@@ -1345,18 +1345,31 @@
     }
   }
 
-  // #91 — navigation vers un signal sur la MÊME page (ex. A16 → Rf51 page 2) :
-  // `page` ne change pas, mais le signal COURANT (signals[].current) change. On
-  // re-rend pour mettre à jour la mise en avant + recentrer sur le nouveau
-  // courant. Clé = id du signal marqué courant.
-  $: currentSignalId = effectiveSignals.find((s) => s.current)?.id ?? null;
-  let lastCurrentSignalId = currentSignalId;
-  $: if (currentSignalId !== lastCurrentSignalId) {
-    lastCurrentSignalId = currentSignalId;
-    // Ne re-rend que si la page ne va PAS changer (sinon double rendu) : le bloc
-    // `page` ci-dessus s'en charge quand la page diffère.
-    if (pdfDoc && (!page || page === currentPage)) {
-      schedulePageRender(currentPage);
+  // Highlight refresh when highlight inputs change (archived co-signal removed,
+  // citation edited on the same page, current switch without doc/page change).
+  // The previous current-only key missed removals and edits when the document,
+  // the page and the current id stayed identical, leaving stale badges and
+  // highlights on screen. Any highlight input change invalidates in-flight
+  // renders and re-renders the displayed window; in-flight slots abort on
+  // their render token.
+  $: highlightFingerprint = effectiveSignals
+    .map((item) =>
+      [
+        item.id,
+        item.excerpt ?? "",
+        item.page ?? "",
+        item.color,
+        item.current ? "1" : "0",
+        item.inFilter !== false ? "1" : "0",
+        item.label,
+      ].join("|"),
+    )
+    .join(";");
+  let lastHighlightFingerprint = highlightFingerprint;
+  $: if (highlightFingerprint !== lastHighlightFingerprint) {
+    lastHighlightFingerprint = highlightFingerprint;
+    if (pdfDoc) {
+      rerenderWindow();
     }
   }
 
