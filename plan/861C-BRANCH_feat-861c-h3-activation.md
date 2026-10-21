@@ -298,3 +298,5 @@ finalization, quotas, persistent ledger and HTTP/MCP parity remain unverified.
 - [x] P4: wire named patches, wildcard placeholders and denial policies.
 
 - [x] P4: detect dotted, indexed, destructured and aliased environment access.
+
+- [x] P4: assert the API banner and no-argument image startup.
