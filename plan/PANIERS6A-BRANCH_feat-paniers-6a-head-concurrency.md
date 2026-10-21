@@ -129,7 +129,7 @@ Add explicit expected-head concurrency to personal signal facets. Every mutation
 - [ ] **Lot 4 — Astra review corrections**
   - [x] Carry the launched target, viewer context and refusal copy from controls.
   - [x] Render a dismissible parent notice independently of the signal card.
-  - [ ] Keep current-city refusals and ignore late conflicts from another city.
+  - [x] Keep current-city refusals and ignore late conflicts from another city.
   - [ ] Test signal removal after conflict and late replies after switching city.
   - [ ] Test callback arguments, notice identity and dismissal.
   - [ ] Qualify isolated typecheck, lint, UI maps/signals and API facets.
