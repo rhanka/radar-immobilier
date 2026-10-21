@@ -74,7 +74,7 @@ Build a read-only deterministic report mapping every `prospect_marks` row to its
   - [x] `api/src/services/facets/lot-migration-report/fixtures.ts`
   - [x] `api/src/services/facets/lot-migration-report/report.test.ts`
   - [x] `api/src/services/facets/lot-migration-report/contract.test.ts`
-  - [ ] `api/src/services/facets/lot-migration-report/destinations.test.ts`
+  - [x] `api/src/services/facets/lot-migration-report/destinations.test.ts`
   - [ ] `api/src/services/facets/lot-migration-report/lossless.test.ts`
   - [ ] `api/src/services/facets/lot-migration-report/integrity.test.ts`
   - [ ] `api/src/services/facets/lot-migration-report/no-write-guard.test.ts`
