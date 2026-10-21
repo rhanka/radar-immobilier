@@ -120,7 +120,51 @@ export const TOOL_DEFINITIONS: readonly ToolDefinition[] = [
 ];
 
 /** Raw-data tool contracts (zones/lots GeoJSON, grille & PV PDFs, provenance). */
-export const RAW_TOOL_DEFINITIONS: readonly ToolDefinition[] = [];
+export const RAW_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
+  {
+    name: "get_zones_geojson",
+    title: "Get zones GeoJSON",
+    description:
+      "FeatureCollection GeoJSON des zones de zonage d'une ville (code de zone, kind, " +
+      "grille PDF et propriétés sources). Réponse BORNÉE : limit défaut 500 (max 2000), " +
+      "bbox [minLon,minLat,maxLon,maxLat] OBLIGATOIRE pour limit > 500. " +
+      "numberMatched/numberReturned/truncated indiquent ce qui reste : si truncated, " +
+      "resserrez le bbox. Read-only.",
+    inputSchema: {
+      city: z.string().min(1).describe("Ville (slug, ex: longueuil, valleyfield, delson)"),
+      bbox: bboxSchema,
+      limit: limitSchema,
+    },
+    scope: IMMO_SCOPES.read,
+  },
+  {
+    name: "get_lots_geojson",
+    title: "Get lots GeoJSON",
+    description:
+      "FeatureCollection GeoJSON des lots cadastraux d'une ville, enrichis server-side : " +
+      "zone jointe (zone.code/kind/densiteLogHa/usages/grillePdfUrl), zoneCode, " +
+      "multifamilial4plus (+ multifamilial4plusSource: grille|heuristique), superficieM2, " +
+      "tod/priorite quand la source les porte. Réponse BORNÉE : limit défaut 500 (max 2000), " +
+      "bbox OBLIGATOIRE pour limit > 500 ; une ville peut dépasser 15 000 lots — paginez " +
+      "par bbox. Filtres optionnels only4Plus/superficieMinM2 appliqués sur la page " +
+      "récupérée. truncated=true → resserrez le bbox. Read-only.",
+    inputSchema: {
+      city: z.string().min(1).describe("Ville (slug, ex: longueuil, valleyfield, delson)"),
+      bbox: bboxSchema,
+      limit: limitSchema,
+      only4Plus: z
+        .boolean()
+        .optional()
+        .describe("Ne garder que les lots dont multifamilial4plus === true"),
+      superficieMinM2: z
+        .number()
+        .positive()
+        .optional()
+        .describe("Superficie minimale en m² (champ superficieM2)"),
+    },
+    scope: IMMO_SCOPES.read,
+  },
+];
 
 /** Every tool contract in registration order (domain first, raw-data second). */
 export const ALL_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
