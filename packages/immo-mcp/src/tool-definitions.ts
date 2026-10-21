@@ -120,7 +120,135 @@ export const TOOL_DEFINITIONS: readonly ToolDefinition[] = [
 ];
 
 /** Raw-data tool contracts (zones/lots GeoJSON, grille & PV PDFs, provenance). */
-export const RAW_TOOL_DEFINITIONS: readonly ToolDefinition[] = [];
+export const RAW_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
+  {
+    name: "get_zones_geojson",
+    title: "Get zones GeoJSON",
+    description:
+      "FeatureCollection GeoJSON des zones de zonage d'une ville (code de zone, kind, " +
+      "grille PDF et propriétés sources). Réponse BORNÉE : limit défaut 500 (max 2000), " +
+      "bbox [minLon,minLat,maxLon,maxLat] OBLIGATOIRE pour limit > 500. " +
+      "numberMatched/numberReturned/truncated indiquent ce qui reste : si truncated, " +
+      "resserrez le bbox. Read-only.",
+    inputSchema: {
+      city: z.string().min(1).describe("Ville (slug, ex: longueuil, valleyfield, delson)"),
+      bbox: bboxSchema,
+      limit: limitSchema,
+    },
+    scope: IMMO_SCOPES.read,
+  },
+  {
+    name: "get_lots_geojson",
+    title: "Get lots GeoJSON",
+    description:
+      "FeatureCollection GeoJSON des lots cadastraux d'une ville, enrichis server-side : " +
+      "zone jointe (zone.code/kind/densiteLogHa/usages/grillePdfUrl), zoneCode, " +
+      "multifamilial4plus (+ multifamilial4plusSource: grille|heuristique), superficieM2, " +
+      "tod/priorite quand la source les porte. Réponse BORNÉE : limit défaut 500 (max 2000), " +
+      "bbox OBLIGATOIRE pour limit > 500 ; une ville peut dépasser 15 000 lots — paginez " +
+      "par bbox. Filtres optionnels only4Plus/superficieMinM2 appliqués sur la page " +
+      "récupérée. truncated=true → resserrez le bbox. Read-only.",
+    inputSchema: {
+      city: z.string().min(1).describe("Ville (slug, ex: longueuil, valleyfield, delson)"),
+      bbox: bboxSchema,
+      limit: limitSchema,
+      only4Plus: z
+        .boolean()
+        .optional()
+        .describe("Ne garder que les lots dont multifamilial4plus === true"),
+      superficieMinM2: z
+        .number()
+        .positive()
+        .optional()
+        .describe("Superficie minimale en m² (champ superficieM2)"),
+    },
+    scope: IMMO_SCOPES.read,
+  },
+  {
+    name: "get_grille_pdf",
+    title: "Get grille de zonage PDF",
+    description:
+      "URL de la grille de zonage PDF (grillePdfUrl) d'une zone d'une ville, quand la " +
+      "source municipale la porte. L'URL retournée est publique : elle peut être lue " +
+      "directement. Retourne found=false si la zone est inconnue, grillePdfUrl=null si la " +
+      "zone existe sans grille. Read-only.",
+    inputSchema: {
+      city: z.string().min(1).describe("Ville (slug, ex: longueuil)"),
+      zone: z.string().min(1).describe("Code de zonage (ex: H-203)"),
+    },
+    scope: IMMO_SCOPES.documentsRead,
+  },
+  {
+    name: "get_pv_pdf",
+    title: "Get PV source PDF",
+    description:
+      "URL servie du procès-verbal source (PDF archivé) d'un signal, à partir de sa " +
+      "référence brute rawRef (ex: raw/proces-verbaux-<ville>/cas/<sha>.pdf, telle que " +
+      "portée par les signaux/documents) + métadonnées (ville, content-type). " +
+      "Le PDF lui-même n'est jamais inliné dans la réponse. Read-only.",
+    inputSchema: {
+      rawRef: z
+        .string()
+        .min(1)
+        .describe(
+          "Référence brute du document (rawRef S3, ex: raw/proces-verbaux-longueuil/cas/<sha>.pdf ; " +
+            "en mode mock: l'id de document, ex: doc-longueuil-pv-2026-04-14)",
+        ),
+    },
+    scope: IMMO_SCOPES.documentsRead,
+  },
+  {
+    name: "get_reglement_provenance",
+    title: "Get règlement de zonage provenance",
+    description:
+      "Provenance du règlement de zonage en vigueur d'une ville — numéro, millésime, " +
+      "page source, URL publique du règlement — telle que geo la stampe sur la grille " +
+      "de normes (qc-zonage-norms), + la relation « modifie » (règlement ancien) quand " +
+      "servie. Passthrough VERBATIM : un champ absent = null, jamais deviné/dérivé ; seul " +
+      "reglement_url est l'URL publique (le breadcrumb interne _source_url n'est jamais " +
+      "exposé). La provenance est muni-uniforme : zone_code est accepté mais n'affecte pas " +
+      "le résultat (réservé au lien events, tool à venir). found=false si la grille de " +
+      "normes n'est pas publiée pour la ville. Read-only.",
+    inputSchema: {
+      muni_slug: z.string().min(1).describe("Ville (slug, ex: longueuil)"),
+      zone_code: z
+        .string()
+        .optional()
+        .describe("Code de zone — accepté mais no-op pour la provenance (muni-uniforme)"),
+    },
+    scope: IMMO_SCOPES.read,
+  },
+  {
+    name: "query_zoning_events",
+    title: "Query zoning lifecycle events",
+    description:
+      "Timeline des events de cycle de vie du zonage d'une ville (avis de motion, " +
+      "projets de règlement, adoptions, entrées en vigueur, dérogations, CPTAQ…) servis " +
+      "par geo. Filtres exacts optionnels : zone_code (events liés à cette zone via " +
+      "zone_codes_resolus), document_type (avis_motion|projet_reglement|adoption|" +
+      "entree_en_vigueur|abrogation), decision_state (planned|decided). Chaque event est " +
+      "renvoyé VERBATIM (§2 : document_type, decision_state, type_instrument, bylaw_numero, " +
+      "date_iso, zone_codes_resolus, libelles_relation, url_pdf, provenance…) ; les clés " +
+      "internes préfixées « _ » (breadcrumbs) ne sont jamais exposées. decision_state=planned " +
+      "n'est JAMAIS présenté comme adopté (planned ≠ decided). Read-only.",
+    inputSchema: {
+      muni_slug: z.string().min(1).describe("Ville (slug, ex: longueuil)"),
+      zone_code: z
+        .string()
+        .optional()
+        .describe("Filtre : events liés à ce code de zone (exact, via zone_codes_resolus)"),
+      document_type: z
+        .string()
+        .optional()
+        .describe("Filtre exact : avis_motion|projet_reglement|adoption|entree_en_vigueur|abrogation"),
+      decision_state: z
+        .string()
+        .optional()
+        .describe("Filtre exact : planned|decided"),
+    },
+    scope: IMMO_SCOPES.read,
+  },
+];
 
 /** Every tool contract in registration order (domain first, raw-data second). */
 export const ALL_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
