@@ -23,7 +23,7 @@ const config = JSON.parse(readFileSync(
   "utf8",
 )) as {
   invocationScope: string;
-  selection: { tool: string; operation: string; method: string; path: string }[];
+  selection: { tool: string; operation: string; method: string; path: string; command: string }[];
   effectiveProfile: {
     artifacts_ensure: { required: string[] };
     artifacts_publish: {
