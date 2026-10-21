@@ -10,7 +10,7 @@ import { initializeWorkspaceStore } from "../workspaces/init-store.js";
 import { attachPersonalHistory } from "./attachment.js";
 import type { ActivationSafety } from "./activation.js";
 
-export const describeDb = describe.skipIf(process.env.LOT_MIGRATION_DB_TEST !== "1");
+export const describeDb: ReturnType<typeof describe.skipIf> = describe.skipIf(process.env.LOT_MIGRATION_DB_TEST !== "1");
 const handles: Array<ReturnType<typeof createDb> & { name: string }> = [];
 export const safety: ActivationSafety = { drain: async () => {}, readback: async () => {} };
 
