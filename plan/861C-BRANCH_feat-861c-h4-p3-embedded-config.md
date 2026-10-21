@@ -64,7 +64,7 @@ Prepare the data-and-contracts slice of P3: versioned Immo provider and artifact
   - [ ] Lot gate (same checklist as Lot 1).
 - [ ] **Lot 3 — Local registry validation and digest freeze**
   - [x] `src/registry/mcp-registry.ts`: provider, tool, scope and contract validation.
-  - [ ] `src/registry/composition.ts`: detached frozen candidate and binding-aware digest.
+  - [x] `src/registry/composition.ts`: detached frozen candidate and binding-aware digest.
   - [ ] `src/registry/index.ts`: public re-exports.
   - [ ] Lot gate (same checklist as Lot 1).
 - [ ] **Lot 4 — Compatibility tests**
