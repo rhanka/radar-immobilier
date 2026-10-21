@@ -25,10 +25,10 @@ let publicKey: KeyLike;
 let privateKey: KeyLike;
 let keySource: TokenKeySource;
 
-async function signToken(claims: Record<string, unknown> = {}): Promise<string> {
+async function signToken(claims: Record<string, unknown> = {}, subject = "user-1"): Promise<string> {
   const { scope = SCOPES, ...rest } = claims;
   return new SignJWT({ scope, client_id: "immo-cli", tid: "radar", ...rest })
-    .setProtectedHeader({ alg: "RS256" }).setIssuer(ISSUER).setSubject("user-1")
+    .setProtectedHeader({ alg: "RS256" }).setIssuer(ISSUER).setSubject(subject)
     .setAudience(RESOURCE).setIssuedAt().setExpirationTime("5m").sign(privateKey);
 }
 
@@ -171,5 +171,93 @@ describe("sessions and egress on 0.1.0", () => {
     ]);
     expect(seen.map((request) => request.url)).toEqual([`${BASE_URL}/api/graph-signals/longueuil`]);
     expect(seen[0]?.headers.get("authorization")).toBe(`Bearer ${token}`);
+  });
+
+  it("forwards showDiscarded=1 end to end, keeps default hiding otherwise (6C)", async () => {
+    const { seen, token } = await captureEgress([
+      ["search_signals", { city: "longueuil", showDiscarded: true }, 20],
+      ["search_signals", { city: "longueuil", showDiscarded: false }, 21],
+      ["search_signals", { city: "longueuil" }, 22],
+    ]);
+    expect(seen.map((request) => request.url)).toEqual([
+      `${BASE_URL}/api/graph-signals/longueuil?showDiscarded=1`,
+      `${BASE_URL}/api/graph-signals/longueuil`,
+      `${BASE_URL}/api/graph-signals/longueuil`,
+    ]);
+    for (const request of seen) {
+      expect(request.headers.get("authorization")).toBe(`Bearer ${token}`);
+    }
+  });
+
+  function signalEgressApp() {
+    const seen: Request[] = [];
+    const app = createImmoHttpApp({ ...CONFIG, dataMode: "real" }, {
+      keySource,
+      data: new HttpDataSource({
+        baseUrl: BASE_URL,
+        fetchImpl: async (input, init) => {
+          seen.push(new Request(input, init));
+          return Response.json({ nodes: [{ id: "sig-1", type: "Signal" }] });
+        },
+      }),
+    });
+    return { app, seen };
+  }
+
+  it("uses refreshed reveal credentials and isolates two users' sessions", async () => {
+    const { app, seen } = signalEgressApp();
+    const initial = await signToken({ jti: "initial" });
+    const refreshed = await signToken({ jti: "refreshed" });
+    const bob = await signToken({}, "user-2");
+    const session = await initialize(app, initial);
+    for (const [id, token] of [initial, refreshed].entries()) {
+      const res = await callTool(app, token, session, "search_signals", {
+        city: "longueuil", showDiscarded: true,
+      }, id + 30);
+      expect(res.status).toBe(200);
+      expect((await res.json()).result.isError).not.toBe(true);
+    }
+    const refused = await callTool(app, bob, session, "search_signals", {
+      city: "longueuil", showDiscarded: true,
+    }, 32);
+    expect(refused.status).toBe(404);
+    expect(seen).toHaveLength(2);
+    const bobSession = await initialize(app, bob);
+    const accepted = await callTool(app, bob, bobSession, "search_signals", {
+      city: "longueuil", showDiscarded: true,
+    }, 33);
+    expect(accepted.status).toBe(200);
+    expect((await accepted.json()).result.isError).not.toBe(true);
+    expect(seen.map((request) => request.headers.get("authorization"))).toEqual(
+      [initial, refreshed, bob].map((token) => `Bearer ${token}`),
+    );
+    expect(seen.map((request) => request.url)).toEqual(
+      Array<string>(3).fill(`${BASE_URL}/api/graph-signals/longueuil?showDiscarded=1`),
+    );
+  });
+
+  it("requires the current immo:search scope even for reveal", async () => {
+    const { app, seen } = signalEgressApp();
+    const token = await signToken();
+    const session = await initialize(app, token);
+    const reduced = await signToken({ scope: "immo:read" });
+    const res = await callTool(app, reduced, session, "search_signals", {
+      city: "longueuil", showDiscarded: true,
+    }, 34);
+    expect(res.status).toBe(200);
+    expect((await res.json()).result.isError).toBe(true);
+    expect(seen).toHaveLength(0);
+  });
+
+  it("rejects a non-boolean reveal argument before any API request", async () => {
+    const { app, seen } = signalEgressApp();
+    const token = await signToken();
+    const session = await initialize(app, token);
+    const res = await callTool(app, token, session, "search_signals", {
+      city: "longueuil", showDiscarded: "true",
+    }, 35);
+    expect(res.status).toBe(200);
+    expect((await res.json()).result.isError).toBe(true);
+    expect(seen).toHaveLength(0);
   });
 });
