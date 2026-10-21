@@ -46,7 +46,7 @@ it("should retain personal archive identity through real graph refreshes", async
   const counts = await cityCounts();
   expect(await get(`${target.citySlug}?showDiscarded=1`)).toEqual(baseline);
   expect(await cityCounts("?showDiscarded=1")).toEqual(counts);
-  await writeFacet(db, alice.sub, { action: "discard", target, reasonCode: "V2-PRECEDENT", commandKey: randomUUID() });
+  await writeFacet(db, alice.sub, { action: "discard", target, reasonCode: "V2-PRECEDENT", expectedHeadId: null, commandKey: randomUUID() });
   const hidden = await get(target.citySlug);
   expect(hidden.nodes.map((node: { id: string }) => node.id)).toEqual([keep.id]);
   expect((await cityCounts()).signalCount).toBe(1);
