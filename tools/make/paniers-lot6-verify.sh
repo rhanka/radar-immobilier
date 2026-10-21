@@ -4,7 +4,8 @@ case "$ENV" in test-*|e2e-*) ;; *) exit 2;; esac
 task_dir="$PWD/tmp/paniers-${LOT,,}"
 log_dir="$task_dir/logs/${EVIDENCE_TAG:-$1}"
 runtime_dir="$task_dir/runs/$ENV-${EVIDENCE_TAG:-$1}"
-mkdir -p "$log_dir" "$task_dir/checkpoints" "$runtime_dir"
+checkpoint_dir="${CHECKPOINT_DIR:-$task_dir/checkpoints}"
+mkdir -p "$log_dir" "$checkpoint_dir" "$runtime_dir"
 export COMPOSE_DISABLE_ENV_FILE=1
 export COMPOSE_PROJECT_NAME="radar-$ENV"
 export POSTGRES_USER=radar POSTGRES_PASSWORD=synthetic-only POSTGRES_DB=radar
@@ -27,7 +28,7 @@ services:
     volumes: !override
       - $runtime_dir/source.tar:/source.tar:ro
       - $log_dir:/evidence
-      - $task_dir/checkpoints:/checkpoints:ro
+      - $checkpoint_dir:/checkpoints:ro
       - runtime:/workspace
     environment:
       NODE_ENV: test
@@ -121,4 +122,5 @@ CONFIG
   esac
   if [ "$1" = verify ] && [ "$LOT" = 6F ]; then bash /workspace/tools/make/paniers-lot6-mutation.sh; fi
   if [ "$1" = verify ] && [ "$LOT" = 6G ]; then bash /workspace/tools/make/paniers-lot6g-mutation.sh; fi
+  if [ "$1" = verify ] && [ "$LOT" = 6G ]; then bash /workspace/tools/make/paniers-lot6g-fix-mutation.sh; fi
 ' -- "$1" "$SCOPE" 2>&1 | tee "$log_dir/$1.log"
