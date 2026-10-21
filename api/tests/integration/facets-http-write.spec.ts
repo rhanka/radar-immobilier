@@ -5,6 +5,7 @@ import { afterAll, expect, it } from "vitest";
 import { createDb } from "../../src/db/client.js";
 import { loadConfig } from "../../src/config.js";
 import { accountUsers } from "../../src/db/schema.js";
+import { resolveTarget } from "../../src/services/facets/target.js";
 import { facetFixture } from "./facets-fixture.js";
 import { facetCookie, facetHttp, facetAuth } from "./facets-http-fixture.js";
 
@@ -12,6 +13,7 @@ const { db, pool } = createDb(loadConfig());
 afterAll(() => pool.end());
 it("should enforce browser identity, strict commands and domain errors", async () => {
   const { sub, target } = await facetFixture(db);
+  const displayedFingerprint = await resolveTarget(db, target);
   const app = facetHttp(db);
   const cookie = await facetCookie(sub);
   const post = async (action: string, body: unknown, key: string | null = randomUUID(), session = cookie) => {
@@ -21,7 +23,7 @@ it("should enforce browser identity, strict commands and domain errors", async (
     expect(response.headers.get("vary")).toBe("Cookie, Authorization");
     return response;
   };
-  const body = { target, basket: "pertinent", expectedHeadId: null };
+  const body = { target, basket: "pertinent", expectedHeadId: null, displayedFingerprint };
   for (const reasonCode of ["", "p-densite", "-N-ADMIN", "N--ADMIN", "N-ADMIN-", "N_ADMIN", " N-ADMIN", "N-ADMIN\n"]) {
     for (const action of ["select", "discard"]) {
       expect((await post(action, { ...(action === "select" ? body : { target, expectedHeadId: null }), reasonCode })).status).toBe(400);
@@ -38,7 +40,8 @@ it("should enforce browser identity, strict commands and domain errors", async (
   expect((await app.request("/api/v1/signal-facets/select", { method: "POST", headers: { accept: "text/html" } })).status).toBe(401);
   expect((await post("select", { ...body, target: { ...target, id: "missing" } })).status).toBe(404);
   for (const reasonCode of [undefined, "UNKNOWN", "P-DENSITE"]) {
-    expect((await post("discard", { target, expectedHeadId: null, reasonCode })).status).toBe(422);
+    expect((await post("discard", { target, expectedHeadId: null, displayedFingerprint, reasonCode })).status,
+    ).toBe(422);
   }
   const key = randomUUID();
   const first = await post("select", body, key);
@@ -48,11 +51,14 @@ it("should enforce browser identity, strict commands and domain errors", async (
     state: "active", reasonCode: null, verdict: null, createdAt: expect.any(String) });
   expect(await (await post("select", body, key.toUpperCase())).json()).toEqual(firstBody);
   expect((await post("select", { ...body, reasonCode: "P-DENSITE" }, key)).status).toBe(409);
-  expect((await post("deselect", { target, basket: "pertinent", expectedHeadId: firstBody.event.id })).status).toBe(200);
-  const discarded = await post("discard", { target, reasonCode: "N-ADMIN", expectedHeadId: null });
+  expect((await post("deselect", { target, basket: "pertinent", expectedHeadId: firstBody.event.id,
+    displayedFingerprint })).status).toBe(200);
+  const discarded = await post("discard",
+    { target, reasonCode: "N-ADMIN", expectedHeadId: null, displayedFingerprint });
   expect(discarded.status).toBe(200);
   const discardedBody = await discarded.json() as { event: { id: string } };
-  expect((await post("restore", { target, expectedHeadId: discardedBody.event.id })).status).toBe(200);
+  expect((await post("restore",
+    { target, expectedHeadId: discardedBody.event.id, displayedFingerprint })).status).toBe(200);
   await db.update(accountUsers).set({ status: "suspended" }).where(eq(accountUsers.sub, sub));
   expect((await post("select", body)).status).toBe(403);
   const open = facetHttp(db, { ...facetAuth, enabled: false });
