@@ -10,20 +10,35 @@ import type { ObjectStore } from "../../src/storage/object-store.js";
 import { auth, cookie } from "./artifacts-h2.helpers.js";
 import { startHarness, migrationsFolder, type Harness } from "./artifacts-h2.helpers.js";
 
+const journal = JSON.parse(readFileSync(new URL("../../drizzle/meta/_journal.json", import.meta.url), "utf8")) as {
+  entries: { tag: string; when: number }[];
+};
+const artifactEntries = ["0015_artifacts_core", "0016_artifacts_lifecycle"].map((tag) => {
+  const entry = journal.entries.find((item) => item.tag === tag);
+  if (!entry) throw new Error(`missing artifact migration ${tag}`);
+  return entry;
+});
+
 let h: Harness;
 beforeAll(async () => { h = await startHarness("migrations"); });
 afterAll(async () => { await h?.close(); });
 describe("artifact journal and startup guard", () => {
   it("installs both package hashes, replays cleanly and repairs a missing journal row", async () => {
     const before = (await h.pool.query("SELECT hash, created_at FROM drizzle.__drizzle_migrations ORDER BY id")).rows;
-    expect(before).toHaveLength(16);
-    for (const [index, name] of [[14, "0001_artifacts.sql"], [15, "0002_lifecycle.sql"]] as const) {
+    expect(before).toHaveLength(journal.entries.length);
+    for (const [index, name] of [[0, "0001_artifacts.sql"], [1, "0002_lifecycle.sql"]] as const) {
+      const entry = artifactEntries[index]!;
       const bytes = readFileSync(createRequire(import.meta.url).resolve(`@sentropic/artifacts/migrations/${name}`));
-      expect(before[index].hash).toBe(createHash("sha256").update(bytes).digest("hex"));
+      const rows = before.filter((row) => String(row.created_at) === String(entry.when));
+      expect(rows).toHaveLength(1);
+      expect(rows[0].hash).toBe(createHash("sha256").update(bytes).digest("hex"));
     }
     await migrate(drizzle(h.pool), { migrationsFolder });
-    expect((await h.pool.query("SELECT count(*) FROM drizzle.__drizzle_migrations")).rows[0].count).toBe("16");
-    await h.pool.query("DELETE FROM drizzle.__drizzle_migrations WHERE created_at = $1", [before[15].created_at]);
+    expect((await h.pool.query("SELECT hash, created_at FROM drizzle.__drizzle_migrations ORDER BY id")).rows).toEqual(before);
+    // Later rows must also go: Drizzle replays only beyond its last recorded timestamp.
+    const replaySince = artifactEntries[1]!.when;
+    const deleted = await h.pool.query("DELETE FROM drizzle.__drizzle_migrations WHERE created_at >= $1", [replaySince]);
+    expect(deleted.rowCount).toBe(journal.entries.filter((entry) => entry.when >= replaySince).length);
     await expect(composeArtifactHost(h.pool, h.config)).rejects.toThrow("0016 absent or hash mismatch");
     const app = createApp({ checkDb: async () => ({ ok: true }),
       checkObjectStore: async () => ({ ok: true }), store: {} as ObjectStore, auth,
@@ -34,8 +49,8 @@ describe("artifact journal and startup guard", () => {
     expect(unavailable.status).toBe(503);
     expect((await app.request("https://app.example.test/livez")).status).toBe(200);
     await migrate(drizzle(h.pool), { migrationsFolder });
-    const repaired = (await h.pool.query("SELECT hash FROM drizzle.__drizzle_migrations ORDER BY id DESC LIMIT 1")).rows[0];
-    expect(repaired.hash).toBe(before[15].hash);
+    const repaired = (await h.pool.query("SELECT hash, created_at FROM drizzle.__drizzle_migrations ORDER BY id")).rows;
+    expect(repaired).toEqual(before);
     const restarted = await composeArtifactHost(h.pool, h.config);
     expect(restarted).toBeDefined(); restarted?.close();
   });
@@ -44,7 +59,7 @@ describe("artifact journal and startup guard", () => {
     expect((await h.pool.query("SELECT org_id FROM artifacts.storage_scopes WHERE id = $1", [h.config.storageScope])).rows[0].org_id).toBe(h.config.orgId);
   });
   it("refuses a 0016 journal row with a different hash without writing a scope", async () => {
-    const when = 1791200002000;
+    const when = artifactEntries[1]!.when;
     const original = (await h.pool.query("SELECT hash FROM drizzle.__drizzle_migrations WHERE created_at = $1", [when])).rows[0].hash;
     try {
       await h.pool.query("UPDATE drizzle.__drizzle_migrations SET hash = $1 WHERE created_at = $2", ["0".repeat(64), when]);
