@@ -68,7 +68,7 @@ trap 'exit 143' TERM
 # are excluded before reading file contents. The container sees no host tree.
 tar --exclude='.env*' --exclude=node_modules --exclude=dist --exclude=.svelte-kit \
   -cf "$runtime_dir/source.tar" api packages ui tools/make deploy/k8s/41-immo-mcp-ingress.yaml package.json package-lock.json tsconfig.base.json eslint.config.js
-case "$1" in verify|test-api) "${compose[@]}" up -d --wait postgres ;; esac
+case "$1" in verify|test-api|astra-proof) "${compose[@]}" up -d --wait postgres ;; esac
 "${compose[@]}" run --rm --no-deps -T api sh -ec '
   tar -xf /source.tar
   npm ci --ignore-scripts --no-audit --no-fund
@@ -77,6 +77,7 @@ import config from "./vitest.config.js";
 export default { ...config, envDir: false, test: { ...config.test, fileParallelism: false, maxWorkers: 2 } };
 CONFIG
   case "$1" in
+    build) npm run build --workspace=api ;;
     verify|typecheck) npm run typecheck --workspace=api ;;
     checkpoints)
       for snapshot in /checkpoints/*.tar; do
@@ -94,6 +95,11 @@ CONFIG
       done
       ;;
   esac
+  if [ "$1" = astra-proof ]; then
+    test "$LOT" = 6H
+    bash /workspace/tools/make/paniers-lot6h-fix-mutation.sh
+    exit
+  fi
   if [ "$1" = regression ]; then
     cat > /workspace/ui/vitest.isolated.config.ts <<'"'"'CONFIG'"'"'
 import config from "./vitest.config.js";
