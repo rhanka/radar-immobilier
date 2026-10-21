@@ -68,7 +68,7 @@ Require the displayed signal fingerprint on every new personal facet command. Ve
   - [x] Adapt existing API integration contracts.
 - [ ] **Lot 2 — Captured UI intentions**
   - [x] Capture fingerprints in commands/undo; retain parent notices and launch context.
-  - [ ] Qualify client/control/viewer/panel behavior and exact network retries.
+  - [x] Qualify client/control/viewer/panel behavior and exact network retries.
   - [ ] Qualify undo after card removal and version-conflict reloads.
   - [ ] Browser UAT (not covered).
 - [ ] **Lot 3 — Discriminating qualification**
