@@ -9,13 +9,14 @@
  * requested selection. Old writers cannot commit here: the deferred SQL
  * check rejects unbound events once the epoch is scoped.
  */
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import {
   facetCommandContexts,
   facetCommands,
   facetEvents,
   facetEventBindings,
+  facetHeads,
   facetStreams,
 } from "../../db/schema.js";
 import { lockWorkspace } from "../workspaces/mutations.js";
@@ -81,8 +82,22 @@ export async function writeScopedPersonalFacet(
     await lockCityGraph(tx, command.target.citySlug);
     const fingerprint = await resolveTarget(tx, command.target);
     if (fingerprint !== command.displayedFingerprint) {
+      const headRows = await tx.select({ event: facetEvents })
+        .from(facetStreams)
+        .innerJoin(facetHeads, eq(facetHeads.streamId, facetStreams.id))
+        .innerJoin(facetEvents, eq(facetEvents.id, facetHeads.eventId))
+        .where(and(
+          eq(facetStreams.workspaceId, workspaceId),
+          eq(facetStreams.scope, "personal"),
+          eq(facetStreams.ownerId, accountId),
+          eq(facetStreams.citySlug, command.target.citySlug),
+          eq(facetStreams.nodeType, command.target.type),
+          eq(facetStreams.nodeId, command.target.id),
+        ))
+        .orderBy(facetEvents.facet, facetEvents.basket);
       throw new FacetTargetVersionConflictError({
-        target: command.target, version: { fingerprint }, heads: [],
+        target: command.target, version: { fingerprint },
+        heads: headRows.map(({ event }) => facetEventResponse(event)),
       });
     }
     const selection = command.action === "select" || command.action === "deselect";

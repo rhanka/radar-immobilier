@@ -79,11 +79,19 @@ describeDb("6H scoped personal commands", () => {
     await expect(writeScopedPersonalFacet(f.db, f.member.sub, f.workspaceId,
       { ...select, action: "deselect", commandKey: randomUUID() }))
       .rejects.toMatchObject({ status: 409, current: { heads: [expect.objectContaining({ id: first!.id })] } });
-    await expect(writeScopedPersonalFacet(f.db, f.member.sub, f.workspaceId,
-      { ...select, commandKey: randomUUID(), displayedFingerprint: "0".repeat(64) }))
-      .rejects.toMatchObject({ status: 409, message: "target_version_conflict" });
+    await f.db.update(graphNodes).set({ label: "Synthetic signal revised" })
+      .where(eq(graphNodes.id, select.target.id));
+    const stale = { ...select, commandKey: randomUUID() };
+    const conflict = await writeScopedPersonalFacet(f.db, f.member.sub, f.workspaceId, stale)
+      .then(() => { throw new Error("expected target version conflict"); }, (error) => error);
+    expect(conflict).toMatchObject({ status: 409, message: "target_version_conflict",
+      current: { heads: [expect.objectContaining({ id: first!.id })] } });
+    expect((conflict.current.heads as Array<{ id: string }>).map((head) => head.id))
+      .toEqual([first!.id]);
+    const [revised] = await f.db.select().from(graphNodes).where(eq(graphNodes.id, select.target.id));
     const inactive = await writeScopedPersonalFacet(f.db, f.member.sub, f.workspaceId,
-      { ...select, action: "deselect", expectedHeadId: first!.id, commandKey: randomUUID() });
+      { ...select, action: "deselect", expectedHeadId: first!.id, commandKey: randomUUID(),
+        displayedFingerprint: targetFingerprint(revised!) });
     expect(inactive).toMatchObject({ state: "inactive", supersedes: first!.id });
   });
 
