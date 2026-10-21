@@ -3,12 +3,16 @@ import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { getCookie } from "hono/cookie";
 import { bodyLimit } from "hono/body-limit";
 import {
+  checkAdmission,
+  createAdmissionAuthority,
   isApprovedAccountStatus,
   readAccountStatus,
   type AccountStatusQueryable,
+  type ActivationConfig,
   type ArtifactControl,
 } from "@radar/artifacts-host";
 import type { AuthConfig } from "../config.js";
+import { controlCacheHeaders } from "./control-cache.js";
 import {
   SESSION_COOKIE_NAME,
   verifySession,
@@ -25,6 +29,13 @@ export interface ControlRouteDeps {
   readonly auth: AuthConfig;
   readonly accounts: AccountStatusQueryable;
   readonly backend?: ArtifactControl | undefined;
+  /**
+   * H3 rehearsal activation reader (861C units 2-3). Absent preserves the H2
+   * behavior (approval check only). Present enforces closed-by-default cohort
+   * admission at entry and rereads it before every write dispatch. Provider
+   * commits already in flight need separate enforcement.
+   */
+  readonly readActivation?: (() => ActivationConfig) | undefined;
 }
 
 export const CONTROL_MAX_BODY_BYTES = 2 * 1024 * 1024;
@@ -56,6 +67,15 @@ async function guard(
   }
   // A failed startup probe must not query the same unavailable database.
   if (!deps.backend) return jsonError(c, 503, { error: "capability_unavailable" });
+  if (deps.readActivation) {
+    const admission = await checkAdmission(
+      createAdmissionAuthority(deps.accounts, deps.readActivation), session.sub,
+    );
+    if (!admission.allowed) {
+      return c.json(admission.body, admission.status);
+    }
+    return { session };
+  }
   const status = await readAccountStatus(deps.accounts, session.sub);
   if (!isApprovedAccountStatus(status)) {
     return c.json({ error: "account_not_approved", status: status ?? "unknown" }, 403);
@@ -91,11 +111,21 @@ async function guardPost(
 export function controlRoute(deps: ControlRouteDeps): Hono {
   const backend = deps.backend ?? unavailableBackend;
   const app = new Hono();
+  app.use("*", controlCacheHeaders);
   app.use("*", bodyLimit({
     maxSize: CONTROL_MAX_BODY_BYTES,
     onError: (c) => c.json({ error: "body_too_large" }, 413),
   }));
   async function dispatch(op: ControlOp, c: Context, session: VerifiedSession, body: unknown) {
+    if (deps.readActivation && (op === "ensure" || op === "publish")) {
+      // Reread after the entry guard, immediately before storage dispatch.
+      const commit = await checkAdmission(
+        createAdmissionAuthority(deps.accounts, deps.readActivation), session.sub,
+      );
+      if (!commit.allowed) {
+        return c.json(commit.body, commit.status);
+      }
+    }
     const result = await backend.handle(op, session.sub, body);
     return c.json(result.body as object, result.status as ContentfulStatusCode);
   }
