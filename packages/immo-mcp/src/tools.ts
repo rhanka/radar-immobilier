@@ -118,7 +118,7 @@ function guarded<A>(
  * (server.ts stdio and server-http.ts Streamable HTTP).
  */
 export function registerTools(server: McpServer, ctx: ToolContext): void {
-  for (const def of ALL_TOOL_DEFINITIONS.filter((def) => ["search_lots","get_lot_card","search_signals","get_opportunity_dossier"].includes(def.name))) {
+  for (const def of ALL_TOOL_DEFINITIONS.filter((def) => ["search_lots","get_lot_card","search_signals","get_opportunity_dossier","list_documents"].includes(def.name))) {
     const handler = TOOL_HANDLERS[def.name];
     if (!handler) throw new Error(`missing_handler:${def.name}`);
     server.registerTool(
@@ -154,23 +154,6 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
       },
     );
   }
-
-  server.registerTool(
-    "list_documents",
-    {
-      title: "List documents",
-      description:
-        "Liste les documents sources archivés (procès-verbaux, etc.) par ville. Read-only.",
-      inputSchema: {
-        city: z.string().optional(),
-        limit: z.number().int().min(1).max(100).default(20),
-      },
-    },
-    guarded(ctx, "list_documents", IMMO_SCOPES.documentsRead, async (args) => {
-      const documents = await ctx.data.listDocuments(args);
-      return jsonResult({ count: documents.length, documents });
-    }),
-  );
 
   server.registerTool(
     "read_document_excerpt",
