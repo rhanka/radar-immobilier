@@ -1,0 +1,92 @@
+# Preprod content-denial boundary (861c H3 unit 12). Isolated listener running
+# the api image in `content-deny` mode (api/docker-entrypoint.sh validates the
+# mode; this manifest uses `args`, never `command`, so the validation applies).
+# Nothing applies this except an explicit operator apply of the reviewed render
+# (see docs/operator/h3-preprod-activation.md). No credentials: no env, no
+# envFrom, no volumes, no Secret/ConfigMap reference; the ServiceAccount token
+# is not mounted. The `content-deny` component label keeps its selectors
+# disjoint from the api. Capacity on the constrained preprod node: unverified.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: radar-artifact-content-deny
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: content-deny
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: radar-immobilier
+      app.kubernetes.io/component: content-deny
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/part-of: sentropic
+        app.kubernetes.io/component: content-deny
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: content-deny
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+          # Unverified while disabled; activation gate requires the reviewed
+          # sha256 digest, identical to radar-api (no invented digest in git).
+          image: ghcr.io/rhanka/radar-api:latest
+          imagePullPolicy: Always
+          args: ["content-deny"]
+          ports:
+            - name: http
+              containerPort: 3000
+          startupProbe:
+            httpGet: { path: /livez, port: http }
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            httpGet: { path: /health, port: http }
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            httpGet: { path: /livez, port: http }
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 4
+          resources:
+            requests: { cpu: 20m, memory: 64Mi }
+            limits: { cpu: 200m, memory: 256Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: radar-artifact-content-deny
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: content-deny
+spec:
+  selector:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/component: content-deny
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
