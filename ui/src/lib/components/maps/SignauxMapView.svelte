@@ -590,6 +590,7 @@
   let discardedActionError: string | null = null;
   let undoCommandKey: string | null = null;
   let undoExpectedHeadId: string | null = null;
+  let undoDisplayedFingerprint: string | null = null;
   let undoBusy = false;
   let selPanel: {
     focusSignalCard(id: string): void;
@@ -645,6 +646,7 @@
       discardedActionError = null;
       undoCommandKey = null;
       undoExpectedHeadId = null;
+      undoDisplayedFingerprint = null;
       undoBusy = false;
       detailCache.clear();
       detailNodes = [];
@@ -1547,6 +1549,7 @@
     discardedActionError = null;
     undoCommandKey = null;
     undoExpectedHeadId = null;
+    undoDisplayedFingerprint = null;
     facetReloadError = null;
     facetReloadAfterWrite = false;
     undoOperationToken += 1;
@@ -1757,6 +1760,7 @@
       discardedActionError = null;
       undoCommandKey = null;
       undoExpectedHeadId = launch?.confirmedHeadId ?? null;
+      undoDisplayedFingerprint = launch?.displayedFingerprint ?? null;
       undoOperationToken += 1;
       undoBusy = false;
     }
@@ -1822,10 +1826,18 @@
       if (!undoCommandKey) undoCommandKey = createCommandKey();
       const commandKeyForOperation = undoCommandKey;
       const expectedHeadId = undoExpectedHeadId;
-      await postFacetCommand("", "restore", { target, expectedHeadId }, commandKeyForOperation);
+      const displayedFingerprint = undoDisplayedFingerprint;
+      if (displayedFingerprint === null) {
+        discardedActionError = "Données périmées — rechargez les données puis réessayez.";
+        await reloadAfterFacetWrite(operationCity, { silentDetail: true, afterWrite: false });
+        return;
+      }
+      await postFacetCommand("", "restore", { target, expectedHeadId, displayedFingerprint },
+        commandKeyForOperation);
       if (isCurrent()) {
         undoCommandKey = null;
         undoExpectedHeadId = null;
+        undoDisplayedFingerprint = null;
       }
       if (appliedFacetContext !== operationViewer) return;
       detailCache.delete(operationCity);
@@ -1852,7 +1864,8 @@
         err instanceof SignalFacetError
           ? facetErrorMessage(err)
           : "Écriture non confirmée — Réessayer.";
-      if (err instanceof SignalFacetError && err.code === "facet_head_conflict") {
+      if (err instanceof SignalFacetError
+        && (err.code === "facet_head_conflict" || err.code === "target_version_conflict")) {
         await reloadAfterFacetWrite(operationCity, { silentDetail: true, afterWrite: false });
       }
     } finally {
@@ -1865,6 +1878,7 @@
     discardedActionError = null;
     undoCommandKey = null;
     undoExpectedHeadId = null;
+    undoDisplayedFingerprint = null;
     selPanel?.focusSignalsBucket();
   }
 
@@ -1898,6 +1912,7 @@
     discardedActionError = null;
     undoCommandKey = null;
     undoExpectedHeadId = null;
+    undoDisplayedFingerprint = null;
     facetReloadError = null;
     facetReloadAfterWrite = false;
     undoOperationToken += 1;

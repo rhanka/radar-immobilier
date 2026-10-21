@@ -31,6 +31,8 @@ const CODES = [
   { code: "S-VEILLE", verdict: "a_surveiller" },
 ];
 
+const FINGERPRINT = "0123456789abcdef".repeat(4);
+
 function head(overrides: Partial<FacetHead>): FacetHead {
   return {
     id: "event-1",
@@ -264,7 +266,8 @@ describe("facet writes", () => {
     const event = await postFacetCommand(
       "",
       "discard",
-      { target: { citySlug: "ville-synth", type: "Signal", id: "sig-1" }, reasonCode: "N-ADMIN", expectedHeadId: null },
+      { target: { citySlug: "ville-synth", type: "Signal", id: "sig-1" }, reasonCode: "N-ADMIN",
+        expectedHeadId: null, displayedFingerprint: FINGERPRINT },
       key,
     );
     expect(event).toEqual({ id: "event-1" });
@@ -276,6 +279,7 @@ describe("facet writes", () => {
       target: { citySlug: "ville-synth", type: "Signal", id: "sig-1" },
       reasonCode: "N-ADMIN",
       expectedHeadId: null,
+      displayedFingerprint: FINGERPRINT,
     });
   });
 
@@ -286,7 +290,8 @@ describe("facet writes", () => {
       if (url.endsWith("/restore")) return jsonResponse(404, { error: "signal_not_found" });
       return jsonResponse(401, { error: "unauthenticated" });
     });
-    const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" }, expectedHeadId: null };
+    const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" },
+      expectedHeadId: null, displayedFingerprint: FINGERPRINT };
     await expect(postFacetCommand("", "select", body, "k1")).rejects.toMatchObject({
       status: 422,
       code: "reason_code_required",
@@ -318,6 +323,9 @@ describe("facet writes", () => {
     expect(facetErrorMessage(new SignalFacetError(409, "facet_head_conflict"))).toContain(
       "Données périmées",
     );
+    expect(facetErrorMessage(new SignalFacetError(409, "target_version_conflict"))).toContain(
+      "Contenu modifié",
+    );
     expect(facetErrorMessage(new SignalFacetError(409, "command_context_unresolved"))).toContain(
       "Contexte de commande périmé",
     );
@@ -326,18 +334,33 @@ describe("facet writes", () => {
   it("carries the authorized current state on a head conflict", async () => {
     const current = { target: { citySlug: "ville-synth" }, version: null, heads: [] };
     stubFetch(() => jsonResponse(409, { error: "facet_head_conflict", current }));
-    const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" }, expectedHeadId: null };
+    const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" },
+      expectedHeadId: null, displayedFingerprint: FINGERPRINT };
     const failure = await postFacetCommand("", "select", body, "k1").catch((err) => err);
     expect(failure).toBeInstanceOf(SignalFacetError);
     if (!(failure instanceof SignalFacetError)) throw new Error("Expected a facet failure");
     expect(failure).toMatchObject({ status: 409, code: "facet_head_conflict", current });
   });
 
+  it("carries the current version on a target version conflict", async () => {
+    const current = { target: { citySlug: "ville-synth" },
+      version: { fingerprint: "f".repeat(64) }, heads: [] };
+    stubFetch(() => jsonResponse(409, { error: "target_version_conflict", current }));
+    const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" },
+      expectedHeadId: null, displayedFingerprint: FINGERPRINT };
+    const failure = await postFacetCommand("", "select", body, "k1").catch((err) => err);
+    expect(failure).toBeInstanceOf(SignalFacetError);
+    if (!(failure instanceof SignalFacetError)) throw new Error("Expected a facet failure");
+    expect(failure).toMatchObject({ status: 409, code: "target_version_conflict", current });
+    expect(facetErrorMessage(failure)).toContain("Contenu modifié");
+  });
+
   it("reports a network failure as unconfirmed, never as refused", async () => {
     vi.stubGlobal("fetch", async () => {
       throw new TypeError("fetch failed");
     });
-    const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" }, expectedHeadId: null };
+    const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" },
+      expectedHeadId: null, displayedFingerprint: FINGERPRINT };
     const failure = await postFacetCommand("", "restore", body, "k1").catch((err) => err);
     expect(failure).toBeInstanceOf(SignalFacetError);
     if (!(failure instanceof SignalFacetError)) throw new Error("Expected a facet failure");
@@ -347,7 +370,8 @@ describe("facet writes", () => {
 
   it("reports a stalled write body as unconfirmed, never as refused", async () => {
     stubStalledBody(200);
-    const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" }, expectedHeadId: null };
+    const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" },
+      expectedHeadId: null, displayedFingerprint: FINGERPRINT };
     const failure = await postFacetCommand("", "select", body, "k1", { timeoutMs: 10 }).catch(
       (err) => err,
     );

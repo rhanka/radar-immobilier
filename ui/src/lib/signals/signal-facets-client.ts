@@ -45,6 +45,8 @@ export interface FacetCommandLaunch {
   viewerKey: { context: string } | null;
   /** Head returned by this exact command, never inferred from a later read. */
   confirmedHeadId?: string | null;
+  /** Source version captured by this command, retained when discard hides its card. */
+  displayedFingerprint?: string;
 }
 
 export interface ReasonCode {
@@ -61,6 +63,8 @@ export interface FacetCommandBody {
     pertinent?: string | null;
     a_surveiller?: string | null;
   };
+  /** Fingerprint of the displayed signal version, captured with the intention. */
+  displayedFingerprint: string;
 }
 
 /** One persisted facet head, as served by GET cities/:city. */
@@ -353,6 +357,9 @@ export function facetErrorMessage(error: SignalFacetError): string {
     case 409:
       if (error.code === "facet_head_conflict") {
         return "Données périmées — rechargez les données puis réessayez.";
+      }
+      if (error.code === "target_version_conflict") {
+        return "Contenu modifié depuis l'affichage — rechargez les données puis réessayez.";
       }
       if (error.code === "command_context_unresolved") {
         return "Contexte de commande périmé — rechargez les données puis réessayez.";
