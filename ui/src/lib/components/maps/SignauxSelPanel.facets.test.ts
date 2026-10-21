@@ -42,6 +42,8 @@ function makeCity(): CityMapEntry {
   return { municipality, signalCount6m: 1, subsetCounts: {}, vivierV2Counts: null };
 }
 
+export const SIGNAL_FINGERPRINT = "0123456789abcdef".repeat(4);
+
 function makeSignal(id = "sig-1"): GraphSignalNode {
   return {
     id,
@@ -49,6 +51,7 @@ function makeSignal(id = "sig-1"): GraphSignalNode {
     label: "Synthetic zonage signal",
     citySlug: "delson",
     sourceRef: `raw/proces-verbaux-delson/2026/05/19/${id}.txt`,
+    facetFingerprint: SIGNAL_FINGERPRINT,
     createdAt: "2026-05-19T12:00:00.000Z",
     description: "Synthetic description.",
     publishedAt: "2026-05-19T12:00:00.000Z",
@@ -201,6 +204,7 @@ describe("SignauxSelPanel — controls and discard notice", () => {
       target: { citySlug: "delson", type: "DesignationEvent", id: "sig-1" },
       reasonCode: "N-ADMIN",
       expectedHeadId: null,
+      displayedFingerprint: SIGNAL_FINGERPRINT,
     });
   });
 
