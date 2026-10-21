@@ -66,9 +66,9 @@ Selected mappings (exact method/path only, no generic proxy):
 ## Deliverables
 
 - [x] Adapter types, exact routing and MCP result mapping helpers.
-- [ ] Closed validation and sanitized facade delegation.
-- [ ] Authority and effective-input checks (caller key, binding, profile, pagination, forged fields).
-- [ ] Provider-contract seams documented as preparation (`BLOCKED` finalization, typed outcome via facade).
+- [x] Closed validation and sanitized facade delegation.
+- [x] Authority and effective-input checks (caller key, binding, profile, pagination, forged fields).
+- [x] Provider-contract seams documented as preparation (`BLOCKED` finalization, typed outcome via facade).
 - [x] Post-success admission outage: sanitized response, no receipt, exactly one ledger entry.
 - [ ] Real-provider parity, conflict, private metadata, pagination and pre-dispatch admission evidence.
 - [ ] Four copied-source mutation failures, restored and checked with `cmp`.
