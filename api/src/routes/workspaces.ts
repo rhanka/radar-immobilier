@@ -21,7 +21,7 @@ const membershipBody = z.object({
   status: z.enum(["active", "revoked"]).optional(),
   moderateArchive: z.boolean().optional(),
   manageMembers: z.boolean().optional(),
-  expectedRevision: z.number().int().min(1).nullable(),
+  expectedRevision: z.number().int().min(1).nullish(),
 }).strict().refine((body) => body.status !== "revoked"
   || (body.moderateArchive === undefined && body.manageMembers === undefined));
 
