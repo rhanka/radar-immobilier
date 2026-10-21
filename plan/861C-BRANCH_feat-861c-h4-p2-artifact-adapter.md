@@ -73,6 +73,7 @@ Selected mappings (exact method/path only, no generic proxy):
 - [x] Provider-contract seams documented as preparation (`BLOCKED` finalization, typed outcome via facade).
 - [x] Post-success admission outage: sanitized response, no receipt, exactly one ledger entry.
 - [ ] Real-provider parity, conflict, private metadata, pagination and pre-dispatch admission evidence.
+- [x] Added composed-provider tests with shared PostgreSQL/S3 and the existing HTTP control route.
 - [ ] Four copied-source mutation failures, restored and checked with `cmp`.
 - [x] Parity cases with preparation mocks: minimal profile, HTTP↔MCP replay, changed-content conflict
       including file order, key boundaries, forged refusals, foreign metadata/pagination, suspension/expiry.
