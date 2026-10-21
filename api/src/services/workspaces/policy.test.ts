@@ -93,7 +93,14 @@ describe("workspace capability policy", () => {
       conflict = error;
     }
     expect(conflict).toMatchObject({ status: 409, current });
-    expect(() => checkRevision(current, null)).toThrowError(
+    let absence: unknown;
+    try {
+      checkRevision(current, null);
+    } catch (error) {
+      absence = error;
+    }
+    expect(absence).toMatchObject({ status: 409, message: "workspace_revision_conflict", current });
+    expect(() => checkRevision(current, undefined)).toThrowError(
       expect.objectContaining({ status: 400, message: "invalid_workspace_command" }),
     );
     expect(() => checkRevision(current, 1.5)).toThrowError(

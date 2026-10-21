@@ -14,6 +14,7 @@ import {
   audit,
   managingActorId,
   lockWorkspace,
+  revisionConflict,
   type MembershipMutation,
   type WorkspaceDb,
 } from "./mutations.js";
@@ -45,7 +46,11 @@ export async function setMembershipCapability(
       : { manageMembers: mutation.granted, revision: current.revision + 1 };
     const [saved] = await tx.update(workspaceMemberships).set(values).where(and(
       eq(workspaceMemberships.workspaceId, mutation.workspaceId),
-      eq(workspaceMemberships.accountId, mutation.targetAccountId))).returning();
+      eq(workspaceMemberships.accountId, mutation.targetAccountId),
+      eq(workspaceMemberships.revision, current.revision))).returning();
+    if (!saved) {
+      throw await revisionConflict(tx, mutation.workspaceId, mutation.targetAccountId, current);
+    }
     await audit(tx, mutation.workspaceId, mutation.targetAccountId,
       mutation.granted ? "capability_granted" : "capability_revoked",
       mutation.capability, actorId, mutation.reason);

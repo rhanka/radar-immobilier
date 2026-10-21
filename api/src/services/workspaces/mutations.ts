@@ -14,6 +14,7 @@ import { checkRevision } from "./policy.js";
 import { approvedAccountId, toRecord } from "./store.js";
 import {
   WorkspaceError,
+  WorkspaceRevisionConflictError,
   type MembershipRecord,
   type WorkspaceCapability,
 } from "./types.js";
@@ -21,9 +22,13 @@ import {
 export type MutationTx = Parameters<Parameters<Database["transaction"]>[0]>[0];
 export type WorkspaceDb = Pick<Database, "transaction">;
 
+function canonicalWorkspaceId(workspaceId: string): string {
+  return workspaceId.toLowerCase();
+}
+
 export async function lockWorkspace(tx: MutationTx, workspaceId: string): Promise<void> {
   await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${JSON.stringify(
-    ["workspace", workspaceId])}, 0))`);
+    ["workspace", canonicalWorkspaceId(workspaceId)])}, 0))`);
 }
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -33,7 +38,11 @@ export interface MembershipMutation {
   targetAccountId: string;
   actorSub: string;
   reason: string;
-  expectedRevision: number | null;
+  /**
+   * Caller-supplied revision: a number expects that revision, null expects
+   * no membership yet, and undefined (missing) is always rejected with 400.
+   */
+  expectedRevision: number | null | undefined;
 }
 
 /** Shared with capabilities.ts; not a public entry point. */
@@ -70,6 +79,17 @@ export async function approvedTargetId(tx: MutationTx, targetAccountId: string):
 }
 
 /** Shared with capabilities.ts; not a public entry point. */
+export async function revisionConflict(
+  tx: MutationTx, workspaceId: string, accountId: string, fallback: MembershipRecord,
+): Promise<WorkspaceRevisionConflictError> {
+  const [fresh] = await tx.select().from(workspaceMemberships).where(and(
+    eq(workspaceMemberships.workspaceId, workspaceId),
+    eq(workspaceMemberships.accountId, accountId),
+  ));
+  return new WorkspaceRevisionConflictError(fresh ? toRecord(fresh) : fallback);
+}
+
+/** Shared with capabilities.ts; not a public entry point. */
 export async function audit(
   tx: MutationTx, workspaceId: string, accountId: string, kind: string,
   capability: WorkspaceCapability | null, actorId: string, reason: string,
@@ -102,8 +122,12 @@ export async function addMembership(
     const [saved] = row
       ? await tx.update(workspaceMemberships).set(values)
         .where(and(eq(workspaceMemberships.workspaceId, mutation.workspaceId),
-          eq(workspaceMemberships.accountId, targetId))).returning()
+          eq(workspaceMemberships.accountId, targetId),
+          eq(workspaceMemberships.revision, row.revision))).returning()
       : await tx.insert(workspaceMemberships).values(values).returning();
+    if (row && !saved) {
+      throw await revisionConflict(tx, mutation.workspaceId, targetId, toRecord(row));
+    }
     await audit(tx, mutation.workspaceId, targetId, "member_added", null, actorId, mutation.reason);
     return { record: toRecord(saved!), changed: true };
   });
@@ -126,7 +150,11 @@ export async function revokeMembership(db: WorkspaceDb, mutation: MembershipMuta
     const [saved] = await tx.update(workspaceMemberships).set({
       status: "revoked", revision: current.revision + 1, revokedAt: new Date(),
     }).where(and(eq(workspaceMemberships.workspaceId, mutation.workspaceId),
-      eq(workspaceMemberships.accountId, mutation.targetAccountId))).returning();
+      eq(workspaceMemberships.accountId, mutation.targetAccountId),
+      eq(workspaceMemberships.revision, current.revision))).returning();
+    if (!saved) {
+      throw await revisionConflict(tx, mutation.workspaceId, mutation.targetAccountId, current);
+    }
     await audit(tx, mutation.workspaceId, mutation.targetAccountId,
       "member_revoked", null, actorId, mutation.reason);
     return toRecord(saved!);

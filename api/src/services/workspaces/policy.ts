@@ -54,12 +54,16 @@ export function requireCapability(
 
 export function checkRevision(
   current: MembershipRecord,
-  expectedRevision: number | null,
+  expectedRevision: number | null | undefined,
 ): void {
-  if (expectedRevision === null || !Number.isInteger(expectedRevision)) {
+  // A missing revision is always a malformed command. An explicit null means
+  // "no membership expected": on an existing row that expectation is stale,
+  // so the conflict carries the current state instead of a generic 400.
+  if (expectedRevision === undefined
+    || (expectedRevision !== null && !Number.isInteger(expectedRevision))) {
     throw new WorkspaceError(400, "invalid_workspace_command");
   }
-  if (current.revision !== expectedRevision) {
+  if (expectedRevision === null || current.revision !== expectedRevision) {
     throw new WorkspaceRevisionConflictError(current);
   }
 }
