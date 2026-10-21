@@ -13,7 +13,7 @@ const { db, pool } = createDb(loadConfig());
 afterAll(() => pool.end());
 it.each(["codes", "heads", "discarded"] as const)("should read %s in a read-only transaction", async (kind) => {
   const { sub, target } = await facetFixture(db);
-  await writeFacet(db, sub, { action: "discard", target, reasonCode: "N-ADMIN", commandKey: randomUUID() });
+  await writeFacet(db, sub, { action: "discard", target, reasonCode: "N-ADMIN", expectedHeadId: null, commandKey: randomUUID() });
   const client = await pool.connect();
   try {
     await client.query("BEGIN READ ONLY");
