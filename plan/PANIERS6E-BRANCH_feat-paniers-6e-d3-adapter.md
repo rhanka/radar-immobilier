@@ -69,14 +69,14 @@ Actions with the following status should be included around tasks only if really
   - [x] Explicit unsupported-value diagnostics; absent values stay silent.
   - [x] Export `REAL_GRAPH_ADAPTER_VERSION` from `index.ts`.
   - [ ] Lot gate:
-    - [ ] `make typecheck` + `make lint`
-    - [ ] `make test-api SCOPE=src/services/steve-source/d3-report ENV=test-paniers-l6e`
+    - [x] Isolated Make `check-api` + `lint-lot` on `ENV=test-paniers-l6e-sol`.
+    - [x] Isolated Make `test-d3` and `test-steve`, synthetic inputs only.
     - [ ] Cleanup with `down -v`, failure status preserved.
 - [ ] **Lot 2 — Resolver and report integration (report only)**
-  - [ ] Route `candidatesForToken` in `resolve.ts` through the adapter; distinct native nodes stay distinct.
-  - [ ] Record `adapterVersion` in `report.ts` metadata; snapshot identity and digest pass through unchanged.
-  - [ ] Update `SPEC.md` adapter contract (keys, nesting, arrays, diagnostics, versions).
-  - [ ] Five-bucket accounting unchanged; no persistence, no facet writes.
+  - [x] Route `candidatesForToken` in `resolve.ts` through the adapter; distinct native nodes stay distinct.
+  - [x] Record `adapterVersion` in `report.ts` metadata; snapshot identity and digest pass through unchanged.
+  - [x] Update `SPEC.md` adapter contract (keys, nesting, arrays, diagnostics, versions).
+  - [x] Five-bucket accounting unchanged; no persistence, no facet writes.
   - [ ] Lot gate (same checklist as Lot 1).
 - [ ] **Lot 3 — Synthetic qualification**
   - [ ] Add `graph-adapter.test.ts`: nested/camelCase values; arrays; repeated aliases; malformed values; competing nodes; municipality/MRC ambiguity; unchanged five-bucket accounting; frozen-input no-mutation check.
