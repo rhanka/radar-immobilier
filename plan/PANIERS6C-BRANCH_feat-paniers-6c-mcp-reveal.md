@@ -86,17 +86,19 @@ No blockage. No exception.
     - [x] `make -f tools/immo-mcp-test.mk test-immo-mcp SCOPE=src/data-source.test.ts ENV=test-paniers-6c-sol`
     - [x] Runner trap executes `docker compose down -v --remove-orphans` after every gate, including failures.
 
-- [ ] **Lot 2 — Discriminating tests and golden re-baseline**
+- [x] **Lot 2 — Discriminating tests and golden re-baseline**
   - [x] Default/false/omitted URL shape (no query string); `true` yields `?showDiscarded=1` with the current user token forwarded. Server visibility precedes the client limit.
-  - [ ] Reveal-before-search-before-limit ordering; 401/403/503 propagation with the flag set; end-to-end egress through the MCP transport.
+  - [x] Reveal-before-search-before-limit ordering; 401/403/503 propagation with the flag set; end-to-end egress through the MCP transport.
   - [x] Update the `search_signals` input schema in `src/fixtures/immo-tools.v1.json`; refresh the two `toolFixtureSha256` anchors.
-  - [ ] Full `packages/immo-mcp` suite stays green (no narrowed run in the final gate).
-  - [ ] Lot gate (same checklist as Lot 1, full `test-immo-mcp` without `SCOPE`)
+  - [x] Full `packages/immo-mcp` suite stays green: 127 tests across 10 files, including 12 added tests relative to the base.
+  - [x] Current credentials, two-user session isolation, current search scope and invalid flag types are qualified through the transport.
+  - [x] Existing API graph-signals contract: 48 tests pass without API changes.
+  - [x] Lot gate: typecheck, lint and full `test-immo-mcp` without `SCOPE` pass.
 
-- [ ] **Lot N-1 — Delivery evidence**
-  - [ ] Record a failing forwarding mutation, restoration and byte identity checks.
-  - [ ] Write the uncommitted French integration report with results and commit accounting.
-  - [ ] Update this `BRANCH.md` with merge-ready state.
+- [x] **Lot N-1 — Delivery evidence**
+  - [x] Record a failing forwarding mutation: 8 failures among 31 tests; restoration yields 31 passes and both `cmp` checks pass.
+  - [x] Write the uncommitted French integration report with results and commit accounting.
+  - [x] Record locally verified state; CI, deployment, workspace authorization and independent review consensus remain outside the verified claim.
 
 - [ ] **Lot N — Merge & close**
   - [ ] Deferred to the conductor: push, CI, PR, merge and roadmap consolidation are outside this assignment.
