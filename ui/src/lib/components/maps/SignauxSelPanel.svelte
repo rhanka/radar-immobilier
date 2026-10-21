@@ -1455,6 +1455,7 @@
                     {@const coPv = coPvSignalCount(node)}
                     {@const facetCardState = facetStateFor(node)}
                     {@const facetCardTarget = buildFacetTarget(node)}
+                    {@const facetCardFingerprint = node.facetFingerprint ?? null}
                     <div class="sel-entity-detail">
                       <!-- ID du signal + pastille couleur : lien visuel avec le
                            surlignage de la preuve (#84). La pastille reprend la
@@ -1624,6 +1625,7 @@
                         <SignalFacetControls
                           target={facetCardTarget}
                           state={facetCardState}
+                          displayedFingerprint={facetCardFingerprint}
                           codes={reasonCodes}
                           codesError={facetCodesError}
                           codesLoading={facetCodesLoading}

@@ -3,9 +3,16 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { accountUsers, facetCommands, facetEvents, facetReasonCodes } from "../../db/schema.js";
 import { FACET_PROFILE } from "./codebook.js";
-import { FacetError, FacetHeadConflictError, resolveTarget, type SignalTarget } from "./target.js";
+import {
+  FacetError,
+  FacetHeadConflictError,
+  FacetTargetVersionConflictError,
+  resolveTarget,
+  type SignalTarget,
+} from "./target.js";
 import { facetCommandDigest, historicalCommandDigest, readCommand } from "./commands.js";
 import { facetEventResponse } from "./response.js";
+import { lockCityGraph } from "../graph/graph-store.js";
 
 export type Basket = "pertinent" | "a_surveiller";
 export interface ExpectedSelectionHeads {
@@ -20,10 +27,13 @@ export interface FacetCommand {
   deselect?: Basket[] | undefined;
   expectedHeadId: string | null;
   expectedSelectionHeads?: ExpectedSelectionHeads | undefined;
+  /** Fingerprint of the signal version the writer displayed, verified before any transition. */
+  displayedFingerprint: string;
   commandKey: string;
 }
 type Tx = Parameters<Parameters<Database["transaction"]>[0]>[0];
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const FINGERPRINT_PATTERN = /^[a-f0-9]{64}$/;
 
 function assertHeadId(value: unknown): asserts value is string | null {
   if (value === null) return;
@@ -32,8 +42,15 @@ function assertHeadId(value: unknown): asserts value is string | null {
   }
 }
 
+function assertFingerprint(value: unknown): asserts value is string {
+  if (typeof value !== "string" || value.length !== 64 || !FINGERPRINT_PATTERN.test(value)) {
+    throw new FacetError(400, "invalid_facet_command");
+  }
+}
+
 function validateExpectations(command: FacetCommand, removals: Basket[]): void {
   assertHeadId(command.expectedHeadId);
+  assertFingerprint(command.displayedFingerprint);
   const selection = command.action === "select" || command.action === "deselect";
   if (selection || command.action === "restore") {
     if (command.expectedSelectionHeads !== undefined) {
@@ -71,7 +88,10 @@ export async function approvedOwner(db: Pick<Database, "select">, sub: string, l
 
 /** Recovery only: a missing receipt never falls through to a mutation. */
 export async function recoverHistoricalFacet(
-  db: Database, sub: string, command: Omit<FacetCommand, "expectedHeadId" | "expectedSelectionHeads">,
+  db: Database, sub: string,
+  command: Omit<FacetCommand, "expectedHeadId" | "displayedFingerprint"> & {
+    expectedHeadId?: string | null;
+  },
 ) {
   return db.transaction(async (tx) => {
     const ownerId = await approvedOwner(tx, sub, true);
@@ -83,7 +103,7 @@ export async function recoverHistoricalFacet(
   });
 }
 export async function writeFacet(db: Database, sub: string, command: FacetCommand) {
-  if (command.expectedHeadId === undefined) {
+  if (command.expectedHeadId === undefined || command.displayedFingerprint === undefined) {
     throw new FacetError(400, "invalid_facet_command");
   }
   command = { ...command, commandKey: command.commandKey.toLowerCase() };
@@ -97,14 +117,24 @@ export async function writeFacet(db: Database, sub: string, command: FacetComman
     validateExpectations(command, removals);
     const locks = [[facet, selection ? basket : null], ...removals.map((b) => ["selection", b])]
       .map(([f, b]) => JSON.stringify(["personal", ownerId, f, b, target.citySlug, target.type, target.id]));
-    locks.push(JSON.stringify(["command", ownerId, command.commandKey]));
-    for (const key of [...new Set(locks)].sort()) {
-      await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${key}, 0))`);
-    }
+    const commandLock = JSON.stringify(["command", ownerId, command.commandKey]);
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${commandLock}, 0))`);
     const commandDigest = facetCommandDigest(command);
     const replay = await readCommand(tx, ownerId, command.commandKey, commandDigest);
     if (replay !== undefined) return replay;
+    // 6B: serialize against graph refreshes. The transaction-scoped city lock is
+    // held through commit, so no refresh can slip between version comparison
+    // and the appended transitions. A deleted target fails explicitly (404).
+    await lockCityGraph(tx, target.citySlug);
+    for (const key of [...new Set(locks)].sort()) {
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${key}, 0))`);
+    }
     const fingerprint = await resolveTarget(tx, target);
+    if (fingerprint !== command.displayedFingerprint) {
+      const rows = await readHeadRows(tx, ownerId, target);
+      throw new FacetTargetVersionConflictError({ target, version: { fingerprint },
+        heads: rows.map((row) => facetEventResponse(row)) });
+    }
     await compareExpectedHeads(tx, ownerId, command, removals);
     if (action === "discard" && command.reasonCode === undefined) throw new FacetError(422, "reason_code_required");
     if (action === "select" || action === "discard") {
@@ -119,22 +149,27 @@ export async function writeFacet(db: Database, sub: string, command: FacetComman
     const result = event ? { ...event, createdAt: event.createdAt.toISOString() } : null;
     const context = { target, facet, basket: selection ? basket ?? null : null,
       expectedHeadId: command.expectedHeadId,
-      expectedSelectionHeads: command.expectedSelectionHeads ?? null };
+      expectedSelectionHeads: command.expectedSelectionHeads ?? null,
+      displayedFingerprint: command.displayedFingerprint };
     await tx.insert(facetCommands).values({ ownerId, commandKey: command.commandKey,
       commandDigest, result: { event: result, context } });
     return result;
   });
 }
 
-async function compareExpectedHeads(
-  tx: Tx, ownerId: string, command: FacetCommand, removals: Basket[],
-): Promise<void> {
-  const { target } = command;
-  const rows = await tx.select().from(facetEvents).where(and(
+async function readHeadRows(tx: Tx, ownerId: string, target: SignalTarget) {
+  return tx.select().from(facetEvents).where(and(
     eq(facetEvents.ownerId, ownerId), eq(facetEvents.scope, "personal"),
     eq(facetEvents.citySlug, target.citySlug), eq(facetEvents.nodeType, target.type),
     eq(facetEvents.nodeId, target.id), isNull(facetEvents.supersededBy),
   ));
+}
+
+async function compareExpectedHeads(
+  tx: Tx, ownerId: string, command: FacetCommand, removals: Basket[],
+): Promise<void> {
+  const { target } = command;
+  const rows = await readHeadRows(tx, ownerId, target);
   const headFor = (facet: string, basket: Basket | null) =>
     rows.find((row) => row.facet === facet && (basket === null ? row.basket === null : row.basket === basket));
   const mismatch = (facet: string, basket: Basket | null, expected: string | null): boolean => {
