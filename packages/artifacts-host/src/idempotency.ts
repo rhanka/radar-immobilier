@@ -104,7 +104,15 @@ export async function withArtifactAdvisoryLock<T>(
     throw new Error("withArtifactAdvisoryLock: keyHex must be hex (16+ chars)");
   }
   const lockId = keyHex.slice(0, 16);
-  const client = await pool.connect();
+  let client: pg.PoolClient;
+  try {
+    client = await pool.connect();
+  } catch (error) {
+    if (isConnectionFailure(error)) {
+      throw new ArtifactConnectionError("artifact postgres connection lost", { cause: error });
+    }
+    throw error;
+  }
   let discard = false;
   let locked = false;
   let connectionError: unknown = null;
