@@ -118,7 +118,7 @@ function guarded<A>(
  * (server.ts stdio and server-http.ts Streamable HTTP).
  */
 export function registerTools(server: McpServer, ctx: ToolContext): void {
-  for (const def of ALL_TOOL_DEFINITIONS.filter((def) => ["search_lots","get_lot_card","search_signals"].includes(def.name))) {
+  for (const def of ALL_TOOL_DEFINITIONS.filter((def) => ["search_lots","get_lot_card","search_signals","get_opportunity_dossier"].includes(def.name))) {
     const handler = TOOL_HANDLERS[def.name];
     if (!handler) throw new Error(`missing_handler:${def.name}`);
     server.registerTool(
@@ -154,26 +154,6 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
       },
     );
   }
-
-  server.registerTool(
-    "get_opportunity_dossier",
-    {
-      title: "Get opportunity dossier",
-      description:
-        "Dossier d'opportunité consolidé (score, lots et signaux liés, rationale). Read-only.",
-      inputSchema: {
-        city: z.string().min(1),
-        opportunityId: z.string().min(1),
-      },
-    },
-    guarded(ctx, "get_opportunity_dossier", IMMO_SCOPES.read, async (args) => {
-      const dossier = await ctx.data.getOpportunityDossier(args);
-      if (!dossier) {
-        return jsonResult({ found: false, city: args.city, opportunityId: args.opportunityId });
-      }
-      return jsonResult({ found: true, dossier });
-    }),
-  );
 
   server.registerTool(
     "list_documents",
