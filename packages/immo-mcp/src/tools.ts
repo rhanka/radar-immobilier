@@ -118,7 +118,7 @@ function guarded<A>(
  * (server.ts stdio and server-http.ts Streamable HTTP).
  */
 export function registerTools(server: McpServer, ctx: ToolContext): void {
-  for (const def of ALL_TOOL_DEFINITIONS.filter((def) => ["search_lots"].includes(def.name))) {
+  for (const def of ALL_TOOL_DEFINITIONS.filter((def) => ["search_lots","get_lot_card"].includes(def.name))) {
     const handler = TOOL_HANDLERS[def.name];
     if (!handler) throw new Error(`missing_handler:${def.name}`);
     server.registerTool(
@@ -154,23 +154,6 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
       },
     );
   }
-
-  server.registerTool(
-    "get_lot_card",
-    {
-      title: "Get lot card",
-      description: "Fiche détaillée d'un lot (zonage, superficie, signaux liés). Read-only.",
-      inputSchema: {
-        city: z.string().min(1),
-        no_lot: z.string().min(1).describe("Numéro de lot cadastral exact"),
-      },
-    },
-    guarded(ctx, "get_lot_card", IMMO_SCOPES.read, async (args) => {
-      const card = await ctx.data.getLotCard(args);
-      if (!card) return jsonResult({ found: false, city: args.city, no_lot: args.no_lot });
-      return jsonResult({ found: true, lot: card });
-    }),
-  );
 
   server.registerTool(
     "search_signals",
