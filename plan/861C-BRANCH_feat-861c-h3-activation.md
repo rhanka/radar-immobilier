@@ -77,7 +77,7 @@ Review integration (both non-blocking points):
       unknown, suspended, expired or non-cohort subjects are refused with no storage
       dispatch; authority is reread before dispatch, including suspension after entry.
       Authorization inside an in-flight provider commit remains unverified.
-  - [ ] Shared admission and facade seam.
+  - [x] Shared admission and facade seam.
   - [ ] Refusal regression tests.
   - [ ] Async query and pre-dispatch reread tests.
   - [ ] HTTP admission seam.
