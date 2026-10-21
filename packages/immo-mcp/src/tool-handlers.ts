@@ -210,6 +210,33 @@ async function getLotsGeojsonHandler(
   return geojsonResult(await ctx.raw.getLotsGeojson(args));
 }
 
+interface GrillePdfToolArgs {
+  city: string;
+  zone: string;
+}
+
+async function getGrillePdfHandler(
+  rawArgs: Record<string, unknown>,
+  ctx: InvocationContext,
+): Promise<ToolTextResult> {
+  const args = rawArgs as unknown as GrillePdfToolArgs;
+  assertScope(ctx.auth, IMMO_SCOPES.documentsRead);
+  return jsonResult(await ctx.raw.getGrillePdf(args));
+}
+
+interface PvPdfToolArgs {
+  rawRef: string;
+}
+
+async function getPvPdfHandler(
+  rawArgs: Record<string, unknown>,
+  ctx: InvocationContext,
+): Promise<ToolTextResult> {
+  const args = rawArgs as unknown as PvPdfToolArgs;
+  assertScope(ctx.auth, IMMO_SCOPES.documentsRead);
+  return jsonResult(await ctx.raw.getPvPdf(args));
+}
+
 /**
  * One handler per tool, keyed by exact tool name. The SDK registrar and the
  * future cluster-mesh bridge resolve through this map: there is no second
@@ -224,4 +251,6 @@ export const TOOL_HANDLERS: Readonly<Record<string, ToolHandler>> = Object.freez
   read_document_excerpt: readDocumentExcerptHandler,
   get_zones_geojson: getZonesGeojsonHandler,
   get_lots_geojson: getLotsGeojsonHandler,
+  get_grille_pdf: getGrillePdfHandler,
+  get_pv_pdf: getPvPdfHandler,
 });
