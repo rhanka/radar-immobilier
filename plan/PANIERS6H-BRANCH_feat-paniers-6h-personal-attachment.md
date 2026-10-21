@@ -168,3 +168,4 @@ unchanged until activation runs; scoped routes stay unmounted from `app.ts`.
 - [x] Fix2 integration checkpoint: `b0ffb300`.
 - [x] Fix2 integration checkpoint: `90638353`.
 - [x] Fix2 integration checkpoint: `c21da28d`.
+- [x] Fix2 integration checkpoint: `d02954fa`.
