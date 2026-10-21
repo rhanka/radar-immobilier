@@ -118,7 +118,7 @@ function guarded<A>(
  * (server.ts stdio and server-http.ts Streamable HTTP).
  */
 export function registerTools(server: McpServer, ctx: ToolContext): void {
-  for (const def of ALL_TOOL_DEFINITIONS.filter((def) => ["search_lots","get_lot_card","search_signals","get_opportunity_dossier","list_documents","read_document_excerpt","get_zones_geojson","get_lots_geojson"].includes(def.name))) {
+  for (const def of ALL_TOOL_DEFINITIONS.filter((def) => ["search_lots","get_lot_card","search_signals","get_opportunity_dossier","list_documents","read_document_excerpt","get_zones_geojson","get_lots_geojson","get_grille_pdf"].includes(def.name))) {
     const handler = TOOL_HANDLERS[def.name];
     if (!handler) throw new Error(`missing_handler:${def.name}`);
     server.registerTool(
@@ -175,25 +175,6 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
       `Nombre max de features retournées (défaut ${RAW_GEOJSON_DEFAULT_LIMIT}, ` +
         `max ${RAW_GEOJSON_MAX_LIMIT} — bbox obligatoire au-delà de ${RAW_GEOJSON_DEFAULT_LIMIT}).`,
     );
-
-  server.registerTool(
-    "get_grille_pdf",
-    {
-      title: "Get grille de zonage PDF",
-      description:
-        "URL de la grille de zonage PDF (grillePdfUrl) d'une zone d'une ville, quand la " +
-        "source municipale la porte. L'URL retournée est publique : elle peut être lue " +
-        "directement. Retourne found=false si la zone est inconnue, grillePdfUrl=null si la " +
-        "zone existe sans grille. Read-only.",
-      inputSchema: {
-        city: z.string().min(1).describe("Ville (slug, ex: longueuil)"),
-        zone: z.string().min(1).describe("Code de zonage (ex: H-203)"),
-      },
-    },
-    guarded(ctx, "get_grille_pdf", IMMO_SCOPES.documentsRead, async (args) =>
-      jsonResult(await ctx.raw.getGrillePdf(args)),
-    ),
-  );
 
   server.registerTool(
     "get_pv_pdf",
