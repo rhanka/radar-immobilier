@@ -16,6 +16,11 @@ export interface MembershipCommand extends MembershipMutation {
   manageMembers?: boolean;
 }
 
+const CAPABILITY_FIELDS = [
+  ["moderate_archive", "moderateArchive"],
+  ["manage_members", "manageMembers"],
+] as const;
+
 export async function applyMembershipCommand(
   db: WorkspaceDb, command: MembershipCommand,
 ): Promise<MembershipRecord> {
@@ -27,13 +32,34 @@ export async function applyMembershipCommand(
       eq(workspaceMemberships.workspaceId, command.workspaceId),
       eq(workspaceMemberships.accountId, command.targetAccountId),
     ));
-    if (row) checkRevision(toRecord(row), command.expectedRevision);
+    const current = row ? toRecord(row) : null;
+    if (current) checkRevision(current, command.expectedRevision);
     else if (command.expectedRevision !== null) throw new WorkspaceError(400, "invalid_workspace_command");
     if (command.status === "revoked") return revokeMembership(tx, command);
-    let { record } = await addMembership(tx, command);
-    for (const [capability, granted] of [
-      ["moderate_archive", command.moderateArchive], ["manage_members", command.manageMembers],
-    ] as const) {
+    const grants = [command.moderateArchive, command.manageMembers].some((value) => value === true);
+    if (!current && command.status !== "active" && !grants) {
+      // Withdrawals and bare commands never create a membership.
+      throw new WorkspaceError(404, "workspace_membership_not_found");
+    }
+    if (command.status === "active" || !current) {
+      // Explicit creation or reactivation, then the requested deltas.
+      let { record } = await addMembership(tx, command);
+      for (const [capability, field] of CAPABILITY_FIELDS) {
+        const granted = command[field];
+        if (granted === undefined) continue;
+        const changed = await setMembershipCapability(tx, {
+          ...command, expectedRevision: record.revision, capability, granted,
+        });
+        record = changed.record;
+      }
+      return record;
+    }
+    // Active membership without an explicit add status: apply the deltas on
+    // the existing row. A withdrawal never reactivates a revoked membership
+    // and never requires the target account to stay approved.
+    let record = current;
+    for (const [capability, field] of CAPABILITY_FIELDS) {
+      const granted = command[field];
       if (granted === undefined) continue;
       const changed = await setMembershipCapability(tx, {
         ...command, expectedRevision: record.revision, capability, granted,
