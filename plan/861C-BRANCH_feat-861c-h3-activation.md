@@ -87,7 +87,7 @@ Review integration (both non-blocking points):
       plus `Vary: Cookie, Authorization` on control successes, errors and account-switch
       responses.
   - [x] Final-response cache middleware.
-  - [ ] Success, refusal and account-switch cache tests.
+  - [x] Success, refusal and account-switch cache tests.
   - [ ] Parent-handler exception cache tests.
 
 ## Verification
