@@ -73,7 +73,7 @@ Require the displayed signal fingerprint on every new personal facet command. Ve
   - [ ] Browser UAT (not covered).
 - [ ] **Lot 3 — Discriminating qualification**
   - [x] Cover stale/matching/community-only versions and malformed commands.
-  - [ ] Cover exact replay, deletion, privacy and parallel stale writes.
+  - [x] Cover exact replay, deletion, privacy and parallel stale writes.
   - [ ] Cover 6A receipts, fingerprint-bound keys and lock retention through receipt commit.
   - [ ] Workspace typecheck, full lint, API facets/graph routes and UI maps/signals.
   - [ ] Remove verification in a copy; observe failure, restore, compare bytes and rerun.
