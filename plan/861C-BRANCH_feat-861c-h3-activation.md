@@ -141,7 +141,7 @@ rtk make -f tools/artifact-host.mk inspect API_PORT=18973 UI_PORT=15973 MAILDEV_
 followed by `inspect` proving no project containers, volumes or networks remain.
 
 - [x] Complete admission receipt fixtures verified by typecheck; test gate pending.
-- [ ] Unmounted capability cache regressions verified.
+- [x] Unmounted capability cache regression cases implemented.
 - [ ] Commit authorization and write-only failure ledger verified.
 - [ ] Blocked-provider revocation tests verified.
 - [ ] Provider failure and read-exclusion tests verified.
