@@ -9,6 +9,7 @@ NAME="${COMPOSE_PROJECT_NAME:?test project required}-h3img"
 IMAGE="$NAME:local"
 DENY="$NAME-deny"
 API="$NAME-api"
+DEFAULT="$NAME-default"
 UNKNOWN="$NAME-unknown"
 NODE_IMAGE="node:24-bookworm-slim"
 
@@ -17,7 +18,7 @@ NODE_IMAGE="node:24-bookworm-slim"
 if test -n "$(find . -name '.env*' ! -name '.env.example' -print -quit)"; then
   echo "[h3-image] refused: .env* present in build context" >&2; exit 1
 fi
-for resource in "$DENY" "$API" "$UNKNOWN"; do
+for resource in "$DENY" "$API" "$DEFAULT" "$UNKNOWN"; do
   if docker container inspect "$resource" >/dev/null 2>&1; then
     echo "[h3-image] refused: container $resource already exists" >&2; exit 1
   fi
@@ -31,7 +32,7 @@ if docker image inspect "$IMAGE" >/dev/null 2>&1; then
 fi
 cleanup() {
   status=$?
-  docker rm -f "$DENY" "$API" "$UNKNOWN" >/dev/null 2>&1 || true
+  docker rm -f "$DENY" "$API" "$DEFAULT" "$UNKNOWN" >/dev/null 2>&1 || true
   docker network rm "$NAME" >/dev/null 2>&1 || true
   docker image rm "$IMAGE" >/dev/null 2>&1 || true
   exit "$status"
@@ -58,14 +59,19 @@ docker run -d --rm --name "$DENY" --network "$NAME" \
 docker run -d --rm --name "$API" --network "$NAME" \
   --label "com.docker.compose.project=$COMPOSE_PROJECT_NAME" \
   -e PORT=3001 "$IMAGE" api >/dev/null
+# No-argument startup: the entrypoint default must boot the api mode.
+docker run -d --rm --name "$DEFAULT" --network "$NAME" \
+  --label "com.docker.compose.project=$COMPOSE_PROJECT_NAME" \
+  -e PORT=3002 "$IMAGE" >/dev/null
 
 docker run --rm -i --network "$NAME" \
   --label "com.docker.compose.project=$COMPOSE_PROJECT_NAME" \
-  -e DENY_HOST="$DENY" -e API_HOST="$API" "$NODE_IMAGE" node --input-type=module <<'JS'
+  -e DENY_HOST="$DENY" -e API_HOST="$API" -e DEFAULT_HOST="$DEFAULT" "$NODE_IMAGE" node --input-type=module <<'JS'
 import assert from "node:assert/strict";
 import http from "node:http";
 const deny = process.env.DENY_HOST;
 const api = process.env.API_HOST;
+const def = process.env.DEFAULT_HOST;
 function request(host, port, path, { method = "GET", headers = {} } = {}) {
   return new Promise((resolve, reject) => {
     const req = http.request({ host, port, path, method, headers }, res => {
@@ -115,7 +121,18 @@ assert.equal(head.data, "");
 assert.equal(head.headers["set-cookie"], undefined);
 console.log("[h3-image] PASS: content-deny mode denies every host form");
 await waitReady(api, 3001, "/livez", 90);
-console.log("[h3-image] PASS: api mode boots and serves /livez");
+// Discrimination: the same path the denial boundary closes with 404 must
+// serve the application banner in api mode (api/src/app.ts), proving the two
+// modes are not the same server.
+const banner = await request(api, 3001, "/", { headers: { Host: "preprod.immo.sent-tech.ca" } });
+assert.equal(banner.status, 200, "api GET / status");
+assert.deepEqual(JSON.parse(banner.data), { name: "radar-immobilier-api", status: "up" }, "api GET / banner");
+console.log("[h3-image] PASS: api mode serves the application banner (not the denial boundary)");
+await waitReady(def, 3002, "/livez", 90);
+const fallback = await request(def, 3002, "/", { headers: { Host: "preprod.immo.sent-tech.ca" } });
+assert.equal(fallback.status, 200, "default GET / status");
+assert.deepEqual(JSON.parse(fallback.data), { name: "radar-immobilier-api", status: "up" }, "default GET / banner");
+console.log("[h3-image] PASS: no-argument startup boots the api mode by default");
 JS
 
 for mode in bogus ''; do
