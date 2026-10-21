@@ -3,9 +3,8 @@ import { afterAll, expect, it } from "vitest";
 import { createDb } from "../../src/db/client.js";
 import { loadConfig } from "../../src/config.js";
 import { createDiscardedSignalsReader } from "../../src/services/facets/discarded-reader.js";
-import { writeFacet } from "../../src/services/facets/writer.js";
 import { discardedSignalKey } from "../../src/services/graph/discarded-signals.js";
-import { facetFixture } from "./facets-fixture.js";
+import { facetFixture, writeDisplayedFacet as writeFacet } from "./facets-fixture.js";
 
 const { db, pool } = createDb(loadConfig());
 afterAll(() => pool.end());

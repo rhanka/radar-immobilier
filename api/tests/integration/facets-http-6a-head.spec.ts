@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { createDb } from "../../src/db/client.js";
 import { loadConfig } from "../../src/config.js";
 import { accountUsers, facetCommands, facetEvents, graphNodes } from "../../src/db/schema.js";
-import { digest } from "../../src/services/facets/target.js";
+import { digest, resolveTarget } from "../../src/services/facets/target.js";
 import { facetFixture } from "./facets-fixture.js";
 import { facetCookie, facetHttp } from "./facets-http-fixture.js";
 
@@ -21,37 +21,46 @@ async function post(app: ReturnType<typeof facetHttp>, cookie: string,
   return response;
 }
 
-it("requires explicit head expectations and rejects extraneous ones", async () => {
+it("requires explicit head expectations and a displayed fingerprint", async () => {
   const { sub, target } = await facetFixture(db);
   const app = facetHttp(db);
   const cookie = await facetCookie(sub);
+  const displayedFingerprint = await resolveTarget(db, target);
   expect((await post(app, cookie, "select", { target, basket: "pertinent" })).status).toBe(400);
-  expect((await post(app, cookie, "deselect", { target, basket: "pertinent", expectedHeadId: null },
-  )).status).toBe(200);
+  expect((await post(app, cookie, "select",
+    { target, basket: "pertinent", expectedHeadId: null })).status).toBe(400);
+  expect((await post(app, cookie, "deselect", { target, basket: "pertinent", expectedHeadId: null,
+    displayedFingerprint })).status).toBe(200);
   expect((await post(app, cookie, "select",
     { target, basket: "pertinent", expectedHeadId: null, displayedFingerprint: "x".repeat(64) })).status,
   ).toBe(400);
   expect((await post(app, cookie, "select",
-    { target, basket: "pertinent", expectedHeadId: null, expectedSelectionHeads: { pertinent: null } })).status,
+    { target, basket: "pertinent", expectedHeadId: null, displayedFingerprint,
+      expectedSelectionHeads: { pertinent: null } })).status,
   ).toBe(400);
   expect((await post(app, cookie, "restore", { target })).status).toBe(400);
-  expect((await post(app, cookie, "discard", { target, reasonCode: "N-ADMIN", expectedHeadId: null },
-  )).status).toBe(200);
+  expect((await post(app, cookie, "discard", { target, reasonCode: "N-ADMIN", expectedHeadId: null,
+    displayedFingerprint })).status).toBe(200);
 });
 
 it("discard rejects mismatched selection-head maps", async () => {
   const { sub, target } = await facetFixture(db);
   const app = facetHttp(db);
   const cookie = await facetCookie(sub);
-  await post(app, cookie, "select", { target, basket: "pertinent", expectedHeadId: null });
+  const displayedFingerprint = await resolveTarget(db, target);
+  await post(app, cookie, "select",
+    { target, basket: "pertinent", expectedHeadId: null, displayedFingerprint });
   const selected = await (await post(app, cookie, "select",
-    { target, basket: "a_surveiller", expectedHeadId: null })).json() as { event: { id: string } };
+    { target, basket: "a_surveiller", expectedHeadId: null, displayedFingerprint },
+  )).json() as { event: { id: string } };
   expect((await post(app, cookie, "discard", { target, reasonCode: "N-ADMIN", expectedHeadId: null,
-    deselect: ["a_surveiller"] })).status).toBe(400);
+    displayedFingerprint, deselect: ["a_surveiller"] })).status).toBe(400);
   expect((await post(app, cookie, "discard", { target, reasonCode: "N-ADMIN", expectedHeadId: null,
-    deselect: ["a_surveiller"], expectedSelectionHeads: { pertinent: null } })).status).toBe(400);
+    displayedFingerprint, deselect: ["a_surveiller"],
+    expectedSelectionHeads: { pertinent: null } })).status).toBe(400);
   expect((await post(app, cookie, "discard", { target, reasonCode: "N-ADMIN", expectedHeadId: null,
-    deselect: ["a_surveiller"], expectedSelectionHeads: { a_surveiller: selected.event.id } })).status,
+    displayedFingerprint, deselect: ["a_surveiller"],
+    expectedSelectionHeads: { a_surveiller: selected.event.id } })).status,
   ).toBe(200);
 });
 
@@ -59,13 +68,16 @@ it("returns 409 with the authorized current state on a stale write", async () =>
   const { sub, target } = await facetFixture(db);
   const app = facetHttp(db);
   const cookie = await facetCookie(sub);
+  const displayedFingerprint = await resolveTarget(db, target);
   const created = await (await post(app, cookie, "select",
-    { target, basket: "pertinent", expectedHeadId: null })).json() as { event: { id: string } };
+    { target, basket: "pertinent", expectedHeadId: null, displayedFingerprint },
+  )).json() as { event: { id: string } };
   const other = await facetFixture(db);
   expect((await post(app, await facetCookie(other.sub), "select",
-    { target, basket: "pertinent", expectedHeadId: null })).status).toBe(200);
+    { target, basket: "pertinent", expectedHeadId: null, displayedFingerprint },
+  )).status).toBe(200);
   const conflict = await post(app, cookie, "select",
-    { target, basket: "pertinent", expectedHeadId: null });
+    { target, basket: "pertinent", expectedHeadId: null, displayedFingerprint });
   expect(conflict.status).toBe(409);
   const body = await conflict.json() as {
     error: string; current: { target: unknown; version: null; heads: Array<Record<string, unknown>> };
@@ -82,9 +94,9 @@ it("returns 409 with the authorized current state on a stale write", async () =>
   expect(body.current.heads[0]).not.toHaveProperty("commandDigest");
   const key = randomUUID();
   await post(app, cookie, "deselect",
-    { target, basket: "pertinent", expectedHeadId: created.event.id }, key);
+    { target, basket: "pertinent", expectedHeadId: created.event.id, displayedFingerprint }, key);
   const replayed = await post(app, cookie, "select",
-    { target, basket: "pertinent", expectedHeadId: null }, key);
+    { target, basket: "pertinent", expectedHeadId: null, displayedFingerprint }, key);
   expect(replayed.status).toBe(409);
   expect(await replayed.json()).toMatchObject({ error: "idempotency_key_conflict" });
 });
@@ -121,15 +133,20 @@ it("keeps historical null receipts reserved without inventing their context", as
   const { sub, ownerId, target } = await facetFixture(db);
   const app = facetHttp(db);
   const cookie = await facetCookie(sub);
+  const displayedFingerprint = await resolveTarget(db, target);
   const key = randomUUID();
   await db.insert(facetCommands).values({ ownerId, commandKey: key,
     commandDigest: digest({ action: "restore", target, basket: null, reasonCode: null, deselect: [] }),
     result: { event: null } });
-  for (const body of [{ target }, { target, expectedHeadId: null }]) {
+  for (const body of [{ target }, { target, expectedHeadId: null, displayedFingerprint }]) {
     const response = await post(app, cookie, "restore", body, key);
     expect(response.status).toBe(409);
     expect(await response.json()).toEqual({ error: "command_context_unresolved" });
   }
+  const missingFingerprint = await post(app, cookie, "restore",
+    { target, expectedHeadId: null }, key);
+  expect(missingFingerprint.status).toBe(409);
+  expect(await missingFingerprint.json()).toEqual({ error: "command_context_unresolved" });
   expect(await db.select().from(facetEvents).where(eq(facetEvents.ownerId, ownerId))).toHaveLength(0);
   expect(await db.select().from(facetCommands).where(eq(facetCommands.ownerId, ownerId))).toHaveLength(1);
 });
