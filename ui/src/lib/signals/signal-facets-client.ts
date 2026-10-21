@@ -366,3 +366,18 @@ export function facetErrorMessage(error: SignalFacetError): string {
       return `Écriture refusée (${error.status}).`;
   }
 }
+
+/**
+ * Parent-owned refusal notice for a 409 head conflict. The target is the
+ * native facet identity (city, type, id) so the notice survives the removal
+ * of the signal card from the detail list.
+ */
+export interface FacetConflictNotice {
+  target: FacetTarget;
+  message: string;
+}
+
+/** Identity of one facet target (city, type, id). */
+export function sameFacetTarget(a: FacetTarget, b: FacetTarget): boolean {
+  return a.citySlug === b.citySlug && a.type === b.type && a.id === b.id;
+}
