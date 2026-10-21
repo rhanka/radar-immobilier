@@ -9,8 +9,8 @@ Prepare the data-and-contracts slice of P3: versioned Immo provider and artifact
 - No test capture used as production configuration; non-secret values and opaque references only.
 - Isolated tooling only: `tools/immo-mcp-test.mk` (unchanged); root `ENV=dev` stays reserved for the user.
 - Every commit stays within 150 changed lines and 15 files, including its plan update.
-- Integration uses `ENV=test-861c-h4-p3` with no published ports; API/UI/Maildev ports are not used.
-- Shared Git metadata stays read-only; commits and the delivery bundle live under `tmp/861c-h4-p3/`.
+- Integration uses `ENV=test-861c-h4-p3`, `ENV=test-861c-h4-p3-fix` and `ENV=test-861c-h4-p3-fix2` with no published host ports.
+- Shared Git metadata stays read-only; local commits and bundles live under `tmp/861c-h4-p3/`, `tmp/861c-h4-p3-fix/` and `tmp/861c-h4-p3-fix2/`.
 
 ## Branch Scope Boundaries (MANDATORY)
 - **Allowed Paths (implementation scope)**:
@@ -19,7 +19,7 @@ Prepare the data-and-contracts slice of P3: versioned Immo provider and artifact
   - `packages/immo-mcp/config/immo-artifacts.v1.json`
   - `packages/immo-mcp/src/registry/**`
   - `RAPPORT-MUSE-H4-P3.md` (uncommitted deliverable)
-  - `RAPPORT-SOL-H4-P3.md`, `tmp/861c-h4-p3/**`, `tmp/861c-h4-p3-fix/**` (uncommitted integration evidence)
+  - `RAPPORT-SOL-H4-P3.md`, `tmp/861c-h4-p3/**`, `tmp/861c-h4-p3-fix/**`, `tmp/861c-h4-p3-fix2/**` (uncommitted integration evidence)
 - **Forbidden Paths (must not change in this branch)**:
   - `Makefile`
   - `docker-compose*.yml`
@@ -40,8 +40,13 @@ Prepare the data-and-contracts slice of P3: versioned Immo provider and artifact
 - Required provider-contract revisions are recorded as `pending-upstream` in config and tests; no compatible export is claimed.
 - Integration inspection found two TypeScript errors and thirteen failing regression cases; corrections remain inside registry scope.
 - Harness consensus review is `selection-failed`: the handoff lacks supported author host/model/effort metadata; no consensus is claimed.
-- Integration gates passed: 173 tests in 16 files, including 46 registry cases; lint clean, each commit typechecked in isolation.
+- Initial integration gates passed: 173 tests in 16 files, including 46 registry cases; lint clean, each commit typechecked in isolation.
 - Four copy mutations were refused; byte restoration and three final `cmp` checks passed. Test-project teardown leaves zero resources.
+- Astra correction gates passed: 190 tests in 18 files, including 63 registry cases; lint clean and snapshot typechecks recorded.
+- Five copy scenarios produced six refusals and twenty successful `cmp` checks; the isolated project leaves zero resources.
+- Full-profile integrity and duplicate-selection regressions were reproduced before correction and pass afterward.
+- Independent review corrections pass 195 tests in 18 files (68 registry cases), lint and per-commit typechecks.
+- Six regression failures were observed on the base; four copy scenarios prove five registry refusals, frozen-candidate rejection and nineteen targeted cmp checks.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch** (no history copying; local commits and base-relative bundle)
@@ -82,7 +87,7 @@ Prepare the data-and-contracts slice of P3: versioned Immo provider and artifact
   - [x] Audit dependencies, secrets, network-free registry and forbidden paths.
   - [x] Teardown with `down -v`; verify zero remaining project resources.
   - [x] Produce uncommitted `RAPPORT-SOL-H4-P3.md` and base-relative bundle.
-- [ ] **Lot 5b — Astra review corrections**
+- [x] **Lot 5b — Astra review corrections**
   - [x] Define the supported local artifact version and complete effective profile.
   - [x] Enforce artifact scopes and required caller-key semantics.
   - [x] Compile only selected capabilities and freeze the complete profile into the digest.
@@ -90,7 +95,14 @@ Prepare the data-and-contracts slice of P3: versioned Immo provider and artifact
   - [x] Verify embedded required fields and durable identity parity.
   - [x] Cover selection, scope and provider-version refusals.
   - [x] Prove complete profile integrity and authorized digest evolution.
-  - [ ] Pass full gates, five copy mutations, restoration checks and resource teardown.
+  - [x] Preserve duplicate-declaration rejection for selected artifact tools and providers.
+  - [x] Pass full gates, five copy mutations, restoration checks and resource teardown.
+- [x] **Lot 5c — Independent review corrections**
+  - [x] Reject duplicate provider identifiers with disjoint Immo inventory coverage.
+  - [x] Validate command mappings and require bindingName for artifacts_ensure.
+  - [x] Rebuild frozen selection entries from validated fields and cover nested caller mutations.
+  - [x] Verify baseline failures, full gates, four copy scenarios and cmp restoration.
+  - [x] Deliver snapshot-typechecked commits, base-relative bundle and updated integration report.
 - [ ] **Lot 6 — Merge and close**
   - [ ] Push branch (excluded from this integration assignment).
   - [ ] Open PR, verify CI green.
