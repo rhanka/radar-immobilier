@@ -292,3 +292,5 @@ finalization, quotas, persistent ledger and HTTP/MCP parity remain unverified.
 - [x] P4: declare the fourth-PR scope and exclusions.
 
 - [x] P4: add mode off and opaque optional S3 Secret references.
+
+- [x] P4: add the credential-free denial Deployment and Service.
