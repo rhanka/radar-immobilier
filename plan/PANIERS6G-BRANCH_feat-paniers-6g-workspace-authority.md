@@ -51,6 +51,7 @@ Provide the workspace and membership authority for one team workspace: explicit 
   - Include reason, impact, and rollback strategy.
 
 ## Feedback Loop
+- [x] CI build correction: merge origin/main, reproduce TS4023, explicitly type the Vitest collector with ReturnType<typeof describe.skipIf>; API declaration build, typecheck, scoped lint, 41 tests and 11 copied mutation checks pass.
 - [x] Astra fix qualification: canonical locks, SQL revision guards and explicit-absence conflicts.
 - [x] Astra fix qualification: withdrawals preserve revoked status and work on suspended accounts.
 - [x] Astra fix qualification: deterministic service concurrency and stale-creation regression tests.
