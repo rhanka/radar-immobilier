@@ -81,7 +81,7 @@ Build a read-only deterministic report mapping every `prospect_marks` row to its
   - [x] `api/src/services/facets/lot-migration-report/source-db.test.ts`
 - [ ] **Lot 4 — Isolated verification (BR6F-EX1)**
   - [x] `tools/make/paniers-lot6.mk`
-  - [ ] `tools/make/paniers-lot6-verify.sh`
+  - [x] `tools/make/paniers-lot6-verify.sh`
   - [ ] `tools/make/paniers-lot6-mutation.sh`
   - [ ] API typecheck and facets lint pass in containers.
   - [ ] All `src/services/facets` tests, including the read-only DB test, pass.
