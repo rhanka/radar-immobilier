@@ -179,6 +179,37 @@ async function readDocumentExcerptHandler(
   });
 }
 
+interface ZonesGeojsonToolArgs {
+  city: string;
+  bbox?: Bbox | undefined;
+  limit: number;
+}
+
+interface LotsGeojsonToolArgs extends ZonesGeojsonToolArgs {
+  only4Plus?: boolean | undefined;
+  superficieMinM2?: number | undefined;
+}
+
+async function getZonesGeojsonHandler(
+  rawArgs: Record<string, unknown>,
+  ctx: InvocationContext,
+): Promise<ToolTextResult> {
+  const args = rawArgs as unknown as ZonesGeojsonToolArgs;
+  assertScope(ctx.auth, IMMO_SCOPES.read);
+  checkGeoBounds(args);
+  return geojsonResult(await ctx.raw.getZonesGeojson(args));
+}
+
+async function getLotsGeojsonHandler(
+  rawArgs: Record<string, unknown>,
+  ctx: InvocationContext,
+): Promise<ToolTextResult> {
+  const args = rawArgs as unknown as LotsGeojsonToolArgs;
+  assertScope(ctx.auth, IMMO_SCOPES.read);
+  checkGeoBounds(args);
+  return geojsonResult(await ctx.raw.getLotsGeojson(args));
+}
+
 /**
  * One handler per tool, keyed by exact tool name. The SDK registrar and the
  * future cluster-mesh bridge resolve through this map: there is no second
@@ -191,4 +222,6 @@ export const TOOL_HANDLERS: Readonly<Record<string, ToolHandler>> = Object.freez
   get_opportunity_dossier: getOpportunityDossierHandler,
   list_documents: listDocumentsHandler,
   read_document_excerpt: readDocumentExcerptHandler,
+  get_zones_geojson: getZonesGeojsonHandler,
+  get_lots_geojson: getLotsGeojsonHandler,
 });
