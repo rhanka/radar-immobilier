@@ -54,7 +54,7 @@ Provide the workspace and membership authority for one team workspace: explicit 
 - [x] Astra fix qualification: canonical locks, SQL revision guards and explicit-absence conflicts.
 - [x] Astra fix qualification: withdrawals preserve revoked status and work on suspended accounts.
 - [x] Astra fix qualification: deterministic service concurrency and stale-creation regression tests.
-- [ ] Astra fix qualification: HTTP withdrawal invariants and concurrent creation conflicts.
+- [x] Astra fix qualification: HTTP withdrawal invariants and concurrent creation conflicts.
 - [ ] Astra fix qualification: LOT-specific default scopes and copied Make regression proof.
 - [ ] Astra fix qualification: copied assertion failures, byte restoration and checked commit snapshots.
 - `BR6G-EX2`: extend `tools/make/paniers-lot6*` for SQL/HTTP regression tests, migration replay, copied mutation proofs, failure diagnostics and workspace-local commit/bundle delivery. Reason: complete the assigned integration qualification without reading environment files or writing shared Git metadata. Impact: isolated test tooling only; no application activation. Rollback: restore these tools from the base commit.
