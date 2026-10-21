@@ -4,10 +4,18 @@ import {
   IMMO_TOOL_NAMES,
   IMMO_TOOL_SCOPES,
 } from "./immo-provider.js";
-import { ARTIFACT_PROFILE_REVISION, ARTIFACT_SELECTION } from "./artifact-profile.js";
+import {
+  ARTIFACT_DURABLE_IDENTITY,
+  ARTIFACT_EFFECTIVE_REQUIRED,
+  ARTIFACT_PROFILE_REVISION,
+  ARTIFACT_PROVIDER_VERSION,
+  ARTIFACT_SELECTION,
+  REQUIRED_PROVIDER_CONTRACTS,
+} from "./artifact-profile.js";
 import { compileComposition } from "./composition.js";
 import {
   ARTIFACT_PROVIDER_ID,
+  checkEffectiveProfile,
   RegistryError,
   type ArtifactActivationRequest,
   type ProviderDefinition,
@@ -35,7 +43,7 @@ function codeOf(task: () => unknown): string {
   throw new Error("expected a RegistryError");
 }
 
-function artifactProvider(version = "0.1.4"): ProviderDefinition {
+function artifactProvider(version: string = ARTIFACT_PROVIDER_VERSION): ProviderDefinition {
   return {
     id: ARTIFACT_PROVIDER_ID,
     version,
@@ -67,9 +75,7 @@ describe("artifact activation", () => {
     expect(candidate.artifact?.selection).toHaveLength(4);
     expect(JSON.stringify(active)).toBe(before);
     expect(candidate.digest).not.toBe(compileComposition(active).digest);
-    expect(candidate.digest).not.toBe(
-      compileComposition([...active, artifactProvider("0.1.5")], { artifact: artifactRequest() }).digest,
-    );
+    expect(candidate.digest).toMatch(/^[0-9a-f]{64}$/);
   });
 
   it("should refuse activation without its provider contracts", () => {
@@ -103,5 +109,96 @@ describe("artifact activation", () => {
       : entry));
     const remapped = artifactRequest({ selection: remappedSelection });
     expect(codeOf(() => compileComposition(providers, { artifact: remapped }))).toBe("unavailable_capability");
+  });
+
+  it("should refuse an artifact provider without a validated selection", () => {
+    const providers = [immoProvider(), artifactProvider()];
+    expect(codeOf(() => compileComposition(providers))).toBe("unavailable_capability");
+  });
+
+  it("should exclude unselected artifact capabilities from the compiled inventory", () => {
+    const baseline = compileComposition([immoProvider(), artifactProvider()], { artifact: artifactRequest() });
+    const extended = artifactProvider();
+    const withExtra: ProviderDefinition = {
+      ...extended,
+      tools: [...extended.tools, {
+        name: "artifacts_delete",
+        scope: "immo:read",
+        binding: { context: "artifact-service", registeredBy: "registerTools" },
+      }],
+    };
+    const candidate = compileComposition([immoProvider(), withExtra], { artifact: artifactRequest() });
+    expect(Object.keys(candidate.toolScopes)).toHaveLength(16);
+    expect(candidate.toolScopes).not.toHaveProperty("artifacts_delete");
+    expect(candidate.toolScopes).toEqual(baseline.toolScopes);
+    expect(candidate.digest).toBe(baseline.digest);
+  });
+
+  it("should freeze the effective profile and durable identity in the digest", () => {
+    const candidate = compileComposition([immoProvider(), artifactProvider()], { artifact: artifactRequest() });
+    expect(candidate.artifact?.effectiveRequired.artifacts_ensure).toContain("idempotencyKey");
+    expect(candidate.artifact?.effectiveRequired.artifacts_publish).toContain("idempotencyKey");
+    expect(candidate.artifact?.effectiveRequired).toEqual({
+      artifacts_ensure: [...ARTIFACT_EFFECTIVE_REQUIRED.artifacts_ensure],
+      artifacts_publish: [...ARTIFACT_EFFECTIVE_REQUIRED.artifacts_publish],
+      artifacts_list: [...ARTIFACT_EFFECTIVE_REQUIRED.artifacts_list],
+      artifacts_get: [...ARTIFACT_EFFECTIVE_REQUIRED.artifacts_get],
+    });
+    expect(candidate.artifact?.durableIdentity).toEqual({ ...ARTIFACT_DURABLE_IDENTITY });
+    expect(candidate.artifact?.requiredContracts).toEqual({ ...REQUIRED_PROVIDER_CONTRACTS });
+    expect(Object.isFrozen(candidate.artifact?.effectiveRequired.artifacts_ensure)).toBe(true);
+    expect(Object.isFrozen(candidate.artifact?.durableIdentity)).toBe(true);
+    expect(Object.isFrozen(candidate.artifact?.requiredContracts)).toBe(true);
+    const saved = ARTIFACT_DURABLE_IDENTITY.conflict;
+    try {
+      Object.assign(ARTIFACT_DURABLE_IDENTITY, { conflict: "revised conflict semantics" });
+      const evolved = compileComposition([immoProvider(), artifactProvider()], { artifact: artifactRequest() });
+      expect(evolved.digest).not.toBe(candidate.digest);
+      expect(candidate.artifact?.durableIdentity.conflict).toBe(saved);
+    } finally {
+      Object.assign(ARTIFACT_DURABLE_IDENTITY, { conflict: saved });
+    }
+  });
+
+  it("should refuse a mutation that drops the idempotency requirement", () => {
+    expect(codeOf(() => checkEffectiveProfile({
+      artifacts_ensure: ["bindingName"],
+      artifacts_publish: ["artifactId", "files", "idempotencyKey"],
+      artifacts_list: [],
+      artifacts_get: ["artifactId"],
+    }))).toBe("unavailable_capability");
+    expect(codeOf(() => checkEffectiveProfile({
+      artifacts_ensure: ["bindingName", "idempotencyKey"],
+      artifacts_publish: ["artifactId", "files"],
+      artifacts_list: [],
+      artifacts_get: ["artifactId"],
+    }))).toBe("unavailable_capability");
+  });
+
+  it.each(ARTIFACT_SELECTION)("should require immo:read on $tool", ({ tool: name }) => {
+    for (const scope of ["immo:search", "immo:documents:read", "artifacts:*"]) {
+      const scoped = artifactProvider();
+      const providers: ProviderDefinition[] = [{
+        ...scoped,
+        tools: scoped.tools.map((tool) => (tool.name === name
+          ? { ...tool, scope }
+          : tool)),
+      }, immoProvider()];
+      expect(codeOf(() => compileComposition(providers, { artifact: artifactRequest() }))).toBe("generic_scope");
+    }
+  });
+
+  it("should require the qualified artifact provider version", () => {
+    const missing = structuredClone(artifactProvider());
+    Reflect.deleteProperty(missing, "version");
+    expect(codeOf(() => compileComposition([immoProvider(), missing], {
+      artifact: artifactRequest(),
+    }))).toBe("incompatible_version");
+    expect(codeOf(() => compileComposition([immoProvider(), artifactProvider("0.1.5")], {
+      artifact: artifactRequest(),
+    }))).toBe("incompatible_version");
+    expect(codeOf(() => compileComposition([immoProvider(), artifactProvider("9.9.9")], {
+      artifact: artifactRequest(),
+    }))).toBe("incompatible_version");
   });
 });
