@@ -79,7 +79,7 @@ Review integration (both non-blocking points):
       Authorization inside an in-flight provider commit remains unverified.
   - [x] Shared admission and facade seam.
   - [x] Refusal regression tests.
-  - [ ] Async query and pre-dispatch reread tests.
+  - [x] Async query and pre-dispatch reread tests.
   - [ ] HTTP admission seam.
   - [ ] HTTP entry regression tests.
   - [ ] HTTP reread regression tests.
