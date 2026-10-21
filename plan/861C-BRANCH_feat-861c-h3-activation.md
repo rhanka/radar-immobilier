@@ -1,17 +1,22 @@
-# H3 activation — branch scope for feat/861c-h3-p3-denial-image (third PR: units 8 and 9)
+# H3 activation — branch scope for feat/861c-h3-p4-preprod-resources (fourth PR: units 11 to 15)
 
-**Type**: feature · **Base**: `main` (H3 first PR and second PR merged) · **Branch**: `feat/861c-h3-p3-denial-image`
-**Workspace**: `/home/antoinefa/src/radar-immobilier/.worktrees/861c-h3-p3`
-**Reference design**: `.lanes/conductor/tmp/861c/conception-h3-v1.md` (§10, units 8 and 9; §5.4 and §6.4 contracts)
+**Type**: feature · **Base**: `main` (H3 first, second and third PRs merged; H4 P0 to P3 present) · **Branch**: `feat/861c-h3-p4-preprod-resources`
+**Workspace**: `/home/antoinefa/src/radar-immobilier/.worktrees/861c-h3-p4`
+**Reference design**: `.lanes/conductor/tmp/861c/conception-h3-v1.md` (§6 deployment, §7, §9, §10 units 11 to 15, §11 activation and rollback)
 
 ## Objective
 
-Deliver the third H3 pull request: unit 8 (isolated denial listener) and
-unit 9 (runtime image entrypoint plus real-image smoke tooling). No provider
-quota dependency, no migration, no preprod resources, no rollback
-documentation. Each test below fails without its fix. Units 1-4 (first PR),
-review rework, unit 7 (blocked, pinned leak documented) and unit 10 (second
-PR) are merged and unchanged.
+Deliver the fourth H3 pull request: units 11 to 15 (named preprod
+configuration patches, denial Deployment/Service, NetworkPolicy and
+wildcard/TLS routing, render/operator preflight checks, activation and
+rollback documentation), everything disabled by default with no activation,
+plus the third-PR review rework (image smoke distinguishes the api mode from
+the denial service and exercises no-argument startup; the denial isolation
+test detects every environment read in both modules through the TypeScript
+AST). No provider quota dependency, no migration, no real cluster apply.
+Units 1-4 (first PR), review rework A/B, unit 7 (blocked, pinned leak
+documented), unit 10 (second PR) and units 8-9 (third PR) are merged and
+unchanged apart from the two review-rework files named below.
 
 Review integration (both non-blocking points):
 
@@ -28,35 +33,55 @@ Review integration (both non-blocking points):
 ## Scope / Guardrails
 
 - English code, tests and identifiers; no Python; never read `.env`.
-- Reuse the existing denial response; no copied domain logic, no new dependency.
-- Do not touch `api/src/config.ts`, the root `Makefile`, or root `docker-compose*`.
-- Isolated tooling only: `tools/artifact-host.mk` provides runtime smoke,
-  CI API build and entrypoint checks; no root Makefile or environment-file loading.
-- Quotas (unit 5), migration (6), unit 7 (blocked), preprod resources (11-14)
-  and rollback documentation (15) stay out of scope.
+- Opaque credential references only; no secret or real credential value in git.
+- Do not touch `api/src/config.ts` or root `docker-compose*`.
+- Root `Makefile`: only the minimal `k8s-validate` wiring of the new offline
+  render gate (existing convention: `k8s-validate` already runs the
+  `deploy/ci` offline gates `check-image-entrypoints.sh` and its hermetic
+  test); no other change.
+- Isolated tooling only: `tools/artifact-host.mk` gains `test-h3-render`;
+  no root Makefile or environment-file loading beyond the `k8s-validate`
+  exception above.
+- Quotas (unit 5), migration (6), unit 7 (blocked) and any real cluster apply
+  stay out of scope. The real content domain, DNS and certificate are unknown:
+  placeholders only, never invented values.
 
 ## Branch Scope Boundaries (MANDATORY)
 
 - **Allowed Paths (implementation scope)**:
   - `plan/861C-BRANCH_feat-861c-h3-activation.md`
-  - `api/src/artifacts/content-deny.ts` (shared denial response, standalone app)
-  - `api/src/artifacts/content-deny-server.ts` (dependency-free entrypoint)
-  - `api/src/artifacts/content-deny.test.ts` (every host form denied)
-  - `api/src/artifacts/content-deny-isolation.test.ts` (no app dependency)
-  - `api/src/artifacts/content-app.ts` (reuse the shared denial response only)
-  - `api/docker-entrypoint.sh` (mode validation, `api` or `content-deny`)
-  - `api/Dockerfile` (denial entrypoint bundle, entrypoint wiring only)
-  - `tools/h3-image-runtime-smoke.sh` (real-image smoke, no Python)
-  - `tools/artifact-host.mk` (runtime smoke, CI API build and entrypoint checks)
-  - `RAPPORT-MUSE-H3-P3.md`, `RAPPORT-SOL-H3-P3.md` (uncommitted deliverables)
-  - `tmp/861c-h3-p3/**` (ignored copies, evidence, local Git and bundle)
+  - `deploy/overlays/preprod/patch-artifacts-control.yaml` (unit 11, control off)
+  - `deploy/overlays/preprod/patch-artifacts-api-env.yaml` (unit 11, opaque refs)
+  - `deploy/overlays/preprod/artifact-content-deny.yaml` (unit 12)
+  - `deploy/overlays/preprod/artifact-content-networkpolicy.yaml` (unit 13)
+  - `deploy/overlays/preprod/artifact-content-ingress.yaml` (unit 13)
+  - `deploy/overlays/preprod/kustomization.yaml` (unit 11-13 wiring; Ingress
+    host patch restricted to the named `radar` and `radar-immo-mcp` Ingresses)
+  - `deploy/k8s/secrets.example.yaml` (unit 11 operator Secret shape, example only)
+  - `deploy/ci/check-h3-preprod-render.sh` (unit 14 render gate, no Python)
+  - `deploy/ci/check-h3-activation-render.sh` (unit 13/14 activation-time gate)
+  - `deploy/ci/check-h3-preprod-render.test.sh` (unit 14 hermetic tests)
+  - `deploy/ci/h3-render-*.awk` (canonical rendered-object checks)
+  - `deploy/ci/check-h3-activation-render.test.sh` (activation regressions)
+  - `deploy/ci/check-h3-discrimination.test.sh` (copy/restore/cmp proofs)
+  - `deploy/ci/preflight-h3-preprod.test.sh` (offline and fail-closed preflight)
+  - `deploy/ci/preflight-h3-preprod.sh` (unit 14 read-only operator preflight)
+  - `docs/operator/h3-preprod-activation.md` (unit 15 runbook)
+  - `tools/h3-image-runtime-smoke.sh` (review rework: api/deny discrimination,
+    no-argument startup)
+  - `api/src/artifacts/content-deny-isolation.test.ts` (review rework: AST env reads)
+  - `tools/artifact-host.mk` (`test-h3-render` target only)
+  - `Makefile` (`k8s-validate` wiring of the render gate only)
+  - `RAPPORT-MUSE-H3-P4.md` (uncommitted deliverable)
+  - `RAPPORT-SOL-H3-P4.md` (uncommitted integration report)
+  - `tmp/861c-h3-p4/**` (ignored evidence, copies, local Git and bundle)
 - **Forbidden Paths (must not change in this branch)**:
-  - `api/src/config.ts`, root `Makefile`, root `docker-compose*.yml`
+  - `api/src/config.ts`, root `docker-compose*.yml`
   - `rules/**`, agent bootstrap files, other `plan/*-BRANCH_*.md`
   - Business routes, MCP composition, product UI
   - Upstream `@sentropic/artifacts` library sources
-  - Provider quotas/reservations (unit 5), migration (6), unit 7, preprod
-    resources (11-14), rollback documentation (15)
+  - Provider quotas/reservations (unit 5), migration (6), unit 7, any real
+    cluster apply or automated suite against preprod
 - **Conditional Paths (allowed only with an explicit exception recorded here)**:
   - `tools/artifact-host.mk` — extended with `test-h3-proxy` (unit 10, no Python, no `.env` load)
   - `api/src/app.ts` — closed-capability control mount (review rework, guards unchanged)
@@ -261,3 +286,7 @@ finalization, quotas, persistent ledger and HTTP/MCP parity remain unverified.
 
 - Reviewer selection: exact Muse model/effort unavailable; no complementary peer
   consensus claimed. Local integration review and executable evidence are required.
+
+
+
+- [x] P4: declare the fourth-PR scope and exclusions.
