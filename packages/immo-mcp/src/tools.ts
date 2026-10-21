@@ -118,7 +118,7 @@ function guarded<A>(
  * (server.ts stdio and server-http.ts Streamable HTTP).
  */
 export function registerTools(server: McpServer, ctx: ToolContext): void {
-  for (const def of ALL_TOOL_DEFINITIONS.filter((def) => ["search_lots","get_lot_card","search_signals","get_opportunity_dossier","list_documents","read_document_excerpt","get_zones_geojson","get_lots_geojson","get_grille_pdf","get_pv_pdf"].includes(def.name))) {
+  for (const def of ALL_TOOL_DEFINITIONS.filter((def) => ["search_lots","get_lot_card","search_signals","get_opportunity_dossier","list_documents","read_document_excerpt","get_zones_geojson","get_lots_geojson","get_grille_pdf","get_pv_pdf","get_reglement_provenance"].includes(def.name))) {
     const handler = TOOL_HANDLERS[def.name];
     if (!handler) throw new Error(`missing_handler:${def.name}`);
     server.registerTool(
@@ -175,34 +175,6 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
       `Nombre max de features retournées (défaut ${RAW_GEOJSON_DEFAULT_LIMIT}, ` +
         `max ${RAW_GEOJSON_MAX_LIMIT} — bbox obligatoire au-delà de ${RAW_GEOJSON_DEFAULT_LIMIT}).`,
     );
-
-  server.registerTool(
-    "get_reglement_provenance",
-    {
-      title: "Get règlement de zonage provenance",
-      description:
-        "Provenance du règlement de zonage en vigueur d'une ville — numéro, millésime, " +
-        "page source, URL publique du règlement — telle que geo la stampe sur la grille " +
-        "de normes (qc-zonage-norms), + la relation « modifie » (règlement ancien) quand " +
-        "servie. Passthrough VERBATIM : un champ absent = null, jamais deviné/dérivé ; seul " +
-        "reglement_url est l'URL publique (le breadcrumb interne _source_url n'est jamais " +
-        "exposé). La provenance est muni-uniforme : zone_code est accepté mais n'affecte pas " +
-        "le résultat (réservé au lien events, tool à venir). found=false si la grille de " +
-        "normes n'est pas publiée pour la ville. Read-only.",
-      inputSchema: {
-        muni_slug: z.string().min(1).describe("Ville (slug, ex: longueuil)"),
-        zone_code: z
-          .string()
-          .optional()
-          .describe("Code de zone — accepté mais no-op pour la provenance (muni-uniforme)"),
-      },
-    },
-    guarded(ctx, "get_reglement_provenance", IMMO_SCOPES.read, async (args) =>
-      jsonResult(
-        await ctx.raw.getReglementProvenance({ city: args.muni_slug, zone: args.zone_code }),
-      ),
-    ),
-  );
 
   server.registerTool(
     "query_zoning_events",
