@@ -73,7 +73,7 @@ Build a read-only deterministic report mapping every `prospect_marks` row to its
 - [ ] **Lot 3 — Synthetic and discriminating qualification**
   - [x] `api/src/services/facets/lot-migration-report/fixtures.ts`
   - [x] `api/src/services/facets/lot-migration-report/report.test.ts`
-  - [ ] `api/src/services/facets/lot-migration-report/contract.test.ts`
+  - [x] `api/src/services/facets/lot-migration-report/contract.test.ts`
   - [ ] `api/src/services/facets/lot-migration-report/destinations.test.ts`
   - [ ] `api/src/services/facets/lot-migration-report/lossless.test.ts`
   - [ ] `api/src/services/facets/lot-migration-report/integrity.test.ts`
