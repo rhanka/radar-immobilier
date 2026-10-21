@@ -164,6 +164,39 @@ export const RAW_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
     },
     scope: IMMO_SCOPES.read,
   },
+  {
+    name: "get_grille_pdf",
+    title: "Get grille de zonage PDF",
+    description:
+      "URL de la grille de zonage PDF (grillePdfUrl) d'une zone d'une ville, quand la " +
+      "source municipale la porte. L'URL retournée est publique : elle peut être lue " +
+      "directement. Retourne found=false si la zone est inconnue, grillePdfUrl=null si la " +
+      "zone existe sans grille. Read-only.",
+    inputSchema: {
+      city: z.string().min(1).describe("Ville (slug, ex: longueuil)"),
+      zone: z.string().min(1).describe("Code de zonage (ex: H-203)"),
+    },
+    scope: IMMO_SCOPES.documentsRead,
+  },
+  {
+    name: "get_pv_pdf",
+    title: "Get PV source PDF",
+    description:
+      "URL servie du procès-verbal source (PDF archivé) d'un signal, à partir de sa " +
+      "référence brute rawRef (ex: raw/proces-verbaux-<ville>/cas/<sha>.pdf, telle que " +
+      "portée par les signaux/documents) + métadonnées (ville, content-type). " +
+      "Le PDF lui-même n'est jamais inliné dans la réponse. Read-only.",
+    inputSchema: {
+      rawRef: z
+        .string()
+        .min(1)
+        .describe(
+          "Référence brute du document (rawRef S3, ex: raw/proces-verbaux-longueuil/cas/<sha>.pdf ; " +
+            "en mode mock: l'id de document, ex: doc-longueuil-pv-2026-04-14)",
+        ),
+    },
+    scope: IMMO_SCOPES.documentsRead,
+  },
 ];
 
 /** Every tool contract in registration order (domain first, raw-data second). */
