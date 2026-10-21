@@ -6,6 +6,8 @@ import { createArtifactControl } from "./facade.js";
 const NOW = Date.parse("2026-10-21T00:00:00Z");
 const FUTURE = Date.parse("2026-10-22T00:00:00Z");
 const ARTIFACT = "123e4567-e89b-12d3-a456-426614174000";
+const RELEASE = "123e4567-e89b-12d3-a456-426614174001";
+const DIGEST = "ab".repeat(32);
 
 const live = (subjects: string[] = ["alice"]): ActivationConfig =>
   ({ enabled: true, subjects, expiresAtMs: FUTURE });
@@ -22,7 +24,10 @@ function harness(activations: ActivationConfig[], statuses: Array<string | null>
 }
 
 function stubHost() {
-  const handle = vi.fn(async () => ({ status: 201, body: { artifactId: ARTIFACT } }));
+  // Complete provider receipt: with the final reread removed the facade maps
+  // this to a publication receipt instead of throwing before the assertions.
+  const handle = vi.fn(async () => ({ status: 201,
+    body: { artifactId: ARTIFACT, releaseId: RELEASE, manifest: JSON.stringify({ digest: DIGEST }) } }));
   const host = { app: { handle } } as unknown as Parameters<typeof createArtifactControl>[0];
   return { host, handle };
 }
@@ -91,5 +96,27 @@ describe("commit-time authority reread [T05 T13]", () => {
       .handle("ensure", "alice", { bindingName: "summer", idempotencyKey: "key" });
     expect(response).toEqual({ status: 403, body: { error: "activation_closed" } });
     expect(handle).not.toHaveBeenCalled();
+  });
+
+  it("refuses at entry when the publisher is already suspended", async () => {
+    const { response, handle } = await publishWith(harness([live()], ["suspended"]));
+    expect(response).toEqual(
+      { status: 403, body: { error: "account_not_approved", status: "suspended" } });
+    expect(handle).not.toHaveBeenCalled();
+  });
+
+  it("refuses at entry when activation is already closed", async () => {
+    const { response, handle } = await publishWith(harness([expired], ["approved"]));
+    expect(response).toEqual({ status: 403, body: { error: "activation_closed" } });
+    expect(handle).not.toHaveBeenCalled();
+  });
+
+  it("publishes with a complete receipt while admission holds", async () => {
+    const { response, handle } = await publishWith(harness([live(), live()], ["approved", "approved"]));
+    expect(response).toEqual({ status: 201,
+      body: { artifactId: ARTIFACT, releaseId: RELEASE, digest: DIGEST,
+        stableUrl: `https://${ARTIFACT}.pages.example.test/`,
+        pinnedUrl: `https://${RELEASE}.pinned.pages.example.test/` } });
+    expect(handle).toHaveBeenCalledTimes(1);
   });
 });
