@@ -118,7 +118,7 @@ function guarded<A>(
  * (server.ts stdio and server-http.ts Streamable HTTP).
  */
 export function registerTools(server: McpServer, ctx: ToolContext): void {
-  for (const def of ALL_TOOL_DEFINITIONS.filter((def) => ["search_lots","get_lot_card","search_signals"].includes(def.name))) {
+  for (const def of ALL_TOOL_DEFINITIONS.filter((def) => ["search_lots","get_lot_card","search_signals","get_opportunity_dossier","list_documents","read_document_excerpt","get_zones_geojson","get_lots_geojson","get_grille_pdf"].includes(def.name))) {
     const handler = TOOL_HANDLERS[def.name];
     if (!handler) throw new Error(`missing_handler:${def.name}`);
     server.registerTool(
@@ -155,74 +155,6 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
     );
   }
 
-  server.registerTool(
-    "get_opportunity_dossier",
-    {
-      title: "Get opportunity dossier",
-      description:
-        "Dossier d'opportunité consolidé (score, lots et signaux liés, rationale). Read-only.",
-      inputSchema: {
-        city: z.string().min(1),
-        opportunityId: z.string().min(1),
-      },
-    },
-    guarded(ctx, "get_opportunity_dossier", IMMO_SCOPES.read, async (args) => {
-      const dossier = await ctx.data.getOpportunityDossier(args);
-      if (!dossier) {
-        return jsonResult({ found: false, city: args.city, opportunityId: args.opportunityId });
-      }
-      return jsonResult({ found: true, dossier });
-    }),
-  );
-
-  server.registerTool(
-    "list_documents",
-    {
-      title: "List documents",
-      description:
-        "Liste les documents sources archivés (procès-verbaux, etc.) par ville. Read-only.",
-      inputSchema: {
-        city: z.string().optional(),
-        limit: z.number().int().min(1).max(100).default(20),
-      },
-    },
-    guarded(ctx, "list_documents", IMMO_SCOPES.documentsRead, async (args) => {
-      const documents = await ctx.data.listDocuments(args);
-      return jsonResult({ count: documents.length, documents });
-    }),
-  );
-
-  server.registerTool(
-    "read_document_excerpt",
-    {
-      title: "Read document excerpt",
-      description:
-        "Lit un extrait borné d'un document source. La sortie est passée par la redaction anti-PII. Read-only.",
-      inputSchema: {
-        documentId: z.string().min(1),
-        offset: z.number().int().min(0).default(0),
-        maxChars: z.number().int().min(1).max(4000).default(1200),
-      },
-    },
-    guarded(ctx, "read_document_excerpt", IMMO_SCOPES.documentsRead, async (args) => {
-      const body = await ctx.data.readDocumentBody(args.documentId);
-      if (!body) return jsonResult({ found: false, documentId: args.documentId });
-      const total = body.text.length;
-      const slice = body.text.slice(args.offset, args.offset + args.maxChars);
-      const excerpt = redact(slice); // anti-PII defence-in-depth
-      return jsonResult({
-        found: true,
-        documentId: args.documentId,
-        title: body.title,
-        offset: args.offset,
-        length: slice.length,
-        total_length: total,
-        truncated: args.offset + slice.length < total,
-        excerpt,
-      });
-    }),
-  );
-
   // ── Raw-data tools (ad hoc representations côté client MCP) ───────────────
   // Shared zod pieces. The DESCRIPTIONS are part of the contract: they are what
   // guides claude.ai to stay within the size bounds (limit/bbox/truncated).
@@ -243,80 +175,6 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
       `Nombre max de features retournées (défaut ${RAW_GEOJSON_DEFAULT_LIMIT}, ` +
         `max ${RAW_GEOJSON_MAX_LIMIT} — bbox obligatoire au-delà de ${RAW_GEOJSON_DEFAULT_LIMIT}).`,
     );
-
-  server.registerTool(
-    "get_zones_geojson",
-    {
-      title: "Get zones GeoJSON",
-      description:
-        "FeatureCollection GeoJSON des zones de zonage d'une ville (code de zone, kind, " +
-        "grille PDF et propriétés sources). Réponse BORNÉE : limit défaut 500 (max 2000), " +
-        "bbox [minLon,minLat,maxLon,maxLat] OBLIGATOIRE pour limit > 500. " +
-        "numberMatched/numberReturned/truncated indiquent ce qui reste : si truncated, " +
-        "resserrez le bbox. Read-only.",
-      inputSchema: {
-        city: z.string().min(1).describe("Ville (slug, ex: longueuil, valleyfield, delson)"),
-        bbox: bboxSchema,
-        limit: limitSchema,
-      },
-    },
-    guarded(ctx, "get_zones_geojson", IMMO_SCOPES.read, async (args) => {
-      checkGeoBounds(args);
-      return geojsonResult(await ctx.raw.getZonesGeojson(args));
-    }),
-  );
-
-  server.registerTool(
-    "get_lots_geojson",
-    {
-      title: "Get lots GeoJSON",
-      description:
-        "FeatureCollection GeoJSON des lots cadastraux d'une ville, enrichis server-side : " +
-        "zone jointe (zone.code/kind/densiteLogHa/usages/grillePdfUrl), zoneCode, " +
-        "multifamilial4plus (+ multifamilial4plusSource: grille|heuristique), superficieM2, " +
-        "tod/priorite quand la source les porte. Réponse BORNÉE : limit défaut 500 (max 2000), " +
-        "bbox OBLIGATOIRE pour limit > 500 ; une ville peut dépasser 15 000 lots — paginez " +
-        "par bbox. Filtres optionnels only4Plus/superficieMinM2 appliqués sur la page " +
-        "récupérée. truncated=true → resserrez le bbox. Read-only.",
-      inputSchema: {
-        city: z.string().min(1).describe("Ville (slug, ex: longueuil, valleyfield, delson)"),
-        bbox: bboxSchema,
-        limit: limitSchema,
-        only4Plus: z
-          .boolean()
-          .optional()
-          .describe("Ne garder que les lots dont multifamilial4plus === true"),
-        superficieMinM2: z
-          .number()
-          .positive()
-          .optional()
-          .describe("Superficie minimale en m² (champ superficieM2)"),
-      },
-    },
-    guarded(ctx, "get_lots_geojson", IMMO_SCOPES.read, async (args) => {
-      checkGeoBounds(args);
-      return geojsonResult(await ctx.raw.getLotsGeojson(args));
-    }),
-  );
-
-  server.registerTool(
-    "get_grille_pdf",
-    {
-      title: "Get grille de zonage PDF",
-      description:
-        "URL de la grille de zonage PDF (grillePdfUrl) d'une zone d'une ville, quand la " +
-        "source municipale la porte. L'URL retournée est publique : elle peut être lue " +
-        "directement. Retourne found=false si la zone est inconnue, grillePdfUrl=null si la " +
-        "zone existe sans grille. Read-only.",
-      inputSchema: {
-        city: z.string().min(1).describe("Ville (slug, ex: longueuil)"),
-        zone: z.string().min(1).describe("Code de zonage (ex: H-203)"),
-      },
-    },
-    guarded(ctx, "get_grille_pdf", IMMO_SCOPES.documentsRead, async (args) =>
-      jsonResult(await ctx.raw.getGrillePdf(args)),
-    ),
-  );
 
   server.registerTool(
     "get_pv_pdf",
