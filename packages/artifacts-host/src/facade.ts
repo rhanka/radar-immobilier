@@ -1,6 +1,7 @@
 import { isArtifactId } from "@sentropic/artifacts/contracts";
 import { parseContentHost } from "@sentropic/artifacts/content/routing";
 import type { HttpResponse } from "@sentropic/artifacts/http";
+import { checkAdmission, type AdmissionAuthority } from "./admission.js";
 import type { composeArtifactHost } from "./composition.js";
 import { computeParamsHash, deriveIdempotencyKey } from "./idempotency.js";
 import { validateBindingName, validatePublishFiles } from "./publish-policy.js";
@@ -35,11 +36,20 @@ function filesForPublication(raw: unknown) {
   return files;
 }
 
-export function createArtifactControl(host: Host, scope: string, contentBase: string): ArtifactControl {
+export function createArtifactControl(
+  host: Host,
+  scope: string,
+  contentBase: string,
+  admission?: AdmissionAuthority | undefined,
+): ArtifactControl {
   return {
     async handle(op, actorId, raw) {
       if (!["ensure", "publish", "meta", "list"].includes(op)) {
         return { status: 503, body: { error: "capability_unavailable" } };
+      }
+      if (admission) {
+        const entry = await checkAdmission(admission, actorId);
+        if (!entry.allowed) return { status: entry.status, body: entry.body };
       }
       if (!raw || typeof raw !== "object" || Array.isArray(raw)) return invalid();
       const body = raw as Record<string, unknown>;
@@ -78,6 +88,12 @@ export function createArtifactControl(host: Host, scope: string, contentBase: st
         effective.idempotencyKey = deriveIdempotencyKey({ scope, sub: actorId, op,
           artifactId: typeof artifactId === "string" && op === "publish" ? artifactId : "",
           clientKey: body.idempotencyKey as string });
+      }
+      if (write && admission) {
+        // Reread immediately before dispatch; provider commits already in
+        // flight require their own authorization enforcement.
+        const commit = await checkAdmission(admission, actorId);
+        if (!commit.allowed) return { status: commit.status, body: commit.body };
       }
       const response = await host.app.handle({ actorId, body: effective,
         method: op === "meta" ? "GET" : "POST",
