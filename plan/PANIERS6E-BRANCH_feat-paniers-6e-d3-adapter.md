@@ -64,10 +64,10 @@ Actions with the following status should be included around tasks only if really
   - [x] Define isolated `test-paniers-l6e-sol`: API `18886`, UI `15886`, mail `11886`; no published ports.
   - [x] Confirm command style: `make -f tmp/paniers-6e/verify.mk ... ENV=test-paniers-l6e-sol` with `ENV` last.
 - [ ] **Lot 1 — Graph adapter (reuse lot 5 normalization)**
-  - [ ] Add `graph-adapter.ts`: `props` plus nested `props.properties`; keys `reglement_number`, `cible_reglement_numero`, `cibleReglementNumero`.
-  - [ ] Scalar plus array values through lot 5 normalization; one node yields one token set (aliases deduped).
-  - [ ] Explicit unsupported-value diagnostics; absent values stay silent.
-  - [ ] Export `REAL_GRAPH_ADAPTER_VERSION` from `index.ts`.
+  - [x] Add `graph-adapter.ts`: `props` plus nested `props.properties`; keys `reglement_number`, `cible_reglement_numero`, `cibleReglementNumero`.
+  - [x] Scalar plus array values through lot 5 normalization; one node yields one token set (aliases deduped).
+  - [x] Explicit unsupported-value diagnostics; absent values stay silent.
+  - [x] Export `REAL_GRAPH_ADAPTER_VERSION` from `index.ts`.
   - [ ] Lot gate:
     - [ ] `make typecheck` + `make lint`
     - [ ] `make test-api SCOPE=src/services/steve-source/d3-report ENV=test-paniers-l6e`
