@@ -161,9 +161,17 @@ followed by `inspect` proving no project containers, volumes or networks remain.
 - [x] Commit authorization and write-only failure ledger verified.
 - [x] Blocked-provider revocation tests verified.
 - [x] Provider failure and read-exclusion tests verified.
-- [ ] Probe-mapped provider failures and revocation residue against the real
-      stack: `artifacts-commit-probe.spec.ts` authored, run pending (other
-      agent). Unit 7 stays blocked until the upstream request below lands.
+- [x] Probe-mapped provider failures and revocation residue against the real
+      stack: four `artifacts-commit-probe.spec.ts` cases pass through the composed
+      provider. Unit 7 stays blocked until the upstream contract below lands.
+- [x] Concurrent dispatches retain separate typed causes (regression reproduced
+      before AsyncLocalStorage isolation); connection acquisition is typed too.
+- [x] Astra correction gates: 97 package tests, 67 targeted API tests,
+      2537 API tests outside integration (7 skipped), 21 artifact integrations,
+      lint, and ten proxy boundary cases pass. Seven Svelte warnings remain.
+- [x] Discrimination in a copy: removing below-HTTP reporters breaks both 503
+      mappings; restoration passes four cases and `cmp`. Removing the nginx
+      path boundary breaks the neighboring-route case; restoration passes ten.
 - [x] Nginx production configuration boundary verified.
 - [x] Container-only proxy check and mutation proofs verified.
 - [x] Final gates, per-commit typechecks, bundle and teardown verified.
@@ -194,9 +202,9 @@ the provider is blocked (lock, connection, S3), the 403 masks a publication
 the provider may already have committed: `releases` row (`ready`), S3
 objects, idempotency result and current pointer persist, and replaying the
 same idempotency key after re-approval receipts that publication. The
-provider sources (`@sentropic/artifacts@0.1.2`) are not installed in this
-checkout and could not be fetched, so no retraction operation usable from
-the facade was found; 0016 widens release states without exposing a
+provider (`@sentropic/artifacts@0.1.2`) runs in the isolated qualification
+container. No supported safe retraction usable from the facade is established;
+0016 widens release states without exposing a
 facade-level retire. Direct SQL/S3 surgery from Radar would bypass provider
 invariants (current pointer, idempotency replay, blob refcounts/GC pins)
 and is therefore NOT implemented.
@@ -237,7 +245,14 @@ Inject typed failures below the real HTTP app, asserting sanitized status/body,
 one correlated write-ledger entry, no read entries, and MCP code/retry parity.
 
 Until the upstream lands, `artifacts-commit-probe.spec.ts` ("documents the
-uncompensated residue") pins the leak and must be inverted when it does.
+uncompensated residue") pins the leak: one ready release, one current pointer,
+one success idempotency result and one new S3 object survive. Replay while
+suspended is denied; after reauthorization, another composed instance returns
+201 with that same release and no new release/key/object. It must be inverted
+when the upstream lands: no denied success; same-key retry freshly authorized.
+These are PostgreSQL/S3 API observations (S3 mock), with PostgreSQL on isolated tmpfs;
+durability after database restart, other wait/revocation boundaries, `ensure`
+finalization, quotas, persistent ledger and HTTP/MCP parity remain unverified.
 
 ## Feedback Loop
 
