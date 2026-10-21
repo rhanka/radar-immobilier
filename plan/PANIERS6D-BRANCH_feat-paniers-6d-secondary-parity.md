@@ -55,6 +55,7 @@ indicators) while preserving each consumer's non-basket population.
 - Local Git metadata and a bundle are authorized by the execution brief; shared Git metadata stays read-only.
 - [x] Evidence reconciliation rebuilds current nodes and uses the current visible IDs synchronously.
 - [x] PDF regressions cover archives, changed evidence, out-of-filter co-signals and zero delta.
+- [x] Regulation/demo/grid and cadastral-indicator regression fixtures are implemented.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + cherry-pick** (default for orthogonal tasks; single final test cycle)
