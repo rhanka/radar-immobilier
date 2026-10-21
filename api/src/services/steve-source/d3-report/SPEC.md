@@ -35,8 +35,10 @@ against an identified synthetic graph set. No persistence, no network.
   aliases on that node stay one candidate. One is a resolved native triplet
   (slug, type, id); two or more is a conflict; zero is unresolved.
 - Unsupported graph values (wrong kinds, non-finite numbers, malformed
-  `properties`) are reported as explicit adapter diagnostics and never match.
-  Absent or blank values stay silent.
+  `properties`) never match. The exported `extractGraphNodeTokens` API returns
+  their locations and kinds in `unsupported`; the aggregate D3 report does not
+  store these per-node diagnostics. Absent or blank values stay silent.
+  Only recognized keys at the two supported locations are inspected.
 
 Exclusive status, in order: unique city with a missing graph is
 `unavailable`; else any city or target conflict is `ambiguous`; else at
