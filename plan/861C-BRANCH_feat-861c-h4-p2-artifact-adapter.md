@@ -41,6 +41,7 @@ Selected mappings (exact method/path only, no generic proxy):
   - `packages/artifacts-host/src/mcp-app-adapter.ts`
   - `packages/artifacts-host/src/mcp-app-adapter.test.ts`
   - `RAPPORT-MUSE-H4-P2.md` (uncommitted deliverable)
+  - `RAPPORT-SOL-H4-P2.md`, `tmp/861c-h4-p2/**` (uncommitted delivery/proofs only)
 - **Forbidden Paths (must not change in this branch)**:
   - `packages/artifacts-host/src/facade.ts`, `composition.ts`, `admission.ts`, `index.ts`, other host sources
   - `api/src/artifacts/**`, MCP server/host/transport, `packages/immo-mcp/**`
@@ -63,7 +64,16 @@ Selected mappings (exact method/path only, no generic proxy):
   ancestry and holds the integrated branch; deliver a bundle, never push or mutate the root checkout.
 - [x] Integrated main by fast-forward; `.track` is byte-identical, with no divergent events to reconcile.
 
-## Deliverables
+## Orchestration Mode
+
+- [x] Single branch, sequential source changes; independent isolated verification projects.
+- [x] Use the owner-provided worktree; keep root Git metadata and UAT untouched, no push.
+
+## UAT Management
+
+- [x] No UI or transport exposure; browser UAT is outside this preparation step.
+
+## Plan / Todo (lot-based)
 
 - [x] Mock minimal calls, bidirectional replay, effective hashing and ordered file conflicts.
 - [x] Mock caller-key preservation and boundaries, authority and unsupported-route refusals.
@@ -72,16 +82,16 @@ Selected mappings (exact method/path only, no generic proxy):
 - [x] Authority and effective-input checks (caller key, binding, profile, pagination, forged fields).
 - [x] Provider-contract seams documented as preparation (`BLOCKED` finalization, typed outcome via facade).
 - [x] Post-success admission outage: sanitized response, no receipt, exactly one ledger entry.
-- [ ] Real-provider parity, conflict, private metadata, pagination and pre-dispatch admission evidence.
+- [x] Real-provider parity, conflict, private metadata, pagination and pre-dispatch admission evidence.
 - [x] Added composed-provider tests with shared PostgreSQL/S3 and the existing HTTP control route.
 - [x] Corrected the composed fixture name to satisfy S3 bucket naming; retained the initial failure log.
 - [x] Aligned list assertions and mocks with the selected provider's `{ total, artifacts }` response.
-- [ ] Four copied-source mutation failures, restored and checked with `cmp`.
+- [x] Four copied-source mutation failures, restored and checked with `cmp`.
 - [x] Parity cases with preparation mocks: minimal profile, HTTP↔MCP replay, changed-content conflict
       including file order, key boundaries, forged refusals, foreign metadata/pagination, suspension/expiry.
-- [ ] Report `RAPPORT-MUSE-H4-P2.md` with tests, commit split, commands, `not covered`/`unverified`/`BLOCKED`.
+- [x] Muse report available; SOL report retains commands, proof paths and qualification boundaries.
 
-## Verification (executed by another agent; no shell here)
+## Verification
 
 ```sh
 rtk make -f tools/artifact-host.mk typecheck API_PORT=18914 UI_PORT=15914 MAILDEV_UI_PORT=11914 ENV=test-861c-h4-p2
@@ -90,10 +100,19 @@ rtk make -f tools/artifact-host.mk test-host SCOPE=src/artifacts API_PORT=18914 
 rtk make -f tools/artifact-host.mk test-api SCOPE="tests/integration/artifacts --no-file-parallelism" API_PORT=18914 UI_PORT=15914 MAILDEV_UI_PORT=11914 ENV=test-861c-h4-p2
 ```
 
-Ports are reserved planning values. Teardown with the same runner and `ENV` follows every run.
+All stacks publish no host ports. Final isolated runs use the local diagnostic wrapper and synthetic
+Compose override in `tmp/861c-h4-p2/`: npm dependencies in memory, no unnecessary Poppler install,
+Postgres health checked over TCP after its temporary initialization server. No test timeout is raised.
+The tracked runner and Compose files are unchanged. Every run tears down with `down -v --remove-orphans`.
+
+- [x] Typecheck each exact commit archive (all workspaces, zero errors, seven unchanged CSS warnings).
+- [x] Lint; 153 artifacts-host tests; 67 scoped API tests; 2,616 API tests passed / 8 skipped.
+- [x] Five composed P2 cases passed before mutation; all four mutations fail behaviorally and restore cleanly.
+- [x] Full-suite outcomes and infrastructure limits retained separately in the uncommitted SOL report.
 
 ## Not covered (later work)
 
-Real-provider qualification through `createHttpArtifactApp`/`composeArtifactHost` with PostgreSQL/S3 barriers and
-faults below the app; persistent prevention, reauthorization retry, cross-process restart evidence; MCP codec
-qualification; candidate scope/hash/validation reconciliation; tuple publication and image qualification; P7 wiring.
+Provider finalization authorization remains BLOCKED: current post-settle refusal can hide an already
+persisted publication. Existing H3 tests pin this residue; no compensation or prevention is claimed.
+The upstream typed-outcome contract, effective candidate profile, MCP codec, cross-process restart,
+tuple publication, image qualification, operator bindings and P7 exposure remain unverified/not covered.
