@@ -1,18 +1,9 @@
 import type { Context, MiddlewareHandler } from "hono";
+import { applyContentDenyHeaders } from "./content-deny.js";
 import { parseContentHost } from "./content-host.js";
 
-const DENY_HEADERS: Record<string, string> = {
-  "Cache-Control": "no-store",
-  "X-Content-Type-Options": "nosniff",
-  "Referrer-Policy": "no-referrer",
-  "X-Frame-Options": "DENY",
-  "Cross-Origin-Resource-Policy": "same-origin",
-};
-
 function deny(c: Context, status: 401 | 404, error: string): Response {
-  for (const [name, value] of Object.entries(DENY_HEADERS)) {
-    c.header(name, value);
-  }
+  applyContentDenyHeaders(c);
   return c.json({ error }, status);
 }
 
