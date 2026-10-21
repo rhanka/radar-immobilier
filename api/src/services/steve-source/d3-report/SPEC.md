@@ -28,9 +28,15 @@ against an identified synthetic graph set. No persistence, no network.
   with `normalizeReglementKey`. A token without a digit is ignored and
   counted apart.
 - Candidate: a `Signal` or `DesignationEvent` node of the city graph whose
-  `props.reglement_number` or `props.cible_reglement_numero`, normalized
-  the same way, equals the token. One is a resolved native triplet
+  adapter token set contains the token. The adapter (`real-graph-adapter-v1`)
+  reads `reglement_number`, `cible_reglement_numero` and camelCase
+  `cibleReglementNumero` at `props` plus nested `props.properties`, as scalars
+  or arrays, normalized the same way. One node yields one token set: repeated
+  aliases on that node stay one candidate. One is a resolved native triplet
   (slug, type, id); two or more is a conflict; zero is unresolved.
+- Unsupported graph values (wrong kinds, non-finite numbers, malformed
+  `properties`) are reported as explicit adapter diagnostics and never match.
+  Absent or blank values stay silent.
 
 Exclusive status, in order: unique city with a missing graph is
 `unavailable`; else any city or target conflict is `ambiguous`; else at
@@ -39,10 +45,11 @@ resolved is `partially_resolved`; else `unresolved`.
 
 ## Report
 
-Pure function of inventory plus graph set: line total, five statuses
-(summing to lines), intended references, ignored tokens, distinct
-resolved triplets, classement breakdown. No signal count is derived from
-rows and no per-row diagnostic is stored or logged.
+Pure function of inventory plus graph set: rule and adapter versions,
+snapshot identity plus digest, line total, five statuses (summing to lines),
+intended references, ignored tokens, distinct resolved triplets and the
+classement breakdown. No signal count is derived from rows and no per-row
+diagnostic is stored or logged.
 
 ## No-write and no client data
 
