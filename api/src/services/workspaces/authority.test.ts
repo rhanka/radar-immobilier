@@ -26,6 +26,17 @@ function input(overrides: Partial<WorkspaceInitInput> = {}): WorkspaceInitInput 
 }
 
 describe("workspace authority grants", () => {
+  it("should return the current membership when an explicit null revision is stale", () => {
+    const authority = new WorkspaceAuthority();
+    const { workspace } = authority.ensureWorkspace("synthetic-null", "Synthetic");
+    authority.addMember(workspace.id, MEMBER, ACTOR, "synthetic");
+    const current = authority.getMembership(workspace.id, MEMBER);
+    expect(() => authority.setCapability(
+      workspace.id, MEMBER, "moderate_archive", true, ACTOR, "synthetic", null,
+    )).toThrowError(expect.objectContaining({ status: 409, current }));
+    expect(authority.audit()).toHaveLength(1);
+  });
+
   it("should isolate two workspaces for the same account", () => {
     const authority = new WorkspaceAuthority();
     const first = authority.ensureWorkspace("synthetic-a", "Synthetic A").workspace;
