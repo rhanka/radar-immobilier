@@ -1,4 +1,7 @@
 import { randomUUID } from "node:crypto";
+import { captureInvocationContext, getInvocationContext } from "./invocation-context.js";
+import { ALL_TOOL_DEFINITIONS } from "./tool-definitions.js";
+import { TOOL_HANDLERS, type ToolTextResult } from "./tool-handlers.js";
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import {
@@ -115,25 +118,42 @@ function guarded<A>(
  * (server.ts stdio and server-http.ts Streamable HTTP).
  */
 export function registerTools(server: McpServer, ctx: ToolContext): void {
-  server.registerTool(
-    "search_lots",
-    {
-      title: "Search lots",
-      description:
-        "Recherche de lots par ville et critères (zone, no_lot, superficie min). Read-only.",
-      inputSchema: {
-        city: z.string().min(1).describe("Ville (ex: longueuil, valleyfield)"),
-        zone: z.string().optional().describe("Code de zonage (ex: H-203)"),
-        no_lot: z.string().optional().describe("Numéro de lot cadastral exact"),
-        minArea: z.number().positive().optional().describe("Superficie minimale en m²"),
-        limit: z.number().int().min(1).max(100).default(20),
+  for (const def of ALL_TOOL_DEFINITIONS.filter((def) => ["search_lots"].includes(def.name))) {
+    const handler = TOOL_HANDLERS[def.name];
+    if (!handler) throw new Error(`missing_handler:${def.name}`);
+    server.registerTool(
+      def.name,
+      { title: def.title, description: def.description, inputSchema: def.inputSchema },
+      async (args): Promise<ToolTextResult> => {
+        const snapshot =
+          getInvocationContext() ??
+          captureInvocationContext({ auth: ctx.auth, data: ctx.data, raw: ctx.raw });
+        const correlationId = randomUUID();
+        try {
+          assertScope(snapshot.auth, def.scope);
+          auditToolCall(snapshot.auth, def.name, hashInput(args), correlationId);
+          return await handler(args as Record<string, unknown>, snapshot);
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          // stderr only — never leak to the protocol stdout channel.
+          process.stderr.write(
+            `${JSON.stringify({
+              at: new Date().toISOString(),
+              kind: "immo-mcp.error",
+              tool: def.name,
+              correlationId,
+              message,
+            })}\n`,
+          );
+          const result: ToolTextResult = {
+            content: [{ type: "text", text: JSON.stringify({ error: message, tool: def.name, correlationId }, null, 2) }],
+          };
+          result.isError = true;
+          return result;
+        }
       },
-    },
-    guarded(ctx, "search_lots", IMMO_SCOPES.search, async (args) => {
-      const lots = await ctx.data.searchLots(args);
-      return jsonResult({ city: args.city, count: lots.length, lots });
-    }),
-  );
+    );
+  }
 
   server.registerTool(
     "get_lot_card",
