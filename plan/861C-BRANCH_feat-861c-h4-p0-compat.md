@@ -89,13 +89,13 @@
   - [ ] Lot gate:
     - [ ] Both ordinary MCP targets exclude `**/*.e2e.test.ts`; dedicated service targets own future service suites.
     - [ ] `make -f tools/artifact-host.mk test-mcp API_PORT=18914 UI_PORT=15914 MAILDEV_UI_PORT=11914 ENV=test-861c-h4-p0`
-- [ ] **Lot 4 — Dedicated H4 runner skeleton**
-  - [ ] Write `tools/h4-mcp.mk`: `guard-env` (`test-*`/`e2e-*`), environment-file refusal guard, `COMPOSE_DISABLE_ENV_FILE=1` with `--env-file /dev/null`, project-scoped `down -v --remove-orphans` and `inspect`, phase-owned placeholders (`qualify-tuple`, `test-exchange-e2e`, `image-smoke`, `test-composition-e2e`) that refuse until P4/P6/P7 implement them.
-  - [ ] Files: `tools/h4-mcp.mk`, this plan.
-  - [ ] Lot gate:
-    - [ ] Runner never includes the root Makefile and never references `env_file`.
-    - [ ] `down`/`inspect` touch only the `radar-$(ENV)` project.
-    - [ ] Provenance test guard assertions pass through the Lot 2 command.
+- [x] **Lot 4 — Dedicated H4 runner skeleton**
+  - [x] Write `tools/h4-mcp.mk`: strict `test-*`/`e2e-*` slugs, environment-file refusal, fixed Compose options, project-scoped cleanup/inspection and phase placeholders refusing execution before P4/P6/P7.
+  - [x] Files: `tools/h4-mcp.mk`, this plan.
+  - [x] Lot gate:
+    - [x] Runner never includes the root Makefile and never references `env_file`.
+    - [x] `test-guard` behaviorally verifies eight unsafe slugs, two project bindings despite overrides and environment-file refusal without Docker.
+    - [x] Provenance test guard assertions pass through the Lot 2 command.
 - [ ] **Lot 5 — Docs consolidation**
   - [ ] Tick every completed checkbox in this plan within its own lot commit.
   - [ ] Write `RAPPORT-MUSE-H4-P0.md` at the workspace root (not committed): changes, tests, commit split, test commands, `not covered` remainder.
