@@ -818,6 +818,11 @@
       );
       if (token !== loadToken) return;
 
+      // Page requests during dimension loading precede slot mounting.
+      // Initialize the window, scroll and render from the latest request.
+      const target = page && page >= 1 && page <= numPages ? page : initial;
+      currentPage = target;
+
       fitWidthScale = computeFitWidth(
         dimensions.length > 0
           ? Math.max(...dimensions.map((slot) => slot.baseWidth))
@@ -829,10 +834,10 @@
         width: slot.baseWidth * scale,
         height: slot.baseHeight * scale,
       }));
-      setRenderWindow(initial, false);
+      setRenderWindow(target, false);
       await tick();
-      pageSlotEls.get(initial)?.scrollIntoView({ behavior: "auto", block: "start" });
-      await renderPageSlot(initial);
+      pageSlotEls.get(target)?.scrollIntoView({ behavior: "auto", block: "start" });
+      await renderPageSlot(target);
       if (token !== loadToken) return;
       attachResizeObserver();
 
@@ -841,7 +846,7 @@
         recordPerf(url, performance.now() - startedAt, fromCache);
       }
       for (const pageNumber of renderWindow) {
-        if (pageNumber !== initial) schedulePageRender(pageNumber);
+        if (pageNumber !== target) schedulePageRender(pageNumber);
       }
     } catch (err) {
       if (token !== loadToken) return; // erreur d'un load dépassé : on ignore

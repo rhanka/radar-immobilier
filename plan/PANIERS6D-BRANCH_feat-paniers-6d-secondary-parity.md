@@ -24,7 +24,8 @@ indicators) while preserving each consumer's non-basket population.
 ## Branch Scope Boundaries (MANDATORY)
 - **Allowed Paths (implementation scope)**:
   - `ui/src/lib/components/maps/SignauxMapView.svelte`
-  - `ui/src/lib/components/maps/SignalPdfOverlay.svelte` (BR6D-EX1, BR6D-EX2)
+  - `ui/src/lib/components/maps/SignalPdfOverlay.svelte` (BR6D-EX1, BR6D-EX2, BR6D-EX3)
+  - `ui/src/lib/components/maps/SignalPdfOverlay.test.ts` (BR6D-EX3)
   - `ui/src/lib/components/maps/SignauxSelPanel.svelte`
   - `ui/src/lib/components/maps/SignauxSelPanel.test.ts`
   - `ui/src/lib/signals/pdf-overlay-signals.ts`
@@ -60,6 +61,10 @@ indicators) while preserving each consumer's non-basket population.
 - Reason: the retained current signal ID misses removed co-signals and changed citations on the same page.
 - Impact: refresh mounted pages with existing render-token cancellation; no API or geographic change.
 - Rollback: revert the isolated PDF refresh commit; retain its rendered regression tests.
+- BR6D-EX3: the independent-review execution brief authorizes latest-page PDF initialization.
+- Reason: dimension loading can overwrite a newer same-document page request.
+- Impact: initialize the render window, scroll and highlights from the latest page; UI only.
+- Rollback: revert the isolated initialization fix; retain its deferred five-page regression.
 - 6D needs no owner decision (reference design, section 6D).
 - Local Git metadata and a bundle are authorized by the execution brief; shared Git metadata stays read-only.
 - [x] Evidence reconciliation rebuilds current nodes and uses the current visible IDs synchronously.
@@ -117,6 +122,10 @@ indicators) while preserving each consumer's non-basket population.
   - [x] Mark unavailable regulatory counts explicitly while preserving demo PDFs and geography.
   - [x] Discriminate both fixes in a working copy; restore and verify with `cmp`.
   - [x] Pass indexed typechecks, lint and all three UI directories; remove private test resources.
+- [x] **Lot 6D-R2 — Independent review correction**
+  - [x] Initialize the PDF from the latest page after deferred dimensions resolve.
+  - [x] Verify page 4, its rendered window, scroll and refreshed highlights after a 1-to-4 request.
+  - [x] Discriminate in a copy, restore with `cmp`, pass indexed gates and remove private resources.
 - [ ] **Lot 6D-5 — Merge & close**
   - [ ] Push branch.
   - [ ] Open PR (or merge directly if solo dev).
