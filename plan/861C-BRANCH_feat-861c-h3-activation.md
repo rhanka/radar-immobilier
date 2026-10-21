@@ -128,7 +128,7 @@ the actual preprod server block, with a valid publication and 1024 decoded bytes
 
 ```sh
 rtk make -f tools/artifact-host.mk test-host SCOPE=src/artifacts API_PORT=18973 UI_PORT=15973 MAILDEV_UI_PORT=11973 ENV=test-861c-h3-p2
-rtk make -f tools/artifact-host.mk test-api SCOPE="--exclude tests/integration/**" API_PORT=18973 UI_PORT=15973 MAILDEV_UI_PORT=11973 ENV=test-861c-h3-p2
+rtk make -f tools/artifact-host.mk test-api SCOPE="--exclude tests/integration/** --no-file-parallelism" API_PORT=18973 UI_PORT=15973 MAILDEV_UI_PORT=11973 ENV=test-861c-h3-p2
 rtk make -f tools/artifact-host.mk test-api SCOPE="tests/integration/artifacts --no-file-parallelism" API_PORT=18973 UI_PORT=15973 MAILDEV_UI_PORT=11973 ENV=test-861c-h3-p2
 rtk make -f tools/artifact-host.mk test-h3-proxy API_PORT=18973 UI_PORT=15973 MAILDEV_UI_PORT=11973 ENV=test-861c-h3-p2
 rtk make -f tools/artifact-host.mk typecheck API_PORT=18973 UI_PORT=15973 MAILDEV_UI_PORT=11973 ENV=test-861c-h3-p2
@@ -140,14 +140,25 @@ rtk make -f tools/artifact-host.mk inspect API_PORT=18973 UI_PORT=15973 MAILDEV_
 `ENV` stays last in every command. Teardown (`down -v --remove-orphans`) must be
 followed by `inspect` proving no project containers, volumes or networks remain.
 
-- [x] Complete admission receipt fixtures verified by typecheck; test gate pending.
-- [x] Unmounted capability cache regression cases implemented.
+- [x] Complete admission receipt fixtures verified (90 package tests pass).
+- [x] Unmounted capability cache regressions verified (3 cases pass).
 - [x] Commit authorization and write-only failure ledger verified.
 - [x] Blocked-provider revocation tests verified.
 - [x] Provider failure and read-exclusion tests verified.
 - [x] Nginx production configuration boundary verified.
-- [ ] Container-only proxy check and mutation proofs verified.
-- [ ] Final gates, per-commit typechecks, bundle and teardown verified.
+- [x] Container-only proxy check and mutation proofs verified.
+- [x] Final gates, per-commit typechecks, bundle and teardown verified.
+
+Final evidence: 90 package tests, 67 targeted API tests, 2537 API tests outside
+`tests/integration` (7 skipped), 17 artifact integration tests and 6 proxy cases
+pass. Lint and all nine commit source states pass typecheck (7 Svelte warnings).
+Mutation proofs: three revocation failures, three unmounted-cache failures and
+nginx 413 instead of 201 without the size directive; restored copies pass `cmp`.
+Qualification uses local ignored Compose overrides for TCP readiness, isolated
+workspace dependency volumes and in-memory PostgreSQL integration data. No test
+timeout is increased. Physical database durability is not covered by that run.
+Full commands, failed attempts, image identities, commit IDs and cleanup counts
+are recorded in the uncommitted `RAPPORT-SOL-H3-P2.md` and ignored logs.
 
 ## Not covered (later H3 units)
 

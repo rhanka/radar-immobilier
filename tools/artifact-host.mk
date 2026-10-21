@@ -78,6 +78,10 @@ test-mcp: guard-env ## Run the immo-mcp workspace suites
 	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
 	$(COMPOSE) run --rm --no-deps -T api sh -c "npm ci && npm run test --workspace=@radar/immo-mcp"
 
+.PHONY: test-h3-proxy
+test-h3-proxy: guard-env ## Isolated nginx control-limit check (H3 unit 10, no compose stack)
+	bash tools/h3-nginx-control-limit.sh
+
 .PHONY: image-smoke
 image-smoke: guard-env ## Build --target build, refuse .env*, smoke-boot API+MCP bundles, check api/drizzle
 	@set -e; trap 'docker image rm radar-artifact-host-smoke:local >/dev/null 2>&1 || true' EXIT INT TERM; \
