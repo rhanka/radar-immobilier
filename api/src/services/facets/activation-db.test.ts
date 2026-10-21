@@ -27,7 +27,7 @@ describeDb("6H protected activation", () => {
     await f.pool.query(readFileSync("drizzle/0018_facet_scope_bindings.sql", "utf8"));
     expect((await f.pool.query("SELECT * FROM facet_events ORDER BY id")).rows).toEqual(before);
     const journal = JSON.parse(readFileSync("drizzle/meta/_journal.json", "utf8")) as {
-      entries: Array<{ tag: string }>;
+      entries: Array<{ tag: string; when: number }>;
     };
     expect((await f.pool.query("SELECT count(*)::int AS n FROM drizzle.__drizzle_migrations")).rows[0].n)
       .toBe(journal.entries.length);
@@ -46,6 +46,25 @@ describeDb("6H protected activation", () => {
     expect(await readScopedPersonalHeads(f.db, f.actor.sub, f.workspaceId, first.citySlug)).toEqual([]);
     await expect(runPersonalAttachmentActivation(f.db, activation(f), safety))
       .rejects.toMatchObject({ status: 409, message: "activation_already_scoped" });
+    const entry = journal.entries.find((item) => item.tag === "0018_facet_scope_bindings")!;
+    const journalRows = () => f.pool.query(
+      "SELECT hash, created_at FROM drizzle.__drizzle_migrations WHERE created_at >= $1 ORDER BY created_at",
+      [entry.when]);
+    const recorded = (await journalRows()).rows;
+    const tables = ["facet_streams", "facet_event_bindings", "facet_heads",
+      "facet_stream_attachments", "facet_command_contexts", "facet_activation_state"];
+    const snapshot = async () => Promise.all(tables.map(async (table) =>
+      (await f.pool.query(`SELECT to_jsonb(t) AS row FROM ${table} t ORDER BY to_jsonb(t)::text`)).rows));
+    const activated = await snapshot();
+    await f.pool.query(readFileSync("drizzle/0018_facet_scope_bindings.sql", "utf8"));
+    const deleted = await f.pool.query(
+      "DELETE FROM drizzle.__drizzle_migrations WHERE created_at >= $1", [entry.when]);
+    expect(deleted.rowCount).toBe(recorded.length);
+    await migrate(f.db, { migrationsFolder: "drizzle" });
+    expect((await journalRows()).rows).toEqual(recorded);
+    expect(await snapshot()).toEqual(activated);
+    expect((await f.pool.query("SELECT * FROM facet_events ORDER BY id")).rows).toEqual(before);
+    expect((await f.pool.query("SELECT to_regclass('facet_events_head_idx') AS idx")).rows[0].idx).toBeNull();
   });
 
   it("should keep activation closed without delivery safety or designated management", async () => {
