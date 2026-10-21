@@ -18,11 +18,16 @@ describe("artifact migration provenance", () => {
     expect(createHash("sha256").update(copy).digest("hex")).toBe(expected);
   });
   it("appends unique increasing timestamps after every earlier migration", () => {
-    const previousMax = Math.max(...journal.entries.slice(0, -2).map((e) => e.when));
-    const tail = journal.entries.slice(-2);
-    expect(tail.map((e) => e.tag)).toEqual(migrations.map(([tag]) => tag));
-    expect(tail[0]!.when).toBeGreaterThan(previousMax);
-    expect(tail[1]!.when).toBeGreaterThan(tail[0]!.when);
+    let previousIndex = -1;
+    for (const [tag] of migrations) {
+      const matches = journal.entries.filter((entry) => entry.tag === tag);
+      expect(matches).toHaveLength(1);
+      const index = journal.entries.findIndex((entry) => entry.tag === tag);
+      expect(index).toBeGreaterThan(previousIndex);
+      const previousMax = Math.max(...journal.entries.slice(0, index).map((entry) => entry.when));
+      expect(matches[0]!.when).toBeGreaterThan(previousMax);
+      previousIndex = index;
+    }
     expect(new Set(journal.entries.map((e) => e.when)).size).toBe(journal.entries.length);
   });
 });
