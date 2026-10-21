@@ -198,3 +198,101 @@ CREATE CONSTRAINT TRIGGER facet_events_scoped_binding
 --> statement-breakpoint
 CREATE OR REPLACE FUNCTION enforce_facet_registry() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
+  PERFORM check_facet_stream(NEW.stream_id);
+  IF TG_OP = 'UPDATE' AND OLD.stream_id IS DISTINCT FROM NEW.stream_id THEN
+    RAISE EXCEPTION 'facet head stream is immutable';
+  END IF;
+  RETURN NULL;
+END $$;
+--> statement-breakpoint
+DROP TRIGGER IF EXISTS facet_bindings_integrity ON facet_event_bindings;
+CREATE CONSTRAINT TRIGGER facet_bindings_integrity AFTER INSERT ON facet_event_bindings
+  DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION enforce_facet_registry();
+DROP TRIGGER IF EXISTS facet_heads_integrity ON facet_heads;
+CREATE CONSTRAINT TRIGGER facet_heads_integrity AFTER INSERT OR UPDATE ON facet_heads
+  DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION enforce_facet_registry();
+--> statement-breakpoint
+CREATE OR REPLACE FUNCTION enforce_facet_receipt_context() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM facet_activation_state WHERE old_index_dropped)
+    AND NOT EXISTS (SELECT 1 FROM facet_command_contexts c WHERE c.owner_id = NEW.owner_id
+      AND c.command_key = NEW.command_key AND c.status = 'resolved' AND c.command_digest = NEW.command_digest) THEN
+    RAISE EXCEPTION 'scoped facet receipt requires context';
+  END IF;
+  RETURN NULL;
+END $$;
+--> statement-breakpoint
+DROP TRIGGER IF EXISTS facet_receipts_scoped_context ON facet_commands;
+CREATE CONSTRAINT TRIGGER facet_receipts_scoped_context AFTER INSERT ON facet_commands
+  DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION enforce_facet_receipt_context();
+--> statement-breakpoint
+CREATE OR REPLACE FUNCTION facet_swap_head_enforcement(p_workspace_id uuid) RETURNS void LANGUAGE plpgsql AS $$
+DECLARE
+  barrier boolean;
+  stream record;
+BEGIN
+  LOCK TABLE facet_events, facet_commands, facet_streams, facet_event_bindings, facet_heads
+    IN ACCESS EXCLUSIVE MODE;
+  SELECT maintenance_barrier INTO barrier FROM facet_activation_state
+    WHERE workspace_id = p_workspace_id AND xmin::text::bigint <> txid_current();
+  IF barrier IS NULL OR barrier = false THEN
+    RAISE EXCEPTION 'facet activation requires a committed maintenance barrier';
+  END IF;
+  FOR stream IN SELECT id FROM facet_streams ORDER BY id LOOP
+    PERFORM check_facet_stream(stream.id);
+  END LOOP;
+  IF NOT EXISTS (SELECT 1 FROM facet_activation_state WHERE old_index_dropped) THEN
+    INSERT INTO facet_unresolved_events SELECT e.id FROM facet_events e
+      LEFT JOIN facet_event_bindings b ON b.event_id = e.id WHERE b.event_id IS NULL ON CONFLICT DO NOTHING;
+  END IF;
+  DROP INDEX IF EXISTS facet_events_head_idx;
+  UPDATE facet_activation_state
+    SET writer_epoch = 'scoped', old_index_dropped = true, updated_at = now()
+    WHERE workspace_id = p_workspace_id;
+END $$;
+--> statement-breakpoint
+CREATE OR REPLACE FUNCTION guard_facet_inventory() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM facet_activation_state WHERE old_index_dropped) THEN
+    RAISE EXCEPTION 'facet unresolved inventory is frozen';
+  END IF;
+  IF TG_OP <> 'INSERT' THEN RAISE EXCEPTION 'facet inventory is append-only'; END IF;
+  RETURN NEW;
+END $$;
+--> statement-breakpoint
+CREATE OR REPLACE TRIGGER facet_unresolved_frozen BEFORE INSERT OR UPDATE OR DELETE
+  ON facet_unresolved_events FOR EACH ROW EXECUTE FUNCTION guard_facet_inventory();
+CREATE OR REPLACE TRIGGER facet_unresolved_no_truncate BEFORE TRUNCATE
+  ON facet_unresolved_events FOR EACH STATEMENT EXECUTE FUNCTION guard_facet_binding();
+--> statement-breakpoint
+CREATE OR REPLACE FUNCTION fence_facet_maintenance() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM facet_activation_state WHERE maintenance_barrier AND writer_epoch = 'legacy') THEN
+    RAISE EXCEPTION 'facet maintenance barrier is closed';
+  END IF;
+  RETURN NEW;
+END $$;
+--> statement-breakpoint
+CREATE OR REPLACE TRIGGER facet_events_maintenance BEFORE INSERT OR UPDATE
+  ON facet_events FOR EACH ROW EXECUTE FUNCTION fence_facet_maintenance();
+CREATE OR REPLACE TRIGGER facet_commands_maintenance BEFORE INSERT
+  ON facet_commands FOR EACH ROW EXECUTE FUNCTION fence_facet_maintenance();
+--> statement-breakpoint
+CREATE OR REPLACE FUNCTION guard_facet_epoch() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF TG_OP = 'INSERT' AND (NEW.writer_epoch <> 'legacy' OR NEW.old_index_dropped) THEN
+    RAISE EXCEPTION 'facet epoch must start as legacy';
+  END IF;
+  IF TG_OP = 'UPDATE' AND ((OLD.old_index_dropped AND NOT NEW.old_index_dropped)
+    OR (OLD.writer_epoch = 'scoped' AND NEW.writer_epoch <> 'scoped')) THEN
+    RAISE EXCEPTION 'facet epoch cannot revert after cutover';
+  END IF;
+  RETURN NEW;
+END $$;
+--> statement-breakpoint
+CREATE OR REPLACE TRIGGER facet_epoch_monotonic BEFORE INSERT OR UPDATE
+  ON facet_activation_state FOR EACH ROW EXECUTE FUNCTION guard_facet_epoch();
+CREATE OR REPLACE TRIGGER facet_epoch_no_delete BEFORE DELETE
+  ON facet_activation_state FOR EACH ROW EXECUTE FUNCTION guard_facet_binding();
+CREATE OR REPLACE TRIGGER facet_epoch_no_truncate BEFORE TRUNCATE
+  ON facet_activation_state FOR EACH STATEMENT EXECUTE FUNCTION guard_facet_binding();
