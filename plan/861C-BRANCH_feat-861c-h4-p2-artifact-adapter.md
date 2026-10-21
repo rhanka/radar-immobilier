@@ -68,7 +68,7 @@ Selected mappings (exact method/path only, no generic proxy):
 - [ ] Adapter types, exact routing, closed validation, sanitized delegation, MCP result mapping.
 - [ ] Authority and effective-input checks (caller key, binding, profile, pagination, forged fields).
 - [ ] Provider-contract seams documented as preparation (`BLOCKED` finalization, typed outcome via facade).
-- [ ] Post-success admission outage: sanitized response, no receipt, exactly one ledger entry.
+- [x] Post-success admission outage: sanitized response, no receipt, exactly one ledger entry.
 - [ ] Real-provider parity, conflict, private metadata, pagination and pre-dispatch admission evidence.
 - [ ] Four copied-source mutation failures, restored and checked with `cmp`.
 - [ ] Parity cases with preparation mocks: minimal profile, HTTP↔MCP replay, changed-content conflict

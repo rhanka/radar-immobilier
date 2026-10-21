@@ -37,6 +37,29 @@ function blockedProvider() {
 }
 
 describe("commit-time authorization while the provider is blocked [T05 T13]", () => {
+  it.each(["ensure", "publish"])("accounts a post-success admission outage for %s", async (op) => {
+    let unavailable = false;
+    const authority: AdmissionAuthority = {
+      readActivation: () => live(), nowMs: () => NOW,
+      readStatus: async () => {
+        if (unavailable) throw new Error("private database query and storage identifiers");
+        return "approved";
+      },
+    };
+    const { host, handle, gate } = blockedProvider();
+    const { ledger, entries } = createMemoryCommitLedger();
+    const pending = createArtifactControl(host, "scope", "pages.example.test", authority,
+      { ledger, nowMs: () => NOW }).handle(op, "alice", op === "publish" ? publishBody :
+      { bindingName: "summer", idempotencyKey: "key" });
+    await vi.waitFor(() => expect(handle).toHaveBeenCalledTimes(1));
+    unavailable = true;
+    gate.resolve({ status: 201, body: receiptBody() });
+    await expect(pending).resolves.toEqual(
+      { status: 503, body: { error: "capability_unavailable" } });
+    expect(entries).toEqual([{ op, actorId: "alice",
+      reason: "admission_unavailable", status: 503, atMs: NOW }]);
+  });
+
   it("refuses a publish suspended while the provider is blocked", async () => {
     let status = "approved";
     const authority: AdmissionAuthority = {
