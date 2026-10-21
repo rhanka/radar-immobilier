@@ -1,4 +1,7 @@
 import { randomUUID } from "node:crypto";
+import { captureInvocationContext, getInvocationContext } from "./invocation-context.js";
+import { ALL_TOOL_DEFINITIONS } from "./tool-definitions.js";
+import { TOOL_HANDLERS, type ToolTextResult } from "./tool-handlers.js";
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import {
@@ -115,72 +118,42 @@ function guarded<A>(
  * (server.ts stdio and server-http.ts Streamable HTTP).
  */
 export function registerTools(server: McpServer, ctx: ToolContext): void {
-  server.registerTool(
-    "search_lots",
-    {
-      title: "Search lots",
-      description:
-        "Recherche de lots par ville et critères (zone, no_lot, superficie min). Read-only.",
-      inputSchema: {
-        city: z.string().min(1).describe("Ville (ex: longueuil, valleyfield)"),
-        zone: z.string().optional().describe("Code de zonage (ex: H-203)"),
-        no_lot: z.string().optional().describe("Numéro de lot cadastral exact"),
-        minArea: z.number().positive().optional().describe("Superficie minimale en m²"),
-        limit: z.number().int().min(1).max(100).default(20),
+  for (const def of ALL_TOOL_DEFINITIONS.filter((def) => ["search_lots","get_lot_card","search_signals"].includes(def.name))) {
+    const handler = TOOL_HANDLERS[def.name];
+    if (!handler) throw new Error(`missing_handler:${def.name}`);
+    server.registerTool(
+      def.name,
+      { title: def.title, description: def.description, inputSchema: def.inputSchema },
+      async (args): Promise<ToolTextResult> => {
+        const snapshot =
+          getInvocationContext() ??
+          captureInvocationContext({ auth: ctx.auth, data: ctx.data, raw: ctx.raw });
+        const correlationId = randomUUID();
+        try {
+          assertScope(snapshot.auth, def.scope);
+          auditToolCall(snapshot.auth, def.name, hashInput(args), correlationId);
+          return await handler(args as Record<string, unknown>, snapshot);
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          // stderr only — never leak to the protocol stdout channel.
+          process.stderr.write(
+            `${JSON.stringify({
+              at: new Date().toISOString(),
+              kind: "immo-mcp.error",
+              tool: def.name,
+              correlationId,
+              message,
+            })}\n`,
+          );
+          const result: ToolTextResult = {
+            content: [{ type: "text", text: JSON.stringify({ error: message, tool: def.name, correlationId }, null, 2) }],
+          };
+          result.isError = true;
+          return result;
+        }
       },
-    },
-    guarded(ctx, "search_lots", IMMO_SCOPES.search, async (args) => {
-      const lots = await ctx.data.searchLots(args);
-      return jsonResult({ city: args.city, count: lots.length, lots });
-    }),
-  );
-
-  server.registerTool(
-    "get_lot_card",
-    {
-      title: "Get lot card",
-      description: "Fiche détaillée d'un lot (zonage, superficie, signaux liés). Read-only.",
-      inputSchema: {
-        city: z.string().min(1),
-        no_lot: z.string().min(1).describe("Numéro de lot cadastral exact"),
-      },
-    },
-    guarded(ctx, "get_lot_card", IMMO_SCOPES.read, async (args) => {
-      const card = await ctx.data.getLotCard(args);
-      if (!card) return jsonResult({ found: false, city: args.city, no_lot: args.no_lot });
-      return jsonResult({ found: true, lot: card });
-    }),
-  );
-
-  server.registerTool(
-    "search_signals",
-    {
-      title: "Search signals",
-      description:
-        "Recherche de signaux réglementaires par ville (étape, mot-clé). Read-only.",
-      inputSchema: {
-        city: z.string().min(1),
-        etape: z
-          .string()
-          .optional()
-          .describe("Étape du processus (ex: avis_motion, adoption, consultation)"),
-        query: z.string().optional().describe("Mot-clé libre"),
-        showDiscarded: z
-          .boolean()
-          .optional()
-          .describe("Reveal archived signals hidden by default (default false). Read-only."),
-        limit: z.number().int().min(1).max(100).default(20),
-      },
-    },
-    guarded(ctx, "search_signals", IMMO_SCOPES.search, async (args) => {
-      // Per-user auth (D4): forward the CURRENT user's token (from the verified
-      // auth CONTEXT, never from args) so the api applies its normal per-user auth.
-      const signals = await ctx.data.searchSignals(args, {
-        accessToken: ctx.auth.accessToken,
-      });
-      return jsonResult({ city: args.city, count: signals.length, signals });
-    }),
-  );
+    );
+  }
 
   server.registerTool(
     "get_opportunity_dossier",
