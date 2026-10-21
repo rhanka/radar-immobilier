@@ -117,7 +117,7 @@ Add explicit expected-head concurrency to personal signal facets. Every mutation
     - [ ] `make test-ui SCOPE=SignalFacetControls ENV=test-paniers-l6a` (last arg `ENV`)
     - [ ] `make test-ui SCOPE=SignauxMapView.6a-head ENV=test-paniers-l6a` (last arg `ENV`)
 - [ ] **Lot 3 — Discriminating tests**
-  - [ ] API: concurrent first writes (one success, one 409 with current); stale expectation conflicts even when the final state matches; null conflicts with an inactive head; one selection conflict rolls back the whole discard; exact replay returns the original result after later transitions; changed expectations with the same key conflict; undo cannot overwrite an intervening archive change; 409 carries only authorized heads.
+  - [x] API: concurrent first writes (one success, one 409 with current); stale expectation conflicts even when the final state matches; null conflicts with an inactive head; one selection conflict rolls back the whole discard; exact replay returns the original result after later transitions; changed expectations with the same key conflict; undo cannot overwrite an intervening archive change; 409 carries only authorized heads.
   - [ ] UI: inactive IDs retained by the index; controls send expectations; 409 copy and reload path; undo carries the discard head.
   - [ ] Each test fails without the fix (assert the pre-fix behavior would differ).
   - [ ] Lot gate: same as Lots 1-2.
