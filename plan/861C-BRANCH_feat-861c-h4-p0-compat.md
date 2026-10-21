@@ -72,12 +72,12 @@
   - [x] Confirm this worktree and branch `feat/861c-h4-p0-compat`; root checkout stays on user dev.
   - [x] Confirm command style: `make -f tools/<runner>.mk <target> API_PORT=18914 UI_PORT=15914 MAILDEV_UI_PORT=11914 ENV=test-861c-h4-p0` with `ENV` last.
   - [x] Confirm scope and guardrails; execution-brief clarifications recorded above.
-- [ ] **Lot 1 — Fixture provenance record**
-  - [ ] Write `packages/immo-mcp/src/fixtures/immo-tools.provenance.v1.json`: captured hash `31487e8f...`, amended source hash `2145e05a...`, `showDiscarded` attribution to the 6C sub-lot amendment, retained 401 capture with the separately recorded 403 delta, five-stub inventory, evidence-class distinction.
-  - [ ] Files: `packages/immo-mcp/src/fixtures/immo-tools.provenance.v1.json`, this plan.
-  - [ ] Lot gate:
-    - [ ] JSON parses and hashes match the design and the deployed-baseline receipt.
-    - [ ] No runtime file touched.
+- [x] **Lot 1 — Fixture provenance record**
+  - [x] Write `packages/immo-mcp/src/fixtures/immo-tools.provenance.v1.json`: captured hash `31487e8f...`, amended source hash `2145e05a...`, `showDiscarded` attribution to the 6C sub-lot amendment, retained 401 capture with the separately recorded 403 delta, five-stub inventory, evidence-class distinction.
+  - [x] Files: `packages/immo-mcp/src/fixtures/immo-tools.provenance.v1.json`, this plan.
+  - [x] Lot gate:
+    - [x] JSON parses and hashes match the design and the deployed-baseline receipt.
+    - [x] No runtime file touched.
 - [ ] **Lot 2 — Discriminating provenance tests**
   - [ ] Write `packages/immo-mcp/src/tool-fixture-provenance.test.ts`: derived captured bytes hash, amended hash, exact `showDiscarded` block, five `not_wired_yet` stubs, retained 401 capture, evidence-class distinction, ordinary-target E2E exclusion, H4 runner guards.
   - [ ] Files: `packages/immo-mcp/src/tool-fixture-provenance.test.ts`, this plan.
