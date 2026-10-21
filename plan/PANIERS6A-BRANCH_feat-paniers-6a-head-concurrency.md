@@ -126,6 +126,15 @@ Add explicit expected-head concurrency to personal signal facets. Every mutation
   - [x] UI: inactive IDs retained by the index; controls send expectations; 409 copy and reload path; undo carries the discard head.
   - [x] Mutation proof: removing the comparison makes six tests fail; restoring identical bytes returns all twelve new API tests to green.
   - [x] Lot gate: same as Lots 1-2.
+- [ ] **Lot 4 — Astra review corrections**
+  - [x] Carry the launched target, viewer context and refusal copy from controls.
+  - [ ] Render a dismissible parent notice independently of the signal card.
+  - [ ] Keep current-city refusals and ignore late conflicts from another city.
+  - [ ] Test signal removal after conflict and late replies after switching city.
+  - [ ] Test callback arguments, notice identity and dismissal.
+  - [ ] Qualify isolated typecheck, lint, UI maps/signals and API facets.
+  - [ ] Discriminate both fixes in a copy; restore and compare identical bytes.
+  - [ ] Audit local commits and bundle from `410a4974`; keep reports uncommitted.
 - [x] **Lot N-1 — Docs consolidation**
   - [x] Write `RAPPORT-SOL-6A.md` in French (uncommitted) with results, discrimination, commit audit and `not covered`; preserve the Muse handoff.
   - [x] Record completed local qualification; UAT and remote integration remain not covered.
