@@ -70,10 +70,13 @@ function facetState(overrides: Partial<TargetFacetState> = {}): TargetFacetState
   return {
     pertinent: false,
     pertinentCode: null,
+    pertinentHeadId: null,
     watching: false,
     watchingCode: null,
+    watchingHeadId: null,
     archived: false,
     archiveCode: null,
+    archiveHeadId: null,
     changedSinceArchive: false,
     targetAvailable: true,
     ...overrides,
@@ -197,6 +200,7 @@ describe("SignauxSelPanel — controls and discard notice", () => {
     expect(postCommand.mock.calls[0]![2]).toEqual({
       target: { citySlug: "delson", type: "DesignationEvent", id: "sig-1" },
       reasonCode: "N-ADMIN",
+      expectedHeadId: null,
     });
   });
 

@@ -105,7 +105,7 @@ Add explicit expected-head concurrency to personal signal facets. Every mutation
     - [ ] `make test-api SCOPE=facets-6a-head-concurrency ENV=test-paniers-l6a` (last arg `ENV`)
     - [ ] `make test-api SCOPE=facets-http-6a-head ENV=test-paniers-l6a` (last arg `ENV`)
 - [ ] **Lot 2 — UI intention capture and conflict handling**
-  - [ ] `signal-facets-client.ts`: extend `TargetFacetState` with `pertinentHeadId`, `watchingHeadId`, `archiveHeadId`; `indexFacetHeads` preserves inactive head IDs; `FacetCommandBody` carries expectations; `SignalFacetError` carries `current`; conflict copy requires reload and a new intention.
+  - [x] `signal-facets-client.ts`: extend `TargetFacetState` with `pertinentHeadId`, `watchingHeadId`, `archiveHeadId`; `indexFacetHeads` preserves inactive head IDs; `FacetCommandBody` carries expectations; `SignalFacetError` carries `current`; conflict copy requires reload and a new intention.
   - [ ] `SignalFacetControls.svelte`: send `expectedHeadId` (and `expectedSelectionHeads` when discard carries deselect) from state IDs; surface `facet_head_conflict` distinctly; never auto-resubmit a confirmed conflict; same-key retry only for unconfirmed writes; notify parent on stale heads for reload.
   - [ ] `SignauxSelPanel.svelte`: forward stale-head notification; pass through IDs via `facetHeads`.
   - [ ] `SignauxMapView.svelte`: reload heads/detail/by-city on stale-head notification; store undo expectation from the confirmed discard head; undo `restore` carries that expectation so an intervening archive change conflicts instead of overwriting.
