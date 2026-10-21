@@ -118,7 +118,7 @@ function guarded<A>(
  * (server.ts stdio and server-http.ts Streamable HTTP).
  */
 export function registerTools(server: McpServer, ctx: ToolContext): void {
-  for (const def of ALL_TOOL_DEFINITIONS.filter((def) => ["search_lots","get_lot_card","search_signals","get_opportunity_dossier","list_documents","read_document_excerpt","get_zones_geojson"].includes(def.name))) {
+  for (const def of ALL_TOOL_DEFINITIONS.filter((def) => ["search_lots","get_lot_card","search_signals","get_opportunity_dossier","list_documents","read_document_excerpt","get_zones_geojson","get_lots_geojson"].includes(def.name))) {
     const handler = TOOL_HANDLERS[def.name];
     if (!handler) throw new Error(`missing_handler:${def.name}`);
     server.registerTool(
@@ -175,39 +175,6 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
       `Nombre max de features retournées (défaut ${RAW_GEOJSON_DEFAULT_LIMIT}, ` +
         `max ${RAW_GEOJSON_MAX_LIMIT} — bbox obligatoire au-delà de ${RAW_GEOJSON_DEFAULT_LIMIT}).`,
     );
-
-  server.registerTool(
-    "get_lots_geojson",
-    {
-      title: "Get lots GeoJSON",
-      description:
-        "FeatureCollection GeoJSON des lots cadastraux d'une ville, enrichis server-side : " +
-        "zone jointe (zone.code/kind/densiteLogHa/usages/grillePdfUrl), zoneCode, " +
-        "multifamilial4plus (+ multifamilial4plusSource: grille|heuristique), superficieM2, " +
-        "tod/priorite quand la source les porte. Réponse BORNÉE : limit défaut 500 (max 2000), " +
-        "bbox OBLIGATOIRE pour limit > 500 ; une ville peut dépasser 15 000 lots — paginez " +
-        "par bbox. Filtres optionnels only4Plus/superficieMinM2 appliqués sur la page " +
-        "récupérée. truncated=true → resserrez le bbox. Read-only.",
-      inputSchema: {
-        city: z.string().min(1).describe("Ville (slug, ex: longueuil, valleyfield, delson)"),
-        bbox: bboxSchema,
-        limit: limitSchema,
-        only4Plus: z
-          .boolean()
-          .optional()
-          .describe("Ne garder que les lots dont multifamilial4plus === true"),
-        superficieMinM2: z
-          .number()
-          .positive()
-          .optional()
-          .describe("Superficie minimale en m² (champ superficieM2)"),
-      },
-    },
-    guarded(ctx, "get_lots_geojson", IMMO_SCOPES.read, async (args) => {
-      checkGeoBounds(args);
-      return geojsonResult(await ctx.raw.getLotsGeojson(args));
-    }),
-  );
 
   server.registerTool(
     "get_grille_pdf",
