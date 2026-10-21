@@ -80,13 +80,13 @@ Review integration (both non-blocking points):
   - [x] Shared admission and facade seam.
   - [x] Refusal regression tests.
   - [x] Async query and pre-dispatch reread tests.
-  - [ ] HTTP admission seam.
+  - [x] HTTP admission seam.
   - [ ] HTTP entry regression tests.
   - [ ] HTTP reread regression tests.
 - [ ] **Unit 4 — control cache headers** (§5.3, T29): `Cache-Control: private, no-store`
       plus `Vary: Cookie, Authorization` on control successes, errors and account-switch
       responses.
-  - [ ] Final-response cache middleware.
+  - [x] Final-response cache middleware.
   - [ ] Success, refusal and account-switch cache tests.
   - [ ] Parent-handler exception cache tests.
 
