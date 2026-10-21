@@ -45,6 +45,8 @@ Prepare the data-and-contracts slice of P3: versioned Immo provider and artifact
 - Astra correction gates passed: 190 tests in 18 files, including 63 registry cases; lint clean and snapshot typechecks recorded.
 - Five copy scenarios produced six refusals and twenty successful `cmp` checks; the isolated project leaves zero resources.
 - Full-profile integrity and duplicate-selection regressions were reproduced before correction and pass afterward.
+- Independent review corrections pass 195 tests in 18 files (68 registry cases), lint and per-commit typechecks.
+- Six regression failures were observed on the base; four copy scenarios prove five registry refusals, frozen-candidate rejection and nineteen targeted cmp checks.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch** (no history copying; local commits and base-relative bundle)
@@ -95,12 +97,12 @@ Prepare the data-and-contracts slice of P3: versioned Immo provider and artifact
   - [x] Prove complete profile integrity and authorized digest evolution.
   - [x] Preserve duplicate-declaration rejection for selected artifact tools and providers.
   - [x] Pass full gates, five copy mutations, restoration checks and resource teardown.
-- [ ] **Lot 5c — Independent review corrections**
+- [x] **Lot 5c — Independent review corrections**
   - [x] Reject duplicate provider identifiers with disjoint Immo inventory coverage.
   - [x] Validate command mappings and require bindingName for artifacts_ensure.
   - [x] Rebuild frozen selection entries from validated fields and cover nested caller mutations.
-  - [ ] Verify baseline failures, full gates, four copy scenarios and cmp restoration.
-  - [ ] Deliver snapshot-typechecked commits, base-relative bundle and updated integration report.
+  - [x] Verify baseline failures, full gates, four copy scenarios and cmp restoration.
+  - [x] Deliver snapshot-typechecked commits, base-relative bundle and updated integration report.
 - [ ] **Lot 6 — Merge and close**
   - [ ] Push branch (excluded from this integration assignment).
   - [ ] Open PR, verify CI green.
