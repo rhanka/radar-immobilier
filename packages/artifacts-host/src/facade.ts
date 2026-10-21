@@ -18,6 +18,7 @@ export interface ArtifactControl {
  */
 export type CommitFailureReason =
   | "unauthorized_at_commit"
+  | "admission_unavailable"
   | "provider_conflict"
   | "provider_unavailable"
   | "provider_error";
@@ -222,7 +223,16 @@ export function createArtifactControl(
         // pointer may already persist. Replay after re-approval can return
         // that publication. Unit 7 stays blocked on a host authorization
         // callback invoked inside provider finalization after all waits.
-        const after = await checkAdmission(admission, actorId);
+        let after;
+        try {
+          after = await checkAdmission(admission, actorId);
+        } catch {
+          // Admission availability is separate from a provider failure. The
+          // publication may already persist; suppress its receipt and count
+          // this dispatch once without exposing the underlying query error.
+          fail("admission_unavailable", 503);
+          return { status: 503, body: { error: "capability_unavailable" } };
+        }
         if (!after.allowed) {
           fail("unauthorized_at_commit", after.status);
           return { status: after.status, body: after.body };
