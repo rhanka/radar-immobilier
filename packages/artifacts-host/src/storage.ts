@@ -1,7 +1,13 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import type pg from "pg";
 import { createPostgresArtifactStore } from "@sentropic/artifacts/adapters/postgres";
-import { withArtifactAdvisoryLock } from "./idempotency.js";
+import { ArtifactConnectionError, withArtifactAdvisoryLock } from "./idempotency.js";
+
+/** Only failures minted by the lock path itself are reported, never body work. */
+function isLockFailure(error: unknown): boolean {
+  return error instanceof ArtifactConnectionError ||
+    (error instanceof Error && error.message.includes("artifact advisory lock timeout conflict"));
+}
 
 export const ARTIFACTS_LIFECYCLE_WHEN = 1791200002000;
 export const ARTIFACTS_LIFECYCLE_HASH = "fdfbe97f84774b47a207e66915f7426926650e85b6dbb9a4d80272591df624fd";
@@ -31,7 +37,9 @@ export async function initializeArtifactScope(
  * Session locks allow the adapter's putRelease transaction to stay intact.
  * Even five simultaneous lock waiters cannot exhaust the pool underneath work.
  */
-export function createLockedArtifactStore(pool: pg.Pool) {
+export function createLockedArtifactStore(
+  pool: pg.Pool, onFailure?: ((error: unknown) => void) | undefined,
+) {
   const connections = new AsyncLocalStorage<pg.PoolClient>();
   const routed = new Proxy(pool, {
     get(target, property) {
@@ -48,9 +56,16 @@ export function createLockedArtifactStore(pool: pg.Pool) {
   return {
     ...store,
     execute<T>(key: string, hash: string, work: () => Promise<T>) {
-      return withArtifactAdvisoryLock(pool, key, (client) =>
+      const run = withArtifactAdvisoryLock(pool, key, (client) =>
         connections.run(client, () => store.execute(key, hash, work)),
       );
+      if (onFailure === undefined) return run;
+      return run.catch((error: unknown) => {
+        if (isLockFailure(error)) {
+          try { onFailure(error); } catch { /* probe failure stays silent */ }
+        }
+        throw error;
+      });
     },
   };
 }
