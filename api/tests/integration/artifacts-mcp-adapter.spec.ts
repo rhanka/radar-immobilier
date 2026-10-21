@@ -123,9 +123,9 @@ describe("unexposed MCP adapter with the composed provider", () => {
     expect(hidden).toEqual(await meta("123e4567-e89b-12d3-a456-426614174000"));
     expect(hidden).toMatchObject({ ok: false, status: 404 });
     expect(await adapter.execute({ method: "POST", path: "/list", args: { limit: 1, offset: 0 } },
-      { actorId: "bob" })).toMatchObject({ ok: true, data: { items: [], total: 0 } });
+      { actorId: "bob" })).toMatchObject({ ok: true, data: { artifacts: [], total: 0 } });
     const listed = await adapter.execute({ method: "POST", path: "/list", args: { limit: 1, offset: 1 } },
       { actorId: "alice" });
-    expect(listed).toMatchObject({ ok: true, data: { items: [expect.any(Object)], total: 4 } });
+    expect(listed).toMatchObject({ ok: true, data: { artifacts: [expect.any(Object)], total: 4 } });
   });
 });
