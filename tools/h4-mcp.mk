@@ -119,3 +119,7 @@ test-guard: guard-env ## Exercise refusals and project binding without Docker
 	grep -Fq 'environment file present or example is unsafe' "$$tmp/output"; \
 	test ! -e "$$H4_GUARD_LOG"; rm .env.guard; \
 	echo '[test-guard] PASS: refused environment file before Docker'
+
+.PHONY: test-e2e-exclusion
+test-e2e-exclusion: guard ## Real Vitest canaries on both ordinary recipes, with inverse controls
+	@bash tools/test-mcp-e2e-exclusion.sh
