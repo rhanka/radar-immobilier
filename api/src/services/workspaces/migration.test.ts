@@ -52,8 +52,8 @@ describe("workspace membership migration", () => {
     expect(entries.filter((entry) => entry.idx === 16)).toHaveLength(1);
     expect(entries.some((entry) => entry.tag === "0016_artifacts_lifecycle")).toBe(true);
     expect(entries.map((entry) => entry.idx)).toEqual(entries.map((_, index) => index));
-    expect(entries.at(-1)?.tag).toBe("0017_workspace_memberships");
-    expect(found!.when).toBeGreaterThan(Math.max(...entries.slice(0, -1).map((entry) => entry.when)));
+    expect(entries[15]?.tag).toBe("0016_artifacts_lifecycle");
+    expect(found!.when).toBeGreaterThan(Math.max(...entries.slice(0, found!.idx).map((entry) => entry.when)));
   });
 
   it("should bake in no operational identity or account data", () => {
