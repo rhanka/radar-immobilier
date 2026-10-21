@@ -33,6 +33,11 @@ export interface SearchSignalsArgs {
    * signals are included. False or omitted preserves default hiding.
    */
   showDiscarded?: boolean | undefined;
+  /**
+   * Reserved explicit context. Scoped graph delivery remains unavailable
+   * until its guarded route is installed; current callers omit this field.
+   */
+  workspaceId?: string | undefined;
   limit: number;
 }
 
@@ -306,6 +311,7 @@ export class HttpDataSource implements ImmoDataSource {
     const slug = citySlug(args.city);
     // 6C reveal: forwarded BEFORE search and limit; the API applies its own
     // hiding predicate under the same per-user auth. Absent/false = hidden.
+    if (args.workspaceId !== undefined) throw new Error("scoped_signal_search_unavailable");
     const reveal = args.showDiscarded === true ? "?showDiscarded=1" : "";
     const url = `${this.baseUrl}/api/graph-signals/${encodeURIComponent(slug)}${reveal}`;
     // Forward the user's OWN token so the api applies its normal per-user auth.
