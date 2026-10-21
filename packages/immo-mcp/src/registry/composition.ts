@@ -134,7 +134,13 @@ export function compileComposition(
     }
     artifact = Object.freeze({
       providerId: request.providerId,
-      selection: Object.freeze(request.selection.map((entry) => Object.freeze({ ...entry }))),
+      selection: Object.freeze(request.selection.map((entry) => Object.freeze({
+        tool: entry.tool,
+        operation: entry.operation,
+        method: entry.method,
+        path: entry.path,
+        command: entry.command,
+      }))),
       profileRevision: request.profileRevision,
       finalizationContract: request.finalizationContract,
       errorContract: request.errorContract,

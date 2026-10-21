@@ -97,8 +97,8 @@ Prepare the data-and-contracts slice of P3: versioned Immo provider and artifact
   - [x] Pass full gates, five copy mutations, restoration checks and resource teardown.
 - [ ] **Lot 5c — Independent review corrections**
   - [x] Reject duplicate provider identifiers with disjoint Immo inventory coverage.
-  - [ ] Validate command mappings and require bindingName for artifacts_ensure.
-  - [ ] Rebuild frozen selection entries from validated fields and cover nested caller mutations.
+  - [x] Validate command mappings and require bindingName for artifacts_ensure.
+  - [x] Rebuild frozen selection entries from validated fields and cover nested caller mutations.
   - [ ] Verify baseline failures, full gates, four copy scenarios and cmp restoration.
   - [ ] Deliver snapshot-typechecked commits, base-relative bundle and updated integration report.
 - [ ] **Lot 6 — Merge and close**
