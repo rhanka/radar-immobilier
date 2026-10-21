@@ -59,7 +59,7 @@ Build a read-only deterministic report mapping every `prospect_marks` row to its
 
 ## Plan / Todo (lot-based)
 - [ ] **Lot 1 — Report contract and source inventory**
-  - [ ] `api/src/services/facets/lot-migration-report/types.ts`
+  - [x] `api/src/services/facets/lot-migration-report/types.ts`
   - [ ] `api/src/services/facets/lot-migration-report/manifest.ts`
   - [ ] `api/src/services/facets/lot-migration-report/SPEC.md`
 - [ ] **Lot 2 — Deterministic, read-only report builder**
