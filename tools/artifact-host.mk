@@ -74,9 +74,9 @@ test-host: guard-env ## Run artifact storage/publication suites (SCOPE=<path> fi
 	$(COMPOSE) run --rm -T -e ARTIFACTS_CONTENT_BASE $(TEST_ARTIFACT_ENV) api sh -c "npm ci && npm run db:migrate --workspace=api && npm run test --workspace=@radar/artifacts-host && npm run test --workspace=api $(if $(SCOPE),-- $(SCOPE),)"
 
 .PHONY: test-mcp
-test-mcp: guard-env ## Run the immo-mcp workspace suites
+test-mcp: guard-env ## Run the immo-mcp workspace suites (service E2E excluded)
 	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
-	$(COMPOSE) run --rm --no-deps -T api sh -c "npm ci && npm run test --workspace=@radar/immo-mcp"
+	$(COMPOSE) run --rm --no-deps -T api sh -c "npm ci && npm run test --workspace=@radar/immo-mcp -- --exclude '**/*.e2e.test.ts'"
 
 .PHONY: test-h3-proxy
 test-h3-proxy: guard-env ## Isolated nginx control-limit check (H3 unit 10, no compose stack)
