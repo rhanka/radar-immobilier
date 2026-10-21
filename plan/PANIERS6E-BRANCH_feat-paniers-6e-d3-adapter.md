@@ -63,31 +63,33 @@ Actions with the following status should be included around tasks only if really
   - [x] Confirm scope and guardrails; no `BRxx-EXn` exception needed.
   - [x] Define isolated `test-paniers-l6e-sol`: API `18886`, UI `15886`, mail `11886`; no published ports.
   - [x] Confirm command style: `make -f tmp/paniers-6e/verify.mk ... ENV=test-paniers-l6e-sol` with `ENV` last.
-- [ ] **Lot 1 — Graph adapter (reuse lot 5 normalization)**
+- [x] **Lot 1 — Graph adapter (reuse lot 5 normalization)**
   - [x] Add `graph-adapter.ts`: `props` plus nested `props.properties`; keys `reglement_number`, `cible_reglement_numero`, `cibleReglementNumero`.
   - [x] Scalar plus array values through lot 5 normalization; one node yields one token set (aliases deduped).
   - [x] Explicit unsupported-value diagnostics; absent values stay silent.
   - [x] Export `REAL_GRAPH_ADAPTER_VERSION` from `index.ts`.
-  - [ ] Lot gate:
+  - [x] Lot gate:
     - [x] Isolated Make `check-api` + `lint-lot` on `ENV=test-paniers-l6e-sol`.
     - [x] Isolated Make `test-d3` and `test-steve`, synthetic inputs only.
-    - [ ] Cleanup with `down -v`, failure status preserved.
-- [ ] **Lot 2 — Resolver and report integration (report only)**
+    - [x] Cleanup with `down -v`, failure status preserved.
+- [x] **Lot 2 — Resolver and report integration (report only)**
   - [x] Route `candidatesForToken` in `resolve.ts` through the adapter; distinct native nodes stay distinct.
   - [x] Record `adapterVersion` in `report.ts` metadata; snapshot identity and digest pass through unchanged.
   - [x] Update `SPEC.md` adapter contract (keys, nesting, arrays, diagnostics, versions).
   - [x] Five-bucket accounting unchanged; no persistence, no facet writes.
-  - [ ] Lot gate (same checklist as Lot 1).
-- [ ] **Lot 3 — Synthetic qualification**
+  - [x] Lot gate (same checklist as Lot 1).
+- [x] **Lot 3 — Synthetic qualification**
   - [x] Qualify every key/location with scalar, numeric and array values; empty, malformed and mixed values; frozen deterministic extraction.
   - [x] Add `graph-adapter.test.ts`: nested/camelCase values; arrays; repeated aliases; malformed values; competing nodes; municipality/MRC ambiguity; unchanged five-bucket accounting; frozen-input no-mutation check.
   - [x] Fixtures reproduce real shapes only with synthetic values; no client data.
-  - [ ] Lot gate (same checklist as Lot 1).
-- [ ] **Lot N-1 — Docs consolidation**
-  - [ ] Consolidate the adapter contract in scoped `d3-report/SPEC.md`.
-  - [ ] Record measured results, discrimination and limitations in uncommitted `RAPPORT-SOL-6E.md`.
-  - [ ] Update this branch plan with verified state.
-- [ ] **Lot N — Local delivery**
-  - [ ] Create commits of at most 150 changed lines and 15 files, each passing typecheck.
-  - [ ] Produce and verify `tmp/paniers-6e/6e.bundle` from `7c56bb93` using local Git metadata.
-  - [ ] Preserve the source branch; no push, PR, CI claim or merge in this assignment.
+  - [x] Qualify API package: 2,661 passing tests, 6 skipped; D3 115/115; Steve 247/247.
+  - [x] Bypass adapter in a separate copy: 5 failing assertions; restore, compare all D3 files with `cmp`, then 30/30 adapter and 115/115 D3.
+  - [x] Lot gate (same checklist as Lot 1).
+- [x] **Lot N-1 — Docs consolidation**
+  - [x] Consolidate the adapter contract in scoped `d3-report/SPEC.md`.
+  - [x] Record measured results, discrimination and limitations in uncommitted `RAPPORT-SOL-6E.md`.
+  - [x] Update this branch plan with verified state.
+- [x] **Lot N — Local delivery**
+  - [x] Create commits of at most 150 changed lines and 15 files, each passing typecheck.
+  - [x] Produce and verify `tmp/paniers-6e/6e.bundle` from `7c56bb93` using local Git metadata.
+  - [x] Preserve the source branch; no push, PR, CI claim or merge in this assignment.
