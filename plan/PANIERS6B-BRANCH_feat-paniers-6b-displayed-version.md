@@ -72,7 +72,7 @@ Require the displayed signal fingerprint on every new personal facet command. Ve
   - [x] Qualify undo after card removal and version-conflict reloads.
   - [ ] Browser UAT (not covered).
 - [ ] **Lot 3 — Discriminating qualification**
-  - [ ] Cover stale/matching/community-only versions and malformed commands.
+  - [x] Cover stale/matching/community-only versions and malformed commands.
   - [ ] Cover exact replay, deletion, privacy and parallel stale writes.
   - [ ] Cover 6A receipts, fingerprint-bound keys and lock retention through receipt commit.
   - [ ] Workspace typecheck, full lint, API facets/graph routes and UI maps/signals.
