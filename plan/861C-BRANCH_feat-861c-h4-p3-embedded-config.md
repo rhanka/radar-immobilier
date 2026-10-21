@@ -86,10 +86,10 @@ Prepare the data-and-contracts slice of P3: versioned Immo provider and artifact
   - [x] Define the supported local artifact version and complete effective profile.
   - [x] Enforce artifact scopes and required caller-key semantics.
   - [x] Compile only selected capabilities and freeze the complete profile into the digest.
-  - [ ] Export the revised registry contracts.
-  - [ ] Verify embedded required fields and durable identity parity.
+  - [x] Export the revised registry contracts.
+  - [x] Verify embedded required fields and durable identity parity.
   - [ ] Cover selection, scope and provider-version refusals.
-  - [ ] Prove complete profile integrity and authorized digest evolution.
+  - [x] Prove complete profile integrity and authorized digest evolution.
   - [ ] Pass full gates, five copy mutations, restoration checks and resource teardown.
 - [ ] **Lot 6 — Merge and close**
   - [ ] Push branch (excluded from this integration assignment).
