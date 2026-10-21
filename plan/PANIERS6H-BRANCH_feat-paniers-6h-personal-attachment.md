@@ -105,3 +105,5 @@ unchanged until activation runs; scoped routes stay unmounted from `app.ts`.
 - [ ] **Lot N — Close (not covered)**: verify green, push, PR, CI, merge
   commit (no squash/rebase), keep branch, move plan to `plan/done/`.
 - [x] Delivery checkpoint: 35
+
+- [x] Fix2 integration checkpoint: `9631a885`.
