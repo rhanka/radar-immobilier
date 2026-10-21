@@ -54,6 +54,7 @@ indicators) while preserving each consumer's non-basket population.
 - 6D needs no owner decision (reference design, section 6D).
 - Local Git metadata and a bundle are authorized by the execution brief; shared Git metadata stays read-only.
 - [x] Evidence reconciliation rebuilds current nodes and uses the current visible IDs synchronously.
+- [x] PDF regressions cover archives, changed evidence, out-of-filter co-signals and zero delta.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + cherry-pick** (default for orthogonal tasks; single final test cycle)
