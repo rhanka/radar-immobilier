@@ -1664,8 +1664,8 @@
         <summary class="sel-bucket-head">
           <span class="sel-bucket-name">Règlement et Normes</span>
           <!-- 01KZGM07 item 2 : N/M quand la liste est restreinte à la zone active. -->
-          <span class="rail-row-count">
-            {#if detailLoading}–{:else if focusedZoneCode}{zoneScopedReglements.length}/{reglements.length}{:else}{reglements.length}{/if}
+          <span class="rail-row-count" data-testid="reglements-bucket-count">
+            {#if detailLoading}–{:else if detailError}n/d{:else if focusedZoneCode}{zoneScopedReglements.length}/{reglements.length}{:else}{reglements.length}{/if}
           </span>
         </summary>
         <div class="sel-entities">
@@ -1674,22 +1674,30 @@
               <RefreshCw class="h-4 w-4 animate-spin" aria-hidden="true" />
               <span>Chargement des règlements…</span>
             </div>
-          {:else if zoneScopedReglements.length === 0}
-            <p class="sel-empty">
-              {#if focusedZoneCode && reglements.length > 0}
-                Aucun règlement rattaché à la zone active.
-              {:else}
-                Aucun règlement cité par les signaux de cette ville.
-              {/if}
-            </p>
           {:else}
-            {#each zoneScopedReglements as reg (reg.key)}
+            {#if detailError}
+              <p class="sel-empty" data-testid="reglements-unavailable">
+                Règlements indisponibles (signaux illisibles).
+              </p>
+            {/if}
+            {#if zoneScopedReglements.length === 0}
+              {#if !detailError}
+                <p class="sel-empty">
+                  {#if focusedZoneCode && reglements.length > 0}
+                    Aucun règlement rattaché à la zone active.
+                  {:else}
+                    Aucun règlement cité par les signaux de cette ville.
+                  {/if}
+                </p>
+              {/if}
+            {:else}
+              {#each zoneScopedReglements as reg (reg.key)}
               <div class="sel-entity-bar">
                 <div class="reglement-row">
                   <div class="reglement-head">
                     <code class="reglement-number">{reg.number}</code>
-                    <span class="reglement-count">
-                      {formatSignalCount(reg.signalCount)}
+                    <span class="reglement-count" data-testid="reglement-count">
+                      {detailError ? "n/d" : formatSignalCount(reg.signalCount)}
                     </span>
                   </div>
                   {#if reg.zoneCodes.length > 0}
@@ -1755,7 +1763,8 @@
                   </div>
                 </div>
               </div>
-            {/each}
+              {/each}
+            {/if}
           {/if}
 
           <!-- Sous-section NORMES (grille de zonage) de la zone active : usage
