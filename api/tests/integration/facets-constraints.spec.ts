@@ -83,7 +83,10 @@ describe("facet event constraints", () => {
       .rejects.toThrow("immutable");
     await expect(pool.query("DELETE FROM facet_commands WHERE owner_id = $1", [owner!.id])).rejects.toThrow("immutable");
     for (const table of ["facet_events", "facet_commands"]) {
-      await expect(pool.query(`TRUNCATE ${table}`)).rejects.toThrow(/append-only|immutable/);
+      // CASCADE reaches the immutability guards even when additive tables reference these rows.
+      await expect(pool.query(`TRUNCATE ${table} CASCADE`)).rejects.toThrow(/append-only|immutable/);
     }
+    expect((await pool.query("SELECT result FROM facet_commands WHERE owner_id = $1", [owner!.id])).rows)
+      .toEqual([{ result: { event: null } }]);
   });
 });
