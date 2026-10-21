@@ -83,12 +83,12 @@
   - [x] Files: `packages/immo-mcp/src/tool-fixture-provenance.test.ts`, this plan.
   - [x] Lot gate:
     - [x] `make -f tools/immo-mcp-test.mk typecheck lint test-immo-mcp API_PORT=18914 UI_PORT=15914 MAILDEV_UI_PORT=11914 ENV=test-861c-h4-p0`
-- [ ] **Lot 3 — Ordinary-target E2E exclusion**
-  - [ ] Append `-- --exclude '**/*.e2e.test.ts'` to the `test-mcp` recipe in `tools/artifact-host.mk`, matching `test-immo-mcp`.
-  - [ ] Files: `tools/artifact-host.mk`, this plan.
-  - [ ] Lot gate:
-    - [ ] Both ordinary MCP targets exclude `**/*.e2e.test.ts`; dedicated service targets own future service suites.
-    - [ ] `make -f tools/artifact-host.mk test-mcp API_PORT=18914 UI_PORT=15914 MAILDEV_UI_PORT=11914 ENV=test-861c-h4-p0`
+- [x] **Lot 3 — Ordinary-target E2E exclusion**
+  - [x] Append `-- --exclude '**/*.e2e.test.ts'` to the `test-mcp` recipe in `tools/artifact-host.mk`, matching `test-immo-mcp`.
+  - [x] Files: `tools/artifact-host.mk`, this plan.
+  - [x] Lot gate:
+    - [x] Both ordinary targets pass 134 tests with a throwing E2E canary present in a copy; removing the exclusion executes it and fails. Restore the runner, remove the canary and confirm `cmp=0`.
+    - [x] `make -f tools/artifact-host.mk test-mcp API_PORT=18914 UI_PORT=15914 MAILDEV_UI_PORT=11914 ENV=test-861c-h4-p0-canary`
 - [x] **Lot 4 — Dedicated H4 runner skeleton**
   - [x] Write `tools/h4-mcp.mk`: strict `test-*`/`e2e-*` slugs, environment-file refusal, fixed Compose options, project-scoped cleanup/inspection and phase placeholders refusing execution before P4/P6/P7.
   - [x] Files: `tools/h4-mcp.mk`, this plan.
@@ -96,10 +96,11 @@
     - [x] Runner never includes the root Makefile and never references `env_file`.
     - [x] `test-guard` behaviorally verifies eight unsafe slugs, two project bindings despite overrides and environment-file refusal without Docker.
     - [x] Provenance test guard assertions pass through the Lot 2 command.
-- [ ] **Lot 5 — Docs consolidation**
-  - [ ] Tick every completed checkbox in this plan within its own lot commit.
-  - [ ] Write `RAPPORT-MUSE-H4-P0.md` at the workspace root (not committed): changes, tests, commit split, test commands, `not covered` remainder.
-- [ ] **Lot N — Merge and close**
+- [x] **Lot 5 — Docs consolidation**
+  - [x] Tick every completed checkbox in this plan within its own lot commit.
+  - [x] Write the uncommitted French integrator report `RAPPORT-SOL-H4-P0.md`; retain Muse's initial report as historical context.
+  - [x] Recover historical Git bytes, prove hash mutation failure/restoration (`cmp=0`), and record all local qualification evidence under `tmp/861c-h4-p0/evidence`.
+- [ ] **Lot N — Merge and close (operator-owned; outside this execution brief)**
   - [ ] Push branch.
   - [ ] Open PR (or merge directly if solo dev).
   - [ ] Verify CI green.
