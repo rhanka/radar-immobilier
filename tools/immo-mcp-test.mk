@@ -10,7 +10,13 @@
 # down -v --remove-orphans in a trap, even on failure.
 SHELL := /bin/bash
 ENV ?= test-mcp-auth-022
-COMPOSE := docker compose --env-file /dev/null -p radar-$(ENV) -f docker-compose.test.yml
+# Effective compose project derives only from ENV: fixed command and -p flag
+# ignore inherited DOCKER_COMPOSE/COMPOSE/COMPOSE_PROJECT_NAME values.
+override DOCKER_COMPOSE := docker compose
+override COMPOSE_PROJECT_NAME := radar-$(ENV)
+override COMPOSE_DISABLE_ENV_FILE := 1
+export COMPOSE_PROJECT_NAME COMPOSE_DISABLE_ENV_FILE
+override COMPOSE := $(DOCKER_COMPOSE) --env-file /dev/null -p radar-$(ENV) -f docker-compose.test.yml
 RUN_API := $(COMPOSE) run --rm --no-deps -T --entrypoint '' api
 CHECK = trap '$(COMPOSE) down -v --remove-orphans' EXIT; $(RUN_API) sh -ec
 INSTALL := npm ci --workspace=packages/immo-mcp --include-workspace-root
