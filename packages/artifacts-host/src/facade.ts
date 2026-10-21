@@ -1,13 +1,101 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import { isArtifactId } from "@sentropic/artifacts/contracts";
 import { parseContentHost } from "@sentropic/artifacts/content/routing";
 import type { HttpResponse } from "@sentropic/artifacts/http";
 import { checkAdmission, type AdmissionAuthority } from "./admission.js";
 import type { composeArtifactHost } from "./composition.js";
-import { computeParamsHash, deriveIdempotencyKey } from "./idempotency.js";
+import { ArtifactConnectionError, computeParamsHash, deriveIdempotencyKey } from "./idempotency.js";
 import { validateBindingName, validatePublishFiles } from "./publish-policy.js";
+import { ArtifactS3TimeoutError } from "./s3-timeout.js";
 
 export interface ArtifactControl {
   handle(op: string, actorId: string, body: unknown): Promise<HttpResponse>;
+}
+
+/**
+ * Failure accounting for write dispatches (861C unit 7). Every refused or
+ * failed commit is recorded with its cause; reads are never recorded.
+ */
+export type CommitFailureReason =
+  | "unauthorized_at_commit"
+  | "provider_conflict"
+  | "provider_unavailable"
+  | "provider_error";
+
+export interface CommitFailureRecord {
+  readonly op: string;
+  readonly actorId: string;
+  readonly reason: CommitFailureReason;
+  readonly status: number;
+  readonly atMs: number;
+}
+
+export interface CommitFailureLedger {
+  record(entry: CommitFailureRecord): void;
+}
+
+export function createMemoryCommitLedger(): {
+  readonly ledger: CommitFailureLedger; readonly entries: CommitFailureRecord[];
+} {
+  const entries: CommitFailureRecord[] = [];
+  return { ledger: { record: (entry) => { entries.push(entry); } }, entries };
+}
+
+/**
+ * Typed provider failure preserved below the provider HTTP layer (861C unit 7).
+ * The provider HTTP app converts thrown causes into responses before the
+ * facade sees them, so the facade cannot classify from the response alone.
+ * Radar-owned wrappers below that layer (timeout blob store in
+ * `s3-timeout.ts`, locked store in `storage.ts`) record the original cause
+ * here; the facade drains it once per dispatch and lets it win over the
+ * converted response. Async context binds each cause to its dispatch even
+ * when one composed host serves concurrent callers.
+ */
+export interface ProviderFailureProbe {
+  readonly record: (error: unknown) => void;
+  take(): unknown | undefined;
+  run<T>(work: () => Promise<T>): Promise<T>;
+}
+
+export function createMemoryProviderProbe(): ProviderFailureProbe {
+  const contexts = new AsyncLocalStorage<{ pending?: unknown }>();
+  return {
+    run: (work) => contexts.run({}, work),
+    record: (error: unknown): void => {
+      const context = contexts.getStore();
+      if (context) context.pending = error;
+    },
+    take: (): unknown | undefined => {
+      const context = contexts.getStore();
+      const failure = context?.pending;
+      if (context) delete context.pending;
+      return failure;
+    },
+  };
+}
+
+export interface ArtifactControlOptions {
+  readonly ledger?: CommitFailureLedger | undefined;
+  readonly nowMs?: (() => number) | undefined;
+  readonly probe?: ProviderFailureProbe | undefined;
+}
+
+type ProviderFailureOverride =
+  | { readonly status: 503; readonly reason: "provider_unavailable" }
+  | { readonly status: 409; readonly reason: "provider_conflict" };
+
+function classifyProviderCause(error: unknown): ProviderFailureOverride | undefined {
+  const code = error !== null && typeof error === "object"
+    ? (error as { code?: unknown }).code
+    : undefined;
+  if (error instanceof ArtifactConnectionError || error instanceof ArtifactS3TimeoutError ||
+    code === "artifact_connection_lost" || code === "artifact_s3_timeout") {
+    return { status: 503, reason: "provider_unavailable" };
+  }
+  if (error instanceof Error && error.message.includes("artifact advisory lock timeout conflict")) {
+    return { status: 409, reason: "provider_conflict" };
+  }
+  return undefined;
 }
 type Host = NonNullable<Awaited<ReturnType<typeof composeArtifactHost>>>;
 const invalid = (): HttpResponse => ({ status: 400, body: { error: "invalid_request" } });
@@ -41,8 +129,9 @@ export function createArtifactControl(
   scope: string,
   contentBase: string,
   admission?: AdmissionAuthority | undefined,
+  options?: ArtifactControlOptions | undefined,
 ): ArtifactControl {
-  return {
+  const control: ArtifactControl = {
     async handle(op, actorId, raw) {
       if (!["ensure", "publish", "meta", "list"].includes(op)) {
         return { status: 503, body: { error: "capability_unavailable" } };
@@ -95,9 +184,64 @@ export function createArtifactControl(
         const commit = await checkAdmission(admission, actorId);
         if (!commit.allowed) return { status: commit.status, body: commit.body };
       }
-      const response = await host.app.handle({ actorId, body: effective,
-        method: op === "meta" ? "GET" : "POST",
-        path: op === "meta" ? `/meta/${String(artifactId)}` : `/${op}` });
+      const clock = options?.nowMs ?? Date.now;
+      const fail = (reason: CommitFailureReason, status: number): void => {
+        if (write) options?.ledger?.record({ op, actorId, reason, status, atMs: clock() });
+      };
+      let response: HttpResponse;
+      try {
+        response = await host.app.handle({ actorId, body: effective,
+          method: op === "meta" ? "GET" : "POST",
+          path: op === "meta" ? `/meta/${String(artifactId)}` : `/${op}` });
+      } catch (error) {
+        // The provider HTTP layer converts thrown causes into responses, so
+        // a cause preserved below that layer (probe) wins over the throw.
+        const cause = options?.probe?.take() ?? error;
+        const override = classifyProviderCause(cause);
+        if (override !== undefined) {
+          fail(override.reason, override.status);
+          return { status: override.status,
+            body: { error: override.status === 503 ? "capability_unavailable" : "conflict" } };
+        }
+        fail("provider_error", 500);
+        return { status: 500, body: { error: "provider_error" } };
+      }
+      // Drain the preserved cause once per dispatch. On success the provider
+      // recovered after the recorded failure (retry inside its transaction),
+      // so the stale cause is dropped and the success stands. Reads drain
+      // without remapping: their converted status is returned unchanged.
+      const preserved = options?.probe?.take();
+      if (write && admission && response.status >= 200 && response.status < 300) {
+        // Post-settle authorization (861C unit 7): @sentropic/artifacts@0.1.2
+        // offers no commit-time hook — its publication service, HTTP app and
+        // Postgres store accept no authorization callback, and the advisory
+        // lock only bounds the wait — so a success that settles after
+        // revocation is refused to the caller and accounted here instead of
+        // receipted. Residual state is NOT undone: the provider release
+        // (ready), its S3 objects, the idempotency result and the current
+        // pointer may already persist. Replay after re-approval can return
+        // that publication. Unit 7 stays blocked on a host authorization
+        // callback invoked inside provider finalization after all waits.
+        const after = await checkAdmission(admission, actorId);
+        if (!after.allowed) {
+          fail("unauthorized_at_commit", after.status);
+          return { status: after.status, body: after.body };
+        }
+      } else if (write && response.status >= 400) {
+        // A converted error (500 internal_error, 409 conflict) is remapped
+        // from the preserved cause when one was recorded below the HTTP
+        // layer; otherwise the converted response is accounted as before.
+        const override = preserved === undefined ? undefined : classifyProviderCause(preserved);
+        if (override !== undefined) {
+          fail(override.reason, override.status);
+          return { status: override.status,
+            body: { error: override.status === 503 ? "capability_unavailable" : "conflict" } };
+        } else if (response.status === 409) {
+          fail("provider_conflict", 409);
+        } else {
+          fail("provider_error", response.status);
+        }
+      }
       if (op !== "publish" || response.status !== 201) return response;
       const result = response.body as { releaseId: string; manifest: string };
       const manifest = JSON.parse(result.manifest) as { digest: string };
@@ -108,4 +252,6 @@ export function createArtifactControl(
         stableUrl, pinnedUrl } };
     },
   };
+  const probe = options?.probe;
+  return probe ? { handle: (...args) => probe.run(() => control.handle(...args)) } : control;
 }

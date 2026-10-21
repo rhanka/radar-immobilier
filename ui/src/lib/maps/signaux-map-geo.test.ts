@@ -437,6 +437,57 @@ describe("decorateLotsWithSignalProjection", () => {
   });
 });
 
+describe("6D lot-indicator parity — derived projections never remove cadastral lots", () => {
+  const cityZones = () => [zone("H-609", ["4 516 943", "4 516 944"])];
+
+  it("removing the last referencing signal clears the projection but keeps every lot", () => {
+    const before = decorateLotsWithSignalProjection(
+      lots(),
+      cityZones(),
+      [signal("sig-1", { targets_lot: ["4516944"] })],
+    );
+    expect(before.features[1]!.properties.signalProjection).toBe("direct");
+    // The referencing signal is archived: the refreshed population is empty.
+    const after = decorateLotsWithSignalProjection(lots(), cityZones(), []);
+    expect(after.features.map((feature) => feature.properties.noLot)).toEqual([
+      "4 516 943",
+      "4 516 944",
+      "4 516 945",
+    ]);
+    expect(
+      after.features.every(
+        (feature) => (feature.properties.signalProjection ?? "none") === "none",
+      ),
+    ).toBe(true);
+  });
+
+  it("an archived direct signal falls back to surviving zone signals only", () => {
+    const afterArchive = decorateLotsWithSignalProjection(
+      lots(),
+      cityZones(),
+      [signal("sig-zone", { zone_ref: "H-609" })],
+    );
+    expect(
+      afterArchive.features.map((feature) => feature.properties.signalProjection ?? "none"),
+    ).toEqual(["inherited", "inherited", "none"]);
+    // Cadastral attributes are untouched by the derived projection.
+    expect(afterArchive.features[0]!.properties.noLot).toBe("4 516 943");
+  });
+
+  it("unknown signal refs produce no projection and no count", () => {
+    const decorated = decorateLotsWithSignalProjection(
+      lots(),
+      cityZones(),
+      [signal("sig-ghost", { targets_lot: ["9 999 999"] })],
+    );
+    expect(decorated.features).toHaveLength(3);
+    // Unknown refs stay explicit: no projection set, never a zero count.
+    expect(
+      decorated.features.every((feature) => feature.properties.signalProjection === undefined),
+    ).toBe(true);
+  });
+});
+
 // ── C3 — decorateSelectedFlag (exergue orange de la sélection carte) ──────────
 
 describe("decorateSelectedFlag", () => {
