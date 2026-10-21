@@ -4,36 +4,51 @@ import { afterAll, expect, it } from "vitest";
 import { createDb } from "../../src/db/client.js";
 import { loadConfig } from "../../src/config.js";
 import { facetEvents } from "../../src/db/schema.js";
-import { writeFacet, type FacetCommand } from "../../src/services/facets/writer.js";
-import { facetFixture } from "./facets-fixture.js";
+import { facetFixture, writeDisplayedFacet as writeFacet } from "./facets-fixture.js";
 
 const { db, pool } = createDb(loadConfig());
 afterAll(() => pool.end());
 it("should archive with an explicit code, change codes and restore without selecting", async () => {
   const { sub, target, ownerId } = await facetFixture(db);
-  const run = (input: Omit<FacetCommand, "target" | "commandKey">) =>
-    writeFacet(db, sub, { ...input, target, commandKey: randomUUID() });
-  expect(await run({ action: "restore" })).toBeNull();
-  await run({ action: "select", basket: "pertinent" });
+  expect(await writeFacet(db, sub,
+    { action: "restore", target, expectedHeadId: null, commandKey: randomUUID() })).toBeNull();
+  const selected = await writeFacet(db, sub,
+    { action: "select", target, basket: "pertinent", expectedHeadId: null, commandKey: randomUUID() });
   for (const reasonCode of [undefined, "UNKNOWN", "P-DENSITE", "S-CONTRAINTE"]) {
-    await expect(run({ action: "discard", ...(reasonCode ? { reasonCode } : {}), deselect: ["pertinent"] })).rejects.toMatchObject({ status: 422 });
+    await expect(writeFacet(db, sub, { action: "discard", target,
+      ...(reasonCode ? { reasonCode } : {}), deselect: ["pertinent"], expectedHeadId: null,
+      expectedSelectionHeads: { pertinent: selected?.id ?? null },
+      commandKey: randomUUID() })).rejects.toMatchObject({ status: 422 });
   }
-  const first = await run({ action: "discard", reasonCode: "V2-PRECEDENT" });
-  expect((await run({ action: "discard", reasonCode: "V2-PRECEDENT" }))?.id).toBe(first?.id);
-  const changed = await run({ action: "discard", reasonCode: "N-ADMIN", deselect: ["pertinent"] });
+  const first = await writeFacet(db, sub,
+    { action: "discard", target, reasonCode: "V2-PRECEDENT", expectedHeadId: null,
+      commandKey: randomUUID() });
+  expect((await writeFacet(db, sub, { action: "discard", target, reasonCode: "V2-PRECEDENT",
+    expectedHeadId: first?.id ?? null, commandKey: randomUUID() }))?.id).toBe(first?.id);
+  const changed = await writeFacet(db, sub, { action: "discard", target, reasonCode: "N-ADMIN",
+    deselect: ["pertinent"], expectedHeadId: first?.id ?? null,
+    expectedSelectionHeads: { pertinent: selected?.id ?? null }, commandKey: randomUUID() });
   expect(changed?.supersedes).toBe(first?.id);
-  await run({ action: "restore" });
+  const deselected = await db.select().from(facetEvents).where(and(eq(facetEvents.ownerId, ownerId),
+    eq(facetEvents.facet, "selection"), isNull(facetEvents.supersededBy)));
+  const restored = await writeFacet(db, sub, { action: "restore", target,
+    expectedHeadId: changed?.id ?? null, commandKey: randomUUID() });
+  expect(restored?.state).toBe("inactive");
   const heads = await db.select().from(facetEvents).where(and(eq(facetEvents.ownerId, ownerId), isNull(facetEvents.supersededBy)));
   expect(heads).toHaveLength(2);
   expect(heads.every((row) => row.state === "inactive")).toBe(true);
   const before = await db.select().from(facetEvents).where(eq(facetEvents.ownerId, ownerId));
-  await run({ action: "restore" });
-  await run({ action: "deselect", basket: "a_surveiller" });
+  await writeFacet(db, sub, { action: "restore", target,
+    expectedHeadId: restored?.id ?? null, commandKey: randomUUID() });
+  await writeFacet(db, sub, { action: "deselect", target, basket: "a_surveiller",
+    expectedHeadId: null, commandKey: randomUUID() });
   expect(await db.select().from(facetEvents).where(eq(facetEvents.ownerId, ownerId))).toHaveLength(before.length);
+  expect(deselected).toHaveLength(1);
 });
 it("should roll back the archive and every removal when a later insert fails", async () => {
   const { sub, target, ownerId } = await facetFixture(db);
-  await writeFacet(db, sub, { action: "select", target, basket: "pertinent", commandKey: randomUUID() });
+  const selected = await writeFacet(db, sub, { action: "select", target, basket: "pertinent",
+    expectedHeadId: null, commandKey: randomUUID() });
   // This owner-specific failure occurs AFTER the archive INSERT, during deselection.
   await pool.query(`CREATE OR REPLACE FUNCTION fail_facet_removal() RETURNS trigger LANGUAGE plpgsql AS $$
     BEGIN RAISE EXCEPTION 'synthetic removal failure'; END $$`);
@@ -42,7 +57,9 @@ it("should roll back the archive and every removal when a later insert fails", a
     EXECUTE FUNCTION fail_facet_removal()`);
   try {
     await expect(writeFacet(db, sub, { action: "discard", target, reasonCode: "N-ADMIN",
-      deselect: ["pertinent"], commandKey: randomUUID() })).rejects.toThrow();
+      deselect: ["pertinent"], expectedHeadId: null,
+      expectedSelectionHeads: { pertinent: selected?.id ?? null },
+      commandKey: randomUUID() })).rejects.toThrow();
     const rows = await db.select().from(facetEvents).where(eq(facetEvents.ownerId, ownerId));
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({ facet: "selection", state: "active", supersededBy: null });
