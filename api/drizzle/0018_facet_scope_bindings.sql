@@ -98,3 +98,103 @@ CREATE TABLE IF NOT EXISTS facet_command_contexts (
   PRIMARY KEY (owner_id, command_key),
   FOREIGN KEY (owner_id, command_key) REFERENCES facet_commands(owner_id, command_key) ON DELETE RESTRICT
 );
+CREATE INDEX IF NOT EXISTS facet_command_contexts_workspace_idx
+  ON facet_command_contexts (workspace_id);
+--> statement-breakpoint
+CREATE OR REPLACE FUNCTION guard_facet_command_context() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  RAISE EXCEPTION 'facet command contexts are immutable';
+END $$;
+--> statement-breakpoint
+CREATE OR REPLACE TRIGGER facet_command_contexts_immutable
+  BEFORE UPDATE OR DELETE ON facet_command_contexts FOR EACH ROW EXECUTE FUNCTION guard_facet_command_context();
+CREATE OR REPLACE TRIGGER facet_command_contexts_no_truncate
+  BEFORE TRUNCATE ON facet_command_contexts FOR EACH STATEMENT EXECUTE FUNCTION guard_facet_command_context();
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS facet_activation_state (
+  workspace_id uuid PRIMARY KEY REFERENCES workspaces(id) ON DELETE RESTRICT,
+  writer_epoch text NOT NULL DEFAULT 'legacy' CHECK (writer_epoch IN ('legacy', 'scoped')),
+  maintenance_barrier boolean NOT NULL DEFAULT false,
+  old_index_dropped boolean NOT NULL DEFAULT false,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+--> statement-breakpoint
+-- Frozen pre-cutover exceptions may be qualified later, but never advanced unbound.
+CREATE TABLE IF NOT EXISTS facet_unresolved_events (
+  event_id uuid PRIMARY KEY REFERENCES facet_events(id) ON DELETE RESTRICT
+);
+--> statement-breakpoint
+CREATE OR REPLACE TRIGGER facet_streams_immutable
+  BEFORE UPDATE OR DELETE ON facet_streams FOR EACH ROW EXECUTE FUNCTION guard_facet_binding();
+CREATE OR REPLACE TRIGGER facet_streams_no_truncate
+  BEFORE TRUNCATE ON facet_streams FOR EACH STATEMENT EXECUTE FUNCTION guard_facet_binding();
+--> statement-breakpoint
+CREATE OR REPLACE FUNCTION check_facet_stream(p_stream uuid) RETURNS void LANGUAGE plpgsql AS $$
+DECLARE
+  terminal uuid;
+  total integer;
+  reached integer;
+BEGIN
+  PERFORM id FROM facet_streams WHERE id = p_stream FOR UPDATE;
+  SELECT count(*) INTO total FROM facet_event_bindings WHERE stream_id = p_stream;
+  IF total = 0 THEN RETURN; END IF;
+  IF EXISTS (
+    SELECT 1 FROM facet_event_bindings b JOIN facet_events e ON e.id = b.event_id
+    JOIN facet_streams s ON s.id = b.stream_id WHERE b.stream_id = p_stream
+    AND (e.scope, e.owner_id, e.target_type, e.city_slug, e.node_type, e.node_id, e.facet, e.basket)
+      IS DISTINCT FROM (s.scope, s.owner_id, s.target_type, s.city_slug, s.node_type, s.node_id, s.facet, s.basket)
+  ) THEN RAISE EXCEPTION 'facet stream identity mismatch'; END IF;
+  IF (SELECT count(*) FROM facet_event_bindings b JOIN facet_events e ON e.id = b.event_id
+      WHERE b.stream_id = p_stream AND e.superseded_by IS NULL) <> 1 THEN
+    RAISE EXCEPTION 'facet stream requires exactly one terminal';
+  END IF;
+  SELECT e.id INTO terminal FROM facet_event_bindings b JOIN facet_events e ON e.id = b.event_id
+    WHERE b.stream_id = p_stream AND e.superseded_by IS NULL;
+  IF NOT EXISTS (SELECT 1 FROM facet_heads WHERE stream_id = p_stream AND event_id = terminal) THEN
+    RAISE EXCEPTION 'facet head must register the terminal';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM facet_event_bindings b JOIN facet_events e ON e.id = b.event_id
+    LEFT JOIN facet_event_bindings pb ON pb.event_id = e.supersedes
+    LEFT JOIN facet_events parent ON parent.id = e.supersedes
+    LEFT JOIN facet_event_bindings nb ON nb.event_id = e.superseded_by
+    LEFT JOIN facet_events child ON child.id = e.superseded_by
+    WHERE b.stream_id = p_stream AND
+      ((e.supersedes IS NOT NULL AND (pb.stream_id IS DISTINCT FROM p_stream OR parent.superseded_by IS DISTINCT FROM e.id))
+       OR (e.superseded_by IS NOT NULL AND (nb.stream_id IS DISTINCT FROM p_stream OR child.supersedes IS DISTINCT FROM e.id)))
+  ) THEN RAISE EXCEPTION 'facet chain must be complete and reciprocal'; END IF;
+  IF EXISTS (
+    SELECT 1 FROM facet_event_bindings b JOIN facet_events e
+      ON e.supersedes = b.event_id OR e.superseded_by = b.event_id
+    LEFT JOIN facet_event_bindings other ON other.event_id = e.id
+    WHERE b.stream_id = p_stream AND other.stream_id IS DISTINCT FROM p_stream
+  ) THEN RAISE EXCEPTION 'facet chain crosses an unresolved or different stream'; END IF;
+  WITH RECURSIVE chain(id, supersedes) AS (
+    SELECT id, supersedes FROM facet_events WHERE id = terminal
+    UNION SELECT e.id, e.supersedes FROM facet_events e JOIN chain c ON e.id = c.supersedes
+  ) SELECT count(*) INTO reached FROM chain;
+  IF reached <> total THEN RAISE EXCEPTION 'facet chain must be connected and acyclic'; END IF;
+END $$;
+--> statement-breakpoint
+CREATE OR REPLACE FUNCTION enforce_scoped_event_binding() RETURNS trigger LANGUAGE plpgsql AS $$
+DECLARE
+  bound_stream uuid;
+BEGIN
+  SELECT stream_id INTO bound_stream FROM facet_event_bindings WHERE event_id = NEW.id;
+  IF bound_stream IS NOT NULL THEN
+    PERFORM check_facet_stream(bound_stream);
+  ELSIF EXISTS (SELECT 1 FROM facet_activation_state WHERE old_index_dropped) THEN
+    IF TG_OP <> 'INSERT' OR NOT EXISTS (SELECT 1 FROM facet_unresolved_events WHERE event_id = NEW.id) THEN
+      RAISE EXCEPTION 'scoped facet event committed without a stream binding';
+    END IF;
+  END IF;
+  RETURN NULL;
+END $$;
+--> statement-breakpoint
+DROP TRIGGER IF EXISTS facet_events_scoped_binding ON facet_events;
+CREATE CONSTRAINT TRIGGER facet_events_scoped_binding
+  AFTER INSERT OR UPDATE ON facet_events DEFERRABLE INITIALLY DEFERRED
+  FOR EACH ROW EXECUTE FUNCTION enforce_scoped_event_binding();
+--> statement-breakpoint
+CREATE OR REPLACE FUNCTION enforce_facet_registry() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
