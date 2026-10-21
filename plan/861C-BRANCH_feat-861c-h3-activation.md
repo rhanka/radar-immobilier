@@ -146,7 +146,7 @@ followed by `inspect` proving no project containers, volumes or networks remain.
 - [x] Blocked-provider revocation tests verified.
 - [x] Provider failure and read-exclusion tests verified.
 - [x] Nginx production configuration boundary verified.
-- [ ] Container-only proxy check and mutation proofs verified.
+- [x] Container-only proxy check and mutation proofs verified.
 - [ ] Final gates, per-commit typechecks, bundle and teardown verified.
 
 ## Not covered (later H3 units)
