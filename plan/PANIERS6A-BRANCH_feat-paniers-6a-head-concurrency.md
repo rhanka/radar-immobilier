@@ -62,19 +62,27 @@ Add explicit expected-head concurrency to personal signal facets. Every mutation
   - `api/tests/integration/facets-archive.spec.ts`
   - `api/tests/integration/facets-concurrency.spec.ts`
   - `api/tests/integration/facets-http-write.spec.ts`
+  - `api/tests/integration/facets-discarded.spec.ts`
+  - `api/tests/integration/facets-http-read.spec.ts`
+  - `api/tests/integration/facets-read-only.spec.ts`
+  - `api/tests/integration/facets-refresh.spec.ts`
+  - `ui/src/lib/components/maps/SignauxSelPanelHarness.svelte`
 - **Exception process**:
-  - Declare exception ID `6A-EXn` in `## Feedback Loop` before touching any conditional/forbidden path.
+  - Declare exception ID `BR6a-EXn` in `## Feedback Loop` before touching any conditional/forbidden path.
   - Include reason, impact, and rollback strategy.
 
 ## Feedback Loop
-- `6A-EX1` — Touch `api/tests/integration/facets-selection.spec.ts`, `facets-archive.spec.ts`, `facets-concurrency.spec.ts`, `facets-http-write.spec.ts` ONLY to add required `expectedHeadId` / `expectedSelectionHeads` arguments to existing `writeFacet` / HTTP calls. Reason: the new contract requires explicit expectations; untouched legacy calls would fail typecheck and misrepresent lots 2-4 behavior. Impact: test-only adaptation, no production logic change outside Allowed Paths. Rollback: revert those hunks; production code still compiles because the new fields are required.
-- `6A-EX2` — Adapt `api/tests/integration/facets-{discarded,http-read,read-only,refresh}.spec.ts` to explicit head expectations only. Reason: the requested complete facet regression campaign exercises these write fixtures too. Impact: test-only contract updates. Rollback: revert these expectation arguments.
-- `6A-EX3` — Update `ui/src/lib/components/maps/SignauxSelPanelHarness.svelte` to forward the stale-head callback. Reason: exercise the existing parent contract through its test harness. Impact: test-only wiring. Rollback: remove the callback prop and forwarding.
+- `BR6a-EX1` — Touch `api/tests/integration/facets-selection.spec.ts`, `facets-archive.spec.ts`, `facets-concurrency.spec.ts`, `facets-http-write.spec.ts` ONLY to add required `expectedHeadId` / `expectedSelectionHeads` arguments to existing `writeFacet` / HTTP calls. Reason: the new contract requires explicit expectations; untouched legacy calls would fail typecheck and misrepresent lots 2-4 behavior. Impact: test-only adaptation, no production logic change outside Allowed Paths. Rollback: revert those hunks; production code still compiles because the new fields are required.
+- `BR6a-EX2` — Adapt `api/tests/integration/facets-{discarded,http-read,read-only,refresh}.spec.ts` to explicit head expectations only. Reason: the requested complete facet regression campaign exercises these write fixtures too. Impact: test-only contract updates. Rollback: revert these expectation arguments.
+- `BR6a-EX3` — Update `ui/src/lib/components/maps/SignauxSelPanelHarness.svelte` to forward the stale-head callback. Reason: exercise the existing parent contract through its test harness. Impact: test-only wiring. Rollback: remove the callback prop and forwarding.
 - Verification uses `tmp/paniers-6a/Makefile`, standalone Compose and sanitized source copies; no root Makefile or environment files. Dedicated ENV `test-paniers-sol6a`; reserved API/UI/mail ports 18886/15386/11186 (no services published), PostgreSQL 15686. Local reports, logs and bundle are uncommitted verification artifacts under the authorized workspace.
+- Local qualification: 36 API tests and 625 UI tests passed; full workspace lint passed. Every delivered commit is typechecked from its indexed tree.
+- Discrimination: removing the comparison in a copy caused 6 of 12 tests to fail; restoration passed both `cmp` checks and all 12 tests. UI regressions were reproduced before correction.
+- Independent peer consensus is unverified (author model/effort missing); UAT, remote CI, push and merge are not covered by this local assignment.
 - No migration created. Historical receipt recovery alone may accept the old payload; it must never execute a new command.
 
 ## Orchestration Mode (AI-selected)
-- [x] **Mono-branch + cherry-pick** (default for orthogonal tasks; single final test cycle)
+- [x] **Mono-branch + local bundle** (single feature branch; no shared Git writes)
 - [ ] **Multi-branch** (only if sub-workstreams require independent CI or long-running validation)
 - Rationale: 6A is a single reviewable sublot with no dependency; one branch, one test cycle.
 
@@ -91,41 +99,37 @@ Add explicit expected-head concurrency to personal signal facets. Every mutation
   - [x] Read reference design `/home/antoinefa/src/radar-immobilier/.lanes/conductor/tmp/paniers/conception-lot6-v2.md` §3.1-§3.3 and `### 6A`.
   - [x] Confirm no migration: 6A migration is `none`; never touch `0014`-`0016`.
   - [x] Capture Make targets for debug/testing; `ENV` last on every command.
-  - [x] Confirm scope and guardrails; declare `6A-EXn` exceptions if needed (`6A-EX1` to `6A-EX3`).
-- [ ] **Lot 1 — API expected-head contract**
+  - [x] Confirm scope and guardrails; declare `BR6a-EXn` exceptions if needed (`BR6a-EX1` to `BR6a-EX3`).
+- [x] **Lot 1 — API expected-head contract**
   - [x] `target.ts`: add `FacetHeadConflictError` with authorized `current` (`target`, `version: null`, `heads`).
   - [x] `commands.ts`: version digest with contract version plus expected heads; strict receipt recovery; pending null receipts without context return `command_context_unresolved`.
   - [x] `writer.ts`: require `expectedHeadId` plus `expectedSelectionHeads` for composite discard; compare every affected head before any no-op shortcut; atomic multi-stream discard; record receipt context for null results; disclose sanitized current heads on conflict.
   - [x] `response.ts`: keep `facetEventResponse` as the sanitized head shape (no owner, actor, digest).
   - [x] `signal-facets.ts`: strict zod schemas (`expectedHeadId`, `expectedSelectionHeads` with exact key match for discard); 400 on missing/extraneous; 409 `facet_head_conflict` with `current`, 409 `idempotency_key_conflict`, 409 `command_context_unresolved`.
-  - [x] Adapt existing integration calls under `6A-EX1` (test-only) to the new required fields.
-  - [ ] Lot gate:
-    - [ ] `make typecheck`
-    - [ ] `make lint`
-    - [ ] `make test-api SCOPE=facets-6a-head-concurrency ENV=test-paniers-l6a` (last arg `ENV`)
-    - [ ] `make test-api SCOPE=facets-http-6a-head ENV=test-paniers-l6a` (last arg `ENV`)
+  - [x] Adapt existing integration calls under `BR6a-EX1` (test-only) to the new required fields.
+  - [x] Lot gate:
+    - [x] Standalone Make `typecheck`, using `-f tmp/paniers-6a/Makefile` and `ENV=test-paniers-sol6a` last.
+    - [x] Full workspace lint through standalone Make `run CMD='npx --no-install eslint .'`, same ENV.
+    - [x] Standalone Make `test-api SCOPE='src/services/facets tests/integration/facets-'`, same ENV; includes both new 6A specs.
 - [ ] **Lot 2 — UI intention capture and conflict handling**
   - [x] `signal-facets-client.ts`: extend `TargetFacetState` with `pertinentHeadId`, `watchingHeadId`, `archiveHeadId`; `indexFacetHeads` preserves inactive head IDs; `FacetCommandBody` carries expectations; `SignalFacetError` carries `current`; conflict copy requires reload and a new intention.
   - [x] `SignalFacetControls.svelte`: send `expectedHeadId` (and `expectedSelectionHeads` when discard carries deselect) from state IDs; surface `facet_head_conflict` distinctly; never auto-resubmit a confirmed conflict; same-key retry only for unconfirmed writes; notify parent on stale heads for reload.
   - [x] `SignauxSelPanel.svelte`: forward stale-head notification; pass through IDs via `facetHeads`.
   - [x] `SignauxMapView.svelte`: reload heads/detail/by-city on stale-head notification; store undo expectation from the confirmed discard head; undo `restore` carries that expectation so an intervening archive change conflicts instead of overwriting.
   - [ ] UAT checkpoint: select/deselect/discard/restore round-trip on one signal; conflict banner after a stale retry; undo restores once and conflicts after an intervening archive change.
-  - [ ] Lot gate:
-    - [ ] `make typecheck`
-    - [ ] `make lint`
-    - [ ] `make test-ui SCOPE=signal-facets-client ENV=test-paniers-l6a` (last arg `ENV`)
-    - [ ] `make test-ui SCOPE=SignalFacetControls ENV=test-paniers-l6a` (last arg `ENV`)
-    - [ ] `make test-ui SCOPE=SignauxMapView.6a-head ENV=test-paniers-l6a` (last arg `ENV`)
-- [ ] **Lot 3 — Discriminating tests**
+  - [x] Lot gate:
+    - [x] Standalone Make `typecheck` and full workspace lint, same entrypoint and ENV as Lot 1.
+    - [x] Standalone Make `test-ui SCOPE='src/lib/components/maps src/lib/signals'`, same ENV; includes controls, clients, viewer and 6A map specs.
+- [x] **Lot 3 — Discriminating tests**
   - [x] API: concurrent first writes (one success, one 409 with current); stale expectation conflicts even when the final state matches; null conflicts with an inactive head; one selection conflict rolls back the whole discard; exact replay returns the original result after later transitions; changed expectations with the same key conflict; undo cannot overwrite an intervening archive change; 409 carries only authorized heads.
   - [x] Controls and viewer regression tests assert explicit expectations and receipt metadata.
   - [x] UI: inactive IDs retained by the index; controls send expectations; 409 copy and reload path; undo carries the discard head.
-  - [x] Each test fails without the fix (assert the pre-fix behavior would differ).
-  - [ ] Lot gate: same as Lots 1-2.
-- [ ] **Lot N-1 — Docs consolidation**
-  - [ ] Update `RAPPORT-MUSE-6A.md` (root, uncommitted) with changes, tests, commit split, test commands, `not covered`.
-  - [ ] Update this `BRANCH.md` with merge-ready state.
-- [ ] **Lot N — Merge & close**
+  - [x] Mutation proof: removing the comparison makes six tests fail; restoring identical bytes returns all twelve new API tests to green.
+  - [x] Lot gate: same as Lots 1-2.
+- [x] **Lot N-1 — Docs consolidation**
+  - [x] Write `RAPPORT-SOL-6A.md` in French (uncommitted) with results, discrimination, commit audit and `not covered`; preserve the Muse handoff.
+  - [x] Record completed local qualification; UAT and remote integration remain not covered.
+- [ ] **Lot N — Remote integration (not covered; no push authorized)**
   - [ ] Push branch.
   - [ ] Open PR (or merge directly if solo dev).
   - [ ] Verify CI green.
