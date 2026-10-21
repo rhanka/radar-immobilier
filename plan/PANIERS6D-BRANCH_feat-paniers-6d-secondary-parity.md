@@ -62,6 +62,9 @@ indicators) while preserving each consumer's non-basket population.
 - [x] Regulation/demo/grid and cadastral-indicator regression fixtures are implemented.
 - [x] Real detail-route fixtures exercise filtering and explicit reveal through secondary projections.
 - [x] BR6D-EX1 closes archived hover cards and refreshes retained evidence; both rendered regressions pass.
+- [x] First-reload component regression reproduced the stale filter flag and verifies the corrected current population.
+- [x] Predicate discrimination: two new route regressions fail without filtering, all three pass after restoration; both `cmp` checks pass.
+- [x] Reference UI: 1,182 tests / 74 files pass; the expanded UI campaign retains every existing test.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + cherry-pick** (default for orthogonal tasks; single final test cycle)
@@ -80,30 +83,30 @@ indicators) while preserving each consumer's non-basket population.
   - [x] Read reference design section 6D and the inspected checkout.
   - [x] Confirm primary reads filter server-side before aggregation.
   - [x] Confirm scope and guardrails; no `BRxx-EXn` exception needed.
-- [ ] **Lot 6D-1 — Evidence reconciliation helper + MapView wiring**
+- [x] **Lot 6D-1 — Evidence reconciliation helper + MapView wiring**
   - [x] Add pure `rebuildSignalEvidence` in `pdf-overlay-signals.ts`.
   - [x] Rebuild open signal-bound evidence in `reconcileToVisibleNodes`.
   - [x] Preserve independent browsing (`activeSource`/`activeDocument`) and grids.
-  - [ ] Verify actual detail-route filtering and explicit-reveal parity.
-  - [ ] Verify first-reload filter flags using the current visible population.
-  - [ ] Lot gate (isolated Make entry):
-    - [ ] `make typecheck` + `make lint`
-    - [ ] `make test-ui SCOPE=pdf-overlay-signals ENV=test-paniers-6d`
-    - [ ] `make test-ui SCOPE=SignauxMapView ENV=test-paniers-6d`
-- [ ] **Lot 6D-2 — Regulation/demo/grid parity tests**
+  - [x] Verify actual detail-route filtering and explicit-reveal parity.
+  - [x] Verify first-reload filter flags using the current visible population.
+  - [x] Lot gate (isolated Make entry):
+    - [x] `typecheck` + `lint`
+    - [x] UI tests: `src/lib/signals` (including PDF-overlay helpers).
+    - [x] UI tests: `src/lib/components/maps` (including MapView).
+- [x] **Lot 6D-2 — Regulation/demo/grid parity tests**
   - [x] Lock panel entries, demo zero-signal entries and grid passthrough.
   - [x] Lock out-of-vivier zone enrichment input population.
-  - [ ] Lot gate (isolated Make entry):
-    - [ ] `make typecheck` + `make lint`
-    - [ ] `make test-ui SCOPE=signaux-reglements ENV=test-paniers-6d`
-- [ ] **Lot 6D-3 — Lot-indicator parity tests**
+  - [x] Lot gate (isolated Make entry):
+    - [x] `typecheck` + `lint`
+    - [x] UI tests: `src/lib/maps` (including regulation/demo/grid parity).
+- [x] **Lot 6D-3 — Lot-indicator parity tests**
   - [x] Lock projection removal without cadastral lot removal.
   - [x] Lock unknown refs producing no projection and no count.
-  - [ ] Lot gate (isolated Make entry):
-    - [ ] `make typecheck` + `make lint`
-    - [ ] `make test-ui SCOPE=signaux-map-geo ENV=test-paniers-6d`
-- [ ] **Lot 6D-4 — Docs consolidation**
-  - [ ] Update this `BRANCH.md` with merge-ready state.
+  - [x] Lot gate (isolated Make entry):
+    - [x] `typecheck` + `lint`
+    - [x] UI tests: `src/lib/maps` (including cadastral-indicator parity).
+- [x] **Lot 6D-4 — Docs consolidation**
+  - [x] Record locally validated state; CI, operational qualification and merge remain outstanding.
 - [ ] **Lot 6D-5 — Merge & close**
   - [ ] Push branch.
   - [ ] Open PR (or merge directly if solo dev).
