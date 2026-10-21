@@ -78,11 +78,11 @@
   - [x] Lot gate:
     - [x] JSON parses and hashes match the design and the deployed-baseline receipt.
     - [x] No runtime file touched.
-- [ ] **Lot 2 — Discriminating provenance tests**
-  - [ ] Write `packages/immo-mcp/src/tool-fixture-provenance.test.ts`: derived captured bytes hash, amended hash, exact `showDiscarded` block, five `not_wired_yet` stubs, retained 401 capture, evidence-class distinction, ordinary-target E2E exclusion, H4 runner guards.
-  - [ ] Files: `packages/immo-mcp/src/tool-fixture-provenance.test.ts`, this plan.
-  - [ ] Lot gate:
-    - [ ] `make -f tools/immo-mcp-test.mk typecheck lint test-immo-mcp API_PORT=18914 UI_PORT=15914 MAILDEV_UI_PORT=11914 ENV=test-861c-h4-p0`
+- [x] **Lot 2 — Discriminating provenance tests**
+  - [x] Write `packages/immo-mcp/src/tool-fixture-provenance.test.ts`: derived captured bytes hash, amended hash, exact `showDiscarded` block, five `not_wired_yet` stubs, retained 401 capture, evidence-class distinction, ordinary-target E2E exclusion, H4 runner guards.
+  - [x] Files: `packages/immo-mcp/src/tool-fixture-provenance.test.ts`, this plan.
+  - [x] Lot gate:
+    - [x] `make -f tools/immo-mcp-test.mk typecheck lint test-immo-mcp API_PORT=18914 UI_PORT=15914 MAILDEV_UI_PORT=11914 ENV=test-861c-h4-p0`
 - [ ] **Lot 3 — Ordinary-target E2E exclusion**
   - [ ] Append `-- --exclude '**/*.e2e.test.ts'` to the `test-mcp` recipe in `tools/artifact-host.mk`, matching `test-immo-mcp`.
   - [ ] Files: `tools/artifact-host.mk`, this plan.
