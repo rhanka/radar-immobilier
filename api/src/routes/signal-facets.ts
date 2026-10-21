@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { z } from "zod";
 import type { Database } from "../db/client.js";
-import { FacetError } from "../services/facets/target.js";
-import { writeFacet } from "../services/facets/writer.js";
+import { FacetError, FacetHeadConflictError } from "../services/facets/target.js";
+import { recoverHistoricalFacet, writeFacet } from "../services/facets/writer.js";
 import { readCityFacets, readReasonCodes } from "../services/facets/reader.js";
 import { FACET_PROFILE } from "../services/facets/codebook.js";
 import { privateSignalResponse } from "../services/facets/private-response.js";
@@ -16,7 +16,39 @@ const target = z.object({
 const basket = z.enum(["pertinent", "a_surveiller"]);
 // The negative lookahead enforces the absolute end, including a final newline.
 const reasonCode = z.string().max(128).regex(/^[A-Z0-9]+(-[A-Z0-9]+)*(?![\s\S])/).optional();
+const expectedHeadId = z.string().uuid().nullable();
+const expectedSelectionHeads = z.object({
+  pertinent: z.string().uuid().nullable().optional(),
+  a_surveiller: z.string().uuid().nullable().optional(),
+}).strict().optional();
+const discardSchema = z.object({
+  target, reasonCode, deselect: z.array(basket).max(2).optional(),
+  expectedHeadId, expectedSelectionHeads,
+}).strict().superRefine((value, ctx) => {
+  const removals = [...new Set(value.deselect ?? [])].sort();
+  if (removals.length === 0) {
+    if (value.expectedSelectionHeads !== undefined) {
+      ctx.addIssue({ code: "custom", message: "invalid_facet_command" });
+    }
+    return;
+  }
+  const expected = value.expectedSelectionHeads;
+  if (expected === undefined) {
+    ctx.addIssue({ code: "custom", message: "invalid_facet_command" });
+    return;
+  }
+  const keys = Object.keys(expected).sort();
+  if (keys.length !== removals.length || keys.some((key, index) => key !== removals[index])) {
+    ctx.addIssue({ code: "custom", message: "invalid_facet_command" });
+  }
+});
 const schemas = {
+  select: z.object({ target, basket, reasonCode, expectedHeadId }).strict(),
+  deselect: z.object({ target, basket, expectedHeadId }).strict(),
+  discard: discardSchema,
+  restore: z.object({ target, expectedHeadId }).strict(),
+};
+const historicalSchemas = {
   select: z.object({ target, basket, reasonCode }).strict(),
   deselect: z.object({ target, basket }).strict(),
   discard: z.object({ target, reasonCode, deselect: z.array(basket).max(2).optional() }).strict(),
@@ -37,14 +69,23 @@ export function signalFacetsRoute(deps: SignalFacetsDeps): Hono {
   });
   for (const action of ["select", "deselect", "discard", "restore"] as const) {
     app.post(`/api/v1/signal-facets/${action}`, async (c) => {
-      const parsed = schemas[action].safeParse(await c.req.json().catch(() => null));
+      const body = await c.req.json().catch(() => null);
+      const parsed = schemas[action].safeParse(body);
       const key = z.string().uuid().transform((value) => value.toLowerCase()).safeParse(c.req.header("Idempotency-Key"));
-      if (!parsed.success || !key.success) return c.json({ error: "invalid_facet_command" }, 400);
+      if (!key.success) return c.json({ error: "invalid_facet_command" }, 400);
+      const historical = parsed.success ? null : historicalSchemas[action].safeParse(body);
+      if (!parsed.success && !historical?.success) return c.json({ error: "invalid_facet_command" }, 400);
       const session = c.get("session" as never) as { sub: string };
       try {
-        const event = await writeFacet(deps.db, session.sub, { ...parsed.data, action, commandKey: key.data });
+        const event = parsed.success
+          ? await writeFacet(deps.db, session.sub, { ...parsed.data, action, commandKey: key.data })
+          : await recoverHistoricalFacet(deps.db, session.sub,
+            { ...historical!.data!, action, commandKey: key.data });
         return c.json({ ok: true, event: event ? facetEventResponse(event) : null });
       } catch (error) {
+        if (error instanceof FacetHeadConflictError) {
+          return c.json({ error: error.message, current: error.current }, error.status);
+        }
         if (error instanceof FacetError) return c.json({ error: error.message }, error.status);
         throw error;
       }
