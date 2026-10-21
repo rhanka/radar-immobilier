@@ -115,7 +115,7 @@ describe("deployed twelve-tool baseline", () => {
         buildCommit: "ea90951ca253bd300c26daa44ce0ce416602a271",
       },
       toolFixture: "immo-tools.v1.json",
-      toolFixtureSha256: "31487e8fb9b85019fc707ed3a7296e33156c46fb5fd3071d456d6dae1b44d998",
+      toolFixtureSha256: "2145e05ae003ce567f3f4edf5bd628d0367e38c44d23dad5de1e3e3e331869d3",
       toolCount: 12,
       versions: { "@sentropic/mcp-auth": "0.1.0" },
     });
