@@ -7,7 +7,7 @@ import { auth, cookie, startHarness, type Harness } from "./artifacts-h2.helpers
 
 let h: Harness;
 beforeAll(async () => {
-  h = await startHarness("mcp_adapter");
+  h = await startHarness("mcpadapter");
   await h.pool.query("INSERT INTO account_users (sub, email, status) VALUES " +
     "('alice','alice@example.test','approved'), ('bob','bob@example.test','approved')");
 });
