@@ -239,3 +239,63 @@ it("serves the fingerprint of the exact stored node, including degraded cards", 
   const node = body.nodes.find((row) => row.id === target.id && row.type === target.type);
   expect(node?.facetFingerprint).toBe(expected);
 });
+
+it("recovers immutable 6A receipts without allowing an unversioned new command", async () => {
+  const { sub, ownerId, target } = await facetFixture(db);
+  const shown = await resolveTarget(db, target);
+  const event = await writeFacet(db, sub, { action: "select", target, basket: "pertinent",
+    expectedHeadId: null, displayedFingerprint: shown, commandKey: randomUUID() });
+  const key = randomUUID();
+  const body = { target, basket: "pertinent", expectedHeadId: null };
+  await db.insert(facetCommands).values({ ownerId, commandKey: key,
+    commandDigest: digest({ version: "signal-facets-v1", action: "select", ...body,
+      reasonCode: null, deselect: [], expectedSelectionHeads: null }), result: { event } });
+  await removeNode(target);
+  const app = facetHttp(db);
+  const cookie = await facetCookie(sub);
+  const replay = await post(app, cookie, "select", body, key);
+  expect(replay.status).toBe(200);
+  expect(await replay.json()).toMatchObject({ event: { id: event!.id } });
+  expect((await post(app, cookie, "select", body)).status).toBe(400);
+  expect((await post(app, cookie, "select", { ...body, expectedHeadId: randomUUID() }, key)).status).toBe(409);
+});
+
+it("holds the city lock after source comparison until the receipt commits", async () => {
+  const { sub, target } = await facetFixture(db);
+  const shown = await resolveTarget(db, target);
+  const inserted = Promise.withResolvers<void>();
+  const release = Promise.withResolvers<void>();
+  const guarded = new Proxy(db, { get(base, key, receiver) {
+    if (key !== "transaction") return Reflect.get(base, key, receiver);
+    return (callback: Parameters<Database["transaction"]>[0]) => db.transaction((tx) => callback(
+      new Proxy(tx, { get(transaction, name, proxy) {
+        if (name !== "insert") return Reflect.get(transaction, name, proxy);
+        return (table: typeof facetCommands) => {
+          const builder = transaction.insert(table);
+          if (table !== facetCommands) return builder;
+          return new Proxy(builder, { get(query, method, valuesProxy) {
+            if (method !== "values") return Reflect.get(query, method, valuesProxy);
+            return async (values: typeof facetCommands.$inferInsert) => {
+              inserted.resolve();
+              await release.promise;
+              return query.values(values);
+            };
+          } });
+        };
+      } }),
+    ));
+  } });
+  const write = writeFacet(guarded, sub, { action: "select", target, basket: "pertinent",
+    expectedHeadId: null, displayedFingerprint: shown, commandKey: randomUUID() });
+  try {
+    await inserted.promise;
+    const held = await db.transaction((tx) => tx.execute<{ acquired: boolean }>(sql`
+      SELECT pg_try_advisory_xact_lock(hashtext(${`graph-city:${target.citySlug}`})) AS acquired`));
+    expect(held.rows[0]?.acquired).toBe(false);
+  } finally {
+    release.resolve();
+    await write;
+  }
+  await refresh(target, "Refresh after commit");
+  expect(await resolveTarget(db, target)).not.toBe(shown);
+});
