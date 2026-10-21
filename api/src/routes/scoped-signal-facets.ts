@@ -33,6 +33,18 @@ const expectedSelectionHeads = z.object({
 }).strict().optional();
 const displayedFingerprint = z.string().length(64).regex(/^[a-f0-9]{64}$/);
 const workspaceId = z.string().uuid();
+const historicalSchemas = {
+  select: z.object({ target, basket, reasonCode }).strict(),
+  deselect: z.object({ target, basket }).strict(),
+  discard: z.object({ target, reasonCode, deselect: z.array(basket).max(2).optional() }).strict(),
+  restore: z.object({ target }).strict(),
+};
+const headSchemas = {
+  select: historicalSchemas.select.extend({ expectedHeadId }),
+  deselect: historicalSchemas.deselect.extend({ expectedHeadId }),
+  discard: historicalSchemas.discard.extend({ expectedHeadId, expectedSelectionHeads }),
+  restore: historicalSchemas.restore.extend({ expectedHeadId }),
+};
 
 const schemas = {
   select: z.object({ target, basket, reasonCode, expectedHeadId, displayedFingerprint }).strict(),
@@ -67,14 +79,22 @@ export function scopedSignalFacetsRoute(deps: ScopedSignalFacetsDeps): Hono {
     app.post(`/api/v1/workspaces/:workspaceId/signal-facets/personal/${action}`, async (c) => {
       const body = await c.req.json().catch(() => null);
       const parsed = schemas[action].safeParse(body);
-      if (!parsed.success) return c.json({ error: "invalid_facet_command" }, 400);
       const key = z.string().uuid().transform((value) => value.toLowerCase())
         .safeParse(c.req.header("Idempotency-Key"));
       if (!key.success) return c.json({ error: "invalid_facet_command" }, 400);
+      const previousHead = parsed.success ? null : headSchemas[action].safeParse(body);
+      const historical = parsed.success ? null : previousHead!.success
+        ? previousHead : historicalSchemas[action].safeParse(body);
+      if (!parsed.success && !historical!.success) {
+        return c.json({ error: "invalid_facet_command" }, 400);
+      }
       const session = c.get("session" as never) as { sub: string };
       try {
-        const event = await writeScopedPersonalFacet(deps.db, session.sub,
-          c.req.param("workspaceId"), { ...parsed.data, action, commandKey: key.data });
+        const event = parsed.success
+          ? await writeScopedPersonalFacet(deps.db, session.sub,
+            c.req.param("workspaceId"), { ...parsed.data, action, commandKey: key.data })
+          : await writeScopedPersonalFacet(deps.db, session.sub,
+            c.req.param("workspaceId"), { ...historical!.data!, action, commandKey: key.data });
         return c.json({ ok: true, event: event ? facetEventResponse(event) : null });
       } catch (error) {
         if (error instanceof FacetHeadConflictError) {
