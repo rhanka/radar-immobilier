@@ -1,0 +1,48 @@
+# Preprod content-denial network boundary (861c H3 unit 13). Additive only.
+# allow-traefik-to-content-deny mirrors allow-traefik-to-immo-mcp: without it
+# the wildcard Ingress routes but every request is dropped before the pod.
+# deny-content-deny-egress closes ALL egress from the denial pods (no DNS, no
+# backend): the listener serves static denials and opens no outbound
+# connection, so an empty egress list is the complete policy.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-traefik-to-content-deny
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: content-deny
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: radar-immobilier
+      app.kubernetes.io/component: content-deny
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: TCP
+          port: 3000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-content-deny-egress
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: content-deny
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: radar-immobilier
+      app.kubernetes.io/component: content-deny
+  policyTypes: ["Egress"]

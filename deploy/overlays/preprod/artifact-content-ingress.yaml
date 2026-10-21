@@ -1,0 +1,49 @@
+# Preprod wildcard content boundary (861c H3 unit 13). Both wildcard levels
+# route ONLY to the isolated denial Service; no rule reaches the UI or api.
+# Domain, DNS and certificate are UNVERIFIED `.invalid` placeholders: the real
+# content base is unknown, so no real domain is committed. The operator
+# substitutes the reviewed base out-of-band at activation; the render check
+# (deploy/ci/check-h3-activation-render.sh) refuses an unfilled placeholder at
+# that point. No cert-manager annotation on purpose: wildcard issuance needs
+# DNS-01 authorization that is unverified, so the TLS Secret is an
+# operator-provisioned reference. Operator-applied only, never reconciled.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: radar-artifact-content
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: content-deny
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - "*.artifacts-content-unverified.invalid"
+        - "*.pinned.artifacts-content-unverified.invalid"
+      secretName: radar-artifact-content-unverified-tls
+  rules:
+    - host: "*.artifacts-content-unverified.invalid"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: radar-artifact-content-deny
+                port:
+                  name: http
+    - host: "*.pinned.artifacts-content-unverified.invalid"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: radar-artifact-content-deny
+                port:
+                  name: http
