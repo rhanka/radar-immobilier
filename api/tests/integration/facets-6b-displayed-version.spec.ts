@@ -124,3 +124,118 @@ it("answers a stale displayed version with the current fingerprint over HTTP", a
     current: { target, version: { fingerprint: current }, heads: [] } });
   expect(await db.select().from(facetEvents).where(eq(facetEvents.ownerId, ownerId))).toHaveLength(0);
 });
+
+it("preserves exact replay after later transitions and after source deletion", async () => {
+  const { sub, target } = await facetFixture(db);
+  const key = randomUUID();
+  const shown = await resolveTarget(db, target);
+  const first = await writeFacet(db, sub, { action: "select", target, basket: "pertinent",
+    expectedHeadId: null, displayedFingerprint: shown, commandKey: key });
+  expect(first?.state).toBe("active");
+  await refresh(target, "Changed synthetic content");
+  const replayed = await writeFacet(db, sub, { action: "select", target, basket: "pertinent",
+    expectedHeadId: null, displayedFingerprint: shown, commandKey: key });
+  expect(replayed?.id).toBe(first?.id);
+  await writeFacet(db, sub, { action: "deselect", target, basket: "pertinent",
+    expectedHeadId: first!.id, displayedFingerprint: await resolveTarget(db, target), commandKey: randomUUID() });
+  await refresh(target, "Changed synthetic content");
+  await removeNode(target);
+  const afterDelete = await writeFacet(db, sub, { action: "select", target, basket: "pertinent",
+    expectedHeadId: null, displayedFingerprint: shown, commandKey: key });
+  expect(afterDelete?.id).toBe(first?.id);
+  await expect(writeFacet(db, sub, { action: "select", target, basket: "pertinent",
+    expectedHeadId: null, displayedFingerprint: shown, commandKey: randomUUID() },
+  )).rejects.toMatchObject({ status: 404, message: "signal_not_found" });
+  await expect(writeFacet(db, sub, { action: "deselect", target, basket: "pertinent",
+    expectedHeadId: first?.id ?? null, displayedFingerprint: shown, commandKey: key },
+  )).rejects.toMatchObject({ status: 409, message: "idempotency_key_conflict" });
+});
+
+it("fails new commands explicitly when the target was deleted", async () => {
+  const { sub, target } = await facetFixture(db);
+  const shown = await resolveTarget(db, target);
+  await removeNode(target);
+  await expect(writeFacet(db, sub, { action: "discard", target, reasonCode: "N-ADMIN",
+    expectedHeadId: null, displayedFingerprint: shown, commandKey: randomUUID() },
+  )).rejects.toMatchObject({ status: 404, message: "signal_not_found" });
+});
+
+it("keeps changedSinceArchive coherent with verified writes and content changes", async () => {
+  const { sub, target } = await facetFixture(db);
+  const shown = await resolveTarget(db, target);
+  await writeFacet(db, sub, { action: "discard", target, reasonCode: "N-ADMIN",
+    expectedHeadId: null, displayedFingerprint: shown, commandKey: randomUUID() });
+  expect((await readCityFacets(db, sub, target.citySlug))[0]?.changedSinceArchive).toBe(false);
+  await refresh(target, "Changed synthetic content");
+  expect((await readCityFacets(db, sub, target.citySlug))[0]?.changedSinceArchive).toBe(true);
+});
+
+it("discloses only the writer's own authorized state on a version conflict", async () => {
+  const { sub, target } = await facetFixture(db);
+  const other = await facetFixture(db);
+  const shown = await resolveTarget(db, target);
+  const otherShown = await resolveTarget(db, other.target);
+  const own = await writeFacet(db, sub, { action: "select", target, basket: "pertinent",
+    expectedHeadId: null, displayedFingerprint: shown, commandKey: randomUUID() });
+  await writeFacet(db, other.sub, { action: "select", target, basket: "a_surveiller",
+    expectedHeadId: null, displayedFingerprint: shown, commandKey: randomUUID() });
+  expect(otherShown).toBe(shown);
+  await refresh(target, "Changed synthetic content");
+  const failure = await writeFacet(db, sub, { action: "discard", target, reasonCode: "N-ADMIN",
+    expectedHeadId: null, displayedFingerprint: shown, commandKey: randomUUID() },
+  ).catch((error: unknown) => error);
+  expect(failure).toMatchObject({ status: 409, message: "target_version_conflict" });
+  const disclosed = (failure as { current: { heads: Array<Record<string, unknown>> } }).current;
+  expect(disclosed.heads).toHaveLength(1);
+  expect(disclosed.heads[0]?.id).toBe(own!.id);
+  for (const head of disclosed.heads) {
+    expect(head).not.toHaveProperty("ownerId");
+    expect(head).not.toHaveProperty("actorId");
+    expect(head).not.toHaveProperty("commandDigest");
+  }
+});
+
+it("serializes parallel stale writes: every conflict, no transition", async () => {
+  const { sub, ownerId, target } = await facetFixture(db);
+  const shown = await resolveTarget(db, target);
+  await refresh(target, "Changed synthetic content");
+  const settled = await Promise.allSettled(Array.from({ length: 8 }, () => writeFacet(db, sub, {
+    action: "select", target, basket: "pertinent", expectedHeadId: null,
+    displayedFingerprint: shown, commandKey: randomUUID(),
+  })));
+  expect(settled.filter((entry) => entry.status === "rejected")).toHaveLength(8);
+  for (const entry of settled.filter((entry) => entry.status === "rejected")) {
+    expect((entry as PromiseRejectedResult).reason)
+      .toMatchObject({ status: 409, message: "target_version_conflict" });
+  }
+  expect(await db.select().from(facetEvents).where(eq(facetEvents.ownerId, ownerId))).toHaveLength(0);
+});
+
+it("binds the idempotency key to the original displayed fingerprint", async () => {
+  const { sub, ownerId, target } = await facetFixture(db);
+  const key = randomUUID();
+  const command = { action: "select" as const, target, basket: "pertinent" as const,
+    expectedHeadId: null, displayedFingerprint: await resolveTarget(db, target), commandKey: key };
+  await writeFacet(db, sub, command);
+  await refresh(target, "Changed synthetic content");
+  await expect(writeFacet(db, sub, { ...command, displayedFingerprint: await resolveTarget(db, target) }))
+    .rejects.toMatchObject({ status: 409, message: "idempotency_key_conflict" });
+  expect(await db.select().from(facetEvents).where(eq(facetEvents.ownerId, ownerId))).toHaveLength(1);
+});
+
+it("serves the fingerprint of the exact stored node, including degraded cards", async () => {
+  const { sub, target } = await facetFixture(db);
+  const expected = await resolveTarget(db, target);
+  const app = new Hono();
+  app.use("*", protect(facetAuth, { db }));
+  app.route("/", graphSignalsRoute({ db, store: {} as ObjectStore, auth: facetAuth,
+    discarded: createDiscardedSignalsReader(db) }));
+  const cookie = await facetCookie(sub);
+  const response = await app.request(`/api/graph-signals/${target.citySlug}`, { headers: { cookie } });
+  expect(response.status).toBe(200);
+  const body = await response.json() as {
+    nodes: Array<{ id: string; type: string; facetFingerprint: string }>;
+  };
+  const node = body.nodes.find((row) => row.id === target.id && row.type === target.type);
+  expect(node?.facetFingerprint).toBe(expected);
+});
