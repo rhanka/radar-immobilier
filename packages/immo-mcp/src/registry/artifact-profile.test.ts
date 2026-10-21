@@ -1,11 +1,14 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
+  ARTIFACT_DURABLE_IDENTITY,
+  ARTIFACT_EFFECTIVE_REQUIRED,
   ARTIFACT_FORBIDDEN_CALLER_FIELDS,
   ARTIFACT_INVOCATION_SCOPE,
   ARTIFACT_LIMITS,
   ARTIFACT_MIME_TYPES,
   ARTIFACT_PROFILE_REVISION,
+  ARTIFACT_PROVIDER_VERSION,
   ARTIFACT_RESERVED_FIRST_SEGMENTS,
   ARTIFACT_SELECTION,
   ARTIFACT_TOOL_NAMES,
@@ -22,7 +25,9 @@ const config = JSON.parse(readFileSync(
   invocationScope: string;
   selection: { tool: string; operation: string; method: string; path: string }[];
   effectiveProfile: {
+    artifacts_ensure: { required: string[] };
     artifacts_publish: {
+      required: string[];
       files: {
         maxCount: number;
         maxDecodedBytesPerFile: number;
@@ -31,9 +36,16 @@ const config = JSON.parse(readFileSync(
         reservedFirstSegments: string[];
       };
     };
+    artifacts_list: { required: string[] };
+    artifacts_get: { required: string[] };
     closedArguments: string[];
   };
-  durableIdentity: { payloadHashInKey: boolean };
+  durableIdentity: {
+    internalKey: string;
+    paramsHash: string;
+    conflict: string;
+    payloadHashInKey: boolean;
+  };
   activation: { requiresFinalizationBinding: boolean; requiresErrorBinding: boolean };
   requiredContracts: Record<string, string>;
 };
@@ -87,6 +99,20 @@ describe("artifact effective profile", () => {
     for (const entry of config.selection) {
       expect(isArtifactToolName(entry.tool)).toBe(true);
     }
+    expect(config.effectiveProfile.artifacts_ensure.required).toEqual([
+      ...ARTIFACT_EFFECTIVE_REQUIRED.artifacts_ensure,
+    ]);
+    expect(config.effectiveProfile.artifacts_publish.required).toEqual([
+      ...ARTIFACT_EFFECTIVE_REQUIRED.artifacts_publish,
+    ]);
+    expect(config.effectiveProfile.artifacts_list.required).toEqual([
+      ...ARTIFACT_EFFECTIVE_REQUIRED.artifacts_list,
+    ]);
+    expect(config.effectiveProfile.artifacts_get.required).toEqual([
+      ...ARTIFACT_EFFECTIVE_REQUIRED.artifacts_get,
+    ]);
+    expect(config.effectiveProfile.artifacts_ensure.required).toContain("idempotencyKey");
+    expect(config.effectiveProfile.artifacts_publish.required).toContain("idempotencyKey");
     const files = config.effectiveProfile.artifacts_publish.files;
     expect(files.maxCount).toBe(ARTIFACT_LIMITS.filesMax);
     expect(files.maxDecodedBytesPerFile).toBe(ARTIFACT_LIMITS.decodedBytesPerFile);
@@ -94,9 +120,17 @@ describe("artifact effective profile", () => {
     expect(files.mimeTypes).toEqual([...ARTIFACT_MIME_TYPES]);
     expect(files.reservedFirstSegments).toEqual([...ARTIFACT_RESERVED_FIRST_SEGMENTS]);
     expect(config.effectiveProfile.closedArguments).toEqual([...ARTIFACT_FORBIDDEN_CALLER_FIELDS]);
+    expect(config.durableIdentity.internalKey).toBe(ARTIFACT_DURABLE_IDENTITY.internalKey);
+    expect(config.durableIdentity.paramsHash).toBe(ARTIFACT_DURABLE_IDENTITY.paramsHash);
+    expect(config.durableIdentity.conflict).toBe(ARTIFACT_DURABLE_IDENTITY.conflict);
     expect(config.durableIdentity.payloadHashInKey).toBe(false);
+    expect(config.durableIdentity.payloadHashInKey).toBe(ARTIFACT_DURABLE_IDENTITY.payloadHashInKey);
     expect(config.activation.requiresFinalizationBinding).toBe(true);
     expect(config.activation.requiresErrorBinding).toBe(true);
     expect(config.requiredContracts).toEqual(REQUIRED_PROVIDER_CONTRACTS);
+  });
+
+  it("should expose the single qualified artifact provider version", () => {
+    expect(ARTIFACT_PROVIDER_VERSION).toBe("0.1.4");
   });
 });
