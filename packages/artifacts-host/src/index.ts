@@ -13,6 +13,13 @@ export {
   type ActivationDisabledReason,
 } from "./activation.js";
 export {
+  checkAdmission,
+  createAdmissionAuthority,
+  type AdmissionAuthority,
+  type AdmissionDeniedBody,
+  type AdmissionResult,
+} from "./admission.js";
+export {
   ArtifactConnectionError,
   computeParamsHash,
   createArtifactsPool,
