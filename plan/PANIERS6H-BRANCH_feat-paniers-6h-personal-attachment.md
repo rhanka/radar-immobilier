@@ -92,4 +92,4 @@ unchanged until activation runs; scoped routes stay unmounted from `app.ts`.
 - [x] **Lot N-1 — Docs**: uncommitted French Muse and Sol reports.
 - [ ] **Lot N — Close (not covered)**: verify green, push, PR, CI, merge
   commit (no squash/rebase), keep branch, move plan to `plan/done/`.
-- [x] Delivery checkpoint: 5
+- [x] Delivery checkpoint: 6
