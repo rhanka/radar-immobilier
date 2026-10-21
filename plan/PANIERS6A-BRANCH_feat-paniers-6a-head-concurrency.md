@@ -128,7 +128,7 @@ Add explicit expected-head concurrency to personal signal facets. Every mutation
   - [x] Lot gate: same as Lots 1-2.
 - [ ] **Lot 4 — Astra review corrections**
   - [x] Carry the launched target, viewer context and refusal copy from controls.
-  - [ ] Render a dismissible parent notice independently of the signal card.
+  - [x] Render a dismissible parent notice independently of the signal card.
   - [ ] Keep current-city refusals and ignore late conflicts from another city.
   - [ ] Test signal removal after conflict and late replies after switching city.
   - [ ] Test callback arguments, notice identity and dismissal.

@@ -36,6 +36,7 @@
     postFacetCommand,
     type FacetAction,
     type FacetCommandLaunch,
+    type FacetConflictNotice,
     type FacetHeadsStatus,
     type FacetTarget,
     type ReasonCode,
@@ -86,7 +87,13 @@
   export let facetReloadError: string | null = null;
   export let facetReloadAfterWrite = false;
   export let onRetryFacetReads: () => void = () => {};
-  export let onFacetHeadsStale: () => void = () => {};
+  export let onFacetHeadsStale: (
+    target: FacetTarget,
+    launch: FacetCommandLaunch,
+    message: string,
+  ) => void = () => {};
+  export let facetConflictNotice: FacetConflictNotice | null = null;
+  export let onDismissFacetConflict: () => void = () => {};
   export let discardedNotice: { target: FacetTarget; label: string } | null = null;
   export let discardedActionError: string | null = null;
   export let onUndoDiscard: (target: FacetTarget) => void = () => {};
@@ -159,6 +166,8 @@
   {facetReloadAfterWrite}
   {onRetryFacetReads}
   {onFacetHeadsStale}
+  {facetConflictNotice}
+  {onDismissFacetConflict}
   {discardedNotice}
   {discardedActionError}
   {onUndoDiscard}
