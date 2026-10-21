@@ -77,6 +77,8 @@ Add explicit expected-head concurrency to personal signal facets. Every mutation
 - `BR6a-EX3` — Update `ui/src/lib/components/maps/SignauxSelPanelHarness.svelte` to forward the stale-head callback. Reason: exercise the existing parent contract through its test harness. Impact: test-only wiring. Rollback: remove the callback prop and forwarding.
 - Verification uses `tmp/paniers-6a/Makefile`, standalone Compose and sanitized source copies; no root Makefile or environment files. Dedicated ENV `test-paniers-sol6a`; reserved API/UI/mail ports 18886/15386/11186 (no services published), PostgreSQL 15686. Local reports, logs and bundle are uncommitted verification artifacts under the authorized workspace.
 - Local qualification: 36 API tests and 625 UI tests passed; full workspace lint passed. Every delivered commit is typechecked from its indexed tree.
+- Astra correction pass: 36 API and 628 UI tests passed; full lint passed. Error alerts use their design-system `alert` role; both new assertions were corrected accordingly.
+- Both UI mutations failed their targeted test; restoration passed two `cmp` checks and each targeted test. Delivery uses `tmp/paniers-6a-fix/git` and `6a-fix.bundle`, based on `410a4974`; `ENV=test-paniers-sol6a-fix`, same isolated ports. See the uncommitted SOL report for evidence and limitations.
 - Discrimination: removing the comparison in a copy caused 6 of 12 tests to fail; restoration passed both `cmp` checks and all 12 tests. UI regressions were reproduced before correction.
 - Independent peer consensus is unverified (author model/effort missing); UAT, remote CI, push and merge are not covered by this local assignment.
 - No migration created. Historical receipt recovery alone may accept the old payload; it must never execute a new command.
@@ -126,15 +128,15 @@ Add explicit expected-head concurrency to personal signal facets. Every mutation
   - [x] UI: inactive IDs retained by the index; controls send expectations; 409 copy and reload path; undo carries the discard head.
   - [x] Mutation proof: removing the comparison makes six tests fail; restoring identical bytes returns all twelve new API tests to green.
   - [x] Lot gate: same as Lots 1-2.
-- [ ] **Lot 4 — Astra review corrections**
+- [x] **Lot 4 — Astra review corrections**
   - [x] Carry the launched target, viewer context and refusal copy from controls.
   - [x] Render a dismissible parent notice independently of the signal card.
   - [x] Keep current-city refusals and ignore late conflicts from another city.
   - [x] Test signal removal after conflict and late replies after switching city.
   - [x] Test callback arguments, notice identity and dismissal.
-  - [ ] Qualify isolated typecheck, lint, UI maps/signals and API facets.
-  - [ ] Discriminate both fixes in a copy; restore and compare identical bytes.
-  - [ ] Audit local commits and bundle from `410a4974`; keep reports uncommitted.
+  - [x] Qualify isolated typecheck, lint, UI maps/signals and API facets.
+  - [x] Discriminate both fixes in a copy; restore and compare identical bytes.
+  - [x] Audit local commits and bundle from `410a4974`; keep reports uncommitted.
 - [x] **Lot N-1 — Docs consolidation**
   - [x] Write `RAPPORT-SOL-6A.md` in French (uncommitted) with results, discrimination, commit audit and `not covered`; preserve the Muse handoff.
   - [x] Record completed local qualification; UAT and remote integration remain not covered.
