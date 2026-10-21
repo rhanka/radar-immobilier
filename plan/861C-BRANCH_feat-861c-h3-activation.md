@@ -1,19 +1,17 @@
-# H3 activation — branch scope for feat/861c-h3-p2 (second PR: review rework, units 7 and 10)
+# H3 activation — branch scope for feat/861c-h3-p3-denial-image (third PR: units 8 and 9)
 
-**Type**: feature · **Base**: `main` at `cd52bd72` (H3 first PR merged) · **Branch**: `feat/861c-h3-p2`
-**Workspace**: `/home/antoinefa/src/radar-immobilier/.worktrees/861c-h3-p2`
-**Reference design**: `.lanes/conductor/tmp/861c/conception-h3-v1.md` (§10, units 7 and 10)
-**Design review**: `.lanes/conductor/tmp/revues/astra-h3-p1.md` and `astra-h3-p1-indep.md` (approved, rework below)
+**Type**: feature · **Base**: `main` (H3 first PR and second PR merged) · **Branch**: `feat/861c-h3-p3-denial-image`
+**Workspace**: `/home/antoinefa/src/radar-immobilier/.worktrees/861c-h3-p3`
+**Reference design**: `.lanes/conductor/tmp/861c/conception-h3-v1.md` (§10, units 8 and 9; §5.4 and §6.4 contracts)
 
 ## Objective
 
-Deliver the second H3 pull request: rework requested by both P1 reviews
-(complete publication receipts, cache policy on the unmounted prefix), unit 7
-commit-time authorization with failure accounting, and unit 10 nginx control
-route limit. No provider quota dependency, no other deployment change. Each
-test below fails without its fix and carries its §H matrix identifier where
-one exists. Units 1-4 (first PR) are merged and unchanged except for the
-review rework listed here.
+Deliver the third H3 pull request: unit 8 (isolated denial listener) and
+unit 9 (runtime image entrypoint plus real-image smoke tooling). No provider
+quota dependency, no migration, no preprod resources, no rollback
+documentation. Each test below fails without its fix. Units 1-4 (first PR),
+review rework, unit 7 (blocked, pinned leak documented) and unit 10 (second
+PR) are merged and unchanged.
 
 Review integration (both non-blocking points):
 
@@ -30,41 +28,35 @@ Review integration (both non-blocking points):
 ## Scope / Guardrails
 
 - English code, tests and identifiers; no Python; never read `.env`.
-- Reuse `api/src/artifacts/` and `packages/artifacts-host/`; no copied domain logic.
+- Reuse the existing denial response; no copied domain logic, no new dependency.
 - Do not touch `api/src/config.ts`, the root `Makefile`, or root `docker-compose*`.
-- Isolated tooling only: `tools/artifact-host.mk`, extended solely for the proxy
-  check; no root Makefile include or environment-file loading.
-- Production activation wiring (`api/src/index.ts`,
-  `api/src/artifacts/control-route-startup.ts`) is deferred to a later unit: this PR
-  adds the admission seam as an optional dependency so existing H2 behavior is
-  preserved when no activation reader is provided.
+- Isolated tooling only: `tools/artifact-host.mk` provides runtime smoke,
+  CI API build and entrypoint checks; no root Makefile or environment-file loading.
+- Quotas (unit 5), migration (6), unit 7 (blocked), preprod resources (11-14)
+  and rollback documentation (15) stay out of scope.
 
 ## Branch Scope Boundaries (MANDATORY)
 
 - **Allowed Paths (implementation scope)**:
   - `plan/861C-BRANCH_feat-861c-h3-activation.md`
-  - `packages/artifacts-host/src/admission.test.ts` (complete receipts, valid meta id)
-  - `packages/artifacts-host/src/admission-commit.test.ts` (complete receipts, entry/final split)
-  - `packages/artifacts-host/src/facade.ts` (commit-time recheck, failure ledger)
-  - `packages/artifacts-host/src/commit-authorization.test.ts` (revocation while blocked)
-  - `packages/artifacts-host/src/commit-failures.test.ts` (failure accounting)
-  - `packages/artifacts-host/src/index.ts` (re-exports only)
-  - `api/src/app.ts` (cache policy on the unmounted control prefix only)
-  - `api/src/artifacts/control-cache-unmounted.test.ts` (unmounted prefix cases)
-  - `deploy/overlays/preprod/nginx/default.conf` (control route 2m limit only)
-  - `deploy/overlays/preprod/nginx/nginx-test-control-limit.conf` (isolated test conf)
-  - `tools/h3-nginx-control-limit.sh` (isolated proxy check, no Python)
-  - `tools/artifact-host.mk` (`test-h3-proxy` target only)
-  - `RAPPORT-MUSE-H3-P2.md`, `RAPPORT-SOL-H3-P2.md` (uncommitted deliverables)
-  - `tmp/861c-h3-p2/**` (ignored logs, copies, local Git and bundle)
-  - `tmp/861c-h3-p2-fix/**` (astra correction evidence and local Git)
+  - `api/src/artifacts/content-deny.ts` (shared denial response, standalone app)
+  - `api/src/artifacts/content-deny-server.ts` (dependency-free entrypoint)
+  - `api/src/artifacts/content-deny.test.ts` (every host form denied)
+  - `api/src/artifacts/content-deny-isolation.test.ts` (no app dependency)
+  - `api/src/artifacts/content-app.ts` (reuse the shared denial response only)
+  - `api/docker-entrypoint.sh` (mode validation, `api` or `content-deny`)
+  - `api/Dockerfile` (denial entrypoint bundle, entrypoint wiring only)
+  - `tools/h3-image-runtime-smoke.sh` (real-image smoke, no Python)
+  - `tools/artifact-host.mk` (runtime smoke, CI API build and entrypoint checks)
+  - `RAPPORT-MUSE-H3-P3.md`, `RAPPORT-SOL-H3-P3.md` (uncommitted deliverables)
+  - `tmp/861c-h3-p3/**` (ignored copies, evidence, local Git and bundle)
 - **Forbidden Paths (must not change in this branch)**:
   - `api/src/config.ts`, root `Makefile`, root `docker-compose*.yml`
   - `rules/**`, agent bootstrap files, other `plan/*-BRANCH_*.md`
   - Business routes, MCP composition, product UI
   - Upstream `@sentropic/artifacts` library sources
-  - Provider quotas/reservations (unit 5), migration (6), denial service (8),
-    image (9), preprod resources except the unit 10 nginx limit (11-14)
+  - Provider quotas/reservations (unit 5), migration (6), unit 7, preprod
+    resources (11-14), rollback documentation (15)
 - **Conditional Paths (allowed only with an explicit exception recorded here)**:
   - `tools/artifact-host.mk` — extended with `test-h3-proxy` (unit 10, no Python, no `.env` load)
   - `api/src/app.ts` — closed-capability control mount (review rework, guards unchanged)
