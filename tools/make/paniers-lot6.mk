@@ -14,12 +14,12 @@ endif
 ACTION ?= verify
 export ENV LOT API_PORT UI_PORT MAILDEV_UI_PORT SCOPE ACTION EVIDENCE_TAG CHECKPOINT_DIR
 
-.PHONY: guard verify typecheck lint test-api clean inspect diagnose commit prepare checkpoints deliver regression audit
+.PHONY: guard verify build typecheck lint test-api clean inspect diagnose commit prepare checkpoints deliver regression audit
 guard:
 	@case '$(ENV)' in test-*|e2e-*) ;; *) echo 'test-* or e2e-* ENV required'; exit 1;; esac
 	@case '$(LOT)' in 6F|6G) ;; *) echo 'LOT must be 6F or 6G'; exit 1;; esac
 
-verify typecheck lint test-api: guard
+verify build typecheck lint test-api: guard
 	@bash tools/make/paniers-lot6-verify.sh $@
 
 regression: guard

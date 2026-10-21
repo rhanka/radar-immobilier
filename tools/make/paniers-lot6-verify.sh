@@ -77,6 +77,7 @@ import config from "./vitest.config.js";
 export default { ...config, envDir: false, test: { ...config.test, fileParallelism: false, maxWorkers: 2 } };
 CONFIG
   case "$1" in
+    build) npm run build --workspace=api ;;
     verify|typecheck) npm run typecheck --workspace=api ;;
     checkpoints)
       for snapshot in /checkpoints/*.tar; do
