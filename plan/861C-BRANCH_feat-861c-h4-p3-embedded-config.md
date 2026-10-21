@@ -19,7 +19,7 @@ Prepare the data-and-contracts slice of P3: versioned Immo provider and artifact
   - `packages/immo-mcp/config/immo-artifacts.v1.json`
   - `packages/immo-mcp/src/registry/**`
   - `RAPPORT-MUSE-H4-P3.md` (uncommitted deliverable)
-  - `RAPPORT-SOL-H4-P3.md`, `tmp/861c-h4-p3/**` (uncommitted integration evidence)
+  - `RAPPORT-SOL-H4-P3.md`, `tmp/861c-h4-p3/**`, `tmp/861c-h4-p3-fix/**` (uncommitted integration evidence)
 - **Forbidden Paths (must not change in this branch)**:
   - `Makefile`
   - `docker-compose*.yml`
@@ -82,6 +82,15 @@ Prepare the data-and-contracts slice of P3: versioned Immo provider and artifact
   - [x] Audit dependencies, secrets, network-free registry and forbidden paths.
   - [x] Teardown with `down -v`; verify zero remaining project resources.
   - [x] Produce uncommitted `RAPPORT-SOL-H4-P3.md` and base-relative bundle.
+- [ ] **Lot 5b — Astra review corrections**
+  - [x] Define the supported local artifact version and complete effective profile.
+  - [ ] Enforce artifact scopes and required caller-key semantics.
+  - [ ] Compile only selected capabilities and freeze the complete profile into the digest.
+  - [ ] Export the revised registry contracts.
+  - [ ] Verify embedded required fields and durable identity parity.
+  - [ ] Cover selection, scope and provider-version refusals.
+  - [ ] Prove complete profile integrity and authorized digest evolution.
+  - [ ] Pass full gates, five copy mutations, restoration checks and resource teardown.
 - [ ] **Lot 6 — Merge and close**
   - [ ] Push branch (excluded from this integration assignment).
   - [ ] Open PR, verify CI green.
