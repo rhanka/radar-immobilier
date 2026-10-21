@@ -63,7 +63,7 @@ Require the displayed signal fingerprint on every new personal facet command. Ve
   - [x] Resolve the controls conflict with 6A context/notice behavior and 6B version conflicts.
   - [x] Establish standalone Make, synthetic configuration and private volumes without published ports.
 - [ ] **Lot 1 — Source version and writer**
-  - [ ] Serve the exact stored-node fingerprint, including degraded cards; preserve golden bytes.
+  - [x] Serve the exact stored-node fingerprint, including degraded cards; preserve golden bytes.
   - [ ] Verify versions under the city lock, bind digests and preserve historical recovery.
   - [ ] Adapt existing API integration contracts.
 - [ ] **Lot 2 — Captured UI intentions**
