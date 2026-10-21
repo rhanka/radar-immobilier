@@ -17,9 +17,10 @@ export async function composeArtifactHost(
   pool: pg.Pool,
   config: Extract<ArtifactsStorageConfig, { enabled: true }>,
   injectedBlobs?: PublicationBlobStore,
+  onProviderFailure?: ((error: unknown) => void) | undefined,
 ) {
   await initializeArtifactScope(pool, config.storageScope, config.orgId);
-  const store = createLockedArtifactStore(pool);
+  const store = createLockedArtifactStore(pool, onProviderFailure);
   const getAcl = store.getArtifactAcl;
   store.getArtifactAcl = async (id) => {
     const acl = await getAcl(id);
@@ -34,7 +35,7 @@ export async function composeArtifactHost(
   const baseBlobs = injectedBlobs ?? createS3BlobStore({ client: timeoutClient, bucket: config.s3Bucket });
   // Bound every blob operation including body streaming after headers, so a
   // stalled S3 response fails fast and frees the advisory lock + connection.
-  const blobs = createTimeoutBlobStore(baseBlobs, S3_OPERATION_TIMEOUT_MS);
+  const blobs = createTimeoutBlobStore(baseBlobs, S3_OPERATION_TIMEOUT_MS, onProviderFailure);
   const lifecycle = createLifecycleService(store, undefined, store);
   const publication = createPublicationService({ state: store, blobs, intents: store, idempotency: store });
   const artifacts: ArtifactService = {
