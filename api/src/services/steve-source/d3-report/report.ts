@@ -9,6 +9,7 @@
 
 import { SteveCaptureError } from "../types.js";
 import type { WorkbookInventory } from "../types.js";
+import { REAL_GRAPH_ADAPTER_VERSION } from "./graph-adapter.js";
 import type { IdentifiedGraphSet } from "./graph-set.js";
 import type { MunicipalityRef } from "./municipality.js";
 import { D3_RULE_VERSION, resolveTriageRow, tripletKey } from "./resolve.js";
@@ -25,6 +26,7 @@ export interface D3StatusCounts {
 
 export interface D3Report {
   ruleVersion: typeof D3_RULE_VERSION;
+  adapterVersion: typeof REAL_GRAPH_ADAPTER_VERSION;
   snapshotId: string;
   graphSha256: string;
   lines: number;
@@ -89,6 +91,7 @@ export function buildD3Report(
   );
   return {
     ruleVersion: D3_RULE_VERSION,
+    adapterVersion: REAL_GRAPH_ADAPTER_VERSION,
     snapshotId: graphSet.snapshotId,
     graphSha256: graphSet.sha256,
     lines: rows.length,
