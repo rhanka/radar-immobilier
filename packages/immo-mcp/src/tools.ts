@@ -118,7 +118,7 @@ function guarded<A>(
  * (server.ts stdio and server-http.ts Streamable HTTP).
  */
 export function registerTools(server: McpServer, ctx: ToolContext): void {
-  for (const def of ALL_TOOL_DEFINITIONS.filter((def) => ["search_lots","get_lot_card"].includes(def.name))) {
+  for (const def of ALL_TOOL_DEFINITIONS.filter((def) => ["search_lots","get_lot_card","search_signals"].includes(def.name))) {
     const handler = TOOL_HANDLERS[def.name];
     if (!handler) throw new Error(`missing_handler:${def.name}`);
     server.registerTool(
@@ -154,36 +154,6 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
       },
     );
   }
-
-  server.registerTool(
-    "search_signals",
-    {
-      title: "Search signals",
-      description:
-        "Recherche de signaux réglementaires par ville (étape, mot-clé). Read-only.",
-      inputSchema: {
-        city: z.string().min(1),
-        etape: z
-          .string()
-          .optional()
-          .describe("Étape du processus (ex: avis_motion, adoption, consultation)"),
-        query: z.string().optional().describe("Mot-clé libre"),
-        showDiscarded: z
-          .boolean()
-          .optional()
-          .describe("Reveal archived signals hidden by default (default false). Read-only."),
-        limit: z.number().int().min(1).max(100).default(20),
-      },
-    },
-    guarded(ctx, "search_signals", IMMO_SCOPES.search, async (args) => {
-      // Per-user auth (D4): forward the CURRENT user's token (from the verified
-      // auth CONTEXT, never from args) so the api applies its normal per-user auth.
-      const signals = await ctx.data.searchSignals(args, {
-        accessToken: ctx.auth.accessToken,
-      });
-      return jsonResult({ city: args.city, count: signals.length, signals });
-    }),
-  );
 
   server.registerTool(
     "get_opportunity_dossier",
