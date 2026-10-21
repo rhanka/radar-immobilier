@@ -118,7 +118,7 @@ function guarded<A>(
  * (server.ts stdio and server-http.ts Streamable HTTP).
  */
 export function registerTools(server: McpServer, ctx: ToolContext): void {
-  for (const def of ALL_TOOL_DEFINITIONS.filter((def) => ["search_lots","get_lot_card","search_signals","get_opportunity_dossier","list_documents","read_document_excerpt","get_zones_geojson","get_lots_geojson","get_grille_pdf"].includes(def.name))) {
+  for (const def of ALL_TOOL_DEFINITIONS.filter((def) => ["search_lots","get_lot_card","search_signals","get_opportunity_dossier","list_documents","read_document_excerpt","get_zones_geojson","get_lots_geojson","get_grille_pdf","get_pv_pdf"].includes(def.name))) {
     const handler = TOOL_HANDLERS[def.name];
     if (!handler) throw new Error(`missing_handler:${def.name}`);
     server.registerTool(
@@ -175,30 +175,6 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
       `Nombre max de features retournées (défaut ${RAW_GEOJSON_DEFAULT_LIMIT}, ` +
         `max ${RAW_GEOJSON_MAX_LIMIT} — bbox obligatoire au-delà de ${RAW_GEOJSON_DEFAULT_LIMIT}).`,
     );
-
-  server.registerTool(
-    "get_pv_pdf",
-    {
-      title: "Get PV source PDF",
-      description:
-        "URL servie du procès-verbal source (PDF archivé) d'un signal, à partir de sa " +
-        "référence brute rawRef (ex: raw/proces-verbaux-<ville>/cas/<sha>.pdf, telle que " +
-        "portée par les signaux/documents) + métadonnées (ville, content-type). " +
-        "Le PDF lui-même n'est jamais inliné dans la réponse. Read-only.",
-      inputSchema: {
-        rawRef: z
-          .string()
-          .min(1)
-          .describe(
-            "Référence brute du document (rawRef S3, ex: raw/proces-verbaux-longueuil/cas/<sha>.pdf ; " +
-              "en mode mock: l'id de document, ex: doc-longueuil-pv-2026-04-14)",
-          ),
-      },
-    },
-    guarded(ctx, "get_pv_pdf", IMMO_SCOPES.documentsRead, async (args) =>
-      jsonResult(await ctx.raw.getPvPdf(args)),
-    ),
-  );
 
   server.registerTool(
     "get_reglement_provenance",
