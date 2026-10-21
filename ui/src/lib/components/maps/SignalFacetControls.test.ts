@@ -330,5 +330,8 @@ describe("SignalFacetControls — expected heads (6A)", () => {
     expect(screen.getByText(/Données périmées/)).toBeTruthy();
     expect(screen.queryByTestId("facet-retry")).toBeNull();
     expect(onHeadsStale).toHaveBeenCalledTimes(1);
+    expect(onHeadsStale.mock.calls[0]![0]).toEqual(TARGET);
+    expect(onHeadsStale.mock.calls[0]![1]).toEqual({ viewerKey: null });
+    expect(onHeadsStale.mock.calls[0]![2]).toMatch(/Données périmées/);
   });
 });
