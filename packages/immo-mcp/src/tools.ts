@@ -165,6 +165,10 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
           .optional()
           .describe("Étape du processus (ex: avis_motion, adoption, consultation)"),
         query: z.string().optional().describe("Mot-clé libre"),
+        showDiscarded: z
+          .boolean()
+          .optional()
+          .describe("Reveal archived signals hidden by default (default false). Read-only."),
         limit: z.number().int().min(1).max(100).default(20),
       },
     },

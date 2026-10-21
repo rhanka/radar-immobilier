@@ -175,6 +175,79 @@ describe("HttpDataSource.searchSignals (the fix — REAL signals)", () => {
   });
 });
 
+describe("HttpDataSource.searchSignals showDiscarded (6C reveal)", () => {
+  function source(fetchImpl: typeof fetch): HttpDataSource {
+    return new HttpDataSource({ baseUrl: BASE, fetchImpl });
+  }
+
+  function calledUrl(fetchImpl: ReturnType<typeof vi.fn>): string {
+    const call = fetchImpl.mock.calls[0] as unknown[];
+    return String(call[0]);
+  }
+
+  it.each([undefined, false, true])("uses server visibility before limit when showDiscarded=%s", async (showDiscarded) => {
+    const archived = signalNode({ id: "archived" });
+    const visible = signalNode({ id: "visible" });
+    const fetchImpl = vi.fn(async (url: string | URL | Request) =>
+      apiResponse(String(url).endsWith("?showDiscarded=1") ? [archived, visible] : [visible]),
+    );
+    const out = await source(fetchImpl as unknown as typeof fetch).searchSignals({
+      city: "longueuil",
+      limit: 1,
+      ...(showDiscarded === undefined ? {} : { showDiscarded }),
+    });
+    const suffix = showDiscarded === true ? "?showDiscarded=1" : "";
+    expect(calledUrl(fetchImpl)).toBe(`${BASE}/api/graph-signals/longueuil${suffix}`);
+    expect(out.map((signal) => signal.id)).toEqual([showDiscarded ? "archived" : "visible"]);
+  });
+
+  it("forwards showDiscarded=1 when true, still under the user token", async () => {
+    const fetchImpl = vi.fn(async () => apiResponse([signalNode()]));
+    const out = await source(fetchImpl as unknown as typeof fetch).searchSignals(
+      { city: "longueuil", limit: 20, showDiscarded: true },
+      { accessToken: "user-token-xyz" },
+    );
+    const call = fetchImpl.mock.calls[0] as unknown[];
+    expect(String(call[0])).toBe(`${BASE}/api/graph-signals/longueuil?showDiscarded=1`);
+    expect((call[1] as { headers?: Record<string, string> }).headers?.authorization).toBe(
+      "Bearer user-token-xyz",
+    );
+    expect(out).toHaveLength(1);
+  });
+
+  it("applies reveal before search and limit (revealed signals are searchable, limit last)", async () => {
+    const fetchImpl = vi.fn(async () =>
+      apiResponse([
+        signalNode({ id: "wrong-stage", description: "rezonage", props: { properties: { etape: "accorde" } } }),
+        signalNode({ id: "wrong-query", description: "consultation", props: { properties: { etape: "avis_motion" } } }),
+        signalNode({ id: "revealed-1", description: "rezonage nord", props: { properties: { etape: "avis_motion" } } }),
+        signalNode({ id: "visible-2", description: "rezonage sud", props: { properties: { etape: "avis_motion" } } }),
+      ]),
+    );
+    const out = await source(fetchImpl as unknown as typeof fetch).searchSignals({
+      city: "longueuil",
+      etape: "avis_motion",
+      query: "rezonage",
+      limit: 1,
+      showDiscarded: true,
+    });
+    expect(calledUrl(fetchImpl)).toContain("?showDiscarded=1");
+    expect(out.map((s) => s.id)).toEqual(["revealed-1"]);
+  });
+
+  it.each([401, 403, 503])("propagates HTTP %s with the reveal flag set", async (status) => {
+    const fetchImpl = vi.fn(async () => new Response("unavailable", { status }));
+    await expect(
+      source(fetchImpl as unknown as typeof fetch).searchSignals({
+        city: "x",
+        limit: 20,
+        showDiscarded: true,
+      }),
+    ).rejects.toThrow(status === 503 ? /radar_api_error:503/ : /unauthenticated/);
+    expect(calledUrl(fetchImpl)).toContain("?showDiscarded=1");
+  });
+});
+
 describe("toMockSignal (anti-invention normaliser)", () => {
   it("never fabricates: missing fields become empty string / null", () => {
     const sig = toMockSignal({ id: "bare" }, "delson");
