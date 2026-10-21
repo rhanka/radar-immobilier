@@ -85,6 +85,7 @@
     buildOverlaySignals,
     buildNavSignals,
     buildHoverCard,
+    rebuildSignalEvidence,
     type OverlaySignal,
     type OverlayNavSignal,
     type HoverCardData,
@@ -721,8 +722,19 @@
       ).map((node) => node.id),
     );
     selectionState = reconcileVivierSelection(selectionState, allowedIds);
-    const evidenceId = retainProjectedSignalId(activeEvidence?.nodeId ?? null, allowedIds);
-    if (activeEvidence && evidenceId === null) activeEvidence = null;
+    // 6D — an open signal-bound evidence view follows the refreshed
+    // discard-consistent nodes: an archived target closes the view, an
+    // archived co-signal drops out of the rebuilt highlights, and a changed
+    // citation/page/rawRef replaces the old evidence. Independent browsing
+    // (activeSource/activeDocument) and geographic grids are preserved.
+    if (activeEvidence) {
+      activeEvidence = rebuildSignalEvidence(
+        activeEvidence,
+        detailNodes,
+        (node) => allowedIds.has(node.id),
+        allowedIds,
+      );
+    }
     hoveredEvidenceSignalId = retainProjectedSignalId(hoveredEvidenceSignalId, allowedIds);
   }
 
