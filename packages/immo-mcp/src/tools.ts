@@ -118,7 +118,7 @@ function guarded<A>(
  * (server.ts stdio and server-http.ts Streamable HTTP).
  */
 export function registerTools(server: McpServer, ctx: ToolContext): void {
-  for (const def of ALL_TOOL_DEFINITIONS.filter((def) => ["search_lots","get_lot_card","search_signals","get_opportunity_dossier","list_documents","read_document_excerpt"].includes(def.name))) {
+  for (const def of ALL_TOOL_DEFINITIONS.filter((def) => ["search_lots","get_lot_card","search_signals","get_opportunity_dossier","list_documents","read_document_excerpt","get_zones_geojson"].includes(def.name))) {
     const handler = TOOL_HANDLERS[def.name];
     if (!handler) throw new Error(`missing_handler:${def.name}`);
     server.registerTool(
@@ -175,28 +175,6 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
       `Nombre max de features retournées (défaut ${RAW_GEOJSON_DEFAULT_LIMIT}, ` +
         `max ${RAW_GEOJSON_MAX_LIMIT} — bbox obligatoire au-delà de ${RAW_GEOJSON_DEFAULT_LIMIT}).`,
     );
-
-  server.registerTool(
-    "get_zones_geojson",
-    {
-      title: "Get zones GeoJSON",
-      description:
-        "FeatureCollection GeoJSON des zones de zonage d'une ville (code de zone, kind, " +
-        "grille PDF et propriétés sources). Réponse BORNÉE : limit défaut 500 (max 2000), " +
-        "bbox [minLon,minLat,maxLon,maxLat] OBLIGATOIRE pour limit > 500. " +
-        "numberMatched/numberReturned/truncated indiquent ce qui reste : si truncated, " +
-        "resserrez le bbox. Read-only.",
-      inputSchema: {
-        city: z.string().min(1).describe("Ville (slug, ex: longueuil, valleyfield, delson)"),
-        bbox: bboxSchema,
-        limit: limitSchema,
-      },
-    },
-    guarded(ctx, "get_zones_geojson", IMMO_SCOPES.read, async (args) => {
-      checkGeoBounds(args);
-      return geojsonResult(await ctx.raw.getZonesGeojson(args));
-    }),
-  );
 
   server.registerTool(
     "get_lots_geojson",
