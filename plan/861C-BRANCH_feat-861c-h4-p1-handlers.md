@@ -45,6 +45,7 @@ Extract the twelve immo-mcp tool handlers behind an immutable per-request contex
 
 ## Feedback Loop
 - [x] BR861C-EX1 — Owner execution brief explicitly requests the P0 review's behavioral E2E exclusion canary on both ordinary targets, including inverse controls. Allow the dedicated H4 target, its shell harness and removal of the obsolete textual assertion. Impact: verification only; rollback: revert those changes. Neither ordinary runner recipe changes.
+- [x] BR861C-EX2 — Astra review requires bounded compose isolation hardening for the E2E canary: `tools/test-mcp-e2e-exclusion.sh` imposes `test-*` guard plus `env -u` with explicit compose command and isolated project for both sub-makes, with fake-docker coverage for `run` and `down`; `tools/artifact-host.mk` and `tools/immo-mcp-test.mk` pin compose via `override` so the effective project derives only from `ENV`. Impact: test tooling only; rollback: revert the three tooling files.
 - [x] Test mapping: `ENV=test-861c-h4-p1`, API `18915`, UI `15915`, Maildev `11915`; no host ports published. Canary and mutation copies use separate test project suffixes.
 Actions with the following status should be included around tasks only if really required:
 - subagent or agent requires support or informs: `blocked` / `deferred` / `cancelled` / `attention`
@@ -62,37 +63,37 @@ Actions with the following status should be included around tasks only if really
 - **Mono-branch**: UAT after each lot if UI surface impacted. P1 has no UI surface: no UAT checkpoint.
 
 ## Plan / Todo (lot-based)
-- [x] Current commit unit: test(h4): gate both ordinary MCP recipes with canaries.
-- [ ] **Lot 0 — Baseline & constraints**
-  - [ ] Read `conception-h4-v3.md` P1 section and the P0 filets (`deployed-baseline.test.ts`, `tool-fixture-provenance.test.ts`).
-  - [ ] Confirm scope and guardrails; apply BR861C-EX1.
-  - [ ] Verification style: `make -f tools/immo-mcp-test.mk <target> ENV=test-861c-h4-p1` with `ENV` last; the H4 runner owns the behavioral canary only.
-- [ ] **Lot 1 — Immutable invocation context**
-  - [ ] Add `src/invocation-context.ts`: frozen `InvocationContext` + `AuthorizedEgress` snapshot, `captureInvocationContext`, `authorizedCallContext`, `AsyncLocalStorage` run/get.
-  - [ ] Expose `./invocation-context` in `package.json` exports.
-  - [ ] Lot gate:
-    - [ ] `make -f tools/immo-mcp-test.mk typecheck ENV=test-861c-h4-p1`
-    - [ ] `make -f tools/immo-mcp-test.mk lint ENV=test-861c-h4-p1`
-- [ ] **Lot 2 — Tool definitions (single contract source)**
-  - [ ] Add `src/tool-definitions.ts`: the twelve contracts verbatim (titles, descriptions, zod schemas, bounds, defaults) + per-tool scope + scope map.
-  - [ ] Expose `./tool-definitions` in `package.json` exports.
-  - [ ] Lot gate: typecheck + lint + `make -f tools/immo-mcp-test.mk test-immo-mcp ENV=test-861c-h4-p1` (P0 filets must stay green).
-- [ ] **Lot 3 — Tool handlers (single implementation)**
-  - [ ] Add `src/tool-handlers.ts`: the twelve handlers on `InvocationContext` with identical logic, errors and redaction; frozen `TOOL_HANDLERS` map (lookup table, not a dispatcher).
-  - [ ] Expose `./tool-handlers` in `package.json` exports.
-  - [ ] Lot gate: typecheck + lint + `test-immo-mcp`.
-- [ ] **Lot 4 — Registrar and HTTP rewiring**
-  - [ ] Rewrite `src/tools.ts` as the single SDK registrar over definitions + handlers with per-call snapshot resolution.
-  - [ ] Widen `assertScope` to readonly snapshots in `src/auth-context.ts`.
-  - [ ] Capture the immutable snapshot at HTTP entry in `src/server-http.ts`; remove shared-holder rebinding.
-  - [ ] Lot gate: typecheck + lint + `test-immo-mcp` (twelve-tool parity, five `not_wired_yet`, session/egress suites).
-- [ ] **Lot 5 — Discriminant isolation tests**
-  - [ ] Add `src/invocation-context.test.ts`: frozen snapshot, concurrent `AsyncLocalStorage` isolation, definition/handler/registrar parity.
-  - [ ] Add `src/request-isolation.test.ts`: out-of-order completion on one session, zero protected egress on missing scope, requesting-human `showDiscarded` semantics.
-  - [ ] Lot gate: typecheck + lint + `test-immo-mcp` full file run.
-- [ ] **Lot N-1 — Docs consolidation**
-  - [ ] Update this `BRANCH.md` with merge-ready state.
-  - [ ] Hand off `RAPPORT-MUSE-H4-P1.md` (modifications, tests, commit split, remaining `not covered`).
+- [x] Current commit unit: fix(h4): pin isolated compose runners to test projects.
+- [x] **Lot 0 — Baseline & constraints**
+  - [x] Read `conception-h4-v3.md` P1 section and the P0 filets (`deployed-baseline.test.ts`, `tool-fixture-provenance.test.ts`).
+  - [x] Confirm scope and guardrails; apply BR861C-EX1.
+  - [x] Verification style: `make -f tools/immo-mcp-test.mk <target> ENV=test-861c-h4-p1` with `ENV` last; the H4 runner owns the behavioral canary only.
+- [x] **Lot 1 — Immutable invocation context**
+  - [x] Add `src/invocation-context.ts`: frozen `InvocationContext` + `AuthorizedEgress` snapshot, `captureInvocationContext`, `authorizedCallContext`, `AsyncLocalStorage` run/get.
+  - [x] Expose `./invocation-context` in `package.json` exports.
+  - [x] Lot gate:
+    - [x] `make -f tools/immo-mcp-test.mk typecheck ENV=test-861c-h4-p1`
+    - [x] `make -f tools/immo-mcp-test.mk lint ENV=test-861c-h4-p1`
+- [x] **Lot 2 — Tool definitions (single contract source)**
+  - [x] Add `src/tool-definitions.ts`: the twelve contracts verbatim (titles, descriptions, zod schemas, bounds, defaults) + per-tool scope + scope map.
+  - [x] Expose `./tool-definitions` in `package.json` exports.
+  - [x] Lot gate: typecheck + lint + `make -f tools/immo-mcp-test.mk test-immo-mcp ENV=test-861c-h4-p1` (P0 filets must stay green).
+- [x] **Lot 3 — Tool handlers (single implementation)**
+  - [x] Add `src/tool-handlers.ts`: the twelve handlers on `InvocationContext` with identical logic, errors and redaction; frozen `TOOL_HANDLERS` map (lookup table, not a dispatcher).
+  - [x] Expose `./tool-handlers` in `package.json` exports.
+  - [x] Lot gate: typecheck + lint + `test-immo-mcp`.
+- [x] **Lot 4 — Registrar and HTTP rewiring**
+  - [x] Rewrite `src/tools.ts` as the single SDK registrar over definitions + handlers with per-call snapshot resolution.
+  - [x] Widen `assertScope` to readonly snapshots in `src/auth-context.ts`.
+  - [x] Capture the immutable snapshot at HTTP entry in `src/server-http.ts`; remove shared-holder rebinding.
+  - [x] Lot gate: typecheck + lint + `test-immo-mcp` (twelve-tool parity, five `not_wired_yet`, session/egress suites).
+- [x] **Lot 5 — Discriminant isolation tests**
+  - [x] Add `src/invocation-context.test.ts`: frozen snapshot, concurrent `AsyncLocalStorage` isolation, definition/handler/registrar parity.
+  - [x] Add `src/request-isolation.test.ts`: out-of-order completion on one session, zero protected egress on missing scope, requesting-human `showDiscarded` semantics.
+  - [x] Lot gate: typecheck + lint + `test-immo-mcp` full file run.
+- [x] **Lot N-1 — Docs consolidation**
+  - [x] Update this `BRANCH.md` with merge-ready state.
+  - [x] Hand off `RAPPORT-MUSE-H4-P1.md` (modifications, tests, commit split, remaining `not covered`).
 - [ ] **Lot N — Merge & close**
   - [ ] Push branch.
   - [ ] Open PR (or merge directly if solo dev).
