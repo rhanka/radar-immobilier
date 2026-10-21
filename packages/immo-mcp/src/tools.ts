@@ -1,26 +1,19 @@
 import { randomUUID } from "node:crypto";
-import { captureInvocationContext, getInvocationContext } from "./invocation-context.js";
-import { ALL_TOOL_DEFINITIONS } from "./tool-definitions.js";
-import { TOOL_HANDLERS, type ToolTextResult } from "./tool-handlers.js";
-import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import {
   assertScope,
   auditToolCall,
   hashInput,
-  IMMO_SCOPES,
-  redact,
   type ImmoMcpAuthContext,
 } from "./auth-context.js";
 import type { ImmoDataSource } from "./data-source.js";
+import type { RawDataSource } from "./raw-data.js";
 import {
-  assertValidBbox,
-  RAW_GEOJSON_DEFAULT_LIMIT,
-  RAW_GEOJSON_MAX_LIMIT,
-  type Bbox,
-  type RawDataSource,
-  type RawFeatureCollectionResult,
-} from "./raw-data.js";
+  captureInvocationContext,
+  getInvocationContext,
+} from "./invocation-context.js";
+import { ALL_TOOL_DEFINITIONS } from "./tool-definitions.js";
+import { TOOL_HANDLERS, type ToolTextResult } from "./tool-handlers.js";
 
 export interface ToolContext {
   auth: ImmoMcpAuthContext;
@@ -29,58 +22,17 @@ export interface ToolContext {
   raw: RawDataSource;
 }
 
-type TextResult = {
-  content: { type: "text"; text: string }[];
-  isError?: boolean;
-};
-
-function jsonResult(payload: unknown, isError = false): TextResult {
-  const result: TextResult = {
-    content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
-  };
-  if (isError) result.isError = true;
-  return result;
-}
-
-/**
- * Hard char bound on GeoJSON tool answers (~1 MB serialized, compact JSON).
- * `limit`/`bbox` are the primary bounds; this is the last-resort guard so a
- * pathological page (huge multipolygons) can never flood the MCP client.
- */
-const MAX_GEOJSON_RESPONSE_CHARS = 1_000_000;
-
-/** GeoJSON results are serialized COMPACT (no indent): size matters here. */
-function geojsonResult(payload: RawFeatureCollectionResult): TextResult {
-  const text = JSON.stringify(payload);
-  if (text.length > MAX_GEOJSON_RESPONSE_CHARS) {
-    throw new Error(
-      `response_too_large: ${text.length} caractères (max ${MAX_GEOJSON_RESPONSE_CHARS}). ` +
-        "Réduisez limit ou resserrez bbox.",
-    );
-  }
-  return { content: [{ type: "text", text }] };
-}
-
-/**
- * Shared bound checks for the two GeoJSON tools: valid bbox when present,
- * and bbox REQUIRED past the default page size (anti "give me the whole
- * city" — 15 000+ lots would flood the context).
- */
-function checkGeoBounds(args: { bbox?: Bbox | undefined; limit: number }): void {
-  if (args.bbox) assertValidBbox(args.bbox);
-  if (args.limit > RAW_GEOJSON_DEFAULT_LIMIT && !args.bbox) {
-    throw new Error(
-      `bbox_required: limit > ${RAW_GEOJSON_DEFAULT_LIMIT} exige un bbox ` +
-        "[minLon, minLat, maxLon, maxLat] pour borner la réponse.",
-    );
-  }
-}
-
 /**
  * Registers every read-only tool on the server: the 6 v0 domain tools
- * (backed by `ctx.data`) + the 4 raw-data tools (backed by `ctx.raw` —
+ * (backed by `ctx.data`) + the 6 raw-data tools (backed by `ctx.raw` —
  * zones/lots GeoJSON, grille & PV PDFs). Shared by BOTH transports
  * (server.ts stdio and server-http.ts Streamable HTTP).
+ *
+ * P1 keeps this function the single SDK registrar: contracts come from
+ * `tool-definitions.ts`, implementations from `tool-handlers.ts`. Each call
+ * runs on an immutable snapshot (ambient invocation when the HTTP host set
+ * one, else a fresh capture of these seeds) so concurrent requests on one
+ * session cannot exchange identities or credentials.
  */
 export function registerTools(server: McpServer, ctx: ToolContext): void {
   for (const def of ALL_TOOL_DEFINITIONS) {
@@ -119,27 +71,6 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
       },
     );
   }
-
-  // ── Raw-data tools (ad hoc representations côté client MCP) ───────────────
-  // Shared zod pieces. The DESCRIPTIONS are part of the contract: they are what
-  // guides claude.ai to stay within the size bounds (limit/bbox/truncated).
-  const bboxSchema = z
-    .tuple([z.number(), z.number(), z.number(), z.number()])
-    .optional()
-    .describe(
-      "Emprise [minLon, minLat, maxLon, maxLat] en WGS84 (ex: [-73.53, 45.52, -73.5, 45.55]). " +
-        "Obligatoire quand limit > 500.",
-    );
-  const limitSchema = z
-    .number()
-    .int()
-    .min(1)
-    .max(RAW_GEOJSON_MAX_LIMIT)
-    .default(RAW_GEOJSON_DEFAULT_LIMIT)
-    .describe(
-      `Nombre max de features retournées (défaut ${RAW_GEOJSON_DEFAULT_LIMIT}, ` +
-        `max ${RAW_GEOJSON_MAX_LIMIT} — bbox obligatoire au-delà de ${RAW_GEOJSON_DEFAULT_LIMIT}).`,
-    );
 }
 
 /** Names of the tools registered in v0 (used by tests + docs). */

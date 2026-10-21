@@ -12,6 +12,10 @@ import { getMcpAuthContext, mcpAuthRoutes, requireMcpAuth } from "@sentropic/mcp
 import { fromRemoteJwks } from "@sentropic/oauth-verify";
 import type { AccessTokenClaims, TokenKeySource } from "@sentropic/oauth-verify";
 import { IMMO_SCOPES, type ImmoMcpAuthContext } from "./auth-context.js";
+import {
+  captureInvocationContext,
+  runWithInvocationContext,
+} from "./invocation-context.js";
 import type { ToolContext } from "./tools.js";
 import { createDataSource, type ImmoDataSource } from "./data-source.js";
 import { createRawDataSource, type RawDataSource } from "./raw-data.js";
@@ -157,14 +161,15 @@ function buildHttpScopedServer(
   auth: ImmoMcpAuthContext,
   data: ImmoDataSource,
   raw: RawDataSource,
-): { server: McpServer; toolCtx: ToolContext } {
-  // `toolCtx` is shared by reference with the registered tool handlers: replacing
-  // its `auth` on every request rebinds the tools to the CURRENT request identity
-  // (scopes + bearer) without rebuilding the session's server/transport.
+): McpServer {
+  // `toolCtx` seeds the registered tool handlers. Per-request identity does NOT
+  // flow through this holder: `handleMcp` captures an immutable snapshot at
+  // entry and runs transport dispatch inside `runWithInvocationContext`, so a
+  // concurrent request cannot rebind the credentials of an in-flight call.
   const toolCtx: ToolContext = { auth, data, raw };
   const server = new McpServer({ name: IMMO_MCP_NAME, version: IMMO_MCP_VERSION });
   registerTools(server, toolCtx);
-  return { server, toolCtx };
+  return server;
 }
 
 /** Identity a session is bound to at `initialize` time. */
@@ -178,8 +183,6 @@ interface SessionOwner {
 interface SessionEntry {
   transport: WebStandardStreamableHTTPServerTransport;
   server: McpServer;
-  /** Mutable holder shared with the session's tool handlers (see `buildHttpScopedServer`). */
-  toolCtx: ToolContext;
   owner: SessionOwner;
   createdAt: number;
   lastSeenAt: number;
@@ -337,8 +340,10 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
       // unknown-session response.
       if (!isSessionOwner(entry.owner, mcpAuth)) return unknownSession(c);
       entry.lastSeenAt = now;
-      entry.toolCtx.auth = auth;
-      return entry.transport.handleRequest(c.req.raw);
+      // Immutable capture at entry: the running handler keeps this request's
+      // identity even when a concurrent request enters the same session.
+      const snapshot = captureInvocationContext({ auth, data, raw });
+      return runWithInvocationContext(snapshot, () => entry.transport.handleRequest(c.req.raw));
     }
 
     // No session yet: only a POST (the `initialize` request) may open one.
@@ -348,10 +353,11 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
     await sweepExpiredSessions(clock());
 
     // The session is bound to the opening request's identity; later requests
-    // rebind identity, scopes and the RAW verified bearer (D4) before reaching
-    // the transport (see the session branch above).
+    // capture identity, scopes and the RAW verified bearer (D4) per request
+    // before reaching the transport (see the session branch above).
     const { mcpAuth, auth } = currentAuth(c);
-    const { server, toolCtx } = buildHttpScopedServer(auth, data, raw);
+    const snapshot = captureInvocationContext({ auth, data, raw });
+    const server = buildHttpScopedServer(auth, data, raw);
     const transport = new WebStandardStreamableHTTPServerTransport({
       sessionIdGenerator: () => randomUUID(),
       enableJsonResponse: true,
@@ -361,13 +367,14 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
       if (sid) sessions.delete(sid);
     };
     await server.connect(transport);
-    const response = await transport.handleRequest(c.req.raw);
+    const response = await runWithInvocationContext(snapshot, () =>
+      transport.handleRequest(c.req.raw),
+    );
     if (transport.sessionId) {
       const now = clock();
       sessions.set(transport.sessionId, {
         transport,
         server,
-        toolCtx,
         owner: sessionOwnerFromMcp(mcpAuth),
         createdAt: now,
         lastSeenAt: now,
