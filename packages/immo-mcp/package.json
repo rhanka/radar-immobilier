@@ -16,7 +16,8 @@
     "./invocation-context": "./src/invocation-context.ts",
     "./auth-context": "./src/auth-context.ts",
     "./data-source": "./src/data-source.ts",
-    "./tool-definitions": "./src/tool-definitions.ts"
+    "./tool-definitions": "./src/tool-definitions.ts",
+    "./tool-handlers": "./src/tool-handlers.ts"
   },
   "files": [
     "dist",
