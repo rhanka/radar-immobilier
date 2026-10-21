@@ -84,7 +84,7 @@ Prepare the data-and-contracts slice of P3: versioned Immo provider and artifact
   - [x] Produce uncommitted `RAPPORT-SOL-H4-P3.md` and base-relative bundle.
 - [ ] **Lot 5b — Astra review corrections**
   - [x] Define the supported local artifact version and complete effective profile.
-  - [ ] Enforce artifact scopes and required caller-key semantics.
+  - [x] Enforce artifact scopes and required caller-key semantics.
   - [ ] Compile only selected capabilities and freeze the complete profile into the digest.
   - [ ] Export the revised registry contracts.
   - [ ] Verify embedded required fields and durable identity parity.
