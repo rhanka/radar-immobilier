@@ -87,7 +87,7 @@ No blockage. No exception.
     - [x] Runner trap executes `docker compose down -v --remove-orphans` after every gate, including failures.
 
 - [ ] **Lot 2 — Discriminating tests and golden re-baseline**
-  - [ ] Default/false/omitted URL shape (no query string); `true` yields `?showDiscarded=1` with the user Bearer [REDACTED] forwarded.
+  - [x] Default/false/omitted URL shape (no query string); `true` yields `?showDiscarded=1` with the current user token forwarded. Server visibility precedes the client limit.
   - [ ] Reveal-before-search-before-limit ordering; 401/403/503 propagation with the flag set; end-to-end egress through the MCP transport.
   - [x] Update the `search_signals` input schema in `src/fixtures/immo-tools.v1.json`; refresh the two `toolFixtureSha256` anchors.
   - [ ] Full `packages/immo-mcp` suite stays green (no narrowed run in the final gate).
