@@ -67,7 +67,7 @@ trap 'exit 143' TERM
 # Only source/manifests: environment files, Git metadata and host dependencies
 # are excluded before reading file contents. The container sees no host tree.
 tar --exclude='.env*' --exclude=node_modules --exclude=dist --exclude=.svelte-kit \
-  -cf "$runtime_dir/source.tar" api packages ui tools/make deploy/k8s/41-immo-mcp-ingress.yaml package.json package-lock.json tsconfig.base.json eslint.config.js
+  -cf "$runtime_dir/source.tar" api packages ui tools/make tools/h4-mcp.mk deploy/k8s/41-immo-mcp-ingress.yaml package.json package-lock.json tsconfig.base.json eslint.config.js
 case "$1" in verify|test-api|astra-proof) "${compose[@]}" up -d --wait postgres ;; esac
 "${compose[@]}" run --rm --no-deps -T api sh -ec '
   tar -xf /source.tar
