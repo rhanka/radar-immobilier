@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import { isArtifactId } from "@sentropic/artifacts/contracts";
 import { parseContentHost } from "@sentropic/artifacts/content/routing";
 import type { HttpResponse } from "@sentropic/artifacts/http";
@@ -40,9 +41,61 @@ export function createMemoryCommitLedger(): {
   return { ledger: { record: (entry) => { entries.push(entry); } }, entries };
 }
 
+/**
+ * Typed provider failure preserved below the provider HTTP layer (861C unit 7).
+ * The provider HTTP app converts thrown causes into responses before the
+ * facade sees them, so the facade cannot classify from the response alone.
+ * Radar-owned wrappers below that layer (timeout blob store in
+ * `s3-timeout.ts`, locked store in `storage.ts`) record the original cause
+ * here; the facade drains it once per dispatch and lets it win over the
+ * converted response. Async context binds each cause to its dispatch even
+ * when one composed host serves concurrent callers.
+ */
+export interface ProviderFailureProbe {
+  readonly record: (error: unknown) => void;
+  take(): unknown | undefined;
+  run<T>(work: () => Promise<T>): Promise<T>;
+}
+
+export function createMemoryProviderProbe(): ProviderFailureProbe {
+  const contexts = new AsyncLocalStorage<{ pending?: unknown }>();
+  return {
+    run: (work) => contexts.run({}, work),
+    record: (error: unknown): void => {
+      const context = contexts.getStore();
+      if (context) context.pending = error;
+    },
+    take: (): unknown | undefined => {
+      const context = contexts.getStore();
+      const failure = context?.pending;
+      if (context) delete context.pending;
+      return failure;
+    },
+  };
+}
+
 export interface ArtifactControlOptions {
   readonly ledger?: CommitFailureLedger | undefined;
   readonly nowMs?: (() => number) | undefined;
+  readonly probe?: ProviderFailureProbe | undefined;
+}
+
+type ProviderFailureOverride =
+  | { readonly status: 503; readonly reason: "provider_unavailable" }
+  | { readonly status: 409; readonly reason: "provider_conflict" };
+
+function classifyProviderCause(error: unknown): ProviderFailureOverride | undefined {
+  const code = error !== null && typeof error === "object"
+    ? (error as { code?: unknown }).code
+    : undefined;
+  if (error instanceof ArtifactConnectionError || error instanceof ArtifactS3TimeoutError ||
+    code === "artifact_connection_lost" || code === "artifact_s3_timeout") {
+    return { status: 503, reason: "provider_unavailable" };
+  }
+  if (error instanceof Error && error.message.includes("artifact advisory lock timeout conflict")) {
+    return { status: 409, reason: "provider_conflict" };
+  }
+  return undefined;
 }
 type Host = NonNullable<Awaited<ReturnType<typeof composeArtifactHost>>>;
 const invalid = (): HttpResponse => ({ status: 400, body: { error: "invalid_request" } });
@@ -78,7 +131,7 @@ export function createArtifactControl(
   admission?: AdmissionAuthority | undefined,
   options?: ArtifactControlOptions | undefined,
 ): ArtifactControl {
-  return {
+  const control: ArtifactControl = {
     async handle(op, actorId, raw) {
       if (!["ensure", "publish", "meta", "list"].includes(op)) {
         return { status: 503, body: { error: "capability_unavailable" } };
@@ -141,41 +194,53 @@ export function createArtifactControl(
           method: op === "meta" ? "GET" : "POST",
           path: op === "meta" ? `/meta/${String(artifactId)}` : `/${op}` });
       } catch (error) {
-        // The provider was blocked on its lock, connection or S3: account
-        // the failure with a typed status instead of an unhandled throw.
-        const code = error !== null && typeof error === "object"
-          ? (error as { code?: unknown }).code
-          : undefined;
-        if (error instanceof ArtifactConnectionError || error instanceof ArtifactS3TimeoutError ||
-          code === "artifact_connection_lost" || code === "artifact_s3_timeout") {
-          fail("provider_unavailable", 503);
-          return { status: 503, body: { error: "capability_unavailable" } };
-        }
-        if (error instanceof Error && error.message.includes("artifact advisory lock timeout conflict")) {
-          fail("provider_conflict", 409);
-          return { status: 409, body: { error: "conflict" } };
+        // The provider HTTP layer converts thrown causes into responses, so
+        // a cause preserved below that layer (probe) wins over the throw.
+        const cause = options?.probe?.take() ?? error;
+        const override = classifyProviderCause(cause);
+        if (override !== undefined) {
+          fail(override.reason, override.status);
+          return { status: override.status,
+            body: { error: override.status === 503 ? "capability_unavailable" : "conflict" } };
         }
         fail("provider_error", 500);
         return { status: 500, body: { error: "provider_error" } };
       }
+      // Drain the preserved cause once per dispatch. On success the provider
+      // recovered after the recorded failure (retry inside its transaction),
+      // so the stale cause is dropped and the success stands. Reads drain
+      // without remapping: their converted status is returned unchanged.
+      const preserved = options?.probe?.take();
       if (write && admission && response.status >= 200 && response.status < 300) {
         // Post-settle authorization (861C unit 7): @sentropic/artifacts@0.1.2
         // offers no commit-time hook — its publication service, HTTP app and
         // Postgres store accept no authorization callback, and the advisory
         // lock only bounds the wait — so a success that settles after
         // revocation is refused to the caller and accounted here instead of
-        // receipted. Prevention inside the provider transaction is unverified:
-        // it needs a provider authorizeCommit callback run after lock
-        // acquisition and before the release insert/S3 finalization.
+        // receipted. Residual state is NOT undone: the provider release
+        // (ready), its S3 objects, the idempotency result and the current
+        // pointer may already persist. Replay after re-approval can return
+        // that publication. Unit 7 stays blocked on a host authorization
+        // callback invoked inside provider finalization after all waits.
         const after = await checkAdmission(admission, actorId);
         if (!after.allowed) {
           fail("unauthorized_at_commit", after.status);
           return { status: after.status, body: after.body };
         }
-      } else if (write && response.status === 409) {
-        fail("provider_conflict", 409);
       } else if (write && response.status >= 400) {
-        fail("provider_error", response.status);
+        // A converted error (500 internal_error, 409 conflict) is remapped
+        // from the preserved cause when one was recorded below the HTTP
+        // layer; otherwise the converted response is accounted as before.
+        const override = preserved === undefined ? undefined : classifyProviderCause(preserved);
+        if (override !== undefined) {
+          fail(override.reason, override.status);
+          return { status: override.status,
+            body: { error: override.status === 503 ? "capability_unavailable" : "conflict" } };
+        } else if (response.status === 409) {
+          fail("provider_conflict", 409);
+        } else {
+          fail("provider_error", response.status);
+        }
       }
       if (op !== "publish" || response.status !== 201) return response;
       const result = response.body as { releaseId: string; manifest: string };
@@ -187,4 +252,6 @@ export function createArtifactControl(
         stableUrl, pinnedUrl } };
     },
   };
+  const probe = options?.probe;
+  return probe ? { handle: (...args) => probe.run(() => control.handle(...args)) } : control;
 }
