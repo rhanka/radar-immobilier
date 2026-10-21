@@ -81,7 +81,7 @@ Review integration (both non-blocking points):
   - [x] Refusal regression tests.
   - [x] Async query and pre-dispatch reread tests.
   - [x] HTTP admission seam.
-  - [ ] HTTP entry regression tests.
+  - [x] HTTP entry regression tests.
   - [ ] HTTP reread regression tests.
 - [ ] **Unit 4 — control cache headers** (§5.3, T29): `Cache-Control: private, no-store`
       plus `Vary: Cookie, Authorization` on control successes, errors and account-switch
