@@ -63,7 +63,7 @@ Actions with the following status should be included around tasks only if really
 - **Mono-branch**: UAT after each lot if UI surface impacted. P1 has no UI surface: no UAT checkpoint.
 
 ## Plan / Todo (lot-based)
-- [x] Current commit unit: fix(h4): pin isolated compose runners to test projects.
+- [x] Current commit unit: test(h4): prove compose isolation and early canary refusal.
 - [x] **Lot 0 — Baseline & constraints**
   - [x] Read `conception-h4-v3.md` P1 section and the P0 filets (`deployed-baseline.test.ts`, `tool-fixture-provenance.test.ts`).
   - [x] Confirm scope and guardrails; apply BR861C-EX1.
@@ -91,6 +91,13 @@ Actions with the following status should be included around tasks only if really
   - [x] Add `src/invocation-context.test.ts`: frozen snapshot, concurrent `AsyncLocalStorage` isolation, definition/handler/registrar parity.
   - [x] Add `src/request-isolation.test.ts`: out-of-order completion on one session, zero protected egress on missing scope, requesting-human `showDiscarded` semantics.
   - [x] Lot gate: typecheck + lint + `test-immo-mcp` full file run.
+- [ ] **Lot 6 — Astra review corrections**
+  - [x] Pin both ordinary runners and canary sub-makes to the ENV-derived project (BR861C-EX2).
+  - [x] Prove four hostile fake-Docker cases, one -p per call, down -v and zero Docker calls for e2e-*.
+  - [x] Compare eight ordinary recipes against ff7d8529; retain payload, command order and SCOPE (cmp=0).
+  - [x] Reject inherited DOCKER_COMPOSE in a copy; restore all three tooling files (cmp=0) and rerun green.
+  - [ ] Repeat real MCP typecheck, lint, full suite and both exclusion canaries with inverse controls.
+  - [ ] Record results and local commits in the Sol report; verify the fix bundle and project teardown.
 - [x] **Lot N-1 — Docs consolidation**
   - [x] Update this `BRANCH.md` with merge-ready state.
   - [x] Hand off `RAPPORT-MUSE-H4-P1.md` (modifications, tests, commit split, remaining `not covered`).
