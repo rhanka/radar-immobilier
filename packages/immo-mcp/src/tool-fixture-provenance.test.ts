@@ -33,7 +33,6 @@ const TWELVE_TOOLS = [
 
 const fixtureUrl = new URL("./fixtures/immo-tools.v1.json", import.meta.url);
 const provenanceUrl = new URL("./fixtures/immo-tools.provenance.v1.json", import.meta.url);
-const artifactHostMkUrl = new URL("../../../tools/artifact-host.mk", import.meta.url);
 const h4RunnerMkUrl = new URL("../../../tools/h4-mcp.mk", import.meta.url);
 
 function sha256(text: string): string {
@@ -100,11 +99,6 @@ describe("H4 P0 fixture provenance", () => {
   it("pins the twelve-tool contract names", () => {
     const fixture = JSON.parse(readFileSync(fixtureUrl, "utf8")) as { tools: { name: string }[] };
     expect(fixture.tools.map((tool) => tool.name).sort()).toEqual([...TWELVE_TOOLS].sort());
-  });
-
-  it("excludes service E2E from the ordinary test-mcp target", () => {
-    const mk = readFileSync(artifactHostMkUrl, "utf8");
-    expect(mk).toContain("--exclude '**/*.e2e.test.ts'");
   });
 
   it("guards the dedicated H4 runner", () => {

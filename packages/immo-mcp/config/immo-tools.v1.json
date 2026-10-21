@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "configVersion": "immo-tools.v1",
+  "provider": {
+    "id": "immo",
+    "version": "0.0.1",
+    "registry": "local",
+    "centralRegistryRequest": "never"
+  },
+  "entryScope": "immo:read",
+  "scopePolicy": {
+    "allowedScopes": ["immo:read", "immo:search", "immo:documents:read"],
+    "rejectedGenericScopes": ["mcp:*", "artifacts:*"],
+    "note": "Generic scopes never replace the Immo scope policy."
+  },
+  "tools": [
+    { "name": "search_lots", "scope": "immo:search", "binding": { "context": "data", "registeredBy": "registerTools" } },
+    { "name": "get_lot_card", "scope": "immo:read", "binding": { "context": "data", "registeredBy": "registerTools" } },
+    { "name": "search_signals", "scope": "immo:search", "binding": { "context": "data", "registeredBy": "registerTools" } },
+    { "name": "get_opportunity_dossier", "scope": "immo:read", "binding": { "context": "data", "registeredBy": "registerTools" } },
+    { "name": "list_documents", "scope": "immo:documents:read", "binding": { "context": "data", "registeredBy": "registerTools" } },
+    { "name": "read_document_excerpt", "scope": "immo:documents:read", "binding": { "context": "data", "registeredBy": "registerTools" } },
+    { "name": "get_reglement_provenance", "scope": "immo:read", "binding": { "context": "raw", "registeredBy": "registerTools" } },
+    { "name": "query_zoning_events", "scope": "immo:read", "binding": { "context": "raw", "registeredBy": "registerTools" } },
+    { "name": "get_zones_geojson", "scope": "immo:read", "binding": { "context": "raw", "registeredBy": "registerTools" } },
+    { "name": "get_lots_geojson", "scope": "immo:read", "binding": { "context": "raw", "registeredBy": "registerTools" } },
+    { "name": "get_grille_pdf", "scope": "immo:documents:read", "binding": { "context": "raw", "registeredBy": "registerTools" } },
+    { "name": "get_pv_pdf", "scope": "immo:documents:read", "binding": { "context": "raw", "registeredBy": "registerTools" } }
+  ],
+  "compatibility": {
+    "toolCount": 12,
+    "sourceFixture": "packages/immo-mcp/src/fixtures/immo-tools.v1.json",
+    "note": "Test captures stay test evidence and are never production configuration."
+  },
+  "provenance": {
+    "design": "conception-h4-v3",
+    "section": "P3",
+    "owner": "immo",
+    "values": "non-secret identifiers and opaque references only"
+  }
+}
