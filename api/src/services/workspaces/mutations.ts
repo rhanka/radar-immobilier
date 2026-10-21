@@ -132,4 +132,3 @@ export async function revokeMembership(db: WorkspaceDb, mutation: MembershipMuta
     return toRecord(saved!);
   });
 }
-
