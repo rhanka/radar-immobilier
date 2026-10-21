@@ -180,3 +180,4 @@ unchanged until activation runs; scoped routes stay unmounted from `app.ts`.
 - [x] Fix2 integration checkpoint: `4ebcb5a1`.
 - [x] Fix2 integration checkpoint: `fb9cd79e`.
 - [x] Fix2 integration checkpoint: `c83ca75b`.
+- [x] Fix2 integration checkpoint: `9e03c7c0`.

@@ -51,6 +51,8 @@ Provide the workspace and membership authority for one team workspace: explicit 
   - Include reason, impact, and rollback strategy.
 
 ## Feedback Loop
+- `BR6G-EX3`: adapt only `migrate-idempotence.spec.ts`, `artifacts-migrations.spec.ts` and `artifacts-provenance.spec.ts` under `api/tests/integration/` for appended migrations. Reason: CI assumes the artifact migrations end the journal. Impact: preserve hash, timestamp, replay and startup-guard checks while including every later migration; isolated Make entry and evidence stay under ignored `tmp/paniers-6g-ci/`. Rollback: restore these tests and this plan from `fd814416`.
+- [x] CI integration correction: 2,774 API tests pass (32 conditional skips), API declarations build, two SQL guard tests pass, five copied mutations fail as expected then restore green, and all eight adapted-file tests pass with a copied future 0018; existing SQL stays unchanged.
 - [x] CI build correction: merge origin/main, reproduce TS4023, explicitly type the Vitest collector with ReturnType<typeof describe.skipIf>; API declaration build, typecheck, scoped lint, 41 tests and 11 copied mutation checks pass.
 - [x] Astra fix qualification: canonical locks, SQL revision guards and explicit-absence conflicts.
 - [x] Astra fix qualification: withdrawals preserve revoked status and work on suspended accounts.
