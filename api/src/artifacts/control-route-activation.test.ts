@@ -114,5 +114,3 @@ describe("controlRoute cohort admission [T02 T05 T17 T24]", () => {
     }
   });
 });
-
-

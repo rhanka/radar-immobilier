@@ -83,12 +83,12 @@ Review integration (both non-blocking points):
   - [x] HTTP admission seam.
   - [x] HTTP entry regression tests.
   - [x] HTTP reread regression tests.
-- [ ] **Unit 4 — control cache headers** (§5.3, T29): `Cache-Control: private, no-store`
+- [x] **Unit 4 — control cache headers** (§5.3, T29): `Cache-Control: private, no-store`
       plus `Vary: Cookie, Authorization` on control successes, errors and account-switch
       responses.
   - [x] Final-response cache middleware.
   - [x] Success, refusal and account-switch cache tests.
-  - [ ] Parent-handler exception cache tests.
+  - [x] Parent-handler exception cache tests.
 
 ## Verification
 
