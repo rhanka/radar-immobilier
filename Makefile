@@ -394,6 +394,12 @@ k8s-validate: ## Validate the radar/sentropic-app manifests offline (no cluster)
 	@echo "[k8s-validate] every Job script is an esbuild entrypoint of api/Dockerfile…"
 	@bash deploy/ci/check-image-entrypoints.sh
 	@bash deploy/ci/check-image-entrypoints.test.sh >/dev/null
+	@echo "[k8s-validate] H3 preprod render stays disabled and isolated…"
+	@bash deploy/ci/check-h3-preprod-render.sh
+	@bash deploy/ci/check-h3-preprod-render.test.sh >/dev/null
+	@bash deploy/ci/check-h3-activation-render.test.sh >/dev/null
+	@bash deploy/ci/check-h3-discrimination.test.sh >/dev/null
+	@bash deploy/ci/preflight-h3-preprod.test.sh >/dev/null
 	@if [ "$(K8S_VALIDATE_WITH_CLUSTER)" = "1" ]; then \
 	  echo "[k8s-validate] server-side dry-run (KUBECONFIG required)…"; \
 	  $(KUBECTL) apply --dry-run=server -k $(K8S_MANIFEST_DIR); \
