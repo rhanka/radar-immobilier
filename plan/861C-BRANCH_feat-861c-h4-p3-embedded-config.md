@@ -9,8 +9,8 @@ Prepare the data-and-contracts slice of P3: versioned Immo provider and artifact
 - No test capture used as production configuration; non-secret values and opaque references only.
 - Isolated tooling only: `tools/immo-mcp-test.mk` (unchanged); root `ENV=dev` stays reserved for the user.
 - Every commit stays within 150 changed lines and 15 files, including its plan update.
-- Integration uses `ENV=test-861c-h4-p3` and `ENV=test-861c-h4-p3-fix` with no published host ports.
-- Shared Git metadata stays read-only; local commits and bundles live under `tmp/861c-h4-p3/` and `tmp/861c-h4-p3-fix/`.
+- Integration uses `ENV=test-861c-h4-p3`, `ENV=test-861c-h4-p3-fix` and `ENV=test-861c-h4-p3-fix2` with no published host ports.
+- Shared Git metadata stays read-only; local commits and bundles live under `tmp/861c-h4-p3/`, `tmp/861c-h4-p3-fix/` and `tmp/861c-h4-p3-fix2/`.
 
 ## Branch Scope Boundaries (MANDATORY)
 - **Allowed Paths (implementation scope)**:
@@ -19,7 +19,7 @@ Prepare the data-and-contracts slice of P3: versioned Immo provider and artifact
   - `packages/immo-mcp/config/immo-artifacts.v1.json`
   - `packages/immo-mcp/src/registry/**`
   - `RAPPORT-MUSE-H4-P3.md` (uncommitted deliverable)
-  - `RAPPORT-SOL-H4-P3.md`, `tmp/861c-h4-p3/**`, `tmp/861c-h4-p3-fix/**` (uncommitted integration evidence)
+  - `RAPPORT-SOL-H4-P3.md`, `tmp/861c-h4-p3/**`, `tmp/861c-h4-p3-fix/**`, `tmp/861c-h4-p3-fix2/**` (uncommitted integration evidence)
 - **Forbidden Paths (must not change in this branch)**:
   - `Makefile`
   - `docker-compose*.yml`
@@ -95,6 +95,12 @@ Prepare the data-and-contracts slice of P3: versioned Immo provider and artifact
   - [x] Prove complete profile integrity and authorized digest evolution.
   - [x] Preserve duplicate-declaration rejection for selected artifact tools and providers.
   - [x] Pass full gates, five copy mutations, restoration checks and resource teardown.
+- [ ] **Lot 5c — Independent review corrections**
+  - [x] Reject duplicate provider identifiers with disjoint Immo inventory coverage.
+  - [ ] Validate command mappings and require bindingName for artifacts_ensure.
+  - [ ] Rebuild frozen selection entries from validated fields and cover nested caller mutations.
+  - [ ] Verify baseline failures, full gates, four copy scenarios and cmp restoration.
+  - [ ] Deliver snapshot-typechecked commits, base-relative bundle and updated integration report.
 - [ ] **Lot 6 — Merge and close**
   - [ ] Push branch (excluded from this integration assignment).
   - [ ] Open PR, verify CI green.

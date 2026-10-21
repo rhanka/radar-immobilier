@@ -61,6 +61,7 @@ export function compileComposition(
   },
 ): CompiledComposition {
   const allowedScopes = options?.allowedScopes ?? DEFAULT_ALLOWED_SCOPES;
+  const providerIds = new Set<string>();
   const seen = new Set<string>();
   const toolScopes: Record<string, string> = Object.create(null);
   const hasArtifactProvider = providers.some((provider) => provider.id === ARTIFACT_PROVIDER_ID);
@@ -68,6 +69,10 @@ export function compileComposition(
     if (!provider.id || typeof provider.id !== "string") {
       throw new RegistryError("malformed_parameter", "provider id is malformed");
     }
+    if (providerIds.has(provider.id)) {
+      throw new RegistryError("duplicate_tool", `provider ${provider.id} is declared twice`);
+    }
+    providerIds.add(provider.id);
     if (provider.id !== IMMO_PROVIDER_ID && provider.id !== ARTIFACT_PROVIDER_ID) {
       throw new RegistryError("unknown_provider", `provider ${provider.id} is unknown`);
     }
