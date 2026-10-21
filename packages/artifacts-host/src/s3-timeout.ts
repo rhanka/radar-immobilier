@@ -22,8 +22,14 @@ export function withS3Timeout<T>(
   return Promise.race([work, deadline]).finally(() => clearTimeout(timer));
 }
 
+/** Recording must never break dispatch. */
+function safeReport(report: (error: unknown) => void, error: unknown): void {
+  try { report(error); } catch { /* probe failure stays silent */ }
+}
+
 export function createTimeoutBlobStore<T extends object>(
   inner: T, timeoutMs = S3_OPERATION_TIMEOUT_MS,
+  onFailure?: ((error: unknown) => void) | undefined,
 ): T {
   return new Proxy(inner, {
     get(target, property) {
@@ -32,7 +38,9 @@ export function createTimeoutBlobStore<T extends object>(
       return (...args: unknown[]) => {
         const result = (value as (...args: unknown[]) => unknown).apply(target, args);
         if (property !== "destroy" && property !== "close" && result instanceof Promise) {
-          return withS3Timeout(result, `blobs.${String(property)}`, timeoutMs);
+          const bounded = withS3Timeout(result, `blobs.${String(property)}`, timeoutMs);
+          if (onFailure === undefined) return bounded;
+          return bounded.catch((error: unknown) => { safeReport(onFailure, error); throw error; });
         }
         return result;
       };

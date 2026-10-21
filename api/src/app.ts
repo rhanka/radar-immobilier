@@ -68,7 +68,7 @@ export type AppDeps = HealthDeps &
     contentHost?: ContentHostConfig;
     /**
      * Artifact control plane (861c H2); mounted only when auth is enabled.
-     * Absent keeps the chain (open mode or ARTIFACTS_* unset).
+     * When absent, authenticated mode mounts the closed control capability.
      */
     artifactsControl?: ControlRouteDeps;
   };
@@ -85,8 +85,18 @@ export function createApp(deps: AppDeps): Hono {
   }
 
   // Control requests use the official cookie guard before general bearer auth.
-  if (deps.auth?.enabled && deps.artifactsControl) {
-    app.route("/api/v1/artifacts/control", controlRoute(deps.artifactsControl));
+  if (deps.auth?.enabled) {
+    if (deps.artifactsControl) {
+      app.route("/api/v1/artifacts/control", controlRoute(deps.artifactsControl));
+    } else {
+      // Closed capability: same identity guards and cache headers as the
+      // mounted route, without storage. The guard returns 503 after the
+      // cookie/origin checks, so no account query is needed here.
+      app.route("/api/v1/artifacts/control", controlRoute({
+        auth: deps.auth,
+        accounts: { query: async () => ({ rows: [] }) },
+      }));
+    }
   }
 
   // Auth runs after the content gate, so protect still fronts every business
