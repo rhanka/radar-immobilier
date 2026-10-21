@@ -166,23 +166,29 @@ rtk make -f tools/artifact-host.mk inspect API_PORT=18983 UI_PORT=15983 MAILDEV_
 `ENV` stays last in every command. Teardown (`down -v --remove-orphans`) must be
 followed by `inspect` proving no project containers, volumes or networks remain.
 
-- [ ] Deny behavior: every host form refused with identical closed headers
+- [x] Deny behavior: every host form refused with identical closed headers
       (`content-deny.test.ts`, new cases; `content-app.test.ts` unchanged).
-- [ ] Deny isolation: import graph and `PORT`-only reads pinned
+- [x] Deny isolation: import graph and `PORT`-only reads pinned
       (`content-deny-isolation.test.ts`).
-- [ ] No regression on the H1 gate: existing `content-app`/`content-host`/
+- [x] No regression on the H1 gate: existing `content-app`/`content-host`/
       `content-config` suites stay green.
-- [ ] Real-image smoke: `image-runtime-smoke` passes (both modes boot with
+- [x] Real-image smoke: `image-runtime-smoke` passes (both modes boot with
       closed denial; unknown mode refused), then `down` + `inspect` prove no
       project containers, volumes or networks remain.
-- [ ] Per-commit typechecks, lint, and `check-image-entrypoints.sh` stay green
+- [x] Per-commit typechecks, lint, and `check-image-entrypoints.sh` stay green
       (the new esbuild entrypoint is picked up automatically).
-- [ ] Discrimination in a copy: removing the shared denial reuse breaks the
-      H1 gate cases; removing the Dockerfile entrypoint line breaks the
-      runtime smoke; restoration passes.
+- [x] Discrimination in copies: accepting a malformed host or adding a side-effect
+      application import fails the unit suite; accepting an unknown mode fails
+      the real-image exit assertion. Restored copies pass, with bytewise `cmp`.
 
-No shell or test was run while writing this PR (execution consigne); the
-testing agent runs the gates above and records results in `RAPPORT-MUSE-H3-P3.md`.
+- [x] Final evidence: 153 hosting-package tests, 104 targeted API tests,
+      2653 API tests outside integration (8 skipped), and 26 artifact integrations
+      pass. Exact CI API declaration build, lint and runtime smoke pass; seven
+      Svelte warnings remain. Logs and the transfer bundle are under
+      `tmp/861c-h3-p3/`; the French report is `RAPPORT-SOL-H3-P3.md` (uncommitted).
+- [x] Security boundary recorded: npm audit reports Vite GHSA-587h-7wmj-h5pm
+      (high) in the unchanged dependency tree. No dependency update or risk
+      acceptance is included; dependency remediation belongs on its own branch.
 
 ## Not covered (later H3 units)
 
