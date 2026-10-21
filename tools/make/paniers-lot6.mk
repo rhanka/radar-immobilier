@@ -6,9 +6,13 @@ LOT ?= 6F
 API_PORT ?= 18866
 UI_PORT ?= 15866
 MAILDEV_UI_PORT ?= 11866
+ifeq ($(LOT),6G)
+SCOPE ?= src/services/workspaces
+else
 SCOPE ?= src/services/facets
+endif
 ACTION ?= verify
-export ENV LOT API_PORT UI_PORT MAILDEV_UI_PORT SCOPE ACTION EVIDENCE_TAG
+export ENV LOT API_PORT UI_PORT MAILDEV_UI_PORT SCOPE ACTION EVIDENCE_TAG CHECKPOINT_DIR
 
 .PHONY: guard verify typecheck lint test-api clean inspect diagnose commit prepare checkpoints deliver regression audit
 guard:
@@ -20,6 +24,10 @@ verify typecheck lint test-api: guard
 
 regression: guard
 	@bash tools/make/paniers-lot6-verify.sh regression
+
+.PHONY: scope-proof
+scope-proof: guard
+	@bash tools/make/paniers-lot6g-fix-scope.sh
 
 prepare: guard
 	@bash tools/make/paniers-lot6g-deliver.sh prepare
