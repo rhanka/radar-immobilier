@@ -6,6 +6,13 @@ export {
   type ArtifactsStorageConfig,
 } from "./config.js";
 export {
+  readActivationEnv,
+  resolveActivationConfig,
+  type ActivationConfig,
+  type ActivationConfigInput,
+  type ActivationDisabledReason,
+} from "./activation.js";
+export {
   ArtifactConnectionError,
   computeParamsHash,
   createArtifactsPool,
