@@ -40,8 +40,17 @@
   export let codesLoading = false;
   /** Parent-level inactivation (not allowed, reload in flight). */
   export let disabled = false;
-  /** Parent reload after a 409 head conflict (stale heads, new intention required). */
-  export let onHeadsStale: () => void = () => {};
+  /**
+   * Parent reload after a 409 head conflict (stale heads, new intention
+   * required). Carries the launched target, its launch context and the
+   * refusal copy, so the parent keeps the refusal visible when the reload
+   * removes the card and ignores late conflicts from another city/viewer.
+   */
+  export let onHeadsStale: (
+    target: FacetTarget,
+    launch: FacetCommandLaunch,
+    message: string,
+  ) => void = () => {};
   /** Injectable for tests; defaults to the real facet client. */
   export let postCommand: typeof postFacetCommand = postFacetCommand;
   /** Parent-owned viewer identity, captured before each command. */
@@ -149,14 +158,15 @@
         lastIntent = null;
         commandKey = null;
       }
-      if (err instanceof SignalFacetError
-        && (err.code === "facet_head_conflict" || err.code === "command_context_unresolved")) {
-        onHeadsStale();
-      }
-      error =
+      const refusalMessage =
         err instanceof SignalFacetError
           ? facetErrorMessage(err)
           : "Écriture non confirmée — Réessayer.";
+      if (err instanceof SignalFacetError
+        && (err.code === "facet_head_conflict" || err.code === "command_context_unresolved")) {
+        onHeadsStale(body.target, launch, refusalMessage);
+      }
+      error = refusalMessage;
     } finally {
       busy = false;
       await tick();
