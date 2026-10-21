@@ -44,6 +44,7 @@ export interface ArtifactSelectionRequest {
   readonly operation: string;
   readonly method: string;
   readonly path: string;
+  readonly command: string;
 }
 
 export interface ArtifactActivationRequest {
@@ -88,6 +89,9 @@ export function checkEffectiveProfile(
     if (!required[tool]?.includes("idempotencyKey")) {
       throw new RegistryError("unavailable_capability", `artifact tool ${tool} must require idempotencyKey`);
     }
+  }
+  if (!required["artifacts_ensure"]?.includes("bindingName")) {
+    throw new RegistryError("unavailable_capability", "artifact tool artifacts_ensure must require bindingName");
   }
   if (!required["artifacts_publish"]?.includes("artifactId") ||
     !required["artifacts_publish"]?.includes("files")) {
@@ -158,7 +162,8 @@ export function checkArtifact(request: ArtifactActivationRequest, providers: rea
     if (declared.scope !== ARTIFACT_INVOCATION_SCOPE) {
       throw new RegistryError("generic_scope", `artifact tool ${entry.tool} scope must be immo:read`);
     }
-    if (expected.operation !== entry.operation || expected.method !== entry.method || expected.path !== entry.path) {
+    if (expected.operation !== entry.operation || expected.method !== entry.method ||
+      expected.path !== entry.path || expected.command !== entry.command) {
       throw new RegistryError("unavailable_capability", `artifact tool ${entry.tool} mapping is not supported`);
     }
   }
