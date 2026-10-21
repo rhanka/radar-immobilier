@@ -1,4 +1,4 @@
-import { afterAll, expect, it } from "vitest";
+import { afterAll, expect, it, vi } from "vitest";
 import { and, eq } from "drizzle-orm";
 import { accountUsers, workspaceMembershipEvents, workspaceMemberships } from "../../db/schema.js";
 import { setMembershipCapability } from "./capabilities.js";
@@ -98,4 +98,80 @@ describeDb("workspace SQL authority", () => {
     expect(() => requireCapability({ ...access, workspaceId: f.workspaceId, status: "active", revision: 2 },
       access.manageMembers ? "moderate_archive" : "manage_members")).toThrow();
   });
+
+  it("should serialize writes that spell the workspace UUID in different cases", async () => {
+    const f = await fixture();
+    expect(f.workspaceId.toUpperCase()).not.toBe(f.workspaceId.toLowerCase());
+    const base = { targetAccountId: f.member.id, actorSub: f.manager.sub, reason: "synthetic",
+      granted: true, expectedRevision: 1 };
+    const results = await Promise.allSettled([
+      setMembershipCapability(db, { ...base, workspaceId: f.workspaceId.toLowerCase(), capability: "moderate_archive" }),
+      setMembershipCapability(db, { ...base, workspaceId: f.workspaceId.toUpperCase(), capability: "manage_members" }),
+    ]);
+    expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(1);
+    expect(results.find((result) => result.status === "rejected")).toMatchObject({
+      reason: { status: 409, message: "workspace_revision_conflict" },
+    });
+  });
+
+  it("should queue an uppercase workspace writer behind the lowercase transaction", async () => {
+    const f = await fixture();
+    const base = { targetAccountId: f.member.id, actorSub: f.manager.sub, reason: "synthetic",
+      granted: true, expectedRevision: 1 };
+    let pending: Promise<unknown> = Promise.resolve();
+    await db.transaction(async (tx) => {
+      await setMembershipCapability(tx, { ...base, workspaceId: f.workspaceId.toLowerCase(),
+        capability: "moderate_archive" });
+      pending = setMembershipCapability(db, { ...base, workspaceId: f.workspaceId.toUpperCase(),
+        capability: "manage_members" }).then(
+        (result) => ({ result }), (error: unknown) => ({ error }),
+      );
+      await vi.waitFor(async () => {
+        const waiting = await pool.query(`SELECT pid FROM pg_stat_activity
+          WHERE datname = current_database() AND wait_event = 'advisory'`);
+        expect(waiting.rows).toHaveLength(1);
+      }, { timeout: 1000, interval: 20 });
+    });
+    expect(await pending).toMatchObject({ error: { status: 409, current: { revision: 2 } } });
+    expect(await resolveWorkspaceAccess(db, f.workspaceId, f.member.sub))
+      .toMatchObject({ moderateArchive: true, manageMembers: false });
+  });
+
+  it.each(["capability", "reactivation", "revocation"] as const)(
+    "should compare the SQL revision during %s against a concurrent row writer", async (operation) => {
+      const f = await fixture();
+      const base = { workspaceId: f.workspaceId, targetAccountId: f.member.id,
+        actorSub: f.manager.sub, reason: "synthetic" };
+      const revision = operation === "reactivation"
+        ? (await revokeMembership(db, { ...base, expectedRevision: 1 })).revision : 1;
+      const blocker = await pool.connect();
+      let pending: Promise<unknown> = Promise.resolve();
+      let committed = false;
+      try {
+        await blocker.query("BEGIN");
+        const owner = await blocker.query<{ pid: number }>("SELECT pg_backend_pid() AS pid");
+        await blocker.query(`UPDATE workspace_memberships SET revision = revision + 1
+          WHERE workspace_id = $1 AND account_id = $2`, [f.workspaceId, f.member.id]);
+        const mutation = { ...base, expectedRevision: revision };
+        pending = (operation === "reactivation" ? addMembership(db, mutation)
+          : operation === "revocation" ? revokeMembership(db, mutation)
+            : setMembershipCapability(db, { ...mutation, capability: "moderate_archive", granted: true }))
+          .then((result) => ({ result }), (error: unknown) => ({ error }));
+        await vi.waitFor(async () => {
+          const waiting = await pool.query(`SELECT pid FROM pg_stat_activity
+            WHERE $1::int = ANY(pg_blocking_pids(pid))`, [owner.rows[0]!.pid]);
+          expect(waiting.rows).toHaveLength(1);
+        }, { timeout: 1000, interval: 20 });
+        await blocker.query("COMMIT");
+        committed = true;
+      } finally {
+        if (!committed) await blocker.query("ROLLBACK");
+        blocker.release();
+        await pending;
+      }
+      expect(await pending).toMatchObject({ error: { status: 409,
+        current: { revision: revision + 1, moderateArchive: false,
+          status: operation === "reactivation" ? "revoked" : "active" } } });
+    },
+  );
 });
