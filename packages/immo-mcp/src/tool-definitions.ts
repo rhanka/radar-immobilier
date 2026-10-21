@@ -38,7 +38,52 @@ const limitSchema = z
       `max ${RAW_GEOJSON_MAX_LIMIT} — bbox obligatoire au-delà de ${RAW_GEOJSON_DEFAULT_LIMIT}).`,
   );
 
-export const TOOL_DEFINITIONS: readonly ToolDefinition[] = [];
+export const TOOL_DEFINITIONS: readonly ToolDefinition[] = [
+  {
+    name: "search_lots",
+    title: "Search lots",
+    description:
+      "Recherche de lots par ville et critères (zone, no_lot, superficie min). Read-only.",
+    inputSchema: {
+      city: z.string().min(1).describe("Ville (ex: longueuil, valleyfield)"),
+      zone: z.string().optional().describe("Code de zonage (ex: H-203)"),
+      no_lot: z.string().optional().describe("Numéro de lot cadastral exact"),
+      minArea: z.number().positive().optional().describe("Superficie minimale en m²"),
+      limit: z.number().int().min(1).max(100).default(20),
+    },
+    scope: IMMO_SCOPES.search,
+  },
+  {
+    name: "get_lot_card",
+    title: "Get lot card",
+    description: "Fiche détaillée d'un lot (zonage, superficie, signaux liés). Read-only.",
+    inputSchema: {
+      city: z.string().min(1),
+      no_lot: z.string().min(1).describe("Numéro de lot cadastral exact"),
+    },
+    scope: IMMO_SCOPES.read,
+  },
+  {
+    name: "search_signals",
+    title: "Search signals",
+    description:
+      "Recherche de signaux réglementaires par ville (étape, mot-clé). Read-only.",
+    inputSchema: {
+      city: z.string().min(1),
+      etape: z
+        .string()
+        .optional()
+        .describe("Étape du processus (ex: avis_motion, adoption, consultation)"),
+      query: z.string().optional().describe("Mot-clé libre"),
+      showDiscarded: z
+        .boolean()
+        .optional()
+        .describe("Reveal archived signals hidden by default (default false). Read-only."),
+      limit: z.number().int().min(1).max(100).default(20),
+    },
+    scope: IMMO_SCOPES.search,
+  },
+];
 
 /** Raw-data tool contracts (zones/lots GeoJSON, grille & PV PDFs, provenance). */
 export const RAW_TOOL_DEFINITIONS: readonly ToolDefinition[] = [];
