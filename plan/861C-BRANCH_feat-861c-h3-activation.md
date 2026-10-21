@@ -107,7 +107,7 @@ Review integration (both non-blocking points):
 
 ## Deliverables (third PR)
 
-- [ ] **Unit 8 — isolated denial listener** (§5.4, T02/T23/T24): new
+- [x] **Unit 8 — isolated denial listener** (§5.4, T02/T23/T24): new
       `api/src/artifacts/content-deny.ts` exposes the shared denial
       response plus `createContentDenyApp()`, which denies every request
       unconditionally (401 under `/api/*`, 404 elsewhere), serves only
@@ -140,7 +140,7 @@ Review integration (both non-blocking points):
 
 - [x] Shared denial module and H1 header reuse.
 - [x] Host and probe behavior regression coverage.
-- [ ] Isolated HTTP listener and import-graph checks.
+- [x] Isolated HTTP listener and import-graph checks.
 - [ ] Runtime bundling and strict service-mode selection.
 - [ ] Real-image smoke and isolated CI build targets.
 
