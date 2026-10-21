@@ -161,6 +161,8 @@ function classification(): GraphSignalNode["classification"] {
   } as unknown as GraphSignalNode["classification"];
 }
 
+export const NODE_FINGERPRINT = "0123456789abcdef".repeat(4);
+
 function signalNode(citySlug: string, id: string, label: string): GraphSignalNode {
   return {
     id,
@@ -168,6 +170,7 @@ function signalNode(citySlug: string, id: string, label: string): GraphSignalNod
     label,
     citySlug,
     sourceRef: `raw/proces-verbaux-ville/cas/${id}.pdf`,
+    facetFingerprint: NODE_FINGERPRINT,
     createdAt: "2026-05-19T12:00:00.000Z",
     description: `Synthetic ${label}.`,
     publishedAt: "2026-05-19",
