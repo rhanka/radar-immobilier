@@ -17,12 +17,12 @@ ACTION ?= verify
 DELIVERY_PROFILE = $(if $(filter 6H,$(LOT)),6h,6g)
 export ENV LOT API_PORT UI_PORT MAILDEV_UI_PORT SCOPE ACTION EVIDENCE_TAG CHECKPOINT_DIR
 
-.PHONY: guard verify typecheck lint test-api clean inspect diagnose commit prepare checkpoints deliver regression audit
+.PHONY: guard verify build typecheck lint test-api clean inspect diagnose commit prepare checkpoints deliver regression audit astra-proof
 guard:
 	@case '$(ENV)' in test-*|e2e-*) ;; *) echo 'test-* or e2e-* ENV required'; exit 1;; esac
 	@case '$(LOT)' in 6F|6G|6H) ;; *) echo 'LOT must be 6F, 6G or 6H'; exit 1;; esac
 
-verify typecheck lint test-api: guard
+verify build typecheck lint test-api astra-proof: guard
 	@bash tools/make/paniers-lot6-verify.sh $@
 
 regression: guard
@@ -43,6 +43,11 @@ deliver: guard
 
 audit: guard
 	@bash tools/make/paniers-lot$(DELIVERY_PROFILE)-deliver.sh audit
+
+.PHONY: fix-prepare fix-deliver fix-audit
+fix-prepare fix-deliver fix-audit: guard
+	@test '$(LOT)' = 6H
+	@bash tools/make/paniers-lot6h-fix-deliver.sh $@
 
 clean inspect diagnose: guard
 	@bash tools/make/paniers-lot6-verify.sh $@
