@@ -1,0 +1,21 @@
+feat: add workspace membership schema|api/drizzle/0017_workspace_memberships.sql api/drizzle/meta/_journal.json api/src/db/schema.ts
+feat: add explicit workspace capability policy|api/src/services/workspaces/types.ts api/src/services/workspaces/policy.ts
+feat: add workspace authority reference|api/src/services/workspaces/authority.ts
+feat: add workspace authority reads|api/src/services/workspaces/store.ts
+feat: add audited workspace membership mutations|api/src/services/workspaces/mutations.ts
+feat: add separate workspace capability mutations|api/src/services/workspaces/capabilities.ts
+feat: add idempotent workspace initialization|api/src/services/workspaces/init.ts
+feat: initialize workspace authority in Postgres|api/src/services/workspaces/init-store.ts
+feat: apply workspace membership commands atomically|api/src/services/workspaces/membership-command.ts
+feat: add guarded workspace membership routes|api/src/routes/workspaces.ts
+feat: add workspace initialization operator CLI|api/src/scripts/init-workspace-authority.ts
+test: cover workspace policy with synthetic fixtures|api/src/services/workspaces/policy.test.ts api/src/services/workspaces/db-fixture.ts
+test: cover workspace authority and initialization|api/src/services/workspaces/authority.test.ts
+test: verify workspace migration and SQL audit guards|api/src/services/workspaces/migration.test.ts api/src/services/workspaces/migration-db.test.ts
+test: qualify workspace authority on Postgres|api/src/services/workspaces/store-db.test.ts
+test: qualify workspace HTTP and atomic commands|api/src/services/workspaces/routes-db.test.ts api/src/services/workspaces/commands-db.test.ts
+test: verify operator initialization and exact replay|api/src/services/workspaces/cli-db.test.ts
+chore: isolate workspace qualification and regression runs|tools/make/paniers-lot6.mk tools/make/paniers-lot6-verify.sh
+test: prove workspace capability audit and replay guards|tools/make/paniers-lot6g-mutation.sh
+chore: deliver workspace commits with checked snapshots|tools/make/paniers-lot6g-deliver.sh tools/make/paniers-lot6g-slices.txt
+docs: record workspace authority scope and qualification|plan/PANIERS6G-BRANCH_feat-paniers-6g-workspace-authority.md
