@@ -65,7 +65,7 @@ Require the displayed signal fingerprint on every new personal facet command. Ve
 - [ ] **Lot 1 — Source version and writer**
   - [x] Serve the exact stored-node fingerprint, including degraded cards; preserve golden bytes.
   - [x] Verify versions under the city lock, bind digests and preserve historical recovery.
-  - [ ] Adapt existing API integration contracts.
+  - [x] Adapt existing API integration contracts.
 - [ ] **Lot 2 — Captured UI intentions**
   - [ ] Capture fingerprints in commands/undo; retain parent notices and launch context.
   - [ ] Qualify client/control/viewer/panel behavior and exact network retries.
