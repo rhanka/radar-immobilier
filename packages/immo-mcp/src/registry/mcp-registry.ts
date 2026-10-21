@@ -122,7 +122,11 @@ export function checkTool(def: RegistryToolDefinition, allowedScopes: readonly s
 }
 
 export function checkArtifact(request: ArtifactActivationRequest, providers: readonly ProviderDefinition[]): void {
-  const provider = providers.find(({ id }) => id === request.providerId);
+  const matchingProviders = providers.filter(({ id }) => id === request.providerId);
+  if (matchingProviders.length > 1) {
+    throw new RegistryError("duplicate_tool", `artifact provider ${request.providerId} is declared twice`);
+  }
+  const provider = matchingProviders[0];
   if (request.providerId !== ARTIFACT_PROVIDER_ID || !provider) {
     throw new RegistryError("unknown_provider", `artifact provider ${request.providerId} is not registered`);
   }
@@ -143,7 +147,11 @@ export function checkArtifact(request: ArtifactActivationRequest, providers: rea
     }
     selected.add(entry.tool);
     const expected = ARTIFACT_SELECTION.find((item) => item.tool === (entry.tool as ArtifactToolName));
-    const declared = provider.tools.find(({ name }) => name === entry.tool);
+    const matchingTools = provider.tools.filter(({ name }) => name === entry.tool);
+    if (matchingTools.length > 1) {
+      throw new RegistryError("duplicate_tool", `artifact tool ${entry.tool} is declared twice`);
+    }
+    const declared = matchingTools[0];
     if (!expected || !declared) {
       throw new RegistryError("unavailable_capability", `artifact tool ${entry.tool} is not selectable`);
     }
