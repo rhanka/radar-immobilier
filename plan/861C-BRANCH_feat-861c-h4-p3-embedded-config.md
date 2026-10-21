@@ -90,6 +90,7 @@ Prepare the data-and-contracts slice of P3: versioned Immo provider and artifact
   - [x] Verify embedded required fields and durable identity parity.
   - [x] Cover selection, scope and provider-version refusals.
   - [x] Prove complete profile integrity and authorized digest evolution.
+  - [x] Preserve duplicate-declaration rejection for selected artifact tools and providers.
   - [ ] Pass full gates, five copy mutations, restoration checks and resource teardown.
 - [ ] **Lot 6 — Merge and close**
   - [ ] Push branch (excluded from this integration assignment).
