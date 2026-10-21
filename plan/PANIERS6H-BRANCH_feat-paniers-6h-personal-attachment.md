@@ -76,6 +76,7 @@ unchanged until activation runs; scoped routes stay unmounted from `app.ts`.
 - [x] Astra fix 6: qualify source-copy mutations and their restoration.
 - [x] Astra fix 7: deliver typechecked atomic commits and a verified bundle.
 - [x] Second pass: compare activation to the current journal and return scoped conflict heads.
+- [x] Second pass qualification: replay activated 0018, repair its journal and exclude foreign conflict heads.
 - [x] Integration qualification: migration replay, 6A–6G non-regression,
   attachment idempotency, ambiguous-pending, SQL enforcement, activation
   recovery, UI/MCP suites.
