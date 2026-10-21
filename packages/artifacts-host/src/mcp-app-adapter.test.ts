@@ -280,7 +280,7 @@ describe("mcp adapter foreign metadata and pagination", () => {
     [{ offset: 5 }],
     [{}],
   ])("accepts valid pagination %s", async (args) => {
-    const handle = vi.fn(async () => ({ status: 200, body: { items: [], total: 0 } }));
+    const handle = vi.fn(async () => ({ status: 200, body: { artifacts: [], total: 0 } }));
     const adapter = createMcpArtifactAdapter(stubControl({}, handle));
     const result = await adapter.execute(mcp("POST", "/list", args), { actorId: "alice" });
     expect(result.ok).toBe(true);
@@ -307,7 +307,7 @@ describe("mcp adapter foreign metadata and pagination", () => {
     const authority: AdmissionAuthority = {
       readActivation: () => live(), nowMs: () => NOW, readStatus: async () => "suspended",
     };
-    const handle = vi.fn(async () => ({ status: 200, body: { items: [], total: 0 } }));
+    const handle = vi.fn(async () => ({ status: 200, body: { artifacts: [], total: 0 } }));
     const host = { app: { handle } } as unknown as Parameters<typeof createArtifactControl>[0];
     const adapter = createMcpArtifactAdapter(
       createArtifactControl(host, "scope", "pages.example.test", authority));
