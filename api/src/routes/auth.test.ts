@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { Hono } from "hono";
 import {
   SignJWT,
@@ -25,7 +25,8 @@ const AUTH_ON: AuthConfig = {
   sessionTtlSeconds: 3600,
   sessionAbsoluteTtlSeconds: 7200,
   jwksUri: "https://auth.example.test/.well-known/jwks.json",
-  bearerAudiences: ["https://immo.example.test", "https://immo.example.test/mcp"],
+  bearerAudiences: ["https://immo.example.test"],
+  bearerWorkloadClientId: "immo-mcp-workload",
 };
 
 const AUTH_OFF: AuthConfig = { ...AUTH_ON, enabled: false };
@@ -681,136 +682,222 @@ describe("protect middleware", () => {
     });
   });
 
-  // ── Per-user IdP bearer (D4, option A): the api accepts the user's OWN token ─
-  // The immo-mcp pod forwards it on /api/graph-signals; the api verifies it
-  // against OUR IdP JWKS and authorises per-user. NOT a public route.
+  // Delegated bearer cases use signed tokens, a fixed clock and no session cookie.
+  const NOW = 1_800_000_000_000;
+  const SIGNALS_PATH = "/api/graph-signals/mont-tremblant";
 
-  /** Sign a USER access token + return the matching local JWKS getter. */
-  async function makeAccessToken(opts: {
-    sub: string;
-    aud?: string | string[];
-    iss?: string;
-    exp?: number; // epoch seconds (past → expired)
-  }): Promise<{ accessToken: string; getKey: JWTVerifyGetKey }> {
+  async function makeAccessToken(
+    overrides: Record<string, unknown> = {},
+  ): Promise<{ accessToken: string; getKey: JWTVerifyGetKey }> {
     const { publicKey, privateKey } = await generateKeyPair("EdDSA", { crv: "Ed25519" });
-    const pubJwk: JWK = await exportJWK(publicKey);
-    pubJwk.kid = "k1";
-    pubJwk.alg = "EdDSA";
+    const pubJwk: JWK = { ...await exportJWK(publicKey), kid: "k1", alg: "EdDSA" };
     const getKey = createLocalJWKSet({ keys: [pubJwk] });
-    const builder = new SignJWT({})
-      .setProtectedHeader({ alg: "EdDSA", kid: "k1" })
-      .setIssuer(opts.iss ?? AUTH_ON.issuer)
-      .setAudience(opts.aud ?? "https://immo.example.test/mcp")
-      .setSubject(opts.sub)
-      .setIssuedAt();
-    builder.setExpirationTime(opts.exp ?? "5m");
-    const accessToken = await builder.sign(privateKey);
+    const accessToken = await new SignJWT({
+      iss: AUTH_ON.issuer, aud: AUTH_ON.appBaseUrl, sub: "mcp-user",
+      act: { sub: AUTH_ON.bearerWorkloadClientId },
+      client_id: AUTH_ON.bearerWorkloadClientId, scope: "immo:search",
+      iat: NOW / 1000, exp: NOW / 1000 + 300, ...overrides,
+    }).setProtectedHeader({ alg: "EdDSA", kid: "k1" }).sign(privateKey);
     return { accessToken, getKey };
   }
 
-  const approvedDb = () =>
-    makeEnrollmentDb([
-      { sub: "mcp-user", status: "approved", isAdmin: false },
-    ]) as unknown as import("../db/client.js").Database;
+  function delegatedApp(
+    getKey: JWTVerifyGetKey,
+    status = "approved",
+    auth = AUTH_ON,
+  ) {
+    const db = makeEnrollmentDb(
+      status === "unknown" ? [] : [{ sub: "mcp-user", status, isAdmin: false }],
+    ) as unknown as import("../db/client.js").Database;
+    const handler = vi.fn();
+    const app = new Hono();
+    app.use("*", protect(auth, { db, bearerGetKey: getKey, now: () => NOW }));
+    app.all("*", (c) => {
+      handler(c.get("session" as never));
+      return c.json({ ok: true, nodes: [] });
+    });
+    return { app, handler };
+  }
 
-  it("accepts a valid IdP bearer for an APPROVED user → 200 (per-user)", async () => {
-    const { accessToken, getKey } = await makeAccessToken({ sub: "mcp-user" });
-    const app = appWith(AUTH_ON, approvedDb(), getKey);
-    const res = await app.request("/api/graph-signals/mont-tremblant", {
-      headers: { authorization: `Bearer ${accessToken}` },
-    });
-    expect(res.status).toBe(200);
-    expect((await res.json()).ok).toBe(true);
-  });
+  it.each([{ aud: "https://immo.example.test" }, { aud: ["https://immo.example.test"] }])(
+    "accepts a valid exchanged bearer with a single audience $aud as the same human",
+    async ({ aud }) => {
+      const { accessToken, getKey } = await makeAccessToken({ aud });
+      const { app, handler } = delegatedApp(getKey);
+      const res = await app.request(SIGNALS_PATH, {
+        headers: { authorization: `Bearer ${accessToken}` },
+      });
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ ok: true, nodes: [] });
+      expect(handler).toHaveBeenCalledExactlyOnceWith({ sub: "mcp-user", via: "bearer" });
+      expect(res.headers.get("set-cookie")).toBeNull();
+    },
+  );
 
-  it("accepts the api-origin audience too (aud allowlist)", async () => {
-    const { accessToken, getKey } = await makeAccessToken({
-      sub: "mcp-user",
-      aud: "https://immo.example.test",
-    });
-    const app = appWith(AUTH_ON, approvedDb(), getKey);
-    const res = await app.request("/api/graph-signals/mont-tremblant", {
-      headers: { authorization: `Bearer ${accessToken}` },
-    });
-    expect(res.status).toBe(200);
-  });
+  const invalidClaims: [string, Record<string, unknown>][] = [
+    ["original MCP user token", { aud: "https://immo.example.test/mcp", act: undefined, client_id: "immo-mcp" }],
+    ["MCP audience even with actor", { aud: "https://immo.example.test/mcp" }],
+    ["wrong audience", { aud: "https://other.example.test" }],
+    ["multiple audiences", { aud: [AUTH_ON.appBaseUrl, `${AUTH_ON.appBaseUrl}/mcp`] }],
+    ["duplicate audiences", { aud: [AUTH_ON.appBaseUrl, AUTH_ON.appBaseUrl] }],
+    ["missing audience", { aud: undefined }],
+    ["missing actor", { act: undefined }],
+    ["null actor", { act: null }],
+    ["string actor", { act: "immo-mcp-workload" }],
+    ["array actor", { act: [{ sub: "immo-mcp-workload" }] }],
+    ["missing actor subject", { act: {} }],
+    ["non-string actor subject", { act: { sub: 42 } }],
+    ["empty actor subject", { act: { sub: "" } }],
+    ["wrong actor", { act: { sub: "other-workload" } }],
+    ["nested actor", { act: { sub: "immo-mcp-workload", act: { sub: "previous-workload" } } }],
+    ["actor with extra claims", { act: { sub: "immo-mcp-workload", role: "admin" } }],
+    ["wrong client", { client_id: "immo-mcp" }],
+    ["missing client", { client_id: undefined }],
+    ["malformed client", { client_id: ["immo-mcp-workload"] }],
+    ["wrong issuer", { iss: "https://evil.example.test" }],
+    ["expired token", { exp: NOW / 1000 - 1 }],
+    ["expiry boundary", { exp: NOW / 1000 }],
+    ["missing expiry", { exp: undefined }],
+    ["not yet valid", { nbf: NOW / 1000 + 60 }],
+    ["missing subject", { sub: undefined }],
+    ["empty subject", { sub: "" }],
+    ["blank subject", { sub: " " }],
+  ];
 
-  it("rejects a request with NO bearer and no session → 401", async () => {
-    const app = appWith(AUTH_ON, approvedDb());
-    const res = await app.request("/api/graph-signals/mont-tremblant");
-    expect(res.status).toBe(401);
-    expect((await res.json()).error).toBe("unauthenticated");
-  });
-
-  it("rejects an EXPIRED bearer → 401", async () => {
-    const { accessToken, getKey } = await makeAccessToken({
-      sub: "mcp-user",
-      exp: Math.floor(Date.now() / 1000) - 60,
-    });
-    const app = appWith(AUTH_ON, approvedDb(), getKey);
-    const res = await app.request("/api/graph-signals/mont-tremblant", {
-      headers: { authorization: `Bearer ${accessToken}` },
-    });
-    expect(res.status).toBe(401);
-  });
-
-  it("rejects a bearer from the WRONG issuer → 401", async () => {
-    const { accessToken, getKey } = await makeAccessToken({
-      sub: "mcp-user",
-      iss: "https://evil.example",
-    });
-    const app = appWith(AUTH_ON, approvedDb(), getKey);
-    const res = await app.request("/api/graph-signals/mont-tremblant", {
-      headers: { authorization: `Bearer ${accessToken}` },
-    });
-    expect(res.status).toBe(401);
-  });
-
-  it("rejects a bearer with the WRONG audience → 401", async () => {
-    const { accessToken, getKey } = await makeAccessToken({
-      sub: "mcp-user",
-      aud: "https://someone-else.example/mcp",
-    });
-    const app = appWith(AUTH_ON, approvedDb(), getKey);
-    const res = await app.request("/api/graph-signals/mont-tremblant", {
-      headers: { authorization: `Bearer ${accessToken}` },
-    });
-    expect(res.status).toBe(401);
-  });
-
-  it("rejects a valid bearer whose signature does not match the JWKS → 401", async () => {
-    const { accessToken } = await makeAccessToken({ sub: "mcp-user" });
-    // Different keypair than the token was signed with.
-    const { getKey } = await makeAccessToken({ sub: "other" });
-    const app = appWith(AUTH_ON, approvedDb(), getKey);
-    const res = await app.request("/api/graph-signals/mont-tremblant", {
+  it.each(invalidClaims)("rejects %s with 401 before the business handler", async (_name, claims) => {
+    const { accessToken, getKey } = await makeAccessToken(claims);
+    const { app, handler } = delegatedApp(getKey);
+    const res = await app.request(SIGNALS_PATH, {
       headers: { authorization: `Bearer ${accessToken}` },
     });
     expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ error: "unauthenticated" });
+    expect(handler).not.toHaveBeenCalled();
   });
 
-  it("rejects a valid bearer for a SUSPENDED user → 403", async () => {
-    const { accessToken, getKey } = await makeAccessToken({ sub: "mcp-user" });
-    const db = makeEnrollmentDb([
-      { sub: "mcp-user", status: "suspended", isAdmin: false },
-    ]) as unknown as import("../db/client.js").Database;
-    const app = appWith(AUTH_ON, db, getKey);
-    const res = await app.request("/api/graph-signals/mont-tremblant", {
+  it("rejects a bearer signed with another key before the business handler", async () => {
+    const { accessToken } = await makeAccessToken();
+    const { getKey } = await makeAccessToken();
+    const { app, handler } = delegatedApp(getKey);
+    const res = await app.request(SIGNALS_PATH, {
       headers: { authorization: `Bearer ${accessToken}` },
+    });
+    expect(res.status).toBe(401);
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  it.each([undefined, "", "immo:read", "immo:search:all", ["immo:search"]].map((scope) => ({ scope })))(
+    "refuses delegation with scope $scope with 403 before the business handler",
+    async ({ scope }) => {
+      const { accessToken, getKey } = await makeAccessToken({ scope });
+      const { app, handler } = delegatedApp(getKey);
+      const res = await app.request(SIGNALS_PATH, {
+        headers: { authorization: `Bearer ${accessToken}` },
+      });
+      expect(res.status).toBe(403);
+      expect(await res.json()).toEqual({ error: "forbidden" });
+      expect(handler).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
+    ["POST", SIGNALS_PATH], ["PUT", SIGNALS_PATH], ["PATCH", SIGNALS_PATH],
+    ["DELETE", SIGNALS_PATH], ["HEAD", SIGNALS_PATH], ["OPTIONS", SIGNALS_PATH],
+    ["GET", "/api/protected"], ["GET", "/api/graph-signals"],
+    ["GET", "/api/graph-signals/"], ["GET", `${SIGNALS_PATH}/detail`],
+    ["GET", "/api/graph-signals/by-city"], ["GET", "/api/graph-signals/by-city?dateFrom=2026-01-01"],
+    ["GET", "/API/graph-signals/mont-tremblant"], ["GET", "/api/Graph-signals/mont-tremblant"],
+    ["GET", "/api/graph-signals/BY-CITY"], ["GET", "/api/graph-signals/Mont-Tremblant"],
+    ["GET", "/api//graph-signals/mont-tremblant"], ["GET", "/api/graph-signals//mont-tremblant"],
+    ["GET", "/api/graph-signals/mont-tremblant%2Fdetail"], ["GET", "/api/graph-signals/mont-tremblant%2fdetail"],
+    ["GET", "/api/graph-signals%2Fmont-tremblant"], ["GET", "/api/graph-signals/%62y-city"],
+    ["GET", `${SIGNALS_PATH}/`], ["GET", "/api/graph-signals/by-city/"],
+    ["GET", "/api/graph-signals-other/mont-tremblant"],
+    ["GET", "/api/geo/collections-private"], ["GET", "/api/documents/raw-private"],
+  ])("refuses %s %s outside the delegation profile", async (method, path) => {
+    const { accessToken, getKey } = await makeAccessToken();
+    const { app, handler } = delegatedApp(getKey);
+    const res = await app.request(path, {
+      method, headers: { authorization: `Bearer ${accessToken}` },
     });
     expect(res.status).toBe(403);
-    expect((await res.json()).error).toBe("account_not_approved");
+    expect(handler).not.toHaveBeenCalled();
   });
 
-  it("rejects a valid bearer for an UNKNOWN (non-enrolled) user → 403", async () => {
-    const { accessToken, getKey } = await makeAccessToken({ sub: "ghost" });
-    const app = appWith(AUTH_ON, approvedDb(), getKey); // db has only mcp-user
-    const res = await app.request("/api/graph-signals/mont-tremblant", {
+  it("rejects bearers when no API audience is configured while preserving cookie access", async () => {
+    const { accessToken, getKey } = await makeAccessToken();
+    const { app, handler } = delegatedApp(getKey, "approved", {
+      ...AUTH_ON, appBaseUrl: "", bearerAudiences: [],
+    });
+    const res = await app.request(SIGNALS_PATH, {
       headers: { authorization: `Bearer ${accessToken}` },
     });
-    expect(res.status).toBe(403);
-    expect((await res.json()).status).toBe("unknown");
+    expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ error: "unauthenticated" });
+    expect(handler).not.toHaveBeenCalled();
+    const token = await signSession({ sub: "mcp-user" }, {
+      sessionSecret: AUTH_ON.sessionSecret, ttlSeconds: 3600, now: NOW,
+    });
+    const browser = await app.request(SIGNALS_PATH, { headers: { cookie: `radar_session=${token}` } });
+    expect(browser.status).toBe(200);
+    expect(handler).toHaveBeenCalledOnce();
   });
+
+  it.each(["suspended", "unknown", "pending", "rejected"])(
+    "preserves the approved-account denial for a %s account",
+    async (status) => {
+      const { accessToken, getKey } = await makeAccessToken();
+      const { app, handler } = delegatedApp(getKey, status);
+      const res = await app.request(SIGNALS_PATH, {
+        headers: { authorization: `Bearer ${accessToken}` },
+      });
+      expect(res.status).toBe(403);
+      expect(await res.json()).toEqual({ error: "account_not_approved", status });
+      expect(handler).not.toHaveBeenCalled();
+    },
+  );
+
+  it("requires the configured workload identity in both signed claims", async () => {
+    const auth = { ...AUTH_ON, bearerWorkloadClientId: "preprod-workload" };
+    for (const [act, client_id, expected] of [
+      [{ sub: "preprod-workload" }, "preprod-workload", 200],
+      [{ sub: "immo-mcp-workload" }, "preprod-workload", 401],
+      [{ sub: "preprod-workload" }, "immo-mcp-workload", 401],
+    ] as const) {
+      const { accessToken, getKey } = await makeAccessToken({ act, client_id });
+      const { app, handler } = delegatedApp(getKey, "approved", auth);
+      const res = await app.request(SIGNALS_PATH, {
+        headers: { authorization: `Bearer ${accessToken}` },
+      });
+      expect(res.status).toBe(expected);
+      expect(handler).toHaveBeenCalledTimes(expected === 200 ? 1 : 0);
+    }
+  });
+
+  it("keeps browser cookies independent from the bearer scope and method profile", async () => {
+    const token = await signSession(
+      { sub: "mcp-user" },
+      { sessionSecret: AUTH_ON.sessionSecret, ttlSeconds: 3600, now: NOW },
+    );
+    const { getKey } = await makeAccessToken();
+    const { app, handler } = delegatedApp(getKey);
+    const res = await app.request("/api/protected", {
+      method: "POST", headers: { cookie: `radar_session=${token}`, authorization: "Bearer invalid" },
+    });
+    expect(res.status).toBe(200);
+    expect(handler).toHaveBeenCalledOnce();
+  });
+
+  it.each(["/api/geo/collections/qc-lots-longueuil/items", "/api/documents/raw?rawRef=raw/test.pdf"])(
+    "keeps the public raw-data prefix %s independent from bearer validation",
+    async (path) => {
+      const { getKey } = await makeAccessToken();
+      const { app, handler } = delegatedApp(getKey);
+      const res = await app.request(path, { headers: { authorization: "Bearer invalid" } });
+      expect(res.status).toBe(200);
+      expect(handler).toHaveBeenCalledOnce();
+    },
+  );
 });
 
 describe("sliding session re-mint (durable session — wp5 §B)", () => {

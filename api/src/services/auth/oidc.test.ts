@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { SignJWT, generateKeyPair, exportJWK, type JWK } from "jose";
 import { createLocalJWKSet } from "jose";
 import {
@@ -8,6 +8,7 @@ import {
   exchangeCode,
   fetchDiscovery,
   verifyIdToken,
+  verifyAccessToken,
   type FetchLike,
   type OidcDiscovery,
 } from "./oidc.js";
@@ -25,7 +26,8 @@ const AUTH: AuthConfig = {
   sessionTtlSeconds: 3600,
   sessionAbsoluteTtlSeconds: 7200,
   jwksUri: "https://auth.example.test/.well-known/jwks.json",
-  bearerAudiences: ["https://immo.example.test", "https://immo.example.test/mcp"],
+  bearerAudiences: ["https://immo.example.test"],
+  bearerWorkloadClientId: "immo-mcp-workload",
 };
 
 const DISCOVERY: OidcDiscovery = {
@@ -198,6 +200,105 @@ describe("exchangeCode", () => {
   });
 });
 
+describe("verifyAccessToken (delegated API bearer)", () => {
+  const NOW = 1_800_000_000_000;
+  let privateKey: Awaited<ReturnType<typeof generateKeyPair>>["privateKey"];
+  let getKey: ReturnType<typeof createLocalJWKSet>;
+  const baseClaims = {
+    iss: AUTH.issuer, aud: AUTH.appBaseUrl, sub: "human-42",
+    act: { sub: AUTH.bearerWorkloadClientId }, client_id: AUTH.bearerWorkloadClientId,
+    scope: "immo:read immo:search", iat: NOW / 1000, exp: NOW / 1000 + 300,
+  };
+  beforeAll(async () => {
+    const pair = await generateKeyPair("EdDSA", { crv: "Ed25519" });
+    privateKey = pair.privateKey;
+    getKey = createLocalJWKSet({ keys: [{
+      ...await exportJWK(pair.publicKey), kid: "delegation-key", alg: "EdDSA",
+    }] });
+  });
+
+  function sign(overrides: Record<string, unknown> = {}) {
+    return new SignJWT({ ...baseClaims, ...overrides })
+      .setProtectedHeader({ alg: "EdDSA", kid: "delegation-key" }).sign(privateKey);
+  }
+
+  function verify(token: string, audiences = AUTH.bearerAudiences) {
+    return verifyAccessToken(token, {
+      issuer: AUTH.issuer, audiences, workloadClientId: AUTH.bearerWorkloadClientId,
+      getKey, now: NOW,
+    });
+  }
+
+  it("retains the verified human, audience, actor, client, scopes and expiry", async () => {
+    const claims = await verify(await sign({ scope: " immo:read  immo:search " }));
+    expect(claims).toEqual({
+      sub: "human-42", aud: AUTH.appBaseUrl, act: { sub: AUTH.bearerWorkloadClientId },
+      clientId: AUTH.bearerWorkloadClientId, scopes: ["immo:read", "immo:search"],
+      exp: NOW / 1000 + 300,
+    });
+  });
+
+  it("accepts a singleton audience array and returns its exact audience", async () => {
+    expect((await verify(await sign({ aud: [AUTH.appBaseUrl] }))).aud).toBe(AUTH.appBaseUrl);
+  });
+
+  const audienceError = { message: "access_token audience mismatch" };
+  const subjectError = { message: "access_token missing sub" };
+  const actorError = { message: "access_token actor mismatch" };
+  const clientError = { message: "access_token client mismatch" };
+  const claimError = { code: "ERR_JWT_CLAIM_VALIDATION_FAILED", reason: "check_failed" };
+  const expiredError = { code: "ERR_JWT_EXPIRED", claim: "exp", reason: "check_failed" };
+
+  it.each([
+    ["multiple audiences", { aud: [AUTH.appBaseUrl, `${AUTH.appBaseUrl}/mcp`] }, audienceError],
+    ["repeated audience", { aud: [AUTH.appBaseUrl, AUTH.appBaseUrl] }, audienceError],
+    ["MCP audience", { aud: `${AUTH.appBaseUrl}/mcp` }, { ...claimError, claim: "aud" }],
+    ["wrong audience", { aud: "https://other.example.test" }, { ...claimError, claim: "aud" }],
+    ["audience with a trailing slash", { aud: `${AUTH.appBaseUrl}/` }, { ...claimError, claim: "aud" }],
+    ["missing audience", { aud: undefined }, { ...claimError, claim: "aud", reason: "missing" }],
+    ["missing expiry", { exp: undefined }, { ...claimError, claim: "exp", reason: "missing" }],
+    ["expired token", { exp: NOW / 1000 - 1 }, expiredError],
+    ["expiry boundary", { exp: NOW / 1000 }, expiredError],
+    ["future not-before", { nbf: NOW / 1000 + 60 }, { ...claimError, claim: "nbf" }],
+    ["wrong issuer", { iss: "https://other.example.test" }, { ...claimError, claim: "iss" }],
+    ["missing subject", { sub: undefined }, { ...claimError, claim: "sub", reason: "missing" }],
+    ["empty subject", { sub: "" }, subjectError],
+    ["blank subject", { sub: " " }, subjectError],
+    ["missing actor", { act: undefined }, actorError],
+    ["null actor", { act: null }, actorError],
+    ["malformed actor", { act: "immo-mcp-workload" }, actorError],
+    ["array actor", { act: [{ sub: AUTH.bearerWorkloadClientId }] }, actorError],
+    ["missing actor subject", { act: {} }, actorError],
+    ["non-string actor subject", { act: { sub: 42 } }, actorError],
+    ["empty actor subject", { act: { sub: "" } }, actorError],
+    ["wrong actor", { act: { sub: "other-workload" } }, actorError],
+    ["nested actor", { act: { sub: AUTH.bearerWorkloadClientId, act: { sub: "previous-workload" } } }, actorError],
+    ["actor with extra claims", { act: { sub: AUTH.bearerWorkloadClientId, role: "admin" } }, actorError],
+    ["missing client", { client_id: undefined }, clientError],
+    ["wrong client", { client_id: "immo-mcp" }, clientError],
+    ["malformed client", { client_id: [AUTH.bearerWorkloadClientId] }, clientError],
+  ] as [string, Record<string, unknown>, Record<string, string>][])("rejects %s", async (_name, overrides, error) => {
+    await expect(verify(await sign(overrides))).rejects.toMatchObject(error);
+  });
+
+  it("rejects configuration permitting several audiences", async () => {
+    await expect(verify(await sign(), [AUTH.appBaseUrl, `${AUTH.appBaseUrl}/mcp`])).rejects.toThrow(
+      "access_token audience mismatch",
+    );
+  });
+
+  it("does not invent scopes when the claim is missing or malformed", async () => {
+    expect((await verify(await sign({ scope: undefined }))).scopes).toEqual([]);
+    expect((await verify(await sign({ scope: ["immo:search"] }))).scopes).toEqual([]);
+  });
+
+  it("rejects a signature that does not match the trusted key", async () => {
+    const pair = await generateKeyPair("EdDSA", { crv: "Ed25519" });
+    const token = await new SignJWT(baseClaims)
+      .setProtectedHeader({ alg: "EdDSA", kid: "delegation-key" }).sign(pair.privateKey);
+    await expect(verify(token)).rejects.toMatchObject({ code: "ERR_JWS_SIGNATURE_VERIFICATION_FAILED" });
+  });
+});
 describe("verifyIdToken (JWKS, EdDSA)", () => {
   async function makeIdToken(opts: {
     nonce?: string;
@@ -259,7 +360,7 @@ describe("verifyIdToken (JWKS, EdDSA)", () => {
         expectedNonce: "wrong-nonce",
         getKey,
       }),
-    ).rejects.toThrow(/nonce mismatch/);
+    ).rejects.toThrow("id_token nonce mismatch");
   });
 
   it("rejects a wrong audience", async () => {
@@ -274,7 +375,7 @@ describe("verifyIdToken (JWKS, EdDSA)", () => {
         expectedNonce: "n",
         getKey,
       }),
-    ).rejects.toThrow();
+    ).rejects.toMatchObject({ code: "ERR_JWT_CLAIM_VALIDATION_FAILED", claim: "aud", reason: "check_failed" });
   });
 
   it("rejects a wrong issuer", async () => {
@@ -289,7 +390,7 @@ describe("verifyIdToken (JWKS, EdDSA)", () => {
         expectedNonce: "n",
         getKey,
       }),
-    ).rejects.toThrow();
+    ).rejects.toMatchObject({ code: "ERR_JWT_CLAIM_VALIDATION_FAILED", claim: "iss", reason: "check_failed" });
   });
 
   it("rejects a token signed by an unknown key", async () => {
@@ -307,6 +408,6 @@ describe("verifyIdToken (JWKS, EdDSA)", () => {
         expectedNonce: "n",
         getKey: otherGetKey,
       }),
-    ).rejects.toThrow();
+    ).rejects.toMatchObject({ code: "ERR_JWKS_NO_MATCHING_KEY" });
   });
 });
