@@ -125,3 +125,51 @@ beforeAll(async () => {
   ({ publicKey, privateKey } = await generateKeyPair("RS256"));
   keySource = { resolveKey: async () => publicKey };
 });
+
+describe("request isolation on a shared session (P1)", () => {
+  it.each(["refreshed", "reduced-scope"])("isolates A when %s B completes before A dispatches", async (mode) => {
+    const data = new RecordingDataSource();
+    const app = createImmoHttpApp(CONFIG, { keySource, data });
+    const first = await signToken({ jti: "first" });
+    const sessionId = await initialize(app, first);
+    const barrier = pauseAtDispatch();
+    const pending = callTool(app, first, sessionId, "search_signals", { city: "longueuil", showDiscarded: true }, 2, true);
+    try {
+      await barrier.ready;
+      expect(data.calls).toHaveLength(0);
+      const reduced = mode === "reduced-scope";
+      const refreshed = await signToken({ jti: "refreshed", scope: reduced ? "immo:read" : SCOPES });
+      expect(refreshed).not.toBe(first);
+      const second = await callTool(app, refreshed, sessionId, "search_signals", { city: "longueuil", showDiscarded: false }, 3);
+      const payload = await toolPayload(second);
+      if (reduced) {
+        expect(payload.isError).toBe(true);
+        expect(payload.text).toContain("scope_denied:immo:search");
+        expect(data.calls).toHaveLength(0);
+      } else {
+        expect(payload.isError).not.toBe(true);
+        expect(data.calls).toEqual([{ credential: refreshed, reveal: false, sub: "user-1" }]);
+      }
+      barrier.release();
+      expect((await toolPayload(await pending)).isError).not.toBe(true);
+      expect(data.calls).toHaveLength(reduced ? 1 : 2);
+      expect(data.calls.at(-1)).toEqual({ credential: first, reveal: true, sub: "user-1" });
+    } finally {
+      barrier.release();
+      await pending;
+    }
+  });
+
+  it("emits zero protected egress when the current scope is missing", async () => {
+    const data = new RecordingDataSource();
+    const app = createImmoHttpApp(CONFIG, { keySource, data });
+    const full = await signToken();
+    const sessionId = await initialize(app, full);
+    const reduced = await signToken({ scope: "immo:read" });
+    const res = await callTool(app, reduced, sessionId, "search_signals", { city: "longueuil", showDiscarded: true }, 4);
+    const payload = await toolPayload(res);
+    expect(payload.isError).toBe(true);
+    expect(payload.text).toContain("scope_denied:immo:search");
+    expect(data.calls).toHaveLength(0);
+  });
+});
