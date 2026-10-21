@@ -60,7 +60,7 @@ Prepare the data-and-contracts slice of P3: versioned Immo provider and artifact
   - [ ] Lot gate: `typecheck` + `lint` + full `test-immo-mcp` on `ENV=test-861c-h4-p3`.
 - [ ] **Lot 2 — Artifact effective profile and selection config**
   - [x] `src/registry/artifact-profile.ts`: four-tool selection, input bounds, caller key, durable identity, required contract revisions.
-  - [ ] `config/immo-artifacts.v1.json`: versioned embedded artifact configuration.
+  - [x] `config/immo-artifacts.v1.json`: versioned embedded artifact configuration.
   - [ ] Lot gate (same checklist as Lot 1).
 - [ ] **Lot 3 — Local registry validation and digest freeze**
   - [ ] `src/registry/mcp-registry.ts`: provider, tool, scope and contract validation.
