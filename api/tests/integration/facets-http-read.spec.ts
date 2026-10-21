@@ -4,8 +4,7 @@ import { afterAll, expect, it } from "vitest";
 import { createDb } from "../../src/db/client.js";
 import { loadConfig } from "../../src/config.js";
 import { accountUsers, graphNodes } from "../../src/db/schema.js";
-import { writeFacet } from "../../src/services/facets/writer.js";
-import { facetFixture } from "./facets-fixture.js";
+import { facetFixture, writeDisplayedFacet as writeFacet } from "./facets-fixture.js";
 import { facetCookie, facetHttp } from "./facets-http-fixture.js";
 
 const { db, pool } = createDb(loadConfig());
@@ -26,7 +25,7 @@ it("should read the runtime codebook and isolate personal heads and availability
   expect(codes.profileId).toBe("immo-steve-2026-09");
   expect(codes.codes).toHaveLength(28);
   expect(codes.codes.find((row: { code: string }) => row.code === "V2-PRECEDENT").verdict).toBe("non_pertinent");
-  await writeFacet(db, alice.sub, { action: "discard", target: alice.target, reasonCode: "N-ADMIN", commandKey: randomUUID() });
+  await writeFacet(db, alice.sub, { action: "discard", target: alice.target, reasonCode: "N-ADMIN", expectedHeadId: null, commandKey: randomUUID() });
   expect((await (await get(cityPath)).json()).heads).toEqual([{
     id: expect.any(String), target: alice.target, facet: "archive", basket: null, state: "active",
     reasonCode: "N-ADMIN", verdict: "non_pertinent", createdAt: expect.any(String),
