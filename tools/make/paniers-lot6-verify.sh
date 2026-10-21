@@ -67,8 +67,8 @@ trap 'exit 143' TERM
 # Only source/manifests: environment files, Git metadata and host dependencies
 # are excluded before reading file contents. The container sees no host tree.
 tar --exclude='.env*' --exclude=node_modules --exclude=dist --exclude=.svelte-kit \
-  -cf "$runtime_dir/source.tar" api packages ui tools/make package.json package-lock.json tsconfig.base.json eslint.config.js
-case "$1" in verify|test-api) "${compose[@]}" up -d --wait postgres ;; esac
+  -cf "$runtime_dir/source.tar" api packages ui tools/make tools/h4-mcp.mk deploy/k8s/41-immo-mcp-ingress.yaml package.json package-lock.json tsconfig.base.json eslint.config.js
+case "$1" in verify|test-api|astra-proof) "${compose[@]}" up -d --wait postgres ;; esac
 "${compose[@]}" run --rm --no-deps -T api sh -ec '
   tar -xf /source.tar
   npm ci --ignore-scripts --no-audit --no-fund
@@ -82,9 +82,12 @@ CONFIG
     checkpoints)
       for snapshot in /checkpoints/*.tar; do
         number=$(basename "$snapshot" .tar)
-        rm -rf api/src api/drizzle
+        rm -rf api/src api/drizzle packages/immo-mcp/src
         tar -xf "$snapshot"
         npm run typecheck --workspace=api > "/evidence/checkpoint-$number.log" 2>&1 || {
+          cat "/evidence/checkpoint-$number.log"; exit 1;
+        }
+        ./node_modules/.bin/tsc --noEmit -p packages/immo-mcp/tsconfig.json >> "/evidence/checkpoint-$number.log" 2>&1 || {
           cat "/evidence/checkpoint-$number.log"; exit 1;
         }
         grep "^$number|" /checkpoints/manifest | cut -d "|" -f 2 > "/evidence/checkpoint-$number.pass"
@@ -92,22 +95,28 @@ CONFIG
       done
       ;;
   esac
+  if [ "$1" = astra-proof ]; then
+    test "$LOT" = 6H
+    bash /workspace/tools/make/paniers-lot6h-fix-mutation.sh
+    exit
+  fi
   if [ "$1" = regression ]; then
     cat > /workspace/ui/vitest.isolated.config.ts <<'"'"'CONFIG'"'"'
 import config from "./vitest.config.js";
 export default { ...config, envDir: false, test: { ...config.test, fileParallelism: false, maxWorkers: 2 } };
 CONFIG
     npm run test --workspace=ui -- --config vitest.isolated.config.ts \
-      facets 6a-head 6b-version signaux-reglements signal-facets-client SignalFacetControls selection-bucket selection-camera
+      facets 6a-head 6b-version signaux-reglements signal-facets-client SignalFacetControls selection-bucket selection-camera signal-facet-scope
     cd /workspace/packages/immo-mcp
-    ../../node_modules/.bin/vitest run --config /workspace/api/vitest.isolated.config.ts \
-      src/data-source.test.ts src/raw-data.test.ts src/server.test.ts
+    ../../node_modules/.bin/tsc --noEmit -p tsconfig.json
+    ../../node_modules/.bin/vitest run --config /workspace/api/vitest.isolated.config.ts src
     exit
   fi
   case "$1" in
     verify|lint)
       case "$LOT" in
         6G) npx --no-install eslint api/src/services/workspaces api/src/routes/workspaces.ts api/src/scripts/init-workspace-authority.ts ;;
+        6H) npx --no-install eslint api/src/services/facets api/src/routes/scoped-signal-facets*.ts api/src/scripts/attach-personal-history.ts api/src/services/workspaces/authority*.ts api/src/services/workspaces/migration.test.ts packages/immo-mcp/src/workspace-context*.ts packages/immo-mcp/src/data-source.ts ui/src/lib/signals/signal-facet-scope*.ts ;;
         *) npx --no-install eslint api/src/services/facets ;;
       esac
       ;;
@@ -124,4 +133,5 @@ CONFIG
   if [ "$1" = verify ] && [ "$LOT" = 6F ]; then bash /workspace/tools/make/paniers-lot6-mutation.sh; fi
   if [ "$1" = verify ] && [ "$LOT" = 6G ]; then bash /workspace/tools/make/paniers-lot6g-mutation.sh; fi
   if [ "$1" = verify ] && [ "$LOT" = 6G ]; then bash /workspace/tools/make/paniers-lot6g-fix-mutation.sh; fi
+  if [ "$1" = verify ] && [ "$LOT" = 6H ]; then bash /workspace/tools/make/paniers-lot6h-mutation.sh; fi
 ' -- "$1" "$SCOPE" 2>&1 | tee "$log_dir/$1.log"
