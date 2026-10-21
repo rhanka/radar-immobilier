@@ -78,7 +78,7 @@ Build a read-only deterministic report mapping every `prospect_marks` row to its
   - [x] `api/src/services/facets/lot-migration-report/lossless.test.ts`
   - [x] `api/src/services/facets/lot-migration-report/integrity.test.ts`
   - [x] `api/src/services/facets/lot-migration-report/no-write-guard.test.ts`
-  - [ ] `api/src/services/facets/lot-migration-report/source-db.test.ts`
+  - [x] `api/src/services/facets/lot-migration-report/source-db.test.ts`
 - [ ] **Lot 4 — Isolated verification (BR6F-EX1)**
   - [ ] `tools/make/paniers-lot6.mk`
   - [ ] `tools/make/paniers-lot6-verify.sh`
