@@ -1,0 +1,7 @@
+fix: name fixture types for API declaration builds|api/src/services/facets/scope-db-fixture.ts api/src/services/workspaces/db-fixture.ts
+fix: preserve bound histories during workspace activation|api/src/services/facets/activation-bind.ts api/src/services/facets/activation-db.test.ts
+fix: recover exact historical scoped receipts without writes|api/src/services/facets/scoped-writer.ts api/src/services/facets/scoped-db.test.ts
+fix: recover pre-6B scoped receipts through HTTP|api/src/routes/scoped-signal-facets.ts api/src/routes/scoped-signal-facets-db.test.ts
+fix: compare scoped viewer incarnations by object identity|ui/src/lib/signals/signal-facet-scope.ts ui/src/lib/signals/signal-facet-scope.test.ts
+test: qualify review fixes with restored source mutations|tools/make/paniers-lot6.mk tools/make/paniers-lot6-verify.sh tools/make/paniers-lot6h-fix-mutation.sh
+chore: package checked review corrections above the 6H head|tools/make/paniers-lot6h-fix-deliver.sh tools/make/paniers-lot6h-fix-slices.txt

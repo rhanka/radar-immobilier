@@ -74,7 +74,7 @@ unchanged until activation runs; scoped routes stay unmounted from `app.ts`.
 - [x] Astra fix 4: accept historical HTTP payloads for recovery only.
 - [x] Astra fix 5: compare viewer incarnations by object identity.
 - [x] Astra fix 6: qualify source-copy mutations and their restoration.
-- [ ] Astra fix 7: deliver typechecked atomic commits and a verified bundle.
+- [x] Astra fix 7: deliver typechecked atomic commits and a verified bundle.
 - [x] Integration qualification: migration replay, 6A–6G non-regression,
   attachment idempotency, ambiguous-pending, SQL enforcement, activation
   recovery, UI/MCP suites.
@@ -103,4 +103,4 @@ unchanged until activation runs; scoped routes stay unmounted from `app.ts`.
 - [x] **Lot N-1 — Docs**: uncommitted French Muse and Sol reports.
 - [ ] **Lot N — Close (not covered)**: verify green, push, PR, CI, merge
   commit (no squash/rebase), keep branch, move plan to `plan/done/`.
-- [x] Delivery checkpoint: 34
+- [x] Delivery checkpoint: 35
