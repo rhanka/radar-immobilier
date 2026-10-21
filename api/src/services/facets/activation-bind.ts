@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { facetEventBindings, facetEvents, facetHeads, facetStreams } from "../../db/schema.js";
 import { assertStreamIdentity, streamKey } from "./scope.js";
@@ -11,8 +11,11 @@ export async function bindAttachedChains(tx: Tx, workspaceId: string, accounts: 
   let streamsBound = 0;
   const sealedUnresolved: ActivationReceipt["sealedUnresolved"] = [];
   for (const attachment of accounts) {
-    const events = await tx.select().from(facetEvents)
-      .where(and(eq(facetEvents.ownerId, attachment.accountId), eq(facetEvents.scope, "personal")));
+    const rows = await tx.select({ event: facetEvents }).from(facetEvents)
+      .leftJoin(facetEventBindings, eq(facetEventBindings.eventId, facetEvents.id))
+      .where(and(eq(facetEvents.ownerId, attachment.accountId),
+        eq(facetEvents.scope, "personal"), isNull(facetEventBindings.eventId)));
+    const events = rows.map((row) => row.event);
     const groups = new Map<string, typeof events>();
     for (const event of events) {
       const identity = streamIdentityFor(workspaceId, attachment.accountId, {

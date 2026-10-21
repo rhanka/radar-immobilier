@@ -3,11 +3,14 @@ import { readFileSync } from "node:fs";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { eq } from "drizzle-orm";
 import { expect, it, vi } from "vitest";
-import { facetEvents } from "../../db/schema.js";
+import { facetEvents, graphNodes } from "../../db/schema.js";
 import { attach, activation, describeDb, event, fixture, safety } from "./scope-db-fixture.js";
+import { attachPersonalHistory } from "./attachment.js";
 import { runPersonalAttachmentActivation } from "./activation-run.js";
 import { readScopedPersonalHeads } from "./scoped-reader.js";
 import { resumePersonalAttachmentReadback } from "./activation-open.js";
+import { writeScopedPersonalFacet } from "./scoped-writer.js";
+import { targetFingerprint } from "./target.js";
 
 describeDb("6H protected activation", () => {
   it("should upgrade 0017 with whole chains and replay 0018 without changing historical bytes", async () => {
@@ -96,5 +99,36 @@ describeDb("6H protected activation", () => {
     expect((await f.pool.query("SELECT count(*)::int AS n FROM facet_unresolved_events")).rows[0].n).toBe(2);
     await expect(f.pool.query("UPDATE facet_events SET superseded_by = $1 WHERE id = $2",
       [randomUUID(), missingParent.id])).rejects.toThrow();
+  });
+
+  it("should activate a second workspace from unlinked chains without blocking the first", async () => {
+    const f = await fixture();
+    const history = await event(f);
+    await attach(f);
+    await runPersonalAttachmentActivation(f.db, activation(f), safety);
+    const [node] = await f.db.insert(graphNodes).values({ id: randomUUID(), type: "Signal",
+      citySlug: "synthetic-city", label: "Synthetic second-scope signal" }).returning();
+    const select = { action: "select" as const, basket: "pertinent" as const, target: {
+      citySlug: node!.citySlug, type: "Signal" as const, id: node!.id },
+    displayedFingerprint: targetFingerprint(node!), expectedHeadId: null, commandKey: randomUUID() };
+    const actorFirst = await writeScopedPersonalFacet(f.db, f.actor.sub, f.workspaceId, select);
+    expect(actorFirst).toMatchObject({ scope: "personal" });
+    const bindings = () => f.pool.query("SELECT * FROM facet_event_bindings ORDER BY event_id");
+    const boundBefore = (await bindings()).rows;
+    await attachPersonalHistory(f.db, { actorAccountId: f.actor.id, reason: "synthetic second scope",
+      entries: [{ accountId: f.actor.id, workspaceId: f.otherId }] });
+    await expect(runPersonalAttachmentActivation(f.db, { ...activation(f), workspaceId: f.otherId }, safety))
+      .resolves.toMatchObject({ streamsBound: 0, sealedUnresolved: [], epoch: "scoped" });
+    expect((await bindings()).rows).toEqual(boundBefore);
+    expect((await readScopedPersonalHeads(f.db, f.member.sub, f.workspaceId, "synthetic-city"))
+      .map((head) => head.id)).toEqual([history.id]);
+    expect(await readScopedPersonalHeads(f.db, f.actor.sub, f.otherId, node!.citySlug)).toEqual([]);
+    const actorSecond = await writeScopedPersonalFacet(f.db, f.actor.sub, f.otherId,
+      { ...select, commandKey: randomUUID() });
+    const inactive = await writeScopedPersonalFacet(f.db, f.actor.sub, f.workspaceId,
+      { ...select, action: "deselect", expectedHeadId: actorFirst!.id, commandKey: randomUUID() });
+    expect(inactive).toMatchObject({ state: "inactive", supersedes: actorFirst!.id });
+    expect((await readScopedPersonalHeads(f.db, f.actor.sub, f.otherId, node!.citySlug))
+      .map((head) => head.id)).toEqual([actorSecond!.id]);
   });
 });
