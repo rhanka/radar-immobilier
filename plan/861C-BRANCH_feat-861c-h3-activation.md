@@ -304,3 +304,5 @@ finalization, quotas, persistent ledger and HTTP/MCP parity remain unverified.
 - [x] P4: validate canonical objects, exact references, digests and wildcards.
 
 - [x] P4: add offline gates, expiry checks and disabled-render regressions.
+
+- [x] P4: prove activation and credential regressions with restore and cmp.
