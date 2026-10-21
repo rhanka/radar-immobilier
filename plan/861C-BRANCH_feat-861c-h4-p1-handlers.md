@@ -62,7 +62,7 @@ Actions with the following status should be included around tasks only if really
 - **Mono-branch**: UAT after each lot if UI surface impacted. P1 has no UI surface: no UAT checkpoint.
 
 ## Plan / Todo (lot-based)
-- [x] Current commit unit: refactor(mcp): register extracted get_grille_pdf.
+- [x] Current commit unit: refactor(mcp): remove the superseded guard closure.
 - [ ] **Lot 0 — Baseline & constraints**
   - [ ] Read `conception-h4-v3.md` P1 section and the P0 filets (`deployed-baseline.test.ts`, `tool-fixture-provenance.test.ts`).
   - [ ] Confirm scope and guardrails; apply BR861C-EX1.
