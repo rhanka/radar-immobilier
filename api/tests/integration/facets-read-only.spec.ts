@@ -6,14 +6,13 @@ import { schema } from "../../src/db/schema.js";
 import { loadConfig } from "../../src/config.js";
 import { readCityFacets, readReasonCodes } from "../../src/services/facets/reader.js";
 import { createDiscardedSignalsReader } from "../../src/services/facets/discarded-reader.js";
-import { writeFacet } from "../../src/services/facets/writer.js";
-import { facetFixture } from "./facets-fixture.js";
+import { facetFixture, writeDisplayedFacet as writeFacet } from "./facets-fixture.js";
 
 const { db, pool } = createDb(loadConfig());
 afterAll(() => pool.end());
 it.each(["codes", "heads", "discarded"] as const)("should read %s in a read-only transaction", async (kind) => {
   const { sub, target } = await facetFixture(db);
-  await writeFacet(db, sub, { action: "discard", target, reasonCode: "N-ADMIN", commandKey: randomUUID() });
+  await writeFacet(db, sub, { action: "discard", target, reasonCode: "N-ADMIN", expectedHeadId: null, commandKey: randomUUID() });
   const client = await pool.connect();
   try {
     await client.query("BEGIN READ ONLY");

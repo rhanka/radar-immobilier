@@ -39,6 +39,7 @@
     postFacetCommand,
     type FacetAction,
     type FacetCommandLaunch,
+    type FacetConflictNotice,
     type FacetHeadsStatus,
     type FacetTarget,
     type ReasonCode,
@@ -232,6 +233,21 @@
   /** Only confirmed writes get the recorded-write error title. */
   export let facetReloadAfterWrite = false;
   export let onRetryFacetReads: () => void = () => {};
+  /**
+   * Reload heads/detail/by-city after a 409 head conflict in the controls.
+   * Carries the launched target, its launch context and the refusal copy.
+   */
+  export let onFacetHeadsStale: (
+    target: FacetTarget,
+    launch: FacetCommandLaunch,
+    message: string,
+  ) => void = () => {};
+  /**
+   * Parent-owned 409 refusal: survives the removal of the signal card from
+   * the detail list. Rendered in the single live region below.
+   */
+  export let facetConflictNotice: FacetConflictNotice | null = null;
+  export let onDismissFacetConflict: () => void = () => {};
   export let discardedNotice: { target: FacetTarget; label: string } | null = null;
   export let discardedActionError: string | null = null;
   export let undoBusy = false;
@@ -1208,6 +1224,29 @@
         </Button>
       </div>
     {/if}
+    {#if facetConflictNotice}
+      {@const conflict = facetConflictNotice}
+      <!-- The design-system error Alert provides the single live region
+           with role="alert". Parent-owned, so the refusal
+           outlives the signal card removed by the post-409 reload. -->
+      <div class="sel-notice" data-testid="facet-conflict-notice">
+        <Alert
+          tone="error"
+          title="Écriture refusée"
+          message={`${conflict.target.type} ${conflict.target.id} (${conflict.target.citySlug}) — ${conflict.message}`}
+        />
+        <div class="sel-notice-actions">
+          <Button
+            variant="secondary"
+            size="sm"
+            type="button"
+            onclick={onDismissFacetConflict}
+          >
+            Fermer
+          </Button>
+        </div>
+      </div>
+    {/if}
     {#if discardedNotice}
       {@const notice = discardedNotice}
       {#key notice}
@@ -1416,6 +1455,7 @@
                     {@const coPv = coPvSignalCount(node)}
                     {@const facetCardState = facetStateFor(node)}
                     {@const facetCardTarget = buildFacetTarget(node)}
+                    {@const facetCardFingerprint = node.facetFingerprint ?? null}
                     <div class="sel-entity-detail">
                       <!-- ID du signal + pastille couleur : lien visuel avec le
                            surlignage de la preuve (#84). La pastille reprend la
@@ -1585,6 +1625,7 @@
                         <SignalFacetControls
                           target={facetCardTarget}
                           state={facetCardState}
+                          displayedFingerprint={facetCardFingerprint}
                           codes={reasonCodes}
                           codesError={facetCodesError}
                           codesLoading={facetCodesLoading}
@@ -1593,6 +1634,7 @@
                           viewerKey={facetViewerKey}
                           onSaved={(action, launch) => onFacetSaved(action, facetCardTarget, launch)}
                           onRetryCodes={onRetryFacetReads}
+                          onHeadsStale={onFacetHeadsStale}
                         />
                       {:else if facetsNote}
                         <p class="sel-muted" data-testid="facet-card-note">{facetsNote}</p>
@@ -1622,8 +1664,8 @@
         <summary class="sel-bucket-head">
           <span class="sel-bucket-name">Règlement et Normes</span>
           <!-- 01KZGM07 item 2 : N/M quand la liste est restreinte à la zone active. -->
-          <span class="rail-row-count">
-            {#if detailLoading}–{:else if focusedZoneCode}{zoneScopedReglements.length}/{reglements.length}{:else}{reglements.length}{/if}
+          <span class="rail-row-count" data-testid="reglements-bucket-count">
+            {#if detailLoading}–{:else if detailError}n/d{:else if focusedZoneCode}{zoneScopedReglements.length}/{reglements.length}{:else}{reglements.length}{/if}
           </span>
         </summary>
         <div class="sel-entities">
@@ -1632,22 +1674,30 @@
               <RefreshCw class="h-4 w-4 animate-spin" aria-hidden="true" />
               <span>Chargement des règlements…</span>
             </div>
-          {:else if zoneScopedReglements.length === 0}
-            <p class="sel-empty">
-              {#if focusedZoneCode && reglements.length > 0}
-                Aucun règlement rattaché à la zone active.
-              {:else}
-                Aucun règlement cité par les signaux de cette ville.
-              {/if}
-            </p>
           {:else}
-            {#each zoneScopedReglements as reg (reg.key)}
+            {#if detailError}
+              <p class="sel-empty" data-testid="reglements-unavailable">
+                Règlements indisponibles (signaux illisibles).
+              </p>
+            {/if}
+            {#if zoneScopedReglements.length === 0}
+              {#if !detailError}
+                <p class="sel-empty">
+                  {#if focusedZoneCode && reglements.length > 0}
+                    Aucun règlement rattaché à la zone active.
+                  {:else}
+                    Aucun règlement cité par les signaux de cette ville.
+                  {/if}
+                </p>
+              {/if}
+            {:else}
+              {#each zoneScopedReglements as reg (reg.key)}
               <div class="sel-entity-bar">
                 <div class="reglement-row">
                   <div class="reglement-head">
                     <code class="reglement-number">{reg.number}</code>
-                    <span class="reglement-count">
-                      {formatSignalCount(reg.signalCount)}
+                    <span class="reglement-count" data-testid="reglement-count">
+                      {detailError ? "n/d" : formatSignalCount(reg.signalCount)}
                     </span>
                   </div>
                   {#if reg.zoneCodes.length > 0}
@@ -1713,7 +1763,8 @@
                   </div>
                 </div>
               </div>
-            {/each}
+              {/each}
+            {/if}
           {/if}
 
           <!-- Sous-section NORMES (grille de zonage) de la zone active : usage

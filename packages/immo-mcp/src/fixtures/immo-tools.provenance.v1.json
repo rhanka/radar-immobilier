@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "fixture": "immo-tools.v1.json",
+  "captured": {
+    "sha256": "31487e8fb9b85019fc707ed3a7296e33156c46fb5fd3071d456d6dae1b44d998",
+    "gitRef": "310b6b9af80729b690e957d31f65d1f8da96a383",
+    "gitBlob": "07f1f4b2fda361473706ba0390d08dea91220775",
+    "origin": "Deployed image capture 2026-10-16 (preprod image ghcr.io/rhanka/radar-api@sha256:96a0f646b1316bce58231252cf45a766b31c46fdd7fb49ab359ada8834d3f221).",
+    "note": "Historical image and capture identifiers are retained unchanged."
+  },
+  "amendment": {
+    "id": "showDiscarded",
+    "gitRef": "3d2869a35c7cd73347808e82fc5093024e477321",
+    "gitBlob": "608ae5bd27fccfaebc39863e55d1eb48b76aafe8",
+    "origin": "Sub-lot 6C source-contract amendment merged into the source fixture; recorded by commit 3d2869a3.",
+    "scope": "search_signals inputSchema property only; no capture bytes rewritten.",
+    "property": {
+      "type": "boolean",
+      "description": "Reveal archived signals hidden by default (default false). Read-only."
+    },
+    "amendedSourceSha256": "2145e05ae003ce567f3f4edf5bd628d0367e38c44d23dad5de1e3e3e331869d3",
+    "note": "The amended fixture is a source expectation, not a new deployed capture."
+  },
+  "coarseScope": {
+    "captured": { "code": 401, "error": "invalid_token" },
+    "expectedAfterMcpAuth022": { "code": 403, "error": "insufficient_scope" },
+    "note": "The 401 capture is retained under mcp-auth 0.1.0; the 403 delta is qualified separately in P4, without reconnection."
+  },
+  "stubs": [
+    "search_lots",
+    "get_lot_card",
+    "get_opportunity_dossier",
+    "list_documents",
+    "read_document_excerpt"
+  ],
+  "stubMarker": "not_wired_yet:http_data_source",
+  "evidenceClasses": {
+    "httpImageCapture": "Synthetic Streamable HTTP capture against the digest-pinned image.",
+    "sourceExpectation": "Current source fixture including the separately attributed amendment.",
+    "ingress": "External qualification through real ingress; not established by local captures.",
+    "stdio": "In-memory source-server factory evidence; not a deployed stdio capture."
+  }
+}

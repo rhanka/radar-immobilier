@@ -10,9 +10,8 @@ import { protect } from "../../src/routes/auth.js";
 import type { ObjectStore } from "../../src/storage/object-store.js";
 import { createDiscardedSignalsReader } from "../../src/services/facets/discarded-reader.js";
 import { readCityFacets } from "../../src/services/facets/reader.js";
-import { writeFacet } from "../../src/services/facets/writer.js";
 import { upsertGraphAtomic } from "../../src/services/graph/graph-store.js";
-import { facetFixture } from "./facets-fixture.js";
+import { facetFixture, writeDisplayedFacet as writeFacet } from "./facets-fixture.js";
 import { facetAuth, facetCookie } from "./facets-http-fixture.js";
 
 const { db, pool } = createDb(loadConfig());
@@ -46,7 +45,7 @@ it("should retain personal archive identity through real graph refreshes", async
   const counts = await cityCounts();
   expect(await get(`${target.citySlug}?showDiscarded=1`)).toEqual(baseline);
   expect(await cityCounts("?showDiscarded=1")).toEqual(counts);
-  await writeFacet(db, alice.sub, { action: "discard", target, reasonCode: "V2-PRECEDENT", commandKey: randomUUID() });
+  await writeFacet(db, alice.sub, { action: "discard", target, reasonCode: "V2-PRECEDENT", expectedHeadId: null, commandKey: randomUUID() });
   const hidden = await get(target.citySlug);
   expect(hidden.nodes.map((node: { id: string }) => node.id)).toEqual([keep.id]);
   expect((await cityCounts()).signalCount).toBe(1);
