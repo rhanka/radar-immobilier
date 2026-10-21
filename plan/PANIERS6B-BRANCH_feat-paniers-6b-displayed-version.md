@@ -47,6 +47,10 @@ Require the displayed signal fingerprint on every new personal facet command. Ve
 - `BR6b-EX4`: supply fingerprints in viewer-control fixtures and qualify capture/retry/undo after card removal. Reason: disabled controls without a version and exact retry semantics. Impact: UI capture/tests. Rollback: revert capture/fixtures.
 - Recovery accepts pre-6A and 6A payloads only for an exact existing authorized receipt; no historical payload executes a new transition.
 - Initial checks exposed a golden-test type error and an outdated pending-receipt expectation; corrections preserve immutable receipts.
+- Local gates: seven workspace typechecks, full lint, 103 API tests (18 files), 636 UI tests (40 files), all passed.
+- Discrimination: removing the version check in a copy produced four failures out of fourteen; restoration passed two byte comparisons and all fourteen tests.
+- Every delivery commit has its indexed-tree typecheck log; the final commit also gates on isolated `down -v` and absence of project containers/volumes.
+- Complementary peer consensus is unverified: the Muse handoff lacks an exact eligible author model/host declaration. Local integration review and all corrections are recorded in the uncommitted SOL report.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + local bundle** (single dependency; no shared Git writes)
@@ -62,7 +66,7 @@ Require the displayed signal fingerprint on every new personal facet command. Ve
   - [x] Read rules/contract, preserve Muse's patch/stash, and rebase locally onto `43af2941`.
   - [x] Resolve the controls conflict with 6A context/notice behavior and 6B version conflicts.
   - [x] Establish standalone Make, synthetic configuration and private volumes without published ports.
-- [ ] **Lot 1 — Source version and writer**
+- [x] **Lot 1 — Source version and writer**
   - [x] Serve the exact stored-node fingerprint, including degraded cards; preserve golden bytes.
   - [x] Verify versions under the city lock, bind digests and preserve historical recovery.
   - [x] Adapt existing API integration contracts.
@@ -71,15 +75,15 @@ Require the displayed signal fingerprint on every new personal facet command. Ve
   - [x] Qualify client/control/viewer/panel behavior and exact network retries.
   - [x] Qualify undo after card removal and version-conflict reloads.
   - [ ] Browser UAT (not covered).
-- [ ] **Lot 3 — Discriminating qualification**
+- [x] **Lot 3 — Discriminating qualification**
   - [x] Cover stale/matching/community-only versions and malformed commands.
   - [x] Cover exact replay, deletion, privacy and parallel stale writes.
   - [x] Cover 6A receipts, fingerprint-bound keys and lock retention through receipt commit.
-  - [ ] Workspace typecheck, full lint, API facets/graph routes and UI maps/signals.
-  - [ ] Remove verification in a copy; observe failure, restore, compare bytes and rerun.
-- [ ] **Lot N-1 — Delivery**
-  - [ ] Audit commits/typecheck logs and verify bundle prerequisite `43af2941`.
-  - [ ] Write uncommitted French `RAPPORT-SOL-6B.md` with counts, evidence and limits.
-  - [ ] Verify final source identity and `down -v` cleanup.
+  - [x] Workspace typecheck, full lint, API facets/graph routes and UI maps/signals.
+  - [x] Remove verification in a copy; observe failure, restore, compare bytes and rerun.
+- [x] **Lot N-1 — Delivery**
+  - [x] Audit commits/typecheck logs and verify bundle prerequisite `43af2941`.
+  - [x] Write uncommitted French `RAPPORT-SOL-6B.md` with counts, evidence and limits.
+  - [x] Verify final source identity and `down -v` cleanup.
 - [ ] **Lot N — Remote integration (not covered)**
   - [ ] Push, PR, remote CI and merge commit; preserve the branch.
