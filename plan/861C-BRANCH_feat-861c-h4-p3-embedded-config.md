@@ -85,7 +85,7 @@ Prepare the data-and-contracts slice of P3: versioned Immo provider and artifact
 - [ ] **Lot 5b — Astra review corrections**
   - [x] Define the supported local artifact version and complete effective profile.
   - [x] Enforce artifact scopes and required caller-key semantics.
-  - [ ] Compile only selected capabilities and freeze the complete profile into the digest.
+  - [x] Compile only selected capabilities and freeze the complete profile into the digest.
   - [ ] Export the revised registry contracts.
   - [ ] Verify embedded required fields and durable identity parity.
   - [ ] Cover selection, scope and provider-version refusals.
