@@ -77,48 +77,13 @@ function checkGeoBounds(args: { bbox?: Bbox | undefined; limit: number }): void 
 }
 
 /**
- * Wraps a tool handler with the cross-cutting concerns every immo tool needs:
- * scope check (from the auth CONTEXT, never from args), audit logging with an
- * input hash + correlationId, and uniform error shaping. The LLM-supplied
- * `args` are treated purely as query parameters.
- */
-function guarded<A>(
-  ctx: ToolContext,
-  toolName: string,
-  scope: string,
-  handler: (args: A) => Promise<TextResult>,
-): (args: A) => Promise<TextResult> {
-  return async (args: A) => {
-    const correlationId = randomUUID();
-    try {
-      assertScope(ctx.auth, scope);
-      auditToolCall(ctx.auth, toolName, hashInput(args), correlationId);
-      return await handler(args);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      // stderr only — never leak to the protocol stdout channel.
-      process.stderr.write(
-        `${JSON.stringify({
-          at: new Date().toISOString(),
-          kind: "immo-mcp.error",
-          tool: toolName,
-          correlationId,
-          message,
-        })}\n`,
-      );
-      return jsonResult({ error: message, tool: toolName, correlationId }, true);
-    }
-  };
-}
-
-/**
  * Registers every read-only tool on the server: the 6 v0 domain tools
  * (backed by `ctx.data`) + the 4 raw-data tools (backed by `ctx.raw` —
  * zones/lots GeoJSON, grille & PV PDFs). Shared by BOTH transports
  * (server.ts stdio and server-http.ts Streamable HTTP).
  */
 export function registerTools(server: McpServer, ctx: ToolContext): void {
-  for (const def of ALL_TOOL_DEFINITIONS.filter((def) => ["search_lots","get_lot_card","search_signals","get_opportunity_dossier","list_documents","read_document_excerpt","get_zones_geojson","get_lots_geojson","get_grille_pdf"].includes(def.name))) {
+  for (const def of ALL_TOOL_DEFINITIONS) {
     const handler = TOOL_HANDLERS[def.name];
     if (!handler) throw new Error(`missing_handler:${def.name}`);
     server.registerTool(
@@ -175,100 +140,6 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
       `Nombre max de features retournées (défaut ${RAW_GEOJSON_DEFAULT_LIMIT}, ` +
         `max ${RAW_GEOJSON_MAX_LIMIT} — bbox obligatoire au-delà de ${RAW_GEOJSON_DEFAULT_LIMIT}).`,
     );
-
-  server.registerTool(
-    "get_pv_pdf",
-    {
-      title: "Get PV source PDF",
-      description:
-        "URL servie du procès-verbal source (PDF archivé) d'un signal, à partir de sa " +
-        "référence brute rawRef (ex: raw/proces-verbaux-<ville>/cas/<sha>.pdf, telle que " +
-        "portée par les signaux/documents) + métadonnées (ville, content-type). " +
-        "Le PDF lui-même n'est jamais inliné dans la réponse. Read-only.",
-      inputSchema: {
-        rawRef: z
-          .string()
-          .min(1)
-          .describe(
-            "Référence brute du document (rawRef S3, ex: raw/proces-verbaux-longueuil/cas/<sha>.pdf ; " +
-              "en mode mock: l'id de document, ex: doc-longueuil-pv-2026-04-14)",
-          ),
-      },
-    },
-    guarded(ctx, "get_pv_pdf", IMMO_SCOPES.documentsRead, async (args) =>
-      jsonResult(await ctx.raw.getPvPdf(args)),
-    ),
-  );
-
-  server.registerTool(
-    "get_reglement_provenance",
-    {
-      title: "Get règlement de zonage provenance",
-      description:
-        "Provenance du règlement de zonage en vigueur d'une ville — numéro, millésime, " +
-        "page source, URL publique du règlement — telle que geo la stampe sur la grille " +
-        "de normes (qc-zonage-norms), + la relation « modifie » (règlement ancien) quand " +
-        "servie. Passthrough VERBATIM : un champ absent = null, jamais deviné/dérivé ; seul " +
-        "reglement_url est l'URL publique (le breadcrumb interne _source_url n'est jamais " +
-        "exposé). La provenance est muni-uniforme : zone_code est accepté mais n'affecte pas " +
-        "le résultat (réservé au lien events, tool à venir). found=false si la grille de " +
-        "normes n'est pas publiée pour la ville. Read-only.",
-      inputSchema: {
-        muni_slug: z.string().min(1).describe("Ville (slug, ex: longueuil)"),
-        zone_code: z
-          .string()
-          .optional()
-          .describe("Code de zone — accepté mais no-op pour la provenance (muni-uniforme)"),
-      },
-    },
-    guarded(ctx, "get_reglement_provenance", IMMO_SCOPES.read, async (args) =>
-      jsonResult(
-        await ctx.raw.getReglementProvenance({ city: args.muni_slug, zone: args.zone_code }),
-      ),
-    ),
-  );
-
-  server.registerTool(
-    "query_zoning_events",
-    {
-      title: "Query zoning lifecycle events",
-      description:
-        "Timeline des events de cycle de vie du zonage d'une ville (avis de motion, " +
-        "projets de règlement, adoptions, entrées en vigueur, dérogations, CPTAQ…) servis " +
-        "par geo. Filtres exacts optionnels : zone_code (events liés à cette zone via " +
-        "zone_codes_resolus), document_type (avis_motion|projet_reglement|adoption|" +
-        "entree_en_vigueur|abrogation), decision_state (planned|decided). Chaque event est " +
-        "renvoyé VERBATIM (§2 : document_type, decision_state, type_instrument, bylaw_numero, " +
-        "date_iso, zone_codes_resolus, libelles_relation, url_pdf, provenance…) ; les clés " +
-        "internes préfixées « _ » (breadcrumbs) ne sont jamais exposées. decision_state=planned " +
-        "n'est JAMAIS présenté comme adopté (planned ≠ decided). Read-only.",
-      inputSchema: {
-        muni_slug: z.string().min(1).describe("Ville (slug, ex: longueuil)"),
-        zone_code: z
-          .string()
-          .optional()
-          .describe("Filtre : events liés à ce code de zone (exact, via zone_codes_resolus)"),
-        document_type: z
-          .string()
-          .optional()
-          .describe("Filtre exact : avis_motion|projet_reglement|adoption|entree_en_vigueur|abrogation"),
-        decision_state: z
-          .string()
-          .optional()
-          .describe("Filtre exact : planned|decided"),
-      },
-    },
-    guarded(ctx, "query_zoning_events", IMMO_SCOPES.read, async (args) =>
-      jsonResult(
-        await ctx.raw.queryZoningEvents({
-          city: args.muni_slug,
-          zoneCode: args.zone_code,
-          documentType: args.document_type,
-          decisionState: args.decision_state,
-        }),
-      ),
-    ),
-  );
 }
 
 /** Names of the tools registered in v0 (used by tests + docs). */
