@@ -53,6 +53,7 @@ indicators) while preserving each consumer's non-basket population.
 - No exception declared: no conditional or forbidden path is touched.
 - 6D needs no owner decision (reference design, section 6D).
 - Local Git metadata and a bundle are authorized by the execution brief; shared Git metadata stays read-only.
+- [x] Evidence reconciliation rebuilds current nodes and uses the current visible IDs synchronously.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + cherry-pick** (default for orthogonal tasks; single final test cycle)
