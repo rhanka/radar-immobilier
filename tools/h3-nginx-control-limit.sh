@@ -88,8 +88,12 @@ for (let attempt = 0; attempt < 50; attempt++) {
 assert.ok(ready, "proxy ready");
 for (const [label, path, size, chunked, expected] of [
   ["control accepts 1.5 MiB", control, 1572864, false, 201],
+  ["exact control accepts 1.5 MiB", "/api/v1/artifacts/control", 1572864, false, 201],
   ["control accepts exactly 2 MiB", control, 2097152, false, 201],
   ["control refuses 2 MiB + 1", control, 2097153, false, 413],
+  ["neighbor control-other keeps 1 MiB", "/api/v1/artifacts/control-other", 1572864, false, 413],
+  ["neighbor accepts exactly 1 MiB", "/api/v1/artifacts/control-other", 1048576, false, 201],
+  ["neighbor refuses 1 MiB + 1", "/api/v1/artifacts/control-other", 1048577, false, 413],
   ["generic route refuses 1.5 MiB", "/api/echo", 1572864, false, 413],
   ["control accepts chunked exactly 2 MiB", control, 2097152, true, 201],
   ["control refuses chunked 2 MiB + 1", control, 2097153, true, 413],
