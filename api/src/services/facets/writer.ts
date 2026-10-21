@@ -7,12 +7,18 @@ import { FacetError, resolveTarget, type SignalTarget } from "./target.js";
 import { facetCommandDigest, readCommand } from "./commands.js";
 
 export type Basket = "pertinent" | "a_surveiller";
+export interface ExpectedSelectionHeads {
+  pertinent?: string | null;
+  a_surveiller?: string | null;
+}
 export interface FacetCommand {
   action: "select" | "deselect" | "discard" | "restore";
   target: SignalTarget;
   basket?: Basket | undefined;
   reasonCode?: string | undefined;
   deselect?: Basket[] | undefined;
+  expectedHeadId: string | null;
+  expectedSelectionHeads?: ExpectedSelectionHeads | undefined;
   commandKey: string;
 }
 type Tx = Parameters<Parameters<Database["transaction"]>[0]>[0];
