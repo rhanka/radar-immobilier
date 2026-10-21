@@ -28,8 +28,9 @@ MAILDEV_UI_PORT ?= 11895
 ARTIFACTS_CONTENT_BASE ?=
 ARTIFACTS_TEST_CONFIG ?= 0
 export API_PORT UI_PORT MAILDEV_UI_PORT ARTIFACTS_CONTENT_BASE
-export COMPOSE_PROJECT_NAME := radar-$(ENV)
-export COMPOSE_DISABLE_ENV_FILE := 1
+override COMPOSE_PROJECT_NAME := radar-$(ENV)
+override COMPOSE_DISABLE_ENV_FILE := 1
+export COMPOSE_PROJECT_NAME COMPOSE_DISABLE_ENV_FILE
 export BUILDX_CONFIG := $(CURDIR)/tmp/artifact-host-buildx
 
 # Neutralize host-inherited values that docker-compose.yml interpolates into
@@ -49,9 +50,11 @@ export GOOGLE_API_KEY :=
 export MISTRAL_API_KEY :=
 export COHERE_API_KEY :=
 
-DOCKER_COMPOSE ?= docker compose
+# Effective compose project derives only from ENV: fixed command and -p flag
+# ignore inherited DOCKER_COMPOSE/COMPOSE/COMPOSE_PROJECT_NAME values.
+override DOCKER_COMPOSE := docker compose
 COMPOSE_FILES := -f docker-compose.yml -f docker-compose.test.yml
-COMPOSE := $(DOCKER_COMPOSE) --env-file /dev/null $(COMPOSE_FILES)
+override COMPOSE := $(DOCKER_COMPOSE) --env-file /dev/null -p radar-$(ENV) $(COMPOSE_FILES)
 TEST_ARTIFACT_ENV := $(if $(filter 1,$(ARTIFACTS_TEST_CONFIG)),-e ARTIFACTS_STORAGE_SCOPE=h2_suite -e ARTIFACTS_ORG_ID=h2_org -e ARTIFACTS_S3_BUCKET=h2-artifacts-suite -e ARTIFACTS_S3_ENDPOINT=http://minio:9000 -e ARTIFACTS_S3_REGION=us-east-1 -e ARTIFACTS_S3_ACCESS_KEY=test-access -e ARTIFACTS_S3_SECRET_KEY=test-secret -e ARTIFACTS_CONTENT_BASE=pages.example.test,)
 
 .PHONY: guard-env
