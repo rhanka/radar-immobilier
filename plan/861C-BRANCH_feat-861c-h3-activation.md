@@ -71,7 +71,7 @@ Review integration (both non-blocking points):
 - [ ] **Unit 2 — activation parser** (§5.1): absent, incomplete, malformed and
       expired inputs stay closed by default; `off` disables; `validation` with exact
       subjects and a future `ARTIFACTS_VALIDATION_UNTIL` enables.
-  - [ ] Activation parser and exports.
+  - [x] Activation parser and exports.
   - [ ] Parser regression tests.
 - [ ] **Unit 3 — cohort/approval admission** (T02, T05, T17, T24; T05, T13):
       unknown, suspended, expired or non-cohort subjects are refused with no storage
