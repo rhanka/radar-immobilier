@@ -70,7 +70,7 @@ Prepare the data-and-contracts slice of P3: versioned Immo provider and artifact
 - [ ] **Lot 4 — Compatibility tests**
   - [x] `src/registry/immo-provider.test.ts`: provider and embedded-config parity.
   - [x] `src/registry/artifact-profile.test.ts`: effective-profile parity and bounds.
-  - [ ] `src/registry/mcp-registry.test.ts`: local registry refusal cases.
+  - [x] `src/registry/mcp-registry.test.ts`: local registry refusal cases.
   - [ ] `src/registry/artifact-activation.test.ts`: artifact activation guards.
   - [ ] `src/registry/validation-regressions.test.ts`: integration regression cases.
   - [ ] `src/registry/binding-parity.test.ts`: twelve actual handler seams and scopes.
