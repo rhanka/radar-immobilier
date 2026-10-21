@@ -52,7 +52,7 @@ Provide the workspace and membership authority for one team workspace: explicit 
 
 ## Feedback Loop
 - [x] Astra fix qualification: canonical locks, SQL revision guards and explicit-absence conflicts.
-- [ ] Astra fix qualification: withdrawals preserve revoked status and work on suspended accounts.
+- [x] Astra fix qualification: withdrawals preserve revoked status and work on suspended accounts.
 - [ ] Astra fix qualification: deterministic service concurrency and stale-creation regression tests.
 - [ ] Astra fix qualification: HTTP withdrawal invariants and concurrent creation conflicts.
 - [ ] Astra fix qualification: LOT-specific default scopes and copied Make regression proof.
