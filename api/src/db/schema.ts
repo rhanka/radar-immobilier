@@ -808,10 +808,46 @@ export const facetCommands = pgTable("facet_commands", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => ({ pk: primaryKey({ columns: [t.ownerId, t.commandKey] }) }));
 
+// 6G workspace and membership authority. Explicit grants only: approval,
+// invitation, or global administration never implies membership or capability.
+// Partial indexes and the audit immutability trigger live in migration 0017.
+export const workspaces = pgTable("workspaces", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  slug: text("slug").notNull().unique(),
+  label: text("label").notNull(),
+  scope: text("scope").notNull().default("all-municipalities"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const workspaceMemberships = pgTable("workspace_memberships", {
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  accountId: uuid("account_id").notNull().references(() => accountUsers.id),
+  status: text("status").notNull().default("active"),
+  revision: integer("revision").notNull().default(1),
+  moderateArchive: boolean("moderate_archive").notNull().default(false),
+  manageMembers: boolean("manage_members").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
+}, (t) => ({ pk: primaryKey({ columns: [t.workspaceId, t.accountId] }) }));
+
+export const workspaceMembershipEvents = pgTable("workspace_membership_events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  accountId: uuid("account_id").notNull().references(() => accountUsers.id),
+  kind: text("kind").notNull(),
+  capability: text("capability"),
+  actorId: uuid("actor_id").notNull().references(() => accountUsers.id),
+  reason: text("reason").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const schema = {
   facetCommands,
   facetEvents,
   facetReasonCodes,
+  workspaces,
+  workspaceMemberships,
+  workspaceMembershipEvents,
   refreshDocumentOutcomes,
   sources,
   ingestions,

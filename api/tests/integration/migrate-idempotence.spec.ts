@@ -90,6 +90,25 @@ async function expectRelationPresent(name: string): Promise<void> {
   expect(found.rows[0]?.relation).toBe(name);
 }
 
+async function expectWorkspaceAuthorityIntact(): Promise<void> {
+  for (const name of ["workspaces", "workspace_memberships", "workspace_membership_events",
+    "workspace_memberships_account_idx", "workspace_membership_events_workspace_idx",
+    "workspace_membership_events_account_idx"]) {
+    await expectRelationPresent(name);
+  }
+  const triggers = await pool.query(
+    `SELECT tgname, tgenabled, pg_get_triggerdef(oid) AS definition FROM pg_trigger
+     WHERE tgrelid = 'workspace_membership_events'::regclass AND NOT tgisinternal ORDER BY tgname`,
+  );
+  expect(triggers.rows.map((row) => row.tgname)).toEqual([
+    "workspace_membership_events_immutable", "workspace_membership_events_no_truncate",
+  ]);
+  for (const row of triggers.rows) {
+    expect(row.tgenabled).toBe("O");
+    expect(row.definition).toContain("EXECUTE FUNCTION guard_workspace_membership_event()");
+  }
+}
+
 afterAll(async () => {
   await pool.end();
 });
@@ -99,8 +118,8 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
     "re-applies the last migration without error when its journal row is missing but its schema is already present, " +
       "and re-registers exactly that row",
     async () => {
-      expect(journal.entries.at(-3)).toMatchObject({ tag: "0014_facets_signal", when: 1791200000000 });
-      expect(lastEntry.tag).toBe("0016_artifacts_lifecycle");
+      expect(journal.entries.find((entry) => entry.tag === "0014_facets_signal"))
+        .toMatchObject({ when: 1791200000000 });
       // The journal selects the current last migration, including appended
       // package migrations. Its persisted hash must match those exact bytes.
       const expectedHash = createHash("sha256")
@@ -112,7 +131,7 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
       // test Postgres is already fully migrated (the `make test` /
       // `make test-api` flow runs `db:migrate` before vitest) or genuinely
       // vierge (this file run alone against a fresh Postgres). Either way it
-      // converges on a clean database whose journal is complete up to 0016.
+      // converges on a clean database whose journal includes every entry.
       //
       // Deliberately NOT a `DROP SCHEMA public CASCADE`: this Postgres is
       // shared with the other integration spec files in the same test run
@@ -126,6 +145,7 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
       expect(Number(beforeCount.rows[0]?.count)).toBe(journal.entries.length);
       const lifecycleBefore = await pool.query("SELECT to_regclass('artifacts.artifact_access') AS relation");
       expect(lifecycleBefore.rows[0]?.relation).toBe("artifacts.artifact_access");
+      await expectWorkspaceAuthorityIntact();
 
       const typeCountBeforeDrift = await pool.query<{ count: string }>(
         `SELECT count(*)::text AS count FROM pg_type WHERE typname = 'refresh_outcome_status'`,
@@ -145,13 +165,13 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
           `expected at least one row in ${MIGRATIONS_SCHEMA}.${MIGRATIONS_TABLE} after migrate()`,
         );
       }
-      // Confirms the max-id row really is 0016's row (same folderMillis as
+      // Confirms the max-id row really is the last entry (same folderMillis as
       // the journal's last entry) before we delete it below.
       expect(lastRow.created_at).toBe(String(lastEntry.when));
       expect(lastRow.hash).toBe(expectedHash);
 
       // ── 2. Simulate the "restored from prod" drift ──────────────────────
-      // The schema already has 0016 (artifact lifecycle, sources and grants),
+      // The schema already has the last migration's objects,
       // but its journal row is gone — the
       // bookkeeping is behind the schema, as seen after a prod restore whose
       // dump predates a `drizzle.__drizzle_migrations` insert. Only the
@@ -179,8 +199,8 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
 
       // ── 3. Re-run migrate() on the drifted journal ──────────────────────
       // drizzle's migrator compares each migration file's folderMillis
-      // against only the remaining last row's created_at (now 0015's), so it
-      // replays 0016's guarded columns, constraint and tables/indexes.
+      // against only the remaining last row's created_at, so it replays the
+      // current last migration on its existing tables, indexes and triggers.
       let rerunError: unknown = null;
       try {
         await migrate(db, { migrationsFolder });
@@ -189,7 +209,7 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
       }
       expect(
         rerunError,
-        `migrate() must succeed replaying 0016 on a schema that already has it, ` +
+        `migrate() must succeed replaying ${lastEntry.tag} on a schema that already has it, ` +
           `got: ${String(rerunError)}`,
       ).toBeNull();
 
@@ -204,11 +224,12 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
       const rerunRow = lastRowAfterRerun.rows[0];
       if (!rerunRow) {
         throw new Error(
-          `expected the ${MIGRATIONS_SCHEMA}.${MIGRATIONS_TABLE} row for 0016 to be re-inserted`,
+          `expected the ${MIGRATIONS_SCHEMA}.${MIGRATIONS_TABLE} row for ${lastEntry.tag} to be re-inserted`,
         );
       }
       expect(rerunRow.hash).toBe(lastRow.hash);
       expect(rerunRow.created_at).toBe(lastRow.created_at);
+      await expectWorkspaceAuthorityIntact();
       const lifecycleAfterReplay = await pool.query("SELECT to_regclass('artifacts.artifact_access') AS relation");
       expect(lifecycleAfterReplay.rows[0]?.relation).toBe("artifacts.artifact_access");
 
@@ -255,21 +276,21 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
   );
 
   it(
-    "re-applies 0014_facets_signal with 0015 and 0016 when every journal row from 0014 onward is missing, " +
+    "re-applies 0014_facets_signal and every later migration when their journal rows are missing, " +
       "and re-registers those rows with identical hashes and timestamps",
     async () => {
       // drizzle's migrator replays a migration file only when its folderMillis
       // is newer than the created_at of the LAST REMAINING journal row, so
-      // deleting only 0014's row would never replay 0014 (0016's row would
-      // still be the cutoff). The drift must drop every row from 0014 onward:
-      // 0014, 0015 and 0016. The cutoff is read from the journal by tag, so no
+      // deleting only 0014's row would never replay 0014 (a later row would
+      // still be the cutoff). The drift must drop every row from 0014 onward.
+      // The cutoff is read from the journal by tag, so no
       // timestamp is hardcoded here.
       const replayStart = journal.entries.findIndex(
         (entry) => entry.tag === "0014_facets_signal",
       );
       expect(replayStart).toBeGreaterThanOrEqual(0);
       const replayEntries = journal.entries.slice(replayStart);
-      expect(replayEntries.map((entry) => entry.tag)).toEqual([
+      expect(replayEntries.slice(0, 3).map((entry) => entry.tag)).toEqual([
         "0014_facets_signal",
         "0015_artifacts_core",
         "0016_artifacts_lifecycle",
@@ -289,7 +310,11 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
       expect(await countJournalRows()).toBe(journal.entries.length);
 
       const rowsBeforeDrift = await readJournalRowsSince(replaySince);
-      expect(rowsBeforeDrift).toHaveLength(replayEntries.length);
+      const expectedRows = replayEntries.map((entry) => ({
+        hash: createHash("sha256").update(readFileSync(`${migrationsFolder}/${entry.tag}.sql`)).digest("hex"),
+        created_at: String(entry.when),
+      }));
+      expect(rowsBeforeDrift).toEqual(expectedRows);
 
       // ── 2. Simulate the drift: journal behind the schema from 0014 on ──
       // Only journal bookkeeping rows are touched; no application table is
@@ -312,7 +337,7 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
       }
       expect(
         rerunError,
-        `migrate() must succeed replaying 0014, 0015 and 0016 on a schema that already has them, ` +
+        `migrate() must succeed replaying ${replayEntries.map((entry) => entry.tag).join(", ")} on an existing schema, ` +
           `got: ${String(rerunError)}`,
       ).toBeNull();
 
@@ -331,6 +356,7 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
       // are intact, not duplicated by the replay.
       await expectRelationPresent("artifacts.artifacts");
       await expectRelationPresent("artifacts.artifact_access");
+      await expectWorkspaceAuthorityIntact();
     },
   );
 });
