@@ -56,6 +56,11 @@ export interface FacetCommandBody {
   target: FacetTarget;
   basket?: FacetBasket;
   reasonCode?: string;
+  expectedHeadId: string | null;
+  expectedSelectionHeads?: {
+    pertinent?: string | null;
+    a_surveiller?: string | null;
+  };
 }
 
 /** One persisted facet head, as served by GET cities/:city. */

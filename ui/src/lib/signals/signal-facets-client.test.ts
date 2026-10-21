@@ -264,7 +264,7 @@ describe("facet writes", () => {
     const event = await postFacetCommand(
       "",
       "discard",
-      { target: { citySlug: "ville-synth", type: "Signal", id: "sig-1" }, reasonCode: "N-ADMIN" },
+      { target: { citySlug: "ville-synth", type: "Signal", id: "sig-1" }, reasonCode: "N-ADMIN", expectedHeadId: null },
       key,
     );
     expect(event).toEqual({ id: "event-1" });
@@ -275,6 +275,7 @@ describe("facet writes", () => {
     expect(JSON.parse(init.body as string)).toEqual({
       target: { citySlug: "ville-synth", type: "Signal", id: "sig-1" },
       reasonCode: "N-ADMIN",
+      expectedHeadId: null,
     });
   });
 
@@ -285,7 +286,7 @@ describe("facet writes", () => {
       if (url.endsWith("/restore")) return jsonResponse(404, { error: "signal_not_found" });
       return jsonResponse(401, { error: "unauthenticated" });
     });
-    const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" } };
+    const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" }, expectedHeadId: null };
     await expect(postFacetCommand("", "select", body, "k1")).rejects.toMatchObject({
       status: 422,
       code: "reason_code_required",
@@ -325,7 +326,7 @@ describe("facet writes", () => {
   it("carries the authorized current state on a head conflict", async () => {
     const current = { target: { citySlug: "ville-synth" }, version: null, heads: [] };
     stubFetch(() => jsonResponse(409, { error: "facet_head_conflict", current }));
-    const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" } };
+    const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" }, expectedHeadId: null };
     const failure = await postFacetCommand("", "select", body, "k1").catch((err) => err);
     expect(failure).toBeInstanceOf(SignalFacetError);
     if (!(failure instanceof SignalFacetError)) throw new Error("Expected a facet failure");
@@ -336,7 +337,7 @@ describe("facet writes", () => {
     vi.stubGlobal("fetch", async () => {
       throw new TypeError("fetch failed");
     });
-    const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" } };
+    const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" }, expectedHeadId: null };
     const failure = await postFacetCommand("", "restore", body, "k1").catch((err) => err);
     expect(failure).toBeInstanceOf(SignalFacetError);
     if (!(failure instanceof SignalFacetError)) throw new Error("Expected a facet failure");
@@ -346,7 +347,7 @@ describe("facet writes", () => {
 
   it("reports a stalled write body as unconfirmed, never as refused", async () => {
     stubStalledBody(200);
-    const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" } };
+    const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" }, expectedHeadId: null };
     const failure = await postFacetCommand("", "select", body, "k1", { timeoutMs: 10 }).catch(
       (err) => err,
     );
