@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { z } from "zod";
 import type { Database } from "../db/client.js";
-import { FacetError, FacetHeadConflictError } from "../services/facets/target.js";
+import { FacetError, FacetHeadConflictError, FacetTargetVersionConflictError } from "../services/facets/target.js";
 import { recoverHistoricalFacet, writeFacet } from "../services/facets/writer.js";
 import { readCityFacets, readReasonCodes } from "../services/facets/reader.js";
 import { FACET_PROFILE } from "../services/facets/codebook.js";
@@ -21,9 +21,10 @@ const expectedSelectionHeads = z.object({
   pertinent: z.string().uuid().nullable().optional(),
   a_surveiller: z.string().uuid().nullable().optional(),
 }).strict().optional();
+const displayedFingerprint = z.string().length(64).regex(/^[a-f0-9]{64}$/);
 const discardSchema = z.object({
   target, reasonCode, deselect: z.array(basket).max(2).optional(),
-  expectedHeadId, expectedSelectionHeads,
+  expectedHeadId, expectedSelectionHeads, displayedFingerprint,
 }).strict().superRefine((value, ctx) => {
   const removals = [...new Set(value.deselect ?? [])].sort();
   if (removals.length === 0) {
@@ -43,16 +44,22 @@ const discardSchema = z.object({
   }
 });
 const schemas = {
-  select: z.object({ target, basket, reasonCode, expectedHeadId }).strict(),
-  deselect: z.object({ target, basket, expectedHeadId }).strict(),
+  select: z.object({ target, basket, reasonCode, expectedHeadId, displayedFingerprint }).strict(),
+  deselect: z.object({ target, basket, expectedHeadId, displayedFingerprint }).strict(),
   discard: discardSchema,
-  restore: z.object({ target, expectedHeadId }).strict(),
+  restore: z.object({ target, expectedHeadId, displayedFingerprint }).strict(),
 };
 const historicalSchemas = {
   select: z.object({ target, basket, reasonCode }).strict(),
   deselect: z.object({ target, basket }).strict(),
   discard: z.object({ target, reasonCode, deselect: z.array(basket).max(2).optional() }).strict(),
   restore: z.object({ target }).strict(),
+};
+const headSchemas = {
+  select: historicalSchemas.select.extend({ expectedHeadId }),
+  deselect: historicalSchemas.deselect.extend({ expectedHeadId }),
+  discard: historicalSchemas.discard.extend({ expectedHeadId, expectedSelectionHeads }),
+  restore: historicalSchemas.restore.extend({ expectedHeadId }),
 };
 export interface SignalFacetsDeps { db: Database; auth?: { enabled: boolean } }
 export function signalFacetsRoute(deps: SignalFacetsDeps): Hono {
@@ -73,7 +80,9 @@ export function signalFacetsRoute(deps: SignalFacetsDeps): Hono {
       const parsed = schemas[action].safeParse(body);
       const key = z.string().uuid().transform((value) => value.toLowerCase()).safeParse(c.req.header("Idempotency-Key"));
       if (!key.success) return c.json({ error: "invalid_facet_command" }, 400);
-      const historical = parsed.success ? null : historicalSchemas[action].safeParse(body);
+      const previousHead = headSchemas[action].safeParse(body);
+      const historical = parsed.success ? null : previousHead.success
+        ? previousHead : historicalSchemas[action].safeParse(body);
       if (!parsed.success && !historical?.success) return c.json({ error: "invalid_facet_command" }, 400);
       const session = c.get("session" as never) as { sub: string };
       try {
@@ -84,6 +93,9 @@ export function signalFacetsRoute(deps: SignalFacetsDeps): Hono {
         return c.json({ ok: true, event: event ? facetEventResponse(event) : null });
       } catch (error) {
         if (error instanceof FacetHeadConflictError) {
+          return c.json({ error: error.message, current: error.current }, error.status);
+        }
+        if (error instanceof FacetTargetVersionConflictError) {
           return c.json({ error: error.message, current: error.current }, error.status);
         }
         if (error instanceof FacetError) return c.json({ error: error.message }, error.status);
