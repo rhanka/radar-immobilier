@@ -133,6 +133,52 @@ async function searchSignalsHandler(
   return jsonResult({ city: args.city, count: signals.length, signals });
 }
 
+async function getOpportunityDossierHandler(
+  rawArgs: Record<string, unknown>,
+  ctx: InvocationContext,
+): Promise<ToolTextResult> {
+  const args = rawArgs as unknown as GetOpportunityDossierToolArgs;
+  assertScope(ctx.auth, IMMO_SCOPES.read);
+  const dossier = await ctx.data.getOpportunityDossier(args);
+  if (!dossier) {
+    return jsonResult({ found: false, city: args.city, opportunityId: args.opportunityId });
+  }
+  return jsonResult({ found: true, dossier });
+}
+
+async function listDocumentsHandler(
+  rawArgs: Record<string, unknown>,
+  ctx: InvocationContext,
+): Promise<ToolTextResult> {
+  const args = rawArgs as unknown as ListDocumentsToolArgs;
+  assertScope(ctx.auth, IMMO_SCOPES.documentsRead);
+  const documents = await ctx.data.listDocuments(args);
+  return jsonResult({ count: documents.length, documents });
+}
+
+async function readDocumentExcerptHandler(
+  rawArgs: Record<string, unknown>,
+  ctx: InvocationContext,
+): Promise<ToolTextResult> {
+  const args = rawArgs as unknown as ReadDocumentExcerptToolArgs;
+  assertScope(ctx.auth, IMMO_SCOPES.documentsRead);
+  const body = await ctx.data.readDocumentBody(args.documentId);
+  if (!body) return jsonResult({ found: false, documentId: args.documentId });
+  const total = body.text.length;
+  const slice = body.text.slice(args.offset, args.offset + args.maxChars);
+  const excerpt = redact(slice); // anti-PII defence-in-depth
+  return jsonResult({
+    found: true,
+    documentId: args.documentId,
+    title: body.title,
+    offset: args.offset,
+    length: slice.length,
+    total_length: total,
+    truncated: args.offset + slice.length < total,
+    excerpt,
+  });
+}
+
 /**
  * One handler per tool, keyed by exact tool name. The SDK registrar and the
  * future cluster-mesh bridge resolve through this map: there is no second
@@ -142,4 +188,7 @@ export const TOOL_HANDLERS: Readonly<Record<string, ToolHandler>> = Object.freez
   search_lots: searchLotsHandler,
   get_lot_card: getLotCardHandler,
   search_signals: searchSignalsHandler,
+  get_opportunity_dossier: getOpportunityDossierHandler,
+  list_documents: listDocumentsHandler,
+  read_document_excerpt: readDocumentExcerptHandler,
 });
