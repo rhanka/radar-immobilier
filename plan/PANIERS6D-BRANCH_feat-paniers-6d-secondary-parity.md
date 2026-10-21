@@ -24,6 +24,7 @@ indicators) while preserving each consumer's non-basket population.
 ## Branch Scope Boundaries (MANDATORY)
 - **Allowed Paths (implementation scope)**:
   - `ui/src/lib/components/maps/SignauxMapView.svelte`
+  - `ui/src/lib/components/maps/SignalPdfOverlay.svelte` (BR6D-EX1)
   - `ui/src/lib/components/maps/SignauxSelPanel.svelte`
   - `ui/src/lib/signals/pdf-overlay-signals.ts`
   - `ui/src/lib/signals/pdf-overlay-signals.test.ts`
@@ -50,12 +51,16 @@ indicators) while preserving each consumer's non-basket population.
   - Include reason, impact, and rollback strategy.
 
 ## Feedback Loop
-- No exception declared: no conditional or forbidden path is touched.
+- BR6D-EX1: allow `SignalPdfOverlay.svelte` solely to reconcile its retained hover card.
+- Reason: two rendered-PDF regressions prove an archived co-signal's hover card remains open and stale citations survive reload.
+- Impact: refresh or close the existing card when signal inputs change; no remount, API or geographic change.
+- Rollback: revert the isolated hover reconciliation commit; keep its regression tests to expose the gap.
 - 6D needs no owner decision (reference design, section 6D).
 - Local Git metadata and a bundle are authorized by the execution brief; shared Git metadata stays read-only.
 - [x] Evidence reconciliation rebuilds current nodes and uses the current visible IDs synchronously.
 - [x] PDF regressions cover archives, changed evidence, out-of-filter co-signals and zero delta.
 - [x] Regulation/demo/grid and cadastral-indicator regression fixtures are implemented.
+- [x] Real detail-route fixtures exercise filtering and explicit reveal through secondary projections.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + cherry-pick** (default for orthogonal tasks; single final test cycle)
