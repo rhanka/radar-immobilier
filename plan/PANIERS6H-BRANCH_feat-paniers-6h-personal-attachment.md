@@ -69,7 +69,7 @@ unchanged until activation runs; scoped routes stay unmounted from `app.ts`.
   reports TS4023 on the inherited fixture. Impact: type-only annotation and
   isolated Make targets/proofs/delivery; rollback: restore these hunks.
 - [x] Astra fix 1: name both DB fixture exports for declaration builds.
-- [ ] Astra fix 2: preserve bound chains during successive activation.
+- [x] Astra fix 2: preserve bound chains during successive activation.
 - [ ] Astra fix 3: recover exact pre-6A/6A receipts without writes.
 - [ ] Astra fix 4: accept historical HTTP payloads for recovery only.
 - [ ] Astra fix 5: compare viewer incarnations by object identity.
@@ -103,4 +103,4 @@ unchanged until activation runs; scoped routes stay unmounted from `app.ts`.
 - [x] **Lot N-1 — Docs**: uncommitted French Muse and Sol reports.
 - [ ] **Lot N — Close (not covered)**: verify green, push, PR, CI, merge
   commit (no squash/rebase), keep branch, move plan to `plan/done/`.
-- [x] Delivery checkpoint: 29
+- [x] Delivery checkpoint: 30
