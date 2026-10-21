@@ -98,7 +98,7 @@ Add explicit expected-head concurrency to personal signal facets. Every mutation
   - [x] `writer.ts`: require `expectedHeadId` plus `expectedSelectionHeads` for composite discard; compare every affected head before any no-op shortcut; atomic multi-stream discard; record receipt context for null results; disclose sanitized current heads on conflict.
   - [x] `response.ts`: keep `facetEventResponse` as the sanitized head shape (no owner, actor, digest).
   - [x] `signal-facets.ts`: strict zod schemas (`expectedHeadId`, `expectedSelectionHeads` with exact key match for discard); 400 on missing/extraneous; 409 `facet_head_conflict` with `current`, 409 `idempotency_key_conflict`, 409 `command_context_unresolved`.
-  - [ ] Adapt existing integration calls under `6A-EX1` (test-only) to the new required fields.
+  - [x] Adapt existing integration calls under `6A-EX1` (test-only) to the new required fields.
   - [ ] Lot gate:
     - [ ] `make typecheck`
     - [ ] `make lint`
