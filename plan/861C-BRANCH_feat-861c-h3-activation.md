@@ -78,7 +78,7 @@ Review integration (both non-blocking points):
       dispatch; authority is reread before dispatch, including suspension after entry.
       Authorization inside an in-flight provider commit remains unverified.
   - [x] Shared admission and facade seam.
-  - [ ] Refusal regression tests.
+  - [x] Refusal regression tests.
   - [ ] Async query and pre-dispatch reread tests.
   - [ ] HTTP admission seam.
   - [ ] HTTP entry regression tests.
