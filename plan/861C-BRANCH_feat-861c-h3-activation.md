@@ -1,16 +1,19 @@
-# H3 activation — branch scope for feat/861c-h3 (first PR, units 1-4)
+# H3 activation — branch scope for feat/861c-h3-p2 (second PR: review rework, units 7 and 10)
 
-**Type**: feature · **Base**: `main` at `7c56bb93` (H1+H2 merged) · **Branch**: `feat/861c-h3`
-**Workspace**: `/home/antoinefa/src/radar-immobilier/.worktrees/861c-h3`
-**Reference design**: `.lanes/conductor/tmp/861c/conception-h3-v1.md` (§10, units 1-4 only)
-**Design review**: `.lanes/conductor/tmp/revues/astra-conception-h3.md` (approved, two non-blocking points)
+**Type**: feature · **Base**: `main` at `cd52bd72` (H3 first PR merged) · **Branch**: `feat/861c-h3-p2`
+**Workspace**: `/home/antoinefa/src/radar-immobilier/.worktrees/861c-h3-p2`
+**Reference design**: `.lanes/conductor/tmp/861c/conception-h3-v1.md` (§10, units 7 and 10)
+**Design review**: `.lanes/conductor/tmp/revues/astra-h3-p1.md` and `astra-h3-p1-indep.md` (approved, rework below)
 
 ## Objective
 
-Deliver the first H3 pull request: branch scope, activation parser, cohort/approval
-admission with commit-time reread, and private control cache headers. No provider
-quota dependency, no deployment change. Each test below fails without its fix and
-carries its §H matrix identifier where one exists.
+Deliver the second H3 pull request: rework requested by both P1 reviews
+(complete publication receipts, cache policy on the unmounted prefix), unit 7
+commit-time authorization with failure accounting, and unit 10 nginx control
+route limit. No provider quota dependency, no other deployment change. Each
+test below fails without its fix and carries its §H matrix identifier where
+one exists. Units 1-4 (first PR) are merged and unchanged except for the
+review rework listed here.
 
 Review integration (both non-blocking points):
 
@@ -29,10 +32,9 @@ Review integration (both non-blocking points):
 - English code, tests and identifiers; no Python; never read `.env`.
 - Reuse `api/src/artifacts/` and `packages/artifacts-host/`; no copied domain logic.
 - Do not touch `api/src/config.ts`, the root `Makefile`, or root `docker-compose*`.
-- Isolated tooling only: `tools/artifact-host.mk` (unchanged in this pass — the
-  existing `test-host`, `test-api`, `typecheck` and `lint` targets already cover the
-  new unit suites; no root Makefile include, no `.env` loading).
-- Production startup wiring (`api/src/index.ts`, `api/src/app.ts`,
+- Isolated tooling only: `tools/artifact-host.mk`, extended solely for the proxy
+  check; no root Makefile include or environment-file loading.
+- Production activation wiring (`api/src/index.ts`,
   `api/src/artifacts/control-route-startup.ts`) is deferred to a later unit: this PR
   adds the admission seam as an optional dependency so existing H2 behavior is
   preserved when no activation reader is provided.
@@ -41,29 +43,32 @@ Review integration (both non-blocking points):
 
 - **Allowed Paths (implementation scope)**:
   - `plan/861C-BRANCH_feat-861c-h3-activation.md`
-  - `packages/artifacts-host/src/activation.ts`, `activation.test.ts`
-  - `packages/artifacts-host/src/admission.ts`, `admission.test.ts`
-  - `packages/artifacts-host/src/admission-commit.test.ts`
-  - `packages/artifacts-host/src/facade.ts` (optional admission seam only)
+  - `packages/artifacts-host/src/admission.test.ts` (complete receipts, valid meta id)
+  - `packages/artifacts-host/src/admission-commit.test.ts` (complete receipts, entry/final split)
+  - `packages/artifacts-host/src/facade.ts` (commit-time recheck, failure ledger)
+  - `packages/artifacts-host/src/commit-authorization.test.ts` (revocation while blocked)
+  - `packages/artifacts-host/src/commit-failures.test.ts` (failure accounting)
   - `packages/artifacts-host/src/index.ts` (re-exports only)
-  - `api/src/artifacts/control-cache.ts`, `control-cache.test.ts`
-  - `api/src/artifacts/control-cache-errors.test.ts`
-  - `api/src/artifacts/control-route.ts` (activation admission + cache headers only)
-  - `api/src/artifacts/control-route-activation.test.ts`
-  - `api/src/artifacts/control-route-commit.test.ts`
-  - `RAPPORT-MUSE-H3-P1.md`, `RAPPORT-SOL-H3-P1.md` (uncommitted deliverables)
-  - `tmp/861c-h3-p1/**` (ignored logs, copies, local Git and bundle)
+  - `api/src/app.ts` (cache policy on the unmounted control prefix only)
+  - `api/src/artifacts/control-cache-unmounted.test.ts` (unmounted prefix cases)
+  - `deploy/overlays/preprod/nginx/default.conf` (control route 2m limit only)
+  - `deploy/overlays/preprod/nginx/nginx-test-control-limit.conf` (isolated test conf)
+  - `tools/h3-nginx-control-limit.sh` (isolated proxy check, no Python)
+  - `tools/artifact-host.mk` (`test-h3-proxy` target only)
+  - `RAPPORT-MUSE-H3-P2.md`, `RAPPORT-SOL-H3-P2.md` (uncommitted deliverables)
+  - `tmp/861c-h3-p2/**` (ignored logs, copies, local Git and bundle)
 - **Forbidden Paths (must not change in this branch)**:
   - `api/src/config.ts`, root `Makefile`, root `docker-compose*.yml`
   - `rules/**`, agent bootstrap files, other `plan/*-BRANCH_*.md`
   - Business routes, MCP composition, product UI
   - Upstream `@sentropic/artifacts` library sources
-  - Provider quotas/reservations, migrations, denial service, image, nginx,
-    preprod resources (units 5-15, later PRs)
+  - Provider quotas/reservations (unit 5), migration (6), denial service (8),
+    image (9), preprod resources except the unit 10 nginx limit (11-14)
 - **Conditional Paths (allowed only with an explicit exception recorded here)**:
-  - `tools/artifact-host.mk` — no change required in this pass
-  - `api/src/index.ts`, `api/src/app.ts`, `api/src/artifacts/control-route-startup.ts`
-    — deferred (production wiring of the activation reader)
+  - `tools/artifact-host.mk` — extended with `test-h3-proxy` (unit 10, no Python, no `.env` load)
+  - `api/src/app.ts` — closed-capability control mount (review rework, guards unchanged)
+  - `api/src/index.ts`, `api/src/artifacts/control-route-startup.ts`
+    — deferred (production wiring of the activation reader and ledger)
 
 ## Deliverables
 
@@ -90,30 +95,66 @@ Review integration (both non-blocking points):
   - [x] Success, refusal and account-switch cache tests.
   - [x] Parent-handler exception cache tests.
 
+## Deliverables (second PR)
+
+- [x] **Review rework A — publication proofs**: complete stub receipts
+      (`releaseId`, `manifest` with digest) and valid `artifactId`; a
+      successful H3-admitted publication returning the full receipt; separate
+      entry-denial and final-reread-denial cases.
+- [x] **Review rework B — unmounted prefix cache** (§5.3, T29): the control
+      prefix stays mounted with the private policy when the capability is
+      absent; covered through `createApp` for anonymous, unavailable,
+      origin and Bearer [REDACTED] responses.
+- [x] **Unit 7 — commit-time authorization and failure accounting** (T05, T13):
+      a publish revoked (suspension, cohort removal, expiration) while the
+      provider is blocked is refused to the caller with no receipt and
+      accounted (`unauthorized_at_commit`); provider lock/connection/S3
+      failures map to typed statuses and are accounted. Prevention inside
+      the provider transaction is `unverified` (missing provider hook,
+      described in `facade.ts`).
+- [x] **Unit 10 — nginx control route limit** (T11 transport part):
+      `client_max_body_size 2m` on `/api/v1/artifacts/control` in the
+      preprod overlay; isolated test config plus a proxy check proving a
+      valid >1 MiB body passes, exactly 2 MiB passes, 2 MiB + 1 is refused,
+      the generic route still refuses >1 MiB, and a chunked body past the
+      limit is refused.
+
 ## Verification
 
-Ports: API 18913, UI 15913, Maildev UI 11913; the test compose publishes none.
+Ports: API 18973, UI 15973, Maildev UI 11973; the test compose publishes none.
+Environment: `test-861c-h3-p2`. Proxy containers use an internal project network,
+with ports 8080 and 3000 inside that network and no host ports. The proxy loads
+the actual preprod server block, with a valid publication and 1024 decoded bytes.
 
 ```sh
-rtk make -f tools/artifact-host.mk test-host SCOPE=src/artifacts API_PORT=18913 UI_PORT=15913 MAILDEV_UI_PORT=11913 ENV=test-861c-h3
-rtk make -f tools/artifact-host.mk test-api SCOPE=src/artifacts API_PORT=18913 UI_PORT=15913 MAILDEV_UI_PORT=11913 ENV=test-861c-h3
-rtk make -f tools/artifact-host.mk test-api SCOPE="--exclude tests/integration/**" API_PORT=18913 UI_PORT=15913 MAILDEV_UI_PORT=11913 ENV=test-861c-h3
-rtk make -f tools/artifact-host.mk test-api SCOPE="tests/integration/artifacts --no-file-parallelism" API_PORT=18913 UI_PORT=15913 MAILDEV_UI_PORT=11913 ENV=test-861c-h3
-rtk make -f tools/artifact-host.mk typecheck API_PORT=18913 UI_PORT=15913 MAILDEV_UI_PORT=11913 ENV=test-861c-h3
-rtk make -f tools/artifact-host.mk lint API_PORT=18913 UI_PORT=15913 MAILDEV_UI_PORT=11913 ENV=test-861c-h3
-rtk make -f tools/artifact-host.mk down API_PORT=18913 UI_PORT=15913 MAILDEV_UI_PORT=11913 ENV=test-861c-h3
-rtk make -f tools/artifact-host.mk inspect API_PORT=18913 UI_PORT=15913 MAILDEV_UI_PORT=11913 ENV=test-861c-h3
+rtk make -f tools/artifact-host.mk test-host SCOPE=src/artifacts API_PORT=18973 UI_PORT=15973 MAILDEV_UI_PORT=11973 ENV=test-861c-h3-p2
+rtk make -f tools/artifact-host.mk test-api SCOPE="--exclude tests/integration/**" API_PORT=18973 UI_PORT=15973 MAILDEV_UI_PORT=11973 ENV=test-861c-h3-p2
+rtk make -f tools/artifact-host.mk test-api SCOPE="tests/integration/artifacts --no-file-parallelism" API_PORT=18973 UI_PORT=15973 MAILDEV_UI_PORT=11973 ENV=test-861c-h3-p2
+rtk make -f tools/artifact-host.mk test-h3-proxy API_PORT=18973 UI_PORT=15973 MAILDEV_UI_PORT=11973 ENV=test-861c-h3-p2
+rtk make -f tools/artifact-host.mk typecheck API_PORT=18973 UI_PORT=15973 MAILDEV_UI_PORT=11973 ENV=test-861c-h3-p2
+rtk make -f tools/artifact-host.mk lint API_PORT=18973 UI_PORT=15973 MAILDEV_UI_PORT=11973 ENV=test-861c-h3-p2
+rtk make -f tools/artifact-host.mk down API_PORT=18973 UI_PORT=15973 MAILDEV_UI_PORT=11973 ENV=test-861c-h3-p2
+rtk make -f tools/artifact-host.mk inspect API_PORT=18973 UI_PORT=15973 MAILDEV_UI_PORT=11973 ENV=test-861c-h3-p2
 ```
 
 `ENV` stays last in every command. Teardown (`down -v --remove-orphans`) must be
 followed by `inspect` proving no project containers, volumes or networks remain.
 
+- [x] Complete admission receipt fixtures verified by typecheck; test gate pending.
+- [ ] Unmounted capability cache regressions verified.
+- [ ] Commit authorization and write-only failure ledger verified.
+- [ ] Blocked-provider revocation tests verified.
+- [ ] Provider failure and read-exclusion tests verified.
+- [ ] Nginx production configuration boundary verified.
+- [ ] Container-only proxy check and mutation proofs verified.
+- [ ] Final gates, per-commit typechecks, bundle and teardown verified.
+
 ## Not covered (later H3 units)
 
-Provider quota binding and migration, commit-time failure accounting, denial
-listener, runtime image smoke, nginx route limit, preprod resources, render/operator
-preflight, rollback documentation, and production startup wiring of the activation
-reader.
+Provider quota binding and migration, denial listener, runtime image smoke,
+preprod resources (11-14), render/operator preflight, rollback documentation,
+production startup wiring of the activation reader and ledger, deployed proxy,
+TLS and routing. Physical prevention inside provider transactions is `unverified`.
 
 ## Feedback Loop
 
