@@ -53,9 +53,11 @@ export { composeArtifactHost } from "./composition.js";
 export {
   createArtifactControl,
   createMemoryCommitLedger,
+  createMemoryProviderProbe,
   type ArtifactControl,
   type ArtifactControlOptions,
   type CommitFailureLedger,
   type CommitFailureReason,
   type CommitFailureRecord,
+  type ProviderFailureProbe,
 } from "./facade.js";
