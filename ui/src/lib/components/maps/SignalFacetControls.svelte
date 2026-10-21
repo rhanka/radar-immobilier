@@ -34,6 +34,8 @@
 
   export let target: FacetTarget;
   export let state: TargetFacetState;
+  /** Fingerprint of the displayed signal version; null inactivates every control. */
+  export let displayedFingerprint: string | null = null;
   /** Null when the codebook is unreadable: every control stays inactive. */
   export let codes: ReasonCode[] | null = null;
   export let codesError: string | null = null;
@@ -78,7 +80,7 @@
   $: watchingCodes = codes ? codesForVerdict(codes, "a_surveiller") : [];
   $: discardCodes = codes ? codesForVerdict(codes, "non_pertinent") : [];
   $: codesReady = codes !== null && !codesLoading;
-  $: inactive = disabled || busy || !codesReady;
+  $: inactive = disabled || busy || !codesReady || displayedFingerprint === null;
 
   function describeTarget(): string {
     return `${target.type} ${target.id}`;
@@ -123,8 +125,15 @@
     }
   }
 
-  async function run(action: FacetAction, body: FacetCommandBody): Promise<void> {
-    const intent = JSON.stringify([action, body]);
+  async function run(action: FacetAction, body: Omit<FacetCommandBody, "displayedFingerprint"> & {
+    displayedFingerprint?: string;
+  }): Promise<void> {
+    // No fingerprint, no write: a command without the displayed version would
+    // fail server-side; stay inactive instead of sending a doomed write.
+    const fingerprint = body.displayedFingerprint ?? displayedFingerprint;
+    if (fingerprint === null) return;
+    const fullBody: FacetCommandBody = { ...body, displayedFingerprint: fingerprint };
+    const intent = JSON.stringify([action, fullBody]);
     // One key per intention, reused when retrying the same intention.
     if (lastIntent !== intent) {
       commandKey = createCommandKey();
@@ -132,12 +141,12 @@
     }
     // Consume stale keys without reporting results to a different viewer.
     const viewerAtStart = viewerKey;
-    const launch: FacetCommandLaunch = { viewerKey: viewerAtStart };
+    const launch: FacetCommandLaunch = { viewerKey: viewerAtStart, displayedFingerprint: fingerprint };
     const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     busy = true;
     error = null;
     try {
-      const event = await postCommand("", action, body, commandKey!);
+      const event = await postCommand("", action, fullBody, commandKey!);
       commandKey = null;
       lastIntent = null;
       if (viewerAtStart !== viewerKey) return;
@@ -163,7 +172,8 @@
           ? facetErrorMessage(err)
           : "Écriture non confirmée — Réessayer.";
       if (err instanceof SignalFacetError
-        && (err.code === "facet_head_conflict" || err.code === "command_context_unresolved")) {
+        && (err.code === "facet_head_conflict" || err.code === "target_version_conflict"
+          || err.code === "command_context_unresolved")) {
         onHeadsStale(body.target, launch, refusalMessage);
       }
       error = refusalMessage;
