@@ -67,9 +67,10 @@ RUN npm run typecheck --workspace=packages/immo-mcp
 RUN npm install --no-save esbuild@0.25.12 \
  && printf '%s\n' \
   "import { build } from 'esbuild';" \
-  "await build({" \
+  "const apiBuild = await build({" \
   "  entryPoints: [" \
   "    'api/src/index.ts'," \
+  "    'api/src/artifacts/content-deny-server.ts'," \
   "    'api/src/db/migrate.ts'," \
   "    'api/src/db/scripts/backfill-0004-tracking.ts'," \
   "    'api/src/scripts/project-graph-from-s3.ts'," \
@@ -91,8 +92,12 @@ RUN npm install --no-save esbuild@0.25.12 \
   "  bundle: true, platform: 'node', format: 'esm', target: 'node24'," \
   "  outdir: 'api/dist', outbase: 'api/src', entryNames: '[dir]/[name]'," \
   "  logLevel: 'info'," \
+  "  metafile: true," \
   "  plugins: [{ name: 'ext', setup(b){ b.onResolve({ filter: /^[^.\/]/ }, a => a.path.startsWith('@radar/') ? null : ({ path: a.path, external: true })); } }]," \
   "});" \
+  "const deny = apiBuild.metafile.outputs['api/dist/artifacts/content-deny-server.js'];" \
+  "const allowedInputs = ['api/src/artifacts/content-deny-server.ts', 'api/src/artifacts/content-deny.ts'];" \
+  "if (Object.keys(deny.inputs).some(p => !allowedInputs.includes(p)) || deny.imports.some(i => !['hono', '@hono/node-server', 'node:http'].includes(i.path))) throw new Error('content-deny application dependency detected');" \
   "// SECOND, separate build call for packages/immo-mcp: its outbase ('src')" \
   "// is NOT under api/src, so it cannot share the entryPoints array above" \
   "// (outbase/entryNames there assume everything lives under api/src)." \
@@ -166,6 +171,12 @@ ENV RADAR_ONTOLOGY_PROFILE_PATH=/workspace/radar/ontology/ontology-profile.yaml
 # new sha only rebuilds this tiny ENV layer, never the cached COPY layers above.
 ARG GIT_SHA=unknown
 ENV GIT_SHA=$GIT_SHA
+# H3 unit 9: single-image service selection. The entrypoint validates the
+# requested mode (`api` or `content-deny`) and refuses anything else at
+# startup. Manifests that set `command:` bypass it; the default stays the API.
+COPY api/docker-entrypoint.sh ./api/docker-entrypoint.sh
+RUN chmod +x ./api/docker-entrypoint.sh
 USER radar
 EXPOSE 3000
-CMD ["node", "api/dist/index.js"]
+ENTRYPOINT ["/workspace/api/docker-entrypoint.sh"]
+CMD ["api"]
