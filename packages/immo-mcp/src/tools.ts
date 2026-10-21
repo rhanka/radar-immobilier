@@ -77,41 +77,6 @@ function checkGeoBounds(args: { bbox?: Bbox | undefined; limit: number }): void 
 }
 
 /**
- * Wraps a tool handler with the cross-cutting concerns every immo tool needs:
- * scope check (from the auth CONTEXT, never from args), audit logging with an
- * input hash + correlationId, and uniform error shaping. The LLM-supplied
- * `args` are treated purely as query parameters.
- */
-function guarded<A>(
-  ctx: ToolContext,
-  toolName: string,
-  scope: string,
-  handler: (args: A) => Promise<TextResult>,
-): (args: A) => Promise<TextResult> {
-  return async (args: A) => {
-    const correlationId = randomUUID();
-    try {
-      assertScope(ctx.auth, scope);
-      auditToolCall(ctx.auth, toolName, hashInput(args), correlationId);
-      return await handler(args);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      // stderr only — never leak to the protocol stdout channel.
-      process.stderr.write(
-        `${JSON.stringify({
-          at: new Date().toISOString(),
-          kind: "immo-mcp.error",
-          tool: toolName,
-          correlationId,
-          message,
-        })}\n`,
-      );
-      return jsonResult({ error: message, tool: toolName, correlationId }, true);
-    }
-  };
-}
-
-/**
  * Registers every read-only tool on the server: the 6 v0 domain tools
  * (backed by `ctx.data`) + the 4 raw-data tools (backed by `ctx.raw` —
  * zones/lots GeoJSON, grille & PV PDFs). Shared by BOTH transports
