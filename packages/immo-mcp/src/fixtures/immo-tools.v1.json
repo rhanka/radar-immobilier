@@ -99,6 +99,10 @@
             "type": "string",
             "description": "Mot-clé libre"
           },
+          "showDiscarded": {
+            "type": "boolean",
+            "description": "Reveal archived signals hidden by default (default false). Read-only."
+          },
           "limit": {
             "type": "integer",
             "minimum": 1,
