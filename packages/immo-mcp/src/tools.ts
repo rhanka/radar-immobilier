@@ -29,53 +29,6 @@ export interface ToolContext {
   raw: RawDataSource;
 }
 
-type TextResult = {
-  content: { type: "text"; text: string }[];
-  isError?: boolean;
-};
-
-function jsonResult(payload: unknown, isError = false): TextResult {
-  const result: TextResult = {
-    content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
-  };
-  if (isError) result.isError = true;
-  return result;
-}
-
-/**
- * Hard char bound on GeoJSON tool answers (~1 MB serialized, compact JSON).
- * `limit`/`bbox` are the primary bounds; this is the last-resort guard so a
- * pathological page (huge multipolygons) can never flood the MCP client.
- */
-const MAX_GEOJSON_RESPONSE_CHARS = 1_000_000;
-
-/** GeoJSON results are serialized COMPACT (no indent): size matters here. */
-function geojsonResult(payload: RawFeatureCollectionResult): TextResult {
-  const text = JSON.stringify(payload);
-  if (text.length > MAX_GEOJSON_RESPONSE_CHARS) {
-    throw new Error(
-      `response_too_large: ${text.length} caractères (max ${MAX_GEOJSON_RESPONSE_CHARS}). ` +
-        "Réduisez limit ou resserrez bbox.",
-    );
-  }
-  return { content: [{ type: "text", text }] };
-}
-
-/**
- * Shared bound checks for the two GeoJSON tools: valid bbox when present,
- * and bbox REQUIRED past the default page size (anti "give me the whole
- * city" — 15 000+ lots would flood the context).
- */
-function checkGeoBounds(args: { bbox?: Bbox | undefined; limit: number }): void {
-  if (args.bbox) assertValidBbox(args.bbox);
-  if (args.limit > RAW_GEOJSON_DEFAULT_LIMIT && !args.bbox) {
-    throw new Error(
-      `bbox_required: limit > ${RAW_GEOJSON_DEFAULT_LIMIT} exige un bbox ` +
-        "[minLon, minLat, maxLon, maxLat] pour borner la réponse.",
-    );
-  }
-}
-
 /**
  * Registers every read-only tool on the server: the 6 v0 domain tools
  * (backed by `ctx.data`) + the 4 raw-data tools (backed by `ctx.raw` —
