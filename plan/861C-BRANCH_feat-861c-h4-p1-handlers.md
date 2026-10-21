@@ -45,6 +45,7 @@ Extract the twelve immo-mcp tool handlers behind an immutable per-request contex
 
 ## Feedback Loop
 - [x] BR861C-EX1 — Owner execution brief explicitly requests the P0 review's behavioral E2E exclusion canary on both ordinary targets, including inverse controls. Allow the dedicated H4 target, its shell harness and removal of the obsolete textual assertion. Impact: verification only; rollback: revert those changes. Neither ordinary runner recipe changes.
+- [x] BR861C-EX2 — Astra review requires bounded compose isolation hardening for the E2E canary: `tools/test-mcp-e2e-exclusion.sh` imposes `test-*` guard plus `env -u` with explicit compose command and isolated project for both sub-makes, with fake-docker coverage for `run` and `down`; `tools/artifact-host.mk` and `tools/immo-mcp-test.mk` pin compose via `override` so the effective project derives only from `ENV`. Impact: test tooling only; rollback: revert the three tooling files.
 - [x] Test mapping: `ENV=test-861c-h4-p1`, API `18915`, UI `15915`, Maildev `11915`; no host ports published. Canary and mutation copies use separate test project suffixes.
 Actions with the following status should be included around tasks only if really required:
 - subagent or agent requires support or informs: `blocked` / `deferred` / `cancelled` / `attention`
@@ -62,7 +63,7 @@ Actions with the following status should be included around tasks only if really
 - **Mono-branch**: UAT after each lot if UI surface impacted. P1 has no UI surface: no UAT checkpoint.
 
 ## Plan / Todo (lot-based)
-- [x] Current commit unit: docs(h4): record completed local P1 verification.
+- [x] Current commit unit: fix(h4): pin isolated compose runners to test projects.
 - [x] **Lot 0 — Baseline & constraints**
   - [x] Read `conception-h4-v3.md` P1 section and the P0 filets (`deployed-baseline.test.ts`, `tool-fixture-provenance.test.ts`).
   - [x] Confirm scope and guardrails; apply BR861C-EX1.
