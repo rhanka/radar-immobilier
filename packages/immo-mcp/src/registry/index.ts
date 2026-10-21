@@ -12,11 +12,15 @@ export {
 } from "./immo-provider.js";
 export {
   ARTIFACT_PROVIDER_ID,
+  artifactEffectiveProfile,
+  ARTIFACT_DURABLE_IDENTITY,
+  ARTIFACT_EFFECTIVE_REQUIRED,
   ARTIFACT_FORBIDDEN_CALLER_FIELDS,
   ARTIFACT_INVOCATION_SCOPE,
   ARTIFACT_LIMITS,
   ARTIFACT_MIME_TYPES,
   ARTIFACT_PROFILE_REVISION,
+  ARTIFACT_PROVIDER_VERSION,
   ARTIFACT_RESERVED_FIRST_SEGMENTS,
   ARTIFACT_SELECTION,
   ARTIFACT_TOOL_NAMES,
@@ -31,6 +35,7 @@ export {
 } from "./artifact-profile.js";
 export {
   checkArtifact,
+  checkEffectiveProfile,
   checkTool,
   canonicalize,
   DEFAULT_ALLOWED_SCOPES,
