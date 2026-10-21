@@ -118,7 +118,7 @@ function guarded<A>(
  * (server.ts stdio and server-http.ts Streamable HTTP).
  */
 export function registerTools(server: McpServer, ctx: ToolContext): void {
-  for (const def of ALL_TOOL_DEFINITIONS.filter((def) => ["search_lots","get_lot_card","search_signals","get_opportunity_dossier","list_documents"].includes(def.name))) {
+  for (const def of ALL_TOOL_DEFINITIONS.filter((def) => ["search_lots","get_lot_card","search_signals","get_opportunity_dossier","list_documents","read_document_excerpt"].includes(def.name))) {
     const handler = TOOL_HANDLERS[def.name];
     if (!handler) throw new Error(`missing_handler:${def.name}`);
     server.registerTool(
@@ -154,37 +154,6 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
       },
     );
   }
-
-  server.registerTool(
-    "read_document_excerpt",
-    {
-      title: "Read document excerpt",
-      description:
-        "Lit un extrait borné d'un document source. La sortie est passée par la redaction anti-PII. Read-only.",
-      inputSchema: {
-        documentId: z.string().min(1),
-        offset: z.number().int().min(0).default(0),
-        maxChars: z.number().int().min(1).max(4000).default(1200),
-      },
-    },
-    guarded(ctx, "read_document_excerpt", IMMO_SCOPES.documentsRead, async (args) => {
-      const body = await ctx.data.readDocumentBody(args.documentId);
-      if (!body) return jsonResult({ found: false, documentId: args.documentId });
-      const total = body.text.length;
-      const slice = body.text.slice(args.offset, args.offset + args.maxChars);
-      const excerpt = redact(slice); // anti-PII defence-in-depth
-      return jsonResult({
-        found: true,
-        documentId: args.documentId,
-        title: body.title,
-        offset: args.offset,
-        length: slice.length,
-        total_length: total,
-        truncated: args.offset + slice.length < total,
-        excerpt,
-      });
-    }),
-  );
 
   // ── Raw-data tools (ad hoc representations côté client MCP) ───────────────
   // Shared zod pieces. The DESCRIPTIONS are part of the contract: they are what
