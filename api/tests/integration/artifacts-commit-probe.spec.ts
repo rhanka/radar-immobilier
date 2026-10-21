@@ -1,0 +1,125 @@
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import pg from "pg";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
+import { CreateBucketCommand, DeleteBucketCommand, S3Client } from "@aws-sdk/client-s3";
+import { createS3BlobStore } from "@sentropic/artifacts/adapters/s3";
+import {
+  ArtifactS3TimeoutError,
+  composeArtifactHost,
+  createArtifactControl,
+  createArtifactsPool,
+  createMemoryCommitLedger,
+  createMemoryProviderProbe,
+} from "@radar/artifacts-host";
+import { loadConfig } from "../../src/config.js";
+import { migrationsFolder } from "./artifacts-h2.helpers.js";
+
+const DATABASE = "artifacts_h2_commit_probe";
+const SCOPE = "probe_scope";
+const ORG = "probe_org";
+const BASE = "pages.example.test";
+const BUCKET = "h2-artifacts-commit-probe";
+
+let admin: pg.Pool;
+let pool: pg.Pool;
+let s3: S3Client;
+let endpoint = "";
+let accessKey = "";
+let secretKey = "";
+
+const rawBlobs = () => createS3BlobStore({ client: s3, bucket: BUCKET });
+const storageConfig = () => ({ enabled: true as const, storageScope: SCOPE, orgId: ORG,
+  s3Bucket: BUCKET, s3Endpoint: endpoint, s3Region: "us-east-1",
+  s3AccessKey: accessKey, s3SecretKey: secretKey });
+
+async function s3KeyCount(): Promise<number> {
+  return [...(await rawBlobs().listKeys(`artifacts/${SCOPE}/`))].length;
+}
+
+async function tableCount(table: string): Promise<number> {
+  return Number((await pool.query(`SELECT count(*) FROM artifacts.${table}`)).rows[0].count);
+}
+
+async function ensureArtifact(
+  control: ReturnType<typeof createArtifactControl>, key: string,
+): Promise<string> {
+  const response = await control.handle("ensure", "alice", { bindingName: "probe", idempotencyKey: key });
+  expect(response.status).toBe(201);
+  return (response.body as { artifactId: string }).artifactId;
+}
+
+beforeAll(async () => {
+  const env = loadConfig();
+  endpoint = env.S3_ENDPOINT; accessKey = env.S3_ACCESS_KEY; secretKey = env.S3_SECRET_KEY;
+  admin = new pg.Pool({ host: env.POSTGRES_HOST, port: env.POSTGRES_PORT,
+    user: env.POSTGRES_USER, password: env.POSTGRES_PASSWORD, database: env.POSTGRES_DB });
+  await admin.query(`CREATE DATABASE ${DATABASE}`);
+  pool = createArtifactsPool({ host: env.POSTGRES_HOST, port: env.POSTGRES_PORT,
+    user: env.POSTGRES_USER, password: env.POSTGRES_PASSWORD, database: DATABASE });
+  await migrate(drizzle(pool), { migrationsFolder });
+  s3 = new S3Client({ endpoint, forcePathStyle: true, region: "us-east-1",
+    credentials: { accessKeyId: accessKey, secretAccessKey: secretKey } });
+  await s3.send(new CreateBucketCommand({ Bucket: BUCKET }));
+  await pool.query("INSERT INTO account_users (sub, email, status) VALUES ('alice','alice@example.test','approved')");
+});
+
+afterAll(async () => {
+  for (const key of await rawBlobs().listKeys(`artifacts/${SCOPE}/`)) await rawBlobs().deleteBlob(key);
+  await s3.send(new DeleteBucketCommand({ Bucket: BUCKET }));
+  s3.destroy();
+  await pool.end();
+  await admin.query(`DROP DATABASE ${DATABASE} WITH (FORCE)`);
+  await admin.end();
+});
+
+describe("commit probe against the real provider stack [T05 T13]", () => {
+  it("maps a below-layer S3 timeout converted to 500 back to 503", async () => {
+    const probe = createMemoryProviderProbe();
+    const { ledger, entries } = createMemoryCommitLedger();
+    const broken = (await composeArtifactHost(pool, storageConfig(), { ...rawBlobs(),
+      async putBlob() { throw new ArtifactS3TimeoutError("blobs.putBlob"); } }, probe.record))!;
+    const control = createArtifactControl(broken, SCOPE, BASE, undefined, { ledger, probe });
+    try {
+      const id = await ensureArtifact(control, "probe-s3-ensure");
+      expect(await tableCount("releases")).toBe(0);
+      const response = await control.handle("publish", "alice",
+        { artifactId: id, files: [{ path: "index.html", mimeType: "text/html", text: "s3 timeout probe" }],
+          idempotencyKey: "probe-s3" });
+      expect(response).toEqual({ status: 503, body: { error: "capability_unavailable" } });
+      expect(entries).toEqual([{ op: "publish", actorId: "alice",
+        reason: "provider_unavailable", status: 503, atMs: expect.any(Number) }]);
+    } finally {
+      broken.close();
+    }
+  });
+
+  it("maps a below-layer connection loss converted to 409 back to 503", async () => {
+    const armed = { current: false };
+    const flaky = new Proxy(pool, { get(target, property, receiver) {
+      if ((property === "query" || property === "connect") && armed.current) {
+        return async (): Promise<never> => {
+          throw Object.assign(new Error("terminating connection"), { code: "57P06" });
+        };
+      }
+      const value = Reflect.get(target, property, receiver);
+      return typeof value === "function" ? value.bind(target) : value;
+    } });
+    const probe = createMemoryProviderProbe();
+    const { ledger, entries } = createMemoryCommitLedger();
+    const host = (await composeArtifactHost(flaky, storageConfig(), rawBlobs(), probe.record))!;
+    const control = createArtifactControl(host, SCOPE, BASE, undefined, { ledger, probe });
+    armed.current = true;
+    try {
+      const response = await control.handle("ensure", "alice",
+        { bindingName: "probe-conn", idempotencyKey: "probe-conn" });
+      expect(response).toEqual({ status: 503, body: { error: "capability_unavailable" } });
+      expect(entries).toEqual([{ op: "ensure", actorId: "alice",
+        reason: "provider_unavailable", status: 503, atMs: expect.any(Number) }]);
+    } finally {
+      armed.current = false;
+      host.close();
+    }
+  });
+
+});
