@@ -138,7 +138,7 @@ Review integration (both non-blocking points):
 
 ## Integration checkpoints
 
-- [ ] Shared denial module and H1 header reuse.
+- [x] Shared denial module and H1 header reuse.
 - [ ] Host and probe behavior regression coverage.
 - [ ] Isolated HTTP listener and import-graph checks.
 - [ ] Runtime bundling and strict service-mode selection.
