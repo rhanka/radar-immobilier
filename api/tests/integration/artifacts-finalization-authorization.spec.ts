@@ -395,4 +395,68 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       if (typeof close === "function") (close as () => void)();
     }
   });
+
+  it.each(["ensure", "publish"] as const)("%s replay rechecks authority after lookup waits", async (operation) => {
+    await requireCommitContract();
+    await requireOutcomeContract();
+    const barrier = await requireCommitBarrier();
+    const host = await composeQ1Host(barrier.observer);
+    try {
+      const execute = requireHostExecute(host);
+      const ensureBody = { bindingName: `replay-${operation}`, idempotencyKey: `replay-ensure-${operation}` };
+      const ensured = await execute({ method: "POST", path: "/ensure", body: ensureBody },
+        invocationFor(allowAll(), `replay-setup-${operation}`));
+      expect(ensured).toMatchObject({ ok: true });
+      const artifactId = ((ensured as { result: { body: { artifactId: string } } }).result).body.artifactId;
+      const body = operation === "ensure" ? ensureBody : { artifactId, idempotencyKey: "replay-publish",
+        files: [{ path: "index.html", mimeType: "text/html", text: "replay" }] };
+      if (operation === "publish") expect(await execute({ method: "POST", path: "/publish", body },
+        invocationFor(allowAll(), "replay-first"))).toMatchObject({ ok: true });
+      const before = await committedState(pool);
+      let revoked = false;
+      const guard: AuthorizeCommit = async (context, transaction) => {
+        expect(context.purpose).toBe("replay");
+        return revoked ? { allowed: false, reason: "unauthorized_at_commit",
+          publicCode: "account_not_approved", status: 403, retriable: false }
+          : authorizeTransaction(context, transaction);
+      };
+      const invocation = invocationFor(guard, `replay-denial-${operation}`);
+      const id = invocation.invocationId as string;
+      const reached = arrived(barrier, "after_replay_lookup_before_guard", id);
+      const pending = execute({ method: "POST", path: `/${operation}`, body }, invocation);
+      try { await reached; revoked = true; }
+      finally { barrier.release("after_replay_lookup_before_guard", id); }
+      const outcome = await pending as Record<string, unknown>;
+      assertOutcomeFailure(outcome, id);
+      expect(outcome.failure).toMatchObject({ category: "unauthorized_at_commit", commitState: "not_committed" });
+      expect(await committedState(pool)).toEqual(before);
+    } finally { if (typeof host.close === "function") host.close(); }
+  });
+
+  it.each(["withdrawn", "deleted", "purged"] as const)("refuses publication after lifecycle becomes %s", async (state) => {
+    await requireCommitContract();
+    const barrier = await requireCommitBarrier();
+    const host = await composeQ1Host(barrier.observer);
+    try {
+      const execute = requireHostExecute(host);
+      const ensured = await execute({ method: "POST", path: "/ensure",
+        body: { bindingName: `lifecycle-${state}`, idempotencyKey: `lifecycle-${state}` } },
+        invocationFor(allowAll(), `lifecycle-${state}`));
+      expect(ensured).toMatchObject({ ok: true });
+      const artifactId = (ensured as { result: { body: { artifactId: string } } }).result.body.artifactId;
+      const writer = await pool.connect();
+      try {
+        await writer.query("BEGIN");
+        await writer.query("SELECT id FROM artifacts.artifacts WHERE id=$1 FOR UPDATE", [artifactId]);
+        await writer.query("UPDATE artifacts.artifacts SET lifecycle_state=$1 WHERE id=$2", [state, artifactId]);
+        await writer.query("COMMIT");
+      } finally { writer.release(); }
+      const before = await committedState(pool);
+      const outcome = await execute({ method: "POST", path: "/publish", body: { artifactId,
+        idempotencyKey: `terminal-${state}`, files: [{ path: "index.html", mimeType: "text/html", text: state }] } },
+        invocationFor(allowAll(), `terminal-${state}`));
+      expect(outcome).toMatchObject({ ok: false });
+      expect(await committedState(pool)).toEqual(before);
+    } finally { if (typeof host.close === "function") host.close(); }
+  });
 });
