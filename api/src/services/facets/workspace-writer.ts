@@ -38,6 +38,7 @@ import {
 } from "./target.js";
 import { lockCityGraph } from "../graph/graph-store.js";
 import { requireScopedEpoch } from "./scope.js";
+import { bumpWorkspaceRevision } from "./projection-revisions.js";
 import { scopedEpochFor } from "./activation.js";
 import { FACET_PROFILE } from "./codebook.js";
 import { resolveWorkspaceStream } from "./workspace-streams.js";
@@ -122,6 +123,13 @@ export async function writeWorkspaceArchiveFacet(
     }).returning())[0]!.id : stream.id;
     const event = await appendWorkspaceTransition(tx, actorId, command,
       streamId, command.action === "discard" ? "active" : "inactive", fingerprint, base);
+    // 6L1: the shared revision moves only when a transition was appended;
+    // no-op commands keep every member's token stable.
+    const [head] = await tx.select().from(facetHeads)
+      .where(eq(facetHeads.streamId, streamId));
+    if ((head?.eventId ?? null) !== (stream.headEventId ?? null)) {
+      await bumpWorkspaceRevision(tx, workspaceId, command.target.citySlug);
+    }
     const result = event ? { ...event, createdAt: event.createdAt.toISOString() } : null;
     const context = { target: command.target, facet: "archive", basket: null,
       scope: "workspace", expectedHeadId: command.expectedHeadId,
