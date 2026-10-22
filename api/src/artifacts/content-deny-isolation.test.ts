@@ -13,6 +13,54 @@ function importSpecifiers(source: string): string[] {
 }
 
 /**
+ * The single allowed `process` occurrence: the root object of an exact
+ * `process.env.PORT` property chain over dots. Bracket spellings,
+ * assertions between the links and destructured copies are not allowed.
+ * It must initialize `raw` directly inside the entrypoint's `resolvePort`.
+ */
+function isAllowedProcessIdentifier(node: ts.Identifier): boolean {
+  if (node.text !== "process") return false;
+  const parent = node.parent;
+  if (!ts.isPropertyAccessExpression(parent)) return false;
+  if (parent.expression !== node) return false;
+  if (parent.name.text !== "env") return false;
+  const grandparent = parent.parent;
+  if (!ts.isPropertyAccessExpression(grandparent)) return false;
+  if (grandparent.expression !== parent) return false;
+  if (grandparent.name.text !== "PORT") return false;
+  const declaration = grandparent.parent;
+  if (!ts.isVariableDeclaration(declaration) || declaration.initializer !== grandparent) return false;
+  if (!ts.isIdentifier(declaration.name) || declaration.name.text !== "raw") return false;
+  const statement = declaration.parent.parent;
+  if (!ts.isVariableStatement(statement)) return false;
+  const body = statement.parent;
+  if (!ts.isBlock(body) || !ts.isFunctionDeclaration(body.parent)) return false;
+  return body.parent.name?.text === "resolvePort" &&
+    ts.isSourceFile(body.parent.parent) &&
+    node.getSourceFile().fileName === "content-deny-server.ts";
+}
+
+function countAllowedPortReads(source: string, file: string): number {
+  const root = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true);
+  let count = 0;
+  const visit = (node: ts.Node): void => {
+    if (
+      ts.isPropertyAccessExpression(node) &&
+      node.name.text === "PORT" &&
+      ts.isPropertyAccessExpression(node.expression) &&
+      node.expression.name.text === "env" &&
+      ts.isIdentifier(node.expression.expression) &&
+      isAllowedProcessIdentifier(node.expression.expression)
+    ) {
+      count += 1;
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(root);
+  return count;
+}
+
+/**
  * Every environment key read through any `process.env` spelling, found with
  * the TypeScript AST (not a pattern): dotted access (`process.env.PORT`),
  * indexed access (`process.env["PORT"]`), `process["env"]` variants and
@@ -139,6 +187,10 @@ function envKeys(source: string, file: string): string[] {
 }
 
 describe("content-deny module isolation", () => {
+  it("pins the PORT read to resolvePort", () => {
+    expect(countAllowedPortReads(read("content-deny-server.ts"), "content-deny-server.ts")).toBe(1);
+    expect(countAllowedPortReads("void process.env.PORT;", "content-deny-server.ts")).toBe(0);
+  });
   it.each([
     ["process.env.EXTRA", ["EXTRA"]],
     ["process['env']['EXTRA']", ["EXTRA"]],
