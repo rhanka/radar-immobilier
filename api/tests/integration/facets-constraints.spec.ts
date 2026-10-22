@@ -33,8 +33,8 @@ describe("facet event constraints", () => {
     };
     const cases: [Partial<typeof facetEvents.$inferInsert>, string][] = [
       [{ scope: "common" }, "facet_events_scope_check"],
-      [{ targetType: "lot" }, "facet_events_target_type_check"],
-      [{ nodeType: "Bylaw" }, "facet_events_node_type_check"],
+      [{ targetType: "lot" }, "chk_facet_events_target_lot_6j"],
+      [{ nodeType: "Bylaw" }, "chk_facet_events_target_lot_6j"],
       [{ actorId: other!.id }, "chk_facet_events_actor_owner"],
       [{ reasonCode: "UNKNOWN" }, "facet_events_profile_id_reason_code_verdict_fkey"],
       [{ verdict: "pertinent" }, "chk_facet_events_classified_reason"],
