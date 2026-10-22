@@ -15,12 +15,15 @@ export COMPOSE_PROJECT_NAME="radar-$ENV"
 export POSTGRES_USER=radar POSTGRES_PASSWORD=synthetic-only POSTGRES_DB=radar
 export S3_REGION=test S3_BUCKET=synthetic S3_ACCESS_KEY=synthetic S3_SECRET_KEY=synthetic
 export OPENAI_API_KEY= ANTHROPIC_API_KEY= GEMINI_API_KEY= GOOGLE_API_KEY= MISTRAL_API_KEY= COHERE_API_KEY=
+postgres_tmpfs=512m
+# Parallel CI discovery creates many disposable databases simultaneously.
+if [[ "$1" == api-ci ]]; then postgres_tmpfs=8g; fi
 cat > "$runtime_dir/compose.yml" <<YAML
 services:
   postgres:
     volumes: !reset []
     tmpfs:
-      - /var/lib/postgresql/data:size=512m
+      - /var/lib/postgresql/data:size=$postgres_tmpfs
     environment:
       POSTGRES_INITDB_ARGS: --no-sync
     healthcheck:
@@ -106,7 +109,7 @@ if [[ "$LOT" == 6J ]]; then
   done > "$log_dir/archived-files.sha256"
 fi
 case "$1" in
-  verify|test-api|mutation-proof|astra-proof) "${compose[@]}" up -d --wait postgres ;;
+  verify|test-api|mutation-proof|astra-proof|fix-proof) "${compose[@]}" up -d --wait postgres ;;
   api-ci) "${compose[@]}" up -d --wait postgres minio ;;
 esac
 "${compose[@]}" run --rm --no-deps -T api sh -ec '
@@ -115,6 +118,10 @@ esac
   cat > /workspace/api/vitest.isolated.config.ts <<'"'"'CONFIG'"'"'
 import config from "./vitest.config.js";
 export default { ...config, envDir: false, test: { ...config.test, fileParallelism: false, maxWorkers: 2 } };
+CONFIG
+  cat > /workspace/api/vitest.ci.config.ts <<'"'"'CONFIG'"'"'
+import config from "./vitest.config.js";
+export default { ...config, envDir: false };
 CONFIG
   case "$1" in
     build) npm run build --workspace=api ;;
@@ -143,6 +150,11 @@ CONFIG
       done
       ;;
   esac
+  if [ "$1" = fix-proof ]; then
+    test "$LOT" = 6J
+    bash /workspace/tools/make/paniers-lot6j-fix-mutation.sh
+    exit
+  fi
   if [ "$1" = astra-proof ]; then
     test "$LOT" = 6H
     bash /workspace/tools/make/paniers-lot6h-fix-mutation.sh
@@ -175,7 +187,7 @@ CONFIG
         6G) npx --no-install eslint api/src/services/workspaces api/src/routes/workspaces.ts api/src/scripts/init-workspace-authority.ts ;;
         6H) npx --no-install eslint api/src/services/facets api/src/routes/scoped-signal-facets*.ts api/src/scripts/attach-personal-history.ts api/src/services/workspaces/authority*.ts api/src/services/workspaces/migration.test.ts packages/immo-mcp/src/workspace-context*.ts packages/immo-mcp/src/data-source.ts ui/src/lib/signals/signal-facet-scope*.ts ;;
         6I) npx --no-install eslint api/src/services/facets api/src/routes/scoped-workspace-archive*.ts ui/src/lib/signals/signal-facet-workspace*.ts ;;
-        6J) npx --no-install eslint api/src/services/facets/lots api/src/routes/scoped-lot-*.ts ;;
+        6J) npx --no-install eslint api/src/services/facets/lots api/src/routes/scoped-lot-*.ts api/src/services/facets/activation-db.test.ts api/src/services/workspaces/cli-db.test.ts ;;
         *) npx --no-install eslint api/src/services/facets ;;
       esac
       ;;
@@ -186,7 +198,7 @@ CONFIG
       LOG_LEVEL=info npm run db:migrate --workspace=api
       cd api
       if [ "$1" = api-ci ]; then
-        npm run test -- --config vitest.isolated.config.ts
+        npm run test -- --config vitest.ci.config.ts
       else
         set -f
         ../node_modules/.bin/vitest run --config vitest.isolated.config.ts $2
