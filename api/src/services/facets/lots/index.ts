@@ -75,3 +75,78 @@ export {
 /** Stream planning. */
 export { lotConflictHeads, planLotStreams } from "./lot-transition.js";
 
+/** Atomic transitions. */
+export {
+  appendLotTransition,
+  type LotImportProvenance,
+} from "./lot-apply.js";
+export {
+  lotStreamKey,
+  lotTargetLock,
+  resolveLotStream,
+  type LotFacet,
+  type LotStreamRef,
+  type LotStreamScope,
+} from "./lot-streams.js";
+
+/** Public event snapshots. */
+export { lotEventResponse, type LotEventSnapshot } from "./lot-response.js";
+
+/** Shape validation and D4 authorization shared by writers. */
+export {
+  authorizeLotMutation,
+  validateLotMutationShape,
+} from "./lot-authorize.js";
+
+/** Single commands and the atomic batch. */
+export { writeLotFacet, type LotTx, type LotWriteResult } from "./lot-writer.js";
+export { writeLotBatch } from "./lot-batch.js";
+
+/** Authorized reads and paginated history. */
+export {
+  isEffectivelyDiscarded,
+  readLotState,
+  type LotArchiveHead,
+  type LotArchiveState,
+  type LotReadState,
+  type LotSelectionHead,
+} from "./lot-reader.js";
+
+/** Collection projection. */
+export { readLotCity, type LotCityHead } from "./lot-city.js";
+export {
+  readLotHistory,
+  readLotSourceHistory,
+  type LotHistoryPage,
+  type LotSourceHistoryPage,
+} from "./lot-history.js";
+
+/** Import run ledger. */
+export {
+  recordImportReceipt,
+  replayRecordedReceipt,
+  type LotImportCounts,
+  type LotImportInput,
+  type LotImportReceipt,
+} from "./lot-import-runs.js";
+
+/** Synthetic importer and preserved evidence. */
+export {
+  LOT_IMPORTER_VERSION,
+  runLotImport,
+} from "./lot-importer.js";
+export {
+  LOT_6J_AA,
+  LOT_6J_BB,
+  lot6jMarks,
+  lot6jVersions,
+  qualifiedLotReport,
+  unqualifiedLotReport,
+} from "./lot-import-input.js";
+
+/** Terminal-head projection. */
+export {
+  isProjectableHead,
+  projectTerminalHeads,
+  type ProjectionInput,
+} from "./lot-project.js";
