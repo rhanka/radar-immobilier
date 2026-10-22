@@ -53,6 +53,86 @@ export interface WorkspaceArchiveCommand {
 
 type WorkspaceTx = Parameters<Parameters<Database["transaction"]>[0]>[0];
 
+export async function writeWorkspaceArchiveFacet(
+  db: Database, sub: string, workspaceId: string, command: WorkspaceArchiveCommand,
+) {
+  if (command.action !== "discard" && command.action !== "restore") {
+    throw new FacetError(400, "invalid_facet_command");
+  }
+  if ((command as { basket?: unknown }).basket !== undefined
+    || (command as { deselect?: unknown }).deselect !== undefined
+    || (command as { expectedSelectionHeads?: unknown }).expectedSelectionHeads !== undefined) {
+    throw new FacetError(400, "invalid_facet_command");
+  }
+  if (command.action === "restore" && command.reasonCode !== undefined) {
+    throw new FacetError(400, "invalid_facet_command");
+  }
+  if (command.action === "discard" && command.reasonCode === undefined) {
+    throw new FacetError(422, "reason_code_required");
+  }
+  if (command.expectedHeadId === undefined || command.displayedFingerprint === undefined) {
+    throw new FacetError(400, "invalid_facet_command");
+  }
+  const key = command.commandKey.toLowerCase();
+  return db.transaction(async (tx) => {
+    await lockWorkspace(tx, workspaceId);
+    const actorId = await approvedAccountId(tx, sub, true);
+    const access = await resolveWorkspaceAccess(tx, workspaceId, sub);
+    if (!access.moderateArchive) {
+      throw new WorkspaceError(403, "workspace_capability_required");
+    }
+    requireScopedEpoch(await scopedEpochFor(tx, workspaceId), workspaceId);
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${JSON.stringify(
+      ["workspace-archive-command", actorId, key])}, 0))`);
+    const base = facetCommandDigest({ ...command, commandKey: key });
+    const commandDigest = digest({ scope: "workspace", workspaceId: workspaceId.toLowerCase(), command: base });
+    const [contextRow] = await tx.select().from(facetCommandContexts).where(sql`
+      ${facetCommandContexts.ownerId} = ${actorId} AND ${facetCommandContexts.commandKey} = ${key}`);
+    const [receiptRow] = await tx.select().from(facetCommands).where(sql`
+      ${facetCommands.ownerId} = ${actorId} AND ${facetCommands.commandKey} = ${key}`);
+    if (receiptRow && (!contextRow || contextRow.status !== "resolved")) {
+      throw new FacetError(409, "command_context_unresolved");
+    }
+    if (contextRow && contextRow.workspaceId !== workspaceId.toLowerCase()) {
+      throw new FacetError(409, "idempotency_key_conflict");
+    }
+    const replay = await readCommand(tx, actorId, key, commandDigest);
+    if (replay !== undefined) return replay;
+    await lockCityGraph(tx, command.target.citySlug);
+    const fingerprint = await resolveTarget(tx, command.target);
+    if (fingerprint !== command.displayedFingerprint) {
+      throw new FacetTargetVersionConflictError({
+        target: command.target, version: { fingerprint },
+        heads: await workspaceConflictHeads(tx, workspaceId, command.target),
+      });
+    }
+    const stream = await resolveWorkspaceStream(tx, workspaceId, command.target);
+    if ((stream.headEventId ?? null) !== command.expectedHeadId) {
+      throw new FacetHeadConflictError({
+        target: command.target, version: null,
+        heads: await workspaceConflictHeads(tx, workspaceId, command.target),
+      });
+    }
+    const streamId = stream.id === "" ? (await tx.insert(facetStreams).values({
+      workspaceId, scope: "workspace", ownerId: null, targetType: "signal",
+      citySlug: command.target.citySlug, nodeType: command.target.type,
+      nodeId: command.target.id, facet: "archive", basket: null,
+    }).returning())[0]!.id : stream.id;
+    const event = await appendWorkspaceTransition(tx, actorId, command,
+      streamId, command.action === "discard" ? "active" : "inactive", fingerprint, base);
+    const result = event ? { ...event, createdAt: event.createdAt.toISOString() } : null;
+    const context = { target: command.target, facet: "archive", basket: null,
+      scope: "workspace", expectedHeadId: command.expectedHeadId,
+      displayedFingerprint: command.displayedFingerprint, workspaceId };
+    await tx.insert(facetCommands).values({ ownerId: actorId, commandKey: key,
+      commandDigest, result: { event: result, context } });
+    await tx.insert(facetCommandContexts).values({
+      ownerId: actorId, commandKey: key, workspaceId, status: "resolved", commandDigest,
+    }).onConflictDoNothing();
+    return result;
+  });
+}
+
 /** Authorized conflict disclosure: the workspace head only, never personal state. */
 async function workspaceConflictHeads(
   tx: WorkspaceTx, workspaceId: string, target: SignalTarget,
