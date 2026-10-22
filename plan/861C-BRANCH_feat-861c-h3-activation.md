@@ -102,6 +102,13 @@ Review integration (both non-blocking points):
 
 ## Deliverables
 
+- [x] BR861C-EX1: root Makefile exception limited to `k8s-validate` offline
+  gate/test calls, matching the existing entrypoint-check convention; rollback
+  removes only those calls, with no impact on other targets.
+- [x] BR861C-EX2: retain the assigned `.worktrees/861c-h3-p4` checkout;
+  external Git metadata is read-only, so commits and bundle live under
+  `tmp/861c-h3-p4`; no root checkout or external metadata is modified.
+
 - [x] **Unit 1 — scope**: this plan; isolated tooling statement (no Makefile change).
 - [x] **Unit 2 — activation parser** (§5.1): absent, incomplete, malformed and
       expired inputs stay closed by default; `off` disables; `validation` with exact
@@ -130,7 +137,40 @@ Review integration (both non-blocking points):
 - [x] Units 1-4, review rework A/B, unit 10: merged (see Git history).
 - [ ] Unit 7 stays BLOCKED on the upstream `authorizeCommit` request below.
 
-## Deliverables (third PR)
+## Deliverables (third PR, merged and unchanged except review rework)
+
+## Deliverables (fourth PR, this branch)
+
+- [x] **Unit 11 — named preprod configuration patches** (§6.1): ConfigMap
+  patch pins `ARTIFACTS_CONTROL_MODE: "off"`; subjects, window and storage
+  coordinates stay absent (closed); S3 keys bind through optional opaque
+  `radar-artifacts-preprod` Secret references; Secret shape recorded in
+  `secrets.example.yaml` (example only). Existing preprod isolation checks
+  remain valid.
+- [x] **Unit 12 — denial Deployment/Service** (§5.4): unit 9 image in
+  `content-deny` mode through `args` (never `command`), distinct
+  `content-deny` selectors, no credential, no token mount, minimal probes.
+- [x] **Unit 13 — NetworkPolicy and wildcard/TLS routing** (§6.2):
+  Traefik-to-deny ingress policy plus deny-all egress; content Ingress with
+  both wildcard levels to the denial Service only, `.invalid` domain/TLS
+  placeholders marked `unverified`, activation-time gate refusing unfilled
+  values. The shared Ingress host patch is restricted to the named `radar`
+  and `radar-immo-mcp` Ingresses.
+- [x] **Review rework (third PR)**: image smoke distinguishes the api mode
+  from the denial service (`GET /` banner vs `404 not_found`) and exercises
+  no-argument startup (entrypoint default); the denial isolation test detects
+  every environment read (dotted access included) in both modules through the
+  TypeScript AST.
+- [x] **Unit 14 — render and preflight checks** (`deploy/ci/`, no Python):
+  exact objects, single-image identity, no prod leakage, no activation by
+  default; companion activation-time gate refusing unfilled values; read-only
+  operator preflight (never applies); hermetic tests; `test-h3-render`
+  isolated target and minimal `k8s-validate` wiring (existing offline-gate
+  convention).
+- [x] **Unit 15 — activation and rollback documentation**
+  (`docs/operator/h3-preprod-activation.md`): §11 order, rollback to H2 by
+  removing the complete activation group, data preservation, retained-data
+  record, credential cycle.
 
 - [x] **Unit 8 — isolated denial listener** (§5.4, T02/T23/T24): new
       `api/src/artifacts/content-deny.ts` exposes the shared denial
@@ -171,21 +211,23 @@ Review integration (both non-blocking points):
 
 ## Verification
 
-Ports: API 18983, UI 15983, Maildev UI 11983; the test compose publishes none.
-Environment: `test-861c-h3-p3`. Smoke containers use an internal project network
-with no host ports.
+Ports: API 18984, UI 15984, Maildev UI 11984 (availability unverified); the
+test compose publishes none. Environment: `test-861c-h3-p4`. Smoke containers
+use an internal project network with no host ports.
 
 ```sh
-rtk make -f tools/artifact-host.mk test-host SCOPE=src/artifacts API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
-rtk make -f tools/artifact-host.mk test-api SCOPE="--exclude tests/integration/** --no-file-parallelism" API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
-rtk make -f tools/artifact-host.mk test-api SCOPE="tests/integration/artifacts --no-file-parallelism" API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
-rtk make -f tools/artifact-host.mk image-runtime-smoke API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
-rtk make -f tools/artifact-host.mk typecheck API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
-rtk make -f tools/artifact-host.mk lint API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
-rtk make -f tools/artifact-host.mk build-api API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
-rtk make -f tools/artifact-host.mk check-image-entrypoints API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
-rtk make -f tools/artifact-host.mk down API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
-rtk make -f tools/artifact-host.mk inspect API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
+rtk make -f tools/artifact-host.mk test-host SCOPE=src/artifacts API_PORT=18984 UI_PORT=15984 MAILDEV_UI_PORT=11984 ENV=test-861c-h3-p4
+rtk make -f tools/artifact-host.mk test-api SCOPE="--exclude tests/integration/** --no-file-parallelism" API_PORT=18984 UI_PORT=15984 MAILDEV_UI_PORT=11984 ENV=test-861c-h3-p4
+rtk make -f tools/artifact-host.mk test-api SCOPE="tests/integration/artifacts --no-file-parallelism" API_PORT=18984 UI_PORT=15984 MAILDEV_UI_PORT=11984 ENV=test-861c-h3-p4
+rtk make -f tools/artifact-host.mk test-h3-render API_PORT=18984 UI_PORT=15984 MAILDEV_UI_PORT=11984 ENV=test-861c-h3-p4
+rtk make -f tools/artifact-host.mk image-runtime-smoke API_PORT=18984 UI_PORT=15984 MAILDEV_UI_PORT=11984 ENV=test-861c-h3-p4
+rtk make -f tools/artifact-host.mk typecheck API_PORT=18984 UI_PORT=15984 MAILDEV_UI_PORT=11984 ENV=test-861c-h3-p4
+rtk make -f tools/artifact-host.mk lint API_PORT=18984 UI_PORT=15984 MAILDEV_UI_PORT=11984 ENV=test-861c-h3-p4
+rtk make -f tools/artifact-host.mk build-api API_PORT=18984 UI_PORT=15984 MAILDEV_UI_PORT=11984 ENV=test-861c-h3-p4
+rtk make -f tools/artifact-host.mk check-image-entrypoints API_PORT=18984 UI_PORT=15984 MAILDEV_UI_PORT=11984 ENV=test-861c-h3-p4
+rtk make k8s-validate ENV=ci
+rtk make -f tools/artifact-host.mk down API_PORT=18984 UI_PORT=15984 MAILDEV_UI_PORT=11984 ENV=test-861c-h3-p4
+rtk make -f tools/artifact-host.mk inspect API_PORT=18984 UI_PORT=15984 MAILDEV_UI_PORT=11984 ENV=test-861c-h3-p4
 ```
 
 `ENV` stays last in every command. Teardown (`down -v --remove-orphans`) must be
@@ -215,12 +257,20 @@ followed by `inspect` proving no project containers, volumes or networks remain.
       (high) in the unchanged dependency tree. No dependency update or risk
       acceptance is included; dependency remediation belongs on its own branch.
 
-## Not covered (later H3 units)
+## Not covered (this branch is unapplied configuration)
+
+- [x] H3 P4 integration: 114 artifact API tests including 13 AST cases;
+  98 relevant shell checks (34 H3, 39 entrypoint, 25 auth isolation) and real runtime smoke pass.
+  Activation requires filled values, future expiry and pinned reviewed digests.
+  Copy mutations fail, restored bytes match with `cmp`. See uncommitted report
+  and `tmp/861c-h3-p4/evidence/` for exact commands and commit checks.
 
 Provider quota binding (5) and migration (6), unit 7 (blocked, see below),
-preprod resources (11-14), render/operator preflight, rollback documentation
-(15), deployed proxy, TLS and routing. Physical prevention inside provider
-transactions is `unverified`.
+supplier quotas (design §5 lots 5-6), deployed proxy behavior, live TLS/DNS
+and routing state, real content domain, private bucket and credentials,
+capacity for the extra denial pod, and any real cluster apply. Physical
+prevention inside provider transactions is `unverified`. Nothing in this
+branch was executed against a cluster; all automated checks are offline.
 
 ## Upstream request — provider commit-time authorization (blocks unit 7)
 
@@ -286,29 +336,3 @@ finalization, quotas, persistent ledger and HTTP/MCP parity remain unverified.
 
 - Reviewer selection: exact Muse model/effort unavailable; no complementary peer
   consensus claimed. Local integration review and executable evidence are required.
-
-
-
-- [x] P4: declare the fourth-PR scope and exclusions.
-
-- [x] P4: add mode off and opaque optional S3 Secret references.
-
-- [x] P4: add the credential-free denial Deployment and Service.
-
-- [x] P4: wire named patches, wildcard placeholders and denial policies.
-
-- [x] P4: detect dotted, indexed, destructured and aliased environment access.
-
-- [x] P4: assert the API banner and no-argument image startup.
-
-- [x] P4: validate canonical objects, exact references, digests and wildcards.
-
-- [x] P4: add offline gates, expiry checks and disabled-render regressions.
-
-- [x] P4: prove activation and credential regressions with restore and cmp.
-
-- [x] P4: default preflight to offline and stop on failed gates or probes.
-
-- [x] P4: wire the existing offline Make validation convention.
-
-- [x] P4: document CD ownership, prerequisites, activation and rollback.
