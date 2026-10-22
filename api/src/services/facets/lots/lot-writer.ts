@@ -34,6 +34,7 @@ import {
 import { lotTargetLock } from "./lot-streams.js";
 import { resolveLotRights } from "./lot-capabilities.js";
 import { requireLotDestination } from "./lot-gate.js";
+import { assertCutoverTargetReady } from "./lot-cutover-target.js";
 import { authorizeLotMutation, validateLotMutationShape } from "./lot-authorize.js";
 import { lotEventResponse } from "./lot-response.js";
 import { appendLotTransition } from "./lot-apply.js";
@@ -67,6 +68,7 @@ export async function writeLotFacet(
     const destination = await requireLotDestination(tx, workspaceId);
     requireScopedEpoch(await scopedEpochFor(tx, workspaceId), workspaceId);
     authorizeLotMutation(rights, scope, command.mutation, destination.selectionBasket);
+    await assertCutoverTargetReady(tx as unknown as Database, workspaceId, command.mode, command.target);
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${JSON.stringify(
       ["scoped-command", actorId, key])}, 0))`);
     const base = lotCommandDigest(scope, "single", workspaceId, { ...command, command_key: key });
