@@ -146,17 +146,18 @@ export async function writeLotBatch(
     const items: LotBatchItemResult[] = [];
     let eventsAppended = 0;
     for (const entry of prepared) {
-      const before = entry.plan.main.current?.id ?? null;
       const outcome = await appendLotTransition(tx, workspaceId, scope, actorId,
         entry.itemCommand, entry.itemCommand.target, entry.plan,
         entry.resolvedFingerprint, commandDigest, {});
-    const appended = outcome.appended[0] ?? outcome.heads[0] ?? null;
-      const snapshot = appended ? lotEventResponse(appended)
-        : entry.plan.main.current ? lotEventResponse(entry.plan.main.current) : null;
-      if (appended && appended.id !== before) {
-        eventsAppended += 1 + entry.plan.removals.filter((removal) => removal.current?.state === "active").length;
-      }
-      items.push({ target: entry.itemCommand.target, event: snapshot, appended: appended !== null && appended.id !== before });
+      const changed = outcome.appended.length > 0;
+      if (changed) eventsAppended += outcome.appended.length;
+      items.push({
+        target: entry.itemCommand.target,
+        mode: batch.mode,
+        events: outcome.appended.map((event) => lotEventResponse(event)),
+        heads: outcome.heads.map((event) => lotEventResponse(event)),
+        appended: changed,
+      });
     }
     const changed = items.filter((item) => item.appended).length;
     const result: LotBatchResult = {
