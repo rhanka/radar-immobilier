@@ -33,7 +33,6 @@ import {
 } from "../services/chat/mesh-runtime.js";
 import { executeBacklogTool } from "../services/chat/backlog-tools.js";
 import {
-  isLegacyMarkDeliveryRetired,
   publish,
   replayAll,
   retireLegacyMarkDelivery,
@@ -136,19 +135,21 @@ export function chatRoute(db?: Database): Hono {
 
   /** Browser StreamHub SSE feed (replay buffer + live frames). */
   app.get("/api/chat/streams/sse", async (c) => {
-    // A restarted replica must consult durable state before replaying buffers.
-    // Only an attested barrier or opening retires delivery irreversibly; an
-    // unreadable fence suspends mark frames for this connection only.
+    // Before activation, replay and live delivery follow main, including
+    // on an unknown fence: no suspension, queue or connection-local re-read.
+    // Only a confirmed barrier/open retires delivery. The §6K sequence stops
+    // publishers, closes existing readers and destroys replay buffers, so
+    // unknown cannot revive obsolete frames after that retirement.
+    // The process-wide retired set remembers this positive decision even
+    // if a later connection's fence read fails. New connections re-read the
+    // durable fence, including after a process restart.
     const fence = db ? await legacyMarksFence(db) : "none";
     if (fence === "open" || fence === "barrier") retireLegacyMarkDelivery();
-    let suspendLegacyMarks = fence === "unknown";
     const encoder = new TextEncoder();
     let unsubscribe: (() => void) | null = null;
     let unsubscribeRetirement: (() => void) | null = null;
     let heartbeat: ReturnType<typeof setInterval> | null = null;
-    let disconnected = false;
     const disconnect = () => {
-      disconnected = true;
       unsubscribe?.();
       unsubscribeRetirement?.();
       if (heartbeat) clearInterval(heartbeat);
@@ -156,13 +157,6 @@ export function chatRoute(db?: Database): Hono {
 
     const stream = new ReadableStream<Uint8Array>({
       start(controller) {
-        // Marks withheld while the fence is unreadable stay queued so a
-        // later recovery can resume them in order on this same connection,
-        // without any client reconnect and without duplicates.
-        const suspendedBacklog: StreamFrame[] = [];
-        const suspendedLive: StreamFrame[] = [];
-        let revalidating = false;
-        let replaying = true;
         const deliver = (frame: StreamFrame): void => {
           controller.enqueue(
             encoder.encode(
@@ -183,67 +177,14 @@ export function chatRoute(db?: Database): Hono {
             // Already closed by the retirement broadcast.
           }
         };
-        const revalidateFence = async (): Promise<void> => {
-          if (disconnected || revalidating || !suspendLegacyMarks || !db) return;
-          revalidating = true;
-          try {
-            const current = await legacyMarksFence(db);
-            if (disconnected) return;
-            if (isLegacyMarkDeliveryRetired()) { closeRetired(); return; }
-            if (current === "none") {
-              suspendLegacyMarks = false;
-              const queued = [...suspendedBacklog, ...suspendedLive];
-              suspendedBacklog.length = 0;
-              suspendedLive.length = 0;
-              for (const frame of queued) {
-                try {
-                  deliver(frame);
-                } catch {
-                  disconnect();
-                  break;
-                }
-              }
-            } else if (current === "open" || current === "barrier") {
-              suspendedBacklog.length = 0;
-              suspendedLive.length = 0;
-              retireLegacyMarkDelivery();
-              if (isLegacyMarkDeliveryRetired()) closeRetired();
-            } else {
-              // Still unreadable: drop live frames published during the
-              // outage, as before, but keep the withheld replay backlog.
-              suspendedLive.length = 0;
-            }
-          } catch {
-            suspendedLive.length = 0;
-          } finally {
-            revalidating = false;
-          }
-        };
         unsubscribeRetirement = subscribeRetirement((streamId, types) => {
           if (streamId !== "prospect-marks" || !types.some((type) =>
             type === "prospect:mark" || type === "prospect:batch")) return;
           closeRetired();
         });
-        const isSuspendedMark = (frame: StreamFrame): boolean =>
-          suspendLegacyMarks && frame.streamId === "prospect-marks"
-          && (frame.type === "prospect:mark" || frame.type === "prospect:batch");
-        const send = (frame: StreamFrame): void => {
-          if (!isSuspendedMark(frame)) {
-            deliver(frame);
-            return;
-          }
-          if (replaying) {
-            suspendedBacklog.push(frame);
-            return;
-          }
-          suspendedLive.push(frame);
-          void revalidateFence();
-        };
-        replayAll(send);
-        replaying = false;
-        unsubscribe = subscribe(send);
+        replayAll(deliver);
+        unsubscribe = subscribe(deliver);
         heartbeat = setInterval(() => {
-          void revalidateFence();
           try {
             controller.enqueue(encoder.encode(sseFrame("ping", { ts: Date.now() })));
           } catch {
