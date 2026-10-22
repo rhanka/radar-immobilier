@@ -1,0 +1,6 @@
+fix: refuse scoped union on unresolved personal history|api/src/services/facets/workspace-discarded.ts api/src/services/facets/workspace-union-db.test.ts
+fix: share actor key lock across scoped command families|api/src/services/facets/workspace-writer.ts api/src/services/facets/workspace-receipts-db.test.ts
+fix: answer 422 when a workspace discard omits reasonCode|api/src/routes/scoped-workspace-archive.ts api/src/routes/scoped-workspace-archive-db.test.ts
+test: keep personal hiding on workspace-first restore|api/src/services/facets/workspace-archive-db.test.ts
+test: discriminate workspace archive review corrections on copies|tools/make/paniers-lot6i-mutation.sh
+chore: deliver verified workspace archive review corrections|tools/make/paniers-lot6.mk tools/make/paniers-lot6i-fix-deliver.sh tools/make/paniers-lot6i-fix-slices.txt

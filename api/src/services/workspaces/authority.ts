@@ -6,12 +6,12 @@
 import { randomUUID } from "node:crypto";
 import {
   WorkspaceError,
-  WorkspaceRevisionConflictError,
   type MembershipEvent,
   type MembershipRecord,
   type WorkspaceCapability,
   type WorkspaceRef,
 } from "./types.js";
+import { checkRevision } from "./policy.js";
 
 const key = (workspaceId: string, accountId: string): string =>
   `${workspaceId}:${accountId}`;
@@ -76,7 +76,7 @@ export class WorkspaceAuthority {
     if (!current || current.status !== "active") {
       throw new WorkspaceError(404, "workspace_membership_not_found");
     }
-    this.checkExpected(current, expectedRevision);
+    checkRevision(current, expectedRevision);
     this.memberships.set(key(workspaceId, accountId),
       { ...current, status: "revoked", revision: current.revision + 1 });
     this.record({ workspaceId, accountId, kind: "member_revoked", capability: null, actorId, reason });
@@ -90,7 +90,7 @@ export class WorkspaceAuthority {
     if (!current || current.status !== "active") {
       throw new WorkspaceError(404, "workspace_membership_not_found");
     }
-    this.checkExpected(current, expectedRevision);
+    checkRevision(current, expectedRevision);
     const held = capability === "moderate_archive" ? current.moderateArchive : current.manageMembers;
     if (held === granted) return { changed: false };
     this.memberships.set(key(workspaceId, accountId), capability === "moderate_archive"
@@ -100,15 +100,6 @@ export class WorkspaceAuthority {
       kind: granted ? "capability_granted" : "capability_revoked",
       capability, actorId, reason });
     return { changed: true };
-  }
-
-  private checkExpected(current: MembershipRecord, expectedRevision: number | null): void {
-    if (expectedRevision === null || !Number.isInteger(expectedRevision)) {
-      throw new WorkspaceError(400, "invalid_workspace_command");
-    }
-    if (current.revision !== expectedRevision) {
-      throw new WorkspaceRevisionConflictError(current);
-    }
   }
 
   private record(event: Omit<MembershipEvent, "id">): void {
