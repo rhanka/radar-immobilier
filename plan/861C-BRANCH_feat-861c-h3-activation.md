@@ -196,6 +196,7 @@ Review integration (both non-blocking points):
 - [x] Third-pass correction 3: ban constructor/getPrototypeOf/__proto__ in the AST guard as defense in depth.
 - [x] Third-pass correction 4: reject calculated dynamic imports and cover both independent-review bypasses.
 - [x] Third-pass verification: introduce child-process helpers with explicit PORT-only environments.
+- [x] Third-pass verification: preserve all five invalid PORT diagnostics in child processes.
 - [x] Operator runbook: validate preparation and the H2 rollback plan before
   GO; keep the real content boundary and a matching reviewed CD target.
 

@@ -411,12 +411,31 @@ describe("content-deny module isolation", () => {
   });
 });
 
-describe("content-deny runtime environment isolation", () => {
-  it.each(["", "  invalid  ", "0", "65536", "1.5"])("preserves invalid PORT diagnostics (%j)", (port) => {
-    expect(() => executeDenialModules({ PORT: port }, [])).toThrow(
-      `invalid PORT ${JSON.stringify(port)}: expected an integer in 1-65535`,
-    );
-  });
+describe("content-deny child-process environment isolation", () => {
+  it.each(["", "  invalid  ", "0", "65536", "1.5"])(
+    "rejects invalid PORT %j without starting a listener",
+    async (port) => {
+      const dir = mkdtempSync(join(tmpdir(), "deny-child-"));
+      try {
+        const entry = writeChildBundle(dir, "", "");
+        const child = spawn(process.execPath, [entry], {
+          env: { PORT: port },
+          stdio: ["ignore", "pipe", "pipe"],
+        });
+        let stderr = "";
+        child.stderr?.on("data", (chunk: Buffer | string) => {
+          stderr += chunk.toString();
+        });
+        await waitForChildExit(child);
+        expect(child.exitCode).toBe(1);
+        expect(stderr).toContain(
+          `invalid PORT ${JSON.stringify(port)}: expected an integer in 1-65535`,
+        );
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    },
+  );
 
   it(
     "reads only PORT at runtime",
