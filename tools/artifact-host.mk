@@ -27,6 +27,7 @@ UI_PORT ?= 15895
 MAILDEV_UI_PORT ?= 11895
 ARTIFACTS_CONTENT_BASE ?=
 ARTIFACTS_TEST_CONFIG ?= 0
+ARTIFACTS_PROVIDER_ACCEPTANCE ?= 0
 export API_PORT UI_PORT MAILDEV_UI_PORT ARTIFACTS_CONTENT_BASE
 override COMPOSE_PROJECT_NAME := radar-$(ENV)
 override COMPOSE_DISABLE_ENV_FILE := 1
@@ -63,6 +64,21 @@ guard-env:
 	  test-*|e2e-*) ;; \
 	  *) echo "[artifact-host] refused: ENV must be test-* or e2e-*, got '$(ENV)'" >&2; exit 1;; \
 	esac
+	@df -h .
+	@df -Pk . | awk 'NR == 2 && $$4 < 10485760 { print "[artifact-host] refused: less than 10 GiB free" > "/dev/stderr"; exit 1 }'
+
+.PHONY: test-provider-acceptance typecheck-provider-acceptance
+test-provider-acceptance: guard-env ## Qualify candidate provider; opt in with ARTIFACTS_PROVIDER_ACCEPTANCE=1
+	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
+	$(COMPOSE) up -d postgres minio && \
+	$(COMPOSE) run --rm -T -e ARTIFACTS_PROVIDER_ACCEPTANCE=$(if $(filter 1,$(ARTIFACTS_PROVIDER_ACCEPTANCE)),1,0) api sh -c "npm ci && npm run db:migrate --workspace=api && npm run test --workspace=api -- tests/integration/artifacts-provider-acceptance.spec.ts"
+
+# API tsconfig excludes integration tests: explicitly check this delivery too.
+typecheck-provider-acceptance: guard-env
+	@mkdir -p tmp/861c-provider-acceptance
+	@printf '%s\n' '{"extends":"../../tsconfig.base.json","compilerOptions":{"noEmit":true,"types":["node"]},"include":["../../api/tests/integration/artifacts-provider-acceptance.spec.ts","../../api/tests/integration/artifacts-provider-contract.helpers.ts"]}' > tmp/861c-provider-acceptance/tsconfig.json
+	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
+	$(COMPOSE) run --rm --no-deps -T api sh -c "npm ci && npx tsc -p tmp/861c-provider-acceptance/tsconfig.json"
 
 .PHONY: test-api
 test-api: guard-env ## Run API tests (SCOPE=<path> for scoped runs)
