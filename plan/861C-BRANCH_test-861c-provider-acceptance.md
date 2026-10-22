@@ -49,11 +49,18 @@ Keep current host API names in one test adaptation module pending spec r2.
 - [x] **Lot 4 — Reproducible runner and tests included in static checking.**
 - [x] **Lot 5 — Full CI-equivalent API suite with acceptance disabled.**
 - [x] **Lot 6 — Enabled suite: archive each expected contract failure.**
-- [ ] **Lot 7 — Typecheck, lint and API build with declarations.**
-- [ ] **Lot 8 — Review, French report, atomic commits and verified bundle.**
+- [x] **Lot 7 — Typecheck, lint and API build with declarations.**
+- [x] **Lot 8 — Direct review, French report, atomic commits and verified bundle.**
 
 ## Verification commands
 - [x] `rtk make -f tools/artifact-host.mk test-api API_PORT=18986 UI_PORT=15986 MAILDEV_UI_PORT=11986 ENV=test-861c-provider-acceptance`
 - [x] `rtk make -f tools/artifact-host.mk test-provider-acceptance ARTIFACTS_PROVIDER_ACCEPTANCE=1 API_PORT=18986 UI_PORT=15986 MAILDEV_UI_PORT=11986 ENV=test-861c-provider-acceptance`
-- [ ] `rtk make -f tools/artifact-host.mk verify-provider-acceptance API_PORT=18986 UI_PORT=15986 MAILDEV_UI_PORT=11986 ENV=test-861c-provider-acceptance`
-- [ ] `rtk make -f tools/artifact-host.mk down API_PORT=18986 UI_PORT=15986 MAILDEV_UI_PORT=11986 ENV=test-861c-provider-acceptance`
+- [x] `rtk make -f tools/artifact-host.mk verify-provider-acceptance API_PORT=18986 UI_PORT=15986 MAILDEV_UI_PORT=11986 ENV=test-861c-provider-acceptance`
+- [x] `rtk make -f tools/artifact-host.mk down API_PORT=18986 UI_PORT=15986 MAILDEV_UI_PORT=11986 ENV=test-861c-provider-acceptance`
+
+## Final evidence
+- [x] Full API: 218 files / 2830 tests passed, 23 files / 80 tests skipped.
+- [x] Enabled acceptance: six missing-contract failures only (two clean runs).
+- [x] Final static gates and declaration emit passed; isolated stack removed.
+- [x] Independent review selection failed on missing exact author metadata;
+  no consensus claimed and no merge requested; dossier in ignored evidence.
