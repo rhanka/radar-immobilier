@@ -13,7 +13,7 @@ SCOPE ?= src/services/facets src/services/workspaces tests/integration/facets sr
 else ifeq ($(LOT),6I)
 SCOPE ?= src/services/facets/workspace src/services/facets/scoped src/services/facets/registry src/routes/scoped-workspace-archive src/routes/scoped-signal-facets src/services/workspaces
 else ifeq ($(LOT),6J)
-SCOPE ?= src/services/facets/lots src/routes/scoped-lot-facets src/services/facets/lot-migration-report
+SCOPE ?= src/services/facets/lots src/routes/scoped-lot- src/services/facets/lot-migration-report
 else
 SCOPE ?= src/services/facets
 endif
@@ -26,7 +26,7 @@ guard:
 	@case '$(ENV)' in test-*|e2e-*) ;; *) echo 'test-* or e2e-* ENV required'; exit 1;; esac
 	@case '$(LOT)' in 6F|6G|6H|6I|6J) ;; *) echo 'LOT must be 6F, 6G, 6H, 6I or 6J'; exit 1;; esac
 
-verify build typecheck lint test-api api-ci mutation-proof astra-proof: guard
+verify build typecheck lint test-api api-ci mutation-proof astra-proof fix-proof: guard
 	@bash tools/make/paniers-lot6-verify.sh $@
 
 regression: guard
@@ -50,7 +50,7 @@ audit: guard
 
 .PHONY: fix-prepare fix-deliver fix-audit
 fix-prepare fix-deliver fix-audit: guard
-	@case '$(LOT)' in 6H|6I) ;; *) exit 1;; esac
+	@case '$(LOT)' in 6H|6I|6J) ;; *) exit 1;; esac
 	@bash tools/make/paniers-lot$(shell echo $(LOT) | tr A-Z a-z)-fix-deliver.sh $@
 
 run-6j: guard
