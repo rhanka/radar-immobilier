@@ -8,7 +8,7 @@
  */
 import { and, eq, isNull, or } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
-import { facetEvents, facetHeads, facetStreams } from "../../db/schema.js";
+import { facetEventBindings, facetEvents, facetHeads, facetStreams } from "../../db/schema.js";
 import {
   discardedSignalKey,
   unionDiscardedSignals,
@@ -21,7 +21,9 @@ import { lockWorkspace } from "../workspaces/mutations.js";
 import { requireScopedEpoch, ScopeError } from "./scope.js";
 import { scopedEpochFor } from "./activation.js";
 
-/** Union keys for one viewer in one workspace; fails closed when unavailable. */
+/** Union keys for one viewer in one workspace; fails closed when unavailable.
+ * Unattached pre-cutover personal history refuses with 503 instead of
+ * returning an incomplete (possibly empty) set. */
 export async function readScopedUnionDiscardedKeys(
   db: Database, sub: string, workspaceId: string,
 ): Promise<ReadonlySet<DiscardedSignalKey>> {
@@ -30,6 +32,11 @@ export async function readScopedUnionDiscardedKeys(
     const accountId = await approvedAccountId(tx, sub, true);
     await resolveWorkspaceAccess(tx, workspaceId, sub);
     requireScopedEpoch(await scopedEpochFor(tx, workspaceId), workspaceId);
+    const [unresolved] = await tx.select({ id: facetEvents.id }).from(facetEvents)
+      .leftJoin(facetEventBindings, eq(facetEventBindings.eventId, facetEvents.id))
+      .where(and(eq(facetEvents.ownerId, accountId),
+        isNull(facetEventBindings.eventId))).limit(1);
+    if (unresolved) throw new ScopeError(503, "personal_history_unresolved");
     const workspace = new Set<DiscardedSignalKey>();
     const personal = new Set<DiscardedSignalKey>();
     const scoped = await tx.select({ scope: facetEvents.scope, ownerId: facetEvents.ownerId,
