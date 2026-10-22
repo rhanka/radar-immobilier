@@ -1,17 +1,22 @@
-# H3 activation — branch scope for feat/861c-h3-p3-denial-image (third PR: units 8 and 9)
+# H3 activation — branch scope for feat/861c-h3-p4-preprod-resources (fourth PR: units 11 to 15)
 
-**Type**: feature · **Base**: `main` (H3 first PR and second PR merged) · **Branch**: `feat/861c-h3-p3-denial-image`
-**Workspace**: `/home/antoinefa/src/radar-immobilier/.worktrees/861c-h3-p3`
-**Reference design**: `.lanes/conductor/tmp/861c/conception-h3-v1.md` (§10, units 8 and 9; §5.4 and §6.4 contracts)
+**Type**: feature · **Base**: `main` (H3 first, second and third PRs merged; H4 P0 to P3 present) · **Branch**: `feat/861c-h3-p4-preprod-resources`
+**Workspace**: `/home/antoinefa/src/radar-immobilier/.worktrees/861c-h3-p4`
+**Reference design**: `.lanes/conductor/tmp/861c/conception-h3-v1.md` (§6 deployment, §7, §9, §10 units 11 to 15, §11 activation and rollback)
 
 ## Objective
 
-Deliver the third H3 pull request: unit 8 (isolated denial listener) and
-unit 9 (runtime image entrypoint plus real-image smoke tooling). No provider
-quota dependency, no migration, no preprod resources, no rollback
-documentation. Each test below fails without its fix. Units 1-4 (first PR),
-review rework, unit 7 (blocked, pinned leak documented) and unit 10 (second
-PR) are merged and unchanged.
+Deliver the fourth H3 pull request: units 11 to 15 (named preprod
+configuration patches, denial Deployment/Service, NetworkPolicy and
+wildcard/TLS routing, render/operator preflight checks, activation and
+rollback documentation), everything disabled by default with no activation,
+plus the third-PR review rework (image smoke distinguishes the api mode from
+the denial service and exercises no-argument startup; the denial isolation
+test detects every environment read in both modules through the TypeScript
+AST). No provider quota dependency, no migration, no real cluster apply.
+Units 1-4 (first PR), review rework A/B, unit 7 (blocked, pinned leak
+documented), unit 10 (second PR) and units 8-9 (third PR) are merged and
+unchanged apart from the two review-rework files named below.
 
 Review integration (both non-blocking points):
 
@@ -28,35 +33,63 @@ Review integration (both non-blocking points):
 ## Scope / Guardrails
 
 - English code, tests and identifiers; no Python; never read `.env`.
-- Reuse the existing denial response; no copied domain logic, no new dependency.
-- Do not touch `api/src/config.ts`, the root `Makefile`, or root `docker-compose*`.
-- Isolated tooling only: `tools/artifact-host.mk` provides runtime smoke,
-  CI API build and entrypoint checks; no root Makefile or environment-file loading.
-- Quotas (unit 5), migration (6), unit 7 (blocked), preprod resources (11-14)
-  and rollback documentation (15) stay out of scope.
+- Opaque credential references only; no secret or real credential value in git.
+- Do not touch `api/src/config.ts` or root `docker-compose*`.
+- Root `Makefile`: only the minimal `k8s-validate` wiring of the new offline
+  render gate (existing convention: `k8s-validate` already runs the
+  `deploy/ci` offline gates `check-image-entrypoints.sh` and its hermetic
+  test); no other change.
+- Isolated tooling only: `tools/artifact-host.mk` gains `test-h3-render` and
+  the three offline operator render targets;
+  no root Makefile or environment-file loading beyond the `k8s-validate`
+  exception above.
+- Quotas (unit 5), migration (6), unit 7 (blocked) and any real cluster apply
+  stay out of scope. The real content domain, DNS and certificate are unknown:
+  placeholders only, never invented values.
 
 ## Branch Scope Boundaries (MANDATORY)
 
 - **Allowed Paths (implementation scope)**:
   - `plan/861C-BRANCH_feat-861c-h3-activation.md`
-  - `api/src/artifacts/content-deny.ts` (shared denial response, standalone app)
-  - `api/src/artifacts/content-deny-server.ts` (dependency-free entrypoint)
-  - `api/src/artifacts/content-deny.test.ts` (every host form denied)
-  - `api/src/artifacts/content-deny-isolation.test.ts` (no app dependency)
-  - `api/src/artifacts/content-app.ts` (reuse the shared denial response only)
-  - `api/docker-entrypoint.sh` (mode validation, `api` or `content-deny`)
-  - `api/Dockerfile` (denial entrypoint bundle, entrypoint wiring only)
-  - `tools/h3-image-runtime-smoke.sh` (real-image smoke, no Python)
-  - `tools/artifact-host.mk` (runtime smoke, CI API build and entrypoint checks)
-  - `RAPPORT-MUSE-H3-P3.md`, `RAPPORT-SOL-H3-P3.md` (uncommitted deliverables)
-  - `tmp/861c-h3-p3/**` (ignored copies, evidence, local Git and bundle)
+  - `deploy/overlays/preprod/patch-artifacts-control.yaml` (unit 11, control off)
+  - `deploy/overlays/preprod/patch-artifacts-api-env.yaml` (unit 11, opaque refs)
+  - `deploy/overlays/preprod/artifact-content-deny.yaml` (unit 12)
+  - `deploy/overlays/preprod/artifact-content-networkpolicy.yaml` (unit 13)
+  - `deploy/overlays/preprod/artifact-content-ingress.yaml` (unit 13)
+  - `deploy/overlays/preprod/kustomization.yaml` (unit 11-13 wiring; Ingress
+    host patch restricted to the named `radar` and `radar-immo-mcp` Ingresses)
+  - `deploy/k8s/secrets.example.yaml` (unit 11 operator Secret shape, example only)
+  - `deploy/ci/check-h3-preprod-render.sh` (unit 14 render gate, no Python)
+  - `deploy/ci/check-h3-activation-render.sh` (unit 13/14 activation-time gate)
+  - `deploy/ci/check-h3-{preparation,rollback}-render.sh` (operator transitions)
+  - `deploy/ci/check-h3-transition-render.test.sh` (transition regressions)
+  - `deploy/ci/check-h3-preprod-render.test.sh` (unit 14 hermetic tests)
+  - `deploy/ci/h3-render-*.awk` (canonical rendered-object checks)
+  - `deploy/ci/check-h3-activation-render.test.sh` (activation regressions)
+  - `deploy/ci/check-h3-discrimination.test.sh` (copy/restore/cmp proofs)
+  - `deploy/ci/preflight-h3-preprod.test.sh` (offline and fail-closed preflight)
+  - `deploy/ci/preflight-h3-preprod.sh` (unit 14 read-only operator preflight)
+  - `docs/operator/h3-preprod-activation.md` (unit 15 runbook)
+  - `tools/h3-image-runtime-smoke.sh` (review rework: api/deny discrimination,
+    no-argument startup)
+  - `api/src/artifacts/content-deny-isolation.test.ts` (review rework: AST env reads)
+  - `api/src/artifacts/content-deny-server.ts` (single PORT read, behavior preserved)
+  - `tools/artifact-host.mk` (H3 render tests and offline operator targets only)
+  - `Makefile` (`k8s-validate` wiring of the render gate only)
+  - `RAPPORT-MUSE-H3-P4.md` (uncommitted deliverable)
+  - `RAPPORT-SOL-H3-P4.md` (uncommitted integration report)
+  - `tmp/861c-h3-p4/**` (ignored evidence, copies, local Git and bundle)
+  - `tmp/861c-h3-p4-fix/**` (review correction evidence, local Git and bundle)
+  - `tmp/861c-h3-p4-fix2/**` (second correction evidence, local Git and bundle)
+  - `tmp/861c-h3-p4-fix3/**` (third correction evidence, local Git and bundle)
+  - `tmp/861c-h3-p4-fix4/**` (fourth correction evidence, local Git and bundle)
 - **Forbidden Paths (must not change in this branch)**:
-  - `api/src/config.ts`, root `Makefile`, root `docker-compose*.yml`
+  - `api/src/config.ts`, root `docker-compose*.yml`
   - `rules/**`, agent bootstrap files, other `plan/*-BRANCH_*.md`
   - Business routes, MCP composition, product UI
   - Upstream `@sentropic/artifacts` library sources
-  - Provider quotas/reservations (unit 5), migration (6), unit 7, preprod
-    resources (11-14), rollback documentation (15)
+  - Provider quotas/reservations (unit 5), migration (6), unit 7, any real
+    cluster apply or automated suite against preprod
 - **Conditional Paths (allowed only with an explicit exception recorded here)**:
   - `tools/artifact-host.mk` — extended with `test-h3-proxy` (unit 10, no Python, no `.env` load)
   - `api/src/app.ts` — closed-capability control mount (review rework, guards unchanged)
@@ -76,6 +109,20 @@ Review integration (both non-blocking points):
     1b-1c and 2, isolated database and bucket, no new harness dependency)
 
 ## Deliverables
+
+- [x] Fourth pass: validate the complete canonical API envFrom list and denial
+      policy selectors against the pod template in all four phases.
+- [x] Fourth pass: exercise valid phase fixtures, indirect sources and both
+      NetworkPolicy selectors with copy/fail/restore/cmp regressions.
+- [x] Fourth pass: bound HTTP probes and terminate every tracked child,
+      including a listener that accepts livez without answering.
+
+- [x] BR861C-EX1: root Makefile exception limited to `k8s-validate` offline
+  gate/test calls, matching the existing entrypoint-check convention; rollback
+  removes only those calls, with no impact on other targets.
+- [x] BR861C-EX2: retain the assigned `.worktrees/861c-h3-p4` checkout;
+  external Git metadata is read-only, so commits and bundle live under
+  `tmp/861c-h3-p4`; no root checkout or external metadata is modified.
 
 - [x] **Unit 1 — scope**: this plan; isolated tooling statement (no Makefile change).
 - [x] **Unit 2 — activation parser** (§5.1): absent, incomplete, malformed and
@@ -105,7 +152,66 @@ Review integration (both non-blocking points):
 - [x] Units 1-4, review rework A/B, unit 10: merged (see Git history).
 - [ ] Unit 7 stays BLOCKED on the upstream `authorizeCommit` request below.
 
-## Deliverables (third PR)
+## Deliverables (third PR, merged and unchanged except review rework)
+
+## Deliverables (fourth PR, this branch)
+
+- [x] **Unit 11 — named preprod configuration patches** (§6.1): ConfigMap
+  patch pins `ARTIFACTS_CONTROL_MODE: "off"`; subjects, window and storage
+  coordinates stay absent (closed); S3 keys bind through optional opaque
+  `radar-artifacts-preprod` Secret references; Secret shape recorded in
+  `secrets.example.yaml` (example only). Existing preprod isolation checks
+  remain valid.
+- [x] **Unit 12 — denial Deployment/Service** (§5.4): unit 9 image in
+  `content-deny` mode through `args` (never `command`), distinct
+  `content-deny` selectors, no credential, no token mount, minimal probes.
+- [x] **Unit 13 — NetworkPolicy and wildcard/TLS routing** (§6.2):
+  Traefik-to-deny ingress policy plus deny-all egress; content Ingress with
+  both wildcard levels to the denial Service only, `.invalid` domain/TLS
+  placeholders marked `unverified`, activation-time gate refusing unfilled
+  values. The shared Ingress host patch is restricted to the named `radar`
+  and `radar-immo-mcp` Ingresses.
+- [x] **Review rework (third PR)**: image smoke distinguishes the api mode
+  from the denial service (`GET /` banner vs `404 not_found`) and exercises
+  no-argument startup (entrypoint default); the denial isolation test detects
+  every environment read (dotted access included) in both modules through the
+  TypeScript AST.
+- [x] **Unit 14 — render and preflight checks** (`deploy/ci/`, no Python):
+  exact objects, single-image identity, no prod leakage, no activation by
+  default; companion activation-time gate refusing unfilled values; read-only
+  operator preflight (never applies); hermetic tests; `test-h3-render`
+  isolated target and minimal `k8s-validate` wiring (existing offline-gate
+  convention).
+- [x] **Unit 15 — activation and rollback documentation**
+  (`docs/operator/h3-preprod-activation.md`): §11 order, rollback to H2 by
+  removing the complete activation group, data preservation, retained-data
+  record, credential cycle.
+- [x] Review correction 1: reject additive egress on the named denial ingress
+  policy; exact policy types, disabled/activation copy mutations and `cmp`.
+- [x] Review correction 2: computed global `process` reads fail AST isolation
+  in both denial modules, including parenthesized/type-wrapped access;
+  41 tests and copy/failure/restore/`cmp` pass.
+- [x] Review correction 3: explicit preparation (`off`, complete reviewed
+  values) and H2 rollback (no activation group, independent pinned denial
+  image) gates; 25 transition tests pass without relaxing existing phases.
+- [x] Second-pass correction 1: Read PORT once and preserve invalid-port diagnostics and listener behavior.
+- [x] Second-pass correction 2: Pin the sole PORT read to the raw initializer in resolvePort.
+- [x] Second-pass correction 3: Reject global references at their source, including separate assignments.
+- [x] Second-pass correction 4: Exercise strict reference rejection with 32 probes on both denial modules.
+- [x] Second-pass correction 5: Remove alias tracking and require the strict guard for both source files.
+- [x] Second-pass correction 6: Execute transpiled modules in an isolated context; preserve invalid PORT errors.
+- [x] Second-pass correction 7: Verify PORT-only runtime reads through a Proxy and a real HTTP listener.
+- [x] Third-pass correction 1: run the denial service in a child process with only PORT; the Function bypass reads nothing there.
+- [x] Third-pass correction 2: gate the denial Deployment env (PORT only, no envFrom/valueFrom), volumes, token and identity in the render.
+- [x] Third-pass correction 3: ban constructor/getPrototypeOf/__proto__ in the AST guard as defense in depth.
+- [x] Third-pass correction 4: reject calculated dynamic imports and cover both independent-review bypasses.
+- [x] Third-pass verification: introduce child-process helpers with explicit PORT-only environments.
+- [x] Third-pass verification: preserve all five invalid PORT diagnostics in child processes.
+- [x] Third-pass verification: keep the live denial listener independent of runner variables.
+- [x] Third-pass verification: require exactly PORT and absent EXTRA for all three runtime bypasses; reject inherited or extra environments.
+- [x] Third-pass verification: validate canonical PORT indentation, Secret references, secret volumes and missing/true token settings with copy/restore/cmp proofs.
+- [x] Operator runbook: validate preparation and the H2 rollback plan before
+  GO; keep the real content boundary and a matching reviewed CD target.
 
 - [x] **Unit 8 — isolated denial listener** (§5.4, T02/T23/T24): new
       `api/src/artifacts/content-deny.ts` exposes the shared denial
@@ -146,21 +252,23 @@ Review integration (both non-blocking points):
 
 ## Verification
 
-Ports: API 18983, UI 15983, Maildev UI 11983; the test compose publishes none.
-Environment: `test-861c-h3-p3`. Smoke containers use an internal project network
-with no host ports.
+Ports: API 18984, UI 15984, Maildev UI 11984 (availability unverified); the
+test compose publishes none. Environment: `test-861c-h3-p4`. Smoke containers
+use an internal project network with no host ports.
 
 ```sh
-rtk make -f tools/artifact-host.mk test-host SCOPE=src/artifacts API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
-rtk make -f tools/artifact-host.mk test-api SCOPE="--exclude tests/integration/** --no-file-parallelism" API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
-rtk make -f tools/artifact-host.mk test-api SCOPE="tests/integration/artifacts --no-file-parallelism" API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
-rtk make -f tools/artifact-host.mk image-runtime-smoke API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
-rtk make -f tools/artifact-host.mk typecheck API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
-rtk make -f tools/artifact-host.mk lint API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
-rtk make -f tools/artifact-host.mk build-api API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
-rtk make -f tools/artifact-host.mk check-image-entrypoints API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
-rtk make -f tools/artifact-host.mk down API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
-rtk make -f tools/artifact-host.mk inspect API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
+rtk make -f tools/artifact-host.mk test-host SCOPE=src/artifacts API_PORT=18984 UI_PORT=15984 MAILDEV_UI_PORT=11984 ENV=test-861c-h3-p4
+rtk make -f tools/artifact-host.mk test-api SCOPE="--exclude tests/integration/** --no-file-parallelism" API_PORT=18984 UI_PORT=15984 MAILDEV_UI_PORT=11984 ENV=test-861c-h3-p4
+rtk make -f tools/artifact-host.mk test-api SCOPE="tests/integration/artifacts --no-file-parallelism" API_PORT=18984 UI_PORT=15984 MAILDEV_UI_PORT=11984 ENV=test-861c-h3-p4
+rtk make -f tools/artifact-host.mk test-h3-render API_PORT=18984 UI_PORT=15984 MAILDEV_UI_PORT=11984 ENV=test-861c-h3-p4
+rtk make -f tools/artifact-host.mk image-runtime-smoke API_PORT=18984 UI_PORT=15984 MAILDEV_UI_PORT=11984 ENV=test-861c-h3-p4
+rtk make -f tools/artifact-host.mk typecheck API_PORT=18984 UI_PORT=15984 MAILDEV_UI_PORT=11984 ENV=test-861c-h3-p4
+rtk make -f tools/artifact-host.mk lint API_PORT=18984 UI_PORT=15984 MAILDEV_UI_PORT=11984 ENV=test-861c-h3-p4
+rtk make -f tools/artifact-host.mk build-api API_PORT=18984 UI_PORT=15984 MAILDEV_UI_PORT=11984 ENV=test-861c-h3-p4
+rtk make -f tools/artifact-host.mk check-image-entrypoints API_PORT=18984 UI_PORT=15984 MAILDEV_UI_PORT=11984 ENV=test-861c-h3-p4
+rtk make k8s-validate ENV=ci
+rtk make -f tools/artifact-host.mk down API_PORT=18984 UI_PORT=15984 MAILDEV_UI_PORT=11984 ENV=test-861c-h3-p4
+rtk make -f tools/artifact-host.mk inspect API_PORT=18984 UI_PORT=15984 MAILDEV_UI_PORT=11984 ENV=test-861c-h3-p4
 ```
 
 `ENV` stays last in every command. Teardown (`down -v --remove-orphans`) must be
@@ -190,12 +298,20 @@ followed by `inspect` proving no project containers, volumes or networks remain.
       (high) in the unchanged dependency tree. No dependency update or risk
       acceptance is included; dependency remediation belongs on its own branch.
 
-## Not covered (later H3 units)
+## Not covered (this branch is unapplied configuration)
+
+- [x] H3 P4 integration: 114 artifact API tests including 13 AST cases;
+  98 relevant shell checks (34 H3, 39 entrypoint, 25 auth isolation) and real runtime smoke pass.
+  Activation requires filled values, future expiry and pinned reviewed digests.
+  Copy mutations fail, restored bytes match with `cmp`. See uncommitted report
+  and `tmp/861c-h3-p4/evidence/` for exact commands and commit checks.
 
 Provider quota binding (5) and migration (6), unit 7 (blocked, see below),
-preprod resources (11-14), render/operator preflight, rollback documentation
-(15), deployed proxy, TLS and routing. Physical prevention inside provider
-transactions is `unverified`.
+supplier quotas (design §5 lots 5-6), deployed proxy behavior, live TLS/DNS
+and routing state, real content domain, private bucket and credentials,
+capacity for the extra denial pod, and any real cluster apply. Physical
+prevention inside provider transactions is `unverified`. Nothing in this
+branch was executed against a cluster; all automated checks are offline.
 
 ## Upstream request — provider commit-time authorization (blocks unit 7)
 
