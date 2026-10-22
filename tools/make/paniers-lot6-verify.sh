@@ -131,6 +131,8 @@ export default { ...config, envDir: false };
 CONFIG
   case "$1" in
     build) npm run build --workspace=api ;;
+    typecheck-ui) npm run typecheck --workspace=ui ;;
+    lint-ui) npx --no-install eslint ui/src ;;
     verify|typecheck) npm run typecheck --workspace=api ;;
     checkpoints)
       for snapshot in /checkpoints/*.tar; do
