@@ -64,7 +64,7 @@ writes stay disabled until 6K. No D5 input is required.
   common archive from contributors; keep personal restore without workspace
   effect; return 422 for omitted market fields; conflict payloads expose
   authorized heads only.
-- Delivery checkpoint: 69.
+- Delivery checkpoint: 70.
 - Review fixes use CI test parallelism, seven copied-source proofs, and a
   bundle based on `8b2347e9`; shared Git metadata remains read-only.
 - Final receipt review: share the actor/key lock with signal writers and
@@ -134,7 +134,7 @@ writes stay disabled until 6K. No D5 input is required.
 - [x] Review fix 11: CI parallelism, capacity and seven mutation proofs.
 - [x] Review fix 12: bounded, individually typechecked bundle delivery.
 - [x] Second-pass fix 1: preserve composite heads and unchanged archive observations.
-- [ ] Second-pass fix 2: determine source destination before pagination.
+- [x] Second-pass fix 2: determine source destination before pagination.
 - [ ] Second-pass fix 3: qualify HTTP composite no-ops and batch replay.
 - [ ] Second-pass fix 4: discriminate all three defects on restored copies.
 - [ ] Second-pass fix 5: deliver bounded commits above `4044af20`.

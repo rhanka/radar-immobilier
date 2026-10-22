@@ -51,10 +51,11 @@ export interface LotSourceHistoryPage {
 }
 
 /**
- * Reverse navigation: when every row of the page carries the same
+ * Reverse navigation: when every row of the chain carries the same
  * destination, expose its stable target (with mode implied by the
  * destination) so the client can reach destination history without
- * reading the import manifest. Mixed or destination-less chains stay
+ * reading the import manifest. Uniqueness is judged over the whole
+ * chain, never over one page. Mixed or destination-less chains stay
  * ambiguous and return null.
  */
 function singleDestinationTarget(
@@ -136,12 +137,17 @@ export async function readLotSourceHistory(
     await resolveWorkspaceAccess(tx, workspaceId, sub);
     await requireLotDestination(tx, workspaceId);
     requireScopedEpoch(await scopedEpochFor(tx, workspaceId), workspaceId);
+    const chain = await tx.select({ destination: lotSourceRows.destination })
+      .from(lotSourceRows).where(and(
+        eq(lotSourceRows.workspaceId, workspaceId),
+        eq(lotSourceRows.chainId, chainId),
+      ));
+    const destination = singleDestinationTarget(chain.map((row) => row.destination));
     const rows = await tx.select().from(lotSourceRows).where(and(
       eq(lotSourceRows.workspaceId, workspaceId),
       eq(lotSourceRows.chainId, chainId),
     )).orderBy(asc(lotSourceRows.sourceId)).limit(limit + 1).offset(offset);
     const page = rows.slice(0, limit);
-    const destination = singleDestinationTarget(page.map((row) => row.destination));
     return {
       target: destination.target,
       mode: destination.mode,

@@ -37,6 +37,32 @@ describeDb("6J lot source navigation", () => {
       .toMatchObject({ sourceChainId: chainId, sourceRowId: "mark-6j-0003" });
   });
 
+  it("should keep a mixed source chain ambiguous on every page size", async () => {
+    const f = await lotFixture();
+    await runLotImport(f.db, { workspaceId: f.workspaceId,
+      report: qualifiedLotReport(), actorSub: f.moderator.sub, importKey: randomUUID() },
+      { enabled: true });
+    const [mark] = await f.db.select().from(lotSourceRows)
+      .where(eq(lotSourceRows.sourceId, "mark-6j-0005"));
+    const full = await readLotSourceHistory(
+      f.db, f.contributor.sub, f.workspaceId, mark!.chainId, 0, 10);
+    expect(full.rows.map((row) => row.sourceId)).toEqual(["mark-6j-0005", "mark-6j-0006"]);
+    expect(full.target).toBeNull();
+    expect(full.mode).toBeNull();
+    const firstPage = await readLotSourceHistory(
+      f.db, f.contributor.sub, f.workspaceId, mark!.chainId, 0, 1);
+    expect(firstPage.rows.map((row) => row.sourceId)).toEqual(["mark-6j-0005"]);
+    expect(firstPage.target).toBeNull();
+    expect(firstPage.mode).toBeNull();
+    expect(firstPage.nextOffset).toBe(1);
+    const secondPage = await readLotSourceHistory(
+      f.db, f.contributor.sub, f.workspaceId, mark!.chainId, 1, 1);
+    expect(secondPage.rows.map((row) => row.sourceId)).toEqual(["mark-6j-0006"]);
+    expect(secondPage.target).toBeNull();
+    expect(secondPage.mode).toBeNull();
+    expect(secondPage.nextOffset).toBeNull();
+  });
+
   it("should keep destination-less source chains ambiguous", async () => {
     const f = await lotFixture();
     await runLotImport(f.db, { workspaceId: f.workspaceId,
