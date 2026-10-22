@@ -182,6 +182,8 @@ Review integration (both non-blocking points):
 - [x] Review correction 3: explicit preparation (`off`, complete reviewed
   values) and H2 rollback (no activation group, independent pinned denial
   image) gates; 25 transition tests pass without relaxing existing phases.
+- [x] Operator runbook: validate preparation and the H2 rollback plan before
+  GO; keep the real content boundary and a matching reviewed CD target.
 
 - [x] **Unit 8 — isolated denial listener** (§5.4, T02/T23/T24): new
       `api/src/artifacts/content-deny.ts` exposes the shared denial

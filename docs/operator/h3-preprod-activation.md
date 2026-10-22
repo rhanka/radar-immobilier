@@ -12,7 +12,7 @@ references only.
 | Prerequisite | Proof before GO |
 | --- | --- |
 | Provider quota/reservation capability | inspected library export + reservation/restart evidence |
-| Real content base, DNS delegation, TLS/DNS-01 | reviewed base substituted locally, `check-h3-activation-render.sh` green |
+| Real content base, DNS delegation, TLS/DNS-01 | preparation render gate green + separate DNS/TLS receipts |
 | Private preprod bucket + scoped credentials | canary PUT/HEAD/GET/DELETE + cleanup receipt |
 | Migration state, scope/org mapping | preflight output + migration receipt |
 | Capacity for one extra denial pod | node allocatable vs denial requests |
@@ -26,7 +26,8 @@ migrations, DNS, certificate SANs or node capacity: attach separate receipts.
 
 The disabled overlay retains inherited image tags as **unverified**. Before
 activation, pin API, denial, UI and migration/job images by reviewed sha256
-digests in the operator render. API and denial must use the same digest. The
+digests in the operator render. API and denial must use the same digest during
+preparation and activation; H2 rollback keeps its separate H3 denial digest. The
 gate checks canonical `kubectl kustomize` output, not arbitrary YAML styles.
 
 Apply only these named objects in `radar-immobilier-preprod`: ConfigMap
@@ -43,9 +44,40 @@ new denial resources. The committed ConfigMap explicitly restores mode `off`
 on reconciliation. Pause automatic preprod CD before the rehearsal and keep it
 paused throughout the window, or first qualify a declarative activation render
 that reconciliation actually consumes. An ad hoc live patch is insufficient.
-Resume CD only after rollback to the reviewed disabled render; verify content
-denial remains on its pinned image. CD state and this operator procedure remain
-unverified against live infrastructure.
+Resume CD only after it consumes the reviewed closed operator render below;
+verify content denial remains on its pinned image. The committed placeholder
+overlay is not a rollback for an already routed real domain. CD state and this
+procedure remain unverified against live infrastructure.
+
+## Offline operator renders (prepare before activation)
+
+Produce canonical Kustomize output in local operator files, with Secret
+references only. Validate the complete intended state before applying any of
+its named objects, then record its hash. These gates do not access the cluster.
+
+| Render | Required state |
+| --- | --- |
+| Default disabled | committed `.invalid`/TLS placeholders, `off`, other activation values absent; unchanged CI gate |
+| Preparation | reviewed real content base and both wildcard/TLS routes, complete storage/cohort/future window, mode `off`, API/denial same digest |
+| Activation | same reviewed values and digest constraints, mode `validation`; run again immediately before GO |
+| H2 rollback | retain real content base, routes/TLS and pinned H3 denial image; remove every other `ARTIFACTS_*` ConfigMap key and all API artifact env/Secret references; independently pin the H2 API image |
+
+Run these Make targets on the corresponding reviewed files (`ENV=test-*` is
+required even though these checks start no stack):
+
+```sh
+rtk make -f tools/artifact-host.mk check-h3-preparation-render H3_RENDER=path/to/preparation.yaml ENV=test-h3-rehearsal
+rtk make -f tools/artifact-host.mk check-h3-activation-render H3_RENDER=path/to/activation.yaml ENV=test-h3-rehearsal
+rtk make -f tools/artifact-host.mk check-h3-rollback-render H3_RENDER=path/to/h2-rollback.yaml ENV=test-h3-rehearsal
+```
+
+Prepare and validate the rollback file before GO. The rollback gate still
+requires reviewed digests on API, denial, UI and jobs, unchanged denial
+isolation/network/auth checks, and both real wildcard routes. It permits API
+and denial images to differ; the retained denial image must contain the H3
+entrypoint. Offline validation cannot prove that an image digest contains H2
+or H3: retain the separate image qualification receipts. An abort before GO
+can use the preparation render, with control kept `off`.
 
 ## 1. Activation order (design §11)
 
@@ -65,9 +97,10 @@ unverified against live infrastructure.
 9. Close admission at completion or expiration; record retained objects and
    outstanding intentions.
 
-Render gates for every step: `check-h3-preprod-render.sh` (committed state),
-`check-h3-activation-render.sh` (activation render with reviewed values),
-`preflight-h3-preprod.sh` (offline by default; live metadata probes require
+Render gates: `check-h3-preprod-render.sh` for the committed state;
+`check-h3-preparation-render.sh` before steps 1–6; activation gate immediately
+before step 7; rollback gate before GO and again before any H2 return.
+Also run `preflight-h3-preprod.sh` (offline by default; live metadata probes require
 `--live`, explicit `KUBECONFIG` and `H3_EXPECTED_API_IMAGE`; never applies).
 
 ## 2. Rollback
@@ -81,6 +114,8 @@ Render gates for every step: `check-h3-preprod-render.sh` (committed state),
   mode, subjects, window, storage coordinates, Secret references) before
   restarting — H2 does not understand the new activation switch and could
   otherwise reopen control for all approved accounts.
+- Validate the complete H2 rollback render with `check-h3-rollback-render`,
+  then apply only its reviewed named objects. Keep `ARTIFACTS_CONTENT_BASE`.
 - Keep the denial service on an image containing its entrypoint; do not roll
   it back blindly with the API.
 - Do not delete storage or rewrite migration history.

@@ -18,7 +18,10 @@ sed -i -e 's/artifacts-content-unverified.invalid/pages.fixture.test/g' \
   -e "s#radar-api:latest#radar-api@sha256:$(printf 'a%.0s' {1..64})#g" \
   -e "s#radar-ui:[^ ]*#radar-ui@sha256:$(printf 'b%.0s' {1..64})#g" "$GOOD"
 PASS=0
-accept() { bash "$HERE/check-h3-$1-render.sh" "$2"; PASS=$((PASS + 1)); }
+accept() {
+  make --no-print-directory -C "$ROOT" -f tools/artifact-host.mk "check-h3-$1-render" H3_RENDER="$2" ENV=test-h3-transition
+  PASS=$((PASS + 1))
+}
 reject() {
   local phase="$1" mutation="$2" reason="$3" out
   cp "$GOOD" "$CASE"
