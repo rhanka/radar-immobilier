@@ -64,7 +64,7 @@ writes stay disabled until 6K. No D5 input is required.
   common archive from contributors; keep personal restore without workspace
   effect; return 422 for omitted market fields; conflict payloads expose
   authorized heads only.
-- Delivery checkpoint: 49.
+- Delivery checkpoint: 50.
 - `BR6J-EX5`: adapt integration constraint names and the 6H upgrade
   snapshot to additive lot columns. Preserve every historical value and
   classified signal selection; no prior migration changes. Impact: two
@@ -103,7 +103,7 @@ writes stay disabled until 6K. No D5 input is required.
   legacy-unknown exception, pending dispositions, no author ownership.
 - [x] **Lot 9 — Routes**: scoped reads/commands/batch, browser-session
   writes, unmounted; mapping table for `LotFichePanel` actions.
-- [ ] **Lot 10 — Fixtures**: synthetic workspace/lots/manifest builders,
+- [x] **Lot 10 — Fixtures**: synthetic workspace/lots/manifest builders,
   annotated exports, disposable databases.
 - [ ] **Lot 11 — Tests**: facet independence, atomic batch, 409
   head/version, D4 rights, moderator-only common archive, no author_id
