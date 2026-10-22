@@ -57,7 +57,7 @@ without exposing another member's private state.
   single-value guard and the unconditional lint lines.
 - Delivery uses individually typechecked snapshots; the French report
   remains uncommitted.
-- Delivery checkpoint: 18.
+- Delivery checkpoint: 19.
 - `BR6I-EX2`: narrow personal owners in `activation-bind.ts` after the
   schema permits null workspace owners. Typecheck proves the old chain
   input no longer fits. Reject null personal owners; no history rewrite.
@@ -71,29 +71,29 @@ without exposing another member's private state.
 
 - [x] **Lot 0 — Baseline**: read §3.4 + `### 6I` + O2; next free
   number is `0019`; write this plan.
-- [ ] **Lot 1 — Schema**: `0019` workspace scope, null business owner,
+- [x] **Lot 1 — Schema**: `0019` workspace scope, null business owner,
   moderator attribution, archive-only workspace events; journal entry;
   schema mirror. Replayable (`IF EXISTS`, `CREATE OR REPLACE` style
   guards, `DO` blocks for constraints).
-- [ ] **Lot 2 — Writer**: `workspace-writer.ts` moderator-only
+- [x] **Lot 2 — Writer**: `workspace-writer.ts` moderator-only
   discard/restore with 6A/6B checks, workspace stream lock, terminal
   registration, actor-keyed receipt with workspace context.
-- [ ] **Lot 3 — Reader**: `workspace-reader.ts` separate personal and
+- [x] **Lot 3 — Reader**: `workspace-reader.ts` separate personal and
   workspace heads, effective hiding, capabilities; never exposes
   another member's personal state, including in conflicts.
-- [ ] **Lot 4 — Union**: `workspace-discarded.ts` scoped union
+- [x] **Lot 4 — Union**: `workspace-discarded.ts` scoped union
   `D(viewer) = D(workspace) ∪ D(personal viewer)`; legacy readers
   untouched.
-- [ ] **Lot 5 — Routes**: `scoped-workspace-archive.ts` guarded
+- [x] **Lot 5 — Routes**: `scoped-workspace-archive.ts` guarded
   workspace discard/restore and city projection; unmounted.
-- [ ] **Lot 6 — UI client**: `signal-facet-workspace.ts` intention
+- [x] **Lot 6 — UI client**: `signal-facet-workspace.ts` intention
   builder, effective-hiding helpers; no existing view wiring.
-- [ ] **Lot 7 — Tests**: moderator allowed, contributor refused,
+- [x] **Lot 7 — Tests**: moderator allowed, contributor refused,
   personal restore without workspace effect, stale-head 409,
   no private-state leak, version conflict, duplicate-terminal
   enforcement in both workspaces with null-basket archives
   (6H review reprise), HTTP authorization and conflicts.
-- [ ] **Lot 8 — Make**: `LOT=6I` guard, SCOPE, lint; build and
+- [x] **Lot 8 — Make**: `LOT=6I` guard, SCOPE, lint; build and
   regression targets covered.
 - [ ] **Lot N-1 — Docs**: uncommitted French `RAPPORT-MUSE-6I.md`.
 - [ ] **Lot N — Close (not covered)**: verify green, push, PR, CI,

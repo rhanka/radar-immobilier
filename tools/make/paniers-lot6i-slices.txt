@@ -16,3 +16,4 @@ test: qualify union filtering and UI archive intentions|api/src/services/facets/
 chore: extend isolated verification with the 6I profile|tools/make/paniers-lot6.mk tools/make/paniers-lot6-verify.sh tools/make/paniers-lot6i-slices.txt|0,1,2,3,4,5,6,7
 test: prove five workspace archive regressions on source copies|tools/make/paniers-lot6i-mutation.sh|0,1,2,3,4,5,6,7
 chore: deliver size-checked and typechecked workspace commits|tools/make/paniers-lot6i-deliver.sh|0,1,2,3,4,5,6,7,8
+docs: record verified workspace archive delivery|tools/make/paniers-lot6i-deliver.sh tools/make/paniers-lot6i-slices.txt|0,1,2,3,4,5,6,7,8
