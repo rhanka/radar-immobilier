@@ -31,6 +31,7 @@ import {
 } from "./target.js";
 import { lockCityGraph } from "../graph/graph-store.js";
 import { requireScopedEpoch } from "./scope.js";
+import { bumpPersonalRevision } from "./projection-revisions.js";
 import { digest } from "./target.js";
 import { scopedEpochFor } from "./activation.js";
 import { resolveStream, type StreamRef } from "./scoped-reader.js";
@@ -139,14 +140,27 @@ export async function writeScopedPersonalFacet(
     }).returning())[0]!.id : main.id;
     const event = await appendScopedTransition(tx, accountId, command, streamId,
       facet, basket, active ? "active" : "inactive", fingerprint);
+    const touched = new Map<string, string | null>([[streamId, main.headEventId ?? null]]);
     for (const [entry, ref] of removed) {
       const targetId = ref.id === "" ? (await tx.insert(facetStreams).values({
         workspaceId, scope: "personal", ownerId: accountId, targetType: "signal",
         citySlug: command.target.citySlug, nodeType: command.target.type,
         nodeId: command.target.id, facet: "selection", basket: entry,
       }).returning())[0]!.id : ref.id;
+      touched.set(targetId, ref.headEventId ?? null);
       await appendScopedTransition(tx, accountId, command, targetId,
         "selection", entry, "inactive", fingerprint);
+    }
+    // 6L1: the personal revision moves only when a transition was appended.
+    // No-op and replayed commands leave every head untouched, so the viewer's
+    // token stays stable.
+    for (const [touchedId, previousHead] of touched) {
+      const [head] = await tx.select().from(facetHeads)
+        .where(eq(facetHeads.streamId, touchedId));
+      if ((head?.eventId ?? null) !== previousHead) {
+        await bumpPersonalRevision(tx, workspaceId, accountId, command.target.citySlug);
+        break;
+      }
     }
     const result = event ? { ...event, createdAt: event.createdAt.toISOString() } : null;
     const context = { target: command.target, facet, basket,
