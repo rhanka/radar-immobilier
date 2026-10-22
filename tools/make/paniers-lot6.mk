@@ -22,6 +22,7 @@ else
 SCOPE ?= src/services/facets
 endif
 ACTION ?= verify
+DELIVERY_DIR ?= tmp/paniers-$(shell echo $(LOT) | tr A-Z a-z)/git
 UI_SCOPE ?=
 DELIVERY_PROFILE = $(if $(filter 6J,$(LOT)),6j,$(if $(filter 6I,$(LOT)),6i,$(if $(filter 6H,$(LOT)),6h,6g)))
 export ENV LOT API_PORT UI_PORT MAILDEV_UI_PORT SCOPE ACTION EVIDENCE_TAG CHECKPOINT_DIR UI_SCOPE
@@ -38,6 +39,11 @@ verify build typecheck lint test-api test-ui api-ci mutation-proof astra-proof f
 prepare-6k deliver-6k finalize-6k audit-6k: guard
 	@test '$(LOT)' = 6K
 	@bash tools/make/paniers-lot6k-deliver.sh $@
+
+.PHONY: fix-6k-prepare fix-6k-deliver fix-6k-audit
+fix-6k-prepare fix-6k-deliver fix-6k-audit: guard
+	@test '$(LOT)' = 6K
+	@bash tools/make/paniers-lot6k-fix-deliver.sh $(patsubst fix-6k-%,%,$@)
 
 regression: guard
 	@bash tools/make/paniers-lot$(if $(filter 6K,$(LOT)),6k-run,$(if $(filter 6J,$(LOT)),6j-run,6-verify)).sh regression
@@ -89,4 +95,4 @@ clean inspect diagnose: guard
 # This local repository is the fallback when shared metadata is read-only.
 commit: guard
 	@test -n "$$MSG"
-	git -C tmp/paniers-$(shell echo $(LOT) | tr A-Z a-z)/git -c core.hooksPath=/dev/null -c commit.gpgsign=false commit -m "$$MSG"
+	git -C $(DELIVERY_DIR) -c core.hooksPath=/dev/null -c commit.gpgsign=false commit -m "$$MSG"
