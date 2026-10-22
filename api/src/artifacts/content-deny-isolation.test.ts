@@ -1,10 +1,11 @@
 import { createRequire } from "node:module";
-import { createServer as createHttpServer } from "node:http";
-import { runInNewContext } from "node:vm";
-import type { Server } from "node:http";
+import { createServer as createHttpServer, request as httpRequest } from "node:http";
 import { readFileSync } from "node:fs";
+import { createServer as createNetServer } from "node:net";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { runInNewContext } from "node:vm";
+import type { Server } from "node:http";
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
 
@@ -192,6 +193,35 @@ const FORBIDDEN_PROBES = [
   'import { env } from "node:process"; void env;',
 ];
 
+function httpGet(port: number, path: string): Promise<{ status: number; body: string }> {
+  return new Promise((resolve, reject) => {
+    const req = httpRequest({ host: "127.0.0.1", port, path, method: "GET" }, (res) => {
+      let data = "";
+      res.on("data", (chunk: Buffer | string) => {
+        data += chunk.toString();
+      });
+      res.on("end", () => resolve({ status: res.statusCode ?? 0, body: data }));
+    });
+    req.once("error", reject);
+    req.end();
+  });
+}
+
+function findFreePort(): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const probe = createNetServer();
+    probe.once("error", reject);
+    probe.listen(0, "127.0.0.1", () => {
+      const address = probe.address();
+      const port = typeof address === "object" && address !== null ? address.port : 0;
+      probe.close((error?: Error) => {
+        if (error !== undefined) reject(error);
+        else resolve(port);
+      });
+    });
+  });
+}
+
 /** Execute the actual modules without instrumenting the test runner's env. */
 function executeDenialModules(env: NodeJS.ProcessEnv, servers: Server[]): void {
   const require = createRequire(import.meta.url);
@@ -279,4 +309,62 @@ describe("content-deny runtime environment isolation", () => {
     );
   });
 
+  it(
+    "reads only PORT at runtime",
+    async () => {
+      const freePort = await findFreePort();
+      expect(freePort).toBeGreaterThan(0);
+      const readKeys = new Set<string>();
+      const target = { ...process.env, PORT: ` ${freePort} ` };
+      const trackedEnv = new Proxy(target, {
+        get(t, p, r) {
+          if (typeof p === "string") readKeys.add(p);
+          return Reflect.get(t, p, r);
+        },
+        has(t, p) {
+          if (typeof p === "string") readKeys.add(p);
+          return Reflect.has(t, p);
+        },
+        ownKeys(t) {
+          const keys = Reflect.ownKeys(t);
+          for (const key of keys) {
+            if (typeof key === "string") readKeys.add(key);
+          }
+          return keys;
+        },
+        getOwnPropertyDescriptor(t, p) {
+          if (typeof p === "string") readKeys.add(p);
+          return Reflect.getOwnPropertyDescriptor(t, p);
+        },
+        set(t, p, value, r) {
+          if (typeof p === "string") readKeys.add(p);
+          return Reflect.set(t, p, value, r);
+        },
+      });
+      const servers: Server[] = [];
+      try {
+        executeDenialModules(trackedEnv, servers);
+        const deadline = Date.now() + 5000;
+        for (;;) {
+          try {
+            const live = await httpGet(freePort, "/livez");
+            if (live.status === 200) break;
+          } catch {
+            // Retry until the listener accepts connections.
+          }
+          if (Date.now() > deadline) throw new Error(`denial server did not start on ${freePort}`);
+          await new Promise<void>((resolve) => setTimeout(() => resolve(undefined), 50));
+        }
+        const root = await httpGet(freePort, "/");
+        expect(root.status).toBe(404);
+        expect(JSON.parse(root.body)).toEqual({ error: "not_found" });
+        expect(readKeys).toEqual(new Set(["PORT"]));
+      } finally {
+        for (const server of servers) {
+          await new Promise<void>((resolve) => server.close(() => resolve(undefined)));
+        }
+      }
+    },
+    15000,
+  );
 });
