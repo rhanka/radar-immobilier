@@ -64,7 +64,7 @@ writes stay disabled until 6K. No D5 input is required.
   common archive from contributors; keep personal restore without workspace
   effect; return 422 for omitted market fields; conflict payloads expose
   authorized heads only.
-- Delivery checkpoint: 8.
+- Delivery checkpoint: 9.
 - `BR6J-EX5`: adapt integration constraint names and the 6H upgrade
   snapshot to additive lot columns. Preserve every historical value and
   classified signal selection; no prior migration changes. Impact: two
@@ -89,7 +89,7 @@ writes stay disabled until 6K. No D5 input is required.
   preserved for signal rows.
 - [x] **Lot 2 — Target/version DTOs**: stable lot identity, fingerprint
   over stored source fields, UUID vs content-change conflicts.
-- [ ] **Lot 3 — Values**: canonical decimal price, public URL contract,
+- [x] **Lot 3 — Values**: canonical decimal price, public URL contract,
   complete market replacement, pipeline values, import-only provenance.
 - [x] **Lot 4 — Commands**: `lot-facets-v1` digest incl. every batch item;
   strict DTOs rejecting client actor/owner/scope fields.
