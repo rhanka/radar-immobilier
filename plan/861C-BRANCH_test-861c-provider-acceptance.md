@@ -2,7 +2,7 @@
 
 ## Objective
 Qualify the six requested H4 v3 provider behaviors against real PostgreSQL/S3.
-Keep current host API names in one test adaptation module pending spec r2.
+Keep the r2 host API target and its remaining construction bindings explicit.
 
 ## Scope / Guardrails
 - [x] Assigned worktree `.worktrees/861c-provider-acceptance`, branch
@@ -86,13 +86,13 @@ Keep current host API names in one test adaptation module pending spec r2.
   quota/admission `not covered` via the helper where H3 units 5-6 are
   missing).
 
-## Verification commands
+## Baseline verification commands
 - [x] `rtk make -f tools/artifact-host.mk test-api API_PORT=18986 UI_PORT=15986 MAILDEV_UI_PORT=11986 ENV=test-861c-provider-acceptance`
 - [x] `rtk make -f tools/artifact-host.mk test-provider-acceptance ARTIFACTS_PROVIDER_ACCEPTANCE=1 API_PORT=18986 UI_PORT=15986 MAILDEV_UI_PORT=11986 ENV=test-861c-provider-acceptance`
 - [x] `rtk make -f tools/artifact-host.mk verify-provider-acceptance API_PORT=18986 UI_PORT=15986 MAILDEV_UI_PORT=11986 ENV=test-861c-provider-acceptance`
 - [x] `rtk make -f tools/artifact-host.mk down API_PORT=18986 UI_PORT=15986 MAILDEV_UI_PORT=11986 ENV=test-861c-provider-acceptance`
 
-## Final evidence
+## Baseline evidence at original head 3fc55b4f
 - [x] Full API: 218 files / 2830 tests passed, 23 files / 80 tests skipped.
 - [x] Enabled acceptance: six missing-contract failures only (two clean runs).
 - [x] Final static gates and declaration emit passed; isolated stack removed.
@@ -116,8 +116,12 @@ Keep current host API names in one test adaptation module pending spec r2.
 - [x] Reject both disabled-reminder and zero-executed-case mutations on copies;
   gate 1 observed inside test-api and test-host containers.
 - [x] Typecheck tests/workspaces, lint and API declaration build pass.
-- [ ] Confirm the default gate 0 inside the test-host container.
-- [ ] Record per-case results, bounded upstream handoff, commits and bundle.
+- [x] Confirm default gate 0 and installed provider 0.1.2 inside test-host;
+  all 153 host tests plus the isolated forwarding probe pass.
+- [x] Record per-case results and the bounded upstream handoff. Selectively
+  stage declaration/case snapshots with the plan; every commit is <=150 lines.
+- [x] Verify a bundle requiring only `9a815087`, English subjects <=72 chars,
+  empty commit bodies/trailers, and unchanged existing suites/runtime/lock.
 - [ ] Candidate qualification: replace provisional construction with the real
   compiled profile/coordinator/transaction participant and cleanup bindings;
   prove preparation accounting/cleanup/shared blobs and both race orders.
