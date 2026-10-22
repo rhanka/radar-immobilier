@@ -94,8 +94,14 @@ test-h3-render: guard-env ## Offline H3 preprod render gate: activation disabled
 	bash deploy/ci/check-h3-preprod-render.sh
 	bash deploy/ci/check-h3-preprod-render.test.sh
 	bash deploy/ci/check-h3-activation-render.test.sh
+	bash deploy/ci/check-h3-transition-render.test.sh
 	bash deploy/ci/check-h3-discrimination.test.sh
 	bash deploy/ci/preflight-h3-preprod.test.sh
+
+.PHONY: check-h3-preparation-render check-h3-activation-render check-h3-rollback-render
+check-h3-preparation-render check-h3-activation-render check-h3-rollback-render: guard-env
+	@test -n "$(H3_RENDER)" && test -f "$(H3_RENDER)" || { echo 'Pass H3_RENDER=<canonical-render.yaml>' >&2; exit 1; }
+	bash deploy/ci/$@.sh "$(H3_RENDER)"
 
 .PHONY: image-smoke
 image-smoke: guard-env ## Build --target build, refuse .env*, smoke-boot API+MCP bundles, check api/drizzle
