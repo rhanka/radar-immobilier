@@ -41,6 +41,37 @@ run_bad "$CASE_ROOT" 'rejects an invented storage value' 'ARTIFACTS_S3_BUCKET mu
 fixture; sed -i 's#args: \["content-deny"\]#args: ["content-deny"]\n          command: ["sh"]#' "$CASE_ROOT/$DENY"
 run_bad "$CASE_ROOT" 'rejects a command: override bypassing entrypoint validation' 'bypasses entrypoint validation'; rm -rf "$CASE_ROOT"
 
+fixture; sed -i 's#args: \["content-deny"\]#args: ["content-deny"]\n          env:\n            - name: EXTRA\n              value: leaked#' "$CASE_ROOT/$DENY"
+run_bad "$CASE_ROOT" 'rejects a non-PORT variable on the denial container' 'only PORT env allowed'; rm -rf "$CASE_ROOT"
+
+fixture; sed -i 's#args: \["content-deny"\]#args: ["content-deny"]\n          env:\n            - name: PORT\n              value: "3000"#' "$CASE_ROOT/$DENY"
+run_ok "$CASE_ROOT" 'accepts a literal PORT on the denial container'; rm -rf "$CASE_ROOT"
+
+fixture; sed -i 's#args: \["content-deny"\]#args: ["content-deny"]\n          env:\n            - name: EXTRA#' "$CASE_ROOT/$DENY"
+run_bad "$CASE_ROOT" 'rejects a non-PORT variable without a value' 'only PORT env allowed'; rm -rf "$CASE_ROOT"
+
+fixture; sed -i 's#args: \["content-deny"\]#args: ["content-deny"]\n          envFrom:\n            - secretRef:\n                name: radar-artifacts-preprod#' "$CASE_ROOT/$DENY"
+run_bad "$CASE_ROOT" 'rejects envFrom on the denial container' 'envFrom forbidden'; rm -rf "$CASE_ROOT"
+
+fixture; sed -i 's#args: \["content-deny"\]#args: ["content-deny"]\n          env:\n            - name: PORT\n              valueFrom:\n                fieldRef:\n                  fieldPath: metadata.name#' "$CASE_ROOT/$DENY"
+run_bad "$CASE_ROOT" 'rejects valueFrom on the denial container' 'valueFrom forbidden'; rm -rf "$CASE_ROOT"
+
+fixture; sed -i 's#args: \["content-deny"\]#args: ["content-deny"]\n          env:\n            - name: PORT\n              valueFrom:\n                secretKeyRef:\n                  name: radar-artifacts-preprod\n                  key: PORT#' "$CASE_ROOT/$DENY"
+run_bad "$CASE_ROOT" 'rejects a secret valueFrom on the denial container' 'valueFrom forbidden'; rm -rf "$CASE_ROOT"
+
+fixture; sed -i '/automountServiceAccountToken: false/d' "$CASE_ROOT/$DENY"
+run_bad "$CASE_ROOT" 'rejects a missing ServiceAccount token setting' 'token mount forbidden'; rm -rf "$CASE_ROOT"
+
+fixture; sed -i 's#automountServiceAccountToken: false#automountServiceAccountToken: true#' "$CASE_ROOT/$DENY"
+run_bad "$CASE_ROOT" 'rejects a mounted ServiceAccount token' 'token mount forbidden'; rm -rf "$CASE_ROOT"
+
+fixture; sed -i 's#automountServiceAccountToken: false#automountServiceAccountToken: false\n      serviceAccountName: radar-deployer#' "$CASE_ROOT/$DENY"
+run_bad "$CASE_ROOT" 'rejects a serviceAccountName on the denial pod' 'serviceAccountName forbidden'; rm -rf "$CASE_ROOT"
+
+fixture; sed -i 's#args: \["content-deny"\]#args: ["content-deny"]\n          volumeMounts:\n            - name: creds\n              mountPath: /creds#' "$CASE_ROOT/$DENY"
+sed -i 's#automountServiceAccountToken: false#automountServiceAccountToken: false\n      volumes:\n        - name: creds\n          secret:\n            secretName: radar-artifacts-preprod#' "$CASE_ROOT/$DENY"
+run_bad "$CASE_ROOT" 'rejects a secret volume on the denial pod' 'volume mount forbidden'; rm -rf "$CASE_ROOT"
+
 fixture; sed -i 's/name: radar-artifact-content-deny/name: radar-api/' "$CASE_ROOT/$INGRESS"
 run_bad "$CASE_ROOT" 'rejects content routing to the api Service' 'only to the denial Service'; rm -rf "$CASE_ROOT"
 
