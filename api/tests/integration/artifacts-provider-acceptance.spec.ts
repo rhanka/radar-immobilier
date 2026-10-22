@@ -283,66 +283,123 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
   });
 
   it("maps an injected S3 timeout below the HTTP layer to 503 without internals", async () => {
-    const { ledger, entries } = createMemoryCommitLedger();
-    const fault = new ArtifactS3TimeoutError("blobs.putBlob");
-    let injected = false;
-    const broken = (await composeArtifactHost(pool, storageConfig(), { ...rawBlobs(),
-      async putBlob() { injected = true; throw fault; } }))!;
+    await requireOutcomeContract();
+    const barrier = await requireCommitBarrier();
+    const faulty = { ...rawBlobs(),
+      async putBlob() {
+        throw Object.assign(new Error("stream timeout"), { code: "artifact_s3_timeout" });
+      } };
+    const host = await composeAcceptanceHost(barrier.observer, { blobs: faulty });
+    const close = host["close"];
     try {
-      const { probe, causes } = providerCauses(broken);
-      const control = createArtifactControl(broken, SCOPE, BASE, undefined, { ledger, probe });
-      const artifactId = await ensureArtifact(control, "acceptance-s3-ensure");
+      const execute = requireHostExecute(host);
+      const authorizeCommit: AuthorizeCommit = authorizeTransaction;
+      const ensured = await execute({ method: "POST", path: "/ensure",
+        body: { bindingName: "acceptance-s3", idempotencyKey: "acceptance-s3-ensure" } },
+        invocationFor(authorizeCommit, "s3-ensure"));
+      expect(ensured).toMatchObject({ ok: true });
+      const artifactId = successBody(ensured)["artifactId"] as string;
       const releasesBefore = await tableCount("releases");
-      const response = await control.handle("publish", ACTOR,
-        { artifactId, files: [{ path: "index.html", mimeType: "text/html", text: "s3 timeout" }],
-          idempotencyKey: "acceptance-s3" });
-      expect(injected).toBe(true);
-      expect(causes).toContain(fault);
-      expect(response).toEqual({ status: 503, body: { error: "capability_unavailable" } });
-      expect(JSON.stringify(response.body)).not.toMatch(/timeout|stack|connection|lost|Error/i);
-      expect(entries).toEqual([{ op: "publish", actorId: ACTOR,
-        reason: "provider_unavailable", status: 503, atMs: expect.any(Number) }]);
+      const invocation = invocationFor(authorizeCommit, "s3");
+      const outcome = await execute({ method: "POST", path: "/publish",
+        body: { artifactId,
+          files: [{ path: "index.html", mimeType: "text/html", text: "s3 timeout" }],
+          idempotencyKey: "acceptance-s3" } }, invocation) as Record<string, unknown>;
+      assertOutcomeFailure(outcome, invocation["invocationId"] as string);
+      expect(outcome["failure"]).toMatchObject({ category: "provider_unavailable" });
+      expect(await projectOutcomeHttp(outcome)).toEqual({ status: 503, body: { error: "capability_unavailable" } });
       expect(await tableCount("releases")).toBe(releasesBefore);
     } finally {
-      broken.close();
+      if (typeof close === "function") (close as () => void)();
     }
   });
 
   it("maps a lost Postgres connection to provider_unavailable, never conflict", async () => {
+    await requireOutcomeContract();
+    const barrier = await requireCommitBarrier();
     const armed = { current: false };
-    let injected = false;
     const flaky = new Proxy(pool, { get(target, property, receiver) {
       if ((property === "query" || property === "connect") && armed.current) {
         return async (): Promise<never> => {
-          injected = true;
           throw Object.assign(new Error("terminating connection lost by peer"), { code: "57P06" });
         };
       }
       const value = Reflect.get(target, property, receiver);
       return typeof value === "function" ? value.bind(target) : value;
-    } });
-    const { ledger, entries } = createMemoryCommitLedger();
-    const host = (await composeArtifactHost(flaky, storageConfig(), rawBlobs()))!;
+    } }) as unknown as pg.Pool;
+    const host = await composeAcceptanceHost(barrier.observer, { pool: flaky });
+    const close = host["close"];
     try {
-      const { probe, causes } = providerCauses(host);
-      const control = createArtifactControl(host, SCOPE, BASE, undefined, { ledger, probe });
+      const execute = requireHostExecute(host);
+      const authorizeCommit: AuthorizeCommit = authorizeTransaction;
       const before = await tableCount("artifacts");
       const keysBefore = await tableCount("idempotency_keys");
       armed.current = true;
-      const response = await control.handle("ensure", ACTOR,
-        { bindingName: "acceptance-lost", idempotencyKey: "acceptance-lost" });
-      armed.current = false;
-      expect(injected).toBe(true);
-      expect(causes.length).toBeGreaterThan(0);
-      expect(response).toEqual({ status: 503, body: { error: "capability_unavailable" } });
-      expect(JSON.stringify(response.body)).not.toMatch(/lost|terminat|57P06|connection|Error/i);
-      expect(entries).toEqual([{ op: "ensure", actorId: ACTOR,
-        reason: "provider_unavailable", status: 503, atMs: expect.any(Number) }]);
+      try {
+        const invocation = invocationFor(authorizeCommit, "lost");
+        const outcome = await execute({ method: "POST", path: "/ensure",
+          body: { bindingName: "acceptance-lost", idempotencyKey: "acceptance-lost" } },
+          invocation) as Record<string, unknown>;
+        assertOutcomeFailure(outcome, invocation["invocationId"] as string);
+        expect(outcome["failure"]).toMatchObject({ category: "provider_unavailable" });
+        expect(await projectOutcomeHttp(outcome)).toEqual({ status: 503, body: { error: "capability_unavailable" } });
+      } finally {
+        armed.current = false;
+      }
       expect(await tableCount("artifacts")).toBe(before);
       expect(await tableCount("idempotency_keys")).toBe(keysBefore);
     } finally {
-      armed.current = false;
-      host.close();
+      if (typeof close === "function") (close as () => void)();
+    }
+  });
+
+  it("replays HTTP to MCP and MCP to HTTP as one durable authorized release per key", async () => {
+    await requireCommitContract();
+    const barrier = await requireCommitBarrier();
+    const host = await composeAcceptanceHost(barrier.observer);
+    const close = host["close"];
+    try {
+      requireSelectedProfile(host);
+      const firstHost = (await composeAcceptanceHost(barrier.observer));
+      const control = createArtifactControl(firstHost, SCOPE, BASE);
+      try {
+        const route = controlRoute({ auth, accounts: pool, backend: control });
+        const httpPublish = async (args: unknown) => {
+          const response = await route.request("https://app.example.test/publish", {
+            method: "POST", headers: { cookie: await cookie(ACTOR), origin: auth.appBaseUrl,
+              "content-type": "application/json" }, body: JSON.stringify(args),
+          });
+          return { status: response.status, body: await response.json() as Record<string, unknown> };
+        };
+        const ensured = await control.handle("ensure", ACTOR,
+          { bindingName: "replay", idempotencyKey: "replay" });
+        expect(ensured.status).toBe(201);
+        const artifactId = (ensured.body as { artifactId: string }).artifactId;
+        const second = (await composeAcceptanceHost(barrier.observer));
+        try {
+          const adapter = createMcpArtifactAdapter(createArtifactControl(second, SCOPE, BASE));
+          const args = { artifactId, files: [{ path: "index.html", mimeType: "text/html", text: "hello" }],
+            idempotencyKey: " replay " };
+          const mcp = () => adapter.execute({ method: "POST", path: "/publish", args }, { actorId: ACTOR });
+          const bodyOf = (value: unknown) => "body" in (value as Record<string, unknown>)
+            ? (value as { body: unknown }).body
+            : (value as { ok: boolean; data: unknown }).data;
+          const releasesBefore = await tableCount("releases");
+          const keysBefore = await tableCount("idempotency_keys");
+          const first = await httpPublish(args);
+          const replay = await mcp();
+          expect(first.status).toBe(201);
+          expect(replay.status).toBe(201);
+          expect(await tableCount("releases")).toBe(releasesBefore + 1);
+          expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
+          expect(bodyOf(replay)).toEqual(bodyOf(first));
+          expect(await currentReleaseId(artifactId)).toBe((bodyOf(first) as { releaseId: string }).releaseId);
+        } finally { second.close(); }
+      } finally {
+        firstHost.close();
+      }
+    } finally {
+      if (typeof close === "function") (close as () => void)();
     }
   });
 
