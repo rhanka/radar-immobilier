@@ -48,8 +48,8 @@ audit: guard
 
 .PHONY: fix-prepare fix-deliver fix-audit
 fix-prepare fix-deliver fix-audit: guard
-	@test '$(LOT)' = 6H
-	@bash tools/make/paniers-lot6h-fix-deliver.sh $@
+	@case '$(LOT)' in 6H|6I) ;; *) exit 1;; esac
+	@bash tools/make/paniers-lot$(shell echo $(LOT) | tr A-Z a-z)-fix-deliver.sh $@
 
 clean inspect diagnose: guard
 	@bash tools/make/paniers-lot6-verify.sh $@

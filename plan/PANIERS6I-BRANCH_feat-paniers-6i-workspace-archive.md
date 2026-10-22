@@ -57,7 +57,7 @@ without exposing another member's private state.
   single-value guard and the unconditional lint lines.
 - Delivery uses individually typechecked snapshots; the French report
   remains uncommitted.
-- Delivery checkpoint: 24.
+- Delivery checkpoint: 25.
 - `BR6I-EX2`: narrow personal owners in `activation-bind.ts` after the
   schema permits null workspace owners. Typecheck proves the old chain
   input no longer fits. Reject null personal owners; no history rewrite.
@@ -106,7 +106,7 @@ without exposing another member's private state.
 - [x] Review fix 3: omitted workspace discard reason returns 422.
 - [x] Review fix 4: workspace-first restore preserves personal hiding.
 - [x] Review fix 5: source-copy discrimination for all four corrections.
-- [ ] Review fix 6: size-checked, typechecked commits and incremental bundle.
+- [x] Review fix 6: size-checked, typechecked commits and incremental bundle.
 - [ ] **Lot N-1 — Docs**: uncommitted French `RAPPORT-MUSE-6I.md`.
 - [ ] **Lot N — Close (not covered)**: verify green, push, PR, CI,
   merge commit (no squash/rebase), keep branch, move plan to
