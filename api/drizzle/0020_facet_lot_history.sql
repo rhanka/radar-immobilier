@@ -186,3 +186,80 @@ DO $$ BEGIN
   END IF;
 END $$;
 --> statement-breakpoint
+-- Lot streams carry an explicit mode; signal streams keep mode null.
+ALTER TABLE facet_streams ADD COLUMN IF NOT EXISTS mode text;
+--> statement-breakpoint
+ALTER TABLE facet_streams DROP CONSTRAINT IF EXISTS facet_streams_target_type_check;
+--> statement-breakpoint
+ALTER TABLE facet_streams DROP CONSTRAINT IF EXISTS facet_streams_node_type_check;
+--> statement-breakpoint
+ALTER TABLE facet_streams DROP CONSTRAINT IF EXISTS facet_streams_facet_check;
+--> statement-breakpoint
+ALTER TABLE facet_streams DROP CONSTRAINT IF EXISTS chk_facet_streams_basket;
+--> statement-breakpoint
+ALTER TABLE facet_streams DROP CONSTRAINT IF EXISTS facet_streams_identity_key;
+--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_facet_streams_target_lot_6j') THEN
+    ALTER TABLE facet_streams ADD CONSTRAINT chk_facet_streams_target_lot_6j CHECK (
+      (target_type = 'signal' AND node_type IN ('Signal', 'DesignationEvent') AND mode IS NULL)
+      OR (target_type = 'lot' AND node_type = 'Lot' AND mode IS NOT NULL AND mode IN ('real', 'simulation')
+        AND (scope = 'workspace' OR facet = 'archive')));
+  END IF;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_facet_streams_facet_lot_6j') THEN
+    ALTER TABLE facet_streams ADD CONSTRAINT chk_facet_streams_facet_lot_6j CHECK (
+      (target_type = 'signal' AND facet IN ('selection', 'archive'))
+      OR (target_type = 'lot' AND facet IN ('selection', 'archive', 'pipeline', 'market')));
+  END IF;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_facet_streams_basket') THEN
+    ALTER TABLE facet_streams ADD CONSTRAINT chk_facet_streams_basket CHECK (
+      (facet = 'selection' AND basket IS NOT NULL AND basket <> ''
+        AND ((target_type = 'signal' AND basket IN ('pertinent', 'a_surveiller')) OR target_type = 'lot'))
+      OR (facet = 'archive' AND basket IS NULL)
+      OR (target_type = 'lot' AND facet IN ('pipeline', 'market') AND basket IS NULL));
+  END IF;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'facet_streams_identity_key') THEN
+    ALTER TABLE facet_streams ADD CONSTRAINT facet_streams_identity_key UNIQUE NULLS NOT DISTINCT
+      (workspace_id, scope, owner_id, target_type, mode, city_slug, node_type, node_id, facet, basket);
+  END IF;
+END $$;
+--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS facet_events_lot_target_idx
+  ON facet_events (city_slug, node_type, node_id)
+  WHERE target_type = 'lot' AND superseded_by IS NULL;
+--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS facet_events_lot_import_idx
+  ON facet_events (import_run_id) WHERE import_run_id IS NOT NULL;
+--> statement-breakpoint
+CREATE OR REPLACE FUNCTION guard_lot_source_evidence() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  RAISE EXCEPTION 'lot source evidence is immutable';
+END $$;
+--> statement-breakpoint
+CREATE OR REPLACE TRIGGER lot_source_rows_immutable
+  BEFORE UPDATE OR DELETE ON lot_source_rows FOR EACH ROW EXECUTE FUNCTION guard_lot_source_evidence();
+CREATE OR REPLACE TRIGGER lot_source_rows_no_truncate
+  BEFORE TRUNCATE ON lot_source_rows FOR EACH STATEMENT EXECUTE FUNCTION guard_lot_source_evidence();
+--> statement-breakpoint
+CREATE OR REPLACE FUNCTION guard_lot_stream_mode() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM facet_events e JOIN facet_streams s ON s.id = NEW.stream_id
+      WHERE e.id = NEW.event_id AND e.mode IS DISTINCT FROM s.mode
+  ) THEN
+    RAISE EXCEPTION 'lot stream mode mismatch';
+  END IF;
+  RETURN NEW;
+END $$;
+--> statement-breakpoint
+CREATE OR REPLACE TRIGGER facet_bindings_mode
+  BEFORE INSERT ON facet_event_bindings FOR EACH ROW EXECUTE FUNCTION guard_lot_stream_mode();
