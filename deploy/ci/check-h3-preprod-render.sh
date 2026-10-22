@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Offline H3 gate: committed disabled overlay or reviewed activation render.
+# Offline H3 gate: disabled overlay or an explicit reviewed operator state.
 # No apply, discovery, credential lookup or cluster access.
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 TARGET="${1:-$(cd "$HERE/../.." && pwd)}"
 PHASE="${H3_RENDER_PHASE:-disabled}"
-case "$PHASE" in disabled|activation) ;; *) echo 'FAIL: unknown render phase' >&2; exit 1;; esac
+case "$PHASE" in disabled|preparation|activation|rollback) ;; *) echo 'FAIL: unknown render phase' >&2; exit 1;; esac
 if [ -f "$TARGET" ]; then
   RENDER="$TARGET"
 elif [ -d "$TARGET" ]; then
@@ -27,7 +27,7 @@ awk -v phase="$PHASE" -f "$HERE/h3-render-common.awk" -f "$HERE/h3-render-worklo
 awk -v phase="$PHASE" -f "$HERE/h3-render-common.awk" -f "$HERE/h3-render-routing.awk" "$RENDER" || status=1
 [ "$status" -eq 0 ] || exit 1
 bash "$HERE/check-preprod-auth-isolation.sh" "$RENDER"
-if [ "$PHASE" = activation ]; then
+if [ "$PHASE" = activation ] || [ "$PHASE" = preparation ]; then
   until_value="$(awk -f "$HERE/h3-render-common.awk" -f "$HERE/h3-render-until.awk" "$RENDER")"
   until_epoch="$(date -u -d "$until_value" +%s 2>/dev/null)" || {
     echo 'FAIL: invalid ARTIFACTS_VALIDATION_UNTIL' >&2; exit 1;
