@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
 # Review corrections on independent Git metadata; shared checkout stays intact.
 set -euo pipefail
-task_dir="$PWD/tmp/paniers-6k-fix"
+round=${2:-fix}
+case "$round" in fix|fix2) ;; *) exit 2;; esac
+task_dir="$PWD/tmp/paniers-6k-$round"
 repo="$task_dir/git"
-base=$(git rev-parse '63a8991c^{commit}')
+base_ref=63a8991c
+[[ "$round" != fix2 ]] || base_ref=323d0db9
+base=$(git rev-parse "$base_ref^{commit}")
+slices="tools/make/paniers-lot6k-$round-slices.txt"
+label='Review fix'
+[[ "$round" != fix2 ]] || label='Second review fix'
 plan=plan/PANIERS6K-BRANCH_feat-paniers-6k-lot-cutover.md
 local_git() { git --git-dir="$repo/.git" --work-tree="$PWD" "$@"; }
 scope() {
@@ -33,9 +40,9 @@ case "$1" in
       read -r -a paths <<< "$files"
       local_git add -- "${paths[@]}"
       index=$((index + 1))
-      blob=$(sed -E "s/^- \[[ x]\] Review fix checkpoint: [0-9]+/- [x] Review fix checkpoint: $index/" "$plan" \
-        | awk -v stage="$index" '/^- \[[ x]\] Review fix [0-9]+:/ {
-          step=$0; sub(/^.*Review fix /, "", step)
+      blob=$(sed -E "s/^- \[[ x]\] $label checkpoint: [0-9]+/- [x] $label checkpoint: $index/" "$plan" \
+        | awk -v stage="$index" -v label="$label" '$0 ~ "^- \\[[ x]\\] " label " [0-9]+:" {
+          step=$0; sub("^.*" label " ", "", step)
           if (step+0 <= stage) sub(/\[[ x]\]/, "[x]"); else sub(/\[[ x]\]/, "[ ]")
         } {print}' | local_git hash-object -w --stdin)
       local_git update-index --add --cacheinfo "100644,$blob,$plan"
@@ -47,14 +54,33 @@ case "$1" in
       scope "$tree"
       printf '%02d|%s|%s\n' "$index" "$tree" "$subject" >> "$task_dir/checkpoints/manifest"
       previous=$tree
-    done < tools/make/paniers-lot6k-fix-slices.txt
+    done < "$slices"
     local_git diff --exit-code "$tree" -- api ui tools/make
+    if [[ "$round" == fix2 ]]; then
+      diff_hash=$(git diff HEAD --no-ext-diff | sha256sum | cut -d ' ' -f 1)
+      cat > "$task_dir/review.md" <<EOF
+---
+status: selection-failed
+target-ref: $base_ref / current working tree
+target-diff-sha256: $diff_hash
+observed-failure: Muse author host, exact model and effort are unavailable.
+---
+
+The two supplied reviews define the correction criteria. No new peer consensus
+is claimed. Review selection stops under harness-review's unknown-author rule.
+EOF
+    fi
     echo "$index bounded review correction trees prepared"
     ;;
   deliver)
     test "$(local_git rev-parse HEAD)" = "$base"
-    for gate in fix-api-ci/api-ci fix-verify/verify fix-build/build fix-lint/lint \
-      fix-ui/test-ui fix-regression/regression fix-mutations/mutation-proof; do
+    gates=(fix-api-ci/api-ci fix-verify/verify fix-build/build fix-lint/lint
+      fix-ui/test-ui fix-regression/regression fix-mutations/mutation-proof)
+    if [[ "$round" == fix2 ]]; then
+      gates=(fix2-api-ci/api-ci fix2-verify/verify fix2-build/build fix2-lint/lint
+        fix2-typecheck/typecheck fix2-regression/regression fix2-mutations/mutation-proof)
+    fi
+    for gate in "${gates[@]}"; do
       test "$(cat "tmp/paniers-6k/logs/$gate.status")" = 0
       evidence="tmp/paniers-6k/logs/${gate%/*}/archived-files.sha256"
       awk '$2 ~ /^(api\/(src|drizzle)\/|ui\/src\/)/ && $2 !~ /__6k_baseline__/ {print}' \
@@ -75,9 +101,9 @@ case "$1" in
     local_git diff --check "$base" HEAD
     local_git diff --exit-code HEAD -- api ui tools/make "$plan"
     branch=$(local_git branch --show-current)
-    local_git bundle create "$task_dir/6k-fix.bundle" "$base..$branch"
-    local_git bundle verify "$task_dir/6k-fix.bundle"
-    sha256sum "$task_dir/6k-fix.bundle" > "$task_dir/bundle.sha256"
+    local_git bundle create "$task_dir/6k-$round.bundle" "$base..$branch"
+    local_git bundle verify "$task_dir/6k-$round.bundle"
+    sha256sum "$task_dir/6k-$round.bundle" > "$task_dir/bundle.sha256"
     cp RAPPORT-SOL-6K.md "$task_dir/RAPPORT-SOL-6K.md"
     sha256sum "$task_dir/RAPPORT-SOL-6K.md" > "$task_dir/report.sha256"
     ;;
@@ -99,10 +125,10 @@ case "$1" in
     : > "$task_dir/cleanup-inspect.log"
     for kind in container volume network; do
       flags=(-q); [[ "$kind" != container ]] || flags+=(-a)
-      test -z "$(docker "$kind" ls "${flags[@]}" --filter 'name=radar-test-paniers-6k-fix')"
+      test -z "$(docker "$kind" ls "${flags[@]}" --filter "name=radar-test-paniers-6k-$round")"
       echo "$kind=0" >> "$task_dir/cleanup-inspect.log"
     done
-    local_git bundle verify "$task_dir/6k-fix.bundle"
+    local_git bundle verify "$task_dir/6k-$round.bundle"
     sha256sum -c "$task_dir/bundle.sha256"
     sha256sum -c "$task_dir/report.sha256"
     cmp RAPPORT-SOL-6K.md "$task_dir/RAPPORT-SOL-6K.md"

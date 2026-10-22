@@ -1,0 +1,4 @@
+fix(paniers): resume suspended SSE delivery after database recovery|api/src/routes/chat.ts
+test(paniers): cover SSE recovery on open and new connections|api/src/routes/lot-cutover-stream.test.ts
+chore(paniers): discriminate SSE recovery with versioned mutations|tools/make/paniers-lot6k-mutation.sh tools/make/paniers-lot6k-run.sh tools/make/paniers-lot6-verify.sh
+chore(paniers): bundle second review corrections from their base|tools/make/paniers-lot6.mk tools/make/paniers-lot6k-fix-deliver.sh tools/make/paniers-lot6k-fix2-slices.txt

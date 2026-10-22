@@ -76,10 +76,10 @@ D5 applies only to actual conflicts; qualification uses synthetic data.
 - [x] Review fix 7: unknown fence suspends; publications recover without activation.
 - [x] Review fix 8: discrimination on copies, restoration, byte comparisons.
 - [x] Review fix 9: bounded bundle, complete API CI, declarations, types, lint, UI, regression.
-- [x] Second review fix checkpoint: 3.
+- [x] Second review fix checkpoint: 4.
 - [x] Second review fix 1: resume suspended SSE on publication and heartbeat; keep retirement final.
 - [x] Second review fix 2: prove same-connection and new-connection replay and live mark/batch delivery.
 - [x] Second review fix 3: copied mutations fail by assertion, restore, compare bytes, then pass.
-- [ ] Second review fix 4: API CI parallelism, declarations, types, lint, verify, regression and bounded bundle.
+- [x] Second review fix 4: API CI parallelism, declarations, types, lint, verify, regression and bounded bundle.
 - [ ] **Operational acceptance**: real 6F/D5, writer locks, replicas, parent UI wiring, browser UAT.
 - [ ] **Merge & close**: conductor imports bundle, runs CI, reviews scope, uses a merge commit.
