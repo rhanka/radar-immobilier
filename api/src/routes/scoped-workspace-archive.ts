@@ -35,7 +35,9 @@ const displayedFingerprint = z.string().length(64).regex(/^[a-f0-9]{64}$/);
 const workspaceId = z.string().uuid();
 const city = z.string().min(1).max(128).regex(/^[a-z0-9-]+$/);
 
-const discardSchema = z.object({ target, reasonCode, expectedHeadId, displayedFingerprint }).strict();
+const discardSchema = z.object({
+  target, reasonCode: reasonCode.optional(), expectedHeadId, displayedFingerprint,
+}).strict();
 const restoreSchema = z.object({ target, expectedHeadId, displayedFingerprint }).strict();
 
 export interface ScopedWorkspaceArchiveDeps {
