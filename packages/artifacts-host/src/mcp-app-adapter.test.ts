@@ -179,7 +179,7 @@ describe("mcp adapter caller key validation", () => {
   });
 
   it.each([
-    ["absent", {}, "POST", "/ensure"],
+    ["absent", { bindingName: "summer" }, "POST", "/ensure"],
     ["empty", { bindingName: "summer", idempotencyKey: "" }, "POST", "/ensure"],
     ["blank", { bindingName: "summer", idempotencyKey: "   " }, "POST", "/ensure"],
     ["overlong", { bindingName: "summer", idempotencyKey: "k".repeat(257) }, "POST", "/ensure"],
