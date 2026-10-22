@@ -64,3 +64,6 @@ Keep current host API names in one test adaptation module pending spec r2.
 - [x] Final static gates and declaration emit passed; isolated stack removed.
 - [x] Independent review selection failed on missing exact author metadata;
   no consensus claimed and no merge requested; dossier in ignored evidence.
+
+## Q1/Q2 delivery slices
+- [x] Slice 001: harden artifact acceptance qualification.
