@@ -64,8 +64,14 @@ guard-env:
 	  test-*|e2e-*) ;; \
 	  *) echo "[artifact-host] refused: ENV must be test-* or e2e-*, got '$(ENV)'" >&2; exit 1;; \
 	esac
+
+# Keep cleanup available even when a campaign must stop for low disk space.
+.PHONY: guard-disk
+guard-disk: guard-env
 	@df -h .
 	@df -Pk . | awk 'NR == 2 && $$4 < 10485760 { print "[artifact-host] refused: less than 10 GiB free" > "/dev/stderr"; exit 1 }'
+
+test-api test-host test-mcp test-provider-acceptance provider-acceptance-tsconfig typecheck lint build-api image-runtime-smoke image-smoke: guard-disk
 
 .PHONY: test-provider-acceptance typecheck-provider-acceptance provider-acceptance-tsconfig verify-provider-acceptance
 test-provider-acceptance: guard-env ## Qualify candidate provider; opt in with ARTIFACTS_PROVIDER_ACCEPTANCE=1
