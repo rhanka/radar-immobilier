@@ -1,10 +1,12 @@
 import { randomUUID } from "node:crypto";
+import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { expect, it } from "vitest";
 import { graphNodes } from "../db/schema.js";
 import { writeScopedPersonalFacet } from "../services/facets/scoped-writer.js";
 import { writeWorkspaceArchiveFacet } from "../services/facets/workspace-writer.js";
 import { scopedProjectionRevisionsRoute } from "./scoped-projection-revisions.js";
+import { bumpGraphSourceRevision } from "../services/facets/projection-revisions.js";
 import { describeDb, fixture } from "../services/facets/scope-db-fixture.js";
 import {
   revisionCitySignal,
@@ -86,5 +88,35 @@ describeDb("6L1 projection revision HTTP contract", () => {
     const closed = await app.request(url);
     expect(closed.status).toBe(503);
     expect(closed.headers.get("cache-control")).toBe("private, no-store");
+  });
+
+  it("should serve displayed fingerprints usable for 6B commands after a graph refresh", async () => {
+    const f = await revisionFixture();
+    const { target, fingerprint } = await revisionCitySignal(f);
+    const base = `/api/v1/workspaces/${f.workspaceId}/signal-facets`;
+    const member = appFor(f, { sub: f.contributor.sub });
+    const first = await (await member.request(`${base}/coherent-city?citySlug=${target.citySlug}&mode=signal`)).json() as {
+      token: string; signals: Array<{ id: string; facetFingerprint: string }>;
+    };
+    expect(first.signals).toHaveLength(1);
+    expect(first.signals[0]!.facetFingerprint).toBe(fingerprint);
+    await f.db.update(graphNodes).set({ label: "Synthetic 6L1 revised signal" })
+      .where(eq(graphNodes.id, target.id));
+    await f.db.transaction((tx) => bumpGraphSourceRevision(tx, target.citySlug));
+    const second = await (await member.request(`${base}/coherent-city?citySlug=${target.citySlug}&mode=signal`)).json() as {
+      token: string; signals: Array<{ id: string; label: string; facetFingerprint: string }>;
+    };
+    expect(second.token).not.toBe(first.token);
+    expect(second.signals[0]!.label).toBe("Synthetic 6L1 revised signal");
+    expect(second.signals[0]!.facetFingerprint).not.toBe(fingerprint);
+    const refreshed = second.signals[0]!.facetFingerprint;
+    await expect(writeScopedPersonalFacet(f.db, f.contributor.sub, f.workspaceId,
+      { action: "discard", target, reasonCode: "N-NON-RES", expectedHeadId: null,
+        displayedFingerprint: fingerprint, commandKey: randomUUID() }))
+      .rejects.toMatchObject({ status: 409, message: "target_version_conflict" });
+    const created = await writeScopedPersonalFacet(f.db, f.contributor.sub, f.workspaceId,
+      { action: "discard", target, reasonCode: "N-NON-RES", expectedHeadId: null,
+        displayedFingerprint: refreshed, commandKey: randomUUID() });
+    expect(created).toMatchObject({ state: "active" });
   });
 });
