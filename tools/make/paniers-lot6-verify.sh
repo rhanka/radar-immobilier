@@ -101,12 +101,13 @@ disk_monitor=$!
 # Only source/manifests: environment files, Git metadata and host dependencies
 # are excluded before reading file contents. The container sees no host tree.
 tar --exclude='.env*' --exclude=node_modules --exclude=dist --exclude=.svelte-kit \
-  -cf "$runtime_dir/source.tar" api packages ui radar/ontology tools/make tools/h4-mcp.mk deploy/k8s/41-immo-mcp-ingress.yaml deploy/k8s/scrape/run-chunks.sh package.json package-lock.json tsconfig.base.json eslint.config.js
+  -cf "$runtime_dir/source.tar" api packages ui radar/ontology tools/make tools/h4-mcp.mk deploy/k8s/41-immo-mcp-ingress.yaml deploy/k8s/scrape/run-chunks.sh package.json package-lock.json tsconfig.base.json eslint.config.js \
+  docs/spec/reports/study-2026-07/report.md docs/spec/reports/study-2026-07/slides.html
 sha256sum "$runtime_dir/source.tar" > "$log_dir/source.sha256"
 if [[ "$LOT" == 6J || "$LOT" == 6L2 ]]; then
   case "$LOT" in
     6J) echo "${RUNNER_VERSION:-6J-2}" > "$log_dir/runner-version.txt" ;;
-    6L2) echo "${RUNNER_VERSION:-6L2-2}" > "$log_dir/runner-version.txt" ;;
+    6L2) echo "${RUNNER_VERSION:-6L2-3}" > "$log_dir/runner-version.txt" ;;
   esac
   tar -tf "$runtime_dir/source.tar" > "$log_dir/archived-paths.txt"
   tar -tf "$runtime_dir/source.tar" | while IFS= read -r path; do
