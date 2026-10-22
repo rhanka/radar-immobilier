@@ -176,6 +176,8 @@ Review integration (both non-blocking points):
   record, credential cycle.
 - [x] Review correction 1: reject additive egress on the named denial ingress
   policy; exact policy types, disabled/activation copy mutations and `cmp`.
+- [x] Review correction 2: computed global `process` reads fail AST isolation
+  in both denial modules; 35 tests and copy/failure/restore/`cmp` pass.
 
 - [x] **Unit 8 — isolated denial listener** (§5.4, T02/T23/T24): new
       `api/src/artifacts/content-deny.ts` exposes the shared denial
