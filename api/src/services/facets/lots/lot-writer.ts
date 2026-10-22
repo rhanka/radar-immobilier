@@ -67,8 +67,9 @@ export async function writeLotFacet(
     const rights = await resolveLotRights(tx, workspaceId, sub);
     const destination = await requireLotDestination(tx, workspaceId);
     requireScopedEpoch(await scopedEpochFor(tx, workspaceId), workspaceId);
+    authorizeLotMutation(rights, scope, command.mutation, destination.selectionBasket);
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${JSON.stringify(
-      ["lot-scoped-command", actorId, key])}, 0))`);
+      ["scoped-command", actorId, key])}, 0))`);
     const base = lotCommandDigest(scope, "single", workspaceId, { ...command, command_key: key });
     const commandDigest = digest({ scope, workspaceId: workspaceId.toLowerCase(), command: base });
     const [contextRow] = await tx.select().from(facetCommandContexts).where(sql`
@@ -83,7 +84,6 @@ export async function writeLotFacet(
     }
     const replay = await readCommand(tx, actorId, key, commandDigest);
     if (replay !== undefined) return replay as ReturnType<typeof lotEventResponse> | null;
-    authorizeLotMutation(rights, scope, command.mutation, destination.selectionBasket);
     await lotTargetLock(tx, command.target);
     const resolved = await resolveLotSource(tx, command.target);
     if (resolved.row.id !== command.displayed_version.lot_version_id
