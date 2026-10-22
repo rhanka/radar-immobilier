@@ -10,7 +10,7 @@ import { z } from "zod";
 import { and, eq, inArray } from "drizzle-orm";
 import type { Database } from "../db/client.js";
 import { graphNodes } from "../db/schema.js";
-import { FacetError } from "../services/facets/target.js";
+import { FacetError, targetFingerprint } from "../services/facets/target.js";
 import { ScopeError } from "../services/facets/scope.js";
 import { WorkspaceError } from "../services/workspaces/types.js";
 import {
@@ -109,7 +109,10 @@ export function scopedProjectionRevisionsRoute(deps: ScopedProjectionRevisionsDe
       const key = (row: { type: string; id: string }) => JSON.stringify([row.type, row.id]);
       const hiddenKeys = new Set(heads.filter((head) => head.effectiveDiscarded)
         .map((head) => key(head.target)));
-      const signals = coherent.payload.signals.filter((node) => !hiddenKeys.has(key(node)));
+      // Each served node carries the displayed fingerprint computed exactly
+      // like the 6B contract, so the snapshot supports a follow-up command.
+      const signals = coherent.payload.signals.filter((node) => !hiddenKeys.has(key(node)))
+        .map((node) => ({ ...node, facetFingerprint: targetFingerprint(node) }));
       const total = coherent.payload.signals.length;
       const hidden = total - signals.length;
       const selection = coherent.payload.selection.filter((head) => head.facet === "selection");
