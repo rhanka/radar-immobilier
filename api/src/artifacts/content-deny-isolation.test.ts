@@ -1,3 +1,7 @@
+import { createRequire } from "node:module";
+import { createServer as createHttpServer } from "node:http";
+import { runInNewContext } from "node:vm";
+import type { Server } from "node:http";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -188,6 +192,36 @@ const FORBIDDEN_PROBES = [
   'import { env } from "node:process"; void env;',
 ];
 
+/** Execute the actual modules without instrumenting the test runner's env. */
+function executeDenialModules(env: NodeJS.ProcessEnv, servers: Server[]): void {
+  const require = createRequire(import.meta.url);
+  const application: Record<string, unknown> = {};
+  const http = {
+    ...require("node:http"),
+    createServer: (...args: Parameters<typeof createHttpServer>): Server => {
+      const server = createHttpServer(...args);
+      servers.push(server);
+      return server;
+    },
+  };
+  for (const file of ["content-deny.ts", "content-deny-server.ts"]) {
+    const { outputText } = ts.transpileModule(read(file), {
+      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+    });
+    runInNewContext(outputText, {
+      exports: file === "content-deny.ts" ? application : {},
+      require: (name: string): unknown => {
+        if (name === "./content-deny.js") return application;
+        if (name === "node:http") return http;
+        return require(name);
+      },
+      process: { env },
+      console,
+      Response,
+    }, { filename: file });
+  }
+}
+
 describe("content-deny module isolation", () => {
   it.each(FORBIDDEN_PROBES)("rejects forbidden pattern %s", (probe) => {
     expect(collectViolations(probe as string, "fixture.ts")).not.toEqual([]);
@@ -236,4 +270,13 @@ describe("content-deny module isolation", () => {
     expect(collectViolations(read("content-deny-server.ts"), "content-deny-server.ts")).toEqual([]);
     expect(countAllowedPortReads(read("content-deny-server.ts"), "content-deny-server.ts")).toBe(1);
   });
+});
+
+describe("content-deny runtime environment isolation", () => {
+  it.each(["", "  invalid  ", "0", "65536", "1.5"])("preserves invalid PORT diagnostics (%j)", (port) => {
+    expect(() => executeDenialModules({ PORT: port }, [])).toThrow(
+      `invalid PORT ${JSON.stringify(port)}: expected an integer in 1-65535`,
+    );
+  });
+
 });

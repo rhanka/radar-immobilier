@@ -190,6 +190,7 @@ Review integration (both non-blocking points):
 - [x] Second-pass correction 3: Reject global references at their source, including separate assignments.
 - [x] Second-pass correction 4: Exercise strict reference rejection with 32 probes on both denial modules.
 - [x] Second-pass correction 5: Remove alias tracking and require the strict guard for both source files.
+- [x] Second-pass correction 6: Execute transpiled modules in an isolated context; preserve invalid PORT errors.
 - [x] Operator runbook: validate preparation and the H2 rollback plan before
   GO; keep the real content boundary and a matching reviewed CD target.
 
