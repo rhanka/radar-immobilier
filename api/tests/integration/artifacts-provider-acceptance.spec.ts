@@ -195,4 +195,68 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
     }
   });
 
+  it("maps an injected S3 timeout below the HTTP layer to 503 without internals", async () => {
+    const { ledger, entries } = createMemoryCommitLedger();
+    const fault = new ArtifactS3TimeoutError("blobs.putBlob");
+    let injected = false;
+    const broken = (await composeArtifactHost(pool, storageConfig(), { ...rawBlobs(),
+      async putBlob() { injected = true; throw fault; } }))!;
+    try {
+      const { probe, causes } = providerCauses(broken);
+      const control = createArtifactControl(broken, SCOPE, BASE, undefined, { ledger, probe });
+      const artifactId = await ensureArtifact(control, "acceptance-s3-ensure");
+      const releasesBefore = await tableCount("releases");
+      const response = await control.handle("publish", ACTOR,
+        { artifactId, files: [{ path: "index.html", mimeType: "text/html", text: "s3 timeout" }],
+          idempotencyKey: "acceptance-s3" });
+      expect(injected).toBe(true);
+      expect(causes).toContain(fault);
+      expect(response).toEqual({ status: 503, body: { error: "capability_unavailable" } });
+      expect(JSON.stringify(response.body)).not.toMatch(/timeout|stack|connection|lost|Error/i);
+      expect(entries).toEqual([{ op: "publish", actorId: ACTOR,
+        reason: "provider_unavailable", status: 503, atMs: expect.any(Number) }]);
+      expect(await tableCount("releases")).toBe(releasesBefore);
+    } finally {
+      broken.close();
+    }
+  });
+
+  it("maps a lost Postgres connection to provider_unavailable, never conflict", async () => {
+    const armed = { current: false };
+    let injected = false;
+    const flaky = new Proxy(pool, { get(target, property, receiver) {
+      if ((property === "query" || property === "connect") && armed.current) {
+        return async (): Promise<never> => {
+          injected = true;
+          throw Object.assign(new Error("terminating connection lost by peer"), { code: "57P06" });
+        };
+      }
+      const value = Reflect.get(target, property, receiver);
+      return typeof value === "function" ? value.bind(target) : value;
+    } });
+    const { ledger, entries } = createMemoryCommitLedger();
+    const host = (await composeArtifactHost(flaky, storageConfig(), rawBlobs()))!;
+    try {
+      const { probe, causes } = providerCauses(host);
+      const control = createArtifactControl(host, SCOPE, BASE, undefined, { ledger, probe });
+      const before = await tableCount("artifacts");
+      const keysBefore = await tableCount("idempotency_keys");
+      armed.current = true;
+      const response = await control.handle("ensure", ACTOR,
+        { bindingName: "acceptance-lost", idempotencyKey: "acceptance-lost" });
+      armed.current = false;
+      expect(injected).toBe(true);
+      expect(causes.length).toBeGreaterThan(0);
+      expect(response).toEqual({ status: 503, body: { error: "capability_unavailable" } });
+      expect(JSON.stringify(response.body)).not.toMatch(/lost|terminat|57P06|connection|Error/i);
+      expect(entries).toEqual([{ op: "ensure", actorId: ACTOR,
+        reason: "provider_unavailable", status: 503, atMs: expect.any(Number) }]);
+      expect(await tableCount("artifacts")).toBe(before);
+      expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+    } finally {
+      armed.current = false;
+      host.close();
+    }
+  });
+
 });
