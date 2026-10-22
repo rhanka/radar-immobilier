@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+# Review corrections on independent Git metadata; shared checkout stays intact.
+set -euo pipefail
+task_dir="$PWD/tmp/paniers-6k-fix"
+repo="$task_dir/git"
+base=$(git rev-parse '63a8991c^{commit}')
+plan=plan/PANIERS6K-BRANCH_feat-paniers-6k-lot-cutover.md
+local_git() { git --git-dir="$repo/.git" --work-tree="$PWD" "$@"; }
+scope() {
+  while IFS= read -r path; do
+    case "$path" in
+      api/drizzle/0023_facet_lot_versions_fence.sql|api/drizzle/meta/_journal.json|\
+      api/src/services/facets/lots/lot-cutover*.ts|api/src/services/facets/lots/lot-city.ts|\
+      api/src/services/facets/lots/lot-legacy-fence*.ts|api/src/routes/chat.ts|\
+      api/src/routes/prospect-marks.ts|api/src/routes/lot-cutover-stream.test.ts|\
+      tools/make/paniers-lot6*|"$plan") ;;
+      *) echo "Forbidden review correction path: $path"; exit 1 ;;
+    esac
+  done < <(local_git diff --name-only "$base" "$1")
+}
+case "$1" in
+  prepare)
+    mkdir -p "$task_dir/checkpoints"
+    if [[ ! -d "$repo/.git" ]]; then git clone --shared --no-checkout --local . "$repo"; fi
+    test "$(local_git rev-parse HEAD)" = "$base"
+    local_git config core.worktree "$PWD"
+    local_git config user.name Codex
+    local_git config user.email codex@openai.com
+    local_git read-tree "$base"
+    : > "$task_dir/checkpoints/manifest"
+    index=0; previous=$base
+    while IFS='|' read -r subject files; do
+      read -r -a paths <<< "$files"
+      local_git add -- "${paths[@]}"
+      index=$((index + 1))
+      blob=$(sed -E "s/^- \[[ x]\] Review fix checkpoint: [0-9]+/- [x] Review fix checkpoint: $index/" "$plan" \
+        | awk -v stage="$index" '/^- \[[ x]\] Review fix [0-9]+:/ {
+          step=$0; sub(/^.*Review fix /, "", step)
+          if (step+0 <= stage) sub(/\[[ x]\]/, "[x]"); else sub(/\[[ x]\]/, "[ ]")
+        } {print}' | local_git hash-object -w --stdin)
+      local_git update-index --add --cacheinfo "100644,$blob,$plan"
+      tree=$(local_git write-tree)
+      local_git diff --numstat "$previous" "$tree" > "$task_dir/checkpoints/stat"
+      awk '{n+=$1+$2; f++} END {exit !(n>0 && n<=150 && f<=15)}' "$task_dir/checkpoints/stat"
+      test "${#subject}" -le 72
+      [[ "$subject" =~ ^(feat|fix|test|docs|chore)(\([a-z0-9-]+\))?:\ [a-z] ]]
+      scope "$tree"
+      printf '%02d|%s|%s\n' "$index" "$tree" "$subject" >> "$task_dir/checkpoints/manifest"
+      previous=$tree
+    done < tools/make/paniers-lot6k-fix-slices.txt
+    local_git diff --exit-code "$tree" -- api ui tools/make
+    echo "$index bounded review correction trees prepared"
+    ;;
+  deliver)
+    test "$(local_git rev-parse HEAD)" = "$base"
+    for gate in fix-api-ci/api-ci fix-verify/verify fix-build/build fix-lint/lint \
+      fix-ui/test-ui fix-regression/regression fix-mutations/mutation-proof; do
+      test "$(cat "tmp/paniers-6k/logs/$gate.status")" = 0
+      evidence="tmp/paniers-6k/logs/${gate%/*}/archived-files.sha256"
+      awk '$2 ~ /^(api\/(src|drizzle)\/|ui\/src\/)/ && $2 !~ /__6k_baseline__/ {print}' \
+        "$evidence" | sha256sum --check --quiet
+    done
+    : > "$task_dir/commits.tsv"
+    while IFS='|' read -r number tree subject; do
+      local_git read-tree "$tree"
+      make -f tools/make/paniers-lot6.mk commit MSG="$subject" LOT=6K \
+        DELIVERY_DIR="$repo" ENV="$ENV"
+      sha=$(local_git rev-parse HEAD)
+      test "$(local_git rev-parse HEAD^{tree})" = "$tree"
+      test "$(local_git log -1 --format=%B)" = "$subject"
+      changes=$(local_git diff --numstat "$sha^" "$sha" | awk '{n+=$1+$2; f++} END {print n "\t" f}')
+      printf '%s\t%s\t%s\n' "$sha" "$subject" "$changes" >> "$task_dir/commits.tsv"
+    done < "$task_dir/checkpoints/manifest"
+    local_git show "HEAD:$plan" > "$plan"
+    local_git diff --check "$base" HEAD
+    local_git diff --exit-code HEAD -- api ui tools/make "$plan"
+    branch=$(local_git branch --show-current)
+    local_git bundle create "$task_dir/6k-fix.bundle" "$base..$branch"
+    local_git bundle verify "$task_dir/6k-fix.bundle"
+    sha256sum "$task_dir/6k-fix.bundle" > "$task_dir/bundle.sha256"
+    cp RAPPORT-SOL-6K.md "$task_dir/RAPPORT-SOL-6K.md"
+    sha256sum "$task_dir/RAPPORT-SOL-6K.md" > "$task_dir/report.sha256"
+    ;;
+  audit)
+    for script in tools/make/paniers-lot6{k-run,k-mutation,k-fix-deliver,-verify}.sh; do bash -n "$script"; done
+    local_git merge-base --is-ancestor "$base" HEAD
+    local_git diff --check "$base" HEAD
+    local_git diff --exit-code HEAD -- api ui tools/make "$plan"
+    scope HEAD
+    while IFS= read -r sha; do
+      local_git diff --numstat "$sha^" "$sha" | awk '{n+=$1+$2; f++} END {exit !(n<=150 && f<=15)}'
+      subject=$(local_git log -1 --format=%s "$sha")
+      test "${#subject}" -le 72
+      [[ "$subject" =~ ^(feat|fix|test|docs|chore)(\([a-z0-9-]+\))?:\ [a-z] ]]
+      test "$(local_git log -1 --format=%B "$sha")" = "$subject"
+    done < <(local_git rev-list "$base..HEAD")
+    local_git diff --exit-code "$base" HEAD -- api/drizzle ':!api/drizzle/meta/_journal.json' \
+      ':!api/drizzle/0023_facet_lot_versions_fence.sql'
+    : > "$task_dir/cleanup-inspect.log"
+    for kind in container volume network; do
+      flags=(-q); [[ "$kind" != container ]] || flags+=(-a)
+      test -z "$(docker "$kind" ls "${flags[@]}" --filter 'name=radar-test-paniers-6k-fix')"
+      echo "$kind=0" >> "$task_dir/cleanup-inspect.log"
+    done
+    local_git bundle verify "$task_dir/6k-fix.bundle"
+    sha256sum -c "$task_dir/bundle.sha256"
+    sha256sum -c "$task_dir/report.sha256"
+    cmp RAPPORT-SOL-6K.md "$task_dir/RAPPORT-SOL-6K.md"
+    df -h "$PWD" /var/lib/docker
+    ;;
+  *) exit 2 ;;
+esac
