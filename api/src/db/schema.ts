@@ -777,10 +777,12 @@ export const facetReasonCodes = pgTable("facet_reason_codes", {
 }));
 
 // Partial indexes and immutability triggers are hand-authored in migration 0014.
+// 6I workspace archives carry a null business owner attributed to the
+// acting moderator (migration 0019); personal events keep owner = actor.
 export const facetEvents = pgTable("facet_events", {
   id: uuid("id").primaryKey().defaultRandom(),
   scope: text("scope").notNull().default("personal"),
-  ownerId: uuid("owner_id").notNull().references(() => accountUsers.id),
+  ownerId: uuid("owner_id").references(() => accountUsers.id),
   actorId: uuid("actor_id").notNull().references(() => accountUsers.id),
   targetType: text("target_type").notNull().default("signal"),
   citySlug: text("city_slug").notNull(),
