@@ -16,6 +16,7 @@ D5 applies only to actual conflicts; qualification uses synthetic data.
 - No operational activation, source identity, membership, grant, or D5 inference.
 - Subject-only Conventional Commits: at most 72 characters, 150 changed lines, 15 files.
 - Shared Git metadata is read-only; local delivery metadata and bundle: `tmp/paniers-6k`.
+- Review correction base: `63a8991c`; delivery: `tmp/paniers-6k-fix/6k-fix.bundle`.
 
 ## Branch Scope Boundaries (MANDATORY)
 - **Allowed Paths (implementation scope)**:
@@ -36,6 +37,7 @@ D5 applies only to actual conflicts; qualification uses synthetic data.
   - Other branch plans, 6J business semantics, 6L1 storage, notes/contacts consumers (#859).
 - **Conditional Paths**:
   - The single 0022 migration and necessary legacy-delivery boundaries above.
+  - BR6K-EX6: additive `0023_facet_lot_versions_fence.sql`, `lot-city.ts`, review reports.
 
 ## Feedback Loop
 - [x] BR6K-EX1: retain owner-assigned worktree; root UAT untouched; rollback rejects bundle.
@@ -45,6 +47,7 @@ D5 applies only to actual conflicts; qualification uses synthetic data.
 - [x] BR6K-EX5: separate final opening helper for complete commits within 150 lines.
 - [x] Attention: real writers, replica exclusion and parent UI data/command wiring remain unqualified.
 - [x] Attention: no peer consensus claimed; author metadata names Muse, not an eligible review host/model pair.
+- [x] BR6K-EX6: fence source versions until opening and exclude pending city aliases; rollback rejects the fix bundle before activation.
 
 ## Orchestration Mode (AI-selected)
 - [x] One branch, local delivery repository; no merge, rebase, or cherry-pick.
@@ -62,5 +65,15 @@ D5 applies only to actual conflicts; qualification uses synthetic data.
 - [x] **Lot 5 — UI isolation**: compare DOM/requests with main; independent facet counters.
 - [x] **Lot 6 — Qualification**: API CI parallelism, types, declarations, lint, UI/MCP regression, mutations.
 - [x] Delivery checkpoint: 50.
+- [x] Review fix checkpoint: 1.
+- [x] Review fix 1: additive source fence; existing migrations unchanged.
+- [ ] Review fix 2: canonical and denormalized guards, including city projection.
+- [ ] Review fix 3: late-qualified native history stays pending.
+- [ ] Review fix 4: denormalized aliases stay excluded from reads and commands.
+- [ ] Review fix 5: real stage-7 interruption, attempted drift, HTTP resume.
+- [ ] Review fix 6: stale source snapshot and 0022/0023 migration replay.
+- [ ] Review fix 7: unknown fence suspends; publications recover without activation.
+- [ ] Review fix 8: discrimination on copies, restoration, byte comparisons.
+- [ ] Review fix 9: bounded bundle, complete API CI, declarations, types, lint, UI, regression.
 - [ ] **Operational acceptance**: real 6F/D5, writer locks, replicas, parent UI wiring, browser UAT.
 - [ ] **Merge & close**: conductor imports bundle, runs CI, reviews scope, uses a merge commit.
