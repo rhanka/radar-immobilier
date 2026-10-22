@@ -1,0 +1,55 @@
+docs: declare guarded lot destination qualification|plan|0
+feat: install lot provenance and capability tables|migration-a api/drizzle/meta/_journal.json|0
+feat: extend event checks for independent lot facets|migration-b|0
+feat: preserve lot evidence and enforce stream modes|api/drizzle/0020_facet_lot_history.sql|0
+feat: mirror lot destination tables and values|api/src/db/schema.ts|0,1
+feat: resolve stable lot targets and displayed source versions|lot-target.ts|0,1
+feat: define lot transaction and public event types|lot-types.ts lot-response.ts|0,1,2
+feat: define lot commands and complete idempotency digests|lot-commands.ts|0,1,2,4
+feat: validate exact lot prices and listing links|lot-values.ts lot-values.test.ts|0,1,2,3,4
+feat: resolve and serialize mode-specific lot streams|lot-streams.ts|0,1,2,3,4
+feat: grant explicit lot capabilities with audited revisions|capabilities-base|0,1,2,3,4
+feat: derive distinct lot rights from explicit grants|lot-capabilities.ts|0,1,2,3,4
+feat: gate and authorize lot commands by scope|lot-gate.ts lot-authorize.ts|0,1,2,3,4,5
+feat: model independent lot stream plans|lot-plan.ts|0,1,2,3,4,5
+feat: compare lot heads and retain restore provenance|lot-transition.ts|0,1,2,3,4,5
+feat: append lot transitions with atomic bindings|lot-apply.ts|0,1,2,3,4,5
+feat: write guarded lot commands with exact replay|lot-writer.ts|0,1,2,3,4,5
+feat: define the atomic lot batch preparation contract|batch-base|0,1,2,3,4,5
+feat: validate and commit whole lot batches|lot-batch.ts|0,1,2,3,4,5,6
+feat: define authorized lot read snapshots|reader-base|0,1,2,3,4,5,6
+feat: expose independent lot facet state and capabilities|lot-reader.ts|0,1,2,3,4,5,6
+feat: project lot collection heads for map indicators|lot-city.ts|0,1,2,3,4,5,6
+feat: paginate authorized lot and source histories|lot-history.ts|0,1,2,3,4,5,6,7
+feat: ledger lot import runs and replay receipts|lot-import-runs.ts lot-import-locks.ts|0,1,2,3,4,5,6,7
+feat: project only qualified terminal lot heads|lot-project.ts|0,1,2,3,4,5,6,7
+feat: import source evidence once behind explicit opt-in|lot-importer.ts|0,1,2,3,4,5,6,7,8
+test: isolate synthetic lot destination fixtures|lot-fixture.ts|0,1,2,3,4,5,6,7,8
+test: build synthetic lot inputs from the 6F report|lot-import-input.ts lot-test-helpers.ts|0,1,2,3,4,5,6,7,8
+feat: export stable lot destination contracts|index-base|0,1,2,3,4,5,6,7,8
+feat: export guarded lot commands readers and importer|index.ts|0,1,2,3,4,5,6,7,8
+feat: define strict scoped lot HTTP payloads and errors|api/src/routes/scoped-lot-facets-common.ts|0,1,2,3,4,5,6,7,8
+feat: expose scoped lot reads and history routes|api/src/routes/scoped-lot-reads.ts|0,1,2,3,4,5,6,7,8
+feat: expose browser-only lot commands and batches|api/src/routes/scoped-lot-commands.ts|0,1,2,3,4,5,6,7,8
+feat: compose guarded lot routes without mounting them|api/src/routes/scoped-lot-facets.ts|0,1,2,3,4,5,6,7,8,9
+test: qualify stable lot identities and command digests|lot-target.test.ts|0,1,2,3,4,5,6,7,8,9
+test: qualify complete lot command digests|lot-commands.test.ts|0,1,2,3,4,5,6,7,8,9
+test: qualify independent lot facets and source conflicts|lot-writer-db.test.ts|0,1,2,3,4,5,6,7,8,9
+test: qualify lot replay concurrency and explicit composites|lot-writer-replay-db.test.ts|0,1,2,3,4,5,6,7,8,9
+test: qualify lot scope and independent D4 rights|lot-writer-scope-db.test.ts lot-capabilities-db.test.ts|0,1,2,3,4,5,6,7,8,9
+test: qualify moderator archives and separate restoration|lot-rights-db.test.ts|0,1,2,3,4,5,6,7,8,9
+test: qualify lot ownership and access boundaries|lot-ownership-db.test.ts|0,1,2,3,4,5,6,7,8,9
+test: qualify all-or-nothing lot batches|batch-tests-base|0,1,2,3,4,5,6,7,8,9
+test: qualify lot batch rollback no-ops and replay|lot-batch-db.test.ts|0,1,2,3,4,5,6,7,8,9
+test: qualify lot history and collection projections|lot-history-db.test.ts lot-history-privacy-db.test.ts|0,1,2,3,4,5,6,7,8,9
+test: qualify disabled importer and exact source preservation|lot-importer-db.test.ts|0,1,2,3,4,5,6,7,8,9
+test: qualify pending lot import dispositions|lot-importer-pending-db.test.ts|0,1,2,3,4,5,6,7,8,9
+test: qualify SQL lot constraints and immutable evidence|lot-constraints-db.test.ts lot-mode-db.test.ts|0,1,2,3,4,5,6,7,8,9
+test: qualify 0020 replay and author ownership isolation|lot-migration-db.test.ts lot-import-ownership-db.test.ts|0,1,2,3,4,5,6,7,8,9
+test: qualify the scoped lot HTTP contract|api/src/routes/scoped-lot-facets-db.test.ts|0,1,2,3,4,5,6,7,8,9
+fix: wait for synthetic database clients before teardown|api/src/services/facets/scope-db-fixture.ts|0,1,2,3,4,5,6,7,8,9,10
+test: preserve prior signal checks across additive lot schema|api/tests/integration/facets-constraints.spec.ts api/src/services/facets/activation-db.test.ts|0,1,2,3,4,5,6,7,8,9,10
+chore: archive all lot verification inputs and guard disk use|tools/make/paniers-lot6.mk tools/make/paniers-lot6-verify.sh tools/make/paniers-lot6j-run.sh|0,1,2,3,4,5,6,7,8,9,10,11,12
+test: discriminate five lot regressions on restored copies|tools/make/paniers-lot6j-mutation.sh|0,1,2,3,4,5,6,7,8,9,10,11,12
+chore: define atomic lot delivery checkpoints|tools/make/paniers-lot6j-slices.txt|0,1,2,3,4,5,6,7,8,9,10,11,12
+chore: deliver individually typechecked lot commits|tools/make/paniers-lot6j-deliver.sh|0,1,2,3,4,5,6,7,8,9,10,11,12
