@@ -64,7 +64,9 @@ writes stay disabled until 6K. No D5 input is required.
   common archive from contributors; keep personal restore without workspace
   effect; return 422 for omitted market fields; conflict payloads expose
   authorized heads only.
-- Delivery checkpoint: 56.
+- Delivery checkpoint: 57.
+- Review fixes use CI test parallelism, seven copied-source proofs, and a
+  bundle based on `8b2347e9`; shared Git metadata remains read-only.
 - Final receipt review: share the actor/key lock with signal writers and
   recheck D4 authorization before replay. Three deterministic regressions
   cover single/batch races across workspaces and revoked-right replay.
@@ -72,6 +74,12 @@ writes stay disabled until 6K. No D5 input is required.
   snapshot to additive lot columns. Preserve every historical value and
   classified signal selection; no prior migration changes. Impact: two
   existing test files; rollback: revert those test assertions.
+- `BR6J-EX6`: isolate `workspaces/cli-db.test.ts` in a disposable database.
+  Evidence: parallel API execution adds five approved accounts between CLI
+  retries, so a global-account inventory changes the replay result. Impact:
+  fixture and child-process database only; rollback: restore the shared DB.
+  Acceptance: both CLI calls see the same synthetic accounts with CI
+  parallelism; verify with the complete API suite.
 - `BR6J-EX4`: await socket closure in `scope-db-fixture.ts` before dropping
   synthetic databases. Evidence: 115 passing tests still exited with
   uncaught `57P01` on a closing pooled client during forced teardown.
@@ -113,6 +121,18 @@ writes stay disabled until 6K. No D5 input is required.
   ownership, exact-once import, disabled importer.
 - [x] **Lot 12 — Make**: `LOT=6J` guard, SCOPE, lint; versioned runner
   archiving every file read by tests; build and regression covered.
+- [x] Review fix 1: canonical prices and business validation.
+- [ ] Review fix 2: source references and unknown historical observations.
+- [ ] Review fix 3: complete internal append outcomes and source links.
+- [ ] Review fix 4: full public command and batch results.
+- [ ] Review fix 5: composite and unchanged result qualification.
+- [ ] Review fix 6: HTTP result replay and source navigation.
+- [ ] Review fix 7: importer D4 rights before writes and replay.
+- [ ] Review fix 8: contradictory deselection expectations rejected.
+- [ ] Review fix 9: equivalent price no-ops in commands and batches.
+- [ ] Review fix 10: isolate CLI replay and preserve prior schema snapshots.
+- [ ] Review fix 11: CI parallelism, capacity and seven mutation proofs.
+- [ ] Review fix 12: bounded, individually typechecked bundle delivery.
 - [ ] **Lot N-1 — Docs**: uncommitted French `RAPPORT-MUSE-6J.md`.
 - [ ] **Lot N — Close (not covered)**: verify green, push, PR, CI, merge
   commit (no squash/rebase), keep branch, move plan to `plan/done/`.
