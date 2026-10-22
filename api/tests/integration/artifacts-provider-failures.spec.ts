@@ -334,4 +334,142 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       if (typeof close === "function") (close as () => void)();
     }
   });
+
+  it.each([
+    ["57P06", Object.assign(new Error("terminating connection"), { code: "57P06" })],
+    ["artifact_connection_lost", Object.assign(new Error("connection lost"), { code: "artifact_connection_lost" })],
+    ["class-08", Object.assign(new Error("connection failure"), { code: "08006" })],
+    ["network-reset", Object.assign(new Error("read ECONNRESET"), { code: "ECONNRESET" })],
+    ["unqualified-55P03", Object.assign(new Error("unqualified timeout"), { code: "55P03" })],
+  ])("maps connection loss %s to provider_unavailable, never conflict", async (_name, fault) => {
+    await requireOutcomeContract();
+    const barrier = await requireCommitBarrier();
+    const armed = { current: false };
+    const flaky = proxyLeasedPool(pool, { get(target, property, receiver) {
+      if ((property === "query" || property === "connect") && armed.current) {
+        return async (): Promise<never> => { throw fault; };
+      }
+      const value = Reflect.get(target, property, receiver);
+      return typeof value === "function" ? value.bind(target) : value;
+    } }) as unknown as pg.Pool;
+    const host = await composeQ2Host(barrier.observer, { pool: flaky });
+    const close = host["close"];
+    try {
+      const execute = executeWithParity(host);
+      const before = await tableCount("artifacts");
+      armed.current = true;
+      try {
+        const invocation = invocationFor(allowAll(), "conn");
+        const outcome = await execute({ method: "POST", path: "/ensure",
+          body: { bindingName: "q2-conn", idempotencyKey: "q2-conn" } },
+          invocation) as unknown as Record<string, unknown>;
+        assertOutcomeFailure(outcome, invocation["invocationId"] as string);
+        expect(outcome["failure"]).toMatchObject({
+          category: "provider_unavailable", retriable: true, commitState: "not_committed" });
+        expect(outcome["failure"]).not.toMatchObject({ category: "conflict" });
+      } finally {
+        armed.current = false;
+      }
+      expect(await tableCount("artifacts")).toBe(before);
+    } finally {
+      if (typeof close === "function") (close as () => void)();
+    }
+  });
+
+  it("maps real contention for the full scoped key to conflict and retains 55P03", async () => {
+    await requireOutcomeContract();
+    const barrier = await requireCommitBarrier();
+    const timed = proxyLeasedPool(pool, { get(target, property, receiver) {
+      if (property === "query") return async (text: unknown, params?: unknown) => {
+        const result = await (target.query as (...args: unknown[]) => Promise<unknown>)(text, params);
+        if (typeof text === "string" && /^BEGIN/i.test(text)) {
+          await target.query("SET LOCAL lock_timeout = '150ms'");
+        }
+        return result;
+      };
+      const value = Reflect.get(target, property, receiver);
+      return typeof value === "function" ? value.bind(target) : value;
+    } });
+    const host = await composeQ2Host(barrier.observer, { pool: timed });
+    const holder = await pool.connect();
+    try {
+      const execute = executeWithParity(host);
+      const artifactId = await ensureVia(execute, allowAll(), "q2-keylock", "q2-keylock-ensure");
+      const internalKey = deriveIdempotencyKey({ scope: SCOPE, sub: ACTOR, op: "publish",
+        artifactId, clientKey: "q2-keylock" });
+      await pool.query("INSERT INTO artifacts.operation_keys (storage_scope_id, internal_key) VALUES ($1,$2) ON CONFLICT DO NOTHING", [SCOPE, internalKey]);
+      await holder.query("BEGIN");
+      const locked = await holder.query("SELECT internal_key FROM artifacts.operation_keys WHERE storage_scope_id=$1 AND internal_key=$2 FOR UPDATE", [SCOPE, internalKey]);
+      expect(locked.rows).toEqual([{ internal_key: internalKey }]);
+      const releasesBefore = await tableCount("releases");
+      const keysBefore = await tableCount("idempotency_keys");
+      const invocation = invocationFor(allowAll(), "keylock");
+      const outcome = await execute({ method: "POST", path: "/publish", body: { artifactId,
+        files: [{ path: "index.html", mimeType: "text/html", text: "key lock conflict" }],
+        idempotencyKey: "q2-keylock" } }, invocation) as Record<string, unknown>;
+      assertOutcomeFailure(outcome, invocation.invocationId as string);
+      expect(outcome.failure).toMatchObject({ category: "conflict", retriable: false,
+        commitState: "not_committed", cause: { code: "55P03" } });
+      expect(await projectOutcomeHttp(outcome)).toEqual({ status: 409, body: { error: "conflict" } });
+      expect(await tableCount("releases")).toBe(releasesBefore);
+      expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+    } finally {
+      await holder.query("ROLLBACK"); holder.release(); host.close();
+    }
+  });
+
+  it.each([
+    "binding",
+    "artifact-lifecycle",
+    "acl",
+    "pointer",
+    "policy",
+    "quota",
+    "blob-reference",
+    "deletion-claim",
+    "schema-infrastructure",
+    "unqualified",
+  ])("maps a 55P03 outside the key row (%s) to provider_unavailable", async (lockClass) => {
+    await requireOutcomeContract();
+    const barrier = await requireCommitBarrier();
+    const armed = { current: false };
+    const contended = proxyLeasedPool(pool, { get(target, property, receiver) {
+      if (property === "query" && armed.current) {
+        return async (text: unknown, params?: unknown): Promise<unknown> => {
+          if (typeof text === "string" && /FOR (UPDATE|SHARE)/.test(text) &&
+            !text.includes("operation_keys") && new RegExp(({ binding: "binding|artifacts", "artifact-lifecycle": "artifacts", acl: "artifact_access", pointer: "artifact_current", policy: "policy|account_users", quota: "quota", "blob-reference": "blob_ref", "deletion-claim": "deletion|claim", "schema-infrastructure": "schema|pg_", unqualified: ".*" } as Record<string,string>)[lockClass]!).test(text)) {
+            throw Object.assign(new Error("lock timeout outside the key row"), { code: "55P03" });
+          }
+          return (target.query as (...args: unknown[]) => Promise<unknown>)(text, params);
+        };
+      }
+      const value = Reflect.get(target, property, receiver);
+      return typeof value === "function" ? value.bind(target) : value;
+    } }) as unknown as pg.Pool;
+    const host = await composeQ2Host(barrier.observer, { pool: contended });
+    const close = host["close"];
+    try {
+      const execute = executeWithParity(host);
+      const artifactId = await ensureVia(execute, allowAll(), "q2-nonkey", "q2-nonkey-ensure");
+      const releasesBefore = await tableCount("releases");
+      armed.current = true;
+      try {
+        const invocation = invocationFor(allowAll(), "nonkey");
+        const outcome = await execute({ method: "POST", path: "/publish",
+          body: { artifactId,
+            files: [{ path: "index.html", mimeType: "text/html", text: "non-key lock timeout" }],
+            idempotencyKey: "q2-nonkey" } }, invocation) as unknown as Record<string, unknown>;
+        assertOutcomeFailure(outcome, invocation["invocationId"] as string);
+        expect(outcome["failure"]).toMatchObject({
+          category: "provider_unavailable", retriable: true, commitState: "not_committed" });
+        const projected = await projectOutcomeHttp(outcome);
+        expect(projected).toEqual({ status: 503, body: { error: "capability_unavailable" } });
+      } finally {
+        armed.current = false;
+      }
+      expect(await tableCount("releases")).toBe(releasesBefore);
+    } finally {
+      if (typeof close === "function") (close as () => void)();
+    }
+  });
 });
