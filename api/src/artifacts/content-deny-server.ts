@@ -9,11 +9,11 @@ import { createContentDenyApp } from "./content-deny.js";
  * Listens on PORT (default 3000); an invalid PORT fails fast.
  */
 function resolvePort(): number {
-  const raw = (process.env["PORT"] ?? "3000").trim();
-  const port = Number(raw);
+  const raw = process.env.PORT;
+  const port = Number((raw ?? "3000").trim());
   if (!Number.isInteger(port) || port < 1 || port > 65535) {
     throw new Error(
-      `invalid PORT ${JSON.stringify(process.env["PORT"])}: expected an integer in 1-65535`,
+      `invalid PORT ${JSON.stringify(raw)}: expected an integer in 1-65535`,
     );
   }
   return port;
