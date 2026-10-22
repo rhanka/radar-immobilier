@@ -4,10 +4,10 @@ import { lotCutoverState } from "../../../db/schema.js";
 import { legacyMarksFence } from "./lot-legacy-fence.js";
 
 describe("6K legacy reader fence", () => {
-  it("should fail closed when the database is unreadable or malformed", async () => {
+  it("should report unknown when the database is unreadable or malformed", async () => {
     for (const select of [() => { throw new Error("unavailable"); },
       () => ({ from: () => ({}) })]) {
-      expect(await legacyMarksFence({ select } as unknown as Database)).toBe("barrier");
+      expect(await legacyMarksFence({ select } as unknown as Database)).toBe("unknown");
     }
   });
   it("should keep legacy readers closed if a workspace state was removed", async () => {
