@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# Discrimination changes disposable container copies only.
+set -euo pipefail
+copy=/workspace/6l1-copy
+mkdir -p "$copy" /workspace/6l1-originals
+cp -a /workspace/api /workspace/ui "$copy/"
+cp /workspace/{package.json,tsconfig.base.json} "$copy/"
+ln -s /workspace/node_modules "$copy/node_modules"
+ln -s /workspace/packages "$copy/packages"
+cd "$copy"
+cat > ui/vitest.isolated.config.ts <<'CONFIG'
+import config from "./vitest.config.js";
+export default { ...config, envDir: false, test: { ...config.test, fileParallelism: false, maxWorkers: 2 } };
+CONFIG
+mutate() {
+  node --input-type=module - "$@" <<'JS'
+import { readFileSync, writeFileSync } from "node:fs";
+const [file, ...changes] = process.argv.slice(2);
+let source = readFileSync(file, "utf8");
+for (let i = 0; i < changes.length; i += 2) {
+  const [before, after] = changes.slice(i, i + 2);
+  if (source.split(before).length !== 2) throw new Error("Mutation anchor must occur once");
+  source = source.replace(before, after);
+}
+writeFileSync(file, source);
+JS
+}
+test_case() {
+  local suite=$1
+  shift
+  (cd "$suite" && ../node_modules/.bin/vitest run --config vitest.isolated.config.ts "$@")
+}
+proof() {
+  local name=$1 file=$2 suite=$3 test_file=$4 test_name=$5 status=0
+  shift 5
+  cp "$file" "/workspace/6l1-originals/$name"
+  test_case "$suite" "$test_file" -t "$test_name" > "/evidence/$name-baseline.log" 2>&1
+  mutate "$file" "$@"
+  test_case "$suite" "$test_file" -t "$test_name" > "/evidence/$name-failed.log" 2>&1 || status=$?
+  cp "/workspace/6l1-originals/$name" "$file"
+  cmp "/workspace/6l1-originals/$name" "$file"
+  cmp "/workspace/$file" "$file"
+  test "$status" -eq 1
+  grep -q AssertionError "/evidence/$name-failed.log"
+  test_case "$suite" "$test_file" -t "$test_name" > "/evidence/$name-restored.log" 2>&1
+  echo "$name: baseline PASS; mutation exit=1 (AssertionError); restored PASS; saved cmp=0; source cmp=0" \
+    | tee -a /evidence/mutation-identity.log
+  sha256sum "$file" > "/evidence/$name.sha256"
+}
+proof unauthorized api/src/services/facets/projection-revisions.ts api \
+  src/services/facets/projection-revisions-db.test.ts 'refuse revisions to unauthorized' \
+  'await resolveWorkspaceAccess(tx, workspaceId, sub);' '/* authorization bypass in disposable copy */' \
+  'eq(workspaceMemberships.accountId, accountId)' 'undefined'
+proof cross-scope api/src/services/facets/projection-revisions.ts api \
+  src/services/facets/projection-races-db.test.ts 'isolate cities and workspaces' \
+  'eq(personalProjectionRevisions.workspaceId, workspaceId)' 'undefined' \
+  'eq(workspaceProjectionRevisions.workspaceId, workspaceId)' 'undefined'
+proof superseded ui/src/lib/signals/signal-projection-revision.ts ui \
+  src/lib/signals/signal-projection-lifecycle.test.ts 'ignore superseded requests' \
+  'if (operation !== state.operation) return false;' '/* superseded response applied */'
+proof missing-bump api/src/services/facets/scoped-writer.ts api \
+  src/services/facets/projection-revisions-db.test.ts 'isolate personal revisions across members' \
+  'await bumpPersonalRevision(tx, workspaceId, accountId, command.target.citySlug);' 'await Promise.resolve(0);'
+diff -r /workspace/api/src api/src
+diff -r /workspace/api/drizzle api/drizzle
+diff -r /workspace/ui/src ui/src
+echo 'all copied API/SQL/UI sources restored: diff=0' | tee -a /evidence/mutation-identity.log
