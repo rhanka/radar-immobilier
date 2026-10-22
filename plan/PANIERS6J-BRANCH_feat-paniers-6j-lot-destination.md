@@ -64,7 +64,7 @@ writes stay disabled until 6K. No D5 input is required.
   common archive from contributors; keep personal restore without workspace
   effect; return 422 for omitted market fields; conflict payloads expose
   authorized heads only.
-- Delivery checkpoint: 22.
+- Delivery checkpoint: 23.
 - `BR6J-EX5`: adapt integration constraint names and the 6H upgrade
   snapshot to additive lot columns. Preserve every historical value and
   classified signal selection; no prior migration changes. Impact: two
@@ -97,7 +97,7 @@ writes stay disabled until 6K. No D5 input is required.
   grants, moderator archive, closed destination gate, disabled importer.
 - [x] **Lot 6 — Writer**: four families, independence, composite
   discard/deselect, 409 head/version, atomic batch, exact replay.
-- [ ] **Lot 7 — Reader/history**: independent facet heads, capabilities,
+- [x] **Lot 7 — Reader/history**: independent facet heads, capabilities,
   effective hiding, paginated destination + source history.
 - [ ] **Lot 8 — Importer**: exact-once evidence, head-only init,
   legacy-unknown exception, pending dispositions, no author ownership.
