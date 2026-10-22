@@ -273,59 +273,72 @@ function envKeys(source: string, file: string): string[] {
   return [...keys].sort();
 }
 
+/**
+ * Probes from the three reviews. Each must fail the strict ban, alone and
+ * appended to each denial module: indexed global access, type assertions,
+ * separate-assignment alias, destructuring and computed string access, plus
+ * one probe per remaining forbidden handle.
+ */
+const FORBIDDEN_PROBES = [
+  'void globalThis["process"].env.EXTRA;',
+  'void (globalThis["process"] as NodeJS.Process).env.EXTRA;',
+  'void (globalThis as typeof globalThis)["process"].env.EXTRA;',
+  "void globalThis.process.env.EXTRA;",
+  "void global.process.env.EXTRA;",
+  'void global["process"].env.EXTRA;',
+  "void self.process.env.EXTRA;",
+  'void self["process"].env.EXTRA;',
+  "void window.process.env.EXTRA;",
+  'let runtime: typeof globalThis;\nruntime = globalThis;\nvoid runtime["process"].env["EXTRA"];',
+  "const { process } = globalThis; void process;",
+  "const { process: probe } = globalThis; void probe;",
+  "const p = process; void p;",
+  "const env = process.env; void env;",
+  "const { PORT } = process.env; void PORT;",
+  'void process["env"].EXTRA;',
+  'void process.env["EXTRA"];',
+  'void process.env["PORT"];',
+  'void process["env"]["PORT"];',
+  'void globalThis["proc" + "ess"].env.EXTRA;',
+  'void process["en" + "v"].EXTRA;',
+  "void (process as unknown as { env: { EXTRA: string } }).env.EXTRA;",
+  "void (process.env as unknown as Record<string, string>).EXTRA;",
+  'void eval("process.env.EXTRA");',
+  'void Function("return process.env.EXTRA")();',
+  'void Function("return process")().env.EXTRA;',
+  'void Reflect.get(globalThis, "process").env.EXTRA;',
+  'void Reflect.get(process.env, "EXTRA");',
+  'void require("node:process");',
+  "void import.meta.env;",
+  'import process from "node:process"; void process;',
+  'import { env } from "node:process"; void env;',
+];
+
 describe("content-deny module isolation", () => {
-  it("pins the PORT read to resolvePort", () => {
-    expect(countAllowedPortReads(read("content-deny-server.ts"), "content-deny-server.ts")).toBe(1);
-    expect(countAllowedPortReads("void process.env.PORT;", "content-deny-server.ts")).toBe(0);
-  });
-  it("rejects separated global assignment sources", () => {
-    expect(collectViolations('let r; r = globalThis; void r["process"].env.X;', "fixture.ts")).not.toEqual([]);
-    expect(collectViolations(read("content-deny-server.ts"), "content-deny-server.ts")).toEqual([]);
-  });
-  it.each([
-    ["process.env.EXTRA", ["EXTRA"]],
-    ["process['env']['EXTRA']", ["EXTRA"]],
-    ["const { EXTRA: PORT } = process.env", ["EXTRA"]],
-    ["const { ...rest } = process.env", ["<dynamic>"]],
-    ["const env = process.env; env.EXTRA", ["<dynamic>"]],
-    ["const p = process; p.env.EXTRA", ["<dynamic>"]],
-    ["process.env[key]", ["<dynamic>"]],
-    ["globalThis.process.env.EXTRA", ["<dynamic>"]],
-    ["globalThis[\"process\"].env.EXTRA", ["<dynamic>"]],
-    ['(globalThis["process"] as NodeJS.Process).env.EXTRA', ["<dynamic>"]],
-    ['(globalThis as typeof globalThis)["process"].env.EXTRA', ["<dynamic>"]],
-    ["global.process.env.EXTRA", ["<dynamic>"]],
-    ["global[\"process\"].env.EXTRA", ["<dynamic>"]],
-    ["self.process.env.EXTRA", ["<dynamic>"]],
-    ["globalThis[\"proc\" + \"ess\"].env.EXTRA", ["<dynamic>"]],
-    ["process[\"en\" + \"v\"].EXTRA", ["<dynamic>"]],
-    ["globalThis.process.env[key]", ["<dynamic>"]],
-    ["const { EXTRA } = globalThis.process.env", ["<dynamic>"]],
-    ["const { process } = globalThis", ["<dynamic>"]],
-    ["const p = globalThis.process", ["<dynamic>"]],
-    ["process.env.PORT", ["PORT"]],
-  ])("detects environment access in %s", (source, expected) => {
-    expect(envKeys(source as string, "fixture.ts")).toEqual(expected);
+  it.each(FORBIDDEN_PROBES)("rejects forbidden pattern %s", (probe) => {
+    expect(collectViolations(probe as string, "fixture.ts")).not.toEqual([]);
   });
 
-  /** Global-object probes: each must be refused in both denial modules. */
-  const GLOBAL_PROCESS_PROBES = [
-    'void globalThis["process"].env.EXTRA;',
-    'void (globalThis["process"] as NodeJS.Process).env.EXTRA;',
-    'void (globalThis as typeof globalThis)["process"].env.EXTRA;',
-    "void globalThis.process.env.EXTRA;",
-    "void global.process.env.EXTRA;",
-    "void self.process.env.EXTRA;",
-    'void globalThis["proc" + "ess"].env.EXTRA;',
-    "const { process: probe } = globalThis; void probe.env.EXTRA;",
-  ];
-
-  it.each(GLOBAL_PROCESS_PROBES)("refuses global process access in the denial application (%s)", (probe: string) => {
-    expect(envKeys(`${read("content-deny.ts")}\n${probe}`, "content-deny.ts")).toContain("<dynamic>");
+  it.each(FORBIDDEN_PROBES)("refuses forbidden pattern in the denial application (%s)", (probe: string) => {
+    expect(collectViolations(`${read("content-deny.ts")}\n${probe}`, "content-deny.ts")).not.toEqual([]);
   });
 
-  it.each(GLOBAL_PROCESS_PROBES)("refuses global process access in the denial entrypoint (%s)", (probe: string) => {
-    expect(envKeys(`${read("content-deny-server.ts")}\n${probe}`, "content-deny-server.ts")).toContain("<dynamic>");
+  it.each(FORBIDDEN_PROBES)("refuses forbidden pattern in the denial entrypoint (%s)", (probe: string) => {
+    expect(
+      collectViolations(`${read("content-deny-server.ts")}\n${probe}`, "content-deny-server.ts"),
+    ).not.toEqual([]);
+  });
+
+  it("accepts the single process.env.PORT read as precise", () => {
+    const source = "function resolvePort() { const raw = process.env.PORT; }";
+    expect(collectViolations(source, "content-deny-server.ts")).toEqual([]);
+    expect(countAllowedPortReads(source, "content-deny-server.ts")).toBe(1);
+    expect(collectViolations(source, "content-deny.ts")).not.toEqual([]);
+    expect(collectViolations("void process.env.PORT;", "content-deny-server.ts")).not.toEqual([]);
+  });
+
+  it("refuses the bracket spelling of the PORT read", () => {
+    expect(collectViolations('void process.env["PORT"];', "fixture.ts")).not.toEqual([]);
   });
 
   it("loads no application dependency in the denial application", () => {
