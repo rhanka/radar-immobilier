@@ -47,3 +47,4 @@ chore(paniers): expose versioned cutover verification targets|tools/make/paniers
 test(paniers): discriminate six cutover regressions on copies|tools/make/paniers-lot6k-mutation.sh
 chore(paniers): stage and audit bounded delivery commits|tools/make/paniers-lot6k-deliver.sh
 chore(paniers): version the cutover delivery slices|tools/make/paniers-lot6k-slices.txt
+chore(paniers): finalize verified cutover delivery|api/src/services/facets/lots/lot-cutover-run.ts tools/make/paniers-lot6.mk tools/make/paniers-lot6k-deliver.sh tools/make/paniers-lot6k-slices.txt
