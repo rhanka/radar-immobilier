@@ -186,6 +186,7 @@ Review integration (both non-blocking points):
   values) and H2 rollback (no activation group, independent pinned denial
   image) gates; 25 transition tests pass without relaxing existing phases.
 - [x] Second-pass correction 1: Read PORT once and preserve invalid-port diagnostics and listener behavior.
+- [x] Second-pass correction 2: Pin the sole PORT read to the raw initializer in resolvePort.
 - [x] Operator runbook: validate preparation and the H2 rollback plan before
   GO; keep the real content boundary and a matching reviewed CD target.
 
