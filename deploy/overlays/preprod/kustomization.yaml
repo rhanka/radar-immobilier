@@ -50,6 +50,13 @@ resources:
   # Deployment/Service already exist live and stay rolled by set-image.
   - ../../k8s/40-immo-mcp-http-deploy.yaml
   - ../../k8s/41-immo-mcp-ingress.yaml
+# Isolated content-denial boundary (861c H3 unit 12, disabled by default:
+# operator-applied only, never reconciled by the CD).
+  - artifact-content-deny.yaml
+# Content wildcard routing and network boundary (861c H3 unit 13, same
+# disabled-by-default ownership as unit 12).
+  - artifact-content-networkpolicy.yaml
+  - artifact-content-ingress.yaml
 
 configMapGenerator:
   - name: radar-ui-nginx
@@ -94,6 +101,17 @@ patches:
       kind: ConfigMap
       name: radar-api
     path: patch-radar-api-auth.yaml
+# Artifact control-plane activation record (861c H3 unit 11): control mode
+# off by default, no subjects, no window, no storage coordinates. Secrets
+# stay opaque operator-provisioned references (never committed).
+  - target:
+      kind: ConfigMap
+      name: radar-api
+    path: patch-artifacts-control.yaml
+  - target:
+      kind: Deployment
+      name: radar-api
+    path: patch-artifacts-api-env.yaml
   - target:
       kind: ConfigMap
       name: radar-sentropic-auth
@@ -107,11 +125,17 @@ patches:
       kind: ConfigMap
       name: immo-mcp-config
     path: patch-immo-mcp-config.yaml
-# Preprod host + TLS Secret on EVERY Ingress (UI `radar` and MCP
-# `radar-immo-mcp`), so the operator-applied render routes
-# preprod.immo.sent-tech.ca/{,mcp} and never claims a PROD host.
+# Preprod host + TLS Secret on the UI `radar` and MCP `radar-immo-mcp`
+# Ingresses ONLY (named targets): the content Ingress
+# `radar-artifact-content` (861c H3 unit 13) keeps its wildcard hosts, which a
+# blanket every-Ingress patch would overwrite with the app host.
   - target:
       kind: Ingress
+      name: radar
+    path: patch-ingress-preprod-host.yaml
+  - target:
+      kind: Ingress
+      name: radar-immo-mcp
     path: patch-ingress-preprod-host.yaml
 # radar-immo-mcp requests.cpu = the live preprod value (10m, single
 # constrained preprod node, same reason as the radar-api patch below) so the
