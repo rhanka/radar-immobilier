@@ -459,4 +459,84 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       expect(await committedState(pool)).toEqual(before);
     } finally { if (typeof host.close === "function") host.close(); }
   });
+
+  it("reauthorization of the same key mints a fresh release, then replays on the other transport", async () => {
+    await requireCommitContract();
+    await requireOutcomeContract();
+    const barrier = await requireCommitBarrier();
+    const host = await composeQ1Host(barrier.observer);
+    const close = host["close"];
+    try {
+      requireSelectedProfile(host);
+      const execute = requireHostExecute(host);
+      const ensured = await execute({ method: "POST", path: "/ensure",
+        body: { bindingName: "q1-reauth", idempotencyKey: "q1-reauth-ensure" } },
+        invocationFor(allowAll(), "reauth-ensure"));
+      expect(ensured).toMatchObject({ ok: true });
+      const artifactId = ((ensured as { result: unknown }).result as { body: { artifactId: string } })
+        .body.artifactId;
+      const clientKey = "q1-reauth";
+      const body = { artifactId,
+        files: [{ path: "index.html", mimeType: "text/html", text: "reauthorized" }],
+        idempotencyKey: clientKey };
+      const invocation = invocationFor(statusDriven(), "reauth-denied");
+      const invocationId = invocation["invocationId"] as string;
+      let settled = false;
+      const pending = execute({ method: "POST", path: "/publish", body }, invocation)
+        .finally(() => { settled = true; });
+      const pump = (async () => {
+        const deadline = performance.now() + 1500;
+        while (!settled) {
+          if (performance.now() > deadline) throw new Error("[contract-violation] commit barrier did not progress");
+          for (const candidate of PUBLISH_POINTS) {
+            if (settled || candidate === "after_finalization_locks_before_guard") continue;
+            const arrived = await withTimeout(barrier.waitUntilReached(candidate, invocationId), 50);
+            if (arrived) barrier.release(candidate, invocationId);
+          }
+          const targetArrived = await withTimeout(
+            barrier.waitUntilReached("after_finalization_locks_before_guard", invocationId), 50);
+          if (targetArrived) break;
+        }
+      })();
+      await pump;
+      await pool.query("UPDATE account_users SET status = 'suspended' WHERE sub = 'alice'");
+      barrier.release("after_finalization_locks_before_guard", invocationId);
+      const denied = await pending as unknown as Record<string, unknown>;
+      assertOutcomeFailure(denied, invocationId);
+      await pool.query("UPDATE account_users SET status = 'approved' WHERE sub = 'alice'");
+      const releasesBefore = await tableCount("releases");
+      const keysBefore = await tableCount("idempotency_keys");
+      const fresh = await execute({ method: "POST", path: "/publish", body },
+        invocationFor(allowAll(), "reauth-fresh")) as unknown as Record<string, unknown>;
+      expect(fresh).toMatchObject({ ok: true });
+      expect(await tableCount("releases")).toBe(releasesBefore + 1);
+      expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
+      const releaseId = await currentReleaseId(artifactId);
+      expect(typeof releaseId).toBe("string");
+      const second = (await composeQ1Host(barrier.observer));
+      try {
+        const peerControl = createArtifactControl(second, SCOPE, BASE);
+        const route = controlRoute({ auth, accounts: pool, backend: peerControl });
+        const httpReplay = await route.request("https://app.example.test/publish", {
+          method: "POST", headers: { cookie: await cookie(ACTOR), origin: auth.appBaseUrl,
+            "content-type": "application/json" }, body: JSON.stringify(body),
+        });
+        expect(httpReplay.status).toBe(201);
+        const httpBody = await httpReplay.json() as Record<string, unknown>;
+        expect(httpBody["releaseId"]).toBe(releaseId);
+        const adapter = createMcpArtifactAdapter(peerControl);
+        const mcpReplay = await adapter.execute(
+          { method: "POST", path: "/publish", args: body }, { actorId: ACTOR });
+        expect(mcpReplay).toMatchObject({ ok: true, status: 201 });
+        expect((mcpReplay as { ok: true; data: unknown }).data).toEqual(httpBody);
+        expect(await tableCount("releases")).toBe(releasesBefore + 1);
+        expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
+      } finally {
+        second.close();
+      }
+    } finally {
+      await pool.query("UPDATE account_users SET status = 'approved' WHERE sub = 'alice'");
+      if (typeof close === "function") (close as () => void)();
+    }
+  });
 });
