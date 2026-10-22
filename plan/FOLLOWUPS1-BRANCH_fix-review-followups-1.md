@@ -32,7 +32,7 @@
 
 ## Plan / Todo (lot-based)
 - [x] Lot 1 — Exact denial Service selector and four-phase shell regression.
-- [ ] Lot 2 — Missing caller key fixture with valid binding and no dispatch.
+- [x] Lot 2 — Missing caller key fixture with valid binding and no dispatch.
 - [ ] Lot 3 — Malformed discard reason fixture with valid displayed fingerprint.
 - [ ] Final gate — Kubernetes render, deploy shell tests, package tests, scoped integration, typecheck and lint.
 - [ ] Evidence — Copy, mutation, old-test pass, new-test failure, restore and cmp for each point.
