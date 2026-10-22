@@ -12,23 +12,25 @@ else ifeq ($(LOT),6H)
 SCOPE ?= src/services/facets src/services/workspaces tests/integration/facets src/services/steve-source src/services/graph/discarded-signals src/routes/scoped-signal-facets src/routes/signal-facets src/routes/graph-signals src/scripts/attach-personal-history
 else ifeq ($(LOT),6I)
 SCOPE ?= src/services/facets/workspace src/services/facets/scoped src/services/facets/registry src/routes/scoped-workspace-archive src/routes/scoped-signal-facets src/services/workspaces
+else ifeq ($(LOT),6J)
+SCOPE ?= src/services/facets/lots src/routes/scoped-lot-facets src/services/facets/lot-migration-report
 else
 SCOPE ?= src/services/facets
 endif
 ACTION ?= verify
-DELIVERY_PROFILE = $(if $(filter 6I,$(LOT)),6i,$(if $(filter 6H,$(LOT)),6h,6g))
+DELIVERY_PROFILE = $(if $(filter 6J,$(LOT)),6j,$(if $(filter 6I,$(LOT)),6i,$(if $(filter 6H,$(LOT)),6h,6g)))
 export ENV LOT API_PORT UI_PORT MAILDEV_UI_PORT SCOPE ACTION EVIDENCE_TAG CHECKPOINT_DIR
 
-.PHONY: guard verify build typecheck lint test-api clean inspect diagnose commit prepare checkpoints deliver regression audit astra-proof
+.PHONY: guard verify build typecheck lint test-api clean inspect diagnose commit prepare checkpoints deliver regression audit astra-proof run-6j
 guard:
 	@case '$(ENV)' in test-*|e2e-*) ;; *) echo 'test-* or e2e-* ENV required'; exit 1;; esac
-	@case '$(LOT)' in 6F|6G|6H|6I) ;; *) echo 'LOT must be 6F, 6G, 6H or 6I'; exit 1;; esac
+	@case '$(LOT)' in 6F|6G|6H|6I|6J) ;; *) echo 'LOT must be 6F, 6G, 6H, 6I or 6J'; exit 1;; esac
 
 verify build typecheck lint test-api api-ci mutation-proof astra-proof: guard
 	@bash tools/make/paniers-lot6-verify.sh $@
 
 regression: guard
-	@bash tools/make/paniers-lot6-verify.sh regression
+	@bash tools/make/paniers-lot$(if $(filter 6J,$(LOT)),6j-run,6-verify).sh regression
 
 .PHONY: scope-proof
 scope-proof: guard
@@ -50,6 +52,10 @@ audit: guard
 fix-prepare fix-deliver fix-audit: guard
 	@case '$(LOT)' in 6H|6I) ;; *) exit 1;; esac
 	@bash tools/make/paniers-lot$(shell echo $(LOT) | tr A-Z a-z)-fix-deliver.sh $@
+
+run-6j: guard
+	@test '$(LOT)' = 6J
+	@bash tools/make/paniers-lot6j-run.sh verify
 
 clean inspect diagnose: guard
 	@bash tools/make/paniers-lot6-verify.sh $@
