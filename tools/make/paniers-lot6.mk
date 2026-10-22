@@ -34,8 +34,8 @@ guard:
 verify build typecheck lint test-api test-ui api-ci mutation-proof astra-proof fix-proof fix2-proof: guard
 	@bash tools/make/paniers-lot$(if $(filter 6K,$(LOT)),6k-run,6-verify).sh $@
 
-.PHONY: prepare-6k deliver-6k audit-6k
-prepare-6k deliver-6k audit-6k: guard
+.PHONY: prepare-6k deliver-6k finalize-6k audit-6k
+prepare-6k deliver-6k finalize-6k audit-6k: guard
 	@test '$(LOT)' = 6K
 	@bash tools/make/paniers-lot6k-deliver.sh $@
 
