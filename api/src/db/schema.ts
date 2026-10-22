@@ -779,6 +779,9 @@ export const facetReasonCodes = pgTable("facet_reason_codes", {
 // Partial indexes and immutability triggers are hand-authored in migration 0014.
 // 6I workspace archives carry a null business owner attributed to the
 // acting moderator (migration 0019); personal events keep owner = actor.
+// 6J lot events carry an explicit mode, the observed lot version, market
+// and pipeline values, and import-only provenance (migration 0020);
+// signal rows keep every lot column null.
 export const facetEvents = pgTable("facet_events", {
   id: uuid("id").primaryKey().defaultRandom(),
   scope: text("scope").notNull().default("personal"),
@@ -797,6 +800,14 @@ export const facetEvents = pgTable("facet_events", {
   observedFingerprint: text("observed_fingerprint").notNull(),
   commandKey: uuid("command_key").notNull(),
   commandDigest: text("command_digest").notNull(),
+  mode: text("mode"),
+  observedLotVersion: uuid("observed_lot_version"),
+  askingPrice: numeric("asking_price", { precision: 14, scale: 2 }),
+  listingUrl: text("listing_url"),
+  pipelineStatus: text("pipeline_status"),
+  sourceAuthor: text("source_author"),
+  sourceCreatedAt: timestamp("source_created_at", { withTimezone: true }),
+  importRunId: uuid("import_run_id"),
   supersedes: uuid("supersedes").references((): AnyPgColumn => facetEvents.id),
   supersededBy: uuid("superseded_by").references((): AnyPgColumn => facetEvents.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -846,12 +857,15 @@ export const workspaceMembershipEvents = pgTable("workspace_membership_events", 
 // 6H scoped attachment and activation. Partial indexes, immutability guards,
 // the deferred binding check, and the protected index swap live in
 // migration 0018; existing facet tables are untouched.
+// 6J lot streams carry an explicit mode (migration 0020); signal streams
+// keep mode null so their uniqueness is unchanged.
 export const facetStreams = pgTable("facet_streams", {
   id: uuid("id").primaryKey().defaultRandom(),
   workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
   scope: text("scope").notNull().default("personal"),
   ownerId: uuid("owner_id").references(() => accountUsers.id),
   targetType: text("target_type").notNull().default("signal"),
+  mode: text("mode"),
   citySlug: text("city_slug").notNull(),
   nodeType: text("node_type").notNull(),
   nodeId: text("node_id").notNull(),
@@ -904,6 +918,73 @@ export const facetActivationState = pgTable("facet_activation_state", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+// 6J lot destination gate, import provenance, and distinct lot
+// capabilities (D4). Writes stay disabled until 6K enables the gate.
+// Partial indexes, append-only guards, and widened facet checks live in
+// migration 0020; prospect_marks is untouched.
+export const lotDestinationState = pgTable("lot_destination_state", {
+  workspaceId: uuid("workspace_id").primaryKey().references(() => workspaces.id),
+  enabled: boolean("enabled").notNull().default(false),
+  selectionBasket: text("selection_basket"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const lotImportRuns = pgTable("lot_import_runs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  importKey: uuid("import_key").notNull(),
+  manifestSha: text("manifest_sha").notNull(),
+  mappingVersion: text("mapping_version").notNull(),
+  importerVersion: text("importer_version").notNull(),
+  sourceSnapshotId: text("source_snapshot_id").notNull(),
+  counts: jsonb("counts").notNull().default({}),
+  status: text("status").notNull().default("complete"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const lotSourceRows = pgTable("lot_source_rows", {
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  sourceId: text("source_id").notNull(),
+  chainId: text("chain_id").notNull(),
+  nativeTarget: text("native_target").notNull(),
+  disposition: text("disposition").notNull(),
+  diagnostics: text("diagnostics").array().notNull().default([]),
+  destination: jsonb("destination"),
+  observed: jsonb("observed").notNull(),
+  manifestSha: text("manifest_sha").notNull(),
+  importRunId: uuid("import_run_id").references(() => lotImportRuns.id),
+  importedAt: timestamp("imported_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.workspaceId, t.sourceId] }),
+  byChain: index("lot_source_rows_chain_idx").on(t.workspaceId, t.chainId),
+}));
+
+export const lotCapabilityGrants = pgTable("lot_capability_grants", {
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  accountId: uuid("account_id").notNull().references(() => accountUsers.id),
+  capability: text("capability").notNull(),
+  granted: boolean("granted").notNull().default(false),
+  revision: integer("revision").notNull().default(1),
+  actorId: uuid("actor_id").notNull().references(() => accountUsers.id),
+  reason: text("reason").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.workspaceId, t.accountId, t.capability] }),
+}));
+
+export const lotCapabilityEvents = pgTable("lot_capability_events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  accountId: uuid("account_id").notNull().references(() => accountUsers.id),
+  capability: text("capability").notNull(),
+  kind: text("kind").notNull(),
+  actorId: uuid("actor_id").notNull().references(() => accountUsers.id),
+  reason: text("reason").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  byWorkspace: index("lot_capability_events_workspace_idx").on(t.workspaceId, t.createdAt),
+}));
+
 export const schema = {
   facetCommands,
   facetEvents,
@@ -917,6 +998,11 @@ export const schema = {
   workspaces,
   workspaceMemberships,
   workspaceMembershipEvents,
+  lotDestinationState,
+  lotImportRuns,
+  lotSourceRows,
+  lotCapabilityGrants,
+  lotCapabilityEvents,
   refreshDocumentOutcomes,
   sources,
   ingestions,
