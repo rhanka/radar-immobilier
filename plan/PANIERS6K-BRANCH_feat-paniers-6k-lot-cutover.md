@@ -61,6 +61,6 @@ D5 applies only to actual conflicts; qualification uses synthetic data.
 - [x] **Lot 4 — Delivery retirement**: queued SSE destruction and replica/reconnect fail-closed checks.
 - [x] **Lot 5 — UI isolation**: compare DOM/requests with main; independent facet counters.
 - [x] **Lot 6 — Qualification**: API CI parallelism, types, declarations, lint, UI/MCP regression, mutations.
-- [x] Delivery checkpoint: 3.
+- [x] Delivery checkpoint: 4.
 - [ ] **Operational acceptance**: real 6F/D5, writer locks, replicas, parent UI wiring, browser UAT.
 - [ ] **Merge & close**: conductor imports bundle, runs CI, reviews scope, uses a merge commit.
