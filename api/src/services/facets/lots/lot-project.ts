@@ -33,16 +33,42 @@ export interface ProjectionInput {
   selectionBasket: string;
 }
 
-/** Heads eligible for projection: qualified mapping, terminal, single destination. */
-export function isProjectableHead(row: ManifestRow, mappingQualified: boolean): boolean {
-  return mappingQualified
-    && row.disposition === "mapped"
-    && row.destination !== null
-    && (row.observed.supersededBy ?? null) === null;
+/**
+ * Stable 6K target key: qualified destinations resolve to their canonical
+ * target and mode, everything else to the observed native target. One key
+ * may cover several source rows; D5 dispositions are recorded per key.
+ */
+export function cutoverTargetKey(row: ManifestRow): string {
+  if (row.destination) {
+    return `dest:${row.destination.citySlug}::${row.destination.canonicalTarget}::${row.destination.mode}`;
+  }
+  return `native:${row.nativeTarget}`;
+}
+
+/**
+ * Heads eligible for projection: qualified mapping, terminal, single
+ * destination. Conflict rows stay out unless the 6K activation recorded
+ * an `activate` disposition naming their exact source row; the set is
+ * empty in ordinary 6J imports, which keeps their behavior unchanged.
+ * No automatic newest-wins rule: without an explicit winning source row,
+ * converged heads never project.
+ */
+export function isProjectableHead(
+  row: ManifestRow, mappingQualified: boolean, activatedSourceIds?: ReadonlySet<string>,
+  eligibleTargetKeys?: ReadonlySet<string>,
+): boolean {
+  if (eligibleTargetKeys && !eligibleTargetKeys.has(cutoverTargetKey(row))) return false;
+  if (!mappingQualified || row.destination === null
+    || (row.observed.supersededBy ?? null) !== null) return false;
+  if (row.disposition === "mapped") return true;
+  return row.disposition === "conflict"
+    && (activatedSourceIds?.has(row.sourceId) === true);
 }
 
 export async function projectTerminalHeads(
   tx: LotTx, input: ProjectionInput, ordered: ManifestRow[], mappingQualified: boolean,
+  activatedSourceIds?: ReadonlySet<string>,
+  eligibleTargetKeys?: ReadonlySet<string>,
 ): Promise<{ projected: number; alreadyProjected: number; skipped: Array<{ sourceId: string; cause: string }> }> {
   let projected = 0;
   let alreadyProjected = 0;
@@ -50,7 +76,7 @@ export async function projectTerminalHeads(
   const seenStreams = new Set<string>();
   await lockLotImportTargets(tx, ordered);
   for (const row of ordered) {
-    if (!isProjectableHead(row, mappingQualified) || !row.destination) continue;
+    if (!isProjectableHead(row, mappingQualified, activatedSourceIds, eligibleTargetKeys) || !row.destination) continue;
     const target: LotTarget = {
       type: "Lot", authority: "lot_versions",
       citySlug: row.destination.citySlug, canonicalId: row.destination.canonicalTarget,
