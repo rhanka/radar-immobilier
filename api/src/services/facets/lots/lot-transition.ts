@@ -13,6 +13,7 @@ import {
   facetHeads,
   facetStreams,
 } from "../../../db/schema.js";
+import { FacetError } from "../target.js";
 import {
   type LotCommand,
   type LotScope,
@@ -69,6 +70,10 @@ export async function planLotStreams(
   const main: PlannedStream = { facet, basket, ref: mainRef, current: await currentFor(mainRef, tx) };
   const removals: PlannedStream[] = [];
   if (command.mutation.action === "discard") {
+    const baskets = (command.mutation.deselect ?? []).map((entry) => entry.basket_id);
+    if (new Set(baskets).size !== baskets.length) {
+      throw new FacetError(409, "facet_head_conflict");
+    }
     const expected = new Map((command.mutation.deselect ?? []).map((entry) =>
       [entry.basket_id, entry.expected_head_id ?? null]));
     for (const basketId of [...expected.keys()].sort()) {
