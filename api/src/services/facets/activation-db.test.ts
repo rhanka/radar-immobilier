@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { expect, it, vi } from "vitest";
 import { facetEvents, graphNodes } from "../../db/schema.js";
 import { attach, activation, describeDb, event, fixture, safety } from "./scope-db-fixture.js";
@@ -15,17 +15,31 @@ import { targetFingerprint } from "./target.js";
 describeDb("6H protected activation", () => {
   it("should upgrade 0017 with whole chains and replay 0018 without changing historical bytes", async () => {
     const f = await fixture(true);
-    const first = await event(f);
+    const historicalEvents = async () => (await f.pool.query(`SELECT to_jsonb(e) - ARRAY[
+      'mode','observed_lot_version','asking_price','listing_url','pipeline_status',
+      'source_author','source_created_at','import_run_id','source_row_id','source_chain_id'
+      ] AS row FROM facet_events e ORDER BY id`)).rows;
+    // Seed the old schema with its own column set before 0020 exists.
+    const first = (await f.pool.query<{ id: string; citySlug: string }>(`
+      INSERT INTO facet_events (owner_id,actor_id,city_slug,node_type,node_id,facet,basket,state,
+        observed_fingerprint,command_key,command_digest)
+      VALUES ($1,$1,'synthetic-city','Signal',$2,'selection','pertinent','active',$3,$4,$5)
+      RETURNING id, city_slug AS "citySlug"`,
+    [f.member.id, randomUUID(), "a".repeat(64), randomUUID(), "b".repeat(64)])).rows[0]!;
     const nextId = randomUUID();
     await f.db.transaction(async (tx) => {
       await tx.update(facetEvents).set({ supersededBy: nextId }).where(eq(facetEvents.id, first.id));
-      await tx.insert(facetEvents).values({ ...first, id: nextId, state: "inactive", supersedes: first.id });
+      await tx.execute(sql`INSERT INTO facet_events
+        (id,owner_id,actor_id,city_slug,node_type,node_id,facet,basket,state,
+          observed_fingerprint,command_key,command_digest,supersedes)
+        SELECT ${nextId},owner_id,actor_id,city_slug,node_type,node_id,facet,basket,'inactive',
+          observed_fingerprint,${randomUUID()},command_digest,id FROM facet_events WHERE id = ${first.id}`);
     });
-    const before = (await f.pool.query("SELECT * FROM facet_events ORDER BY id")).rows;
+    const before = await historicalEvents();
     await migrate(f.db, { migrationsFolder: "drizzle" });
     await migrate(f.db, { migrationsFolder: "drizzle" });
     await f.pool.query(readFileSync("drizzle/0018_facet_scope_bindings.sql", "utf8"));
-    expect((await f.pool.query("SELECT * FROM facet_events ORDER BY id")).rows).toEqual(before);
+    expect(await historicalEvents()).toEqual(before);
     const journal = JSON.parse(readFileSync("drizzle/meta/_journal.json", "utf8")) as {
       entries: Array<{ tag: string; when: number }>;
     };
@@ -40,7 +54,7 @@ describeDb("6H protected activation", () => {
     expect(await runPersonalAttachmentActivation(f.db, activation(f), { ...safety, readback }))
       .toMatchObject({ streamsBound: 1, headsRegistered: 1, sealedUnresolved: [], epoch: "scoped" });
     expect(readback).toHaveBeenCalledOnce();
-    expect((await f.pool.query("SELECT * FROM facet_events ORDER BY id")).rows).toEqual(before);
+    expect(await historicalEvents()).toEqual(before);
     expect((await readScopedPersonalHeads(f.db, f.member.sub, f.workspaceId, first.citySlug))[0])
       .toMatchObject({ id: nextId, state: "inactive" });
     expect(await readScopedPersonalHeads(f.db, f.actor.sub, f.workspaceId, first.citySlug)).toEqual([]);
@@ -63,7 +77,7 @@ describeDb("6H protected activation", () => {
     await migrate(f.db, { migrationsFolder: "drizzle" });
     expect((await journalRows()).rows).toEqual(recorded);
     expect(await snapshot()).toEqual(activated);
-    expect((await f.pool.query("SELECT * FROM facet_events ORDER BY id")).rows).toEqual(before);
+    expect(await historicalEvents()).toEqual(before);
     expect((await f.pool.query("SELECT to_regclass('facet_events_head_idx') AS idx")).rows[0].idx).toBeNull();
   });
 
