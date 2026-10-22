@@ -1,16 +1,20 @@
 import { randomUUID } from "node:crypto";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { afterAll, expect, it } from "vitest";
+import { expect, it } from "vitest";
 import { eq } from "drizzle-orm";
 import { accountUsers, workspaceMembershipEvents } from "../../db/schema.js";
-import { account, db, describeDb, pool } from "./db-fixture.js";
+import { database, describeDb } from "../facets/scope-db-fixture.js";
 import { resolveWorkspaceAccess } from "./store.js";
 
 describeDb("operator workspace initialization CLI", () => {
-  afterAll(() => pool.end());
-
   it("should resolve synthetic subjects, audit explicit approved members and replay unchanged", async () => {
+    const { db, name } = await database();
+    const account = async (status = "approved") => {
+      const person = { id: randomUUID(), sub: `synthetic-cli-${randomUUID()}`, status };
+      await db.insert(accountUsers).values(person);
+      return person;
+    };
     const actor = await account();
     const moderator = await account();
     const member = await account();
@@ -20,7 +24,8 @@ describeDb("operator workspace initialization CLI", () => {
       "--workspace-label", "Synthetic CLI team", "--actor", actor.sub,
       "--moderator", moderator.sub, "--manager", actor.sub];
     const run = () => promisify(execFile)(process.execPath,
-      ["--import", "tsx", "src/scripts/init-workspace-authority.ts", ...args]);
+      ["--import", "tsx", "src/scripts/init-workspace-authority.ts", ...args],
+      { env: { ...process.env, POSTGRES_DB: name } });
     const firstRun = await run();
     expect(firstRun.stderr).toBe("");
     const first = JSON.parse(firstRun.stdout);
