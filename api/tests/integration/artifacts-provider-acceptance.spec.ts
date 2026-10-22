@@ -127,6 +127,40 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
     return (response.body as { artifactId: string }).artifactId;
   }
 
+  /**
+   * Candidate host construction. The require below fails by name against
+   * 0.1.2 before any legacy composition runs. The options bag carries the
+   * barrier observer so the candidate coordinator binds it as its
+   * `testObserver` with invocation correlation.
+   */
+  async function composeAcceptanceHost(
+    observer: unknown,
+    overrides?: { readonly pool?: pg.Pool | undefined; readonly blobs?: unknown | undefined },
+  ): Promise<NonNullable<Awaited<ReturnType<typeof composeArtifactHost>>> & Record<string, unknown>> {
+    await requireCommitContract();
+    const compose = composeArtifactHost as unknown as (
+      pool: unknown, config: unknown, blobs: unknown, options?: unknown,
+    ) => Promise<unknown>;
+    return (await compose(overrides?.pool ?? pool, storageConfig(), overrides?.blobs ?? rawBlobs(), {
+      profile: { selectedCapabilities: [...FROZEN_CAPABILITIES] },
+      coordinator: { testObserver: observer },
+    })) as NonNullable<Awaited<ReturnType<typeof composeArtifactHost>>> & Record<string, unknown>;
+  }
+
+  function successBody(outcome: unknown): Record<string, unknown> {
+    const result = (outcome as { result: unknown }).result as { body: unknown };
+    return result.body as Record<string, unknown>;
+  }
+
+  function invocationFor(authorizeCommit: AuthorizeCommit, suffix: string): Record<string, unknown> {
+    return buildInvocationContext({
+      invocationId: `acceptance-${suffix}-${nextInvocationId++}`,
+      actorId: ACTOR,
+      storageScopeId: SCOPE,
+      authorizeCommit,
+    }) as unknown as Record<string, unknown>;
+  }
+
   beforeAll(async () => {
     const env = loadConfig();
     endpoint = env.S3_ENDPOINT; accessKey = env.S3_ACCESS_KEY; secretKey = env.S3_SECRET_KEY;
@@ -145,6 +179,107 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
     bucketCreated = true;
     console.info("[acceptance-setup] bucket created");
     await pool.query("INSERT INTO account_users (sub, email, status) VALUES ('alice','alice@example.test','approved')");
+  });
+
+  afterAll(async () => {
+    console.info("[acceptance-cleanup] start", { total: pool?.totalCount, idle: pool?.idleCount, waiting: pool?.waitingCount });
+    try {
+      if (bucketCreated) {
+        for (const key of await rawBlobs().listKeys("")) await rawBlobs().deleteBlob(key);
+        console.info("[acceptance-cleanup] objects removed");
+        await s3.send(new DeleteBucketCommand({ Bucket: BUCKET }));
+        console.info("[acceptance-cleanup] bucket removed");
+      }
+    } finally {
+      s3?.destroy();
+      await pool?.end();
+      console.info("[acceptance-cleanup] pool ended");
+      try {
+        if (databaseCreated) await admin.query(`DROP DATABASE ${DATABASE} WITH (FORCE)`);
+        console.info("[acceptance-cleanup] database removed");
+      } finally { await admin?.end(); }
+    }
+  });
+
+  it("refuses authorization at the commit barrier with zero committed effects", async () => {
+    await requireCommitContract();
+    await requireOutcomeContract();
+    const barrier = await requireCommitBarrier();
+    const host = await composeAcceptanceHost(barrier.observer);
+    const close = host["close"];
+    try {
+      requireSelectedProfile(host);
+      const execute = requireHostExecute(host);
+      const seenTransactions: unknown[] = [];
+      let passedBarrier = false;
+      const authorizeCommit: AuthorizeCommit = async (context, transaction) => {
+        expect(context).toMatchObject({ actorId: ACTOR, storageScopeId: SCOPE, purpose: "finalize" });
+        expect(transaction).toBeDefined();
+        seenTransactions.push({ transaction, passedBarrier });
+        const status = (await pool.query(
+          "SELECT status FROM account_users WHERE sub = 'alice'")).rows[0]?.status as string | null;
+        return status === "approved" ? authorizeTransaction(context, transaction)
+          : toGuardDecision({ allowed: false, status: 403, body: { error: "account_not_approved", status: status ?? "unknown" } });
+      };
+      const allowAll: AuthorizeCommit = authorizeTransaction;
+      try {
+        const ensured = await execute({ method: "POST", path: "/ensure",
+          body: { bindingName: "acceptance", idempotencyKey: "acceptance-refusal-ensure" } },
+          invocationFor(allowAll, "refusal-ensure"));
+        expect(ensured).toMatchObject({ ok: true });
+        const artifactId = successBody(ensured)["artifactId"] as string;
+        const clientKey = "acceptance-refusal";
+        const body = { artifactId,
+          files: [{ path: "index.html", mimeType: "text/html", text: "refused while blocked" }],
+          idempotencyKey: clientKey };
+        const internalKey = deriveIdempotencyKey(
+          { scope: SCOPE, sub: ACTOR, op: "publish", artifactId, clientKey });
+        const invocation = invocationFor(authorizeCommit, "refusal");
+        const invocationId = invocation["invocationId"] as string;
+        const stateBefore = await committedState(pool);
+        const releasesBefore = await tableCount("releases");
+        const keysBefore = await tableCount("idempotency_keys");
+        const s3Before = await s3KeyCount();
+        const wait = barrier.waitUntilReached("after_finalization_locks_before_guard", invocationId);
+        const pending = execute({ method: "POST", path: "/publish", body }, invocation);
+        await wait;
+        await pool.query("UPDATE account_users SET status = 'suspended' WHERE sub = 'alice'");
+        passedBarrier = true;
+        barrier.release("after_finalization_locks_before_guard", invocationId);
+        const outcome = await pending as Record<string, unknown>;
+        expect(seenTransactions.length).toBeGreaterThan(0);
+      expect(seenTransactions.at(-1)).toMatchObject({ passedBarrier: true });
+        assertOutcomeFailure(outcome, invocationId);
+        expect(outcome["failure"]).toMatchObject({ category: "unauthorized_at_commit" });
+        expect(await committedState(pool)).toEqual(stateBefore);
+        expect(await tableCount("releases")).toBe(releasesBefore);
+        expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+        expect(await successRowCount(internalKey)).toBe(0);
+        expect(await currentReleaseId(artifactId)).toBeUndefined();
+        const s3AfterDenial = await s3KeyCount();
+        console.info("[preparation-debt]", JSON.stringify({ s3Before, s3AfterDenial }));
+        expect(s3AfterDenial).toBeGreaterThanOrEqual(s3Before);
+        await pool.query("UPDATE account_users SET status = 'approved' WHERE sub = 'alice'");
+        const retry = await execute({ method: "POST", path: "/publish", body },
+          invocationFor(authorizeCommit, "refusal-retry")) as Record<string, unknown>;
+        expect(retry).toMatchObject({ ok: true });
+        expect(await tableCount("releases")).toBe(releasesBefore + 1);
+        expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
+        expect(await successRowCount(internalKey)).toBe(1);
+        expect(await currentReleaseId(artifactId)).toBe(
+          (successBody(retry)["releaseId"] as string));
+        const replay = await execute({ method: "POST", path: "/publish", body },
+          invocationFor(authorizeCommit, "refusal-replay")) as Record<string, unknown>;
+        expect(replay).toMatchObject({ ok: true });
+        expect(successBody(replay)).toEqual(successBody(retry));
+        expect(await tableCount("releases")).toBe(releasesBefore + 1);
+        expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
+      } finally {
+        await pool.query("UPDATE account_users SET status = 'approved' WHERE sub = 'alice'");
+      }
+    } finally {
+      if (typeof close === "function") (close as () => void)();
+    }
   });
 
   it("maps an injected S3 timeout below the HTTP layer to 503 without internals", async () => {
