@@ -12,7 +12,7 @@ writes stay disabled until 6K. No D5 input is required.
 - Base: this worktree (`feat/paniers-6j-lot-destination`), stacked on main
   (6F report) plus 6G + 6H + 6I; reference `conception-lot6-v2.md` §3.7 +
   `### 6J`, ratified D4; D5 stays at the 6K gate only.
-- One migration max (`0020_facet_lot_history.sql`); never modify existing
+- One migration max (`0021_facet_lot_history.sql`); never modify existing
   migrations; never modify `prospect_marks` or its indexes.
 - Contracts 6A (expected head, 409 with authorized state) and 6B
   (displayed version) apply per lot stream; mode is explicit in stream
@@ -29,7 +29,7 @@ writes stay disabled until 6K. No D5 input is required.
 
 ## Branch Scope Boundaries (MANDATORY)
 
-- **Allowed**: this plan file; `api/drizzle/0020_*`;
+- **Allowed**: this plan file; `api/drizzle/0021_facet_lot_history.sql`;
   `api/drizzle/meta/_journal.json` (append-only entry);
   `api/src/db/schema.ts` (additive lot mirrors only);
   `api/src/services/facets/lots/**`;
@@ -47,6 +47,11 @@ writes stay disabled until 6K. No D5 input is required.
 
 ## Feedback Loop
 
+- `BR6J-EX7`: merge approved 6L1 (`ffbb180b`) before integration and move
+  6J to migration 0021. Reason: 6L1 owns 0020 on main first. Impact:
+  retain both schemas, verifier profiles and fixture cleanup fixes; update
+  the journal, migration tests and 6J launcher references without SQL edits.
+  Rollback: revert this integration before either migration is deployed.
 - Delivery uses individually typechecked snapshots; the French report
   remains uncommitted.
 - `BR6J-EX1`: widen the `paniers-lot6*` guard to `6F|6G|6H|6I|6J`, add the
@@ -93,8 +98,8 @@ writes stay disabled until 6K. No D5 input is required.
 ## Plan / Todo (lot-based)
 
 - [x] **Lot 0 — Baseline**: read §3.7 + `### 6J` + D4; next free number
-  is `0020`; write this plan.
-- [x] **Lot 1 — Schema**: `0020` lot streams/mode/values/provenance,
+  is `0021` after the approved 6L1 integration; write this plan.
+- [x] **Lot 1 — Schema**: `0021` lot streams/mode/values/provenance,
   destination gate, import runs/evidence, lot capability grants/events;
   journal entry; schema mirror. Replayable guards; signal constraints
   preserved for signal rows.
@@ -138,6 +143,7 @@ writes stay disabled until 6K. No D5 input is required.
 - [x] Second-pass fix 3: qualify HTTP composite no-ops and batch replay.
 - [x] Second-pass fix 4: discriminate all three defects on restored copies.
 - [x] Second-pass fix 5: deliver bounded commits above `4044af20`.
+- [x] Integration: merge 6L1 and renumber lot history to 0021 unchanged.
 - [ ] **Lot N-1 — Docs**: uncommitted French `RAPPORT-MUSE-6J.md`.
 - [ ] **Lot N — Close (not covered)**: verify green, push, PR, CI, merge
   commit (no squash/rebase), keep branch, move plan to `plan/done/`.

@@ -7,7 +7,7 @@ import { qualifiedLotReport } from "./lot-import-input.js";
 import { describeDb, lotFixture } from "./lot-fixture.js";
 
 describeDb("6J migration replay", () => {
-  it("should replay 0020 and re-register its journal without changing data", async () => {
+  it("should replay 0021 and re-register its journal without changing data", async () => {
     const f = await lotFixture();
     await runLotImport(f.db, { workspaceId: f.workspaceId,
       actorSub: f.moderator.sub, report: qualifiedLotReport(), importKey: randomUUID() },
@@ -15,7 +15,7 @@ describeDb("6J migration replay", () => {
     const journal = JSON.parse(readFileSync("drizzle/meta/_journal.json", "utf8")) as {
       entries: Array<{ idx: number; tag: string; when: number }>;
     };
-    const entry = journal.entries.find((item) => item.tag === "0020_facet_lot_history")!;
+    const entry = journal.entries.find((item) => item.tag === "0021_facet_lot_history")!;
     const source = readFileSync(`drizzle/${entry.tag}.sql`, "utf8");
     const tables = ["lot_destination_state", "lot_source_rows", "lot_import_runs",
       "lot_capability_grants", "lot_capability_events", "facet_events", "facet_streams",
