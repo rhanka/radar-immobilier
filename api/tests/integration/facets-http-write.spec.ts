@@ -26,7 +26,7 @@ it("should enforce browser identity, strict commands and domain errors", async (
   const body = { target, basket: "pertinent", expectedHeadId: null, displayedFingerprint };
   for (const reasonCode of ["", "p-densite", "-N-ADMIN", "N--ADMIN", "N-ADMIN-", "N_ADMIN", " N-ADMIN", "N-ADMIN\n"]) {
     for (const action of ["select", "discard"]) {
-      expect((await post(action, { ...(action === "select" ? body : { target, expectedHeadId: null }), reasonCode })).status).toBe(400);
+      expect((await post(action, { ...(action === "select" ? body : { target, expectedHeadId: null, displayedFingerprint }), reasonCode })).status).toBe(400);
     }
   }
   expect((await post("select", { target, basket: "pertinent" })).status).toBe(400);
