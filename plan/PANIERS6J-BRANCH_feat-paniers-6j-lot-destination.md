@@ -64,7 +64,7 @@ writes stay disabled until 6K. No D5 input is required.
   common archive from contributors; keep personal restore without workspace
   effect; return 422 for omitted market fields; conflict payloads expose
   authorized heads only.
-- Delivery checkpoint: 63.
+- Delivery checkpoint: 64.
 - Review fixes use CI test parallelism, seven copied-source proofs, and a
   bundle based on `8b2347e9`; shared Git metadata remains read-only.
 - Final receipt review: share the actor/key lock with signal writers and
@@ -128,7 +128,7 @@ writes stay disabled until 6K. No D5 input is required.
 - [x] Review fix 5: composite and unchanged result qualification.
 - [x] Review fix 6: HTTP result replay and source navigation.
 - [x] Review fix 7: importer D4 rights before writes and replay.
-- [ ] Review fix 8: contradictory deselection expectations rejected.
+- [x] Review fix 8: contradictory deselection expectations rejected.
 - [ ] Review fix 9: equivalent price no-ops in commands and batches.
 - [ ] Review fix 10: isolate CLI replay and preserve prior schema snapshots.
 - [ ] Review fix 11: CI parallelism, capacity and seven mutation proofs.
