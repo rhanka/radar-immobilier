@@ -28,6 +28,10 @@ function envKeys(source: string, file: string): string[] {
   const root = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true);
   const keys = new Set<string>();
   const isGlobalChain = (expr: ts.Expression): boolean => {
+    if (
+      ts.isParenthesizedExpression(expr) || ts.isAsExpression(expr) ||
+      ts.isTypeAssertionExpression(expr) || ts.isNonNullExpression(expr) || ts.isSatisfiesExpression(expr)
+    ) return isGlobalChain(expr.expression);
     if (ts.isIdentifier(expr)) return GLOBAL_OBJECTS.has(expr.text);
     if (ts.isPropertyAccessExpression(expr) || ts.isElementAccessExpression(expr)) {
       return isGlobalChain(expr.expression);
@@ -80,6 +84,9 @@ function envKeys(source: string, file: string): string[] {
     return false;
   };
   const visit = (node: ts.Node): void => {
+    if ((ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) && isProcessRef(node)) {
+      keys.add("<dynamic>");
+    }
     if (ts.isIdentifier(node) && node.text === "process" && !isProcessEnv(node.parent as ts.Expression)) {
       keys.add("<dynamic>");
     }
@@ -142,6 +149,8 @@ describe("content-deny module isolation", () => {
     ["process.env[key]", ["<dynamic>"]],
     ["globalThis.process.env.EXTRA", ["<dynamic>"]],
     ["globalThis[\"process\"].env.EXTRA", ["<dynamic>"]],
+    ['(globalThis["process"] as NodeJS.Process).env.EXTRA', ["<dynamic>"]],
+    ['(globalThis as typeof globalThis)["process"].env.EXTRA', ["<dynamic>"]],
     ["global.process.env.EXTRA", ["<dynamic>"]],
     ["global[\"process\"].env.EXTRA", ["<dynamic>"]],
     ["self.process.env.EXTRA", ["<dynamic>"]],
@@ -159,6 +168,8 @@ describe("content-deny module isolation", () => {
   /** Global-object probes: each must be refused in both denial modules. */
   const GLOBAL_PROCESS_PROBES = [
     'void globalThis["process"].env.EXTRA;',
+    'void (globalThis["process"] as NodeJS.Process).env.EXTRA;',
+    'void (globalThis as typeof globalThis)["process"].env.EXTRA;',
     "void globalThis.process.env.EXTRA;",
     "void global.process.env.EXTRA;",
     "void self.process.env.EXTRA;",

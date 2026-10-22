@@ -178,7 +178,8 @@ Review integration (both non-blocking points):
 - [x] Review correction 1: reject additive egress on the named denial ingress
   policy; exact policy types, disabled/activation copy mutations and `cmp`.
 - [x] Review correction 2: computed global `process` reads fail AST isolation
-  in both denial modules; 35 tests and copy/failure/restore/`cmp` pass.
+  in both denial modules, including parenthesized/type-wrapped access;
+  41 tests and copy/failure/restore/`cmp` pass.
 - [x] Review correction 3: explicit preparation (`off`, complete reviewed
   values) and H2 rollback (no activation group, independent pinned denial
   image) gates; 25 transition tests pass without relaxing existing phases.
