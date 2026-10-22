@@ -142,24 +142,47 @@ describeDb("6J scoped lot HTTP contract", () => {
           deselect: [{ basket_id: f.selectionBasket,
             expected_head_id: selectedBody.result.heads[0]!.id }] } }) });
     expect(await replayed.json()).toEqual(compositeBody);
+    const archiveHeadId = compositeBody.result.events
+      .find((event) => event.facet === "archive")!.id;
+    const retiredHeadId = compositeBody.result.events
+      .find((event) => event.facet === "selection")!.id;
     const noopKey = randomUUID();
     const noopRequest = { method: "POST",
       headers: { "content-type": "application/json", "Idempotency-Key": noopKey },
       body: JSON.stringify({ mode: "real", target,
-        displayed_version: resolved.displayed,
-        expected_head_id: compositeBody.result.heads.find(
-          (head) => compositeBody.result.events.some((event) =>
-            event.id === head.id && event.facet === "archive"))!.id,
-        mutation: { action: "discard", reasonCode: "N-NON-RES" } }) };
+        displayed_version: resolved.displayed, expected_head_id: archiveHeadId,
+        mutation: { action: "discard", reasonCode: "N-NON-RES",
+          deselect: [{ basket_id: f.selectionBasket,
+            expected_head_id: retiredHeadId }] } }) };
     const noop = await app.request(`${base}/workspace/commands`, noopRequest);
     expect(noop.status).toBe(200);
     const noopBody = await noop.json() as {
       result: { events: unknown[]; heads: Array<{ id: string }> } };
     expect(noopBody.result.events).toEqual([]);
-    expect(noopBody.result.heads).toHaveLength(1);
+    expect.soft(noopBody.result.heads.map((head) => head.id))
+      .toEqual([archiveHeadId, retiredHeadId]);
     const noopReplay = await app.request(`${base}/workspace/commands`, noopRequest);
     expect(noopReplay.status).toBe(200);
     expect(await noopReplay.json()).toEqual(noopBody);
+    const noopBatchRequest = { method: "POST",
+      headers: { "content-type": "application/json", "Idempotency-Key": randomUUID() },
+      body: JSON.stringify({ mode: "real", items: [{ target,
+        displayed_version: resolved.displayed, expected_head_id: archiveHeadId,
+        mutation: { action: "discard", reasonCode: "N-NON-RES",
+          deselect: [{ basket_id: f.selectionBasket, expected_head_id: retiredHeadId }] } }] }) };
+    const noopBatch = await app.request(`${base}/workspace/commands/batch`, noopBatchRequest);
+    expect(noopBatch.status).toBe(200);
+    const noopBatchBody = await noopBatch.json() as {
+      result: { items: Array<{ events: unknown[]; heads: Array<{ id: string }> }> } };
+    expect(noopBatchBody.result).toMatchObject({
+      targets: 1, changed: 0, unchanged: 1, eventsAppended: 0 });
+    expect(noopBatchBody.result.items[0]!.events).toEqual([]);
+    expect.soft(noopBatchBody.result.items[0]!.heads.map((head) => head.id))
+      .toEqual([archiveHeadId, retiredHeadId]);
+    const noopBatchReplay = await app.request(
+      `${base}/workspace/commands/batch`, noopBatchRequest);
+    expect(noopBatchReplay.status).toBe(200);
+    expect(await noopBatchReplay.json()).toEqual(noopBatchBody);
   });
 
   it("should return 422 for a missing discard reason on both command routes", async () => {
