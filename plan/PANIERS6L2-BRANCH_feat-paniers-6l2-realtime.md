@@ -77,7 +77,7 @@ business-event ledger: durable 6L1 revisions stay the only authority.
 
 - [x] **Lot 0 — Baseline**: read §3.6 + `### 6L2`; confirm no migration
   beyond 6L1; write this plan.
-- [ ] **Lot 1 — Helpers**: opaque cursor (viewer/workspace/city/mode/
+- [x] **Lot 1 — Helpers**: opaque cursor (viewer/workspace/city/mode/
   token), tick and reconnect decisions, authorized per-cycle poll,
   configurable watcher interval, SSE frame encoding.
 - [ ] **Lot 2 — Route**: guarded SSE under the workspace, initial-resync
@@ -96,4 +96,4 @@ business-event ledger: durable 6L1 revisions stay the only authority.
 - [ ] **Lot N — Close (not covered)**: push, PR, remote CI,
   merge commit (no squash/rebase), keep branch, move plan to `plan/done/`.
 
-- Delivery checkpoint: 1.
+- Delivery checkpoint: 2.
