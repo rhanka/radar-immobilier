@@ -101,8 +101,8 @@ business-event ledger: durable 6L1 revisions stay the only authority.
   merge commit (no squash/rebase), keep branch, move plan to `plan/done/`.
 
 - [x] Review fix 1: serialize reads and qualify deferred reconnect denials.
-- [ ] Review fix 2: bound SSE buffering and reauthorize resumed consumers.
+- [x] Review fix 2: bound SSE buffering and reauthorize resumed consumers.
 - [ ] Review fix 3: discriminate live ping and unavailable handling.
 - [ ] Review fix 4: qualify copy mutations and byte-for-byte restoration.
 - [ ] Review fix 5: version isolated incremental delivery and its audit.
-- Delivery checkpoint: 18.
+- Delivery checkpoint: 19.
