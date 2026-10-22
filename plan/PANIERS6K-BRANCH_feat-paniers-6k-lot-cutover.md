@@ -65,11 +65,11 @@ D5 applies only to actual conflicts; qualification uses synthetic data.
 - [x] **Lot 5 — UI isolation**: compare DOM/requests with main; independent facet counters.
 - [x] **Lot 6 — Qualification**: API CI parallelism, types, declarations, lint, UI/MCP regression, mutations.
 - [x] Delivery checkpoint: 50.
-- [x] Review fix checkpoint: 3.
+- [x] Review fix checkpoint: 4.
 - [x] Review fix 1: additive source fence; existing migrations unchanged.
 - [x] Review fix 2: canonical and denormalized guards, including city projection.
 - [x] Review fix 3: late-qualified native history stays pending.
-- [ ] Review fix 4: denormalized aliases stay excluded from reads and commands.
+- [x] Review fix 4: denormalized aliases stay excluded from reads and commands.
 - [ ] Review fix 5: real stage-7 interruption, attempted drift, HTTP resume.
 - [ ] Review fix 6: stale source snapshot and 0022/0023 migration replay.
 - [ ] Review fix 7: unknown fence suspends; publications recover without activation.
