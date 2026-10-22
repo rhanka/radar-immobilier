@@ -55,6 +55,7 @@ import {
   type ProspectMode,
 } from "../services/prospect/marks-service.js";
 import { publish } from "../services/chat/stream-bus.js";
+import { legacyMarksFence } from "../services/facets/lots/lot-legacy-fence.js";
 
 // ─── Constante SSE ────────────────────────────────────────────────────────────
 
@@ -214,6 +215,20 @@ async function isApprovedReader(
   return (await resolveSessionApprovedId(c, deps)) !== null;
 }
 
+/**
+ * 6K legacy fence: mark readers and writers are retired once the lot
+ * destination opens (410) and fenced while a cutover barrier is committed
+ * (503). Notes and contacts stay separate and are never fenced here.
+ */
+async function legacyFenceResponse(
+  c: HonoContext, deps: ProspectMarksDeps,
+): Promise<Response | null> {
+  const fence = await legacyMarksFence(deps.db);
+  if (fence === "open") return c.json({ error: "legacy_marks_retired" }, 410);
+  if (fence === "barrier") return c.json({ error: "lot_cutover_barrier" }, 503);
+  return null;
+}
+
 /** Attribution visible (contrat §3.2) : id + nom/email de l'auteur. */
 async function resolveAuthorSummary(
   deps: ProspectMarksDeps,
@@ -235,6 +250,8 @@ export function prospectMarksRoute(deps: ProspectMarksDeps): Hono {
   // ── POST /api/v1/prospects/marks ──────────────────────────────────────────
 
   app.post("/api/v1/prospects/marks", async (c) => {
+    const fenced = await legacyFenceResponse(c, deps);
+    if (fenced) return fenced;
     const parsed = createMarkSchema.safeParse(
       await c.req.json().catch(() => null),
     );
@@ -424,6 +441,8 @@ export function prospectMarksRoute(deps: ProspectMarksDeps): Hono {
   // ── POST /api/v1/prospects/marks/batch ────────────────────────────────────
 
   app.post("/api/v1/prospects/marks/batch", async (c) => {
+    const fenced = await legacyFenceResponse(c, deps);
+    if (fenced) return fenced;
     const parsed = batchMarkSchema.safeParse(
       await c.req.json().catch(() => null),
     );
@@ -463,6 +482,8 @@ export function prospectMarksRoute(deps: ProspectMarksDeps): Hono {
   // ── GET /api/v1/prospects/lots/:lotVersionId/marks ────────────────────────
 
   app.get("/api/v1/prospects/lots/:lotVersionId/marks", async (c) => {
+    const fenced = await legacyFenceResponse(c, deps);
+    if (fenced) return fenced;
     const lotVersionId = c.req.param("lotVersionId");
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(lotVersionId)) {
       return c.json({ error: "lotVersionId invalide" }, 400);
@@ -484,6 +505,8 @@ export function prospectMarksRoute(deps: ProspectMarksDeps): Hono {
   // ── GET /api/v1/prospects/zones/:citySlug/marks ───────────────────────────
 
   app.get("/api/v1/prospects/zones/:citySlug/marks", async (c) => {
+    const fenced = await legacyFenceResponse(c, deps);
+    if (fenced) return fenced;
     const citySlug = c.req.param("citySlug");
     if (!citySlug || citySlug.length > 100) {
       return c.json({ error: "citySlug invalide" }, 400);
@@ -510,6 +533,8 @@ export function prospectMarksRoute(deps: ProspectMarksDeps): Hono {
   // Variante par noLot+citySlug (UI sans lotVersionId)
 
   app.get("/api/v1/prospects/lots/:noLot/:citySlug/marks", async (c) => {
+    const fenced = await legacyFenceResponse(c, deps);
+    if (fenced) return fenced;
     const noLot = c.req.param("noLot");
     const citySlug = c.req.param("citySlug");
     if (!noLot || !citySlug) {
