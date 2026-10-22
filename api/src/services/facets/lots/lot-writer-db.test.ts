@@ -15,18 +15,19 @@ describeDb("6J lot writer families", () => {
     const { target, displayed } = await displayedFor(f);
     const selected = await writeLotFacet(f.db, f.contributor.sub, f.workspaceId, "workspace",
       lotCommand(target, displayed, { action: "select", basket_id: basket }));
-    expect(selected).toMatchObject({ facet: "selection", state: "active", basket });
+    expect(selected.events[0]).toMatchObject({ facet: "selection", state: "active", basket });
     const solicited = await writeLotFacet(f.db, f.contributor.sub, f.workspaceId, "workspace",
       lotCommand(target, displayed, { action: "set_pipeline", status: "sollicite" }));
-    expect(solicited).toMatchObject({ facet: "pipeline", state: "active", pipelineStatus: "sollicite" });
+    expect(solicited.events[0]).toMatchObject({ facet: "pipeline", state: "active",
+      pipelineStatus: "sollicite" });
     const market = await writeLotFacet(f.db, f.contributor.sub, f.workspaceId, "workspace",
       lotCommand(target, displayed, { action: "set_market", status: "en_vente",
         asking_price: "250000.00", listing_url: "https://synthetic.invalid/annonce/1" }));
-    expect(market).toMatchObject({ askingPrice: "250000.00",
+    expect(market.events[0]).toMatchObject({ askingPrice: "250000.00",
       listingUrl: "https://synthetic.invalid/annonce/1" });
     const archived = await writeLotFacet(f.db, f.moderator.sub, f.workspaceId, "workspace",
       lotCommand(target, displayed, { action: "discard", reasonCode: "N-NON-RES" }));
-    expect(archived).toMatchObject({ facet: "archive", state: "active" });
+    expect(archived.events[0]).toMatchObject({ facet: "archive", state: "active" });
     const state = await readLotState(f.db, f.contributor.sub, f.workspaceId, "real", target);
     expect(state.selection.map((head) => head.state)).toEqual(["active"]);
     expect(state.pipeline).toMatchObject({ state: "active", pipelineStatus: "sollicite" });
@@ -35,8 +36,8 @@ describeDb("6J lot writer families", () => {
     expect(state.capabilities).toEqual({ select: true, changePipeline: true,
       changeMarket: true, discardPersonally: true, moderateArchive: false });
     const restored = await writeLotFacet(f.db, f.moderator.sub, f.workspaceId, "workspace",
-      lotCommand(target, displayed, { action: "restore" }, archived!.id));
-    expect(restored).toMatchObject({ state: "inactive" });
+      lotCommand(target, displayed, { action: "restore" }, archived.heads[0]!.id));
+    expect(restored.events[0]).toMatchObject({ state: "inactive" });
     const visible = await readLotState(f.db, f.contributor.sub, f.workspaceId, "real", target);
     expect(visible.archive.effectiveDiscarded).toBe(false);
     expect(visible.selection.map((head) => head.state)).toEqual(["active"]);
@@ -54,7 +55,8 @@ describeDb("6J lot writer families", () => {
       lotCommand(target, displayed, { action: "deselect", basket_id: f.selectionBasket }))
       .then(() => { throw new Error("expected facet_head_conflict"); }, (error) => error);
     expect(conflict).toMatchObject({ status: 409, message: "facet_head_conflict" });
-    expect(conflict.current.heads.map((head: { id: string }) => head.id)).toEqual([first!.id]);
+    expect(conflict.current.heads.map((head: { id: string }) => head.id))
+      .toEqual([first.heads[0]!.id]);
     for (const head of conflict.current.heads) {
       expect(head).not.toHaveProperty("actorId");
       expect(head).not.toHaveProperty("ownerId");

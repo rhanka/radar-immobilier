@@ -39,9 +39,9 @@ export function scopedLotCommandsRoute(deps: ScopedLotFacetsDeps): Hono {
         const command: LotCommand = { ...item,
           contract_version: LOT_FACETS_CONTRACT_VERSION,
           command_key: key.data, mode: commandMode };
-        const event = await writeLotFacet(deps.db, session.sub,
+        const result = await writeLotFacet(deps.db, session.sub,
           c.req.param("workspaceId"), scope, command);
-        return c.json({ ok: true, result: event });
+        return c.json({ ok: true, result });
       } catch (error) {
         return toLotError(c, error);
       }

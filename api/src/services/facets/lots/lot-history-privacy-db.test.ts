@@ -13,9 +13,9 @@ describeDb("6J history visibility", () => {
     const privateHead = await writeLotFacet(f.db, f.moderator.sub, f.workspaceId, "personal",
       lotCommand(target, displayed, { action: "discard", reasonCode: "N-NON-RES" }));
     await writeLotFacet(f.db, f.moderator.sub, f.workspaceId, "personal",
-      lotCommand(target, displayed, { action: "restore" }, privateHead!.id));
+      lotCommand(target, displayed, { action: "restore" }, privateHead.heads[0]!.id));
     const page = await readLotHistory(f.db, f.contributor.sub, f.workspaceId, "real", target, 0, 1);
-    expect(page.events.map((event) => event.id)).toEqual([selected!.id]);
+    expect(page.events.map((event) => event.id)).toEqual([selected.heads[0]!.id]);
     expect(page.nextOffset).toBeNull();
   });
 });
