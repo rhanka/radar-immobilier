@@ -103,7 +103,7 @@ it); no legacy reader/buffer retirement here (6K owns it).
 - [x] **Lot 6 — UI**: reconciliation coordinator over `viewerKey`
   incarnation and workspace guards; superseded responses ignored; failed
   reads retain the last acknowledged snapshot.
-- [ ] **Lot 7 — Tests**: revision visible only when authorized; coherent
+- [x] **Lot 7 — Tests**: revision visible only when authorized; coherent
   reload after revision; superseded response ignored; no leak (personal,
   workspace, source, membership, mode cases).
 - [ ] **Lot 8 — Make**: `LOT=6L1` guard, SCOPE, lint, regression patterns;
@@ -112,4 +112,4 @@ it); no legacy reader/buffer retirement here (6K owns it).
 - [ ] **Lot N — Close (not covered)**: run verification, push, PR, CI,
   merge commit (no squash/rebase), keep branch, move plan to `plan/done/`.
 
-- Delivery checkpoint: 17.
+- Delivery checkpoint: 18.
