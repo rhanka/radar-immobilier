@@ -5,6 +5,13 @@ Qualify the explicit nine-stage lot cutover over the current 6F manifest.
 Preserve every source row, independent facets, and pre-activation UI behavior.
 Dependencies: qualified 6J, 6F manifest contracts, ratified D4, and 6L1.
 D5 applies only to actual conflicts; qualification uses synthetic data.
+Third-pass SSE model: the historic feed passes `unknown` through
+exactly as on main; only an attested barrier/open retires delivery.
+This is safe because the §6K sequence itself stops the publishers,
+closes the pre-existing SSE connections via the retirement broadcast,
+and destroys the replay buffers, so no historic frame survives a
+cutover; the process-wide retired set remembers the positive decision
+for later connections.
 
 ## Scope / Guardrails
 - Make-only, container-only execution; no environment-file reads or real data.
@@ -18,6 +25,7 @@ D5 applies only to actual conflicts; qualification uses synthetic data.
 - Shared Git metadata is read-only; local delivery metadata and bundle: `tmp/paniers-6k`.
 - Review correction base: `63a8991c`; delivery: `tmp/paniers-6k-fix/6k-fix.bundle`.
 - Second review base: `323d0db9`; delivery: `tmp/paniers-6k-fix2/6k-fix2.bundle`.
+- Third review base: `0456f85f`; delivery: `tmp/paniers-6k-fix3/6k-fix3.bundle`.
 
 ## Branch Scope Boundaries (MANDATORY)
 - **Allowed Paths (implementation scope)**:
@@ -81,5 +89,10 @@ D5 applies only to actual conflicts; qualification uses synthetic data.
 - [x] Second review fix 2: prove same-connection and new-connection replay and live mark/batch delivery.
 - [x] Second review fix 3: copied mutations fail by assertion, restore, compare bytes, then pass.
 - [x] Second review fix 4: API CI parallelism, declarations, types, lint, verify, regression and bounded bundle.
+- [x] Third review fix checkpoint: 1.
+- [x] Third review fix 1: historic SSE passes unknown through like main; retire only on attested barrier/open.
+- [ ] Third review fix 2: prove pass-through on a late-failing read and refusal after an observed cutover.
+- [ ] Third review fix 3: copied mutations fail by assertion, restore, compare bytes, then pass.
+- [ ] Third review fix 4: API CI parallelism, declarations, types, verify, regression and bounded bundle.
 - [ ] **Operational acceptance**: real 6F/D5, writer locks, replicas, parent UI wiring, browser UAT.
 - [ ] **Merge & close**: conductor imports bundle, runs CI, reviews scope, uses a merge commit.
