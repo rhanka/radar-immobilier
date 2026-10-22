@@ -5,6 +5,8 @@ import { facetEvents, graphNodes } from "../../db/schema.js";
 import { writeScopedPersonalFacet } from "./scoped-writer.js";
 import { writeWorkspaceArchiveFacet } from "./workspace-writer.js";
 import { readWorkspaceArchiveState } from "./workspace-reader.js";
+import { readScopedUnionDiscardedKeys } from "./workspace-discarded.js";
+import { discardedSignalKey } from "../graph/discarded-signals.js";
 import { describeDb, workspaceFixture, workspaceSignal } from "./workspace-archive-fixture.js";
 import { targetFingerprint } from "./target.js";
 
@@ -52,6 +54,28 @@ describeDb("6I workspace archive authorization and O2 restore", () => {
       f.db, f.contributor.sub, f.workspaceId, target);
     expect(visible).toMatchObject({ effectiveDiscarded: false });
     expect(visible.workspace).toMatchObject({ state: "inactive" });
+  });
+
+  it("should keep personal hiding when the workspace archive restores first", async () => {
+    const f = await workspaceFixture();
+    const { target, fingerprint } = await workspaceSignal(f);
+    const personal = await writeScopedPersonalFacet(f.db, f.contributor.sub, f.workspaceId,
+      { action: "discard", target, reasonCode: "N-NON-RES", expectedHeadId: null,
+        displayedFingerprint: fingerprint, commandKey: randomUUID() });
+    const common = await writeWorkspaceArchiveFacet(f.db, f.moderator.sub, f.workspaceId,
+      { action: "discard", target, reasonCode: "N-NON-RES", expectedHeadId: null,
+        displayedFingerprint: fingerprint, commandKey: randomUUID() });
+    const reopened = await writeWorkspaceArchiveFacet(f.db, f.moderator.sub, f.workspaceId,
+      { action: "restore", target, expectedHeadId: common!.id,
+        displayedFingerprint: fingerprint, commandKey: randomUUID() });
+    expect(reopened).toMatchObject({ state: "inactive" });
+    const view = await readWorkspaceArchiveState(
+      f.db, f.contributor.sub, f.workspaceId, target);
+    expect(view.personal).toMatchObject({ id: personal!.id, state: "active" });
+    expect(view.workspace).toMatchObject({ id: reopened!.id, state: "inactive" });
+    expect(view.effectiveDiscarded).toBe(true);
+    expect([...await readScopedUnionDiscardedKeys(f.db, f.contributor.sub, f.workspaceId)])
+      .toEqual([discardedSignalKey(target.citySlug, target.type, target.id)]);
   });
 
   it("should conflict on stale workspace heads without leaking personal state", async () => {
