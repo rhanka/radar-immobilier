@@ -64,7 +64,7 @@ writes stay disabled until 6K. No D5 input is required.
   common archive from contributors; keep personal restore without workspace
   effect; return 422 for omitted market fields; conflict payloads expose
   authorized heads only.
-- Delivery checkpoint: 12.
+- Delivery checkpoint: 13.
 - `BR6J-EX5`: adapt integration constraint names and the 6H upgrade
   snapshot to additive lot columns. Preserve every historical value and
   classified signal selection; no prior migration changes. Impact: two
@@ -93,7 +93,7 @@ writes stay disabled until 6K. No D5 input is required.
   complete market replacement, pipeline values, import-only provenance.
 - [x] **Lot 4 — Commands**: `lot-facets-v1` digest incl. every batch item;
   strict DTOs rejecting client actor/owner/scope fields.
-- [ ] **Lot 5 — Capabilities/gate**: distinct select/pipeline/market
+- [x] **Lot 5 — Capabilities/gate**: distinct select/pipeline/market
   grants, moderator archive, closed destination gate, disabled importer.
 - [ ] **Lot 6 — Writer**: four families, independence, composite
   discard/deselect, 409 head/version, atomic batch, exact replay.
