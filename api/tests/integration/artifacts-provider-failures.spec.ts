@@ -106,4 +106,115 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
   function allowAll(): AuthorizeCommit {
     return authorizeTransaction;
   }
+
+  // Observe the real execute path. This wrapper neither classifies failures
+  // nor repairs a response: HTTP and MCP must consume the provider outcome.
+  function executeWithParity(host: Record<string, unknown>) {
+    const execute = requireHostExecute(host);
+    return async (request: unknown, invocation: unknown): Promise<unknown> => {
+      const outcome = await execute(request, invocation) as Record<string, unknown>;
+      if (outcome.ok !== false) return outcome;
+      const failure = outcome.failure as Record<string, unknown>;
+      const projected = await projectOutcomeHttp(outcome);
+      const req = request as { method: string; path: string; body: Record<string, unknown> };
+      for (const transport of ["http", "mcp"] as const) {
+        const entries: Record<string, unknown>[] = [];
+        const observed: Record<string, unknown>[] = [];
+        const observe = async (r: unknown, context: unknown) => {
+          const ctx = context as InvocationContextShape;
+          const result = await execute(r, buildInvocationContext({ ...ctx,
+            authorizeCommit: (invocation as InvocationContextShape).authorizeCommit })) as Record<string, unknown>;
+          observed.push(result);
+          return result;
+        };
+        const instrumented = { ...host, execute: observe,
+          app: { ...host.app as object, execute: observe } };
+        const control = createArtifactControl(instrumented as unknown as Parameters<typeof createArtifactControl>[0],
+          SCOPE, BASE, undefined, { ledger: { record: (entry) => {
+            entries.push(entry as unknown as Record<string, unknown>);
+          } } });
+        if (transport === "http") {
+          const route = controlRoute({ auth, accounts: pool, backend: control });
+          const path = req.method === "GET" ? `/meta?artifactId=${req.path.slice("/meta/".length)}` : req.path;
+          const response = await route.request(`https://app.example.test${path}`, {
+            method: req.method, headers: { cookie: await cookie(ACTOR), origin: auth.appBaseUrl,
+              "content-type": "application/json" },
+            ...(req.method === "GET" ? {} : { body: JSON.stringify(req.body) }),
+          });
+          expect({ status: response.status, body: await response.json() }).toEqual(projected);
+        } else {
+          const result = await createMcpArtifactAdapter(control).execute({
+            method: req.method, path: req.path, args: req.body }, { actorId: ACTOR });
+          expect(result).toMatchObject({ ok: false, status: projected.status,
+            code: failure.code, retryable: failure.retriable });
+          expectRedacted({ status: result.status, body: result });
+        }
+        const dispatched = req.method === "POST" && ["/publish", "/ensure"].includes(req.path) &&
+          failure.code !== "invalid_request" && failure.category !== "capability_unselected";
+        expect(entries).toHaveLength(dispatched ? 1 : 0);
+        if (dispatched) {
+          expect(observed).toHaveLength(1);
+          const actual = observed[0]!.failure as Record<string, unknown>;
+          assertOutcomeFailure(observed[0], actual.invocationId as string);
+          expect(entries[0]).toMatchObject({ invocationId: actual.invocationId,
+            reason: failure.category === "conflict" ? "provider_conflict" : failure.category,
+            status: projected.status });
+        }
+      }
+      return outcome;
+    };
+  }
+
+  async function ensureVia(
+    execute: (request: unknown, invocation: unknown) => Promise<unknown>,
+    authorizeCommit: AuthorizeCommit,
+    bindingName: string,
+    clientKey: string,
+  ): Promise<string> {
+    const outcome = await execute({ method: "POST", path: "/ensure",
+      body: { bindingName, idempotencyKey: clientKey } },
+      invocationFor(authorizeCommit, `ensure-${clientKey}`));
+    expect(outcome).toMatchObject({ ok: true });
+    return ((outcome as { result: unknown }).result as { body: { artifactId: string } }).body.artifactId;
+  }
+
+  function expectRedacted(projected: { status: number; body: unknown }): void {
+    const text = JSON.stringify(projected.body);
+    expect(text).not.toMatch(/stack|BEGIN|COMMIT|SELECT|secret|credential|password/i);
+    expect(text).not.toContain(BUCKET);
+    expect(text).not.toContain(endpoint);
+    expect(text).not.toContain(accessKey);
+  }
+
+  beforeAll(async () => {
+    const env = loadConfig();
+    endpoint = env.S3_ENDPOINT; accessKey = env.S3_ACCESS_KEY; secretKey = env.S3_SECRET_KEY;
+    admin = new pg.Pool({ host: env.POSTGRES_HOST, port: env.POSTGRES_PORT,
+      user: env.POSTGRES_USER, password: env.POSTGRES_PASSWORD, database: env.POSTGRES_DB });
+    await admin.query(`CREATE DATABASE ${DATABASE}`);
+    databaseCreated = true;
+    pool = createArtifactsPool({ host: env.POSTGRES_HOST, port: env.POSTGRES_PORT,
+      user: env.POSTGRES_USER, password: env.POSTGRES_PASSWORD, database: DATABASE });
+    await migrate(drizzle(pool), { migrationsFolder });
+    s3 = new S3Client({ endpoint, forcePathStyle: true, region: "us-east-1",
+      credentials: { accessKeyId: accessKey, secretAccessKey: secretKey } });
+    await s3.send(new CreateBucketCommand({ Bucket: BUCKET }));
+    bucketCreated = true;
+    await pool.query("INSERT INTO account_users (sub, email, status) VALUES ('alice','alice@example.test','approved')");
+  });
+
+  afterAll(async () => {
+    try {
+      if (bucketCreated) {
+        for (const key of await rawBlobs().listKeys("")) await rawBlobs().deleteBlob(key);
+        await s3.send(new DeleteBucketCommand({ Bucket: BUCKET }));
+      }
+    } finally {
+      s3?.destroy();
+      await pool?.end();
+      try {
+        if (databaseCreated) await admin.query(`DROP DATABASE ${DATABASE} WITH (FORCE)`);
+      } finally { await admin?.end(); }
+    }
+  });
 });
