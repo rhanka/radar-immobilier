@@ -3,7 +3,7 @@ import { createProjectionInvalidationSync, parseProjectionStreamEvent, type Stre
 import { observeProjectionInvalidation } from "./signal-projection-invalidation-observer.js";
 import { beginProjectionRead, noteProjectionSuccess, retainedSnapshot } from "./signal-projection-revision.js";
 
-function setup(fetchCoherent = async () => ({ token: "synthetic-token" })) {
+function setup(fetchCoherent = async () => ({ token: "synthetic-token" }), useClock = false) {
   const state = createProjectionInvalidationSync({ viewerKey: { context: "synthetic" },
     workspaceId: "11111111-1111-4111-8111-111111111111", citySlug: "synthetic", mode: "signal" }, { enabled: true });
   const callbacks: { onEvent: (event: StreamEvent | null) => void; onError: () => void }[] = [];
@@ -14,7 +14,11 @@ function setup(fetchCoherent = async () => ({ token: "synthetic-token" })) {
   const observer = observeProjectionInvalidation(state, { live: () => state.launched,
     fetchCoherent, rebuild, onClosed, createSource: (_url, handlers) => {
       callbacks.push(handlers); return { close }; },
-    schedule: (run) => { const job = { run, cancel: vi.fn() }; scheduled.push(job); return job; } });
+    schedule: (run, delay) => {
+      const timer = useClock ? setTimeout(run, delay) : null;
+      const job = { run, cancel: vi.fn(() => { if (timer !== null) clearTimeout(timer); }) };
+      scheduled.push(job); return job;
+    } });
   return { state, callbacks, scheduled, rebuild, onClosed, close, observer };
 }
 const flush = async () => { await Promise.resolve(); await Promise.resolve(); await Promise.resolve(); };
@@ -60,6 +64,34 @@ describe("6L2 pending refetch guards", () => {
     expect(fetch).toHaveBeenCalledTimes(2);
     expect(h.state.ackedToken).toBe("synthetic-token");
     h.observer.dispose();
+  });
+  it("should clear a revoked context when reconnects overlap deferred denials", async () => {
+    vi.useFakeTimers();
+    const fetch = vi.fn(() => new Promise<{ token: string }>((_resolve, reject) => {
+      setTimeout(() => reject({ status: 403 }), 1500);
+    }));
+    const h = setup(fetch, true);
+    try {
+      noteProjectionSuccess(h.state, h.state.launched, { token: "prior" }, beginProjectionRead(h.state));
+      h.state.cursor = "prior-cursor";
+      h.callbacks[0]!.onError();
+      await vi.advanceTimersByTimeAsync(1000);
+      h.callbacks[1]!.onError();
+      await vi.advanceTimersByTimeAsync(500);
+      expect(h.onClosed).toHaveBeenCalledTimes(1);
+      expect(h.state.enabled).toBe(false);
+      expect(h.state.launched.viewerKey).toBeNull();
+      expect(h.state.launched.workspaceId).toBeNull();
+      expect(h.state.ackedToken).toBeNull();
+      expect(h.state.cursor).toBeNull();
+      expect(retainedSnapshot(h.state)).toBeNull();
+      expect(h.rebuild).not.toHaveBeenCalled();
+      await vi.advanceTimersByTimeAsync(5000);
+      expect(h.callbacks).toHaveLength(2);
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(vi.getTimerCount()).toBe(0);
+      for (const job of h.scheduled) expect(job.cancel).toHaveBeenCalled();
+    } finally { h.observer.dispose(); vi.useRealTimers(); }
   });
   it("should clear authorization failures instead of retrying them", async () => {
     const h = setup(async () => { throw { status: 403 }; });
