@@ -904,6 +904,50 @@ export const facetActivationState = pgTable("facet_activation_state", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+/**
+ * 6L1 per-viewer personal projection revisions: one monotonic counter per
+ * (workspace, viewer, city, mode). Another member's personal mutation never
+ * touches this viewer's row, so it never invalidates this viewer's token.
+ * `mode` is restricted to `signal` until 6J/6K qualify lot modes.
+ */
+export const personalProjectionRevisions = pgTable("personal_projection_revisions", {
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  ownerId: uuid("owner_id").notNull().references(() => accountUsers.id),
+  citySlug: text("city_slug").notNull(),
+  mode: text("mode").notNull().default("signal"),
+  revision: integer("revision").notNull().default(0),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.workspaceId, t.ownerId, t.citySlug, t.mode] }),
+}));
+
+/**
+ * 6L1 shared workspace projection revisions: one monotonic counter per
+ * (workspace, city, mode), bumped by moderator archive transitions visible
+ * to every member.
+ */
+export const workspaceProjectionRevisions = pgTable("workspace_projection_revisions", {
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  citySlug: text("city_slug").notNull(),
+  mode: text("mode").notNull().default("signal"),
+  revision: integer("revision").notNull().default(0),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.workspaceId, t.citySlug, t.mode] }),
+}));
+
+/**
+ * 6L1 per-city graph source revisions: the content digest covers served
+ * signal content only (community excluded, like the 6B fingerprint), so a
+ * community-only refresh or a backdated identical import bumps nothing.
+ */
+export const graphSourceRevisions = pgTable("graph_source_revisions", {
+  citySlug: text("city_slug").primaryKey(),
+  revision: integer("revision").notNull().default(0),
+  contentDigest: text("content_digest").notNull().default(""),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const schema = {
   facetCommands,
   facetEvents,
@@ -914,6 +958,9 @@ export const schema = {
   facetStreamAttachments,
   facetCommandContexts,
   facetActivationState,
+  personalProjectionRevisions,
+  workspaceProjectionRevisions,
+  graphSourceRevisions,
   workspaces,
   workspaceMemberships,
   workspaceMembershipEvents,

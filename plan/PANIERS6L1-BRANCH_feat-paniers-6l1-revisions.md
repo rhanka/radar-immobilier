@@ -89,7 +89,7 @@ it); no legacy reader/buffer retirement here (6K owns it).
 
 - [x] **Lot 0 — Baseline**: read §3.6 + `### 6L1`; confirm next free
   migration number at merge time; write this plan.
-- [ ] **Lot 1 — Schema**: `0020` personal/workspace projection revisions
+- [x] **Lot 1 — Schema**: `0020` personal/workspace projection revisions
   plus city graph source revisions; journal entry; schema mirror.
 - [ ] **Lot 2 — Token**: pure `projection-scope.ts` composition and city
   content digest (community excluded); no counters, no timestamps.
@@ -112,4 +112,4 @@ it); no legacy reader/buffer retirement here (6K owns it).
 - [ ] **Lot N — Close (not covered)**: run verification, push, PR, CI,
   merge commit (no squash/rebase), keep branch, move plan to `plan/done/`.
 
-- Delivery checkpoint: 1.
+- Delivery checkpoint: 2.
