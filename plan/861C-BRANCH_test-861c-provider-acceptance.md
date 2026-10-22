@@ -81,3 +81,4 @@ Keep current host API names in one test adaptation module pending spec r2.
 - [x] Slice 013: add finalization authorization case.
 - [x] Slice 014: add finalization authorization case.
 - [x] Slice 015: add finalization authorization case.
+- [x] Slice 016: add finalization authorization case.
