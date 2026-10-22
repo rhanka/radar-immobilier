@@ -14,10 +14,14 @@ CONFIG
 mutate() {
   node --input-type=module - "$@" <<'JS'
 import { readFileSync, writeFileSync } from "node:fs";
-const [file, before, after] = process.argv.slice(2);
-const source = readFileSync(file, "utf8");
-if (source.split(before).length !== 2) throw new Error("Mutation anchor must occur once");
-writeFileSync(file, source.replace(before, after));
+const [file, ...edits] = process.argv.slice(2);
+let source = readFileSync(file, "utf8");
+for (let index = 0; index < edits.length; index += 2) {
+  const [before, after] = edits.slice(index, index + 2);
+  if (source.split(before).length !== 2) throw new Error("Mutation anchor must occur once");
+  source = source.replace(before, after);
+}
+writeFileSync(file, source);
 JS
 }
 test_case() {
@@ -56,9 +60,9 @@ proof unauthorized "$route" api "$cycles" 'authorize each cycle before emitting'
 proof private api/src/services/facets/projection-invalidation.ts api "$cycles" 'emit no private change' \
   'if (lastEmittedToken === currentToken) return { kind: "steady" };' '/* private silence bypass */'
 proof idle-revocation "$route" api "$cycles" 'close an idle stream' \
-  'send(invalidationSseFrame("closed", { reason: end.reason }));
+  'if (canAccept()) send(invalidationSseFrame("closed", { reason: end.reason }));
                 close();' \
-  'send(invalidationSseFrame("closed", { reason: end.reason }));'
+  'if (canAccept()) send(invalidationSseFrame("closed", { reason: end.reason }));'
 proof incompatible "$route" api src/routes/scoped-projection-events-db.test.ts \
   'resynchronize on restart and on incompatible cursors' \
   'send(invalidationSseFrame("resync",' \
@@ -83,9 +87,40 @@ proof retry "$observer" ui "$races" 'retry failed reloads without another server
   'pendingRetry = schedule(() => { void wake({ kind: "resync" }); }, PROJECTION_RECONNECT_DELAY_MS);' \
   '/* failed fetch never retried */'
 proof reconnect-denied "$observer" ui "$races" 'clear denied reconnects when EventSource' \
-  '    void wake({ kind: "resync" });' '    /* reconnect never rechecks authorization */'
+  'pendingReconnect = schedule(connect, deps.reconnectDelayMs ?? PROJECTION_RECONNECT_DELAY_MS);
+    void wake({ kind: "resync" });' \
+  'pendingReconnect = schedule(connect, deps.reconnectDelayMs ?? PROJECTION_RECONNECT_DELAY_MS);
+    /* reconnect never rechecks authorization */'
 proof final-credential "$route" api "$lifecycle" 'recheck expiration immediately before emitting' \
   'try { requireCredential(); } catch {' 'try { /* final credential guard bypass */ } catch {'
+proof reconnect-starvation "$observer" ui "$races" 'reconnects overlap deferred denials' \
+  '    if (fetchInflight) {
+      refetchRequested = true;
+      return;
+    }' '' \
+  '      if (disposed) return;
+      const status' '      if (disposed || operation !== state.operation) return;
+      const status'
+proof slow-consumer "$route" api "$lifecycle" 'blocked consumer and close on revocation' \
+  'return desired === null || desired > 0;' 'return true;'
+proof saturated-watcher "$route" api "$lifecycle" 'drop a saturated stream within five cycles' \
+  'const maxSaturatedTicks = 5;' 'const maxSaturatedTicks = Infinity;'
+proof resumed-authorization "$route" api "$lifecycle" 'authorize again before flushing' \
+  '          try {
+            let current: typeof scope;' '          try {
+            flushPendingInvalidation();
+            let current: typeof scope;'
+transport=ui/src/lib/signals/signal-projection-invalidation.ts
+proof swapped-control-frames "$transport" ui src/lib/signals/signal-projection-invalidation.test.ts \
+  'preserve ping frame identity' \
+  'if (event === "ping" || event === "unavailable") return { kind: event };' \
+  'if (event === "ping" || event === "unavailable") return { kind: event === "ping" ? "unavailable" : "ping" };'
+for kind in ping unavailable; do
+  proof "$kind-as-invalidation" "$transport" ui src/lib/signals/signal-projection-invalidation.test.ts \
+    "ignore a live $kind frame" \
+    'if (streamEvent.kind === "unavailable" || streamEvent.kind === "ping") return "ignore";' \
+    "if (streamEvent.kind === \"$kind\") return \"fetch\";"
+done
 diff -r /workspace/api/src api/src
 diff -r /workspace/api/drizzle api/drizzle
 diff -r /workspace/ui/src ui/src
