@@ -67,3 +67,4 @@ Keep current host API names in one test adaptation module pending spec r2.
 
 ## Q1/Q2 delivery slices
 - [x] Slice 001: harden artifact acceptance qualification.
+- [x] Slice 002: bind r2 provider contracts.
