@@ -88,20 +88,18 @@ export function observeProjection<T extends ProjectionSnapshot>(
   let disposed = false;
   const refresh = async () => {
     const operation = beginProjectionRead(state);
-    const reconciled = await reconcileProjection(state, live, fetch, operation);
-    if (!reconciled) return;
-    // Final guard immediately before applying the snapshot: disposal,
-    // live context (account and workspace), city, mode, and the operation
-    // token are rechecked here with no suspension between this control
-    // and the rebuild, so a disposal or an account switch landing after
-    // validation still skips the stale rebuild.
+    const snapshot = await fetch();
+    // Single synchronous sequence with no suspension between the final
+    // validation, the acknowledgment, and the application: a discarded
+    // response acknowledges nothing, so a later failure keeps the last
+    // displayed snapshot and its token consistent.
     if (disposed) return;
     const current = live();
     if (!isLiveScopedContext(state.launched, current)) return;
     if (state.launched.citySlug !== current.citySlug || state.launched.mode !== current.mode) return;
     if (state.operation !== operation) return;
-    const snapshot = state.snapshot;
-    if (snapshot === null) return;
+    state.ackedToken = snapshot.token;
+    state.snapshot = snapshot;
     rebuild(snapshot);
   };
   const wake = () => { void refresh().catch(() => {}); };
