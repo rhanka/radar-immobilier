@@ -114,7 +114,7 @@ Review integration (both non-blocking points):
       policy selectors against the pod template in all four phases.
 - [x] Fourth pass: exercise valid phase fixtures, indirect sources and both
       NetworkPolicy selectors with copy/fail/restore/cmp regressions.
-- [ ] Fourth pass: bound HTTP probes and terminate every tracked child,
+- [x] Fourth pass: bound HTTP probes and terminate every tracked child,
       including a listener that accepts livez without answering.
 
 - [x] BR861C-EX1: root Makefile exception limited to `k8s-validate` offline
