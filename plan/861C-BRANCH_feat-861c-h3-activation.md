@@ -81,6 +81,7 @@ Review integration (both non-blocking points):
   - `tmp/861c-h3-p4/**` (ignored evidence, copies, local Git and bundle)
   - `tmp/861c-h3-p4-fix/**` (review correction evidence, local Git and bundle)
   - `tmp/861c-h3-p4-fix2/**` (second correction evidence, local Git and bundle)
+  - `tmp/861c-h3-p4-fix3/**` (third correction evidence, local Git and bundle)
 - **Forbidden Paths (must not change in this branch)**:
   - `api/src/config.ts`, root `docker-compose*.yml`
   - `rules/**`, agent bootstrap files, other `plan/*-BRANCH_*.md`
@@ -192,6 +193,8 @@ Review integration (both non-blocking points):
 - [x] Second-pass correction 5: Remove alias tracking and require the strict guard for both source files.
 - [x] Second-pass correction 6: Execute transpiled modules in an isolated context; preserve invalid PORT errors.
 - [x] Second-pass correction 7: Verify PORT-only runtime reads through a Proxy and a real HTTP listener.
+- [x] Third-pass correction 3: ban constructor/getPrototypeOf/__proto__ in the AST guard as defense in depth.
+- [x] Third-pass correction 4: reject calculated dynamic imports and cover both independent-review bypasses.
 - [x] Operator runbook: validate preparation and the H2 rollback plan before
   GO; keep the real content boundary and a matching reviewed CD target.
 
