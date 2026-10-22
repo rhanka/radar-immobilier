@@ -3,8 +3,10 @@
  *
  * Appends the planned main transition plus any composite deselection
  * retirements in one transaction, with stream bindings and terminal
- * registrations. An unchanged command appends nothing and returns the
- * existing head; restoration never recreates a removed selection.
+ * registrations. An unchanged command appends nothing and returns every
+ * explicitly targeted existing head; an unchanged facet keeps its head
+ * and observation without a new transition. Restoration never recreates
+ * a removed selection.
  */
 import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
@@ -51,15 +53,20 @@ export async function appendLotTransition(
   if (desired.state === "active" && plan.facet === "archive") {
     await assertArchiveReason(tx, desired, internal);
   }
+  const mainCurrent = plan.main.current;
+  const mainUnchanged = mainCurrent !== null && sameValue(plan, mainCurrent);
+  const mainNeedsWrite = !mainUnchanged
+    && !(mainCurrent === null && desired.state === "inactive");
+  const orderedRemovals = [...plan.removals].sort((left, right) =>
+    (left.basket ?? "").localeCompare(right.basket ?? ""));
   const removalsActive = plan.removals.filter((removal) => removal.current?.state === "active");
-  if (plan.main.current && sameValue(plan, plan.main.current) && removalsActive.length === 0) {
-    return { appended: [], heads: [plan.main.current] };
-  }
-  if (!plan.main.current && desired.state === "inactive" && removalsActive.length === 0) {
-    return { appended: [], heads: [] };
+  if (!mainNeedsWrite && removalsActive.length === 0) {
+    return { appended: [],
+      heads: [...(mainCurrent ? [mainCurrent] : []),
+        ...orderedRemovals.flatMap((removal) => (removal.current ? [removal.current] : []))] };
   }
   let streamId = plan.main.ref.id;
-  if (streamId === "") {
+  if (mainNeedsWrite && streamId === "") {
     const [stream] = await tx.insert(facetStreams).values({
       workspaceId, scope, ownerId: plan.ownerId, targetType: "lot", mode: command.mode,
       citySlug: target.citySlug, nodeType: "Lot", nodeId: target.canonicalId,
@@ -69,12 +76,15 @@ export async function appendLotTransition(
   }
   const appended: Array<typeof facetEvents.$inferSelect> = [];
   const heads: Array<typeof facetEvents.$inferSelect> = [];
-  const event = await insertLotEvent(tx, scope, actorId, command, target, plan,
-    streamId, plan.main.current, desired, fingerprint, commandDigest, internal);
-  appended.push(event);
-  heads.push(event);
-  for (const removal of [...plan.removals].sort((left, right) =>
-    (left.basket ?? "").localeCompare(right.basket ?? ""))) {
+  if (mainNeedsWrite) {
+    const event = await insertLotEvent(tx, scope, actorId, command, target, plan,
+      streamId, mainCurrent, desired, fingerprint, commandDigest, internal);
+    appended.push(event);
+    heads.push(event);
+  } else if (mainCurrent) {
+    heads.push(mainCurrent);
+  }
+  for (const removal of orderedRemovals) {
     if (removal.current?.state !== "active") {
       if (removal.current) heads.push(removal.current);
       continue;
