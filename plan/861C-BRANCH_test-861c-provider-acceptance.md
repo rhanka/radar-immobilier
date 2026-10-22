@@ -70,3 +70,4 @@ Keep current host API names in one test adaptation module pending spec r2.
 - [x] Slice 002: bind r2 provider contracts.
 - [x] Slice 003: bind r2 provider contracts.
 - [x] Slice 004: bind r2 provider contracts.
+- [x] Slice 005: bind r2 provider contracts.
