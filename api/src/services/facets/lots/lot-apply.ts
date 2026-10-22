@@ -16,6 +16,7 @@ import {
   facetStreams,
 } from "../../../db/schema.js";
 import { FacetError } from "../target.js";
+import { normalizeAskingPrice } from "./lot-values.js";
 import { FACET_PROFILE } from "../codebook.js";
 import {
   LOT_IMPORT_PROFILE,
@@ -31,6 +32,13 @@ export interface LotImportProvenance {
   sourceAuthor: string;
   sourceCreatedAt: string;
   importRunId: string;
+  sourceRowId: string | null;
+  sourceChainId: string | null;
+}
+
+export interface LotAppendOutcome {
+  appended: Array<typeof facetEvents.$inferSelect>;
+  heads: Array<typeof facetEvents.$inferSelect>;
 }
 
 export async function appendLotTransition(
@@ -38,17 +46,17 @@ export async function appendLotTransition(
   command: LotCommand, target: LotTarget, plan: LotPlan,
   fingerprint: string, commandDigest: string,
   internal: { allowImportProvenance?: boolean; provenance?: LotImportProvenance | null },
-): Promise<typeof facetEvents.$inferSelect | null> {
+): Promise<LotAppendOutcome> {
   const desired = plan.desired;
   if (desired.state === "active" && plan.facet === "archive") {
     await assertArchiveReason(tx, desired, internal);
   }
   const removalsActive = plan.removals.filter((removal) => removal.current?.state === "active");
   if (plan.main.current && sameValue(plan, plan.main.current) && removalsActive.length === 0) {
-    return plan.main.current;
+    return { appended: [], heads: [plan.main.current] };
   }
   if (!plan.main.current && desired.state === "inactive" && removalsActive.length === 0) {
-    return null;
+    return { appended: [], heads: [] };
   }
   let streamId = plan.main.ref.id;
   if (streamId === "") {
@@ -59,10 +67,18 @@ export async function appendLotTransition(
     }).returning();
     streamId = stream!.id;
   }
+  const appended: Array<typeof facetEvents.$inferSelect> = [];
+  const heads: Array<typeof facetEvents.$inferSelect> = [];
   const event = await insertLotEvent(tx, scope, actorId, command, target, plan,
     streamId, plan.main.current, desired, fingerprint, commandDigest, internal);
-  for (const removal of plan.removals) {
-    if (removal.current?.state !== "active") continue;
+  appended.push(event);
+  heads.push(event);
+  for (const removal of [...plan.removals].sort((left, right) =>
+    (left.basket ?? "").localeCompare(right.basket ?? ""))) {
+    if (removal.current?.state !== "active") {
+      if (removal.current) heads.push(removal.current);
+      continue;
+    }
     const removalStreamId = removal.ref.id;
     if (removalStreamId === "") continue;
     const deselected = await insertLotEvent(tx, scope, actorId, command, target,
@@ -71,9 +87,10 @@ export async function appendLotTransition(
       { state: "inactive", reasonCode: null, profileId: null, verdict: null,
         pipelineStatus: null, askingPrice: null, listingUrl: null },
       fingerprint, commandDigest, { allowImportProvenance: internal.allowImportProvenance ?? false });
-    void deselected;
+    appended.push(deselected);
+    heads.push(deselected);
   }
-  return event;
+  return { appended, heads };
 }
 
 function sameValue(plan: LotPlan, event: typeof facetEvents.$inferSelect): boolean {
@@ -81,8 +98,13 @@ function sameValue(plan: LotPlan, event: typeof facetEvents.$inferSelect): boole
   return event.state === desired.state
     && (event.reasonCode ?? null) === desired.reasonCode
     && (event.pipelineStatus ?? null) === desired.pipelineStatus
-    && (event.askingPrice ?? null) === desired.askingPrice
+    && normalizePrice(event.askingPrice) === normalizePrice(desired.askingPrice)
     && (event.listingUrl ?? null) === desired.listingUrl;
+}
+
+function normalizePrice(value: string | null | undefined): string | null {
+  if (value === null || value === undefined) return null;
+  return normalizeAskingPrice(value);
 }
 
 async function assertArchiveReason(
@@ -103,6 +125,26 @@ async function assertArchiveReason(
   if (!reason) throw new FacetError(422, "invalid_reason_code");
 }
 
+/** Immutable source link: import projections carry it, ordinary writes never invent it. */
+function importLink(
+  provenance: LotImportProvenance | typeof facetEvents.$inferSelect | null | undefined,
+): LotImportProvenance | null {
+  if (!provenance) return null;
+  if (provenance.importRunId === null || provenance.importRunId === undefined) return null;
+  if (provenance.sourceAuthor === null || provenance.sourceAuthor === undefined) return null;
+  const createdAt = provenance.sourceCreatedAt instanceof Date
+    ? provenance.sourceCreatedAt.toISOString()
+    : provenance.sourceCreatedAt;
+  if (!createdAt) return null;
+  return {
+    sourceAuthor: provenance.sourceAuthor,
+    sourceCreatedAt: createdAt,
+    importRunId: provenance.importRunId,
+    sourceRowId: provenance.sourceRowId ?? null,
+    sourceChainId: provenance.sourceChainId ?? null,
+  };
+}
+
 async function insertLotEvent(
   tx: LotTx, scope: LotScope, actorId: string, command: LotCommand, target: LotTarget,
   plan: Pick<LotPlan, "facet" | "basket" | "ownerId">, streamId: string,
@@ -115,7 +157,8 @@ async function insertLotEvent(
     await tx.update(facetEvents).set({ supersededBy: id }).where(eq(facetEvents.id, current.id));
   }
   const isImportReason = desired.reasonCode === LOT_IMPORT_UNKNOWN_REASON && internal.allowImportProvenance;
-  const provenance = internal.provenance ?? (command.mutation.action === "restore" ? current : null);
+  const provenance = importLink(internal.provenance
+    ?? (command.mutation.action === "restore" ? current : null));
   const [event] = await tx.insert(facetEvents).values({
     id, scope, ownerId: plan.ownerId, actorId,
     targetType: "lot", citySlug: target.citySlug, nodeType: "Lot", nodeId: target.canonicalId,
@@ -127,6 +170,8 @@ async function insertLotEvent(
     sourceAuthor: provenance?.sourceAuthor ?? null,
     sourceCreatedAt: provenance?.sourceCreatedAt ? new Date(provenance.sourceCreatedAt) : null,
     importRunId: provenance?.importRunId ?? null,
+    sourceRowId: provenance?.sourceRowId ?? null,
+    sourceChainId: provenance?.sourceChainId ?? null,
     observedFingerprint: fingerprint,
     commandKey: command.command_key.toLowerCase(), commandDigest,
     supersedes: current?.id ?? null,

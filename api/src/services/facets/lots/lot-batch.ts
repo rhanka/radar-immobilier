@@ -147,9 +147,10 @@ export async function writeLotBatch(
     let eventsAppended = 0;
     for (const entry of prepared) {
       const before = entry.plan.main.current?.id ?? null;
-      const appended = await appendLotTransition(tx, workspaceId, scope, actorId,
+      const outcome = await appendLotTransition(tx, workspaceId, scope, actorId,
         entry.itemCommand, entry.itemCommand.target, entry.plan,
         entry.resolvedFingerprint, commandDigest, {});
+    const appended = outcome.appended[0] ?? outcome.heads[0] ?? null;
       const snapshot = appended ? lotEventResponse(appended)
         : entry.plan.main.current ? lotEventResponse(entry.plan.main.current) : null;
       if (appended && appended.id !== before) {
