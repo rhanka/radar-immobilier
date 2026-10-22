@@ -82,6 +82,24 @@ case "$1" in
     local_git bundle verify "$task_dir/6k.bundle"
     sha256sum "$task_dir/6k.bundle" > "$task_dir/bundle.sha256"
     ;;
+  finalize-6k)
+    # Record final review corrections after an interrupted packaging audit.
+    local_git add -- api/src/services/facets/lots/lot-cutover-run.ts "$plan" \
+      tools/make/paniers-lot6.mk tools/make/paniers-lot6k-deliver.sh tools/make/paniers-lot6k-slices.txt
+    local_git diff --cached --numstat | awk '{n+=$1+$2; f++} END {exit !(n>0 && n<=150 && f<=15)}'
+    scope "$(local_git write-tree)"
+    subject='chore(paniers): finalize verified cutover delivery'
+    make -f tools/make/paniers-lot6.mk commit MSG="$subject" LOT=6K ENV="$ENV"
+    sha=$(local_git rev-parse HEAD)
+    changes=$(local_git diff --numstat "$sha^" "$sha" | awk '{n+=$1+$2; f++} END {print n "\t" f}')
+    printf '%s\t%s\t%s\n' "$sha" "$subject" "$changes" >> "$task_dir/commits.tsv"
+    local_git diff --check "$base" HEAD
+    local_git diff --exit-code HEAD -- api ui tools/make "$plan"
+    branch=$(local_git branch --show-current)
+    local_git bundle create "$task_dir/6k.bundle" "$base..$branch"
+    local_git bundle verify "$task_dir/6k.bundle"
+    sha256sum "$task_dir/6k.bundle" > "$task_dir/bundle.sha256"
+    ;;
   audit-6k)
     for script in tools/make/paniers-lot6{k-run,k-mutation,k-deliver,-verify}.sh; do bash -n "$script"; done
     local_git merge-base --is-ancestor "$base" HEAD
