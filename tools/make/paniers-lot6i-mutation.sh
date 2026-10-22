@@ -69,6 +69,20 @@ proof duplicate-terminal api/drizzle/0018_facet_scope_bindings.sql \
   src/services/facets/workspace-head-enforcement-db.test.ts 'second null-basket terminal' 'AssertionError' \
   'PERFORM id FROM facet_streams WHERE id = p_stream FOR UPDATE;' \
   'RETURN; PERFORM id FROM facet_streams WHERE id = p_stream FOR UPDATE;'
+proof unresolved-history api/src/services/facets/workspace-discarded.ts \
+  src/services/facets/workspace-union-db.test.ts 'late-admitted account' 'promise resolved' \
+  'if (unresolved) throw new ScopeError(503, "personal_history_unresolved");' \
+  'if (false && unresolved) throw new ScopeError(503, "personal_history_unresolved");'
+proof cross-family-lock api/src/services/facets/workspace-writer.ts \
+  src/services/facets/workspace-receipts-db.test.ts 'concurrent same-key commands' 'idempotency_key_conflict' \
+  '["scoped-command", actorId, key]' '["workspace-archive-command", actorId, key]'
+proof missing-reason api/src/routes/scoped-workspace-archive.ts \
+  src/routes/scoped-workspace-archive-db.test.ts 'moderator' 'expected 400 to be 422' \
+  'reasonCode: reasonCode.optional()' 'reasonCode: reasonCode'
+proof workspace-first-restore api/src/services/facets/workspace-reader.ts \
+  src/services/facets/workspace-archive-db.test.ts 'workspace archive restores first' 'expected false to be true' \
+  'return personal?.state === "active" || workspace?.state === "active";' \
+  'return workspace?.state === "active";'
 diff -r /workspace/api/src api/src
 diff -r /workspace/api/drizzle api/drizzle
 echo 'all copied API/SQL sources restored: diff=0' | tee -a "$identity"
