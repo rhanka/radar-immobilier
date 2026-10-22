@@ -75,6 +75,10 @@ describeDb("6I workspace archive HTTP contract", () => {
     expect(created.status).toBe(200);
     const original = await created.json();
     expect(await (await post("discard", key, discard)).json()).toEqual(original);
+    const missingReason = await post("discard", randomUUID(),
+      { target, expectedHeadId: null, displayedFingerprint: fingerprint });
+    expect(missingReason.status).toBe(422);
+    expect(await missingReason.json()).toMatchObject({ error: "reason_code_required" });
     session = { sub: f.contributor.sub };
     expect((await post("discard", randomUUID(), discard)).status).toBe(403);
     session = { sub: f.outsider.sub };
