@@ -98,7 +98,7 @@ it); no legacy reader/buffer retirement here (6K owns it).
   served signal content changes.
 - [x] **Lot 4 — Reads**: authorized scope read (approval, membership with
   capabilities, epoch, unresolved history) plus bounded coherent refetch.
-- [ ] **Lot 5 — Routes**: guarded token and coherent-city routes, private
+- [x] **Lot 5 — Routes**: guarded token and coherent-city routes, private
   caching, unmounted.
 - [ ] **Lot 6 — UI**: reconciliation coordinator over `viewerKey`
   incarnation and workspace guards; superseded responses ignored; failed
@@ -112,4 +112,4 @@ it); no legacy reader/buffer retirement here (6K owns it).
 - [ ] **Lot N — Close (not covered)**: run verification, push, PR, CI,
   merge commit (no squash/rebase), keep branch, move plan to `plan/done/`.
 
-- Delivery checkpoint: 8.
+- Delivery checkpoint: 9.
