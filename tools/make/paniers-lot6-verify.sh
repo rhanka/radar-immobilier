@@ -60,12 +60,14 @@ if [[ "$1" == clean ]]; then
   exit
 fi
 if [[ "$1" == inspect ]]; then
+  uptime
   docker ps -a --filter "label=com.docker.compose.project=radar-$ENV" --format '{{.Names}} {{.Status}}'
   docker volume ls --filter "label=com.docker.compose.project=radar-$ENV" --format '{{.Name}}'
   docker network ls --filter "label=com.docker.compose.project=radar-$ENV" --format '{{.Name}}'
   exit
 fi
 df -h "$PWD" /var/lib/docker | tee "$log_dir/disk-before.log"
+uptime | tee "$log_dir/host-load-before.log"
 if [[ $(df -Pk "$PWD" | awk 'NR==2 {print $4}') -lt 10485760 ]]; then
   echo 'STOP: less than 10 GiB available' >&2
   exit 3
@@ -101,8 +103,11 @@ disk_monitor=$!
 tar --exclude='.env*' --exclude=node_modules --exclude=dist --exclude=.svelte-kit \
   -cf "$runtime_dir/source.tar" api packages ui radar/ontology tools/make tools/h4-mcp.mk deploy/k8s/41-immo-mcp-ingress.yaml deploy/k8s/scrape/run-chunks.sh package.json package-lock.json tsconfig.base.json eslint.config.js
 sha256sum "$runtime_dir/source.tar" > "$log_dir/source.sha256"
-if [[ "$LOT" == 6J ]]; then
-  echo "${RUNNER_VERSION:-6J-2}" > "$log_dir/runner-version.txt"
+if [[ "$LOT" == 6J || "$LOT" == 6L2 ]]; then
+  case "$LOT" in
+    6J) echo "${RUNNER_VERSION:-6J-2}" > "$log_dir/runner-version.txt" ;;
+    6L2) echo "${RUNNER_VERSION:-6L2-2}" > "$log_dir/runner-version.txt" ;;
+  esac
   tar -tf "$runtime_dir/source.tar" > "$log_dir/archived-paths.txt"
   tar -tf "$runtime_dir/source.tar" | while IFS= read -r path; do
     [[ "$path" == */ ]] || sha256sum "$path"
@@ -166,7 +171,7 @@ CONFIG
     bash /workspace/tools/make/paniers-lot6j-fix-mutation.sh
     exit
   fi
-  if [ "$LOT" = 6L1 ] && { [ "$1" = verify ] || [ "$1" = typecheck ]; }; then
+  if { [ "$LOT" = 6L1 ] || [ "$LOT" = 6L2 ]; } && { [ "$1" = verify ] || [ "$1" = typecheck ]; }; then
     ./node_modules/.bin/tsc --noEmit --skipLibCheck --strict --target ES2022 --module ESNext \
       --moduleResolution Bundler ui/src/lib/signals/signal-projection*.ts
   fi
@@ -180,19 +185,26 @@ CONFIG
       6I) bash /workspace/tools/make/paniers-lot6i-mutation.sh ;;
       6J) bash /workspace/tools/make/paniers-lot6j-mutation.sh ;;
       6L1) bash /workspace/tools/make/paniers-lot6l1-mutation.sh ;;
+      6L2) bash /workspace/tools/make/paniers-lot6l2-mutation.sh ;;
       *) exit 2 ;;
     esac
     exit
   fi
-  if [ "$1" = regression ]; then
+  if [ "$1" = regression ] || [ "$1" = test-ui ]; then
     cat > /workspace/ui/vitest.isolated.config.ts <<'"'"'CONFIG'"'"'
 import config from "./vitest.config.js";
 export default { ...config, envDir: false, test: { ...config.test, fileParallelism: false, maxWorkers: 2 } };
 CONFIG
+    if [ "$1" = test-ui ]; then
+      set -f
+      npm run test --workspace=ui -- --config vitest.isolated.config.ts $2
+      exit
+    fi
     npm run test --workspace=ui -- --config vitest.isolated.config.ts \
       facets 6a-head 6b-version signaux-reglements signal-facets-client SignalFacetControls selection-bucket selection-camera signal-facet-scope \
-      $(if [ "$LOT" = 6I ] || [ "$LOT" = 6J ] || [ "$LOT" = 6L1 ]; then echo signal-facet-workspace; fi) \
-      $(if [ "$LOT" = 6L1 ]; then echo signal-projection; fi)
+      $(if [ "$LOT" = 6I ] || [ "$LOT" = 6J ] || [ "$LOT" = 6L1 ] || [ "$LOT" = 6L2 ]; then echo signal-facet-workspace; fi) \
+      $(if [ "$LOT" = 6L1 ] || [ "$LOT" = 6L2 ]; then echo signal-projection; fi) \
+      $(if [ "$LOT" = 6L2 ]; then echo signal-projection-invalidation; fi)
     cd /workspace/packages/immo-mcp
     ../../node_modules/.bin/tsc --noEmit -p tsconfig.json
     ../../node_modules/.bin/vitest run --config /workspace/api/vitest.isolated.config.ts src
@@ -206,6 +218,7 @@ CONFIG
         6I) npx --no-install eslint api/src/services/facets api/src/routes/scoped-workspace-archive*.ts ui/src/lib/signals/signal-facet-workspace*.ts ;;
         6J) npx --no-install eslint api/src/services/facets/lots api/src/routes/scoped-lot-*.ts api/src/services/facets/activation-db.test.ts api/src/services/workspaces/cli-db.test.ts ;;
         6L1) npx --no-install eslint api/src/services/facets/projection*.ts api/src/services/facets/scoped-writer.ts api/src/services/facets/workspace-writer.ts api/src/services/graph/graph-store.ts api/src/routes/scoped-projection*.ts ui/src/lib/signals/signal-projection*.ts ;;
+        6L2) npx --no-install eslint api/src/services/facets/projection-invalidation*.ts api/src/routes/scoped-projection-events*.ts ui/src/lib/signals/signal-projection-invalidation*.ts ;;
         *) npx --no-install eslint api/src/services/facets ;;
       esac
       ;;
@@ -216,6 +229,8 @@ CONFIG
       LOG_LEVEL=info npm run db:migrate --workspace=api
       cd api
       if [ "$1" = api-ci ]; then
+        getconf _NPROCESSORS_ONLN
+        cat /sys/fs/cgroup/cpu.max /proc/pressure/cpu
         npm run test -- --config vitest.ci.config.ts
       else
         set -f
