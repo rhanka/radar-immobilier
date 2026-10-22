@@ -87,25 +87,38 @@ proof sources-fence api/drizzle/0023_facet_lot_versions_fence.sql api \
   'WHERE maintenance_barrier AND NOT destination_open' \
   'WHERE false'
 proof unknown-fence api/src/services/facets/lots/lot-legacy-fence.ts api \
-  src/routes/lot-cutover-stream.test.ts 'recover it on the same connection via publication' \
+  src/routes/lot-cutover-stream.test.ts 'open connection when the fence read fails' \
   '  } catch {
     return "unknown";' \
   '  } catch {
     return "barrier";'
-proof outage-filter api/src/routes/chat.ts api \
-  src/routes/lot-cutover-stream.test.ts 'recover it on the same connection via publication' \
-  'if (!isSuspendedMark(frame)) {' 'if (true) {'
-proof suspended-resume api/src/routes/chat.ts api \
-  src/routes/lot-cutover-stream.test.ts 'recover it on the same connection via publication' \
-  'if (current === "none") {' 'if (false && current === "none") {'
-proof reopened-resume api/src/routes/chat.ts api \
-  src/routes/lot-cutover-stream.test.ts 'replay and deliver marks on a new connection after recovery' \
-  'let suspendLegacyMarks = fence === "unknown";' \
-  'let suspendLegacyMarks = fence === "unknown" || fence === "none";'
-proof heartbeat-resume api/src/routes/chat.ts api \
-  src/routes/lot-cutover-stream.test.ts 'recover it on the same connection via heartbeat' \
-  '          void revalidateFence();
-          try {' '          try {'
+proof unknown-retires api/src/routes/chat.ts api \
+  src/routes/lot-cutover-stream.test.ts 'open connection when the fence read fails' \
+  'if (fence === "open" || fence === "barrier") retireLegacyMarkDelivery();' \
+  'if (fence !== "none") retireLegacyMarkDelivery();'
+proof open-retires api/src/routes/chat.ts api \
+  src/routes/lot-cutover-stream.test.ts 'retire preloaded replica buffers when durable state is open' \
+  'if (fence === "open" || fence === "barrier") retireLegacyMarkDelivery();' \
+  'if (false) retireLegacyMarkDelivery();'
+proof retirement-closes api/src/routes/chat.ts api \
+  src/routes/lot-cutover-stream.test.ts 'discard queued frames' \
+  'controller.error(new Error("legacy_mark_delivery_retired"));' \
+  'controller.close();'
+proof late-read-loss api/src/routes/chat.ts api \
+  src/routes/lot-cutover-stream.test.ts 'open connection when the fence read fails' \
+  'unsubscribe = subscribe(deliver);' \
+  'unsubscribe = subscribe((frame) => {
+          if (frame.streamId === "prospect-marks" && fence === "unknown" && db) {
+            void legacyMarksFence(db).then((current) => {
+              if (current === "none") deliver(frame);
+            });
+          } else deliver(frame);
+        });'
+proof confirmed-reopens api/src/services/chat/stream-bus.ts api \
+  src/routes/lot-cutover-stream.test.ts 'keep a confirmed cutover closed' \
+  '  subscribers.add(subscriber);' \
+  '  retiredTypes.clear();
+  subscribers.add(subscriber);'
 diff -r /workspace/api/src api/src
 diff -r /workspace/api/drizzle api/drizzle
 diff -r /workspace/ui/src ui/src

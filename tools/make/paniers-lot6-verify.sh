@@ -124,7 +124,7 @@ if [[ "$LOT" == 6J ]]; then
     [[ "$path" == */ ]] || sha256sum "$path"
   done > "$log_dir/archived-files.sha256"
 elif [[ "$LOT" == 6K ]]; then
-  echo "${RUNNER_VERSION:-6K-6}" > "$log_dir/runner-version.txt"
+  echo "${RUNNER_VERSION:-6K-8}" > "$log_dir/runner-version.txt"
   tar -tf "$runtime_dir/source.tar" > "$log_dir/archived-paths.txt"
   tar -tf "$runtime_dir/source.tar" | while IFS= read -r path; do
     if [[ "$path" == ui/src/lib/components/maps/__6k_baseline__/*.svelte ]]; then
