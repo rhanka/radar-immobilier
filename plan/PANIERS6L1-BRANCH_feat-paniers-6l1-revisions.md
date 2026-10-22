@@ -112,4 +112,4 @@ it); no legacy reader/buffer retirement here (6K owns it).
 - [ ] **Lot N — Close (not covered)**: run verification, push, PR, CI,
   merge commit (no squash/rebase), keep branch, move plan to `plan/done/`.
 
-- Delivery checkpoint: 14.
+- Delivery checkpoint: 15.
