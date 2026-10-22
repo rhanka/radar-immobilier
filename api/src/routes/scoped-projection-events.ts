@@ -5,7 +5,10 @@
  * `replayAll`, no marks/notes bus, no second ledger: durable 6L1 revisions
  * stay the only authority. Every cycle re-polls the 6L1 scope before
  * emitting; revocation closes the stream. Initial connection, restart and
- * incompatible cursor always open with a `resync` frame. */
+ * incompatible cursor always open with a `resync` frame. Invalidations
+ * coalesce to the latest token and emit only while the consumer drains; a
+ * stream that stops consuming is dropped after a bounded number of
+ * saturated cycles without leaking the watcher. */
 import { Hono } from "hono";
 import { z } from "zod";
 import type { Database } from "../db/client.js";
@@ -102,6 +105,10 @@ export function scopedProjectionEventsRoute(deps: ScopedProjectionEventsDeps): H
     let emitted = 0;
     let lastToken = scope.token;
     let lastUnavailable: string | null = null;
+    let pendingToken: string | null = null;
+    let saturatedTicks = 0;
+    /** Consecutive watcher cycles with undeliverable invalidations before an idle stream is dropped. */
+    const maxSaturatedTicks = 5;
     let timer: ReturnType<typeof setTimeout> | null = null;
     let stopped = false;
     let closeStream = () => {};
@@ -128,6 +135,30 @@ export function scopedProjectionEventsRoute(deps: ScopedProjectionEventsDeps): H
           if (deps.maxEvents !== undefined && emitted >= deps.maxEvents) close();
           return true;
         };
+        const canAccept = (): boolean => {
+          const desired = controller.desiredSize;
+          return desired === null || desired > 0;
+        };
+        const noteSaturated = (): void => {
+          saturatedTicks += 1;
+          // A stream that stops consuming while invalidations pile up is
+          // dropped without a revocation frame: the next reconnection
+          // resynchronizes through the authorization path. No watcher leak.
+          if (saturatedTicks >= maxSaturatedTicks) close();
+        };
+        /** Emit the latest coalesced invalidation in one frame once the consumer drains. */
+        const flushPendingInvalidation = (): void => {
+          if (pendingToken === null || stopped) return;
+          if (!canAccept()) {
+            noteSaturated();
+            return;
+          }
+          const token = pendingToken;
+          pendingToken = null;
+          if (send(invalidationSseFrame("invalidated", { token, revisions: revisions() }))) {
+            saturatedTicks = 0;
+          }
+        };
         send(invalidationSseFrame("resync", { token: scope.token, revisions: revisions(), reason,
           cursor: encodeInvalidationCursor({ version: PROJECTION_INVALIDATION_VERSION, sub: session.sub,
             workspaceId: routeWorkspaceId, citySlug: params.data.citySlug,
@@ -141,20 +172,30 @@ export function scopedProjectionEventsRoute(deps: ScopedProjectionEventsDeps): H
             } catch (error) {
               const end = toStreamEnd(error);
               if (end.kind === "closed") {
-                send(invalidationSseFrame("closed", { reason: end.reason }));
+                // Revocation closes even a saturated stream; without capacity
+                // the frame is skipped and the reconnecting client learns the
+                // refusal through the authorization path instead.
+                if (canAccept()) send(invalidationSseFrame("closed", { reason: end.reason }));
                 close();
               } else if (end.reason !== lastUnavailable) {
-                lastUnavailable = end.reason;
-                send(invalidationSseFrame("unavailable", { reason: end.reason }));
+                if (!canAccept()) {
+                  noteSaturated();
+                } else if (send(invalidationSseFrame("unavailable", { reason: end.reason }))) {
+                  lastUnavailable = end.reason;
+                  saturatedTicks = 0;
+                }
               }
               return;
             }
             lastUnavailable = null;
             scope = current;
             const tick = decideInvalidationTick(lastToken, current.token);
-            if (tick.kind === "steady") return;
-            lastToken = tick.token;
-            send(invalidationSseFrame("invalidated", { token: tick.token, revisions: revisions() }));
+            if (tick.kind !== "steady") {
+              // Coalesce only after this cycle has reauthorized the scope.
+              lastToken = tick.token;
+              pendingToken = tick.token;
+            }
+            flushPendingInvalidation();
           } catch { close(); }
           finally { if (!stopped) timer = setTimeout(() => { void tickOnce(); }, watchIntervalMs); }
         };
