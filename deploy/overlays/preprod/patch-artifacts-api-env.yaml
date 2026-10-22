@@ -1,0 +1,25 @@
+# PREPROD artifact S3 credential bindings (861c H3 unit 11). Opaque references
+# only: values live in the operator-provisioned Secret radar-artifacts-preprod
+# (see deploy/k8s/secrets.example.yaml), never in git. Both entries are
+# optional so a missing Secret keeps the capability closed instead of
+# crash-looping the api on the next reconcile. Disabled by default together
+# with patch-artifacts-control.yaml (control mode off, no subjects, no
+# window, no storage coordinates).
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: ARTIFACTS_S3_ACCESS_KEY
+    valueFrom:
+      secretKeyRef:
+        name: radar-artifacts-preprod
+        key: ARTIFACTS_S3_ACCESS_KEY
+        optional: true
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: ARTIFACTS_S3_SECRET_KEY
+    valueFrom:
+      secretKeyRef:
+        name: radar-artifacts-preprod
+        key: ARTIFACTS_S3_SECRET_KEY
+        optional: true
