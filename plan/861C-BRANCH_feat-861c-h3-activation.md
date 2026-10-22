@@ -112,7 +112,7 @@ Review integration (both non-blocking points):
 
 - [x] Fourth pass: validate the complete canonical API envFrom list and denial
       policy selectors against the pod template in all four phases.
-- [ ] Fourth pass: exercise valid phase fixtures, indirect sources and both
+- [x] Fourth pass: exercise valid phase fixtures, indirect sources and both
       NetworkPolicy selectors with copy/fail/restore/cmp regressions.
 - [ ] Fourth pass: bound HTTP probes and terminate every tracked child,
       including a listener that accepts livez without answering.

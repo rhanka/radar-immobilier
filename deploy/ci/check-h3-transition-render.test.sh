@@ -17,6 +17,8 @@ sed -i -e 's/artifacts-content-unverified.invalid/pages.fixture.test/g' \
   -e 's/radar-artifact-content-unverified-tls/fixture-content-tls/g' \
   -e "s#radar-api:latest#radar-api@sha256:$(printf 'a%.0s' {1..64})#g" \
   -e "s#radar-ui:[^ ]*#radar-ui@sha256:$(printf 'b%.0s' {1..64})#g" "$GOOD"
+cp "$GOOD" "$CASE_ROOT/preparation.yaml"
+sed 's/ARTIFACTS_CONTROL_MODE: "off"/ARTIFACTS_CONTROL_MODE: validation/' "$GOOD" >"$CASE_ROOT/activation.yaml"
 PASS=0
 accept() {
   make --no-print-directory -C "$ROOT" -f tools/artifact-host.mk "check-h3-$1-render" H3_RENDER="$2" ENV=test-h3-transition
@@ -61,4 +63,21 @@ reject rollback 's/name: radar-db-credentials/name: radar-artifacts-preprod/g' '
 reject rollback 's/pages.fixture.test/artifacts-content-unverified.invalid/g' 'unfilled content-domain placeholder'
 reject rollback 's#radar-api@sha256:[a-f0-9]*#radar-api:latest#g' 'requires image digest pin'
 reject rollback '/^  name: allow-traefik-to-content-deny$/,/^---$/{s/^  - Ingress$/  - Ingress\n  - Egress/;s/^spec:$/spec:\n  egress:\n  - {}/;}' 'egress forbidden on denial ingress policy'
+cp "$GOOD" "$CASE_ROOT/rollback.yaml"
+for phase in disabled preparation activation rollback; do
+  cp "$CASE_ROOT/$phase.yaml" "$GOOD"
+  H3_RENDER_PHASE="$phase" bash "$CHECK" "$GOOD" >/dev/null
+  echo "ok: unmodified $phase render accepted"; PASS=$((PASS + 1))
+  reject "$phase" '/^  name: radar-api$/,/^---$/{/        - configMapRef:/i\        - secretRef:\n            name: radar-artifacts-shadow
+  }' 'secretRef envFrom forbidden'
+  reject "$phase" '/^  name: radar-api$/,/^---$/{/            name: radar-api$/a\        - configMapRef:\n            name: shadow
+  }' 'exact api envFrom source required'
+  for policy in deny-content-deny-egress allow-traefik-to-content-deny; do
+    reject "$phase" "/^  name: $policy$/,/^---$/{/      app.kubernetes.io\/name: radar-immobilier$/a\\      z-isolation: other
+    }" 'exact denial podSelector required'
+    reject "$phase" "/^  name: $policy$/,/^---$/{/  podSelector:/a\\    matchExpressions:\\n    - key: z-isolation\\n      operator: Exists
+    }" 'exact denial podSelector required'
+  done
+  reject "$phase" '/^  name: radar-artifact-content-deny$/,/^---$/{/        app.kubernetes.io\/name: radar-immobilier$/s/radar-immobilier/other/;}' 'denial pod labels must carry the selector'
+done
 echo "check-h3-transition-render tests: $PASS passed, 0 failed"
