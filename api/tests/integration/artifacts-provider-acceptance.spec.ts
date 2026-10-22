@@ -259,4 +259,55 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
     }
   });
 
+  it("replays HTTP to MCP and MCP to HTTP as one durable release per key", async () => {
+    for (const direction of ["http-first", "mcp-first"]) {
+      const host = (await composeArtifactHost(pool, storageConfig(), rawBlobs()))!;
+      try {
+        requireSelectedProfile(host);
+        const control = createArtifactControl(host, SCOPE, BASE);
+        const route = controlRoute({ auth, accounts: pool, backend: control });
+        const httpPublish = async (args: unknown) => {
+          const response = await route.request("https://app.example.test/publish", {
+            method: "POST", headers: { cookie: await cookie(ACTOR), origin: auth.appBaseUrl,
+              "content-type": "application/json" }, body: JSON.stringify(args),
+          });
+          return { status: response.status, body: await response.json() as Record<string, unknown> };
+        };
+        const ensured = await control.handle("ensure", ACTOR,
+          { bindingName: direction, idempotencyKey: direction });
+        expect(ensured.status).toBe(201);
+        const artifactId = (ensured.body as { artifactId: string }).artifactId;
+        const second = (await composeArtifactHost(pool, storageConfig(), rawBlobs()))!;
+        try {
+          requireSelectedProfile(second);
+          const adapter = createMcpArtifactAdapter(createArtifactControl(second, SCOPE, BASE));
+          const args = { artifactId, files: [{ path: "index.html", mimeType: "text/html", text: "hello" }],
+            idempotencyKey: ` ${direction} ` };
+          const mcp = () => adapter.execute({ method: "POST", path: "/publish", args }, { actorId: ACTOR });
+          const bodyOf = (value: unknown) => "body" in (value as Record<string, unknown>)
+            ? (value as { body: unknown }).body
+            : (value as { ok: boolean; data: unknown }).data;
+          const releasesBefore = await tableCount("releases");
+          const keysBefore = await tableCount("idempotency_keys");
+          const objectsBefore = await s3KeyCount();
+          const first = direction === "http-first" ? await httpPublish(args) : await mcp();
+          const objectsAfter = await s3KeyCount();
+          const replay = direction === "http-first" ? await mcp() : await httpPublish(args);
+          expect(first.status).toBe(201);
+          expect(replay.status).toBe(201);
+          expect(await tableCount("releases")).toBe(releasesBefore + 1);
+          expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
+          expect(objectsAfter).toBeGreaterThan(objectsBefore);
+          expect(await s3KeyCount()).toBe(objectsAfter);
+          expect(bodyOf(replay)).toEqual(bodyOf(first));
+          expect(bodyOf(first)).toEqual({ artifactId, releaseId: expect.any(String),
+            digest: expect.any(String), stableUrl: expect.any(String), pinnedUrl: expect.any(String) });
+          expect(await currentReleaseId(artifactId)).toBe((bodyOf(first) as { releaseId: string }).releaseId);
+        } finally { second.close(); }
+      } finally {
+        host.close();
+      }
+    }
+  });
+
 });
