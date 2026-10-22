@@ -72,6 +72,10 @@ business-event ledger: durable 6L1 revisions stay the only authority.
   and the uncommitted `RAPPORT-SOL-6L2.md`. Reason: versioned copy proofs,
   atomic commits and local bundle with isolated Git metadata. Impact: test
   tooling and delivery only. Rollback: remove these files and bundle.
+- `BR6L2-EX3`: allow `tools/make/paniers-lot6l2-fix-{deliver.sh,slices.txt}`.
+  Reason: deliver review corrections above `960a9c4d` without shared Git writes.
+  Impact: isolated commit checkpoints and a local bundle only.
+  Rollback: remove the fix delivery files and generated bundle.
 
 ## Plan / Todo (lot-based)
 
@@ -96,4 +100,9 @@ business-event ledger: durable 6L1 revisions stay the only authority.
 - [ ] **Lot N — Close (not covered)**: push, PR, remote CI,
   merge commit (no squash/rebase), keep branch, move plan to `plan/done/`.
 
-- Delivery checkpoint: 17.
+- [x] Review fix 1: serialize reads and qualify deferred reconnect denials.
+- [ ] Review fix 2: bound SSE buffering and reauthorize resumed consumers.
+- [ ] Review fix 3: discriminate live ping and unavailable handling.
+- [ ] Review fix 4: qualify copy mutations and byte-for-byte restoration.
+- [ ] Review fix 5: version isolated incremental delivery and its audit.
+- Delivery checkpoint: 18.
