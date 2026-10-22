@@ -225,7 +225,9 @@ async function legacyFenceResponse(
 ): Promise<Response | null> {
   const fence = await legacyMarksFence(deps.db);
   if (fence === "open") return c.json({ error: "legacy_marks_retired" }, 410);
-  if (fence === "barrier") return c.json({ error: "lot_cutover_barrier" }, 503);
+  if (fence === "barrier" || fence === "unknown") {
+    return c.json({ error: "lot_cutover_barrier" }, 503);
+  }
   return null;
 }
 

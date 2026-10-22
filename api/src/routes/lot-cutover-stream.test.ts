@@ -24,16 +24,50 @@ describe("6K SSE retirement", () => {
     } finally { await next.cancel(); }
   });
 
-  it.each(["open", "barrier", "unreadable"])("should retire preloaded replica buffers when durable state is %s", async (state) => {
+  it("should suspend mark delivery without retiring on an unreadable fence", async () => {
+    const bus = await import("../services/chat/stream-bus.js");
+    const { chatRoute } = await import("./chat.js");
+    await bus.publish("prospect-marks", "prospect:mark", { secret: "suspended-mark" });
+    await bus.publish("prospect-marks", "prospect:batch", { secret: "suspended-batch" });
+    await bus.publish("synthetic-chat", "text_delta", { text: "chat remains" });
+    const { lotCutoverState } = await import("../db/schema.js");
+    let unavailable = true;
+    const db = { select: () => {
+      if (unavailable) throw new Error("database unavailable");
+      return { from: async (table: unknown) => table === lotCutoverState ? [] : [{ enabled: false }] };
+    } };
+    const response = await chatRoute(db as never).request("/api/chat/streams/sse");
+    const reader = response.body!.getReader();
+    try {
+      const text = new TextDecoder().decode((await reader.read()).value);
+      expect(text).toContain("chat remains");
+      expect(text).not.toContain("suspended-mark");
+      expect(text).not.toContain("suspended-batch");
+      expect(bus.isLegacyMarkDeliveryRetired()).toBe(false);
+    } finally { await reader.cancel(); }
+    unavailable = false;
+    const recovered = await chatRoute(db as never).request("/api/chat/streams/sse");
+    const next = recovered.body!.getReader();
+    try {
+      const decoder = new TextDecoder();
+      expect(decoder.decode((await next.read()).value)).toContain("suspended-mark");
+      expect(decoder.decode((await next.read()).value)).toContain("suspended-batch");
+      expect(decoder.decode((await next.read()).value)).toContain("chat remains");
+      await bus.publish("prospect-marks", "prospect:mark", { text: "live after recovery" });
+      expect(decoder.decode((await next.read()).value)).toContain("live after recovery");
+      expect(bus.isLegacyMarkDeliveryRetired()).toBe(false);
+    } finally { await next.cancel(); }
+  });
+
+  it.each(["open", "barrier"])("should retire preloaded replica buffers when durable state is %s", async (state) => {
     const bus = await import("../services/chat/stream-bus.js");
     const { chatRoute } = await import("./chat.js");
     await bus.publish("prospect-marks", "prospect:mark", { secret: "old-replica" });
     await bus.publish("prospect-marks", "prospect:batch", { secret: "old-batch" });
     await bus.publish("synthetic-chat", "text_delta", { text: "chat remains" });
-    const db = { select: () => ({ from: async () => {
-      if (state === "unreadable") throw new Error("database unavailable");
-      return [{ destinationOpen: state === "open", maintenanceBarrier: true }];
-    } }) };
+    const db = { select: () => ({ from: async () =>
+      [{ destinationOpen: state === "open", maintenanceBarrier: true }],
+    }) };
     // The global feed has no workspace membership: a reconnecting outsider
     // must be unable to recover any retired mark, even from a fresh process.
     const response = await chatRoute(db as never).request("/api/chat/streams/sse");
