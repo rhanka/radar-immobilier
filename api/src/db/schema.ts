@@ -777,10 +777,12 @@ export const facetReasonCodes = pgTable("facet_reason_codes", {
 }));
 
 // Partial indexes and immutability triggers are hand-authored in migration 0014.
+// 6I workspace archives carry a null business owner attributed to the
+// acting moderator (migration 0019); personal events keep owner = actor.
 export const facetEvents = pgTable("facet_events", {
   id: uuid("id").primaryKey().defaultRandom(),
   scope: text("scope").notNull().default("personal"),
-  ownerId: uuid("owner_id").notNull().references(() => accountUsers.id),
+  ownerId: uuid("owner_id").references(() => accountUsers.id),
   actorId: uuid("actor_id").notNull().references(() => accountUsers.id),
   targetType: text("target_type").notNull().default("signal"),
   citySlug: text("city_slug").notNull(),
@@ -841,10 +843,77 @@ export const workspaceMembershipEvents = pgTable("workspace_membership_events", 
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+// 6H scoped attachment and activation. Partial indexes, immutability guards,
+// the deferred binding check, and the protected index swap live in
+// migration 0018; existing facet tables are untouched.
+export const facetStreams = pgTable("facet_streams", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  scope: text("scope").notNull().default("personal"),
+  ownerId: uuid("owner_id").references(() => accountUsers.id),
+  targetType: text("target_type").notNull().default("signal"),
+  citySlug: text("city_slug").notNull(),
+  nodeType: text("node_type").notNull(),
+  nodeId: text("node_id").notNull(),
+  facet: text("facet").notNull(),
+  basket: text("basket"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const facetEventBindings = pgTable("facet_event_bindings", {
+  eventId: uuid("event_id").primaryKey().references(() => facetEvents.id),
+  streamId: uuid("stream_id").notNull().references(() => facetStreams.id),
+  boundAt: timestamp("bound_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const facetHeads = pgTable("facet_heads", {
+  streamId: uuid("stream_id").primaryKey().references(() => facetStreams.id),
+  eventId: uuid("event_id").notNull().unique().references(() => facetEvents.id),
+  boundAt: timestamp("bound_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const facetStreamAttachments = pgTable("facet_stream_attachments", {
+  accountId: uuid("account_id").primaryKey().references(() => accountUsers.id),
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  status: text("status").notNull(),
+  detail: jsonb("detail").notNull().default({}),
+  actorId: uuid("actor_id").notNull().references(() => accountUsers.id),
+  reason: text("reason").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  byWorkspace: index("facet_stream_attachments_workspace_idx").on(t.workspaceId),
+}));
+
+export const facetCommandContexts = pgTable("facet_command_contexts", {
+  ownerId: uuid("owner_id").notNull().references(() => accountUsers.id),
+  commandKey: uuid("command_key").notNull(),
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  status: text("status").notNull(),
+  commandDigest: text("command_digest"),
+  decidedAt: timestamp("decided_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.ownerId, t.commandKey] }),
+  byWorkspace: index("facet_command_contexts_workspace_idx").on(t.workspaceId),
+}));
+
+export const facetActivationState = pgTable("facet_activation_state", {
+  workspaceId: uuid("workspace_id").primaryKey().references(() => workspaces.id),
+  writerEpoch: text("writer_epoch").notNull().default("legacy"),
+  maintenanceBarrier: boolean("maintenance_barrier").notNull().default(false),
+  oldIndexDropped: boolean("old_index_dropped").notNull().default(false),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const schema = {
   facetCommands,
   facetEvents,
   facetReasonCodes,
+  facetStreams,
+  facetEventBindings,
+  facetHeads,
+  facetStreamAttachments,
+  facetCommandContexts,
+  facetActivationState,
   workspaces,
   workspaceMemberships,
   workspaceMembershipEvents,
