@@ -111,13 +111,112 @@ type DynamicImport = (specifier: string) => Promise<unknown>;
 // would fail module resolution at typecheck time.
 const dynamicImport: DynamicImport = (specifier) => import(/* @vite-ignore */ specifier);
 
-export function requireSelectedProfile(host: unknown): void {
-  const selected = member(host, "selectedCapabilities");
-  if (selected === undefined || selected === null) {
-    throw new Error("[missing-contract] provider.selectCapabilities: explicit selectedCapabilities required before compilation");
+async function loadUpstream(specifier: string, entry: string): Promise<Record<string, unknown>> {
+  let loaded: unknown;
+  try {
+    loaded = await dynamicImport(specifier);
+  } catch (error) {
+    const code = (error as { code?: unknown }).code;
+    const message = error instanceof Error ? error.message : String(error);
+    const absent = code === "ERR_PACKAGE_PATH_NOT_EXPORTED" ||
+      (["MODULE_NOT_FOUND", "ERR_MODULE_NOT_FOUND"].includes(String(code)) && message.includes(specifier)) ||
+      (message.includes("Missing") && message.includes(specifier.replace("@sentropic/artifacts", ".")) &&
+        message.includes("@sentropic/artifacts"));
+    if (!absent) throw error;
+    missingContract(entry, `upstream entry ${specifier} is not provided by the installed provider`);
   }
-  if (!Array.isArray(selected) || selected.length !== 4 ||
-    ["ensure", "publish", "meta", "list"].some((op) => !selected.includes(op))) {
-    throw new Error("[contract-violation] provider.selectCapabilities: expected exactly ensure, publish, meta, list");
+  if (loaded === null || (typeof loaded !== "object" && typeof loaded !== "function")) {
+    missingContract(entry, `upstream entry ${specifier} resolved to a non-module value`);
   }
+  return loaded as Record<string, unknown>;
+}
+
+/** Require the r2 commit-contract entry (types + guard/transaction/fence). */
+export async function requireCommitContract(): Promise<Record<string, unknown>> {
+  return loadUpstream(COMMIT_CONTRACT_SPECIFIER, "commit-contract.ArtifactInvocationContext");
+}
+
+/** Require the r2 outcome-contract entry (ArtifactOutcome/ArtifactFailure). */
+export async function requireOutcomeContract(): Promise<Record<string, unknown>> {
+  return loadUpstream(OUTCOME_CONTRACT_SPECIFIER, "outcome-contract.ArtifactOutcome");
+}
+
+/**
+ * Require the test-only barrier factory. Names the missing factory entry
+ * against 0.1.2 so the denial/race suites fail by name instead of hanging.
+ */
+export async function requireCommitBarrier(): Promise<CommitBarrier> {
+  const testing = await loadUpstream(TESTING_SPECIFIER, "testing.createArtifactCommitBarrier");
+  const factory = testing["createArtifactCommitBarrier"];
+  if (typeof factory !== "function") {
+    missingContract(
+      "testing.createArtifactCommitBarrier",
+      "factory createArtifactCommitBarrier is not exported by the installed provider",
+    );
+  }
+  const barrier = (factory as () => CommitBarrier)();
+  if (barrier === null || typeof barrier !== "object" ||
+    typeof (barrier as CommitBarrier).waitUntilReached !== "function" ||
+    typeof (barrier as CommitBarrier).release !== "function") {
+    throw new Error("[contract-violation] testing.createArtifactCommitBarrier: malformed barrier");
+  }
+  return barrier;
+}
+
+/**
+ * Assert the frozen selection value plus the compiled profile digest.
+ * Throws `[missing-contract] provider.selectCapabilities` (or
+ * `provider.profileDigest`) while the provider predates the r2 line.
+ */
+export function requireSelectedProfile(host: unknown): string {
+  const record = host as Record<string, unknown> | null;
+  const selected = record !== null ? record["selectedCapabilities"] : undefined;
+  if (!Array.isArray(selected)) {
+    missingContract(
+      "provider.selectCapabilities",
+      "explicit selectedCapabilities is required before compilation",
+    );
+  }
+  const names = [...(selected as unknown[])].map(String).sort();
+  if (!Object.isFrozen(selected)) {
+    throw new Error("[contract-violation] host.selectedCapabilities must be frozen");
+  }
+  const frozen = [...FROZEN_CAPABILITIES].sort();
+  if (names.length !== frozen.length || names.some((name, index) => name !== frozen[index])) {
+    throw new Error(
+      `[contract-violation] provider.selectCapabilities: expected exactly ${frozen.join(", ")}`,
+    );
+  }
+  const digest = record?.["profileDigest"] ??
+    (record?.["profile"] as Record<string, unknown> | undefined)?.["digest"] ??
+    (record?.["compiledProfile"] as Record<string, unknown> | undefined)?.["digest"];
+  if (typeof digest !== "string" || !/^(sha256:)?[a-f0-9]{64}$/.test(digest)) {
+    missingContract("provider.profileDigest", "compiled profile digest is required with the selection");
+  }
+  return digest;
+}
+
+/** Require the sole execution path `host.execute(request, invocation)`. */
+export function requireHostExecute(host: unknown): (
+  request: unknown,
+  invocation: unknown,
+) => Promise<unknown> {
+  const record = host as Record<string, unknown> | null;
+  const direct = record !== null ? record["execute"] : undefined;
+  const requestWithActor = (request: unknown, invocation: unknown) => ({
+    ...(request as object), actorId: (invocation as InvocationContextShape).actorId,
+  });
+  if (typeof direct === "function") return (request, invocation) => direct.call(host, requestWithActor(request, invocation), invocation);
+  const app = record !== null ? record["app"] : undefined;
+  const nested = app !== null && typeof app === "object"
+    ? (app as Record<string, unknown>)["execute"]
+    : undefined;
+  if (typeof nested === "function") {
+    const bound = nested as (request: unknown, invocation: unknown) => Promise<unknown>;
+    return (request, invocation) => bound.call(app, requestWithActor(request, invocation), invocation);
+  }
+  missingContract(
+    "provider.execute",
+    "callable host.execute(request, invocation) (or host.app.execute) is required",
+  );
 }
