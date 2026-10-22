@@ -35,13 +35,17 @@ import { executeBacklogTool } from "../services/chat/backlog-tools.js";
 import {
   publish,
   replayAll,
+  retireLegacyMarkDelivery,
   subscribe,
+  subscribeRetirement,
   type StreamFrame,
 } from "../services/chat/stream-bus.js";
 import {
   buildRadarContext,
   serializeRadarContext,
 } from "../services/chat/radar-context.js";
+import type { Database } from "../db/client.js";
+import { legacyMarksFence } from "../services/facets/lots/lot-legacy-fence.js";
 
 const chatTurnSchema = z.object({
   role: z.enum(["system", "user", "assistant"]),
@@ -112,7 +116,7 @@ const sseFrame = (event: string, payload: unknown): string =>
 const randomStreamId = (): string =>
   `radar-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 
-export function chatRoute(): Hono {
+export function chatRoute(db?: Database): Hono {
   const app = new Hono();
 
   /** Providers configured via env, neutral alphabetical order. */
@@ -130,13 +134,28 @@ export function chatRoute(): Hono {
   });
 
   /** Browser StreamHub SSE feed (replay buffer + live frames). */
-  app.get("/api/chat/streams/sse", (c) => {
+  app.get("/api/chat/streams/sse", async (c) => {
+    // A restarted replica must consult durable state before replaying buffers.
+    if (db && await legacyMarksFence(db) !== "none") retireLegacyMarkDelivery();
     const encoder = new TextEncoder();
     let unsubscribe: (() => void) | null = null;
+    let unsubscribeRetirement: (() => void) | null = null;
     let heartbeat: ReturnType<typeof setInterval> | null = null;
+    const disconnect = () => {
+      unsubscribe?.();
+      unsubscribeRetirement?.();
+      if (heartbeat) clearInterval(heartbeat);
+    };
 
     const stream = new ReadableStream<Uint8Array>({
       start(controller) {
+        unsubscribeRetirement = subscribeRetirement((streamId, types) => {
+          if (streamId !== "prospect-marks" || !types.some((type) =>
+            type === "prospect:mark" || type === "prospect:batch")) return;
+          disconnect();
+          // Error discards queued frames; close() would still deliver them.
+          controller.error(new Error("legacy_mark_delivery_retired"));
+        });
         const send = (frame: StreamFrame): void => {
           controller.enqueue(
             encoder.encode(
@@ -159,8 +178,7 @@ export function chatRoute(): Hono {
         }, 15000);
       },
       cancel() {
-        if (unsubscribe) unsubscribe();
-        if (heartbeat) clearInterval(heartbeat);
+        disconnect();
       },
     });
 
