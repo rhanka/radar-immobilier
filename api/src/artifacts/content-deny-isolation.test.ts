@@ -1,13 +1,17 @@
+import { spawn } from "node:child_process";
+import type { ChildProcess } from "node:child_process";
 import { createRequire } from "node:module";
 import { createServer as createHttpServer, request as httpRequest } from "node:http";
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createServer as createNetServer } from "node:net";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { runInNewContext } from "node:vm";
-import type { Server } from "node:http";
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
+
+import { runInNewContext } from "node:vm";
+import type { Server } from "node:http";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const read = (name: string): string => readFileSync(join(here, name), "utf8");
@@ -271,6 +275,90 @@ function executeDenialModules(env: NodeJS.ProcessEnv, servers: Server[]): void {
       Response,
     }, { filename: file });
   }
+}
+
+/**
+ * Transpile the denial sources into an isolated directory as CommonJS with
+ * absolute targets for the three allowed imports. No runtime resolver from
+ * the test runner is exposed to the child.
+ */
+function writeChildBundle(dir: string, appSuffix: string, serverSuffix: string): string {
+  const resolve = (specifier: string): string =>
+    createRequire(import.meta.url).resolve(specifier);
+  const hono = resolve("hono");
+  const nodeServer = resolve("@hono/node-server");
+  const compile = (name: string, suffix: string): string =>
+    ts.transpileModule(read(name) + suffix, {
+      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+    }).outputText;
+  writeFileSync(
+    join(dir, "content-deny.cjs"),
+    compile("content-deny.ts", appSuffix).replace(
+      /require\(["']hono["']\)/,
+      `require(${JSON.stringify(hono)})`,
+    ),
+  );
+  writeFileSync(
+    join(dir, "content-deny-server.cjs"),
+    compile("content-deny-server.ts", serverSuffix)
+      .replace(/require\(["']\.\/content-deny\.js["']\)/, 'require("./content-deny.cjs")')
+      .replace(
+        /require\(["']@hono\/node-server["']\)/,
+        `require(${JSON.stringify(nodeServer)})`,
+      ),
+  );
+  return join(dir, "content-deny-server.cjs");
+}
+
+function waitForChildExit(child: ChildProcess): Promise<void> {
+  return new Promise((resolve) => {
+    if ((child.exitCode !== null || child.signalCode !== null) &&
+      child.stdout?.destroyed && child.stderr?.destroyed) resolve(undefined);
+    else child.once("close", () => resolve(undefined));
+  });
+}
+
+/**
+ * Start the denial service in a child Node process whose environment holds
+ * only PORT. Whatever the code reads, there is nothing else to find: the
+ * guarantee is structural, not syntactic.
+ */
+async function startDenialChild(
+  entry: string,
+  port: number,
+): Promise<{ child: ChildProcess; output: () => string }> {
+  const child = spawn(process.execPath, [entry], {
+    env: { PORT: ` ${port} ` },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  let output = "";
+  child.stdout?.on("data", (chunk: Buffer | string) => {
+    output += chunk.toString();
+  });
+  child.stderr?.on("data", (chunk: Buffer | string) => {
+    output += chunk.toString();
+  });
+  const deadline = Date.now() + 5000;
+  try {
+    for (;;) {
+      try {
+        const live = await httpGet(port, "/livez");
+        if (live.status === 200) break;
+      } catch {
+        // Retry until the listener accepts connections.
+      }
+      if (child.exitCode !== null || child.signalCode !== null) {
+        throw new Error(`denial child exited early on ${port}: ${output}`);
+      }
+      if (Date.now() > deadline) throw new Error(`denial child did not start on ${port}: ${output}`);
+      await new Promise<void>((resolve) => setTimeout(() => resolve(undefined), 50));
+    }
+  } catch (error) {
+    child.kill("SIGTERM");
+    await waitForChildExit(child);
+    throw error;
+  }
+  return { child, output: () => output };
 }
 
 describe("content-deny module isolation", () => {
