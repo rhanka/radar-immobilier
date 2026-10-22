@@ -593,4 +593,116 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       if (typeof close === "function") (close as () => void)();
     }
   });
+
+  it("rejects same-key changed content as conflict with no extra release", async () => {
+    await requireOutcomeContract();
+    const barrier = await requireCommitBarrier();
+    const host = await composeQ2Host(barrier.observer);
+    const close = host["close"];
+    try {
+      requireSelectedProfile(host);
+      const execute = executeWithParity(host);
+      const artifactId = await ensureVia(execute, allowAll(), "q2-conflict", "q2-conflict-ensure");
+      const files = [{ path: "index.html", mimeType: "text/html", text: "hello" }];
+      const clientKey = "q2-conflict";
+      const internalKey = deriveIdempotencyKey(
+        { scope: SCOPE, sub: ACTOR, op: "publish", artifactId, clientKey });
+      const first = await execute({ method: "POST", path: "/publish", body: { artifactId, files, idempotencyKey: clientKey } },
+        invocationFor(allowAll(), "conflict-first")) as unknown as Record<string, unknown>;
+      expect(first).toMatchObject({ ok: true });
+      const releasesBefore = await tableCount("releases");
+      const keysBefore = await tableCount("idempotency_keys");
+      const invocation = invocationFor(allowAll(), "conflict-changed");
+      const conflicted = await execute({ method: "POST", path: "/publish",
+        body: { artifactId, files: [{ path: "index.html", mimeType: "text/html", text: "changed" }],
+          idempotencyKey: clientKey } }, invocation) as unknown as Record<string, unknown>;
+      assertOutcomeFailure(conflicted, invocation["invocationId"] as string);
+      expect(conflicted["failure"]).toMatchObject({
+        category: "conflict", retriable: false, commitState: "not_committed" });
+      const projected = await projectOutcomeHttp(conflicted);
+      expect(projected).toEqual({ status: 409, body: { error: "conflict" } });
+      expect(await tableCount("releases")).toBe(releasesBefore);
+      expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+      const successRows = Number((await pool.query(
+        "SELECT count(*) FROM artifacts.idempotency_keys WHERE key = $1", [internalKey])).rows[0].count);
+      expect(successRows).toBe(1);
+    } finally {
+      if (typeof close === "function") (close as () => void)();
+    }
+  });
+
+  it("sanitizes a commit denial to the existing host policy projection", async () => {
+    await requireOutcomeContract();
+    const barrier = await requireCommitBarrier();
+    const host = await composeQ2Host(barrier.observer);
+    const close = host["close"];
+    try {
+      const execute = executeWithParity(host);
+      const seenTransactions: unknown[] = [];
+      const authorizeCommit: AuthorizeCommit = async (_context, transaction) => {
+        expect(transaction).toBeDefined();
+        seenTransactions.push(transaction);
+        return { allowed: false, reason: "unauthorized_at_commit",
+          publicCode: "account_not_approved", status: 403, retriable: false };
+      };
+      const artifactId = await ensureVia(execute, allowAll(), "q2-deny", "q2-deny-ensure");
+      const releasesBefore = await tableCount("releases");
+      const invocation = invocationFor(authorizeCommit, "deny");
+      const outcome = await execute({ method: "POST", path: "/publish",
+        body: { artifactId,
+          files: [{ path: "index.html", mimeType: "text/html", text: "denied" }],
+          idempotencyKey: "q2-deny" } }, invocation) as unknown as Record<string, unknown>;
+      assertOutcomeFailure(outcome, invocation["invocationId"] as string);
+      expect(seenTransactions.length).toBeGreaterThan(0);
+      expect(outcome["failure"]).toMatchObject({
+        category: "unauthorized_at_commit", commitState: "not_committed" });
+      const projected = await projectOutcomeHttp(outcome);
+      expect(projected.status).toBe(403);
+      expectRedacted(projected);
+      expect(await tableCount("releases")).toBe(releasesBefore);
+    } finally {
+      if (typeof close === "function") (close as () => void)();
+    }
+  });
+
+  it.each([
+    ["plain-error", new Error("kaboom")],
+    ["lost-text", new Error("lost and found in plain text")],
+    ["conflict-text", new Error("conflict zone in plain text")],
+    ["unknown-code", Object.assign(new Error("weird adapter failure"), { code: "E_TOTALLY_UNKNOWN" })],
+  ])("maps unrecognized failure %s to provider_error without text inference", async (_name, fault) => {
+    await requireOutcomeContract();
+    const barrier = await requireCommitBarrier();
+    const armed = { current: false };
+    const failing = proxyLeasedPool(pool, { get(target, property, receiver) {
+      if ((property === "query" || property === "connect") && armed.current) {
+        return async (): Promise<never> => { throw fault; };
+      }
+      const value = Reflect.get(target, property, receiver);
+      return typeof value === "function" ? value.bind(target) : value;
+    } }) as unknown as pg.Pool;
+    const host = await composeQ2Host(barrier.observer, { pool: failing });
+    const close = host["close"];
+    try {
+      const execute = executeWithParity(host);
+      const before = await tableCount("artifacts");
+      armed.current = true;
+      try {
+        const invocation = invocationFor(allowAll(), "unknown");
+        const outcome = await execute({ method: "POST", path: "/ensure",
+          body: { bindingName: "q2-unknown", idempotencyKey: "q2-unknown" } },
+          invocation) as unknown as Record<string, unknown>;
+        assertOutcomeFailure(outcome, invocation["invocationId"] as string);
+        expect(outcome["failure"]).toMatchObject({ category: "provider_error", retriable: false });
+        const projected = await projectOutcomeHttp(outcome);
+        expect(projected).toEqual({ status: 500, body: { error: "internal_error" } });
+        expectRedacted(projected);
+      } finally {
+        armed.current = false;
+      }
+      expect(await tableCount("artifacts")).toBe(before);
+    } finally {
+      if (typeof close === "function") (close as () => void)();
+    }
+  });
 });
