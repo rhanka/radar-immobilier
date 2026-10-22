@@ -86,4 +86,68 @@ describe("6L2 credential and connection lifecycle", () => {
     expect((await reader.read()).done).toBe(true);
     expect(vi.getTimerCount()).toBe(0);
   });
+  it("should coalesce changes for a blocked consumer and close on revocation", async () => {
+    vi.useFakeTimers();
+    poll.mockResolvedValueOnce(scope)
+      .mockResolvedValueOnce({ ...scope, token: "token-b" })
+      .mockResolvedValueOnce({ ...scope, token: "token-c" })
+      .mockRejectedValueOnce(new ScopeError(403, "synthetic revocation"));
+    const reader = (await appFor({ sub: "synthetic", exp: 2 }).request(url)).body!.getReader();
+    // The consumer never reads: three watcher cycles observe two token
+    // changes, then a revocation, without queueing an unbounded frame run.
+    await vi.advanceTimersByTimeAsync(300);
+    const first = new TextDecoder().decode((await reader.read()).value);
+    expect(first).toContain("event: resync");
+    expect(first).not.toContain("event: invalidated");
+    expect((await reader.read()).done).toBe(true);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+  it("should authorize again before flushing a resumed consumer", async () => {
+    vi.useFakeTimers();
+    poll.mockResolvedValueOnce(scope)
+      .mockResolvedValueOnce({ ...scope, token: "token-b" })
+      .mockRejectedValueOnce(new ScopeError(403, "synthetic revocation"));
+    const reader = (await appFor({ sub: "synthetic", exp: 2 }).request(url)).body!.getReader();
+    try {
+      await vi.advanceTimersByTimeAsync(100);
+      expect(new TextDecoder().decode((await reader.read()).value)).toContain("event: resync");
+      await vi.advanceTimersByTimeAsync(100);
+      const frame = new TextDecoder().decode((await reader.read()).value);
+      expect(frame).toContain("event: closed");
+      expect(frame).not.toContain("event: invalidated");
+      expect((await reader.read()).done).toBe(true);
+      expect(vi.getTimerCount()).toBe(0);
+    } finally { await reader.cancel(); }
+  });
+  it("should drop a saturated stream within five cycles without leaking a watcher", async () => {
+    vi.useFakeTimers();
+    let revision = 0;
+    poll.mockImplementation(async () => ({ ...scope, token: `token-${revision++}` }));
+    const reader = (await appFor({ sub: "synthetic", exp: 2 }).request(url)).body!.getReader();
+    try {
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(vi.getTimerCount()).toBe(0);
+      expect(new TextDecoder().decode((await reader.read()).value)).toContain("event: resync");
+      expect((await reader.read()).done).toBe(true);
+      expect(poll).toHaveBeenCalledTimes(6);
+      expect(vi.getTimerCount()).toBe(0);
+    } finally { await reader.cancel(); }
+  });
+  it("should emit only the latest authorized token when a consumer resumes", async () => {
+    vi.useFakeTimers();
+    poll.mockResolvedValueOnce(scope)
+      .mockResolvedValueOnce({ ...scope, token: "token-b", workspaceRevision: 1 })
+      .mockResolvedValue({ ...scope, token: "token-c", workspaceRevision: 2 });
+    const reader = (await appFor({ sub: "synthetic", exp: 2 }).request(url)).body!.getReader();
+    try {
+      await vi.advanceTimersByTimeAsync(200);
+      await reader.read();
+      await vi.advanceTimersByTimeAsync(100);
+      const frame = new TextDecoder().decode((await reader.read()).value);
+      expect(frame).toContain('"token":"token-c"');
+      expect(frame).toContain('"workspace":2');
+      expect(frame).not.toContain("token-b");
+    } finally { await reader.cancel(); }
+    expect(vi.getTimerCount()).toBe(0);
+  });
 });
