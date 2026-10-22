@@ -53,22 +53,33 @@ if [[ "$1" == inspect ]]; then
   docker network ls --filter "label=com.docker.compose.project=radar-$ENV" --format '{{.Name}}'
   exit
 fi
+df -h "$PWD" /var/lib/docker | tee "$log_dir/disk-before.log"
+if [[ $(df -Pk "$PWD" | awk 'NR==2 {print $4}') -lt 10485760 ]]; then
+  echo 'STOP: less than 10 GiB available' >&2
+  exit 3
+fi
 cleanup() {
   task_status=$?
   trap - EXIT
   "${compose[@]}" logs --no-color postgres > "$log_dir/postgres.log" 2>&1 || true
   "${compose[@]}" ps -a > "$log_dir/compose-state.log" 2>&1 || true
   "${compose[@]}" down -v --remove-orphans || { [[ $task_status != 0 ]] || task_status=1; }
+  printf '%s\n' "$task_status" > "$log_dir/$1.status"
   exit "$task_status"
 }
-trap cleanup EXIT
+action=$1
+trap 'cleanup "$action"' EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 # Only source/manifests: environment files, Git metadata and host dependencies
 # are excluded before reading file contents. The container sees no host tree.
 tar --exclude='.env*' --exclude=node_modules --exclude=dist --exclude=.svelte-kit \
-  -cf "$runtime_dir/source.tar" api packages ui tools/make tools/h4-mcp.mk deploy/k8s/41-immo-mcp-ingress.yaml package.json package-lock.json tsconfig.base.json eslint.config.js
-case "$1" in verify|test-api|astra-proof) "${compose[@]}" up -d --wait postgres ;; esac
+  -cf "$runtime_dir/source.tar" api packages ui radar/ontology tools/make tools/h4-mcp.mk deploy/k8s/41-immo-mcp-ingress.yaml deploy/k8s/scrape/run-chunks.sh package.json package-lock.json tsconfig.base.json eslint.config.js
+sha256sum "$runtime_dir/source.tar" > "$log_dir/source.sha256"
+case "$1" in
+  verify|test-api|mutation-proof|astra-proof) "${compose[@]}" up -d --wait postgres ;;
+  api-ci) "${compose[@]}" up -d --wait postgres minio ;;
+esac
 "${compose[@]}" run --rm --no-deps -T api sh -ec '
   tar -xf /source.tar
   npm ci --ignore-scripts --no-audit --no-fund
@@ -82,7 +93,7 @@ CONFIG
     checkpoints)
       for snapshot in /checkpoints/*.tar; do
         number=$(basename "$snapshot" .tar)
-        rm -rf api/src api/drizzle packages/immo-mcp/src
+        rm -rf api/src api/drizzle ui/src packages/immo-mcp/src
         tar -xf "$snapshot"
         npm run typecheck --workspace=api > "/evidence/checkpoint-$number.log" 2>&1 || {
           cat "/evidence/checkpoint-$number.log"; exit 1;
@@ -90,6 +101,12 @@ CONFIG
         ./node_modules/.bin/tsc --noEmit -p packages/immo-mcp/tsconfig.json >> "/evidence/checkpoint-$number.log" 2>&1 || {
           cat "/evidence/checkpoint-$number.log"; exit 1;
         }
+        if [ -f ui/src/lib/signals/signal-facet-workspace.ts ]; then
+          ./node_modules/.bin/tsc --noEmit --skipLibCheck --strict --target ES2022 --module ESNext \
+            --moduleResolution Bundler ui/src/lib/signals/signal-facet-workspace*.ts >> "/evidence/checkpoint-$number.log" 2>&1 || {
+            cat "/evidence/checkpoint-$number.log"; exit 1;
+          }
+        fi
         grep "^$number|" /checkpoints/manifest | cut -d "|" -f 2 > "/evidence/checkpoint-$number.pass"
         echo "checkpoint-$number: typecheck PASS"
       done
@@ -100,13 +117,19 @@ CONFIG
     bash /workspace/tools/make/paniers-lot6h-fix-mutation.sh
     exit
   fi
+  if [ "$1" = mutation-proof ]; then
+    test "$LOT" = 6I
+    bash /workspace/tools/make/paniers-lot6i-mutation.sh
+    exit
+  fi
   if [ "$1" = regression ]; then
     cat > /workspace/ui/vitest.isolated.config.ts <<'"'"'CONFIG'"'"'
 import config from "./vitest.config.js";
 export default { ...config, envDir: false, test: { ...config.test, fileParallelism: false, maxWorkers: 2 } };
 CONFIG
     npm run test --workspace=ui -- --config vitest.isolated.config.ts \
-      facets 6a-head 6b-version signaux-reglements signal-facets-client SignalFacetControls selection-bucket selection-camera signal-facet-scope
+      facets 6a-head 6b-version signaux-reglements signal-facets-client SignalFacetControls selection-bucket selection-camera signal-facet-scope \
+      $(if [ "$LOT" = 6I ]; then echo signal-facet-workspace; fi)
     cd /workspace/packages/immo-mcp
     ../../node_modules/.bin/tsc --noEmit -p tsconfig.json
     ../../node_modules/.bin/vitest run --config /workspace/api/vitest.isolated.config.ts src
@@ -117,17 +140,22 @@ CONFIG
       case "$LOT" in
         6G) npx --no-install eslint api/src/services/workspaces api/src/routes/workspaces.ts api/src/scripts/init-workspace-authority.ts ;;
         6H) npx --no-install eslint api/src/services/facets api/src/routes/scoped-signal-facets*.ts api/src/scripts/attach-personal-history.ts api/src/services/workspaces/authority*.ts api/src/services/workspaces/migration.test.ts packages/immo-mcp/src/workspace-context*.ts packages/immo-mcp/src/data-source.ts ui/src/lib/signals/signal-facet-scope*.ts ;;
+        6I) npx --no-install eslint api/src/services/facets api/src/routes/scoped-workspace-archive*.ts ui/src/lib/signals/signal-facet-workspace*.ts ;;
         *) npx --no-install eslint api/src/services/facets ;;
       esac
       ;;
   esac
   case "$1" in
-    verify|test-api)
+    verify|test-api|api-ci)
       LOG_LEVEL=info npm run db:migrate --workspace=api
       LOG_LEVEL=info npm run db:migrate --workspace=api
       cd api
-      set -f
-      ../node_modules/.bin/vitest run --config vitest.isolated.config.ts $2
+      if [ "$1" = api-ci ]; then
+        npm run test -- --config vitest.isolated.config.ts
+      else
+        set -f
+        ../node_modules/.bin/vitest run --config vitest.isolated.config.ts $2
+      fi
       ;;
   esac
   if [ "$1" = verify ] && [ "$LOT" = 6F ]; then bash /workspace/tools/make/paniers-lot6-mutation.sh; fi
