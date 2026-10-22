@@ -1,9 +1,13 @@
 /**
  * 6L2 invalidation observer: a gated browser SSE observer over one launched
  * invalidation sync. Dormant while the gate is closed or no workspace is
- * selected. Each event runs the 6L1 coherent fetch exactly once against the
- * live context; failures and late responses retain the last acknowledged
- * snapshot. Disposal closes the source and cancels a pending reconnect.
+ * selected. Reads serialize: at most one coherent fetch runs at a time and
+ * overlapping events coalesce into a single follow-up read, so repeated
+ * reconnects cannot supersede a pending authorization refusal. A refusal
+ * concerning the still-current context always closes through the
+ * authorization path; failures and late responses retain the last
+ * acknowledged snapshot. Disposal closes the source and cancels a pending
+ * reconnect.
  */
 import {
   PROJECTION_RECONNECT_DELAY_MS,
@@ -43,6 +47,8 @@ export function observeProjectionInvalidation<T extends ProjectionSnapshot = Pro
   let source: ProjectionEventSource | null = null;
   let pendingReconnect: { cancel: () => void } | null = null;
   let pendingRetry: { cancel: () => void } | null = null;
+  let fetchInflight = false;
+  let refetchRequested = false;
   let generation = 0;
   const schedule = deps.schedule ?? ((run, delayMs) => {
     const timer = setTimeout(run, delayMs);
@@ -73,6 +79,11 @@ export function observeProjectionInvalidation<T extends ProjectionSnapshot = Pro
     pendingReconnect = schedule(connect, deps.reconnectDelayMs ?? PROJECTION_RECONNECT_DELAY_MS);
     void wake({ kind: "resync" });
   };
+  const drainCoalescedRead = () => {
+    if (disposed || !refetchRequested) return;
+    refetchRequested = false;
+    void wake({ kind: "resync" });
+  };
   const wake = async (streamEvent: StreamEvent | null): Promise<void> => {
     if (disposed) return;
     const signal = noteInvalidationEvent(state, deps.live(), streamEvent);
@@ -85,24 +96,38 @@ export function observeProjectionInvalidation<T extends ProjectionSnapshot = Pro
       deps.onClosed();
       return;
     }
+    if (fetchInflight) {
+      refetchRequested = true;
+      return;
+    }
     const operation = beginInvalidationFetch(state);
+    fetchInflight = true;
     pendingRetry?.cancel();
+    pendingRetry = null;
     let snapshot: T;
     try {
       snapshot = await deps.fetchCoherent();
     } catch (error) {
-      if (disposed || operation !== state.operation) return;
+      fetchInflight = false;
+      if (disposed) return;
       const status = (error as { status?: number } | null)?.status;
       if (status === 401 || status === 403 || status === 404) {
+        // A refusal concerning the still-current context closes through the
+        // authorization path even when a newer operation superseded this
+        // read: repeated reconnects must not bury a revocation. A context
+        // switch still ignores it through the closed-signal guards.
         await wake({ kind: "closed" });
       } else {
         pendingRetry = schedule(() => { void wake({ kind: "resync" }); }, PROJECTION_RECONNECT_DELAY_MS);
       }
+      drainCoalescedRead();
       return;
     }
+    fetchInflight = false;
     if (disposed) return;
     const current = deps.live();
     if (noteInvalidationReconciled(state, current, snapshot, operation)) deps.rebuild(snapshot);
+    drainCoalescedRead();
   };
   const refresh = () => wake({ kind: "resync" });
   const dispose = () => {
