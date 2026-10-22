@@ -398,6 +398,7 @@ k8s-validate: ## Validate the radar/sentropic-app manifests offline (no cluster)
 	@bash deploy/ci/check-h3-preprod-render.sh
 	@bash deploy/ci/check-h3-preprod-render.test.sh >/dev/null
 	@bash deploy/ci/check-h3-activation-render.test.sh >/dev/null
+	@bash deploy/ci/check-h3-transition-render.test.sh >/dev/null
 	@bash deploy/ci/check-h3-discrimination.test.sh >/dev/null
 	@bash deploy/ci/preflight-h3-preprod.test.sh >/dev/null
 	@if [ "$(K8S_VALIDATE_WITH_CLUSTER)" = "1" ]; then \
