@@ -310,4 +310,51 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
     }
   });
 
+  it("rejects same-key changed content as conflict without a new release", async () => {
+    const host = (await composeArtifactHost(pool, storageConfig(), rawBlobs()))!;
+    const control = createArtifactControl(host, SCOPE, BASE);
+    try {
+      requireSelectedProfile(host);
+      const artifactId = await ensureArtifact(control, "acceptance-conflict-ensure");
+      const files = [{ path: "index.html", mimeType: "text/html", text: "hello" }];
+      const first = await control.handle("publish", ACTOR,
+        { artifactId, files, idempotencyKey: "acceptance-conflict" });
+      expect(first.status).toBe(201);
+      const releasesBefore = await tableCount("releases");
+      const keysBefore = await tableCount("idempotency_keys");
+      const objectsBefore = await s3KeyCount();
+      const conflicts = [
+        { files: [{ path: "index.html", mimeType: "text/html", text: "changed" }] },
+        { files: [{ path: "other.html", mimeType: "text/html", text: "hello" }] },
+        { files: [{ path: "index.html", mimeType: "text/css", text: "hello" }] },
+        { files, profile: { theme: "dark" } },
+      ];
+      for (const change of conflicts) {
+        expect(await control.handle("publish", ACTOR,
+          { artifactId, idempotencyKey: "acceptance-conflict", ...change }))
+          .toEqual({ status: 409, body: { error: "conflict" } });
+        expect(await tableCount("releases")).toBe(releasesBefore);
+        expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+        expect(await s3KeyCount()).toBe(objectsBefore);
+      }
+      const ordered = await control.handle("publish", ACTOR, { artifactId,
+        files: [...files, { path: "other.html", mimeType: "text/html", text: "hello" }],
+        idempotencyKey: "acceptance-order" });
+      expect(ordered.status).toBe(201);
+      const orderedObjects = await s3KeyCount();
+      expect(await control.handle("publish", ACTOR, { artifactId,
+        files: [{ path: "other.html", mimeType: "text/html", text: "hello" }, ...files],
+        idempotencyKey: "acceptance-order" }))
+        .toEqual({ status: 409, body: { error: "conflict" } });
+      expect(await tableCount("releases")).toBe(releasesBefore + 1);
+      expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
+      expect(await s3KeyCount()).toBe(orderedObjects);
+      expect(await currentReleaseId(artifactId)).toBe((ordered.body as { releaseId: string }).releaseId);
+      expect(await control.handle("publish", ACTOR,
+        { artifactId, files, idempotencyKey: "acceptance-conflict" })).toEqual(first);
+    } finally {
+      host.close();
+    }
+  });
+
 });
