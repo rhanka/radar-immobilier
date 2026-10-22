@@ -653,4 +653,64 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       if (typeof close === "function") (close as () => void)();
     }
   });
+
+  it("policy revision race denies the stale writer linearized after the revocation", async () => {
+    await requireCommitContract();
+    await requireOutcomeContract();
+    const barrier = await requireCommitBarrier();
+    const host = await composeQ1Host(barrier.observer);
+    const close = host["close"];
+    try {
+      requireSelectedProfile(host);
+      const execute = requireHostExecute(host);
+      let liveRevision = "q1-rev-1";
+      const authorizeCommit: AuthorizeCommit = async (context, transaction) => {
+        expect(transaction).toBeDefined();
+        if (context.policyRevision !== liveRevision) {
+          return { allowed: false, reason: "unauthorized_at_commit",
+            publicCode: "capability_unavailable", status: 403, retriable: false };
+        }
+        return authorizeTransaction(context, transaction);
+      };
+      const ensured = await execute({ method: "POST", path: "/ensure",
+        body: { bindingName: "q1-rev", idempotencyKey: "q1-rev-ensure" } },
+        invocationFor(allowAll(), "rev-ensure"));
+      expect(ensured).toMatchObject({ ok: true });
+      const artifactId = ((ensured as { result: unknown }).result as { body: { artifactId: string } })
+        .body.artifactId;
+      const body = { artifactId,
+        files: [{ path: "index.html", mimeType: "text/html", text: "stale revision" }],
+        idempotencyKey: "q1-rev" };
+      const invocation = invocationFor(authorizeCommit, "rev");
+      const invocationId = invocation["invocationId"] as string;
+      const before = await committedSnapshot(artifactId);
+      let settled = false;
+      const pending = execute({ method: "POST", path: "/publish", body }, invocation)
+        .finally(() => { settled = true; });
+      const pump = (async () => {
+        const deadline = performance.now() + 1500;
+        while (!settled) {
+          if (performance.now() > deadline) throw new Error("[contract-violation] commit barrier did not progress");
+          for (const candidate of PUBLISH_POINTS) {
+            if (settled || candidate === "after_finalization_locks_before_guard") continue;
+            const arrived = await withTimeout(barrier.waitUntilReached(candidate, invocationId), 50);
+            if (arrived) barrier.release(candidate, invocationId);
+          }
+          const targetArrived = await withTimeout(
+            barrier.waitUntilReached("after_finalization_locks_before_guard", invocationId), 50);
+          if (targetArrived) break;
+        }
+      })();
+      await pump;
+      liveRevision = "q1-rev-2";
+      barrier.release("after_finalization_locks_before_guard", invocationId);
+      const outcome = await pending as unknown as Record<string, unknown>;
+      assertOutcomeFailure(outcome, invocationId);
+      expect(outcome["failure"]).toMatchObject({ category: "unauthorized_at_commit" });
+      expect(await committedSnapshot(artifactId)).toEqual(before);
+      expect(await currentReleaseId(artifactId)).toBeUndefined();
+    } finally {
+      if (typeof close === "function") (close as () => void)();
+    }
+  });
 });
