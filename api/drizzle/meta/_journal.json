@@ -139,7 +139,14 @@
       "idx": 19,
       "version": "7",
       "when": 1791600000000,
-      "tag": "0020_facet_lot_history",
+      "tag": "0020_facet_projection_revisions",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1791700000000,
+      "tag": "0021_facet_lot_history",
       "breakpoints": true
     }
   ]

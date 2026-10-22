@@ -1,7 +1,7 @@
 docs: declare guarded lot destination qualification|plan|0
 feat: install lot provenance and capability tables|migration-a api/drizzle/meta/_journal.json|0
 feat: extend event checks for independent lot facets|migration-b|0
-feat: preserve lot evidence and enforce stream modes|api/drizzle/0020_facet_lot_history.sql|0
+feat: preserve lot evidence and enforce stream modes|api/drizzle/0021_facet_lot_history.sql|0
 feat: mirror lot destination tables and values|api/src/db/schema.ts|0,1
 feat: resolve stable lot targets and displayed source versions|lot-target.ts|0,1
 feat: define lot transaction and public event types|lot-types.ts lot-response.ts|0,1,2
@@ -45,7 +45,7 @@ test: qualify lot history and collection projections|lot-history-db.test.ts lot-
 test: qualify disabled importer and exact source preservation|lot-importer-db.test.ts|0,1,2,3,4,5,6,7,8,9
 test: qualify pending lot import dispositions|lot-importer-pending-db.test.ts|0,1,2,3,4,5,6,7,8,9
 test: qualify SQL lot constraints and immutable evidence|lot-constraints-db.test.ts lot-mode-db.test.ts|0,1,2,3,4,5,6,7,8,9
-test: qualify 0020 replay and author ownership isolation|lot-migration-db.test.ts lot-import-ownership-db.test.ts|0,1,2,3,4,5,6,7,8,9
+test: qualify 0021 replay and author ownership isolation|lot-migration-db.test.ts lot-import-ownership-db.test.ts|0,1,2,3,4,5,6,7,8,9
 test: qualify the scoped lot HTTP contract|api/src/routes/scoped-lot-facets-db.test.ts|0,1,2,3,4,5,6,7,8,9
 fix: wait for synthetic database clients before teardown|api/src/services/facets/scope-db-fixture.ts|0,1,2,3,4,5,6,7,8,9,10
 test: preserve prior signal checks across additive lot schema|api/tests/integration/facets-constraints.spec.ts api/src/services/facets/activation-db.test.ts|0,1,2,3,4,5,6,7,8,9,10

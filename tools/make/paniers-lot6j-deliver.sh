@@ -6,7 +6,7 @@ repo="$task_dir/git"
 base=$(git rev-parse '71f41b72^{commit}')
 plan=plan/PANIERS6J-BRANCH_feat-paniers-6j-lot-destination.md
 lots=api/src/services/facets/lots
-migration=api/drizzle/0020_facet_lot_history.sql
+migration=api/drizzle/0021_facet_lot_history.sql
 local_git() { git --git-dir="$repo/.git" --work-tree="$PWD" "$@"; }
 partial() {
   local token=$1 path=$2 blob
@@ -99,7 +99,7 @@ case "$1" in
     local_git diff --exit-code HEAD -- api packages ui tools/make "$plan"
     local_git diff --exit-code "$base" HEAD -- Makefile 'docker-compose*.yml' rules \
       api/src/app.ts api/src/routes/prospect-marks.ts ui/src \
-      api/src/services/prospect api/drizzle ':!api/drizzle/0020_facet_lot_history.sql' ':!api/drizzle/meta/_journal.json'
+      api/src/services/prospect api/drizzle ':!api/drizzle/0021_facet_lot_history.sql' ':!api/drizzle/meta/_journal.json'
     local_git log --format=%H "$base..HEAD" | while IFS= read -r sha; do
       local_git diff --numstat "$sha^" "$sha" | awk '{n+=$1+$2; f++} END {exit !(n<=150 && f<=15)}'
       test "$(local_git log -1 --format=%B "$sha")" = "$(local_git log -1 --format=%s "$sha")"
