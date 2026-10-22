@@ -80,7 +80,7 @@ business-event ledger: durable 6L1 revisions stay the only authority.
 - [x] **Lot 1 — Helpers**: opaque cursor (viewer/workspace/city/mode/
   token), tick and reconnect decisions, authorized per-cycle poll,
   configurable watcher interval, SSE frame encoding.
-- [ ] **Lot 2 — Route**: guarded SSE under the workspace, initial-resync
+- [x] **Lot 2 — Route**: guarded SSE under the workspace, initial-resync
   first frame, per-cycle authorization before emission, revocation close,
   coalesced invalidations, test seam for the first frames, unmounted.
 - [ ] **Lot 3 — API tests**: shared changes invalidate every member, private
@@ -96,4 +96,4 @@ business-event ledger: durable 6L1 revisions stay the only authority.
 - [ ] **Lot N — Close (not covered)**: push, PR, remote CI,
   merge commit (no squash/rebase), keep branch, move plan to `plan/done/`.
 
-- Delivery checkpoint: 4.
+- Delivery checkpoint: 5.
