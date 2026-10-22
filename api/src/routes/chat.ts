@@ -33,6 +33,7 @@ import {
 } from "../services/chat/mesh-runtime.js";
 import { executeBacklogTool } from "../services/chat/backlog-tools.js";
 import {
+  isLegacyMarkDeliveryRetired,
   publish,
   replayAll,
   retireLegacyMarkDelivery,
@@ -140,12 +141,14 @@ export function chatRoute(db?: Database): Hono {
     // unreadable fence suspends mark frames for this connection only.
     const fence = db ? await legacyMarksFence(db) : "none";
     if (fence === "open" || fence === "barrier") retireLegacyMarkDelivery();
-    const suspendLegacyMarks = fence === "unknown";
+    let suspendLegacyMarks = fence === "unknown";
     const encoder = new TextEncoder();
     let unsubscribe: (() => void) | null = null;
     let unsubscribeRetirement: (() => void) | null = null;
     let heartbeat: ReturnType<typeof setInterval> | null = null;
+    let disconnected = false;
     const disconnect = () => {
+      disconnected = true;
       unsubscribe?.();
       unsubscribeRetirement?.();
       if (heartbeat) clearInterval(heartbeat);
@@ -153,16 +156,14 @@ export function chatRoute(db?: Database): Hono {
 
     const stream = new ReadableStream<Uint8Array>({
       start(controller) {
-        unsubscribeRetirement = subscribeRetirement((streamId, types) => {
-          if (streamId !== "prospect-marks" || !types.some((type) =>
-            type === "prospect:mark" || type === "prospect:batch")) return;
-          disconnect();
-          // Error discards queued frames; close() would still deliver them.
-          controller.error(new Error("legacy_mark_delivery_retired"));
-        });
-        const send = (frame: StreamFrame): void => {
-          if (suspendLegacyMarks && frame.streamId === "prospect-marks"
-            && (frame.type === "prospect:mark" || frame.type === "prospect:batch")) return;
+        // Marks withheld while the fence is unreadable stay queued so a
+        // later recovery can resume them in order on this same connection,
+        // without any client reconnect and without duplicates.
+        const suspendedBacklog: StreamFrame[] = [];
+        const suspendedLive: StreamFrame[] = [];
+        let revalidating = false;
+        let replaying = true;
+        const deliver = (frame: StreamFrame): void => {
           controller.enqueue(
             encoder.encode(
               sseFrame(frame.type, {
@@ -173,9 +174,76 @@ export function chatRoute(db?: Database): Hono {
             ),
           );
         };
+        const closeRetired = (): void => {
+          disconnect();
+          // Error discards queued frames; close() would still deliver them.
+          try {
+            controller.error(new Error("legacy_mark_delivery_retired"));
+          } catch {
+            // Already closed by the retirement broadcast.
+          }
+        };
+        const revalidateFence = async (): Promise<void> => {
+          if (disconnected || revalidating || !suspendLegacyMarks || !db) return;
+          revalidating = true;
+          try {
+            const current = await legacyMarksFence(db);
+            if (disconnected) return;
+            if (isLegacyMarkDeliveryRetired()) { closeRetired(); return; }
+            if (current === "none") {
+              suspendLegacyMarks = false;
+              const queued = [...suspendedBacklog, ...suspendedLive];
+              suspendedBacklog.length = 0;
+              suspendedLive.length = 0;
+              for (const frame of queued) {
+                try {
+                  deliver(frame);
+                } catch {
+                  disconnect();
+                  break;
+                }
+              }
+            } else if (current === "open" || current === "barrier") {
+              suspendedBacklog.length = 0;
+              suspendedLive.length = 0;
+              retireLegacyMarkDelivery();
+              if (isLegacyMarkDeliveryRetired()) closeRetired();
+            } else {
+              // Still unreadable: drop live frames published during the
+              // outage, as before, but keep the withheld replay backlog.
+              suspendedLive.length = 0;
+            }
+          } catch {
+            suspendedLive.length = 0;
+          } finally {
+            revalidating = false;
+          }
+        };
+        unsubscribeRetirement = subscribeRetirement((streamId, types) => {
+          if (streamId !== "prospect-marks" || !types.some((type) =>
+            type === "prospect:mark" || type === "prospect:batch")) return;
+          closeRetired();
+        });
+        const isSuspendedMark = (frame: StreamFrame): boolean =>
+          suspendLegacyMarks && frame.streamId === "prospect-marks"
+          && (frame.type === "prospect:mark" || frame.type === "prospect:batch");
+        const send = (frame: StreamFrame): void => {
+          if (!isSuspendedMark(frame)) {
+            deliver(frame);
+            return;
+          }
+          if (replaying) {
+            suspendedBacklog.push(frame);
+            return;
+          }
+          suspendedLive.push(frame);
+          void revalidateFence();
+        };
         replayAll(send);
+        replaying = false;
         unsubscribe = subscribe(send);
         heartbeat = setInterval(() => {
+          void revalidateFence();
           try {
             controller.enqueue(encoder.encode(sseFrame("ping", { ts: Date.now() })));
           } catch {
