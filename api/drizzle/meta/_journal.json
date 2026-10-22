@@ -127,6 +127,13 @@
       "when": 1791400000000,
       "tag": "0018_facet_scope_bindings",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1791500000000,
+      "tag": "0019_facet_workspace_archive",
+      "breakpoints": true
     }
   ]
 }

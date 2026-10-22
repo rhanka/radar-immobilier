@@ -1,7 +1,7 @@
 import { and, eq, isNull } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { facetEventBindings, facetEvents, facetHeads, facetStreams } from "../../db/schema.js";
-import { assertStreamIdentity, streamKey } from "./scope.js";
+import { assertStreamIdentity, ScopeError, streamKey } from "./scope.js";
 import { qualifyChain, sealPendingReceiptContexts, type ActivationReceipt } from "./activation.js";
 import { streamIdentityFor } from "./scoped-reader.js";
 
@@ -15,7 +15,10 @@ export async function bindAttachedChains(tx: Tx, workspaceId: string, accounts: 
       .leftJoin(facetEventBindings, eq(facetEventBindings.eventId, facetEvents.id))
       .where(and(eq(facetEvents.ownerId, attachment.accountId),
         eq(facetEvents.scope, "personal"), isNull(facetEventBindings.eventId)));
-    const events = rows.map((row) => row.event);
+    const events = rows.map(({ event }) => {
+      if (event.ownerId === null) throw new ScopeError(503, "personal_history_unresolved");
+      return { ...event, ownerId: event.ownerId };
+    });
     const groups = new Map<string, typeof events>();
     for (const event of events) {
       const identity = streamIdentityFor(workspaceId, attachment.accountId, {
