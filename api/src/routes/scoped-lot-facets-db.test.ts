@@ -96,4 +96,92 @@ describeDb("6J scoped lot HTTP contract", () => {
     expect(batchResult.result).toMatchObject({ targets: 1, changed: 1 });
   });
 
+  it("should return full results and exact replays for composite and unchanged commands", async () => {
+    const f = await lotFixture();
+    const moderator: { sub: string; via?: string } = { sub: f.moderator.sub };
+    const app = new Hono();
+    app.use("*", async (c, next) => { c.set("session" as never, moderator as never); await next(); });
+    app.route("/", scopedLotFacetsRoute({ db: f.db, auth: { enabled: true } }));
+    const base = `/api/v1/workspaces/${f.workspaceId}/lot-facets`;
+    const resolved = await resolveLotSource(f.db,
+      { citySlug: "synthetic-6j-city", canonicalId: "lot-canonical-syn-6j-01" });
+    const target = { type: "Lot", authority: "lot_versions",
+      citySlug: "synthetic-6j-city", canonicalId: "lot-canonical-syn-6j-01" };
+    const selected = await app.request(`${base}/workspace/commands`, { method: "POST",
+      headers: { "content-type": "application/json", "Idempotency-Key": randomUUID() },
+      body: JSON.stringify({ mode: "real", target,
+        displayed_version: resolved.displayed, expected_head_id: null,
+        mutation: { action: "select", basket_id: f.selectionBasket } }) });
+    const selectedBody = await selected.json() as {
+      result: { events: Array<{ id: string }>; heads: Array<{ id: string }> } };
+    const key = randomUUID();
+    const composite = await app.request(`${base}/workspace/commands`, { method: "POST",
+      headers: { "content-type": "application/json", "Idempotency-Key": key },
+      body: JSON.stringify({ mode: "real", target,
+        displayed_version: resolved.displayed, expected_head_id: null,
+        mutation: { action: "discard", reasonCode: "N-NON-RES",
+          deselect: [{ basket_id: f.selectionBasket,
+            expected_head_id: selectedBody.result.heads[0]!.id }] } }) });
+    expect(composite.status).toBe(200);
+    const compositeBody = await composite.json() as {
+      result: {
+        target: unknown; mode: string;
+        events: Array<{ facet: string; state: string; id: string }>;
+        heads: Array<{ id: string }>;
+      } };
+    expect(compositeBody.result).toMatchObject({ target, mode: "real" });
+    expect(compositeBody.result.events.map((event) => [event.facet, event.state]))
+      .toEqual([["archive", "active"], ["selection", "inactive"]]);
+    expect(compositeBody.result.heads.map((head) => head.id).sort()).toEqual(
+      compositeBody.result.events.map((event) => event.id).sort());
+    const replayed = await app.request(`${base}/workspace/commands`, { method: "POST",
+      headers: { "content-type": "application/json", "Idempotency-Key": key },
+      body: JSON.stringify({ mode: "real", target,
+        displayed_version: resolved.displayed, expected_head_id: null,
+        mutation: { action: "discard", reasonCode: "N-NON-RES",
+          deselect: [{ basket_id: f.selectionBasket,
+            expected_head_id: selectedBody.result.heads[0]!.id }] } }) });
+    expect(await replayed.json()).toEqual(compositeBody);
+    const noopKey = randomUUID();
+    const noopRequest = { method: "POST",
+      headers: { "content-type": "application/json", "Idempotency-Key": noopKey },
+      body: JSON.stringify({ mode: "real", target,
+        displayed_version: resolved.displayed,
+        expected_head_id: compositeBody.result.heads.find(
+          (head) => compositeBody.result.events.some((event) =>
+            event.id === head.id && event.facet === "archive"))!.id,
+        mutation: { action: "discard", reasonCode: "N-NON-RES" } }) };
+    const noop = await app.request(`${base}/workspace/commands`, noopRequest);
+    expect(noop.status).toBe(200);
+    const noopBody = await noop.json() as {
+      result: { events: unknown[]; heads: Array<{ id: string }> } };
+    expect(noopBody.result.events).toEqual([]);
+    expect(noopBody.result.heads).toHaveLength(1);
+    const noopReplay = await app.request(`${base}/workspace/commands`, noopRequest);
+    expect(noopReplay.status).toBe(200);
+    expect(await noopReplay.json()).toEqual(noopBody);
+  });
+
+  it("should return 422 for a missing discard reason on both command routes", async () => {
+    const f = await lotFixture();
+    const session: { sub: string; via?: string } = { sub: f.moderator.sub };
+    const app = new Hono();
+    app.use("*", async (c, next) => { c.set("session" as never, session as never); await next(); });
+    app.route("/", scopedLotFacetsRoute({ db: f.db, auth: { enabled: true } }));
+    const base = `/api/v1/workspaces/${f.workspaceId}/lot-facets`;
+    const resolved = await resolveLotSource(f.db,
+      { citySlug: "synthetic-6j-city", canonicalId: "lot-canonical-syn-6j-01" });
+    const item = { target: { type: "Lot", authority: "lot_versions",
+      citySlug: "synthetic-6j-city", canonicalId: "lot-canonical-syn-6j-01" },
+    displayed_version: resolved.displayed, expected_head_id: null,
+    mutation: { action: "discard" } };
+    const single = await app.request(`${base}/workspace/commands`, { method: "POST",
+      headers: { "content-type": "application/json", "Idempotency-Key": randomUUID() },
+      body: JSON.stringify({ mode: "real", ...item }) });
+    expect.soft(single.status).toBe(422);
+    const batch = await app.request(`${base}/workspace/commands/batch`, { method: "POST",
+      headers: { "content-type": "application/json", "Idempotency-Key": randomUUID() },
+      body: JSON.stringify({ mode: "real", items: [item] }) });
+    expect(batch.status).toBe(422);
+  });
 });
