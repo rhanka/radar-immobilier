@@ -6,7 +6,9 @@
  * reconnects cannot supersede a pending authorization refusal. A refusal
  * concerning the still-current context always closes through the
  * authorization path; failures and late responses retain the last
- * acknowledged snapshot. Disposal closes the source and cancels a pending
+ * acknowledged snapshot. A fetch superseded by a concurrent 6L1 read keeps
+ * its invalidation pending until an acknowledgment lands, so convergence
+ * needs no new server event. Disposal closes the source and cancels a pending
  * reconnect.
  */
 import {
@@ -20,6 +22,7 @@ import {
   type ProjectionSnapshot,
   type StreamEvent,
 } from "./signal-projection-invalidation.js";
+import { isLiveScopedContext } from "./signal-facet-scope.js";
 
 export interface ProjectionEventSource {
   close(): void;
@@ -126,7 +129,20 @@ export function observeProjectionInvalidation<T extends ProjectionSnapshot = Pro
     fetchInflight = false;
     if (disposed) return;
     const current = deps.live();
-    if (noteInvalidationReconciled(state, current, snapshot, operation)) deps.rebuild(snapshot);
+    if (noteInvalidationReconciled(state, current, snapshot, operation)) {
+      deps.rebuild(snapshot);
+    } else if (
+      state.enabled &&
+      operation !== state.operation &&
+      isLiveScopedContext(state.launched, current) &&
+      state.launched.citySlug === current.citySlug &&
+      state.launched.mode === current.mode &&
+      state.ackedToken !== snapshot.token
+    ) {
+      // A concurrent 6L1 read superseded this fetch without acknowledging:
+      // retain the invalidation so the drain below converges without a new event.
+      refetchRequested = true;
+    }
     drainCoalescedRead();
   };
   const refresh = () => wake({ kind: "resync" });
