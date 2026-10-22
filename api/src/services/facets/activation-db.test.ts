@@ -17,7 +17,8 @@ describeDb("6H protected activation", () => {
     const f = await fixture(true);
     const historicalEvents = async () => (await f.pool.query(`SELECT to_jsonb(e) - ARRAY[
       'mode','observed_lot_version','asking_price','listing_url','pipeline_status',
-      'source_author','source_created_at','import_run_id'] AS row FROM facet_events e ORDER BY id`)).rows;
+      'source_author','source_created_at','import_run_id','source_row_id','source_chain_id'
+      ] AS row FROM facet_events e ORDER BY id`)).rows;
     // Seed the old schema with its own column set before 0020 exists.
     const first = (await f.pool.query<{ id: string; citySlug: string }>(`
       INSERT INTO facet_events (owner_id,actor_id,city_slug,node_type,node_id,facet,basket,state,
