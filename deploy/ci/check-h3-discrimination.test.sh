@@ -26,4 +26,5 @@ reject 's/ARTIFACTS_CONTROL_MODE: "off"/ARTIFACTS_CONTROL_MODE: validation/' 'ex
 reject '/automountServiceAccountToken: false/a\      volumes:\n      - name: fixture-credential\n        secret:\n          secretName: fixture-secret' 'credential or volume mount forbidden'
 reject '/^        - content-deny$/a\        env:\n        - name: FIXTURE_CREDENTIAL\n          value: fixture-only' 'credential or volume mount forbidden'
 reject 's/- content-deny/- api/' 'exact content-deny args missing'
-echo 'check-h3-discrimination tests: 4 passed, 0 failed'
+reject '/^  name: allow-traefik-to-content-deny$/,/^---$/{s/^  - Ingress$/  - Ingress\n  - Egress/;s/^spec:$/spec:\n  egress:\n  - {}/;}' 'egress forbidden on denial ingress policy'
+echo 'check-h3-discrimination tests: 5 passed, 0 failed'

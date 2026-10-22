@@ -50,4 +50,5 @@ reject 's/- content-deny/- api/' 'exact content-deny args missing'
 reject 's/automountServiceAccountToken: false/automountServiceAccountToken: true/' 'ServiceAccount token mount forbidden'
 reject 's/port: 3000/port: 3001/g' 'denial Service port mismatch'
 reject 's/name: deny-content-deny-egress/name: removed-egress/' 'deny-content-deny-egress not found'
+reject '/^  name: allow-traefik-to-content-deny$/,/^---$/{s/^  - Ingress$/  - Ingress\n  - Egress/;s/^spec:$/spec:\n  egress:\n  - {}/;}' 'egress forbidden on denial ingress policy'
 echo "check-h3-activation-render tests: $PASS passed, 0 failed"

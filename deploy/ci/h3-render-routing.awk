@@ -6,11 +6,12 @@ function judge( i, v, selector) {
     selector = "  podSelector:\n    matchLabels:\n      app.kubernetes.io/component: content-deny\n      app.kubernetes.io/name: radar-immobilier\n"
     if (name == "deny-content-deny-egress") {
       egress++
-      if (!index(doc, selector) || !index(doc, "  policyTypes:\n  - Egress\n")) fail("exact deny-all egress selector/type required")
+      if (!index(doc, selector) || !index(doc, "  policyTypes:\n  - Egress\n") || count("^  - (Ingress|Egress)$") != 1) fail("exact deny-all egress selector/type required")
       if (count("^  egress:")) fail("egress stanza forbidden (deny-all)")
     } else if (name == "allow-traefik-to-content-deny") {
       ingress++
-      if (!index(doc, selector) || !index(doc, "  policyTypes:\n  - Ingress\n")) fail("exact denial ingress selector/type required")
+      if (!index(doc, selector) || !index(doc, "  policyTypes:\n  - Ingress\n") || count("^  - (Ingress|Egress)$") != 1) fail("exact denial ingress selector/type required")
+      if (count("^  - Egress$") || count("^  egress:")) fail("egress forbidden on denial ingress policy (NetworkPolicies are additive)")
       if (count("^    - port: 3000$") != 1 || count("kubernetes.io/metadata.name: (traefik|kube-system)$") != 2) fail("Traefik ingress port/namespaces missing")
     } else if (count("^  egress:") && (!count("^      app.kubernetes.io/component:") || count("^      app.kubernetes.io/component: content-deny$"))) {
       fail("broad egress policy can select denial pods")

@@ -60,6 +60,8 @@ Review integration (both non-blocking points):
   - `deploy/k8s/secrets.example.yaml` (unit 11 operator Secret shape, example only)
   - `deploy/ci/check-h3-preprod-render.sh` (unit 14 render gate, no Python)
   - `deploy/ci/check-h3-activation-render.sh` (unit 13/14 activation-time gate)
+  - `deploy/ci/check-h3-{preparation,rollback}-render.sh` (operator transitions)
+  - `deploy/ci/check-h3-transition-render.test.sh` (transition regressions)
   - `deploy/ci/check-h3-preprod-render.test.sh` (unit 14 hermetic tests)
   - `deploy/ci/h3-render-*.awk` (canonical rendered-object checks)
   - `deploy/ci/check-h3-activation-render.test.sh` (activation regressions)
@@ -75,6 +77,7 @@ Review integration (both non-blocking points):
   - `RAPPORT-MUSE-H3-P4.md` (uncommitted deliverable)
   - `RAPPORT-SOL-H3-P4.md` (uncommitted integration report)
   - `tmp/861c-h3-p4/**` (ignored evidence, copies, local Git and bundle)
+  - `tmp/861c-h3-p4-fix/**` (review correction evidence, local Git and bundle)
 - **Forbidden Paths (must not change in this branch)**:
   - `api/src/config.ts`, root `docker-compose*.yml`
   - `rules/**`, agent bootstrap files, other `plan/*-BRANCH_*.md`
@@ -171,6 +174,8 @@ Review integration (both non-blocking points):
   (`docs/operator/h3-preprod-activation.md`): §11 order, rollback to H2 by
   removing the complete activation group, data preservation, retained-data
   record, credential cycle.
+- [x] Review correction 1: reject additive egress on the named denial ingress
+  policy; exact policy types, disabled/activation copy mutations and `cmp`.
 
 - [x] **Unit 8 — isolated denial listener** (§5.4, T02/T23/T24): new
       `api/src/artifacts/content-deny.ts` exposes the shared denial
