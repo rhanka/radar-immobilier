@@ -1,0 +1,49 @@
+docs(paniers): declare the guarded lot cutover scope|plan/PANIERS6K-BRANCH_feat-paniers-6k-lot-cutover.md
+feat(paniers): add replayable lot cutover migration|api/drizzle/0022_facet_lot_cutover.sql api/drizzle/meta/_journal.json
+feat(paniers): expose cutover tables in the database schema|api/src/db/schema.ts
+feat(paniers): define protected cutover contracts|api/src/services/facets/lots/lot-cutover-types.ts
+feat(paniers): share canonical lot source serialization|api/src/services/facets/lots/lot-source-serialization.ts api/src/services/facets/lots/lot-streams.ts
+feat(paniers): require explicit source writer coverage|api/src/services/facets/lots/lot-source-coverage.ts
+feat(paniers): fail closed on legacy reader fence errors|api/src/services/facets/lots/lot-legacy-fence.ts
+test(paniers): cover source locks and durable reader fencing|api/src/services/facets/lots/lot-source-serialization.test.ts api/src/services/facets/lots/lot-legacy-fence.test.ts
+feat(paniers): classify targets and persist exact D5 decisions|api/src/services/facets/lots/lot-cutover-classify.ts api/src/services/facets/lots/lot-cutover-dispositions.ts
+feat(paniers): require concrete roster and destination inputs|api/src/services/facets/lots/lot-cutover-roster.ts api/src/services/facets/lots/lot-cutover-gate.ts
+feat(paniers): expose stored cutover and pending target status|api/src/services/facets/lots/lot-cutover-status.ts
+feat(paniers): project only explicitly qualified lot heads|api/src/services/facets/lots/lot-project.ts api/src/services/facets/lots/lot-importer.ts
+feat(paniers): rebuild the source manifest on the server|api/src/services/facets/lots/lot-manifest-refresh.ts
+feat(paniers): guard pending targets in reads and commands|api/src/services/facets/lots/lot-cutover-target.ts api/src/services/facets/lots/lot-reader.ts api/src/services/facets/lots/lot-writer.ts api/src/services/facets/lots/lot-batch.ts
+feat(paniers): require confirmed delivery retirement|api/src/services/facets/lots/lot-cutover-safety.ts
+feat(paniers): verify committed state before opening lots|api/src/services/facets/lots/lot-cutover-open.ts
+feat(paniers): run the cutover behind a durable fence|api/src/services/facets/lots/lot-cutover-run.ts
+feat(paniers): expose the guarded cutover service|api/src/services/facets/lots/lot-cutover.ts
+test(paniers): add annotated clean cutover fixtures|cutover-fixture-base
+test(paniers): add converged conflict cutover fixtures|api/src/services/facets/lots/cutover-fixture.ts
+test(paniers): qualify clean and conflicted manifests|api/src/services/facets/lots/cutover-manifest.test.ts
+test(paniers): replay migration with a later journal entry|api/src/services/facets/lots/lot-cutover-journal-db.test.ts
+test(paniers): cover activation inputs and conditional D5|api/src/services/facets/lots/lot-cutover-gate-db.test.ts api/src/services/facets/lots/lot-cutover-roster-db.test.ts
+test(paniers): require exact D5 retry identity|api/src/services/facets/lots/lot-cutover-dispositions-db.test.ts
+test(paniers): verify activation and legacy fencing|api/src/services/facets/lots/lot-cutover-run-db.test.ts
+test(paniers): preserve conflicting source chains and decisions|api/src/services/facets/lots/lot-cutover-d5-run-db.test.ts
+test(paniers): preserve independent facets after cutover|api/src/services/facets/lots/lot-cutover-facets-db.test.ts
+test(paniers): recover every cutover stage behind the barrier|api/src/services/facets/lots/lot-cutover-recovery-db.test.ts
+feat(paniers): retire buffered and queued legacy delivery|api/src/services/chat/stream-bus.ts api/src/routes/chat.ts
+test(paniers): qualify retirement and replica reconnects|api/src/services/chat/stream-bus-retirement.test.ts api/src/routes/lot-cutover-stream.test.ts
+feat(paniers): expose operator cutover evaluation|api/src/routes/scoped-lot-cutover.ts
+feat(paniers): require explicit cutover confirmation|api/src/routes/scoped-lot-cutover-activation.ts
+feat(paniers): mount closed lot routes and fence legacy marks|api/src/app.ts api/src/routes/scoped-lot-facets-common.ts api/src/routes/scoped-lot-facets.ts api/src/routes/prospect-marks.ts api/src/routes/prospect-marks.test.ts
+test(paniers): wire synthetic cutover HTTP fixtures|api/src/routes/scoped-lot-cutover-harness.ts
+test(paniers): verify cutover status and operator mapping|api/src/routes/scoped-lot-cutover-db.test.ts api/src/routes/scoped-lot-cutover-mapping-db.test.ts
+test(paniers): activate and retire legacy traffic over HTTP|api/src/routes/scoped-lot-cutover-activate-db.test.ts
+test(paniers): require recorded D5 over HTTP for conflicts|api/src/routes/scoped-lot-cutover-d5-db.test.ts
+feat(paniers): count and filter each lot facet independently|ui/src/lib/maps/lot-facet-counters.ts
+test(paniers): distinguish facet counts from lot population|ui/src/lib/maps/lot-facet-counters.test.ts
+feat(paniers): parse cutover status without reopening legacy|ui/src/lib/prospect/lot-cutover-client.ts
+test(paniers): reject inconsistent open cutover status|ui/src/lib/prospect/lot-cutover-client.test.ts
+feat(paniers): preserve the panel until explicit activation|ui/src/lib/components/maps/LotFichePanel.svelte
+feat(paniers): use independent counters in the activated map|ui/src/lib/components/maps/EvaluationMapView.svelte
+test(paniers): compare inactive UI DOM and requests with main|ui/src/lib/components/maps/LotCutover.ui.test.ts
+chore(paniers): archive complete isolated verification inputs|tools/make/paniers-lot6-verify.sh
+chore(paniers): expose versioned cutover verification targets|tools/make/paniers-lot6.mk tools/make/paniers-lot6k-run.sh
+test(paniers): discriminate six cutover regressions on copies|tools/make/paniers-lot6k-mutation.sh
+chore(paniers): stage and audit bounded delivery commits|tools/make/paniers-lot6k-deliver.sh
+chore(paniers): version the cutover delivery slices|tools/make/paniers-lot6k-slices.txt
