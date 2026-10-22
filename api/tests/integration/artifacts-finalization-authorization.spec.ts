@@ -539,4 +539,118 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       if (typeof close === "function") (close as () => void)();
     }
   });
+
+  it.each([
+    "suspension",
+    "cohort-removal",
+    "activation-expiry",
+    "authority-outage",
+  ] as const)("publish denied for %s prevents success with a fresh check", async (mode) => {
+    await requireCommitContract();
+    await requireOutcomeContract();
+    const barrier = await requireCommitBarrier();
+    const host = await composeQ1Host(barrier.observer);
+    const close = host["close"];
+    const env = loadConfig();
+    let policyPool: pg.Pool | undefined;
+    try {
+      requireSelectedProfile(host);
+      const execute = requireHostExecute(host);
+      const fixtures = { subjects: [ACTOR], expiresAtMs: 3_600_000 };
+      policyPool = new pg.Pool({ host: env.POSTGRES_HOST, port: env.POSTGRES_PORT,
+        user: env.POSTGRES_USER, password: env.POSTGRES_PASSWORD, database: DATABASE });
+      const authorizeCommit: AuthorizeCommit = async (context, transaction) => {
+        expect(transaction).toBeDefined();
+        if (mode === "authority-outage") {
+          try {
+            await policyPool?.query("SELECT status FROM account_users WHERE sub = 'alice'");
+          } catch {
+            return { allowed: false, reason: "unauthorized_at_commit",
+              publicCode: "capability_unavailable", status: 503, retriable: true };
+          }
+        }
+        const status = (await pool.query(
+          "SELECT status FROM account_users WHERE sub = 'alice'")).rows[0]?.status as string | null;
+        if (status !== "approved") {
+          return toGuardDecision(
+            { allowed: false, status: 403, body: { error: "account_not_approved", status: status ?? "unknown" } });
+        }
+        if (!fixtures.subjects.includes(ACTOR)) {
+          return toGuardDecision(
+            { allowed: false, status: 403, body: { error: "not_in_cohort" } });
+        }
+        if (fixtures.expiresAtMs <= 1_000) {
+          return toGuardDecision(
+            { allowed: false, status: 403, body: { error: "activation_closed" } });
+        }
+        return authorizeTransaction(context, transaction);
+      };
+      const ensured = await execute({ method: "POST", path: "/ensure",
+        body: { bindingName: `q1-${mode}`, idempotencyKey: `q1-${mode}-ensure` } },
+        invocationFor(allowAll(), `${mode}-ensure`));
+      expect(ensured).toMatchObject({ ok: true });
+      const artifactId = ((ensured as { result: unknown }).result as { body: { artifactId: string } })
+        .body.artifactId;
+      const body = { artifactId,
+        files: [{ path: "index.html", mimeType: "text/html", text: `denied for ${mode}` }],
+        idempotencyKey: `q1-${mode}` };
+      const invocation = invocationFor(authorizeCommit, mode);
+      const invocationId = invocation["invocationId"] as string;
+      const releasesBefore = await tableCount("releases");
+      const keysBefore = await tableCount("idempotency_keys");
+      let settled = false;
+      const pending = execute({ method: "POST", path: "/publish", body }, invocation)
+        .finally(() => { settled = true; });
+      const pump = (async () => {
+        const deadline = performance.now() + 1500;
+        while (!settled) {
+          if (performance.now() > deadline) throw new Error("[contract-violation] commit barrier did not progress");
+          for (const candidate of PUBLISH_POINTS) {
+            if (settled || candidate === "after_finalization_locks_before_guard") continue;
+            const arrived = await withTimeout(barrier.waitUntilReached(candidate, invocationId), 50);
+            if (arrived) barrier.release(candidate, invocationId);
+          }
+          const targetArrived = await withTimeout(
+            barrier.waitUntilReached("after_finalization_locks_before_guard", invocationId), 50);
+          if (targetArrived) break;
+        }
+      })();
+      await pump;
+      if (mode === "suspension") {
+        await pool.query("UPDATE account_users SET status = 'suspended' WHERE sub = 'alice'");
+      } else if (mode === "cohort-removal") {
+        fixtures.subjects = ["bob"];
+      } else if (mode === "activation-expiry") {
+        fixtures.expiresAtMs = 999;
+      } else {
+        await policyPool?.end();
+      }
+      barrier.release("after_finalization_locks_before_guard", invocationId);
+      const outcome = await pending as unknown as Record<string, unknown>;
+      assertOutcomeFailure(outcome, invocationId);
+      if (mode === "authority-outage") {
+        expect(outcome["failure"]).toMatchObject({
+          category: "unauthorized_at_commit", retriable: true, commitState: "not_committed" });
+      } else {
+        expect(outcome["failure"]).toMatchObject({
+          category: "unauthorized_at_commit", retriable: false, commitState: "not_committed" });
+      }
+      expect(await tableCount("releases")).toBe(releasesBefore);
+      expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+      expect(await currentReleaseId(artifactId)).toBeUndefined();
+      fixtures.subjects = [ACTOR];
+      fixtures.expiresAtMs = 3_600_000;
+      await pool.query("UPDATE account_users SET status = 'approved' WHERE sub = 'alice'");
+      const retry = await execute({ method: "POST", path: "/publish", body },
+        invocationFor(mode === "authority-outage" ? allowAll() : authorizeCommit, `${mode}-retry`));
+      if (mode === "authority-outage") {
+        expect(retry).toMatchObject({ ok: true });
+        expect(await tableCount("releases")).toBe(releasesBefore + 1);
+      }
+    } finally {
+      await policyPool?.end().catch(() => {});
+      await pool.query("UPDATE account_users SET status = 'approved' WHERE sub = 'alice'");
+      if (typeof close === "function") (close as () => void)();
+    }
+  });
 });
