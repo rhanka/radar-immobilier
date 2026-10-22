@@ -105,27 +105,35 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
       user: env.POSTGRES_USER, password: env.POSTGRES_PASSWORD, database: env.POSTGRES_DB });
     await admin.query(`CREATE DATABASE ${DATABASE}`);
     databaseCreated = true;
+    console.info("[acceptance-setup] database created");
     pool = createArtifactsPool({ host: env.POSTGRES_HOST, port: env.POSTGRES_PORT,
       user: env.POSTGRES_USER, password: env.POSTGRES_PASSWORD, database: DATABASE });
     await migrate(drizzle(pool), { migrationsFolder });
+    console.info("[acceptance-setup] migrations applied");
     s3 = new S3Client({ endpoint, forcePathStyle: true, region: "us-east-1",
       credentials: { accessKeyId: accessKey, secretAccessKey: secretKey } });
     await s3.send(new CreateBucketCommand({ Bucket: BUCKET }));
     bucketCreated = true;
+    console.info("[acceptance-setup] bucket created");
     await pool.query("INSERT INTO account_users (sub, email, status) VALUES ('alice','alice@example.test','approved')");
   });
 
   afterAll(async () => {
+    console.info("[acceptance-cleanup] start", { total: pool?.totalCount, idle: pool?.idleCount, waiting: pool?.waitingCount });
     try {
       if (bucketCreated) {
         for (const key of await rawBlobs().listKeys(`artifacts/${SCOPE}/`)) await rawBlobs().deleteBlob(key);
+        console.info("[acceptance-cleanup] objects removed");
         await s3.send(new DeleteBucketCommand({ Bucket: BUCKET }));
+        console.info("[acceptance-cleanup] bucket removed");
       }
     } finally {
       s3?.destroy();
       await pool?.end();
+      console.info("[acceptance-cleanup] pool ended");
       try {
         if (databaseCreated) await admin.query(`DROP DATABASE ${DATABASE} WITH (FORCE)`);
+        console.info("[acceptance-cleanup] database removed");
       } finally { await admin?.end(); }
     }
   });
