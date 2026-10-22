@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import type { ChildProcess } from "node:child_process";
 import { createRequire } from "node:module";
-import { createServer as createHttpServer, request as httpRequest } from "node:http";
+import { request as httpRequest } from "node:http";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createServer as createNetServer } from "node:net";
 import { tmpdir } from "node:os";
@@ -9,9 +9,6 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
-
-import { runInNewContext } from "node:vm";
-import type { Server } from "node:http";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const read = (name: string): string => readFileSync(join(here, name), "utf8");
@@ -247,36 +244,6 @@ function findFreePort(): Promise<number> {
   });
 }
 
-/** Execute the actual modules without instrumenting the test runner's env. */
-function executeDenialModules(env: NodeJS.ProcessEnv, servers: Server[]): void {
-  const require = createRequire(import.meta.url);
-  const application: Record<string, unknown> = {};
-  const http = {
-    ...require("node:http"),
-    createServer: (...args: Parameters<typeof createHttpServer>): Server => {
-      const server = createHttpServer(...args);
-      servers.push(server);
-      return server;
-    },
-  };
-  for (const file of ["content-deny.ts", "content-deny-server.ts"]) {
-    const { outputText } = ts.transpileModule(read(file), {
-      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
-    });
-    runInNewContext(outputText, {
-      exports: file === "content-deny.ts" ? application : {},
-      require: (name: string): unknown => {
-        if (name === "./content-deny.js") return application;
-        if (name === "node:http") return http;
-        return require(name);
-      },
-      process: { env },
-      console,
-      Response,
-    }, { filename: file });
-  }
-}
-
 /**
  * Transpile the denial sources into an isolated directory as CommonJS with
  * absolute targets for the three allowed imports. No runtime resolver from
@@ -463,4 +430,53 @@ describe("content-deny child-process environment isolation", () => {
     }
   }, 15000);
 
+  it.each([
+    'report(Object.getPrototypeOf(Response).constructor("return process")().env);',
+    'report(console.log.constructor.call(null, "return process")().env);',
+    'void import(["node", "process"].join(":")).then(({ env }) => report(env));',
+  ])("bypass reads nothing in the reduced child: %s", async (access) => {
+    // Execute each review bypass in both modules. The static guard rejects
+    // them separately; here the environment itself must contain only PORT.
+    const probe =
+      '\nfunction report(env) {\n' +
+      'if (env.H3_DENY_PARENT_SENTINEL !== undefined) console.log(`LEAKED ${env.H3_DENY_PARENT_SENTINEL}`);\n' +
+      'console.log("H3_CHILD_ENV " + JSON.stringify({ keys: Object.keys(env).sort(), extra: env.EXTRA ?? null }));\n' +
+      `}\n${access}\n`;
+    const sentinel = `h3-parent-sentinel-${process.pid}`;
+    const previousExtra = process.env.EXTRA;
+    const previousSentinel = process.env.H3_DENY_PARENT_SENTINEL;
+    process.env.H3_DENY_PARENT_SENTINEL = sentinel;
+    process.env.EXTRA = "h3-parent-extra";
+    const port = await findFreePort();
+    expect(port).toBeGreaterThan(0);
+    const dir = mkdtempSync(join(tmpdir(), "deny-child-"));
+    try {
+      const { child, output } = await startDenialChild(
+        writeChildBundle(dir, probe, probe),
+        port,
+      );
+      try {
+        const root = await httpGet(port, "/");
+        expect(root.status).toBe(404);
+        expect(JSON.parse(root.body)).toEqual({ error: "not_found" });
+        expect(output()).not.toContain("LEAKED");
+        expect(output()).not.toContain(sentinel);
+        expect(root.body).not.toContain(sentinel);
+      } finally {
+        child.kill("SIGTERM");
+        await waitForChildExit(child);
+      }
+      expect(output()).not.toContain(sentinel);
+      expect(output().split("\n").filter((line) => line.startsWith("H3_CHILD_ENV "))
+        .map((line) => JSON.parse(line.slice("H3_CHILD_ENV ".length)))).toEqual([
+        { keys: ["PORT"], extra: null }, { keys: ["PORT"], extra: null },
+      ]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+      if (previousSentinel === undefined) delete process.env.H3_DENY_PARENT_SENTINEL;
+      else process.env.H3_DENY_PARENT_SENTINEL = previousSentinel;
+      if (previousExtra === undefined) delete process.env.EXTRA;
+      else process.env.EXTRA = previousExtra;
+    }
+  }, 15000);
 });
