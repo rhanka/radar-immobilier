@@ -48,12 +48,12 @@ Keep current host API names in one test adaptation module pending spec r2.
 - [x] **Lot 3 — Bidirectional replay, ordered conflict, selected profile.**
 - [x] **Lot 4 — Reproducible runner and tests included in static checking.**
 - [x] **Lot 5 — Full CI-equivalent API suite with acceptance disabled.**
-- [ ] **Lot 6 — Enabled suite: archive each expected contract failure.**
+- [x] **Lot 6 — Enabled suite: archive each expected contract failure.**
 - [ ] **Lot 7 — Typecheck, lint and API build with declarations.**
 - [ ] **Lot 8 — Review, French report, atomic commits and verified bundle.**
 
 ## Verification commands
 - [x] `rtk make -f tools/artifact-host.mk test-api API_PORT=18986 UI_PORT=15986 MAILDEV_UI_PORT=11986 ENV=test-861c-provider-acceptance`
-- [ ] `rtk make -f tools/artifact-host.mk test-provider-acceptance ARTIFACTS_PROVIDER_ACCEPTANCE=1 API_PORT=18986 UI_PORT=15986 MAILDEV_UI_PORT=11986 ENV=test-861c-provider-acceptance`
-- [ ] `rtk make -f tools/artifact-host.mk typecheck-provider-acceptance typecheck lint build-api API_PORT=18986 UI_PORT=15986 MAILDEV_UI_PORT=11986 ENV=test-861c-provider-acceptance`
+- [x] `rtk make -f tools/artifact-host.mk test-provider-acceptance ARTIFACTS_PROVIDER_ACCEPTANCE=1 API_PORT=18986 UI_PORT=15986 MAILDEV_UI_PORT=11986 ENV=test-861c-provider-acceptance`
+- [ ] `rtk make -f tools/artifact-host.mk verify-provider-acceptance API_PORT=18986 UI_PORT=15986 MAILDEV_UI_PORT=11986 ENV=test-861c-provider-acceptance`
 - [ ] `rtk make -f tools/artifact-host.mk down API_PORT=18986 UI_PORT=15986 MAILDEV_UI_PORT=11986 ENV=test-861c-provider-acceptance`
