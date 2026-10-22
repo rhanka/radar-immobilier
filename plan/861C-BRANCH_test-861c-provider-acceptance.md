@@ -74,3 +74,4 @@ Keep current host API names in one test adaptation module pending spec r2.
 - [x] Slice 006: retire superseded provider assertion.
 - [x] Slice 007: migrate provider acceptance case.
 - [x] Slice 008: migrate provider acceptance case.
+- [x] Slice 009: migrate provider acceptance case.
