@@ -114,7 +114,7 @@ it); no legacy reader/buffer retirement here (6K owns it).
 
 - [x] Review correction 1: guard rebuild after the final async boundary; qualify disposal and account switching.
 - [x] Review correction 2: return coherent displayed fingerprints; qualify a subsequent 6B command.
-- [ ] Review correction 3: locate the migration by identity; replay its suffix with a later migration.
+- [x] Review correction 3: locate the migration by identity; replay its suffix with a later migration.
 - [ ] Review correction 4: discriminate all three review regressions on restored source copies.
 
-- Delivery checkpoint: 23.
+- Delivery checkpoint: 24.
