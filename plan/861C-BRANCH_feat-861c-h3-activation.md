@@ -188,6 +188,7 @@ Review integration (both non-blocking points):
 - [x] Second-pass correction 1: Read PORT once and preserve invalid-port diagnostics and listener behavior.
 - [x] Second-pass correction 2: Pin the sole PORT read to the raw initializer in resolvePort.
 - [x] Second-pass correction 3: Reject global references at their source, including separate assignments.
+- [x] Second-pass correction 4: Exercise strict reference rejection with 32 probes on both denial modules.
 - [x] Operator runbook: validate preparation and the H2 rollback plan before
   GO; keep the real content boundary and a matching reviewed CD target.
 
