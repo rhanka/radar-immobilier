@@ -82,8 +82,10 @@ export async function writeWorkspaceArchiveFacet(
       throw new WorkspaceError(403, "workspace_capability_required");
     }
     requireScopedEpoch(await scopedEpochFor(tx, workspaceId), workspaceId);
+    // Shared actor/key receipt lock with the personal writer: same-key commands
+    // across families serialize here instead of colliding on the receipt key.
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${JSON.stringify(
-      ["workspace-archive-command", actorId, key])}, 0))`);
+      ["scoped-command", actorId, key])}, 0))`);
     const base = facetCommandDigest({ ...command, commandKey: key });
     const commandDigest = digest({ scope: "workspace", workspaceId: workspaceId.toLowerCase(), command: base });
     const [contextRow] = await tx.select().from(facetCommandContexts).where(sql`
