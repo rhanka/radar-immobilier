@@ -2,15 +2,17 @@
 # Review corrections on independent Git metadata; shared checkout stays intact.
 set -euo pipefail
 round=${2:-fix}
-case "$round" in fix|fix2) ;; *) exit 2;; esac
+case "$round" in fix|fix2|fix3) ;; *) exit 2;; esac
 task_dir="$PWD/tmp/paniers-6k-$round"
 repo="$task_dir/git"
 base_ref=63a8991c
 [[ "$round" != fix2 ]] || base_ref=323d0db9
+[[ "$round" != fix3 ]] || base_ref=0456f85f
 base=$(git rev-parse "$base_ref^{commit}")
 slices="tools/make/paniers-lot6k-$round-slices.txt"
 label='Review fix'
 [[ "$round" != fix2 ]] || label='Second review fix'
+[[ "$round" != fix3 ]] || label='Third review fix'
 plan=plan/PANIERS6K-BRANCH_feat-paniers-6k-lot-cutover.md
 local_git() { git --git-dir="$repo/.git" --work-tree="$PWD" "$@"; }
 scope() {
@@ -56,7 +58,7 @@ case "$1" in
       previous=$tree
     done < "$slices"
     local_git diff --exit-code "$tree" -- api ui tools/make
-    if [[ "$round" == fix2 ]]; then
+    if [[ "$round" == fix2 || "$round" == fix3 ]]; then
       diff_hash=$(git diff HEAD --no-ext-diff | sha256sum | cut -d ' ' -f 1)
       cat > "$task_dir/review.md" <<EOF
 ---
@@ -79,6 +81,10 @@ EOF
     if [[ "$round" == fix2 ]]; then
       gates=(fix2-api-ci/api-ci fix2-verify/verify fix2-build/build fix2-lint/lint
         fix2-typecheck/typecheck fix2-regression/regression fix2-mutations/mutation-proof)
+    fi
+    if [[ "$round" == fix3 ]]; then
+      gates=(fix3-final-api-ci/api-ci fix3-final-verify/verify fix3-final-build/build fix3-final-lint/lint
+        fix3-final-typecheck/typecheck fix3-final-ui/test-ui fix3-final-regression/regression fix3-final-mutations/mutation-proof)
     fi
     for gate in "${gates[@]}"; do
       test "$(cat "tmp/paniers-6k/logs/$gate.status")" = 0
@@ -132,6 +138,14 @@ EOF
     sha256sum -c "$task_dir/bundle.sha256"
     sha256sum -c "$task_dir/report.sha256"
     cmp RAPPORT-SOL-6K.md "$task_dir/RAPPORT-SOL-6K.md"
+    if [[ "$round" == fix3 ]]; then
+      main_ref=$(git rev-parse origin/main)
+      printf '%s\n' "$main_ref" > "$task_dir/main-ref.txt"
+      local_git diff "$main_ref..HEAD" -- api/src/routes/chat.ts > "$task_dir/chat-vs-main.diff"
+      if local_git show HEAD:api/src/routes/chat.ts | grep -Eq \
+        'suspendedLive|suspendedBacklog|suspendLegacyMarks|revalidateFence|revalidating'; then exit 1; fi
+      local_git diff --exit-code "$base" HEAD -- api/drizzle ui
+    fi
     df -h "$PWD" /var/lib/docker
     ;;
   *) exit 2 ;;
