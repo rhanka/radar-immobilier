@@ -64,7 +64,7 @@ writes stay disabled until 6K. No D5 input is required.
   common archive from contributors; keep personal restore without workspace
   effect; return 422 for omitted market fields; conflict payloads expose
   authorized heads only.
-- Delivery checkpoint: 4.
+- Delivery checkpoint: 5.
 - `BR6J-EX5`: adapt integration constraint names and the 6H upgrade
   snapshot to additive lot columns. Preserve every historical value and
   classified signal selection; no prior migration changes. Impact: two
@@ -83,7 +83,7 @@ writes stay disabled until 6K. No D5 input is required.
 
 - [x] **Lot 0 — Baseline**: read §3.7 + `### 6J` + D4; next free number
   is `0020`; write this plan.
-- [ ] **Lot 1 — Schema**: `0020` lot streams/mode/values/provenance,
+- [x] **Lot 1 — Schema**: `0020` lot streams/mode/values/provenance,
   destination gate, import runs/evidence, lot capability grants/events;
   journal entry; schema mirror. Replayable guards; signal constraints
   preserved for signal rows.
