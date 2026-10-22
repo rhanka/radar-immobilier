@@ -109,7 +109,7 @@ if [[ "$LOT" == 6J ]]; then
   done > "$log_dir/archived-files.sha256"
 fi
 case "$1" in
-  verify|test-api|mutation-proof|astra-proof|fix-proof) "${compose[@]}" up -d --wait postgres ;;
+  verify|test-api|mutation-proof|astra-proof|fix-proof|fix2-proof) "${compose[@]}" up -d --wait postgres ;;
   api-ci) "${compose[@]}" up -d --wait postgres minio ;;
 esac
 "${compose[@]}" run --rm --no-deps -T api sh -ec '
@@ -150,6 +150,11 @@ CONFIG
       done
       ;;
   esac
+  if [ "$1" = fix2-proof ]; then
+    test "$LOT" = 6J
+    bash /workspace/tools/make/paniers-lot6j-fix2-mutation.sh
+    exit
+  fi
   if [ "$1" = fix-proof ]; then
     test "$LOT" = 6J
     bash /workspace/tools/make/paniers-lot6j-fix-mutation.sh
