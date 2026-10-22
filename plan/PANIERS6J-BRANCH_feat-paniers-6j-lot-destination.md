@@ -64,7 +64,7 @@ writes stay disabled until 6K. No D5 input is required.
   common archive from contributors; keep personal restore without workspace
   effect; return 422 for omitted market fields; conflict payloads expose
   authorized heads only.
-- Delivery checkpoint: 72.
+- Delivery checkpoint: 73.
 - Review fixes use CI test parallelism, seven copied-source proofs, and a
   bundle based on `8b2347e9`; shared Git metadata remains read-only.
 - Final receipt review: share the actor/key lock with signal writers and
@@ -137,7 +137,7 @@ writes stay disabled until 6K. No D5 input is required.
 - [x] Second-pass fix 2: determine source destination before pagination.
 - [x] Second-pass fix 3: qualify HTTP composite no-ops and batch replay.
 - [x] Second-pass fix 4: discriminate all three defects on restored copies.
-- [ ] Second-pass fix 5: deliver bounded commits above `4044af20`.
+- [x] Second-pass fix 5: deliver bounded commits above `4044af20`.
 - [ ] **Lot N-1 — Docs**: uncommitted French `RAPPORT-MUSE-6J.md`.
 - [ ] **Lot N — Close (not covered)**: verify green, push, PR, CI, merge
   commit (no squash/rebase), keep branch, move plan to `plan/done/`.
