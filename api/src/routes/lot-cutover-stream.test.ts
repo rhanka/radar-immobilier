@@ -1,7 +1,6 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 beforeEach(() => { vi.resetModules(); });
-afterEach(() => { vi.useRealTimers(); });
 
 async function readThrough(reader: ReadableStreamDefaultReader<Uint8Array>, marker: string): Promise<string> {
   let text = "";
@@ -35,106 +34,105 @@ describe("6K SSE retirement", () => {
     } finally { await next.cancel(); }
   });
 
-  it.each(["publication", "heartbeat"])("should suspend mark delivery and recover it on the same connection via %s", async (trigger) => {
+  it("should deliver every mark and batch on the open connection when the fence read fails", async () => {
     const bus = await import("../services/chat/stream-bus.js");
     const { chatRoute } = await import("./chat.js");
-    await bus.publish("prospect-marks", "prospect:mark", { secret: "suspended-mark" });
-    await bus.publish("prospect-marks", "prospect:batch", { secret: "suspended-batch" });
-    await bus.publish("synthetic-chat", "text_delta", { text: "chat remains" });
-    const { lotCutoverState } = await import("../db/schema.js");
-    let unavailable = true;
-    const db = { select: () => {
-      if (unavailable) throw new Error("database unavailable");
-      return { from: async (table: unknown) => table === lotCutoverState ? [] : [{ enabled: false }] };
-    } };
-    vi.useFakeTimers();
-    const response = await chatRoute(db as never).request("/api/chat/streams/sse");
+    await bus.publish("prospect-marks", "prospect:mark", { text: "mark before outage" });
+    await bus.publish("prospect-marks", "prospect:batch", { text: "batch before outage" });
+    await bus.publish("synthetic-chat", "text_delta", { text: "chat before outage" });
+    let rejectRead!: (reason: unknown) => void;
+    const pending = new Promise<never>((_, reject) => { rejectRead = reject; });
+    void pending.catch(() => {});
+    let recovered = false;
+    const select = vi.fn(() => {
+      if (select.mock.calls.length === 1) throw new Error("database unavailable");
+      return { from: async () => recovered ? [{ enabled: false }] : pending };
+    });
+    const route = chatRoute({ select } as never);
+    const response = await route.request("/api/chat/streams/sse");
     const reader = response.body!.getReader();
+    let delayed: Response | undefined;
     try {
-      const text = await readThrough(reader, "chat remains");
-      expect(text).toContain("chat remains");
-      expect(text).not.toContain("suspended-mark");
-      expect(text).not.toContain("suspended-batch");
-      expect(bus.isLegacyMarkDeliveryRetired()).toBe(false);
-      await bus.publish("prospect-marks", "prospect:mark", { text: "withheld during outage" });
-      await vi.advanceTimersByTimeAsync(0);
-      await bus.publish("prospect-marks", "prospect:note", { text: "notes remain" });
-      const outage = await readThrough(reader, "notes remain");
-      expect(outage).not.toContain("withheld during outage");
-      unavailable = false;
-      if (trigger === "publication") {
-        await bus.publish("prospect-marks", "prospect:mark", { text: "live after recovery" });
-        await bus.publish("prospect-marks", "prospect:batch", { text: "batch after recovery" });
-        await vi.advanceTimersByTimeAsync(0);
-      } else {
-        await vi.advanceTimersByTimeAsync(15000);
+      const replayed = await readThrough(reader, "chat before outage");
+      const opening = route.request("/api/chat/streams/sse");
+      await bus.publish("prospect-marks", "prospect:mark", { text: "mark during outage" });
+      await bus.publish("prospect-marks", "prospect:batch", { text: "batch during outage" });
+      recovered = true;
+      rejectRead(new Error("late database failure"));
+      delayed = await opening;
+      await bus.publish("synthetic-chat", "text_delta", { text: "late read checked" });
+      const during = await readThrough(reader, "late read checked");
+      await bus.publish("prospect-marks", "prospect:mark", { text: "mark after outage" });
+      await bus.publish("prospect-marks", "prospect:batch", { text: "batch after outage" });
+      await bus.publish("synthetic-chat", "text_delta", { text: "after checked" });
+      const live = await readThrough(reader, "after checked");
+      const all = replayed + during + live;
+      for (const marker of ["mark before outage", "batch before outage", "chat before outage",
+        "mark during outage", "batch during outage", "mark after outage", "batch after outage"]) {
+        expect(all.match(new RegExp(marker, "g")), marker).toHaveLength(1);
       }
-      await bus.publish("synthetic-chat", "text_delta", { text: "recovery checked" });
-      const recovered = await readThrough(reader, "recovery checked");
-      expect(recovered.match(/suspended-mark/g)).toHaveLength(1);
-      expect(recovered.match(/suspended-batch/g)).toHaveLength(1);
-      expect(recovered.indexOf("suspended-mark")).toBeLessThan(recovered.indexOf("suspended-batch"));
-      if (trigger === "publication") {
-        expect(recovered.match(/live after recovery/g)).toHaveLength(1);
-        expect(recovered.match(/batch after recovery/g)).toHaveLength(1);
-      }
-      await bus.publish("prospect-marks", "prospect:mark", { text: "direct mark" });
-      await bus.publish("prospect-marks", "prospect:batch", { text: "direct batch" });
-      await bus.publish("synthetic-chat", "text_delta", { text: "direct checked" });
-      const direct = await readThrough(reader, "direct checked");
-      expect(direct).toContain("direct mark");
-      expect(direct).toContain("direct batch");
-      expect(direct).not.toContain("suspended-");
+      expect(all.indexOf("mark before outage")).toBeLessThan(all.indexOf("mark during outage"));
+      expect(all.indexOf("mark during outage")).toBeLessThan(all.indexOf("mark after outage"));
+      expect(select).toHaveBeenCalledTimes(2); // Only the two opening reads.
       expect(bus.isLegacyMarkDeliveryRetired()).toBe(false);
-    } finally { await reader.cancel(); }
+    } finally { await reader.cancel(); await delayed?.body?.cancel(); }
   });
 
-  it("should replay and deliver marks on a new connection after recovery", async () => {
+  it("should replay and stream marks on a new connection after fence recovery", async () => {
     const bus = await import("../services/chat/stream-bus.js");
     const { chatRoute } = await import("./chat.js");
     const { lotCutoverState } = await import("../db/schema.js");
-    let unavailable = true;
-    const db = { select: () => {
-      if (unavailable) throw new Error("database unavailable");
-      return { from: async (table: unknown) => table === lotCutoverState ? [] : [{ enabled: false }] };
-    } };
+    const db = { select: () => ({ from: async (table: unknown) =>
+      table === lotCutoverState ? [] : [{ enabled: false }] }) };
     await bus.publish("prospect-marks", "prospect:mark", { text: "replayed mark" });
     await bus.publish("prospect-marks", "prospect:batch", { text: "replayed batch" });
     await bus.publish("synthetic-chat", "text_delta", { text: "replay checked" });
-    const first = await chatRoute(db as never).request("/api/chat/streams/sse");
-    const firstReader = first.body!.getReader();
-    unavailable = false;
-    const reopened = await chatRoute(db as never).request("/api/chat/streams/sse");
-    const next = reopened.body!.getReader();
+    const response = await chatRoute(db as never).request("/api/chat/streams/sse");
+    const reader = response.body!.getReader();
     try {
-      const replay = await readThrough(next, "replay checked");
+      const replay = await readThrough(reader, "replay checked");
       expect(replay.match(/replayed mark/g)).toHaveLength(1);
       expect(replay.match(/replayed batch/g)).toHaveLength(1);
       await bus.publish("prospect-marks", "prospect:mark", { text: "new live mark" });
       await bus.publish("prospect-marks", "prospect:batch", { text: "new live batch" });
       await bus.publish("synthetic-chat", "text_delta", { text: "new checked" });
-      const direct = await readThrough(next, "new checked");
+      const direct = await readThrough(reader, "new checked");
       expect(direct).toContain("new live mark");
       expect(direct).toContain("new live batch");
+      expect(direct).not.toContain("replayed ");
       expect(bus.isLegacyMarkDeliveryRetired()).toBe(false);
-    } finally { await next.cancel(); await firstReader.cancel(); }
+    } finally { await reader.cancel(); }
   });
 
-  it.each(["open", "barrier"])("should retire a suspended connection when revalidation confirms %s", async (state) => {
+  it("should keep a confirmed cutover closed when a later fence read fails", async () => {
     const bus = await import("../services/chat/stream-bus.js");
     const { chatRoute } = await import("./chat.js");
-    let unavailable = true;
-    const db = { select: () => {
-      if (unavailable) throw new Error("database unavailable");
-      return { from: async () => [{ destinationOpen: state === "open", maintenanceBarrier: true }] };
-    } };
-    await bus.publish("prospect-marks", "prospect:mark", { text: "withheld" });
-    const response = await chatRoute(db as never).request("/api/chat/streams/sse");
-    const reader = response.body!.getReader();
-    unavailable = false;
-    await bus.publish("prospect-marks", "prospect:batch", { text: "never delivered" });
+    await bus.publish("prospect-marks", "prospect:mark", { text: "historic mark" });
+    await bus.publish("synthetic-chat", "text_delta", { text: "historic chat" });
+    const before = await chatRoute().request("/api/chat/streams/sse");
+    const reader = before.body!.getReader();
+    // The §6K retirement closes readers and destroys replay buffers.
+    bus.retireLegacyMarkDelivery();
     await expect(reader.read()).rejects.toThrow("legacy_mark_delivery_retired");
-    expect(bus.isLegacyMarkDeliveryRetired()).toBe(true);
+    await bus.publish("prospect-marks", "prospect:mark", { text: "late mark" });
+    await bus.publish("prospect-marks", "prospect:batch", { text: "late batch" });
+    await bus.publish("synthetic-chat", "text_delta", { text: "chat stays" });
+    await expect(reader.read()).rejects.toThrow("legacy_mark_delivery_retired");
+    const failingDb = { select: () => { throw new Error("database unavailable"); } };
+    const reopened = await chatRoute(failingDb as never).request("/api/chat/streams/sse");
+    const next = reopened.body!.getReader();
+    try {
+      await bus.publish("prospect-marks", "prospect:mark", { text: "reopened mark" });
+      await bus.publish("prospect-marks", "prospect:batch", { text: "reopened batch" });
+      await bus.publish("synthetic-chat", "text_delta", { text: "reopen checked" });
+      const text = await readThrough(next, "reopen checked");
+      expect(text).toContain("chat stays");
+      expect(text).not.toContain("prospect:mark");
+      expect(text).not.toContain("prospect:batch");
+      expect(text).not.toContain("historic mark");
+      expect(text).not.toContain("late mark");
+      expect(bus.isLegacyMarkDeliveryRetired()).toBe(true);
+    } finally { await next.cancel(); }
   });
 
   it.each(["open", "barrier"])("should retire preloaded replica buffers when durable state is %s", async (state) => {
