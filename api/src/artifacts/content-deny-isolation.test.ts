@@ -8,7 +8,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const read = (name: string): string => readFileSync(join(here, name), "utf8");
@@ -215,7 +215,13 @@ const FORBIDDEN_PROBES = [
   'void import(["node", "process"].join(":")).then(({ env }) => { void env.EXTRA; });',
 ];
 
-function httpGet(port: number, path: string): Promise<{ status: number; body: string }> {
+const REQUEST_TIMEOUT_MS = 2000;
+
+function httpGet(
+  port: number,
+  path: string,
+  timeoutMs = REQUEST_TIMEOUT_MS,
+): Promise<{ status: number; body: string }> {
   return new Promise((resolve, reject) => {
     const req = httpRequest({ host: "127.0.0.1", port, path, method: "GET" }, (res) => {
       let data = "";
@@ -223,7 +229,12 @@ function httpGet(port: number, path: string): Promise<{ status: number; body: st
         data += chunk.toString();
       });
       res.on("end", () => resolve({ status: res.statusCode ?? 0, body: data }));
+      res.once("error", reject);
     });
+    const timer = setTimeout(() => {
+      req.destroy(new Error(`request to ${path} timed out after ${timeoutMs}ms`));
+    }, timeoutMs);
+    req.once("close", () => clearTimeout(timer));
     req.once("error", reject);
     req.end();
   });
@@ -277,13 +288,43 @@ function writeChildBundle(dir: string, appSuffix: string, serverSuffix: string):
   return join(dir, "content-deny-server.cjs");
 }
 
-function waitForChildExit(child: ChildProcess): Promise<void> {
+function waitForChildExit(child: ChildProcess, timeoutMs = 1000): Promise<void> {
   return new Promise((resolve) => {
     if ((child.exitCode !== null || child.signalCode !== null) &&
-      child.stdout?.destroyed && child.stderr?.destroyed) resolve(undefined);
-    else child.once("close", () => resolve(undefined));
+      (child.stdout?.destroyed ?? true) && (child.stderr?.destroyed ?? true)) resolve(undefined);
+    else {
+      const timer = setTimeout(() => resolve(undefined), timeoutMs);
+      child.once("close", () => {
+        clearTimeout(timer);
+        resolve(undefined);
+      });
+    }
   });
 }
+
+const liveChildren = new Set<ChildProcess>();
+
+function trackChild(child: ChildProcess): void {
+  liveChildren.add(child);
+  child.once("close", () => {
+    liveChildren.delete(child);
+  });
+}
+
+async function stopChild(child: ChildProcess): Promise<void> {
+  if (child.exitCode === null && child.signalCode === null) child.kill("SIGTERM");
+  await waitForChildExit(child);
+  if (child.exitCode === null && child.signalCode === null) child.kill("SIGKILL");
+  await waitForChildExit(child);
+  if (child.exitCode === null && child.signalCode === null) {
+    throw new Error(`denial child ${child.pid} survived SIGKILL`);
+  }
+  liveChildren.delete(child);
+}
+
+afterEach(async () => {
+  await Promise.all([...liveChildren].map((child) => stopChild(child)));
+});
 
 /**
  * Start the denial service in a child Node process whose environment holds
@@ -298,6 +339,7 @@ async function startDenialChild(
     env: { PORT: ` ${port} ` },
     stdio: ["ignore", "pipe", "pipe"],
   });
+  trackChild(child);
   let output = "";
   child.stdout?.on("data", (chunk: Buffer | string) => {
     output += chunk.toString();
@@ -321,8 +363,7 @@ async function startDenialChild(
       await new Promise<void>((resolve) => setTimeout(() => resolve(undefined), 50));
     }
   } catch (error) {
-    child.kill("SIGTERM");
-    await waitForChildExit(child);
+    await stopChild(child);
     throw error;
   }
   return { child, output: () => output };
@@ -389,11 +430,13 @@ describe("content-deny child-process environment isolation", () => {
           env: { PORT: port },
           stdio: ["ignore", "pipe", "pipe"],
         });
+        trackChild(child);
         let stderr = "";
         child.stderr?.on("data", (chunk: Buffer | string) => {
           stderr += chunk.toString();
         });
         await waitForChildExit(child);
+        await stopChild(child);
         expect(child.exitCode).toBe(1);
         expect(stderr).toContain(
           `invalid PORT ${JSON.stringify(port)}: expected an integer in 1-65535`,
@@ -419,8 +462,7 @@ describe("content-deny child-process environment isolation", () => {
         expect(root.body).not.toContain(sentinel);
         expect(output()).not.toContain(sentinel);
       } finally {
-        child.kill("SIGTERM");
-        await waitForChildExit(child);
+        await stopChild(child);
       }
       expect(child.signalCode).toBe("SIGTERM");
       expect(output()).not.toContain(sentinel);
@@ -463,8 +505,7 @@ describe("content-deny child-process environment isolation", () => {
         expect(output()).not.toContain(sentinel);
         expect(root.body).not.toContain(sentinel);
       } finally {
-        child.kill("SIGTERM");
-        await waitForChildExit(child);
+        await stopChild(child);
       }
       expect(output()).not.toContain(sentinel);
       expect(output().split("\n").filter((line) => line.startsWith("H3_CHILD_ENV "))
@@ -477,6 +518,20 @@ describe("content-deny child-process environment isolation", () => {
       else process.env.H3_DENY_PARENT_SENTINEL = previousSentinel;
       if (previousExtra === undefined) delete process.env.EXTRA;
       else process.env.EXTRA = previousExtra;
+    }
+  }, 15000);
+
+  it("bounds a hanging livez and reaps the tracked child", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "h3-hanging-child-"));
+    const entry = join(dir, "hanging.cjs");
+    writeFileSync(entry, `require("node:net").createServer(() => {}).listen(Number(process.env.PORT), "127.0.0.1");`);
+    const started = Date.now();
+    try {
+      await expect(startDenialChild(entry, await findFreePort())).rejects.toThrow(/did not start/);
+      expect(Date.now() - started).toBeLessThan(10000);
+      expect(liveChildren.size).toBe(0);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
     }
   }, 15000);
 });
