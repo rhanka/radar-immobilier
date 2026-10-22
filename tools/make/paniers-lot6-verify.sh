@@ -124,7 +124,7 @@ if [[ "$LOT" == 6J ]]; then
     [[ "$path" == */ ]] || sha256sum "$path"
   done > "$log_dir/archived-files.sha256"
 elif [[ "$LOT" == 6K ]]; then
-  echo "${RUNNER_VERSION:-6K-4}" > "$log_dir/runner-version.txt"
+  echo "${RUNNER_VERSION:-6K-6}" > "$log_dir/runner-version.txt"
   tar -tf "$runtime_dir/source.tar" > "$log_dir/archived-paths.txt"
   tar -tf "$runtime_dir/source.tar" | while IFS= read -r path; do
     if [[ "$path" == ui/src/lib/components/maps/__6k_baseline__/*.svelte ]]; then
@@ -151,7 +151,10 @@ import config from "./vitest.config.js";
 export default { ...config, envDir: false };
 CONFIG
   case "$1" in
-    build) npm run build --workspace=api ;;
+    build) npm run build --workspace=api
+      test -s api/dist/routes/chat.d.ts
+      test -s api/dist/routes/chat.d.ts.map
+      echo "API declarations and declaration maps: PASS" ;;
     verify|typecheck) npm run typecheck --workspace=api
       if [ "$LOT" = 6K ]; then npm run typecheck --workspace=ui; fi ;;
     checkpoints)

@@ -87,11 +87,25 @@ proof sources-fence api/drizzle/0023_facet_lot_versions_fence.sql api \
   'WHERE maintenance_barrier AND NOT destination_open' \
   'WHERE false'
 proof unknown-fence api/src/services/facets/lots/lot-legacy-fence.ts api \
-  src/routes/lot-cutover-stream.test.ts 'suspend mark delivery' \
+  src/routes/lot-cutover-stream.test.ts 'recover it on the same connection via publication' \
   '  } catch {
     return "unknown";' \
   '  } catch {
     return "barrier";'
+proof outage-filter api/src/routes/chat.ts api \
+  src/routes/lot-cutover-stream.test.ts 'recover it on the same connection via publication' \
+  'if (!isSuspendedMark(frame)) {' 'if (true) {'
+proof suspended-resume api/src/routes/chat.ts api \
+  src/routes/lot-cutover-stream.test.ts 'recover it on the same connection via publication' \
+  'if (current === "none") {' 'if (false && current === "none") {'
+proof reopened-resume api/src/routes/chat.ts api \
+  src/routes/lot-cutover-stream.test.ts 'replay and deliver marks on a new connection after recovery' \
+  'let suspendLegacyMarks = fence === "unknown";' \
+  'let suspendLegacyMarks = fence === "unknown" || fence === "none";'
+proof heartbeat-resume api/src/routes/chat.ts api \
+  src/routes/lot-cutover-stream.test.ts 'recover it on the same connection via heartbeat' \
+  '          void revalidateFence();
+          try {' '          try {'
 diff -r /workspace/api/src api/src
 diff -r /workspace/api/drizzle api/drizzle
 diff -r /workspace/ui/src ui/src
