@@ -16,6 +16,8 @@ else ifeq ($(LOT),6J)
 SCOPE ?= src/services/facets/lots src/routes/scoped-lot- src/services/facets/lot-migration-report
 else ifeq ($(LOT),6L1)
 SCOPE ?= src/services/facets/projection src/services/facets/scoped src/services/facets/workspace src/routes/scoped-projection src/services/graph/graph-store ui/src/lib/signals/signal-projection
+else ifeq ($(LOT),6L2)
+SCOPE ?= src/services/facets/projection-invalidation src/routes/scoped-projection-events ui/src/lib/signals/signal-projection-invalidation
 else
 SCOPE ?= src/services/facets
 endif
@@ -26,9 +28,9 @@ export ENV LOT API_PORT UI_PORT MAILDEV_UI_PORT SCOPE ACTION EVIDENCE_TAG CHECKP
 .PHONY: guard verify build typecheck lint test-api clean inspect diagnose commit prepare checkpoints deliver regression audit astra-proof run-6j
 guard:
 	@case '$(ENV)' in test-*|e2e-*) ;; *) echo 'test-* or e2e-* ENV required'; exit 1;; esac
-	@case '$(LOT)' in 6F|6G|6H|6I|6J|6L1) ;; *) echo 'LOT must be 6F, 6G, 6H, 6I, 6J or 6L1'; exit 1;; esac
+	@case '$(LOT)' in 6F|6G|6H|6I|6J|6L1|6L2) ;; *) echo 'LOT must be 6F, 6G, 6H, 6I, 6J, 6L1 or 6L2'; exit 1;; esac
 
-verify build typecheck lint test-api api-ci mutation-proof astra-proof fix-proof fix2-proof: guard
+verify build typecheck lint test-api test-ui api-ci mutation-proof astra-proof fix-proof fix2-proof: guard
 	@bash tools/make/paniers-lot6-verify.sh $@
 
 regression: guard
@@ -68,8 +70,8 @@ run-6j: guard
 	@bash tools/make/paniers-lot6j-run.sh verify
 .PHONY: sol-prepare sol-deliver sol-audit
 sol-prepare sol-deliver sol-audit: guard
-	@test '$(LOT)' = 6L1
-	@bash tools/make/paniers-lot6l1-deliver.sh $@
+	@case '$(LOT)' in 6L1|6L2) ;; *) exit 2;; esac
+	@bash tools/make/paniers-lot$(shell echo $(LOT) | tr A-Z a-z)-deliver.sh $@
 
 clean inspect diagnose: guard
 	@bash tools/make/paniers-lot6-verify.sh $@

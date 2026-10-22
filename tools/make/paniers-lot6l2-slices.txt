@@ -1,0 +1,17 @@
+docs: declare 6L2 realtime scope and branch plan|plan/PANIERS6L2-BRANCH_feat-paniers-6l2-realtime.md|0
+feat: add projection invalidation cursor and tick helpers|api/src/services/facets/projection-invalidation.ts|0,1
+test: qualify cursor isolation and tick decisions|api/src/services/facets/projection-invalidation.test.ts|0,1
+feat: define scoped stream dependencies and denial mapping|route-helpers|0,1
+feat: expose serialized session-bound projection SSE route|api/src/routes/scoped-projection-events.ts|0,1,2
+test: qualify invalidation isolation and revocation|api/src/services/facets/projection-invalidation-db.test.ts|0,1,2
+test: qualify guarded SSE resync and close paths|api/src/routes/scoped-projection-events-db.test.ts|0,1,2
+test: qualify live SSE authorization and private isolation|api/src/routes/scoped-projection-events-cycle-db.test.ts|0,1,2
+test: cover stream credentials cancellation and recovery|api/src/routes/scoped-projection-events-lifecycle.test.ts|0,1,2,3
+feat: add authorized invalidation transport for UI|ui/src/lib/signals/signal-projection-invalidation.ts|0,1,2,3
+feat: guard pending invalidation fetches and retry failures|ui/src/lib/signals/signal-projection-invalidation-observer.ts|0,1,2,3,4
+test: qualify invalidation transport guards|ui/src/lib/signals/signal-projection-invalidation.test.ts|0,1,2,3,4
+test: qualify invalidation observer lifecycle|ui/src/lib/signals/signal-projection-invalidation-lifecycle.test.ts|0,1,2,3,4
+test: cover pending refetch revocation and autonomous retry|ui/src/lib/signals/signal-projection-invalidation-races.test.ts|0,1,2,3,4,5
+test: version 6L2 copy mutation and restoration proofs|tools/make/paniers-lot6l2-mutation.sh|0,1,2,3,4,5
+chore: version isolated 6L2 bundle delivery|tools/make/paniers-lot6l2-deliver.sh|0,1,2,3,4,5
+chore: wire isolated 6L2 verification and delivery slices|tools/make/paniers-lot6.mk tools/make/paniers-lot6-verify.sh tools/make/paniers-lot6l2-slices.txt|0,1,2,3,4,5,6

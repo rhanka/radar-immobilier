@@ -91,9 +91,9 @@ business-event ledger: durable 6L1 revisions stay the only authority.
   never acknowledged, late responses ignored.
 - [x] **Lot 5 — UI tests**: two tabs, shared invalidation, private silence,
   idle revocation, restart, lost cursor, late response, failed refetch.
-- [ ] **Lot 6 — Make**: `LOT=6L2` guard, SCOPE, lint, regression patterns,
+- [x] **Lot 6 — Make**: `LOT=6L2` guard, SCOPE, lint, regression patterns,
   versioned archiving of every file read by tests; slices file.
 - [ ] **Lot N — Close (not covered)**: push, PR, remote CI,
   merge commit (no squash/rebase), keep branch, move plan to `plan/done/`.
 
-- Delivery checkpoint: 16.
+- Delivery checkpoint: 17.
