@@ -82,6 +82,18 @@ describeDb("6J lot importer", () => {
       sourceCreatedAt: new Date("2026-01-17T10:00:00.000Z") });
   });
 
+  it("should keep the historical unknown observation unknown after import", async () => {
+    const f: LotFixture = await lotFixture();
+    await runLotImport(f.db, { workspaceId: f.workspaceId,
+      report: qualifiedLotReport(), actorSub: f.moderator.sub, importKey: randomUUID() },
+      { enabled: true });
+    const target = { type: "Lot" as const, authority: "lot_versions" as const,
+      citySlug: "synthetic-6j-city", canonicalId: "lot-canonical-syn-6j-01" };
+    const state = await readLotState(f.db, f.contributor.sub, f.workspaceId, "real", target);
+    expect(state.archive.workspace?.reasonCode).toBe("legacy-unknown");
+    expect(state.archive.workspace?.changedSinceArchive).toBeNull();
+  });
+
   it("should preserve exact market values and keep full chains navigable", async () => {
     const f: LotFixture = await lotFixture();
     const report = qualifiedLotReport();
