@@ -103,7 +103,7 @@ case "$1" in
     local_git diff --check "$base" HEAD
     local_git diff --exit-code HEAD -- api packages ui tools/make "$plan"
     local_git diff --exit-code "$base" HEAD -- Makefile 'docker-compose*.yml' rules api/src/app.ts \
-      api/src/services/prospect ui/src packages api/drizzle ':!api/drizzle/0020_facet_lot_history.sql'
+      api/src/services/prospect ui/src packages api/drizzle ':!api/drizzle/0021_facet_lot_history.sql'
     while IFS= read -r sha; do
       local_git diff --numstat "$sha^" "$sha" | awk '{n+=$1+$2; f++} END {exit !(n<=150 && f<=15)}'
       test "$(local_git log -1 --format=%B "$sha")" = "$(local_git log -1 --format=%s "$sha")"

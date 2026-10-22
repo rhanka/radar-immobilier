@@ -1,5 +1,5 @@
 fix: canonicalize lot prices and validate missing reasons|commands-pre-result lot-values.ts lot-values.test.ts lot-commands.test.ts lot-plan.ts lot-authorize.ts api/src/routes/scoped-lot-facets-common.ts
-fix: expose lot source references and preserve unknown observations|api/drizzle/0020_facet_lot_history.sql api/src/db/schema.ts lot-response.ts lot-history.ts lot-reader.ts lot-importer-db.test.ts lot-source-navigation-db.test.ts
+fix: expose lot source references and preserve unknown observations|api/drizzle/0021_facet_lot_history.sql api/src/db/schema.ts lot-response.ts lot-history.ts lot-reader.ts lot-importer-db.test.ts lot-source-navigation-db.test.ts
 refacto: retain every appended lot event and imported source link|lot-apply.ts writer-outcome batch-outcome lot-project.ts index.ts
 fix: return complete lot command and batch receipts|lot-writer.ts lot-batch.ts lot-commands.ts api/src/routes/scoped-lot-commands.ts http-basic lot-writer-db.test.ts lot-writer-replay-db.test.ts lot-writer-scope-db.test.ts lot-rights-db.test.ts lot-batch-db.test.ts lot-history-db.test.ts lot-history-privacy-db.test.ts
 test: qualify complete composite and unchanged batch results|lot-command-result-db.test.ts lot-batch-result-db.test.ts
