@@ -75,6 +75,56 @@ export function isEffectivelyDiscarded(
 
 type LotTx = Parameters<Parameters<Database["transaction"]>[0]>[0];
 
+export async function readLotState(
+  db: Database, sub: string, workspaceId: string, mode: LotMode, target: LotTarget,
+): Promise<LotReadState> {
+  return db.transaction(async (tx) => {
+    await lockWorkspace(tx, workspaceId);
+    const accountId = await approvedAccountId(tx, sub, true);
+    await resolveWorkspaceAccess(tx, workspaceId, sub);
+    const rights = await resolveLotRights(tx, workspaceId, sub);
+    await requireLotDestination(tx, workspaceId);
+    requireScopedEpoch(await scopedEpochFor(tx, workspaceId), workspaceId);
+    await assertNoUnresolvedPersonalHistory(tx, accountId);
+    let displayed: DisplayedLotVersion | null = null;
+    let available = false;
+    try {
+      displayed = (await resolveLotSource(tx, target)).displayed;
+      available = true;
+    } catch (error) {
+      if (!(error instanceof FacetError) || error.status !== 409) throw error;
+      available = false;
+    }
+    const heads = await readLotHeadSnapshots(tx, workspaceId, accountId, mode, target);
+    const selection = heads.filter((head) => head.facet === "selection");
+    const personal = heads.find(
+      (head): head is LotArchiveHead => "changedSinceArchive" in head && head.scope === "personal") ?? null;
+    const common = heads.find(
+      (head): head is LotArchiveHead => "changedSinceArchive" in head && head.scope === "workspace") ?? null;
+    return {
+      target,
+      mode,
+      targetAvailable: available,
+      displayed_version: displayed,
+      selection,
+      archive: {
+        personal,
+        workspace: common,
+        effectiveDiscarded: isEffectivelyDiscarded(personal, common),
+      },
+      pipeline: heads.find((head) => head.facet === "pipeline") ?? null,
+      market: heads.find((head) => head.facet === "market") ?? null,
+      capabilities: {
+        select: rights.select,
+        changePipeline: rights.changePipeline,
+        changeMarket: rights.changeMarket,
+        discardPersonally: rights.discardPersonally,
+        moderateArchive: rights.moderateArchive,
+      },
+    };
+  });
+}
+
 type HeadSnapshot = (LotSelectionHead | LotArchiveHead) & { facet: string };
 
 async function readLotHeadSnapshots(
