@@ -39,7 +39,8 @@ Review integration (both non-blocking points):
   render gate (existing convention: `k8s-validate` already runs the
   `deploy/ci` offline gates `check-image-entrypoints.sh` and its hermetic
   test); no other change.
-- Isolated tooling only: `tools/artifact-host.mk` gains `test-h3-render`;
+- Isolated tooling only: `tools/artifact-host.mk` gains `test-h3-render` and
+  the three offline operator render targets;
   no root Makefile or environment-file loading beyond the `k8s-validate`
   exception above.
 - Quotas (unit 5), migration (6), unit 7 (blocked) and any real cluster apply
@@ -72,7 +73,7 @@ Review integration (both non-blocking points):
   - `tools/h3-image-runtime-smoke.sh` (review rework: api/deny discrimination,
     no-argument startup)
   - `api/src/artifacts/content-deny-isolation.test.ts` (review rework: AST env reads)
-  - `tools/artifact-host.mk` (`test-h3-render` target only)
+  - `tools/artifact-host.mk` (H3 render tests and offline operator targets only)
   - `Makefile` (`k8s-validate` wiring of the render gate only)
   - `RAPPORT-MUSE-H3-P4.md` (uncommitted deliverable)
   - `RAPPORT-SOL-H3-P4.md` (uncommitted integration report)
@@ -178,6 +179,9 @@ Review integration (both non-blocking points):
   policy; exact policy types, disabled/activation copy mutations and `cmp`.
 - [x] Review correction 2: computed global `process` reads fail AST isolation
   in both denial modules; 35 tests and copy/failure/restore/`cmp` pass.
+- [x] Review correction 3: explicit preparation (`off`, complete reviewed
+  values) and H2 rollback (no activation group, independent pinned denial
+  image) gates; 25 transition tests pass without relaxing existing phases.
 
 - [x] **Unit 8 — isolated denial listener** (§5.4, T02/T23/T24): new
       `api/src/artifacts/content-deny.ts` exposes the shared denial
