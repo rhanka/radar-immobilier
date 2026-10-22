@@ -96,7 +96,7 @@ it); no legacy reader/buffer retirement here (6K owns it).
 - [ ] **Lot 3 — Revisions**: bump helpers; facet bumps on appended
   transitions only (no-op and replay bump nothing); source bump only when
   served signal content changes.
-- [ ] **Lot 4 — Reads**: authorized scope read (approval, membership with
+- [x] **Lot 4 — Reads**: authorized scope read (approval, membership with
   capabilities, epoch, unresolved history) plus bounded coherent refetch.
 - [ ] **Lot 5 — Routes**: guarded token and coherent-city routes, private
   caching, unmounted.
@@ -112,4 +112,4 @@ it); no legacy reader/buffer retirement here (6K owns it).
 - [ ] **Lot N — Close (not covered)**: run verification, push, PR, CI,
   merge commit (no squash/rebase), keep branch, move plan to `plan/done/`.
 
-- Delivery checkpoint: 5.
+- Delivery checkpoint: 6.
