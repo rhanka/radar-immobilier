@@ -437,62 +437,30 @@ describe("content-deny child-process environment isolation", () => {
     },
   );
 
-  it(
-    "reads only PORT at runtime",
-    async () => {
-      const freePort = await findFreePort();
-      expect(freePort).toBeGreaterThan(0);
-      const readKeys = new Set<string>();
-      const target = { ...process.env, PORT: ` ${freePort} ` };
-      const trackedEnv = new Proxy(target, {
-        get(t, p, r) {
-          if (typeof p === "string") readKeys.add(p);
-          return Reflect.get(t, p, r);
-        },
-        has(t, p) {
-          if (typeof p === "string") readKeys.add(p);
-          return Reflect.has(t, p);
-        },
-        ownKeys(t) {
-          const keys = Reflect.ownKeys(t);
-          for (const key of keys) {
-            if (typeof key === "string") readKeys.add(key);
-          }
-          return keys;
-        },
-        getOwnPropertyDescriptor(t, p) {
-          if (typeof p === "string") readKeys.add(p);
-          return Reflect.getOwnPropertyDescriptor(t, p);
-        },
-        set(t, p, value, r) {
-          if (typeof p === "string") readKeys.add(p);
-          return Reflect.set(t, p, value, r);
-        },
-      });
-      const servers: Server[] = [];
+  it("serves denial from a child whose environment holds only PORT", async () => {
+    const sentinel = `h3-parent-sentinel-${process.pid}`;
+    process.env.H3_DENY_PARENT_SENTINEL = sentinel;
+    const port = await findFreePort();
+    expect(port).toBeGreaterThan(0);
+    const dir = mkdtempSync(join(tmpdir(), "deny-child-"));
+    try {
+      const { child, output } = await startDenialChild(writeChildBundle(dir, "", ""), port);
       try {
-        executeDenialModules(trackedEnv, servers);
-        const deadline = Date.now() + 5000;
-        for (;;) {
-          try {
-            const live = await httpGet(freePort, "/livez");
-            if (live.status === 200) break;
-          } catch {
-            // Retry until the listener accepts connections.
-          }
-          if (Date.now() > deadline) throw new Error(`denial server did not start on ${freePort}`);
-          await new Promise<void>((resolve) => setTimeout(() => resolve(undefined), 50));
-        }
-        const root = await httpGet(freePort, "/");
+        const root = await httpGet(port, "/");
         expect(root.status).toBe(404);
         expect(JSON.parse(root.body)).toEqual({ error: "not_found" });
-        expect(readKeys).toEqual(new Set(["PORT"]));
+        expect(root.body).not.toContain(sentinel);
+        expect(output()).not.toContain(sentinel);
       } finally {
-        for (const server of servers) {
-          await new Promise<void>((resolve) => server.close(() => resolve(undefined)));
-        }
+        child.kill("SIGTERM");
+        await waitForChildExit(child);
       }
-    },
-    15000,
-  );
+      expect(child.signalCode).toBe("SIGTERM");
+      expect(output()).not.toContain(sentinel);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+      delete process.env.H3_DENY_PARENT_SENTINEL;
+    }
+  }, 15000);
+
 });
