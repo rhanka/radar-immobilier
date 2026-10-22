@@ -45,7 +45,7 @@ Keep current host API names in one test adaptation module pending spec r2.
 - [x] **Lot 0 — Read baseline, scope, six-case packet and H4 v3 contracts.**
 - [x] **Lot 1 — Typed, callable contract adapter; gated suite and cleanup.**
 - [x] **Lot 2 — Refusal after lock wait; below-HTTP S3/connection failures.**
-- [ ] **Lot 3 — Bidirectional replay, ordered conflict, selected profile.**
+- [x] **Lot 3 — Bidirectional replay, ordered conflict, selected profile.**
 - [ ] **Lot 4 — Reproducible runner and tests included in static checking.**
 - [ ] **Lot 5 — Full CI-equivalent API suite with acceptance disabled.**
 - [ ] **Lot 6 — Enabled suite: archive each expected contract failure.**
