@@ -138,4 +138,128 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       authorizeCommit,
     }) as unknown as Record<string, unknown>;
   }
+
+  function allowAll(): AuthorizeCommit {
+    return authorizeTransaction;
+  }
+
+  function statusDriven(): AuthorizeCommit {
+    return async (context, transaction) => {
+      const status = (await pool.query(
+        "SELECT status FROM account_users WHERE sub = 'alice'")).rows[0]?.status as string | null;
+      return status === "approved" ? authorizeTransaction(context, transaction)
+        : toGuardDecision({ allowed: false, status: 403, body: { error: "account_not_approved", status: status ?? "unknown" } });
+    };
+  }
+
+  async function withTimeout(work: Promise<unknown>, ms: number): Promise<boolean | undefined> {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      return await Promise.race([
+        work.then(() => true),
+        new Promise<undefined>((resolve) => { timer = setTimeout(() => resolve(undefined), ms); }),
+      ]);
+    } finally {
+      if (timer !== undefined) clearTimeout(timer);
+    }
+  }
+
+  beforeAll(async () => {
+    const env = loadConfig();
+    endpoint = env.S3_ENDPOINT; accessKey = env.S3_ACCESS_KEY; secretKey = env.S3_SECRET_KEY;
+    admin = new pg.Pool({ host: env.POSTGRES_HOST, port: env.POSTGRES_PORT,
+      user: env.POSTGRES_USER, password: env.POSTGRES_PASSWORD, database: env.POSTGRES_DB });
+    await admin.query(`CREATE DATABASE ${DATABASE}`);
+    databaseCreated = true;
+    pool = createArtifactsPool({ host: env.POSTGRES_HOST, port: env.POSTGRES_PORT,
+      user: env.POSTGRES_USER, password: env.POSTGRES_PASSWORD, database: DATABASE });
+    await migrate(drizzle(pool), { migrationsFolder });
+    s3 = new S3Client({ endpoint, forcePathStyle: true, region: "us-east-1",
+      credentials: { accessKeyId: accessKey, secretAccessKey: secretKey } });
+    await s3.send(new CreateBucketCommand({ Bucket: BUCKET }));
+    bucketCreated = true;
+    await pool.query("INSERT INTO account_users (sub, email, status) VALUES ('alice','alice@example.test','approved')");
+  });
+
+  afterAll(async () => {
+    try {
+      if (bucketCreated) {
+        for (const key of await rawBlobs().listKeys("")) await rawBlobs().deleteBlob(key);
+        await s3.send(new DeleteBucketCommand({ Bucket: BUCKET }));
+      }
+    } finally {
+      s3?.destroy();
+      await pool?.end();
+      try {
+        if (databaseCreated) await admin.query(`DROP DATABASE ${DATABASE} WITH (FORCE)`);
+      } finally { await admin?.end(); }
+    }
+  });
+
+  it.each(PUBLISH_POINTS)("publish refused at barrier point %s leaves zero committed effects", async (point) => {
+    await requireCommitContract();
+    await requireOutcomeContract();
+    const barrier = await requireCommitBarrier();
+    const host = await composeQ1Host(barrier.observer);
+    const close = host["close"];
+    try {
+      requireSelectedProfile(host);
+      const execute = requireHostExecute(host);
+      const seenTransactions: unknown[] = [];
+      let passedBarrier = false;
+      const authorizeCommit: AuthorizeCommit = async (context, transaction) => {
+        expect(context.purpose).toBe("finalize");
+        expect(transaction).toBeDefined();
+        seenTransactions.push({ transaction, passedBarrier });
+        return statusDriven()(context, transaction);
+      };
+      const ensured = await execute({ method: "POST", path: "/ensure",
+        body: { bindingName: `q1-${point}`, idempotencyKey: `q1-publish-${point}-ensure` } },
+        invocationFor(allowAll(), `publish-${point}-ensure`));
+      expect(ensured).toMatchObject({ ok: true });
+      const artifactId = ((ensured as { result: unknown }).result as { body: { artifactId: string } })
+        .body.artifactId;
+      const body = { artifactId,
+        files: [{ path: "index.html", mimeType: "text/html", text: `refused at ${point}` }],
+        idempotencyKey: `q1-publish-${point}` };
+      const invocation = invocationFor(authorizeCommit, `publish-${point}`);
+      const invocationId = invocation["invocationId"] as string;
+      const before = await committedSnapshot(artifactId);
+      const s3Before = await s3KeyCount();
+      let settled = false;
+      const pending = execute({ method: "POST", path: "/publish", body }, invocation)
+        .finally(() => { settled = true; });
+      const pump = (async () => {
+        const deadline = performance.now() + 1500;
+        while (!settled) {
+          if (performance.now() > deadline) throw new Error("[contract-violation] commit barrier did not progress");
+          for (const candidate of PUBLISH_POINTS) {
+            if (settled || candidate === point) continue;
+            const arrived = await withTimeout(barrier.waitUntilReached(candidate, invocationId), 50);
+            if (arrived) barrier.release(candidate, invocationId);
+          }
+          const targetArrived = await withTimeout(barrier.waitUntilReached(point, invocationId), 50);
+          if (targetArrived) break;
+        }
+      })();
+      await pump;
+      await pool.query("UPDATE account_users SET status = 'suspended' WHERE sub = 'alice'");
+      passedBarrier = true;
+      barrier.release(point, invocationId);
+      const outcome = await pending as unknown as Record<string, unknown>;
+      expect(seenTransactions.length).toBeGreaterThan(0);
+      expect(seenTransactions.at(-1)).toMatchObject({ passedBarrier: true });
+      assertOutcomeFailure(outcome, invocationId);
+      expect(outcome["failure"]).toMatchObject({ category: "unauthorized_at_commit" });
+      expect(await committedSnapshot(artifactId)).toEqual(before);
+      expect(await currentReleaseId(artifactId)).toBeUndefined();
+      const s3AfterDenial = await s3KeyCount();
+      console.info("[preparation-debt]", JSON.stringify({ point, s3Before, s3AfterDenial }));
+      expect(s3AfterDenial).toBeGreaterThanOrEqual(s3Before);
+      await pool.query("UPDATE account_users SET status = 'approved' WHERE sub = 'alice'");
+    } finally {
+      await pool.query("UPDATE account_users SET status = 'approved' WHERE sub = 'alice'");
+      if (typeof close === "function") (close as () => void)();
+    }
+  });
 });
