@@ -50,6 +50,11 @@ fix2-6k-prepare fix2-6k-deliver fix2-6k-audit: guard
 	@test '$(LOT)' = 6K
 	@bash tools/make/paniers-lot6k-fix-deliver.sh $(patsubst fix2-6k-%,%,$@) fix2
 
+.PHONY: fix3-6k-prepare fix3-6k-deliver fix3-6k-audit
+fix3-6k-prepare fix3-6k-deliver fix3-6k-audit: guard
+	@test '$(LOT)' = 6K
+	@bash tools/make/paniers-lot6k-fix-deliver.sh $(patsubst fix3-6k-%,%,$@) fix3
+
 regression: guard
 	@bash tools/make/paniers-lot$(if $(filter 6K,$(LOT)),6k-run,$(if $(filter 6J,$(LOT)),6j-run,6-verify)).sh regression
 
