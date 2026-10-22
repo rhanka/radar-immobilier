@@ -24,7 +24,7 @@ reject() {
 }
 reject 's/ARTIFACTS_CONTROL_MODE: "off"/ARTIFACTS_CONTROL_MODE: validation/' 'expected off: no activation by default'
 reject '/automountServiceAccountToken: false/a\      volumes:\n      - name: fixture-credential\n        secret:\n          secretName: fixture-secret' 'credential or volume mount forbidden'
-reject '/^        - content-deny$/a\        env:\n        - name: FIXTURE_CREDENTIAL\n          value: fixture-only' 'credential or volume mount forbidden'
+reject '/^        - content-deny$/a\        env:\n        - name: FIXTURE_CREDENTIAL\n          value: fixture-only' 'only PORT env allowed'
 reject 's/- content-deny/- api/' 'exact content-deny args missing'
 reject '/^  name: radar-artifact-content-deny$/,/^---$/{s/radar-api:latest/radar-api:other/;}' 'denial image differs from api image'
 reject '/^  name: allow-traefik-to-content-deny$/,/^---$/{s/^  - Ingress$/  - Ingress\n  - Egress/;s/^spec:$/spec:\n  egress:\n  - {}/;}' 'egress forbidden on denial ingress policy'
