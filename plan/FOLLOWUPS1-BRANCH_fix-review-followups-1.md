@@ -1,7 +1,7 @@
 # Feature: Merged review follow-ups
 
 ## Objective
-- [ ] Close H3 P4, H4 P2 and 6B review observations without product changes.
+- [x] Close H3 P4, H4 P2 and 6B review observations without product changes.
 
 ## Scope / Guardrails
 - [x] Use the owner-provided `fix/review-followups-1` worktree at base `455b9d90`.
@@ -23,6 +23,7 @@
 
 ## Feedback Loop
 - [x] Owner brief authorizes this worktree and subject-only commits without trailers.
+- [x] Verification observation (owner: conductor): `object-storage-inventory-job.test.sh` fails 11 assertions because it expects retired inventory resources and launchers; the full shell gate remains red. No inventory resource is restored in this branch.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch, three atomic commits; no merge or push requested.
@@ -33,7 +34,7 @@
 ## Plan / Todo (lot-based)
 - [x] Lot 1 — Exact denial Service selector and four-phase shell regression.
 - [x] Lot 2 — Missing caller key fixture with valid binding and no dispatch.
-- [ ] Lot 3 — Malformed discard reason fixture with valid displayed fingerprint.
-- [ ] Final gate — Kubernetes render, deploy shell tests, package tests, scoped integration, typecheck and lint.
-- [ ] Evidence — Copy, mutation, old-test pass, new-test failure, restore and cmp for each point.
-- [ ] Delivery — Three commits, bundle from `455b9d90`, uncommitted French report.
+- [x] Lot 3 — Malformed discard reason fixture with valid displayed fingerprint.
+- [x] Final gate executed — Kubernetes render, 22/23 deploy shell suites passing, 153 package tests, 2 scoped integration tests, typecheck and lint passing.
+- [x] Evidence — Copy, mutation, old-test pass, new-test failure, restore and cmp for each point.
+- [x] Delivery — Three atomic commits; bundle from `455b9d90` and uncommitted French report prepared by the local delivery target.
