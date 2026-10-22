@@ -95,26 +95,106 @@ describe("observeProjection refresh", () => {
     expect(rebuilt).toEqual({ token: "token-a" });
   });
 
-  it("skips rebuild when disposal and an account switch land between validation and resume", async () => {
+  it.each(["disposal", "account switch"])("skips rebuild when %s lands between fetch and resume", async (transition) => {
     const launched = context("viewer-1", workspace);
     const state = createProjectionSync(launched);
     let current = launched;
-    const liveFn = (): ProjectionContext => {
-      if (current === launched) {
-        // A microtask switches account and disposes after the response
-        // validated but before refresh resumes, matching the reported window.
-        queueMicrotask(() => {
-          current = context("viewer-2", workspace);
-          dispose();
-        });
-      }
-      return current;
-    };
+    let disposeFn: () => void = () => {};
     let rebuilt: unknown = null;
-    const { refresh, dispose } = observeProjection(state, liveFn,
-      async () => ({ token: "token-new" }),
+    const { refresh, dispose } = observeProjection(state, () => current,
+      async () => {
+        // The transition lands after the fetch resolves but before
+        // the synchronous validation applies anything, so nothing is acked.
+        queueMicrotask(() => {
+          if (transition === "account switch") current = context("viewer-2", workspace);
+          else disposeFn();
+        });
+        return { token: "token-new" };
+      },
       (snapshot) => { rebuilt = snapshot; }, fakeTarget());
+    disposeFn = dispose;
     await refresh();
     expect(rebuilt).toBeNull();
+    expect(retainedSnapshot(state)).toBeNull();
+    expect(shouldReconcile(state, "token-new")).toBe(true);
+  });
+
+  it("retains the old display and acknowledgment when a superseded read drops then the next read fails", async () => {
+    const state = createProjectionSync(context("viewer-1", workspace));
+    noteProjectionSuccess(state, live(state), { token: "token-old" }, beginProjectionRead(state));
+    let rebuilt: { token: string } | null = null;
+    let resolveA!: (snapshot: { token: string }) => void;
+    let rejectB!: (reason: unknown) => void;
+    let calls = 0;
+    const fetch = (): Promise<{ token: string }> => {
+      calls += 1;
+      if (calls === 1) return new Promise((resolve) => { resolveA = resolve; });
+      return new Promise((_, reject) => { rejectB = reject; });
+    };
+    const { refresh } = observeProjection(state, () => state.launched,
+      fetch, (snapshot) => { rebuilt = snapshot; }, fakeTarget());
+    const pendingA = refresh();
+    resolveA({ token: "token-a" });
+    const pendingB = refresh();
+    await pendingA;
+    expect(rebuilt).toBeNull();
+    expect(retainedSnapshot(state)).toEqual({ token: "token-old" });
+    expect(state.ackedToken).toBe("token-old");
+    rejectB(new Error("offline"));
+    await expect(pendingB).rejects.toThrow("offline");
+    expect(rebuilt).toBeNull();
+    expect(retainedSnapshot(state)).toEqual({ token: "token-old" });
+    expect(state.ackedToken).toBe("token-old");
+    expect(shouldReconcile(state, "token-a")).toBe(true);
+  });
+
+  it.each(["disposal", "account switch"])("never rebuilds after %s queued during validation", async (transition) => {
+    const state = createProjectionSync(context("viewer-1", workspace));
+    let current = state.launched;
+    let invalidated = false;
+    let lateRebuild: unknown = null;
+    const { refresh, dispose } = observeProjection(state, () => {
+      queueMicrotask(() => {
+        invalidated = true;
+        if (transition === "account switch") current = context("viewer-2", workspace);
+        else dispose();
+      });
+      return current;
+    }, async () => ({ token: "token-a" }), (snapshot) => {
+      if (invalidated) lateRebuild = snapshot;
+    }, fakeTarget());
+    await refresh();
+    expect(invalidated).toBe(true);
+    expect(lateRebuild).toBeNull();
+  });
+
+  it("keeps the displayed revision retryable when a read starts after validation and fails", async () => {
+    const state = createProjectionSync(context("viewer-1", workspace));
+    let displayed = { token: "token-old" };
+    noteProjectionSuccess(state, live(state), displayed, beginProjectionRead(state));
+    let pendingB!: Promise<void>;
+    let rejectB!: (reason: Error) => void;
+    let calls = 0;
+    let validated = false;
+    const { refresh } = observeProjection(state, () => {
+      if (!validated) {
+        validated = true;
+        // In the regression, A is acknowledged here, then B supersedes it
+        // before refresh resumes. Atomic application displays A before B.
+        queueMicrotask(() => { pendingB = refresh(); });
+      }
+      return state.launched;
+    }, () => ++calls === 1 ? Promise.resolve({ token: "token-a" })
+      : new Promise<{ token: string }>((_, reject) => { rejectB = reject; }),
+    (snapshot) => { displayed = snapshot; }, fakeTarget());
+    await refresh();
+    expect(calls).toBe(2);
+    rejectB(new Error("offline"));
+    await expect(pendingB).rejects.toThrow("offline");
+    // A discarded by the final guard must remain retryable. A displayed
+    // synchronously before B starts is already acknowledged and up to date.
+    expect(shouldReconcile(state, "token-a")).toBe(displayed.token !== "token-a");
+    expect(state.ackedToken).toBe(displayed.token);
+    expect(retainedSnapshot(state)).toEqual(displayed);
   });
 });
