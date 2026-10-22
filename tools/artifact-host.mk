@@ -67,18 +67,25 @@ guard-env:
 	@df -h .
 	@df -Pk . | awk 'NR == 2 && $$4 < 10485760 { print "[artifact-host] refused: less than 10 GiB free" > "/dev/stderr"; exit 1 }'
 
-.PHONY: test-provider-acceptance typecheck-provider-acceptance
+.PHONY: test-provider-acceptance typecheck-provider-acceptance provider-acceptance-tsconfig verify-provider-acceptance
 test-provider-acceptance: guard-env ## Qualify candidate provider; opt in with ARTIFACTS_PROVIDER_ACCEPTANCE=1
 	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
 	$(COMPOSE) up -d postgres minio && \
 	$(COMPOSE) run --rm -T -e ARTIFACTS_PROVIDER_ACCEPTANCE=$(if $(filter 1,$(ARTIFACTS_PROVIDER_ACCEPTANCE)),1,0) api sh -c "npm ci && npm run db:migrate --workspace=api && npm run test --workspace=api -- tests/integration/artifacts-provider-acceptance.spec.ts"
 
 # API tsconfig excludes integration tests: explicitly check this delivery too.
-typecheck-provider-acceptance: guard-env
+provider-acceptance-tsconfig: guard-env
 	@mkdir -p tmp/861c-provider-acceptance
 	@printf '%s\n' '{"extends":"../../tsconfig.base.json","compilerOptions":{"noEmit":true,"types":["node"]},"include":["../../api/tests/integration/artifacts-provider-acceptance.spec.ts","../../api/tests/integration/artifacts-provider-contract.helpers.ts"]}' > tmp/861c-provider-acceptance/tsconfig.json
+
+typecheck-provider-acceptance: provider-acceptance-tsconfig
 	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
 	$(COMPOSE) run --rm --no-deps -T api sh -c "npm ci && npx tsc -p tmp/861c-provider-acceptance/tsconfig.json"
+
+# Same quality commands as the standalone targets, with one dependency install.
+verify-provider-acceptance: provider-acceptance-tsconfig
+	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
+	$(COMPOSE) run --rm --no-deps -T api sh -c "npm ci && npx tsc -p tmp/861c-provider-acceptance/tsconfig.json && npm run typecheck --workspaces --if-present && npx eslint . --ignore-pattern 'tmp/**' && npm run build --workspace=api && test -s api/dist/index.d.ts"
 
 .PHONY: test-api
 test-api: guard-env ## Run API tests (SCOPE=<path> for scoped runs)
