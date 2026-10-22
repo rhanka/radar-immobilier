@@ -57,7 +57,7 @@ without exposing another member's private state.
   single-value guard and the unconditional lint lines.
 - Delivery uses individually typechecked snapshots; the French report
   remains uncommitted.
-- Delivery checkpoint: 21.
+- Delivery checkpoint: 22.
 - `BR6I-EX2`: narrow personal owners in `activation-bind.ts` after the
   schema permits null workspace owners. Typecheck proves the old chain
   input no longer fits. Reject null personal owners; no history rewrite.
@@ -103,7 +103,7 @@ without exposing another member's private state.
   regression targets covered.
 - [x] Review fix 1: unresolved history refuses the union with 503.
 - [x] Review fix 2: cross-family, cross-workspace receipt serialization.
-- [ ] Review fix 3: omitted workspace discard reason returns 422.
+- [x] Review fix 3: omitted workspace discard reason returns 422.
 - [ ] Review fix 4: workspace-first restore preserves personal hiding.
 - [ ] Review fix 5: source-copy discrimination for all four corrections.
 - [ ] Review fix 6: size-checked, typechecked commits and incremental bundle.
