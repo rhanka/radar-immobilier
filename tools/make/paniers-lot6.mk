@@ -73,6 +73,11 @@ sol-prepare sol-deliver sol-audit: guard
 	@case '$(LOT)' in 6L1|6L2) ;; *) exit 2;; esac
 	@bash tools/make/paniers-lot$(shell echo $(LOT) | tr A-Z a-z)-deliver.sh $@
 
+.PHONY: sol-fix-prepare sol-fix-deliver sol-fix-audit
+sol-fix-prepare sol-fix-deliver sol-fix-audit: guard
+	@test '$(LOT)' = 6L2
+	@bash tools/make/paniers-lot6l2-fix-deliver.sh $@
+
 clean inspect diagnose: guard
 	@bash tools/make/paniers-lot6-verify.sh $@
 
