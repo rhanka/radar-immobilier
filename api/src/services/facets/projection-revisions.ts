@@ -94,3 +94,82 @@ export async function bumpGraphSourceRevision(
   return { revision: updated!.revision, digest: contentDigest };
 }
 
+export interface ProjectionRead extends ProjectionScope {
+  token: string;
+}
+
+/**
+ * Authorized revision scope for one viewer, workspace, city, and mode.
+ * Approval, membership, epoch, and history attachment are established
+ * before any number is disclosed.
+ */
+export async function readProjectionScope(
+  db: Database, sub: string, workspaceId: string, citySlug: string, mode: string,
+): Promise<ProjectionRead> {
+  if (mode !== SIGNAL_PROJECTION_MODE) throw new ScopeError(400, "unsupported_projection_mode");
+  if (typeof citySlug !== "string" || citySlug.length === 0) {
+    throw new ScopeError(400, "invalid_scoped_identity");
+  }
+  return db.transaction(async (tx) => {
+    await lockWorkspace(tx, workspaceId);
+    const accountId = await approvedAccountId(tx, sub, true);
+    await resolveWorkspaceAccess(tx, workspaceId, sub);
+    requireScopedEpoch(await scopedEpochFor(tx, workspaceId), workspaceId);
+    const [unresolved] = await tx.select({ id: facetEvents.id }).from(facetEvents)
+      .leftJoin(facetEventBindings, eq(facetEventBindings.eventId, facetEvents.id))
+      .where(and(eq(facetEvents.ownerId, accountId),
+        isNull(facetEventBindings.eventId))).limit(1);
+    if (unresolved) throw new ScopeError(503, "personal_history_unresolved");
+    const [membership] = await tx.select().from(workspaceMemberships).where(and(
+      eq(workspaceMemberships.workspaceId, workspaceId),
+      eq(workspaceMemberships.accountId, accountId)));
+    if (!membership || membership.status !== "active") {
+      throw new ScopeError(403, "workspace_membership_required");
+    }
+    const [personal] = await tx.select().from(personalProjectionRevisions).where(and(
+      eq(personalProjectionRevisions.workspaceId, workspaceId),
+      eq(personalProjectionRevisions.ownerId, accountId),
+      eq(personalProjectionRevisions.citySlug, citySlug),
+      eq(personalProjectionRevisions.mode, SIGNAL_PROJECTION_MODE)));
+    const [shared] = await tx.select().from(workspaceProjectionRevisions).where(and(
+      eq(workspaceProjectionRevisions.workspaceId, workspaceId),
+      eq(workspaceProjectionRevisions.citySlug, citySlug),
+      eq(workspaceProjectionRevisions.mode, SIGNAL_PROJECTION_MODE)));
+    const [source] = await tx.select().from(graphSourceRevisions)
+      .where(eq(graphSourceRevisions.citySlug, citySlug));
+    const scope: ProjectionScope = {
+      workspaceId, accountId, citySlug, mode: SIGNAL_PROJECTION_MODE,
+      personalRevision: personal?.revision ?? 0,
+      workspaceRevision: shared?.revision ?? 0,
+      sourceRevision: source?.revision ?? 0,
+      sourceDigest: source?.contentDigest ?? "",
+      membershipRevision: membership.revision,
+      moderateArchive: membership.moderateArchive,
+      manageMembers: membership.manageMembers,
+    };
+    return { ...scope, token: projectionToken(scope) };
+  });
+}
+
+export interface CoherentProjection<T> {
+  scope: ProjectionRead;
+  payload: T;
+}
+
+/**
+ * Coherent refetch: sample the revision, fetch the payload, sample again.
+ * The result is acknowledged only when both samples agree; bounded retries
+ * on drift, otherwise the caller keeps its stale snapshot (503).
+ */
+export async function readCoherentProjection<T>(
+  db: Database, sub: string, workspaceId: string, citySlug: string, mode: string,
+  readPayload: () => Promise<T>, maxAttempts = 3,
+): Promise<CoherentProjection<T>> {
+  for (let attempt = 1; ; attempt += 1) {
+    const before = await readProjectionScope(db, sub, workspaceId, citySlug, mode);
+    const payload = await readPayload();
+    const after = await readProjectionScope(db, sub, workspaceId, citySlug, mode);
+    if (before.token === after.token) return { scope: after, payload };
+    if (attempt >= maxAttempts) throw new ScopeError(503, "projection_revision_unstable");
+  }
+}
