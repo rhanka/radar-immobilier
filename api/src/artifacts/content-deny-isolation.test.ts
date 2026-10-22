@@ -19,8 +19,13 @@ function importSpecifiers(source: string): string[] {
 
 /**
  * Strict ban for the denial modules: no identifier, property name or
- * computed-access string may reference a global or environment handle.
- * The ban makes aliases impossible: any alias source already fails.
+ * computed-access string may reference a global or environment handle, and
+ * no `constructor`, `getPrototypeOf` or `__proto__` access may appear in any
+ * spelling (identifier, property or computed string). The ban makes aliases
+ * impossible: any alias source already fails. This static guard is defense
+ * in depth only: it cannot be exhaustive in JavaScript, so the execution
+ * guarantee comes from the child process with a reduced environment and the
+ * deployment gate (see below).
  */
 const FORBIDDEN_IDENTIFIERS = new Set([
   "globalThis",
@@ -32,6 +37,9 @@ const FORBIDDEN_IDENTIFIERS = new Set([
   "Function",
   "Reflect",
   "require",
+  "constructor",
+  "getPrototypeOf",
+  "__proto__",
 ]);
 
 const FORBIDDEN_STRINGS = new Set([
@@ -44,6 +52,9 @@ const FORBIDDEN_STRINGS = new Set([
   "Function",
   "Reflect",
   "require",
+  "constructor",
+  "getPrototypeOf",
+  "__proto__",
 ]);
 
 const FORBIDDEN_IMPORTS = new Set(["node:process", "process"]);
@@ -139,12 +150,10 @@ function collectViolations(source: string, file: string): string[] {
     if (
       ts.isCallExpression(node) &&
       node.expression.kind === ts.SyntaxKind.ImportKeyword &&
-      node.arguments.length === 1 &&
-      node.arguments[0] !== undefined &&
-      ts.isStringLiteral(node.arguments[0]) &&
-      FORBIDDEN_IMPORTS.has(node.arguments[0].text)
+      (node.arguments[0] === undefined || !ts.isStringLiteral(node.arguments[0]) ||
+        FORBIDDEN_IMPORTS.has(node.arguments[0].text))
     ) {
-      violations.add(`${file}:${lineOf(node)} forbidden dynamic import ${node.arguments[0].text}`);
+      violations.add(`${file}:${lineOf(node)} forbidden dynamic import ${node.arguments[0]?.getText()}`);
     }
     ts.forEachChild(node, visit);
   };
@@ -153,10 +162,11 @@ function collectViolations(source: string, file: string): string[] {
 }
 
 /**
- * Probes from the three reviews. Each must fail the strict ban, alone and
+ * Probes from the four reviews. Each must fail the strict ban, alone and
  * appended to each denial module: indexed global access, type assertions,
- * separate-assignment alias, destructuring and computed string access, plus
- * one probe per remaining forbidden handle.
+ * separate-assignment alias, destructuring and computed string access, one
+ * probe per remaining forbidden handle, and the prototype-chain constructor
+ * bypass (identifier, property and computed spellings).
  */
 const FORBIDDEN_PROBES = [
   'void globalThis["process"].env.EXTRA;',
@@ -191,6 +201,17 @@ const FORBIDDEN_PROBES = [
   "void import.meta.env;",
   'import process from "node:process"; void process;',
   'import { env } from "node:process"; void env;',
+  'const runtime = Object.getPrototypeOf(Response).constructor("return process")();\nvoid runtime.env.EXTRA;',
+  "void Object.getPrototypeOf(Response);",
+  "void Response.constructor;",
+  'void probe.constructor("return process")();',
+  'void obj["constructor"];',
+  "void ({}).__proto__;",
+  'void obj["__proto__"];',
+  'void Object["getPrototypeOf"](Response);',
+  "void constructor;",
+  'void console.log.constructor.call(null, "return process.env.EXTRA")();',
+  'void import(["node", "process"].join(":")).then(({ env }) => { void env.EXTRA; });',
 ];
 
 function httpGet(port: number, path: string): Promise<{ status: number; body: string }> {
