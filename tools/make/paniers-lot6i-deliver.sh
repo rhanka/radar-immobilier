@@ -29,7 +29,8 @@ case "$1" in
       index=$((index + 1))
       blob=$(awk -v stage="$index" -v done=",$lots," '
         /^- \[[ x]\] \*\*Lot [0-8] / {
-          lot=$4; if (index(done, "," lot ",") > 0) sub(/\[[ x]\]/, "[x]"); else sub(/\[[ x]\]/, "[ ]");
+          lot=$0; sub(/^.*\*\*Lot /, "", lot); sub(/ .*/, "", lot);
+          if (index(done, "," lot ",") > 0) sub(/\[[ x]\]/, "[x]"); else sub(/\[[ x]\]/, "[ ]");
         }
         /^- Delivery checkpoint:/ {$0="- Delivery checkpoint: " stage "."} {print}
       ' "$plan" | local_git hash-object -w --stdin)
@@ -48,12 +49,28 @@ case "$1" in
       previous=$tree
     done < tools/make/paniers-lot6i-slices.txt
     ;;
+  seal-plan)
+    test "$(wc -l < "$task_dir/checkpoints/manifest")" -eq 18
+    mkdir -p "$task_dir/final-checkpoint"
+    blob=$(local_git show ":$plan" | sed -E 's/^- \[ \] (\*\*Lot [0-8] )/- [x] \1/; s/Delivery checkpoint: 18/Delivery checkpoint: 19/' | local_git hash-object -w --stdin)
+    local_git update-index --add --cacheinfo "100644,$blob,$plan"
+    local_git add -- tools/make/paniers-lot6i-deliver.sh tools/make/paniers-lot6i-slices.txt
+    tree=$(local_git write-tree)
+    previous=$(tail -n 1 "$task_dir/checkpoints/manifest" | cut -d '|' -f 2)
+    local_git diff --numstat "$previous" "$tree" | awk '{n+=$1+$2; f++} END {exit !(n>0 && n<=150 && f<=15)}'
+    mapfile -t paths < <(local_git ls-tree -r --name-only "$tree" -- api packages ui | awk '$0 !~ /(^|\/)\.env/')
+    local_git archive "$tree" -- "${paths[@]}" > "$task_dir/final-checkpoint/19.tar"
+    printf '19|%s|docs: record verified workspace archive delivery\n' "$tree" > "$task_dir/final-checkpoint/manifest"
+    cat "$task_dir/final-checkpoint/manifest" >> "$task_dir/checkpoints/manifest"
+    ;;
   finish)
     test "$(local_git rev-parse HEAD)" = "$base"
     : > "$task_dir/commits.tsv"
     previous=$base
     while IFS='|' read -r number tree subject; do
-      test "$(cat "$task_dir/logs/resume-checkpoints/checkpoint-$number.pass")" = "$tree"
+      pass="$task_dir/logs/resume-checkpoints/checkpoint-$number.pass"
+      if [[ ! -f "$pass" ]]; then pass="$task_dir/logs/resume-plan-checkpoint/checkpoint-$number.pass"; fi
+      test "$(cat "$pass")" = "$tree"
       local_git read-tree "$tree"
       local_git -c core.hooksPath=/dev/null -c commit.gpgsign=false \
         -c user.name=Codex -c user.email=codex@openai.com commit -m "$subject"
@@ -81,7 +98,7 @@ case "$1" in
       api/drizzle ':!api/drizzle/0019_facet_workspace_archive.sql' ':!api/drizzle/meta/_journal.json'
     : > "$task_dir/cleanup-inspect.log"
     for suffix in '' -repro -repro-tests -build -regression -resume-verify -resume-regression \
-      -resume-api-ci -resume-proofs -resume-checkpoints -resume-build; do
+      -resume-api-ci -resume-proofs -resume-checkpoints -resume-plan-checkpoint -resume-build; do
       project="radar-test-paniers-6i$suffix"
       for kind in container volume network; do
         list_flags=(-q)
