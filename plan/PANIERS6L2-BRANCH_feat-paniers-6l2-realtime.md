@@ -86,7 +86,7 @@ business-event ledger: durable 6L1 revisions stay the only authority.
 - [x] **Lot 3 — API tests**: shared changes invalidate every member, private
   changes stay invisible, idle revocation closes, restart/lost cursor
   resync, late emission never precedes authorization.
-- [ ] **Lot 4 — UI transport**: gated signals and observer over the 6L1
+- [x] **Lot 4 — UI transport**: gated signals and observer over the 6L1
   sync state, cursor tracking, revocation context clearing, failed refetch
   never acknowledged, late responses ignored.
 - [ ] **Lot 5 — UI tests**: two tabs, shared invalidation, private silence,
@@ -96,4 +96,4 @@ business-event ledger: durable 6L1 revisions stay the only authority.
 - [ ] **Lot N — Close (not covered)**: push, PR, remote CI,
   merge commit (no squash/rebase), keep branch, move plan to `plan/done/`.
 
-- Delivery checkpoint: 10.
+- Delivery checkpoint: 11.
