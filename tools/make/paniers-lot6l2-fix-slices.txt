@@ -1,0 +1,5 @@
+fix: serialize invalidation reads and close revoked contexts|ui/src/lib/signals/signal-projection-invalidation-observer.ts ui/src/lib/signals/signal-projection-invalidation-races.test.ts
+fix: bound SSE buffering and reauthorize resumed consumers|api/src/routes/scoped-projection-events.ts api/src/routes/scoped-projection-events-lifecycle.test.ts
+test: discriminate live ping and unavailable handling|ui/src/lib/signals/signal-projection-invalidation.test.ts
+test: prove review regressions on disposable source copies|tools/make/paniers-lot6l2-mutation.sh
+chore: version incremental 6L2 fix delivery and audit|tools/make/paniers-lot6.mk tools/make/paniers-lot6-verify.sh tools/make/paniers-lot6l2-fix-deliver.sh tools/make/paniers-lot6l2-fix-slices.txt
