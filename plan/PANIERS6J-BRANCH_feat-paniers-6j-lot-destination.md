@@ -64,7 +64,7 @@ writes stay disabled until 6K. No D5 input is required.
   common archive from contributors; keep personal restore without workspace
   effect; return 422 for omitted market fields; conflict payloads expose
   authorized heads only.
-- Delivery checkpoint: 66.
+- Delivery checkpoint: 67.
 - Review fixes use CI test parallelism, seven copied-source proofs, and a
   bundle based on `8b2347e9`; shared Git metadata remains read-only.
 - Final receipt review: share the actor/key lock with signal writers and
@@ -131,7 +131,7 @@ writes stay disabled until 6K. No D5 input is required.
 - [x] Review fix 8: contradictory deselection expectations rejected.
 - [x] Review fix 9: equivalent price no-ops in commands and batches.
 - [x] Review fix 10: isolate CLI replay and preserve prior schema snapshots.
-- [ ] Review fix 11: CI parallelism, capacity and seven mutation proofs.
+- [x] Review fix 11: CI parallelism, capacity and seven mutation proofs.
 - [ ] Review fix 12: bounded, individually typechecked bundle delivery.
 - [ ] **Lot N-1 — Docs**: uncommitted French `RAPPORT-MUSE-6J.md`.
 - [ ] **Lot N — Close (not covered)**: verify green, push, PR, CI, merge
