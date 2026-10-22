@@ -355,3 +355,107 @@ export function proxyLeasedPool(pool: pg.Pool, handler: ProxyHandler<pg.Pool>): 
     return typeof value === "function" ? value.bind(target) : value;
   } });
 }
+
+/** Observe committed state on a separate raw connection, with stable ordering. */
+export async function committedState(pool: pg.Pool): Promise<unknown> {
+  const client = await pool.connect();
+  try {
+    const snapshot: Record<string, unknown> = {};
+    for (const table of ["artifacts", "releases", "artifact_current", "idempotency_keys",
+      "artifact_access", "artifact_sources", "blobs", "blob_ref_holders", "blob_pins"]) {
+      snapshot[table] = (await client.query(
+        `SELECT to_jsonb(t) AS row FROM artifacts.${table} t ORDER BY to_jsonb(t)::text`)).rows;
+    }
+    return snapshot;
+  } finally { client.release(); }
+}
+
+type WorkerMessage = { id: number; method?: string; args?: unknown[];
+  result?: unknown; error?: string; authorization?: { invocationId: string; purpose: string } };
+
+/** A separate OS process with its own pool/app, not two objects in Vitest. */
+export async function startArtifactWorker(database: pg.PoolConfig, config: unknown) {
+  const child = fork(fileURLToPath(import.meta.url), ["--artifact-worker"], {
+    execArgv: ["--import", "tsx"], stdio: ["ignore", "inherit", "inherit", "ipc"],
+  });
+  let sequence = 0;
+  const pending = new Map<number, { resolve: (value: unknown) => void; reject: (error: Error) => void }>();
+  const authorizations: Array<{ invocationId: string; purpose: string }> = [];
+  child.on("message", (payload) => {
+    const message = payload as WorkerMessage;
+    if (message.authorization) { authorizations.push(message.authorization); return; }
+    const waiter = pending.get(message.id);
+    pending.delete(message.id);
+    if (message.error) waiter?.reject(new Error(message.error));
+    else waiter?.resolve(message.result);
+  });
+  child.on("exit", (code) => {
+    for (const waiter of pending.values()) waiter.reject(new Error(`artifact worker exited: ${code}`));
+    pending.clear();
+  });
+  const call = (method: string, ...args: unknown[]): Promise<unknown> => new Promise((resolve, reject) => {
+    const id = ++sequence; pending.set(id, { resolve, reject });
+    child.send({ id, method, args }, (error) => {
+      if (error) { pending.delete(id); reject(error); }
+    });
+  });
+  try { await call("initialize", database, config); }
+  catch (error) { child.kill(); throw error; }
+  return {
+    pid: child.pid, authorizations,
+    execute: (request: unknown, invocation: unknown) => call("execute", request, invocation),
+    barrier: {
+      observer: undefined,
+      waitUntilReached: async (point: CommitBarrierPoint, id?: string) => { await call("wait", point, id); },
+      release: (point: CommitBarrierPoint, id?: string) => { void call("release", point, id); },
+    } satisfies CommitBarrier,
+    close: async () => { try { await call("close"); } finally { child.kill(); } },
+  };
+}
+
+if (process.argv[2] === "--artifact-worker") {
+  let pool: pg.Pool;
+  let host: Record<string, unknown>;
+  let barrier: CommitBarrier;
+  let s3: import("@aws-sdk/client-s3").S3Client;
+  process.on("message", async (payload) => {
+    const message = payload as WorkerMessage;
+    try {
+      const args = message.args ?? [];
+      let result: unknown;
+      if (message.method === "initialize") {
+        await requireCommitContract();
+        const { default: pgModule } = await import("pg");
+        const { S3Client } = await import("@aws-sdk/client-s3");
+        const { createS3BlobStore } = await import("@sentropic/artifacts/adapters/s3");
+        const { composeArtifactHost } = await import("@radar/artifacts-host");
+        const config = args[1] as Record<string, string>;
+        pool = new pgModule.Pool(args[0] as pg.PoolConfig);
+        s3 = new S3Client({ endpoint: config.s3Endpoint!, region: config.s3Region!, forcePathStyle: true,
+          credentials: { accessKeyId: config.s3AccessKey!, secretAccessKey: config.s3SecretKey! } });
+        barrier = await requireCommitBarrier();
+        const compose = composeArtifactHost as unknown as (...args: unknown[]) => Promise<Record<string, unknown>>;
+        host = await compose(pool, config, createS3BlobStore({ client: s3, bucket: config.s3Bucket! }),
+          { profile: { selectedCapabilities: [...FROZEN_CAPABILITIES] }, coordinator: { testObserver: barrier.observer } });
+        requireSelectedProfile(host);
+      } else if (message.method === "execute") {
+        const invocation = args[1] as InvocationContextShape;
+        result = await requireHostExecute(host)(args[0], buildInvocationContext({ ...invocation,
+          authorizeCommit: async (context, transaction) => {
+            process.send?.({ id: message.id, authorization: { invocationId: context.invocationId, purpose: context.purpose } });
+            return authorizeTransaction(context, transaction);
+          } }));
+      } else if (message.method === "wait") {
+        await barrier.waitUntilReached(args[0] as CommitBarrierPoint, args[1] as string);
+      } else if (message.method === "release") {
+        barrier.release(args[0] as CommitBarrierPoint, args[1] as string);
+      } else if (message.method === "close") {
+        if (typeof host.close === "function") host.close();
+        s3.destroy(); await pool.end();
+      }
+      process.send?.({ id: message.id, result });
+    } catch (error) {
+      process.send?.({ id: message.id, error: error instanceof Error ? error.message : String(error) });
+    }
+  });
+}
