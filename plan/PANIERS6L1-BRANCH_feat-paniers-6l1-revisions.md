@@ -106,10 +106,10 @@ it); no legacy reader/buffer retirement here (6K owns it).
 - [x] **Lot 7 — Tests**: revision visible only when authorized; coherent
   reload after revision; superseded response ignored; no leak (personal,
   workspace, source, membership, mode cases).
-- [ ] **Lot 8 — Make**: `LOT=6L1` guard, SCOPE, lint, regression patterns;
+- [x] **Lot 8 — Make**: `LOT=6L1` guard, SCOPE, lint, regression patterns;
   delivery targets refuse 6L1 (no delivery profile ships here); slices file.
 - [x] **Lot N-1 — Docs**: uncommitted French Muse and SOL reports.
 - [ ] **Lot N — Close (not covered)**: run verification, push, PR, CI,
   merge commit (no squash/rebase), keep branch, move plan to `plan/done/`.
 
-- Delivery checkpoint: 20.
+- Delivery checkpoint: 21.
