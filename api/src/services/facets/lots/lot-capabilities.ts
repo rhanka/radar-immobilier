@@ -117,3 +117,33 @@ function fallbackRecord(mutation: LotGrantMutation): MembershipRecord {
   };
 }
 
+export interface LotRights {
+  select: boolean;
+  changePipeline: boolean;
+  changeMarket: boolean;
+  discardPersonally: boolean;
+  moderateArchive: boolean;
+}
+
+export const LOT_RIGHTS_LABELS = ["select", "changePipeline", "changeMarket"] as const;
+
+/** Distinct D4 rights for one viewer; every grant is explicit. */
+export async function resolveLotRights(
+  db: Pick<Database, "select">, workspaceId: string, sub: string,
+): Promise<LotRights> {
+  const accountId = await approvedAccountId(db, sub);
+  const access = await resolveWorkspaceAccess(db, workspaceId, sub);
+  const rows = await db.select().from(lotCapabilityGrants).where(and(
+    eq(lotCapabilityGrants.workspaceId, workspaceId),
+    eq(lotCapabilityGrants.accountId, accountId),
+  ));
+  const granted = new Set(rows.filter((row) => row.granted).map((row) => row.capability));
+  for (const capability of granted) assertLotCapability(capability);
+  return {
+    select: granted.has("lot_select"),
+    changePipeline: granted.has("lot_pipeline"),
+    changeMarket: granted.has("lot_market"),
+    discardPersonally: true,
+    moderateArchive: access.moderateArchive,
+  };
+}
