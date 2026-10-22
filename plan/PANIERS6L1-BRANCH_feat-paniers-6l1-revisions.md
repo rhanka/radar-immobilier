@@ -91,7 +91,7 @@ it); no legacy reader/buffer retirement here (6K owns it).
   migration number at merge time; write this plan.
 - [x] **Lot 1 — Schema**: `0020` personal/workspace projection revisions
   plus city graph source revisions; journal entry; schema mirror.
-- [ ] **Lot 2 — Token**: pure `projection-scope.ts` composition and city
+- [x] **Lot 2 — Token**: pure `projection-scope.ts` composition and city
   content digest (community excluded); no counters, no timestamps.
 - [ ] **Lot 3 — Revisions**: bump helpers; facet bumps on appended
   transitions only (no-op and replay bump nothing); source bump only when
@@ -112,4 +112,4 @@ it); no legacy reader/buffer retirement here (6K owns it).
 - [ ] **Lot N — Close (not covered)**: run verification, push, PR, CI,
   merge commit (no squash/rebase), keep branch, move plan to `plan/done/`.
 
-- Delivery checkpoint: 2.
+- Delivery checkpoint: 3.
