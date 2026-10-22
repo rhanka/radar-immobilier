@@ -10,6 +10,7 @@
  */
 import { digest } from "../target.js";
 import type { DisplayedLotVersion, LotMode, LotTarget } from "./lot-target.js";
+import { normalizeAskingPrice } from "./lot-values.js";
 
 export const LOT_FACETS_CONTRACT_VERSION = "lot-facets-v1";
 
@@ -21,7 +22,7 @@ export type LotScope = "personal" | "workspace";
 export type LotMutation =
   | { action: "select"; basket_id: string }
   | { action: "deselect"; basket_id: string }
-  | { action: "discard"; reasonCode: string; deselect?: Array<{ basket_id: string; expected_head_id: string | null }> | undefined }
+  | { action: "discard"; reasonCode?: string | undefined; deselect?: Array<{ basket_id: string; expected_head_id: string | null }> | undefined }
   | { action: "restore" }
   | { action: "set_pipeline"; status: "sollicite" | "lettre_envoyee" }
   | { action: "clear_pipeline" }
@@ -85,7 +86,7 @@ function normalizeMutation(mutation: LotMutation): unknown {
       return {
         action: "set_market",
         status: "en_vente",
-        asking_price: mutation.asking_price,
+        asking_price: normalizeAskingPrice(mutation.asking_price),
         listing_url: mutation.listing_url,
       };
     case "clear_market":

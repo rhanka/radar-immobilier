@@ -46,7 +46,7 @@ export const lotMutationSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("select"), basket_id: lotBasketId }).strict(),
   z.object({ action: z.literal("deselect"), basket_id: lotBasketId }).strict(),
   z.object({
-    action: z.literal("discard"), reasonCode: lotReasonCode,
+    action: z.literal("discard"), reasonCode: lotReasonCode.optional(),
     deselect: z.array(lotDeselectEntry).max(8).optional(),
   }).strict(),
   z.object({ action: z.literal("restore") }).strict(),

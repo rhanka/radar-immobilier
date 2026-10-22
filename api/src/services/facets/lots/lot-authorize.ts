@@ -31,6 +31,9 @@ export function validateLotMutationShape(scope: LotScope, mutation: LotMutation)
   if (scope === "personal" && mutation.action === "discard" && mutation.deselect !== undefined) {
     throw new FacetError(400, "invalid_facet_command");
   }
+  if (mutation.action === "discard" && mutation.reasonCode == null) {
+    throw new FacetError(422, "reason_code_required");
+  }
   if (mutation.action === "discard" && mutation.reasonCode === LOT_IMPORT_UNKNOWN_REASON) {
     throw new FacetError(422, "invalid_reason_code");
   }
