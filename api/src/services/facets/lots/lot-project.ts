@@ -101,7 +101,7 @@ export async function projectTerminalHeads(
       skipped.push({ sourceId: row.sourceId, cause: "destination-head-conflict" });
       continue;
     }
-    const appended = await appendLotTransition(tx, input.workspaceId, "workspace", input.actorId,
+    const outcome = await appendLotTransition(tx, input.workspaceId, "workspace", input.actorId,
       command, target, plan, resolved.fingerprint, commandDigest,
       {
         allowImportProvenance: true,
@@ -109,9 +109,11 @@ export async function projectTerminalHeads(
           sourceAuthor: row.observed.authorId,
           sourceCreatedAt: row.observed.createdAt,
           importRunId: input.runId,
+          sourceRowId: row.sourceId,
+          sourceChainId: row.chainId,
         },
       });
-    if (appended) projected += 1;
+    if (outcome.appended.length > 0) projected += 1;
     else alreadyProjected += 1;
   }
   return { projected, alreadyProjected, skipped };

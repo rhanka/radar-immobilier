@@ -96,8 +96,9 @@ export async function writeLotFacet(
       });
     }
     const plan = await planLotStreams(tx, workspaceId, scope, actorId, command, command.target);
-    const appended = await appendLotTransition(tx, workspaceId, scope, actorId,
+    const outcome = await appendLotTransition(tx, workspaceId, scope, actorId,
       command, command.target, plan, resolved.fingerprint, commandDigest, internal);
+    const appended = outcome.appended[0] ?? outcome.heads[0] ?? null;
     const result = appended ? lotEventResponse(appended)
       : plan.main.current ? lotEventResponse(plan.main.current) : null;
     const context = {

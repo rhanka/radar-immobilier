@@ -64,7 +64,7 @@ writes stay disabled until 6K. No D5 input is required.
   common archive from contributors; keep personal restore without workspace
   effect; return 422 for omitted market fields; conflict payloads expose
   authorized heads only.
-- Delivery checkpoint: 58.
+- Delivery checkpoint: 59.
 - Review fixes use CI test parallelism, seven copied-source proofs, and a
   bundle based on `8b2347e9`; shared Git metadata remains read-only.
 - Final receipt review: share the actor/key lock with signal writers and
@@ -123,7 +123,7 @@ writes stay disabled until 6K. No D5 input is required.
   archiving every file read by tests; build and regression covered.
 - [x] Review fix 1: canonical prices and business validation.
 - [x] Review fix 2: source references and unknown historical observations.
-- [ ] Review fix 3: complete internal append outcomes and source links.
+- [x] Review fix 3: complete internal append outcomes and source links.
 - [ ] Review fix 4: full public command and batch results.
 - [ ] Review fix 5: composite and unchanged result qualification.
 - [ ] Review fix 6: HTTP result replay and source navigation.

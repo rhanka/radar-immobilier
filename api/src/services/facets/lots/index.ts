@@ -78,6 +78,7 @@ export { lotConflictHeads, planLotStreams } from "./lot-transition.js";
 /** Atomic transitions. */
 export {
   appendLotTransition,
+  type LotAppendOutcome,
   type LotImportProvenance,
 } from "./lot-apply.js";
 export {
@@ -90,7 +91,11 @@ export {
 } from "./lot-streams.js";
 
 /** Public event snapshots. */
-export { lotEventResponse, type LotEventSnapshot } from "./lot-response.js";
+export {
+  lotEventResponse,
+  type LotEventSnapshot,
+  type LotEventSource,
+} from "./lot-response.js";
 
 /** Shape validation and D4 authorization shared by writers. */
 export {
