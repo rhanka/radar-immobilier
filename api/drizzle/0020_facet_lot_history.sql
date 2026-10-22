@@ -86,3 +86,103 @@ INSERT INTO facet_reason_codes (profile_id, code, verdict) VALUES
   ('lot-import-v1', 'legacy-unknown', 'non_pertinent')
 ON CONFLICT DO NOTHING;
 --> statement-breakpoint
+-- Lot event columns. All nullable so existing signal rows are unaffected.
+ALTER TABLE facet_events ADD COLUMN IF NOT EXISTS mode text;
+--> statement-breakpoint
+ALTER TABLE facet_events ADD COLUMN IF NOT EXISTS observed_lot_version uuid;
+--> statement-breakpoint
+ALTER TABLE facet_events ADD COLUMN IF NOT EXISTS asking_price numeric(14,2);
+--> statement-breakpoint
+ALTER TABLE facet_events ADD COLUMN IF NOT EXISTS listing_url text;
+--> statement-breakpoint
+ALTER TABLE facet_events ADD COLUMN IF NOT EXISTS pipeline_status text;
+--> statement-breakpoint
+ALTER TABLE facet_events ADD COLUMN IF NOT EXISTS source_author text;
+--> statement-breakpoint
+ALTER TABLE facet_events ADD COLUMN IF NOT EXISTS source_created_at timestamptz;
+--> statement-breakpoint
+ALTER TABLE facet_events ADD COLUMN IF NOT EXISTS import_run_id uuid
+  REFERENCES lot_import_runs(id) ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+--> statement-breakpoint
+-- Widen event checks: signal behavior preserved, lot rules added.
+ALTER TABLE facet_events DROP CONSTRAINT IF EXISTS facet_events_target_type_check;
+--> statement-breakpoint
+ALTER TABLE facet_events DROP CONSTRAINT IF EXISTS facet_events_node_type_check;
+--> statement-breakpoint
+ALTER TABLE facet_events DROP CONSTRAINT IF EXISTS facet_events_facet_check;
+--> statement-breakpoint
+ALTER TABLE facet_events DROP CONSTRAINT IF EXISTS chk_facet_events_basket;
+--> statement-breakpoint
+ALTER TABLE facet_events DROP CONSTRAINT IF EXISTS chk_facet_events_classified_reason;
+--> statement-breakpoint
+ALTER TABLE facet_events DROP CONSTRAINT IF EXISTS chk_facet_events_workspace_archive_6i;
+--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_facet_events_target_lot_6j') THEN
+    ALTER TABLE facet_events ADD CONSTRAINT chk_facet_events_target_lot_6j CHECK (
+      (target_type = 'signal' AND node_type IN ('Signal', 'DesignationEvent')
+        AND mode IS NULL AND observed_lot_version IS NULL
+        AND asking_price IS NULL AND listing_url IS NULL AND pipeline_status IS NULL
+        AND source_author IS NULL AND source_created_at IS NULL AND import_run_id IS NULL)
+      OR (target_type = 'lot' AND node_type = 'Lot' AND node_id <> ''
+        AND mode IS NOT NULL AND mode IN ('real', 'simulation') AND observed_lot_version IS NOT NULL
+        AND (scope = 'workspace' OR facet = 'archive')));
+  END IF;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_facet_events_facet_lot_6j') THEN
+    ALTER TABLE facet_events ADD CONSTRAINT chk_facet_events_facet_lot_6j CHECK (
+      (target_type = 'signal' AND facet IN ('selection', 'archive'))
+      OR (target_type = 'lot' AND facet IN ('selection', 'archive', 'pipeline', 'market')));
+  END IF;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_facet_events_basket') THEN
+    ALTER TABLE facet_events ADD CONSTRAINT chk_facet_events_basket CHECK (
+      (target_type = 'signal' AND ((facet = 'selection' AND basket IS NOT NULL AND basket IN ('pertinent', 'a_surveiller'))
+        OR (facet = 'archive' AND basket IS NULL)))
+      OR (target_type = 'lot' AND ((facet = 'selection' AND basket IS NOT NULL AND basket <> '')
+        OR (facet IN ('archive', 'pipeline', 'market') AND basket IS NULL))));
+  END IF;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_facet_events_classified_reason') THEN
+    ALTER TABLE facet_events ADD CONSTRAINT chk_facet_events_classified_reason CHECK (
+      (target_type = 'signal' AND ((profile_id IS NULL AND reason_code IS NULL AND verdict IS NULL)
+        OR (profile_id IS NOT NULL AND reason_code IS NOT NULL AND verdict IS NOT NULL
+          AND ((facet = 'selection' AND verdict = basket) OR (facet = 'archive' AND verdict = 'non_pertinent')))))
+      OR (target_type = 'lot' AND (
+        (facet IN ('selection', 'pipeline', 'market') AND profile_id IS NULL AND reason_code IS NULL AND verdict IS NULL)
+        OR (facet = 'archive' AND profile_id IS NOT NULL AND reason_code IS NOT NULL AND verdict IS NOT NULL AND verdict = 'non_pertinent'
+          AND ((profile_id = 'lot-import-v1' AND reason_code = 'legacy-unknown' AND import_run_id IS NOT NULL)
+            OR profile_id <> 'lot-import-v1')))));
+  END IF;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_facet_events_workspace_archive_6i') THEN
+    ALTER TABLE facet_events ADD CONSTRAINT chk_facet_events_workspace_archive_6i CHECK (
+      scope <> 'workspace'
+      OR (target_type = 'signal' AND facet = 'archive' AND basket IS NULL)
+      OR (target_type = 'lot' AND facet IN ('selection', 'archive', 'pipeline', 'market')));
+  END IF;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_facet_events_market_6j') THEN
+    ALTER TABLE facet_events ADD CONSTRAINT chk_facet_events_market_6j CHECK (
+      target_type <> 'lot'
+      OR (facet = 'market' AND pipeline_status IS NULL
+        AND (asking_price IS NULL OR (asking_price >= 0.01 AND asking_price <= 999999999999.99))
+        AND (state <> 'inactive' OR (asking_price IS NULL AND listing_url IS NULL)))
+      OR (facet = 'pipeline' AND asking_price IS NULL AND listing_url IS NULL
+        AND ((state = 'inactive' AND pipeline_status IS NULL)
+          OR (state = 'active' AND pipeline_status IS NOT NULL AND pipeline_status IN ('sollicite', 'lettre_envoyee'))))
+      OR (facet IN ('selection', 'archive') AND asking_price IS NULL AND listing_url IS NULL
+        AND pipeline_status IS NULL));
+  END IF;
+END $$;
+--> statement-breakpoint
