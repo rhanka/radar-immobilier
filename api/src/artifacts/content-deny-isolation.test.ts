@@ -13,6 +13,37 @@ function importSpecifiers(source: string): string[] {
 }
 
 /**
+ * Strict ban for the denial modules: no identifier, property name or
+ * computed-access string may reference a global or environment handle.
+ * The ban makes aliases impossible: any alias source already fails.
+ */
+const FORBIDDEN_IDENTIFIERS = new Set([
+  "globalThis",
+  "global",
+  "self",
+  "window",
+  "process",
+  "eval",
+  "Function",
+  "Reflect",
+  "require",
+]);
+
+const FORBIDDEN_STRINGS = new Set([
+  "globalThis",
+  "global",
+  "self",
+  "window",
+  "process",
+  "eval",
+  "Function",
+  "Reflect",
+  "require",
+]);
+
+const FORBIDDEN_IMPORTS = new Set(["node:process", "process"]);
+
+/**
  * The single allowed `process` occurrence: the root object of an exact
  * `process.env.PORT` property chain over dots. Bracket spellings,
  * assertions between the links and destructured copies are not allowed.
@@ -58,6 +89,62 @@ function countAllowedPortReads(source: string, file: string): number {
   };
   visit(root);
   return count;
+}
+
+/** Every forbidden reference found in one source, with line numbers. */
+function collectViolations(source: string, file: string): string[] {
+  const root = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true);
+  const violations = new Set<string>();
+  const lineOf = (node: ts.Node): number =>
+    root.getLineAndCharacterOfPosition(node.getStart()).line + 1;
+  const visit = (node: ts.Node): void => {
+    if (ts.isIdentifier(node) && FORBIDDEN_IDENTIFIERS.has(node.text)) {
+      if (!(node.text === "process" && isAllowedProcessIdentifier(node))) {
+        violations.add(`${file}:${lineOf(node)} forbidden identifier ${node.text}`);
+      }
+    }
+    if (ts.isElementAccessExpression(node)) {
+      const arg = node.argumentExpression;
+      if (arg !== undefined && ts.isStringLiteral(arg) && FORBIDDEN_STRINGS.has(arg.text)) {
+        violations.add(`${file}:${lineOf(node)} forbidden computed string ${arg.text}`);
+      }
+    }
+    if (
+      ts.isMetaProperty(node) &&
+      node.keywordToken === ts.SyntaxKind.ImportKeyword &&
+      node.name.text === "meta"
+    ) {
+      violations.add(`${file}:${lineOf(node)} forbidden import.meta`);
+    }
+    if (
+      ts.isImportDeclaration(node) &&
+      ts.isStringLiteral(node.moduleSpecifier) &&
+      FORBIDDEN_IMPORTS.has(node.moduleSpecifier.text)
+    ) {
+      violations.add(`${file}:${lineOf(node)} forbidden import ${node.moduleSpecifier.text}`);
+    }
+    if (
+      ts.isExportDeclaration(node) &&
+      node.moduleSpecifier !== undefined &&
+      ts.isStringLiteral(node.moduleSpecifier) &&
+      FORBIDDEN_IMPORTS.has(node.moduleSpecifier.text)
+    ) {
+      violations.add(`${file}:${lineOf(node)} forbidden export ${node.moduleSpecifier.text}`);
+    }
+    if (
+      ts.isCallExpression(node) &&
+      node.expression.kind === ts.SyntaxKind.ImportKeyword &&
+      node.arguments.length === 1 &&
+      node.arguments[0] !== undefined &&
+      ts.isStringLiteral(node.arguments[0]) &&
+      FORBIDDEN_IMPORTS.has(node.arguments[0].text)
+    ) {
+      violations.add(`${file}:${lineOf(node)} forbidden dynamic import ${node.arguments[0].text}`);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(root);
+  return [...violations].sort();
 }
 
 /**
@@ -190,6 +277,10 @@ describe("content-deny module isolation", () => {
   it("pins the PORT read to resolvePort", () => {
     expect(countAllowedPortReads(read("content-deny-server.ts"), "content-deny-server.ts")).toBe(1);
     expect(countAllowedPortReads("void process.env.PORT;", "content-deny-server.ts")).toBe(0);
+  });
+  it("rejects separated global assignment sources", () => {
+    expect(collectViolations('let r; r = globalThis; void r["process"].env.X;', "fixture.ts")).not.toEqual([]);
+    expect(collectViolations(read("content-deny-server.ts"), "content-deny-server.ts")).toEqual([]);
   });
   it.each([
     ["process.env.EXTRA", ["EXTRA"]],
