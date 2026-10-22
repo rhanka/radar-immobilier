@@ -217,4 +217,121 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       } finally { await admin?.end(); }
     }
   });
+
+  it("maps an S3 request timeout to provider_unavailable with a redacted projection", async () => {
+    await requireOutcomeContract();
+    const barrier = await requireCommitBarrier();
+    const faulty = { ...rawBlobs(),
+      async putBlob() {
+        throw Object.assign(new Error("request timeout"), { code: "artifact_s3_timeout" });
+      } };
+    const host = await composeQ2Host(barrier.observer, { blobs: faulty });
+    const close = host["close"];
+    try {
+      const execute = executeWithParity(host);
+      const artifactId = await ensureVia(execute, allowAll(), "q2-s3", "q2-s3-ensure");
+      const releasesBefore = await tableCount("releases");
+      const invocation = invocationFor(allowAll(), "s3");
+      const outcome = await execute({ method: "POST", path: "/publish",
+        body: { artifactId,
+          files: [{ path: "index.html", mimeType: "text/html", text: "s3 request timeout" }],
+          idempotencyKey: "q2-s3" } }, invocation) as unknown as Record<string, unknown>;
+      assertOutcomeFailure(outcome, invocation["invocationId"] as string);
+      expect(outcome["failure"]).toMatchObject({
+        category: "provider_unavailable", retriable: true, commitState: "not_committed" });
+      const projected = await projectOutcomeHttp(outcome);
+      expect(projected).toEqual({ status: 503, body: { error: "capability_unavailable" } });
+      expectRedacted(projected);
+      expect(await tableCount("releases")).toBe(releasesBefore);
+    } finally {
+      if (typeof close === "function") (close as () => void)();
+    }
+  });
+
+  it("maps an S3 body-stream timeout to provider_unavailable with a redacted projection", async () => {
+    await requireOutcomeContract();
+    const barrier = await requireCommitBarrier();
+    let streamReads = 0;
+    const streaming = new Proxy(s3, { get(target, property) {
+      if (property === "send") return async (command: unknown) => {
+        const send = target.send.bind(target) as (command: unknown) => Promise<Record<string, unknown>>;
+        const response = await send(command);
+        if (!(command instanceof GetObjectCommand) || !response.Body) return response;
+        // Headers arrived from S3. Failure occurs when the adapter consumes
+        // the body, rather than before it sends PUT or GET.
+        return { ...response, Body: new Proxy(response.Body as object, { get(body, key) {
+          if (key === "transformToByteArray") return async () => {
+            streamReads++;
+            throw Object.assign(new Error("body stream stalled after headers"), {
+              code: "artifact_s3_timeout", phase: "body-stream" });
+          };
+          const value = Reflect.get(body, key);
+          return typeof value === "function" ? value.bind(body) : value;
+        } }) };
+      };
+      const value = Reflect.get(target, property);
+      return typeof value === "function" ? value.bind(target) : value;
+    } });
+    const faulty = createS3BlobStore({ client: streaming, bucket: BUCKET });
+    const host = await composeQ2Host(barrier.observer, { blobs: faulty });
+    const close = host["close"];
+    try {
+      const execute = executeWithParity(host);
+      const artifactId = await ensureVia(execute, allowAll(), "q2-s3stream", "q2-s3stream-ensure");
+      const releasesBefore = await tableCount("releases");
+      const invocation = invocationFor(allowAll(), "s3stream");
+      const outcome = await execute({ method: "POST", path: "/publish",
+        body: { artifactId,
+          files: [{ path: "index.html", mimeType: "text/html", text: "s3 body stream timeout" }],
+          idempotencyKey: "q2-s3stream" } }, invocation) as unknown as Record<string, unknown>;
+      assertOutcomeFailure(outcome, invocation["invocationId"] as string);
+      expect(outcome["failure"]).toMatchObject({
+        category: "provider_unavailable", retriable: true, commitState: "not_committed" });
+      const projected = await projectOutcomeHttp(outcome);
+      expect(projected).toEqual({ status: 503, body: { error: "capability_unavailable" } });
+      expectRedacted(projected);
+      expect(streamReads).toBeGreaterThan(0);
+      expect(await tableCount("releases")).toBe(releasesBefore);
+    } finally {
+      if (typeof close === "function") (close as () => void)();
+    }
+  });
+
+  it("maps a pool acquisition timeout to provider_unavailable without a commit", async () => {
+    await requireOutcomeContract();
+    const barrier = await requireCommitBarrier();
+    const armed = { current: false };
+    const starved = proxyLeasedPool(pool, { get(target, property, receiver) {
+      if (property === "connect" && armed.current) {
+        return async (): Promise<never> => {
+          throw Object.assign(new Error("pool acquisition timed out"), { code: "artifact_pool_timeout" });
+        };
+      }
+      const value = Reflect.get(target, property, receiver);
+      return typeof value === "function" ? value.bind(target) : value;
+    } }) as unknown as pg.Pool;
+    const host = await composeQ2Host(barrier.observer, { pool: starved });
+    const close = host["close"];
+    try {
+      const execute = executeWithParity(host);
+      const before = await tableCount("artifacts");
+      const keysBefore = await tableCount("idempotency_keys");
+      armed.current = true;
+      try {
+        const invocation = invocationFor(allowAll(), "pool");
+        const outcome = await execute({ method: "POST", path: "/ensure",
+          body: { bindingName: "q2-pool", idempotencyKey: "q2-pool" } },
+          invocation) as unknown as Record<string, unknown>;
+        assertOutcomeFailure(outcome, invocation["invocationId"] as string);
+        expect(outcome["failure"]).toMatchObject({
+          category: "provider_unavailable", retriable: true, commitState: "not_committed" });
+      } finally {
+        armed.current = false;
+      }
+      expect(await tableCount("artifacts")).toBe(before);
+      expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+    } finally {
+      if (typeof close === "function") (close as () => void)();
+    }
+  });
 });
