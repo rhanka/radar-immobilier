@@ -76,6 +76,10 @@ business-event ledger: durable 6L1 revisions stay the only authority.
   Reason: deliver review corrections above `960a9c4d` without shared Git writes.
   Impact: isolated commit checkpoints and a local bundle only.
   Rollback: remove the fix delivery files and generated bundle.
+- `BR6L2-EX4`: allow `tools/make/paniers-lot6l2-fix2-{deliver.sh,slices.txt}`.
+  Reason: qualify and deliver second-pass corrections above `8fc226fb`.
+  Impact: isolated Git snapshots, UI gates and local bundle audit only.
+  Rollback: remove the second-pass tooling and generated bundle.
 
 ## Plan / Todo (lot-based)
 
@@ -105,4 +109,6 @@ business-event ledger: durable 6L1 revisions stay the only authority.
 - [x] Review fix 3: discriminate live ping and unavailable handling.
 - [x] Review fix 4: qualify copy mutations and byte-for-byte restoration.
 - [x] Review fix 5: version isolated incremental delivery and its audit.
-- Delivery checkpoint: 22.
+- [x] Second-pass fix 1: retain invalidations across failed focus reads.
+- [ ] Second-pass fix 2: qualify copy mutations, UI gates and local delivery.
+- Delivery checkpoint: 23.

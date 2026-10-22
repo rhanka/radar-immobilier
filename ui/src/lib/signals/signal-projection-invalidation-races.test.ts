@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createProjectionInvalidationSync, parseProjectionStreamEvent, type StreamEvent } from "./signal-projection-invalidation.js";
 import { observeProjectionInvalidation } from "./signal-projection-invalidation-observer.js";
-import { beginProjectionRead, noteProjectionSuccess, retainedSnapshot } from "./signal-projection-revision.js";
+import { beginProjectionRead, noteProjectionSuccess, observeProjection, retainedSnapshot } from "./signal-projection-revision.js";
 
 function setup(fetchCoherent = async () => ({ token: "synthetic-token" }), useClock = false) {
   const state = createProjectionInvalidationSync({ viewerKey: { context: "synthetic" },
@@ -126,5 +126,59 @@ describe("6L2 pending refetch guards", () => {
   it("should reject null and scalar frame payloads", () => {
     expect(parseProjectionStreamEvent("invalidated", "null")).toBeNull();
     expect(parseProjectionStreamEvent("invalidated", "42")).toBeNull();
+  });
+  it("should converge after a 6L1 read supersedes the invalidation fetch", async () => {
+    const shared = createProjectionInvalidationSync({ viewerKey: { context: "synthetic" },
+      workspaceId: "11111111-1111-4111-8111-111111111111", citySlug: "synthetic", mode: "signal" }, { enabled: true });
+    noteProjectionSuccess(shared, shared.launched, { token: "prior" }, beginProjectionRead(shared));
+    const callbacks: { onEvent: (event: StreamEvent | null) => void; onError: () => void }[] = [];
+    const scheduled: { run: () => void; cancel: ReturnType<typeof vi.fn> }[] = [];
+    const sseRebuild = vi.fn();
+    const focusRebuild = vi.fn();
+    const onClosed = vi.fn();
+    let resolveA!: (value: { token: string }) => void;
+    let resolveRetry!: (value: { token: string }) => void;
+    let rejectB!: (reason: unknown) => void;
+    let sseCalls = 0;
+    const sseFetch = vi.fn(() => {
+      sseCalls += 1;
+      if (sseCalls === 1) return new Promise<{ token: string }>((resolve) => { resolveA = resolve; });
+      return new Promise<{ token: string }>((resolve) => { resolveRetry = resolve; });
+    });
+    const focusFetch = vi.fn(() => new Promise<{ token: string }>((_, reject) => { rejectB = reject; }));
+    const listeners = new Map<string, () => void>();
+    const fakeTarget = { addEventListener: (event: string, run: () => void) => listeners.set(event, run), removeEventListener: () => {},
+      document: { addEventListener: () => {}, removeEventListener: () => {}, visibilityState: "hidden" } } as unknown as Window;
+    const sseObserver = observeProjectionInvalidation(shared, { live: () => shared.launched,
+      fetchCoherent: sseFetch, rebuild: sseRebuild, onClosed, createSource: (_url, handlers) => {
+        callbacks.push(handlers); return { close: () => {} }; },
+      schedule: (run) => { const job = { run, cancel: vi.fn() }; scheduled.push(job); return job; } });
+    const focusObserver = observeProjection(shared, () => shared.launched, focusFetch, focusRebuild, fakeTarget);
+    callbacks[0]!.onEvent({ kind: "invalidated", token: "synthetic-token" });
+    await flush();
+    expect(sseFetch).toHaveBeenCalledTimes(1);
+    listeners.get("focus")!();
+    expect(focusFetch).toHaveBeenCalledTimes(1);
+    rejectB(new Error("offline"));
+    await flush();
+    expect(focusRebuild).not.toHaveBeenCalled();
+    expect(shared.ackedToken).toBe("prior");
+    resolveA({ token: "synthetic-token" });
+    await flush();
+    await flush();
+    expect(sseFetch).toHaveBeenCalledTimes(2);
+    expect(sseRebuild).not.toHaveBeenCalled();
+    expect(shared.ackedToken).toBe("prior");
+    expect(retainedSnapshot(shared)).toEqual({ token: "prior" });
+    resolveRetry({ token: "synthetic-token" });
+    await flush();
+    expect(shared.ackedToken).toBe("synthetic-token");
+    expect(retainedSnapshot(shared)).toEqual({ token: "synthetic-token" });
+    expect(sseRebuild).toHaveBeenCalledWith({ token: "synthetic-token" });
+    expect(sseRebuild).toHaveBeenCalledTimes(1);
+    expect(onClosed).not.toHaveBeenCalled();
+    expect(scheduled).toHaveLength(0);
+    sseObserver.dispose();
+    focusObserver.dispose();
   });
 });
