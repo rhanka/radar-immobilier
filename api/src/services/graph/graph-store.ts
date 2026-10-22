@@ -30,6 +30,7 @@ import {
   type VivierSignalInput,
 } from "./vivier-v2.js";
 import { filterDiscardedSignals, type DiscardedSignalKey } from "./discarded-signals.js";
+import { bumpGraphSourceRevision } from "../facets/projection-revisions.js";
 
 export {
   classifyVivierSignal,
@@ -1087,6 +1088,9 @@ export async function upsertGraph(
         });
     }
     await upsertEdgeRows(tx, citySlug, edgeRows);
+    // 6L1: record served signal content under the city lock; identical or
+    // community-only refreshes bump nothing.
+    await bumpGraphSourceRevision(tx, citySlug);
   });
 
   return { nodeCount: nodeRows.length, edgeCount: edgeRows.length };
@@ -1380,6 +1384,11 @@ export async function projectCityInTransaction(
         `${completeBefore} → ${completeAfter} (rollback, projection ignorée)`,
     });
   }
+
+  // 6L1: applied projections only (guard refusals return earlier, preview
+  // and completeness aborts roll back). Content-identical rewrites bump
+  // nothing.
+  await bumpGraphSourceRevision(tx, citySlug);
 
   return result;
 }
