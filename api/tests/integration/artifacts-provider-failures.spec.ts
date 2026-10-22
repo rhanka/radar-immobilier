@@ -705,4 +705,111 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       if (typeof close === "function") (close as () => void)();
     }
   });
+
+  it("keeps HTTP and MCP retry parity with one correlated outcome per dispatch", async () => {
+    await requireOutcomeContract();
+    const barrier = await requireCommitBarrier();
+    const faulty = { ...rawBlobs(),
+      async putBlob() {
+        throw Object.assign(new Error("stream timeout"), { code: "artifact_s3_timeout" });
+      } };
+    const host = await composeQ2Host(barrier.observer, { blobs: faulty });
+    const close = host["close"];
+    try {
+      requireSelectedProfile(host);
+      const execute = executeWithParity(host);
+      const artifactId = await ensureVia(execute, allowAll(), "q2-parity", "q2-parity-ensure");
+      const body = { artifactId,
+        files: [{ path: "index.html", mimeType: "text/html", text: "parity" }],
+        idempotencyKey: "q2-parity" };
+      const invocation = invocationFor(allowAll(), "parity");
+      const outcome = await execute({ method: "POST", path: "/publish", body },
+        invocation) as unknown as Record<string, unknown>;
+      assertOutcomeFailure(outcome, invocation["invocationId"] as string);
+      expect(outcome["failure"]).toMatchObject({ category: "provider_unavailable" });
+      const peerHost = (await composeQ2Host(barrier.observer, { blobs: faulty }));
+      try {
+        const adapter = createMcpArtifactAdapter(createArtifactControl(peerHost, SCOPE, BASE));
+        const mcp = await adapter.execute({ method: "POST", path: "/publish", args: body }, { actorId: ACTOR });
+        expect(mcp).toMatchObject({ ok: false, status: 503, code: "capability_unavailable", retryable: true });
+        expect(JSON.stringify(mcp)).not.toMatch(/timeout|stack|Error/i);
+      } finally {
+        peerHost.close();
+      }
+      const parallel = await composeQ2Host(barrier.observer, { blobs: faulty });
+      const parallelClose = parallel["close"];
+      try {
+        const parallelExecute = requireHostExecute(parallel);
+        const invA = invocationFor(allowAll(), "parity-a");
+        const invB = invocationFor(allowAll(), "parity-b");
+        const [outcomeA, outcomeB] = await Promise.all([
+          execute({ method: "POST", path: "/publish", body },
+            invA) as Promise<unknown>,
+          parallelExecute({ method: "POST", path: "/publish", body },
+            invB) as Promise<unknown>,
+        ]);
+        const failureA = (outcomeA as Record<string, unknown>)["failure"] as Record<string, unknown>;
+        const failureB = (outcomeB as Record<string, unknown>)["failure"] as Record<string, unknown>;
+        expect(invA["invocationId"]).not.toBe(invB["invocationId"]);
+        expect(failureA["cause"]).toBeDefined();
+        expect(failureB["cause"]).toBeDefined();
+        expect(failureB["cause"]).not.toBe(failureA["cause"]);
+      } finally {
+        if (typeof parallelClose === "function") (parallelClose as () => void)();
+      }
+    } finally {
+      if (typeof close === "function") (close as () => void)();
+    }
+  });
+
+  it("fails reads without a write-commit entry and distinguishes entry refusal", async () => {
+    await requireOutcomeContract();
+    const barrier = await requireCommitBarrier();
+    const armed = { current: false };
+    const flaky = proxyLeasedPool(pool, { get(target, property, receiver) {
+      if ((property === "query" || property === "connect") && armed.current) {
+        return async (): Promise<never> => {
+          throw Object.assign(new Error("terminating connection"), { code: "57P06" });
+        };
+      }
+      const value = Reflect.get(target, property, receiver);
+      return typeof value === "function" ? value.bind(target) : value;
+    } }) as unknown as pg.Pool;
+    const host = await composeQ2Host(barrier.observer, { pool: flaky });
+    const close = host["close"];
+    try {
+      const execute = executeWithParity(host);
+      const artifactId = await ensureVia(execute, allowAll(), "q2-read", "q2-read-ensure");
+      const keysBefore = await tableCount("idempotency_keys");
+      const releasesBefore = await tableCount("releases");
+      armed.current = true;
+      try {
+        const invocation = invocationFor(allowAll(), "read");
+        const outcome = await execute({ method: "GET", path: `/meta/${artifactId}`, body: {} },
+          invocation) as unknown as Record<string, unknown>;
+        assertOutcomeFailure(outcome, invocation["invocationId"] as string);
+        const projected = await projectOutcomeHttp(outcome);
+        expectRedacted(projected);
+      } finally {
+        armed.current = false;
+      }
+      expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+      expect(await tableCount("releases")).toBe(releasesBefore);
+      const seenTransactions: unknown[] = [];
+      const guard: AuthorizeCommit = async (context, transaction) => {
+        seenTransactions.push(transaction);
+        return authorizeTransaction(context, transaction);
+      };
+      const entry = await execute({ method: "POST", path: "/publish",
+        body: { artifactId: "123e4567-e89b-12d3-a456-426614174000",
+          files: [{ path: "index.html", mimeType: "text/html", text: "x" }],
+          idempotencyKey: "   " } },
+        invocationFor(guard, "entry")) as unknown as Record<string, unknown>;
+      assertOutcomeFailure(entry);
+      expect(entry["failure"]).toMatchObject({ code: "invalid_request" });
+      expect(seenTransactions).toEqual([]);
+    } finally {
+      if (typeof close === "function") (close as () => void)();
+    }
+  });
 });
