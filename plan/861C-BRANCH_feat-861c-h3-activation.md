@@ -194,12 +194,14 @@ Review integration (both non-blocking points):
 - [x] Second-pass correction 6: Execute transpiled modules in an isolated context; preserve invalid PORT errors.
 - [x] Second-pass correction 7: Verify PORT-only runtime reads through a Proxy and a real HTTP listener.
 - [x] Third-pass correction 1: run the denial service in a child process with only PORT; the Function bypass reads nothing there.
+- [x] Third-pass correction 2: gate the denial Deployment env (PORT only, no envFrom/valueFrom), volumes, token and identity in the render.
 - [x] Third-pass correction 3: ban constructor/getPrototypeOf/__proto__ in the AST guard as defense in depth.
 - [x] Third-pass correction 4: reject calculated dynamic imports and cover both independent-review bypasses.
 - [x] Third-pass verification: introduce child-process helpers with explicit PORT-only environments.
 - [x] Third-pass verification: preserve all five invalid PORT diagnostics in child processes.
 - [x] Third-pass verification: keep the live denial listener independent of runner variables.
 - [x] Third-pass verification: require exactly PORT and absent EXTRA for all three runtime bypasses; reject inherited or extra environments.
+- [x] Third-pass verification: validate canonical PORT indentation, Secret references, secret volumes and missing/true token settings with copy/restore/cmp proofs.
 - [x] Operator runbook: validate preparation and the H2 rollback plan before
   GO; keep the real content boundary and a matching reviewed CD target.
 

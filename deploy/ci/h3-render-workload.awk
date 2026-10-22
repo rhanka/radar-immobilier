@@ -33,11 +33,21 @@ function judge( i, key, v, expected, keys, image) {
   if (kind == "Deployment" && name == "radar-artifact-content-deny") {
     deny++; denyImage = field("^[ \t]*(- )?image:")
     if (count("^[ \t]*command:")) fail("command bypasses entrypoint validation")
-    if (!index(doc, "      - args:\n        - content-deny\n        image:")) fail("exact content-deny args missing")
+    if (!index(doc, "      - args:\n        - content-deny\n")) fail("exact content-deny args missing")
+    for (i = 1; i <= n; i++) if (buf[i] == "      - args:" && buf[i + 2] ~ /^        -/) fail("exact content-deny args missing")
     if (count("^[ \t]*(- )?image:") != 1 || count("^[ \t]*initContainers:")) fail("only one denial container allowed")
     if (field("^      automountServiceAccountToken:") != "false") fail("ServiceAccount token mount forbidden")
-    if (count("^[ \t]*(env:|envFrom:|volumes:|volumeMounts:)|secretKeyRef|secretRef:|configMapRef:|configMapKeyRef"))
+    if (count("valueFrom:")) fail("valueFrom forbidden on denial container")
+    if (count("^[ \t]*envFrom:")) fail("envFrom forbidden on denial container")
+    if (count("^[ \t]*(volumes:|volumeMounts:)|secretKeyRef|secretRef:|configMapRef:|configMapKeyRef"))
       fail("credential or volume mount forbidden")
+    if (count("^      serviceAccountName:") || count("^      serviceAccount:"))
+      fail("serviceAccountName forbidden on denial container")
+    for (i = 1; i <= n; i++) if (buf[i] ~ /^        - name:/) {
+      v = val(buf[i])
+      if (v != "PORT") fail("only PORT env allowed on denial container, found " v)
+      else if (buf[i + 1] !~ /^          value: /) fail("denial PORT env must use a literal value")
+    }
     if (count("app.kubernetes.io/component: content-deny$") != 3 || count("app.kubernetes.io/component: api$")) fail("distinct denial selectors required")
   }
   if (kind == "Service" && name == "radar-artifact-content-deny") {
