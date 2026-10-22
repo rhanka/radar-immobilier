@@ -104,6 +104,10 @@ ALTER TABLE facet_events ADD COLUMN IF NOT EXISTS source_created_at timestamptz;
 ALTER TABLE facet_events ADD COLUMN IF NOT EXISTS import_run_id uuid
   REFERENCES lot_import_runs(id) ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
 --> statement-breakpoint
+ALTER TABLE facet_events ADD COLUMN IF NOT EXISTS source_row_id text;
+--> statement-breakpoint
+ALTER TABLE facet_events ADD COLUMN IF NOT EXISTS source_chain_id text;
+--> statement-breakpoint
 -- Widen event checks: signal behavior preserved, lot rules added.
 ALTER TABLE facet_events DROP CONSTRAINT IF EXISTS facet_events_target_type_check;
 --> statement-breakpoint
@@ -239,6 +243,17 @@ CREATE INDEX IF NOT EXISTS facet_events_lot_target_idx
 --> statement-breakpoint
 CREATE INDEX IF NOT EXISTS facet_events_lot_import_idx
   ON facet_events (import_run_id) WHERE import_run_id IS NOT NULL;
+--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS facet_events_lot_source_chain_idx
+  ON facet_events (source_chain_id) WHERE source_chain_id IS NOT NULL;
+--> statement-breakpoint
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_facet_events_source_link_6j') THEN
+    ALTER TABLE facet_events ADD CONSTRAINT chk_facet_events_source_link_6j CHECK (
+      (target_type = 'signal' AND source_row_id IS NULL AND source_chain_id IS NULL)
+      OR target_type = 'lot');
+  END IF;
+END $$;
 --> statement-breakpoint
 CREATE OR REPLACE FUNCTION guard_lot_source_evidence() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN

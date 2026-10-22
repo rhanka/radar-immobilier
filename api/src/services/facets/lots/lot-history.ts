@@ -21,6 +21,7 @@ import { lockWorkspace } from "../../workspaces/mutations.js";
 import { requireScopedEpoch } from "../scope.js";
 import { scopedEpochFor } from "../activation.js";
 import { FacetError } from "../target.js";
+import type { DestinationProjection } from "../lot-migration-report/manifest.js";
 import type { LotMode, LotTarget } from "./lot-target.js";
 import { resolveLotRights } from "./lot-capabilities.js";
 import { requireLotDestination } from "./lot-gate.js";
@@ -35,6 +36,7 @@ export interface LotHistoryPage {
 
 export interface LotSourceHistoryPage {
   target: LotTarget | null;
+  mode: LotMode | null;
   chainId: string;
   rows: Array<{
     sourceId: string;
@@ -46,6 +48,34 @@ export interface LotSourceHistoryPage {
     observed: unknown;
   }>;
   nextOffset: number | null;
+}
+
+/**
+ * Reverse navigation: when every row of the page carries the same
+ * destination, expose its stable target (with mode implied by the
+ * destination) so the client can reach destination history without
+ * reading the import manifest. Mixed or destination-less chains stay
+ * ambiguous and return null.
+ */
+function singleDestinationTarget(
+  destinations: unknown[],
+): { target: LotTarget | null; mode: LotMode | null } {
+  let target: LotTarget | null = null;
+  let mode: LotMode | null = null;
+  for (const destination of destinations) {
+    const projection = destination as DestinationProjection | null;
+    if (!projection || typeof projection !== "object") return { target: null, mode: null };
+    const candidate: LotTarget = { type: "Lot", authority: "lot_versions",
+      citySlug: projection.citySlug, canonicalId: projection.canonicalTarget };
+    if (!target) {
+      target = candidate;
+      mode = projection.mode;
+    } else if (target.citySlug !== candidate.citySlug
+      || target.canonicalId !== candidate.canonicalId || mode !== projection.mode) {
+      return { target: null, mode: null };
+    }
+  }
+  return { target, mode };
 }
 
 function assertPage(offset: number, limit: number): void {
@@ -111,8 +141,10 @@ export async function readLotSourceHistory(
       eq(lotSourceRows.chainId, chainId),
     )).orderBy(asc(lotSourceRows.sourceId)).limit(limit + 1).offset(offset);
     const page = rows.slice(0, limit);
+    const destination = singleDestinationTarget(page.map((row) => row.destination));
     return {
-      target: null,
+      target: destination.target,
+      mode: destination.mode,
       chainId,
       rows: page.map((row) => ({
         sourceId: row.sourceId,

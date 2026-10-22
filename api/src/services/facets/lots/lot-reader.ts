@@ -23,6 +23,7 @@ import { lockWorkspace } from "../../workspaces/mutations.js";
 import { requireScopedEpoch, ScopeError } from "../scope.js";
 import { scopedEpochFor } from "../activation.js";
 import { FacetError } from "../target.js";
+import { LOT_IMPORT_UNKNOWN_REASON } from "./lot-commands.js";
 import {
   lotFingerprint,
   resolveLotSource,
@@ -167,6 +168,9 @@ async function readLotHeadSnapshots(
 async function changedSinceArchive(
   tx: LotTx, event: typeof facetEvents.$inferSelect,
 ): Promise<boolean | null> {
+  // Import projections carry the technical verification fingerprint, not a
+  // documentary observation: the historical unknown stays unknown.
+  if (event.importRunId !== null && event.reasonCode === LOT_IMPORT_UNKNOWN_REASON) return null;
   if (event.observedLotVersion === null) return null;
   const [row] = await tx.select().from(lotVersions)
     .where(eq(lotVersions.id, event.observedLotVersion));

@@ -12,7 +12,13 @@ type LotEventRow = Pick<typeof facetEvents.$inferSelect,
   | "id" | "citySlug" | "nodeType" | "nodeId" | "facet" | "basket" | "state"
   | "reasonCode" | "verdict" | "mode" | "observedLotVersion" | "askingPrice"
   | "listingUrl" | "pipelineStatus" | "observedFingerprint" | "supersedes"
-  | "supersededBy"> & { createdAt: Date | string };
+  | "supersededBy" | "importRunId" | "sourceRowId" | "sourceChainId"> & { createdAt: Date | string };
+
+export interface LotEventSource {
+  importRunId: string;
+  sourceRowId: string | null;
+  sourceChainId: string | null;
+}
 
 export interface LotEventSnapshot {
   id: string;
@@ -27,6 +33,7 @@ export interface LotEventSnapshot {
   askingPrice: string | null;
   listingUrl: string | null;
   displayedVersion: DisplayedLotVersion;
+  source: LotEventSource | null;
   createdAt: string;
 }
 
@@ -51,6 +58,11 @@ export function lotEventResponse(event: LotEventRow): LotEventSnapshot {
     displayedVersion: {
       lot_version_id: event.observedLotVersion ?? "",
       fingerprint: event.observedFingerprint,
+    },
+    source: event.importRunId === null || event.importRunId === undefined ? null : {
+      importRunId: event.importRunId,
+      sourceRowId: event.sourceRowId,
+      sourceChainId: event.sourceChainId,
     },
     createdAt: typeof event.createdAt === "string" ? event.createdAt : event.createdAt.toISOString(),
   };
