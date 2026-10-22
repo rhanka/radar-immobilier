@@ -102,7 +102,7 @@ business-event ledger: durable 6L1 revisions stay the only authority.
 
 - [x] Review fix 1: serialize reads and qualify deferred reconnect denials.
 - [x] Review fix 2: bound SSE buffering and reauthorize resumed consumers.
-- [ ] Review fix 3: discriminate live ping and unavailable handling.
+- [x] Review fix 3: discriminate live ping and unavailable handling.
 - [ ] Review fix 4: qualify copy mutations and byte-for-byte restoration.
 - [ ] Review fix 5: version isolated incremental delivery and its audit.
-- Delivery checkpoint: 19.
+- Delivery checkpoint: 20.

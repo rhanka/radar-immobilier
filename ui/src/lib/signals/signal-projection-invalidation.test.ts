@@ -25,6 +25,9 @@ function enabled(label = "viewer-1") {
 }
 
 describe("parseProjectionStreamEvent", () => {
+  it.each(["ping", "unavailable"] as const)("should preserve %s frame identity", (kind) => {
+    expect(parseProjectionStreamEvent(kind, "{}")).toEqual({ kind });
+  });
   it("should parse named frames and reject unknown or malformed frames", () => {
     expect(parseProjectionStreamEvent("invalidated", '{"token":"a"}'))
       .toEqual({ kind: "invalidated", token: "a" });
@@ -91,10 +94,15 @@ describe("noteInvalidationEvent", () => {
     expect(state.cursor).toBeNull();
   });
 
-  it("should ignore pings, unavailable scopes and unknown frames", () => {
+  it.each(["ping", "unavailable"] as const)("should ignore a live %s frame", (kind) => {
     const state = enabled();
-    expect(noteInvalidationEvent(state, context("viewer-1"), { kind: "ping" })).toBe("ignore");
-    expect(noteInvalidationEvent(state, context("viewer-1"), { kind: "unavailable" })).toBe("ignore");
+    const live = state.launched;
+    const before = structuredClone(state);
+    expect(noteInvalidationEvent(state, live, { kind })).toBe("ignore");
+    expect(state).toEqual(before);
+  });
+  it("should ignore unknown frames", () => {
+    const state = enabled();
     expect(noteInvalidationEvent(state, context("viewer-1"), null)).toBe("ignore");
   });
 });
