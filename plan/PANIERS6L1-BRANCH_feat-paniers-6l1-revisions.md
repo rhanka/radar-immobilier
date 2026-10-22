@@ -93,7 +93,7 @@ it); no legacy reader/buffer retirement here (6K owns it).
   plus city graph source revisions; journal entry; schema mirror.
 - [x] **Lot 2 — Token**: pure `projection-scope.ts` composition and city
   content digest (community excluded); no counters, no timestamps.
-- [ ] **Lot 3 — Revisions**: bump helpers; facet bumps on appended
+- [x] **Lot 3 — Revisions**: bump helpers; facet bumps on appended
   transitions only (no-op and replay bump nothing); source bump only when
   served signal content changes.
 - [x] **Lot 4 — Reads**: authorized scope read (approval, membership with
@@ -112,4 +112,4 @@ it); no legacy reader/buffer retirement here (6K owns it).
 - [ ] **Lot N — Close (not covered)**: run verification, push, PR, CI,
   merge commit (no squash/rebase), keep branch, move plan to `plan/done/`.
 
-- Delivery checkpoint: 7.
+- Delivery checkpoint: 8.
