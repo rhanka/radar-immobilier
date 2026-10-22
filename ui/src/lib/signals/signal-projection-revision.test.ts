@@ -8,6 +8,7 @@ import {
   createProjectionSync,
   beginProjectionRead,
   noteProjectionSuccess,
+  observeProjection,
   retainedSnapshot,
   shouldReconcile,
   type ProjectionSyncState,
@@ -71,5 +72,49 @@ describe("noteProjectionSuccess", () => {
     const state = createProjectionSync(context("viewer-1", workspace));
     expect(retainedSnapshot(state)).toBeNull();
     expect(shouldReconcile(state, "token-a")).toBe(true);
+  });
+});
+
+describe("observeProjection refresh", () => {
+  function fakeTarget(): Window {
+    const noop = () => {};
+    return {
+      addEventListener: noop,
+      removeEventListener: noop,
+      document: { addEventListener: noop, removeEventListener: noop, visibilityState: "hidden" },
+    } as unknown as Window;
+  }
+
+  it("rebuilds the acknowledged snapshot while the context stays live", async () => {
+    const state = createProjectionSync(context("viewer-1", workspace));
+    let rebuilt: { token: string } | null = null;
+    const { refresh } = observeProjection(state, () => state.launched,
+      async () => ({ token: "token-a" }),
+      (snapshot) => { rebuilt = snapshot; }, fakeTarget());
+    await refresh();
+    expect(rebuilt).toEqual({ token: "token-a" });
+  });
+
+  it("skips rebuild when disposal and an account switch land between validation and resume", async () => {
+    const launched = context("viewer-1", workspace);
+    const state = createProjectionSync(launched);
+    let current = launched;
+    const liveFn = (): ProjectionContext => {
+      if (current === launched) {
+        // A microtask switches account and disposes after the response
+        // validated but before refresh resumes, matching the reported window.
+        queueMicrotask(() => {
+          current = context("viewer-2", workspace);
+          dispose();
+        });
+      }
+      return current;
+    };
+    let rebuilt: unknown = null;
+    const { refresh, dispose } = observeProjection(state, liveFn,
+      async () => ({ token: "token-new" }),
+      (snapshot) => { rebuilt = snapshot; }, fakeTarget());
+    await refresh();
+    expect(rebuilt).toBeNull();
   });
 });

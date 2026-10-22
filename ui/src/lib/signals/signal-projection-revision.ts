@@ -67,11 +67,15 @@ export function retainedSnapshot<T extends ProjectionSnapshot>(state: Projection
   return state.snapshot;
 }
 
-/** All derived views rebuild from this one successful payload; failures stay retryable. */
+/**
+ * Reconcile one fetch against the live context. The caller may supply the
+ * operation begun before the fetch so a later guard can detect a disposal
+ * or a superseding read that landed after validation.
+ */
 export async function reconcileProjection<T extends ProjectionSnapshot>(
   state: ProjectionSyncState<T>, live: () => ProjectionContext, fetch: () => Promise<T>,
+  operation: number = beginProjectionRead(state),
 ): Promise<boolean> {
-  const operation = beginProjectionRead(state);
   const snapshot = await fetch();
   return noteProjectionSuccess(state, live(), snapshot, operation);
 }
@@ -81,15 +85,34 @@ export function observeProjection<T extends ProjectionSnapshot>(
   state: ProjectionSyncState<T>, live: () => ProjectionContext, fetch: () => Promise<T>,
   rebuild: (snapshot: T) => void, target: Window = window,
 ): { refresh: () => Promise<void>; dispose: () => void } {
+  let disposed = false;
   const refresh = async () => {
-    if (await reconcileProjection(state, live, fetch)) rebuild(state.snapshot!);
+    const operation = beginProjectionRead(state);
+    const reconciled = await reconcileProjection(state, live, fetch, operation);
+    if (!reconciled) return;
+    // Final guard immediately before applying the snapshot: disposal,
+    // live context (account and workspace), city, mode, and the operation
+    // token are rechecked here with no suspension between this control
+    // and the rebuild, so a disposal or an account switch landing after
+    // validation still skips the stale rebuild.
+    if (disposed) return;
+    const current = live();
+    if (!isLiveScopedContext(state.launched, current)) return;
+    if (state.launched.citySlug !== current.citySlug || state.launched.mode !== current.mode) return;
+    if (state.operation !== operation) return;
+    const snapshot = state.snapshot;
+    if (snapshot === null) return;
+    rebuild(snapshot);
   };
   const wake = () => { void refresh().catch(() => {}); };
   const visible = () => { if (target.document.visibilityState === "visible") wake(); };
   for (const event of ["focus", "online", "pageshow"]) target.addEventListener(event, wake);
   target.document.addEventListener("visibilitychange", visible);
   return { refresh, dispose: () => {
-    ++state.operation;
+    if (!disposed) {
+      disposed = true;
+      ++state.operation;
+    }
     for (const event of ["focus", "online", "pageshow"]) target.removeEventListener(event, wake);
     target.document.removeEventListener("visibilitychange", visible);
   } };
