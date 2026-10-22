@@ -73,12 +73,14 @@ Review integration (both non-blocking points):
   - `tools/h3-image-runtime-smoke.sh` (review rework: api/deny discrimination,
     no-argument startup)
   - `api/src/artifacts/content-deny-isolation.test.ts` (review rework: AST env reads)
+  - `api/src/artifacts/content-deny-server.ts` (single PORT read, behavior preserved)
   - `tools/artifact-host.mk` (H3 render tests and offline operator targets only)
   - `Makefile` (`k8s-validate` wiring of the render gate only)
   - `RAPPORT-MUSE-H3-P4.md` (uncommitted deliverable)
   - `RAPPORT-SOL-H3-P4.md` (uncommitted integration report)
   - `tmp/861c-h3-p4/**` (ignored evidence, copies, local Git and bundle)
   - `tmp/861c-h3-p4-fix/**` (review correction evidence, local Git and bundle)
+  - `tmp/861c-h3-p4-fix2/**` (second correction evidence, local Git and bundle)
 - **Forbidden Paths (must not change in this branch)**:
   - `api/src/config.ts`, root `docker-compose*.yml`
   - `rules/**`, agent bootstrap files, other `plan/*-BRANCH_*.md`
@@ -183,6 +185,7 @@ Review integration (both non-blocking points):
 - [x] Review correction 3: explicit preparation (`off`, complete reviewed
   values) and H2 rollback (no activation group, independent pinned denial
   image) gates; 25 transition tests pass without relaxing existing phases.
+- [x] Second-pass correction 1: Read PORT once and preserve invalid-port diagnostics and listener behavior.
 - [x] Operator runbook: validate preparation and the H2 rollback plan before
   GO; keep the real content boundary and a matching reviewed CD target.
 
