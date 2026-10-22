@@ -39,7 +39,7 @@ describeDb("6J lot writer scope", () => {
       .rejects.toMatchObject({ status: 400 });
     const archived = await writeLotFacet(f.db, f.contributor.sub, f.workspaceId, "personal",
       lotCommand(target, displayed, { action: "discard", reasonCode: "N-NON-RES" }));
-    expect(archived).toMatchObject({ facet: "archive", state: "active" });
+    expect(archived.events[0]).toMatchObject({ facet: "archive", state: "active" });
     await expect(writeLotFacet(f.db, f.contributor.sub, f.workspaceId, "personal",
       lotCommand(target, displayed, { action: "discard", reasonCode: "N-NON-RES",
         deselect: [{ basket_id: f.selectionBasket, expected_head_id: null }] })))

@@ -33,8 +33,8 @@ describeDb("6J lot writer replay and composition", () => {
     const before = await lotEventCount(f);
     const repeated = await writeLotFacet(f.db, f.contributor.sub, f.workspaceId, "workspace",
       lotCommand(target, displayed, { action: "set_market", status: "en_vente",
-        asking_price: "10.00", listing_url: null }, first!.id));
-    expect(repeated!.id).toBe(first!.id);
+        asking_price: "10.00", listing_url: null }, first.heads[0]!.id));
+    expect(repeated.heads[0]!.id).toBe(first.heads[0]!.id);
     expect(await lotEventCount(f)).toBe(before);
   });
 
@@ -56,13 +56,13 @@ describeDb("6J lot writer replay and composition", () => {
       lotCommand(target, displayed, { action: "select", basket_id: f.selectionBasket }));
     const archived = await writeLotFacet(f.db, f.moderator.sub, f.workspaceId, "workspace",
       lotCommand(target, displayed, { action: "discard", reasonCode: "N-NON-RES",
-        deselect: [{ basket_id: f.selectionBasket, expected_head_id: selected!.id }] }));
-    expect(archived).toMatchObject({ facet: "archive", state: "active" });
+        deselect: [{ basket_id: f.selectionBasket, expected_head_id: selected.heads[0]!.id }] }));
+    expect(archived.events[0]).toMatchObject({ facet: "archive", state: "active" });
     const state = await readLotState(f.db, f.contributor.sub, f.workspaceId, "real", target);
     expect(state.selection.map((head) => head.state)).toEqual(["inactive"]);
     const restored = await writeLotFacet(f.db, f.moderator.sub, f.workspaceId, "workspace",
-      lotCommand(target, displayed, { action: "restore" }, archived!.id));
-    expect(restored).toMatchObject({ state: "inactive" });
+      lotCommand(target, displayed, { action: "restore" }, archived.heads[0]!.id));
+    expect(restored.events[0]).toMatchObject({ state: "inactive" });
     const visible = await readLotState(f.db, f.contributor.sub, f.workspaceId, "real", target);
     expect(visible.selection.map((head) => head.state)).toEqual(["inactive"]);
   });
@@ -76,7 +76,7 @@ describeDb("6J lot writer replay and composition", () => {
       { action: "select", basket_id: f.selectionBasket }), mode: "simulation" as const };
     const simulated = await writeLotFacet(f.db, f.contributor.sub, f.workspaceId,
       "workspace", simulation);
-    expect(simulated).toMatchObject({ state: "active" });
+    expect(simulated.events[0]).toMatchObject({ state: "active" });
     const realState = await readLotState(f.db, f.contributor.sub, f.workspaceId, "real", target);
     const simulationState = await readLotState(
       f.db, f.contributor.sub, f.workspaceId, "simulation", target);
@@ -98,6 +98,6 @@ describeDb("6J lot writer replay and composition", () => {
       .rejects.toMatchObject({ status: 403, message: "workspace_capability_required" });
     const selected = await writeLotFacet(f.db, f.contributor.sub, f.workspaceId, "workspace",
       lotCommand(target, displayed, { action: "select", basket_id: f.selectionBasket }));
-    expect(selected).toMatchObject({ state: "active" });
+    expect(selected.events[0]).toMatchObject({ state: "active" });
   });
 });

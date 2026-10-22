@@ -11,6 +11,7 @@
 import { digest } from "../target.js";
 import type { DisplayedLotVersion, LotMode, LotTarget } from "./lot-target.js";
 import { normalizeAskingPrice } from "./lot-values.js";
+import type { LotEventSnapshot } from "./lot-response.js";
 
 export const LOT_FACETS_CONTRACT_VERSION = "lot-facets-v1";
 
@@ -51,7 +52,9 @@ export interface LotBatchCommand {
 
 export interface LotBatchItemResult {
   target: LotTarget;
-  event: import("./lot-response.js").LotEventSnapshot | null;
+  mode: LotMode;
+  events: LotEventSnapshot[];
+  heads: LotEventSnapshot[];
   appended: boolean;
 }
 

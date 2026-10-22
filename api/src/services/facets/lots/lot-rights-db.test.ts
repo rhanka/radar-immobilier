@@ -19,12 +19,12 @@ describeDb("6J lot D4 rights", () => {
       .rejects.toMatchObject({ status: 403, message: "workspace_capability_required" });
     const archived = await writeLotFacet(f.db, f.moderator.sub, f.workspaceId, "workspace",
       lotCommand(target, displayed, { action: "discard", reasonCode: "N-NON-RES" }));
-    expect(archived).toMatchObject({ facet: "archive", state: "active" });
+    expect(archived.events[0]).toMatchObject({ facet: "archive", state: "active" });
     await expect(writeLotFacet(f.db, f.contributor.sub, f.workspaceId, "workspace",
-      lotCommand(target, displayed, { action: "restore" }, archived!.id)))
+      lotCommand(target, displayed, { action: "restore" }, archived.heads[0]!.id)))
       .rejects.toMatchObject({ status: 403, message: "workspace_capability_required" });
     const stored = await f.db.select().from(facetEvents)
-      .where(eq(facetEvents.id, archived!.id));
+      .where(eq(facetEvents.id, archived.heads[0]!.id));
     expect(stored[0]).toMatchObject({ scope: "workspace", ownerId: null,
       actorId: f.moderator.id, reasonCode: "N-NON-RES" });
   });
@@ -39,12 +39,13 @@ describeDb("6J lot D4 rights", () => {
     const personal = await readLotState(f.db, f.contributor.sub, f.workspaceId, "real", target);
     expect(personal.archive.personal).toMatchObject({ state: "active" });
     const restored = await writeLotFacet(f.db, f.contributor.sub, f.workspaceId, "personal",
-      lotCommand(target, displayed, { action: "restore" }, personal.archive.personal!.id));
-    expect(restored).toMatchObject({ state: "inactive" });
+      lotCommand(target, displayed, { action: "restore" },
+        personal.archive.personal!.id));
+    expect(restored.events[0]).toMatchObject({ state: "inactive" });
     const stillHidden = await readLotState(
       f.db, f.contributor.sub, f.workspaceId, "real", target);
     expect(stillHidden.archive.personal).toMatchObject({ state: "inactive" });
-    expect(stillHidden.archive.workspace).toMatchObject({ id: common!.id, state: "active" });
+    expect(stillHidden.archive.workspace).toMatchObject({ id: common.heads[0]!.id, state: "active" });
     expect(stillHidden.archive.effectiveDiscarded).toBe(true);
   });
 
@@ -56,9 +57,9 @@ describeDb("6J lot D4 rights", () => {
     const common = await writeLotFacet(f.db, f.moderator.sub, f.workspaceId, "workspace",
       lotCommand(target, displayed, { action: "discard", reasonCode: "N-NON-RES" }));
     await writeLotFacet(f.db, f.moderator.sub, f.workspaceId, "workspace",
-      lotCommand(target, displayed, { action: "restore" }, common!.id));
+      lotCommand(target, displayed, { action: "restore" }, common.heads[0]!.id));
     const view = await readLotState(f.db, f.contributor.sub, f.workspaceId, "real", target);
-    expect(view.archive.personal).toMatchObject({ id: personal!.id, state: "active" });
+    expect(view.archive.personal).toMatchObject({ id: personal.heads[0]!.id, state: "active" });
     expect(view.archive.effectiveDiscarded).toBe(true);
   });
 
@@ -85,6 +86,7 @@ describeDb("6J lot D4 rights", () => {
     }
   });
 
+
   it("should require moderation plus selection for composite discard", async () => {
     const f = await lotFixture();
     const { target, displayed } = await displayedFor(f);
@@ -97,7 +99,8 @@ describeDb("6J lot D4 rights", () => {
       expectedRevision: 1 });
     await expect(writeLotFacet(f.db, f.moderator.sub, f.workspaceId, "workspace",
       lotCommand(target, displayed, { action: "discard", reasonCode: "N-NON-RES",
-        deselect: [{ basket_id: f.selectionBasket, expected_head_id: selected!.id }] })))
+        deselect: [{ basket_id: f.selectionBasket,
+          expected_head_id: selected.heads[0]!.id }] })))
       .rejects.toMatchObject({ status: 403, message: "workspace_capability_required" });
   });
 });

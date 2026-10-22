@@ -134,7 +134,7 @@ describeDb("6J atomic lot batch", () => {
     const first = await writeLotBatch(f.db, f.contributor.sub, f.workspaceId, "workspace", batch(items));
     for (const item of items) {
       item.expected_head_id = first.items.find((result) =>
-        result.target.canonicalId === item.target.canonicalId)!.event!.id;
+        result.target.canonicalId === item.target.canonicalId)!.heads[0]!.id;
     }
     const result = await writeLotBatch(f.db, f.contributor.sub, f.workspaceId, "workspace", batch(items));
     expect(result).toMatchObject({ targets: 2, changed: 0, unchanged: 2, eventsAppended: 0 });

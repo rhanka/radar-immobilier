@@ -46,12 +46,13 @@ describeDb("6J lot history", () => {
       command(target, displayed, { action: "set_pipeline", status: "sollicite" }));
     const archived = await writeLotFacet(f.db, f.moderator.sub, f.workspaceId, "workspace",
       command(target, displayed, { action: "discard", reasonCode: "N-NON-RES",
-        deselect: [{ basket_id: f.selectionBasket, expected_head_id: selected!.id }] }));
+        deselect: [{ basket_id: f.selectionBasket,
+          expected_head_id: selected.heads[0]!.id }] }));
     const first = await readLotHistory(
       f.db, f.contributor.sub, f.workspaceId, "real", target, 0, 2);
     // Composite events share a transaction timestamp; UUID breaks the tie.
     expect(first.events).toHaveLength(2);
-    expect(first.events.map((event) => event.id)).toContain(archived!.id);
+    expect(first.events.map((event) => event.id)).toContain(archived.heads[0]!.id);
     expect(first.events).toEqual(expect.arrayContaining([
       expect.objectContaining({ facet: "selection", state: "inactive" }),
       expect.objectContaining({ facet: "archive", state: "active" }),

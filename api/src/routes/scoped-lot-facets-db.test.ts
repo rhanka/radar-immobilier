@@ -63,7 +63,10 @@ describeDb("6J scoped lot HTTP contract", () => {
       body: JSON.stringify(single) });
     expect(created.status).toBe(200);
     const original = await created.json();
-    expect(original.result).toMatchObject({ facet: "pipeline", state: "active" });
+    expect(original.result).toMatchObject({ target: single.target, mode: "real" });
+    expect(original.result.events[0]).toMatchObject({ facet: "pipeline", state: "active" });
+    expect(original.result.heads).toHaveLength(1);
+    expect(original.result.heads[0].displayedVersion).toEqual(resolved.displayed);
     const replayed = await app.request(`${base}/workspace/commands`, { method: "POST",
       headers: { "content-type": "application/json", "Idempotency-Key": key },
       body: JSON.stringify(single) });
@@ -92,4 +95,5 @@ describeDb("6J scoped lot HTTP contract", () => {
     const batchResult = await batch.json() as { result: { targets: number; changed: number } };
     expect(batchResult.result).toMatchObject({ targets: 1, changed: 1 });
   });
+
 });

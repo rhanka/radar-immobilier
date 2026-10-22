@@ -20,7 +20,6 @@ import { lockWorkspace } from "../../workspaces/mutations.js";
 import { approvedAccountId } from "../../workspaces/store.js";
 import { requireScopedEpoch } from "../scope.js";
 import { scopedEpochFor } from "../activation.js";
-import { readCommand } from "../commands.js";
 import { digest, FacetError } from "../target.js";
 import {
   lotCommandDigest,
@@ -55,7 +54,7 @@ export type { LotTx } from "./lot-types.js";
 export async function writeLotFacet(
   db: Database, sub: string, workspaceId: string, scope: LotScope, command: LotCommand,
   internal: { allowImportProvenance?: boolean } = {},
-): Promise<ReturnType<typeof lotEventResponse> | null> {
+): Promise<LotWriteResult> {
   validateLotMutationShape(scope, command.mutation);
   if (command.expected_head_id === undefined || command.displayed_version === undefined) {
     throw new FacetError(400, "invalid_facet_command");
@@ -82,8 +81,17 @@ export async function writeLotFacet(
     if (contextRow && contextRow.workspaceId !== workspaceId.toLowerCase()) {
       throw new FacetError(409, "idempotency_key_conflict");
     }
-    const replay = await readCommand(tx, actorId, key, commandDigest);
-    if (replay !== undefined) return replay as ReturnType<typeof lotEventResponse> | null;
+    if (receiptRow) {
+      const stored = receiptRow.result as { result?: LotWriteResult; context?: unknown };
+      if (!stored.result || !Array.isArray(stored.result.events)
+        || !Array.isArray(stored.result.heads) || stored.context === undefined) {
+        throw new FacetError(409, "command_context_unresolved");
+      }
+      if (receiptRow.commandDigest !== commandDigest) {
+        throw new FacetError(409, "idempotency_key_conflict");
+      }
+      return stored.result;
+    }
     await lotTargetLock(tx, command.target);
     const resolved = await resolveLotSource(tx, command.target);
     if (resolved.row.id !== command.displayed_version.lot_version_id
@@ -98,9 +106,12 @@ export async function writeLotFacet(
     const plan = await planLotStreams(tx, workspaceId, scope, actorId, command, command.target);
     const outcome = await appendLotTransition(tx, workspaceId, scope, actorId,
       command, command.target, plan, resolved.fingerprint, commandDigest, internal);
-    const appended = outcome.appended[0] ?? outcome.heads[0] ?? null;
-    const result = appended ? lotEventResponse(appended)
-      : plan.main.current ? lotEventResponse(plan.main.current) : null;
+    const result: LotWriteResult = {
+      target: command.target,
+      mode: command.mode,
+      events: outcome.appended.map((event) => lotEventResponse(event)),
+      heads: outcome.heads.map((event) => lotEventResponse(event)),
+    };
     const context = {
       scope, mode: command.mode, target: command.target,
       facet: plan.facet, basket: plan.basket,
@@ -109,7 +120,7 @@ export async function writeLotFacet(
       workspaceId,
     };
     await tx.insert(facetCommands).values({
-      ownerId: actorId, commandKey: key, commandDigest, result: { event: result, context },
+      ownerId: actorId, commandKey: key, commandDigest, result: { result, context },
     });
     await tx.insert(facetCommandContexts).values({
       ownerId: actorId, commandKey: key, workspaceId,
