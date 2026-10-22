@@ -61,6 +61,33 @@ proof superseded ui/src/lib/signals/signal-projection-revision.ts ui \
 proof missing-bump api/src/services/facets/scoped-writer.ts api \
   src/services/facets/projection-revisions-db.test.ts 'isolate personal revisions across members' \
   'await bumpPersonalRevision(tx, workspaceId, accountId, command.target.citySlug);' 'await Promise.resolve(0);'
+# Move the live/disposal checks into the awaited helper. Its return still
+# leaves an async boundary before rebuild, recreating the review's window.
+late_guard=$(sed -n '/    const reconciled = await reconcileProjection/,/    rebuild(snapshot);/p' \
+  ui/src/lib/signals/signal-projection-revision.ts)
+early_guard=$(cat <<'GUARD'
+    const reconciled = await (async () => {
+      const snapshot = await fetch();
+      if (disposed) return false;
+      const current = live();
+      if (!isLiveScopedContext(state.launched, current)) return false;
+      if (state.launched.citySlug !== current.citySlug || state.launched.mode !== current.mode) return false;
+      if (state.operation !== operation) return false;
+      return noteProjectionSuccess(state, current, snapshot, operation);
+    })();
+    if (reconciled) rebuild(state.snapshot!);
+GUARD
+)
+proof review-ui-final-guard ui/src/lib/signals/signal-projection-revision.ts ui \
+  src/lib/signals/signal-projection-revision.test.ts 'skips rebuild when disposal' \
+  "$late_guard" "$early_guard"
+proof review-fingerprint api/src/routes/scoped-projection-revisions.ts api \
+  src/routes/scoped-projection-revisions-db.test.ts 'serve displayed fingerprints usable for 6B commands' \
+  'facetFingerprint: targetFingerprint(node)' '/* displayed fingerprint omitted */'
+proof review-later-migration api/src/services/facets/projection-migration-db.test.ts api \
+  src/services/facets/projection-migration-db.test.ts 'when a later migration follows it' \
+  '      expect(targeted).toMatchObject({ hash, created_at: String(entry.when) });' \
+  '      expect(before.rows.at(-1)).toMatchObject({ hash, created_at: String(entry.when) });'
 diff -r /workspace/api/src api/src
 diff -r /workspace/api/drizzle api/drizzle
 diff -r /workspace/ui/src ui/src
