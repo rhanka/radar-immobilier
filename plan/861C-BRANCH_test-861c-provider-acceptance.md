@@ -76,3 +76,4 @@ Keep current host API names in one test adaptation module pending spec r2.
 - [x] Slice 008: migrate provider acceptance case.
 - [x] Slice 009: migrate provider acceptance case.
 - [x] Slice 010: migrate provider acceptance case.
+- [x] Slice 011: migrate provider acceptance case.
