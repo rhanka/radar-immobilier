@@ -472,4 +472,125 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       if (typeof close === "function") (close as () => void)();
     }
   });
+
+  it.each([
+    ["40001", Object.assign(new Error("could not serialize access"), { code: "40001" })],
+    ["40P01", Object.assign(new Error("deadlock detected"), { code: "40P01" })],
+  ])("maps %s to retriable provider_unavailable on explicit abort", async (_code, fault) => {
+    await requireOutcomeContract();
+    const barrier = await requireCommitBarrier();
+    const armed = { current: false };
+    const aborting = proxyLeasedPool(pool, { get(target, property, receiver) {
+      if ((property === "query" || property === "connect") && armed.current) {
+        return async (): Promise<never> => { throw fault; };
+      }
+      const value = Reflect.get(target, property, receiver);
+      return typeof value === "function" ? value.bind(target) : value;
+    } }) as unknown as pg.Pool;
+    const host = await composeQ2Host(barrier.observer, { pool: aborting });
+    const close = host["close"];
+    try {
+      const execute = executeWithParity(host);
+      const before = await tableCount("artifacts");
+      armed.current = true;
+      try {
+        const invocation = invocationFor(allowAll(), "abort");
+        const outcome = await execute({ method: "POST", path: "/ensure",
+          body: { bindingName: "q2-abort", idempotencyKey: "q2-abort" } },
+          invocation) as unknown as Record<string, unknown>;
+        assertOutcomeFailure(outcome, invocation["invocationId"] as string);
+        expect(outcome["failure"]).toMatchObject({
+          category: "provider_unavailable", retriable: true, commitState: "not_committed" });
+      } finally {
+        armed.current = false;
+      }
+      expect(await tableCount("artifacts")).toBe(before);
+    } finally {
+      if (typeof close === "function") (close as () => void)();
+    }
+  });
+
+  it("maps statement cancellation to retriable provider_unavailable", async () => {
+    await requireOutcomeContract();
+    const barrier = await requireCommitBarrier();
+    const armed = { current: false };
+    const cancelling = proxyLeasedPool(pool, { get(target, property, receiver) {
+      if (property === "query" && armed.current) {
+        return async (): Promise<never> => {
+          throw Object.assign(new Error("canceling statement due to statement timeout"), { code: "57014" });
+        };
+      }
+      const value = Reflect.get(target, property, receiver);
+      return typeof value === "function" ? value.bind(target) : value;
+    } }) as unknown as pg.Pool;
+    const host = await composeQ2Host(barrier.observer, { pool: cancelling });
+    const close = host["close"];
+    try {
+      const execute = executeWithParity(host);
+      const before = await tableCount("artifacts");
+      armed.current = true;
+      try {
+        const invocation = invocationFor(allowAll(), "cancel");
+        const outcome = await execute({ method: "POST", path: "/ensure",
+          body: { bindingName: "q2-cancel", idempotencyKey: "q2-cancel" } },
+          invocation) as unknown as Record<string, unknown>;
+        assertOutcomeFailure(outcome, invocation["invocationId"] as string);
+        expect(outcome["failure"]).toMatchObject({
+          category: "provider_unavailable", retriable: true, commitState: "not_committed" });
+      } finally {
+        armed.current = false;
+      }
+      expect(await tableCount("artifacts")).toBe(before);
+    } finally {
+      if (typeof close === "function") (close as () => void)();
+    }
+  });
+
+  it("reports commitState unknown on COMMIT acknowledgment loss and recovers by key", async () => {
+    await requireOutcomeContract();
+    const barrier = await requireCommitBarrier();
+    const armed = { current: false };
+    const ackLost = proxyLeasedPool(pool, { get(target, property, receiver) {
+      if (property === "query" && armed.current) {
+        return async (text: unknown, params?: unknown): Promise<unknown> => {
+          if (typeof text === "string" && text.trim().toUpperCase() === "COMMIT") {
+            await (target.query as (...args: unknown[]) => Promise<unknown>)(text, params);
+            throw Object.assign(new Error("terminating connection during COMMIT"), { code: "57P06" });
+          }
+          return (target.query as (...args: unknown[]) => Promise<unknown>)(text, params);
+        };
+      }
+      const value = Reflect.get(target, property, receiver);
+      return typeof value === "function" ? value.bind(target) : value;
+    } }) as unknown as pg.Pool;
+    const host = await composeQ2Host(barrier.observer, { pool: ackLost });
+    const close = host["close"];
+    try {
+      const execute = executeWithParity(host);
+      const artifactId = await ensureVia(execute, allowAll(), "q2-unknown", "q2-unknown-ensure");
+      const body = { artifactId,
+        files: [{ path: "index.html", mimeType: "text/html", text: "commit uncertainty" }],
+        idempotencyKey: "q2-unknown" };
+      const releasesBefore = await tableCount("releases");
+      armed.current = true;
+      let uncertain: Record<string, unknown>;
+      try {
+        const invocation = invocationFor(allowAll(), "uncertain");
+        uncertain = await execute({ method: "POST", path: "/publish", body },
+          invocation) as unknown as Record<string, unknown>;
+      } finally {
+        armed.current = false;
+      }
+      const commitState = (uncertain["commitState"] as string | undefined) ??
+        ((uncertain["failure"] as Record<string, unknown> | undefined)?.["commitState"] as string | undefined);
+      expect(commitState).toBe("unknown");
+      expect(JSON.stringify(uncertain)).not.toMatch(/no effects/i);
+      const retry = await execute({ method: "POST", path: "/publish", body },
+        invocationFor(allowAll(), "uncertain-retry")) as unknown as Record<string, unknown>;
+      expect(retry).toMatchObject({ ok: true });
+      expect(await tableCount("releases")).toBe(releasesBefore + 1);
+    } finally {
+      if (typeof close === "function") (close as () => void)();
+    }
+  });
 });
