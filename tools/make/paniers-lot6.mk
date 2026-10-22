@@ -15,7 +15,7 @@ SCOPE ?= src/services/facets/workspace src/services/facets/scoped src/services/f
 else ifeq ($(LOT),6J)
 SCOPE ?= src/services/facets/lots src/routes/scoped-lot- src/services/facets/lot-migration-report
 else ifeq ($(LOT),6K)
-SCOPE ?= src/services/facets/lots src/routes/scoped-lot- src/services/facets/lot-migration-report src/services/chat/stream-bus
+SCOPE ?= src/services/facets/lots src/routes/scoped-lot- src/services/facets/lot-migration-report src/services/chat/stream-bus src/routes/lot-cutover-stream
 else ifeq ($(LOT),6L1)
 SCOPE ?= src/services/facets/projection src/services/facets/scoped src/services/facets/workspace src/routes/scoped-projection src/services/graph/graph-store ui/src/lib/signals/signal-projection
 else
@@ -44,6 +44,11 @@ prepare-6k deliver-6k finalize-6k audit-6k: guard
 fix-6k-prepare fix-6k-deliver fix-6k-audit: guard
 	@test '$(LOT)' = 6K
 	@bash tools/make/paniers-lot6k-fix-deliver.sh $(patsubst fix-6k-%,%,$@)
+
+.PHONY: fix2-6k-prepare fix2-6k-deliver fix2-6k-audit
+fix2-6k-prepare fix2-6k-deliver fix2-6k-audit: guard
+	@test '$(LOT)' = 6K
+	@bash tools/make/paniers-lot6k-fix-deliver.sh $(patsubst fix2-6k-%,%,$@) fix2
 
 regression: guard
 	@bash tools/make/paniers-lot$(if $(filter 6K,$(LOT)),6k-run,$(if $(filter 6J,$(LOT)),6j-run,6-verify)).sh regression
