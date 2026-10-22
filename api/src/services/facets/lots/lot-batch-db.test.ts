@@ -98,4 +98,76 @@ describeDb("6J atomic lot batch", () => {
     expect(await eventCount(f)).toBe(before);
   });
 
+  it("should reject duplicate native targets, empty batches, and oversized batches", async () => {
+    const f = await lotFixture();
+    const items = await itemsFor(f, [0]);
+    await expect(writeLotBatch(f.db, f.contributor.sub, f.workspaceId, "workspace",
+      batch([items[0]!, { ...items[0]!, mutation: { action: "clear_pipeline" } }])))
+      .rejects.toMatchObject({ status: 400 });
+    await expect(writeLotBatch(f.db, f.contributor.sub, f.workspaceId, "workspace", batch([])))
+      .rejects.toMatchObject({ status: 400 });
+    const many = Array.from({ length: 501 }, (_, position) => ({
+      ...items[0]!,
+      target: { ...items[0]!.target, canonicalId: `lot-canonical-syn-6j-${position}` },
+    }));
+    await expect(writeLotBatch(f.db, f.contributor.sub, f.workspaceId, "workspace", batch(many)))
+      .rejects.toMatchObject({ status: 400 });
+    expect(await eventCount(f)).toBe(0);
+  });
+
+  it("should roll back an appended item when a later reason is invalid", async () => {
+    const f = await lotFixture();
+    const items = await itemsFor(f, [0, 1]);
+    items[1]!.mutation = { action: "discard", reasonCode: "N-UNKNOWN" };
+    await expect(writeLotBatch(f.db, f.moderator.sub, f.workspaceId, "workspace", batch(items)))
+      .rejects.toMatchObject({ status: 422, message: "invalid_reason_code" });
+    expect(await eventCount(f)).toBe(0);
+    for (const table of ["facet_streams", "facet_event_bindings", "facet_heads", "facet_commands",
+      "facet_command_contexts"]) {
+      expect((await f.pool.query(`SELECT * FROM ${table}`)).rows).toHaveLength(0);
+    }
+  });
+
+  it("should report no events for an unchanged batch with a new key", async () => {
+    const f = await lotFixture();
+    const items = await itemsFor(f, [0, 1]);
+    const first = await writeLotBatch(f.db, f.contributor.sub, f.workspaceId, "workspace", batch(items));
+    for (const item of items) {
+      item.expected_head_id = first.items.find((result) =>
+        result.target.canonicalId === item.target.canonicalId)!.event!.id;
+    }
+    const result = await writeLotBatch(f.db, f.contributor.sub, f.workspaceId, "workspace", batch(items));
+    expect(result).toMatchObject({ targets: 2, changed: 0, unchanged: 2, eventsAppended: 0 });
+    expect(await eventCount(f)).toBe(2);
+  });
+
+  it("should replay exact batches without appending and reject reused keys", async () => {
+    const f = await lotFixture();
+    const key = randomUUID();
+    const first = await writeLotBatch(
+      f.db, f.contributor.sub, f.workspaceId, "workspace", batch(await itemsFor(f, [0]), key));
+    const before = await eventCount(f);
+    const replayed = await writeLotBatch(
+      f.db, f.contributor.sub, f.workspaceId, "workspace", batch(await itemsFor(f, [0]), key));
+    expect(replayed).toEqual(first);
+    expect(await eventCount(f)).toBe(before);
+    await expect(writeLotBatch(
+      f.db, f.contributor.sub, f.workspaceId, "workspace", batch(await itemsFor(f, [1]), key)))
+      .rejects.toMatchObject({ status: 409, message: "idempotency_key_conflict" });
+  });
+
+  it("should restrict personal batches to archive and restoration", async () => {
+    const f = await lotFixture();
+    await expect(writeLotBatch(
+      f.db, f.contributor.sub, f.workspaceId, "personal", batch(await itemsFor(f, [0]))))
+      .rejects.toMatchObject({ status: 400 });
+    expect(await eventCount(f)).toBe(0);
+  });
+
+  it("should refuse batch writes while the destination gate is closed", async () => {
+    const f = await lotFixture();
+    await expect(writeLotBatch(
+      f.db, f.contributor.sub, f.otherId, "workspace", batch(await itemsFor(f, [0]))))
+      .rejects.toMatchObject({ status: 503 });
+  });
 });
