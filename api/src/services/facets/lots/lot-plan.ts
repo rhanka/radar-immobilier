@@ -8,6 +8,7 @@
  */
 import { FACET_PROFILE } from "../codebook.js";
 import type { LotMutation } from "./lot-commands.js";
+import { normalizeAskingPrice } from "./lot-values.js";
 import type { LotFacet, LotStreamRef } from "./lot-streams.js";
 import type { facetEvents } from "../../../db/schema.js";
 
@@ -61,7 +62,7 @@ export function desiredFor(mutation: LotMutation): LotPlan["desired"] {
       return { state: "inactive", reasonCode: null, profileId: null, verdict: null,
         pipelineStatus: null, askingPrice: null, listingUrl: null };
     case "discard":
-      return { state: "active", reasonCode: mutation.reasonCode, profileId: FACET_PROFILE,
+      return { state: "active", reasonCode: mutation.reasonCode ?? null, profileId: FACET_PROFILE,
         verdict: "non_pertinent", pipelineStatus: null, askingPrice: null, listingUrl: null };
     case "restore":
       return { state: "inactive", reasonCode: null, profileId: null, verdict: null,
@@ -74,7 +75,8 @@ export function desiredFor(mutation: LotMutation): LotPlan["desired"] {
         pipelineStatus: null, askingPrice: null, listingUrl: null };
     case "set_market":
       return { state: "active", reasonCode: null, profileId: null, verdict: null,
-        pipelineStatus: null, askingPrice: mutation.asking_price, listingUrl: mutation.listing_url };
+        pipelineStatus: null, askingPrice: normalizeAskingPrice(mutation.asking_price),
+        listingUrl: mutation.listing_url };
     case "clear_market":
       return { state: "inactive", reasonCode: null, profileId: null, verdict: null,
         pipelineStatus: null, askingPrice: null, listingUrl: null };
