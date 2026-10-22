@@ -32,6 +32,37 @@ trap 'rm -rf "${CASE_ROOT:-}"' EXIT
 
 run_ok "$ROOT" 'accepts the released preprod overlay (activation disabled)'
 
+# Compare the complete Service selector in every operator state.
+fixture
+"${KUBECTL:-kubectl}" kustomize --load-restrictor LoadRestrictionsNone "$ROOT/deploy/overlays/preprod" >"$CASE_ROOT/disabled.yaml"
+sed '/ARTIFACTS_CONTROL_MODE:/a\  ARTIFACTS_CONTENT_BASE: pages.fixture.test\n  ARTIFACTS_STORAGE_SCOPE: fixture_scope\n  ARTIFACTS_ORG_ID: fixture_org\n  ARTIFACTS_S3_BUCKET: fixture-bucket\n  ARTIFACTS_S3_ENDPOINT: https://s3.fixture.test\n  ARTIFACTS_S3_REGION: fixture-region\n  ARTIFACTS_VALIDATION_SUBJECTS: fixture_subject\n  ARTIFACTS_VALIDATION_UNTIL: "2099-01-01T00:00:00Z"' "$CASE_ROOT/disabled.yaml" \
+  | sed -e 's/artifacts-content-unverified.invalid/pages.fixture.test/g' \
+    -e 's/radar-artifact-content-unverified-tls/fixture-content-tls/g' \
+    -e "s#radar-api:latest#radar-api@sha256:$(printf 'a%.0s' {1..64})#g" \
+    -e "s#radar-ui:[^ ]*#radar-ui@sha256:$(printf 'b%.0s' {1..64})#g" >"$CASE_ROOT/preparation.yaml"
+sed 's/ARTIFACTS_CONTROL_MODE: "off"/ARTIFACTS_CONTROL_MODE: validation/' "$CASE_ROOT/preparation.yaml" >"$CASE_ROOT/activation.yaml"
+sed -e '/^  ARTIFACTS_/ { /ARTIFACTS_CONTENT_BASE:/!d; }' \
+  -e '/        - name: ARTIFACTS_S3_/{N;N;N;N;N;d;}' "$CASE_ROOT/preparation.yaml" >"$CASE_ROOT/rollback.yaml"
+for phase in disabled preparation activation rollback; do
+  H3_RENDER_PHASE="$phase" run_ok "$CASE_ROOT/$phase.yaml" "accepts the current $phase render"
+  for mutation in label expression; do
+    awk -v mutation="$mutation" '
+      /^---$/ { service = deny = selector = 0 }
+      /^kind: Service$/ { service = 1 }
+      /^  name: radar-artifact-content-deny$/ { deny = 1 }
+      /^  selector:$/ { selector = 1 }
+      { print }
+      service && deny && selector && /^    app.kubernetes.io\/name: radar-immobilier$/ {
+        print mutation == "label" ? "    z-isolation: other" : "    matchExpressions:\n    - key: z-isolation\n      operator: Exists"
+      }' "$CASE_ROOT/$phase.yaml" >"$CASE_ROOT/selector.yaml"
+    H3_RENDER_PHASE="$phase" run_bad "$CASE_ROOT/selector.yaml" "rejects an extra Service selector $mutation in $phase" 'exact denial Service selector required'
+    cp "$CASE_ROOT/$phase.yaml" "$CASE_ROOT/selector.yaml"
+    cmp "$CASE_ROOT/$phase.yaml" "$CASE_ROOT/selector.yaml" || bad "restores the $phase selector copy"
+    H3_RENDER_PHASE="$phase" run_ok "$CASE_ROOT/selector.yaml" "accepts the restored $phase selector copy"
+  done
+done
+rm -rf "$CASE_ROOT"
+
 fixture; sed -i 's/ARTIFACTS_CONTROL_MODE: "off"/ARTIFACTS_CONTROL_MODE: "validation"/' "$CASE_ROOT/$CONTROL"
 run_bad "$CASE_ROOT" 'rejects a control mode other than off by default' 'expected off: no activation by default'; rm -rf "$CASE_ROOT"
 
