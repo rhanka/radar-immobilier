@@ -60,10 +60,18 @@ function judge( i, key, v, expected, keys, image, ef) {
       else if (buf[i + 1] !~ /^          value: /) fail("denial PORT env must use a literal value")
     }
     if (count("app.kubernetes.io/component: content-deny$") != 3 || count("app.kubernetes.io/component: api$")) fail("distinct denial selectors required")
+    if (field("^        app.kubernetes.io/component:") != "content-deny" ||
+        field("^        app.kubernetes.io/name:") != "radar-immobilier") fail("denial pod labels must carry the Service selector")
   }
   if (kind == "Service" && name == "radar-artifact-content-deny") {
     svc++
-    if (!index(doc, "  selector:\n    app.kubernetes.io/component: content-deny\n    app.kubernetes.io/name: radar-immobilier\n")) fail("exact denial Service selector required")
+    ef = 0; v = ""
+    for (i = 1; i <= n; i++) {
+      if (buf[i] == "  selector:") { ef = 1; continue }
+      if (ef && buf[i] !~ /^    /) break
+      if (ef) v = v buf[i] "\n"
+    }
+    if (v != "    app.kubernetes.io/component: content-deny\n    app.kubernetes.io/name: radar-immobilier\n") fail("exact denial Service selector required")
     if (field("^    port:") != "3000" || field("^    targetPort:") != "http") fail("denial Service port mismatch")
   }
   if (phase != "disabled" && ((kind == "Deployment" && name ~ /^radar-(api|ui|artifact-content-deny)$/) || kind ~ /^(Job|CronJob)$/)) {
