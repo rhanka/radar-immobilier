@@ -808,6 +808,8 @@ export const facetEvents = pgTable("facet_events", {
   sourceAuthor: text("source_author"),
   sourceCreatedAt: timestamp("source_created_at", { withTimezone: true }),
   importRunId: uuid("import_run_id"),
+  sourceRowId: text("source_row_id"),
+  sourceChainId: text("source_chain_id"),
   supersedes: uuid("supersedes").references((): AnyPgColumn => facetEvents.id),
   supersededBy: uuid("superseded_by").references((): AnyPgColumn => facetEvents.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
