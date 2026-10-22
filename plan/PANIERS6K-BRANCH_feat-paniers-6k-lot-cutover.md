@@ -89,9 +89,9 @@ for later connections.
 - [x] Second review fix 2: prove same-connection and new-connection replay and live mark/batch delivery.
 - [x] Second review fix 3: copied mutations fail by assertion, restore, compare bytes, then pass.
 - [x] Second review fix 4: API CI parallelism, declarations, types, lint, verify, regression and bounded bundle.
-- [x] Third review fix checkpoint: 1.
+- [x] Third review fix checkpoint: 2.
 - [x] Third review fix 1: historic SSE passes unknown through like main; retire only on attested barrier/open.
-- [ ] Third review fix 2: prove pass-through on a late-failing read and refusal after an observed cutover.
+- [x] Third review fix 2: prove pass-through on a late-failing read and refusal after an observed cutover.
 - [ ] Third review fix 3: copied mutations fail by assertion, restore, compare bytes, then pass.
 - [ ] Third review fix 4: API CI parallelism, declarations, types, verify, regression and bounded bundle.
 - [ ] **Operational acceptance**: real 6F/D5, writer locks, replicas, parent UI wiring, browser UAT.
