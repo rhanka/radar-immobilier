@@ -20,6 +20,15 @@ export function assertPipelineStatus(value: unknown): asserts value is PipelineS
   }
 }
 
+/** Canonical decimal text: no leading zeros, exactly two fraction digits. */
+export function normalizeAskingPrice(value: string | null): string | null {
+  if (value === null) return null;
+  assertAskingPrice(value);
+  const [whole = "", fraction = ""] = value.split(".");
+  const digits = whole.replace(/^0+(?=\d)/, "");
+  return `${digits}.${(fraction + "00").slice(0, 2)}`;
+}
+
 /** Canonical decimal text: 0.01–999999999999.99, at most two fraction digits. */
 export function assertAskingPrice(value: unknown): asserts value is string | null {
   if (value === null) return;

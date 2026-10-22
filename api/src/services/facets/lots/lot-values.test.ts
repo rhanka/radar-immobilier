@@ -8,6 +8,7 @@ import {
   assertListingUrl,
   assertMarketValue,
   assertPipelineStatus,
+  normalizeAskingPrice,
 } from "./lot-values.js";
 
 describe("6J lot business values", () => {
@@ -20,6 +21,16 @@ describe("6J lot business values", () => {
       "1000000000000.00", "999999999999.999", "NaN", " 10.00"]) {
       expect(() => assertAskingPrice(price as unknown as string)).toThrow("invalid_business_value");
     }
+  });
+
+  it("should canonicalize accepted spellings without floating point", () => {
+    expect(normalizeAskingPrice(null)).toBeNull();
+    expect(normalizeAskingPrice("10")).toBe("10.00");
+    expect(normalizeAskingPrice("10.5")).toBe("10.50");
+    expect(normalizeAskingPrice("0010.0")).toBe("10.00");
+    expect(normalizeAskingPrice("000000000001.00")).toBe("1.00");
+    expect(normalizeAskingPrice("999999999999.99")).toBe("999999999999.99");
+    expect(() => normalizeAskingPrice("10.123")).toThrow("invalid_business_value");
   });
 
   it("should never round-trip prices through floating point", () => {

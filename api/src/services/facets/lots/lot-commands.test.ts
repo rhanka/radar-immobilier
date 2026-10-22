@@ -61,6 +61,21 @@ describe("6J lot command digest", () => {
       .not.toBe(base);
   });
 
+  it("should digest canonically spelled prices identically", () => {
+    const canonical = lotCommandDigest("workspace", "single", "workspace-id", single({
+      mutation: { action: "set_market", status: "en_vente",
+        asking_price: "10.00", listing_url: null },
+    }));
+    expect(lotCommandDigest("workspace", "single", "workspace-id", single({
+      mutation: { action: "set_market", status: "en_vente",
+        asking_price: "0010.0", listing_url: null },
+    }))).toBe(canonical);
+    expect(lotCommandDigest("workspace", "single", "workspace-id", single({
+      mutation: { action: "set_market", status: "en_vente",
+        asking_price: "10.50", listing_url: null },
+    }))).not.toBe(canonical);
+  });
+
   it("should normalize batch item order and deselection order", () => {
     const first: LotBatchCommand = {
       contract_version: "lot-facets-v1",
