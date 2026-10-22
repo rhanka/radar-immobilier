@@ -26,6 +26,8 @@ import { approvedAccountId, resolveWorkspaceAccess } from "../../workspaces/stor
 import { requireScopedEpoch } from "../scope.js";
 import { scopedEpochFor } from "../activation.js";
 import { digest, FacetError } from "../target.js";
+import { resolveLotRights, type LotRights } from "./lot-capabilities.js";
+import type { LotTx } from "./lot-types.js";
 import type { ManifestRow } from "../lot-migration-report/manifest.js";
 import { requireLotDestination } from "./lot-gate.js";
 import { isProjectableHead, projectTerminalHeads } from "./lot-project.js";
@@ -65,6 +67,10 @@ export async function runLotImport(
     if (!access.moderateArchive) throw new FacetError(403, "workspace_capability_required");
     const destination = await requireLotDestination(tx, input.workspaceId);
     requireScopedEpoch(await scopedEpochFor(tx, input.workspaceId), input.workspaceId);
+    const mappingQualified = input.report.destinationsQualified === true;
+    const ordered = [...input.report.rows].sort((left, right) =>
+      left.sourceId < right.sourceId ? -1 : 1);
+    await assertImportRights(tx, input.workspaceId, input.actorSub, ordered, mappingQualified);
     const [existing] = await tx.select().from(lotImportRuns).where(and(
       eq(lotImportRuns.workspaceId, input.workspaceId),
       eq(lotImportRuns.importKey, key)));
@@ -75,9 +81,6 @@ export async function runLotImport(
       return replayRecordedReceipt(existing);
     }
     const runId = randomUUID();
-    const mappingQualified = input.report.destinationsQualified === true;
-    const ordered = [...input.report.rows].sort((left, right) =>
-      left.sourceId < right.sourceId ? -1 : 1);
     let evidenceStored = 0;
     for (const row of ordered) {
       const inserted = await tx.insert(lotSourceRows).values({
@@ -129,6 +132,30 @@ export async function runLotImport(
     await recordImportReceipt(tx, input, runId, receipt, LOT_IMPORTER_VERSION);
     return receipt;
   });
+}
+
+/**
+ * The importer crosses every facet it projects, so it needs the same
+ * distinct D4 rights as the commands it replaces: moderation for the
+ * archive heads plus selection, pipeline, or market rights for the other
+ * heads it would project. Checked before any write and before replay.
+ */
+async function assertImportRights(
+  tx: LotTx,
+  workspaceId: string, actorSub: string, ordered: ManifestRow[], mappingQualified: boolean,
+): Promise<void> {
+  const rights = await resolveLotRights(tx, workspaceId, actorSub);
+  const required = new Set<keyof LotRights>();
+  for (const row of ordered) {
+    if (!isProjectableHead(row, mappingQualified) || !row.destination) continue;
+    if (row.destination.facet === "selection") required.add("select");
+    else if (row.destination.facet === "pipeline") required.add("changePipeline");
+    else if (row.destination.facet === "market") required.add("changeMarket");
+    else required.add("moderateArchive");
+  }
+  for (const capability of required) {
+    if (!rights[capability]) throw new FacetError(403, "workspace_capability_required");
+  }
 }
 
 function pendingCause(row: ManifestRow, mappingQualified: boolean): string {
