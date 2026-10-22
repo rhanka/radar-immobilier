@@ -47,6 +47,10 @@ run_bad "$CASE_ROOT" 'rejects content routing to the api Service' 'only to the d
 fixture; sed -i 's/name: deny-content-deny-egress/name: deny-content-deny-egress-x/' "$CASE_ROOT/$NETPOL"
 run_bad "$CASE_ROOT" 'rejects a missing deny-all egress policy' 'deny-content-deny-egress not found'; rm -rf "$CASE_ROOT"
 
+fixture; sed -i 's/policyTypes: \["Ingress"\]/policyTypes: ["Ingress", "Egress"]/' "$CASE_ROOT/$NETPOL"
+sed -i 's/^---$/  egress:\n  - {}\n---/' "$CASE_ROOT/$NETPOL"
+run_bad "$CASE_ROOT" 'rejects open egress on the denial ingress policy' 'egress forbidden on denial ingress policy'; rm -rf "$CASE_ROOT"
+
 fixture
 if out="$(bash "$ACTIVATE" "$CASE_ROOT" 2>&1)"; then bad 'activation gate accepts the committed render (unfilled)'; else
   grep -Fq -- "unfilled content-domain placeholder" <<<"$out" && ok 'activation gate refuses the unfilled placeholder' || bad 'activation gate refuses the unfilled placeholder'
