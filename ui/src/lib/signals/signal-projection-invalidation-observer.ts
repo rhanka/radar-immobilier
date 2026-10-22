@@ -1,0 +1,159 @@
+/**
+ * 6L2 invalidation observer: a gated browser SSE observer over one launched
+ * invalidation sync. Dormant while the gate is closed or no workspace is
+ * selected. Reads serialize: at most one coherent fetch runs at a time and
+ * overlapping events coalesce into a single follow-up read, so repeated
+ * reconnects cannot supersede a pending authorization refusal. A refusal
+ * concerning the still-current context always closes through the
+ * authorization path; failures and late responses retain the last
+ * acknowledged snapshot. A fetch superseded by a concurrent 6L1 read keeps
+ * its invalidation pending until an acknowledgment lands, so convergence
+ * needs no new server event. Disposal closes the source and cancels a pending
+ * reconnect.
+ */
+import {
+  PROJECTION_RECONNECT_DELAY_MS,
+  beginInvalidationFetch,
+  buildProjectionEventsUrl,
+  noteInvalidationEvent,
+  noteInvalidationReconciled,
+  type ProjectionInvalidationContext,
+  type ProjectionInvalidationSync,
+  type ProjectionSnapshot,
+  type StreamEvent,
+} from "./signal-projection-invalidation.js";
+import { isLiveScopedContext } from "./signal-facet-scope.js";
+
+export interface ProjectionEventSource {
+  close(): void;
+}
+
+export interface ProjectionInvalidationDeps<T extends ProjectionSnapshot = ProjectionSnapshot> {
+  live: () => ProjectionInvalidationContext;
+  fetchCoherent: () => Promise<T>;
+  rebuild: (snapshot: T) => void;
+  onClosed: () => void;
+  createSource: (
+    url: string,
+    handlers: { onEvent: (streamEvent: StreamEvent | null) => void; onError: () => void },
+  ) => ProjectionEventSource;
+  baseUrl?: string;
+  reconnectDelayMs?: number;
+  schedule?: (run: () => void, delayMs: number) => { cancel: () => void };
+}
+
+export function observeProjectionInvalidation<T extends ProjectionSnapshot = ProjectionSnapshot>(
+  state: ProjectionInvalidationSync,
+  deps: ProjectionInvalidationDeps<T>,
+): { refresh: () => Promise<void>; dispose: () => void } {
+  let disposed = false;
+  let source: ProjectionEventSource | null = null;
+  let pendingReconnect: { cancel: () => void } | null = null;
+  let pendingRetry: { cancel: () => void } | null = null;
+  let fetchInflight = false;
+  let refetchRequested = false;
+  let generation = 0;
+  const schedule = deps.schedule ?? ((run, delayMs) => {
+    const timer = setTimeout(run, delayMs);
+    return { cancel: () => clearTimeout(timer) };
+  });
+  const closeSource = () => {
+    generation += 1;
+    source?.close();
+    source = null;
+  };
+  const connect = () => {
+    if (disposed || !state.enabled || state.launched.workspaceId === null) return;
+    if (noteInvalidationEvent(state, deps.live(), { kind: "resync" }) === "ignore") return;
+    closeSource();
+    const connection = generation;
+    const url = buildProjectionEventsUrl(deps.baseUrl ?? "",
+      { workspaceId: state.launched.workspaceId, citySlug: state.launched.citySlug,
+        mode: state.launched.mode, cursor: state.cursor });
+    source = deps.createSource(url, {
+      onEvent: (streamEvent) => { if (connection === generation) void wake(streamEvent); },
+      onError: () => { if (connection === generation) onError(); },
+    });
+  };
+  const onError = () => {
+    if (disposed) return;
+    closeSource();
+    pendingReconnect?.cancel();
+    pendingReconnect = schedule(connect, deps.reconnectDelayMs ?? PROJECTION_RECONNECT_DELAY_MS);
+    void wake({ kind: "resync" });
+  };
+  const drainCoalescedRead = () => {
+    if (disposed || !refetchRequested) return;
+    refetchRequested = false;
+    void wake({ kind: "resync" });
+  };
+  const wake = async (streamEvent: StreamEvent | null): Promise<void> => {
+    if (disposed) return;
+    const signal = noteInvalidationEvent(state, deps.live(), streamEvent);
+    if (signal === "ignore") return;
+    if (signal === "closed") {
+      disposed = true;
+      closeSource();
+      pendingReconnect?.cancel();
+      pendingRetry?.cancel();
+      deps.onClosed();
+      return;
+    }
+    if (fetchInflight) {
+      refetchRequested = true;
+      return;
+    }
+    const operation = beginInvalidationFetch(state);
+    fetchInflight = true;
+    pendingRetry?.cancel();
+    pendingRetry = null;
+    let snapshot: T;
+    try {
+      snapshot = await deps.fetchCoherent();
+    } catch (error) {
+      fetchInflight = false;
+      if (disposed) return;
+      const status = (error as { status?: number } | null)?.status;
+      if (status === 401 || status === 403 || status === 404) {
+        // A refusal concerning the still-current context closes through the
+        // authorization path even when a newer operation superseded this
+        // read: repeated reconnects must not bury a revocation. A context
+        // switch still ignores it through the closed-signal guards.
+        await wake({ kind: "closed" });
+      } else {
+        pendingRetry = schedule(() => { void wake({ kind: "resync" }); }, PROJECTION_RECONNECT_DELAY_MS);
+      }
+      drainCoalescedRead();
+      return;
+    }
+    fetchInflight = false;
+    if (disposed) return;
+    const current = deps.live();
+    if (noteInvalidationReconciled(state, current, snapshot, operation)) {
+      deps.rebuild(snapshot);
+    } else if (
+      state.enabled &&
+      operation !== state.operation &&
+      isLiveScopedContext(state.launched, current) &&
+      state.launched.citySlug === current.citySlug &&
+      state.launched.mode === current.mode &&
+      state.ackedToken !== snapshot.token
+    ) {
+      // A concurrent 6L1 read superseded this fetch without acknowledging:
+      // retain the invalidation so the drain below converges without a new event.
+      refetchRequested = true;
+    }
+    drainCoalescedRead();
+  };
+  const refresh = () => wake({ kind: "resync" });
+  const dispose = () => {
+    if (disposed) return;
+    disposed = true;
+    pendingReconnect?.cancel();
+    pendingRetry?.cancel();
+    closeSource();
+    state.operation += 1;
+  };
+  connect();
+  return { refresh, dispose };
+}
