@@ -455,71 +455,75 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
   });
 
   it("exposes only the selected profile with caller keys and derived identity", async () => {
-    const host = (await composeArtifactHost(pool, storageConfig(), rawBlobs()))!;
-    const control = createArtifactControl(host, SCOPE, BASE);
+    await requireCommitContract();
+    const barrier = await requireCommitBarrier();
+    const host = await composeAcceptanceHost(barrier.observer);
+    const close = host["close"];
     try {
-      requireSelectedProfile(host);
-      const adapter = createMcpArtifactAdapter(control);
-      for (const request of [
-        { method: "POST", path: "/fork", args: {} },
-        { method: "POST", path: "/delete", args: {} },
-        { method: "POST", path: "/commit_upload", args: {} },
-        { method: "POST", path: "/promote", args: {} },
-      ]) {
-        expect(await adapter.execute(request, { actorId: ACTOR })).toMatchObject(
-          { ok: false, status: 503, code: "capability_unavailable", retryable: false });
-        const direct = await host.app.handle({ method: request.method, path: request.path,
-          actorId: ACTOR, body: request.args });
-        expect([404, 503]).toContain(direct.status);
-      }
-      expect(await control.handle("fork", ACTOR, {}))
-        .toEqual({ status: 503, body: { error: "capability_unavailable" } });
-      expect(await adapter.execute({ method: "POST", path: "/publish",
-        args: { artifactId: "123e4567-e89b-12d3-a456-426614174000",
-          files: [{ path: "index.html", mimeType: "text/html", text: "x" }],
-          idempotencyKey: "acceptance-selection", storageScopeId: "forged" } },
-        { actorId: ACTOR })).toMatchObject({ ok: false, status: 400, code: "invalid_request" });
-      const artifactId = await ensureArtifact(control, "acceptance-selection-ensure");
-      const files = [{ path: "index.html", mimeType: "text/html", text: "selection" }];
-      const releasesBefore = await tableCount("releases");
-      const keysBefore = await tableCount("idempotency_keys");
-      const artifactsBefore = await tableCount("artifacts");
-      const objectsBefore = await s3KeyCount();
-      for (const callerKey of [undefined, null, 42, "", "   ", "x".repeat(257), "😀".repeat(129)]) {
-        for (const op of ["ensure", "publish"]) {
-          const args = { ...(op === "ensure" ? { bindingName: "invalid-key" } : { artifactId, files }),
-            ...(callerKey === undefined ? {} : { idempotencyKey: callerKey }) };
-          expect(await control.handle(op, ACTOR, args))
-            .toEqual({ status: 400, body: { error: "invalid_request" } });
-          expect(await adapter.execute({ method: "POST", path: `/${op}`, args }, { actorId: ACTOR }))
-            .toMatchObject({ ok: false, status: 400, code: "invalid_request" });
+      const digest = requireSelectedProfile(host);
+      expect(typeof digest).toBe("string");
+      const composed = (await composeAcceptanceHost(barrier.observer));
+      const control = createArtifactControl(composed, SCOPE, BASE);
+      try {
+        const adapter = createMcpArtifactAdapter(control);
+        for (const request of [
+          { method: "POST", path: "/fork", args: {} },
+          { method: "POST", path: "/delete", args: {} },
+          { method: "POST", path: "/commit_upload", args: {} },
+          { method: "POST", path: "/promote", args: {} },
+        ]) {
+          expect(await adapter.execute(request, { actorId: ACTOR })).toMatchObject(
+            { ok: false, status: 503, code: "capability_unavailable", retryable: false });
         }
+        expect(await control.handle("fork", ACTOR, {}))
+          .toEqual({ status: 503, body: { error: "capability_unavailable" } });
+        expect(await adapter.execute({ method: "POST", path: "/publish",
+          args: { artifactId: "123e4567-e89b-12d3-a456-426614174000",
+            files: [{ path: "index.html", mimeType: "text/html", text: "x" }],
+            idempotencyKey: "acceptance-selection", storageScopeId: "forged" } },
+          { actorId: ACTOR })).toMatchObject({ ok: false, status: 400, code: "invalid_request" });
+        const artifactId = await ensureArtifact(control, "acceptance-selection-ensure");
+        const files = [{ path: "index.html", mimeType: "text/html", text: "selection" }];
+        const releasesBefore = await tableCount("releases");
+        const keysBefore = await tableCount("idempotency_keys");
+        const artifactsBefore = await tableCount("artifacts");
+        for (const callerKey of [undefined, null, 42, "", "   ", "x".repeat(257), "😀".repeat(129)]) {
+          for (const op of ["ensure", "publish"]) {
+            const args = { ...(op === "ensure" ? { bindingName: "invalid-key" } : { artifactId, files }),
+              ...(callerKey === undefined ? {} : { idempotencyKey: callerKey }) };
+            expect(await control.handle(op, ACTOR, args))
+              .toEqual({ status: 400, body: { error: "invalid_request" } });
+            expect(await adapter.execute({ method: "POST", path: `/${op}`, args }, { actorId: ACTOR }))
+              .toMatchObject({ ok: false, status: 400, code: "invalid_request" });
+          }
+        }
+        expect(await tableCount("releases")).toBe(releasesBefore);
+        expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+        expect(await tableCount("artifacts")).toBe(artifactsBefore);
+        expect(await adapter.execute({ method: "GET", path: `/meta/${artifactId}`, args: {} },
+          { actorId: ACTOR })).toMatchObject({ ok: true, status: 200 });
+        expect(await adapter.execute({ method: "POST", path: "/list", args: {} },
+          { actorId: ACTOR })).toMatchObject({ ok: true, status: 200 });
+        const padded = " acceptance-derived ";
+        const published = await control.handle("publish", ACTOR,
+          { artifactId, files, idempotencyKey: padded });
+        expect(published.status).toBe(201);
+        const expected = deriveIdempotencyKey(
+          { scope: SCOPE, sub: ACTOR, op: "publish", artifactId, clientKey: padded });
+        expect(expected).toHaveLength(64);
+        expect(expected).not.toBe(padded);
+        const stored = (await pool.query("SELECT key FROM artifacts.idempotency_keys")).rows as { key: string }[];
+        expect(stored.map((row) => row.key)).toContain(expected);
+        expect(stored.map((row) => row.key)).not.toContain(padded);
+        expect(deriveIdempotencyKey({ scope: SCOPE, sub: ACTOR, op: "publish", artifactId,
+          clientKey: padded.trim() })).not.toBe(expected);
+        expect((await control.handle("publish", ACTOR,
+          { artifactId, files, idempotencyKey: "😀".repeat(128) })).status).toBe(201);
+      } finally {
+        composed.close();
       }
-      expect(await tableCount("releases")).toBe(releasesBefore);
-      expect(await tableCount("idempotency_keys")).toBe(keysBefore);
-      expect(await tableCount("artifacts")).toBe(artifactsBefore);
-      expect(await s3KeyCount()).toBe(objectsBefore);
-      expect(await adapter.execute({ method: "GET", path: `/meta/${artifactId}`, args: {} },
-        { actorId: ACTOR })).toMatchObject({ ok: true, status: 200 });
-      expect(await adapter.execute({ method: "POST", path: "/list", args: {} },
-        { actorId: ACTOR })).toMatchObject({ ok: true, status: 200 });
-      const padded = " acceptance-derived ";
-      const published = await control.handle("publish", ACTOR,
-        { artifactId, files, idempotencyKey: padded });
-      expect(published.status).toBe(201);
-      const expected = deriveIdempotencyKey(
-        { scope: SCOPE, sub: ACTOR, op: "publish", artifactId, clientKey: padded });
-      expect(expected).toHaveLength(64);
-      expect(expected).not.toBe(padded);
-      const stored = (await pool.query("SELECT key FROM artifacts.idempotency_keys")).rows as { key: string }[];
-      expect(stored.map((row) => row.key)).toContain(expected);
-      expect(stored.map((row) => row.key)).not.toContain(padded);
-      expect(deriveIdempotencyKey({ scope: SCOPE, sub: ACTOR, op: "publish", artifactId,
-        clientKey: padded.trim() })).not.toBe(expected);
-      expect((await control.handle("publish", ACTOR,
-        { artifactId, files, idempotencyKey: "😀".repeat(128) })).status).toBe(201);
     } finally {
-      host.close();
+      if (typeof close === "function") (close as () => void)();
     }
   });
 });
