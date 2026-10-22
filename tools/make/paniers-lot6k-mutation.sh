@@ -74,6 +74,24 @@ proof sum-is-population ui/src/lib/maps/lot-facet-counters.ts ui \
   '  return counters;' \
   '  counters.total = counters.selected + counters.sollicite + counters.lettreEnvoyee + counters.enVente + counters.archived;
   return counters;'
+proof native-guard api/src/services/facets/lots/lot-cutover-target.ts api \
+  src/services/facets/lots/lot-cutover-target-blocked-db.test.ts 'late-qualified native history' \
+  'const candidates = [destCutoverKeyFor(target, mode), nativeCanonicalCutoverKeyFor(target)];' \
+  'const candidates = [destCutoverKeyFor(target, mode)];'
+proof denormalized-city api/src/services/facets/lots/lot-city.ts api \
+  src/services/facets/lots/lot-cutover-target-identities-db.test.ts 'exclude a denormalized pending history' \
+  'if (isCutoverBlockedTarget(blocked, target, mode)) continue;' \
+  'if (false) continue;'
+proof sources-fence api/drizzle/0023_facet_lot_versions_fence.sql api \
+  src/services/facets/lots/lot-cutover-sources-fence-db.test.ts 'fence source writes' \
+  'WHERE maintenance_barrier AND NOT destination_open' \
+  'WHERE false'
+proof unknown-fence api/src/services/facets/lots/lot-legacy-fence.ts api \
+  src/routes/lot-cutover-stream.test.ts 'suspend mark delivery' \
+  '  } catch {
+    return "unknown";' \
+  '  } catch {
+    return "barrier";'
 diff -r /workspace/api/src api/src
 diff -r /workspace/api/drizzle api/drizzle
 diff -r /workspace/ui/src ui/src
