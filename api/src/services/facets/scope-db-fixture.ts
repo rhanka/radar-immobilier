@@ -19,7 +19,9 @@ afterAll(async () => {
   const admin = createDb(loadConfig());
   for (const handle of handles) {
     await handle.pool.end();
-    await admin.pool.query(`DROP DATABASE "${handle.name}" WITH (FORCE)`);
+    // Normal removal lets closing clients disconnect; FORCE can kill them
+    // after pool.end() resolves and emit an unhandled 57P01 pool error.
+    await admin.pool.query(`DROP DATABASE "${handle.name}"`);
   }
   await admin.pool.end();
 });

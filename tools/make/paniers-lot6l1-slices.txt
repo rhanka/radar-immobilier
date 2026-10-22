@@ -1,0 +1,21 @@
+docs: declare authorized projection revision scope|plan/PANIERS6L1-BRANCH_feat-paniers-6l1-revisions.md|0
+feat: store scoped projection and source revisions|api/drizzle/0020_facet_projection_revisions.sql api/drizzle/meta/_journal.json api/src/db/schema.ts|0,1
+feat: compose authorized projection tokens with source identity|api/src/services/facets/projection-scope.ts|0,1,2
+test: qualify token composition and source replacement|api/src/services/facets/projection-scope.test.ts|0,1,2
+feat: increment projection revisions in write transactions|projection-store|0,1,2
+feat: read authorized revisions with bounded coherent refetch|api/src/services/facets/projection-revisions.ts|0,1,2,4
+feat: bump scoped facet revisions on appended transitions|api/src/services/facets/scoped-writer.ts api/src/services/facets/workspace-writer.ts|0,1,2,4
+feat: track graph source revisions under city writer locks|api/src/services/graph/graph-store.ts|0,1,2,3,4
+feat: expose guarded coherent signal snapshots without mounting|api/src/routes/scoped-projection-revisions.ts|0,1,2,3,4,5
+feat: reconcile snapshots with context and operation guards|ui/src/lib/signals/signal-projection-revision.ts|0,1,2,3,4,5,6
+test: add annotated revision and pending-history fixtures|api/src/services/facets/projection-revisions-fixture.ts|0,1,2,3,4,5,6
+fix: let synthetic database clients disconnect before removal|api/src/services/facets/scope-db-fixture.ts|0,1,2,3,4,5,6
+test: qualify revision authorization and member isolation|api/src/services/facets/projection-revisions-db.test.ts|0,1,2,3,4,5,6
+test: qualify source drift and permission races|api/src/services/facets/projection-races-db.test.ts|0,1,2,3,4,5,6
+test: qualify migration upgrade and journal row repair|api/src/services/facets/projection-migration-db.test.ts|0,1,2,3,4,5,6
+test: qualify guarded coherent signal HTTP snapshots|api/src/routes/scoped-projection-revisions-db.test.ts|0,1,2,3,4,5,6
+test: qualify viewer and workspace reconciliation guards|ui/src/lib/signals/signal-projection-revision.test.ts|0,1,2,3,4,5,6
+test: qualify request supersession and wake reconciliation|ui/src/lib/signals/signal-projection-lifecycle.test.ts|0,1,2,3,4,5,6,7
+test: prove revision discrimination on restored source copies|tools/make/paniers-lot6l1-mutation.sh|0,1,2,3,4,5,6,7
+chore: extend isolated verification and revision delivery targets|tools/make/paniers-lot6.mk tools/make/paniers-lot6-verify.sh tools/make/paniers-lot6l1-slices.txt|0,1,2,3,4,5,6,7
+chore: deliver checked revision commits in a local bundle|tools/make/paniers-lot6l1-deliver.sh|0,1,2,3,4,5,6,7,8

@@ -5,7 +5,7 @@ task_dir="$PWD/tmp/paniers-${LOT,,}"
 log_dir="$task_dir/logs/${EVIDENCE_TAG:-$1}"
 runtime_dir="$task_dir/runs/$ENV-${EVIDENCE_TAG:-$1}"
 checkpoint_dir="${CHECKPOINT_DIR:-$task_dir/checkpoints}"
-mkdir -p "$log_dir" "$checkpoint_dir" "$runtime_dir"
+mkdir -p "$log_dir" "$checkpoint_dir" "$runtime_dir" "$task_dir/npm-cache"
 export COMPOSE_DISABLE_ENV_FILE=1
 export COMPOSE_PROJECT_NAME="radar-$ENV"
 export POSTGRES_USER=radar POSTGRES_PASSWORD=synthetic-only POSTGRES_DB=radar
@@ -29,6 +29,7 @@ services:
       - $runtime_dir/source.tar:/source.tar:ro
       - $log_dir:/evidence
       - $checkpoint_dir:/checkpoints:ro
+      - $task_dir/npm-cache:/npm-cache
       - runtime:/workspace
     environment:
       NODE_ENV: test
@@ -48,7 +49,7 @@ if [[ "$1" == clean ]]; then
   exit
 fi
 if [[ "$1" == inspect ]]; then
-  docker ps -a --filter "label=com.docker.compose.project=radar-$ENV" --format '{{.Names}}'
+  docker ps -a --filter "label=com.docker.compose.project=radar-$ENV" --format '{{.Names}} {{.Status}}'
   docker volume ls --filter "label=com.docker.compose.project=radar-$ENV" --format '{{.Name}}'
   docker network ls --filter "label=com.docker.compose.project=radar-$ENV" --format '{{.Name}}'
   exit
@@ -82,7 +83,7 @@ case "$1" in
 esac
 "${compose[@]}" run --rm --no-deps -T api sh -ec '
   tar -xf /source.tar
-  npm ci --ignore-scripts --no-audit --no-fund
+  npm ci --ignore-scripts --no-audit --no-fund --cache /npm-cache --prefer-offline
   cat > /workspace/api/vitest.isolated.config.ts <<'"'"'CONFIG'"'"'
 import config from "./vitest.config.js";
 export default { ...config, envDir: false, test: { ...config.test, fileParallelism: false, maxWorkers: 2 } };
@@ -107,19 +108,32 @@ CONFIG
             cat "/evidence/checkpoint-$number.log"; exit 1;
           }
         fi
+        if [ -f ui/src/lib/signals/signal-projection-revision.ts ]; then
+          ./node_modules/.bin/tsc --noEmit --skipLibCheck --strict --target ES2022 --module ESNext \
+            --moduleResolution Bundler ui/src/lib/signals/signal-projection*.ts >> "/evidence/checkpoint-$number.log" 2>&1 || {
+            cat "/evidence/checkpoint-$number.log"; exit 1;
+          }
+        fi
         grep "^$number|" /checkpoints/manifest | cut -d "|" -f 2 > "/evidence/checkpoint-$number.pass"
         echo "checkpoint-$number: typecheck PASS"
       done
       ;;
   esac
+  if [ "$LOT" = 6L1 ] && { [ "$1" = verify ] || [ "$1" = typecheck ]; }; then
+    ./node_modules/.bin/tsc --noEmit --skipLibCheck --strict --target ES2022 --module ESNext \
+      --moduleResolution Bundler ui/src/lib/signals/signal-projection*.ts
+  fi
   if [ "$1" = astra-proof ]; then
     test "$LOT" = 6H
     bash /workspace/tools/make/paniers-lot6h-fix-mutation.sh
     exit
   fi
   if [ "$1" = mutation-proof ]; then
-    test "$LOT" = 6I
-    bash /workspace/tools/make/paniers-lot6i-mutation.sh
+    case "$LOT" in
+      6I) bash /workspace/tools/make/paniers-lot6i-mutation.sh ;;
+      6L1) bash /workspace/tools/make/paniers-lot6l1-mutation.sh ;;
+      *) exit 2 ;;
+    esac
     exit
   fi
   if [ "$1" = regression ]; then
@@ -129,7 +143,8 @@ export default { ...config, envDir: false, test: { ...config.test, fileParalleli
 CONFIG
     npm run test --workspace=ui -- --config vitest.isolated.config.ts \
       facets 6a-head 6b-version signaux-reglements signal-facets-client SignalFacetControls selection-bucket selection-camera signal-facet-scope \
-      $(if [ "$LOT" = 6I ]; then echo signal-facet-workspace; fi)
+      $(if [ "$LOT" = 6I ] || [ "$LOT" = 6L1 ]; then echo signal-facet-workspace; fi) \
+      $(if [ "$LOT" = 6L1 ]; then echo signal-projection; fi)
     cd /workspace/packages/immo-mcp
     ../../node_modules/.bin/tsc --noEmit -p tsconfig.json
     ../../node_modules/.bin/vitest run --config /workspace/api/vitest.isolated.config.ts src
@@ -141,6 +156,7 @@ CONFIG
         6G) npx --no-install eslint api/src/services/workspaces api/src/routes/workspaces.ts api/src/scripts/init-workspace-authority.ts ;;
         6H) npx --no-install eslint api/src/services/facets api/src/routes/scoped-signal-facets*.ts api/src/scripts/attach-personal-history.ts api/src/services/workspaces/authority*.ts api/src/services/workspaces/migration.test.ts packages/immo-mcp/src/workspace-context*.ts packages/immo-mcp/src/data-source.ts ui/src/lib/signals/signal-facet-scope*.ts ;;
         6I) npx --no-install eslint api/src/services/facets api/src/routes/scoped-workspace-archive*.ts ui/src/lib/signals/signal-facet-workspace*.ts ;;
+        6L1) npx --no-install eslint api/src/services/facets/projection*.ts api/src/services/facets/scoped-writer.ts api/src/services/facets/workspace-writer.ts api/src/services/graph/graph-store.ts api/src/routes/scoped-projection*.ts ui/src/lib/signals/signal-projection*.ts ;;
         *) npx --no-install eslint api/src/services/facets ;;
       esac
       ;;
