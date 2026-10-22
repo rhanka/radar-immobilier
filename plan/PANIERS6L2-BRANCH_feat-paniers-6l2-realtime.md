@@ -110,5 +110,5 @@ business-event ledger: durable 6L1 revisions stay the only authority.
 - [x] Review fix 4: qualify copy mutations and byte-for-byte restoration.
 - [x] Review fix 5: version isolated incremental delivery and its audit.
 - [x] Second-pass fix 1: retain invalidations across failed focus reads.
-- [ ] Second-pass fix 2: qualify copy mutations, UI gates and local delivery.
-- Delivery checkpoint: 23.
+- [x] Second-pass fix 2: qualify copy mutations, UI gates and local delivery.
+- Delivery checkpoint: 24.

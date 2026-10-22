@@ -80,9 +80,10 @@ proof overlap "$route" api "$lifecycle" 'serialize slow cycles' \
 proof pending-revocation "$observer" ui "$races" 'prevent pending refetch acknowledgment after revocation' \
   '    if (disposed) return;
     const current = deps.live();
-    if (noteInvalidationReconciled(state, current, snapshot, operation)) deps.rebuild(snapshot);' \
-  '    state.ackedToken = snapshot.token;
-    deps.rebuild(snapshot);'
+    if (noteInvalidationReconciled(state, current, snapshot, operation)) {' \
+  '    const current = deps.live();
+    state.ackedToken = snapshot.token;
+    if (true) {'
 proof retry "$observer" ui "$races" 'retry failed reloads without another server event' \
   'pendingRetry = schedule(() => { void wake({ kind: "resync" }); }, PROJECTION_RECONNECT_DELAY_MS);' \
   '/* failed fetch never retried */'
@@ -101,6 +102,9 @@ proof reconnect-starvation "$observer" ui "$races" 'reconnects overlap deferred 
   '      if (disposed) return;
       const status' '      if (disposed || operation !== state.operation) return;
       const status'
+proof superseded-convergence "$observer" ui "$races" 'supersedes the invalidation fetch' \
+  '      state.ackedToken !== snapshot.token' \
+  '      false'
 proof slow-consumer "$route" api "$lifecycle" 'blocked consumer and close on revocation' \
   'return desired === null || desired > 0;' 'return true;'
 proof saturated-watcher "$route" api "$lifecycle" 'drop a saturated stream within five cycles' \

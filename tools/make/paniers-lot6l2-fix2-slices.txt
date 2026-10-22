@@ -1,0 +1,2 @@
+fix: retain invalidations superseded by concurrent reads|ui/src/lib/signals/signal-projection-invalidation-observer.ts ui/src/lib/signals/signal-projection-invalidation-races.test.ts
+test: qualify second-pass convergence and incremental delivery|tools/make/paniers-lot6l2-mutation.sh tools/make/paniers-lot6.mk tools/make/paniers-lot6-verify.sh tools/make/paniers-lot6l2-fix2-deliver.sh tools/make/paniers-lot6l2-fix2-slices.txt

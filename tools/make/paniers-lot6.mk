@@ -30,7 +30,7 @@ guard:
 	@case '$(ENV)' in test-*|e2e-*) ;; *) echo 'test-* or e2e-* ENV required'; exit 1;; esac
 	@case '$(LOT)' in 6F|6G|6H|6I|6J|6L1|6L2) ;; *) echo 'LOT must be 6F, 6G, 6H, 6I, 6J, 6L1 or 6L2'; exit 1;; esac
 
-verify build typecheck lint test-api test-ui api-ci mutation-proof astra-proof fix-proof fix2-proof: guard
+verify build typecheck lint typecheck-ui lint-ui test-api test-ui api-ci mutation-proof astra-proof fix-proof fix2-proof: guard
 	@bash tools/make/paniers-lot6-verify.sh $@
 
 regression: guard
@@ -77,6 +77,11 @@ sol-prepare sol-deliver sol-audit: guard
 sol-fix-prepare sol-fix-deliver sol-fix-audit: guard
 	@test '$(LOT)' = 6L2
 	@bash tools/make/paniers-lot6l2-fix-deliver.sh $@
+
+.PHONY: sol-fix2-prepare sol-fix2-deliver sol-fix2-audit
+sol-fix2-prepare sol-fix2-deliver sol-fix2-audit: guard
+	@test '$(LOT)' = 6L2
+	@bash tools/make/paniers-lot6l2-fix2-deliver.sh $@
 
 clean inspect diagnose: guard
 	@bash tools/make/paniers-lot6-verify.sh $@
