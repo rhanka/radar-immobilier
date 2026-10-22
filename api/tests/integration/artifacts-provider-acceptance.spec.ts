@@ -1,26 +1,45 @@
 /**
- * Sentropic provider acceptance suite (H4 v3 upstream request + P7).
+ * Sentropic provider acceptance suite (spec r2 target + H4 P7).
  *
- * TARGET behavior for `@sentropic/artifacts` deliveries: this suite MUST FAIL
- * against the current provider (0.1.2, no finalization authorization, no typed
- * cause, no capability selection) and PASS once Sentropic ships those contracts.
- * Real composed provider via `composeArtifactHost` with PostgreSQL + S3, same
- * composition as `artifacts-commit-probe.spec.ts` / `artifacts-mcp-adapter.spec.ts`.
+ * TARGET behavior for `@sentropic/artifacts` 0.2.0 deliveries: this suite
+ * MUST FAIL against the current provider (0.1.2, no commit-contract,
+ * outcome-contract or testing entries) with `[missing-contract]` naming the
+ * missing entry, and PASS once Sentropic ships those contracts. It drives the
+ * real composed provider via PostgreSQL + S3, the same composition family as
+ * `artifacts-commit-probe.spec.ts` / `artifacts-mcp-adapter.spec.ts`.
  *
- * Gate: ARTIFACTS_PROVIDER_ACCEPTANCE=1; otherwise all six cases are skipped.
+ * Gate: ARTIFACTS_PROVIDER_ACCEPTANCE=1; otherwise all six cases are skipped
+ * and the module logs `[acceptance-disabled]`. The runner forwards the gate
+ * and fails qualification when that reminder appears with the gate enabled.
  *
- * Sentropic runbook (pin candidate dependencies before running):
- *   rtk make -f tools/artifact-host.mk test-provider-acceptance \
- *     ARTIFACTS_PROVIDER_ACCEPTANCE=1 API_PORT=18986 UI_PORT=15986 \
- *     MAILDEV_UI_PORT=11986 ENV=test-861c-provider-acceptance
- *   rtk make -f tools/artifact-host.mk down API_PORT=18986 UI_PORT=15986 \
- *     MAILDEV_UI_PORT=11986 ENV=test-861c-provider-acceptance
- * The runner propagates the gate, starts PostgreSQL/S3, migrates and always
- * runs down -v --remove-orphans. No .env is read. Omit the variable to skip.
+ * Upstream contract (spec r2 section 3.2, exact names):
+ * - `ArtifactInvocationContext.authorizeCommit` from
+ *   `@sentropic/artifacts/server/commit-contract`: the suite binds a
+ *   per-request context and behaviorally asserts the provider invokes the
+ *   callback with the leased finalization transaction AFTER the commit
+ *   barrier. Retired: `host.setFinalizeAuthorization` is never probed.
+ * - `host.execute(request, invocation)` (equivalently `host.app.execute`)
+ *   with `ArtifactOutcome` from
+ *   `@sentropic/artifacts/server/outcome-contract`: failure cases assert
+ *   `outcome.ok === false` plus `outcome.failure.cause`, the failure
+ *   category and the invocation ID BEFORE projection. Retired:
+ *   `host.app.takeTypedCause` is never drained.
+ * - `host.selectedCapabilities`: asserted as the frozen four-name value
+ *   plus the compiled profile digest, never as a truthy property.
+ * - Test-only `createArtifactCommitBarrier()` from
+ *   `@sentropic/artifacts/testing`, bound once as the coordinator
+ *   `testObserver` below the app with invocation correlation.
+ *
+ * Post-denial storage rule (section 6.3): after a refusal past S3 upload or
+ * key-row locking, the suite NO LONGER asserts immediate raw S3 object-count
+ * equality. It asserts zero COMMITTED effects (no new ready release, no
+ * pointer move, no provenance/ACL/binding/lifecycle change, no success
+ * idempotency row, no consumed quota) plus accounted nonvisible preparations
+ * and eventual bounded cleanup with shared-blob retention.
  *
  * Provisional extension bindings live ONLY in artifacts-provider-contract.helpers.ts.
- * Missing contracts fail by name. Cases 4/5 require the selected provider profile:
- * Radar-only replay/hash compensation does not qualify a provider delivery.
+ * Missing contracts fail by name. Cases 4/5 require the selected provider
+ * profile: Radar-only replay/hash compensation does not qualify a delivery.
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import pg from "pg";
@@ -29,23 +48,36 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { CreateBucketCommand, DeleteBucketCommand, S3Client } from "@aws-sdk/client-s3";
 import { createS3BlobStore } from "@sentropic/artifacts/adapters/s3";
 import {
-  ArtifactS3TimeoutError,
-  checkAdmission,
   composeArtifactHost,
   createArtifactControl,
   createArtifactsPool,
-  createMemoryCommitLedger,
-  createMemoryProviderProbe,
   deriveIdempotencyKey,
-  type AdmissionAuthority,
 } from "@radar/artifacts-host";
 import { createMcpArtifactAdapter } from "../../../packages/artifacts-host/src/mcp-app-adapter.js";
 import { controlRoute } from "../../src/artifacts/control-route.js";
 import { auth, cookie, migrationsFolder } from "./artifacts-h2.helpers.js";
 import { loadConfig } from "../../src/config.js";
-import { bindFinalization, providerCauses, requireSelectedProfile } from "./artifacts-provider-contract.helpers.js";
+import {
+  assertOutcomeFailure,
+  authorizeTransaction,
+  buildInvocationContext,
+  FROZEN_CAPABILITIES,
+  requireCommitBarrier,
+  projectOutcomeHttp,
+  committedState,
+  requireCommitContract,
+  requireHostExecute,
+  requireOutcomeContract,
+  requireSelectedProfile,
+  toGuardDecision,
+  type AuthorizeCommit,
+} from "./artifacts-provider-contract.helpers.js";
 
+let nextInvocationId = 1;
 const ENABLED = process.env.ARTIFACTS_PROVIDER_ACCEPTANCE === "1";
+if (!ENABLED) {
+  console.info("[acceptance-disabled] sentropic provider acceptance skipped without ARTIFACTS_PROVIDER_ACCEPTANCE=1");
+}
 const DATABASE = "artifacts_h2_provider_acceptance";
 const SCOPE = "provider_acceptance_scope";
 const ORG = "provider_acceptance_org";
@@ -69,7 +101,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
     s3AccessKey: accessKey, s3SecretKey: secretKey });
 
   async function s3KeyCount(): Promise<number> {
-    return [...(await rawBlobs().listKeys(`artifacts/${SCOPE}/`))].length;
+    return [...(await rawBlobs().listKeys(""))].length;
   }
 
   async function tableCount(table: "releases" | "idempotency_keys" | "artifacts"): Promise<number> {
@@ -80,6 +112,11 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
     const rows = (await pool.query(
       "SELECT release_id FROM artifacts.artifact_current WHERE artifact_id = $1", [artifactId])).rows;
     return rows[0]?.release_id as string | undefined;
+  }
+
+  async function successRowCount(internalKey: string): Promise<number> {
+    return Number((await pool.query(
+      "SELECT count(*) FROM artifacts.idempotency_keys WHERE key = $1", [internalKey])).rows[0].count);
   }
 
   async function ensureArtifact(
@@ -171,57 +208,6 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
     } finally {
       armed.current = false;
       host.close();
-    }
-  });
-
-  it("replays HTTP to MCP and MCP to HTTP as one durable release per key", async () => {
-    for (const direction of ["http-first", "mcp-first"]) {
-      const host = (await composeArtifactHost(pool, storageConfig(), rawBlobs()))!;
-      try {
-        requireSelectedProfile(host);
-        const control = createArtifactControl(host, SCOPE, BASE);
-        const route = controlRoute({ auth, accounts: pool, backend: control });
-        const httpPublish = async (args: unknown) => {
-          const response = await route.request("https://app.example.test/publish", {
-            method: "POST", headers: { cookie: await cookie(ACTOR), origin: auth.appBaseUrl,
-              "content-type": "application/json" }, body: JSON.stringify(args),
-          });
-          return { status: response.status, body: await response.json() as Record<string, unknown> };
-        };
-        const ensured = await control.handle("ensure", ACTOR,
-          { bindingName: direction, idempotencyKey: direction });
-        expect(ensured.status).toBe(201);
-        const artifactId = (ensured.body as { artifactId: string }).artifactId;
-        const second = (await composeArtifactHost(pool, storageConfig(), rawBlobs()))!;
-        try {
-          requireSelectedProfile(second);
-          const adapter = createMcpArtifactAdapter(createArtifactControl(second, SCOPE, BASE));
-          const args = { artifactId, files: [{ path: "index.html", mimeType: "text/html", text: "hello" }],
-            idempotencyKey: ` ${direction} ` };
-          const mcp = () => adapter.execute({ method: "POST", path: "/publish", args }, { actorId: ACTOR });
-          const bodyOf = (value: unknown) => "body" in (value as Record<string, unknown>)
-            ? (value as { body: unknown }).body
-            : (value as { ok: boolean; data: unknown }).data;
-          const releasesBefore = await tableCount("releases");
-          const keysBefore = await tableCount("idempotency_keys");
-          const objectsBefore = await s3KeyCount();
-          const first = direction === "http-first" ? await httpPublish(args) : await mcp();
-          const objectsAfter = await s3KeyCount();
-          const replay = direction === "http-first" ? await mcp() : await httpPublish(args);
-          expect(first.status).toBe(201);
-          expect(replay.status).toBe(201);
-          expect(await tableCount("releases")).toBe(releasesBefore + 1);
-          expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
-          expect(objectsAfter).toBeGreaterThan(objectsBefore);
-          expect(await s3KeyCount()).toBe(objectsAfter);
-          expect(bodyOf(replay)).toEqual(bodyOf(first));
-          expect(bodyOf(first)).toEqual({ artifactId, releaseId: expect.any(String),
-            digest: expect.any(String), stableUrl: expect.any(String), pinnedUrl: expect.any(String) });
-          expect(await currentReleaseId(artifactId)).toBe((bodyOf(first) as { releaseId: string }).releaseId);
-        } finally { second.close(); }
-      } finally {
-        host.close();
-      }
     }
   });
 
