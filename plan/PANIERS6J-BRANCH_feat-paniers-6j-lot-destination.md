@@ -144,6 +144,7 @@ writes stay disabled until 6K. No D5 input is required.
 - [x] Second-pass fix 4: discriminate all three defects on restored copies.
 - [x] Second-pass fix 5: deliver bounded commits above `4044af20`.
 - [x] Integration: merge 6L1 and renumber lot history to 0021 unchanged.
+- [x] Integration: qualify 0021 journal replay with a later migration too.
 - [ ] **Lot N-1 — Docs**: uncommitted French `RAPPORT-MUSE-6J.md`.
 - [ ] **Lot N — Close (not covered)**: verify green, push, PR, CI, merge
   commit (no squash/rebase), keep branch, move plan to `plan/done/`.
