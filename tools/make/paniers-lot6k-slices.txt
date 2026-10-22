@@ -48,3 +48,10 @@ test(paniers): discriminate six cutover regressions on copies|tools/make/paniers
 chore(paniers): stage and audit bounded delivery commits|tools/make/paniers-lot6k-deliver.sh
 chore(paniers): version the cutover delivery slices|tools/make/paniers-lot6k-slices.txt
 chore(paniers): finalize verified cutover delivery|api/src/services/facets/lots/lot-cutover-run.ts tools/make/paniers-lot6.mk tools/make/paniers-lot6k-deliver.sh tools/make/paniers-lot6k-slices.txt
+feat(paniers): fence lot_versions writes behind the cutover barrier|api/drizzle/0023_facet_lot_versions_fence.sql api/drizzle/meta/_journal.json
+fix(paniers): block pending lot targets under native identity|api/src/services/facets/lots/lot-cutover-target.ts api/src/services/facets/lots/lot-city.ts
+test(paniers): keep late-qualified native history pending|api/src/services/facets/lots/lot-cutover-target-blocked-db.test.ts
+test(paniers): fence cutover sources and resume after interruption|api/src/services/facets/lots/lot-cutover-sources-fence-db.test.ts
+fix(paniers): suspend mark delivery on unknown fence state|api/src/services/facets/lots/lot-legacy-fence.ts api/src/routes/chat.ts api/src/routes/prospect-marks.ts
+test(paniers): suspend without retiring on unreadable fence|api/src/services/facets/lots/lot-legacy-fence.test.ts api/src/routes/lot-cutover-stream.test.ts
+chore(paniers): discriminate the three review corrections|tools/make/paniers-lot6k-mutation.sh tools/make/paniers-lot6k-run.sh tools/make/paniers-lot6-verify.sh
