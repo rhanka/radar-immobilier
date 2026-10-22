@@ -136,7 +136,11 @@ export function chatRoute(db?: Database): Hono {
   /** Browser StreamHub SSE feed (replay buffer + live frames). */
   app.get("/api/chat/streams/sse", async (c) => {
     // A restarted replica must consult durable state before replaying buffers.
-    if (db && await legacyMarksFence(db) !== "none") retireLegacyMarkDelivery();
+    // Only an attested barrier or opening retires delivery irreversibly; an
+    // unreadable fence suspends mark frames for this connection only.
+    const fence = db ? await legacyMarksFence(db) : "none";
+    if (fence === "open" || fence === "barrier") retireLegacyMarkDelivery();
+    const suspendLegacyMarks = fence === "unknown";
     const encoder = new TextEncoder();
     let unsubscribe: (() => void) | null = null;
     let unsubscribeRetirement: (() => void) | null = null;
@@ -157,6 +161,8 @@ export function chatRoute(db?: Database): Hono {
           controller.error(new Error("legacy_mark_delivery_retired"));
         });
         const send = (frame: StreamFrame): void => {
+          if (suspendLegacyMarks && frame.streamId === "prospect-marks"
+            && (frame.type === "prospect:mark" || frame.type === "prospect:batch")) return;
           controller.enqueue(
             encoder.encode(
               sseFrame(frame.type, {
