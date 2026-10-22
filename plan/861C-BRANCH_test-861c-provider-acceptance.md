@@ -17,9 +17,13 @@ Keep current host API names in one test adaptation module pending spec r2.
 ## Branch Scope Boundaries (MANDATORY)
 - [x] **Allowed Paths**: this plan;
   `api/tests/integration/artifacts-provider-acceptance.spec.ts`;
+  `api/tests/integration/artifacts-finalization-authorization.spec.ts`;
+  `api/tests/integration/artifacts-provider-failures.spec.ts`;
   `api/tests/integration/artifacts-provider-contract.helpers.ts`;
-  `tools/artifact-host.mk`; `RAPPORT-SOL-PROVIDER-ACCEPTANCE.md`;
-  ignored evidence and local Git metadata under `tmp/861c-provider-acceptance/`.
+  `tools/artifact-host.mk`; `RAPPORT-MUSE-PROVIDER-ACCEPTANCE.md`;
+  `RAPPORT-SOL-PROVIDER-ACCEPTANCE.md`;
+  uncommitted `RAPPORT-SOL-Q1-Q2.md`; ignored evidence and local Git metadata
+  under `tmp/861c-provider-acceptance/` and `tmp/861c-q1-q2/`.
 - [x] **Forbidden Paths**: root Makefile, compose files, rules, agent entrypoints,
   other plans, runtime sources, manifests, lockfiles, upstream repositories.
 - [x] **Conditional Paths**: no additional paths required.
@@ -30,8 +34,8 @@ Keep current host API names in one test adaptation module pending spec r2.
   body/trailer, superseding Muse's earlier scope. Rollback: remove new targets.
 - [x] BR861C-EX2: user authorizes a single adaptation module for provisional
   extension names. Rollback: remove that test-only helper.
-- [x] Shared Git metadata is outside writable scope; local commits and bundle use
-  ignored metadata, leaving the assigned checkout's shared refs untouched.
+- [x] Assemble commits and bundle using ignored local Git metadata; synchronize
+  only the assigned branch after verifying the bundle and expected old head.
 - [x] Cases 4/5 must qualify the selected provider profile, not just Radar's
   existing replay/hash compensation; they require selection before dispatch.
 
@@ -52,6 +56,36 @@ Keep current host API names in one test adaptation module pending spec r2.
 - [x] **Lot 7 — Typecheck, lint and API build with declarations.**
 - [x] **Lot 8 — Direct review, French report, atomic commits and verified bundle.**
 
+## Upstream contract (spec r2, exact names)
+
+- `ArtifactInvocationContext.authorizeCommit` from
+  `@sentropic/artifacts/server/commit-contract`: compile-time binding plus a
+  behavioral assertion that the callback receives the leased finalization
+  transaction AFTER the barrier. Retired: `host.setFinalizeAuthorization`.
+- `host.execute(request, invocation)` (equivalently `host.app.execute`) with
+  `ArtifactOutcome` from `@sentropic/artifacts/server/outcome-contract`:
+  assert `outcome.ok === false`, `outcome.failure.cause`, category and
+  invocation ID BEFORE projection. Retired: `host.app.takeTypedCause`.
+- `host.selectedCapabilities`: frozen four-name value
+  (`artifacts_ensure`, `artifacts_get`, `artifacts_list`,
+  `artifacts_publish`) plus the compiled profile digest. Retired: truthy
+  property check.
+- Test-only `createArtifactCommitBarrier()` from
+  `@sentropic/artifacts/testing`, bound once as the coordinator
+  `testObserver`; points `before_connection_acquire`, `before_key_lock`,
+  `before_blob_put`, `after_blob_put_before_verify`,
+  `before_blob_readback`, `before_finalization_row_lock`,
+  `after_finalization_locks_before_guard`,
+  `after_replay_lookup_before_guard`, `before_commit`.
+- All three upstream entries are loaded dynamically in
+  `artifacts-provider-contract.helpers.ts`; each missing entry fails as
+  `[missing-contract] <entry>` against 0.1.2. The two retired slots never
+  raise that diagnostic. New suites: Q1
+  `api/tests/integration/artifacts-finalization-authorization.spec.ts`, Q2
+  `api/tests/integration/artifacts-provider-failures.spec.ts` (same gate,
+  quota/admission `not covered` via the helper where H3 units 5-6 are
+  missing).
+
 ## Verification commands
 - [x] `rtk make -f tools/artifact-host.mk test-api API_PORT=18986 UI_PORT=15986 MAILDEV_UI_PORT=11986 ENV=test-861c-provider-acceptance`
 - [x] `rtk make -f tools/artifact-host.mk test-provider-acceptance ARTIFACTS_PROVIDER_ACCEPTANCE=1 API_PORT=18986 UI_PORT=15986 MAILDEV_UI_PORT=11986 ENV=test-861c-provider-acceptance`
@@ -64,6 +98,29 @@ Keep current host API names in one test adaptation module pending spec r2.
 - [x] Final static gates and declaration emit passed; isolated stack removed.
 - [x] Independent review selection failed on missing exact author metadata;
   no consensus claimed and no merge requested; dossier in ignored evidence.
+
+## Q1/Q2 r2 qualification
+- [x] Preserve Muse's uncommitted input in ignored evidence; rebase the local
+  delivery branch on `9a81508704b8ee247e3d402f9cbf15d458edfe2a`.
+- [x] Correct syntax, void barrier arrivals, private-cause redaction, leased
+  query faults, COMMIT acknowledgment injection and process separation.
+- [x] Bind `ArtifactInvocationContext.authorizeCommit` by a type-only import;
+  isolated typechecking uses clearly labeled baseline declarations only when
+  installed exports are absent. Candidate declarations replace those shims.
+- [x] Never synthesize an allowed authorization fence. Transaction participant
+  construction remains an explicit upstream binding prerequisite.
+- [x] Recheck full API suite after rebase: 224 files / 3010 tests pass;
+  56 files / 256 cases skipped, including all 65 gated acceptance cases.
+- [x] Archive 63 missing-contract and two explicit not-covered failures, with
+  zero skipped or passing cases on the installed provider 0.1.2.
+- [x] Reject both disabled-reminder and zero-executed-case mutations on copies;
+  gate 1 observed inside test-api and test-host containers.
+- [x] Typecheck tests/workspaces, lint and API declaration build pass.
+- [ ] Confirm the default gate 0 inside the test-host container.
+- [ ] Record per-case results, bounded upstream handoff, commits and bundle.
+- [ ] Candidate qualification: replace provisional construction with the real
+  compiled profile/coordinator/transaction participant and cleanup bindings;
+  prove preparation accounting/cleanup/shared blobs and both race orders.
 
 ## Q1/Q2 delivery slices
 - [x] Slice 001: harden artifact acceptance qualification.
