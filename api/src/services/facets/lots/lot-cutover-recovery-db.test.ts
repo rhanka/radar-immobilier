@@ -40,4 +40,22 @@ describeDb("6K cutover recovery", () => {
           'pipeline', 'favori', $1)`, [f.moderator.id])).rejects.toMatchObject({ code: "40001" });
     } finally { await old.query("ROLLBACK"); old.release(); }
   });
+
+  it("should reject a lot source writer with a pre-barrier snapshot", async () => {
+    const f = await cutoverFixture();
+    const old = await f.pool.connect();
+    try {
+      await old.query("BEGIN ISOLATION LEVEL REPEATABLE READ");
+      await old.query("SELECT * FROM lot_legacy_fence");
+      const { report } = cleanCutoverReport();
+      await expect(runLotCutover(f.db, { workspaceId: f.workspaceId,
+        actorSub: f.moderator.sub, report, importKey: cutoverImportKeyFor(f.workspaceId),
+        confirmCutover: true, recomputeManifest: async () => report,
+      }, { ...recordingCutoverSafety().safety, readbackAuthorized: async () => {
+        throw new Error("synthetic_interruption");
+      } })).rejects.toThrow("synthetic_interruption");
+      await expect(old.query("UPDATE lot_versions SET recon_status = 'pending'"))
+        .rejects.toMatchObject({ code: "40001" });
+    } finally { await old.query("ROLLBACK"); old.release(); }
+  });
 });

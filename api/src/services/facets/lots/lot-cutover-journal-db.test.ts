@@ -16,21 +16,24 @@ const folders: string[] = [];
 afterEach(() => { for (const folder of folders.splice(0)) rmSync(folder, { recursive: true }); });
 
 describeDb("6K migration replay", () => {
-  it("should replay 0022 without changing data and tolerate a later migration", async () => {
+  it.each(["0022_facet_lot_cutover", "0023_facet_lot_versions_fence"])(
+    "should replay %s without changing data and tolerate a later migration", async (tag) => {
     const f = await cutoverFixture();
     const journal = JSON.parse(readFileSync("drizzle/meta/_journal.json", "utf8")) as {
       entries: Array<{ idx: number; tag: string; when: number; version: string; breakpoints: boolean }>;
     };
     expect(journal.entries.map((entry) => entry.idx)).toEqual(journal.entries.map((_, idx) => idx));
-    const entry = journal.entries.find((item) => item.tag === "0022_facet_lot_cutover")!;
+    const entry = journal.entries.find((item) => item.tag === tag)!;
     expect(entry).toBeDefined();
-    expect(journal.entries[entry.idx - 1]!.tag).toBe("0021_facet_lot_history");
-    expect(journal.entries[entry.idx - 2]!.tag).toBe("0020_facet_projection_revisions");
+    const cutover = journal.entries.find((item) => item.tag === "0022_facet_lot_cutover")!;
+    expect(journal.entries[cutover.idx - 1]!.tag).toBe("0021_facet_lot_history");
+    expect(journal.entries[cutover.idx - 2]!.tag).toBe("0020_facet_projection_revisions");
+    expect(journal.entries[cutover.idx + 1]!.tag).toBe("0023_facet_lot_versions_fence");
     expect(entry.when).toBeGreaterThan(Math.max(
       ...journal.entries.slice(0, entry.idx).map((item) => item.when)));
     const source = readFileSync(`drizzle/${entry.tag}.sql`, "utf8");
     const tables = ["lot_cutover_state", "lot_cutover_events", "lot_d5_dispositions",
-      "lot_source_writer_coverage", "prospect_marks"];
+      "lot_source_writer_coverage", "prospect_marks", "lot_versions", "lot_legacy_fence"];
     const snapshot = () => Promise.all(tables.map(async (table) =>
       (await f.pool.query(`SELECT to_jsonb(t) AS row FROM ${table} t ORDER BY to_jsonb(t)::text`)).rows));
     const before = await snapshot();
