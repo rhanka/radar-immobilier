@@ -57,7 +57,7 @@ without exposing another member's private state.
   single-value guard and the unconditional lint lines.
 - Delivery uses individually typechecked snapshots; the French report
   remains uncommitted.
-- Delivery checkpoint: 19.
+- Delivery checkpoint: 20.
 - `BR6I-EX2`: narrow personal owners in `activation-bind.ts` after the
   schema permits null workspace owners. Typecheck proves the old chain
   input no longer fits. Reject null personal owners; no history rewrite.
@@ -66,6 +66,12 @@ without exposing another member's private state.
   ontology fixtures, source-copy discrimination and checked 6I delivery.
   Impact: test-only container actions and workspace-local Git metadata.
   Rollback: remove the 6I actions and scripts; no operational change.
+- Review corrections: reject unresolved personal history before union;
+  share the actor/key receipt lock; return 422 for omitted reasons;
+  qualify workspace-first restore with an active personal archive.
+- Integration follow-up: classify the synthetic historical archive and
+  admit its owner after activation. Force both receipt race directions
+  with a PostgreSQL city-lock barrier; no timing assumptions.
 
 ## Plan / Todo (lot-based)
 
@@ -95,6 +101,12 @@ without exposing another member's private state.
   (6H review reprise), HTTP authorization and conflicts.
 - [x] **Lot 8 — Make**: `LOT=6I` guard, SCOPE, lint; build and
   regression targets covered.
+- [x] Review fix 1: unresolved history refuses the union with 503.
+- [ ] Review fix 2: cross-family, cross-workspace receipt serialization.
+- [ ] Review fix 3: omitted workspace discard reason returns 422.
+- [ ] Review fix 4: workspace-first restore preserves personal hiding.
+- [ ] Review fix 5: source-copy discrimination for all four corrections.
+- [ ] Review fix 6: size-checked, typechecked commits and incremental bundle.
 - [ ] **Lot N-1 — Docs**: uncommitted French `RAPPORT-MUSE-6I.md`.
 - [ ] **Lot N — Close (not covered)**: verify green, push, PR, CI,
   merge commit (no squash/rebase), keep branch, move plan to
