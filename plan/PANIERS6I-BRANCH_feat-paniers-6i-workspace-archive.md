@@ -57,7 +57,7 @@ without exposing another member's private state.
   single-value guard and the unconditional lint lines.
 - Delivery uses individually typechecked snapshots; the French report
   remains uncommitted.
-- Delivery checkpoint: 17.
+- Delivery checkpoint: 18.
 - `BR6I-EX2`: narrow personal owners in `activation-bind.ts` after the
   schema permits null workspace owners. Typecheck proves the old chain
   input no longer fits. Reject null personal owners; no history rewrite.
