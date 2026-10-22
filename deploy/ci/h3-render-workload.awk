@@ -1,5 +1,5 @@
 # H3 configuration, credential isolation and image identity on rendered YAML.
-function judge( i, key, v, expected, keys, image) {
+function judge( i, key, v, expected, keys, image, ef) {
   if (!n) return
   if ((kind != "Namespace" && namespace != "radar-immobilier-preprod") || (kind == "Namespace" && name != "radar-immobilier-preprod")) fail("namespace is not preprod")
   if (kind == "ConfigMap" && name == "radar-api") {
@@ -29,6 +29,17 @@ function judge( i, key, v, expected, keys, image) {
     }
     if (count("^[ \t]*- name: ARTIFACTS_") != (phase == "rollback" ? 0 : 2)) fail("unexpected ARTIFACTS env override")
     if (phase == "rollback" && index(doc, "radar-artifacts-preprod")) fail("artifact Secret reference forbidden for H2 rollback")
+    if (count("^[ \t]*envFrom:") != 1) fail("exact api envFrom required (single configMapRef radar-api)")
+    if (count("configMapRef:") != 1) fail("exact api envFrom source required (single configMapRef radar-api)")
+    if (count("secretRef:")) fail("secretRef envFrom forbidden on api container")
+    if (count("prefix:")) fail("prefix envFrom forbidden on api container")
+    ef = 0; v = ""
+    for (i = 1; i <= n; i++) {
+      if (buf[i] == "        envFrom:") { ef = 1; continue }
+      if (ef && buf[i] ~ /^        [^ -]/) break
+      if (ef) v = v buf[i] "\n"
+    }
+    if (v != "        - configMapRef:\n            name: radar-api\n") fail("exact api envFrom sources required: only configMapRef radar-api, without prefix")
   }
   if (kind == "Deployment" && name == "radar-artifact-content-deny") {
     deny++; denyImage = field("^[ \t]*(- )?image:")

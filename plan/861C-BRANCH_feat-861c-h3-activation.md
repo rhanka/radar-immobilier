@@ -82,6 +82,7 @@ Review integration (both non-blocking points):
   - `tmp/861c-h3-p4-fix/**` (review correction evidence, local Git and bundle)
   - `tmp/861c-h3-p4-fix2/**` (second correction evidence, local Git and bundle)
   - `tmp/861c-h3-p4-fix3/**` (third correction evidence, local Git and bundle)
+  - `tmp/861c-h3-p4-fix4/**` (fourth correction evidence, local Git and bundle)
 - **Forbidden Paths (must not change in this branch)**:
   - `api/src/config.ts`, root `docker-compose*.yml`
   - `rules/**`, agent bootstrap files, other `plan/*-BRANCH_*.md`
@@ -108,6 +109,13 @@ Review integration (both non-blocking points):
     1b-1c and 2, isolated database and bucket, no new harness dependency)
 
 ## Deliverables
+
+- [x] Fourth pass: validate the complete canonical API envFrom list and denial
+      policy selectors against the pod template in all four phases.
+- [ ] Fourth pass: exercise valid phase fixtures, indirect sources and both
+      NetworkPolicy selectors with copy/fail/restore/cmp regressions.
+- [ ] Fourth pass: bound HTTP probes and terminate every tracked child,
+      including a listener that accepts livez without answering.
 
 - [x] BR861C-EX1: root Makefile exception limited to `k8s-validate` offline
   gate/test calls, matching the existing entrypoint-check convention; rollback
