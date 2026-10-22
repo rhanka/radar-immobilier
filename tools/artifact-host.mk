@@ -89,6 +89,20 @@ test-h3-proxy: guard-env ## Isolated nginx control-limit check (H3 unit 10, no c
 image-runtime-smoke: guard-env ## Build the runtime image, smoke-test api + content-deny modes, refuse unknown mode (H3 unit 9)
 	sh tools/h3-image-runtime-smoke.sh
 
+.PHONY: test-h3-render
+test-h3-render: guard-env ## Offline H3 preprod render gate: activation disabled, isolated, no prod leakage (H3 units 11-14, no cluster)
+	bash deploy/ci/check-h3-preprod-render.sh
+	bash deploy/ci/check-h3-preprod-render.test.sh
+	bash deploy/ci/check-h3-activation-render.test.sh
+	bash deploy/ci/check-h3-transition-render.test.sh
+	bash deploy/ci/check-h3-discrimination.test.sh
+	bash deploy/ci/preflight-h3-preprod.test.sh
+
+.PHONY: check-h3-preparation-render check-h3-activation-render check-h3-rollback-render
+check-h3-preparation-render check-h3-activation-render check-h3-rollback-render: guard-env
+	@test -n "$(H3_RENDER)" && test -f "$(H3_RENDER)" || { echo 'Pass H3_RENDER=<canonical-render.yaml>' >&2; exit 1; }
+	bash deploy/ci/$@.sh "$(H3_RENDER)"
+
 .PHONY: image-smoke
 image-smoke: guard-env ## Build --target build, refuse .env*, smoke-boot API+MCP bundles, check api/drizzle
 	@set -e; trap 'docker image rm radar-artifact-host-smoke:local >/dev/null 2>&1 || true' EXIT INT TERM; \
