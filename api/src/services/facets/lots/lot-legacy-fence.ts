@@ -7,10 +7,11 @@
  * database trigger on `prospect_marks` is the enforcing backstop,
  * including for direct writers; this read only lets routes answer with
  * the explicit 503/410 contract instead of a trigger failure. An
- * unreadable fence reports `unknown`: routes fail closed (as on
- * `barrier`), but SSE delivery only suspends mark frames for that
- * connection and never retires them irreversibly. Only an attested
- * `barrier` or `open` state retires delivery.
+ * unreadable fence reports `unknown`: HTTP routes fail closed (as on
+ * `barrier`), while the historic SSE feed passes frames through exactly
+ * as on main. Only an attested `barrier` or `open` state retires
+ * delivery, through the shared retirement the §6K sequence itself
+ * drives (stop-publishers, close-readers, destroy-buffers).
  */
 import type { Database } from "../../../db/client.js";
 import { lotCutoverState, lotLegacyFence } from "../../../db/schema.js";
