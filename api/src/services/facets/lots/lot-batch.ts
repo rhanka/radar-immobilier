@@ -85,7 +85,7 @@ export async function writeLotBatch(
       authorizeLotMutation(rights, scope, item.mutation, destination.selectionBasket);
     }
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${JSON.stringify(
-      ["lot-scoped-command", actorId, key])}, 0))`);
+      ["scoped-command", actorId, key])}, 0))`);
     const base = lotCommandDigest(scope, "batch", workspaceId, { ...batch, command_key: key });
     const commandDigest = digest({ scope, workspaceId: workspaceId.toLowerCase(), command: base });
     const [contextRow] = await tx.select().from(facetCommandContexts).where(sql`
