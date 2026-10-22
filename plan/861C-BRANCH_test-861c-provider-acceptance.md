@@ -89,3 +89,4 @@ Keep current host API names in one test adaptation module pending spec r2.
 - [x] Slice 021: add provider failure case.
 - [x] Slice 022: add provider failure case.
 - [x] Slice 023: add provider failure case.
+- [x] Slice 024: add provider failure case.
