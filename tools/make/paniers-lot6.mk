@@ -12,50 +12,60 @@ else ifeq ($(LOT),6H)
 SCOPE ?= src/services/facets src/services/workspaces tests/integration/facets src/services/steve-source src/services/graph/discarded-signals src/routes/scoped-signal-facets src/routes/signal-facets src/routes/graph-signals src/scripts/attach-personal-history
 else ifeq ($(LOT),6I)
 SCOPE ?= src/services/facets/workspace src/services/facets/scoped src/services/facets/registry src/routes/scoped-workspace-archive src/routes/scoped-signal-facets src/services/workspaces
+else ifeq ($(LOT),6J)
+SCOPE ?= src/services/facets/lots src/routes/scoped-lot- src/services/facets/lot-migration-report
 else ifeq ($(LOT),6L1)
 SCOPE ?= src/services/facets/projection src/services/facets/scoped src/services/facets/workspace src/routes/scoped-projection src/services/graph/graph-store ui/src/lib/signals/signal-projection
 else
 SCOPE ?= src/services/facets
 endif
 ACTION ?= verify
-DELIVERY_PROFILE = $(if $(filter 6I,$(LOT)),6i,$(if $(filter 6H,$(LOT)),6h,6g))
+DELIVERY_PROFILE = $(if $(filter 6J,$(LOT)),6j,$(if $(filter 6I,$(LOT)),6i,$(if $(filter 6H,$(LOT)),6h,6g)))
 export ENV LOT API_PORT UI_PORT MAILDEV_UI_PORT SCOPE ACTION EVIDENCE_TAG CHECKPOINT_DIR
 
-.PHONY: guard verify build typecheck lint test-api clean inspect diagnose commit prepare checkpoints deliver regression audit astra-proof
+.PHONY: guard verify build typecheck lint test-api clean inspect diagnose commit prepare checkpoints deliver regression audit astra-proof run-6j
 guard:
 	@case '$(ENV)' in test-*|e2e-*) ;; *) echo 'test-* or e2e-* ENV required'; exit 1;; esac
-	@case '$(LOT)' in 6F|6G|6H|6I|6L1) ;; *) echo 'LOT must be 6F, 6G, 6H, 6I or 6L1'; exit 1;; esac
+	@case '$(LOT)' in 6F|6G|6H|6I|6J|6L1) ;; *) echo 'LOT must be 6F, 6G, 6H, 6I, 6J or 6L1'; exit 1;; esac
 
-verify build typecheck lint test-api api-ci mutation-proof astra-proof: guard
+verify build typecheck lint test-api api-ci mutation-proof astra-proof fix-proof fix2-proof: guard
 	@bash tools/make/paniers-lot6-verify.sh $@
 
 regression: guard
-	@bash tools/make/paniers-lot6-verify.sh regression
+	@bash tools/make/paniers-lot$(if $(filter 6J,$(LOT)),6j-run,6-verify).sh regression
 
 .PHONY: scope-proof
 scope-proof: guard
 	@bash tools/make/paniers-lot6g-fix-scope.sh
 
 prepare: guard
-	@case '$(LOT)' in 6G|6H|6I) ;; *) echo 'no delivery profile ships for this LOT'; exit 2;; esac
+	@case '$(LOT)' in 6G|6H|6I|6J) ;; *) echo 'no delivery profile ships for this LOT'; exit 2;; esac
 	@bash tools/make/paniers-lot$(DELIVERY_PROFILE)-deliver.sh prepare
 
 checkpoints: guard
 	@bash tools/make/paniers-lot6-verify.sh checkpoints
 
 deliver: guard
-	@case '$(LOT)' in 6G|6H|6I) ;; *) echo 'no delivery profile ships for this LOT'; exit 2;; esac
+	@case '$(LOT)' in 6G|6H|6I|6J) ;; *) echo 'no delivery profile ships for this LOT'; exit 2;; esac
 	@bash tools/make/paniers-lot$(DELIVERY_PROFILE)-deliver.sh finish
 
 audit: guard
-	@case '$(LOT)' in 6G|6H|6I) ;; *) echo 'no delivery profile ships for this LOT'; exit 2;; esac
+	@case '$(LOT)' in 6G|6H|6I|6J) ;; *) echo 'no delivery profile ships for this LOT'; exit 2;; esac
 	@bash tools/make/paniers-lot$(DELIVERY_PROFILE)-deliver.sh audit
 
 .PHONY: fix-prepare fix-deliver fix-audit
 fix-prepare fix-deliver fix-audit: guard
-	@case '$(LOT)' in 6H|6I) ;; *) exit 1;; esac
+	@case '$(LOT)' in 6H|6I|6J) ;; *) exit 1;; esac
 	@bash tools/make/paniers-lot$(shell echo $(LOT) | tr A-Z a-z)-fix-deliver.sh $@
 
+.PHONY: fix2-prepare fix2-deliver fix2-audit
+fix2-prepare fix2-deliver fix2-audit: guard
+	@test '$(LOT)' = 6J
+	@bash tools/make/paniers-lot6j-fix2-deliver.sh $(patsubst fix2-%,%,$(subst deliver,finish,$@))
+
+run-6j: guard
+	@test '$(LOT)' = 6J
+	@bash tools/make/paniers-lot6j-run.sh verify
 .PHONY: sol-prepare sol-deliver sol-audit
 sol-prepare sol-deliver sol-audit: guard
 	@test '$(LOT)' = 6L1

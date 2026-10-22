@@ -11,7 +11,7 @@ import { attachPersonalHistory } from "./attachment.js";
 import type { ActivationSafety } from "./activation.js";
 
 export const describeDb: ReturnType<typeof describe.skipIf> = describe.skipIf(process.env.LOT_MIGRATION_DB_TEST !== "1");
-const handles: Array<ReturnType<typeof createDb> & { name: string }> = [];
+const handles: Array<ReturnType<typeof createDb> & { name: string; disconnected: Promise<void>[] }> = [];
 export const safety: ActivationSafety = { drain: async () => {}, readback: async () => {} };
 
 afterAll(async () => {
@@ -19,6 +19,7 @@ afterAll(async () => {
   const admin = createDb(loadConfig());
   for (const handle of handles) {
     await handle.pool.end();
+    await Promise.all(handle.disconnected);
     // Normal removal lets closing clients disconnect; FORCE can kill them
     // after pool.end() resolves and emit an unhandled 57P01 pool error.
     await admin.pool.query(`DROP DATABASE "${handle.name}"`);
@@ -30,7 +31,11 @@ export async function database(legacy = false) {
   const name = `synthetic_6h_${randomUUID().replaceAll("-", "")}`;
   const admin = createDb(loadConfig());
   try { await admin.pool.query(`CREATE DATABASE "${name}"`); } finally { await admin.pool.end(); }
-  const handle = { ...createDb({ ...loadConfig(), POSTGRES_DB: name }), name };
+  const handle = { ...createDb({ ...loadConfig(), POSTGRES_DB: name }), name,
+    disconnected: [] as Promise<void>[] };
+  handle.pool.on("connect", (client) => {
+    handle.disconnected.push(new Promise<void>((resolve) => { client.once("end", resolve); }));
+  });
   handles.push(handle);
   if (legacy) {
     mkdirSync("tmp", { recursive: true });
