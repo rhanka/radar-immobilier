@@ -72,6 +72,14 @@ fixture; sed -i 's#args: \["content-deny"\]#args: ["content-deny"]\n          vo
 sed -i 's#automountServiceAccountToken: false#automountServiceAccountToken: false\n      volumes:\n        - name: creds\n          secret:\n            secretName: radar-artifacts-preprod#' "$CASE_ROOT/$DENY"
 run_bad "$CASE_ROOT" 'rejects a secret volume on the denial pod' 'volume mount forbidden'; rm -rf "$CASE_ROOT"
 
+fixture
+sed -i '/configMapRef:/{n;s#name: radar-api#name: radar-api\n            - secretRef:\n                name: shadow-fixture#}' "$CASE_ROOT/deploy/k8s/30-api.yaml"
+run_bad "$CASE_ROOT" 'rejects an added envFrom secretRef after the ConfigMap in disabled phase' 'secretRef envFrom forbidden'; rm -rf "$CASE_ROOT"
+
+fixture
+sed -i '/configMapRef:/{n;s#name: radar-api#name: radar-api\n              prefix: SHADOW_#}' "$CASE_ROOT/deploy/k8s/30-api.yaml"
+run_bad "$CASE_ROOT" 'rejects an envFrom prefix on the api container in disabled phase' 'prefix envFrom forbidden'; rm -rf "$CASE_ROOT"
+
 fixture; sed -i 's/name: radar-artifact-content-deny/name: radar-api/' "$CASE_ROOT/$INGRESS"
 run_bad "$CASE_ROOT" 'rejects content routing to the api Service' 'only to the denial Service'; rm -rf "$CASE_ROOT"
 
