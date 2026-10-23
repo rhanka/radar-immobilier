@@ -41,7 +41,7 @@ export async function renewGrant(
   const verified = await verifyGrant(presented, deps.issuer, deps.secret, now());
   if (!verified) return null;
   if (isRevoked(verified.sessionId)) return null;
-  const rights = await deps.authority.getRights(verified.readerSub);
+  const rights = await deps.authority.getRights(verified.readerSub, verified.artifactId);
   if (!rights || !rights.approved || rights.readerSub !== verified.readerSub) return null;
   if (!rights.capabilities.includes("geo.read") && !rights.capabilities.includes("signals.protected-read")) return null;
   const profile = await deps.authority.getProfile(verified.artifactId);
