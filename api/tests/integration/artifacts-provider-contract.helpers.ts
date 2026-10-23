@@ -581,9 +581,12 @@ export async function requirePreparationCleanupBinding(): Promise<PreparationCle
 /** Expected L4 observation seam; absence is a named prerequisite, never SQL guesswork. */
 export async function verifyPreparationCleanup(host: unknown, artifactId: string,
   blobs: { listKeys(prefix: string): Promise<Iterable<string>> }, requireAttempts = true,
-  requireShared = false): Promise<void> {
+  requireShared = false,
+  options?: { readonly expectedInvocationIds?: readonly string[];
+    readonly s3KeysBefore?: ReadonlySet<string> | readonly string[] }): Promise<void> {
   const binding = await requirePreparationCleanupBinding();
   const before = await binding.inspectPreparations(host, artifactId);
+  const keysBefore = new Set(await blobs.listKeys(""));
   if (requireAttempts && before.attempts.length === 0) throw new Error("[contract-violation] missing preparation attribution");
   let throughMs = 0;
   for (const attempt of before.attempts) {
@@ -593,14 +596,56 @@ export async function verifyPreparationCleanup(host: unknown, artifactId: string
         !["abandoned", "failed", "pending-cleanup"].includes(attempt.state)) {
       throw new Error("[contract-violation] preparation must have attempt/invocation, failure state and bounded deadline");
     }
+    if (!Array.isArray(attempt.blobKeys)) {
+      throw new Error("[contract-violation] preparation must expose attempt.blobKeys for S3 reconciliation");
+    }
     throughMs = Math.max(throughMs, attempt.cleanupDeadlineMs);
+  }
+  const hasNewObjects = options?.s3KeysBefore !== undefined &&
+    [...keysBefore].some((key) => !new Set(options.s3KeysBefore).has(key));
+  if (options?.expectedInvocationIds !== undefined && (requireAttempts || hasNewObjects)) {
+    const observedIds = new Set(before.attempts.map((attempt) => attempt.invocationId));
+    for (const expectedId of options.expectedInvocationIds) {
+      if (!observedIds.has(expectedId)) {
+        throw new Error("[contract-violation] expected preparation invocation missing from attempt inventory");
+      }
+    }
   }
   if (requireShared && (before.protectedKeys.length === 0 || before.abandonedKeys.length === 0)) {
     throw new Error("[contract-violation] cleanup fixture must contain shared and unreferenced blobs");
   }
-  const keysBefore = new Set(await blobs.listKeys(""));
   for (const key of [...before.protectedKeys, ...before.abandonedKeys]) {
     if (!keysBefore.has(key)) throw new Error("[contract-violation] preparation blob missing before cleanup");
+  }
+  // Reconcile the observed S3 inventory against attempts and invocations: every
+  // new object since the caller baseline must belong to the expected invocation
+  // via attempt.blobKeys. Protection/abandonment lists alone cannot attribute it.
+  // An undeclared leftover passes the old
+  // declared-only check and fails here. Cross-artifact exhaustive attribution
+  // stays not covered (owner Sentropic L4); this reconciliation is scoped to
+  // the artifact under test plus the caller baseline.
+  const attributable = new Set<string>();
+  for (const attempt of before.attempts) {
+    for (const key of attempt.blobKeys) {
+      if (options?.expectedInvocationIds === undefined ||
+          options.expectedInvocationIds.includes(attempt.invocationId)) attributable.add(key);
+    }
+  }
+  if (options?.s3KeysBefore !== undefined) {
+    const baseline = new Set(options.s3KeysBefore);
+    for (const key of before.protectedKeys) {
+      if (!baseline.has(key)) throw new Error("[contract-violation] new denied preparation has no preexisting protection");
+    }
+    for (const key of keysBefore) {
+      if (!baseline.has(key) && !attributable.has(key)) {
+        throw new Error("[contract-violation] undeclared S3 object without preparation attribution");
+      }
+    }
+  }
+  for (const attempt of before.attempts) {
+    for (const key of attempt.blobKeys) {
+      if (!keysBefore.has(key)) throw new Error("[contract-violation] preparation blob missing from S3 inventory");
+    }
   }
   await binding.scheduleBoundedPreparationCleanup(host, throughMs);
   const keysAfter = new Set(await blobs.listKeys(""));
@@ -609,6 +654,14 @@ export async function verifyPreparationCleanup(host: unknown, artifactId: string
   }
   for (const key of before.abandonedKeys.filter((key) => !before.protectedKeys.includes(key))) {
     if (keysAfter.has(key)) throw new Error("[contract-violation] abandoned blob survived its cleanup deadline");
+  }
+  if (options?.s3KeysBefore !== undefined) {
+    const baseline = new Set(options.s3KeysBefore);
+    for (const key of keysAfter) {
+      if (!baseline.has(key) && !before.protectedKeys.includes(key) && keysAfter.has(key)) {
+        throw new Error("[contract-violation] new unprotected object survived its cleanup deadline");
+      }
+    }
   }
   const after = await binding.inspectPreparations(host, artifactId);
   if (after.attempts.some((attempt) => !["cleaned", "failed-cleaned"].includes(attempt.state))) {
