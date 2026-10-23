@@ -65,8 +65,8 @@
 - [ ] Chain A: tmp/base-api-b1, branch feat/base-api-decouplee-b1; B1, then B4.
 - [ ] Chain B: tmp/base-api-b2, branch feat/base-api-decouplee-b2; B2, then B3.
 - [ ] Sol A is the BASE integrator for its integration workspace; cross-track shared writes require the current conductor-recorded CT-1 lease, with no independent concurrent write right. Muse/Sol B submit shared-file hunks.
-- [ ] Start B1 nonshared work while the integrator performs B2's pinned 6K import; release B2 from that qualified integration SHA.
-- [ ] Import the same integration SHA into B1 before its app/startup wiring; preserve main's 6L2 additions.
+- [x] Start B1 nonshared work while the integrator performs B2's pinned 6K import; release B2 from that qualified integration SHA.
+- [x] Import the same integration SHA into B1 before its app/startup wiring; preserve main's 6L2 additions.
 - [ ] Integrate through merge commits, preserving source history; no squash, cherry-pick or whole-file ours/theirs resolution.
 - [ ] Each chain edits only its own plan checkboxes; the integrator reconciles both sets without losing either.
 - [ ] B4 development follows B1/B2; final B4 qualification also requires B3; B5 follows B3/B4.
@@ -92,15 +92,24 @@
   - [x] B0.4: document commands, idempotency, expected heads, displayed versions and errors.
   - [x] B0.5: freeze the existing authority matrix and independent HTTP/SQL acceptance cases.
   - [x] Gate: contract traced to code; open defaults visible; no artifact dependency; safe runner and bundle audit qualified.
-- [ ] B1 — Signal/workspace API; Muse 3–5 h, Sol 3–4 h, total 6–9 h.
-  - [ ] B1.1: mount workspace, personal, common-archive, revision and invalidation routers.
-  - [ ] B1.2: constrain middleware to its intended endpoints; preserve cookie writes and supported bearer reads.
-  - [ ] B1.3: expose workspace context and reason codes without legacy readers.
-  - [ ] B1.4: implement authorized reveal with current content, fingerprint and scoped heads.
-  - [ ] B1.5: qualify reveal → restore, concurrent source changes and independent archive scopes.
-  - [ ] B1.6: return explicit legacy 503 during cutover and 410 after retirement, never a replacement 404.
-  - [ ] B1.7: preserve exact receipt recovery and unresolved command contexts.
-  - [ ] Gate: base-api-{composition,authority,reveal,legacy,receipts}.spec.ts plus existing scoped/SSE regressions; typecheck and scoped lint.
+- [x] B1 — Signal/workspace API; Muse 3–5 h, Sol 3–4 h, total 6–9 h.
+  - [x] B1 preparation: add the signed composed fixture and verify each staged slice independently of later workspace drafts.
+  - [x] B1.1: mount workspace, personal, common-archive, revision and invalidation routers.
+  - [x] B1.2: constrain middleware to its intended endpoints; preserve cookie writes and supported bearer reads.
+  - [x] B1.2 first slice: isolate SSE, personal, common archive and revision middleware; qualify both middleware orders.
+  - [x] B1.3: expose workspace context and reason codes without legacy readers.
+  - [x] B1.4: implement authorized reveal with current content, fingerprint and scoped heads.
+  - [x] B1.4 service: authorize reveal and qualify restoration with independent personal/common archive heads.
+  - [x] B1.4 router: expose scoped reason codes and reveal with isolated guards; composed mount qualified under L2.
+  - [x] B1.5: qualify reveal → restore, concurrent source changes and independent archive scopes.
+  - [x] B1.6: return explicit legacy 503 during cutover and 410 after retirement, never a replacement 404.
+  - [x] B1.6 route contract: fence graph/signal endpoints with named successors and verify composed retirement with signed cookies.
+  - [x] B1.7: preserve exact receipt recovery and unresolved command contexts.
+  - [x] B1 invalidations: qualify signed composed cursors, revocation and stream guards.
+  - [x] B1 authority: qualify personal isolation, moderation grants and authorized conflicts in PostgreSQL.
+  - [x] B1 delivery tooling: run required faults independently and audit the bundle against K in an isolated repository.
+  - [x] B1 mutations: qualify all seven required faults with passing baselines, intended assertion failures, restored passes and identical checksums.
+  - [x] Gate: base-api-{composition,authority,reveal,legacy,receipts}.spec.ts plus existing scoped/SSE regressions; typecheck and scoped lint.
 - [x] B2 — Complete lot destination; Muse 4–6 h, Sol 4–5 h, total 8–11 h.
   - [x] B2.1 preparation: audit authored merge resolutions separately from preserved inherited history; extend bounded staging to the authorized API scope.
   - [x] B2.1: integrate pinned 6K history and both migrations under CT-1–CT-8; preserve 6L2 routes, watcher and verifier profiles; qualify CT-7 migration assertions before releasing K_SHA.
@@ -120,6 +129,7 @@
   - [ ] B3.4: qualify lock order, contention and unchanged-UUID content changes before recording writer coverage.
   - [ ] Gate: all three real writer paths contend with facet commands; no coverage attestation without the corresponding executable proof.
 - [ ] B4 — Operational cutover; Muse 5–8 h, Sol 4–6 h, total 9–14 h.
+  - [x] B4/B3 tooling preparation: narrow delivery paths, exact ontology input, changed-file lint and common synthetic DB migration; functional gates remain open.
   - [ ] B4.1: implement/inject 6H and 6K maintenance safety through existing activation interfaces; Muse A implements B4, Sol A verifies and commits BASE-owned files; shared application/startup deltas use the current CT-1 lease holder.
   - [ ] B4.1 entry: add base-api-activate-personal and base-api-resume-personal to tools/make/base-api.mk, dispatched by tools/make/base-api-activation.sh; Sol A owns both tooling paths.
   - [ ] B4.1 script: Muse A owns api/src/scripts/base-api-personal-activation.ts; require workspace, actor, reason and qualified maintenance evidence; execute in the API container without environment-file discovery.

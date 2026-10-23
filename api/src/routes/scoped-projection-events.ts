@@ -48,11 +48,13 @@ export function toStreamEnd(error: unknown): { kind: "closed" | "unavailable"; s
   return { kind: "unavailable", status, reason };
 }
 
+const SCOPED_EVENTS_PATH = "/api/v1/workspaces/:workspaceId/signal-facets/projection-events";
+
 export function scopedProjectionEventsRoute(deps: ScopedProjectionEventsDeps): Hono {
   const app = new Hono();
   const now = deps.now ?? Date.now;
   const watchIntervalMs = resolveWatchIntervalMs(process.env, deps.watchIntervalMs);
-  app.use("/api/v1/workspaces/:workspaceId/signal-facets/*", async (c, next) => {
+  app.use(SCOPED_EVENTS_PATH, async (c, next) => {
     c.header("Cache-Control", "private, no-store");
     c.header("Vary", "Cookie, Authorization");
     const session = c.get("session" as never) as { sub?: string; via?: string } | undefined;

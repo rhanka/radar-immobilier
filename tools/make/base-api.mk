@@ -3,11 +3,14 @@
 # ports with ENV last, e.g.:
 #   make -f tools/make/base-api.mk base-api-test API_PORT=18910 UI_PORT=15910 MAILDEV_UI_PORT=11910 ENV=test-base-api-b0
 ENV ?= test-base-api-b0
+BASE_API_SOURCE ?= worktree
 API_PORT ?= 18910
 UI_PORT ?= 15910
 MAILDEV_UI_PORT ?= 11910
 BASE_API_MK := $(lastword $(MAKEFILE_LIST))
 export ENV API_PORT UI_PORT MAILDEV_UI_PORT SCOPE MSG FILES OUT SLUG BRANCH START SRC RECEIPT BASE_API_SCOPE
+export BASE_API_SOURCE BASE_API_LINT_FILES
+export BASE_API_WORKSPACE BASE_API_ACTOR BASE_API_REASON BASE_API_MAINTENANCE_EVIDENCE
 BASE_API_ARGS = "API_PORT=$$API_PORT" "UI_PORT=$$UI_PORT" "MAILDEV_UI_PORT=$$MAILDEV_UI_PORT" "ENV=$$ENV"
 BASE_API_SCOPE := src/services/facets/scoped-db.test.ts src/services/facets/workspace-receipts-db.test.ts src/services/facets/projection-migration-db.test.ts src/routes/scoped-projection-events-db.test.ts
 
@@ -18,6 +21,27 @@ BASE_API_SCOPE := src/services/facets/scoped-db.test.ts src/services/facets/work
 .PHONY: base-api-verify
 .PHONY: base-api-contract-proof
 .PHONY: base-api-network-proof
+.PHONY: base-api-tooling-proof
+
+base-api-tooling-proof:
+	rtk bash tools/make/base-api-tooling-proof.sh $(BASE_API_ARGS)
+
+.PHONY: base-api-activate-personal base-api-resume-personal
+.PHONY: base-api-b3-mutation-required base-api-b4-mutation-required base-api-bundle-proof
+base-api-activate-personal:
+	rtk bash tools/make/base-api-activation.sh activate $(BASE_API_ARGS)
+
+base-api-resume-personal:
+	rtk bash tools/make/base-api-activation.sh resume $(BASE_API_ARGS)
+
+base-api-b3-mutation-required:
+	rtk bash tools/make/base-api-verify.sh b3-mutation-required "SCOPE=src/services/geo/ogc-pull-source-lock-db.test.ts src/services/geo/populate-geo-source-lock-db.test.ts src/services/exploitation/projection-source-lock-db.test.ts src/services/facets/lots/lot-source-writer-races-db.test.ts src/services/facets/lots/lot-source-writer-coverage-db.test.ts" $(BASE_API_ARGS)
+
+base-api-b4-mutation-required:
+	rtk bash tools/make/base-api-verify.sh b4-mutation-required "SCOPE=tests/integration/base-api-activation.spec.ts tests/integration/base-api-activation-resume.spec.ts tests/integration/base-api-legacy.spec.ts" $(BASE_API_ARGS)
+
+base-api-bundle-proof:
+	rtk bash tools/make/base-api-bundle-proof.sh $(BASE_API_ARGS)
 
 base-api-network-proof:
 	rtk bash tools/make/base-api-verify.sh network-proof $(BASE_API_ARGS)
@@ -46,6 +70,17 @@ base-api-test-api:
 base-api-mutation-proof:
 	rtk bash tools/make/base-api-mutation.sh $(BASE_API_ARGS)
 
+.PHONY: base-api-b1-mutation-legacy base-api-b1-mutation-archive
+.PHONY: base-api-b1-mutation-required
+base-api-b1-mutation-required:
+	rtk bash tools/make/base-api-verify.sh b1-mutation-required "SCOPE=tests/integration/base-api-authority.spec.ts tests/integration/base-api-reveal.spec.ts tests/integration/base-api-receipts.spec.ts tests/integration/base-api-reveal-restore.spec.ts tests/integration/base-api-legacy.spec.ts" $(BASE_API_ARGS)
+
+base-api-b1-mutation-legacy:
+	rtk bash tools/make/base-api-verify.sh b1-mutation-legacy "SCOPE=tests/integration/base-api-legacy.spec.ts" $(BASE_API_ARGS)
+
+base-api-b1-mutation-archive:
+	rtk bash tools/make/base-api-verify.sh b1-mutation-archive "SCOPE=tests/integration/base-api-reveal-restore.spec.ts" $(BASE_API_ARGS)
+
 base-api-input-guards:
 	rtk bash tools/make/base-api-verify.sh input-guards $(BASE_API_ARGS)
 
@@ -62,7 +97,7 @@ base-api-audit:
 	rtk bash tools/make/base-api-deliver.sh audit $(BASE_API_ARGS)
 
 base-api-bundle:
-	rtk bash tools/make/base-api-deliver.sh bundle "OUT=$$OUT" $(BASE_API_ARGS)
+	rtk bash tools/make/base-api-deliver.sh bundle "OUT=$$OUT" "START=$$START" $(BASE_API_ARGS)
 
 base-api-worktree:
 	rtk bash tools/make/base-api-deliver.sh worktree "SLUG=$$SLUG" "BRANCH=$$BRANCH" "START=$$START" $(BASE_API_ARGS)
