@@ -72,3 +72,4 @@ No invented production domain or certificate.
 - [x] Operation inputs reject undeclared authority or URL fields.
 - [x] Normalized operation responses reject publisher substitution.
 - [x] Serving requires current authority; synthetic operation data removed from runtime path.
+- [x] Synthetic operation ports isolated in an explicit module-test fixture.
