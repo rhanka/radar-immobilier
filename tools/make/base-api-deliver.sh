@@ -23,25 +23,43 @@ allowed() {
   [[ ! -L $1 && $1 != *..* ]]
 }
 stats() {
-  awk 'BEGIN {n=0; total=0} $1 !~ /^[0-9]+$/ || $2 !~ /^[0-9]+$/ {exit 1}
+  awk -v minimum="${1:-1}" 'BEGIN {n=0; total=0} $1 !~ /^[0-9]+$/ || $2 !~ /^[0-9]+$/ {exit 1}
     {n++; total+=$1+$2} END {print "files=" n " changed-lines=" total;
-    if (n<1 || n>15 || total>150) exit 1}'
+    if (n<minimum || n>15 || total>150) exit 1}'
 }
 audit_staged() {
-  local paths p
-  paths=$(git diff --cached --name-only)
-  [[ -n $paths ]] || { echo 'Nothing staged' >&2; return 1; }
-  while IFS= read -r p; do allowed "$p"; done <<< "$paths"
-  git diff --cached --numstat | stats
+  local paths p preview merge_head minimum=1
+  [[ -z $(git ls-files -u) ]] || { echo 'Unresolved merge entries' >&2; return 2; }
+  local comparison=()
+  if merge_head=$(git rev-parse -q --verify MERGE_HEAD); then
+    # Measure authored resolutions against Git's inherited merge candidate.
+    # Imported history is retained and audited separately, never re-sliced.
+    preview=$(git merge-tree --write-tree HEAD "$merge_head") || [[ $? == 1 ]]
+    preview=${preview%%$'\n'*}
+    [[ $preview =~ ^[a-f0-9]{40}$ ]] || return 2
+    comparison=("$preview")
+    minimum=0
+  fi
+  paths=$(git diff --cached --name-only "${comparison[@]}")
+  [[ -n $paths || $minimum == 0 ]] || { echo 'Nothing staged' >&2; return 1; }
+  while IFS= read -r p; do [[ -z $p ]] || allowed "$p"; done <<< "$paths"
+  git diff --cached --numstat "${comparison[@]}" | stats "$minimum"
 }
 subject() {
   [[ $1 != *$'\n'* && $1 != *$'\r'* && ${#1} -le 72 && $1 =~ ^(chore|docs|test|feat|fix|refacto|ci)\(base\):\ [[:print:]]+$ ]]
 }
 audit_commit() {
-  local sha=$1 message
+  local sha=$1 message preview parents first second
   message=$(git show -s --format=%B "$sha")
   subject "$message" || { echo "Invalid subject/body/trailer: $sha" >&2; return 1; }
-  git show --format= --numstat "$sha" | stats
+  parents=$(git show -s --format=%P "$sha")
+  if [[ $parents == *' '* ]]; then
+    read -r first second <<< "$parents"
+    [[ $second != *' '* ]] || return 2
+    preview=$(git merge-tree --write-tree "$first" "$second") || [[ $? == 1 ]]
+    preview=${preview%%$'\n'*}
+    git diff --numstat "$preview" "$sha" | stats 0
+  else git show --format= --numstat "$sha" | stats; fi
   git show -s --format='%H %s' "$sha"
 }
 case $ACTION in
@@ -56,7 +74,7 @@ case $ACTION in
     git -c core.hooksPath=/dev/null commit -m "$MSG"
     audit_commit HEAD;;
   audit)
-    while IFS= read -r sha; do audit_commit "$sha"; done < <(git rev-list --reverse "$BASE..HEAD")
+    while IFS= read -r sha; do audit_commit "$sha"; done < <(git rev-list --first-parent --reverse "$BASE..HEAD")
     git status --short;;
   bundle)
     [[ $OUT == tmp/base-api-evidence/B0/base-api-b0.bundle ]] || exit 2
