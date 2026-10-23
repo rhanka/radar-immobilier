@@ -265,6 +265,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
         const releasesBefore = await tableCount("releases");
         const keysBefore = await tableCount("idempotency_keys");
         const s3Before = await s3KeyCount();
+        const s3Baseline = new Set(await rawBlobs().listKeys(""));
         const run = startBarrierOperation(barrier, invocationId,
           () => execute({ method: "POST", path: "/publish", body }, invocation), "before_finalization_row_lock");
         await run.reached;
@@ -283,7 +284,8 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
         expect(await currentReleaseId(artifactId)).toBeUndefined();
         const s3AfterDenial = await s3KeyCount();
         console.info("[preparation-debt]", JSON.stringify({ s3Before, s3AfterDenial }));
-        await verifyPreparationCleanup(host, artifactId, rawBlobs(), true, true);
+        await verifyPreparationCleanup(host, artifactId, rawBlobs(), true, true,
+          { expectedInvocationIds: [invocationId], s3KeysBefore: s3Baseline });
         await pool.query("UPDATE account_users SET status = 'approved' WHERE sub = 'alice'");
         const retry = await execute({ method: "POST", path: "/publish", body },
           invocationFor(finalizeGuard, "refusal-retry")) as Record<string, unknown>;
