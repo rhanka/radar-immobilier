@@ -158,8 +158,14 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
 
   // Observe the real execute path. This wrapper neither classifies failures
   // nor repairs a response: HTTP and MCP must consume the provider outcome.
-  function executeWithParity(host: Record<string, unknown>) {
+  // Private fault markers travel with the wrapper so the MCP leg asserts the
+  // same redaction as the direct projection: a correct MCP response carrying
+  // the marker in any representation (text, error.debug, _meta) must fail.
+  function executeWithParity(host: Record<string, unknown>,
+    options?: { readonly privateMarkers?: readonly string[]; readonly secrets?: readonly string[] }) {
     const execute = requireHostExecute(host);
+    const parityMarkers = options?.privateMarkers ?? [];
+    const paritySecrets = options?.secrets ?? [BUCKET, endpoint, accessKey, SCOPE, secretKey];
     return async (request: unknown, invocation: unknown): Promise<unknown> => {
       const outcome = await execute(request, invocation) as Record<string, unknown>;
       if (outcome.ok !== false) return outcome;
@@ -196,9 +202,15 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
         } else {
           const result = await createMcpArtifactAdapter(control).execute({
             method: req.method, path: req.path, args: req.body }, { actorId: ACTOR });
-          expect(result).toMatchObject({ ok: false, status: projected.status,
-            code: failure.code, retryable: failure.retriable });
-          expectRedacted({ status: result.status, body: result });
+          // Reinforced structural check on the actually obtained MCP result:
+          // exact public error shape plus marker/secret sweep over every
+          // serialized representation. The old substring check let a correct
+          // response augmented with the private stream marker through.
+          const wireError = (projected.body as { error?: unknown } | null)?.error;
+          assertMcpResultRedacted(result, { status: projected.status,
+            code: String(failure.code), retryable: Boolean(failure.retriable),
+            publicError: typeof wireError === "string" ? wireError : String(failure.code) },
+            parityMarkers, paritySecrets);
         }
         const dispatched = req.method === "POST" && ["/publish", "/ensure"].includes(req.path) &&
           failure.code !== "invalid_request" && failure.category !== "capability_unselected";
@@ -286,7 +298,8 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     const host = composed.host;
     const close = host["close"];
     try {
-      const execute = executeWithParity(host);
+      const execute = executeWithParity(host, { privateMarkers: [requestMarker],
+        secrets: [BUCKET, endpoint, accessKey, SCOPE, secretKey] });
       const artifactId = await ensureVia(execute, allowAll(), "q2-s3", "q2-s3-ensure");
       const releasesBefore = await tableCount("releases");
       const invocation = invocationFor(allowAll(), "s3");
@@ -336,7 +349,8 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     const host = composed.host;
     const close = host["close"];
     try {
-      const execute = executeWithParity(host);
+      const execute = executeWithParity(host, { privateMarkers: [streamMarker],
+        secrets: [BUCKET, endpoint, accessKey, SCOPE, secretKey] });
       const artifactId = await ensureVia(execute, allowAll(), "q2-s3stream", "q2-s3stream-ensure");
       const releasesBefore = await tableCount("releases");
       const invocation = invocationFor(allowAll(), "s3stream");
@@ -774,7 +788,8 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     const close = host["close"];
     try {
       requireSelectedProfile(host, composed.profile.digest);
-      const execute = executeWithParity(host);
+      const execute = executeWithParity(host, { privateMarkers: [parityMarker],
+        secrets: [BUCKET, endpoint, accessKey, SCOPE, secretKey] });
       const artifactId = await ensureVia(execute, allowAll(), "q2-parity", "q2-parity-ensure");
       const body = { artifactId,
         files: [{ path: "index.html", mimeType: "text/html", text: "parity" }],
@@ -870,7 +885,8 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     const host = composed.host;
     const close = host["close"];
     try {
-      const execute = executeWithParity(host);
+      const execute = executeWithParity(host, { privateMarkers: [readMarker],
+        secrets: [BUCKET, endpoint, accessKey, SCOPE, secretKey] });
       const artifactId = await ensureVia(execute, allowAll(), "q2-read", "q2-read-ensure");
       const keysBefore = await tableCount("idempotency_keys");
       const releasesBefore = await tableCount("releases");
