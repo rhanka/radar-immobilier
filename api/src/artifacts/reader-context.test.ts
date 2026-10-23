@@ -35,4 +35,9 @@ describe("reader-context adaptation", () => {
     expect(fixedUpstream("geo")).toBe("https://geo.example.test");
     expect(fixedUpstream("radar")).toBe("https://api.example.test");
   });
+  it("should refuse an old tab after release activation changes", async () => {
+    const authority = { ...createFixtureAuthority(), getRelease: async () => ({
+      artifactId: GRANT.artifactId, releaseId: "release-002", authorSub: "publisher" }) };
+    expect(await adaptGrantToReader(GRANT, authority)).toBeNull();
+  });
 });
