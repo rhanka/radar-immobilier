@@ -69,6 +69,7 @@ import {
   requireCommitContract,
   requireHostExecute,
   requireOutcomeContract,
+  requirePreparationCleanupBinding,
   verifyPreparationCleanup,
   startBarrierOperation,
   requireSelectedProfile,
@@ -269,6 +270,11 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
         const run = startBarrierOperation(barrier, invocationId,
           () => execute({ method: "POST", path: "/publish", body }, invocation), "before_finalization_row_lock");
         await run.reached;
+        const prepared = await (await requirePreparationCleanupBinding()).inspectPreparations(host, artifactId);
+        const attempt = prepared.attempts.find((candidate) => candidate.invocationId === invocationId);
+        expect(attempt?.blobKeys.length).toBeGreaterThan(0);
+        const preparedKeys = new Set(await rawBlobs().listKeys(""));
+        for (const key of attempt!.blobKeys) expect(preparedKeys.has(key)).toBe(true);
         await pool.query("UPDATE account_users SET status = 'suspended' WHERE sub = 'alice'");
         passedBarrier = true;
         run.release();
@@ -285,7 +291,8 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
         const s3AfterDenial = await s3KeyCount();
         console.info("[preparation-debt]", JSON.stringify({ s3Before, s3AfterDenial }));
         await verifyPreparationCleanup(host, artifactId, rawBlobs(), true, true,
-          { expectedInvocationIds: [invocationId], s3KeysBefore: s3Baseline });
+          { expectedInvocationIds: [invocationId], s3KeysBefore: s3Baseline,
+            preparationsBeforeRefusal: prepared.attempts });
         await pool.query("UPDATE account_users SET status = 'approved' WHERE sub = 'alice'");
         const retry = await execute({ method: "POST", path: "/publish", body },
           invocationFor(finalizeGuard, "refusal-retry")) as Record<string, unknown>;
