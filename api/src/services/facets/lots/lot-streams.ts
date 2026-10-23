@@ -13,6 +13,7 @@ import {
   facetStreams,
 } from "../../../db/schema.js";
 import type { LotMode, LotTarget } from "./lot-target.js";
+import { lotSourceLockKey } from "./lot-source-serialization.js";
 
 export type LotFacet = "selection" | "archive" | "pipeline" | "market";
 export type LotStreamScope = "personal" | "workspace";
@@ -22,13 +23,17 @@ export interface LotStreamRef {
   headEventId: string | null;
 }
 
-/** Canonical-target serialization held through source comparison and commit. */
+/**
+ * Canonical-target serialization held through source comparison and
+ * commit. Delegates to the shared 6K serialization key so source writers
+ * and facet writers serialize on the same lock.
+ */
 export async function lotTargetLock(
   tx: { execute: Database["execute"] },
   target: Pick<LotTarget, "citySlug" | "canonicalId">,
 ): Promise<void> {
-  await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${JSON.stringify(
-    ["lot-source", target.citySlug, target.canonicalId])}, 0))`);
+  await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${
+    lotSourceLockKey(target.citySlug, target.canonicalId)}, 0))`);
 }
 
 export function lotStreamKey(
