@@ -1,0 +1,17 @@
+{
+  "proposal": "register shared/0024_artifacts_commit_outcomes.sql in api/drizzle/meta/_journal.json",
+  "suggestedTag": "0024_artifacts_commit_outcomes",
+  "breakpoints": true,
+  "rules": [
+    "CT-4: 0022/0023 stay reserved for BASE 6K; artifact technical files start at 0024.",
+    "CT-5: the lease holder assigns idx (max existing + 1) and when (greater than the maximum existing journal/applied timestamp). Never renumber, retime or replace an applied/released entry.",
+    "CT-6: BASE-first appends artifact entries after the fixed BASE prefix; ARTEFACTS-first is permitted without importing or applying 6K.",
+    "CT-7: freeze one journal order before first persistent use across the target release chain; record provenance for any reindex/retime of unpublished suffix metadata.",
+    "CT-8: qualify standalone delivery on fresh DB, baseline upgrade and rerun with only its own migrations before any combined delivery."
+  ],
+  "notes": [
+    "idx/when are assigned by the integration writer at apply time; this file proposes content only and performs no numbering.",
+    "Applied/deployed state is unverified until an operator receipt.",
+    "SQL bytes and hashes are preserved from this proposal; the writer records the resulting hash."
+  ]
+}
