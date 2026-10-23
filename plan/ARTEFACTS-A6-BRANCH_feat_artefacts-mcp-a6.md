@@ -60,3 +60,4 @@ No invented production domain or certificate.
 - [x] Local profile seam prepared; A1 authority binding remains pending.
 - [x] Origin validation now uses the authority-owned origin.
 - [x] In-process single-use tickets require an independent browser binding; durable store pending.
+- [x] AEAD envelope modules prepared and locally tested.
