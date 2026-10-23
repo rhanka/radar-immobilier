@@ -30,6 +30,7 @@ export interface ExchangeRuntimeDeps {
 }
 const inputByContext = new WeakMap<object, ExchangeInput>();
 const depsStorage = new AsyncLocalStorage<ExchangeRuntimeDeps>();
+const httpTransportStorage = new AsyncLocalStorage<boolean>();
 const defaults = new WeakMap<ExchangeRuntimeDeps, { cache: ExchangeCache; flight: SingleFlightExchange }>();
 const egressByContext = new WeakMap<object, { cache: ExchangeCache; key: string; token: string }>();
 export function bindExchangeInput(ctx: object, input: ExchangeInput): void {
@@ -40,6 +41,12 @@ export function runWithExchangeDeps<T>(deps: ExchangeRuntimeDeps, fn: () => T): 
 }
 export function getExchangeDeps(): ExchangeRuntimeDeps | undefined {
   return depsStorage.getStore();
+}
+export function runWithHttpTransport<T>(fn: () => T): T {
+  return httpTransportStorage.run(true, fn);
+}
+export function isHttpTransport(): boolean {
+  return httpTransportStorage.getStore() === true;
 }
 function defaultState(deps: ExchangeRuntimeDeps) {
   let state = defaults.get(deps);
@@ -59,8 +66,12 @@ export async function resolveExchangedCallContext(
   if (toolName !== EXCHANGE_TOOL_NAME) return {};
   assertScope(ctx.auth, IMMO_SCOPES.search);
   const input = inputByContext.get(ctx);
-  if (!input) return {};
   const deps = getExchangeDeps();
+  const http = isHttpTransport();
+  if (!input) {
+    if (!http && !deps) return {};
+    throw new Error("exchange_missing_authority");
+  }
   if (!deps) throw new Error("exchange_not_configured");
   if (input.confirmation !== "none") throw new Error("exchange_proof_binding_refused");
   if (input.subjectSub === deps.config.workloadSub) {

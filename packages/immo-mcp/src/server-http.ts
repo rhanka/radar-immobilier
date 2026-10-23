@@ -12,7 +12,7 @@ import { getMcpAuthContext, mcpAuthRoutes, requireMcpAuth } from "@sentropic/mcp
 import { fromRemoteJwks } from "@sentropic/oauth-verify";
 import type { AccessTokenClaims, TokenKeySource } from "@sentropic/oauth-verify";
 import { IMMO_SCOPES, type ImmoMcpAuthContext } from "./auth-context.js";
-import { bindExchangeInput, buildExchangeInput, runWithExchangeDeps, type ExchangeRuntimeDeps } from "./authorized-egress.js";
+import { bindExchangeInput, buildExchangeInput, runWithExchangeDeps, runWithHttpTransport, type ExchangeRuntimeDeps } from "./authorized-egress.js";
 import {
   captureInvocationContext,
   runWithInvocationContext,
@@ -310,26 +310,28 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
   };
 
   const dispatchWithExchange = <T>(mcpAuth: McpAuthContext, auth: ImmoMcpAuthContext, subjectToken: string | undefined, snapshot: InvocationContext, fn: () => T): T => {
-    if (subjectToken) {
-      const claims = mcpAuth.claims as unknown as Record<string, unknown>;
-      const exp = claims["exp"];
-      const jti = claims["jti"];
-      bindExchangeInput(snapshot, buildExchangeInput({
-        subjectToken,
-        subjectSub: mcpAuth.sub,
-        subjectExp: typeof exp === "number" && Number.isFinite(exp) ? Math.floor(exp) : 0,
-        subjectScopes: [...mcpAuth.scopes],
-        subjectJti: typeof jti === "string" && jti.length > 0 ? jti : undefined,
-        subjectClientId: ownerClientId(mcpAuth),
-        issuer: config.issuer,
-        membership: `${auth.tenantId}:${[...auth.workspaces].sort().join(",")}`,
-        confirmation: claims["cnf"] !== undefined ? "cnf" : "none",
-      }));
-    }
-    if (deps.exchange) {
-      return runWithExchangeDeps(deps.exchange, () => runWithInvocationContext(snapshot, fn));
-    }
-    return runWithInvocationContext(snapshot, fn);
+    return runWithHttpTransport(() => {
+      if (subjectToken) {
+        const claims = mcpAuth.claims as unknown as Record<string, unknown>;
+        const exp = claims["exp"];
+        const jti = claims["jti"];
+        bindExchangeInput(snapshot, buildExchangeInput({
+          subjectToken,
+          subjectSub: mcpAuth.sub,
+          subjectExp: typeof exp === "number" && Number.isFinite(exp) ? Math.floor(exp) : 0,
+          subjectScopes: [...mcpAuth.scopes],
+          subjectJti: typeof jti === "string" && jti.length > 0 ? jti : undefined,
+          subjectClientId: ownerClientId(mcpAuth),
+          issuer: config.issuer,
+          membership: `${auth.tenantId}:${[...auth.workspaces].sort().join(",")}`,
+          confirmation: claims["cnf"] !== undefined ? "cnf" : "none",
+        }));
+      }
+      if (deps.exchange) {
+        return runWithExchangeDeps(deps.exchange, () => runWithInvocationContext(snapshot, fn));
+      }
+      return runWithInvocationContext(snapshot, fn);
+    });
   };
 
   const closeSession = async (sessionId: string, entry: SessionEntry): Promise<void> => {
