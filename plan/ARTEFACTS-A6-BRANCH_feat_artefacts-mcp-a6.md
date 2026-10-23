@@ -54,7 +54,7 @@ No invented production domain or certificate.
 
 ## Integration receipts
 
-- [ ] Consume the integrator's committed Vitest exclusion before browser commits.
+- [x] Consumed Vitest exclusion e61810325adf064af88012981e622d1a9c464aec via merge f6edd1b6efdb7992078fd03dad1f9eb1ff2b8363 before browser commits.
 - [ ] Consume A1 authority/store and reader-auth/image commits; no lease held here.
 - [ ] D1/D2 remain open with read-only and technical-example defaults.
 - [x] Local profile seam prepared; A1 authority binding remains pending.
