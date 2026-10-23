@@ -81,3 +81,4 @@ No invented production domain or certificate.
 - [x] Standalone reader listener prepared; production authority/store binding pending.
 - [x] Dedicated runner refuses integrated acceptance without the image/API binding.
 - [x] Collection and isolated module mutation proof runners prepared.
+- [x] Image smoke records image/source identity and excludes all environment file content.
