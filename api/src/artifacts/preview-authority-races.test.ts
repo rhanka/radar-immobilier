@@ -10,7 +10,9 @@ const artifactId = "123e4567-e89b-12d3-a456-426614174000";
 const releaseId = "123e4567-e89b-12d3-a456-426614174001";
 const issuer = { issuer: "https://api.example.test", audience: "https://api.example.test/reader", tier: "preprod" };
 const claims = { ...issuer, artifactId, releaseId, readerSub: "reader-alice",
-  host: "artifact.pages.example.test", sessionId: "session-1", profileName: "demo", policyRevision: "pol-001" };
+  host: "artifact.pages.example.test", sessionId: "session-1", profileName: "demo", policyRevision: "pol-001",
+  profileFingerprint: fingerprintReaderProfile({ name: "demo", policyRevision: "pol-001",
+    capabilities: ["geo.read", "signals.protected-read"] }) };
 const secret = "grant-secret-32-bytes-long-padding!";
 
 describe("authority decision consistency", () => {

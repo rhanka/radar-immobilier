@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { mintGrant } from "./preview-grant.js";
+import { fingerprintReaderProfile } from "./reader-profile.js";
 import { createReaderContentApp } from "./content-serve.js";
+
 import {
   GRANT_SECRET,
   HOST,
@@ -11,6 +13,9 @@ import {
   makeApp,
   request,
 } from "./reader-test-fixture.js";
+
+const FINGERPRINT = fingerprintReaderProfile({ name: "demo", policyRevision: "pol-001",
+  capabilities: ["geo.read", "signals.protected-read"] });
 
 describe("authorized artifact content serving", () => {
   it("should refuse anonymous page and API access", async () => {
@@ -26,7 +31,7 @@ describe("authorized artifact content serving", () => {
     const app = makeApp();
     const cookie = await credentials("reader-alice", "session-1", 1_000);
     const grant = await mintGrant(
-      { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-1", profileName: "demo", policyRevision: "pol-001" },
+      { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-1", profileName: "demo", policyRevision: "pol-001", profileFingerprint: FINGERPRINT },
       GRANT_SECRET,
       1_000,
     );
@@ -41,7 +46,7 @@ describe("authorized artifact content serving", () => {
     const app = makeApp();
     const alice = await credentials("reader-alice", "session-a", 1_000);
     const grantAlice = await mintGrant(
-      { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-a", profileName: "demo", policyRevision: "pol-001" },
+      { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-a", profileName: "demo", policyRevision: "pol-001", profileFingerprint: FINGERPRINT },
       GRANT_SECRET,
       1_000,
     );
@@ -52,7 +57,7 @@ describe("authorized artifact content serving", () => {
 
     const bob = await credentials("reader-bob", "session-b", 1_000);
     const grantBob = await mintGrant(
-      { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-bob", sessionId: "session-b", profileName: "demo", policyRevision: "pol-001" },
+      { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-bob", sessionId: "session-b", profileName: "demo", policyRevision: "pol-001", profileFingerprint: FINGERPRINT },
       GRANT_SECRET,
       1_000,
     );
@@ -67,7 +72,7 @@ describe("authorized artifact content serving", () => {
     const app = makeApp();
     const cookie = await credentials("reader-alice", "session-1", 1_000);
     const grant = await mintGrant(
-      { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-1", profileName: "demo", policyRevision: "pol-001" },
+      { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-1", profileName: "demo", policyRevision: "pol-001", profileFingerprint: FINGERPRINT },
       GRANT_SECRET,
       1_000,
     );
@@ -79,7 +84,7 @@ describe("authorized artifact content serving", () => {
     const app = makeApp();
     const cookie = await credentials("reader-alice", "session-1", 1_000);
     const grant = await mintGrant(
-      { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-1", profileName: "demo", policyRevision: "pol-001" },
+      { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-1", profileName: "demo", policyRevision: "pol-001", profileFingerprint: FINGERPRINT },
       GRANT_SECRET,
       1_000,
     );
@@ -94,7 +99,7 @@ describe("authorized artifact content serving", () => {
     const app = makeApp();
     const cookie = await credentials("reader-alice", "session-1", 1_000);
     const grant = await mintGrant(
-      { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-1", profileName: "demo", policyRevision: "pol-001" },
+      { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-1", profileName: "demo", policyRevision: "pol-001", profileFingerprint: FINGERPRINT },
       GRANT_SECRET,
       1_000,
     );
@@ -108,7 +113,7 @@ describe("authorized artifact content serving", () => {
     const app = makeApp();
     const cookie = await credentials("reader-alice", "session-1", 1_000);
     const grant = await mintGrant(
-      { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-1", profileName: "demo", policyRevision: "pol-001" },
+      { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-1", profileName: "demo", policyRevision: "pol-001", profileFingerprint: FINGERPRINT },
       GRANT_SECRET,
       1_000,
     );
@@ -122,7 +127,7 @@ describe("authorized artifact content serving", () => {
     const app = makeApp(() => 200_000);
     const cookie = await credentials("reader-alice", "session-1", 1_000);
     const expired = await mintGrant(
-      { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-1", profileName: "demo", policyRevision: "pol-001" },
+      { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-1", profileName: "demo", policyRevision: "pol-001", profileFingerprint: FINGERPRINT },
       GRANT_SECRET,
       1_000,
     );
@@ -130,7 +135,7 @@ describe("authorized artifact content serving", () => {
     expect((await request(app, "/index.html", cookie, "forged.grant.value")).status).toBe(401);
     const otherSession = await credentials("reader-alice", "session-2", 150_000);
     const grantSession1 = await mintGrant(
-      { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-1", profileName: "demo", policyRevision: "pol-001" },
+      { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-1", profileName: "demo", policyRevision: "pol-001", profileFingerprint: FINGERPRINT },
       GRANT_SECRET,
       150_000,
     );
@@ -148,7 +153,7 @@ describe("authorized artifact content serving", () => {
       sessionSecret: SESSION_SECRET, issuer: ISSUER, now: () => 1_000 });
     const cookie = await credentials("reader-alice", "session-1", 1_000);
     const grant = await mintGrant(
-      { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-1", profileName: "demo", policyRevision: "pol-001" },
+      { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-1", profileName: "demo", policyRevision: "pol-001", profileFingerprint: FINGERPRINT },
       GRANT_SECRET,
       1_000,
     );
@@ -159,20 +164,22 @@ describe("authorized artifact content serving", () => {
 
   it("should refuse operations missing from either side without calling upstream", async () => {
     const fixture = fixtureReaderDeps();
+    const narrowFingerprint = fingerprintReaderProfile({ name: "demo", policyRevision: "pol-001",
+      capabilities: ["geo.read"] });
     const narrowProfile = { ...fixture.authority!,
       getProfile: async () => ({ name: "demo", policyRevision: "pol-001",
         capabilities: ["geo.read" as const] }) };
     const narrowRights = { ...fixture.authority!,
       getRights: async (readerSub: string, artifactId: string) => (
         { readerSub, artifactId, approved: true, capabilities: ["geo.read" as const] }) };
-    for (const authority of [narrowProfile, narrowRights]) {
+    for (const [authority, fingerprint] of [[narrowProfile, narrowFingerprint], [narrowRights, FINGERPRINT]] as const) {
       const upstream = vi.fn(fixture.readOperation!);
       const app = createReaderContentApp({ ...fixture, authority, readOperation: upstream,
         contentBase: "pages.example.test", grantSecret: GRANT_SECRET,
         sessionSecret: SESSION_SECRET, issuer: ISSUER, now: () => 1_000 });
       const cookie = await credentials("reader-alice", "session-1", 1_000);
       const grant = await mintGrant(
-        { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-1", profileName: "demo", policyRevision: "pol-001" },
+        { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-1", profileName: "demo", policyRevision: "pol-001", profileFingerprint: fingerprint },
         GRANT_SECRET,
         1_000,
       );

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createFixtureAuthority } from "./reader-profile.js";
+import { createFixtureAuthority, fingerprintReaderProfile } from "./reader-profile.js";
 import { adaptGrantToReader, canInvoke, fixedUpstream } from "./reader-context.js";
 import type { GrantClaims } from "./preview-grant.js";
 
@@ -14,6 +14,8 @@ const GRANT: GrantClaims = {
   sessionId: "session-1",
   profileName: "demo",
   policyRevision: "pol-001",
+  profileFingerprint: fingerprintReaderProfile({ name: "demo", policyRevision: "pol-001",
+    capabilities: ["geo.read", "signals.protected-read"] }),
 };
 
 describe("reader-context adaptation", () => {
@@ -36,6 +38,8 @@ describe("reader-context adaptation", () => {
     const seen: string[] = [];
     const base = createFixtureAuthority();
     const authority = { ...base,
+      getAuthorizationVersion: async (artifactId: string) => artifactId === other
+        ? "sibling-v1" : base.getAuthorizationVersion(artifactId),
       getRelease: async (artifactId: string) => artifactId === other
         ? { artifactId: other, releaseId: "release-sibling", authorSub: "author-alice" }
         : base.getRelease(artifactId),
@@ -49,7 +53,9 @@ describe("reader-context adaptation", () => {
       } };
     expect(await adaptGrantToReader(GRANT, authority)).toBeNull();
     const sibling = await adaptGrantToReader(
-      { ...GRANT, artifactId: other, releaseId: "release-sibling" }, authority);
+      { ...GRANT, artifactId: other, releaseId: "release-sibling",
+        profileFingerprint: fingerprintReaderProfile({ name: "demo", policyRevision: "pol-001",
+          capabilities: ["geo.read"] }) }, authority);
     expect(sibling?.capabilities).toEqual(["geo.read"]);
     expect(seen).toContain(`reader-alice|${GRANT.artifactId}`);
     expect(seen).toContain(`reader-alice|${other}`);
@@ -57,10 +63,12 @@ describe("reader-context adaptation", () => {
 
   it("should intersect profile and reader capabilities both ways", async () => {
     const base = createFixtureAuthority();
+    const narrowFingerprint = fingerprintReaderProfile({ name: "demo", policyRevision: "pol-001",
+      capabilities: ["geo.read"] });
     const profileOnly = { ...base,
       getProfile: async () => ({ name: "demo", policyRevision: "pol-001",
         capabilities: ["geo.read" as const] }) };
-    expect((await adaptGrantToReader(GRANT, profileOnly))?.capabilities).toEqual(["geo.read"]);
+    expect((await adaptGrantToReader({ ...GRANT, profileFingerprint: narrowFingerprint }, profileOnly))?.capabilities).toEqual(["geo.read"]);
     const rightsOnly = { ...base,
       getRights: async (readerSub: string, artifactId: string) => ({
         readerSub, artifactId, approved: true, capabilities: ["geo.read" as const] }) };
@@ -84,4 +92,5 @@ describe("reader-context adaptation", () => {
       artifactId: GRANT.artifactId, releaseId: "release-002", authorSub: "publisher" }) };
     expect(await adaptGrantToReader(GRANT, authority)).toBeNull();
   });
+
 });

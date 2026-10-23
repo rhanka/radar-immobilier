@@ -104,3 +104,4 @@ No invented production domain or certificate.
 - [x] FIX1: 21 isolated mutants killed by behavioral assertions, with passing controls before/after and byte restoration; stream integration remains pending.
 - [x] FIX1 lint correction: spell mutation-regex indentation with explicit space counts.
 - [x] FIX2: propagate approved fingerprints through integration and browser grant fixtures.
+- [x] FIX2: verified grants require and return the approved fingerprint; module fixtures carry their actual approved profile.

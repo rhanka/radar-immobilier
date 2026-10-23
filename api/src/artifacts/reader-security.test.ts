@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createReaderContentApp } from "./content-serve.js";
 import { mintGrant } from "./preview-grant.js";
 import { mintSessionCookie } from "./preview-session.js";
-import { createFixtureAuthority } from "./reader-profile.js";
+import { createFixtureAuthority, fingerprintReaderProfile } from "./reader-profile.js";
 import { validatePreviewInit } from "./preview-init.js";
 import { fixtureReaderDeps } from "./reader-test-fixture.js";
 
@@ -16,7 +16,9 @@ const ISSUER = { issuer: "https://api.example.test", audience: "reader", tier: "
 async function request(path: string, artifactId = ARTIFACT, extra: Record<string, string> = {}) {
   const grant = await mintGrant({ ...ISSUER, host: HOST, artifactId: ARTIFACT,
     releaseId: RELEASE, readerSub: "reader-alice", sessionId: "session-1",
-    profileName: "demo", policyRevision: "pol-001" }, SECRET, 1_000);
+    profileName: "demo", policyRevision: "pol-001",
+    profileFingerprint: fingerprintReaderProfile({ name: "demo", policyRevision: "pol-001",
+      capabilities: ["geo.read", "signals.protected-read"] }) }, SECRET, 1_000);
   const cookie = mintSessionCookie({ sid: "session-1", readerSub: "reader-alice",
     artifactId, createdAt: 1_000, expiresAt: 90_000 }, SESSION).split(";")[0]!;
   const app = createReaderContentApp({ ...fixtureReaderDeps(), contentBase: "pages.example.test",
