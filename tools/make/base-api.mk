@@ -3,11 +3,13 @@
 # ports with ENV last, e.g.:
 #   make -f tools/make/base-api.mk base-api-test API_PORT=18910 UI_PORT=15910 MAILDEV_UI_PORT=11910 ENV=test-base-api-b0
 ENV ?= test-base-api-b0
+BASE_API_SOURCE ?= worktree
 API_PORT ?= 18910
 UI_PORT ?= 15910
 MAILDEV_UI_PORT ?= 11910
 BASE_API_MK := $(lastword $(MAKEFILE_LIST))
 export ENV API_PORT UI_PORT MAILDEV_UI_PORT SCOPE MSG FILES OUT SLUG BRANCH START SRC RECEIPT BASE_API_SCOPE
+export BASE_API_SOURCE
 BASE_API_ARGS = "API_PORT=$$API_PORT" "UI_PORT=$$UI_PORT" "MAILDEV_UI_PORT=$$MAILDEV_UI_PORT" "ENV=$$ENV"
 BASE_API_SCOPE := src/services/facets/scoped-db.test.ts src/services/facets/workspace-receipts-db.test.ts src/services/facets/projection-migration-db.test.ts src/routes/scoped-projection-events-db.test.ts
 
