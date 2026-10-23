@@ -63,3 +63,4 @@ No invented production domain or certificate.
 - [x] AEAD envelope modules prepared and locally tested.
 - [x] Separate host-only page cookie modules prepared and locally tested.
 - [x] Signed grant verification requires bounded expiry and matching subject.
+- [x] Local activation registry prepared; provider activation binding pending.
