@@ -37,6 +37,7 @@ import {
 } from "./lot-commands.js";
 import { resolveLotRights } from "./lot-capabilities.js";
 import { requireLotDestination } from "./lot-gate.js";
+import { assertCutoverTargetReady } from "./lot-cutover-target.js";
 import { authorizeLotMutation, validateLotMutationShape } from "./lot-authorize.js";
 import { appendLotTransition } from "./lot-apply.js";
 import type { LotPlan } from "./lot-plan.js";
@@ -83,6 +84,7 @@ export async function writeLotBatch(
     }
     for (const item of batch.items) {
       authorizeLotMutation(rights, scope, item.mutation, destination.selectionBasket);
+      await assertCutoverTargetReady(tx as unknown as Database, workspaceId, batch.mode, item.target);
     }
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${JSON.stringify(
       ["scoped-command", actorId, key])}, 0))`);
