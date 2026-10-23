@@ -198,3 +198,4 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 - [x] reconcile S3 inventory with invocation cleanup intents.
 - [x] reconcile preparation inventory after denied finalization.
 - [x] isolate race variants and compare both durable receipts.
+- [x] protect cross-artifact references in both purge orders.

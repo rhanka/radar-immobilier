@@ -838,7 +838,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
     }
   });
 
-  it.each(["purge-first", "publication-first"] as const)("purge claim protects shared blobs in %s order", async (order) => {
+  it.each(["purge-first", "publication-first"] as const)("purge claim blocks a new reference from another artifact in %s order", async (order) => {
     await requireCommitContract();
     const binding = await requirePurgeRaceBinding();
     const barrier = await requireCommitBarrier();
@@ -847,40 +847,96 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
     let run: ReturnType<typeof startBarrierOperation> | undefined;
     try {
       const execute = requireHostExecute(host);
-      const file = { path: "index.html", mimeType: "text/html", text: "purge-shared-" + order };
-      const seed = async (name: string): Promise<string> => {
+      // Collectable bytes live only on the purge target; the other artifact is
+      // active but does NOT reference them yet. Referencing them from the other
+      // artifact while the deletion claim is held is the discriminating act: a
+      // provider ignoring claims during reference creation passes the old
+      // same-artifact lifecycle check and fails here.
+      const collectableText = `purge-collectable-${order}`;
+      const seedTarget = async (name: string): Promise<string> => {
         const ensured = await execute({ method: "POST", path: "/ensure", body: { bindingName: name,
           idempotencyKey: name } }, invocationFor(allowAll(), name)) as { result: { body: { artifactId: string } } };
         const id = ensured.result.body.artifactId;
-        expect(await execute({ method: "POST", path: "/publish", body: { artifactId: id, files: [file],
+        expect(await execute({ method: "POST", path: "/publish", body: { artifactId: id,
+          files: [{ path: "index.html", mimeType: "text/html", text: collectableText },
+            { path: "exclusive.html", mimeType: "text/html", text: `exclusive-${order}` }],
           idempotencyKey: name + "-publish" } }, invocationFor(allowAll(), name + "-publish"))).toMatchObject({ ok: true });
         return id;
       };
-      const artifactId = await seed("purge-target-" + order);
-      await seed("purge-shared-owner-" + order);
-      const body = { artifactId, files: [file], idempotencyKey: "purge-racing-" + order };
-      const invocation = invocationFor(allowAll(), "purge-racing-" + order);
-      if (order === "publication-first") {
-        run = startBarrierOperation(barrier, invocation.invocationId,
-          () => execute({ method: "POST", path: "/publish", body }, invocation), "before_commit");
+      const seedActive = async (name: string): Promise<string> => {
+        const ensured = await execute({ method: "POST", path: "/ensure", body: { bindingName: name,
+          idempotencyKey: name } }, invocationFor(allowAll(), name)) as { result: { body: { artifactId: string } } };
+        return ensured.result.body.artifactId;
+      };
+      const targetId = await seedTarget(`purge-target-${order}`);
+      const otherId = await seedActive(`purge-other-${order}`);
+      const sharedKeys: string[] = [];
+      for (const key of await rawBlobs().listKeys("")) {
+        if (new TextDecoder().decode(await rawBlobs().getBlob(key)) === collectableText) sharedKeys.push(key);
+      }
+      expect(sharedKeys.length).toBeGreaterThan(0);
+      const referenceBody = { artifactId: otherId,
+        files: [{ path: "index.html", mimeType: "text/html", text: collectableText }] };
+      if (order === "purge-first") {
+        // Suspend the deletion of the collectable blob, then try to reference
+        // the same bytes from the other active artifact while the claim holds.
+        paused = await binding.pausePurgeBeforeDelete(host, targetId);
+        expect(paused.claimId.length).toBeGreaterThan(0);
+        expect(paused.blobKeys.length).toBeGreaterThan(0);
+        for (const key of sharedKeys) expect(paused.blobKeys).toContain(key);
+        expect(await binding.inspectDeletionClaims(host)).toContainEqual(
+          expect.objectContaining({ claimId: paused.claimId }));
+        const reference = invocationFor(allowAll(), `purge-reference-${order}`);
+        const pending = execute({ method: "POST", path: "/publish",
+          body: { ...referenceBody, idempotencyKey: `purge-reference-${order}` } },
+          reference);
+        void pending.catch(() => {});
+        let early: unknown;
+        await withTimeout(pending.then((value) => { early = value; }), 100);
+        if (early !== undefined) assertOutcomeFailure(early, reference.invocationId);
+        paused.release();
+        await paused.finished;
+        paused = undefined;
+        const outcome = await pending;
+        if (early === undefined) expect(outcome).toMatchObject({ ok: true });
+        // After claim resolution, a fresh authorized attempt must reprepare
+        // rather than attach the deleted blob.
+        const retry = invocationFor(allowAll(), `purge-retry-${order}`);
+        const retried = await execute({ method: "POST", path: "/publish",
+          body: { ...referenceBody, idempotencyKey: `purge-retry-${order}` } },
+          retry);
+        expect(retried).toMatchObject({ ok: true });
+      } else {
+        // Hold the cross-artifact reference preparation at the final barrier,
+        // then prove the purge waits; release the publication first (success),
+        // then resolve the purge and prove the shared bytes survive.
+        const reference = invocationFor(allowAll(), `purge-held-${order}`);
+        run = startBarrierOperation(barrier, reference.invocationId, () => execute({
+          method: "POST", path: "/publish",
+          body: { ...referenceBody, idempotencyKey: `purge-held-${order}` } }, reference), "before_commit");
         await run.reached;
-        const purge = binding.pausePurgeBeforeDelete(host, artifactId);
-        expect(await withTimeout(purge, 100)).toBeUndefined();
+        const purge = binding.pausePurgeBeforeDelete(host, targetId);
+        let earlyPause: typeof paused;
+        await withTimeout(purge.then((value) => { earlyPause = value; }), 100);
+        if (earlyPause) for (const key of sharedKeys) expect(earlyPause.blobKeys).not.toContain(key);
         run.release();
         expect(await run.pending).toMatchObject({ ok: true });
-        paused = await purge;
-      } else {
-        paused = await binding.pausePurgeBeforeDelete(host, artifactId);
-        expect(await execute({ method: "POST", path: "/publish", body }, invocation)).toMatchObject({ ok: false });
+        paused = earlyPause ?? await purge;
+        expect(paused.claimId.length).toBeGreaterThan(0);
+        expect(await binding.inspectDeletionClaims(host)).toContainEqual(
+          expect.objectContaining({ claimId: paused.claimId }));
+        // The target has exclusive bytes too, so purge can reach DELETE even
+        // though the new committed reference protects the shared bytes.
+        for (const key of sharedKeys) expect(paused.blobKeys).not.toContain(key);
+        paused.release();
+        await paused.finished;
+        paused = undefined;
+        const after = new Set(await rawBlobs().listKeys(""));
+        for (const key of sharedKeys) expect(after.has(key)).toBe(true);
       }
-      expect(paused.claimId.length).toBeGreaterThan(0);
-      expect(await binding.inspectDeletionClaims(host)).toContainEqual(expect.objectContaining({ claimId: paused.claimId, state: "deleting" }));
-      const before = new Set(await rawBlobs().listKeys(""));
-      expect(before.size).toBeGreaterThan(0);
-      paused.release();
-      await paused.finished;
-      const after = new Set(await rawBlobs().listKeys(""));
-      for (const key of before) expect(after.has(key)).toBe(true); // other artifact still references the bytes
+      for (const key of sharedKeys) {
+        expect(new TextDecoder().decode(await rawBlobs().getBlob(key))).toBe(collectableText);
+      }
     } finally {
       run?.release(); paused?.release();
       await run?.pending.catch(() => {}); await paused?.finished.catch(() => {});
