@@ -84,3 +84,4 @@ No invented production domain or certificate.
 - [x] Image smoke records image/source identity and excludes all environment file content.
 - [x] Shared patch proposals pass git apply checks; no shared file was edited.
 - [x] Integration handoff identifies missing authority/store/receiving API and image receipts.
+- [x] Review correction: require full 128-bit GCM authentication tags.

@@ -29,7 +29,7 @@ export function openSession(sealed: string, secret: string): string | null {
     if (parts.length !== 3) return null;
     const [nonceB64, bodyB64, tagB64] = parts as [string, string, string];
     const key = deriveKey(secret);
-    const decipher = createDecipheriv(ALGORITHM, key, Buffer.from(nonceB64, "base64url"));
+    const decipher = createDecipheriv(ALGORITHM, key, Buffer.from(nonceB64, "base64url"), { authTagLength: 16 });
     decipher.setAuthTag(Buffer.from(tagB64, "base64url"));
     const body = Buffer.concat([
       decipher.update(Buffer.from(bodyB64, "base64url")),
