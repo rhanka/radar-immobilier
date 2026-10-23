@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { createFixtureAuthority } from "./reader-profile.js";
-import { mintGrant, type GrantClaims } from "./preview-grant.js";
+import { createFixtureAuthority, fingerprintReaderProfile } from "./reader-profile.js";
+import { mintGrant, verifyGrant, type GrantClaims } from "./preview-grant.js";
 import { accessOpen, createRevocationList, renewGrant } from "./preview-renewal.js";
 
 const SECRET = "grant-secret-32-bytes-long-padding!";
@@ -14,6 +14,8 @@ const GRANT: GrantClaims = {
   sessionId: "session-1",
   profileName: "demo",
   policyRevision: "pol-001",
+  profileFingerprint: fingerprintReaderProfile({ name: "demo", policyRevision: "pol-001",
+    capabilities: ["geo.read", "signals.protected-read"] }),
 };
 
 describe("grant renewal and revocation", () => {
@@ -41,7 +43,9 @@ describe("grant renewal and revocation", () => {
       10_000,
     )).toBeNull();
     const other = "223e4567-e89b-12d3-a456-426614174000";
-    const siblingGrant = await mintGrant({ ...GRANT, artifactId: other }, SECRET, 1_000);
+    const siblingGrant = await mintGrant({ ...GRANT, artifactId: other,
+      profileFingerprint: fingerprintReaderProfile({ name: "demo", policyRevision: "pol-001",
+        capabilities: ["geo.read"] }) }, SECRET, 1_000);
     const sibling = { ...base,
       getAuthorizationVersion: async (artifactId: string) => artifactId === other
         ? "sibling-v1" : base.getAuthorizationVersion(artifactId),
@@ -95,6 +99,7 @@ describe("grant renewal and revocation", () => {
       10_000,
     )).toBeNull();
   });
+
 
   it("should close access at expiry, on revocation and on outage", () => {
     expect(accessOpen({ grantValid: true, revoked: false, outage: false })).toBe(true);

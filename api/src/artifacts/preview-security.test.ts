@@ -13,6 +13,8 @@ const GRANT: GrantClaims = {
   artifactId: "123e4567-e89b-12d3-a456-426614174000",
   releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice",
   sessionId: "session-1", profileName: "demo", policyRevision: "pol-001",
+  profileFingerprint: fingerprintReaderProfile({ name: "demo", policyRevision: "pol-001",
+    capabilities: ["geo.read", "signals.protected-read"] }),
 };
 
 describe("preview security boundaries", () => {
