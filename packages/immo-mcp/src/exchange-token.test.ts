@@ -17,12 +17,12 @@ const CONFIG = {
   workloadClientId: TEST_WORKLOAD_CLIENT,
 };
 
-async function mint(key: KeyLike, claims: Record<string, unknown>, expIn = 60): Promise<string> {
+async function mint(key: KeyLike, claims: Record<string, unknown>, expIn = 60, sub = "user-1"): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   return new SignJWT({ ...claims })
     .setProtectedHeader({ alg: "RS256", typ: "at+jwt" })
     .setIssuer(TEST_ISSUER)
-    .setSubject("user-1")
+    .setSubject(sub)
     .setAudience(TEST_API_AUDIENCE)
     .setIssuedAt(now)
     .setExpirationTime(now + expIn)
@@ -62,8 +62,8 @@ describe("validateExchangedToken", () => {
   it("refuses service users, broad scopes, long lifetimes and proof binding", async () => {
     const { publicKey, privateKey } = await generateKeyPair("RS256");
     const key = { resolveKey: async () => publicKey as KeyLike };
-    const service = await mint(privateKey as KeyLike, { scope: "immo:search", client_id: TEST_WORKLOAD_CLIENT, act: { sub: TEST_WORKLOAD_SUB } });
-    await expect(validateExchangedToken(service, { ...SUBJECT, sub: TEST_WORKLOAD_SUB }, CONFIG, key)).rejects.toThrow(/exchange_service_user_refused|exchange_invalid_subject/);
+    const service = await mint(privateKey as KeyLike, { scope: "immo:search", client_id: TEST_WORKLOAD_CLIENT, act: { sub: TEST_WORKLOAD_SUB } }, 60, TEST_WORKLOAD_SUB);
+    await expect(validateExchangedToken(service, { ...SUBJECT, sub: TEST_WORKLOAD_SUB }, CONFIG, key)).rejects.toThrow(/exchange_service_user_refused/);
     const broad = await mint(privateKey as KeyLike, { scope: "immo:search immo:admin", client_id: TEST_WORKLOAD_CLIENT, act: { sub: TEST_WORKLOAD_SUB } });
     await expect(validateExchangedToken(broad, SUBJECT, CONFIG, key)).rejects.toThrow(/exchange_scope_refused/);
     const long = await mint(privateKey as KeyLike, { scope: "immo:search", client_id: TEST_WORKLOAD_CLIENT, act: { sub: TEST_WORKLOAD_SUB } }, 301);

@@ -153,3 +153,5 @@ activation, no cluster-mesh composition.
 - [x] Reject protected HTTP search without private authority, including missing exchange runtime.
 
 - [x] Prove valid DPoP refusal with and without runtime, zero exchange/API calls, and preserved synthetic stdio.
+
+- [x] Require the exact service-user refusal for a signed token matching the expected workload subject.
