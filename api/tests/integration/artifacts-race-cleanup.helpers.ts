@@ -18,12 +18,10 @@ export async function closeArtifactWorker(child: ChildProcess, requestClose: () 
     else child.once("exit", () => resolve());
   });
   try { await settledWithin(requestClose(), 5000); } catch { /* child may already have exited */ }
-  finally {
-    if (child.exitCode === null && child.signalCode === null) child.kill("SIGTERM");
-    if (!await settledWithin(exited, 1000)) {
-      child.kill("SIGKILL");
-      if (!await settledWithin(exited, 1000)) throw new Error("artifact worker did not exit after SIGKILL");
-    }
+  if (child.exitCode === null && child.signalCode === null) child.kill("SIGTERM");
+  if (!await settledWithin(exited, 1000)) {
+    child.kill("SIGKILL");
+    if (!await settledWithin(exited, 1000)) throw new Error("artifact worker did not exit after SIGKILL");
   }
 }
 
