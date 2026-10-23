@@ -5,6 +5,8 @@ import type { ObjectStore } from "../../src/storage/object-store.js";
 import { graphSignalsRoute } from "../../src/routes/graph-signals.js";
 import { signalFacetsRoute } from "../../src/routes/signal-facets.js";
 import { legacyFenceStatus } from "../../src/services/facets/legacy-retirement.js";
+import { describeDb } from "../../src/services/facets/workspace-archive-fixture.js";
+import { httpFixture } from "./base-api-http-fixture.js";
 
 const db = {} as Database;
 const store = {} as ObjectStore;
@@ -62,4 +64,25 @@ describe("base-api legacy retirement fence", () => {
     const cities = await facets("retired").request("/api/v1/signal-facets/cities/some-city");
     expect(cities.status).toBe(410);
   });
+});
+
+describeDb("base-api composed legacy retirement", () => {
+  it.each([["cutover-closed", 503], ["retired", 410]] as const)(
+    "serves %s through createApp with verified browser cookies", async (state, status) => {
+      const f = await httpFixture(state);
+      for (const path of ["/api/graph-signals/synthetic-city", "/api/graph-signals/by-city",
+        "/api/v1/signal-facets/reason-codes", "/api/v1/signal-facets/cities/synthetic-city"]) {
+        const response = await f.request(path);
+        expect(response.status).toBe(status);
+        expect(response.headers.get("cache-control")).toBe("private, no-store");
+        expect((await response.json()).successor).toContain("/api/v1/workspaces/");
+      }
+      for (const action of ["select", "deselect", "discard", "restore"]) {
+        const response = await f.request(`/api/v1/signal-facets/${action}`,
+          f.data.contributor.sub, { method: "POST" });
+        expect(response.status).toBe(status);
+        expect((await response.json()).successor).toContain(`personal/${action}`);
+      }
+    },
+  );
 });
