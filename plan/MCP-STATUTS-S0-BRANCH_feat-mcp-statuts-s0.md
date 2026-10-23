@@ -77,8 +77,8 @@ successor compatibility and delegation A as pure, unregistered contracts.
   - [x] Cover forged, broadened and generic-scope delegation refusals.
 - [ ] **Review 1 — Scoped compatibility and discriminating evidence**
   - [x] Require the exact requested POST operation in the received delegation.
-  - [ ] Preserve reason classifications and missing-basket diagnostics.
-  - [ ] Carry read-head metadata separately from receipt event snapshots.
+  - [x] Preserve reason classifications and missing-basket diagnostics.
+  - [x] Carry read-head metadata separately from receipt event snapshots.
   - [ ] Match scoped HTTP lot bounds and reject orphan signal expectations.
   - [ ] Reject private context fields using a complete accepted fixture.
   - [ ] Cover selection, pipeline and market grants one at a time.

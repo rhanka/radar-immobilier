@@ -8,6 +8,8 @@ export const CitySchema = z.string().min(1).max(128).regex(/^[a-z0-9-]+$/);
 export const ScopeSchema = z.enum(["personal", "common"]);
 export const ModeSchema = z.enum(["real", "simulation"]);
 export const BasketSchema = z.enum(["pertinent", "a_surveiller"]);
+/** Signal classification bound to each reason code (SPEC 4.1, SQL chk constraints). */
+export const ReasonVerdictSchema = z.enum(["pertinent", "a_surveiller", "non_pertinent"]);
 export const ReasonSchema = z.string().max(128).regex(/^[A-Z0-9]+(-[A-Z0-9]+)*$/);
 export const SignalTargetSchema = z.object({
   citySlug: CitySchema, type: z.enum(["Signal", "DesignationEvent"]),

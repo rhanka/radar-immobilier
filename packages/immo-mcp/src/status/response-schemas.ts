@@ -1,14 +1,15 @@
 import { z } from "zod";
 import {
   AskingPriceSchema, CitySchema, DisplayedLotVersionSchema, FingerprintSchema,
-  ListingUrlSchema, LotTargetSchema, ModeSchema, OperationSchema, RightsSchema,
-  SemanticProfileSchema, SignalTargetSchema, WorkspaceIdSchema,
+  ListingUrlSchema, LotTargetSchema, ModeSchema, OperationSchema, ReasonVerdictSchema,
+  RightsSchema, SemanticProfileSchema, SignalTargetSchema, WorkspaceIdSchema,
 } from "./wire-schemas.js";
 
 const commonEvent = {
   id: z.string().uuid(), facet: z.enum(["selection", "archive", "pipeline", "market"]),
   basket: z.string().nullable(), state: z.enum(["active", "inactive"]),
-  reasonCode: z.string().nullable(), verdict: z.string().nullable(), createdAt: z.string().datetime(),
+  reasonCode: z.string().nullable(), verdict: ReasonVerdictSchema.nullable(),
+  createdAt: z.string().datetime(),
 };
 export const SignalEventSchema = z.object({ ...commonEvent, target: SignalTargetSchema }).strict();
 export const LotEventSchema = z.object({ ...commonEvent, target: LotTargetSchema, mode: ModeSchema,
@@ -18,27 +19,41 @@ export const LotEventSchema = z.object({ ...commonEvent, target: LotTargetSchema
   source: z.object({ importRunId: z.string().uuid(), sourceRowId: z.string().nullable(),
     sourceChainId: z.string().nullable() }).strict().nullable(),
 }).strict();
+const ReasonCatalogEntrySchema = z.object({
+  code: z.string().min(1), label: z.string().min(1), verdict: ReasonVerdictSchema,
+}).strict();
 const WorkspaceContextSchema = z.object({
   workspaceId: WorkspaceIdSchema, label: z.string().min(1),
-  capabilities: RightsSchema, selectionBasket: z.string().min(1),
-  reasonCatalog: z.array(z.object({ code: z.string().min(1), label: z.string().min(1) }).strict()),
+  capabilities: RightsSchema, selectionBasket: z.string().min(1).nullable(),
+  reasonCatalog: z.array(ReasonCatalogEntrySchema),
   semanticProfile: SemanticProfileSchema, operations: z.array(OperationSchema),
   activation: z.enum(["open", "closed", "unavailable"]),
-}).strict();
+}).strict().superRefine((context, ctx) => {
+  if (context.activation === "open" && context.selectionBasket === null) {
+    ctx.addIssue({ code: "custom", message: "An open destination requires its configured basket" });
+  }
+});
 export const GetFacetContextOutputSchema = z.object({
   workspaces: z.array(z.object({ workspaceId: WorkspaceIdSchema, label: z.string() }).strict()),
   selectedWorkspace: WorkspaceContextSchema.nullable(),
 }).strict();
 
+/** Read heads carry scoped-reader metadata; receipts stay plain event snapshots. */
+const SignalHeadSchema = SignalEventSchema.extend({
+  changedSinceArchive: z.boolean().nullable(),
+}).strict();
+const LotHeadSchema = LotEventSchema.extend({
+  changedSinceArchive: z.boolean().nullable(),
+}).strict();
 const hidden = { personalHidden: z.boolean(), commonHidden: z.boolean(), effectiveHidden: z.boolean() };
 const signalReady = z.object({ readiness: z.literal("ready"), target: SignalTargetSchema,
   displayedContent: z.string(), displayedFingerprint: FingerprintSchema,
-  personalHeads: z.array(SignalEventSchema), commonHeads: z.array(SignalEventSchema),
+  personalHeads: z.array(SignalHeadSchema), commonHeads: z.array(SignalHeadSchema),
   ...hidden, operations: z.array(OperationSchema),
 }).strict();
 const lotReady = z.object({ readiness: z.literal("ready"), target: LotTargetSchema,
   displayed_version: DisplayedLotVersionSchema,
-  personalHeads: z.array(LotEventSchema), commonHeads: z.array(LotEventSchema),
+  personalHeads: z.array(LotHeadSchema), commonHeads: z.array(LotHeadSchema),
   ...hidden, operations: z.array(OperationSchema),
 }).strict();
 const unavailable = z.enum(["missing_state", "source_unavailable", "projection_unavailable"]);
