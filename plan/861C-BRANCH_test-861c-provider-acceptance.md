@@ -22,6 +22,7 @@ Keep the r2 host API target and its remaining construction bindings explicit.
   `api/tests/integration/artifacts-provider-contract.helpers.ts`;
   `tools/artifact-host.mk`; `RAPPORT-MUSE-PROVIDER-ACCEPTANCE.md`;
   `RAPPORT-SOL-PROVIDER-ACCEPTANCE.md`;
+  uncommitted `RAPPORT-SOL-FIX1-908.md`;
   uncommitted `RAPPORT-SOL-Q1-Q2.md`; ignored evidence and local Git metadata
   under `tmp/861c-provider-acceptance/` and `tmp/861c-q1-q2/`.
 - [x] **Forbidden Paths**: root Makefile, compose files, rules, agent entrypoints,
@@ -126,6 +127,16 @@ Keep the r2 host API target and its remaining construction bindings explicit.
   compiled profile/coordinator/transaction participant and cleanup bindings;
   prove preparation accounting/cleanup/shared blobs and both race orders.
 
+## Review 1 corrections
+- [x] Name both unimplemented construction joints before partial composition.
+- [x] Distinguish replay guards and permit the public MCP error field.
+- [x] Use transaction-bound policy reads and both serialization orders.
+- [x] Specify observable preparation deadlines, shared cleanup and purge claims.
+- [x] Target E3 phases and the finalization COMMIT with one-shot faults.
+- [x] Assert read 503, same-host correlation, reverse replay and direct selection.
+- [x] Reject zero/skipped required API and host suites, including option scopes.
+- [x] Pin final mutation, API, static and baseline-contract receipts.
+
 ## Q1/Q2 delivery slices
 - [x] Slice 001: harden artifact acceptance qualification.
 - [x] Slice 002: bind r2 provider contracts.
@@ -175,3 +186,4 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 - [x] target SQL fault phases and reject internal retries.
 - [x] retain typed provider failure causes before wire projection.
 - [x] require retriable read failures to project as 503.
+- [x] docs: record review fixes and qualification prerequisites.
