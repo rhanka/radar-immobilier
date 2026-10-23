@@ -16,7 +16,8 @@ import {
   syntheticLotVersion,
   syntheticMark,
 } from "../lot-migration-report/fixtures.js";
-import { lotVersions } from "../../../db/schema.js";
+import { eq } from "drizzle-orm";
+import { lotCutoverState, lotVersions } from "../../../db/schema.js";
 import {
   attestLotSourceWriter,
   KNOWN_LOT_SOURCE_WRITERS,
@@ -45,6 +46,7 @@ export const LOT_6K_CC = "6c000000-0000-4000-8000-0000000000cc";
  */
 export async function cutoverFixture(): Promise<CutoverFixture> {
   const f = await lotFixture();
+  await f.db.delete(lotCutoverState).where(eq(lotCutoverState.workspaceId, f.workspaceId));
   await f.db.insert(lotVersions).values({
     id: LOT_6K_CC,
     canonicalId: "lot-canonical-syn-6k-03",
