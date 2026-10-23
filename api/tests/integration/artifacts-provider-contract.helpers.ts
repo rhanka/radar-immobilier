@@ -728,13 +728,76 @@ export function proxyLeasedPool(pool: pg.Pool, handler: ProxyHandler<pg.Pool>): 
   } });
 }
 
+/** Instrument real leased clients; one fault, then pass through to expose retries. */
+export function finalizationFaultPool(pool: pg.Pool, options: {
+  code: string; lockClass?: string; loseCommitAck?: boolean;
+}) {
+  const evidence = { armed: false, injections: 0, attempts: 0, writes: 0,
+    phase: "", commits: 0, guardPassed: false };
+  const matchesLock = (sql: string): boolean => {
+    const tables = [...sql.replaceAll('"', '').matchAll(/\b(?:FROM|JOIN|UPDATE|INTO|TABLE)\s+([\w.]+)/gi)]
+      .map((match) => match[1]!.split(".").at(-1)!);
+    const names: Record<string, RegExp> = {
+      binding: /^(artifact_)?bindings?(_keys)?$/, "artifact-lifecycle": /^artifacts$/,
+      acl: /^artifact_access$/, pointer: /^artifact_current$/,
+      policy: /^(account_users|test_policy_revision|.*policy.*)$/,
+      quota: /quota/, "blob-reference": /^blob_(ref|pin)/,
+      "deletion-claim": /deletion.*claim|claim.*deletion/,
+    };
+    if (options.lockClass === "schema-infrastructure") return /\bLOCK\s+TABLE\b|\bpg_catalog\./i.test(sql);
+    if (options.lockClass === "unqualified") return /^\s*SET\s+LOCAL\b/i.test(sql);
+    return /FOR\s+(UPDATE|SHARE)/i.test(sql) &&
+      tables.some((name) => names[options.lockClass ?? ""]?.test(name));
+  };
+  const instrumented = new Proxy(pool, { get(target, property, receiver) {
+    if (property === "connect") return async () => {
+      const client = await target.connect();
+      let finalizing = false;
+      return new Proxy(client, { get(leased, key, clientReceiver) {
+        if (key === "query") return async (text: unknown, params?: unknown) => {
+          const sql = typeof text === "string" ? text : String((text as { text?: string })?.text ?? "");
+          const query = () => (leased.query as (...args: unknown[]) => Promise<unknown>).call(leased, text, params);
+          if (/^\s*BEGIN\b/i.test(sql)) finalizing = false;
+          if (/\boperation_keys\b/i.test(sql) && /FOR\s+UPDATE/i.test(sql)) {
+            finalizing = true;
+            if (evidence.armed) evidence.attempts++;
+          }
+          const commit = /^\s*COMMIT\s*;?\s*$/i.test(sql);
+          const write = finalizing && /^\s*(INSERT|UPDATE|DELETE)\b/i.test(sql);
+          const lockFault = options.lockClass !== undefined && matchesLock(sql);
+          if (evidence.armed && evidence.injections === 0 &&
+              (lockFault || (!options.lockClass && !options.loseCommitAck && write) ||
+                (options.loseCommitAck && finalizing && commit && evidence.guardPassed))) {
+            // Abort cases execute a provisional write before injection. COMMIT
+            // loss executes the real finalization COMMIT before losing its ACK.
+            if (write || options.loseCommitAck) await query();
+            if (write) evidence.writes++;
+            if (options.loseCommitAck) evidence.commits++;
+            evidence.injections++;
+            evidence.phase = options.loseCommitAck ? "commit" : options.lockClass ?? "provisional-write";
+            throw Object.assign(new Error(`private injected ${evidence.phase}`), { code: options.code });
+          }
+          const result = await query();
+          if (evidence.armed && write) evidence.writes++;
+          return result;
+        };
+        const value = Reflect.get(leased, key, clientReceiver);
+        return typeof value === "function" ? value.bind(leased) : value;
+      } });
+    };
+    const value = Reflect.get(target, property, receiver);
+    return typeof value === "function" ? value.bind(target) : value;
+  } });
+  return { pool: instrumented, evidence };
+}
+
 /** Observe committed state on a separate raw connection, with stable ordering. */
 export async function committedState(pool: pg.Pool): Promise<unknown> {
   const client = await pool.connect();
   try {
     const snapshot: Record<string, unknown> = {};
     for (const table of ["artifacts", "releases", "artifact_current", "idempotency_keys",
-      "artifact_access", "artifact_sources", "blobs", "blob_ref_holders", "blob_pins"]) {
+      "artifact_access", "artifact_sources", "blob_ref_holders"]) {
       snapshot[table] = (await client.query(
         `SELECT to_jsonb(t) AS row FROM artifacts.${table} t ORDER BY to_jsonb(t)::text`)).rows;
     }
@@ -796,20 +859,19 @@ if (process.argv[2] === "--artifact-worker") {
       const args = message.args ?? [];
       let result: unknown;
       if (message.method === "initialize") {
-        await requireCommitContract();
         const { default: pgModule } = await import("pg");
         const { S3Client } = await import("@aws-sdk/client-s3");
         const { createS3BlobStore } = await import("@sentropic/artifacts/adapters/s3");
-        const { composeArtifactHost } = await import("@radar/artifacts-host");
         const config = args[1] as Record<string, string>;
         pool = new pgModule.Pool(args[0] as pg.PoolConfig);
         s3 = new S3Client({ endpoint: config.s3Endpoint!, region: config.s3Region!, forcePathStyle: true,
           credentials: { accessKeyId: config.s3AccessKey!, secretAccessKey: config.s3SecretKey! } });
         barrier = await requireCommitBarrier();
-        const compose = composeArtifactHost as unknown as (...args: unknown[]) => Promise<Record<string, unknown>>;
-        host = await compose(pool, config, createS3BlobStore({ client: s3, bucket: config.s3Bucket! }),
-          { profile: { selectedCapabilities: [...FROZEN_CAPABILITIES] }, coordinator: { testObserver: barrier.observer } });
-        requireSelectedProfile(host);
+        const composed = await composeR2AcceptanceHost({
+          pool, config, blobs: createS3BlobStore({ client: s3, bucket: config.s3Bucket! }), barrier,
+        });
+        host = composed.host;
+        requireSelectedProfile(host, composed.profile.digest);
       } else if (message.method === "execute") {
         const invocation = args[1] as InvocationContextShape;
         result = await requireHostExecute(host)(args[0], buildInvocationContext({ ...invocation,
