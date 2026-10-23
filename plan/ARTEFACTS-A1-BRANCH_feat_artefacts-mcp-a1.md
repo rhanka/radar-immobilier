@@ -107,4 +107,5 @@ unverified evidence. ETA unchanged: 14-23 agent hours, complete A1 circuit.
 
 - [x] Compare replay bodies while retaining replay authorization and durable uniqueness checks.
 - [x] Bound the three principal race waits and propagate pump failures into cleanup.
+- [x] Cover pending SQL operations, stalled barriers and successful pump completion in regression tests.
 - [ ] Execute the corrected race scenarios on the identified r2 candidate; synthetic doubles do not qualify it.
