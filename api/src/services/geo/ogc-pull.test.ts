@@ -342,7 +342,7 @@ describe("upsertLotBatch", () => {
   });
 
   it.each([[true, false], [false, false], [true, true], [false, true]])(
-    "should update the divergent stored row with geometry=%s and recheck=%s",
+    "should hold the stored lock with geometry=%s and recheck=%s",
     async (withGeom, recheck) => {
       const stored = {
         id: "stored-uuid", city_slug: "sainte-catherine", canonical_id: "ogc:lots:legacy:4516943",
@@ -354,18 +354,63 @@ describe("upsertLotBatch", () => {
       });
       const client = { query: queryMock, release: vi.fn() };
       const pool = { connect: vi.fn().mockResolvedValue(client) } as unknown as pg.Pool;
-      const result = await upsertLotBatch(makeMockDb(), pool, "sainte-catherine", [makeFeature("4516943", withGeom)]);
-      expect(result.upserted).toBe(1);
-      expect(result.skipped).toBe(0);
-      const updateCall = queryMock.mock.calls.find(
-        (c: unknown[]) => typeof c[0] === "string" && c[0].includes("UPDATE lot_versions"),
-      );
-      expect(updateCall).toBeDefined();
-      expect(updateCall![1]).toContain("stored-uuid");
-      expect(updateCall![0]).not.toContain("canonical_id");
-      expect(queryMock.mock.calls.some(([sql]) => sql.includes("INSERT INTO lot_versions"))).toBe(false);
+      if (!recheck) {
+        const result = await upsertLotBatch(makeMockDb(), pool, "sainte-catherine", [makeFeature("4516943", withGeom)]);
+        expect(result.upserted).toBe(1);
+        expect(result.skipped).toBe(0);
+        const lockCall = queryMock.mock.calls.find(
+          (c: unknown[]) => typeof c[0] === "string" && c[0].includes("pg_advisory_xact_lock"),
+        );
+        const updateCall = queryMock.mock.calls.find(
+          (c: unknown[]) => typeof c[0] === "string" && c[0].includes("UPDATE lot_versions"),
+        );
+        expect(lockCall).toBeDefined();
+        expect(updateCall).toBeDefined();
+        expect(lockCall![1]).toEqual([
+          JSON.stringify(["lot-source", "sainte-catherine", "ogc:lots:legacy:4516943"]),
+        ]);
+        const statements = queryMock.mock.calls.map(
+          (c: unknown[]) => (typeof c[0] === "string" ? c[0] : ""),
+        );
+        const lockIndex = statements.findIndex((s) => s.includes("pg_advisory_xact_lock"));
+        const updateIndex = statements.findIndex((s) => s.includes("UPDATE lot_versions"));
+        expect(lockIndex).toBeGreaterThanOrEqual(0);
+        expect(updateIndex).toBeGreaterThan(lockIndex);
+        expect(statements.indexOf("COMMIT")).toBeGreaterThan(updateIndex);
+        expect(client.release).toHaveBeenCalledOnce();
+        expect(updateCall![1]).toContain("stored-uuid");
+        expect(updateCall![0]).not.toContain("canonical_id");
+        expect(queryMock.mock.calls.some(([sql]) => sql.includes("INSERT INTO lot_versions"))).toBe(false);
+        return;
+      }
+      await expect(
+        upsertLotBatch(makeMockDb(), pool, "sainte-catherine", [makeFeature("4516943", withGeom)]),
+      ).rejects.toThrow("ogc_lot_source_lock_changed");
+      const calls = queryMock.mock.calls;
+      expect(calls.some(([sql]) => sql.includes("ROLLBACK"))).toBe(true);
+      expect(calls.some(([sql]) => sql === "COMMIT")).toBe(false);
+      expect(client.release).toHaveBeenCalledOnce();
+      expect(calls.some(([sql]) =>
+        typeof sql === "string" &&
+        (sql.includes("UPDATE lot_versions") || sql.includes("INSERT INTO lot_versions")),
+      )).toBe(false);
     },
   );
+
+  it("should deduplicate and sort all source locks before inserting", async () => {
+    const queryMock = vi.fn().mockResolvedValue({ rows: [], rowCount: 0 });
+    const pool = { connect: vi.fn().mockResolvedValue({ query: queryMock, release: vi.fn() }) } as unknown as pg.Pool;
+    await upsertLotBatch(makeMockDb(), pool, "delson", [makeFeature("222"), makeFeature("111"), makeFeature("222")]);
+    const calls = queryMock.mock.calls;
+    const locks = calls.filter(([sql]) => sql.includes("pg_advisory_xact_lock"));
+    expect(locks.map(([, params]) => params)).toEqual([
+      [JSON.stringify(["lot-source", "delson", "ogc:lots:delson:111"])],
+      [JSON.stringify(["lot-source", "delson", "ogc:lots:delson:222"])],
+    ]);
+    expect(calls.indexOf(locks[1]!)).toBeLessThan(calls.findIndex(([sql]) => sql.includes("INSERT INTO")));
+    expect(calls[0]![0]).toBe("BEGIN");
+    expect(calls.at(-1)![0]).toBe("COMMIT");
+  });
 
   it("should retain the stored canonical identity when revalidating an insert", () => {
     const decision = decideOgcLotInsert("sainte-catherine", "4516943");
