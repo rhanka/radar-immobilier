@@ -7,6 +7,7 @@
  * served bytes or headers.
  */
 import type { Context, MiddlewareHandler } from "hono";
+import { READER_EXAMPLE_SCRIPT_HASH } from "./reader-example.js";
 
 export const READER_CONTENT_HEADERS: Record<string, string> = {
   "Cache-Control": "private, no-store",
@@ -15,7 +16,7 @@ export const READER_CONTENT_HEADERS: Record<string, string> = {
   "X-Frame-Options": "DENY",
   "Cross-Origin-Opener-Policy": "same-origin",
   "Cross-Origin-Resource-Policy": "same-origin",
-  "Content-Security-Policy": "default-src 'self'; worker-src 'none'; frame-ancestors 'none'; object-src 'none'",
+  "Content-Security-Policy": `default-src 'self'; script-src 'sha256-${READER_EXAMPLE_SCRIPT_HASH}'; worker-src 'none'; frame-ancestors 'none'; object-src 'none'`,
 };
 
 export function applyReaderContentHeaders(c: Context): void {

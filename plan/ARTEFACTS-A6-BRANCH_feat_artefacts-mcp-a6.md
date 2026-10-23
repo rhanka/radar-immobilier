@@ -87,3 +87,4 @@ No invented production domain or certificate.
 - [x] Review correction: require full 128-bit GCM authentication tags.
 - [x] Credential budget controls measured 303-byte cookies and 725-byte grants on two fixtures.
 - [x] Review correction: recheck grant/session expiry and revocation after authority and API waits.
+- [x] Review correction: hash-authorize only the technical example bootstrap script in CSP.
