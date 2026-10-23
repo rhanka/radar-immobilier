@@ -213,7 +213,10 @@ export function requireSelectedProfile(host: unknown, expectedDigest: string): s
       "explicit selectedCapabilities is required before compilation",
     );
   }
-  const names = [...(selected as unknown[])].map(String).sort();
+  if (selected.some((name: unknown) => typeof name !== "string")) {
+    throw new Error("[contract-violation] provider.selectCapabilities: expected string names");
+  }
+  const names = [...selected].sort();
   if (!Object.isFrozen(selected)) {
     throw new Error("[contract-violation] host.selectedCapabilities must be frozen");
   }
