@@ -118,3 +118,120 @@ Moderator-only common archive, same path family as personal facets:
   the full population). Port failure or missing session under auth → 503
   `discarded_signals_unavailable`.
 
+## 2. Preserved wire conventions
+
+- Signals: `expectedHeadId` (uuid | null, null = no head expected) and
+  `displayedFingerprint` (sha256 hex of the displayed target version).
+  A mismatch on the target version → `FacetTargetVersionConflictError`
+  (409 + `current`); a mismatch on the stream head → `FacetHeadConflictError`
+  (409 + `current`).
+- Lots: `expected_head_id` and `displayed_version.{lot_version_id, fingerprint}`
+  with identical conflict semantics (`LotHeadConflictError`,
+  `LotVersionConflictError`, 409 + `current`).
+- No silent coercion: unknown fields rejected (strict schemas); malformed
+  commands → `invalid_facet_command` (400); missing/invalid idempotency key
+  → `invalid_facet_command` (400).
+
+## 3. Authority matrix (existing behavior, frozen)
+
+- Account approval precedes every scoped write (`approvedAccountId`); the
+  server derives actor and personal owner — client-supplied actor/owner/
+  tenant/scope fields are rejected.
+- Personal scope: selection baskets (`pertinent`, `a_surveiller`), personal
+  discard/restore. Personal restoration never lifts common hiding and never
+  recreates a removed selection. Personal lot scope supports archive and
+  restoration only and can never remove a workspace basket membership.
+- Common scope: moderator-only discard/restore (`moderateArchive`
+  capability); a contributor is never silently redirected from a forbidden
+  common archive to a personal action.
+- Membership management: `manageMembers` capability; revocation closes
+  affected reads/writes; revision conflicts surface `current` for retry.
+- Lot capabilities are distinct per mutation family: selection right for
+  select/deselect in the configured basket, `moderateArchive` for workspace
+  discard, plus distinct pipeline (`sollicite`, `lettre_envoyee`) and market
+  (`en_vente`) rights. `lettre_envoyee` keeps its existing meaning; no
+  `a_lettre` state exists. Lot discard keeps its mandatory reason
+  (`reason_code_required`, 422); the legacy-import reason is rejected
+  (`invalid_reason_code`).
+
+## 4. Idempotency, replay, conflicts, batches
+
+- `Idempotency-Key` (uuid) is required on every command and lowercased
+  server-side inside an advisory transaction lock.
+- Exact replay: same key + same command digest + resolved context returns the
+  original receipt byte-identically, including its original event when present;
+  no new mutation occurs. Only an originally null receipt replays as null.
+- Same key with a different command digest, or a key bound to another
+  workspace → `idempotency_key_conflict` (409).
+- Receipt with an unresolved command context → `command_context_unresolved`
+  (409); the context must resolve before the receipt is returned.
+- Owner history with events lacking stream bindings →
+  `personal_history_unresolved` (409); legacy payloads use recovery-only
+  paths and never create new commands.
+- Source-version conflicts (changed content under the same head, including
+  unchanged-UUID content changes) → 409 + `current` carrying the live
+  version; the client re-reads and retries with the fresh displayed version.
+- Head conflicts → 409 + `current` carrying the live head; retry with the
+  fresh `expectedHeadId`.
+- Lot batch: all-or-nothing atomic append, 1–500 items, one shared
+  idempotency key and one contract version (`lot-facets-v1`).
+- Destination closure (`lot_destination_disabled:<workspaceId>`, 503) precedes
+  business reads and receipt returns once the 6K gate lands (B2.2/B2.3).
+
+## 5. Reveal and reason catalog (B1 additions, contract reserved)
+
+- New router file `api/src/routes/scoped-signal-reveal.ts` (exact name) exposing,
+  under the same session guard and fingerprint semantics as §1.2:
+  - `GET /api/v1/workspaces/:workspaceId/signal-facets/reveal?citySlug&type&id` — authorized
+    read of one archived signal with current content, its fingerprint and its
+    personal/workspace heads, so a restore can present the actually re-read
+    version. Query fields use the existing target validators. Response:
+    `{ ok: true, target, signal, displayedFingerprint, heads: { personal, workspace }, effectiveDiscarded, capabilities }`.
+    Require approved membership and an open scoped epoch before fetching content;
+    reject missing rights and stale context without revealing hidden content.
+  - `GET /api/v1/workspaces/:workspaceId/signal-facets/reason-codes` —
+    workspace-scoped reason catalog (same entry shape as the legacy
+    `reason-codes` read), served without legacy readers.
+- Mount order in `app.ts` (B1.1): content-host isolation first, control
+  cookie guard, then the scoped routers with the existing session guard;
+  `privateSignalResponse` cache headers preserved on every scoped path.
+- Focused tests (B1.4/B1.5): reveal → restore with the re-read version,
+  concurrent source change between reveal and restore (409 + `current`),
+  independent archive scopes per workspace.
+
+## 6. Session, Bearer [REDACTED] SSE rules
+
+- Writes: browser session only. Any non-GET with `via === "bearer"` →
+  `browser_session_required` (403) on all scoped routers.
+- Reads: the same session guard fronts scoped GETs (`unauthenticated`, 401
+  when auth is enabled and no session). A supported Bearer [REDACTED] read does not
+  confer write rights.
+- SSE (`projection-events`): browser session only for both the initial
+  request and every re-poll; expiry mid-stream closes the stream; Bearer is
+  rejected before any frame.
+- Cookie/session mechanics and OIDC behavior are unchanged in B0; `auth.ts`
+  is conditional scope (only for evidenced BASE composition defects, and
+  then under CT-1 if both tracks touch it).
+
+## 7. Legacy retirement responses
+
+- During cutover (old paths closed, new paths not yet serving): explicit
+  `503` with a stable machine-readable error (never a silent empty set).
+- After retirement: explicit `410` with the successor operation named in the
+  body. No replacement `404`: the `search_signals` MCP consumer
+  (`packages/immo-mcp/src/data-source.ts:307-350`, call at :316) maps 404
+  to an empty list, so a retired route answering 404 would read as "no
+  signals". BASE supplies this contract; the adapter requalification is
+  owned by ARTEFACTS under CT-3/CT-9. No MCP implementation enters BASE.
+- Applies to `GET /api/graph-signals/:city`, the legacy signal-facet writes,
+  and the legacy mark/prospect paths retired in B1.6/B4.
+
+## 8. API authority independence
+
+- The API is the permanent contract. MCP, artifacts, H5 and any new
+  Sentropic package are consumers, never prerequisites: BASE qualifies and
+  delivers with artifact configuration absent and artifact services unused.
+- No business delivery or activation prerequisite is created between the
+  tracks in either direction (CT-8/CT-9). Schema coordination never
+  requires 6K business activation and never makes MCP/H5 a BASE prerequisite.
+
