@@ -110,16 +110,16 @@
   - [x] B1 delivery tooling: run required faults independently and audit the bundle against K in an isolated repository.
   - [x] B1 mutations: qualify all seven required faults with passing baselines, intended assertion failures, restored passes and identical checksums.
   - [x] Gate: base-api-{composition,authority,reveal,legacy,receipts}.spec.ts plus existing scoped/SSE regressions; typecheck and scoped lint.
-- [ ] B2 — Complete lot destination; Muse 4–6 h, Sol 4–5 h, total 8–11 h.
+- [x] B2 — Complete lot destination; Muse 4–6 h, Sol 4–5 h, total 8–11 h.
   - [x] B2.1 preparation: audit authored merge resolutions separately from preserved inherited history; extend bounded staging to the authorized API scope.
   - [x] B2.1: integrate pinned 6K history and both migrations under CT-1–CT-8; preserve 6L2 routes, watcher and verifier profiles; qualify CT-7 migration assertions before releasing K_SHA.
-  - [ ] B2.2: require destination opening in services before business reads and receipt returns.
-  - [ ] B2.3: apply the same opening rule to single commands and atomic batches.
-  - [ ] B2.4: cover target/city reads, destination history and source-history navigation.
-  - [ ] B2.5: separate authorized internal cutover readback from public opened-destination reads.
-  - [ ] B2.6: qualify truly empty history → opening → first mark without artificial business events.
-  - [ ] B2.7: retain closure for unresolved-only history, missing rights, uncovered writers or invalid epoch.
-  - [ ] Gate: lot-opening*, lot-cutover-readback*, lot-cutover-empty*, existing 6J/6K and 6L2 regressions; typecheck and scoped lint.
+  - [x] B2.2: require destination opening in services before business reads and receipt returns.
+  - [x] B2.3: apply the same opening rule to single commands and atomic batches.
+  - [x] B2.4: cover target/city reads, destination history and source-history navigation.
+  - [x] B2.5: separate authorized internal cutover readback from public opened-destination reads.
+  - [x] B2.6: qualify truly empty history → opening → first mark without artificial business events.
+  - [x] B2.7: retain closure for unresolved-only history, missing rights, uncovered writers or invalid epoch.
+  - [x] Gate: lot-opening*, lot-cutover-readback*, lot-cutover-empty*, existing 6J/6K and 6L2 regressions; typecheck and scoped lint.
 - [ ] B3 — Serialized source writers; Muse 3–5 h, Sol 3–4 h, total 6–9 h.
   - [ ] B3.1: ogc-pull.ts and its source-lock DB tests; lock the actual mutated identity in the mutation transaction.
   - [ ] B3.2: populate-geo.ts and its source-lock DB tests; cover both update and insert paths.
