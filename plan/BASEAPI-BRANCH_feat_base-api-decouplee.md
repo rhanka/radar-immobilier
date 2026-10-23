@@ -99,6 +99,7 @@
   - [x] B1.2 first slice: isolate SSE, personal, common archive and revision middleware; qualify both middleware orders.
   - [ ] B1.3: expose workspace context and reason codes without legacy readers.
   - [ ] B1.4: implement authorized reveal with current content, fingerprint and scoped heads.
+  - [x] B1.4 service: authorize reveal and qualify restoration with independent personal/common archive heads.
   - [ ] B1.5: qualify reveal → restore, concurrent source changes and independent archive scopes.
   - [ ] B1.6: return explicit legacy 503 during cutover and 410 after retirement, never a replacement 404.
   - [ ] B1.7: preserve exact receipt recovery and unresolved command contexts.
