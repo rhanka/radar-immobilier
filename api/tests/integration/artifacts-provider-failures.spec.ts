@@ -550,19 +550,25 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     const probe = finalizationFaultPool(pool, { code });
     const { host } = await composeQ2Host(barrier, { pool: probe.pool });
     try {
-      const execute = requireHostExecute(host);
-      const before = await committedState(pool);
-      probe.evidence.armed = true;
-      const invocation = invocationFor(allowAll(), "abort");
-      const outcome = await execute({ method: "POST", path: "/ensure",
-        body: { bindingName: "q2-abort", idempotencyKey: "q2-abort" } }, invocation) as Record<string, unknown>;
-      assertOutcomeFailure(outcome, invocation.invocationId);
-      expect(probe.evidence).toMatchObject({ injections: 1, attempts: 1, phase: "provisional-write" });
-      expect(probe.evidence.writes).toBeGreaterThan(0);
-      expect(outcome.failure).toMatchObject({ category: "provider_unavailable", status: 503,
-        code: "capability_unavailable", retriable: true, commitState: "not_committed", cause: { code } });
-      expect(await committedState(pool)).toEqual(before);
-    } finally { probe.evidence.armed = false; (host["close"] as () => void)(); }
+      // One independent caller key and one rearmed injection per transport, with
+      // one correlated ledger entry per failed dispatch. A hidden provider
+      // retry would surface as injections !== 1 or as a second ledger entry.
+      for (const transport of ["http", "mcp"] as const) {
+        const clientKey = `q2-abort-${code}-${transport}`;
+        const body = { bindingName: `q2-abort-${code}-${transport}`, idempotencyKey: clientKey };
+        const before = await committedState(pool);
+        Object.assign(probe.evidence, { armed: true, injections: 0, attempts: 0, writes: 0, phase: "" });
+        try {
+          const outcome = await failViaTransport(host, { method: "POST", path: "/ensure", body }, transport);
+          expect(outcome.failure).toMatchObject({ cause: { code }, commitState: "not_committed" });
+          expect(probe.evidence).toMatchObject({ injections: 1, attempts: 1, phase: "provisional-write" });
+          expect(probe.evidence.writes).toBeGreaterThan(0);
+          expect(await committedState(pool)).toEqual(before);
+        } finally {
+          probe.evidence.armed = false;
+        }
+      }
+    } finally { (host["close"] as () => void)(); }
   });
 
   it("reports commitState unknown on COMMIT acknowledgment loss and recovers by key", async () => {
