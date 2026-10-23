@@ -310,6 +310,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
   it("maps an S3 body-stream timeout to provider_unavailable with a redacted projection", async () => {
     await requireOutcomeContract();
     const barrier = await requireCommitBarrier();
+    const streamMarker = createPrivateMarker("s3_body_stream");
     let streamReads = 0;
     const streaming = new Proxy(s3, { get(target, property) {
       if (property === "send") return async (command: unknown) => {
@@ -321,8 +322,8 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
         return { ...response, Body: new Proxy(response.Body as object, { get(body, key) {
           if (key === "transformToByteArray") return async () => {
             streamReads++;
-            throw Object.assign(new Error("body stream stalled after headers"), {
-              code: "artifact_s3_timeout", phase: "body-stream" });
+            throw Object.assign(new Error(`body stream stalled after headers ${streamMarker}`), {
+              code: "artifact_s3_timeout", phase: "body-stream", marker: streamMarker });
           };
           const value = Reflect.get(body, key);
           return typeof value === "function" ? value.bind(body) : value;
@@ -331,9 +332,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       const value = Reflect.get(target, property);
       return typeof value === "function" ? value.bind(target) : value;
     } });
-    const faulty = createS3BlobStore({ client: streaming, bucket: BUCKET });
-    const streamMarker = createPrivateMarker("s3_body_stream");
-    const composed = await composeQ2Host(barrier, { blobs: faulty });
+    const composed = await composeQ2Host(barrier, { blobs: createS3BlobStore({ client: streaming, bucket: BUCKET }) });
     const host = composed.host;
     const close = host["close"];
     try {
