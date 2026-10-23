@@ -105,3 +105,4 @@ No invented production domain or certificate.
 - [x] FIX1 lint correction: spell mutation-regex indentation with explicit space counts.
 - [x] FIX2: propagate approved fingerprints through integration and browser grant fixtures.
 - [x] FIX2: verified grants require and return the approved fingerprint; module fixtures carry their actual approved profile.
+- [x] FIX2 r2a-1/r2b-1: adaptation refuses an altered profile under the same name, revision and release.
