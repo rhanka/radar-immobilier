@@ -79,7 +79,7 @@ successor compatibility and delegation A as pure, unregistered contracts.
   - [x] Require the exact requested POST operation in the received delegation.
   - [x] Preserve reason classifications and missing-basket diagnostics.
   - [x] Carry read-head metadata separately from receipt event snapshots.
-  - [ ] Match scoped HTTP lot bounds and reject orphan signal expectations.
+  - [x] Match scoped HTTP lot bounds and reject orphan signal expectations.
   - [ ] Reject private context fields using a complete accepted fixture.
   - [ ] Cover selection, pipeline and market grants one at a time.
   - [ ] Kill copied mutations for every defect in both Astra reviews.
