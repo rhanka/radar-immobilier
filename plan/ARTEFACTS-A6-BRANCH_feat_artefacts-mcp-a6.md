@@ -57,3 +57,4 @@ No invented production domain or certificate.
 - [ ] Consume the integrator's committed Vitest exclusion before browser commits.
 - [ ] Consume A1 authority/store and reader-auth/image commits; no lease held here.
 - [ ] D1/D2 remain open with read-only and technical-example defaults.
+- [x] Local profile seam prepared; A1 authority binding remains pending.
