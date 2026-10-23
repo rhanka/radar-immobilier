@@ -33,6 +33,7 @@
 - [ ] BRARTEFACTS-EX2: conditional integration edits implement approved package, migration and auth bindings; preserve business state; recovery closes artifact admission and retains strict identity checks.
 - [ ] BRARTEFACTS-EX3: add the H5 image entrypoint and opt-in routing/network render; A6 owns runtime deltas, A7 owns operations; recovery restores the existing denial Service without changing artifact data.
 - [ ] Commit messages: one English Conventional Commit subject <=72 characters, no body or trailer.
+- [x] Integration quality: declare existing Node runtime globals in the two H4 exchange qualification helpers; preserve lint rules, assertions and runtime behavior.
 - [ ] OPEN D1: first proof is read-only by default; reader-authorized writes remain an extensible, operation-qualified objective.
 - [ ] OPEN D2: technical example only by default; optional business sketch remains outside the principal total (+2-4 agent hours in the approved proposal).
 - [ ] External waits: r2 candidate/signatures; compatible published artifacts/platform/mesh/mcp-auth tuple and provenance; RFC 8693 issuer/identity configuration; content DNS/TLS/network/resources; operator/CI and publication GO.
