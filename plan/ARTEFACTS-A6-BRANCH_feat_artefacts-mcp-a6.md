@@ -97,3 +97,4 @@ No invented production domain or certificate.
 - [x] FIX1 A1: scope authority rights to the reader/artifact pair; define nonreusable authorization versions and canonical profile fingerprints.
 - [x] FIX1 A2/B4: tickets carry the approved policy revision and profile fingerprint; init retains the presented profile.
 - [x] FIX1 A2/B4: exchange validates current release, profile and per-artifact approval under an authorization-version fence; HTTP integration remains pending.
+- [x] FIX1 B1: activation revalidates release/profile and refuses obsolete authority versions or concurrent registry writes.

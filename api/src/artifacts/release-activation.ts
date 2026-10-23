@@ -27,17 +27,32 @@ export function createActivationRegistry(options: { now?: () => number } = {}): 
 
   return {
     async activate(artifactId, releaseId, authority) {
+      const previous = active.get(artifactId);
+      const version = await authority.getAuthorizationVersion(artifactId);
+      if (!version) return null;
       const release = await authority.getRelease(artifactId);
-      if (!release || release.releaseId !== releaseId) return null;
+      if (!release || release.artifactId !== artifactId || release.releaseId !== releaseId) return null;
       const profile = await authority.getProfile(artifactId);
       if (!profile) return null;
+      // Revalidate: a concurrent activation may have moved the authority on.
+      // A stale activation never overwrites the current record.
+      const freshRelease = await authority.getRelease(artifactId);
+      if (!freshRelease || freshRelease.artifactId !== artifactId || freshRelease.releaseId !== releaseId) return null;
+      const freshProfile = await authority.getProfile(artifactId);
+      if (!freshProfile || freshProfile.name !== profile.name) return null;
+      if (freshProfile.policyRevision !== profile.policyRevision) return null;
       const record: ActiveRelease = {
         artifactId,
         releaseId,
-        profileName: profile.name,
-        policyRevision: profile.policyRevision,
+        profileName: freshProfile.name,
+        policyRevision: freshProfile.policyRevision,
         activatedAt: now(),
       };
+      // Confirm the authority still points at this release before writing.
+      const current = await authority.getRelease(artifactId);
+      if (!current || current.artifactId !== artifactId || current.releaseId !== releaseId) return null;
+      if (await authority.getAuthorizationVersion(artifactId) !== version) return null;
+      if (active.get(artifactId) !== previous) return null;
       active.set(artifactId, record);
       return record;
     },
