@@ -1,7 +1,7 @@
 /**
- * H5 browser cutoff proof: expired grants, revoked sessions and release
- * pinning through a real browser. Synthetic clocks mint the expired grant;
- * the server enforces the <= 60 s cutoff with its own clock.
+ * H5 browser fixture for expired grants and local session revocation.
+ * A pre-expired grant does not measure wall-clock cutoff or active streams.
+ * Synthetic ports do not qualify durable storage or receiving API identity.
  */
 import { createServer, type Server } from "node:http";
 import { test, expect, type Page } from "@playwright/test";
@@ -10,6 +10,7 @@ import { createReaderContentApp } from "../../src/artifacts/content-serve.js";
 import { mintGrant } from "../../src/artifacts/preview-grant.js";
 import { mintSessionCookie } from "../../src/artifacts/preview-session.js";
 import { createRevocationList } from "../../src/artifacts/preview-renewal.js";
+import { fixtureReaderDeps } from "../../src/artifacts/reader-test-fixture.js";
 
 const GRANT_SECRET = "grant-secret-32-bytes-long-padding!";
 const SESSION_SECRET = "session-secret-32-bytes-long-pad!!";
@@ -28,14 +29,18 @@ async function cookieFor(page: Page, readerSub: string, sessionId: string, atMs:
   await page.context().addCookies([{
     name: "__Host-preview-session",
     value: sealed.split(";")[0]?.split("=")[1] ?? "",
-    domain: "localhost",
-    path: "/",
+    url: baseURL,
     secure: true,
+    httpOnly: true,
+    sameSite: "Strict",
   }]);
+  expect((await page.context().cookies(baseURL)).find(cookie => cookie.name === "__Host-preview-session"))
+    .toMatchObject({ domain: HOST, secure: true, httpOnly: true, path: "/" });
 }
 
 test.beforeAll(async () => {
   const app = createReaderContentApp({
+    ...fixtureReaderDeps(),
     contentBase: "localhost",
     grantSecret: GRANT_SECRET,
     sessionSecret: SESSION_SECRET,

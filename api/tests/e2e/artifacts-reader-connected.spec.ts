@@ -1,8 +1,8 @@
 /**
- * H5 browser proof: real Chromium -> real content app -> named API ops.
- * Spins the reader content app on localhost with synthetic fixtures (no
- * DB, no network); drives two readers plus the closed capability through
- * a real browser. Excluded from Vitest; selected by the H5 Playwright
+ * H5 browser fixture: real Chromium -> source content app -> local ports.
+ * Synthetic authority and operation ports do not prove receiving API
+ * identity, publication, durable storage or the final runtime image.
+ * Excluded from Vitest; selected by the H5 Playwright
  * config (testDir ../api/tests/e2e, testMatch artifacts-reader*.spec.ts).
  */
 import { createServer, type Server } from "node:http";
@@ -11,6 +11,7 @@ import { getRequestListener } from "@hono/node-server";
 import { createReaderContentApp } from "../../src/artifacts/content-serve.js";
 import { mintGrant } from "../../src/artifacts/preview-grant.js";
 import { mintSessionCookie } from "../../src/artifacts/preview-session.js";
+import { fixtureReaderDeps } from "../../src/artifacts/reader-test-fixture.js";
 
 const GRANT_SECRET = "grant-secret-32-bytes-long-padding!";
 const SESSION_SECRET = "session-secret-32-bytes-long-pad!!";
@@ -39,14 +40,18 @@ async function hostCookie(page: Page, cookieValue: string): Promise<void> {
   await page.context().addCookies([{
     name: "__Host-preview-session",
     value: cookieValue,
-    domain: "localhost",
-    path: "/",
+    url: baseURL,
     secure: true,
+    httpOnly: true,
+    sameSite: "Strict",
   }]);
+  expect((await page.context().cookies(baseURL)).find(cookie => cookie.name === "__Host-preview-session"))
+    .toMatchObject({ domain: HOST, secure: true, httpOnly: true, path: "/" });
 }
 
 test.beforeAll(async () => {
   const app = createReaderContentApp({
+    ...fixtureReaderDeps(),
     contentBase: "localhost",
     grantSecret: GRANT_SECRET,
     sessionSecret: SESSION_SECRET,
@@ -102,6 +107,12 @@ test("closed capability fails locally without disabling the page", async ({ page
     return res.status;
   }, grant);
   expect(closed).toBe(503);
+  const geoStatus = await page.evaluate(async (g: string) => {
+    const response = await fetch("/__reader/api/geo.read.v1?limit=2", { headers: { "x-preview-grant": g } });
+    const body = await response.json() as { features: unknown[] };
+    return { status: response.status, count: body.features.length };
+  }, grant);
+  expect(geoStatus).toEqual({ status: 200, count: 2 });
   await expect(page.getByTestId("reader-status")).toHaveText("Connected.");
 });
 
