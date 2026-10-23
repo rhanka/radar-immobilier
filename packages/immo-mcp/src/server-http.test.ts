@@ -17,6 +17,7 @@ import type {
 } from "./data-source.js";
 import { MockDataSource } from "./data-source.js";
 import type { MockSignal } from "./mocks.js";
+import { createIsolatedExchangeFixture, exchangeDepsFor } from "./test-exchange-fixtures.js";
 
 // Resource-server settings under test. `resource` == the token `aud` (single-audience model).
 const ISSUER = "https://auth.test.local";
@@ -264,7 +265,7 @@ describe("extractBearerToken", () => {
   });
 });
 
-describe("per-user token propagation (D4) through the transport", () => {
+describe("delegated token propagation (P4) through the transport", () => {
   // A data source that records the per-call caller context so we can assert the
   // CURRENT user's own token reached search_signals (never a machine credential).
   class RecordingDataSource extends MockDataSource {
@@ -291,10 +292,11 @@ describe("per-user token propagation (D4) through the transport", () => {
     }
   }
 
-  it("forwards the verified user bearer to search_signals", async () => {
+  it("forwards the exchanged delegated token to search_signals, never the subject", async () => {
     const data: ImmoDataSource & { lastAccessToken: string | undefined | null } =
       new RecordingDataSource();
-    const scopedApp = createImmoHttpApp(CONFIG, { keySource, data });
+    const fixture = await createIsolatedExchangeFixture();
+    const scopedApp = createImmoHttpApp(CONFIG, { keySource, data, exchange: exchangeDepsFor(fixture) });
     const token = await signToken();
 
     const initRes = await scopedApp.request("/mcp", {
@@ -324,7 +326,8 @@ describe("per-user token propagation (D4) through the transport", () => {
       }),
     });
     expect(callRes.status).toBe(200);
-    // The raw JWT presented on the request is what reached the data source.
-    expect(data.lastAccessToken).toBe(token);
+    // The exchanged delegated JWT reached the data source, never the subject JWT.
+    expect(data.lastAccessToken).toBe(fixture.issuedExchangedTokens[0]);
+    expect(data.lastAccessToken).not.toBe(token);
   });
 });
