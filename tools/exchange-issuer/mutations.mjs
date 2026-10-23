@@ -1,3 +1,4 @@
+/* global process:readonly, console:readonly */
 import assert from "node:assert/strict";
 import { cpSync, mkdirSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
