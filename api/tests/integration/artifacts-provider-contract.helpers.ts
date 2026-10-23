@@ -583,18 +583,32 @@ export async function verifyPreparationCleanup(host: unknown, artifactId: string
   blobs: { listKeys(prefix: string): Promise<Iterable<string>> }, requireAttempts = true,
   requireShared = false,
   options?: { readonly expectedInvocationIds?: readonly string[];
+    readonly preparationsBeforeRefusal?: Awaited<ReturnType<PreparationCleanupBinding["inspectPreparations"]>>["attempts"];
     readonly s3KeysBefore?: ReadonlySet<string> | readonly string[] }): Promise<void> {
   const binding = await requirePreparationCleanupBinding();
   const before = await binding.inspectPreparations(host, artifactId);
   const keysBefore = new Set(await blobs.listKeys(""));
+  for (const prepared of options?.preparationsBeforeRefusal ?? []) {
+    const historical = before.attempts.find((attempt) => attempt.attemptId === prepared.attemptId);
+    if (!historical || !Array.isArray(historical.blobKeys) || historical.invocationId !== prepared.invocationId ||
+        historical.preparedAtMs !== prepared.preparedAtMs ||
+        historical.cleanupDeadlineMs !== prepared.cleanupDeadlineMs ||
+        JSON.stringify([...historical.blobKeys].sort()) !== JSON.stringify([...prepared.blobKeys].sort())) {
+      throw new Error("[contract-violation] cleanup lost historical preparation attribution");
+    }
+  }
   if (requireAttempts && before.attempts.length === 0) throw new Error("[contract-violation] missing preparation attribution");
   let throughMs = 0;
   for (const attempt of before.attempts) {
+    // A6 sets a maximum bound, never a retention duty until inspection: a
+    // conforming provider may finish cleanup before returning the refusal and
+    // expose an already-settled state. Historical attribution (attempt,
+    // invocation, blobKeys, deadline) is still required below.
     if (!attempt.attemptId || !attempt.invocationId || !Number.isFinite(attempt.cleanupDeadlineMs) ||
         !Number.isFinite(attempt.preparedAtMs) || attempt.cleanupDeadlineMs <= attempt.preparedAtMs ||
         attempt.cleanupDeadlineMs - attempt.preparedAtMs > 60_000 ||
-        !["abandoned", "failed", "pending-cleanup"].includes(attempt.state)) {
-      throw new Error("[contract-violation] preparation must have attempt/invocation, failure state and bounded deadline");
+        !["abandoned", "failed", "pending-cleanup", "cleaned", "failed-cleaned"].includes(attempt.state)) {
+      throw new Error("[contract-violation] preparation must have attempt/invocation, settled-or-pending state and bounded deadline");
     }
     if (!Array.isArray(attempt.blobKeys)) {
       throw new Error("[contract-violation] preparation must expose attempt.blobKeys for S3 reconciliation");
@@ -611,11 +625,25 @@ export async function verifyPreparationCleanup(host: unknown, artifactId: string
       }
     }
   }
-  if (requireShared && (before.protectedKeys.length === 0 || before.abandonedKeys.length === 0)) {
+  const protectedSet = new Set(before.protectedKeys);
+  // Settled providers may clear the live abandoned-key queue. Historical
+  // attempt keys still identify the exclusive objects that must be absent.
+  const abandonedKeys = new Set([...before.abandonedKeys, ...before.attempts.flatMap(
+    (attempt) => attempt.blobKeys.filter((key) => !protectedSet.has(key)))]);
+  if (requireShared && (protectedSet.size === 0 || abandonedKeys.size === 0)) {
     throw new Error("[contract-violation] cleanup fixture must contain shared and unreferenced blobs");
   }
-  for (const key of [...before.protectedKeys, ...before.abandonedKeys]) {
+  // Protected objects must survive: they are always present before cleanup.
+  // Abandoned objects may already be gone when the provider cleaned up before
+  // returning the refusal (A6 allows this); only abandoned keys that are also
+  // protected must still be present here.
+  for (const key of before.protectedKeys) {
     if (!keysBefore.has(key)) throw new Error("[contract-violation] preparation blob missing before cleanup");
+  }
+  for (const key of before.abandonedKeys) {
+    if (protectedSet.has(key) && !keysBefore.has(key)) {
+      throw new Error("[contract-violation] preparation blob missing before cleanup");
+    }
   }
   // Reconcile the observed S3 inventory against attempts and invocations: every
   // new object since the caller baseline must belong to the expected invocation
@@ -642,9 +670,19 @@ export async function verifyPreparationCleanup(host: unknown, artifactId: string
       }
     }
   }
+  // Historical attribution stays mandatory even when cleanup already ran:
+  // every attempt keeps its blobKeys. Cleanup may already have removed some
+  // exclusive bytes while its state is still pending. Protected bytes must
+  // survive; a settled attempt must already have removed its exclusive bytes.
   for (const attempt of before.attempts) {
+    const settled = attempt.state === "cleaned" || attempt.state === "failed-cleaned";
     for (const key of attempt.blobKeys) {
-      if (!keysBefore.has(key)) throw new Error("[contract-violation] preparation blob missing from S3 inventory");
+      if (protectedSet.has(key) && !keysBefore.has(key)) {
+        throw new Error("[contract-violation] cleanup deleted a shared/protected blob");
+      }
+      if (settled && !protectedSet.has(key) && keysBefore.has(key)) {
+        throw new Error("[contract-violation] settled preparation retained an unprotected blob");
+      }
     }
   }
   await binding.scheduleBoundedPreparationCleanup(host, throughMs);
@@ -652,7 +690,7 @@ export async function verifyPreparationCleanup(host: unknown, artifactId: string
   for (const key of before.protectedKeys) {
     if (!keysAfter.has(key)) throw new Error("[contract-violation] cleanup deleted a shared/protected blob");
   }
-  for (const key of before.abandonedKeys.filter((key) => !before.protectedKeys.includes(key))) {
+  for (const key of [...abandonedKeys].filter((key) => !protectedSet.has(key))) {
     if (keysAfter.has(key)) throw new Error("[contract-violation] abandoned blob survived its cleanup deadline");
   }
   if (options?.s3KeysBefore !== undefined) {
@@ -664,6 +702,14 @@ export async function verifyPreparationCleanup(host: unknown, artifactId: string
     }
   }
   const after = await binding.inspectPreparations(host, artifactId);
+  for (const attempt of before.attempts) {
+    const historical = after.attempts.find((candidate) => candidate.attemptId === attempt.attemptId);
+    if (!historical || !Array.isArray(historical.blobKeys) || historical.invocationId !== attempt.invocationId ||
+        historical.preparedAtMs !== attempt.preparedAtMs || historical.cleanupDeadlineMs !== attempt.cleanupDeadlineMs ||
+        JSON.stringify([...historical.blobKeys].sort()) !== JSON.stringify([...attempt.blobKeys].sort())) {
+      throw new Error("[contract-violation] cleanup erased or changed preparation history");
+    }
+  }
   if (after.attempts.some((attempt) => !["cleaned", "failed-cleaned"].includes(attempt.state))) {
     throw new Error("[contract-violation] cleanup did not settle preparation debt");
   }

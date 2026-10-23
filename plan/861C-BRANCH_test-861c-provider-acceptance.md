@@ -24,6 +24,7 @@ Keep the r2 host API target and its remaining construction bindings explicit.
   `RAPPORT-SOL-PROVIDER-ACCEPTANCE.md`;
   uncommitted `RAPPORT-SOL-FIX1-908.md`;
   uncommitted `RAPPORT-SOL-FIX2-908.md`;
+  uncommitted `RAPPORT-SOL-FIX3-908.md`;
   uncommitted `RAPPORT-SOL-Q1-Q2.md`; ignored evidence and local Git metadata
   under `tmp/861c-provider-acceptance/` and `tmp/861c-q1-q2/`.
 - [x] **Forbidden Paths**: root Makefile, compose files, rules, agent entrypoints,
@@ -224,3 +225,10 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 - [x] redact storage scope from HTTP and MCP failure bodies.
 - [x] docs: record round-two provider acceptance verification.
 - [x] accept delayed refusal after deletion claim resolution.
+
+## Review 3 corrections
+- [x] Retain preparation history across completed and partial cleanup.
+- [ ] Verify the first purge receipt before retry and preserve settled race history.
+- [ ] Enforce private MCP marker redaction through transport parity.
+- [ ] Qualify final sources: 59 controls and 59 mutants, 3010 API passes,
+  69 disabled cases and 69 named contract or coverage failures on 0.1.2.
