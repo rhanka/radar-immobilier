@@ -192,3 +192,4 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 - [x] bind full Radar profile and reject constant digests.
 - [x] reconcile S3 inventory with invocation cleanup intents.
 - [x] reject private identifiers in every MCP representation.
+- [x] name E3 phase seams without requiring optional SQL.
