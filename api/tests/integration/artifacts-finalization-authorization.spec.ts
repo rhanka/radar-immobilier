@@ -30,6 +30,7 @@ import { createMcpArtifactAdapter } from "../../../packages/artifacts-host/src/m
 import { controlRoute } from "../../src/artifacts/control-route.js";
 import { auth, cookie, migrationsFolder } from "./artifacts-h2.helpers.js";
 import { loadConfig } from "../../src/config.js";
+import { cleanupArtifactRace, assertPurgeEffects } from "./artifacts-race-cleanup.helpers.js";
 import {
   assertOutcomeFailure,
   authorizeTransaction,
@@ -185,7 +186,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
   afterAll(async () => {
     try {
       if (bucketCreated) {
-        for (const key of await rawBlobs().listKeys("")) await rawBlobs().deleteBlob(key);
+        for (const key of await rawBlobs().listKeys("artifacts/")) await rawBlobs().deleteBlob(key);
         await s3.send(new DeleteBucketCommand({ Bucket: BUCKET }));
       }
     } finally {
@@ -724,6 +725,15 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       user: env.POSTGRES_USER, password: env.POSTGRES_PASSWORD, database: DATABASE }, storageConfig());
     expect(worker.pid).not.toBe(process.pid);
     const barrierB = worker.barrier;
+    let invAId = "";
+    let invBId = "";
+    let pendingA: Promise<unknown> | undefined;
+    let pendingB: Promise<unknown> | undefined;
+    let pumpA: Promise<void> | undefined;
+    let pumpB: Promise<void> | undefined;
+    const cleanupPoints: readonly CommitBarrierPoint[] = [
+      ...PUBLISH_POINTS, "after_replay_lookup_before_guard",
+    ];
     try {
       requireSelectedProfile(hostA, composedA.profile.digest);
       const executeA = requireHostExecute(hostA);
@@ -747,18 +757,19 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         { scope: SCOPE, sub: ACTOR, op: "publish", artifactId, clientKey: raceKey });
       const invA = invocationFor(authorizeCommit, `${raceKey}-a`);
       const invB = invocationFor(authorizeCommit, `${raceKey}-b`);
-      const invAId = invA["invocationId"] as string;
-      const invBId = invB["invocationId"] as string;
+      invAId = invA["invocationId"] as string;
+      invBId = invB["invocationId"] as string;
       const releasesBefore = await tableCount("releases");
       const keysBefore = await tableCount("idempotency_keys");
       const drainPoints: readonly CommitBarrierPoint[] = [
         ...PUBLISH_POINTS, "after_replay_lookup_before_guard",
       ];
       let settledB = false;
-      const pendingB = executeB({ method: "POST", path: "/publish", body: changedCommand
+      pendingB = executeB({ method: "POST", path: "/publish", body: changedCommand
         ? { ...body, files: [{ path: "different.html", mimeType: "text/html", text: "different command" }] } : body }, invB)
         .finally(() => { settledB = true; });
-      const pumpB = (async () => {
+      void pendingB.catch(() => {});
+      pumpB = (async () => {
         const deadline = performance.now() + 1500;
         while (!settledB) {
           if (performance.now() > deadline) throw new Error("[contract-violation] commit barrier B did not progress");
@@ -770,11 +781,13 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
           await withTimeout(new Promise<void>((resolve) => setTimeout(resolve, 50)), 50);
         }
       })();
+      void pumpB.catch(() => {});
       await barrierB.waitUntilReached("before_key_lock", invBId);
       let settledA = false;
-      const pendingA = executeA({ method: "POST", path: "/publish", body }, invA)
+      pendingA = executeA({ method: "POST", path: "/publish", body }, invA)
         .finally(() => { settledA = true; });
-      const pumpA = (async () => {
+      void pendingA.catch(() => {});
+      pumpA = (async () => {
         const deadline = performance.now() + 1500;
         while (!settledA) {
           if (performance.now() > deadline) throw new Error("[contract-violation] commit barrier A did not progress");
@@ -785,6 +798,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
           }
         }
       })();
+      void pumpA.catch(() => {});
       const winner = await pendingA as unknown as Record<string, unknown>;
       await pumpA;
       expect(winner).toMatchObject({ ok: true });
@@ -810,11 +824,12 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       expect(observed.attempts.map((attempt) => attempt.invocationId)).toEqual(expect.arrayContaining([invAId, invBId]));
       expect(new Set(observed.attempts.map((attempt) => attempt.attemptId)).size).toBeGreaterThanOrEqual(2);
       expect(observed.attempts.find((attempt) => attempt.invocationId === invBId)?.state).toBe("abandoned");
-      const keys = await rawBlobs().listKeys("");
+      const keys = await rawBlobs().listKeys("artifacts/");
       expect([...keys].length).toBeGreaterThan(0);
     } finally {
-      if (typeof closeA === "function") (closeA as () => void)();
-      await worker.close();
+      await cleanupArtifactRace([{ barrier, invocationId: invAId }, { barrier: barrierB, invocationId: invBId }],
+        cleanupPoints, [pendingA, pendingB, pumpA, pumpB],
+        () => { if (typeof closeA === "function") (closeA as () => void)(); }, () => worker.close());
     }
   });
 
@@ -828,16 +843,26 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
     try {
       const execute = requireHostExecute(host);
       const file = { path: "index.html", mimeType: "text/html", text: "purge-shared-" + order };
-      const seed = async (name: string): Promise<string> => {
+      const exclusive = { path: "exclusive.html", mimeType: "text/html", text: "purge-exclusive-" + order };
+      const seed = async (name: string, files = [file]): Promise<string> => {
         const ensured = await execute({ method: "POST", path: "/ensure", body: { bindingName: name,
           idempotencyKey: name } }, invocationFor(allowAll(), name)) as { result: { body: { artifactId: string } } };
         const id = ensured.result.body.artifactId;
-        expect(await execute({ method: "POST", path: "/publish", body: { artifactId: id, files: [file],
+        expect(await execute({ method: "POST", path: "/publish", body: { artifactId: id, files,
           idempotencyKey: name + "-publish" } }, invocationFor(allowAll(), name + "-publish"))).toMatchObject({ ok: true });
         return id;
       };
-      const artifactId = await seed("purge-target-" + order);
+      const artifactId = await seed("purge-target-" + order, [file, exclusive]);
       await seed("purge-shared-owner-" + order);
+      const protectedKeys: string[] = [];
+      const exclusiveKeys: string[] = [];
+      for (const key of await rawBlobs().listKeys("artifacts/")) {
+        const text = new TextDecoder().decode(await rawBlobs().getBlob(key));
+        if (text === file.text) protectedKeys.push(key);
+        if (text === exclusive.text) exclusiveKeys.push(key);
+      }
+      expect(protectedKeys.length).toBeGreaterThan(0);
+      expect(exclusiveKeys.length).toBeGreaterThan(0);
       const body = { artifactId, files: [file], idempotencyKey: "purge-racing-" + order };
       const invocation = invocationFor(allowAll(), "purge-racing-" + order);
       if (order === "publication-first") {
@@ -855,12 +880,13 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       }
       expect(paused.claimId.length).toBeGreaterThan(0);
       expect(await binding.inspectDeletionClaims(host)).toContainEqual(expect.objectContaining({ claimId: paused.claimId, state: "deleting" }));
-      const before = new Set(await rawBlobs().listKeys(""));
-      expect(before.size).toBeGreaterThan(0);
+      for (const key of protectedKeys) expect(paused.blobKeys).not.toContain(key);
+      for (const key of exclusiveKeys) expect(paused.blobKeys).toContain(key);
       paused.release();
       await paused.finished;
-      const after = new Set(await rawBlobs().listKeys(""));
-      for (const key of before) expect(after.has(key)).toBe(true); // other artifact still references the bytes
+      const after = new Set(await rawBlobs().listKeys("artifacts/"));
+      assertPurgeEffects(protectedKeys, exclusiveKeys, after);
+      for (const key of protectedKeys) expect(new TextDecoder().decode(await rawBlobs().getBlob(key))).toBe(file.text);
     } finally {
       run?.release(); paused?.release();
       await run?.pending.catch(() => {}); await paused?.finished.catch(() => {});
