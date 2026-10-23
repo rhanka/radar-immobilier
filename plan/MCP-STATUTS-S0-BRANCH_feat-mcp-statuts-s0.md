@@ -69,7 +69,7 @@ successor compatibility and delegation A as pure, unregistered contracts.
   - [x] Freeze command-key and batch-shape validation.
   - [x] Freeze semantic refusals against qualified progression evidence.
   - [x] Catalog all six inert contracts and cover command regressions.
-  - [ ] Cover command schema refusals and historical receipt outputs.
+  - [x] Cover command schema refusals and historical receipt outputs.
 - [ ] **S0d — Successor compatibility**
   - [ ] Freeze versioned manifest and named successor search migration.
   - [ ] Cover successor schema compatibility and unchanged live definitions.
