@@ -206,3 +206,4 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 - [x] qualify non-key lock faults through HTTP and MCP.
 - [x] name E3 phase seams without requiring optional SQL.
 - [x] qualify transaction aborts through HTTP and MCP.
+- [x] qualify uncertain COMMIT on both transports.
