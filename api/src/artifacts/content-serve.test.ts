@@ -188,4 +188,41 @@ describe("authorized artifact content serving", () => {
       expect(upstream).not.toHaveBeenCalled();
     }
   });
+  it("should refuse a widened profile and serve it again after new approval", async () => {
+    const fixture = fixtureReaderDeps();
+    let wide = false;
+    const narrowFingerprint = fingerprintReaderProfile({ name: "demo", policyRevision: "pol-001",
+      capabilities: ["geo.read"] });
+    const widened = { ...fixture.authority!,
+      getAuthorizationVersion: async () => wide ? "v2" : "v1",
+      getProfile: async () => ({ name: "demo", policyRevision: "pol-001",
+        capabilities: wide ? ["geo.read" as const, "signals.protected-read" as const] : ["geo.read" as const] }),
+      getRights: async (readerSub: string, artifactId: string) => ({ readerSub, artifactId,
+        approved: true, capabilities: ["geo.read" as const, "signals.protected-read" as const] }) };
+    const upstream = vi.fn(fixture.readOperation!);
+    const app = createReaderContentApp({ ...fixture, authority: widened, readOperation: upstream,
+      contentBase: "pages.example.test", grantSecret: GRANT_SECRET,
+      sessionSecret: SESSION_SECRET, issuer: ISSUER, now: () => 1_000 });
+    const cookie = await credentials("reader-alice", "session-1", 1_000);
+    const stale = await mintGrant(
+      { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-1", profileName: "demo", policyRevision: "pol-001", profileFingerprint: narrowFingerprint },
+      GRANT_SECRET,
+      1_000,
+    );
+    expect((await request(app, "/index.html", cookie, stale)).status).toBe(200);
+    expect((await request(app, "/__reader/api/signals.protected-read.v1", cookie, stale)).status).toBe(403);
+    wide = true;
+    expect((await request(app, "/index.html", cookie, stale)).status).toBe(401);
+    expect((await request(app, "/__reader/api/geo.read.v1?collectionId=qc-zonage-valleyfield", cookie, stale)).status).toBe(401);
+    expect((await request(app, "/__reader/api/signals.protected-read.v1", cookie, stale)).status).toBe(401);
+    expect(upstream).not.toHaveBeenCalled();
+    const fresh = await mintGrant(
+      { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-1", profileName: "demo", policyRevision: "pol-001", profileFingerprint: FINGERPRINT },
+      GRANT_SECRET,
+      1_000,
+    );
+    expect((await request(app, "/index.html", cookie, fresh)).status).toBe(200);
+    expect((await request(app, "/__reader/api/signals.protected-read.v1", cookie, fresh)).status).toBe(200);
+    expect(upstream).toHaveBeenCalledTimes(1);
+  });
 });
