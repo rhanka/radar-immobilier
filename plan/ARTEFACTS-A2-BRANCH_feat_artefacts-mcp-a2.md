@@ -136,3 +136,5 @@ activation, no cluster-mesh composition.
 - [x] Closed reviewed token-type and client-id gaps and preserved mutation dependency resolution.
 
 - [x] Preserved byte-identical deployed tool fixtures under an explicitly configured exchange runtime.
+
+- [x] Discriminated subject expiry and enforced TLS for confidential workload exchange.

@@ -27,6 +27,7 @@ describe("delegated issuer profile", () => {
   });
   it("refuses future issuance and expiry beyond the subject", async () => {
     await expect(verify({ iat: now + 1 })).rejects.toThrow(/exchange_invalid_lifetime/);
-    await expect(verify({ iat: now + 10, exp: now + 301 })).rejects.toThrow(/exchange_invalid_lifetime/);
+    await expect(validateExchangedToken(await mint(), { ...subject, exp: now + 30 }, config,
+      { resolveKey: async () => publicKey }, now)).rejects.toThrow(/exchange_invalid_lifetime/);
   });
 });
