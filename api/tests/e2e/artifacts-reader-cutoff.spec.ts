@@ -29,7 +29,8 @@ async function cookieFor(page: Page, readerSub: string, sessionId: string, atMs:
   await page.context().addCookies([{
     name: "__Host-preview-session",
     value: sealed.split(";")[0]?.split("=")[1] ?? "",
-    url: baseURL,
+    domain: HOST,
+    path: "/",
     secure: true,
     httpOnly: true,
     sameSite: "Strict",
