@@ -3,7 +3,7 @@ import { exportJWK, generateKeyPair, jwtVerify, SignJWT, type KeyLike } from "jo
 
 /** Synthetic issuer only: verifies subjects; never accepts arbitrary decoded claims. */
 export async function createIsolatedIssuer(options: {
-  issuer: string; resource: string; audience: string; subjectKey: KeyLike; workload: string;
+  issuer: string; resource: string; audience: string; subjectKey: KeyLike; workload: string; clientSecret: string;
 }) {
   const pair = await generateKeyPair("RS256");
   const jwk = await exportJWK(pair.publicKey);
@@ -14,6 +14,9 @@ export async function createIsolatedIssuer(options: {
   ] }));
   app.post("/token", async (c) => {
     const form = new URLSearchParams(await c.req.text());
+    const expected = Buffer.from(`${encodeURIComponent(options.workload)}:${encodeURIComponent(options.clientSecret)}`).toString("base64");
+    if (c.req.header("authorization") !== `Basic ${expected}`) return c.json({ error: "invalid_client" }, 401);
+    if (form.has("client_id") || form.has("client_secret") || form.has("actor_token")) return c.json({ error: "invalid_request" }, 400);
     if (form.get("grant_type") !== "urn:ietf:params:oauth:grant-type:token-exchange" ||
         form.get("subject_token_type") !== "urn:ietf:params:oauth:token-type:access_token" ||
         form.get("requested_token_type") !== "urn:ietf:params:oauth:token-type:access_token" ||

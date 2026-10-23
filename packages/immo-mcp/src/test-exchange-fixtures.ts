@@ -9,6 +9,7 @@ export const TEST_RESOURCE = "https://immo.test.local/mcp";
 export const TEST_API_AUDIENCE = "https://immo.test.local";
 export const TEST_WORKLOAD_SUB = "immo-mcp-workload";
 export const TEST_WORKLOAD_CLIENT = "immo-mcp-workload";
+export const TEST_WORKLOAD_SECRET = "synthetic:workload/key";
 export const TEST_TOKEN_ENDPOINT = "https://exchange.test.local/token";
 export const TEST_SCOPES = "immo:read immo:search immo:documents:read";
 
@@ -44,6 +45,8 @@ export async function createIsolatedExchangeFixture(): Promise<IsolatedExchangeF
   const fetchImpl = (async (input: unknown, init?: RequestInit): Promise<Response> => {
     const url = String(input instanceof Request ? input.url : input);
     if (url !== TEST_TOKEN_ENDPOINT) throw new Error(`unexpected exchange route: ${url}`);
+    const expected = Buffer.from(`${encodeURIComponent(TEST_WORKLOAD_CLIENT)}:${encodeURIComponent(TEST_WORKLOAD_SECRET)}`).toString("base64");
+    if (new Headers(init?.headers).get("authorization") !== `Basic ${expected}`) return new Response("{}", { status: 401 });
     state.calls += 1;
     const body = new URLSearchParams(String((init?.body as string | undefined) ?? ""));
     const subjectToken = body.get("subject_token") ?? "";
@@ -117,6 +120,7 @@ export function exchangeDepsFor(
 ): ExchangeRuntimeDeps {
   return {
     config: fixture.config,
+    clientSecret: TEST_WORKLOAD_SECRET,
     fetchImpl: fixture.fetchImpl,
     keySource: fixture.exchangeKeySource,
     cache: new ExchangeCache({}),

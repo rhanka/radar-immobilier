@@ -6,7 +6,7 @@ import { createIsolatedIssuer } from "./isolated-issuer.js";
 import { createImmoHttpApp } from "../../packages/immo-mcp/src/server-http.js";
 import { HttpDataSource } from "../../packages/immo-mcp/src/data-source.js";
 import { ExchangeCache, SingleFlightExchange } from "../../packages/immo-mcp/src/exchange-cache.js";
-import { signSubjectToken, TEST_ISSUER, TEST_RESOURCE, TEST_API_AUDIENCE } from "../../packages/immo-mcp/src/test-exchange-fixtures.js";
+import { signSubjectToken, TEST_ISSUER, TEST_RESOURCE, TEST_API_AUDIENCE, TEST_WORKLOAD_SECRET } from "../../packages/immo-mcp/src/test-exchange-fixtures.js";
 
 export async function serviceFixture() {
   const servers: ReturnType<typeof serve>[] = [];
@@ -27,7 +27,7 @@ export async function serviceFixture() {
   try {
     const subject = await generateKeyPair("RS256");
     const issuer = await createIsolatedIssuer({ issuer: TEST_ISSUER, resource: TEST_RESOURCE,
-      audience: TEST_API_AUDIENCE, subjectKey: subject.publicKey, workload: "immo-mcp-workload" });
+      audience: TEST_API_AUDIENCE, subjectKey: subject.publicKey, workload: "immo-mcp-workload", clientSecret: TEST_WORKLOAD_SECRET });
     const issuerUrl = await listen(issuer.app);
     const radar = new Hono();
     const seen: string[] = [];
@@ -49,7 +49,7 @@ export async function serviceFixture() {
       requiredScopes: ["immo:read"], scopesSupported: ["immo:read", "immo:search"], port: 0,
       dataMode: "real", sessionIdleTimeoutMs: 1_800_000, sessionMaxLifetimeMs: 28_800_000,
     }, { keySource: { resolveKey: async () => subject.publicKey }, data: new HttpDataSource({ baseUrl: radarUrl }),
-      exchange: { config: { issuer: TEST_ISSUER, apiAudience: TEST_API_AUDIENCE, mcpResource: TEST_RESOURCE,
+      exchange: { clientSecret: TEST_WORKLOAD_SECRET, config: { issuer: TEST_ISSUER, apiAudience: TEST_API_AUDIENCE, mcpResource: TEST_RESOURCE,
         tokenEndpoint: `${issuerUrl}/token`, workloadSub: "immo-mcp-workload", workloadClientId: "immo-mcp-workload",
         environment: "test-artefacts-mcp-a2", policyRevision: "p4-v1" },
         keySource: { resolveKey: (header) => jwks(header as never, {} as never) },
