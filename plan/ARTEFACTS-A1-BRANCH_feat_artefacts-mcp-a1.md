@@ -98,3 +98,4 @@ unverified evidence. ETA unchanged: 14-23 agent hours, complete A1 circuit.
 
 - [x] Implement bounded race draining and process exit, including SIGKILL escalation.
 - [x] Add SQL/S3 regression fixtures for failed winners, stuck workers and purge effects.
+- [x] Release and collect both race branches; assert shared retention and exclusive deletion.
