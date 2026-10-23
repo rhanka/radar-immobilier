@@ -65,3 +65,4 @@ No invented production domain or certificate.
 - [x] Signed grant verification requires bounded expiry and matching subject.
 - [x] Local activation registry prepared; provider activation binding pending.
 - [x] Named operation schemas prepared; receiving API integration remains pending.
+- [x] Reader context checks current release, policy and reader rights.
