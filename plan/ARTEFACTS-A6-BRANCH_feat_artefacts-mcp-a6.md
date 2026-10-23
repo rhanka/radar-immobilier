@@ -78,3 +78,4 @@ No invented production domain or certificate.
 - [x] Optional content gate delegation preserves ordinary API denial.
 - [x] Reader init, ticket and release integration module cases prepared.
 - [x] Operation integration module cases use synthetic ports, not receiving API proof.
+- [x] Standalone reader listener prepared; production authority/store binding pending.
