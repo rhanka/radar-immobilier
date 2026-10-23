@@ -25,6 +25,37 @@ export async function closeArtifactWorker(child: ChildProcess, requestClose: () 
   }
 }
 
+/**
+ * Bound a principal wait by the pump outcome and a timeout.
+ * The pump rejection wins immediately so the caller reaches its
+ * cleanup instead of waiting for an operation that never settles.
+ * A timeout rejection bounds a stalled barrier or operation.
+ */
+export async function awaitWithPump(
+  operation: Promise<unknown>,
+  pump: Promise<unknown>,
+  label: string,
+  timeoutMs = 8000,
+): Promise<unknown> {
+  void operation.catch(() => {});
+  void pump.catch(() => {});
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      operation,
+      pump.then(
+        () => operation,
+        (error: unknown) => { throw error; },
+      ),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new Error(`[contract-violation] ${label} did not settle`)), timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
+}
+
 /** Observe every rejection, release barriers, then close both hosts within bounds. */
 export async function cleanupArtifactRace(
   barriers: ReadonlyArray<{ barrier: CommitBarrier; invocationId: string }>,
