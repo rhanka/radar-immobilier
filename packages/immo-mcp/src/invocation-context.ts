@@ -6,9 +6,12 @@ import type { RawDataSource } from "./raw-data.js";
 /**
  * Prepared authorized egress for a single tool invocation.
  *
- * P1 captures the verified per-request credential without performing any token
- * exchange. A later stage replaces `bearer` with an exchanged credential;
- * handlers must only consume this snapshot, never a mutable holder.
+ * P4 keeps the subject credential in the private exchange boundary
+ * (`authorized-egress.ts`) and never copies it here. `bearer` carries only
+ * an already-exchanged delegated token when a resolver has produced one;
+ * at capture it is always `undefined` (public tools and stubs stay
+ * credential-free). Handlers must only consume this snapshot, never a
+ * mutable holder.
  */
 export interface AuthorizedEgress {
   readonly bearer: string | undefined;
@@ -36,7 +39,7 @@ export interface InvocationContext {
   readonly egress: AuthorizedEgress;
 }
 
-export type InvocationAuth = Readonly<Omit<ImmoMcpAuthContext, "scopes" | "roles" | "workspaces">> & {
+export type InvocationAuth = Readonly<Omit<ImmoMcpAuthContext, "accessToken" | "scopes" | "roles" | "workspaces">> & {
   readonly scopes: readonly string[];
   readonly roles: readonly string[];
   readonly workspaces: readonly string[];
@@ -44,8 +47,10 @@ export type InvocationAuth = Readonly<Omit<ImmoMcpAuthContext, "scopes" | "roles
 
 /** Freeze one verified request into an immutable invocation context. */
 export function captureInvocationContext(seeds: InvocationSeeds): InvocationContext {
+  const { accessToken: _droppedSubjectBearer, ...rest } = seeds.auth;
+  void _droppedSubjectBearer;
   const auth: InvocationAuth = {
-    ...seeds.auth,
+    ...rest,
     scopes: Object.freeze([...seeds.auth.scopes]),
     roles: [...seeds.auth.roles],
     workspaces: [...seeds.auth.workspaces],
@@ -55,18 +60,20 @@ export function captureInvocationContext(seeds: InvocationSeeds): InvocationCont
   Object.freeze(auth.workspaces);
   Object.freeze(auth);
   const snapshot: AuthorizedEgress = Object.freeze({
-    bearer: seeds.auth.accessToken,
+    bearer: undefined,
     scopes: Object.freeze([...seeds.auth.scopes]),
     sub: seeds.auth.sub,
   });
   return Object.freeze({ auth, data: seeds.data, raw: seeds.raw, egress: snapshot });
 }
 
-/** Per-call caller identity for the data seam (never a machine credential). */
-export function authorizedCallContext(ctx: InvocationContext): DataSourceCallContext {
-  const token = ctx.egress.bearer;
-  if (token === undefined) return {};
-  return { accessToken: token };
+/**
+ * Per-call caller identity for tools without delegated egress (public tools
+ * and stubs). Always empty: only `resolveExchangedCallContext` may supply
+ * an exchanged token, and only for `search_signals`.
+ */
+export function authorizedCallContext(_ctx: InvocationContext): DataSourceCallContext {
+  return {};
 }
 
 const storage = new AsyncLocalStorage<InvocationContext>();

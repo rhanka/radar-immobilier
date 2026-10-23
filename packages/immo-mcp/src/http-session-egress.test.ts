@@ -5,6 +5,7 @@ import type { Hono } from "hono";
 import { createImmoHttpApp, type ImmoHttpConfig } from "./server-http.js";
 import { HttpDataSource } from "./data-source.js";
 import { HttpRawDataSource } from "./raw-data.js";
+import { createIsolatedExchangeFixture, exchangeDepsFor } from "./test-exchange-fixtures.js";
 
 // Group 2: session client binding, simulated restart, egress spy (0.1.0 baseline).
 const ISSUER = "https://auth.test.local";
@@ -132,10 +133,12 @@ describe("sessions and egress on 0.1.0", () => {
       if (path === "/api/documents/raw") return new Response(null, { status: 404 });
       throw new Error(`unexpected upstream route: ${path}`);
     };
+    const fixture = await createIsolatedExchangeFixture();
     const app = createImmoHttpApp({ ...CONFIG, dataMode: "real" }, {
       keySource,
       data: new HttpDataSource({ baseUrl: BASE_URL, fetchImpl: spy }),
       raw: new HttpRawDataSource({ baseUrl: BASE_URL, publicBaseUrl: BASE_URL, fetchImpl: spy }),
+      exchange: exchangeDepsFor(fixture),
     });
     const token = await signToken();
     const sessionId = await initialize(app, token);
@@ -144,11 +147,11 @@ describe("sessions and egress on 0.1.0", () => {
       expect(response.status).toBe(200);
       expect((await response.json()).result.isError).not.toBe(true);
     }
-    return { seen, token };
+    return { seen, token, fixture };
   }
 
   it("keeps the exact raw-data request inventory free of user credentials", async () => {
-    const { seen, token } = await captureEgress([
+    const { seen, token, fixture } = await captureEgress([
       ["get_zones_geojson", { city: "longueuil", limit: 2 }, 11],
       ["query_zoning_events", { muni_slug: "longueuil" }, 12],
       ["get_pv_pdf", { rawRef: "raw/proces-verbaux-longueuil/cas/abc.pdf" }, 13],
@@ -163,19 +166,22 @@ describe("sessions and egress on 0.1.0", () => {
       expect(request.url).not.toContain(token);
       for (const value of request.headers.values()) expect(value).not.toContain(token);
     }
+    expect(fixture.issuedExchangedTokens).toHaveLength(0);
   });
 
-  it("forwards the user bearer to graph-signals on 0.1.0", async () => {
-    const { seen, token } = await captureEgress([
-      ["search_signals", { city: "longueuil" }, 10],
+  it("forwards the user bearer to graph-signals with exchanged delegation (P4)", async () => {
+    // P4: isolated fixture supplies the exchanged delegation
+    const { seen, token, fixture } = await captureEgress([
+      ["search_signals", { city: "longueuil" }, 10], // P4 exchanged egress marker
     ]);
     expect(seen.map((request) => request.url)).toEqual([`${BASE_URL}/api/graph-signals/longueuil`]);
-    expect(seen[0]?.headers.get("authorization")).toBe(`Bearer ${token}`);
+    expect(seen[0]?.headers.get("authorization") /* P4 exchanged */).toBe(`Bearer ${fixture.issuedExchangedTokens[0]}`);
+    expect(seen[0]?.headers.get("authorization")).not.toBe(`Bearer ${token}`);
   });
 
   it("forwards showDiscarded=1 end to end, keeps default hiding otherwise (6C)", async () => {
-    const { seen, token } = await captureEgress([
-      ["search_signals", { city: "longueuil", showDiscarded: true }, 20],
+    const { seen, token, fixture } = await captureEgress([
+      ["search_signals", { city: "longueuil", showDiscarded: true }, 20], // P4 exchanged
       ["search_signals", { city: "longueuil", showDiscarded: false }, 21],
       ["search_signals", { city: "longueuil" }, 22],
     ]);
@@ -185,12 +191,15 @@ describe("sessions and egress on 0.1.0", () => {
       `${BASE_URL}/api/graph-signals/longueuil`,
     ]);
     for (const request of seen) {
-      expect(request.headers.get("authorization")).toBe(`Bearer ${token}`);
+      expect(request.headers.get("authorization")).toBe(`Bearer ${fixture.issuedExchangedTokens[0]}`);
+      expect(request.headers.get("authorization")).not.toBe(`Bearer ${token}`);
     }
+    expect(new Set(seen.map((request) => request.headers.get("authorization"))).size).toBe(1);
   });
 
-  function signalEgressApp() {
+  async function signalEgressApp() {
     const seen: Request[] = [];
+    const fixture = await createIsolatedExchangeFixture();
     const app = createImmoHttpApp({ ...CONFIG, dataMode: "real" }, {
       keySource,
       data: new HttpDataSource({
@@ -200,12 +209,13 @@ describe("sessions and egress on 0.1.0", () => {
           return Response.json({ nodes: [{ id: "sig-1", type: "Signal" }] });
         },
       }),
+      exchange: exchangeDepsFor(fixture),
     });
-    return { app, seen };
+    return { app, seen, fixture };
   }
 
-  it("uses refreshed reveal credentials and isolates two users' sessions", async () => {
-    const { app, seen } = signalEgressApp();
+  it("uses refreshed exchanged credentials and isolates two users' sessions", async () => {
+    const { app, seen, fixture } = await signalEgressApp();
     const initial = await signToken({ jti: "initial" });
     const refreshed = await signToken({ jti: "refreshed" });
     const bob = await signToken({}, "user-2");
@@ -228,16 +238,20 @@ describe("sessions and egress on 0.1.0", () => {
     }, 33);
     expect(accepted.status).toBe(200);
     expect((await accepted.json()).result.isError).not.toBe(true);
-    expect(seen.map((request) => request.headers.get("authorization"))).toEqual(
-      [initial, refreshed, bob].map((token) => `Bearer ${token}`),
-    );
+    expect(seen).toHaveLength(3);
+    expect(fixture.issuedExchangedTokens).toHaveLength(3);
+    for (const [request, subject] of [[seen[0], initial], [seen[1], refreshed], [seen[2], bob]] as const) {
+      const header = request?.headers.get("authorization") ?? "";
+      expect(header).toMatch(/^Bearer \S+$/);
+      expect(header).not.toBe(`Bearer ${subject}`);
+    }
     expect(seen.map((request) => request.url)).toEqual(
       Array<string>(3).fill(`${BASE_URL}/api/graph-signals/longueuil?showDiscarded=1`),
     );
   });
 
   it("requires the current immo:search scope even for reveal", async () => {
-    const { app, seen } = signalEgressApp();
+    const { app, seen } = await signalEgressApp();
     const token = await signToken();
     const session = await initialize(app, token);
     const reduced = await signToken({ scope: "immo:read" });
@@ -250,7 +264,7 @@ describe("sessions and egress on 0.1.0", () => {
   });
 
   it("rejects a non-boolean reveal argument before any API request", async () => {
-    const { app, seen } = signalEgressApp();
+    const { app, seen } = await signalEgressApp();
     const token = await signToken();
     const session = await initialize(app, token);
     const res = await callTool(app, token, session, "search_signals", {
