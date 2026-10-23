@@ -98,3 +98,5 @@ activation, no cluster-mesh composition.
 - Qualified `mcp-auth` publication, provenance and compatibility.
 - Isolated and deployed RFC 8693 issuer, identity configuration and workload references.
 - Receiving-environment and operator evidence, publication GO and CI.
+
+- [x] Added exchange configuration and bounded response reader.
