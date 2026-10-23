@@ -170,3 +170,4 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 - [x] bind authorization fixtures to transaction participants.
 - [x] inspect both process preparations and the losing attempt.
 - [x] inspect both process preparations and the losing attempt.
+- [x] serialize lifecycle writers and observe purge deletion claims.
