@@ -100,7 +100,7 @@ export async function validateExchangedToken(
   const actSub =
     typeof act === "object" && act !== null ? asString((act as Record<string, unknown>)["sub"]) : undefined;
   if (actSub !== config.workloadSub) throw new Error("exchange_invalid_actor");
-  const clientId = asString(payload["client_id"]) ?? (typeof act === "object" && act !== null ? asString((act as Record<string, unknown>)["client_id"]) : undefined);
+  const clientId = asString(payload["client_id"]);
   if (clientId !== config.workloadClientId) throw new Error("exchange_invalid_client");
   const scopes = claimScopes(payload);
   if (scopes.length !== 1 || scopes[0] !== requiredScope) throw new Error("exchange_scope_refused");

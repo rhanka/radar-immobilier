@@ -5,6 +5,12 @@ const input = { subjectToken: "synthetic-private-subject", audience: "https://ap
   workload: { clientId: "synthetic-workload", clientSecret: "synthetic-secret" } };
 
 describe("exchange response boundary", () => {
+  it.each([undefined, "", [], "urn:invalid"])("refuses invalid issued_token_type %j", async (issued) => {
+    await expect(requestTokenExchange("https://issuer.example.test/token", input, {
+      fetchImpl: async () => Response.json({ access_token: "synthetic-delegation", token_type: "Bearer", issued_token_type: issued }),
+    })).rejects.toThrow(/^exchange_invalid_token_type$/);
+  });
+
   it("sanitizes network errors that include the original subject credential", async () => {
     const failure = requestTokenExchange("https://issuer.example.test/token", input, {
       fetchImpl: async () => { throw new Error(`failed body subject_token=${input.subjectToken}`); },
