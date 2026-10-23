@@ -374,10 +374,47 @@ export const authorizeTransaction: AuthorizeCommit = async (context, transaction
 };
 
 /**
+ * Radar effective profile data required by spec r2 C3/C4: selection plus the
+ * operation limits, defaults and contract revisions that drive schema
+ * generation, validation, normalization, command hashing and digests. A
+ * semantic-only change (same JSON Schema text, different limit or default)
+ * must invalidate composition evidence.
+ */
+export const RADAR_EFFECTIVE_PROFILE = Object.freeze({
+  selection: Object.freeze([...FROZEN_CAPABILITIES]),
+  closedObjects: true,
+  limits: Object.freeze({
+    ensureBindingName: Object.freeze({ minUtf16: 1, maxUtf16: 128, normalize: false }),
+    callerKey: Object.freeze({ trimNonempty: true, maxUtf16: 256, keepWhitespace: true,
+      rejectLoneSurrogates: true, normalize: false }),
+    artifactId: Object.freeze({ validator: "lowercase-uuid" }),
+    publishFiles: Object.freeze({ min: 1, max: 32 }),
+    publishBytes: Object.freeze({ maxDecodedPerFile: 262144, maxDecodedTotal: 262144 }),
+    mime: Object.freeze(["text/html", "text/css", "text/javascript", "application/json"]),
+    path: Object.freeze({ maxUtf8Bytes: 1024, forbidColon: true, forbidDel: true,
+      noEmptyDotSegments: true, noBackslash: true, noPercent: true,
+      noQueryFragment: true, noControls: true,
+      forbiddenFirstSegment: Object.freeze(["api", "__artifacts", "livez", "health"]) }),
+    fileContent: Object.freeze({ exactlyOneOfTextOrBytes: true, textEncoding: "utf8",
+      byteIntegerMin: 0, byteIntegerMax: 255, uniquePaths: true }),
+    profile: Object.freeze({ flatJsonPrimitivesOnly: true }),
+    list: Object.freeze({ integerOnly: true, limitMin: 1, limitMax: 100,
+      limitDefault: 20, offsetMin: 0, offsetDefault: 0 }),
+  }),
+  emptyParametersOnly: true,
+  defaults: Object.freeze({ parameters: Object.freeze({}), profile: Object.freeze({}) }),
+  provenance: Object.freeze({ kind: "inline-original", callerSourceAbsent: true }),
+  revisions: Object.freeze({ profile: "radar-c4-r2", providerContract: "0.2.0", commandCodec: "v1" }),
+});
+
+/**
  * Compile the Radar provider profile through the upstream compiler.
  * Returns the immutable compiled profile; never fabricates a digest.
  * Fails `[missing-contract] mcp-core.compileArtifactsProfile` naming the
- * upstream entry while the provider predates the r2 line.
+ * upstream entry while the provider predates the r2 line, and
+ * `[missing-contract] mcp-core.effectiveProfile` (owner Sentropic L0/L1) while
+ * the compiler input carries selection only without the C3/C4 limits,
+ * defaults and revisions.
  */
 export async function compileArtifactsProfile(input: {
   readonly selectedCapabilities: readonly string[];
@@ -398,11 +435,21 @@ export async function compileArtifactsProfile(input: {
       `upstream entry ${PROFILE_COMPILER_SPECIFIER} must export compileArtifactsProfile(input: ArtifactProviderProfile): CompiledArtifactsProfile (Sentropic spec r2 section 3.2)`,
     );
   }
-  const compiled = await (compile as (
-    candidate: unknown,
-  ) => Promise<CompiledArtifactsProfile> | CompiledArtifactsProfile)({
+  const candidate = {
     selectedCapabilities: [...FROZEN_CAPABILITIES],
-  });
+    effectiveProfile: RADAR_EFFECTIVE_PROFILE,
+  };
+  let compiled: CompiledArtifactsProfile;
+  try {
+    compiled = await (compile as (
+      candidate: unknown,
+    ) => Promise<CompiledArtifactsProfile> | CompiledArtifactsProfile)(candidate);
+  } catch (error) {
+    missingContract(
+      "mcp-core.effectiveProfile",
+      `upstream compiler must accept the full Radar effective profile (C3/C4 limits, defaults, revisions; owner Sentropic L0/L1): ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
   if (compiled === null || typeof compiled !== "object") {
     throw new Error("[contract-violation] mcp-core.compileArtifactsProfile: malformed profile");
   }
@@ -413,6 +460,23 @@ export async function compileArtifactsProfile(input: {
   if (!Object.isFrozen(compiled) || !Object.isFrozen(compiled.selectedCapabilities) ||
       [...compiled.selectedCapabilities].sort().join(",") !== frozen.join(",")) {
     throw new Error("[contract-violation] compiler must return the immutable four-operation profile");
+  }
+  // A compiler returning a constant digest that the host reuses would pass the
+  // old equality check. A semantic-only profile change must change the digest.
+  const mutated = {
+    ...candidate,
+    effectiveProfile: { ...RADAR_EFFECTIVE_PROFILE,
+      limits: { ...RADAR_EFFECTIVE_PROFILE.limits,
+        publishBytes: { ...RADAR_EFFECTIVE_PROFILE.limits.publishBytes, maxDecodedTotal: 262143 } } },
+  };
+  const recompiled = await (compile as (
+    candidate: unknown,
+  ) => Promise<CompiledArtifactsProfile> | CompiledArtifactsProfile)(mutated);
+  if (typeof recompiled?.digest !== "string" || !/^(sha256:)?[a-f0-9]{64}$/.test(recompiled.digest)) {
+    throw new Error("[contract-violation] semantic profile compilation returned an invalid digest");
+  }
+  if (recompiled.digest === digest) {
+    throw new Error("[contract-violation] mcp-core.compileArtifactsProfile: semantic profile change left the digest unchanged");
   }
   return compiled;
 }

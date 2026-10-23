@@ -187,3 +187,6 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 - [x] retain typed provider failure causes before wire projection.
 - [x] require retriable read failures to project as 503.
 - [x] docs: record review fixes and qualification prerequisites.
+
+## Review 2 delivery slices
+- [x] bind full Radar profile and reject constant digests.
