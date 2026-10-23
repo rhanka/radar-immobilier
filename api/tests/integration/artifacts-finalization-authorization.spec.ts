@@ -197,8 +197,12 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
     }
   });
 
-  async function assertPreparationCleanup(host: unknown, artifactId: string): Promise<void> {
-    await verifyPreparationCleanup(host, artifactId, rawBlobs(), false);
+  async function assertPreparationCleanup(host: unknown, artifactId: string,
+    expectedInvocationIds?: readonly string[],
+    s3KeysBefore?: ReadonlySet<string> | readonly string[]): Promise<void> {
+    await verifyPreparationCleanup(host, artifactId, rawBlobs(), false, false,
+      { ...(expectedInvocationIds === undefined ? {} : { expectedInvocationIds }),
+        ...(s3KeysBefore === undefined ? {} : { s3KeysBefore }) });
   }
 
   async function assertSqlWriterBlocked(pid: number): Promise<void> {
