@@ -118,3 +118,41 @@
   - [ ] Gate: all three real writer paths contend with facet commands; no coverage attestation without the corresponding executable proof.
 - [ ] B4 — Operational cutover; Muse 5–8 h, Sol 4–6 h, total 9–14 h.
   - [ ] B4.1: implement/inject 6H and 6K maintenance safety through existing activation interfaces; Muse A implements B4, Sol A verifies and commits BASE-owned files; shared application/startup deltas use the current CT-1 lease holder.
+  - [ ] B4.1 entry: add base-api-activate-personal and base-api-resume-personal to tools/make/base-api.mk, dispatched by tools/make/base-api-activation.sh; Sol A owns both tooling paths.
+  - [ ] B4.1 script: Muse A owns api/src/scripts/base-api-personal-activation.ts; require workspace, actor, reason and qualified maintenance evidence; execute in the API container without environment-file discovery.
+  - [ ] B4.1 activation: call runPersonalAttachmentActivation from activation-run.ts; attach-personal-history.ts only attaches histories and cannot substitute for activation.
+  - [ ] B4.1 resume: inspect durable state; legacy/closed retries protected activation, scoped/closed calls resumePersonalAttachmentReadback from activation-open.ts, already-open returns status after authorization without mutation.
+  - [ ] B4.1 adapter: Muse A implements api/src/services/facets/activation-maintenance-safety.ts using ActivationSafety; inject actual drain/shutdown evidence and the internal reader, never successful empty callbacks.
+  - [ ] B4.2: close admission and old reads/writes/publications; drain responses, connections and buffers.
+  - [ ] B4.3: verify old-instance shutdown and guarded restart; process-local retirement alone is insufficient.
+  - [ ] B4.4: Muse A owns api/src/services/facets/activation-readback.ts; read and validate real PostgreSQL bindings, heads and scoped projections under the still-closed barrier.
+  - [ ] B4.4 authority: recheck management, account approval, memberships, qualified attachments and scoped epoch; retain personal-scope isolation and return only bounded verification evidence to the operator.
+  - [ ] B4.4 isolation: keep scopedEpochFor/public readers closed; expose no public bypass; readback is internal to activation/resume and succeeds before activation-open.ts clears the barrier.
+  - [ ] B4.5: Muse A adds api/tests/integration/base-api-activation.spec.ts and base-api-activation-resume.spec.ts; Sol A qualifies the real Make/script/safety/reader composition on synthetic PostgreSQL.
+  - [ ] B4.5 proof: public reads return 503 while closed, real readback validates seeded heads/projections, then opening enables public reads; no fixture-success adapter qualifies this test.
+  - [ ] B4.5 recovery: interrupted activation and readback failure retain the durable barrier; resume rechecks rights/evidence; mismatched persisted state or missing shutdown/drain proof prevents opening.
+  - [ ] Gate: both B4 activation suites plus legacy-delivery tests actually execute; B3 coverage present; global signal authority transition protected; record exact activate/resume Make commands in BASE_API_ACTIVATION.md.
+- [ ] B5 — BASE acceptance; Muse 1–2 h, Sol 3–4 h, total 4–6 h.
+  - [ ] B5.1: HTTP/SQL authority, transitions, history and exact-replay scenarios through createApp.
+  - [ ] B5.2: concurrent writes, revocation, changed content and atomic batches through 500 targets.
+  - [ ] B5.3: fresh installation, migrated installation, empty history and interrupted cutover; CT-8 governs standalone and combined migration qualification.
+  - [ ] B5.4: prove BASE works with artifact configuration absent and artifact services unused.
+  - [ ] B5.5: finalize SPEC_BASE_API.md and BASE_API_ACTIVATION.md with evidence and unresolved operational inputs.
+  - [ ] Gate: all required cases actually execute; two independent Astra max reviews; corrections retested; reproducible bundle and report; apply CT-8/CT-9 before combined delivery, without waiting for ARTEFACTS to qualify standalone BASE.
+
+## Estimates copied from the approved proposal
+- [ ] Build and qualification: Muse 17–28 h; Sol 18–24 h; combined 35–52 agent-hours.
+- [ ] Two independent Astra max reviews: 3–5 agent-hours; correction/retest/review reserve: 3–6 agent-hours.
+- [ ] Qualified code: 41–63 agent-hours; nominal operational activation: an additional 2–3 agent-hours.
+- [ ] Two-chain elapsed estimate: 28–43 h, corrections included, external waits excluded.
+- [ ] Original projection anchor: 2026-10-23 14:00 UTC; these dates are copied, not rebased.
+- [ ] Original earliest milestones: no-correction floor 2026-10-24 14:30 UTC; qualified code 18:00 UTC; nominal activation 20:00 UTC.
+- [ ] Original upper qualified-code projection: 2026-10-25 09:00 UTC; actual circuit throughput remains unverified.
+- [ ] External waits: agent/CI availability, final 6K qualification, operational identities/rights/mappings, real manifest/dispositions and maintenance access.
+- [ ] Artifact publication, H5 and new Sentropic package delivery are not BASE prerequisites.
+
+## Merge & close
+- [ ] Qualify the exact integrated SHA; review integrity/migration/concurrency and authority/API/artifact independence separately; record the CT-2 receipt and CT-8/CT-9 evidence before any combined shared-image update.
+- [ ] Record remote CI against the full head SHA; remote CI and PR #906 status are currently unverified.
+- [ ] Complete push/PR/merge through the established integration workflow, outside the initial launch packets.
+- [ ] Merge commit only; preserve branches; move this plan to plan/done after merge.
