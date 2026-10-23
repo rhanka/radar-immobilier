@@ -138,3 +138,14 @@ activation, no cluster-mesh composition.
 - [x] Preserved byte-identical deployed tool fixtures under an explicitly configured exchange runtime.
 
 - [x] Discriminated subject expiry and enforced TLS for confidential workload exchange.
+
+## Integration receipt and activation gates
+
+- [x] P4 implementation uses confidential `client_secret_basic` per Sentropic source `6ec93105b380bc65063994417716dfacfaceb462`; no actor token or original-bearer fallback.
+- [x] Synthetic-only runtime reads `IMMO_MCP_WORKLOAD_CLIENT_SECRET` from explicitly supplied process configuration; no credential value or deployment edit is delivered.
+- [x] The first ten behavioral mutants were killed with restored passing controls; the added subject-expiry mutant still requires execution on the final source.
+- [ ] ARTEFACTS integrator supplies a coherent `mcp-auth 0.2.2`/`oauth-verify 0.1.0` manifest and lockfile integration commit, archive integrity, provenance and strict full-Radar peer receipt.
+- [ ] Apply the intended missing-coarse-scope 401-to-403 delta and remove the canonical discovery shim only after that qualified dependency integration; invalid authentication stays 401.
+- [ ] Identity owner supplies the exact real RFC 8693 issuer build/tuple and an isolated compatibility receipt; the local synthetic issuer does not satisfy this gate.
+- [ ] Operator supplies environment-specific confidential workload references, issuer/audiences, image digest, positive deployed search and connected-client continuity receipts before P4 acceptance or A3 activation.
+- [ ] Conductor merges the accepted A2 HEAD and acknowledges the H4 file hash/target/gate receipt before ownership returns for P6/P7; no transfer has occurred.
