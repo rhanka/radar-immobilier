@@ -126,3 +126,5 @@ activation, no cluster-mesh composition.
 - [x] Implemented executable P4 gates and synthetic issuer; P6 and P7 still refuse.
 
 - [x] Added real loopback HTTP exchange proof with synthetic issuer and receiver.
+
+- [x] Added isolated behavioral mutations with byte restoration and control reruns.
