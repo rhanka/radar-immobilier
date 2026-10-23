@@ -59,3 +59,4 @@ No invented production domain or certificate.
 - [ ] D1/D2 remain open with read-only and technical-example defaults.
 - [x] Local profile seam prepared; A1 authority binding remains pending.
 - [x] Origin validation now uses the authority-owned origin.
+- [x] In-process single-use tickets require an independent browser binding; durable store pending.
