@@ -19,7 +19,7 @@ import { scopedEpochFor } from "../activation.js";
 import { FacetError } from "../target.js";
 import type { LotMode, LotTarget } from "./lot-target.js";
 import { resolveLotRights } from "./lot-capabilities.js";
-import { requireLotDestination } from "./lot-gate.js";
+import { requireOpenLotDestination } from "./lot-gate.js";
 import {
   isCutoverBlockedTarget,
   readBlockedCutoverKeys,
@@ -53,7 +53,7 @@ export async function readLotCity(
     const accountId = await approvedAccountId(tx, sub, true);
     await resolveWorkspaceAccess(tx, workspaceId, sub);
     await resolveLotRights(tx, workspaceId, sub);
-    await requireLotDestination(tx, workspaceId);
+    await requireOpenLotDestination(tx, workspaceId);
     requireScopedEpoch(await scopedEpochFor(tx, workspaceId), workspaceId);
     const blocked = await readBlockedCutoverKeys(tx as unknown as Database, workspaceId);
     const rows = await tx.select({ event: facetEvents })
