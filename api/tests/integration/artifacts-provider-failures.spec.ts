@@ -534,6 +534,16 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     }
   });
 
+  it.each(["schema-infrastructure", "unqualified"] as const)(
+    "requires an explicit phase-injection joint for E3 cause %s, never optional SQL",
+    async (phase) => {
+      // r2 imposes no LOCK TABLE / pg_catalog.* or SET LOCAL shape. A
+      // conforming coordinator using implicit PostgreSQL locks must fail here
+      // by named joint, never on an optional-form assertion.
+      await requirePhaseInjectionBinding(phase);
+    },
+  );
+
   it.each(["40001", "40P01", "57014"])("maps %s after provisional writes without an internal retry", async (code) => {
     await requireOutcomeContract();
     const barrier = await requireCommitBarrier();
