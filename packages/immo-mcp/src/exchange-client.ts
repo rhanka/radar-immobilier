@@ -13,8 +13,8 @@ export interface TokenExchangeInput {
   readonly scope: string;
   /** Exact API audience for the delegated token. */
   readonly audience: string;
-  /** Optional workload actor token; absent in the isolated P4 binding. */
-  readonly actorToken?: string | undefined;
+  /** Confidential workload authentication; only sent to the trusted issuer. */
+  readonly workload: { readonly clientId: string; readonly clientSecret: string };
 }
 
 export interface TokenExchangeResult {
@@ -44,6 +44,7 @@ export async function requestTokenExchange(
   opts: ExchangeHttpOptions = {},
 ): Promise<TokenExchangeResult> {
   if (!input.subjectToken) throw new Error("exchange_missing_subject_token");
+  if (!input.workload?.clientId || !input.workload.clientSecret) throw new Error("exchange_not_configured");
   const fetchImpl = opts.fetchImpl ?? fetch;
   const maxBytes = opts.maxBytes ?? EXCHANGE_MAX_RESPONSE_BYTES;
   const body = new URLSearchParams({
@@ -54,15 +55,13 @@ export async function requestTokenExchange(
     scope: input.scope,
     requested_token_type: EXCHANGE_REQUESTED_TOKEN_TYPE,
   });
-  if (input.actorToken) {
-    body.set("actor_token", input.actorToken);
-    body.set("actor_token_type", EXCHANGE_SUBJECT_TOKEN_TYPE);
-  }
+  const credentials = `${encodeURIComponent(input.workload.clientId)}:${encodeURIComponent(input.workload.clientSecret)}`;
   let res: Response;
   try {
     res = await fetchImpl(tokenEndpoint, {
       method: "POST",
-      headers: { "content-type": "application/x-www-form-urlencoded", accept: "application/json" },
+      headers: { "content-type": "application/x-www-form-urlencoded", accept: "application/json",
+        authorization: `Basic ${Buffer.from(credentials, "utf8").toString("base64")}` },
       body: body.toString(),
       redirect: "error",
       signal: AbortSignal.timeout(5_000),

@@ -20,6 +20,7 @@ export interface ExchangeInput {
 }
 export interface ExchangeRuntimeDeps {
   readonly config: ExchangeConfig;
+  readonly clientSecret: string;
   readonly fetchImpl?: typeof fetch | undefined;
   readonly keySource: ExchangeKeySource;
   readonly cache?: ExchangeCache | undefined;
@@ -94,7 +95,8 @@ export async function resolveExchangedCallContext(
     if (doubleChecked) return doubleChecked.validated;
     const response = await requestTokenExchange(
       deps.config.tokenEndpoint,
-      { subjectToken: input.subjectToken, scope: effectiveScopes, audience: deps.config.apiAudience },
+      { subjectToken: input.subjectToken, scope: effectiveScopes, audience: deps.config.apiAudience,
+        workload: { clientId: deps.config.workloadClientId, clientSecret: deps.clientSecret } },
       { fetchImpl: deps.fetchImpl },
     );
     if (response.tokenType.toLowerCase() !== "bearer") {

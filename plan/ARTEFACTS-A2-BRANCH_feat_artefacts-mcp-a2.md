@@ -130,3 +130,5 @@ activation, no cluster-mesh composition.
 - [x] Added isolated behavioral mutations with byte restoration and control reruns.
 
 - [x] Covered subject and delegated expiry and corrected nested tuple qualification.
+
+- [x] Bound confidential client_secret_basic authentication to the pinned issuer contract.

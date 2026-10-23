@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { requestTokenExchange } from "./exchange-client.js";
 
-const input = { subjectToken: "synthetic-private-subject", audience: "https://api.example.test", scope: "immo:search" };
+const input = { subjectToken: "synthetic-private-subject", audience: "https://api.example.test", scope: "immo:search",
+  workload: { clientId: "synthetic-workload", clientSecret: "synthetic-secret" } };
 
 describe("exchange response boundary", () => {
   it("sanitizes network errors that include the original subject credential", async () => {

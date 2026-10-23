@@ -2,7 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import { requestTokenExchange } from "./exchange-client.js";
 
 const ENDPOINT = "https://exchange.test.local/token";
-const INPUT = { subjectToken: "subject-1", scope: "immo:search", audience: "https://immo.test.local" };
+const INPUT = { subjectToken: "subject-1", scope: "immo:search", audience: "https://immo.test.local",
+  workload: { clientId: "synthetic:client", clientSecret: "synthetic:key/secret" } };
 
 function okResponse(payload: unknown): Response {
   return Response.json(payload);
@@ -15,6 +16,9 @@ describe("requestTokenExchange", () => {
     const [url, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toBe(ENDPOINT);
     expect(init.method).toBe("POST");
+    expect(new Headers(init.headers).get("authorization")).toBe(`Basic ${Buffer.from("synthetic%3Aclient:synthetic%3Akey%2Fsecret").toString("base64")}`);
+    expect(String(init.body)).not.toContain("client_secret");
+    expect(String(init.body)).not.toContain("actor_token");
     expect(String(init.body)).toContain("grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange");
     expect(String(init.body)).toContain("audience=" + encodeURIComponent(INPUT.audience));
     expect(String(init.body)).toContain("scope=immo%3Asearch");
