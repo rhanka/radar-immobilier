@@ -67,11 +67,15 @@ guard: guard-env
 
 .PHONY: qualify-tuple
 qualify-tuple: guard ## P4 owns this target: strict dependency qualification
-	@echo "[h4-mcp] refused: qualify-tuple is implemented in P4" >&2; exit 1
+	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; \
+	$(COMPOSE) run --rm --no-deps -T --entrypoint '' api sh -ec \
+	'node tools/exchange-issuer/qualify-tuple.mjs && npm ci --ignore-scripts --strict-peer-deps && npm audit signatures'
 
 .PHONY: test-exchange-e2e
 test-exchange-e2e: guard ## P4 owns this target: isolated issuer exchange proof
-	@echo "[h4-mcp] refused: test-exchange-e2e is implemented in P4" >&2; exit 1
+	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; \
+	$(COMPOSE) run --rm --no-deps -T --entrypoint '' api sh -ec \
+	'npm ci --workspace=packages/immo-mcp --include-workspace-root && npm run test --workspace=packages/immo-mcp -- src/exchange.e2e.test.ts'
 
 .PHONY: image-smoke
 image-smoke: guard ## P6 owns this target: built-image inspection
