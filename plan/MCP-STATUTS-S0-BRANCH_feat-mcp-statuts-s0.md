@@ -54,30 +54,30 @@ successor compatibility and delegation A as pure, unregistered contracts.
 
 ## Plan / Todo (lot-based)
 
-- [ ] **S0a — Context/profile**
+- [x] **S0a — Context/profile**
   - [x] Freeze wire primitives and ordered D4/public-opening authority contract.
   - [x] Freeze personal/common rights and independent capabilities.
   - [x] Cover rights and moderation refusals.
   - [x] Freeze Steve vocabulary and pending-choice availability metadata.
   - [x] Cover vocabulary and pending-choice metadata.
-- [ ] **S0b — Read schemas**
+- [x] **S0b — Read schemas**
   - [x] Freeze closed read input/output schemas and continuation context.
   - [x] Freeze read validation and diagnostic confidentiality.
   - [x] Cover qualified reads, effective hiding, pagination and fingerprints.
-- [ ] **S0c — Command schemas**
+- [x] **S0c — Command schemas**
   - [x] Freeze signal/lot DTOs, explicit versions, heads and atomic envelopes.
   - [x] Freeze command-key and batch-shape validation.
   - [x] Freeze semantic refusals against qualified progression evidence.
   - [x] Catalog all six inert contracts and cover command regressions.
   - [x] Cover command schema refusals and historical receipt outputs.
-- [ ] **S0d — Successor compatibility**
+- [x] **S0d — Successor compatibility**
   - [x] Freeze versioned manifest and named successor search migration.
   - [x] Cover successor schema compatibility and unchanged live definitions.
   - [x] Freeze verified issuer/receiver delegation A policy.
   - [x] Cover forged, broadened and generic-scope delegation refusals.
-- [ ] **Lot N — Validate and deliver**
-  - [ ] Package unit suite, existing and new tests, passes.
-  - [ ] Rights, pending-choice and delegation mutations on copies are killed.
-  - [ ] Package and API typecheck, lint and build pass.
-  - [ ] Twelve exposed tools and protected composition match the base.
-  - [ ] Atomic commits obey line, subject and message constraints.
+- [x] **Lot N — Validate and deliver**
+  - [x] Package unit suite, existing and new tests, passes.
+  - [x] Rights, pending-choice and delegation mutations on copies are killed.
+  - [x] Package and API typecheck, lint and build pass.
+  - [x] Twelve exposed tools and protected composition match the base.
+  - [x] Atomic commits obey line, subject and message constraints.
