@@ -131,6 +131,7 @@
   - [x] B4 operator input transport: actual Make activation/resume command-double proof preserves literal Make functions and shell syntax without evaluation.
   - [x] B4 slice 1: internal maintenance validator binds workspace, actor, attempt, release and instances; real reader, operator and durable wiring remain pending.
   - [x] B4 slice 2: executable pure rejection tests cover independent drain/shutdown, evidence bindings, stale proof and reader delegation; full B4 integration and mutations remain open.
+  - [x] B4 slice 3: qualify internal closed-barrier readback authorization, current manager/attached-account rights, PostgreSQL rejections, isolation and public closure; binding/head/projection verification remains pending.
   - [ ] B4.1: implement/inject 6H and 6K maintenance safety through existing activation interfaces; Muse A implements B4, Sol A verifies and commits BASE-owned files; shared application/startup deltas use the current CT-1 lease holder.
   - [ ] B4.1 entry: add base-api-activate-personal and base-api-resume-personal to tools/make/base-api.mk, dispatched by tools/make/base-api-activation.sh; Sol A owns both tooling paths.
   - [ ] B4.1 script: Muse A owns api/src/scripts/base-api-personal-activation.ts; require workspace, actor, reason and qualified maintenance evidence; execute in the API container without environment-file discovery.
