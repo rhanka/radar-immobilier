@@ -46,6 +46,8 @@ export COHERE_API_KEY :=
 override DOCKER_COMPOSE := docker compose
 COMPOSE_FILES := -f docker-compose.yml -f docker-compose.test.yml
 override COMPOSE := $(DOCKER_COMPOSE) --env-file /dev/null -p radar-$(ENV) $(COMPOSE_FILES)
+override CLEANUP := status=$$?; if ! $(COMPOSE) down -v --remove-orphans; then status=1; fi; exit $$status
+override SET_TRAPS := trap '$(CLEANUP)' EXIT; trap 'exit 130' INT; trap 'exit 143' TERM
 
 .PHONY: guard-env
 guard-env:
@@ -62,19 +64,19 @@ guard-test: guard-env
 
 .PHONY: test-reader-unit
 test-reader-unit: guard-test
-	@set -e; trap '$(COMPOSE) down -v --remove-orphans' EXIT; \
+	@set -e; $(SET_TRAPS); \
 	$(COMPOSE) run --rm --no-deps -T --entrypoint '' api sh -ec \
 	'npm ci --ignore-scripts && npm run test --workspace=api -- $(SCOPE)'
 
 .PHONY: test-reader-mutations
 test-reader-mutations: guard-test
-	@set -e; trap '$(COMPOSE) down -v --remove-orphans' EXIT; \
+	@set -e; $(SET_TRAPS); \
 	$(COMPOSE) run --rm --no-deps -T --entrypoint '' api sh -ec \
 	'npm ci --ignore-scripts && node tools/h5-reader-mutations.mjs'
 
 .PHONY: test-reader-discovery
 test-reader-discovery: guard-test ## Collect using the execution configurations; reject missing or empty inventories
-	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
+	@set -e; $(SET_TRAPS); \
 	$(COMPOSE) run --rm --no-deps -T --entrypoint '' api sh -ec \
 	'npm ci --ignore-scripts && node tools/h5-reader-discovery.mjs'
 
@@ -95,23 +97,17 @@ test-reader-e2e: guard-test ## Integrated image/routing prerequisite; source-mou
 	@echo '[h5-artifacts] BLOCKED: final-image API/authority/store integration receipt is required' >&2
 	@exit 2
 
-.PHONY: test-reader-browser-preparation
-test-reader-browser-preparation: guard-test ## Development fixture only; never an integrated H5 acceptance
-	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
-	$(COMPOSE) up -d postgres minio && \
-	$(COMPOSE) run --rm -T -e ARTIFACTS_CONTENT_BASE=pages.example.test api sh -c "npm ci && \
-	npm run db:migrate --workspace=api && \
-	npm run test --workspace=api && \
-	npx --no-install playwright install --with-deps chromium && \
-	npx --no-install playwright test --config tools/h5-artifacts.playwright.config.ts"
-
 .PHONY: down
+.PHONY: test-reader-runner-guards
+test-reader-runner-guards: guard-env
+	@bash tools/h5-runner-guards.sh
+
 down: guard-env ## Stop the H5 stack and remove volumes/orphans (project-scoped)
 	$(COMPOSE) down -v --remove-orphans
 
 .PHONY: inspect
 inspect: guard-env
-	@test -z "$$(docker ps -aq --filter label=com.docker.compose.project=radar-$(ENV))"
-	@test -z "$$(docker volume ls -q --filter label=com.docker.compose.project=radar-$(ENV))"
-	@test -z "$$(docker network ls -q --filter label=com.docker.compose.project=radar-$(ENV))"
+	@set -e; remaining=$$(docker ps -aq --filter label=com.docker.compose.project=radar-$(ENV)); test -z "$$remaining"; \
+	remaining=$$(docker volume ls -q --filter label=com.docker.compose.project=radar-$(ENV)); test -z "$$remaining"; \
+	remaining=$$(docker network ls -q --filter label=com.docker.compose.project=radar-$(ENV)); test -z "$$remaining"
 	@echo '[h5-artifacts] zero project containers, volumes and networks'

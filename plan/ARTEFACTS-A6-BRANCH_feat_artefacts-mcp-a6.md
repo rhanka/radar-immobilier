@@ -89,3 +89,4 @@ No invented production domain or certificate.
 - [x] Review correction: recheck grant/session expiry and revocation after authority and API waits.
 - [x] Review correction: hash-authorize only the technical example bootstrap script in CSP.
 - [x] Review correction: image delta preserves denial isolation code; script globals are explicit.
+- [x] Review corrections: committed build context, accurate smoke labels and observable cleanup failures.

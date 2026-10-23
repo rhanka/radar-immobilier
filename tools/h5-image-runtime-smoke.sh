@@ -31,9 +31,15 @@ fi
 cleanup() {
   status=$?
   COMPOSE_DISABLE_ENV_FILE=1 docker compose --env-file /dev/null -p "$COMPOSE_PROJECT_NAME" -f docker-compose.yml -f docker-compose.test.yml down -v --remove-orphans || status=1
-  docker rm -f "$DENY" "$READER" "$API" "$UNKNOWN" >/dev/null 2>&1 || true
-  docker network rm "$NAME" >/dev/null 2>&1 || true
-  docker image rm "$IMAGE" >/dev/null 2>&1 || true
+  if remaining=$(docker ps -aq --filter "label=com.docker.compose.project=$COMPOSE_PROJECT_NAME"); then
+    if [ -n "$remaining" ]; then docker rm -f $remaining || status=1; fi
+  else status=1; fi
+  if remaining=$(docker network ls -q --filter "name=^$NAME$"); then
+    if [ -n "$remaining" ]; then docker network rm $remaining || status=1; fi
+  else status=1; fi
+  if remaining=$(docker image ls -q --filter "reference=$IMAGE"); then
+    if [ -n "$remaining" ]; then docker image rm $remaining || status=1; fi
+  else status=1; fi
   exit "$status"
 }
 trap cleanup EXIT
@@ -41,11 +47,16 @@ trap 'exit 130' INT
 trap 'exit 143' TERM
 
 git_sha=$(git rev-parse HEAD)
-tar --exclude='./.git' --exclude='./tmp' --exclude='*/node_modules' --exclude='*/.env*' -cf - . |
+set -- .dockerignore package.json package-lock.json tsconfig.base.json api packages/artifacts-host packages/radar-domain packages/radar-scoring packages/radar-sources packages/immo-mcp radar/ontology
+if git ls-tree -r --name-only "$git_sha" -- "$@" | grep -Eq '(^|/)\.env'; then
+  echo '[h5-image] refused: environment file in committed build paths' >&2; exit 1
+fi
+git archive --format=tar "$git_sha" -- "$@" |
   docker build --build-arg "GIT_SHA=$git_sha" -f api/Dockerfile -t "$IMAGE" - >/dev/null
 docker image inspect --format '{{.Id}} {{json .RepoDigests}} {{json .Config.Entrypoint}} {{json .Config.Cmd}}' "$IMAGE"
 printf 'Source commit: %s\n' "$git_sha"
-sha256sum api/Dockerfile api/docker-entrypoint.sh
+git show "$git_sha:api/Dockerfile" | sha256sum
+git show "$git_sha:api/docker-entrypoint.sh" | sha256sum
 docker run --rm --network none --entrypoint sh "$IMAGE" -ec '
   test "$(id -u)" = 1001
   test -z "$(find /workspace -name ".env*" ! -name .env.example -print -quit)"
@@ -111,7 +122,7 @@ assert.equal(anon.status, 401, "reader anonymous page 401");
 assert.equal(anon.headers["cache-control"], "private, no-store");
 const sw = await request(reader, 3001, "/sw.js", { headers: { Host: "123e4567-e89b-12d3-a456-426614174000.localhost" } });
 assert.equal(sw.status, 404, "reader service worker refused");
-console.log("[h5-image] PASS: deny -> reader -> authorized-only content");
+console.log("[h5-image] PASS: reader refuses anonymous content and service workers");
 await waitReady(api, 3002, "/livez", 90);
 const banner = await request(api, 3002, "/", { headers: { Host: "preprod.immo.sent-tech.ca" } });
 assert.equal(banner.status, 200, "api GET / status");
