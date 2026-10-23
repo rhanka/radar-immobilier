@@ -10,7 +10,11 @@ require_env
 case "$ACTION" in
   input-guards) for file in "$TOOLS"/base-api*.sh; do bash -n "$file"; done; exit;;
   check-scope) scope_check; exit;;
-  verify|test|test-api) require_scope;;
+  b3-mutation-required|b4-mutation-required)
+    require_scope
+    runner="$TOOLS/base-api-${ACTION%%-*}-mutation.sh"
+    [[ -s $runner && ! -L $runner ]] || { echo "Missing required mutation runner: ${runner##*/}" >&2; exit 2; };;
+  verify|test|test-api|b1-mutation-legacy|b1-mutation-archive|b1-mutation-required) require_scope;;
   typecheck|lint|network-proof|clean) ;;
   *) echo "Unknown action: $ACTION" >&2; exit 2;;
 esac
@@ -67,5 +71,5 @@ export BASE_API_RUN_PID=$$
 RUN_PID=$!
 wait "$RUN_PID"
 RUN_PID=
-if [[ $ACTION == verify || $ACTION == test || $ACTION == test-api ]]; then assert_tests_ran "$LOG_DIR/tests.tsv"; fi
+if [[ $ACTION == verify || $ACTION == test || $ACTION == test-api || $ACTION == *-mutation-* ]]; then assert_tests_ran "$LOG_DIR/tests.tsv"; fi
 echo "PASS $ACTION" > "$LOG_DIR/result"
