@@ -92,5 +92,16 @@ describe("reader-context adaptation", () => {
       artifactId: GRANT.artifactId, releaseId: "release-002", authorSub: "publisher" }) };
     expect(await adaptGrantToReader(GRANT, authority)).toBeNull();
   });
+  it("should refuse a widened profile with unchanged name and revision", async () => {
+    const base = createFixtureAuthority();
+    const widened = { ...base,
+      getProfile: async () => ({ name: "demo", policyRevision: "pol-001",
+        capabilities: ["geo.read" as const, "signals.protected-read" as const] }),
+      getRights: async (readerSub: string, artifactId: string) => ({ readerSub, artifactId,
+        approved: true, capabilities: ["geo.read" as const, "signals.protected-read" as const] }) };
+    const narrowFingerprint = fingerprintReaderProfile({ name: "demo", policyRevision: "pol-001",
+      capabilities: ["geo.read"] });
+    expect(await adaptGrantToReader({ ...GRANT, profileFingerprint: narrowFingerprint }, widened)).toBeNull();
+  });
 
 });
