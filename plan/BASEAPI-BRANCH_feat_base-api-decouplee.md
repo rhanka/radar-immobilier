@@ -96,6 +96,7 @@
   - [x] B1 preparation: add the signed composed fixture and verify each staged slice independently of later workspace drafts.
   - [ ] B1.1: mount workspace, personal, common-archive, revision and invalidation routers.
   - [ ] B1.2: constrain middleware to its intended endpoints; preserve cookie writes and supported bearer reads.
+  - [x] B1.2 first slice: isolate SSE, personal, common archive and revision middleware; qualify both middleware orders.
   - [ ] B1.3: expose workspace context and reason codes without legacy readers.
   - [ ] B1.4: implement authorized reveal with current content, fingerprint and scoped heads.
   - [ ] B1.5: qualify reveal → restore, concurrent source changes and independent archive scopes.
