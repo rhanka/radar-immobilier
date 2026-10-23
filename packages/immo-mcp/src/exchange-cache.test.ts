@@ -39,10 +39,23 @@ describe("buildCacheKey", () => {
     expect(buildCacheKey({ ...KEY, client: "other" })).not.toBe(a);
     expect(buildCacheKey({ ...KEY, effectiveScopes: "immo:read" })).not.toBe(a);
     expect(buildCacheKey({ ...KEY, policyRevision: "p4-v2" })).not.toBe(a);
+    for (const field of Object.keys(KEY) as (keyof typeof KEY)[]) {
+      expect(buildCacheKey({ ...KEY, [field]: `${KEY[field]}-changed` })).not.toBe(a);
+    }
   });
 });
 
 describe("ExchangeCache", () => {
+  it.each([[10, 120, 5_000], [120, 20, 15_000]])(
+    "expires at the delegated or subject deadline (%s/%s seconds)", (issued, subject, expected) => {
+      const now = 1_000_000;
+      const cache = new ExchangeCache({ clock: () => now });
+      const entry = cache.store("key", validated({ exp: now / 1000 + issued }), now / 1000 + subject);
+      expect(entry.deadlineMs).toBe(now + expected);
+      expect(cache.getIfFresh("key", now + expected - 1)).toBeDefined();
+      expect(cache.getIfFresh("key", now + expected)).toBeUndefined();
+    },
+  );
   it("honours min(issued, subject, inserted+60s) minus margin and never serves stale entries", () => {
     let now = 1_000_000;
     const cache = new ExchangeCache({ clock: () => now });
