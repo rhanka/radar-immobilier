@@ -32,7 +32,7 @@ import {
   type LotTarget,
 } from "./lot-target.js";
 import { resolveLotRights } from "./lot-capabilities.js";
-import { requireLotDestination } from "./lot-gate.js";
+import { requireOpenLotDestination } from "./lot-gate.js";
 import { lotEventResponse, type LotEventSnapshot } from "./lot-response.js";
 import { assertCutoverTargetReady } from "./lot-cutover-target.js";
 
@@ -85,7 +85,7 @@ export async function readLotState(
     const accountId = await approvedAccountId(tx, sub, true);
     await resolveWorkspaceAccess(tx, workspaceId, sub);
     const rights = await resolveLotRights(tx, workspaceId, sub);
-    await requireLotDestination(tx, workspaceId);
+    await requireOpenLotDestination(tx, workspaceId);
     requireScopedEpoch(await scopedEpochFor(tx, workspaceId), workspaceId);
     await assertCutoverTargetReady(tx as unknown as Database, workspaceId, mode, target);
     await assertNoUnresolvedPersonalHistory(tx, accountId);
