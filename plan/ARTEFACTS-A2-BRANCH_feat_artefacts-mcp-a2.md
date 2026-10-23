@@ -128,3 +128,5 @@ activation, no cluster-mesh composition.
 - [x] Added real loopback HTTP exchange proof with synthetic issuer and receiver.
 
 - [x] Added isolated behavioral mutations with byte restoration and control reruns.
+
+- [x] Covered subject and delegated expiry and corrected nested tuple qualification.
