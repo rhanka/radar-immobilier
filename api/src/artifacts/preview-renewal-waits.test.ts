@@ -25,4 +25,36 @@ describe("renewal after authority waits", () => {
     const token = await mintGrant(claims, secret, now);
     expect(await renewGrant(token, deps, () => revoked, now)).toBeNull();
   });
+
+  it("should refuse renewal after approval is withdrawn during the wait", async () => {
+    let approved = true;
+    const fixture = createFixtureAuthority();
+    const authority = { ...fixture,
+      getRights: async (readerSub: string, artifactId: string) => {
+        if (!approved) return { readerSub, artifactId, approved: false, capabilities: [] as const };
+        return fixture.getRights(readerSub, artifactId);
+      },
+      getProfile: async (artifactId: string) => {
+        await Promise.resolve();
+        approved = false;
+        return fixture.getProfile(artifactId);
+      } };
+    const token = await mintGrant(claims, secret, 1_000);
+    expect(await renewGrant(token, { authority, secret, issuer }, () => false, 10_000)).toBeNull();
+  });
+
+  it("should refuse renewal after the policy changes during the wait", async () => {
+    let revision = "pol-001";
+    const fixture = createFixtureAuthority();
+    const authority = { ...fixture,
+      getProfile: async () => ({
+        name: "demo", policyRevision: revision, capabilities: ["geo.read" as const] }),
+      getRelease: async (artifactId: string) => {
+        await Promise.resolve();
+        revision = "pol-002";
+        return fixture.getRelease(artifactId);
+      } };
+    const token = await mintGrant(claims, secret, 1_000);
+    expect(await renewGrant(token, { authority, secret, issuer }, () => false, 10_000)).toBeNull();
+  });
 });
