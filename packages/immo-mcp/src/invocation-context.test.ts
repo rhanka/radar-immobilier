@@ -31,7 +31,7 @@ function seeds(sub: string, token: string | undefined, scopes: string[]) {
   };
 }
 
-describe("invocation context (P1)", () => {
+describe("invocation context (P4 private boundary)", () => {
   it("freezes the captured snapshot against later rebinding", () => {
     const seed = seeds("user-1", "credential-1", ["immo:read", "immo:search"]);
     const ctx = captureInvocationContext(seed);
@@ -41,7 +41,7 @@ describe("invocation context (P1)", () => {
     seed.auth.workspaces.push("other");
     expect(ctx.auth.sub).toBe("user-1");
     expect(ctx.auth.scopes).toEqual(["immo:read", "immo:search"]);
-    expect(ctx.egress).toMatchObject({ bearer: "credential-1", sub: "user-1" });
+    expect(ctx.egress).toMatchObject({ bearer: undefined, sub: "user-1" });
     expect(Object.isFrozen(ctx)).toBe(true);
     expect(Object.isFrozen(ctx.auth)).toBe(true);
     expect(Object.isFrozen(ctx.egress)).toBe(true);
@@ -66,19 +66,19 @@ describe("invocation context (P1)", () => {
       runWithInvocationContext(ctxA, async () => {
         await gate;
         const current = getInvocationContext();
-        seen.push(`A:${current?.auth.sub}:${current?.egress.bearer}`);
+        seen.push(`A:${current?.auth.sub}:${String(current?.egress.bearer)}`);
         return "a";
       }),
       runWithInvocationContext(ctxB, async () => {
         const current = getInvocationContext();
-        seen.push(`B:${current?.auth.sub}:${current?.egress.bearer}`);
+        seen.push(`B:${current?.auth.sub}:${String(current?.egress.bearer)}`);
         release();
         return "b";
       }),
     ]);
     expect([idA, idB].sort()).toEqual(["a", "b"]);
-    expect(seen).toContain("A:user-a:credential-a");
-    expect(seen).toContain("B:user-b:credential-b");
+    expect(seen).toContain("A:user-a:undefined");
+    expect(seen).toContain("B:user-b:undefined");
   });
 
   it("keeps one contract source: definitions, handlers and registrar agree", () => {
