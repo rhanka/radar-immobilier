@@ -35,7 +35,7 @@ case $action in
   network-proof) node tools/make/base-api-network.mjs;;
   typecheck) typecheck_api;;
   lint) lint_api;;
-  verify|test|test-api|b1-mutation-legacy|b1-mutation-archive)
+  verify|test|test-api|b1-mutation-legacy|b1-mutation-archive|b1-mutation-required)
     if [[ $action == verify || $action == b1-mutation-* ]]; then
       typecheck_api
       lint_api

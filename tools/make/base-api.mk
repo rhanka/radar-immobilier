@@ -49,6 +49,10 @@ base-api-mutation-proof:
 	rtk bash tools/make/base-api-mutation.sh $(BASE_API_ARGS)
 
 .PHONY: base-api-b1-mutation-legacy base-api-b1-mutation-archive
+.PHONY: base-api-b1-mutation-required
+base-api-b1-mutation-required:
+	rtk bash tools/make/base-api-verify.sh b1-mutation-required "SCOPE=tests/integration/base-api-authority.spec.ts tests/integration/base-api-reveal.spec.ts tests/integration/base-api-receipts.spec.ts tests/integration/base-api-reveal-restore.spec.ts tests/integration/base-api-legacy.spec.ts" $(BASE_API_ARGS)
+
 base-api-b1-mutation-legacy:
 	rtk bash tools/make/base-api-verify.sh b1-mutation-legacy "SCOPE=tests/integration/base-api-legacy.spec.ts" $(BASE_API_ARGS)
 
@@ -71,7 +75,7 @@ base-api-audit:
 	rtk bash tools/make/base-api-deliver.sh audit $(BASE_API_ARGS)
 
 base-api-bundle:
-	rtk bash tools/make/base-api-deliver.sh bundle "OUT=$$OUT" $(BASE_API_ARGS)
+	rtk bash tools/make/base-api-deliver.sh bundle "OUT=$$OUT" "START=$$START" $(BASE_API_ARGS)
 
 base-api-worktree:
 	rtk bash tools/make/base-api-deliver.sh worktree "SLUG=$$SLUG" "BRANCH=$$BRANCH" "START=$$START" $(BASE_API_ARGS)

@@ -77,11 +77,40 @@ case $ACTION in
     while IFS= read -r sha; do audit_commit "$sha"; done < <(git rev-list --first-parent --reverse "$BASE..HEAD")
     git status --short;;
   bundle)
-    [[ $OUT == tmp/base-api-evidence/B0/base-api-b0.bundle ]] || exit 2
+    prerequisite=$BASE
+    case $OUT in
+      tmp/base-api-evidence/B0/base-api-b0.bundle) ;;
+      tmp/base-api-evidence/B1/base-api-b1.bundle)
+        [[ $(git branch --show-current) == feat/base-api-decouplee-b1 && $START =~ ^[a-f0-9]{40}$ ]] || exit 2
+        git merge-base --is-ancestor 3c6d3c1f95d6794ba0939cf71db6b169cb3f071d "$START"
+        git merge-base --is-ancestor "$START" HEAD
+        prerequisite=$START;;
+      *) exit 2;;
+    esac
+    df -h .
+    [[ $(df -Pk . | awk 'NR==2 {print $4}') -ge 10485760 ]] || exit 3
+    for directory in tmp tmp/base-api-evidence "${OUT%/*}"; do [[ ! -L $directory ]] || exit 2; done
     mkdir -p "${OUT%/*}"
     [[ ! -L ${OUT%/*} && ! -L $OUT ]] || exit 2
-    git bundle create "$OUT" "$BASE..HEAD"
+    git bundle create "$OUT" "$prerequisite..HEAD"
     git bundle verify "$OUT"
+    if [[ $OUT == tmp/base-api-evidence/B1/* ]]; then
+      audit=$(mktemp -d "${OUT%/*}/bundle-audit.XXXXXX")
+      bundle=$(realpath "$OUT")
+      root=$(pwd -P)
+      head=$(git rev-parse HEAD)
+      git init --bare -q "$audit"
+      git -C "$audit" fetch --no-tags --no-write-fetch-head "$root" "$prerequisite:refs/heads/prerequisite"
+      git -C "$audit" symbolic-ref HEAD refs/heads/prerequisite
+      if git -C "$audit" cat-file -e "$head^{commit}" 2>/dev/null; then
+        echo 'Payload already exists in prerequisite audit repository' >&2; exit 2
+      fi
+      git -C "$audit" bundle verify "$bundle"
+      git -C "$audit" fetch --no-tags --no-write-fetch-head "$bundle" HEAD:refs/heads/payload
+      [[ $(git -C "$audit" rev-parse refs/heads/payload) == "$head" ]]
+      git -C "$audit" fsck --full --no-reflogs
+      printf 'Bundle prerequisite: %s\nIsolated audit repository: %s\n' "$prerequisite" "$audit"
+    fi
     sha256sum "$OUT"
     git rev-parse HEAD;;
   worktree)

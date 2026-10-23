@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-const kind = process.argv[2];
+const requested = process.argv[2];
 const cases = {
   legacy: {
     source: 'src/services/facets/legacy-retirement.ts',
@@ -26,7 +26,49 @@ const cases = {
     mutate: s => s.replace('return personal?.state === "active" || workspace?.state === "active";',
       'return personal?.state === "inactive" ? false : personal?.state === "active" || workspace?.state === "active";'),
   },
+  bearer: {
+    source: 'src/routes/scoped-projection-events.ts',
+    scope: 'tests/integration/base-api-authority.spec.ts',
+    targets: ['supports verified bearer reads while rejecting bearer writes and SSE'],
+    failure: /expected 403 to be 200/,
+    mutate: s => s.replace('app.use(SCOPED_EVENTS_PATH,',
+      'app.use("/api/v1/workspaces/:workspaceId/*",'),
+  },
+  moderation: {
+    source: 'src/services/facets/workspace-writer.ts',
+    scope: 'tests/integration/base-api-authority.spec.ts',
+    targets: ['rejects unauthorized common commands without a personal fallback'],
+    failure: /expected 200 to be 403/,
+    mutate: s => s.replace('if (!access.moderateArchive) {', 'if (false && !access.moderateArchive) {'),
+  },
+  fingerprint: {
+    source: 'src/services/facets/scoped-writer.ts',
+    scope: 'tests/integration/base-api-reveal.spec.ts',
+    targets: ['rejects restore when the source changes after reveal'],
+    failure: /expected 200 to be 409/,
+    mutate: s => s.replace('if (fingerprint !== command.displayedFingerprint) {',
+      'if (false && fingerprint !== command.displayedFingerprint) {'),
+  },
+  receiptFirst: {
+    source: 'src/services/facets/scoped-writer.ts',
+    scope: 'tests/integration/base-api-receipts.spec.ts',
+    targets: ['denies revoked receipt recovery without disclosing the receipt'],
+    failure: /expected 200 to be 403/,
+    mutate: s => s.replace('    await resolveWorkspaceAccess(tx, workspaceId, sub);\n', '')
+      .replace('if (replay !== undefined) return replay;',
+        'if (replay !== undefined) return replay;\n    await resolveWorkspaceAccess(tx, workspaceId, sub);'),
+  },
+  replayRevision: {
+    source: 'src/services/facets/scoped-writer.ts',
+    scope: 'tests/integration/base-api-receipts.spec.ts',
+    targets: ['preserves SQL state on exact personal and common replay'],
+    failure: /expected[\s\S]*to deeply equal/,
+    mutate: s => s.replace('if (replay !== undefined) return replay;',
+      'if (replay !== undefined) { await bumpPersonalRevision(tx, workspaceId, accountId, command.target.citySlug); return replay; }'),
+  },
 };
+const restoredReports = new Map();
+for (const kind of requested === 'required' ? Object.keys(cases) : [requested]) {
 const entry = cases[kind];
 assert.ok(entry, 'An explicit supported mutation is required');
 const original = readFileSync(entry.source);
@@ -70,7 +112,8 @@ try {
   writeFileSync(entry.source, original);
   assert.equal(hash(readFileSync(entry.source)), hash(original));
   run('restored', true);
-  writeFileSync('/evidence/tests.json', readFileSync(`${prefix}-restored.json`));
+  const restored = JSON.parse(readFileSync(`${prefix}-restored.json`));
+  for (const suite of restored.testResults) restoredReports.set(suite.name, suite);
   writeFileSync(`${prefix}-receipt.json`, JSON.stringify({ kind, source: entry.source,
     scope: entry.scope, targets: entry.targets, restorationSha256: hash(original), records }, null, 2));
   console.log(`B1 ${kind} restoration sha256=${hash(original)}`);
@@ -78,4 +121,7 @@ try {
   writeFileSync(entry.source, original);
   assert.equal(hash(readFileSync(entry.source)), hash(original));
 }
+}
+writeFileSync('/evidence/tests.json', JSON.stringify({ success: true,
+  testResults: [...restoredReports.values()] }));
 JS

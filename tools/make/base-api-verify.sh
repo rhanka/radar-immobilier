@@ -10,7 +10,7 @@ require_env
 case "$ACTION" in
   input-guards) for file in "$TOOLS"/base-api*.sh; do bash -n "$file"; done; exit;;
   check-scope) scope_check; exit;;
-  verify|test|test-api|b1-mutation-legacy|b1-mutation-archive) require_scope;;
+  verify|test|test-api|b1-mutation-legacy|b1-mutation-archive|b1-mutation-required) require_scope;;
   typecheck|lint|network-proof|clean) ;;
   *) echo "Unknown action: $ACTION" >&2; exit 2;;
 esac
