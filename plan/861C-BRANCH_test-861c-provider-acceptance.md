@@ -164,3 +164,4 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 - [x] exercise provider command conflicts without facade hashing.
 - [x] refuse unselected provider operations before storage.
 - [x] bind authorization fixtures to transaction participants.
+- [x] bind authorization fixtures to transaction participants.
