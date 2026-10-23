@@ -439,6 +439,137 @@ export async function createTestCommitCoordinator(params: {
   );
 }
 
+/**
+ * Named joint (b): Radar H3/H4 migration of `composeArtifactHost`.
+ * Calls the new r2 signature `composeArtifactHost(pool, config, blobs,
+ * {profile, coordinator})` and refuses any partial composition. Fails
+ * `[missing-contract]` naming this migration (owner Radar) while the
+ * installed composition still interprets the fourth argument as the legacy
+ * `onProviderFailure` callback.
+ */
+export async function composeProviderHost(params: {
+  readonly pool: pg.Pool;
+  readonly config: unknown;
+  readonly blobs: unknown;
+  readonly profile: CompiledArtifactsProfile;
+  readonly coordinator: R2CommitCoordinator;
+}): Promise<Record<string, unknown>> {
+  void params;
+  // The current Radar signature takes onProviderFailure in argument four.
+  // Calling it with an options bag would create a partially wired legacy host.
+  missingContract(
+    "Radar.composeArtifactHost.r2",
+    "Radar H3/H4 must migrate composeArtifactHost(pool, config, blobs, {profile, coordinator}) and export ArtifactHost/ArtifactHostOptions before candidate qualification",
+  );
+}
+
+/**
+ * Single typed r2 construction for tests: compiled profile, real
+ * coordinator with a registered PostgreSQL participant and barrier
+ * observer, then the migrated composition. No partial composition reaches
+ * the assertions: each joint above fails `[missing-contract]` by name.
+ */
+export interface R2AcceptanceHost {
+  readonly host: Record<string, unknown>;
+  readonly profile: CompiledArtifactsProfile;
+  readonly coordinator: R2CommitCoordinator;
+}
+
+export async function composeR2AcceptanceHost(params: {
+  readonly pool: pg.Pool;
+  readonly config: unknown;
+  readonly blobs: unknown;
+  readonly barrier: CommitBarrier;
+}): Promise<R2AcceptanceHost> {
+  await requireCommitContract();
+  await requireOutcomeContract();
+  const barrier = params.barrier;
+  const profile = await compileArtifactsProfile({ selectedCapabilities: [...FROZEN_CAPABILITIES] });
+  const coordinator = await createTestCommitCoordinator({ pool: params.pool, profile, barrier });
+  const host = await composeProviderHost({
+    pool: params.pool, config: params.config, blobs: params.blobs, profile, coordinator,
+  });
+  return { host, profile, coordinator };
+}
+
+/**
+ * Bounded preparation/cleanup observation binding expected from r2.
+ * Fails `[missing-contract]` naming the binding (owner Sentropic L4) while
+ * the spec target has no queryable intent/deadline/cleanup interface; raw
+ * S3 object counts must never be presented as cleanup proof.
+ */
+export async function requirePreparationCleanupBinding(): Promise<PreparationCleanupBinding> {
+  const module = await loadUpstream(
+    PREPARATION_CLEANUP_SPECIFIER, "preparation-cleanup.scheduleBoundedPreparationCleanup");
+  if (typeof module["scheduleBoundedPreparationCleanup"] !== "function" ||
+      typeof module["inspectPreparations"] !== "function") {
+    missingContract(
+      "preparation-cleanup.scheduleBoundedPreparationCleanup",
+      `expected binding ${EXPECTED_CLEANUP_BINDING} from ${PREPARATION_CLEANUP_SPECIFIER} (owner Sentropic L4; spec r2 A6); raw S3 counts are not cleanup evidence`,
+    );
+  }
+  return {
+    inspectPreparations: module["inspectPreparations"] as PreparationCleanupBinding["inspectPreparations"],
+    scheduleBoundedPreparationCleanup: module["scheduleBoundedPreparationCleanup"] as PreparationCleanupBinding["scheduleBoundedPreparationCleanup"],
+  };
+}
+
+/** Expected L4 observation seam; absence is a named prerequisite, never SQL guesswork. */
+export async function verifyPreparationCleanup(host: unknown, artifactId: string,
+  blobs: { listKeys(prefix: string): Promise<Iterable<string>> }, requireAttempts = true,
+  requireShared = false): Promise<void> {
+  const binding = await requirePreparationCleanupBinding();
+  const before = await binding.inspectPreparations(host, artifactId);
+  if (requireAttempts && before.attempts.length === 0) throw new Error("[contract-violation] missing preparation attribution");
+  let throughMs = 0;
+  for (const attempt of before.attempts) {
+    if (!attempt.attemptId || !attempt.invocationId || !Number.isFinite(attempt.cleanupDeadlineMs) ||
+        !Number.isFinite(attempt.preparedAtMs) || attempt.cleanupDeadlineMs <= attempt.preparedAtMs ||
+        attempt.cleanupDeadlineMs - attempt.preparedAtMs > 60_000 ||
+        !["abandoned", "failed", "pending-cleanup"].includes(attempt.state)) {
+      throw new Error("[contract-violation] preparation must have attempt/invocation, failure state and bounded deadline");
+    }
+    throughMs = Math.max(throughMs, attempt.cleanupDeadlineMs);
+  }
+  if (requireShared && (before.protectedKeys.length === 0 || before.abandonedKeys.length === 0)) {
+    throw new Error("[contract-violation] cleanup fixture must contain shared and unreferenced blobs");
+  }
+  const keysBefore = new Set(await blobs.listKeys(""));
+  for (const key of [...before.protectedKeys, ...before.abandonedKeys]) {
+    if (!keysBefore.has(key)) throw new Error("[contract-violation] preparation blob missing before cleanup");
+  }
+  await binding.scheduleBoundedPreparationCleanup(host, throughMs);
+  const keysAfter = new Set(await blobs.listKeys(""));
+  for (const key of before.protectedKeys) {
+    if (!keysAfter.has(key)) throw new Error("[contract-violation] cleanup deleted a shared/protected blob");
+  }
+  for (const key of before.abandonedKeys.filter((key) => !before.protectedKeys.includes(key))) {
+    if (keysAfter.has(key)) throw new Error("[contract-violation] abandoned blob survived its cleanup deadline");
+  }
+  const after = await binding.inspectPreparations(host, artifactId);
+  if (after.attempts.some((attempt) => !["cleaned", "failed-cleaned"].includes(attempt.state))) {
+    throw new Error("[contract-violation] cleanup did not settle preparation debt");
+  }
+}
+
+/** Provisional test seam for the A4 purge claim held across external DELETE. */
+export async function requirePurgeRaceBinding(): Promise<{
+  pausePurgeBeforeDelete(host: unknown, artifactId: string): Promise<{
+    claimId: string; blobKeys: string[]; release(): void; finished: Promise<void>;
+  }>;
+  inspectDeletionClaims(host: unknown): Promise<Array<{ claimId: string; state: string; blobKeys: string[] }>>;
+}> {
+  const module = await loadUpstream(TESTING_SPECIFIER, "testing.pausePurgeBeforeDelete");
+  if (typeof module["pausePurgeBeforeDelete"] !== "function" || typeof module["inspectDeletionClaims"] !== "function") {
+    missingContract("testing.pausePurgeBeforeDelete",
+      "Sentropic L4 must expose a correlated purge pause and durable deletion-claim inspection before external DELETE (spec r2 A4/A6)");
+  }
+  return {
+    pausePurgeBeforeDelete: module["pausePurgeBeforeDelete"] as Awaited<ReturnType<typeof requirePurgeRaceBinding>>["pausePurgeBeforeDelete"],
+    inspectDeletionClaims: module["inspectDeletionClaims"] as Awaited<ReturnType<typeof requirePurgeRaceBinding>>["inspectDeletionClaims"],
+  };
+}
+
 /** Resolve void arrivals explicitly; never test Promise<void>'s value. */
 export async function arrived(barrier: CommitBarrier, point: CommitBarrierPoint,
   invocationId: string, timeoutMs = 1000): Promise<void> {
