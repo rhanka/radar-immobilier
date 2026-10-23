@@ -47,6 +47,7 @@ import {
   committedState,
   requireCommitBarrier,
   requireHostExecute,
+  requirePhaseInjectionBinding,
   requireOutcomeContract,
   requireSelectedProfile,
   type AuthorizeCommit,
