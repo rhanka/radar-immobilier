@@ -42,6 +42,7 @@ case $action in
     fi
     cd api
     node ../tools/make/base-api-ct8.mjs | tee /evidence/ct8.log
+    npm run db:migrate
     set -f
     ../node_modules/.bin/vitest run --config vitest.isolated.config.ts \
       --reporter=default --reporter=json --outputFile.json=/evidence/tests.json $scope

@@ -51,4 +51,25 @@ describe("base-api scoped middleware isolation", () => {
     expect(await facets.json()).toMatchObject({ error: "invalid_scoped_identity" });
   });
 
+  it("keeps session-only writes and private headers on every family", async () => {
+    const app = mount(bearer, ["facets", "archive", "revisions", "events", "workspaces"]);
+    const write = await app.request(
+      `/api/v1/workspaces/${INVALID_WORKSPACE}/signal-facets/personal/select`,
+      { method: "POST", headers: { "content-type": "application/json" }, body: "{}" },
+    );
+    expect(write.status).toBe(403);
+    const anonymous = mount(null, ["facets", "archive", "revisions", "events", "workspaces"]);
+    for (const path of [
+      "/api/v1/workspaces",
+      `/api/v1/workspaces/${INVALID_WORKSPACE}/signal-facets/personal/cities/c`,
+      `/api/v1/workspaces/${INVALID_WORKSPACE}/signal-facets/archive/cities/c`,
+      `/api/v1/workspaces/${INVALID_WORKSPACE}/signal-facets/projection-revisions?citySlug=c&mode=signal`,
+      `/api/v1/workspaces/${INVALID_WORKSPACE}/signal-facets/projection-events?citySlug=c&mode=signal`,
+    ]) {
+      const res = await anonymous.request(path);
+      expect(res.status).toBe(401);
+      expect(res.headers.get("cache-control")).toBe("private, no-store");
+      expect(res.headers.get("vary")).toBe("Cookie, Authorization");
+    }
+  });
 });
