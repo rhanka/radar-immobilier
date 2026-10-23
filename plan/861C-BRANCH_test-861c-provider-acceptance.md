@@ -201,3 +201,4 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 - [x] protect cross-artifact references in both purge orders.
 - [x] wire explicit E3 phase prerequisites into failure suites.
 - [x] correlate transport failures with provider invocations.
+- [x] reject private identifiers in every MCP representation.
