@@ -6,7 +6,7 @@
  * Stream integration must call the access predicate; no stream is served here.
  */
 import { performance } from "node:perf_hooks";
-import type { AuthorityReader } from "./reader-profile.js";
+import { fingerprintReaderProfile, type AuthorityReader } from "./reader-profile.js";
 import { mintGrant, verifyGrant, type GrantClaims, type GrantIssuer } from "./preview-grant.js";
 
 export interface RenewalDeps {
@@ -51,6 +51,7 @@ export async function renewGrant(
   const profile = await deps.authority.getProfile(verified.artifactId);
   if (!profile || profile.name !== verified.profileName) return null;
   if (profile.policyRevision !== verified.policyRevision) return null;
+  if (fingerprintReaderProfile(profile) !== verified.profileFingerprint) return null;
   const release = await deps.authority.getRelease(verified.artifactId);
   if (!release || release.artifactId !== verified.artifactId || release.releaseId !== verified.releaseId) return null;
   // Freshness revalidation: approval or policy withdrawn during the waits
@@ -61,6 +62,7 @@ export async function renewGrant(
   const freshProfile = await deps.authority.getProfile(verified.artifactId);
   if (!freshProfile || freshProfile.name !== verified.profileName) return null;
   if (freshProfile.policyRevision !== verified.policyRevision) return null;
+  if (fingerprintReaderProfile(freshProfile) !== verified.profileFingerprint) return null;
   const freshRelease = await deps.authority.getRelease(verified.artifactId);
   if (!freshRelease || freshRelease.artifactId !== verified.artifactId || freshRelease.releaseId !== verified.releaseId) return null;
   const issuedAt = now();
