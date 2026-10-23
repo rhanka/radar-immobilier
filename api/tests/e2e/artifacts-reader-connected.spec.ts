@@ -84,6 +84,8 @@ test("reader-alice loads the connected page with Geo and protected signals", asy
   expect(signals.signals).toHaveLength(2);
   expect(signals.signals[0]?.detail).not.toBeNull();
   expect(page.url()).not.toContain("grant=");
+  await page.context().clearCookies();
+  expect((await page.goto(`${baseURL}/index.html?grant=${grant}`))?.status()).toBe(401);
 });
 
 test("reader-bob sees redacted protected signals", async ({ page }) => {
