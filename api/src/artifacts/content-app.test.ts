@@ -1,4 +1,6 @@
+import { Hono } from "hono";
 import { describe, expect, it } from "vitest";
+import { contentGate } from "./content-app.js";
 import { createApp } from "../app.js";
 import type { AuthConfig } from "../config.js";
 import type { Database } from "../db/client.js";
@@ -163,5 +165,29 @@ describe("contentGate on other hosts", () => {
   it("passes every host through when no content base is configured", async () => {
     const open = makeApp(null);
     expect((await open.request(`http://${STABLE}/api/v1/auth/login`)).status).toBe(302);
+  });
+});
+
+describe("contentGate reader dispatch (A6/H5 seam)", () => {
+  it("delegates page paths to the mounted reader while /api stays denied", async () => {
+    const reader = new Hono().get("*", (c) => c.text("reader"));
+    const gated = new Hono();
+    gated.use("*", contentGate(BASE, reader));
+    gated.get("/fallback", (c) => c.text("fallback"));
+    const page = await gated.request(`http://${STABLE}/index.html`, {
+      headers: { host: STABLE },
+    });
+    expect(page.status).toBe(200);
+    expect(await page.text()).toBe("reader");
+    const api = await gated.request(`http://${STABLE}/api/v1/auth/login`, {
+      headers: { host: STABLE },
+    });
+    expect(api.status).toBe(401);
+  });
+
+  it("stays closed without a mounted reader", async () => {
+    const res = await app.request(`http://${STABLE}/index.html`);
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({ error: "not_found" });
   });
 });
