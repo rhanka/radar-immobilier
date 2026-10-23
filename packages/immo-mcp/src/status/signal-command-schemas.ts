@@ -15,6 +15,12 @@ export const SignalCommandBodySchemas = {
       a_surveiller: HeadIdSchema.optional() }).strict().optional(),
   }).strict().superRefine((body, ctx) => {
     const removals = body.deselect ?? [];
+    if (removals.length === 0) {
+      if (body.expectedSelectionHeads !== undefined) {
+        ctx.addIssue({ code: "custom", message: "Orphan selection expectations without removals" });
+      }
+      return;
+    }
     const heads = Object.keys(body.expectedSelectionHeads ?? {});
     if (new Set(removals).size !== removals.length || removals.length !== heads.length
       || removals.some((key) => !heads.includes(key))) {

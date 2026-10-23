@@ -74,6 +74,46 @@ describe("closed command schemas", () => {
       body: { ...lot, mutation: { action: "discard", reasonCode: "X", deselect: [] } } }).success).toBe(false);
   });
 
+  it("should match the scoped HTTP bounds for baskets and deselection lists", () => {
+    for (const action of ["select", "deselect"]) {
+      for (const length of [0, 1, 128, 129, 256, 257]) {
+        const command = { ...envelope, mode: "real",
+          body: { ...lot, mutation: { action, basket_id: "b".repeat(length) } } };
+        const accepted = length > 0 && length <= 256;
+        expect(CommandLotFacetInputSchema.safeParse(command).success).toBe(accepted);
+        expect(BatchLotFacetCommandsInputSchema.safeParse({ ...envelope, mode: "real",
+          items: [command.body] }).success).toBe(accepted);
+      }
+    }
+    const removals = (count: number) => Array.from({ length: count },
+      (_, i) => ({ basket_id: `basket-${i}`, expected_head_id: null }));
+    const discard = (deselect: ReturnType<typeof removals>) => ({ ...envelope, mode: "real",
+      body: { ...lot, mutation: { action: "discard", reasonCode: "X", deselect } } });
+    expect(CommandLotFacetInputSchema.safeParse(discard(removals(8))).success).toBe(true);
+    expect(CommandLotFacetInputSchema.safeParse(discard(removals(9))).success).toBe(false);
+    for (const length of [0, 1, 129, 256, 257]) {
+      expect(CommandLotFacetInputSchema.safeParse(discard([
+        { basket_id: "b".repeat(length), expected_head_id: null },
+      ])).success).toBe(length > 0 && length <= 256);
+    }
+    for (const count of [8, 9]) {
+      expect(BatchLotFacetCommandsInputSchema.safeParse({ ...envelope, mode: "real",
+        items: [discard(removals(count)).body] }).success).toBe(count <= 8);
+    }
+  });
+
+  it("should reject orphan selection expectations without removals", () => {
+    const personal = { ...envelope, scope: "personal" };
+    for (const deselect of [undefined, []]) {
+      for (const expectedSelectionHeads of [{}, { pertinent: null }, { pertinent: uuid }]) {
+        expect(CommandSignalFacetInputSchema.safeParse({ ...personal, action: "discard",
+          body: { ...signal, reasonCode: "X", deselect, expectedSelectionHeads } }).success).toBe(false);
+      }
+      expect(CommandSignalFacetInputSchema.safeParse({ ...personal, action: "discard",
+        body: { ...signal, reasonCode: "X", deselect } }).success).toBe(true);
+    }
+  });
+
   it("should accept exactly 500 distinct lot targets and refuse invalid atomic envelopes", () => {
     const batch = { ...envelope, mode: "simulation", items: Array.from({ length: 500 }, (_, i) => ({ ...lot,
       target: { ...lot.target, canonicalId: `L${i}` } })) };
