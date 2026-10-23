@@ -229,6 +229,6 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 ## Review 3 corrections
 - [x] Retain preparation history across completed and partial cleanup.
 - [x] Verify the first purge receipt before retry and preserve settled race history.
-- [ ] Enforce private MCP marker redaction through transport parity.
-- [ ] Qualify final sources: 59 controls and 59 mutants, 3010 API passes,
+- [x] Enforce private MCP marker redaction through transport parity.
+- [x] Qualify final sources: 59 controls and 59 mutants, 3010 API passes,
   69 disabled cases and 69 named contract or coverage failures on 0.1.2.
