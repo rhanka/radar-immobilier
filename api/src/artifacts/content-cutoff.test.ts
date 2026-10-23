@@ -1,7 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import { createReaderContentApp } from "./content-serve.js";
 import { mintGrant } from "./preview-grant.js";
+import { fingerprintReaderProfile } from "./reader-profile.js";
 import { credentials, fixtureReaderDeps, GRANT_SECRET, HOST, ISSUER, request } from "./reader-test-fixture.js";
+
+const FINGERPRINT = fingerprintReaderProfile({ name: "demo", policyRevision: "pol-001",
+  capabilities: ["geo.read", "signals.protected-read"] });
 
 function latch() {
   let release!: () => void;
@@ -12,7 +16,8 @@ function latch() {
 async function token() {
   return mintGrant({ ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000",
     releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice",
-    sessionId: "session-1", profileName: "demo", policyRevision: "pol-001" }, GRANT_SECRET, 1_000);
+    sessionId: "session-1", profileName: "demo", policyRevision: "pol-001",
+    profileFingerprint: FINGERPRINT }, GRANT_SECRET, 1_000);
 }
 
 describe("reader access after asynchronous waits", () => {

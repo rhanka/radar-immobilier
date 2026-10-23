@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createFixtureAuthority } from "./reader-profile.js";
+import { createFixtureAuthority, fingerprintReaderProfile } from "./reader-profile.js";
 import { mintGrant } from "./preview-grant.js";
 import { renewGrant } from "./preview-renewal.js";
 
@@ -8,7 +8,9 @@ const issuer = { issuer: "https://api.example.test", audience: "https://api.exam
 const claims = { ...issuer, host: "artifact.pages.example.test",
   artifactId: "123e4567-e89b-12d3-a456-426614174000",
   releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice",
-  sessionId: "session-1", profileName: "demo", policyRevision: "pol-001" };
+  sessionId: "session-1", profileName: "demo", policyRevision: "pol-001",
+  profileFingerprint: fingerprintReaderProfile({ name: "demo", policyRevision: "pol-001",
+    capabilities: ["geo.read", "signals.protected-read"] }) };
 
 describe("renewal after authority waits", () => {
   it.each(["expiry", "revocation"])("should refuse renewal after %s during the authority wait", async reason => {
@@ -54,7 +56,10 @@ describe("renewal after authority waits", () => {
         revision = "pol-002";
         return fixture.getRelease(artifactId);
       } };
-    const token = await mintGrant(claims, secret, 1_000);
+    const narrowClaims = { ...claims,
+      profileFingerprint: fingerprintReaderProfile({ name: "demo", policyRevision: "pol-001",
+        capabilities: ["geo.read"] }) };
+    const token = await mintGrant(narrowClaims, secret, 1_000);
     expect(await renewGrant(token, { authority, secret, issuer }, () => false, 10_000)).toBeNull();
   });
 });

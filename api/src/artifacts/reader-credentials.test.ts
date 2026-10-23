@@ -1,12 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { mintGrant, type GrantClaims } from "./preview-grant.js";
 import { mintSessionCookie } from "./preview-session.js";
+import { fingerprintReaderProfile } from "./reader-profile.js";
 import { GRANT_SECRET, HOST, ISSUER, makeApp, request } from "./reader-test-fixture.js";
 
 const SESSION_SECRET = "session-secret-32-bytes-long-pad!!";
 const claims = (readerSub: string): GrantClaims => ({ ...ISSUER, host: HOST,
   artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001",
-  readerSub, sessionId: "session-measure", profileName: "demo", policyRevision: "pol-001" });
+  readerSub, sessionId: "session-measure", profileName: "demo", policyRevision: "pol-001",
+  profileFingerprint: fingerprintReaderProfile({ name: "demo", policyRevision: "pol-001",
+    capabilities: ["geo.read", "signals.protected-read"] }) });
 const session = (readerSub: string) => ({ sid: "session-measure", readerSub,
   artifactId: "123e4567-e89b-12d3-a456-426614174000", createdAt: 1_000, expiresAt: 900_000 });
 

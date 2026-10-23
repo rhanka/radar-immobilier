@@ -6,6 +6,7 @@ import {
   verifyGrant,
   type GrantClaims,
 } from "./preview-grant.js";
+import { fingerprintReaderProfile } from "./reader-profile.js";
 
 const SECRET = "grant-secret-32-bytes-long-padding!";
 const GRANT: GrantClaims = {
@@ -19,12 +20,19 @@ const GRANT: GrantClaims = {
   sessionId: "session-1",
   profileName: "demo",
   policyRevision: "pol-001",
+  profileFingerprint: fingerprintReaderProfile({ name: "demo", policyRevision: "pol-001",
+    capabilities: ["geo.read", "signals.protected-read"] }),
 };
 
 describe("preview grants", () => {
   it("should verify a grant inside its lifetime", async () => {
     const token = await mintGrant(GRANT, SECRET, 1_000);
-    expect(await verifyGrant(token, GRANT, SECRET, 20_000)).not.toBeNull();
+    expect((await verifyGrant(token, GRANT, SECRET, 20_000))?.profileFingerprint).toBe(GRANT.profileFingerprint);
+  });
+
+  it.each([undefined, null, 42, []])("should refuse a missing or non-string profile fingerprint (%s)", async (value) => {
+    const token = await mintGrant({ ...GRANT, profileFingerprint: value } as unknown as GrantClaims, SECRET, 1_000);
+    expect(await verifyGrant(token, { issuer: GRANT.issuer, audience: GRANT.audience, tier: GRANT.tier }, SECRET, 2_000)).toBeNull();
   });
 
   it("should refuse forged, expired and cross-bound grants", async () => {
@@ -35,6 +43,7 @@ describe("preview grants", () => {
     expect(await verifyGrant(token, { ...GRANT, releaseId: "release-002" }, SECRET, 2_000)).toBeNull();
     expect(await verifyGrant(token, { ...GRANT, host: "other.pages.example.test" }, SECRET, 2_000)).toBeNull();
     expect(await verifyGrant(token, { ...GRANT, policyRevision: "pol-002" }, SECRET, 2_000)).toBeNull();
+    expect(await verifyGrant(token, { ...GRANT, profileFingerprint: "00".repeat(32) }, SECRET, 2_000)).toBeNull();
   });
 
   it("should keep the 55 s grant inside the 60 s cutoff with the skew budget", () => {

@@ -2,7 +2,7 @@
  * Signed reader grants (ARTEFACTS A6/H5).
  *
  * HS256 JWT bound to issuer/audience/tier/host/artifact/release/reader/
- * session/profile/policy-revision/expiry. Proposed lifetime is 55 seconds;
+ * session/profile/policy-revision/profile-fingerprint/expiry. Proposed lifetime is 55 seconds;
  * with the <= 5 s propagation/skew budget the measured cutoff stays <= 60 s.
  * Forged, expired or cross-bound grants fail closed.
  */
@@ -26,6 +26,7 @@ export interface GrantSubject {
   readonly sessionId: string;
   readonly profileName: string;
   readonly policyRevision: string;
+  readonly profileFingerprint: string;
 }
 
 export type GrantClaims = GrantIssuer & GrantSubject;
@@ -73,7 +74,7 @@ export async function verifyGrant(
     if (typeof payload.exp !== "number" || typeof payload.iat !== "number" ||
       payload.exp <= payload.iat || payload.exp - payload.iat > PREVIEW_GRANT_TTL_SECONDS ||
       payload.sub !== claims.readerSub) return null;
-    const fields = ["tier", "host", "artifactId", "releaseId", "readerSub", "sessionId", "profileName", "policyRevision"] as const;
+    const fields = ["tier", "host", "artifactId", "releaseId", "readerSub", "sessionId", "profileName", "policyRevision", "profileFingerprint"] as const;
     for (const field of fields) {
       const want = expected[field];
       if (want !== undefined && claims[field] !== want) return null;
@@ -93,6 +94,7 @@ export async function verifyGrant(
       sessionId: claims.sessionId as string,
       profileName: claims.profileName as string,
       policyRevision: claims.policyRevision as string,
+      profileFingerprint: claims.profileFingerprint as string,
     };
   } catch {
     return null;
