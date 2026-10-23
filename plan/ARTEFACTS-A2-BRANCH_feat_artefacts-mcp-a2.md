@@ -112,3 +112,5 @@ activation, no cluster-mesh composition.
 - [x] Added synthetic signed-token fixtures for exchange assertions.
 
 - [x] Added client refusal and cache isolation behavior assertions.
+
+- [x] Added delegated-token actor audience subject scope and lifetime assertions.
