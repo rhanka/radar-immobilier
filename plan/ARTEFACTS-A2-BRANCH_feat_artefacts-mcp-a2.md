@@ -114,3 +114,5 @@ activation, no cluster-mesh composition.
 - [x] Added client refusal and cache isolation behavior assertions.
 
 - [x] Added delegated-token actor audience subject scope and lifetime assertions.
+
+- [x] Added scope-first exchange and missing-runtime refusal assertions.
