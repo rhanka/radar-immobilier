@@ -8,6 +8,7 @@
  */
 import type { GrantClaims } from "./preview-grant.js";
 import {
+  fingerprintReaderProfile,
   intersectCapabilities,
   type AuthorityReader,
   type ReaderCapability,
@@ -33,6 +34,7 @@ export async function adaptGrantToReader(
   const profile = await authority.getProfile(grant.artifactId);
   if (!profile || profile.name !== grant.profileName) return null;
   if (profile.policyRevision !== grant.policyRevision) return null;
+  if (fingerprintReaderProfile(profile) !== grant.profileFingerprint) return null;
   const rights = await authority.getRights(grant.readerSub, grant.artifactId);
   if (!rights || !rights.approved || rights.readerSub !== grant.readerSub) return null;
   if (rights.artifactId !== grant.artifactId) return null;
