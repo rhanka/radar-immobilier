@@ -428,10 +428,12 @@ async function main(): Promise<void> {
   const raw = createRawDataSource(process.env);
   const exchangeConfig = loadExchangeConfig(process.env);
   let exchange: ExchangeRuntimeDeps | undefined;
-  if (exchangeConfig) {
+  const clientSecret = process.env.IMMO_MCP_WORKLOAD_CLIENT_SECRET;
+  if (exchangeConfig && clientSecret) {
     const exchangeJwksUri = process.env.IMMO_MCP_EXCHANGE_JWKS_URI ?? `${exchangeConfig.issuer.replace(/\/$/, "")}/.well-known/jwks.json`;
     exchange = {
       config: exchangeConfig,
+      clientSecret,
       keySource: fromRemoteJwks(exchangeJwksUri) as unknown as ExchangeKeySource,
       cache: new ExchangeCache({}),
       singleFlight: new SingleFlightExchange(),
