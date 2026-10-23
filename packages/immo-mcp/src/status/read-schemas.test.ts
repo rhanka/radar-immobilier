@@ -12,6 +12,21 @@ const item = { readiness: "ready", target, displayedContent: "Synthetic evidence
   displayedFingerprint: "a".repeat(64), personalHeads: [], commonHeads: [],
   personalHidden: false, commonHidden: true, effectiveHidden: true, operations: [] };
 
+const selectedWorkspace = {
+  workspaceId, label: "synthetic",
+  capabilities: { select: true, changePipeline: false, changeMarket: false,
+    discardPersonally: true, moderateArchive: false },
+  selectionBasket: "favorites",
+  reasonCatalog: [
+    { code: "P-VILLE-TERRITOIRE", label: "Pertinent", verdict: "pertinent" },
+    { code: "S-PLANIFIE", label: "A surveiller", verdict: "a_surveiller" },
+    { code: "N-DOUBLON", label: "Non pertinent", verdict: "non_pertinent" },
+  ],
+  semanticProfile: { lotReason: "undecided", correspondence: "undecided",
+    signalClassification: "separate_action", semanticContractVersion: "v1" },
+  operations: [], activation: "closed",
+};
+
 describe("closed read schemas", () => {
   it("should accept discovery and reject authority fields or convenience workspaces", () => {
     expect(GetFacetContextInputSchema.parse({})).toEqual({});
@@ -20,8 +35,13 @@ describe("closed read schemas", () => {
     for (const input of [{ actor: "x" }, { workspaceId: "radar" }, { workspaceId: "default" }]) {
       expect(GetFacetContextInputSchema.safeParse(input).success).toBe(false);
     }
-    expect(GetFacetContextOutputSchema.safeParse({ workspaces: [], selectedWorkspace: { heads: [] } }).success)
-      .toBe(false);
+  });
+
+  it.each(["heads", "history", "receipts"])("should reject private %s on a valid selected context", (field) => {
+    const output = { workspaces: [], selectedWorkspace };
+    expect(GetFacetContextOutputSchema.parse(output)).toEqual(output);
+    expect(GetFacetContextOutputSchema.safeParse({ ...output,
+      selectedWorkspace: { ...selectedWorkspace, [field]: [] } }).success).toBe(false);
   });
 
   it("should require closed bounded workspace/city reads and qualified lot targets", () => {
