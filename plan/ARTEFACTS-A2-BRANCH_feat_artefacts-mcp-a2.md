@@ -155,3 +155,5 @@ activation, no cluster-mesh composition.
 - [x] Prove valid DPoP refusal with and without runtime, zero exchange/API calls, and preserved synthetic stdio.
 
 - [x] Require the exact service-user refusal for a signed token matching the expected workload subject.
+
+- [x] Isolate HTTP audience refusal using destination-verifiable signatures and otherwise valid claims.

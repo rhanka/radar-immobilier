@@ -1,5 +1,7 @@
 import { expect, it, vi } from "vitest";
+import { SignJWT } from "jose";
 import { serviceFixture } from "../../../tools/exchange-issuer/service-fixture.js";
+import { signSubjectToken, TEST_ISSUER } from "./test-exchange-fixtures.js";
 
 it("exchanges over HTTP across isolated issuer, MCP and synthetic receiver without cookies", async () => {
   const f = await serviceFixture();
@@ -38,6 +40,15 @@ it("exchanges over HTTP across isolated issuer, MCP and synthetic receiver witho
     expect(direct.status).toBe(401);
     const delegatedAtMcp = await rpc("tools/list", {}, f.issuer.issued[0]);
     expect(delegatedAtMcp.status).toBe(401);
+    const wrongRadarAudience = await new SignJWT({ scope: "immo:search", client_id: "immo-mcp-workload", act: { sub: "immo-mcp-workload" } })
+      .setProtectedHeader({ alg: "RS256", typ: "at+jwt" })
+      .setIssuer(TEST_ISSUER).setSubject("user-1").setAudience("https://wrong-audience.test")
+      .setIssuedAt().setExpirationTime("60s").sign(f.issuerPrivateKey);
+    const wrongAudDirect = await fetch(`${f.radarUrl}/api/graph-signals/longueuil`, { headers: { authorization: `Bearer ${wrongRadarAudience}` } });
+    expect(wrongAudDirect.status).toBe(401);
+    const wrongMcpAudience = await signSubjectToken(f.subjectPrivateKey, { audience: "https://wrong-mcp.test" });
+    const wrongAudMcp = await rpc("tools/list", {}, wrongMcpAudience);
+    expect(wrongAudMcp.status).toBe(401);
     const reduced = await (await call("search_signals", { city: "longueuil" }, f.reduced)).json();
     expect(reduced.result.isError).toBe(true);
     expect(JSON.stringify(reduced)).toContain("scope_denied");
