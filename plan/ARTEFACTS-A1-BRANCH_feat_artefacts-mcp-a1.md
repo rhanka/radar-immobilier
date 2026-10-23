@@ -102,3 +102,8 @@ unverified evidence. ETA unchanged: 14-23 agent hours, complete A1 circuit.
 - [x] Guard client end events, bound SQL cleanup and retain typed connection causes.
 - [x] Use a nonempty S3 prefix in acceptance teardown; keep r2 qualification open.
 - [x] Preserve bounded shutdown while reporting exit failure outside a finally block.
+
+## Fix2 review corrections
+
+- [x] Compare replay bodies while retaining replay authorization and durable uniqueness checks.
+- [ ] Execute the corrected race scenarios on the identified r2 candidate; synthetic doubles do not qualify it.
