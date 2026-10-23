@@ -12,10 +12,15 @@ import { getMcpAuthContext, mcpAuthRoutes, requireMcpAuth } from "@sentropic/mcp
 import { fromRemoteJwks } from "@sentropic/oauth-verify";
 import type { AccessTokenClaims, TokenKeySource } from "@sentropic/oauth-verify";
 import { IMMO_SCOPES, type ImmoMcpAuthContext } from "./auth-context.js";
+import { bindExchangeInput, buildExchangeInput, runWithExchangeDeps, type ExchangeRuntimeDeps } from "./authorized-egress.js";
 import {
   captureInvocationContext,
   runWithInvocationContext,
+  type InvocationContext,
 } from "./invocation-context.js";
+import { loadExchangeConfig } from "./exchange-config.js";
+import { ExchangeCache, SingleFlightExchange } from "./exchange-cache.js";
+import type { ExchangeKeySource } from "./exchange-token.js";
 import type { ToolContext } from "./tools.js";
 import { createDataSource, type ImmoDataSource } from "./data-source.js";
 import { createRawDataSource, type RawDataSource } from "./raw-data.js";
@@ -129,7 +134,7 @@ function asStringArray(value: unknown): string[] | null {
  */
 export function authContextFromMcp(
   mcpAuth: McpAuthContext,
-  opts: { audience: string; dataMode: "real" | "simulation"; accessToken?: string | undefined },
+  opts: { audience: string; dataMode: "real" | "simulation" },
 ): ImmoMcpAuthContext {
   const claims: AccessTokenClaims = mcpAuth.claims;
   const ctx: ImmoMcpAuthContext = {
@@ -144,9 +149,7 @@ export function authContextFromMcp(
   };
   const orgId = claims["org_id"];
   if (typeof orgId === "string") ctx.orgId = orgId;
-  // Carry the RAW verified user token so a data source can act PER-USER (D4):
-  // forward the user's own bearer to the radar API instead of a machine cred.
-  if (opts.accessToken) ctx.accessToken = opts.accessToken;
+  // The subject credential stays in the private exchange boundary.
   return ctx;
 }
 
@@ -242,6 +245,8 @@ export interface ImmoHttpDeps {
   keySource?: TokenKeySource;
   /** Clock for session timestamps (default = `Date.now`; injectable for tests). */
   clock?: () => number;
+  /** Private request-bound exchange runtime; missing configuration fails closed. */
+  exchange?: ExchangeRuntimeDeps | undefined;
 }
 
 /**
@@ -292,17 +297,39 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
   const unknownSession = (c: Context): Response =>
     jsonRpcError(c, 404, "Unknown or expired MCP session");
 
-  const currentAuth = (c: Context): { mcpAuth: McpAuthContext; auth: ImmoMcpAuthContext } => {
+  const currentAuth = (c: Context): { mcpAuth: McpAuthContext; auth: ImmoMcpAuthContext; subjectToken: string | undefined } => {
     const mcpAuth = getMcpAuthContext(c);
-    // Identity, scopes AND raw bearer come from the CURRENT request (verified
+    // Identity and scopes come from the CURRENT request (verified
     // upstream by the resource server guard): tools act per-request (D4), so a
     // refreshed token or a removed scope applies to the very next request.
     const auth = authContextFromMcp(mcpAuth, {
       audience: config.resource,
       dataMode: data.mode === "http" ? "real" : "simulation",
-      accessToken: extractBearerToken(c.req.header("authorization")),
     });
-    return { mcpAuth, auth };
+    return { mcpAuth, auth, subjectToken: extractBearerToken(c.req.header("authorization")) };
+  };
+
+  const dispatchWithExchange = <T>(mcpAuth: McpAuthContext, auth: ImmoMcpAuthContext, subjectToken: string | undefined, snapshot: InvocationContext, fn: () => T): T => {
+    if (subjectToken) {
+      const claims = mcpAuth.claims as unknown as Record<string, unknown>;
+      const exp = claims["exp"];
+      const jti = claims["jti"];
+      bindExchangeInput(snapshot, buildExchangeInput({
+        subjectToken,
+        subjectSub: mcpAuth.sub,
+        subjectExp: typeof exp === "number" && Number.isFinite(exp) ? Math.floor(exp) : 0,
+        subjectScopes: [...mcpAuth.scopes],
+        subjectJti: typeof jti === "string" && jti.length > 0 ? jti : undefined,
+        subjectClientId: ownerClientId(mcpAuth),
+        issuer: config.issuer,
+        membership: `${auth.tenantId}:${[...auth.workspaces].sort().join(",")}`,
+        confirmation: claims["cnf"] !== undefined ? "cnf" : "none",
+      }));
+    }
+    if (deps.exchange) {
+      return runWithExchangeDeps(deps.exchange, () => runWithInvocationContext(snapshot, fn));
+    }
+    return runWithInvocationContext(snapshot, fn);
   };
 
   const closeSession = async (sessionId: string, entry: SessionEntry): Promise<void> => {
@@ -335,7 +362,7 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
         await closeSession(sessionId, entry);
         return unknownSession(c);
       }
-      const { mcpAuth, auth } = currentAuth(c);
+      const { mcpAuth, auth, subjectToken } = currentAuth(c);
       // Owner mismatch: reject WITHOUT touching the transport, with the exact
       // unknown-session response.
       if (!isSessionOwner(entry.owner, mcpAuth)) return unknownSession(c);
@@ -343,7 +370,7 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
       // Immutable capture at entry: the running handler keeps this request's
       // identity even when a concurrent request enters the same session.
       const snapshot = captureInvocationContext({ auth, data, raw });
-      return runWithInvocationContext(snapshot, () => entry.transport.handleRequest(c.req.raw));
+      return dispatchWithExchange(mcpAuth, auth, subjectToken, snapshot, () => entry.transport.handleRequest(c.req.raw));
     }
 
     // No session yet: only a POST (the `initialize` request) may open one.
@@ -353,11 +380,11 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
     await sweepExpiredSessions(clock());
 
     // The session is bound to the opening request's identity; later requests
-    // capture identity, scopes and the RAW verified bearer (D4) per request
+    // capture identity and scopes per request; the subject bearer stays private
     // before reaching the transport (see the session branch above).
-    const { mcpAuth, auth } = currentAuth(c);
-    const snapshot = captureInvocationContext({ auth, data, raw });
-    const server = buildHttpScopedServer(auth, data, raw);
+    const { mcpAuth: openAuth, auth: openAuthCtx, subjectToken: openSubject } = currentAuth(c);
+    const snapshotForOpen = captureInvocationContext({ auth: openAuthCtx, data, raw });
+    const server = buildHttpScopedServer(openAuthCtx, data, raw);
     const transport = new WebStandardStreamableHTTPServerTransport({
       sessionIdGenerator: () => randomUUID(),
       enableJsonResponse: true,
@@ -367,7 +394,7 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
       if (sid) sessions.delete(sid);
     };
     await server.connect(transport);
-    const response = await runWithInvocationContext(snapshot, () =>
+    const response = await dispatchWithExchange(openAuth, openAuthCtx, openSubject, snapshotForOpen, () =>
       transport.handleRequest(c.req.raw),
     );
     if (transport.sessionId) {
@@ -375,7 +402,7 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
       sessions.set(transport.sessionId, {
         transport,
         server,
-        owner: sessionOwnerFromMcp(mcpAuth),
+        owner: sessionOwnerFromMcp(openAuth),
         createdAt: now,
         lastSeenAt: now,
       });
@@ -399,7 +426,18 @@ async function main(): Promise<void> {
   // to mock signals.
   const data = createDataSource(process.env);
   const raw = createRawDataSource(process.env);
-  const app = createImmoHttpApp(config, { data, raw });
+  const exchangeConfig = loadExchangeConfig(process.env);
+  let exchange: ExchangeRuntimeDeps | undefined;
+  if (exchangeConfig) {
+    const exchangeJwksUri = process.env.IMMO_MCP_EXCHANGE_JWKS_URI ?? `${exchangeConfig.issuer.replace(/\/$/, "")}/.well-known/jwks.json`;
+    exchange = {
+      config: exchangeConfig,
+      keySource: fromRemoteJwks(exchangeJwksUri) as unknown as ExchangeKeySource,
+      cache: new ExchangeCache({}),
+      singleFlight: new SingleFlightExchange(),
+    };
+  }
+  const app = createImmoHttpApp(config, { data, raw, exchange });
   const { serve } = await import("@hono/node-server");
   serve({ fetch: app.fetch, port: config.port });
   process.stderr.write(

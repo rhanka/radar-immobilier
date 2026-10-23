@@ -116,3 +116,5 @@ activation, no cluster-mesh composition.
 - [x] Added delegated-token actor audience subject scope and lifetime assertions.
 
 - [x] Added scope-first exchange and missing-runtime refusal assertions.
+
+- [x] Bound verified HTTP requests and search handlers to exchanged credentials.

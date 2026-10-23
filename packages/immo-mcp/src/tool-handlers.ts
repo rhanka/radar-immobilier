@@ -1,8 +1,6 @@
 import { assertScope, IMMO_SCOPES, redact } from "./auth-context.js";
-import {
-  authorizedCallContext,
-  type InvocationContext,
-} from "./invocation-context.js";
+import { invalidateExchangedCallContext, resolveExchangedCallContext } from "./authorized-egress.js";
+import type { InvocationContext } from "./invocation-context.js";
 import { assertValidBbox } from "./raw-data.js";
 import { RAW_GEOJSON_DEFAULT_LIMIT } from "./raw-data.js";
 import type {
@@ -127,10 +125,18 @@ async function searchSignalsHandler(
 ): Promise<ToolTextResult> {
   const args = rawArgs as unknown as SearchSignalsToolArgs;
   assertScope(ctx.auth, IMMO_SCOPES.search);
-  // Per-user egress (D4): the CURRENT snapshot bearer reaches the radar API.
-  // No exchange is performed here; a later stage swaps this credential.
-  const signals = await ctx.data.searchSignals(args, authorizedCallContext(ctx));
-  return jsonResult({ city: args.city, count: signals.length, signals });
+  // Per-user egress (D4): the exchanged delegated token reaches the radar API.
+  // Exactly one exchange is performed here for this tool only; a later stage swaps this credential.
+  const callCtx = await resolveExchangedCallContext(ctx, "search_signals");
+  try {
+    const signals = await ctx.data.searchSignals(args, callCtx);
+    return jsonResult({ city: args.city, count: signals.length, signals });
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith("unauthenticated:")) {
+      invalidateExchangedCallContext(ctx, callCtx.accessToken);
+    }
+    throw error;
+  }
 }
 
 async function getOpportunityDossierHandler(
