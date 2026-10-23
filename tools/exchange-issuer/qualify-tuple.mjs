@@ -6,9 +6,10 @@ const manifest = JSON.parse(await readFile("packages/immo-mcp/package.json", "ut
 const lock = JSON.parse(await readFile("package-lock.json", "utf8"));
 for (const [name, version] of [["mcp-auth", "0.2.2"], ["oauth-verify", "0.1.0"]]) {
   const id = `@sentropic/${name}`;
-  const entry = lock.packages[`node_modules/${id}`];
+  const entry = lock.packages[`packages/immo-mcp/node_modules/${id}`] ?? lock.packages[`node_modules/${id}`];
   assert.equal(entry?.version, version, `${id}: qualified integration commit required`);
   assert.equal(manifest.dependencies[id], `^${version}`, `${id}: manifest tuple mismatch`);
+  assert(typeof entry.resolved === "string" && typeof entry.integrity === "string", `${id}: archive URL and integrity required in lockfile`);
   const metadataResponse = await fetch(`https://registry.npmjs.org/${id}/${version}`, { redirect: "error" });
   assert(metadataResponse.ok, `${id}: publication not available`);
   const metadata = await metadataResponse.json();

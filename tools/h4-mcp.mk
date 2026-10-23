@@ -77,6 +77,12 @@ test-exchange-e2e: guard ## P4 owns this target: isolated issuer exchange proof
 	$(COMPOSE) run --rm --no-deps -T --entrypoint '' api sh -ec \
 	'npm ci --workspace=packages/immo-mcp --include-workspace-root && npm run test --workspace=packages/immo-mcp -- src/exchange.e2e.test.ts'
 
+.PHONY: test-exchange-mutations
+test-exchange-mutations: guard ## P4: isolated mutations with restoration controls
+	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; \
+	$(COMPOSE) run --rm --no-deps -T --entrypoint '' api sh -ec \
+	'npm ci --workspace=packages/immo-mcp --include-workspace-root && node tools/exchange-issuer/mutations.mjs'
+
 .PHONY: image-smoke
 image-smoke: guard ## P6 owns this target: built-image inspection
 	@echo "[h4-mcp] refused: image-smoke is implemented in P6" >&2; exit 1
