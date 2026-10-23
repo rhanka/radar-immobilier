@@ -60,8 +60,14 @@ archive_sources() {
   sha256sum "$RUN_DIR/source.tar" > "$LOG_DIR/source.sha256"
 }
 scope_check() {
-  local path paths
-  paths=$(git diff --name-only HEAD; git ls-files --others --exclude-standard)
+  local path paths preview merge_head
+  local comparison=HEAD
+  if merge_head=$(git rev-parse -q --verify MERGE_HEAD); then
+    preview=$(git merge-tree --write-tree HEAD "$merge_head") || [[ $? == 1 ]]
+    comparison=${preview%%$'\n'*}
+    [[ $comparison =~ ^[a-f0-9]{40}$ ]] || return 2
+  fi
+  paths=$(git diff --name-only "$comparison"; git ls-files --others --exclude-standard)
   while IFS= read -r path; do
     [[ -n $path ]] || continue
     case $path in

@@ -924,6 +924,10 @@ export const facetActivationState = pgTable("facet_activation_state", {
 // capabilities (D4). Writes stay disabled until 6K enables the gate.
 // Partial indexes, append-only guards, and widened facet checks live in
 // migration 0021; prospect_marks is untouched.
+// 6K cutover state, append-only cutover events, immutable D5 dispositions,
+// and source-writer coverage live in migration 0022. The cutover fence
+// blocks legacy prospect_marks writes while a barrier is committed or the
+// destination is open; prospect_notes and contacts stay separate.
 export const lotDestinationState = pgTable("lot_destination_state", {
   workspaceId: uuid("workspace_id").primaryKey().references(() => workspaces.id),
   enabled: boolean("enabled").notNull().default(false),
@@ -986,6 +990,69 @@ export const lotCapabilityEvents = pgTable("lot_capability_events", {
 }, (t) => ({
   byWorkspace: index("lot_capability_events_workspace_idx").on(t.workspaceId, t.createdAt),
 }));
+
+/**
+ * 6K guarded cutover state: one row per workspace. The maintenance
+ * barrier is committed before any fencing; the destination opens only
+ * through the explicit operator activation. The SQL fence and the route
+ * layer read this row; legacy writes stay fenced once the barrier exists.
+ */
+export const lotCutoverState = pgTable("lot_cutover_state", {
+  workspaceId: uuid("workspace_id").primaryKey().references(() => workspaces.id),
+  maintenanceBarrier: boolean("maintenance_barrier").notNull().default(false),
+  destinationOpen: boolean("destination_open").notNull().default(false),
+  manifestSha: text("manifest_sha"),
+  activatedAt: timestamp("activated_at", { withTimezone: true }),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Existing singleton also fences transactions carrying an older snapshot. */
+export const lotLegacyFence = pgTable("lot_legacy_fence", {
+  singleton: boolean("singleton").primaryKey().default(true),
+  enabled: boolean("enabled").notNull().default(false),
+});
+
+/** 6K append-only audit of every cutover stage and D5 recording. */
+export const lotCutoverEvents = pgTable("lot_cutover_events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  stage: text("stage").notNull(),
+  detail: jsonb("detail").notNull().default({}),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  byWorkspace: index("lot_cutover_events_workspace_idx").on(t.workspaceId, t.createdAt),
+}));
+
+/**
+ * 6K immutable D5 dispositions: one moderator decision per conflicted
+ * target recorded against the exact manifest digest. A changed manifest
+ * or a revised decision is a new row set, never an overwrite.
+ */
+export const lotD5Dispositions = pgTable("lot_d5_dispositions", {
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  manifestSha: text("manifest_sha").notNull(),
+  targetKey: text("target_key").notNull(),
+  decision: text("decision").notNull(),
+  sourceId: text("source_id"),
+  reason: text("reason").notNull(),
+  recordedBy: uuid("recorded_by").notNull().references(() => accountUsers.id),
+  recordedAt: timestamp("recorded_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.workspaceId, t.manifestSha, t.targetKey] }),
+}));
+
+/**
+ * 6K source-writer coverage attestations: every supported lot_versions
+ * writer must be recorded as covered before activation. Seeded uncovered
+ * by migration 0022; deployment qualifies each writer against the
+ * canonical-target serialization protocol.
+ */
+export const lotSourceWriterCoverage = pgTable("lot_source_writer_coverage", {
+  writer: text("writer").primaryKey(),
+  covered: boolean("covered").notNull().default(false),
+  checkedAt: timestamp("checked_at", { withTimezone: true }).notNull().defaultNow(),
+  reason: text("reason").notNull().default(""),
+});
 
 /**
  * 6L1 per-viewer personal projection revisions: one monotonic counter per
@@ -1052,6 +1119,10 @@ export const schema = {
   lotSourceRows,
   lotCapabilityGrants,
   lotCapabilityEvents,
+  lotCutoverState,
+  lotCutoverEvents,
+  lotD5Dispositions,
+  lotSourceWriterCoverage,
   refreshDocumentOutcomes,
   sources,
   ingestions,

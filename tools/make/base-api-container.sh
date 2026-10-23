@@ -29,7 +29,7 @@ CONFIG
 lint_api() {
   shopt -s nullglob
   local tests=(api/tests/integration/base-api*.ts)
-  node_modules/.bin/eslint api/src/services/facets api/src/routes/scoped-*.ts api/src/routes/workspaces.ts api/src/routes/graph-signals.ts api/src/routes/signal-facets.ts "${tests[@]}"
+  node_modules/.bin/eslint api/src/services/facets api/src/routes/scoped-*.ts api/src/routes/workspaces.ts api/src/routes/graph-signals.ts api/src/routes/signal-facets.ts api/src/app.ts api/src/index.ts api/src/db/schema.ts api/src/routes/chat.ts api/src/routes/prospect-marks*.ts api/src/services/chat/stream-bus*.ts "${tests[@]}"
 }
 case $action in
   network-proof) node tools/make/base-api-network.mjs;;
@@ -43,6 +43,9 @@ case $action in
     cd api
     node ../tools/make/base-api-ct8.mjs | tee /evidence/ct8.log
     npm run db:migrate
+    if [[ $action == verify && -f src/services/facets/lots/lot-cutover-journal-db.test.ts ]]; then
+      node ../tools/make/base-api-ct7-proof.mjs | tee /evidence/ct7.log
+    fi
     set -f
     if [[ $action == b1-mutation-* ]]; then
       bash ../tools/make/base-api-b1-mutation.sh "${action#b1-mutation-}"
