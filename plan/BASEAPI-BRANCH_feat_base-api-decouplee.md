@@ -85,13 +85,13 @@
 - [ ] Keep root dev/UAT unchanged; operational activation is a separate maintenance-window execution.
 
 ## Plan / Todo (lot-based)
-- [ ] B0 — BASE contract; Muse 1–2 h, Sol 1 h, total 2–3 h.
-  - [ ] B0.1: establish standalone Make entry points, isolated verification and bounded delivery; qualify zero-Python execution and cleanup after success, failure and interruption.
+- [x] B0 — BASE contract; Muse 1–2 h, Sol 1 h, total 2–3 h.
+  - [x] B0.1: establish standalone Make entry points, isolated verification and bounded delivery; qualify zero-Python execution and cleanup after success, failure and interruption.
   - [x] B0.2: commit this plan and branch/path ownership; bind every packet to CT-1–CT-9 and record BASE Sol A's lease/handoff duties.
   - [x] B0.3: document reads, reveal, reason catalog, workspace context, heads and revisions.
   - [x] B0.4: document commands, idempotency, expected heads, displayed versions and errors.
   - [x] B0.5: freeze the existing authority matrix and independent HTTP/SQL acceptance cases.
-  - [ ] Gate: contract traced to code; open defaults visible; no artifact dependency; safe runner and bundle audit qualified.
+  - [x] Gate: contract traced to code; open defaults visible; no artifact dependency; safe runner and bundle audit qualified.
 - [ ] B1 — Signal/workspace API; Muse 3–5 h, Sol 3–4 h, total 6–9 h.
   - [ ] B1.1: mount workspace, personal, common-archive, revision and invalidation routers.
   - [ ] B1.2: constrain middleware to its intended endpoints; preserve cookie writes and supported bearer reads.
