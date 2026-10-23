@@ -80,3 +80,4 @@ No invented production domain or certificate.
 - [x] Operation integration module cases use synthetic ports, not receiving API proof.
 - [x] Standalone reader listener prepared; production authority/store binding pending.
 - [x] Dedicated runner refuses integrated acceptance without the image/API binding.
+- [x] Collection and isolated module mutation proof runners prepared.
