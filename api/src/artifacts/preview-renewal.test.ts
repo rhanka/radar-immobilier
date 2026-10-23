@@ -28,6 +28,55 @@ describe("grant renewal and revocation", () => {
     expect(renewed).not.toBeNull();
   });
 
+  it("should refuse renewal when per-artifact approval is withdrawn", async () => {
+    const token = await mintGrant(GRANT, SECRET, 1_000);
+    const base = createFixtureAuthority();
+    const revoked = { ...base,
+      getRights: async (readerSub: string, artifactId: string) =>
+        artifactId === GRANT.artifactId ? null : base.getRights(readerSub, artifactId) };
+    expect(await renewGrant(
+      token,
+      { authority: revoked, secret: SECRET, issuer: ISSUER },
+      () => false,
+      10_000,
+    )).toBeNull();
+    const other = "223e4567-e89b-12d3-a456-426614174000";
+    const siblingGrant = await mintGrant({ ...GRANT, artifactId: other }, SECRET, 1_000);
+    const sibling = { ...base,
+      getAuthorizationVersion: async (artifactId: string) => artifactId === other
+        ? "sibling-v1" : base.getAuthorizationVersion(artifactId),
+      getRelease: async (artifactId: string) => artifactId === other
+        ? { artifactId: other, releaseId: GRANT.releaseId, authorSub: "author-alice" }
+        : base.getRelease(artifactId),
+      getProfile: async (artifactId: string) => artifactId === other
+        ? { name: "demo", policyRevision: "pol-001", capabilities: ["geo.read" as const] }
+        : base.getProfile(artifactId),
+      getRights: async (readerSub: string, artifactId: string) => artifactId === other
+        ? { readerSub, artifactId, approved: true, capabilities: ["geo.read" as const] }
+        : null };
+    expect(await renewGrant(
+      siblingGrant,
+      { authority: sibling, secret: SECRET, issuer: ISSUER },
+      () => false,
+      10_000,
+    )).not.toBeNull();
+  });
+
+  it("should renew page access for approved readers without API capabilities", async () => {
+    const token = await mintGrant(GRANT, SECRET, 1_000);
+    const base = createFixtureAuthority();
+    const noCaps = { ...base,
+      getRights: async (readerSub: string, artifactId: string) => ({
+        readerSub, artifactId, approved: true, capabilities: [] as const }) };
+    const renewed = await renewGrant(
+      token,
+      { authority: noCaps, secret: SECRET, issuer: ISSUER },
+      () => false,
+      10_000,
+    );
+    expect(renewed).not.toBeNull();
+  });
+
   it("should refuse renewal for revoked sessions and unapproved readers", async () => {
     const revoked = createRevocationList();
     revoked.revoke("session-1");
