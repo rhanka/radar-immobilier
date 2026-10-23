@@ -786,14 +786,14 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       assertOutcomeFailure(outcome, invocationId);
       expect(outcome["failure"]).toMatchObject({ category: "provider_unavailable", retriable: true });
       const projected = await projectOutcomeHttp(outcome);
-      assertPublicBodyRedacted(projected, { error: "capability_unavailable" }, [parityMarker], [BUCKET, endpoint, accessKey]);
+      assertPublicBodyRedacted(projected, { error: "capability_unavailable" }, [parityMarker], [BUCKET, endpoint, accessKey, SCOPE]);
       const peerComposed = (await composeQ2Host(barrier, { blobs: faulty }));
       try {
         const adapter = createMcpArtifactAdapter(createArtifactControl(peerComposed.host as never, SCOPE, BASE));
         const mcp = await adapter.execute({ method: "POST", path: "/publish", args: body }, { actorId: ACTOR });
         assertMcpResultRedacted(mcp,
           { status: 503, code: "capability_unavailable", retryable: true, publicError: "capability_unavailable" },
-          [parityMarker], [BUCKET, endpoint, accessKey]);
+          [parityMarker], [BUCKET, endpoint, accessKey, SCOPE]);
       } finally {
         (peerComposed.host["close"] as () => void)();
       }
