@@ -570,6 +570,117 @@ export async function requirePurgeRaceBinding(): Promise<{
   };
 }
 
+/**
+ * Read the approval status through the leased finalization transaction.
+ * Guards must call this instead of `pool.query`: a `pool.query` read runs
+ * outside the finalization unit and cannot prove `FOR SHARE` protection.
+ * Fails `[missing-contract]` naming the transaction read binding while the
+ * coordinator supplies no queryable transaction.
+ */
+export async function transactionQuery<T>(transaction: unknown, text: string, params: unknown[] = []): Promise<{ rows: T[] }> {
+  const tx = transaction as { policyParticipant?: { query?: unknown } } | null;
+  const participant = tx?.policyParticipant;
+  if (typeof participant?.query !== "function") {
+    missingContract("ArtifactCommitTransaction.policyRead",
+      "registered participant must read policy through the leased transaction; no unrelated pool fallback is allowed (Sentropic L3 / Radar H3/H4)");
+  }
+  return (participant.query as (text: string, params: unknown[]) => Promise<{ rows: T[] }>).call(participant, text, params);
+}
+
+export async function readPolicyStatusViaTransaction(transaction: unknown): Promise<string | null> {
+  const result = await transactionQuery<{ status: string | null }>(transaction,
+    "SELECT status FROM account_users WHERE sub = $1 FOR SHARE", ["alice"]);
+  return result.rows[0]?.status ?? null;
+}
+
+/** Unique private token embedded in an injected fault, never serialized. */
+let privateMarkerSequence = 0;
+export function createPrivateMarker(prefix: string): string {
+  return `__private_${prefix}_${++privateMarkerSequence}__`;
+}
+
+function assertNoPrivateFields(value: unknown): void {
+  if (value === null || typeof value !== "object") return;
+  for (const [key, child] of Object.entries(value)) {
+    if (/^(cause|stack|sql|query|password|credentials?|endpoint|bucket)$/i.test(key)) {
+      throw new Error(`[contract-violation] redaction: private field ${key} leaked`);
+    }
+    assertNoPrivateFields(child);
+  }
+}
+
+/**
+ * Assert a sanitized public body: exact public shape plus absence of every
+ * private marker. The public `error` key is allowed; private `stack`,
+ * SQL, endpoint, bucket and credential material is forbidden.
+ */
+export function assertPublicBodyRedacted(
+  projected: { status: number; body: unknown },
+  expectedBody: unknown,
+  privateMarkers: readonly string[],
+  secrets: readonly string[],
+): void {
+  assertNoPrivateFields(projected.body);
+  const bodyText = JSON.stringify(projected.body);
+  const expectedText = JSON.stringify(expectedBody);
+  if (bodyText !== expectedText) {
+    throw new Error(
+      `[contract-violation] redaction: expected public body ${expectedText}, got ${bodyText}`,
+    );
+  }
+  for (const marker of privateMarkers) {
+    if (marker.length > 0 && bodyText.includes(marker)) {
+      throw new Error("[contract-violation] redaction: private marker leaked to the wire");
+    }
+  }
+  if (/stack/i.test(bodyText) && privateMarkers.some((marker) => /stack/i.test(marker))) {
+    throw new Error("[contract-violation] redaction: private stack leaked to the wire");
+  }
+  for (const secret of secrets) {
+    if (secret.length > 0 && bodyText.includes(secret)) {
+      throw new Error("[contract-violation] redaction: deployment secret leaked to the wire");
+    }
+  }
+  if (/BEGIN|COMMIT|SELECT\s+\S+\s+FROM|FOR\s+(UPDATE|SHARE)/i.test(bodyText)) {
+    throw new Error("[contract-violation] redaction: SQL leaked to the wire");
+  }
+}
+
+/**
+ * Assert an MCP failure result carries the public code without private
+ * material. The public `error`/`code` fields are required; injected
+ * `timeout`/`stack` markers and `Error` instance text are forbidden.
+ */
+export function assertMcpResultRedacted(
+  result: unknown,
+  expected: { status: number; code: string; retryable: boolean; publicError: string },
+  privateMarkers: readonly string[],
+  secrets: readonly string[],
+): void {
+  assertNoPrivateFields(result);
+  const record = result as Record<string, unknown>;
+  if (record["ok"] !== false || record["status"] !== expected.status ||
+    record["code"] !== expected.code || record["retryable"] !== expected.retryable) {
+    throw new Error("[contract-violation] MCP parity: unexpected public failure shape");
+  }
+  const structured = (record["structuredContent"] ?? record["data"] ?? record["error"]) as unknown;
+  const text = JSON.stringify({ body: record, structured });
+  for (const marker of privateMarkers) {
+    if (marker.length > 0 && text.includes(marker)) {
+      throw new Error("[contract-violation] MCP redaction: private marker leaked");
+    }
+  }
+  for (const secret of secrets) {
+    if (secret.length > 0 && text.includes(secret)) {
+      throw new Error("[contract-violation] MCP redaction: deployment secret leaked");
+    }
+  }
+  const errorText = JSON.stringify(record["error"] ?? record["data"] ?? {});
+  if (!errorText.includes(expected.publicError)) {
+    throw new Error("[contract-violation] MCP parity: public error code missing");
+  }
+}
+
 /** Resolve void arrivals explicitly; never test Promise<void>'s value. */
 export async function arrived(barrier: CommitBarrier, point: CommitBarrierPoint,
   invocationId: string, timeoutMs = 1000): Promise<void> {
@@ -580,6 +691,28 @@ export async function arrived(barrier: CommitBarrier, point: CommitBarrierPoint,
         timer = setTimeout(() => reject(new Error(`[barrier-timeout] ${point}/${invocationId}`)), timeoutMs);
       })]);
   } finally { clearTimeout(timer); }
+}
+
+/** Drain every unrelated wait while keeping one invocation at the target. */
+export function startBarrierOperation(barrier: CommitBarrier, invocationId: string,
+  start: () => Promise<unknown>, target?: CommitBarrierPoint) {
+  const points: CommitBarrierPoint[] = ["before_connection_acquire", "before_key_lock",
+    "before_blob_put", "after_blob_put_before_verify", "before_blob_readback",
+    "before_finalization_row_lock", "after_finalization_locks_before_guard",
+    "after_replay_lookup_before_guard", "before_commit"];
+  let finish!: () => void;
+  const done = new Promise<false>((resolve) => { finish = () => resolve(false); });
+  const waits = points.map((point) => Promise.race([
+    barrier.waitUntilReached(point, invocationId).then(() => true), done,
+  ]).then((reached) => { if (reached && point !== target) barrier.release(point, invocationId); }));
+  const pending = start().finally(finish);
+  // Attach a handler immediately so a failed operation cannot become an
+  // unhandled rejection while the caller is inspecting the competing writer.
+  void pending.catch(() => {});
+  return { pending, drained: Promise.all(waits),
+    reached: target ? arrived(barrier, target, invocationId) : Promise.resolve(),
+    release: () => { if (target) barrier.release(target, invocationId); },
+  };
 }
 
 /** Faults must reach the leased client's queries, not a second pool query. */

@@ -158,3 +158,4 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 - [x] reject empty required suites and forward scope options.
 - [x] name missing r2 construction and migration bindings.
 - [x] serialize lifecycle writers and observe purge deletion claims.
+- [x] drain commit barriers while preserving the targeted wait.
