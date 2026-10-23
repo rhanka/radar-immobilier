@@ -571,7 +571,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     } finally { (host["close"] as () => void)(); }
   });
 
-  it("reports commitState unknown on COMMIT acknowledgment loss and recovers by key", async () => {
+  it.each(["http", "mcp"] as const)("reports commitState unknown on %s COMMIT loss and recovers by key", async (transport) => {
     await requireOutcomeContract();
     const barrier = await requireCommitBarrier();
     const probe = finalizationFaultPool(pool, { code: "57P06", loseCommitAck: true });
@@ -580,11 +580,11 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     const close = host["close"];
     try {
       const execute = requireHostExecute(host);
-      const artifactId = await ensureVia(execute, allowAll(), "q2-unknown", "q2-unknown-ensure");
+      const artifactId = await ensureVia(execute, allowAll(), `q2-unknown-${transport}`, `q2-unknown-ensure-${transport}`);
       const body = { artifactId,
         files: [{ path: "index.html", mimeType: "text/html", text: "commit uncertainty" }],
-        idempotencyKey: "q2-unknown" };
-      const internalKey = deriveIdempotencyKey({ scope: SCOPE, sub: ACTOR, op: "publish", artifactId, clientKey: "q2-unknown" });
+        idempotencyKey: `q2-unknown-${transport}` };
+      const internalKey = deriveIdempotencyKey({ scope: SCOPE, sub: ACTOR, op: "publish", artifactId, clientKey: body.idempotencyKey });
       const releasesBefore = await tableCount("releases");
       const guard: AuthorizeCommit = async (context, transaction) => {
         const decision = await authorizeTransaction(context, transaction);
@@ -592,11 +592,8 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
         state.armed = true;
         return decision;
       };
-      const invocation = invocationFor(guard, "uncertain");
-      const uncertain = await execute({ method: "POST", path: "/publish", body },
-        invocation) as unknown as Record<string, unknown>;
+      const uncertain = await failViaTransport(host, { method: "POST", path: "/publish", body }, transport, guard);
       expect(state.commits).toBe(1);
-      assertOutcomeFailure(uncertain, invocation.invocationId);
       expect(uncertain.failure).toMatchObject({ category: "provider_unavailable", status: 503,
         retriable: true, cause: { code: "57P06" }, commitState: "unknown" });
       const commitState = (uncertain["commitState"] as string | undefined) ??
@@ -622,6 +619,25 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
         invocationFor(allowAll(), "uncertain-retry")) as unknown as Record<string, unknown>;
       expect(retry).toMatchObject({ ok: true, replayed: true });
       expect((retry.result as { body: unknown }).body).toEqual(durableReceipt);
+      // The first uncertain issue (503, commitState unknown) is distinct from
+      // the legitimate receipt replay below: both transports converge on the
+      // same durable receipt with the same key and no new release.
+      const entries: Record<string, unknown>[] = [];
+      const parityControl = createArtifactControl(host as never, SCOPE, BASE, undefined,
+        { ledger: { record: (entry) => { entries.push(entry as unknown as Record<string, unknown>); } } });
+      const route = controlRoute({ auth, accounts: pool, backend: parityControl });
+      const httpReplay = await route.request("https://app.example.test/publish", {
+        method: "POST", headers: { cookie: await cookie(ACTOR), origin: auth.appBaseUrl,
+          "content-type": "application/json" }, body: JSON.stringify(body),
+      });
+      expect(httpReplay.status).toBe(201);
+      expect(await httpReplay.json()).toEqual(durableReceipt);
+      const adapter = createMcpArtifactAdapter(parityControl);
+      const mcpReplay = await adapter.execute(
+        { method: "POST", path: "/publish", args: body }, { actorId: ACTOR });
+      expect(mcpReplay).toMatchObject({ ok: true, status: 201 });
+      expect((mcpReplay as { ok: true; data: unknown }).data).toEqual(durableReceipt);
+      expect(entries).toHaveLength(0);
       expect(await tableCount("releases")).toBe(releasesBefore + 1);
       const successRows = Number((await pool.query(
         "SELECT count(*) FROM artifacts.idempotency_keys WHERE key = $1", [internalKey])).rows[0].count);
