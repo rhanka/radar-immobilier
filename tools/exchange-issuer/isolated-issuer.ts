@@ -43,5 +43,5 @@ export async function createIsolatedIssuer(options: {
         scope: "immo:search", issued_token_type: "urn:ietf:params:oauth:token-type:access_token" });
     } catch { return c.json({ error: "invalid_grant" }, 400); }
   });
-  return { app, issued, publicKey: pair.publicKey };
+  return { app, issued, publicKey: pair.publicKey, privateKey: pair.privateKey };
 }
