@@ -108,8 +108,8 @@
   - [x] B2.3: apply the same opening rule to single commands and atomic batches.
   - [x] B2.4: cover target/city reads, destination history and source-history navigation.
   - [x] B2.5: separate authorized internal cutover readback from public opened-destination reads.
-  - [ ] B2.6: qualify truly empty history → opening → first mark without artificial business events.
-  - [ ] B2.7: retain closure for unresolved-only history, missing rights, uncovered writers or invalid epoch.
+  - [x] B2.6: qualify truly empty history → opening → first mark without artificial business events.
+  - [x] B2.7: retain closure for unresolved-only history, missing rights, uncovered writers or invalid epoch.
   - [ ] Gate: lot-opening*, lot-cutover-readback*, lot-cutover-empty*, existing 6J/6K and 6L2 regressions; typecheck and scoped lint.
 - [ ] B3 — Serialized source writers; Muse 3–5 h, Sol 3–4 h, total 6–9 h.
   - [ ] B3.1: ogc-pull.ts and its source-lock DB tests; lock the actual mutated identity in the mutation transaction.
