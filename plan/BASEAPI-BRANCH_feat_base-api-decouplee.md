@@ -128,6 +128,7 @@
   - [ ] Gate: all three real writer paths contend with facet commands; no coverage attestation without the corresponding executable proof.
 - [ ] B4 — Operational cutover; Muse 5–8 h, Sol 4–6 h, total 9–14 h.
   - [x] B4/B3 tooling preparation: narrow delivery paths, exact ontology input, changed-file lint and common synthetic DB migration; functional gates remain open.
+  - [x] B4 operator input transport: actual Make activation/resume command-double proof preserves literal Make functions and shell syntax without evaluation.
   - [x] B4 slice 1: internal maintenance validator binds workspace, actor, attempt, release and instances; real reader, operator and durable wiring remain pending.
   - [x] B4 slice 2: executable pure rejection tests cover independent drain/shutdown, evidence bindings, stale proof and reader delegation; full B4 integration and mutations remain open.
   - [ ] B4.1: implement/inject 6H and 6K maintenance safety through existing activation interfaces; Muse A implements B4, Sol A verifies and commits BASE-owned files; shared application/startup deltas use the current CT-1 lease holder.
