@@ -15,6 +15,8 @@ import { lotCommand, lotEventCount } from "./lot-test-helpers.js";
 describeDb("6K denormalized cutover identity", () => {
   it("should exclude a denormalized pending history from reads, commands, and city heads", async () => {
     const f = await cutoverFixture();
+    await f.db.insert(lotCutoverState).values({ workspaceId: f.workspaceId,
+      maintenanceBarrier: true, destinationOpen: true });
     const target = { type: "Lot" as const, authority: "lot_versions" as const,
       citySlug: CUTOVER_CITY, canonicalId: "lot-canonical-syn-6j-01" };
     const displayed = (await resolveLotSource(f.db, target)).displayed;
@@ -33,7 +35,9 @@ describeDb("6K denormalized cutover identity", () => {
     await runLotImport(f.db, { workspaceId: f.workspaceId, actorSub: f.moderator.sub,
       report, importKey: randomUUID() }, { enabled: true });
     await f.db.insert(lotCutoverState).values({ workspaceId: f.workspaceId,
-      manifestSha: report.manifestSha256, maintenanceBarrier: true, destinationOpen: true });
+      manifestSha: report.manifestSha256, maintenanceBarrier: true, destinationOpen: true })
+      .onConflictDoUpdate({ target: lotCutoverState.workspaceId,
+        set: { manifestSha: report.manifestSha256 } });
     const before = await lotEventCount(f);
     await expect(readLotState(f.db, f.contributor.sub, f.workspaceId, "real", target))
       .rejects.toMatchObject({ status: 409, message: "lot_target_pending" });
