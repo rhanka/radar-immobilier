@@ -29,6 +29,7 @@ export interface GrantSubject {
 }
 
 export type GrantClaims = GrantIssuer & GrantSubject;
+export type VerifiedGrant = GrantClaims & { readonly expiresAtMs: number };
 
 function secretKey(secret: string): Uint8Array {
   return new TextEncoder().encode(secret);
@@ -40,7 +41,7 @@ export async function mintGrant(
   nowMs: number,
 ): Promise<string> {
   const issuedAt = Math.floor(nowMs / 1000);
-  return new SignJWT({ ...grant })
+  const token = await new SignJWT({ ...grant })
     .setProtectedHeader({ alg: "HS256", typ: "JWT" })
     .setIssuer(grant.issuer)
     .setAudience(grant.audience)
@@ -48,6 +49,8 @@ export async function mintGrant(
     .setSubject(grant.readerSub)
     .setExpirationTime(issuedAt + PREVIEW_GRANT_TTL_SECONDS)
     .sign(secretKey(secret));
+  if (Buffer.byteLength(token) > 4096) throw new Error("Reader grant exceeds header budget");
+  return token;
 }
 
 export async function verifyGrant(
@@ -55,8 +58,9 @@ export async function verifyGrant(
   expected: GrantIssuer & Partial<GrantSubject>,
   secret: string,
   nowMs: number,
-): Promise<GrantClaims | null> {
+): Promise<VerifiedGrant | null> {
   try {
+    if (token.length > 4096) return null;
     const { payload } = await jwtVerify(token, secretKey(secret), {
       algorithms: ["HS256"],
       issuer: expected.issuer,
@@ -78,6 +82,7 @@ export async function verifyGrant(
       if (typeof claims[field] !== "string") return null;
     }
     return {
+      expiresAtMs: payload.exp * 1000,
       issuer: expected.issuer ?? "",
       audience: expected.audience ?? "",
       tier: claims.tier as string,

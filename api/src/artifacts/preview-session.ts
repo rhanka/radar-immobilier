@@ -22,7 +22,9 @@ export interface PreviewSessionClaims {
 }
 
 function hostCookie(name: string, value: string, maxAgeSeconds: number): string {
-  return `${name}=${value}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=${maxAgeSeconds}`;
+  const cookie = `${name}=${value}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=${maxAgeSeconds}`;
+  if (!/^[A-Za-z0-9._-]+$/.test(value) || Buffer.byteLength(cookie) > 4096) throw new Error("Invalid preview cookie");
+  return cookie;
 }
 
 export function parseCookieHeader(header: string | null | undefined, name: string): string | null {
@@ -51,7 +53,7 @@ export function readSessionClaims(
   now: number,
 ): PreviewSessionClaims | null {
   const sealed = parseCookieHeader(cookieHeader, PREVIEW_SESSION_COOKIE);
-  if (!sealed) return null;
+  if (!sealed || sealed.length > 4096) return null;
   const raw = openSession(sealed, secret);
   if (!raw) return null;
   try {
