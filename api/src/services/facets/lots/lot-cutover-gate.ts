@@ -4,7 +4,9 @@
  * The gate reads destination, epoch, writer coverage, and recorded D5
  * dispositions; it never writes. Without conflicts there is no approval
  * step; with conflicts every affected target needs a recorded disposition
- * before activation (see `lot-cutover-dispositions`).
+ * before activation (see `lot-cutover-dispositions`). A truly empty,
+ * qualified manifest opens without ready targets; unresolved-only or
+ * conflicted history never counts as empty.
  */
 import { and, eq } from "drizzle-orm";
 import type { Database } from "../../../db/client.js";
@@ -82,7 +84,7 @@ export async function evaluateActivationGate(
   if (gate.unavailable.length > 0) {
     gate.reasons.push(`d5_dispositions_missing:${gate.unavailable.length}`);
   }
-  if (gate.ready.length === 0) {
+  if (gate.ready.length === 0 && report.rows.length > 0) {
     gate.reasons.push("no_activatable_targets");
   }
   gate.ready.sort();
