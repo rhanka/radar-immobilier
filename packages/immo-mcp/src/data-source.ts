@@ -83,7 +83,7 @@ export interface DocumentExcerpt {
  * — e.g. forward their bearer token to the radar API (D4, per-user auth).
  */
 export interface DataSourceCallContext {
-  /** Raw OAuth access token of the current user, when one was presented. */
+  /** Exchanged delegated token, when the tool resolved one. */
   accessToken?: string | undefined;
 }
 
@@ -258,7 +258,7 @@ export interface HttpDataSourceOptions {
  * and the app serve the SAME signals (consistency decision D12).
  *
  * PER-USER AUTH (D4): that route is SESSION-PROTECTED (NOT a public prefix). We
- * forward the CURRENT user's OWN bearer token (ctx.accessToken, verified upstream
+ * forward the exchanged delegated bearer token (ctx.accessToken, verified upstream
  * by the MCP resource server) as `Authorization: Bearer`, so the radar API sees
  * the real user identity — never a shared machine credential. The radar API
  * ACCEPTS this user bearer (api `protect`: verified against the IdP JWKS,
@@ -314,7 +314,7 @@ export class HttpDataSource implements ImmoDataSource {
     if (args.workspaceId !== undefined) throw new Error("scoped_signal_search_unavailable");
     const reveal = args.showDiscarded === true ? "?showDiscarded=1" : "";
     const url = `${this.baseUrl}/api/graph-signals/${encodeURIComponent(slug)}${reveal}`;
-    // Forward the user's OWN token so the api applies its normal per-user auth.
+    // Forward the exchanged delegated token so the api applies its normal per-user auth.
     const headers: Record<string, string> = { accept: "application/json" };
     if (ctx.accessToken) headers.authorization = `Bearer ${ctx.accessToken}`;
     let res: Response;
