@@ -12,9 +12,22 @@ const mutations = [
   ["grant-binding", "preview-grant.ts", "const want = expected[field];", "const want = undefined;", "preview-grant.test.ts"],
   ["publisher-substitution", "reader-test-fixture.ts", "reader: context.readerSub", 'reader: "publisher"', "content-serve.test.ts"],
   ["content-url", "reader-operations.ts", /\.strict\(\)/g, ".passthrough()", "reader-security.test.ts"],
-  ["renewal-approval", "preview-renewal.ts", "!rights || !rights.approved || rights.readerSub !== verified.readerSub", "!rights", "preview-security.test.ts"],
+  ["renewal-approval", "preview-renewal.ts", /!(freshRights|rights) \|\| !\1.approved \|\| \1.readerSub !== verified.readerSub/g, "!$1", "preview-security.test.ts"],
   ["old-tab-release", "reader-context.ts", "if (!release || release.artifactId !== grant.artifactId || release.releaseId !== grant.releaseId) return null;", "void release;", "reader-context.test.ts"],
   ["service-worker-fallback", "content-serve.ts", 'c.req.header("service-worker") || ', "", "reader-security.test.ts"],
+  ["a1-artifact-pair", "reader-context.ts", "authority.getRights(grant.readerSub, grant.artifactId)", "authority.getRights(grant.readerSub, undefined)", "reader-context.test.ts"],
+  ["a1-returned-artifact", "reader-context.ts", "if (rights.artifactId !== grant.artifactId) return null;", "", "reader-context.test.ts"],
+  ["a2-b4-ticket-profile", "preview-tickets.ts", /ticket.policyRevision === profile.policyRevision[\s\S]*?fingerprintReaderProfile\(profile\)/, "true", "preview-tickets.test.ts"],
+  ["a2-b4-exchange-profile", "preview-exchange.ts", /    if \(profile.policyRevision[\s\S]*?ticket.profileFingerprint\) return null;\n/, "", "preview-exchange.test.ts"],
+  ["a3-b3-page-capability", "preview-renewal.ts", "if (rights.artifactId !== verified.artifactId) return null;", 'if (!rights.capabilities.includes("geo.read") && !rights.capabilities.includes("signals.protected-read")) return null;', "preview-renewal.test.ts"],
+  ["b1-stale-activation", "release-activation.ts", /      \/\/ Revalidate:[\s\S]*?      active.set\(artifactId, record\);/, "const record = { artifactId, releaseId, profileName: profile.name, policyRevision: profile.policyRevision, activatedAt: now() }; active.set(artifactId, record);", "release-activation.test.ts"],
+  ["b2-renewal-freshness", "preview-renewal.ts", /  const freshRights =[\s\S]*?  const issuedAt = now\(\);/, "  const issuedAt = now();", "preview-renewal-waits.test.ts"],
+  ["b2-final-read-version", "preview-renewal.ts", "if (await deps.authority.getAuthorizationVersion(verified.artifactId) !== version) return null;", "", "preview-authority-races.test.ts"],
+  ["a2-exchange-wait-version", "preview-exchange.ts", "if (await authority.getAuthorizationVersion(ticket.artifactId) !== version) return null;", "", "preview-authority-races.test.ts"],
+  ["b1-final-activation-fences", "release-activation.ts", /      if \(await authority.getAuthorizationVersion\(artifactId\) !== version\) return null;\n      if \(active.get\(artifactId\) !== previous\) return null;/, "", "preview-authority-races.test.ts"],
+  ["b5-profile-intersection", "reader-profile.ts", "profile.capabilities.filter((c) => rights.capabilities.includes(c))", "[...rights.capabilities]", "reader-context.test.ts"],
+  ["b5-rights-intersection", "reader-profile.ts", "profile.capabilities.filter((c) => rights.capabilities.includes(c))", "[...profile.capabilities]", "reader-context.test.ts"],
+  ["b5-operation-guard", "reader-context.ts", "context.releaseId === releaseId && context.capabilities.includes(capability)", "true", "content-serve.test.ts"],
 ];
 const hash = bytes => createHash("sha256").update(bytes).digest("hex");
 const base = mkdtempSync("/h5-mutations-");
@@ -43,7 +56,9 @@ try {
         `src/artifacts/${spec}`, "--reporter=json", `--outputFile=${report}`],
       { cwd: path.join(root, "api"), encoding: "utf8", timeout: 60_000 });
       assert(!result.error, result.error?.message);
+      if (result.status !== 0 && phase !== "mutant") process.stderr.write(result.stdout + result.stderr);
       const data = JSON.parse(readFileSync(report, "utf8"));
+      if (result.status !== 0 && phase !== "mutant") console.error(JSON.stringify(data));
       return { exit: result.status, passed: data.numPassedTests, failed: data.numFailedTests,
         pending: data.numPendingTests, cases: data.testResults.flatMap(suite => suite.assertionResults)
           .map(test => ({ name: test.fullName, status: test.status })) };
