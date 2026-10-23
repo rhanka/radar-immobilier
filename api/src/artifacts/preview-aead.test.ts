@@ -13,4 +13,12 @@ describe("preview AEAD envelope", () => {
     expect(openSession("a.b", "test-secret-32-bytes-padding!!!")).toBeNull();
     expect(openSession(sealed, "wrong-secret-32-bytes-padding!!!!")).toBeNull();
   });
+  it("should refuse shortened GCM authentication tags", () => {
+    const secret = "test-secret-32-bytes-padding!!!";
+    const [nonce, body, tag] = sealSession("payload", secret).split(".") as [string, string, string];
+    for (const length of [4, 8, 12, 13, 14, 15]) {
+      const prefix = Buffer.from(tag, "base64url").subarray(0, length).toString("base64url");
+      expect(openSession(`${nonce}.${body}.${prefix}`, secret), `tag length ${length}`).toBeNull();
+    }
+  });
 });
