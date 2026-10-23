@@ -33,7 +33,7 @@ export interface ContentServeDeps {
   /** Optional revocation predicate; revoked sessions fail closed. */
   readonly isRevoked?: (sessionId: string) => boolean;
 }
-type AuthorizedReader = ApiReaderContext & { readonly validUntil: number };
+type AuthorizedReader = ApiReaderContext & { readonly validUntil: number; readonly authorityVersion: string };
 
 function bareHost(header: string | undefined): string {
   const raw = (header ?? "").trim().toLowerCase();
@@ -54,6 +54,13 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     return reader.validUntil > now() && !deps.isRevoked?.(reader.sessionId);
   }
 
+  async function authorityCurrent(reader: AuthorizedReader): Promise<boolean> {
+    if (!deps.authority) return false;
+    try {
+      return await deps.authority.getAuthorizationVersion(reader.artifactId) === reader.authorityVersion && stillOpen(reader);
+    } catch { return false; }
+  }
+
   async function authorized(c: Context): Promise<AuthorizedReader | null> {
     const grant = c.req.query("grant") ?? c.req.header("x-preview-grant") ?? "";
     if (!grant) return null;
@@ -68,9 +75,12 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     if (deps.isRevoked?.(session.sid)) return null;
     if (!deps.authority) return null;
     try {
+      const version = await deps.authority.getAuthorizationVersion(claims.artifactId);
+      if (!version) return null;
       const context = await adaptGrantToReader(claims, deps.authority);
       if (!context) return null;
-      const reader = { ...context, validUntil: Math.min(claims.expiresAtMs, session.expiresAt) };
+      if (await deps.authority.getAuthorizationVersion(claims.artifactId) !== version) return null;
+      const reader = { ...context, validUntil: Math.min(claims.expiresAtMs, session.expiresAt), authorityVersion: version };
       return stillOpen(reader) ? reader : null;
     } catch { return null; }
   }
@@ -123,9 +133,11 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
         return c.json({ error: "invalid_params" }, 400);
       }
       applyReaderContentHeaders(c);
+      if (!await authorityCurrent(auth)) return c.json({ error: "unauthenticated" }, 401);
       try {
         const body = validateReaderResponse(op, await deps.readOperation(op, params.params, auth), auth.readerSub);
         if (!stillOpen(auth)) return c.json({ error: "unauthenticated" }, 401);
+        if (!await authorityCurrent(auth)) return c.json({ error: "unauthenticated" }, 401);
         return c.json(body);
       }
       catch { return c.json({ error: "capability_unavailable" }, 503); }
@@ -136,9 +148,11 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
       return c.json({ error: "invalid_params" }, 400);
     }
     applyReaderContentHeaders(c);
+    if (!await authorityCurrent(auth)) return c.json({ error: "unauthenticated" }, 401);
     try {
       const body = validateReaderResponse(op, await deps.readOperation(op, checked.params, auth), auth.readerSub);
       if (!stillOpen(auth)) return c.json({ error: "unauthenticated" }, 401);
+      if (!await authorityCurrent(auth)) return c.json({ error: "unauthenticated" }, 401);
       return c.json(body);
     }
     catch { return c.json({ error: "capability_unavailable" }, 503); }

@@ -108,3 +108,4 @@ No invented production domain or certificate.
 - [x] FIX2 r2a-1/r2b-1: adaptation refuses an altered profile under the same name, revision and release.
 - [x] FIX2 r2a-1/r2b-1: renewal checks and preserves the approved fingerprint; a newly approved profile renews successfully.
 - [x] FIX2 r2a-1/r2b-1: old pages and operations close after profile expansion; fresh approval restores protected reads.
+- [x] FIX2 r2b-2: fence coherent authority reads and both API boundaries; recheck expiry and revocation after each version wait.
