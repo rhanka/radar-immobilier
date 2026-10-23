@@ -71,7 +71,7 @@ successor compatibility and delegation A as pure, unregistered contracts.
   - [x] Catalog all six inert contracts and cover command regressions.
   - [x] Cover command schema refusals and historical receipt outputs.
 - [ ] **S0d — Successor compatibility**
-  - [ ] Freeze versioned manifest and named successor search migration.
+  - [x] Freeze versioned manifest and named successor search migration.
   - [ ] Cover successor schema compatibility and unchanged live definitions.
   - [ ] Freeze verified issuer/receiver delegation A policy.
   - [ ] Cover forged, broadened and generic-scope delegation refusals.
