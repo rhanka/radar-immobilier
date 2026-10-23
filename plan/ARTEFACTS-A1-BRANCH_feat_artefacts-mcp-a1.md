@@ -100,3 +100,4 @@ unverified evidence. ETA unchanged: 14-23 agent hours, complete A1 circuit.
 - [x] Add SQL/S3 regression fixtures for failed winners, stuck workers and purge effects.
 - [x] Release and collect both race branches; assert shared retention and exclusive deletion.
 - [x] Guard client end events, bound SQL cleanup and retain typed connection causes.
+- [x] Use a nonempty S3 prefix in acceptance teardown; keep r2 qualification open.
