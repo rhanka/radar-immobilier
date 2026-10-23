@@ -215,7 +215,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
   afterAll(async () => {
     try {
       if (bucketCreated) {
-        for (const key of await rawBlobs().listKeys("")) await rawBlobs().deleteBlob(key);
+        for (const key of await rawBlobs().listKeys("artifacts/")) await rawBlobs().deleteBlob(key);
         await s3.send(new DeleteBucketCommand({ Bucket: BUCKET }));
       }
     } finally {

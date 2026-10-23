@@ -108,7 +108,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
     s3AccessKey: accessKey, s3SecretKey: secretKey });
 
   async function s3KeyCount(): Promise<number> {
-    return [...(await rawBlobs().listKeys(""))].length;
+    return [...(await rawBlobs().listKeys("artifacts/"))].length;
   }
 
   async function tableCount(table: "releases" | "idempotency_keys" | "artifacts"): Promise<number> {
@@ -193,7 +193,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
     console.info("[acceptance-cleanup] start", { total: pool?.totalCount, idle: pool?.idleCount, waiting: pool?.waitingCount });
     try {
       if (bucketCreated) {
-        for (const key of await rawBlobs().listKeys("")) await rawBlobs().deleteBlob(key);
+        for (const key of await rawBlobs().listKeys("artifacts/")) await rawBlobs().deleteBlob(key);
         console.info("[acceptance-cleanup] objects removed");
         await s3.send(new DeleteBucketCommand({ Bucket: BUCKET }));
         console.info("[acceptance-cleanup] bucket removed");
