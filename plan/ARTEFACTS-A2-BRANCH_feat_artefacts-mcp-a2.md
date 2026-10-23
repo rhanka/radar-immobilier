@@ -100,3 +100,5 @@ activation, no cluster-mesh composition.
 - Receiving-environment and operator evidence, publication GO and CI.
 
 - [x] Added exchange configuration and bounded response reader.
+
+- [x] Added single-request exchange client and response-boundary assertions.
