@@ -165,3 +165,4 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 - [x] refuse unselected provider operations before storage.
 - [x] bind authorization fixtures to transaction participants.
 - [x] bind authorization fixtures to transaction participants.
+- [x] bind authorization fixtures to transaction participants.

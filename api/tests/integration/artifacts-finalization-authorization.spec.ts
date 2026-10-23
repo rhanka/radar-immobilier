@@ -121,26 +121,24 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
   }
 
   async function composeQ1Host(
-    observer: unknown,
+    barrier: CommitBarrier,
     overrides?: { readonly pool?: pg.Pool | undefined; readonly blobs?: unknown | undefined },
-  ): Promise<NonNullable<Awaited<ReturnType<typeof composeArtifactHost>>> & Record<string, unknown>> {
-    await requireCommitContract();
-    const compose = composeArtifactHost as unknown as (
-      pool: unknown, config: unknown, blobs: unknown, options?: unknown,
-    ) => Promise<unknown>;
-    return (await compose(overrides?.pool ?? pool, storageConfig(), overrides?.blobs ?? rawBlobs(), {
-      profile: { selectedCapabilities: [...FROZEN_CAPABILITIES] },
-      coordinator: { testObserver: observer },
-    })) as NonNullable<Awaited<ReturnType<typeof composeArtifactHost>>> & Record<string, unknown>;
+  ): Promise<{ readonly host: Record<string, unknown>; readonly profile: CompiledArtifactsProfile }> {
+    return composeR2AcceptanceHost({
+      pool: overrides?.pool ?? pool,
+      config: storageConfig(),
+      blobs: overrides?.blobs ?? rawBlobs(),
+      barrier,
+    });
   }
 
-  function invocationFor(authorizeCommit: AuthorizeCommit, suffix: string): Record<string, unknown> {
+  function invocationFor(authorizeCommit: AuthorizeCommit, suffix: string): InvocationContextShape {
     return buildInvocationContext({
       invocationId: `q1-${suffix}-${nextInvocationId++}`,
       actorId: ACTOR,
       storageScopeId: SCOPE,
       authorizeCommit,
-    }) as unknown as Record<string, unknown>;
+    });
   }
 
   function allowAll(): AuthorizeCommit {
@@ -149,8 +147,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
 
   function statusDriven(): AuthorizeCommit {
     return async (context, transaction) => {
-      const status = (await pool.query(
-        "SELECT status FROM account_users WHERE sub = 'alice'")).rows[0]?.status as string | null;
+      const status = await readPolicyStatusViaTransaction(transaction);
       return status === "approved" ? authorizeTransaction(context, transaction)
         : toGuardDecision({ allowed: false, status: 403, body: { error: "account_not_approved", status: status ?? "unknown" } });
     };
@@ -199,6 +196,81 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       } finally { await admin?.end(); }
     }
   });
+
+  async function assertPreparationCleanup(host: unknown, artifactId: string): Promise<void> {
+    await verifyPreparationCleanup(host, artifactId, rawBlobs(), false);
+  }
+
+  async function assertSqlWriterBlocked(pid: number): Promise<void> {
+    const deadline = performance.now() + 1000;
+    while (performance.now() < deadline) {
+      const row = (await pool.query("SELECT cardinality(pg_blocking_pids($1)) AS blockers", [pid])).rows[0];
+      if (Number(row.blockers) > 0) return;
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+    throw new Error("[contract-violation] policy/lifecycle writer did not wait on the finalization lock");
+  }
+
+  for (const operation of ["publish", "ensure"] as const) {
+    it.each(operation === "publish" ? PUBLISH_POINTS : ENSURE_POINTS)(operation + " serializes revocation at %s", async (point) => {
+      await requireCommitContract();
+      await requireOutcomeContract();
+      const barrier = await requireCommitBarrier();
+      const { host, profile } = await composeQ1Host(barrier);
+      const writer = await pool.connect();
+      let run: ReturnType<typeof startBarrierOperation> | undefined;
+      let revocation: Promise<unknown> | undefined;
+      try {
+        requireSelectedProfile(host, profile.digest);
+        const execute = requireHostExecute(host);
+        const tag = operation + "-" + point;
+        let artifactId: string | undefined;
+        if (operation === "publish") {
+          const ensured = await execute({ method: "POST", path: "/ensure",
+            body: { bindingName: tag, idempotencyKey: tag + "-setup" } }, invocationFor(allowAll(), tag));
+          expect(ensured).toMatchObject({ ok: true });
+          artifactId = (ensured as { result: { body: { artifactId: string } } }).result.body.artifactId;
+        }
+        const body = operation === "publish" ? { artifactId, idempotencyKey: tag,
+          files: [{ path: "index.html", mimeType: "text/html", text: tag }] }
+          : { bindingName: tag, idempotencyKey: tag };
+        const before = await committedState(pool);
+        const invocation = invocationFor(statusDriven(), tag);
+        run = startBarrierOperation(barrier, invocation.invocationId,
+          () => execute({ method: "POST", path: "/" + operation, body }, invocation), point);
+        await run.reached;
+        // All finalization locks include the registered authority rows (A4).
+        const protectedByLock = ["after_finalization_locks_before_guard", "before_commit"].includes(point);
+        const pid = Number((await writer.query("SELECT pg_backend_pid() AS pid")).rows[0].pid);
+        revocation = writer.query("UPDATE account_users SET status='suspended' WHERE sub='alice'");
+        if (protectedByLock) await assertSqlWriterBlocked(pid);
+        else await revocation;
+        run.release();
+        const outcome = await run.pending;
+        await run.drained;
+        await revocation;
+        if (protectedByLock) {
+          expect(outcome).toMatchObject({ ok: true, commitState: "committed" });
+        } else {
+          assertOutcomeFailure(outcome, invocation.invocationId);
+          expect((outcome as { failure: unknown }).failure).toMatchObject({
+            category: "unauthorized_at_commit", commitState: "not_committed" });
+          expect(await committedState(pool)).toEqual(before);
+          if (artifactId) {
+            expect(await currentReleaseId(artifactId)).toBeUndefined();
+            await assertPreparationCleanup(host, artifactId);
+          }
+        }
+      } finally {
+        run?.release();
+        await run?.pending.catch(() => {});
+        await revocation?.catch(() => {});
+        writer.release();
+        await pool.query("UPDATE account_users SET status='approved' WHERE sub='alice'");
+        (host["close"] as () => void)();
+      }
+    });
+  }
 
   it("revocation then release holds no committed success on inspection from another connection", async () => {
     await requireCommitContract();
