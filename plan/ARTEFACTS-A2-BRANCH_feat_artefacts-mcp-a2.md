@@ -102,3 +102,5 @@ activation, no cluster-mesh composition.
 - [x] Added exchange configuration and bounded response reader.
 
 - [x] Added single-request exchange client and response-boundary assertions.
+
+- [x] Added delegated JWT authority validation with controlled verification time.
