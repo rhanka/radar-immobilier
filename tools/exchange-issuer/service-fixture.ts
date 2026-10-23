@@ -59,6 +59,8 @@ export async function serviceFixture() {
     return { issuer, seen, issuerUrl, mcpUrl, radarUrl, close,
       subject: await signSubjectToken(subject.privateKey),
       reduced: await signSubjectToken(subject.privateKey, { scope: "immo:read" }),
+      subjectPrivateKey: subject.privateKey,
+      issuerPrivateKey: issuer.privateKey,
     };
   } catch (error) { await close(); throw error; }
 }
