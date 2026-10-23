@@ -112,6 +112,7 @@
   - [x] B2.7: retain closure for unresolved-only history, missing rights, uncovered writers or invalid epoch.
   - [x] Gate: lot-opening*, lot-cutover-readback*, lot-cutover-empty*, existing 6J/6K and 6L2 regressions; typecheck and scoped lint.
 - [ ] B3 — Serialized source writers; Muse 3–5 h, Sol 3–4 h, total 6–9 h.
+  - [x] B3 preparation: qualify the synthetic source-writer fixture before changing any production writer.
   - [ ] B3.1: ogc-pull.ts and its source-lock DB tests; lock the actual mutated identity in the mutation transaction.
   - [ ] B3.2: populate-geo.ts and its source-lock DB tests; cover both update and insert paths.
   - [ ] B3.3: exploitation/projection.ts and its source-lock DB tests; share the canonical lock protocol.
