@@ -1,5 +1,6 @@
-import { beforeAll, describe, expect, it } from "vitest";
-import { SignJWT, generateKeyPair } from "jose";
+import { beforeAll, describe, expect, it, vi } from "vitest";
+import { SignJWT, calculateJwkThumbprint, exportJWK, generateKeyPair } from "jose";
+import { createHash } from "node:crypto";
 import type { KeyLike } from "jose";
 import type { TokenKeySource } from "@sentropic/oauth-verify";
 import {
@@ -329,5 +330,67 @@ describe("delegated token propagation (P4) through the transport", () => {
     // The exchanged delegated JWT reached the data source, never the subject JWT.
     expect(data.lastAccessToken).toBe(fixture.issuedExchangedTokens[0]);
     expect(data.lastAccessToken).not.toBe(token);
+  });
+
+  it.each([true, false])("refuses valid DPoP HTTP search with zero egress (exchange runtime: %s)", async (configured) => {
+    const data: ImmoDataSource & { lastAccessToken: string | undefined | null } =
+      new RecordingDataSource();
+    const fixture = await createIsolatedExchangeFixture();
+    const exchangeFetch = vi.fn(fixture.fetchImpl);
+    const search = vi.spyOn(data, "searchSignals");
+    const scopedApp = createImmoHttpApp(CONFIG, { keySource, data,
+      ...(configured ? { exchange: exchangeDepsFor(fixture, { fetchImpl: exchangeFetch }) } : {}),
+    });
+    const token = await signToken();
+    const initRes = await scopedApp.request("/mcp", {
+      method: "POST",
+      headers: mcpHeaders({ token }),
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "initialize",
+        params: { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "t", version: "0" } },
+      }),
+    });
+    expect(initRes.status).toBe(200);
+    const sessionId = initRes.headers.get("mcp-session-id");
+    expect(sessionId).toBeTruthy();
+    await scopedApp.request("/mcp", {
+      method: "POST",
+      headers: mcpHeaders({ token, sessionId }),
+      body: JSON.stringify({ jsonrpc: "2.0", method: "notifications/initialized" }),
+    });
+    const proofKey = await generateKeyPair("ES256");
+    const jwk = await exportJWK(proofKey.publicKey);
+    const boundToken = await signToken({ cnf: { jkt: await calculateJwkThumbprint(jwk) } });
+    const proof = await new SignJWT({ htm: "POST", htu: "http://localhost/mcp",
+      ath: createHash("sha256").update(boundToken).digest("base64url"),
+    }).setProtectedHeader({ alg: "ES256", typ: "dpop+jwt", jwk })
+      .setIssuedAt().setJti("synthetic-dpop-search").sign(proofKey.privateKey);
+    const dpopHeaders: Record<string, string> = {
+      "content-type": "application/json",
+      accept: "application/json, text/event-stream",
+      authorization: `DPoP ${boundToken}`,
+      dpop: proof,
+    };
+    if (sessionId) dpopHeaders["mcp-session-id"] = sessionId;
+    const callRes = await scopedApp.request("/mcp", {
+      method: "POST",
+      headers: dpopHeaders,
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 2,
+        method: "tools/call",
+        params: { name: "search_signals", arguments: { city: "mont-tremblant" } },
+      }),
+    });
+    expect(exchangeFetch).not.toHaveBeenCalled();
+    expect(search).not.toHaveBeenCalled();
+    expect(fixture.issuedExchangedTokens).toHaveLength(0);
+    expect(data.lastAccessToken).toBeNull();
+    expect(callRes.status).toBe(200);
+    const body = (await callRes.json()) as { result?: { isError?: boolean } };
+    expect(body.result?.isError).toBe(true);
+    expect(JSON.stringify(body)).toContain("exchange_missing_authority");
   });
 });
