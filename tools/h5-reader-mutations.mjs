@@ -28,6 +28,17 @@ const mutations = [
   ["b5-profile-intersection", "reader-profile.ts", "profile.capabilities.filter((c) => rights.capabilities.includes(c))", "[...rights.capabilities]", "reader-context.test.ts"],
   ["b5-rights-intersection", "reader-profile.ts", "profile.capabilities.filter((c) => rights.capabilities.includes(c))", "[...profile.capabilities]", "reader-context.test.ts"],
   ["b5-operation-guard", "reader-context.ts", "context.releaseId === releaseId && context.capabilities.includes(capability)", "true", "content-serve.test.ts"],
+  ["r2-grant-fingerprint-required", "preview-grant.ts", '"policyRevision", "profileFingerprint"] as const', '"policyRevision"] as const', "preview-grant.test.ts"],
+  ["r2-adaptation-fingerprint", "reader-context.ts", "if (fingerprintReaderProfile(profile) !== grant.profileFingerprint) return null;", "", "content-serve.test.ts"],
+  ["r2-renewal-fingerprint", "preview-renewal.ts", / {2}if \(fingerprintReaderProfile\((?:freshProfile|profile)\) !== verified.profileFingerprint\) return null;\n/g, "", "preview-renewal.test.ts"],
+  ["r2-renewal-preservation", "preview-renewal.ts", "{ ...deps.issuer, ...verified }", '{ ...deps.issuer, ...verified, profileFingerprint: "" }', "preview-renewal.test.ts"],
+  ["r2-adaptation-version", "reader-context.ts", "if (await authority.getAuthorizationVersion(grant.artifactId) !== version) return null;", "", "reader-context.test.ts"],
+  ["r2-content-version", "content-serve.ts", "if (await deps.authority.getAuthorizationVersion(claims.artifactId) !== version) return null;", "", "content-authority-races.test.ts"],
+  ["r2-geo-before-call", "content-serve.ts", / {6}if \(!await authorityCurrent\(auth\)\) return c.json\(\{ error: "unauthenticated" \}, 401\);\n {6}try/, "      try", "content-authority-races.test.ts"],
+  ["r2-signals-before-call", "content-serve.ts", / {4}if \(!await authorityCurrent\(auth\)\) return c.json\(\{ error: "unauthenticated" \}, 401\);\n {4}try/, "    try", "content-authority-races.test.ts"],
+  ["r2-geo-before-response", "content-serve.ts", / {8}if \(!await authorityCurrent\(auth\)\) return c.json\(\{ error: "unauthenticated" \}, 401\);\n {8}return c.json\(body\);/, "        return c.json(body);", "content-authority-races.test.ts"],
+  ["r2-signals-before-response", "content-serve.ts", / {6}if \(!await authorityCurrent\(auth\)\) return c.json\(\{ error: "unauthenticated" \}, 401\);\n {6}return c.json\(body\);/, "      return c.json(body);", "content-authority-races.test.ts"],
+  ["r2-version-wait-cutoff", "content-serve.ts", " === reader.authorityVersion && stillOpen(reader)", " === reader.authorityVersion", "content-authority-races.test.ts"],
 ];
 const hash = bytes => createHash("sha256").update(bytes).digest("hex");
 const base = mkdtempSync("/h5-mutations-");
