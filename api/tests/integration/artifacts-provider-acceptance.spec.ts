@@ -571,13 +571,44 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
   it("exposes only the selected profile with caller keys and derived identity", async () => {
     await requireCommitContract();
     const barrier = await requireCommitBarrier();
-    const host = await composeAcceptanceHost(barrier.observer);
+    const checked = await composeAcceptanceHost(barrier);
+    const host = checked.host;
     const close = host["close"];
     try {
-      const digest = requireSelectedProfile(host);
-      expect(typeof digest).toBe("string");
-      const composed = (await composeAcceptanceHost(barrier.observer));
-      const control = createArtifactControl(composed, SCOPE, BASE);
+      const digest = requireSelectedProfile(host, checked.profile.digest);
+      expect(digest).toBe(checked.profile.digest);
+      const storageCalls = { blobs: 0, pool: 0 };
+      const countingBlobs = new Proxy(rawBlobs(), { get(target, property, receiver) {
+        const value = Reflect.get(target, property, receiver);
+        if (typeof value === "function") {
+          return (...args: unknown[]) => { storageCalls.blobs++; return (value as (...a: unknown[]) => unknown).apply(target, args); };
+        }
+        return typeof value === "function" ? value.bind(target) : value;
+      } });
+      const countingPool = new Proxy(pool, { get(target, property, receiver) {
+        const value = Reflect.get(target, property, receiver);
+        if (["query", "connect"].includes(String(property)) && typeof value === "function") {
+          return (...args: unknown[]) => { storageCalls.pool++; return value.apply(target, args); };
+        }
+        return typeof value === "function" ? value.bind(target) : value;
+      } });
+      const composed = await composeAcceptanceHost(barrier, { pool: countingPool, blobs: countingBlobs });
+      const execute = requireHostExecute(composed.host);
+      storageCalls.blobs = 0;
+      storageCalls.pool = 0;
+      const directGuard: AuthorizeCommit = authorizeTransaction;
+      for (const path of ["/fork", "/delete", "/commit_upload", "/promote"]) {
+        const outcome = await execute({ method: "POST", path, body: {} },
+          invocationFor(directGuard, `selection-${path}`)) as Record<string, unknown>;
+        assertOutcomeFailure(outcome);
+        expect(outcome["failure"]).toMatchObject({
+          category: "capability_unselected", code: "capability_unavailable", status: 503, retriable: false, commitState: "not_committed" });
+        const projected = await projectOutcomeHttp(outcome);
+        assertPublicBodyRedacted(projected, { error: "capability_unavailable" }, [], []);
+      }
+      expect(storageCalls.blobs).toBe(0);
+      expect(storageCalls.pool).toBe(0);
+      const control = createArtifactControl(composed.host as never, SCOPE, BASE);
       try {
         const adapter = createMcpArtifactAdapter(control);
         for (const request of [
@@ -634,7 +665,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
         expect((await control.handle("publish", ACTOR,
           { artifactId, files, idempotencyKey: "😀".repeat(128) })).status).toBe(201);
       } finally {
-        composed.close();
+        (composed.host["close"] as () => void)();
       }
     } finally {
       if (typeof close === "function") (close as () => void)();
