@@ -1,8 +1,9 @@
-import { expect, it } from "vitest";
+import { expect, it, vi } from "vitest";
 import { serviceFixture } from "../../../tools/exchange-issuer/service-fixture.js";
 
 it("exchanges over HTTP across isolated issuer, MCP and synthetic receiver without cookies", async () => {
   const f = await serviceFixture();
+  const audit = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
   let session: string | null = null;
   let id = 0;
   const rpc = (method: string, params: unknown, token = f.subject) => fetch(`${f.mcpUrl}/mcp`, {
@@ -12,6 +13,14 @@ it("exchanges over HTTP across isolated issuer, MCP and synthetic receiver witho
   });
   const call = (name: string, args: unknown, token = f.subject) => rpc("tools/call", { name, arguments: args }, token);
   try {
+    for (const authorization of [undefined, "Basic invalid"]) {
+      const response = await fetch(`${f.issuerUrl}/token`, { method: "POST",
+        headers: { "content-type": "application/x-www-form-urlencoded", ...(authorization ? { authorization } : {}) },
+        body: new URLSearchParams({ subject_token: f.subject }),
+      });
+      expect(response.status).toBe(401);
+      expect(f.issuer.issued).toHaveLength(0);
+    }
     const init = await rpc("initialize", { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "isolated-a2", version: "1" } });
     expect(init.status).toBe(200);
     session = init.headers.get("mcp-session-id");
@@ -47,6 +56,7 @@ it("exchanges over HTTP across isolated issuer, MCP and synthetic receiver witho
     }
     expect(f.issuer.issued).toHaveLength(1);
     expect(f.seen).toHaveLength(1);
+    expect(JSON.stringify(audit.mock.calls)).not.toContain(f.subject);
     console.log("[P4] real loopback HTTP: synthetic issuer, MCP, receiver; 12 tools; no cookies");
-  } finally { await f.close(); }
+  } finally { audit.mockRestore(); await f.close(); }
 });
