@@ -806,7 +806,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       const loser = await pendingB as unknown as Record<string, unknown>;
       await pumpB;
       expect(loser).toMatchObject({ ok: !changedCommand });
-      const winnerBody = ((winner as { result: unknown }).result as { body: unknown });
+      const winnerBody = ((winner as { result: unknown }).result as { body: unknown }).body;
       if (changedCommand) expect(loser.failure).toMatchObject({ category: "conflict" });
       else {
         expect((loser.result as { body: unknown }).body).toEqual(winnerBody);
