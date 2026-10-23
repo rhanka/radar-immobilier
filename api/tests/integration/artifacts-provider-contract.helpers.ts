@@ -43,6 +43,12 @@ import { fileURLToPath } from "node:url";
 export const COMMIT_CONTRACT_SPECIFIER = "@sentropic/artifacts/server/commit-contract";
 export const OUTCOME_CONTRACT_SPECIFIER = "@sentropic/artifacts/server/outcome-contract";
 export const TESTING_SPECIFIER = "@sentropic/artifacts/testing";
+export const PROFILE_COMPILER_SPECIFIER = "@sentropic/artifacts/mcp-core";
+export const COORDINATOR_FACTORY_SPECIFIER = "@sentropic/artifacts/server/commit";
+export const PREPARATION_CLEANUP_SPECIFIER = "@sentropic/artifacts/server/object-intents";
+export const EXPECTED_COORDINATOR_CTOR = "createArtifactCommitCoordinator";
+export const EXPECTED_CLEANUP_BINDING =
+  "scheduleBoundedPreparationCleanup with attempt intent, cleanup-deadline and shared-blob observation";
 
 /** Frozen r2 selection for the Radar profile, deterministically ordered. */
 export const FROZEN_CAPABILITIES = [
@@ -51,6 +57,34 @@ export const FROZEN_CAPABILITIES = [
   "artifacts_list",
   "artifacts_publish",
 ] as const;
+
+/** Compiled r2 profile returned by the upstream compiler, never fabricated. */
+export interface CompiledArtifactsProfile {
+  readonly digest: string;
+  readonly selectedCapabilities: readonly string[];
+  readonly [key: string]: unknown;
+}
+
+/** Real r2 coordinator bound to a transaction participant and test observer. */
+export interface R2CommitCoordinator {
+  readonly testObserver: unknown;
+  readonly [key: string]: unknown;
+}
+
+export interface ProviderHostShape extends Record<string, unknown> {
+  readonly selectedCapabilities: readonly string[];
+  readonly execute: (request: unknown, invocation: unknown) => Promise<unknown>;
+  readonly close: () => void;
+}
+
+export interface PreparationCleanupBinding {
+  inspectPreparations(host: unknown, artifactId: string): Promise<{
+    attempts: Array<{ attemptId: string; invocationId: string; state: string;
+      preparedAtMs: number; cleanupDeadlineMs: number; blobKeys: string[] }>;
+    protectedKeys: string[]; abandonedKeys: string[];
+  }>;
+  scheduleBoundedPreparationCleanup(host: unknown, throughMs: number): Promise<void>;
+}
 
 /** Barrier points frozen by spec r2 section 3.2. */
 export type CommitBarrierPoint =
@@ -165,10 +199,12 @@ export async function requireCommitBarrier(): Promise<CommitBarrier> {
 
 /**
  * Assert the frozen selection value plus the compiled profile digest.
- * Throws `[missing-contract] provider.selectCapabilities` (or
+ * The digest must equal the digest of the profile returned by
+ * `compileArtifactsProfile`; any well-formed but unrelated hex digest is
+ * rejected. Throws `[missing-contract] provider.selectCapabilities` (or
  * `provider.profileDigest`) while the provider predates the r2 line.
  */
-export function requireSelectedProfile(host: unknown): string {
+export function requireSelectedProfile(host: unknown, expectedDigest: string): string {
   const record = host as Record<string, unknown> | null;
   const selected = record !== null ? record["selectedCapabilities"] : undefined;
   if (!Array.isArray(selected)) {
@@ -193,6 +229,12 @@ export function requireSelectedProfile(host: unknown): string {
   if (typeof digest !== "string" || !/^(sha256:)?[a-f0-9]{64}$/.test(digest)) {
     missingContract("provider.profileDigest", "compiled profile digest is required with the selection");
   }
+  const expected = expectedDigest;
+  if (digest !== expected) {
+    throw new Error(
+      "[contract-violation] provider.profileDigest: host digest does not match the compiled profile digest",
+    );
+  }
   return digest;
 }
 
@@ -203,17 +245,17 @@ export function requireHostExecute(host: unknown): (
 ) => Promise<unknown> {
   const record = host as Record<string, unknown> | null;
   const direct = record !== null ? record["execute"] : undefined;
-  const requestWithActor = (request: unknown, invocation: unknown) => ({
-    ...(request as object), actorId: (invocation as InvocationContextShape).actorId,
-  });
-  if (typeof direct === "function") return (request, invocation) => direct.call(host, requestWithActor(request, invocation), invocation);
+  if (typeof direct === "function") {
+    const bound = direct as (request: unknown, invocation: unknown) => Promise<unknown>;
+    return (request, invocation) => bound.call(host, request, invocation);
+  }
   const app = record !== null ? record["app"] : undefined;
   const nested = app !== null && typeof app === "object"
     ? (app as Record<string, unknown>)["execute"]
     : undefined;
   if (typeof nested === "function") {
     const bound = nested as (request: unknown, invocation: unknown) => Promise<unknown>;
-    return (request, invocation) => bound.call(app, requestWithActor(request, invocation), invocation);
+    return (request, invocation) => bound.call(app, request, invocation);
   }
   missingContract(
     "provider.execute",
@@ -330,6 +372,72 @@ export const authorizeTransaction: AuthorizeCommit = async (context, transaction
   }
   return participant.authorize(context, transaction);
 };
+
+/**
+ * Compile the Radar provider profile through the upstream compiler.
+ * Returns the immutable compiled profile; never fabricates a digest.
+ * Fails `[missing-contract] mcp-core.compileArtifactsProfile` naming the
+ * upstream entry while the provider predates the r2 line.
+ */
+export async function compileArtifactsProfile(input: {
+  readonly selectedCapabilities: readonly string[];
+}): Promise<CompiledArtifactsProfile> {
+  const frozen = [...FROZEN_CAPABILITIES].sort();
+  const names = [...input.selectedCapabilities].map(String).sort();
+  if (names.length !== frozen.length || names.some((name, index) => name !== frozen[index])) {
+    throw new Error(
+      `[contract-violation] compileArtifactsProfile: expected exactly ${frozen.join(", ")}`,
+    );
+  }
+  const module = await loadUpstream(
+    PROFILE_COMPILER_SPECIFIER, "mcp-core.compileArtifactsProfile");
+  const compile = module["compileArtifactsProfile"];
+  if (typeof compile !== "function") {
+    missingContract(
+      "mcp-core.compileArtifactsProfile",
+      `upstream entry ${PROFILE_COMPILER_SPECIFIER} must export compileArtifactsProfile(input: ArtifactProviderProfile): CompiledArtifactsProfile (Sentropic spec r2 section 3.2)`,
+    );
+  }
+  const compiled = await (compile as (
+    candidate: unknown,
+  ) => Promise<CompiledArtifactsProfile> | CompiledArtifactsProfile)({
+    selectedCapabilities: [...FROZEN_CAPABILITIES],
+  });
+  if (compiled === null || typeof compiled !== "object") {
+    throw new Error("[contract-violation] mcp-core.compileArtifactsProfile: malformed profile");
+  }
+  const digest = (compiled as CompiledArtifactsProfile).digest;
+  if (typeof digest !== "string" || !/^(sha256:)?[a-f0-9]{64}$/.test(digest)) {
+    throw new Error("[contract-violation] mcp-core.compileArtifactsProfile: missing digest");
+  }
+  if (!Object.isFrozen(compiled) || !Object.isFrozen(compiled.selectedCapabilities) ||
+      [...compiled.selectedCapabilities].sort().join(",") !== frozen.join(",")) {
+    throw new Error("[contract-violation] compiler must return the immutable four-operation profile");
+  }
+  return compiled;
+}
+
+/**
+ * Named joint (a): expected public coordinator constructor from Sentropic.
+ * Builds the real transaction-bound coordinator carrying the PostgreSQL
+ * participant and the barrier `testObserver`. Fails `[missing-contract]`
+ * naming `createArtifactCommitCoordinator` while Sentropic has not shipped
+ * the public constructor; the spec r2 freezes the coordinator obligations
+ * but not this factory name, so the name below is the expected joint.
+ */
+export async function createTestCommitCoordinator(params: {
+  readonly pool: pg.Pool;
+  readonly profile: CompiledArtifactsProfile;
+  readonly barrier: CommitBarrier;
+}): Promise<R2CommitCoordinator> {
+  void params;
+  // r2 freezes the protocol, but not the public participant registration API.
+  // Do not guess a factory signature or accept a coordinator with no participant.
+  missingContract(
+    "coordinator.createArtifactCommitCoordinator",
+    "Sentropic L0/L3 must supply the public coordinator constructor and registered PostgreSQL policy participant API; spec r2 does not freeze this construction binding",
+  );
+}
 
 /** Resolve void arrivals explicitly; never test Promise<void>'s value. */
 export async function arrived(barrier: CommitBarrier, point: CommitBarrierPoint,
