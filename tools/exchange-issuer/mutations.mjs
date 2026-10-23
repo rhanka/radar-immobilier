@@ -28,6 +28,8 @@ const cases = [
     from: 'if (!deps) throw new Error("exchange_not_configured");', to: 'if (!deps) return { accessToken: input.subjectToken };' },
   { name: "actor-validation", file: "exchange-token.ts", scope: "exchange-token.test.ts",
     from: 'if (actSub !== config.workloadSub) throw new Error("exchange_invalid_actor");', to: 'void actSub;' },
+  { name: "subject-expiry", file: "exchange-token.ts", scope: "exchange-token-profile.test.ts",
+    from: 'if (Math.floor(exp) > Math.floor(subject.exp)) throw new Error("exchange_invalid_lifetime");', to: 'void subject.exp;' },
   { name: "audience-validation", file: "exchange-token.ts", scope: "exchange-token.test.ts",
     transform: (text) => text.replace('audience: config.apiAudience,', '').replace('audiences.length !== 1 || audiences[0] !== config.apiAudience', 'false') },
   ...["subjectIdentity", "client", "effectiveScopes"].map((part) => ({

@@ -21,6 +21,7 @@ export interface ExchangeInput {
 export interface ExchangeRuntimeDeps {
   readonly config: ExchangeConfig;
   readonly clientSecret: string;
+  readonly allowLoopbackHttp?: boolean;
   readonly fetchImpl?: typeof fetch | undefined;
   readonly keySource: ExchangeKeySource;
   readonly cache?: ExchangeCache | undefined;
@@ -97,7 +98,7 @@ export async function resolveExchangedCallContext(
       deps.config.tokenEndpoint,
       { subjectToken: input.subjectToken, scope: effectiveScopes, audience: deps.config.apiAudience,
         workload: { clientId: deps.config.workloadClientId, clientSecret: deps.clientSecret } },
-      { fetchImpl: deps.fetchImpl },
+      { fetchImpl: deps.fetchImpl, allowLoopbackHttp: deps.allowLoopbackHttp === true },
     );
     if (response.tokenType.toLowerCase() !== "bearer") {
       throw new Error("exchange_invalid_token_type");
