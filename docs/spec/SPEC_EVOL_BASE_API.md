@@ -235,3 +235,137 @@ Moderator-only common archive, same path family as personal facets:
   tracks in either direction (CT-8/CT-9). Schema coordination never
   requires 6K business activation and never makes MCP/H5 a BASE prerequisite.
 
+## 9. Acceptance cases and file ownership
+
+HTTP/PostgreSQL cases (artifacts disabled; B5 executes, B0 only records):
+
+- A1 authority: personal/common separation, moderation-gated archive,
+  revocation closing reads/writes, membership revision conflicts.
+- A2 transitions: select/deselect/discard/restore per basket, pipeline and
+  market mutations with distinct rights, mandatory discard reason.
+- A3 history: receipt recovery, unresolved contexts preserved, history and
+  source-history pagination.
+- A4 concurrency: head conflicts, changed content under unchanged UUID,
+  exact replay without mutation, atomic batch through 500 targets.
+- A5 bootstrap: truly empty history → opening → first mark without
+  artificial events; unresolved-only history stays closed.
+- A6 cutover: closed destination refuses business reads and receipts (503);
+  interrupted cutover resumes under the durable barrier; fresh install,
+  migrated install and rerun qualify under CT-8.
+
+B1/B2 file ownership map:
+
+- B1 (chain A): `api/src/routes/workspaces.ts`,
+  `api/src/routes/scoped-signal-facets*`,
+  `api/src/routes/scoped-workspace-archive*`,
+  `api/src/routes/scoped-projection-*`,
+  `api/src/routes/signal-facets*`, `api/src/routes/graph-signals*`,
+  new `api/src/routes/scoped-signal-reveal.ts`, synthetic tests
+  `api/tests/integration/base-api-*`.
+- B2 (chain B): `api/src/routes/scoped-lot-*`,
+  `api/src/services/facets/lots/**`, 6K import under CT-1–CT-8.
+- BASE Sol A-owned: `api/src/db/schema.ts` and shared BASE verification files.
+  Cross-track CT-1 lease only: `api/src/app.ts`,
+  `api/src/index.ts`, `api/drizzle/**`, `tools/make/paniers-lot6.mk`,
+  `tools/make/paniers-lot6-verify.sh`; `api/src/routes/auth.ts` joins this
+  set if both tracks touch it. Muse never writes these files. BASE-local ownership
+  never grants a concurrent cross-track shared-file write right.
+
+## 10. B4 entry points (recorded, not implemented in B0)
+
+Reserved names, owned and implemented in B4 only. B0 supplies no stub and
+no success path for them:
+
+- Make: `base-api-activate-personal`, `base-api-resume-personal` in
+  `tools/make/base-api.mk`, dispatched by
+  `tools/make/base-api-activation.sh` (Sol A owns both tooling paths).
+- Script: `api/src/scripts/base-api-personal-activation.ts` (Muse A).
+  Requires workspace, actor, reason and qualified maintenance evidence;
+  runs in the API container without environment-file discovery.
+- Composition: `runPersonalAttachmentActivation` from `activation-run.ts`
+  performs activation; `attach-personal-history.ts` only attaches histories.
+  Resume inspects durable state: legacy/closed retries protected activation,
+  scoped/closed calls `resumePersonalAttachmentReadback` from
+  `activation-open.ts`, already-open returns status after authorization
+  without mutation.
+- Safety: `api/src/services/facets/activation-maintenance-safety.ts`
+  implements `ActivationSafety` with injected drain/shutdown evidence and
+  the internal reader — never successful empty callbacks.
+- Readback: `api/src/services/facets/activation-readback.ts` validates real
+  PostgreSQL bindings, heads and scoped projections under the still-closed
+  barrier; `scopedEpochFor`/public readers stay closed with no public bypass.
+- Suites: `api/tests/integration/base-api-activation.spec.ts` and
+  `base-api-activation-resume.spec.ts`. Public reads return 503 while
+  closed; readback validates seeded heads/projections; opening then enables
+  public reads. Interrupted activation keeps the durable barrier.
+
+## 11. Cross-track rules CT-1–CT-9 (verbatim, binding on both packets)
+
+- [ ] CT-1 — BASE/ARTEFACTS shared-write rule: one conductor-recorded lease holder at a time edits `api/src/app.ts`, `api/src/index.ts` and `api/drizzle/**` across both tracks; include `auth.ts` if both tracks touch it. Neither lane's integrator has an independent concurrent write right.
+- [ ] CT-2 — Each lease records holder, receiving branch/HEAD, both input SHAs, exact hunks, migration reservations, tests and resulting commit. The next holder acknowledges that receipt. Nonshared work continues; joining the histories uses merge commits, never whole-file ours/theirs or copied commits.
+- [ ] CT-3 — Preserve both sets of mounts/startup dependencies and middleware order: content-host isolation first, control cookie guard, then authenticated business routes; keep H4 and H5 identities distinct. Requalify the named signals API adapter if BASE retires its route; do not reopen a retired route.
+- [ ] CT-4 — Reserve `0022_facet_lot_cutover.sql` and `0023_facet_lot_versions_fence.sql` for BASE's pinned 6K import. Allocate artifact technical files from the next globally unreserved number, at least 0024; reservation alone is not migration-order proof. Preserve inherited SQL bytes and hashes.
+- [ ] CT-5 — Use the existing common Drizzle journal/migrator. The lease holder assigns each unreleased suffix entry a unique tag and sequential idx, with when greater than the maximum existing journal/applied timestamp. Preserve the applied prefix; never renumber, retime or replace an applied/released entry or edit database migration history.
+- [ ] CT-6 — BASE-first is permitted: append artifact entries after the fixed BASE prefix. ARTEFACTS-first is permitted without importing or applying 6K: release its technical suffix on the current baseline, then register still-unreleased BASE entries after that suffix, retaining 0022/0023 SQL bytes and their relative order. Their original lower timestamps must not be inserted behind an already-applied artifact suffix.
+- [ ] CT-7 — Freeze one journal order before first persistent use across the target release chain. Reindex/retime only unpublished, unapplied suffix metadata, with provenance; a branch commit or disposable test DB is not a deployment release; BASE owns qualifying its migration assertions by relative prerequisite order rather than obsolete adjacency. If 6K metadata is already immutable, retain its prefix and refuse an incompatible combined upgrade; do not invent a history repair. Applied/deployed state is unverified until an operator receipt.
+- [ ] CT-8 — Qualify a standalone delivery on fresh DB, its baseline upgrade and rerun using only its own migrations. Before a combined delivery, also qualify baseline-to-first-track-to-combined with its frozen journal: every expected SQL hash occurs once, none is skipped, technical/business data survive. Alternative orders need their own pre-release qualification. Serialize migration jobs per target DB; never wait for the other track to qualify a standalone delivery.
+- [ ] CT-9 — After joining histories, test the exact combined SHA/image: both mount sets, auth/session and 6L2 regressions, BASE with artifacts off, artifacts without optional business capabilities, two-reader API proof and migration history. A shared-image update must retain already-delivered capabilities; no stale branch image may overwrite them. Schema coordination never requires 6K business activation or makes MCP/H5 a BASE prerequisite.
+
+Lease/receipt protocol: the conductor records each lease (holder, receiving
+branch/HEAD, both input SHAs, exact hunks, migration reservations, tests).
+The next holder acknowledges the receipt before another shared-file edit.
+BASE Sol A is the integrator for `schema.ts`, shared app/startup files and
+shared BASE verification files, and edits them only while holding the
+recorded lease; otherwise it submits bounded hunks to the holder. Muse never
+writes these files.
+
+Standalone qualification (fresh DB, baseline upgrade, rerun with BASE-only
+migrations) never waits for the other track. Combined delivery adds the
+baseline-to-first-track-to-combined qualification and the exact-combined-SHA
+proof; it never becomes a business delivery or activation prerequisite
+between tracks.
+
+## 12. Open decisions and unverified facts
+
+Code trace verified in B0 (source presence never proves operational availability):
+
+- `app.ts:152–154` mounts legacy graph/signals; `index.ts:101` composes
+  `createApp` with `createDiscardedSignalsReader` and existing artifact options.
+- `scoped-projection-revisions.ts:114–118` filters effective archive heads
+  before returning nodes, so B1 reveal requires an authorized separate read.
+- `scoped-writer.ts:184–212` recovers historical receipts under approval,
+  membership, scoped epoch and context checks; missing receipts cannot mutate.
+- `lots/lot-gate.ts:23–28` already checks enabled destination + configured
+  basket. B2 adds the durable cutover opening requirement; it does not replace
+  this configuration guard.
+- Pinned 6K `3c6d3c1f95d6794ba0939cf71db6b169cb3f071d` reserves
+  `0022_facet_lot_cutover.sql` (SHA-256 `c33768aa02233e04f887d2829772c6eec3fcf776be054816b3766b23cf5a3cda`)
+  and `0023_facet_lot_versions_fence.sql` (SHA-256 `757d70bb5b90bc6d2e6b3d2d6bc18763254ece5651261afbc259a1d4655b66f3`).
+  `lot-cutover-gate.ts` requires destination, epoch, qualified roster/manifest,
+  writer coverage and recorded D5 decisions; `lot-cutover-open.ts` separately
+  performs authorized readback before durable opening under the barrier.
+  Original journal adjacency at `lot-cutover-journal-db.test.ts:29–31` is
+  incompatible with an intervening artifact suffix; B2.1 qualifies relative
+  prerequisites before K_SHA. SQL bytes remain fixed.
+- CT-2 receipt fields: holder, receiving branch/HEAD, both input SHAs, exact
+  hunks, migration reservations, tests, resulting commit and next-holder
+  acknowledgement. B0 edits no CT-1 file and claims no lease.
+- CT-7 applied/released journal state remains unverified: no operator receipt
+  was supplied. Neither a source checkout nor a disposable DB establishes it.
+- `base-api-verify` runs the standalone CT-8 fresh/upgrade/rerun profile on
+  the current BASE journal. It cannot attest a later combined journal/image;
+  combined CT-8/CT-9 remains a separate gate after history integration.
+
+- OPEN O1: maintenance window is the execution default; continuous
+  coordination is outside this delivery.
+- OPEN O2: lot discard reason remains mandatory.
+- OPEN O3: `lettre_envoyee` keeps its meaning; no `a_lettre` state, no
+  historical relabeling.
+- OPEN O4: independent signal baskets and separate archive scopes retained.
+- D1–D4 remain ratified; concrete operational values (workspace, tenant
+  bindings, members, moderators, manager, lot rights, basket, destinations)
+  are `unverified`.
+- `unverified` until executed: B0_SHA value, port availability
+  (API 18910 / UI 15910 / Maildev 11910), runner behavior, typecheck/lint/
+  test/mutation outcomes, bundle contents, migration-applied state,
+  K_SHA value and timing, 6K history import bytes, remote CI and PR #906.
