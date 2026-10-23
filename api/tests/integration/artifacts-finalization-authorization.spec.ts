@@ -30,7 +30,7 @@ import { createMcpArtifactAdapter } from "../../../packages/artifacts-host/src/m
 import { controlRoute } from "../../src/artifacts/control-route.js";
 import { auth, cookie, migrationsFolder } from "./artifacts-h2.helpers.js";
 import { loadConfig } from "../../src/config.js";
-import { cleanupArtifactRace, assertPurgeEffects } from "./artifacts-race-cleanup.helpers.js";
+import { awaitWithPump, cleanupArtifactRace, assertPurgeEffects } from "./artifacts-race-cleanup.helpers.js";
 import {
   assertOutcomeFailure,
   authorizeTransaction,
@@ -782,7 +782,12 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         }
       })();
       void pumpB.catch(() => {});
-      await barrierB.waitUntilReached("before_key_lock", invBId);
+      await awaitWithPump(
+        barrierB.waitUntilReached("before_key_lock", invBId),
+        pumpB!,
+        "before_key_lock/B",
+        5000,
+      );
       let settledA = false;
       pendingA = executeA({ method: "POST", path: "/publish", body }, invA)
         .finally(() => { settledA = true; });
@@ -799,11 +804,11 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         }
       })();
       void pumpA.catch(() => {});
-      const winner = await pendingA as unknown as Record<string, unknown>;
+      const winner = (await awaitWithPump(pendingA!, pumpA!, "publish/A", 8000)) as unknown as Record<string, unknown>;
       await pumpA;
       expect(winner).toMatchObject({ ok: true });
       barrierB.release("before_key_lock", invBId);
-      const loser = await pendingB as unknown as Record<string, unknown>;
+      const loser = (await awaitWithPump(pendingB!, pumpB!, "publish/B", 8000)) as unknown as Record<string, unknown>;
       await pumpB;
       expect(loser).toMatchObject({ ok: !changedCommand });
       const winnerBody = ((winner as { result: unknown }).result as { body: unknown }).body;
