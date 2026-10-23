@@ -11,6 +11,7 @@ import { getRequestListener } from "@hono/node-server";
 import { createReaderContentApp } from "../../src/artifacts/content-serve.js";
 import { mintGrant } from "../../src/artifacts/preview-grant.js";
 import { mintSessionCookie } from "../../src/artifacts/preview-session.js";
+import { fingerprintReaderProfile } from "../../src/artifacts/reader-profile.js";
 import { fixtureReaderDeps } from "../../src/artifacts/reader-test-fixture.js";
 
 const GRANT_SECRET = "grant-secret-32-bytes-long-padding!";
@@ -24,7 +25,7 @@ let baseURL = "";
 async function grantFor(readerSub: string, sessionId: string): Promise<{ grant: string; cookieValue: string }> {
   const nowMs = Date.now();
   const grant = await mintGrant(
-    { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub, sessionId, profileName: "demo", policyRevision: "pol-001" },
+    { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub, sessionId, profileName: "demo", policyRevision: "pol-001", profileFingerprint: fingerprintReaderProfile({ name: "demo", policyRevision: "pol-001", capabilities: ["geo.read", "signals.protected-read"] }) },
     GRANT_SECRET,
     nowMs,
   );
