@@ -712,6 +712,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
   });
 
   it.each([false, true])("same-key S3 race across processes, changed command %s", async (changedCommand) => {
+    const raceKey = changedCommand ? "q1-race-changed" : "q1-race-identical";
     await requireCommitContract();
     await requireOutcomeContract();
     const barrier = await requireCommitBarrier();
@@ -734,18 +735,18 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         return authorizeTransaction(context, transaction);
       };
       const ensured = await executeA({ method: "POST", path: "/ensure",
-        body: { bindingName: "q1-race", idempotencyKey: "q1-race-ensure" } },
-        invocationFor(authorizeCommit, "race-ensure"));
+        body: { bindingName: raceKey, idempotencyKey: `${raceKey}-ensure` } },
+        invocationFor(authorizeCommit, `${raceKey}-ensure`));
       expect(ensured).toMatchObject({ ok: true });
       const artifactId = ((ensured as { result: unknown }).result as { body: { artifactId: string } })
         .body.artifactId;
       const body = { artifactId,
         files: [{ path: "index.html", mimeType: "text/html", text: "same-key race" }],
-        idempotencyKey: "q1-race" };
+        idempotencyKey: raceKey };
       const internalKey = deriveIdempotencyKey(
-        { scope: SCOPE, sub: ACTOR, op: "publish", artifactId, clientKey: "q1-race" });
-      const invA = invocationFor(authorizeCommit, "race-a");
-      const invB = invocationFor(authorizeCommit, "race-b");
+        { scope: SCOPE, sub: ACTOR, op: "publish", artifactId, clientKey: raceKey });
+      const invA = invocationFor(authorizeCommit, `${raceKey}-a`);
+      const invB = invocationFor(authorizeCommit, `${raceKey}-b`);
       const invAId = invA["invocationId"] as string;
       const invBId = invB["invocationId"] as string;
       const releasesBefore = await tableCount("releases");

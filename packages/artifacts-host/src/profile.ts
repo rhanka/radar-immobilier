@@ -58,7 +58,10 @@ export interface CompiledArtifactsProfile {
 /** Assert the exact frozen four-operation selection, deterministically ordered. */
 export function assertFrozenSelection(names: readonly unknown[]): asserts names is readonly string[] {
   const frozen = [...FROZEN_CAPABILITIES].sort();
-  const actual = [...names].map(String).sort();
+  if (names.some((name) => typeof name !== "string")) {
+    throw new Error("[contract-violation] provider selection: expected string names");
+  }
+  const actual = [...names].sort();
   if (actual.length !== frozen.length || actual.some((name, index) => name !== frozen[index])) {
     throw new Error(
       `[contract-violation] provider selection: expected exactly ${frozen.join(", ")}`,
