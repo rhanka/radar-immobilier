@@ -80,7 +80,7 @@ successor compatibility and delegation A as pure, unregistered contracts.
   - [x] Preserve reason classifications and missing-basket diagnostics.
   - [x] Carry read-head metadata separately from receipt event snapshots.
   - [x] Match scoped HTTP lot bounds and reject orphan signal expectations.
-  - [ ] Reject private context fields using a complete accepted fixture.
+  - [x] Reject private context fields using a complete accepted fixture.
   - [ ] Cover selection, pipeline and market grants one at a time.
   - [ ] Kill copied mutations for every defect in both Astra reviews.
   - [ ] Pass the complete MCP suite and MCP/API typecheck, lint and build.
