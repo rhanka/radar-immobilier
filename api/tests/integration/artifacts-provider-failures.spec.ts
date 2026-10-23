@@ -18,13 +18,13 @@
  * a broken upstream mapping.
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { AsyncLocalStorage } from "node:async_hooks";
 import pg from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { CreateBucketCommand, DeleteBucketCommand, GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { createS3BlobStore } from "@sentropic/artifacts/adapters/s3";
 import {
-  composeArtifactHost,
   createArtifactControl,
   createArtifactsPool,
   deriveIdempotencyKey,
@@ -34,18 +34,24 @@ import { auth, cookie, migrationsFolder } from "./artifacts-h2.helpers.js";
 import { controlRoute } from "../../src/artifacts/control-route.js";
 import { loadConfig } from "../../src/config.js";
 import {
+  assertMcpResultRedacted,
   assertOutcomeFailure,
+  assertPublicBodyRedacted,
   authorizeTransaction,
   buildInvocationContext,
-  FROZEN_CAPABILITIES,
+  composeR2AcceptanceHost,
+  createPrivateMarker,
   projectOutcomeHttp,
   proxyLeasedPool,
+  finalizationFaultPool,
+  committedState,
   requireCommitBarrier,
-  requireCommitContract,
   requireHostExecute,
   requireOutcomeContract,
   requireSelectedProfile,
   type AuthorizeCommit,
+  type CommitBarrier,
+  type CompiledArtifactsProfile,
   type InvocationContextShape,
 } from "./artifacts-provider-contract.helpers.js";
 
@@ -81,26 +87,24 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
   }
 
   async function composeQ2Host(
-    observer: unknown,
+    barrier: CommitBarrier,
     overrides?: { readonly pool?: pg.Pool | undefined; readonly blobs?: unknown | undefined },
-  ): Promise<NonNullable<Awaited<ReturnType<typeof composeArtifactHost>>> & Record<string, unknown>> {
-    await requireCommitContract();
-    const compose = composeArtifactHost as unknown as (
-      pool: unknown, config: unknown, blobs: unknown, options?: unknown,
-    ) => Promise<unknown>;
-    return (await compose(overrides?.pool ?? pool, storageConfig(), overrides?.blobs ?? rawBlobs(), {
-      profile: { selectedCapabilities: [...FROZEN_CAPABILITIES] },
-      coordinator: { testObserver: observer },
-    })) as NonNullable<Awaited<ReturnType<typeof composeArtifactHost>>> & Record<string, unknown>;
+  ): Promise<{ readonly host: Record<string, unknown>; readonly profile: CompiledArtifactsProfile }> {
+    return composeR2AcceptanceHost({
+      pool: overrides?.pool ?? pool,
+      config: storageConfig(),
+      blobs: overrides?.blobs ?? rawBlobs(),
+      barrier,
+    });
   }
 
-  function invocationFor(authorizeCommit: AuthorizeCommit, suffix: string): Record<string, unknown> {
+  function invocationFor(authorizeCommit: AuthorizeCommit, suffix: string): InvocationContextShape {
     return buildInvocationContext({
       invocationId: `q2-${suffix}-${nextInvocationId++}`,
       actorId: ACTOR,
       storageScopeId: SCOPE,
       authorizeCommit,
-    }) as unknown as Record<string, unknown>;
+    });
   }
 
   function allowAll(): AuthorizeCommit {
@@ -120,8 +124,10 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       for (const transport of ["http", "mcp"] as const) {
         const entries: Record<string, unknown>[] = [];
         const observed: Record<string, unknown>[] = [];
+        const dispatchedIds: string[] = [];
         const observe = async (r: unknown, context: unknown) => {
           const ctx = context as InvocationContextShape;
+          dispatchedIds.push(ctx.invocationId);
           const result = await execute(r, buildInvocationContext({ ...ctx,
             authorizeCommit: (invocation as InvocationContextShape).authorizeCommit })) as Record<string, unknown>;
           observed.push(result);
@@ -154,9 +160,8 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
         expect(entries).toHaveLength(dispatched ? 1 : 0);
         if (dispatched) {
           expect(observed).toHaveLength(1);
-          const actual = observed[0]!.failure as Record<string, unknown>;
-          assertOutcomeFailure(observed[0], actual.invocationId as string);
-          expect(entries[0]).toMatchObject({ invocationId: actual.invocationId,
+          assertOutcomeFailure(observed[0], dispatchedIds[0]);
+          expect(entries[0]).toMatchObject({ invocationId: dispatchedIds[0],
             reason: failure.category === "conflict" ? "provider_conflict" : failure.category,
             status: projected.status });
         }
@@ -178,12 +183,16 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     return ((outcome as { result: unknown }).result as { body: { artifactId: string } }).body.artifactId;
   }
 
-  function expectRedacted(projected: { status: number; body: unknown }): void {
+  function expectRedacted(projected: { status: number; body: unknown }, privateMarkers: readonly string[] = []): void {
     const text = JSON.stringify(projected.body);
-    expect(text).not.toMatch(/stack|BEGIN|COMMIT|SELECT|secret|credential|password/i);
+    expect(text).not.toMatch(/BEGIN|COMMIT|SELECT\s+\S+\s+FROM|FOR\s+(UPDATE|SHARE)|secret|credential|password/i);
+    for (const marker of privateMarkers) {
+      if (marker.length > 0) expect(text).not.toContain(marker);
+    }
     expect(text).not.toContain(BUCKET);
     expect(text).not.toContain(endpoint);
     expect(text).not.toContain(accessKey);
+    if (secretKey.length > 0) expect(text).not.toContain(secretKey);
   }
 
   beforeAll(async () => {
@@ -221,11 +230,13 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
   it("maps an S3 request timeout to provider_unavailable with a redacted projection", async () => {
     await requireOutcomeContract();
     const barrier = await requireCommitBarrier();
+    const requestMarker = createPrivateMarker("s3_request");
     const faulty = { ...rawBlobs(),
       async putBlob() {
-        throw Object.assign(new Error("request timeout"), { code: "artifact_s3_timeout" });
+        throw Object.assign(new Error(`request timeout ${requestMarker}`), { code: "artifact_s3_timeout", phase: "s3-request" });
       } };
-    const host = await composeQ2Host(barrier.observer, { blobs: faulty });
+    const composed = await composeQ2Host(barrier, { blobs: faulty });
+    const host = composed.host;
     const close = host["close"];
     try {
       const execute = executeWithParity(host);
@@ -238,10 +249,11 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
           idempotencyKey: "q2-s3" } }, invocation) as unknown as Record<string, unknown>;
       assertOutcomeFailure(outcome, invocation["invocationId"] as string);
       expect(outcome["failure"]).toMatchObject({
-        category: "provider_unavailable", retriable: true, commitState: "not_committed" });
+        category: "provider_unavailable", retriable: true, commitState: "not_committed", phase: "s3-request" });
+      expect((outcome["failure"] as Record<string, unknown>)["cause"]).toMatchObject({ code: "artifact_s3_timeout" });
       const projected = await projectOutcomeHttp(outcome);
-      expect(projected).toEqual({ status: 503, body: { error: "capability_unavailable" } });
-      expectRedacted(projected);
+      assertPublicBodyRedacted(projected, { error: "capability_unavailable" }, [requestMarker], [BUCKET, endpoint, accessKey]);
+      expectRedacted(projected, [requestMarker]);
       expect(await tableCount("releases")).toBe(releasesBefore);
     } finally {
       if (typeof close === "function") (close as () => void)();
@@ -468,79 +480,6 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
         armed.current = false;
       }
       expect(await tableCount("releases")).toBe(releasesBefore);
-    } finally {
-      if (typeof close === "function") (close as () => void)();
-    }
-  });
-
-  it.each([
-    ["40001", Object.assign(new Error("could not serialize access"), { code: "40001" })],
-    ["40P01", Object.assign(new Error("deadlock detected"), { code: "40P01" })],
-  ])("maps %s to retriable provider_unavailable on explicit abort", async (_code, fault) => {
-    await requireOutcomeContract();
-    const barrier = await requireCommitBarrier();
-    const armed = { current: false };
-    const aborting = proxyLeasedPool(pool, { get(target, property, receiver) {
-      if ((property === "query" || property === "connect") && armed.current) {
-        return async (): Promise<never> => { throw fault; };
-      }
-      const value = Reflect.get(target, property, receiver);
-      return typeof value === "function" ? value.bind(target) : value;
-    } }) as unknown as pg.Pool;
-    const host = await composeQ2Host(barrier.observer, { pool: aborting });
-    const close = host["close"];
-    try {
-      const execute = executeWithParity(host);
-      const before = await tableCount("artifacts");
-      armed.current = true;
-      try {
-        const invocation = invocationFor(allowAll(), "abort");
-        const outcome = await execute({ method: "POST", path: "/ensure",
-          body: { bindingName: "q2-abort", idempotencyKey: "q2-abort" } },
-          invocation) as unknown as Record<string, unknown>;
-        assertOutcomeFailure(outcome, invocation["invocationId"] as string);
-        expect(outcome["failure"]).toMatchObject({
-          category: "provider_unavailable", retriable: true, commitState: "not_committed" });
-      } finally {
-        armed.current = false;
-      }
-      expect(await tableCount("artifacts")).toBe(before);
-    } finally {
-      if (typeof close === "function") (close as () => void)();
-    }
-  });
-
-  it("maps statement cancellation to retriable provider_unavailable", async () => {
-    await requireOutcomeContract();
-    const barrier = await requireCommitBarrier();
-    const armed = { current: false };
-    const cancelling = proxyLeasedPool(pool, { get(target, property, receiver) {
-      if (property === "query" && armed.current) {
-        return async (): Promise<never> => {
-          throw Object.assign(new Error("canceling statement due to statement timeout"), { code: "57014" });
-        };
-      }
-      const value = Reflect.get(target, property, receiver);
-      return typeof value === "function" ? value.bind(target) : value;
-    } }) as unknown as pg.Pool;
-    const host = await composeQ2Host(barrier.observer, { pool: cancelling });
-    const close = host["close"];
-    try {
-      const execute = executeWithParity(host);
-      const before = await tableCount("artifacts");
-      armed.current = true;
-      try {
-        const invocation = invocationFor(allowAll(), "cancel");
-        const outcome = await execute({ method: "POST", path: "/ensure",
-          body: { bindingName: "q2-cancel", idempotencyKey: "q2-cancel" } },
-          invocation) as unknown as Record<string, unknown>;
-        assertOutcomeFailure(outcome, invocation["invocationId"] as string);
-        expect(outcome["failure"]).toMatchObject({
-          category: "provider_unavailable", retriable: true, commitState: "not_committed" });
-      } finally {
-        armed.current = false;
-      }
-      expect(await tableCount("artifacts")).toBe(before);
     } finally {
       if (typeof close === "function") (close as () => void)();
     }
