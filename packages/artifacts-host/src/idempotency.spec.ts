@@ -15,6 +15,27 @@ function fakePool(client: FakeClient): pg.Pool {
 }
 
 describe("withArtifactAdvisoryLock connection guard", () => {
+  it.each(["pg_advisory_unlock", "ROLLBACK"])("bounds cleanup when %s never responds", async (phase) => {
+    vi.useFakeTimers();
+    const client = new FakeClient();
+    client.query.mockImplementation(async (sql) => {
+      if (phase === "ROLLBACK" && sql === "BEGIN") throw new Error("acquisition failed");
+      if (sql.includes(phase)) return new Promise<never>(() => {});
+      return { rows: [], rowCount: 0 };
+    });
+    try {
+      const pending = withArtifactAdvisoryLock(fakePool(client), KEY, async () => "ok");
+      const rejected = phase === "ROLLBACK" ? expect(pending).rejects.toThrow("acquisition failed")
+        : expect(pending).rejects.toMatchObject({ code: "artifact_connection_lost", cause: expect.any(Error) });
+      await vi.advanceTimersByTimeAsync(5000);
+      await rejected;
+      expect(client.release).toHaveBeenCalledWith(expect.any(Error));
+      expect(client.listenerCount("error")).toBe(0);
+      expect(client.listenerCount("end")).toBe(0);
+      expect(vi.getTimerCount()).toBe(0);
+    } finally { vi.useRealTimers(); }
+  });
+
   it("fails a pending operation with a typed error when the reserved client errors", async () => {
     const client = new FakeClient();
     let releaseGate!: (value: string) => void;
