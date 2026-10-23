@@ -26,6 +26,8 @@ import {
   fetchCollectionIds,
   fetchCollectionFeatures,
   upsertLotBatch,
+  decideOgcLotInsert,
+  revalidateOgcLotInsertDecision,
   upsertZoneBatch,
   pullGeoOgc,
   type OgcFeature,
@@ -91,13 +93,13 @@ function makeSequentialFetch(...bodies: unknown[]): typeof fetch {
 
 /** Crée un pg.Pool mock. */
 function makeMockPool(responses: {
-  existing?: { rows: { id: string }[]; rowCount: number };
+  existing?: { rows: { id: string; city_slug?: string; canonical_id?: string }[]; rowCount: number };
 } = {}): pg.Pool {
   const client = {
     query: vi.fn().mockImplementation((sql: string) => {
       if (
         typeof sql === "string" &&
-        (sql.includes("SELECT id FROM lot_versions") ||
+        (sql.includes("FROM lot_versions") ||
           sql.includes("SELECT id FROM zone_versions"))
       ) {
         return Promise.resolve(responses.existing ?? { rows: [], rowCount: 0 });
@@ -339,15 +341,56 @@ describe("upsertLotBatch", () => {
     expect(result.skipped).toBe(0);
   });
 
-  it("UPDATE quand le lot existe déjà (known_to IS NULL)", async () => {
-    const pool = makeMockPool({
-      existing: { rows: [{ id: "some-uuid" }], rowCount: 1 },
+  it.each([[true, false], [false, false], [true, true], [false, true]])(
+    "should update the divergent stored row with geometry=%s and recheck=%s",
+    async (withGeom, recheck) => {
+      const stored = {
+        id: "stored-uuid", city_slug: "sainte-catherine", canonical_id: "ogc:lots:legacy:4516943",
+      };
+      let reads = 0;
+      const queryMock = vi.fn().mockImplementation((sql: string) => {
+        const rows = sql.includes("FROM lot_versions") && (!recheck || reads++ > 0) ? [stored] : [];
+        return Promise.resolve({ rows, rowCount: rows.length });
+      });
+      const client = { query: queryMock, release: vi.fn() };
+      const pool = { connect: vi.fn().mockResolvedValue(client) } as unknown as pg.Pool;
+      const result = await upsertLotBatch(makeMockDb(), pool, "sainte-catherine", [makeFeature("4516943", withGeom)]);
+      expect(result.upserted).toBe(1);
+      expect(result.skipped).toBe(0);
+      const updateCall = queryMock.mock.calls.find(
+        (c: unknown[]) => typeof c[0] === "string" && c[0].includes("UPDATE lot_versions"),
+      );
+      expect(updateCall).toBeDefined();
+      expect(updateCall![1]).toContain("stored-uuid");
+      expect(updateCall![0]).not.toContain("canonical_id");
+      expect(queryMock.mock.calls.some(([sql]) => sql.includes("INSERT INTO lot_versions"))).toBe(false);
+    },
+  );
+
+  it("should retain the stored canonical identity when revalidating an insert", () => {
+    const decision = decideOgcLotInsert("sainte-catherine", "4516943");
+    const stored = { id: "stored-uuid", citySlug: "sainte-catherine", canonicalId: "ogc:lots:legacy:4516943" };
+    expect(revalidateOgcLotInsertDecision(decision, stored)).toEqual({
+      kind: "update", rowId: stored.id, identity: { citySlug: stored.citySlug, canonicalId: stored.canonicalId },
     });
-    const db = makeMockDb();
-    const features = [makeFeature("4516943")];
-    const result = await upsertLotBatch(db, pool, "sainte-catherine", features);
+  });
+
+  it("rechecks the insert decision before inserting the derived identity", async () => {
+    const queryMock = vi.fn().mockResolvedValue({ rows: [], rowCount: 0 });
+    const client = { query: queryMock, release: vi.fn() };
+    const pool = { connect: vi.fn().mockResolvedValue(client) } as unknown as pg.Pool;
+    const result = await upsertLotBatch(makeMockDb(), pool, "sainte-catherine", [makeFeature("4516943")]);
     expect(result.upserted).toBe(1);
     expect(result.skipped).toBe(0);
+    const selects = queryMock.mock.calls.filter(
+      (c: unknown[]) => typeof c[0] === "string" && c[0].includes("FROM lot_versions"),
+    );
+    expect(selects).toHaveLength(2);
+    const insertCall = queryMock.mock.calls.find(
+      (c: unknown[]) => typeof c[0] === "string" && c[0].includes("INSERT INTO lot_versions"),
+    );
+    expect(insertCall).toBeDefined();
+    expect(insertCall![1]).toContain("ogc:lots:sainte-catherine:4516943");
   });
 
   it("skip les features sans NO_LOT", async () => {
@@ -372,7 +415,7 @@ describe("upsertLotBatch", () => {
     // Vérifie que le SELECT utilise le no_lot normalisé sans espaces
     const selectCall = queryMock.mock.calls.find(
       (c: unknown[]) =>
-        typeof c[0] === "string" && c[0].includes("SELECT id FROM lot_versions"),
+        typeof c[0] === "string" && c[0].includes("FROM lot_versions"),
     );
     expect(selectCall).toBeDefined();
     expect(selectCall![1]).toContain("4516943");
