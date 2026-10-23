@@ -97,11 +97,11 @@
   - [x] B1.1: mount workspace, personal, common-archive, revision and invalidation routers.
   - [x] B1.2: constrain middleware to its intended endpoints; preserve cookie writes and supported bearer reads.
   - [x] B1.2 first slice: isolate SSE, personal, common archive and revision middleware; qualify both middleware orders.
-  - [ ] B1.3: expose workspace context and reason codes without legacy readers.
-  - [ ] B1.4: implement authorized reveal with current content, fingerprint and scoped heads.
+  - [x] B1.3: expose workspace context and reason codes without legacy readers.
+  - [x] B1.4: implement authorized reveal with current content, fingerprint and scoped heads.
   - [x] B1.4 service: authorize reveal and qualify restoration with independent personal/common archive heads.
   - [x] B1.4 router: expose scoped reason codes and reveal with isolated guards; composed mount remains pending CT-1.
-  - [ ] B1.5: qualify reveal → restore, concurrent source changes and independent archive scopes.
+  - [x] B1.5: qualify reveal → restore, concurrent source changes and independent archive scopes.
   - [x] B1.6: return explicit legacy 503 during cutover and 410 after retirement, never a replacement 404.
   - [x] B1.6 route contract: fence graph/signal endpoints with named successors and verify composed retirement with signed cookies.
   - [ ] B1.7: preserve exact receipt recovery and unresolved command contexts.
