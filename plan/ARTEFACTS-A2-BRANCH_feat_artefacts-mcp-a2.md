@@ -132,3 +132,5 @@ activation, no cluster-mesh composition.
 - [x] Covered subject and delegated expiry and corrected nested tuple qualification.
 
 - [x] Bound confidential client_secret_basic authentication to the pinned issuer contract.
+
+- [x] Closed reviewed token-type and client-id gaps and preserved mutation dependency resolution.

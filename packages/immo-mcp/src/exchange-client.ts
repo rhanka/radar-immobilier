@@ -87,6 +87,7 @@ export async function requestTokenExchange(
   }
   if (payload["refresh_token"] !== undefined) throw new Error("exchange_refresh_token_refused");
   if (payload["id_token"] !== undefined) throw new Error("exchange_refresh_token_refused");
+  if (payload["issued_token_type"] !== EXCHANGE_REQUESTED_TOKEN_TYPE) throw new Error("exchange_invalid_token_type");
   const accessToken = payload["access_token"];
   const tokenType = payload["token_type"];
   if (typeof accessToken !== "string" || accessToken.length === 0) {
@@ -97,6 +98,10 @@ export async function requestTokenExchange(
   }
   const result: TokenExchangeResult = { accessToken, tokenType };
   const expiresIn = payload["expires_in"];
+  if (expiresIn !== undefined && (typeof expiresIn !== "number" || !Number.isInteger(expiresIn) || expiresIn <= 0)) {
+    throw new Error("exchange_invalid_response");
+  }
+  if (payload["scope"] !== undefined && typeof payload["scope"] !== "string") throw new Error("exchange_invalid_response");
   if (typeof expiresIn === "number" && Number.isFinite(expiresIn)) {
     return { ...result, expiresIn: Math.floor(expiresIn), scope: asScope(payload["scope"]), issuedTokenType: asScope(payload["issued_token_type"]) };
   }

@@ -102,9 +102,10 @@ export async function resolveExchangedCallContext(
     if (response.tokenType.toLowerCase() !== "bearer") {
       throw new Error("exchange_invalid_token_type");
     }
-    if (response.issuedTokenType !== undefined && response.issuedTokenType !== "urn:ietf:params:oauth:token-type:access_token") {
+    if (response.issuedTokenType !== "urn:ietf:params:oauth:token-type:access_token") {
       throw new Error("exchange_invalid_token_type");
     }
+    if (response.scope !== undefined && response.scope.split(/\s+/).filter(Boolean).join(" ") !== effectiveScopes) throw new Error("exchange_scope_refused");
     const subjectExp = Math.floor(input.subjectExp);
     const checked = await validateExchangedToken(
       response.accessToken,

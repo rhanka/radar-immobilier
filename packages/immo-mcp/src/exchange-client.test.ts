@@ -11,7 +11,7 @@ function okResponse(payload: unknown): Response {
 
 describe("requestTokenExchange", () => {
   it("posts the RFC 8693 grant with audience and scope", async () => {
-    const fetchImpl = vi.fn(async () => okResponse({ access_token: "ex-1", token_type: "Bearer" }));
+    const fetchImpl = vi.fn(async () => okResponse({ access_token: "ex-1", token_type: "Bearer", issued_token_type: "urn:ietf:params:oauth:token-type:access_token" }));
     await requestTokenExchange(ENDPOINT, INPUT, { fetchImpl: fetchImpl as unknown as typeof fetch });
     const [url, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toBe(ENDPOINT);
@@ -46,7 +46,7 @@ describe("requestTokenExchange", () => {
   });
 
   it("refuses missing credentials and HTTP errors without retry", async () => {
-    const missing = vi.fn(async () => okResponse({ token_type: "Bearer" }));
+    const missing = vi.fn(async () => okResponse({ token_type: "Bearer", issued_token_type: "urn:ietf:params:oauth:token-type:access_token" }));
     await expect(requestTokenExchange(ENDPOINT, INPUT, { fetchImpl: missing as unknown as typeof fetch })).rejects.toThrow(/exchange_invalid_response/);
     const failing = vi.fn(async () => new Response("denied", { status: 400 }));
     await expect(requestTokenExchange(ENDPOINT, INPUT, { fetchImpl: failing as unknown as typeof fetch })).rejects.toThrow(/exchange_http_error:400/);
