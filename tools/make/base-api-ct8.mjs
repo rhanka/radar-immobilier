@@ -20,12 +20,12 @@ entries.forEach((e, i) => {
   assert.equal(e.idx, i);
   if (i >= baselineCount) assert.ok(e.when > Math.max(...entries.slice(0, i).map(e => e.when)));
 });
-const admin = new pg.Pool({ host: 'postgres', user: 'radar', password: 'synthetic-only', database: 'radar' });
+const admin = new pg.Pool({ host: process.env.POSTGRES_HOST, user: 'radar', password: 'synthetic-only', database: 'radar' });
 try {
   for (const profile of ['fresh', 'upgrade']) {
     const name = `synthetic_ct8_${randomUUID().replaceAll('-', '')}`;
     await admin.query(`CREATE DATABASE "${name}"`);
-    const pool = new pg.Pool({ host: 'postgres', user: 'radar', password: 'synthetic-only', database: name });
+    const pool = new pg.Pool({ host: process.env.POSTGRES_HOST, user: 'radar', password: 'synthetic-only', database: name });
     const db = drizzle(pool);
     const folder = `tmp/${name}`;
     try {
