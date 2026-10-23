@@ -86,3 +86,6 @@ unverified evidence. ETA unchanged: 14-23 agent hours, complete A1 circuit.
   absent; `shared/0024_*` remains a proposal, not registered SQL.
 - [ ] Candidate archive, actual r2 construction API and published tuple:
   absent; dependent qualification remains open.
+- [x] Retain the provider-neutral immutable profile and authority types for A6.
+- [ ] Candidate-dependent Muse code is preserved in ignored evidence/pending
+  files; it is not accepted or wired into production by this preparation slice.
