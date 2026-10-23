@@ -634,15 +634,23 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
     await requireCommitContract();
     await requireOutcomeContract();
     const barrier = await requireCommitBarrier();
-    const host = await composeQ1Host(barrier.observer);
+    const composed = await composeQ1Host(barrier);
+    const host = composed.host;
     const close = host["close"];
     try {
-      requireSelectedProfile(host);
+      requireSelectedProfile(host, composed.profile.digest);
       const execute = requireHostExecute(host);
-      let liveRevision = "q1-rev-1";
+      await pool.query("CREATE TABLE IF NOT EXISTS test_policy_revision (id int PRIMARY KEY, rev text NOT NULL)");
+      await pool.query("INSERT INTO test_policy_revision (id, rev) VALUES (1, 'q1-rev-1') ON CONFLICT (id) DO UPDATE SET rev = 'q1-rev-1'");
+      const readRevisionViaTransaction = async (transaction: unknown): Promise<string> => {
+        const rows = await transactionQuery<{ rev: string }>(transaction,
+          "SELECT rev FROM test_policy_revision WHERE id = $1 FOR SHARE", [1]);
+        return rows.rows[0]?.rev ?? "";
+      };
       const authorizeCommit: AuthorizeCommit = async (context, transaction) => {
         expect(transaction).toBeDefined();
-        if (context.policyRevision !== liveRevision) {
+        const current = await readRevisionViaTransaction(transaction);
+        if (current !== "q1-rev-1") {
           return { allowed: false, reason: "unauthorized_at_commit",
             publicCode: "capability_unavailable", status: 403, retriable: false };
         }
@@ -654,40 +662,56 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       expect(ensured).toMatchObject({ ok: true });
       const artifactId = ((ensured as { result: unknown }).result as { body: { artifactId: string } })
         .body.artifactId;
-      const body = { artifactId,
-        files: [{ path: "index.html", mimeType: "text/html", text: "stale revision" }],
-        idempotencyKey: "q1-rev" };
-      const invocation = invocationFor(authorizeCommit, "rev");
-      const invocationId = invocation["invocationId"] as string;
-      const before = await committedSnapshot(artifactId);
-      let settled = false;
-      const pending = execute({ method: "POST", path: "/publish", body }, invocation)
-        .finally(() => { settled = true; });
-      const pump = (async () => {
-        const deadline = performance.now() + 1500;
-        while (!settled) {
-          if (performance.now() > deadline) throw new Error("[contract-violation] commit barrier did not progress");
-          for (const candidate of PUBLISH_POINTS) {
-            if (settled || candidate === "after_finalization_locks_before_guard") continue;
-            const arrived = await withTimeout(barrier.waitUntilReached(candidate, invocationId), 50);
-            if (arrived) barrier.release(candidate, invocationId);
-          }
-          const targetArrived = await withTimeout(
-            barrier.waitUntilReached("after_finalization_locks_before_guard", invocationId), 50);
-          if (targetArrived) break;
-        }
-      })();
-      await pump;
-      liveRevision = "q1-rev-2";
-      barrier.release("after_finalization_locks_before_guard", invocationId);
-      const outcome = await pending as unknown as Record<string, unknown>;
-      assertOutcomeFailure(outcome, invocationId);
-      expect(outcome["failure"]).toMatchObject({ category: "unauthorized_at_commit" });
-      expect(await committedSnapshot(artifactId)).toEqual(before);
-      expect(await currentReleaseId(artifactId)).toBeUndefined();
+      const orderRevocationFirst = async (): Promise<void> => {
+        const writer = await pool.connect();
+        let run: ReturnType<typeof startBarrierOperation> | undefined;
+        try {
+          await writer.query("BEGIN");
+          await writer.query("SELECT rev FROM test_policy_revision WHERE id=1 FOR UPDATE");
+          await writer.query("UPDATE test_policy_revision SET rev='q1-rev-2' WHERE id=1");
+          const before = await committedSnapshot(artifactId);
+          const invocation = invocationFor(authorizeCommit, "rev-first");
+          run = startBarrierOperation(barrier, invocation.invocationId, () => execute({
+            method: "POST", path: "/publish", body: { artifactId, idempotencyKey: "q1-rev-first",
+              files: [{ path: "index.html", mimeType: "text/html", text: "stale revision" }] } }, invocation), "before_finalization_row_lock");
+          await run.reached;
+          run.release();
+          expect(await withTimeout(run.pending, 100)).toBeUndefined();
+          await writer.query("COMMIT");
+          const outcome = await run.pending;
+          assertOutcomeFailure(outcome, invocation.invocationId);
+          expect((outcome as { failure: unknown }).failure).toMatchObject({ category: "unauthorized_at_commit" });
+          expect(await committedSnapshot(artifactId)).toEqual(before);
+          expect(await currentReleaseId(artifactId)).toBeUndefined();
+        } finally { run?.release(); await writer.query("ROLLBACK"); await run?.pending.catch(() => {}); writer.release(); }
+        await pool.query("UPDATE test_policy_revision SET rev='q1-rev-1' WHERE id=1");
+      };
+      const orderPublicationHoldsShareLock = async (): Promise<void> => {
+        const invocation = invocationFor(authorizeCommit, "rev-held");
+        const run = startBarrierOperation(barrier, invocation.invocationId, () => execute({
+          method: "POST", path: "/publish", body: { artifactId, idempotencyKey: "q1-rev-held",
+            files: [{ path: "index.html", mimeType: "text/html", text: "held revision" }] } }, invocation), "before_commit");
+        const client = await pool.connect();
+        let writer: Promise<unknown> | undefined;
+        try {
+          await run.reached;
+          const pid = Number((await client.query("SELECT pg_backend_pid() AS pid")).rows[0].pid);
+          writer = client.query("UPDATE test_policy_revision SET rev='q1-rev-2' WHERE id=1");
+          await assertSqlWriterBlocked(pid);
+          run.release();
+          expect(await run.pending).toMatchObject({ ok: true });
+          await writer;
+        } finally { run.release(); await run.pending.catch(() => {}); await writer?.catch(() => {}); client.release(); }
+        await pool.query("UPDATE test_policy_revision SET rev='q1-rev-1' WHERE id=1");
+      };
+      await orderRevocationFirst();
+      await orderPublicationHoldsShareLock();
     } finally {
       if (typeof close === "function") (close as () => void)();
     }
+  });
+
+  it.each([false, true])("same-key S3 race across processes, changed command %s", async (changedCommand) => {
   });
 
   it("last quota unit across processes is not covered without the H3 quota interface", () => {
