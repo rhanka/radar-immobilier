@@ -6,7 +6,7 @@
  */
 import type { Database } from "../../../db/client.js";
 import { retireLegacyMarkDelivery } from "../../chat/stream-bus.js";
-import { readLotCity } from "./lot-city.js";
+import { readLotCutoverReadback } from "./lot-cutover-readback.js";
 import type { CutoverSafety } from "./lot-cutover-types.js";
 import { ScopeError } from "../scope.js";
 
@@ -33,7 +33,7 @@ export function defaultCutoverSafety(
       }
       for (const [city, modes] of cities) {
         for (const mode of modes) {
-          await readLotCity(db, actorSub, workspaceId,
+          await readLotCutoverReadback(db, actorSub, workspaceId,
             mode as "real" | "simulation", city);
         }
       }
