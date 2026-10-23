@@ -112,6 +112,50 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     return authorizeTransaction;
   }
 
+  async function failViaTransport(host: Record<string, unknown>,
+    request: { method: string; path: string; body: Record<string, unknown> },
+    transport: "http" | "mcp", guard: AuthorizeCommit = allowAll()): Promise<Record<string, unknown>> {
+    const execute = requireHostExecute(host);
+    const observed: Record<string, unknown>[] = [];
+    const ids: string[] = [];
+    const entries: Record<string, unknown>[] = [];
+    const observe = async (req: unknown, context: unknown) => {
+      const invocation = context as InvocationContextShape;
+      ids.push(invocation.invocationId);
+      const outcome = await execute(req, buildInvocationContext({ ...invocation,
+        authorizeCommit: guard })) as Record<string, unknown>;
+      observed.push(outcome);
+      return outcome;
+    };
+    const control = createArtifactControl({ ...host, execute: observe,
+      app: { ...host.app as object, execute: observe } } as never, SCOPE, BASE, undefined,
+    { ledger: { record: (entry) => { entries.push({ ...entry }); } } });
+    if (transport === "http") {
+      const response = await controlRoute({ auth, accounts: pool, backend: control }).request(
+        `https://app.example.test${request.path}`, {
+          method: request.method, headers: { cookie: await cookie(ACTOR), origin: auth.appBaseUrl,
+            "content-type": "application/json" }, body: JSON.stringify(request.body),
+        });
+      expect(response.status).toBe(503);
+      assertPublicBodyRedacted({ status: response.status, body: await response.json() },
+        { error: "capability_unavailable" }, [], [BUCKET, endpoint, accessKey, SCOPE]);
+    } else {
+      const result = await createMcpArtifactAdapter(control).execute(
+        { method: request.method, path: request.path, args: request.body }, { actorId: ACTOR });
+      assertMcpResultRedacted(result, { status: 503, code: "capability_unavailable",
+        retryable: true, publicError: "capability_unavailable" }, [], [BUCKET, endpoint, accessKey, SCOPE]);
+    }
+    expect(ids).toHaveLength(1);
+    expect(observed).toHaveLength(1);
+    const outcome = observed[0]!;
+    assertOutcomeFailure(outcome, ids[0]);
+    expect(outcome.failure).toMatchObject({ category: "provider_unavailable", status: 503,
+      code: "capability_unavailable", retriable: true });
+    expect(entries).toHaveLength(1);
+    expect(entries[0]).toMatchObject({ invocationId: ids[0], reason: "provider_unavailable", status: 503 });
+    return outcome;
+  }
+
   // Observe the real execute path. This wrapper neither classifies failures
   // nor repairs a response: HTTP and MCP must consume the provider outcome.
   function executeWithParity(host: Record<string, unknown>) {
