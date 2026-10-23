@@ -156,3 +156,4 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 
 ## Review 1 delivery slices
 - [x] reject empty required suites and forward scope options.
+- [x] name missing r2 construction and migration bindings.
