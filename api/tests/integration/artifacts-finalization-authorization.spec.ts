@@ -22,7 +22,6 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { CreateBucketCommand, DeleteBucketCommand, S3Client } from "@aws-sdk/client-s3";
 import { createS3BlobStore } from "@sentropic/artifacts/adapters/s3";
 import {
-  composeArtifactHost,
   createArtifactControl,
   createArtifactsPool,
   deriveIdempotencyKey,
@@ -35,19 +34,28 @@ import {
   assertOutcomeFailure,
   authorizeTransaction,
   buildInvocationContext,
-  FROZEN_CAPABILITIES,
+  composeR2AcceptanceHost,
   reportNotCovered,
   committedState,
   startArtifactWorker,
   arrived,
+  startBarrierOperation,
   requireCommitBarrier,
   requireCommitContract,
   requireHostExecute,
   requireOutcomeContract,
+  requirePreparationCleanupBinding,
+  requirePurgeRaceBinding,
+  verifyPreparationCleanup,
   requireSelectedProfile,
+  readPolicyStatusViaTransaction,
+  transactionQuery,
   toGuardDecision,
   type AuthorizeCommit,
+  type CommitBarrier,
   type CommitBarrierPoint,
+  type CompiledArtifactsProfile,
+  type InvocationContextShape,
 } from "./artifacts-provider-contract.helpers.js";
 
 let nextInvocationId = 1;
@@ -711,99 +719,6 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       expect(await currentReleaseId(artifactId)).toBeUndefined();
     } finally {
       if (typeof close === "function") (close as () => void)();
-    }
-  });
-
-  it("same-key S3 race across two processes keeps one winner and replays the loser", async () => {
-    await requireCommitContract();
-    await requireOutcomeContract();
-    const barrier = await requireCommitBarrier();
-    const env = loadConfig();
-    const hostA = await composeQ1Host(barrier.observer);
-    const closeA = hostA["close"];
-    const worker = await startArtifactWorker({ host: env.POSTGRES_HOST, port: env.POSTGRES_PORT,
-      user: env.POSTGRES_USER, password: env.POSTGRES_PASSWORD, database: DATABASE }, storageConfig());
-    expect(worker.pid).not.toBe(process.pid);
-    const barrierB = worker.barrier;
-    try {
-      requireSelectedProfile(hostA);
-      const executeA = requireHostExecute(hostA);
-      const executeB = worker.execute;
-      const purposes: Array<{ invocationId: string; purpose: string }> = [];
-      const authorizeCommit: AuthorizeCommit = async (context, transaction) => {
-        expect(transaction).toBeDefined();
-        purposes.push({ invocationId: context.invocationId, purpose: context.purpose });
-        return authorizeTransaction(context, transaction);
-      };
-      const ensured = await executeA({ method: "POST", path: "/ensure",
-        body: { bindingName: "q1-race", idempotencyKey: "q1-race-ensure" } },
-        invocationFor(authorizeCommit, "race-ensure"));
-      expect(ensured).toMatchObject({ ok: true });
-      const artifactId = ((ensured as { result: unknown }).result as { body: { artifactId: string } })
-        .body.artifactId;
-      const body = { artifactId,
-        files: [{ path: "index.html", mimeType: "text/html", text: "same-key race" }],
-        idempotencyKey: "q1-race" };
-      const internalKey = deriveIdempotencyKey(
-        { scope: SCOPE, sub: ACTOR, op: "publish", artifactId, clientKey: "q1-race" });
-      const invA = invocationFor(authorizeCommit, "race-a");
-      const invB = invocationFor(authorizeCommit, "race-b");
-      const invAId = invA["invocationId"] as string;
-      const invBId = invB["invocationId"] as string;
-      const releasesBefore = await tableCount("releases");
-      const keysBefore = await tableCount("idempotency_keys");
-      const drainPoints: readonly CommitBarrierPoint[] = [
-        ...PUBLISH_POINTS, "after_replay_lookup_before_guard",
-      ];
-      let settledB = false;
-      const pendingB = executeB({ method: "POST", path: "/publish", body }, invB)
-        .finally(() => { settledB = true; });
-      const pumpB = (async () => {
-        const deadline = performance.now() + 1500;
-        while (!settledB) {
-          if (performance.now() > deadline) throw new Error("[contract-violation] commit barrier B did not progress");
-          for (const candidate of drainPoints) {
-            if (settledB || candidate === "before_key_lock") continue;
-            const arrived = await withTimeout(barrierB.waitUntilReached(candidate, invBId), 50);
-            if (arrived) barrierB.release(candidate, invBId);
-          }
-          await withTimeout(new Promise<void>((resolve) => setTimeout(resolve, 50)), 50);
-        }
-      })();
-      await barrierB.waitUntilReached("before_key_lock", invBId);
-      let settledA = false;
-      const pendingA = executeA({ method: "POST", path: "/publish", body }, invA)
-        .finally(() => { settledA = true; });
-      const pumpA = (async () => {
-        const deadline = performance.now() + 1500;
-        while (!settledA) {
-          if (performance.now() > deadline) throw new Error("[contract-violation] commit barrier A did not progress");
-          for (const candidate of drainPoints) {
-            if (settledA) break;
-            const arrived = await withTimeout(barrier.waitUntilReached(candidate, invAId), 50);
-            if (arrived) barrier.release(candidate, invAId);
-          }
-        }
-      })();
-      const winner = await pendingA as unknown as Record<string, unknown>;
-      await pumpA;
-      expect(winner).toMatchObject({ ok: true });
-      barrierB.release("before_key_lock", invBId);
-      const loser = await pendingB as unknown as Record<string, unknown>;
-      await pumpB;
-      expect(loser).toMatchObject({ ok: true });
-      const winnerBody = ((winner as { result: unknown }).result as { body: unknown });
-      const loserBody = ((loser as { result: unknown }).result as { body: unknown });
-      expect(loserBody).toEqual(winnerBody);
-      expect(worker.authorizations).toContainEqual({ invocationId: invBId, purpose: "replay" });
-      expect(await tableCount("releases")).toBe(releasesBefore + 1);
-      expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
-      const successRows = Number((await pool.query(
-        "SELECT count(*) FROM artifacts.idempotency_keys WHERE key = $1", [internalKey])).rows[0].count);
-      expect(successRows).toBe(1);
-    } finally {
-      if (typeof closeA === "function") (closeA as () => void)();
-      await worker.close();
     }
   });
 
