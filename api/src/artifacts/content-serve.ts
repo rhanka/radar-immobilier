@@ -33,6 +33,7 @@ export interface ContentServeDeps {
   /** Optional revocation predicate; revoked sessions fail closed. */
   readonly isRevoked?: (sessionId: string) => boolean;
 }
+type AuthorizedReader = ApiReaderContext & { readonly validUntil: number };
 
 function bareHost(header: string | undefined): string {
   const raw = (header ?? "").trim().toLowerCase();
@@ -49,7 +50,11 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
   const app = new Hono();
   const now = deps.now ?? (() => Date.now());
 
-  async function authorized(c: Context): Promise<ApiReaderContext | null> {
+  function stillOpen(reader: AuthorizedReader): boolean {
+    return reader.validUntil > now() && !deps.isRevoked?.(reader.sessionId);
+  }
+
+  async function authorized(c: Context): Promise<AuthorizedReader | null> {
     const grant = c.req.query("grant") ?? c.req.header("x-preview-grant") ?? "";
     if (!grant) return null;
     const host = bareHost(c.req.header("host"));
@@ -62,7 +67,12 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     if (content.kind === "pinned" && content.releaseId !== claims.releaseId) return null;
     if (deps.isRevoked?.(session.sid)) return null;
     if (!deps.authority) return null;
-    try { return await adaptGrantToReader(claims, deps.authority); } catch { return null; }
+    try {
+      const context = await adaptGrantToReader(claims, deps.authority);
+      if (!context) return null;
+      const reader = { ...context, validUntil: Math.min(claims.expiresAtMs, session.expiresAt) };
+      return stillOpen(reader) ? reader : null;
+    } catch { return null; }
   }
 
   app.get("/livez", (c) => c.json({ status: "ok" }));
@@ -113,7 +123,11 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
         return c.json({ error: "invalid_params" }, 400);
       }
       applyReaderContentHeaders(c);
-      try { return c.json(validateReaderResponse(op, await deps.readOperation(op, params.params, auth), auth.readerSub)); }
+      try {
+        const body = validateReaderResponse(op, await deps.readOperation(op, params.params, auth), auth.readerSub);
+        if (!stillOpen(auth)) return c.json({ error: "unauthenticated" }, 401);
+        return c.json(body);
+      }
       catch { return c.json({ error: "capability_unavailable" }, 503); }
     }
     const checked = validateOperationParams(op as ReaderOperationName, { ...Object.fromEntries(Object.entries(c.req.query()).filter(([key]) => key !== "grant")), city: c.req.query("city") ?? "valleyfield" });
@@ -122,7 +136,11 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
       return c.json({ error: "invalid_params" }, 400);
     }
     applyReaderContentHeaders(c);
-    try { return c.json(validateReaderResponse(op, await deps.readOperation(op, checked.params, auth), auth.readerSub)); }
+    try {
+      const body = validateReaderResponse(op, await deps.readOperation(op, checked.params, auth), auth.readerSub);
+      if (!stillOpen(auth)) return c.json({ error: "unauthenticated" }, 401);
+      return c.json(body);
+    }
     catch { return c.json({ error: "capability_unavailable" }, 503); }
   });
 
