@@ -32,8 +32,10 @@ cleanup_cases() {
   compose=(docker compose --env-file /dev/null -p "$PROJECT" -f unused)
   touch "$PROOF_DIR/live"
   ENV=dev; rejected guarded_down
+  rm -f "$PROOF_DIR/live"
   ENV=test-proof; PROJECT=foreign; rejected guarded_down
   PROJECT=$PROOF_PROJECT
+  touch "$PROOF_DIR/live"
   export PROOF_CASE=foreign; rejected guarded_down
   export PROOF_CASE=shared; rejected guarded_down
   [[ $(grep -c ' down ' "$PROOF_DIR/commands" || true) == 0 ]] || fail 'foreign deletion attempted'

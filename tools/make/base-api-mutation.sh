@@ -4,22 +4,24 @@ set -euo pipefail
 ROOT=$PWD
 mkdir -p tmp/base-api-evidence/B0
 DIR=$(mktemp -d "$PWD/tmp/base-api-evidence/B0/mutations-XXXXXX")
-for kind in environment archive suite skipped cleanup; do
+for kind in environment archive suite skipped cleanup project; do
   copy=$DIR/$kind
   mkdir -p "$copy/tools/make" "$copy/api/src/services/facets"
   cp tools/make/base-api* "$copy/tools/make/"
   touch "$copy/api/src/services/facets/scoped-db.test.ts"
   target=$copy/tools/make/base-api-guards.sh
-  [[ $kind != cleanup ]] || target=$copy/tools/make/base-api-resources.sh
+  [[ $kind != cleanup && $kind != project ]] || target=$copy/tools/make/base-api-resources.sh
   cp "$target" "$copy/original"
   proof_case=$kind; [[ $kind != skipped ]] || proof_case=suite
+  [[ $kind != project ]] || proof_case=cleanup
   (cd "$copy"; PROOF_ONLY=$proof_case bash tools/make/base-api-runner-proof.sh) > "$copy/control.log" 2>&1
   case $kind in
     environment) sed -i '/^require_env() {/a\  return 0 # behavior mutant' "$target";;
     archive) sed -i '/^allowed_path() {/a\  return 0 # behavior mutant' "$target";;
     suite) sed -i '/^require_scope() {/a\  return 0 # behavior mutant' "$target";;
     skipped) sed -i '/^assert_tests_ran() {/a\  return 0 # behavior mutant' "$target";;
-    cleanup) sed -i '/^verify_ownership() {/a\  return 0 # behavior mutant' "$target";;
+    cleanup) sed -i '/^verify_resource() {/a\  return 0 # behavior mutant' "$target";;
+    project) sed -i '/^  \[\[ \$PROJECT ==/c\  : # behavior mutant' "$target";;
   esac
   bash -n "$target"
   code=0
