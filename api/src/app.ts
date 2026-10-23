@@ -37,6 +37,12 @@ import { scopedLotFacetsRoute } from "./routes/scoped-lot-facets.js";
 import { signalFacetsRoute } from "./routes/signal-facets.js";
 import { privateSignalResponse } from "./services/facets/private-response.js";
 import { documentsRoute, type DocumentsDeps } from "./routes/documents.js";
+import { workspacesRoute } from "./routes/workspaces.js";
+import { scopedSignalFacetsRoute } from "./routes/scoped-signal-facets.js";
+import { scopedWorkspaceArchiveRoute } from "./routes/scoped-workspace-archive.js";
+import { scopedProjectionRevisionsRoute } from "./routes/scoped-projection-revisions.js";
+import { scopedProjectionEventsRoute } from "./routes/scoped-projection-events.js";
+import { scopedSignalRevealRoute } from "./routes/scoped-signal-reveal.js";
 
 export type AppDeps = HealthDeps &
   SourcesDeps &
@@ -106,6 +112,8 @@ export function createApp(deps: AppDeps): Hono {
 
   // Auth runs after the content gate, so protect still fronts every business
   // route. When `deps.auth` is absent or disabled both are inert no-ops.
+  app.use("/api/v1/workspaces/*", privateSignalResponse);
+  app.use("/api/v1/workspaces", privateSignalResponse);
   if (deps.auth) {
     app.use("*", protect(deps.auth, { db: deps.db }));
     // Pass db into authOptions so enrollment runs in production.
@@ -156,6 +164,12 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", documentsRoute(deps));
   app.route("/", graphSignalsRoute(deps));
   app.route("/", signalFacetsRoute(deps));
+  app.route("/", workspacesRoute(deps));
+  app.route("/", scopedSignalFacetsRoute(deps));
+  app.route("/", scopedWorkspaceArchiveRoute(deps));
+  app.route("/", scopedProjectionRevisionsRoute(deps));
+  app.route("/", scopedProjectionEventsRoute(deps));
+  app.route("/", scopedSignalRevealRoute(deps));
   app.route("/", graphRoute(deps));
   app.route("/", geoLotsRoute());
   app.route("/", geoZonesRoute({ db: deps.db }));
