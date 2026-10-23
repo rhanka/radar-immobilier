@@ -69,3 +69,4 @@ No invented production domain or certificate.
 - [x] Renewal checks current release and fails closed during authority outage.
 - [x] Isolation headers prohibit workers and preserve deny responses.
 - [x] Technical example source prepared; browser behavior remains unverified.
+- [x] Operation inputs reject undeclared authority or URL fields.
