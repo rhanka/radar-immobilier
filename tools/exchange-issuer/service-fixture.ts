@@ -49,14 +49,14 @@ export async function serviceFixture() {
       requiredScopes: ["immo:read"], scopesSupported: ["immo:read", "immo:search"], port: 0,
       dataMode: "real", sessionIdleTimeoutMs: 1_800_000, sessionMaxLifetimeMs: 28_800_000,
     }, { keySource: { resolveKey: async () => subject.publicKey }, data: new HttpDataSource({ baseUrl: radarUrl }),
-      exchange: { clientSecret: TEST_WORKLOAD_SECRET, config: { issuer: TEST_ISSUER, apiAudience: TEST_API_AUDIENCE, mcpResource: TEST_RESOURCE,
+      exchange: { clientSecret: TEST_WORKLOAD_SECRET, allowLoopbackHttp: true, config: { issuer: TEST_ISSUER, apiAudience: TEST_API_AUDIENCE, mcpResource: TEST_RESOURCE,
         tokenEndpoint: `${issuerUrl}/token`, workloadSub: "immo-mcp-workload", workloadClientId: "immo-mcp-workload",
         environment: "test-artefacts-mcp-a2", policyRevision: "p4-v1" },
         keySource: { resolveKey: (header) => jwks(header as never, {} as never) },
         cache: new ExchangeCache(), singleFlight: new SingleFlightExchange(),
       } });
     const mcpUrl = await listen(mcp);
-    return { issuer, seen, mcpUrl, radarUrl, close,
+    return { issuer, seen, issuerUrl, mcpUrl, radarUrl, close,
       subject: await signSubjectToken(subject.privateKey),
       reduced: await signSubjectToken(subject.privateKey, { scope: "immo:read" }),
     };

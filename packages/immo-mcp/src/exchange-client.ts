@@ -28,6 +28,7 @@ export interface TokenExchangeResult {
 export interface ExchangeHttpOptions {
   readonly fetchImpl?: typeof fetch | undefined;
   readonly maxBytes?: number | undefined;
+  readonly allowLoopbackHttp?: boolean;
 }
 
 /**
@@ -45,6 +46,13 @@ export async function requestTokenExchange(
 ): Promise<TokenExchangeResult> {
   if (!input.subjectToken) throw new Error("exchange_missing_subject_token");
   if (!input.workload?.clientId || !input.workload.clientSecret) throw new Error("exchange_not_configured");
+  let endpoint: URL;
+  try { endpoint = new URL(tokenEndpoint); } catch { throw new Error("exchange_invalid_endpoint"); }
+  const loopback = opts.allowLoopbackHttp === true && endpoint.protocol === "http:" &&
+    ["127.0.0.1", "localhost", "[::1]"].includes(endpoint.hostname);
+  if ((endpoint.protocol !== "https:" && !loopback) || endpoint.username || endpoint.password) {
+    throw new Error("exchange_invalid_endpoint");
+  }
   const fetchImpl = opts.fetchImpl ?? fetch;
   const maxBytes = opts.maxBytes ?? EXCHANGE_MAX_RESPONSE_BYTES;
   const body = new URLSearchParams({

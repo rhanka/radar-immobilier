@@ -5,6 +5,13 @@ const input = { subjectToken: "synthetic-private-subject", audience: "https://ap
   workload: { clientId: "synthetic-workload", clientSecret: "synthetic-secret" } };
 
 describe("exchange response boundary", () => {
+  it.each(["http://issuer.example.test/token", "https://user:password@issuer.example.test/token"])(
+    "refuses unsafe endpoint %s before sending credentials", async (endpoint) => {
+      let calls = 0;
+      await expect(requestTokenExchange(endpoint, input, { fetchImpl: async () => { calls++; throw new Error("unexpected"); } })).rejects.toThrow(/exchange_invalid_endpoint/);
+      expect(calls).toBe(0);
+    },
+  );
   it.each([undefined, "", [], "urn:invalid"])("refuses invalid issued_token_type %j", async (issued) => {
     await expect(requestTokenExchange("https://issuer.example.test/token", input, {
       fetchImpl: async () => Response.json({ access_token: "synthetic-delegation", token_type: "Bearer", issued_token_type: issued }),
