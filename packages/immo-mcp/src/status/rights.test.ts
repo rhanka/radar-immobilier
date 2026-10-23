@@ -69,6 +69,24 @@ describe("status rights matrix", () => {
     expect(adminGrantsNoStatusRight(true)).toBe(false);
   });
 
+  it.each(["select", "changePipeline", "changeMarket"] as const)(
+    "should authorize only its own lot operations with the %s grant alone", (grant) => {
+      const rights: StatusRights = { select: false, changePipeline: false, changeMarket: false,
+        discardPersonally: false, moderateArchive: false, [grant]: true };
+      for (const [required, operations] of [
+        ["select", ["select", "deselect"]],
+        ["changePipeline", ["set_pipeline", "clear_pipeline"]],
+        ["changeMarket", ["set_market", "clear_market"]],
+      ] as const) {
+        for (const operation of operations) {
+          expect(lotDenial("common", operation, rights))
+            .toBe(required === grant ? null : "workspace_capability_required");
+        }
+      }
+      expect(lotDenial("common", "discard", rights)).toBe("workspace_capability_required");
+      expect(signalDenial("common", "restore", rights)).toBe("workspace_capability_required");
+    });
+
   it("rejects caller-supplied authority and convenience workspaces", () => {
     expect(findCallerAuthorityField({ actor: "x" })).toBe("actor");
     expect(findCallerAuthorityField({ owner: "x" })).toBe("owner");
