@@ -19,4 +19,35 @@ describe("release activation", () => {
     expect(registry.canUpgrade("123e4567-e89b-12d3-a456-426614174000", "123e4567-e89b-12d3-a456-426614174001")).toBe(false);
     expect(registry.canUpgrade("123e4567-e89b-12d3-a456-426614174000", "release-002")).toBe(true);
   });
+
+  it("should never let a stale activation overwrite the current release", async () => {
+    const artifact = "123e4567-e89b-12d3-a456-426614174000";
+    const staleRelease = "123e4567-e89b-12d3-a456-426614174001";
+    const currentRelease = "223e4567-e89b-12d3-a456-426614174001";
+    const registry = createActivationRegistry({ now: () => 1_000 });
+    const base = createFixtureAuthority();
+    let current = { artifactId: artifact, releaseId: staleRelease, authorSub: "author-alice" };
+    let entered: (() => void) | null = null;
+    let releaseGate: (() => void) | null = null;
+    const enteredPromise = new Promise<void>((resolve) => { entered = resolve; });
+    const gatePromise = new Promise<void>((resolve) => { releaseGate = resolve; });
+    let profileCalls = 0;
+    const authority = { ...base,
+      getRelease: async (id: string) => (id === artifact ? { ...current } : base.getRelease(id)),
+      getProfile: async (id: string) => {
+        profileCalls += 1;
+        if (profileCalls === 1) {
+          entered!();
+          await gatePromise;
+        }
+        return base.getProfile(id);
+      } };
+    const stale = registry.activate(artifact, staleRelease, authority);
+    await enteredPromise;
+    current = { artifactId: artifact, releaseId: currentRelease, authorSub: "author-alice" };
+    expect(await registry.activate(artifact, currentRelease, authority)).not.toBeNull();
+    releaseGate!();
+    expect(await stale).toBeNull();
+    expect(registry.active(artifact)?.releaseId).toBe(currentRelease);
+  });
 });
