@@ -75,3 +75,14 @@ descending from `9a81508704b8ee247e3d402f9cbf15d458edfe2a`.
 Uncommitted `RAPPORT-MUSE-ARTEFACTS-A1.md`: files, proposed partitions and
 line counts, expected tests, shared deltas, exact missing interfaces and
 unverified evidence. ETA unchanged: 14-23 agent hours, complete A1 circuit.
+
+## Integration evidence (Sol)
+
+- [x] Import PR908 committed bytes through merge
+  `39e38e2156ee142ff0e9570c5a15744cf58764c2`, second parent
+  `81e8e729feb6aa8f8255b754320f8a9581ddd1c3`; no copied commits.
+- [x] Correct the proposed CT-8 copy to match all nine master checkboxes.
+- [ ] Conductor lease, applied-prefix receipt and frozen migration order:
+  absent; `shared/0024_*` remains a proposal, not registered SQL.
+- [ ] Candidate archive, actual r2 construction API and published tuple:
+  absent; dependent qualification remains open.
