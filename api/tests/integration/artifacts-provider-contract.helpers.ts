@@ -873,8 +873,13 @@ export function finalizationFaultPool(pool: pg.Pool, options: {
       quota: /quota/, "blob-reference": /^blob_(ref|pin)/,
       "deletion-claim": /deletion.*claim|claim.*deletion/,
     };
-    if (options.lockClass === "schema-infrastructure") return /\bLOCK\s+TABLE\b|\bpg_catalog\./i.test(sql);
-    if (options.lockClass === "unqualified") return /^\s*SET\s+LOCAL\b/i.test(sql);
+    // r2 does not require LOCK TABLE / pg_catalog.* or SET LOCAL shapes: never
+    // impose those optional SQL forms on the provider. Those two cause classes
+    // use an explicitly wired phase-injection joint (see
+    // requirePhaseInjectionBinding); matching optional text here would fail a
+    // conforming coordinator that uses implicit PostgreSQL locks.
+    if (options.lockClass === "schema-infrastructure") return false;
+    if (options.lockClass === "unqualified") return false;
     return /FOR\s+(UPDATE|SHARE)/i.test(sql) &&
       tables.some((name) => names[options.lockClass ?? ""]?.test(name));
   };
@@ -918,6 +923,22 @@ export function finalizationFaultPool(pool: pg.Pool, options: {
     return typeof value === "function" ? value.bind(target) : value;
   } });
   return { pool: instrumented, evidence };
+}
+
+/**
+ * Explicitly wired phase-injection joint for E3 cause classes whose SQL shape
+ * r2 does not impose (schema-infrastructure, unqualified). Fails
+ * `[missing-contract]` naming the joint and its owner instead of asserting an
+ * optional LOCK TABLE / pg_catalog / SET LOCAL form. A conforming coordinator
+ * using implicit PostgreSQL locks fails here by name, never on a form
+ * assertion.
+ */
+export async function requirePhaseInjectionBinding(phase: string): Promise<never> {
+  void phase;
+  missingContract(
+    `testing.injectPhaseFault.${phase}`,
+    `explicit phase-injection joint for E3 cause ${phase} is required (owner Sentropic L2/L3, spec r2 E3); optional LOCK TABLE / pg_catalog / SET LOCAL SQL must not be imposed on the provider`,
+  );
 }
 
 /** Observe committed state on a separate raw connection, with stable ordering. */
