@@ -93,6 +93,7 @@
   - [x] B0.5: freeze the existing authority matrix and independent HTTP/SQL acceptance cases.
   - [x] Gate: contract traced to code; open defaults visible; no artifact dependency; safe runner and bundle audit qualified.
 - [ ] B1 — Signal/workspace API; Muse 3–5 h, Sol 3–4 h, total 6–9 h.
+  - [x] B1 preparation: add the signed composed fixture and verify each staged slice independently of later workspace drafts.
   - [ ] B1.1: mount workspace, personal, common-archive, revision and invalidation routers.
   - [ ] B1.2: constrain middleware to its intended endpoints; preserve cookie writes and supported bearer reads.
   - [ ] B1.3: expose workspace context and reason codes without legacy readers.
