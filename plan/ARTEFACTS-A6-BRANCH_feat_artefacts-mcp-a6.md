@@ -95,3 +95,4 @@ No invented production domain or certificate.
 - [x] Prepared explicit fixture ports, exact-host secure cookies and a separate source-browser runner; final-image/API acceptance remains open.
 - [x] Same-HEAD Astra reviews identified renewal expiry/revocation after waits; both regressions reproduced, then 13 scoped controls passed after correction.
 - [x] FIX1 A1: scope authority rights to the reader/artifact pair; define nonreusable authorization versions and canonical profile fingerprints.
+- [x] FIX1 A2/B4: tickets carry the approved policy revision and profile fingerprint; init retains the presented profile.

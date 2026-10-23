@@ -8,6 +8,7 @@
  * store binding; this in-memory store is the unit seam.
  */
 import { randomBytes } from "node:crypto";
+import { fingerprintReaderProfile, type ReaderProfile } from "./reader-profile.js";
 
 export const PREVIEW_TICKET_TTL_MS = 60_000;
 
@@ -18,6 +19,8 @@ export interface PreviewTicket {
   readonly artifactId: string;
   readonly releaseId: string;
   readonly profileName: string;
+  readonly policyRevision: string;
+  readonly profileFingerprint: string;
   readonly readerSub: string;
   readonly returnTarget: string;
   readonly expiresAt: number;
@@ -29,6 +32,8 @@ export interface TicketMint {
   readonly artifactId: string;
   readonly releaseId: string;
   readonly profileName: string;
+  readonly policyRevision: string;
+  readonly profileFingerprint: string;
   readonly readerSub: string;
   readonly returnTarget: string;
 }
@@ -36,6 +41,16 @@ export interface TicketMint {
 export interface TicketStoreOptions {
   readonly now?: () => number;
   readonly random?: () => string;
+}
+
+/** Refuse any substitution of the approved profile between init and exchange. */
+export function isTicketProfileCurrent(
+  ticket: Pick<PreviewTicket, "profileName" | "policyRevision" | "profileFingerprint">,
+  profile: ReaderProfile,
+): boolean {
+  return ticket.profileName === profile.name
+    && ticket.policyRevision === profile.policyRevision
+    && ticket.profileFingerprint === fingerprintReaderProfile(profile);
 }
 
 export function createTicketStore(options: TicketStoreOptions = {}): {

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { SignJWT } from "jose";
 import { createTicketStore } from "./preview-tickets.js";
+import { fingerprintReaderProfile } from "./reader-profile.js";
 import { mintGrant, verifyGrant, type GrantClaims } from "./preview-grant.js";
 import { renewGrant } from "./preview-renewal.js";
 import { createFixtureAuthority } from "./reader-profile.js";
@@ -18,7 +19,10 @@ describe("preview security boundaries", () => {
   it("should refuse a ticket stolen from another browser", () => {
     const store = createTicketStore({ now: () => 1_000 });
     const input = { origin: `https://${GRANT.host}`, artifactId: GRANT.artifactId,
-      releaseId: GRANT.releaseId, profileName: "demo", readerSub: "reader-alice",
+      releaseId: GRANT.releaseId, profileName: "demo", policyRevision: "pol-001",
+      profileFingerprint: fingerprintReaderProfile({ name: "demo",
+        policyRevision: "pol-001", capabilities: ["geo.read", "signals.protected-read"] }),
+      readerSub: "reader-alice",
       returnTarget: "/", browserBinding: "browser-secret-at-least-32-characters" };
     const ticket = store.mint(input);
     expect(store.consume(ticket.ticket, "another-browser-secret")).toBeNull();

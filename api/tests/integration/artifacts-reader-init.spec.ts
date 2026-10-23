@@ -3,7 +3,7 @@
  * Synthetic fixtures only; no DB, no network, deterministic clocks.
  */
 import { describe, expect, it } from "vitest";
-import { createFixtureAuthority } from "../../src/artifacts/reader-profile.js";
+import { createFixtureAuthority, fingerprintReaderProfile } from "../../src/artifacts/reader-profile.js";
 import { validatePreviewInit } from "../../src/artifacts/preview-init.js";
 import { createTicketStore } from "../../src/artifacts/preview-tickets.js";
 
@@ -25,10 +25,18 @@ describe("artifacts reader init and ticket flow", () => {
     expect(summary?.capabilities).toEqual(["geo.read", "signals.protected-read"]);
 
     const store = createTicketStore({ now: () => 1_000 });
-    const ticket = store.mint({ ...INIT, readerSub: "reader-alice" });
+    const ticket = store.mint({ ...INIT,
+      readerSub: "reader-alice",
+      policyRevision: summary!.policyRevision,
+      profileFingerprint: fingerprintReaderProfile({ name: summary!.profileName,
+        policyRevision: summary!.policyRevision,
+        capabilities: summary!.capabilities as ("geo.read" | "signals.protected-read")[] }),
+    });
     expect(ticket.ticket.length).toBeGreaterThanOrEqual(32);
     expect(ticket.expiresAt).toBe(1_000 + 60_000);
-    expect(store.consume(ticket.ticket, INIT.browserBinding)?.readerSub).toBe("reader-alice");
+    expect(ticket.policyRevision).toBe(summary!.policyRevision);
+    const consumed = store.consume(ticket.ticket, INIT.browserBinding);
+    expect(consumed?.readerSub).toBe("reader-alice");
     expect(store.consume(ticket.ticket, INIT.browserBinding)).toBeNull();
   });
 
