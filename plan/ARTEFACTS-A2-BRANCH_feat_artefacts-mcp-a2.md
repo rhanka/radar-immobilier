@@ -157,3 +157,5 @@ activation, no cluster-mesh composition.
 - [x] Require the exact service-user refusal for a signed token matching the expected workload subject.
 
 - [x] Isolate HTTP audience refusal using destination-verifiable signatures and otherwise valid claims.
+
+- [x] Cover untrusted delegated signatures, wrong issuers and DPoP token types with precise rejection reasons.

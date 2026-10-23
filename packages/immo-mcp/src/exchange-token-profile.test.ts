@@ -19,6 +19,17 @@ async function verify(overrides: Record<string, unknown>) {
   return validateExchangedToken(await mint(overrides), subject, config, { resolveKey: async () => publicKey }, now);
 }
 describe("delegated issuer profile", () => {
+  it("refuses a delegated token signed by an untrusted key", async () => {
+    const untrusted = await generateKeyPair("RS256");
+    await expect(validateExchangedToken(await mint(), subject, config,
+      { resolveKey: async () => untrusted.publicKey }, now)).rejects.toThrow(/^exchange_invalid_signature$/);
+  });
+  it("refuses a valid signature from the wrong issuer", async () => {
+    await expect(verify({ iss: "https://other-issuer.example.test" })).rejects.toThrow(/^exchange_invalid_issuer$/);
+  });
+  it("refuses a delegated DPoP token type without confirmation binding", async () => {
+    await expect(verify({ token_type: "DPoP" })).rejects.toThrow(/^exchange_invalid_token_type$/);
+  });
   it.each([undefined, "", 4])("requires top-level client_id without actor fallback (%j)", async (client) => {
     await expect(verify({ client_id: client, act: { sub: config.workloadSub, client_id: config.workloadClientId } })).rejects.toThrow(/exchange_invalid_client/);
   });
