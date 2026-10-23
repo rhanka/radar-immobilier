@@ -151,3 +151,5 @@ activation, no cluster-mesh composition.
 - [ ] Conductor merges the accepted A2 HEAD and acknowledges the H4 file hash/target/gate receipt before ownership returns for P6/P7; no transfer has occurred.
 
 - [x] Reject protected HTTP search without private authority, including missing exchange runtime.
+
+- [x] Prove valid DPoP refusal with and without runtime, zero exchange/API calls, and preserved synthetic stdio.

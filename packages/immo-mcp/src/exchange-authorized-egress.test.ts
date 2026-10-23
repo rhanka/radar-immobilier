@@ -8,6 +8,7 @@ import {
   getExchangeDeps,
   resolveExchangedCallContext,
   runWithExchangeDeps,
+  runWithHttpTransport,
 } from "./authorized-egress.js";
 import {
   createIsolatedExchangeFixture,
@@ -90,6 +91,18 @@ describe("resolveExchangedCallContext", () => {
     }));
     await expect(runWithExchangeDeps(deps, () => resolveExchangedCallContext(ctx, "search_signals"))).rejects.toThrow(/exchange_proof_binding_refused/);
     expect(getExchangeDeps()).toBeUndefined();
+  });
+
+  it("refuses HTTP search without bound authority and keeps stdio synthetic", async () => {
+    const fixture = await createIsolatedExchangeFixture();
+    const ctx = captureInvocationContext(seeds(TEST_SCOPES.split(" ")));
+    const deps = exchangeDepsFor(fixture);
+    await expect(runWithHttpTransport(() => runWithExchangeDeps(deps, () => resolveExchangedCallContext(ctx, "search_signals")))).rejects.toThrow(/exchange_missing_authority/);
+    await expect(runWithHttpTransport(() => resolveExchangedCallContext(ctx, "search_signals"))).rejects.toThrow(/exchange_missing_authority/);
+    await expect(runWithExchangeDeps(deps, () => resolveExchangedCallContext(ctx, "search_signals"))).rejects.toThrow(/exchange_missing_authority/);
+    expect(fixture.issuedExchangedTokens).toHaveLength(0);
+    const synthetic = await resolveExchangedCallContext(ctx, "search_signals");
+    expect(synthetic).toEqual({});
   });
 
   it("exchanges once per subject and caches within the deadline", async () => {
