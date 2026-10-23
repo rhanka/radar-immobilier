@@ -276,10 +276,11 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
     await requireCommitContract();
     await requireOutcomeContract();
     const barrier = await requireCommitBarrier();
-    const host = await composeQ1Host(barrier.observer);
+    const composed = await composeQ1Host(barrier);
+    const host = composed.host;
     const close = host["close"];
     try {
-      requireSelectedProfile(host);
+      requireSelectedProfile(host, composed.profile.digest);
       const execute = requireHostExecute(host);
       const ensured = await execute({ method: "POST", path: "/ensure",
         body: { bindingName: "q1-inspect", idempotencyKey: "q1-inspect-ensure" } },
@@ -293,52 +294,69 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         idempotencyKey: clientKey };
       const internalKey = deriveIdempotencyKey(
         { scope: SCOPE, sub: ACTOR, op: "publish", artifactId, clientKey });
-      const invocation = invocationFor(statusDriven(), "inspect");
-      const invocationId = invocation["invocationId"] as string;
-      const before = await committedSnapshot(artifactId);
-      let settled = false;
-      const pending = execute({ method: "POST", path: "/publish", body }, invocation)
-        .finally(() => { settled = true; });
-      const pump = (async () => {
-        const deadline = performance.now() + 1500;
-        while (!settled) {
-          if (performance.now() > deadline) throw new Error("[contract-violation] commit barrier did not progress");
-          for (const candidate of PUBLISH_POINTS) {
-            if (settled || candidate === "after_finalization_locks_before_guard") continue;
-            const arrived = await withTimeout(barrier.waitUntilReached(candidate, invocationId), 50);
-            if (arrived) barrier.release(candidate, invocationId);
+      const orderRevocationFirst = async (): Promise<void> => {
+        const invocation = invocationFor(statusDriven(), "inspect-first");
+        const invocationId = invocation["invocationId"] as string;
+        const before = await committedSnapshot(artifactId);
+        await pool.query("UPDATE account_users SET status = 'suspended' WHERE sub = 'alice'");
+        let settled = false;
+        const pending = execute({ method: "POST", path: "/publish", body }, invocation)
+          .finally(() => { settled = true; });
+        const pump = (async () => {
+          const deadline = performance.now() + 1500;
+          while (!settled) {
+            if (performance.now() > deadline) throw new Error("[contract-violation] commit barrier did not progress");
+            for (const candidate of PUBLISH_POINTS) {
+              if (settled) break;
+              const arrived = await withTimeout(barrier.waitUntilReached(candidate, invocationId), 50);
+              if (arrived) barrier.release(candidate, invocationId);
+            }
           }
-          const targetArrived = await withTimeout(
-            barrier.waitUntilReached("after_finalization_locks_before_guard", invocationId), 50);
-          if (targetArrived) break;
+        })();
+        await pump;
+        const outcome = await pending as unknown as Record<string, unknown>;
+        assertOutcomeFailure(outcome, invocationId);
+        expect(outcome["failure"]).toMatchObject({
+          category: "unauthorized_at_commit", retriable: false, commitState: "not_committed" });
+        const env = loadConfig();
+        const peer = new pg.Pool({ host: env.POSTGRES_HOST, port: env.POSTGRES_PORT,
+          user: env.POSTGRES_USER, password: env.POSTGRES_PASSWORD, database: DATABASE });
+        try {
+          const peerReleases = Number((await peer.query(
+            "SELECT count(*) FROM artifacts.releases WHERE artifact_id = $1", [artifactId])).rows[0].count);
+          expect(peerReleases).toBe(0);
+          const peerCurrent = (await peer.query(
+            "SELECT release_id FROM artifacts.artifact_current WHERE artifact_id = $1", [artifactId])).rows;
+          expect(peerCurrent).toEqual([]);
+          const peerKeys = Number((await peer.query(
+            "SELECT count(*) FROM artifacts.idempotency_keys WHERE key = $1", [internalKey])).rows[0].count);
+          expect(peerKeys).toBe(0);
+          const peerSnapshot = await committedState(peer);
+          expect(peerSnapshot).toEqual(before);
+        } finally {
+          await peer.end();
+          await pool.query("UPDATE account_users SET status = 'approved' WHERE sub = 'alice'");
         }
-      })();
-      await pump;
-      await pool.query("UPDATE account_users SET status = 'suspended' WHERE sub = 'alice'");
-      barrier.release("after_finalization_locks_before_guard", invocationId);
-      const outcome = await pending as unknown as Record<string, unknown>;
-      assertOutcomeFailure(outcome, invocationId);
-      expect(outcome["failure"]).toMatchObject({
-        category: "unauthorized_at_commit", retriable: false, commitState: "not_committed" });
-      const env = loadConfig();
-      const peer = new pg.Pool({ host: env.POSTGRES_HOST, port: env.POSTGRES_PORT,
-        user: env.POSTGRES_USER, password: env.POSTGRES_PASSWORD, database: DATABASE });
-      try {
-        const peerReleases = Number((await peer.query(
-          "SELECT count(*) FROM artifacts.releases WHERE artifact_id = $1", [artifactId])).rows[0].count);
-        expect(peerReleases).toBe(0);
-        const peerCurrent = (await peer.query(
-          "SELECT release_id FROM artifacts.artifact_current WHERE artifact_id = $1", [artifactId])).rows;
-        expect(peerCurrent).toEqual([]);
-        const peerKeys = Number((await peer.query(
-          "SELECT count(*) FROM artifacts.idempotency_keys WHERE key = $1", [internalKey])).rows[0].count);
-        expect(peerKeys).toBe(0);
-        const peerSnapshot = await committedState(peer);
-        expect(peerSnapshot).toEqual(before);
-      } finally {
-        await peer.end();
-        await pool.query("UPDATE account_users SET status = 'approved' WHERE sub = 'alice'");
-      }
+      };
+      const orderPublicationHoldsGuard = async (): Promise<void> => {
+        const invocation = invocationFor(statusDriven(), "inspect-held");
+        const run = startBarrierOperation(barrier, invocation.invocationId, () => execute({
+          method: "POST", path: "/publish", body: { ...body, idempotencyKey: "q1-inspect-held" } }, invocation), "before_commit");
+        const client = await pool.connect();
+        let revocation: Promise<unknown> | undefined;
+        try {
+          await run.reached;
+          const pid = Number((await client.query("SELECT pg_backend_pid() AS pid")).rows[0].pid);
+          revocation = client.query("UPDATE account_users SET status='suspended' WHERE sub='alice'");
+          await assertSqlWriterBlocked(pid);
+          run.release();
+          expect(await run.pending).toMatchObject({ ok: true });
+          await revocation;
+        } finally { run.release(); await run.pending.catch(() => {}); await revocation?.catch(() => {}); client.release(); }
+        await pool.query("UPDATE account_users SET status='approved' WHERE sub='alice'");
+      };
+      await orderRevocationFirst();
+      await orderPublicationHoldsGuard();
     } finally {
       await pool.query("UPDATE account_users SET status = 'approved' WHERE sub = 'alice'");
       if (typeof close === "function") (close as () => void)();
@@ -349,7 +367,8 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
     await requireCommitContract();
     await requireOutcomeContract();
     const barrier = await requireCommitBarrier();
-    const host = await composeQ1Host(barrier.observer);
+    const composed = await composeQ1Host(barrier);
+    const host = composed.host;
     try {
       const execute = requireHostExecute(host);
       const ensureBody = { bindingName: `replay-${operation}`, idempotencyKey: `replay-ensure-${operation}` };
@@ -379,7 +398,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       assertOutcomeFailure(outcome, id);
       expect(outcome.failure).toMatchObject({ category: "unauthorized_at_commit", commitState: "not_committed" });
       expect(await committedState(pool)).toEqual(before);
-    } finally { if (typeof host.close === "function") host.close(); }
+    } finally { if (typeof host["close"] === "function") (host["close"] as () => void)(); }
   });
 
   it.each(["withdrawn", "deleted", "purged"] as const)("refuses publication after lifecycle becomes %s", async (state) => {
