@@ -285,7 +285,9 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       return typeof value === "function" ? value.bind(target) : value;
     } });
     const faulty = createS3BlobStore({ client: streaming, bucket: BUCKET });
-    const host = await composeQ2Host(barrier.observer, { blobs: faulty });
+    const streamMarker = createPrivateMarker("s3_body_stream");
+    const composed = await composeQ2Host(barrier, { blobs: faulty });
+    const host = composed.host;
     const close = host["close"];
     try {
       const execute = executeWithParity(host);
@@ -298,10 +300,11 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
           idempotencyKey: "q2-s3stream" } }, invocation) as unknown as Record<string, unknown>;
       assertOutcomeFailure(outcome, invocation["invocationId"] as string);
       expect(outcome["failure"]).toMatchObject({
-        category: "provider_unavailable", retriable: true, commitState: "not_committed" });
+        category: "provider_unavailable", retriable: true, commitState: "not_committed", phase: "body-stream" });
+      expect((outcome["failure"] as Record<string, unknown>)["cause"]).toMatchObject({ code: "artifact_s3_timeout" });
       const projected = await projectOutcomeHttp(outcome);
-      expect(projected).toEqual({ status: 503, body: { error: "capability_unavailable" } });
-      expectRedacted(projected);
+      assertPublicBodyRedacted(projected, { error: "capability_unavailable" }, [streamMarker], [BUCKET, endpoint, accessKey]);
+      expectRedacted(projected, [streamMarker]);
       expect(streamReads).toBeGreaterThan(0);
       expect(await tableCount("releases")).toBe(releasesBefore);
     } finally {
@@ -322,7 +325,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       const value = Reflect.get(target, property, receiver);
       return typeof value === "function" ? value.bind(target) : value;
     } }) as unknown as pg.Pool;
-    const host = await composeQ2Host(barrier.observer, { pool: starved });
+    const { host } = await composeQ2Host(barrier, { pool: starved });
     const close = host["close"];
     try {
       const execute = executeWithParity(host);
@@ -364,7 +367,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       const value = Reflect.get(target, property, receiver);
       return typeof value === "function" ? value.bind(target) : value;
     } }) as unknown as pg.Pool;
-    const host = await composeQ2Host(barrier.observer, { pool: flaky });
+    const { host } = await composeQ2Host(barrier, { pool: flaky });
     const close = host["close"];
     try {
       const execute = executeWithParity(host);
@@ -391,8 +394,12 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
   it("maps real contention for the full scoped key to conflict and retains 55P03", async () => {
     await requireOutcomeContract();
     const barrier = await requireCommitBarrier();
+    const keyLockAttempts = { keyLock: 0 };
     const timed = proxyLeasedPool(pool, { get(target, property, receiver) {
       if (property === "query") return async (text: unknown, params?: unknown) => {
+        if (typeof text === "string" && /operation_keys/.test(text) && /FOR UPDATE/.test(text)) {
+          keyLockAttempts.keyLock++;
+        }
         const result = await (target.query as (...args: unknown[]) => Promise<unknown>)(text, params);
         if (typeof text === "string" && /^BEGIN/i.test(text)) {
           await target.query("SET LOCAL lock_timeout = '150ms'");
@@ -402,7 +409,8 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       const value = Reflect.get(target, property, receiver);
       return typeof value === "function" ? value.bind(target) : value;
     } });
-    const host = await composeQ2Host(barrier.observer, { pool: timed });
+    const composed = await composeQ2Host(barrier, { pool: timed });
+    const host = composed.host;
     const holder = await pool.connect();
     try {
       const execute = executeWithParity(host);
@@ -420,13 +428,14 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
         files: [{ path: "index.html", mimeType: "text/html", text: "key lock conflict" }],
         idempotencyKey: "q2-keylock" } }, invocation) as Record<string, unknown>;
       assertOutcomeFailure(outcome, invocation.invocationId as string);
+      expect(keyLockAttempts.keyLock).toBeGreaterThan(0);
       expect(outcome.failure).toMatchObject({ category: "conflict", retriable: false,
-        commitState: "not_committed", cause: { code: "55P03" } });
+        commitState: "not_committed", cause: { code: "55P03" }, phase: "key-lock" });
       expect(await projectOutcomeHttp(outcome)).toEqual({ status: 409, body: { error: "conflict" } });
       expect(await tableCount("releases")).toBe(releasesBefore);
       expect(await tableCount("idempotency_keys")).toBe(keysBefore);
     } finally {
-      await holder.query("ROLLBACK"); holder.release(); host.close();
+      await holder.query("ROLLBACK"); holder.release(); (host["close"] as () => void)();
     }
   });
 
@@ -444,45 +453,61 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
   ])("maps a 55P03 outside the key row (%s) to provider_unavailable", async (lockClass) => {
     await requireOutcomeContract();
     const barrier = await requireCommitBarrier();
-    const armed = { current: false };
-    const contended = proxyLeasedPool(pool, { get(target, property, receiver) {
-      if (property === "query" && armed.current) {
-        return async (text: unknown, params?: unknown): Promise<unknown> => {
-          if (typeof text === "string" && /FOR (UPDATE|SHARE)/.test(text) &&
-            !text.includes("operation_keys") && new RegExp(({ binding: "binding|artifacts", "artifact-lifecycle": "artifacts", acl: "artifact_access", pointer: "artifact_current", policy: "policy|account_users", quota: "quota", "blob-reference": "blob_ref", "deletion-claim": "deletion|claim", "schema-infrastructure": "schema|pg_", unqualified: ".*" } as Record<string,string>)[lockClass]!).test(text)) {
-            throw Object.assign(new Error("lock timeout outside the key row"), { code: "55P03" });
-          }
-          return (target.query as (...args: unknown[]) => Promise<unknown>)(text, params);
-        };
-      }
-      const value = Reflect.get(target, property, receiver);
-      return typeof value === "function" ? value.bind(target) : value;
-    } }) as unknown as pg.Pool;
-    const host = await composeQ2Host(barrier.observer, { pool: contended });
+    const probe = finalizationFaultPool(pool, { code: "55P03", lockClass });
+    const { host } = await composeQ2Host(barrier, { pool: probe.pool });
     const close = host["close"];
     try {
-      const execute = executeWithParity(host);
+      const execute = requireHostExecute(host);
       const artifactId = await ensureVia(execute, allowAll(), "q2-nonkey", "q2-nonkey-ensure");
       const releasesBefore = await tableCount("releases");
-      armed.current = true;
+      probe.evidence.armed = true;
       try {
         const invocation = invocationFor(allowAll(), "nonkey");
-        const outcome = await execute({ method: "POST", path: "/publish",
-          body: { artifactId,
-            files: [{ path: "index.html", mimeType: "text/html", text: "non-key lock timeout" }],
-            idempotencyKey: "q2-nonkey" } }, invocation) as unknown as Record<string, unknown>;
+        const isBinding = lockClass === "binding";
+        const outcome = isBinding
+          ? await execute({ method: "POST", path: "/ensure",
+            body: { bindingName: "q2-nonkey-binding", idempotencyKey: "q2-nonkey-binding" } }, invocation) as unknown as Record<string, unknown>
+          : await execute({ method: "POST", path: "/publish",
+            body: { artifactId,
+              files: [{ path: "index.html", mimeType: "text/html", text: "non-key lock timeout" }],
+              idempotencyKey: "q2-nonkey" } }, invocation) as unknown as Record<string, unknown>;
         assertOutcomeFailure(outcome, invocation["invocationId"] as string);
+        expect(probe.evidence.injections).toBe(1);
+        expect(probe.evidence.phase).toBe(lockClass);
+        expect(probe.evidence.attempts).toBeLessThanOrEqual(1);
         expect(outcome["failure"]).toMatchObject({
           category: "provider_unavailable", retriable: true, commitState: "not_committed" });
+        expect((outcome["failure"] as Record<string, unknown>)["cause"]).toMatchObject({ code: "55P03" });
         const projected = await projectOutcomeHttp(outcome);
         expect(projected).toEqual({ status: 503, body: { error: "capability_unavailable" } });
       } finally {
-        armed.current = false;
+        probe.evidence.armed = false;
       }
       expect(await tableCount("releases")).toBe(releasesBefore);
     } finally {
       if (typeof close === "function") (close as () => void)();
     }
+  });
+
+  it.each(["40001", "40P01", "57014"])("maps %s after provisional writes without an internal retry", async (code) => {
+    await requireOutcomeContract();
+    const barrier = await requireCommitBarrier();
+    const probe = finalizationFaultPool(pool, { code });
+    const { host } = await composeQ2Host(barrier, { pool: probe.pool });
+    try {
+      const execute = requireHostExecute(host);
+      const before = await committedState(pool);
+      probe.evidence.armed = true;
+      const invocation = invocationFor(allowAll(), "abort");
+      const outcome = await execute({ method: "POST", path: "/ensure",
+        body: { bindingName: "q2-abort", idempotencyKey: "q2-abort" } }, invocation) as Record<string, unknown>;
+      assertOutcomeFailure(outcome, invocation.invocationId);
+      expect(probe.evidence).toMatchObject({ injections: 1, attempts: 1, phase: "provisional-write" });
+      expect(probe.evidence.writes).toBeGreaterThan(0);
+      expect(outcome.failure).toMatchObject({ category: "provider_unavailable", status: 503,
+        code: "capability_unavailable", retriable: true, commitState: "not_committed", cause: { code } });
+      expect(await committedState(pool)).toEqual(before);
+    } finally { probe.evidence.armed = false; (host["close"] as () => void)(); }
   });
 
   it("reports commitState unknown on COMMIT acknowledgment loss and recovers by key", async () => {
