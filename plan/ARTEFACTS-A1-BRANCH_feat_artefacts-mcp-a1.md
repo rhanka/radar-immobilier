@@ -93,3 +93,7 @@ unverified evidence. ETA unchanged: 14-23 agent hours, complete A1 circuit.
   findings and correct non-string selection coercion and shared race keys.
 - [ ] Race variants still require joint execution on the actual candidate;
   structural tests and typechecking cannot qualify that concurrency behavior.
+
+## Fix1 review corrections
+
+- [x] Implement bounded race draining and process exit, including SIGKILL escalation.
