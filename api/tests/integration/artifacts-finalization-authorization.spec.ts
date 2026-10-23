@@ -712,6 +712,109 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
   });
 
   it.each([false, true])("same-key S3 race across processes, changed command %s", async (changedCommand) => {
+    await requireCommitContract();
+    await requireOutcomeContract();
+    const barrier = await requireCommitBarrier();
+    const env = loadConfig();
+    const composedA = await composeQ1Host(barrier);
+    const hostA = composedA.host;
+    const closeA = hostA["close"];
+    const worker = await startArtifactWorker({ host: env.POSTGRES_HOST, port: env.POSTGRES_PORT,
+      user: env.POSTGRES_USER, password: env.POSTGRES_PASSWORD, database: DATABASE }, storageConfig());
+    expect(worker.pid).not.toBe(process.pid);
+    const barrierB = worker.barrier;
+    try {
+      requireSelectedProfile(hostA, composedA.profile.digest);
+      const executeA = requireHostExecute(hostA);
+      const executeB = worker.execute;
+      const purposes: Array<{ invocationId: string; purpose: string }> = [];
+      const authorizeCommit: AuthorizeCommit = async (context, transaction) => {
+        expect(transaction).toBeDefined();
+        purposes.push({ invocationId: context.invocationId, purpose: context.purpose });
+        return authorizeTransaction(context, transaction);
+      };
+      const ensured = await executeA({ method: "POST", path: "/ensure",
+        body: { bindingName: "q1-race", idempotencyKey: "q1-race-ensure" } },
+        invocationFor(authorizeCommit, "race-ensure"));
+      expect(ensured).toMatchObject({ ok: true });
+      const artifactId = ((ensured as { result: unknown }).result as { body: { artifactId: string } })
+        .body.artifactId;
+      const body = { artifactId,
+        files: [{ path: "index.html", mimeType: "text/html", text: "same-key race" }],
+        idempotencyKey: "q1-race" };
+      const internalKey = deriveIdempotencyKey(
+        { scope: SCOPE, sub: ACTOR, op: "publish", artifactId, clientKey: "q1-race" });
+      const invA = invocationFor(authorizeCommit, "race-a");
+      const invB = invocationFor(authorizeCommit, "race-b");
+      const invAId = invA["invocationId"] as string;
+      const invBId = invB["invocationId"] as string;
+      const releasesBefore = await tableCount("releases");
+      const keysBefore = await tableCount("idempotency_keys");
+      const drainPoints: readonly CommitBarrierPoint[] = [
+        ...PUBLISH_POINTS, "after_replay_lookup_before_guard",
+      ];
+      let settledB = false;
+      const pendingB = executeB({ method: "POST", path: "/publish", body: changedCommand
+        ? { ...body, files: [{ path: "different.html", mimeType: "text/html", text: "different command" }] } : body }, invB)
+        .finally(() => { settledB = true; });
+      const pumpB = (async () => {
+        const deadline = performance.now() + 1500;
+        while (!settledB) {
+          if (performance.now() > deadline) throw new Error("[contract-violation] commit barrier B did not progress");
+          for (const candidate of drainPoints) {
+            if (settledB || candidate === "before_key_lock") continue;
+            const arrived = await withTimeout(barrierB.waitUntilReached(candidate, invBId), 50);
+            if (arrived) barrierB.release(candidate, invBId);
+          }
+          await withTimeout(new Promise<void>((resolve) => setTimeout(resolve, 50)), 50);
+        }
+      })();
+      await barrierB.waitUntilReached("before_key_lock", invBId);
+      let settledA = false;
+      const pendingA = executeA({ method: "POST", path: "/publish", body }, invA)
+        .finally(() => { settledA = true; });
+      const pumpA = (async () => {
+        const deadline = performance.now() + 1500;
+        while (!settledA) {
+          if (performance.now() > deadline) throw new Error("[contract-violation] commit barrier A did not progress");
+          for (const candidate of drainPoints) {
+            if (settledA) break;
+            const arrived = await withTimeout(barrier.waitUntilReached(candidate, invAId), 50);
+            if (arrived) barrier.release(candidate, invAId);
+          }
+        }
+      })();
+      const winner = await pendingA as unknown as Record<string, unknown>;
+      await pumpA;
+      expect(winner).toMatchObject({ ok: true });
+      barrierB.release("before_key_lock", invBId);
+      const loser = await pendingB as unknown as Record<string, unknown>;
+      await pumpB;
+      expect(loser).toMatchObject({ ok: !changedCommand });
+      const winnerBody = ((winner as { result: unknown }).result as { body: unknown });
+      if (changedCommand) expect(loser.failure).toMatchObject({ category: "conflict" });
+      else {
+        expect((loser.result as { body: unknown }).body).toEqual(winnerBody);
+        expect(worker.authorizations).toContainEqual({ invocationId: invBId, purpose: "replay" });
+      }
+      expect(await tableCount("releases")).toBe(releasesBefore + 1);
+      expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
+      const successRows = Number((await pool.query(
+        "SELECT count(*) FROM artifacts.idempotency_keys WHERE key = $1", [internalKey])).rows[0].count);
+      expect(successRows).toBe(1);
+      const cleanup = await requirePreparationCleanupBinding();
+      expect(cleanup).toBeDefined();
+      const observed = await cleanup.inspectPreparations(hostA, artifactId);
+      expect(observed.attempts.length).toBeGreaterThanOrEqual(2);
+      expect(observed.attempts.map((attempt) => attempt.invocationId)).toEqual(expect.arrayContaining([invAId, invBId]));
+      expect(new Set(observed.attempts.map((attempt) => attempt.attemptId)).size).toBeGreaterThanOrEqual(2);
+      expect(observed.attempts.find((attempt) => attempt.invocationId === invBId)?.state).toBe("abandoned");
+      const keys = await rawBlobs().listKeys("");
+      expect([...keys].length).toBeGreaterThan(0);
+    } finally {
+      if (typeof closeA === "function") (closeA as () => void)();
+      await worker.close();
+    }
   });
 
   it("last quota unit across processes is not covered without the H3 quota interface", () => {
