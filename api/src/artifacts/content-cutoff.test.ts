@@ -22,10 +22,10 @@ describe("reader access after asynchronous waits", () => {
     const entered = latch();
     const blocked = latch();
     const readOperation = vi.fn(fixture.readOperation!);
-    const authority = { ...fixture.authority!, getRights: async (sub: string) => {
+    const authority = { ...fixture.authority!, getRights: async (sub: string, artifactId: string) => {
       entered.release();
       await blocked.promise;
-      return fixture.authority!.getRights(sub);
+      return fixture.authority!.getRights(sub, artifactId);
     } };
     const app = createReaderContentApp({ ...fixture, authority, readOperation, now: () => now,
       contentBase: "pages.example.test", grantSecret: GRANT_SECRET,

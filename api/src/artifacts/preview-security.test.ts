@@ -51,8 +51,8 @@ describe("preview security boundaries", () => {
   it("should recheck current approval and policy on renewal", async () => {
     const base = createFixtureAuthority();
     const changes = [
-      { ...base, getRights: async () => ({ readerSub: GRANT.readerSub, approved: false,
-        capabilities: ["geo.read" as const] }) },
+      { ...base, getRights: async () => ({ readerSub: GRANT.readerSub, artifactId: GRANT.artifactId,
+        approved: false, capabilities: ["geo.read" as const] }) },
       { ...base, getProfile: async () => ({ name: "demo", policyRevision: "pol-002",
         capabilities: ["geo.read" as const] }) },
     ];
