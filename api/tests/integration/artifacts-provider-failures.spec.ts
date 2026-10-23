@@ -231,12 +231,14 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
   function expectRedacted(projected: { status: number; body: unknown }, privateMarkers: readonly string[] = []): void {
     const text = JSON.stringify(projected.body);
     expect(text).not.toMatch(/BEGIN|COMMIT|SELECT\s+\S+\s+FROM|FOR\s+(UPDATE|SHARE)|secret|credential|password/i);
+    expect(text).not.toMatch(/storageScopeId|storageScope|internalKey|paramsHash/i);
     for (const marker of privateMarkers) {
       if (marker.length > 0) expect(text).not.toContain(marker);
     }
     expect(text).not.toContain(BUCKET);
     expect(text).not.toContain(endpoint);
     expect(text).not.toContain(accessKey);
+    expect(text).not.toContain(SCOPE);
     if (secretKey.length > 0) expect(text).not.toContain(secretKey);
   }
 
