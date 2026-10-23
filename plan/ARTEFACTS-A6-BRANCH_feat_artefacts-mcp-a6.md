@@ -62,3 +62,4 @@ No invented production domain or certificate.
 - [x] In-process single-use tickets require an independent browser binding; durable store pending.
 - [x] AEAD envelope modules prepared and locally tested.
 - [x] Separate host-only page cookie modules prepared and locally tested.
+- [x] Signed grant verification requires bounded expiry and matching subject.
