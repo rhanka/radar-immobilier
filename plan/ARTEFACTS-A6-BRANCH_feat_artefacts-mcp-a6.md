@@ -88,3 +88,4 @@ No invented production domain or certificate.
 - [x] Credential budget controls measured 303-byte cookies and 725-byte grants on two fixtures.
 - [x] Review correction: recheck grant/session expiry and revocation after authority and API waits.
 - [x] Review correction: hash-authorize only the technical example bootstrap script in CSP.
+- [x] Review correction: image delta preserves denial isolation code; script globals are explicit.
