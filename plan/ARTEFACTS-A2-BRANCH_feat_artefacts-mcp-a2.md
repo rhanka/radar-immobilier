@@ -149,3 +149,5 @@ activation, no cluster-mesh composition.
 - [ ] Identity owner supplies the exact real RFC 8693 issuer build/tuple and an isolated compatibility receipt; the local synthetic issuer does not satisfy this gate.
 - [ ] Operator supplies environment-specific confidential workload references, issuer/audiences, image digest, positive deployed search and connected-client continuity receipts before P4 acceptance or A3 activation.
 - [ ] Conductor merges the accepted A2 HEAD and acknowledges the H4 file hash/target/gate receipt before ownership returns for P6/P7; no transfer has occurred.
+
+- [x] Reject protected HTTP search without private authority, including missing exchange runtime.
