@@ -19,4 +19,11 @@ describe("provider-neutral Radar profile preparation", () => {
     expect(() => assertFrozenSelection([...selected, "artifacts_extra"])).toThrow("[contract-violation]");
     expect(() => assertFrozenSelection([...selected.slice(1), selected[1]])).toThrow("[contract-violation]");
   });
+
+  it("rejects nested arrays and objects that stringify to valid names", () => {
+    expect(() => assertFrozenSelection(FROZEN_CAPABILITIES.map((name) => [name])))
+      .toThrow("[contract-violation]");
+    expect(() => assertFrozenSelection(FROZEN_CAPABILITIES.map((name) => ({ toString: () => name }))))
+      .toThrow("[contract-violation]");
+  });
 });

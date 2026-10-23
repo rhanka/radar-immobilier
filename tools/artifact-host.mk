@@ -87,7 +87,7 @@ test-provider-acceptance: test-api ## Alias using the same fail-closed qualifica
 # API tsconfig excludes integration tests: explicitly check this delivery too.
 provider-acceptance-tsconfig: guard-env
 	@mkdir -p tmp/861c-provider-acceptance
-	@printf '%s\n' '{"extends":"../../tsconfig.base.json","compilerOptions":{"noEmit":true,"types":["node"]},"include":["../../api/tests/integration/artifacts-provider-acceptance.spec.ts","../../api/tests/integration/artifacts-finalization-authorization.spec.ts","../../api/tests/integration/artifacts-provider-failures.spec.ts","../../api/tests/integration/artifacts-provider-contract.helpers.ts"]}' > tmp/861c-provider-acceptance/tsconfig.json
+	@printf '%s\n' '{"extends":"../../tsconfig.base.json","compilerOptions":{"noEmit":true,"types":["node"]},"include":["../../api/tests/integration/artifacts-provider-acceptance.spec.ts","../../api/tests/integration/artifacts-finalization-authorization.spec.ts","../../api/tests/integration/artifacts-provider-failures.spec.ts","../../api/tests/integration/artifacts-provider-contract.helpers.ts","../../api/tests/integration/artifacts-provider-selection.spec.ts"]}' > tmp/861c-provider-acceptance/tsconfig.json
 	@printf '%s\n' \
 	  'const fs = require("node:fs"); const path = "tmp/861c-provider-acceptance/";' \
 	  'const config = JSON.parse(fs.readFileSync(path + "tsconfig.json")); config.compilerOptions.baseUrl = "../.."; config.compilerOptions.paths = {};' \
