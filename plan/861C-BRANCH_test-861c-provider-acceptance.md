@@ -160,3 +160,4 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 - [x] serialize lifecycle writers and observe purge deletion claims.
 - [x] drain commit barriers while preserving the targeted wait.
 - [x] bind private invocation and provider outcome contracts.
+- [x] bind acceptance fixtures to the compiled provider host.
