@@ -67,3 +67,4 @@ No invented production domain or certificate.
 - [x] Named operation schemas prepared; receiving API integration remains pending.
 - [x] Reader context checks current release, policy and reader rights.
 - [x] Renewal checks current release and fails closed during authority outage.
+- [x] Isolation headers prohibit workers and preserve deny responses.
