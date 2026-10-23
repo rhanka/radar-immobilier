@@ -97,6 +97,14 @@ test-reader-e2e: guard-test ## Integrated image/routing prerequisite; source-mou
 	@echo '[h5-artifacts] BLOCKED: final-image API/authority/store integration receipt is required' >&2
 	@exit 2
 
+.PHONY: test-reader-browser-fixture
+test-reader-browser-fixture: guard-test ## Real Chromium over source fixtures; not final-image/API acceptance
+	@set -e; $(SET_TRAPS); \
+	$(COMPOSE) run --rm --no-deps -T --entrypoint '' api sh -ec \
+	'npm ci --ignore-scripts && npx --no-install playwright install --with-deps --only-shell chromium && \
+	PLAYWRIGHT_JSON_OUTPUT_FILE=/workspace/tmp/artefacts-mcp-a6/playwright-fixture.json \
+	node node_modules/@playwright/test/cli.js test --config=tools/h5-artifacts.playwright.config.ts --reporter=list,json'
+
 .PHONY: down
 .PHONY: test-reader-runner-guards
 test-reader-runner-guards: guard-env
