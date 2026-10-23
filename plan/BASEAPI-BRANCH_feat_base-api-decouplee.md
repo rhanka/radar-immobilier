@@ -103,6 +103,7 @@
   - [x] B1.4 router: expose scoped reason codes and reveal with isolated guards; composed mount remains pending CT-1.
   - [ ] B1.5: qualify reveal → restore, concurrent source changes and independent archive scopes.
   - [ ] B1.6: return explicit legacy 503 during cutover and 410 after retirement, never a replacement 404.
+  - [x] B1.6 route contract: fence graph/signal endpoints with named successors; composed retirement proof remains pending.
   - [ ] B1.7: preserve exact receipt recovery and unresolved command contexts.
   - [ ] Gate: base-api-{composition,authority,reveal,legacy,receipts}.spec.ts plus existing scoped/SSE regressions; typecheck and scoped lint.
 - [ ] B2 — Complete lot destination; Muse 4–6 h, Sol 4–5 h, total 8–11 h.
