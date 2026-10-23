@@ -62,19 +62,18 @@ test.afterAll(async () => {
 });
 
 test("expired grant is refused in a real browser", async ({ page }) => {
-  const issuedAt = Date.now() - 120_000;
-  const grant = await mintGrant(
-    { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-old", profileName: "demo", policyRevision: "pol-001" },
-    GRANT_SECRET,
-    issuedAt,
-  );
-  await cookieFor(page, "reader-alice", "session-old", issuedAt);
+  const nowMs = Date.now();
+  const claims = { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-old", profileName: "demo", policyRevision: "pol-001" };
+  await cookieFor(page, "reader-alice", "session-old", nowMs);
+  const valid = await mintGrant(claims, GRANT_SECRET, nowMs);
+  expect((await page.goto(`${baseURL}/index.html?grant=${valid}`))?.status()).toBe(200);
+  await expect(page.getByTestId("reader-status")).toHaveText("Connected.");
+  const grant = await mintGrant(claims, GRANT_SECRET, nowMs - 120_000);
   const res = await page.goto(`${baseURL}/index.html?grant=${grant}`);
   expect(res?.status()).toBe(401);
 });
 
 test("revoked session closes page access without touching other sessions", async ({ page }) => {
-  revoked.revoke("session-revoked-1");
   const nowMs = Date.now();
   const grant = await mintGrant(
     { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-revoked-1", profileName: "demo", policyRevision: "pol-001" },
@@ -82,6 +81,9 @@ test("revoked session closes page access without touching other sessions", async
     nowMs,
   );
   await cookieFor(page, "reader-alice", "session-revoked-1", nowMs);
+  expect((await page.goto(`${baseURL}/index.html?grant=${grant}`))?.status()).toBe(200);
+  await expect(page.getByTestId("reader-status")).toHaveText("Connected.");
+  revoked.revoke("session-revoked-1");
   expect((await page.goto(`${baseURL}/index.html?grant=${grant}`))?.status()).toBe(401);
 
   const fresh = await mintGrant(
@@ -103,6 +105,8 @@ test("service worker and embed stay unavailable in a real browser", async ({ pag
     nowMs,
   );
   await cookieFor(page, "reader-alice", "session-sw-1", nowMs);
+  expect((await page.goto(`${baseURL}/index.html?grant=${grant}`))?.status()).toBe(200);
+  await expect(page.getByTestId("reader-status")).toHaveText("Connected.");
   expect((await page.goto(`${baseURL}/sw.js?grant=${grant}`))?.status()).toBe(404);
   expect((await page.goto(`${baseURL}/embed/123e4567-e89b-12d3-a456-426614174000?grant=${grant}`))?.status()).toBe(404);
 });
