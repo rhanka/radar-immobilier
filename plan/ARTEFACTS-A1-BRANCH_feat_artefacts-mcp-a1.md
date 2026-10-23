@@ -106,4 +106,5 @@ unverified evidence. ETA unchanged: 14-23 agent hours, complete A1 circuit.
 ## Fix2 review corrections
 
 - [x] Compare replay bodies while retaining replay authorization and durable uniqueness checks.
+- [x] Bound the three principal race waits and propagate pump failures into cleanup.
 - [ ] Execute the corrected race scenarios on the identified r2 candidate; synthetic doubles do not qualify it.
