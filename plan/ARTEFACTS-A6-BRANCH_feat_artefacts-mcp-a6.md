@@ -61,3 +61,4 @@ No invented production domain or certificate.
 - [x] Origin validation now uses the authority-owned origin.
 - [x] In-process single-use tickets require an independent browser binding; durable store pending.
 - [x] AEAD envelope modules prepared and locally tested.
+- [x] Separate host-only page cookie modules prepared and locally tested.
