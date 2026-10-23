@@ -75,3 +75,4 @@ No invented production domain or certificate.
 - [x] Synthetic operation ports isolated in an explicit module-test fixture.
 - [x] Authorized content unit controls cover two local fixture identities.
 - [x] Eight reproduced preview/content defects now have behavioral regressions.
+- [x] Optional content gate delegation preserves ordinary API denial.
