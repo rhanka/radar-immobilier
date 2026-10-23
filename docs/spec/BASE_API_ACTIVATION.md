@@ -26,7 +26,8 @@ B5 and the nominal operational rehearsal retain their original scope and budget.
 ## Operator interface
 
 Only `tools/make/base-api.mk` is used. All three ports are explicit and `ENV`
-is last. Inputs are exported as literal values, never evaluated as shell code:
+is last. Inputs are captured with Make's `value` before export, preserving literal
+embedded Make functions as well as shell syntax without evaluating either:
 
 | Make input | Validated script argument |
 |---|---|
