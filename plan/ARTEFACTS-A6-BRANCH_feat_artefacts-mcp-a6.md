@@ -90,3 +90,4 @@ No invented production domain or certificate.
 - [x] Review correction: hash-authorize only the technical example bootstrap script in CSP.
 - [x] Review correction: image delta preserves denial isolation code; script globals are explicit.
 - [x] Review corrections: committed build context, accurate smoke labels and observable cleanup failures.
+- [x] Standalone Git helper audits subjects, sizes and browser snapshots, then reconstructs the bundle.
