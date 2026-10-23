@@ -195,3 +195,4 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 - [x] name E3 phase seams without requiring optional SQL.
 - [x] attribute refused preparation to its captured invocation.
 - [x] reject forged scopes and invalid keys on direct execute.
+- [x] reconcile S3 inventory with invocation cleanup intents.
