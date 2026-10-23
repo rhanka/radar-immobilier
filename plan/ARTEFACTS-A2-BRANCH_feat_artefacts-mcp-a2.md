@@ -134,3 +134,5 @@ activation, no cluster-mesh composition.
 - [x] Bound confidential client_secret_basic authentication to the pinned issuer contract.
 
 - [x] Closed reviewed token-type and client-id gaps and preserved mutation dependency resolution.
+
+- [x] Preserved byte-identical deployed tool fixtures under an explicitly configured exchange runtime.
