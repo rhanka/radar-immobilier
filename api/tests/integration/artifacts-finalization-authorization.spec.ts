@@ -56,6 +56,7 @@ import {
   type CommitBarrierPoint,
   type CompiledArtifactsProfile,
   type InvocationContextShape,
+  type PreparationCleanupBinding,
 } from "./artifacts-provider-contract.helpers.js";
 
 let nextInvocationId = 1;
@@ -199,10 +200,12 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
 
   async function assertPreparationCleanup(host: unknown, artifactId: string,
     expectedInvocationIds?: readonly string[],
-    s3KeysBefore?: ReadonlySet<string> | readonly string[]): Promise<void> {
+    s3KeysBefore?: ReadonlySet<string> | readonly string[],
+    preparationsBeforeRefusal?: Awaited<ReturnType<PreparationCleanupBinding["inspectPreparations"]>>["attempts"]): Promise<void> {
     await verifyPreparationCleanup(host, artifactId, rawBlobs(), false, false,
       { ...(expectedInvocationIds === undefined ? {} : { expectedInvocationIds }),
-        ...(s3KeysBefore === undefined ? {} : { s3KeysBefore }) });
+        ...(s3KeysBefore === undefined ? {} : { s3KeysBefore }),
+        ...(preparationsBeforeRefusal === undefined ? {} : { preparationsBeforeRefusal }) });
   }
 
   async function assertSqlWriterBlocked(pid: number): Promise<void> {
@@ -244,6 +247,8 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         run = startBarrierOperation(barrier, invocation.invocationId,
           () => execute({ method: "POST", path: "/" + operation, body }, invocation), point);
         await run.reached;
+        const prepared = artifactId
+          ? await (await requirePreparationCleanupBinding()).inspectPreparations(host, artifactId) : undefined;
         // All finalization locks include the registered authority rows (A4).
         const protectedByLock = ["after_finalization_locks_before_guard", "before_commit"].includes(point);
         const pid = Number((await writer.query("SELECT pg_backend_pid() AS pid")).rows[0].pid);
@@ -263,7 +268,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
           expect(await committedState(pool)).toEqual(before);
           if (artifactId) {
             expect(await currentReleaseId(artifactId)).toBeUndefined();
-            await assertPreparationCleanup(host, artifactId, [invocation.invocationId], s3Baseline);
+            await assertPreparationCleanup(host, artifactId, [invocation.invocationId], s3Baseline, prepared?.attempts);
           }
         }
       } finally {
@@ -797,6 +802,12 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       const winner = await pendingA as unknown as Record<string, unknown>;
       await pumpA;
       expect(winner).toMatchObject({ ok: true });
+      const cleanup = await requirePreparationCleanupBinding();
+      const preparing = await cleanup.inspectPreparations(hostA, artifactId);
+      const preparedLoser = preparing.attempts.find((attempt) => attempt.invocationId === invBId);
+      expect(preparedLoser?.blobKeys.length).toBeGreaterThan(0);
+      const preparedKeys = new Set(await rawBlobs().listKeys(""));
+      for (const key of preparedLoser!.blobKeys) expect(preparedKeys.has(key)).toBe(true);
       barrierB.release("before_key_lock", invBId);
       const loser = await pendingB as unknown as Record<string, unknown>;
       await pumpB;
@@ -812,7 +823,6 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       const successRows = Number((await pool.query(
         "SELECT count(*) FROM artifacts.idempotency_keys WHERE key = $1", [internalKey])).rows[0].count);
       expect(successRows).toBe(1);
-      const cleanup = await requirePreparationCleanupBinding();
       expect(cleanup).toBeDefined();
       const observed = await cleanup.inspectPreparations(hostA, artifactId);
       // Both preparations of THIS variant must be attributed; a replayed
@@ -820,7 +830,13 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       expect(observed.attempts.length).toBeGreaterThanOrEqual(2);
       expect(observed.attempts.map((attempt) => attempt.invocationId)).toEqual(expect.arrayContaining([invAId, invBId]));
       expect(new Set(observed.attempts.map((attempt) => attempt.attemptId)).size).toBeGreaterThanOrEqual(2);
-      expect(observed.attempts.find((attempt) => attempt.invocationId === invBId)?.state).toBe("abandoned");
+      // A6 allows the loser to finish cleanup before this observation: accept
+      // an already-settled state, but keep the historical attribution and the
+      // shared-blob retention proof.
+      const loserAttempt = observed.attempts.find((attempt) => attempt.invocationId === invBId);
+      expect(["abandoned", "failed-cleaned", "cleaned"]).toContain(loserAttempt?.state);
+      expect(loserAttempt).toMatchObject({ attemptId: preparedLoser!.attemptId,
+        invocationId: preparedLoser!.invocationId, blobKeys: preparedLoser!.blobKeys });
       for (const attempt of observed.attempts.filter((candidate) =>
         [invAId, invBId].includes(candidate.invocationId))) {
         expect(attempt.blobKeys.length).toBeGreaterThan(0);
@@ -828,9 +844,22 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       const keys = await rawBlobs().listKeys("");
       expect([...keys].length).toBeGreaterThan(0);
       const s3Keys = new Set([...keys]);
+      const winnerKeys = new Set(observed.attempts.find(
+        (attempt) => attempt.invocationId === invAId)?.blobKeys ?? []);
+      const sharedSet = new Set(observed.protectedKeys);
       for (const attempt of observed.attempts.filter((candidate) =>
         [invAId, invBId].includes(candidate.invocationId))) {
-        for (const blobKey of attempt.blobKeys) expect(s3Keys.has(blobKey)).toBe(true);
+        const settled = attempt.state === "cleaned" || attempt.state === "failed-cleaned";
+        for (const blobKey of attempt.blobKeys) {
+          // Cleanup may remove exclusive loser bytes before its state settles.
+          // The preparation was observed before releasing B; the winner's
+          // bytes and every protected shared blob must still survive.
+          if (winnerKeys.has(blobKey) || sharedSet.has(blobKey)) {
+            expect(s3Keys.has(blobKey)).toBe(true);
+          } else if (settled) {
+            expect(s3Keys.has(blobKey)).toBe(false);
+          }
+        }
       }
     } finally {
       if (typeof closeA === "function") (closeA as () => void)();
@@ -887,8 +916,15 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         expect(await binding.inspectDeletionClaims(host)).toContainEqual(
           expect.objectContaining({ claimId: paused.claimId }));
         const reference = invocationFor(allowAll(), `purge-reference-${order}`);
+        const referenceKey = `purge-reference-${order}`;
+        const referenceInternalKey = deriveIdempotencyKey(
+          { scope: SCOPE, sub: ACTOR, op: "publish", artifactId: otherId, clientKey: referenceKey });
+        const referenceReleaseCount = async (): Promise<number> => Number((await pool.query(
+          "SELECT count(*) FROM artifacts.releases WHERE artifact_id = $1", [otherId])).rows[0].count);
+        const releasesBeforeReference = await referenceReleaseCount();
+        const pointerBeforeReference = await currentReleaseId(otherId);
         const pending = execute({ method: "POST", path: "/publish",
-          body: { ...referenceBody, idempotencyKey: `purge-reference-${order}` } },
+          body: { ...referenceBody, idempotencyKey: referenceKey } },
           reference);
         void pending.catch(() => {});
         let early: unknown;
@@ -900,9 +936,51 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         paused = undefined;
         const outcome = await pending;
         // A refusal may arrive after waiting for claim resolution too (A4).
+        // The first result is verified HERE, before any reparative retry: a
+        // retry with a fresh key would recreate the bytes and mask a success
+        // that attached the deleted blob without repreparing it.
+        const referenceSuccessRows = async (): Promise<number> => Number((await pool.query(
+          "SELECT count(*) FROM artifacts.idempotency_keys WHERE key = $1",
+          [referenceInternalKey])).rows[0].count);
         if (!refusedBeforeResolution && (outcome as { ok?: unknown }).ok === false) {
           assertOutcomeFailure(outcome, reference.invocationId);
-        } else if (!refusedBeforeResolution) expect(outcome).toMatchObject({ ok: true });
+          // A refused attempt must commit no success for its durable key.
+          expect(await referenceSuccessRows()).toBe(0);
+          expect(await referenceReleaseCount()).toBe(releasesBeforeReference);
+          expect(await currentReleaseId(otherId)).toBe(pointerBeforeReference);
+        } else if (!refusedBeforeResolution) {
+          expect(outcome).toMatchObject({ ok: true });
+          // A success that waited for claim resolution must have reprepared
+          // the bytes: the durable receipt exists and the collectable bytes
+          // still read back BEFORE the retry below recreates anything.
+          expect(await referenceSuccessRows()).toBe(1);
+          expect(await referenceReleaseCount()).toBe(releasesBeforeReference + 1);
+          const receipt = (outcome as { result: { body: { artifactId: string; releaseId: string } } }).result.body;
+          expect(receipt.artifactId).toBe(otherId);
+          expect(receipt.releaseId).toEqual(expect.any(String));
+          expect(await currentReleaseId(otherId)).toBe(receipt.releaseId);
+          const durableReceipt = (await pool.query(
+            "SELECT result FROM artifacts.idempotency_keys WHERE key = $1", [referenceInternalKey])).rows;
+          expect(durableReceipt).toEqual([{ result: receipt }]);
+          const release = (await pool.query(
+            "SELECT artifact_id, manifest, state FROM artifacts.releases WHERE id = $1", [receipt.releaseId])).rows[0];
+          expect(release).toMatchObject({ artifact_id: otherId, state: "ready" });
+          const files = JSON.parse(release.manifest).files as Array<{ path: string; digest: string }>;
+          expect(files).toHaveLength(1);
+          expect(files[0]?.path).toBe("index.html");
+          expect(sharedKeys).toContain(`artifacts/${SCOPE}/blobs/sha256/${files[0]!.digest.slice(7)}`);
+          expect(Number((await pool.query(
+            "SELECT count(*) FROM artifacts.blob_ref_holders WHERE digest = $1", [files[0]!.digest])).rows[0].count))
+            .toBeGreaterThan(0);
+          for (const key of sharedKeys) {
+            expect(new TextDecoder().decode(await rawBlobs().getBlob(key))).toBe(collectableText);
+          }
+        } else {
+          // An early refusal must also leave no committed success behind.
+          expect(await referenceSuccessRows()).toBe(0);
+          expect(await referenceReleaseCount()).toBe(releasesBeforeReference);
+          expect(await currentReleaseId(otherId)).toBe(pointerBeforeReference);
+        }
         // After claim resolution, a fresh authorized attempt must reprepare
         // rather than attach the deleted blob.
         const retry = invocationFor(allowAll(), `purge-retry-${order}`);
