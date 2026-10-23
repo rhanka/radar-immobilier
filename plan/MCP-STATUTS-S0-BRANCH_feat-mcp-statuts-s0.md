@@ -73,7 +73,7 @@ successor compatibility and delegation A as pure, unregistered contracts.
 - [ ] **S0d — Successor compatibility**
   - [x] Freeze versioned manifest and named successor search migration.
   - [x] Cover successor schema compatibility and unchanged live definitions.
-  - [ ] Freeze verified issuer/receiver delegation A policy.
+  - [x] Freeze verified issuer/receiver delegation A policy.
   - [ ] Cover forged, broadened and generic-scope delegation refusals.
 - [ ] **Lot N — Validate and deliver**
   - [ ] Package unit suite, existing and new tests, passes.
