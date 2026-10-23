@@ -134,13 +134,29 @@ export async function withArtifactAdvisoryLock<T>(
       new ArtifactConnectionError("artifact postgres connection lost", { cause: error }),
     );
   };
+  const onClientEnd = (): void => {
+    onClientError(new Error("artifact postgres connection ended"));
+  };
   client.on("error", onClientError);
+  client.on("end", onClientEnd);
   const guard = <U>(work: Promise<U>): Promise<U> => Promise.race([work, connectionLost]);
+  const guardedCleanup = async (work: Promise<unknown>): Promise<void> => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      await Promise.race([
+        guard(work),
+        new Promise<never>((_, reject) => {
+          timer = setTimeout(() => reject(new ArtifactConnectionError("artifact postgres connection lost",
+            { cause: new Error("artifact postgres cleanup timeout") })), 5000);
+        }),
+      ]);
+    } finally { clearTimeout(timer); }
+  };
   const cleanup = async (): Promise<void> => {
     try {
       // A dead session already released its advisory lock: never query it.
       if (locked && connectionError === null) {
-        await guard(client.query("SELECT pg_advisory_unlock(('x' || $1)::bit(64)::bigint)", [lockId]));
+        await guardedCleanup(client.query("SELECT pg_advisory_unlock(('x' || $1)::bit(64)::bigint)", [lockId]));
       }
       if (connectionError !== null) {
         throw new ArtifactConnectionError("artifact postgres connection lost", { cause: connectionError });
@@ -154,6 +170,7 @@ export async function withArtifactAdvisoryLock<T>(
       throw error;
     } finally {
       client.removeListener("error", onClientError);
+      client.removeListener("end", onClientEnd);
       // Pass an error to destroy the broken client instead of pooling it.
       if (connectionError instanceof Error) {
         client.release(connectionError);
@@ -179,7 +196,9 @@ export async function withArtifactAdvisoryLock<T>(
       await guard(client.query("COMMIT"));
     } catch (error) {
       if (connectionError === null) {
-        try { await guard(client.query("ROLLBACK")); } catch { discard = true; }
+        try {
+          await guardedCleanup(client.query("ROLLBACK"));
+        } catch { discard = true; }
       }
       if ((error as { code?: string }).code === "55P03") {
         throw new Error("artifact advisory lock timeout conflict", { cause: error });

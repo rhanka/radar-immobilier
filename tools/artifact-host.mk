@@ -22,11 +22,18 @@ SHELL := /bin/bash
 
 ENV ?=
 SCOPE ?=
+API_TEST_SCOPE = $(patsubst api/%,%,$(SCOPE))
 API_PORT ?= 18895
 UI_PORT ?= 15895
 MAILDEV_UI_PORT ?= 11895
 ARTIFACTS_CONTENT_BASE ?=
 ARTIFACTS_TEST_CONFIG ?= 0
+ARTIFACTS_PROVIDER_ACCEPTANCE ?= 0
+EVIDENCE_DIR := tmp/artifact-host/$(ENV)
+ACCEPTANCE_NAMES := artifacts-provider-acceptance artifacts-finalization-authorization artifacts-provider-failures
+REQUIRED_SUITES := artifacts-provider-acceptance artifacts-finalization-authorization artifacts-provider-failures artifacts-mcp-adapter artifacts-commit-probe
+ACCEPTANCE_REPORT := $(if $(filter 1,$(ARTIFACTS_PROVIDER_ACCEPTANCE)),--reporter=default --reporter=json --outputFile.json=/workspace/$(EVIDENCE_DIR)/results.json,)
+HOST_ACCEPTANCE_REPORT := $(if $(filter 1,$(ARTIFACTS_PROVIDER_ACCEPTANCE)),-- --reporter=default --reporter=json --outputFile.json=/workspace/$(EVIDENCE_DIR)/results-host.json,)
 export API_PORT UI_PORT MAILDEV_UI_PORT ARTIFACTS_CONTENT_BASE
 override COMPOSE_PROJECT_NAME := radar-$(ENV)
 override COMPOSE_DISABLE_ENV_FILE := 1
@@ -64,17 +71,74 @@ guard-env:
 	  *) echo "[artifact-host] refused: ENV must be test-* or e2e-*, got '$(ENV)'" >&2; exit 1;; \
 	esac
 
+# Keep cleanup available even when a campaign must stop for low disk space.
+.PHONY: guard-disk
+guard-disk: guard-env
+	@df -h .
+	@df -Pk . | awk 'NR == 2 && $$4 < 10485760 { print "[artifact-host] refused: less than 10 GiB free" > "/dev/stderr"; exit 1 }'
+
+test-api test-host test-mcp test-provider-acceptance provider-acceptance-tsconfig typecheck lint build-api image-runtime-smoke image-smoke: guard-disk
+verify-provider-acceptance typecheck-provider-acceptance: guard-disk
+
+.PHONY: test-provider-acceptance typecheck-provider-acceptance provider-acceptance-tsconfig verify-provider-acceptance
+test-provider-acceptance: SCOPE := api/tests/integration/artifacts-provider-acceptance.spec.ts
+test-provider-acceptance: test-api ## Alias using the same fail-closed qualification gate
+
+# API tsconfig excludes integration tests: explicitly check this delivery too.
+provider-acceptance-tsconfig: guard-env
+	@mkdir -p tmp/861c-provider-acceptance
+	@printf '%s\n' '{"extends":"../../tsconfig.base.json","compilerOptions":{"noEmit":true,"types":["node"]},"include":["../../api/tests/integration/artifacts-provider-acceptance.spec.ts","../../api/tests/integration/artifacts-finalization-authorization.spec.ts","../../api/tests/integration/artifacts-provider-failures.spec.ts","../../api/tests/integration/artifacts-provider-contract.helpers.ts","../../api/tests/integration/artifacts-provider-selection.spec.ts"]}' > tmp/861c-provider-acceptance/tsconfig.json
+	@printf '%s\n' \
+	  'const fs = require("node:fs"); const path = "tmp/861c-provider-acceptance/";' \
+	  'const config = JSON.parse(fs.readFileSync(path + "tsconfig.json")); config.compilerOptions.baseUrl = "../.."; config.compilerOptions.paths = {};' \
+	  'for (const [entry, symbol] of [["commit-contract", "ArtifactInvocationContext"], ["outcome-contract", "ArtifactOutcome<T>"]]) {' \
+	  '  const specifier = "@sentropic/artifacts/server/" + entry; try { require.resolve(specifier); } catch (error) {' \
+	  '    if (!["ERR_PACKAGE_PATH_NOT_EXPORTED", "MODULE_NOT_FOUND"].includes(error.code)) throw error;' \
+	  '    console.log("[baseline-types-only] " + specifier + "; runtime acceptance remains required");' \
+	  '    const shape = entry === "commit-contract" ? "InvocationContextShape" : "OutcomeShape<T>";' \
+	  '    fs.writeFileSync(path + entry + ".d.ts", "export type " + symbol + " = import(\"../../api/tests/integration/artifacts-provider-contract.helpers.js\")." + shape + ";\n");' \
+	  '    config.compilerOptions.paths[specifier] = [path + entry + ".d.ts"];' \
+	  '  }' \
+	  '} fs.writeFileSync(path + "tsconfig.json", JSON.stringify(config));' > tmp/861c-provider-acceptance/prepare-types.cjs
+
+typecheck-provider-acceptance: provider-acceptance-tsconfig
+	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
+	$(COMPOSE) run --rm --no-deps -T api sh -c "npm ci && node tmp/861c-provider-acceptance/prepare-types.cjs && npx tsc -p tmp/861c-provider-acceptance/tsconfig.json"
+
+# Same quality commands as the standalone targets, with one dependency install.
+verify-provider-acceptance: provider-acceptance-tsconfig
+	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
+	$(COMPOSE) run --rm --no-deps -T api sh -c "npm ci && node tmp/861c-provider-acceptance/prepare-types.cjs && npx tsc -p tmp/861c-provider-acceptance/tsconfig.json && npm run typecheck --workspaces --if-present && npx eslint . --ignore-pattern 'tmp/**' && npm run build --workspace=api && test -s api/dist/index.d.ts"
+
+# Validate the API report, independently of the host workspace's test totals.
+# A pending/skipped assertion is not an executed acceptance case.
+define acceptance-check
+if [ "$(ARTIFACTS_PROVIDER_ACCEPTANCE)" = 1 ]; then \
+  if grep -q '\[acceptance-disabled\]' "$(EVIDENCE_DIR)/$(1).log"; then echo '[artifact-host] refused: acceptance suite reported disabled' >&2; exit 1; fi; \
+  if [ "$(1)" = test-host ]; then $(COMPOSE) run --rm --no-deps -T --entrypoint node api -e 'const fs=require("node:fs"); const r=JSON.parse(fs.readFileSync(process.argv[1])); for(const name of ["commit-authorization.test.ts","commit-failures.test.ts","mcp-app-adapter.test.ts"]){const cases=r.testResults.filter(t=>t.name.endsWith("/"+name)).flatMap(t=>t.assertionResults);if(!cases.length||cases.some(t=>!["passed","failed"].includes(t.status))){console.error("[artifact-host] refused: "+name+" has zero executed cases or skipped cases");process.exit(1);}}' -- '$(EVIDENCE_DIR)/results-host.json' || exit 1; fi; \
+  $(COMPOSE) run --rm --no-deps -T --entrypoint node api -e 'const fs=require("node:fs"); const raw=process.argv[1].split(/\s+/).filter(Boolean); const takesValue=new Set(["--maxWorkers","--workers","-w","--reporter","--outputFile","--shard","--project","--testTimeout","--hookTimeout"]); const paths=[]; for(let i=0;i<raw.length;i++){const t=raw[i]; if(t.startsWith("-")){ if(takesValue.has(t)||/^--[^=]+$$/.test(t)&&!t.includes("=")&&["--maxWorkers","--workers","--reporter","--outputFile","--shard","--project"].includes(t)) i++; continue;} if(/\.spec\.ts$$/.test(t)||t.includes("/")||t.startsWith("artifacts-")) paths.push(t); else if(!/^\d+$$/.test(t)) paths.push(t);} const required=process.argv[2].split(" ").filter(Boolean); const names=required.filter(n=>!paths.length || paths.some(f=>("api/tests/integration/"+n+".spec.ts").includes(f)||f.includes(n))); if(!names.length && paths.length){ console.error("[artifact-host] refused: scoped suite is not a required suite: "+paths.join(" ")); process.exit(1); } if(!names.length){ console.error("[artifact-host] refused: zero required suites selected"); process.exit(1); } const r=JSON.parse(fs.readFileSync(process.argv[3])); for(const n of names) { const cases=r.testResults.filter(t=>t.name.endsWith("/"+n+".spec.ts")).flatMap(t=>t.assertionResults); if(!cases.length || cases.some(t=>!["passed","failed"].includes(t.status))) { console.error("[artifact-host] refused: "+n+" has zero executed cases or skipped cases"); process.exit(1); } }' -- '$(SCOPE)' '$(REQUIRED_SUITES)' '$(EVIDENCE_DIR)/results.json' || exit 1; \
+fi
+endef
+
 .PHONY: test-api
 test-api: guard-env ## Run API tests (SCOPE=<path> for scoped runs)
 	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
-	$(COMPOSE) up -d postgres minio && \
-	$(COMPOSE) run --rm -T -e ARTIFACTS_CONTENT_BASE $(TEST_ARTIFACT_ENV) api sh -c "npm ci && npm run db:migrate --workspace=api && npm run test --workspace=api $(if $(SCOPE),-- $(SCOPE),)"
+	mkdir -p $(EVIDENCE_DIR); rm -f $(EVIDENCE_DIR)/results.json; \
+	$(COMPOSE) up -d postgres minio || exit $$?; \
+	$(COMPOSE) run --rm -T -e ARTIFACTS_CONTENT_BASE $(TEST_ARTIFACT_ENV) -e ARTIFACTS_PROVIDER_ACCEPTANCE=$(ARTIFACTS_PROVIDER_ACCEPTANCE) api sh -c "npm ci && npm run db:migrate --workspace=api && npm run test --workspace=api -- $(API_TEST_SCOPE) $(ACCEPTANCE_REPORT)" 2>&1 | tee $(EVIDENCE_DIR)/test-api.log; \
+	status=$${PIPESTATUS[0]}; \
+	$(call acceptance-check,test-api); \
+	exit $$status
 
 .PHONY: test-host
 test-host: guard-env ## Run artifact storage/publication suites (SCOPE=<path> filters the api suite only)
 	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
-	$(COMPOSE) up -d postgres minio && \
-	$(COMPOSE) run --rm -T -e ARTIFACTS_CONTENT_BASE $(TEST_ARTIFACT_ENV) api sh -c "npm ci && npm run db:migrate --workspace=api && npm run test --workspace=@radar/artifacts-host && npm run test --workspace=api $(if $(SCOPE),-- $(SCOPE),)"
+	mkdir -p $(EVIDENCE_DIR); rm -f $(EVIDENCE_DIR)/results.json; \
+	$(COMPOSE) up -d postgres minio || exit $$?; \
+	$(COMPOSE) run --rm -T -e ARTIFACTS_CONTENT_BASE $(TEST_ARTIFACT_ENV) -e ARTIFACTS_PROVIDER_ACCEPTANCE=$(ARTIFACTS_PROVIDER_ACCEPTANCE) api sh -c "npm ci && npm run db:migrate --workspace=api && npm run test --workspace=@radar/artifacts-host $(HOST_ACCEPTANCE_REPORT) && npm run test --workspace=api -- $(API_TEST_SCOPE) $(ACCEPTANCE_REPORT)" 2>&1 | tee $(EVIDENCE_DIR)/test-host.log; \
+	status=$${PIPESTATUS[0]}; \
+	$(call acceptance-check,test-host); \
+	exit $$status
 
 .PHONY: test-mcp
 test-mcp: guard-env ## Run the immo-mcp workspace suites (service E2E excluded)
