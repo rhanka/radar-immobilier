@@ -103,5 +103,36 @@ describe("reader-context adaptation", () => {
       capabilities: ["geo.read"] });
     expect(await adaptGrantToReader({ ...GRANT, profileFingerprint: narrowFingerprint }, widened)).toBeNull();
   });
+  it("should refuse adaptation when the authority version moves during reads", async () => {
+    const base = createFixtureAuthority();
+    let version = "v1";
+    const authority = { ...base,
+      getAuthorizationVersion: async () => version,
+      getProfile: async (artifactId: string) => {
+        await Promise.resolve();
+        version = "v2";
+        return base.getProfile(artifactId);
+      } };
+    expect(await adaptGrantToReader(GRANT, authority)).toBeNull();
+  });
 
+  it("should refuse a mixed decision that never granted protected access", async () => {
+    const base = createFixtureAuthority();
+    let moved = false;
+    const authority = { ...base,
+      getAuthorizationVersion: async () => moved ? "v2" : "v1",
+      getProfile: async () => ({ name: "demo", policyRevision: moved ? "pol-002" : "pol-001",
+        capabilities: moved ? ["geo.read" as const] : ["geo.read" as const, "signals.protected-read" as const] }),
+      getRights: async (readerSub: string, artifactId: string) => {
+        await Promise.resolve();
+        moved = true;
+        return { readerSub, artifactId, approved: true,
+          capabilities: ["geo.read" as const, "signals.protected-read" as const] };
+      } };
+    expect(await adaptGrantToReader(GRANT, authority)).toBeNull();
+    const profile = await authority.getProfile();
+    const fresh = await adaptGrantToReader({ ...GRANT, policyRevision: profile.policyRevision,
+      profileFingerprint: fingerprintReaderProfile(profile) }, authority);
+    expect(fresh?.capabilities).toEqual(["geo.read"]);
+  });
 });
