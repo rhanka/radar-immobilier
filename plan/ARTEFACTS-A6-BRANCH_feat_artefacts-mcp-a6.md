@@ -71,3 +71,4 @@ No invented production domain or certificate.
 - [x] Technical example source prepared; browser behavior remains unverified.
 - [x] Operation inputs reject undeclared authority or URL fields.
 - [x] Normalized operation responses reject publisher substitution.
+- [x] Serving requires current authority; synthetic operation data removed from runtime path.
