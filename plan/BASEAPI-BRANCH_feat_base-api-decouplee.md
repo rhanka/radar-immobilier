@@ -105,7 +105,7 @@
   - [x] B2.1 preparation: audit authored merge resolutions separately from preserved inherited history; extend bounded staging to the authorized API scope.
   - [x] B2.1: integrate pinned 6K history and both migrations under CT-1–CT-8; preserve 6L2 routes, watcher and verifier profiles; qualify CT-7 migration assertions before releasing K_SHA.
   - [x] B2.2: require destination opening in services before business reads and receipt returns.
-  - [ ] B2.3: apply the same opening rule to single commands and atomic batches.
+  - [x] B2.3: apply the same opening rule to single commands and atomic batches.
   - [ ] B2.4: cover target/city reads, destination history and source-history navigation.
   - [x] B2.5: separate authorized internal cutover readback from public opened-destination reads.
   - [ ] B2.6: qualify truly empty history → opening → first mark without artificial business events.

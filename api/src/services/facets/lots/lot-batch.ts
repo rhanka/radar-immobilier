@@ -36,7 +36,7 @@ import {
   type LotScope,
 } from "./lot-commands.js";
 import { resolveLotRights } from "./lot-capabilities.js";
-import { requireLotDestination } from "./lot-gate.js";
+import { requireOpenLotDestination } from "./lot-gate.js";
 import { assertCutoverTargetReady } from "./lot-cutover-target.js";
 import { authorizeLotMutation, validateLotMutationShape } from "./lot-authorize.js";
 import { appendLotTransition } from "./lot-apply.js";
@@ -77,7 +77,7 @@ export async function writeLotBatch(
     await lockWorkspace(tx, workspaceId);
     const actorId = await approvedAccountId(tx, sub, true);
     const rights = await resolveLotRights(tx, workspaceId, sub);
-    const destination = await requireLotDestination(tx, workspaceId);
+    const destination = await requireOpenLotDestination(tx, workspaceId);
     requireScopedEpoch(await scopedEpochFor(tx, workspaceId), workspaceId);
     for (const item of batch.items) {
       validateLotMutationShape(scope, item.mutation);
@@ -169,13 +169,13 @@ export async function writeLotBatch(
       eventsAppended,
       items,
     };
-    await tx.insert(facetCommands).values({
+    const [stored] = await tx.insert(facetCommands).values({
       ownerId: actorId, commandKey: key, commandDigest, result: { batch: result, context: { scope, mode: batch.mode, workspaceId } },
-    });
+    }).returning({ result: facetCommands.result });
     await tx.insert(facetCommandContexts).values({
       ownerId: actorId, commandKey: key, workspaceId,
       status: "resolved", commandDigest,
     }).onConflictDoNothing();
-    return result;
+    return (stored!.result as { batch: LotBatchResult }).batch;
   });
 }
