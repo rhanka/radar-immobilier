@@ -1,0 +1,18 @@
+--- a/api/Dockerfile
++++ b/api/Dockerfile
+@@ -71,6 +71,7 @@
+   "  entryPoints: [" \
+   "    'api/src/index.ts'," \
+   "    'api/src/artifacts/content-deny-server.ts'," \
++  "    'api/src/artifacts/content-reader-server.ts'," \
+   "    'api/src/db/migrate.ts'," \
+   "    'api/src/db/scripts/backfill-0004-tracking.ts'," \
+   "    'api/src/scripts/project-graph-from-s3.ts'," \
+@@ -97,6 +98,7 @@
+   "});" \
+   "const deny = apiBuild.metafile.outputs['api/dist/artifacts/content-deny-server.js'];" \
+   "const allowedInputs = ['api/src/artifacts/content-deny-server.ts', 'api/src/artifacts/content-deny.ts'];" \
++  "    'api/src/artifacts/content-reader-server.ts'," \
+   "if (Object.keys(deny.inputs).some(p => !allowedInputs.includes(p)) || deny.imports.some(i => !['hono', '@hono/node-server', 'node:http'].includes(i.path))) throw new Error('content-deny application dependency detected');" \
+   "// SECOND, separate build call for packages/immo-mcp: its outbase ('src')" \
+   "// is NOT under api/src, so it cannot share the entryPoints array above" \
