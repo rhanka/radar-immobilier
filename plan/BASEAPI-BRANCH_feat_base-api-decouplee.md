@@ -107,7 +107,7 @@
   - [ ] B2.2: require destination opening in services before business reads and receipt returns.
   - [ ] B2.3: apply the same opening rule to single commands and atomic batches.
   - [ ] B2.4: cover target/city reads, destination history and source-history navigation.
-  - [ ] B2.5: separate authorized internal cutover readback from public opened-destination reads.
+  - [x] B2.5: separate authorized internal cutover readback from public opened-destination reads.
   - [ ] B2.6: qualify truly empty history → opening → first mark without artificial business events.
   - [ ] B2.7: retain closure for unresolved-only history, missing rights, uncovered writers or invalid epoch.
   - [ ] Gate: lot-opening*, lot-cutover-readback*, lot-cutover-empty*, existing 6J/6K and 6L2 regressions; typecheck and scoped lint.
