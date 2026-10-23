@@ -93,3 +93,4 @@ No invented production domain or certificate.
 - [x] Standalone Git helper audits subjects, sizes and browser snapshots, then reconstructs the bundle.
 - [x] Committed both browser fixtures after the integrator exclusion; Chromium reproduced four positive-case failures before fixture corrections.
 - [x] Prepared explicit fixture ports, exact-host secure cookies and a separate source-browser runner; final-image/API acceptance remains open.
+- [x] Same-HEAD Astra reviews identified renewal expiry/revocation after waits; both regressions reproduced, then 13 scoped controls passed after correction.
