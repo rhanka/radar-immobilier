@@ -86,3 +86,4 @@ No invented production domain or certificate.
 - [x] Integration handoff identifies missing authority/store/receiving API and image receipts.
 - [x] Review correction: require full 128-bit GCM authentication tags.
 - [x] Credential budget controls measured 303-byte cookies and 725-byte grants on two fixtures.
+- [x] Review correction: recheck grant/session expiry and revocation after authority and API waits.
