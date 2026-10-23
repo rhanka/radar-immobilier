@@ -40,7 +40,8 @@ async function hostCookie(page: Page, cookieValue: string): Promise<void> {
   await page.context().addCookies([{
     name: "__Host-preview-session",
     value: cookieValue,
-    url: baseURL,
+    domain: HOST,
+    path: "/",
     secure: true,
     httpOnly: true,
     sameSite: "Strict",
