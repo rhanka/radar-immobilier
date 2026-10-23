@@ -76,3 +76,4 @@ No invented production domain or certificate.
 - [x] Authorized content unit controls cover two local fixture identities.
 - [x] Eight reproduced preview/content defects now have behavioral regressions.
 - [x] Optional content gate delegation preserves ordinary API denial.
+- [x] Reader init, ticket and release integration module cases prepared.
