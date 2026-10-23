@@ -108,3 +108,5 @@ activation, no cluster-mesh composition.
 - [x] Added bounded cache deadlines and single-flight concurrency.
 
 - [x] Added private subject binding and request-scoped delegation resolution.
+
+- [x] Added synthetic signed-token fixtures for exchange assertions.
