@@ -75,6 +75,16 @@ successor compatibility and delegation A as pure, unregistered contracts.
   - [x] Cover successor schema compatibility and unchanged live definitions.
   - [x] Freeze verified issuer/receiver delegation A policy.
   - [x] Cover forged, broadened and generic-scope delegation refusals.
+- [ ] **Review 1 — Scoped compatibility and discriminating evidence**
+  - [x] Require the exact requested POST operation in the received delegation.
+  - [ ] Preserve reason classifications and missing-basket diagnostics.
+  - [ ] Carry read-head metadata separately from receipt event snapshots.
+  - [ ] Match scoped HTTP lot bounds and reject orphan signal expectations.
+  - [ ] Reject private context fields using a complete accepted fixture.
+  - [ ] Cover selection, pipeline and market grants one at a time.
+  - [ ] Kill copied mutations for every defect in both Astra reviews.
+  - [ ] Pass the complete MCP suite and MCP/API typecheck, lint and build.
+  - [ ] Recheck inertness, commit constraints and the delivery bundle.
 - [x] **Lot N — Validate and deliver**
   - [x] Package unit suite, existing and new tests, passes.
   - [x] Rights, pending-choice and delegation mutations on copies are killed.

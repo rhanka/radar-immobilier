@@ -37,6 +37,13 @@ export interface DelegationPolicy {
 export type DelegationError = "delegation_missing" | "delegation_forged" | "delegation_broadened"
   | "audience_mismatch" | "workload_mismatch" | "profile_expired" | "insufficient_scope";
 
+/** The exact receiver operation the caller asks to perform. */
+export type RequestedOperation = z.infer<typeof RouteSchema>;
+function routeCovers(entry: RequestedOperation, requested: RequestedOperation): boolean {
+  return entry.method === requested.method && entry.path === requested.path
+    && entry.inputContract === requested.inputContract && entry.schemaDigest === requested.schemaDigest;
+}
+
 export function validateDelegationProfile(
   input: unknown, nowIso: string, expected: DelegationPolicy,
 ): DelegationError | null {
@@ -73,9 +80,19 @@ export function validateDelegationProfile(
 }
 
 /** Generic scopes alone fail. A needs a verified bounded write profile as well.
- * Dedicated B scopes do not qualify B's consent, exchange or receiver themselves. */
-export function canAuthorizeWrite(profile: unknown, nowIso: string, policy: DelegationPolicy): boolean {
-  return policy.permitsWrites && validateDelegationProfile(profile, nowIso, policy) === null;
+ * Dedicated B scopes do not qualify B's consent, exchange or receiver themselves.
+ * The requested POST operation must appear verbatim in the delegation and the
+ * policy: a read-only delegation under a broader policy, or a different POST
+ * route, never authorizes the requested write. Reads never satisfy this gate. */
+export function canAuthorizeWrite(
+  profile: unknown, nowIso: string, policy: DelegationPolicy, requested: RequestedOperation,
+): boolean {
+  if (!policy.permitsWrites || requested.method !== "POST") return false;
+  if (validateDelegationProfile(profile, nowIso, policy) !== null) return false;
+  const parsed = DelegationProfileSchema.safeParse(profile);
+  if (!parsed.success) return false;
+  return parsed.data.routes.some((entry) => routeCovers(entry, requested))
+    && policy.routes.some((entry) => routeCovers(entry, requested));
 }
 
 /** JSON tuples prevent collisions across every required cache dimension. */
