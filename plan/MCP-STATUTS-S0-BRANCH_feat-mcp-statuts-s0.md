@@ -65,7 +65,7 @@ successor compatibility and delegation A as pure, unregistered contracts.
   - [x] Freeze read validation and diagnostic confidentiality.
   - [x] Cover qualified reads, effective hiding, pagination and fingerprints.
 - [ ] **S0c — Command schemas**
-  - [ ] Freeze signal/lot DTOs, explicit versions, heads and atomic envelopes.
+  - [x] Freeze signal/lot DTOs, explicit versions, heads and atomic envelopes.
   - [ ] Freeze command-key and batch-shape validation.
   - [ ] Freeze semantic refusals against qualified progression evidence.
   - [ ] Catalog all six inert contracts and cover command regressions.
