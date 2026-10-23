@@ -109,6 +109,7 @@
   - [ ] Slices: browser-bound init; atomic ticket; separate session/grant; release activation; content serving; named API operations; reader-context adaptation; renewal/revocation; isolation/refusals; minimal example.
   - [ ] Files/tests: API artifact content/reader modules; artifact-reader integration suites; dedicated browser runner; shared app/auth/SQL deltas follow CT-1 through CT-9.
   - [ ] A6 supplies `api/vitest.config.ts` exclusion `tests/e2e/artifacts-reader*.spec.ts`, preserving `configDefaults.exclude`; the ARTEFACTS Sol integrator commits it before browser specs enter either lane or integration HEAD. Playwright explicitly selects those files.
+  - [x] Integrator applied A6's exclusion: both browser drafts disappear from discovery; all 277 ordinary API files and 2,658 test definitions remain collectible, with default exclusions preserved.
   - [ ] A6 runtime: `content-reader` mode -> `api/dist/artifacts/content-reader-server.js`; bundle its new source through `api/Dockerfile` and dispatch through `api/docker-entrypoint.sh`. Preserve `api`, independent `content-deny`, unknown-mode refusal and API content-host denial.
   - [ ] Acceptance: publisher/workload/reader remain distinct; rights intersect profile/current reader/API checks; no arbitrary URL, identity or authority headers.
   - [ ] Acceptance: browser-bound <=60-second single-use ticket; separate secure cookies; release-bound grant; renewal rechecks authority; measured cutoff <=60 seconds; old tabs gain no newer profile.
