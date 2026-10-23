@@ -196,3 +196,4 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 - [x] attribute refused preparation to its captured invocation.
 - [x] reject forged scopes and invalid keys on direct execute.
 - [x] reconcile S3 inventory with invocation cleanup intents.
+- [x] reconcile preparation inventory after denied finalization.
