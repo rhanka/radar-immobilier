@@ -120,3 +120,5 @@ activation, no cluster-mesh composition.
 - [x] Bound verified HTTP requests and search handlers to exchanged credentials.
 
 - [x] Removed subject credentials from invocation context and preserved public egress.
+
+- [x] Added cold and warm outages downstream invalidation and all public-stub assertions.
