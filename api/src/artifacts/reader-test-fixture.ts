@@ -19,7 +19,7 @@ export function fixtureReaderDeps(): Pick<ContentServeDeps, "authority" | "readO
 }
 
 export const GRANT_SECRET = "grant-secret-32-bytes-long-padding!";
-const SESSION_SECRET = "session-secret-32-bytes-long-pad!!";
+export const SESSION_SECRET = "session-secret-32-bytes-long-pad!!";
 export const ISSUER = { issuer: "https://api.example.test", audience: "https://api.example.test/reader", tier: "preprod" };
 export const HOST = "123e4567-e89b-12d3-a456-426614174000.pages.example.test";
 
