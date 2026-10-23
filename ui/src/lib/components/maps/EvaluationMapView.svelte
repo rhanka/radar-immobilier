@@ -88,6 +88,12 @@
     type ProspectMark,
     type ProspectStatus,
   } from "$lib/prospect/prospect-marks-client.js";
+  import {
+    computeLotFacetCounters,
+    facetCounterFor,
+    lotMatchesFacetFilter,
+    type LotFacetState,
+  } from "$lib/maps/lot-facet-counters.js";
   
 
   import { prioritizedCities } from "@radar/sources/municipalities";
@@ -206,6 +212,18 @@
   let prospectMarks: ProspectMark[] = [];
   let prospectFilter: ProspectStatus | "all" | "unmarked" = "all";
 
+  /**
+   * 6K cutover seam. `false` (default) preserves the established legacy
+   * mark behavior exactly. When the operator activates the destination,
+   * the parent supplies destination facet states and counters, filters,
+   * and map highlights switch to the independent facets.
+   */
+  export let lotFacetsActive = false;
+  export let lotFacetStates: LotFacetState[] = [];
+  $: facetStatesByKey = new Map(lotFacetStates.map((state) => [state.key, state]));
+  $: facetCounters = computeLotFacetCounters(lotFacetStates);
+  $: if (lotFacetsActive) prospectMarks = [];
+
   // ── Filtres carte (parité carte de référence) ──────────────────────────────
   // Catégorie EXCLUSIVE × usages ADDITIFS × superficie min. Chaque changement
   // ne fait que recalculer le STYLE des lots (aucun refetch) : les non-matchés
@@ -320,12 +338,18 @@
   const zonageGuard = new RequestGuard();
 
   async function loadProspectMarks(citySlug: string, lease: RequestLease): Promise<void> {
+    if (lotFacetsActive) {
+      prospectMarks = [];
+      prospectMarksError = null;
+      prospectMarksLoading = false;
+      return;
+    }
     prospectMarksLoading = true;
     prospectMarksError = null;
     prospectMarks = [];
     try {
       const marks = await fetchProspectMarksForZone(citySlug, undefined, { signal: lease.signal });
-      if (!lease.isCurrent()) return;
+      if (lotFacetsActive || !lease.isCurrent()) return;
       prospectMarks = marks;
     } catch (e) {
       if (!lease.isCurrent() || isAbortError(e)) return;
@@ -545,6 +569,7 @@
   $: filteredPolygonFeatures = polygonFeatures.filter((feature) => {
     if (prospectFilter === "all") return true;
     const key = lotKey(feature.properties.noLot, feature.properties.citySlug ?? selectedEvalCity?.slug ?? "");
+    if (lotFacetsActive) return lotMatchesFacetFilter(facetStatesByKey.get(key), prospectFilter);
     const marks = prospectMarks.filter((mark) => lotKey(mark.noLot, mark.citySlug) === key);
     const pipeline = activePipelineMark(marks);
     const market = activeMarketMark(marks);
@@ -553,6 +578,7 @@
   });
 
   function prospectCounterFor(filter: ProspectStatus | "all" | "unmarked"): number {
+    if (lotFacetsActive) return facetCounterFor(facetCounters, filter);
     if (filter === "all") return prospectCounters.all;
     if (filter === "unmarked") return prospectCounters.unmarked;
     return prospectCounters[filter];
@@ -1212,11 +1238,16 @@
                   {@const lotMarks = prospectMarksByLot.get(lotKey(feature.properties.noLot, feature.properties.citySlug ?? selectedEvalCity?.slug ?? "")) ?? []}
                   {@const lotPipelineMark = activePipelineMark(lotMarks)}
                   {@const lotMarketMark = activeMarketMark(lotMarks)}
+                  {@const lotFacet = lotFacetsActive
+                    ? facetStatesByKey.get(lotKey(feature.properties.noLot, feature.properties.citySlug ?? selectedEvalCity?.slug ?? ""))
+                    : null}
                   {@const paint = evalLotPaint(feature.properties, {
                     matched: lotMatchesEvalFilter(feature.properties, evalFilter),
                     selected: isLotSelected,
                     hovered: isHovered,
-                    marked: !!(lotPipelineMark || lotMarketMark),
+                    marked: lotFacetsActive
+                      ? !lotMatchesFacetFilter(lotFacet, "unmarked")
+                      : !!(lotPipelineMark || lotMarketMark),
                     el: null,
                   })}
                   {#if rings && rings.length > 0}
@@ -1276,6 +1307,10 @@
                     lot={selectedLot}
                     cityName={selectedEvalCity?.name ?? ""}
                     allowMarquage={true}
+                    {lotFacetsActive}
+                    facetState={lotFacetsActive ? facetStatesByKey.get(lotKey(
+                      selectedLot.properties.noLot,
+                      selectedLot.properties.citySlug ?? selectedEvalCity?.slug ?? "")) ?? null : null}
                     mode={isCarteSteve ? "simulation" : "real"}
                     onClose={() => { selectedLot = null; }}
                   />
