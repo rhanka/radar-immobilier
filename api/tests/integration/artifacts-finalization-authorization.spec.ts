@@ -239,6 +239,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
           files: [{ path: "index.html", mimeType: "text/html", text: tag }] }
           : { bindingName: tag, idempotencyKey: tag };
         const before = await committedState(pool);
+        const s3Baseline = new Set(await rawBlobs().listKeys(""));
         const invocation = invocationFor(statusDriven(), tag);
         run = startBarrierOperation(barrier, invocation.invocationId,
           () => execute({ method: "POST", path: "/" + operation, body }, invocation), point);
@@ -262,7 +263,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
           expect(await committedState(pool)).toEqual(before);
           if (artifactId) {
             expect(await currentReleaseId(artifactId)).toBeUndefined();
-            await assertPreparationCleanup(host, artifactId);
+            await assertPreparationCleanup(host, artifactId, [invocation.invocationId], s3Baseline);
           }
         }
       } finally {
