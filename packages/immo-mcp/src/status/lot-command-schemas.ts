@@ -5,13 +5,14 @@ import {
   LotTargetSchema, ModeSchema, ReasonSchema, ScopeSchema, WorkspaceIdSchema,
 } from "./wire-schemas.js";
 
-const basket = z.string().min(1).max(128);
+/** Parity with scoped-lot-facets-common: basket 256, deselect 8. */
+const basket = z.string().min(1).max(256);
 const removal = z.object({ basket_id: basket, expected_head_id: HeadIdSchema }).strict();
 export const LotMutationSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("select"), basket_id: basket }).strict(),
   z.object({ action: z.literal("deselect"), basket_id: basket }).strict(),
   z.object({ action: z.literal("discard"), reasonCode: ReasonSchema.optional(),
-    deselect: z.array(removal).max(100).optional() }).strict(),
+    deselect: z.array(removal).max(8).optional() }).strict(),
   z.object({ action: z.literal("restore") }).strict(),
   z.object({ action: z.literal("set_pipeline"),
     status: z.enum(["sollicite", "lettre_envoyee"]) }).strict(),
