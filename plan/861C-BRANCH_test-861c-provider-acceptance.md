@@ -199,7 +199,7 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 - [x] Compile the complete Radar profile and reject invariant semantic digests.
 - [x] Refuse forged scope and invalid caller keys directly before storage.
 - [x] Reject private identifiers in all MCP representations and inject stream markers.
-- [x] Accept 94 conforming controls and reject all 94 discriminant mutations.
+- [x] Accept 96 conforming controls and reject all 96 discriminant mutations.
 - [x] Archive final API, enabled-gate and static receipts; audit atomic commits.
 
 ## Review 2 delivery slices
@@ -223,3 +223,4 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 - [x] qualify uncertain COMMIT on both transports.
 - [x] redact storage scope from HTTP and MCP failure bodies.
 - [x] docs: record round-two provider acceptance verification.
+- [x] accept delayed refusal after deletion claim resolution.

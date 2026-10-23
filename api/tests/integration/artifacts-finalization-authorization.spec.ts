@@ -893,12 +893,16 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         void pending.catch(() => {});
         let early: unknown;
         await withTimeout(pending.then((value) => { early = value; }), 100);
-        if (early !== undefined) assertOutcomeFailure(early, reference.invocationId);
+        const refusedBeforeResolution = early !== undefined;
+        if (refusedBeforeResolution) assertOutcomeFailure(early, reference.invocationId);
         paused.release();
         await paused.finished;
         paused = undefined;
         const outcome = await pending;
-        if (early === undefined) expect(outcome).toMatchObject({ ok: true });
+        // A refusal may arrive after waiting for claim resolution too (A4).
+        if (!refusedBeforeResolution && (outcome as { ok?: unknown }).ok === false) {
+          assertOutcomeFailure(outcome, reference.invocationId);
+        } else if (!refusedBeforeResolution) expect(outcome).toMatchObject({ ok: true });
         // After claim resolution, a fresh authorized attempt must reprepare
         // rather than attach the deleted blob.
         const retry = invocationFor(allowAll(), `purge-retry-${order}`);
