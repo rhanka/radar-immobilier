@@ -124,3 +124,5 @@ activation, no cluster-mesh composition.
 - [x] Added cold and warm outages downstream invalidation and all public-stub assertions.
 
 - [x] Implemented executable P4 gates and synthetic issuer; P6 and P7 still refuse.
+
+- [x] Added real loopback HTTP exchange proof with synthetic issuer and receiver.
