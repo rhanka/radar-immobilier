@@ -143,7 +143,7 @@ activation, no cluster-mesh composition.
 
 - [x] P4 implementation uses confidential `client_secret_basic` per Sentropic source `6ec93105b380bc65063994417716dfacfaceb462`; no actor token or original-bearer fallback.
 - [x] Synthetic-only runtime reads `IMMO_MCP_WORKLOAD_CLIENT_SECRET` from explicitly supplied process configuration; no credential value or deployment edit is delivered.
-- [x] The first ten behavioral mutants were killed with restored passing controls; the added subject-expiry mutant still requires execution on the final source.
+- [x] Eleven behavioral mutants were killed with restored passing controls on source `6cc4ece927f7ea6da8c4fdb8ac82d10bf8808eef`; see `tmp/artefacts-mcp-a2/RAPPORT-SOL-ARTEFACTS-A2.md` and `logs/final-service-mutations.log` under that evidence directory.
 - [ ] ARTEFACTS integrator supplies a coherent `mcp-auth 0.2.2`/`oauth-verify 0.1.0` manifest and lockfile integration commit, archive integrity, provenance and strict full-Radar peer receipt.
 - [ ] Apply the intended missing-coarse-scope 401-to-403 delta and remove the canonical discovery shim only after that qualified dependency integration; invalid authentication stays 401.
 - [ ] Identity owner supplies the exact real RFC 8693 issuer build/tuple and an isolated compatibility receipt; the local synthetic issuer does not satisfy this gate.
