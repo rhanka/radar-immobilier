@@ -162,3 +162,4 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 - [x] bind private invocation and provider outcome contracts.
 - [x] bind acceptance fixtures to the compiled provider host.
 - [x] exercise provider command conflicts without facade hashing.
+- [x] refuse unselected provider operations before storage.
