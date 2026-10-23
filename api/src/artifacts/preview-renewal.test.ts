@@ -100,6 +100,34 @@ describe("grant renewal and revocation", () => {
     )).toBeNull();
   });
 
+  it("should refuse renewal after the profile gains a capability without new approval", async () => {
+    const narrowFingerprint = fingerprintReaderProfile({ name: "demo", policyRevision: "pol-001",
+      capabilities: ["geo.read"] });
+    const token = await mintGrant({ ...GRANT, profileFingerprint: narrowFingerprint }, SECRET, 1_000);
+    const base = createFixtureAuthority();
+    const widened = { ...base,
+      getProfile: async () => ({ name: "demo", policyRevision: "pol-001",
+        capabilities: ["geo.read" as const, "signals.protected-read" as const] }),
+      getRights: async (readerSub: string, artifactId: string) => ({ readerSub, artifactId,
+        approved: true, capabilities: ["geo.read" as const, "signals.protected-read" as const] }) };
+    expect(await renewGrant(
+      token,
+      { authority: widened, secret: SECRET, issuer: ISSUER },
+      () => false,
+      10_000,
+    )).toBeNull();
+    const renewedWide = await mintGrant({ ...GRANT,
+      profileFingerprint: fingerprintReaderProfile({ name: "demo", policyRevision: "pol-001",
+        capabilities: ["geo.read", "signals.protected-read"] }) }, SECRET, 10_000);
+    const renewed = await renewGrant(
+      renewedWide,
+      { authority: widened, secret: SECRET, issuer: ISSUER },
+      () => false,
+      20_000,
+    );
+    expect(renewed).not.toBeNull();
+    expect((await verifyGrant(renewed!, ISSUER, SECRET, 20_000))?.profileFingerprint).toBe(GRANT.profileFingerprint);
+  });
 
   it("should close access at expiry, on revocation and on outage", () => {
     expect(accessOpen({ grantValid: true, revoked: false, outage: false })).toBe(true);
