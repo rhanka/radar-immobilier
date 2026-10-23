@@ -68,3 +68,4 @@ No invented production domain or certificate.
 - [x] Reader context checks current release, policy and reader rights.
 - [x] Renewal checks current release and fails closed during authority outage.
 - [x] Isolation headers prohibit workers and preserve deny responses.
+- [x] Technical example source prepared; browser behavior remains unverified.
