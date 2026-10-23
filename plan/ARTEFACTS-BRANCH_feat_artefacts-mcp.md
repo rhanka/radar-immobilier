@@ -68,6 +68,8 @@
 - [ ] CT-9 — After joining histories, test the exact combined SHA/image: both mount sets, auth/session and 6L2 regressions, BASE with artifacts off, artifacts without optional business capabilities, two-reader API proof and migration history. A shared-image update must retain already-delivered capabilities; no stale branch image may overwrite them. Schema coordination never requires 6K business activation or makes MCP/H5 a BASE prerequisite.
 - [ ] H4 file ownership: Sol A2 alone applies/commits P4 deltas in `tools/h4-mcp.mk` under an exclusive lease; Muse A2 proposes hunks only. After accepted A2 HEAD is merged and acknowledged, ownership returns to the ARTEFACTS Sol integrator for A4/P6 and A5/P7; no overlapping edits.
 - [x] A2 integration: approved source `b104ae90a28a5581e8eabd15f12acb58558d3396`; the ARTEFACTS Sol integrator acknowledges the P4 receipt and H4 SHA-256 `7c1f4c68f47929764cd0f37e60b0c9a7d719e40900a2634a98931655cca52e40`, resuming exclusive ownership for A4/P6 and A5/P7; P4 activation remains open.
+- [x] A1 partial integration: approved source `f2b6c25cc9458ec285d6d4f620a55dad8c30f909` received on `e70651851104bbbc885c131164526dad3dee30f0` after both r3 approvals; CT-1 files and Track remain unchanged.
+- [ ] A1 acceptance remains open pending Sentropic r2; enabled `[missing-contract]` cases remain named failures and ordinary API collection keeps acceptance disabled by default. Proposed SQL/journal remain unregistered; CT-8/CT-9 remain unverified.
 
 ## UAT Management (in orchestration context)
 - [ ] Automated acceptance uses synthetic readers/data and isolated stacks; no automated test targets root `ENV=dev`.
