@@ -3,7 +3,7 @@
  * Synthetic clocks prove the <= 60 s access cutoff without waiting.
  */
 import { describe, expect, it } from "vitest";
-import { createFixtureAuthority } from "../../src/artifacts/reader-profile.js";
+import { createFixtureAuthority, fingerprintReaderProfile } from "../../src/artifacts/reader-profile.js";
 import {
   mintGrant,
   PREVIEW_ACCESS_CUTOFF_MS,
@@ -24,6 +24,8 @@ const GRANT: GrantClaims = {
   sessionId: "session-1",
   profileName: "demo",
   policyRevision: "pol-001",
+  profileFingerprint: fingerprintReaderProfile({ name: "demo", policyRevision: "pol-001",
+    capabilities: ["geo.read", "signals.protected-read"] }),
 };
 
 describe("artifacts reader grants and activation", () => {
