@@ -191,3 +191,4 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 ## Review 2 delivery slices
 - [x] bind full Radar profile and reject constant digests.
 - [x] reconcile S3 inventory with invocation cleanup intents.
+- [x] reject private identifiers in every MCP representation.

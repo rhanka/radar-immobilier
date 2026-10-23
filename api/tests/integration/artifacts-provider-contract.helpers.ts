@@ -719,7 +719,7 @@ export function createPrivateMarker(prefix: string): string {
 function assertNoPrivateFields(value: unknown): void {
   if (value === null || typeof value !== "object") return;
   for (const [key, child] of Object.entries(value)) {
-    if (/^(cause|stack|sql|query|password|credentials?|endpoint|bucket)$/i.test(key)) {
+    if (/^(cause|stack|sql|query|password|credentials?|endpoint|bucket|storageScopeId|storageScope|scopeId|tenantId|workspaceId|internalKey|paramsHash)$/i.test(key)) {
       throw new Error(`[contract-violation] redaction: private field ${key} leaked`);
     }
     assertNoPrivateFields(child);
@@ -780,8 +780,20 @@ export function assertMcpResultRedacted(
     record["code"] !== expected.code || record["retryable"] !== expected.retryable) {
     throw new Error("[contract-violation] MCP parity: unexpected public failure shape");
   }
-  const structured = (record["structuredContent"] ?? record["data"] ?? record["error"]) as unknown;
-  const text = JSON.stringify({ body: record, structured });
+  // Exact public failure structure: the wire error must equal the sanitized
+  // public body, with no extra private identifiers in any MCP representation
+  // (error, data, structuredContent, text, _meta). A correct response augmented
+  // with error.storageScopeId passes the old substring check and fails here.
+  const wireError = record["error"];
+  if (JSON.stringify(wireError) !== JSON.stringify({ error: expected.publicError })) {
+    throw new Error("[contract-violation] MCP parity: unexpected public error structure");
+  }
+  const representations = { error: record["error"], data: record["data"],
+    structuredContent: record["structuredContent"], text: record["text"], meta: record["_meta"] };
+  const text = JSON.stringify({ body: record, representations });
+  if (/storageScopeId|storageScope|scopeId|tenantId|workspaceId|internalKey|paramsHash/i.test(text)) {
+    throw new Error("[contract-violation] MCP redaction: private identifier in serialized representation");
+  }
   for (const marker of privateMarkers) {
     if (marker.length > 0 && text.includes(marker)) {
       throw new Error("[contract-violation] MCP redaction: private marker leaked");
