@@ -10,6 +10,7 @@ import {
   type SearchSignalsArgs,
 } from "./data-source.js";
 import { getInvocationContext } from "./invocation-context.js";
+import { createIsolatedExchangeFixture, exchangeDepsFor } from "./test-exchange-fixtures.js";
 
 const ISSUER = "https://auth.test.local";
 const RESOURCE = "https://immo.test.local/mcp";
@@ -126,10 +127,11 @@ beforeAll(async () => {
   keySource = { resolveKey: async () => publicKey };
 });
 
-describe("request isolation on a shared session (P1)", () => {
+describe("request isolation on a shared session (P4 exchanged egress)", () => {
   it.each(["refreshed", "reduced-scope"])("isolates A when %s B completes before A dispatches", async (mode) => {
     const data = new RecordingDataSource();
-    const app = createImmoHttpApp(CONFIG, { keySource, data });
+    const fixture = await createIsolatedExchangeFixture();
+    const app = createImmoHttpApp(CONFIG, { keySource, data, exchange: exchangeDepsFor(fixture) });
     const first = await signToken({ jti: "first" });
     const sessionId = await initialize(app, first);
     const barrier = pauseAtDispatch();
@@ -148,12 +150,19 @@ describe("request isolation on a shared session (P1)", () => {
         expect(data.calls).toHaveLength(0);
       } else {
         expect(payload.isError).not.toBe(true);
-        expect(data.calls).toEqual([{ credential: refreshed, reveal: false, sub: "user-1" }]);
+        expect(data.calls).toHaveLength(1);
+        expect(data.calls[0]?.reveal).toBe(false);
+        expect(data.calls[0]?.sub).toBe("user-1");
+        expect(data.calls[0]?.credential).toBeTruthy();
+        expect(data.calls[0]?.credential).not.toBe(refreshed);
       }
       barrier.release();
       expect((await toolPayload(await pending)).isError).not.toBe(true);
       expect(data.calls).toHaveLength(reduced ? 1 : 2);
-      expect(data.calls.at(-1)).toEqual({ credential: first, reveal: true, sub: "user-1" });
+      expect(data.calls.at(-1)?.reveal).toBe(true);
+      expect(data.calls.at(-1)?.sub).toBe("user-1");
+      expect(data.calls.at(-1)?.credential).toBeTruthy();
+      expect(data.calls.at(-1)?.credential).not.toBe(first);
     } finally {
       barrier.release();
       await pending;
@@ -162,7 +171,8 @@ describe("request isolation on a shared session (P1)", () => {
 
   it("emits zero protected egress when the current scope is missing", async () => {
     const data = new RecordingDataSource();
-    const app = createImmoHttpApp(CONFIG, { keySource, data });
+    const fixture = await createIsolatedExchangeFixture();
+    const app = createImmoHttpApp(CONFIG, { keySource, data, exchange: exchangeDepsFor(fixture) });
     const full = await signToken();
     const sessionId = await initialize(app, full);
     const reduced = await signToken({ scope: "immo:read" });
@@ -171,5 +181,6 @@ describe("request isolation on a shared session (P1)", () => {
     expect(payload.isError).toBe(true);
     expect(payload.text).toContain("scope_denied:immo:search");
     expect(data.calls).toHaveLength(0);
+    expect(fixture.issuedExchangedTokens).toHaveLength(0);
   });
 });
