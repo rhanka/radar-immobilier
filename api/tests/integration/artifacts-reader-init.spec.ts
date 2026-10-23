@@ -5,6 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { createFixtureAuthority, fingerprintReaderProfile } from "../../src/artifacts/reader-profile.js";
 import { validatePreviewInit } from "../../src/artifacts/preview-init.js";
+import { validateTicketForExchange } from "../../src/artifacts/preview-exchange.js";
 import { createTicketStore } from "../../src/artifacts/preview-tickets.js";
 
 const INIT = {
@@ -37,7 +38,26 @@ describe("artifacts reader init and ticket flow", () => {
     expect(ticket.policyRevision).toBe(summary!.policyRevision);
     const consumed = store.consume(ticket.ticket, INIT.browserBinding);
     expect(consumed?.readerSub).toBe("reader-alice");
+    expect(await validateTicketForExchange(consumed!, authority)).not.toBeNull();
     expect(store.consume(ticket.ticket, INIT.browserBinding)).toBeNull();
+  });
+
+  it("should refuse exchange when the policy changes after init", async () => {
+    const authority = createFixtureAuthority();
+    const summary = (await validatePreviewInit(INIT, authority))!;
+    const store = createTicketStore({ now: () => 1_000 });
+    const ticket = store.mint({ ...INIT,
+      readerSub: "reader-alice",
+      policyRevision: summary.policyRevision,
+      profileFingerprint: fingerprintReaderProfile({ name: summary.profileName,
+        policyRevision: summary.policyRevision,
+        capabilities: summary.capabilities as ("geo.read" | "signals.protected-read")[] }),
+    });
+    const consumed = store.consume(ticket.ticket, INIT.browserBinding)!;
+    const mutated = { ...authority,
+      getProfile: async () => ({ name: "demo", policyRevision: "pol-002",
+        capabilities: ["geo.read" as const] }) };
+    expect(await validateTicketForExchange(consumed, mutated)).toBeNull();
   });
 
   it("should refuse binding mismatches before any ticket exists", async () => {

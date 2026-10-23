@@ -96,3 +96,4 @@ No invented production domain or certificate.
 - [x] Same-HEAD Astra reviews identified renewal expiry/revocation after waits; both regressions reproduced, then 13 scoped controls passed after correction.
 - [x] FIX1 A1: scope authority rights to the reader/artifact pair; define nonreusable authorization versions and canonical profile fingerprints.
 - [x] FIX1 A2/B4: tickets carry the approved policy revision and profile fingerprint; init retains the presented profile.
+- [x] FIX1 A2/B4: exchange validates current release, profile and per-artifact approval under an authorization-version fence; HTTP integration remains pending.
