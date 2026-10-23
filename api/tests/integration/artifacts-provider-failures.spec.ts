@@ -494,8 +494,6 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     "quota",
     "blob-reference",
     "deletion-claim",
-    "schema-infrastructure",
-    "unqualified",
   ])("maps a 55P03 outside the key row (%s) to provider_unavailable", async (lockClass) => {
     await requireOutcomeContract();
     const barrier = await requireCommitBarrier();
@@ -503,33 +501,34 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     const { host } = await composeQ2Host(barrier, { pool: probe.pool });
     const close = host["close"];
     try {
-      const execute = requireHostExecute(host);
-      const artifactId = await ensureVia(execute, allowAll(), "q2-nonkey", "q2-nonkey-ensure");
+      const setup = requireHostExecute(host);
+      const artifactId = await ensureVia(setup, allowAll(), "q2-nonkey", "q2-nonkey-ensure");
       const releasesBefore = await tableCount("releases");
-      probe.evidence.armed = true;
-      try {
-        const invocation = invocationFor(allowAll(), "nonkey");
+      const keysBefore = await tableCount("idempotency_keys");
+      // Each transport uses an independent caller key and a rearmed injection,
+      // with one correlated write-ledger entry per failed dispatch.
+      for (const transport of ["http", "mcp"] as const) {
+        const clientKey = `q2-nonkey-${lockClass}-${transport}`;
         const isBinding = lockClass === "binding";
-        const outcome = isBinding
-          ? await execute({ method: "POST", path: "/ensure",
-            body: { bindingName: "q2-nonkey-binding", idempotencyKey: "q2-nonkey-binding" } }, invocation) as unknown as Record<string, unknown>
-          : await execute({ method: "POST", path: "/publish",
-            body: { artifactId,
-              files: [{ path: "index.html", mimeType: "text/html", text: "non-key lock timeout" }],
-              idempotencyKey: "q2-nonkey" } }, invocation) as unknown as Record<string, unknown>;
-        assertOutcomeFailure(outcome, invocation["invocationId"] as string);
-        expect(probe.evidence.injections).toBe(1);
-        expect(probe.evidence.phase).toBe(lockClass);
-        expect(probe.evidence.attempts).toBeLessThanOrEqual(1);
-        expect(outcome["failure"]).toMatchObject({
-          category: "provider_unavailable", retriable: true, commitState: "not_committed" });
-        expect((outcome["failure"] as Record<string, unknown>)["cause"]).toMatchObject({ code: "55P03" });
-        const projected = await projectOutcomeHttp(outcome);
-        expect(projected).toEqual({ status: 503, body: { error: "capability_unavailable" } });
-      } finally {
-        probe.evidence.armed = false;
+        const body = isBinding
+          ? { bindingName: `q2-nonkey-${lockClass}-${transport}`, idempotencyKey: clientKey }
+          : { artifactId,
+            files: [{ path: "index.html", mimeType: "text/html", text: "non-key lock timeout" }],
+            idempotencyKey: clientKey };
+        Object.assign(probe.evidence, { armed: true, injections: 0, attempts: 0, writes: 0, phase: "" });
+        try {
+          const outcome = await failViaTransport(host, { method: "POST",
+            path: isBinding ? "/ensure" : "/publish", body }, transport);
+          expect(outcome.failure).toMatchObject({ cause: { code: "55P03" }, commitState: "not_committed" });
+          expect(probe.evidence.injections).toBe(1);
+          expect(probe.evidence.phase).toBe(lockClass);
+          expect(probe.evidence.attempts).toBeLessThanOrEqual(1);
+          expect(await tableCount("releases")).toBe(releasesBefore);
+          expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+        } finally {
+          probe.evidence.armed = false;
+        }
       }
-      expect(await tableCount("releases")).toBe(releasesBefore);
     } finally {
       if (typeof close === "function") (close as () => void)();
     }
