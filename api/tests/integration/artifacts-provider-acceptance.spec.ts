@@ -399,12 +399,51 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
   it("replays HTTP to MCP and MCP to HTTP as one durable authorized release per key", async () => {
     await requireCommitContract();
     const barrier = await requireCommitBarrier();
-    const host = await composeAcceptanceHost(barrier.observer);
+    const composed = await composeAcceptanceHost(barrier);
+    const host = composed.host;
     const close = host["close"];
     try {
-      requireSelectedProfile(host);
-      const firstHost = (await composeAcceptanceHost(barrier.observer));
-      const control = createArtifactControl(firstHost, SCOPE, BASE);
+      requireSelectedProfile(host, composed.profile.digest);
+      const seenPurposes: string[] = [];
+      const finalizeGuard: AuthorizeCommit = async (context, transaction) => {
+        expect(context.purpose).toBe("finalize");
+        seenPurposes.push("finalize");
+        return authorizeTransaction(context, transaction);
+      };
+      const replayGuard: AuthorizeCommit = async (context, transaction) => {
+        expect(context.purpose).toBe("replay");
+        seenPurposes.push("replay");
+        return authorizeTransaction(context, transaction);
+      };
+      const direct = await composeAcceptanceHost(barrier);
+      try {
+        const execute = requireHostExecute(direct.host);
+        const ensured = await execute({ method: "POST", path: "/ensure",
+          body: { bindingName: "replay-direct", idempotencyKey: "replay-direct-ensure" } },
+          invocationFor(finalizeGuard, "replay-direct-ensure"));
+        expect(ensured).toMatchObject({ ok: true });
+        const artifactId = successBody(ensured)["artifactId"] as string;
+        for (const [label, clientKey] of [["http-first", "replay-direct-http"], ["mcp-first", "replay-direct-mcp"]] as const) {
+          const body = { artifactId,
+            files: [{ path: "index.html", mimeType: "text/html", text: `hello ${label}` }],
+            idempotencyKey: clientKey };
+          const releasesBefore = await tableCount("releases");
+          const first = await execute({ method: "POST", path: "/publish", body },
+            invocationFor(finalizeGuard, label)) as Record<string, unknown>;
+          expect(first).toMatchObject({ ok: true });
+          const second = await execute({ method: "POST", path: "/publish", body },
+            invocationFor(replayGuard, `${label}-replay`)) as Record<string, unknown>;
+          expect(second).toMatchObject({ ok: true, replayed: true });
+          expect(successBody(second)).toEqual(successBody(first));
+          expect(await tableCount("releases")).toBe(releasesBefore + 1);
+          expect(seenPurposes).toContain("finalize");
+          expect(seenPurposes).toContain("replay");
+        }
+      } finally {
+        (direct.host["close"] as () => void)();
+      }
+      const firstComposed = await composeAcceptanceHost(barrier);
+      const control = createArtifactControl(firstComposed.host as never, SCOPE, BASE);
       try {
         const route = controlRoute({ auth, accounts: pool, backend: control });
         const httpPublish = async (args: unknown) => {
@@ -418,28 +457,37 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
           { bindingName: "replay", idempotencyKey: "replay" });
         expect(ensured.status).toBe(201);
         const artifactId = (ensured.body as { artifactId: string }).artifactId;
-        const second = (await composeAcceptanceHost(barrier.observer));
+        const secondComposed = await composeAcceptanceHost(barrier);
         try {
-          const adapter = createMcpArtifactAdapter(createArtifactControl(second, SCOPE, BASE));
-          const args = { artifactId, files: [{ path: "index.html", mimeType: "text/html", text: "hello" }],
-            idempotencyKey: " replay " };
-          const mcp = () => adapter.execute({ method: "POST", path: "/publish", args }, { actorId: ACTOR });
+          const adapter = createMcpArtifactAdapter(createArtifactControl(secondComposed.host as never, SCOPE, BASE));
           const bodyOf = (value: unknown) => "body" in (value as Record<string, unknown>)
             ? (value as { body: unknown }).body
             : (value as { ok: boolean; data: unknown }).data;
           const releasesBefore = await tableCount("releases");
           const keysBefore = await tableCount("idempotency_keys");
-          const first = await httpPublish(args);
-          const replay = await mcp();
+          const httpArgs = { artifactId, files: [{ path: "index.html", mimeType: "text/html", text: "hello" }],
+            idempotencyKey: " replay " };
+          const mcpOf = () => adapter.execute({ method: "POST", path: "/publish", args: httpArgs }, { actorId: ACTOR });
+          const first = await httpPublish(httpArgs);
+          const replay = await mcpOf();
           expect(first.status).toBe(201);
           expect(replay.status).toBe(201);
           expect(await tableCount("releases")).toBe(releasesBefore + 1);
           expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
           expect(bodyOf(replay)).toEqual(bodyOf(first));
           expect(await currentReleaseId(artifactId)).toBe((bodyOf(first) as { releaseId: string }).releaseId);
-        } finally { second.close(); }
+          const mcpFirstArgs = { artifactId, files: [{ path: "index.html", mimeType: "text/html", text: "hello mcp-first" }],
+            idempotencyKey: "replay-mcp-first" };
+          const mcpFirst = await adapter.execute({ method: "POST", path: "/publish", args: mcpFirstArgs }, { actorId: ACTOR });
+          expect(mcpFirst).toMatchObject({ ok: true, status: 201 });
+          const httpReplay = await httpPublish(mcpFirstArgs);
+          expect(httpReplay.status).toBe(201);
+          expect(httpReplay.body).toEqual(bodyOf(mcpFirst));
+          expect(await tableCount("releases")).toBe(releasesBefore + 2);
+          expect(await tableCount("idempotency_keys")).toBe(keysBefore + 2);
+        } finally { (secondComposed.host["close"] as () => void)(); }
       } finally {
-        firstHost.close();
+        (firstComposed.host["close"] as () => void)();
       }
     } finally {
       if (typeof close === "function") (close as () => void)();
@@ -449,12 +497,35 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
   it("rejects same-key changed content as conflict without a new release", async () => {
     await requireCommitContract();
     const barrier = await requireCommitBarrier();
-    const host = await composeAcceptanceHost(barrier.observer);
+    const composedCheck = await composeAcceptanceHost(barrier);
+    const host = composedCheck.host;
     const close = host["close"];
     try {
-      requireSelectedProfile(host);
-      const composed = (await composeAcceptanceHost(barrier.observer));
-      const control = createArtifactControl(composed, SCOPE, BASE);
+      requireSelectedProfile(host, composedCheck.profile.digest);
+      const direct = requireHostExecute(host);
+      const guard = authorizeTransaction;
+      const ensured = await direct({ method: "POST", path: "/ensure", body: {
+        bindingName: "direct-conflict", idempotencyKey: "direct-conflict-ensure" } }, invocationFor(guard, "direct-conflict-ensure"));
+      expect(ensured).toMatchObject({ ok: true });
+      const directId = successBody(ensured).artifactId as string;
+      const original = [{ path: "index.html", mimeType: "text/html", text: "first" },
+        { path: "other.html", mimeType: "text/html", text: "second" }];
+      const directBody = { artifactId: directId, files: original, idempotencyKey: "direct-conflict" };
+      expect(await direct({ method: "POST", path: "/publish", body: directBody }, invocationFor(guard, "direct-first"))).toMatchObject({ ok: true });
+      const directBefore = await committedState(pool);
+      for (const change of [{ files: [...original].reverse() },
+        { files: [{ ...original[0], text: "changed" }, original[1]] },
+        { files: [{ ...original[0], path: "changed.html" }, original[1]] },
+        { files: [{ ...original[0], mimeType: "text/css" }, original[1]] },
+        { profile: { theme: "dark" } }]) {
+        const invocation = invocationFor(guard, "direct-changed");
+        const outcome = await direct({ method: "POST", path: "/publish", body: { ...directBody, ...change } }, invocation);
+        assertOutcomeFailure(outcome, invocation.invocationId);
+        expect((outcome as { failure: unknown }).failure).toMatchObject({ category: "conflict", status: 409 });
+        expect(await committedState(pool)).toEqual(directBefore);
+      }
+      const composed = (await composeAcceptanceHost(barrier));
+      const control = createArtifactControl(composed.host as never, SCOPE, BASE);
       try {
         const artifactId = await ensureArtifact(control, "acceptance-conflict-ensure");
         const files = [{ path: "index.html", mimeType: "text/html", text: "hello" }];
@@ -490,7 +561,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
         expect(await control.handle("publish", ACTOR,
           { artifactId, files, idempotencyKey: "acceptance-conflict" })).toEqual(first);
       } finally {
-        composed.close();
+        (composed.host["close"] as () => void)();
       }
     } finally {
       if (typeof close === "function") (close as () => void)();
