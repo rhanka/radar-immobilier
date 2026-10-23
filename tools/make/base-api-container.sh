@@ -18,6 +18,7 @@ CONFIG
 POSTGRES_HOST=$(node --input-type=module -e 'import {lookup} from "node:dns/promises"; console.log((await lookup("postgres", {family:4})).address)')
 export POSTGRES_HOST
 typecheck_api() {
+  node --check tools/make/base-api-required-mutations.mjs
   npm run typecheck --workspace=api
   if compgen -G 'api/tests/integration/base-api*.ts' > /dev/null; then
     cat > api/tsconfig.base-api-tests.json <<'CONFIG'
@@ -41,8 +42,8 @@ case $action in
   network-proof) node tools/make/base-api-network.mjs;;
   typecheck) typecheck_api;;
   lint) lint_api;;
-  verify|test|test-api|b1-mutation-legacy|b1-mutation-archive|b1-mutation-required)
-    if [[ $action == verify || $action == b1-mutation-* ]]; then
+  verify|test|test-api|b1-mutation-legacy|b1-mutation-archive|b1-mutation-required|b3-mutation-required|b4-mutation-required)
+    if [[ $action == verify || $action == *-mutation-* ]]; then
       typecheck_api
       lint_api
     fi
@@ -53,8 +54,9 @@ case $action in
       node ../tools/make/base-api-ct7-proof.mjs | tee /evidence/ct7.log
     fi
     set -f
-    if [[ $action == b1-mutation-* ]]; then
-      bash ../tools/make/base-api-b1-mutation.sh "${action#b1-mutation-}"
+    if [[ $action == *-mutation-* ]]; then
+      timeout --signal=TERM --kill-after=5 600 bash "../tools/make/base-api-${action%%-*}-mutation.sh" "${action#*-mutation-}"
+      if [[ $action == b3-* || $action == b4-* ]]; then node ../tools/make/base-api-required-mutations.mjs "${action%%-*}"; fi
     else
     ../node_modules/.bin/vitest run --config vitest.isolated.config.ts \
       --reporter=default --reporter=json --outputFile.json=/evidence/tests.json $scope
