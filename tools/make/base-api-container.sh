@@ -35,8 +35,8 @@ case $action in
   network-proof) node tools/make/base-api-network.mjs;;
   typecheck) typecheck_api;;
   lint) lint_api;;
-  verify|test|test-api)
-    if [[ $action == verify ]]; then
+  verify|test|test-api|b1-mutation-legacy|b1-mutation-archive)
+    if [[ $action == verify || $action == b1-mutation-* ]]; then
       typecheck_api
       lint_api
     fi
@@ -44,8 +44,12 @@ case $action in
     node ../tools/make/base-api-ct8.mjs | tee /evidence/ct8.log
     npm run db:migrate
     set -f
+    if [[ $action == b1-mutation-* ]]; then
+      bash ../tools/make/base-api-b1-mutation.sh "${action#b1-mutation-}"
+    else
     ../node_modules/.bin/vitest run --config vitest.isolated.config.ts \
       --reporter=default --reporter=json --outputFile.json=/evidence/tests.json $scope
+    fi
     node ../tools/make/base-api-results.mjs /evidence/tests.json > /evidence/tests.tsv;;
   *) exit 2;;
 esac

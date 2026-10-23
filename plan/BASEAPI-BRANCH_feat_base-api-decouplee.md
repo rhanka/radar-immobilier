@@ -105,6 +105,7 @@
   - [x] B1.6: return explicit legacy 503 during cutover and 410 after retirement, never a replacement 404.
   - [x] B1.6 route contract: fence graph/signal endpoints with named successors; composed retirement proof remains pending.
   - [ ] B1.7: preserve exact receipt recovery and unresolved command contexts.
+  - [x] B1 mutation subset: qualify archive-union and composed legacy-status faults on disposable source copies; five required faults remain pending.
   - [ ] Gate: base-api-{composition,authority,reveal,legacy,receipts}.spec.ts plus existing scoped/SSE regressions; typecheck and scoped lint.
 - [ ] B2 — Complete lot destination; Muse 4–6 h, Sol 4–5 h, total 8–11 h.
   - [ ] B2.1: integrate pinned 6K history and both migrations under CT-1–CT-8; preserve 6L2 routes, watcher and verifier profiles; qualify CT-7 migration assertions before releasing K_SHA.
