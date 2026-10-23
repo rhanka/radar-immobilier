@@ -9,8 +9,12 @@ import { getRequestListener } from "@hono/node-server";
 import { createReaderContentApp } from "../../src/artifacts/content-serve.js";
 import { mintGrant } from "../../src/artifacts/preview-grant.js";
 import { mintSessionCookie } from "../../src/artifacts/preview-session.js";
+import { fingerprintReaderProfile } from "../../src/artifacts/reader-profile.js";
 import { createRevocationList } from "../../src/artifacts/preview-renewal.js";
 import { fixtureReaderDeps } from "../../src/artifacts/reader-test-fixture.js";
+
+const FINGERPRINT = fingerprintReaderProfile({ name: "demo", policyRevision: "pol-001",
+  capabilities: ["geo.read", "signals.protected-read"] });
 
 const GRANT_SECRET = "grant-secret-32-bytes-long-padding!";
 const SESSION_SECRET = "session-secret-32-bytes-long-pad!!";
@@ -64,7 +68,7 @@ test.afterAll(async () => {
 
 test("expired grant is refused in a real browser", async ({ page }) => {
   const nowMs = Date.now();
-  const claims = { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-old", profileName: "demo", policyRevision: "pol-001" };
+  const claims = { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-old", profileName: "demo", policyRevision: "pol-001", profileFingerprint: FINGERPRINT };
   await cookieFor(page, "reader-alice", "session-old", nowMs);
   const valid = await mintGrant(claims, GRANT_SECRET, nowMs);
   expect((await page.goto(`${baseURL}/index.html?grant=${valid}`))?.status()).toBe(200);
@@ -77,7 +81,7 @@ test("expired grant is refused in a real browser", async ({ page }) => {
 test("revoked session closes page access without touching other sessions", async ({ page }) => {
   const nowMs = Date.now();
   const grant = await mintGrant(
-    { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-revoked-1", profileName: "demo", policyRevision: "pol-001" },
+    { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-revoked-1", profileName: "demo", policyRevision: "pol-001", profileFingerprint: FINGERPRINT },
     GRANT_SECRET,
     nowMs,
   );
@@ -88,7 +92,7 @@ test("revoked session closes page access without touching other sessions", async
   expect((await page.goto(`${baseURL}/index.html?grant=${grant}`))?.status()).toBe(401);
 
   const fresh = await mintGrant(
-    { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-fresh-1", profileName: "demo", policyRevision: "pol-001" },
+    { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-fresh-1", profileName: "demo", policyRevision: "pol-001", profileFingerprint: FINGERPRINT },
     GRANT_SECRET,
     nowMs,
   );
@@ -101,7 +105,7 @@ test("revoked session closes page access without touching other sessions", async
 test("service worker and embed stay unavailable in a real browser", async ({ page }) => {
   const nowMs = Date.now();
   const grant = await mintGrant(
-    { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-sw-1", profileName: "demo", policyRevision: "pol-001" },
+    { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-sw-1", profileName: "demo", policyRevision: "pol-001", profileFingerprint: FINGERPRINT },
     GRANT_SECRET,
     nowMs,
   );
