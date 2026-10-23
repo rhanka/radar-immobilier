@@ -66,3 +66,4 @@ No invented production domain or certificate.
 - [x] Local activation registry prepared; provider activation binding pending.
 - [x] Named operation schemas prepared; receiving API integration remains pending.
 - [x] Reader context checks current release, policy and reader rights.
+- [x] Renewal checks current release and fails closed during authority outage.
