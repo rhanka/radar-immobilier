@@ -74,7 +74,7 @@ successor compatibility and delegation A as pure, unregistered contracts.
   - [x] Freeze versioned manifest and named successor search migration.
   - [x] Cover successor schema compatibility and unchanged live definitions.
   - [x] Freeze verified issuer/receiver delegation A policy.
-  - [ ] Cover forged, broadened and generic-scope delegation refusals.
+  - [x] Cover forged, broadened and generic-scope delegation refusals.
 - [ ] **Lot N — Validate and deliver**
   - [ ] Package unit suite, existing and new tests, passes.
   - [ ] Rights, pending-choice and delegation mutations on copies are killed.
