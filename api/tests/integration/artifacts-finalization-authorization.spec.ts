@@ -404,7 +404,8 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
   it.each(["withdrawn", "deleted", "purged"] as const)("refuses publication after lifecycle becomes %s", async (state) => {
     await requireCommitContract();
     const barrier = await requireCommitBarrier();
-    const host = await composeQ1Host(barrier.observer);
+    const composed = await composeQ1Host(barrier);
+    const host = composed.host;
     try {
       const execute = requireHostExecute(host);
       const ensured = await execute({ method: "POST", path: "/ensure",
@@ -412,30 +413,65 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         invocationFor(allowAll(), `lifecycle-${state}`));
       expect(ensured).toMatchObject({ ok: true });
       const artifactId = (ensured as { result: { body: { artifactId: string } } }).result.body.artifactId;
-      const writer = await pool.connect();
-      try {
-        await writer.query("BEGIN");
-        await writer.query("SELECT id FROM artifacts.artifacts WHERE id=$1 FOR UPDATE", [artifactId]);
-        await writer.query("UPDATE artifacts.artifacts SET lifecycle_state=$1 WHERE id=$2", [state, artifactId]);
-        await writer.query("COMMIT");
-      } finally { writer.release(); }
-      const before = await committedState(pool);
-      const outcome = await execute({ method: "POST", path: "/publish", body: { artifactId,
-        idempotencyKey: `terminal-${state}`, files: [{ path: "index.html", mimeType: "text/html", text: state }] } },
-        invocationFor(allowAll(), `terminal-${state}`));
-      expect(outcome).toMatchObject({ ok: false });
-      expect(await committedState(pool)).toEqual(before);
-    } finally { if (typeof host.close === "function") host.close(); }
+      const orderTerminalFirst = async (variant: string): Promise<void> => {
+        const writer = await pool.connect();
+        let run: ReturnType<typeof startBarrierOperation> | undefined;
+        try {
+          await writer.query("BEGIN");
+          await writer.query("UPDATE artifacts.artifacts SET lifecycle_state=$1 WHERE id=$2", [state, artifactId]);
+          const invocation = invocationFor(allowAll(), "terminal-" + state + variant);
+          const before = await committedState(pool);
+          run = startBarrierOperation(barrier, invocation.invocationId, () => execute({ method: "POST", path: "/publish",
+            body: { artifactId, idempotencyKey: "terminal-" + state + variant,
+              files: [{ path: variant + ".html", mimeType: "text/html", text: state + variant }] } }, invocation), "before_finalization_row_lock");
+          await run.reached;
+          run.release();
+          expect(await withTimeout(run.pending, 100)).toBeUndefined();
+          await writer.query("COMMIT");
+          expect(await run.pending).toMatchObject({ ok: false });
+          const after = await committedState(pool);
+          // The only committed change is the terminal writer's lifecycle.
+          await pool.query("UPDATE artifacts.artifacts SET lifecycle_state='active' WHERE id=$1", [artifactId]);
+          expect(await committedState(pool)).toEqual(before);
+          expect(after).not.toEqual(before);
+        } finally { run?.release(); await writer.query("ROLLBACK"); await run?.pending.catch(() => {}); writer.release(); }
+      };
+      const orderPublishHoldsLifecycleLock = async (): Promise<void> => {
+        const invocation = invocationFor(allowAll(), "lifecycle-held-" + state);
+        const run = startBarrierOperation(barrier, invocation.invocationId, () => execute({ method: "POST", path: "/publish",
+          body: { artifactId, idempotencyKey: "lifecycle-held-" + state,
+            files: [{ path: "index.html", mimeType: "text/html", text: "held " + state }] } }, invocation), "before_commit");
+        const client = await pool.connect();
+        let writer: Promise<unknown> | undefined;
+        try {
+          await run.reached;
+          const pid = Number((await client.query("SELECT pg_backend_pid() AS pid")).rows[0].pid);
+          writer = client.query("UPDATE artifacts.artifacts SET lifecycle_state=$1 WHERE id=$2", [state, artifactId]);
+          await assertSqlWriterBlocked(pid);
+          run.release();
+          expect(await run.pending).toMatchObject({ ok: true });
+          await writer;
+        } finally { run.release(); await run.pending.catch(() => {}); await writer?.catch(() => {}); client.release(); }
+        await pool.query("UPDATE artifacts.artifacts SET lifecycle_state='active' WHERE id=$1", [artifactId]);
+      };
+      await orderTerminalFirst("a");
+      await orderTerminalFirst("b");
+      await orderPublishHoldsLifecycleLock();
+      const cleanup = await requirePreparationCleanupBinding();
+      expect(cleanup).toBeDefined();
+
+    } finally { if (typeof host["close"] === "function") (host["close"] as () => void)(); }
   });
 
   it("reauthorization of the same key mints a fresh release, then replays on the other transport", async () => {
     await requireCommitContract();
     await requireOutcomeContract();
     const barrier = await requireCommitBarrier();
-    const host = await composeQ1Host(barrier.observer);
+    const composed = await composeQ1Host(barrier);
+    const host = composed.host;
     const close = host["close"];
     try {
-      requireSelectedProfile(host);
+      requireSelectedProfile(host, composed.profile.digest);
       const execute = requireHostExecute(host);
       const ensured = await execute({ method: "POST", path: "/ensure",
         body: { bindingName: "q1-reauth", idempotencyKey: "q1-reauth-ensure" } },
@@ -449,26 +485,12 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         idempotencyKey: clientKey };
       const invocation = invocationFor(statusDriven(), "reauth-denied");
       const invocationId = invocation["invocationId"] as string;
-      let settled = false;
-      const pending = execute({ method: "POST", path: "/publish", body }, invocation)
-        .finally(() => { settled = true; });
-      const pump = (async () => {
-        const deadline = performance.now() + 1500;
-        while (!settled) {
-          if (performance.now() > deadline) throw new Error("[contract-violation] commit barrier did not progress");
-          for (const candidate of PUBLISH_POINTS) {
-            if (settled || candidate === "after_finalization_locks_before_guard") continue;
-            const arrived = await withTimeout(barrier.waitUntilReached(candidate, invocationId), 50);
-            if (arrived) barrier.release(candidate, invocationId);
-          }
-          const targetArrived = await withTimeout(
-            barrier.waitUntilReached("after_finalization_locks_before_guard", invocationId), 50);
-          if (targetArrived) break;
-        }
-      })();
-      await pump;
+      const driven1 = startBarrierOperation(barrier, invocationId,
+        () => execute({ method: "POST", path: "/publish", body }, invocation), "before_finalization_row_lock");
+      const pending = driven1.pending;
+      await driven1.reached;
       await pool.query("UPDATE account_users SET status = 'suspended' WHERE sub = 'alice'");
-      barrier.release("after_finalization_locks_before_guard", invocationId);
+      barrier.release("before_finalization_row_lock", invocationId);
       const denied = await pending as unknown as Record<string, unknown>;
       assertOutcomeFailure(denied, invocationId);
       await pool.query("UPDATE account_users SET status = 'approved' WHERE sub = 'alice'");
@@ -481,9 +503,9 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
       const releaseId = await currentReleaseId(artifactId);
       expect(typeof releaseId).toBe("string");
-      const second = (await composeQ1Host(barrier.observer));
+      const second = (await composeQ1Host(barrier));
       try {
-        const peerControl = createArtifactControl(second, SCOPE, BASE);
+        const peerControl = createArtifactControl(second.host as never, SCOPE, BASE);
         const route = controlRoute({ auth, accounts: pool, backend: peerControl });
         const httpReplay = await route.request("https://app.example.test/publish", {
           method: "POST", headers: { cookie: await cookie(ACTOR), origin: auth.appBaseUrl,
@@ -500,7 +522,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         expect(await tableCount("releases")).toBe(releasesBefore + 1);
         expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
       } finally {
-        second.close();
+        (second.host["close"] as () => void)();
       }
     } finally {
       await pool.query("UPDATE account_users SET status = 'approved' WHERE sub = 'alice'");
@@ -517,12 +539,13 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
     await requireCommitContract();
     await requireOutcomeContract();
     const barrier = await requireCommitBarrier();
-    const host = await composeQ1Host(barrier.observer);
+    const composed = await composeQ1Host(barrier);
+    const host = composed.host;
     const close = host["close"];
     const env = loadConfig();
     let policyPool: pg.Pool | undefined;
     try {
-      requireSelectedProfile(host);
+      requireSelectedProfile(host, composed.profile.digest);
       const execute = requireHostExecute(host);
       const fixtures = { subjects: [ACTOR], expiresAtMs: 3_600_000 };
       policyPool = new pg.Pool({ host: env.POSTGRES_HOST, port: env.POSTGRES_PORT,
@@ -531,14 +554,13 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         expect(transaction).toBeDefined();
         if (mode === "authority-outage") {
           try {
-            await policyPool?.query("SELECT status FROM account_users WHERE sub = 'alice'");
+            await policyPool?.query("SELECT status FROM account_users WHERE sub = 'alice' FOR SHARE");
           } catch {
             return { allowed: false, reason: "unauthorized_at_commit",
               publicCode: "capability_unavailable", status: 503, retriable: true };
           }
         }
-        const status = (await pool.query(
-          "SELECT status FROM account_users WHERE sub = 'alice'")).rows[0]?.status as string | null;
+        const status = await readPolicyStatusViaTransaction(transaction);
         if (status !== "approved") {
           return toGuardDecision(
             { allowed: false, status: 403, body: { error: "account_not_approved", status: status ?? "unknown" } });
@@ -566,24 +588,10 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       const invocationId = invocation["invocationId"] as string;
       const releasesBefore = await tableCount("releases");
       const keysBefore = await tableCount("idempotency_keys");
-      let settled = false;
-      const pending = execute({ method: "POST", path: "/publish", body }, invocation)
-        .finally(() => { settled = true; });
-      const pump = (async () => {
-        const deadline = performance.now() + 1500;
-        while (!settled) {
-          if (performance.now() > deadline) throw new Error("[contract-violation] commit barrier did not progress");
-          for (const candidate of PUBLISH_POINTS) {
-            if (settled || candidate === "after_finalization_locks_before_guard") continue;
-            const arrived = await withTimeout(barrier.waitUntilReached(candidate, invocationId), 50);
-            if (arrived) barrier.release(candidate, invocationId);
-          }
-          const targetArrived = await withTimeout(
-            barrier.waitUntilReached("after_finalization_locks_before_guard", invocationId), 50);
-          if (targetArrived) break;
-        }
-      })();
-      await pump;
+      const driven2 = startBarrierOperation(barrier, invocationId,
+        () => execute({ method: "POST", path: "/publish", body }, invocation), "before_finalization_row_lock");
+      const pending = driven2.pending;
+      await driven2.reached;
       if (mode === "suspension") {
         await pool.query("UPDATE account_users SET status = 'suspended' WHERE sub = 'alice'");
       } else if (mode === "cohort-removal") {
@@ -593,7 +601,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       } else {
         await policyPool?.end();
       }
-      barrier.release("after_finalization_locks_before_guard", invocationId);
+      barrier.release("before_finalization_row_lock", invocationId);
       const outcome = await pending as unknown as Record<string, unknown>;
       assertOutcomeFailure(outcome, invocationId);
       if (mode === "authority-outage") {
