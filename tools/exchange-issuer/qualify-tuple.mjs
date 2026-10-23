@@ -1,3 +1,4 @@
+/* global fetch:readonly, Buffer:readonly, console:readonly */
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
