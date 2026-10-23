@@ -23,7 +23,7 @@ allowed_path() {
     */.env*|*/.git/*|*/node_modules/*|*/dist/*|*/credentials*|*/secrets*|*/fixtures/*|*/reports/*|*/input/*) return 2;;
   esac
   case $p in
-    package.json|package-lock.json|tsconfig.base.json|eslint.config.js|api/package.json|api/tsconfig.json|api/vitest.config.ts) ;;
+    package.json|package-lock.json|tsconfig.base.json|eslint.config.js|api/package.json|api/tsconfig.json|api/vitest.config.ts|radar/ontology/ontology-profile.yaml) ;;
     api/src/*.ts|api/tests/integration/base-api*.ts|api/drizzle/*.sql|api/drizzle/meta/_journal.json) ;;
     packages/*/package.json|packages/*/tsconfig.json|packages/*/src/*.ts|packages/*/src/*.svelte|tools/make/base-api*.sh|tools/make/base-api*.mjs) ;;
     *) return 2;;
@@ -35,11 +35,29 @@ allowed_path() {
     if [[ $part == */* ]]; then part=${part%/*}; else part=.; fi
   done
 }
+allowed_delivery_path() {
+  case $1 in
+    plan/BASEAPI-BRANCH_feat_base-api-decouplee.md|docs/spec/SPEC_EVOL_BASE_API.md|docs/spec/BASE_API_ACTIVATION.md|tools/make/base-api*.sh|tools/make/base-api*.mk|tools/make/base-api*.mjs) ;;
+    api/src/app.ts|api/src/index.ts|api/src/routes/auth.ts|api/src/db/schema.ts|api/drizzle/*|tools/make/paniers-lot6.mk|tools/make/paniers-lot6-verify.sh) ;;
+    api/src/services/facets/*|api/src/routes/scoped-*|api/src/routes/workspaces.ts|api/src/routes/signal-facets*|api/src/routes/graph-signals*|api/tests/integration/base-api*) ;;
+    api/src/scripts/base-api-personal-activation.ts) ;;
+    api/src/services/geo/ogc-pull.ts|api/src/services/geo/ogc-pull.test.ts|api/src/services/geo/ogc-pull-*.test.ts) ;;
+    api/src/services/geo/populate-geo.ts|api/src/services/geo/populate-geo.test.ts|api/src/services/geo/populate-geo-*.test.ts) ;;
+    api/src/services/exploitation/projection.ts|api/src/services/exploitation/projection.test.ts|api/src/services/exploitation/projection-*.test.ts) ;;
+    *) echo "Out-of-scope staging: $1" >&2; return 2;;
+  esac
+  local part=$1
+  [[ $part != *..* ]] || return 2
+  while [[ $part != . ]]; do
+    [[ ! -L $part ]] || return 2
+    if [[ $part == */* ]]; then part=${part%/*}; else part=.; fi
+  done
+}
 archive_sources() {
   local tracking=(--cached)
   [[ ${BASE_API_SOURCE:-worktree} != worktree ]] || tracking+=(--others)
   git ls-files "${tracking[@]}" --exclude-standard -- api/src api/drizzle api/package.json api/tsconfig.json api/vitest.config.ts \
-    api/tests/integration packages tools/make package.json package-lock.json tsconfig.base.json eslint.config.js \
+    api/tests/integration packages tools/make radar/ontology/ontology-profile.yaml package.json package-lock.json tsconfig.base.json eslint.config.js \
     > "$RUN_DIR/candidates"
   : > "$RUN_DIR/paths"
   while IFS= read -r path; do
@@ -47,6 +65,18 @@ archive_sources() {
     if allowed_path "$path"; then printf '%s\n' "$path" >> "$RUN_DIR/paths"; fi
   done < "$RUN_DIR/candidates"
   while IFS= read -r path; do allowed_path "$path" || return 2; done < "$RUN_DIR/paths"
+  local changed
+  changed=$(git diff --name-only HEAD; git ls-files --others --exclude-standard)
+  [[ -z ${BASE_API_LINT_FILES:-} ]] || changed=${BASE_API_LINT_FILES// /$'\n'}
+  : > "$LOG_DIR/changed-files.txt"
+  while IFS= read -r path; do
+    case $path in api/src/*.ts|api/tests/integration/base-api*.ts)
+      allowed_path "$path" && [[ -f $path ]] || return 2
+      printf '%s\n' "$path" >> "$LOG_DIR/changed-files.txt";;
+      '') ;;
+      *) [[ -z ${BASE_API_LINT_FILES:-} ]] || return 2;;
+    esac
+  done <<< "$changed"
   if [[ ${BASE_API_SOURCE:-worktree} == index ]]; then
     local tree paths
     tree=$(git write-tree)

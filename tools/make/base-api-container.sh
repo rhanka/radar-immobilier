@@ -30,6 +30,12 @@ lint_api() {
   shopt -s nullglob
   local tests=(api/tests/integration/base-api*.ts)
   node_modules/.bin/eslint api/src/services/facets api/src/routes/scoped-*.ts api/src/routes/workspaces.ts api/src/routes/graph-signals.ts api/src/routes/signal-facets.ts api/src/app.ts api/src/index.ts api/src/db/schema.ts api/src/routes/chat.ts api/src/routes/prospect-marks*.ts api/src/services/chat/stream-bus*.ts "${tests[@]}"
+  local file
+  while IFS= read -r file; do
+    [[ -n $file ]] || continue
+    printf 'CHANGED_FILE_LINT %s\n' "$file"
+    node_modules/.bin/eslint -- "$file"
+  done < /evidence/changed-files.txt
 }
 case $action in
   network-proof) node tools/make/base-api-network.mjs;;
@@ -42,7 +48,7 @@ case $action in
     fi
     cd api
     node ../tools/make/base-api-ct8.mjs | tee /evidence/ct8.log
-    npm run db:migrate
+    node ../tools/make/base-api-b2-setup.mjs
     if [[ $action == verify && -f src/services/facets/lots/lot-cutover-journal-db.test.ts ]]; then
       node ../tools/make/base-api-ct7-proof.mjs | tee /evidence/ct7.log
     fi
