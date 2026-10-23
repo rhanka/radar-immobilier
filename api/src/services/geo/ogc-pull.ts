@@ -148,6 +148,59 @@ export function zoneCanonicalId(citySlug: string, codeNorm: string): string {
   return `ogc:zones:${citySlug}:${codeNorm}`;
 }
 
+export interface OgcLotStoredRow {
+  id: string;
+  city_slug: string;
+  canonical_id: string;
+}
+
+export interface OgcLotStoredIdentity {
+  id: string;
+  citySlug: string;
+  canonicalId: string;
+}
+
+export interface OgcLotInsertDecision {
+  citySlug: string;
+  canonicalId: string;
+  noLotNorm: string;
+  rawRef: string;
+}
+
+export type OgcLotValidatedMutation =
+  | { kind: "update"; rowId: string; identity: { citySlug: string; canonicalId: string } }
+  | { kind: "insert"; decision: OgcLotInsertDecision };
+
+export function resolveOgcLotUpdateIdentity(stored: OgcLotStoredIdentity) {
+  return { citySlug: stored.citySlug, canonicalId: stored.canonicalId };
+}
+
+export function decideOgcLotInsert(citySlug: string, noLotNorm: string): OgcLotInsertDecision {
+  return {
+    citySlug,
+    canonicalId: lotCanonicalId(citySlug, noLotNorm),
+    noLotNorm,
+    rawRef: `ogc:${citySlug}:${noLotNorm}`,
+  };
+}
+
+// A row appearing after discovery uses its stored update identity.
+// Transactional locking of the resulting identity lands in the next slice.
+export function revalidateOgcLotInsertDecision(
+  decision: OgcLotInsertDecision,
+  updateRow: OgcLotStoredIdentity | null,
+): OgcLotValidatedMutation {
+  if (updateRow) {
+    return { kind: "update", rowId: updateRow.id, identity: resolveOgcLotUpdateIdentity(updateRow) };
+  }
+  return { kind: "insert", decision };
+}
+
+function toOgcLotStoredIdentity(row: OgcLotStoredRow | undefined): OgcLotStoredIdentity | null {
+  if (!row?.id || !row.city_slug || !row.canonical_id) return null;
+  return { id: row.id, citySlug: row.city_slug, canonicalId: row.canonical_id };
+}
+
 // ─── OGC Fetcher ─────────────────────────────────────────────────────────────
 
 /**
@@ -263,23 +316,34 @@ export async function upsertLotBatch(
         ? JSON.stringify(feature.geometry)
         : null;
 
-      const canonId = lotCanonicalId(citySlug, noLotNorm);
-      const rawRef = `ogc:${citySlug}:${noLotNorm}`;
+      const decision = decideOgcLotInsert(citySlug, noLotNorm);
       const evidence = JSON.stringify([{
         source: "ogc-api",
         fetchedAt: now,
         ...publicProvenanceFromProperties(feature.properties),
       }]);
 
-      // Vérifier l'existence d'une version courante (known_to IS NULL)
-      const existing = await client.query<{ id: string }>(
-        `SELECT id FROM lot_versions
+      // The stored identity may differ from the derived canonical id.
+      const discovered = await client.query<OgcLotStoredRow>(
+        `SELECT id, city_slug, canonical_id FROM lot_versions
          WHERE no_lot = $1 AND city_slug = $2 AND known_to IS NULL
          LIMIT 1`,
         [noLotNorm, citySlug],
       );
+      let updateRow = toOgcLotStoredIdentity(discovered.rows[0]);
+      if (!updateRow) {
+        // The next slice acquires the lock on this same client before rechecking.
+        const rechecked = await client.query<OgcLotStoredRow>(
+          `SELECT id, city_slug, canonical_id FROM lot_versions
+           WHERE no_lot = $1 AND city_slug = $2 AND known_to IS NULL
+           LIMIT 1`,
+          [noLotNorm, citySlug],
+        );
+        updateRow = toOgcLotStoredIdentity(rechecked.rows[0]);
+      }
+      const validated = revalidateOgcLotInsertDecision(decision, updateRow);
 
-      if (existing.rowCount && existing.rowCount > 0) {
+      if (validated.kind === "update") {
         if (geomJson) {
           await client.query(
             `UPDATE lot_versions
@@ -288,12 +352,12 @@ export async function upsertLotBatch(
                  raw_ref = $2,
                  evidence = $3::jsonb
              WHERE id = $4`,
-            [geomJson, rawRef, evidence, existing.rows[0]!.id],
+            [geomJson, decision.rawRef, evidence, validated.rowId],
           );
         } else {
           await client.query(
             `UPDATE lot_versions SET evidence = $1::jsonb WHERE id = $2`,
-            [evidence, existing.rows[0]!.id],
+            [evidence, validated.rowId],
           );
         }
         upserted++;
@@ -307,13 +371,13 @@ export async function upsertLotBatch(
                ($1, $2, $3, 'validated', $4::date, $5::timestamptz,
                 ST_SetSRID(ST_GeomFromGeoJSON($6), 4326), 'ogc-api', $7, $8::jsonb)`,
             [
-              canonId,
+              validated.decision.canonicalId,
               noLotNorm,
               citySlug,
               today,
               now,
               geomJson,
-              rawRef,
+              validated.decision.rawRef,
               evidence,
             ],
           );
@@ -326,12 +390,12 @@ export async function upsertLotBatch(
                ($1, $2, $3, 'validated', $4::date, $5::timestamptz,
                 'none', $6, $7::jsonb)`,
             [
-              canonId,
+              validated.decision.canonicalId,
               noLotNorm,
               citySlug,
               today,
               now,
-              rawRef,
+              validated.decision.rawRef,
               evidence,
             ],
           );
