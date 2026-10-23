@@ -61,3 +61,12 @@ export {
   type CommitFailureRecord,
   type ProviderFailureProbe,
 } from "./facade.js";
+export {
+  FROZEN_CAPABILITIES, RADAR_EFFECTIVE_PROFILE, assertFrozenSelection,
+  type ArtifactCapability, type RadarEffectiveProfile, type CompiledArtifactsProfile,
+} from "./profile.js";
+export {
+  POLICY_REVISION,
+  type AuthorizePurpose, type CommitOperation, type AuthorizeCommitContext,
+  type AuthorizeCommitDecision, type AuthorizeCommit,
+} from "./transaction-authority.js";
