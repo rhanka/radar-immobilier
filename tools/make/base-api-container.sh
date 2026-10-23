@@ -14,6 +14,9 @@ import config from './vitest.config.js';
 export default { ...config, envDir: false,
   test: { ...config.test, fileParallelism: false, maxWorkers: 2 } };
 CONFIG
+# Avoid repeated container DNS lookups consuming the API's 3s connect budget.
+POSTGRES_HOST=$(node --input-type=module -e 'import {lookup} from "node:dns/promises"; console.log((await lookup("postgres", {family:4})).address)')
+export POSTGRES_HOST
 case $action in
   network-proof) node tools/make/base-api-network.mjs;;
   typecheck) npm run typecheck --workspace=api;;
