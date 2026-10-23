@@ -102,3 +102,4 @@ No invented production domain or certificate.
 - [x] FIX1 A3/B3/B5: fixed-clock content controls require page 200 and per-operation 403 without upstream calls for each missing capability side.
 - [x] FIX1: four additional final-wait races failed against Muse's patch, then passed with authorization-version and activation fences.
 - [x] FIX1: 21 isolated mutants killed by behavioral assertions, with passing controls before/after and byte restoration; stream integration remains pending.
+- [x] FIX1 lint correction: spell mutation-regex indentation with explicit space counts.
