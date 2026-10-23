@@ -5,6 +5,7 @@ import type { HttpResponse } from "@sentropic/artifacts/http";
 import type pg from "pg";
 import { fork } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { closeArtifactWorker } from "./artifacts-race-cleanup.helpers.js";
 
 /**
  * Provisional r2 upstream contract bindings (Sentropic spec r2, section 3.2).
@@ -537,12 +538,12 @@ export async function verifyPreparationCleanup(host: unknown, artifactId: string
   if (requireShared && (before.protectedKeys.length === 0 || before.abandonedKeys.length === 0)) {
     throw new Error("[contract-violation] cleanup fixture must contain shared and unreferenced blobs");
   }
-  const keysBefore = new Set(await blobs.listKeys(""));
+  const keysBefore = new Set(await blobs.listKeys("artifacts/"));
   for (const key of [...before.protectedKeys, ...before.abandonedKeys]) {
     if (!keysBefore.has(key)) throw new Error("[contract-violation] preparation blob missing before cleanup");
   }
   await binding.scheduleBoundedPreparationCleanup(host, throughMs);
-  const keysAfter = new Set(await blobs.listKeys(""));
+  const keysAfter = new Set(await blobs.listKeys("artifacts/"));
   for (const key of before.protectedKeys) {
     if (!keysAfter.has(key)) throw new Error("[contract-violation] cleanup deleted a shared/protected blob");
   }
@@ -845,9 +846,9 @@ export async function startArtifactWorker(database: pg.PoolConfig, config: unkno
     barrier: {
       observer: undefined,
       waitUntilReached: async (point: CommitBarrierPoint, id?: string) => { await call("wait", point, id); },
-      release: (point: CommitBarrierPoint, id?: string) => { void call("release", point, id); },
+      release: (point: CommitBarrierPoint, id?: string) => { void call("release", point, id).catch(() => {}); },
     } satisfies CommitBarrier,
-    close: async () => { try { await call("close"); } finally { child.kill(); } },
+    close: () => closeArtifactWorker(child, () => call("close")),
   };
 }
 
@@ -888,7 +889,8 @@ if (process.argv[2] === "--artifact-worker") {
         barrier.release(args[0] as CommitBarrierPoint, args[1] as string);
       } else if (message.method === "close") {
         if (typeof host.close === "function") host.close();
-        s3.destroy(); await pool.end();
+        s3.destroy();
+        await pool.end();
       }
       process.send?.({ id: message.id, result });
     } catch (error) {
