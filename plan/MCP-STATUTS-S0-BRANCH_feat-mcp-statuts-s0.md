@@ -67,7 +67,7 @@ successor compatibility and delegation A as pure, unregistered contracts.
 - [ ] **S0c — Command schemas**
   - [x] Freeze signal/lot DTOs, explicit versions, heads and atomic envelopes.
   - [x] Freeze command-key and batch-shape validation.
-  - [ ] Freeze semantic refusals against qualified progression evidence.
+  - [x] Freeze semantic refusals against qualified progression evidence.
   - [ ] Catalog all six inert contracts and cover command regressions.
   - [ ] Cover command schema refusals and historical receipt outputs.
 - [ ] **S0d — Successor compatibility**
