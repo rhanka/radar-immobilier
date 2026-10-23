@@ -9,7 +9,7 @@ UI_PORT ?= 15910
 MAILDEV_UI_PORT ?= 11910
 BASE_API_MK := $(lastword $(MAKEFILE_LIST))
 export ENV API_PORT UI_PORT MAILDEV_UI_PORT SCOPE MSG FILES OUT SLUG BRANCH START SRC RECEIPT BASE_API_SCOPE
-export BASE_API_SOURCE
+export BASE_API_SOURCE BASE_API_LINT_FILES
 BASE_API_ARGS = "API_PORT=$$API_PORT" "UI_PORT=$$UI_PORT" "MAILDEV_UI_PORT=$$MAILDEV_UI_PORT" "ENV=$$ENV"
 BASE_API_SCOPE := src/services/facets/scoped-db.test.ts src/services/facets/workspace-receipts-db.test.ts src/services/facets/projection-migration-db.test.ts src/routes/scoped-projection-events-db.test.ts
 
@@ -20,6 +20,10 @@ BASE_API_SCOPE := src/services/facets/scoped-db.test.ts src/services/facets/work
 .PHONY: base-api-verify
 .PHONY: base-api-contract-proof
 .PHONY: base-api-network-proof
+.PHONY: base-api-tooling-proof
+
+base-api-tooling-proof:
+	rtk bash tools/make/base-api-tooling-proof.sh $(BASE_API_ARGS)
 
 base-api-network-proof:
 	rtk bash tools/make/base-api-verify.sh network-proof $(BASE_API_ARGS)
