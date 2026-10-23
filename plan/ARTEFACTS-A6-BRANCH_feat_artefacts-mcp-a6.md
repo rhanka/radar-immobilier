@@ -99,3 +99,4 @@ No invented production domain or certificate.
 - [x] FIX1 A2/B4: exchange validates current release, profile and per-artifact approval under an authorization-version fence; HTTP integration remains pending.
 - [x] FIX1 B1: activation revalidates release/profile and refuses obsolete authority versions or concurrent registry writes.
 - [x] FIX1 B2/A3/B3: renewal rereads per-artifact approval/policy, fences signing by authority version and preserves page access without API capabilities.
+- [x] FIX1 A3/B3/B5: fixed-clock content controls require page 200 and per-operation 403 without upstream calls for each missing capability side.

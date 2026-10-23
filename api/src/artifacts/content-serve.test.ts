@@ -1,6 +1,16 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { mintGrant } from "./preview-grant.js";
-import { GRANT_SECRET, HOST, ISSUER, credentials, makeApp, request } from "./reader-test-fixture.js";
+import { createReaderContentApp } from "./content-serve.js";
+import {
+  GRANT_SECRET,
+  HOST,
+  ISSUER,
+  SESSION_SECRET,
+  credentials,
+  fixtureReaderDeps,
+  makeApp,
+  request,
+} from "./reader-test-fixture.js";
 
 describe("authorized artifact content serving", () => {
   it("should refuse anonymous page and API access", async () => {
@@ -125,5 +135,50 @@ describe("authorized artifact content serving", () => {
       150_000,
     );
     expect((await request(app, "/index.html", otherSession, grantSession1)).status).toBe(401);
+  });
+
+  it("should serve pages without API capabilities but refuse operations", async () => {
+    const fixture = fixtureReaderDeps();
+    const upstream = vi.fn(fixture.readOperation!);
+    const authority = { ...fixture.authority!,
+      getRights: async (readerSub: string, artifactId: string) => (
+        { readerSub, artifactId, approved: true, capabilities: [] as const }) };
+    const app = createReaderContentApp({ ...fixture, authority, readOperation: upstream,
+      contentBase: "pages.example.test", grantSecret: GRANT_SECRET,
+      sessionSecret: SESSION_SECRET, issuer: ISSUER, now: () => 1_000 });
+    const cookie = await credentials("reader-alice", "session-1", 1_000);
+    const grant = await mintGrant(
+      { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-1", profileName: "demo", policyRevision: "pol-001" },
+      GRANT_SECRET,
+      1_000,
+    );
+    expect((await request(app, "/index.html", cookie, grant)).status).toBe(200);
+    expect((await request(app, "/__reader/api/signals.protected-read.v1?city=valleyfield", cookie, grant)).status).toBe(403);
+    expect(upstream).not.toHaveBeenCalled();
+  });
+
+  it("should refuse operations missing from either side without calling upstream", async () => {
+    const fixture = fixtureReaderDeps();
+    const narrowProfile = { ...fixture.authority!,
+      getProfile: async () => ({ name: "demo", policyRevision: "pol-001",
+        capabilities: ["geo.read" as const] }) };
+    const narrowRights = { ...fixture.authority!,
+      getRights: async (readerSub: string, artifactId: string) => (
+        { readerSub, artifactId, approved: true, capabilities: ["geo.read" as const] }) };
+    for (const authority of [narrowProfile, narrowRights]) {
+      const upstream = vi.fn(fixture.readOperation!);
+      const app = createReaderContentApp({ ...fixture, authority, readOperation: upstream,
+        contentBase: "pages.example.test", grantSecret: GRANT_SECRET,
+        sessionSecret: SESSION_SECRET, issuer: ISSUER, now: () => 1_000 });
+      const cookie = await credentials("reader-alice", "session-1", 1_000);
+      const grant = await mintGrant(
+        { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-1", profileName: "demo", policyRevision: "pol-001" },
+        GRANT_SECRET,
+        1_000,
+      );
+      expect((await request(app, "/index.html", cookie, grant)).status).toBe(200);
+      expect((await request(app, "/__reader/api/signals.protected-read.v1?city=valleyfield", cookie, grant)).status).toBe(403);
+      expect(upstream).not.toHaveBeenCalled();
+    }
   });
 });
