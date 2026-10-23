@@ -48,7 +48,6 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { CreateBucketCommand, DeleteBucketCommand, S3Client } from "@aws-sdk/client-s3";
 import { createS3BlobStore } from "@sentropic/artifacts/adapters/s3";
 import {
-  composeArtifactHost,
   createArtifactControl,
   createArtifactsPool,
   deriveIdempotencyKey,
@@ -59,18 +58,26 @@ import { auth, cookie, migrationsFolder } from "./artifacts-h2.helpers.js";
 import { loadConfig } from "../../src/config.js";
 import {
   assertOutcomeFailure,
+  assertPublicBodyRedacted,
   authorizeTransaction,
   buildInvocationContext,
-  FROZEN_CAPABILITIES,
+  composeR2AcceptanceHost,
+  createPrivateMarker,
   requireCommitBarrier,
   projectOutcomeHttp,
   committedState,
   requireCommitContract,
   requireHostExecute,
   requireOutcomeContract,
+  verifyPreparationCleanup,
+  startBarrierOperation,
   requireSelectedProfile,
+  readPolicyStatusViaTransaction,
   toGuardDecision,
   type AuthorizeCommit,
+  type CommitBarrier,
+  type CompiledArtifactsProfile,
+  type InvocationContextShape,
 } from "./artifacts-provider-contract.helpers.js";
 
 let nextInvocationId = 1;
@@ -128,23 +135,24 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
   }
 
   /**
-   * Candidate host construction. The require below fails by name against
-   * 0.1.2 before any legacy composition runs. The options bag carries the
-   * barrier observer so the candidate coordinator binds it as its
-   * `testObserver` with invocation correlation.
+   * Candidate host construction through the single typed r2 joint.
+   * `compileArtifactsProfile` returns the compiled profile, the real
+   * coordinator carries the PostgreSQL participant and the barrier
+   * `testObserver`, and the migrated composition uses the new r2 signature
+   * `composeArtifactHost(pool, config, blobs, {profile, coordinator})`.
+   * Each joint fails `[missing-contract]` by name; no partial composition
+   * reaches the assertions.
    */
   async function composeAcceptanceHost(
-    observer: unknown,
+    barrier: CommitBarrier,
     overrides?: { readonly pool?: pg.Pool | undefined; readonly blobs?: unknown | undefined },
-  ): Promise<NonNullable<Awaited<ReturnType<typeof composeArtifactHost>>> & Record<string, unknown>> {
-    await requireCommitContract();
-    const compose = composeArtifactHost as unknown as (
-      pool: unknown, config: unknown, blobs: unknown, options?: unknown,
-    ) => Promise<unknown>;
-    return (await compose(overrides?.pool ?? pool, storageConfig(), overrides?.blobs ?? rawBlobs(), {
-      profile: { selectedCapabilities: [...FROZEN_CAPABILITIES] },
-      coordinator: { testObserver: observer },
-    })) as NonNullable<Awaited<ReturnType<typeof composeArtifactHost>>> & Record<string, unknown>;
+  ): Promise<{ readonly host: Record<string, unknown>; readonly profile: CompiledArtifactsProfile }> {
+    return composeR2AcceptanceHost({
+      pool: overrides?.pool ?? pool,
+      config: storageConfig(),
+      blobs: overrides?.blobs ?? rawBlobs(),
+      barrier,
+    });
   }
 
   function successBody(outcome: unknown): Record<string, unknown> {
@@ -152,13 +160,13 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
     return result.body as Record<string, unknown>;
   }
 
-  function invocationFor(authorizeCommit: AuthorizeCommit, suffix: string): Record<string, unknown> {
+  function invocationFor(authorizeCommit: AuthorizeCommit, suffix: string): InvocationContextShape {
     return buildInvocationContext({
       invocationId: `acceptance-${suffix}-${nextInvocationId++}`,
       actorId: ACTOR,
       storageScopeId: SCOPE,
       authorizeCommit,
-    }) as unknown as Record<string, unknown>;
+    });
   }
 
   beforeAll(async () => {
@@ -205,22 +213,31 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
     await requireCommitContract();
     await requireOutcomeContract();
     const barrier = await requireCommitBarrier();
-    const host = await composeAcceptanceHost(barrier.observer);
+    const composed = await composeAcceptanceHost(barrier);
+    const host = composed.host;
     const close = host["close"];
     try {
-      requireSelectedProfile(host);
+      requireSelectedProfile(host, composed.profile.digest);
       const execute = requireHostExecute(host);
       const seenTransactions: unknown[] = [];
+      const seenPurposes: string[] = [];
       let passedBarrier = false;
-      const authorizeCommit: AuthorizeCommit = async (context, transaction) => {
+      const finalizeGuard: AuthorizeCommit = async (context, transaction) => {
         expect(context).toMatchObject({ actorId: ACTOR, storageScopeId: SCOPE, purpose: "finalize" });
         expect(transaction).toBeDefined();
         seenTransactions.push({ transaction, passedBarrier });
-        const status = (await pool.query(
-          "SELECT status FROM account_users WHERE sub = 'alice'")).rows[0]?.status as string | null;
+        seenPurposes.push(context.purpose);
+        const status = await readPolicyStatusViaTransaction(transaction);
         return status === "approved" ? authorizeTransaction(context, transaction)
           : toGuardDecision({ allowed: false, status: 403, body: { error: "account_not_approved", status: status ?? "unknown" } });
       };
+      const replayGuard: AuthorizeCommit = async (context, transaction) => {
+        expect(context).toMatchObject({ actorId: ACTOR, storageScopeId: SCOPE, purpose: "replay" });
+        expect(transaction).toBeDefined();
+        seenPurposes.push(context.purpose);
+        return authorizeTransaction(context, transaction);
+      };
+      const authorizeCommit: AuthorizeCommit = finalizeGuard;
       const allowAll: AuthorizeCommit = authorizeTransaction;
       try {
         const ensured = await execute({ method: "POST", path: "/ensure",
@@ -228,9 +245,17 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
           invocationFor(allowAll, "refusal-ensure"));
         expect(ensured).toMatchObject({ ok: true });
         const artifactId = successBody(ensured)["artifactId"] as string;
+        const seed = await execute({ method: "POST", path: "/ensure",
+          body: { bindingName: "shared-seed", idempotencyKey: "shared-seed-ensure" } }, invocationFor(allowAll, "shared-seed"));
+        expect(seed).toMatchObject({ ok: true });
+        const seedId = successBody(seed)["artifactId"] as string;
+        expect(await execute({ method: "POST", path: "/publish", body: { artifactId: seedId,
+          files: [{ path: "index.html", mimeType: "text/html", text: "shared protected bytes" }],
+          idempotencyKey: "shared-seed-publish" } }, invocationFor(allowAll, "shared-publish"))).toMatchObject({ ok: true });
         const clientKey = "acceptance-refusal";
         const body = { artifactId,
-          files: [{ path: "index.html", mimeType: "text/html", text: "refused while blocked" }],
+          files: [{ path: "index.html", mimeType: "text/html", text: "shared protected bytes" },
+            { path: "private.html", mimeType: "text/html", text: "refused unique bytes" }],
           idempotencyKey: clientKey };
         const internalKey = deriveIdempotencyKey(
           { scope: SCOPE, sub: ACTOR, op: "publish", artifactId, clientKey });
@@ -240,13 +265,13 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
         const releasesBefore = await tableCount("releases");
         const keysBefore = await tableCount("idempotency_keys");
         const s3Before = await s3KeyCount();
-        const wait = barrier.waitUntilReached("after_finalization_locks_before_guard", invocationId);
-        const pending = execute({ method: "POST", path: "/publish", body }, invocation);
-        await wait;
+        const run = startBarrierOperation(barrier, invocationId,
+          () => execute({ method: "POST", path: "/publish", body }, invocation), "before_finalization_row_lock");
+        await run.reached;
         await pool.query("UPDATE account_users SET status = 'suspended' WHERE sub = 'alice'");
         passedBarrier = true;
-        barrier.release("after_finalization_locks_before_guard", invocationId);
-        const outcome = await pending as Record<string, unknown>;
+        run.release();
+        const outcome = await run.pending as Record<string, unknown>;
         expect(seenTransactions.length).toBeGreaterThan(0);
       expect(seenTransactions.at(-1)).toMatchObject({ passedBarrier: true });
         assertOutcomeFailure(outcome, invocationId);
@@ -258,10 +283,10 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
         expect(await currentReleaseId(artifactId)).toBeUndefined();
         const s3AfterDenial = await s3KeyCount();
         console.info("[preparation-debt]", JSON.stringify({ s3Before, s3AfterDenial }));
-        expect(s3AfterDenial).toBeGreaterThanOrEqual(s3Before);
+        await verifyPreparationCleanup(host, artifactId, rawBlobs(), true, true);
         await pool.query("UPDATE account_users SET status = 'approved' WHERE sub = 'alice'");
         const retry = await execute({ method: "POST", path: "/publish", body },
-          invocationFor(authorizeCommit, "refusal-retry")) as Record<string, unknown>;
+          invocationFor(finalizeGuard, "refusal-retry")) as Record<string, unknown>;
         expect(retry).toMatchObject({ ok: true });
         expect(await tableCount("releases")).toBe(releasesBefore + 1);
         expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
@@ -269,8 +294,9 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
         expect(await currentReleaseId(artifactId)).toBe(
           (successBody(retry)["releaseId"] as string));
         const replay = await execute({ method: "POST", path: "/publish", body },
-          invocationFor(authorizeCommit, "refusal-replay")) as Record<string, unknown>;
+          invocationFor(replayGuard, "refusal-replay")) as Record<string, unknown>;
         expect(replay).toMatchObject({ ok: true });
+        expect(seenPurposes).toContain("replay");
         expect(successBody(replay)).toEqual(successBody(retry));
         expect(await tableCount("releases")).toBe(releasesBefore + 1);
         expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
@@ -285,11 +311,16 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
   it("maps an injected S3 timeout below the HTTP layer to 503 without internals", async () => {
     await requireOutcomeContract();
     const barrier = await requireCommitBarrier();
+    const timeoutMarker = createPrivateMarker("s3_timeout");
+    const stackMarker = createPrivateMarker("s3_stack");
     const faulty = { ...rawBlobs(),
       async putBlob() {
-        throw Object.assign(new Error("stream timeout"), { code: "artifact_s3_timeout" });
+        const fault = Object.assign(new Error(`stream timeout ${timeoutMarker}`),
+          { code: "artifact_s3_timeout", stack: `Error: injected ${stackMarker}` });
+        throw fault;
       } };
-    const host = await composeAcceptanceHost(barrier.observer, { blobs: faulty });
+    const composed = await composeAcceptanceHost(barrier, { blobs: faulty });
+    const host = composed.host;
     const close = host["close"];
     try {
       const execute = requireHostExecute(host);
@@ -306,8 +337,12 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
           files: [{ path: "index.html", mimeType: "text/html", text: "s3 timeout" }],
           idempotencyKey: "acceptance-s3" } }, invocation) as Record<string, unknown>;
       assertOutcomeFailure(outcome, invocation["invocationId"] as string);
-      expect(outcome["failure"]).toMatchObject({ category: "provider_unavailable" });
-      expect(await projectOutcomeHttp(outcome)).toEqual({ status: 503, body: { error: "capability_unavailable" } });
+      expect(outcome["failure"]).toMatchObject({ category: "provider_unavailable", retriable: true, commitState: "not_committed" });
+      const failure = outcome["failure"] as Record<string, unknown>;
+      expect(String((failure["cause"] as Record<string, unknown>)?.["code"] ?? (failure["cause"] as Error)?.message ?? "")).toContain("artifact_s3_timeout");
+      const projected = await projectOutcomeHttp(outcome);
+      assertPublicBodyRedacted(projected, { error: "capability_unavailable" },
+        [timeoutMarker, stackMarker], [BUCKET, endpoint, accessKey]);
       expect(await tableCount("releases")).toBe(releasesBefore);
     } finally {
       if (typeof close === "function") (close as () => void)();
@@ -317,17 +352,20 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
   it("maps a lost Postgres connection to provider_unavailable, never conflict", async () => {
     await requireOutcomeContract();
     const barrier = await requireCommitBarrier();
-    const armed = { current: false };
+    const armed = { current: false, attempts: 0 };
+    const lostMarker = createPrivateMarker("pg_lost");
     const flaky = new Proxy(pool, { get(target, property, receiver) {
       if ((property === "query" || property === "connect") && armed.current) {
         return async (): Promise<never> => {
-          throw Object.assign(new Error("terminating connection lost by peer"), { code: "57P06" });
+          armed.attempts++;
+          throw Object.assign(new Error(`terminating connection lost by peer ${lostMarker}`), { code: "57P06" });
         };
       }
       const value = Reflect.get(target, property, receiver);
       return typeof value === "function" ? value.bind(target) : value;
     } }) as unknown as pg.Pool;
-    const host = await composeAcceptanceHost(barrier.observer, { pool: flaky });
+    const composed = await composeAcceptanceHost(barrier, { pool: flaky });
+    const host = composed.host;
     const close = host["close"];
     try {
       const execute = requireHostExecute(host);
@@ -341,11 +379,16 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
           body: { bindingName: "acceptance-lost", idempotencyKey: "acceptance-lost" } },
           invocation) as Record<string, unknown>;
         assertOutcomeFailure(outcome, invocation["invocationId"] as string);
-        expect(outcome["failure"]).toMatchObject({ category: "provider_unavailable" });
-        expect(await projectOutcomeHttp(outcome)).toEqual({ status: 503, body: { error: "capability_unavailable" } });
+        expect(outcome["failure"]).toMatchObject({ category: "provider_unavailable", retriable: true, commitState: "not_committed" });
+        expect(outcome["failure"]).not.toMatchObject({ category: "conflict" });
+        const failure = outcome["failure"] as Record<string, unknown>;
+        expect((failure["cause"] as { code?: string })?.code).toBe("57P06");
+        const projected = await projectOutcomeHttp(outcome);
+        assertPublicBodyRedacted(projected, { error: "capability_unavailable" }, [lostMarker], []);
       } finally {
         armed.current = false;
       }
+      expect(armed.attempts).toBeGreaterThan(0);
       expect(await tableCount("artifacts")).toBe(before);
       expect(await tableCount("idempotency_keys")).toBe(keysBefore);
     } finally {
