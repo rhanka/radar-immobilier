@@ -738,19 +738,24 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         purposes.push({ invocationId: context.invocationId, purpose: context.purpose });
         return authorizeTransaction(context, transaction);
       };
+      // Isolate durable identities per variant: without this, the second
+      // variant replays the first variant's durable success and never reaches
+      // the key barrier. The shared key below stays common only to the two
+      // competitors (A/B) of THIS variant.
+      const variant = changedCommand ? "changed" : "same";
       const ensured = await executeA({ method: "POST", path: "/ensure",
-        body: { bindingName: "q1-race", idempotencyKey: "q1-race-ensure" } },
-        invocationFor(authorizeCommit, "race-ensure"));
+        body: { bindingName: `q1-race-${variant}`, idempotencyKey: `q1-race-ensure-${variant}` } },
+        invocationFor(authorizeCommit, `race-ensure-${variant}`));
       expect(ensured).toMatchObject({ ok: true });
       const artifactId = ((ensured as { result: unknown }).result as { body: { artifactId: string } })
         .body.artifactId;
       const body = { artifactId,
-        files: [{ path: "index.html", mimeType: "text/html", text: "same-key race" }],
-        idempotencyKey: "q1-race" };
+        files: [{ path: "index.html", mimeType: "text/html", text: `same-key race ${variant}` }],
+        idempotencyKey: `q1-race-${variant}` };
       const internalKey = deriveIdempotencyKey(
-        { scope: SCOPE, sub: ACTOR, op: "publish", artifactId, clientKey: "q1-race" });
-      const invA = invocationFor(authorizeCommit, "race-a");
-      const invB = invocationFor(authorizeCommit, "race-b");
+        { scope: SCOPE, sub: ACTOR, op: "publish", artifactId, clientKey: `q1-race-${variant}` });
+      const invA = invocationFor(authorizeCommit, `race-a-${variant}`);
+      const invB = invocationFor(authorizeCommit, `race-b-${variant}`);
       const invAId = invA["invocationId"] as string;
       const invBId = invB["invocationId"] as string;
       const releasesBefore = await tableCount("releases");
@@ -796,7 +801,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       const loser = await pendingB as unknown as Record<string, unknown>;
       await pumpB;
       expect(loser).toMatchObject({ ok: !changedCommand });
-      const winnerBody = ((winner as { result: unknown }).result as { body: unknown });
+      const winnerBody = ((winner as { result: unknown }).result as { body: unknown }).body;
       if (changedCommand) expect(loser.failure).toMatchObject({ category: "conflict" });
       else {
         expect((loser.result as { body: unknown }).body).toEqual(winnerBody);
@@ -810,12 +815,23 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       const cleanup = await requirePreparationCleanupBinding();
       expect(cleanup).toBeDefined();
       const observed = await cleanup.inspectPreparations(hostA, artifactId);
+      // Both preparations of THIS variant must be attributed; a replayed
+      // durable success from the other variant cannot satisfy this.
       expect(observed.attempts.length).toBeGreaterThanOrEqual(2);
       expect(observed.attempts.map((attempt) => attempt.invocationId)).toEqual(expect.arrayContaining([invAId, invBId]));
       expect(new Set(observed.attempts.map((attempt) => attempt.attemptId)).size).toBeGreaterThanOrEqual(2);
       expect(observed.attempts.find((attempt) => attempt.invocationId === invBId)?.state).toBe("abandoned");
+      for (const attempt of observed.attempts.filter((candidate) =>
+        [invAId, invBId].includes(candidate.invocationId))) {
+        expect(attempt.blobKeys.length).toBeGreaterThan(0);
+      }
       const keys = await rawBlobs().listKeys("");
       expect([...keys].length).toBeGreaterThan(0);
+      const s3Keys = new Set([...keys]);
+      for (const attempt of observed.attempts.filter((candidate) =>
+        [invAId, invBId].includes(candidate.invocationId))) {
+        for (const blobKey of attempt.blobKeys) expect(s3Keys.has(blobKey)).toBe(true);
+      }
     } finally {
       if (typeof closeA === "function") (closeA as () => void)();
       await worker.close();

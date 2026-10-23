@@ -197,3 +197,4 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 - [x] reject forged scopes and invalid keys on direct execute.
 - [x] reconcile S3 inventory with invocation cleanup intents.
 - [x] reconcile preparation inventory after denied finalization.
+- [x] isolate race variants and compare both durable receipts.
