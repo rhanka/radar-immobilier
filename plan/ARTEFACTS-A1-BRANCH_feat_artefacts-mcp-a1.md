@@ -89,3 +89,7 @@ unverified evidence. ETA unchanged: 14-23 agent hours, complete A1 circuit.
 - [x] Retain the provider-neutral immutable profile and authority types for A6.
 - [ ] Candidate-dependent Muse code is preserved in ignored evidence/pending
   files; it is not accepted or wired into production by this preparation slice.
+- [x] Two owner-requested independent Astra reviews of `c04d09a0`: preserve
+  findings and correct non-string selection coercion and shared race keys.
+- [ ] Race variants still require joint execution on the actual candidate;
+  structural tests and typechecking cannot qualify that concurrency behavior.
