@@ -6,21 +6,9 @@
  * the URL) and renders synthetic Geo + protected signals. No publisher or
  * MCP credential appears in these bytes.
  */
-export const READER_EXAMPLE_HTML = `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Artifact reader example</title>
-</head>
-<body>
-<main>
-<h1>Artifact reader example</h1>
-<p data-testid="reader-status">Loading authorized content…</p>
-<section><h2>Public geography</h2><pre data-testid="geo-output">[]</pre></section>
-<section><h2>Protected signals</h2><pre data-testid="signals-output">[]</pre></section>
-</main>
-<script>
+import { createHash } from "node:crypto";
+
+const READER_EXAMPLE_SCRIPT = `
 (async () => {
   const params = new URLSearchParams(location.search);
   const grant = params.get("grant");
@@ -37,7 +25,25 @@ export const READER_EXAMPLE_HTML = `<!doctype html>
   document.querySelector('[data-testid="signals-output"]').textContent = JSON.stringify(await signals.json());
   status.textContent = geo.ok && signals.ok ? "Connected." : "Reader call refused.";
 })();
-</script>
+`;
+
+export const READER_EXAMPLE_SCRIPT_HASH = createHash("sha256").update(READER_EXAMPLE_SCRIPT).digest("base64");
+
+export const READER_EXAMPLE_HTML = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Artifact reader example</title>
+</head>
+<body>
+<main>
+<h1>Artifact reader example</h1>
+<p data-testid="reader-status">Loading authorized content…</p>
+<section><h2>Public geography</h2><pre data-testid="geo-output">[]</pre></section>
+<section><h2>Protected signals</h2><pre data-testid="signals-output">[]</pre></section>
+</main>
+<script>${READER_EXAMPLE_SCRIPT}</script>
 </body>
 </html>
 `;
