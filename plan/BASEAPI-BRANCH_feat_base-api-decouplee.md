@@ -101,7 +101,7 @@
   - [ ] B1.6: return explicit legacy 503 during cutover and 410 after retirement, never a replacement 404.
   - [ ] B1.7: preserve exact receipt recovery and unresolved command contexts.
   - [ ] Gate: base-api-{composition,authority,reveal,legacy,receipts}.spec.ts plus existing scoped/SSE regressions; typecheck and scoped lint.
-- [ ] B2 — Complete lot destination; Muse 4–6 h, Sol 4–5 h, total 8–11 h.
+- [x] B2 — Complete lot destination; Muse 4–6 h, Sol 4–5 h, total 8–11 h.
   - [x] B2.1 preparation: audit authored merge resolutions separately from preserved inherited history; extend bounded staging to the authorized API scope.
   - [x] B2.1: integrate pinned 6K history and both migrations under CT-1–CT-8; preserve 6L2 routes, watcher and verifier profiles; qualify CT-7 migration assertions before releasing K_SHA.
   - [x] B2.2: require destination opening in services before business reads and receipt returns.
@@ -110,7 +110,7 @@
   - [x] B2.5: separate authorized internal cutover readback from public opened-destination reads.
   - [x] B2.6: qualify truly empty history → opening → first mark without artificial business events.
   - [x] B2.7: retain closure for unresolved-only history, missing rights, uncovered writers or invalid epoch.
-  - [ ] Gate: lot-opening*, lot-cutover-readback*, lot-cutover-empty*, existing 6J/6K and 6L2 regressions; typecheck and scoped lint.
+  - [x] Gate: lot-opening*, lot-cutover-readback*, lot-cutover-empty*, existing 6J/6K and 6L2 regressions; typecheck and scoped lint.
 - [ ] B3 — Serialized source writers; Muse 3–5 h, Sol 3–4 h, total 6–9 h.
   - [ ] B3.1: ogc-pull.ts and its source-lock DB tests; lock the actual mutated identity in the mutation transaction.
   - [ ] B3.2: populate-geo.ts and its source-lock DB tests; cover both update and insert paths.
