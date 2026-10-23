@@ -173,3 +173,4 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 - [x] serialize lifecycle writers and observe purge deletion claims.
 - [x] retain typed provider failure causes before wire projection.
 - [x] target SQL fault phases and reject internal retries.
+- [x] retain typed provider failure causes before wire projection.

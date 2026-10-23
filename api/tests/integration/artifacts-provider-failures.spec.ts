@@ -513,46 +513,58 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
   it("reports commitState unknown on COMMIT acknowledgment loss and recovers by key", async () => {
     await requireOutcomeContract();
     const barrier = await requireCommitBarrier();
-    const armed = { current: false };
-    const ackLost = proxyLeasedPool(pool, { get(target, property, receiver) {
-      if (property === "query" && armed.current) {
-        return async (text: unknown, params?: unknown): Promise<unknown> => {
-          if (typeof text === "string" && text.trim().toUpperCase() === "COMMIT") {
-            await (target.query as (...args: unknown[]) => Promise<unknown>)(text, params);
-            throw Object.assign(new Error("terminating connection during COMMIT"), { code: "57P06" });
-          }
-          return (target.query as (...args: unknown[]) => Promise<unknown>)(text, params);
-        };
-      }
-      const value = Reflect.get(target, property, receiver);
-      return typeof value === "function" ? value.bind(target) : value;
-    } }) as unknown as pg.Pool;
-    const host = await composeQ2Host(barrier.observer, { pool: ackLost });
+    const probe = finalizationFaultPool(pool, { code: "57P06", loseCommitAck: true });
+    const state = probe.evidence;
+    const { host } = await composeQ2Host(barrier, { pool: probe.pool });
     const close = host["close"];
     try {
-      const execute = executeWithParity(host);
+      const execute = requireHostExecute(host);
       const artifactId = await ensureVia(execute, allowAll(), "q2-unknown", "q2-unknown-ensure");
       const body = { artifactId,
         files: [{ path: "index.html", mimeType: "text/html", text: "commit uncertainty" }],
         idempotencyKey: "q2-unknown" };
+      const internalKey = deriveIdempotencyKey({ scope: SCOPE, sub: ACTOR, op: "publish", artifactId, clientKey: "q2-unknown" });
       const releasesBefore = await tableCount("releases");
-      armed.current = true;
-      let uncertain: Record<string, unknown>;
-      try {
-        const invocation = invocationFor(allowAll(), "uncertain");
-        uncertain = await execute({ method: "POST", path: "/publish", body },
-          invocation) as unknown as Record<string, unknown>;
-      } finally {
-        armed.current = false;
-      }
+      const guard: AuthorizeCommit = async (context, transaction) => {
+        const decision = await authorizeTransaction(context, transaction);
+        state.guardPassed = true;
+        state.armed = true;
+        return decision;
+      };
+      const invocation = invocationFor(guard, "uncertain");
+      const uncertain = await execute({ method: "POST", path: "/publish", body },
+        invocation) as unknown as Record<string, unknown>;
+      expect(state.commits).toBe(1);
+      assertOutcomeFailure(uncertain, invocation.invocationId);
+      expect(uncertain.failure).toMatchObject({ category: "provider_unavailable", status: 503,
+        retriable: true, cause: { code: "57P06" }, commitState: "unknown" });
       const commitState = (uncertain["commitState"] as string | undefined) ??
         ((uncertain["failure"] as Record<string, unknown> | undefined)?.["commitState"] as string | undefined);
       expect(commitState).toBe("unknown");
       expect(JSON.stringify(uncertain)).not.toMatch(/no effects/i);
+      const env = (await import("../../src/config.js")).loadConfig();
+      const peer = new (await import("pg")).default.Pool({ host: env.POSTGRES_HOST, port: env.POSTGRES_PORT,
+        user: env.POSTGRES_USER, password: env.POSTGRES_PASSWORD, database: DATABASE });
+      let durableReceipt: unknown;
+      try {
+        const durable = Number((await peer.query(
+          "SELECT count(*) FROM artifacts.releases WHERE artifact_id = $1", [artifactId])).rows[0].count);
+        expect(durable).toBe(1);
+        expect(await tableCount("releases")).toBe(releasesBefore + 1);
+        const success = (await peer.query("SELECT result FROM artifacts.idempotency_keys WHERE key = $1", [internalKey])).rows;
+        expect(success).toHaveLength(1);
+        durableReceipt = success[0].result;
+        expect(durableReceipt).toBeDefined();
+      } finally { await peer.end(); }
+      state.armed = false;
       const retry = await execute({ method: "POST", path: "/publish", body },
         invocationFor(allowAll(), "uncertain-retry")) as unknown as Record<string, unknown>;
-      expect(retry).toMatchObject({ ok: true });
+      expect(retry).toMatchObject({ ok: true, replayed: true });
+      expect((retry.result as { body: unknown }).body).toEqual(durableReceipt);
       expect(await tableCount("releases")).toBe(releasesBefore + 1);
+      const successRows = Number((await pool.query(
+        "SELECT count(*) FROM artifacts.idempotency_keys WHERE key = $1", [internalKey])).rows[0].count);
+      expect(successRows).toBe(1);
     } finally {
       if (typeof close === "function") (close as () => void)();
     }
@@ -561,10 +573,11 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
   it("rejects same-key changed content as conflict with no extra release", async () => {
     await requireOutcomeContract();
     const barrier = await requireCommitBarrier();
-    const host = await composeQ2Host(barrier.observer);
+    const composed = await composeQ2Host(barrier);
+    const { host } = composed;
     const close = host["close"];
     try {
-      requireSelectedProfile(host);
+      requireSelectedProfile(host, composed.profile.digest);
       const execute = executeWithParity(host);
       const artifactId = await ensureVia(execute, allowAll(), "q2-conflict", "q2-conflict-ensure");
       const files = [{ path: "index.html", mimeType: "text/html", text: "hello" }];
@@ -598,7 +611,8 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
   it("sanitizes a commit denial to the existing host policy projection", async () => {
     await requireOutcomeContract();
     const barrier = await requireCommitBarrier();
-    const host = await composeQ2Host(barrier.observer);
+    const composed = await composeQ2Host(barrier);
+    const { host } = composed;
     const close = host["close"];
     try {
       const execute = executeWithParity(host);
@@ -645,7 +659,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       const value = Reflect.get(target, property, receiver);
       return typeof value === "function" ? value.bind(target) : value;
     } }) as unknown as pg.Pool;
-    const host = await composeQ2Host(barrier.observer, { pool: failing });
+    const { host } = await composeQ2Host(barrier, { pool: failing });
     const close = host["close"];
     try {
       const execute = executeWithParity(host);
