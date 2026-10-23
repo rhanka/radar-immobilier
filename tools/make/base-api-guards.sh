@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Guards shared by the executable runner and command-double proofs.
 require_env() {
+  [[ ${BASE_API_SOURCE:-worktree} == worktree || ${BASE_API_SOURCE:-worktree} == index ]] || return 2
   [[ ${ENV:-} =~ ^(test|e2e)-[a-z0-9]+(-[a-z0-9]+)*$ ]] || {
     echo "Refusing unqualified ENV: ${ENV:-}" >&2; return 2;
   }
@@ -35,17 +36,26 @@ allowed_path() {
   done
 }
 archive_sources() {
-  git ls-files --cached --others --exclude-standard -- api/src api/drizzle api/package.json api/tsconfig.json api/vitest.config.ts \
-    api/tests/integration packages package.json package-lock.json tsconfig.base.json eslint.config.js \
+  local tracking=(--cached)
+  [[ ${BASE_API_SOURCE:-worktree} != worktree ]] || tracking+=(--others)
+  git ls-files "${tracking[@]}" --exclude-standard -- api/src api/drizzle api/package.json api/tsconfig.json api/vitest.config.ts \
+    api/tests/integration packages tools/make package.json package-lock.json tsconfig.base.json eslint.config.js \
     > "$RUN_DIR/candidates"
-  printf '%s\n' tools/make/base-api*.sh tools/make/base-api*.mjs >> "$RUN_DIR/candidates"
   : > "$RUN_DIR/paths"
   while IFS= read -r path; do
     # Non-source metadata is excluded without accessing its contents.
     if allowed_path "$path"; then printf '%s\n' "$path" >> "$RUN_DIR/paths"; fi
   done < "$RUN_DIR/candidates"
   while IFS= read -r path; do allowed_path "$path" || return 2; done < "$RUN_DIR/paths"
-  tar --verbatim-files-from --no-recursion -cf "$RUN_DIR/source.tar" -T "$RUN_DIR/paths"
+  if [[ ${BASE_API_SOURCE:-worktree} == index ]]; then
+    local tree paths
+    tree=$(git write-tree)
+    mapfile -t paths < "$RUN_DIR/paths"
+    git archive --format=tar "$tree" -- "${paths[@]}" > "$RUN_DIR/source.tar"
+    printf '%s\n' "$tree" > "$LOG_DIR/source-tree.txt"
+  else
+    tar --verbatim-files-from --no-recursion -cf "$RUN_DIR/source.tar" -T "$RUN_DIR/paths"
+  fi
   cp "$RUN_DIR/paths" "$LOG_DIR/archived-paths.txt"
   sha256sum "$RUN_DIR/source.tar" > "$LOG_DIR/source.sha256"
 }

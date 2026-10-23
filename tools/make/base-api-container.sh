@@ -17,14 +17,28 @@ CONFIG
 # Avoid repeated container DNS lookups consuming the API's 3s connect budget.
 POSTGRES_HOST=$(node --input-type=module -e 'import {lookup} from "node:dns/promises"; console.log((await lookup("postgres", {family:4})).address)')
 export POSTGRES_HOST
+typecheck_api() {
+  npm run typecheck --workspace=api
+  if compgen -G 'api/tests/integration/base-api*.ts' > /dev/null; then
+    cat > api/tsconfig.base-api-tests.json <<'CONFIG'
+{"extends":"./tsconfig.json","compilerOptions":{"rootDir":"..","noEmit":true},"include":["src/**/*.ts","tests/integration/base-api*.ts"],"exclude":["dist","node_modules"]}
+CONFIG
+    node_modules/.bin/tsc --noEmit -p api/tsconfig.base-api-tests.json
+  fi
+}
+lint_api() {
+  shopt -s nullglob
+  local tests=(api/tests/integration/base-api*.ts)
+  node_modules/.bin/eslint api/src/services/facets api/src/routes/scoped-*.ts api/src/routes/workspaces.ts api/src/routes/graph-signals.ts api/src/routes/signal-facets.ts "${tests[@]}"
+}
 case $action in
   network-proof) node tools/make/base-api-network.mjs;;
-  typecheck) npm run typecheck --workspace=api;;
-  lint) node_modules/.bin/eslint api/src/services/facets api/src/routes/scoped-*.ts api/src/routes/workspaces.ts;;
+  typecheck) typecheck_api;;
+  lint) lint_api;;
   verify|test|test-api)
     if [[ $action == verify ]]; then
-      npm run typecheck --workspace=api
-      node_modules/.bin/eslint api/src/services/facets api/src/routes/scoped-*.ts api/src/routes/workspaces.ts
+      typecheck_api
+      lint_api
     fi
     cd api
     node ../tools/make/base-api-ct8.mjs | tee /evidence/ct8.log
