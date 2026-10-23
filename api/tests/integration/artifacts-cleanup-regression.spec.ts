@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { S3Client, CreateBucketCommand, DeleteBucketCommand } from "@aws-sdk/client-s3";
 import { createS3BlobStore } from "@sentropic/artifacts/adapters/s3";
 import { loadConfig } from "../../src/config.js";
-import { cleanupArtifactRace, closeArtifactWorker, assertPurgeEffects } from "./artifacts-race-cleanup.helpers.js";
+import { awaitWithPump, cleanupArtifactRace, closeArtifactWorker, assertPurgeEffects } from "./artifacts-race-cleanup.helpers.js";
 
 const bucket = "artifacts-fix1-cleanup";
 let pool: pg.Pool;
@@ -88,5 +88,75 @@ describe("artifact acceptance cleanup regression", () => {
       expect(check).not.toThrow();
       expect(new TextDecoder().decode(await blobs.getBlob(protectedKey))).toBe(texts[0]);
     } else expect(check).toThrow(mode === "delete-protected" ? "referenced blob" : "exclusive blob");
+  });
+
+  it("bounds a stalled progression while the operation stays pending", async () => {
+    let releaseStalled!: () => void;
+    const gate = new Promise<void>((resolve) => { releaseStalled = resolve; });
+    const stalled = gate.then(() => "late success");
+    void stalled.catch(() => {});
+    const failingPump = (async () => {
+      await new Promise<void>((resolve) => setTimeout(resolve, 20));
+      throw new Error("[contract-violation] commit barrier B did not progress");
+    })();
+    void failingPump.catch(() => {});
+    const started = performance.now();
+    await expect(awaitWithPump(stalled, failingPump, "before_key_lock/B", 2000)).rejects.toThrow(
+      "commit barrier B did not progress",
+    );
+    expect(performance.now() - started).toBeLessThan(2000);
+    releaseStalled();
+    await expect(stalled).resolves.toBe("late success");
+    const hangingBarrier = new Promise<void>(() => {});
+    const hangingOperation = new Promise<unknown>(() => {});
+    void hangingBarrier.catch(() => {});
+    void hangingOperation.catch(() => {});
+    const idlePump = new Promise<void>(() => {});
+    void idlePump.catch(() => {});
+    await expect(awaitWithPump(hangingBarrier, idlePump, "stalled-barrier", 100)).rejects.toThrow(
+      "stalled-barrier did not settle",
+    );
+    await expect(awaitWithPump(hangingOperation, idlePump, "stalled-operation", 100)).rejects.toThrow(
+      "stalled-operation did not settle",
+    );
+  });
+
+  it.each(["before_key_lock/B", "publish/A", "publish/B"])("reaches SQL cleanup after a pump fails during %s", async (label) => {
+    const client = await pool.connect();
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => { release = resolve; });
+    const operation = gate.then(() => client.query("SELECT 1")).finally(() => client.release());
+    let pumpFailed = false;
+    const pump = client.query("SELECT 1").then(() => {
+      pumpFailed = true;
+      throw new Error(`stalled ${label}`);
+    });
+    void pump.catch(() => {});
+    const barrier = { observer: undefined, waitUntilReached: () => gate, release: () => release() };
+    const closeWorker = vi.fn(async () => {});
+    const started = performance.now();
+    const run = async () => {
+      try { await awaitWithPump(operation, pump, label, 1000); }
+      finally {
+        expect(pumpFailed).toBe(true);
+        await cleanupArtifactRace([{ barrier, invocationId: label }], ["before_key_lock"],
+          [operation, pump], () => {}, closeWorker);
+      }
+    };
+    try {
+      await expect(run()).rejects.toThrow(`stalled ${label}`);
+      expect(performance.now() - started).toBeLessThan(1000);
+      expect(closeWorker).toHaveBeenCalledOnce();
+      expect(pool.idleCount).toBe(1);
+      expect(pool.waitingCount).toBe(0);
+    } finally { release(); await Promise.allSettled([operation, pump]); }
+  });
+
+  it.each(["idle", "finished"])("bounds an operation after an %s pump without hiding success", async (mode) => {
+    const pump = mode === "idle" ? new Promise<void>(() => {}) : Promise.resolve();
+    const stalled = new Promise<void>(() => {});
+    await expect(awaitWithPump(stalled, pump, mode, 100)).rejects.toThrow(`${mode} did not settle`);
+    const receipt = { status: 200, body: { releaseId: "synthetic-release" } };
+    await expect(awaitWithPump(Promise.resolve(receipt), pump, mode, 100)).resolves.toBe(receipt);
   });
 });
