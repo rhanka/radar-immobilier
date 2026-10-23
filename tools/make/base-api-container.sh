@@ -15,6 +15,7 @@ export default { ...config, envDir: false,
   test: { ...config.test, fileParallelism: false, maxWorkers: 2 } };
 CONFIG
 case $action in
+  network-proof) node tools/make/base-api-network.mjs;;
   typecheck) npm run typecheck --workspace=api;;
   lint) node_modules/.bin/eslint api/src/services/facets api/src/routes/scoped-*.ts api/src/routes/workspaces.ts;;
   verify|test|test-api)

@@ -11,7 +11,7 @@ case "$ACTION" in
   input-guards) for file in "$TOOLS"/base-api*.sh; do bash -n "$file"; done; exit;;
   check-scope) scope_check; exit;;
   verify|test|test-api) require_scope;;
-  typecheck|lint|clean) ;;
+  typecheck|lint|network-proof|clean) ;;
   *) echo "Unknown action: $ACTION" >&2; exit 2;;
 esac
 PROJECT=radar-$ENV
@@ -28,6 +28,8 @@ export COMPOSE_DISABLE_ENV_FILE=1
 unset COMPOSE_FILE COMPOSE_PROFILES COMPOSE_ENV_FILES
 docker() {
   if [[ $1 == compose && " $* " == *' run '* ]]; then command docker "$@";
+  elif [[ $1 == compose && ( " $* " == *' down '* || " $* " == *' up '* ) ]]; then
+    timeout --signal=TERM --kill-after=5 180 docker "$@";
   else timeout --signal=TERM --kill-after=5 60 docker "$@"; fi
 }
 compose=(docker compose --env-file /dev/null -p "$PROJECT" -f "$RUN_DIR/compose.yml")

@@ -17,6 +17,10 @@ BASE_API_SCOPE := src/services/facets/scoped-db.test.ts src/services/facets/work
 .PHONY: base-api-worktree base-api-integrate base-api-clean base-api-runner-proof
 .PHONY: base-api-verify
 .PHONY: base-api-contract-proof
+.PHONY: base-api-network-proof
+
+base-api-network-proof:
+	rtk bash tools/make/base-api-verify.sh network-proof $(BASE_API_ARGS)
 
 base-api-contract-proof:
 	rtk bash tools/make/base-api-contract-proof.sh $(BASE_API_ARGS)
