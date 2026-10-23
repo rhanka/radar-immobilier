@@ -16,11 +16,13 @@ export POSTGRES_USER=radar POSTGRES_PASSWORD=synthetic-only POSTGRES_DB=radar
 export S3_REGION=test S3_BUCKET=synthetic S3_ACCESS_KEY=synthetic S3_SECRET_KEY=synthetic
 export OPENAI_API_KEY= ANTHROPIC_API_KEY= GEMINI_API_KEY= GOOGLE_API_KEY= MISTRAL_API_KEY= COHERE_API_KEY=
 postgres_tmpfs=512m
+postgres_connections=100
 # Parallel CI discovery creates many disposable databases simultaneously.
-if [[ "$1" == api-ci ]]; then postgres_tmpfs=8g; fi
+if [[ "$1" == api-ci ]]; then postgres_tmpfs=8g; postgres_connections=512; fi
 cat > "$runtime_dir/compose.yml" <<YAML
 services:
   postgres:
+    command: ["postgres", "-c", "max_connections=$postgres_connections"]
     volumes: !reset []
     tmpfs:
       - /var/lib/postgresql/data:size=$postgres_tmpfs
@@ -42,6 +44,7 @@ services:
       NODE_ENV: test
       LOG_LEVEL: silent
       LOT: '$LOT'
+      UI_SCOPE: '${UI_SCOPE:-}'
       LOT_MIGRATION_DB_TEST: '1'
 volumes:
   runtime:
@@ -103,6 +106,19 @@ disk_monitor=$!
 tar --exclude='.env*' --exclude=node_modules --exclude=dist --exclude=.svelte-kit \
   -cf "$runtime_dir/source.tar" api packages ui radar/ontology tools/make tools/h4-mcp.mk deploy/k8s/41-immo-mcp-ingress.yaml deploy/k8s/scrape/run-chunks.sh package.json package-lock.json tsconfig.base.json eslint.config.js \
   docs/spec/reports/study-2026-07/report.md docs/spec/reports/study-2026-07/slides.html
+if [[ "$LOT" == 6K ]]; then
+  baseline="$runtime_dir/baseline/ui/src/lib/components/maps/__6k_baseline__"
+  mkdir -p "$baseline"
+  git rev-parse origin/main > "$log_dir/ui-baseline-ref.txt"
+  for component in EvaluationMapView LotFichePanel; do
+    path="ui/src/lib/components/maps/$component.svelte"
+    git show "origin/main:$path" > "$baseline/$component.svelte"
+    git show "81678e05:$path" | cmp "$baseline/$component.svelte" -
+    sha256sum "$baseline/$component.svelte" >> "$log_dir/ui-baseline.sha256"
+  done
+  sed -i 's|\$lib/components/maps/LotFichePanel.svelte|./LotFichePanel.svelte|' "$baseline/EvaluationMapView.svelte"
+  tar -rf "$runtime_dir/source.tar" -C "$runtime_dir/baseline" ui
+fi
 sha256sum "$runtime_dir/source.tar" > "$log_dir/source.sha256"
 if [[ "$LOT" == 6J || "$LOT" == 6L2 ]]; then
   case "$LOT" in
@@ -113,9 +129,20 @@ if [[ "$LOT" == 6J || "$LOT" == 6L2 ]]; then
   tar -tf "$runtime_dir/source.tar" | while IFS= read -r path; do
     [[ "$path" == */ ]] || sha256sum "$path"
   done > "$log_dir/archived-files.sha256"
+elif [[ "$LOT" == 6K ]]; then
+  echo "${RUNNER_VERSION:-6K-8}" > "$log_dir/runner-version.txt"
+  tar -tf "$runtime_dir/source.tar" > "$log_dir/archived-paths.txt"
+  tar -tf "$runtime_dir/source.tar" | while IFS= read -r path; do
+    if [[ "$path" == ui/src/lib/components/maps/__6k_baseline__/*.svelte ]]; then
+      (cd "$runtime_dir/baseline" && sha256sum "$path")
+    else
+      [[ "$path" == */ ]] || sha256sum "$path"
+    fi
+  done > "$log_dir/archived-files.sha256"
 fi
 case "$1" in
   verify|test-api|mutation-proof|astra-proof|fix-proof|fix2-proof) "${compose[@]}" up -d --wait postgres ;;
+  regression) if [[ "$LOT" == 6K ]]; then "${compose[@]}" up -d --wait postgres; fi ;;
   api-ci) "${compose[@]}" up -d --wait postgres minio ;;
 esac
 "${compose[@]}" run --rm --no-deps -T api sh -ec '
@@ -130,10 +157,14 @@ import config from "./vitest.config.js";
 export default { ...config, envDir: false };
 CONFIG
   case "$1" in
-    build) npm run build --workspace=api ;;
     typecheck-ui) npm run typecheck --workspace=ui ;;
     lint-ui) npx --no-install eslint ui/src ;;
-    verify|typecheck) npm run typecheck --workspace=api ;;
+    build) npm run build --workspace=api
+      test -s api/dist/routes/chat.d.ts
+      test -s api/dist/routes/chat.d.ts.map
+      echo "API declarations and declaration maps: PASS" ;;
+    verify|typecheck) npm run typecheck --workspace=api
+      if [ "$LOT" = 6K ]; then npm run typecheck --workspace=ui; fi ;;
     checkpoints)
       for snapshot in /checkpoints/*.tar; do
         number=$(basename "$snapshot" .tar)
@@ -187,6 +218,7 @@ CONFIG
     case "$LOT" in
       6I) bash /workspace/tools/make/paniers-lot6i-mutation.sh ;;
       6J) bash /workspace/tools/make/paniers-lot6j-mutation.sh ;;
+      6K) bash /workspace/tools/make/paniers-lot6k-mutation.sh ;;
       6L1) bash /workspace/tools/make/paniers-lot6l1-mutation.sh ;;
       6L2) bash /workspace/tools/make/paniers-lot6l2-mutation.sh ;;
       *) exit 2 ;;
@@ -199,15 +231,26 @@ import config from "./vitest.config.js";
 export default { ...config, envDir: false, test: { ...config.test, fileParallelism: false, maxWorkers: 2 } };
 CONFIG
     if [ "$1" = test-ui ]; then
-      set -f
-      npm run test --workspace=ui -- --config vitest.isolated.config.ts $2
+      if [ "$LOT" = 6K ]; then
+        if [ -n "$UI_SCOPE" ]; then
+          npm run test --workspace=ui -- --config vitest.isolated.config.ts "$UI_SCOPE"
+        else npm run test --workspace=ui -- --config vitest.isolated.config.ts; fi
+      else
+        set -f
+        npm run test --workspace=ui -- --config vitest.isolated.config.ts $2
+      fi
       exit
     fi
     npm run test --workspace=ui -- --config vitest.isolated.config.ts \
       facets 6a-head 6b-version signaux-reglements signal-facets-client SignalFacetControls selection-bucket selection-camera signal-facet-scope \
       $(if [ "$LOT" = 6I ] || [ "$LOT" = 6J ] || [ "$LOT" = 6L1 ] || [ "$LOT" = 6L2 ]; then echo signal-facet-workspace; fi) \
-      $(if [ "$LOT" = 6L1 ] || [ "$LOT" = 6L2 ]; then echo signal-projection; fi) \
-      $(if [ "$LOT" = 6L2 ]; then echo signal-projection-invalidation; fi)
+      $(if [ "$LOT" = 6L1 ] || [ "$LOT" = 6L2 ] || [ "$LOT" = 6K ]; then echo signal-projection signal-facet-workspace; fi) \
+      $(if [ "$LOT" = 6L2 ]; then echo signal-projection-invalidation; fi) \
+      $(if [ "$LOT" = 6K ]; then echo lot-facet-counters lot-cutover-client LotFichePanel EvaluationMapView LotCutover; fi)
+    if [ "$LOT" = 6K ]; then
+      cd /workspace/api
+      ../node_modules/.bin/vitest run --config vitest.isolated.config.ts src/services/facets/lots src/routes/scoped-lot- src/services/chat/stream-bus src/routes/lot-cutover-stream
+    fi
     cd /workspace/packages/immo-mcp
     ../../node_modules/.bin/tsc --noEmit -p tsconfig.json
     ../../node_modules/.bin/vitest run --config /workspace/api/vitest.isolated.config.ts src
@@ -220,6 +263,7 @@ CONFIG
         6H) npx --no-install eslint api/src/services/facets api/src/routes/scoped-signal-facets*.ts api/src/scripts/attach-personal-history.ts api/src/services/workspaces/authority*.ts api/src/services/workspaces/migration.test.ts packages/immo-mcp/src/workspace-context*.ts packages/immo-mcp/src/data-source.ts ui/src/lib/signals/signal-facet-scope*.ts ;;
         6I) npx --no-install eslint api/src/services/facets api/src/routes/scoped-workspace-archive*.ts ui/src/lib/signals/signal-facet-workspace*.ts ;;
         6J) npx --no-install eslint api/src/services/facets/lots api/src/routes/scoped-lot-*.ts api/src/services/facets/activation-db.test.ts api/src/services/workspaces/cli-db.test.ts ;;
+        6K) npx --no-install eslint api/src/app.ts api/src/db/schema.ts api/src/routes/chat.ts api/src/routes/lot-cutover-stream.test.ts api/src/services/facets/lots api/src/services/chat/stream-bus*.ts api/src/routes/scoped-lot-*.ts api/src/routes/prospect-marks*.ts ui/src/lib/maps/lot-facet-counters*.ts ui/src/lib/prospect/lot-cutover-client*.ts ui/src/lib/components/maps/LotCutover*.ts ;;
         6L1) npx --no-install eslint api/src/services/facets/projection*.ts api/src/services/facets/scoped-writer.ts api/src/services/facets/workspace-writer.ts api/src/services/graph/graph-store.ts api/src/routes/scoped-projection*.ts ui/src/lib/signals/signal-projection*.ts ;;
         6L2) npx --no-install eslint api/src/services/facets/projection-invalidation*.ts api/src/routes/scoped-projection-events*.ts ui/src/lib/signals/signal-projection-invalidation*.ts ;;
         *) npx --no-install eslint api/src/services/facets ;;

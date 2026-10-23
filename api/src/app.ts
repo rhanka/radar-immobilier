@@ -31,6 +31,9 @@ import { dataQualityRoute, type DataQualityDeps } from "./routes/data-quality.js
 import { sourceCoverageRoute } from "./routes/source-coverage.js";
 import { sourceConsistencyRoute } from "./routes/source-consistency.js";
 import { prospectMarksRoute } from "./routes/prospect-marks.js";
+import { scopedLotCutoverRoute, type ScopedLotCutoverDeps } from "./routes/scoped-lot-cutover.js";
+import { scopedLotCutoverActivationRoute } from "./routes/scoped-lot-cutover-activation.js";
+import { scopedLotFacetsRoute } from "./routes/scoped-lot-facets.js";
 import { signalFacetsRoute } from "./routes/signal-facets.js";
 import { privateSignalResponse } from "./services/facets/private-response.js";
 import { documentsRoute, type DocumentsDeps } from "./routes/documents.js";
@@ -71,6 +74,8 @@ export type AppDeps = HealthDeps &
      * When absent, authenticated mode mounts the closed control capability.
      */
     artifactsControl?: ControlRouteDeps;
+    /** Explicit operator mapping and qualified deployment retirement adapter. */
+    lotCutover?: Pick<ScopedLotCutoverDeps, "cutoverMapping" | "cutoverSafety">;
   };
 
 /** Compose the Hono application from injected dependencies. */
@@ -136,7 +141,7 @@ export function createApp(deps: AppDeps): Hono {
   }
 
   app.route("/", healthRoute(deps));
-  app.route("/", chatRoute());
+  app.route("/", chatRoute(deps.db));
   app.route("/", automationRoute());
   app.route("/", sourcesRoute(deps));
   app.route("/", ontologyRoute(deps));
@@ -159,6 +164,17 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", signalsDetailRoute(deps));
   app.route("/", opportunitesRoute(deps));
   app.route("/", prospectMarksRoute(deps.auth?.enabled && deps.auth.sessionSecret ? { db: deps.db, sessionSecret: deps.auth.sessionSecret } : { db: deps.db }));
+  // 6K: scoped lot facets and cutover are mounted but self-gating. Lot
+  // reads and commands answer 503 until the workspace destination and
+  // scoped epoch are established, and stay closed until the explicit
+  // operator cutover opens the destination. Legacy mark traffic is fenced
+  // at the route layer (503/410) with a database trigger as backstop.
+  if (deps.db) {
+    const lotDeps = { db: deps.db, ...(deps.auth ? { auth: deps.auth } : {}) };
+    app.route("/", scopedLotFacetsRoute({ ...lotDeps, requireCutover: true }));
+    app.route("/", scopedLotCutoverRoute({ ...lotDeps, ...deps.lotCutover }));
+    app.route("/", scopedLotCutoverActivationRoute({ ...lotDeps, ...deps.lotCutover }));
+  }
 
   app.get("/", (c) => c.json({ name: "radar-immobilier-api", status: "up" }));
 
