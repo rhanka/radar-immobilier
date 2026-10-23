@@ -64,3 +64,4 @@ No invented production domain or certificate.
 - [x] Separate host-only page cookie modules prepared and locally tested.
 - [x] Signed grant verification requires bounded expiry and matching subject.
 - [x] Local activation registry prepared; provider activation binding pending.
+- [x] Named operation schemas prepared; receiving API integration remains pending.
