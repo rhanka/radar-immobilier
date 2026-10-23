@@ -66,7 +66,7 @@
 - [ ] Chain B: tmp/base-api-b2, branch feat/base-api-decouplee-b2; B2, then B3.
 - [ ] Sol A is the BASE integrator for its integration workspace; cross-track shared writes require the current conductor-recorded CT-1 lease, with no independent concurrent write right. Muse/Sol B submit shared-file hunks.
 - [ ] Start B1 nonshared work while the integrator performs B2's pinned 6K import; release B2 from that qualified integration SHA.
-- [ ] Import the same integration SHA into B1 before its app/startup wiring; preserve main's 6L2 additions.
+- [x] Import the same integration SHA into B1 before its app/startup wiring; preserve main's 6L2 additions.
 - [ ] Integrate through merge commits, preserving source history; no squash, cherry-pick or whole-file ours/theirs resolution.
 - [ ] Each chain edits only its own plan checkboxes; the integrator reconciles both sets without losing either.
 - [ ] B4 development follows B1/B2; final B4 qualification also requires B3; B5 follows B3/B4.
@@ -94,7 +94,7 @@
   - [x] Gate: contract traced to code; open defaults visible; no artifact dependency; safe runner and bundle audit qualified.
 - [ ] B1 — Signal/workspace API; Muse 3–5 h, Sol 3–4 h, total 6–9 h.
   - [x] B1 preparation: add the signed composed fixture and verify each staged slice independently of later workspace drafts.
-  - [ ] B1.1: mount workspace, personal, common-archive, revision and invalidation routers.
+  - [x] B1.1: mount workspace, personal, common-archive, revision and invalidation routers.
   - [x] B1.2: constrain middleware to its intended endpoints; preserve cookie writes and supported bearer reads.
   - [x] B1.2 first slice: isolate SSE, personal, common archive and revision middleware; qualify both middleware orders.
   - [ ] B1.3: expose workspace context and reason codes without legacy readers.

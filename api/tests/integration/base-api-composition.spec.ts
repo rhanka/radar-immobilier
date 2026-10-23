@@ -19,14 +19,14 @@ describeDb("base-api composed composition", () => {
     expect(await cities.json()).toEqual({ ok: true, heads: [] });
   });
 
-  it("does not hand-mount scoped routers in the composed app", async () => {
+  it("keeps mounted scoped reads closed before activation", async () => {
     const { app, data, cookie } = await startComposedBase();
     const sessionCookie = await cookie(data.member.sub);
     const scoped = await app.request(
       `/api/v1/workspaces/${data.workspaceId}/signal-facets/personal/cities/synthetic-city`,
       { headers: { cookie: sessionCookie } },
     );
-    expect(scoped.status).toBe(404);
+    expect(scoped.status).toBe(503);
   });
 
   it("keeps artifact configuration absent", async () => {
