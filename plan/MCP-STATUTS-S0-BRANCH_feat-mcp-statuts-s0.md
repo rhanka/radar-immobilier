@@ -62,7 +62,7 @@ successor compatibility and delegation A as pure, unregistered contracts.
   - [x] Cover vocabulary and pending-choice metadata.
 - [ ] **S0b — Read schemas**
   - [x] Freeze closed read input/output schemas and continuation context.
-  - [ ] Freeze read validation and diagnostic confidentiality.
+  - [x] Freeze read validation and diagnostic confidentiality.
   - [ ] Cover qualified reads, effective hiding, pagination and fingerprints.
 - [ ] **S0c — Command schemas**
   - [ ] Freeze signal/lot DTOs, explicit versions, heads and atomic envelopes.
