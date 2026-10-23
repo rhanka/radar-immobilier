@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { cpSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { resolve, join } from "node:path";
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
@@ -10,9 +11,15 @@ const evidence = join(root, "tmp/artefacts-mcp-a2/mutations");
 mkdirSync(evidence, { recursive: true });
 function digest(directory) {
   const hash = createHash("sha256");
-  for (const file of readdirSync(directory).sort()) {
-    hash.update(file); hash.update(readFileSync(join(directory, file)));
+  function visit(folder, prefix = "") {
+    for (const entry of readdirSync(folder, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+      const path = join(folder, entry.name);
+      const relative = `${prefix}${entry.name}`;
+      if (entry.isDirectory()) visit(path, `${relative}/`);
+      else { hash.update(relative); hash.update(readFileSync(path)); }
+    }
   }
+  visit(directory);
   return hash.digest("hex");
 }
 const before = digest(source);
@@ -53,6 +60,9 @@ function restore() {
   rmSync(directory, { recursive: true, force: true });
   cpSync(source, join(directory, "src"), { recursive: true });
   cpSync("packages/immo-mcp/package.json", join(directory, "package.json"));
+  symlinkSync(resolve("packages/immo-mcp/node_modules"), join(directory, "node_modules"), "dir");
+  const copyJose = createRequire(join(directory, "package.json")).resolve("jose");
+  assert.equal(copyJose, createRequire(resolve("packages/immo-mcp/package.json")).resolve("jose"), "copy changed crypto dependency");
   assert.equal(digest(join(directory, "src")), before, "copy restoration differs");
 }
 try {
