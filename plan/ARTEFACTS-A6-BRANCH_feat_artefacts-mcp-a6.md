@@ -91,3 +91,5 @@ No invented production domain or certificate.
 - [x] Review correction: image delta preserves denial isolation code; script globals are explicit.
 - [x] Review corrections: committed build context, accurate smoke labels and observable cleanup failures.
 - [x] Standalone Git helper audits subjects, sizes and browser snapshots, then reconstructs the bundle.
+- [x] Committed both browser fixtures after the integrator exclusion; Chromium reproduced four positive-case failures before fixture corrections.
+- [x] Prepared explicit fixture ports, exact-host secure cookies and a separate source-browser runner; final-image/API acceptance remains open.
