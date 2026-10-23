@@ -225,4 +225,28 @@ describe("authorized artifact content serving", () => {
     expect((await request(app, "/__reader/api/signals.protected-read.v1", cookie, fresh)).status).toBe(200);
     expect(upstream).toHaveBeenCalledTimes(1);
   });
+  it("should withhold the API result when the authority version moves during adaptation", async () => {
+    const fixture = fixtureReaderDeps();
+    let version = "v1";
+    const base = fixture.authority!;
+    const authority = { ...base,
+      getAuthorizationVersion: async () => version,
+      getProfile: async (artifactId: string) => {
+        await Promise.resolve();
+        version = "v2";
+        return base.getProfile(artifactId);
+      } };
+    const upstream = vi.fn(fixture.readOperation!);
+    const app = createReaderContentApp({ ...fixture, authority, readOperation: upstream,
+      contentBase: "pages.example.test", grantSecret: GRANT_SECRET,
+      sessionSecret: SESSION_SECRET, issuer: ISSUER, now: () => 1_000 });
+    const cookie = await credentials("reader-alice", "session-1", 1_000);
+    const grant = await mintGrant(
+      { ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000", releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "session-1", profileName: "demo", policyRevision: "pol-001", profileFingerprint: FINGERPRINT },
+      GRANT_SECRET,
+      1_000,
+    );
+    expect((await request(app, "/__reader/api/geo.read.v1?collectionId=qc-zonage-valleyfield", cookie, grant)).status).toBe(401);
+    expect(upstream).not.toHaveBeenCalled();
+  });
 });

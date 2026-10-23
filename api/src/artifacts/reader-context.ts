@@ -29,6 +29,9 @@ export async function adaptGrantToReader(
   grant: GrantClaims,
   authority: AuthorityReader,
 ): Promise<ApiReaderContext | null> {
+  try {
+  const version = await authority.getAuthorizationVersion(grant.artifactId);
+  if (!version) return null;
   const release = await authority.getRelease(grant.artifactId);
   if (!release || release.artifactId !== grant.artifactId || release.releaseId !== grant.releaseId) return null;
   const profile = await authority.getProfile(grant.artifactId);
@@ -38,6 +41,7 @@ export async function adaptGrantToReader(
   const rights = await authority.getRights(grant.readerSub, grant.artifactId);
   if (!rights || !rights.approved || rights.readerSub !== grant.readerSub) return null;
   if (rights.artifactId !== grant.artifactId) return null;
+  if (await authority.getAuthorizationVersion(grant.artifactId) !== version) return null;
   return {
     readerSub: grant.readerSub,
     sessionId: grant.sessionId,
@@ -48,6 +52,7 @@ export async function adaptGrantToReader(
     capabilities: intersectCapabilities(profile, rights),
     source: "h5-grant",
   };
+  } catch { return null; }
 }
 
 export function canInvoke(
