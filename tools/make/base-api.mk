@@ -10,6 +10,7 @@ MAILDEV_UI_PORT ?= 11910
 BASE_API_MK := $(lastword $(MAKEFILE_LIST))
 export ENV API_PORT UI_PORT MAILDEV_UI_PORT SCOPE MSG FILES OUT SLUG BRANCH START SRC RECEIPT BASE_API_SCOPE
 export BASE_API_SOURCE BASE_API_LINT_FILES
+export BASE_API_WORKSPACE BASE_API_ACTOR BASE_API_REASON BASE_API_MAINTENANCE_EVIDENCE
 BASE_API_ARGS = "API_PORT=$$API_PORT" "UI_PORT=$$UI_PORT" "MAILDEV_UI_PORT=$$MAILDEV_UI_PORT" "ENV=$$ENV"
 BASE_API_SCOPE := src/services/facets/scoped-db.test.ts src/services/facets/workspace-receipts-db.test.ts src/services/facets/projection-migration-db.test.ts src/routes/scoped-projection-events-db.test.ts
 
@@ -24,6 +25,23 @@ BASE_API_SCOPE := src/services/facets/scoped-db.test.ts src/services/facets/work
 
 base-api-tooling-proof:
 	rtk bash tools/make/base-api-tooling-proof.sh $(BASE_API_ARGS)
+
+.PHONY: base-api-activate-personal base-api-resume-personal
+.PHONY: base-api-b3-mutation-required base-api-b4-mutation-required base-api-bundle-proof
+base-api-activate-personal:
+	rtk bash tools/make/base-api-activation.sh activate $(BASE_API_ARGS)
+
+base-api-resume-personal:
+	rtk bash tools/make/base-api-activation.sh resume $(BASE_API_ARGS)
+
+base-api-b3-mutation-required:
+	rtk bash tools/make/base-api-verify.sh b3-mutation-required "SCOPE=src/services/geo/ogc-pull-source-lock-db.test.ts src/services/geo/populate-geo-source-lock-db.test.ts src/services/exploitation/projection-source-lock-db.test.ts src/services/facets/lots/lot-source-writer-races-db.test.ts src/services/facets/lots/lot-source-writer-coverage-db.test.ts" $(BASE_API_ARGS)
+
+base-api-b4-mutation-required:
+	rtk bash tools/make/base-api-verify.sh b4-mutation-required "SCOPE=tests/integration/base-api-activation.spec.ts tests/integration/base-api-activation-resume.spec.ts tests/integration/base-api-legacy.spec.ts" $(BASE_API_ARGS)
+
+base-api-bundle-proof:
+	rtk bash tools/make/base-api-bundle-proof.sh $(BASE_API_ARGS)
 
 base-api-network-proof:
 	rtk bash tools/make/base-api-verify.sh network-proof $(BASE_API_ARGS)
