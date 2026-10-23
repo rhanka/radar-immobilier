@@ -687,54 +687,88 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
   it("keeps HTTP and MCP retry parity with one correlated outcome per dispatch", async () => {
     await requireOutcomeContract();
     const barrier = await requireCommitBarrier();
+    const parityMarker = createPrivateMarker("parity_timeout");
     const faulty = { ...rawBlobs(),
       async putBlob() {
-        throw Object.assign(new Error("stream timeout"), { code: "artifact_s3_timeout" });
+        throw Object.assign(new Error(`stream timeout ${parityMarker}`), { code: "artifact_s3_timeout" });
       } };
-    const host = await composeQ2Host(barrier.observer, { blobs: faulty });
+    const composed = await composeQ2Host(barrier, { blobs: faulty });
+    const host = composed.host;
     const close = host["close"];
     try {
-      requireSelectedProfile(host);
+      requireSelectedProfile(host, composed.profile.digest);
       const execute = executeWithParity(host);
       const artifactId = await ensureVia(execute, allowAll(), "q2-parity", "q2-parity-ensure");
       const body = { artifactId,
         files: [{ path: "index.html", mimeType: "text/html", text: "parity" }],
         idempotencyKey: "q2-parity" };
       const invocation = invocationFor(allowAll(), "parity");
+      const invocationId = invocation["invocationId"] as string;
       const outcome = await execute({ method: "POST", path: "/publish", body },
         invocation) as unknown as Record<string, unknown>;
-      assertOutcomeFailure(outcome, invocation["invocationId"] as string);
-      expect(outcome["failure"]).toMatchObject({ category: "provider_unavailable" });
-      const peerHost = (await composeQ2Host(barrier.observer, { blobs: faulty }));
+      assertOutcomeFailure(outcome, invocationId);
+      expect(outcome["failure"]).toMatchObject({ category: "provider_unavailable", retriable: true });
+      const projected = await projectOutcomeHttp(outcome);
+      assertPublicBodyRedacted(projected, { error: "capability_unavailable" }, [parityMarker], [BUCKET, endpoint, accessKey]);
+      const peerComposed = (await composeQ2Host(barrier, { blobs: faulty }));
       try {
-        const adapter = createMcpArtifactAdapter(createArtifactControl(peerHost, SCOPE, BASE));
+        const adapter = createMcpArtifactAdapter(createArtifactControl(peerComposed.host as never, SCOPE, BASE));
         const mcp = await adapter.execute({ method: "POST", path: "/publish", args: body }, { actorId: ACTOR });
-        expect(mcp).toMatchObject({ ok: false, status: 503, code: "capability_unavailable", retryable: true });
-        expect(JSON.stringify(mcp)).not.toMatch(/timeout|stack|Error/i);
+        assertMcpResultRedacted(mcp,
+          { status: 503, code: "capability_unavailable", retryable: true, publicError: "capability_unavailable" },
+          [parityMarker], [BUCKET, endpoint, accessKey]);
       } finally {
-        peerHost.close();
+        (peerComposed.host["close"] as () => void)();
       }
-      const parallel = await composeQ2Host(barrier.observer, { blobs: faulty });
-      const parallelClose = parallel["close"];
+      const faults = [
+        Object.assign(new Error("isolated connection"), { code: "57P06" }),
+        Object.assign(new Error("isolated serialization"), { code: "40001" }),
+      ];
+      const local = new AsyncLocalStorage<Error>();
+      let arrivals = 0;
+      let releaseBoth!: () => void;
+      const both = new Promise<void>((resolve) => { releaseBoth = resolve; });
+      const failing = new Proxy(pool, { get(target, property, receiver) {
+        if (property === "connect") return async () => {
+          const cause = local.getStore();
+          if (!cause) return target.connect();
+          if (++arrivals === 2) releaseBoth();
+          await both;
+          throw cause;
+        };
+        const value = Reflect.get(target, property, receiver);
+        return typeof value === "function" ? value.bind(target) : value;
+      } });
+      const isolated = await composeQ2Host(barrier, { pool: failing });
       try {
-        const parallelExecute = requireHostExecute(parallel);
-        const invA = invocationFor(allowAll(), "parity-a");
-        const invB = invocationFor(allowAll(), "parity-b");
-        const [outcomeA, outcomeB] = await Promise.all([
-          execute({ method: "POST", path: "/publish", body },
-            invA) as Promise<unknown>,
-          parallelExecute({ method: "POST", path: "/publish", body },
-            invB) as Promise<unknown>,
-        ]);
-        const failureA = (outcomeA as Record<string, unknown>)["failure"] as Record<string, unknown>;
-        const failureB = (outcomeB as Record<string, unknown>)["failure"] as Record<string, unknown>;
-        expect(invA["invocationId"]).not.toBe(invB["invocationId"]);
-        expect(failureA["cause"]).toBeDefined();
-        expect(failureB["cause"]).toBeDefined();
-        expect(failureB["cause"]).not.toBe(failureA["cause"]);
-      } finally {
-        if (typeof parallelClose === "function") (parallelClose as () => void)();
-      }
+        const entries: Record<string, unknown>[] = [];
+        const dispatched: Array<{ id: string; cause: Error; outcome: unknown }> = [];
+        const direct = requireHostExecute(isolated.host);
+        const observe = async (request: unknown, context: unknown) => {
+          const invocation = context as InvocationContextShape;
+          const id = invocation.invocationId; // captured BEFORE dispatch
+          const cause = local.getStore()!;
+          const outcome = await direct(request, buildInvocationContext({ ...invocation,
+            authorizeCommit: allowAll() }));
+          dispatched.push({ id, cause, outcome });
+          return outcome;
+        };
+        const control = createArtifactControl({ ...isolated.host, execute: observe,
+          app: { ...isolated.host.app as object, execute: observe } } as never,
+          SCOPE, BASE, undefined, { ledger: { record: (entry) => { entries.push({ ...entry }); } } });
+        await Promise.all(faults.map((cause, index) => local.run(cause, () =>
+          control.handle("ensure", ACTOR, { bindingName: "q2-iso-" + index, idempotencyKey: "q2-iso-" + index }))));
+        expect(dispatched).toHaveLength(2);
+        expect(new Set(dispatched.map(({ id }) => id)).size).toBe(2);
+        expect(entries).toHaveLength(2);
+        for (const { id, cause, outcome } of dispatched) {
+          assertOutcomeFailure(outcome, id);
+          expect((outcome as { failure: { cause: unknown } }).failure.cause).toBe(cause);
+          expect(entries.filter((entry) => entry.invocationId === id)).toEqual([
+            expect.objectContaining({ invocationId: id, reason: "provider_unavailable", status: 503 }),
+          ]);
+        }
+      } finally { (isolated.host["close"] as () => void)(); }
     } finally {
       if (typeof close === "function") (close as () => void)();
     }
@@ -743,17 +777,20 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
   it("fails reads without a write-commit entry and distinguishes entry refusal", async () => {
     await requireOutcomeContract();
     const barrier = await requireCommitBarrier();
-    const armed = { current: false };
+    const armed = { current: false, attempts: 0 };
+    const readMarker = createPrivateMarker("read_conn");
     const flaky = proxyLeasedPool(pool, { get(target, property, receiver) {
       if ((property === "query" || property === "connect") && armed.current) {
         return async (): Promise<never> => {
-          throw Object.assign(new Error("terminating connection"), { code: "57P06" });
+          armed.attempts++;
+          throw Object.assign(new Error(`terminating connection ${readMarker}`), { code: "57P06" });
         };
       }
       const value = Reflect.get(target, property, receiver);
       return typeof value === "function" ? value.bind(target) : value;
     } }) as unknown as pg.Pool;
-    const host = await composeQ2Host(barrier.observer, { pool: flaky });
+    const composed = await composeQ2Host(barrier, { pool: flaky });
+    const host = composed.host;
     const close = host["close"];
     try {
       const execute = executeWithParity(host);
@@ -766,11 +803,16 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
         const outcome = await execute({ method: "GET", path: `/meta/${artifactId}`, body: {} },
           invocation) as unknown as Record<string, unknown>;
         assertOutcomeFailure(outcome, invocation["invocationId"] as string);
+        expect(outcome["failure"]).toMatchObject({
+          category: "provider_unavailable", code: "capability_unavailable", retriable: true, commitState: "not_committed" });
         const projected = await projectOutcomeHttp(outcome);
-        expectRedacted(projected);
+        assertPublicBodyRedacted(projected, { error: "capability_unavailable" }, [readMarker], []);
+        expectRedacted(projected, [readMarker]);
+        expect(projected.status).toBe(503);
       } finally {
         armed.current = false;
       }
+      expect(armed.attempts).toBeGreaterThan(0);
       expect(await tableCount("idempotency_keys")).toBe(keysBefore);
       expect(await tableCount("releases")).toBe(releasesBefore);
       const seenTransactions: unknown[] = [];

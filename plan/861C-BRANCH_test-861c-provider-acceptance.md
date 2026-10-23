@@ -174,3 +174,4 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 - [x] retain typed provider failure causes before wire projection.
 - [x] target SQL fault phases and reject internal retries.
 - [x] retain typed provider failure causes before wire projection.
+- [x] require retriable read failures to project as 503.
