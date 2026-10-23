@@ -97,3 +97,4 @@ unverified evidence. ETA unchanged: 14-23 agent hours, complete A1 circuit.
 ## Fix1 review corrections
 
 - [x] Implement bounded race draining and process exit, including SIGKILL escalation.
+- [x] Add SQL/S3 regression fixtures for failed winners, stuck workers and purge effects.
