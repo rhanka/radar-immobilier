@@ -59,7 +59,7 @@ successor compatibility and delegation A as pure, unregistered contracts.
   - [x] Freeze personal/common rights and independent capabilities.
   - [x] Cover rights and moderation refusals.
   - [x] Freeze Steve vocabulary and pending-choice availability metadata.
-  - [ ] Cover vocabulary and pending-choice metadata.
+  - [x] Cover vocabulary and pending-choice metadata.
 - [ ] **S0b — Read schemas**
   - [ ] Freeze closed read input/output schemas and continuation context.
   - [ ] Freeze read validation and diagnostic confidentiality.
