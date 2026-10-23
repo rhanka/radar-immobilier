@@ -817,6 +817,56 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
     }
   });
 
+  it.each(["purge-first", "publication-first"] as const)("purge claim protects shared blobs in %s order", async (order) => {
+    await requireCommitContract();
+    const binding = await requirePurgeRaceBinding();
+    const barrier = await requireCommitBarrier();
+    const { host } = await composeQ1Host(barrier);
+    let paused: Awaited<ReturnType<typeof binding.pausePurgeBeforeDelete>> | undefined;
+    let run: ReturnType<typeof startBarrierOperation> | undefined;
+    try {
+      const execute = requireHostExecute(host);
+      const file = { path: "index.html", mimeType: "text/html", text: "purge-shared-" + order };
+      const seed = async (name: string): Promise<string> => {
+        const ensured = await execute({ method: "POST", path: "/ensure", body: { bindingName: name,
+          idempotencyKey: name } }, invocationFor(allowAll(), name)) as { result: { body: { artifactId: string } } };
+        const id = ensured.result.body.artifactId;
+        expect(await execute({ method: "POST", path: "/publish", body: { artifactId: id, files: [file],
+          idempotencyKey: name + "-publish" } }, invocationFor(allowAll(), name + "-publish"))).toMatchObject({ ok: true });
+        return id;
+      };
+      const artifactId = await seed("purge-target-" + order);
+      await seed("purge-shared-owner-" + order);
+      const body = { artifactId, files: [file], idempotencyKey: "purge-racing-" + order };
+      const invocation = invocationFor(allowAll(), "purge-racing-" + order);
+      if (order === "publication-first") {
+        run = startBarrierOperation(barrier, invocation.invocationId,
+          () => execute({ method: "POST", path: "/publish", body }, invocation), "before_commit");
+        await run.reached;
+        const purge = binding.pausePurgeBeforeDelete(host, artifactId);
+        expect(await withTimeout(purge, 100)).toBeUndefined();
+        run.release();
+        expect(await run.pending).toMatchObject({ ok: true });
+        paused = await purge;
+      } else {
+        paused = await binding.pausePurgeBeforeDelete(host, artifactId);
+        expect(await execute({ method: "POST", path: "/publish", body }, invocation)).toMatchObject({ ok: false });
+      }
+      expect(paused.claimId.length).toBeGreaterThan(0);
+      expect(await binding.inspectDeletionClaims(host)).toContainEqual(expect.objectContaining({ claimId: paused.claimId, state: "deleting" }));
+      const before = new Set(await rawBlobs().listKeys(""));
+      expect(before.size).toBeGreaterThan(0);
+      paused.release();
+      await paused.finished;
+      const after = new Set(await rawBlobs().listKeys(""));
+      for (const key of before) expect(after.has(key)).toBe(true); // other artifact still references the bytes
+    } finally {
+      run?.release(); paused?.release();
+      await run?.pending.catch(() => {}); await paused?.finished.catch(() => {});
+      (host["close"] as () => void)();
+    }
+  });
+
   it("last quota unit across processes is not covered without the H3 quota interface", () => {
     reportNotCovered(
       "q1-last-quota-unit",
