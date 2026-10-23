@@ -1,10 +1,13 @@
 import assert from "node:assert/strict";
+import process from "node:process";
+import console from "node:console";
 import { createHash } from "node:crypto";
 import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 
 const mutations = [
+  ["gcm-tag-truncation", "preview-aead.ts", ", { authTagLength: 16 }", "", "preview-aead.test.ts"],
   ["ticket-single-use", "preview-tickets.ts", "live.delete(ticket);", "void ticket;", "preview-security.test.ts"],
   ["grant-binding", "preview-grant.ts", "const want = expected[field];", "const want = undefined;", "preview-grant.test.ts"],
   ["publisher-substitution", "reader-test-fixture.ts", "reader: context.readerSub", 'reader: "publisher"', "content-serve.test.ts"],

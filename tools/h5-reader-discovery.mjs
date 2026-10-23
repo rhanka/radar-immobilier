@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import process from "node:process";
+import console from "node:console";
 import { execFileSync } from "node:child_process";
 import { readdirSync } from "node:fs";
 
