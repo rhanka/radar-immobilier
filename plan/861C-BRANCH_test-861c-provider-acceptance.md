@@ -153,3 +153,6 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 - [x] Slice 024: add provider failure case.
 - [x] Slice 025: add provider failure case.
 - [x] Slice 026: add provider failure case.
+
+## Review 1 delivery slices
+- [x] reject empty required suites and forward scope options.
