@@ -23,6 +23,7 @@ Keep the r2 host API target and its remaining construction bindings explicit.
   `tools/artifact-host.mk`; `RAPPORT-MUSE-PROVIDER-ACCEPTANCE.md`;
   `RAPPORT-SOL-PROVIDER-ACCEPTANCE.md`;
   uncommitted `RAPPORT-SOL-FIX1-908.md`;
+  uncommitted `RAPPORT-SOL-FIX2-908.md`;
   uncommitted `RAPPORT-SOL-Q1-Q2.md`; ignored evidence and local Git metadata
   under `tmp/861c-provider-acceptance/` and `tmp/861c-q1-q2/`.
 - [x] **Forbidden Paths**: root Makefile, compose files, rules, agent entrypoints,
@@ -188,6 +189,19 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 - [x] require retriable read failures to project as 503.
 - [x] docs: record review fixes and qualification prerequisites.
 
+## Review 2 corrections
+- [x] Isolate both S3 race variants and compare the durable receipt bodies.
+- [x] Reconcile every new S3 object with its expected invocation and cleanup.
+- [x] Exercise cross-artifact purge references in both safe serialization orders.
+- [x] Name phase-injection seams instead of requiring optional SQL statements.
+- [x] Check E3 HTTP/MCP failures, captured invocation IDs and ledger uniqueness.
+- [x] Qualify COMMIT uncertainty on each transport separately from receipt replay.
+- [x] Compile the complete Radar profile and reject invariant semantic digests.
+- [x] Refuse forged scope and invalid caller keys directly before storage.
+- [x] Reject private identifiers in all MCP representations and inject stream markers.
+- [x] Accept 94 conforming controls and reject all 94 discriminant mutations.
+- [x] Archive final API, enabled-gate and static receipts; audit atomic commits.
+
 ## Review 2 delivery slices
 - [x] bind full Radar profile and reject constant digests.
 - [x] reconcile S3 inventory with invocation cleanup intents.
@@ -208,3 +222,4 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 - [x] qualify transaction aborts through HTTP and MCP.
 - [x] qualify uncertain COMMIT on both transports.
 - [x] redact storage scope from HTTP and MCP failure bodies.
+- [x] docs: record round-two provider acceptance verification.
