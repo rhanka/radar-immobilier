@@ -156,8 +156,8 @@
   - [x] B4 review fix retained gate: all 124 tranche-15 required suites execute 971 cases without failure or skip; standalone CT-8 and unchanged frozen SQL/journal are preserved.
   - [x] B4 review fix resource isolation: one campaign and worker, API 4-GiB/PG 2-GiB/S3 512-MiB limits, bounded RAM volumes and JVM heap; keep all test deadlines and owned-project cleanup.
   - [x] B4 review fix operator runtime: keep the RAM-backed dependency volume mounted read-only by the retained database service between API CLI containers.
-  - [ ] B4 review fix operator proof: execute actual activation/resume, corrupted scoped/closed refusal, corrected forward resume and guarded restart on one synthetic database.
-  - [ ] B4 review fix delivery: publish measured evidence and a prerequisite-e1758ef6 bundle for the second independent review pass.
+  - [x] B4 review fix operator proof: actual activation/resume pass on one synthetic database; corrupted scoped/closed resume refuses without SQL changes, corrected forward resume preserves history, and four guarded-restart cases pass.
+  - [x] B4 review fix delivery: measured evidence and the prerequisite-e1758ef6 correction bundle are bound in RAPPORT-SOL-BASE-B4-FIX.md; the second independent review pass remains pending.
   - [x] B4/B3 tooling preparation: narrow delivery paths, exact ontology input, changed-file lint and common synthetic DB migration; functional gates remain open.
   - [x] B4 operator input transport: actual Make activation/resume command-double proof preserves literal Make functions and shell syntax without evaluation.
   - [x] B4 slice 1: internal maintenance validator binds workspace, actor, attempt, release and instances; real reader, operator and durable wiring remain pending.
