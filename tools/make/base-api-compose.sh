@@ -5,8 +5,13 @@ name: $PROJECT
 services:
   postgres:
     image: postgis/postgis:16-3.4
+    # Synthetic databases exercise SQL commits, never PostgreSQL crash durability.
+    command: postgres -c max_wal_size=64MB -c min_wal_size=32MB -c fsync=off -c synchronous_commit=off
+    mem_limit: 2g
     labels: {org.radar.base.owner: "$OWNER"}
-    tmpfs: [/var/lib/postgresql/data:size=512m]
+    tmpfs: [/var/lib/postgresql/data:size=1536m]
+    # Retain RAM-backed dependencies between successive operator containers.
+    volumes: [runtime:/base-api-runtime:ro]
     environment:
       POSTGRES_USER: radar
       POSTGRES_PASSWORD: synthetic-only
@@ -18,6 +23,8 @@ services:
       retries: 30
   api:
     image: node:24-bookworm-slim
+    mem_limit: 4g
+    tmpfs: ["/tmp:size=512m,exec"]
     labels: {org.radar.base.owner: "$OWNER"}
     working_dir: /workspace
     volumes:
@@ -34,13 +41,36 @@ services:
       POSTGRES_DB: radar
       S3_ACCESS_KEY: synthetic
       S3_SECRET_KEY: synthetic
+      S3_ENDPOINT: http://minio:9000
       DOTENV_CONFIG_PATH: /dev/null
     entrypoint: []
 volumes:
   runtime:
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+      o: size=1536m
     labels: {org.radar.base.owner: "$OWNER"}
 networks:
   default:
     labels: {org.radar.base.owner: "$OWNER"}
 YAML
+  if [[ ${ACTION:-} == ci-api || ${ACTION:-} == test-api ]]; then
+    cat > "$RUN_DIR/ci.yml" <<YAML
+services:
+  minio:
+    image: adobe/s3mock:3.12.0
+    mem_limit: 512m
+    labels: {org.radar.base.owner: "$OWNER"}
+    environment:
+      COM_ADOBE_TESTING_S3MOCK_HTTPPORT: '9000'
+      initialBuckets: radar-immobilier-raw,radar-immobilier-docs
+      JAVA_TOOL_OPTIONS: '-Xms64m -Xmx256m'
+    healthcheck:
+      test: [CMD-SHELL, 'wget -q -O /dev/null http://localhost:9000/favicon.ico || exit 1']
+      interval: 2s
+      retries: 45
+YAML
+    compose+=(-f "$RUN_DIR/ci.yml")
+  fi
 }

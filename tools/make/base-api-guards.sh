@@ -23,7 +23,7 @@ allowed_path() {
     */.env*|*/.git/*|*/node_modules/*|*/dist/*|*/credentials*|*/secrets*|*/fixtures/*|*/reports/*|*/input/*) return 2;;
   esac
   case $p in
-    package.json|package-lock.json|tsconfig.base.json|eslint.config.js|api/package.json|api/tsconfig.json|api/vitest.config.ts|radar/ontology/ontology-profile.yaml) ;;
+    package.json|package-lock.json|tsconfig.base.json|eslint.config.js|api/package.json|api/tsconfig.json|api/vitest.config.ts|radar/ontology/ontology-profile.yaml|packages/radar-sources/src/geo/municipalities.qc.json) ;;
     api/src/*.ts|api/tests/integration/base-api*.ts|api/drizzle/*.sql|api/drizzle/meta/_journal.json) ;;
     packages/*/package.json|packages/*/tsconfig.json|packages/*/src/*.ts|packages/*/src/*.svelte|tools/make/base-api*.sh|tools/make/base-api*.mjs) ;;
     *) return 2;;

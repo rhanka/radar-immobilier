@@ -11,10 +11,16 @@
 import { Hono } from "hono";
 import { z } from "zod";
 import type { Database } from "../db/client.js";
-import type { CutoverSafety } from "../services/facets/lots/lot-cutover-types.js";
+import type {
+  ActivationGate,
+  CutoverSafety,
+} from "../services/facets/lots/lot-cutover-types.js";
+import type { LotMigrationReport } from "../services/facets/lot-migration-report/manifest.js";
 import { approvedAccountId, resolveWorkspaceAccess } from "../services/workspaces/store.js";
 import { WorkspaceError } from "../services/workspaces/types.js";
 import { ScopeError } from "../services/facets/scope.js";
+import { readLotCutoverServerConfig } from "../services/facets/lots/lot-cutover-config.js";
+import { qualifiedCutoverSafetyForRequest } from "../services/facets/lots/lot-cutover-safety.js";
 import { digest, FacetError } from "../services/facets/target.js";
 import {
   evaluateActivationGate,
@@ -44,7 +50,44 @@ export interface ScopedLotCutoverDeps {
   auth?: { enabled: boolean };
   /** Deployment adapter must positively retire every replica and reconnect path. */
   cutoverSafety?: CutoverSafety;
+  /**
+   * Per-request safety factory. When present the entry route builds the
+   * adapter from the current workspace, actor and qualified manifest
+   * around server-held evidence; a static `cutoverSafety` is never
+   * rebuilt and stays subject to the binding check below.
+   */
+  cutoverSafetyFor?: CutoverSafetyFactory;
   cutoverMapping?: { workspaceId: string; mapping: ManifestMapping };
+}
+
+/** Per-request 6K safety input: current workspace, actor and qualified manifest. */
+export interface CutoverSafetyRequest {
+  workspaceId: string;
+  actorSub: string;
+  report: LotMigrationReport;
+  gate: ActivationGate;
+}
+
+export type CutoverSafetyFactory = (request: CutoverSafetyRequest) => CutoverSafety;
+
+/** Reached by createApp/index.ts without changing shared startup ownership. */
+export function configuredCutoverDeps(deps: ScopedLotCutoverDeps): ScopedLotCutoverDeps {
+  if (deps.cutoverMapping || deps.cutoverSafety || deps.cutoverSafetyFor) return deps;
+  const config = readLotCutoverServerConfig();
+  if (!config) return deps;
+  return { ...deps, cutoverMapping: { workspaceId: config.workspaceId, mapping: config.mapping },
+    cutoverSafetyFor: (request) => qualifiedCutoverSafetyForRequest(deps.db, {
+      evidence: config.maintenance.evidence,
+      maintenanceAttemptId: config.maintenance.maintenanceAttemptId,
+      releaseId: config.maintenance.releaseId,
+      instanceIds: config.maintenance.instanceIds,
+      options: {
+        ...(config.maintenance.options?.qualifiedEmptyManifest !== undefined
+          ? { qualifiedEmptyManifest: config.maintenance.options.qualifiedEmptyManifest } : {}),
+        ...(config.maintenance.options?.emptyReadbackScope
+          ? { emptyReadbackScope: config.maintenance.options.emptyReadbackScope } : {}),
+      },
+    }, request) };
 }
 
 /** Mapping qualification comes from the operator's server configuration. */
@@ -90,7 +133,26 @@ export async function assertModerator(
   }
 }
 
+/**
+ * Refuse the reuse of a bound adapter under another request identity. An
+ * adapter qualified for one actor never authorizes a different moderator,
+ * even when the runner would authorize that moderator on its own rights.
+ */
+export function assertCutoverSafetyBinding(
+  safety: CutoverSafety, workspaceId: string, actorSub: string,
+): void {
+  const binding = safety.safetyBinding;
+  if (!binding) return;
+  if (binding.workspaceId.toLowerCase() !== workspaceId.toLowerCase()) {
+    throw new ScopeError(403, "maintenance_evidence_workspace_mismatch");
+  }
+  if (binding.actorSub !== actorSub) {
+    throw new ScopeError(403, "maintenance_evidence_actor_mismatch");
+  }
+}
+
 export function scopedLotCutoverRoute(deps: ScopedLotCutoverDeps): Hono {
+  deps = configuredCutoverDeps(deps);
   const app = new Hono();
   app.route("/", cutoverWorkspaceGuard(deps));
 

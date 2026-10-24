@@ -4,6 +4,7 @@
  */
 import { createHash, randomUUID } from "node:crypto";
 import type {
+  DestinationFacet,
   LotMigrationReport,
   ManifestRow,
 } from "../lot-migration-report/manifest.js";
@@ -70,6 +71,28 @@ export interface D5Decision {
 export interface CutoverSafety {
   drainDeliveryPaths: (workspaceId: string) => Promise<void>;
   readbackAuthorized: (workspaceId: string) => Promise<void>;
+  /**
+   * Declared request binding. Present only on adapters built for one
+   * authorized actor and workspace; the entry route refuses any reuse
+   * under a different session before the runner authorizes.
+   */
+  readonly safetyBinding?: CutoverSafetyBinding;
+}
+
+/** Minimal request identity declared by a bound cutover adapter. */
+export interface CutoverSafetyBinding {
+  workspaceId: string;
+  actorSub: string;
+}
+
+/** Expected persisted head value for one ready target, from the qualified manifest. */
+export interface ExpectedCutoverHeadValue {
+  targetKey: string;
+  sourceId: string;
+  facet: DestinationFacet;
+  statut: string;
+  prixDemande: string | null;
+  lienAnnonce: string | null;
 }
 
 export interface RunLotCutoverInput {

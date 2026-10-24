@@ -15,6 +15,18 @@ evidence=${BASE_API_MAINTENANCE_EVIDENCE:-}
 }
 [[ -n $actor && ${#actor} -le 256 && $actor != *[$'\r\n']* ]] || exit 2
 [[ -n $reason && ${#reason} -le 512 && $reason != *[$'\r\n']* ]] || exit 2
+attempt=${BASE_API_MAINTENANCE_ATTEMPT:-}
+release=${BASE_API_RELEASE:-}
+[[ $attempt =~ ^[a-fA-F0-9]{8}(-[a-fA-F0-9]{4}){3}-[a-fA-F0-9]{12}$ ]] || exit 2
+[[ -n $release && ${#release} -le 256 && $release != *[$'\r\n']* ]] || exit 2
+[[ -n ${BASE_API_INSTANCES:-} && $BASE_API_INSTANCES != *[$'\r\n\t']* ]] || exit 2
+read -r -a instances <<< "$BASE_API_INSTANCES"
+instance_args=()
+for instance in "${instances[@]}"; do
+  [[ $instance =~ ^[a-zA-Z0-9_.:-]{1,256}$ ]] || exit 2
+  instance_args+=(--instance "$instance")
+done
+[[ ${#instance_args[@]} -gt 0 ]] || exit 2
 [[ $evidence =~ ^tmp/base-api-evidence/[a-zA-Z0-9_./-]+\.json$ && $evidence != *..* ]] || exit 2
 part=$evidence
 while [[ $part != . ]]; do
@@ -26,6 +38,10 @@ script=api/src/scripts/base-api-personal-activation.ts
 allowed_path "$script"
 [[ -s $script ]] || { echo 'Operator implementation not received' >&2; exit 2; }
 ROOT=$(pwd -P)
+df -h "$ROOT"
+[[ $(df -Pk "$ROOT" | awk 'NR==2 {print $4}') -ge 10485760 ]] || {
+  echo 'STOP: less than 10 GiB free' >&2; exit 3;
+}
 PROJECT=radar-$ENV
 RUN_DIR=$ROOT/tmp/base-api-evidence/$ENV/runtime
 for file in "$RUN_DIR" "$RUN_DIR/compose.yml" "$RUN_DIR/source.tar"; do [[ ! -L $file && -e $file ]] || exit 2; done
@@ -43,5 +59,8 @@ verify_ownership
 [[ $(tar -xOf "$RUN_DIR/source.tar" "$script" | sha256sum) == "$(sha256sum < "$script")" ]] || exit 2
 compose=(docker compose --env-file /dev/null -p "$PROJECT" -f "$RUN_DIR/compose.yml")
 "${compose[@]}" run --rm --no-deps -T --volume "$ROOT/$evidence:/maintenance-evidence.json:ro" \
-  api node_modules/.bin/tsx "$script" "$action" --workspace "$workspace" --actor "$actor" \
-  --reason "$reason" --maintenance-evidence /maintenance-evidence.json
+  api bash -euc 'tar -xOf /source.tar "$1" | cmp - "$1"
+    evidence=$(cat /maintenance-evidence.json)
+    exec node_modules/.bin/tsx "$@" --evidence-json "$evidence"' -- \
+  "$script" "$action" --workspace "$workspace" --actor "$actor" --reason "$reason" \
+  --maintenance-attempt "$attempt" --release "$release" "${instance_args[@]}"
