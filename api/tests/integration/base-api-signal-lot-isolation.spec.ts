@@ -25,8 +25,10 @@ const MODES: LotMode[] = ["real", "simulation"];
 describeDb("signal routes hide closed-destination lots", () => {
   it("serves signals only on signal routes while 6K stays closed", async () => {
     const f = await lotFixture();
-    const [node] = await f.db.insert(graphNodes).values({ id: randomUUID(),
-      type: "Signal", citySlug: CITY, label: "Synthetic shared-city signal" }).returning();
+    const [node, visible] = await f.db.insert(graphNodes).values([
+      { id: randomUUID(), type: "Signal", citySlug: CITY, label: "Synthetic archived signal" },
+      { id: randomUUID(), type: "Signal", citySlug: CITY, label: "Synthetic visible signal" },
+    ]).returning();
     const target = { citySlug: CITY, type: "Signal" as const, id: node!.id };
     const fingerprint = targetFingerprint(node!);
     await writeScopedPersonalFacet(f.db, f.contributor.sub, f.workspaceId,
@@ -81,12 +83,14 @@ describeDb("signal routes hide closed-destination lots", () => {
       `${workspace}/signal-facets/coherent-city?citySlug=${CITY}&mode=signal`);
     expect(coherent.status).toBe(200);
     const city = await coherent.json() as {
-      heads: Array<{ target: { type: string } }>;
-      selection: Array<{ target: { type: string } }>;
+      heads: Array<{ target: { type: string; id: string } }>;
+      selection: Array<{ target: { type: string; id: string } }>;
       signals: Array<{ id: string }>;
     };
     for (const head of city.heads) expect(head.target.type).not.toBe("Lot");
     for (const head of city.selection) expect(head.target.type).not.toBe("Lot");
-    expect(city.signals.map((signal) => signal.id)).toContain(node!.id);
+    expect(city.heads.map((head) => head.target.id)).toContain(node!.id);
+    expect(city.selection.map((head) => head.target.id)).toContain(node!.id);
+    expect(city.signals.map((signal) => signal.id)).toEqual([visible!.id]);
   });
 });
