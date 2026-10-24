@@ -29,10 +29,11 @@ async function assertProtectedResumeClosed(f: Fixture) {
   const snapshot = async () => (await f.pool.query(`SELECT jsonb_agg(to_jsonb(a)) AS state
     FROM facet_activation_state a`)).rows;
   const before = await snapshot();
-  await expect(executePersonalActivationResume(f.db, { workspaceId: f.workspaceId,
+  const observed = await executePersonalActivationResume(f.db, { workspaceId: f.workspaceId,
     actorSub: f.actor.sub, reason: "synthetic chain qualification", bound,
-    evidence: { ...bound, reason: "synthetic chain qualification", drain: proof, shutdown: proof } }))
-    .rejects.toMatchObject({ status: 503 });
+    evidence: { ...bound, reason: "synthetic chain qualification", drain: proof, shutdown: proof } })
+    .then(() => 200, (error: { status: number }) => error.status);
+  expect(observed).toBe(503);
   expect(await snapshot()).toEqual(before);
 }
 

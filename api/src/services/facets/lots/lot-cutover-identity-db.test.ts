@@ -110,7 +110,9 @@ describeDb("6K readback stream and event identity", () => {
     expect(await persistedCounts(f)).toEqual(before);
     const safety = qualifiedLotCutoverSafety(f.db, bound, evidence, gate.ready,
       { expectedCutoverHeads: expectedCutoverHeadValues(report, gate.activatedSourceIds) });
-    await expect(runLotCutover(f.db, input, safety)).rejects.toMatchObject({ status: 503 });
+    const observed = await runLotCutover(f.db, input, safety)
+      .then(() => 200, (error: { status: number }) => error.status);
+    expect(observed).toBe(503);
     await assertClosedResume(f);
     await expect(readLotCutoverReadback(f.db, f.moderator.sub, f.workspaceId, "real", CUTOVER_CITY))
       .rejects.toMatchObject({ status: 503, message: "lot_cutover_identity_mismatch" });
@@ -130,7 +132,9 @@ describeDb("6K readback stream and event identity", () => {
     expect(await persistedCounts(f)).toEqual(before);
     const safety = qualifiedLotCutoverSafety(f.db, bound, evidence, gate.ready,
       { expectedCutoverHeads: expectedCutoverHeadValues(report, gate.activatedSourceIds) });
-    await expect(runLotCutover(f.db, input, safety)).rejects.toMatchObject({ status: 503 });
+    const observed = await runLotCutover(f.db, input, safety)
+      .then(() => 200, (error: { status: number }) => error.status);
+    expect(observed).toBe(503);
     await assertClosedResume(f);
     await expect(readLotCutoverReadback(f.db, f.moderator.sub, f.workspaceId, "real", CUTOVER_CITY))
       .rejects.toMatchObject({ status: 503, message: "lot_cutover_identity_mismatch" });
