@@ -129,6 +129,7 @@
   - [x] B3.2 transaction preparation: lock stored and resulting population identities through update/insert commit; retain existing unit behavior.
   - [ ] B3.2: populate-geo.ts and its source-lock DB tests; cover both update and insert paths.
   - [x] B3.2 contention evidence: verify update/insert and both city-change identities with PostgreSQL waits, same-backend locks during mutation, persisted SQL and unchanged-UUID fingerprint rejection.
+  - [x] B3.3 transaction preparation: insert canonical lots under the shared transaction lock after validation; retain existing projection and lot behavior, with DB contention proof pending.
   - [ ] B3.3: exploitation/projection.ts and its source-lock DB tests; share the canonical lock protocol.
   - [ ] B3.4: qualify lock order, contention and unchanged-UUID content changes before recording writer coverage.
   - [ ] Gate: all three real writer paths contend with facet commands; no coverage attestation without the corresponding executable proof.
