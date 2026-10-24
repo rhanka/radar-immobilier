@@ -14,6 +14,8 @@ src/artifacts/control-route-commit.test.ts
 src/artifacts/control-route-startup.test.ts
 src/artifacts/control-route.test.ts
 src/routes/auth.test.ts
+src/routes/graph-signals.test.ts
+src/routes/signal-facets-headers.test.ts
 src/routes/lot-cutover-stream.test.ts
 src/routes/scoped-lot-cutover-activate-db.test.ts
 src/routes/scoped-lot-cutover-d5-db.test.ts
@@ -29,6 +31,10 @@ src/routes/scoped-projection-revisions-db.test.ts
 src/routes/scoped-signal-facets-db.test.ts
 src/routes/scoped-workspace-archive-db.test.ts
 src/services/auth/session.test.ts
+src/services/exploitation/projection.test.ts
+src/services/geo/ogc-pull.test.ts
+src/services/geo/populate-geo.test.ts
+src/services/workspaces/routes-db.test.ts
 src/services/chat/stream-bus-retirement.test.ts
 src/services/exploitation/projection-source-lock-db.test.ts
 src/services/facets/activation-db.test.ts
