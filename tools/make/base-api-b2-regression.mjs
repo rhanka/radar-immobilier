@@ -4,9 +4,13 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 assert.equal(process.cwd(), '/workspace');
 assert.equal(process.env.LOT_MIGRATION_DB_TEST, '1');
+let commandIndex = 0;
 function command(binary, args, cwd = '/workspace') {
   console.log(JSON.stringify({ binary, args, cwd }));
   const result = spawnSync(binary, args, { cwd, env: process.env, stdio: 'inherit' });
+  writeFileSync(`/evidence/6l2-command-${++commandIndex}.json`, JSON.stringify({
+    binary, args, cwd, status: result.status, signal: result.signal, error: result.error?.message,
+  }, null, 2));
   assert.equal(result.error, undefined);
   assert.equal(result.signal, null);
   assert.equal(result.status, 0);

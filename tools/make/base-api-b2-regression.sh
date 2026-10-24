@@ -21,6 +21,9 @@ mkdir -p "$RUN_DIR" "$LOG_DIR"
 printf 'Evidence: %s\n' "$LOG_DIR"
 exec 9>"$RUN_DIR/lock"
 flock -n 9 || { echo 'Runner already active' >&2; exit 2; }
+exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
+flock -n 8 || { echo 'Another Docker campaign is active' >&2; exit 2; }
+[[ -z $(docker ps -q) ]] || { echo 'STOP: another stack is running' >&2; exit 2; }
 OWNER=$(printf '%s' "$ROOT/$ENV" | sha256sum | cut -d' ' -f1)
 export COMPOSE_DISABLE_ENV_FILE=1
 unset COMPOSE_FILE COMPOSE_PROFILES COMPOSE_ENV_FILES
@@ -75,7 +78,7 @@ guarded_down
       kill -TERM "$$"; exit
     fi
   done
-) 9>&- > "$LOG_DIR/disk-monitor.log" 2>&1 &
+) 8>&- 9>&- > "$LOG_DIR/disk-monitor.log" 2>&1 &
 MONITOR=$!
 "${compose[@]}" up -d --wait postgres
 export BASE_API_RUN_PID=$$
