@@ -22,7 +22,7 @@ services:
   api:
     image: node:24-bookworm-slim
     mem_limit: 4g
-    tmpfs: [/tmp:size=512m]
+    tmpfs: [/tmp:size=512m,exec]
     labels: {org.radar.base.owner: "$OWNER"}
     working_dir: /workspace
     volumes:
