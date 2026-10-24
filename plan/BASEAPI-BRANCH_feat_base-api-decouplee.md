@@ -154,6 +154,7 @@
   - [x] B4 review fix runbook: document server-only 6K configuration and request-bound readback without shared startup edits.
   - [x] B4 review fix S3 startup: bound the CI S3 mock JVM heap explicitly instead of relying on machine memory detection.
   - [x] B4 review fix CI dispatch: invoke the API workspace command from the monorepo root after the declaration build.
+  - [x] B4 review fix CI fixtures: archive the repository's simulation JSON resources used by the full API suite.
   - [ ] B4 review fix delivery: publish measured evidence and a prerequisite-e1758ef6 bundle for the second independent review pass.
   - [x] B4/B3 tooling preparation: narrow delivery paths, exact ontology input, changed-file lint and common synthetic DB migration; functional gates remain open.
   - [x] B4 operator input transport: actual Make activation/resume command-double proof preserves literal Make functions and shell syntax without evaluation.
