@@ -142,6 +142,15 @@
   - [x] B3.4 coverage evidence: verify all three writers with synthetic executed-case reasons; each missing row, false coverage or invalid reason blocks activation; operational inputs stay separate.
   - [x] Gate: all three real writer paths contend with facet commands; no coverage attestation without the corresponding executable proof.
 - [x] B4 — Operational cutover; Muse 5–8 h, Sol 4–6 h, total 9–14 h.
+  - [x] B4 review fix expectations: derive every projected facet from the qualified manifest and explicit D5 winners.
+  - [ ] B4 review fix readback: compare persisted 6K heads and values before opening.
+  - [ ] B4 review fix identity: reject misattributed 6H event/stream identity at constant counts.
+  - [ ] B4 review fix wiring: build server-configured 6K safety for the current HTTP request actor.
+  - [ ] B4 review fix composition: qualify two moderators through createApp and reject static adapter reuse.
+  - [ ] B4 review fix recovery: retain closed barriers for missing or altered reconciled PostgreSQL heads.
+  - [ ] B4 review fix witnesses: cover full personal identities and persisted projection comparisons.
+  - [ ] B4 review fix tooling: run all sixteen integrated mutation families, full CI API selection and declaration build with bounded resources.
+  - [ ] B4 review fix delivery: publish measured evidence and a prerequisite-e1758ef6 bundle for the second independent review pass.
   - [x] B4/B3 tooling preparation: narrow delivery paths, exact ontology input, changed-file lint and common synthetic DB migration; functional gates remain open.
   - [x] B4 operator input transport: actual Make activation/resume command-double proof preserves literal Make functions and shell syntax without evaluation.
   - [x] B4 slice 1: internal maintenance validator binds workspace, actor, attempt, release and instances; real reader, operator and durable wiring remain pending.
