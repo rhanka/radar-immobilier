@@ -14,13 +14,7 @@ require_env
 [[ $(git branch --show-current) == feat/base-api-decouplee* ]] || exit 2
 git merge-base --is-ancestor "$BASE" HEAD
 allowed() {
-  case $1 in
-    plan/BASEAPI-BRANCH_feat_base-api-decouplee.md|docs/spec/SPEC_EVOL_BASE_API.md|tools/make/base-api*.sh|tools/make/base-api*.mk|tools/make/base-api*.mjs) ;;
-    api/src/app.ts|api/src/index.ts|api/src/routes/auth.ts|api/src/db/schema.ts|api/drizzle/*|tools/make/paniers-lot6.mk|tools/make/paniers-lot6-verify.sh) ;;
-    api/src/services/facets/*|api/src/routes/scoped-*|api/src/routes/workspaces.ts|api/src/routes/signal-facets*|api/src/routes/graph-signals*|api/tests/integration/base-api*) ;;
-    *) echo "Out-of-scope staging: $1" >&2; return 2;;
-  esac
-  [[ ! -L $1 && $1 != *..* ]]
+  allowed_delivery_path "$1"
 }
 stats() {
   awk -v minimum="${1:-1}" 'BEGIN {n=0; total=0} $1 !~ /^[0-9]+$/ || $2 !~ /^[0-9]+$/ {exit 1}
@@ -85,8 +79,16 @@ case $ACTION in
         git merge-base --is-ancestor 3c6d3c1f95d6794ba0939cf71db6b169cb3f071d "$START"
         git merge-base --is-ancestor "$START" HEAD
         prerequisite=$START;;
+      tmp/base-api-evidence/B3/base-api-b3.bundle)
+        [[ $(git branch --show-current) == feat/base-api-decouplee-b2 && $START == d033bc18bf9b9537c5c7a69311ebe44b0b545517 ]] || exit 2
+        prerequisite=$START;;
+      tmp/base-api-evidence/B4/base-api-b4.bundle)
+        [[ $(git branch --show-current) == feat/base-api-decouplee-b1 && $START == 4fc755e9f69daae2c32286dd3cf0069c5798ecd0 ]] || exit 2
+        prerequisite=$START;;
       *) exit 2;;
     esac
+    git merge-base --is-ancestor "$prerequisite" HEAD
+    git diff --quiet; git diff --cached --quiet
     df -h .
     [[ $(df -Pk . | awk 'NR==2 {print $4}') -ge 10485760 ]] || exit 3
     for directory in tmp tmp/base-api-evidence "${OUT%/*}"; do [[ ! -L $directory ]] || exit 2; done
@@ -94,7 +96,7 @@ case $ACTION in
     [[ ! -L ${OUT%/*} && ! -L $OUT ]] || exit 2
     git bundle create "$OUT" "$prerequisite..HEAD"
     git bundle verify "$OUT"
-    if [[ $OUT == tmp/base-api-evidence/B1/* ]]; then
+    if [[ $OUT == tmp/base-api-evidence/B[134]/* ]]; then
       audit=$(mktemp -d "${OUT%/*}/bundle-audit.XXXXXX")
       bundle=$(realpath "$OUT")
       root=$(pwd -P)
