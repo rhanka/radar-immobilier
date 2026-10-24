@@ -122,9 +122,10 @@
   - [x] Gate: lot-opening*, lot-cutover-readback*, lot-cutover-empty*, existing 6J/6K and 6L2 regressions; typecheck and scoped lint.
 - [ ] B3 — Serialized source writers; Muse 3–5 h, Sol 3–4 h, total 6–9 h.
   - [x] B3 preparation: qualify the synthetic source-writer fixture before changing any production writer.
-  - [x] B3.1 identity preparation: retain OGC stored update identities and revalidate insert decisions; real DB contention remains pending.
-  - [x] B3.1 transaction locks: hold ordered OGC source locks through batch commit and reject identity drift; real DB contention remains pending.
+  - [x] B3.1 identity preparation: retain OGC stored update identities and revalidate insert decisions; stored-identity DB contention verified below.
+  - [x] B3.1 transaction locks: hold ordered OGC source locks through batch commit and reject identity drift; deterministic commit-boundary proof remains pending.
   - [ ] B3.1: ogc-pull.ts and its source-lock DB tests; lock the actual mutated identity in the mutation transaction.
+  - [x] B3.1 contention evidence: verify real OGC stored-identity lock waits, same-backend lock retention during UPDATE, independent targets, unchanged-UUID invalidation and batch rollback.
   - [ ] B3.2: populate-geo.ts and its source-lock DB tests; cover both update and insert paths.
   - [ ] B3.3: exploitation/projection.ts and its source-lock DB tests; share the canonical lock protocol.
   - [ ] B3.4: qualify lock order, contention and unchanged-UUID content changes before recording writer coverage.
