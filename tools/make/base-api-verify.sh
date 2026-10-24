@@ -14,11 +14,11 @@ case "$ACTION" in
     require_scope;;
   input-guards) for file in "$TOOLS"/base-api*.sh; do bash -n "$file"; done; exit;;
   check-scope) scope_check; exit;;
-  b3-mutation-required|b4-mutation-required)
+  b3-mutation-required|b4-mutation-required|b5-mutation-required)
     require_scope
     runner="$TOOLS/base-api-${ACTION%%-*}-mutation.sh"
     [[ -s $runner && ! -L $runner ]] || { echo "Missing required mutation runner: ${runner##*/}" >&2; exit 2; };;
-  verify|test|test-api|b1-mutation-legacy|b1-mutation-archive|b1-mutation-required) require_scope;;
+  b5-verify|verify|test|test-api|b1-mutation-legacy|b1-mutation-archive|b1-mutation-required) require_scope;;
   typecheck|lint|network-proof|clean) ;;
   *) echo "Unknown action: $ACTION" >&2; exit 2;;
 esac
@@ -33,6 +33,9 @@ exec 9>"$RUN_DIR/lock"
 flock -n 9 || { echo 'Runner already active' >&2; exit 2; }
 exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
 flock -n 8 || { echo 'Another Docker campaign is active' >&2; exit 2; }
+if [[ $ACTION == b5-* ]]; then
+  [[ -z $(docker ps -q) ]] || { echo 'STOP: another stack is running' >&2; exit 2; }
+fi
 OWNER=$(printf '%s' "$ROOT/$ENV" | sha256sum | cut -d' ' -f1)
 export COMPOSE_DISABLE_ENV_FILE=1
 unset COMPOSE_FILE COMPOSE_PROFILES COMPOSE_ENV_FILES
@@ -55,7 +58,7 @@ df -h "$ROOT" | tee "$LOG_DIR/disk-before.log"
 }
 # Validate all paths using metadata before tar can open any file.
 archive_sources
-if [[ $ACTION == ci-api || $ACTION == test-api ]]; then
+if [[ $ACTION == ci-api || $ACTION == b5-verify || $ACTION == test-api ]]; then
   source "$TOOLS/base-api-ci-archive.sh"
   archive_ci_inputs
 fi
@@ -71,16 +74,16 @@ guarded_down
       kill -TERM "$$"; exit
     fi
   done
-) 9>&- > "$LOG_DIR/disk-monitor.log" 2>&1 &
+) 8>&- 9>&- > "$LOG_DIR/disk-monitor.log" 2>&1 &
 MONITOR=$!
 export BASE_API_RUN_PID=$$
 "${compose[@]}" up -d --wait postgres
-if [[ $ACTION == ci-api || $ACTION == test-api ]]; then "${compose[@]}" up -d --wait minio; fi
+if [[ $ACTION == ci-api || $ACTION == b5-verify || $ACTION == test-api ]]; then "${compose[@]}" up -d --wait minio; fi
 "${compose[@]}" run --rm --no-deps -T api bash -ec \
   'tar -xf /source.tar -C /workspace; exec bash -x tools/make/base-api-container.sh "$@"' -- "$ACTION" "$SCOPE" \
   > >(tee "$LOG_DIR/$ACTION.log") 2>&1 &
 RUN_PID=$!
 wait "$RUN_PID"
 RUN_PID=
-if [[ $ACTION == verify || $ACTION == ci-api || $ACTION == test || $ACTION == test-api || $ACTION == *-mutation-* ]]; then assert_tests_ran "$LOG_DIR/tests.tsv"; fi
+if [[ $ACTION == b5-verify || $ACTION == verify || $ACTION == ci-api || $ACTION == test || $ACTION == test-api || $ACTION == *-mutation-* ]]; then assert_tests_ran "$LOG_DIR/tests.tsv"; fi
 echo "PASS $ACTION" > "$LOG_DIR/result"
