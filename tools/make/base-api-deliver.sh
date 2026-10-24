@@ -120,7 +120,13 @@ case $ACTION in
     sha256sum "$OUT"
     git rev-parse HEAD;;
   worktree)
-    [[ $SLUG =~ ^tmp/base-api-b[12]$ && $BRANCH == "feat/base-api-decouplee-${SLUG##*-}" && $START =~ ^[a-f0-9]{40}$ ]] || exit 2
+    case $SLUG in
+      tmp/base-api-b[12])
+        [[ $BRANCH == "feat/base-api-decouplee-${SLUG##*-}" && $START =~ ^[a-f0-9]{40}$ ]] || exit 2;;
+      tmp/base-api-b5)
+        [[ $BRANCH == "feat/base-api-decouplee-b5" && $START == bf84974e78c6251cb9e1737a30a68c3e14af59e1 ]] || exit 2;;
+      *) exit 2;;
+    esac
     root=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")
     [[ ! -L $root/tmp && ! -L $root/$SLUG ]] || exit 2
     git worktree add "$root/$SLUG" -b "$BRANCH" "$START";;
