@@ -75,7 +75,7 @@ guarded_down
 MONITOR=$!
 export BASE_API_RUN_PID=$$
 "${compose[@]}" up -d --wait postgres
-if [[ $ACTION == ci-api ]]; then "${compose[@]}" up -d --wait minio; fi
+if [[ $ACTION == ci-api || $ACTION == test-api ]]; then "${compose[@]}" up -d --wait minio; fi
 "${compose[@]}" run --rm --no-deps -T api bash -ec \
   'tar -xf /source.tar -C /workspace; exec bash -x tools/make/base-api-container.sh "$@"' -- "$ACTION" "$SCOPE" \
   > >(tee "$LOG_DIR/$ACTION.log") 2>&1 &
