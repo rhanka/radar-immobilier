@@ -50,12 +50,12 @@ Resolve GHSA-587h-7wmj-h5pm in the independent Focus dependency tree by pinning 
   - [x] Pin the Focus Vite declaration to exactly 6.4.4.
   - [x] Regenerate through the existing containerized `deps` target.
   - [x] Prove equal package counts and no changes outside the Vite declaration and resolution.
-- [ ] **Lot 2 — Verification and security record**
-  - [ ] Run the existing Focus build and test targets in containers.
-  - [ ] Rescan without changing manifests; report remaining findings separately.
-  - [ ] Update the Vite finding with observed Focus verification.
+- [x] **Lot 2 — Verification and security record**
+  - [x] Run the existing Focus build and test targets in containers.
+  - [x] Rescan without changing manifests; report remaining findings separately.
+  - [x] Update the Vite finding with observed Focus verification.
 - [ ] **Lot 3 — Delivery**
-  - [ ] Create selective, bounded commits in the recovery repository.
+  - [x] Create selective, bounded commits in the recovery repository.
   - [ ] Create a bundle excluding the exact supplied base and audit it in a fresh repository.
   - [ ] Write the French report with commit SHA, bundle path, and SHA-256.
-  - [ ] Clean up campaign containers; do not push.
+  - [x] Clean up campaign containers; do not push.
