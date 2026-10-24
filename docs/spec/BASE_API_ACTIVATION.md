@@ -403,8 +403,8 @@ with artifact configuration absent and no live artifact backend:
   attempts unresolved-only activation and checks SQL closure/public 503.
   `base-api-lot-closed-replays.spec.ts` closes an already-populated
   destination and refuses existing single/batch receipts without mutation.
-  `base-api-cutover-acceptance.spec.ts` retains additional gate, proof-binding
-  and explicit legacy 503/410 witnesses. Protected interruption, forward
+  `base-api-cutover-acceptance.spec.ts` retains additional gate
+  and explicit legacy 503/410 witnesses. Proof-binding, protected interruption, forward
   resume, current authority and durable reconstruction remain qualified by
   inherited `base-api-activation{,-resume}.spec.ts`,
   `base-api-mutation-closure.spec.ts` and `base-api-cutover-bound.spec.ts`.
