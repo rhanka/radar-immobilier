@@ -55,7 +55,7 @@ networks:
   default:
     labels: {org.radar.base.owner: "$OWNER"}
 YAML
-  if [[ ${ACTION:-} == ci-api || ${ACTION:-} == test-api ]]; then
+  if [[ ${ACTION:-} == ci-api || ${ACTION:-} == b5-verify || ${ACTION:-} == test-api ]]; then
     cat > "$RUN_DIR/ci.yml" <<YAML
 services:
   minio:

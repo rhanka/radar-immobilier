@@ -29,6 +29,13 @@ BASE_API_SCOPE := src/services/facets/scoped-db.test.ts src/services/facets/work
 .PHONY: base-api-worktree base-api-integrate base-api-clean base-api-runner-proof
 .PHONY: base-api-verify
 .PHONY: base-api-ci-api
+.PHONY: base-api-b5-verify base-api-b5-mutation-required
+base-api-b5-verify:
+	rtk bash tools/make/base-api-verify.sh b5-verify "SCOPE=$$(bash tools/make/base-api-b5-scope.sh)" $(BASE_API_ARGS)
+
+base-api-b5-mutation-required:
+	rtk bash tools/make/base-api-verify.sh b5-mutation-required "SCOPE=$$(bash tools/make/base-api-b5-mutation.sh scope)" $(BASE_API_ARGS)
+
 base-api-ci-api:
 	rtk bash tools/make/base-api-verify.sh ci-api $(BASE_API_ARGS)
 .PHONY: base-api-contract-proof
