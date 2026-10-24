@@ -228,3 +228,21 @@ It rejects an empty valid target set and adds no public bypass or opening write.
 Both typechecks, explicit lint, 595 tests/60 suites and standalone CT-8 pass.
 Direct 6K adapter qualification, including qualified empty history, is expected
 in Muse slice 12. Qualified B3, named B4 integrations and mutations remain open.
+
+## Slice 12 reception and qualified empty-history finding
+
+`base-api-activation.spec.ts` exercises the real qualified 6K adapter against
+PostgreSQL. Public city reads return 503 before and after internal readback
+under the durable closed barrier, then succeed after opening. Current manager
+rights and workspace binding are checked. This is direct service qualification;
+the actual Make activation/resume rehearsal remains recorded in the L6 section.
+
+Qualified empty history is already required by plan B2.6 and qualified in
+`lots/lot-cutover-empty-db.test.ts:26`, using the recording safety probe at
+`lots/cutover-fixture.ts:168`. B4's real evidence adapter still rejects an empty
+ready set at `activation-maintenance-safety.ts:140`; the real reader factory
+also rejects an empty city set at `lots/lot-cutover-safety.ts:80`.
+Slice 12 reproduces that 503 through `runLotCutover` and checks that durable and
+public state stay closed. This is a B4 integration gap against existing B2
+acceptance, not a missing empty-history requirement. No solution is selected.
+Stop after this reception; slice 13 and final B4 qualification remain pending.
