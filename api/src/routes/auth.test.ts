@@ -1673,3 +1673,104 @@ describe("strict receiver — exchanged search and audience confusions (H4 P5)",
     expect((await res.json()).error).toBe("account_not_approved");
   });
 });
+
+describe("strict receiver — forbidden routes, methods and preserved behavior (H4 P5)", () => {
+  const STRICT_AUTH = strictReceiverTestAuth(strictReceiverTestConfig());
+
+  async function makeExchanged(): Promise<{ presented: string; getKey: JWTVerifyGetKey }> {
+    const { publicKey, privateKey } = await generateKeyPair("EdDSA", { crv: "Ed25519" });
+    const pubJwk: JWK = await exportJWK(publicKey);
+    pubJwk.kid = "k1";
+    pubJwk.alg = "EdDSA";
+    const presented = await new SignJWT({
+      scope: "immo:search",
+      client_id: "immo-mcp-workload",
+      act: { sub: "immo-mcp-workload" },
+    })
+      .setProtectedHeader({ alg: "EdDSA", kid: "k1" })
+      .setIssuer(STRICT_AUTH.issuer)
+      .setAudience("https://immo.example.test")
+      .setSubject("mcp-user")
+      .setIssuedAt()
+      .setExpirationTime("5m")
+      .sign(privateKey);
+    return { presented, getKey: createLocalJWKSet({ keys: [pubJwk] }) };
+  }
+
+  type Db = import("../db/client.js").Database;
+  const approvedDb = () =>
+    makeEnrollmentDb([{ sub: "mcp-user", status: "approved", isAdmin: false }]) as unknown as Db;
+
+  function strictApp(bearerGetKey?: JWTVerifyGetKey): Hono {
+    const app = new Hono();
+    app.use("*", protect(STRICT_AUTH, { db: approvedDb(), ...(bearerGetKey ? { bearerGetKey } : {}) }));
+    app.get("/api/graph-signals/:city", (c) => c.json({ ok: true, nodes: [] }));
+    app.get("/api/graph-signals/by-city", (c) => c.json({ ok: true, cities: [] }));
+    app.get("/api/v1/signal-facets/reason-codes", (c) => c.json({ ok: true, codes: [] }));
+    app.post("/api/v1/signal-facets/select", (c) => c.json({ ok: true }));
+    return app;
+  }
+
+  it("denies a valid delegated presentation on aggregate, facets and writes", async () => {
+    const { presented, getKey } = await makeExchanged();
+    const headers = { authorization: `Bearer ${presented}` };
+    for (const [path, method] of [
+      ["/api/graph-signals/by-city", "GET"],
+      ["/api/v1/signal-facets/reason-codes", "GET"],
+      ["/api/v1/signal-facets/select", "POST"],
+      ["/api/graph-signals/drummondville", "POST"],
+    ] as const) {
+      const res = await strictApp(getKey).request(path, { method, headers });
+      expect(res.status).toBe(403);
+      expect((await res.json()).error).toBe("delegated_scope_refused");
+    }
+  });
+
+  it("denies encoded, case-varied, trailing-slash and double-slash variants", async () => {
+    const { presented, getKey } = await makeExchanged();
+    const headers = { authorization: `Bearer ${presented}` };
+    for (const path of [
+      "/api/graph-signals/%64rummondville",
+      "/api/graph-signals/Drummondville",
+      "/api/graph-signals/drummondville/",
+      "/api/graph-signals//drummondville",
+    ]) {
+      const res = await strictApp(getKey).request(path, { headers });
+      expect([401, 403, 404].includes(res.status)).toBe(true);
+    }
+  });
+
+  it("denies an unknown query key on the delegated search", async () => {
+    const { presented, getKey } = await makeExchanged();
+    const res = await strictApp(getKey).request("/api/graph-signals/drummondville?debug=1", {
+      headers: { authorization: `Bearer ${presented}` },
+    });
+    expect(res.status).toBe(403);
+  });
+
+  it("preserves cookie sessions on search, aggregate and facets under strict arming", async () => {
+    const cookie = `radar_session=${await signSession(
+      { sub: "mcp-user" },
+      { sessionSecret: STRICT_AUTH.sessionSecret, ttlSeconds: 3600 },
+    )}`;
+    for (const [path, method] of [
+      ["/api/graph-signals/drummondville", "GET"],
+      ["/api/graph-signals/by-city", "GET"],
+      ["/api/v1/signal-facets/reason-codes", "GET"],
+    ] as const) {
+      const res = await strictApp().request(path, { method, headers: { cookie } });
+      expect(res.status).toBe(200);
+    }
+  });
+
+  it("preserves public routes without any identity under strict arming", async () => {
+    const app = new Hono();
+    app.use("*", protect(STRICT_AUTH, {}));
+    app.get("/livez", (c) => c.json({ status: "ok" }));
+    app.get("/api/geo/collections/:id/items", (c) => c.json({ type: "FeatureCollection" }));
+    app.get("/api/documents/raw", (c) => c.json({ ok: true }));
+    expect((await app.request("/livez")).status).toBe(200);
+    expect((await app.request("/api/geo/collections/qc-lots-x/items")).status).toBe(200);
+    expect((await app.request("/api/documents/raw?rawRef=raw%2Fabc.pdf")).status).toBe(200);
+  });
+});
