@@ -163,3 +163,43 @@ the full B12 prerequisite. No final B4 bundle is issued for slices 1–8. The
 slice-8 rehearsal qualifies operator transport and seeded activation/resume only;
 shared retirement/restart wiring, final integrations, mutations and qualified B3
 history remain open. After scoped epoch change, use forward resume only.
+
+## Slice 10 and L6 synthetic restart rehearsal
+
+Slice 10 qualifies `readDurableLegacyRetirement` before startup integration:
+595 tests in 60 suites, API/source-test typechecks, explicit changed-file lint
+and standalone CT-8 pass. The exact deferred L5 `index.ts` patch has a separate
+TS2379 failure: `AppDeps.legacyRetirement` is optional, but cannot explicitly
+receive `undefined` with `exactOptionalPropertyTypes`. That patch remains
+uncommitted and its startup integration is not qualified. A one-line conditional
+property spread is proposed in the L6 evidence; applying it requires resolving
+the owner's exact-patch instruction. No `app.ts` type change is authorized by L6.
+
+The behavioral rehearsal executes the real `index.ts` against PostgreSQL,
+with the listener and object storage mocked and artifact configuration absent.
+Two imports from a committed legacy barrier return 503 on eight legacy paths;
+two imports after the scoped switch return 410. An unavailable durable table
+also starts closed in each phase. The existing stream-retirement suites remain
+separate from this startup proof. Four temporary startup tests pass; this does
+not override the failed compiler gate.
+
+Exact synthetic operator invocations, each exiting 0 on the same campaign DB:
+
+```sh
+rtk make -f tools/make/base-api.mk base-api-activate-personal BASE_API_WORKSPACE=0f3fb638-55cc-4d00-aa72-31bd9dfe6b6c BASE_API_ACTOR=synthetic-l6-manager BASE_API_REASON='synthetic L6 $(shell touch injected) `touch injected`' BASE_API_MAINTENANCE_ATTEMPT=22222222-2222-4222-8222-222222222222 BASE_API_RELEASE=synthetic-l6-release BASE_API_INSTANCES='synthetic-old-a synthetic-old-b' BASE_API_MAINTENANCE_EVIDENCE=tmp/base-api-evidence/B4/l6/operator/maintenance.json API_PORT=18911 UI_PORT=15911 MAILDEV_UI_PORT=11911 ENV=test-base-api-b1
+rtk make -f tools/make/base-api.mk base-api-resume-personal BASE_API_WORKSPACE=0f3fb638-55cc-4d00-aa72-31bd9dfe6b6c BASE_API_ACTOR=synthetic-l6-manager BASE_API_REASON='synthetic L6 $(shell touch injected) `touch injected`' BASE_API_MAINTENANCE_ATTEMPT=22222222-2222-4222-8222-222222222222 BASE_API_RELEASE=synthetic-l6-release BASE_API_INSTANCES='synthetic-old-a synthetic-old-b' BASE_API_MAINTENANCE_EVIDENCE=tmp/base-api-evidence/B4/l6/operator/maintenance.json API_PORT=18911 UI_PORT=15911 MAILDEV_UI_PORT=11911 ENV=test-base-api-b1
+```
+
+Database `radar`, PostgreSQL system identifier `7700093356303638567`, started
+`2026-10-24 04:54:54.376582+00`, project `radar-test-base-api-b1`: before activation,
+legacy epoch/closed barrier and one attached personal event; after activation,
+scoped epoch/open barrier, dropped legacy index and one event/stream/binding/head.
+Missing drain, missing shutdown and foreign workspace/attempt/release each exit 2
+with byte-equivalent SQL state. Already-open resume and subsequent startup tests
+preserve the complete public-table SQL snapshot. The maintenance proofs are
+synthetic; operational values and deployed-instance shutdown remain unverified.
+Full commands, database identity, SQL snapshots and statuses are under
+`tmp/base-api-evidence/B4/l6/`. Recovery after scoped activation remains forward
+resume only. Qualified B3 reception, the two named B4 integration suites and the
+nine mutation families remain required; B5 and nominal activation keep their
+original position and budget.
