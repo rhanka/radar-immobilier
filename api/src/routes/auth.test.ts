@@ -9,7 +9,8 @@ import {
   type JWTVerifyGetKey,
 } from "jose";
 import { authRoute, protect, pickValidInvitation, resolveGraphSignalsViewer } from "./auth.js";
-import type { AuthConfig } from "../config.js";
+import { strictReceiverTestAuth, strictReceiverTestConfig } from "../artifacts/strict-receiver.js";
+import { loadConfig, resolveAuthConfig, type AuthConfig } from "../config.js";
 import type { OidcDiscovery, FetchLike } from "../services/auth/oidc.js";
 import { signSession, verifySession } from "../services/auth/session.js";
 
@@ -1514,5 +1515,409 @@ describe("resolveGraphSignalsViewer — session sub for the discard port", () =>
     expect(await viewerOf({ sub: 42 }, true)).toBeNull();
     expect(await viewerOf({ sub: "" }, true)).toBeNull();
     expect(await viewerOf(null, false)).toBeNull();
+  });
+
+  it("returns the sub of an exchanged strict session (per-user discard intact)", async () => {
+    expect(await viewerOf({ sub: "mcp-user", via: "exchanged" }, true)).toBe("mcp-user");
+  });
+});
+
+describe("strict receiver — exchanged search and audience confusions (H4 P5)", () => {
+  const STRICT_AUTH = strictReceiverTestAuth(strictReceiverTestConfig());
+  const RESOLVED_BASE = {
+    NODE_ENV: "test",
+    POSTGRES_HOST: "localhost", POSTGRES_USER: "radar",
+    POSTGRES_PASSWORD: "pw", POSTGRES_DB: "radar",
+    S3_ENDPOINT: "http://localhost:9000", S3_ACCESS_KEY: "minio", S3_SECRET_KEY: "minio",
+    SENTROPIC_IDP_ISSUER: STRICT_AUTH.issuer,
+    SENTROPIC_OAUTH_CLIENT_ID: "radar-immobilier",
+    SENTROPIC_OAUTH_CLIENT_SECRET: "super-secret",
+    SENTROPIC_OAUTH_REDIRECT_URI: `${STRICT_AUTH.appBaseUrl}/api/v1/auth/oauth/callback`,
+    AUTH_CALLBACK_BASE_URL: STRICT_AUTH.appBaseUrl,
+    SESSION_SECRET: "session-signing-key-min-32-chars-x",
+    STRICT_RECEIVER_WORKLOAD_SUB: "immo-mcp-workload",
+    STRICT_RECEIVER_WORKLOAD_CLIENT_ID: "immo-mcp-workload",
+    STRICT_RECEIVER_ENVIRONMENT: "test",
+  };
+  const A2_RECEIPT = {
+    STRICT_RECEIVER_RECEIPT_ISSUER: STRICT_AUTH.issuer,
+    STRICT_RECEIVER_RECEIPT_API_AUDIENCE: STRICT_AUTH.appBaseUrl,
+    STRICT_RECEIVER_RECEIPT_WORKLOAD_SUB: "immo-mcp-workload",
+    STRICT_RECEIVER_RECEIPT_WORKLOAD_CLIENT_ID: "immo-mcp-workload",
+    STRICT_RECEIVER_RECEIPT_ENVIRONMENT: "test",
+  };
+
+  async function makeExchanged(
+    overrides: Record<string, unknown> = {},
+  ): Promise<{ presented: string; getKey: JWTVerifyGetKey }> {
+    const { publicKey, privateKey } = await generateKeyPair("EdDSA", { crv: "Ed25519" });
+    const pubJwk: JWK = await exportJWK(publicKey);
+    pubJwk.kid = "k1";
+    pubJwk.alg = "EdDSA";
+    const builder = new SignJWT({
+      scope: "immo:search",
+      client_id: "immo-mcp-workload",
+      act: { sub: "immo-mcp-workload" },
+      ...overrides,
+    }).setProtectedHeader({ alg: "EdDSA", kid: "k1" });
+    if (!("iss" in overrides)) builder.setIssuer(STRICT_AUTH.issuer);
+    if (!("aud" in overrides)) builder.setAudience("https://immo.example.test");
+    if (!("sub" in overrides)) builder.setSubject("mcp-user");
+    if (!("iat" in overrides)) builder.setIssuedAt();
+    if (!("exp" in overrides)) builder.setExpirationTime("5m");
+    return {
+      presented: await builder.sign(privateKey),
+      getKey: createLocalJWKSet({ keys: [pubJwk] }),
+    };
+  }
+
+  async function makeSubject(aud: string): Promise<{ presented: string; getKey: JWTVerifyGetKey }> {
+    const { publicKey, privateKey } = await generateKeyPair("EdDSA", { crv: "Ed25519" });
+    const pubJwk: JWK = await exportJWK(publicKey);
+    pubJwk.kid = "k1";
+    pubJwk.alg = "EdDSA";
+    const presented = await new SignJWT({ scope: "immo:search immo:read" })
+      .setProtectedHeader({ alg: "EdDSA", kid: "k1" })
+      .setIssuer(STRICT_AUTH.issuer)
+      .setAudience(aud)
+      .setSubject("mcp-user")
+      .setIssuedAt()
+      .setExpirationTime("5m")
+      .sign(privateKey);
+    return { presented, getKey: createLocalJWKSet({ keys: [pubJwk] }) };
+  }
+
+  type Db = import("../db/client.js").Database;
+  const approvedDb = () =>
+    makeEnrollmentDb([{ sub: "mcp-user", status: "approved", isAdmin: false }]) as unknown as Db;
+
+  function strictApp(
+    auth: AuthConfig = STRICT_AUTH,
+    db?: Db,
+    bearerGetKey?: JWTVerifyGetKey,
+  ): Hono {
+    const app = new Hono();
+    app.use(
+      "*",
+      protect(auth, {
+        ...(db ? { db } : {}),
+        ...(bearerGetKey ? { bearerGetKey } : {}),
+      }),
+    );
+    app.get("/api/graph-signals/:city", (c) => c.json({ ok: true, nodes: [] }));
+    app.get("/api/graph-signals/by-city", (c) => c.json({ ok: true, cities: [] }));
+    app.get("/api/v1/signal-facets/reason-codes", (c) => c.json({ ok: true, codes: [] }));
+    app.post("/api/v1/signal-facets/select", (c) => c.json({ ok: true }));
+    app.get("/api/admin/ping", (c) => c.json({ ok: true }));
+    app.get("/api/documents/raw", (c) => c.json({ ok: true }));
+    app.get("/health", (c) => c.json({ status: "ok" }));
+    return app;
+  }
+
+  it("serves the permitted search with a correct exchanged presentation, no cookie", async () => {
+    const { presented, getKey } = await makeExchanged();
+    const res = await strictApp(STRICT_AUTH, approvedDb(), getKey).request(
+      "/api/graph-signals/drummondville",
+      { headers: { authorization: `Bearer ${presented}` } },
+    );
+    expect(res.status).toBe(200);
+    expect((await res.json()).ok).toBe(true);
+  });
+
+  it("refuses the MCP-audience subject presentation on the armed search route", async () => {
+    const { presented, getKey } = await makeSubject("https://immo.example.test/mcp");
+    const res = await strictApp(STRICT_AUTH, approvedDb(), getKey).request(
+      "/api/graph-signals/drummondville",
+      { headers: { authorization: `Bearer ${presented}` } },
+    );
+    expect(res.status).toBe(401);
+    expect((await res.json()).error).toBe("unauthenticated");
+  });
+
+  it("refuses original subject tokens on every protected route after activation", async () => {
+    for (const aud of [STRICT_AUTH.appBaseUrl, `${STRICT_AUTH.appBaseUrl}/mcp`]) {
+      const { presented, getKey } = await makeSubject(aud);
+      for (const path of ["/api/admin/ping", "/api/v1/signal-facets/reason-codes"]) {
+        const res = await strictApp(STRICT_AUTH, approvedDb(), getKey).request(path, {
+          headers: { authorization: `Bearer ${presented}` },
+        });
+        expect(res.status).toBe(401);
+      }
+    }
+  });
+
+  it("refuses a foreign-environment API audience on this receiver", async () => {
+    const { presented, getKey } = await makeExchanged({ aud: "https://immo.sent-tech.ca" });
+    const res = await strictApp(STRICT_AUTH, approvedDb(), getKey).request(
+      "/api/graph-signals/drummondville",
+      { headers: { authorization: `Bearer ${presented}` } },
+    );
+    expect(res.status).toBe(401);
+  });
+
+  it("refuses wrong actor, client and non-search scope", async () => {
+    for (const [overrides, status, error] of [
+      [{ act: { sub: "evil-workload" } }, 401, "unauthenticated"],
+      [{ client_id: "evil-client" }, 401, "unauthenticated"],
+      [{ scope: "immo:read" }, 403, "delegated_scope_refused"],
+    ] as const) {
+      const { presented, getKey } = await makeExchanged({ ...overrides });
+      const res = await strictApp(STRICT_AUTH, approvedDb(), getKey).request(
+        "/api/graph-signals/drummondville",
+        { headers: { authorization: `Bearer ${presented}` } },
+      );
+      expect(res.status).toBe(status);
+      expect((await res.json()).error).toBe(error);
+    }
+  });
+
+  it("serves exchanged search before activation (disarmed A2 continuity)", async () => {
+    const unarmed = strictReceiverTestAuth(strictReceiverTestConfig({ enabled: false }));
+    const { presented, getKey } = await makeExchanged();
+    const res = await strictApp(unarmed, approvedDb(), getKey).request(
+      "/api/graph-signals/drummondville",
+      { headers: { authorization: `Bearer ${presented}` } },
+    );
+    expect(res.status).toBe(200);
+    expect((await res.json()).ok).toBe(true);
+  });
+
+  it("accepts raw subject tokens before activation but refuses them after", async () => {
+    const unarmed = strictReceiverTestAuth(strictReceiverTestConfig({ enabled: false }));
+    const armed = strictReceiverTestAuth(strictReceiverTestConfig());
+    for (const aud of [unarmed.appBaseUrl, `${unarmed.appBaseUrl}/mcp`]) {
+      const { presented, getKey } = await makeSubject(aud);
+      const before = await strictApp(unarmed, approvedDb(), getKey).request(
+        "/api/graph-signals/drummondville",
+        { headers: { authorization: `Bearer ${presented}` } },
+      );
+      expect(before.status).toBe(200);
+      const after = await strictApp(armed, approvedDb(), getKey).request(
+        "/api/graph-signals/drummondville",
+        { headers: { authorization: `Bearer ${presented}` } },
+      );
+      expect(after.status).toBe(401);
+    }
+  });
+
+  it("fails closed when arming was requested with an invalid receipt", async () => {
+    const invalid = strictReceiverTestAuth(
+      strictReceiverTestConfig({ enabled: false, armingRequested: true }),
+    );
+    const { presented: exchanged, getKey: exchangedKey } = await makeExchanged();
+    const refusedExchanged = await strictApp(invalid, approvedDb(), exchangedKey).request(
+      "/api/graph-signals/drummondville",
+      { headers: { authorization: `Bearer ${exchanged}` } },
+    );
+    expect(refusedExchanged.status).toBe(401);
+    expect((await refusedExchanged.json()).error).toBe("strict_receiver_receipt_invalid");
+    for (const aud of [invalid.appBaseUrl, `${invalid.appBaseUrl}/mcp`]) {
+      const { presented, getKey } = await makeSubject(aud);
+      const refusedRaw = await strictApp(invalid, approvedDb(), getKey).request(
+        "/api/graph-signals/drummondville",
+        { headers: { authorization: `Bearer ${presented}` } },
+      );
+      expect(refusedRaw.status).toBe(401);
+      expect((await refusedRaw.json()).error).toBe("strict_receiver_receipt_invalid");
+    }
+  });
+
+  it("refuses an exchanged presentation for a suspended account", async () => {
+    const db = makeEnrollmentDb([
+      { sub: "mcp-user", status: "suspended", isAdmin: false },
+    ]) as unknown as Db;
+    const { presented, getKey } = await makeExchanged();
+    const res = await strictApp(STRICT_AUTH, db, getKey).request(
+      "/api/graph-signals/drummondville",
+      { headers: { authorization: `Bearer ${presented}` } },
+    );
+    expect(res.status).toBe(403);
+    expect((await res.json()).error).toBe("account_not_approved");
+  });
+
+  it("keeps exchanged search working disarmed then armed via resolved config, no cookie", async () => {
+    const disarmed = resolveAuthConfig(
+      loadConfig({ ...RESOLVED_BASE, STRICT_RECEIVER_ARMED: "0" }),
+    );
+    expect(disarmed.strict?.enabled).toBe(false);
+    const armed = resolveAuthConfig(
+      loadConfig({
+        ...RESOLVED_BASE,
+        STRICT_RECEIVER_ARMED: "1",
+        ...A2_RECEIPT,
+      }),
+    );
+    expect(armed.strict?.enabled).toBe(true);
+    const { presented, getKey } = await makeExchanged();
+    const headers = { authorization: `Bearer ${presented}` };
+    const before = await strictApp(disarmed, approvedDb(), getKey).request(
+      "/api/graph-signals/drummondville",
+      { headers },
+    );
+    expect(before.status).toBe(200);
+    const after = await strictApp(armed, approvedDb(), getKey).request(
+      "/api/graph-signals/drummondville",
+      { headers },
+    );
+    expect(after.status).toBe(200);
+    for (const aud of armed.bearerAudiences) {
+      const raw = await makeSubject(aud);
+      for (const [auth, status] of [[disarmed, 200], [armed, 401]] as const) {
+        const res = await strictApp(auth, approvedDb(), raw.getKey).request(
+          "/api/graph-signals/drummondville",
+          { headers: { authorization: `Bearer ${raw.presented}` } },
+        );
+        expect(res.status).toBe(status);
+      }
+    }
+  });
+
+  it("keeps exchanged search working disarmed without workload references", async () => {
+    const { presented, getKey } = await makeExchanged();
+    for (const workload of [
+      { STRICT_RECEIVER_WORKLOAD_SUB: "" },
+      { STRICT_RECEIVER_WORKLOAD_CLIENT_ID: "" },
+      { STRICT_RECEIVER_WORKLOAD_SUB: "", STRICT_RECEIVER_WORKLOAD_CLIENT_ID: "" },
+    ]) {
+      const auth = resolveAuthConfig(loadConfig({
+        ...RESOLVED_BASE, ...workload, STRICT_RECEIVER_ARMED: "0",
+      }));
+      const res = await strictApp(auth, approvedDb(), getKey).request(
+        "/api/graph-signals/drummondville",
+        { headers: { authorization: `Bearer ${presented}` } },
+      );
+      expect(res.status).toBe(200);
+    }
+  });
+
+  it("never serves raw tokens when arming has an invalid or incomplete receipt", async () => {
+    const receiptKeys = Object.keys(A2_RECEIPT);
+    const variants = [
+      Object.fromEntries(receiptKeys.map((key) => [key, undefined])),
+      ...receiptKeys.flatMap((key) => [
+        { [key]: undefined }, { [key]: "" }, { [key]: "https://wrong.example.test" },
+      ]),
+    ];
+    for (const aud of STRICT_AUTH.bearerAudiences) {
+      const { presented, getKey } = await makeSubject(aud);
+      for (const variant of variants) {
+        let auth: AuthConfig;
+        try {
+          auth = resolveAuthConfig(loadConfig({
+            ...RESOLVED_BASE, ...A2_RECEIPT, ...variant, STRICT_RECEIVER_ARMED: "1",
+          }));
+        } catch (err) {
+          expect((err as Error).message).toBe("strict_receiver_receipt_invalid");
+          continue;
+        }
+        const res = await strictApp(auth, approvedDb(), getKey).request(
+          "/api/graph-signals/drummondville",
+          { headers: { authorization: `Bearer ${presented}` } },
+        );
+        expect(res.status).toBe(401);
+        expect.unreachable("invalid arming must refuse startup");
+      }
+    }
+  });
+});
+
+describe("strict receiver — forbidden routes, methods and preserved behavior (H4 P5)", () => {
+  const STRICT_AUTH = strictReceiverTestAuth(strictReceiverTestConfig());
+
+  async function makeExchanged(): Promise<{ presented: string; getKey: JWTVerifyGetKey }> {
+    const { publicKey, privateKey } = await generateKeyPair("EdDSA", { crv: "Ed25519" });
+    const pubJwk: JWK = await exportJWK(publicKey);
+    pubJwk.kid = "k1";
+    pubJwk.alg = "EdDSA";
+    const presented = await new SignJWT({
+      scope: "immo:search",
+      client_id: "immo-mcp-workload",
+      act: { sub: "immo-mcp-workload" },
+    })
+      .setProtectedHeader({ alg: "EdDSA", kid: "k1" })
+      .setIssuer(STRICT_AUTH.issuer)
+      .setAudience("https://immo.example.test")
+      .setSubject("mcp-user")
+      .setIssuedAt()
+      .setExpirationTime("5m")
+      .sign(privateKey);
+    return { presented, getKey: createLocalJWKSet({ keys: [pubJwk] }) };
+  }
+
+  type Db = import("../db/client.js").Database;
+  const approvedDb = () =>
+    makeEnrollmentDb([{ sub: "mcp-user", status: "approved", isAdmin: false }]) as unknown as Db;
+
+  function strictApp(bearerGetKey?: JWTVerifyGetKey): Hono {
+    const app = new Hono();
+    app.use("*", protect(STRICT_AUTH, { db: approvedDb(), ...(bearerGetKey ? { bearerGetKey } : {}) }));
+    app.get("/api/graph-signals/:city", (c) => c.json({ ok: true, nodes: [] }));
+    app.get("/api/graph-signals/by-city", (c) => c.json({ ok: true, cities: [] }));
+    app.get("/api/v1/signal-facets/reason-codes", (c) => c.json({ ok: true, codes: [] }));
+    app.post("/api/v1/signal-facets/select", (c) => c.json({ ok: true }));
+    return app;
+  }
+
+  it("denies a valid delegated presentation on aggregate, facets and writes", async () => {
+    const { presented, getKey } = await makeExchanged();
+    const headers = { authorization: `Bearer ${presented}` };
+    for (const [path, method] of [
+      ["/api/graph-signals/by-city", "GET"],
+      ["/api/v1/signal-facets/reason-codes", "GET"],
+      ["/api/v1/signal-facets/select", "POST"],
+      ["/api/graph-signals/drummondville", "POST"],
+    ] as const) {
+      const res = await strictApp(getKey).request(path, { method, headers });
+      expect(res.status).toBe(403);
+      expect((await res.json()).error).toBe("delegated_scope_refused");
+    }
+  });
+
+  it("denies encoded, case-varied, trailing-slash and double-slash variants", async () => {
+    const { presented, getKey } = await makeExchanged();
+    const headers = { authorization: `Bearer ${presented}` };
+    for (const path of [
+      "/api/graph-signals/%64rummondville",
+      "/api/graph-signals/Drummondville",
+      "/api/graph-signals/drummondville/",
+      "/api/graph-signals//drummondville",
+    ]) {
+      const res = await strictApp(getKey).request(path, { headers });
+      expect([401, 403, 404].includes(res.status)).toBe(true);
+    }
+  });
+
+  it("denies an unknown query key on the delegated search", async () => {
+    const { presented, getKey } = await makeExchanged();
+    const res = await strictApp(getKey).request("/api/graph-signals/drummondville?debug=1", {
+      headers: { authorization: `Bearer ${presented}` },
+    });
+    expect(res.status).toBe(403);
+  });
+
+  it("preserves cookie sessions on search, aggregate and facets under strict arming", async () => {
+    const cookie = `radar_session=${await signSession(
+      { sub: "mcp-user" },
+      { sessionSecret: STRICT_AUTH.sessionSecret, ttlSeconds: 3600 },
+    )}`;
+    for (const [path, method] of [
+      ["/api/graph-signals/drummondville", "GET"],
+      ["/api/graph-signals/by-city", "GET"],
+      ["/api/v1/signal-facets/reason-codes", "GET"],
+    ] as const) {
+      const res = await strictApp().request(path, { method, headers: { cookie } });
+      expect(res.status).toBe(200);
+    }
+  });
+
+  it("preserves public routes without any identity under strict arming", async () => {
+    const app = new Hono();
+    app.use("*", protect(STRICT_AUTH, {}));
+    app.get("/livez", (c) => c.json({ status: "ok" }));
+    app.get("/api/geo/collections/:id/items", (c) => c.json({ type: "FeatureCollection" }));
+    app.get("/api/documents/raw", (c) => c.json({ ok: true }));
+    expect((await app.request("/livez")).status).toBe(200);
+    expect((await app.request("/api/geo/collections/qc-lots-x/items")).status).toBe(200);
+    expect((await app.request("/api/documents/raw?rawRef=raw%2Fabc.pdf")).status).toBe(200);
   });
 });
