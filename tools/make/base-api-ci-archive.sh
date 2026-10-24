@@ -2,6 +2,7 @@
 # Only repository test/code resources, never environment files or client data.
 archive_ci_inputs() {
   git ls-files --cached --others --exclude-standard -- api/tests api/src packages/radar-sources/tests/fixtures \
+    packages/radar-sources/src/sources/_spikes/roles-evaluation-fonciere-mamh/samples/*.first-record.xml \
     > "$RUN_DIR/ci-candidates"
   : > "$RUN_DIR/ci-paths"
   local path part
@@ -9,7 +10,8 @@ archive_ci_inputs() {
     case /$path/ in */.env*|*/credentials*|*/secrets*|*/reports/*|*/input/*) continue;; esac
     case $path in
       api/tests/integration/*.ts|api/tests/fixtures/*.json|api/src/services/geo/fixtures/simulation/*.json|api/src/services/graph/__fixtures__/*.tsv|\
-      api/src/services/track/__fixtures__/*.jsonl|packages/radar-sources/tests/fixtures/*) ;;
+      api/src/services/track/__fixtures__/*.jsonl|packages/radar-sources/tests/fixtures/*|\
+      packages/radar-sources/src/sources/_spikes/roles-evaluation-fonciere-mamh/samples/*.first-record.xml) ;;
       *) continue;;
     esac
     part=$path
