@@ -51,11 +51,14 @@ export function defaultCutoverSafety(
  *
  * Internal only: `bound` and `evidence` are server-supplied, never taken from
  * client input. Drain validates the qualified maintenance evidence for every
- * expected instance. Readback validates the same evidence, rejects an empty
- * ready-target set, then verifies every ready city and mode with the real
- * internal reader under the closed barrier using the current rights of
- * `bound.actorSub`. 6K keeps its legacy fence; this adapter never clears it.
- * Opening `destinationOpen` stays in `openLotDestination`.
+ * expected instance. Readback validates the same evidence, rejects an
+ * undeclared empty ready-target set, then verifies every ready city and mode
+ * with the real internal reader under the closed barrier using the current
+ * rights of `bound.actorSub`. A declared qualified empty manifest passes only
+ * through a real zero-head proof over `options.emptyReadbackScope`; this
+ * preserves the B2 qualified empty opening with no new behavior. 6K keeps its
+ * legacy fence; this adapter never clears it. Opening `destinationOpen`
+ * stays in `openLotDestination`.
  */
 export function qualifiedLotCutoverSafety(
   db: Database,
@@ -77,7 +80,22 @@ export function qualifiedLotCutoverSafety(
         modes.add(mode);
         cities.set(city, modes);
       }
-      if (cities.size === 0) throw new ScopeError(503, "lot_cutover_readback_unconfirmed");
+      if (cities.size === 0) {
+        if (options.qualifiedEmptyManifest !== true) {
+          throw new ScopeError(503, "lot_cutover_readback_unconfirmed");
+        }
+        const scope = options.emptyReadbackScope;
+        if (!scope || scope.citySlugs.length === 0 || scope.modes.length === 0) {
+          throw new ScopeError(503, "lot_cutover_readback_unconfirmed");
+        }
+        for (const city of scope.citySlugs) {
+          for (const mode of scope.modes) {
+            const seen = await readLotCutoverReadback(db, bound.actorSub, workspaceId, mode, city);
+            if (seen.heads.length !== 0) throw new ScopeError(503, "lot_cutover_readback_unconfirmed");
+          }
+        }
+        return;
+      }
       for (const [city, modes] of cities) {
         for (const mode of modes) {
           await readLotCutoverReadback(db, bound.actorSub, workspaceId,
