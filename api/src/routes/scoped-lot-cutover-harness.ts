@@ -4,9 +4,13 @@
  */
 import { Hono } from "hono";
 import { prospectMarksRoute } from "./prospect-marks.js";
-import { scopedLotCutoverRoute } from "./scoped-lot-cutover.js";
+import {
+  scopedLotCutoverRoute,
+  type CutoverSafetyFactory,
+} from "./scoped-lot-cutover.js";
 import { scopedLotCutoverActivationRoute } from "./scoped-lot-cutover-activation.js";
 import { scopedLotFacetsRoute } from "./scoped-lot-facets.js";
+import type { CutoverSafety } from "../services/facets/lots/lot-cutover-types.js";
 import type { CutoverFixture } from "../services/facets/lots/cutover-fixture.js";
 import { recordingCutoverSafety } from "../services/facets/lots/cutover-fixture.js";
 
@@ -50,6 +54,7 @@ export async function seedLegacyChain(f: CutoverFixture, authorId: string): Prom
 
 export function makeCutoverApp(
   f: CutoverFixture, session: { sub: string; via?: string } | null,
+  overrides: { cutoverSafety?: CutoverSafety; cutoverSafetyFor?: CutoverSafetyFactory } = {},
 ): Hono {
   const app = new Hono();
   app.use("*", async (c, next) => { c.set("session" as never, session as never); await next(); });
@@ -57,7 +62,9 @@ export function makeCutoverApp(
   const cutoverMapping = { workspaceId: f.workspaceId, mapping: MAPPING };
   app.route("/", scopedLotCutoverRoute({ db: f.db as never, auth: { enabled: true }, cutoverMapping }));
   app.route("/", scopedLotCutoverActivationRoute({ db: f.db as never, auth: { enabled: true },
-    cutoverSafety: recordingCutoverSafety().safety, cutoverMapping }));
+    ...(overrides.cutoverSafetyFor ? { cutoverSafetyFor: overrides.cutoverSafetyFor }
+      : { cutoverSafety: overrides.cutoverSafety ?? recordingCutoverSafety().safety }),
+    cutoverMapping }));
   app.route("/", scopedLotFacetsRoute({ db: f.db as never, auth: { enabled: true }, requireCutover: true }));
   return app;
 }
