@@ -221,4 +221,122 @@ describeDb("internal personal activation persistence", () => {
       .toEqual([{ maintenance_barrier: true }]);
   });
 
+  it("should reject a nonreciprocal same-stream chain", async () => {
+    const f = await closedFixture();
+    const streamId = randomUUID();
+    const nodeId = randomUUID();
+    const firstId = randomUUID();
+    const secondId = randomUUID();
+    const identity = { citySlug: "synthetic-city", nodeType: "Signal", nodeId,
+      facet: "selection", basket: "pertinent" };
+    // Consistent two-event chain through guarded inserts, then drop one link only.
+    await f.db.transaction(async (tx) => {
+      await tx.insert(facetStreams).values({ id: streamId, workspaceId: f.workspaceId,
+        scope: "personal", ownerId: f.member.id, targetType: "signal", ...identity });
+      await tx.insert(facetEvents).values({ id: firstId, scope: "personal",
+        ownerId: f.member.id, actorId: f.member.id, state: "active",
+        observedFingerprint: "a".repeat(64), commandKey: randomUUID(),
+        commandDigest: "b".repeat(64), supersededBy: secondId, ...identity });
+      await tx.insert(facetEvents).values({ id: secondId, scope: "personal",
+        ownerId: f.member.id, actorId: f.member.id, state: "active",
+        observedFingerprint: "a".repeat(64), commandKey: randomUUID(),
+        commandDigest: "b".repeat(64), supersedes: firstId, ...identity });
+      await tx.insert(facetEventBindings).values([
+        { eventId: firstId, streamId }, { eventId: secondId, streamId }]);
+      await tx.insert(facetHeads).values({ streamId, eventId: secondId });
+    });
+    const before = await persistedCounts(f);
+    await corrupt(f, `UPDATE facet_events SET supersedes = NULL WHERE id = $1`, [secondId]);
+    expect(await persistedCounts(f)).toEqual(before);
+    await assertProtectedResumeClosed(f);
+    await expect(verifyPersonalActivationPersistence(f.db, f.workspaceId, f.actor.sub,
+      { streams: 2, bindings: 3, heads: 2 }))
+      .rejects.toMatchObject({ status: 503, message: "activation_identity_mismatch" });
+    await expect(readScopedPersonalHeads(f.db, f.member.sub, f.workspaceId, "synthetic-city"))
+      .rejects.toMatchObject({ status: 503 });
+    expect((await f.pool.query("SELECT maintenance_barrier FROM facet_activation_state")).rows)
+      .toEqual([{ maintenance_barrier: true }]);
+  });
+
+  it("should reject a stream with two terminals", async () => {
+    const f = await closedFixture();
+    const streamId = randomUUID();
+    const nodeId = randomUUID();
+    const firstId = randomUUID();
+    const secondId = randomUUID();
+    const identity = { citySlug: "synthetic-city", nodeType: "Signal", nodeId,
+      facet: "selection", basket: "pertinent" };
+    await f.db.transaction(async (tx) => {
+      await tx.insert(facetStreams).values({ id: streamId, workspaceId: f.workspaceId,
+        scope: "personal", ownerId: f.member.id, targetType: "signal", ...identity });
+      await tx.insert(facetEvents).values({ id: firstId, scope: "personal",
+        ownerId: f.member.id, actorId: f.member.id, state: "active",
+        observedFingerprint: "a".repeat(64), commandKey: randomUUID(),
+        commandDigest: "b".repeat(64), ...identity });
+      await tx.insert(facetEventBindings).values({ eventId: firstId, streamId });
+      await tx.insert(facetHeads).values({ streamId, eventId: firstId });
+    });
+    // Second terminal appended past the guards, cardinalities otherwise constant.
+    await corrupt(f, `INSERT INTO facet_events (id, scope, owner_id, actor_id, city_slug,
+      node_type, node_id, facet, basket, state, observed_fingerprint, command_key, command_digest)
+      VALUES ($1, 'personal', $2, $2, 'synthetic-city', 'Signal', $3,
+      'selection', 'pertinent', 'active', '${"a".repeat(64)}', $4, $5)`,
+      [secondId, f.member.id, nodeId, randomUUID(), "b".repeat(64)]);
+    await corrupt(f, `INSERT INTO facet_event_bindings (event_id, stream_id) VALUES ($1, $2)`,
+      [secondId, streamId]);
+    await assertProtectedResumeClosed(f);
+    await expect(verifyPersonalActivationPersistence(f.db, f.workspaceId, f.actor.sub,
+      { streams: 2, bindings: 3, heads: 2 }))
+      .rejects.toMatchObject({ status: 503, message: "activation_head_mismatch" });
+    await expect(readScopedPersonalHeads(f.db, f.member.sub, f.workspaceId, "synthetic-city"))
+      .rejects.toMatchObject({ status: 503 });
+    expect((await f.pool.query("SELECT maintenance_barrier FROM facet_activation_state")).rows)
+      .toEqual([{ maintenance_barrier: true }]);
+  });
+
+  it("should reject a disconnected chain with one terminal", async () => {
+    const f = await closedFixture();
+    const streamId = randomUUID();
+    const nodeId = randomUUID();
+    const firstId = randomUUID();
+    const secondId = randomUUID();
+    const detachedId = randomUUID();
+    const detachedPairId = randomUUID();
+    const identity = { citySlug: "synthetic-city", nodeType: "Signal", nodeId,
+      facet: "selection", basket: "pertinent" };
+    await f.db.transaction(async (tx) => {
+      await tx.insert(facetStreams).values({ id: streamId, workspaceId: f.workspaceId,
+        scope: "personal", ownerId: f.member.id, targetType: "signal", ...identity });
+      await tx.insert(facetEvents).values({ id: firstId, scope: "personal",
+        ownerId: f.member.id, actorId: f.member.id, state: "active",
+        observedFingerprint: "a".repeat(64), commandKey: randomUUID(),
+        commandDigest: "b".repeat(64), supersededBy: secondId, ...identity });
+      await tx.insert(facetEvents).values({ id: secondId, scope: "personal",
+        ownerId: f.member.id, actorId: f.member.id, state: "active",
+        observedFingerprint: "a".repeat(64), commandKey: randomUUID(),
+        commandDigest: "b".repeat(64), supersedes: firstId, ...identity });
+      await tx.insert(facetEventBindings).values([
+        { eventId: firstId, streamId }, { eventId: secondId, streamId }]);
+      await tx.insert(facetHeads).values({ streamId, eventId: secondId });
+    });
+    // Reciprocal two-event cycle: one terminal overall, still disconnected.
+    await corrupt(f, `INSERT INTO facet_events (id, scope, owner_id, actor_id, city_slug,
+      node_type, node_id, facet, basket, state, observed_fingerprint, command_key, command_digest,
+      supersedes, superseded_by)
+      VALUES ($1, 'personal', $2, $2, 'synthetic-city', 'Signal', $3,
+      'selection', 'pertinent', 'active', '${"a".repeat(64)}', $4, $5, $6, $6),
+      ($6, 'personal', $2, $2, 'synthetic-city', 'Signal', $3,
+      'selection', 'pertinent', 'active', '${"a".repeat(64)}', $7, $5, $1, $1)`,
+      [detachedId, f.member.id, nodeId, randomUUID(), "b".repeat(64), detachedPairId, randomUUID()]);
+    await corrupt(f, `INSERT INTO facet_event_bindings (event_id, stream_id) VALUES ($1, $2), ($3, $2)`,
+      [detachedId, streamId, detachedPairId]);
+    await assertProtectedResumeClosed(f);
+    await expect(verifyPersonalActivationPersistence(f.db, f.workspaceId, f.actor.sub,
+      { streams: 2, bindings: 5, heads: 2 }))
+      .rejects.toMatchObject({ status: 503, message: "activation_identity_mismatch" });
+    await expect(readScopedPersonalHeads(f.db, f.member.sub, f.workspaceId, "synthetic-city"))
+      .rejects.toMatchObject({ status: 503 });
+    expect((await f.pool.query("SELECT maintenance_barrier FROM facet_activation_state")).rows)
+      .toEqual([{ maintenance_barrier: true }]);
+  });
 });

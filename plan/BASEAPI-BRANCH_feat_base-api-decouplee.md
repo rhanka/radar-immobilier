@@ -147,6 +147,7 @@
   - [x] B4 second-pass D5: open the explicit winning head through qualifiedLotCutoverSafety and refuse persisted losing values during protected resume.
   - [x] B4 second-pass personal chains: verify link existence, same-stream reciprocity, one terminal/head and full connectivity while preserving count error codes.
   - [x] B4 second-pass foreign links: reject dangling and cross-workspace links through delivered operator resume with unchanged closed state.
+  - [x] B4 second-pass chain witnesses: reject a removed reciprocal link, two terminals and a disconnected reciprocal cycle through protected resume.
   - [x] B4 review fix expectations: derive every projected facet from the qualified manifest and explicit D5 winners.
   - [x] B4 review fix readback: compare persisted 6K heads and values before opening.
   - [x] B4 review fix identity: reject misattributed 6H event/stream identity at constant counts.
