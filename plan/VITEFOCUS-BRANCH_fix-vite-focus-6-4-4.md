@@ -54,8 +54,8 @@ Resolve GHSA-587h-7wmj-h5pm in the independent Focus dependency tree by pinning 
   - [x] Run the existing Focus build and test targets in containers.
   - [x] Rescan without changing manifests; report remaining findings separately.
   - [x] Update the Vite finding with observed Focus verification.
-- [ ] **Lot 3 — Delivery**
+- [x] **Lot 3 — Delivery**
   - [x] Create selective, bounded commits in the recovery repository.
-  - [ ] Create a bundle excluding the exact supplied base and audit it in a fresh repository.
-  - [ ] Write the French report with commit SHA, bundle path, and SHA-256.
+  - [x] Create a bundle excluding the exact supplied base and audit it in a fresh repository.
+  - [x] Write the French report with commit SHA, bundle path, and SHA-256.
   - [x] Clean up campaign containers; do not push.
