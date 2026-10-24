@@ -1,8 +1,69 @@
+import { randomUUID } from "node:crypto";
 import { expect, it } from "vitest";
-import { activation, attach, describeDb, event, fixture, safety } from "./scope-db-fixture.js";
+import {
+  facetEventBindings,
+  facetEvents,
+  facetHeads,
+  facetStreams,
+} from "../../db/schema.js";
+import {
+  activation,
+  attach,
+  describeDb,
+  event,
+  fixture,
+  safety,
+  type Fixture,
+} from "./scope-db-fixture.js";
 import { runPersonalAttachmentActivation } from "./activation-run.js";
 import { verifyPersonalActivationPersistence } from "./activation-readback.js";
 import { readScopedPersonalHeads } from "./scoped-reader.js";
+import { executePersonalActivationResume } from "../../scripts/base-api-personal-activation.js";
+
+/** Exercise the delivered operator coordinator against the damaged closed state. */
+async function assertProtectedResumeClosed(f: Fixture) {
+  const bound = { workspaceId: f.workspaceId, actorSub: f.actor.sub,
+    maintenanceAttemptId: randomUUID(), releaseId: "synthetic-chain-release",
+    instanceIds: ["synthetic-old"] };
+  const proof = { completedAt: new Date().toISOString(), coveredInstanceIds: bound.instanceIds };
+  const snapshot = async () => (await f.pool.query(`SELECT jsonb_agg(to_jsonb(a)) AS state
+    FROM facet_activation_state a`)).rows;
+  const before = await snapshot();
+  await expect(executePersonalActivationResume(f.db, { workspaceId: f.workspaceId,
+    actorSub: f.actor.sub, reason: "synthetic chain qualification", bound,
+    evidence: { ...bound, reason: "synthetic chain qualification", drain: proof, shutdown: proof } }))
+    .rejects.toMatchObject({ status: 503 });
+  expect(await snapshot()).toEqual(before);
+}
+
+/** Bypass immutable-history guards only to simulate damaged disposable storage. */
+async function corrupt(f: Fixture, query: string, params: unknown[]) {
+  const client = await f.pool.connect();
+  try {
+    await client.query("BEGIN; SET LOCAL session_replication_role = replica");
+    await client.query(query, params);
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally { client.release(); }
+}
+
+async function persistedCounts(f: Fixture) {
+  const one = async (query: string, params: unknown[]) =>
+    ((await f.pool.query(query, params)).rows[0] as { n: number }).n;
+  const scope: unknown[] = [f.workspaceId];
+  return {
+    streams: await one(`SELECT count(*)::int AS n FROM facet_streams WHERE workspace_id = $1`, scope),
+    bindings: await one(`SELECT count(*)::int AS n FROM facet_event_bindings b
+      JOIN facet_streams s ON s.id = b.stream_id WHERE s.workspace_id = $1`, scope),
+    heads: await one(`SELECT count(*)::int AS n FROM facet_heads h
+      JOIN facet_streams s ON s.id = h.stream_id WHERE s.workspace_id = $1`, scope),
+    events: await one(`SELECT count(*)::int AS n FROM facet_events e WHERE e.id IN
+      (SELECT b.event_id FROM facet_event_bindings b
+       JOIN facet_streams s ON s.id = b.stream_id WHERE s.workspace_id = $1)`, scope),
+  };
+}
 
 const populated = { streams: 1, bindings: 1, heads: 1 };
 const empty = { streams: 0, bindings: 0, heads: 0 };
@@ -107,4 +168,57 @@ describeDb("internal personal activation persistence", () => {
     expect((await f.pool.query("SELECT maintenance_barrier FROM facet_activation_state")).rows)
       .toEqual([{ maintenance_barrier: true }]);
   });
+
+  it("should reject a dangling chain link at constant cardinality", async () => {
+    const f = await closedFixture();
+    const before = await persistedCounts(f);
+    const [bound] = (await f.pool.query(
+      `SELECT b.event_id AS id FROM facet_event_bindings b
+       JOIN facet_streams s ON s.id = b.stream_id WHERE s.workspace_id = $1 LIMIT 1`,
+      [f.workspaceId])).rows as Array<{ id: string }>;
+    await corrupt(f, `UPDATE facet_events SET supersedes = $1 WHERE id = $2`, [randomUUID(), bound!.id]);
+    expect(await persistedCounts(f)).toEqual(before);
+    await assertProtectedResumeClosed(f);
+    await expect(verifyPersonalActivationPersistence(f.db, f.workspaceId, f.actor.sub, populated))
+      .rejects.toMatchObject({ status: 503, message: "activation_identity_mismatch" });
+    await expect(readScopedPersonalHeads(f.db, f.member.sub, f.workspaceId, "synthetic-city"))
+      .rejects.toMatchObject({ status: 503 });
+    expect((await f.pool.query("SELECT maintenance_barrier FROM facet_activation_state")).rows)
+      .toEqual([{ maintenance_barrier: true }]);
+  });
+
+  it("should reject a link into another workspace", async () => {
+    const f = await closedFixture();
+    const nodeId = randomUUID();
+    const foreignEvent = randomUUID();
+    const foreignStream = randomUUID();
+    const identity = { citySlug: "synthetic-city", nodeType: "Signal", nodeId,
+      facet: "selection", basket: "pertinent" };
+    await f.db.transaction(async (tx) => {
+      await tx.insert(facetStreams).values({ id: foreignStream, workspaceId: f.otherId,
+        scope: "personal", ownerId: f.actor.id, targetType: "signal", ...identity });
+      await tx.insert(facetEvents).values({ id: foreignEvent, scope: "personal",
+        ownerId: f.actor.id, actorId: f.actor.id, state: "active",
+        observedFingerprint: "a".repeat(64), commandKey: randomUUID(),
+        commandDigest: "b".repeat(64), ...identity });
+      await tx.insert(facetEventBindings).values({ eventId: foreignEvent, streamId: foreignStream });
+      await tx.insert(facetHeads).values({ streamId: foreignStream, eventId: foreignEvent });
+    });
+    const before = await persistedCounts(f);
+    const [bound] = (await f.pool.query(
+      `SELECT b.event_id AS id FROM facet_event_bindings b
+       JOIN facet_streams s ON s.id = b.stream_id WHERE s.workspace_id = $1 LIMIT 1`,
+      [f.workspaceId])).rows as Array<{ id: string }>;
+    await corrupt(f, `UPDATE facet_events SET supersedes = $1 WHERE id = $2`,
+      [foreignEvent, bound!.id]);
+    expect(await persistedCounts(f)).toEqual(before);
+    await assertProtectedResumeClosed(f);
+    await expect(verifyPersonalActivationPersistence(f.db, f.workspaceId, f.actor.sub, populated))
+      .rejects.toMatchObject({ status: 503, message: "activation_identity_mismatch" });
+    await expect(readScopedPersonalHeads(f.db, f.member.sub, f.workspaceId, "synthetic-city"))
+      .rejects.toMatchObject({ status: 503 });
+    expect((await f.pool.query("SELECT maintenance_barrier FROM facet_activation_state")).rows)
+      .toEqual([{ maintenance_barrier: true }]);
+  });
+
 });
