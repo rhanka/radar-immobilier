@@ -55,7 +55,7 @@ df -h "$ROOT" | tee "$LOG_DIR/disk-before.log"
 }
 # Validate all paths using metadata before tar can open any file.
 archive_sources
-if [[ $ACTION == ci-api ]]; then
+if [[ $ACTION == ci-api || $ACTION == test-api ]]; then
   source "$TOOLS/base-api-ci-archive.sh"
   archive_ci_inputs
 fi
