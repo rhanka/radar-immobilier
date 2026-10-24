@@ -134,6 +134,7 @@
   - [x] B4 slice 3: qualify internal closed-barrier readback authorization, current manager/attached-account rights, PostgreSQL rejections, isolation and public closure; binding/head/projection verification remains pending.
   - [x] B4 slice 3 handoff: document the authorizer boundary; await Muse slice 4 before qualifying persisted bindings, heads and projections or final opening.
   - [x] B4 slice 4: verify persisted personal bindings, terminal heads and projections under the closed barrier; reject foreign-workspace histories even against explicit zero expectations.
+  - [x] B4 slice 4 handoff: qualify 11 new PostgreSQL cases and 195 tests across 42 suites; await Muse slice 5 for final authority checks before opening; full B4 and CT-1 wiring remain open.
   - [ ] B4.1: implement/inject 6H and 6K maintenance safety through existing activation interfaces; Muse A implements B4, Sol A verifies and commits BASE-owned files; shared application/startup deltas use the current CT-1 lease holder.
   - [ ] B4.1 entry: add base-api-activate-personal and base-api-resume-personal to tools/make/base-api.mk, dispatched by tools/make/base-api-activation.sh; Sol A owns both tooling paths.
   - [ ] B4.1 script: Muse A owns api/src/scripts/base-api-personal-activation.ts; require workspace, actor, reason and qualified maintenance evidence; execute in the API container without environment-file discovery.
