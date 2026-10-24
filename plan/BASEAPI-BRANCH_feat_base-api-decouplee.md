@@ -141,7 +141,7 @@
   - [x] B3 FIX1 final gate: 146 cases across 25 suites, zero failed/skipped; thirteen mutation cycles 0/1/0; API/source-test typecheck, explicit changed-file lint, CT-7 and CT-8 pass.
   - [x] B3.4 coverage evidence: verify all three writers with synthetic executed-case reasons; each missing row, false coverage or invalid reason blocks activation; operational inputs stay separate.
   - [x] Gate: all three real writer paths contend with facet commands; no coverage attestation without the corresponding executable proof.
-- [ ] B4 — Operational cutover; Muse 5–8 h, Sol 4–6 h, total 9–14 h.
+- [x] B4 — Operational cutover; Muse 5–8 h, Sol 4–6 h, total 9–14 h.
   - [x] B4/B3 tooling preparation: narrow delivery paths, exact ontology input, changed-file lint and common synthetic DB migration; functional gates remain open.
   - [x] B4 operator input transport: actual Make activation/resume command-double proof preserves literal Make functions and shell syntax without evaluation.
   - [x] B4 slice 1: internal maintenance validator binds workspace, actor, attempt, release and instances; real reader, operator and durable wiring remain pending.
@@ -165,23 +165,24 @@
   - [x] B4 slice 13 reception: qualify interrupted 6K/protected resume and empty history with the real adapter; primary 10 tests/3 suites and retained 600 tests/62 suites pass, with both typechecks, explicit lint and CT-8; stop before slice 14; final B4 remains open.
   - [x] B4 slice 14 reception: qualify 16 safety mutants with baseline/assertion-failure/restored exits 0/1/0 and identical bytes; primary 10 tests/3 suites and retained 611 tests/63 suites pass, both typechecks, explicit lint and CT-8; stop before slice 15; qualified B3 and the full B4 mutation gate remain open.
   - [x] B4 slice 15: verify exact activate/resume inputs against preserved SQL and database receipts; correct stale runbook status and L6 identity; no shared file; final qualification and bundle follow.
+  - [x] B4 final reception: retain qualified B3 dbcd82a3 via B123 1c304311 and merge a1f20d7a; all twelve integrated mutation families pass 0/1/0 at d779d460 with identical restoration bytes; final delivery SHA qualification and bundle are bound in the B4 report.
   - [x] B4 mutation witnesses: eleven PostgreSQL cases cover operator evidence, persisted corruption, readback closure, final authority, reconstructed legacy fences and public bypass rejection; invalid-evidence cases capture SQL/public state before assertions; production bytes remain unchanged.
   - [x] B4 runner implementation: add the twelve bounded behavioral mutation families with exact source hunks, per-phase commands and logs, strict assertion failures and byte restoration; the unchanged common validator and final run determine qualification.
-  - [ ] B4.1: implement/inject 6H and 6K maintenance safety through existing activation interfaces; Muse A implements B4, Sol A verifies and commits BASE-owned files; shared application/startup deltas use the current CT-1 lease holder.
+  - [x] B4.1: implement/inject 6H and 6K maintenance safety through existing activation interfaces; Muse A implements B4, Sol A verifies and commits BASE-owned files; shared application/startup deltas use the current CT-1 lease holder.
   - [x] B4.1 entry: dispatch actual activation/resume with independent attempt/release/instance bindings and literal arguments; preserve owned disposable campaign state and fail closed on absent mutation packets.
-  - [ ] B4.1 script: Muse A owns api/src/scripts/base-api-personal-activation.ts; require workspace, actor, reason and qualified maintenance evidence; execute in the API container without environment-file discovery.
-  - [ ] B4.1 activation: call runPersonalAttachmentActivation from activation-run.ts; attach-personal-history.ts only attaches histories and cannot substitute for activation.
-  - [ ] B4.1 resume: inspect durable state; legacy/closed retries protected activation, scoped/closed calls resumePersonalAttachmentReadback from activation-open.ts, already-open returns status after authorization without mutation.
-  - [ ] B4.1 adapter: Muse A implements api/src/services/facets/activation-maintenance-safety.ts using ActivationSafety; inject actual drain/shutdown evidence and the internal reader, never successful empty callbacks.
-  - [ ] B4.2: close admission and old reads/writes/publications; drain responses, connections and buffers.
-  - [ ] B4.3: verify old-instance shutdown and guarded restart; process-local retirement alone is insufficient.
-  - [ ] B4.4: Muse A owns api/src/services/facets/activation-readback.ts; read and validate real PostgreSQL bindings, heads and scoped projections under the still-closed barrier.
-  - [ ] B4.4 authority: recheck management, account approval, memberships, qualified attachments and scoped epoch; retain personal-scope isolation and return only bounded verification evidence to the operator.
-  - [ ] B4.4 isolation: keep scopedEpochFor/public readers closed; expose no public bypass; readback is internal to activation/resume and succeeds before activation-open.ts clears the barrier.
-  - [ ] B4.5: Muse A adds api/tests/integration/base-api-activation.spec.ts and base-api-activation-resume.spec.ts; Sol A qualifies the real Make/script/safety/reader composition on synthetic PostgreSQL.
-  - [ ] B4.5 proof: public reads return 503 while closed, real readback validates seeded heads/projections, then opening enables public reads; no fixture-success adapter qualifies this test.
-  - [ ] B4.5 recovery: interrupted activation and readback failure retain the durable barrier; resume rechecks rights/evidence; mismatched persisted state or missing shutdown/drain proof prevents opening.
-  - [ ] Gate: both B4 activation suites plus legacy-delivery tests actually execute; B3 coverage present; global signal authority transition protected; record exact activate/resume Make commands in BASE_API_ACTIVATION.md.
+  - [x] B4.1 script: Muse A owns api/src/scripts/base-api-personal-activation.ts; require workspace, actor, reason and qualified maintenance evidence; execute in the API container without environment-file discovery.
+  - [x] B4.1 activation: call runPersonalAttachmentActivation from activation-run.ts; attach-personal-history.ts only attaches histories and cannot substitute for activation.
+  - [x] B4.1 resume: inspect durable state; legacy/closed retries protected activation, scoped/closed calls resumePersonalAttachmentReadback from activation-open.ts, already-open returns status after authorization without mutation.
+  - [x] B4.1 adapter: Muse A implements api/src/services/facets/activation-maintenance-safety.ts using ActivationSafety; inject actual drain/shutdown evidence and the internal reader, never successful empty callbacks.
+  - [x] B4.2: close admission and old reads/writes/publications; drain responses, connections and buffers.
+  - [x] B4.3: verify old-instance shutdown and guarded restart; process-local retirement alone is insufficient.
+  - [x] B4.4: Muse A owns api/src/services/facets/activation-readback.ts; read and validate real PostgreSQL bindings, heads and scoped projections under the still-closed barrier.
+  - [x] B4.4 authority: recheck management, account approval, memberships, qualified attachments and scoped epoch; retain personal-scope isolation and return only bounded verification evidence to the operator.
+  - [x] B4.4 isolation: keep scopedEpochFor/public readers closed; expose no public bypass; readback is internal to activation/resume and succeeds before activation-open.ts clears the barrier.
+  - [x] B4.5: Muse A adds api/tests/integration/base-api-activation.spec.ts and base-api-activation-resume.spec.ts; Sol A qualifies the real Make/script/safety/reader composition on synthetic PostgreSQL.
+  - [x] B4.5 proof: public reads return 503 while closed, real readback validates seeded heads/projections, then opening enables public reads; no fixture-success adapter qualifies this test.
+  - [x] B4.5 recovery: interrupted activation and readback failure retain the durable barrier; resume rechecks rights/evidence; mismatched persisted state or missing shutdown/drain proof prevents opening.
+  - [x] Gate: both B4 activation suites plus legacy-delivery tests actually execute; B3 coverage present; global signal authority transition protected; record exact activate/resume Make commands in BASE_API_ACTIVATION.md.
 - [ ] B5 — BASE acceptance; Muse 1–2 h, Sol 3–4 h, total 4–6 h.
   - [ ] B5.1: HTTP/SQL authority, transitions, history and exact-replay scenarios through createApp.
   - [ ] B5.2: concurrent writes, revocation, changed content and atomic batches through 500 targets.
