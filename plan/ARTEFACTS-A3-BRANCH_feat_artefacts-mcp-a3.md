@@ -39,7 +39,7 @@
 - [x] Verify exchanged tokens while retaining the pre-activation bearer path.
 - [x] Cover token identity, audience, scope, lifetime and delegation refusals.
 - [x] Add the canonical search profile and strict recovery guard.
-- [ ] Cover profile, activation and recovery behavior.
+- [x] Cover profile, activation and recovery behavior.
 - [ ] Enforce the exchanged profile in the existing auth middleware.
 - [ ] Add exchanged-search fixtures and preserve per-viewer identity.
 - [ ] Cover cookie-free search, audience confusions and account refusal.
