@@ -66,6 +66,27 @@ describeDb("B4 integrated mutation closure", () => {
     expect(await snapshot(f)).toBe(before); expect(await closedState(f)).toEqual(closed);
   });
 
+  it("should reject constant-count owner corruption through protected resume", async () => {
+    const f = await prepared();
+    const counts = async () => (await f.pool.query(`SELECT
+      (SELECT count(*) FROM facet_events) AS events, (SELECT count(*) FROM facet_streams) AS streams,
+      (SELECT count(*) FROM facet_event_bindings) AS bindings, (SELECT count(*) FROM facet_heads) AS heads`)).rows;
+    const beforeCounts = await counts();
+    const client = await f.pool.connect();
+    try {
+      await client.query("BEGIN; SET LOCAL session_replication_role = replica");
+      await client.query("UPDATE facet_streams SET owner_id = $1", [f.actor.id]);
+      await client.query("COMMIT");
+    } finally { client.release(); }
+    const before = await snapshot(f);
+    const observed = await status(executePersonalActivationResume(f.db, command(f)));
+    expect(await counts()).toEqual(beforeCounts);
+    expect(observed).toBe(503);
+    expect(await snapshot(f)).toBe(before);
+    expect(await closedState(f)).toEqual(closed);
+    expect(await status(readScopedPersonalHeads(f.db, f.actor.sub, f.workspaceId, "synthetic-city"))).toBe(503);
+  });
+
   it("should keep durable and public barriers closed throughout scoped resume readback", async () => {
     const f = await prepared(); const history = (await f.pool.query("SELECT * FROM facet_events ORDER BY id")).rows;
     const verify = readback.authorizePersonalActivationReadback;
