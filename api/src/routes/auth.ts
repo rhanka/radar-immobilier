@@ -36,7 +36,9 @@ import {
   type OidcDiscovery,
 } from "../services/auth/oidc.js";
 import {
+  isStrictArmingInvalid,
   isStrictSearchRequest,
+  isStrictWiringComplete,
   strictRequestPath,
 } from "../artifacts/strict-receiver.js";
 import type { Database } from "../db/client.js";
@@ -671,6 +673,9 @@ export function protect(
       // H4 P5: verify a delegated (exchanged) presentation against the strict
       // receiver before considering the plain user path.
       if (auth.strict) {
+        if (isStrictArmingInvalid(auth)) {
+          return c.json({ error: "strict_receiver_receipt_invalid" }, 401);
+        }
         try {
           const exchanged = await verifyExchangedSearchToken(bearer, {
             issuer: auth.strict.issuer,
@@ -683,10 +688,7 @@ export function protect(
             now: nowFn(),
           });
           const rawPath = strictRequestPath(c.req.url) ?? "";
-          if (
-            !auth.strict.enabled ||
-            !isStrictSearchRequest(c.req.method, rawPath, c.req.query())
-          ) {
+          if (!isStrictSearchRequest(c.req.method, rawPath, c.req.query())) {
             return c.json({ error: "delegated_scope_refused" }, 403);
           }
           if (!options.db) return c.json({ error: "unauthenticated" }, 401);
@@ -719,9 +721,15 @@ export function protect(
           getKey,
           now: nowFn(),
         });
-        // A delegated presentation that reached the plain path is refused:
-        // delegation is search-route-only and verified above.
-        if (claims.delegated) {
+        // A delegated presentation that reached the plain path is refused except
+        // for disarmed wiring without verification references (A2 continuity
+        // via the plain account check); complete or armed wiring stays strict.
+        const disarmedIncomplete =
+          auth.strict !== undefined &&
+          auth.strict.enabled !== true &&
+          auth.strict.armingRequested !== true &&
+          !isStrictWiringComplete(auth);
+        if (claims.delegated && !disarmedIncomplete) {
           return c.json({ error: "delegated_scope_refused" }, 403);
         }
         sub = claims.sub;
