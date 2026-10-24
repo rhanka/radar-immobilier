@@ -150,19 +150,13 @@
   - [x] B4 review fix recovery: retain closed barriers for missing or altered reconciled PostgreSQL heads.
   - [x] B4 review fix witnesses: cover full personal identities and persisted projection comparisons.
   - [x] B4 review fix comparisons: exercise missing, altered and D5-selected expected heads directly.
-  - [x] B4 review fix tooling: provide sixteen integrated mutation families, full CI API selection and declaration build with bounded resources.
+  - [x] B4 review fix tooling: sixteen integrated mutation families pass 0/1/0 with byte restoration and the strict validator; the restored run passes 31 cases in seven suites.
   - [x] B4 review fix runbook: document server-only 6K configuration and request-bound readback without shared startup edits.
-  - [x] B4 review fix S3 startup: bound the CI S3 mock JVM heap explicitly instead of relying on machine memory detection.
-  - [x] B4 review fix CI dispatch: invoke the API workspace command from the monorepo root after the declaration build.
-  - [x] B4 review fix CI fixtures: archive the repository's simulation JSON resources used by the full API suite.
-  - [x] B4 review fix source fixtures: include the two committed public role XML records required by existing API tests.
-  - [x] B4 review fix resource note: distinguish historical B3 memory bounds from the current bounded B4 runner.
-  - [x] B4 review fix complete CI resources: include the replay shell entry and NDJSON fixture; retain one worker and memory limits without an artificial CPU quota or changed timeouts.
-  - [x] B4 review fix CI isolation: include public address fixtures and bound API source/dependency and temporary storage in RAM to avoid measured host disk stalls; preserve all test deadlines.
-  - [x] B4 review fix scoped API environment: start the same bounded S3 service for scoped full-API reproductions and complete CI runs.
-  - [x] B4 review fix replay preflight: allow execution in the bounded temporary mount; Docker's default noexec blocks the existing synthetic pdftotext fixture.
-  - [x] B4 review fix Compose encoding: preserve the temporary mount options as one quoted YAML scalar.
-  - [x] B4 review fix mutation assertion: assert the observed 503 error explicitly so an incorrectly successful 6K resume produces an AssertionError; retain the strict common validator.
+  - [x] B4 review fix complete API: retain the exact CI test include list and committed resources; 3496 passed, seven optional skips in 333 files, 602 generated declarations, both typechecks and explicit changed-file lint pass.
+  - [x] B4 review fix retained gate: all 124 tranche-15 required suites execute 971 cases without failure or skip; standalone CT-8 and unchanged frozen SQL/journal are preserved.
+  - [x] B4 review fix resource isolation: one campaign and worker, API 4-GiB/PG 2-GiB/S3 512-MiB limits, bounded RAM volumes and JVM heap; keep all test deadlines and owned-project cleanup.
+  - [x] B4 review fix operator runtime: keep the RAM-backed dependency volume mounted read-only by the retained database service between API CLI containers.
+  - [ ] B4 review fix operator proof: execute actual activation/resume, corrupted scoped/closed refusal, corrected forward resume and guarded restart on one synthetic database.
   - [ ] B4 review fix delivery: publish measured evidence and a prerequisite-e1758ef6 bundle for the second independent review pass.
   - [x] B4/B3 tooling preparation: narrow delivery paths, exact ontology input, changed-file lint and common synthetic DB migration; functional gates remain open.
   - [x] B4 operator input transport: actual Make activation/resume command-double proof preserves literal Make functions and shell syntax without evaluation.
