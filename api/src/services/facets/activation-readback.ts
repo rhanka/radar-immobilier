@@ -13,7 +13,7 @@
  * 6H opens by clearing its barrier after readback; 6K keeps its legacy
  * fence and opens `destinationOpen` separately.
  */
-import { and, eq, isNull, ne, or, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import {
   accountUsers,
@@ -144,6 +144,28 @@ export async function verifyPersonalActivationPersistence(
       if (misbound) throw new ScopeError(503, "personal_history_unresolved");
     }
     const bindingByEvent = new Map(scopedBindings.map((binding) => [binding.eventId, binding.streamId]));
+    const streamById = new Map(streams.map((stream) => [stream.id, stream]));
+    const scopedEventIds = [...new Set(scopedBindings.map((binding) => binding.eventId))];
+    const scopedEvents = scopedEventIds.length === 0 ? [] : await tx.select().from(facetEvents)
+      .where(inArray(facetEvents.id, scopedEventIds));
+    const eventById = new Map(scopedEvents.map((event) => [event.id, event]));
+    for (const binding of scopedBindings) {
+      const stream = streamById.get(binding.streamId);
+      const event = eventById.get(binding.eventId);
+      if (!stream || !event) throw new ScopeError(503, "personal_history_unresolved");
+      if (event.scope !== "personal" || event.ownerId !== stream.ownerId
+        || event.citySlug !== stream.citySlug || event.nodeType !== stream.nodeType
+        || event.nodeId !== stream.nodeId || event.facet !== stream.facet
+        || (event.basket ?? null) !== (stream.basket ?? null)) {
+        throw new ScopeError(503, "activation_identity_mismatch");
+      }
+      for (const link of [event.supersedes, event.supersededBy] as const) {
+        if (link !== null && bindingByEvent.has(link)
+          && bindingByEvent.get(link) !== binding.streamId) {
+          throw new ScopeError(503, "activation_identity_mismatch");
+        }
+      }
+    }
     for (const head of scopedHeads) {
       if (bindingByEvent.get(head.eventId) !== head.streamId) {
         throw new ScopeError(503, "activation_head_mismatch");
