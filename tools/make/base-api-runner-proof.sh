@@ -19,7 +19,7 @@ cat > "$PROOF_DIR/bin/tar" <<'DOUBLE'
 #!/usr/bin/env bash
 printf 'tar %s\n' "$*" >> "$PROOF_DIR/commands"
 while [[ $# -gt 0 ]]; do
-  if [[ $1 == -cf ]]; then touch "$2"; exit; fi
+  if [[ $1 == -cf || $1 == -rf ]]; then touch "$2"; exit; fi
   shift
 done
 exit 2

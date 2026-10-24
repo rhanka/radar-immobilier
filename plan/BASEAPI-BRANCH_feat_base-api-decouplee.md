@@ -210,11 +210,11 @@
   - [x] B4.5 recovery: interrupted activation and readback failure retain the durable barrier; resume rechecks rights/evidence; mismatched persisted state or missing shutdown/drain proof prevents opening.
   - [x] Gate: both B4 activation suites plus legacy-delivery tests actually execute; B3 coverage present; global signal authority transition protected; record exact activate/resume Make commands in BASE_API_ACTIVATION.md.
 - [ ] B5 — BASE acceptance; Muse 1–2 h, Sol 3–4 h, total 4–6 h.
-  - [ ] B5.1: HTTP/SQL authority, transitions, history and exact-replay scenarios through createApp.
-  - [ ] B5.2: concurrent writes, revocation, changed content and atomic batches through 500 targets.
-  - [ ] B5.3: fresh installation, migrated installation, empty history and interrupted cutover; CT-8 governs standalone and combined migration qualification.
-  - [ ] B5.4: prove BASE works with artifact configuration absent and artifact services unused.
-  - [ ] B5.5: finalize SPEC_BASE_API.md and BASE_API_ACTIVATION.md with evidence and unresolved operational inputs.
+  - [x] B5.1: HTTP/SQL authority, transitions, history and exact-replay scenarios through createApp.
+  - [x] B5.2: concurrent writes, revocation, changed content and atomic batches through 500 targets.
+  - [x] B5.3: fresh installation, migrated installation, empty history and interrupted cutover; CT-8 governs standalone and combined migration qualification.
+  - [x] B5.4: prove BASE works with artifact configuration absent and artifact services unused.
+  - [x] B5.5: finalize SPEC_BASE_API.md and BASE_API_ACTIVATION.md with evidence and unresolved operational inputs.
   - [ ] Gate: all required cases actually execute; two independent Astra max reviews; corrections retested; reproducible bundle and report; apply CT-8/CT-9 before combined delivery, without waiting for ARTEFACTS to qualify standalone BASE.
 
 ## Estimates copied from the approved proposal
