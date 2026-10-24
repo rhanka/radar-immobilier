@@ -1,23 +1,25 @@
 // B5 regressions are applied only to the disposable container sources.
-import { readFileSync } from 'node:fs';
 const L = 'src/services/facets/lots/';
 const T = 'tests/integration/base-api-';
 const M = (id, source, suite, title, edits) => ({ id, source,
   testFile: T + suite + '.spec.ts', title, edits });
 function receipt(kind) {
-  const source = L + (kind === 'single' ? 'lot-writer.ts' : 'lot-batch.ts');
-  const text = readFileSync(source, 'utf8');
-  const start = text.indexOf('    const rights = await resolveLotRights');
-  const end = text.indexOf('    await tx.execute', start);
-  const guard = text.slice(start, end);
-  const anchor = kind === 'single' ? '    await lotTargetLock' : '    const ordered =';
-  return { ...M('receipt-' + kind, source, 'lot-replay-guards', '', [
-    ['import { sql }', 'import { sql, eq }'],
-    ['  facetCommandContexts,', '  accountUsers,\n  facetCommandContexts,'],
-    ['    const actorId = await approvedAccountId(tx, sub, true);',
-      '    const [actor] = await tx.select().from(accountUsers).where(eq(accountUsers.sub, sub));\n    const actorId = actor!.id;'],
-    [guard, ''],
-    [anchor, '    await approvedAccountId(tx, sub, true);\n' + guard + anchor],
+  const suffix = kind === 'single' ? '/commands' : '/commands/batch';
+  const anchor = '        const status = await fetchAccountStatus(options.db, session.sub);';
+  return { ...M('receipt-' + kind, 'src/routes/auth.ts', 'lot-replay-guards', '', [
+    ['import { eq } from "drizzle-orm";', 'import { and, eq } from "drizzle-orm";'],
+    [anchor, `        const key = c.req.header("idempotency-key");
+        if (key && c.req.path.endsWith("${suffix}")) {
+          const schema = await import("../db/schema.js");
+          const [owner] = await options.db.select().from(schema.accountUsers).where(eq(schema.accountUsers.sub, session.sub));
+          const [receipt] = await options.db.select().from(schema.facetCommands).where(and(
+            eq(schema.facetCommands.ownerId, owner!.id), eq(schema.facetCommands.commandKey, key)));
+          if (receipt) {
+            const stored = receipt.result as { result?: unknown; batch?: unknown };
+            return c.json({ ok: true, result: stored.result ?? stored.batch });
+          }
+        }
+` + anchor],
   ]), titles: ['approval', 'membership', 'lot_select', 'lot_pipeline', 'lot_market']
     .map(right => `denies ${kind} recovery after revoking ${right}`) };
 }
