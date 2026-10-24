@@ -18,7 +18,7 @@
 - [x] Local report, evidence, supplemental Makefiles, sanitized source snapshot, and rescue Git repositories live outside the delivered patch.
 
 ## Feedback Loop
-- [ ] Record the Zod compatibility decision and any remaining security blockers after installed-tree and registry verification.
+- [x] `attention`: Zod 3.25.76 remains vulnerable; the audit requires >=4.6.6, violating five direct workspace ranges and both Ollama peer ranges. Owner decision required for a separate migration; no forced override.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch**: sequential dependency/test campaign; no source transfer between branches.
@@ -32,10 +32,10 @@
   - [x] Read project rules, security/testing skills, previous campaign report and findings.
   - [x] Confirm branch/base, scope, available disk, and Make targets.
   - [x] Create local rescue repository and source snapshot excluding all environment files.
-- [ ] **Lot 1 — Inventory & minimal compatible fix**
-  - [ ] Record all installed instances, consumers, declared dependency/peer ranges, and registry patches.
-  - [ ] Update only compatible dependency resolutions through containerized Make targets.
-  - [ ] Assert the complete lockfile diff and justify every changed dependency.
+- [x] **Lot 1 — Inventory & minimal compatible fix**
+  - [x] Record all installed instances, consumers, declared dependency/peer ranges, and registry patches.
+  - [x] Update only compatible dependency resolutions through containerized Make targets.
+  - [x] Assert the complete lockfile diff: body-parser 2.4.0, required iconv-lite 0.7.3 and qs 6.16.1; 837 entries preserved, no manifest changes.
 - [ ] **Lot 2 — Verification**
   - [ ] Read-only npm audit with manifest/lockfile hashes; list every remaining advisory.
   - [ ] CI-equivalent lint, workspace typecheck, API/UI build and UI bundle smoke.
