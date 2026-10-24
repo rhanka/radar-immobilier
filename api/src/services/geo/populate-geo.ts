@@ -319,8 +319,9 @@ async function upsertZoneVersion(
 /**
  * UPSERT one cadastral lot into `lot_versions` (B3.2 serializer).
  * Preserves the `lot-{noLotNorm}` namespace. Decision and mutation share
- * one transaction: stored and resulting identities are locked in
- * deterministic order before mutation, then revalidated under the lock.
+ * one transaction: every stored live identity plus the resulting identity
+ * are locked in deterministic order before mutation, then the full live
+ * set is revalidated under the lock and every live row is updated.
  */
 export async function upsertLotVersion(
   db: Database,
@@ -334,14 +335,20 @@ export async function upsertLotVersion(
   const canonicalId = `lot-${noLotNorm}`;
   const geomJson = JSON.stringify(geomGeoJson);
   type Row = { id: string; city_slug: string; canonical_id: string };
+  const sameRow = (left: Row, right: Row): boolean =>
+    left.id === right.id
+    && left.city_slug === right.city_slug
+    && left.canonical_id === right.canonical_id;
   return db.transaction(async (tx) => {
     const discovered = await tx.execute<Row>(sql`
       SELECT id, city_slug, canonical_id FROM lot_versions
-      WHERE canonical_id = ${canonicalId} AND known_to IS NULL LIMIT 1`);
-    const preLockRow = discovered.rows[0] as Row | undefined;
-    const raw = preLockRow?.city_slug && preLockRow.canonical_id
-      ? [{ citySlug: preLockRow.city_slug, canonicalId: preLockRow.canonical_id }, { citySlug, canonicalId }]
-      : [{ citySlug, canonicalId }];
+      WHERE canonical_id = ${canonicalId} AND known_to IS NULL ORDER BY id`);
+    const preLockRows = ((discovered.rows ?? []) as Row[])
+      .filter((row) => row?.id && row.city_slug && row.canonical_id);
+    const raw = [
+      ...preLockRows.map((row) => ({ citySlug: row.city_slug, canonicalId: row.canonical_id })),
+      { citySlug, canonicalId },
+    ];
     const seen = new Set<string>();
     const ordered = raw
       .filter((t) => {
@@ -357,18 +364,26 @@ export async function upsertLotVersion(
     }
     const rechecked = await tx.execute<Row>(sql`
       SELECT id, city_slug, canonical_id FROM lot_versions
-      WHERE canonical_id = ${canonicalId} AND known_to IS NULL LIMIT 1`);
-    const updateRow = rechecked.rows[0] as Row | undefined;
-    if ((preLockRow?.id ?? null) !== (updateRow?.id ?? null)
-      || (preLockRow?.city_slug ?? citySlug) !== (updateRow?.city_slug ?? citySlug)) {
+      WHERE canonical_id = ${canonicalId} AND known_to IS NULL ORDER BY id`);
+    const updateRows = ((rechecked.rows ?? []) as Row[])
+      .filter((row) => row?.id && row.city_slug && row.canonical_id);
+    if (updateRows.length !== preLockRows.length
+      || updateRows.some((row, index) => !sameRow(row, preLockRows[index]!))) {
       throw new Error(`populate_geo_lot_source_lock_changed:${canonicalId}`);
     }
-    if (updateRow?.id) {
-      await tx.execute(sql`
+    if (updateRows.length > 0) {
+      const updated = await tx.execute<{ id: string }>(sql`
         UPDATE lot_versions SET
           geom = ST_Multi(ST_GeomFromGeoJSON(${geomJson}))::geometry(MultiPolygon,4326),
           geom_fetched_at = ${geomFetchedAt}::timestamptz, city_slug = ${citySlug}
-        WHERE id = ${updateRow.id}`);
+        WHERE canonical_id = ${canonicalId} AND known_to IS NULL
+        RETURNING id`);
+      const updatedIds = new Set(((updated.rows ?? []) as Array<{ id: string }>).map((row) => row.id));
+      const expectedIds = new Set(updateRows.map((row) => row.id));
+      if (updatedIds.size !== expectedIds.size
+        || updateRows.some((row) => !updatedIds.has(row.id))) {
+        throw new Error(`populate_geo_lot_source_lock_changed:${canonicalId}`);
+      }
       return "upserted" as const;
     }
     await tx.execute(sql`
