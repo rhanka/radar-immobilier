@@ -150,6 +150,7 @@
   - [x] B4 second-pass chain witnesses: reject a removed reciprocal link, two terminals and a disconnected reciprocal cycle through protected resume.
   - [x] B4 second-pass actor reuse: grant B all required lot rights, prove its own bound proof opens and refuse reuse of A's adapter under B's session.
   - [x] B4 second-pass mutation definitions: target constant-count lot swaps, all five personal chain corruptions and the D5 loser through protected execution.
+  - [x] B4 second-pass mutation integration: require all nineteen families and every named assertion, retaining copy/failure/restoration/cmp validation.
   - [x] B4 review fix expectations: derive every projected facet from the qualified manifest and explicit D5 winners.
   - [x] B4 review fix readback: compare persisted 6K heads and values before opening.
   - [x] B4 review fix identity: reject misattributed 6H event/stream identity at constant counts.

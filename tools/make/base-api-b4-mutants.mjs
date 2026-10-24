@@ -1,4 +1,5 @@
 // Every family targets an observable assertion in the integrated PostgreSQL composition.
+import reviewMutations from './base-api-b4-review-mutants.mjs';
 const closure = 'tests/integration/base-api-mutation-closure.spec.ts';
 const safety = 'src/services/facets/activation-maintenance-safety.ts';
 const operator = 'src/scripts/base-api-personal-activation.ts';
@@ -7,6 +8,7 @@ const M = (id, source, testFile, title, edits) => ({ id, source, testFile, title
 const invalid = (key) => 'should retain closed SQL and public state for invalid ' + key + ' evidence';
 const coverage = (key) => 'checkCoverage(evidence["' + key + '"], instances, "maintenance_' + key + '_unconfirmed", nowMs, maxAgeMs);';
 export default [
+  ...reviewMutations,
   M('readback-6k', 'src/services/facets/lots/lot-cutover-safety.ts',
     'tests/integration/base-api-activation.spec.ts',
     'should keep 503 when a reconciled head goes missing before resume',
