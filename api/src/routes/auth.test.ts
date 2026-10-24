@@ -1592,4 +1592,84 @@ describe("strict receiver — exchanged search and audience confusions (H4 P5)",
     return app;
   }
 
+  it("serves the permitted search with a correct exchanged presentation, no cookie", async () => {
+    const { presented, getKey } = await makeExchanged();
+    const res = await strictApp(STRICT_AUTH, approvedDb(), getKey).request(
+      "/api/graph-signals/drummondville",
+      { headers: { authorization: `Bearer ${presented}` } },
+    );
+    expect(res.status).toBe(200);
+    expect((await res.json()).ok).toBe(true);
+  });
+
+  it("refuses the MCP-audience subject presentation on the armed search route", async () => {
+    const { presented, getKey } = await makeSubject("https://immo.example.test/mcp");
+    const res = await strictApp(STRICT_AUTH, approvedDb(), getKey).request(
+      "/api/graph-signals/drummondville",
+      { headers: { authorization: `Bearer ${presented}` } },
+    );
+    expect(res.status).toBe(401);
+    expect((await res.json()).error).toBe("unauthenticated");
+  });
+
+  it("refuses original subject tokens on every protected route after activation", async () => {
+    for (const aud of [STRICT_AUTH.appBaseUrl, `${STRICT_AUTH.appBaseUrl}/mcp`]) {
+      const { presented, getKey } = await makeSubject(aud);
+      for (const path of ["/api/admin/ping", "/api/v1/signal-facets/reason-codes"]) {
+        const res = await strictApp(STRICT_AUTH, approvedDb(), getKey).request(path, {
+          headers: { authorization: `Bearer ${presented}` },
+        });
+        expect(res.status).toBe(401);
+      }
+    }
+  });
+
+  it("refuses a foreign-environment API audience on this receiver", async () => {
+    const { presented, getKey } = await makeExchanged({ aud: "https://immo.sent-tech.ca" });
+    const res = await strictApp(STRICT_AUTH, approvedDb(), getKey).request(
+      "/api/graph-signals/drummondville",
+      { headers: { authorization: `Bearer ${presented}` } },
+    );
+    expect(res.status).toBe(401);
+  });
+
+  it("refuses wrong actor, client and non-search scope", async () => {
+    for (const [overrides, status, error] of [
+      [{ act: { sub: "evil-workload" } }, 401, "unauthenticated"],
+      [{ client_id: "evil-client" }, 401, "unauthenticated"],
+      [{ scope: "immo:read" }, 403, "delegated_scope_refused"],
+    ] as const) {
+      const { presented, getKey } = await makeExchanged({ ...overrides });
+      const res = await strictApp(STRICT_AUTH, approvedDb(), getKey).request(
+        "/api/graph-signals/drummondville",
+        { headers: { authorization: `Bearer ${presented}` } },
+      );
+      expect(res.status).toBe(status);
+      expect((await res.json()).error).toBe(error);
+    }
+  });
+
+  it("stays closed before activation even with a valid exchanged presentation", async () => {
+    const unarmed = strictReceiverTestAuth(strictReceiverTestConfig({ enabled: false }));
+    const { presented, getKey } = await makeExchanged();
+    const res = await strictApp(unarmed, approvedDb(), getKey).request(
+      "/api/graph-signals/drummondville",
+      { headers: { authorization: `Bearer ${presented}` } },
+    );
+    expect(res.status).toBe(403);
+    expect((await res.json()).error).toBe("delegated_scope_refused");
+  });
+
+  it("refuses an exchanged presentation for a suspended account", async () => {
+    const db = makeEnrollmentDb([
+      { sub: "mcp-user", status: "suspended", isAdmin: false },
+    ]) as unknown as Db;
+    const { presented, getKey } = await makeExchanged();
+    const res = await strictApp(STRICT_AUTH, db, getKey).request(
+      "/api/graph-signals/drummondville",
+      { headers: { authorization: `Bearer ${presented}` } },
+    );
+    expect(res.status).toBe(403);
+    expect((await res.json()).error).toBe("account_not_approved");
+  });
 });
