@@ -46,6 +46,7 @@ import {
   type CrawlQcCadastreLotsOptions,
 } from "@sentropic/geo-sources-americas";
 import { normalizeZoneCode, normalizeLotRef } from "./extract-refs.js";
+import { lotSourceLockKey } from "../facets/lots/lot-source-serialization.js";
 import { resolveGeoRefsBatch, type GeoResolveInput } from "./resolve-refs.js";
 
 // ─── Types publics ────────────────────────────────────────────────────────────
@@ -316,14 +317,12 @@ async function upsertZoneVersion(
 // ─── UPSERT lot_versions (idempotent, upsert manuel) ─────────────────────────
 
 /**
- * UPSERT un lot cadastral dans `lot_versions`.
- *
- * canonical_id = "lot-{noLotNorm}".
- * geom = ST_Multi(ST_GeomFromGeoJSON(...)) → MultiPolygon SRID 4326.
- *
- * Même stratégie que upsertZoneVersion : UPDATE d'abord, INSERT si nécessaire.
+ * UPSERT one cadastral lot into `lot_versions` (B3.2 serializer).
+ * Preserves the `lot-{noLotNorm}` namespace. Decision and mutation share
+ * one transaction: stored and resulting identities are locked in
+ * deterministic order before mutation, then revalidated under the lock.
  */
-async function upsertLotVersion(
+export async function upsertLotVersion(
   db: Database,
   citySlug: string,
   noLot: string,
@@ -332,49 +331,56 @@ async function upsertLotVersion(
 ): Promise<"upserted" | "skipped"> {
   const noLotNorm = normalizeLotRef(noLot);
   if (!noLotNorm || noLotNorm.length < 7) return "skipped";
-
   const canonicalId = `lot-${noLotNorm}`;
   const geomJson = JSON.stringify(geomGeoJson);
-
-  // 1. Tente la mise à jour de la version vivante
-  const updateResult = await db.execute<{ id: string }>(sql`
-    UPDATE lot_versions
-    SET
-      geom            = ST_Multi(ST_GeomFromGeoJSON(${geomJson}))::geometry(MultiPolygon,4326),
-      geom_fetched_at = ${geomFetchedAt}::timestamptz,
-      city_slug       = ${citySlug}
-    WHERE canonical_id = ${canonicalId}
-      AND known_to IS NULL
-    RETURNING id
-  `);
-
-  if ((updateResult.rows ?? []).length > 0) {
-    return "upserted";
-  }
-
-  // 2. Pas de version vivante → INSERT
-  await db.execute(sql`
-    INSERT INTO lot_versions
-      (id, canonical_id, no_lot, city_slug, recon_status,
-       valid_from, known_from, geom, geom_source, geom_fetched_at,
-       no_lot_norm, raw_ref, evidence)
-    VALUES
-      (gen_random_uuid(),
-       ${canonicalId},
-       ${noLot},
-       ${citySlug},
-       'validated',
-       CURRENT_DATE,
-       NOW(),
-       ST_Multi(ST_GeomFromGeoJSON(${geomJson}))::geometry(MultiPolygon,4326),
-       'cadastre-allege',
-       ${geomFetchedAt}::timestamptz,
-       ${noLotNorm},
-       ${noLot},
-       '[]'::jsonb)
-  `);
-
-  return "upserted";
+  type Row = { id: string; city_slug: string; canonical_id: string };
+  return db.transaction(async (tx) => {
+    const discovered = await tx.execute<Row>(sql`
+      SELECT id, city_slug, canonical_id FROM lot_versions
+      WHERE canonical_id = ${canonicalId} AND known_to IS NULL LIMIT 1`);
+    const preLockRow = discovered.rows[0] as Row | undefined;
+    const raw = preLockRow?.city_slug && preLockRow.canonical_id
+      ? [{ citySlug: preLockRow.city_slug, canonicalId: preLockRow.canonical_id }, { citySlug, canonicalId }]
+      : [{ citySlug, canonicalId }];
+    const seen = new Set<string>();
+    const ordered = raw
+      .filter((t) => {
+        const k = lotSourceLockKey(t.citySlug, t.canonicalId);
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      })
+      .sort((a, b) => (JSON.stringify([a.citySlug, a.canonicalId]) < JSON.stringify([b.citySlug, b.canonicalId]) ? -1 : 1));
+    for (const target of ordered) {
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${
+        lotSourceLockKey(target.citySlug, target.canonicalId)}, 0))`);
+    }
+    const rechecked = await tx.execute<Row>(sql`
+      SELECT id, city_slug, canonical_id FROM lot_versions
+      WHERE canonical_id = ${canonicalId} AND known_to IS NULL LIMIT 1`);
+    const updateRow = rechecked.rows[0] as Row | undefined;
+    if ((preLockRow?.id ?? null) !== (updateRow?.id ?? null)
+      || (preLockRow?.city_slug ?? citySlug) !== (updateRow?.city_slug ?? citySlug)) {
+      throw new Error(`populate_geo_lot_source_lock_changed:${canonicalId}`);
+    }
+    if (updateRow?.id) {
+      await tx.execute(sql`
+        UPDATE lot_versions SET
+          geom = ST_Multi(ST_GeomFromGeoJSON(${geomJson}))::geometry(MultiPolygon,4326),
+          geom_fetched_at = ${geomFetchedAt}::timestamptz, city_slug = ${citySlug}
+        WHERE id = ${updateRow.id}`);
+      return "upserted" as const;
+    }
+    await tx.execute(sql`
+      INSERT INTO lot_versions
+        (id, canonical_id, no_lot, city_slug, recon_status, valid_from, known_from,
+         geom, geom_source, geom_fetched_at, no_lot_norm, raw_ref, evidence)
+      VALUES (gen_random_uuid(), ${canonicalId}, ${noLot}, ${citySlug}, 'validated',
+        CURRENT_DATE, NOW(),
+        ST_Multi(ST_GeomFromGeoJSON(${geomJson}))::geometry(MultiPolygon,4326),
+        'cadastre-allege', ${geomFetchedAt}::timestamptz, ${noLotNorm}, ${noLot}, '[]'::jsonb)`);
+    return "upserted" as const;
+  });
 }
 
 // ─── Récupération des signaux en DB pour une ville ────────────────────────────
