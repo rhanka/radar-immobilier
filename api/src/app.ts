@@ -33,6 +33,7 @@ import { sourceConsistencyRoute } from "./routes/source-consistency.js";
 import { prospectMarksRoute } from "./routes/prospect-marks.js";
 import { scopedLotCutoverRoute, type ScopedLotCutoverDeps } from "./routes/scoped-lot-cutover.js";
 import { scopedLotCutoverActivationRoute } from "./routes/scoped-lot-cutover-activation.js";
+import type { LegacyRetirementState } from "./services/facets/legacy-retirement.js";
 import { scopedLotFacetsRoute } from "./routes/scoped-lot-facets.js";
 import { signalFacetsRoute } from "./routes/signal-facets.js";
 import { privateSignalResponse } from "./services/facets/private-response.js";
@@ -82,6 +83,8 @@ export type AppDeps = HealthDeps &
     artifactsControl?: ControlRouteDeps;
     /** Explicit operator mapping and qualified deployment retirement adapter. */
     lotCutover?: Pick<ScopedLotCutoverDeps, "cutoverMapping" | "cutoverSafety">;
+    /** Durable server-only retirement; never derived from public input. */
+    legacyRetirement?: LegacyRetirementState;
   };
 
 /** Compose the Hono application from injected dependencies. */
@@ -162,8 +165,12 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", sourceCoverageRoute(deps));
   app.route("/", sourceConsistencyRoute({ db: deps.db }));
   app.route("/", documentsRoute(deps));
-  app.route("/", graphSignalsRoute(deps));
-  app.route("/", signalFacetsRoute(deps));
+  app.route("/", graphSignalsRoute(deps.legacyRetirement
+    ? { ...deps, retirement: deps.legacyRetirement }
+    : deps));
+  app.route("/", signalFacetsRoute(deps.legacyRetirement
+    ? { ...deps, retirement: deps.legacyRetirement }
+    : deps));
   app.route("/", workspacesRoute(deps));
   app.route("/", scopedSignalFacetsRoute(deps));
   app.route("/", scopedWorkspaceArchiveRoute(deps));

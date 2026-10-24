@@ -39,9 +39,9 @@ describeDb("B2 closed readback and cutover resume", () => {
     await expect(defaultCutoverSafety(f.db, f.moderator.sub,
       (await evaluateActivationGate(f.db, f.workspaceId, report)).ready)
       .readbackAuthorized(f.workspaceId)).resolves.toBeUndefined();
-    await expect(Reflect.apply(readLotCity, undefined,
-      [f.db, f.moderator.sub, f.workspaceId, "real", CUTOVER_CITY, { readback: true }]))
-      .rejects.toMatchObject({ status: 503 });
+    const publicAttempt = Reflect.apply(readLotCity, undefined,
+      [f.db, f.moderator.sub, f.workspaceId, "real", CUTOVER_CITY, { readback: true }]);
+    expect(await publicAttempt.then(() => 200, (error: { status: number }) => error.status)).toBe(503);
     await expect(readLotCutoverReadback(f.db, f.contributor.sub, f.workspaceId, "real", CUTOVER_CITY))
       .rejects.toMatchObject({ status: 403 });
     await expect(readLotCutoverReadback(f.db, f.moderator.sub, f.workspaceId, "real", ""))
