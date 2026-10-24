@@ -70,14 +70,14 @@ Resolve GHSA-587h-7wmj-h5pm in Focus with Vite 6.4.4, then resolve GHSA-cg2g-xh6
   - [x] Set root override and Focus direct dependency to exactly 3.4.17.
   - [x] Regenerate via containerized Make targets; prove stable entry counts and no unrelated changes.
   - [x] Remove the renderer's use of Mermaid's embedded DOMPurify 3.4.12; verify it bundles the installed sanitizer.
-- [ ] **Lot 5 — DOMPurify verification**
-  - [ ] Audit both trees without modifying manifests; list all remaining findings.
-  - [ ] Run CI quality commands: typecheck, lint, API/UI builds, bundle smoke, all workspace unit/integration tests.
-  - [ ] Run Focus tests and complete Mermaid/HTML/PDF build.
-  - [ ] Record advisories, Mermaid dependency paths, exposure, remediation, and observed verification.
+- [x] **Lot 5 — DOMPurify verification**
+  - [x] Audit both trees without modifying manifests; list all remaining findings.
+  - [x] Run CI quality commands: typecheck, lint, API/UI builds, bundle smoke, all workspace unit/integration tests.
+  - [x] Run Focus tests and complete Mermaid/HTML/PDF build.
+  - [x] Record advisories, Mermaid dependency paths, exposure, remediation, and observed verification.
   - [x] Use `ENV=test-dompurify`, one Compose project, one test worker, no published application ports.
 - [ ] **Lot 6 — DOMPurify delivery**
   - [ ] Create bounded subject-only commits and a bundle excluding `3ffd7fd7a96aeaea9844a93d3ce44620733c443b`.
   - [ ] Audit the bundle in a fresh repository seeded only with the base; compare trees and delivered files.
   - [ ] Append the French delivery receipt with final SHA and bundle SHA-256.
-  - [ ] Restore generated documents and remove campaign containers/volumes with `down -v --remove-orphans`.
+  - [x] Restore generated documents and remove campaign containers/volumes with `down -v --remove-orphans`.
