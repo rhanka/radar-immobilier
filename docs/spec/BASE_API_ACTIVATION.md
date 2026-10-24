@@ -1,7 +1,7 @@
 # BASE activation and protected recovery
 
-Status: B4 slices 1–6 and standalone tooling preparation only. The activation
-entry has scoped PostgreSQL coverage; durable resume, dispatcher integration,
+Status: B4 slices 1–7 and standalone tooling preparation only. Activation and
+durable resume have scoped PostgreSQL coverage; dispatcher integration,
 restart wiring and B3 qualification remain pending. This document does not
 authorize operational activation.
 B5 and the nominal operational rehearsal retain their original scope and budget.
@@ -44,11 +44,11 @@ The dispatcher invokes `api/src/scripts/base-api-personal-activation.ts` with
 positional action `activate` or `resume` in the API container on the same campaign.
 It never starts a replacement database or silently chooses an operational target.
 
-The received slice-6 script currently accepts flat `--workspace`, `--actor`,
+The received slice-7 script currently accepts flat `--workspace`, `--actor`,
 `--reason`, `--maintenance-attempt`, `--release`, repeated `--instance` and
 `--evidence-json` flags. It does not implement the dispatcher's evidence-file
-interface or durable `resume` yet. Slice 8 must reconcile these interfaces after
-slice 7; the reserved Make calls below remain unqualified.
+interface. It dispatches positional `activate`/`resume` by durable state. Slice 8
+must reconcile the interfaces; the reserved Make calls below remain unqualified.
 
 These exact **synthetic examples have not executed a functional activation**:
 
@@ -78,7 +78,7 @@ instance, including in-flight responses, streams, queued buffers and reconnects.
 No operational workspace, actor, release, instance roster, maintenance attempt,
 writer coverage, mapping, manifest or D5 disposition is verified by these examples.
 
-## Durable recovery contract still to qualify
+## Durable operator recovery; restart wiring still to qualify
 
 | Durable state | Required recovery |
 |---|---|
@@ -103,13 +103,23 @@ transaction under the workspace lock. Account approval and active membership are
 required; share locks retain those rights through commit. Revocation after real
 readback rejects opening and preserves the closed barrier and history. A concurrent
 opening returns `409 activation_already_open` without another SQL write. This
-low-level guard does not implement already-open operator resume: that later path
-must reauthorize and return status with byte-equivalent SQL state.
+low-level guard remains distinct from already-open operator resume. Slice 7
+rechecks manager and attached-account approval/membership under the workspace lock
+before returning status without SQL mutation, including explicitly empty history.
+Scoped/closed resume uses real persisted readback without rebinding event history;
+projection mismatch and revoked rights retain the closed barrier. Public readers
+remain closed during readback. Correction of the persisted mismatch permits resume.
 Seeded mismatches must prevent opening. Recheck rights after readback and before
 opening. Public inputs must never enable internal readback. 6H releases its
 maintenance barrier; 6K retains legacy closure and opens `destinationOpen`.
 Restart tests must prove durable 503/410 and retired publication behavior.
 After the scoped epoch commits, recovery is forward resume only.
+
+Slice-7 PostgreSQL qualification (helper execution, not actual operator targets):
+
+```sh
+rtk make -f tools/make/base-api.mk -f tmp/base-api-evidence/B4/slice-7.mk b4-slice-7-qualify B4_PHASE=full API_PORT=18911 UI_PORT=15911 MAILDEV_UI_PORT=11911 ENV=test-base-api-b1
+```
 
 ## Verification and mutation tooling
 
@@ -128,4 +138,4 @@ Synthetic databases cannot establish deployment migration state. If ARTEFACTS is
 joined, qualify the actual combined frozen order and exact SHA/image under CT-8/CT-9.
 Final B4 delivery requires both activation suites, real Make activation/resume,
 all retained regressions, qualified B3 reception and a bundle reconstructed from
-the full B12 prerequisite. No final B4 bundle is issued for slices 1–6.
+the full B12 prerequisite. No final B4 bundle is issued for slices 1–7.
