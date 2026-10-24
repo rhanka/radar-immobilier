@@ -183,6 +183,73 @@ export async function verifyPersonalActivationPersistence(
       || projection.length !== expected.heads || scopedHeads.length !== expected.heads) {
       throw new ScopeError(503, "activation_projection_mismatch");
     }
+    // Full chain verification aligned with check_facet_stream: every link
+    // must exist, stay bound to the same stream and be reciprocal; each
+    // stream carries exactly one terminal registered as its head; the walk
+    // from that terminal must reach every bound event exactly once.
+    const headsByStream = new Map(scopedHeads.map((head) => [head.streamId, head.eventId]));
+    const boundByStream = new Map<string, string[]>();
+    for (const binding of scopedBindings) {
+      const members = boundByStream.get(binding.streamId) ?? [];
+      members.push(binding.eventId);
+      boundByStream.set(binding.streamId, members);
+    }
+    const linkedIds = [...new Set(scopedEvents
+      .flatMap((event) => [event.supersedes, event.supersededBy])
+      .filter((link): link is string => link !== null && !eventById.has(link)))];
+    const linkedEvents = linkedIds.length === 0 ? [] : await tx.select().from(facetEvents)
+      .where(inArray(facetEvents.id, linkedIds));
+    const linkedById = new Map(linkedEvents.map((event) => [event.id, event]));
+    for (const event of scopedEvents) {
+      const streamId = bindingByEvent.get(event.id);
+      if (streamId === undefined) throw new ScopeError(503, "activation_identity_mismatch");
+      for (const [link, reciprocal] of [
+        [event.supersedes, "supersededBy"],
+        [event.supersededBy, "supersedes"],
+      ] as const) {
+        if (link === null) continue;
+        const target = eventById.get(link) ?? linkedById.get(link);
+        if (!target) throw new ScopeError(503, "activation_identity_mismatch");
+        if (bindingByEvent.get(target.id) !== streamId) {
+          throw new ScopeError(503, "activation_identity_mismatch");
+        }
+        if ((target[reciprocal] ?? null) !== event.id) {
+          throw new ScopeError(503, "activation_identity_mismatch");
+        }
+      }
+    }
+    // No unbound or foreign-stream event may point into a scoped chain.
+    if (scopedEventIds.length > 0) {
+      const inbound = await tx.select().from(facetEvents).where(or(
+        inArray(facetEvents.supersedes, scopedEventIds),
+        inArray(facetEvents.supersededBy, scopedEventIds)));
+      for (const event of inbound) {
+        if (bindingByEvent.get(event.id) === undefined) {
+          throw new ScopeError(503, "activation_identity_mismatch");
+        }
+      }
+    }
+    for (const stream of streams) {
+      const members = boundByStream.get(stream.id) ?? [];
+      if (members.length === 0) continue;
+      const terminals = members.filter((id) => (eventById.get(id)?.supersededBy ?? null) === null);
+      if (terminals.length !== 1 || headsByStream.get(stream.id) !== terminals[0]) {
+        throw new ScopeError(503, "activation_head_mismatch");
+      }
+      const memberSet = new Set(members);
+      const seen = new Set<string>();
+      let cursor: string | null = terminals[0]!;
+      while (cursor !== null) {
+        if (seen.has(cursor) || !memberSet.has(cursor)) {
+          throw new ScopeError(503, "activation_identity_mismatch");
+        }
+        seen.add(cursor);
+        cursor = eventById.get(cursor)?.supersedes ?? null;
+      }
+      if (seen.size !== members.length) {
+        throw new ScopeError(503, "activation_identity_mismatch");
+      }
+    }
     return { streams: streams.length, bindings: scopedBindings.length, heads: projection.length };
   });
 }
