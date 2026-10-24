@@ -6,6 +6,8 @@
 // injectable JWKS resolver so unit tests run fully offline.
 
 import {
+  decodeProtectedHeader,
+  errors,
   jwtVerify,
   createRemoteJWKSet,
   type JWTPayload,
@@ -245,6 +247,12 @@ export async function verifyIdToken(
 /** Verified USER access-token claims we act on (per-user MCP path). */
 export interface VerifiedAccessToken {
   sub: string;
+  /**
+   * True when the verified payload carries delegation markers (`act`): an
+   * exchanged token that reached the plain user-bearer path. The strict
+   * receiver refuses it there — delegation is search-route-only.
+   */
+  delegated: boolean;
 }
 
 /**
@@ -277,5 +285,124 @@ export async function verifyAccessToken(
   if (typeof payload.sub !== "string" || payload.sub === "") {
     throw new Error("access_token missing sub");
   }
-  return { sub: payload.sub };
+  const act = (payload as JWTPayload & Record<string, unknown>)["act"];
+  return {
+    sub: payload.sub,
+    delegated: act !== undefined,
+  };
+}
+
+/** Scope values carried by an exchanged search token (`scope` or `scp`). */
+function exchangedScopes(payload: JWTPayload): string[] {
+  const raw = (payload as JWTPayload & Record<string, unknown>)["scope"] ??
+    (payload as JWTPayload & Record<string, unknown>)["scp"];
+  if (Array.isArray(raw)) {
+    if (!raw.every((v) => typeof v === "string")) return [];
+    return raw
+      .filter((v): v is string => typeof v === "string")
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+  }
+  if (typeof raw === "string") {
+    return raw.split(/\s+/).map((s) => s.trim()).filter((s) => s.length > 0);
+  }
+  return [];
+}
+
+/**
+ * Verify an EXCHANGED search token on the H4 P5 strict receiver.
+ *
+ * Stricter than `verifyAccessToken`: the audience must be EXACTLY the API
+ * origin (single value — MCP and foreign audiences fail), `act.sub` and the
+ * top-level `client_id` must equal the configured workload, the scope must be
+ * exactly `immo:search`, the lifetime must be positive and within
+ * `maxLifetimeS` (and never outlive the call clock), proof-bound keys (`cnf`)
+ * and service-user subjects fail. Error codes use the `strict_*` namespace.
+ */
+export async function verifyExchangedSearchToken(
+  presented: string,
+  opts: {
+    issuer: string;
+    apiAudience: string;
+    workloadSub: string;
+    workloadClientId: string;
+    requiredScope?: string | undefined;
+    maxLifetimeS?: number | undefined;
+    getKey: JWTVerifyGetKey;
+    now?: number | undefined;
+  },
+): Promise<{ sub: string }> {
+  const requiredScope = opts.requiredScope ?? "immo:search";
+  const maxLifetimeS = opts.maxLifetimeS ?? 300;
+  const nowS = Math.floor((opts.now ?? Date.now()) / 1000);
+  let headerTyp: string | undefined;
+  try {
+    const header = decodeProtectedHeader(presented) as Record<string, unknown>;
+    if (typeof header["typ"] === "string") headerTyp = header["typ"];
+  } catch {
+    throw new Error("strict_invalid_signature");
+  }
+  let payload: JWTPayload;
+  try {
+    ({ payload } = await jwtVerify(presented, opts.getKey, {
+      issuer: opts.issuer,
+      audience: opts.apiAudience,
+      ...(opts.now !== undefined ? { currentDate: new Date(opts.now) } : {}),
+    }));
+  } catch (err) {
+    if (err instanceof errors.JWTClaimValidationFailed && err.claim === "aud") {
+      throw new Error("strict_invalid_audience");
+    }
+    if (err instanceof errors.JWTClaimValidationFailed && err.claim === "iss") {
+      throw new Error("strict_invalid_issuer");
+    }
+    if (err instanceof errors.JWTExpired) throw new Error("strict_invalid_lifetime");
+    throw new Error("strict_invalid_signature");
+  }
+  const audiences = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
+  if (audiences.length !== 1 || audiences[0] !== opts.apiAudience) throw new Error("strict_invalid_audience");
+  const claims = payload as JWTPayload & Record<string, unknown>;
+  if (claims["cnf"] !== undefined) throw new Error("strict_proof_binding_refused");
+  const declaredType = typeof claims["token_type"] === "string"
+    ? (claims["token_type"] as string).toLowerCase()
+    : headerTyp?.toLowerCase();
+  if (
+    declaredType !== undefined &&
+    declaredType !== "bearer" &&
+    declaredType !== "at+jwt" &&
+    declaredType !== "jwt"
+  ) {
+    throw new Error("strict_invalid_token_type");
+  }
+  if (typeof claims.sub !== "string" || claims.sub.trim() === "") {
+    throw new Error("strict_invalid_subject");
+  }
+  if (claims.sub === opts.workloadSub) throw new Error("strict_service_user_refused");
+  const actRecord =
+    typeof claims["act"] === "object" && claims["act"] !== null && !Array.isArray(claims["act"])
+      ? (claims["act"] as Record<string, unknown>)
+      : undefined;
+  const actSub =
+    actRecord !== undefined && typeof actRecord["sub"] === "string"
+      ? actRecord["sub"]
+      : undefined;
+  if (actSub !== opts.workloadSub || Object.keys(actRecord ?? {}).length !== 1) throw new Error("strict_invalid_actor");
+  if (typeof claims["client_id"] !== "string" || claims["client_id"] !== opts.workloadClientId) {
+    throw new Error("strict_invalid_client");
+  }
+  const scopes = exchangedScopes(payload);
+  if (scopes.length !== 1 || scopes[0] !== requiredScope) {
+    throw new Error("strict_scope_refused");
+  }
+  const exp = typeof claims.exp === "number" ? claims.exp : NaN;
+  const iat = typeof claims.iat === "number" ? claims.iat : NaN;
+  if (!Number.isFinite(exp) || !Number.isFinite(iat)) {
+    throw new Error("strict_invalid_lifetime");
+  }
+  const lifetime = Math.floor(exp) - Math.floor(iat);
+  if (lifetime <= 0 || lifetime > maxLifetimeS) throw new Error("strict_invalid_lifetime");
+  if (Math.floor(iat) > nowS || Math.floor(exp) <= nowS) {
+    throw new Error("strict_invalid_lifetime");
+  }
+  return { sub: claims.sub };
 }
