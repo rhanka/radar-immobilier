@@ -50,6 +50,8 @@
 - [ ] BRBASE-EX2: import existing 6K history at 3c6d3c1f95d6794ba0939cf71db6b169cb3f071d, including 0022 and 0023; preserve inherited SQL bytes/hashes; only unpublished, unapplied journal suffix metadata may change under CT-5–CT-7.
 - [ ] BRBASE-EX2 impact: inherited schema, retirement paths, tooling and UI enter with provenance; rollback before activation by reverting integration.
 - [ ] BRBASE-EX3: retire legacy delivery paths required by B1/B4; preserve unrelated notes, contacts and chat behavior; rollback only before epoch change.
+- [x] BRBASE-EX4: PR #910 qualification explicitly authorizes eslint.config.js for the reviewed Node-global lint failures; impact is tools/make/*.mjs globals only; rollback reverts that config block.
+- [x] PR #910 fix reception: retain the two signal target-type filters, their HTTP isolation regression, the lint corrections and the inherited 323d0db9 subject exception; executable qualification is recorded separately.
 - [ ] OPEN O1: maintenance window is the execution default; continuous coordination is outside this delivery.
 - [ ] OPEN O2: lot discard reason remains mandatory.
 - [ ] OPEN O3: keep lettre_envoyee; no new a_lettre state or historical event relabeling.
