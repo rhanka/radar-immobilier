@@ -21,6 +21,9 @@ describeDb("b5 composed lot concurrency and revocation", () => {
     const after = (await f.fixture.pool.query("SELECT COUNT(*)::integer AS n FROM facet_events"))
       .rows[0]!.n as number;
     expect(after).toBe(before + 1);
+    for (const table of ["facet_event_bindings", "facet_streams", "facet_heads", "facet_commands", "facet_command_contexts"]) {
+      expect((await f.fixture.pool.query(`SELECT * FROM ${table}`)).rows).toHaveLength(1);
+    }
   });
 
   it("replays identical idempotency keys with one SQL mutation", async () => {
@@ -37,10 +40,19 @@ describeDb("b5 composed lot concurrency and revocation", () => {
     ]);
     expect(left.status).toBe(200);
     expect(right.status).toBe(200);
-    expect(await right.text()).toBe(await left.text());
+    const receipt = await left.text();
+    expect(await right.text()).toBe(receipt);
     const events = (await f.fixture.pool.query("SELECT COUNT(*)::integer AS n FROM facet_events"))
       .rows[0]!.n as number;
     expect(events).toBe((before[0] as unknown[]).length + 1);
+    const settled = await f.sqlSnapshot();
+    const replay = await f.command("workspace", body, sub, key);
+    expect(replay.status).toBe(200);
+    expect(await replay.text()).toBe(receipt);
+    expect(await f.sqlSnapshot()).toEqual(settled);
+    for (const table of ["facet_event_bindings", "facet_streams", "facet_heads", "facet_commands", "facet_command_contexts"]) {
+      expect((await f.fixture.pool.query(`SELECT * FROM ${table}`)).rows).toHaveLength(1);
+    }
   });
 
   it("conflicts on stale content fingerprints with the current version", async () => {
