@@ -45,6 +45,8 @@ describeDb("internal personal activation persistence", () => {
     ["unbound history", "DELETE FROM facet_event_bindings", populated, "personal_history_unresolved"],
     ["missing projection", "DELETE FROM facet_heads", populated, "activation_projection_mismatch"],
     ["nonterminal head", "UPDATE facet_events SET superseded_by = gen_random_uuid()", populated, "activation_head_mismatch"],
+    ["misattributed basket", "UPDATE facet_streams SET basket = 'a_surveiller'", populated, "activation_identity_mismatch"],
+    ["misattributed city", "UPDATE facet_streams SET city_slug = 'foreign-city'", populated, "activation_identity_mismatch"],
     ["wrong scope", "UPDATE facet_streams SET scope = 'workspace', owner_id = NULL", populated, "activation_scope_mismatch"],
     ["foreign binding", "UPDATE facet_streams SET workspace_id = (SELECT id FROM workspaces WHERE id <> facet_streams.workspace_id LIMIT 1)", empty, "personal_history_unresolved"],
   ] as const)("should reject %s while keeping the barrier closed", async (_label, query, expected, message) => {
@@ -58,6 +60,48 @@ describeDb("internal personal activation persistence", () => {
     } finally { client.release(); }
     await expect(verifyPersonalActivationPersistence(f.db, f.workspaceId, f.actor.sub, expected))
       .rejects.toMatchObject({ status: 503, message });
+    await expect(readScopedPersonalHeads(f.db, f.member.sub, f.workspaceId, "synthetic-city"))
+      .rejects.toMatchObject({ status: 503 });
+    expect((await f.pool.query("SELECT maintenance_barrier FROM facet_activation_state")).rows)
+      .toEqual([{ maintenance_barrier: true }]);
+  });
+
+  it("should reject a misattributed owner without disclosing to the new owner", async () => {
+    const f = await closedFixture();
+    const client = await f.pool.connect();
+    try {
+      await client.query("BEGIN; SET LOCAL session_replication_role = replica");
+      await client.query("UPDATE facet_streams SET owner_id = $1", [f.actor.id]);
+      await client.query("COMMIT");
+    } finally { client.release(); }
+    await expect(verifyPersonalActivationPersistence(f.db, f.workspaceId, f.actor.sub, populated))
+      .rejects.toMatchObject({ status: 503, message: "activation_identity_mismatch" });
+    await expect(readScopedPersonalHeads(f.db, f.actor.sub, f.workspaceId, "synthetic-city"))
+      .rejects.toMatchObject({ status: 503 });
+    await expect(readScopedPersonalHeads(f.db, f.member.sub, f.workspaceId, "synthetic-city"))
+      .rejects.toMatchObject({ status: 503 });
+    expect((await f.pool.query("SELECT maintenance_barrier FROM facet_activation_state")).rows)
+      .toEqual([{ maintenance_barrier: true }]);
+  });
+
+  it("should reject a cross-stream chain link at constant cardinality", async () => {
+    const f = await fixture();
+    const first = await event(f);
+    const second = await event(f);
+    await attach(f);
+    await expect(runPersonalAttachmentActivation(f.db, activation(f), { ...safety,
+      readback: async () => { throw new Error("synthetic persistence pause"); },
+    })).rejects.toThrow("synthetic persistence pause");
+    const client = await f.pool.connect();
+    try {
+      await client.query("BEGIN; SET LOCAL session_replication_role = replica");
+      await client.query("UPDATE facet_events SET superseded_by = $1 WHERE id = $2",
+        [second.id, first.id]);
+      await client.query("COMMIT");
+    } finally { client.release(); }
+    await expect(verifyPersonalActivationPersistence(f.db, f.workspaceId, f.actor.sub,
+      { streams: 2, bindings: 2, heads: 2 }))
+      .rejects.toMatchObject({ status: 503, message: "activation_identity_mismatch" });
     await expect(readScopedPersonalHeads(f.db, f.member.sub, f.workspaceId, "synthetic-city"))
       .rejects.toMatchObject({ status: 503 });
     expect((await f.pool.query("SELECT maintenance_barrier FROM facet_activation_state")).rows)
