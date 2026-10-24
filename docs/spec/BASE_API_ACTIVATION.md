@@ -163,26 +163,51 @@ rtk make -f tools/make/base-api.mk -f tmp/base-api-evidence/B4/slice-7.mk b4-sli
 
 Use `BASE_API_LINT_FILES="api/path.ts api/path.test.ts"` for explicit changed-file
 lint receipts; API typechecking includes source tests and the exact operator script.
-`base-api-b3-mutation-required` and `base-api-b4-mutation-required` use fixed suites,
-require real packet runners and bound each runner to 600 seconds. Missing suites,
-runners or receipts fail closed. Each receipt must prove an actual assertion
-failure between passing baseline and restored runs, with unchanged selected cases,
-no skips, original/mutant bytes, exact patch, command, exits and restored checksum.
+`base-api-b3-mutation-required`, `base-api-b4-mutation-required` and
+`base-api-b5-mutation-required` use fixed suites, require real packet runners
+and bound each runner to 600 seconds. Missing suites, runners or receipts fail
+closed. Each receipt must prove an actual assertion failure between passing
+baseline and restored runs, with unchanged selected cases, no skips,
+original/mutant bytes, exact patch, command, exits and restored checksum.
 The receipt contract is implemented in `tools/make/base-api-required-mutations.mjs`.
-The full packet mutation runners remain pending; setup errors do not qualify.
-The fixed B4 target is already wired through the dispatcher and bounded to 600
-seconds in the container. With the two B4 integration suites still absent it
-rejects before creating a campaign, rather than reporting a mutation pass.
+Setup errors do not qualify.
 
-Standalone CT-8 fresh/upgrade/rerun and frozen 0022/0023 bytes remain required.
-Synthetic databases cannot establish deployment migration state. If ARTEFACTS is
-joined, qualify the actual combined frozen order and exact SHA/image under CT-8/CT-9.
-Final B4 delivery requires both activation suites, real Make activation/resume,
-all retained regressions, qualified B3 reception and a bundle reconstructed from
-the full B12 prerequisite. No final B4 bundle is issued for slices 1–8. The
-slice-8 rehearsal qualifies operator transport and seeded activation/resume only;
-shared retirement/restart wiring, final integrations, mutations and qualified B3
-history remain open. After scoped epoch change, use forward resume only.
+Historic B4 slices 1-8 state (snapshot retained on 2026-10-24):
+the full packet mutation runners were still pending, and with the two B4
+integration suites still absent the fixed B4 target rejected before creating
+a campaign rather than reporting a mutation pass. No final B4 bundle was
+issued for slices 1-8; the slice-8 rehearsal qualified only operator transport
+and seeded activation/resume, with shared retirement/restart wiring, final
+integrations, mutations and qualified B3 history still open. That historic
+state is superseded by the current qualification below.
+
+Qualified baseline B5 `965cd42b` before review corrections (2026-10-24, evidence in
+`tmp/base-api-evidence/B5/report.md`): the B4 integration suites
+(`base-api-activation.spec.ts`, `base-api-activation-resume.spec.ts`) are
+delivered and executed; the B5 mutation runner records 15 strict `0/1/0`
+cycles with a genuine restored pass of 44/44 tests in 11 suites
+(`20261024T190434-28-b5-mutation-required`); the B4 mutation rerun records
+19 strict `0/1/0` cycles with a genuine restored pass of 56/56 tests in 10
+suites (`20261024T184504-24-b4-mutation-required`); the final API gate records
+3,549 passed with zero failures in 346 files and 1,072 passed with zero
+failures or skips across the required 150 suites, plus both typechecks,
+explicit changed-file lint, declaration build, CT-7 and standalone CT-8
+(`20261024T191509-28-b5-verify`); retained compatibility records UI 262/262
+and MCP 217/217 (`20261024T191018-24-b2-6l2`); the B5 bundle SHA-256 is
+`907bca19e319d18b6ab83851bd1a54fecb55637d8efb3ed76ff3cd5cb2e209d5`.
+Review-correction qualification and its incremental bundle are recorded in
+`RAPPORT-SOL-BASE-B5.md`, section `Corrections revues astra B5`.
+
+Standalone CT-8 fresh/upgrade/rerun and frozen 0022/0023 bytes remain required
+and are qualified on synthetic databases only. Synthetic databases cannot
+establish deployment migration state. If ARTEFACTS is joined, qualify the
+actual combined frozen order and exact SHA/image under CT-8/CT-9.
+After scoped epoch change, use forward resume only.
+
+Remaining open (operational only): receiving-branch integration SHA and
+evidence, remote CI, deployed state, combined CT-8/CT-9 qualification, and
+operational activation with real workspace, actor, maintenance evidence,
+mapping, drain/shutdown proof and target database identity.
 
 ## Initial slice 10 and L6 synthetic restart rehearsal
 
@@ -422,6 +447,13 @@ access or activation. The three source writers (`ogc-pull`,
 Standalone CT-8 governs this delivery; combined CT-8/CT-9 waits for the
 frozen combined journal and the exact combined image. Evidence is synthetic;
 exact tested revisions, commands, results and review receipts are recorded in
-`tmp/base-api-evidence/B5/report.md` outside source commits. Receiving-branch
-integration and operational activation have their own receipts and are not
-established by the B5 branch bundle.
+`tmp/base-api-evidence/B5/report.md` outside source commits. Final executed
+evidence at `965cd42b` (2026-10-24): final API `20261024T191509-28-b5-verify`
+with 3,549 passed and required 150 suites with 1,072 passed; B5 mutations
+`20261024T190434-28-b5-mutation-required` with 15 strict `0/1/0` cycles;
+B4 rerun `20261024T184504-24-b4-mutation-required` with 19 strict `0/1/0`
+cycles; compatibility `20261024T191018-24-b2-6l2` with UI 262/262 and MCP
+217/217; bundle SHA-256
+`907bca19e319d18b6ab83851bd1a54fecb55637d8efb3ed76ff3cd5cb2e209d5`.
+Receiving-branch integration and operational activation have their own
+receipts and are not established by the B5 branch bundle.

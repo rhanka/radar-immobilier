@@ -318,10 +318,12 @@ Protected operator entry points owned and implemented in B4:
 Lease/receipt protocol: the conductor records each lease (holder, receiving
 branch/HEAD, both input SHAs, exact hunks, migration reservations, tests).
 The next holder acknowledges the receipt before another shared-file edit.
-BASE Sol A is the integrator for `schema.ts`, shared app/startup files and
-shared BASE verification files, and edits them only while holding the
-recorded lease; otherwise it submits bounded hunks to the holder. Muse never
-writes these files.
+The recorded lease covers only the CT-1 paths (`api/src/app.ts`,
+`api/src/index.ts`, `api/drizzle/**`, plus `api/src/routes/auth.ts` when both
+tracks touch it). BASE Sol A integrates `api/src/db/schema.ts` and shared BASE
+verification files under BASE-local ownership without a cross-track lease;
+shared app/startup edits apply only through the recorded CT-1 holder,
+otherwise bounded hunks go to that holder. Muse never writes these files.
 
 Standalone qualification (fresh DB, baseline upgrade, rerun with BASE-only
 migrations) never waits for the other track. Combined delivery adds the
@@ -369,10 +371,28 @@ Code trace verified in B0 (source presence never proves operational availability
 - D1–D4 remain ratified; concrete operational values (workspace, tenant
   bindings, members, moderators, manager, lot rights, basket, destinations)
   are `unverified`.
-- `unverified` until executed: B0_SHA value, port availability
+- Historic B0 state (snapshot retained on 2026-10-24): the following were
+  `unverified` until executed: B0_SHA value, port availability
   (API 18910 / UI 15910 / Maildev 11910), runner behavior, typecheck/lint/
   test/mutation outcomes, bundle contents, migration-applied state,
   K_SHA value and timing, 6K history import bytes, remote CI and PR #906.
+  That historic list is superseded by the current qualification below.
+- Qualified baseline B5 `965cd42b` before review corrections (2026-10-24, evidence in
+  `tmp/base-api-evidence/B5/report.md`): B0/K/B1/B2/B3/B123/B1234 ancestry,
+  frozen 0022/0023 bytes, port-bound synthetic campaigns
+  (API 18915 / UI 15915 / Maildev 11915), required packet runners, both
+  typechecks, explicit changed-file lint, declaration build, CT-7, standalone
+  CT-8, final API gate (3,549 passed, zero failures; required 150 suites with
+  1,072 passed, zero failures or skips), B5 mutations (15 strict `0/1/0`
+  cycles, restored 44/44), B4 mutation rerun (19 strict `0/1/0` cycles,
+  restored 56/56), retained UI 262/262 and MCP 217/217 compatibility, and the
+  B5 bundle (`907bca19e319d18b6ab83851bd1a54fecb55637d8efb3ed76ff3cd5cb2e209d5`).
+  Review-correction qualification and its incremental bundle are recorded in
+  `RAPPORT-SOL-BASE-B5.md`, section `Corrections revues astra B5`.
+- Remaining open (`unverified`, operational only): receiving-branch
+  integration SHA and evidence, remote CI and PR #906 status, deployed state,
+  combined CT-8/CT-9 qualification, and operational activation with real
+  inputs and target database identity.
 
 ## 13. B5 qualification matrix and evidence boundary
 
@@ -405,6 +425,10 @@ are recorded in `tmp/base-api-evidence/B5/report.md` outside source commits.
 
 B1–B4 mutation receipts keep their original identities and source hashes.
 B5 mutation cycles record baseline/assertion failure/restored success.
+Final executed evidence at `965cd42b` (2026-10-24, `tmp/base-api-evidence/B5/report.md`):
+final API with 3,549 passed and required 150 suites with 1,072 passed, B5
+mutations with 15 strict `0/1/0` cycles, B4 rerun with 19 strict `0/1/0`
+cycles, UI 262/262 and MCP 217/217 compatibility.
 Final reviews and receiving-branch integration require the exact tested SHA;
 a B5 branch bundle alone does not establish receiving-branch acceptance.
 Combined CT-8/CT-9 and operational activation remain separate qualifications.
