@@ -37,7 +37,7 @@
 - [x] Add receipt-gated strict receiver configuration.
 - [x] Cover receipt mismatch, missing fields and auth-disabled refusal.
 - [x] Verify exchanged tokens while retaining the pre-activation bearer path.
-- [ ] Cover token identity, audience, scope, lifetime and delegation refusals.
+- [x] Cover token identity, audience, scope, lifetime and delegation refusals.
 - [ ] Add the canonical search profile and strict recovery guard.
 - [ ] Cover profile, activation and recovery behavior.
 - [ ] Enforce the exchanged profile in the existing auth middleware.
