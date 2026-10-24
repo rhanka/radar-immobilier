@@ -38,7 +38,7 @@
 - [x] Cover receipt mismatch, missing fields and auth-disabled refusal.
 - [x] Verify exchanged tokens while retaining the pre-activation bearer path.
 - [x] Cover token identity, audience, scope, lifetime and delegation refusals.
-- [ ] Add the canonical search profile and strict recovery guard.
+- [x] Add the canonical search profile and strict recovery guard.
 - [ ] Cover profile, activation and recovery behavior.
 - [ ] Enforce the exchanged profile in the existing auth middleware.
 - [ ] Add exchanged-search fixtures and preserve per-viewer identity.
