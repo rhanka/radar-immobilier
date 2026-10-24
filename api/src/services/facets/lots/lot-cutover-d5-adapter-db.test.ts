@@ -95,7 +95,9 @@ describeDb("6K D5 winner through the real adapter", () => {
       [f.workspaceId, "lot-canonical-syn-6k-03"]);
     const safety = qualifiedLotCutoverSafety(f.db, bound, evidence, gate.ready,
       { expectedCutoverHeads: expectedCutoverHeadValues(report, gate.activatedSourceIds) });
-    await expect(runLotCutover(f.db, input, safety)).rejects.toMatchObject({ status: 503 });
+    const observed = await runLotCutover(f.db, input, safety)
+      .then(() => 200, (error: { status: number }) => error.status);
+    expect(observed).toBe(503);
     const [state] = await f.db.select().from(lotCutoverState)
       .where(eq(lotCutoverState.workspaceId, f.workspaceId));
     expect(state).toMatchObject({ maintenanceBarrier: true, destinationOpen: false });
