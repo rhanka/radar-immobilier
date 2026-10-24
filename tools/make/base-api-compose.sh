@@ -59,6 +59,7 @@ services:
     environment:
       COM_ADOBE_TESTING_S3MOCK_HTTPPORT: '9000'
       initialBuckets: radar-immobilier-raw,radar-immobilier-docs
+      JAVA_TOOL_OPTIONS: '-Xms64m -Xmx256m'
     healthcheck:
       test: [CMD-SHELL, 'wget -q -O /dev/null http://localhost:9000/favicon.ico || exit 1']
       interval: 2s
