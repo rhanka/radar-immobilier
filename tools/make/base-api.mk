@@ -40,7 +40,11 @@ base-api-ci-api:
 	rtk bash tools/make/base-api-verify.sh ci-api $(BASE_API_ARGS)
 .PHONY: base-api-contract-proof
 .PHONY: base-api-network-proof
+.PHONY: base-api-worktree-proof
 .PHONY: base-api-tooling-proof
+
+base-api-worktree-proof:
+	rtk bash tools/make/base-api-worktree-proof.sh $(BASE_API_ARGS)
 
 base-api-tooling-proof:
 	rtk bash tools/make/base-api-tooling-proof.sh $(BASE_API_ARGS)
