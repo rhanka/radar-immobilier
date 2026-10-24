@@ -1,7 +1,7 @@
 # Feature: H4 P5 strict API receiver
 
 ## Objective
-- [ ] Qualify the existing #865 receiver on the A3 baseline without activating it.
+- [x] Qualify the existing #865 receiver on the A3 baseline without activating it.
 
 ## Scope / Guardrails
 - [x] Baseline: `b9eeca218f3ea09906e8064581703b00658625bf`; branch: `feat/artefacts-mcp-a3`.
@@ -44,10 +44,10 @@
 - [x] Add exchanged-search fixtures and preserve per-viewer identity.
 - [x] Cover cookie-free search, audience confusions and account refusal.
 - [x] Cover forbidden methods/paths and browser/public-route behavior.
-- [ ] Pass focused auth/OIDC/session/signals tests and four restored mutations.
-- [ ] Pass typecheck, lint, API declarations and the complete ordinary API suite.
-- [ ] Verify every commit, bundle reconstruction and source byte equality.
-- [ ] Hand off the bundle and uncommitted French evidence report.
+- [x] Pass focused auth/OIDC/session/signals tests and four restored mutations.
+- [x] Pass typecheck, lint, API declarations and the complete ordinary API suite.
+- [x] Verify every commit, bundle reconstruction and source byte equality.
+- [x] Hand off the bundle and uncommitted French evidence report.
 
 ## Merge & Close
 - [ ] Conductor consumes the lane bundle under the shared-file lease.
