@@ -1,0 +1,17 @@
+{
+  "fixture": "reader-example",
+  "description": "Minimal connected technical example for ARTEFACTS A6/H5 proofs (D2 default). Synthetic data only.",
+  "servedBy": "api/src/artifacts/reader-example.ts (READER_EXAMPLE_HTML)",
+  "artifactId": "123e4567-e89b-12d3-a456-426614174000",
+  "releaseId": "123e4567-e89b-12d3-a456-426614174001",
+  "profile": "demo",
+  "policyRevision": "pol-001",
+  "readers": [
+    { "readerSub": "reader-alice", "approved": true, "signalsDetail": "full" },
+    { "readerSub": "reader-bob", "approved": true, "signalsDetail": "redacted" },
+    { "readerSub": "reader-mallory", "approved": false, "signalsDetail": "none" }
+  ],
+  "operations": ["geo.read.v1", "signals.protected-read.v1", "status.closed.v1"],
+  "geoFixture": { "collectionId": "qc-zonage-valleyfield", "limit": 2 },
+  "signalsFixture": { "city": "valleyfield" }
+}
