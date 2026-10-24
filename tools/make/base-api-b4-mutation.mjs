@@ -58,8 +58,9 @@ for (const m of mutations) {
   }, original.toString());
   assert.notEqual(mutant, original.toString());
   const baseline = step(m, prefix, 'baseline');
-  const targets = baseline.tests.filter((test) => test.title === m.title).map((test) => test.fullName);
-  assert.ok(targets.length > 0, 'missing behavioral target: ' + m.title);
+  const titles = m.titles ?? [m.title];
+  const targets = baseline.tests.filter((test) => titles.includes(test.title)).map((test) => test.fullName);
+  assert.equal(targets.length, titles.length, 'missing behavioral target: ' + titles.join(', '));
   writeFileSync(prefix + '-original.ts', original); writeFileSync(prefix + '-mutant.ts', mutant);
   const diff = spawnSync('diff', ['-u', '--label', 'a/api/' + m.source, '--label', 'b/api/' + m.source,
     prefix + '-original.ts', prefix + '-mutant.ts'], { encoding: 'utf8' });
