@@ -30,7 +30,7 @@ config=
 while [[ $# -gt 0 ]]; do
   case $1 in
     --env-file|-p) shift 2;;
-    -f) config=$2; shift 2;;
+    -f) [[ -n $config ]] || config=$2; shift 2;;
     *) break;;
   esac
 done
