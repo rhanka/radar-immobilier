@@ -8,7 +8,7 @@ archive_ci_inputs() {
   while IFS= read -r path; do
     case /$path/ in */.env*|*/credentials*|*/secrets*|*/reports/*|*/input/*) continue;; esac
     case $path in
-      api/tests/integration/*.ts|api/tests/fixtures/*.json|api/src/services/graph/__fixtures__/*.tsv|\
+      api/tests/integration/*.ts|api/tests/fixtures/*.json|api/src/services/geo/fixtures/simulation/*.json|api/src/services/graph/__fixtures__/*.tsv|\
       api/src/services/track/__fixtures__/*.jsonl|packages/radar-sources/tests/fixtures/*) ;;
       *) continue;;
     esac
