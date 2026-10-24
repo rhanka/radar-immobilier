@@ -34,7 +34,7 @@
 - [x] This lane uses synthetic automated tests only; root UAT remains on its fixed ports.
 
 ## Plan / Todo (lot-based)
-- [ ] Add receipt-gated strict receiver configuration.
+- [x] Add receipt-gated strict receiver configuration.
 - [ ] Cover receipt mismatch, missing fields and auth-disabled refusal.
 - [ ] Verify exchanged tokens while retaining the pre-activation bearer path.
 - [ ] Cover token identity, audience, scope, lifetime and delegation refusals.

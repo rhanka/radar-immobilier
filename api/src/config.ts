@@ -198,6 +198,23 @@ const envSchema = z.object({
     .positive()
     .default(2_592_000),
 
+  // ── H4 P5 strict receiver (exchange-first) — non-secret wiring only ─────
+  // Arming needs operator intent (STRICT_RECEIVER_ARMED=1) PLUS the A2
+  // receipt fields matching the receiver below exactly. Workload sub/client
+  // are non-secret references; the confidential credential stays operator-held.
+  STRICT_RECEIVER_ARMED: z
+    .enum(["0", "1"])
+    .default("0")
+    .transform((v) => v === "1"),
+  STRICT_RECEIVER_WORKLOAD_SUB: optStr(z.string().min(1)),
+  STRICT_RECEIVER_WORKLOAD_CLIENT_ID: optStr(z.string().min(1)),
+  STRICT_RECEIVER_ENVIRONMENT: optStr(z.string().min(1)),
+  STRICT_RECEIVER_RECEIPT_ISSUER: optStr(z.string().url()),
+  STRICT_RECEIVER_RECEIPT_API_AUDIENCE: optStr(z.string().min(1)),
+  STRICT_RECEIVER_RECEIPT_WORKLOAD_SUB: optStr(z.string().min(1)),
+  STRICT_RECEIVER_RECEIPT_WORKLOAD_CLIENT_ID: optStr(z.string().min(1)),
+  STRICT_RECEIVER_RECEIPT_ENVIRONMENT: optStr(z.string().min(1)),
+
   // ── Scaleway Transactional Email (TEM) — emails d'invitation ────────────
   // L'egress SMTP est BLOQUÉ au niveau plateforme sur ce cluster (BR-37b), donc
   // le relais smtp.tem.scw.cloud:587 ne délivre jamais. On envoie via l'API HTTP
@@ -339,6 +356,74 @@ export interface AuthConfig {
    * disabled.
    */
   readonly bearerAudiences: string[];
+  /**
+   * H4 P5 strict receiver wiring. Always attached by `resolveAuthConfig`;
+   * `enabled` is true only after exchange-first arming (intent plus an exact
+   * A2 receipt match). Hand-built configs without it mean pre-strict.
+   */
+  readonly strict?: StrictReceiverConfig | undefined;
+}
+
+/** Delegated scope the strict receiver accepts on the search route. */
+export const STRICT_RECEIVER_REQUIRED_SCOPE = "immo:search";
+/** Upper bound of an exchanged search-token lifetime, in seconds. */
+export const STRICT_RECEIVER_MAX_LIFETIME_S = 300;
+
+/**
+ * H4 P5 strict receiver wiring (exchange-first activation).
+ *
+ * `enabled` is true only when the operator armed the receiver AND the recorded
+ * A2 receipt matches this receiver exactly (issuer, API audience, workload
+ * subject, environment). A code merge alone never enables enforcement.
+ */
+export interface StrictReceiverConfig {
+  readonly enabled: boolean;
+  readonly issuer: string;
+  readonly apiAudience: string;
+  readonly mcpAudience: string;
+  readonly workloadSub: string;
+  readonly workloadClientId: string;
+  readonly requiredScope: string;
+  readonly maxLifetimeS: number;
+  readonly environment: string;
+}
+
+/**
+ * Resolve the strict receiver wiring from the app config plus the already
+ * derived issuer/app origins (no trailing slash, exact match semantics).
+ */
+export function resolveStrictReceiverConfig(
+  config: AppConfig,
+  issuerNoSlash: string,
+  appBaseUrlNoSlash: string,
+): StrictReceiverConfig {
+  const workloadSub = config.STRICT_RECEIVER_WORKLOAD_SUB ?? "";
+  const workloadClientId = config.STRICT_RECEIVER_WORKLOAD_CLIENT_ID ?? "";
+  const environment = config.STRICT_RECEIVER_ENVIRONMENT ?? "";
+  const apiAudience = appBaseUrlNoSlash !== "" ? new URL(appBaseUrlNoSlash).origin : "";
+  const receiptMatches =
+    config.STRICT_RECEIVER_ARMED &&
+    issuerNoSlash !== "" &&
+    appBaseUrlNoSlash !== "" &&
+    workloadSub !== "" &&
+    workloadClientId !== "" &&
+    environment !== "" &&
+    config.STRICT_RECEIVER_RECEIPT_ISSUER === issuerNoSlash &&
+    config.STRICT_RECEIVER_RECEIPT_API_AUDIENCE === apiAudience &&
+    config.STRICT_RECEIVER_RECEIPT_WORKLOAD_SUB === workloadSub &&
+    config.STRICT_RECEIVER_RECEIPT_WORKLOAD_CLIENT_ID === workloadClientId &&
+    config.STRICT_RECEIVER_RECEIPT_ENVIRONMENT === environment;
+  return {
+    enabled: receiptMatches,
+    issuer: issuerNoSlash,
+    apiAudience,
+    mcpAudience: apiAudience !== "" ? `${apiAudience}/mcp` : "",
+    workloadSub,
+    workloadClientId,
+    requiredScope: STRICT_RECEIVER_REQUIRED_SCOPE,
+    maxLifetimeS: STRICT_RECEIVER_MAX_LIFETIME_S,
+    environment,
+  };
 }
 
 /**
@@ -360,6 +445,9 @@ export function resolveAuthConfig(config: AppConfig): AuthConfig {
     clientSecret !== "" &&
     redirectUri !== "" &&
     sessionSecret !== "";
+  if (config.STRICT_RECEIVER_ARMED && !enabled) {
+    throw new Error("strict_receiver_requires_auth");
+  }
 
   const issuerNoSlash = issuer.replace(/\/$/, "");
   const appBaseUrlNoSlash = appBaseUrl.replace(/\/$/, "");
@@ -383,6 +471,7 @@ export function resolveAuthConfig(config: AppConfig): AuthConfig {
     sessionAbsoluteTtlSeconds: config.SESSION_ABSOLUTE_TTL_SECONDS,
     jwksUri,
     bearerAudiences,
+    strict: resolveStrictReceiverConfig(config, issuerNoSlash, appBaseUrlNoSlash),
   };
 }
 
