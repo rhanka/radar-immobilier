@@ -24,7 +24,7 @@ for (const entry of suffix) {
   if (gap) entries.push({ ...entry, tag: gap, idx: entries.length, when: ++clock });
   entries.push({ ...entry, idx: entries.length, when: ++clock });
 }
-const relative = /    const prerequisites = \["0020_facet_projection_revisions"[\s\S]*?    const source =/;
+const relative = / {4}const prerequisites = \["0020_facet_projection_revisions"[\s\S]*? {4}const source =/;
 const obsolete = `    const cutover = journal.entries.find((item) => item.tag === "0022_facet_lot_cutover")!;
     expect(journal.entries[cutover.idx - 1]!.tag).toBe("0021_facet_lot_history");
     expect(journal.entries[cutover.idx - 2]!.tag).toBe("0020_facet_projection_revisions");
