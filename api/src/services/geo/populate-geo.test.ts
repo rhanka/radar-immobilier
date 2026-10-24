@@ -73,6 +73,7 @@ function makeMockDb(): { db: Database; executeCount: number } {
       executeCount++;
       return Promise.resolve({ rows: [] });
     },
+    transaction: <T>(cb: (tx: unknown) => Promise<T>): Promise<T> => cb(db),
     select: (_fields: unknown) => ({
       from: (_table: unknown) => ({
         where: (_cond: unknown) => ({
