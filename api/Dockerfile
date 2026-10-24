@@ -71,6 +71,7 @@ RUN npm install --no-save esbuild@0.25.12 \
   "  entryPoints: [" \
   "    'api/src/index.ts'," \
   "    'api/src/artifacts/content-deny-server.ts'," \
+  "    'api/src/artifacts/content-reader-server.ts'," \
   "    'api/src/db/migrate.ts'," \
   "    'api/src/db/scripts/backfill-0004-tracking.ts'," \
   "    'api/src/scripts/project-graph-from-s3.ts'," \
