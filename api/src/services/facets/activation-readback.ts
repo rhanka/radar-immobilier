@@ -13,12 +13,16 @@
  * 6H opens by clearing its barrier after readback; 6K keeps its legacy
  * fence and opens `destinationOpen` separately.
  */
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, isNull, ne, or, sql } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import {
   accountUsers,
   facetActivationState,
+  facetEventBindings,
+  facetEvents,
+  facetHeads,
   facetStreamAttachments,
+  facetStreams,
   workspaceMemberships,
 } from "../../db/schema.js";
 import { lockWorkspace, managingActorId } from "../workspaces/mutations.js";
@@ -78,5 +82,85 @@ export async function authorizePersonalActivationReadback(
       attachedAccounts: attachments.length,
       activeMemberships,
     };
+  });
+}
+
+/** Declared persisted shape; a qualified empty history declares zero explicitly. */
+export interface ExpectedActivationPersistence {
+  streams: number;
+  bindings: number;
+  heads: number;
+}
+
+/** Bounded operator evidence: counts only, no event payloads. */
+export interface ActivationPersistenceEvidence {
+  streams: number;
+  bindings: number;
+  heads: number;
+}
+
+/**
+ * Verify real bindings, terminal heads and scoped projections while the 6H
+ * barrier stays closed. Throws closed on any missing, mismatched or
+ * incorrectly scoped state. Reading a store without using its result never
+ * qualifies: every count below is compared against the declared expectation,
+ * so an empty iteration passes only for an explicitly declared empty history.
+ * `scopedEpochFor` and public readers stay closed by design.
+ */
+export async function verifyPersonalActivationPersistence(
+  db: Database,
+  workspaceId: string,
+  actorSub: string,
+  expected: ExpectedActivationPersistence,
+): Promise<ActivationPersistenceEvidence> {
+  return db.transaction(async (tx) => {
+    await lockWorkspace(tx, workspaceId);
+    await managingActorId(tx, workspaceId, actorSub);
+    const [state] = await tx.select().from(facetActivationState)
+      .where(eq(facetActivationState.workspaceId, workspaceId));
+    if (!state) throw new ScopeError(503, "activation_not_scoped");
+    if (state.writerEpoch !== SCOPED_EPOCH) throw new ScopeError(409, "activation_not_scoped");
+    if (state.maintenanceBarrier !== true) throw new ScopeError(409, "activation_already_open");
+    const streams = await tx.select().from(facetStreams).where(
+      eq(facetStreams.workspaceId, workspaceId));
+    if (streams.some((stream) => stream.scope !== "personal")) {
+      throw new ScopeError(503, "activation_scope_mismatch");
+    }
+    const streamIds = new Set(streams.map((stream) => stream.id));
+    const bindings = streamIds.size === 0 ? [] : await tx.select().from(facetEventBindings);
+    const scopedBindings = bindings.filter((binding) => streamIds.has(binding.streamId));
+    const heads = streamIds.size === 0 ? [] : await tx.select().from(facetHeads);
+    const scopedHeads = heads.filter((head) => streamIds.has(head.streamId));
+    const attached = await tx.select().from(facetStreamAttachments).where(and(
+      eq(facetStreamAttachments.workspaceId, workspaceId),
+      eq(facetStreamAttachments.status, "attached")));
+    for (const attachment of attached) {
+      const [misbound] = await tx.select({ id: facetEvents.id }).from(facetEvents)
+        .leftJoin(facetEventBindings, eq(facetEventBindings.eventId, facetEvents.id))
+        .leftJoin(facetStreams, eq(facetStreams.id, facetEventBindings.streamId))
+        .where(and(eq(facetEvents.ownerId, attachment.accountId),
+          eq(facetEvents.scope, "personal"), or(isNull(facetEventBindings.eventId),
+            isNull(facetStreams.id), ne(facetStreams.workspaceId, workspaceId)))).limit(1);
+      if (misbound) throw new ScopeError(503, "personal_history_unresolved");
+    }
+    const bindingByEvent = new Map(scopedBindings.map((binding) => [binding.eventId, binding.streamId]));
+    for (const head of scopedHeads) {
+      if (bindingByEvent.get(head.eventId) !== head.streamId) {
+        throw new ScopeError(503, "activation_head_mismatch");
+      }
+    }
+    const projection = await tx.select({ event: facetEvents }).from(facetStreams)
+      .innerJoin(facetHeads, eq(facetHeads.streamId, facetStreams.id))
+      .innerJoin(facetEvents, eq(facetEvents.id, facetHeads.eventId))
+      .where(and(eq(facetStreams.workspaceId, workspaceId),
+        eq(facetStreams.scope, "personal")));
+    if (projection.some(({ event }) => event.supersededBy !== null)) {
+      throw new ScopeError(503, "activation_head_mismatch");
+    }
+    if (streams.length !== expected.streams || scopedBindings.length !== expected.bindings
+      || projection.length !== expected.heads || scopedHeads.length !== expected.heads) {
+      throw new ScopeError(503, "activation_projection_mismatch");
+    }
+    return { streams: streams.length, bindings: scopedBindings.length, heads: projection.length };
   });
 }
