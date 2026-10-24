@@ -29,6 +29,7 @@ CONFIG
 }
 lint_api() {
   shopt -s nullglob
+  node_modules/.bin/eslint -- api/src/scripts/base-api-personal-activation.ts
   local tests=(api/tests/integration/base-api*.ts)
   node_modules/.bin/eslint api/src/services/facets api/src/routes/scoped-*.ts api/src/routes/workspaces.ts api/src/routes/graph-signals.ts api/src/routes/signal-facets.ts api/src/app.ts api/src/index.ts api/src/db/schema.ts api/src/routes/chat.ts api/src/routes/prospect-marks*.ts api/src/services/chat/stream-bus*.ts "${tests[@]}"
   local file

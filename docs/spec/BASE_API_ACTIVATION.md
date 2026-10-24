@@ -35,31 +35,49 @@ embedded Make functions as well as shell syntax without evaluating either:
 | `BASE_API_WORKSPACE` | `--workspace` (required UUID) |
 | `BASE_API_ACTOR` | `--actor` (required, maximum 256 characters) |
 | `BASE_API_REASON` | `--reason` (required, maximum 512 characters) |
-| `BASE_API_MAINTENANCE_EVIDENCE` | `--maintenance-evidence` (required JSON file) |
+| `BASE_API_MAINTENANCE_ATTEMPT` | `--maintenance-attempt` (required UUID) |
+| `BASE_API_RELEASE` | `--release` (required, maximum 256 characters) |
+| `BASE_API_INSTANCES` | repeated `--instance` (space-separated IDs, each matching `[a-zA-Z0-9_.:-]{1,256}`) |
+| `BASE_API_MAINTENANCE_EVIDENCE` | required JSON file, read as data into `--evidence-json` inside the container |
 
 Evidence must be a regular, nonempty file below `tmp/base-api-evidence/`, with
 no traversal, environment-file component or symlink ancestor. It is mounted
-read-only as `/maintenance-evidence.json`; its contents are never shell arguments.
+read-only as `/maintenance-evidence.json`; its contents become one quoted script
+argument and are never evaluated or printed by the dispatcher.
 The dispatcher invokes `api/src/scripts/base-api-personal-activation.ts` with
 positional action `activate` or `resume` in the API container on the same campaign.
 It never starts a replacement database or silently chooses an operational target.
 
-The received slice-7 script currently accepts flat `--workspace`, `--actor`,
-`--reason`, `--maintenance-attempt`, `--release`, repeated `--instance` and
-`--evidence-json` flags. It does not implement the dispatcher's evidence-file
-interface. It dispatches positional `activate`/`resume` by durable state. Slice 8
-must reconcile the interfaces; the reserved Make calls below remain unqualified.
+The dispatcher supplies the script's flat validated flags and positional action.
+Attempt, release and expected instances are independent operator inputs; they are
+never inferred from submitted evidence. Missing inputs, foreign evidence and stale
+script bytes reject before activation. The actual runtime script must match the
+immutable campaign archive. These targets accept only owned disposable test/e2e
+campaigns; operational workspace/database values remain unverified.
 
-These exact **synthetic examples have not executed a functional activation**:
+The following exact **synthetic qualification commands executed successfully**
+on the same owned `radar-test-base-api-b1` campaign. The two instance names and
+drain/shutdown evidence are synthetic; no operational shutdown is established.
+Evidence expires after seven days; a new rehearsal needs freshly qualified proof.
 
 ```sh
-rtk make -f tools/make/base-api.mk base-api-activate-personal BASE_API_WORKSPACE=11111111-1111-4111-8111-111111111111 BASE_API_ACTOR=synthetic-actor-1 BASE_API_REASON="synthetic maintenance window" BASE_API_MAINTENANCE_EVIDENCE=tmp/base-api-evidence/B4/maintenance.json API_PORT=18911 UI_PORT=15911 MAILDEV_UI_PORT=11911 ENV=test-base-api-b1
-rtk make -f tools/make/base-api.mk base-api-resume-personal BASE_API_WORKSPACE=11111111-1111-4111-8111-111111111111 BASE_API_ACTOR=synthetic-actor-1 BASE_API_REASON="synthetic maintenance window" BASE_API_MAINTENANCE_EVIDENCE=tmp/base-api-evidence/B4/maintenance.json API_PORT=18911 UI_PORT=15911 MAILDEV_UI_PORT=11911 ENV=test-base-api-b1
+rtk make -f tools/make/base-api.mk base-api-activate-personal BASE_API_WORKSPACE=d2ec54f4-1afd-482b-986f-3814fd8d21f8 BASE_API_ACTOR=synthetic-slice8-manager BASE_API_REASON='synthetic slice 8 $(shell touch injected) `touch injected`' BASE_API_MAINTENANCE_ATTEMPT=22222222-2222-4222-8222-222222222222 BASE_API_RELEASE=synthetic-slice8-release BASE_API_INSTANCES='synthetic-old-a synthetic-old-b' BASE_API_MAINTENANCE_EVIDENCE=tmp/base-api-evidence/B4/slice-8/operator/maintenance.json API_PORT=18911 UI_PORT=15911 MAILDEV_UI_PORT=11911 ENV=test-base-api-b1
+rtk make -f tools/make/base-api.mk base-api-resume-personal BASE_API_WORKSPACE=d2ec54f4-1afd-482b-986f-3814fd8d21f8 BASE_API_ACTOR=synthetic-slice8-manager BASE_API_REASON='synthetic slice 8 $(shell touch injected) `touch injected`' BASE_API_MAINTENANCE_ATTEMPT=22222222-2222-4222-8222-222222222222 BASE_API_RELEASE=synthetic-slice8-release BASE_API_INSTANCES='synthetic-old-a synthetic-old-b' BASE_API_MAINTENANCE_EVIDENCE=tmp/base-api-evidence/B4/slice-8/operator/maintenance.json API_PORT=18911 UI_PORT=15911 MAILDEV_UI_PORT=11911 ENV=test-base-api-b1
 ```
 
-The shell command-double proof tests literal argument transport and rejection of
-missing inputs. It is not a database rehearsal. Record exact real commands,
-database identity, durable before/after state and exit status once slices 6–8 land.
+`base-api-tooling-proof` verifies literal argument transport, required-input
+rejection and exact staging paths without a daemon. The PostgreSQL rehearsal below
+separately records real Make calls, database identity, durable SQL and exit status.
+
+Slice-8 evidence lives in `tmp/base-api-evidence/B4/slice-8/operator/`.
+Database `radar`, PostgreSQL system identifier `7700072694517792808`, start time
+`2026-10-24 03:34:43.49684+00`, remained identical across both calls. Both exited
+0 with `open-success`. Activation changed absent epoch state and one legacy event
+into scoped/open state with one stream, binding and head; already-open resume
+preserved serialized rows of every public SQL table byte for byte. Missing drain,
+missing shutdown and foreign workspace/attempt/release evidence each exited 2
+through Make and preserved all SQL bytes. Exact arguments, proof files, before/
+after states, checksums and per-command exits are retained; no shell marker ran.
 
 ## Qualified maintenance evidence
 
@@ -132,10 +150,16 @@ failure between passing baseline and restored runs, with unchanged selected case
 no skips, original/mutant bytes, exact patch, command, exits and restored checksum.
 The receipt contract is implemented in `tools/make/base-api-required-mutations.mjs`.
 The full packet mutation runners remain pending; setup errors do not qualify.
+The fixed B4 target is already wired through the dispatcher and bounded to 600
+seconds in the container. With the two B4 integration suites still absent it
+rejects before creating a campaign, rather than reporting a mutation pass.
 
 Standalone CT-8 fresh/upgrade/rerun and frozen 0022/0023 bytes remain required.
 Synthetic databases cannot establish deployment migration state. If ARTEFACTS is
 joined, qualify the actual combined frozen order and exact SHA/image under CT-8/CT-9.
 Final B4 delivery requires both activation suites, real Make activation/resume,
 all retained regressions, qualified B3 reception and a bundle reconstructed from
-the full B12 prerequisite. No final B4 bundle is issued for slices 1–7.
+the full B12 prerequisite. No final B4 bundle is issued for slices 1–8. The
+slice-8 rehearsal qualifies operator transport and seeded activation/resume only;
+shared retirement/restart wiring, final integrations, mutations and qualified B3
+history remain open. After scoped epoch change, use forward resume only.

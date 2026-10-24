@@ -15,7 +15,11 @@ override BASE_API_WORKSPACE := $(value BASE_API_WORKSPACE)
 override BASE_API_ACTOR := $(value BASE_API_ACTOR)
 override BASE_API_REASON := $(value BASE_API_REASON)
 override BASE_API_MAINTENANCE_EVIDENCE := $(value BASE_API_MAINTENANCE_EVIDENCE)
+override BASE_API_MAINTENANCE_ATTEMPT := $(value BASE_API_MAINTENANCE_ATTEMPT)
+override BASE_API_RELEASE := $(value BASE_API_RELEASE)
+override BASE_API_INSTANCES := $(value BASE_API_INSTANCES)
 export BASE_API_WORKSPACE BASE_API_ACTOR BASE_API_REASON BASE_API_MAINTENANCE_EVIDENCE
+export BASE_API_MAINTENANCE_ATTEMPT BASE_API_RELEASE BASE_API_INSTANCES
 BASE_API_ARGS = "API_PORT=$$API_PORT" "UI_PORT=$$UI_PORT" "MAILDEV_UI_PORT=$$MAILDEV_UI_PORT" "ENV=$$ENV"
 BASE_API_SCOPE := src/services/facets/scoped-db.test.ts src/services/facets/workspace-receipts-db.test.ts src/services/facets/projection-migration-db.test.ts src/routes/scoped-projection-events-db.test.ts
 
@@ -30,6 +34,7 @@ BASE_API_SCOPE := src/services/facets/scoped-db.test.ts src/services/facets/work
 
 base-api-tooling-proof:
 	rtk bash tools/make/base-api-tooling-proof.sh $(BASE_API_ARGS)
+	rtk bash tools/make/base-api-activation-proof.sh $(BASE_API_ARGS)
 
 .PHONY: base-api-activate-personal base-api-resume-personal
 .PHONY: base-api-b3-mutation-required base-api-b4-mutation-required base-api-bundle-proof
