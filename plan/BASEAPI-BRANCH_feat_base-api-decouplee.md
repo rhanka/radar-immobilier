@@ -120,7 +120,7 @@
   - [x] B2.6: qualify truly empty history → opening → first mark without artificial business events.
   - [x] B2.7: retain closure for unresolved-only history, missing rights, uncovered writers or invalid epoch.
   - [x] Gate: lot-opening*, lot-cutover-readback*, lot-cutover-empty*, existing 6J/6K and 6L2 regressions; typecheck and scoped lint.
-- [x] B3 — Serialized source writers; Muse 3–5 h, Sol 3–4 h, total 6–9 h.
+- [ ] B3 — Serialized source writers; Muse 3–5 h, Sol 3–4 h, total 6–9 h.
   - [x] B3 preparation: qualify the synthetic source-writer fixture before changing any production writer.
   - [x] B3.1 identity preparation: retain OGC stored update identities and revalidate insert decisions; stored-identity DB contention verified below.
   - [x] B3.1 transaction locks: hold ordered OGC source locks through batch commit and reject identity drift; deterministic transaction-boundary mutation qualified.
@@ -132,10 +132,11 @@
   - [x] B3.3 transaction preparation: insert canonical lots under the shared transaction lock after validation; retain existing projection and lot behavior, with DB contention and serialization mutation qualified.
   - [x] B3.3: exploitation/projection.ts and its source-lock DB tests; share the canonical lock protocol.
   - [x] B3.3 contention evidence: verify canonical projection lock waits, same-backend lock retention during INSERT, independent committed targets and scope rejection without writes; serialization removal fails its own contention assertion.
-  - [x] B3.4: qualify lock order, contention and unchanged-UUID content changes before recording writer coverage.
-  - [x] B3.4 race evidence: verify real OGC versus single/batch facet writers in both orders with PostgreSQL barriers, exact canonical lock order, same-backend DML retention, stable-UUID fingerprint conflicts and atomic persistence; all ten discriminating writer mutations qualified via tools/make/base-api-b3-mutation.sh.
+  - [x] B3 FIX1 cardinality: update every live population period on city change; reject identity or live-set drift after discovery with PostgreSQL barriers.
+  - [ ] B3.4: qualify lock order, contention and unchanged-UUID content changes before recording writer coverage.
+  - [ ] B3.4 race evidence: requalify real OGC, populate and projection versus single/batch facet writers in both orders; preserve all ten required mutations and add review-defect discrimination.
   - [x] B3.4 coverage evidence: verify all three writers with synthetic executed-case reasons; each missing row, false coverage or invalid reason blocks activation; operational inputs stay separate.
-  - [x] Gate: all three real writer paths contend with facet commands; no coverage attestation without the corresponding executable proof.
+  - [ ] Gate: all three real writer paths contend with facet commands; no coverage attestation without the corresponding executable proof.
 - [ ] B4 — Operational cutover; Muse 5–8 h, Sol 4–6 h, total 9–14 h.
   - [x] B4/B3 tooling preparation: narrow delivery paths, exact ontology input, changed-file lint and common synthetic DB migration; functional gates remain open.
   - [ ] B4.1: implement/inject 6H and 6K maintenance safety through existing activation interfaces; Muse A implements B4, Sol A verifies and commits BASE-owned files; shared application/startup deltas use the current CT-1 lease holder.
