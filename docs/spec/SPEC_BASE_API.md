@@ -153,8 +153,9 @@ Moderator-only common archive, same path family as personal facets:
   discard, plus distinct pipeline (`sollicite`, `lettre_envoyee`) and market
   (`en_vente`) rights. `lettre_envoyee` keeps its existing meaning; no
   `a_lettre` state exists. Lot discard keeps its mandatory reason
-  (`reason_code_required`, 422); the legacy-import reason is rejected
-  (`invalid_reason_code`).
+  (`reason_code_required`, 422). The reserved `legacy-unknown` reason is
+  rejected by the strict HTTP schema with 400 `invalid_facet_command`;
+  direct service callers receive 422 `invalid_reason_code`.
 
 ## 4. Idempotency, replay, conflicts, batches
 
@@ -168,7 +169,8 @@ Moderator-only common archive, same path family as personal facets:
 - Receipt with an unresolved command context → `command_context_unresolved`
   (409); the context must resolve before the receipt is returned.
 - Owner history with events lacking stream bindings →
-  `personal_history_unresolved` (409); legacy payloads use recovery-only
+  `personal_history_unresolved`: signal commands return 409; public personal
+  readers, reveal and lot reads return 503. Legacy payloads use recovery-only
   paths and never create new commands.
 - Source-version conflicts (changed content under the same head, including
   unchanged-UUID content changes) → 409 + `current` carrying the live
@@ -391,7 +393,7 @@ are recorded in `tmp/base-api-evidence/B5/report.md` outside source commits.
 - B5.3: `base-api-cutover-readback.spec.ts` observes real qualified empty
   PostgreSQL readback while public HTTP remains 503, then opening and the
   first ordinary mark. `base-api-cutover-acceptance.spec.ts` adds gate,
-  identity-binding and legacy observations. Inherited B4
+  legacy observations. Inherited B4
   `base-api-activation{,-resume}.spec.ts`, `base-api-cutover-bound.spec.ts`
   and `base-api-mutation-closure.spec.ts` retain protected interruption,
   forward resume, persisted integrity and durable reconstruction witnesses.

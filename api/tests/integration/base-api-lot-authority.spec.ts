@@ -77,6 +77,7 @@ describeDb("b5 composed lot authority", () => {
     expect(await f.sqlSnapshot()).toEqual(before);
     const allowed = await f.command("workspace", discard, f.fixture.moderator.sub);
     expect(allowed.status).toBe(200);
+    const commonHead = (await allowed.json()).result.heads[0].id as string;
     const personal = await f.command("personal", {
       mode: "real", target, displayed_version: displayed,
       expected_head_id: null, mutation: { action: "select", basket_id: f.fixture.selectionBasket },
@@ -84,5 +85,14 @@ describeDb("b5 composed lot authority", () => {
     expect(personal.status).toBe(400);
     const archived = await f.command("personal", discard, f.fixture.contributor.sub);
     expect(archived.status).toBe(200);
+    const personalHead = (await archived.json()).result.heads[0].id as string;
+    const restored = await f.command("workspace", { ...discard, expected_head_id: commonHead,
+      mutation: { action: "restore" } }, f.fixture.moderator.sub);
+    expect(restored.status).toBe(200);
+    const state = await f.request(`${f.lotBase}?citySlug=${target.citySlug}&canonicalId=${target.canonicalId}&mode=real`,
+      f.fixture.contributor.sub);
+    expect(state.status).toBe(200);
+    expect(await state.json()).toMatchObject({ archive: { workspace: { state: "inactive" },
+      personal: { id: personalHead, state: "active" }, effectiveDiscarded: true } });
   });
 });
