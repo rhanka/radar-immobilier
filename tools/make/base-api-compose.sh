@@ -10,6 +10,8 @@ services:
     mem_limit: 2g
     labels: {org.radar.base.owner: "$OWNER"}
     tmpfs: [/var/lib/postgresql/data:size=1536m]
+    # Retain RAM-backed dependencies between successive operator containers.
+    volumes: [runtime:/base-api-runtime:ro]
     environment:
       POSTGRES_USER: radar
       POSTGRES_PASSWORD: synthetic-only
