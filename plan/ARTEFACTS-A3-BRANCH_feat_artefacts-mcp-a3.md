@@ -40,7 +40,7 @@
 - [x] Cover token identity, audience, scope, lifetime and delegation refusals.
 - [x] Add the canonical search profile and strict recovery guard.
 - [x] Cover profile, activation and recovery behavior.
-- [ ] Enforce the exchanged profile in the existing auth middleware.
+- [x] Enforce the exchanged profile in the existing auth middleware.
 - [ ] Add exchanged-search fixtures and preserve per-viewer identity.
 - [ ] Cover cookie-free search, audience confusions and account refusal.
 - [ ] Cover forbidden methods/paths and browser/public-route behavior.
