@@ -50,8 +50,8 @@ async function raceWithObservedOverlap<T>(
     return { first: firstResult, second: secondResult, waiting };
   } finally {
     if (!released) {
-      try { await guard.query("SELECT pg_advisory_unlock_all()"); } catch { undefined; }
-      try { guard.release(); } catch { undefined; }
+      try { await guard.query("SELECT pg_advisory_unlock_all()"); }
+      finally { guard.release(); }
     }
   }
 }
