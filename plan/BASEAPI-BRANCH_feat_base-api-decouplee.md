@@ -146,7 +146,7 @@
   - [x] B4 review fix readback: compare persisted 6K heads and values before opening.
   - [x] B4 review fix identity: reject misattributed 6H event/stream identity at constant counts.
   - [x] B4 review fix wiring: build server-configured 6K safety for the current HTTP request actor.
-  - [ ] B4 review fix composition: qualify two moderators through createApp and reject static adapter reuse.
+  - [x] B4 review fix composition: qualify two moderators through createApp and reject static adapter reuse.
   - [ ] B4 review fix recovery: retain closed barriers for missing or altered reconciled PostgreSQL heads.
   - [ ] B4 review fix witnesses: cover full personal identities and persisted projection comparisons.
   - [ ] B4 review fix tooling: run all sixteen integrated mutation families, full CI API selection and declaration build with bounded resources.
