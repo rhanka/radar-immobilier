@@ -94,7 +94,7 @@ async function readAuthorizedHeads(
       eq(graphNodes.type, facetEvents.nodeType), eq(graphNodes.id, facetEvents.nodeId)))
     .where(and(eq(facetStreams.workspaceId, workspaceId),
       eq(facetStreams.scope, "personal"), eq(facetStreams.ownerId, accountId),
-      eq(facetStreams.citySlug, city)))
+      eq(facetStreams.targetType, "signal"), eq(facetStreams.citySlug, city)))
     .orderBy(facetEvents.nodeType, facetEvents.nodeId, facetEvents.facet, facetEvents.basket);
   return rows.map(({ event, node }) => ({
     ...facetEventResponse(event),
