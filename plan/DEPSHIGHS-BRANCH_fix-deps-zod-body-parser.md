@@ -42,11 +42,11 @@
   - [x] CI-equivalent lint, workspace typecheck, API/UI build and UI bundle smoke.
   - [x] CI `test` target: final unchanged rerun passes 7,006 tests, 260 skipped, 10 todo; retain the initial cleanup-hook failure.
   - [x] API Zod validation (15 checks) and Express parsing (12 checks); advisory crash reproduced before and absent after.
-- [ ] **Lot 3 — Documentation & local delivery**
+- [x] **Lot 3 — Documentation & local delivery**
   - [x] Write security finding with explicit compatibility blocker and bounded remediation options.
-  - [ ] Commit selective changes in subject-only commits of at most 150 lines.
-  - [ ] Create bundle from the exact base and audit it in a fresh repository.
-  - [ ] Write French campaign report with delivered SHA and bundle SHA-256.
-  - [ ] Remove campaign containers/volumes and verify final disk and shared-Git state.
+  - [x] Commit selective changes in subject-only commits of at most 150 lines.
+  - [x] Create bundle from the exact base and audit it in a fresh repository; repeat on the final documentation commit.
+  - [x] Write French campaign report; final SHA and bundle SHA-256 are recorded after packaging.
+  - [x] Remove campaign containers/volumes; observed free space stays above 29 GiB; shared Git remains at the base.
 - [x] **Merge & close — outside this local delivery**
   - [x] No push, PR mutation, merge, or risk acceptance authorized by this campaign.
