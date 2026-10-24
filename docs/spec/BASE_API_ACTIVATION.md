@@ -1,8 +1,9 @@
 # BASE activation and protected recovery
 
-Status: B4 slices 1–5 and standalone tooling preparation only. The real operator
-implementation, restart wiring and B3 qualification
-are still pending. This document does not authorize operational activation.
+Status: B4 slices 1–6 and standalone tooling preparation only. The activation
+entry has scoped PostgreSQL coverage; durable resume, dispatcher integration,
+restart wiring and B3 qualification remain pending. This document does not
+authorize operational activation.
 B5 and the nominal operational rehearsal retain their original scope and budget.
 
 ## Prerequisites
@@ -42,6 +43,12 @@ read-only as `/maintenance-evidence.json`; its contents are never shell argument
 The dispatcher invokes `api/src/scripts/base-api-personal-activation.ts` with
 positional action `activate` or `resume` in the API container on the same campaign.
 It never starts a replacement database or silently chooses an operational target.
+
+The received slice-6 script currently accepts flat `--workspace`, `--actor`,
+`--reason`, `--maintenance-attempt`, `--release`, repeated `--instance` and
+`--evidence-json` flags. It does not implement the dispatcher's evidence-file
+interface or durable `resume` yet. Slice 8 must reconcile these interfaces after
+slice 7; the reserved Make calls below remain unqualified.
 
 These exact **synthetic examples have not executed a functional activation**:
 
@@ -87,9 +94,11 @@ manager and attached-account rights, scoped epoch and a closed barrier are requi
 Slice 4 separately checks persisted stream/binding/head counts against explicit
 expectations and verifies terminal projections under that same closed barrier.
 Explicit zero counts qualify an empty history only when attached personal events
-are neither unresolved nor bound outside the selected workspace. These internal
-helpers still require operator composition. Slice 5 rechecks the manager and every
-qualified attached account before drainage and again in the final opening
+are neither unresolved nor bound outside the selected workspace. Slice 6 composes
+both checks for activation, deriving expected stream/binding/head counts from
+attached personal history rather than the projections being checked. A missing
+persisted head rejects with 503 and retains the scoped barrier. Slice 5 rechecks
+the manager and every qualified attached account before drainage and again in the final opening
 transaction under the workspace lock. Account approval and active membership are
 required; share locks retain those rights through commit. Revocation after real
 readback rejects opening and preserves the closed barrier and history. A concurrent
@@ -119,4 +128,4 @@ Synthetic databases cannot establish deployment migration state. If ARTEFACTS is
 joined, qualify the actual combined frozen order and exact SHA/image under CT-8/CT-9.
 Final B4 delivery requires both activation suites, real Make activation/resume,
 all retained regressions, qualified B3 reception and a bundle reconstructed from
-the full B12 prerequisite. No final B4 bundle is issued for slices 1–5.
+the full B12 prerequisite. No final B4 bundle is issued for slices 1–6.
