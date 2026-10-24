@@ -120,12 +120,27 @@
   - [x] B2.6: qualify truly empty history → opening → first mark without artificial business events.
   - [x] B2.7: retain closure for unresolved-only history, missing rights, uncovered writers or invalid epoch.
   - [x] Gate: lot-opening*, lot-cutover-readback*, lot-cutover-empty*, existing 6J/6K and 6L2 regressions; typecheck and scoped lint.
-- [ ] B3 — Serialized source writers; Muse 3–5 h, Sol 3–4 h, total 6–9 h.
-  - [ ] B3.1: ogc-pull.ts and its source-lock DB tests; lock the actual mutated identity in the mutation transaction.
-  - [ ] B3.2: populate-geo.ts and its source-lock DB tests; cover both update and insert paths.
-  - [ ] B3.3: exploitation/projection.ts and its source-lock DB tests; share the canonical lock protocol.
-  - [ ] B3.4: qualify lock order, contention and unchanged-UUID content changes before recording writer coverage.
-  - [ ] Gate: all three real writer paths contend with facet commands; no coverage attestation without the corresponding executable proof.
+- [x] B3 — Serialized source writers; Muse 3–5 h, Sol 3–4 h, total 6–9 h.
+  - [x] B3 preparation: qualify the synthetic source-writer fixture before changing any production writer.
+  - [x] B3.1 identity preparation: retain OGC stored update identities and revalidate insert decisions; stored-identity DB contention verified below.
+  - [x] B3.1 transaction locks: hold ordered OGC source locks through batch commit and reject identity drift; deterministic transaction-boundary mutation qualified.
+  - [x] B3.1: ogc-pull.ts and its source-lock DB tests; lock the actual mutated identity in the mutation transaction.
+  - [x] B3.1 contention evidence: verify real OGC stored-identity lock waits, same-backend lock retention during UPDATE, independent targets, unchanged-UUID invalidation and batch rollback.
+  - [x] B3.2 transaction preparation: lock stored and resulting population identities through update/insert commit; retain existing unit behavior.
+  - [x] B3.2: populate-geo.ts and its source-lock DB tests; cover both update and insert paths.
+  - [x] B3.2 contention evidence: verify update/insert and both city-change identities with PostgreSQL waits, same-backend locks during mutation, persisted SQL and unchanged-UUID fingerprint rejection.
+  - [x] B3.3 transaction preparation: insert canonical lots under the shared transaction lock after validation; retain existing projection and lot behavior, with DB contention and serialization mutation qualified.
+  - [x] B3.3: exploitation/projection.ts and its source-lock DB tests; share the canonical lock protocol.
+  - [x] B3.3 contention evidence: verify canonical projection lock waits, same-backend lock retention during INSERT, independent committed targets and scope rejection without writes; serialization removal fails its own contention assertion.
+  - [x] B3 FIX1 cardinality: update every live population period on city change; reject identity or live-set drift after discovery with PostgreSQL barriers.
+  - [x] B3 FIX1 population races: execute the real source against single and batch facet commands in both orders, with PostgreSQL waits and atomic persisted state.
+  - [x] B3 FIX1 projection races: execute historical projection against single and batch facet commands in both orders; retain the current source identity and fingerprint.
+  - [x] B3.4: qualify lock order, contention and unchanged-UUID content changes before recording writer coverage.
+  - [x] B3.4 race evidence: qualify real OGC, populate and projection versus single/batch facet writers in both orders; all ten required mutations plus three FIX1 discriminators complete baseline PASS, assertion FAIL and restored PASS.
+  - [x] B3 FIX1 resource proof: retain the 512-MiB disposable database bound; confirm mutation-only WAL settings through SQL before running the complete packet, with rejected attempts preserved separately.
+  - [x] B3 FIX1 final gate: 146 cases across 25 suites, zero failed/skipped; thirteen mutation cycles 0/1/0; API/source-test typecheck, explicit changed-file lint, CT-7 and CT-8 pass.
+  - [x] B3.4 coverage evidence: verify all three writers with synthetic executed-case reasons; each missing row, false coverage or invalid reason blocks activation; operational inputs stay separate.
+  - [x] Gate: all three real writer paths contend with facet commands; no coverage attestation without the corresponding executable proof.
 - [ ] B4 — Operational cutover; Muse 5–8 h, Sol 4–6 h, total 9–14 h.
   - [x] B4/B3 tooling preparation: narrow delivery paths, exact ontology input, changed-file lint and common synthetic DB migration; functional gates remain open.
   - [x] B4 operator input transport: actual Make activation/resume command-double proof preserves literal Make functions and shell syntax without evaluation.
