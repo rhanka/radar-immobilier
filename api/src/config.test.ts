@@ -208,4 +208,90 @@ describe("loadConfig", () => {
       expect(auth.sessionAbsoluteTtlSeconds).toBe(1209600);
     });
   });
+
+  describe("strict receiver (H4 P5, exchange-first)", () => {
+    const STRICT_BASE: NodeJS.ProcessEnv = {
+      ...BASE_ENV,
+      SENTROPIC_IDP_ISSUER: "https://auth.example.test",
+      SENTROPIC_OAUTH_CLIENT_ID: "radar-immobilier",
+      SENTROPIC_OAUTH_CLIENT_SECRET: "super-secret",
+      SENTROPIC_OAUTH_REDIRECT_URI: "https://immo.example.test/api/v1/auth/oauth/callback",
+      AUTH_CALLBACK_BASE_URL: "https://preprod.immo.example.test",
+      SESSION_SECRET: "session-signing-key-min-32-chars-x",
+      STRICT_RECEIVER_ARMED: "1",
+      STRICT_RECEIVER_WORKLOAD_SUB: "immo-mcp-workload",
+      STRICT_RECEIVER_WORKLOAD_CLIENT_ID: "immo-mcp-workload",
+      STRICT_RECEIVER_ENVIRONMENT: "preprod",
+      STRICT_RECEIVER_RECEIPT_ISSUER: "https://auth.example.test",
+      STRICT_RECEIVER_RECEIPT_API_AUDIENCE: "https://preprod.immo.example.test",
+      STRICT_RECEIVER_RECEIPT_WORKLOAD_SUB: "immo-mcp-workload",
+      STRICT_RECEIVER_RECEIPT_WORKLOAD_CLIENT_ID: "immo-mcp-workload",
+      STRICT_RECEIVER_RECEIPT_ENVIRONMENT: "preprod",
+    };
+
+    it("stays disabled without arming or receipt (code merge alone never enables)", () => {
+      const auth = resolveAuthConfig(loadConfig({ ...BASE_ENV }));
+      expect(auth.strict?.enabled).toBe(false);
+      const unarmed = resolveAuthConfig(loadConfig({ ...STRICT_BASE, STRICT_RECEIVER_ARMED: "0" }));
+      expect(unarmed.strict?.enabled).toBe(false);
+    });
+
+    it("enables only on an exact receipt match, with derived audiences", () => {
+      const strict = resolveAuthConfig(loadConfig({ ...STRICT_BASE })).strict!;
+      expect(strict.enabled).toBe(true);
+      expect(strict.apiAudience).toBe("https://preprod.immo.example.test");
+      expect(strict.mcpAudience).toBe("https://preprod.immo.example.test/mcp");
+      expect(strict.workloadSub).toBe("immo-mcp-workload");
+      expect(strict.requiredScope).toBe("immo:search");
+      expect(strict.maxLifetimeS).toBe(300);
+      expect(strict.environment).toBe("preprod");
+    });
+
+    it("refuses a receipt bound to another environment, issuer, audience or workload", () => {
+      for (const override of [
+        { STRICT_RECEIVER_RECEIPT_ENVIRONMENT: "prod" },
+        { STRICT_RECEIVER_RECEIPT_ISSUER: "https://auth.other.test" },
+        { STRICT_RECEIVER_RECEIPT_API_AUDIENCE: "https://immo.example.test" },
+        { STRICT_RECEIVER_RECEIPT_WORKLOAD_SUB: "other-workload" },
+        { STRICT_RECEIVER_RECEIPT_WORKLOAD_CLIENT_ID: "other-client" },
+      ]) {
+        const strict = resolveAuthConfig(loadConfig({ ...STRICT_BASE, ...override })).strict!;
+        expect(strict.enabled).toBe(false);
+      }
+    });
+
+    it("refuses arming without workload references", () => {
+      const strict = resolveAuthConfig(
+        loadConfig({ ...STRICT_BASE, STRICT_RECEIVER_WORKLOAD_SUB: "" }),
+      ).strict!;
+      expect(strict.enabled).toBe(false);
+    });
+
+    it("refuses arming without each A2 receipt field or explicit environment", () => {
+      for (const key of [
+        "STRICT_RECEIVER_RECEIPT_ISSUER", "STRICT_RECEIVER_RECEIPT_API_AUDIENCE",
+        "STRICT_RECEIVER_RECEIPT_WORKLOAD_SUB", "STRICT_RECEIVER_RECEIPT_ENVIRONMENT",
+        "STRICT_RECEIVER_RECEIPT_WORKLOAD_CLIENT_ID",
+        "STRICT_RECEIVER_WORKLOAD_CLIENT_ID", "STRICT_RECEIVER_ENVIRONMENT",
+      ]) {
+        expect(resolveAuthConfig(loadConfig({ ...STRICT_BASE, [key]: "" })).strict?.enabled).toBe(false);
+      }
+      expect(resolveAuthConfig(loadConfig({
+        ...STRICT_BASE, STRICT_RECEIVER_ENVIRONMENT: "", STRICT_RECEIVER_RECEIPT_ENVIRONMENT: "unknown",
+      })).strict?.enabled).toBe(false);
+    });
+
+    it("binds the receipt to the API origin even with an app path", () => {
+      const strict = resolveAuthConfig(loadConfig({
+        ...STRICT_BASE, AUTH_CALLBACK_BASE_URL: "https://preprod.immo.example.test/app/",
+      })).strict!;
+      expect(strict.enabled).toBe(true);
+      expect(strict.apiAudience).toBe("https://preprod.immo.example.test");
+    });
+
+    it("refuses an armed configuration that would disable authentication", () => {
+      expect(() => resolveAuthConfig(loadConfig({ ...STRICT_BASE, SESSION_SECRET: "" })))
+        .toThrow("strict_receiver_requires_auth");
+    });
+  });
 });
