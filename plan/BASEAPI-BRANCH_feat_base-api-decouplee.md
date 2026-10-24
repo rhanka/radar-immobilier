@@ -151,6 +151,7 @@
   - [x] B4 review fix witnesses: cover full personal identities and persisted projection comparisons.
   - [x] B4 review fix comparisons: exercise missing, altered and D5-selected expected heads directly.
   - [x] B4 review fix tooling: provide sixteen integrated mutation families, full CI API selection and declaration build with bounded resources.
+  - [x] B4 review fix runbook: document server-only 6K configuration and request-bound readback without shared startup edits.
   - [ ] B4 review fix delivery: publish measured evidence and a prerequisite-e1758ef6 bundle for the second independent review pass.
   - [x] B4/B3 tooling preparation: narrow delivery paths, exact ontology input, changed-file lint and common synthetic DB migration; functional gates remain open.
   - [x] B4 operator input transport: actual Make activation/resume command-double proof preserves literal Make functions and shell syntax without evaluation.
