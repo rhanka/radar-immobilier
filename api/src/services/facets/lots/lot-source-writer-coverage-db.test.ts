@@ -15,8 +15,8 @@ import { evaluateActivationGate } from "./lot-cutover.js";
 
 const EVIDENCE = {
   "geo/ogc-pull": "synthetic B3 evidence: ogc-pull-source-lock-db stored-identity contention plus races-db source-first and facet-first",
-  "geo/populate-geo": "synthetic B3 evidence: populate-geo-source-lock-db update, insert and city-change contention",
-  "exploitation/projection": "synthetic B3 evidence: projection-source-lock-db insert, lock wait and scope rejection",
+  "geo/populate-geo": "synthetic B3 evidence: populate-geo-source-lock-db multi-period city-change and live-set revalidation; races-db real single/batch facet commands in both orders",
+  "exploitation/projection": "synthetic B3 evidence: projection-source-lock-db insert, lock wait and scope rejection; races-db real single/batch facet commands in both orders",
 } as const;
 
 describeDb("source writer coverage", () => {
