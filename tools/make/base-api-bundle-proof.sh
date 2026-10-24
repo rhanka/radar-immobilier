@@ -10,7 +10,7 @@ exec > >(tee tmp/base-api-evidence/tooling/bundle-proof.log) 2>&1
 scratch=$(mktemp -d "$PWD/tmp/base-api-evidence/tooling/bundles.XXXXXX")
 trap 'rm -rf -- "$scratch"' EXIT
 git init -q "$scratch"
-git -C "$scratch" fetch -q --no-tags "$root" 4fc755e9f69daae2c32286dd3cf0069c5798ecd0
+git -C "$scratch" fetch -q --no-tags "$root" bf84974e78c6251cb9e1737a30a68c3e14af59e1
 cd "$scratch"
 git config user.name 'Synthetic tooling proof'
 git config user.email 'synthetic@example.invalid'
@@ -24,17 +24,24 @@ reject() {
     echo 'Bundle guard unexpectedly accepted input' >&2; exit 1
   fi
 }
-for packet in B3 B4; do
+for packet in B3 B4 B5; do
   if [[ $packet == B3 ]]; then
     start=d033bc18bf9b9537c5c7a69311ebe44b0b545517
     branch=feat/base-api-decouplee-b2
-  else
+  elif [[ $packet == B4 ]]; then
     start=4fc755e9f69daae2c32286dd3cf0069c5798ecd0
     branch=feat/base-api-decouplee-b1
     git switch -q -c "$branch" "$start"
     printf 'Synthetic B4 payload\n' > docs/spec/SPEC_EVOL_BASE_API.md
     git add -- docs/spec/SPEC_EVOL_BASE_API.md
     git -c core.hooksPath=/dev/null commit -q -m 'test(base): create synthetic activation payload'
+  else
+    start=bf84974e78c6251cb9e1737a30a68c3e14af59e1
+    branch=feat/base-api-decouplee-b5
+    git switch -q -c "$branch" "$start"
+    printf 'Synthetic B5 payload\n' > docs/spec/SPEC_BASE_API.md
+    git add -- docs/spec/SPEC_BASE_API.md
+    git -c core.hooksPath=/dev/null commit -q -m 'test(base): create synthetic acceptance payload'
   fi
   out=tmp/base-api-evidence/$packet/base-api-${packet,,}.bundle
   reject "OUT=$out" "START=fd39c6168404b250c243222abe1fbba24d5480b0"
