@@ -2,16 +2,19 @@
  * base-api-personal-activation — 6H protected operator entry (B4.1).
  *
  * Validates explicit flags and qualified maintenance evidence BEFORE any mutation,
- * then calls runPersonalAttachmentActivation. Attachment alone is never activation;
- * resume arrives in the next slice. A scoped receipt with a still-closed destination
+ * then calls the protected activation or durable resume runner. Attachment alone
+ * is never activation. A scoped receipt with a still-closed destination
  * is never "open-success". No environment file discovery, no silent default.
  */
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { loadConfig } from "../config.js";
 import { createDb, type Database } from "../db/client.js";
-import { facetActivationState } from "../db/schema.js";
+import { facetActivationState, facetStreamAttachments, workspaceMemberships } from "../db/schema.js";
 import { runPersonalAttachmentActivation } from "../services/facets/activation-run.js";
+import { resumePersonalAttachmentReadback } from "../services/facets/activation-open.js";
 import { authorizePersonalActivationReadback, verifyPersonalActivationPersistence } from "../services/facets/activation-readback.js";
+import { approvedTargetId, lockWorkspace, managingActorId } from "../services/workspaces/mutations.js";
+import { ScopeError } from "../services/facets/scope.js";
 import {
   qualifiedActivationSafety,
   validateQualifiedMaintenanceEvidence,
@@ -116,12 +119,98 @@ export async function executePersonalActivation(
   };
 }
 
+/**
+ * Resume from durable state without ever restoring legacy authority.
+ * legacy/closed (or absent) retries protected activation; scoped/closed
+ * forwards through internal readback; already open authorizes and returns
+ * status with SELECT-only reads and no SQL mutation.
+ */
+export async function executePersonalActivationResume(
+  db: Database, command: PersonalActivationCommand,
+): Promise<PersonalActivationReport> {
+  validateQualifiedMaintenanceEvidence(command.evidence, command.bound);
+  const [durable] = await db.select().from(facetActivationState)
+    .where(eq(facetActivationState.workspaceId, command.workspaceId));
+  if (!durable || durable.writerEpoch !== "scoped") {
+    return executePersonalActivation(db, command);
+  }
+  if (durable.maintenanceBarrier === false) {
+    await db.transaction(async (tx) => {
+      await lockWorkspace(tx, command.workspaceId);
+      await managingActorId(tx, command.workspaceId, command.actorSub);
+      const attachments = await tx.select().from(facetStreamAttachments).where(and(
+        eq(facetStreamAttachments.workspaceId, command.workspaceId),
+        eq(facetStreamAttachments.status, "attached"))).for("share");
+      if (attachments.length === 0) throw new ScopeError(409, "activation_without_attachment");
+      for (const attachment of attachments) {
+        await approvedTargetId(tx, attachment.accountId);
+        const [membership] = await tx.select().from(workspaceMemberships).where(and(
+          eq(workspaceMemberships.workspaceId, command.workspaceId),
+          eq(workspaceMemberships.accountId, attachment.accountId))).for("share");
+        if (membership?.status !== "active") throw new ScopeError(403, "workspace_membership_required");
+      }
+    });
+    const streams = await db.execute<{ count: number }>(sql`
+      SELECT count(*)::int AS count FROM facet_streams WHERE workspace_id = ${command.workspaceId}`);
+    const pending = await db.execute<{ count: number }>(sql`
+      SELECT count(*)::int AS count FROM facet_command_contexts
+      WHERE workspace_id = ${command.workspaceId} AND status = 'pending'`);
+    return {
+      workspaceId: command.workspaceId,
+      epoch: durable.writerEpoch,
+      streamsBound: streams.rows[0]?.count ?? 0,
+      sealedUnresolved: 0,
+      pendingReceipts: pending.rows[0]?.count ?? 0,
+      maintenanceBarrier: false,
+      status: "open-success",
+    };
+  }
+  const safety = qualifiedActivationSafety(command.bound, command.evidence, {
+    readback: async (workspaceId) => {
+      await authorizePersonalActivationReadback(db, workspaceId, command.actorSub);
+      const counts = await db.execute<{ streams: number; bindings: number }>(sql`
+        SELECT count(*)::int AS bindings, count(DISTINCT (e.owner_id, e.city_slug,
+          e.node_type, e.node_id, e.facet, e.basket))::int AS streams
+        FROM facet_events e JOIN facet_stream_attachments a ON a.account_id = e.owner_id
+        WHERE a.workspace_id = ${workspaceId} AND a.status = 'attached' AND e.scope = 'personal'`);
+      const expected = counts.rows[0]!;
+      await verifyPersonalActivationPersistence(db, workspaceId, command.actorSub,
+        { ...expected, heads: expected.streams });
+    },
+  });
+  await resumePersonalAttachmentReadback(db, {
+    workspaceId: command.workspaceId, actorSub: command.actorSub, reason: command.reason,
+  }, safety);
+  const [state] = await db.select().from(facetActivationState)
+    .where(eq(facetActivationState.workspaceId, command.workspaceId));
+  const maintenanceBarrier = state?.maintenanceBarrier ?? true;
+  const open = maintenanceBarrier === false;
+  const streams = await db.execute<{ count: number }>(sql`
+    SELECT count(*)::int AS count FROM facet_streams WHERE workspace_id = ${command.workspaceId}`);
+  const pending = await db.execute<{ count: number }>(sql`
+    SELECT count(*)::int AS count FROM facet_command_contexts
+    WHERE workspace_id = ${command.workspaceId} AND status = 'pending'`);
+  return {
+    workspaceId: command.workspaceId,
+    epoch: state?.writerEpoch ?? "scoped",
+    streamsBound: streams.rows[0]?.count ?? 0,
+    sealedUnresolved: 0,
+    pendingReceipts: pending.rows[0]?.count ?? 0,
+    maintenanceBarrier,
+    status: open ? "open-success" : "activation-committed-readback-pending",
+  };
+}
+
 export async function main(rawArgs: string[]): Promise<void> {
-  const command = parsePersonalActivationArgs(rawArgs);
+  const action = rawArgs[0] === "resume" ? "resume" : "activate";
+  const flagArgs = rawArgs[0] === "resume" || rawArgs[0] === "activate" ? rawArgs.slice(1) : rawArgs;
+  const command = parsePersonalActivationArgs(flagArgs);
   const config = loadConfig();
   const { db, pool } = createDb(config);
   try {
-    const report = await executePersonalActivation(db, command);
+    const report = action === "resume"
+      ? await executePersonalActivationResume(db, command)
+      : await executePersonalActivation(db, command);
     process.stdout.write(`${JSON.stringify(report)}\n`);
   } finally {
     await pool.end();
