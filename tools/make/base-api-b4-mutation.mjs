@@ -10,7 +10,7 @@ assert.equal(process.argv[2], 'required');
 const admin = new pg.Client({ host: process.env.POSTGRES_HOST, user: 'radar', password: 'synthetic-only', database: 'radar' });
 await admin.connect();
 try {
-  // Same mutation-only WAL bound as B3; the 512-MiB tmpfs is unchanged.
+  // Confirm the WAL bound before the disposable mutation campaign.
   await admin.query("ALTER SYSTEM SET max_wal_size = '64MB'");
   await admin.query("ALTER SYSTEM SET min_wal_size = '32MB'");
   await admin.query('SELECT pg_reload_conf()');
