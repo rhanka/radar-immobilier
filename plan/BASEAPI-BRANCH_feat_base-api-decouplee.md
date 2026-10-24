@@ -126,8 +126,9 @@
   - [x] B3.1 transaction locks: hold ordered OGC source locks through batch commit and reject identity drift; deterministic commit-boundary proof remains pending.
   - [ ] B3.1: ogc-pull.ts and its source-lock DB tests; lock the actual mutated identity in the mutation transaction.
   - [x] B3.1 contention evidence: verify real OGC stored-identity lock waits, same-backend lock retention during UPDATE, independent targets, unchanged-UUID invalidation and batch rollback.
-  - [x] B3.2 transaction preparation: lock stored and resulting population identities through update/insert commit; retain existing unit behavior; DB contention qualification remains pending.
+  - [x] B3.2 transaction preparation: lock stored and resulting population identities through update/insert commit; retain existing unit behavior.
   - [ ] B3.2: populate-geo.ts and its source-lock DB tests; cover both update and insert paths.
+  - [x] B3.2 contention evidence: verify update/insert and both city-change identities with PostgreSQL waits, same-backend locks during mutation, persisted SQL and unchanged-UUID fingerprint rejection.
   - [ ] B3.3: exploitation/projection.ts and its source-lock DB tests; share the canonical lock protocol.
   - [ ] B3.4: qualify lock order, contention and unchanged-UUID content changes before recording writer coverage.
   - [ ] Gate: all three real writer paths contend with facet commands; no coverage attestation without the corresponding executable proof.
