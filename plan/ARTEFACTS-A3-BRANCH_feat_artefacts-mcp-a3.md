@@ -43,7 +43,7 @@
 - [x] Enforce the exchanged profile in the existing auth middleware.
 - [x] Add exchanged-search fixtures and preserve per-viewer identity.
 - [x] Cover cookie-free search, audience confusions and account refusal.
-- [ ] Cover forbidden methods/paths and browser/public-route behavior.
+- [x] Cover forbidden methods/paths and browser/public-route behavior.
 - [ ] Pass focused auth/OIDC/session/signals tests and four restored mutations.
 - [ ] Pass typecheck, lint, API declarations and the complete ordinary API suite.
 - [ ] Verify every commit, bundle reconstruction and source byte equality.
