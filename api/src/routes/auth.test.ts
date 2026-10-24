@@ -1524,6 +1524,29 @@ describe("resolveGraphSignalsViewer — session sub for the discard port", () =>
 
 describe("strict receiver — exchanged search and audience confusions (H4 P5)", () => {
   const STRICT_AUTH = strictReceiverTestAuth(strictReceiverTestConfig());
+  const RESOLVED_BASE = {
+    NODE_ENV: "test",
+    POSTGRES_HOST: "localhost", POSTGRES_USER: "radar",
+    POSTGRES_PASSWORD: "pw", POSTGRES_DB: "radar",
+    S3_ENDPOINT: "http://localhost:9000", S3_ACCESS_KEY: "minio", S3_SECRET_KEY: "minio",
+    SENTROPIC_IDP_ISSUER: STRICT_AUTH.issuer,
+    SENTROPIC_OAUTH_CLIENT_ID: "radar-immobilier",
+    SENTROPIC_OAUTH_CLIENT_SECRET: "super-secret",
+    SENTROPIC_OAUTH_REDIRECT_URI: `${STRICT_AUTH.appBaseUrl}/api/v1/auth/oauth/callback`,
+    AUTH_CALLBACK_BASE_URL: STRICT_AUTH.appBaseUrl,
+    SESSION_SECRET: "session-signing-key-min-32-chars-x",
+    STRICT_RECEIVER_WORKLOAD_SUB: "immo-mcp-workload",
+    STRICT_RECEIVER_WORKLOAD_CLIENT_ID: "immo-mcp-workload",
+    STRICT_RECEIVER_ENVIRONMENT: "test",
+  };
+  const A2_RECEIPT = {
+    STRICT_RECEIVER_RECEIPT_ISSUER: STRICT_AUTH.issuer,
+    STRICT_RECEIVER_RECEIPT_API_AUDIENCE: STRICT_AUTH.appBaseUrl,
+    STRICT_RECEIVER_RECEIPT_WORKLOAD_SUB: "immo-mcp-workload",
+    STRICT_RECEIVER_RECEIPT_WORKLOAD_CLIENT_ID: "immo-mcp-workload",
+    STRICT_RECEIVER_RECEIPT_ENVIRONMENT: "test",
+  };
+
   async function makeExchanged(
     overrides: Record<string, unknown> = {},
   ): Promise<{ presented: string; getKey: JWTVerifyGetKey }> {
@@ -1712,6 +1735,90 @@ describe("strict receiver — exchanged search and audience confusions (H4 P5)",
     expect((await res.json()).error).toBe("account_not_approved");
   });
 
+  it("keeps exchanged search working disarmed then armed via resolved config, no cookie", async () => {
+    const disarmed = resolveAuthConfig(
+      loadConfig({ ...RESOLVED_BASE, STRICT_RECEIVER_ARMED: "0" }),
+    );
+    expect(disarmed.strict?.enabled).toBe(false);
+    const armed = resolveAuthConfig(
+      loadConfig({
+        ...RESOLVED_BASE,
+        STRICT_RECEIVER_ARMED: "1",
+        ...A2_RECEIPT,
+      }),
+    );
+    expect(armed.strict?.enabled).toBe(true);
+    const { presented, getKey } = await makeExchanged();
+    const headers = { authorization: `Bearer ${presented}` };
+    const before = await strictApp(disarmed, approvedDb(), getKey).request(
+      "/api/graph-signals/drummondville",
+      { headers },
+    );
+    expect(before.status).toBe(200);
+    const after = await strictApp(armed, approvedDb(), getKey).request(
+      "/api/graph-signals/drummondville",
+      { headers },
+    );
+    expect(after.status).toBe(200);
+    for (const aud of armed.bearerAudiences) {
+      const raw = await makeSubject(aud);
+      for (const [auth, status] of [[disarmed, 200], [armed, 401]] as const) {
+        const res = await strictApp(auth, approvedDb(), raw.getKey).request(
+          "/api/graph-signals/drummondville",
+          { headers: { authorization: `Bearer ${raw.presented}` } },
+        );
+        expect(res.status).toBe(status);
+      }
+    }
+  });
+
+  it("keeps exchanged search working disarmed without workload references", async () => {
+    const { presented, getKey } = await makeExchanged();
+    for (const workload of [
+      { STRICT_RECEIVER_WORKLOAD_SUB: "" },
+      { STRICT_RECEIVER_WORKLOAD_CLIENT_ID: "" },
+      { STRICT_RECEIVER_WORKLOAD_SUB: "", STRICT_RECEIVER_WORKLOAD_CLIENT_ID: "" },
+    ]) {
+      const auth = resolveAuthConfig(loadConfig({
+        ...RESOLVED_BASE, ...workload, STRICT_RECEIVER_ARMED: "0",
+      }));
+      const res = await strictApp(auth, approvedDb(), getKey).request(
+        "/api/graph-signals/drummondville",
+        { headers: { authorization: `Bearer ${presented}` } },
+      );
+      expect(res.status).toBe(200);
+    }
+  });
+
+  it("never serves raw tokens when arming has an invalid or incomplete receipt", async () => {
+    const receiptKeys = Object.keys(A2_RECEIPT);
+    const variants = [
+      Object.fromEntries(receiptKeys.map((key) => [key, undefined])),
+      ...receiptKeys.flatMap((key) => [
+        { [key]: undefined }, { [key]: "" }, { [key]: "https://wrong.example.test" },
+      ]),
+    ];
+    for (const aud of STRICT_AUTH.bearerAudiences) {
+      const { presented, getKey } = await makeSubject(aud);
+      for (const variant of variants) {
+        let auth: AuthConfig;
+        try {
+          auth = resolveAuthConfig(loadConfig({
+            ...RESOLVED_BASE, ...A2_RECEIPT, ...variant, STRICT_RECEIVER_ARMED: "1",
+          }));
+        } catch (err) {
+          expect((err as Error).message).toBe("strict_receiver_receipt_invalid");
+          continue;
+        }
+        const res = await strictApp(auth, approvedDb(), getKey).request(
+          "/api/graph-signals/drummondville",
+          { headers: { authorization: `Bearer ${presented}` } },
+        );
+        expect(res.status).toBe(401);
+        expect.unreachable("invalid arming must refuse startup");
+      }
+    }
+  });
 });
 
 describe("strict receiver — forbidden routes, methods and preserved behavior (H4 P5)", () => {

@@ -53,7 +53,7 @@
 - [x] Cover fail-closed receipt resolution and middleware wiring states.
 - [x] Preserve disarmed exchanged search and refuse invalid arming in protect.
 - [x] Cover raw-token transitions and the invalid-arming middleware guard.
-- [ ] Prove resolved-config continuity and reject invalid-receipt HTTP fallback.
+- [x] Prove resolved-config continuity and reject invalid-receipt HTTP fallback.
 - [ ] Pass Astra-correction gates, restored mutations and bundle reconstruction.
 
 ## Merge & Close
