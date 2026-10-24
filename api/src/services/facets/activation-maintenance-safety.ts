@@ -27,6 +27,10 @@ export interface QualifiedMaintenanceEvidence extends MaintenanceBinding {
 export interface MaintenanceEvidenceOptions {
   now?: Date;
   maxAgeMs?: number;
+  /** Explicitly declared qualified empty history; undeclared emptiness stays refused. */
+  qualifiedEmptyManifest?: boolean;
+  /** Real zero-head proof scope required when qualifiedEmptyManifest is set. */
+  emptyReadbackScope?: { citySlugs: string[]; modes: ("real" | "simulation")[] };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -137,7 +141,9 @@ export function qualifiedLotCutoverSafetyFor(
     readbackAuthorized: async (workspaceId: string) => {
       checkBoundWorkspace(bound.workspaceId, workspaceId);
       validateQualifiedMaintenanceEvidence(evidence, bound, options);
-      if (readyTargets.length === 0) throw new ScopeError(503, "lot_cutover_readback_unconfirmed");
+      if (readyTargets.length === 0 && options.qualifiedEmptyManifest !== true) {
+        throw new ScopeError(503, "lot_cutover_readback_unconfirmed");
+      }
       if (!delegate) throw new ScopeError(503, "lot_cutover_readback_unconfirmed");
       await delegate.readbackAuthorized(workspaceId);
     },

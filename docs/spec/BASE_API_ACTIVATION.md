@@ -246,3 +246,26 @@ Slice 12 reproduces that 503 through `runLotCutover` and checks that durable and
 public state stay closed. This is a B4 integration gap against existing B2
 acceptance, not a missing empty-history requirement. No solution is selected.
 Stop after this reception; slice 13 and final B4 qualification remain pending.
+
+## Slice 13: protected resume and qualified empty history
+
+The B2 empty-history path now uses the real qualified 6K safety adapter.
+An empty ready set remains rejected unless the server explicitly supplies
+`qualifiedEmptyManifest: true` and a nonempty `emptyReadbackScope` containing
+`citySlugs` and `modes`. The synthetic case uses the fixture city and `["real"]`.
+These are internal adapter options, never a public readback bypass or new
+operator Make inputs. The existing manifest gate still qualifies destinations,
+rights, epoch and writer coverage before opening.
+
+For every declared city/mode the real internal reader must return zero heads;
+missing scope or persisted visible heads returns 503. Public reads stay closed
+before and after that readback. Opening creates no artificial business events,
+then the first ordinary selection is accepted and publicly readable, preserving
+B2.6. Failed readback leaves the durable barrier; protected resume rechecks the
+current manager and maintenance evidence while retaining the legacy fence.
+After epoch change, recovery remains forward resume only.
+
+This closes the slice 12 empty-history integration finding. Final B4, qualified
+B3 reception and the mutation campaign remain open. Next slice: 14/15.
+Operational values and deployed state remain unverified; B5 and nominal
+activation retain their original position and budget.
