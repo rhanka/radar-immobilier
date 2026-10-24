@@ -7,6 +7,22 @@ const M = (id, source, testFile, title, edits) => ({ id, source, testFile, title
 const invalid = (key) => 'should retain closed SQL and public state for invalid ' + key + ' evidence';
 const coverage = (key) => 'checkCoverage(evidence["' + key + '"], instances, "maintenance_' + key + '_unconfirmed", nowMs, maxAgeMs);';
 export default [
+  M('readback-6k', 'src/services/facets/lots/lot-cutover-safety.ts',
+    'tests/integration/base-api-activation.spec.ts',
+    'should keep 503 when a reconciled head goes missing before resume',
+    [['checkCutoverReadbackCoverage(parsed.map((target) => target.key), observed, expected);', 'void observed;']]),
+  M('identity-6h', 'src/services/facets/activation-readback.ts',
+    closure,
+    'should reject constant-count owner corruption through protected resume',
+    [['event.ownerId !== stream.ownerId', 'false']]),
+  M('actor-reuse-6k', 'src/routes/scoped-lot-cutover-activation.ts',
+    'tests/integration/base-api-cutover-bound.spec.ts',
+    'should refuse cross-actor reuse of a statically injected qualified safety',
+    [['assertCutoverSafetyBinding(safety, c.req.param("workspaceId"), session.sub);', 'void session.sub;']]),
+  M('missing-adapter-6k', 'src/routes/scoped-lot-cutover-activation.ts',
+    'tests/integration/base-api-cutover-bound.spec.ts',
+    'should refuse a foreign proof while the bound moderator opens',
+    [['deps = configuredCutoverDeps(deps);', 'void deps;']]),
   M('drain', safety, closure, invalid('drain'), [[coverage('drain'), 'void instances;']]),
   M('shutdown', safety, closure, invalid('shutdown'), [[coverage('shutdown'), 'void instances;']]),
   M('workspace-binding', safety, closure, invalid('workspaceId'), [['if (workspaceId.toLowerCase() !== bound.workspaceId.toLowerCase()) {', 'if (false) {']]),

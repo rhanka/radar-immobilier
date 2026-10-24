@@ -8,6 +8,10 @@ TOOLS=$(cd -- "$(dirname -- "$0")" && pwd)
 source "$TOOLS/base-api-guards.sh"
 require_env
 case "$ACTION" in
+  ci-api)
+    # Vitest runs its complete CI include list; required B4 cases may not skip.
+    SCOPE='tests/integration/base-api-activation.spec.ts tests/integration/base-api-activation-resume.spec.ts tests/integration/base-api-legacy.spec.ts tests/integration/base-api-cutover-bound.spec.ts'
+    require_scope;;
   input-guards) for file in "$TOOLS"/base-api*.sh; do bash -n "$file"; done; exit;;
   check-scope) scope_check; exit;;
   b3-mutation-required|b4-mutation-required)
@@ -27,6 +31,8 @@ mkdir -p "$RUN_DIR" "$LOG_DIR"
 printf 'Evidence: %s\n' "$LOG_DIR"
 exec 9>"$RUN_DIR/lock"
 flock -n 9 || { echo 'Runner already active' >&2; exit 2; }
+exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
+flock -n 8 || { echo 'Another Docker campaign is active' >&2; exit 2; }
 OWNER=$(printf '%s' "$ROOT/$ENV" | sha256sum | cut -d' ' -f1)
 export COMPOSE_DISABLE_ENV_FILE=1
 unset COMPOSE_FILE COMPOSE_PROFILES COMPOSE_ENV_FILES
@@ -49,6 +55,10 @@ df -h "$ROOT" | tee "$LOG_DIR/disk-before.log"
 }
 # Validate all paths using metadata before tar can open any file.
 archive_sources
+if [[ $ACTION == ci-api ]]; then
+  source "$TOOLS/base-api-ci-archive.sh"
+  archive_ci_inputs
+fi
 verify_ownership
 trap cleanup EXIT
 trap 'exit 130' INT
@@ -65,11 +75,12 @@ guarded_down
 MONITOR=$!
 export BASE_API_RUN_PID=$$
 "${compose[@]}" up -d --wait postgres
+if [[ $ACTION == ci-api ]]; then "${compose[@]}" up -d --wait minio; fi
 "${compose[@]}" run --rm --no-deps -T api bash -ec \
   'tar -xf /source.tar -C /workspace; exec bash -x tools/make/base-api-container.sh "$@"' -- "$ACTION" "$SCOPE" \
   > >(tee "$LOG_DIR/$ACTION.log") 2>&1 &
 RUN_PID=$!
 wait "$RUN_PID"
 RUN_PID=
-if [[ $ACTION == verify || $ACTION == test || $ACTION == test-api || $ACTION == *-mutation-* ]]; then assert_tests_ran "$LOG_DIR/tests.tsv"; fi
+if [[ $ACTION == verify || $ACTION == ci-api || $ACTION == test || $ACTION == test-api || $ACTION == *-mutation-* ]]; then assert_tests_ran "$LOG_DIR/tests.tsv"; fi
 echo "PASS $ACTION" > "$LOG_DIR/result"
