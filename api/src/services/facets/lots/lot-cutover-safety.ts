@@ -6,8 +6,15 @@
  */
 import type { Database } from "../../../db/client.js";
 import { retireLegacyMarkDelivery } from "../../chat/stream-bus.js";
-import { readLotCutoverReadback } from "./lot-cutover-readback.js";
-import type { CutoverSafety } from "./lot-cutover-types.js";
+import { readLotCutoverReadback, type CutoverReadbackHead } from "./lot-cutover-readback.js";
+import type {
+  ActivationGate,
+  CutoverSafety,
+} from "./lot-cutover-types.js";
+import type {
+  LotMigrationReport,
+} from "../lot-migration-report/manifest.js";
+import { checkCutoverReadbackCoverage, expectedCutoverHeadValues, parseReadyTargetKeys } from "./lot-cutover-expectations.js";
 import {
   qualifiedLotCutoverSafetyFor,
   type MaintenanceBinding,
@@ -46,20 +53,7 @@ export function defaultCutoverSafety(
   };
 }
 
-/**
- * Qualified 6K safety bound to the current authorized actor and workspace.
- *
- * Internal only: `bound` and `evidence` are server-supplied, never taken from
- * client input. Drain validates the qualified maintenance evidence for every
- * expected instance. Readback validates the same evidence, rejects an
- * undeclared empty ready-target set, then verifies every ready city and mode
- * with the real internal reader under the closed barrier using the current
- * rights of `bound.actorSub`. A declared qualified empty manifest passes only
- * through a real zero-head proof over `options.emptyReadbackScope`; this
- * preserves the B2 qualified empty opening with no new behavior. 6K keeps its
- * legacy fence; this adapter never clears it. Opening `destinationOpen`
- * stays in `openLotDestination`.
- */
+/** Qualified, evidence-bound 6K persisted readback. */
 export function qualifiedLotCutoverSafety(
   db: Database,
   bound: MaintenanceBinding,
@@ -69,18 +63,12 @@ export function qualifiedLotCutoverSafety(
 ): CutoverSafety {
   return qualifiedLotCutoverSafetyFor(bound, evidence, readyTargets, {
     readbackAuthorized: async (workspaceId: string) => {
-      const cities = new Map<string, Set<string>>();
-      for (const key of readyTargets) {
-        const parts = key.split("::");
-        const city = parts[0]?.startsWith("dest:") === true
-          ? parts[0].slice("dest:".length) : undefined;
-        const mode = parts[2];
-        if (!city || (mode !== "real" && mode !== "simulation")) continue;
-        const modes = cities.get(city) ?? new Set<string>();
-        modes.add(mode);
-        cities.set(city, modes);
+      const expected = options.expectedCutoverHeads;
+      if (!Array.isArray(expected)) {
+        throw new ScopeError(503, "lot_cutover_readback_unconfirmed");
       }
-      if (cities.size === 0) {
+      const parsed = parseReadyTargetKeys(readyTargets);
+      if (parsed.length === 0) {
         if (options.qualifiedEmptyManifest !== true) {
           throw new ScopeError(503, "lot_cutover_readback_unconfirmed");
         }
@@ -96,12 +84,54 @@ export function qualifiedLotCutoverSafety(
         }
         return;
       }
-      for (const [city, modes] of cities) {
+      const groups = new Map<string, Set<"real" | "simulation">>();
+      for (const target of parsed) {
+        const modes = groups.get(target.city) ?? new Set<"real" | "simulation">();
+        modes.add(target.mode);
+        groups.set(target.city, modes);
+      }
+      const observed = new Map<string, CutoverReadbackHead>();
+      for (const [city, modes] of groups) {
         for (const mode of modes) {
-          await readLotCutoverReadback(db, bound.actorSub, workspaceId,
-            mode as "real" | "simulation", city);
+          const result = await readLotCutoverReadback(db, bound.actorSub, workspaceId, mode, city);
+          for (const head of result.heads) {
+            observed.set(`dest:${result.citySlug}::${head.target.canonicalId}::${result.mode}`, head);
+          }
         }
       }
+      checkCutoverReadbackCoverage(parsed.map((target) => target.key), observed, expected);
     },
   }, options);
+}
+
+/** Server-held maintenance evidence; per-request identities are stamped by the entry route. */
+export interface CutoverServerEvidence {
+  evidence: unknown;
+  maintenanceAttemptId: string;
+  releaseId: string;
+  instanceIds: string[];
+  options?: MaintenanceEvidenceOptions;
+}
+
+/**
+ * Per-request 6K safety factory for the real entry route. Binds the current
+ * workspace, actor and qualified manifest (ready targets plus expected head
+ * values) around the server-held evidence; any divergence between the
+ * proof identity and the calling actor fails closed at drain and readback.
+ */
+export function qualifiedCutoverSafetyForRequest(
+  db: Database,
+  server: CutoverServerEvidence,
+  request: { workspaceId: string; actorSub: string; report: LotMigrationReport; gate: ActivationGate },
+): CutoverSafety {
+  return qualifiedLotCutoverSafety(db, {
+    workspaceId: request.workspaceId,
+    actorSub: request.actorSub,
+    maintenanceAttemptId: server.maintenanceAttemptId,
+    releaseId: server.releaseId,
+    instanceIds: server.instanceIds,
+  }, server.evidence, request.gate.ready, {
+    ...(server.options ?? {}),
+    expectedCutoverHeads: expectedCutoverHeadValues(request.report, request.gate.activatedSourceIds),
+  });
 }

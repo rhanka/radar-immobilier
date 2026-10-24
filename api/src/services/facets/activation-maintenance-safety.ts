@@ -1,6 +1,6 @@
 /** Internal 6H/6K evidence validation; real readback remains mandatory. */
 import type { ActivationSafety } from "./activation.js";
-import type { CutoverSafety } from "./lots/lot-cutover-types.js";
+import type { CutoverSafety, ExpectedCutoverHeadValue } from "./lots/lot-cutover-types.js";
 import { ScopeError } from "./scope.js";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -31,6 +31,12 @@ export interface MaintenanceEvidenceOptions {
   qualifiedEmptyManifest?: boolean;
   /** Real zero-head proof scope required when qualifiedEmptyManifest is set. */
   emptyReadbackScope?: { citySlugs: string[]; modes: ("real" | "simulation")[] };
+  /**
+   * Expected persisted head values from the qualified manifest and D5
+   * dispositions. Required by the 6K readback delegate; an absent array
+   * fails closed instead of silently skipping the values comparison.
+   */
+  expectedCutoverHeads?: ExpectedCutoverHeadValue[];
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -134,6 +140,7 @@ export function qualifiedLotCutoverSafetyFor(
   options: MaintenanceEvidenceOptions = {},
 ): CutoverSafety {
   return {
+    safetyBinding: { workspaceId: bound.workspaceId, actorSub: bound.actorSub },
     drainDeliveryPaths: async (workspaceId: string) => {
       checkBoundWorkspace(bound.workspaceId, workspaceId);
       validateQualifiedMaintenanceEvidence(evidence, bound, options);

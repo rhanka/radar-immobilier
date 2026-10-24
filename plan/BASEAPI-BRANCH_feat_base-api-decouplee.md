@@ -143,7 +143,7 @@
   - [x] Gate: all three real writer paths contend with facet commands; no coverage attestation without the corresponding executable proof.
 - [x] B4 — Operational cutover; Muse 5–8 h, Sol 4–6 h, total 9–14 h.
   - [x] B4 review fix expectations: derive every projected facet from the qualified manifest and explicit D5 winners.
-  - [ ] B4 review fix readback: compare persisted 6K heads and values before opening.
+  - [x] B4 review fix readback: compare persisted 6K heads and values before opening.
   - [ ] B4 review fix identity: reject misattributed 6H event/stream identity at constant counts.
   - [ ] B4 review fix wiring: build server-configured 6K safety for the current HTTP request actor.
   - [ ] B4 review fix composition: qualify two moderators through createApp and reject static adapter reuse.
