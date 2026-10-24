@@ -1,7 +1,7 @@
 # BASE activation and protected recovery
 
-Status: B4 slices 1–3 and standalone tooling preparation only. The real operator
-implementation, binding/head/projection readback, restart wiring and B3 qualification
+Status: B4 slices 1–4 and standalone tooling preparation only. The real operator
+implementation, final authorization/opening, restart wiring and B3 qualification
 are still pending. This document does not authorize operational activation.
 B5 and the nominal operational rehearsal retain their original scope and budget.
 
@@ -84,8 +84,12 @@ Under the closed barrier the real reader must validate PostgreSQL bindings,
 terminal heads, projections, attachment rights and current manager authority.
 Slice 3 adds internal PostgreSQL authorization under the workspace lock: current
 manager and attached-account rights, scoped epoch and a closed barrier are required.
-Its bounded evidence does not verify bindings, heads or projections; slice 4 must
-add those checks before any production reader can qualify activation or resume.
+Slice 4 separately checks persisted stream/binding/head counts against explicit
+expectations and verifies terminal projections under that same closed barrier.
+Explicit zero counts qualify an empty history only when attached personal events
+are neither unresolved nor bound outside the selected workspace. These internal
+helpers still require composition with current attachment authorization and the
+final authorization/opening checks expected from slice 5 and the operator slices.
 Seeded mismatches must prevent opening. Recheck rights after readback and before
 opening. Public inputs must never enable internal readback. 6H releases its
 maintenance barrier; 6K retains legacy closure and opens `destinationOpen`.
@@ -109,4 +113,4 @@ Synthetic databases cannot establish deployment migration state. If ARTEFACTS is
 joined, qualify the actual combined frozen order and exact SHA/image under CT-8/CT-9.
 Final B4 delivery requires both activation suites, real Make activation/resume,
 all retained regressions, qualified B3 reception and a bundle reconstructed from
-the full B12 prerequisite. No final B4 bundle is issued for slices 1–3.
+the full B12 prerequisite. No final B4 bundle is issued for slices 1–4.
