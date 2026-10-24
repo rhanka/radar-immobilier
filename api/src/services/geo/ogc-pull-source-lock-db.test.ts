@@ -65,7 +65,7 @@ describeDb("ogc-pull source locks", () => {
             AND $1::int = ANY(pg_blocking_pids(pid))`, [blocker]);
         writerPid = waiting.rows[0]?.pid ?? 0;
         return writerPid;
-      }).toBeGreaterThan(0);
+      }).toBeGreaterThan(0).catch((error: unknown) => expect.fail(String(error)));
       expect((await storedByNoLot(f, "4516943"))[0]!.geom).toBeNull();
       expect(await upsertLotBatch(f.db, f.pool, CITY, [polygonFeature("9999999")]))
         .toEqual({ upserted: 1, skipped: 0 });
@@ -75,7 +75,7 @@ describeDb("ogc-pull source locks", () => {
       await expect.poll(async () => (await f.pool.query(`SELECT pid FROM pg_locks
         WHERE pid = $1 AND locktype = 'advisory' AND granted
           AND $2::int = ANY(pg_blocking_pids(pid))`, [writerPid, rowBlocker])).rowCount)
-        .toBe(1);
+        .toBe(1).catch((error: unknown) => expect.fail(String(error)));
       expect((await storedByNoLot(f, "4516943"))[0]!.geom).toBeNull();
     } finally {
       if (!released) await releaseBarrier(barrier, false);
