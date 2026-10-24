@@ -25,7 +25,14 @@ archive_ci_inputs() {
     done
     printf '%s\n' "$path" >> "$RUN_DIR/ci-paths"
   done < "$RUN_DIR/ci-candidates"
-  tar --verbatim-files-from --no-recursion -rf "$RUN_DIR/source.tar" -T "$RUN_DIR/ci-paths"
+  if [[ ${BASE_API_SOURCE:-worktree} == index ]]; then
+    local paths
+    mapfile -t paths < "$RUN_DIR/ci-paths"
+    git archive --format=tar "$(git write-tree)" -- "${paths[@]}" > "$RUN_DIR/ci.tar"
+    tar -Af "$RUN_DIR/source.tar" "$RUN_DIR/ci.tar"
+  else
+    tar --verbatim-files-from --no-recursion -rf "$RUN_DIR/source.tar" -T "$RUN_DIR/ci-paths"
+  fi
   cat "$RUN_DIR/ci-paths" >> "$LOG_DIR/archived-paths.txt"
   sha256sum "$RUN_DIR/source.tar" > "$LOG_DIR/source.sha256"
 }
