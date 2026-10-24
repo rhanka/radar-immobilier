@@ -40,29 +40,29 @@ case $action in
   network-proof) node tools/make/base-api-network.mjs;;
   typecheck) typecheck_api;;
   lint) lint_api;;
-  verify|ci-api|test|test-api|b1-mutation-legacy|b1-mutation-archive|b1-mutation-required|b3-mutation-required|b4-mutation-required)
-    if [[ $action == verify || $action == ci-api || $action == *-mutation-* ]]; then
+  b5-verify|verify|ci-api|test|test-api|b1-mutation-legacy|b1-mutation-archive|b1-mutation-required|b3-mutation-required|b4-mutation-required|b5-mutation-required)
+    if [[ $action == b5-verify || $action == verify || $action == ci-api || $action == *-mutation-* ]]; then
       typecheck_api
       lint_api
     fi
     cd api
     node ../tools/make/base-api-ct8.mjs | tee /evidence/ct8.log
     node ../tools/make/base-api-b2-setup.mjs
-    if [[ $action == ci-api ]]; then
+    if [[ $action == ci-api || $action == b5-verify ]]; then
       cd /workspace
       npm run build --workspace=api
       test -s api/dist/index.d.ts
       cd api
     fi
-    if [[ $action == verify && -f src/services/facets/lots/lot-cutover-journal-db.test.ts ]]; then
+    if [[ ( $action == verify || $action == b5-verify ) && -f src/services/facets/lots/lot-cutover-journal-db.test.ts ]]; then
       node ../tools/make/base-api-ct7-proof.mjs | tee /evidence/ct7.log
     fi
     set -f
     if [[ $action == *-mutation-* ]]; then
       timeout --signal=TERM --kill-after=5 600 bash "../tools/make/base-api-${action%%-*}-mutation.sh" "${action#*-mutation-}"
-      if [[ $action == b3-* || $action == b4-* ]]; then node ../tools/make/base-api-required-mutations.mjs "${action%%-*}"; fi
+      if [[ $action == b3-* || $action == b4-* || $action == b5-* ]]; then node ../tools/make/base-api-required-mutations.mjs "${action%%-*}"; fi
     else
-    if [[ $action == ci-api ]]; then
+    if [[ $action == ci-api || $action == b5-verify ]]; then
       (cd /workspace; npm run test --workspace=api -- --config vitest.isolated.config.ts \
         --reporter=default --reporter=json --outputFile.json=/evidence/tests.json)
     else
