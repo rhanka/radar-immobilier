@@ -54,7 +54,7 @@
 - [x] Preserve disarmed exchanged search and refuse invalid arming in protect.
 - [x] Cover raw-token transitions and the invalid-arming middleware guard.
 - [x] Prove resolved-config continuity and reject invalid-receipt HTTP fallback.
-- [ ] Pass Astra-correction gates, restored mutations and bundle reconstruction.
+- [x] Pass Astra-correction gates, restored mutations and bundle reconstruction.
 
 ## Merge & Close
 - [ ] Conductor consumes the lane bundle under the shared-file lease.
