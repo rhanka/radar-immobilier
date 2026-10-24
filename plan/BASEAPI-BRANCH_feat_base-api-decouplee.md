@@ -156,6 +156,7 @@
   - [x] B4 review fix CI dispatch: invoke the API workspace command from the monorepo root after the declaration build.
   - [x] B4 review fix CI fixtures: archive the repository's simulation JSON resources used by the full API suite.
   - [x] B4 review fix source fixtures: include the two committed public role XML records required by existing API tests.
+  - [x] B4 review fix resource note: distinguish historical B3 memory bounds from the current bounded B4 runner.
   - [ ] B4 review fix delivery: publish measured evidence and a prerequisite-e1758ef6 bundle for the second independent review pass.
   - [x] B4/B3 tooling preparation: narrow delivery paths, exact ontology input, changed-file lint and common synthetic DB migration; functional gates remain open.
   - [x] B4 operator input transport: actual Make activation/resume command-double proof preserves literal Make functions and shell syntax without evaluation.
