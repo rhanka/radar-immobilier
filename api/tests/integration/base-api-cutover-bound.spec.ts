@@ -29,6 +29,7 @@ import {
   qualifiedLotCutoverSafety,
   type CutoverServerEvidence,
 } from "../../src/services/facets/lots/lot-cutover-safety.js";
+import { setLotCapability } from "../../src/services/facets/lots/lot-capabilities.js";
 import { expectedCutoverHeadValues } from "../../src/services/facets/lots/lot-cutover-expectations.js";
 import { recomputeLotManifest } from "../../src/services/facets/lots/lot-manifest-refresh.js";
 import {
@@ -51,6 +52,13 @@ async function secondModerator(f: CutoverFixture) {
   await f.db.insert(workspaceMembershipEvents).values({ workspaceId: f.workspaceId,
     accountId: moderatorB.id, kind: "capability_granted", capability: "moderate_archive",
     actorId: f.moderator.id, reason: "synthetic second moderator" });
+  // Fully authorize B: with import rights missing, a removed binding guard
+  // still fails closed at the importer instead of opening under A's proof.
+  for (const capability of ["lot_select", "lot_pipeline", "lot_market"] as const) {
+    await setLotCapability(f.db, { workspaceId: f.workspaceId, targetAccountId: moderatorB.id,
+      actorSub: f.moderator.sub, capability, granted: true,
+      reason: "synthetic second moderator lot rights", expectedRevision: null });
+  }
   return moderatorB;
 }
 
@@ -120,5 +128,23 @@ describeDb("6K per-request cutover safety binding", () => {
     const [state] = await f.db.select().from(lotCutoverState)
       .where(eq(lotCutoverState.workspaceId, f.workspaceId));
     expect(state?.destinationOpen).not.toBe(true);
+  });
+
+  it("should open for a fully authorized moderator with its own proof", async () => {
+    const f = await cutoverFixture();
+    const moderatorB = await secondModerator(f);
+    await seedLegacyChain(f, f.moderator.id);
+    const server = serverEvidenceFor(f, moderatorB.sub);
+    vi.stubEnv("BASE_API_LOT_CUTOVER_CONFIG", JSON.stringify({ workspaceId: f.workspaceId,
+      mapping: MAPPING, maintenance: server }));
+    const app = createApp({ db: f.db, checkDb: async () => ({ ok: true }),
+      checkObjectStore: async () => ({ ok: true }), store: {} as ObjectStore,
+      discarded: EMPTY_DISCARDED_SIGNALS, auth: baseAuth });
+    const base = `/api/v1/workspaces/${f.workspaceId}/lot-facets/cutover`;
+    const opened = await app.request(base, {
+      method: "POST", headers: { "content-type": "application/json", cookie: await baseCookie(moderatorB.sub) },
+      body: JSON.stringify({ mapping: MAPPING, confirmCutover: true }) });
+    expect(opened.status).toBe(200);
+    expect((await opened.json() as { receipt: { status: string } }).receipt.status).toBe("complete");
   });
 });
