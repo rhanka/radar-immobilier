@@ -133,6 +133,7 @@
   - [x] B3.3: exploitation/projection.ts and its source-lock DB tests; share the canonical lock protocol.
   - [x] B3.3 contention evidence: verify canonical projection lock waits, same-backend lock retention during INSERT, independent committed targets and scope rejection without writes; serialization removal fails its own contention assertion.
   - [x] B3 FIX1 cardinality: update every live population period on city change; reject identity or live-set drift after discovery with PostgreSQL barriers.
+  - [x] B3 FIX1 population races: execute the real source against single and batch facet commands in both orders, with PostgreSQL waits and atomic persisted state.
   - [ ] B3.4: qualify lock order, contention and unchanged-UUID content changes before recording writer coverage.
   - [ ] B3.4 race evidence: requalify real OGC, populate and projection versus single/batch facet writers in both orders; preserve all ten required mutations and add review-defect discrimination.
   - [x] B3.4 coverage evidence: verify all three writers with synthetic executed-case reasons; each missing row, false coverage or invalid reason blocks activation; operational inputs stay separate.
