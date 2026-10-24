@@ -22,6 +22,7 @@ services:
   api:
     image: node:24-bookworm-slim
     mem_limit: 4g
+    tmpfs: [/tmp:size=512m]
     labels: {org.radar.base.owner: "$OWNER"}
     working_dir: /workspace
     volumes:
@@ -43,6 +44,10 @@ services:
     entrypoint: []
 volumes:
   runtime:
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+      o: size=1536m
     labels: {org.radar.base.owner: "$OWNER"}
 networks:
   default:
