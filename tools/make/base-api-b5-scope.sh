@@ -127,13 +127,17 @@ tests/integration/base-api-authority.spec.ts
 tests/integration/base-api-composition.spec.ts
 tests/integration/base-api-cutover-acceptance.spec.ts
 tests/integration/base-api-cutover-bound.spec.ts
+tests/integration/base-api-cutover-readback.spec.ts
 tests/integration/base-api-independence.spec.ts
 tests/integration/base-api-invalidations.spec.ts
 tests/integration/base-api-legacy.spec.ts
 tests/integration/base-api-lot-authority.spec.ts
 tests/integration/base-api-lot-batches.spec.ts
+tests/integration/base-api-lot-closed-replays.spec.ts
 tests/integration/base-api-lot-concurrency.spec.ts
+tests/integration/base-api-lot-contexts.spec.ts
 tests/integration/base-api-lot-receipts.spec.ts
+tests/integration/base-api-lot-replay-guards.spec.ts
 tests/integration/base-api-lot-transitions.spec.ts
 tests/integration/base-api-middleware.spec.ts
 tests/integration/base-api-mutation-closure.spec.ts
