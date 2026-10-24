@@ -222,4 +222,9 @@ including unavailable durable storage. Actual activation and already-open resume
 pass on one synthetic database; rejected evidence and reopened state preserve SQL
 bytes. The previous failed compiler run remains evidence of the resolved blocker.
 The completed CT-2 receipt is `tmp/base-api-evidence/B4/l6/ct2-l6.md`.
-Muse slice 11, qualified B3, named B4 integrations and mutations remain open.
+Slice 11 adds `qualifiedLotCutoverSafety`: bound maintenance validation followed
+by real internal readback for each ready city/mode under the closed barrier.
+It rejects an empty valid target set and adds no public bypass or opening write.
+Both typechecks, explicit lint, 595 tests/60 suites and standalone CT-8 pass.
+Direct 6K adapter qualification, including qualified empty history, is expected
+in Muse slice 12. Qualified B3, named B4 integrations and mutations remain open.
