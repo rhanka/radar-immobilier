@@ -134,6 +134,7 @@
   - [x] B3.3 contention evidence: verify canonical projection lock waits, same-backend lock retention during INSERT, independent committed targets and scope rejection without writes; discriminating mutations remain pending.
   - [ ] B3.4: qualify lock order, contention and unchanged-UUID content changes before recording writer coverage.
   - [x] B3.4 race evidence: verify real OGC versus single/batch facet writers in both orders with PostgreSQL barriers, exact canonical lock order, same-backend DML retention, stable-UUID fingerprint conflicts and atomic persistence; writer mutations remain pending.
+  - [x] B3.4 coverage evidence: verify all three writers with synthetic executed-case reasons; each missing row, false coverage or invalid reason blocks activation; operational inputs stay separate.
   - [ ] Gate: all three real writer paths contend with facet commands; no coverage attestation without the corresponding executable proof.
 - [ ] B4 — Operational cutover; Muse 5–8 h, Sol 4–6 h, total 9–14 h.
   - [x] B4/B3 tooling preparation: narrow delivery paths, exact ontology input, changed-file lint and common synthetic DB migration; functional gates remain open.
