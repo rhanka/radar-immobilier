@@ -37,6 +37,7 @@ Resolve GHSA-587h-7wmj-h5pm in Focus with Vite 6.4.4, then resolve GHSA-cg2g-xh6
 - [x] The owner's delivery instruction overrides the generic commit-trailer requirement.
 - [x] The French delivery report follows the owner's explicit language instruction.
 - [x] Build tooling adaptations belong to temporary Makefiles; no project Makefile changes.
+- [x] DOMPurify audits are clear; the root's separate body-parser/Zod high findings still block merging and have no risk acceptance.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch, sequential verification and local bundle delivery.
@@ -76,8 +77,8 @@ Resolve GHSA-587h-7wmj-h5pm in Focus with Vite 6.4.4, then resolve GHSA-cg2g-xh6
   - [x] Run Focus tests and complete Mermaid/HTML/PDF build.
   - [x] Record advisories, Mermaid dependency paths, exposure, remediation, and observed verification.
   - [x] Use `ENV=test-dompurify`, one Compose project, one test worker, no published application ports.
-- [ ] **Lot 6 — DOMPurify delivery**
-  - [ ] Create bounded subject-only commits and a bundle excluding `3ffd7fd7a96aeaea9844a93d3ce44620733c443b`.
-  - [ ] Audit the bundle in a fresh repository seeded only with the base; compare trees and delivered files.
-  - [ ] Append the French delivery receipt with final SHA and bundle SHA-256.
+- [x] **Lot 6 — DOMPurify delivery**
+  - [x] Create bounded subject-only commits and a bundle excluding `3ffd7fd7a96aeaea9844a93d3ce44620733c443b`.
+  - [x] Audit the bundle in a fresh repository seeded only with the base; compare trees and delivered files.
+  - [x] Append the French delivery receipt with final SHA and bundle SHA-256.
   - [x] Restore generated documents and remove campaign containers/volumes with `down -v --remove-orphans`.
