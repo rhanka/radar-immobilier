@@ -375,9 +375,13 @@ export const STRICT_RECEIVER_MAX_LIFETIME_S = 300;
  * `enabled` is true only when the operator armed the receiver AND the recorded
  * A2 receipt matches this receiver exactly (issuer, API audience, workload
  * subject, environment). A code merge alone never enables enforcement.
+ * `armingRequested` records operator intent (`STRICT_RECEIVER_ARMED=1`).
+ * Requested-but-invalid wiring never falls back to permissive: the resolver
+ * throws instead of returning a disabled config.
  */
 export interface StrictReceiverConfig {
   readonly enabled: boolean;
+  readonly armingRequested: boolean;
   readonly issuer: string;
   readonly apiAudience: string;
   readonly mcpAudience: string;
@@ -401,8 +405,9 @@ export function resolveStrictReceiverConfig(
   const workloadClientId = config.STRICT_RECEIVER_WORKLOAD_CLIENT_ID ?? "";
   const environment = config.STRICT_RECEIVER_ENVIRONMENT ?? "";
   const apiAudience = appBaseUrlNoSlash !== "" ? new URL(appBaseUrlNoSlash).origin : "";
+  const armingRequested = config.STRICT_RECEIVER_ARMED === true;
   const receiptMatches =
-    config.STRICT_RECEIVER_ARMED &&
+    armingRequested &&
     issuerNoSlash !== "" &&
     appBaseUrlNoSlash !== "" &&
     workloadSub !== "" &&
@@ -413,8 +418,12 @@ export function resolveStrictReceiverConfig(
     config.STRICT_RECEIVER_RECEIPT_WORKLOAD_SUB === workloadSub &&
     config.STRICT_RECEIVER_RECEIPT_WORKLOAD_CLIENT_ID === workloadClientId &&
     config.STRICT_RECEIVER_RECEIPT_ENVIRONMENT === environment;
+  if (armingRequested && !receiptMatches) {
+    throw new Error("strict_receiver_receipt_invalid");
+  }
   return {
     enabled: receiptMatches,
+    armingRequested,
     issuer: issuerNoSlash,
     apiAudience,
     mcpAudience: apiAudience !== "" ? `${apiAudience}/mcp` : "",

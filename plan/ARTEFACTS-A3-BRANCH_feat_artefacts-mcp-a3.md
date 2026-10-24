@@ -23,6 +23,7 @@
 - [x] Resume after interrupted qualification: retain prior reproduction logs and inspect the existing delivery clone before editing.
 - [x] #865 remains an open draft at `7b12cd937f1e684a7bedb14784d158a420d74ae4`; reuse its verified API audience, actor/client, approved-human and route restrictions.
 - [x] Fix negative fixtures that overwrote caller claims; bind the A2 receipt to client and explicit environment, derive the API origin and refuse armed auth-disabled configuration.
+- [x] Resume Astra corrections from `167b551cc5b6c16198a458d7b64bdad95b0ff118`; keep the exchange-first rollout and fail closed on invalid arming.
 - [ ] Receiving-environment A2 receipt and strict recovery image/configuration qualification remain external activation prerequisites.
 - [ ] Independent integration reviews and combined-SHA deployment qualification remain with the conductor.
 
@@ -48,6 +49,12 @@
 - [x] Pass typecheck, lint, API declarations and the complete ordinary API suite.
 - [x] Verify every commit, bundle reconstruction and source byte equality.
 - [x] Hand off the bundle and uncommitted French evidence report.
+- [x] Keep arming intent explicit and reject invalid receipts at startup.
+- [x] Cover fail-closed receipt resolution and middleware wiring states.
+- [ ] Preserve disarmed exchanged search and refuse invalid arming in protect.
+- [ ] Cover raw-token transitions and the invalid-arming middleware guard.
+- [ ] Prove resolved-config continuity and reject invalid-receipt HTTP fallback.
+- [ ] Pass Astra-correction gates, restored mutations and bundle reconstruction.
 
 ## Merge & Close
 - [ ] Conductor consumes the lane bundle under the shared-file lease.

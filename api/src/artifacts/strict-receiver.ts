@@ -66,6 +66,34 @@ export function isStrictReceiverEnforced(auth: AuthConfig | undefined): boolean 
 }
 
 /**
+ * Requested-but-not-enforced wiring. The config resolver never produces this
+ * state (it throws); the middleware treats hand-built occurrences as
+ * fail-closed and refuses every Bearer, never falling back to permissive.
+ */
+export function isStrictArmingInvalid(auth: AuthConfig | undefined): boolean {
+  return (
+    auth?.strict?.armingRequested === true && auth?.strict?.enabled !== true
+  );
+}
+
+/**
+ * Whether the strict wiring carries enough references to verify an exchanged
+ * presentation (issuer, API audience, workload pair). Disarmed wiring without
+ * these references cannot verify and falls back to the plain path for A2
+ * continuity; complete wiring verifies strictly.
+ */
+export function isStrictWiringComplete(auth: AuthConfig | undefined): boolean {
+  const strict = auth?.strict;
+  return (
+    strict !== undefined &&
+    strict.issuer !== "" &&
+    strict.apiAudience !== "" &&
+    strict.workloadSub !== "" &&
+    strict.workloadClientId !== ""
+  );
+}
+
+/**
  * Recovery eligibility for a strict-stage rollback target. Only a target that
  * retains strict enforcement AND exchange capability AND stored data may
  * replace the active receiver — a permissive (pre-strict) API or a
@@ -88,11 +116,18 @@ export function assertStrictRecoveryEligible(target: StrictRecoveryTarget): void
  * type keeps the API declaration build clean.
  */
 export function strictReceiverTestConfig(
-  overrides: { enabled?: boolean; apiAudience?: string; environment?: string } = {},
+  overrides: {
+    enabled?: boolean;
+    armingRequested?: boolean;
+    apiAudience?: string;
+    environment?: string;
+  } = {},
 ): StrictReceiverConfig {
   const apiAudience = overrides.apiAudience ?? "https://immo.example.test";
+  const enabled = overrides.enabled ?? true;
   return {
-    enabled: overrides.enabled ?? true,
+    enabled,
+    armingRequested: overrides.armingRequested ?? enabled,
     issuer: "https://auth.example.test",
     apiAudience,
     mcpAudience: `${apiAudience}/mcp`,

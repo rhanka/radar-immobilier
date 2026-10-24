@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   assertStrictRecoveryEligible,
+  isStrictArmingInvalid,
   isStrictReceiverEnforced,
   isStrictSearchRequest,
+  isStrictWiringComplete,
   strictReceiverTestAuth,
   strictReceiverTestConfig,
   strictRequestPath,
@@ -58,6 +60,34 @@ describe("isStrictReceiverEnforced", () => {
       ),
     ).toBe(false);
     expect(isStrictReceiverEnforced({ enabled: true } as never)).toBe(false);
+  });
+});
+
+describe("strict arming helpers", () => {
+  it("distinguishes disarmed from requested-but-invalid wiring", () => {
+    const armed = strictReceiverTestAuth(strictReceiverTestConfig());
+    expect(isStrictArmingInvalid(armed)).toBe(false);
+    const disarmed = strictReceiverTestAuth(
+      strictReceiverTestConfig({ enabled: false }),
+    );
+    expect(isStrictArmingInvalid(disarmed)).toBe(false);
+    expect(isStrictReceiverEnforced(disarmed)).toBe(false);
+    const invalid = strictReceiverTestAuth(
+      strictReceiverTestConfig({ enabled: false, armingRequested: true }),
+    );
+    expect(isStrictArmingInvalid(invalid)).toBe(true);
+    expect(isStrictReceiverEnforced(invalid)).toBe(false);
+  });
+
+  it("reports wiring completeness for exchanged verification", () => {
+    const complete = strictReceiverTestAuth(strictReceiverTestConfig());
+    expect(isStrictWiringComplete(complete)).toBe(true);
+    const incomplete = strictReceiverTestAuth({
+      ...strictReceiverTestConfig(),
+      workloadSub: "",
+    });
+    expect(isStrictWiringComplete(incomplete)).toBe(false);
+    expect(isStrictWiringComplete(undefined)).toBe(false);
   });
 });
 
