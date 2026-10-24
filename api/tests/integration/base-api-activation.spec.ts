@@ -151,8 +151,8 @@ describeDb("qualified 6K operator activation and public closure", () => {
     await corrupt(f, `DELETE FROM facet_heads WHERE stream_id =
       (SELECT id FROM facet_streams WHERE workspace_id = $1 LIMIT 1)`);
     const safety = qualifiedLotCutoverSafety(f.db, bound, evidence, gate.ready, { expectedCutoverHeads });
-    await expect(runLotCutover(f.db, input, safety))
-      .rejects.toMatchObject({ status: 503, message: "lot_cutover_readback_unconfirmed" });
+    const result: unknown = await runLotCutover(f.db, input, safety).catch((error: unknown) => error);
+    expect(result).toMatchObject({ status: 503, message: "lot_cutover_readback_unconfirmed" });
     const [state] = await f.db.select().from(lotCutoverState)
       .where(eq(lotCutoverState.workspaceId, f.workspaceId));
     expect(state).toMatchObject({ maintenanceBarrier: true, destinationOpen: false });
@@ -167,8 +167,8 @@ describeDb("qualified 6K operator activation and public closure", () => {
        JOIN facet_streams s ON s.id = b.stream_id
        WHERE s.workspace_id = $1 AND e.facet = 'market')`);
     const safety = qualifiedLotCutoverSafety(f.db, bound, evidence, gate.ready, { expectedCutoverHeads });
-    await expect(runLotCutover(f.db, input, safety))
-      .rejects.toMatchObject({ status: 503, message: "lot_cutover_readback_unconfirmed" });
+    const result: unknown = await runLotCutover(f.db, input, safety).catch((error: unknown) => error);
+    expect(result).toMatchObject({ status: 503, message: "lot_cutover_readback_unconfirmed" });
     const [state] = await f.db.select().from(lotCutoverState)
       .where(eq(lotCutoverState.workspaceId, f.workspaceId));
     expect(state).toMatchObject({ maintenanceBarrier: true, destinationOpen: false });
