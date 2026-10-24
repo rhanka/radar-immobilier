@@ -85,6 +85,9 @@ case $ACTION in
       tmp/base-api-evidence/B4/base-api-b4.bundle)
         [[ $(git branch --show-current) == feat/base-api-decouplee-b1 && $START == 4fc755e9f69daae2c32286dd3cf0069c5798ecd0 ]] || exit 2
         prerequisite=$START;;
+      tmp/base-api-evidence/B5/base-api-b5.bundle)
+        [[ $(git branch --show-current) == feat/base-api-decouplee-b5 && $START == bf84974e78c6251cb9e1737a30a68c3e14af59e1 ]] || exit 2
+        prerequisite=$START;;
       *) exit 2;;
     esac
     git merge-base --is-ancestor "$prerequisite" HEAD
@@ -96,7 +99,7 @@ case $ACTION in
     [[ ! -L ${OUT%/*} && ! -L $OUT ]] || exit 2
     git bundle create "$OUT" "$prerequisite..HEAD"
     git bundle verify "$OUT"
-    if [[ $OUT == tmp/base-api-evidence/B[134]/* ]]; then
+    if [[ $OUT == tmp/base-api-evidence/B[1345]/* ]]; then
       audit=$(mktemp -d "${OUT%/*}/bundle-audit.XXXXXX")
       bundle=$(realpath "$OUT")
       root=$(pwd -P)
@@ -110,6 +113,7 @@ case $ACTION in
       git -C "$audit" bundle verify "$bundle"
       git -C "$audit" fetch --no-tags --no-write-fetch-head "$bundle" HEAD:refs/heads/payload
       [[ $(git -C "$audit" rev-parse refs/heads/payload) == "$head" ]]
+      [[ $(git -C "$audit" rev-parse 'refs/heads/payload^{tree}') == $(git rev-parse 'HEAD^{tree}') ]]
       git -C "$audit" fsck --full --no-reflogs
       printf 'Bundle prerequisite: %s\nIsolated audit repository: %s\n' "$prerequisite" "$audit"
     fi
