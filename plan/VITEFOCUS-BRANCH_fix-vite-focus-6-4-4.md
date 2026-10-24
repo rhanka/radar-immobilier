@@ -17,6 +17,7 @@ Resolve GHSA-587h-7wmj-h5pm in Focus with Vite 6.4.4, then resolve GHSA-cg2g-xh6
   - `package-lock.json`
   - `docs/architecture/focus/package.json`
   - `docs/architecture/focus/package-lock.json`
+  - `docs/architecture/focus/render-mermaid.mjs`
   - `.security/findings/2026-10-21-vite-ghsa-587h.md`
   - `.security/findings/2026-10-24-dompurify-ghsa-cg2g.md`
   - `plan/VITEFOCUS-BRANCH_fix-vite-focus-6-4-4.md`
@@ -30,6 +31,7 @@ Resolve GHSA-587h-7wmj-h5pm in Focus with Vite 6.4.4, then resolve GHSA-cg2g-xh6
 - **Exception process**:
   - Record reason, impact, and rollback here before expanding scope.
   - VITEFOCUS-EX1: the owner's DOMPurify assignment extends scope to both root manifests and its finding. Impact: exact override and DOMPurify resolution only. Rollback: revert the DOMPurify commits; Vite 6.4.4 remains intact.
+  - VITEFOCUS-EX2: Focus reads Mermaid's prebundled runtime, which embeds affected DOMPurify 3.4.12 and ignores the dependency override. The requested fix requires bundling Mermaid's core module against installed DOMPurify instead. Impact: renderer build tooling only, unchanged dependency inventory. Rollback: revert the renderer commit, restoring the affected embedded copy.
 
 ## Feedback Loop
 - [x] The owner's delivery instruction overrides the generic commit-trailer requirement.
@@ -67,6 +69,7 @@ Resolve GHSA-587h-7wmj-h5pm in Focus with Vite 6.4.4, then resolve GHSA-cg2g-xh6
   - [x] Resume the recovery repository above `6dccb58892629c6f0b6f92f29103407c308b64fe`.
   - [x] Set root override and Focus direct dependency to exactly 3.4.17.
   - [x] Regenerate via containerized Make targets; prove stable entry counts and no unrelated changes.
+  - [x] Remove the renderer's use of Mermaid's embedded DOMPurify 3.4.12; verify it bundles the installed sanitizer.
 - [ ] **Lot 5 — DOMPurify verification**
   - [ ] Audit both trees without modifying manifests; list all remaining findings.
   - [ ] Run CI quality commands: typecheck, lint, API/UI builds, bundle smoke, all workspace unit/integration tests.
