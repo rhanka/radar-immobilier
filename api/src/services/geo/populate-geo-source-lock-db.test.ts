@@ -62,7 +62,8 @@ describeDb("populate-geo source locks", () => {
             AND $1::int = ANY(pg_blocking_pids(pid))`, [blocker]);
         writerPid = waiting.rows[0]?.pid ?? 0;
         return writerPid;
-      }, { message: "writer must wait on the protected source identity" }).toBeGreaterThan(0);
+      }, { message: "writer must wait on the protected source identity" }).toBeGreaterThan(0)
+        .catch((error: unknown) => expect.fail(String(error)));
       expect(await live(f, noLot, CITY)).toHaveLength(exists ? 1 : 0);
       if (exists) expect((await live(f, noLot, CITY))[0]!.geom).toBeNull();
       await releaseBarrier(barrier, true);
@@ -70,7 +71,8 @@ describeDb("populate-geo source locks", () => {
       await expect.poll(async () => (await f.pool.query(`SELECT pid FROM pg_locks
         WHERE pid = $1 AND locktype = 'advisory' AND granted
           AND $2::int = ANY(pg_blocking_pids(pid))`, [writerPid, mutationBlocker])).rowCount,
-      { message: "mutation backend must retain every source lock" }).toBe(incoming === CITY ? 1 : 2);
+      { message: "mutation backend must retain every source lock" }).toBe(incoming === CITY ? 1 : 2)
+        .catch((error: unknown) => expect.fail(String(error)));
       expect(await live(f, noLot, CITY)).toHaveLength(exists ? 1 : 0);
       if (exists) expect((await live(f, noLot, CITY))[0]!.geom).toBeNull();
     } finally {
