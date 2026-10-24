@@ -4,7 +4,10 @@ import { eq, sql } from "drizzle-orm";
 import { expect, it } from "vitest";
 import { lotCutoverState } from "../../src/db/schema.js";
 import { ScopeError } from "../../src/services/facets/scope.js";
-import { qualifiedLotCutoverSafety } from "../../src/services/facets/lots/lot-cutover-safety.js";
+import {
+  qualifiedLotCutoverSafety,
+} from "../../src/services/facets/lots/lot-cutover-safety.js";
+import { expectedCutoverHeadValues } from "../../src/services/facets/lots/lot-cutover-expectations.js";
 import { readLotCity } from "../../src/services/facets/lots/lot-city.js";
 import { evaluateActivationGate, runLotCutover } from "../../src/services/facets/lots/lot-cutover.js";
 import { buildLotMigrationReport } from "../../src/services/facets/lot-migration-report/report.js";
@@ -32,7 +35,8 @@ describeDb("interrupted cutover and protected resume", () => {
     const input = { workspaceId: f.workspaceId, actorSub: f.moderator.sub, report, importKey,
       confirmCutover: true, recomputeManifest: async () => report };
     const { bound, evidence } = boundEvidence(f);
-    const failing = qualifiedLotCutoverSafety(f.db, bound, evidence, gate.ready);
+    const expectedCutoverHeads = expectedCutoverHeadValues(report, gate.activatedSourceIds);
+    const failing = qualifiedLotCutoverSafety(f.db, bound, evidence, gate.ready, { expectedCutoverHeads });
     failing.readbackAuthorized = async () => {
       throw new ScopeError(503, "lot_cutover_readback_unconfirmed");
     };
@@ -42,24 +46,26 @@ describeDb("interrupted cutover and protected resume", () => {
     await expect(readLotCity(f.db, f.moderator.sub, f.workspaceId, "real", CUTOVER_CITY))
       .rejects.toMatchObject({ status: 503 });
     const wrong = boundEvidence(f, f.contributor.sub);
-    const wrongSafety = qualifiedLotCutoverSafety(f.db, wrong.bound, wrong.evidence, gate.ready);
+    const wrongSafety = qualifiedLotCutoverSafety(f.db, wrong.bound, wrong.evidence, gate.ready,
+      { expectedCutoverHeads });
     await expect(runLotCutover(f.db, { ...input, actorSub: f.contributor.sub }, wrongSafety))
       .rejects.toMatchObject({ status: 403 });
     const receipt = await runLotCutover(f.db, input,
-      qualifiedLotCutoverSafety(f.db, bound, evidence, gate.ready));
+      qualifiedLotCutoverSafety(f.db, bound, evidence, gate.ready, { expectedCutoverHeads }));
     expect(receipt.status).toBe("complete");
     await expect(readLotCity(f.db, f.moderator.sub, f.workspaceId, "real", CUTOVER_CITY))
       .resolves.toMatchObject({ citySlug: CUTOVER_CITY });
     const [done] = await f.db.select().from(lotCutoverState).where(eq(lotCutoverState.workspaceId, f.workspaceId));
     expect(done).toMatchObject({ maintenanceBarrier: true, destinationOpen: true });
     const emptyClaim = qualifiedLotCutoverSafety(f.db, bound, evidence, [],
-      { qualifiedEmptyManifest: true, emptyReadbackScope: { citySlugs: [CUTOVER_CITY], modes: ["real"] } });
+      { qualifiedEmptyManifest: true, emptyReadbackScope: { citySlugs: [CUTOVER_CITY], modes: ["real"] },
+        expectedCutoverHeads: [] });
     await expect(emptyClaim.readbackAuthorized(f.workspaceId))
       .rejects.toMatchObject({ status: 503, message: "lot_cutover_readback_unconfirmed" });
     const fence = await f.db.execute<{ enabled: boolean }>(sql`SELECT enabled FROM lot_legacy_fence`);
     expect(fence.rows[0]).toMatchObject({ enabled: true });
     await expect(runLotCutover(f.db, { ...input, importKey: randomUUID() },
-      qualifiedLotCutoverSafety(f.db, bound, evidence, gate.ready)))
+      qualifiedLotCutoverSafety(f.db, bound, evidence, gate.ready, { expectedCutoverHeads })))
       .rejects.toMatchObject({ status: 409 });
     const [still] = await f.db.select().from(lotCutoverState).where(eq(lotCutoverState.workspaceId, f.workspaceId));
     expect(still?.manifestSha).toBe(done?.manifestSha);
@@ -74,7 +80,9 @@ describeDb("interrupted cutover and protected resume", () => {
     expect(emptyGate.activatable).toBe(true);
     expect(emptyGate.ready).toEqual([]);
     const { bound, evidence } = boundEvidence(f);
-    const silent = qualifiedLotCutoverSafety(f.db, bound, evidence, emptyGate.ready);
+    const emptyExpected = expectedCutoverHeadValues(emptyReport, emptyGate.activatedSourceIds);
+    const silent = qualifiedLotCutoverSafety(f.db, bound, evidence, emptyGate.ready,
+      { expectedCutoverHeads: emptyExpected });
     await expect(silent.readbackAuthorized(f.workspaceId))
       .rejects.toMatchObject({ status: 503, message: "lot_cutover_readback_unconfirmed" });
     const input = { workspaceId: f.workspaceId, actorSub: f.moderator.sub,
@@ -82,7 +90,8 @@ describeDb("interrupted cutover and protected resume", () => {
       recomputeManifest: async () => emptyReport };
     const before = await lotEventCount(f);
     await expect(runLotCutover(f.db, input,
-      qualifiedLotCutoverSafety(f.db, bound, evidence, emptyGate.ready, { qualifiedEmptyManifest: true })))
+      qualifiedLotCutoverSafety(f.db, bound, evidence, emptyGate.ready,
+        { qualifiedEmptyManifest: true, expectedCutoverHeads: emptyExpected })))
       .rejects.toMatchObject({ status: 503, message: "lot_cutover_readback_unconfirmed" });
     const assertClosed = async () => {
       const [state] = await f.db.select().from(lotCutoverState)
@@ -93,7 +102,8 @@ describeDb("interrupted cutover and protected resume", () => {
     };
     await assertClosed();
     const safety = qualifiedLotCutoverSafety(f.db, bound, evidence, emptyGate.ready,
-      { qualifiedEmptyManifest: true, emptyReadbackScope: { citySlugs: [CUTOVER_CITY], modes: ["real"] } });
+      { qualifiedEmptyManifest: true, emptyReadbackScope: { citySlugs: [CUTOVER_CITY], modes: ["real"] },
+        expectedCutoverHeads: emptyExpected });
     const realReadback = safety.readbackAuthorized;
     let readbacks = 0;
     safety.readbackAuthorized = async (workspaceId) => {
