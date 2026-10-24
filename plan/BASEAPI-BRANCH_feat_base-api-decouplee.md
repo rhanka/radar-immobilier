@@ -142,6 +142,7 @@
   - [x] B3.4 coverage evidence: verify all three writers with synthetic executed-case reasons; each missing row, false coverage or invalid reason blocks activation; operational inputs stay separate.
   - [x] Gate: all three real writer paths contend with facet commands; no coverage attestation without the corresponding executable proof.
 - [x] B4 — Operational cutover; Muse 5–8 h, Sol 4–6 h, total 9–14 h.
+  - [x] B4 second-pass lot identity: verify head/binding/stream association and complete event/lot identity before manifest comparison.
   - [x] B4 review fix expectations: derive every projected facet from the qualified manifest and explicit D5 winners.
   - [x] B4 review fix readback: compare persisted 6K heads and values before opening.
   - [x] B4 review fix identity: reject misattributed 6H event/stream identity at constant counts.

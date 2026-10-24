@@ -8,9 +8,10 @@
  * with moderation, configured destination, scoped epoch and the
  * committed maintenance barrier are all rechecked on every call.
  */
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import type { Database } from "../../../db/client.js";
 import {
+  facetEventBindings,
   facetEvents,
   facetHeads,
   facetStreams,
@@ -18,7 +19,7 @@ import {
 } from "../../../db/schema.js";
 import { lockWorkspace } from "../../workspaces/mutations.js";
 import { approvedAccountId, resolveWorkspaceAccess } from "../../workspaces/store.js";
-import { requireScopedEpoch } from "../scope.js";
+import { requireScopedEpoch, ScopeError } from "../scope.js";
 import { scopedEpochFor } from "../activation.js";
 import { FacetError } from "../target.js";
 import type { LotMode, LotTarget } from "./lot-target.js";
@@ -62,7 +63,7 @@ export async function readLotCutoverReadback(
     await requireLotDestination(tx, workspaceId);
     requireScopedEpoch(await scopedEpochFor(tx, workspaceId), workspaceId);
     const blocked = await readBlockedCutoverKeys(tx as unknown as Database, workspaceId);
-    const rows = await tx.select({ event: facetEvents })
+    const rows = await tx.select({ stream: facetStreams, event: facetEvents })
       .from(facetStreams)
       .innerJoin(facetHeads, eq(facetHeads.streamId, facetStreams.id))
       .innerJoin(facetEvents, eq(facetEvents.id, facetHeads.eventId))
@@ -72,11 +73,42 @@ export async function readLotCutoverReadback(
         eq(facetStreams.mode, mode),
         eq(facetStreams.citySlug, citySlug),
       ));
+    // Every joined (stream, event) pair travels through the registered head,
+    // so the pair below IS the head pair; it must also be a bound pair.
+    const streamIds = [...new Set(rows.map((row) => row.stream.id))];
+    const bindings = streamIds.length === 0 ? [] : await tx.select().from(facetEventBindings)
+      .where(inArray(facetEventBindings.streamId, streamIds));
+    const boundPairs = new Set(bindings.map((binding) => `${binding.streamId}::${binding.eventId}`));
     const byTarget = new Map<string, CutoverReadbackHead>();
-    for (const { event } of rows) {
+    const seenStreams = new Set<string>();
+    for (const { stream, event } of rows) {
+      if (stream.workspaceId.toLowerCase() !== workspaceId.toLowerCase()
+        || stream.targetType !== "lot" || stream.nodeType !== "Lot"
+        || stream.mode !== mode || stream.citySlug !== citySlug) {
+        throw new ScopeError(503, "lot_cutover_identity_mismatch");
+      }
+      if (!boundPairs.has(`${stream.id}::${event.id}`)) {
+        throw new ScopeError(503, "lot_cutover_identity_mismatch");
+      }
+      if (event.scope !== stream.scope || (event.ownerId ?? null) !== (stream.ownerId ?? null)
+        || event.targetType !== "lot" || event.nodeType !== "Lot"
+        || (event.mode ?? null) !== (stream.mode ?? null)
+        || event.citySlug !== stream.citySlug || event.nodeId !== stream.nodeId
+        || event.facet !== stream.facet || (event.basket ?? null) !== (stream.basket ?? null)) {
+        throw new ScopeError(503, "lot_cutover_identity_mismatch");
+      }
+      const streamIdentity = JSON.stringify([stream.workspaceId.toLowerCase(), stream.scope,
+        stream.ownerId ?? null, stream.targetType, stream.mode, stream.citySlug,
+        stream.nodeType, stream.nodeId, stream.facet, stream.basket ?? null]);
+      if (seenStreams.has(streamIdentity)) {
+        throw new ScopeError(503, "lot_cutover_identity_mismatch");
+      }
+      seenStreams.add(streamIdentity);
       if (event.scope === "personal" && event.ownerId !== accountId) continue;
+      // The destination lot is the stream identity, never the event payload:
+      // a swapped head or a renamed stream must not reuse the event values.
       const target: LotTarget = { type: "Lot", authority: "lot_versions",
-        citySlug: event.citySlug, canonicalId: event.nodeId };
+        citySlug: stream.citySlug, canonicalId: stream.nodeId };
       if (isCutoverBlockedTarget(blocked, target, mode)) continue;
       const key = JSON.stringify([target.citySlug, target.canonicalId]);
       const entry = byTarget.get(key) ?? {
@@ -87,19 +119,28 @@ export async function readLotCutoverReadback(
         market: null,
       };
       const scope = event.scope as "personal" | "workspace";
-      if (event.facet === "selection") {
+      if (stream.facet === "selection") {
         entry.selection.push({ ...lotEventResponse(event), scope });
-      } else if (event.facet === "archive") {
+      } else if (stream.facet === "archive") {
         const head = { ...lotEventResponse(event), scope, changedSinceArchive: null } as unknown as
           LotEventSnapshot & { scope: "personal" | "workspace" };
-        if (scope === "workspace") entry.archive.workspace = head;
-        else entry.archive.personal = head;
+        if (scope === "workspace") {
+          if (entry.archive.workspace) throw new ScopeError(503, "lot_cutover_identity_mismatch");
+          entry.archive.workspace = head;
+        } else {
+          if (entry.archive.personal) throw new ScopeError(503, "lot_cutover_identity_mismatch");
+          entry.archive.personal = head;
+        }
         entry.archive.effectiveDiscarded =
           entry.archive.personal?.state === "active" || entry.archive.workspace?.state === "active";
-      } else if (event.facet === "pipeline") {
+      } else if (stream.facet === "pipeline") {
+        if (entry.pipeline) throw new ScopeError(503, "lot_cutover_identity_mismatch");
         entry.pipeline = lotEventResponse(event);
-      } else if (event.facet === "market") {
+      } else if (stream.facet === "market") {
+        if (entry.market) throw new ScopeError(503, "lot_cutover_identity_mismatch");
         entry.market = lotEventResponse(event);
+      } else {
+        throw new ScopeError(503, "lot_cutover_identity_mismatch");
       }
       byTarget.set(key, entry);
     }
