@@ -384,7 +384,7 @@ evidence, qualified mapping, drain proof, old-instance shutdown proof, writer
 coverage, manifest and D5 dispositions, deployment access and target database
 identity. B5, final reviews, remote CI and combined delivery keep their scope.
 
-## B5 acceptance (authored; Sol verification pending)
+## B5 standalone acceptance profile
 
 B5 proves the B1–B4 implementation through `createApp` and PostgreSQL,
 with artifact configuration absent and no live artifact backend:
@@ -420,5 +420,8 @@ What B5 does not do: no `stop`/`down -v` outside the Sol-owned
 access or activation. The three source writers (`ogc-pull`,
 `populate-geo`, `projection`) stay drained before any reconciliation.
 Standalone CT-8 governs this delivery; combined CT-8/CT-9 waits for the
-frozen combined journal and the exact combined image. Evidence below is
-synthetic until Sol executes: no operational attestation is made here.
+frozen combined journal and the exact combined image. Evidence is synthetic;
+exact tested revisions, commands, results and review receipts are recorded in
+`tmp/base-api-evidence/B5/report.md` outside source commits. Receiving-branch
+integration and operational activation have their own receipts and are not
+established by the B5 branch bundle.
