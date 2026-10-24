@@ -393,6 +393,13 @@ Code trace verified in B0 (source presence never proves operational availability
   integration SHA and evidence, remote CI and PR #906 status, deployed state,
   combined CT-8/CT-9 qualification, and operational activation with real
   inputs and target database identity.
+- Inherited Conventional Commits exception (integration `6c48a3db`,
+  PR #910): `323d0db9` carries the subject
+  `Merge branch 'main' into feat/paniers-6k-lot-cutover` from the pinned 6K
+  history. The history is preserved unchanged, so this single inherited
+  subject is exempt from the branch-plan Conventional Commits rule; every
+  authored BASE commit keeps an English Conventional subject (72 characters
+  maximum, no body, no trailers).
 
 ## 13. B5 qualification matrix and evidence boundary
 
