@@ -4,7 +4,9 @@ import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import pg from 'pg';
-import mutations from './base-api-b4-mutants.mjs';
+const packet = process.argv[3] ?? 'b4';
+assert.ok(['b4', 'b5'].includes(packet));
+const { default: mutations } = await import(`./base-api-${packet}-mutants.mjs`);
 assert.equal(process.env.LOT_MIGRATION_DB_TEST, '1');
 assert.equal(process.argv[2], 'required');
 const admin = new pg.Client({ host: process.env.POSTGRES_HOST, user: 'radar', password: 'synthetic-only', database: 'radar' });
@@ -50,7 +52,7 @@ function step(m, prefix, phase, targets = []) {
 }
 for (const m of mutations) {
   m.testFiles = [m.testFile];
-  const prefix = '/evidence/b4-' + m.id;
+  const prefix = '/evidence/' + packet + '-' + m.id;
   const original = readFileSync(m.source);
   const mutant = m.edits.reduce((text, [before, after]) => {
     assert.equal(text.split(before).length, 2, 'unique source anchor: ' + before);
@@ -78,12 +80,12 @@ for (const m of mutations) {
   const restored = step(m, prefix, 'restored');
   manifest[m.id] = { source: m.source, targets, command: killed.command,
     exits: { baseline: baseline.exit, mutant: killed.exit, restored: restored.exit }, restorationSha256: hash(original) };
-  writeFileSync('/evidence/b4-mutations.json', JSON.stringify(manifest, null, 2));
-  console.log('B4 MUTATION PASS ' + m.id);
+  writeFileSync('/evidence/' + packet + '-mutations.json', JSON.stringify(manifest, null, 2));
+  console.log(packet.toUpperCase() + ' MUTATION PASS ' + m.id);
 }
 const testFiles = [...new Set(['tests/integration/base-api-activation.spec.ts',
   'tests/integration/base-api-activation-resume.spec.ts', 'tests/integration/base-api-legacy.spec.ts',
   ...mutations.map((m) => m.testFile)])];
-step({ testFiles }, '/evidence/b4-final', 'restored');
+step({ testFiles }, '/evidence/' + packet + '-final', 'restored');
 // Preserve the final real Vitest report; never synthesize an aggregate JSON.
-writeFileSync('/evidence/tests.json', readFileSync('/evidence/b4-final-restored.json'));
+writeFileSync('/evidence/tests.json', readFileSync('/evidence/' + packet + '-final-restored.json'));
