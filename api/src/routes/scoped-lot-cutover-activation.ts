@@ -22,6 +22,8 @@ import {
 } from "../services/facets/lots/lot-manifest-refresh.js";
 import { toLotError } from "./scoped-lot-facets-common.js";
 import {
+  assertCutoverSafetyBinding,
+  configuredCutoverDeps,
   assertModerator,
   cutoverWorkspaceGuard,
   qualifiedCutoverMapping,
@@ -50,6 +52,7 @@ const cutoverBodySchema = z.object({
 }).strict();
 
 export function scopedLotCutoverActivationRoute(deps: ScopedLotCutoverDeps): Hono {
+  deps = configuredCutoverDeps(deps);
   const app = new Hono();
   app.route("/", cutoverWorkspaceGuard(deps));
 
@@ -79,7 +82,11 @@ export function scopedLotCutoverActivationRoute(deps: ScopedLotCutoverDeps): Hon
       const mapping = qualifiedCutoverMapping(deps, c.req.param("workspaceId"), body.data.mapping);
       const report = await recomputeLotManifest(deps.db, mapping);
       const gate = await evaluateActivationGate(deps.db, c.req.param("workspaceId"), report);
-      const safety = deps.cutoverSafety ?? defaultCutoverSafety(deps.db, session.sub, gate.ready);
+      const safety = deps.cutoverSafetyFor
+        ? deps.cutoverSafetyFor({ workspaceId: c.req.param("workspaceId"),
+          actorSub: session.sub, report, gate })
+        : (deps.cutoverSafety ?? defaultCutoverSafety(deps.db, session.sub, gate.ready));
+      assertCutoverSafetyBinding(safety, c.req.param("workspaceId"), session.sub);
       const receipt = await runLotCutover(deps.db, {
         workspaceId: c.req.param("workspaceId"), actorSub: session.sub, report,
         importKey: cutoverImportKeyFor(c.req.param("workspaceId")),

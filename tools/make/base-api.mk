@@ -10,7 +10,16 @@ MAILDEV_UI_PORT ?= 11910
 BASE_API_MK := $(lastword $(MAKEFILE_LIST))
 export ENV API_PORT UI_PORT MAILDEV_UI_PORT SCOPE MSG FILES OUT SLUG BRANCH START SRC RECEIPT BASE_API_SCOPE
 export BASE_API_SOURCE BASE_API_LINT_FILES
+# Preserve literal operator values before Make can expand embedded functions.
+override BASE_API_WORKSPACE := $(value BASE_API_WORKSPACE)
+override BASE_API_ACTOR := $(value BASE_API_ACTOR)
+override BASE_API_REASON := $(value BASE_API_REASON)
+override BASE_API_MAINTENANCE_EVIDENCE := $(value BASE_API_MAINTENANCE_EVIDENCE)
+override BASE_API_MAINTENANCE_ATTEMPT := $(value BASE_API_MAINTENANCE_ATTEMPT)
+override BASE_API_RELEASE := $(value BASE_API_RELEASE)
+override BASE_API_INSTANCES := $(value BASE_API_INSTANCES)
 export BASE_API_WORKSPACE BASE_API_ACTOR BASE_API_REASON BASE_API_MAINTENANCE_EVIDENCE
+export BASE_API_MAINTENANCE_ATTEMPT BASE_API_RELEASE BASE_API_INSTANCES
 BASE_API_ARGS = "API_PORT=$$API_PORT" "UI_PORT=$$UI_PORT" "MAILDEV_UI_PORT=$$MAILDEV_UI_PORT" "ENV=$$ENV"
 BASE_API_SCOPE := src/services/facets/scoped-db.test.ts src/services/facets/workspace-receipts-db.test.ts src/services/facets/projection-migration-db.test.ts src/routes/scoped-projection-events-db.test.ts
 
@@ -19,12 +28,16 @@ BASE_API_SCOPE := src/services/facets/scoped-db.test.ts src/services/facets/work
 .PHONY: base-api-stage base-api-commit base-api-audit base-api-bundle
 .PHONY: base-api-worktree base-api-integrate base-api-clean base-api-runner-proof
 .PHONY: base-api-verify
+.PHONY: base-api-ci-api
+base-api-ci-api:
+	rtk bash tools/make/base-api-verify.sh ci-api $(BASE_API_ARGS)
 .PHONY: base-api-contract-proof
 .PHONY: base-api-network-proof
 .PHONY: base-api-tooling-proof
 
 base-api-tooling-proof:
 	rtk bash tools/make/base-api-tooling-proof.sh $(BASE_API_ARGS)
+	rtk bash tools/make/base-api-activation-proof.sh $(BASE_API_ARGS)
 
 .PHONY: base-api-activate-personal base-api-resume-personal
 .PHONY: base-api-b3-mutation-required base-api-b4-mutation-required base-api-bundle-proof
