@@ -269,3 +269,27 @@ This closes the slice 12 empty-history integration finding. Final B4, qualified
 B3 reception and the mutation campaign remain open. Next slice: 14/15.
 Operational values and deployed state remain unverified; B5 and nominal
 activation retain their original position and budget.
+
+## Slice 14: discriminating maintenance safety tests
+
+The new safety suite covers reason bounds, malformed attempts, absent releases,
+invalid proof timestamps, validation before 6H/6K drainage, validation before
+6H delegation, cross-workspace readback and explicit qualified empty history.
+Sixteen individual mutations run in the disposable API copy: each has a passing
+baseline, the intended behavioral assertion failure and a passing restored run.
+Both complete safety suites execute in every phase: 34 tests, no skipped cases.
+Missing drain and shutdown validation are removed independently; workspace,
+attempt and release binding are also removed independently. Restored source
+SHA-256 is `032267ff01a1e803e00cf6a759cce050b59438dd758a5fa05b3826fb9ee592b1`.
+
+Primary B4 integration passes 10 tests/3 suites; retained regressions pass
+611 tests/63 suites, with API/source-test typechecks, explicit changed-file lint
+and standalone CT-8. Exact commands, hunks, exits, logs and restoration receipts
+are under `tmp/base-api-evidence/B4/slice-14/`. Temporary mutation tooling is
+retained there and excluded from the delivered source.
+
+This adapter packet does not qualify the complete B4 integration mutations.
+`base-api-b4-mutation-required` still refuses the absent full runner with exit 2.
+Slice 15 must retain that gate, receive qualified B3 by merge commit and qualify
+the exact resulting SHA. Operational inputs and deployed shutdown remain
+unverified. After the scoped switch, recovery remains protected forward resume.
