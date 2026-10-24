@@ -51,9 +51,10 @@ describeDb("B4 integrated mutation closure", () => {
       (input.evidence as Record<string, unknown>)[key] = ["drain", "shutdown"].includes(key)
         ? undefined : key === "releaseId" ? "another-release" : randomUUID();
       const before = await snapshot(f);
-      expect(await status(executePersonalActivationResume(f.db, input))).toBe(key === "drain" || key === "shutdown" ? 503 : 403);
-      expect(await snapshot(f)).toBe(before);
-      expect(await closedState(f)).toEqual(closed);
+      const observed = { status: await status(executePersonalActivationResume(f.db, input)),
+        sql: await snapshot(f), publicState: await closedState(f) };
+      expect(observed).toEqual({ status: key === "drain" || key === "shutdown" ? 503 : 403,
+        sql: before, publicState: closed });
     });
 
   it("should reject seeded persisted corruption through real operator readback", async () => {
