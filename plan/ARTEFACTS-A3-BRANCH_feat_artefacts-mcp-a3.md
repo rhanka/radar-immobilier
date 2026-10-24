@@ -51,8 +51,8 @@
 - [x] Hand off the bundle and uncommitted French evidence report.
 - [x] Keep arming intent explicit and reject invalid receipts at startup.
 - [x] Cover fail-closed receipt resolution and middleware wiring states.
-- [ ] Preserve disarmed exchanged search and refuse invalid arming in protect.
-- [ ] Cover raw-token transitions and the invalid-arming middleware guard.
+- [x] Preserve disarmed exchanged search and refuse invalid arming in protect.
+- [x] Cover raw-token transitions and the invalid-arming middleware guard.
 - [ ] Prove resolved-config continuity and reject invalid-receipt HTTP fallback.
 - [ ] Pass Astra-correction gates, restored mutations and bundle reconstruction.
 

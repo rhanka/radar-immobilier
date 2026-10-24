@@ -10,7 +10,7 @@ import {
 } from "jose";
 import { authRoute, protect, pickValidInvitation, resolveGraphSignalsViewer } from "./auth.js";
 import { strictReceiverTestAuth, strictReceiverTestConfig } from "../artifacts/strict-receiver.js";
-import type { AuthConfig } from "../config.js";
+import { loadConfig, resolveAuthConfig, type AuthConfig } from "../config.js";
 import type { OidcDiscovery, FetchLike } from "../services/auth/oidc.js";
 import { signSession, verifySession } from "../services/auth/session.js";
 
@@ -1524,7 +1524,6 @@ describe("resolveGraphSignalsViewer — session sub for the discard port", () =>
 
 describe("strict receiver — exchanged search and audience confusions (H4 P5)", () => {
   const STRICT_AUTH = strictReceiverTestAuth(strictReceiverTestConfig());
-
   async function makeExchanged(
     overrides: Record<string, unknown> = {},
   ): Promise<{ presented: string; getKey: JWTVerifyGetKey }> {
@@ -1649,15 +1648,55 @@ describe("strict receiver — exchanged search and audience confusions (H4 P5)",
     }
   });
 
-  it("stays closed before activation even with a valid exchanged presentation", async () => {
+  it("serves exchanged search before activation (disarmed A2 continuity)", async () => {
     const unarmed = strictReceiverTestAuth(strictReceiverTestConfig({ enabled: false }));
     const { presented, getKey } = await makeExchanged();
     const res = await strictApp(unarmed, approvedDb(), getKey).request(
       "/api/graph-signals/drummondville",
       { headers: { authorization: `Bearer ${presented}` } },
     );
-    expect(res.status).toBe(403);
-    expect((await res.json()).error).toBe("delegated_scope_refused");
+    expect(res.status).toBe(200);
+    expect((await res.json()).ok).toBe(true);
+  });
+
+  it("accepts raw subject tokens before activation but refuses them after", async () => {
+    const unarmed = strictReceiverTestAuth(strictReceiverTestConfig({ enabled: false }));
+    const armed = strictReceiverTestAuth(strictReceiverTestConfig());
+    for (const aud of [unarmed.appBaseUrl, `${unarmed.appBaseUrl}/mcp`]) {
+      const { presented, getKey } = await makeSubject(aud);
+      const before = await strictApp(unarmed, approvedDb(), getKey).request(
+        "/api/graph-signals/drummondville",
+        { headers: { authorization: `Bearer ${presented}` } },
+      );
+      expect(before.status).toBe(200);
+      const after = await strictApp(armed, approvedDb(), getKey).request(
+        "/api/graph-signals/drummondville",
+        { headers: { authorization: `Bearer ${presented}` } },
+      );
+      expect(after.status).toBe(401);
+    }
+  });
+
+  it("fails closed when arming was requested with an invalid receipt", async () => {
+    const invalid = strictReceiverTestAuth(
+      strictReceiverTestConfig({ enabled: false, armingRequested: true }),
+    );
+    const { presented: exchanged, getKey: exchangedKey } = await makeExchanged();
+    const refusedExchanged = await strictApp(invalid, approvedDb(), exchangedKey).request(
+      "/api/graph-signals/drummondville",
+      { headers: { authorization: `Bearer ${exchanged}` } },
+    );
+    expect(refusedExchanged.status).toBe(401);
+    expect((await refusedExchanged.json()).error).toBe("strict_receiver_receipt_invalid");
+    for (const aud of [invalid.appBaseUrl, `${invalid.appBaseUrl}/mcp`]) {
+      const { presented, getKey } = await makeSubject(aud);
+      const refusedRaw = await strictApp(invalid, approvedDb(), getKey).request(
+        "/api/graph-signals/drummondville",
+        { headers: { authorization: `Bearer ${presented}` } },
+      );
+      expect(refusedRaw.status).toBe(401);
+      expect((await refusedRaw.json()).error).toBe("strict_receiver_receipt_invalid");
+    }
   });
 
   it("refuses an exchanged presentation for a suspended account", async () => {
@@ -1672,6 +1711,7 @@ describe("strict receiver — exchanged search and audience confusions (H4 P5)",
     expect(res.status).toBe(403);
     expect((await res.json()).error).toBe("account_not_approved");
   });
+
 });
 
 describe("strict receiver — forbidden routes, methods and preserved behavior (H4 P5)", () => {
