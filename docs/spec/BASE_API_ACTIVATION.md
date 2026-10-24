@@ -164,7 +164,10 @@ slice-8 rehearsal qualifies operator transport and seeded activation/resume only
 shared retirement/restart wiring, final integrations, mutations and qualified B3
 history remain open. After scoped epoch change, use forward resume only.
 
-## Slice 10 and L6 synthetic restart rehearsal
+## Initial slice 10 and L6 synthetic restart rehearsal
+
+This section records the pre-clarification state at `a5789f81`. The completed
+correction and fresh verification are recorded in the next section.
 
 Slice 10 qualifies `readDurableLegacyRetirement` before startup integration:
 595 tests in 60 suites, API/source-test typechecks, explicit changed-file lint
@@ -203,3 +206,20 @@ Full commands, database identity, SQL snapshots and statuses are under
 resume only. Qualified B3 reception, the two named B4 integration suites and the
 nine mutation families remain required; B5 and nominal activation keep their
 original position and budget.
+
+## Completed L6 startup integration
+
+The owner clarified that the preserved hunk requires exact functional content
+and authorized the one-line optional-property spread in `index.ts`. It omits
+`legacyRetirement` when the durable reader returns undefined; each defined state
+is forwarded unchanged. No application type, service contract or compiler option
+changes. The delivered file equals the original deferred patch plus that proposal.
+
+Fresh API/source-test and integration-test typechecks, fixed and explicit lint,
+595 tests in 60 suites, CT-3 and standalone CT-8 pass. Four additional temporary
+tests import the real entry point against PostgreSQL before and after activation,
+including unavailable durable storage. Actual activation and already-open resume
+pass on one synthetic database; rejected evidence and reopened state preserve SQL
+bytes. The previous failed compiler run remains evidence of the resolved blocker.
+The completed CT-2 receipt is `tmp/base-api-evidence/B4/l6/ct2-l6.md`.
+Muse slice 11, qualified B3, named B4 integrations and mutations remain open.
