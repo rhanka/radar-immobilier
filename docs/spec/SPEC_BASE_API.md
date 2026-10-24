@@ -1,8 +1,9 @@
-# SPEC_EVOL_BASE_API — Independent BASE API contract (B0)
+# SPEC_BASE_API — Independent BASE API contract
 
-Status: evolving. B0 freezes the wire, authority and acceptance contract traced
-to code at `feat/base-api-decouplee` (`9a815087`). Anything not established
-from code is marked `unverified`. B0 changes no application code.
+Status: finalized contract, preserving the complete B0 contract and the
+implemented B1–B4 composition received at `bf84974e78c6251cb9e1737a30a68c3e14af59e1`.
+B5 qualifies that implementation without changing its functional scope.
+Operational values and deployed state remain `unverified`.
 
 Binding: B0_SHA (final audited B0 commit, named in the delivery report) is the frozen
 contract baseline. B1 starts from B0_SHA. B2 starts from K_SHA, released by
@@ -11,9 +12,10 @@ clauses CT-1 through CT-9 (§11) govern both tracks verbatim.
 
 ## 1. Existing route inventory (read from code)
 
-All scoped routers below are implemented but UNMOUNTED in `app.ts` pending
-6H/6K activation. Legacy routers remain mounted and serve unchanged behavior.
-Mount state is `unverified` beyond the `app.ts` read of this baseline.
+All scoped routers below are mounted by `createApp` and enforce their
+destination/epoch gates. Public lot operations remain closed until the
+explicit protected 6K cutover opens their destination. Legacy routers stay
+mounted behind the explicit 503/410 retirement fence (§7).
 
 ### 1.1 `api/src/routes/workspaces.ts` — `workspacesRoute`
 
@@ -175,10 +177,10 @@ Moderator-only common archive, same path family as personal facets:
   fresh `expectedHeadId`.
 - Lot batch: all-or-nothing atomic append, 1–500 items, one shared
   idempotency key and one contract version (`lot-facets-v1`).
-- Destination closure (`lot_destination_disabled:<workspaceId>`, 503) precedes
-  business reads and receipt returns once the 6K gate lands (B2.2/B2.3).
+- Configured-destination checks and durable opening (`lot_cutover_closed`,
+  503) precede business reads and receipt returns, including exact replay.
 
-## 5. Reveal and reason catalog (B1 additions, contract reserved)
+## 5. Reveal and reason catalog (implemented in B1)
 
 - New router file `api/src/routes/scoped-signal-reveal.ts` (exact name) exposing,
   under the same session guard and fingerprint semantics as §1.2:
@@ -266,15 +268,15 @@ B1/B2 file ownership map:
   `api/src/services/facets/lots/**`, 6K import under CT-1–CT-8.
 - BASE Sol A-owned: `api/src/db/schema.ts` and shared BASE verification files.
   Cross-track CT-1 lease only: `api/src/app.ts`,
-  `api/src/index.ts`, `api/drizzle/**`, `tools/make/paniers-lot6.mk`,
-  `tools/make/paniers-lot6-verify.sh`; `api/src/routes/auth.ts` joins this
+  `api/src/index.ts`, `api/drizzle/**`; `api/src/routes/auth.ts` joins this
   set if both tracks touch it. Muse never writes these files. BASE-local ownership
   never grants a concurrent cross-track shared-file write right.
+- `tools/make/paniers-lot6.mk` and `tools/make/paniers-lot6-verify.sh`
+  remain BASE Sol A-owned; CT-1's shared cross-track set is defined above.
 
-## 10. B4 entry points (recorded, not implemented in B0)
+## 10. B4 entry points (implemented)
 
-Reserved names, owned and implemented in B4 only. B0 supplies no stub and
-no success path for them:
+Protected operator entry points owned and implemented in B4:
 
 - Make: `base-api-activate-personal`, `base-api-resume-personal` in
   `tools/make/base-api.mk`, dispatched by
@@ -369,3 +371,38 @@ Code trace verified in B0 (source presence never proves operational availability
   (API 18910 / UI 15910 / Maildev 11910), runner behavior, typecheck/lint/
   test/mutation outcomes, bundle contents, migration-applied state,
   K_SHA value and timing, 6K history import bytes, remote CI and PR #906.
+
+## 13. B5 qualification matrix and evidence boundary
+
+The frozen executable manifest is `tools/make/base-api-b5-scope.sh`.
+`base-api-b5-verify` executes the complete API CI include list with one
+worker, API/test typechecks, explicit changed-file lint, declaration build,
+CT-7 and standalone CT-8, then requires positive executed counts and no
+skips or failures in every listed suite. Raw evidence and exact revisions
+are recorded in `tmp/base-api-evidence/B5/report.md` outside source commits.
+
+- B5.1: `base-api-lot-{authority,transitions,receipts,contexts}.spec.ts`
+  qualifies signed sessions, supported bearer reads, distinct rights,
+  history pagination, exact receipts and unresolved historical contexts.
+- B5.2: `base-api-lot-{concurrency,replay-guards,closed-replays,batches}.spec.ts`
+  qualifies stale heads/content, current approval/membership/operation rights,
+  populated closure and atomic 1–500 batches. Ordered SQL snapshots include
+  events, bindings, streams, heads, receipts, contexts and both revisions.
+- B5.3: `base-api-cutover-readback.spec.ts` observes real qualified empty
+  PostgreSQL readback while public HTTP remains 503, then opening and the
+  first ordinary mark. `base-api-cutover-acceptance.spec.ts` adds gate,
+  identity-binding and legacy observations. Inherited B4
+  `base-api-activation{,-resume}.spec.ts`, `base-api-cutover-bound.spec.ts`
+  and `base-api-mutation-closure.spec.ts` retain protected interruption,
+  forward resume, persisted integrity and durable reconstruction witnesses.
+- B5.4: `base-api-independence.spec.ts` qualifies absent startup configuration,
+  unused artifact pool/host/control factories, successful BASE operations,
+  exact replay and live no-call counters at the artifact backend boundary.
+- B5.5: this complete contract replaces the EVOL document; the activation
+  runbook identifies synthetic qualification and outstanding operator inputs.
+
+B1–B4 mutation receipts keep their original identities and source hashes.
+B5 mutation cycles record baseline/assertion failure/restored success.
+Final reviews and receiving-branch integration require the exact tested SHA;
+a B5 branch bundle alone does not establish receiving-branch acceptance.
+Combined CT-8/CT-9 and operational activation remain separate qualifications.
