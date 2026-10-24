@@ -158,6 +158,7 @@
   - [x] B4 review fix source fixtures: include the two committed public role XML records required by existing API tests.
   - [x] B4 review fix resource note: distinguish historical B3 memory bounds from the current bounded B4 runner.
   - [x] B4 review fix complete CI resources: include the replay shell entry and NDJSON fixture; retain one worker and memory limits without an artificial CPU quota or changed timeouts.
+  - [x] B4 review fix CI isolation: include public address fixtures and bound API source/dependency and temporary storage in RAM to avoid measured host disk stalls; preserve all test deadlines.
   - [ ] B4 review fix delivery: publish measured evidence and a prerequisite-e1758ef6 bundle for the second independent review pass.
   - [x] B4/B3 tooling preparation: narrow delivery paths, exact ontology input, changed-file lint and common synthetic DB migration; functional gates remain open.
   - [x] B4 operator input transport: actual Make activation/resume command-double proof preserves literal Make functions and shell syntax without evaluation.
