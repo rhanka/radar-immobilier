@@ -1,9 +1,8 @@
 # BASE activation and protected recovery
 
-Status: B4 slices 1–7 and standalone tooling preparation only. Activation and
-durable resume have scoped PostgreSQL coverage; dispatcher integration,
-restart wiring and B3 qualification remain pending. This document does not
-authorize operational activation.
+Status: B4 slices 1–15, dispatcher and guarded restart are implemented.
+Qualified B3 is received by preserved merge history; the final B4 report binds
+qualification to the delivery SHA. Operational activation remains unverified.
 B5 and the nominal operational rehearsal retain their original scope and budget.
 
 ## Prerequisites
@@ -13,11 +12,13 @@ B5 and the nominal operational rehearsal retain their original scope and budget.
   B2 `d033bc18bf9b9537c5c7a69311ebe44b0b545517` by their preserved merge history.
 - Obtain a current CT-1 lease before any shared application/startup resolution.
   L3 is released; its receipt is acknowledged, not reused as a B4 grant.
-- Receive qualified B3 with its real-writer coverage matrix before the final B4
-  gate. Synthetic coverage does not establish deployed-image writer coverage.
-- Install the Muse operator script and its internal real reader. Preparing a
-  persistent synthetic campaign is still an integration requirement for slice 8;
-  ordinary `base-api-verify` removes its database at exit.
+- Qualified B3 `dbcd82a388d6be72fdefe1de927a2459afa0dbe8` is received
+  through B123 `1c304311a5d3dede996a4c9307ffd6af1e4db8ef` and B4 merge
+  `a1f20d7a9b2fbee0b20ea6e0f23501d30c926efa`. Its real-writer proof is
+  retained; synthetic coverage does not establish deployed-image coverage.
+- Use the delivered operator script and real reader. Prepare a persistent
+  synthetic campaign for actual dispatcher calls; ordinary `base-api-verify`
+  removes its database at exit.
 - Retain a running, owned `radar-test-*`/`radar-e2e-*` campaign and its immutable
   source archive, runtime dependencies and PostgreSQL database across both calls.
   The dispatcher checks ownership, serializes access and refuses stale script bytes.
@@ -96,7 +97,7 @@ instance, including in-flight responses, streams, queued buffers and reconnects.
 No operational workspace, actor, release, instance roster, maintenance attempt,
 writer coverage, mapping, manifest or D5 disposition is verified by these examples.
 
-## Durable operator recovery; restart wiring still to qualify
+## Durable operator recovery and qualified restart
 
 | Durable state | Required recovery |
 |---|---|
@@ -189,12 +190,12 @@ not override the failed compiler gate.
 Exact synthetic operator invocations, each exiting 0 on the same campaign DB:
 
 ```sh
-rtk make -f tools/make/base-api.mk base-api-activate-personal BASE_API_WORKSPACE=0f3fb638-55cc-4d00-aa72-31bd9dfe6b6c BASE_API_ACTOR=synthetic-l6-manager BASE_API_REASON='synthetic L6 $(shell touch injected) `touch injected`' BASE_API_MAINTENANCE_ATTEMPT=22222222-2222-4222-8222-222222222222 BASE_API_RELEASE=synthetic-l6-release BASE_API_INSTANCES='synthetic-old-a synthetic-old-b' BASE_API_MAINTENANCE_EVIDENCE=tmp/base-api-evidence/B4/l6/operator/maintenance.json API_PORT=18911 UI_PORT=15911 MAILDEV_UI_PORT=11911 ENV=test-base-api-b1
-rtk make -f tools/make/base-api.mk base-api-resume-personal BASE_API_WORKSPACE=0f3fb638-55cc-4d00-aa72-31bd9dfe6b6c BASE_API_ACTOR=synthetic-l6-manager BASE_API_REASON='synthetic L6 $(shell touch injected) `touch injected`' BASE_API_MAINTENANCE_ATTEMPT=22222222-2222-4222-8222-222222222222 BASE_API_RELEASE=synthetic-l6-release BASE_API_INSTANCES='synthetic-old-a synthetic-old-b' BASE_API_MAINTENANCE_EVIDENCE=tmp/base-api-evidence/B4/l6/operator/maintenance.json API_PORT=18911 UI_PORT=15911 MAILDEV_UI_PORT=11911 ENV=test-base-api-b1
+rtk make -f tools/make/base-api.mk base-api-activate-personal BASE_API_WORKSPACE=248ebbb7-2c4d-44cb-8985-d8eafb1faea4 BASE_API_ACTOR=synthetic-l6-manager BASE_API_REASON='synthetic L6 $(shell touch injected) `touch injected`' BASE_API_MAINTENANCE_ATTEMPT=22222222-2222-4222-8222-222222222222 BASE_API_RELEASE=synthetic-l6-release BASE_API_INSTANCES='synthetic-old-a synthetic-old-b' BASE_API_MAINTENANCE_EVIDENCE=tmp/base-api-evidence/B4/l6/operator/maintenance.json API_PORT=18911 UI_PORT=15911 MAILDEV_UI_PORT=11911 ENV=test-base-api-b1
+rtk make -f tools/make/base-api.mk base-api-resume-personal BASE_API_WORKSPACE=248ebbb7-2c4d-44cb-8985-d8eafb1faea4 BASE_API_ACTOR=synthetic-l6-manager BASE_API_REASON='synthetic L6 $(shell touch injected) `touch injected`' BASE_API_MAINTENANCE_ATTEMPT=22222222-2222-4222-8222-222222222222 BASE_API_RELEASE=synthetic-l6-release BASE_API_INSTANCES='synthetic-old-a synthetic-old-b' BASE_API_MAINTENANCE_EVIDENCE=tmp/base-api-evidence/B4/l6/operator/maintenance.json API_PORT=18911 UI_PORT=15911 MAILDEV_UI_PORT=11911 ENV=test-base-api-b1
 ```
 
-Database `radar`, PostgreSQL system identifier `7700093356303638567`, started
-`2026-10-24 04:54:54.376582+00`, project `radar-test-base-api-b1`: before activation,
+Database `radar`, PostgreSQL system identifier `7700099786958155814`, started
+`2026-10-24 05:19:51.51585+00`, project `radar-test-base-api-b1`: before activation,
 legacy epoch/closed barrier and one attached personal event; after activation,
 scoped epoch/open barrier, dropped legacy index and one event/stream/binding/head.
 Missing drain, missing shutdown and foreign workspace/attempt/release each exit 2
@@ -293,3 +294,73 @@ This adapter packet does not qualify the complete B4 integration mutations.
 Slice 15 must retain that gate, receive qualified B3 by merge commit and qualify
 the exact resulting SHA. Operational inputs and deployed shutdown remain
 unverified. After the scoped switch, recovery remains protected forward resume.
+
+## Slice 15: activation commands and recovery evidence
+
+This section is the operator runbook. It records only already tested
+synthetic commands and their evidence. It authorizes no operational activation,
+deployment or production shutdown.
+
+Run the dispatcher on the same owned disposable campaign for both calls.
+Keep `tmp/base-api-evidence/B4/l6/` and the campaign database across the
+interruption and resume phases. Clean the campaign only after its evidence
+is captured. Never point the dispatcher at an operational target.
+
+Tested L6 operator invocations, each exiting 0 on project
+`radar-test-base-api-b1`, database `radar`, PostgreSQL system identifier
+`7700099786958155814`, started `2026-10-24 05:19:51.51585+00`:
+
+```sh
+rtk make -f tools/make/base-api.mk base-api-activate-personal BASE_API_WORKSPACE=248ebbb7-2c4d-44cb-8985-d8eafb1faea4 BASE_API_ACTOR=synthetic-l6-manager BASE_API_REASON='synthetic L6 $(shell touch injected) `touch injected`' BASE_API_MAINTENANCE_ATTEMPT=22222222-2222-4222-8222-222222222222 BASE_API_RELEASE=synthetic-l6-release BASE_API_INSTANCES='synthetic-old-a synthetic-old-b' BASE_API_MAINTENANCE_EVIDENCE=tmp/base-api-evidence/B4/l6/operator/maintenance.json API_PORT=18911 UI_PORT=15911 MAILDEV_UI_PORT=11911 ENV=test-base-api-b1
+rtk make -f tools/make/base-api.mk base-api-resume-personal BASE_API_WORKSPACE=248ebbb7-2c4d-44cb-8985-d8eafb1faea4 BASE_API_ACTOR=synthetic-l6-manager BASE_API_REASON='synthetic L6 $(shell touch injected) `touch injected`' BASE_API_MAINTENANCE_ATTEMPT=22222222-2222-4222-8222-222222222222 BASE_API_RELEASE=synthetic-l6-release BASE_API_INSTANCES='synthetic-old-a synthetic-old-b' BASE_API_MAINTENANCE_EVIDENCE=tmp/base-api-evidence/B4/l6/operator/maintenance.json API_PORT=18911 UI_PORT=15911 MAILDEV_UI_PORT=11911 ENV=test-base-api-b1
+```
+
+Literal transport is proven: the dispatcher preserves Make functions and shell
+syntax without evaluation. Missing, foreign or stale inputs and stale script
+bytes reject before any mutation. The calls above changed legacy/closed epoch state
+into scoped/open state with one stream, binding and head. Already-open resume
+preserved every public SQL row byte for byte. Missing drain, missing shutdown
+and foreign workspace/attempt/release each exited 2 with unchanged SQL bytes.
+
+Bindings per call: `BASE_API_WORKSPACE`, `BASE_API_ACTOR`,
+`BASE_API_MAINTENANCE_ATTEMPT`, `BASE_API_RELEASE` and `BASE_API_INSTANCES`
+are independent operator inputs, never inferred from the evidence file. The
+evidence file must be a regular nonempty JSON file below
+`tmp/base-api-evidence/`, mounted read-only at `/maintenance-evidence.json`.
+
+Recovery after interruption, on the same database:
+
+| Durable state | Required recovery |
+|---|---|
+| Legacy, barrier committed | Keep public 503; retry protected activation only after fresh authorization and evidence. |
+| Scoped, barrier committed | Forward resume through internal readback; never rerun legacy activation. |
+| Scoped, open | Reauthorize; return status without changing SQL bytes. |
+| Unreadable or ambiguous | Stay closed; never default back to legacy serving after restart. |
+
+Durable restart reuses `readDurableLegacyRetirement` through `createApp`:
+closed barrier returns 503 on legacy paths, proven scoped epoch returns 410,
+and any read error, missing proof or ambiguous epoch starts closed. Four
+temporary real-entrypoint tests prove 503 then 410 across activation, plus
+closed start on unavailable storage. Stream retirement alone proves nothing.
+
+B34 integration evidence, received in this chain without new shared writes:
+`B123_SHA 1c304311` at 471 tests/96 suites; integrated `a1f20d7a` at 946
+tests/123 suites; final `d779d460` with twelve mutation families at 0/1/0,
+restored bytes identical, final pass at 26 tests/6 suites, both typechecks,
+explicit lint, CT-7 on the witness baseline and CT-8 on fresh, upgraded and
+rerun databases. Application and migrations at `d779d460` are identical to
+`a1f20d7a`; `app.ts`, `index.ts`, `auth.ts`, `schema.ts` and SQL bytes are
+unchanged. Receipt `ct2-l7.md` and runtime receipts are retained in the B34
+evidence lane. The final standalone bundle follows tranche 15; a future ARTEFACTS join
+requires its own frozen-order CT-8 and exact-image CT-9.
+
+Stop and drain all three source writers (`ogc-pull`, `populate-geo`,
+`projection`) before any reconciliation. Any coexistence needs its
+deterministic PostgreSQL lock-order proof. No operational stop is executed
+here.
+
+Outstanding operational inputs, still unverified: real workspace, actor,
+reason, maintenance attempt, release, instance roster, qualified maintenance
+evidence, qualified mapping, drain proof, old-instance shutdown proof, writer
+coverage, manifest and D5 dispositions, deployment access and target database
+identity. B5, final reviews, remote CI and combined delivery keep their scope.
