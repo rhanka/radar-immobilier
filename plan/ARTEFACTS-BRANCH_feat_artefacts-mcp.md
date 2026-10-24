@@ -72,6 +72,7 @@
 - [x] A1 partial integration: approved source `f2b6c25cc9458ec285d6d4f620a55dad8c30f909` received on `e70651851104bbbc885c131164526dad3dee30f0` after both r3 approvals; CT-1 files and Track remain unchanged.
 - [x] A6 partial integration: approved source `ad49cdd40584fa14ccba95fe94cab4f04184d788` merged under L4 after acknowledging BASE L3 receipt `4fc755e9`; inherited source lines are exempt from the authored 150-line limit, as explicitly authorized; reader activation remains open.
 - [x] L4 app binding: apply A6's exact optional reader mount to `app.ts`; content dispatch stays before control/auth, absent reader remains closed; no startup/auth/Drizzle change.
+- [x] API runner qualification: the full 307-file suite reproduces three CPU-contention deadlines, then passes with four workers; bound shared runner concurrency without changing test deadlines, assertions or exclusions.
 - [ ] A1 acceptance remains open pending Sentropic r2; enabled `[missing-contract]` cases remain named failures and ordinary API collection keeps acceptance disabled by default. Proposed SQL/journal remain unregistered; CT-8/CT-9 remain unverified.
 
 ## UAT Management (in orchestration context)
