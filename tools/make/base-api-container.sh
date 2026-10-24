@@ -63,8 +63,8 @@ case $action in
       if [[ $action == b3-* || $action == b4-* ]]; then node ../tools/make/base-api-required-mutations.mjs "${action%%-*}"; fi
     else
     if [[ $action == ci-api ]]; then
-      npm run test --workspace=api -- --config vitest.isolated.config.ts \
-        --reporter=default --reporter=json --outputFile.json=/evidence/tests.json
+      (cd /workspace; npm run test --workspace=api -- --config vitest.isolated.config.ts \
+        --reporter=default --reporter=json --outputFile.json=/evidence/tests.json)
     else
       ../node_modules/.bin/vitest run --config vitest.isolated.config.ts \
         --reporter=default --reporter=json --outputFile.json=/evidence/tests.json $scope
