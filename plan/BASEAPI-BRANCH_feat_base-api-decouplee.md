@@ -161,6 +161,7 @@
   - [x] B4 review fix CI isolation: include public address fixtures and bound API source/dependency and temporary storage in RAM to avoid measured host disk stalls; preserve all test deadlines.
   - [x] B4 review fix scoped API environment: start the same bounded S3 service for scoped full-API reproductions and complete CI runs.
   - [x] B4 review fix replay preflight: allow execution in the bounded temporary mount; Docker's default noexec blocks the existing synthetic pdftotext fixture.
+  - [x] B4 review fix Compose encoding: preserve the temporary mount options as one quoted YAML scalar.
   - [ ] B4 review fix delivery: publish measured evidence and a prerequisite-e1758ef6 bundle for the second independent review pass.
   - [x] B4/B3 tooling preparation: narrow delivery paths, exact ontology input, changed-file lint and common synthetic DB migration; functional gates remain open.
   - [x] B4 operator input transport: actual Make activation/resume command-double proof preserves literal Make functions and shell syntax without evaluation.
