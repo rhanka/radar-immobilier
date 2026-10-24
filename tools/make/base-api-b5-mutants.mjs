@@ -37,9 +37,13 @@ export default [
   M('moderation', L + 'lot-authorize.ts', 'lot-authority', 'keeps moderation and scope separation on writes', [
     ['case "discard":\n      if (scope === "workspace" && !rights.moderateArchive)', 'case "discard":\n      if (false)'],
   ]),
-  M('head', L + 'lot-transition.ts', 'lot-concurrency', 'settles one winner when distinct commands race the same head', [
+  M('head', L + 'lot-transition.ts', 'lot-concurrency', 'settles one winner under observed concurrent transactions', [
     ['} else if ((main.ref.headEventId ?? null) !== command.expected_head_id) {', '} else if (false) {'],
   ]),
+  { ...M('transaction-overlap', L + 'lot-writer.ts', 'lot-concurrency', '', [
+    ['    await lockWorkspace(tx, workspaceId);', ''],
+  ]), titles: ['settles one winner under observed concurrent transactions',
+    'replays identical idempotency keys under observed concurrent transactions'] },
   M('fingerprint', L + 'lot-writer.ts', 'lot-concurrency', 'conflicts on stale content fingerprints with the current version', [
     ['\n      || resolved.fingerprint !== command.displayed_version.fingerprint', ''],
   ]),
