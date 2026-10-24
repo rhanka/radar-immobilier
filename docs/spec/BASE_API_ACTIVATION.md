@@ -27,6 +27,25 @@ B5 and the nominal operational rehearsal retain their original scope and budget.
 
 ## Operator interface
 
+The delivered 6K HTTP routes also accept server-held maintenance configuration
+through `BASE_API_LOT_CUTOVER_CONFIG`, read once when `createApp` constructs
+its routes (including the ordinary `index.ts` startup). Its JSON contains
+`workspaceId`, `mapping` (`mappingVersion`, `importerVersion`,
+`destinationsQualified: true`), and `maintenance` (`maintenanceAttemptId`,
+`releaseId`, `instanceIds`, `evidence`, optional qualified-empty `options`).
+The evidence has the same workspace/actor/attempt/release/instances and
+drain/shutdown fields described below. This is deployment configuration,
+never a client-supplied manifest or public readback bypass.
+
+Each request derives its safety adapter from the authenticated session actor,
+current workspace, recomputed manifest and D5 gate. Evidence for another actor
+fails with `403 maintenance_evidence_actor_mismatch`; absent configuration
+keeps activation unavailable. Every ready target and projected facet value
+must match the qualified manifest before opening. The composed synthetic
+invocation, including the exact configuration JSON, is executable in
+`api/tests/integration/base-api-cutover-bound.spec.ts`.
+Operational configuration values remain unverified until supplied and qualified.
+
 Only `tools/make/base-api.mk` is used. All three ports are explicit and `ENV`
 is last. Inputs are captured with Make's `value` before export, preserving literal
 embedded Make functions as well as shell syntax without evaluating either:
