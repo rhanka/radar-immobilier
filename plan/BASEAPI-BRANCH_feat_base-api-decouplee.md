@@ -149,6 +149,7 @@
   - [x] B4 review fix composition: qualify two moderators through createApp and reject static adapter reuse.
   - [x] B4 review fix recovery: retain closed barriers for missing or altered reconciled PostgreSQL heads.
   - [x] B4 review fix witnesses: cover full personal identities and persisted projection comparisons.
+  - [x] B4 review fix comparisons: exercise missing, altered and D5-selected expected heads directly.
   - [ ] B4 review fix tooling: run all sixteen integrated mutation families, full CI API selection and declaration build with bounded resources.
   - [ ] B4 review fix delivery: publish measured evidence and a prerequisite-e1758ef6 bundle for the second independent review pass.
   - [x] B4/B3 tooling preparation: narrow delivery paths, exact ontology input, changed-file lint and common synthetic DB migration; functional gates remain open.
