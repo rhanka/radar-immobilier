@@ -41,7 +41,7 @@
 - [x] Add the canonical search profile and strict recovery guard.
 - [x] Cover profile, activation and recovery behavior.
 - [x] Enforce the exchanged profile in the existing auth middleware.
-- [ ] Add exchanged-search fixtures and preserve per-viewer identity.
+- [x] Add exchanged-search fixtures and preserve per-viewer identity.
 - [ ] Cover cookie-free search, audience confusions and account refusal.
 - [ ] Cover forbidden methods/paths and browser/public-route behavior.
 - [ ] Pass focused auth/OIDC/session/signals tests and four restored mutations.

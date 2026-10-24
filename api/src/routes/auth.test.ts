@@ -9,6 +9,7 @@ import {
   type JWTVerifyGetKey,
 } from "jose";
 import { authRoute, protect, pickValidInvitation, resolveGraphSignalsViewer } from "./auth.js";
+import { strictReceiverTestAuth, strictReceiverTestConfig } from "../artifacts/strict-receiver.js";
 import type { AuthConfig } from "../config.js";
 import type { OidcDiscovery, FetchLike } from "../services/auth/oidc.js";
 import { signSession, verifySession } from "../services/auth/session.js";
@@ -1515,4 +1516,80 @@ describe("resolveGraphSignalsViewer — session sub for the discard port", () =>
     expect(await viewerOf({ sub: "" }, true)).toBeNull();
     expect(await viewerOf(null, false)).toBeNull();
   });
+
+  it("returns the sub of an exchanged strict session (per-user discard intact)", async () => {
+    expect(await viewerOf({ sub: "mcp-user", via: "exchanged" }, true)).toBe("mcp-user");
+  });
+});
+
+describe("strict receiver — exchanged search and audience confusions (H4 P5)", () => {
+  const STRICT_AUTH = strictReceiverTestAuth(strictReceiverTestConfig());
+
+  async function makeExchanged(
+    overrides: Record<string, unknown> = {},
+  ): Promise<{ presented: string; getKey: JWTVerifyGetKey }> {
+    const { publicKey, privateKey } = await generateKeyPair("EdDSA", { crv: "Ed25519" });
+    const pubJwk: JWK = await exportJWK(publicKey);
+    pubJwk.kid = "k1";
+    pubJwk.alg = "EdDSA";
+    const builder = new SignJWT({
+      scope: "immo:search",
+      client_id: "immo-mcp-workload",
+      act: { sub: "immo-mcp-workload" },
+      ...overrides,
+    }).setProtectedHeader({ alg: "EdDSA", kid: "k1" });
+    if (!("iss" in overrides)) builder.setIssuer(STRICT_AUTH.issuer);
+    if (!("aud" in overrides)) builder.setAudience("https://immo.example.test");
+    if (!("sub" in overrides)) builder.setSubject("mcp-user");
+    if (!("iat" in overrides)) builder.setIssuedAt();
+    if (!("exp" in overrides)) builder.setExpirationTime("5m");
+    return {
+      presented: await builder.sign(privateKey),
+      getKey: createLocalJWKSet({ keys: [pubJwk] }),
+    };
+  }
+
+  async function makeSubject(aud: string): Promise<{ presented: string; getKey: JWTVerifyGetKey }> {
+    const { publicKey, privateKey } = await generateKeyPair("EdDSA", { crv: "Ed25519" });
+    const pubJwk: JWK = await exportJWK(publicKey);
+    pubJwk.kid = "k1";
+    pubJwk.alg = "EdDSA";
+    const presented = await new SignJWT({ scope: "immo:search immo:read" })
+      .setProtectedHeader({ alg: "EdDSA", kid: "k1" })
+      .setIssuer(STRICT_AUTH.issuer)
+      .setAudience(aud)
+      .setSubject("mcp-user")
+      .setIssuedAt()
+      .setExpirationTime("5m")
+      .sign(privateKey);
+    return { presented, getKey: createLocalJWKSet({ keys: [pubJwk] }) };
+  }
+
+  type Db = import("../db/client.js").Database;
+  const approvedDb = () =>
+    makeEnrollmentDb([{ sub: "mcp-user", status: "approved", isAdmin: false }]) as unknown as Db;
+
+  function strictApp(
+    auth: AuthConfig = STRICT_AUTH,
+    db?: Db,
+    bearerGetKey?: JWTVerifyGetKey,
+  ): Hono {
+    const app = new Hono();
+    app.use(
+      "*",
+      protect(auth, {
+        ...(db ? { db } : {}),
+        ...(bearerGetKey ? { bearerGetKey } : {}),
+      }),
+    );
+    app.get("/api/graph-signals/:city", (c) => c.json({ ok: true, nodes: [] }));
+    app.get("/api/graph-signals/by-city", (c) => c.json({ ok: true, cities: [] }));
+    app.get("/api/v1/signal-facets/reason-codes", (c) => c.json({ ok: true, codes: [] }));
+    app.post("/api/v1/signal-facets/select", (c) => c.json({ ok: true }));
+    app.get("/api/admin/ping", (c) => c.json({ ok: true }));
+    app.get("/api/documents/raw", (c) => c.json({ ok: true }));
+    app.get("/health", (c) => c.json({ status: "ok" }));
+    return app;
+  }
+
 });
