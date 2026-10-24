@@ -1,0 +1,61 @@
+# Feature: Fix the Focus Vite advisory
+
+## Objective
+Resolve GHSA-587h-7wmj-h5pm in the independent Focus dependency tree by pinning Vite to 6.4.4.
+
+## Scope / Guardrails
+- Follow the owner's `consigne-sol-vite-focus.md`; no push or merge.
+- Use Make targets and containers; never read environment files or run Python.
+- Stop if npm changes any other package or disk space falls below 10 GiB.
+- Run one Docker campaign at a time and remove its containers afterward.
+- Commit through a local recovery repository; keep the shared Git directory read-only.
+- Keep each commit at or below 150 changed lines, with an English Conventional Commit subject only.
+
+## Branch Scope Boundaries (MANDATORY)
+- **Allowed Paths (implementation scope)**:
+  - `docs/architecture/focus/package.json`
+  - `docs/architecture/focus/package-lock.json`
+  - `.security/findings/2026-10-21-vite-ghsa-587h.md`
+  - `plan/VITEFOCUS-BRANCH_fix-vite-focus-6-4-4.md`
+  - `RAPPORT-SOL-VITE-FOCUS.md` (owner-requested delivery receipt, outside the bundle)
+- **Forbidden Paths (must not change in this branch)**:
+  - `Makefile`, `docker-compose*.yml`, `rules/**`
+  - `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`
+  - Other branch plans, application code, and generated documentation
+- **Conditional Paths (allowed only with explicit exception when not already listed in Allowed Paths)**:
+  - None.
+- **Exception process**:
+  - Record reason, impact, and rollback here before expanding scope.
+
+## Feedback Loop
+- [x] The owner's delivery instruction overrides the generic commit-trailer requirement.
+- [x] The French delivery report follows the owner's explicit language instruction.
+- [x] Build tooling adaptations belong to temporary Makefiles; no project Makefile changes.
+
+## Orchestration Mode (AI-selected)
+- [x] Mono-branch, sequential verification and local bundle delivery.
+- [ ] Multi-branch.
+
+## UAT Management (in orchestration context)
+- [x] Dependency patch only; automated checks run in this worktree without starting root UAT.
+
+## Plan / Todo (lot-based)
+- [x] **Lot 0 — Baseline & constraints**
+  - [x] Read the assignment, master, workflow, security, and testing rules.
+  - [x] Confirm `fix/vite-focus-6-4-4` at `3ffd7fd7a96aeaea9844a93d3ce44620733c443b`.
+  - [x] Snapshot the lockfile and run the read-only baseline audit.
+  - [x] Use `ENV=test-vite-focus` as the last Make argument.
+  - [x] No application services or API/UI/Maildev ports; isolated Chromium uses port 9238.
+- [x] **Lot 1 — Dependency patch**
+  - [x] Pin the Focus Vite declaration to exactly 6.4.4.
+  - [x] Regenerate through the existing containerized `deps` target.
+  - [x] Prove equal package counts and no changes outside the Vite declaration and resolution.
+- [ ] **Lot 2 — Verification and security record**
+  - [ ] Run the existing Focus build and test targets in containers.
+  - [ ] Rescan without changing manifests; report remaining findings separately.
+  - [ ] Update the Vite finding with observed Focus verification.
+- [ ] **Lot 3 — Delivery**
+  - [ ] Create selective, bounded commits in the recovery repository.
+  - [ ] Create a bundle excluding the exact supplied base and audit it in a fresh repository.
+  - [ ] Write the French report with commit SHA, bundle path, and SHA-256.
+  - [ ] Clean up campaign containers; do not push.
