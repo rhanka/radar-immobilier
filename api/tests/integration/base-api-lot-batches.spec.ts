@@ -36,7 +36,7 @@ describeDb("b5 composed lot batches", () => {
     expect(replayed.status).toBe(200);
     expect(await replayed.text()).toBe(receipt);
     expect(await f.sqlSnapshot()).toEqual(before);
-    for (const table of ["facet_heads", "facet_event_bindings", "facet_streams"]) {
+    for (const table of ["facet_events", "facet_heads", "facet_event_bindings", "facet_streams"]) {
       expect((await f.fixture.pool.query(`SELECT * FROM ${table}`)).rows).toHaveLength(500);
     }
     for (const table of ["facet_commands", "facet_command_contexts"]) {

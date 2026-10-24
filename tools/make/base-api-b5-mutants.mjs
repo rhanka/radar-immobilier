@@ -23,23 +23,17 @@ function receipt(kind) {
   ]), titles: ['approval', 'membership', 'lot_select', 'lot_pipeline', 'lot_market']
     .map(right => `denies ${kind} recovery after revoking ${right}`) };
 }
+function closedReceipt(kind) {
+  return { ...receipt(kind), id: 'closed-' + kind,
+    testFile: T + 'lot-closed-replays.spec.ts', titles: undefined,
+    title: 'closes public reads and existing single and batch receipts without mutation' };
+}
 export default [
   M('mount', 'src/app.ts', 'lot-authority', 'supports verified bearer reads while rejecting bearer writes', [
     ['    app.route("/", scopedLotFacetsRoute({ ...lotDeps, requireCutover: true }));', '    void lotDeps;'],
   ]),
   receipt('single'), receipt('batch'),
-  M('closed-single', L + 'lot-writer.ts', 'lot-closed-replays',
-    'closes public reads and existing single and batch receipts without mutation', [
-      ['const destination = await requireOpenLotDestination(tx, workspaceId);',
-        'const destination = await requireLotDestination(tx, workspaceId);'],
-      ['import { requireOpenLotDestination }', 'import { requireOpenLotDestination, requireLotDestination }'],
-    ]),
-  M('closed-batch', L + 'lot-batch.ts', 'lot-closed-replays',
-    'closes public reads and existing single and batch receipts without mutation', [
-      ['const destination = await requireOpenLotDestination(tx, workspaceId);',
-        'const destination = await requireLotDestination(tx, workspaceId);'],
-      ['import { requireOpenLotDestination }', 'import { requireOpenLotDestination, requireLotDestination }'],
-    ]),
+  closedReceipt('single'), closedReceipt('batch'),
   M('moderation', L + 'lot-authorize.ts', 'lot-authority', 'keeps moderation and scope separation on writes', [
     ['case "discard":\n      if (scope === "workspace" && !rights.moderateArchive)', 'case "discard":\n      if (false)'],
   ]),
