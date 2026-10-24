@@ -3,16 +3,13 @@ set -euo pipefail
 action=$1; scope=$2
 tar -xf /source.tar -C /workspace
 cd /workspace
-# Supply the non-exercised geography import with an explicit synthetic fixture.
-mkdir -p packages/radar-sources/src/geo
-printf '[]\n' > packages/radar-sources/src/geo/municipalities.qc.json
 # Disable every lifecycle hook; only the known JS binary installer is run.
 npm ci --ignore-scripts --no-audit --no-fund > /evidence/install.log 2>&1
 node node_modules/esbuild/install.js >> /evidence/install.log 2>&1
 cat > api/vitest.isolated.config.ts <<'CONFIG'
 import config from './vitest.config.js';
 export default { ...config, envDir: false,
-  test: { ...config.test, fileParallelism: false, maxWorkers: 2 } };
+  test: { ...config.test, fileParallelism: false, maxWorkers: 1 } };
 CONFIG
 # Avoid repeated container DNS lookups consuming the API's 3s connect budget.
 POSTGRES_HOST=$(node --input-type=module -e 'import {lookup} from "node:dns/promises"; console.log((await lookup("postgres", {family:4})).address)')
@@ -43,14 +40,20 @@ case $action in
   network-proof) node tools/make/base-api-network.mjs;;
   typecheck) typecheck_api;;
   lint) lint_api;;
-  verify|test|test-api|b1-mutation-legacy|b1-mutation-archive|b1-mutation-required|b3-mutation-required|b4-mutation-required)
-    if [[ $action == verify || $action == *-mutation-* ]]; then
+  verify|ci-api|test|test-api|b1-mutation-legacy|b1-mutation-archive|b1-mutation-required|b3-mutation-required|b4-mutation-required)
+    if [[ $action == verify || $action == ci-api || $action == *-mutation-* ]]; then
       typecheck_api
       lint_api
     fi
     cd api
     node ../tools/make/base-api-ct8.mjs | tee /evidence/ct8.log
     node ../tools/make/base-api-b2-setup.mjs
+    if [[ $action == ci-api ]]; then
+      cd /workspace
+      npm run build --workspace=api
+      test -s api/dist/index.d.ts
+      cd api
+    fi
     if [[ $action == verify && -f src/services/facets/lots/lot-cutover-journal-db.test.ts ]]; then
       node ../tools/make/base-api-ct7-proof.mjs | tee /evidence/ct7.log
     fi
@@ -59,8 +62,13 @@ case $action in
       timeout --signal=TERM --kill-after=5 600 bash "../tools/make/base-api-${action%%-*}-mutation.sh" "${action#*-mutation-}"
       if [[ $action == b3-* || $action == b4-* ]]; then node ../tools/make/base-api-required-mutations.mjs "${action%%-*}"; fi
     else
-    ../node_modules/.bin/vitest run --config vitest.isolated.config.ts \
-      --reporter=default --reporter=json --outputFile.json=/evidence/tests.json $scope
+    if [[ $action == ci-api ]]; then
+      npm run test --workspace=api -- --config vitest.isolated.config.ts \
+        --reporter=default --reporter=json --outputFile.json=/evidence/tests.json
+    else
+      ../node_modules/.bin/vitest run --config vitest.isolated.config.ts \
+        --reporter=default --reporter=json --outputFile.json=/evidence/tests.json $scope
+    fi
     fi
     node ../tools/make/base-api-results.mjs /evidence/tests.json > /evidence/tests.tsv;;
   *) exit 2;;

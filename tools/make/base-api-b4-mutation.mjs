@@ -67,7 +67,13 @@ for (const m of mutations) {
   writeFileSync(prefix + '.patch', diff.stdout);
   let killed;
   try { writeFileSync(m.source, mutant); killed = step(m, prefix, 'mutant', targets); }
-  finally { writeFileSync(m.source, original); assert.equal(hash(readFileSync(m.source)), hash(original)); }
+  finally {
+    writeFileSync(m.source, original);
+    assert.equal(hash(readFileSync(m.source)), hash(original));
+    const compared = spawnSync('cmp', [m.source, prefix + '-original.ts']);
+    assert.equal(compared.status, 0);
+    writeFileSync(prefix + '-cmp.exit', String(compared.status));
+  }
   const restored = step(m, prefix, 'restored');
   manifest[m.id] = { source: m.source, targets, command: killed.command,
     exits: { baseline: baseline.exit, mutant: killed.exit, restored: restored.exit }, restorationSha256: hash(original) };

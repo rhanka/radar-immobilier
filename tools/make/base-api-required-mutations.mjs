@@ -8,6 +8,7 @@ const required = {
     'ogc-stored-identity', 'populate-update', 'populate-insert', 'populate-old-identity',
     'transaction-boundary', 'multi-target-order', 'content-fingerprint'],
   b4: ['drain', 'shutdown', 'workspace-binding', 'attempt-binding', 'release-binding',
+    'readback-6k', 'identity-6h', 'actor-reuse-6k', 'missing-adapter-6k',
     'readback-noop', 'open-order', 'public-readback', 'resume-authority',
     'protected-resume', 'restart-default', 'writer-coverage'],
 }[packet];
