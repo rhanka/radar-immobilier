@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 const packet = process.argv[2];
 const required = {
   b5: ['mount', 'receipt-single', 'receipt-batch', 'closed-single', 'closed-batch',
-    'moderation', 'head', 'fingerprint', 'atomicity', 'maximum', 'false-empty',
+    'moderation', 'head', 'transaction-overlap', 'fingerprint', 'atomicity', 'maximum', 'false-empty',
     'readback', 'legacy', 'artifact-mount', 'artifact-call'],
   b3: ['ogc-serialization', 'populate-serialization', 'projection-serialization',
     'ogc-stored-identity', 'populate-update', 'populate-insert', 'populate-old-identity',
