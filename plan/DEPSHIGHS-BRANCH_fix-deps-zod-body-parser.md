@@ -19,6 +19,7 @@
 
 ## Feedback Loop
 - [x] `attention`: Zod 3.25.76 remains vulnerable; the audit requires >=4.6.6, violating five direct workspace ranges and both Ollama peer ranges. Owner decision required for a separate migration; no forced override.
+- [x] `attention`: first full test run times out in commit-probe `afterAll` (20 seconds); isolated file and unchanged full rerun pass. Exact cleanup delay cause unresolved; preserve both runs, with no timeout change or flaky acceptance.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch**: sequential dependency/test campaign; no source transfer between branches.
@@ -36,13 +37,13 @@
   - [x] Record all installed instances, consumers, declared dependency/peer ranges, and registry patches.
   - [x] Update only compatible dependency resolutions through containerized Make targets.
   - [x] Assert the complete lockfile diff: body-parser 2.4.0, required iconv-lite 0.7.3 and qs 6.16.1; 837 entries preserved, no manifest changes.
-- [ ] **Lot 2 — Verification**
-  - [ ] Read-only npm audit with manifest/lockfile hashes; list every remaining advisory.
-  - [ ] CI-equivalent lint, workspace typecheck, API/UI build and UI bundle smoke.
-  - [ ] CI `test` target with Postgres/S3 and all workspace suites, one worker.
-  - [ ] API Zod validation and Express request-parsing regressions.
+- [x] **Lot 2 — Verification**
+  - [x] Read-only audit and hashes: body-parser removed; 0 critical, 3 Zod-related high entries remain, all other records identical.
+  - [x] CI-equivalent lint, workspace typecheck, API/UI build and UI bundle smoke.
+  - [x] CI `test` target: final unchanged rerun passes 7,006 tests, 260 skipped, 10 todo; retain the initial cleanup-hook failure.
+  - [x] API Zod validation (15 checks) and Express parsing (12 checks); advisory crash reproduced before and absent after.
 - [ ] **Lot 3 — Documentation & local delivery**
-  - [ ] Write security finding with explicit compatibility blocker and bounded remediation options.
+  - [x] Write security finding with explicit compatibility blocker and bounded remediation options.
   - [ ] Commit selective changes in subject-only commits of at most 150 lines.
   - [ ] Create bundle from the exact base and audit it in a fresh repository.
   - [ ] Write French campaign report with delivered SHA and bundle SHA-256.
