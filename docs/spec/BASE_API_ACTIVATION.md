@@ -383,3 +383,42 @@ reason, maintenance attempt, release, instance roster, qualified maintenance
 evidence, qualified mapping, drain proof, old-instance shutdown proof, writer
 coverage, manifest and D5 dispositions, deployment access and target database
 identity. B5, final reviews, remote CI and combined delivery keep their scope.
+
+## B5 acceptance (authored; Sol verification pending)
+
+B5 proves the B1–B4 implementation through `createApp` and PostgreSQL,
+with artifact configuration absent and no live artifact backend:
+
+- B5.1: composed lot authority, transitions, destination/source-history
+  pagination and exact receipt replay with deterministic SQL snapshots
+  (`base-api-lot-{http-fixture,authority,transitions,receipts}.spec.ts`).
+- B5.2: deterministic command races (one 200, one 409, one committed
+  transition), identical-key replay with one SQL mutation, stale
+  fingerprint conflicts returning the current version, revoked replay
+  denials and atomic 500-target batches with replay (`base-api-lot-
+  {concurrency,batches}.spec.ts`).
+- B5.3: `base-api-cutover-readback.spec.ts` observes public 503 before
+  and during the qualified persisted 6K empty readback, then public 200
+  and the first ordinary mark without any fabricated history. It also
+  attempts unresolved-only activation and checks SQL closure/public 503.
+  `base-api-lot-closed-replays.spec.ts` closes an already-populated
+  destination and refuses existing single/batch receipts without mutation.
+  `base-api-cutover-acceptance.spec.ts` retains additional gate, proof-binding
+  and explicit legacy 503/410 witnesses. Protected interruption, forward
+  resume, current authority and durable reconstruction remain qualified by
+  inherited `base-api-activation{,-resume}.spec.ts`,
+  `base-api-mutation-closure.spec.ts` and `base-api-cutover-bound.spec.ts`.
+- B5.4: successful BASE operations with absent configuration, zero
+  artifact backend calls observed by counting/failing boundary doubles,
+  and the closed control router staying `cookie`/`origin` guarded
+  (`base-api-independence.spec.ts`).
+- B5.5: `docs/spec/SPEC_BASE_API.md` is the single normative
+  specification; this section is the B5 runbook delta.
+
+What B5 does not do: no `stop`/`down -v` outside the Sol-owned
+`radar-test-base-api-b5` project, no dev/UAT change, no production
+access or activation. The three source writers (`ogc-pull`,
+`populate-geo`, `projection`) stay drained before any reconciliation.
+Standalone CT-8 governs this delivery; combined CT-8/CT-9 waits for the
+frozen combined journal and the exact combined image. Evidence below is
+synthetic until Sol executes: no operational attestation is made here.
