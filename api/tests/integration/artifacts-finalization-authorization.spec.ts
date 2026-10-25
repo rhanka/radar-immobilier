@@ -750,16 +750,24 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
           text: "different command" }] } : body }, invB), "before_key_lock");
       await runB.reached;
       runA = startBarrierOperation(barrier, invAId,
-        () => executeA({ method: "POST", path: "/publish", body }, invA));
-      const winner = await runA.pending as Record<string, unknown>;
-      await runA.drained;
-      expect(winner).toMatchObject({ ok: true });
+        () => executeA({ method: "POST", path: "/publish", body }, invA), "before_commit");
+      await runA.reached;
       const cleanup = await requirePreparationCleanupBinding();
       const preparing = await cleanup.inspectPreparations(hostA, artifactId);
+      // The public inventory excludes completed successes: observe both
+      // preparations before A commits, then retain B's failed history below.
+      expect(preparing.attempts.length).toBeGreaterThanOrEqual(2);
+      expect(preparing.attempts.map((attempt) => attempt.invocationId))
+        .toEqual(expect.arrayContaining([invAId, invBId]));
+      expect(new Set(preparing.attempts.map((attempt) => attempt.attemptId)).size).toBeGreaterThanOrEqual(2);
       const preparedLoser = preparing.attempts.find((attempt) => attempt.invocationId === invBId);
       expect(preparedLoser?.blobKeys.length).toBeGreaterThan(0);
       const preparedKeys = new Set(await rawBlobs().listKeys(`artifacts/${SCOPE}/`));
       for (const key of preparedLoser!.blobKeys) expect(preparedKeys.has(key)).toBe(true);
+      runA.release();
+      const winner = await runA.pending as Record<string, unknown>;
+      await runA.drained;
+      expect(winner).toMatchObject({ ok: true });
       runB.release();
       const loser = await runB.pending as Record<string, unknown>;
       await runB.drained;
@@ -776,12 +784,9 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         "SELECT count(*) FROM artifacts.operation_receipts WHERE internal_key = $1", [internalKey])).rows[0].count);
       expect(successRows).toBe(1);
       expect(cleanup).toBeDefined();
+      await cleanup.scheduleBoundedPreparationCleanup(hostA,
+        Math.max(...preparing.attempts.map((attempt) => attempt.cleanupDeadlineMs)));
       const observed = await cleanup.inspectPreparations(hostA, artifactId);
-      // Both preparations of THIS variant must be attributed; a replayed
-      // durable success from the other variant cannot satisfy this.
-      expect(observed.attempts.length).toBeGreaterThanOrEqual(2);
-      expect(observed.attempts.map((attempt) => attempt.invocationId)).toEqual(expect.arrayContaining([invAId, invBId]));
-      expect(new Set(observed.attempts.map((attempt) => attempt.attemptId)).size).toBeGreaterThanOrEqual(2);
       // A6 allows the loser to finish cleanup before this observation: accept
       // an already-settled state, but keep the historical attribution and the
       // shared-blob retention proof.
@@ -796,7 +801,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       const keys = await listTestBucketKeys(s3, BUCKET);
       expect([...keys].length).toBeGreaterThan(0);
       const s3Keys = new Set([...keys]);
-      const winnerKeys = new Set(observed.attempts.find(
+      const winnerKeys = new Set(preparing.attempts.find(
         (attempt) => attempt.invocationId === invAId)?.blobKeys ?? []);
       const sharedSet = new Set(observed.protectedKeys);
       for (const attempt of observed.attempts.filter((candidate) =>
