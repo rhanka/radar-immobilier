@@ -29,7 +29,7 @@
 
 ## Plan / Todo (lot-based)
 - [x] PR920: init requires a null UUID and identical declared/argument slug; returned UUID resolves to that slug, also checked at collection.
-- [ ] PR920: verify operation-specific SQL rights, including every table/row lock.
+- [x] PR920: shared SQL matrix covers every operation; row-lock UPDATE and all five table locks gate proofs and the runtime before mutation.
 - [ ] PR920: bind proofs and receipts to the executing release and image digest.
 - [ ] PR920: bind Q2 to the latest API restart, pod instance and configuration.
 - [ ] PR920: retain failed Job receipts and their verified hashes.

@@ -6,6 +6,8 @@ mkdir -p "$root/tmp"
 testdir=$(mktemp -d "$root/tmp/base-preprod-tests.XXXXXX")
 trap 'status=$?; if [[ $status == 0 ]]; then rm -rf "$testdir"; else cat "$testdir"/result-*.log >&2; echo "Retained: $testdir" >&2; fi' EXIT
 mkdir -p "$testdir/tools/make" "$testdir/deploy/base-preprod" "$testdir/bin" "$testdir/.env"
+mkdir -p "$testdir/api/src/scripts"
+cp api/src/scripts/base-preprod-rights.json "$testdir/api/src/scripts/"
 cp tools/make/base-preprod*.sh tools/make/base-preprod*.jq "$testdir/tools/make/"
 cp deploy/base-preprod/operator.mk "$testdir/deploy/base-preprod/"
 printf '%s\n' '$(error root_makefile_was_read)' > "$testdir/Makefile"
@@ -90,7 +92,7 @@ jq -n --slurpfile c input.json --slurpfile ids expected.json --arg now "$now" '
      "facet_streams","facet_event_bindings","facet_heads","facet_stream_attachments","facet_command_contexts",
      "facet_activation_state","facet_unresolved_events","facet_events","facet_commands",
      "personal_projection_revisions","workspace_projection_revisions"]
-      |map({relation:.,read:true,insert:true,lock_authority:true})),
+      |map({relation:.,read:true,insert:true,update:true,lock_authority:true})),
     functions:[{proname:"check_facet_stream",execute:true},{proname:"facet_swap_head_enforcement",execute:true}],
     indexAuthority:[{can_drop_as_current_role:true}],transactions:[{active_transactions:0,active_sessions:0}]}},
    evidence:($c.binding+{reason:$c.reason,instanceIds:($ids[0]|map(.id)),
@@ -99,6 +101,12 @@ jq -n --slurpfile c input.json --slurpfile ids expected.json --arg now "$now" '
 invoke render-job EXPECTED="$testdir/expected.json" PROOFS="$testdir/proofs.json"
 jq -e '.spec.template.spec.containers[0].command[2]|fromjson|.args|index("--evidence-json")!=null' "out-$n/job.json" >/dev/null
 cp proofs.json good-proofs.json
+while IFS=$'\t' read -r privilege relation; do
+  jq --arg relation "$relation" --arg privilege "$privilege" \
+    '(.databaseInspection.result.privileges[]|select(.relation==$relation)|.[$privilege])=false' good-proofs.json > proofs.json
+  reject render-job EXPECTED="$testdir/expected.json" PROOFS="$testdir/proofs.json"
+done < <(jq -r '.activate|to_entries[]|.key as $key|.value[]|[$key,.]|@tsv' api/src/scripts/base-preprod-rights.json)
+cp good-proofs.json proofs.json
 for field in binding.actorSub binding.workspaceId binding.maintenanceAttemptId binding.releaseId evidence.actorSub evidence.maintenanceAttemptId evidence.releaseId; do
   jq --arg field "$field" 'setpath($field|split(".");"foreign")' good-proofs.json > proofs.json
   reject render-job EXPECTED="$testdir/expected.json" PROOFS="$testdir/proofs.json"

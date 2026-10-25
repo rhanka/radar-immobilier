@@ -39,6 +39,7 @@ require_proofs() {
   # Reuse the same schema definitions without running its final common-input filter.
   { sed '$d' tools/make/base-preprod-input.jq; cat tools/make/base-preprod-proof.jq; } > "$OUTPUT/proof-filter.jq"
   jq -e --slurpfile input "$INPUT" --slurpfile expected "$EXPECTED" \
+    --slurpfile rights api/src/scripts/base-preprod-rights.json \
     -f "$OUTPUT/proof-filter.jq" "$PROOFS" >/dev/null || fail 'Unqualified or foreign maintenance proofs'
 }
 render_job() {
