@@ -3,7 +3,7 @@ import { expect, it, vi } from "vitest";
 import type { ObjectStore } from "../../src/storage/object-store.js";
 import { describeDb } from "../../src/services/facets/workspace-archive-fixture.js";
 import { readMcpSignalCards } from "../../src/services/facets/mcp-signal-search.js";
-import { bumpGraphSourceRevision } from "../../src/services/facets/projection-revisions.js";
+import { bumpGraphSourceRevision, readProjectionScope } from "../../src/services/facets/projection-revisions.js";
 import { writeWorkspaceArchiveFacet } from "../../src/services/facets/workspace-writer.js";
 import { searchFixture, barrier } from "./mcp-signal-search-fixture.js";
 
@@ -22,6 +22,8 @@ describeDb("MCP post-enrichment authority and projection races", () => {
   it.each(["added", "removed", "replaced", "unapproved"])(
     "rejects %s authority after documentary enrichment starts", async (change) => {
       const f = await delayedSearch();
+      const before = await readProjectionScope(f.data.db, f.data.contributor.sub,
+        f.data.workspaceId, "synthetic-city", "signal");
       const response = f.search("&showDiscarded=1");
       await f.started.waiting;
       try {
@@ -29,6 +31,11 @@ describeDb("MCP post-enrichment authority and projection races", () => {
           await f.data.pool.query("UPDATE account_users SET status = 'pending' WHERE id = $1", [f.data.contributor.id]);
         } else await f.memberships(change === "added" ? [f.data.workspaceId, f.data.otherId]
           : change === "removed" ? [] : [f.data.otherId]);
+        if (change === "added") {
+          const after = await readProjectionScope(f.data.db, f.data.contributor.sub,
+            f.data.workspaceId, "synthetic-city", "signal");
+          expect(after.token).toBe(before.token);
+        }
       } finally { f.resume.release(); }
       const result = await response;
       expect(result.status).toBeGreaterThanOrEqual(400);
