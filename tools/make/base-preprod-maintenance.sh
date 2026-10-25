@@ -199,6 +199,16 @@ reopen-api() {
   # All consumers except the qualified API must remain unavailable.
   "${k[@]}" get deployments -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.replicas}{"\n"}{end}' > "$OUTPUT/final-replicas.tsv"
   awk '$1!="radar-api" && $1!="radar-postgres" && $2!=0 {exit 1}' "$OUTPUT/final-replicas.tsv"
+  "${k[@]}" get cronjobs -o jsonpath='{range .items[*]}{.spec.suspend}{"\n"}{end}' > "$OUTPUT/final-cron.txt"
+  if grep -vx true "$OUTPUT/final-cron.txt"; then fail 'CronJob restarted before acceptance'; fi
+  "${k[@]}" get jobs -o jsonpath='{range .items[*]}{.status.active}{"\n"}{end}' > "$OUTPUT/final-jobs.txt"
+  if grep -E '[1-9]' "$OUTPUT/final-jobs.txt"; then fail 'Job restarted before acceptance'; fi
+  "${k[@]}" get pods -o jsonpath='{range .items[*]}{.status.phase}{"\t"}{.metadata.labels.app\.kubernetes\.io/component}{"\t"}{.spec.containers[0].image}{"\n"}{end}' > "$OUTPUT/final-pods.tsv"
+  local phase component image
+  while IFS=$'\t' read -r phase component image; do
+    [[ $phase == Succeeded || $phase == Failed || $component == postgres
+      || ( $component == api && $image == "$(jq -r .image "$INPUT")" ) ]] || fail 'Unqualified consumer restarted'
+  done < "$OUTPUT/final-pods.tsv"
   api_routes
   local ingress annotation middleware
   ingress=$(jq -r .apiIngress "$INPUT")
