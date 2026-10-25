@@ -19,7 +19,7 @@ describeDb("T12 exact delegated receiver on createApp/PostgreSQL", () => {
         ["GET", path + "?city=synthetic-city&limit=1&limit=2"], ["GET", path + "?city=synthetic-city&sub=other"],
         ["GET", path + "?city=synthetic-city&showDiscarded=true"], ["GET", path + "?city=synthetic-city&workspaceId=default"],
         ["GET", "/api/v1/workspaces/" + f.data.workspaceId + "/signal-facets/coherent-city?citySlug=synthetic-city&mode=signal"],
-      ]) {
+      ] as const) {
         const response = await f.receiver.request(route!, { method, headers });
         expect(response.status, `${method} ${route}`).toBe(403);
         expect(await response.json()).toEqual({ error: "delegated_scope_refused" });
