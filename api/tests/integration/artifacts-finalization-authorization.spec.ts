@@ -301,22 +301,10 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         const invocationId = invocation["invocationId"] as string;
         const before = await committedSnapshot(artifactId);
         await pool.query("UPDATE account_users SET status = 'suspended' WHERE sub = 'alice'");
-        let settled = false;
-        const pending = execute({ method: "POST", path: "/publish", body }, invocation)
-          .finally(() => { settled = true; });
-        const pump = (async () => {
-          const deadline = performance.now() + 1500;
-          while (!settled) {
-            if (performance.now() > deadline) throw new Error("[contract-violation] commit barrier did not progress");
-            for (const candidate of PUBLISH_POINTS) {
-              if (settled) break;
-              const arrived = await withTimeout(barrier.waitUntilReached(candidate, invocationId), 50);
-              if (arrived) barrier.release(candidate, invocationId);
-            }
-          }
-        })();
-        await pump;
-        const outcome = await pending as unknown as Record<string, unknown>;
+        const run = startBarrierOperation(barrier, invocationId,
+          () => execute({ method: "POST", path: "/publish", body }, invocation));
+        const outcome = await run.pending as Record<string, unknown>;
+        await run.drained;
         assertOutcomeFailure(outcome, invocationId);
         expect(outcome["failure"]).toMatchObject({
           category: "unauthorized_at_commit", retriable: false, commitState: "not_committed" });
