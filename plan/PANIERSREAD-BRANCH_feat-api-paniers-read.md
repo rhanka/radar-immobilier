@@ -31,7 +31,7 @@
 - [x] P0-04 family context (durable gates, separate rights, no head read).
 - [x] P0-05 nullable catalog (guarded persisted associations, nullable labels, version).
 - [x] P0-06 discovery 0/1/N (whole membership set revalidated, transports closed).
-- [ ] P0-07 closed route.
+- [x] P0-07 closed route (private headers before authentication, no activation).
 - [ ] P0-08 authority/context tests.
 - [ ] P1-01 population and native keys.
 - [ ] P1-02 scoped heads and archive union.
