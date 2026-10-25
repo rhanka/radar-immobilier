@@ -2,12 +2,12 @@
 set -euo pipefail
 case ${1:?} in
   verify)
-    export CMD='npm ci --strict-peer-deps --ignore-scripts && npm run test --workspace=packages/immo-mcp -- --exclude "**/*.e2e.test.ts" --maxWorkers=1 --reporter=json --outputFile=/evidence/mcp-results.json && npm run test --workspace=packages/artifacts-host -- --maxWorkers=1 --reporter=json --outputFile=/evidence/host-results.json && npm run typecheck --workspaces --if-present && npx eslint . --ignore-pattern "tmp/**" && node --test tools/security/*.test.mjs && node tools/security/audit-gate.mjs && npm run build --workspace=api && node tools/make/artefacts-a4-mutations.mjs && node tools/make/artefacts-a4-tuple.mjs && npx tsx tools/make/artefacts-a5-profile-proof.ts' ;;
+    export CMD='npm ci --strict-peer-deps --ignore-scripts && npm run test --workspace=packages/immo-mcp -- --exclude "**/*.e2e.test.ts" --maxWorkers=1 --reporter=json --outputFile=/evidence/mcp-results.json && npm run test --workspace=packages/artifacts-host -- --maxWorkers=1 --reporter=json --outputFile=/evidence/host-results.json && npm run typecheck --workspaces --if-present && npx eslint . --ignore-pattern "tmp/**" && node --test tools/security/*.test.mjs && node tools/security/audit-gate.mjs && npm run build --workspace=api && node tools/make/artefacts-a4-mutations.mjs && node tools/make/artefacts-a5-tuple.mjs && npx tsx tools/make/artefacts-a5-profile-proof.ts' ;;
   test-api-ci)
     export A5_SERVICES=1
     export CMD='npm ci --strict-peer-deps --ignore-scripts && npm run db:migrate --workspace=api && npm run test --workspace=api -- --maxWorkers=1 --reporter=json --outputFile=/evidence/api-results.json' ;;
   inspect-profile)
-    export CMD='npm ci --strict-peer-deps --ignore-scripts && npx tsx tools/make/artefacts-a5-profile-proof.ts && node tools/make/artefacts-a4-tuple.mjs' ;;
+    export CMD='npm ci --strict-peer-deps --ignore-scripts && npx tsx tools/make/artefacts-a5-profile-proof.ts && node tools/make/artefacts-a5-tuple.mjs' ;;
   test-composition-contract)
     export CMD='npm ci --strict-peer-deps --ignore-scripts && npm run test --workspace=packages/immo-mcp -- src/registry/artifact-provider.test.ts src/registry/artifact-binding.test.ts src/artifacts-composition.test.ts src/stateful-composition.test.ts src/stateful-host.test.ts --maxWorkers=1 --reporter=json --outputFile=/evidence/composition-results.json' ;;
   diagnose-provider|test-provider)
