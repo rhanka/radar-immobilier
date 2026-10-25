@@ -44,6 +44,7 @@
 - [x] T06 coherent population and visibility cases written; no domain normalization or active mount is introduced.
 - [x] Static fixture review respects the graph city/id primary key and snapshots facet/mark/activation state, including selections.
 - [ ] T07: read-only reveal, post-enrichment authority/revision checks and shared document context across bounded attempts.
+- [x] T07 deterministic createApp/PG races written for approval, membership set, graph source and common archive changes during document I/O; execution waits for canonical exports.
 - [ ] Lot gate: unit tests, real createApp/PostgreSQL tests, named behavioral mutations, targeted lint/typecheck.
 - [x] Machine-serialized runner written with explicit file scopes, a 60-second wait, disk monitoring, one-worker container configuration and inherited ownership-checked cleanup.
 - [x] Container checks and test-only S0 contract comparison written; API runtime has no MCP import.
