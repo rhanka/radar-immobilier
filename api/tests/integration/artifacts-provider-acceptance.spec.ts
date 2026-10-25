@@ -214,7 +214,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
         expect(transaction).toBeDefined();
         seenTransactions.push({ transaction, passedBarrier });
         seenPurposes.push(context.purpose);
-        const status = await readPolicyStatusViaTransaction(transaction);
+        const status = await readPolicyStatusViaTransaction(transaction, context);
         return status === "approved" ? authorizeTransaction(context, transaction)
           : toGuardDecision({ allowed: false, status: 403, body: { error: "account_not_approved", status: status ?? "unknown" } });
       };

@@ -702,7 +702,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       const authorizeCommit: AuthorizeCommit = async (_context, transaction) => {
         expect(transaction).toBeDefined();
         seenTransactions.push(transaction);
-        return { allowed: false, reason: "unauthorized_at_commit",
+        return { allowed: false, reason: "denied",
           publicCode: "account_not_approved", status: 403, retriable: false };
       };
       const artifactId = await ensureVia(execute, allowAll(), "q2-deny", "q2-deny-ensure");

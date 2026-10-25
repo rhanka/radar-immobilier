@@ -280,10 +280,11 @@ export function assertOutcomeFailure(outcome: unknown, expectedInvocationId?: st
   if (failure["cause"] === undefined) {
     throw new Error("[contract-violation] provider.execute: failure.cause must be retained privately");
   }
-  if (typeof failure["category"] !== "string" || typeof failure["code"] !== "string") {
-    throw new Error("[contract-violation] provider.execute: failure category and code are required");
+  if (typeof failure["category"] !== "string" || typeof failure["publicCode"] !== "string") {
+    throw new Error("[contract-violation] provider.execute: failure category and publicCode are required");
   }
-  if (typeof failure["status"] !== "number" || typeof failure["retriable"] !== "boolean" ||
+  if (typeof failure["httpStatus"] !== "number" ||
+    (failure["kind"] !== "ordinary" && typeof failure["retriable"] !== "boolean") ||
     typeof failure["operation"] !== "string" || typeof failure["phase"] !== "string" ||
     !["not_committed", "committed", "unknown"].includes(String(failure["commitState"]))) {
     throw new Error("[contract-violation] host.execute: incomplete failure before projection");
@@ -326,13 +327,11 @@ export async function projectOutcomeHttp(outcome: unknown): Promise<{ status: nu
 }
 
 /** Wrap a test admission decision as an upstream commit-guard decision. */
-export function toGuardDecision(decision: AdmissionResult): AuthorizeCommitDecision {
-  if (decision.allowed) {
-    missingContract("ArtifactCommitTransaction.policyParticipant", "an allowed decision requires a transaction-minted fence; use authorizeTransaction");
-  }
+export function toGuardDecision(decision: Extract<AdmissionResult, { allowed: false }>):
+  Extract<Awaited<ReturnType<AuthorizeCommit>>, { allowed: false }> {
   return {
     allowed: false,
-    reason: "unauthorized_at_commit",
+    reason: "denied",
     publicCode: decision.body.error,
     status: decision.status,
     retriable: false,
@@ -359,20 +358,40 @@ export function reportNotCovered(
 /** Baseline-only declaration shape; never installed as a runtime contract. */
 export type OutcomeShape<T> =
   | { ok: true; result: T; invocationId: string; commitState: string; replayed: boolean }
-  | { ok: false; failure: { category: string; code: string; cause: unknown;
-      invocationId: string; phase: string; operation: string; status: number;
-      retriable: boolean; commitState: string } };
+  | { ok: false; failure: { category: string; publicCode: string; cause: unknown;
+      invocationId: string; phase: string; operation: string; httpStatus: number;
+      retriable?: boolean; commitState: string } };
 export type ExecuteOutcome = ArtifactOutcome<HttpResponse>;
 
 /** The registered participant owns fence minting; a plain revision is invalid. */
 export const authorizeTransaction: AuthorizeCommit = async (context, transaction) => {
-  const participant = (transaction as { policyParticipant?: unknown }).policyParticipant;
-  if (!participant || typeof participant !== "object" ||
-      !("authorize" in participant) || typeof participant.authorize !== "function") {
-    missingContract("ArtifactCommitTransaction.policyParticipant", "transaction-bound test participant binding is required (r2 does not freeze its construction API)");
+  const participant = transactionParticipant(transaction);
+  const revision = await participant.readRevision();
+  const admission = await participant.readAdmission({ ...context, policyRevision: revision });
+  if (!admission.allowed || revision !== context.policyRevision) {
+    return { allowed: false, reason: revision !== context.policyRevision ? "revoked" : admission.reason,
+      publicCode: "access_denied", status: 403, retriable: false };
   }
-  return participant.authorize(context, transaction);
+  return { allowed: true, fence: participant.mintFence(revision, context.invocationId) };
 };
+
+interface TransactionParticipant {
+  readAdmission(context: unknown): Promise<{ allowed: boolean;
+    reason: Extract<Awaited<ReturnType<AuthorizeCommit>>, { allowed: false }>["reason"] }>;
+  readRevision(): Promise<string>;
+  checkApproval(input: { actorId: string; operation: string }): Promise<{ approved: boolean }>;
+  mintFence(revision: string, invocationId: string):
+    Extract<Awaited<ReturnType<AuthorizeCommit>>, { allowed: true }>["fence"];
+}
+
+function transactionParticipant(transaction: unknown): TransactionParticipant {
+  const participant = (transaction as { participant?: TransactionParticipant } | null)?.participant;
+  if (!participant || ["readAdmission", "readRevision", "checkApproval", "mintFence"].some(
+    (name) => typeof (participant as unknown as Record<string, unknown>)[name] !== "function")) {
+    throw new Error("[contract-violation] ArtifactCommitTransaction.participant: invalid participant");
+  }
+  return participant;
+}
 
 /**
  * Radar effective profile data required by spec r2 C3/C4: selection plus the
@@ -709,27 +728,15 @@ export async function requirePurgeRaceBinding(): Promise<{
   };
 }
 
-/**
- * Read the approval status through the leased finalization transaction.
- * Guards must call this instead of `pool.query`: a `pool.query` read runs
- * outside the finalization unit and cannot prove `FOR SHARE` protection.
- * Fails `[missing-contract]` naming the transaction read binding while the
- * coordinator supplies no queryable transaction.
- */
-export async function transactionQuery<T>(transaction: unknown, text: string, params: unknown[] = []): Promise<{ rows: T[] }> {
-  const tx = transaction as { policyParticipant?: { query?: unknown } } | null;
-  const participant = tx?.policyParticipant;
-  if (typeof participant?.query !== "function") {
-    missingContract("ArtifactCommitTransaction.policyRead",
-      "registered participant must read policy through the leased transaction; no unrelated pool fallback is allowed (Sentropic L3 / Radar H3/H4)");
-  }
-  return (participant.query as (text: string, params: unknown[]) => Promise<{ rows: T[] }>).call(participant, text, params);
+/** Guards receive policy methods only; SQL belongs to the registered factory. */
+export async function readPolicyRevisionViaTransaction(transaction: unknown): Promise<string> {
+  return transactionParticipant(transaction).readRevision();
 }
 
-export async function readPolicyStatusViaTransaction(transaction: unknown): Promise<string | null> {
-  const result = await transactionQuery<{ status: string | null }>(transaction,
-    "SELECT status FROM account_users WHERE sub = $1 FOR SHARE", ["alice"]);
-  return result.rows[0]?.status ?? null;
+export async function readPolicyStatusViaTransaction(transaction: unknown,
+  context: { actorId: string; operation: string }): Promise<string | null> {
+  const approval = await transactionParticipant(transaction).checkApproval(context);
+  return approval.approved ? "approved" : null;
 }
 
 /** Unique private token embedded in an injected fault, never serialized. */

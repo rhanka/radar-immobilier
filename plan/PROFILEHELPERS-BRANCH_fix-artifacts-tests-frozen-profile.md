@@ -32,6 +32,7 @@
 - [x] Lot 0: read rules, full conductor analysis, and candidate public declarations.
 - [x] Lot 1: frozen profile input, digest and semantic mutation.
 - [ ] Lot 2: participant authorization, policy reads and outcome names.
+- [x] Lot 2a: use participant admission/revision/approval methods and minted fences; remove guard SQL.
 - [ ] Lot 3: public coordinator, provider composition and E3 binding probes.
 - [ ] Lot 4: before/after Q1/Q2 candidate qualification and failure classification.
 - [ ] Lot 5: full CI-equivalent API suite without candidate, lint and typecheck.
