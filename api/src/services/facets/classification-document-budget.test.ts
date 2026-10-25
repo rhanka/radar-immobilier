@@ -12,7 +12,7 @@ describe("classification shared canonical document budget", () => {
       const store = { head } as unknown as ObjectStore;
       const context = createDocEnrichmentContext(2000);
       const node = { id: "one", type: "Signal", citySlug: "city", label: "Signal", sourceRef: null,
-        props: { refs: [{ rawRef: "raw/city/doc.pdf", docSha: "f".repeat(64), excerpt: "Citation", page: 2 }] }, createdAt: null };
+        props: { refs: [{ rawRef: "raw/city/doc.pdf", docSha: "f".repeat(64), excerpt: "Citation", page: 2 }] }, createdAt: new Date("2026-01-01") };
       const row = { node, target: { citySlug: "city", type: "Signal" as const, id: node.id }, day: null, facets: syntheticFacets() };
       const pending = Promise.all([projectClassificationItem(store, row, context, "https://api.example.test"),
         projectClassificationItem(store, { ...row, target: { ...row.target, id: "two" } }, context, "https://api.example.test")]);
