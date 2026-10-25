@@ -115,7 +115,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
 
   async function failViaTransport(host: Record<string, unknown>,
     request: { method: string; path: string; body: Record<string, unknown> },
-    transport: "http" | "mcp", guard: AuthorizeCommit = allowAll(),
+    transport: "http" | "mcp" | "direct", guard: AuthorizeCommit = allowAll(),
     onInvocation?: (invocation: InvocationContextShape) => void): Promise<Record<string, unknown>> {
     const execute = requireHostExecute(host);
     const observed: Record<string, unknown>[] = [];
@@ -133,7 +133,13 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     const control = createArtifactControl({ ...host, execute: observe,
       app: { ...host.app as object, execute: observe } } as never, SCOPE, BASE, undefined,
     { ledger: { record: (entry) => { entries.push({ ...entry }); } } });
-    if (transport === "http") {
+    if (transport === "direct") {
+      const outcome = await observe(request, invocationFor(guard, "direct"));
+      const projected = await projectOutcomeHttp(outcome);
+      expect(projected.status).toBe(503);
+      assertPublicBodyRedacted(projected, { error: "capability_unavailable" }, [],
+        [BUCKET, endpoint, accessKey, SCOPE]);
+    } else if (transport === "http") {
       const response = await controlRoute({ auth, accounts: pool, backend: control }).request(
         `https://app.example.test${request.path}`, {
           method: request.method, headers: { cookie: await cookie(ACTOR), origin: auth.appBaseUrl,
@@ -154,8 +160,10 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     assertOutcomeFailure(outcome, ids[0]);
     expect(outcome.failure).toMatchObject({ category: "provider_unavailable", httpStatus: 503,
       publicCode: "capability_unavailable", retriable: true });
-    expect(entries).toHaveLength(1);
-    expect(entries[0]).toMatchObject({ invocationId: ids[0], reason: "provider_unavailable", status: 503 });
+    expect(entries).toHaveLength(transport === "direct" ? 0 : 1);
+    if (transport !== "direct") {
+      expect(entries[0]).toMatchObject({ invocationId: ids[0], reason: "provider_unavailable", status: 503 });
+    }
     return outcome;
   }
 
@@ -514,7 +522,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       const keysBefore = await tableCount("operation_receipts");
       // Each transport uses an independent caller key and a rearmed injection,
       // with one correlated write-ledger entry per failed dispatch.
-      for (const transport of ["http", "mcp"] as const) {
+      for (const transport of ["direct", "http", "mcp"] as const) {
         const clientKey = `q2-nonkey-${lockClass}-${transport}`;
         const isBinding = lockClass === "binding";
         const body = isBinding
@@ -532,6 +540,8 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
           expect(probe.evidence.attempts).toBeLessThanOrEqual(1);
           expect(await tableCount("releases")).toBe(releasesBefore);
           expect(await tableCount("operation_receipts")).toBe(keysBefore);
+          if (transport === "direct") console.info("[q2-direct-lock-evidence]", lockClass,
+            JSON.stringify(probe.evidence));
         } finally {
           probe.evidence.armed = false;
         }
@@ -551,7 +561,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       await pool.query("INSERT INTO test_guard_authority VALUES (1) ON CONFLICT DO NOTHING");
       const { host } = await composeQ2Host(barrier, { pool: probe.pool });
       try {
-        for (const transport of ["http", "mcp"] as const) {
+        for (const transport of ["direct", "http", "mcp"] as const) {
           const before = await committedState(pool);
           const initial = { ...probe.evidence, errors: [...probe.evidence.errors] };
           let guardCalls = 0;
@@ -589,6 +599,8 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
             expect(probe.evidence.rollbacks).toBe(paused.rollbacks + 1);
             expect(guardCalls).toBe(1);
             expect(await committedState(pool)).toEqual(before);
+            if (transport === "direct") console.info("[e3-direct-fault-evidence]", phase,
+              JSON.stringify(probe.evidence));
           } finally {
             await holder.query("ROLLBACK"); holder.release(); run.release();
             await run.pending.catch(() => {});
