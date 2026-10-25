@@ -7,11 +7,12 @@ import { getSignalNodesForCity } from "../graph/graph-store.js";
 import { readCoherentProjection } from "./projection-revisions.js";
 import { readWorkspaceArchiveCity } from "./workspace-reader.js";
 import { resolveMcpSignalWorkspace, revalidateMcpSignalWorkspace } from "./mcp-signal-workspace.js";
+import { projectMcpSignalResults } from "./mcp-signal-result.js";
 
 const targetKey = (target: { citySlug: string | null; type: string; id: string }) =>
   JSON.stringify([target.citySlug, target.type, target.id]);
 
-/** Internal card population. Domain normalization and production mounting are separate slices. */
+/** Internal canonical cards with authorized, coherent visibility. */
 export async function readMcpSignalCards(
   deps: { db: Database; store: ObjectStore; docEnrichmentBudgetMs?: number },
   sub: string, input: McpSignalSearchArgs,
@@ -36,4 +37,12 @@ export async function readMcpSignalCards(
   });
   await revalidateMcpSignalWorkspace(deps.db, sub, workspaceId, args.workspaceId);
   return { workspaceId, citySlug: args.city, cards: coherent.payload };
+}
+
+export async function searchMcpSignals(
+  deps: Parameters<typeof readMcpSignalCards>[0], sub: string, input: McpSignalSearchArgs,
+) {
+  const result = await readMcpSignalCards(deps, sub, input);
+  return { ok: true as const, workspaceId: result.workspaceId, citySlug: result.citySlug,
+    signals: projectMcpSignalResults(result.cards, input) };
 }
