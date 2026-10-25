@@ -43,6 +43,12 @@ set -f
 ../node_modules/.bin/vitest run --config vitest.isolated.config.ts \
   --reporter=default --reporter=json --outputFile.json=/evidence/tests.json $scope
 node ../tools/make/base-api-results.mjs /evidence/tests.json > /evidence/tests.tsv
+if [[ $mode == qualify ]]; then
+  # Identical API npm test entrypoint and collection as CI, serialized for this host.
+  (cd /workspace; npm run test --workspace=api -- --config vitest.isolated.config.ts \
+    --reporter=default --reporter=json --outputFile.json=/evidence/ci-api-tests.json)
+  node ../tools/make/base-api-results.mjs /evidence/ci-api-tests.json > /evidence/ci-api-tests.tsv
+fi
 cd ../packages/immo-mcp
 ../../node_modules/.bin/vitest run --config vitest.isolated.config.ts \
   --reporter=default --reporter=json --outputFile.json=/evidence/mcp-tests.json $mcp_scope

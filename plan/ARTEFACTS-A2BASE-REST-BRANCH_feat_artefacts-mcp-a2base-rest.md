@@ -27,6 +27,7 @@
 - [x] No UI/UAT change; root checkout and stable dev data preserved.
 
 ## Plan / Todo (lot-based)
+- [x] Add two controlled mutants: removing the preactivation reader fails missing-epoch parity; any internal legacy read after activation fails the scoped no-call assertion. Final qualification includes the CI API npm test entrypoint and complete collection.
 - [x] T14 grows to eleven network/image cases: missing, legacy and scoped epochs return date and document hash resolved from stored PDF metadata, preserve human-specific archives/reveal, and deny warm-session revocation; preactivation cases assert no scoped state exists.
 - [x] Network/image fixture supports databases never activated and uses the genuine S3ObjectStore against isolated object storage; seed synthetic PDF bytes and metadata for documentary assertions.
 - [x] Reproduced the blocking defect on an unactivated database: three business assertions fail with facade 503 versus legacy 200. Replace facade preactivation refusal expectations and explicitly assert zero internal legacy calls after 6H.
