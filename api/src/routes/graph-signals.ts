@@ -557,7 +557,7 @@ export async function toGraphSignalCard(
  * par doc-ref (cas non prévu), on renvoie quand même la carte sans enrichissement
  * S3 plutôt que de faire tomber toute la ville. Aucun accès store.
  */
-function toDegradedSignalCard(
+export function toDegradedSignalCard(
   node: Awaited<ReturnType<typeof getSignalNodesForCity>>[number],
 ): GraphSignalCard {
   const props = (node.props ?? {}) as Record<string, unknown>;

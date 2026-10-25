@@ -36,7 +36,7 @@
 - [ ] T04: revalidate the entire membership set and reject changed singleton.
 - [x] T04 revalidation helper and unit cases written; race qualification pending.
 - [x] T01/T03/T04 real createApp/PostgreSQL fixture and deterministic membership race cases written; test-only probe uses the existing verified-bearer seam, not A3 qualification.
-- [x] T05 inventory before edits: context interface/factory at graph-signals lines 360/366; async canonical card at 545; synchronous degraded card at 573. Three export slices, no helper moves or duplicated implementation; keep existing builder/evidence dependencies in place.
+- [x] T05 inventory against the original c5fb85db bytes: context interface/factory at graph-signals lines 363/369; async canonical card at 534; synchronous degraded card at 560. Three export slices, no helper moves or duplicated implementation; keep existing builder/evidence dependencies in place.
 - [ ] T05a: expose per-request document context/factory; explicit graph-signals/date-parity gates.
 - [x] T05a code exports the existing context/factory without moving implementation; direct invariant test written, mandatory regressions pending.
 - [ ] T05b: expose canonical async card helper; explicit graph-signals/date-parity gates.
@@ -45,6 +45,8 @@
 - [x] A later T05b campaign hit the 10 GiB disk cutoff and was stopped; no skipped date-parity cases are accepted. Move the disposable npm download cache onto the existing container /tmp tmpfs before retrying.
 - [x] Interrupted cleanup reported a transient in-use runtime volume after operator auto-removal; perform an owned cleanup retry and bound future retries to three ownership-checked attempts.
 - [ ] T05c: expose canonical degraded card helper; explicit graph-signals/date-parity gates.
+- [x] T05b required suites completed: graph-signals 48, date parity 5, direct helper 2, workspace PG 7, all passing/no skips; outer campaign subsequently stopped on disk cutoff, so final campaign qualification remains open.
+- [x] T05c exports the unchanged degraded helper and adds parity with expired-budget canonical construction; its gate is pending.
 - [ ] T06: authorized coherent city population and personal/common masking before enrichment.
 - [x] T06 coherent population and visibility cases written; no domain normalization or active mount is introduced.
 - [x] Unit authority/masking tests assert that hidden or unauthorized targets never reach document enrichment; reveal keeps all guards.
