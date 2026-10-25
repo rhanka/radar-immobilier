@@ -40,18 +40,14 @@ async function call(app: ReturnType<typeof createImmoHttpApp>, bearer: string, s
 
 describe("P6 composed effects", () => {
   it("should return composition_unavailable for every method after a future binding fails", async () => {
-    let host: ImmoStatefulHost | undefined;
-    const bind = ImmoStatefulHost.prototype.bind;
-    const capture = vi.spyOn(ImmoStatefulHost.prototype, "bind").mockImplementation(function (this: ImmoStatefulHost, hooks) {
-      host = this;
-      return bind.call(this, hooks);
-    });
+    const capture = vi.spyOn(ImmoStatefulHost.prototype, "bind");
     try {
       const app = createImmoHttpApp(config, { keySource: { resolveKey: async () => publicKey } });
       const bearer = await token(); const sid = await session(app, bearer);
+      const host = capture.mock.contexts[0] as ImmoStatefulHost;
       const future = new Server({ name: "failed", version: "1" });
       vi.spyOn(future, "setRequestHandler").mockImplementation(() => { throw new Error("install_failed"); });
-      expect(() => host!.retain(future)).toThrow("install_failed");
+      expect(() => host.retain(future)).toThrow("install_failed");
       for (const method of ["POST", "GET", "DELETE"]) {
         const res = await app.request("/mcp", { method, headers: headers(bearer, sid),
           ...(method === "POST" ? { body: JSON.stringify(initializeBody) } : {}) });
