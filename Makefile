@@ -126,6 +126,14 @@ lint: ## Lint across the workspace (ESLint flat config)
 audit: ## Run npm audit gate (fails on critical or high vulnerabilities)
 	npm audit --audit-level=critical
 
+.PHONY: audit-security
+audit-security: ## Run HIGH/CRITICAL audit gate with expiring register exceptions
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm --no-deps -T --entrypoint node api tools/security/audit-gate.mjs
+
+.PHONY: test-audit-security
+test-audit-security: ## Test audit matching and expiry without network access
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm --no-deps -T --entrypoint node api --test --test-concurrency=1 tools/security/*.test.mjs
+
 .PHONY: format
 format: ## Auto-format (prettier / dprint, defined later)
 	@echo "[format] no formatter wired yet — placeholder for a later branch"
