@@ -214,6 +214,8 @@ function isSessionOwner(owner: SessionOwner, mcpAuth: McpAuthContext): boolean {
 
 /** Test/wiring overrides — keeps the prod path env-only while letting tests inject a key source. */
 export interface ImmoHttpDeps {
+  /** Trusted shared-service binding. No environment value can fabricate this capability. */
+  artifacts?: import("./registry/artifact-provider.js").ArtifactMcpBinding;
   /** Override the data source (default = `createDataSource({})` → MockDataSource). */
   data?: ImmoDataSource;
   /**
@@ -254,7 +256,7 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
 
   const app = new Hono();
   const host = new ImmoStatefulHost(app);
-  const ready = composeStatefulImmo(host, deps.authorize ?? (async () => data.mode !== "http" && raw.mode !== "http"))
+  const ready = composeStatefulImmo(host, deps.authorize ?? (async () => !deps.artifacts && data.mode !== "http" && raw.mode !== "http"), deps.artifacts)
     .then(() => true, () => false);
 
   // Preserve the historical discovery URL while 0.2 challenges advertise RFC 9728.
