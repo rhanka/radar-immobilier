@@ -78,6 +78,7 @@ export const lotSingleBodySchema = lotSingleSchema.extend({ mode: lotMode });
 export interface ScopedLotFacetsDeps {
   db: Database;
   auth?: { enabled: boolean };
+  requireCutover?: boolean;
 }
 
 export function toLotError(c: Context, error: unknown): Response {

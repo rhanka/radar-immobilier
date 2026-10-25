@@ -48,7 +48,9 @@ export type {
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function runLotImport(
-  db: Database, input: LotImportInput, options: { enabled?: boolean } = {},
+  db: Database, input: LotImportInput,
+  options: { enabled?: boolean; activatedSourceIds?: ReadonlySet<string>;
+    eligibleTargetKeys?: ReadonlySet<string> } = {},
 ): Promise<LotImportReceipt> {
   const key = input.importKey.toLowerCase();
   if (!UUID_PATTERN.test(key)) throw new FacetError(400, "invalid_facet_command");
@@ -70,7 +72,8 @@ export async function runLotImport(
     const mappingQualified = input.report.destinationsQualified === true;
     const ordered = [...input.report.rows].sort((left, right) =>
       left.sourceId < right.sourceId ? -1 : 1);
-    await assertImportRights(tx, input.workspaceId, input.actorSub, ordered, mappingQualified);
+    await assertImportRights(tx, input.workspaceId, input.actorSub, ordered,
+      mappingQualified, options.activatedSourceIds);
     const [existing] = await tx.select().from(lotImportRuns).where(and(
       eq(lotImportRuns.workspaceId, input.workspaceId),
       eq(lotImportRuns.importKey, key)));
@@ -100,7 +103,10 @@ export async function runLotImport(
         const [stored] = await tx.select().from(lotSourceRows).where(and(
           eq(lotSourceRows.workspaceId, input.workspaceId), eq(lotSourceRows.sourceId, row.sourceId)));
         if (!stored || stored.chainId !== row.chainId || stored.nativeTarget !== row.nativeTarget
-          || digest(stored.observed) !== digest(row.observed)) {
+          || digest(stored.observed) !== digest(row.observed)
+          || stored.manifestSha !== input.report.manifestSha256
+          || stored.disposition !== row.disposition || digest(stored.destination) !== digest(row.destination)
+          || digest(stored.diagnostics) !== digest(row.diagnostics)) {
           throw new FacetError(409, "lot_source_evidence_conflict");
         }
       }
@@ -108,9 +114,10 @@ export async function runLotImport(
     const projection = await projectTerminalHeads(tx, {
       workspaceId: input.workspaceId, key, runId, actorId,
       selectionBasket: destination.selectionBasket,
-    }, ordered, mappingQualified);
+    }, ordered, mappingQualified, options.activatedSourceIds, options.eligibleTargetKeys);
     const pending = [
-      ...ordered.filter((row) => !isProjectableHead(row, mappingQualified))
+      ...ordered.filter((row) => !isProjectableHead(row, mappingQualified,
+        options.activatedSourceIds, options.eligibleTargetKeys))
         .map((row) => ({ sourceId: row.sourceId, cause: pendingCause(row, mappingQualified) })),
       ...projection.skipped,
     ].sort((left, right) => (left.sourceId < right.sourceId ? -1 : 1));
@@ -143,11 +150,12 @@ export async function runLotImport(
 async function assertImportRights(
   tx: LotTx,
   workspaceId: string, actorSub: string, ordered: ManifestRow[], mappingQualified: boolean,
+  activatedSourceIds?: ReadonlySet<string>,
 ): Promise<void> {
   const rights = await resolveLotRights(tx, workspaceId, actorSub);
   const required = new Set<keyof LotRights>();
   for (const row of ordered) {
-    if (!isProjectableHead(row, mappingQualified) || !row.destination) continue;
+    if (!isProjectableHead(row, mappingQualified, activatedSourceIds) || !row.destination) continue;
     if (row.destination.facet === "selection") required.add("select");
     else if (row.destination.facet === "pipeline") required.add("changePipeline");
     else if (row.destination.facet === "market") required.add("changeMarket");

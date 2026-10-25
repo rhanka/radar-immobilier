@@ -6,6 +6,7 @@ import { recoverHistoricalFacet, writeFacet } from "../services/facets/writer.js
 import { readCityFacets, readReasonCodes } from "../services/facets/reader.js";
 import { FACET_PROFILE } from "../services/facets/codebook.js";
 import { privateSignalResponse } from "../services/facets/private-response.js";
+import { legacyFenceError, legacyFenceStatus, type LegacyRetirementState } from "../services/facets/legacy-retirement.js";
 import { facetEventResponse } from "../services/facets/response.js";
 
 const target = z.object({
@@ -61,7 +62,7 @@ const headSchemas = {
   discard: historicalSchemas.discard.extend({ expectedHeadId, expectedSelectionHeads }),
   restore: historicalSchemas.restore.extend({ expectedHeadId }),
 };
-export interface SignalFacetsDeps { db: Database; auth?: { enabled: boolean } }
+export interface SignalFacetsDeps { db: Database; auth?: { enabled: boolean }; retirement?: LegacyRetirementState }
 export function signalFacetsRoute(deps: SignalFacetsDeps): Hono {
   const app = new Hono();
   app.use("/api/v1/signal-facets/*", privateSignalResponse);
@@ -76,6 +77,11 @@ export function signalFacetsRoute(deps: SignalFacetsDeps): Hono {
   });
   for (const action of ["select", "deselect", "discard", "restore"] as const) {
     app.post(`/api/v1/signal-facets/${action}`, async (c) => {
+      const fence = legacyFenceStatus(deps.retirement);
+      if (fence !== null) {
+        return c.json({ error: legacyFenceError(fence),
+          successor: `POST /api/v1/workspaces/:workspaceId/signal-facets/personal/${action}` }, fence);
+      }
       const body = await c.req.json().catch(() => null);
       const parsed = schemas[action].safeParse(body);
       const key = z.string().uuid().transform((value) => value.toLowerCase()).safeParse(c.req.header("Idempotency-Key"));
@@ -104,6 +110,11 @@ export function signalFacetsRoute(deps: SignalFacetsDeps): Hono {
     });
   }
   app.get("/api/v1/signal-facets/reason-codes", async (c) => {
+    const fence = legacyFenceStatus(deps.retirement);
+    if (fence !== null) {
+      return c.json({ error: legacyFenceError(fence),
+        successor: "GET /api/v1/workspaces/:workspaceId/signal-facets/reason-codes" }, fence);
+    }
     const session = c.get("session" as never) as { sub: string };
     try {
       const codes = await readReasonCodes(deps.db, session.sub);
@@ -114,6 +125,11 @@ export function signalFacetsRoute(deps: SignalFacetsDeps): Hono {
     }
   });
   app.get("/api/v1/signal-facets/cities/:city", async (c) => {
+    const fence = legacyFenceStatus(deps.retirement);
+    if (fence !== null) {
+      return c.json({ error: legacyFenceError(fence),
+        successor: "GET /api/v1/workspaces/:workspaceId/signal-facets/personal/cities/:city" }, fence);
+    }
     const session = c.get("session" as never) as { sub: string };
     const city = c.req.param("city");
     if (!target.shape.citySlug.safeParse(city).success) return c.json({ error: "invalid_city" }, 400);
