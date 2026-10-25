@@ -32,6 +32,7 @@ export function startPreparationCleanup(pool: pg.Pool, store: ReturnType<typeof 
   };
   const timer = setInterval(() => { void runOnce().catch((error: unknown) => {
     failure = error;
+    console.error(JSON.stringify({ kind: "artifacts.preparation_cleanup_unavailable" }));
     onError?.(error);
   }); }, 1000);
   timer.unref();
