@@ -2,7 +2,7 @@
 # Reuse BASE archive, ownership and cleanup guards without weakening them.
 set -euo pipefail
 mode=${1:?}
-case $mode in test|check|mutations|e2e) ;; *) exit 2;; esac
+case $mode in test|check|mutations|e2e|image) ;; *) exit 2;; esac
 source tools/make/base-api-guards.sh
 require_env
 require_scope
@@ -99,6 +99,29 @@ MONITOR=$!
 RUN_PID=$!
 wait "$RUN_PID"
 RUN_PID=
+if [[ $mode == image ]]; then
+  context=$LOG_DIR/image-context
+  mkdir -p "$context"
+  mv "$LOG_DIR/runtime.tar" "$context/runtime.tar"
+  cp tools/make/base-api-a2rest-image.Dockerfile "$context/Dockerfile"
+  candidate=$(cat "$LOG_DIR/candidate-sha.txt")
+  image=radar-a2base-rest:${candidate:0:12}
+  docker build --network=none --build-arg CANDIDATE_SHA="$candidate" -t "$image" "$context" > "$LOG_DIR/image-build.log" 2>&1
+  docker image inspect --format '{{.Id}} {{json .RepoDigests}} {{index .Config.Labels "org.radar.a2base.candidate"}}' \
+    "$image" > "$LOG_DIR/image-identity.txt"
+  docker run --rm --name "$PROJECT-image-proof" --network "${PROJECT}_default" --memory 4g \
+    --label "com.docker.compose.project=$PROJECT" --label "org.radar.base.owner=$OWNER" \
+    -e NODE_ENV=test -e LOG_LEVEL=silent -e LOT_MIGRATION_DB_TEST=1 \
+    -e POSTGRES_HOST=postgres -e POSTGRES_USER=radar -e POSTGRES_PASSWORD=synthetic-only -e POSTGRES_DB=radar \
+    -e S3_ACCESS_KEY=synthetic -e S3_SECRET_KEY=synthetic -e S3_ENDPOINT=http://minio:9000 \
+    -e DOTENV_CONFIG_PATH=/dev/null -v "$LOG_DIR:/evidence" "$image" > "$LOG_DIR/image-run.log" 2>&1 &
+  RUN_PID=$!
+  wait "$RUN_PID"
+  RUN_PID=
+  SCOPE=tests/integration/mcp-signal-search-network.e2e.spec.ts assert_tests_ran "$LOG_DIR/image-tests.tsv"
+  awk -F '\t' '$2 >= 7 && $3 == 0 && $4 == 0 {ok=1} END {exit !ok}' "$LOG_DIR/image-tests.tsv"
+  rm "$context/runtime.tar"
+fi
 [[ $mode == check ]] || assert_tests_ran "$LOG_DIR/tests.tsv"
 if [[ $mode == e2e ]]; then
   [[ $SCOPE == tests/integration/mcp-signal-search-network.e2e.spec.ts ]]

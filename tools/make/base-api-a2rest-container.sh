@@ -22,7 +22,7 @@ export default { envDir: false, test: {
 CONFIG
 POSTGRES_HOST=$(node --input-type=module -e 'import {lookup} from "node:dns/promises"; console.log((await lookup("postgres", {family:4})).address)')
 export POSTGRES_HOST
-if [[ $mode == check || $mode == mutations ]]; then
+if [[ $mode == check || $mode == mutations || $mode == image ]]; then
   npm run typecheck --workspace=api
   npm run typecheck --workspace=packages/immo-mcp
   cat > api/tsconfig.a2rest-tests.json <<'CONFIG'
