@@ -24,8 +24,9 @@ until flock -w 60 8; do
 done
 while :; do
   names=$(docker ps --filter name=radar-test- --format '{{.Names}}')
-  [[ -n $names ]] || break
-  echo "WAIT: $names"
+  builds=$(pgrep -af '^docker (build|buildx build)|^/.*docker-buildx build' || true)
+  [[ -n $names || -n $builds ]] || break
+  echo "WAIT: $names $builds"
   sleep 60
 done
 [[ -z $(docker ps --filter name=radar-test- -q) ]]

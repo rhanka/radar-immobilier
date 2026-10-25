@@ -13,12 +13,13 @@
 - [x] Allowed Paths: `packages/immo-mcp/src/**`, `packages/immo-mcp/config/**`, `packages/artifacts-host/src/**`.
 - [x] Allowed Paths: artifact integration tests, `tools/make/artefacts-a5*`, `tools/h4-mcp.mk`, operator documentation, this plan.
 - [x] Forbidden Paths: root Makefile, compose files, rules, agent bootstrap, other plans, business implementation, client materials.
-- [x] Conditional Paths: manifests/lockfiles and API Dockerfile for the published tuple/runtime; SQL requires a recorded CT-1/CT-2 lease.
+- [x] Conditional Paths: manifests/lockfiles and API Dockerfile for the published tuple/runtime.
+- [x] A5-EX1: owner facade instruction authorizes additive 0024 coordinator/policy SQL and journal append; preserve every existing entry, rollback by disabling the new host, never dropping durable rows.
 
 ## Feedback Loop
 - [x] A4 receipt acknowledged: twelve tools and published MCP tuple; common host/API still use artifacts 0.1.2.
 - [ ] A1 dependency: transaction participant, persistent quota/ledger, operation receipts migration and guarded production composition are not delivered in this baseline.
-- [ ] PR #918 owns Q1/Q2/helper corrections; do not modify or copy those files here.
+- [x] Merge 313fcf44 as a real second parent; use its final helpers in four conflicts. Track event blob unchanged on both parents and merge.
 - [x] CT-1/CT-2: no SQL lease found; clarification requested; keep A1 separate and activation closed without a receipt.
 - [ ] CT-8/CT-9: standalone and combined schema/image receipts remain required after A1 integration.
 
