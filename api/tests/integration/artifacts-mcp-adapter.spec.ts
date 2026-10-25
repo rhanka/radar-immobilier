@@ -27,7 +27,7 @@ async function http(op: string, args: unknown) {
 }
 const count = async () => (await h.pool.query(`SELECT
   (SELECT count(*) FROM artifacts.releases)::int AS releases,
-  (SELECT count(*) FROM artifacts.idempotency_keys)::int AS keys`)).rows[0];
+  (SELECT count(*) FROM artifacts.operation_receipts)::int AS keys`)).rows[0];
 const file = { path: "index.html", mimeType: "text/html", text: "hello" };
 
 describe("unexposed MCP adapter with the composed provider", () => {
@@ -58,7 +58,7 @@ describe("unexposed MCP adapter with the composed provider", () => {
     expect((await h.pool.query("SELECT count(*)::int AS n FROM artifacts.artifacts")).rows[0].n).toBe(0);
   });
 
-  it("counts an admission outage once after a real provider success without a receipt", async () => {
+  it("counts a finalization admission outage once without a durable success", async () => {
     let reads = 0;
     const authority: AdmissionAuthority = {
       nowMs: () => 0,
@@ -76,9 +76,9 @@ describe("unexposed MCP adapter with the composed provider", () => {
       args: { bindingName: "outage", idempotencyKey: "outage" } }, { actorId: "alice" }))
       .toEqual({ ok: false, status: 503, code: "capability_unavailable", retryable: true,
         error: { error: "capability_unavailable" } });
-    expect(entries).toEqual([{ op: "ensure", actorId: "alice", reason: "admission_unavailable",
+    expect(entries).toEqual([{ invocationId: expect.any(String), op: "ensure", actorId: "alice", reason: "unauthorized_at_commit",
       status: 503, atMs: 0 }]);
-    expect(await count()).toEqual({ releases: before.releases, keys: before.keys + 1 });
+    expect(await count()).toEqual(before);
   });
 
   it.each(["http-first", "mcp-first"])("replays %s across separate compositions", async (direction) => {
@@ -130,6 +130,6 @@ describe("unexposed MCP adapter with the composed provider", () => {
       { actorId: "bob" })).toMatchObject({ ok: true, data: { artifacts: [], total: 0 } });
     const listed = await adapter.execute({ method: "POST", path: "/list", args: { limit: 1, offset: 1 } },
       { actorId: "alice" });
-    expect(listed).toMatchObject({ ok: true, data: { artifacts: [expect.any(Object)], total: 4 } });
+    expect(listed).toMatchObject({ ok: true, data: { artifacts: [expect.any(Object)], total: 3 } });
   });
 });
