@@ -17,6 +17,10 @@ and (.databaseInspection.result as $db |
   and any($db.approved[]; .sub==$c.binding.actorSub)
   and any($db.memberships[]; .status=="active" and .manage_members==true
     and .account_id==([$db.approved[]|select(.sub==$c.binding.actorSub)|.id][0]))
+  and ($db.privileges|map(.relation)|sort)==(["account_users","workspaces","workspace_memberships",
+    "workspace_membership_events","facet_streams","facet_event_bindings","facet_heads",
+    "facet_stream_attachments","facet_command_contexts","facet_activation_state","facet_unresolved_events",
+    "facet_events","facet_commands","personal_projection_revisions","workspace_projection_revisions"]|sort)
   and all($db.privileges[]; .read==true)
   and all($db.privileges[]|select(.relation|IN("workspaces","workspace_memberships",
     "workspace_membership_events","facet_streams","facet_event_bindings","facet_heads",
@@ -24,6 +28,7 @@ and (.databaseInspection.result as $db |
   and all($db.privileges[]|select(.relation|IN("account_users","workspace_memberships",
     "facet_events","facet_commands","facet_streams","facet_heads","facet_stream_attachments",
     "facet_command_contexts","facet_activation_state")); .lock_authority==true)
+  and ($db.functions|map(.proname)|sort)==["check_facet_stream","facet_swap_head_enforcement"]
   and all($db.functions[]; .execute==true)
   and (if ($db.indexAuthority|length)>0 then all($db.indexAuthority[];.can_drop_as_current_role==true)
     else any($db.personal[];.workspace_id==$c.binding.workspaceId and .old_index_dropped==true) end)
