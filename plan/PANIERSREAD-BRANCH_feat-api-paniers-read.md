@@ -29,7 +29,7 @@
 - [x] P0-02 heads and count contracts (strict nested schemas and invariants).
 - [x] P0-03 bounded canonical card (explicit public fields and safe URLs).
 - [x] P0-04 family context (durable gates, separate rights, no head read).
-- [ ] P0-05 nullable catalog.
+- [x] P0-05 nullable catalog (guarded persisted associations, nullable labels, version).
 - [ ] P0-06 discovery 0/1/N.
 - [ ] P0-07 closed route.
 - [ ] P0-08 authority/context tests.
