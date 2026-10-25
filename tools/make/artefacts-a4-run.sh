@@ -17,7 +17,12 @@ RUN_DIR=$TASK_DIR/runtime
 LOG_DIR=$TASK_DIR/$(date -u +%Y%m%dT%H%M%S)-$$
 mkdir -p "$RUN_DIR" "$LOG_DIR"
 echo "Evidence: $LOG_DIR"
-git --git-dir="$ROOT/tmp/a4-delivery.git" rev-parse HEAD > "$LOG_DIR/candidate-sha.txt"
+if [[ -f $ROOT/tmp/a4-delivery.git/config ]]; then
+  candidate=$(git --git-dir="$ROOT/tmp/a4-delivery.git" rev-parse HEAD)
+else
+  candidate=$(git rev-parse HEAD)
+fi
+printf '%s\n' "$candidate" > "$LOG_DIR/candidate-sha.txt"
 git show 77cb9553:package-lock.json > "$LOG_DIR/baseline-lock.json"
 while :; do
   names=$(docker ps --filter name=radar-test- --format '{{.Names}}')
@@ -32,7 +37,7 @@ flock -n 8 || { echo 'Machine Docker campaign lock held'; exit 2; }
 OWNER=$(printf '%s' "$ROOT/$ENV" | sha256sum | cut -d' ' -f1)
 mkdir -p "$HOME/.cache/radar-a4-docker"
 export DOCKER_CONFIG=$HOME/.cache/radar-a4-docker
-if [[ ! -e $DOCKER_CONFIG/cli-plugins ]]; then
+if [[ -d $HOME/.docker/cli-plugins && ! -e $DOCKER_CONFIG/cli-plugins && ! -L $DOCKER_CONFIG/cli-plugins ]]; then
   ln -s "$HOME/.docker/cli-plugins" "$DOCKER_CONFIG/cli-plugins"
 fi
 export COMPOSE_DISABLE_ENV_FILE=1
@@ -80,7 +85,7 @@ guarded_down
 MONITOR=$!
 if [[ ${A4_IMAGE:-0} == 1 ]]; then
   image=$PROJECT:runtime
-  timeout --signal=TERM --kill-after=10 1800 docker build --target runtime --build-arg "GIT_SHA=$(git --git-dir=tmp/a4-delivery.git rev-parse HEAD)" \
+  timeout --signal=TERM --kill-after=10 1800 docker build --target runtime --build-arg "GIT_SHA=$candidate" \
     -t "$image" -f api/Dockerfile - < "$RUN_DIR/source.tar" > >(tee "$LOG_DIR/build.log") 2>&1 &
   RUN_PID=$!
   wait "$RUN_PID"
