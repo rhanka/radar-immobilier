@@ -32,7 +32,10 @@ while :; do
   sleep 10
 done
 exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
-flock -n 8 || { echo 'Machine Docker campaign lock held'; exit 2; }
+until flock -n 8; do
+  echo 'WAIT: machine Docker campaign lock held'
+  sleep 10
+done
 [[ -z $(docker ps --filter name=radar-test- -q) ]]
 [[ -z $(ps -C docker -C docker-buildx -o args= | grep -E '(docker|docker-buildx) (build|buildx build)( |$)' || true) ]]
 [[ $(df -Pk . | awk 'NR==2 {print $4}') -ge 8388608 ]]
