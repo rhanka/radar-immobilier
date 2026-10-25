@@ -8,6 +8,8 @@ import { createPublicationService, type PublicationBlobStore } from "@sentropic/
 import type { ArtifactsStorageConfig } from "@radar/artifacts-host";
 import { initializeArtifactScope } from "../../../packages/artifacts-host/src/storage.js";
 import { createPurgeTestHost } from "./artifacts-purge-race.helpers.js";
+import { normalizeHostOutcome } from "../../../packages/artifacts-host/src/host-outcome.js";
+import { bindHostCoordinator } from "../../../packages/artifacts-host/src/host-coordinator.js";
 import { requirePublicFunction, COMMIT_CONTRACT_SPECIFIER, finalizationPhaseFaults,
   type R2CommitCoordinator, type CompiledArtifactsProfile,
   type InvocationContextShape, type CoordinatorBarrierPoint } from "./artifacts-provider-contract.helpers.js";
@@ -104,7 +106,8 @@ export async function composeCandidateHost(params: {
     await client.query(`SELECT ${column} FROM artifacts.${table} WHERE ${column} = $1 FOR UPDATE`,
       [artifact.getStore()]);
   };
-  const app = createApp({ profile, coordinator,
+  const app = createApp({ profile, coordinator: bindHostCoordinator(coordinator as never,
+    () => currentInvocation.getStore()!.authorizeCommit as never),
     derivation: derive({ storageScopeId: config.storageScope, actorIds: actors.rows.map((row) => row.sub) }),
     legacyRecords: legacy(pool),
     ensureHost: {
@@ -135,7 +138,8 @@ export async function composeCandidateHost(params: {
     execute(request: Record<string, unknown>, invocation: InvocationContextShape) {
       const body = request["body"] as { artifactId?: string } | undefined;
       return currentInvocation.run(invocation, () => artifact.run(body?.artifactId ?? "",
-        () => app.execute({ ...request, actorId: request["actorId"] ?? invocation.actorId }, invocation)));
+        async () => normalizeHostOutcome(await app.execute(
+          { ...request, actorId: request["actorId"] ?? invocation.actorId }, invocation) as never)));
     },
     close() { /* The suite owns the injected pool and blob-store lifecycle. */ },
   };
