@@ -1,7 +1,7 @@
 # Feature: Classification read API
 
 ## Objective
-- [ ] Deliver the v4 signal context, search and state read contracts.
+- [x] Deliver the v4 signal context, search and state read contracts.
 
 ## Scope / Guardrails
 - [x] Worktree `tmp/api-paniers-read`, base `600d78485965361c89109bf61eccaa0250cf7284`.
@@ -17,7 +17,8 @@
 ## Feedback Loop
 - [x] PANIERSREAD-EX1: owner instruction assigns the integrator this workspace; preserve all mounts, add the closed read router; rollback removes that mount.
 - [x] PANIERSREAD-EX2: extend `projection-revisions-fixture.ts` with optional event fields to reuse the unresolved-history fixture for lot history; test-only, default unchanged; rollback removes optional fields.
-- [ ] PS-04 H5 state binding waits for A6/A7; no transport activation in this branch.
+- [x] PS-04 handoff documented: H5 state binding waits for A6/A7; no transport activation in this branch.
+- [x] Qualified code SHA: `28ad1d2edb60439fee4cd230379103eddfd90463`; evidence `tmp/classification-evidence/20261025T233829-5-qualify`.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch, sequential implementation and Docker verification.
@@ -48,5 +49,5 @@
 - [x] PS-01 current state DTO (shared canonical item projection, missing-source union).
 - [x] PS-02 reveal and guards (explicit reveal, separate restoration, error revalidation).
 - [x] PS-03 route and missing sources (typed reveal, absent source with/without history).
-- [ ] Gates: targeted contracts/algorithms, createApp/PostgreSQL, mutations, CI API suite, lint, typecheck.
-- [ ] Delivery: commit audit, clean-resource evidence, bundle imported in an empty audit repository, French report.
+- [x] Gates: 36 classification cases, full API suite (3874 passed; 76 conditional skips), eight killed/restored mutants, lint, typecheck and build.
+- [x] Delivery: bounded commit audit, owned-resource teardown, bundle imported and verified in an empty audit repository; separate French receipt carries the final bundle hash.
