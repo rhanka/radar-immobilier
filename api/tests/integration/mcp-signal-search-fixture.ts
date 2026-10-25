@@ -1,4 +1,6 @@
 /** Test-only mounting on the real createApp; production wiring stays absent. */
+import { vi } from "vitest";
+import type { ObjectStore } from "../../src/storage/object-store.js";
 import type { McpSignalSearchArgs } from "../../src/routes/mcp-signal-search.js";
 import { decodeMcpSignalSearch, MCP_SIGNAL_SEARCH_PATH } from "../../src/routes/mcp-signal-search.js";
 import { ScopeError } from "../../src/services/facets/scope.js";
@@ -7,6 +9,8 @@ import { httpFixture, verifiedBearer } from "./base-api-http-fixture.js";
 
 export async function searchFixture() {
   const f = await httpFixture();
+  const head = vi.fn(async () => null);
+  const store = { head } as unknown as ObjectStore;
   const memberships = async (ids: string[]) => {
     await f.data.pool.query(`UPDATE workspace_memberships SET
       status = CASE WHEN workspace_id = ANY($1::uuid[]) THEN 'active' ELSE 'revoked' END,
@@ -32,7 +36,7 @@ export async function searchFixture() {
   const request = (query = "", sub = f.data.contributor.sub) => f.request(
     `${MCP_SIGNAL_SEARCH_PATH}?city=synthetic-city${query}`, sub,
     { headers: verifiedBearer(sub) });
-  return { ...f, memberships, mount, search: request };
+  return { ...f, store, head, memberships, mount, search: request };
 }
 export type SearchFixture = Awaited<ReturnType<typeof searchFixture>>;
 

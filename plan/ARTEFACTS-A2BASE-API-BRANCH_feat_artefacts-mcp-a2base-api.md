@@ -44,6 +44,7 @@
 - [ ] T06: authorized coherent city population and personal/common masking before enrichment.
 - [x] T06 coherent population and visibility cases written; no domain normalization or active mount is introduced.
 - [x] Unit authority/masking tests assert that hidden or unauthorized targets never reach document enrichment; reveal keeps all guards.
+- [x] PostgreSQL visibility fixture now observes real canonical object-store calls and requires zero documentary reads for hidden targets.
 - [x] Static fixture review respects the graph city/id primary key and snapshots facet/mark/activation state, including selections.
 - [x] First campaign: 44 passed, six fixture setup failures on chk_workspace_memberships_revoked_at; fixed synthetic membership timestamps without weakening DB constraints. Owned cleanup passed.
 - [ ] T07: read-only reveal, post-enrichment authority/revision checks and shared document context across bounded attempts.
