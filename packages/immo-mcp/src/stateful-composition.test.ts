@@ -8,6 +8,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { ImmoStatefulHost } from "./stateful-host.js";
+import { AccountBindingUnavailable } from "./account-binding.js";
 
 const config: ImmoHttpConfig = {
   issuer: "https://synthetic.test", resource: "https://synthetic.test/mcp", requiredScopes: ["immo:read"],
@@ -31,9 +32,9 @@ async function session(app: ReturnType<typeof createImmoHttpApp>, bearer: string
   expect(res.status).toBe(200);
   return res.headers.get("mcp-session-id")!;
 }
-async function call(app: ReturnType<typeof createImmoHttpApp>, bearer: string, sid: string) {
+async function call(app: ReturnType<typeof createImmoHttpApp>, bearer: string, sid: string, id = 2) {
   return app.request("/mcp", { method: "POST", headers: headers(bearer, sid), body: JSON.stringify({
-    jsonrpc: "2.0", id: 2, method: "tools/call", params: { name: "search_lots", arguments: { city: "longueuil" } },
+    jsonrpc: "2.0", id, method: "tools/call", params: { name: "search_lots", arguments: { city: "longueuil" } },
   }) });
 }
 
@@ -41,7 +42,7 @@ describe("P6 composed effects", () => {
   it("should return composition_unavailable for every method after a future binding fails", async () => {
     let host: ImmoStatefulHost | undefined;
     const bind = ImmoStatefulHost.prototype.bind;
-    const capture = vi.spyOn(ImmoStatefulHost.prototype, "bind").mockImplementation(function (hooks) {
+    const capture = vi.spyOn(ImmoStatefulHost.prototype, "bind").mockImplementation(function (this: ImmoStatefulHost, hooks) {
       host = this;
       return bind.call(this, hooks);
     });
@@ -108,8 +109,25 @@ describe("P6 composed effects", () => {
     const denied = await (await call(app, bearer, sid)).json();
     expect(denied.result.isError).toBe(true);
     expect(denied.result.content[0].text).toContain("composition_account");
+    expect(JSON.parse(denied.result.content[0].text)).not.toHaveProperty("retriable");
     expect(authorize).toHaveBeenCalledTimes(2);
     expect(effect).toHaveBeenCalledTimes(1);
+  });
+
+  it("should keep a retriable account failure local to one concurrent invocation", async () => {
+    const data = new MockDataSource(); const effect = vi.spyOn(data, "searchLots");
+    const authorize = vi.fn().mockRejectedValueOnce(new AccountBindingUnavailable()).mockResolvedValue(true);
+    const app = createImmoHttpApp(config, { data, authorize, keySource: { resolveKey: async () => publicKey } });
+    const bearer = await token(); const sid = await session(app, bearer);
+    const responses = await Promise.all([call(app, bearer, sid, 21), call(app, bearer, sid, 22)]);
+    const results = await Promise.all(responses.map(async (res) => (await res.json()).result));
+    const failed = results.filter((result) => result.isError === true);
+    expect(failed).toHaveLength(1);
+    expect(JSON.parse(failed[0].content[0].text)).toMatchObject({ error: "account_binding_unavailable", retriable: true });
+    expect(effect).toHaveBeenCalledTimes(1);
+    expect(authorize).toHaveBeenCalledTimes(2);
+    expect((await (await call(app, bearer, sid)).json()).result.isError).not.toBe(true);
+    expect(effect).toHaveBeenCalledTimes(2);
   });
 
   it("should deny a missing real account binding and lookup failure before business calls", async () => {

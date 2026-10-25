@@ -38,5 +38,5 @@
 - [x] Lot 5: atomic commit audit and independent base-relative bundle import; the final report accompanies the bundle, recording its final SHA-256 without a recursive self-reference.
 - [x] Review fixes 0: real-backend disconnect probe, machine-wide build exclusion and correction-only delivery tooling.
 - [x] Review fixes 0b: closed-composition 503/size-only 413 tests; synthetic stdio audit assertion and README boundary; process-death mutation harness ready.
-- [ ] Review fixes 1: PostgreSQL recovery, retriable request errors, closed-composition status and synthetic stdio audit/docs.
+- [x] Review fixes 1: crash reproduced by idle backend termination; PostgreSQL pool recovery and request-local retriable errors implemented; closed-composition status and synthetic stdio audit/docs corrected.
 - [ ] Review fixes 2: MCP/composition/API CI collection, image, lint/typecheck and independently imported bundle.

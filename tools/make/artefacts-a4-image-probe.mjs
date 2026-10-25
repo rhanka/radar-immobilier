@@ -84,6 +84,8 @@ try {
   await db.query("UPDATE workspace_memberships SET status = 'active', revoked_at = NULL");
   assert.notEqual((await call()).isError, true); assert.equal(reads, 2);
   await exerciseDisconnects({ db, child, call, readCount: () => reads });
+  assert.match(logs, /"kind":"immo-mcp.account","error":"account_binding_unavailable","retriable":true/);
+  assert.doesNotMatch(logs, /postgres:\/\/|terminating connection due to administrator command/);
   writeFileSync('/evidence/image-proof.json', JSON.stringify({ passed: true, tools: list.result.tools,
     businessReads: reads, accountRevocationDenied: true, membershipRevocationDenied: true,
     idleDisconnectSurvived: true, activeDisconnectRetriable: true, sameSessionRecovered: true }));
