@@ -113,7 +113,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
     return (await listTestBucketKeys(s3, BUCKET)).length;
   }
 
-  async function tableCount(table: "releases" | "idempotency_keys" | "artifacts"): Promise<number> {
+  async function tableCount(table: "releases" | "operation_receipts" | "artifacts"): Promise<number> {
     return Number((await pool.query(`SELECT count(*) FROM artifacts.${table}`)).rows[0].count);
   }
 
@@ -125,7 +125,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
 
   async function successRowCount(internalKey: string): Promise<number> {
     return Number((await pool.query(
-      "SELECT count(*) FROM artifacts.idempotency_keys WHERE key = $1", [internalKey])).rows[0].count);
+      "SELECT count(*) FROM artifacts.operation_receipts WHERE internal_key = $1", [internalKey])).rows[0].count);
   }
 
   async function ensureArtifact(
@@ -204,7 +204,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
     const host = composed.host;
     const close = host["close"];
     try {
-      requireSelectedProfile(host, composed.profile.digest);
+      requireSelectedProfile(host, composed.profile.profileDigest);
       const execute = requireHostExecute(host);
       const seenTransactions: unknown[] = [];
       const seenPurposes: string[] = [];
@@ -214,7 +214,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
         expect(transaction).toBeDefined();
         seenTransactions.push({ transaction, passedBarrier });
         seenPurposes.push(context.purpose);
-        const status = await readPolicyStatusViaTransaction(transaction);
+        const status = await readPolicyStatusViaTransaction(transaction, context);
         return status === "approved" ? authorizeTransaction(context, transaction)
           : toGuardDecision({ allowed: false, status: 403, body: { error: "account_not_approved", status: status ?? "unknown" } });
       };
@@ -250,7 +250,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
         const invocationId = invocation["invocationId"] as string;
         const stateBefore = await committedState(pool);
         const releasesBefore = await tableCount("releases");
-        const keysBefore = await tableCount("idempotency_keys");
+        const keysBefore = await tableCount("operation_receipts");
         const s3Before = await s3KeyCount();
         const s3Baseline = new Set(await listTestBucketKeys(s3, BUCKET));
         const run = startBarrierOperation(barrier, invocationId,
@@ -271,7 +271,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
         expect(outcome["failure"]).toMatchObject({ category: "unauthorized_at_commit" });
         expect(await committedState(pool)).toEqual(stateBefore);
         expect(await tableCount("releases")).toBe(releasesBefore);
-        expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+        expect(await tableCount("operation_receipts")).toBe(keysBefore);
         expect(await successRowCount(internalKey)).toBe(0);
         expect(await currentReleaseId(artifactId)).toBeUndefined();
         const s3AfterDenial = await s3KeyCount();
@@ -284,7 +284,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
           invocationFor(finalizeGuard, "refusal-retry")) as Record<string, unknown>;
         expect(retry).toMatchObject({ ok: true });
         expect(await tableCount("releases")).toBe(releasesBefore + 1);
-        expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
+        expect(await tableCount("operation_receipts")).toBe(keysBefore + 1);
         expect(await successRowCount(internalKey)).toBe(1);
         expect(await currentReleaseId(artifactId)).toBe(
           (successBody(retry)["releaseId"] as string));
@@ -294,7 +294,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
         expect(seenPurposes).toContain("replay");
         expect(successBody(replay)).toEqual(successBody(retry));
         expect(await tableCount("releases")).toBe(releasesBefore + 1);
-        expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
+        expect(await tableCount("operation_receipts")).toBe(keysBefore + 1);
       } finally {
         await pool.query("UPDATE account_users SET status = 'approved' WHERE sub = 'alice'");
       }
@@ -366,7 +366,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
       const execute = requireHostExecute(host);
       const authorizeCommit: AuthorizeCommit = authorizeTransaction;
       const before = await tableCount("artifacts");
-      const keysBefore = await tableCount("idempotency_keys");
+      const keysBefore = await tableCount("operation_receipts");
       armed.current = true;
       try {
         const invocation = invocationFor(authorizeCommit, "lost");
@@ -385,7 +385,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
       }
       expect(armed.attempts).toBeGreaterThan(0);
       expect(await tableCount("artifacts")).toBe(before);
-      expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+      expect(await tableCount("operation_receipts")).toBe(keysBefore);
     } finally {
       if (typeof close === "function") (close as () => void)();
     }
@@ -398,7 +398,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
     const host = composed.host;
     const close = host["close"];
     try {
-      requireSelectedProfile(host, composed.profile.digest);
+      requireSelectedProfile(host, composed.profile.profileDigest);
       const seenPurposes: string[] = [];
       const finalizeGuard: AuthorizeCommit = async (context, transaction) => {
         expect(context.purpose).toBe("finalize");
@@ -459,7 +459,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
             ? (value as { body: unknown }).body
             : (value as { ok: boolean; data: unknown }).data;
           const releasesBefore = await tableCount("releases");
-          const keysBefore = await tableCount("idempotency_keys");
+          const keysBefore = await tableCount("operation_receipts");
           const httpArgs = { artifactId, files: [{ path: "index.html", mimeType: "text/html", text: "hello" }],
             idempotencyKey: " replay " };
           const mcpOf = () => adapter.execute({ method: "POST", path: "/publish", args: httpArgs }, { actorId: ACTOR });
@@ -468,7 +468,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
           expect(first.status).toBe(201);
           expect(replay.status).toBe(201);
           expect(await tableCount("releases")).toBe(releasesBefore + 1);
-          expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
+          expect(await tableCount("operation_receipts")).toBe(keysBefore + 1);
           expect(bodyOf(replay)).toEqual(bodyOf(first));
           expect(await currentReleaseId(artifactId)).toBe((bodyOf(first) as { releaseId: string }).releaseId);
           const mcpFirstArgs = { artifactId, files: [{ path: "index.html", mimeType: "text/html", text: "hello mcp-first" }],
@@ -479,7 +479,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
           expect(httpReplay.status).toBe(201);
           expect(httpReplay.body).toEqual(bodyOf(mcpFirst));
           expect(await tableCount("releases")).toBe(releasesBefore + 2);
-          expect(await tableCount("idempotency_keys")).toBe(keysBefore + 2);
+          expect(await tableCount("operation_receipts")).toBe(keysBefore + 2);
         } finally { (secondComposed.host["close"] as () => void)(); }
       } finally {
         (firstComposed.host["close"] as () => void)();
@@ -496,7 +496,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
     const host = composedCheck.host;
     const close = host["close"];
     try {
-      requireSelectedProfile(host, composedCheck.profile.digest);
+      requireSelectedProfile(host, composedCheck.profile.profileDigest);
       const direct = requireHostExecute(host);
       const guard = authorizeTransaction;
       const ensured = await direct({ method: "POST", path: "/ensure", body: {
@@ -516,7 +516,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
         const invocation = invocationFor(guard, "direct-changed");
         const outcome = await direct({ method: "POST", path: "/publish", body: { ...directBody, ...change } }, invocation);
         assertOutcomeFailure(outcome, invocation.invocationId);
-        expect((outcome as { failure: unknown }).failure).toMatchObject({ category: "conflict", status: 409 });
+        expect((outcome as { failure: unknown }).failure).toMatchObject({ category: "conflict", httpStatus: 409 });
         expect(await committedState(pool)).toEqual(directBefore);
       }
       const composed = (await composeAcceptanceHost(barrier));
@@ -528,7 +528,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
           { artifactId, files, idempotencyKey: "acceptance-conflict" });
         expect(first.status).toBe(201);
         const releasesBefore = await tableCount("releases");
-        const keysBefore = await tableCount("idempotency_keys");
+        const keysBefore = await tableCount("operation_receipts");
         const conflicts = [
           { files: [{ path: "index.html", mimeType: "text/html", text: "changed" }] },
           { files: [{ path: "other.html", mimeType: "text/html", text: "hello" }] },
@@ -540,7 +540,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
             { artifactId, idempotencyKey: "acceptance-conflict", ...change }))
             .toEqual({ status: 409, body: { error: "conflict" } });
           expect(await tableCount("releases")).toBe(releasesBefore);
-          expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+          expect(await tableCount("operation_receipts")).toBe(keysBefore);
         }
         const ordered = await control.handle("publish", ACTOR, { artifactId,
           files: [...files, { path: "other.html", mimeType: "text/html", text: "hello" }],
@@ -551,7 +551,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
           idempotencyKey: "acceptance-order" }))
           .toEqual({ status: 409, body: { error: "conflict" } });
         expect(await tableCount("releases")).toBe(releasesBefore + 1);
-        expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
+        expect(await tableCount("operation_receipts")).toBe(keysBefore + 1);
         expect(await currentReleaseId(artifactId)).toBe((ordered.body as { releaseId: string }).releaseId);
         expect(await control.handle("publish", ACTOR,
           { artifactId, files, idempotencyKey: "acceptance-conflict" })).toEqual(first);
@@ -570,8 +570,8 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
     const host = checked.host;
     const close = host["close"];
     try {
-      const digest = requireSelectedProfile(host, checked.profile.digest);
-      expect(digest).toBe(checked.profile.digest);
+      const digest = requireSelectedProfile(host, checked.profile.profileDigest);
+      expect(digest).toBe(checked.profile.profileDigest);
       const storageCalls = { blobs: 0, pool: 0 };
       const countingBlobs = new Proxy(rawBlobs(), { get(target, property, receiver) {
         const value = Reflect.get(target, property, receiver);
@@ -597,7 +597,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
           invocationFor(directGuard, `selection-${path}`)) as Record<string, unknown>;
         assertOutcomeFailure(outcome);
         expect(outcome["failure"]).toMatchObject({
-          category: "capability_unselected", code: "capability_unavailable", status: 503, retriable: false, commitState: "not_committed" });
+          category: "capability_unselected", publicCode: "capability_unavailable", httpStatus: 503, retriable: false, commitState: "not_committed" });
         const projected = await projectOutcomeHttp(outcome);
         assertPublicBodyRedacted(projected, { error: "capability_unavailable" }, [], []);
       }
@@ -606,7 +606,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
       // dispatch. These direct host.execute refusals prove selection and input
       // validation run before storage, with zero effects.
       const directReleasesBefore = await tableCount("releases");
-      const directKeysBefore = await tableCount("idempotency_keys");
+      const directKeysBefore = await tableCount("operation_receipts");
       const directArtifactsBefore = await tableCount("artifacts");
       for (const forged of [
         { method: "POST", path: "/publish",
@@ -635,13 +635,13 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
           invocationFor(directGuard, "selection-direct")) as Record<string, unknown>;
         assertOutcomeFailure(outcome);
         expect(outcome["failure"]).toMatchObject({ commitState: "not_committed" });
-        expect((outcome["failure"] as Record<string, unknown>)["code"]).toBe("invalid_request");
+        expect((outcome["failure"] as Record<string, unknown>)["publicCode"]).toBe("invalid_request");
         const projected = await projectOutcomeHttp(outcome);
         expect(projected.status).toBe(400);
         assertPublicBodyRedacted(projected, { error: "invalid_request" }, [], []);
       }
       expect(await tableCount("releases")).toBe(directReleasesBefore);
-      expect(await tableCount("idempotency_keys")).toBe(directKeysBefore);
+      expect(await tableCount("operation_receipts")).toBe(directKeysBefore);
       expect(await tableCount("artifacts")).toBe(directArtifactsBefore);
       expect(storageCalls.blobs).toBe(0);
       expect(storageCalls.pool).toBe(0);
@@ -675,7 +675,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
         const artifactId = await ensureArtifact(control, "acceptance-selection-ensure");
         const files = [{ path: "index.html", mimeType: "text/html", text: "selection" }];
         const releasesBefore = await tableCount("releases");
-        const keysBefore = await tableCount("idempotency_keys");
+        const keysBefore = await tableCount("operation_receipts");
         const artifactsBefore = await tableCount("artifacts");
         for (const callerKey of [undefined, null, 42, "", "   ", "x".repeat(257), "😀".repeat(129)]) {
           for (const op of ["ensure", "publish"]) {
@@ -688,7 +688,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
           }
         }
         expect(await tableCount("releases")).toBe(releasesBefore);
-        expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+        expect(await tableCount("operation_receipts")).toBe(keysBefore);
         expect(await tableCount("artifacts")).toBe(artifactsBefore);
         expect(await adapter.execute({ method: "GET", path: `/meta/${artifactId}`, args: {} },
           { actorId: ACTOR })).toMatchObject({ ok: true, status: 200 });
@@ -702,7 +702,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
           { scope: SCOPE, sub: ACTOR, op: "publish", artifactId, clientKey: padded });
         expect(expected).toHaveLength(64);
         expect(expected).not.toBe(padded);
-        const stored = (await pool.query("SELECT key FROM artifacts.idempotency_keys")).rows as { key: string }[];
+        const stored = (await pool.query("SELECT internal_key AS key FROM artifacts.operation_receipts")).rows as { key: string }[];
         expect(stored.map((row) => row.key)).toContain(expected);
         expect(stored.map((row) => row.key)).not.toContain(padded);
         expect(deriveIdempotencyKey({ scope: SCOPE, sub: ACTOR, op: "publish", artifactId,

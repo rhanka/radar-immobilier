@@ -32,6 +32,7 @@ import {
 import { createMcpArtifactAdapter } from "../../../packages/artifacts-host/src/mcp-app-adapter.js";
 import { auth, cookie, migrationsFolder } from "./artifacts-h2.helpers.js";
 import { cleanupArtifactTestResources } from "./artifacts-s3.helpers.js";
+import { createBarrierFaultProbe, startCorrelatedBarrier } from "./artifacts-e3-barrier.helpers.js";
 import { controlRoute } from "../../src/artifacts/control-route.js";
 import { loadConfig } from "../../src/config.js";
 import {
@@ -48,7 +49,6 @@ import {
   committedState,
   requireCommitBarrier,
   requireHostExecute,
-  requirePhaseInjectionBinding,
   requireOutcomeContract,
   requireSelectedProfile,
   type AuthorizeCommit,
@@ -84,7 +84,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     s3Bucket: BUCKET, s3Endpoint: endpoint, s3Region: "us-east-1",
     s3AccessKey: accessKey, s3SecretKey: secretKey });
 
-  async function tableCount(table: "releases" | "idempotency_keys" | "artifacts"): Promise<number> {
+  async function tableCount(table: "releases" | "operation_receipts" | "artifacts"): Promise<number> {
     return Number((await pool.query(`SELECT count(*) FROM artifacts.${table}`)).rows[0].count);
   }
 
@@ -115,7 +115,8 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
 
   async function failViaTransport(host: Record<string, unknown>,
     request: { method: string; path: string; body: Record<string, unknown> },
-    transport: "http" | "mcp", guard: AuthorizeCommit = allowAll()): Promise<Record<string, unknown>> {
+    transport: "http" | "mcp" | "direct", guard: AuthorizeCommit = allowAll(),
+    onInvocation?: (invocation: InvocationContextShape) => void): Promise<Record<string, unknown>> {
     const execute = requireHostExecute(host);
     const observed: Record<string, unknown>[] = [];
     const ids: string[] = [];
@@ -123,6 +124,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     const observe = async (req: unknown, context: unknown) => {
       const invocation = context as InvocationContextShape;
       ids.push(invocation.invocationId);
+      onInvocation?.(invocation);
       const outcome = await execute(req, buildInvocationContext({ ...invocation,
         authorizeCommit: guard })) as Record<string, unknown>;
       observed.push(outcome);
@@ -131,7 +133,13 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     const control = createArtifactControl({ ...host, execute: observe,
       app: { ...host.app as object, execute: observe } } as never, SCOPE, BASE, undefined,
     { ledger: { record: (entry) => { entries.push({ ...entry }); } } });
-    if (transport === "http") {
+    if (transport === "direct") {
+      const outcome = await observe(request, invocationFor(guard, "direct"));
+      const projected = await projectOutcomeHttp(outcome);
+      expect(projected.status).toBe(503);
+      assertPublicBodyRedacted(projected, { error: "capability_unavailable" }, [],
+        [BUCKET, endpoint, accessKey, SCOPE]);
+    } else if (transport === "http") {
       const response = await controlRoute({ auth, accounts: pool, backend: control }).request(
         `https://app.example.test${request.path}`, {
           method: request.method, headers: { cookie: await cookie(ACTOR), origin: auth.appBaseUrl,
@@ -150,10 +158,12 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     expect(observed).toHaveLength(1);
     const outcome = observed[0]!;
     assertOutcomeFailure(outcome, ids[0]);
-    expect(outcome.failure).toMatchObject({ category: "provider_unavailable", status: 503,
-      code: "capability_unavailable", retriable: true });
-    expect(entries).toHaveLength(1);
-    expect(entries[0]).toMatchObject({ invocationId: ids[0], reason: "provider_unavailable", status: 503 });
+    expect(outcome.failure).toMatchObject({ category: "provider_unavailable", httpStatus: 503,
+      publicCode: "capability_unavailable", retriable: true });
+    expect(entries).toHaveLength(transport === "direct" ? 0 : 1);
+    if (transport !== "direct") {
+      expect(entries[0]).toMatchObject({ invocationId: ids[0], reason: "provider_unavailable", status: 503 });
+    }
     return outcome;
   }
 
@@ -209,12 +219,12 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
           // response augmented with the private stream marker through.
           const wireError = (projected.body as { error?: unknown } | null)?.error;
           assertMcpResultRedacted(result, { status: projected.status,
-            code: String(failure.code), retryable: Boolean(failure.retriable),
-            publicError: typeof wireError === "string" ? wireError : String(failure.code) },
+            code: String(failure.publicCode), retryable: Boolean(failure.retriable),
+            publicError: typeof wireError === "string" ? wireError : String(failure.publicCode) },
             parityMarkers, paritySecrets);
         }
         const dispatched = req.method === "POST" && ["/publish", "/ensure"].includes(req.path) &&
-          failure.code !== "invalid_request" && failure.category !== "capability_unselected";
+          failure.publicCode !== "invalid_request" && failure.category !== "capability_unselected";
         expect(entries).toHaveLength(dispatched ? 1 : 0);
         if (dispatched) {
           expect(observed).toHaveLength(1);
@@ -381,7 +391,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     try {
       const execute = executeWithParity(host);
       const before = await tableCount("artifacts");
-      const keysBefore = await tableCount("idempotency_keys");
+      const keysBefore = await tableCount("operation_receipts");
       armed.current = true;
       try {
         const invocation = invocationFor(allowAll(), "pool");
@@ -395,7 +405,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
         armed.current = false;
       }
       expect(await tableCount("artifacts")).toBe(before);
-      expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+      expect(await tableCount("operation_receipts")).toBe(keysBefore);
     } finally {
       if (typeof close === "function") (close as () => void)();
     }
@@ -473,7 +483,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       const locked = await holder.query("SELECT internal_key FROM artifacts.operation_keys WHERE storage_scope_id=$1 AND internal_key=$2 FOR UPDATE", [SCOPE, internalKey]);
       expect(locked.rows).toEqual([{ internal_key: internalKey }]);
       const releasesBefore = await tableCount("releases");
-      const keysBefore = await tableCount("idempotency_keys");
+      const keysBefore = await tableCount("operation_receipts");
       const invocation = invocationFor(allowAll(), "keylock");
       const outcome = await execute({ method: "POST", path: "/publish", body: { artifactId,
         files: [{ path: "index.html", mimeType: "text/html", text: "key lock conflict" }],
@@ -481,10 +491,10 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       assertOutcomeFailure(outcome, invocation.invocationId as string);
       expect(keyLockAttempts.keyLock).toBeGreaterThan(0);
       expect(outcome.failure).toMatchObject({ category: "conflict", retriable: false,
-        commitState: "not_committed", cause: { code: "55P03" }, phase: "key-lock" });
+        commitState: "not_committed", cause: { code: "55P03" }, phase: "lock" });
       expect(await projectOutcomeHttp(outcome)).toEqual({ status: 409, body: { error: "conflict" } });
       expect(await tableCount("releases")).toBe(releasesBefore);
-      expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+      expect(await tableCount("operation_receipts")).toBe(keysBefore);
     } finally {
       await holder.query("ROLLBACK"); holder.release(); (host["close"] as () => void)();
     }
@@ -509,10 +519,10 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       const setup = requireHostExecute(host);
       const artifactId = await ensureVia(setup, allowAll(), "q2-nonkey", "q2-nonkey-ensure");
       const releasesBefore = await tableCount("releases");
-      const keysBefore = await tableCount("idempotency_keys");
+      const keysBefore = await tableCount("operation_receipts");
       // Each transport uses an independent caller key and a rearmed injection,
       // with one correlated write-ledger entry per failed dispatch.
-      for (const transport of ["http", "mcp"] as const) {
+      for (const transport of ["direct", "http", "mcp"] as const) {
         const clientKey = `q2-nonkey-${lockClass}-${transport}`;
         const isBinding = lockClass === "binding";
         const body = isBinding
@@ -529,7 +539,9 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
           expect(probe.evidence.phase).toBe(lockClass);
           expect(probe.evidence.attempts).toBeLessThanOrEqual(1);
           expect(await tableCount("releases")).toBe(releasesBefore);
-          expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+          expect(await tableCount("operation_receipts")).toBe(keysBefore);
+          if (transport === "direct") console.info("[q2-direct-lock-evidence]", lockClass,
+            JSON.stringify(probe.evidence));
         } finally {
           probe.evidence.armed = false;
         }
@@ -540,12 +552,98 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
   });
 
   it.each(["schema-infrastructure", "unqualified"] as const)(
-    "requires an explicit phase-injection joint for E3 cause %s, never optional SQL",
+    "maps one real E3 %s fault after a correlated barrier without retry",
     async (phase) => {
-      // r2 imposes no LOCK TABLE / pg_catalog.* or SET LOCAL shape. A
-      // conforming coordinator using implicit PostgreSQL locks must fail here
-      // by named joint, never on an optional-form assertion.
-      await requirePhaseInjectionBinding(phase);
+      const point = "after_finalization_locks_before_guard";
+      const barrier = await requireCommitBarrier([point]);
+      const probe = createBarrierFaultProbe(pool);
+      await pool.query("CREATE TABLE IF NOT EXISTS test_guard_authority (id int PRIMARY KEY)");
+      await pool.query("INSERT INTO test_guard_authority VALUES (1) ON CONFLICT DO NOTHING");
+      const { host } = await composeQ2Host(barrier, { pool: probe.pool });
+      try {
+        for (const transport of ["direct", "http", "mcp"] as const) {
+          const before = await committedState(pool);
+          const initial = { ...probe.evidence, errors: [...probe.evidence.errors] };
+          let guardCalls = 0;
+          const guard: AuthorizeCommit = async (context, transaction) => {
+            guardCalls++;
+            return authorizeTransaction(context, transaction);
+          };
+          const run = startCorrelatedBarrier(barrier, point, (register) =>
+            failViaTransport(host, { method: "POST", path: "/ensure", body: {
+              bindingName: `q2-e3-${phase}-${transport}`, idempotencyKey: `q2-e3-${phase}-${transport}`,
+            } }, transport, guard, register));
+          const holder = await pool.connect();
+          try {
+            await run.reached;
+            expect(guardCalls).toBe(0);
+            expect(probe.evidence.writes).toBeGreaterThan(initial.writes);
+            const paused = { ...probe.evidence };
+            await holder.query("BEGIN");
+            // Host-owned contention, independent of the provider's SQL forms.
+            if (phase === "schema-infrastructure") {
+              await holder.query("LOCK TABLE test_guard_authority IN ACCESS EXCLUSIVE MODE");
+            } else {
+              expect((await holder.query("SELECT id FROM test_guard_authority WHERE id=1 FOR UPDATE")).rowCount).toBe(1);
+            }
+            await probe.setTimeout(phase === "schema-infrastructure" ? "lock" : "statement");
+            run.release();
+            const outcome = await run.pending;
+            const code = phase === "schema-infrastructure" ? "55P03" : "57014";
+            expect(outcome.failure).toMatchObject({ category: "provider_unavailable", httpStatus: 503,
+              publicCode: "capability_unavailable", retriable: true,
+              cause: { code }, commitState: "not_committed" });
+            expect(probe.evidence.errors.slice(initial.errors.length)).toEqual([code]);
+            expect(probe.evidence.begins).toBe(paused.begins);
+            expect(probe.evidence.commits).toBe(paused.commits);
+            expect(probe.evidence.rollbacks).toBe(paused.rollbacks + 1);
+            expect(guardCalls).toBe(1);
+            expect(await committedState(pool)).toEqual(before);
+            if (transport === "direct") console.info("[e3-direct-fault-evidence]", phase,
+              JSON.stringify(probe.evidence));
+          } finally {
+            await holder.query("ROLLBACK"); holder.release(); run.release();
+            await run.pending.catch(() => {});
+          }
+        }
+
+        // Revoke host authority after an allowed guard, at the last commit pause.
+        const authorityBarrier = await requireCommitBarrier(["before_commit"]);
+        const { host: authorityHost } = await composeQ2Host(authorityBarrier);
+        const before = await committedState(pool);
+        let guardCalls = 0;
+        let revoked = false;
+        const invocation = invocationFor(async (context, transaction) => {
+          guardCalls++;
+          if (revoked) return { allowed: false, reason: "revoked", publicCode: "access_denied",
+            status: 403, retriable: false };
+          return authorizeTransaction(context, transaction);
+        }, `e3-revoked-${phase}`);
+        const execute = requireHostExecute(authorityHost);
+        const run = startCorrelatedBarrier(authorityBarrier, "before_commit", (register) => {
+          register(invocation);
+          return execute({ method: "POST", path: "/ensure", body: {
+            bindingName: `q2-e3-revoked-${phase}`, idempotencyKey: `q2-e3-revoked-${phase}`,
+          } }, invocation);
+        });
+        try {
+          await run.reached;
+          expect(guardCalls).toBe(1);
+          revoked = true;
+          run.release();
+          const outcome = await run.pending;
+          assertOutcomeFailure(outcome, invocation.invocationId);
+          expect(outcome).toMatchObject({ failure: { publicCode: "access_denied", httpStatus: 403,
+            retriable: false, commitState: "not_committed" } });
+          expect(guardCalls).toBe(2);
+          expect(await committedState(pool)).toEqual(before);
+        } finally {
+          run.release(); await run.pending.catch(() => {});
+          (authorityHost["close"] as () => void)();
+        }
+      } finally {
+        (host["close"] as () => void)();
+      }
     },
   );
 
@@ -599,7 +697,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       };
       const uncertain = await failViaTransport(host, { method: "POST", path: "/publish", body }, transport, guard);
       expect(state.commits).toBe(1);
-      expect(uncertain.failure).toMatchObject({ category: "provider_unavailable", status: 503,
+      expect(uncertain.failure).toMatchObject({ category: "provider_unavailable", httpStatus: 503,
         retriable: true, cause: { code: "57P06" }, commitState: "unknown" });
       const commitState = (uncertain["commitState"] as string | undefined) ??
         ((uncertain["failure"] as Record<string, unknown> | undefined)?.["commitState"] as string | undefined);
@@ -608,25 +706,35 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       const env = (await import("../../src/config.js")).loadConfig();
       const peer = new (await import("pg")).default.Pool({ host: env.POSTGRES_HOST, port: env.POSTGRES_PORT,
         user: env.POSTGRES_USER, password: env.POSTGRES_PASSWORD, database: DATABASE });
-      let durableReceipt: unknown;
+      let durableReceipt!: { releaseId: string; manifest: string };
       try {
         const durable = Number((await peer.query(
           "SELECT count(*) FROM artifacts.releases WHERE artifact_id = $1", [artifactId])).rows[0].count);
         expect(durable).toBe(1);
         expect(await tableCount("releases")).toBe(releasesBefore + 1);
-        const success = (await peer.query("SELECT result FROM artifacts.idempotency_keys WHERE key = $1", [internalKey])).rows;
+        const success = (await peer.query("SELECT receipt AS result FROM artifacts.operation_receipts WHERE internal_key = $1", [internalKey])).rows;
         expect(success).toHaveLength(1);
-        durableReceipt = success[0].result;
-        expect(durableReceipt).toBeDefined();
+        durableReceipt = success[0].result as typeof durableReceipt;
+        const release = (await peer.query(
+          "SELECT id, manifest FROM artifacts.releases WHERE artifact_id = $1", [artifactId])).rows;
+        expect(release).toHaveLength(1);
+        expect(durableReceipt).toEqual({ releaseId: release[0].id, manifest: release[0].manifest });
       } finally { await peer.end(); }
       state.armed = false;
       const retry = await execute({ method: "POST", path: "/publish", body },
         invocationFor(allowAll(), "uncertain-retry")) as unknown as Record<string, unknown>;
       expect(retry).toMatchObject({ ok: true, replayed: true });
-      expect((retry.result as { body: unknown }).body).toEqual(durableReceipt);
+      const publicReplay = await projectOutcomeHttp(retry);
+      expect(publicReplay).toEqual({ status: 201, body: {
+        artifactId, releaseId: durableReceipt.releaseId, manifest: durableReceipt.manifest,
+        digest: (JSON.parse(durableReceipt.manifest) as { digest: string }).digest,
+        stableUrl: `https://${artifactId}.pages.example.test/`,
+        pinnedUrl: `https://${durableReceipt.releaseId}.pinned.pages.example.test/`,
+      } });
+      assertPublicBodyRedacted(publicReplay, publicReplay.body, [], [SCOPE, ACTOR]);
       // The first uncertain issue (503, commitState unknown) is distinct from
       // the legitimate receipt replay below: both transports converge on the
-      // same durable receipt with the same key and no new release.
+      // same public projection with the same key and no new release.
       const entries: Record<string, unknown>[] = [];
       const parityControl = createArtifactControl(host as never, SCOPE, BASE, undefined,
         { ledger: { record: (entry) => { entries.push(entry as unknown as Record<string, unknown>); } } });
@@ -636,17 +744,20 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
           "content-type": "application/json" }, body: JSON.stringify(body),
       });
       expect(httpReplay.status).toBe(201);
-      expect(await httpReplay.json()).toEqual(durableReceipt);
+      expect(await httpReplay.json()).toEqual(publicReplay.body);
       const adapter = createMcpArtifactAdapter(parityControl);
       const mcpReplay = await adapter.execute(
         { method: "POST", path: "/publish", args: body }, { actorId: ACTOR });
       expect(mcpReplay).toMatchObject({ ok: true, status: 201 });
-      expect((mcpReplay as { ok: true; data: unknown }).data).toEqual(durableReceipt);
+      expect((mcpReplay as { ok: true; data: unknown }).data).toEqual(publicReplay.body);
       expect(entries).toHaveLength(0);
       expect(await tableCount("releases")).toBe(releasesBefore + 1);
       const successRows = Number((await pool.query(
-        "SELECT count(*) FROM artifacts.idempotency_keys WHERE key = $1", [internalKey])).rows[0].count);
+        "SELECT count(*) FROM artifacts.operation_receipts WHERE internal_key = $1", [internalKey])).rows[0].count);
       expect(successRows).toBe(1);
+      const receiptAfterReplay = (await pool.query(
+        "SELECT receipt FROM artifacts.operation_receipts WHERE internal_key = $1", [internalKey])).rows;
+      expect(receiptAfterReplay).toEqual([{ receipt: durableReceipt }]);
     } finally {
       if (typeof close === "function") (close as () => void)();
     }
@@ -659,7 +770,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     const { host } = composed;
     const close = host["close"];
     try {
-      requireSelectedProfile(host, composed.profile.digest);
+      requireSelectedProfile(host, composed.profile.profileDigest);
       const execute = executeWithParity(host);
       const artifactId = await ensureVia(execute, allowAll(), "q2-conflict", "q2-conflict-ensure");
       const files = [{ path: "index.html", mimeType: "text/html", text: "hello" }];
@@ -670,7 +781,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
         invocationFor(allowAll(), "conflict-first")) as unknown as Record<string, unknown>;
       expect(first).toMatchObject({ ok: true });
       const releasesBefore = await tableCount("releases");
-      const keysBefore = await tableCount("idempotency_keys");
+      const keysBefore = await tableCount("operation_receipts");
       const invocation = invocationFor(allowAll(), "conflict-changed");
       const conflicted = await execute({ method: "POST", path: "/publish",
         body: { artifactId, files: [{ path: "index.html", mimeType: "text/html", text: "changed" }],
@@ -681,9 +792,9 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       const projected = await projectOutcomeHttp(conflicted);
       expect(projected).toEqual({ status: 409, body: { error: "conflict" } });
       expect(await tableCount("releases")).toBe(releasesBefore);
-      expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+      expect(await tableCount("operation_receipts")).toBe(keysBefore);
       const successRows = Number((await pool.query(
-        "SELECT count(*) FROM artifacts.idempotency_keys WHERE key = $1", [internalKey])).rows[0].count);
+        "SELECT count(*) FROM artifacts.operation_receipts WHERE internal_key = $1", [internalKey])).rows[0].count);
       expect(successRows).toBe(1);
     } finally {
       if (typeof close === "function") (close as () => void)();
@@ -702,7 +813,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       const authorizeCommit: AuthorizeCommit = async (_context, transaction) => {
         expect(transaction).toBeDefined();
         seenTransactions.push(transaction);
-        return { allowed: false, reason: "unauthorized_at_commit",
+        return { allowed: false, reason: "denied",
           publicCode: "account_not_approved", status: 403, retriable: false };
       };
       const artifactId = await ensureVia(execute, allowAll(), "q2-deny", "q2-deny-ensure");
@@ -778,7 +889,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     const host = composed.host;
     const close = host["close"];
     try {
-      requireSelectedProfile(host, composed.profile.digest);
+      requireSelectedProfile(host, composed.profile.profileDigest);
       const execute = executeWithParity(host, { privateMarkers: [parityMarker],
         secrets: [BUCKET, endpoint, accessKey, SCOPE, secretKey] });
       const artifactId = await ensureVia(execute, allowAll(), "q2-parity", "q2-parity-ensure");
@@ -879,7 +990,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       const execute = executeWithParity(host, { privateMarkers: [readMarker],
         secrets: [BUCKET, endpoint, accessKey, SCOPE, secretKey] });
       const artifactId = await ensureVia(execute, allowAll(), "q2-read", "q2-read-ensure");
-      const keysBefore = await tableCount("idempotency_keys");
+      const keysBefore = await tableCount("operation_receipts");
       const releasesBefore = await tableCount("releases");
       armed.current = true;
       try {
@@ -888,7 +999,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
           invocation) as unknown as Record<string, unknown>;
         assertOutcomeFailure(outcome, invocation["invocationId"] as string);
         expect(outcome["failure"]).toMatchObject({
-          category: "provider_unavailable", code: "capability_unavailable", retriable: true, commitState: "not_committed" });
+          category: "provider_unavailable", publicCode: "capability_unavailable", retriable: true, commitState: "not_committed" });
         const projected = await projectOutcomeHttp(outcome);
         assertPublicBodyRedacted(projected, { error: "capability_unavailable" }, [readMarker], []);
         expectRedacted(projected, [readMarker]);
@@ -897,7 +1008,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
         armed.current = false;
       }
       expect(armed.attempts).toBeGreaterThan(0);
-      expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+      expect(await tableCount("operation_receipts")).toBe(keysBefore);
       expect(await tableCount("releases")).toBe(releasesBefore);
       const seenTransactions: unknown[] = [];
       const guard: AuthorizeCommit = async (context, transaction) => {
@@ -910,7 +1021,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
           idempotencyKey: "   " } },
         invocationFor(guard, "entry")) as unknown as Record<string, unknown>;
       assertOutcomeFailure(entry);
-      expect(entry["failure"]).toMatchObject({ code: "invalid_request" });
+      expect(entry["failure"]).toMatchObject({ publicCode: "invalid_request" });
       expect(seenTransactions).toEqual([]);
     } finally {
       if (typeof close === "function") (close as () => void)();
