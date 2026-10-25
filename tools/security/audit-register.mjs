@@ -1,45 +1,42 @@
-// Restricted reader for the checked-in register layout; no runtime dependency.
+import { parseDocument } from "yaml";
+
 export const validDate = (value) => typeof value === "string" &&
   /^\d{4}-\d{2}-\d{2}$/.test(value) &&
   Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value;
 
-const scalar = (value) => {
-  const text = value?.trim().replace(/^(["'])(.*)\1$/, "$2");
-  return text && !["null", "~"].includes(text) ? text : undefined;
-};
+const object = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
+const fields = ["id", "advisory", "cve", "scanner", "scanner_input", "component", "finding_kind", "affected",
+  "embedded_path", "severity", "severity_source", "rationale", "finding_ref", "owner", "status", "resolved_on",
+  "resolution_ref", "accepted_by", "accepted_on", "review_by", "expires", "removal_plan"];
+function checkKeys(value, allowed, label) {
+  if (!object(value) || Object.keys(value).some((key) => !allowed.includes(key))) {
+    throw new Error(`unrecognized ${label} structure`);
+  }
+}
 
 export function parseRegister(text) {
-  if (!/^schema_version: 1$/m.test(text) || !/^exceptions:\s*$/m.test(text)) {
+  // YAML is already installed through radar-domain; do not substitute a text reader.
+  const document = parseDocument(text, { version: "1.2", strict: true, uniqueKeys: true });
+  if (document.errors.length || document.warnings.length) {
+    throw new Error(`invalid vulnerability register YAML: ${[...document.errors, ...document.warnings].map((error) => error.message).join("; ")}`);
+  }
+  const register = document.toJS({ maxAliasCount: 0 });
+  checkKeys(register, ["schema_version", "exceptions"], "vulnerability register");
+  if (register.schema_version !== 1 || !Array.isArray(register.exceptions)) {
     throw new Error("unrecognized vulnerability register layout");
   }
-  const rows = [];
   const ids = new Set();
-  for (const block of text.split(/^ {2}- id: */m).slice(1)) {
-    const row = { id: scalar(block.split("\n")[0]) };
-    const fields = new Set();
-    for (const line of block.split("\n").slice(1)) {
-      const match = line.match(/^ {4}([a-z_]+): *(.*)$/);
-      if (!match) {
-        if (/^\s*-\s/.test(line)) throw new Error("malformed register row");
-        continue;
-      }
-      const [, key, value] = match;
-      if (fields.has(key)) throw new Error(`duplicate register field: ${key}`);
-      fields.add(key);
-      row[key] = scalar(value);
-    }
+  return register.exceptions.map((entry) => {
+    checkKeys(entry, fields, "exception");
+    checkKeys(entry.affected, ["identifier", "version"], "affected package");
+    const { affected, ...metadata } = entry;
+    const row = { ...metadata, identifier: affected.identifier, version: affected.version };
     if (!row.id || ids.has(row.id) || !["accepted", "proposed", "resolved"].includes(row.status)) {
       throw new Error("invalid register row identity or status");
     }
     ids.add(row.id);
-    const affected = row.affected?.match(/^\{\s*identifier: (.+), version: (.+)\s*\}$/);
-    row.identifier = scalar(affected?.[1]);
-    row.version = scalar(affected?.[2]);
-    delete row.affected;
-    rows.push(row);
-  }
-  if (!rows.length) throw new Error("register has no readable rows");
-  return rows;
+    return row;
+  });
 }
 
 export function checkException(row, now) {
