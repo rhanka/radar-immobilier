@@ -41,6 +41,7 @@
 - [x] T05a code exports the existing context/factory without moving implementation; direct invariant test written, mandatory regressions pending.
 - [ ] T05b: expose canonical async card helper; explicit graph-signals/date-parity gates.
 - [x] T05b exports the unchanged async helper and adds a direct canonical-card invariant test; gate pending.
+- [x] Static test review supplies explicit mock parameter types and a stored-node timestamp consistent with the nonnullable schema.
 - [ ] T05c: expose canonical degraded card helper; explicit graph-signals/date-parity gates.
 - [ ] T06: authorized coherent city population and personal/common masking before enrichment.
 - [x] T06 coherent population and visibility cases written; no domain normalization or active mount is introduced.
