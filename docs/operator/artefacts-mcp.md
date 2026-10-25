@@ -68,48 +68,77 @@ Run `node tools/make/artefacts-a4-mutations.mjs` inside the isolated runner afte
 failed-binding mutants with named semantic failures and passing restoration
 controls. Ordinary MCP targets continue excluding service E2E; A5 owns their
 separate provider acceptance. A7 owns operational activation and recovery.
-# A5 guarded artifact composition
+# A5 shared artifact production composition
 
-The published MCP tuple is artifacts `0.2.0`, cluster-mesh `0.22.0`,
-mcp-auth `0.2.1` and resolved mcp-platform `0.4.0`. The complete Radar
-profile is compiled by the published provider before registry admission.
-Its immutable manifest binds all four selected schemas, caller keys,
-semantic rules and `immo:read`; the registry also binds the storage scope.
+API, artifacts-host and MCP use published artifacts `0.2.0`; the MCP tuple
+also pins cluster-mesh `0.22.0`, mcp-auth `0.2.1` and resolves mcp-platform
+`0.4.0`. HTTP and MCP execute the same compiled four-operation profile and
+server scope. The caller key reaches the provider unchanged. A fresh immutable
+invocation supplies actor, scope and authorization; the provider owns canonical
+hashes, ordered command identity, finalization and guarded replay.
+
+The production MCP entrypoint constructs the trusted shared host when storage
+configuration and validation activation are complete. It then exposes twelve
+Immo tools plus `artifacts_ensure`, `artifacts_publish`, `artifacts_list` and
+`artifacts_get`. Without activation it preserves the twelve-tool recovery
+composition. Malformed enabled bindings stop startup. Stdio remains synthetic.
 The artifact wire envelope is 2 MiB, including JSON-RPC framing.
 
-`bindArtifactProvider` accepts the trusted shared application and a
-request-bound finalization authority factory. The stateful namespace then
-lists exactly twelve Immo tools plus the four artifact tools. Each call
-uses a fresh frozen invocation. Lower adapter dispatch stays closed;
-unselected operations fail before authority creation. Invalid bindings
-close the namespace before effects. Stdio remains fixture-only.
+## Migration and admission
 
-**Activation remains unavailable in this delivery.** The production HTTP
-entrypoint has no artifact binding and exposes the preserved twelve tools.
-No environment value substitutes for that binding. The sixteen-tool tests
-use a contract double and qualify composition, not durable finalization.
-API/artifacts-host retain their existing artifacts `0.1.2` dependency
-until the coherent A1 migration is available.
+Stop legacy writers before enabling the new host. Run the normal API migrator:
+`0024_artifacts_coordinator` is appended after the frozen journal prefix. It
+starts with the exact published `0003_coordinator.sql` bytes and adds Radar
+policy, quota and failure tables. It preserves historical records and supports
+fresh installation, upgrade, ordinary replay and missing-journal-row repair.
+Startup verifies the journal hashes for both lifecycle and coordinator SQL;
+it performs no DDL. Legacy inventory is read through the public PostgreSQL
+adapter; ambiguous legacy command codecs remain quarantined.
 
-Before activation, the A1 integrator must deliver and qualify:
+Configure `ARTIFACTS_*` storage, `ARTIFACTS_CONTENT_BASE`,
+`ARTIFACTS_CONTROL_MODE=validation`, `ARTIFACTS_VALIDATION_SUBJECTS` and
+`ARTIFACTS_VALIDATION_UNTIL`. MCP additionally requires
+`IMMO_MCP_ARTIFACT_DATABASE_URL` for its write-capable host and
+`IMMO_MCP_ACCOUNT_DATABASE_URL` for the existing account/membership binding.
+A string setting alone never supplies a provider binding: construction must
+verify the migrated shared service. No live deployment is performed here.
 
-- `composition.ts` and `facade.ts` using the guarded `0.2.0` application,
-  `handle(request, invocation)` and typed outcomes before projection.
-- A transaction-bound admission/quota participant, persistent failure
-  accounting and `artifacts.operation_receipts`, with registered technical
-  migrations under a conductor-recorded CT-1/CT-2 lease.
-- Identical HTTP/MCP scope and policy revision; replay authorization,
-  ordered-content conflicts, last-reservation races, restart and cleanup.
-- Enabled Q1/Q2/provider acceptance after PR #918, real-service H4 E2E,
-  then exact SHA/image/configuration and A7 applied-binding receipts.
+An operator must provision `artifacts.host_quotas` for the server scope with
+explicit `operation_limit` and `byte_limit`; no row grants no write quota.
+Limits are cumulative per storage scope. Each new ensure or publication
+reserves one operation; publication additionally reserves decoded bytes.
+Replays consume neither. Increase limits to add capacity; retain used counters.
+`artifacts.host_policy.revision` fences policy changes. Account status, policy
+revision and quota use the coordinator transaction; activation/cohort/expiry
+are reread by the guard after waits. Locks remain held through COMMIT.
 
-The isolated A5 entrypoint is `tools/make/artefacts-a5.mk`, with
-`API_PORT=18924 UI_PORT=15924 MAILDEV_UI_PORT=11924 ENV=test-artefacts-a5`
-as the final arguments. Its `run` target installs and executes `CMD` only
-inside the source archive container. `A5_SERVICES=1` requests synthetic
-PostgreSQL/S3; `test-runtime A5_EXISTING_IMAGE=<qualified-image-id>`
-exercises the existing runtime and records its own source SHA. No new
-image is built by default. A new build requires separate authorization
-and the explicit `A5_BUILD_IMAGE=1` flag.
-Campaigns wait in 60-second intervals for every `radar-test-*` container,
-hold the machine lock, stop below 8 GiB and remove their own resources.
+Success is finalized in `artifacts.operation_receipts`, atomically with the
+domain writes and quota. Denial rolls them back. Failure accounting uses
+`artifacts.host_failures` with invocation-ID deduplication. A database outage
+can also prevent the failure insert; the host retains `accountingFailure` and
+emits `artifacts.accounting_unavailable` with the invocation ID for operator
+reconciliation. The public failure stays classified and redacted.
+
+Prepared objects have a 30-second deadline. A serialized one-second scheduler
+runs bounded durable-intent cleanup, retaining referenced blobs. Cleanup errors
+remain observable as `cleanup.failure` and
+`artifacts.preparation_cleanup_unavailable`; cleanup resumes after restart.
+Unknown COMMIT outcomes require the same caller key and a fresh authorized
+lookup. A 503 status alone never determines retryability.
+
+## Reproducible qualification
+
+Use `make -f tools/make/artefacts-a5.mk` with `verify`, `test-api-ci`,
+`test-provider`, `migration-proof`, or `test-runtime`, followed by
+`API_PORT=18924 UI_PORT=15924 MAILDEV_UI_PORT=11924 ENV=test-artefacts-a5`.
+`tools/h4-mcp.mk test-composition-e2e` delegates to the enabled provider suite
+with this same environment. `test-runtime` builds the exact committed source
+and tests all sixteen tools, SQL/S3 effects, replay, ordered conflict, process
+restart, and fresh account/membership refusals inside that image. Only probe
+modules and evidence are mounted; product code comes from the image.
+
+Campaigns serialize through the machine lock, wait for `radar-test-*` occupancy
+and Docker builds, stop below 8 GiB free and remove their own volumes/orphans.
+Evidence records the source SHA, clean status, source archive hash, installed
+tuple, image ID and redacted runtime configuration. A7 retains responsibility
+for applied production bindings and deployment receipts.
