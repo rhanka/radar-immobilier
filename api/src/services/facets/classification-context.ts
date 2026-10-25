@@ -34,7 +34,7 @@ async function contextSample(db: Database, sub: string, workspaceId: string) {
         lotAvailability = { state: "closed", reason: "not_configured" };
       }
     }
-    return { access, rights, availability, lotAvailability, selectionBasket };
+    return { access, rights, availability: Availability.parse(availability), lotAvailability: Availability.parse(lotAvailability), selectionBasket };
   });
   if (sample.availability.state === "open") {
     try { await readProjectionScope(db, sub, workspaceId, "facet-context", "signal"); }
