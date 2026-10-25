@@ -2,6 +2,7 @@ import type { AdmissionResult } from "@radar/artifacts-host";
 import type { ArtifactInvocationContext } from "@sentropic/artifacts/server/commit-contract";
 import type { ArtifactOutcome } from "@sentropic/artifacts/server/outcome-contract";
 import type { HttpResponse } from "@sentropic/artifacts/http";
+import { assertAttributedTestObjects } from "./artifacts-s3.helpers.js";
 import type pg from "pg";
 import { fork } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -664,11 +665,7 @@ export async function verifyPreparationCleanup(host: unknown, artifactId: string
     for (const key of before.protectedKeys) {
       if (!baseline.has(key)) throw new Error("[contract-violation] new denied preparation has no preexisting protection");
     }
-    for (const key of keysBefore) {
-      if (!baseline.has(key) && !attributable.has(key)) {
-        throw new Error("[contract-violation] undeclared S3 object without preparation attribution");
-      }
-    }
+    assertAttributedTestObjects(keysBefore, baseline, attributable);
   }
   // Historical attribution stays mandatory even when cleanup already ran:
   // every attempt keeps its blobKeys. Cleanup may already have removed some
