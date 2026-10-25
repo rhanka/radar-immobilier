@@ -6,6 +6,7 @@ import { contentHostAppOption, resolveContentHostConfig } from "./artifacts/cont
 import { loadConfig, resolveAuthConfig, resolveTemConfig } from "./config.js";
 import { createLogger } from "./logger.js";
 import { createDb, makeDbProbe } from "./db/client.js";
+import { readDurableLegacyRetirement } from "./services/facets/legacy-retirement.js";
 import { createDiscardedSignalsReader } from "./services/facets/discarded-reader.js";
 import { loadGeoKeyIndex } from "./services/sources/document-resolver.js";
 import {
@@ -88,6 +89,11 @@ const artifactsControl = await startArtifactControl({
   },
 });
 
+const durableRetirement = await readDurableLegacyRetirement(dbHandle.db).catch((error) => {
+  logger.warn({ err: String(error) }, "durable retirement unreadable; starting closed");
+  return "cutover-closed" as const;
+});
+
 const app = createApp({
   checkDb: makeDbProbe(dbHandle),
   checkObjectStore: makeObjectStoreProbe(objectStore),
@@ -101,6 +107,7 @@ const app = createApp({
   discarded: createDiscardedSignalsReader(dbHandle.db),
   auth,
   tem,
+  ...(durableRetirement ? { legacyRetirement: durableRetirement } : {}),
   ...contentHostAppOption(contentHost),
   ...(artifactsControl ? { artifactsControl } : {}),
 });

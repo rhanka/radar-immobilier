@@ -30,17 +30,26 @@ export interface WorkspacesRouteDeps {
   auth?: { enabled: boolean };
 }
 
+const WORKSPACE_GUARDED = [
+  "/api/v1/workspaces",
+  "/api/v1/workspaces/:workspaceId/memberships",
+];
+
 export function workspacesRoute(deps: WorkspacesRouteDeps): Hono {
   const app = new Hono();
-  app.use("/api/v1/workspaces/*", privateSignalResponse);
-  app.use("/api/v1/workspaces/*", async (c, next) => {
-    const session = c.get("session" as never) as { sub?: string; via?: string } | undefined;
-    if (!deps.auth?.enabled || !session?.sub) return c.json({ error: "unauthenticated" }, 401);
-    if (c.req.method !== "GET" && session.via === "bearer") {
-      return c.json({ error: "browser_session_required" }, 403);
-    }
-    return next();
-  });
+  for (const path of WORKSPACE_GUARDED) {
+    app.use(path, privateSignalResponse);
+  }
+  for (const path of WORKSPACE_GUARDED) {
+    app.use(path, async (c, next) => {
+      const session = c.get("session" as never) as { sub?: string; via?: string } | undefined;
+      if (!deps.auth?.enabled || !session?.sub) return c.json({ error: "unauthenticated" }, 401);
+      if (c.req.method !== "GET" && session.via === "bearer") {
+        return c.json({ error: "browser_session_required" }, 403);
+      }
+      return next();
+    });
+  }
   app.get("/api/v1/workspaces", async (c) => {
     const session = c.get("session" as never) as { sub: string };
     try {
