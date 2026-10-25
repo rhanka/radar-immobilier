@@ -17,6 +17,7 @@
 - [x] P1O1-EX1: owner PR920 instruction authorizes `deploy/ci/check-image-entrypoints.test.sh`; repair the active-entry inventory without weakening validation; rollback only with P1 removal.
 
 ## Feedback Loop
+- [x] PR920: builder activity state uses the writable evidence directory; no writes to the protected Docker configuration.
 - [x] Owner instruction supersedes automatic coauthor trailers: subject-only commits.
 - [x] No 6H opening until successor MCP adapter is deployed and qualified.
 - [x] attention: peer-review selection failed without an exact author model; evidence records no consensus verdict.
