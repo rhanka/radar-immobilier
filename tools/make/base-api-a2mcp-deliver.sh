@@ -26,7 +26,7 @@ git merge-base --is-ancestor "$BASE" HEAD
 allowed() {
   [[ $1 != *..* && $1 != /* && ! -L $1 ]] || return 2
   case $1 in
-    packages/immo-mcp/src/*|api/src/artifacts/strict-receiver*|api/src/config.ts|api/src/config-strict*.test.ts|api/src/routes/auth.ts) ;;
+    packages/immo-mcp/src/*|api/src/artifacts/strict-receiver*|api/src/config*.test.ts|api/src/config.ts|api/src/routes/auth*.ts) ;;
     api/tests/integration/artifacts-strict*.ts|api/tests/integration/a2base-mcp*.ts|tools/make/base-api-a2mcp*) ;;
     plan/ARTEFACTS-BRANCH_feat_artefacts-mcp.md|plan/ARTEFACTS-A2BASE-MCP-BRANCH_feat_artefacts-mcp-a2base-mcp.md) ;;
     *) echo "Out of scope: $1" >&2; return 2;;

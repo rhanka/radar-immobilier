@@ -227,6 +227,13 @@ describe("loadConfig", () => {
       STRICT_RECEIVER_RECEIPT_WORKLOAD_SUB: "immo-mcp-workload",
       STRICT_RECEIVER_RECEIPT_WORKLOAD_CLIENT_ID: "immo-mcp-workload",
       STRICT_RECEIVER_RECEIPT_ENVIRONMENT: "preprod",
+      STRICT_RECEIVER_RECEIPT_ROUTE_PROFILE: "mcp-signals-search.get.v1",
+      STRICT_RECEIVER_RECEIPT_SCHEMA_REVISION: "scoped-signal-search.v1",
+      STRICT_RECEIVER_RECEIPT_POLICY_REVISION: "a2base-search-v1",
+      STRICT_RECEIVER_API_IMAGE: `sha256:${"a".repeat(64)}`,
+      STRICT_RECEIVER_MCP_IMAGE: `sha256:${"b".repeat(64)}`,
+      STRICT_RECEIVER_RECEIPT_API_IMAGE: `sha256:${"a".repeat(64)}`,
+      STRICT_RECEIVER_RECEIPT_MCP_IMAGE: `sha256:${"b".repeat(64)}`,
     };
 
     it("stays disabled without arming or receipt (code merge alone never enables)", () => {
@@ -257,6 +264,11 @@ describe("loadConfig", () => {
         { STRICT_RECEIVER_RECEIPT_API_AUDIENCE: "https://immo.example.test" },
         { STRICT_RECEIVER_RECEIPT_WORKLOAD_SUB: "other-workload" },
         { STRICT_RECEIVER_RECEIPT_WORKLOAD_CLIENT_ID: "other-client" },
+        { STRICT_RECEIVER_RECEIPT_ROUTE_PROFILE: "legacy-city-get" },
+        { STRICT_RECEIVER_RECEIPT_SCHEMA_REVISION: "legacy-nodes" },
+        { STRICT_RECEIVER_RECEIPT_POLICY_REVISION: "p4-v1" },
+        { STRICT_RECEIVER_RECEIPT_API_IMAGE: `sha256:${"c".repeat(64)}` },
+        { STRICT_RECEIVER_RECEIPT_MCP_IMAGE: `sha256:${"c".repeat(64)}` },
       ]) {
         expect(() => resolveAuthConfig(loadConfig({ ...STRICT_BASE, ...override }))).toThrow(
           "strict_receiver_receipt_invalid",
@@ -276,6 +288,9 @@ describe("loadConfig", () => {
         "STRICT_RECEIVER_RECEIPT_WORKLOAD_SUB", "STRICT_RECEIVER_RECEIPT_ENVIRONMENT",
         "STRICT_RECEIVER_RECEIPT_WORKLOAD_CLIENT_ID",
         "STRICT_RECEIVER_WORKLOAD_CLIENT_ID", "STRICT_RECEIVER_ENVIRONMENT",
+        "STRICT_RECEIVER_RECEIPT_ROUTE_PROFILE", "STRICT_RECEIVER_RECEIPT_SCHEMA_REVISION",
+        "STRICT_RECEIVER_RECEIPT_POLICY_REVISION", "STRICT_RECEIVER_API_IMAGE", "STRICT_RECEIVER_MCP_IMAGE",
+        "STRICT_RECEIVER_RECEIPT_API_IMAGE", "STRICT_RECEIVER_RECEIPT_MCP_IMAGE",
       ]) {
         expect(() => resolveAuthConfig(loadConfig({ ...STRICT_BASE, [key]: "" }))).toThrow(
           "strict_receiver_receipt_invalid",
