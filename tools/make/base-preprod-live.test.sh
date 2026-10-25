@@ -48,12 +48,13 @@ case "$*" in
     printf '{"app.kubernetes.io/name":"radar-immobilier","app.kubernetes.io/component":"api"}';;
   'get deployment fixture-mcp '*) jq -r .image "$INPUT";;
   'get deployment radar-api '*metadata.uid*)
-    generation=2; [[ ${FAKE_STATE:-} != new-generation ]] || generation=3
+    generation=$(jq -r .generation api-fixture.json); [[ ${FAKE_STATE:-} != new-generation ]] || generation=3
     printf 'synthetic-api-deployment\t%s\t%s\t1\n' "$generation" "$generation";;
   'get deployment radar-api '*restartedAt*) jq -r .restartedAt api-fixture.json;;
   'get deployment radar-api '*availableReplicas*)
     if [[ ${FAKE_STATE:-} == unavailable ]]; then echo 0; else echo 1; fi;;
   'get deployment radar-api '*) jq -r .image "$INPUT";;
+  'rollout restart deployment/radar-api') cp api-after-fixture.json api-fixture.json;;
   'get cronjobs '*) [[ ${FAKE_STATE:-} != cron ]] || echo false;;
   'get jobs '*) [[ ${FAKE_STATE:-} != job ]] || echo 1;;
   'get endpointslices '*) [[ ${FAKE_STATE:-} != ready ]] || printf '[{"conditions":{"ready":true}}]\n';;
@@ -149,20 +150,56 @@ printf '\n' >> synthetic-receipt.json
 if invoke inspect; then echo 'Corrupted Job receipt accepted' >&2; exit 1; fi
 rg -qF 'Receipt hash mismatch' "result-$n.log"
 cp activation-input.json input.json
-jq -n --slurpfile c input.json --slurpfile instance api-fixture.json --arg now "$now" \
+jq --arg now "$now" '.startedAt=($now|fromdateiso8601-20|todateiso8601)
+  | .restartedAt=($now|fromdateiso8601-30|todateiso8601)' api-fixture.json > api-after-fixture.json
+cp api-after-fixture.json api-fixture.json
+jq --arg now "$now" '.generation="1" | .podUid="synthetic-before-pod" | .templateHash="synthetic-before-template"
+  | .containerId="containerd://synthetic-before" | .startedAt=($now|fromdateiso8601-60|todateiso8601)
+  | .restartedAt=($now|fromdateiso8601-70|todateiso8601)' api-fixture.json > api-before-fixture.json
+jq -n --slurpfile c input.json --slurpfile instance api-fixture.json --slurpfile before api-before-fixture.json --arg now "$now" \
   '{reference:"synthetic-qualification",sha256:("f"*64),observedAt:$now,passed:true,instance:$instance[0]} as $q |
-  {binding:$c[0].binding,image:$c[0].image,q1:$q,q2:($q+{afterRestart:true}),
-    restart:{binding:$c[0].binding,image:$c[0].image,completedAt:$now,instance:$instance[0]},
+  ($q+{instance:$before[0],observedAt:($now|fromdateiso8601-40|todateiso8601|sub("Z$";".123Z"))}) as $q1 |
+  {binding:$c[0].binding,image:$c[0].image,q1:$q1,q2:($q+{afterRestart:true}),
+    restart:{binding:$c[0].binding,image:$c[0].image,q1:$q1,previousInstance:$before[0],
+      completedAt:($now|fromdateiso8601-10|todateiso8601),instance:$instance[0]},
     personal:{writerEpoch:"scoped",maintenanceBarrier:false},lotsOpen:false,mcpSuccessorDeployed:true}' > acceptance.json
 : > cluster-calls
 invoke reopen-api PROOFS="$testdir/acceptance.json"
 rg -q -- '--request-timeout=20s patch ingress fixture-app' cluster-calls
 if rg -- '--request-timeout=20s (scale|set|delete|rollout) ' cluster-calls; then exit 1; fi
 cp acceptance.json accepted.json
+reject_restart_chain() {
+  local scenario=$1 filter=$2
+  jq "$filter" accepted.json > acceptance.json
+  : > cluster-calls
+  if invoke reopen-api PROOFS="$testdir/acceptance.json"; then
+    echo "Unsafe restart chain: $scenario" >&2; exit 1
+  fi
+  rg -qF 'Bound API qualification required' "result-$n.log"
+  [[ ! -s cluster-calls ]]
+}
+reject_restart_chain old-restart '.q1.observedAt=.q2.observedAt | .restart.q1=.q1'
+reject_restart_chain same-instance '.q1=.q2 | del(.q1.afterRestart)
+  | .restart.q1=.q1 | .restart.previousInstance=.q1.instance'
+reject_restart_chain foreign-q1 '.restart.q1.sha256=("e"*64)'
+reject_restart_chain foreign-before '.restart.previousInstance.podUid="foreign"'
+reject_restart_chain reused-pod '.q1.instance.podUid=.q2.instance.podUid
+  | .restart.q1=.q1 | .restart.previousInstance=.q1.instance'
+reject_restart_chain reused-container '.q1.instance.containerId=.q2.instance.containerId
+  | .restart.q1=.q1 | .restart.previousInstance=.q1.instance'
+reject_restart_chain start-at-q1 '.q1.observedAt=.q2.instance.startedAt | .restart.q1=.q1'
 jq 'del(.q2,.restart)' accepted.json > first-qualification.json
+cp api-before-fixture.json api-fixture.json
 invoke restart-api PROOFS="$testdir/first-qualification.json"
-jq -e --slurpfile instance api-fixture.json '.instance==$instance[0] and (.completedAt|length>0)' "out-$n/restart.json" >/dev/null
-for field in q2 q2.afterRestart binding.releaseId restart restart.instance; do
+jq -e --slurpfile instance api-fixture.json --slurpfile q1 first-qualification.json \
+  '.instance==$instance[0] and .q1==$q1[0].q1 and .previousInstance==$q1[0].q1.instance
+    and .instance.podUid!=.previousInstance.podUid and (.completedAt|length>0)' "out-$n/restart.json" >/dev/null
+jq --slurpfile restart "out-$n/restart.json" --arg observedAt "$(date -u +%FT%TZ)" \
+  '.restart=$restart[0] | .q2.observedAt=$observedAt' accepted.json > acceptance.json
+: > cluster-calls
+invoke reopen-api PROOFS="$testdir/acceptance.json"
+rg -q -- '--request-timeout=20s patch ingress fixture-app' cluster-calls
+for field in q2 q2.afterRestart binding.releaseId restart restart.instance restart.q1 restart.previousInstance; do
   jq --arg field "$field" 'delpaths([$field|split(".")])' accepted.json > acceptance.json
   : > cluster-calls
   if invoke reopen-api PROOFS="$testdir/acceptance.json"; then echo 'Unqualified reopening accepted' >&2; exit 1; fi
