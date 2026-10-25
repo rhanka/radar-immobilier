@@ -65,6 +65,7 @@
 - [x] Independent audit: eleven restored mutation file hashes match qualified 2ce816f8 exactly; 22 controls/114 passing executions. API/MCP source bytes are identical at 2ce816f8, image d39eaa8c and final documentary delivery.
 
 ## Docs consolidation
+- [x] Export the correction bundle from prerequisite d8f2cc06 under its own filename, preserving the initial bundle and its recorded hash; audit every new commit and import into a prerequisite-only fresh repository.
 - [x] French companion report with evidence, per-commit numstat, delivered SHA and bundle hash; report remains outside its own hashed bundle. Final commit updates only this plan, preserving qualified runtime bytes.
 
 ## Merge & close
