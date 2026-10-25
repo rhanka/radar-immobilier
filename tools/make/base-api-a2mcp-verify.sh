@@ -18,6 +18,9 @@ RUN_DIR=$TASK_DIR/runtime
 LOG_DIR=$TASK_DIR/$(date -u +%Y%m%dT%H%M%S)-$$-$mode
 mkdir -p "$RUN_DIR" "$LOG_DIR"
 printf 'Evidence: %s\n' "$LOG_DIR"
+printf '%s\n' "$SCOPE" > "$LOG_DIR/api-scope.txt"
+printf '%s\n' "$MCP_SCOPE" > "$LOG_DIR/mcp-scope.txt"
+git --git-dir="$ROOT/tmp/a2base-mcp-delivery.git" rev-parse HEAD > "$LOG_DIR/candidate-sha.txt"
 # Wait before acquiring the shared campaign lock, without touching another stack.
 while :; do
   names=$(docker ps --format '{{.Names}}')
