@@ -7,7 +7,9 @@ describeDb("T11 MCP authority and cache over createApp/PostgreSQL", () => {
     const f = await mcpFixture();
     try {
       const { client } = await f.connect();
-      expect((await search(client)).body.signals.map((s: { id: string }) => s.id)).toEqual([f.signal.node.id]);
+      const initial = await search(client);
+      expect(initial.result.isError).not.toBe(true);
+      expect(initial.body.signals.map((s: { id: string }) => s.id)).toEqual([f.signal.node.id]);
       if (kind === "membership") await f.data.pool.query("UPDATE workspace_memberships SET status='revoked', revoked_at=now() WHERE account_id=$1", [f.data.contributor.id]);
       else await f.data.pool.query("UPDATE account_users SET status='suspended' WHERE id=$1", [f.data.contributor.id]);
       const denied = await search(client);
