@@ -42,5 +42,6 @@
   - [x] Hermetic operator Make tests cover refusals, literal values and no root/environment discovery.
   - [x] Verification serializes Docker campaigns, polls at 60 seconds and monitors 8 GiB floor.
   - [x] Synthetic image proof uses existing Postgres base and actual runtime bundles.
+  - [x] Image rehearsal checks all three JSON receipts and byte-stable read-only inspection/resume.
 - [ ] Lot 5: complete CI API suite, lint, typecheck and audit gate.
 - [ ] Lot 6: runbook, review evidence, local backup, audited bundle and report.
