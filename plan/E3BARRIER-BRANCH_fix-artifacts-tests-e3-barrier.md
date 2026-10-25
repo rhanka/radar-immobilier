@@ -28,6 +28,7 @@
 - [x] Test helpers only; isolated automated verification, no user UAT.
 
 ## Plan / Todo (lot-based)
+- [x] Final A2/A3/A4/B1: apply the packaged coordinator migration, separate entry/revision reads, lock approval before the guard barrier, and use the published executor entrypoint.
 - [x] Final A1/A6: require ordinary retriable=false and classify invalid callable exports as contract violations.
 - [x] Lot 0: rules, predecessor report, branch, local upstream ABI and machine capacity.
 - [x] Lot 1: barrier factory/options and removal of the obsolete phase seam.
