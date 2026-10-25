@@ -14,7 +14,7 @@
 ## Branch Scope Boundaries (MANDATORY)
 - [x] Allowed: `api/Dockerfile`, `api/src/scripts/*personal*`, `api/src/scripts/init-workspace-authority.ts`, `api/src/scripts/base-preprod*`, `api/tests/integration/base-preprod*`, `tools/make/base-preprod*`, `deploy/base-preprod/**`, `docs/spec/BASE_API_ACTIVATION.md`, this plan, `RAPPORT-SOL-BASE-PREPROD-P1O1.md`.
 - [x] Forbidden: root `Makefile`, compose files, rules, agent instructions, other plans, migrations, UI, MCP.
-- [x] Conditional: none; Dockerfile change explicitly authorized by P1.
+- [x] P1O1-EX1: owner PR920 instruction authorizes `deploy/ci/check-image-entrypoints.test.sh`; repair the active-entry inventory without weakening validation; rollback only with P1 removal.
 
 ## Feedback Loop
 - [x] Owner instruction supersedes automatic coauthor trailers: subject-only commits.
@@ -28,6 +28,12 @@
 - [x] No live UAT or cluster operations; namespace administrator executes later.
 
 ## Plan / Todo (lot-based)
+- [ ] PR920: reject mismatched initialization destinations before mutation.
+- [ ] PR920: verify operation-specific SQL rights, including every table/row lock.
+- [ ] PR920: bind proofs and receipts to the executing release and image digest.
+- [ ] PR920: bind Q2 to the latest API restart, pod instance and configuration.
+- [ ] PR920: retain failed Job receipts and their verified hashes.
+- [ ] PR920: reproduce offline K8s CI, mutation tests and fresh bundle audit from c100e6cc.
 - [x] Lot 0: inspect approved design, constraints and existing isolation tooling.
 - [x] Lot 1: bundle scripts and qualify TypeScript/JavaScript entry guards.
   - [x] Built API image emitted successful JSON receipts from all three JavaScript bundles.
