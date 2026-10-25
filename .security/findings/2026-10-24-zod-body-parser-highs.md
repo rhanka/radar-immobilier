@@ -64,15 +64,16 @@ No major upgrade, peer override or security-register suppression was introduced.
 - The same 12 Express parsing checks reproduce one failure under 2.3.0 and pass under 2.4.0: JSON; gzip/deflate/Brotli; malformed JSON; body-size limit; unsupported encoding; nested forms; parameter limit; UTF-8 text; raw bytes; and the advisory payload followed by a successful health request.
 - Fifteen checks against actual API/domain Zod schemas pass: strict object keys, UUIDs, discriminators, eight/nine deselections, 500/501 batch items, empty batches, mode, defaults, confidence, and evidence requirements. They validate behavior only; Zod remains vulnerable.
 - Evidence and reproducible Make/Compose/probe sources: `tmp/deps-highs-delivery/evidence/`, `tmp/deps-highs-delivery/support/`, and `tmp/deps-highs-delivery/campaign.mk`.
-- Coverage boundary: npm audit covers the resolved root npm tree. No new image-layer, vendored-code, Focus-tree, or production deployment scan is claimed. The existing tools image is reused; no image is delivered by this patch.
+- Coverage boundary: npm audit covers the resolved root npm tree. No new image-layer, vendored-code, Focus-tree, or production deployment scan is claimed. The existing tools image is reused; no image is delivered by this patch. The body-parser 2.4.0 `zstd` path is not covered by the 12 parsing checks.
 
 ## Remaining findings
 
-- Zod high [GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5), propagated through Ollama/provider-utils; the three high package entries represent one high advisory.
+- Zod high [GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5), propagated through Ollama/provider-utils; the three high package entries represent one high advisory. During the acceptance window it is covered by register rows EXC-2026-10-25-zod, EXC-2026-10-25-zod-ollama-ai-provider and EXC-2026-10-25-zod-provider-utils-ollama, enforced by `tools/security/audit-gate.mjs` (`make audit-security`, CI Quality gates).
 - provider-utils 2.x low [GHSA-866g-f22w-33x8](https://github.com/advisories/GHSA-866g-f22w-33x8); Ollama/Graphify propagation. See the existing provider-utils finding; its proposed exception remains unsigned.
 - fast-uri moderate [GHSA-w74x-v6f9-j3xg](https://github.com/advisories/GHSA-w74x-v6f9-j3xg), [GHSA-wjr9-j795-jxcr](https://github.com/advisories/GHSA-wjr9-j795-jxcr); low [GHSA-xhq7-xmqj-769h](https://github.com/advisories/GHSA-xhq7-xmqj-769h), [GHSA-333x-w4r6-6crp](https://github.com/advisories/GHSA-333x-w4r6-6crp).
 - ip-address moderate [GHSA-rxp7-6hxx-x8q5](https://github.com/advisories/GHSA-rxp7-6hxx-x8q5).
-- All non-body-parser vulnerability records are identical before/after. The zero-high/critical condition is not met; Zod remains PR-blocking under `rules/security.md`. No push, remote CI result, merge, or deployment is claimed.
+- All non-body-parser vulnerability records are identical before/after. Before the 2026-10-25 owner sign-off the zero-high/critical condition was not met and Zod was PR-blocking under `rules/security.md`. During the acceptance window (2026-10-25 to 2026-11-08) this advisory does not block merges; at expiry it becomes PR-blocking again unless the owner renews it explicitly. No push, remote CI result, merge, or deployment is claimed.
+- The last accepted day is 2026-11-08 UTC; the gate fails from 2026-11-09 UTC, including when an expired row no longer matches a finding. Matching is restricted to the `root npm workspace` component and its `package-lock.json`, exact advisory/package/version/path, and signed dates. The gate runs directly in the existing Compose Node image, bypassing the package-installing service entrypoint.
 
 ## Risk acceptance (Zod GHSA-mrhx-c7xc-m3w5)
 
