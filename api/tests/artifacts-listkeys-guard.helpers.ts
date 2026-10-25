@@ -24,6 +24,7 @@ export function repositoryTestFiles(root: string, readDirectory: ReadDirectory =
       .flatMap((entry) => testFiles(join(packages, entry.name), readDirectory))].sort();
 }
 
+/** Best-effort syntax check; test blob wrappers enforce the contract at runtime. */
 export function analyzeListCalls(source: string, filename = "test.ts"): {
   invalid: number[];
   nonStatic: { line: number; expression: string }[];
@@ -46,6 +47,15 @@ export function analyzeListCalls(source: string, filename = "test.ts"): {
   function staticString(node: ts.Expression, seen = new Set<ts.Node>()): string | undefined {
     node = unwrap(node);
     if (ts.isStringLiteralLike(node)) return node.text;
+    if (ts.isConditionalExpression(node)) {
+      const condition = unwrap(node.condition);
+      const declaration = ts.isIdentifier(condition) ? checker.getSymbolAtLocation(condition)?.valueDeclaration : undefined;
+      const value = declaration && ts.isVariableDeclaration(declaration) && declaration.initializer &&
+        ts.isVariableDeclarationList(declaration.parent) && (declaration.parent.flags & ts.NodeFlags.Const) !== 0
+        ? unwrap(declaration.initializer) : condition;
+      if (value.kind === ts.SyntaxKind.TrueKeyword) return staticString(node.whenTrue, seen);
+      if (value.kind === ts.SyntaxKind.FalseKeyword) return staticString(node.whenFalse, seen);
+    }
     if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.PlusToken) {
       const left = staticString(node.left, seen);
       const right = staticString(node.right, seen);
@@ -62,6 +72,19 @@ export function analyzeListCalls(source: string, filename = "test.ts"): {
     }
     if (ts.isIdentifier(node)) {
       const declaration = checker.getSymbolAtLocation(node)?.valueDeclaration;
+      if (declaration && ts.isBindingElement(declaration) && !declaration.dotDotDotToken && !declaration.initializer &&
+          ts.isArrayBindingPattern(declaration.parent) && !seen.has(declaration)) {
+        const variable = declaration.parent.parent;
+        if (ts.isVariableDeclaration(variable) && variable.initializer && ts.isVariableDeclarationList(variable.parent) &&
+            (variable.parent.flags & ts.NodeFlags.Const) !== 0) {
+          const tuple = unwrap(variable.initializer);
+          const index = declaration.parent.elements.indexOf(declaration);
+          if (ts.isArrayLiteralExpression(tuple) && !tuple.elements.some(ts.isSpreadElement)) {
+            const element = tuple.elements[index];
+            if (element) return staticString(element, new Set([...seen, declaration]));
+          }
+        }
+      }
       if (declaration && ts.isVariableDeclaration(declaration) && declaration.initializer &&
           ts.isIdentifier(declaration.name) && ts.isVariableDeclarationList(declaration.parent) &&
           (declaration.parent.flags & ts.NodeFlags.Const) !== 0 && !seen.has(declaration)) {
@@ -78,9 +101,15 @@ export function analyzeListCalls(source: string, filename = "test.ts"): {
         : ts.isElementAccessExpression(callee) ? staticString(callee.argumentExpression) : undefined;
       if (name === "listKeys") {
         const line = file.getLineAndCharacterOfPosition(node.getStart(file)).line + 1;
-        const prefix = node.arguments[0];
+        const args = node.arguments.flatMap((argument) => {
+          if (!ts.isSpreadElement(argument)) return [argument];
+          const tuple = unwrap(argument.expression);
+          return ts.isArrayLiteralExpression(tuple) && !tuple.elements.some(ts.isSpreadElement)
+            ? [...tuple.elements] : [argument];
+        });
+        const prefix = args[0];
         const value = prefix === undefined ? "" : staticString(prefix);
-        if (value === "") invalid.push(line);
+        if (value !== undefined && (value === "" || value.includes(".."))) invalid.push(line);
         else if (value === undefined && prefix) nonStatic.push({ line, expression: prefix.getText(file) });
       }
     }
