@@ -24,7 +24,7 @@ git merge-base --is-ancestor "$BASE" HEAD
 allowed() {
   [[ $1 != *..* && $1 != /* && ! -L $1 ]]
   case $1 in
-    packages/immo-mcp/*|packages/artifacts-host/*|package.json|package-lock.json) ;;
+    packages/immo-mcp/*|packages/artifacts-host/*|package.json|package-lock.json|api/Dockerfile) ;;
     tools/make/artefacts-a4*|tools/h4-mcp.mk|docs/operator/artefacts-mcp.md) ;;
     plan/ARTEFACTS-A4-BRANCH_feat_artefacts-mcp-a4.md|RAPPORT-SOL-ARTEFACTS-A4.md) ;;
     *) echo "Outside A4 scope: $1" >&2; exit 2;;
