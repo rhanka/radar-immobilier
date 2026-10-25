@@ -18,6 +18,18 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    // Node.js tooling scripts: declare the Node runtime globals they use
+    // (process, console, setTimeout) instead of disabling no-undef.
+    files: ["tools/make/*.mjs"],
+    languageOptions: {
+      globals: {
+        console: "readonly",
+        process: "readonly",
+        setTimeout: "readonly",
+      },
+    },
+  },
+  {
     rules: {
       "@typescript-eslint/no-unused-vars": [
         "error",

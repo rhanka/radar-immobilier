@@ -39,24 +39,33 @@ function revisionsOf(scope: { personalRevision: number; workspaceRevision: numbe
   };
 }
 
+const SCOPED_REVISION_GUARDED = [
+  "/api/v1/workspaces/:workspaceId/signal-facets/projection-revisions",
+  "/api/v1/workspaces/:workspaceId/signal-facets/coherent-city",
+];
+
 export function scopedProjectionRevisionsRoute(deps: ScopedProjectionRevisionsDeps): Hono {
   const app = new Hono();
-  app.use("/api/v1/workspaces/:workspaceId/signal-facets/*", async (c, next) => {
-    c.header("Cache-Control", "private, no-store");
-    c.header("Vary", "Cookie, Authorization");
-    await next();
-  });
-  app.use("/api/v1/workspaces/:workspaceId/signal-facets/*", async (c, next) => {
-    const session = c.get("session" as never) as { sub?: string; via?: string } | undefined;
-    if (!deps.auth?.enabled || !session?.sub) return c.json({ error: "unauthenticated" }, 401);
-    if (c.req.method !== "GET" && session.via === "bearer") {
-      return c.json({ error: "browser_session_required" }, 403);
-    }
-    if (!workspaceId.safeParse(c.req.param("workspaceId")).success) {
-      return c.json({ error: "invalid_scoped_identity" }, 400);
-    }
-    return next();
-  });
+  for (const path of SCOPED_REVISION_GUARDED) {
+    app.use(path, async (c, next) => {
+      c.header("Cache-Control", "private, no-store");
+      c.header("Vary", "Cookie, Authorization");
+      await next();
+    });
+  }
+  for (const path of SCOPED_REVISION_GUARDED) {
+    app.use(path, async (c, next) => {
+      const session = c.get("session" as never) as { sub?: string; via?: string } | undefined;
+      if (!deps.auth?.enabled || !session?.sub) return c.json({ error: "unauthenticated" }, 401);
+      if (c.req.method !== "GET" && session.via === "bearer") {
+        return c.json({ error: "browser_session_required" }, 403);
+      }
+      if (!workspaceId.safeParse(c.req.param("workspaceId")).success) {
+        return c.json({ error: "invalid_scoped_identity" }, 400);
+      }
+      return next();
+    });
+  }
   app.get("/api/v1/workspaces/:workspaceId/signal-facets/projection-revisions", async (c) => {
     const params = z.object({ citySlug: city, mode }).safeParse({
       citySlug: c.req.query("citySlug"), mode: c.req.query("mode"),
