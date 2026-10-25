@@ -7,7 +7,7 @@ operator_inputs
 case $action in
 validate) ;;
 render-job) render_job "$(jq -r .operation "$INPUT")";;
-permissions|inventory|freeze-cd|close|collect-maintenance|reopen-api)
+permissions|inventory|freeze-cd|close|collect-maintenance|start-api|restart-api|reopen-api)
   source tools/make/base-preprod-maintenance.sh
   "$action";;
 inspect|init|attach|activate|resume)
@@ -21,6 +21,9 @@ inspect|init|attach|activate|resume)
       '.attachments|length>0 and all(.[]; (.sub|type=="string" and length>0) and .workspaceId==$workspace)' "$INPUT" >/dev/null;;
   esac
   render_job "$action"
+  source tools/make/base-preprod-maintenance.sh
+  permissions
+  if [[ $action == activate || $action == resume ]]; then assert_closed; assert_mcp; fi
   # Create only: an existing Job is never patched, replaced or automatically deleted.
   "${k[@]}" create -f "$OUTPUT/job.json" > "$OUTPUT/create.txt"
   "${k[@]}" wait --for=condition=complete "job/$job" --timeout=570s > "$OUTPUT/wait.txt" || {
