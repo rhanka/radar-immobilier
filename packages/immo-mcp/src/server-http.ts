@@ -21,11 +21,13 @@ import {
 import { loadExchangeConfig } from "./exchange-config.js";
 import { ExchangeCache, SingleFlightExchange } from "./exchange-cache.js";
 import type { ExchangeKeySource } from "./exchange-token.js";
-import type { ToolContext } from "./tools.js";
 import { createDataSource, type ImmoDataSource } from "./data-source.js";
 import { createRawDataSource, type RawDataSource } from "./raw-data.js";
 import { IMMO_MCP_NAME, IMMO_MCP_VERSION } from "./meta.js";
-import { registerTools } from "./tools.js";
+import { ImmoStatefulHost } from "./stateful-host.js";
+import { composeStatefulImmo } from "./registry/stateful-composition.js";
+import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-stateful";
+import { createAccountBinding } from "./account-binding.js";
 
 /**
  * REMOTE transport for the immo MCP provider: Streamable HTTP (MCP SDK) behind an
@@ -160,21 +162,6 @@ export function extractBearerToken(header: string | undefined | null): string | 
   return match ? match[1]!.trim() : undefined;
 }
 
-function buildHttpScopedServer(
-  auth: ImmoMcpAuthContext,
-  data: ImmoDataSource,
-  raw: RawDataSource,
-): McpServer {
-  // `toolCtx` seeds the registered tool handlers. Per-request identity does NOT
-  // flow through this holder: `handleMcp` captures an immutable snapshot at
-  // entry and runs transport dispatch inside `runWithInvocationContext`, so a
-  // concurrent request cannot rebind the credentials of an in-flight call.
-  const toolCtx: ToolContext = { auth, data, raw };
-  const server = new McpServer({ name: IMMO_MCP_NAME, version: IMMO_MCP_VERSION });
-  registerTools(server, toolCtx);
-  return server;
-}
-
 /** Identity a session is bound to at `initialize` time. */
 interface SessionOwner {
   /** Token subject — always bound. */
@@ -222,8 +209,6 @@ function isSessionOwner(owner: SessionOwner, mcpAuth: McpAuthContext): boolean {
   if (mcpAuth.sub !== owner.sub) return false;
   const currentClientId = ownerClientId(mcpAuth);
   if (
-    owner.clientId !== undefined &&
-    currentClientId !== undefined &&
     currentClientId !== owner.clientId
   ) {
     return false;
@@ -247,6 +232,8 @@ export interface ImmoHttpDeps {
   clock?: () => number;
   /** Private request-bound exchange runtime; missing configuration fails closed. */
   exchange?: ExchangeRuntimeDeps | undefined;
+  /** Trusted current account/membership port; real data without a binding stays closed. */
+  authorize?: (tool: string, request: VerifiedMcpRequest) => Promise<boolean>;
 }
 
 /**
@@ -270,19 +257,23 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
   const mcp = createMcpAuth(mcpAuthConfig);
 
   const app = new Hono();
+  const host = new ImmoStatefulHost(app);
+  const ready = composeStatefulImmo(host, deps.authorize ?? (async () => data.mode !== "http" && raw.mode !== "http"))
+    .then(() => true, () => false);
 
-  // Keep the historical mount first: mcp-auth 0.1.0 advertises this URL.
-  // The same instance supplies root discovery before the transport guard.
-  app.route("/mcp", mcpAuthRoutes(mcp));
-  app.route("/", mcpAuthRoutes(mcp));
-  // Version 0.1.0 only registers the bare well-known path at the root mount.
-  app.get("/.well-known/oauth-protected-resource/mcp", (c) => c.json(mcp.metadata(), 200, {
+  // Preserve the historical discovery URL while 0.2 challenges advertise RFC 9728.
+  app.get("/mcp/.well-known/oauth-protected-resource", (c) => c.json(mcp.metadata(), 200, {
     "Cache-Control": "public, max-age=300",
   }));
+  app.route("/", mcpAuthRoutes(mcp));
 
   // OAuth Resource Server guard: validates the bearer (issuer/audience/scope), or returns
   // 401/403 with the proper WWW-Authenticate (resource_metadata + scope) challenge.
   app.use("/mcp", requireMcpAuth(mcp, { requiredScopes: config.requiredScopes }));
+  app.use("/mcp", async (c, next) => {
+    if (!await ready) return c.json({ error: "composition_unavailable" }, 503);
+    return await next();
+  });
 
   const sessions = new Map<string, SessionEntry>();
   sessionStores.set(app, sessions);
@@ -309,7 +300,14 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
     return { mcpAuth, auth, subjectToken: extractBearerToken(c.req.header("authorization")) };
   };
 
-  const dispatchWithExchange = <T>(mcpAuth: McpAuthContext, auth: ImmoMcpAuthContext, subjectToken: string | undefined, snapshot: InvocationContext, fn: () => T): T => {
+  const dispatchWithExchange = <T>(mcpAuth: McpAuthContext, auth: ImmoMcpAuthContext, subjectToken: string | undefined, snapshot: InvocationContext, fn: () => Promise<T>, signal: AbortSignal): Promise<T> => {
+    const clientId = ownerClientId(mcpAuth);
+    const authority: VerifiedMcpRequest = {
+      principal: { issuer: config.issuer, sub: snapshot.auth.sub, scopes: snapshot.auth.scopes,
+        claims: [], attributes: { workspaces: snapshot.auth.workspaces }, ...(clientId === undefined ? {} : { clientId }) },
+      resource: config.resource, correlationId: randomUUID(), signal,
+    };
+    const dispatch = () => runWithInvocationContext(snapshot, () => host.run(authority, fn));
     return runWithHttpTransport(() => {
       if (subjectToken) {
         const claims = mcpAuth.claims as unknown as Record<string, unknown>;
@@ -328,14 +326,15 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
         }));
       }
       if (deps.exchange) {
-        return runWithExchangeDeps(deps.exchange, () => runWithInvocationContext(snapshot, fn));
+        return runWithExchangeDeps(deps.exchange, dispatch);
       }
-      return runWithInvocationContext(snapshot, fn);
+      return dispatch();
     });
   };
 
   const closeSession = async (sessionId: string, entry: SessionEntry): Promise<void> => {
     sessions.delete(sessionId);
+    host.forget(entry.server.server);
     try {
       await entry.transport.close();
     } catch {
@@ -354,6 +353,9 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
   };
 
   const handleMcp = async (c: Context): Promise<Response> => {
+    let request: Request;
+    try { request = await host.boundRequest(c.req.raw); }
+    catch { return c.json({ error: "invalid_request" }, 413); }
     const sessionId = c.req.header("mcp-session-id");
 
     if (sessionId) {
@@ -372,7 +374,7 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
       // Immutable capture at entry: the running handler keeps this request's
       // identity even when a concurrent request enters the same session.
       const snapshot = captureInvocationContext({ auth, data, raw });
-      return dispatchWithExchange(mcpAuth, auth, subjectToken, snapshot, () => entry.transport.handleRequest(c.req.raw));
+      return dispatchWithExchange(mcpAuth, auth, subjectToken, snapshot, () => entry.transport.handleRequest(request), request.signal);
     }
 
     // No session yet: only a POST (the `initialize` request) may open one.
@@ -386,18 +388,20 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
     // before reaching the transport (see the session branch above).
     const { mcpAuth: openAuth, auth: openAuthCtx, subjectToken: openSubject } = currentAuth(c);
     const snapshotForOpen = captureInvocationContext({ auth: openAuthCtx, data, raw });
-    const server = buildHttpScopedServer(openAuthCtx, data, raw);
+    const server = new McpServer({ name: IMMO_MCP_NAME, version: IMMO_MCP_VERSION });
+    host.retain(server.server);
     const transport = new WebStandardStreamableHTTPServerTransport({
       sessionIdGenerator: () => randomUUID(),
       enableJsonResponse: true,
     });
     transport.onclose = () => {
+      host.forget(server.server);
       const sid = transport.sessionId;
       if (sid) sessions.delete(sid);
     };
     await server.connect(transport);
     const response = await dispatchWithExchange(openAuth, openAuthCtx, openSubject, snapshotForOpen, () =>
-      transport.handleRequest(c.req.raw),
+      transport.handleRequest(request), request.signal,
     );
     if (transport.sessionId) {
       const now = clock();
@@ -408,6 +412,9 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
         createdAt: now,
         lastSeenAt: now,
       });
+    } else {
+      host.forget(server.server);
+      await server.close();
     }
     return response;
   };
@@ -441,7 +448,8 @@ async function main(): Promise<void> {
       singleFlight: new SingleFlightExchange(),
     };
   }
-  const app = createImmoHttpApp(config, { data, raw, exchange });
+  const accounts = createAccountBinding(process.env);
+  const app = createImmoHttpApp(config, { data, raw, exchange, ...(accounts ? { authorize: accounts.authorize } : {}) });
   const { serve } = await import("@hono/node-server");
   serve({ fetch: app.fetch, port: config.port });
   process.stderr.write(
