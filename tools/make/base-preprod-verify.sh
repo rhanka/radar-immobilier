@@ -11,6 +11,8 @@ RUN_DIR=$TASK_DIR/runtime
 LOG_DIR=$TASK_DIR/$(date -u +%Y%m%dT%H%M%S)-$action
 mkdir -p "$RUN_DIR" "$LOG_DIR"
 echo "Evidence: $LOG_DIR"
+git rev-parse HEAD > "$LOG_DIR/source-commit.txt"
+git diff HEAD --no-ext-diff | sha256sum > "$LOG_DIR/source-diff.sha256"
 exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
 while :; do
   busy=$(docker ps --format '{{.Names}}' | awk '/^radar-test-/')
@@ -64,6 +66,7 @@ build-image)
   docker build --build-arg "GIT_SHA=$(git rev-parse HEAD)" -f api/Dockerfile -t radar-base-preprod-p1o1:qualified - < "$RUN_DIR/source.tar" > "$LOG_DIR/build.log" 2>&1 &
   RUN_PID=$!; wait "$RUN_PID"; RUN_PID=
   docker image inspect --format '{{.Id}}' radar-base-preprod-p1o1:qualified > "$LOG_DIR/image-id.txt"
+  OPERATOR_LOCAL_IMAGE=local/synthetic-api@$(cat "$LOG_DIR/image-id.txt")
   image_compose
   guarded_down
   "${compose[@]}" up -d --wait postgres
