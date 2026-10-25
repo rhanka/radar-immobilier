@@ -13,7 +13,7 @@ case ${1:?} in
   diagnose-provider)
     # Diagnostic adoption is container-local; never copy its manifests/lockfile back.
     export A5_SERVICES=1
-    export CMD='npm ci --strict-peer-deps --ignore-scripts && npm install --workspace=api --workspace=packages/artifacts-host --save-exact --strict-peer-deps --ignore-scripts @sentropic/artifacts@0.2.0 && cp package-lock.json /evidence/diagnostic-package-lock.json && npm run db:migrate --workspace=api && ARTIFACTS_PROVIDER_ACCEPTANCE=1 npm run test --workspace=api -- tests/integration/artifacts-provider-acceptance.spec.ts tests/integration/artifacts-finalization-authorization.spec.ts tests/integration/artifacts-provider-failures.spec.ts --maxWorkers=1 --reporter=json --outputFile=/evidence/provider-results.json' ;;
+    export CMD='npm ci --strict-peer-deps --ignore-scripts && npm install --workspace=api --workspace=packages/artifacts-host --save-exact --strict-peer-deps --ignore-scripts @sentropic/artifacts@0.2.0 && cp package-lock.json /evidence/diagnostic-package-lock.json && npm run db:migrate --workspace=api && ARTIFACTS_PROVIDER_ACCEPTANCE=1 timeout --signal=TERM --kill-after=10 180 npm run test --workspace=api -- tests/integration/artifacts-provider-acceptance.spec.ts tests/integration/artifacts-finalization-authorization.spec.ts tests/integration/artifacts-provider-failures.spec.ts --maxWorkers=1 --reporter=json --outputFile=/evidence/provider-results.json' ;;
   test-runtime)
     # Preserved production recovery composition: twelve tools until A1 is qualified.
     export A5_IMAGE=1 A5_SERVICES=1 CMD='actual twelve-tool runtime recovery probe' ;;
