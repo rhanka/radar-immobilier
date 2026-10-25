@@ -36,6 +36,7 @@
 - [x] T13 state group written: canonical parity while legacy serves, legacy 503/410 with independent open scoped reads, missing/legacy/barrier epochs and unresolved history refusals.
 - [x] Initial T08/T09 gate PASS: 74 API tests across six explicit files plus eight MCP baseline cases, no failures/skips; documentary waiting measured 2,025ms/one resolution; owned cleanup status 0.
 - [ ] T14: explicit MCP E2E runner, complete HTTP search through production facade and image evidence.
+- [x] T14 network fixture written: SDK/Streamable HTTP, socket token issuer verifying incoming signatures, signed exchanged JWT/JWKS, real createApp/A3 facade and PostgreSQL; no business response injection.
 - [ ] Qualification: scoped checks and authority/masking mutations, no required skipped cases.
 
 ## Docs consolidation
