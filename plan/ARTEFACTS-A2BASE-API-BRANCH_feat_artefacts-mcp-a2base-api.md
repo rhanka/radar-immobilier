@@ -43,6 +43,7 @@
 - [x] T05b exports the unchanged async helper and adds a direct canonical-card invariant test; gate pending.
 - [x] Static test review supplies explicit mock parameter types and a stored-node timestamp consistent with the nonnullable schema.
 - [x] A later T05b campaign hit the 10 GiB disk cutoff and was stopped; no skipped date-parity cases are accepted. Move the disposable npm download cache onto the existing container /tmp tmpfs before retrying.
+- [x] Interrupted cleanup reported a transient in-use runtime volume after operator auto-removal; perform an owned cleanup retry and bound future retries to three ownership-checked attempts.
 - [ ] T05c: expose canonical degraded card helper; explicit graph-signals/date-parity gates.
 - [ ] T06: authorized coherent city population and personal/common masking before enrichment.
 - [x] T06 coherent population and visibility cases written; no domain normalization or active mount is introduced.
