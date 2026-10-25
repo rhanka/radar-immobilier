@@ -27,6 +27,7 @@
 - [x] No UI/UAT change; root checkout and stable dev data preserved.
 
 ## Plan / Todo (lot-based)
+- [x] Reproduced Docker's label inequality filter returning no foreign containers despite a live foreign stack; inspect explicit project labels and wait before image build instead of trusting that filter.
 - [x] Targeted campaign 20261025T230043-5-test PASS: 82 API cases including eleven real-storage MCP network cases and 48/5/2 graph/date/budget regressions, plus eight MCP baseline cases; zero failures/skips and owned cleanup PASS. Add explicit legacy fence 503/410 and failing-archive parity assertions.
 - [x] Add two controlled mutants: removing the preactivation reader fails missing-epoch parity; any internal legacy read after activation fails the scoped no-call assertion. Final qualification includes the CI API npm test entrypoint and complete collection.
 - [x] T14 grows to eleven network/image cases: missing, legacy and scoped epochs return date and document hash resolved from stored PDF metadata, preserve human-specific archives/reveal, and deny warm-session revocation; preactivation cases assert no scoped state exists.

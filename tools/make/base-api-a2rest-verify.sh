@@ -112,8 +112,14 @@ if [[ $mode == image || $mode == qualify ]]; then
   export BUILDX_CONFIG=$TASK_DIR/buildx
   mkdir -p "$BUILDX_CONFIG"
   # The owned dependency stack stays up; every other stack/build must be absent.
-  [[ -z $(docker ps --filter "label=com.docker.compose.project!=$PROJECT" --format '{{.Names}}') ]]
-  [[ -z $(pgrep -af '(^|/)(docker (build|buildx build)|docker-buildx build)( |$)' || true) ]]
+  while :; do
+    foreign=$(docker ps --format '{{.Names}}|{{.Label "com.docker.compose.project"}}' |
+      awk -F '|' -v project="$PROJECT" '$2 != project')
+    builds=$(pgrep -af '(^|/)(docker (build|buildx build)|docker-buildx build)( |$)' || true)
+    [[ -n $foreign || -n $builds ]] || break
+    printf '%s WAIT before image containers=%s builds=%s\n' "$(date -u +%FT%TZ)" "$foreign" "$builds" | tee -a "$LOG_DIR/wait.log"
+    sleep 60
+  done
   docker build --network=none --build-arg CANDIDATE_SHA="$candidate" -t "$image" "$context" > "$LOG_DIR/image-build.log" 2>&1
   docker image inspect --format '{{.Id}} {{json .RepoDigests}} {{index .Config.Labels "org.radar.a2base.candidate"}}' \
     "$image" > "$LOG_DIR/image-identity.txt"
