@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Read only projected identities, stdout and termination metadata; never recreate a Job.
 collect_job() {
-  local action=$1 uid image image_id code job_uid job_image release_sha
+  local action=$1 uid image image_id code job_uid job_image release_sha condition
   "${k[@]}" get job "$job" -o jsonpath='{.metadata.uid}{"\t"}{.spec.template.spec.containers[0].image}{"\n"}' > "$OUTPUT/job-identity.tsv"
   IFS=$'\t' read -r job_uid job_image < "$OUTPUT/job-identity.tsv"
   image=$(jq -r .image "$INPUT")
@@ -26,7 +26,8 @@ collect_job() {
     jq -e --slurpfile c "$INPUT" '.result.workspaceSlug==$c[0].binding.workspaceSlug
       and (.result.workspaceId|test("^[a-fA-F0-9]{8}(-[a-fA-F0-9]{4}){3}-[a-fA-F0-9]{12}$"))' "$OUTPUT/receipt.json" >/dev/null || fail 'Initialization receipt destination mismatch'
   fi
-  [[ $code == 0 ]] || fail 'Operator Job failed; verified receipt retained'
+  condition=$("${k[@]}" get job "$job" -o jsonpath='{.status.conditions[?(@.status=="True")].type}')
+  [[ $code == 0 && $condition == *Complete* && $condition != *Failed* ]] || fail 'Operator Job failed; verified receipt retained'
 }
 wait_job() {
   local condition deadline=$((SECONDS+570))

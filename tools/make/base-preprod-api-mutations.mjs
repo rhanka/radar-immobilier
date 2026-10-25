@@ -8,6 +8,8 @@ const file = "api/src/scripts/base-preprod-job.ts";
 const original = readFileSync(file, "utf8");
 const mutants = [
   ["init-uuid", "invocation.binding.workspaceId !== null ||", "false ||"],
+  ["init-flag-value", '(_, index) => invocation.args[index - 1] === "--workspace-slug"',
+    '(_, index) => index % 2 === 1 && invocation.args[index - 1] === "--workspace-slug"'],
   ["init-result", 'if (!row || row.slug !== invocation.binding.workspaceSlug) throw new Error("workspace_destination_mismatch");', ""],
   ["image-release", "invocation.binding.releaseId.split(/[:/]/)[0] !== releaseSha", "false"],
   ["sql-preflight", 'if (invocation.action !== "inspect") await assertPrivileges(handle.db, invocation.action);', ""],
@@ -34,4 +36,4 @@ for (const [name, from, to] of mutants) {
   } finally { writeFileSync(file, original); }
 }
 assert.equal(run("restored").code, 0);
-console.log("PASS four runtime mutations, baseline/restored exit 0");
+console.log("PASS five runtime mutations, baseline/restored exit 0");

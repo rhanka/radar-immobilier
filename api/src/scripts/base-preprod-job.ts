@@ -23,8 +23,7 @@ export async function runJob(invocation: Invocation) {
     || process.env.GIT_SHA !== releaseSha || !/@sha256:[a-f0-9]{64}$/.test(invocation.image ?? "")
     || process.env.OPERATOR_IMAGE !== invocation.image) throw new Error("operator_image_release_mismatch");
   if (invocation.action === "init") {
-    const slugs = invocation.args.filter((_, index) => index % 2 === 1
-      && invocation.args[index - 1] === "--workspace-slug");
+    const slugs = invocation.args.filter((_, index) => invocation.args[index - 1] === "--workspace-slug");
     if (invocation.binding.workspaceId !== null || !invocation.binding.workspaceSlug
       || slugs.length !== 1 || slugs[0] !== invocation.binding.workspaceSlug) {
       throw new Error("workspace_destination_mismatch");
