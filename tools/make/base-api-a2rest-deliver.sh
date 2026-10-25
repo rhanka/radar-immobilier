@@ -67,7 +67,7 @@ case $action in
   bundle)
     git diff --quiet; git diff --cached --quiet
     audit > tmp/a2base-rest-commit-audit.txt
-    OUT=$ROOT/tmp/a2base-rest-evidence/a2base-rest.bundle
+    OUT=$ROOT/tmp/a2base-rest-evidence/a2base-rest-astra-corrections.bundle
     mkdir -p "${OUT%/*}"
     [[ ! -L ${OUT%/*} && ! -L $OUT ]]
     git bundle create "$OUT" "$BASE..HEAD"
