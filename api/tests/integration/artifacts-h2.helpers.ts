@@ -36,6 +36,10 @@ export async function startHarness(name: string) {
     credentials: { accessKeyId: config.s3AccessKey, secretAccessKey: config.s3SecretKey } });
   await s3.send(new CreateBucketCommand({ Bucket: config.s3Bucket }));
   const blobs = createTestS3BlobStore({ client: s3, bucket: config.s3Bucket });
+  await pool.query("INSERT INTO artifacts.storage_scopes (id, org_id) VALUES ($1, $2)",
+    [config.storageScope, config.orgId]);
+  await pool.query(`INSERT INTO artifacts.host_quotas (storage_scope_id, operation_limit, byte_limit)
+    VALUES ($1, 1000000, 1000000000)`, [config.storageScope]);
   const host = (await composeArtifactHost(pool, config, blobs))!;
   const control = createArtifactControl(host, config.storageScope, "pages.example.test");
   return { pool, config, host, control, blobs,
