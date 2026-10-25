@@ -12,9 +12,10 @@ import { decodeMcpSignalSearch, MCP_SIGNAL_SEARCH_PATH } from "../routes/mcp-sig
 
 /** The candidate authorizes only the reserved read-search contract. */
 export function isStrictSearchRequest(
-  method: string, rawPath: string, query: URLSearchParams,
+  method: string, rawPath: string, query: URLSearchParams, accept?: string,
 ): boolean {
   if (method !== "GET" || rawPath !== MCP_SIGNAL_SEARCH_PATH) return false;
+  if (accept?.toLowerCase().includes("text/event-stream")) return false;
   try { decodeMcpSignalSearch(query); return true; } catch { return false; }
 }
 

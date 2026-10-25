@@ -10,6 +10,8 @@ describeDb("T12 exact delegated receiver on createApp/PostgreSQL", () => {
       expect((await search(client)).result.isError).not.toBe(true);
       const headers = { authorization: `Bearer ${f.exchange.issuedExchangedTokens[0]}` };
       const path = "/api/v1/mcp/facets/signals/search";
+      expect((await f.receiver.request(path + "?city=synthetic-city", {
+        headers: { ...headers, accept: "text/event-stream" } })).status).toBe(403);
       for (const [method, route] of [
         ["GET", "/api/graph-signals/synthetic-city"], ["GET", path + "/more?city=synthetic-city"],
         ["GET", "/api/v1/mcp/facets/signals/%73earch?city=synthetic-city"],
