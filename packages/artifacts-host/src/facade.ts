@@ -89,7 +89,10 @@ export function createArtifactControl(
       const invocation = Object.freeze({ invocationId: randomUUID(), actorId, storageScopeId: scope,
         authorizeCommit: async (...args: Parameters<typeof authorizeArtifactCommit>) => {
           if (admission) {
-            const decision = await checkAdmission(admission, actorId);
+            let decision;
+            try { decision = await checkAdmission(admission, actorId); }
+            catch { return { allowed: false as const, reason: "unavailable" as const,
+              publicCode: "capability_unavailable", status: 503, retriable: true }; }
             if (!decision.allowed) return { allowed: false as const, reason: "denied" as const,
               publicCode: decision.body.error, status: decision.status, retriable: false };
           }
