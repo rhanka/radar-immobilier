@@ -1,11 +1,14 @@
 $input[0] as $c | ($expected[0]|map(.id)|sort) as $ids |
 . as $p |
 (.binding == $c.binding)
+and .image==$c.image
 and ([.observations.networkAllowed,.observations.networkDenied,.observations.sessionRequired,
       .observations.externalStopped,.observations.streamsTerminated,.observations.mcpSuccessor]
      | all(.[]; attestation and .passed == true and .binding == $c.binding))
 and (.observations.mcpSuccessor.image|text and test("@sha256:[a-f0-9]{64}$"))
 and (.databaseInspection.binding == $c.binding and .databaseInspection.action == "inspect")
+and .databaseInspection.image==$c.image
+and .databaseInspection.releaseSha==($c.binding.releaseId|split(":")[0]|split("/")[0])
 and (.databaseInspection.result as $db |
   ($db.missingMigrations|length)==0
   and ($db.identity[0]|{database,role,schema})==$c.database

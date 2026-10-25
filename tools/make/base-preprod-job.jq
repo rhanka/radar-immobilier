@@ -23,12 +23,13 @@ $input[0] as $c |
        seccompProfile:{type:"RuntimeDefault"}},
      containers:[{name:"operator",image:$c.image,imagePullPolicy:"IfNotPresent",workingDir:"/workspace",
        command:["node","api/dist/scripts/base-preprod-job.js",
-         ({action:$action,binding:$c.binding,database:$c.database,args:$args}|tojson)],
+         ({action:$action,binding:$c.binding,image:$c.image,database:$c.database,args:$args}|tojson)],
        readinessProbe:{exec:{command:["/bin/false"]},periodSeconds:1},
        securityContext:{allowPrivilegeEscalation:false,readOnlyRootFilesystem:true,capabilities:{drop:["ALL"]}},
        resources:{requests:{cpu:"100m",memory:"128Mi"},limits:{cpu:"1",memory:"512Mi"}},
        envFrom:[{configMapRef:{name:"radar-api"}}],
-       env:(["POSTGRES_USER","POSTGRES_PASSWORD","POSTGRES_DB"] | map({name:.,
-         valueFrom:{secretKeyRef:{name:"radar-db-credentials",key:.}}})),
+       env:([{name:"OPERATOR_IMAGE",value:$c.image}] +
+         (["POSTGRES_USER","POSTGRES_PASSWORD","POSTGRES_DB"] | map({name:.,
+         valueFrom:{secretKeyRef:{name:"radar-db-credentials",key:.}}}))),
        terminationMessagePolicy:"File",terminationMessagePath:"/dev/termination-log"
      }]}}}}
