@@ -803,6 +803,8 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       const s3Keys = new Set([...keys]);
       const winnerKeys = new Set(preparing.attempts.find(
         (attempt) => attempt.invocationId === invAId)?.blobKeys ?? []);
+      expect(winnerKeys.size).toBeGreaterThan(0);
+      for (const key of winnerKeys) expect(s3Keys.has(key)).toBe(true);
       const sharedSet = new Set(observed.protectedKeys);
       for (const attempt of observed.attempts.filter((candidate) =>
         [invAId, invBId].includes(candidate.invocationId))) {
