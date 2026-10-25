@@ -42,6 +42,7 @@
   - [x] Explicit Kubernetes/Actions controls and projected workload/route inventories.
   - [x] Closure preserves inventories; collection refuses surviving processes and ready endpoints.
   - [x] Q1/restart/Q2 are separate from reopening; MCP successor deployment is required.
+  - [x] Reopening rechecks stopped consumers/jobs; deletion compares the actual saved Job receipt.
   - [x] Collector derives coverage only after independent roster input and live closure checks.
 - [ ] Lot 4: operator refusal/transport tests and image execution receipts.
   - [x] Hermetic operator Make tests cover refusals, literal values and no root/environment discovery.
