@@ -1,7 +1,7 @@
 # Feature: H4 P7 guarded artifact MCP composition
 
 ## Objective
-- [ ] Deliver four artifact tools with the preserved twelve-tool namespace and the qualified shared service.
+- [x] Deliver four artifact tools with the preserved twelve-tool namespace and the qualified shared service (local A5/P7 closure).
 
 ## Scope / Guardrails
 - [x] Baseline: `c49bb8548fe62df6df7c3d53cd08105af83a1e6c`; branch: `feat/artefacts-mcp-a5`.
@@ -23,7 +23,7 @@
 - [x] Merge 313fcf44 as a real second parent; use its final helpers in four conflicts. Track event blob unchanged on both parents and merge.
 - [x] CT-1/CT-2: owner facade instruction supersedes the earlier missing-lease hold; append 0024 without changing existing migrations.
 - [x] CT-4 through CT-8: 23 frozen entries plus 0024; fresh, upgrade, preserved sentinel, equal schema and replay pass (`20261025T220700-17/migration-proof.json`).
-- [ ] CT-9: exact sixteen-tool image receipt remains required.
+- [x] CT-9: exact image `113cf88d...`, source `33f232f3`, sixteen real tools, SQL/S3, replay, ordered conflict and restart (`20261025T223315-17`).
 
 ## Orchestration Mode (AI-selected)
 - [x] Single writer in the assigned branch; no concurrent Docker campaigns; machine lock plus 60-second occupancy checks.
@@ -38,9 +38,10 @@
 - [x] Qualify profile/selection, lifecycle/composition, failure-closed bindings and discriminating mutations.
 - [x] Reproduce semantic-key exception; project public refusals before authority creation; 26 targeted cases pass after correction.
 - [x] Q1 31/31, Q2 32/32, acceptance 6/6; production quota processes, restart, denial rollback, ledger deduplication and stale policy refusal pass.
-- [x] Ordinary API: 3,838 passed, 76 pending; final MCP: 401 passed; host: 158 passed; separate exchange service E2E: 1 passed.
+- [x] Ordinary API CI selection: 3,914 passed, 76 pending, zero failures (`20261025T222306-17`); MCP 401/401 and host 151/151 (`20261025T221438-17`).
 - [x] Typecheck, lint, security audit (66 gate tests) and API build; two authority/binding mutants killed.
-- [x] Final source qualification on `4866e79b`, clean source status and preserved source archive; all ordinary quality gates pass.
-- [ ] Exact A5 runtime image qualification: owner facade instruction requires a new image and real sixteen-tool execution.
-- [ ] Record exact package/image/configuration provenance, limitations, delivered SHA and independently audited bundle.
+- [x] Final source `33f232f3`: 74/74 enabled provider/production regressions, published archives, bounded lockfile and profile receipt (`20261025T222817-17`); clean preserved source archives.
+- [x] Final cleanup uses the transaction already opened by the public PostgreSQL executor; real cleanup/restart regression and final image pass.
+- [x] Exact A5 image qualification complete; default recovery still preserves twelve tools.
+- [x] Record exact package/image/configuration provenance and limitations. Pre-close bundle audited in fresh `bundle-audit.nMeWyC`; re-anchor the final documentation commit with the same audit procedure.
 - [ ] Independent consensus reviews, remote CI and A7 deployment receipts remain external integration gates.
