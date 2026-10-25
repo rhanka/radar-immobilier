@@ -43,6 +43,7 @@
 - [ ] T07: read-only reveal, post-enrichment authority/revision checks and shared document context across bounded attempts.
 - [ ] Lot gate: unit tests, real createApp/PostgreSQL tests, named behavioral mutations, targeted lint/typecheck.
 - [x] Machine-serialized runner written with explicit file scopes, a 60-second wait, disk monitoring, one-worker container configuration and inherited ownership-checked cleanup.
+- [x] Container checks and test-only S0 contract comparison written; API runtime has no MCP import.
 - [ ] Delivery: report qualified slices, commands/counts, per-commit numstat, remaining integration duties, exact SHA and isolated bundle audit/hash.
 
 ## Docs consolidation
