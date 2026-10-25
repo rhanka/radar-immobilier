@@ -32,6 +32,9 @@ reject() {
 }
 invoke validate
 invoke render-job
+n=$((n+1))
+make --no-print-directory -C bin -f "$testdir/deploy/base-preprod/operator.mk" render-job INPUT="$testdir/input.json" OUTPUT="$testdir/out-$n" ENV=preprod > "result-$n.log" 2>&1
+[[ -s out-$n/job.json ]]
 jq -e '.spec.backoffLimit==0 and .spec.activeDeadlineSeconds==540
  and .spec.template.spec.serviceAccountName=="radar-app"
  and .spec.template.spec.automountServiceAccountToken==false

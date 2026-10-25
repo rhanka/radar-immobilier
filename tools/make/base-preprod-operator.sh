@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 umask 077
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.."
 action=${1:-}
 source tools/make/base-preprod-common.sh
 operator_inputs
@@ -32,7 +33,8 @@ delete-job)
   jq -e --slurpfile c "$INPUT" '.binding==$c[0].binding and .status=="complete" and (.sha256|length==64)' "$PROOFS" >/dev/null
   "${k[@]}" get pods -l "job-name=$job" -o jsonpath='{range .items[*]}{.status.containerStatuses[0].state.terminated.message}{"\n"}{end}' > "$OUTPUT/current-termination.json"
   jq -e --slurpfile saved "$PROOFS" '.==$saved[0]' "$OUTPUT/current-termination.json" >/dev/null || fail 'Saved receipt does not identify current Job'
-  "${k[@]}" delete "job/$job" --wait=true > "$OUTPUT/delete.txt";;
+  source tools/make/base-preprod-maintenance.sh
+  delete_job_uid "$job" "$("${k[@]}" get job "$job" -o jsonpath='{.metadata.uid}')";;
 *) fail 'Unknown operator action';;
 esac
 find "$OUTPUT" -type f ! -name checksums.txt -exec sha256sum '{}' + > "$OUTPUT/checksums.txt"
