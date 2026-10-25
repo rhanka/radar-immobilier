@@ -38,11 +38,13 @@ bundle)
   if git -C "$auditdir" cat-file -e "$(git rev-parse HEAD)^{commit}" 2>/dev/null; then exit 2; fi
   git -C "$auditdir" bundle verify "$(pwd -P)/$out/base-preprod-p1o1.bundle"
   git -C "$auditdir" fetch --no-tags --no-write-fetch-head "$(pwd -P)/$out/base-preprod-p1o1.bundle" HEAD:refs/heads/payload
+  git -C "$auditdir" symbolic-ref HEAD refs/heads/payload
   [[ $(git -C "$auditdir" rev-parse 'payload^{tree}') == $(git rev-parse 'HEAD^{tree}') ]]
   git -C "$auditdir" fsck --full --no-reflogs
   backupdir=$(mktemp -d "$out/backup.XXXXXX.git")
   git init --bare -q "$backupdir"
   git -C "$backupdir" fetch --no-tags --no-write-fetch-head "$(pwd -P)" HEAD:refs/heads/delivery
+  git -C "$backupdir" symbolic-ref HEAD refs/heads/delivery
   git -C "$backupdir" fsck --full --no-reflogs
   printf 'Local backup repository: %s\nFresh bundle audit: %s\nBase: %s\n' "$backupdir" "$auditdir" "$base"
   sha256sum "$out/"*.bundle
