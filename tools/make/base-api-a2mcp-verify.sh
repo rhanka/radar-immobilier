@@ -71,7 +71,9 @@ source tools/make/base-api-ci-archive.sh
 archive_ci_inputs
 tar -rf "$RUN_DIR/source.tar" packages/immo-mcp/src/fixtures/immo-tools.v1.json \
   packages/immo-mcp/src/fixtures/immo-tools.provenance.v1.json \
-  packages/immo-mcp/src/fixtures/immo-deployed-baseline.v1.json
+  packages/immo-mcp/src/fixtures/immo-deployed-baseline.v1.json \
+  packages/immo-mcp/config/immo-tools.v1.json packages/immo-mcp/config/immo-artifacts.v1.json \
+  tools/h4-mcp.mk deploy/k8s/41-immo-mcp-ingress.yaml
 sha256sum "$RUN_DIR/source.tar" > "$LOG_DIR/source.sha256"
 verify_ownership
 trap cleanup EXIT
