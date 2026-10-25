@@ -33,6 +33,9 @@ describeDb("MCP request documentary budget across coherent retries", () => {
       expect(head).toHaveBeenCalledWith(rawRef + ".meta.json");
       // One second accommodates request setup and PostgreSQL scheduling; a reset costs another 2s.
       expect(elapsed).toBeLessThan(DOC_ENRICHMENT_BUDGET_MS + 1_000);
+      console.info("MCP_DOCUMENT_BUDGET", JSON.stringify({ elapsedMs: elapsed,
+        documentaryBudgetMs: DOC_ENRICHMENT_BUDGET_MS, resolutions: head.mock.calls.length,
+        schedulingAllowanceMs: 1_000 }));
       expect(body.result.cards[0].docRefs[0]).not.toHaveProperty("publishedAt");
     } finally { resume.release(); }
   });
