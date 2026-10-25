@@ -46,6 +46,6 @@ node ../tools/make/base-api-results.mjs /evidence/tests.json > /evidence/tests.t
 cd ../packages/immo-mcp
 ../../node_modules/.bin/vitest run --config vitest.isolated.config.ts \
   --reporter=default --reporter=json --outputFile.json=/evidence/mcp-tests.json $mcp_scope
-node ../../tools/make/base-api-results.mjs /evidence/mcp-tests.json > /evidence/mcp-tests.tsv
+node ../../tools/make/base-api-results.mjs /evidence/mcp-tests.json | sed 's|^/workspace/packages/immo-mcp/||' > /evidence/mcp-tests.tsv
 cd /workspace
 if [[ $mode == mutations ]]; then node tools/make/base-api-a2mcp-mutants.mjs; fi
