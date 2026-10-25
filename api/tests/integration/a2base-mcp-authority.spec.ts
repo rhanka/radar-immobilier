@@ -17,11 +17,6 @@ describeDb("T11 MCP authority and cache over createApp/PostgreSQL", () => {
       expect(f.exchange.issuedExchangedTokens).toHaveLength(1);
       expect((await search(client)).result.isError).toBe(true);
       expect(f.exchange.issuedExchangedTokens).toHaveLength(2);
-      const reused = await f.mcp.request("/mcp", { method: "POST", headers: {
-        authorization: `Bearer ${bob.subject}`, "mcp-session-id": alice.transport.sessionId!,
-        "content-type": "application/json", accept: "application/json, text/event-stream",
-      }, body: JSON.stringify({ jsonrpc: "2.0", id: 10, method: "tools/list" }) });
-      expect(reused.status).toBe(404);
       expect(f.requests.every((request) => !request.headers.has("cookie"))).toBe(true);
     } finally { await f.close(); }
   });
@@ -33,6 +28,11 @@ describeDb("T11 MCP authority and cache over createApp/PostgreSQL", () => {
       const results = await Promise.all([search(alice.client), search(bob.client)]);
       expect(results.every(({ result }) => result.isError !== true)).toBe(true);
       expect(f.exchange.issuedExchangedTokens).toHaveLength(2);
+      const reused = await f.mcp.request("/mcp", { method: "POST", headers: {
+        authorization: `Bearer ${bob.subject}`, "mcp-session-id": alice.transport.sessionId!,
+        "content-type": "application/json", accept: "application/json, text/event-stream",
+      }, body: JSON.stringify({ jsonrpc: "2.0", id: 10, method: "tools/list" }) });
+      expect(reused.status).toBe(404);
       const seen = f.requests.map((request) => request.headers.get("authorization"));
       expect(new Set(seen).size).toBe(2);
       for (const header of seen) {
