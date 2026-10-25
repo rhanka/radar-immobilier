@@ -45,8 +45,8 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import pg from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
-import { CreateBucketCommand, DeleteBucketCommand, S3Client } from "@aws-sdk/client-s3";
-import { createS3BlobStore } from "@sentropic/artifacts/adapters/s3";
+import { CreateBucketCommand, S3Client } from "@aws-sdk/client-s3";
+import { createTestS3BlobStore } from "../artifacts-blob-store.helpers.js";
 import {
   createArtifactControl,
   createArtifactsPool,
@@ -55,6 +55,7 @@ import {
 import { createMcpArtifactAdapter } from "../../../packages/artifacts-host/src/mcp-app-adapter.js";
 import { controlRoute } from "../../src/artifacts/control-route.js";
 import { auth, cookie, migrationsFolder } from "./artifacts-h2.helpers.js";
+import { cleanupArtifactTestResources, listTestBucketKeys } from "./artifacts-s3.helpers.js";
 import { loadConfig } from "../../src/config.js";
 import {
   assertOutcomeFailure,
@@ -103,13 +104,13 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
   let databaseCreated = false;
   let bucketCreated = false;
 
-  const rawBlobs = () => createS3BlobStore({ client: s3, bucket: BUCKET });
+  const rawBlobs = () => createTestS3BlobStore({ client: s3, bucket: BUCKET });
   const storageConfig = () => ({ enabled: true as const, storageScope: SCOPE, orgId: ORG,
     s3Bucket: BUCKET, s3Endpoint: endpoint, s3Region: "us-east-1",
     s3AccessKey: accessKey, s3SecretKey: secretKey });
 
   async function s3KeyCount(): Promise<number> {
-    return [...(await rawBlobs().listKeys(""))].length;
+    return (await listTestBucketKeys(s3, BUCKET)).length;
   }
 
   async function tableCount(table: "releases" | "idempotency_keys" | "artifacts"): Promise<number> {
@@ -191,23 +192,8 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
   });
 
   afterAll(async () => {
-    console.info("[acceptance-cleanup] start", { total: pool?.totalCount, idle: pool?.idleCount, waiting: pool?.waitingCount });
-    try {
-      if (bucketCreated) {
-        for (const key of await rawBlobs().listKeys("")) await rawBlobs().deleteBlob(key);
-        console.info("[acceptance-cleanup] objects removed");
-        await s3.send(new DeleteBucketCommand({ Bucket: BUCKET }));
-        console.info("[acceptance-cleanup] bucket removed");
-      }
-    } finally {
-      s3?.destroy();
-      await pool?.end();
-      console.info("[acceptance-cleanup] pool ended");
-      try {
-        if (databaseCreated) await admin.query(`DROP DATABASE ${DATABASE} WITH (FORCE)`);
-        console.info("[acceptance-cleanup] database removed");
-      } finally { await admin?.end(); }
-    }
+    await cleanupArtifactTestResources({ s3, bucket: bucketCreated ? BUCKET : undefined,
+      pool, admin, database: databaseCreated ? DATABASE : undefined });
   });
 
   it("refuses authorization at the commit barrier with zero committed effects", async () => {
@@ -266,14 +252,14 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
         const releasesBefore = await tableCount("releases");
         const keysBefore = await tableCount("idempotency_keys");
         const s3Before = await s3KeyCount();
-        const s3Baseline = new Set(await rawBlobs().listKeys(""));
+        const s3Baseline = new Set(await listTestBucketKeys(s3, BUCKET));
         const run = startBarrierOperation(barrier, invocationId,
           () => execute({ method: "POST", path: "/publish", body }, invocation), "before_finalization_row_lock");
         await run.reached;
         const prepared = await (await requirePreparationCleanupBinding()).inspectPreparations(host, artifactId);
         const attempt = prepared.attempts.find((candidate) => candidate.invocationId === invocationId);
         expect(attempt?.blobKeys.length).toBeGreaterThan(0);
-        const preparedKeys = new Set(await rawBlobs().listKeys(""));
+        const preparedKeys = new Set(await rawBlobs().listKeys(`artifacts/${SCOPE}/`));
         for (const key of attempt!.blobKeys) expect(preparedKeys.has(key)).toBe(true);
         await pool.query("UPDATE account_users SET status = 'suspended' WHERE sub = 'alice'");
         passedBarrier = true;
@@ -290,7 +276,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
         expect(await currentReleaseId(artifactId)).toBeUndefined();
         const s3AfterDenial = await s3KeyCount();
         console.info("[preparation-debt]", JSON.stringify({ s3Before, s3AfterDenial }));
-        await verifyPreparationCleanup(host, artifactId, rawBlobs(), true, true,
+        await verifyPreparationCleanup(host, artifactId, () => listTestBucketKeys(s3, BUCKET), true, true,
           { expectedInvocationIds: [invocationId], s3KeysBefore: s3Baseline,
             preparationsBeforeRefusal: prepared.attempts });
         await pool.query("UPDATE account_users SET status = 'approved' WHERE sub = 'alice'");

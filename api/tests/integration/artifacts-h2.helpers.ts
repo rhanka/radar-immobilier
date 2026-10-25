@@ -3,7 +3,7 @@ import { S3Client, CreateBucketCommand, DeleteBucketCommand } from "@aws-sdk/cli
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { fileURLToPath } from "node:url";
-import { createS3BlobStore } from "@sentropic/artifacts/adapters/s3";
+import { createTestS3BlobStore } from "../artifacts-blob-store.helpers.js";
 import { composeArtifactHost, createArtifactControl, createArtifactsPool } from "@radar/artifacts-host";
 import { loadConfig, type AuthConfig } from "../../src/config.js";
 import { signSession } from "../../src/services/auth/session.js";
@@ -35,7 +35,7 @@ export async function startHarness(name: string) {
   const s3 = new S3Client({ endpoint: config.s3Endpoint, forcePathStyle: true, region: config.s3Region,
     credentials: { accessKeyId: config.s3AccessKey, secretAccessKey: config.s3SecretKey } });
   await s3.send(new CreateBucketCommand({ Bucket: config.s3Bucket }));
-  const blobs = createS3BlobStore({ client: s3, bucket: config.s3Bucket });
+  const blobs = createTestS3BlobStore({ client: s3, bucket: config.s3Bucket });
   const host = (await composeArtifactHost(pool, config, blobs))!;
   const control = createArtifactControl(host, config.storageScope, "pages.example.test");
   return { pool, config, host, control, blobs,
