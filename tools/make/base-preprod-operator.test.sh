@@ -96,4 +96,5 @@ done
 cp good-proofs.json proofs.json
 jq '.evidence.drain.completedAt="2099-01-01T00:00:00Z"' good-proofs.json > proofs.json
 reject render-job EXPECTED="$testdir/expected.json" PROOFS="$testdir/proofs.json"
+source tools/make/base-preprod-live.test.sh
 printf 'PASS operator refusals, literal Make/shell transport, no root/environment discovery, static Job contract (%s cases)\n' "$n"
