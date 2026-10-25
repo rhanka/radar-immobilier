@@ -2,6 +2,7 @@ import type { AdmissionResult } from "@radar/artifacts-host";
 import type { ArtifactInvocationContext } from "@sentropic/artifacts/server/commit-contract";
 import type { ArtifactOutcome } from "@sentropic/artifacts/server/outcome-contract";
 import type { HttpResponse } from "@sentropic/artifacts/http";
+import { assertAttributedTestObjects } from "./artifacts-s3.helpers.js";
 import type pg from "pg";
 import { fork } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -580,14 +581,14 @@ export async function requirePreparationCleanupBinding(): Promise<PreparationCle
 
 /** Expected L4 observation seam; absence is a named prerequisite, never SQL guesswork. */
 export async function verifyPreparationCleanup(host: unknown, artifactId: string,
-  blobs: { listKeys(prefix: string): Promise<Iterable<string>> }, requireAttempts = true,
+  readBucketKeys: () => Promise<Iterable<string>>, requireAttempts = true,
   requireShared = false,
   options?: { readonly expectedInvocationIds?: readonly string[];
     readonly preparationsBeforeRefusal?: Awaited<ReturnType<PreparationCleanupBinding["inspectPreparations"]>>["attempts"];
     readonly s3KeysBefore?: ReadonlySet<string> | readonly string[] }): Promise<void> {
   const binding = await requirePreparationCleanupBinding();
   const before = await binding.inspectPreparations(host, artifactId);
-  const keysBefore = new Set(await blobs.listKeys(""));
+  const keysBefore = new Set(await readBucketKeys());
   for (const prepared of options?.preparationsBeforeRefusal ?? []) {
     const historical = before.attempts.find((attempt) => attempt.attemptId === prepared.attemptId);
     if (!historical || !Array.isArray(historical.blobKeys) || historical.invocationId !== prepared.invocationId ||
@@ -664,11 +665,7 @@ export async function verifyPreparationCleanup(host: unknown, artifactId: string
     for (const key of before.protectedKeys) {
       if (!baseline.has(key)) throw new Error("[contract-violation] new denied preparation has no preexisting protection");
     }
-    for (const key of keysBefore) {
-      if (!baseline.has(key) && !attributable.has(key)) {
-        throw new Error("[contract-violation] undeclared S3 object without preparation attribution");
-      }
-    }
+    assertAttributedTestObjects(keysBefore, baseline, attributable);
   }
   // Historical attribution stays mandatory even when cleanup already ran:
   // every attempt keeps its blobKeys. Cleanup may already have removed some
@@ -686,7 +683,7 @@ export async function verifyPreparationCleanup(host: unknown, artifactId: string
     }
   }
   await binding.scheduleBoundedPreparationCleanup(host, throughMs);
-  const keysAfter = new Set(await blobs.listKeys(""));
+  const keysAfter = new Set(await readBucketKeys());
   for (const key of before.protectedKeys) {
     if (!keysAfter.has(key)) throw new Error("[contract-violation] cleanup deleted a shared/protected blob");
   }
@@ -1057,14 +1054,14 @@ if (process.argv[2] === "--artifact-worker") {
       if (message.method === "initialize") {
         const { default: pgModule } = await import("pg");
         const { S3Client } = await import("@aws-sdk/client-s3");
-        const { createS3BlobStore } = await import("@sentropic/artifacts/adapters/s3");
+        const { createTestS3BlobStore } = await import("../artifacts-blob-store.helpers.js");
         const config = args[1] as Record<string, string>;
         pool = new pgModule.Pool(args[0] as pg.PoolConfig);
         s3 = new S3Client({ endpoint: config.s3Endpoint!, region: config.s3Region!, forcePathStyle: true,
           credentials: { accessKeyId: config.s3AccessKey!, secretAccessKey: config.s3SecretKey! } });
         barrier = await requireCommitBarrier();
         const composed = await composeR2AcceptanceHost({
-          pool, config, blobs: createS3BlobStore({ client: s3, bucket: config.s3Bucket! }), barrier,
+          pool, config, blobs: createTestS3BlobStore({ client: s3, bucket: config.s3Bucket! }), barrier,
         });
         host = composed.host;
         requireSelectedProfile(host, composed.profile.digest);
