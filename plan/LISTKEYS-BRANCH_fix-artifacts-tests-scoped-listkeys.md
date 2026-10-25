@@ -1,7 +1,7 @@
 # Feature: Scoped artifact test inventories
 
 ## Objective
-- [ ] Remove invalid S3 blob prefix calls and preserve exhaustive test isolation checks.
+- [x] Remove invalid S3 blob prefix calls and preserve exhaustive test isolation checks.
 
 ## Scope / Guardrails
 - [x] Read repository rules and harness debug/test skills.
@@ -44,6 +44,7 @@
 - [x] Second-pass lot 1: runtime prefix contract rejects empty, escaping, omitted and non-string values before delegation; 21 failures without it, 23 tests pass with it; strict typecheck passes.
 - [x] Second-pass lot 2: route all nine explicit integration S3 constructors and the package's memory blob double through the shared runtime wrapper; preserve scoped and exhaustive inventories.
 - [x] Second-pass lot 3: resolve simple tuple bindings/spreads and constant boolean branches; document partial static analysis; 44 static tests and strict typecheck pass after six reproduced failures.
+- [x] Second-pass lot 4: wrapper removal fails 21 assertions, S3 factory bypass fails one; restored code passes 78 targeted tests, API/strict typechecks and repository lint without Docker.
 
 ## Merge & Close
 - [x] Deliver a bundle only; no push or merge is authorized by this task.
