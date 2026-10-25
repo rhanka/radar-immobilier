@@ -29,6 +29,7 @@
 - [x] No live UAT or cluster operations; namespace administrator executes later.
 
 ## Plan / Todo (lot-based)
+- [x] PR920 R2: restart receipt binds the consumed Q1 and before/after identities; reopening rejects old restarts and reused pod/container identities before cluster access.
 - [x] PR920: init requires a null UUID and identical declared/argument slug; returned UUID resolves to that slug, also checked at collection.
 - [x] PR920: shared SQL matrix covers every operation; row-lock UPDATE and all five table locks gate proofs and the runtime before mutation.
 - [x] PR920: immutable image SHA gates execution; proofs, Job/pod digest and complete/termination receipts must agree.
