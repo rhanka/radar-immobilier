@@ -31,7 +31,7 @@
 ## Plan / Todo (lot-based)
 - [x] Lot 0: baseline, complete call inventory, isolated recovery Git directory.
 - [x] Lot 1: scoped queries, exhaustive bucket inventories, resilient cleanup.
-- [ ] Lot 2: static guard and real S3 regression/mutation coverage.
+- [x] Lot 2: static guard and real S3 regression/mutation coverage.
 - [ ] Lot 3: scoped suites, full CI-equivalent API suite, lint, typecheck.
 - [ ] Lot 4: bundle audit in a fresh repository, report and teardown.
 
