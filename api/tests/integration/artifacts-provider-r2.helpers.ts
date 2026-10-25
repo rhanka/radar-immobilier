@@ -1,5 +1,8 @@
 import type pg from "pg";
 import { AsyncLocalStorage } from "node:async_hooks";
+import { readFile } from "node:fs/promises";
+import { createRequire } from "node:module";
+import { pathToFileURL } from "node:url";
 import { createPostgresArtifactStore } from "@sentropic/artifacts/adapters/postgres";
 import { createLifecycleService } from "@sentropic/artifacts/server/lifecycle";
 import { createPublicationService, type PublicationBlobStore } from "@sentropic/artifacts/server/publication";
@@ -14,12 +17,19 @@ export interface PolicyClient {
   query<T>(text: string, params: readonly unknown[]): Promise<{ rows: T[]; rowCount: number }>;
 }
 
-export async function readTestPolicyRevision(client: PolicyClient): Promise<string> {
+const currentInvocation = new AsyncLocalStorage<InvocationContextShape>();
+
+export async function readTestPolicyRevision(client: PolicyClient, locked = true): Promise<string> {
+  if (locked) {
+    const actorId = currentInvocation.getStore()?.actorId;
+    if (!actorId) throw new Error("policy lock requires the current invocation actor");
+    await client.query("SELECT sub FROM account_users WHERE sub = $1 FOR SHARE", [actorId]);
+  }
   const table = await client.query<{ present: string | null }>(
     "SELECT to_regclass('test_policy_revision') AS present", []);
   if (!table.rows[0]?.present) return "radar-test-policy/v1";
   const revision = await client.query<{ rev: string }>(
-    "SELECT rev FROM test_policy_revision WHERE id = 1 FOR SHARE", []);
+    `SELECT rev FROM test_policy_revision WHERE id = 1${locked ? " FOR SHARE" : ""}`, []);
   if (!revision.rows[0]) throw new Error("test policy revision is absent");
   return revision.rows[0].rev;
 }
@@ -29,7 +39,7 @@ export async function createCandidateCoordinator(pool: pg.Pool, testObserver: un
   const create = await requirePublicFunction<(options: unknown) => R2CommitCoordinator>(
     COMMIT_CONTRACT_SPECIFIER, "createArtifactCommitCoordinator");
   const executor = await requirePublicFunction<(pool: pg.Pool) => unknown>(
-    "@sentropic/artifacts/adapters/postgres", "createPostgresCommitExecutor");
+    "@sentropic/artifacts/adapters/postgres-commit", "createPostgresCommitExecutor");
   return create({ executor: executor(pool), testObserver,
     ...(testPoints === undefined ? {} : { testPoints }),
     policy: { createParticipant(client: PolicyClient, transactionToken: string) {
@@ -72,7 +82,10 @@ export async function composeCandidateHost(params: {
   const refs = await requirePublicFunction<(store: unknown, executor: unknown) => unknown>(
     "@sentropic/artifacts/server/gc", "createPostgresClaimGuardedRefs");
   const executor = await requirePublicFunction<(pool: pg.Pool) => unknown>(
-    "@sentropic/artifacts/adapters/postgres", "createPostgresCommitExecutor");
+    "@sentropic/artifacts/adapters/postgres-commit", "createPostgresCommitExecutor");
+  const entry = createRequire(import.meta.url).resolve("@sentropic/artifacts");
+  const migration = new URL("../migrations/0003_coordinator.sql", pathToFileURL(entry));
+  await pool.query(await readFile(migration, "utf8"));
   await initializeArtifactScope(pool, config.storageScope, config.orgId);
   const store = createPostgresArtifactStore(pool);
   const actors = await pool.query<{ sub: string }>("SELECT sub FROM account_users");
@@ -86,7 +99,7 @@ export async function composeCandidateHost(params: {
     derivation: derive({ storageScopeId: config.storageScope, actorIds: actors.rows.map((row) => row.sub) }),
     legacyRecords: legacy(pool),
     ensureHost: {
-      readPolicyRevision: () => readTestPolicyRevision(pool as unknown as PolicyClient),
+      readPolicyRevision: () => readTestPolicyRevision(pool as unknown as PolicyClient, false),
       async lockBinding(client: PolicyClient, binding: { storageScopeId: string; ownerId: string; bindingName: string }) {
         await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))",
           [JSON.stringify([binding.storageScopeId, binding.ownerId, binding.bindingName])]);
@@ -111,8 +124,8 @@ export async function composeCandidateHost(params: {
     selectedCapabilities: app.selectedCapabilities, profileDigest: app.profileDigest,
     execute(request: Record<string, unknown>, invocation: InvocationContextShape) {
       const body = request["body"] as { artifactId?: string } | undefined;
-      return artifact.run(body?.artifactId ?? "", () => app.execute({ ...request,
-        actorId: request["actorId"] ?? invocation.actorId }, invocation));
+      return currentInvocation.run(invocation, () => artifact.run(body?.artifactId ?? "",
+        () => app.execute({ ...request, actorId: request["actorId"] ?? invocation.actorId }, invocation)));
     },
     close() { /* The suite owns the injected pool and blob-store lifecycle. */ },
   };
