@@ -16,6 +16,7 @@ describeDb("T11 MCP authority and cache over createApp/PostgreSQL", () => {
       expect(denied.result.isError).toBe(true);
       expect(denied.body.error).toBe(kind === "membership" ? "workspace_missing" : "account_not_approved");
       expect(denied.body.upstreamStatus).toBe(403);
+      expect(f.reads()).toBe(kind === "approval" ? 1 : 2);
       expect(f.exchange.issuedExchangedTokens).toHaveLength(1);
       expect((await search(client)).result.isError).toBe(true);
       expect(f.exchange.issuedExchangedTokens).toHaveLength(2);
