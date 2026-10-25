@@ -150,8 +150,8 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     expect(observed).toHaveLength(1);
     const outcome = observed[0]!;
     assertOutcomeFailure(outcome, ids[0]);
-    expect(outcome.failure).toMatchObject({ category: "provider_unavailable", status: 503,
-      code: "capability_unavailable", retriable: true });
+    expect(outcome.failure).toMatchObject({ category: "provider_unavailable", httpStatus: 503,
+      publicCode: "capability_unavailable", retriable: true });
     expect(entries).toHaveLength(1);
     expect(entries[0]).toMatchObject({ invocationId: ids[0], reason: "provider_unavailable", status: 503 });
     return outcome;
@@ -209,12 +209,12 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
           // response augmented with the private stream marker through.
           const wireError = (projected.body as { error?: unknown } | null)?.error;
           assertMcpResultRedacted(result, { status: projected.status,
-            code: String(failure.code), retryable: Boolean(failure.retriable),
-            publicError: typeof wireError === "string" ? wireError : String(failure.code) },
+            code: String(failure.publicCode), retryable: Boolean(failure.retriable),
+            publicError: typeof wireError === "string" ? wireError : String(failure.publicCode) },
             parityMarkers, paritySecrets);
         }
         const dispatched = req.method === "POST" && ["/publish", "/ensure"].includes(req.path) &&
-          failure.code !== "invalid_request" && failure.category !== "capability_unselected";
+          failure.publicCode !== "invalid_request" && failure.category !== "capability_unselected";
         expect(entries).toHaveLength(dispatched ? 1 : 0);
         if (dispatched) {
           expect(observed).toHaveLength(1);
@@ -599,7 +599,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       };
       const uncertain = await failViaTransport(host, { method: "POST", path: "/publish", body }, transport, guard);
       expect(state.commits).toBe(1);
-      expect(uncertain.failure).toMatchObject({ category: "provider_unavailable", status: 503,
+      expect(uncertain.failure).toMatchObject({ category: "provider_unavailable", httpStatus: 503,
         retriable: true, cause: { code: "57P06" }, commitState: "unknown" });
       const commitState = (uncertain["commitState"] as string | undefined) ??
         ((uncertain["failure"] as Record<string, unknown> | undefined)?.["commitState"] as string | undefined);
@@ -888,7 +888,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
           invocation) as unknown as Record<string, unknown>;
         assertOutcomeFailure(outcome, invocation["invocationId"] as string);
         expect(outcome["failure"]).toMatchObject({
-          category: "provider_unavailable", code: "capability_unavailable", retriable: true, commitState: "not_committed" });
+          category: "provider_unavailable", publicCode: "capability_unavailable", retriable: true, commitState: "not_committed" });
         const projected = await projectOutcomeHttp(outcome);
         assertPublicBodyRedacted(projected, { error: "capability_unavailable" }, [readMarker], []);
         expectRedacted(projected, [readMarker]);
@@ -910,7 +910,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
           idempotencyKey: "   " } },
         invocationFor(guard, "entry")) as unknown as Record<string, unknown>;
       assertOutcomeFailure(entry);
-      expect(entry["failure"]).toMatchObject({ code: "invalid_request" });
+      expect(entry["failure"]).toMatchObject({ publicCode: "invalid_request" });
       expect(seenTransactions).toEqual([]);
     } finally {
       if (typeof close === "function") (close as () => void)();

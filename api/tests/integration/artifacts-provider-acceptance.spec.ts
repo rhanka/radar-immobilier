@@ -516,7 +516,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
         const invocation = invocationFor(guard, "direct-changed");
         const outcome = await direct({ method: "POST", path: "/publish", body: { ...directBody, ...change } }, invocation);
         assertOutcomeFailure(outcome, invocation.invocationId);
-        expect((outcome as { failure: unknown }).failure).toMatchObject({ category: "conflict", status: 409 });
+        expect((outcome as { failure: unknown }).failure).toMatchObject({ category: "conflict", httpStatus: 409 });
         expect(await committedState(pool)).toEqual(directBefore);
       }
       const composed = (await composeAcceptanceHost(barrier));
@@ -597,7 +597,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
           invocationFor(directGuard, `selection-${path}`)) as Record<string, unknown>;
         assertOutcomeFailure(outcome);
         expect(outcome["failure"]).toMatchObject({
-          category: "capability_unselected", code: "capability_unavailable", status: 503, retriable: false, commitState: "not_committed" });
+          category: "capability_unselected", publicCode: "capability_unavailable", httpStatus: 503, retriable: false, commitState: "not_committed" });
         const projected = await projectOutcomeHttp(outcome);
         assertPublicBodyRedacted(projected, { error: "capability_unavailable" }, [], []);
       }
@@ -635,7 +635,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
           invocationFor(directGuard, "selection-direct")) as Record<string, unknown>;
         assertOutcomeFailure(outcome);
         expect(outcome["failure"]).toMatchObject({ commitState: "not_committed" });
-        expect((outcome["failure"] as Record<string, unknown>)["code"]).toBe("invalid_request");
+        expect((outcome["failure"] as Record<string, unknown>)["publicCode"]).toBe("invalid_request");
         const projected = await projectOutcomeHttp(outcome);
         expect(projected.status).toBe(400);
         assertPublicBodyRedacted(projected, { error: "invalid_request" }, [], []);
