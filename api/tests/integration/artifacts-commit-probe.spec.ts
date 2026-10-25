@@ -1,3 +1,4 @@
+import { inspectPreparations } from "@sentropic/artifacts/server/object-intents";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 vi.mock("@sentropic/artifacts/http", async (original) => {
   const { withCandidateProfile } = await import("./artifacts-legacy-profile.helpers.js");
@@ -14,7 +15,8 @@ it("denies a publication revoked during a key wait without a durable success", a
     const key = "guarded-revocation";
     const internalKey = deriveIdempotencyKey({ scope: SCOPE, sub: "alice", op: "publish", artifactId, clientKey: key });
     const body = { artifactId, idempotencyKey: key,
-      files: [{ path: "index.html", mimeType: "text/html", text: "guarded revocation" }] };
+      files: [{ path: "index.html", mimeType: "text/html", text: "guarded revocation" },
+        { path: "shared.css", mimeType: "text/css", text: "body {}" }] };
     await pool.query("INSERT INTO artifacts.operation_keys (storage_scope_id, internal_key) VALUES ($1, $2)", [SCOPE, internalKey]);
     await holder.query("BEGIN");
     await holder.query("SELECT 1 FROM artifacts.operation_keys WHERE storage_scope_id=$1 AND internal_key=$2 FOR UPDATE", [SCOPE, internalKey]);
@@ -31,10 +33,27 @@ it("denies a publication revoked during a key wait without a durable success", a
     expect(await tableCount("operation_receipts")).toBe(receipts);
     expect((await pool.query("SELECT count(*) FROM artifacts.artifact_current WHERE artifact_id=$1", [artifactId])).rows[0].count).toBe("0");
     await pool.query("UPDATE account_users SET status='approved' WHERE sub='alice'");
-    const retry = await control.handle("publish", "alice", body);
+    const retry = await control.handle("publish", "alice", { ...body,
+      files: [{ ...body.files[0], text: "authorized winner" }, body.files[1]] });
     expect(retry.status).toBe(201);
     expect(await tableCount("releases")).toBe(releases + 1);
     expect(await tableCount("operation_receipts")).toBe(receipts + 1);
+    host.close();
+    const restarted = await composeArtifactHost(pool, storageConfig(), rawBlobs());
+    try {
+      const now = Date.now();
+      await pool.query(`UPDATE artifacts.object_intents SET payload = payload ||
+        jsonb_build_object('preparedAtMs', $1::bigint, 'cleanupDeadlineMs', $2::bigint)
+        WHERE payload->>'artifactId' = $3 AND state <> 'done'`, [now - 2000, now - 1000, artifactId]);
+      const observed = await inspectPreparations(restarted, artifactId);
+      expect(observed.abandonedKeys.length).toBeGreaterThan(0);
+      expect(observed.protectedKeys.length).toBeGreaterThan(0);
+      await restarted.cleanup.runOnce();
+      const keys = new Set(await rawBlobs().listKeys(`artifacts/${SCOPE}/`));
+      for (const protectedKey of observed.protectedKeys) expect(keys.has(protectedKey)).toBe(true);
+      for (const abandonedKey of observed.abandonedKeys) expect(keys.has(abandonedKey)).toBe(false);
+      expect(restarted.cleanup.failure).toBeUndefined();
+    } finally { restarted.close(); }
   } finally {
     await holder.query("ROLLBACK"); holder.release();
     await pending?.catch(() => {});
