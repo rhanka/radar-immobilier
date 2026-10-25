@@ -18,7 +18,8 @@
 ## Feedback Loop
 - [x] Owner brief authorizes French report and commits without trailers.
 - [x] Upstream ABI read from `sentropic/tmp/worktrees/861-contract-gaps/packages/artifacts/src/testing.ts`; no Sentropic writes.
-- [x] Candidate 0.2.0 lacks the public testing entry; missing contracts must remain failures.
+- [x] Verified candidate 0.2.0 exports the public barrier, contrary to the brief; A4 seams and the public executor are absent. Missing contracts remain failures.
+- [x] Preserve the first diagnostic run: its setup asserted barrier absence and was corrected after inspecting the pinned tarball.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single assigned developer/tester/integrator; no external agent messaging.
