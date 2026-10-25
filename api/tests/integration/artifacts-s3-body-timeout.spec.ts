@@ -18,7 +18,7 @@ const sockets = new Set<Socket>();
 let requests = 0;
 
 beforeAll(async () => {
-  h = await startHarness("s3timeout");
+  h = await startHarness("s3timeout", ["alice"]);
   // Send headers with a large body, then stall: the exact gap where
   // requestTimeout no longer applies but body streaming hangs.
   server = createServer((_req, res) => {
