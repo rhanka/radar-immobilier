@@ -15,7 +15,9 @@ export async function searchFixture() {
     await f.data.pool.query(`UPDATE workspace_memberships SET
       status = CASE WHEN workspace_id = ANY($1::uuid[]) THEN 'active' ELSE 'revoked' END,
       revoked_at = CASE WHEN workspace_id = ANY($1::uuid[]) THEN NULL ELSE now() END,
-      revision = revision + 1 WHERE account_id = $2`, [ids, f.data.contributor.id]);
+      revision = revision + 1 WHERE account_id = $2 AND status IS DISTINCT FROM
+        CASE WHEN workspace_id = ANY($1::uuid[]) THEN 'active' ELSE 'revoked' END`,
+    [ids, f.data.contributor.id]);
   };
   await memberships([f.data.workspaceId]);
   const mount = (read: (sub: string, args: McpSignalSearchArgs) => Promise<unknown>) => {
