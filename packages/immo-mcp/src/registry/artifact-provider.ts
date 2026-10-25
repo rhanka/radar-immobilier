@@ -10,9 +10,13 @@ import { ARTIFACT_TOOL_NAMES, ARTIFACT_INVOCATION_SCOPE } from "./artifact-profi
 // Compile the complete versioned contract, including semantic rules, before registry admission.
 export const IMMO_ARTIFACT_PROFILE = compileArtifactsProfile({ ...RADAR_ARTIFACTS_PROFILE,
   selectedCapabilities: [...ARTIFACT_TOOL_NAMES] });
-export const IMMO_ARTIFACT_MANIFEST = createArtifactsManifest({
+function freeze<T extends object>(value: T): T {
+  for (const entry of Object.values(value)) if (entry && typeof entry === "object") freeze(entry);
+  return Object.freeze(value);
+}
+export const IMMO_ARTIFACT_MANIFEST = freeze(createArtifactsManifest({
   profile: IMMO_ARTIFACT_PROFILE, invocationScope: ARTIFACT_INVOCATION_SCOPE,
-});
+}));
 const bindings = new WeakSet<object>();
 const unavailable = async (): Promise<never> => { throw new Error("native_wire_dispatch_required"); };
 
@@ -38,7 +42,7 @@ export function bindArtifactProvider(options: {
   const binding: ArtifactMcpBinding = Object.freeze({
     manifest: IMMO_ARTIFACT_MANIFEST,
     configuration: Object.freeze({ storageScopeId: scope }),
-    tools: Object.freeze(IMMO_ARTIFACT_MANIFEST.tools.map((tool) => Object.freeze({
+    tools: Object.freeze(IMMO_ARTIFACT_MANIFEST.tools.map((tool) => freeze({
       name: tool.name, description: tool.description, inputSchema: tool.inputSchema as Tool["inputSchema"],
       execution: { taskSupport: "forbidden" as const },
     }))),
