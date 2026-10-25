@@ -29,6 +29,7 @@
 ## Plan / Todo (lot-based)
 - [x] Lot 0: rules, predecessor report, branch, local upstream ABI and machine capacity.
 - [ ] Lot 1: barrier factory/options and removal of the obsolete phase seam.
+- [x] Lot 1a: confirmed factory/options and transparent PostgreSQL fault observer.
 - [ ] Lot 2: two E3 cases with real PostgreSQL faults, no retry, rollback and resumed authority checks.
 - [ ] Lot 3: A4 typed host binding and public seam calls.
 - [ ] Lot 4: candidate missing-contract evidence; baseline API suite, lint and typecheck.
