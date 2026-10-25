@@ -25,6 +25,9 @@ case "$*" in
   'get service radar-api '*selector*)
     printf '{"app.kubernetes.io/name":"radar-immobilier","app.kubernetes.io/component":"api"}';;
   'get deployment fixture-mcp '*) jq -r .image "$INPUT";;
+  'get deployment radar-api '*availableReplicas*)
+    if [[ ${FAKE_STATE:-} == unavailable ]]; then echo 0; else echo 1; fi;;
+  'get deployment radar-api '*) jq -r .image "$INPUT";;
   'get cronjobs '*) [[ ${FAKE_STATE:-} != cron ]] || echo false;;
   'get jobs '*) [[ ${FAKE_STATE:-} != job ]] || echo 1;;
   'get endpointslices '*) [[ ${FAKE_STATE:-} != ready ]] || printf '[{"conditions":{"ready":true}}]\n';;
@@ -67,6 +70,28 @@ for state in old new cron job ready replicas publish-unready cd run; do
   esac
   rg -qF "$expected_error" "result-$n.log" || { cat "result-$n.log" >&2; exit 1; }
   if rg -- '--request-timeout=20s (create|patch|scale|set|delete|rollout) ' cluster-calls; then exit 1; fi
+done
+unset FAKE_STATE
+jq -n --slurpfile c input.json --arg now "$now" '{reference:"synthetic-qualification",sha256:("f"*64),observedAt:$now,passed:true} as $q |
+  {binding:$c[0].binding,image:$c[0].image,q1:$q,q2:($q+{afterRestart:true}),
+    personal:{writerEpoch:"scoped",maintenanceBarrier:false},lotsOpen:false,mcpSuccessorDeployed:true}' > acceptance.json
+: > cluster-calls
+invoke reopen-api PROOFS="$testdir/acceptance.json"
+rg -q -- '--request-timeout=20s patch ingress fixture-app' cluster-calls
+if rg -- '--request-timeout=20s (scale|set|delete|rollout) ' cluster-calls; then exit 1; fi
+cp acceptance.json accepted.json
+for field in q2 q2.afterRestart binding.releaseId; do
+  jq --arg field "$field" 'delpaths([$field|split(".")])' accepted.json > acceptance.json
+  : > cluster-calls
+  if invoke reopen-api PROOFS="$testdir/acceptance.json"; then echo 'Unqualified reopening accepted' >&2; exit 1; fi
+  [[ ! -s cluster-calls ]]
+done
+cp accepted.json acceptance.json
+for state in unavailable replicas cron job new; do
+  export FAKE_STATE=$state
+  : > cluster-calls
+  if invoke reopen-api PROOFS="$testdir/acceptance.json"; then echo "Unsafe reopening: $state" >&2; exit 1; fi
+  if rg -- '--request-timeout=20s patch ingress ' cluster-calls; then exit 1; fi
 done
 export FAKE_STATE=denied
 if invoke permissions; then echo 'Permission refusal was ignored' >&2; exit 1; fi
