@@ -11,6 +11,7 @@
 ## Branch Scope Boundaries (MANDATORY)
 - [x] **Allowed Paths**: API mcp-signal-search routes, mcp-signal-* services, mcp-signal-search* integration tests, tools/make/base-api-a2rest*, this plan.
 - [x] **Conditional Paths**: api/src/app.ts under exclusive CT-1/CT-2 integration lease; parent plan EX7; root companion report outside hashed bundle.
+- [x] **Conditional Paths**: a2base-mcp-fixture.ts replaces its superseded test-only facade with the production route; no A3 receiver or MCP package edits.
 - [x] **Forbidden Paths**: MCP package, A3/H5 receivers, auth/config/startup, migrations, manifests/lockfile, root Makefile/Compose, rules, bootstrap, other plans.
 - [x] **Exception process**: BRARTEFACTS-EX7 records rationale, impact and recovery before conditional edits.
 
