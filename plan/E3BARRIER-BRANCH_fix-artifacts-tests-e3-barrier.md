@@ -33,5 +33,6 @@
 - [x] Lot 1b: register correlated waits before transport execution; make cleanup release idempotent.
 - [x] Lot 2: two E3 cases with real PostgreSQL faults, no retry, rollback and resumed authority checks (candidate execution pending).
 - [x] Lot 3: A4 typed host binding and public seam calls (candidate execution pending).
+- [x] Lot 3a: release a paused barrier once, including A4 finally cleanup; require invocation IDs.
 - [ ] Lot 4: candidate missing-contract evidence; baseline API suite, lint and typecheck.
 - [ ] Lot 5: atomic history, report, audited bundle from the base and stack cleanup.
