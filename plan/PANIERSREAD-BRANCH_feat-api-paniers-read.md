@@ -28,7 +28,7 @@
 - [x] P0-01 primitives and inputs (strict decoding and fixed public errors).
 - [x] P0-02 heads and count contracts (strict nested schemas and invariants).
 - [x] P0-03 bounded canonical card (explicit public fields and safe URLs).
-- [ ] P0-04 family context.
+- [x] P0-04 family context (durable gates, separate rights, no head read).
 - [ ] P0-05 nullable catalog.
 - [ ] P0-06 discovery 0/1/N.
 - [ ] P0-07 closed route.
