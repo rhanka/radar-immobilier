@@ -15,6 +15,7 @@
 - [x] **Forbidden Paths (must not change in this branch)**: `Makefile`, `docker-compose*.yml`, `rules/**`, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, other branch plans, `tmp/vite-focus/**`.
 - [x] **Conditional Paths**: application/test sources only if a reproduced regression directly requires a fix and a scope exception is recorded first.
 - [x] **Exception process**: record `DEPSHIGHS-EXn` with reason, impact, and rollback before expanding scope.
+- [x] **DEPSHIGHS-EX1**: owner instruction `consigne-sol-fix-pr912.md` authorizes `Makefile`, `.github/workflows/ci.yml`, `.security/vulnerability-register.yaml`, and `tools/security/**` to enforce the existing Zod acceptance. Impact: HIGH/CRITICAL npm-tree gate and unit tests in Quality gates; rollback: revert this follow-up bundle. No compose, dependency, application, or deployment change.
 - [x] Local report, evidence, supplemental Makefiles, sanitized source snapshot, and rescue Git repositories live outside the delivered patch.
 
 ## Feedback Loop
@@ -50,3 +51,13 @@
   - [x] Remove campaign containers/volumes; observed free space stays above 29 GiB; shared Git remains at the base.
 - [x] **Merge & close — outside this local delivery**
   - [x] No push, PR mutation, merge, or risk acceptance authorized by this campaign.
+- [ ] **Lot 4 — Astra PR912 corrections**
+  - [x] Recover rescue Git at PR head `7eac7167`, preserve earlier delivery, and clean only campaign Docker resources.
+  - [x] Deliver the existing Zod acceptance as exact registry rows with a stable root component identity.
+  - [ ] Deliver exact exception matching, UTC expiration, audit propagation, and closed failure on invalid input.
+  - [ ] Deliver unit regressions for matching, expiry, severity thresholds, and the register layout.
+  - [ ] Deliver regressions for propagation, component scope, malformed input, and the checked-in register.
+  - [ ] Deliver the containerized CLI, CI Make wiring, and clarified acceptance status.
+  - [ ] Execute the CI Make step in Docker, synthetic CLI cases, lint, typecheck, and Quality gates tests.
+  - [ ] Deliver subject-only commits of at most 150 lines and audit the bundle from `7eac7167` in a fresh repository.
+  - [ ] Append evidence and bundle identity to the French report; remove campaign containers and volumes.
