@@ -5,6 +5,11 @@ const races = "tests/integration/mcp-signal-search-facade-races.spec.ts";
 const archives = "tests/integration/mcp-signal-search-facade-archives.spec.ts";
 const projection = "src/services/facets/mcp-signal-result.test.ts";
 export const cases = [
+  ["missing-preactivation-reader", search, "if (epoch === SCOPED_EPOCH) {", "if (true) {",
+    "tests/integration/mcp-signal-search-legacy.spec.ts", "serves missing epoch without prior activation"],
+  ["legacy-read-after-activation", search, "result = await readMcpSignalCards(deps, sub, args);",
+    "await readGraphSignalCards(deps, args.city, async () => EMPTY_DISCARDED_KEYS);\n    result = await readMcpSignalCards(deps, sub, args);",
+    "tests/integration/mcp-signal-search-facade-states.spec.ts", "keeps scoped search independent of legacy retired"],
   ["selector-substitution", workspace,
     'if (!ids.includes(parsed.data)) throw new ScopeError(403, "workspace_not_authorized");',
     "if (!ids.includes(parsed.data)) return ids[0];", authority, "resolves zero, one and several memberships"],
