@@ -71,11 +71,14 @@ export async function composeArtifactHost(
         if (entry) await pool.query(
           `INSERT INTO artifacts.host_failures (invocation_id, actor_id, operation, reason, status, at_ms)
            VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (invocation_id) DO NOTHING`,
-          [entry.invocationId, invocation.actorId, entry.operation, entry.reason, entry.status, Date.now()]);
+          [entry.invocationId, invocation.actorId, entry.operation, entry.reason, entry.status, Date.now()])
+          .catch((error: unknown) => { accountingFailure = error; options.onProviderFailure?.(error); });
       }
       return outcome;
     };
+    let accountingFailure: unknown;
     return { ...domain, app: { ...domain.app, execute }, execute, coordinator, blobs,
+      get accountingFailure() { return accountingFailure; },
       cleanup, intents: domain.store, refs: domain.store,
       selectedCapabilities: domain.app.selectedCapabilities, profileDigest: domain.app.profileDigest,
       authorizeCommit: authorizeArtifactCommit, close: () => { cleanup.stop(); client.destroy(); } };
