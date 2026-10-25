@@ -39,10 +39,10 @@ audit() {
   local sha subject
   while IFS= read -r sha; do
     subject=$(git show -s --format=%B "$sha")
-    [[ $subject != *$'\n'* && $subject =~ ^(feat|fix|test|docs|chore|refacto)\([a-z0-9-]+\):\ .+ ]]
+    [[ $subject != *$'\n'* && $subject =~ ^(feat|fix|test|docs|chore|refacto)(\([a-z0-9-]+\))?:\ .+ ]]
     git show --format= --numstat "$sha" | stats
     git show -s --format='%H %s' "$sha"
-  done < <(git rev-list --reverse --first-parent --no-merges "$BASE..HEAD")
+  done < <(git rev-list --reverse --no-merges "$BASE..HEAD")
   # Imported history is immutable under the owner-required merge/no-rewrite rule.
   git log --reverse --format='%H %s' "$BASE..313fcf44" > "$ROOT/tmp/a5-evidence/imported-commit-audit.txt"
   git log --merges --format='%H %P %s' "$BASE..HEAD"
