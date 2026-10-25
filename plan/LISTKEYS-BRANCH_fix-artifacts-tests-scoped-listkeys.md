@@ -23,6 +23,7 @@
 - [x] LISTKEYS-EX2: the requested French delivery report overrides the English Markdown policy for that file.
 - [x] Provider qualification: enabled Q1/Q2 reports 69 failures on missing 0.1.2 contracts and explicitly uncovered cases; no provider upgrade or weakened assertion.
 - [x] Record the intermittent MinIO commit-probe 503 in the delivery report; final scoped and complete API campaigns pass with its code and deadlines unchanged.
+- [x] LISTKEYS-EX3: PR917 correction brief authorizes existing host tools via Make; no Docker, dependency install, shared Git write or push.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch, developer/tester/integrator in one session, per task.
@@ -36,6 +37,7 @@
 - [x] Lot 2: static guard and real S3 regression/mutation coverage.
 - [x] Lot 3: 20 scoped MinIO tests, 153 host tests, 3109 CI-equivalent API tests, lint and typecheck pass; gated provider limitation recorded above.
 - [x] Lot 4: deliver the audited bundle, standalone report and teardown receipts in `tmp/listkeys/`.
+- [x] Review lot 1: reproduce the AST bypasses and resolve empty expressions and lexical constants with TypeScript; in-memory regressions pass.
 
 ## Merge & Close
 - [x] Deliver a bundle only; no push or merge is authorized by this task.
