@@ -67,7 +67,7 @@ jq -n --slurpfile c input.json --slurpfile ids expected.json --arg now "$now" '
   {binding:$c.binding,
    observations:{networkAllowed:$check,networkDenied:$check,sessionRequired:$check,
     externalStopped:$check,streamsTerminated:$check,mcpSuccessor:($check+{image:$c.image})},
-   databaseInspection:{binding:$c.binding,action:"inspect",observedAt:$now,result:{
+   databaseInspection:{binding:$c.binding,action:"inspect",observedAt:($now|sub("Z$";".123Z")),result:{
     identity:[($c.database+{observe_transactions:true})],missingMigrations:[],
     approved:[{id:"synthetic-account",sub:$c.binding.actorSub,status:"approved"}],
     memberships:[{account_id:"synthetic-account",status:"active",manage_members:true}],

@@ -411,8 +411,8 @@ identity. B5, final reviews, remote CI and combined delivery keep their scope.
 
 ## Preprod short path: P1/O1 operator vehicle
 
-This section governs the preprod personal-signals/baskets path (6G + attachments
-+ 6H), with 6K closed. It delivers an administrator-operated vehicle, not a
+This section governs the preprod personal-signals/baskets path
+(6G + attachments + 6H), with 6K closed. It delivers an administrator-operated vehicle, not a
 deployment or an activation receipt. **Do not open 6H until the successor MCP
 adapter for `search_signals` is deployed and qualified.** UI-H, P2/6K and the MCP
 implementation are separate deliveries. UI and MCP remain unavailable during

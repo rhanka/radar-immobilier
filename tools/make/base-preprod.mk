@@ -15,4 +15,4 @@ commit:
 bundle:
 	@rtk bash tools/make/base-preprod-deliver.sh bundle
 verify build-image:
-	@rtk bash tools/make/base-preprod-verify.sh $@
+	@rtk proxy bash tools/make/base-preprod-verify.sh $@

@@ -58,11 +58,11 @@ verify)
     > >(tee "$LOG_DIR/verify.log") 2>&1 &
   RUN_PID=$!; wait "$RUN_PID"; RUN_PID=;;
 build-image)
+  source "$TOOLS/base-preprod-image-compose.sh"
+  image_compose
   docker build --build-arg "GIT_SHA=$(git rev-parse HEAD)" -f api/Dockerfile -t radar-base-preprod-p1o1:qualified - < "$RUN_DIR/source.tar" > "$LOG_DIR/build.log" 2>&1 &
   RUN_PID=$!; wait "$RUN_PID"; RUN_PID=
   docker image inspect --format '{{.Id}}' radar-base-preprod-p1o1:qualified > "$LOG_DIR/image-id.txt"
-  source "$TOOLS/base-preprod-image-compose.sh"
-  image_compose
   guarded_down
   "${compose[@]}" up -d --wait postgres
   "${compose[@]}" run --rm --no-deps -T api > >(tee "$LOG_DIR/image-proof.log") 2>&1 &
