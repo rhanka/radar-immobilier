@@ -29,6 +29,9 @@ export async function readClassificationProjection<T>(db: Database, sub: string,
         projectionVersion: PROJECTION_VERSION, catalogVersion: after });
       return { scope: final, snapshot, payload: result.payload };
     } catch (error) {
+      if (error instanceof ClassificationError && ["target_not_found", "reveal_required"].includes(error.code)) {
+        await readProjectionScope(db, sub, workspaceId, citySlug, "signal");
+      }
       if (!(error instanceof ScopeError) || error.message !== "projection_revision_unstable") throw error;
     }
   }

@@ -45,7 +45,7 @@
 - [x] P1-10 PostgreSQL privacy tests (two readers/workspaces/cities, private-token stability).
 - [x] P1-11 races and pagination (P1-11a/b: authority, source/catalog and singleton races).
 - [x] PS-01 current state DTO (shared canonical item projection, missing-source union).
-- [ ] PS-02 reveal and guards.
+- [x] PS-02 reveal and guards (explicit reveal, separate restoration, error revalidation).
 - [ ] PS-03 route and missing sources.
 - [ ] Gates: targeted contracts/algorithms, createApp/PostgreSQL, mutations, CI API suite, lint, typecheck.
 - [ ] Delivery: commit audit, clean-resource evidence, bundle imported in an empty audit repository, French report.
