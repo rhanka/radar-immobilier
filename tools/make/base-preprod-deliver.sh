@@ -2,7 +2,7 @@
 set -euo pipefail
 [[ ${ENV:-} == test-base-preprod && $(git branch --show-current) == feat/base-preprod-operator ]]
 # Snapshot of origin/main at task bootstrap; other lanes may advance the shared ref.
-base=da24b28677f4c66e950967faa00b9f596044cf2e
+base=c100e6cc0897bebc42c94157d8cb94f28348cab2
 git merge-base --is-ancestor "$base" HEAD
 audit() {
   local count
@@ -15,7 +15,7 @@ stage)
   read -r -a files <<< "$FILES"
   for path in "${files[@]}"; do
     case $path in
-      api/Dockerfile|api/src/scripts/*|api/tests/integration/base-preprod*|tools/make/base-preprod*|deploy/base-preprod/*|docs/spec/BASE_API_ACTIVATION.md|plan/P1O1-BRANCH_base-preprod-operator.md|RAPPORT-SOL-BASE-PREPROD-P1O1.md) ;;
+      api/Dockerfile|api/src/scripts/*|api/tests/integration/base-preprod*|tools/make/base-preprod*|deploy/base-preprod/*|deploy/ci/check-image-entrypoints.test.sh|docs/spec/BASE_API_ACTIVATION.md|plan/P1O1-BRANCH_base-preprod-operator.md|RAPPORT-SOL-BASE-PREPROD-P1O1.md) ;;
       *) exit 2;;
     esac
     [[ $path != *..* && ! -L $path ]]
@@ -25,19 +25,21 @@ stage)
 commit)
   audit
   [[ $MSG =~ ^(feat|fix|test|chore|docs)\(base\):\ [[:print:]]+$ && $MSG != *$'\n'* && ${#MSG} -le 72 ]]
-  git -c core.hooksPath=/dev/null commit -m "$MSG";;
+  git -c core.hooksPath=/dev/null -c user.name="$(git show -s --format=%an "$base")" \
+    -c user.email="$(git show -s --format=%ae "$base")" commit -m "$MSG";;
 bundle)
   git diff --quiet; git diff --cached --quiet
   [[ $(df -Pk . | awk 'NR==2 {print $4}') -ge 8388608 ]]
   out=tmp/base-preprod-evidence/delivery
   mkdir -p "$out"
-  git bundle create "$out/base-preprod-p1o1.bundle" "$base..HEAD"
+  payload=$out/base-preprod-pr920-fixes.bundle
+  git bundle create "$payload" "$base..HEAD"
   auditdir=$(mktemp -d "$out/audit.XXXXXX")
   git init --bare -q "$auditdir"
   git -C "$auditdir" fetch --no-tags --no-write-fetch-head "$(pwd -P)" "$base:refs/heads/base"
   if git -C "$auditdir" cat-file -e "$(git rev-parse HEAD)^{commit}" 2>/dev/null; then exit 2; fi
-  git -C "$auditdir" bundle verify "$(pwd -P)/$out/base-preprod-p1o1.bundle"
-  git -C "$auditdir" fetch --no-tags --no-write-fetch-head "$(pwd -P)/$out/base-preprod-p1o1.bundle" HEAD:refs/heads/payload
+  git -C "$auditdir" bundle verify "$(pwd -P)/$payload"
+  git -C "$auditdir" fetch --no-tags --no-write-fetch-head "$(pwd -P)/$payload" HEAD:refs/heads/payload
   git -C "$auditdir" symbolic-ref HEAD refs/heads/payload
   [[ $(git -C "$auditdir" rev-parse 'payload^{tree}') == $(git rev-parse 'HEAD^{tree}') ]]
   git -C "$auditdir" fsck --full --no-reflogs
@@ -47,7 +49,7 @@ bundle)
   git -C "$backupdir" symbolic-ref HEAD refs/heads/delivery
   git -C "$backupdir" fsck --full --no-reflogs
   printf 'Local backup repository: %s\nFresh bundle audit: %s\nBase: %s\n' "$backupdir" "$auditdir" "$base"
-  sha256sum "$out/"*.bundle
+  sha256sum "$payload"
   git rev-parse HEAD;;
 audit)
   while IFS= read -r sha; do
