@@ -1,6 +1,6 @@
 import type { Database } from "../../db/client.js";
 import type { ObjectStore } from "../../storage/object-store.js";
-import { createDocEnrichmentContext, toGraphSignalCard, toDegradedSignalCard } from "../../routes/graph-signals.js";
+import { createDocEnrichmentContext } from "../../routes/graph-signals.js";
 import { readProjectionScope } from "./projection-revisions.js";
 import { SignalQuery, type SignalQueryArgs } from "./classification-query.js";
 import { readSignalPopulation, nodeTarget, POPULATION } from "./classification-population.js";
@@ -10,7 +10,7 @@ import { classificationDay, compareSignalRows } from "./classification-order.js"
 import { readClassificationProjection } from "./classification-projection.js";
 import { parseClassificationCursor, requireCursorKeyring, type CursorKeyring } from "./classification-cursor.js";
 import { continueSignalSearch } from "./classification-continuation.js";
-import { projectSignalCard } from "./classification-card.js";
+import { projectClassificationItem } from "./classification-item.js";
 import { SignalSearchResponse } from "./classification-search-contract.js";
 import { ClassificationError } from "./classification-errors.js";
 
@@ -39,11 +39,8 @@ export async function searchSignalClassifications(deps: ClassificationReadDeps, 
       facets: projectFacets(heads, nodeTarget(node)) }));
     const selected = selectClassifications(rows, query);
     selected.matched.sort(compareSignalRows);
-    const items = await Promise.all(selected.matched.slice(position, position + query.limit).map(async (row) => {
-      const card = await toGraphSignalCard(deps.store, row.node, enrichment, query.citySlug).catch(() => toDegradedSignalCard(row.node));
-      return { target: row.target, readiness: "ready" as const, displayedFingerprint: card.facetFingerprint,
-        card: projectSignalCard(card, row.day, deps.classification?.apiOrigin), facets: row.facets };
-    }));
+    const items = await Promise.all(selected.matched.slice(position, position + query.limit).map((row) =>
+      projectClassificationItem(deps.store, row, enrichment, deps.classification?.apiOrigin)));
     return { ...selected, items };
   });
   const page = continueSignalSearch(result.payload.matched, ring, { sub, workspaceId, citySlug: query.citySlug,
