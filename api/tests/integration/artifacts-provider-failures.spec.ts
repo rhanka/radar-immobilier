@@ -547,6 +547,8 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       const point = "after_finalization_locks_before_guard";
       const barrier = await requireCommitBarrier([point]);
       const probe = createBarrierFaultProbe(pool);
+      await pool.query("CREATE TABLE IF NOT EXISTS test_guard_authority (id int PRIMARY KEY)");
+      await pool.query("INSERT INTO test_guard_authority VALUES (1) ON CONFLICT DO NOTHING");
       const { host } = await composeQ2Host(barrier, { pool: probe.pool });
       try {
         for (const transport of ["http", "mcp"] as const) {
@@ -570,9 +572,9 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
             await holder.query("BEGIN");
             // Host-owned contention, independent of the provider's SQL forms.
             if (phase === "schema-infrastructure") {
-              await holder.query("LOCK TABLE account_users IN ACCESS EXCLUSIVE MODE");
+              await holder.query("LOCK TABLE test_guard_authority IN ACCESS EXCLUSIVE MODE");
             } else {
-              expect((await holder.query("SELECT sub FROM account_users WHERE sub=$1 FOR UPDATE", [ACTOR])).rowCount).toBe(1);
+              expect((await holder.query("SELECT id FROM test_guard_authority WHERE id=1 FOR UPDATE")).rowCount).toBe(1);
             }
             await probe.setTimeout(phase === "schema-infrastructure" ? "lock" : "statement");
             run.release();

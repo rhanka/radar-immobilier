@@ -28,6 +28,7 @@
 - [x] Test helpers only; isolated automated verification, no user UAT.
 
 ## Plan / Todo (lot-based)
+- [x] Final A5/B3: inject binding/quota callback failures on the executed paths; E3 contends on a separate guard authority fixture after approval is already locked. Quota accounting remains uncovered.
 - [x] Final A2/A3/A4/B1: apply the packaged coordinator migration, separate entry/revision reads, lock approval before the guard barrier, and use the published executor entrypoint.
 - [x] Final A1/A6: require ordinary retriable=false and classify invalid callable exports as contract violations.
 - [x] Lot 0: rules, predecessor report, branch, local upstream ABI and machine capacity.

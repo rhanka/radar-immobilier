@@ -8,7 +8,7 @@ import { createLifecycleService } from "@sentropic/artifacts/server/lifecycle";
 import { createPublicationService, type PublicationBlobStore } from "@sentropic/artifacts/server/publication";
 import type { ArtifactsStorageConfig } from "@radar/artifacts-host";
 import { initializeArtifactScope } from "../../../packages/artifacts-host/src/storage.js";
-import { requirePublicFunction, COMMIT_CONTRACT_SPECIFIER,
+import { requirePublicFunction, COMMIT_CONTRACT_SPECIFIER, finalizationPhaseFaults,
   type R2CommitCoordinator, type CompiledArtifactsProfile,
   type InvocationContextShape, type CoordinatorBarrierPoint } from "./artifacts-provider-contract.helpers.js";
 
@@ -46,12 +46,20 @@ export async function createCandidateCoordinator(pool: pg.Pool, testObserver: un
       return {
         readRevision: () => readTestPolicyRevision(client),
         async checkApproval(input: { actorId: string }) {
+          const guardTable = await client.query<{ present: string | null }>(
+            "SELECT to_regclass('test_guard_authority') AS present", []);
+          if (guardTable.rows[0]?.present) {
+            await client.query("SELECT id FROM test_guard_authority WHERE id = 1 FOR SHARE", []);
+          }
           const result = await client.query<{ status: string }>(
             "SELECT status FROM account_users WHERE sub = $1 FOR SHARE", [input.actorId]);
           return { approved: result.rows[0]?.status === "approved", reason: "denied" };
         },
         // Quota accounting stays explicitly uncovered in H3 units 5-6.
-        async reserveQuota() { return { reserved: true }; },
+        async reserveQuota() {
+          finalizationPhaseFaults.get(pool)?.("quota");
+          return { reserved: true };
+        },
         mintFence(policyRevision: string, invocationId: string) {
           return { fenceId: `test-fence-${transactionToken}`, transactionId: transactionToken,
             invocationId, policyRevision };
@@ -101,6 +109,7 @@ export async function composeCandidateHost(params: {
     ensureHost: {
       readPolicyRevision: () => readTestPolicyRevision(pool as unknown as PolicyClient, false),
       async lockBinding(client: PolicyClient, binding: { storageScopeId: string; ownerId: string; bindingName: string }) {
+        finalizationPhaseFaults.get(pool)?.("binding");
         await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))",
           [JSON.stringify([binding.storageScopeId, binding.ownerId, binding.bindingName])]);
       },
