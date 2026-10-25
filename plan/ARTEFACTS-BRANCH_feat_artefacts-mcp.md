@@ -30,6 +30,7 @@
 
 ## Feedback Loop
 - [x] BRARTEFACTS-EX4 / T00: merge main `f3436944` into integration `b2b802b5`, including inherited BASE/security paths; preserve both capabilities and the frozen migration journal. Rollback returns to the first parent; no activation or main delivery is authorized.
+- [x] BRARTEFACTS-EX5 / A2-BASE API: authorize the bounded search contract, workspace resolver, coherent read helpers, canonical card exports and associated API tests/runners in the A2-BASE API lane. BASE retirement requires this read adaptation (CT-3); no business writes, migration, dependency or production mount. Preserve CT-3/CT-9 and exclusive ownership of app/auth/startup/A3/H5/MCP files. Recovery keeps the current image before activation, then closes only the signal capability and uses a qualified scoped image. No main merge, push or activation is authorized.
 - [ ] T00 qualification: exact merged SHA, API CI collection, H4/MCP, closed BASE, CT-8 fresh/upgrade/rerun and portable bundle audit; report evidence and remaining prerequisites separately.
 - [ ] BRARTEFACTS-EX1: retain the assigned integration worktree; child worktrees use repository-local `tmp/`; root UAT remains untouched; rollback removes only unused child worktrees.
 - [ ] BRARTEFACTS-EX2: conditional integration edits implement approved package, migration and auth bindings; preserve business state; recovery closes artifact admission and retains strict identity checks.
