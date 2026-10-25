@@ -1,7 +1,7 @@
 # Feature: A2-BASE API read chain
 
 ## Objective
-- [ ] Deliver T01/T03/T04/T05/T06/T07 from the approved MCP adapter v2 design, with no active production mount.
+- [x] Deliver qualified T01/T03/T04/T05/T06/T07 from the approved MCP adapter v2 design, with no active production mount.
 
 ## Scope / Guardrails
 - [x] Base: `c5fb85dbd77e12c0c4355a207de84ead0c3fa5d9`; lane: `tmp/a2base-api`; branch: `feat/artefacts-mcp-a2base-api`.
@@ -64,12 +64,15 @@
 - [x] T07 default 2,000ms cross-retry budget and persistent drift cases written with an explicit 1,000ms scheduling allowance outside documentary waiting.
 - [x] The budget case emits measured request elapsed time, documentary budget, resolution count and scheduling allowance into qualification logs.
 - [x] Missing/legacy/barrier epoch and unresolved-history refusals are covered by real createApp/PostgreSQL cases, including empty reveal requests.
-- [ ] Lot gate: unit tests, real createApp/PostgreSQL tests, named behavioral mutations, targeted lint/typecheck.
+- [x] Lot gate: unit tests, real createApp/PostgreSQL tests, named behavioral mutations, targeted lint/typecheck.
 - [x] API and BASE regression campaign passed: 142 cases across 15 explicit files, no failures/skips, owned cleanup passed; static checks and mutations remain to qualify the lot.
 - [x] Two static campaigns stopped during npm install on TLS resets; host probes confirmed registry TLS failures too. Seed only the existing integrity-checked npm download cache read-only into container tmpfs, prefer cached bytes, retain npm ci and the unchanged lockfile; no user npm configuration is mounted.
-- [ ] Complete typecheck/lint and execute the eight mutation controls: registry TLS resets persist with cached downloads, and two read-only network probes outside isolation were not executed because automatic permission review timed out. Do not mark the lot accepted from the 142 passing functional cases alone.
+- [x] Resumption closes the previous static/TLS blocker: locked host static checks pass; all eight named mutations and their initial/restored controls pass in the isolated container copy.
 - [x] Resumption: reproduce four integration typing errors with locked dependencies without Docker; compare S0 defaults without assuming its inferred shape and pass real transactions to the revision helper in three race fixtures; targeted lint and API typecheck already pass.
 - [x] Host static gate PASS: 20261025T171239-5-check, Node 24.18.0/TypeScript 5.4.5, locked npm ci; API plus integration typechecks, targeted lint and runner syntax pass; seed the container from this completed download cache read-only.
+- [x] Final campaign 20261025T171338-5-mutations PASS: 205 tests across 27 explicit files, zero failures/skips, including graph-signals 48 and date parity 5; eight behavioral mutations killed, 16 controls/90 passing executions, independent JSON and restored-source digest audit passed.
+- [x] Shared documentary budget measured at 2,031ms with one resolution and the documented 1,000ms scheduling allowance; persistent drift is refused after three attempts.
+- [x] Owned down -v --remove-orphans passed, status 0, no A2-BASE container/volume/network remains; production API source bytes are identical to the prior delivery and no new slice is added.
 - [x] Scope audit confirms unchanged MCP/A3/H5, app/auth/startup, dependency manifests/lockfile and migration bytes; final delivery remains a bounded, inactive API candidate.
 - [x] Machine-serialized runner written with explicit file scopes, a 60-second wait, disk monitoring, one-worker container configuration and inherited ownership-checked cleanup.
 - [x] Eight named mutants prepared in the isolated container source copy, with a control before each, exact-byte restoration and a passing restored control required; execution pending.
@@ -78,11 +81,11 @@
 - [x] The enrichment race explicitly requires the BASE token to remain identical when the second membership becomes active.
 - [x] A complementary race preserves an explicitly selected authorized workspace when another membership becomes active; omission remains ambiguous.
 - [x] Container checks and test-only S0 contract comparison written; API runtime has no MCP import.
-- [ ] Delivery: report qualified slices, commands/counts, per-commit numstat, remaining integration duties, exact SHA and isolated bundle audit/hash.
+- [x] Delivery: qualified slices, commands/counts, per-commit numstat and remaining integration duties recorded; companion report receives this commit SHA and the audited bundle hash after export.
 - [x] Selective staging, 150-line audit, subject-only commits and bundle verification in a blank prerequisite-only repository have dedicated make targets; no shared Git writes or push.
 
 ## Docs consolidation
-- [ ] Record final evidence in `RAPPORT-SOL-A2BASE-API.md`; qualification does not close CT-9 or authorize activation.
+- [x] Record final evidence in `RAPPORT-SOL-A2BASE-API.md`; qualification does not close CT-9 or authorize activation.
 
 ## Merge & close
 - [ ] Integrator imports audited bundle and qualifies the combined SHA/image; no merge or push in this mission.
