@@ -116,9 +116,8 @@ function toMcpResult(response: HttpResponse): McpResult {
   if (status >= 200 && status < 300) return { ok: true, status, data: body };
   const raw = isRecord(body) ? body["error"] : undefined;
   const code = typeof raw === "string" ? raw : "provider_error";
-  // Only a facade 503 (provider unavailability) is retryable; adapter-level
-  // refusals above already returned with retryable false.
-  return { ok: false, status, code, retryable: status === 503, error: body };
+  const retryable = (response as HttpResponse & { retryable?: boolean }).retryable === true;
+  return { ok: false, status, code, retryable, error: body };
 }
 
 function routeToOp(method: string, path: string):
