@@ -207,51 +207,6 @@ export function createArtifactControl(
         fail("provider_error", 500);
         return { status: 500, body: { error: "provider_error" } };
       }
-      // Drain the preserved cause once per dispatch. On success the provider
-      // recovered after the recorded failure (retry inside its transaction),
-      // so the stale cause is dropped and the success stands. Reads drain
-      // without remapping: their converted status is returned unchanged.
-      const preserved = options?.probe?.take();
-      if (write && admission && response.status >= 200 && response.status < 300) {
-        // Post-settle authorization (861C unit 7): @sentropic/artifacts@0.1.2
-        // offers no commit-time hook — its publication service, HTTP app and
-        // Postgres store accept no authorization callback, and the advisory
-        // lock only bounds the wait — so a success that settles after
-        // revocation is refused to the caller and accounted here instead of
-        // receipted. Residual state is NOT undone: the provider release
-        // (ready), its S3 objects, the idempotency result and the current
-        // pointer may already persist. Replay after re-approval can return
-        // that publication. Unit 7 stays blocked on a host authorization
-        // callback invoked inside provider finalization after all waits.
-        let after;
-        try {
-          after = await checkAdmission(admission, actorId);
-        } catch {
-          // Admission availability is separate from a provider failure. The
-          // publication may already persist; suppress its receipt and count
-          // this dispatch once without exposing the underlying query error.
-          fail("admission_unavailable", 503);
-          return { status: 503, body: { error: "capability_unavailable" } };
-        }
-        if (!after.allowed) {
-          fail("unauthorized_at_commit", after.status);
-          return { status: after.status, body: after.body };
-        }
-      } else if (write && response.status >= 400) {
-        // A converted error (500 internal_error, 409 conflict) is remapped
-        // from the preserved cause when one was recorded below the HTTP
-        // layer; otherwise the converted response is accounted as before.
-        const override = preserved === undefined ? undefined : classifyProviderCause(preserved);
-        if (override !== undefined) {
-          fail(override.reason, override.status);
-          return { status: override.status,
-            body: { error: override.status === 503 ? "capability_unavailable" : "conflict" } };
-        } else if (response.status === 409) {
-          fail("provider_conflict", 409);
-        } else {
-          fail("provider_error", response.status);
-        }
-      }
       if (op !== "publish" || response.status !== 201) return response;
       const result = response.body as { releaseId: string; manifest: string };
       const manifest = JSON.parse(result.manifest) as { digest: string };
