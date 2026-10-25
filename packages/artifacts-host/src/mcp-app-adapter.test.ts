@@ -1,5 +1,5 @@
 import { controlTestHost } from "./control-test-host.js";
-import { compileArtifactsProfile, RADAR_ARTIFACTS_PROFILE, createArtifactCommand, createRadarKeyDerivation } from "@sentropic/artifacts/mcp-core";
+import { compileArtifactsProfile, RADAR_ARTIFACTS_PROFILE, createRadarKeyDerivation } from "@sentropic/artifacts/mcp-core";
 import type { HttpRequest } from "@sentropic/artifacts/http";
 import type { ArtifactInvocationContext } from "@sentropic/artifacts/server/commit-contract";
 import { describe, expect, it, vi } from "vitest";
@@ -35,8 +35,9 @@ function createReplayHost() {
   const handle = vi.fn(async (input: HttpRequest, invocation: ArtifactInvocationContext) => {
     const body = input.body as Record<string, unknown>;
     bodies.push(body);
-    const command = createArtifactCommand(profile, input.path === "/ensure" ? "artifacts_ensure" : "artifacts_publish",
-      body, invocation, derivation);
+    const command = profile.validators.normalizeCommand({
+      capability: input.path === "/ensure" ? "artifacts_ensure" : "artifacts_publish",
+      args: body, authority: invocation, derivation });
     const internal = command.identity.internalKey;
     const hash = command.identity.commandHash;
     const prev = kept.get(internal);

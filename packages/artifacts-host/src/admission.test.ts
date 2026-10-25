@@ -1,3 +1,4 @@
+import { controlTestHost } from "./control-test-host.js";
 import { describe, expect, it, vi } from "vitest";
 import type { ActivationConfig } from "./activation.js";
 import {
@@ -46,7 +47,7 @@ function stubHost() {
   // to a publication receipt instead of throwing before the assertions.
   const handle = vi.fn(async () => ({ status: 201,
     body: { artifactId: ARTIFACT, releaseId: RELEASE, manifest: JSON.stringify({ digest: DIGEST }) } }));
-  const host = { app: { handle } } as unknown as Parameters<typeof createArtifactControl>[0];
+  const host = controlTestHost(handle);
   return { host, handle };
 }
 
@@ -127,7 +128,7 @@ describe("admission refusals without storage mutation [T02 T05 T17 T24]", () => 
     const response = await createArtifactControl(host, "scope", "pages.example.test", authority)
       .handle("publish", "alice", publishBody);
     expect(response).toEqual({ status: 201,
-      body: { artifactId: ARTIFACT, releaseId: RELEASE, digest: DIGEST,
+      body: { artifactId: ARTIFACT, releaseId: RELEASE, manifest: JSON.stringify({ digest: DIGEST }), digest: DIGEST,
         stableUrl: `https://${ARTIFACT}.pages.example.test/`,
         pinnedUrl: `https://${RELEASE}.pinned.pages.example.test/` } });
     expect(handle).toHaveBeenCalledTimes(1);

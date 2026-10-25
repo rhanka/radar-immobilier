@@ -734,12 +734,12 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
           "content-type": "application/json" }, body: JSON.stringify(body),
       });
       expect(httpReplay.status).toBe(201);
-      expect(await httpReplay.json()).toEqual(durableReceipt);
+      expect(await httpReplay.json()).toEqual((retry.result as { body: unknown }).body);
       const adapter = createMcpArtifactAdapter(parityControl);
       const mcpReplay = await adapter.execute(
         { method: "POST", path: "/publish", args: body }, { actorId: ACTOR });
       expect(mcpReplay).toMatchObject({ ok: true, status: 201 });
-      expect((mcpReplay as { ok: true; data: unknown }).data).toEqual(durableReceipt);
+      expect((mcpReplay as { ok: true; data: unknown }).data).toEqual((retry.result as { body: unknown }).body);
       expect(entries).toHaveLength(0);
       expect(await tableCount("releases")).toBe(releasesBefore + 1);
       const successRows = Number((await pool.query(

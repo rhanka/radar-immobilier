@@ -16,7 +16,7 @@ export function normalizeHostOutcome(outcome: ArtifactOutcome<HttpResponse>): Ar
   const mapped = code === "artifact_s3_timeout" || code === "artifact_pool_timeout";
   if (code === "artifact_s3_timeout") {
     const reportedPhase = (cause as { phase?: string }).phase;
-    if (reportedPhase === "s3-request" || reportedPhase === "s3-body-stream") phase = reportedPhase;
+    if (reportedPhase === "s3-request" || reportedPhase === "body-stream") phase = reportedPhase;
   }
   const failure = mapped ? { ...classifyArtifactFailure(cause, { ...original, phase }, () =>
     new ArtifactOperationError("provider_unavailable", { cause })) } : { ...original, phase };
