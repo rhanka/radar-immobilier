@@ -31,6 +31,10 @@ const cases = [
     [`${root}classification-projection.ts`, 'const after = catalogVersion(await readClassificationCatalog(db, sub, workspaceId));', 'const after = before;'],
     [`${root}classification-projection.ts`, 'const final = await readProjectionScope(db, sub, workspaceId, citySlug, "signal");', 'const final = result.scope;'],
   ] },
+  { id: 'document-budget-reset', suite: 'tests/integration/classification-races.spec.ts', test: 'retry source/catalog drift', edits: [
+    [`${root}classification-search.ts`, 'const enrichment = createDocEnrichmentContext(2000);', 'let enrichment = createDocEnrichmentContext(2000);'],
+    [`${root}classification-search.ts`, 'const nodes = await readSignalPopulation', 'enrichment = createDocEnrichmentContext(2000);\n    const nodes = await readSignalPopulation'],
+  ] },
 ];
 function run(entry, phase) {
   const report = `${evidence}/${entry.id}-${phase}.json`;
