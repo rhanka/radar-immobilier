@@ -2,8 +2,7 @@ import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
-import { readFileSync, writeFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { generateKeyPairSync } from 'node:crypto';
 import { once } from 'node:events';
 import { setTimeout as delay } from 'node:timers/promises';
@@ -11,8 +10,10 @@ const require = createRequire('/workspace/packages/immo-mcp/package.json');
 const { SignJWT } = require('jose');
 const { Pool } = require('pg');
 for (const [name, version] of [['cluster-mesh', '0.22.0'], ['artifacts', '0.2.0'], ['mcp-platform', '0.4.0'], ['mcp-auth', '0.2.1']]) {
-  const entry = require.resolve('@sentropic/' + name);
-  const metadata = JSON.parse(readFileSync(resolve(dirname(entry), '../package.json')));
+  const installed = ['/workspace/packages/immo-mcp/node_modules', '/workspace/node_modules']
+    .map((base) => `${base}/@sentropic/${name}/package.json`).find(existsSync);
+  assert.ok(installed, name);
+  const metadata = JSON.parse(readFileSync(installed));
   assert.equal(metadata.version, version);
   console.log('runtime package', name, version);
 }
