@@ -4,6 +4,28 @@ import { describeDb } from "../../src/services/facets/workspace-archive-fixture.
 import { legacyFacadeFixture } from "./mcp-signal-search-legacy-fixture.js";
 
 describeDb("Pre-6H facade authority and maintenance", () => {
+  it.each(["cutover-closed", "retired"] as const)("never reopens a legacy reader fenced as %s", async (state) => {
+    const f = await legacyFacadeFixture("legacy", state);
+    const legacy = await f.request("/api/graph-signals/synthetic-city");
+    const response = await f.search("&showDiscarded=1");
+    expect(response.status).toBe(state === "retired" ? 410 : 503);
+    expect(response.status).toBe(legacy.status);
+    expect(await response.json()).toEqual({ error: state === "retired" ? "legacy_retired" : "legacy_cutover_closed" });
+    expect(f.head).not.toHaveBeenCalled();
+    expect(f.forViewer).not.toHaveBeenCalled();
+  });
+  it("propagates legacy archive failure and bypasses it only for explicit reveal", async () => {
+    const f = await legacyFacadeFixture();
+    f.forViewer.mockRejectedValue(new Error("synthetic archive failure"));
+    const legacy = await f.request("/api/graph-signals/synthetic-city");
+    const response = await f.search();
+    expect(legacy.status).toBe(503);
+    expect(response.status).toBe(503);
+    expect(await response.json()).toEqual({ error: "discarded_signals_unavailable" });
+    expect(f.head).not.toHaveBeenCalled();
+    expect((await f.search("&showDiscarded=1")).status).toBe(200);
+    expect(f.forViewer).toHaveBeenCalledTimes(2);
+  });
   it("checks current approval and 0/1/N membership even for a revealed empty city", async () => {
     const f = await legacyFacadeFixture();
     await f.data.pool.query("DELETE FROM graph_nodes");
