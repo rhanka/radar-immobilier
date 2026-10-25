@@ -39,9 +39,11 @@ export async function mcpFixture() {
   const store = { head } as unknown as ObjectStore;
   let status: number | undefined;
   let error = "";
+  let reads = 0;
   const app = createApp({ db: data.db, store, auth, discarded: EMPTY_DISCARDED_SIGNALS,
     checkDb: async () => ({ ok: true }), checkObjectStore: async () => ({ ok: true }) });
   app.get(MCP_SIGNAL_SEARCH_PATH, async (c) => {
+    reads++;
     if (status) return c.json({ error, successor: "https://private.invalid/token" }, status as 503);
     try {
       const args = decodeMcpSignalSearch(new URL(c.req.url).searchParams);
@@ -94,7 +96,7 @@ export async function mcpFixture() {
       // The imported database fixture owns pool shutdown and database removal.
     }
   };
-  return { data, signal, connect, close, receiver, mcp, exchange, requests, head,
+  return { data, signal, connect, close, receiver, mcp, exchange, requests, head, reads: () => reads,
     upstreamError: (nextStatus: number | undefined, nextError = "") => { status = nextStatus; error = nextError; } };
 }
 export type McpFixture = Awaited<ReturnType<typeof mcpFixture>>;
