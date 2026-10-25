@@ -20,6 +20,15 @@ export async function listTestBucketKeys(client: S3Client, bucket: string): Prom
   return keys.sort();
 }
 
+export function assertAttributedTestObjects(keys: Iterable<string>, baseline: ReadonlySet<string>,
+  attributable: ReadonlySet<string>): void {
+  for (const key of keys) {
+    if (!baseline.has(key) && !attributable.has(key)) {
+      throw new Error("[contract-violation] undeclared S3 object without preparation attribution");
+    }
+  }
+}
+
 /** Report every cleanup error without preventing the remaining resources from closing. */
 export async function cleanupArtifactTestResources(resources: {
   s3: S3Client | undefined;
