@@ -3,6 +3,7 @@ import { generateKeyPair, SignJWT, type KeyLike } from "jose";
 import type { TokenKeySource } from "@sentropic/oauth-verify";
 import type { Hono } from "hono";
 import { createImmoHttpApp, type ImmoHttpConfig } from "./server-http.js";
+import { signalSearchBody, signalSearchItem } from "./signal-search-test-fixture.js";
 import { HttpDataSource } from "./data-source.js";
 import { HttpRawDataSource } from "./raw-data.js";
 import { createIsolatedExchangeFixture, exchangeDepsFor } from "./test-exchange-fixtures.js";
@@ -124,8 +125,8 @@ describe("sessions and egress on 0.1.0", () => {
       const request = new Request(input, init);
       seen.push(request);
       const path = new URL(request.url).pathname;
-      if (path === "/api/graph-signals/longueuil") {
-        return Response.json({ nodes: [{ id: "sig-1", type: "Signal" }] });
+      if (path === "/api/v1/mcp/facets/signals/search") {
+        return Response.json(signalSearchBody("longueuil", [signalSearchItem("longueuil", { id: "sig-1" })]));
       }
       if (path.startsWith("/api/geo/collections/")) {
         return Response.json({ features: [], numberMatched: 0 });
@@ -169,12 +170,12 @@ describe("sessions and egress on 0.1.0", () => {
     expect(fixture.issuedExchangedTokens).toHaveLength(0);
   });
 
-  it("forwards the user bearer to graph-signals with exchanged delegation (P4)", async () => {
+  it("sends only the exchanged bearer to scoped signal search", async () => {
     // P4: isolated fixture supplies the exchanged delegation
     const { seen, token, fixture } = await captureEgress([
       ["search_signals", { city: "longueuil" }, 10], // P4 exchanged egress marker
     ]);
-    expect(seen.map((request) => request.url)).toEqual([`${BASE_URL}/api/graph-signals/longueuil`]);
+    expect(seen.map((request) => request.url)).toEqual([`${BASE_URL}/api/v1/mcp/facets/signals/search?city=longueuil&limit=20`]);
     expect(seen[0]?.headers.get("authorization") /* P4 exchanged */).toBe(`Bearer ${fixture.issuedExchangedTokens[0]}`);
     expect(seen[0]?.headers.get("authorization")).not.toBe(`Bearer ${token}`);
   });
@@ -186,9 +187,9 @@ describe("sessions and egress on 0.1.0", () => {
       ["search_signals", { city: "longueuil" }, 22],
     ]);
     expect(seen.map((request) => request.url)).toEqual([
-      `${BASE_URL}/api/graph-signals/longueuil?showDiscarded=1`,
-      `${BASE_URL}/api/graph-signals/longueuil`,
-      `${BASE_URL}/api/graph-signals/longueuil`,
+      `${BASE_URL}/api/v1/mcp/facets/signals/search?city=longueuil&limit=20&showDiscarded=1`,
+      `${BASE_URL}/api/v1/mcp/facets/signals/search?city=longueuil&limit=20`,
+      `${BASE_URL}/api/v1/mcp/facets/signals/search?city=longueuil&limit=20`,
     ]);
     for (const request of seen) {
       expect(request.headers.get("authorization")).toBe(`Bearer ${fixture.issuedExchangedTokens[0]}`);
@@ -206,7 +207,7 @@ describe("sessions and egress on 0.1.0", () => {
         baseUrl: BASE_URL,
         fetchImpl: async (input, init) => {
           seen.push(new Request(input, init));
-          return Response.json({ nodes: [{ id: "sig-1", type: "Signal" }] });
+          return Response.json(signalSearchBody("longueuil", [signalSearchItem("longueuil", { id: "sig-1" })]));
         },
       }),
       exchange: exchangeDepsFor(fixture),
@@ -246,7 +247,7 @@ describe("sessions and egress on 0.1.0", () => {
       expect(header).not.toBe(`Bearer ${subject}`);
     }
     expect(seen.map((request) => request.url)).toEqual(
-      Array<string>(3).fill(`${BASE_URL}/api/graph-signals/longueuil?showDiscarded=1`),
+      Array<string>(3).fill(`${BASE_URL}/api/v1/mcp/facets/signals/search?city=longueuil&limit=20&showDiscarded=1`),
     );
   });
 
