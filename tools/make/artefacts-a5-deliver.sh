@@ -2,7 +2,7 @@
 set -euo pipefail
 action=${1:?}
 ROOT=$(pwd -P)
-BASE=$(git rev-parse c49bb854)
+BASE=$(git rev-parse 5ea88ce1)
 LOCAL=$ROOT/tmp/a5-delivery.git
 [[ $ENV == test-artefacts-a5 ]]
 if [[ $action == setup ]]; then
@@ -26,7 +26,7 @@ allowed() {
   case $1 in
     packages/immo-mcp/*|packages/artifacts-host/*|package.json|package-lock.json|api/Dockerfile) ;;
     tools/make/artefacts-a5*|tools/h4-mcp.mk|docs/operator/artefacts-mcp.md) ;;
-    api/tests/integration/artifacts-h4-*) ;;
+    api/tests/*artifacts*|api/tests/integration/artifacts-*|api/drizzle/0024_artifacts_coordinator.sql|api/drizzle/meta/_journal.json) ;;
     plan/ARTEFACTS-A5-BRANCH_feat_artefacts-mcp-a5.md|RAPPORT-SOL-ARTEFACTS-A5.md) ;;
     *) echo "Outside A5 scope: $1" >&2; exit 2;;
   esac
@@ -42,7 +42,8 @@ audit() {
     [[ $subject != *$'\n'* && $subject =~ ^(feat|fix|test|docs|chore|refacto)\([a-z0-9-]+\):\ .+ ]]
     git show --format= --numstat "$sha" | stats
     git show -s --format='%H %s' "$sha"
-  done < <(git rev-list --reverse "$BASE..HEAD")
+  done < <(git rev-list --reverse --no-merges "$BASE..HEAD")
+  git log --merges --format='%H %P %s' "$BASE..HEAD"
 }
 case $action in
   stage) for path in $FILES; do allowed "$path"; git add -- "$path"; done;;
