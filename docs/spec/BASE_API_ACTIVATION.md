@@ -409,6 +409,67 @@ evidence, qualified mapping, drain proof, old-instance shutdown proof, writer
 coverage, manifest and D5 dispositions, deployment access and target database
 identity. B5, final reviews, remote CI and combined delivery keep their scope.
 
+## Preprod short path: P1/O1 operator vehicle
+
+This section governs the preprod personal-signals/baskets path (6G + attachments
++ 6H), with 6K closed. It delivers an administrator-operated vehicle, not a
+deployment or an activation receipt. **Do not open 6H until the successor MCP
+adapter for `search_signals` is deployed and qualified.** UI-H, P2/6K and the MCP
+implementation are separate deliveries. UI and MCP remain unavailable during
+this API-only window; CD remains frozen by default.
+
+Use `deploy/base-preprod/operator.mk` from the repository root. It includes no
+other Makefile, discovers no environment file and runs no host Node/Python.
+Prerequisites are GNU Make, Bash, jq, kubectl, gh, RTK and an authorized namespace
+administrator. The conductor needs no exec/admin identity. Never extract a Secret,
+print container environments, transfer cookies/bearers, or put access parameters
+in references. The Job consumes existing ConfigMap/Secret **references** only.
+
+Prepare owner JSON outside Git using `deploy/base-preprod/owner-input.example.json`.
+Every angle-bracket value is deliberately rejected until replaced. Subjects are
+opaque explicit inputs. Preserve immutable per-action input files and evidence.
+`database` must match the effective database name, role and schema. The release
+reference starts with the full 40-character SHA and points to the qualified image
+digest dossier. Supply backup SHA-256 and a restore-rehearsal receipt/timestamp;
+this tool neither dumps nor restores the operational database.
+
+Initially bind the target workspace slug with `workspaceId:null` for inspection
+and initialization. The initializer creates or resolves its UUID; copy the actual
+`result.workspaceId` into subsequent inputs. Never invent a destination UUID.
+Use a fresh `jobName` per action. Set `operation` to the exact script action.
+The two distinct subjects in `moderators` and `managers` must be the same approved
+pair. Include **every** approved account in attachments, including empty history.
+
+The examples below are templates for the administrator, not commands executed
+against preprod by this delivery. Every OUTPUT is a new absolute directory.
+
+```sh
+rtk make -f deploy/base-preprod/operator.mk validate INPUT='<OWNER_INPUT_JSON>' OUTPUT='<NEW_VALIDATION_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk permissions INPUT='<OWNER_INPUT_JSON>' OUTPUT='<NEW_PERMISSION_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk inventory INPUT='<OWNER_INPUT_JSON>' OUTPUT='<NEW_INVENTORY_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk render-job INPUT='<INSPECT_INPUT_JSON>' OUTPUT='<NEW_RENDER_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk inspect INPUT='<INSPECT_INPUT_JSON>' OUTPUT='<NEW_INSPECTION_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk init INPUT='<INIT_INPUT_JSON>' OUTPUT='<NEW_INIT_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk attach INPUT='<ATTACH_INPUT_JSON>' OUTPUT='<NEW_ATTACHMENT_DIR>' ENV=preprod
+```
+
+Inspection performs a repeatable-read, read-only transaction: identity, release
+migration hashes, approved `id/sub/status`, workspace identities, memberships,
+separate capabilities, attachments and discrepancies, global 6H/6K states,
+effective table/lock/function/index-owner privileges and transaction counts.
+It does not query documents, event payloads, account names/emails, connection
+parameters or other sessions' SQL. A missing migration/table fails closed;
+inspection never migrates or repairs it. Compare the readback with the ratified
+roster/grants; excess grants require the audited membership command.
+
+All Jobs use the qualified API digest, `/workspace`, `radar-app`, no automounted
+service-account token, uid/gid 1001, no privilege escalation, no retry, 540-second
+deadline and permanent `/bin/false` readiness. Check `radar-api`'s selector and
+`publishNotReadyAddresses`, and verify no ready EndpointSlice selects the Job.
+Do not exec into a scaled-down API Deployment. A compact termination receipt
+hashes the complete stdout receipt; collection checks both. Job Complete alone
+is insufficient. Keep the Job on any failure, and retain the full hashed evidence.
+
 ## B5 standalone acceptance profile
 
 B5 proves the B1–B4 implementation through `createApp` and PostgreSQL,
