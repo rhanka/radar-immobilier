@@ -33,6 +33,7 @@ export async function readSignalClassification(deps: ClassificationReadDeps, sub
         }
         return { target, readiness: "source_unavailable" as const, displayedFingerprint: null, card: null, facets };
       }
+      if (facets.effectiveHidden && !query.reveal) throw new ClassificationError("reveal_required");
       return projectClassificationItem(deps.store, { node, target, day: classificationDay(node.props), facets },
         enrichment, deps.classification?.apiOrigin);
     });
