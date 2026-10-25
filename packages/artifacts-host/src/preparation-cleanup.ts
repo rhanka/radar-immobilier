@@ -17,7 +17,6 @@ export function startPreparationCleanup(pool: pg.Pool, store: ReturnType<typeof 
       const client = await executor.beginFinalization();
       let error: unknown;
       try {
-        await client.beginReadCommitted();
         await scheduleBoundedPreparationCleanup({ intents: store, refs: store,
           claims: createPostgresDeletionClaimStore(client), blobs }, Date.now());
         await client.commit();
