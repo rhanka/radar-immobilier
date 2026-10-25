@@ -32,6 +32,7 @@ import {
 import { createMcpArtifactAdapter } from "../../../packages/artifacts-host/src/mcp-app-adapter.js";
 import { auth, cookie, migrationsFolder } from "./artifacts-h2.helpers.js";
 import { cleanupArtifactTestResources } from "./artifacts-s3.helpers.js";
+import { createBarrierFaultProbe, startCorrelatedBarrier } from "./artifacts-e3-barrier.helpers.js";
 import { controlRoute } from "../../src/artifacts/control-route.js";
 import { loadConfig } from "../../src/config.js";
 import {
@@ -48,7 +49,6 @@ import {
   committedState,
   requireCommitBarrier,
   requireHostExecute,
-  requirePhaseInjectionBinding,
   requireOutcomeContract,
   requireSelectedProfile,
   type AuthorizeCommit,
@@ -542,31 +542,87 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
   });
 
   it.each(["schema-infrastructure", "unqualified"] as const)(
-    "requires an explicit phase-injection joint for E3 cause %s, never optional SQL",
+    "maps one real E3 %s fault after a correlated barrier without retry",
     async (phase) => {
-      // r2 imposes no LOCK TABLE / pg_catalog.* or SET LOCAL shape. A
-      // conforming coordinator using implicit PostgreSQL locks must fail here
-      // by named joint, never on an optional-form assertion.
-      const inject = await requirePhaseInjectionBinding();
-      const cause = Object.assign(new Error(createPrivateMarker(`phase-${phase}`)), { code: "55P03" });
-      const probe = await inject({ pool, phase, cause });
-      const barrier = await requireCommitBarrier();
+      const point = "after_finalization_locks_before_guard";
+      const barrier = await requireCommitBarrier([point]);
+      const probe = createBarrierFaultProbe(pool);
       const { host } = await composeQ2Host(barrier, { pool: probe.pool });
       try {
         for (const transport of ["http", "mcp"] as const) {
           const before = await committedState(pool);
-          Object.assign(probe.evidence, { armed: true, injections: 0, attempts: 0 });
-          const outcome = await failViaTransport(host, { method: "POST", path: "/ensure", body: {
-            bindingName: `q2-phase-${phase}-${transport}`,
-            idempotencyKey: `q2-phase-${phase}-${transport}`,
-          } }, transport);
-          expect(outcome.failure).toMatchObject({ category: "provider_unavailable", httpStatus: 503,
-            publicCode: "capability_unavailable", retriable: true, cause, commitState: "not_committed" });
-          expect(probe.evidence).toMatchObject({ injections: 1, attempts: 1, phase });
+          const initial = { ...probe.evidence, errors: [...probe.evidence.errors] };
+          let guardCalls = 0;
+          const guard: AuthorizeCommit = async (context, transaction) => {
+            guardCalls++;
+            return authorizeTransaction(context, transaction);
+          };
+          const run = startCorrelatedBarrier(barrier, point, (register) =>
+            failViaTransport(host, { method: "POST", path: "/ensure", body: {
+              bindingName: `q2-e3-${phase}-${transport}`, idempotencyKey: `q2-e3-${phase}-${transport}`,
+            } }, transport, guard, register));
+          const holder = await pool.connect();
+          try {
+            await run.reached;
+            expect(guardCalls).toBe(0);
+            expect(probe.evidence.writes).toBeGreaterThan(initial.writes);
+            const paused = { ...probe.evidence };
+            await holder.query("BEGIN");
+            // Host-owned contention, independent of the provider's SQL forms.
+            if (phase === "schema-infrastructure") {
+              await holder.query("LOCK TABLE account_users IN ACCESS EXCLUSIVE MODE");
+            } else {
+              expect((await holder.query("SELECT sub FROM account_users WHERE sub=$1 FOR UPDATE", [ACTOR])).rowCount).toBe(1);
+            }
+            await probe.setTimeout(phase === "schema-infrastructure" ? "lock" : "statement");
+            run.release();
+            const outcome = await run.pending;
+            const code = phase === "schema-infrastructure" ? "55P03" : "57014";
+            expect(outcome.failure).toMatchObject({ category: "provider_unavailable", httpStatus: 503,
+              publicCode: "capability_unavailable", retriable: true,
+              cause: { code }, commitState: "not_committed" });
+            expect(probe.evidence.errors.slice(initial.errors.length)).toEqual([code]);
+            expect(probe.evidence.begins).toBe(paused.begins);
+            expect(probe.evidence.commits).toBe(initial.commits);
+            expect(probe.evidence.rollbacks).toBe(paused.rollbacks + 1);
+            expect(guardCalls).toBe(1);
+            expect(await committedState(pool)).toEqual(before);
+          } finally {
+            await holder.query("ROLLBACK"); holder.release(); run.release();
+            await run.pending.catch(() => {});
+          }
+        }
+
+        // A successful resume must still read changed authority, never bypass it.
+        const before = await committedState(pool);
+        let guardCalls = 0;
+        const invocation = invocationFor(async (context, transaction) => {
+          guardCalls++;
+          return authorizeTransaction(context, transaction);
+        }, `e3-revoked-${phase}`);
+        const execute = requireHostExecute(host);
+        const run = startCorrelatedBarrier(barrier, point, (register) => {
+          register(invocation);
+          return execute({ method: "POST", path: "/ensure", body: {
+            bindingName: `q2-e3-revoked-${phase}`, idempotencyKey: `q2-e3-revoked-${phase}`,
+          } }, invocation);
+        });
+        try {
+          await run.reached;
+          expect(guardCalls).toBe(0);
+          await pool.query("UPDATE account_users SET status='pending' WHERE sub=$1", [ACTOR]);
+          run.release();
+          const outcome = await run.pending;
+          assertOutcomeFailure(outcome, invocation.invocationId);
+          expect(outcome).toMatchObject({ failure: { publicCode: "access_denied", httpStatus: 403,
+            retriable: false, commitState: "not_committed" } });
+          expect(guardCalls).toBe(1);
           expect(await committedState(pool)).toEqual(before);
+        } finally {
+          run.release(); await run.pending.catch(() => {});
+          await pool.query("UPDATE account_users SET status='approved' WHERE sub=$1", [ACTOR]);
         }
       } finally {
-        probe.evidence.armed = false;
         (host["close"] as () => void)();
       }
     },
