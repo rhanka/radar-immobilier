@@ -17,6 +17,7 @@ RUN_DIR=$TASK_DIR/runtime
 LOG_DIR=$TASK_DIR/$(date -u +%Y%m%dT%H%M%S)-$$
 mkdir -p "$RUN_DIR" "$LOG_DIR"
 echo "Evidence: $LOG_DIR"
+git show 77cb9553:package-lock.json > "$LOG_DIR/baseline-lock.json"
 while :; do
   names=$(docker ps --filter name=radar-test- --format '{{.Names}}')
   [[ -n $names ]] || break
