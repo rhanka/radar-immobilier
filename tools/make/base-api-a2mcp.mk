@@ -6,6 +6,9 @@ export CMD
 override FILES := $(value FILES)
 override MSG := $(value MSG)
 export FILES MSG
+override SCOPE := $(value SCOPE)
+override MCP_SCOPE := $(value MCP_SCOPE)
+export SCOPE MCP_SCOPE
 .PHONY: inspect setup stage commit audit bundle test check mutations status
 inspect:
 	@rtk bash -euc 'eval "$$CMD"'
