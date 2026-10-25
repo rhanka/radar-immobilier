@@ -34,6 +34,7 @@
   - [x] Compact Job receipt hashes complete output; Make has explicit inputs only.
   - [x] Digest-pinned Job is non-root, tokenless, bounded and permanently unready.
   - [x] Independent roster, bound maintenance attestations and full receipt hash enforced.
+  - [x] Expected DB name/role/schema and effective lock/drop privileges gate mutation.
 - [ ] Lot 3: permissions, maintenance collection, closure and selective reopening.
   - [x] Explicit Kubernetes/Actions controls and projected workload/route inventories.
   - [x] Closure preserves inventories; collection refuses surviving processes and ready endpoints.
