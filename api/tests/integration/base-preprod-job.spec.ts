@@ -19,6 +19,19 @@ beforeEach(() => {
 afterEach(() => { vi.resetAllMocks(); vi.restoreAllMocks(); vi.unstubAllEnvs(); process.exitCode = undefined; });
 
 describe("operator Job destination", () => {
+  it("should hash and retain a pending activation receipt while exiting unsuccessfully", async () => {
+    const { runJob } = await import("../../src/scripts/base-preprod-job.js");
+    mocks.execute.mockResolvedValue({ rows: [invocation.database] });
+    mocks.spawn.mockReturnValue({ status: 0,
+      stdout: '{"workspaceId":"11111111-1111-4111-8111-111111111111","status":"activation-committed-readback-pending"}' });
+    await runJob({ ...invocation, action: "activate", binding: { ...binding,
+      workspaceId: "11111111-1111-4111-8111-111111111111" } });
+    const termination = JSON.parse(String(mocks.write.mock.calls[0]?.[1]));
+    expect(termination.status).toBe("complete");
+    expect(termination.sha256).toMatch(/^[a-f0-9]{64}$/);
+    expect(process.exitCode).toBe(2);
+    expect(String(vi.mocked(process.stdout.write).mock.calls[0]?.[0])).toContain("activation-committed-readback-pending");
+  });
   it("should preserve the intended destination and image on initialization and replay", async () => {
     const { runJob } = await import("../../src/scripts/base-preprod-job.js");
     const workspaceId = "11111111-1111-4111-8111-111111111111";
