@@ -24,20 +24,24 @@ for (const [id, file, before, after, suite, assertion] of cases) {
   const bytes = readFileSync(file);
   const source = bytes.toString("utf8");
   if (source.split(before).length !== 2) throw new Error(`Nonunique mutation anchor: ${id}`);
-  control(run(suite, `${id}-before`), id);
+  const initial = run(suite, `${id}-before`);
+  control(initial, id);
   let mutant;
   try {
     writeFileSync(file, source.replace(before, after));
     mutant = run(suite, `${id}-mutant`);
   } finally { writeFileSync(file, bytes); }
   if (digest(readFileSync(file)) !== digest(bytes)) throw new Error(`Restoration failed: ${id}`);
-  control(run(suite, `${id}-restored`), id);
+  const restored = run(suite, `${id}-restored`);
+  control(restored, id);
   const failed = mutant.report.testResults.flatMap((s) => s.assertionResults ?? [])
     .filter((a) => a.status === "failed");
   const named = failed.find((a) => a.fullName.includes(assertion)
     && a.failureMessages.some((m) => m.includes("AssertionError")));
   if (mutant.status === 0 || !named) throw new Error(`No named business assertion killed ${id}`);
   results.push({ id, file, suite, assertion: named.fullName, verdict: "killed", restoredSha256: digest(bytes),
+    controls: { before: initial.report.numTotalTests, restored: restored.report.numTotalTests,
+      failed: 0, skipped: 0 }, mutantFailedTests: mutant.report.numFailedTests,
     failedAssertions: failed.map((a) => a.fullName) });
   writeFileSync("/evidence/mutations.json", JSON.stringify(results, null, 2) + "\n");
   console.log(`KILLED ${id}; exact-byte restoration and controls PASS`);
