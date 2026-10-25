@@ -1,7 +1,7 @@
 # Feature: A2-BASE facade integration
 
 ## Objective
-- [ ] Deliver T08/T09/T13/T14 from e32138c9, without activation or push.
+- [x] Deliver T08/T09/T13/T14 from e32138c9, without activation or push.
 
 ## Scope / Guardrails
 - [x] Make only; no environment files, Python, dependencies or migrations.
@@ -37,7 +37,7 @@
 - [x] T13 state group written: canonical parity while legacy serves, legacy 503/410 with independent open scoped reads, missing/legacy/barrier epochs and unresolved history refusals.
 - [x] Production facade filter qualification includes a late matching PostgreSQL card with limit=1 and preserved firm status.
 - [x] Initial T08/T09 gate PASS: 74 API tests across six explicit files plus eight MCP baseline cases, no failures/skips; documentary waiting measured 2,025ms/one resolution; owned cleanup status 0.
-- [ ] T14: explicit MCP E2E runner, complete HTTP search through production facade and image evidence.
+- [x] T14: explicit MCP E2E runner, complete HTTP search through production facade and image evidence.
 - [x] T14 network fixture written: SDK/Streamable HTTP, socket token issuer verifying incoming signatures, signed exchanged JWT/JWKS, real createApp/A3 facade and PostgreSQL; no business response injection.
 - [x] T14 seven socket E2E cases written: three legacy states, two humans, same-human concurrent renewed scopes, cross-session refusal, warm-cache revocations and capability closure.
 - [x] An eighth network case covers private refusal of original bearer, encoded/suffixed paths, POST, duplicate and authority query keys; header-only middleware covers malformed signal paths without widening A3 authority.
@@ -50,9 +50,11 @@
 - [x] Qualification: scoped checks and authority/masking mutations, no required skipped cases.
 - [x] Campaign 20261025T222444-6-qualify: API/MCP/integration typechecks and lint PASS, 340 API cases/32 files, 95 MCP cases/13 files, zero failures/skips; eleven named mutants killed with 22 passing controls and exact restoration; eight socket E2E cases pass; documentary budget 2,031ms/one resolution; CT-8 and owned cleanup pass.
 - [x] Image build reached valid bundles/declaration output but Buildx attempted a write under read-only ~/.docker. Set BUILDX_CONFIG to the owned workspace evidence path and repeat only image qualification and the explicit T08 regressions; runtime source is unchanged.
+- [x] Image campaign 20261025T223128-5-image PASS on d39eaa8c: static checks, 72 API + eight MCP baseline cases, then eight real network cases against compiled API/MCP inside image sha256:6bcbbba4cf2a38d06d4634515da15b9475e4959d7c859802e4aee9c811e59271, no source/dependency mounts. Zero failures/skips; owned cleanup status 0 and no container/volume/network remains.
+- [x] Independent audit: eleven restored mutation file hashes match qualified 2ce816f8 exactly; 22 controls/114 passing executions. API/MCP source bytes are identical at 2ce816f8, image d39eaa8c and final documentary delivery.
 
 ## Docs consolidation
-- [ ] French companion report with evidence, per-commit numstat, delivered SHA and bundle hash.
+- [x] French companion report with evidence, per-commit numstat, delivered SHA and bundle hash; report remains outside its own hashed bundle. Final commit updates only this plan, preserving qualified runtime bytes.
 
 ## Merge & close
 - [ ] Integration owner imports bundle; T15/H5 and T16/T17 delivery receipts remain separately assigned.
