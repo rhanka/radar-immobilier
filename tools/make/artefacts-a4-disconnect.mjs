@@ -29,9 +29,11 @@ export async function exerciseDisconnects({ db, child, call, readCount }) {
   assert.notEqual(replacement[0].pid, idle[0].pid);
 
   let pending;
-  await db.query('BEGIN');
+  // Hold the lock on a dedicated client; activity polls need fresh autocommit snapshots.
+  const lock = await db.connect();
+  await lock.query('BEGIN');
   try {
-    await db.query('LOCK TABLE account_users IN ACCESS EXCLUSIVE MODE');
+    await lock.query('LOCK TABLE account_users IN ACCESS EXCLUSIVE MODE');
     pending = call();
     // Attach immediately so a child crash cannot create an unhandled rejection in the probe.
     pending.catch(() => {});
@@ -54,7 +56,8 @@ export async function exerciseDisconnects({ db, child, call, readCount }) {
     assert.equal(readCount(), before + 1, 'failed authorization must have no business effect');
     alive();
   } finally {
-    await db.query('ROLLBACK');
+    await lock.query('ROLLBACK');
+    lock.release();
     await pending?.catch(() => {});
   }
   assert.notEqual((await call()).isError, true);
