@@ -4,7 +4,7 @@ import { projectSignalCard, publicDocumentUrl } from "./classification-card.js";
 import { boundedClassificationJson, PAYLOAD_MAX_BYTES } from "./classification-search.js";
 import { classificationFailure } from "./classification-errors.js";
 import { SignalFacets } from "./classification-contracts.js";
-import { syntheticFacets } from "./classification-counts.test.js";
+import { syntheticFacets } from "./classification-test-fixture.js";
 
 describe("bounded classification presentation", () => {
   it("should preserve canonical classification, citations and page while declaring Unicode truncations", () => {
