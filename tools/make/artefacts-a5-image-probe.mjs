@@ -54,7 +54,9 @@ try {
   assert.deepEqual(await call('artifacts_publish', args), published);
   assert.equal((await call('artifacts_list', {})).total, 1);
   assert.equal((await call('artifacts_get', { artifactId })).currentReleaseId, published.releaseId);
-  assert.equal((await client.call('artifacts_publish', { ...args, files: [...files].reverse() })).isError, true);
+  const conflict = await client.call('artifacts_publish', { ...args, files: [...files].reverse() });
+  assert.equal(conflict.isError, true);
+  assert.deepEqual(JSON.parse(conflict.content[0].text), { error: 'conflict', retryable: false });
   await client.restart();
   assert.equal((await client.list()).length, 16);
   assert.deepEqual(await call('artifacts_publish', args), published);
