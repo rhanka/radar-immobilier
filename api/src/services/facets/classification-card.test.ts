@@ -15,7 +15,8 @@ describe("bounded classification presentation", () => {
           documentUrl: "https://docs.example.test/pv.pdf", title: "t".repeat(1100),
         })),
       } });
-    const card = projectSignalCard(canonical, "2026-01-01");
+    const enriched = { ...canonical, docRefs: canonical.docRefs.map((ref) => ({ ...ref, title: "t".repeat(1100) })) };
+    const card = projectSignalCard(enriched, "2026-01-01");
     expect(card.stage).toBe(canonical.classification.etape);
     expect(card.automaticExclusionReason).toBe(canonical.classification.exclusion_reason);
     expect(card.label.length).toBeLessThanOrEqual(1024);
