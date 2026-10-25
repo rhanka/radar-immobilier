@@ -14,7 +14,7 @@ const config: ImmoHttpConfig = {
 };
 let privateKey: KeyLike; let publicKey: KeyLike;
 beforeAll(async () => { ({ privateKey, publicKey } = await generateKeyPair("RS256")); });
-const token = (client: string | undefined = "cli") => new SignJWT({ scope: "immo:read immo:search", client_id: client })
+const token = (client: string | undefined = "cli", scope = "immo:read immo:search") => new SignJWT({ scope, client_id: client })
   .setIssuer(config.issuer).setAudience(config.resource).setSubject("alice")
   .setIssuedAt().setExpirationTime("5m").setProtectedHeader({ alg: "RS256" }).sign(privateKey);
 const headers = (bearer: string, session?: string) => ({
@@ -66,6 +66,12 @@ describe("P6 composed effects", () => {
     expect(success.result.content[0].type).toBe("text");
     expect(JSON.parse(success.result.content[0].text)).toHaveProperty("lots");
     expect(effect).toHaveBeenCalledTimes(1);
+    const reduced = await token("cli", "immo:read");
+    const scopeDenied = await (await call(app, reduced, sid)).json();
+    expect(scopeDenied.result.isError).toBe(true);
+    expect(scopeDenied.result.content[0].text).toContain("scope_denied:immo:search");
+    expect(effect).toHaveBeenCalledTimes(1);
+    expect(authorize).toHaveBeenCalledTimes(1);
     approved = false;
     const denied = await (await call(app, bearer, sid)).json();
     expect(denied.result.isError).toBe(true);
