@@ -50,6 +50,7 @@ export function createArtifactsPool(
     password: params.password,
     database: params.database,
     connectionTimeoutMillis: 3000,
+    options: "-c lock_timeout=1000 -c statement_timeout=5000",
     max,
   });
   pool.on("error", (error) => console.error("artifact pool idle client error", error.message));
