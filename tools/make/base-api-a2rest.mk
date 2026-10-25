@@ -9,7 +9,7 @@ export FILES MSG
 override SCOPE := $(value SCOPE)
 override MCP_SCOPE := $(value MCP_SCOPE)
 export SCOPE MCP_SCOPE
-.PHONY: inspect setup stage commit audit bundle test check mutations status
+.PHONY: inspect setup stage commit audit bundle test check mutations image qualify status
 inspect:
 	@rtk bash -euc 'eval "$$CMD"'
 setup stage commit audit bundle:
