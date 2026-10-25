@@ -67,6 +67,8 @@
 - [ ] Lot gate: unit tests, real createApp/PostgreSQL tests, named behavioral mutations, targeted lint/typecheck.
 - [x] API and BASE regression campaign passed: 142 cases across 15 explicit files, no failures/skips, owned cleanup passed; static checks and mutations remain to qualify the lot.
 - [x] Two static campaigns stopped during npm install on TLS resets; host probes confirmed registry TLS failures too. Seed only the existing integrity-checked npm download cache read-only into container tmpfs, prefer cached bytes, retain npm ci and the unchanged lockfile; no user npm configuration is mounted.
+- [ ] Complete typecheck/lint and execute the eight mutation controls: registry TLS resets persist with cached downloads, and two read-only network probes outside isolation were not executed because automatic permission review timed out. Do not mark the lot accepted from the 142 passing functional cases alone.
+- [x] Scope audit confirms unchanged MCP/A3/H5, app/auth/startup, dependency manifests/lockfile and migration bytes; final delivery remains a bounded, inactive API candidate.
 - [x] Machine-serialized runner written with explicit file scopes, a 60-second wait, disk monitoring, one-worker container configuration and inherited ownership-checked cleanup.
 - [x] Eight named mutants prepared in the isolated container source copy, with a control before each, exact-byte restoration and a passing restored control required; execution pending.
 - [x] Workspace race barriers release on early refusal too, so negative mutations cannot leave their coordinator waiting for a callback that already failed.
