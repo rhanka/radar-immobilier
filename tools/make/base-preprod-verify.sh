@@ -14,12 +14,15 @@ echo "Evidence: $LOG_DIR"
 git rev-parse HEAD > "$LOG_DIR/source-commit.txt"
 git diff HEAD --no-ext-diff | sha256sum > "$LOG_DIR/source-diff.sha256"
 exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
+while ! flock -w 30 8; do
+  printf 'Waiting for the machine-wide Docker campaign lock\n' | tee -a "$LOG_DIR/campaign-wait.log"
+done
 while :; do
   busy=$(docker ps --format '{{.Names}}' | awk '/^radar-test-/')
   builds=$(pgrep -f '(^|/)[d]ocker (build|buildx build)|[d]ocker-buildx (build|buildx build|bake)|[b]uildctl build' || true)
-  if [[ -z $busy && -z $builds ]] && flock -n 8; then break; fi
-  printf 'Waiting 60s: Docker campaign busy\n%s\n%s\n' "$busy" "$builds"
-  sleep 60
+  if [[ -z $busy && -z $builds ]]; then break; fi
+  printf 'Waiting 10s: Docker campaign busy\n%s\n%s\n' "$busy" "$builds" | tee -a "$LOG_DIR/campaign-wait.log"
+  sleep 10
 done
 [[ $(df -Pk "$ROOT" | awk 'NR==2 {print $4}') -ge 8388608 ]] || { echo 'STOP: below 8 GiB free'; exit 3; }
 PROJECT=radar-$ENV
