@@ -583,7 +583,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
               cause: { code }, commitState: "not_committed" });
             expect(probe.evidence.errors.slice(initial.errors.length)).toEqual([code]);
             expect(probe.evidence.begins).toBe(paused.begins);
-            expect(probe.evidence.commits).toBe(initial.commits);
+            expect(probe.evidence.commits).toBe(paused.commits);
             expect(probe.evidence.rollbacks).toBe(paused.rollbacks + 1);
             expect(guardCalls).toBe(1);
             expect(await committedState(pool)).toEqual(before);
