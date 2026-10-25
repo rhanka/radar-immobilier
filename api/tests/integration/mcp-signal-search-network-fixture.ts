@@ -34,17 +34,23 @@ export async function networkFixture(retirement: LegacyRetirementState = "retire
   const listeners: Awaited<ReturnType<typeof listen>>[] = [];
   const clients: { client: Client; transport: StreamableHTTPClientTransport }[] = [];
   const close = async () => {
+    let failure: unknown;
     for (const { client, transport } of clients) {
-      try { await transport.terminateSession(); } finally { await client.close(); }
+      try {
+        try { await transport.terminateSession(); } finally { await client.close(); }
+      } catch (error) { failure ??= error; }
     }
     for (const { server } of listeners.reverse()) {
       server.closeAllConnections();
-      await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+      try { await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve())); }
+      catch (error) { failure ??= error; }
     }
+    if (failure) throw failure;
   };
   try {
-    const issuer = await listen(issuerApp), api = await listen(apiApp), mcp = await listen(mcpApp);
-    listeners.push(issuer, api, mcp);
+    const issuer = await listen(issuerApp); listeners.push(issuer);
+    const api = await listen(apiApp); listeners.push(api);
+    const mcp = await listen(mcpApp); listeners.push(mcp);
     exchange.config = { ...exchange.config, apiAudience: api.url, mcpResource: mcp.url + "/mcp",
       tokenEndpoint: issuer.url + "/token" };
     const jwk = await exportJWK(exchange.exchangePublicKey);
