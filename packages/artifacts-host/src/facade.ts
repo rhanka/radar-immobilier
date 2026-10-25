@@ -82,6 +82,10 @@ export function createArtifactControl(
       const write = op === "ensure" || op === "publish";
       if (write && (typeof body.idempotencyKey !== "string" || !body.idempotencyKey.trim() ||
         body.idempotencyKey.length > 256)) return invalid();
+      if (write && admission) {
+        const commit = await checkAdmission(admission, actorId);
+        if (!commit.allowed) return { status: commit.status, body: commit.body };
+      }
       const invocation = Object.freeze({ invocationId: randomUUID(), actorId, storageScopeId: scope,
         authorizeCommit: async (...args: Parameters<typeof authorizeArtifactCommit>) => {
           if (admission) {
