@@ -19,7 +19,7 @@
 - [x] A4 receipt acknowledged: twelve tools and published MCP tuple; common host/API still use artifacts 0.1.2.
 - [ ] A1 dependency: transaction participant, persistent quota/ledger, operation receipts migration and guarded production composition are not delivered in this baseline.
 - [ ] PR #918 owns Q1/Q2/helper corrections; do not modify or copy those files here.
-- [ ] CT-1/CT-2: no lease for SQL changes in the conductor register; request clarification while preparing independent A5 slices.
+- [x] CT-1/CT-2: no SQL lease found; clarification requested; keep A1 separate and activation closed without a receipt.
 - [ ] CT-8/CT-9: standalone and combined schema/image receipts remain required after A1 integration.
 
 ## Orchestration Mode (AI-selected)
@@ -30,10 +30,12 @@
 
 ## Plan / Todo (lot-based)
 - [x] Read mandatory rules, approved A5/P7 design, CT clauses and A4 handoff.
-- [ ] Compile the complete published profile and bind exactly four selected tools.
+- [x] Compile the complete published profile and bind exactly four selected tools.
 - [ ] Preserve twelve-tool parity and guarded startup; artifact request authority stays immutable.
 - [ ] Qualify profile/selection, lifecycle/composition, failure-closed bindings and discriminating mutations.
 - [ ] Qualify shared HTTP/MCP provider finalization, cross-process replay/conflict, restart, quota and denial persistence after A1 is available.
-- [ ] Run full ordinary API/MCP suites, typecheck, lint, security audit and actual runtime image proof.
+- [x] Ordinary API: 3,838 passed, 76 pending; MCP: 398 passed; host: 158 passed; separate exchange service E2E: 1 passed.
+- [x] Typecheck, lint, security audit (66 gate tests) and API build; two authority/binding mutants killed.
+- [ ] Final source qualification after semantic-refusal correction; exact runtime recovery image proof.
 - [ ] Record exact package/image/configuration provenance, limitations, delivered SHA and independently audited bundle.
 - [ ] Independent consensus reviews, remote CI and A7 deployment receipts remain external integration gates.
