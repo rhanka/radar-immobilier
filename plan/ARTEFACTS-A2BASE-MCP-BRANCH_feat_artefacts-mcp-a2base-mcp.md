@@ -31,12 +31,13 @@
 
 ## Plan / Todo (lot-based)
 - [x] Lot 0: read approved design and both reviews; identify ownership and explicit suite collection requirement; bootstrap local delivery tooling.
-- [ ] T02: fixed public typed errors and MCP serialization; 503/410/404/payload tests; preserve scope/stub behavior.
-- [ ] T10: scoped HTTP request, strict response validation, no legacy mapper/fetch or 404 success.
-- [ ] T11: exchanged bearer only, typed authorization invalidation, cache and concurrent invocations isolated.
-- [ ] T12a: exact GET route and strict raw query decoding; no legacy or broad-prefix authority.
-- [ ] T12b: route/schema/policy/image receipt wiring and negative configuration proofs; defaults remain closed.
+- [x] T02: fixed public typed errors and MCP serialization; 503/410/404/payload tests; preserve scope/stub behavior.
+- [x] T10: scoped HTTP request, strict response validation, no legacy mapper/fetch or 404 success.
+- [x] T11: exchanged bearer only, typed authorization invalidation, cache and concurrent invocations isolated.
+- [x] T12a: exact GET route and strict raw query decoding; no legacy or broad-prefix authority.
+- [x] T12b: route/schema/policy/image receipt wiring and negative configuration proofs; defaults remain closed.
 - [ ] Qualification: unit and createApp/PostgreSQL integration for each slice, authority/masking mutants, inherited graph-signals/date-parity regressions.
+- [x] Static checks PASS at 20261025T173554; 289 API and 372 MCP tests PASS at 20261025T173649, zero skips. Mutation campaign stopped after seven kills because an authority failure was a TypeError; no false PASS recorded. Improve the assertion, select the dedicated membership case and rerun all controls/mutants.
 - [ ] Delivery: every commit numstat audited, bundle from dce9b366 imported and checked in a blank prerequisite-only repository.
 
 ## Docs consolidation
