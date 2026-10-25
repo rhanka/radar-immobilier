@@ -57,7 +57,7 @@ describe("commit-time authorization while the provider is blocked [T05 T13]", ()
     gate.resolve({ status: 201, body: receiptBody() });
     await expect(pending).resolves.toEqual(
       { status: 503, body: { error: "capability_unavailable" } });
-    expect(entries).toEqual([{ op, actorId: "alice",
+    expect(entries).toEqual([{ invocationId: expect.any(String), op, actorId: "alice",
       reason: "unauthorized_at_commit", status: 503, atMs: NOW }]);
   });
 
