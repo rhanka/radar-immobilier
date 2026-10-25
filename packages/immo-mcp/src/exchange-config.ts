@@ -76,6 +76,8 @@ export function loadExchangeConfig(env: NodeJS.ProcessEnv): ExchangeConfig | nul
   }
   const tokenEndpoint =
     nonEmpty(env.IMMO_MCP_EXCHANGE_TOKEN_ENDPOINT) ?? defaultTokenEndpoint(issuer);
+  const policy = nonEmpty(env.IMMO_MCP_EXCHANGE_POLICY_REV) ?? EXCHANGE_DEFAULT_POLICY_REVISION;
+  if (policy !== EXCHANGE_DEFAULT_POLICY_REVISION) throw new Error("exchange_policy_revision_refused");
   return {
     issuer,
     apiAudience,
@@ -84,7 +86,6 @@ export function loadExchangeConfig(env: NodeJS.ProcessEnv): ExchangeConfig | nul
     workloadSub,
     workloadClientId,
     environment: nonEmpty(env.IMMO_MCP_EXCHANGE_ENV) ?? nonEmpty(env.ENV) ?? "unknown",
-    policyRevision:
-      nonEmpty(env.IMMO_MCP_EXCHANGE_POLICY_REV) ?? EXCHANGE_DEFAULT_POLICY_REVISION,
+    policyRevision: policy,
   };
 }

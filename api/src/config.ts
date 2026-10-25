@@ -217,10 +217,10 @@ const envSchema = z.object({
   STRICT_RECEIVER_RECEIPT_ROUTE_PROFILE: optStr(z.string().min(1)),
   STRICT_RECEIVER_RECEIPT_SCHEMA_REVISION: optStr(z.string().min(1)),
   STRICT_RECEIVER_RECEIPT_POLICY_REVISION: optStr(z.string().min(1)),
-  STRICT_RECEIVER_API_IMAGE: optStr(z.string().regex(/^sha256:[a-f0-9]{64}$/)),
-  STRICT_RECEIVER_MCP_IMAGE: optStr(z.string().regex(/^sha256:[a-f0-9]{64}$/)),
-  STRICT_RECEIVER_RECEIPT_API_IMAGE: optStr(z.string().regex(/^sha256:[a-f0-9]{64}$/)),
-  STRICT_RECEIVER_RECEIPT_MCP_IMAGE: optStr(z.string().regex(/^sha256:[a-f0-9]{64}$/)),
+  STRICT_RECEIVER_API_IMAGE: optStr(z.string().min(1)),
+  STRICT_RECEIVER_MCP_IMAGE: optStr(z.string().min(1)),
+  STRICT_RECEIVER_RECEIPT_API_IMAGE: optStr(z.string().min(1)),
+  STRICT_RECEIVER_RECEIPT_MCP_IMAGE: optStr(z.string().min(1)),
 
   // ── Scaleway Transactional Email (TEM) — emails d'invitation ────────────
   // L'egress SMTP est BLOQUÉ au niveau plateforme sur ce cluster (BR-37b), donc
@@ -431,8 +431,8 @@ export function resolveStrictReceiverConfig(
     config.STRICT_RECEIVER_RECEIPT_ROUTE_PROFILE === STRICT_RECEIVER_ROUTE_PROFILE &&
     config.STRICT_RECEIVER_RECEIPT_SCHEMA_REVISION === STRICT_RECEIVER_SCHEMA_REVISION &&
     config.STRICT_RECEIVER_RECEIPT_POLICY_REVISION === STRICT_RECEIVER_POLICY_REVISION &&
-    config.STRICT_RECEIVER_API_IMAGE !== undefined &&
-    config.STRICT_RECEIVER_MCP_IMAGE !== undefined &&
+    /^sha256:[a-f0-9]{64}$/.test(config.STRICT_RECEIVER_API_IMAGE ?? "") &&
+    /^sha256:[a-f0-9]{64}$/.test(config.STRICT_RECEIVER_MCP_IMAGE ?? "") &&
     config.STRICT_RECEIVER_RECEIPT_API_IMAGE === config.STRICT_RECEIVER_API_IMAGE &&
     config.STRICT_RECEIVER_RECEIPT_MCP_IMAGE === config.STRICT_RECEIVER_MCP_IMAGE;
   if (armingRequested && !receiptMatches) {
