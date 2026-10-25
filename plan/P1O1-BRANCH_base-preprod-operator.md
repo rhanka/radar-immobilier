@@ -39,5 +39,6 @@
   - [x] Closure preserves inventories; collection refuses surviving processes and ready endpoints.
   - [x] Q1/restart/Q2 are separate from reopening; MCP successor deployment is required.
 - [ ] Lot 4: operator refusal/transport tests and image execution receipts.
+  - [x] Hermetic operator Make tests cover refusals, literal values and no root/environment discovery.
 - [ ] Lot 5: complete CI API suite, lint, typecheck and audit gate.
 - [ ] Lot 6: runbook, review evidence, local backup, audited bundle and report.
