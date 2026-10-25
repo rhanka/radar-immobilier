@@ -4,11 +4,13 @@
 - [x] Deliver T08/T09/T13/T14 from e32138c9, without activation or push.
 
 ## Scope / Guardrails
+- [x] Astra correction resumes from d8f2cc06: deliver the adapter before 6H using the internal legacy reader; scoped reads, maintenance refusal and legacy retirement remain enforced.
 - [x] Make only; no environment files, Python, dependencies or migrations.
 - [x] Single writer; test-a2base-rest ports 18926/15926/11926; ENV last; one Docker campaign, one worker, 10 GiB disk floor, owned cleanup.
 - [x] Local backup Git only; subject-only commits at most 150 changed lines; audited prerequisite-only bundle import.
 
 ## Branch Scope Boundaries (MANDATORY)
+- [x] BRARTEFACTS-EX8: allow api/src/routes/graph-signals.ts solely to extract its existing read-only card reader for server-side reuse; preserve HTTP status, filters, archives and enrichment behavior; revert extraction and adapter together if parity fails.
 - [x] **Allowed Paths**: API mcp-signal-search routes, mcp-signal-* services, mcp-signal-search* integration tests, tools/make/base-api-a2rest*, this plan.
 - [x] **Conditional Paths**: api/src/app.ts under exclusive CT-1/CT-2 integration lease; parent plan EX7; root companion report outside hashed bundle.
 - [x] **Conditional Paths**: a2base-mcp-fixture.ts replaces its superseded test-only facade with the production route; no A3 receiver or MCP package edits.
