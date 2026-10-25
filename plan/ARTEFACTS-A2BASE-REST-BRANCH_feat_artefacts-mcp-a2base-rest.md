@@ -10,6 +10,7 @@
 - [x] Local backup Git only; subject-only commits at most 150 changed lines; audited prerequisite-only bundle import.
 
 ## Branch Scope Boundaries (MANDATORY)
+- [x] BRARTEFACTS-EX9: allow only api/src/services/graph/regulatory-status-archi.test.ts to follow the mapper's established API relocation; preserve canonical status passthrough and MCP classifier independence through the strict decoder. Impact is test-only; revert if the real mapper/HTTP regressions do not validate the invariant.
 - [x] BRARTEFACTS-EX8: allow api/src/routes/graph-signals.ts solely to extract its existing read-only card reader for server-side reuse; preserve HTTP status, filters, archives and enrichment behavior; revert extraction and adapter together if parity fails.
 - [x] **Allowed Paths**: API mcp-signal-search routes, mcp-signal-* services, mcp-signal-search* integration tests, tools/make/base-api-a2rest*, this plan.
 - [x] **Conditional Paths**: api/src/app.ts under exclusive CT-1/CT-2 integration lease; parent plan EX7; root companion report outside hashed bundle.
