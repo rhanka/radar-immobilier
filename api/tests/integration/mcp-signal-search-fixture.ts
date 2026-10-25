@@ -1,0 +1,42 @@
+/** Test-only mounting on the real createApp; production wiring stays absent. */
+import type { McpSignalSearchArgs } from "../../src/routes/mcp-signal-search.js";
+import { decodeMcpSignalSearch, MCP_SIGNAL_SEARCH_PATH } from "../../src/routes/mcp-signal-search.js";
+import { ScopeError } from "../../src/services/facets/scope.js";
+import { WorkspaceError } from "../../src/services/workspaces/types.js";
+import { httpFixture, verifiedBearer } from "./base-api-http-fixture.js";
+
+export async function searchFixture() {
+  const f = await httpFixture();
+  const memberships = async (ids: string[]) => {
+    await f.data.pool.query(`UPDATE workspace_memberships SET
+      status = CASE WHEN workspace_id = ANY($1::uuid[]) THEN 'active' ELSE 'revoked' END,
+      revision = revision + 1 WHERE account_id = $2`, [ids, f.data.contributor.id]);
+  };
+  await memberships([f.data.workspaceId]);
+  const mount = (read: (sub: string, args: McpSignalSearchArgs) => Promise<unknown>) => {
+    f.app.get(MCP_SIGNAL_SEARCH_PATH, async (c) => {
+      const session = c.get("session" as never) as { sub: string };
+      try {
+        const args = decodeMcpSignalSearch(new URL(c.req.url).searchParams);
+        const result = await read(session.sub, args);
+        return c.json({ ok: true, result } as never);
+      } catch (error) {
+        if (error instanceof ScopeError || error instanceof WorkspaceError) {
+          return c.json({ error: error.message }, error.status);
+        }
+        throw error;
+      }
+    });
+  };
+  const request = (query = "", sub = f.data.contributor.sub) => f.request(
+    `${MCP_SIGNAL_SEARCH_PATH}?city=synthetic-city${query}`, sub,
+    { headers: verifiedBearer(sub) });
+  return { ...f, memberships, mount, search: request };
+}
+export type SearchFixture = Awaited<ReturnType<typeof searchFixture>>;
+
+export function barrier() {
+  let release!: () => void;
+  const waiting = new Promise<void>((resolve) => { release = resolve; });
+  return { waiting, release };
+}
