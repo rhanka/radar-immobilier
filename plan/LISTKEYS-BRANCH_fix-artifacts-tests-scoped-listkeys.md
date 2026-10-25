@@ -38,6 +38,8 @@
 - [x] Lot 3: 20 scoped MinIO tests, 153 host tests, 3109 CI-equivalent API tests, lint and typecheck pass; gated provider limitation recorded above.
 - [x] Lot 4: deliver the audited bundle, standalone report and teardown receipts in `tmp/listkeys/`.
 - [x] Review lot 1: reproduce the AST bypasses and resolve empty expressions and lexical constants with TypeScript; in-memory regressions pass.
+- [x] Review lot 2: scan all API/package test locations and helpers; only third-party node_modules and Git metadata are excluded explicitly; report unresolved arguments.
+- [x] Review lot 3: legacy-regex mutation produces 18 assertion failures; restored AST passes 47 scoped unit tests; strict guard typecheck and repository lint pass without Docker.
 
 ## Merge & Close
 - [x] Deliver a bundle only; no push or merge is authorized by this task.
