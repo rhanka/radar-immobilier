@@ -87,12 +87,16 @@ guarded_down
 ) 8>&- > "$LOG_DIR/disk-monitor.log" 2>&1 &
 MONITOR=$!
 if [[ ${A5_IMAGE:-0} == 1 ]]; then
-  image=$PROJECT:runtime
-  timeout --signal=TERM --kill-after=10 1800 docker build --target runtime --build-arg "GIT_SHA=$candidate" \
-    -t "$image" -f api/Dockerfile - < "$RUN_DIR/source.tar" > >(tee "$LOG_DIR/build.log") 2>&1 &
-  RUN_PID=$!
-  wait "$RUN_PID"
-  RUN_PID=
+  image=${A5_EXISTING_IMAGE:-$PROJECT:runtime}
+  if [[ ${A5_BUILD_IMAGE:-0} == 1 ]]; then
+    timeout --signal=TERM --kill-after=10 1800 docker build --target runtime --build-arg "GIT_SHA=$candidate" \
+      -t "$image" -f api/Dockerfile - < "$RUN_DIR/source.tar" > >(tee "$LOG_DIR/build.log") 2>&1 &
+    RUN_PID=$!
+    wait "$RUN_PID"
+    RUN_PID=
+  else
+    [[ -n ${A5_EXISTING_IMAGE:-} ]] || { echo 'Existing runtime image required; no build authorized' >&2; exit 2; }
+  fi
   docker image inspect --format '{{.Id}}' "$image" > "$LOG_DIR/image-id.txt"
 fi
 if [[ ${A5_SERVICES:-0} == 1 ]]; then "${compose[@]}" up -d --wait postgres minio; fi
@@ -101,7 +105,8 @@ if [[ ${A5_IMAGE:-0} == 1 ]]; then
   chmod 777 "$LOG_DIR"
   timeout --signal=TERM --kill-after=10 180 docker run --rm --name "$PROJECT-image-probe" --network "${PROJECT}_default" \
     --label "com.docker.compose.project=$PROJECT" --label "org.radar.base.owner=$OWNER" \
-    -v "$ROOT/tools/make/artefacts-a4-image-probe.mjs:/workspace/a5-image-probe.mjs:ro" \
+    -v "$ROOT/tools/make/artefacts-a4-image-probe.mjs:/workspace/a4-image-probe.mjs:ro" \
+    -v "$ROOT/tools/make/artefacts-a5-image-probe.mjs:/workspace/a5-image-probe.mjs:ro" \
     -v "$LOG_DIR:/evidence" --entrypoint node "$image" a5-image-probe.mjs \
     > >(tee "$LOG_DIR/run.log") 2>&1 &
 else
