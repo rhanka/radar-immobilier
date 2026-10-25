@@ -22,7 +22,7 @@ export default { envDir: false, test: {
 CONFIG
 POSTGRES_HOST=$(node --input-type=module -e 'import {lookup} from "node:dns/promises"; console.log((await lookup("postgres", {family:4})).address)')
 export POSTGRES_HOST
-if [[ $mode == check ]]; then
+if [[ $mode == check || $mode == mutations ]]; then
   npm run typecheck --workspace=api
   npm run typecheck --workspace=packages/immo-mcp
   cat > api/tsconfig.a2mcp-tests.json <<'CONFIG'
@@ -34,7 +34,7 @@ CONFIG
     api/tests/integration/a2base-mcp*.ts tools/make/base-api-a2mcp*.mjs
   for file in tools/make/base-api-a2mcp*.sh; do bash -n "$file"; done
   for file in tools/make/base-api-a2mcp*.mjs; do node --check "$file"; done
-  exit
+  [[ $mode != check ]] || exit
 fi
 cd api
 node ../tools/make/base-api-ct8.mjs > /evidence/ct8.log
