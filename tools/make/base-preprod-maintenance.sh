@@ -68,6 +68,17 @@ assert_cd_frozen() {
   active_runs > "$OUTPUT/runs-current.jsonl"
   [[ ! -s $OUTPUT/runs-current.jsonl ]] || fail 'A nonterminal Actions run exists'
 }
+stop-job() {
+  local name uid actual
+  name=$(jq -er '.stopJob.name|select(test("^[a-z0-9-]+$"))' "$INPUT")
+  uid=$(jq -er '.stopJob.uid|select(test("^[a-f0-9-]{36}$"))' "$INPUT")
+  actual=$("${k[@]}" get job "$name" -o jsonpath='{.metadata.uid}')
+  [[ $actual == "$uid" ]] || fail 'Recorded Job identity changed'
+  jq -n --arg uid "$uid" '{apiVersion:"v1",kind:"DeleteOptions",propagationPolicy:"Foreground",
+    gracePeriodSeconds:30,preconditions:{uid:$uid}}' > "$OUTPUT/delete-options.json"
+  "${k[@]}" delete --raw "/apis/batch/v1/namespaces/radar-immobilier-preprod/jobs/$name" -f "$OUTPUT/delete-options.json" > /dev/null
+  "${k[@]}" wait --for=delete "job/$name" --timeout=120s > "$OUTPUT/job-stopped.txt"
+}
 maintenance_inputs() {
   jq -e '.maintenance as $m | ($m.middleware|test("^base-maintenance-[a-z0-9-]+$"))
     and ($m.sources|length>0 and all(.[];test("^[a-fA-F0-9.:]+/[0-9]+$") and .!="0.0.0.0/0" and .!="::/0"))

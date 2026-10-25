@@ -52,3 +52,4 @@
 - [ ] Lot 5: complete CI API suite, lint, typecheck and audit gate.
 - [ ] Lot 6: runbook, review evidence, local backup, audited bundle and report.
   - [x] Owner-input template and short-path prerequisites/inspection documented.
+  - [x] Maintenance observations, collector, protected resume and UID-bound Job termination documented.
