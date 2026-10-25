@@ -4,7 +4,7 @@ import { compileArtifactsProfile, RADAR_ARTIFACTS_PROFILE, createArtifactsManife
   createArtifactsToolExecutor, type ArtifactsApp } from "@sentropic/artifacts/mcp-core";
 import type { ArtifactInvocationContext, AuthorizeCommit } from "@sentropic/artifacts/server/commit-contract";
 import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-stateful";
-import type { RegistryDefinition } from "@sentropic/cluster-mesh/mcp/registry";
+import { computeManifestDigest, type RegistryDefinition } from "@sentropic/cluster-mesh/mcp/registry";
 import { ARTIFACT_TOOL_NAMES, ARTIFACT_INVOCATION_SCOPE } from "./artifact-profile.js";
 
 // Compile the complete versioned contract, including semantic rules, before registry admission.
@@ -17,6 +17,7 @@ function freeze<T extends object>(value: T): T {
 export const IMMO_ARTIFACT_MANIFEST = freeze(createArtifactsManifest({
   profile: IMMO_ARTIFACT_PROFILE, invocationScope: ARTIFACT_INVOCATION_SCOPE,
 }));
+export const IMMO_ARTIFACT_MANIFEST_DIGEST = computeManifestDigest(IMMO_ARTIFACT_MANIFEST);
 const bindings = new WeakSet<object>();
 const unavailable = async (): Promise<never> => { throw new Error("native_wire_dispatch_required"); };
 

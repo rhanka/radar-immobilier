@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
-import { computeManifestDigest } from "@sentropic/cluster-mesh/mcp/registry";
-import { IMMO_ARTIFACT_PROFILE, IMMO_ARTIFACT_MANIFEST } from "../../packages/immo-mcp/src/registry/artifact-provider.js";
+import { IMMO_ARTIFACT_PROFILE, IMMO_ARTIFACT_MANIFEST, IMMO_ARTIFACT_MANIFEST_DIGEST }
+  from "../../packages/immo-mcp/src/registry/artifact-provider.js";
 
 const read = (path: string) => JSON.parse(readFileSync(path, "utf8"));
 const configBytes = readFileSync("packages/immo-mcp/config/immo-artifacts.v1.json");
@@ -23,7 +23,7 @@ const receipt = {
   profile: IMMO_ARTIFACT_PROFILE.profile,
   profileDigest: IMMO_ARTIFACT_PROFILE.profileDigest,
   manifest: IMMO_ARTIFACT_MANIFEST,
-  manifestDigest: computeManifestDigest(IMMO_ARTIFACT_MANIFEST),
+  manifestDigest: IMMO_ARTIFACT_MANIFEST_DIGEST,
   embeddedConfigurationSha256: createHash("sha256").update(configBytes).digest("hex"),
   dependencies: { mcp: mcp.dependencies, hostArtifacts: host.dependencies["@sentropic/artifacts"],
     apiArtifacts: api.dependencies["@sentropic/artifacts"] },
