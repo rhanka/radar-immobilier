@@ -29,6 +29,8 @@
 - [ ] **Exception process**: record `BRARTEFACTS-EXn` in Feedback Loop; remain within the owner-authorized outcome.
 
 ## Feedback Loop
+- [x] BRARTEFACTS-EX4 / T00: merge main `f3436944` into integration `b2b802b5`, including inherited BASE/security paths; preserve both capabilities and the frozen migration journal. Rollback returns to the first parent; no activation or main delivery is authorized.
+- [ ] T00 qualification: exact merged SHA, API CI collection, H4/MCP, closed BASE, CT-8 fresh/upgrade/rerun and portable bundle audit; report evidence and remaining prerequisites separately.
 - [ ] BRARTEFACTS-EX1: retain the assigned integration worktree; child worktrees use repository-local `tmp/`; root UAT remains untouched; rollback removes only unused child worktrees.
 - [ ] BRARTEFACTS-EX2: conditional integration edits implement approved package, migration and auth bindings; preserve business state; recovery closes artifact admission and retains strict identity checks.
 - [ ] BRARTEFACTS-EX3: add the H5 image entrypoint and opt-in routing/network render; A6 owns runtime deltas, A7 owns operations; recovery restores the existing denial Service without changing artifact data.

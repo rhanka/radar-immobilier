@@ -378,10 +378,47 @@ export const authorizeTransaction: AuthorizeCommit = async (context, transaction
 };
 
 /**
+ * Radar effective profile data required by spec r2 C3/C4: selection plus the
+ * operation limits, defaults and contract revisions that drive schema
+ * generation, validation, normalization, command hashing and digests. A
+ * semantic-only change (same JSON Schema text, different limit or default)
+ * must invalidate composition evidence.
+ */
+export const RADAR_EFFECTIVE_PROFILE = Object.freeze({
+  selection: Object.freeze([...FROZEN_CAPABILITIES]),
+  closedObjects: true,
+  limits: Object.freeze({
+    ensureBindingName: Object.freeze({ minUtf16: 1, maxUtf16: 128, normalize: false }),
+    callerKey: Object.freeze({ trimNonempty: true, maxUtf16: 256, keepWhitespace: true,
+      rejectLoneSurrogates: true, normalize: false }),
+    artifactId: Object.freeze({ validator: "lowercase-uuid" }),
+    publishFiles: Object.freeze({ min: 1, max: 32 }),
+    publishBytes: Object.freeze({ maxDecodedPerFile: 262144, maxDecodedTotal: 262144 }),
+    mime: Object.freeze(["text/html", "text/css", "text/javascript", "application/json"]),
+    path: Object.freeze({ maxUtf8Bytes: 1024, forbidColon: true, forbidDel: true,
+      noEmptyDotSegments: true, noBackslash: true, noPercent: true,
+      noQueryFragment: true, noControls: true,
+      forbiddenFirstSegment: Object.freeze(["api", "__artifacts", "livez", "health"]) }),
+    fileContent: Object.freeze({ exactlyOneOfTextOrBytes: true, textEncoding: "utf8",
+      byteIntegerMin: 0, byteIntegerMax: 255, uniquePaths: true }),
+    profile: Object.freeze({ flatJsonPrimitivesOnly: true }),
+    list: Object.freeze({ integerOnly: true, limitMin: 1, limitMax: 100,
+      limitDefault: 20, offsetMin: 0, offsetDefault: 0 }),
+  }),
+  emptyParametersOnly: true,
+  defaults: Object.freeze({ parameters: Object.freeze({}), profile: Object.freeze({}) }),
+  provenance: Object.freeze({ kind: "inline-original", callerSourceAbsent: true }),
+  revisions: Object.freeze({ profile: "radar-c4-r2", providerContract: "0.2.0", commandCodec: "v1" }),
+});
+
+/**
  * Compile the Radar provider profile through the upstream compiler.
  * Returns the immutable compiled profile; never fabricates a digest.
  * Fails `[missing-contract] mcp-core.compileArtifactsProfile` naming the
- * upstream entry while the provider predates the r2 line.
+ * upstream entry while the provider predates the r2 line, and
+ * `[missing-contract] mcp-core.effectiveProfile` (owner Sentropic L0/L1) while
+ * the compiler input carries selection only without the C3/C4 limits,
+ * defaults and revisions.
  */
 export async function compileArtifactsProfile(input: {
   readonly selectedCapabilities: readonly string[];
@@ -402,11 +439,21 @@ export async function compileArtifactsProfile(input: {
       `upstream entry ${PROFILE_COMPILER_SPECIFIER} must export compileArtifactsProfile(input: ArtifactProviderProfile): CompiledArtifactsProfile (Sentropic spec r2 section 3.2)`,
     );
   }
-  const compiled = await (compile as (
-    candidate: unknown,
-  ) => Promise<CompiledArtifactsProfile> | CompiledArtifactsProfile)({
+  const candidate = {
     selectedCapabilities: [...FROZEN_CAPABILITIES],
-  });
+    effectiveProfile: RADAR_EFFECTIVE_PROFILE,
+  };
+  let compiled: CompiledArtifactsProfile;
+  try {
+    compiled = await (compile as (
+      candidate: unknown,
+    ) => Promise<CompiledArtifactsProfile> | CompiledArtifactsProfile)(candidate);
+  } catch (error) {
+    missingContract(
+      "mcp-core.effectiveProfile",
+      `upstream compiler must accept the full Radar effective profile (C3/C4 limits, defaults, revisions; owner Sentropic L0/L1): ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
   if (compiled === null || typeof compiled !== "object") {
     throw new Error("[contract-violation] mcp-core.compileArtifactsProfile: malformed profile");
   }
@@ -417,6 +464,23 @@ export async function compileArtifactsProfile(input: {
   if (!Object.isFrozen(compiled) || !Object.isFrozen(compiled.selectedCapabilities) ||
       [...compiled.selectedCapabilities].sort().join(",") !== frozen.join(",")) {
     throw new Error("[contract-violation] compiler must return the immutable four-operation profile");
+  }
+  // A compiler returning a constant digest that the host reuses would pass the
+  // old equality check. A semantic-only profile change must change the digest.
+  const mutated = {
+    ...candidate,
+    effectiveProfile: { ...RADAR_EFFECTIVE_PROFILE,
+      limits: { ...RADAR_EFFECTIVE_PROFILE.limits,
+        publishBytes: { ...RADAR_EFFECTIVE_PROFILE.limits.publishBytes, maxDecodedTotal: 262143 } } },
+  };
+  const recompiled = await (compile as (
+    candidate: unknown,
+  ) => Promise<CompiledArtifactsProfile> | CompiledArtifactsProfile)(mutated);
+  if (typeof recompiled?.digest !== "string" || !/^(sha256:)?[a-f0-9]{64}$/.test(recompiled.digest)) {
+    throw new Error("[contract-violation] semantic profile compilation returned an invalid digest");
+  }
+  if (recompiled.digest === digest) {
+    throw new Error("[contract-violation] mcp-core.compileArtifactsProfile: semantic profile change left the digest unchanged");
   }
   return compiled;
 }
@@ -521,36 +585,135 @@ export async function requirePreparationCleanupBinding(): Promise<PreparationCle
 /** Expected L4 observation seam; absence is a named prerequisite, never SQL guesswork. */
 export async function verifyPreparationCleanup(host: unknown, artifactId: string,
   blobs: { listKeys(prefix: string): Promise<Iterable<string>> }, requireAttempts = true,
-  requireShared = false): Promise<void> {
+  requireShared = false,
+  options?: { readonly expectedInvocationIds?: readonly string[];
+    readonly preparationsBeforeRefusal?: Awaited<ReturnType<PreparationCleanupBinding["inspectPreparations"]>>["attempts"];
+    readonly s3KeysBefore?: ReadonlySet<string> | readonly string[] }): Promise<void> {
   const binding = await requirePreparationCleanupBinding();
   const before = await binding.inspectPreparations(host, artifactId);
+  const keysBefore = new Set(await blobs.listKeys(""));
+  for (const prepared of options?.preparationsBeforeRefusal ?? []) {
+    const historical = before.attempts.find((attempt) => attempt.attemptId === prepared.attemptId);
+    if (!historical || !Array.isArray(historical.blobKeys) || historical.invocationId !== prepared.invocationId ||
+        historical.preparedAtMs !== prepared.preparedAtMs ||
+        historical.cleanupDeadlineMs !== prepared.cleanupDeadlineMs ||
+        JSON.stringify([...historical.blobKeys].sort()) !== JSON.stringify([...prepared.blobKeys].sort())) {
+      throw new Error("[contract-violation] cleanup lost historical preparation attribution");
+    }
+  }
   if (requireAttempts && before.attempts.length === 0) throw new Error("[contract-violation] missing preparation attribution");
   let throughMs = 0;
   for (const attempt of before.attempts) {
+    // A6 sets a maximum bound, never a retention duty until inspection: a
+    // conforming provider may finish cleanup before returning the refusal and
+    // expose an already-settled state. Historical attribution (attempt,
+    // invocation, blobKeys, deadline) is still required below.
     if (!attempt.attemptId || !attempt.invocationId || !Number.isFinite(attempt.cleanupDeadlineMs) ||
         !Number.isFinite(attempt.preparedAtMs) || attempt.cleanupDeadlineMs <= attempt.preparedAtMs ||
         attempt.cleanupDeadlineMs - attempt.preparedAtMs > 60_000 ||
-        !["abandoned", "failed", "pending-cleanup"].includes(attempt.state)) {
-      throw new Error("[contract-violation] preparation must have attempt/invocation, failure state and bounded deadline");
+        !["abandoned", "failed", "pending-cleanup", "cleaned", "failed-cleaned"].includes(attempt.state)) {
+      throw new Error("[contract-violation] preparation must have attempt/invocation, settled-or-pending state and bounded deadline");
+    }
+    if (!Array.isArray(attempt.blobKeys)) {
+      throw new Error("[contract-violation] preparation must expose attempt.blobKeys for S3 reconciliation");
     }
     throughMs = Math.max(throughMs, attempt.cleanupDeadlineMs);
   }
-  if (requireShared && (before.protectedKeys.length === 0 || before.abandonedKeys.length === 0)) {
+  const hasNewObjects = options?.s3KeysBefore !== undefined &&
+    [...keysBefore].some((key) => !new Set(options.s3KeysBefore).has(key));
+  if (options?.expectedInvocationIds !== undefined && (requireAttempts || hasNewObjects)) {
+    const observedIds = new Set(before.attempts.map((attempt) => attempt.invocationId));
+    for (const expectedId of options.expectedInvocationIds) {
+      if (!observedIds.has(expectedId)) {
+        throw new Error("[contract-violation] expected preparation invocation missing from attempt inventory");
+      }
+    }
+  }
+  const protectedSet = new Set(before.protectedKeys);
+  // Settled providers may clear the live abandoned-key queue. Historical
+  // attempt keys still identify the exclusive objects that must be absent.
+  const abandonedKeys = new Set([...before.abandonedKeys, ...before.attempts.flatMap(
+    (attempt) => attempt.blobKeys.filter((key) => !protectedSet.has(key)))]);
+  if (requireShared && (protectedSet.size === 0 || abandonedKeys.size === 0)) {
     throw new Error("[contract-violation] cleanup fixture must contain shared and unreferenced blobs");
   }
-  const keysBefore = new Set(await blobs.listKeys("artifacts/"));
-  for (const key of [...before.protectedKeys, ...before.abandonedKeys]) {
+  // Protected objects must survive: they are always present before cleanup.
+  // Abandoned objects may already be gone when the provider cleaned up before
+  // returning the refusal (A6 allows this); only abandoned keys that are also
+  // protected must still be present here.
+  for (const key of before.protectedKeys) {
     if (!keysBefore.has(key)) throw new Error("[contract-violation] preparation blob missing before cleanup");
+  }
+  for (const key of before.abandonedKeys) {
+    if (protectedSet.has(key) && !keysBefore.has(key)) {
+      throw new Error("[contract-violation] preparation blob missing before cleanup");
+    }
+  }
+  // Reconcile the observed S3 inventory against attempts and invocations: every
+  // new object since the caller baseline must belong to the expected invocation
+  // via attempt.blobKeys. Protection/abandonment lists alone cannot attribute it.
+  // An undeclared leftover passes the old
+  // declared-only check and fails here. Cross-artifact exhaustive attribution
+  // stays not covered (owner Sentropic L4); this reconciliation is scoped to
+  // the artifact under test plus the caller baseline.
+  const attributable = new Set<string>();
+  for (const attempt of before.attempts) {
+    for (const key of attempt.blobKeys) {
+      if (options?.expectedInvocationIds === undefined ||
+          options.expectedInvocationIds.includes(attempt.invocationId)) attributable.add(key);
+    }
+  }
+  if (options?.s3KeysBefore !== undefined) {
+    const baseline = new Set(options.s3KeysBefore);
+    for (const key of before.protectedKeys) {
+      if (!baseline.has(key)) throw new Error("[contract-violation] new denied preparation has no preexisting protection");
+    }
+    for (const key of keysBefore) {
+      if (!baseline.has(key) && !attributable.has(key)) {
+        throw new Error("[contract-violation] undeclared S3 object without preparation attribution");
+      }
+    }
+  }
+  // Historical attribution stays mandatory even when cleanup already ran:
+  // every attempt keeps its blobKeys. Cleanup may already have removed some
+  // exclusive bytes while its state is still pending. Protected bytes must
+  // survive; a settled attempt must already have removed its exclusive bytes.
+  for (const attempt of before.attempts) {
+    const settled = attempt.state === "cleaned" || attempt.state === "failed-cleaned";
+    for (const key of attempt.blobKeys) {
+      if (protectedSet.has(key) && !keysBefore.has(key)) {
+        throw new Error("[contract-violation] cleanup deleted a shared/protected blob");
+      }
+      if (settled && !protectedSet.has(key) && keysBefore.has(key)) {
+        throw new Error("[contract-violation] settled preparation retained an unprotected blob");
+      }
+    }
   }
   await binding.scheduleBoundedPreparationCleanup(host, throughMs);
   const keysAfter = new Set(await blobs.listKeys("artifacts/"));
   for (const key of before.protectedKeys) {
     if (!keysAfter.has(key)) throw new Error("[contract-violation] cleanup deleted a shared/protected blob");
   }
-  for (const key of before.abandonedKeys.filter((key) => !before.protectedKeys.includes(key))) {
+  for (const key of [...abandonedKeys].filter((key) => !protectedSet.has(key))) {
     if (keysAfter.has(key)) throw new Error("[contract-violation] abandoned blob survived its cleanup deadline");
   }
+  if (options?.s3KeysBefore !== undefined) {
+    const baseline = new Set(options.s3KeysBefore);
+    for (const key of keysAfter) {
+      if (!baseline.has(key) && !before.protectedKeys.includes(key) && keysAfter.has(key)) {
+        throw new Error("[contract-violation] new unprotected object survived its cleanup deadline");
+      }
+    }
+  }
   const after = await binding.inspectPreparations(host, artifactId);
+  for (const attempt of before.attempts) {
+    const historical = after.attempts.find((candidate) => candidate.attemptId === attempt.attemptId);
+    if (!historical || !Array.isArray(historical.blobKeys) || historical.invocationId !== attempt.invocationId ||
+        historical.preparedAtMs !== attempt.preparedAtMs || historical.cleanupDeadlineMs !== attempt.cleanupDeadlineMs ||
+        JSON.stringify([...historical.blobKeys].sort()) !== JSON.stringify([...attempt.blobKeys].sort())) {
+      throw new Error("[contract-violation] cleanup erased or changed preparation history");
+    }
+  }
   if (after.attempts.some((attempt) => !["cleaned", "failed-cleaned"].includes(attempt.state))) {
     throw new Error("[contract-violation] cleanup did not settle preparation debt");
   }
@@ -606,7 +769,7 @@ export function createPrivateMarker(prefix: string): string {
 function assertNoPrivateFields(value: unknown): void {
   if (value === null || typeof value !== "object") return;
   for (const [key, child] of Object.entries(value)) {
-    if (/^(cause|stack|sql|query|password|credentials?|endpoint|bucket)$/i.test(key)) {
+    if (/^(cause|stack|sql|query|password|credentials?|endpoint|bucket|storageScopeId|storageScope|scopeId|tenantId|workspaceId|internalKey|paramsHash)$/i.test(key)) {
       throw new Error(`[contract-violation] redaction: private field ${key} leaked`);
     }
     assertNoPrivateFields(child);
@@ -667,8 +830,20 @@ export function assertMcpResultRedacted(
     record["code"] !== expected.code || record["retryable"] !== expected.retryable) {
     throw new Error("[contract-violation] MCP parity: unexpected public failure shape");
   }
-  const structured = (record["structuredContent"] ?? record["data"] ?? record["error"]) as unknown;
-  const text = JSON.stringify({ body: record, structured });
+  // Exact public failure structure: the wire error must equal the sanitized
+  // public body, with no extra private identifiers in any MCP representation
+  // (error, data, structuredContent, text, _meta). A correct response augmented
+  // with error.storageScopeId passes the old substring check and fails here.
+  const wireError = record["error"];
+  if (JSON.stringify(wireError) !== JSON.stringify({ error: expected.publicError })) {
+    throw new Error("[contract-violation] MCP parity: unexpected public error structure");
+  }
+  const representations = { error: record["error"], data: record["data"],
+    structuredContent: record["structuredContent"], text: record["text"], meta: record["_meta"] };
+  const text = JSON.stringify({ body: record, representations });
+  if (/storageScopeId|storageScope|scopeId|tenantId|workspaceId|internalKey|paramsHash/i.test(text)) {
+    throw new Error("[contract-violation] MCP redaction: private identifier in serialized representation");
+  }
   for (const marker of privateMarkers) {
     if (marker.length > 0 && text.includes(marker)) {
       throw new Error("[contract-violation] MCP redaction: private marker leaked");
@@ -748,8 +923,13 @@ export function finalizationFaultPool(pool: pg.Pool, options: {
       quota: /quota/, "blob-reference": /^blob_(ref|pin)/,
       "deletion-claim": /deletion.*claim|claim.*deletion/,
     };
-    if (options.lockClass === "schema-infrastructure") return /\bLOCK\s+TABLE\b|\bpg_catalog\./i.test(sql);
-    if (options.lockClass === "unqualified") return /^\s*SET\s+LOCAL\b/i.test(sql);
+    // r2 does not require LOCK TABLE / pg_catalog.* or SET LOCAL shapes: never
+    // impose those optional SQL forms on the provider. Those two cause classes
+    // use an explicitly wired phase-injection joint (see
+    // requirePhaseInjectionBinding); matching optional text here would fail a
+    // conforming coordinator that uses implicit PostgreSQL locks.
+    if (options.lockClass === "schema-infrastructure") return false;
+    if (options.lockClass === "unqualified") return false;
     return /FOR\s+(UPDATE|SHARE)/i.test(sql) &&
       tables.some((name) => names[options.lockClass ?? ""]?.test(name));
   };
@@ -793,6 +973,22 @@ export function finalizationFaultPool(pool: pg.Pool, options: {
     return typeof value === "function" ? value.bind(target) : value;
   } });
   return { pool: instrumented, evidence };
+}
+
+/**
+ * Explicitly wired phase-injection joint for E3 cause classes whose SQL shape
+ * r2 does not impose (schema-infrastructure, unqualified). Fails
+ * `[missing-contract]` naming the joint and its owner instead of asserting an
+ * optional LOCK TABLE / pg_catalog / SET LOCAL form. A conforming coordinator
+ * using implicit PostgreSQL locks fails here by name, never on a form
+ * assertion.
+ */
+export async function requirePhaseInjectionBinding(phase: string): Promise<never> {
+  void phase;
+  missingContract(
+    `testing.injectPhaseFault.${phase}`,
+    `explicit phase-injection joint for E3 cause ${phase} is required (owner Sentropic L2/L3, spec r2 E3); optional LOCK TABLE / pg_catalog / SET LOCAL SQL must not be imposed on the provider`,
+  );
 }
 
 /** Observe committed state on a separate raw connection, with stable ordering. */

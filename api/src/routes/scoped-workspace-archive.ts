@@ -49,14 +49,22 @@ function headResponse(head: WorkspaceArchiveHead) {
   return head;
 }
 
+const SCOPED_ARCHIVE_GUARDED = [
+  "/api/v1/workspaces/:workspaceId/signal-facets/workspace/*",
+  "/api/v1/workspaces/:workspaceId/signal-facets/archive/*",
+];
+
 export function scopedWorkspaceArchiveRoute(deps: ScopedWorkspaceArchiveDeps): Hono {
   const app = new Hono();
-  app.use("/api/v1/workspaces/:workspaceId/signal-facets/*", async (c, next) => {
-    c.header("Cache-Control", "private, no-store");
-    c.header("Vary", "Cookie, Authorization");
-    await next();
-  });
-  app.use("/api/v1/workspaces/:workspaceId/signal-facets/*", async (c, next) => {
+  for (const path of SCOPED_ARCHIVE_GUARDED) {
+    app.use(path, async (c, next) => {
+      c.header("Cache-Control", "private, no-store");
+      c.header("Vary", "Cookie, Authorization");
+      await next();
+    });
+  }
+  for (const path of SCOPED_ARCHIVE_GUARDED) {
+    app.use(path, async (c, next) => {
     const session = c.get("session" as never) as { sub?: string; via?: string } | undefined;
     if (!deps.auth?.enabled || !session?.sub) return c.json({ error: "unauthenticated" }, 401);
     if (c.req.method !== "GET" && session.via === "bearer") {
@@ -66,7 +74,8 @@ export function scopedWorkspaceArchiveRoute(deps: ScopedWorkspaceArchiveDeps): H
       return c.json({ error: "invalid_scoped_identity" }, 400);
     }
     return next();
-  });
+    });
+  }
   for (const action of ["discard", "restore"] as const) {
     app.post(`/api/v1/workspaces/:workspaceId/signal-facets/workspace/${action}`, async (c) => {
       const body = await c.req.json().catch(() => null);
