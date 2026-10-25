@@ -36,6 +36,7 @@ if [[ -f $ROOT/tmp/a5-delivery.git/config ]]; then candidate_git+=(--git-dir="$R
 candidate=$("${candidate_git[@]}" rev-parse HEAD)
 "${candidate_git[@]}" show 5ea88ce1:api/drizzle/meta/_journal.json > "$LOG_DIR/baseline-journal.json"
 while IFS= read -r path; do
+  [[ $path != api/drizzle/meta/_journal.json ]] || continue
   digest=$("${candidate_git[@]}" show "5ea88ce1:$path" | sha256sum | cut -d' ' -f1)
   printf '%s  %s\n' "$digest" "$path"
 done < <("${candidate_git[@]}" ls-tree -r --name-only 5ea88ce1 -- api/drizzle) > "$LOG_DIR/baseline-migrations.sha256"
@@ -114,7 +115,7 @@ if [[ ${A5_IMAGE:-0} == 1 ]]; then
   chmod 777 "$LOG_DIR"
   timeout --signal=TERM --kill-after=10 180 docker run --pull=never --rm --name "$PROJECT-image-probe" --network "${PROJECT}_default" \
     --label "com.docker.compose.project=$PROJECT" --label "org.radar.base.owner=$OWNER" \
-    -v "$ROOT/tools/make/artefacts-a4-image-probe.mjs:/workspace/a4-image-probe.mjs:ro" \
+    -v "$ROOT/tools/make/artefacts-a5-image-client.mjs:/workspace/a5-image-client.mjs:ro" \
     -v "$ROOT/tools/make/artefacts-a5-image-probe.mjs:/workspace/a5-image-probe.mjs:ro" \
     -v "$LOG_DIR:/evidence" --entrypoint node "$image" a5-image-probe.mjs \
     > >(tee "$LOG_DIR/run.log") 2>&1 &
