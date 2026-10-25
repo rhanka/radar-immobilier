@@ -56,6 +56,7 @@
 - [x] First campaign: 44 passed, six fixture setup failures on chk_workspace_memberships_revoked_at; fixed synthetic membership timestamps without weakening DB constraints. Owned cleanup passed.
 - [x] T05a regressions passed: graph-signals (48), date parity (5), direct context (1); mixed campaign 103 passed, one test-only Hono route-registration failure. Split unmounted and authenticated probes onto separate apps before building their matchers.
 - [ ] T07: read-only reveal, post-enrichment authority/revision checks and shared document context across bounded attempts.
+- [x] T07 implementation uses canonical cards only after masking; lazy document context/cache/deadline lives outside the BASE retry callback; full-set authority is checked after enrichment and again before return.
 - [x] T07 deterministic createApp/PG races written for approval, membership set, graph source and common archive changes during document I/O; execution waits for canonical exports.
 - [x] T07 default 2,000ms cross-retry budget and persistent drift cases written with an explicit 1,000ms scheduling allowance outside documentary waiting.
 - [x] Missing/legacy/barrier epoch and unresolved-history refusals are covered by real createApp/PostgreSQL cases, including empty reveal requests.
