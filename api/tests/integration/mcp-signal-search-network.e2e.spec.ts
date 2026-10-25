@@ -5,6 +5,27 @@ import { writeScopedPersonalFacet } from "../../src/services/facets/scoped-write
 import { networkFixture, networkSearch } from "./mcp-signal-search-network-fixture.js";
 
 describeDb("T14 complete MCP HTTP search through production facade", () => {
+  it("keeps original-bearer and exact-route refusals private on the real receiver", async () => {
+    const f = await networkFixture();
+    try {
+      const { client, subject } = await f.connect();
+      expect((await networkSearch(client)).result.isError).not.toBe(true);
+      const path = "/api/v1/mcp/facets/signals/search";
+      const original = await fetch(f.apiUrl + path + "?city=synthetic-city", {
+        headers: { authorization: `Bearer ${subject}` } });
+      expect(original.status).toBe(401);
+      expect(original.headers.get("cache-control")).toBe("private, no-store");
+      for (const [method, route] of [["POST", path], ["GET", path + "/more"],
+        ["GET", path.replace("search", "%73earch")], ["GET", path + "?city=x&city=y"],
+        ["GET", path + "?city=synthetic-city&sub=other"]] as const) {
+        const response = await fetch(f.apiUrl + route, { method, headers: {
+          authorization: `Bearer ${f.exchange.issuedExchangedTokens[0]}` } });
+        expect(response.status).toBe(403);
+        expect(response.headers.get("cache-control")).toBe("private, no-store");
+        expect(await response.json()).toEqual({ error: "delegated_scope_refused" });
+      }
+    } finally { await f.close(); }
+  });
   it.each(["serving", "cutover-closed", "retired"] as const)(
     "preserves two humans, sessions and exchanged authority with legacy %s", async (retirement) => {
       const f = await networkFixture(retirement);

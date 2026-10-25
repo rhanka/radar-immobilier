@@ -44,7 +44,7 @@ import { scopedWorkspaceArchiveRoute } from "./routes/scoped-workspace-archive.j
 import { scopedProjectionRevisionsRoute } from "./routes/scoped-projection-revisions.js";
 import { scopedProjectionEventsRoute } from "./routes/scoped-projection-events.js";
 import { scopedSignalRevealRoute } from "./routes/scoped-signal-reveal.js";
-import { MCP_SIGNAL_SEARCH_PATH, mcpSignalSearchRoute } from "./routes/mcp-signal-search.js";
+import { mcpSignalSearchRoute } from "./routes/mcp-signal-search.js";
 
 export type AppDeps = HealthDeps &
   SourcesDeps &
@@ -97,7 +97,7 @@ export function createApp(deps: AppDeps): Hono {
   const app = new Hono();
   app.use("/api/graph-signals/*", privateSignalResponse);
   app.use("/api/v1/signal-facets/*", privateSignalResponse);
-  app.use(MCP_SIGNAL_SEARCH_PATH, privateSignalResponse);
+  app.use("/api/v1/mcp/facets/signals/*", privateSignalResponse);
 
   // Content hosts dispatch FIRST, before protect: never app auth or SPA.
   if (deps.contentHost?.enabled) {
