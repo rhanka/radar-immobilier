@@ -832,7 +832,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         [invAId, invBId].includes(candidate.invocationId))) {
         expect(attempt.blobKeys.length).toBeGreaterThan(0);
       }
-      const keys = await rawBlobs().listKeys(`artifacts/${SCOPE}/`);
+      const keys = await listTestBucketKeys(s3, BUCKET);
       expect([...keys].length).toBeGreaterThan(0);
       const s3Keys = new Set([...keys]);
       const winnerKeys = new Set(observed.attempts.find(

@@ -47,7 +47,7 @@ describe("artifact test inventories on real S3", () => {
     expect(() => assertAttributedTestObjects(after, baseline, attributable)).not.toThrow();
   });
 
-  it.each(["artifacts/foreign_scope/blobs/sha256/unattributed", "unexpected-root/unattributed"])(
+  it.each([`artifacts/foreign_scope/blobs/sha256/${"b".repeat(64)}`, "unexpected-root/unattributed"])(
     "should detect an undeclared write at %s even outside the configured scope", async (key) => {
       const baseline = new Set(await listTestBucketKeys(s3, BUCKET));
       await s3.send(new PutObjectCommand({ Bucket: BUCKET, Key: key, Body: "foreign write" }));
@@ -60,19 +60,29 @@ describe("artifact test inventories on real S3", () => {
   );
 
   it("should follow real continuation tokens and return a sorted complete inventory", async () => {
-    let pages = 0;
+    const expected = new Set(await listTestBucketKeys(s3, BUCKET));
+    for (const hex of ["c", "d", "e"]) {
+      const key = `${PREFIX}blobs/sha256/${hex.repeat(64)}`;
+      await s3.send(new PutObjectCommand({ Bucket: BUCKET, Key: key, Body: "pagination fixture" }));
+      expected.add(key);
+    }
+    const tokens: (string | undefined)[] = [];
     s3.middlewareStack.add((next, context) => async (args) => {
       if (context.commandName === "ListObjectsV2Command") {
-        (args.input as { MaxKeys?: number }).MaxKeys = 1;
-        pages++;
+        const input = args.input as { MaxKeys?: number; ContinuationToken?: string };
+        input.MaxKeys = 1;
+        tokens.push(input.ContinuationToken);
       }
       return next(args);
     }, { step: "initialize", name: "smallInventoryPages" });
     try {
       const keys = await listTestBucketKeys(s3, BUCKET);
-      expect(keys).toHaveLength(3);
-      expect(keys).toEqual([...keys].sort());
-      expect(pages).toBe(3);
+      expect(keys).toEqual([...expected].sort());
+      // S3 may return an additional empty terminal page; follow its tokens.
+      expect(tokens.length).toBeGreaterThanOrEqual(expected.size);
+      expect(tokens[0]).toBeUndefined();
+      expect(tokens.slice(1).every((token) => typeof token === "string" && token.length > 0)).toBe(true);
+      expect(new Set(tokens).size).toBe(tokens.length);
     } finally { s3.middlewareStack.remove("smallInventoryPages"); }
   });
 
