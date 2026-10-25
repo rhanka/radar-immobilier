@@ -4,8 +4,8 @@
   "provider": {
     "id": "sentropic.artifacts",
     "version": "0.2.0",
-    "selectionStatus": "unselected",
-    "reason": "awaiting qualified A1 transaction authority, durable quotas, operation receipts and shared production binding"
+    "selectionStatus": "guarded",
+    "reason": "selected only with the shared 0.2.0 host, current activation, migrated coordinator and explicit durable quota"
   },
   "requiredContracts": {
     "capabilitySelection": "artifacts-profile/v1",
