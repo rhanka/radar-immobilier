@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ObjectStore } from "../../storage/object-store.js";
-import { createDocEnrichmentContext, DOC_ENRICHMENT_BUDGET_MS, toGraphSignalCard } from "../../routes/graph-signals.js";
+import { createDocEnrichmentContext, DOC_ENRICHMENT_BUDGET_MS, toGraphSignalCard, toDegradedSignalCard } from "../../routes/graph-signals.js";
 
 describe("canonical per-request documentary context", () => {
   it("starts one absolute budget with an empty request-local cache", () => {
@@ -22,5 +22,13 @@ describe("canonical per-request documentary context", () => {
     expect(card.regulatoryStatus).toBe("firm");
     expect(card.docRefs[0]?.rawRef).toBe("raw/synthetic/a.pdf");
     expect(card.etape).toBe("adoption");
+  });
+  it("uses the same canonical degradation when the document budget is already exhausted", async () => {
+    const node = { id: "synthetic", type: "Signal", label: "Label", citySlug: "city",
+      createdAt: new Date("2026-01-01T00:00:00Z"), sourceRef: "raw/synthetic/a.pdf", props: {} };
+    const degraded = toDegradedSignalCard(node);
+    const expired = await toGraphSignalCard({} as ObjectStore, node, createDocEnrichmentContext(0));
+    expect(degraded).toEqual(expired);
+    expect(degraded.docRefs[0]?.documentUrl).toContain("/api/documents/raw?");
   });
 });
