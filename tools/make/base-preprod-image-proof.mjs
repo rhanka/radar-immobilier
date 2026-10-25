@@ -40,11 +40,56 @@ try {
   const args = ["--workspace", binding.workspaceId, "--actor", binding.actorSub, "--reason", evidence.reason,
     "--maintenance-attempt", binding.maintenanceAttemptId, "--release", binding.releaseId,
     ...instanceIds.flatMap((id) => ["--instance", id]), "--evidence-json", JSON.stringify(evidence)];
-  const activate = JSON.parse(execute("api/dist/scripts/base-api-personal-activation.js", ["activate", ...args]));
+  const job = { action: "activate", binding, image: process.env.OPERATOR_IMAGE, args: ["activate", ...args],
+    database: { database: "radar", role: "synthetic_operator", schema: "public" } };
+  const operator = (invocation = job) => spawnSync(process.execPath,
+    ["api/dist/scripts/base-preprod-job.js", JSON.stringify(invocation)],
+    { encoding: "utf8", timeout: 60_000, env: { ...process.env,
+      POSTGRES_USER: "synthetic_operator", POSTGRES_PASSWORD: "synthetic-only" } });
+  // A nonowner has table locks only through explicit grants. Own just the event
+  // table to qualify DROP INDEX without inheriting every other table's owner.
+  await pool.query("CREATE ROLE synthetic_operator LOGIN PASSWORD 'synthetic-only'");
+  await pool.query("GRANT USAGE ON SCHEMA public TO synthetic_operator");
+  await pool.query("GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA public TO synthetic_operator");
+  await pool.query("ALTER TABLE facet_events OWNER TO synthetic_operator");
+  const refused = async (label, invocation = job) => {
+    const child = operator(invocation);
+    assert.equal(child.status, 1, `${label} must fail before activation`);
+    const state = await pool.query("SELECT count(*)::int AS count FROM facet_activation_state WHERE workspace_id=$1", [init.workspaceId]);
+    assert.equal(state.rows[0].count, 0, `${label} must leave no maintenance barrier`);
+    console.log(JSON.stringify({ deniedBeforeBarrier: label, exitCode: child.status }));
+  };
+  await refused("foreign release", { ...job, binding: { ...binding, releaseId: `${"c".repeat(40)}:foreign` } });
+  await pool.query("REVOKE UPDATE ON facet_event_bindings FROM synthetic_operator");
+  await refused("missing facet_event_bindings table lock");
+  await pool.query("GRANT UPDATE ON facet_event_bindings TO synthetic_operator");
+  await pool.query("REVOKE UPDATE ON account_users FROM synthetic_operator");
+  await pool.query("GRANT DELETE ON account_users TO synthetic_operator");
+  await refused("DELETE cannot replace UPDATE for account row locks");
+  await pool.query("GRANT UPDATE ON account_users TO synthetic_operator");
+  await pool.query("REVOKE INSERT ON facet_command_contexts FROM synthetic_operator");
+  await refused("missing command context insertion");
+  await pool.query("GRANT INSERT ON facet_command_contexts TO synthetic_operator");
+  const qualified = operator();
+  assert.equal(qualified.status, 0, qualified.stderr);
+  const activate = JSON.parse(qualified.stdout).result;
   assert.equal(activate.status, "open-success");
   assert.equal(activate.maintenanceBarrier, false);
   assert.equal(activate.epoch, "scoped");
   console.log(JSON.stringify({ script: "base-api-personal-activation.js", receipt: activate }));
+  const initialization = { action: "init", image: process.env.OPERATOR_IMAGE,
+    binding: { ...binding, workspaceId: null, workspaceSlug: "synthetic-image-scope" },
+    database: { database: "radar", role: "radar", schema: "public" },
+    args: ["--workspace-slug", "synthetic-image-scope", "--workspace-label", "Synthetic image scope",
+      "--actor", subjects[0], "--moderator", subjects[0], "--moderator", subjects[1],
+      "--manager", subjects[0], "--manager", subjects[1]] };
+  for (let replay = 0; replay < 2; replay++) {
+    const receipt = JSON.parse(execute("api/dist/scripts/base-preprod-job.js", [JSON.stringify(initialization)]));
+    assert.equal(receipt.result.workspaceId, init.workspaceId);
+    assert.equal(receipt.result.workspaceSlug, initialization.binding.workspaceSlug);
+    assert.equal(receipt.result.replayed, true);
+    console.log(JSON.stringify({ initializationReplay: replay + 1, receipt }));
+  }
   const snapshot = async () => {
     const tables = await pool.query("SELECT tablename FROM pg_tables WHERE schemaname='public' ORDER BY tablename");
     const hash = createHash("sha256");
