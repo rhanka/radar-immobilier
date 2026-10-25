@@ -39,4 +39,5 @@
 - [x] Review fixes 0: real-backend disconnect probe, machine-wide build exclusion and correction-only delivery tooling.
 - [x] Review fixes 0b: closed-composition 503/size-only 413 tests; synthetic stdio audit assertion and README boundary; process-death mutation harness ready.
 - [x] Review fixes 1: crash reproduced by idle backend termination; PostgreSQL pool recovery and request-local retriable errors implemented; closed-composition status and synthetic stdio audit/docs corrected.
+- [x] Review fixes 1b: 12 focused cases passed; isolate the probe's lock transaction from activity polling so PostgreSQL statistics snapshots stay current.
 - [ ] Review fixes 2: MCP/composition/API CI collection, image, lint/typecheck and independently imported bundle.
