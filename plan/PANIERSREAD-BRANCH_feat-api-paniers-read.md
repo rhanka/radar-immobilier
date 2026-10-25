@@ -27,7 +27,7 @@
 ## Plan / Todo (lot-based)
 - [x] P0-01 primitives and inputs (strict decoding and fixed public errors).
 - [x] P0-02 heads and count contracts (strict nested schemas and invariants).
-- [ ] P0-03 bounded canonical card.
+- [x] P0-03 bounded canonical card (explicit public fields and safe URLs).
 - [ ] P0-04 family context.
 - [ ] P0-05 nullable catalog.
 - [ ] P0-06 discovery 0/1/N.
