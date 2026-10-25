@@ -26,6 +26,9 @@ describeDb("MCP coherent BASE visibility through createApp/PostgreSQL", () => {
       [f.signal.node.id]);
     f.signal.node.sourceRef = "raw/synthetic/hidden.pdf";
     f.signal.fingerprint = targetFingerprint(f.signal.node);
+    await writeScopedPersonalFacet(f.data.db, f.data.contributor.sub, f.data.workspaceId,
+      { action: "select", target: f.signal.target, basket: "pertinent", expectedHeadId: null,
+        displayedFingerprint: f.signal.fingerprint, commandKey: randomUUID() });
     await discard(f, f.signal, "personal");
     await discard(f, common, "workspace");
     await discard(f, both, "personal");
@@ -64,5 +67,18 @@ describeDb("MCP coherent BASE visibility through createApp/PostgreSQL", () => {
     expect((await (await f.search()).json()).result.cards).toEqual([]);
     await f.memberships([]);
     expect(await (await f.search()).json()).toEqual({ error: "workspace_missing" });
+  });
+  it("keeps the common archive hidden after personal restoration without changing selections", async () => {
+    const f = await searchFixture();
+    const personal = await discard(f, f.signal, "personal");
+    await discard(f, f.signal, "workspace");
+    await writeScopedPersonalFacet(f.data.db, f.data.contributor.sub, f.data.workspaceId,
+      { action: "restore", target: f.signal.target, expectedHeadId: personal!.id,
+        displayedFingerprint: f.signal.fingerprint, commandKey: randomUUID() });
+    f.mount((sub, args) => readMcpSignalCards({ db: f.data.db, store: f.store }, sub, args));
+    const before = await businessSnapshot(f);
+    expect((await (await f.search()).json()).result.cards).toEqual([]);
+    expect((await (await f.search("&showDiscarded=1")).json()).result.cards).toHaveLength(1);
+    expect(await businessSnapshot(f)).toEqual(before);
   });
 });
