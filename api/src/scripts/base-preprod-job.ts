@@ -6,6 +6,7 @@ import { inspect } from "./base-preprod-inspect.js";
 import { sql } from "drizzle-orm";
 import { createDb } from "../db/client.js";
 import { loadConfig } from "../config.js";
+import { assertPrivileges } from "./base-preprod-rights.js";
 
 interface Invocation {
   action: "inspect" | "init" | "attach" | "activate" | "resume";
@@ -31,6 +32,7 @@ export async function runJob(invocation: Invocation) {
     for (const key of ["database", "role", "schema"] as const) {
       if (!invocation.database?.[key] || actual?.[key] !== invocation.database[key]) throw new Error("database_identity_mismatch");
     }
+    if (invocation.action !== "inspect") await assertPrivileges(handle.db, invocation.action);
   } finally { await handle.pool.end(); }
   let result: unknown;
   if (invocation.action === "inspect") {

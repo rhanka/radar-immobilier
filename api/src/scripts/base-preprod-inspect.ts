@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { sql } from "drizzle-orm";
 import { loadConfig } from "../config.js";
 import { createDb } from "../db/client.js";
+import { readPrivileges } from "./base-preprod-rights.js";
 
 export async function inspect(workspaceId: string | null) {
   const { db, pool } = createDb(loadConfig());
@@ -41,21 +42,7 @@ export async function inspect(workspaceId: string | null) {
         FROM lot_cutover_state ORDER BY workspace_id`)).rows;
       const capabilities = (await tx.execute(sql`SELECT workspace_id, account_id, capability, granted, revision
         FROM lot_capability_grants WHERE workspace_id=${workspaceId} ORDER BY account_id, capability`)).rows;
-      const privileges = (await tx.execute(sql`SELECT c.relname AS relation, r.rolname AS owner,
-        has_table_privilege(c.oid,'SELECT') AS read,
-        has_table_privilege(c.oid,'INSERT') AS insert,
-        has_table_privilege(c.oid,'UPDATE') AS update,
-        has_table_privilege(c.oid,'DELETE') AS delete,
-        (has_table_privilege(c.oid,'UPDATE') OR has_table_privilege(c.oid,'DELETE')
-          OR has_table_privilege(c.oid,'TRUNCATE')) AS lock_authority,
-        pg_has_role(current_user,c.relowner,'USAGE') AS owner_effective
-        FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace JOIN pg_roles r ON r.oid=c.relowner
-        WHERE n.nspname='public' AND c.relkind IN ('r','p') AND c.relname IN (
-          'account_users','workspaces','workspace_memberships','workspace_membership_events',
-          'facet_streams','facet_event_bindings','facet_heads','facet_stream_attachments',
-          'facet_command_contexts','facet_activation_state','facet_unresolved_events',
-          'facet_events','facet_commands','personal_projection_revisions','workspace_projection_revisions')
-        ORDER BY c.relname`)).rows;
+      const privileges = await readPrivileges(tx);
       const sequences = (await tx.execute(sql`SELECT c.relname,
         has_sequence_privilege(c.oid,'USAGE') AS usage FROM pg_class c
         JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relkind='S'`)).rows;
