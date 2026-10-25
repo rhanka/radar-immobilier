@@ -58,5 +58,13 @@ export async function qualifyAdmissionQuotaAccounting() {
       { ...invocation, invocationId: randomUUID(), authorizeCommit: h.host.authorizeCommit });
     expect(retry).toMatchObject({ ok: true, replayed: false });
     expect((await h.pool.query("SELECT operations_used FROM artifacts.host_quotas")).rows[0].operations_used).toBe("1");
+    await h.pool.query("UPDATE artifacts.host_quotas SET operation_limit = 2");
+    await h.pool.query("UPDATE artifacts.host_policy SET revision = 'withdrawn-policy'");
+    const staleHost = await h.host.execute({ ...request,
+      body: { bindingName: "stale-policy", idempotencyKey: "stale-policy" } },
+    { ...invocation, invocationId: randomUUID(), authorizeCommit: h.host.authorizeCommit });
+    expect(staleHost).toMatchObject({ ok: false, failure: { category: "unauthorized_at_commit" } });
+    expect((await h.pool.query("SELECT operations_used FROM artifacts.host_quotas")).rows[0].operations_used).toBe("1");
+    expect((await h.pool.query("SELECT count(*) FROM artifacts.operation_receipts")).rows[0].count).toBe("1");
   } finally { await h.close(); }
 }
