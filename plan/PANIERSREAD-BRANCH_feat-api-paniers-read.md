@@ -30,7 +30,7 @@
 - [x] P0-03 bounded canonical card (explicit public fields and safe URLs).
 - [x] P0-04 family context (durable gates, separate rights, no head read).
 - [x] P0-05 nullable catalog (guarded persisted associations, nullable labels, version).
-- [ ] P0-06 discovery 0/1/N.
+- [x] P0-06 discovery 0/1/N (whole membership set revalidated, transports closed).
 - [ ] P0-07 closed route.
 - [ ] P0-08 authority/context tests.
 - [ ] P1-01 population and native keys.
