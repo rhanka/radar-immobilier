@@ -35,8 +35,9 @@
 - [x] Qualify profile/selection, lifecycle/composition, failure-closed bindings and discriminating mutations.
 - [x] Reproduce semantic-key exception; project public refusals before authority creation; 26 targeted cases pass after correction.
 - [ ] Qualify shared HTTP/MCP provider finalization, cross-process replay/conflict, restart, quota and denial persistence after A1 is available.
-- [x] Ordinary API: 3,838 passed, 76 pending; MCP: 398 passed; host: 158 passed; separate exchange service E2E: 1 passed.
+- [x] Ordinary API: 3,838 passed, 76 pending; final MCP: 401 passed; host: 158 passed; separate exchange service E2E: 1 passed.
 - [x] Typecheck, lint, security audit (66 gate tests) and API build; two authority/binding mutants killed.
-- [ ] Final source qualification; existing runtime recovery image proof. No new image without owner clarification.
+- [x] Final source qualification on `4866e79b`, clean source status and preserved source archive; all ordinary quality gates pass.
+- [ ] Existing runtime recovery image proof. No new image without owner clarification.
 - [ ] Record exact package/image/configuration provenance, limitations, delivered SHA and independently audited bundle.
 - [ ] Independent consensus reviews, remote CI and A7 deployment receipts remain external integration gates.
