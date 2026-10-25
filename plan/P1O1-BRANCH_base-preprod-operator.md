@@ -31,6 +31,7 @@
 - [ ] Lot 1: bundle scripts and qualify TypeScript/JavaScript entry guards.
 - [ ] Lot 2: standalone operator inputs, read-only inspection and hardened Job.
   - [x] Inspection limited to read-only metadata and effective database privileges.
+  - [x] Compact Job receipt hashes complete output; Make has explicit inputs only.
 - [ ] Lot 3: permissions, maintenance collection, closure and selective reopening.
 - [ ] Lot 4: operator refusal/transport tests and image execution receipts.
 - [ ] Lot 5: complete CI API suite, lint, typecheck and audit gate.
