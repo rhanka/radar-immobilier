@@ -108,7 +108,9 @@ explicit `operation_limit` and `byte_limit`; no row grants no write quota.
 Limits are cumulative per storage scope. Each new ensure or publication
 reserves one operation; publication additionally reserves decoded bytes.
 Replays consume neither. Increase limits to add capacity; retain used counters.
-`artifacts.host_policy.revision` fences policy changes. Account status, policy
+`artifacts.host_policy.revision` fences policy changes: a value different from
+the host's `POLICY_REVISION` refuses old hosts until matching code is deployed.
+Account status, policy
 revision and quota use the coordinator transaction; activation/cohort/expiry
 are reread by the guard after waits. Locks remain held through COMMIT.
 

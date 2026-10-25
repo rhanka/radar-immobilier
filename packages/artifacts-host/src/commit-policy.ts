@@ -17,12 +17,15 @@ export async function createHostPolicy(pool: pg.Pool, scope: string,
         return result.rows[0].revision;
       },
       async checkApproval({ actorId }) {
+        const revision = await client.query<{ revision: string }>(
+          "SELECT revision FROM artifacts.host_policy WHERE storage_scope_id = $1 FOR SHARE", [scope]);
         const result = await client.query<{ status: string }>(
           "SELECT status FROM account_users WHERE sub = $1 FOR SHARE", [actorId]);
         const activation = readActivation?.();
         const active = !activation || (activation.enabled && activation.expiresAtMs > Date.now() &&
           activation.subjects.includes(actorId));
-        return { approved: result.rows[0]?.status === "approved" && active, reason: "denied" as const };
+        return { approved: revision.rows[0]?.revision === POLICY_REVISION &&
+          result.rows[0]?.status === "approved" && active, reason: "denied" as const };
       },
       async reserveQuota({ storageScopeId, bytes }) {
         if (storageScopeId !== scope) return { reserved: false };

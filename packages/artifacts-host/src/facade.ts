@@ -110,7 +110,7 @@ export function createArtifactControl(
         if (entry) await options?.ledger?.record({ invocationId: entry.invocationId, op, actorId,
           reason: entry.reason, status: entry.status, atMs: (options?.nowMs ?? Date.now)() });
       }
-      const response = projectArtifactHttpOutcome(outcome);
+      const response = { ...projectArtifactHttpOutcome(outcome) };
       Object.defineProperty(response, "retryable", { value: !outcome.ok && outcome.failure.retriable });
       if (op !== "publish" || response.status !== 201) return response;
       const result = response.body as { releaseId: string; manifest: string };
