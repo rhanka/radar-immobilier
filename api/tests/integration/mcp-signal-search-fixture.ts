@@ -5,7 +5,7 @@ import type { McpSignalSearchArgs } from "../../src/routes/mcp-signal-search.js"
 import { decodeMcpSignalSearch, MCP_SIGNAL_SEARCH_PATH } from "../../src/routes/mcp-signal-search.js";
 import { ScopeError } from "../../src/services/facets/scope.js";
 import { WorkspaceError } from "../../src/services/workspaces/types.js";
-import { httpFixture, verifiedBearer } from "./base-api-http-fixture.js";
+import { httpFixture } from "./base-api-http-fixture.js";
 
 export async function searchFixture() {
   const f = await httpFixture();
@@ -36,8 +36,7 @@ export async function searchFixture() {
     });
   };
   const request = (query = "", sub = f.data.contributor.sub) => f.request(
-    `${MCP_SIGNAL_SEARCH_PATH}?city=synthetic-city${query}`, sub,
-    { headers: verifiedBearer(sub) });
+    `${MCP_SIGNAL_SEARCH_PATH}?city=synthetic-city${query}`, sub);
   return { ...f, store, head, memberships, mount, search: request };
 }
 export type SearchFixture = Awaited<ReturnType<typeof searchFixture>>;
