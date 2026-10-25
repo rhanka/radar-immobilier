@@ -11,6 +11,8 @@ export async function classificationFixture(extra: Partial<AppDeps> = {}) {
   const head = vi.fn(async () => null);
   const app = createApp({ db: data.db, store: { head } as unknown as ObjectStore,
     auth: baseAuth, discarded: EMPTY_DISCARDED_SIGNALS, checkDb: async () => ({ ok: true }),
+    classification: { cursorKeyring: { currentKeyId: "test-key", keys: new Map([["test-key", Buffer.alloc(32, 19)]]) },
+      apiOrigin: "https://api.example.test", now: () => 1000 },
     checkObjectStore: async () => ({ ok: true }), ...extra });
   const request = async (suffix: string, sub = data.contributor.sub, workspaceId = data.workspaceId) =>
     app.request(`/api/v1/workspaces/${workspaceId}/${suffix}`, { headers: { cookie: await baseCookie(sub) } });
