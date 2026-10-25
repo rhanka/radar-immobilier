@@ -34,6 +34,7 @@
 - [x] Lot 2: participant authorization, policy reads and outcome names.
 - [x] Lot 2a: use participant admission/revision/approval methods and minted fences; remove guard SQL.
 - [ ] Lot 3: public coordinator, provider composition and E3 binding probes.
+- [x] Lot 3a: replace unconditional constructor stubs and register leased policy reads.
 - [ ] Lot 4: before/after Q1/Q2 candidate qualification and failure classification.
 - [ ] Lot 5: full CI-equivalent API suite without candidate, lint and typecheck.
 - [ ] Lot 6: report, atomic history, bundle audit and test-stack cleanup.
