@@ -74,6 +74,7 @@ try {
   await refused("missing activation function execution");
   await pool.query("GRANT EXECUTE ON FUNCTION facet_swap_head_enforcement(uuid) TO PUBLIC");
   await pool.query("ALTER TABLE facet_events OWNER TO radar");
+  await pool.query("GRANT SELECT, INSERT, UPDATE ON facet_events TO synthetic_operator");
   await refused("missing effective index owner");
   await pool.query("ALTER TABLE facet_events OWNER TO synthetic_operator");
   const qualified = operator();
