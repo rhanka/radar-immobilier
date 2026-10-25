@@ -2,6 +2,7 @@
 
 ## Objective
 - [x] Replace the two Q2 E3 injections with the confirmed public barrier ABI and align A4 calls.
+- [x] Correct both helper reviews and requalify the final published 0.2.0 archives without changing delivered dependencies or runtime code.
 
 ## Scope / Guardrails
 - [x] Worktree `tmp/artifacts-e3-barrier`; branch `fix/artifacts-tests-e3-barrier`; base `dde9f4c8`.
@@ -18,7 +19,7 @@
 ## Feedback Loop
 - [x] Owner brief authorizes French report and commits without trailers.
 - [x] Upstream ABI read from `sentropic/tmp/worktrees/861-contract-gaps/packages/artifacts/src/testing.ts`; no Sentropic writes.
-- [x] Verified candidate 0.2.0 exports the public barrier, contrary to the brief; A4 seams and the public executor are absent. Missing contracts remain failures.
+- [x] Historical candidate: public barrier present, A4/executor absent; superseded by the verified final archive and public postgres-commit entrypoint.
 - [x] Preserve the first diagnostic run: its setup asserted barrier absence and was corrected after inspecting the pinned tarball.
 
 ## Orchestration Mode (AI-selected)
@@ -58,3 +59,12 @@
 - [x] Final acceptance typecheck and lint pass; workspace typecheck passes with seven Svelte warnings.
 - [x] Lot 5: atomic history, companion report, audited bundle from the base and stack cleanup.
 - [x] Real E3 fault/rollback/authority behavior and A4 races remain unqualified until the public upstream prerequisites ship.
+- [x] Final archives: SHA-256 and SHA-512 match the owner receipt; all four public probes succeed.
+- [x] Final Q1: 28 pass, one Radar transport failure, two explicit H3 quota gaps; zero skips.
+- [x] Final Q2: 32 Radar transport failures, zero passes/skips; eight direct lock injections and two real E3 faults reach their assertions without converting partial legs into case passes.
+- [x] Final acceptance: one pass, three Radar transport failures, two provider-contract divergences; zero skips.
+- [x] Legacy commit probe: four missing-coordinator failures after the real compiled profile is supplied; MCP has five setup skips caused by the same production composition.
+- [x] Final baseline: 3169 API tests pass, 533 skip, zero fail; all 69 gated cases skip; explicit acceptance/workspace typechecks and global lint pass.
+- [x] Final test sources are frozen and hash-checked against the runner; the intermediate fifth run is excluded after its Q1 copy changed during execution.
+- [x] Final candidate and baseline cleanups remove all project containers, volumes and networks; all campaigns stay above the 10 GiB stop threshold.
+- [x] Remaining runtime migration belongs to Radar H3/H4; guard invocation and bounded host-timeout mapping discrepancies are handed to Sentropic L2/L6 in the companion report. Global qualification remains NO-GO.
