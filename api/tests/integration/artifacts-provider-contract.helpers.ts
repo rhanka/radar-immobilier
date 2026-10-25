@@ -679,12 +679,31 @@ export async function verifyPreparationCleanup(host: unknown, artifactId: string
   }
 }
 
-/** Provisional test seam for the A4 purge claim held across external DELETE. */
+/** Structural public ABI from artifacts/src/testing.ts (Sentropic PR #750). */
+export interface PurgeDeletionClaims {
+  withDigestLock<T>(digest: string, action: (locked: Pick<PurgeDeletionClaims,
+    "claim" | "releaseClaim" | "isClaimed">) => Promise<T>): Promise<T>;
+  claim(digest: string, holder: string): Promise<void>;
+  releaseClaim(digest: string): Promise<void>;
+  isClaimed(digest: string): Promise<boolean>;
+  listClaims(): Promise<Array<{ readonly claimId: string; readonly digest: string;
+    readonly holder: string; readonly state: "pending" | "done" }>>;
+}
+
+export interface PurgeTestHost {
+  readonly claims: PurgeDeletionClaims;
+  readonly storageScopeId: string;
+  readonly blobs: import("@sentropic/artifacts/server/publication").PublicationBlobStore;
+  purge(artifactId: string, deleting: PurgeTestHost["blobs"]): Promise<void>;
+}
+
+/** A4 starts one purge with the deletion adapter supplied by the public seam. */
 export async function requirePurgeRaceBinding(): Promise<{
-  pausePurgeBeforeDelete(host: unknown, artifactId: string): Promise<{
+  pausePurgeBeforeDelete(host: PurgeTestHost, artifactId: string): Promise<{
     claimId: string; blobKeys: string[]; release(): void; finished: Promise<void>;
   }>;
-  inspectDeletionClaims(host: unknown): Promise<Array<{ claimId: string; state: string; blobKeys: string[] }>>;
+  inspectDeletionClaims(host: Pick<PurgeTestHost, "claims" | "storageScopeId">):
+    Promise<Array<{ claimId: string; state: string; blobKeys: string[] }>>;
 }> {
   type Binding = Awaited<ReturnType<typeof requirePurgeRaceBinding>>;
   return {
