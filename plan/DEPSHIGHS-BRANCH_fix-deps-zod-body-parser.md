@@ -1,7 +1,7 @@
 # Feature: Root Zod and body-parser high advisories
 
 ## Objective
-- [ ] Remediate compatible high dependency findings; document instances that require a forbidden major upgrade or peer violation.
+- [x] Remediate compatible high dependency findings; document instances that require a forbidden major upgrade or peer violation.
 
 ## Scope / Guardrails
 - [x] Isolated worktree: `tmp/deps-highs`, branch `fix/deps-zod-body-parser`, base `e45a714c4012cfcba3f25ae3750998215295e67e`.
@@ -51,13 +51,13 @@
   - [x] Remove campaign containers/volumes; observed free space stays above 29 GiB; shared Git remains at the base.
 - [x] **Merge & close — outside this local delivery**
   - [x] No push, PR mutation, merge, or risk acceptance authorized by this campaign.
-- [ ] **Lot 4 — Astra PR912 corrections**
+- [x] **Lot 4 — Astra PR912 corrections**
   - [x] Recover rescue Git at PR head `7eac7167`, preserve earlier delivery, and clean only campaign Docker resources.
   - [x] Deliver the existing Zod acceptance as exact registry rows with a stable root component identity.
   - [x] Deliver exact exception matching, UTC expiration, audit propagation, and closed failure on invalid input.
   - [x] Deliver unit regressions for matching, expiry, severity thresholds, and the register layout.
   - [x] Deliver regressions for propagation, component scope, malformed input, and the checked-in register.
   - [x] Deliver the containerized CLI, CI Make wiring, and clarified acceptance status.
-  - [ ] Execute the CI Make step in Docker, synthetic CLI cases, lint, typecheck, and Quality gates tests.
-  - [ ] Deliver subject-only commits of at most 150 lines and audit the bundle from `7eac7167` in a fresh repository.
-  - [ ] Append evidence and bundle identity to the French report; remove campaign containers and volumes.
+  - [x] Execute the CI Make step in Docker, synthetic CLI cases, lint, typecheck, and Quality gates tests.
+  - [x] Deliver subject-only commits of at most 150 lines and audit the bundle from `7eac7167` in a fresh repository.
+  - [x] Append evidence and bundle identity to the French report; remove campaign containers and volumes.
