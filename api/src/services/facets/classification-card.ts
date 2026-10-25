@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { GraphSignalCard } from "../../routes/graph-signals.js";
 import { Stage } from "./classification-query.js";
+import { normalizeRawRef } from "../sources/document-resolver.js";
 
 export const Day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((day) => {
   const date = new Date(`${day}T00:00:00Z`);
@@ -31,6 +32,13 @@ export function publicDocumentUrl(value: unknown, apiOrigin?: string): string | 
     if (!apiOrigin) return null;
     const origin = url.safeParse(apiOrigin);
     if (!origin.success) return null;
+    const local = new URL(value, new URL(origin.data).origin);
+    if (local.hash || [...local.searchParams.keys()].some((key) => !["rawRef", "sourceUrl"].includes(key)
+      || local.searchParams.getAll(key).length !== 1)) return null;
+    const rawRef = local.searchParams.get("rawRef");
+    if (!rawRef || !normalizeRawRef(rawRef)) return null;
+    const source = local.searchParams.get("sourceUrl");
+    if (source !== null && !url.safeParse(source).success) return null;
     candidate = new URL(value, new URL(origin.data).origin).href;
   }
   return url.safeParse(candidate).success ? candidate : null;
