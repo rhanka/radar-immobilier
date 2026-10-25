@@ -18,7 +18,7 @@ test-mutations:
 status:
 	@rtk bash tools/make/base-preprod-status.sh
 check-static:
-	@rtk bash -c 'for path in tools/make/base-preprod*.sh; do bash -n "$$path"; done; git diff c100e6cc HEAD --check'
+	@rtk bash -c 'for path in tools/make/base-preprod*.sh; do bash -n "$$path"; done; git diff b0cc044d HEAD --check'
 report:
 	@rtk bash tools/make/base-preprod-report.sh
 inspect-host:
