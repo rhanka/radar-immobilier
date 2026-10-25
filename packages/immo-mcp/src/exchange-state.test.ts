@@ -68,7 +68,7 @@ describe("delegation outage and invalidation", () => {
       subjectExp: r.now / 1000 + 300, subjectScopes: TEST_SCOPES.split(" "),
       issuer: r.fixture.config.issuer, membership: "radar:default" }));
     const search = () => runWithExchangeDeps(r.deps, () => TOOL_HANDLERS.search_signals!({ city: "longueuil", limit: 1 }, ctx));
-    await expect(search()).rejects.toThrow(/unauthenticated/);
+    await expect(search()).rejects.toMatchObject({ code: status === 401 ? "unauthenticated" : "forbidden" });
     r.outage();
     await expect(search()).rejects.toThrow(/exchange|issuer/);
     expect(r.calls()).toBe(2);

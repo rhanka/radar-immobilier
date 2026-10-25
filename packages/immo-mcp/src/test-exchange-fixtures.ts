@@ -1,6 +1,6 @@
 import { generateKeyPair, SignJWT, decodeJwt } from "jose";
 import type { KeyLike } from "jose";
-import type { ExchangeConfig } from "./exchange-config.js";
+import { EXCHANGE_DEFAULT_POLICY_REVISION, type ExchangeConfig } from "./exchange-config.js";
 import { ExchangeCache, SingleFlightExchange } from "./exchange-cache.js";
 import type { ExchangeRuntimeDeps } from "./authorized-egress.js";
 
@@ -38,7 +38,7 @@ export async function createIsolatedExchangeFixture(): Promise<IsolatedExchangeF
     workloadSub: TEST_WORKLOAD_SUB,
     workloadClientId: TEST_WORKLOAD_CLIENT,
     environment: "test-artefacts-mcp-a2",
-    policyRevision: "p4-v1",
+    policyRevision: EXCHANGE_DEFAULT_POLICY_REVISION,
   };
   const issuedExchangedTokens: string[] = [];
   const state = { calls: 0 };

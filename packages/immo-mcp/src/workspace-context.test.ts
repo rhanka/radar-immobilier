@@ -2,7 +2,7 @@
  * 6H MCP workspace context: explicit per-call resolution, no defaults.
  * Synthetic workspace ids only.
  */
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { HttpDataSource } from "./data-source.js";
 import { resolveWorkspaceContext, WorkspaceContextError } from "./workspace-context.js";
 
@@ -57,38 +57,16 @@ describe("resolveWorkspaceContext", () => {
 
 describe("HttpDataSource workspace forwarding", () => {
   const baseUrl = "http://radar-api:3000";
-
-  function capture() {
+  it.each([undefined, first])("forwards reserved workspace %s without a transport default", async (workspaceId) => {
     const seen: string[] = [];
-    const fetchImpl = vi.fn(async (input: unknown) => {
+    const source = new HttpDataSource({ baseUrl, fetchImpl: async (input) => {
       seen.push(String(input));
-      return new Response(JSON.stringify({ ok: true, citySlug: "longueuil", nodes: [] }), {
-        status: 200, headers: { "content-type": "application/json" },
-      });
-    });
-    const source = new HttpDataSource({ baseUrl, fetchImpl: fetchImpl as unknown as typeof fetch });
-    return { seen, source };
-  }
-
-  it("preserves the exact legacy URL when no workspace is supplied", async () => {
-    const { seen, source } = capture();
-    await source.searchSignals({ city: "longueuil", limit: 20 });
-    expect(seen).toEqual([`${baseUrl}/api/graph-signals/longueuil`]);
-  });
-
-  it("refuses scoped delivery until the guarded graph route exists", async () => {
-    const { seen, source } = capture();
-    await expect(source.searchSignals({ city: "longueuil", limit: 20, workspaceId: first }))
-      .rejects.toThrow("scoped_signal_search_unavailable");
-    expect(seen).toEqual([]);
-  });
-
-  it("preserves the legacy reveal URL", async () => {
-    const { seen, source } = capture();
-    await source.searchSignals(
-      { city: "longueuil", limit: 20, showDiscarded: true });
-    expect(seen).toEqual([
-      `${baseUrl}/api/graph-signals/longueuil?showDiscarded=1`,
-    ]);
+      return Response.json({ ok: true, workspaceId: first, citySlug: "longueuil", signals: [] });
+    } });
+    await source.searchSignals({ city: "longueuil", limit: 20, workspaceId });
+    const url = new URL(seen[0]!);
+    expect(url.pathname).toBe("/api/v1/mcp/facets/signals/search");
+    expect(url.searchParams.get("workspaceId")).toBe(workspaceId ?? null);
+    expect(seen).toHaveLength(1);
   });
 });

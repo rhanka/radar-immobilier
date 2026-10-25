@@ -13,6 +13,7 @@ import {
   getInvocationContext,
 } from "./invocation-context.js";
 import { ALL_TOOL_DEFINITIONS } from "./tool-definitions.js";
+import { RadarSignalReadError } from "./signal-read-error.js";
 import { TOOL_HANDLERS, type ToolTextResult } from "./tool-handlers.js";
 
 export interface ToolContext {
@@ -51,6 +52,11 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
           auditToolCall(snapshot.auth, def.name, hashInput(args), correlationId);
           return await handler(args as Record<string, unknown>, snapshot);
         } catch (err) {
+          if (err instanceof RadarSignalReadError) {
+            const payload = err.toPublicPayload(def.name, correlationId);
+            process.stderr.write(`${JSON.stringify({ kind: "immo-mcp.error", ...payload })}\n`);
+            return { isError: true, content: [{ type: "text", text: JSON.stringify(payload) }] };
+          }
           const message = err instanceof Error ? err.message : String(err);
           // stderr only — never leak to the protocol stdout channel.
           process.stderr.write(
