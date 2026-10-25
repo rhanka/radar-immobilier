@@ -1,7 +1,7 @@
 # Feature: BASE preprod operator vehicle
 
 ## Objective
-- [ ] Deliver P1 bundles and O1 operator tooling; no live activation or push.
+- [x] Deliver P1 bundles and O1 operator tooling; no live activation or push.
 
 ## Scope / Guardrails
 - [x] Approved v2 design and both reviews read; P2/6K, UI-H and MCP excluded.
@@ -19,6 +19,7 @@
 ## Feedback Loop
 - [x] Owner instruction supersedes automatic coauthor trailers: subject-only commits.
 - [x] No 6H opening until successor MCP adapter is deployed and qualified.
+- [x] attention: peer-review selection failed without an exact author model; evidence records no consensus verdict.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch, serial implementation and Docker verification.
@@ -28,9 +29,9 @@
 
 ## Plan / Todo (lot-based)
 - [x] Lot 0: inspect approved design, constraints and existing isolation tooling.
-- [ ] Lot 1: bundle scripts and qualify TypeScript/JavaScript entry guards.
+- [x] Lot 1: bundle scripts and qualify TypeScript/JavaScript entry guards.
   - [x] Built API image emitted successful JSON receipts from all three JavaScript bundles.
-- [ ] Lot 2: standalone operator inputs, read-only inspection and hardened Job.
+- [x] Lot 2: standalone operator inputs, read-only inspection and hardened Job.
   - [x] Built-image inspection and already-open resume preserved every public SQL row.
   - [x] Inspection limited to read-only metadata and effective database privileges.
   - [x] Compact Job receipt hashes complete output; Make has explicit inputs only.
@@ -43,21 +44,25 @@
   - [x] Fake-cluster tests reject surviving/restarted workloads, ready endpoints, unsuspended jobs and live CD.
   - [x] Reopening tests require both qualifications, available API and stopped excluded consumers.
   - [x] Job collection tests accept complete bound receipts and refuse corrupted stdout hashes.
-- [ ] Lot 3: permissions, maintenance collection, closure and selective reopening.
+- [x] Lot 3: permissions, maintenance collection, closure and selective reopening.
   - [x] Explicit Kubernetes/Actions controls and projected workload/route inventories.
   - [x] Closure preserves inventories; collection refuses surviving processes and ready endpoints.
   - [x] Q1/restart/Q2 are separate from reopening; MCP successor deployment is required.
   - [x] Reopening rechecks stopped consumers/jobs; deletion compares the actual saved Job receipt.
   - [x] Both old and operator Job deletion use Kubernetes UID preconditions.
   - [x] Collector derives coverage only after independent roster input and live closure checks.
-- [ ] Lot 4: operator refusal/transport tests and image execution receipts.
+- [x] Lot 4: operator refusal/transport tests and image execution receipts.
   - [x] Hermetic operator Make tests cover refusals, literal values and no root/environment discovery.
   - [x] Verification serializes Docker campaigns, polls at 60 seconds and monitors 8 GiB floor.
   - [x] Synthetic image proof uses existing Postgres base and actual runtime bundles.
   - [x] Image rehearsal checks all three JSON receipts and byte-stable read-only inspection/resume.
-- [ ] Lot 5: complete CI API suite, lint, typecheck and audit gate.
+- [x] Lot 5: complete CI API suite, lint, typecheck and audit gate.
+  - [x] 3,632 API tests passed, zero failed, 76 conditionally skipped; all seven typechecks, lint and audit passed.
+  - [x] Final immutable runner exited zero and removed only owned test resources.
   - [x] Corrected disposable archive to retain root API test helpers and full CI include list.
-- [ ] Lot 6: runbook, review evidence, local backup, audited bundle and report.
+- [x] Lot 6: runbook, review evidence, local backup, audited bundle and report.
+  - [x] 51 hermetic operator cases and static Job render passed; local backup and fresh-repository bundle audit passed.
+  - [x] Root delivery report generated separately from the source payload; final receipt refresh follows the last metadata commit.
   - [x] Owner-input template and short-path prerequisites/inspection documented.
   - [x] Delivery pins initial origin/main and creates a separate bare backup plus fresh bundle audit.
   - [x] Maintenance observations, collector, protected resume and UID-bound Job termination documented.
