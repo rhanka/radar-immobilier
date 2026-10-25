@@ -45,7 +45,7 @@ export const COMMIT_CONTRACT_SPECIFIER = "@sentropic/artifacts/server/commit-con
 export const OUTCOME_CONTRACT_SPECIFIER = "@sentropic/artifacts/server/outcome-contract";
 export const TESTING_SPECIFIER = "@sentropic/artifacts/testing";
 export const PROFILE_COMPILER_SPECIFIER = "@sentropic/artifacts/mcp-core";
-export const COORDINATOR_FACTORY_SPECIFIER = "@sentropic/artifacts/server/commit";
+export const COORDINATOR_FACTORY_SPECIFIER = COMMIT_CONTRACT_SPECIFIER;
 export const PREPARATION_CLEANUP_SPECIFIER = "@sentropic/artifacts/server/object-intents";
 export const EXPECTED_COORDINATOR_CTOR = "createArtifactCommitCoordinator";
 export const EXPECTED_CLEANUP_BINDING =
@@ -61,7 +61,7 @@ export const FROZEN_CAPABILITIES = [
 
 /** Compiled r2 profile returned by the upstream compiler, never fabricated. */
 export interface CompiledArtifactsProfile {
-  readonly digest: string;
+  readonly profileDigest: string;
   readonly selectedCapabilities: readonly string[];
   readonly [key: string]: unknown;
 }
@@ -225,8 +225,8 @@ export function requireSelectedProfile(host: unknown, expectedDigest: string): s
     );
   }
   const digest = record?.["profileDigest"] ??
-    (record?.["profile"] as Record<string, unknown> | undefined)?.["digest"] ??
-    (record?.["compiledProfile"] as Record<string, unknown> | undefined)?.["digest"];
+    (record?.["profile"] as Record<string, unknown> | undefined)?.["profileDigest"] ??
+    (record?.["compiledProfile"] as Record<string, unknown> | undefined)?.["profileDigest"];
   if (typeof digest !== "string" || !/^(sha256:)?[a-f0-9]{64}$/.test(digest)) {
     missingContract("provider.profileDigest", "compiled profile digest is required with the selection");
   }
@@ -381,41 +381,32 @@ export const authorizeTransaction: AuthorizeCommit = async (context, transaction
  * semantic-only change (same JSON Schema text, different limit or default)
  * must invalidate composition evidence.
  */
-export const RADAR_EFFECTIVE_PROFILE = Object.freeze({
-  selection: Object.freeze([...FROZEN_CAPABILITIES]),
-  closedObjects: true,
-  limits: Object.freeze({
-    ensureBindingName: Object.freeze({ minUtf16: 1, maxUtf16: 128, normalize: false }),
-    callerKey: Object.freeze({ trimNonempty: true, maxUtf16: 256, keepWhitespace: true,
-      rejectLoneSurrogates: true, normalize: false }),
-    artifactId: Object.freeze({ validator: "lowercase-uuid" }),
-    publishFiles: Object.freeze({ min: 1, max: 32 }),
-    publishBytes: Object.freeze({ maxDecodedPerFile: 262144, maxDecodedTotal: 262144 }),
-    mime: Object.freeze(["text/html", "text/css", "text/javascript", "application/json"]),
-    path: Object.freeze({ maxUtf8Bytes: 1024, forbidColon: true, forbidDel: true,
-      noEmptyDotSegments: true, noBackslash: true, noPercent: true,
-      noQueryFragment: true, noControls: true,
-      forbiddenFirstSegment: Object.freeze(["api", "__artifacts", "livez", "health"]) }),
-    fileContent: Object.freeze({ exactlyOneOfTextOrBytes: true, textEncoding: "utf8",
-      byteIntegerMin: 0, byteIntegerMax: 255, uniquePaths: true }),
-    profile: Object.freeze({ flatJsonPrimitivesOnly: true }),
-    list: Object.freeze({ integerOnly: true, limitMin: 1, limitMax: 100,
-      limitDefault: 20, offsetMin: 0, offsetDefault: 0 }),
-  }),
-  emptyParametersOnly: true,
-  defaults: Object.freeze({ parameters: Object.freeze({}), profile: Object.freeze({}) }),
-  provenance: Object.freeze({ kind: "inline-original", callerSourceAbsent: true }),
-  revisions: Object.freeze({ profile: "radar-c4-r2", providerContract: "0.2.0", commandCodec: "v1" }),
+export const RADAR_ARTIFACTS_PROFILE = Object.freeze({
+  version: "artifacts-profile/v1",
+  selectedCapabilities: Object.freeze([...FROZEN_CAPABILITIES]),
+  operations: [
+    { operation: "ensure", limits: { bindingNameMinUnits: 1, bindingNameMaxUnits: 128,
+      idempotencyKeyMaxUnits: 256 }, defaults: { parameters: {} } },
+    { operation: "publish", limits: { idempotencyKeyMaxUnits: 256, publishFilesMin: 1, publishFilesMax: 32,
+      maxDecodedFileBytes: 262144, maxDecodedTotalBytes: 262144 }, defaults: { profile: {} } },
+    { operation: "list", limits: { listLimitMin: 1, listLimitMax: 100 }, defaults: { limit: 20, offset: 0 } },
+    { operation: "get", limits: {}, defaults: {} },
+  ],
+  rules: { lengthUnit: "utf16", textEncoding: "utf8", callerKeyNormalization: "none",
+    rejectLoneSurrogates: true, provenance: "inline-original", keyDerivationAlgorithm: "radar-derive-idempotency-v1",
+    pathMaxBytes: 1024, forbiddenPathPattern: "[\\\\%?#:\\u0000-\\u001f\\u007f]",
+    reservedFirstSegments: ["api", "__artifacts", "livez", "health"],
+    mimeTypes: ["text/html", "text/css", "text/javascript", "application/json"] },
+  contractRevisions: { profile: "artifacts-profile/v1", command: "artifacts-command/v1",
+    authorization: "artifacts-authorization/v1", outcome: "artifacts-outcome/v1" },
 });
 
 /**
  * Compile the Radar provider profile through the upstream compiler.
  * Returns the immutable compiled profile; never fabricates a digest.
  * Fails `[missing-contract] mcp-core.compileArtifactsProfile` naming the
- * upstream entry while the provider predates the r2 line, and
- * `[missing-contract] mcp-core.effectiveProfile` (owner Sentropic L0/L1) while
- * the compiler input carries selection only without the C3/C4 limits,
- * defaults and revisions.
+ * upstream entry while the provider predates the r2 line. Compiler errors
+ * propagate unchanged: rejected input is not an absent contract.
  */
 export async function compileArtifactsProfile(input: {
   readonly selectedCapabilities: readonly string[];
@@ -436,25 +427,14 @@ export async function compileArtifactsProfile(input: {
       `upstream entry ${PROFILE_COMPILER_SPECIFIER} must export compileArtifactsProfile(input: ArtifactProviderProfile): CompiledArtifactsProfile (Sentropic spec r2 section 3.2)`,
     );
   }
-  const candidate = {
-    selectedCapabilities: [...FROZEN_CAPABILITIES],
-    effectiveProfile: RADAR_EFFECTIVE_PROFILE,
-  };
-  let compiled: CompiledArtifactsProfile;
-  try {
-    compiled = await (compile as (
-      candidate: unknown,
-    ) => Promise<CompiledArtifactsProfile> | CompiledArtifactsProfile)(candidate);
-  } catch (error) {
-    missingContract(
-      "mcp-core.effectiveProfile",
-      `upstream compiler must accept the full Radar effective profile (C3/C4 limits, defaults, revisions; owner Sentropic L0/L1): ${error instanceof Error ? error.message : String(error)}`,
-    );
-  }
+  const candidate = RADAR_ARTIFACTS_PROFILE;
+  const compiled = await (compile as (
+    candidate: unknown,
+  ) => Promise<CompiledArtifactsProfile> | CompiledArtifactsProfile)(candidate);
   if (compiled === null || typeof compiled !== "object") {
     throw new Error("[contract-violation] mcp-core.compileArtifactsProfile: malformed profile");
   }
-  const digest = (compiled as CompiledArtifactsProfile).digest;
+  const digest = compiled.profileDigest;
   if (typeof digest !== "string" || !/^(sha256:)?[a-f0-9]{64}$/.test(digest)) {
     throw new Error("[contract-violation] mcp-core.compileArtifactsProfile: missing digest");
   }
@@ -466,17 +446,16 @@ export async function compileArtifactsProfile(input: {
   // old equality check. A semantic-only profile change must change the digest.
   const mutated = {
     ...candidate,
-    effectiveProfile: { ...RADAR_EFFECTIVE_PROFILE,
-      limits: { ...RADAR_EFFECTIVE_PROFILE.limits,
-        publishBytes: { ...RADAR_EFFECTIVE_PROFILE.limits.publishBytes, maxDecodedTotal: 262143 } } },
+    operations: candidate.operations.map((operation) => operation.operation === "publish"
+      ? { ...operation, limits: { ...operation.limits, maxDecodedTotalBytes: 262143 } } : operation),
   };
   const recompiled = await (compile as (
     candidate: unknown,
   ) => Promise<CompiledArtifactsProfile> | CompiledArtifactsProfile)(mutated);
-  if (typeof recompiled?.digest !== "string" || !/^(sha256:)?[a-f0-9]{64}$/.test(recompiled.digest)) {
+  if (typeof recompiled?.profileDigest !== "string" || !/^(sha256:)?[a-f0-9]{64}$/.test(recompiled.profileDigest)) {
     throw new Error("[contract-violation] semantic profile compilation returned an invalid digest");
   }
-  if (recompiled.digest === digest) {
+  if (recompiled.profileDigest === digest) {
     throw new Error("[contract-violation] mcp-core.compileArtifactsProfile: semantic profile change left the digest unchanged");
   }
   return compiled;
@@ -1064,7 +1043,7 @@ if (process.argv[2] === "--artifact-worker") {
           pool, config, blobs: createTestS3BlobStore({ client: s3, bucket: config.s3Bucket! }), barrier,
         });
         host = composed.host;
-        requireSelectedProfile(host, composed.profile.digest);
+        requireSelectedProfile(host, composed.profile.profileDigest);
       } else if (message.method === "execute") {
         const invocation = args[1] as InvocationContextShape;
         result = await requireHostExecute(host)(args[0], buildInvocationContext({ ...invocation,
