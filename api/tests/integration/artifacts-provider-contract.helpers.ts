@@ -45,11 +45,7 @@ export const COMMIT_CONTRACT_SPECIFIER = "@sentropic/artifacts/server/commit-con
 export const OUTCOME_CONTRACT_SPECIFIER = "@sentropic/artifacts/server/outcome-contract";
 export const TESTING_SPECIFIER = "@sentropic/artifacts/testing";
 export const PROFILE_COMPILER_SPECIFIER = "@sentropic/artifacts/mcp-core";
-export const COORDINATOR_FACTORY_SPECIFIER = "@sentropic/artifacts/server/commit";
 export const PREPARATION_CLEANUP_SPECIFIER = "@sentropic/artifacts/server/object-intents";
-export const EXPECTED_COORDINATOR_CTOR = "createArtifactCommitCoordinator";
-export const EXPECTED_CLEANUP_BINDING =
-  "scheduleBoundedPreparationCleanup with attempt intent, cleanup-deadline and shared-blob observation";
 
 /** Frozen r2 selection for the Radar profile, deterministically ordered. */
 export const FROZEN_CAPABILITIES = [
@@ -61,7 +57,7 @@ export const FROZEN_CAPABILITIES = [
 
 /** Compiled r2 profile returned by the upstream compiler, never fabricated. */
 export interface CompiledArtifactsProfile {
-  readonly digest: string;
+  readonly profileDigest: string;
   readonly selectedCapabilities: readonly string[];
   readonly [key: string]: unknown;
 }
@@ -101,8 +97,18 @@ export type CommitBarrierPoint =
 
 export interface CommitBarrier {
   readonly observer: unknown;
-  waitUntilReached(point: CommitBarrierPoint, invocationId?: string): Promise<void>;
-  release(point: CommitBarrierPoint, invocationId?: string): void;
+  readonly coordinatorPoints?: readonly CoordinatorBarrierPoint[] | undefined;
+  waitUntilReached(point: CommitBarrierPoint, invocationId: string): Promise<void>;
+  release(point: CommitBarrierPoint, invocationId: string): void;
+}
+
+export type CoordinatorBarrierPoint = Exclude<CommitBarrierPoint,
+  "before_blob_put" | "after_blob_put_before_verify" | "before_blob_readback">;
+
+interface PublicCommitBarrier extends CommitBarrier {
+  readonly observer: ((point: CommitBarrierPoint, invocationId: string) => Promise<void>) & {
+    arrive(point: CommitBarrierPoint, invocationId: string): void;
+  };
 }
 
 export type AuthorizePurpose = "finalize" | "replay";
@@ -153,17 +159,37 @@ async function loadUpstream(specifier: string, entry: string): Promise<Record<st
   } catch (error) {
     const code = (error as { code?: unknown }).code;
     const message = error instanceof Error ? error.message : String(error);
-    const absent = code === "ERR_PACKAGE_PATH_NOT_EXPORTED" ||
-      (["MODULE_NOT_FOUND", "ERR_MODULE_NOT_FOUND"].includes(String(code)) && message.includes(specifier)) ||
-      (message.includes("Missing") && message.includes(specifier.replace("@sentropic/artifacts", ".")) &&
-        message.includes("@sentropic/artifacts"));
+    const parts = /^(@[^/]+\/[^/]+|[^/]+)(\/.*)?$/.exec(specifier);
+    const packageName = parts?.[1];
+    const subpath = `.${parts?.[2] ?? ""}`;
+    // Read the failing target before "imported from", never its importer.
+    const target = message.split(" imported from ")[0]!;
+    const absent = packageName !== undefined && (
+      (code === "ERR_PACKAGE_PATH_NOT_EXPORTED" &&
+        target.endsWith(`/node_modules/${packageName}/package.json`) &&
+        (target.startsWith(`Package subpath '${subpath}' is not defined by "exports" in `) ||
+          (subpath === "." && target.startsWith('No "exports" main defined in ')))) ||
+      (["MODULE_NOT_FOUND", "ERR_MODULE_NOT_FOUND"].includes(String(code)) &&
+        (message.startsWith(`Cannot find module '${specifier}'`) ||
+          message.startsWith(`Cannot find package '${packageName}'`))) ||
+      message === `Missing "${subpath}" specifier in "${packageName}" package`);
     if (!absent) throw error;
     missingContract(entry, `upstream entry ${specifier} is not provided by the installed provider`);
   }
   if (loaded === null || (typeof loaded !== "object" && typeof loaded !== "function")) {
-    missingContract(entry, `upstream entry ${specifier} resolved to a non-module value`);
+    throw new Error(`[contract-violation] ${entry}: resolved to a non-module value`);
   }
   return loaded as Record<string, unknown>;
+}
+
+/** Resolve public callable symbols only; present-but-invalid values are violations. */
+export async function requirePublicFunction<T>(specifier: string, name: string): Promise<T> {
+  const module = await loadUpstream(specifier, `${specifier}.${name}`);
+  if (!(name in module)) missingContract(`${specifier}.${name}`, "public export is absent");
+  if (typeof module[name] !== "function") {
+    throw new Error(`[contract-violation] ${specifier}.${name}: expected a function`);
+  }
+  return module[name] as T;
 }
 
 /** Require the r2 commit-contract entry (types + guard/transaction/fence). */
@@ -180,39 +206,32 @@ export async function requireOutcomeContract(): Promise<Record<string, unknown>>
  * Require the test-only barrier factory. Names the missing factory entry
  * against 0.1.2 so the denial/race suites fail by name instead of hanging.
  */
-export async function requireCommitBarrier(): Promise<CommitBarrier> {
-  const testing = await loadUpstream(TESTING_SPECIFIER, "testing.createArtifactCommitBarrier");
-  const factory = testing["createArtifactCommitBarrier"];
-  if (typeof factory !== "function") {
-    missingContract(
-      "testing.createArtifactCommitBarrier",
-      "factory createArtifactCommitBarrier is not exported by the installed provider",
-    );
-  }
-  const barrier = (factory as () => CommitBarrier)();
+export async function requireCommitBarrier(points?: readonly CoordinatorBarrierPoint[]): Promise<CommitBarrier> {
+  const factory = await requirePublicFunction<
+    (options?: { readonly points: readonly CommitBarrierPoint[] }) => PublicCommitBarrier
+  >(TESTING_SPECIFIER, "createArtifactCommitBarrier");
+  const barrier = factory(points === undefined ? undefined : { points });
   if (barrier === null || typeof barrier !== "object" ||
+    typeof barrier.observer !== "function" ||
+    typeof (barrier.observer as unknown as { arrive?: unknown }).arrive !== "function" ||
     typeof (barrier as CommitBarrier).waitUntilReached !== "function" ||
     typeof (barrier as CommitBarrier).release !== "function") {
     throw new Error("[contract-violation] testing.createArtifactCommitBarrier: malformed barrier");
   }
-  return barrier;
+  return { ...barrier, coordinatorPoints: points };
 }
 
 /**
  * Assert the frozen selection value plus the compiled profile digest.
  * The digest must equal the digest of the profile returned by
  * `compileArtifactsProfile`; any well-formed but unrelated hex digest is
- * rejected. Throws `[missing-contract] provider.selectCapabilities` (or
- * `provider.profileDigest`) while the provider predates the r2 line.
+ * rejected. A malformed Radar host is a contract violation.
  */
 export function requireSelectedProfile(host: unknown, expectedDigest: string): string {
   const record = host as Record<string, unknown> | null;
   const selected = record !== null ? record["selectedCapabilities"] : undefined;
   if (!Array.isArray(selected)) {
-    missingContract(
-      "provider.selectCapabilities",
-      "explicit selectedCapabilities is required before compilation",
-    );
+    throw new Error("[contract-violation] host.selectedCapabilities is required");
   }
   const names = [...(selected as unknown[])].map(String).sort();
   if (!Object.isFrozen(selected)) {
@@ -225,10 +244,10 @@ export function requireSelectedProfile(host: unknown, expectedDigest: string): s
     );
   }
   const digest = record?.["profileDigest"] ??
-    (record?.["profile"] as Record<string, unknown> | undefined)?.["digest"] ??
-    (record?.["compiledProfile"] as Record<string, unknown> | undefined)?.["digest"];
+    (record?.["profile"] as Record<string, unknown> | undefined)?.["profileDigest"] ??
+    (record?.["compiledProfile"] as Record<string, unknown> | undefined)?.["profileDigest"];
   if (typeof digest !== "string" || !/^(sha256:)?[a-f0-9]{64}$/.test(digest)) {
-    missingContract("provider.profileDigest", "compiled profile digest is required with the selection");
+    throw new Error("[contract-violation] host.profileDigest is required with the selection");
   }
   const expected = expectedDigest;
   if (digest !== expected) {
@@ -258,10 +277,7 @@ export function requireHostExecute(host: unknown): (
     const bound = nested as (request: unknown, invocation: unknown) => Promise<unknown>;
     return (request, invocation) => bound.call(app, request, invocation);
   }
-  missingContract(
-    "provider.execute",
-    "callable host.execute(request, invocation) (or host.app.execute) is required",
-  );
+  throw new Error("[contract-violation] callable host.execute or host.app.execute is required");
 }
 
 /**
@@ -280,10 +296,12 @@ export function assertOutcomeFailure(outcome: unknown, expectedInvocationId?: st
   if (failure["cause"] === undefined) {
     throw new Error("[contract-violation] provider.execute: failure.cause must be retained privately");
   }
-  if (typeof failure["category"] !== "string" || typeof failure["code"] !== "string") {
-    throw new Error("[contract-violation] provider.execute: failure category and code are required");
+  if (typeof failure["category"] !== "string" || typeof failure["publicCode"] !== "string") {
+    throw new Error("[contract-violation] provider.execute: failure category and publicCode are required");
   }
-  if (typeof failure["status"] !== "number" || typeof failure["retriable"] !== "boolean" ||
+  if (typeof failure["httpStatus"] !== "number" ||
+    typeof failure["retriable"] !== "boolean" ||
+    (failure["kind"] === "ordinary" && failure["retriable"] !== false) ||
     typeof failure["operation"] !== "string" || typeof failure["phase"] !== "string" ||
     !["not_committed", "committed", "unknown"].includes(String(failure["commitState"]))) {
     throw new Error("[contract-violation] host.execute: incomplete failure before projection");
@@ -313,26 +331,18 @@ export function buildInvocationContext(params: {
  * stays private. Fails by name while the provider predates the r2 line.
  */
 export async function projectOutcomeHttp(outcome: unknown): Promise<{ status: number; body: unknown }> {
-  const http = await loadUpstream(
-    "@sentropic/artifacts/http", "http.projectArtifactHttpOutcome");
-  const project = http["projectArtifactHttpOutcome"];
-  if (typeof project !== "function") {
-    missingContract(
-      "http.projectArtifactHttpOutcome",
-      "projectArtifactHttpOutcome is not exported by the installed provider",
-    );
-  }
-  return (project as (candidate: unknown) => { status: number; body: unknown })(outcome);
+  const project = await requirePublicFunction<
+    (candidate: unknown) => { status: number; body: unknown }
+  >("@sentropic/artifacts/http", "projectArtifactHttpOutcome");
+  return project(outcome);
 }
 
 /** Wrap a test admission decision as an upstream commit-guard decision. */
-export function toGuardDecision(decision: AdmissionResult): AuthorizeCommitDecision {
-  if (decision.allowed) {
-    missingContract("ArtifactCommitTransaction.policyParticipant", "an allowed decision requires a transaction-minted fence; use authorizeTransaction");
-  }
+export function toGuardDecision(decision: Extract<AdmissionResult, { allowed: false }>):
+  Extract<Awaited<ReturnType<AuthorizeCommit>>, { allowed: false }> {
   return {
     allowed: false,
-    reason: "unauthorized_at_commit",
+    reason: "denied",
     publicCode: decision.body.error,
     status: decision.status,
     retriable: false,
@@ -359,20 +369,40 @@ export function reportNotCovered(
 /** Baseline-only declaration shape; never installed as a runtime contract. */
 export type OutcomeShape<T> =
   | { ok: true; result: T; invocationId: string; commitState: string; replayed: boolean }
-  | { ok: false; failure: { category: string; code: string; cause: unknown;
-      invocationId: string; phase: string; operation: string; status: number;
+  | { ok: false; failure: { category: string; publicCode: string; cause: unknown;
+      invocationId: string; phase: string; operation: string; httpStatus: number;
       retriable: boolean; commitState: string } };
 export type ExecuteOutcome = ArtifactOutcome<HttpResponse>;
 
 /** The registered participant owns fence minting; a plain revision is invalid. */
 export const authorizeTransaction: AuthorizeCommit = async (context, transaction) => {
-  const participant = (transaction as { policyParticipant?: unknown }).policyParticipant;
-  if (!participant || typeof participant !== "object" ||
-      !("authorize" in participant) || typeof participant.authorize !== "function") {
-    missingContract("ArtifactCommitTransaction.policyParticipant", "transaction-bound test participant binding is required (r2 does not freeze its construction API)");
+  const participant = transactionParticipant(transaction);
+  const revision = await participant.readRevision();
+  const admission = await participant.readAdmission({ ...context, policyRevision: revision });
+  if (!admission.allowed || revision !== context.policyRevision) {
+    return { allowed: false, reason: revision !== context.policyRevision ? "revoked" : admission.reason,
+      publicCode: "access_denied", status: 403, retriable: false };
   }
-  return participant.authorize(context, transaction);
+  return { allowed: true, fence: participant.mintFence(revision, context.invocationId) };
 };
+
+interface TransactionParticipant {
+  readAdmission(context: unknown): Promise<{ allowed: boolean;
+    reason: Extract<Awaited<ReturnType<AuthorizeCommit>>, { allowed: false }>["reason"] }>;
+  readRevision(): Promise<string>;
+  checkApproval(input: { actorId: string; operation: string }): Promise<{ approved: boolean }>;
+  mintFence(revision: string, invocationId: string):
+    Extract<Awaited<ReturnType<AuthorizeCommit>>, { allowed: true }>["fence"];
+}
+
+function transactionParticipant(transaction: unknown): TransactionParticipant {
+  const participant = (transaction as { participant?: TransactionParticipant } | null)?.participant;
+  if (!participant || ["readAdmission", "readRevision", "checkApproval", "mintFence"].some(
+    (name) => typeof (participant as unknown as Record<string, unknown>)[name] !== "function")) {
+    throw new Error("[contract-violation] ArtifactCommitTransaction.participant: invalid participant");
+  }
+  return participant;
+}
 
 /**
  * Radar effective profile data required by spec r2 C3/C4: selection plus the
@@ -381,41 +411,32 @@ export const authorizeTransaction: AuthorizeCommit = async (context, transaction
  * semantic-only change (same JSON Schema text, different limit or default)
  * must invalidate composition evidence.
  */
-export const RADAR_EFFECTIVE_PROFILE = Object.freeze({
-  selection: Object.freeze([...FROZEN_CAPABILITIES]),
-  closedObjects: true,
-  limits: Object.freeze({
-    ensureBindingName: Object.freeze({ minUtf16: 1, maxUtf16: 128, normalize: false }),
-    callerKey: Object.freeze({ trimNonempty: true, maxUtf16: 256, keepWhitespace: true,
-      rejectLoneSurrogates: true, normalize: false }),
-    artifactId: Object.freeze({ validator: "lowercase-uuid" }),
-    publishFiles: Object.freeze({ min: 1, max: 32 }),
-    publishBytes: Object.freeze({ maxDecodedPerFile: 262144, maxDecodedTotal: 262144 }),
-    mime: Object.freeze(["text/html", "text/css", "text/javascript", "application/json"]),
-    path: Object.freeze({ maxUtf8Bytes: 1024, forbidColon: true, forbidDel: true,
-      noEmptyDotSegments: true, noBackslash: true, noPercent: true,
-      noQueryFragment: true, noControls: true,
-      forbiddenFirstSegment: Object.freeze(["api", "__artifacts", "livez", "health"]) }),
-    fileContent: Object.freeze({ exactlyOneOfTextOrBytes: true, textEncoding: "utf8",
-      byteIntegerMin: 0, byteIntegerMax: 255, uniquePaths: true }),
-    profile: Object.freeze({ flatJsonPrimitivesOnly: true }),
-    list: Object.freeze({ integerOnly: true, limitMin: 1, limitMax: 100,
-      limitDefault: 20, offsetMin: 0, offsetDefault: 0 }),
-  }),
-  emptyParametersOnly: true,
-  defaults: Object.freeze({ parameters: Object.freeze({}), profile: Object.freeze({}) }),
-  provenance: Object.freeze({ kind: "inline-original", callerSourceAbsent: true }),
-  revisions: Object.freeze({ profile: "radar-c4-r2", providerContract: "0.2.0", commandCodec: "v1" }),
+export const RADAR_ARTIFACTS_PROFILE = Object.freeze({
+  version: "artifacts-profile/v1",
+  selectedCapabilities: Object.freeze([...FROZEN_CAPABILITIES]),
+  operations: [
+    { operation: "ensure", limits: { bindingNameMinUnits: 1, bindingNameMaxUnits: 128,
+      idempotencyKeyMaxUnits: 256 }, defaults: { parameters: {} } },
+    { operation: "publish", limits: { idempotencyKeyMaxUnits: 256, publishFilesMin: 1, publishFilesMax: 32,
+      maxDecodedFileBytes: 262144, maxDecodedTotalBytes: 262144 }, defaults: { profile: {} } },
+    { operation: "list", limits: { listLimitMin: 1, listLimitMax: 100 }, defaults: { limit: 20, offset: 0 } },
+    { operation: "get", limits: {}, defaults: {} },
+  ],
+  rules: { lengthUnit: "utf16", textEncoding: "utf8", callerKeyNormalization: "none",
+    rejectLoneSurrogates: true, provenance: "inline-original", keyDerivationAlgorithm: "radar-derive-idempotency-v1",
+    pathMaxBytes: 1024, forbiddenPathPattern: "[\\\\%?#:\\u0000-\\u001f\\u007f]",
+    reservedFirstSegments: ["api", "__artifacts", "livez", "health"],
+    mimeTypes: ["text/html", "text/css", "text/javascript", "application/json"] },
+  contractRevisions: { profile: "artifacts-profile/v1", command: "artifacts-command/v1",
+    authorization: "artifacts-authorization/v1", outcome: "artifacts-outcome/v1" },
 });
 
 /**
  * Compile the Radar provider profile through the upstream compiler.
  * Returns the immutable compiled profile; never fabricates a digest.
  * Fails `[missing-contract] mcp-core.compileArtifactsProfile` naming the
- * upstream entry while the provider predates the r2 line, and
- * `[missing-contract] mcp-core.effectiveProfile` (owner Sentropic L0/L1) while
- * the compiler input carries selection only without the C3/C4 limits,
- * defaults and revisions.
+ * upstream entry while the provider predates the r2 line. Compiler errors
+ * propagate unchanged: rejected input is not an absent contract.
  */
 export async function compileArtifactsProfile(input: {
   readonly selectedCapabilities: readonly string[];
@@ -427,34 +448,17 @@ export async function compileArtifactsProfile(input: {
       `[contract-violation] compileArtifactsProfile: expected exactly ${frozen.join(", ")}`,
     );
   }
-  const module = await loadUpstream(
-    PROFILE_COMPILER_SPECIFIER, "mcp-core.compileArtifactsProfile");
-  const compile = module["compileArtifactsProfile"];
-  if (typeof compile !== "function") {
-    missingContract(
-      "mcp-core.compileArtifactsProfile",
-      `upstream entry ${PROFILE_COMPILER_SPECIFIER} must export compileArtifactsProfile(input: ArtifactProviderProfile): CompiledArtifactsProfile (Sentropic spec r2 section 3.2)`,
-    );
-  }
-  const candidate = {
-    selectedCapabilities: [...FROZEN_CAPABILITIES],
-    effectiveProfile: RADAR_EFFECTIVE_PROFILE,
-  };
-  let compiled: CompiledArtifactsProfile;
-  try {
-    compiled = await (compile as (
-      candidate: unknown,
-    ) => Promise<CompiledArtifactsProfile> | CompiledArtifactsProfile)(candidate);
-  } catch (error) {
-    missingContract(
-      "mcp-core.effectiveProfile",
-      `upstream compiler must accept the full Radar effective profile (C3/C4 limits, defaults, revisions; owner Sentropic L0/L1): ${error instanceof Error ? error.message : String(error)}`,
-    );
-  }
+  const compile = await requirePublicFunction<
+    (candidate: unknown) => Promise<CompiledArtifactsProfile> | CompiledArtifactsProfile
+  >(PROFILE_COMPILER_SPECIFIER, "compileArtifactsProfile");
+  const candidate = RADAR_ARTIFACTS_PROFILE;
+  const compiled = await (compile as (
+    candidate: unknown,
+  ) => Promise<CompiledArtifactsProfile> | CompiledArtifactsProfile)(candidate);
   if (compiled === null || typeof compiled !== "object") {
     throw new Error("[contract-violation] mcp-core.compileArtifactsProfile: malformed profile");
   }
-  const digest = (compiled as CompiledArtifactsProfile).digest;
+  const digest = compiled.profileDigest;
   if (typeof digest !== "string" || !/^(sha256:)?[a-f0-9]{64}$/.test(digest)) {
     throw new Error("[contract-violation] mcp-core.compileArtifactsProfile: missing digest");
   }
@@ -466,52 +470,32 @@ export async function compileArtifactsProfile(input: {
   // old equality check. A semantic-only profile change must change the digest.
   const mutated = {
     ...candidate,
-    effectiveProfile: { ...RADAR_EFFECTIVE_PROFILE,
-      limits: { ...RADAR_EFFECTIVE_PROFILE.limits,
-        publishBytes: { ...RADAR_EFFECTIVE_PROFILE.limits.publishBytes, maxDecodedTotal: 262143 } } },
+    operations: candidate.operations.map((operation) => operation.operation === "publish"
+      ? { ...operation, limits: { ...operation.limits, maxDecodedTotalBytes: 262143 } } : operation),
   };
   const recompiled = await (compile as (
     candidate: unknown,
   ) => Promise<CompiledArtifactsProfile> | CompiledArtifactsProfile)(mutated);
-  if (typeof recompiled?.digest !== "string" || !/^(sha256:)?[a-f0-9]{64}$/.test(recompiled.digest)) {
+  if (typeof recompiled?.profileDigest !== "string" || !/^(sha256:)?[a-f0-9]{64}$/.test(recompiled.profileDigest)) {
     throw new Error("[contract-violation] semantic profile compilation returned an invalid digest");
   }
-  if (recompiled.digest === digest) {
+  if (recompiled.profileDigest === digest) {
     throw new Error("[contract-violation] mcp-core.compileArtifactsProfile: semantic profile change left the digest unchanged");
   }
   return compiled;
 }
 
-/**
- * Named joint (a): expected public coordinator constructor from Sentropic.
- * Builds the real transaction-bound coordinator carrying the PostgreSQL
- * participant and the barrier `testObserver`. Fails `[missing-contract]`
- * naming `createArtifactCommitCoordinator` while Sentropic has not shipped
- * the public constructor; the spec r2 freezes the coordinator obligations
- * but not this factory name, so the name below is the expected joint.
- */
+/** Real public coordinator over the candidate's exported PostgreSQL executor. */
 export async function createTestCommitCoordinator(params: {
   readonly pool: pg.Pool;
   readonly profile: CompiledArtifactsProfile;
   readonly barrier: CommitBarrier;
 }): Promise<R2CommitCoordinator> {
-  void params;
-  // r2 freezes the protocol, but not the public participant registration API.
-  // Do not guess a factory signature or accept a coordinator with no participant.
-  missingContract(
-    "coordinator.createArtifactCommitCoordinator",
-    "Sentropic L0/L3 must supply the public coordinator constructor and registered PostgreSQL policy participant API; spec r2 does not freeze this construction binding",
-  );
+  const { createCandidateCoordinator } = await import("./artifacts-provider-r2.helpers.js");
+  return createCandidateCoordinator(params.pool, params.barrier.observer, params.barrier.coordinatorPoints);
 }
 
-/**
- * Named joint (b): Radar H3/H4 migration of `composeArtifactHost`.
- * Calls the new r2 signature `composeArtifactHost(pool, config, blobs,
- * {profile, coordinator})` and refuses any partial composition. Fails
- * `[missing-contract]` naming this migration (owner Radar) while the
- * installed composition still interprets the fourth argument as the legacy
- * `onProviderFailure` callback.
- */
+/** Acceptance-only r2 composition, using public candidate services. */
 export async function composeProviderHost(params: {
   readonly pool: pg.Pool;
   readonly config: unknown;
@@ -519,13 +503,8 @@ export async function composeProviderHost(params: {
   readonly profile: CompiledArtifactsProfile;
   readonly coordinator: R2CommitCoordinator;
 }): Promise<Record<string, unknown>> {
-  void params;
-  // The current Radar signature takes onProviderFailure in argument four.
-  // Calling it with an options bag would create a partially wired legacy host.
-  missingContract(
-    "Radar.composeArtifactHost.r2",
-    "Radar H3/H4 must migrate composeArtifactHost(pool, config, blobs, {profile, coordinator}) and export ArtifactHost/ArtifactHostOptions before candidate qualification",
-  );
+  const { composeCandidateHost } = await import("./artifacts-provider-r2.helpers.js");
+  return composeCandidateHost(params);
 }
 
 /**
@@ -564,18 +543,11 @@ export async function composeR2AcceptanceHost(params: {
  * S3 object counts must never be presented as cleanup proof.
  */
 export async function requirePreparationCleanupBinding(): Promise<PreparationCleanupBinding> {
-  const module = await loadUpstream(
-    PREPARATION_CLEANUP_SPECIFIER, "preparation-cleanup.scheduleBoundedPreparationCleanup");
-  if (typeof module["scheduleBoundedPreparationCleanup"] !== "function" ||
-      typeof module["inspectPreparations"] !== "function") {
-    missingContract(
-      "preparation-cleanup.scheduleBoundedPreparationCleanup",
-      `expected binding ${EXPECTED_CLEANUP_BINDING} from ${PREPARATION_CLEANUP_SPECIFIER} (owner Sentropic L4; spec r2 A6); raw S3 counts are not cleanup evidence`,
-    );
-  }
   return {
-    inspectPreparations: module["inspectPreparations"] as PreparationCleanupBinding["inspectPreparations"],
-    scheduleBoundedPreparationCleanup: module["scheduleBoundedPreparationCleanup"] as PreparationCleanupBinding["scheduleBoundedPreparationCleanup"],
+    inspectPreparations: await requirePublicFunction<PreparationCleanupBinding["inspectPreparations"]>(
+      PREPARATION_CLEANUP_SPECIFIER, "inspectPreparations"),
+    scheduleBoundedPreparationCleanup: await requirePublicFunction<PreparationCleanupBinding["scheduleBoundedPreparationCleanup"]>(
+      PREPARATION_CLEANUP_SPECIFIER, "scheduleBoundedPreparationCleanup"),
   };
 }
 
@@ -712,45 +684,50 @@ export async function verifyPreparationCleanup(host: unknown, artifactId: string
   }
 }
 
-/** Provisional test seam for the A4 purge claim held across external DELETE. */
+/** Structural public ABI from artifacts/src/testing.ts (Sentropic PR #750). */
+export interface PurgeDeletionClaims {
+  withDigestLock<T>(digest: string, action: (locked: Pick<PurgeDeletionClaims,
+    "claim" | "releaseClaim" | "isClaimed">) => Promise<T>): Promise<T>;
+  claim(digest: string, holder: string): Promise<void>;
+  releaseClaim(digest: string): Promise<void>;
+  isClaimed(digest: string): Promise<boolean>;
+  listClaims(): Promise<Array<{ readonly claimId: string; readonly digest: string;
+    readonly holder: string; readonly state: "pending" | "done" }>>;
+}
+
+export interface PurgeTestHost {
+  readonly claims: PurgeDeletionClaims;
+  readonly storageScopeId: string;
+  readonly blobs: import("@sentropic/artifacts/server/publication").PublicationBlobStore;
+  purge(artifactId: string, deleting: PurgeTestHost["blobs"]): Promise<void>;
+}
+
+/** A4 starts one purge with the deletion adapter supplied by the public seam. */
 export async function requirePurgeRaceBinding(): Promise<{
-  pausePurgeBeforeDelete(host: unknown, artifactId: string): Promise<{
+  pausePurgeBeforeDelete(host: PurgeTestHost, artifactId: string): Promise<{
     claimId: string; blobKeys: string[]; release(): void; finished: Promise<void>;
   }>;
-  inspectDeletionClaims(host: unknown): Promise<Array<{ claimId: string; state: string; blobKeys: string[] }>>;
+  inspectDeletionClaims(host: Pick<PurgeTestHost, "claims" | "storageScopeId">):
+    Promise<Array<{ claimId: string; state: string; blobKeys: string[] }>>;
 }> {
-  const module = await loadUpstream(TESTING_SPECIFIER, "testing.pausePurgeBeforeDelete");
-  if (typeof module["pausePurgeBeforeDelete"] !== "function" || typeof module["inspectDeletionClaims"] !== "function") {
-    missingContract("testing.pausePurgeBeforeDelete",
-      "Sentropic L4 must expose a correlated purge pause and durable deletion-claim inspection before external DELETE (spec r2 A4/A6)");
-  }
+  type Binding = Awaited<ReturnType<typeof requirePurgeRaceBinding>>;
   return {
-    pausePurgeBeforeDelete: module["pausePurgeBeforeDelete"] as Awaited<ReturnType<typeof requirePurgeRaceBinding>>["pausePurgeBeforeDelete"],
-    inspectDeletionClaims: module["inspectDeletionClaims"] as Awaited<ReturnType<typeof requirePurgeRaceBinding>>["inspectDeletionClaims"],
+    pausePurgeBeforeDelete: await requirePublicFunction<Binding["pausePurgeBeforeDelete"]>(
+      TESTING_SPECIFIER, "pausePurgeBeforeDelete"),
+    inspectDeletionClaims: await requirePublicFunction<Binding["inspectDeletionClaims"]>(
+      TESTING_SPECIFIER, "inspectDeletionClaims"),
   };
 }
 
-/**
- * Read the approval status through the leased finalization transaction.
- * Guards must call this instead of `pool.query`: a `pool.query` read runs
- * outside the finalization unit and cannot prove `FOR SHARE` protection.
- * Fails `[missing-contract]` naming the transaction read binding while the
- * coordinator supplies no queryable transaction.
- */
-export async function transactionQuery<T>(transaction: unknown, text: string, params: unknown[] = []): Promise<{ rows: T[] }> {
-  const tx = transaction as { policyParticipant?: { query?: unknown } } | null;
-  const participant = tx?.policyParticipant;
-  if (typeof participant?.query !== "function") {
-    missingContract("ArtifactCommitTransaction.policyRead",
-      "registered participant must read policy through the leased transaction; no unrelated pool fallback is allowed (Sentropic L3 / Radar H3/H4)");
-  }
-  return (participant.query as (text: string, params: unknown[]) => Promise<{ rows: T[] }>).call(participant, text, params);
+/** Guards receive policy methods only; SQL belongs to the registered factory. */
+export async function readPolicyRevisionViaTransaction(transaction: unknown): Promise<string> {
+  return transactionParticipant(transaction).readRevision();
 }
 
-export async function readPolicyStatusViaTransaction(transaction: unknown): Promise<string | null> {
-  const result = await transactionQuery<{ status: string | null }>(transaction,
-    "SELECT status FROM account_users WHERE sub = $1 FOR SHARE", ["alice"]);
-  return result.rows[0]?.status ?? null;
+export async function readPolicyStatusViaTransaction(transaction: unknown,
+  context: { actorId: string; operation: string }): Promise<string | null> {
+  const approval = await transactionParticipant(transaction).checkApproval(context);
+  return approval.approved ? "approved" : null;
 }
 
 /** Unique private token embedded in an injected fault, never serialized. */
@@ -873,17 +850,26 @@ export function startBarrierOperation(barrier: CommitBarrier, invocationId: stri
     "before_finalization_row_lock", "after_finalization_locks_before_guard",
     "after_replay_lookup_before_guard", "before_commit"];
   let finish!: () => void;
+  let targetPaused = false;
+  let releaseRequested = false;
   const done = new Promise<false>((resolve) => { finish = () => resolve(false); });
   const waits = points.map((point) => Promise.race([
     barrier.waitUntilReached(point, invocationId).then(() => true), done,
-  ]).then((reached) => { if (reached && point !== target) barrier.release(point, invocationId); }));
+  ]).then((reached) => {
+    if (!reached) return;
+    if (point !== target || releaseRequested) barrier.release(point, invocationId);
+    else targetPaused = true;
+  }));
   const pending = start().finally(finish);
   // Attach a handler immediately so a failed operation cannot become an
   // unhandled rejection while the caller is inspecting the competing writer.
   void pending.catch(() => {});
   return { pending, drained: Promise.all(waits),
     reached: target ? arrived(barrier, target, invocationId) : Promise.resolve(),
-    release: () => { if (target) barrier.release(target, invocationId); },
+    release: () => {
+      releaseRequested = true;
+      if (target && targetPaused) { targetPaused = false; barrier.release(target, invocationId); }
+    },
   };
 }
 
@@ -901,26 +887,27 @@ export function proxyLeasedPool(pool: pg.Pool, handler: ProxyHandler<pg.Pool>): 
 }
 
 /** Instrument real leased clients; one fault, then pass through to expose retries. */
+export const finalizationPhaseFaults = new WeakMap<pg.Pool, (phase: string) => void>();
+
 export function finalizationFaultPool(pool: pg.Pool, options: {
   code: string; lockClass?: string; loseCommitAck?: boolean;
 }) {
   const evidence = { armed: false, injections: 0, attempts: 0, writes: 0,
     phase: "", commits: 0, guardPassed: false };
-  const matchesLock = (sql: string): boolean => {
+  const matchesLock = (sql: string, params: unknown): boolean => {
+    if (["blob-reference", "deletion-claim"].includes(options.lockClass ?? "")) {
+      return /pg_advisory_xact_lock/i.test(sql) && Array.isArray(params) &&
+        String(params[0]).startsWith("artifacts-blob:");
+    }
     const tables = [...sql.replaceAll('"', '').matchAll(/\b(?:FROM|JOIN|UPDATE|INTO|TABLE)\s+([\w.]+)/gi)]
       .map((match) => match[1]!.split(".").at(-1)!);
     const names: Record<string, RegExp> = {
-      binding: /^(artifact_)?bindings?(_keys)?$/, "artifact-lifecycle": /^artifacts$/,
+      "artifact-lifecycle": /^artifacts$/,
       acl: /^artifact_access$/, pointer: /^artifact_current$/,
       policy: /^(account_users|test_policy_revision|.*policy.*)$/,
-      quota: /quota/, "blob-reference": /^blob_(ref|pin)/,
-      "deletion-claim": /deletion.*claim|claim.*deletion/,
     };
-    // r2 does not require LOCK TABLE / pg_catalog.* or SET LOCAL shapes: never
-    // impose those optional SQL forms on the provider. Those two cause classes
-    // use an explicitly wired phase-injection joint (see
-    // requirePhaseInjectionBinding); matching optional text here would fail a
-    // conforming coordinator that uses implicit PostgreSQL locks.
+    // E3 uses a public barrier and real PostgreSQL contention instead of
+    // requiring optional provider SQL forms for these two cause classes.
     if (options.lockClass === "schema-infrastructure") return false;
     if (options.lockClass === "unqualified") return false;
     return /FOR\s+(UPDATE|SHARE)/i.test(sql) &&
@@ -941,7 +928,7 @@ export function finalizationFaultPool(pool: pg.Pool, options: {
           }
           const commit = /^\s*COMMIT\s*;?\s*$/i.test(sql);
           const write = finalizing && /^\s*(INSERT|UPDATE|DELETE)\b/i.test(sql);
-          const lockFault = options.lockClass !== undefined && matchesLock(sql);
+          const lockFault = options.lockClass !== undefined && matchesLock(sql, params);
           if (evidence.armed && evidence.injections === 0 &&
               (lockFault || (!options.lockClass && !options.loseCommitAck && write) ||
                 (options.loseCommitAck && finalizing && commit && evidence.guardPassed))) {
@@ -965,23 +952,14 @@ export function finalizationFaultPool(pool: pg.Pool, options: {
     const value = Reflect.get(target, property, receiver);
     return typeof value === "function" ? value.bind(target) : value;
   } });
+  finalizationPhaseFaults.set(instrumented, (phase) => {
+    if (evidence.armed && evidence.injections === 0 && options.lockClass === phase) {
+      evidence.injections++;
+      evidence.phase = phase;
+      throw Object.assign(new Error(`private injected ${phase}`), { code: options.code });
+    }
+  });
   return { pool: instrumented, evidence };
-}
-
-/**
- * Explicitly wired phase-injection joint for E3 cause classes whose SQL shape
- * r2 does not impose (schema-infrastructure, unqualified). Fails
- * `[missing-contract]` naming the joint and its owner instead of asserting an
- * optional LOCK TABLE / pg_catalog / SET LOCAL form. A conforming coordinator
- * using implicit PostgreSQL locks fails here by name, never on a form
- * assertion.
- */
-export async function requirePhaseInjectionBinding(phase: string): Promise<never> {
-  void phase;
-  missingContract(
-    `testing.injectPhaseFault.${phase}`,
-    `explicit phase-injection joint for E3 cause ${phase} is required (owner Sentropic L2/L3, spec r2 E3); optional LOCK TABLE / pg_catalog / SET LOCAL SQL must not be imposed on the provider`,
-  );
 }
 
 /** Observe committed state on a separate raw connection, with stable ordering. */
@@ -989,7 +967,7 @@ export async function committedState(pool: pg.Pool): Promise<unknown> {
   const client = await pool.connect();
   try {
     const snapshot: Record<string, unknown> = {};
-    for (const table of ["artifacts", "releases", "artifact_current", "idempotency_keys",
+    for (const table of ["artifacts", "releases", "artifact_current", "operation_receipts",
       "artifact_access", "artifact_sources", "blob_ref_holders"]) {
       snapshot[table] = (await client.query(
         `SELECT to_jsonb(t) AS row FROM artifacts.${table} t ORDER BY to_jsonb(t)::text`)).rows;
@@ -1034,8 +1012,8 @@ export async function startArtifactWorker(database: pg.PoolConfig, config: unkno
     execute: (request: unknown, invocation: unknown) => call("execute", request, invocation),
     barrier: {
       observer: undefined,
-      waitUntilReached: async (point: CommitBarrierPoint, id?: string) => { await call("wait", point, id); },
-      release: (point: CommitBarrierPoint, id?: string) => { void call("release", point, id); },
+      waitUntilReached: async (point: CommitBarrierPoint, id: string) => { await call("wait", point, id); },
+      release: (point: CommitBarrierPoint, id: string) => { void call("release", point, id); },
     } satisfies CommitBarrier,
     close: async () => { try { await call("close"); } finally { child.kill(); } },
   };
@@ -1064,7 +1042,7 @@ if (process.argv[2] === "--artifact-worker") {
           pool, config, blobs: createTestS3BlobStore({ client: s3, bucket: config.s3Bucket! }), barrier,
         });
         host = composed.host;
-        requireSelectedProfile(host, composed.profile.digest);
+        requireSelectedProfile(host, composed.profile.profileDigest);
       } else if (message.method === "execute") {
         const invocation = args[1] as InvocationContextShape;
         result = await requireHostExecute(host)(args[0], buildInvocationContext({ ...invocation,
