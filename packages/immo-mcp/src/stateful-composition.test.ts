@@ -2,6 +2,7 @@ import { beforeAll, describe, expect, it, vi } from "vitest";
 import { generateKeyPair, SignJWT, type KeyLike } from "jose";
 import { createImmoHttpApp, type ImmoHttpConfig } from "./server-http.js";
 import { HttpDataSource, MockDataSource } from "./data-source.js";
+import { MockRawDataSource } from "./raw-data.js";
 import { buildImmoServer } from "./server.js";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
@@ -35,6 +36,26 @@ async function call(app: ReturnType<typeof createImmoHttpApp>, bearer: string, s
 }
 
 describe("P6 composed effects", () => {
+  it("should preserve the 2,000-feature result bound through native dispatch", async () => {
+    const raw = new MockRawDataSource();
+    const result = await raw.getZonesGeojson({ city: "longueuil" });
+    const features = Array.from({ length: 2000 }, (_, index) => ({
+      type: "Feature" as const, id: index, geometry: null, properties: { label: "x".repeat(300) },
+    }));
+    vi.spyOn(raw, "getZonesGeojson").mockResolvedValue({ ...result,
+      featureCollection: { type: "FeatureCollection", features }, numberReturned: 2000, numberMatched: 2000, truncated: false });
+    const app = createImmoHttpApp(config, { raw, keySource: { resolveKey: async () => publicKey } });
+    const bearer = await token(); const sid = await session(app, bearer);
+    const response = await app.request("/mcp", { method: "POST", headers: headers(bearer, sid), body: JSON.stringify({
+      jsonrpc: "2.0", id: 4, method: "tools/call", params: { name: "get_zones_geojson",
+        arguments: { city: "longueuil", limit: 2000, bbox: [-74, 45, -73, 46] } },
+    }) });
+    const payload = (await response.json()).result;
+    expect(payload.isError).not.toBe(true);
+    expect(JSON.stringify(payload).length).toBeGreaterThan(600_000);
+    expect(JSON.parse(payload.content[0].text).featureCollection.features).toHaveLength(2000);
+  });
+
   it("should execute once and recheck account approval before each effect", async () => {
     const data = new MockDataSource(); const effect = vi.spyOn(data, "searchLots");
     let approved = true;

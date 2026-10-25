@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
+/* global fetch, AbortSignal, Buffer */
 const lock = JSON.parse(readFileSync('package-lock.json'));
 const manifest = JSON.parse(readFileSync('packages/immo-mcp/package.json'));
 const expected = [

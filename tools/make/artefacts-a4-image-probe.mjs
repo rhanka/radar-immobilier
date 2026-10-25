@@ -6,6 +6,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { generateKeyPairSync } from 'node:crypto';
 import { once } from 'node:events';
 import { setTimeout as delay } from 'node:timers/promises';
+/* global fetch, AbortSignal */
 const require = createRequire('/workspace/packages/immo-mcp/package.json');
 const { SignJWT } = require('jose');
 const { Pool } = require('pg');
