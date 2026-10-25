@@ -545,7 +545,28 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       // r2 imposes no LOCK TABLE / pg_catalog.* or SET LOCAL shape. A
       // conforming coordinator using implicit PostgreSQL locks must fail here
       // by named joint, never on an optional-form assertion.
-      await requirePhaseInjectionBinding(phase);
+      const inject = await requirePhaseInjectionBinding();
+      const cause = Object.assign(new Error(createPrivateMarker(`phase-${phase}`)), { code: "55P03" });
+      const probe = await inject({ pool, phase, cause });
+      const barrier = await requireCommitBarrier();
+      const { host } = await composeQ2Host(barrier, { pool: probe.pool });
+      try {
+        for (const transport of ["http", "mcp"] as const) {
+          const before = await committedState(pool);
+          Object.assign(probe.evidence, { armed: true, injections: 0, attempts: 0 });
+          const outcome = await failViaTransport(host, { method: "POST", path: "/ensure", body: {
+            bindingName: `q2-phase-${phase}-${transport}`,
+            idempotencyKey: `q2-phase-${phase}-${transport}`,
+          } }, transport);
+          expect(outcome.failure).toMatchObject({ category: "provider_unavailable", httpStatus: 503,
+            publicCode: "capability_unavailable", retriable: true, cause, commitState: "not_committed" });
+          expect(probe.evidence).toMatchObject({ injections: 1, attempts: 1, phase });
+          expect(await committedState(pool)).toEqual(before);
+        }
+      } finally {
+        probe.evidence.armed = false;
+        (host["close"] as () => void)();
+      }
     },
   );
 
