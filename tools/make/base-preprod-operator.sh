@@ -30,6 +30,8 @@ delete-job)
   # Deletion is separate from successful collection, and needs the collected receipt.
   regular_json "${PROOFS:-}"
   jq -e --slurpfile c "$INPUT" '.binding==$c[0].binding and .status=="complete" and (.sha256|length==64)' "$PROOFS" >/dev/null
+  "${k[@]}" get pods -l "job-name=$job" -o jsonpath='{range .items[*]}{.status.containerStatuses[0].state.terminated.message}{"\n"}{end}' > "$OUTPUT/current-termination.json"
+  jq -e --slurpfile saved "$PROOFS" '.==$saved[0]' "$OUTPUT/current-termination.json" >/dev/null || fail 'Saved receipt does not identify current Job'
   "${k[@]}" delete "job/$job" --wait=true > "$OUTPUT/delete.txt";;
 *) fail 'Unknown operator action';;
 esac
