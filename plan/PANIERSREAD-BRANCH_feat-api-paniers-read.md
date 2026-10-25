@@ -42,7 +42,7 @@
 - [x] P1-07 coherent 6L1 orchestration (three total attempts, catalog revalidation).
 - [x] P1-08 card projection (one canonical cache/deadline, explicit DTO, 2 MiB).
 - [x] P1-09 mounting (operator-injected keyring; absent configuration closes search).
-- [ ] P1-10 PostgreSQL privacy tests.
+- [x] P1-10 PostgreSQL privacy tests (two readers/workspaces/cities, private-token stability).
 - [ ] P1-11 races and pagination.
 - [ ] PS-01 current state DTO.
 - [ ] PS-02 reveal and guards.
