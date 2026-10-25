@@ -34,7 +34,7 @@
 - [x] P0-07 closed route (private headers before authentication, no activation).
 - [x] P0-08 authority/context tests (real createApp, PostgreSQL, 0/1/N).
 - [x] P1-01 population and native keys (canonical city reader, no Vivier filter).
-- [ ] P1-02 scoped heads and archive union.
+- [x] P1-02 scoped heads and archive union (BASE readers and persisted profiles).
 - [ ] P1-03 counters.
 - [ ] P1-04 clock and order.
 - [ ] P1-05 signed cursor.
