@@ -29,7 +29,9 @@
 ## Plan / Todo (lot-based)
 - [x] Lot 0: inspect approved design, constraints and existing isolation tooling.
 - [ ] Lot 1: bundle scripts and qualify TypeScript/JavaScript entry guards.
+  - [x] Built API image emitted successful JSON receipts from all three JavaScript bundles.
 - [ ] Lot 2: standalone operator inputs, read-only inspection and hardened Job.
+  - [x] Built-image inspection and already-open resume preserved every public SQL row.
   - [x] Inspection limited to read-only metadata and effective database privileges.
   - [x] Compact Job receipt hashes complete output; Make has explicit inputs only.
   - [x] Digest-pinned Job is non-root, tokenless, bounded and permanently unready.
