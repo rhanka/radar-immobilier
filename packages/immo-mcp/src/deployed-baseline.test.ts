@@ -8,6 +8,7 @@ import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { createImmoHttpApp } from "./server-http.js";
 import { buildImmoServer } from "./server.js";
 import { HttpDataSource } from "./data-source.js";
+import { signalSearchBody, signalSearchItem } from "./signal-search-test-fixture.js";
 import { HttpRawDataSource } from "./raw-data.js";
 import { createIsolatedExchangeFixture, exchangeDepsFor } from "./test-exchange-fixtures.js";
 
@@ -66,10 +67,13 @@ async function connectHttp(mode: "http" | "simulation", scope = SCOPES) {
   const upstream: typeof fetch = async (input, init) => {
     const url = new URL(String(input));
     expect(url.origin).toBe(BASE_URL);
-    if (url.pathname === "/api/graph-signals/longueuil") {
+    if (url.pathname === "/api/v1/mcp/facets/signals/search") {
       const delegated = new Headers(init?.headers).get("authorization")?.replace(/^Bearer /, "");
       expect(exchange.issuedExchangedTokens).toContain(delegated);
-      return Response.json({ nodes: [{ id: "sig-synthetique-1", type: "reglement" }] });
+      return Response.json(signalSearchBody("longueuil", [signalSearchItem("longueuil", {
+        etape: "", regulatoryStatus: "anticipation", etape_date: "", reglement_number: "",
+        zone_ref: "", summary: "", source_document_id: "",
+      })]));
     }
     if (url.pathname.startsWith("/api/geo/collections/") || url.pathname === "/api/documents/raw") {
       return new Response(null, { status: 404 });
