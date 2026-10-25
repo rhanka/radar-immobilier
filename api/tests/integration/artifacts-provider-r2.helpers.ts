@@ -120,7 +120,7 @@ export async function composeCandidateHost(params: {
       async abandonAttempt() { /* Ensure creates no external preparation objects. */ },
     },
     acls: store, lifecycle: createLifecycleService(store, undefined, store),
-    publication: { blobs, intents: store, refs: refs(store, executor(pool)),
+    publication: { blobs, intents: store, refs: refs(store, executor(pool)), cleanupWindowMs: 30_000,
       createUnitWriter: unitWriter, getCurrent: publication.getCurrent,
       locks: { "artifact-lifecycle": [lock("artifacts", "id")],
         acl: [lock("artifact_access", "artifact_id")],

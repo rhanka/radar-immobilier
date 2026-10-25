@@ -910,13 +910,16 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
           // still read back BEFORE the retry below recreates anything.
           expect(await referenceSuccessRows()).toBe(1);
           expect(await referenceReleaseCount()).toBe(releasesBeforeReference + 1);
-          const receipt = (outcome as { result: { body: { artifactId: string; releaseId: string } } }).result.body;
+          const receipt = (outcome as { result: { body: {
+            artifactId: string; releaseId: string; manifest: string;
+          } } }).result.body;
           expect(receipt.artifactId).toBe(otherId);
           expect(receipt.releaseId).toEqual(expect.any(String));
           expect(await currentReleaseId(otherId)).toBe(receipt.releaseId);
           const durableReceipt = (await pool.query(
             "SELECT receipt AS result FROM artifacts.operation_receipts WHERE internal_key = $1", [referenceInternalKey])).rows;
-          expect(durableReceipt).toEqual([{ result: receipt }]);
+          expect(durableReceipt).toEqual([{ result: { releaseId: receipt.releaseId, manifest: receipt.manifest } }]);
+          expect(JSON.parse(receipt.manifest).artifactId).toBe(receipt.artifactId);
           const release = (await pool.query(
             "SELECT artifact_id, manifest, state FROM artifacts.releases WHERE id = $1", [receipt.releaseId])).rows[0];
           expect(release).toMatchObject({ artifact_id: otherId, state: "ready" });
