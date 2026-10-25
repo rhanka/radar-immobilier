@@ -128,6 +128,8 @@ assert_closed() {
   "${k[@]}" get jobs -o jsonpath='{range .items[*]}{.status.active}{"\n"}{end}' > "$OUTPUT/jobs-current.txt"
   if grep -E '[1-9]' "$OUTPUT/jobs-current.txt"; then fail 'An active Job remains'; fi
   [[ $("${k[@]}" get service radar-api -o jsonpath='{.spec.publishNotReadyAddresses}') != true ]] || fail 'Service publishes unready addresses'
+  "${k[@]}" get service radar-api -o jsonpath='{.spec.selector}' > "$OUTPUT/api-selector.json"
+  jq -e '.["app.kubernetes.io/name"]=="radar-immobilier" and .["app.kubernetes.io/component"]=="api"' "$OUTPUT/api-selector.json" >/dev/null || fail 'Unexpected API Service selector'
   local service
   for service in radar-api radar-ui radar-immo-mcp; do
     "${k[@]}" get endpointslices -l "kubernetes.io/service-name=$service" -o jsonpath='{range .items[*]}{.endpoints}{"\n"}{end}' > "$OUTPUT/$service-endpoints.jsonl"
