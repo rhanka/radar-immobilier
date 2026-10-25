@@ -42,6 +42,7 @@
   - [x] Bound proof tests reject foreign actors, workspaces, attempts/releases and missing/future coverage.
   - [x] Fake-cluster tests reject surviving/restarted workloads, ready endpoints, unsuspended jobs and live CD.
   - [x] Reopening tests require both qualifications, available API and stopped excluded consumers.
+  - [x] Job collection tests accept complete bound receipts and refuse corrupted stdout hashes.
 - [ ] Lot 3: permissions, maintenance collection, closure and selective reopening.
   - [x] Explicit Kubernetes/Actions controls and projected workload/route inventories.
   - [x] Closure preserves inventories; collection refuses surviving processes and ready endpoints.
