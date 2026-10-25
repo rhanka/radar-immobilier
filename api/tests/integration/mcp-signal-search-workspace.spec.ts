@@ -6,9 +6,11 @@ import { MCP_SIGNAL_SEARCH_PATH } from "../../src/routes/mcp-signal-search.js";
 import { searchFixture, barrier } from "./mcp-signal-search-fixture.js";
 
 describeDb("MCP workspace resolution through createApp/PostgreSQL", () => {
-  it("has no production search mount", async () => {
+  it("keeps production search closed without an explicit binding", async () => {
     const f = await searchFixture();
-    expect((await f.search()).status).toBe(404);
+    const response = await f.request(MCP_SIGNAL_SEARCH_PATH + "?city=synthetic-city");
+    expect(response.status).toBe(503);
+    expect(await response.json()).toEqual({ error: "capability_unavailable" });
   });
   it("refuses unauthenticated probes through createApp", async () => {
     const f = await searchFixture();
