@@ -14,3 +14,6 @@ setup stage commit audit bundle:
 	@bash tools/make/artefacts-a5-deliver.sh $@
 run: guard
 	@bash tools/make/artefacts-a5-run.sh
+.PHONY: verify test-api-ci inspect-profile diagnose-provider test-runtime test-composition-contract
+verify test-api-ci inspect-profile diagnose-provider test-runtime test-composition-contract: guard
+	@bash tools/make/artefacts-a5-verify.sh $@
