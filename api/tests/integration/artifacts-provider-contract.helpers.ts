@@ -223,7 +223,10 @@ export function requireSelectedProfile(host: unknown, expectedDigest: string): s
   if (!Array.isArray(selected)) {
     throw new Error("[contract-violation] host.selectedCapabilities is required");
   }
-  const names = [...(selected as unknown[])].map(String).sort();
+  if (selected.some((name: unknown) => typeof name !== "string")) {
+    throw new Error("[contract-violation] provider selection must contain primitive strings");
+  }
+  const names = [...selected].sort();
   if (!Object.isFrozen(selected)) {
     throw new Error("[contract-violation] host.selectedCapabilities must be frozen");
   }
