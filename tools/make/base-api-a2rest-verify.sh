@@ -29,9 +29,10 @@ until flock -w 60 8; do
 done
 while :; do
   names=$(docker ps --format '{{.Names}}')
+  builds=$(pgrep -af '(^|/)(docker (build|buildx build)|docker-buildx build)( |$)' || true)
   free=$(df -Pk "$ROOT" | awk 'NR==2 {print $4}')
-  if [[ -z $names && $free -ge 10485760 ]]; then break; fi
-  printf '%s WAIT containers=%s freeKiB=%s\n' "$(date -u +%FT%TZ)" "$names" "$free" | tee -a "$LOG_DIR/wait.log"
+  if [[ -z $names && -z $builds && $free -ge 10485760 ]]; then break; fi
+  printf '%s WAIT containers=%s builds=%s freeKiB=%s\n' "$(date -u +%FT%TZ)" "$names" "$builds" "$free" | tee -a "$LOG_DIR/wait.log"
   sleep 60
 done
 git --git-dir="$ROOT/tmp/a2base-rest-delivery.git" rev-parse HEAD > "$LOG_DIR/candidate-sha.txt"
@@ -65,6 +66,7 @@ if [[ -d $download_cache && ! -L $download_cache ]]; then
   cat > "$RUN_DIR/cache.yml" <<YAML
 services:
   api:
+    tmpfs: ["/tmp:size=1024m,exec"]
     volumes:
       - $download_cache:/download-cache:ro
 YAML
@@ -109,6 +111,9 @@ if [[ $mode == image || $mode == qualify ]]; then
   image=radar-a2base-rest:${candidate:0:12}
   export BUILDX_CONFIG=$TASK_DIR/buildx
   mkdir -p "$BUILDX_CONFIG"
+  # The owned dependency stack stays up; every other stack/build must be absent.
+  [[ -z $(docker ps --filter "label=com.docker.compose.project!=$PROJECT" --format '{{.Names}}') ]]
+  [[ -z $(pgrep -af '(^|/)(docker (build|buildx build)|docker-buildx build)( |$)' || true) ]]
   docker build --network=none --build-arg CANDIDATE_SHA="$candidate" -t "$image" "$context" > "$LOG_DIR/image-build.log" 2>&1
   docker image inspect --format '{{.Id}} {{json .RepoDigests}} {{index .Config.Labels "org.radar.a2base.candidate"}}' \
     "$image" > "$LOG_DIR/image-identity.txt"

@@ -27,6 +27,7 @@
 - [x] No UI/UAT change; root checkout and stable dev data preserved.
 
 ## Plan / Todo (lot-based)
+- [x] Machine guard also waits for Docker build processes and checks foreign stacks before image build; increase isolated /tmp to 1 GiB after npm cache overflow, retaining 10 GiB host disk stop and owned cleanup.
 - [x] Add a genuinely unactivated PostgreSQL fixture and missing/legacy epoch parity assertions against the production graph-signals route.
 - [x] Extract the existing legacy card read once; both callers share visibility, empty-city behavior, per-card degradation and one enrichment budget.
 - [x] T08: canonical domain projection and filters before limit; explicit shared-builder regressions and cross-retry budget.
