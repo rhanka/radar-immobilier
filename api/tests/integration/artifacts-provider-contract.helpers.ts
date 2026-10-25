@@ -97,9 +97,13 @@ export type CommitBarrierPoint =
 
 export interface CommitBarrier {
   readonly observer: unknown;
-  waitUntilReached(point: CommitBarrierPoint, invocationId?: string): Promise<void>;
-  release(point: CommitBarrierPoint, invocationId?: string): void;
+  readonly coordinatorPoints?: readonly CoordinatorBarrierPoint[] | undefined;
+  waitUntilReached(point: CommitBarrierPoint, invocationId: string): Promise<void>;
+  release(point: CommitBarrierPoint, invocationId: string): void;
 }
+
+export type CoordinatorBarrierPoint = Exclude<CommitBarrierPoint,
+  "before_blob_put" | "after_blob_put_before_verify" | "before_blob_readback">;
 
 export type AuthorizePurpose = "finalize" | "replay";
 
@@ -186,22 +190,19 @@ export async function requireOutcomeContract(): Promise<Record<string, unknown>>
  * Require the test-only barrier factory. Names the missing factory entry
  * against 0.1.2 so the denial/race suites fail by name instead of hanging.
  */
-export async function requireCommitBarrier(): Promise<CommitBarrier> {
-  const testing = await loadUpstream(TESTING_SPECIFIER, "testing.createArtifactCommitBarrier");
-  const factory = testing["createArtifactCommitBarrier"];
-  if (typeof factory !== "function") {
-    missingContract(
-      "testing.createArtifactCommitBarrier",
-      "factory createArtifactCommitBarrier is not exported by the installed provider",
-    );
-  }
-  const barrier = (factory as () => CommitBarrier)();
+export async function requireCommitBarrier(points?: readonly CoordinatorBarrierPoint[]): Promise<CommitBarrier> {
+  const factory = await requirePublicFunction<
+    (options?: { readonly points: readonly CommitBarrierPoint[] }) => CommitBarrier
+  >(TESTING_SPECIFIER, "createArtifactCommitBarrier");
+  const barrier = factory(points === undefined ? undefined : { points });
   if (barrier === null || typeof barrier !== "object" ||
+    typeof barrier.observer !== "function" ||
+    typeof (barrier.observer as unknown as { arrive?: unknown }).arrive !== "function" ||
     typeof (barrier as CommitBarrier).waitUntilReached !== "function" ||
     typeof (barrier as CommitBarrier).release !== "function") {
     throw new Error("[contract-violation] testing.createArtifactCommitBarrier: malformed barrier");
   }
-  return barrier;
+  return { ...barrier, coordinatorPoints: points };
 }
 
 /**
@@ -486,7 +487,7 @@ export async function createTestCommitCoordinator(params: {
   readonly barrier: CommitBarrier;
 }): Promise<R2CommitCoordinator> {
   const { createCandidateCoordinator } = await import("./artifacts-provider-r2.helpers.js");
-  return createCandidateCoordinator(params.pool, params.barrier.observer);
+  return createCandidateCoordinator(params.pool, params.barrier.observer, params.barrier.coordinatorPoints);
 }
 
 /** Acceptance-only r2 composition, using public candidate services. */
@@ -868,11 +869,8 @@ export function finalizationFaultPool(pool: pg.Pool, options: {
       quota: /quota/, "blob-reference": /^blob_(ref|pin)/,
       "deletion-claim": /deletion.*claim|claim.*deletion/,
     };
-    // r2 does not require LOCK TABLE / pg_catalog.* or SET LOCAL shapes: never
-    // impose those optional SQL forms on the provider. Those two cause classes
-    // use an explicitly wired phase-injection joint (see
-    // requirePhaseInjectionBinding); matching optional text here would fail a
-    // conforming coordinator that uses implicit PostgreSQL locks.
+    // E3 uses a public barrier and real PostgreSQL contention instead of
+    // requiring optional provider SQL forms for these two cause classes.
     if (options.lockClass === "schema-infrastructure") return false;
     if (options.lockClass === "unqualified") return false;
     return /FOR\s+(UPDATE|SHARE)/i.test(sql) &&
