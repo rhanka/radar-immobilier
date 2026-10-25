@@ -56,7 +56,7 @@
   - [x] Deliver the existing Zod acceptance as exact registry rows with a stable root component identity.
   - [x] Deliver exact exception matching, UTC expiration, audit propagation, and closed failure on invalid input.
   - [x] Deliver unit regressions for matching, expiry, severity thresholds, and the register layout.
-  - [ ] Deliver regressions for propagation, component scope, malformed input, and the checked-in register.
+  - [x] Deliver regressions for propagation, component scope, malformed input, and the checked-in register.
   - [ ] Deliver the containerized CLI, CI Make wiring, and clarified acceptance status.
   - [ ] Execute the CI Make step in Docker, synthetic CLI cases, lint, typecheck, and Quality gates tests.
   - [ ] Deliver subject-only commits of at most 150 lines and audit the bundle from `7eac7167` in a fresh repository.
