@@ -16,6 +16,7 @@
 
 ## Feedback Loop
 - [x] PANIERSREAD-EX1: owner instruction assigns the integrator this workspace; preserve all mounts, add the closed read router; rollback removes that mount.
+- [x] PANIERSREAD-EX2: extend `projection-revisions-fixture.ts` with optional event fields to reuse the unresolved-history fixture for lot history; test-only, default unchanged; rollback removes optional fields.
 - [ ] PS-04 H5 state binding waits for A6/A7; no transport activation in this branch.
 
 ## Orchestration Mode (AI-selected)
