@@ -19,7 +19,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import pg from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
-import { CreateBucketCommand, DeleteBucketCommand, S3Client } from "@aws-sdk/client-s3";
+import { CreateBucketCommand, S3Client } from "@aws-sdk/client-s3";
 import { createS3BlobStore } from "@sentropic/artifacts/adapters/s3";
 import {
   createArtifactControl,
@@ -29,6 +29,7 @@ import {
 import { createMcpArtifactAdapter } from "../../../packages/artifacts-host/src/mcp-app-adapter.js";
 import { controlRoute } from "../../src/artifacts/control-route.js";
 import { auth, cookie, migrationsFolder } from "./artifacts-h2.helpers.js";
+import { cleanupArtifactTestResources, listTestBucketKeys } from "./artifacts-s3.helpers.js";
 import { loadConfig } from "../../src/config.js";
 import {
   assertOutcomeFailure,
@@ -184,25 +185,15 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
   });
 
   afterAll(async () => {
-    try {
-      if (bucketCreated) {
-        for (const key of await rawBlobs().listKeys("")) await rawBlobs().deleteBlob(key);
-        await s3.send(new DeleteBucketCommand({ Bucket: BUCKET }));
-      }
-    } finally {
-      s3?.destroy();
-      await pool?.end();
-      try {
-        if (databaseCreated) await admin.query(`DROP DATABASE ${DATABASE} WITH (FORCE)`);
-      } finally { await admin?.end(); }
-    }
+    await cleanupArtifactTestResources({ s3, bucket: bucketCreated ? BUCKET : undefined,
+      pool, admin, database: databaseCreated ? DATABASE : undefined });
   });
 
   async function assertPreparationCleanup(host: unknown, artifactId: string,
     expectedInvocationIds?: readonly string[],
     s3KeysBefore?: ReadonlySet<string> | readonly string[],
     preparationsBeforeRefusal?: Awaited<ReturnType<PreparationCleanupBinding["inspectPreparations"]>>["attempts"]): Promise<void> {
-    await verifyPreparationCleanup(host, artifactId, rawBlobs(), false, false,
+    await verifyPreparationCleanup(host, artifactId, () => listTestBucketKeys(s3, BUCKET), false, false,
       { ...(expectedInvocationIds === undefined ? {} : { expectedInvocationIds }),
         ...(s3KeysBefore === undefined ? {} : { s3KeysBefore }),
         ...(preparationsBeforeRefusal === undefined ? {} : { preparationsBeforeRefusal }) });
@@ -242,7 +233,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
           files: [{ path: "index.html", mimeType: "text/html", text: tag }] }
           : { bindingName: tag, idempotencyKey: tag };
         const before = await committedState(pool);
-        const s3Baseline = new Set(await rawBlobs().listKeys(""));
+        const s3Baseline = new Set(await listTestBucketKeys(s3, BUCKET));
         const invocation = invocationFor(statusDriven(), tag);
         run = startBarrierOperation(barrier, invocation.invocationId,
           () => execute({ method: "POST", path: "/" + operation, body }, invocation), point);
@@ -806,7 +797,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       const preparing = await cleanup.inspectPreparations(hostA, artifactId);
       const preparedLoser = preparing.attempts.find((attempt) => attempt.invocationId === invBId);
       expect(preparedLoser?.blobKeys.length).toBeGreaterThan(0);
-      const preparedKeys = new Set(await rawBlobs().listKeys(""));
+      const preparedKeys = new Set(await rawBlobs().listKeys(`artifacts/${SCOPE}/`));
       for (const key of preparedLoser!.blobKeys) expect(preparedKeys.has(key)).toBe(true);
       barrierB.release("before_key_lock", invBId);
       const loser = await pendingB as unknown as Record<string, unknown>;
@@ -841,7 +832,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         [invAId, invBId].includes(candidate.invocationId))) {
         expect(attempt.blobKeys.length).toBeGreaterThan(0);
       }
-      const keys = await rawBlobs().listKeys("");
+      const keys = await rawBlobs().listKeys(`artifacts/${SCOPE}/`);
       expect([...keys].length).toBeGreaterThan(0);
       const s3Keys = new Set([...keys]);
       const winnerKeys = new Set(observed.attempts.find(
@@ -900,7 +891,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       const targetId = await seedTarget(`purge-target-${order}`);
       const otherId = await seedActive(`purge-other-${order}`);
       const sharedKeys: string[] = [];
-      for (const key of await rawBlobs().listKeys("")) {
+      for (const key of await rawBlobs().listKeys(`artifacts/${SCOPE}/`)) {
         if (new TextDecoder().decode(await rawBlobs().getBlob(key)) === collectableText) sharedKeys.push(key);
       }
       expect(sharedKeys.length).toBeGreaterThan(0);
@@ -1013,7 +1004,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         paused.release();
         await paused.finished;
         paused = undefined;
-        const after = new Set(await rawBlobs().listKeys(""));
+        const after = new Set(await rawBlobs().listKeys(`artifacts/${SCOPE}/`));
         for (const key of sharedKeys) expect(after.has(key)).toBe(true);
       }
       for (const key of sharedKeys) {

@@ -22,7 +22,7 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import pg from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
-import { CreateBucketCommand, DeleteBucketCommand, GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { CreateBucketCommand, GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { createS3BlobStore } from "@sentropic/artifacts/adapters/s3";
 import {
   createArtifactControl,
@@ -31,6 +31,7 @@ import {
 } from "@radar/artifacts-host";
 import { createMcpArtifactAdapter } from "../../../packages/artifacts-host/src/mcp-app-adapter.js";
 import { auth, cookie, migrationsFolder } from "./artifacts-h2.helpers.js";
+import { cleanupArtifactTestResources } from "./artifacts-s3.helpers.js";
 import { controlRoute } from "../../src/artifacts/control-route.js";
 import { loadConfig } from "../../src/config.js";
 import {
@@ -272,18 +273,8 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
   });
 
   afterAll(async () => {
-    try {
-      if (bucketCreated) {
-        for (const key of await rawBlobs().listKeys("")) await rawBlobs().deleteBlob(key);
-        await s3.send(new DeleteBucketCommand({ Bucket: BUCKET }));
-      }
-    } finally {
-      s3?.destroy();
-      await pool?.end();
-      try {
-        if (databaseCreated) await admin.query(`DROP DATABASE ${DATABASE} WITH (FORCE)`);
-      } finally { await admin?.end(); }
-    }
+    await cleanupArtifactTestResources({ s3, bucket: bucketCreated ? BUCKET : undefined,
+      pool, admin, database: databaseCreated ? DATABASE : undefined });
   });
 
   it("maps an S3 request timeout to provider_unavailable with a redacted projection", async () => {
