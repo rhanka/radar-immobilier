@@ -10,6 +10,7 @@ export async function searchFixture() {
   const memberships = async (ids: string[]) => {
     await f.data.pool.query(`UPDATE workspace_memberships SET
       status = CASE WHEN workspace_id = ANY($1::uuid[]) THEN 'active' ELSE 'revoked' END,
+      revoked_at = CASE WHEN workspace_id = ANY($1::uuid[]) THEN NULL ELSE now() END,
       revision = revision + 1 WHERE account_id = $2`, [ids, f.data.contributor.id]);
   };
   await memberships([f.data.workspaceId]);
