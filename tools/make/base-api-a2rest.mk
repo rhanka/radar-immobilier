@@ -18,3 +18,6 @@ test check mutations:
 	@rtk bash tools/make/base-api-a2rest-verify.sh $@
 status:
 	@rtk bash -euc 'docker ps --format "{{.Names}}"; df -Pk .'
+.PHONY: test-base-adapter-e2e
+test-base-adapter-e2e:
+	@SCOPE=tests/integration/mcp-signal-search-network.e2e.spec.ts MCP_SCOPE=src/deployed-baseline.test.ts rtk bash tools/make/base-api-a2rest-verify.sh e2e

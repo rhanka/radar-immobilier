@@ -38,6 +38,7 @@
 - [ ] T14: explicit MCP E2E runner, complete HTTP search through production facade and image evidence.
 - [x] T14 network fixture written: SDK/Streamable HTTP, socket token issuer verifying incoming signatures, signed exchanged JWT/JWKS, real createApp/A3 facade and PostgreSQL; no business response injection.
 - [x] T14 seven socket E2E cases written: three legacy states, two humans, same-human concurrent renewed scopes, cross-session refusal, warm-cache revocations and capability closure.
+- [x] Explicit test-base-adapter-e2e target requires seven non-skipped network cases; eleven bounded behavioral mutants cover authority, masking, revision/budget, projection and the closed binding.
 - [ ] Qualification: scoped checks and authority/masking mutations, no required skipped cases.
 
 ## Docs consolidation
