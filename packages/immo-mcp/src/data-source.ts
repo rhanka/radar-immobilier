@@ -10,6 +10,8 @@ import {
   type MockSignal,
 } from "./mocks.js";
 import { citySlug } from "./raw-data.js";
+import { decodeSignalReadError, RadarSignalReadError } from "./signal-read-error.js";
+import { parseSignalSearchResponse, SIGNAL_SEARCH_PATH } from "./signal-search-response.js";
 
 export interface SearchLotsArgs {
   city: string;
@@ -29,13 +31,11 @@ export interface SearchSignalsArgs {
   etape?: string | undefined;
   query?: string | undefined;
   /**
-   * 6C reveal: true forwards `showDiscarded=1` to the radar API so archived
-   * signals are included. False or omitted preserves default hiding.
+   * Authorized reveal includes archived signals; omission preserves hiding.
    */
   showDiscarded?: boolean | undefined;
   /**
-   * Reserved explicit context. Scoped graph delivery remains unavailable
-   * until its guarded route is installed; current callers omit this field.
+   * Reserved API context; the deployed tool schema does not expose it.
    */
   workspaceId?: string | undefined;
   limit: number;
@@ -253,9 +253,8 @@ export interface HttpDataSourceOptions {
 /**
  * Real radar API behind `RADAR_API_BASE_URL` (in-cluster: http://radar-api:3000).
  *
- * `searchSignals` is WIRED to the REAL feed — `GET /api/graph-signals/:city`, the
- * SAME endpoint the web app reads (api/src/routes/graph-signals.ts) — so the MCP
- * and the app serve the SAME signals (consistency decision D12).
+ * `searchSignals` reads the protected scoped facade. The API resolves current
+ * membership, applies visibility and normalizes cards before filtering/limit.
  *
  * PER-USER AUTH (D4): that route is SESSION-PROTECTED (NOT a public prefix). We
  * forward the exchanged delegated bearer token (ctx.accessToken, verified upstream
@@ -263,7 +262,7 @@ export interface HttpDataSourceOptions {
  * the real user identity — never a shared machine credential. The radar API
  * ACCEPTS this user bearer (api `protect`: verified against the IdP JWKS,
  * audience-bounded, approved-account) → per-user end-to-end. A 401/403 upstream
- * is surfaced as an explicit `unauthenticated` error (connect your account).
+ * is surfaced as a typed authentication or authorization error.
  *
  * The other v0 domain tools (lots, opportunities, documents) are NOT wired yet:
  * they throw `not_wired_yet`. Real lots/zones/PV are already served by the
@@ -293,60 +292,31 @@ export class HttpDataSource implements ImmoDataSource {
     return this.notWired("GET /api/geo/:city/lots?no_lot=");
   }
 
-  /**
-   * REAL signals from `GET /api/graph-signals/:city`, called under the CURRENT
-   * user's identity: `ctx.accessToken` is forwarded as `Authorization: Bearer`
-   * (per-user auth, D4). A 404 (the city has no signal node) maps to an EMPTY
-   * list, not an error (anti-invention). A 401/403 is surfaced as an explicit
-   * `unauthenticated` error. `showDiscarded: true` forwards `showDiscarded=1`
-   * so the API reveals archived signals under the same per-user auth; false or
-   * omission preserves default hiding. The etape/query/limit filters are
-   * applied client-side, mirroring MockDataSource.searchSignals so the tool
-   * contract is identical.
-   */
+  /** One request under the exchanged human credential; no retry or fallback. */
   async searchSignals(
     args: SearchSignalsArgs,
     ctx: DataSourceCallContext = {},
   ): Promise<MockSignal[]> {
     const slug = citySlug(args.city);
-    // 6C reveal: forwarded BEFORE search and limit; the API applies its own
-    // hiding predicate under the same per-user auth. Absent/false = hidden.
-    if (args.workspaceId !== undefined) throw new Error("scoped_signal_search_unavailable");
-    const reveal = args.showDiscarded === true ? "?showDiscarded=1" : "";
-    const url = `${this.baseUrl}/api/graph-signals/${encodeURIComponent(slug)}${reveal}`;
+    const params = new URLSearchParams({ city: slug, limit: String(args.limit) });
+    if (args.etape !== undefined) params.set("etape", args.etape);
+    if (args.query !== undefined) params.set("query", args.query);
+    if (args.showDiscarded !== undefined) params.set("showDiscarded", args.showDiscarded ? "1" : "0");
+    if (args.workspaceId !== undefined) params.set("workspaceId", args.workspaceId);
+    const url = `${this.baseUrl}${SIGNAL_SEARCH_PATH}?${params}`;
     // Forward the exchanged delegated token so the api applies its normal per-user auth.
     const headers: Record<string, string> = { accept: "application/json" };
     if (ctx.accessToken) headers.authorization = `Bearer ${ctx.accessToken}`;
     let res: Response;
     try {
-      res = await this.fetchImpl(url, { headers });
-    } catch (err) {
-      const detail = err instanceof Error ? err.message : String(err);
-      throw new Error(`radar_api_unreachable: GET ${url} (${detail})`);
+      res = await this.fetchImpl(url, { method: "GET", headers, redirect: "error" });
+    } catch {
+      throw new RadarSignalReadError("radar_api_unreachable");
     }
-    if (res.status === 404) return []; // no signal nodes for this city → honest empty
-    if (res.status === 401 || res.status === 403) {
-      // The api rejected the (missing/invalid/expired) user token. Never invent
-      // data — tell the caller to (re)authenticate their account in the MCP client.
-      throw new Error(
-        `unauthenticated: /api/graph-signals requires the user to be authenticated ` +
-          `(status ${res.status}). Connect your account in the MCP client and retry.`,
-      );
-    }
-    if (!res.ok) throw new Error(`radar_api_error:${res.status} GET ${url}`);
-    const body = (await res.json()) as ApiGraphSignalsResponse;
-    const nodes = Array.isArray(body.nodes) ? body.nodes : [];
-    const signals = nodes.map((n) => toMockSignal(n, slug));
-
-    const q = args.query ? norm(args.query) : null;
-    return signals
-      .filter((s) => (args.etape ? norm(s.etape) === norm(args.etape) : true))
-      .filter((s) =>
-        q
-          ? norm(`${s.summary} ${s.type} ${s.reglement_number} ${s.zone_ref}`).includes(q)
-          : true,
-      )
-      .slice(0, args.limit);
+    if (res.status !== 200) throw await decodeSignalReadError(res);
+    let body: unknown;
+    try { body = await res.json(); } catch { throw new RadarSignalReadError("radar_api_bad_payload", 200); }
+    return parseSignalSearchResponse(body, { city: slug, limit: args.limit, workspaceId: args.workspaceId });
   }
 
   async getOpportunityDossier(
