@@ -6,9 +6,12 @@ import { MCP_SIGNAL_SEARCH_PATH } from "../../src/routes/mcp-signal-search.js";
 import { searchFixture, barrier } from "./mcp-signal-search-fixture.js";
 
 describeDb("MCP workspace resolution through createApp/PostgreSQL", () => {
-  it("has no production search mount and refuses unauthenticated probes", async () => {
+  it("has no production search mount", async () => {
     const f = await searchFixture();
     expect((await f.search()).status).toBe(404);
+  });
+  it("refuses unauthenticated probes through createApp", async () => {
+    const f = await searchFixture();
     f.mount((sub, args) => resolveMcpSignalWorkspace(f.data.db, sub, args.workspaceId));
     expect((await f.app.request(MCP_SIGNAL_SEARCH_PATH)).status).toBe(401);
   });
