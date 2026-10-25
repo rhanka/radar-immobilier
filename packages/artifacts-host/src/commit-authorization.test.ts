@@ -1,3 +1,4 @@
+import { controlTestHost } from "./control-test-host.js";
 import { describe, expect, it, vi } from "vitest";
 import type { ActivationConfig } from "./activation.js";
 import type { AdmissionAuthority } from "./admission.js";
@@ -32,7 +33,7 @@ type ProviderBody = { readonly status: number; readonly body: unknown };
 function blockedProvider() {
   const gate = deferred<ProviderBody>();
   const handle = vi.fn(async (): Promise<ProviderBody> => gate.promise);
-  const host = { app: { handle } } as unknown as Parameters<typeof createArtifactControl>[0];
+  const host = controlTestHost(handle);
   return { host, handle, gate };
 }
 
@@ -74,7 +75,7 @@ describe("commit-time authorization while the provider is blocked [T05 T13]", ()
     gate.resolve({ status: 201, body: receiptBody() });
     expect(await pending).toEqual(
       { status: 403, body: { error: "account_not_approved", status: "suspended" } });
-    expect(entries).toEqual([{ op: "publish", actorId: "alice",
+    expect(entries).toEqual([{ invocationId: expect.any(String), op: "publish", actorId: "alice",
       reason: "unauthorized_at_commit", status: 403, atMs: NOW }]);
   });
 
@@ -91,7 +92,7 @@ describe("commit-time authorization while the provider is blocked [T05 T13]", ()
     subjects = ["bob"];
     gate.resolve({ status: 201, body: receiptBody() });
     expect(await pending).toEqual({ status: 403, body: { error: "not_in_cohort" } });
-    expect(entries).toEqual([{ op: "publish", actorId: "alice",
+    expect(entries).toEqual([{ invocationId: expect.any(String), op: "publish", actorId: "alice",
       reason: "unauthorized_at_commit", status: 403, atMs: NOW }]);
   });
 
@@ -108,7 +109,7 @@ describe("commit-time authorization while the provider is blocked [T05 T13]", ()
     now = FUTURE;
     gate.resolve({ status: 201, body: receiptBody() });
     expect(await pending).toEqual({ status: 403, body: { error: "activation_closed" } });
-    expect(entries).toEqual([{ op: "publish", actorId: "alice",
+    expect(entries).toEqual([{ invocationId: expect.any(String), op: "publish", actorId: "alice",
       reason: "unauthorized_at_commit", status: 403, atMs: NOW }]);
   });
 
@@ -123,7 +124,7 @@ describe("commit-time authorization while the provider is blocked [T05 T13]", ()
     await vi.waitFor(() => expect(handle).toHaveBeenCalled());
     gate.resolve({ status: 201, body: receiptBody() });
     expect(await pending).toEqual({ status: 201,
-      body: { artifactId: ARTIFACT, releaseId: RELEASE, digest: DIGEST,
+      body: { artifactId: ARTIFACT, releaseId: RELEASE, manifest: JSON.stringify({ digest: DIGEST }), digest: DIGEST,
         stableUrl: `https://${ARTIFACT}.pages.example.test/`,
         pinnedUrl: `https://${RELEASE}.pinned.pages.example.test/` } });
     expect(entries).toEqual([]);
