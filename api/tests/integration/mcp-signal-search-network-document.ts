@@ -5,7 +5,9 @@ import { S3ObjectStore } from "../../src/storage/s3-object-store.js";
 
 /** Genuine S3 transport to the isolated synthetic bucket, including in the image. */
 export async function networkDocumentStore() {
-  const client = new S3Client({ endpoint: process.env.S3_ENDPOINT, region: "us-east-1", forcePathStyle: true,
+  const endpoint = process.env.S3_ENDPOINT;
+  if (!endpoint) throw new Error("Synthetic document storage endpoint required");
+  const client = new S3Client({ endpoint, region: "us-east-1", forcePathStyle: true,
     credentials: { accessKeyId: "synthetic", secretAccessKey: "synthetic" } });
   const store = new S3ObjectStore(client, "radar-immobilier-docs");
   try { await store.ensureBucket(); } catch (error) { client.destroy(); throw error; }
