@@ -5,7 +5,10 @@ import type { Database } from "../db/client.js";
 import type { ObjectStore } from "../storage/object-store.js";
 import { ScopeError } from "../services/facets/scope.js";
 import { WorkspaceError } from "../services/workspaces/types.js";
-import { searchMcpSignals } from "../services/facets/mcp-signal-search.js";
+import { searchMcpSignals, McpSignalLegacyFenceError } from "../services/facets/mcp-signal-search.js";
+import { GraphSignalDiscardedReadError } from "./graph-signals.js";
+import type { DiscardedSignalsPort } from "../services/graph/discarded-signals.js";
+import type { LegacyRetirementState } from "../services/facets/legacy-retirement.js";
 
 export const MCP_SIGNAL_SEARCH_PATH = "/api/v1/mcp/facets/signals/search";
 export const McpWorkspaceId = z.string().uuid().transform((value) => value.toLowerCase());
@@ -58,6 +61,7 @@ export function decodeMcpSignalSearch(params: URLSearchParams): McpSignalSearchA
 
 export function mcpSignalSearchRoute(deps: {
   db?: Database; store: ObjectStore; auth?: { enabled: boolean };
+  discarded?: DiscardedSignalsPort; legacyRetirement?: LegacyRetirementState;
   mcpSignalSearch?: { enabled: boolean };
 }): Hono {
   const app = new Hono();
@@ -67,9 +71,12 @@ export function mcpSignalSearchRoute(deps: {
     if (!deps.mcpSignalSearch?.enabled || !deps.db) return c.json({ error: "capability_unavailable" }, 503);
     try {
       const args = decodeMcpSignalSearch(new URL(c.req.url).searchParams);
-      return c.json(await searchMcpSignals({ db: deps.db, store: deps.store }, session.sub, args));
+      // Missing/legacy epoch: internal legacy cards. Open scoped epoch: BASE only.
+      // Maintenance remains a retriable 503; a retired legacy reader stays 410.
+      return c.json(await searchMcpSignals({ ...deps, db: deps.db }, session.sub, args));
     } catch (error) {
-      if (error instanceof ScopeError || error instanceof WorkspaceError) {
+      if (error instanceof ScopeError || error instanceof WorkspaceError
+        || error instanceof GraphSignalDiscardedReadError || error instanceof McpSignalLegacyFenceError) {
         return c.json({ error: error.message }, error.status);
       }
       return c.json({ error: "signal_search_unavailable" }, 503);
