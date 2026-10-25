@@ -65,5 +65,6 @@
   - [x] Replace the text reader with installed YAML parsing limited to the active exceptions section.
   - [x] Validate the explicit typed schema and reject every invalid row.
   - [x] Deliver regressions for invalid signers, archived rows, missing fields, types, dates and YAML structures, with explicit Node imports for lint.
+  - [x] Refresh the finding's initial tree, current acceptance window and validated register contract.
   - [ ] Qualify signer/section/schema regressions, CLI failures, actual audit and CI quality tests.
   - [ ] Refresh the finding, audit the local bundle, append the report and clean the campaign.
