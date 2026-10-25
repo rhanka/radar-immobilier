@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { Database } from "../../db/client.js";
 import { listWorkspacesForAccount } from "../workspaces/store.js";
-import { resolveMcpSignalWorkspace } from "./mcp-signal-workspace.js";
+import { resolveMcpSignalWorkspace, revalidateMcpSignalWorkspace } from "./mcp-signal-workspace.js";
 
 vi.mock("../workspaces/store.js", () => ({ listWorkspacesForAccount: vi.fn() }));
 const first = "11111111-1111-4111-9111-111111111111";
@@ -34,5 +34,22 @@ describe("MCP workspace resolution", () => {
   it("propagates an account refusal without treating it as missing memberships", async () => {
     vi.mocked(listWorkspacesForAccount).mockRejectedValueOnce(new Error("account_not_approved"));
     await expect(resolveMcpSignalWorkspace(db, "human")).rejects.toThrow("account_not_approved");
+  });
+  it("rejects a second membership or loss of all memberships at revalidation", async () => {
+    memberships([first]);
+    const selected = await resolveMcpSignalWorkspace(db, "human");
+    memberships([first, second]);
+    await expect(revalidateMcpSignalWorkspace(db, "human", selected))
+      .rejects.toThrow("workspace_ambiguous");
+    memberships([]);
+    await expect(revalidateMcpSignalWorkspace(db, "human", selected))
+      .rejects.toThrow("workspace_missing");
+  });
+  it("rejects a replacement singleton instead of switching context", async () => {
+    memberships([second]);
+    await expect(revalidateMcpSignalWorkspace(db, "human", first))
+      .rejects.toThrow("workspace_context_changed");
+    memberships([first, second]);
+    await expect(revalidateMcpSignalWorkspace(db, "human", first, first)).resolves.toBeUndefined();
   });
 });
