@@ -38,7 +38,7 @@
 - [x] P1-03 counters (eight-target oracle, history/archive before basket).
 - [x] P1-04 clock and order (persisted civil dates, binary ties, missing last).
 - [x] P1-05 signed cursor (strict HMAC/keyring, opaque reader context, five minutes).
-- [ ] P1-06 continuation.
+- [x] P1-06 continuation (binding/error order, stable expiry, limit+1, size test).
 - [ ] P1-07 coherent 6L1 orchestration.
 - [ ] P1-08 card projection.
 - [ ] P1-09 mounting.
