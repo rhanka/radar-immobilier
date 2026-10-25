@@ -7,6 +7,7 @@ import { createLifecycleService } from "@sentropic/artifacts/server/lifecycle";
 import { createPublicationService, type PublicationBlobStore } from "@sentropic/artifacts/server/publication";
 import type { ArtifactsStorageConfig } from "@radar/artifacts-host";
 import { initializeArtifactScope } from "../../../packages/artifacts-host/src/storage.js";
+import { createPurgeTestHost } from "./artifacts-purge-race.helpers.js";
 import { requirePublicFunction, COMMIT_CONTRACT_SPECIFIER, finalizationPhaseFaults,
   type R2CommitCoordinator, type CompiledArtifactsProfile,
   type InvocationContextShape, type CoordinatorBarrierPoint } from "./artifacts-provider-contract.helpers.js";
@@ -95,6 +96,7 @@ export async function composeCandidateHost(params: {
   await pool.query(await readFile(migration, "utf8"));
   await initializeArtifactScope(pool, config.storageScope, config.orgId);
   const store = createPostgresArtifactStore(pool);
+  const { claims } = await createPurgeTestHost(pool, config.storageScope, blobs);
   const actors = await pool.query<{ sub: string }>("SELECT sub FROM account_users");
   const publication = createPublicationService({ state: store, blobs, intents: store });
   const artifact = new AsyncLocalStorage<string>();
@@ -128,7 +130,7 @@ export async function composeCandidateHost(params: {
       pinnedUrl: `https://${releaseId}.pinned.pages.example.test/`,
     }),
   });
-  return { app, store, publication, profile, coordinator, blobs,
+  return { app, store, publication, profile, coordinator, blobs, claims, intents: store, refs: store,
     selectedCapabilities: app.selectedCapabilities, profileDigest: app.profileDigest,
     execute(request: Record<string, unknown>, invocation: InvocationContextShape) {
       const body = request["body"] as { artifactId?: string } | undefined;

@@ -884,15 +884,17 @@ export function finalizationFaultPool(pool: pg.Pool, options: {
 }) {
   const evidence = { armed: false, injections: 0, attempts: 0, writes: 0,
     phase: "", commits: 0, guardPassed: false };
-  const matchesLock = (sql: string): boolean => {
+  const matchesLock = (sql: string, params: unknown): boolean => {
+    if (["blob-reference", "deletion-claim"].includes(options.lockClass ?? "")) {
+      return /pg_advisory_xact_lock/i.test(sql) && Array.isArray(params) &&
+        String(params[0]).startsWith("artifacts-blob:");
+    }
     const tables = [...sql.replaceAll('"', '').matchAll(/\b(?:FROM|JOIN|UPDATE|INTO|TABLE)\s+([\w.]+)/gi)]
       .map((match) => match[1]!.split(".").at(-1)!);
     const names: Record<string, RegExp> = {
-      binding: /^(artifact_)?bindings?(_keys)?$/, "artifact-lifecycle": /^artifacts$/,
+      "artifact-lifecycle": /^artifacts$/,
       acl: /^artifact_access$/, pointer: /^artifact_current$/,
       policy: /^(account_users|test_policy_revision|.*policy.*)$/,
-      quota: /quota/, "blob-reference": /^blob_(ref|pin)/,
-      "deletion-claim": /deletion.*claim|claim.*deletion/,
     };
     // E3 uses a public barrier and real PostgreSQL contention instead of
     // requiring optional provider SQL forms for these two cause classes.
@@ -916,7 +918,7 @@ export function finalizationFaultPool(pool: pg.Pool, options: {
           }
           const commit = /^\s*COMMIT\s*;?\s*$/i.test(sql);
           const write = finalizing && /^\s*(INSERT|UPDATE|DELETE)\b/i.test(sql);
-          const lockFault = options.lockClass !== undefined && matchesLock(sql);
+          const lockFault = options.lockClass !== undefined && matchesLock(sql, params);
           if (evidence.armed && evidence.injections === 0 &&
               (lockFault || (!options.lockClass && !options.loseCommitAck && write) ||
                 (options.loseCommitAck && finalizing && commit && evidence.guardPassed))) {

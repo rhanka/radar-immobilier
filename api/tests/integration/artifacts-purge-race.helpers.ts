@@ -14,7 +14,7 @@ interface PurgeExecutor { beginFinalization(): Promise<PurgeClient> }
 export async function createPurgeTestHost(pool: pg.Pool, storageScopeId: string,
   blobs: PurgeTestHost["blobs"]): Promise<PurgeTestHost> {
   const createExecutor = await requirePublicFunction<(pool: pg.Pool) => PurgeExecutor>(
-    "@sentropic/artifacts/adapters/postgres", "createPostgresCommitExecutor");
+    "@sentropic/artifacts/adapters/postgres-commit", "createPostgresCommitExecutor");
   const createClaims = await requirePublicFunction<(client: PolicyClient) => PurgeDeletionClaims>(
     "@sentropic/artifacts/server/gc", "createPostgresDeletionClaimStore");
   const createGc = await requirePublicFunction<(executor: PurgeExecutor,
@@ -23,7 +23,18 @@ export async function createPurgeTestHost(pool: pg.Pool, storageScopeId: string,
     }>("@sentropic/artifacts/server/gc", "createPostgresGcService");
   const executor = createExecutor(pool);
   const storeFor = (client: PolicyClient) => createPostgresArtifactStore(client as unknown as pg.Pool);
-  return { storageScopeId, blobs, claims: createClaims(pool as unknown as PolicyClient),
+  const claims: PurgeDeletionClaims = { ...createClaims(pool as unknown as PolicyClient),
+    async withDigestLock(digest, action) {
+      const client = await executor.beginFinalization();
+      try {
+        const result = await createClaims(client).withDigestLock(digest, action);
+        await client.commit();
+        return result;
+      } catch (error) { await client.rollback(); throw error; }
+      finally { client.release(); }
+    },
+  };
+  return { storageScopeId, blobs, claims,
     async purge(artifactId, deleting) {
       const client = await executor.beginFinalization();
       try {
