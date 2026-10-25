@@ -33,6 +33,7 @@
   - [x] Inspection limited to read-only metadata and effective database privileges.
   - [x] Compact Job receipt hashes complete output; Make has explicit inputs only.
   - [x] Digest-pinned Job is non-root, tokenless, bounded and permanently unready.
+  - [x] Independent roster, bound maintenance attestations and full receipt hash enforced.
 - [ ] Lot 3: permissions, maintenance collection, closure and selective reopening.
 - [ ] Lot 4: operator refusal/transport tests and image execution receipts.
 - [ ] Lot 5: complete CI API suite, lint, typecheck and audit gate.
