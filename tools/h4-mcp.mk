@@ -87,6 +87,10 @@ test-exchange-mutations: guard ## P4: isolated mutations with restoration contro
 image-smoke: guard ## P6: inspect and exercise the actual final runtime image
 	@bash tools/make/artefacts-a4-image.sh
 
+.PHONY: qualify-p6-tuple
+qualify-p6-tuple: guard ## P6 exact published bytes and bounded lockfile closure
+	@CMD='npm ci --ignore-scripts --strict-peer-deps && node tools/make/artefacts-a4-tuple.mjs' bash tools/make/artefacts-a4-run.sh
+
 .PHONY: test-composition-e2e
 test-composition-e2e: guard ## P7 owns this target: provider finalization and typed-failure proof
 	@echo "[h4-mcp] refused: test-composition-e2e is implemented in P7" >&2; exit 1
