@@ -35,7 +35,7 @@
 - [x] P0-08 authority/context tests (real createApp, PostgreSQL, 0/1/N).
 - [x] P1-01 population and native keys (canonical city reader, no Vivier filter).
 - [x] P1-02 scoped heads and archive union (BASE readers and persisted profiles).
-- [ ] P1-03 counters.
+- [x] P1-03 counters (eight-target oracle, history/archive before basket).
 - [ ] P1-04 clock and order.
 - [ ] P1-05 signed cursor.
 - [ ] P1-06 continuation.
