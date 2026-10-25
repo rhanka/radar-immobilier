@@ -9,10 +9,10 @@ import {
 // Group 1a: full 401 golden on 0.1.0 (status, challenge, body) for every /mcp method.
 const RESOURCE = "https://immo.test.local/mcp";
 const ISSUER = "https://auth.test.local";
-const LEGACY_METADATA_URL = "https://immo.test.local/mcp/.well-known/oauth-protected-resource";
+const CANONICAL_METADATA_URL = "https://immo.test.local/.well-known/oauth-protected-resource/mcp";
 const MISSING_AUTH_BODY = '{"error":{"code":"invalid_token","message":"Authorization header is required."}}';
 const MISSING_AUTH_CHALLENGE = 'Bearer error="invalid_token", error_description="Authorization header is required.", ' +
-  `resource_metadata="${LEGACY_METADATA_URL}"`;
+  `resource_metadata="${CANONICAL_METADATA_URL}"`;
 
 const config: ImmoHttpConfig = {
   issuer: ISSUER,
