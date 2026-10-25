@@ -33,7 +33,8 @@ import {
 } from "./lot-target.js";
 import { lotTargetLock } from "./lot-streams.js";
 import { resolveLotRights } from "./lot-capabilities.js";
-import { requireLotDestination } from "./lot-gate.js";
+import { requireOpenLotDestination } from "./lot-gate.js";
+import { assertCutoverTargetReady } from "./lot-cutover-target.js";
 import { authorizeLotMutation, validateLotMutationShape } from "./lot-authorize.js";
 import { lotEventResponse } from "./lot-response.js";
 import { appendLotTransition } from "./lot-apply.js";
@@ -64,9 +65,10 @@ export async function writeLotFacet(
     await lockWorkspace(tx, workspaceId);
     const actorId = await approvedAccountId(tx, sub, true);
     const rights = await resolveLotRights(tx, workspaceId, sub);
-    const destination = await requireLotDestination(tx, workspaceId);
+    const destination = await requireOpenLotDestination(tx, workspaceId);
     requireScopedEpoch(await scopedEpochFor(tx, workspaceId), workspaceId);
     authorizeLotMutation(rights, scope, command.mutation, destination.selectionBasket);
+    await assertCutoverTargetReady(tx as unknown as Database, workspaceId, command.mode, command.target);
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${JSON.stringify(
       ["scoped-command", actorId, key])}, 0))`);
     const base = lotCommandDigest(scope, "single", workspaceId, { ...command, command_key: key });
@@ -119,13 +121,13 @@ export async function writeLotFacet(
       displayedVersion: command.displayed_version,
       workspaceId,
     };
-    await tx.insert(facetCommands).values({
+    const [stored] = await tx.insert(facetCommands).values({
       ownerId: actorId, commandKey: key, commandDigest, result: { result, context },
-    });
+    }).returning({ result: facetCommands.result });
     await tx.insert(facetCommandContexts).values({
       ownerId: actorId, commandKey: key, workspaceId,
       status: "resolved", commandDigest,
     }).onConflictDoNothing();
-    return result;
+    return (stored!.result as { result: LotWriteResult }).result;
   });
 }

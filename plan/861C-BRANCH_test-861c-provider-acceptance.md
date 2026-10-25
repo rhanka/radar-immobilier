@@ -23,6 +23,8 @@ Keep the r2 host API target and its remaining construction bindings explicit.
   `tools/artifact-host.mk`; `RAPPORT-MUSE-PROVIDER-ACCEPTANCE.md`;
   `RAPPORT-SOL-PROVIDER-ACCEPTANCE.md`;
   uncommitted `RAPPORT-SOL-FIX1-908.md`;
+  uncommitted `RAPPORT-SOL-FIX2-908.md`;
+  uncommitted `RAPPORT-SOL-FIX3-908.md`;
   uncommitted `RAPPORT-SOL-Q1-Q2.md`; ignored evidence and local Git metadata
   under `tmp/861c-provider-acceptance/` and `tmp/861c-q1-q2/`.
 - [x] **Forbidden Paths**: root Makefile, compose files, rules, agent entrypoints,
@@ -187,3 +189,46 @@ Keep the r2 host API target and its remaining construction bindings explicit.
 - [x] retain typed provider failure causes before wire projection.
 - [x] require retriable read failures to project as 503.
 - [x] docs: record review fixes and qualification prerequisites.
+
+## Review 2 corrections
+- [x] Isolate both S3 race variants and compare the durable receipt bodies.
+- [x] Reconcile every new S3 object with its expected invocation and cleanup.
+- [x] Exercise cross-artifact purge references in both safe serialization orders.
+- [x] Name phase-injection seams instead of requiring optional SQL statements.
+- [x] Check E3 HTTP/MCP failures, captured invocation IDs and ledger uniqueness.
+- [x] Qualify COMMIT uncertainty on each transport separately from receipt replay.
+- [x] Compile the complete Radar profile and reject invariant semantic digests.
+- [x] Refuse forged scope and invalid caller keys directly before storage.
+- [x] Reject private identifiers in all MCP representations and inject stream markers.
+- [x] Accept 96 conforming controls and reject all 96 discriminant mutations.
+- [x] Archive final API, enabled-gate and static receipts; audit atomic commits.
+
+## Review 2 delivery slices
+- [x] bind full Radar profile and reject constant digests.
+- [x] reconcile S3 inventory with invocation cleanup intents.
+- [x] reject private identifiers in every MCP representation.
+- [x] name E3 phase seams without requiring optional SQL.
+- [x] attribute refused preparation to its captured invocation.
+- [x] reject forged scopes and invalid keys on direct execute.
+- [x] reconcile S3 inventory with invocation cleanup intents.
+- [x] reconcile preparation inventory after denied finalization.
+- [x] isolate race variants and compare both durable receipts.
+- [x] protect cross-artifact references in both purge orders.
+- [x] wire explicit E3 phase prerequisites into failure suites.
+- [x] correlate transport failures with provider invocations.
+- [x] reject private identifiers in every MCP representation.
+- [x] inject private stream markers before wire redaction.
+- [x] qualify non-key lock faults through HTTP and MCP.
+- [x] name E3 phase seams without requiring optional SQL.
+- [x] qualify transaction aborts through HTTP and MCP.
+- [x] qualify uncertain COMMIT on both transports.
+- [x] redact storage scope from HTTP and MCP failure bodies.
+- [x] docs: record round-two provider acceptance verification.
+- [x] accept delayed refusal after deletion claim resolution.
+
+## Review 3 corrections
+- [x] Retain preparation history across completed and partial cleanup.
+- [x] Verify the first purge receipt before retry and preserve settled race history.
+- [x] Enforce private MCP marker redaction through transport parity.
+- [x] Qualify final sources: 59 controls and 59 mutants, 3010 API passes,
+  69 disabled cases and 69 named contract or coverage failures on 0.1.2.

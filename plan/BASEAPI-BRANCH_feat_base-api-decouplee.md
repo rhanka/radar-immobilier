@@ -1,0 +1,237 @@
+# Feature: Independent BASE API and database activation
+
+## Objective
+- [ ] Deliver the existing signal, workspace and lot behavior through an autonomous API.
+- [ ] Qualify and activate BASE without requiring MCP, artifacts, H5 or a new Sentropic package.
+
+## Scope / Guardrails
+- [ ] Authority: the owner's recorded requests and approved proposition-base.md, lots B0–B5.
+- [ ] Baseline: feat/base-api-decouplee at 9a81508704b8ee247e3d402f9cbf15d458edfe2a.
+- [ ] Integration workspace: /home/antoinefa/src/radar-immobilier/.worktrees/base-api.
+- [ ] Retain independent signal baskets, separate archive scopes and existing lot capabilities.
+- [ ] Personal restoration never lifts common hiding or recreates a removed selection.
+- [ ] Keep mandatory lot discard reasons and the existing lettre_envoyee meaning.
+- [ ] Use the recommended maintenance-window activation; keep all four owner choices OPEN.
+- [ ] Never read .env or .env.*, client inputs, client reports, operational data or credentials.
+- [ ] Use synthetic fixtures, isolated PostgreSQL and mocked external HTTP only.
+- [ ] Use standalone Make targets: the root Makefile includes .env at line 3.
+- [ ] Use containers; prefix shell commands with rtk; put ENV last in every Make command.
+- [ ] Zero Python: no Python execution on the host or in containers, including tooling, tests and cleanup.
+- [ ] On success, failure, INT or TERM, capture evidence and clean only the runner-owned disposable test-* or e2e-* project; preserve the original failure/signal status.
+- [ ] Any down -v requires a validated ENV, explicit project identity and verified resource ownership; never target dev, shared/external volumes or another chain.
+- [ ] If cleanup fails or interruption prevents it, report residual resources and use the same guarded Make cleanup on retry; never claim a clean PASS.
+- [ ] Each authored slice is at most 150 added-plus-deleted lines and 15 files, including tests and plan updates.
+- [ ] Muse builds one slice; Sol verifies and commits it before the next slice accumulates.
+- [ ] Commit subjects are English Conventional Commits, at most 72 characters, without body or trailers.
+- [ ] Record actual slice sizes; planned sizes and executable results remain unverified until measured.
+
+## Branch Scope Boundaries (MANDATORY)
+- [ ] Allowed: this plan; docs/spec/SPEC_EVOL_BASE_API.md; docs/spec/SPEC_BASE_API.md.
+- [ ] Allowed: docs/spec/BASE_API_ACTIVATION.md; tools/make/base-api*; local tmp/base-api-* evidence.
+- [ ] Allowed: api/src/services/facets/**; their synthetic tests; api/tests/integration/base-api*.
+- [ ] Allowed: api/src/scripts/base-api-personal-activation.ts, only for B4's 6H activation/resume entry point.
+- [ ] Allowed: api/src/routes/workspaces.ts; scoped-signal-facets*; scoped-workspace-archive*.
+- [ ] Allowed: api/src/routes/scoped-signal-reveal.ts; use this exact name in B0's contract and B1's mount/tests.
+- [ ] Allowed: api/src/routes/scoped-projection-*; scoped-lot-*; signal-facets*; graph-signals*.
+- [ ] Allowed: api/src/services/geo/{ogc-pull,populate-geo}.ts and focused source-lock tests.
+- [ ] Allowed: api/src/services/exploitation/projection.ts and focused source-lock tests.
+- [ ] BASE Sol A-owned: api/src/db/schema.ts; api/src/app.ts, api/src/index.ts and api/drizzle/** are subject to the exclusive cross-track CT-1 lease.
+- [ ] BASE Sol A-owned: tools/make/paniers-lot6.mk; tools/make/paniers-lot6-verify.sh.
+- [ ] Conditional: api/src/routes/auth.ts and existing auth tests, only for evidenced BASE composition defects; auth.ts also follows CT-1 if both tracks touch it.
+- [ ] Conditional: legacy delivery paths in routes/chat.ts, routes/prospect-marks* and services/chat/stream-bus*.
+- [ ] Conditional inherited-only: the pinned 6K plan, tooling and UI changes; no additional UI work.
+- [ ] Forbidden: root Makefile; docker-compose*.yml; rules/**; AGENTS.md; CLAUDE.md; GEMINI.md.
+- [ ] Forbidden: MCP/artifact implementation changes, new dependencies, client files and historical SQL rewrites.
+- [ ] Forbidden: other branch plans except unchanged inherited 6K history; root checkout writes; production actions.
+- [ ] Declare any further scope exception with evidence, impact and rollback before changing its paths.
+
+## Feedback Loop
+- [ ] BRBASE-EX1: retain the owner-specified .worktrees/base-api integration lane; impact is workspace location only; rollback is removal after delivery.
+- [ ] BRBASE-EX2: import existing 6K history at 3c6d3c1f95d6794ba0939cf71db6b169cb3f071d, including 0022 and 0023; preserve inherited SQL bytes/hashes; only unpublished, unapplied journal suffix metadata may change under CT-5–CT-7.
+- [ ] BRBASE-EX2 impact: inherited schema, retirement paths, tooling and UI enter with provenance; rollback before activation by reverting integration.
+- [ ] BRBASE-EX3: retire legacy delivery paths required by B1/B4; preserve unrelated notes, contacts and chat behavior; rollback only before epoch change.
+- [x] BRBASE-EX4: PR #910 qualification explicitly authorizes eslint.config.js for the reviewed Node-global lint failures; impact is tools/make/*.mjs globals only; rollback reverts that config block.
+- [x] PR #910 fix reception: retain the two signal target-type filters, their HTTP isolation regression, the lint corrections and the inherited 323d0db9 subject exception; executable qualification is recorded separately.
+- [ ] OPEN O1: maintenance window is the execution default; continuous coordination is outside this delivery.
+- [ ] OPEN O2: lot discard reason remains mandatory.
+- [ ] OPEN O3: keep lettre_envoyee; no new a_lettre state or historical event relabeling.
+- [ ] OPEN O4: retain independent signal baskets and separate archive state.
+- [ ] D1–D4 remain ratified as recorded in the proposal; concrete operational values remain unverified.
+- [ ] D5 applies only to actual manifest conflicts; never invent dispositions or suppress unresolved history.
+- [ ] After scoped epoch activation, recovery is protected forward resume, never restoration of legacy authority.
+- [ ] CT compatibility: pinned 6K api/src/services/facets/lots/lot-cutover-journal-db.test.ts:29–31 requires adjacency, incompatible with ARTEFACTS-first at lines 29–30; BASE Sol A qualifies relative prerequisite order in B2.1 under unchanged CT-7 before releasing K_SHA.
+- [ ] CT compatibility: packages/immo-mcp/src/data-source.ts:316 calls the route retired by B1.6; BASE supplies the retirement contract, ARTEFACTS owns adapter requalification under unchanged CT-3/CT-9 before combined delivery; no MCP implementation enters BASE.
+
+## Orchestration Mode (AI-selected)
+- [x] Multi-branch: B0 first, then two independent Muse → Sol chains.
+- [ ] Chain A: tmp/base-api-b1, branch feat/base-api-decouplee-b1; B1, then B4.
+- [ ] Chain B: tmp/base-api-b2, branch feat/base-api-decouplee-b2; B2, then B3.
+- [ ] Sol A is the BASE integrator for its integration workspace; cross-track shared writes require the current conductor-recorded CT-1 lease, with no independent concurrent write right. Muse/Sol B submit shared-file hunks.
+- [x] Start B1 nonshared work while the integrator performs B2's pinned 6K import; release B2 from that qualified integration SHA.
+- [x] Import the same integration SHA into B1 before its app/startup wiring; preserve main's 6L2 additions.
+- [ ] Integrate through merge commits, preserving source history; no squash, cherry-pick or whole-file ours/theirs resolution.
+- [ ] Each chain edits only its own plan checkboxes; the integrator reconciles both sets without losing either.
+- [ ] B4 development follows B1/B2; final B4 qualification also requires B3; B5 follows B3/B4.
+- [ ] CT-1 — BASE/ARTEFACTS shared-write rule: one conductor-recorded lease holder at a time edits `api/src/app.ts`, `api/src/index.ts` and `api/drizzle/**` across both tracks; include `auth.ts` if both tracks touch it. Neither lane's integrator has an independent concurrent write right.
+- [ ] CT-2 — Each lease records holder, receiving branch/HEAD, both input SHAs, exact hunks, migration reservations, tests and resulting commit. The next holder acknowledges that receipt. Nonshared work continues; joining the histories uses merge commits, never whole-file ours/theirs or copied commits.
+- [ ] CT-3 — Preserve both sets of mounts/startup dependencies and middleware order: content-host isolation first, control cookie guard, then authenticated business routes; keep H4 and H5 identities distinct. Requalify the named signals API adapter if BASE retires its route; do not reopen a retired route.
+- [ ] CT-4 — Reserve `0022_facet_lot_cutover.sql` and `0023_facet_lot_versions_fence.sql` for BASE's pinned 6K import. Allocate artifact technical files from the next globally unreserved number, at least 0024; reservation alone is not migration-order proof. Preserve inherited SQL bytes and hashes.
+- [ ] CT-5 — Use the existing common Drizzle journal/migrator. The lease holder assigns each unreleased suffix entry a unique tag and sequential idx, with when greater than the maximum existing journal/applied timestamp. Preserve the applied prefix; never renumber, retime or replace an applied/released entry or edit database migration history.
+- [ ] CT-6 — BASE-first is permitted: append artifact entries after the fixed BASE prefix. ARTEFACTS-first is permitted without importing or applying 6K: release its technical suffix on the current baseline, then register still-unreleased BASE entries after that suffix, retaining 0022/0023 SQL bytes and their relative order. Their original lower timestamps must not be inserted behind an already-applied artifact suffix.
+- [ ] CT-7 — Freeze one journal order before first persistent use across the target release chain. Reindex/retime only unpublished, unapplied suffix metadata, with provenance; a branch commit or disposable test DB is not a deployment release; BASE owns qualifying its migration assertions by relative prerequisite order rather than obsolete adjacency. If 6K metadata is already immutable, retain its prefix and refuse an incompatible combined upgrade; do not invent a history repair. Applied/deployed state is unverified until an operator receipt.
+- [ ] CT-8 — Qualify a standalone delivery on fresh DB, its baseline upgrade and rerun using only its own migrations. Before a combined delivery, also qualify baseline-to-first-track-to-combined with its frozen journal: every expected SQL hash occurs once, none is skipped, technical/business data survive. Alternative orders need their own pre-release qualification. Serialize migration jobs per target DB; never wait for the other track to qualify a standalone delivery.
+- [ ] CT-9 — After joining histories, test the exact combined SHA/image: both mount sets, auth/session and 6L2 regressions, BASE with artifacts off, artifacts without optional business capabilities, two-reader API proof and migration history. A shared-image update must retain already-delivered capabilities; no stale branch image may overwrite them. Schema coordination never requires 6K business activation or makes MCP/H5 a BASE prerequisite.
+
+## UAT Management (in orchestration context)
+- [ ] BASE acceptance uses HTTP/PostgreSQL with artifacts disabled; no UI deliverable or artifact acceptance prerequisite.
+- [ ] Keep root dev/UAT unchanged; operational activation is a separate maintenance-window execution.
+
+## Plan / Todo (lot-based)
+- [x] B0 — BASE contract; Muse 1–2 h, Sol 1 h, total 2–3 h.
+  - [x] B0.1: establish standalone Make entry points, isolated verification and bounded delivery; qualify zero-Python execution and cleanup after success, failure and interruption.
+  - [x] B0.2: commit this plan and branch/path ownership; bind every packet to CT-1–CT-9 and record BASE Sol A's lease/handoff duties.
+  - [x] B0.3: document reads, reveal, reason catalog, workspace context, heads and revisions.
+  - [x] B0.4: document commands, idempotency, expected heads, displayed versions and errors.
+  - [x] B0.5: freeze the existing authority matrix and independent HTTP/SQL acceptance cases.
+  - [x] Gate: contract traced to code; open defaults visible; no artifact dependency; safe runner and bundle audit qualified.
+- [x] B1 — Signal/workspace API; Muse 3–5 h, Sol 3–4 h, total 6–9 h.
+  - [x] B1 preparation: add the signed composed fixture and verify each staged slice independently of later workspace drafts.
+  - [x] B1.1: mount workspace, personal, common-archive, revision and invalidation routers.
+  - [x] B1.2: constrain middleware to its intended endpoints; preserve cookie writes and supported bearer reads.
+  - [x] B1.2 first slice: isolate SSE, personal, common archive and revision middleware; qualify both middleware orders.
+  - [x] B1.3: expose workspace context and reason codes without legacy readers.
+  - [x] B1.4: implement authorized reveal with current content, fingerprint and scoped heads.
+  - [x] B1.4 service: authorize reveal and qualify restoration with independent personal/common archive heads.
+  - [x] B1.4 router: expose scoped reason codes and reveal with isolated guards; composed mount qualified under L2.
+  - [x] B1.5: qualify reveal → restore, concurrent source changes and independent archive scopes.
+  - [x] B1.6: return explicit legacy 503 during cutover and 410 after retirement, never a replacement 404.
+  - [x] B1.6 route contract: fence graph/signal endpoints with named successors and verify composed retirement with signed cookies.
+  - [x] B1.7: preserve exact receipt recovery and unresolved command contexts.
+  - [x] B1 invalidations: qualify signed composed cursors, revocation and stream guards.
+  - [x] B1 authority: qualify personal isolation, moderation grants and authorized conflicts in PostgreSQL.
+  - [x] B1 delivery tooling: run required faults independently and audit the bundle against K in an isolated repository.
+  - [x] B1 mutations: qualify all seven required faults with passing baselines, intended assertion failures, restored passes and identical checksums.
+  - [x] Gate: base-api-{composition,authority,reveal,legacy,receipts}.spec.ts plus existing scoped/SSE regressions; typecheck and scoped lint.
+- [x] B2 — Complete lot destination; Muse 4–6 h, Sol 4–5 h, total 8–11 h.
+  - [x] B2.1 preparation: audit authored merge resolutions separately from preserved inherited history; extend bounded staging to the authorized API scope.
+  - [x] B2.1: integrate pinned 6K history and both migrations under CT-1–CT-8; preserve 6L2 routes, watcher and verifier profiles; qualify CT-7 migration assertions before releasing K_SHA.
+  - [x] B2.2: require destination opening in services before business reads and receipt returns.
+  - [x] B2.3: apply the same opening rule to single commands and atomic batches.
+  - [x] B2.4: cover target/city reads, destination history and source-history navigation.
+  - [x] B2.5: separate authorized internal cutover readback from public opened-destination reads.
+  - [x] B2.6: qualify truly empty history → opening → first mark without artificial business events.
+  - [x] B2.7: retain closure for unresolved-only history, missing rights, uncovered writers or invalid epoch.
+  - [x] Gate: lot-opening*, lot-cutover-readback*, lot-cutover-empty*, existing 6J/6K and 6L2 regressions; typecheck and scoped lint.
+- [x] B3 — Serialized source writers; Muse 3–5 h, Sol 3–4 h, total 6–9 h.
+  - [x] B3 preparation: qualify the synthetic source-writer fixture before changing any production writer.
+  - [x] B3.1 identity preparation: retain OGC stored update identities and revalidate insert decisions; stored-identity DB contention verified below.
+  - [x] B3.1 transaction locks: hold ordered OGC source locks through batch commit and reject identity drift; deterministic transaction-boundary mutation qualified.
+  - [x] B3.1: ogc-pull.ts and its source-lock DB tests; lock the actual mutated identity in the mutation transaction.
+  - [x] B3.1 contention evidence: verify real OGC stored-identity lock waits, same-backend lock retention during UPDATE, independent targets, unchanged-UUID invalidation and batch rollback.
+  - [x] B3.2 transaction preparation: lock stored and resulting population identities through update/insert commit; retain existing unit behavior.
+  - [x] B3.2: populate-geo.ts and its source-lock DB tests; cover both update and insert paths.
+  - [x] B3.2 contention evidence: verify update/insert and both city-change identities with PostgreSQL waits, same-backend locks during mutation, persisted SQL and unchanged-UUID fingerprint rejection.
+  - [x] B3.3 transaction preparation: insert canonical lots under the shared transaction lock after validation; retain existing projection and lot behavior, with DB contention and serialization mutation qualified.
+  - [x] B3.3: exploitation/projection.ts and its source-lock DB tests; share the canonical lock protocol.
+  - [x] B3.3 contention evidence: verify canonical projection lock waits, same-backend lock retention during INSERT, independent committed targets and scope rejection without writes; serialization removal fails its own contention assertion.
+  - [x] B3 FIX1 cardinality: update every live population period on city change; reject identity or live-set drift after discovery with PostgreSQL barriers.
+  - [x] B3 FIX1 population races: execute the real source against single and batch facet commands in both orders, with PostgreSQL waits and atomic persisted state.
+  - [x] B3 FIX1 projection races: execute historical projection against single and batch facet commands in both orders; retain the current source identity and fingerprint.
+  - [x] B3.4: qualify lock order, contention and unchanged-UUID content changes before recording writer coverage.
+  - [x] B3.4 race evidence: qualify real OGC, populate and projection versus single/batch facet writers in both orders; all ten required mutations plus three FIX1 discriminators complete baseline PASS, assertion FAIL and restored PASS.
+  - [x] B3 FIX1 resource proof: retain the 512-MiB disposable database bound; confirm mutation-only WAL settings through SQL before running the complete packet, with rejected attempts preserved separately.
+  - [x] B3 FIX1 final gate: 146 cases across 25 suites, zero failed/skipped; thirteen mutation cycles 0/1/0; API/source-test typecheck, explicit changed-file lint, CT-7 and CT-8 pass.
+  - [x] B3.4 coverage evidence: verify all three writers with synthetic executed-case reasons; each missing row, false coverage or invalid reason blocks activation; operational inputs stay separate.
+  - [x] Gate: all three real writer paths contend with facet commands; no coverage attestation without the corresponding executable proof.
+- [x] B4 — Operational cutover; Muse 5–8 h, Sol 4–6 h, total 9–14 h.
+  - [x] B4 second-pass lot identity: verify head/binding/stream association and complete event/lot identity before manifest comparison.
+  - [x] B4 second-pass lot identity witnesses: refuse cross-lot head permutations and renamed streams at constant counts through real protected resume.
+  - [x] B4 second-pass D5: open the explicit winning head through qualifiedLotCutoverSafety and refuse persisted losing values during protected resume.
+  - [x] B4 second-pass personal chains: verify link existence, same-stream reciprocity, one terminal/head and full connectivity while preserving count error codes.
+  - [x] B4 second-pass foreign links: reject dangling and cross-workspace links through delivered operator resume with unchanged closed state.
+  - [x] B4 second-pass chain witnesses: reject a removed reciprocal link, two terminals and a disconnected reciprocal cycle through protected resume.
+  - [x] B4 second-pass actor reuse: grant B all required lot rights, prove its own bound proof opens and refuse reuse of A's adapter under B's session.
+  - [x] B4 second-pass mutation definitions: target constant-count lot swaps, all five personal chain corruptions and the D5 loser through protected execution.
+  - [x] B4 second-pass mutation integration: require all nineteen families and every named assertion, retaining copy/failure/restoration/cmp validation.
+  - [x] B4 second-pass assertion format: compare observed protected-resume status to 503 so successful mutant opening is an AssertionError under the unchanged strict validator.
+  - [x] B4 review fix expectations: derive every projected facet from the qualified manifest and explicit D5 winners.
+  - [x] B4 review fix readback: compare persisted 6K heads and values before opening.
+  - [x] B4 review fix identity: reject misattributed 6H event/stream identity at constant counts.
+  - [x] B4 review fix wiring: build server-configured 6K safety for the current HTTP request actor.
+  - [x] B4 review fix composition: qualify two moderators through createApp and reject static adapter reuse.
+  - [x] B4 review fix recovery: retain closed barriers for missing or altered reconciled PostgreSQL heads.
+  - [x] B4 review fix witnesses: cover full personal identities and persisted projection comparisons.
+  - [x] B4 review fix comparisons: exercise missing, altered and D5-selected expected heads directly.
+  - [x] B4 review fix tooling: sixteen integrated mutation families pass 0/1/0 with byte restoration and the strict validator; the restored run passes 31 cases in seven suites.
+  - [x] B4 review fix runbook: document server-only 6K configuration and request-bound readback without shared startup edits.
+  - [x] B4 review fix complete API: retain the exact CI test include list and committed resources; 3496 passed, seven optional skips in 333 files, 602 generated declarations, both typechecks and explicit changed-file lint pass.
+  - [x] B4 review fix retained gate: all 124 tranche-15 required suites execute 971 cases without failure or skip; standalone CT-8 and unchanged frozen SQL/journal are preserved.
+  - [x] B4 review fix resource isolation: one campaign and worker, API 4-GiB/PG 2-GiB/S3 512-MiB limits, bounded RAM volumes and JVM heap; keep all test deadlines and owned-project cleanup.
+  - [x] B4 review fix operator runtime: keep the RAM-backed dependency volume mounted read-only by the retained database service between API CLI containers.
+  - [x] B4 review fix operator proof: actual activation/resume pass on one synthetic database; corrupted scoped/closed resume refuses without SQL changes, corrected forward resume preserves history, and four guarded-restart cases pass.
+  - [x] B4 review fix delivery: measured evidence and the prerequisite-e1758ef6 correction bundle are bound in RAPPORT-SOL-BASE-B4-FIX.md; the second independent review pass remains pending.
+  - [x] B4/B3 tooling preparation: narrow delivery paths, exact ontology input, changed-file lint and common synthetic DB migration; functional gates remain open.
+  - [x] B4 operator input transport: actual Make activation/resume command-double proof preserves literal Make functions and shell syntax without evaluation.
+  - [x] B4 slice 1: internal maintenance validator binds workspace, actor, attempt, release and instances; real reader, operator and durable wiring remain pending.
+  - [x] B4 slice 2: executable pure rejection tests cover independent drain/shutdown, evidence bindings, stale proof and reader delegation; full B4 integration and mutations remain open.
+  - [x] B4 slice 3: qualify internal closed-barrier readback authorization, current manager/attached-account rights, PostgreSQL rejections, isolation and public closure; binding/head/projection verification remains pending.
+  - [x] B4 slice 3 handoff: document the authorizer boundary; await Muse slice 4 before qualifying persisted bindings, heads and projections or final opening.
+  - [x] B4 slice 4: verify persisted personal bindings, terminal heads and projections under the closed barrier; reject foreign-workspace histories even against explicit zero expectations.
+  - [x] B4 slice 4 handoff: qualify 11 new PostgreSQL cases and 195 tests across 42 suites; await Muse slice 5 for final authority checks before opening; full B4 and CT-1 wiring remain open.
+  - [x] B4 slice 5: recheck manager and qualified attached-account approval/membership before resume and final opening; reject concurrent opening without another write; qualify closed real readback and preserved history; operator composition and full B4 remain open.
+  - [x] B4 slice 6: add the explicit personal activation entry; compose closed authorization and persisted-history readback before opening; durable resume, dispatcher integration and full B4 remain open.
+  - [x] B4 slice 6 handoff: qualify 18 operator cases and 322 tests across 46 suites, API/source-test typechecks and explicit changed-file lint; retain CT-8 and await Muse slice 7 for durable resume.
+  - [x] B4 slice 7: resume legacy/closed through protected activation and scoped/closed through real readback; already-open rechecks manager and attached-account rights without SQL mutation; dispatcher and final B4 remain open.
+  - [x] B4 slice 7 handoff: qualify 20 resume cases and 342 tests across 47 suites, API/source-test typechecks, explicit changed-file lint and CT-8; stop before Sol A tooling slice 8 and Muse CT-1 wiring slice 9.
+  - [x] B4 slice 8: qualify literal dispatcher inputs and actual seeded activation/resume Make targets on one synthetic database, unchanged SQL on rejection/already-open resume, 342 tests/47 suites and CT-8; request bounded CT-1 wiring for slice 9; final B4 remains open.
+  - [x] B4 slice 10: qualify durable retirement and seven guarded-restart cases; 595 tests in 60 suites, API/source-test typechecks, explicit lint and standalone CT-8 pass before the shared startup hunk.
+  - [x] B4 slice 10/L6 evidence: document actual synthetic commands and real-entrypoint restart proof; retain the exact-patch TS2379 failure and leave startup integration open until a corrected hunk is authorized and qualified.
+  - [x] B4 CT-1 L6: commit the deferred index.ts startup hunk with the authorized optional-property spread; both typechecks, lint, 595 tests/60 suites, four real-entrypoint restart tests, CT-3 and standalone CT-8 pass; publish CT-2 and stop before Muse slice 11.
+  - [x] B4 slice 11: add the qualified 6K safety factory with bound maintenance validation and real closed-barrier city/mode readback; both typechecks, explicit lint, 595 tests/60 suites and standalone CT-8 pass; no shared hunk; await Muse slice 12 for direct 6K adapter qualification, including the qualified-empty-history gap.
+  - [x] B4 slice 12: qualify the real 6K adapter, public closure during readback, current rights and workspace binding; reproduce durable closed rejection of qualified empty history, already accepted in B2 with recording safety; report the B4 integration gap without designing a solution; stop before slice 13.
+  - [x] B4 slice 13 adapter: preserve B2 qualified empty opening through explicit server declaration and real city/mode zero-head readback; missing scope and persisted heads stay rejected; no shared CT-1 file changed.
+  - [x] B4 slice 13 reception: qualify interrupted 6K/protected resume and empty history with the real adapter; primary 10 tests/3 suites and retained 600 tests/62 suites pass, with both typechecks, explicit lint and CT-8; stop before slice 14; final B4 remains open.
+  - [x] B4 slice 14 reception: qualify 16 safety mutants with baseline/assertion-failure/restored exits 0/1/0 and identical bytes; primary 10 tests/3 suites and retained 611 tests/63 suites pass, both typechecks, explicit lint and CT-8; stop before slice 15; qualified B3 and the full B4 mutation gate remain open.
+  - [x] B4 slice 15: verify exact activate/resume inputs against preserved SQL and database receipts; correct stale runbook status and L6 identity; no shared file; final qualification and bundle follow.
+  - [x] B4 final reception: retain qualified B3 dbcd82a3 via B123 1c304311 and merge a1f20d7a; all twelve integrated mutation families pass 0/1/0 at d779d460 with identical restoration bytes; final delivery SHA qualification and bundle are bound in the B4 report.
+  - [x] B4 mutation witnesses: eleven PostgreSQL cases cover operator evidence, persisted corruption, readback closure, final authority, reconstructed legacy fences and public bypass rejection; invalid-evidence cases capture SQL/public state before assertions; production bytes remain unchanged.
+  - [x] B4 runner implementation: add the twelve bounded behavioral mutation families with exact source hunks, per-phase commands and logs, strict assertion failures and byte restoration; the unchanged common validator and final run determine qualification.
+  - [x] B4.1: implement/inject 6H and 6K maintenance safety through existing activation interfaces; Muse A implements B4, Sol A verifies and commits BASE-owned files; shared application/startup deltas use the current CT-1 lease holder.
+  - [x] B4.1 entry: dispatch actual activation/resume with independent attempt/release/instance bindings and literal arguments; preserve owned disposable campaign state and fail closed on absent mutation packets.
+  - [x] B4.1 script: Muse A owns api/src/scripts/base-api-personal-activation.ts; require workspace, actor, reason and qualified maintenance evidence; execute in the API container without environment-file discovery.
+  - [x] B4.1 activation: call runPersonalAttachmentActivation from activation-run.ts; attach-personal-history.ts only attaches histories and cannot substitute for activation.
+  - [x] B4.1 resume: inspect durable state; legacy/closed retries protected activation, scoped/closed calls resumePersonalAttachmentReadback from activation-open.ts, already-open returns status after authorization without mutation.
+  - [x] B4.1 adapter: Muse A implements api/src/services/facets/activation-maintenance-safety.ts using ActivationSafety; inject actual drain/shutdown evidence and the internal reader, never successful empty callbacks.
+  - [x] B4.2: close admission and old reads/writes/publications; drain responses, connections and buffers.
+  - [x] B4.3: verify old-instance shutdown and guarded restart; process-local retirement alone is insufficient.
+  - [x] B4.4: Muse A owns api/src/services/facets/activation-readback.ts; read and validate real PostgreSQL bindings, heads and scoped projections under the still-closed barrier.
+  - [x] B4.4 authority: recheck management, account approval, memberships, qualified attachments and scoped epoch; retain personal-scope isolation and return only bounded verification evidence to the operator.
+  - [x] B4.4 isolation: keep scopedEpochFor/public readers closed; expose no public bypass; readback is internal to activation/resume and succeeds before activation-open.ts clears the barrier.
+  - [x] B4.5: Muse A adds api/tests/integration/base-api-activation.spec.ts and base-api-activation-resume.spec.ts; Sol A qualifies the real Make/script/safety/reader composition on synthetic PostgreSQL.
+  - [x] B4.5 proof: public reads return 503 while closed, real readback validates seeded heads/projections, then opening enables public reads; no fixture-success adapter qualifies this test.
+  - [x] B4.5 recovery: interrupted activation and readback failure retain the durable barrier; resume rechecks rights/evidence; mismatched persisted state or missing shutdown/drain proof prevents opening.
+  - [x] Gate: both B4 activation suites plus legacy-delivery tests actually execute; B3 coverage present; global signal authority transition protected; record exact activate/resume Make commands in BASE_API_ACTIVATION.md.
+- [ ] B5 — BASE acceptance; Muse 1–2 h, Sol 3–4 h, total 4–6 h.
+  - [x] B5.1: HTTP/SQL authority, transitions, history and exact-replay scenarios through createApp.
+  - [x] B5.2: concurrent writes, revocation, changed content and atomic batches through 500 targets.
+  - [x] B5.3: fresh installation, migrated installation, empty history and interrupted cutover; CT-8 governs standalone and combined migration qualification.
+  - [x] B5.4: prove BASE works with artifact configuration absent and artifact services unused.
+  - [x] B5.5: finalize SPEC_BASE_API.md and BASE_API_ACTIVATION.md with evidence and unresolved operational inputs.
+  - [ ] Gate: all required cases actually execute; two independent Astra max reviews; corrections retested; reproducible bundle and report; apply CT-8/CT-9 before combined delivery, without waiting for ARTEFACTS to qualify standalone BASE.
+
+## Estimates copied from the approved proposal
+- [ ] Build and qualification: Muse 17–28 h; Sol 18–24 h; combined 35–52 agent-hours.
+- [ ] Two independent Astra max reviews: 3–5 agent-hours; correction/retest/review reserve: 3–6 agent-hours.
+- [ ] Qualified code: 41–63 agent-hours; nominal operational activation: an additional 2–3 agent-hours.
+- [ ] Two-chain elapsed estimate: 28–43 h, corrections included, external waits excluded.
+- [ ] Original projection anchor: 2026-10-23 14:00 UTC; these dates are copied, not rebased.
+- [ ] Original earliest milestones: no-correction floor 2026-10-24 14:30 UTC; qualified code 18:00 UTC; nominal activation 20:00 UTC.
+- [ ] Original upper qualified-code projection: 2026-10-25 09:00 UTC; actual circuit throughput remains unverified.
+- [ ] External waits: agent/CI availability, final 6K qualification, operational identities/rights/mappings, real manifest/dispositions and maintenance access.
+- [ ] Artifact publication, H5 and new Sentropic package delivery are not BASE prerequisites.
+
+## Merge & close
+- [ ] Qualify the exact integrated SHA; review integrity/migration/concurrency and authority/API/artifact independence separately; record the CT-2 receipt and CT-8/CT-9 evidence before any combined shared-image update.
+- [ ] Record remote CI against the full head SHA; remote CI and PR #906 status are currently unverified.
+- [ ] Complete push/PR/merge through the established integration workflow, outside the initial launch packets.
+- [ ] Merge commit only; preserve branches; move this plan to plan/done after merge.

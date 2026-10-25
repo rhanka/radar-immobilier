@@ -68,6 +68,9 @@ jobs:
       - name: Lint
         run: make lint ENV=ci
 
+      - name: Audit gate (HIGH/CRITICAL with expiring exceptions)
+        run: make test-audit-security audit-security ENV=ci
+
       - name: Build
         run: make build ENV=ci
 
