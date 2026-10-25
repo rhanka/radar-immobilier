@@ -1,7 +1,7 @@
 import pg from "pg";
 import { composeArtifactHost, readArtifactsEnv, resolveArtifactsStorageConfig,
   readActivationEnv, resolveActivationConfig } from "@radar/artifacts-host";
-import { parseContentBase } from "@sentropic/artifacts/content/routing";
+import { parseContentHost } from "@sentropic/artifacts/content/routing";
 import { bindArtifactProvider, IMMO_ARTIFACT_PROFILE } from "./registry/artifact-provider.js";
 import { ARTIFACT_INVOCATION_SCOPE } from "./registry/artifact-profile.js";
 
@@ -12,7 +12,10 @@ export async function createArtifactBinding(env: NodeJS.ProcessEnv) {
   if (!config.enabled || !readActivation().enabled) return undefined;
   const url = env.IMMO_MCP_ARTIFACT_DATABASE_URL;
   const contentBase = env.ARTIFACTS_CONTENT_BASE;
-  if (!url || !contentBase || !parseContentBase(contentBase)) throw new Error("artifact_binding_incomplete");
+  if (!url || !contentBase || parseContentHost(
+    `123e4567-e89b-12d3-a456-426614174000.${contentBase}`, contentBase)?.kind !== "stable") {
+    throw new Error("artifact_binding_incomplete");
+  }
   const pool = new pg.Pool({ connectionString: url, max: 5, connectionTimeoutMillis: 2000,
     options: "-c statement_timeout=5000 -c lock_timeout=1000" });
   try {
