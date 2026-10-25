@@ -32,6 +32,6 @@
 - [x] Lot 1a: confirmed factory/options and transparent PostgreSQL fault observer.
 - [x] Lot 1b: register correlated waits before transport execution; make cleanup release idempotent.
 - [x] Lot 2: two E3 cases with real PostgreSQL faults, no retry, rollback and resumed authority checks (candidate execution pending).
-- [ ] Lot 3: A4 typed host binding and public seam calls.
+- [x] Lot 3: A4 typed host binding and public seam calls (candidate execution pending).
 - [ ] Lot 4: candidate missing-contract evidence; baseline API suite, lint and typecheck.
 - [ ] Lot 5: atomic history, report, audited bundle from the base and stack cleanup.

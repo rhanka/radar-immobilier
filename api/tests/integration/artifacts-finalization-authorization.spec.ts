@@ -30,6 +30,7 @@ import { createMcpArtifactAdapter } from "../../../packages/artifacts-host/src/m
 import { controlRoute } from "../../src/artifacts/control-route.js";
 import { auth, cookie, migrationsFolder } from "./artifacts-h2.helpers.js";
 import { cleanupArtifactTestResources, listTestBucketKeys } from "./artifacts-s3.helpers.js";
+import { createPurgeTestHost } from "./artifacts-purge-race.helpers.js";
 import { loadConfig } from "../../src/config.js";
 import {
   assertOutcomeFailure,
@@ -861,6 +862,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
     const binding = await requirePurgeRaceBinding();
     const barrier = await requireCommitBarrier();
     const { host } = await composeQ1Host(barrier);
+    const purgeHost = await createPurgeTestHost(pool, SCOPE, rawBlobs());
     let paused: Awaited<ReturnType<typeof binding.pausePurgeBeforeDelete>> | undefined;
     let run: ReturnType<typeof startBarrierOperation> | undefined;
     try {
@@ -898,11 +900,11 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       if (order === "purge-first") {
         // Suspend the deletion of the collectable blob, then try to reference
         // the same bytes from the other active artifact while the claim holds.
-        paused = await binding.pausePurgeBeforeDelete(host, targetId);
+        paused = await binding.pausePurgeBeforeDelete(purgeHost, targetId);
         expect(paused.claimId.length).toBeGreaterThan(0);
         expect(paused.blobKeys.length).toBeGreaterThan(0);
         for (const key of sharedKeys) expect(paused.blobKeys).toContain(key);
-        expect(await binding.inspectDeletionClaims(host)).toContainEqual(
+        expect(await binding.inspectDeletionClaims(purgeHost)).toContainEqual(
           expect.objectContaining({ claimId: paused.claimId }));
         const reference = invocationFor(allowAll(), `purge-reference-${order}`);
         const referenceKey = `purge-reference-${order}`;
@@ -986,7 +988,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
           method: "POST", path: "/publish",
           body: { ...referenceBody, idempotencyKey: `purge-held-${order}` } }, reference), "before_commit");
         await run.reached;
-        const purge = binding.pausePurgeBeforeDelete(host, targetId);
+        const purge = binding.pausePurgeBeforeDelete(purgeHost, targetId);
         let earlyPause: typeof paused;
         await withTimeout(purge.then((value) => { earlyPause = value; }), 100);
         if (earlyPause) for (const key of sharedKeys) expect(earlyPause.blobKeys).not.toContain(key);
@@ -994,7 +996,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         expect(await run.pending).toMatchObject({ ok: true });
         paused = earlyPause ?? await purge;
         expect(paused.claimId.length).toBeGreaterThan(0);
-        expect(await binding.inspectDeletionClaims(host)).toContainEqual(
+        expect(await binding.inspectDeletionClaims(purgeHost)).toContainEqual(
           expect.objectContaining({ claimId: paused.claimId }));
         // The target has exclusive bytes too, so purge can reach DELETE even
         // though the new committed reference protects the shared bytes.
