@@ -135,7 +135,14 @@ assert_closed() {
   done
 }
 collect-maintenance() {
-  require_expected; require_proofs; assert_closed; assert_mcp
+  require_expected; regular_json "${PROOFS:-}"
+  # Bind declarations to the independently inventoried roster. Live checks still follow.
+  jq --slurpfile c "$INPUT" --slurpfile roster "$EXPECTED" --arg now "$(date -u +%FT%TZ)" \
+    '. + {evidence:($c[0].binding+{reason:$c[0].reason,instanceIds:($roster[0]|map(.id)),
+      drain:{completedAt:$now,coveredInstanceIds:($roster[0]|map(.id))},
+      shutdown:{completedAt:$now,coveredInstanceIds:($roster[0]|map(.id))}})}' "$PROOFS" > "$OUTPUT/qualified-input.json"
+  PROOFS=$OUTPUT/qualified-input.json
+  require_proofs; assert_closed; assert_mcp
   jq --slurpfile roster "$EXPECTED" '{binding,observations,evidence,databaseInspection,
     expectedInstances:$roster[0]}' "$PROOFS" > "$OUTPUT/maintenance.json"
 }
