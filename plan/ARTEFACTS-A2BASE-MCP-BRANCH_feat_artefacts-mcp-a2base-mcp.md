@@ -36,12 +36,15 @@
 - [x] T11: exchanged bearer only, typed authorization invalidation, cache and concurrent invocations isolated.
 - [x] T12a: exact GET route and strict raw query decoding; no legacy or broad-prefix authority.
 - [x] T12b: route/schema/policy/image receipt wiring and negative configuration proofs; defaults remain closed.
-- [ ] Qualification: unit and createApp/PostgreSQL integration for each slice, authority/masking mutants, inherited graph-signals/date-parity regressions.
+- [x] Qualification: unit and createApp/PostgreSQL integration for each slice, authority/masking mutants, inherited graph-signals/date-parity regressions.
 - [x] Static checks PASS at 20261025T173554; 289 API and 372 MCP tests PASS at 20261025T173649, zero skips. Mutation campaign stopped after seven kills because an authority failure was a TypeError; no false PASS recorded. Improve the assertion, select the dedicated membership case and rerun all controls/mutants.
-- [ ] Delivery: every commit numstat audited, bundle from dce9b366 imported and checked in a blank prerequisite-only repository.
+- [x] Final campaign 20261025T174804-5-mutations PASS on d86500e6: static checks, 289 API + 372 MCP tests across 66 explicit files, zero failures/skips; 13 named behavioral mutants killed, 26 passing controls/88 executions, independent JSON and exact archived-source byte audit PASS.
+- [x] Approval mutant now proves refusal before business dispatch, rather than relying on a redundant downstream approval guard; no runtime guard was weakened.
+- [x] CT-8 fresh/upgrade/rerun PASS locally, 23 hashes exactly once; owned down -v --remove-orphans status 0 with no owned container, volume or network remaining.
+- [x] Delivery prepared: every commit numstat audited; mandatory bundle import into a blank prerequisite-only repository is enforced by the export target, with its final result recorded in the companion report.
 
 ## Docs consolidation
-- [ ] Root French report records completed slices, commands, evidence, remaining integration duties, final SHA and bundle SHA-256.
+- [x] Root French companion report records slices, commands, evidence and remaining duties; export finalization supplies its final SHA, bundle hash and independent import audit. The report stays outside its own hashed bundle.
 
 ## Merge & close
 - [ ] Integrator imports bundle and qualifies combined SHA/images; no activation, push or merge in this mission.
