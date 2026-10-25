@@ -12,6 +12,7 @@ import { ScopeError } from "./scope.js";
 import { ClassificationError } from "./classification-errors.js";
 import { Availability, WorkspaceFacetContext } from "./classification-context-contract.js";
 import { digest } from "./target.js";
+import { readClassificationCatalog } from "./classification-catalog.js";
 
 async function contextSample(db: Database, sub: string, workspaceId: string) {
   const sample = await db.transaction(async (tx) => {
@@ -43,6 +44,8 @@ async function contextSample(db: Database, sub: string, workspaceId: string) {
       sample.lotAvailability = sample.availability;
     }
   }
+  const catalog = await readClassificationCatalog(db, sub, workspaceId);
+  if (sample.availability.state === "closed") catalog.availability = sample.availability;
   return WorkspaceFacetContext.parse({ contractVersion: "facet-context-v2", workspaceId,
     semanticProfile: { lotReason: "required", correspondence: "sent", signalClassification: "separate_action",
       semanticContractVersion: "base-classification-v1" },
@@ -53,7 +56,7 @@ async function contextSample(db: Database, sub: string, workspaceId: string) {
       modes: sample.lotAvailability.state === "open" ? ["real", "simulation"] : [],
       canSelect: sample.rights.select, canChangePipeline: sample.rights.changePipeline,
       canChangeMarket: sample.rights.changeMarket, canDiscardPersonally: true, canModerateArchive: sample.rights.moderateArchive },
-    reasonCatalog: { availability: { state: "unavailable", reason: "catalog_unavailable" }, profileId: null, digest: null, entries: null },
+    reasonCatalog: catalog,
   });
 }
 export async function readFacetContext(db: Database, sub: string, workspaceId: string) {
