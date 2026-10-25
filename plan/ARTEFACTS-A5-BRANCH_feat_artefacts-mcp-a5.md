@@ -31,8 +31,9 @@
 ## Plan / Todo (lot-based)
 - [x] Read mandatory rules, approved A5/P7 design, CT clauses and A4 handoff.
 - [x] Compile the complete published profile and bind exactly four selected tools.
-- [ ] Preserve twelve-tool parity and guarded startup; artifact request authority stays immutable.
-- [ ] Qualify profile/selection, lifecycle/composition, failure-closed bindings and discriminating mutations.
+- [x] Preserve twelve-tool parity and guarded startup; artifact request authority stays immutable (contract composition).
+- [x] Qualify profile/selection, lifecycle/composition, failure-closed bindings and discriminating mutations.
+- [x] Reproduce semantic-key exception; project public refusals before authority creation; 26 targeted cases pass after correction.
 - [ ] Qualify shared HTTP/MCP provider finalization, cross-process replay/conflict, restart, quota and denial persistence after A1 is available.
 - [x] Ordinary API: 3,838 passed, 76 pending; MCP: 398 passed; host: 158 passed; separate exchange service E2E: 1 passed.
 - [x] Typecheck, lint, security audit (66 gate tests) and API build; two authority/binding mutants killed.
