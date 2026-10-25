@@ -8,7 +8,7 @@ const file = "api/src/scripts/base-preprod-job.ts";
 const original = readFileSync(file, "utf8");
 const mutants = [
   ["init-uuid", "invocation.binding.workspaceId !== null ||", "false ||"],
-  ["init-result", 'if (row?.slug !== invocation.binding.workspaceSlug) throw new Error("workspace_destination_mismatch");', ""],
+  ["init-result", 'if (!row || row.slug !== invocation.binding.workspaceSlug) throw new Error("workspace_destination_mismatch");', ""],
   ["image-release", "invocation.binding.releaseId.split(/[:/]/)[0] !== releaseSha", "false"],
   ["sql-preflight", 'if (invocation.action !== "inspect") await assertPrivileges(handle.db, invocation.action);', ""],
 ];

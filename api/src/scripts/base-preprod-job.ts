@@ -61,7 +61,7 @@ export async function runJob(invocation: Invocation) {
       try {
         const [row] = (await verification.db.execute(sql`SELECT slug FROM workspaces
           WHERE id=${destination.workspaceId}`)).rows;
-        if (row?.slug !== invocation.binding.workspaceSlug) throw new Error("workspace_destination_mismatch");
+        if (!row || row.slug !== invocation.binding.workspaceSlug) throw new Error("workspace_destination_mismatch");
         destination.workspaceSlug = row.slug as string;
       } finally { await verification.pool.end(); }
     }
