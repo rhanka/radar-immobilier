@@ -823,6 +823,13 @@ jobs:
           if kubectl -n "$NAMESPACE" get deploy radar-immo-mcp >/dev/null 2>&1; then
             kubectl -n "$NAMESPACE" set image deploy/radar-immo-mcp \
               mcp="${IMAGE_PREFIX}/radar-api:${SHA}"
+            # Constat k8s 2026-10-25 : le Deployment restait à replicas=0 (ancien
+            # last-applied), le Service n'avait aucun endpoint et /mcp retombait
+            # sur l'UI. set image ne touche pas replicas : on rétablit 1 si 0.
+            MCP_REPLICAS="$(kubectl -n "$NAMESPACE" get deploy radar-immo-mcp -o jsonpath='{.spec.replicas}')"
+            if [ "$MCP_REPLICAS" = "0" ]; then
+              kubectl -n "$NAMESPACE" patch deploy radar-immo-mcp --type=merge -p '{"spec":{"replicas":1}}'
+            fi
             kubectl -n "$NAMESPACE" rollout status deploy/radar-immo-mcp --timeout=180s \
               || echo "::warning::radar-immo-mcp rollout not complete within 180s (optional connector, deploy continues)"
           else
