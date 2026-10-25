@@ -5,9 +5,12 @@ cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.."
 action=${1:-}
 source tools/make/base-preprod-common.sh
 operator_inputs
+trap 'find "$OUTPUT" -type f ! -name checksums.txt -exec sha256sum "{}" + > "$OUTPUT/checksums.txt"' EXIT
+source tools/make/base-preprod-collect.sh
 case $action in
 validate) ;;
 render-job) render_job "$(jq -r .operation "$INPUT")";;
+collect-job) collect_job "$(jq -r .operation "$INPUT")";;
 permissions|inventory|freeze-cd|close|stop-job|collect-maintenance|start-api|restart-api|reopen-api)
   source tools/make/base-preprod-maintenance.sh
   "$action";;
@@ -18,18 +21,8 @@ inspect|init|attach|activate|resume)
   if [[ $action == activate || $action == resume ]]; then assert_closed; assert_mcp; fi
   # Create only: an existing Job is never patched, replaced or automatically deleted.
   "${k[@]}" create -f "$OUTPUT/job.json" > "$OUTPUT/create.txt"
-  "${k[@]}" wait --for=condition=complete "job/$job" --timeout=570s > "$OUTPUT/wait.txt" || {
-    echo 'Job not complete; retain Job and evidence for diagnosis' >&2; exit 2;
-  }
-  "${k[@]}" get pods -l "job-name=$job" -o jsonpath='{range .items[*]}{.status.containerStatuses[0].state.terminated.message}{"\n"}{end}' > "$OUTPUT/termination.json"
-  jq -e --slurpfile c "$INPUT" '.status=="complete" and .binding==$c[0].binding' "$OUTPUT/termination.json" >/dev/null
-  "${k[@]}" logs "job/$job" -c operator > "$OUTPUT/receipt.json"
-  [[ $(sha256sum "$OUTPUT/receipt.json" | cut -d' ' -f1) == $(jq -r .sha256 "$OUTPUT/termination.json") ]] || fail 'Receipt hash mismatch'
-  jq -e --slurpfile c "$INPUT" --arg action "$action" '.binding==$c[0].binding and .action==$action and (.result|type=="object")' "$OUTPUT/receipt.json" >/dev/null
-  if [[ $action == init ]]; then
-    jq -e --slurpfile c "$INPUT" '.result.workspaceSlug==$c[0].binding.workspaceSlug
-      and (.result.workspaceId|test("^[a-fA-F0-9]{8}(-[a-fA-F0-9]{4}){3}-[a-fA-F0-9]{12}$"))' "$OUTPUT/receipt.json" >/dev/null || fail 'Initialization receipt destination mismatch'
-  fi
+  wait_job || true
+  collect_job "$action"
   ;;
 delete-job)
   # Deletion is separate from successful collection, and needs the collected receipt.
@@ -41,4 +34,3 @@ delete-job)
   delete_job_uid "$job" "$("${k[@]}" get job "$job" -o jsonpath='{.metadata.uid}')";;
 *) fail 'Unknown operator action';;
 esac
-find "$OUTPUT" -type f ! -name checksums.txt -exec sha256sum '{}' + > "$OUTPUT/checksums.txt"

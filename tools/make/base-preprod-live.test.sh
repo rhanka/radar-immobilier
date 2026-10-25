@@ -12,6 +12,14 @@ shift 5
 case "$*" in
   'auth can-i '*) [[ ${FAKE_STATE:-} != denied ]] || { echo no; exit 1; }; echo yes;;
   'api-resources '*) echo middlewares.traefik.io;;
+  'get job '*conditions*)
+    if [[ ${FAKE_STATE:-} == failed-job ]]; then echo Failed; else echo Complete; fi;;
+  'get job '*) printf 'synthetic-job-uid\t%s\n' "$(jq -r .image "$INPUT")";;
+  'get pods -l '*imageID*)
+    digest=$(jq -r '.image|split("@")[1]' "$INPUT")
+    [[ ${FAKE_STATE:-} != foreign-image ]] || digest=sha256:$(printf 'c%.0s' {1..64})
+    code=0; [[ ${FAKE_STATE:-} != failed-job ]] || code=2
+    printf 'synthetic-pod-uid\t%s\tcontainerd://%s\t%s\n' "$(jq -r .image "$INPUT")" "$digest" "$code";;
   'get pods -l '*) cat synthetic-termination.json;;
   'logs job/'*) cat synthetic-receipt.json;;
   'get pods '*)
@@ -78,11 +86,27 @@ jq '.operation="inspect"' input.json > inspect-input.json
 cp input.json activation-input.json
 cp inspect-input.json input.json
 jq -n --slurpfile c input.json --arg now "$now" '{action:"inspect",binding:$c[0].binding,
+  image:$c[0].image,releaseSha:($c[0].binding.releaseId|split(":")[0]),
   observedAt:$now,result:{identity:[$c[0].database]}}' -c > synthetic-receipt.json
 receipt_sha=$(sha256sum synthetic-receipt.json | cut -d' ' -f1)
-jq -n --slurpfile c input.json --arg sha "$receipt_sha" '{status:"complete",binding:$c[0].binding,sha256:$sha}' > synthetic-termination.json
+jq -n --slurpfile c input.json --arg sha "$receipt_sha" '{status:"complete",binding:$c[0].binding,
+  image:$c[0].image,releaseSha:($c[0].binding.releaseId|split(":")[0]),sha256:$sha}' > synthetic-termination.json
 invoke inspect
 cmp synthetic-receipt.json "out-$n/receipt.json"
+export FAKE_STATE=foreign-image
+if invoke inspect; then echo 'Foreign running digest accepted' >&2; exit 1; fi
+rg -qF 'Running pod image digest mismatch' "result-$n.log"
+unset FAKE_STATE
+export FAKE_STATE=failed-job
+if invoke inspect; then echo 'Failed Job accepted' >&2; exit 1; fi
+cmp synthetic-receipt.json "out-$n/receipt.json"
+[[ -s out-$n/checksums.txt ]]
+rg -qF 'Operator Job failed; verified receipt retained' "result-$n.log"
+: > cluster-calls
+if invoke collect-job; then echo 'Failed collected Job accepted' >&2; exit 1; fi
+cmp synthetic-receipt.json "out-$n/receipt.json"
+if rg -- '--request-timeout=20s (create|patch|scale|set|delete|rollout) ' cluster-calls; then exit 1; fi
+unset FAKE_STATE
 printf '\n' >> synthetic-receipt.json
 if invoke inspect; then echo 'Corrupted Job receipt accepted' >&2; exit 1; fi
 rg -qF 'Receipt hash mismatch' "result-$n.log"
