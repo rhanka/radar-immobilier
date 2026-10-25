@@ -12,6 +12,8 @@ shift 5
 case "$*" in
   'auth can-i '*) [[ ${FAKE_STATE:-} != denied ]] || { echo no; exit 1; }; echo yes;;
   'api-resources '*) echo middlewares.traefik.io;;
+  'get pods -l '*) cat synthetic-termination.json;;
+  'logs job/'*) cat synthetic-receipt.json;;
   'get pods '*)
     case ${FAKE_STATE:-} in
       old) printf 'synthetic-old-api\tRunning\tapi\t\n';;
@@ -72,6 +74,19 @@ for state in old new cron job ready replicas publish-unready cd run; do
   if rg -- '--request-timeout=20s (create|patch|scale|set|delete|rollout) ' cluster-calls; then exit 1; fi
 done
 unset FAKE_STATE
+jq '.operation="inspect"' input.json > inspect-input.json
+cp input.json activation-input.json
+cp inspect-input.json input.json
+jq -n --slurpfile c input.json --arg now "$now" '{action:"inspect",binding:$c[0].binding,
+  observedAt:$now,result:{identity:[$c[0].database]}}' -c > synthetic-receipt.json
+receipt_sha=$(sha256sum synthetic-receipt.json | cut -d' ' -f1)
+jq -n --slurpfile c input.json --arg sha "$receipt_sha" '{status:"complete",binding:$c[0].binding,sha256:$sha}' > synthetic-termination.json
+invoke inspect
+cmp synthetic-receipt.json "out-$n/receipt.json"
+printf '\n' >> synthetic-receipt.json
+if invoke inspect; then echo 'Corrupted Job receipt accepted' >&2; exit 1; fi
+rg -qF 'Receipt hash mismatch' "result-$n.log"
+cp activation-input.json input.json
 jq -n --slurpfile c input.json --arg now "$now" '{reference:"synthetic-qualification",sha256:("f"*64),observedAt:$now,passed:true} as $q |
   {binding:$c[0].binding,image:$c[0].image,q1:$q,q2:($q+{afterRestart:true}),
     personal:{writerEpoch:"scoped",maintenanceBarrier:false},lotsOpen:false,mcpSuccessorDeployed:true}' > acceptance.json
