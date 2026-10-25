@@ -30,7 +30,7 @@ import { createMcpArtifactAdapter } from "../../../packages/artifacts-host/src/m
 import { controlRoute } from "../../src/artifacts/control-route.js";
 import { auth, cookie, migrationsFolder } from "./artifacts-h2.helpers.js";
 import { loadConfig } from "../../src/config.js";
-import { awaitWithPump, cleanupArtifactRace } from "./artifacts-race-cleanup.helpers.js";
+import { awaitWithPump, cleanupArtifactRace, assertPurgeEffects } from "./artifacts-race-cleanup.helpers.js";
 import {
   assertOutcomeFailure,
   authorizeTransaction,
@@ -921,10 +921,14 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       const targetId = await seedTarget(`purge-target-${order}`);
       const otherId = await seedActive(`purge-other-${order}`);
       const sharedKeys: string[] = [];
+      const exclusiveKeys: string[] = [];
       for (const key of await rawBlobs().listKeys("")) {
-        if (new TextDecoder().decode(await rawBlobs().getBlob(key)) === collectableText) sharedKeys.push(key);
+        const text = new TextDecoder().decode(await rawBlobs().getBlob(key));
+        if (text === collectableText) sharedKeys.push(key);
+        if (text === `exclusive-${order}`) exclusiveKeys.push(key);
       }
       expect(sharedKeys.length).toBeGreaterThan(0);
+      expect(exclusiveKeys.length).toBeGreaterThan(0);
       const referenceBody = { artifactId: otherId,
         files: [{ path: "index.html", mimeType: "text/html", text: collectableText }] };
       if (order === "purge-first") {
@@ -934,8 +938,9 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         expect(paused.claimId.length).toBeGreaterThan(0);
         expect(paused.blobKeys.length).toBeGreaterThan(0);
         for (const key of sharedKeys) expect(paused.blobKeys).toContain(key);
+        for (const key of exclusiveKeys) expect(paused.blobKeys).toContain(key);
         expect(await binding.inspectDeletionClaims(host)).toContainEqual(
-          expect.objectContaining({ claimId: paused.claimId }));
+          expect.objectContaining({ claimId: paused.claimId, state: "deleting" }));
         const reference = invocationFor(allowAll(), `purge-reference-${order}`);
         const referenceKey = `purge-reference-${order}`;
         const referenceInternalKey = deriveIdempotencyKey(
@@ -1027,16 +1032,18 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         paused = earlyPause ?? await purge;
         expect(paused.claimId.length).toBeGreaterThan(0);
         expect(await binding.inspectDeletionClaims(host)).toContainEqual(
-          expect.objectContaining({ claimId: paused.claimId }));
+          expect.objectContaining({ claimId: paused.claimId, state: "deleting" }));
         // The target has exclusive bytes too, so purge can reach DELETE even
         // though the new committed reference protects the shared bytes.
         for (const key of sharedKeys) expect(paused.blobKeys).not.toContain(key);
+        for (const key of exclusiveKeys) expect(paused.blobKeys).toContain(key);
         paused.release();
         await paused.finished;
         paused = undefined;
         const after = new Set(await rawBlobs().listKeys(""));
         for (const key of sharedKeys) expect(after.has(key)).toBe(true);
       }
+      assertPurgeEffects(sharedKeys, exclusiveKeys, new Set(await rawBlobs().listKeys("")));
       for (const key of sharedKeys) {
         expect(new TextDecoder().decode(await rawBlobs().getBlob(key))).toBe(collectableText);
       }
