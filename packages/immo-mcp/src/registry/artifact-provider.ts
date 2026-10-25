@@ -45,7 +45,7 @@ export function bindArtifactProvider(options: {
   const binding: ArtifactMcpBinding = Object.freeze({
     manifest: IMMO_ARTIFACT_MANIFEST,
     configuration: Object.freeze({ storageScopeId: scope }),
-    tools: Object.freeze(IMMO_ARTIFACT_MANIFEST.tools.map((tool) => freeze({
+    tools: Object.freeze(IMMO_ARTIFACT_MANIFEST.tools.map((tool: Tool) => freeze({
       name: tool.name, description: tool.description, inputSchema: tool.inputSchema as Tool["inputSchema"],
       execution: { taskSupport: "forbidden" as const },
     }))),
