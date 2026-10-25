@@ -80,10 +80,11 @@ jq '.operation="activate"' valid.json > input.json
 jq -n '[{id:"synthetic-old-api",role:"api"},{id:"synthetic-old-mcp",role:"mcp"}]' > expected.json
 jq -n --slurpfile c input.json --slurpfile ids expected.json --arg now "$now" '
   $c[0] as $c | {reference:"synthetic-check",sha256:("e"*64),observedAt:$now,passed:true,binding:$c.binding} as $check |
-  {binding:$c.binding,
+  {binding:$c.binding,image:$c.image,
    observations:{networkAllowed:$check,networkDenied:$check,sessionRequired:$check,
     externalStopped:$check,streamsTerminated:$check,mcpSuccessor:($check+{image:$c.image})},
-   databaseInspection:{binding:$c.binding,action:"inspect",observedAt:($now|sub("Z$";".123Z")),result:{
+   databaseInspection:{binding:$c.binding,image:$c.image,releaseSha:($c.binding.releaseId|split(":")[0]),
+    action:"inspect",observedAt:($now|sub("Z$";".123Z")),result:{
     identity:[($c.database+{observe_transactions:true})],missingMigrations:[],
     approved:[{id:"synthetic-account",sub:$c.binding.actorSub,status:"approved"}],
     memberships:[{account_id:"synthetic-account",status:"active",manage_members:true}],
@@ -107,7 +108,7 @@ while IFS=$'\t' read -r privilege relation; do
   reject render-job EXPECTED="$testdir/expected.json" PROOFS="$testdir/proofs.json"
 done < <(jq -r '.activate|to_entries[]|.key as $key|.value[]|[$key,.]|@tsv' api/src/scripts/base-preprod-rights.json)
 cp good-proofs.json proofs.json
-for field in binding.actorSub binding.workspaceId binding.maintenanceAttemptId binding.releaseId evidence.actorSub evidence.maintenanceAttemptId evidence.releaseId; do
+for field in image databaseInspection.image databaseInspection.releaseSha binding.actorSub binding.workspaceId binding.maintenanceAttemptId binding.releaseId evidence.actorSub evidence.maintenanceAttemptId evidence.releaseId; do
   jq --arg field "$field" 'setpath($field|split(".");"foreign")' good-proofs.json > proofs.json
   reject render-job EXPECTED="$testdir/expected.json" PROOFS="$testdir/proofs.json"
 done
