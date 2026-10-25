@@ -11,15 +11,6 @@ permissions|inventory|freeze-cd|close|collect-maintenance|start-api|restart-api|
   source tools/make/base-preprod-maintenance.sh
   "$action";;
 inspect|init|attach|activate|resume)
-  case $action in
-  init)
-    jq -e '(.workspaceSlug|test("^[a-z0-9-]+$")) and (.workspaceLabel|length>0)
-      and (.moderators|length==2 and all(.[];type=="string" and length>0))
-      and (.managers|length==2 and all(.[];type=="string" and length>0))' "$INPUT" >/dev/null;;
-  attach)
-    jq -e --arg workspace "$(jq -r .binding.workspaceId "$INPUT")" \
-      '.attachments|length>0 and all(.[]; (.sub|type=="string" and length>0) and .workspaceId==$workspace)' "$INPUT" >/dev/null;;
-  esac
   render_job "$action"
   source tools/make/base-preprod-maintenance.sh
   permissions

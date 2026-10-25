@@ -43,6 +43,17 @@ require_proofs() {
 }
 render_job() {
   local action=$1
+  [[ $(jq -r .operation "$INPUT") == "$action" ]] || fail 'Input operation differs from requested action'
+  case $action in
+    init)
+      jq -e '(.workspaceSlug|test("^[a-z0-9-]+$")) and (.workspaceLabel|length>0)
+        and (.moderators|length==2 and (unique|length)==2 and all(.[];type=="string" and length>0))
+        and (.managers|sort)==(.moderators|sort)' "$INPUT" >/dev/null || fail 'Two explicit moderator/manager subjects required';;
+    attach)
+      jq -e '. as $c | .attachments|length>0 and length<=500
+        and all(.[]; (.sub|type=="string" and length>0) and .workspaceId==$c.binding.workspaceId)
+        and (map(.sub)|length==(unique|length))' "$INPUT" >/dev/null || fail 'Explicit attachment destinations required';;
+  esac
   if [[ $action == activate || $action == resume ]]; then require_expected; require_proofs; fi
   jq -n --arg action "$action" --slurpfile input "$INPUT" \
     --slurpfile expected "${EXPECTED:-/dev/null}" --slurpfile proofs "${PROOFS:-/dev/null}" \

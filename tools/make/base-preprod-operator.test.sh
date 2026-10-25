@@ -60,4 +60,40 @@ jq -e --arg literal "$literal" '.spec.template.spec.containers[0].command[2]|fro
 n=$((n+1))
 if make --no-print-directory -f deploy/base-preprod/operator.mk validate 'INPUT=$(shell touch '"$canary"')' OUTPUT="$testdir/out-$n" ENV=preprod > /dev/null 2>&1; then exit 1; fi
 [[ ! -e $canary && ! -e cluster-calls ]]
+jq '.operation="activate"' valid.json > input.json
+jq -n '[{id:"synthetic-old-api",role:"api"},{id:"synthetic-old-mcp",role:"mcp"}]' > expected.json
+jq -n --slurpfile c input.json --slurpfile ids expected.json --arg now "$now" '
+  $c[0] as $c | {reference:"synthetic-check",sha256:("e"*64),observedAt:$now,passed:true,binding:$c.binding} as $check |
+  {binding:$c.binding,
+   observations:{networkAllowed:$check,networkDenied:$check,sessionRequired:$check,
+    externalStopped:$check,streamsTerminated:$check,mcpSuccessor:($check+{image:$c.image})},
+   databaseInspection:{binding:$c.binding,action:"inspect",observedAt:$now,result:{
+    identity:[($c.database+{observe_transactions:true})],missingMigrations:[],
+    approved:[{id:"synthetic-account",sub:$c.binding.actorSub,status:"approved"}],
+    memberships:[{account_id:"synthetic-account",status:"active",manage_members:true}],
+    differences:[{activeMember:true,attachedHere:true,attachedElsewhere:false}],personal:[],lots:[],
+    privileges:(["account_users","workspaces","workspace_memberships","workspace_membership_events",
+     "facet_streams","facet_event_bindings","facet_heads","facet_stream_attachments","facet_command_contexts",
+     "facet_activation_state","facet_unresolved_events","facet_events","facet_commands",
+     "personal_projection_revisions","workspace_projection_revisions"]
+      |map({relation:.,read:true,insert:true,lock_authority:true})),
+    functions:[{proname:"check_facet_stream",execute:true},{proname:"facet_swap_head_enforcement",execute:true}],
+    indexAuthority:[{can_drop_as_current_role:true}],transactions:[{active_transactions:0,active_sessions:0}]}},
+   evidence:($c.binding+{reason:$c.reason,instanceIds:($ids[0]|map(.id)),
+    drain:{completedAt:$now,coveredInstanceIds:($ids[0]|map(.id))},
+    shutdown:{completedAt:$now,coveredInstanceIds:($ids[0]|map(.id))}})}' > proofs.json
+invoke render-job EXPECTED="$testdir/expected.json" PROOFS="$testdir/proofs.json"
+jq -e '.spec.template.spec.containers[0].command[2]|fromjson|.args|index("--evidence-json")!=null' "out-$n/job.json" >/dev/null
+cp proofs.json good-proofs.json
+for field in binding.actorSub binding.workspaceId binding.maintenanceAttemptId binding.releaseId evidence.actorSub evidence.maintenanceAttemptId evidence.releaseId; do
+  jq --arg field "$field" 'setpath($field|split(".");"foreign")' good-proofs.json > proofs.json
+  reject render-job EXPECTED="$testdir/expected.json" PROOFS="$testdir/proofs.json"
+done
+for field in evidence.drain evidence.shutdown observations.networkDenied observations.mcpSuccessor; do
+  jq --arg field "$field" 'delpaths([$field|split(".")])' good-proofs.json > proofs.json
+  reject render-job EXPECTED="$testdir/expected.json" PROOFS="$testdir/proofs.json"
+done
+cp good-proofs.json proofs.json
+jq '.evidence.drain.completedAt="2099-01-01T00:00:00Z"' good-proofs.json > proofs.json
+reject render-job EXPECTED="$testdir/expected.json" PROOFS="$testdir/proofs.json"
 printf 'PASS operator refusals, literal Make/shell transport, no root/environment discovery, static Job contract (%s cases)\n' "$n"
