@@ -17,7 +17,7 @@ RUN_DIR=$TASK_DIR/runtime
 LOG_DIR=$TASK_DIR/$(date -u +%Y%m%dT%H%M%S)-$$
 mkdir -p "$RUN_DIR" "$LOG_DIR"
 echo "Evidence: $LOG_DIR"
-git show c49bb854:package-lock.json > "$LOG_DIR/baseline-lock.json"
+git --git-dir="$ROOT/tmp/a5-delivery.git" show 5ea88ce1:package-lock.json > "$LOG_DIR/baseline-lock.json"
 exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
 until flock -w 60 8; do
   echo 'WAIT: machine Docker campaign lock held'
