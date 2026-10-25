@@ -15,7 +15,7 @@ describe("canonical per-request documentary context", () => {
   });
   it("preserves descriptions, document references and persisted regulatory status", async () => {
     const card = await toGraphSignalCard({ head: async () => null } as unknown as ObjectStore,
-      { id: "synthetic", type: "Signal", label: "Label", citySlug: "city", createdAt: null,
+      { id: "synthetic", type: "Signal", label: "Label", citySlug: "city", createdAt: new Date("2026-01-01T00:00:00Z"),
         sourceRef: "raw/synthetic/a.pdf", props: { description: "Description",
           properties: { etape: "adoption", regulatoryStatus: "firm" } } }, createDocEnrichmentContext());
     expect(card.description).toBe("Description");
