@@ -69,6 +69,7 @@ import {
   requireCommitContract,
   requireHostExecute,
   requireOutcomeContract,
+  requirePreparationCleanupBinding,
   verifyPreparationCleanup,
   startBarrierOperation,
   requireSelectedProfile,
@@ -265,9 +266,15 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
         const releasesBefore = await tableCount("releases");
         const keysBefore = await tableCount("idempotency_keys");
         const s3Before = await s3KeyCount();
+        const s3Baseline = new Set(await rawBlobs().listKeys(""));
         const run = startBarrierOperation(barrier, invocationId,
           () => execute({ method: "POST", path: "/publish", body }, invocation), "before_finalization_row_lock");
         await run.reached;
+        const prepared = await (await requirePreparationCleanupBinding()).inspectPreparations(host, artifactId);
+        const attempt = prepared.attempts.find((candidate) => candidate.invocationId === invocationId);
+        expect(attempt?.blobKeys.length).toBeGreaterThan(0);
+        const preparedKeys = new Set(await rawBlobs().listKeys(""));
+        for (const key of attempt!.blobKeys) expect(preparedKeys.has(key)).toBe(true);
         await pool.query("UPDATE account_users SET status = 'suspended' WHERE sub = 'alice'");
         passedBarrier = true;
         run.release();
@@ -283,7 +290,9 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
         expect(await currentReleaseId(artifactId)).toBeUndefined();
         const s3AfterDenial = await s3KeyCount();
         console.info("[preparation-debt]", JSON.stringify({ s3Before, s3AfterDenial }));
-        await verifyPreparationCleanup(host, artifactId, rawBlobs(), true, true);
+        await verifyPreparationCleanup(host, artifactId, rawBlobs(), true, true,
+          { expectedInvocationIds: [invocationId], s3KeysBefore: s3Baseline,
+            preparationsBeforeRefusal: prepared.attempts });
         await pool.query("UPDATE account_users SET status = 'approved' WHERE sub = 'alice'");
         const retry = await execute({ method: "POST", path: "/publish", body },
           invocationFor(finalizeGuard, "refusal-retry")) as Record<string, unknown>;
@@ -606,8 +615,58 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
         const projected = await projectOutcomeHttp(outcome);
         assertPublicBodyRedacted(projected, { error: "capability_unavailable" }, [], []);
       }
+      // A provider accepting a forged scope or an overlong caller key directly
+      // would pass the facade-only checks below: the facade refuses before
+      // dispatch. These direct host.execute refusals prove selection and input
+      // validation run before storage, with zero effects.
+      const directReleasesBefore = await tableCount("releases");
+      const directKeysBefore = await tableCount("idempotency_keys");
+      const directArtifactsBefore = await tableCount("artifacts");
+      for (const forged of [
+        { method: "POST", path: "/publish",
+          body: { artifactId: "123e4567-e89b-12d3-a456-426614174000",
+            files: [{ path: "index.html", mimeType: "text/html", text: "x" }],
+            idempotencyKey: "acceptance-direct", storageScopeId: "forged" } },
+        { method: "POST", path: "/publish",
+          body: { artifactId: "123e4567-e89b-12d3-a456-426614174000",
+            files: [{ path: "index.html", mimeType: "text/html", text: "x" }],
+            idempotencyKey: "x".repeat(257) } },
+        { method: "POST", path: "/publish",
+          body: { artifactId: "123e4567-e89b-12d3-a456-426614174000",
+            files: [{ path: "index.html", mimeType: "text/html", text: "x" }] } },
+        { method: "POST", path: "/ensure",
+          body: { bindingName: "acceptance-direct", idempotencyKey: "x".repeat(257) } },
+        { method: "POST", path: "/ensure",
+          body: { bindingName: "acceptance-direct", idempotencyKey: "   " } },
+        { method: "POST", path: "/ensure", body: { bindingName: "acceptance-direct" } },
+        { method: "POST", path: "/ensure", body: { bindingName: "acceptance-direct",
+          idempotencyKey: "acceptance-forged", storageScopeId: "forged" } },
+        { method: "POST", path: "/publish", body: {
+          artifactId: "123e4567-e89b-12d3-a456-426614174000", idempotencyKey: "   ",
+          files: [{ path: "index.html", mimeType: "text/html", text: "x" }] } },
+      ]) {
+        const outcome = await execute(forged,
+          invocationFor(directGuard, "selection-direct")) as Record<string, unknown>;
+        assertOutcomeFailure(outcome);
+        expect(outcome["failure"]).toMatchObject({ commitState: "not_committed" });
+        expect((outcome["failure"] as Record<string, unknown>)["code"]).toBe("invalid_request");
+        const projected = await projectOutcomeHttp(outcome);
+        expect(projected.status).toBe(400);
+        assertPublicBodyRedacted(projected, { error: "invalid_request" }, [], []);
+      }
+      expect(await tableCount("releases")).toBe(directReleasesBefore);
+      expect(await tableCount("idempotency_keys")).toBe(directKeysBefore);
+      expect(await tableCount("artifacts")).toBe(directArtifactsBefore);
       expect(storageCalls.blobs).toBe(0);
       expect(storageCalls.pool).toBe(0);
+      // C4/C5 coverage map (spec r2): covered here — four selected routes,
+      // forged scope, absent/blank/257-unit keys, whitespace retention,
+      // BMP/astral boundaries, closed objects via facade forbidden keys.
+      // Still not covered beyond this suite (owner Sentropic L1 / Radar H3):
+      // UTF-8 byte ceiling vs UTF-16 length on paths, reserved path segments,
+      // MIME allowlist beyond exercised values, surrogate-pair aliasing beyond
+      // fixtures, actor-domain canonical mapping, platform envelope equality,
+      // profile-flatness and provenance-forcing on direct execute paths.
       const control = createArtifactControl(composed.host as never, SCOPE, BASE);
       try {
         const adapter = createMcpArtifactAdapter(control);
