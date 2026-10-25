@@ -31,7 +31,7 @@
 - [x] PR920: init requires a null UUID and identical declared/argument slug; returned UUID resolves to that slug, also checked at collection.
 - [x] PR920: shared SQL matrix covers every operation; row-lock UPDATE and all five table locks gate proofs and the runtime before mutation.
 - [x] PR920: immutable image SHA gates execution; proofs, Job/pod digest and complete/termination receipts must agree.
-- [ ] PR920: bind Q2 to the latest API restart, pod instance and configuration.
+- [x] PR920: restart receipt records live generation/template/pod/container identity and times; reopening compares Q2 to that instance again.
 - [x] PR920: collect both terminal Job outcomes; failed verified receipts persist with nonzero exit and explicit read-only collect-job.
 - [ ] PR920: reproduce offline K8s CI, mutation tests and fresh bundle audit from c100e6cc.
 - [x] Lot 0: inspect approved design, constraints and existing isolation tooling.
