@@ -29,6 +29,7 @@ source "$TOOLS/base-api-ci-archive.sh"
 archive_sources
 archive_ci_inputs
 git ls-files --cached --others --exclude-standard -- tools/make/base-preprod* deploy/base-preprod api/Dockerfile api/docker-entrypoint.sh > "$RUN_DIR/operator-paths"
+git ls-files --cached -- ui tools/security .security/vulnerability-register.yaml >> "$RUN_DIR/operator-paths"
 while IFS= read -r path; do [[ ! -L $path && $path != *..* && $path != *.env* ]]; done < "$RUN_DIR/operator-paths"
 tar --verbatim-files-from --no-recursion -rf "$RUN_DIR/source.tar" -T "$RUN_DIR/operator-paths"
 sha256sum "$RUN_DIR/source.tar" > "$LOG_DIR/source.sha256"

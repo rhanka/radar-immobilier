@@ -38,7 +38,7 @@ export async function inspect(workspaceId: string) {
         old_index_dropped FROM facet_activation_state ORDER BY workspace_id`)).rows;
       const lots = (await tx.execute(sql`SELECT workspace_id, destination_open, maintenance_barrier
         FROM lot_cutover_state ORDER BY workspace_id`)).rows;
-      const capabilities = (await tx.execute(sql`SELECT workspace_id, account_id, capability, revision
+      const capabilities = (await tx.execute(sql`SELECT workspace_id, account_id, capability, granted, revision
         FROM lot_capability_grants WHERE workspace_id=${workspaceId} ORDER BY account_id, capability`)).rows;
       const privileges = (await tx.execute(sql`SELECT c.relname AS relation, r.rolname AS owner,
         has_table_privilege(c.oid,'SELECT') AS read,
