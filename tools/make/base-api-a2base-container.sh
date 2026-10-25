@@ -2,7 +2,12 @@
 set -euo pipefail
 mode=$1; scope=$2
 cd /workspace
-npm_config_cache=/tmp/npm-cache npm ci --ignore-scripts --no-audit --no-fund > /evidence/install.log 2>&1
+if [[ -d /download-cache ]]; then
+  mkdir -p /tmp/npm-cache/_cacache
+  cp -R /download-cache/. /tmp/npm-cache/_cacache/
+fi
+npm_config_cache=/tmp/npm-cache npm_config_prefer_offline=true \
+  npm ci --ignore-scripts --no-audit --no-fund > /evidence/install.log 2>&1
 node node_modules/esbuild/install.js >> /evidence/install.log 2>&1
 cat > api/vitest.isolated.config.ts <<'CONFIG'
 import config from './vitest.config.js';

@@ -66,6 +66,7 @@
 - [x] Missing/legacy/barrier epoch and unresolved-history refusals are covered by real createApp/PostgreSQL cases, including empty reveal requests.
 - [ ] Lot gate: unit tests, real createApp/PostgreSQL tests, named behavioral mutations, targeted lint/typecheck.
 - [x] API and BASE regression campaign passed: 142 cases across 15 explicit files, no failures/skips, owned cleanup passed; static checks and mutations remain to qualify the lot.
+- [x] Two static campaigns stopped during npm install on TLS resets; host probes confirmed registry TLS failures too. Seed only the existing integrity-checked npm download cache read-only into container tmpfs, prefer cached bytes, retain npm ci and the unchanged lockfile; no user npm configuration is mounted.
 - [x] Machine-serialized runner written with explicit file scopes, a 60-second wait, disk monitoring, one-worker container configuration and inherited ownership-checked cleanup.
 - [x] Eight named mutants prepared in the isolated container source copy, with a control before each, exact-byte restoration and a passing restored control required; execution pending.
 - [x] Workspace race barriers release on early refusal too, so negative mutations cannot leave their coordinator waiting for a callback that already failed.
