@@ -87,9 +87,9 @@ describe("artifact effective profile", () => {
   });
 
   it("should record the pending upstream contracts without inventing them", () => {
-    expect(REQUIRED_PROVIDER_CONTRACTS.finalizationAuthorization).toBe("pending-upstream");
-    expect(REQUIRED_PROVIDER_CONTRACTS.typedFailure).toBe("pending-upstream");
-    expect(REQUIRED_PROVIDER_CONTRACTS.capabilitySelection).toBe("pending-upstream");
+    expect(REQUIRED_PROVIDER_CONTRACTS.finalizationAuthorization).toBe("artifacts-commit/v1");
+    expect(REQUIRED_PROVIDER_CONTRACTS.typedFailure).toBe("artifacts-outcome/v1");
+    expect(REQUIRED_PROVIDER_CONTRACTS.capabilitySelection).toBe("artifacts-profile/v1");
     expect(REQUIRED_PROVIDER_CONTRACTS.effectiveProfile).toBe(ARTIFACT_PROFILE_REVISION);
   });
 
@@ -131,6 +131,6 @@ describe("artifact effective profile", () => {
   });
 
   it("should expose the single qualified artifact provider version", () => {
-    expect(ARTIFACT_PROVIDER_VERSION).toBe("0.1.4");
+    expect(ARTIFACT_PROVIDER_VERSION).toBe("0.2.0");
   });
 });
