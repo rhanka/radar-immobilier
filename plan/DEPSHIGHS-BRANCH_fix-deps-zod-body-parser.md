@@ -61,10 +61,10 @@
   - [x] Execute the CI Make step in Docker, synthetic CLI cases, lint, typecheck, and Quality gates tests.
   - [x] Deliver subject-only commits of at most 150 lines and audit the bundle from `7eac7167` in a fresh repository.
   - [x] Append evidence and bundle identity to the French report; remove campaign containers and volumes.
-- [ ] **Lot 5 — Second-pass PR912 corrections (base `6a6c3d98`)**
+- [x] **Lot 5 — Second-pass PR912 corrections (base `6a6c3d98`)**
   - [x] Replace the text reader with installed YAML parsing limited to the active exceptions section.
   - [x] Validate the explicit typed schema and reject every invalid row.
   - [x] Deliver regressions for invalid signers, archived rows, missing fields, types, dates and YAML structures, with explicit Node imports for lint.
   - [x] Refresh the finding's initial tree, current acceptance window and validated register contract.
-  - [ ] Qualify signer/section/schema regressions, CLI failures, actual audit and CI quality tests.
-  - [ ] Refresh the finding, audit the local bundle, append the report and clean the campaign.
+  - [x] Qualify 66 security tests, 98 CLI cases, the actual audit, lint, typecheck and 7,006 workspace tests; preserve the first cleanup-hook failure and passing isolated/unchanged full reruns.
+  - [x] Refresh the finding, audit the local bundle from `6a6c3d98`, append the report and clean the campaign.
