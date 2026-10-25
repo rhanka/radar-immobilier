@@ -48,16 +48,16 @@
 - [x] T13 authority group written against the production facade: current account approval, 0/1/N memberships, outsider and explicit destination refusals.
 - [x] T13 archive group written: personal/common OR masking, other-member privacy, reveal guards, identity keys, restoration and SQL read-only snapshots, hidden targets never enriched.
 - [x] T13 races group written: deterministic document barriers for membership/account/source/archive changes, explicit selector stability, plus an observed PostgreSQL lock wait followed by revocation.
-- [x] T13 state group written: canonical parity while legacy serves, legacy 503/410 with independent open scoped reads, missing/legacy/barrier epochs and unresolved history refusals.
+- [x] Initial T13 state group qualified scoped reads and epoch refusals; Astra corrections supersede missing/legacy facade refusals with positive reads from a genuinely unactivated database, retaining maintenance and unresolved scoped-history guards.
 - [x] Production facade filter qualification includes a late matching PostgreSQL card with limit=1 and preserved firm status.
 - [x] Initial T08/T09 gate PASS: 74 API tests across six explicit files plus eight MCP baseline cases, no failures/skips; documentary waiting measured 2,025ms/one resolution; owned cleanup status 0.
 - [x] T14: explicit MCP E2E runner, complete HTTP search through production facade and image evidence.
 - [x] T14 network fixture written: SDK/Streamable HTTP, socket token issuer verifying incoming signatures, signed exchanged JWT/JWKS, real createApp/A3 facade and PostgreSQL; no business response injection.
 - [x] T14 seven socket E2E cases written: three legacy states, two humans, same-human concurrent renewed scopes, cross-session refusal, warm-cache revocations and capability closure.
 - [x] An eighth network case covers private refusal of original bearer, encoded/suffixed paths, POST, duplicate and authority query keys; header-only middleware covers malformed signal paths without widening A3 authority.
-- [x] Explicit test-base-adapter-e2e target requires seven non-skipped network cases; eleven bounded behavioral mutants cover authority, masking, revision/budget, projection and the closed binding.
+- [x] Explicit test-base-adapter-e2e target requires eleven non-skipped network cases; thirteen bounded behavioral mutants cover epoch routing, authority, masking, revision/budget, projection and the closed binding.
 - [x] Image preparation written: locked dependencies, API declaration build and production-style bundles; network fixture imports compiled API/MCP entrypoints in the image, without source mounts or installs at runtime.
-- [x] Qualification can keep a single owned stack for static checks, explicit API/MCP scopes, eleven mutants with controls, declaration/bundle build and eight compiled-image network cases.
+- [x] Qualification keeps one owned stack for static checks, explicit API/MCP scopes, the complete CI API collection, thirteen mutants with controls, declaration/bundle build and eleven compiled-image network cases.
 - [x] Static runner proof PASS: require_scope accepts the explicit network suite and rejects the directory prefix from design review r2; mutation receipts include executed control counts.
 - [x] Reservation race reproduced: local flock available, global flock busy and a new E3 stack started after the empty-container observation. Retry the global reservation every 60 seconds and recheck containers while holding it; never start a second stack or treat reservation failure as qualification.
 - [x] Queue on the same global flock before observing container quiescence, retaining 60-second ownership checks; this prevents repeated new campaigns from taking each brief empty-container window. Earlier waits created no owned resources.
@@ -68,6 +68,9 @@
 - [x] Independent audit: eleven restored mutation file hashes match qualified 2ce816f8 exactly; 22 controls/114 passing executions. API/MCP source bytes are identical at 2ce816f8, image d39eaa8c and final documentary delivery.
 
 ## Docs consolidation
+- [x] Astra campaign 20261025T232411-10-qualify PASS on e6ef67590f379f3be818876838346c3093f824b0: 363 targeted API cases/35 files, full API 3896 passed/76 conditional skips/zero failures, MCP 372/46 files, thirteen killed mutants and 26 passing controls/132 executions; all restored hashes match Git independently.
+- [x] Compiled image sha256:7102f426b7e08f43e64512a6e42a81e75dad6486a5da78697da010269043155f passes eleven network cases including real S3 metadata before/after 6H; typechecks, lint, declarations, bundles, CT-8 and down -v --remove-orphans pass; no owned container, volume or network remains.
+- [x] Final documentation changes only this plan after the qualified candidate; correction bundle is based on d8f2cc06, with source bytes preserved and no push or activation.
 - [x] Export the correction bundle from prerequisite d8f2cc06 under its own filename, preserving the initial bundle and its recorded hash; audit every new commit and import into a prerequisite-only fresh repository.
 - [x] French companion report with evidence, per-commit numstat, delivered SHA and bundle hash; report remains outside its own hashed bundle. Final commit updates only this plan, preserving qualified runtime bytes.
 
