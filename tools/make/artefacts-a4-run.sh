@@ -30,7 +30,8 @@ ACTION=test-api
 write_compose
 # A bounded source archive prevents any environment discovery in the container.
 git ls-files --cached --others --exclude-standard -- api packages ui tools radar/ontology \
-  package.json package-lock.json tsconfig.base.json eslint.config.js > "$RUN_DIR/candidates"
+  package.json package-lock.json tsconfig.base.json eslint.config.js \
+  deploy/k8s/41-immo-mcp-ingress.yaml .security > "$RUN_DIR/candidates"
 : > "$RUN_DIR/paths"
 while IFS= read -r path; do
   case /$path/ in */.env*|*/node_modules/*|*/dist/*|*/input/*|*/credentials*|*/secrets*) continue;; esac
