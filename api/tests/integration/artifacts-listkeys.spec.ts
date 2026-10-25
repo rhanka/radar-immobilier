@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   CreateBucketCommand, HeadBucketCommand, PutObjectCommand, S3Client,
 } from "@aws-sdk/client-s3";
-import { createS3BlobStore } from "@sentropic/artifacts/adapters/s3";
+import { createTestS3BlobStore } from "../artifacts-blob-store.helpers.js";
 import { loadConfig } from "../../src/config.js";
 import {
   assertAttributedTestObjects, cleanupArtifactTestResources, listTestBucketKeys,
@@ -13,7 +13,7 @@ const SCOPE = "listkeys_scope";
 const PREFIX = `artifacts/${SCOPE}/`;
 let s3: S3Client;
 let bucketCreated = false;
-const rawBlobs = () => createS3BlobStore({ client: s3, bucket: BUCKET });
+const rawBlobs = () => createTestS3BlobStore({ client: s3, bucket: BUCKET });
 function client(): S3Client {
   const env = loadConfig();
   return new S3Client({ endpoint: env.S3_ENDPOINT, region: "us-east-1", forcePathStyle: true,

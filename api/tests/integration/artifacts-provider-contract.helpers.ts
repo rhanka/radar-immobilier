@@ -1054,14 +1054,14 @@ if (process.argv[2] === "--artifact-worker") {
       if (message.method === "initialize") {
         const { default: pgModule } = await import("pg");
         const { S3Client } = await import("@aws-sdk/client-s3");
-        const { createS3BlobStore } = await import("@sentropic/artifacts/adapters/s3");
+        const { createTestS3BlobStore } = await import("../artifacts-blob-store.helpers.js");
         const config = args[1] as Record<string, string>;
         pool = new pgModule.Pool(args[0] as pg.PoolConfig);
         s3 = new S3Client({ endpoint: config.s3Endpoint!, region: config.s3Region!, forcePathStyle: true,
           credentials: { accessKeyId: config.s3AccessKey!, secretAccessKey: config.s3SecretKey! } });
         barrier = await requireCommitBarrier();
         const composed = await composeR2AcceptanceHost({
-          pool, config, blobs: createS3BlobStore({ client: s3, bucket: config.s3Bucket! }), barrier,
+          pool, config, blobs: createTestS3BlobStore({ client: s3, bucket: config.s3Bucket! }), barrier,
         });
         host = composed.host;
         requireSelectedProfile(host, composed.profile.digest);
