@@ -5,7 +5,7 @@ import { sql } from "drizzle-orm";
 import { loadConfig } from "../config.js";
 import { createDb } from "../db/client.js";
 
-export async function inspect(workspaceId: string) {
+export async function inspect(workspaceId: string | null) {
   const { db, pool } = createDb(loadConfig());
   try {
     return await db.transaction(async (tx) => {
@@ -28,6 +28,7 @@ export async function inspect(workspaceId: string) {
         row.hash === entry.hash && row.created_at === String(entry.when))).map(({ tag }) => tag);
       const approved = (await tx.execute<{ id: string; sub: string; status: string }>(sql`
         SELECT id, sub, status FROM account_users WHERE status='approved' ORDER BY id`)).rows;
+      const workspaces = (await tx.execute(sql`SELECT id, slug, scope FROM workspaces ORDER BY id`)).rows;
       const memberships = (await tx.execute<{ account_id: string; status: string }>(sql`
         SELECT workspace_id, account_id, status, revision, moderate_archive, manage_members
         FROM workspace_memberships WHERE workspace_id=${workspaceId} ORDER BY account_id`)).rows;
@@ -70,7 +71,7 @@ export async function inspect(workspaceId: string) {
         count(*) FILTER (WHERE state='active')::int AS active_sessions
         FROM pg_stat_activity WHERE datname=current_database() AND pid<>pg_backend_pid()
           AND (xact_start IS NOT NULL OR state='active')`)).rows;
-      return { identity, migrations, missingMigrations, approved, memberships, attachments, personal, lots,
+      return { identity, migrations, missingMigrations, approved, workspaces, memberships, attachments, personal, lots,
         capabilities, privileges, sequences, functions, indexAuthority, transactions,
         differences: approved.map(({ id }) => ({ accountId: id,
           activeMember: memberships.some((row) => row.account_id === id && row.status === "active"),
