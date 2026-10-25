@@ -39,11 +39,12 @@ while IFS= read -r path; do
 done < "$RUN_DIR/candidates"
 tar --verbatim-files-from --no-recursion -cf "$RUN_DIR/source.tar" -T "$RUN_DIR/paths"
 sha256sum "$RUN_DIR/source.tar" > "$LOG_DIR/source.sha256"
+mkdir -p "$HOME/.cache/radar-a4-npm"
 cat > "$RUN_DIR/cache.yml" <<YAML
 services:
   api:
     volumes:
-      - $HOME/.npm:/npm-cache
+      - $HOME/.cache/radar-a4-npm:/npm-cache
     environment:
       npm_config_cache: /npm-cache
 YAML
@@ -65,7 +66,7 @@ MONITOR=$!
 if [[ ${A4_SERVICES:-0} == 1 ]]; then "${compose[@]}" up -d --wait postgres minio; fi
 printf '%s\n' "$CMD" > "$LOG_DIR/command.txt"
 "${compose[@]}" run --rm --no-deps -T -e A4_COMMAND="$CMD" api bash -euc \
-  'tar -xf /source.tar -C /workspace; timeout --signal=TERM --kill-after=10 1800 bash -euc "$A4_COMMAND"' \
+  'tar --no-same-owner -xf /source.tar -C /workspace; chmod 755 /workspace; timeout --signal=TERM --kill-after=10 1800 bash -euc "$A4_COMMAND"' \
   > >(tee "$LOG_DIR/run.log") 2>&1 &
 RUN_PID=$!
 wait "$RUN_PID"
