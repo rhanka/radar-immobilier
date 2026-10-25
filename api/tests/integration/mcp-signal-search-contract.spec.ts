@@ -9,6 +9,7 @@ describe("API contract against inert S0", () => {
   });
   it.each([
     { city: "quebec" },
+    { city: "saint-stanislas--des-chenaux" },
     { city: "salaberry-de-valleyfield", etape: "adoption", query: "zone", limit: 100, showDiscarded: true },
     { city: "quebec", workspaceId: "12345678-1234-4234-9234-123456789abc", limit: 1, showDiscarded: false },
   ])("preserves S0 normalized search arguments %j", (input) => {
