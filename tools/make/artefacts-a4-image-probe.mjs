@@ -93,5 +93,6 @@ try {
     const exited = once(child, 'exit'); child.kill('SIGTERM'); await exited;
   }
   writeFileSync('/evidence/mcp-runtime.log', logs);
+  await db.query('DROP TABLE workspace_memberships, account_users');
   await new Promise((done) => upstream.close(done)); await db.end();
 }
