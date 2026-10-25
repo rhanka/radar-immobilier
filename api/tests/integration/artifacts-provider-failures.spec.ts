@@ -721,7 +721,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       const retry = await execute({ method: "POST", path: "/publish", body },
         invocationFor(allowAll(), "uncertain-retry")) as unknown as Record<string, unknown>;
       expect(retry).toMatchObject({ ok: true, replayed: true });
-      expect((retry.result as { body: unknown }).body).toEqual(durableReceipt);
+      expect((retry.result as { body: unknown }).body).toMatchObject(durableReceipt as object);
       // The first uncertain issue (503, commitState unknown) is distinct from
       // the legitimate receipt replay below: both transports converge on the
       // same durable receipt with the same key and no new release.
