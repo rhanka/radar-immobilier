@@ -3,7 +3,7 @@ import { expect, it } from "vitest";
 import { createApp } from "../../src/app.js";
 import { MCP_SIGNAL_SEARCH_PATH } from "../../src/routes/mcp-signal-search.js";
 import { toMcpSignalResult } from "../../src/services/facets/mcp-signal-result.js";
-import { describeDb } from "../../src/services/facets/workspace-archive-fixture.js";
+import { describeDb, workspaceSignal } from "../../src/services/facets/workspace-archive-fixture.js";
 import { unresolvedRevisionFixture } from "../../src/services/facets/projection-revisions-fixture.js";
 import { initializeWorkspaceStore } from "../../src/services/workspaces/init-store.js";
 import { facetActivationState } from "../../src/db/schema.js";
@@ -12,6 +12,17 @@ import { baseAuth, baseCookie } from "./base-api-fixture.js";
 import { facadeFixture } from "./mcp-signal-search-facade-fixture.js";
 
 describeDb("T13 production facade cutover states", () => {
+  it("finds a late matching card before applying the requested limit", async () => {
+    const f = await facadeFixture();
+    for (let i = 0; i < 3; i++) await workspaceSignal(f.data, `Nonmatching ${i}`);
+    const population = (await (await f.search()).json()).signals;
+    const late = population.at(-1).id;
+    await f.data.pool.query("UPDATE graph_nodes SET props=$1 WHERE id=$2", [{ properties: {
+      etape: "adoption", zone_ref: "LATE-ZONE", regulatoryStatus: "firm" } }, late]);
+    const response = await f.search("&limit=1&etape=adoption&query=LATE-ZONE");
+    expect(response.status).toBe(200);
+    expect((await response.json()).signals).toMatchObject([{ id: late, regulatoryStatus: "firm", zone_ref: "LATE-ZONE" }]);
+  });
   it.each(["serving", "cutover-closed", "retired"] as const)(
     "keeps scoped search independent of legacy %s and preserves canonical domain parity", async (retirement) => {
       const f = await facadeFixture({ retirement });
