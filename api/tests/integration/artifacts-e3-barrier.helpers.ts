@@ -7,19 +7,28 @@ export function startCorrelatedBarrier<T>(barrier: CommitBarrier, point: CommitB
   start: (register: (invocation: InvocationContextShape) => void) => Promise<T>) {
   let invocationId: string | undefined;
   let paused = false;
+  let releaseRequested = false;
   let resolve!: () => void;
   let reject!: (error: unknown) => void;
   const reached = new Promise<void>((ok, fail) => { resolve = ok; reject = fail; });
-  const pending = start((invocation) => {
+  const release = () => {
+    releaseRequested = true;
+    if (paused && invocationId) { paused = false; barrier.release(point, invocationId); }
+  };
+  const fail = (error: unknown) => { release(); reject(error); };
+  const pending = Promise.resolve().then(() => start((invocation) => {
     if (invocationId !== undefined) throw new Error("E3 transport dispatched more than once");
     invocationId = invocation.invocationId;
-    void arrived(barrier, point, invocationId).then(() => { paused = true; resolve(); }, reject);
-  });
-  void pending.catch(reject);
-  void pending.then(() => reject(new Error("E3 operation settled before barrier")), () => {});
-  return { pending, reached, release() {
-    if (paused && invocationId) { paused = false; barrier.release(point, invocationId); }
-  } };
+    // Keep observing arrival after the bounded assertion wait expires.
+    void barrier.waitUntilReached(point, invocationId).then(() => {
+      paused = true;
+      if (releaseRequested) release();
+    }, fail);
+    void arrived(barrier, point, invocationId).then(resolve, fail);
+  }));
+  void pending.catch(fail);
+  void pending.then(() => fail(new Error("E3 operation settled before barrier")), () => {});
+  return { pending, reached, release };
 }
 
 /** Observe real transactions; no query is replaced and no error is fabricated. */
