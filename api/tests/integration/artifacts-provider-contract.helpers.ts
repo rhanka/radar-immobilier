@@ -166,6 +166,16 @@ async function loadUpstream(specifier: string, entry: string): Promise<Record<st
   return loaded as Record<string, unknown>;
 }
 
+/** Resolve public callable symbols only; present-but-invalid values are violations. */
+export async function requirePublicFunction<T>(specifier: string, name: string): Promise<T> {
+  const module = await loadUpstream(specifier, `${specifier}.${name}`);
+  if (!(name in module)) missingContract(`${specifier}.${name}`, "public export is absent");
+  if (typeof module[name] !== "function") {
+    throw new Error(`[contract-violation] ${specifier}.${name}: expected a function`);
+  }
+  return module[name] as T;
+}
+
 /** Require the r2 commit-contract entry (types + guard/transaction/fence). */
 export async function requireCommitContract(): Promise<Record<string, unknown>> {
   return loadUpstream(COMMIT_CONTRACT_SPECIFIER, "commit-contract.ArtifactInvocationContext");
@@ -480,36 +490,17 @@ export async function compileArtifactsProfile(input: {
   return compiled;
 }
 
-/**
- * Named joint (a): expected public coordinator constructor from Sentropic.
- * Builds the real transaction-bound coordinator carrying the PostgreSQL
- * participant and the barrier `testObserver`. Fails `[missing-contract]`
- * naming `createArtifactCommitCoordinator` while Sentropic has not shipped
- * the public constructor; the spec r2 freezes the coordinator obligations
- * but not this factory name, so the name below is the expected joint.
- */
+/** Real public coordinator over the candidate's exported PostgreSQL executor. */
 export async function createTestCommitCoordinator(params: {
   readonly pool: pg.Pool;
   readonly profile: CompiledArtifactsProfile;
   readonly barrier: CommitBarrier;
 }): Promise<R2CommitCoordinator> {
-  void params;
-  // r2 freezes the protocol, but not the public participant registration API.
-  // Do not guess a factory signature or accept a coordinator with no participant.
-  missingContract(
-    "coordinator.createArtifactCommitCoordinator",
-    "Sentropic L0/L3 must supply the public coordinator constructor and registered PostgreSQL policy participant API; spec r2 does not freeze this construction binding",
-  );
+  const { createCandidateCoordinator } = await import("./artifacts-provider-r2.helpers.js");
+  return createCandidateCoordinator(params.pool, params.barrier.observer);
 }
 
-/**
- * Named joint (b): Radar H3/H4 migration of `composeArtifactHost`.
- * Calls the new r2 signature `composeArtifactHost(pool, config, blobs,
- * {profile, coordinator})` and refuses any partial composition. Fails
- * `[missing-contract]` naming this migration (owner Radar) while the
- * installed composition still interprets the fourth argument as the legacy
- * `onProviderFailure` callback.
- */
+/** Acceptance-only r2 composition, using public candidate services. */
 export async function composeProviderHost(params: {
   readonly pool: pg.Pool;
   readonly config: unknown;
@@ -517,13 +508,8 @@ export async function composeProviderHost(params: {
   readonly profile: CompiledArtifactsProfile;
   readonly coordinator: R2CommitCoordinator;
 }): Promise<Record<string, unknown>> {
-  void params;
-  // The current Radar signature takes onProviderFailure in argument four.
-  // Calling it with an options bag would create a partially wired legacy host.
-  missingContract(
-    "Radar.composeArtifactHost.r2",
-    "Radar H3/H4 must migrate composeArtifactHost(pool, config, blobs, {profile, coordinator}) and export ArtifactHost/ArtifactHostOptions before candidate qualification",
-  );
+  const { composeCandidateHost } = await import("./artifacts-provider-r2.helpers.js");
+  return composeCandidateHost(params);
 }
 
 /**
