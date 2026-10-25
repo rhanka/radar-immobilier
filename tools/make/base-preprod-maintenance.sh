@@ -206,11 +206,14 @@ restart-api() {
   qualification_receipt
   assert_cd_frozen; assert_boundary
   assert_api_instance q1
+  cp "$OUTPUT/api-instance.json" "$OUTPUT/api-before-restart.json"
   "${k[@]}" rollout restart deployment/radar-api > "$OUTPUT/restart.txt"
   "${k[@]}" rollout status deployment/radar-api --timeout=180s >> "$OUTPUT/restart.txt"
   api_identity
-  jq -n --slurpfile c "$INPUT" --slurpfile instance "$OUTPUT/api-instance.json" --arg now "$(date -u +%FT%TZ)" \
-    '{binding:$c[0].binding,image:$c[0].image,completedAt:$now,instance:$instance[0]}' > "$OUTPUT/restart.json"
+  jq -n --slurpfile c "$INPUT" --slurpfile q1 "$PROOFS" --slurpfile before "$OUTPUT/api-before-restart.json" \
+    --slurpfile instance "$OUTPUT/api-instance.json" --arg now "$(date -u +%FT%TZ)" \
+    '{binding:$c[0].binding,image:$c[0].image,q1:$q1[0].q1,previousInstance:$before[0],
+      completedAt:$now,instance:$instance[0]}' > "$OUTPUT/restart.json"
   echo 'Keep the operator boundary; qualify Q2 on the final image before reopen-api.'
 }
 reopen-api() {
