@@ -26,6 +26,7 @@ allowed() {
   case $1 in
     packages/immo-mcp/*|packages/artifacts-host/*|package.json|package-lock.json|api/Dockerfile) ;;
     tools/make/artefacts-a4*|tools/h4-mcp.mk|docs/operator/artefacts-mcp.md) ;;
+    api/tests/integration/a2base-mcp-fixture.ts|api/tests/integration/a2base-mcp-authority.spec.ts|api/src/services/graph/regulatory-status-archi.test.ts) ;;
     plan/ARTEFACTS-A4-BRANCH_feat_artefacts-mcp-a4.md|RAPPORT-SOL-ARTEFACTS-A4.md) ;;
     *) echo "Outside A4 scope: $1" >&2; exit 2;;
   esac
