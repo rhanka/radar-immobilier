@@ -92,7 +92,7 @@ export async function mcpFixture() {
       // The imported database fixture owns pool shutdown and database removal.
     }
   };
-  return { data, signal, connect, close, receiver, exchange, requests, head,
+  return { data, signal, connect, close, receiver, mcp, exchange, requests, head,
     upstreamError: (nextStatus: number | undefined, nextError = "") => { status = nextStatus; error = nextError; } };
 }
 export type McpFixture = Awaited<ReturnType<typeof mcpFixture>>;

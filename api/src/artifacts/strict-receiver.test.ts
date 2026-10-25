@@ -14,6 +14,7 @@ describe("isStrictSearchRequest", () => {
   const path = "/api/v1/mcp/facets/signals/search";
   it("accepts only the exact GET and the validated search subset", () => {
     expect(isStrictSearchRequest("GET", path, new URLSearchParams("city=sutton&limit=20&showDiscarded=1"))).toBe(true);
+    expect(isStrictSearchRequest("GET", path, new URLSearchParams("city=sutton"), "text/event-stream")).toBe(false);
   });
   it.each([
     ["POST", path, "city=sutton"], ["GET", "/api/graph-signals/sutton", ""],
