@@ -63,7 +63,8 @@ while IFS= read -r path; do
   printf '%s\n' "$path" >> "$RUN_DIR/paths"
 done < "$RUN_DIR/candidates"
 tar --verbatim-files-from --no-recursion -cf "$RUN_DIR/source.tar" -T "$RUN_DIR/paths"
-sha256sum "$RUN_DIR/source.tar" > "$LOG_DIR/source.sha256"
+cp --reflink=auto "$RUN_DIR/source.tar" "$LOG_DIR/source.tar"
+sha256sum "$LOG_DIR/source.tar" > "$LOG_DIR/source.sha256"
 mkdir -p "$HOME/.cache/radar-a5-npm"
 cat > "$RUN_DIR/cache.yml" <<YAML
 services:
