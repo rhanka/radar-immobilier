@@ -16,7 +16,8 @@ import { captureInvocationContext, runWithInvocationContext } from "./invocation
 export { IMMO_MCP_NAME, IMMO_MCP_VERSION };
 
 /**
- * Builds a fully wired immo MCP server from env (auth stub + data source seam).
+ * Builds a fixture-only MCP server with synthetic claims from env.
+ * Real API and storage settings are ignored at this boundary.
  * Exported so tests can drive it over an in-memory transport without stdio.
  */
 export async function buildImmoServer(env: NodeJS.ProcessEnv = process.env): Promise<McpServer> {

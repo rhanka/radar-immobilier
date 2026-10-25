@@ -25,16 +25,9 @@ export interface ToolContext {
 }
 
 /**
- * Registers every read-only tool on the server: the 6 v0 domain tools
- * (backed by `ctx.data`) + the 6 raw-data tools (backed by `ctx.raw` —
- * zones/lots GeoJSON, grille & PV PDFs). Shared by BOTH transports
- * (server.ts stdio and server-http.ts Streamable HTTP).
- *
- * P1 keeps this function the single SDK registrar: contracts come from
- * `tool-definitions.ts`, implementations from `tool-handlers.ts`. Each call
- * runs on an immutable snapshot (ambient invocation when the HTTP host set
- * one, else a fresh capture of these seeds) so concurrent requests on one
- * session cannot exchange identities or credentials.
+ * SDK contract harness for baseline and handler-binding tests. Production HTTP
+ * and fixture stdio install the cluster-mesh bridge instead. Both paths call
+ * the same native handler function below with an immutable invocation snapshot.
  */
 export function registerTools(server: McpServer, ctx: ToolContext): void {
   for (const def of ALL_TOOL_DEFINITIONS) {
