@@ -204,7 +204,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
     const host = composed.host;
     const close = host["close"];
     try {
-      requireSelectedProfile(host, composed.profile.digest);
+      requireSelectedProfile(host, composed.profile.profileDigest);
       const execute = requireHostExecute(host);
       const seenTransactions: unknown[] = [];
       const seenPurposes: string[] = [];
@@ -398,7 +398,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
     const host = composed.host;
     const close = host["close"];
     try {
-      requireSelectedProfile(host, composed.profile.digest);
+      requireSelectedProfile(host, composed.profile.profileDigest);
       const seenPurposes: string[] = [];
       const finalizeGuard: AuthorizeCommit = async (context, transaction) => {
         expect(context.purpose).toBe("finalize");
@@ -496,7 +496,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
     const host = composedCheck.host;
     const close = host["close"];
     try {
-      requireSelectedProfile(host, composedCheck.profile.digest);
+      requireSelectedProfile(host, composedCheck.profile.profileDigest);
       const direct = requireHostExecute(host);
       const guard = authorizeTransaction;
       const ensured = await direct({ method: "POST", path: "/ensure", body: {
@@ -570,8 +570,8 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
     const host = checked.host;
     const close = host["close"];
     try {
-      const digest = requireSelectedProfile(host, checked.profile.digest);
-      expect(digest).toBe(checked.profile.digest);
+      const digest = requireSelectedProfile(host, checked.profile.profileDigest);
+      expect(digest).toBe(checked.profile.profileDigest);
       const storageCalls = { blobs: 0, pool: 0 };
       const countingBlobs = new Proxy(rawBlobs(), { get(target, property, receiver) {
         const value = Reflect.get(target, property, receiver);

@@ -219,7 +219,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       let run: ReturnType<typeof startBarrierOperation> | undefined;
       let revocation: Promise<unknown> | undefined;
       try {
-        requireSelectedProfile(host, profile.digest);
+        requireSelectedProfile(host, profile.profileDigest);
         const execute = requireHostExecute(host);
         const tag = operation + "-" + point;
         let artifactId: string | undefined;
@@ -281,7 +281,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
     const host = composed.host;
     const close = host["close"];
     try {
-      requireSelectedProfile(host, composed.profile.digest);
+      requireSelectedProfile(host, composed.profile.profileDigest);
       const execute = requireHostExecute(host);
       const ensured = await execute({ method: "POST", path: "/ensure",
         body: { bindingName: "q1-inspect", idempotencyKey: "q1-inspect-ensure" } },
@@ -472,7 +472,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
     const host = composed.host;
     const close = host["close"];
     try {
-      requireSelectedProfile(host, composed.profile.digest);
+      requireSelectedProfile(host, composed.profile.profileDigest);
       const execute = requireHostExecute(host);
       const ensured = await execute({ method: "POST", path: "/ensure",
         body: { bindingName: "q1-reauth", idempotencyKey: "q1-reauth-ensure" } },
@@ -546,7 +546,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
     const env = loadConfig();
     let policyPool: pg.Pool | undefined;
     try {
-      requireSelectedProfile(host, composed.profile.digest);
+      requireSelectedProfile(host, composed.profile.profileDigest);
       const execute = requireHostExecute(host);
       const fixtures = { subjects: [ACTOR], expiresAtMs: 3_600_000 };
       policyPool = new pg.Pool({ host: env.POSTGRES_HOST, port: env.POSTGRES_PORT,
@@ -639,7 +639,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
     const host = composed.host;
     const close = host["close"];
     try {
-      requireSelectedProfile(host, composed.profile.digest);
+      requireSelectedProfile(host, composed.profile.profileDigest);
       const execute = requireHostExecute(host);
       await pool.query("CREATE TABLE IF NOT EXISTS test_policy_revision (id int PRIMARY KEY, rev text NOT NULL)");
       await pool.query("INSERT INTO test_policy_revision (id, rev) VALUES (1, 'q1-rev-1') ON CONFLICT (id) DO UPDATE SET rev = 'q1-rev-1'");
@@ -725,7 +725,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
     expect(worker.pid).not.toBe(process.pid);
     const barrierB = worker.barrier;
     try {
-      requireSelectedProfile(hostA, composedA.profile.digest);
+      requireSelectedProfile(hostA, composedA.profile.profileDigest);
       const executeA = requireHostExecute(hostA);
       const executeB = worker.execute;
       const purposes: Array<{ invocationId: string; purpose: string }> = [];

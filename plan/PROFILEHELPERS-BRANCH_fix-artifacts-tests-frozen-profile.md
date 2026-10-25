@@ -30,7 +30,7 @@
 
 ## Plan / Todo (lot-based)
 - [x] Lot 0: read rules, full conductor analysis, and candidate public declarations.
-- [ ] Lot 1: frozen profile input, digest and semantic mutation.
+- [x] Lot 1: frozen profile input, digest and semantic mutation.
 - [ ] Lot 2: participant authorization, policy reads and outcome names.
 - [ ] Lot 3: public coordinator, provider composition and E3 binding probes.
 - [ ] Lot 4: before/after Q1/Q2 candidate qualification and failure classification.
