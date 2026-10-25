@@ -33,8 +33,9 @@ describeDb("MCP workspace resolution through createApp/PostgreSQL", () => {
     const f = await searchFixture();
     const started = barrier(), resume = barrier();
     f.mount(async (sub, args) => {
-      const id = await resolveMcpSignalWorkspace(f.data.db, sub, args.workspaceId);
-      started.release();
+      let id: string;
+      try { id = await resolveMcpSignalWorkspace(f.data.db, sub, args.workspaceId); }
+      finally { started.release(); }
       await resume.waiting;
       await revalidateMcpSignalWorkspace(f.data.db, sub, id, args.workspaceId);
       return id;
