@@ -21,6 +21,8 @@ flock -n 8 || { echo 'Machine Docker campaign lock held'; exit 2; }
 [[ -z $(docker ps --filter name=radar-test- -q) ]]
 [[ $(df -Pk . | awk 'NR==2 {print $4}') -ge 8388608 ]]
 OWNER=$(printf '%s' "$ROOT/$ENV" | sha256sum | cut -d' ' -f1)
+mkdir -p "$HOME/.cache/radar-a4-docker"
+export DOCKER_CONFIG=$HOME/.cache/radar-a4-docker
 export COMPOSE_DISABLE_ENV_FILE=1
 unset COMPOSE_FILE COMPOSE_PROFILES COMPOSE_ENV_FILES
 compose=(docker compose --env-file /dev/null -p "$PROJECT" -f "$RUN_DIR/compose.yml")
