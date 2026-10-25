@@ -11,28 +11,22 @@ import {
 } from "./strict-receiver.js";
 
 describe("isStrictSearchRequest", () => {
-  it("accepts a canonical per-city GET with an allowlisted query", () => {
-    expect(isStrictSearchRequest("GET", "/api/graph-signals/drummondville", {})).toBe(true);
-    expect(
-      isStrictSearchRequest("GET", "/api/graph-signals/sutton", {
-        showDiscarded: "1",
-        dateFrom: "2026-01-01",
-      }),
-    ).toBe(true);
+  const path = "/api/v1/mcp/facets/signals/search";
+  it("accepts only the exact GET and the validated search subset", () => {
+    expect(isStrictSearchRequest("GET", path, new URLSearchParams("city=sutton&limit=20&showDiscarded=1"))).toBe(true);
+    expect(isStrictSearchRequest("GET", path, new URLSearchParams("city=sutton"), "text/event-stream")).toBe(false);
   });
-
-  it("refuses the aggregate, methods, unknown queries and malformed variants", () => {
-    expect(isStrictSearchRequest("GET", "/api/graph-signals/by-city", {})).toBe(false);
-    expect(isStrictSearchRequest("POST", "/api/graph-signals/drummondville", {})).toBe(false);
-    expect(
-      isStrictSearchRequest("GET", "/api/graph-signals/drummondville", { viewer: "x" }),
-    ).toBe(false);
-    expect(isStrictSearchRequest("GET", "/api/graph-signals/", {})).toBe(false);
-    expect(isStrictSearchRequest("GET", "/api/graph-signals/drummondville/", {})).toBe(false);
-    expect(isStrictSearchRequest("GET", "/api/graph-signals//drummondville", {})).toBe(false);
-    expect(isStrictSearchRequest("GET", "/api/graph-signals/Drummondville", {})).toBe(false);
-    expect(isStrictSearchRequest("GET", "/api/graph-signals/%64rummondville", {})).toBe(false);
-    expect(isStrictSearchRequest("GET", "/api/v1/signal-facets/reason-codes", {})).toBe(false);
+  it.each([
+    ["POST", path, "city=sutton"], ["GET", "/api/graph-signals/sutton", ""],
+    ["GET", path + "/", "city=sutton"], ["GET", path + "/extra", "city=sutton"],
+    ["GET", "/api/v1/mcp/facets/signals/%73earch", "city=sutton"],
+    ["GET", path, "city=sutton&city=sutton"], ["GET", path, "city=sutton&limit=1&limit=2"],
+    ["GET", path, "city=sutton&sub=other"], ["GET", path, "city=sutton&dateFrom=2026-01-01"],
+    ["GET", path, "city=sutton&showDiscarded=true"], ["GET", path, "city=Sutton"],
+    ["GET", path, "city=sutton&workspaceId=default"], ["GET", path, "city=sutton&limit=101"],
+    ["GET", path, ""], ["GET", "/api/v1/workspaces/anything/signal-facets/coherent-city", "city=sutton"],
+  ])("refuses %s %s?%s", (method, route, query) => {
+    expect(isStrictSearchRequest(method, route, new URLSearchParams(query))).toBe(false);
   });
 });
 

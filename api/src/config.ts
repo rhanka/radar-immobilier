@@ -214,6 +214,13 @@ const envSchema = z.object({
   STRICT_RECEIVER_RECEIPT_WORKLOAD_SUB: optStr(z.string().min(1)),
   STRICT_RECEIVER_RECEIPT_WORKLOAD_CLIENT_ID: optStr(z.string().min(1)),
   STRICT_RECEIVER_RECEIPT_ENVIRONMENT: optStr(z.string().min(1)),
+  STRICT_RECEIVER_RECEIPT_ROUTE_PROFILE: optStr(z.string().min(1)),
+  STRICT_RECEIVER_RECEIPT_SCHEMA_REVISION: optStr(z.string().min(1)),
+  STRICT_RECEIVER_RECEIPT_POLICY_REVISION: optStr(z.string().min(1)),
+  STRICT_RECEIVER_API_IMAGE: optStr(z.string().min(1)),
+  STRICT_RECEIVER_MCP_IMAGE: optStr(z.string().min(1)),
+  STRICT_RECEIVER_RECEIPT_API_IMAGE: optStr(z.string().min(1)),
+  STRICT_RECEIVER_RECEIPT_MCP_IMAGE: optStr(z.string().min(1)),
 
   // ── Scaleway Transactional Email (TEM) — emails d'invitation ────────────
   // L'egress SMTP est BLOQUÉ au niveau plateforme sur ce cluster (BR-37b), donc
@@ -368,6 +375,9 @@ export interface AuthConfig {
 export const STRICT_RECEIVER_REQUIRED_SCOPE = "immo:search";
 /** Upper bound of an exchanged search-token lifetime, in seconds. */
 export const STRICT_RECEIVER_MAX_LIFETIME_S = 300;
+export const STRICT_RECEIVER_ROUTE_PROFILE = "mcp-signals-search.get.v1";
+export const STRICT_RECEIVER_SCHEMA_REVISION = "scoped-signal-search.v1";
+export const STRICT_RECEIVER_POLICY_REVISION = "a2base-search-v1";
 
 /**
  * H4 P5 strict receiver wiring (exchange-first activation).
@@ -417,7 +427,14 @@ export function resolveStrictReceiverConfig(
     config.STRICT_RECEIVER_RECEIPT_API_AUDIENCE === apiAudience &&
     config.STRICT_RECEIVER_RECEIPT_WORKLOAD_SUB === workloadSub &&
     config.STRICT_RECEIVER_RECEIPT_WORKLOAD_CLIENT_ID === workloadClientId &&
-    config.STRICT_RECEIVER_RECEIPT_ENVIRONMENT === environment;
+    config.STRICT_RECEIVER_RECEIPT_ENVIRONMENT === environment &&
+    config.STRICT_RECEIVER_RECEIPT_ROUTE_PROFILE === STRICT_RECEIVER_ROUTE_PROFILE &&
+    config.STRICT_RECEIVER_RECEIPT_SCHEMA_REVISION === STRICT_RECEIVER_SCHEMA_REVISION &&
+    config.STRICT_RECEIVER_RECEIPT_POLICY_REVISION === STRICT_RECEIVER_POLICY_REVISION &&
+    /^sha256:[a-f0-9]{64}$/.test(config.STRICT_RECEIVER_API_IMAGE ?? "") &&
+    /^sha256:[a-f0-9]{64}$/.test(config.STRICT_RECEIVER_MCP_IMAGE ?? "") &&
+    config.STRICT_RECEIVER_RECEIPT_API_IMAGE === config.STRICT_RECEIVER_API_IMAGE &&
+    config.STRICT_RECEIVER_RECEIPT_MCP_IMAGE === config.STRICT_RECEIVER_MCP_IMAGE;
   if (armingRequested && !receiptMatches) {
     throw new Error("strict_receiver_receipt_invalid");
   }

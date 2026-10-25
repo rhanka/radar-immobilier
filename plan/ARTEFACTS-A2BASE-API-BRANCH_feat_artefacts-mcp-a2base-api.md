@@ -1,0 +1,91 @@
+# Feature: A2-BASE API read chain
+
+## Objective
+- [x] Deliver qualified T01/T03/T04/T05/T06/T07 from the approved MCP adapter v2 design, with no active production mount.
+
+## Scope / Guardrails
+- [x] Base: `c5fb85dbd77e12c0c4355a207de84ead0c3fa5d9`; lane: `tmp/a2base-api`; branch: `feat/artefacts-mcp-a2base-api`.
+- [x] Make only; no new dependency, migration or environment-file read; owner-authorized host static checks on resumption.
+- [x] Test environment: `test-a2base-api`; API/UI/Maildev ports: `18919/15919/11919`; ENV last.
+- [x] One Docker campaign machine-wide; wait 60 seconds between ownership checks; one worker; stop below 10 GiB; clean only owned resources.
+- [x] Shared Git remains read-only; use an ignored local Git directory with this worktree, subject-only Conventional Commits of at most 150 changed lines; no push.
+
+## Branch Scope Boundaries (MANDATORY)
+- [x] **Allowed Paths**: `api/src/routes/mcp-signal-search*`, `api/src/services/facets/mcp-signal-*`, `api/tests/integration/mcp-signal-search*`, new `tools/make/base-api-a2base*`, this lane plan.
+- [x] **Conditional Paths**: canonical helper exports in `api/src/routes/graph-signals.ts`; EX5 entry in the ARTEFACTS plan; root delivery report.
+- [x] **Forbidden Paths**: `packages/immo-mcp/**`, A3 receiver, H5 reader, `api/src/{app,index,config}.ts`, `api/src/routes/auth.ts`, schemas/migrations/manifests/lockfile, root Makefile/Compose, rules, bootstrap, other plans, client materials.
+- [x] **Exception process**: BRARTEFACTS-EX5 records rationale, impact and recovery in the parent plan before conditional edits.
+
+## Feedback Loop
+- [x] Owner explicitly assigned developer/tester/integrator duties and local backup Git delivery.
+- [x] Production wiring and A3/MCP/H5 remain with their assigned owners; CT-3/CT-9 are unchanged.
+
+## Orchestration Mode (AI-selected)
+- [x] Single API lane with sequential writes and tests; no copied commits or shared-file lease required.
+
+## UAT Management (in orchestration context)
+- [x] No UI change or UAT stack; root checkout and stable dev data remain untouched.
+
+## Plan / Todo (lot-based)
+- [x] Lot 0: read master/workflow/testing, approved design and both reviews; verify clean assigned branch.
+- [x] T01: strict local request/response contract and GET decoder, compared with inert S0.
+- [x] T01 implementation: strict wire decoder and reserved response schema; unit cases written, qualification pending.
+- [x] Normalized city contract preserves real double-hyphen municipality/MRC slugs already retained by citySlug().
+- [x] T03: approved-account workspace resolution (0/1/N, UUID, no substitution).
+- [x] T03 implementation and unit cases written; database qualification pending.
+- [x] T04: revalidate the entire membership set and reject changed singleton.
+- [x] T04 revalidation helper and unit cases written; race qualification pending.
+- [x] T01/T03/T04 real createApp/PostgreSQL fixture and deterministic membership race cases written; test-only probes use real signed sessions through protect, not A3 qualification.
+- [x] T05 inventory against the original c5fb85db bytes: context interface/factory at graph-signals lines 363/369; async canonical card at 534; synchronous degraded card at 560. Three export slices, no helper moves or duplicated implementation; keep existing builder/evidence dependencies in place.
+- [x] T05a: expose per-request document context/factory; explicit graph-signals/date-parity gates.
+- [x] T05a code exports the existing context/factory without moving implementation; direct invariant test written, mandatory regressions pending.
+- [x] T05b: expose canonical async card helper; explicit graph-signals/date-parity gates.
+- [x] T05b exports the unchanged async helper and adds a direct canonical-card invariant test; gate pending.
+- [x] Static test review supplies explicit mock parameter types and a stored-node timestamp consistent with the nonnullable schema.
+- [x] A later T05b campaign hit the 10 GiB disk cutoff and was stopped; no skipped date-parity cases are accepted. Move the disposable npm download cache onto the existing container /tmp tmpfs before retrying.
+- [x] Interrupted cleanup reported a transient in-use runtime volume after operator auto-removal; perform an owned cleanup retry and bound future retries to three ownership-checked attempts.
+- [x] T05c: expose canonical degraded card helper; explicit graph-signals/date-parity gates.
+- [x] T05b required suites completed: graph-signals 48, date parity 5, direct helper 2, workspace PG 7, all passing/no skips; outer campaign subsequently stopped on disk cutoff, so final campaign qualification remains open.
+- [x] T05c exports the unchanged degraded helper and adds parity with expired-budget canonical construction; its gate is pending.
+- [x] T05c gate passed with cleanup: 63 tests, zero failures/skips (48 graph-signals, 5 date parity, 3 helpers, 7 workspace PostgreSQL).
+- [x] T06: authorized coherent city population and personal/common masking before enrichment.
+- [x] T06 coherent population and visibility cases written; no domain normalization or active mount is introduced.
+- [x] Unit authority/masking tests assert that hidden or unauthorized targets never reach document enrichment; reveal keeps all guards.
+- [x] PostgreSQL visibility fixture now observes real canonical object-store calls and requires zero documentary reads for hidden targets.
+- [x] Visibility cases also preserve an active selection and prove personal restoration cannot lift a common archive.
+- [x] Static fixture review respects the graph city/id primary key and snapshots facet/mark/activation state, including selections.
+- [x] First campaign: 44 passed, six fixture setup failures on chk_workspace_memberships_revoked_at; fixed synthetic membership timestamps without weakening DB constraints. Owned cleanup passed.
+- [x] T05a regressions passed: graph-signals (48), date parity (5), direct context (1); mixed campaign 103 passed, one test-only Hono route-registration failure. Split unmounted and authenticated probes onto separate apps before building their matchers.
+- [x] T07: read-only reveal, post-enrichment authority/revision checks and shared document context across bounded attempts.
+- [x] T07 implementation uses canonical cards only after masking; lazy document context/cache/deadline lives outside the BASE retry callback; full-set authority is checked after enrichment and again before return.
+- [x] Isolated visibility run identified 401 from OIDC mock import order after loading the canonical route. Use valid signed browser sessions for DB qualification, retaining protect and current account approval; H4/A3 network qualification remains separate.
+- [x] T06/T07 focused campaign: 19 passed; two state-fixture failures confirmed immutable cutover guards. Create fresh unactivated workspaces for absent/legacy epoch cases instead of deleting or reverting activated state; no guard bypass.
+- [x] T07 deterministic createApp/PG races written for approval, membership set, graph source and common archive changes during document I/O; execution waits for canonical exports.
+- [x] T07 default 2,000ms cross-retry budget and persistent drift cases written with an explicit 1,000ms scheduling allowance outside documentary waiting.
+- [x] The budget case emits measured request elapsed time, documentary budget, resolution count and scheduling allowance into qualification logs.
+- [x] Missing/legacy/barrier epoch and unresolved-history refusals are covered by real createApp/PostgreSQL cases, including empty reveal requests.
+- [x] Lot gate: unit tests, real createApp/PostgreSQL tests, named behavioral mutations, targeted lint/typecheck.
+- [x] API and BASE regression campaign passed: 142 cases across 15 explicit files, no failures/skips, owned cleanup passed; static checks and mutations remain to qualify the lot.
+- [x] Two static campaigns stopped during npm install on TLS resets; host probes confirmed registry TLS failures too. Seed only the existing integrity-checked npm download cache read-only into container tmpfs, prefer cached bytes, retain npm ci and the unchanged lockfile; no user npm configuration is mounted.
+- [x] Resumption closes the previous static/TLS blocker: locked host static checks pass; all eight named mutations and their initial/restored controls pass in the isolated container copy.
+- [x] Resumption: reproduce four integration typing errors with locked dependencies without Docker; compare S0 defaults without assuming its inferred shape and pass real transactions to the revision helper in three race fixtures; targeted lint and API typecheck already pass.
+- [x] Host static gate PASS: 20261025T171239-5-check, Node 24.18.0/TypeScript 5.4.5, locked npm ci; API plus integration typechecks, targeted lint and runner syntax pass; seed the container from this completed download cache read-only.
+- [x] Final campaign 20261025T171338-5-mutations PASS: 205 tests across 27 explicit files, zero failures/skips, including graph-signals 48 and date parity 5; eight behavioral mutations killed, 16 controls/90 passing executions, independent JSON and restored-source digest audit passed.
+- [x] Shared documentary budget measured at 2,031ms with one resolution and the documented 1,000ms scheduling allowance; persistent drift is refused after three attempts.
+- [x] Owned down -v --remove-orphans passed, status 0, no A2-BASE container/volume/network remains; production API source bytes are identical to the prior delivery and no new slice is added.
+- [x] Scope audit confirms unchanged MCP/A3/H5, app/auth/startup, dependency manifests/lockfile and migration bytes; final delivery remains a bounded, inactive API candidate.
+- [x] Machine-serialized runner written with explicit file scopes, a 60-second wait, disk monitoring, one-worker container configuration and inherited ownership-checked cleanup.
+- [x] Eight named mutants prepared in the isolated container source copy, with a control before each, exact-byte restoration and a passing restored control required; execution pending.
+- [x] Workspace race barriers release on early refusal too, so negative mutations cannot leave their coordinator waiting for a callback that already failed.
+- [x] Membership-set races change only affected rows; activating a second membership leaves the chosen workspace revision unchanged, isolating the full-set revalidation requirement.
+- [x] The enrichment race explicitly requires the BASE token to remain identical when the second membership becomes active.
+- [x] A complementary race preserves an explicitly selected authorized workspace when another membership becomes active; omission remains ambiguous.
+- [x] Container checks and test-only S0 contract comparison written; API runtime has no MCP import.
+- [x] Delivery: qualified slices, commands/counts, per-commit numstat and remaining integration duties recorded; companion report receives this commit SHA and the audited bundle hash after export.
+- [x] Selective staging, 150-line audit, subject-only commits and bundle verification in a blank prerequisite-only repository have dedicated make targets; no shared Git writes or push.
+
+## Docs consolidation
+- [x] Record final evidence in `RAPPORT-SOL-A2BASE-API.md`; qualification does not close CT-9 or authorize activation.
+
+## Merge & close
+- [ ] Integrator imports audited bundle and qualifies the combined SHA/image; no merge or push in this mission.
