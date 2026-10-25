@@ -28,6 +28,7 @@
 - [x] Test helpers only; isolated automated verification, no user UAT.
 
 ## Plan / Todo (lot-based)
+- [x] Independently require every observed winner blob to survive loser cleanup, including the changed-command variant with no shared digest.
 - [x] Observe both race preparations before winner COMMIT (the public inventory excludes completed successes), then sweep the loser by its deadline and preserve shared bytes/history assertions.
 - [x] Preserve HTTP/MCP assertions and run a direct provider leg first for Q2 lock/E3 faults, so transport blockers cannot hide whether injections execute.
 - [x] Configure the documented 30-second cleanup lifetime and compare the stored publication receipt (releaseId/manifest) separately from its HTTP projection.
