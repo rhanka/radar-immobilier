@@ -58,4 +58,5 @@ render_job() {
   jq -n --arg action "$action" --slurpfile input "$INPUT" \
     --slurpfile expected "${EXPECTED:-/dev/null}" --slurpfile proofs "${PROOFS:-/dev/null}" \
     -f tools/make/base-preprod-job.jq > "$OUTPUT/job.json"
+  jq -e '.spec.template.spec.containers[0].command[2]|length<=64000' "$OUTPUT/job.json" >/dev/null || fail 'Operator invocation exceeds bounded argument size'
 }

@@ -4,7 +4,7 @@ def sha: type == "string" and test("^[a-f0-9]{64}$") and (test("^0+$")|not);
 def name: text and test("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$") and length <= 63;
 def bound($b): .binding == $b;
 def fresh: type == "string" and (try (sub("\\.[0-9]+Z$";"Z")|fromdateiso8601 as $t | $t <= now and $t >= now-86400) catch false);
-def reference: .reference|text;
+def reference: .reference|text and (test("\\?|://[^/]*@|[Bb]earer |[Tt]oken=" )|not);
 def attestation: reference and (.sha256|sha) and (.observedAt|fresh);
 def valid:
   ([..|strings|test("<|>|placeholder|replace.me|changeme|todo|\\$\\{";"i")]|any|not)
@@ -21,6 +21,8 @@ def valid:
   and (.database.database|text) and (.database.role|text) and (.database.schema|text)
   and (.database|keys)==["database","role","schema"]
   and (.binding|keys-["workspaceId","workspaceSlug","actorSub","maintenanceAttemptId","releaseId"]|length)==0
+  and (if .binding|has("workspaceSlug") then (.binding.workspaceSlug|text and test("^[a-z0-9-]+$")) else true end)
   and (.backup|reference and (.sha256|sha) and (.restoredAt|fresh) and (.restoreReceiptSha256|sha))
+  and (.backup|keys)==(["reference","sha256","restoredAt","restoreReceiptSha256"]|sort)
   and (.operation|IN("inspect","init","attach","activate","resume"));
 valid

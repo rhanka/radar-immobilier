@@ -35,6 +35,7 @@
   - [x] Digest-pinned Job is non-root, tokenless, bounded and permanently unready.
   - [x] Independent roster, bound maintenance attestations and full receipt hash enforced.
   - [x] Expected DB name/role/schema and effective lock/drop privileges gate mutation.
+  - [x] References reject access parameters; manifest arguments and termination bindings are bounded.
   - [x] Initial inspection can bind the target slug before its generated UUID exists.
   - [x] Bound proof tests reject foreign actors, workspaces, attempts/releases and missing/future coverage.
   - [x] Fake-cluster tests reject surviving/restarted workloads, ready endpoints, unsuspended jobs and live CD.
@@ -52,4 +53,5 @@
 - [ ] Lot 5: complete CI API suite, lint, typecheck and audit gate.
 - [ ] Lot 6: runbook, review evidence, local backup, audited bundle and report.
   - [x] Owner-input template and short-path prerequisites/inspection documented.
+  - [x] Delivery pins initial origin/main and creates a separate bare backup plus fresh bundle audit.
   - [x] Maintenance observations, collector, protected resume and UID-bound Job termination documented.

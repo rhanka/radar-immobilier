@@ -428,6 +428,8 @@ in references. The Job consumes existing ConfigMap/Secret **references** only.
 Prepare owner JSON outside Git using `deploy/base-preprod/owner-input.example.json`.
 Every angle-bracket value is deliberately rejected until replaced. Subjects are
 opaque explicit inputs. Preserve immutable per-action input files and evidence.
+Remove optional fields that are not yet applicable (especially attachments before
+initialization), rather than leaving unused placeholders in the input document.
 `database` must match the effective database name, role and schema. The release
 reference starts with the full 40-character SHA and points to the qualified image
 digest dossier. Supply backup SHA-256 and a restore-rehearsal receipt/timestamp;
