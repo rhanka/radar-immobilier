@@ -36,7 +36,7 @@
 - [x] P1-01 population and native keys (canonical city reader, no Vivier filter).
 - [x] P1-02 scoped heads and archive union (BASE readers and persisted profiles).
 - [x] P1-03 counters (eight-target oracle, history/archive before basket).
-- [ ] P1-04 clock and order.
+- [x] P1-04 clock and order (persisted civil dates, binary ties, missing last).
 - [ ] P1-05 signed cursor.
 - [ ] P1-06 continuation.
 - [ ] P1-07 coherent 6L1 orchestration.
