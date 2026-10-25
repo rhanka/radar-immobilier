@@ -51,6 +51,7 @@
   - [x] Synthetic image proof uses existing Postgres base and actual runtime bundles.
   - [x] Image rehearsal checks all three JSON receipts and byte-stable read-only inspection/resume.
 - [ ] Lot 5: complete CI API suite, lint, typecheck and audit gate.
+  - [x] Corrected disposable archive to retain root API test helpers and full CI include list.
 - [ ] Lot 6: runbook, review evidence, local backup, audited bundle and report.
   - [x] Owner-input template and short-path prerequisites/inspection documented.
   - [x] Delivery pins initial origin/main and creates a separate bare backup plus fresh bundle audit.
