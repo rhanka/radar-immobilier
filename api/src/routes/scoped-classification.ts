@@ -31,6 +31,7 @@ export function scopedClassificationRoute(deps: ClassificationDeps) {
   const app = new Hono();
   app.use("*", classificationBoundary);
   app.use("*", async (c, next) => {
+    if (!isReadPath(c.req.path)) return next();
     const session = c.get("session" as never) as { sub?: string } | undefined;
     if (!deps.auth?.enabled || !session?.sub) throw new ClassificationError("unauthenticated");
     if (!WorkspaceId.safeParse(c.req.param("workspaceId")).success) throw new ClassificationError("invalid_query");
