@@ -7,7 +7,7 @@
 - [x] Assigned worktree/branch; baseline `77cb9553`; no push or deployment.
 - [x] Standalone Make, RTK, containers only; never read environment files.
 - [x] `ENV=test-artefacts-a4`, API 18923, UI 15923, Maildev 11923; ENV last.
-- [x] One machine-wide Docker campaign; stop below 8 GiB; remove project resources.
+- [x] One machine-wide Docker campaign; wait for test containers, builds and the campaign lock; stop below 8 GiB; remove project resources. Preserve original delivery receipts.
 - [x] Local backup Git repository; <=150 changed lines per commit; subject only.
 
 ## Branch Scope Boundaries (MANDATORY)
