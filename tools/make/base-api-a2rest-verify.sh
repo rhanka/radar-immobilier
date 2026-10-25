@@ -20,23 +20,18 @@ mkdir -p "$RUN_DIR" "$LOG_DIR"
 printf 'Evidence: %s\n' "$LOG_DIR"
 printf '%s\n' "$SCOPE" > "$LOG_DIR/api-scope.txt"
 printf '%s\n' "$MCP_SCOPE" > "$LOG_DIR/mcp-scope.txt"
-# Wait before acquiring the shared campaign lock, without touching another stack.
+# Queue for the campaign before waiting for containers; never touch another stack.
+exec 9>"$RUN_DIR/lock"
+flock -n 9 || exit 2
+exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
+until flock -w 60 8; do
+  printf '%s WAIT global campaign reservation\n' "$(date -u +%FT%TZ)" | tee -a "$LOG_DIR/wait.log"
+done
 while :; do
   names=$(docker ps --format '{{.Names}}')
   free=$(df -Pk "$ROOT" | awk 'NR==2 {print $4}')
   if [[ -z $names && $free -ge 10485760 ]]; then break; fi
   printf '%s WAIT containers=%s freeKiB=%s\n' "$(date -u +%FT%TZ)" "$names" "$free" | tee -a "$LOG_DIR/wait.log"
-  sleep 60
-done
-exec 9>"$RUN_DIR/lock"
-flock -n 9 || exit 2
-exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
-while :; do
-  if flock -n 8; then
-    if [[ -z $(docker ps -q) ]]; then break; fi
-    flock -u 8
-  fi
-  printf '%s WAIT global campaign reservation\n' "$(date -u +%FT%TZ)" | tee -a "$LOG_DIR/wait.log"
   sleep 60
 done
 git --git-dir="$ROOT/tmp/a2base-rest-delivery.git" rev-parse HEAD > "$LOG_DIR/candidate-sha.txt"
