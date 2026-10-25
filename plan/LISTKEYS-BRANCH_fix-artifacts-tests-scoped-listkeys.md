@@ -43,6 +43,7 @@
 - [x] Review lot 3: legacy-regex mutation produces 18 assertion failures; restored AST passes 47 scoped unit tests; strict guard typecheck and repository lint pass without Docker.
 - [x] Second-pass lot 1: runtime prefix contract rejects empty, escaping, omitted and non-string values before delegation; 21 failures without it, 23 tests pass with it; strict typecheck passes.
 - [x] Second-pass lot 2: route all nine explicit integration S3 constructors and the package's memory blob double through the shared runtime wrapper; preserve scoped and exhaustive inventories.
+- [x] Second-pass lot 3: resolve simple tuple bindings/spreads and constant boolean branches; document partial static analysis; 44 static tests and strict typecheck pass after six reproduced failures.
 
 ## Merge & Close
 - [x] Deliver a bundle only; no push or merge is authorized by this task.

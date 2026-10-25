@@ -16,6 +16,11 @@ describe("listKeys static prefix analysis", () => {
     'store.listKeys(("")!)', '(store.listKeys)("")',
     '(store.listKeys as Function)("")', 'store["list" + "Keys"]("")',
     'const method = "listKeys"; store[method]("")',
+    'const [prefix] = [""] as const; store.listKeys(prefix)',
+    'store.listKeys(...([""] as const))', 'store.listKeys(...([] as const))',
+    'const flag = false; store.listKeys(flag ? "artifacts/test/" : "")',
+    'const flag = true; store.listKeys(flag ? "" : "artifacts/test/")',
+    'store.listKeys("artifacts/../")',
   ])("should reject a statically empty or omitted prefix: %s", (source) => {
     expect(analyzeListCalls(source).invalid).toEqual([1]);
   });
@@ -45,6 +50,22 @@ describe("listKeys static prefix analysis", () => {
       { line: 1, expression: "config.prefix" }, { line: 2, expression: "prefix" },
       { line: 3, expression: "a" },
     ] });
+  });
+
+  it("should keep complex expressions unresolved and rely on the runtime contract", () => {
+    const source = 'const { prefix } = config; store.listKeys(prefix);\n' +
+      'store.listKeys(...args);\nstore.listKeys(flag ? config.a : config.b);';
+    expect(analyzeListCalls(source)).toEqual({ invalid: [], nonStatic: [
+      { line: 1, expression: "prefix" }, { line: 2, expression: "...args" },
+      { line: 3, expression: "flag ? config.a : config.b" },
+    ] });
+  });
+
+  it("should preserve valid tuple spreads, destructuring and constant branches", () => {
+    const source = 'const [prefix] = ["artifacts/tuple/"] as const; store.listKeys(prefix);\n' +
+      'store.listKeys(...([] as const), "artifacts/spread/");\n' +
+      'const flag = false; store.listKeys(flag ? "" : "artifacts/branch/");';
+    expect(analyzeListCalls(source)).toEqual({ invalid: [], nonStatic: [] });
   });
 
   it("should scan every API and package test location using in-memory directories", () => {

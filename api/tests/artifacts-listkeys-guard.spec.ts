@@ -16,16 +16,17 @@ describe("S3 blob prefix test guard", () => {
       'const fixture = \'store.listKeys("")\';').invalid).toEqual([]);
   });
 
-  it("should forbid empty and omitted listKeys prefixes in all API and package tests", () => {
+  it("should flag statically invalid listKeys prefixes in all API and package tests", () => {
     const tests = repositoryTestFiles(fileURLToPath(new URL("../../", import.meta.url)));
     const violations: string[] = [];
     const nonStatic: string[] = [];
     for (const path of tests) {
       const result = analyzeListCalls(readFileSync(path, "utf8"), path);
-      violations.push(...result.invalid.map((line) => `${path}:${line}: listKeys requires a nonempty scoped prefix`));
+      violations.push(...result.invalid.map((line) => `${path}:${line}: listKeys requires a nonempty prefix without '..'`));
       nonStatic.push(...result.nonStatic.map(({ line, expression }) => `${path}:${line}: ${expression}`));
     }
     console.info(`listKeys guard: scanned ${tests.length} tests/helpers; excluded directories: ${excludedTestDirectories.join(", ")}`);
+    console.info("Static analysis is partial; test blob store wrappers enforce every executed listKeys prefix.");
     console.info(`listKeys arguments requiring review (${nonStatic.length}):\n${nonStatic.join("\n")}`);
     expect(violations).toEqual([]);
   });
