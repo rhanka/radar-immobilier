@@ -22,7 +22,7 @@ check-static:
 report:
 	@rtk bash tools/make/base-preprod-report.sh
 inspect-host:
-	@rtk bash -c 'git status --short --branch; git rev-parse origin/main; command -v jq kubectl; df -h .; docker ps --format "{{.Names}}"; pgrep -af "docker (build|buildx build)" || true'
+	@rtk bash -c 'git status --short --branch; git rev-parse HEAD c100e6cc; command -v jq kubectl; df -h .; docker ps --format "{{.Names}}"; pgrep -f "[d]ocker (build|buildx build)" || true'
 stage:
 	@rtk bash tools/make/base-preprod-deliver.sh stage
 commit:
