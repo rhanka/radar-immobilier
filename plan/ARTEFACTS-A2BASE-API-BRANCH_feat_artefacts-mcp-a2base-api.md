@@ -35,7 +35,7 @@
 - [x] T03 implementation and unit cases written; database qualification pending.
 - [ ] T04: revalidate the entire membership set and reject changed singleton.
 - [x] T04 revalidation helper and unit cases written; race qualification pending.
-- [x] T01/T03/T04 real createApp/PostgreSQL fixture and deterministic membership race cases written; test-only probe uses the existing verified-bearer seam, not A3 qualification.
+- [x] T01/T03/T04 real createApp/PostgreSQL fixture and deterministic membership race cases written; test-only probes use real signed sessions through protect, not A3 qualification.
 - [x] T05 inventory against the original c5fb85db bytes: context interface/factory at graph-signals lines 363/369; async canonical card at 534; synchronous degraded card at 560. Three export slices, no helper moves or duplicated implementation; keep existing builder/evidence dependencies in place.
 - [ ] T05a: expose per-request document context/factory; explicit graph-signals/date-parity gates.
 - [x] T05a code exports the existing context/factory without moving implementation; direct invariant test written, mandatory regressions pending.
@@ -58,6 +58,7 @@
 - [x] T05a regressions passed: graph-signals (48), date parity (5), direct context (1); mixed campaign 103 passed, one test-only Hono route-registration failure. Split unmounted and authenticated probes onto separate apps before building their matchers.
 - [ ] T07: read-only reveal, post-enrichment authority/revision checks and shared document context across bounded attempts.
 - [x] T07 implementation uses canonical cards only after masking; lazy document context/cache/deadline lives outside the BASE retry callback; full-set authority is checked after enrichment and again before return.
+- [x] Isolated visibility run identified 401 from OIDC mock import order after loading the canonical route. Use valid signed browser sessions for DB qualification, retaining protect and current account approval; H4/A3 network qualification remains separate.
 - [x] T07 deterministic createApp/PG races written for approval, membership set, graph source and common archive changes during document I/O; execution waits for canonical exports.
 - [x] T07 default 2,000ms cross-retry budget and persistent drift cases written with an explicit 1,000ms scheduling allowance outside documentary waiting.
 - [x] Missing/legacy/barrier epoch and unresolved-history refusals are covered by real createApp/PostgreSQL cases, including empty reveal requests.
