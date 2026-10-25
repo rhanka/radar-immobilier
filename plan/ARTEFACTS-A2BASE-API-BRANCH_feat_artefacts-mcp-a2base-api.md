@@ -28,27 +28,27 @@
 
 ## Plan / Todo (lot-based)
 - [x] Lot 0: read master/workflow/testing, approved design and both reviews; verify clean assigned branch.
-- [ ] T01: strict local request/response contract and GET decoder, compared with inert S0.
+- [x] T01: strict local request/response contract and GET decoder, compared with inert S0.
 - [x] T01 implementation: strict wire decoder and reserved response schema; unit cases written, qualification pending.
 - [x] Normalized city contract preserves real double-hyphen municipality/MRC slugs already retained by citySlug().
-- [ ] T03: approved-account workspace resolution (0/1/N, UUID, no substitution).
+- [x] T03: approved-account workspace resolution (0/1/N, UUID, no substitution).
 - [x] T03 implementation and unit cases written; database qualification pending.
-- [ ] T04: revalidate the entire membership set and reject changed singleton.
+- [x] T04: revalidate the entire membership set and reject changed singleton.
 - [x] T04 revalidation helper and unit cases written; race qualification pending.
 - [x] T01/T03/T04 real createApp/PostgreSQL fixture and deterministic membership race cases written; test-only probes use real signed sessions through protect, not A3 qualification.
 - [x] T05 inventory against the original c5fb85db bytes: context interface/factory at graph-signals lines 363/369; async canonical card at 534; synchronous degraded card at 560. Three export slices, no helper moves or duplicated implementation; keep existing builder/evidence dependencies in place.
-- [ ] T05a: expose per-request document context/factory; explicit graph-signals/date-parity gates.
+- [x] T05a: expose per-request document context/factory; explicit graph-signals/date-parity gates.
 - [x] T05a code exports the existing context/factory without moving implementation; direct invariant test written, mandatory regressions pending.
-- [ ] T05b: expose canonical async card helper; explicit graph-signals/date-parity gates.
+- [x] T05b: expose canonical async card helper; explicit graph-signals/date-parity gates.
 - [x] T05b exports the unchanged async helper and adds a direct canonical-card invariant test; gate pending.
 - [x] Static test review supplies explicit mock parameter types and a stored-node timestamp consistent with the nonnullable schema.
 - [x] A later T05b campaign hit the 10 GiB disk cutoff and was stopped; no skipped date-parity cases are accepted. Move the disposable npm download cache onto the existing container /tmp tmpfs before retrying.
 - [x] Interrupted cleanup reported a transient in-use runtime volume after operator auto-removal; perform an owned cleanup retry and bound future retries to three ownership-checked attempts.
-- [ ] T05c: expose canonical degraded card helper; explicit graph-signals/date-parity gates.
+- [x] T05c: expose canonical degraded card helper; explicit graph-signals/date-parity gates.
 - [x] T05b required suites completed: graph-signals 48, date parity 5, direct helper 2, workspace PG 7, all passing/no skips; outer campaign subsequently stopped on disk cutoff, so final campaign qualification remains open.
 - [x] T05c exports the unchanged degraded helper and adds parity with expired-budget canonical construction; its gate is pending.
 - [x] T05c gate passed with cleanup: 63 tests, zero failures/skips (48 graph-signals, 5 date parity, 3 helpers, 7 workspace PostgreSQL).
-- [ ] T06: authorized coherent city population and personal/common masking before enrichment.
+- [x] T06: authorized coherent city population and personal/common masking before enrichment.
 - [x] T06 coherent population and visibility cases written; no domain normalization or active mount is introduced.
 - [x] Unit authority/masking tests assert that hidden or unauthorized targets never reach document enrichment; reveal keeps all guards.
 - [x] PostgreSQL visibility fixture now observes real canonical object-store calls and requires zero documentary reads for hidden targets.
@@ -56,7 +56,7 @@
 - [x] Static fixture review respects the graph city/id primary key and snapshots facet/mark/activation state, including selections.
 - [x] First campaign: 44 passed, six fixture setup failures on chk_workspace_memberships_revoked_at; fixed synthetic membership timestamps without weakening DB constraints. Owned cleanup passed.
 - [x] T05a regressions passed: graph-signals (48), date parity (5), direct context (1); mixed campaign 103 passed, one test-only Hono route-registration failure. Split unmounted and authenticated probes onto separate apps before building their matchers.
-- [ ] T07: read-only reveal, post-enrichment authority/revision checks and shared document context across bounded attempts.
+- [x] T07: read-only reveal, post-enrichment authority/revision checks and shared document context across bounded attempts.
 - [x] T07 implementation uses canonical cards only after masking; lazy document context/cache/deadline lives outside the BASE retry callback; full-set authority is checked after enrichment and again before return.
 - [x] Isolated visibility run identified 401 from OIDC mock import order after loading the canonical route. Use valid signed browser sessions for DB qualification, retaining protect and current account approval; H4/A3 network qualification remains separate.
 - [x] T06/T07 focused campaign: 19 passed; two state-fixture failures confirmed immutable cutover guards. Create fresh unactivated workspaces for absent/legacy epoch cases instead of deleting or reverting activated state; no guard bypass.
@@ -65,6 +65,7 @@
 - [x] The budget case emits measured request elapsed time, documentary budget, resolution count and scheduling allowance into qualification logs.
 - [x] Missing/legacy/barrier epoch and unresolved-history refusals are covered by real createApp/PostgreSQL cases, including empty reveal requests.
 - [ ] Lot gate: unit tests, real createApp/PostgreSQL tests, named behavioral mutations, targeted lint/typecheck.
+- [x] API and BASE regression campaign passed: 142 cases across 15 explicit files, no failures/skips, owned cleanup passed; static checks and mutations remain to qualify the lot.
 - [x] Machine-serialized runner written with explicit file scopes, a 60-second wait, disk monitoring, one-worker container configuration and inherited ownership-checked cleanup.
 - [x] Eight named mutants prepared in the isolated container source copy, with a control before each, exact-byte restoration and a passing restored control required; execution pending.
 - [x] Workspace race barriers release on early refusal too, so negative mutations cannot leave their coordinator waiting for a callback that already failed.
