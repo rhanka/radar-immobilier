@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({ execute: vi.fn(), end: vi.fn(), spawn: vi.fn(), write: vi.fn() }));
+const mocks = vi.hoisted(() => ({ execute: vi.fn(), end: vi.fn(), spawn: vi.fn(), write: vi.fn(), rights: vi.fn() }));
+vi.mock("../../src/scripts/base-preprod-rights.js", () => ({ assertPrivileges: mocks.rights }));
 vi.mock("../../src/config.js", () => ({ loadConfig: () => ({}) }));
 vi.mock("../../src/db/client.js", () => ({ createDb: () => ({ db: { execute: mocks.execute }, pool: { end: mocks.end } }) }));
 vi.mock("node:child_process", () => ({ spawnSync: mocks.spawn }));
@@ -12,6 +13,13 @@ const invocation = { action: "init" as const, binding, args: ["--workspace-slug"
 afterEach(() => { vi.resetAllMocks(); vi.restoreAllMocks(); process.exitCode = undefined; });
 
 describe("operator Job destination", () => {
+  it("should refuse insufficient SQL rights before invoking a mutating child", async () => {
+    const { runJob } = await import("../../src/scripts/base-preprod-job.js");
+    mocks.execute.mockResolvedValue({ rows: [invocation.database] });
+    mocks.rights.mockRejectedValue(new Error("operator_sql_privileges_missing"));
+    await expect(runJob(invocation)).rejects.toThrow("operator_sql_privileges_missing");
+    expect(mocks.spawn).not.toHaveBeenCalled();
+  });
   it("should refuse an unrelated UUID before opening the database or running initialization", async () => {
     const { runJob } = await import("../../src/scripts/base-preprod-job.js");
     await expect(runJob({ ...invocation, binding: { ...binding, workspaceId: "11111111-1111-4111-8111-111111111111" } }))
