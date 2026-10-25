@@ -1,0 +1,47 @@
+# Feature: A2-BASE API read chain
+
+## Objective
+- [ ] Deliver T01/T03/T04/T05/T06/T07 from the approved MCP adapter v2 design, with no active production mount.
+
+## Scope / Guardrails
+- [x] Base: `c5fb85dbd77e12c0c4355a207de84ead0c3fa5d9`; lane: `tmp/a2base-api`; branch: `feat/artefacts-mcp-a2base-api`.
+- [x] Make only; no host runtime, new dependency, migration or environment-file read.
+- [x] Test environment: `test-a2base-api`; API/UI/Maildev ports: `18919/15919/11919`; ENV last.
+- [x] One Docker campaign machine-wide; wait 60 seconds between ownership checks; one worker; stop below 10 GiB; clean only owned resources.
+- [x] Shared Git remains read-only; use an ignored local Git directory with this worktree, subject-only Conventional Commits of at most 150 changed lines; no push.
+
+## Branch Scope Boundaries (MANDATORY)
+- [x] **Allowed Paths**: `api/src/routes/mcp-signal-search*`, `api/src/services/facets/mcp-signal-*`, `api/tests/integration/mcp-signal-search*`, `tools/make/a2base-api*`, this lane plan.
+- [x] **Conditional Paths**: canonical helper exports in `api/src/routes/graph-signals.ts`; EX5 entry in the ARTEFACTS plan; root delivery report.
+- [x] **Forbidden Paths**: `packages/immo-mcp/**`, A3 receiver, H5 reader, `api/src/{app,index,config}.ts`, `api/src/routes/auth.ts`, schemas/migrations/manifests/lockfile, root Makefile/Compose, rules, bootstrap, other plans, client materials.
+- [x] **Exception process**: BRARTEFACTS-EX5 records rationale, impact and recovery in the parent plan before conditional edits.
+
+## Feedback Loop
+- [x] Owner explicitly assigned developer/tester/integrator duties and local backup Git delivery.
+- [x] Production wiring and A3/MCP/H5 remain with their assigned owners; CT-3/CT-9 are unchanged.
+
+## Orchestration Mode (AI-selected)
+- [x] Single API lane with sequential writes and tests; no copied commits or shared-file lease required.
+
+## UAT Management (in orchestration context)
+- [x] No UI change or UAT stack; root checkout and stable dev data remain untouched.
+
+## Plan / Todo (lot-based)
+- [x] Lot 0: read master/workflow/testing, approved design and both reviews; verify clean assigned branch.
+- [ ] T01: strict local request/response contract and GET decoder, compared with inert S0.
+- [ ] T03: approved-account workspace resolution (0/1/N, UUID, no substitution).
+- [ ] T04: revalidate the entire membership set and reject changed singleton.
+- [x] T05 inventory before edits: context interface/factory at graph-signals lines 360/366; async canonical card at 545; synchronous degraded card at 573. Three export slices, no helper moves or duplicated implementation; keep existing builder/evidence dependencies in place.
+- [ ] T05a: expose per-request document context/factory; explicit graph-signals/date-parity gates.
+- [ ] T05b: expose canonical async card helper; explicit graph-signals/date-parity gates.
+- [ ] T05c: expose canonical degraded card helper; explicit graph-signals/date-parity gates.
+- [ ] T06: authorized coherent city population and personal/common masking before enrichment.
+- [ ] T07: read-only reveal, post-enrichment authority/revision checks and shared document context across bounded attempts.
+- [ ] Lot gate: unit tests, real createApp/PostgreSQL tests, named behavioral mutations, targeted lint/typecheck.
+- [ ] Delivery: report qualified slices, commands/counts, per-commit numstat, remaining integration duties, exact SHA and isolated bundle audit/hash.
+
+## Docs consolidation
+- [ ] Record final evidence in `RAPPORT-SOL-A2BASE-API.md`; qualification does not close CT-9 or authorize activation.
+
+## Merge & close
+- [ ] Integrator imports audited bundle and qualifies the combined SHA/image; no merge or push in this mission.
