@@ -16,7 +16,7 @@ case "$*" in
   'auth can-i '*) [[ ${FAKE_STATE:-} != denied ]] || { echo no; exit 1; }; echo yes;;
   'api-resources '*) echo middlewares.traefik.io;;
   'get job '*conditions*)
-    if [[ ${FAKE_STATE:-} == failed-job ]]; then echo Failed; else echo Complete; fi;;
+    if [[ ${FAKE_STATE:-} == failed-job || ${FAKE_STATE:-} == failed-with-zero ]]; then echo Failed; else echo Complete; fi;;
   'get job '*) printf 'synthetic-job-uid\t%s\n' "$(jq -r .image "$INPUT")";;
   'get pods -l app.kubernetes.io/name='*)
     case ${FAKE_STATE:-} in
@@ -123,6 +123,11 @@ rg -qF 'Operator Job failed; verified receipt retained' "result-$n.log"
 if invoke collect-job; then echo 'Failed collected Job accepted' >&2; exit 1; fi
 cmp synthetic-receipt.json "out-$n/receipt.json"
 if rg -- '--request-timeout=20s (create|patch|scale|set|delete|rollout) ' cluster-calls; then exit 1; fi
+unset FAKE_STATE
+export FAKE_STATE=failed-with-zero
+if invoke collect-job; then echo 'Failed Job with zero process exit accepted' >&2; exit 1; fi
+cmp synthetic-receipt.json "out-$n/receipt.json"
+rg -qF 'Operator Job failed; verified receipt retained' "result-$n.log"
 unset FAKE_STATE
 cp input.json inspect-input.json
 jq '.operation="init" | .binding.workspaceId=null | .binding.workspaceSlug="fixture"

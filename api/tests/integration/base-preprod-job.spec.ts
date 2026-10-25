@@ -57,7 +57,8 @@ describe("operator Job destination", () => {
   });
   it("should refuse a foreign or repeated slug before running initialization", async () => {
     const { runJob } = await import("../../src/scripts/base-preprod-job.js");
-    for (const args of [["--workspace-slug", "other"], ["--workspace-slug", "fixture", "--workspace-slug", "other"]]) {
+    for (const args of [["--workspace-slug", "other"], ["--workspace-slug", "fixture", "--workspace-slug", "other"],
+      ["--workspace-slug", "fixture", "--reason", "--workspace-slug", "--actor", "opaque"]]) {
       await expect(runJob({ ...invocation, args })).rejects.toThrow("workspace_destination_mismatch");
     }
     expect(mocks.spawn).not.toHaveBeenCalled();
