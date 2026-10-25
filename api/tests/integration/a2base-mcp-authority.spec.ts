@@ -4,7 +4,8 @@ import { mcpFixture, search } from "./a2base-mcp-fixture.js";
 
 describeDb("T11 MCP authority and cache over createApp/PostgreSQL", () => {
   it.each(["membership", "approval"])("invalidates a warm exchange after current %s is revoked", async (kind) => {
-    const f = await mcpFixture();
+    // Exercise receiver-side revocation and exchange invalidation after an approved MCP port.
+    const f = await mcpFixture({ authorize: async () => true });
     try {
       const { client } = await f.connect();
       const initial = await search(client);
@@ -24,7 +25,7 @@ describeDb("T11 MCP authority and cache over createApp/PostgreSQL", () => {
     } finally { await f.close(); }
   });
   it("keeps two humans and concurrent sessions distinct while refusing cross-session reuse", async () => {
-    const f = await mcpFixture();
+    const f = await mcpFixture({ authorize: async () => true });
     try {
       const alice = await f.connect();
       const bob = await f.connect(f.data.outsider.sub);

@@ -16,11 +16,12 @@ import { EMPTY_DISCARDED_SIGNALS } from "../../src/services/graph/discarded-sign
 import type { ObjectStore } from "../../src/storage/object-store.js";
 import { createIsolatedExchangeFixture, exchangeDepsFor, signSubjectToken } from "../../../packages/immo-mcp/src/test-exchange-fixtures.js";
 import { HttpDataSource } from "../../../packages/immo-mcp/src/data-source.js";
-import { createImmoHttpApp } from "../../../packages/immo-mcp/src/server-http.js";
+import { createImmoHttpApp, type ImmoHttpDeps } from "../../../packages/immo-mcp/src/server-http.js";
+import { accountAuthorizer } from "../../../packages/immo-mcp/src/account-binding.js";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
-export async function mcpFixture() {
+export async function mcpFixture(options: Pick<ImmoHttpDeps, "authorize"> = {}) {
   const data = await workspaceFixture();
   const signal = await workspaceSignal(data);
   await data.pool.query("UPDATE workspace_memberships SET status='revoked', revoked_at=now() WHERE workspace_id=$1 AND account_id=$2",
@@ -74,6 +75,7 @@ export async function mcpFixture() {
     requiredScopes: ["immo:read"], scopesSupported: ["immo:read", "immo:search"], port: 0, dataMode: "real",
     sessionIdleTimeoutMs: 1_800_000, sessionMaxLifetimeMs: 28_800_000 }, {
     keySource: exchange.subjectKeySource, exchange: deps,
+    authorize: options.authorize ?? accountAuthorizer(data.pool),
     data: new HttpDataSource({ baseUrl: exchange.config.apiAudience, fetchImpl: upstream }),
   });
   const clients: { client: Client; transport: StreamableHTTPClientTransport }[] = [];
