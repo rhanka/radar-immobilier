@@ -88,6 +88,7 @@ RUN npm install --no-save esbuild@0.25.12 \
   "    'api/src/scripts/init-workspace-authority.ts'," \
   "    'api/src/scripts/attach-personal-history.ts'," \
   "    'api/src/scripts/base-api-personal-activation.ts'," \
+  "    'api/src/scripts/base-preprod-job.ts'," \
   "    'api/src/services/geo/run-geo-mapper.ts'," \
   "    'api/src/services/geo/run-populate-geo.ts'," \
   "    'api/src/services/consistency/run-consistency-snapshot.ts'," \
