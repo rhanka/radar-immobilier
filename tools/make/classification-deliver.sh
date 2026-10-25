@@ -64,7 +64,7 @@ case $action in
     sha256sum "$out"; git rev-parse HEAD; echo "$audit";;
   test|typecheck|lint|ci)
     flock -w 3600 7
-    while [[ -n $(docker ps --format '{{.Names}}' --filter name=radar-test-) ]] || pgrep -f '^docker (build|buildx)' >/dev/null; do
+    while ! flock -n "${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock" true || [[ -n $(docker ps --format '{{.Names}}' --filter name=radar-test-) ]] || pgrep -f '^docker (build|buildx)' >/dev/null; do
       echo 'Waiting for the active Docker campaign'; sleep 10
     done
     [[ $(df -Pk . | awk 'NR==2 {print $4}') -ge 8388608 ]] || exit 3

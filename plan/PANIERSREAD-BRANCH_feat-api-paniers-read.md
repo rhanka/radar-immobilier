@@ -33,7 +33,7 @@
 - [x] P0-06 discovery 0/1/N (whole membership set revalidated, transports closed).
 - [x] P0-07 closed route (private headers before authentication, no activation).
 - [x] P0-08 authority/context tests (real createApp, PostgreSQL, 0/1/N).
-- [ ] P1-01 population and native keys.
+- [x] P1-01 population and native keys (canonical city reader, no Vivier filter).
 - [ ] P1-02 scoped heads and archive union.
 - [ ] P1-03 counters.
 - [ ] P1-04 clock and order.
