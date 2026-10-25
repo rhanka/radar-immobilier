@@ -43,7 +43,7 @@ export function projectFacets(heads: AuthorizedHeads, target: SignalTarget): z.i
   const selection = { pertinent: project(personal.find((head) => head.facet === "selection" && head.basket === "pertinent")),
     a_surveiller: project(personal.find((head) => head.facet === "selection" && head.basket === "a_surveiller")) };
   return SignalFacets.parse({ selection, archive: { personal: archive(archives?.personal), workspace: archive(archives?.workspace) },
-    personalHistoryState: personal.length ? "has_history" : "untouched",
+    personalHistoryState: personal.length || archives?.personal ? "has_history" : "untouched",
     personalHidden: archives?.personal?.state === "active", workspaceHidden: archives?.workspace?.state === "active",
     effectiveHidden: isEffectivelyDiscarded(archives?.personal ?? null, archives?.workspace ?? null),
   });

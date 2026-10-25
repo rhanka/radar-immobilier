@@ -9,6 +9,9 @@ const privacy = 'tests/integration/classification-privacy.spec.ts';
 const cursor = 'src/services/facets/classification-cursor.test.ts';
 const counts = 'src/services/facets/classification-counts.test.ts';
 const cases = [
+  { id: 'personal-history-race', suite: 'tests/integration/classification-races.spec.ts', test: 'archive appended between', edits: [[`${root}classification-heads.ts`,
+    'personalHistoryState: personal.length || archives?.personal ? "has_history" : "untouched",',
+    'personalHistoryState: personal.length ? "has_history" : "untouched",']] },
   { id: 'personal-filter', suite: privacy, test: 'isolate two readers', edits: [[`${root}scoped-reader.ts`,
     'eq(facetStreams.scope, "personal"), eq(facetStreams.ownerId, accountId),\n      eq(facetStreams.targetType',
     'eq(facetStreams.scope, "personal"),\n      eq(facetStreams.targetType']] },
