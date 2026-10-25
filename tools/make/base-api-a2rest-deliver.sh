@@ -3,7 +3,7 @@
 set -euo pipefail
 action=${1:?}
 ROOT=$(pwd -P)
-BASE=$(git rev-parse e32138c9)
+BASE=$(git rev-parse d8f2cc06)
 LOCAL=$ROOT/tmp/a2base-rest-delivery.git
 if [[ $action == setup ]]; then
   [[ $(git branch --show-current) == feat/artefacts-mcp-a2base-rest ]]
@@ -26,7 +26,7 @@ git merge-base --is-ancestor "$BASE" HEAD
 allowed() {
   [[ $1 != *..* && $1 != /* && ! -L $1 ]] || return 2
   case $1 in
-    api/src/app.ts|api/src/routes/mcp-signal-search*|api/src/services/facets/mcp-signal-*) ;;
+    api/src/app.ts|api/src/routes/graph-signals.ts|api/src/routes/mcp-signal-search*|api/src/services/facets/mcp-signal-*) ;;
     api/tests/integration/mcp-signal-search*|api/tests/integration/a2base-mcp-fixture.ts|tools/make/base-api-a2rest*) ;;
     plan/ARTEFACTS-BRANCH_feat_artefacts-mcp.md|plan/ARTEFACTS-A2BASE-REST-BRANCH_feat_artefacts-mcp-a2base-rest.md) ;;
     *) echo "Out of scope: $1" >&2; return 2;;
