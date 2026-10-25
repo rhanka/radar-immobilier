@@ -12,10 +12,26 @@ const binding = { workspaceId: null, workspaceSlug: "fixture", actorSub: "opaque
 const invocation = { action: "init" as const, binding, args: ["--workspace-slug", "fixture"],
   image: `ghcr.io/fixture/api@sha256:${"a".repeat(64)}`,
   database: { database: "radar", role: "radar", schema: "public" } };
-beforeEach(() => { vi.stubEnv("GIT_SHA", "b".repeat(40)); vi.stubEnv("OPERATOR_IMAGE", invocation.image); });
+beforeEach(() => {
+  vi.stubEnv("GIT_SHA", "b".repeat(40)); vi.stubEnv("OPERATOR_IMAGE", invocation.image);
+  vi.spyOn(process.stdout, "write").mockReturnValue(true);
+});
 afterEach(() => { vi.resetAllMocks(); vi.restoreAllMocks(); vi.unstubAllEnvs(); process.exitCode = undefined; });
 
 describe("operator Job destination", () => {
+  it("should preserve the intended destination and image on initialization and replay", async () => {
+    const { runJob } = await import("../../src/scripts/base-preprod-job.js");
+    const workspaceId = "11111111-1111-4111-8111-111111111111";
+    for (let replay = 0; replay < 2; replay++) {
+      mocks.execute.mockResolvedValueOnce({ rows: [invocation.database] }).mockResolvedValueOnce({ rows: [{ slug: "fixture" }] });
+      mocks.spawn.mockReturnValue({ status: 0, stdout: JSON.stringify({ workspaceId, replayed: replay === 1 }) });
+      await runJob(invocation);
+      const receipt = JSON.parse(String(vi.mocked(process.stdout.write).mock.calls.at(-1)?.[0]));
+      expect(receipt.result).toEqual({ workspaceId, workspaceSlug: "fixture", replayed: replay === 1 });
+      expect(receipt.image).toBe(invocation.image);
+      expect(receipt.releaseSha).toBe("b".repeat(40));
+    }
+  });
   it("should refuse foreign image releases before any database access or mutation", async () => {
     const { runJob } = await import("../../src/scripts/base-preprod-job.js");
     await expect(runJob({ ...invocation, binding: { ...binding, releaseId: `${"c".repeat(40)}:fixture` } }))
