@@ -11,7 +11,7 @@
 - [x] Shared Git remains read-only; use an ignored local Git directory with this worktree, subject-only Conventional Commits of at most 150 changed lines; no push.
 
 ## Branch Scope Boundaries (MANDATORY)
-- [x] **Allowed Paths**: `api/src/routes/mcp-signal-search*`, `api/src/services/facets/mcp-signal-*`, `api/tests/integration/mcp-signal-search*`, `tools/make/a2base-api*`, this lane plan.
+- [x] **Allowed Paths**: `api/src/routes/mcp-signal-search*`, `api/src/services/facets/mcp-signal-*`, `api/tests/integration/mcp-signal-search*`, new `tools/make/base-api-a2base*`, this lane plan.
 - [x] **Conditional Paths**: canonical helper exports in `api/src/routes/graph-signals.ts`; EX5 entry in the ARTEFACTS plan; root delivery report.
 - [x] **Forbidden Paths**: `packages/immo-mcp/**`, A3 receiver, H5 reader, `api/src/{app,index,config}.ts`, `api/src/routes/auth.ts`, schemas/migrations/manifests/lockfile, root Makefile/Compose, rules, bootstrap, other plans, client materials.
 - [x] **Exception process**: BRARTEFACTS-EX5 records rationale, impact and recovery in the parent plan before conditional edits.
@@ -42,6 +42,7 @@
 - [ ] T06: authorized coherent city population and personal/common masking before enrichment.
 - [ ] T07: read-only reveal, post-enrichment authority/revision checks and shared document context across bounded attempts.
 - [ ] Lot gate: unit tests, real createApp/PostgreSQL tests, named behavioral mutations, targeted lint/typecheck.
+- [x] Machine-serialized runner written with explicit file scopes, a 60-second wait, disk monitoring, one-worker container configuration and inherited ownership-checked cleanup.
 - [ ] Delivery: report qualified slices, commands/counts, per-commit numstat, remaining integration duties, exact SHA and isolated bundle audit/hash.
 
 ## Docs consolidation
