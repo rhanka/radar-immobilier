@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analyzeListCalls } from "./artifacts-listkeys-guard.helpers.js";
+import { analyzeListCalls, repositoryTestFiles } from "./artifacts-listkeys-guard.helpers.js";
 
 describe("listKeys static prefix analysis", () => {
   it.each([
@@ -13,6 +13,9 @@ describe("listKeys static prefix analysis", () => {
     'const a = ``; const b = (a satisfies string); store.listKeys(b)',
     'store["listKeys"]("")', 'store[`listKeys`]((""))',
     'store?.listKeys?.((""))', 'store.listKeys(`${""}`)',
+    'store.listKeys(("")!)', '(store.listKeys)("")',
+    '(store.listKeys as Function)("")', 'store["list" + "Keys"]("")',
+    'const method = "listKeys"; store[method]("")',
   ])("should reject a statically empty or omitted prefix: %s", (source) => {
     expect(analyzeListCalls(source).invalid).toEqual([1]);
   });
@@ -42,5 +45,31 @@ describe("listKeys static prefix analysis", () => {
       { line: 1, expression: "config.prefix" }, { line: 2, expression: "prefix" },
       { line: 3, expression: "a" },
     ] });
+  });
+
+  it("should scan every API and package test location using in-memory directories", () => {
+    const directories: Record<string, string[]> = {
+      "repo/api": ["tests/", "src/", "custom/", "dist/", "tmp/", "node_modules/", ".git/"],
+      "repo/api/tests": ["a.spec.ts", "a.test.ts", "a.helpers.ts", "ignored.ts"],
+      "repo/api/src": ["nested/"], "repo/api/src/nested": ["b.test.ts", "b.spec.ts"],
+      "repo/api/custom": ["c.test.ts"], "repo/api/dist": ["d.spec.ts"],
+      "repo/api/tmp": ["e.test.ts"], "repo/packages": ["one/", "two/", "README.md", "node_modules/", ".git/"],
+      "repo/packages/one": ["src/", "tests/", "root.test.ts"],
+      "repo/packages/one/src": ["f.spec.ts"], "repo/packages/one/tests": ["g.test.ts"],
+      "repo/packages/two": ["__tests__/"], "repo/packages/two/__tests__": ["h.spec.ts"],
+    };
+    const readDirectory = (path: string) => {
+      expect(directories[path], `unexpected directory: ${path}`).toBeDefined();
+      return directories[path]!.map((name) => ({
+        name: name.replace(/\/$/, ""), isDirectory: () => name.endsWith("/"),
+      }));
+    };
+    expect(repositoryTestFiles("repo", readDirectory)).toEqual([
+      "repo/api/custom/c.test.ts", "repo/api/dist/d.spec.ts", "repo/api/src/nested/b.spec.ts",
+      "repo/api/src/nested/b.test.ts", "repo/api/tests/a.helpers.ts", "repo/api/tests/a.spec.ts",
+      "repo/api/tests/a.test.ts", "repo/api/tmp/e.test.ts", "repo/packages/one/root.test.ts",
+      "repo/packages/one/src/f.spec.ts", "repo/packages/one/tests/g.test.ts",
+      "repo/packages/two/__tests__/h.spec.ts",
+    ]);
   });
 });

@@ -1,4 +1,28 @@
 import ts from "typescript";
+import { readdirSync } from "node:fs";
+import { join } from "node:path";
+
+type ReadDirectory = (path: string) => readonly { name: string; isDirectory(): boolean }[];
+export const excludedTestDirectories = ["node_modules", ".git"];
+
+export function testFiles(directory: string, readDirectory: ReadDirectory =
+  (path) => readdirSync(path, { withFileTypes: true })): string[] {
+  return readDirectory(directory).flatMap((entry) => {
+    const path = join(directory, entry.name);
+    if (entry.isDirectory()) {
+      return excludedTestDirectories.includes(entry.name) ? [] : testFiles(path, readDirectory);
+    }
+    return /\.(?:spec|test|helpers)\.ts$/.test(entry.name) ? [path] : [];
+  });
+}
+
+export function repositoryTestFiles(root: string, readDirectory: ReadDirectory =
+  (path) => readdirSync(path, { withFileTypes: true })): string[] {
+  const packages = join(root, "packages");
+  return [...testFiles(join(root, "api"), readDirectory),
+    ...readDirectory(packages).filter((entry) => entry.isDirectory() && !excludedTestDirectories.includes(entry.name))
+      .flatMap((entry) => testFiles(join(packages, entry.name), readDirectory))].sort();
+}
 
 export function analyzeListCalls(source: string, filename = "test.ts"): {
   invalid: number[];
@@ -12,10 +36,15 @@ export function analyzeListCalls(source: string, filename = "test.ts"): {
   const invalid: number[] = [];
   const nonStatic: { line: number; expression: string }[] = [];
 
-  function staticString(node: ts.Expression, seen = new Set<ts.Node>()): string | undefined {
-    if (ts.isParenthesizedExpression(node) || ts.isAsExpression(node) ||
+  function unwrap(node: ts.Expression): ts.Expression {
+    while (ts.isParenthesizedExpression(node) || ts.isAsExpression(node) ||
         ts.isSatisfiesExpression(node) || ts.isTypeAssertionExpression(node) ||
-        ts.isNonNullExpression(node)) return staticString(node.expression, seen);
+        ts.isNonNullExpression(node)) node = node.expression;
+    return node;
+  }
+
+  function staticString(node: ts.Expression, seen = new Set<ts.Node>()): string | undefined {
+    node = unwrap(node);
     if (ts.isStringLiteralLike(node)) return node.text;
     if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.PlusToken) {
       const left = staticString(node.left, seen);
@@ -44,7 +73,7 @@ export function analyzeListCalls(source: string, filename = "test.ts"): {
 
   function visit(node: ts.Node): void {
     if (ts.isCallExpression(node)) {
-      const callee = node.expression;
+      const callee = unwrap(node.expression);
       const name = ts.isPropertyAccessExpression(callee) ? callee.name.text
         : ts.isElementAccessExpression(callee) ? staticString(callee.argumentExpression) : undefined;
       if (name === "listKeys") {
