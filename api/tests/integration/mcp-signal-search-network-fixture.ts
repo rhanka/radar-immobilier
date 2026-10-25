@@ -8,9 +8,11 @@ import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/
 import { createApp } from "../../src/app.js";
 import { strictReceiverTestAuth, strictReceiverTestConfig } from "../../src/artifacts/strict-receiver.js";
 import { workspaceFixture, workspaceSignal } from "../../src/services/facets/workspace-archive-fixture.js";
-import { EMPTY_DISCARDED_SIGNALS } from "../../src/services/graph/discarded-signals.js";
+import { createDiscardedSignalsReader } from "../../src/services/facets/discarded-reader.js";
+import { facetActivationState } from "../../src/db/schema.js";
 import type { LegacyRetirementState } from "../../src/services/facets/legacy-retirement.js";
-import type { ObjectStore } from "../../src/storage/object-store.js";
+import { legacyDataFixture } from "./mcp-signal-search-legacy-fixture.js";
+import { networkDocumentStore } from "./mcp-signal-search-network-document.js";
 import { HttpDataSource } from "../../../packages/immo-mcp/src/data-source.js";
 import { createImmoHttpApp } from "../../../packages/immo-mcp/src/server-http.js";
 import { createIsolatedExchangeFixture, exchangeDepsFor, signSubjectToken,
@@ -24,8 +26,10 @@ async function listen(app: Hono) {
 }
 
 /** All three hops use sockets; no injected business results or local facade mounts. */
-export async function networkFixture(retirement: LegacyRetirementState = "retired", enabled = true) {
-  const data = await workspaceFixture();
+export async function networkFixture(retirement: LegacyRetirementState = "retired", enabled = true,
+  epoch: "scoped" | "missing" | "legacy" = "scoped") {
+  const data = epoch === "scoped" ? await workspaceFixture() : await legacyDataFixture();
+  if (epoch === "legacy") await data.db.insert(facetActivationState).values({ workspaceId: data.workspaceId });
   const signal = await workspaceSignal(data);
   await data.pool.query("UPDATE workspace_memberships SET status='revoked', revoked_at=now() WHERE workspace_id=$1 AND account_id=$2",
     [data.otherId, data.contributor.id]);
@@ -33,6 +37,7 @@ export async function networkFixture(retirement: LegacyRetirementState = "retire
   const issuerApp = new Hono(), apiApp = new Hono(), mcpApp = new Hono();
   const listeners: Awaited<ReturnType<typeof listen>>[] = [];
   const clients: { client: Client; transport: StreamableHTTPClientTransport }[] = [];
+  let documents: Awaited<ReturnType<typeof networkDocumentStore>> | undefined;
   const close = async () => {
     let failure: unknown;
     for (const { client, transport } of clients) {
@@ -45,9 +50,11 @@ export async function networkFixture(retirement: LegacyRetirementState = "retire
       try { await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve())); }
       catch (error) { failure ??= error; }
     }
+    documents?.close();
     if (failure) throw failure;
   };
   try {
+    documents = await networkDocumentStore();
     const issuer = await listen(issuerApp); listeners.push(issuer);
     const api = await listen(apiApp); listeners.push(api);
     const mcp = await listen(mcpApp); listeners.push(mcp);
@@ -74,8 +81,8 @@ export async function networkFixture(retirement: LegacyRetirementState = "retire
         cookie: c.req.header("cookie") ?? null });
       await next();
     });
-    apiApp.route("/", createApp({ db: data.db, store: { head: async () => null } as unknown as ObjectStore,
-      auth, discarded: EMPTY_DISCARDED_SIGNALS, checkDb: async () => ({ ok: true }),
+    apiApp.route("/", createApp({ db: data.db, store: documents.store,
+      auth, discarded: createDiscardedSignalsReader(data.db), checkDb: async () => ({ ok: true }),
       checkObjectStore: async () => ({ ok: true }), legacyRetirement: retirement,
       mcpSignalSearch: { enabled } }));
     const exchangeDeps = exchangeDepsFor(exchange, { fetchImpl: fetch, allowLoopbackHttp: true });
@@ -95,7 +102,7 @@ export async function networkFixture(retirement: LegacyRetirementState = "retire
       await client.connect(transport as Parameters<Client["connect"]>[0]);
       return { client, transport, subject };
     };
-    return { data, signal, connect, close, requests, exchange, apiUrl: api.url, mcpUrl: mcp.url,
+    return { data, signal, documents, connect, close, requests, exchange, apiUrl: api.url, mcpUrl: mcp.url,
       exchanges: () => exchanges };
   } catch (error) { await close(); throw error; }
 }

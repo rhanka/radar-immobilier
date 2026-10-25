@@ -27,6 +27,7 @@
 - [x] No UI/UAT change; root checkout and stable dev data preserved.
 
 ## Plan / Todo (lot-based)
+- [x] Network/image fixture supports databases never activated and uses the genuine S3ObjectStore against isolated object storage; seed synthetic PDF bytes and metadata for documentary assertions.
 - [x] Reproduced the blocking defect on an unactivated database: three business assertions fail with facade 503 versus legacy 200. Replace facade preactivation refusal expectations and explicitly assert zero internal legacy calls after 6H.
 - [x] Route missing/legacy epochs through the shared legacy reader with verified viewer and reveal semantics; recheck membership and epoch after enrichment. Scoped BASE remains unchanged and never invokes legacy; maintenance and explicit retirement stay closed.
 - [x] Machine guard also waits for Docker build processes and checks foreign stacks before image build; increase isolated /tmp to 1 GiB after npm cache overflow, retaining 10 GiB host disk stop and owned cleanup.
