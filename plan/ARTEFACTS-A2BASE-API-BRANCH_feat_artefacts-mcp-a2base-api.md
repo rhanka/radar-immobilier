@@ -34,6 +34,7 @@
 - [x] T03 implementation and unit cases written; database qualification pending.
 - [ ] T04: revalidate the entire membership set and reject changed singleton.
 - [x] T04 revalidation helper and unit cases written; race qualification pending.
+- [x] T01/T03/T04 real createApp/PostgreSQL fixture and deterministic membership race cases written; test-only probe uses the existing verified-bearer seam, not A3 qualification.
 - [x] T05 inventory before edits: context interface/factory at graph-signals lines 360/366; async canonical card at 545; synchronous degraded card at 573. Three export slices, no helper moves or duplicated implementation; keep existing builder/evidence dependencies in place.
 - [ ] T05a: expose per-request document context/factory; explicit graph-signals/date-parity gates.
 - [ ] T05b: expose canonical async card helper; explicit graph-signals/date-parity gates.
