@@ -28,6 +28,7 @@
 - [x] Test helpers only; isolated automated verification, no user UAT.
 
 ## Plan / Todo (lot-based)
+- [x] Preserve HTTP/MCP assertions and run a direct provider leg first for Q2 lock/E3 faults, so transport blockers cannot hide whether injections execute.
 - [x] Configure the documented 30-second cleanup lifetime and compare the stored publication receipt (releaseId/manifest) separately from its HTTP projection.
 - [x] Register cross-process race waits before execution, drain each once, and release/join both competitors before closing the worker.
 - [x] Replace inspection-race polling with one registered wait/release per public barrier point; historical arrival is not a fresh pause.
