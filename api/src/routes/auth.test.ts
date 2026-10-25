@@ -1545,6 +1545,13 @@ describe("strict receiver — exchanged search and audience confusions (H4 P5)",
     STRICT_RECEIVER_RECEIPT_WORKLOAD_SUB: "immo-mcp-workload",
     STRICT_RECEIVER_RECEIPT_WORKLOAD_CLIENT_ID: "immo-mcp-workload",
     STRICT_RECEIVER_RECEIPT_ENVIRONMENT: "test",
+    STRICT_RECEIVER_RECEIPT_ROUTE_PROFILE: "mcp-signals-search.get.v1",
+    STRICT_RECEIVER_RECEIPT_SCHEMA_REVISION: "scoped-signal-search.v1",
+    STRICT_RECEIVER_RECEIPT_POLICY_REVISION: "a2base-search-v1",
+    STRICT_RECEIVER_API_IMAGE: `sha256:${"a".repeat(64)}`,
+    STRICT_RECEIVER_MCP_IMAGE: `sha256:${"b".repeat(64)}`,
+    STRICT_RECEIVER_RECEIPT_API_IMAGE: `sha256:${"a".repeat(64)}`,
+    STRICT_RECEIVER_RECEIPT_MCP_IMAGE: `sha256:${"b".repeat(64)}`,
   };
 
   async function makeExchanged(
@@ -1604,6 +1611,7 @@ describe("strict receiver — exchanged search and audience confusions (H4 P5)",
         ...(bearerGetKey ? { bearerGetKey } : {}),
       }),
     );
+    app.get("/api/v1/mcp/facets/signals/search", (c) => c.json({ ok: true, signals: [] }));
     app.get("/api/graph-signals/:city", (c) => c.json({ ok: true, nodes: [] }));
     app.get("/api/graph-signals/by-city", (c) => c.json({ ok: true, cities: [] }));
     app.get("/api/v1/signal-facets/reason-codes", (c) => c.json({ ok: true, codes: [] }));
@@ -1617,7 +1625,7 @@ describe("strict receiver — exchanged search and audience confusions (H4 P5)",
   it("serves the permitted search with a correct exchanged presentation, no cookie", async () => {
     const { presented, getKey } = await makeExchanged();
     const res = await strictApp(STRICT_AUTH, approvedDb(), getKey).request(
-      "/api/graph-signals/drummondville",
+      "/api/v1/mcp/facets/signals/search?city=drummondville",
       { headers: { authorization: `Bearer ${presented}` } },
     );
     expect(res.status).toBe(200);
@@ -1627,7 +1635,7 @@ describe("strict receiver — exchanged search and audience confusions (H4 P5)",
   it("refuses the MCP-audience subject presentation on the armed search route", async () => {
     const { presented, getKey } = await makeSubject("https://immo.example.test/mcp");
     const res = await strictApp(STRICT_AUTH, approvedDb(), getKey).request(
-      "/api/graph-signals/drummondville",
+      "/api/v1/mcp/facets/signals/search?city=drummondville",
       { headers: { authorization: `Bearer ${presented}` } },
     );
     expect(res.status).toBe(401);
@@ -1649,7 +1657,7 @@ describe("strict receiver — exchanged search and audience confusions (H4 P5)",
   it("refuses a foreign-environment API audience on this receiver", async () => {
     const { presented, getKey } = await makeExchanged({ aud: "https://immo.sent-tech.ca" });
     const res = await strictApp(STRICT_AUTH, approvedDb(), getKey).request(
-      "/api/graph-signals/drummondville",
+      "/api/v1/mcp/facets/signals/search?city=drummondville",
       { headers: { authorization: `Bearer ${presented}` } },
     );
     expect(res.status).toBe(401);
@@ -1663,7 +1671,7 @@ describe("strict receiver — exchanged search and audience confusions (H4 P5)",
     ] as const) {
       const { presented, getKey } = await makeExchanged({ ...overrides });
       const res = await strictApp(STRICT_AUTH, approvedDb(), getKey).request(
-        "/api/graph-signals/drummondville",
+        "/api/v1/mcp/facets/signals/search?city=drummondville",
         { headers: { authorization: `Bearer ${presented}` } },
       );
       expect(res.status).toBe(status);
@@ -1675,7 +1683,7 @@ describe("strict receiver — exchanged search and audience confusions (H4 P5)",
     const unarmed = strictReceiverTestAuth(strictReceiverTestConfig({ enabled: false }));
     const { presented, getKey } = await makeExchanged();
     const res = await strictApp(unarmed, approvedDb(), getKey).request(
-      "/api/graph-signals/drummondville",
+      "/api/v1/mcp/facets/signals/search?city=drummondville",
       { headers: { authorization: `Bearer ${presented}` } },
     );
     expect(res.status).toBe(200);
@@ -1688,12 +1696,12 @@ describe("strict receiver — exchanged search and audience confusions (H4 P5)",
     for (const aud of [unarmed.appBaseUrl, `${unarmed.appBaseUrl}/mcp`]) {
       const { presented, getKey } = await makeSubject(aud);
       const before = await strictApp(unarmed, approvedDb(), getKey).request(
-        "/api/graph-signals/drummondville",
+        "/api/v1/mcp/facets/signals/search?city=drummondville",
         { headers: { authorization: `Bearer ${presented}` } },
       );
       expect(before.status).toBe(200);
       const after = await strictApp(armed, approvedDb(), getKey).request(
-        "/api/graph-signals/drummondville",
+        "/api/v1/mcp/facets/signals/search?city=drummondville",
         { headers: { authorization: `Bearer ${presented}` } },
       );
       expect(after.status).toBe(401);
@@ -1706,7 +1714,7 @@ describe("strict receiver — exchanged search and audience confusions (H4 P5)",
     );
     const { presented: exchanged, getKey: exchangedKey } = await makeExchanged();
     const refusedExchanged = await strictApp(invalid, approvedDb(), exchangedKey).request(
-      "/api/graph-signals/drummondville",
+      "/api/v1/mcp/facets/signals/search?city=drummondville",
       { headers: { authorization: `Bearer ${exchanged}` } },
     );
     expect(refusedExchanged.status).toBe(401);
@@ -1714,7 +1722,7 @@ describe("strict receiver — exchanged search and audience confusions (H4 P5)",
     for (const aud of [invalid.appBaseUrl, `${invalid.appBaseUrl}/mcp`]) {
       const { presented, getKey } = await makeSubject(aud);
       const refusedRaw = await strictApp(invalid, approvedDb(), getKey).request(
-        "/api/graph-signals/drummondville",
+        "/api/v1/mcp/facets/signals/search?city=drummondville",
         { headers: { authorization: `Bearer ${presented}` } },
       );
       expect(refusedRaw.status).toBe(401);
@@ -1728,7 +1736,7 @@ describe("strict receiver — exchanged search and audience confusions (H4 P5)",
     ]) as unknown as Db;
     const { presented, getKey } = await makeExchanged();
     const res = await strictApp(STRICT_AUTH, db, getKey).request(
-      "/api/graph-signals/drummondville",
+      "/api/v1/mcp/facets/signals/search?city=drummondville",
       { headers: { authorization: `Bearer ${presented}` } },
     );
     expect(res.status).toBe(403);
@@ -1751,12 +1759,12 @@ describe("strict receiver — exchanged search and audience confusions (H4 P5)",
     const { presented, getKey } = await makeExchanged();
     const headers = { authorization: `Bearer ${presented}` };
     const before = await strictApp(disarmed, approvedDb(), getKey).request(
-      "/api/graph-signals/drummondville",
+      "/api/v1/mcp/facets/signals/search?city=drummondville",
       { headers },
     );
     expect(before.status).toBe(200);
     const after = await strictApp(armed, approvedDb(), getKey).request(
-      "/api/graph-signals/drummondville",
+      "/api/v1/mcp/facets/signals/search?city=drummondville",
       { headers },
     );
     expect(after.status).toBe(200);
@@ -1764,7 +1772,7 @@ describe("strict receiver — exchanged search and audience confusions (H4 P5)",
       const raw = await makeSubject(aud);
       for (const [auth, status] of [[disarmed, 200], [armed, 401]] as const) {
         const res = await strictApp(auth, approvedDb(), raw.getKey).request(
-          "/api/graph-signals/drummondville",
+          "/api/v1/mcp/facets/signals/search?city=drummondville",
           { headers: { authorization: `Bearer ${raw.presented}` } },
         );
         expect(res.status).toBe(status);
@@ -1783,7 +1791,7 @@ describe("strict receiver — exchanged search and audience confusions (H4 P5)",
         ...RESOLVED_BASE, ...workload, STRICT_RECEIVER_ARMED: "0",
       }));
       const res = await strictApp(auth, approvedDb(), getKey).request(
-        "/api/graph-signals/drummondville",
+        "/api/v1/mcp/facets/signals/search?city=drummondville",
         { headers: { authorization: `Bearer ${presented}` } },
       );
       expect(res.status).toBe(200);
@@ -1811,7 +1819,7 @@ describe("strict receiver — exchanged search and audience confusions (H4 P5)",
           continue;
         }
         const res = await strictApp(auth, approvedDb(), getKey).request(
-          "/api/graph-signals/drummondville",
+          "/api/v1/mcp/facets/signals/search?city=drummondville",
           { headers: { authorization: `Bearer ${presented}` } },
         );
         expect(res.status).toBe(401);
@@ -1851,6 +1859,7 @@ describe("strict receiver — forbidden routes, methods and preserved behavior (
   function strictApp(bearerGetKey?: JWTVerifyGetKey): Hono {
     const app = new Hono();
     app.use("*", protect(STRICT_AUTH, { db: approvedDb(), ...(bearerGetKey ? { bearerGetKey } : {}) }));
+    app.get("/api/v1/mcp/facets/signals/search", (c) => c.json({ ok: true, signals: [] }));
     app.get("/api/graph-signals/:city", (c) => c.json({ ok: true, nodes: [] }));
     app.get("/api/graph-signals/by-city", (c) => c.json({ ok: true, cities: [] }));
     app.get("/api/v1/signal-facets/reason-codes", (c) => c.json({ ok: true, codes: [] }));
@@ -1865,7 +1874,7 @@ describe("strict receiver — forbidden routes, methods and preserved behavior (
       ["/api/graph-signals/by-city", "GET"],
       ["/api/v1/signal-facets/reason-codes", "GET"],
       ["/api/v1/signal-facets/select", "POST"],
-      ["/api/graph-signals/drummondville", "POST"],
+      ["/api/v1/mcp/facets/signals/search?city=drummondville", "POST"],
     ] as const) {
       const res = await strictApp(getKey).request(path, { method, headers });
       expect(res.status).toBe(403);
@@ -1901,7 +1910,7 @@ describe("strict receiver — forbidden routes, methods and preserved behavior (
       { sessionSecret: STRICT_AUTH.sessionSecret, ttlSeconds: 3600 },
     )}`;
     for (const [path, method] of [
-      ["/api/graph-signals/drummondville", "GET"],
+      ["/api/v1/mcp/facets/signals/search?city=drummondville", "GET"],
       ["/api/graph-signals/by-city", "GET"],
       ["/api/v1/signal-facets/reason-codes", "GET"],
     ] as const) {
