@@ -19,13 +19,13 @@ mkdir -p "$RUN_DIR" "$LOG_DIR"
 echo "Evidence: $LOG_DIR"
 git show c49bb854:package-lock.json > "$LOG_DIR/baseline-lock.json"
 exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
+until flock -w 60 8; do
+  echo 'WAIT: machine Docker campaign lock held'
+done
 while :; do
   names=$(docker ps --filter name=radar-test- --format '{{.Names}}')
-  if [[ -z $names ]] && flock -n 8; then
-    if [[ -z $(docker ps --filter name=radar-test- -q) ]]; then break; fi
-    flock -u 8
-  fi
-  echo "WAIT: ${names:-machine Docker campaign lock held}"
+  [[ -n $names ]] || break
+  echo "WAIT: $names"
   sleep 60
 done
 [[ -z $(docker ps --filter name=radar-test- -q) ]]
