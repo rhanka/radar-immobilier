@@ -37,7 +37,7 @@ case $action in
     staged
     [[ ${MSG:?} != *$'\n'* && $MSG != *$'\r'* && $MSG =~ ^(feat|fix|test|chore|docs)\(classification\):\ .+ ]]
     git -c user.name=Codex -c user.email=codex@users.noreply.github.com -c core.hooksPath=/dev/null commit -m "$MSG";;
-  state) git status --short; git log -4 --oneline; df -h .; docker ps --format '{{.Names}}'; pgrep -af 'docker (build|buildx)' || true;;
+  state) git status --short; git log -4 --oneline; df -h .; docker ps --format '{{.Names}} {{.Status}}'; pgrep -af 'docker (build|buildx)' || true;;
   audit)
     while IFS= read -r sha; do
       message=$(git show -s --format=%B "$sha")

@@ -18,7 +18,7 @@ mkdir -p "$RUN_DIR" "$LOG_DIR"
 echo "Evidence: $LOG_DIR"
 exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
 flock -w 3600 8
-while [[ -n $(docker ps -q --filter name=radar-test-) ]] || pgrep -f '^docker (build|buildx)' >/dev/null; do
+while [[ -n $(docker ps -q --filter name=radar-test-) ]] || pgrep -f '(^|/)(docker|docker-buildx)([[:space:]]+build(x)?|[[:space:]]+bake)' >/dev/null; do
   echo 'Waiting for Docker to become idle'; sleep 2
 done
 exec 9>"$RUN_DIR/lock"
@@ -32,6 +32,8 @@ source "$TOOLS/base-api-ci-archive.sh"
 write_compose
 df -h . | tee "$LOG_DIR/disk-before.log"
 [[ $(df -Pk . | awk 'NR==2 {print $4}') -ge 10485760 ]] || exit 3
+git rev-parse HEAD > "$LOG_DIR/candidate.sha"
+git status --short > "$LOG_DIR/worktree-status.txt"
 BASE_API_LINT_FILES=$(git diff --name-only 600d78485965361c89109bf61eccaa0250cf7284 -- api/src | tr '\n' ' ')
 archive_sources
 archive_ci_inputs
