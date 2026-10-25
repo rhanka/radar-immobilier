@@ -991,21 +991,13 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
     }
   });
 
-  it("last quota unit across processes is not covered without the H3 quota interface", () => {
-    reportNotCovered(
-      "q1-last-quota-unit",
-      "transaction-bound quota reservation/commit participant",
-      "H3 units 5-6",
-      "71f41b72",
-    );
+  it("reserves the last quota unit once across production processes and restart", async () => {
+    const { qualifyLastQuotaUnit } = await import("./artifacts-production-quota.helpers.js");
+    await qualifyLastQuotaUnit();
   });
 
-  it("transaction-bound admission accounting is not covered without the H3 quota interface", () => {
-    reportNotCovered(
-      "q1-admission-quota-accounting",
-      "quota-aware admission binding with policy-revision fence",
-      "H3 units 5-6",
-      "71f41b72",
-    );
+  it("rolls back denied quota and deduplicates durable admission accounting", async () => {
+    const { qualifyAdmissionQuotaAccounting } = await import("./artifacts-production-quota.helpers.js");
+    await qualifyAdmissionQuotaAccounting();
   });
 });
