@@ -28,7 +28,7 @@ source "$TOOLS/base-api-resources.sh"
 source "$TOOLS/base-api-ci-archive.sh"
 archive_sources
 archive_ci_inputs
-git ls-files --cached --others --exclude-standard -- tools/make/base-preprod* deploy/base-preprod api/Dockerfile api/docker-entrypoint.sh > "$RUN_DIR/operator-paths"
+git ls-files --cached --others --exclude-standard -- tools/make/base-preprod* deploy/base-preprod api/src/scripts/base-preprod*.json api/Dockerfile api/docker-entrypoint.sh > "$RUN_DIR/operator-paths"
 git ls-files --cached -- ui api/tests tools/security .security/vulnerability-register.yaml >> "$RUN_DIR/operator-paths"
 while IFS= read -r path; do [[ ! -L $path && $path != *..* && $path != *.env* ]]; done < "$RUN_DIR/operator-paths"
 tar --verbatim-files-from --no-recursion -rf "$RUN_DIR/source.tar" -T "$RUN_DIR/operator-paths"
@@ -60,9 +60,11 @@ verify)
 build-image)
   source "$TOOLS/base-preprod-image-compose.sh"
   image_compose
+  guarded_down
   docker build --build-arg "GIT_SHA=$(git rev-parse HEAD)" -f api/Dockerfile -t radar-base-preprod-p1o1:qualified - < "$RUN_DIR/source.tar" > "$LOG_DIR/build.log" 2>&1 &
   RUN_PID=$!; wait "$RUN_PID"; RUN_PID=
   docker image inspect --format '{{.Id}}' radar-base-preprod-p1o1:qualified > "$LOG_DIR/image-id.txt"
+  image_compose
   guarded_down
   "${compose[@]}" up -d --wait postgres
   "${compose[@]}" run --rm --no-deps -T api > >(tee "$LOG_DIR/image-proof.log") 2>&1 &

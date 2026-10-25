@@ -18,3 +18,4 @@ npm run db:migrate --workspace=api
 npm run test --workspace=api -- --config vitest.isolated.config.ts --reporter=default --reporter=json --outputFile.json=/evidence/tests.json
 node tools/make/base-api-results.mjs /evidence/tests.json > /evidence/tests.tsv
 node -e 'const r=require("/evidence/tests.json"); if(r.numFailedTests||!r.numPassedTests) process.exit(1); console.log(JSON.stringify({passed:r.numPassedTests,failed:r.numFailedTests,skipped:r.numPendingTests}));'
+node tools/make/base-preprod-api-mutations.mjs
