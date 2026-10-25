@@ -19,6 +19,7 @@
 - [x] BRA4-EX1: assigned integrator owns dependency/P6 runner edits; preserve A2 guards; restore closed admission on failure.
 - [x] BRA4-EX2: minimal `api/Dockerfile` externalization and MCP metadata/dependency copy preserve cluster-mesh dynamic loaders in the actual runtime; rollback removes those three image hunks; shared API source/SQL remain untouched.
 - [x] BRA4-EX3: full CI API collection exposed missing P6 fixture wiring and a retired A2 source-form assertion. Update only `api/tests/integration/a2base-mcp-{fixture.ts,authority.spec.ts}` and `api/src/services/graph/regulatory-status-archi.test.ts`; preserve receiver assertions and isolate its guard tests with an explicit approved test port. Rollback restores these test-only hunks; no shared runtime or SQL edit.
+- [x] BRA4-EX4: supply the explicit approved synthetic account port in `tools/exchange-issuer/service-fixture.ts` so the existing loopback issuer/receiver E2E continues exercising A2; real P6 account revocation remains covered separately in the final image. Rollback removes this test-only binding.
 - [ ] External operator account bindings, deployment digest and P7 storage acceptance remain separate receipts.
 
 ## Orchestration Mode (AI-selected)
