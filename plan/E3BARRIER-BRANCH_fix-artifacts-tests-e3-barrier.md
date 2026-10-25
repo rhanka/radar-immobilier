@@ -29,6 +29,7 @@
 - [x] Test helpers only; isolated automated verification, no user UAT.
 
 ## Plan / Todo (lot-based)
+- [x] PR918 second passes: compare the independent durable receipt to its business shape and compare sanitized public responses across direct/HTTP/MCP replays; require the candidate's public lock phase.
 - [x] Independently require every observed winner blob to survive loser cleanup, including the changed-command variant with no shared digest.
 - [x] Observe both race preparations before winner COMMIT (the public inventory excludes completed successes), then sweep the loser by its deadline and preserve shared bytes/history assertions.
 - [x] Preserve HTTP/MCP assertions and run a direct provider leg first for Q2 lock/E3 faults, so transport blockers cannot hide whether injections execute.
