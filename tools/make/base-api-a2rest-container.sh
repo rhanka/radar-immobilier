@@ -48,3 +48,8 @@ cd ../packages/immo-mcp
 node ../../tools/make/base-api-results.mjs /evidence/mcp-tests.json | sed 's|^/workspace/packages/immo-mcp/||' > /evidence/mcp-tests.tsv
 cd /workspace
 if [[ $mode == mutations ]]; then node tools/make/base-api-a2rest-mutants.mjs; fi
+if [[ $mode == image ]]; then
+  npm run build --workspace=api
+  node tools/make/base-api-a2rest-image.mjs
+  tar -cf /evidence/runtime.tar --exclude=./tmp --exclude=./.git .
+fi
