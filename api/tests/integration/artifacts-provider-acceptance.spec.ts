@@ -46,7 +46,7 @@ import pg from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { CreateBucketCommand, S3Client } from "@aws-sdk/client-s3";
-import { createS3BlobStore } from "@sentropic/artifacts/adapters/s3";
+import { createTestS3BlobStore } from "../artifacts-blob-store.helpers.js";
 import {
   createArtifactControl,
   createArtifactsPool,
@@ -104,7 +104,7 @@ describe.skipIf(!ENABLED)("sentropic provider acceptance (set ARTIFACTS_PROVIDER
   let databaseCreated = false;
   let bucketCreated = false;
 
-  const rawBlobs = () => createS3BlobStore({ client: s3, bucket: BUCKET });
+  const rawBlobs = () => createTestS3BlobStore({ client: s3, bucket: BUCKET });
   const storageConfig = () => ({ enabled: true as const, storageScope: SCOPE, orgId: ORG,
     s3Bucket: BUCKET, s3Endpoint: endpoint, s3Region: "us-east-1",
     s3AccessKey: accessKey, s3SecretKey: secretKey });
