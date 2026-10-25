@@ -1,7 +1,7 @@
 # Fix: artifacts E3 commit barrier qualification
 
 ## Objective
-- [ ] Replace the two Q2 E3 injections with the confirmed public barrier ABI and align A4 calls.
+- [x] Replace the two Q2 E3 injections with the confirmed public barrier ABI and align A4 calls.
 
 ## Scope / Guardrails
 - [x] Worktree `tmp/artifacts-e3-barrier`; branch `fix/artifacts-tests-e3-barrier`; base `dde9f4c8`.
@@ -38,5 +38,10 @@
 - [x] Lot 3b: revoke host authority at before_commit after an allowed guard; require a second guard and rollback on resume.
 - [x] Lot 3c: preserve the public callable observer plus arrival method type at the dynamic factory boundary.
 - [x] Lot 3d: count commits from the paused finalization, without constraining earlier preparation transactions.
-- [ ] Lot 4: candidate missing-contract evidence; baseline API suite, lint and typecheck.
-- [ ] Lot 5: atomic history, report, audited bundle from the base and stack cleanup.
+- [x] Lot 4: candidate missing-contract evidence; baseline API suite, lint and typecheck.
+- [x] Baseline: 3169 API tests pass, 533 skip, zero fail; all 69 ACC/Q1/Q2 cases skip.
+- [x] Candidate: 63 failures, zero passes/skips; 59 missing public executor, two missing A4 pause seam, two H3 quota gaps.
+- [x] Installed 0.1.2: both selected E3 cases fail by createArtifactCommitBarrier; all three testing symbols independently fail by exact name.
+- [x] Final acceptance typecheck and lint pass; workspace typecheck passes with seven Svelte warnings.
+- [x] Lot 5: atomic history, companion report, audited bundle from the base and stack cleanup.
+- [x] Real E3 fault/rollback/authority behavior and A4 races remain unqualified until the public upstream prerequisites ship.
