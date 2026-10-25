@@ -845,17 +845,26 @@ export function startBarrierOperation(barrier: CommitBarrier, invocationId: stri
     "before_finalization_row_lock", "after_finalization_locks_before_guard",
     "after_replay_lookup_before_guard", "before_commit"];
   let finish!: () => void;
+  let targetPaused = false;
+  let releaseRequested = false;
   const done = new Promise<false>((resolve) => { finish = () => resolve(false); });
   const waits = points.map((point) => Promise.race([
     barrier.waitUntilReached(point, invocationId).then(() => true), done,
-  ]).then((reached) => { if (reached && point !== target) barrier.release(point, invocationId); }));
+  ]).then((reached) => {
+    if (!reached) return;
+    if (point !== target || releaseRequested) barrier.release(point, invocationId);
+    else targetPaused = true;
+  }));
   const pending = start().finally(finish);
   // Attach a handler immediately so a failed operation cannot become an
   // unhandled rejection while the caller is inspecting the competing writer.
   void pending.catch(() => {});
   return { pending, drained: Promise.all(waits),
     reached: target ? arrived(barrier, target, invocationId) : Promise.resolve(),
-    release: () => { if (target) barrier.release(target, invocationId); },
+    release: () => {
+      releaseRequested = true;
+      if (target && targetPaused) { targetPaused = false; barrier.release(target, invocationId); }
+    },
   };
 }
 
@@ -987,8 +996,8 @@ export async function startArtifactWorker(database: pg.PoolConfig, config: unkno
     execute: (request: unknown, invocation: unknown) => call("execute", request, invocation),
     barrier: {
       observer: undefined,
-      waitUntilReached: async (point: CommitBarrierPoint, id?: string) => { await call("wait", point, id); },
-      release: (point: CommitBarrierPoint, id?: string) => { void call("release", point, id); },
+      waitUntilReached: async (point: CommitBarrierPoint, id: string) => { await call("wait", point, id); },
+      release: (point: CommitBarrierPoint, id: string) => { void call("release", point, id); },
     } satisfies CommitBarrier,
     close: async () => { try { await call("close"); } finally { child.kill(); } },
   };
