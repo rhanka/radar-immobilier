@@ -35,6 +35,7 @@
   - [x] Digest-pinned Job is non-root, tokenless, bounded and permanently unready.
   - [x] Independent roster, bound maintenance attestations and full receipt hash enforced.
 - [ ] Lot 3: permissions, maintenance collection, closure and selective reopening.
+  - [x] Explicit Kubernetes/Actions controls and projected workload/route inventories.
 - [ ] Lot 4: operator refusal/transport tests and image execution receipts.
 - [ ] Lot 5: complete CI API suite, lint, typecheck and audit gate.
 - [ ] Lot 6: runbook, review evidence, local backup, audited bundle and report.
