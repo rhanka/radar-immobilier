@@ -1,7 +1,7 @@
 import { and, eq, sql } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
-import { facetActivationState, facetStreamAttachments } from "../../db/schema.js";
-import { lockWorkspace, managingActorId } from "../workspaces/mutations.js";
+import { facetActivationState, facetStreamAttachments, workspaceMemberships } from "../../db/schema.js";
+import { approvedTargetId, lockWorkspace, managingActorId } from "../workspaces/mutations.js";
 import type { ActivationInput, ActivationSafety } from "./activation.js";
 import { ScopeError } from "./scope.js";
 
@@ -12,10 +12,25 @@ export async function resumePersonalAttachmentReadback(
   if (!safety) throw new ScopeError(503, "activation_delivery_safety_required");
   const check = async (tx: Parameters<Parameters<Database["transaction"]>[0]>[0]) => {
     await lockWorkspace(tx, input.workspaceId);
+    // Rechecked in the final transaction before opening: a revocation
+    // between readback and opening blocks the barrier release with 403.
     await managingActorId(tx, input.workspaceId, input.actorSub);
     const [state] = await tx.select().from(facetActivationState)
       .where(eq(facetActivationState.workspaceId, input.workspaceId));
     if (state?.writerEpoch !== "scoped") throw new ScopeError(409, "activation_not_scoped");
+    // Reject a concurrent opening without another release or timestamp write.
+    if (state.maintenanceBarrier !== true) throw new ScopeError(409, "activation_already_open");
+    const attachments = await tx.select().from(facetStreamAttachments).where(and(
+      eq(facetStreamAttachments.workspaceId, input.workspaceId),
+      eq(facetStreamAttachments.status, "attached"))).for("share");
+    if (attachments.length === 0) throw new ScopeError(409, "activation_without_attachment");
+    for (const attachment of attachments) {
+      await approvedTargetId(tx, attachment.accountId);
+      const [membership] = await tx.select().from(workspaceMemberships).where(and(
+        eq(workspaceMemberships.workspaceId, input.workspaceId),
+        eq(workspaceMemberships.accountId, attachment.accountId))).for("share");
+      if (membership?.status !== "active") throw new ScopeError(403, "workspace_membership_required");
+    }
     const ambiguous = await tx.select().from(facetStreamAttachments).where(and(
       eq(facetStreamAttachments.status, "pending-ambiguous"),
       sql`${facetStreamAttachments.detail}->'ids' ? ${input.workspaceId.toLowerCase()}`));
