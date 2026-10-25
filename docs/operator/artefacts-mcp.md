@@ -107,6 +107,9 @@ The isolated A5 entrypoint is `tools/make/artefacts-a5.mk`, with
 `API_PORT=18924 UI_PORT=15924 MAILDEV_UI_PORT=11924 ENV=test-artefacts-a5`
 as the final arguments. Its `run` target installs and executes `CMD` only
 inside the source archive container. `A5_SERVICES=1` requests synthetic
-PostgreSQL/S3; `A5_IMAGE=1 A5_SERVICES=1` exercises the actual runtime.
+PostgreSQL/S3; `test-runtime A5_EXISTING_IMAGE=<qualified-image-id>`
+exercises the existing runtime and records its own source SHA. No new
+image is built by default. A new build requires separate authorization
+and the explicit `A5_BUILD_IMAGE=1` flag.
 Campaigns wait in 60-second intervals for every `radar-test-*` container,
 hold the machine lock, stop below 8 GiB and remove their own resources.
