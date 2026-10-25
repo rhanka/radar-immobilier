@@ -19,3 +19,11 @@ export async function resolveMcpSignalWorkspace(
   if (ids.length !== 1) throw new ScopeError(409, "workspace_ambiguous");
   return ids[0]!;
 }
+
+/** Re-read the whole set: the selected workspace token misses additions elsewhere. */
+export async function revalidateMcpSignalWorkspace(
+  db: Database, sub: string, workspaceId: string, selector?: string,
+): Promise<void> {
+  const current = await resolveMcpSignalWorkspace(db, sub, selector);
+  if (current !== workspaceId) throw new ScopeError(409, "workspace_context_changed");
+}
