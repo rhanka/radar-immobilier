@@ -5,7 +5,7 @@ MAILDEV_UI_PORT ?= 11927
 export ENV API_PORT UI_PORT MAILDEV_UI_PORT FILES MSG SCOPE
 .PHONY: FORCE
 FORCE:
-classification-targeted classification-qualify classification-types: FORCE
-	rtk bash tools/make/classification-verify.sh $(patsubst classification-%,%,$@)
+classification-targeted classification-qualify classification-types classification-test classification-typecheck classification-lint classification-ci: FORCE
+	rtk bash tools/make/classification-verify.sh $(subst lint,types,$(subst typecheck,types,$(subst test,targeted,$(subst ci,qualify,$(patsubst classification-%,%,$@)))))
 classification-%: FORCE
 	rtk bash tools/make/classification-deliver.sh $*

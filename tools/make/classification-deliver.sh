@@ -23,8 +23,8 @@ allowed() {
   esac
 }
 stats() {
-  awk '$1 !~ /^[0-9]+$/ || $2 !~ /^[0-9]+$/ {bad=1} {n++; total+=$1+$2}
-    END {print "files=" n " changed-lines=" total; if(bad || n<1 || n>15 || total>150) exit 1}'
+  awk '$1 !~ /^[0-9]+$/ || $2 !~ /^[0-9]+$/ {bad=1} {n++; total+=$1+$2; added+=$1; removed+=$2}
+    END {print "files=" n " added=" added " removed=" removed " changed-lines=" total; if(bad || n<1 || n>15 || total>150) exit 1}'
 }
 staged() {
   while IFS= read -r p; do allowed "$p"; done < <(git diff --cached --name-only)
@@ -59,18 +59,9 @@ case $action in
     if independent cat-file -e "$head^{commit}" 2>/dev/null; then exit 2; fi
     independent bundle verify "$out"
     independent fetch --no-tags "$out" HEAD:refs/heads/delivered
+    [[ $(independent rev-parse refs/heads/delivered) == "$head" ]]
     [[ $(independent rev-parse 'refs/heads/delivered^{tree}') == $(git rev-parse 'HEAD^{tree}') ]]
     independent fsck --full --no-reflogs
     sha256sum "$out"; git rev-parse HEAD; echo "$audit";;
-  test|typecheck|lint|ci)
-    flock -w 3600 7
-    while ! flock -n "${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock" true || [[ -n $(docker ps --format '{{.Names}}' --filter name=radar-test-) ]] || pgrep -f '^docker (build|buildx)' >/dev/null; do
-      echo 'Waiting for the active Docker campaign'; sleep 10
-    done
-    [[ $(df -Pk . | awk 'NR==2 {print $4}') -ge 8388608 ]] || exit 3
-    case $action in test) target=base-api-test-api;; typecheck) target=base-api-typecheck;; lint) target=base-api-lint;; ci) target=base-api-ci-api;; esac
-    export BASE_API_LINT_FILES
-    BASE_API_LINT_FILES=$(git diff --name-only "$BASE" -- api/src api/tests | tr '\n' ' ')
-    make -f tools/make/base-api.mk "$target" "SCOPE=${SCOPE:-}" "API_PORT=$API_PORT" "UI_PORT=$UI_PORT" "MAILDEV_UI_PORT=$MAILDEV_UI_PORT" "ENV=$ENV";;
   *) exit 2;;
 esac 7>tmp/classification-docker.lock
