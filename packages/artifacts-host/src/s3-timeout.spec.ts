@@ -49,11 +49,12 @@ describe("s3 operation timeout", () => {
   it("bounds blob reads and stays reusable afterwards", async () => {
     const inner = {
       getBlob: vi.fn((_key: string) => new Promise<Uint8Array>(() => {})),
-      listKeys: vi.fn(async () => ["a"]),
+      listKeys: vi.fn(async (_prefix: string) => ["artifacts/timeout/a"]),
     };
     const blobs = createTimeoutBlobStore(inner, 20);
     await expect(blobs.getBlob("missing")).rejects.toBeInstanceOf(ArtifactS3TimeoutError);
-    await expect(blobs.listKeys()).resolves.toEqual(["a"]);
+    await expect(blobs.listKeys("artifacts/timeout/")).resolves.toEqual(["artifacts/timeout/a"]);
+    expect(inner.listKeys).toHaveBeenCalledWith("artifacts/timeout/");
   });
 
   it("aborts a hanging S3 send and surfaces a typed error", async () => {
