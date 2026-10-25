@@ -49,6 +49,9 @@ cp valid.json input.json
 reject activate
 reject resume
 reject close
+jq '.backup.reference="https://backup.invalid/object?token=synthetic"' valid.json > input.json
+reject validate
+cp valid.json input.json
 n=$((n+1))
 if make --no-print-directory -f deploy/base-preprod/operator.mk activate OUTPUT="$testdir/out-$n" ENV=preprod > /dev/null 2>&1; then exit 1; fi
 canary=$testdir/injected
