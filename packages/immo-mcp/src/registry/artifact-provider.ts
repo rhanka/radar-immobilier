@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { CallToolResult, Tool } from "@modelcontextprotocol/sdk/types.js";
 import { compileArtifactsProfile, RADAR_ARTIFACTS_PROFILE, createArtifactsManifest,
-  createArtifactsToolExecutor, type ArtifactsApp } from "@sentropic/artifacts/mcp-core";
+  createArtifactsToolExecutor, ArtifactProfileInputError, type ArtifactsApp } from "@sentropic/artifacts/mcp-core";
 import type { ArtifactInvocationContext, AuthorizeCommit } from "@sentropic/artifacts/server/commit-contract";
 import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-stateful";
 import { computeManifestDigest, type RegistryDefinition } from "@sentropic/cluster-mesh/mcp/registry";
@@ -20,6 +20,8 @@ export const IMMO_ARTIFACT_MANIFEST = freeze(createArtifactsManifest({
 export const IMMO_ARTIFACT_MANIFEST_DIGEST = computeManifestDigest(IMMO_ARTIFACT_MANIFEST);
 const bindings = new WeakSet<object>();
 const unavailable = async (): Promise<never> => { throw new Error("native_wire_dispatch_required"); };
+const refusal = (error: string, retryable: boolean): CallToolResult => ({ isError: true,
+  content: [{ type: "text", text: JSON.stringify({ error, retryable }) }] });
 
 export interface ArtifactMcpBinding {
   readonly manifest: RegistryDefinition["manifest"];
@@ -49,18 +51,24 @@ export function bindArtifactProvider(options: {
     }))),
     async invoke(tool: string, args: unknown, request: VerifiedMcpRequest): Promise<CallToolResult> {
       // Selection/input refusal happens before minting any host authority.
-      IMMO_ARTIFACT_PROFILE.validate(tool, args);
+      try { IMMO_ARTIFACT_PROFILE.validate(tool, args); }
+      catch (error) {
+        if (error instanceof ArtifactProfileInputError) return refusal(error.publicCode, error.retriable);
+        throw error;
+      }
       if (!request.principal.scopes.includes(ARTIFACT_INVOCATION_SCOPE)) throw new Error("artifact_scope_denied");
+      let authority: AuthorizeCommit;
+      try {
+        authority = authorizeCommit(request);
+        if (typeof authority !== "function") throw new Error("artifact_authority_unavailable");
+      } catch { return refusal("capability_unavailable", true); }
       const invocation: ArtifactInvocationContext = Object.freeze({
         invocationId: randomUUID(), actorId: request.principal.sub, storageScopeId: scope,
-        authorizeCommit: authorizeCommit(request),
+        authorizeCommit: authority,
       });
       const outcome = await executor.execute({ tool, args, invocation });
-      const payload = outcome.ok ? outcome.result.body : {
-        error: outcome.failure.publicCode, retryable: outcome.failure.retriable,
-      };
-      return { ...(outcome.ok ? {} : { isError: true }),
-        content: [{ type: "text", text: JSON.stringify(payload) }] };
+      if (!outcome.ok) return refusal(outcome.failure.publicCode, outcome.failure.retriable);
+      return { content: [{ type: "text", text: JSON.stringify(outcome.result.body) }] };
     },
   });
   bindings.add(binding);
@@ -74,6 +82,7 @@ export function assertArtifactBinding(value: ArtifactMcpBinding): void {
 /** The stateful bridge is the only active dispatcher, just like the twelve Immo tools. */
 export const ARTIFACT_NATIVE_ADAPTER = Object.freeze({
   appId: IMMO_ARTIFACT_MANIFEST.appId, connectorId: IMMO_ARTIFACT_MANIFEST.providerId,
-  manifest: IMMO_ARTIFACT_MANIFEST, resolveTenant: unavailable, listCapabilities: unavailable,
+  manifest: IMMO_ARTIFACT_MANIFEST, resolveTenant: unavailable,
+  listCapabilities: async () => [...IMMO_ARTIFACT_MANIFEST.tools],
   invokeTool: unavailable, readResource: unavailable, validateSecrets: unavailable,
 });

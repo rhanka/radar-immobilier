@@ -26,7 +26,7 @@ function setup() {
 }
 
 describe("P7 trusted artifact binding", () => {
-  it("should refuse app/profile mismatch and missing authority at construction", () => {
+  it("should refuse app/profile mismatch and missing authority at construction", async () => {
     const h = setup();
     expect(() => bindArtifactProvider({ app: { ...h.app, profileDigest: "other" },
       storageScopeId: "synthetic", authorizeCommit: h.createGuard })).toThrow("app/profile mismatch");
@@ -34,6 +34,7 @@ describe("P7 trusted artifact binding", () => {
       authorizeCommit: h.createGuard })).toThrow("artifact_binding_incomplete");
     expect(Object.isFrozen(IMMO_ARTIFACT_MANIFEST.tools[0]!.requiredScopes)).toBe(true);
     expect(Object.isFrozen(h.binding.configuration)).toBe(true);
+    expect((await ARTIFACT_NATIVE_ADAPTER.listCapabilities()).map((tool) => tool.name)).toEqual(profile.selectedCapabilities);
   });
 
   it("should close the entire namespace for an unrecognized binding", async () => {
@@ -47,7 +48,9 @@ describe("P7 trusted artifact binding", () => {
 
   it("should refuse direct unselected dispatch and removed scope before creating authority", async () => {
     const h = setup();
-    await expect(h.binding.invoke("artifacts_delete", {}, authority)).rejects.toThrow();
+    const unselected = await h.binding.invoke("artifacts_delete", {}, authority);
+    expect(unselected.isError).toBe(true);
+    expect(JSON.stringify(unselected)).toContain("capability_unavailable");
     await expect(h.binding.invoke("artifacts_list", {}, {
       ...authority, principal: { ...authority.principal, scopes: [] },
     })).rejects.toThrow("artifact_scope_denied");
@@ -65,5 +68,28 @@ describe("P7 trusted artifact binding", () => {
     expect(JSON.stringify(result)).not.toContain("private driver");
     expect(h.execute).toHaveBeenCalledTimes(1);
     expect(h.createGuard).toHaveBeenCalledExactlyOnceWith(authority);
+  });
+
+  it("should return a public refusal for semantic input errors without creating authority", async () => {
+    const h = setup();
+    const result = await h.binding.invoke("artifacts_ensure", {
+      bindingName: "x", idempotencyKey: "\ud800",
+    }, authority);
+    expect(result.isError).toBe(true);
+    expect(JSON.parse((result.content[0] as { text: string }).text))
+      .toEqual({ error: "invalid_request", retryable: false });
+    expect(h.createGuard).not.toHaveBeenCalled();
+    expect(h.execute).not.toHaveBeenCalled();
+  });
+
+  it("should refuse unavailable invocation authority before dispatch without exposing its cause", async () => {
+    const h = setup();
+    h.createGuard.mockImplementation(() => { throw new Error("private authority query"); });
+    const result = await h.binding.invoke("artifacts_list", {}, authority);
+    expect(result.isError).toBe(true);
+    expect(JSON.parse((result.content[0] as { text: string }).text))
+      .toEqual({ error: "capability_unavailable", retryable: true });
+    expect(JSON.stringify(result)).not.toContain("private authority query");
+    expect(h.execute).not.toHaveBeenCalled();
   });
 });

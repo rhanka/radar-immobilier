@@ -10,7 +10,7 @@ const config: ImmoHttpConfig = {
   scopesSupported: ["immo:read"], dataMode: "simulation", port: 0,
   sessionIdleTimeoutMs: 1000, sessionMaxLifetimeMs: 2000,
 };
-async function setup() {
+async function setup(withAccountBinding = true) {
   const keys = await generateKeyPair("RS256");
   const seen: ArtifactInvocationContext[] = [];
   const execute = vi.fn<ArtifactsApp["execute"]>(async (_request, invocation) => {
@@ -23,7 +23,8 @@ async function setup() {
   const artifacts = bindArtifactProvider({ app: { execute, profileDigest: profile.profileDigest,
     selectedCapabilities: profile.selectedCapabilities }, storageScopeId: "synthetic-scope", authorizeCommit: createGuard });
   const authorize = vi.fn(async () => true);
-  const app = createImmoHttpApp(config, { artifacts, authorize, keySource: { resolveKey: async () => keys.publicKey } });
+  const app = createImmoHttpApp(config, { artifacts, ...(withAccountBinding ? { authorize } : {}),
+    keySource: { resolveKey: async () => keys.publicKey } });
   const token = (scope = "immo:read") => new SignJWT({ scope }).setIssuer(config.issuer).setAudience(config.resource)
     .setSubject("alice").setIssuedAt().setExpirationTime("5m").setProtectedHeader({ alg: "RS256" }).sign(keys.privateKey);
   const post = async (message: object, session?: string, scope?: string) => app.request("/mcp", { method: "POST",
@@ -75,5 +76,14 @@ describe("P7 composed transport (contract double; no storage qualification)", ()
     })).json();
     expect(result.result.isError).not.toBe(true);
     expect(h.execute).toHaveBeenCalledTimes(1);
+  });
+
+  it("should deny artifact effects when the account port is absent even with fixture business data", async () => {
+    const h = await setup(false);
+    const result = await (await h.call("artifacts_list")).json();
+    expect(result.result.isError).toBe(true);
+    expect(result.result.content[0].text).toContain("composition_account");
+    expect(h.execute).not.toHaveBeenCalled();
+    expect(h.createGuard).not.toHaveBeenCalled();
   });
 });
