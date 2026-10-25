@@ -435,10 +435,22 @@ reference starts with the full 40-character SHA and points to the qualified imag
 digest dossier. Supply backup SHA-256 and a restore-rehearsal receipt/timestamp;
 this tool neither dumps nor restores the operational database.
 
+The operator image must be built with `GIT_SHA` equal to the **full** release
+SHA. `/workspace/api/release-sha` is written in the image layer and checked
+before any database connection; an environment override cannot change that
+identity. Images stamped with a short SHA must be rebuilt for this vehicle.
+Use the published platform manifest digest observed in the pod's `imageID`,
+not a multi-platform index or a local image configuration ID. Collection
+compares the input, Job template, pod specification, runtime digest, full
+receipt and termination receipt. A mismatch retains the boundary and fails.
+
 Initially bind the target workspace slug with `workspaceId:null` for inspection
 and initialization. The initializer creates or resolves its UUID; copy the actual
 `result.workspaceId` into subsequent inputs. Never invent a destination UUID.
 Use a fresh `jobName` per action. Set `operation` to the exact script action.
+An `init` input with any non-null workspace UUID is refused, including replay.
+The returned UUID is resolved back to the declared slug before emitting the
+receipt; collection checks `result.workspaceSlug` as well.
 The two distinct subjects in `moderators` and `managers` must be the same approved
 pair. Include **every** approved account in attachments, including empty history.
 
@@ -471,6 +483,14 @@ deadline and permanent `/bin/false` readiness. Check `radar-api`'s selector and
 Do not exec into a scaled-down API Deployment. A compact termination receipt
 hashes the complete stdout receipt; collection checks both. Job Complete alone
 is insufficient. Keep the Job on any failure, and retain the full hashed evidence.
+Both Complete and Failed outcomes trigger collection. A nonzero script outcome
+still fails the Make command after retaining its verified receipt, including
+`activation-committed-readback-pending`. To recover receipts without creating
+or mutating any Job, use a fresh OUTPUT directory:
+
+```sh
+rtk make -f deploy/base-preprod/operator.mk collect-job INPUT='<EXACT_JOB_INPUT_JSON>' OUTPUT='<NEW_COLLECTION_DIR>' ENV=preprod
+```
 
 Freeze and close before the first 6H transition. `freeze-cd` saves the workflow
 state, disables `build-push-images.yml`, and refuses remaining nonterminal runs.
@@ -505,7 +525,7 @@ a business session. Preserve hostname/TLS/OIDC. An API-path allowlist alone is
 insufficient. Keep full route snapshots in restricted evidence storage, never
 environment dumps or document content.
 
-Prepare observation JSON with `binding` identical to the input, and
+Prepare observation JSON with `binding` and `image` identical to the input, and
 `observations.networkAllowed`, `networkDenied`, `sessionRequired`,
 `externalStopped`, `streamsTerminated`, `mcpSuccessor`. Each attestation carries
 the same `binding`, `reference`, `sha256`, `observedAt` and `passed:true`;
@@ -526,6 +546,12 @@ consumer replicas, suspended schedules, no active Jobs, no ready consumer
 endpoints, API Service selector/no publishing of unready addresses, disabled CD
 and no nonterminal Actions runs. It checks DB migration/roster/attachment,
 manager, lock/drop/function/statistics authority and quiet transaction receipts.
+`base-preprod-rights.json` is the shared per-operation SQL matrix. SELECT FOR
+SHARE/UPDATE needs UPDATE, which DELETE/TRUNCATE lock authority cannot replace.
+Activation requires all five ACCESS EXCLUSIVE locks (including bindings),
+context insertion, state updates, function execution and effective index-owner
+authority. The Job rechecks actual rights before launching any mutating child;
+missing privileges never trigger automatic grants or barrier persistence.
 It derives drain/shutdown coverage from the independent roster after these
 controls; the separate stream/buffer/external observations remain mandatory.
 Activation/resume repeat live closure checks and verify that the configured MCP
@@ -554,6 +580,16 @@ and `mcpSuccessorDeployed:true`. `q1` and `q2` each carry `reference`, `sha256`,
 UTC `observedAt` and `passed:true`; Q2 additionally requires `afterRestart:true`
 and an observation after Q1. Q1 is required to request the restart; both are
 required to reopen. Re-read durable states and actual served image in each pass.
+Each qualification also carries `instance`, copied from the relevant
+`api-instance.json`: deployment UID/generation, template hash, restart annotation,
+pod UID, container ID, restart count, start time, image and runtime image ID.
+`restart-api` verifies Q1 against the live instance, then writes `restart.json`
+after rollout. Embed that full object as `restart` in Q2 acceptance and copy
+its `instance` into `q2.instance`. Q2 must be observed after the restart
+completion, container start and restart annotation. Reopening compares Q2 to
+the live instance again: another rollout, configuration change, replacement
+pod or container restart invalidates Q2 even with the same digest and attempt.
+Requalify Q1/restart/Q2 for the current instance; never reuse an older receipt.
 These fields summarize the referenced full tests; they never replace them.
 
 Under admitted browser sessions, qualify workspaces, coherent-city signals,
