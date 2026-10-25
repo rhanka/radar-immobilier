@@ -31,8 +31,14 @@ done
 exec 9>"$RUN_DIR/lock"
 flock -n 9 || exit 2
 exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
-flock -n 8 || exit 2
-[[ -z $(docker ps -q) ]]
+while :; do
+  if flock -n 8; then
+    if [[ -z $(docker ps -q) ]]; then break; fi
+    flock -u 8
+  fi
+  printf '%s WAIT global campaign reservation\n' "$(date -u +%FT%TZ)" | tee -a "$LOG_DIR/wait.log"
+  sleep 60
+done
 git --git-dir="$ROOT/tmp/a2base-rest-delivery.git" rev-parse HEAD > "$LOG_DIR/candidate-sha.txt"
 OWNER=$(printf '%s' "$ROOT/$ENV" | sha256sum | cut -d' ' -f1)
 export COMPOSE_DISABLE_ENV_FILE=1

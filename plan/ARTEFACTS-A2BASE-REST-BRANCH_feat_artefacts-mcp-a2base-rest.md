@@ -45,6 +45,7 @@
 - [x] Image preparation written: locked dependencies, API declaration build and production-style bundles; network fixture imports compiled API/MCP entrypoints in the image, without source mounts or installs at runtime.
 - [x] Qualification can keep a single owned stack for static checks, explicit API/MCP scopes, eleven mutants with controls, declaration/bundle build and eight compiled-image network cases.
 - [x] Static runner proof PASS: require_scope accepts the explicit network suite and rejects the directory prefix from design review r2; mutation receipts include executed control counts.
+- [x] Reservation race reproduced: local flock available, global flock busy and a new E3 stack started after the empty-container observation. Retry the global reservation every 60 seconds and recheck containers while holding it; never start a second stack or treat reservation failure as qualification.
 - [ ] Qualification: scoped checks and authority/masking mutations, no required skipped cases.
 
 ## Docs consolidation
