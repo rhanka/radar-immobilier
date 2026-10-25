@@ -10,7 +10,7 @@
 
 ## Affected and exposure
 
-The installed root tree has exactly two relevant instances: `node_modules/zod@3.25.76` and `node_modules/body-parser@2.3.0`. There is no body-parser 1.x instance. Installed manifests, `npm ls --all`, `npm explain`, and the lockfile agree. All Zod consumers share the root instance; no nested Zod copy was found.
+The initial root tree inspected on 2026-10-24 had two relevant instances: `node_modules/zod@3.25.76` and `node_modules/body-parser@2.3.0`. The remediated tree has body-parser 2.4.0 and retains Zod 3.25.76. There is no body-parser 1.x instance. Installed manifests, `npm ls --all`, `npm explain`, and the lockfile agree. All Zod consumers share the root instance; no nested Zod copy was found.
 
 | Zod consumer (installed path relative to root) | Version | Declared dependency / peer range |
 | --- | --- | --- |
@@ -51,13 +51,14 @@ The installed root tree has exactly two relevant instances: `node_modules/zod@3.
 
 The audit marks every version below 4.6.6 affected, including installed 3.25.76. The registry provides 4.6.6, but no patched stable 3.x release. A global override to 4.x would both change the installed major and violate five workspace dependency ranges and both Ollama peer ranges. Adding another 4.x copy would leave the affected 3.x instance installed. Neither is a fix permitted by this campaign.
 
-1. **Compatible upstream backport:** retain Zod 3 until a published 3.x security backport is available and the advisory recognizes it. Impact: no application migration, but the high finding remains blocking meanwhile. Acceptance: compatible installed tree and read-only audit showing the advisory removed.
+1. **Compatible upstream backport:** retain Zod 3 until a published 3.x security backport is available and the advisory recognizes it. Impact: no application migration; the high finding is temporarily covered by the owner's 2026-10-25 acceptance through 2026-11-08 UTC inclusive, and blocks again from 2026-11-09 UTC unless remediated or explicitly renewed. Acceptance: compatible installed tree and read-only audit showing the advisory removed.
 2. **Separately authorized Zod 4 migration:** migrate the five workspace consumers and replace/remove the Ollama/provider-utils 2.x dependency chain through a compatible Graphify/provider migration. Impact: schema, error/default behavior, JSON-schema and provider contract changes requiring dedicated API/domain/MCP/provider validation. Updating Graphify alone cannot fix the five direct Zod 3 consumers. Acceptance: no installed affected Zod instance, no invalid peers, full gates and zero high/critical findings.
 
-No major upgrade, peer override or security-register suppression was introduced. The remediation itself does not reach zero high findings; the Zod exception below is a separate, time-boxed owner decision.
+The initial remediation on 2026-10-24 introduced no major upgrade, peer override or security-register suppression, and did not reach zero high findings. The owner's separate 2026-10-25 decision now covers the three exact Zod-related high entries through 2026-11-08 UTC inclusive; the audit gate enforces that time-boxed register acceptance. Zod itself remains vulnerable.
 
 ## Verification
 
+- PR912 second-pass register contract: `tools/security/audit-register.mjs` uses the existing `yaml` dependency (resolved as 2.9.0 from `tools/security` in both test and CI base + dev containers). Only the root `exceptions` sequence is read; unknown keys, duplicate keys, aliases, multiple documents and invalid row structures fail closed. Required metadata, affected package/version, rationale, finding reference and removal plan are typed and non-empty. Accepted rows additionally require a text signer, acceptance date, review date and expiration date; calendar dates are validated. Proposed/resolved rows retain their unsigned status and never suppress a finding, but their schema is still validated. No dependency or manifest change is required.
 - Read-only final `npm audit --json` exits 1: 0 critical, 3 high, 2 moderate, 1 low package entries. body-parser and GHSA-27r3-jxmh-p828 disappear; all other vulnerability records are identical. SHA-256 checks confirm that both audits leave the manifest and lockfile unchanged. The post-`npm ci` installed tree has body-parser 2.4.0 and Zod 3.25.76 with no invalid peers. Runtime: Node 24.22.1, npm 11.19.1.
 - Root lint, all-workspace typecheck (0 errors, 7 Svelte warnings), API/UI builds and browser-bundle smoke pass. The final CI `test` target passes all seven workspaces: 7,006 passed, 260 skipped, 10 todo. API: 3,010 passed, 260 skipped; UI: 1,894 passed, 10 todo. Existing conditional selections are retained.
 - The first full run exits 1 despite all 7,006 assertions passing: `artifacts-commit-probe.spec.ts` exceeds its 20-second `afterAll` timeout while cleaning S3/Postgres. The precise stalled operation is unknown. Its four tests and cleanup then pass in isolation in 4.88 seconds; the full unchanged command also passes on rerun. No timeout/assertion/exclusion is modified and no flaky acceptance is claimed; the initial failure remains in the evidence.
