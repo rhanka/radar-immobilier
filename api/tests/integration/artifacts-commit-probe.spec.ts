@@ -1,4 +1,8 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+vi.mock("@sentropic/artifacts/http", async (original) => {
+  const { withCandidateProfile } = await import("./artifacts-legacy-profile.helpers.js");
+  return withCandidateProfile(await original<typeof import("@sentropic/artifacts/http")>());
+});
 import pg from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
