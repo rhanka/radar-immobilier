@@ -40,7 +40,7 @@ describe("OAuth protected resource discovery", () => {
     expect(res.status).toBe(404);
   });
 
-  it("follows the historical resource_metadata URL advertised by mcp-auth 0.1.0", async () => {
+  it("follows the canonical resource_metadata URL advertised by mcp-auth 0.2.1", async () => {
     const app = createApp();
     const denied = await app.request("/mcp", { method: "POST" });
     expect(denied.status).toBe(401);
@@ -48,7 +48,7 @@ describe("OAuth protected resource discovery", () => {
     expect(challenge).toMatch(/^Bearer /);
     expect(challenge).toContain('error="invalid_token"');
     const advertised = /resource_metadata="([^"]+)"/.exec(challenge)?.[1];
-    expect(advertised).toBe(`https://immo.test.local${LEGACY_PATH}`);
+    expect(advertised).toBe(`https://immo.test.local${CANONICAL_PATH}`);
     const res = await app.request(advertised!);
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toContain("application/json");

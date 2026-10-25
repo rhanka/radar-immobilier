@@ -78,12 +78,18 @@ describe("check-archi FACE-2 — chaque payload servi PORTE regulatoryStatus", (
     expect(read("api/src/scripts/export-designation-events.ts")).toContain("regulatoryStatus: readRegulatoryStatus({");
   });
 
-  it("immo-mcp : MockSignal porte regulatoryStatus, LU en passthrough (0 dérivation, 0 dép @radar/domain)", () => {
+  it("should preserve validated MCP regulatory status without local classification", async () => {
     const mocks = read("packages/immo-mcp/src/mocks.ts");
     expect(mocks).toContain('regulatoryStatus: "firm" | "anticipation"');
     const dataSource = read("packages/immo-mcp/src/data-source.ts");
-    // Passthrough du champ servi + fail-safe, jamais re-classifié.
-    expect(dataSource).toContain('regulatoryStatus: node.regulatoryStatus ?? "anticipation"');
+    const { parseSignalSearchResponse } = await import(resolve(REPO_ROOT, "packages/immo-mcp/src/signal-search-response.ts"));
+    const { signalSearchBody, signalSearchItem } = await import(resolve(REPO_ROOT, "packages/immo-mcp/src/signal-search-test-fixture.ts"));
+    for (const regulatoryStatus of ["firm", "anticipation"]) {
+      const body = signalSearchBody("synthetic-city", [signalSearchItem("synthetic-city", { regulatoryStatus })]);
+      expect(parseSignalSearchResponse(body, { city: "synthetic-city", limit: 20 })[0]?.regulatoryStatus).toBe(regulatoryStatus);
+    }
+    const missing = signalSearchBody("synthetic-city", [signalSearchItem("synthetic-city", { regulatoryStatus: undefined })]);
+    expect(() => parseSignalSearchResponse(missing, { city: "synthetic-city", limit: 20 })).toThrowError(expect.objectContaining({ code: "radar_api_bad_payload" }));
     // Découplage volontaire : le MCP ne dépend PAS du classifieur (le ré-importer/
     // ré-implémenter serait l'anti-pattern re-classifieur).
     expect(dataSource, "immo-mcp reste découplé de @radar/domain (passthrough only)").not.toContain(

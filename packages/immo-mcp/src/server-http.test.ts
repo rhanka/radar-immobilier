@@ -24,7 +24,7 @@ import { createIsolatedExchangeFixture, exchangeDepsFor } from "./test-exchange-
 const ISSUER = "https://auth.test.local";
 const RESOURCE = "https://immo.test.local/mcp";
 const SUPPORTED = ["immo:read", "immo:search", "immo:documents:read"];
-const PRM_PATH = "/.well-known/oauth-protected-resource";
+const PRM_PATH = "/.well-known/oauth-protected-resource/mcp";
 
 const CONFIG: ImmoHttpConfig = {
   issuer: ISSUER,
@@ -92,8 +92,8 @@ beforeAll(async () => {
 
 describe("immo-mcp remote (Streamable HTTP + OAuth RS)", () => {
   it("(a) serves the RFC 9728 PRM and rejects an unauthenticated /mcp with WWW-Authenticate", async () => {
-    // The installed 0.1.0 challenge keeps advertising the historical URL.
-    const prm = await app.request(`/mcp${PRM_PATH}`);
+    // The compatible auth tuple advertises the RFC 9728 canonical URL.
+    const prm = await app.request(PRM_PATH);
     expect(prm.status).toBe(200);
     const prmDoc = (await prm.json()) as Record<string, unknown>;
     expect(prmDoc["resource"]).toBe(RESOURCE);
@@ -111,7 +111,7 @@ describe("immo-mcp remote (Streamable HTTP + OAuth RS)", () => {
     const challenge = res.headers.get("www-authenticate") ?? "";
     expect(challenge).toMatch(/^Bearer /);
     expect(challenge).toContain('error="invalid_token"');
-    expect(challenge).toContain(`resource_metadata="${RESOURCE}${PRM_PATH}"`);
+    expect(challenge).toContain(`resource_metadata="${new URL(RESOURCE).origin}${PRM_PATH}"`);
   });
 
   it("(b) accepts the original MCP-audience token for initialize and tool calls", async () => {

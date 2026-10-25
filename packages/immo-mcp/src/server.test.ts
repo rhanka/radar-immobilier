@@ -11,7 +11,7 @@ const STUB_ENV: NodeJS.ProcessEnv = {
 };
 
 async function connectClient(env: NodeJS.ProcessEnv = STUB_ENV): Promise<Client> {
-  const server = buildImmoServer(env);
+  const server = await buildImmoServer(env);
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
   const client = new Client({ name: "immo-test-client", version: "0.0.0" });
   await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);

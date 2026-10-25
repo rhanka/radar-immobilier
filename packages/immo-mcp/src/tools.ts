@@ -11,6 +11,7 @@ import type { RawDataSource } from "./raw-data.js";
 import {
   captureInvocationContext,
   getInvocationContext,
+  type InvocationContext,
 } from "./invocation-context.js";
 import { ALL_TOOL_DEFINITIONS } from "./tool-definitions.js";
 import { RadarSignalReadError } from "./signal-read-error.js";
@@ -24,16 +25,9 @@ export interface ToolContext {
 }
 
 /**
- * Registers every read-only tool on the server: the 6 v0 domain tools
- * (backed by `ctx.data`) + the 6 raw-data tools (backed by `ctx.raw` —
- * zones/lots GeoJSON, grille & PV PDFs). Shared by BOTH transports
- * (server.ts stdio and server-http.ts Streamable HTTP).
- *
- * P1 keeps this function the single SDK registrar: contracts come from
- * `tool-definitions.ts`, implementations from `tool-handlers.ts`. Each call
- * runs on an immutable snapshot (ambient invocation when the HTTP host set
- * one, else a fresh capture of these seeds) so concurrent requests on one
- * session cannot exchange identities or credentials.
+ * SDK contract harness for baseline and handler-binding tests. Production HTTP
+ * and fixture stdio install the cluster-mesh bridge instead. Both paths call
+ * the same native handler function below with an immutable invocation snapshot.
  */
 export function registerTools(server: McpServer, ctx: ToolContext): void {
   for (const def of ALL_TOOL_DEFINITIONS) {
@@ -46,6 +40,17 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
         const snapshot =
           getInvocationContext() ??
           captureInvocationContext({ auth: ctx.auth, data: ctx.data, raw: ctx.raw });
+        return invokeTool(def.name, args as Record<string, unknown>, snapshot);
+      },
+    );
+  }
+}
+
+/** Native wire result shared by composition and the contract-test registrar. */
+export async function invokeTool(name: string, args: Record<string, unknown>, snapshot: InvocationContext): Promise<ToolTextResult> {
+        const def = ALL_TOOL_DEFINITIONS.find((entry) => entry.name === name);
+        const handler = TOOL_HANDLERS[name];
+        if (!def || !handler) throw new Error(`missing_handler:${name}`);
         const correlationId = randomUUID();
         try {
           assertScope(snapshot.auth, def.scope);
@@ -74,9 +79,6 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
           result.isError = true;
           return result;
         }
-      },
-    );
-  }
 }
 
 /** Names of the tools registered in v0 (used by tests + docs). */
