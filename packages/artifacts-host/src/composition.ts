@@ -12,6 +12,8 @@ import type { ActivationConfig } from "./activation.js";
 import { initializeArtifactScope } from "./storage.js";
 import { createHostPolicy, authorizeArtifactCommit } from "./commit-policy.js";
 import { createCommitDomain } from "./commit-domain.js";
+import { startPreparationCleanup } from "./preparation-cleanup.js";
+import { projectArtifactWriteFailure } from "@sentropic/artifacts/server/outcome-contract";
 import { createTimeoutBlobStore, createTimeoutS3Client, S3_OPERATION_TIMEOUT_MS } from "./s3-timeout.js";
 
 export interface ArtifactHostOptions {
@@ -59,8 +61,23 @@ export async function composeArtifactHost(
         pinnedUrl: `https://${releaseId}.pinned.${options.contentBase}/`,
       }) } : {}),
     });
-    return { ...domain, coordinator, blobs, intents: domain.store, refs: domain.store,
+    const cleanup = startPreparationCleanup(pool, domain.store, blobs, options.onProviderFailure);
+    const execute: typeof domain.execute = async (request, invocation) => {
+      const outcome = await domain.execute(request, invocation);
+      if (!outcome.ok) {
+        const entry = projectArtifactWriteFailure(outcome.failure, {
+          dispatched: true, write: request.method === "POST" && ["/ensure", "/publish"].includes(request.path),
+        });
+        if (entry) await pool.query(
+          `INSERT INTO artifacts.host_failures (invocation_id, actor_id, operation, reason, status, at_ms)
+           VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (invocation_id) DO NOTHING`,
+          [entry.invocationId, invocation.actorId, entry.operation, entry.reason, entry.status, Date.now()]);
+      }
+      return outcome;
+    };
+    return { ...domain, app: { ...domain.app, execute }, execute, coordinator, blobs,
+      cleanup, intents: domain.store, refs: domain.store,
       selectedCapabilities: domain.app.selectedCapabilities, profileDigest: domain.app.profileDigest,
-      authorizeCommit: authorizeArtifactCommit, close: () => client.destroy() };
+      authorizeCommit: authorizeArtifactCommit, close: () => { cleanup.stop(); client.destroy(); } };
   } catch (error) { client.destroy(); throw error; }
 }
