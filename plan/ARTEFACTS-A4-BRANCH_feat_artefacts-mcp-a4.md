@@ -1,7 +1,7 @@
 # Feature: H4 P6 stateful MCP composition
 
 ## Objective
-- [ ] Compose twelve existing tools through cluster-mesh with request-bound authority.
+- [x] Compose twelve existing tools through cluster-mesh with request-bound authority.
 
 ## Scope / Guardrails
 - [x] Assigned worktree/branch; baseline `77cb9553`; no push or deployment.
@@ -34,11 +34,11 @@
 - [x] Lot 1: published MCP tuple and required compatibility; API artifact service migration belongs to A5.
 - [x] Lot 2: single bridge, twelve bindings and session lifecycle.
 - [x] Lot 3: synthetic stdio and trusted account binding.
-- [x] Lot 4: 384 ordinary MCP tests; 3,838 API tests (76 configured pending); 158 host tests; six isolated composition/exchange cases; two killed mutants with restored controls; workspace typecheck/lint, audit gate and API build; actual P6 runtime proof.
+- [x] Lot 4: 388 ordinary MCP tests; 3,838 API tests (76 configured pending); 158 host tests; nine isolated composition/exchange cases; three killed mutants with restored controls; workspace typecheck/lint, audit gate and API build; actual P6 runtime proof including idle/active PostgreSQL disconnect recovery.
 - [x] Lot 5: atomic commit audit and independent base-relative bundle import; the final report accompanies the bundle, recording its final SHA-256 without a recursive self-reference.
 - [x] Review fixes 0: real-backend disconnect probe, machine-wide build exclusion and correction-only delivery tooling.
 - [x] Review fixes 0b: closed-composition 503/size-only 413 tests; synthetic stdio audit assertion and README boundary; process-death mutation harness ready.
 - [x] Review fixes 1: crash reproduced by idle backend termination; PostgreSQL pool recovery and request-local retriable errors implemented; closed-composition status and synthetic stdio audit/docs corrected.
 - [x] Review fixes 1b: 12 focused cases passed; isolate the probe's lock transaction from activity polling so PostgreSQL statistics snapshots stay current.
 - [x] Review fixes 2a: API 3,838 passed/76 pending; MCP 388, host 158, composition/exchange 9; three mutants killed; workspace typecheck passed. Replace the probe's lint-rejected this-alias with the spy's recorded context.
-- [ ] Review fixes 2: MCP/composition/API CI collection, image, lint/typecheck and independently imported bundle.
+- [x] Review fixes 2: MCP/composition/API CI collection, image, lint/typecheck and independently imported correction bundle from `c49bb854`; final receipts accompany the bundle outside Git.
