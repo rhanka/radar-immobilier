@@ -30,7 +30,7 @@ describe("bounded classification presentation", () => {
     const local = "/api/documents/raw?rawRef=raw%2Fcity%2Fpv%20one.pdf";
     expect(publicDocumentUrl(local, "https://api.example.test")).toBe(`https://api.example.test${local}`);
     expect(publicDocumentUrl(local)).toBeNull();
-    for (const value of ["/other/path", "//attacker.test/a", "javascript:alert(1)", "https://user:password@host.test/a", `https://host.test/${"x".repeat(8192)}`]) {
+    for (const value of ["/other/path", "/api/documents/raw?url=https://attacker.test", "/api/documents/raw?rawRef=raw%2F..%2Fprivate", "//attacker.test/a", "javascript:alert(1)", "https://user:password@host.test/a", `https://host.test/${"x".repeat(8192)}`]) {
       expect(publicDocumentUrl(value, "https://api.example.test")).toBeNull();
     }
   });
