@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source tools/make/base-preprod-api-identity.sh
 permissions() {
   local resource verb
   : > "$OUTPUT/permissions.tsv"
@@ -198,19 +199,25 @@ start-api() {
   "${k[@]}" set image deployment/radar-api "api=$(jq -r .image "$INPUT")" > "$OUTPUT/api-image.txt"
   "${k[@]}" scale deployment/radar-api --replicas=1 >> "$OUTPUT/api.txt"
   "${k[@]}" rollout status deployment/radar-api --timeout=180s >> "$OUTPUT/api.txt"
+  api_identity
   echo 'Keep the operator boundary; qualify Q1 before restart-api.'
 }
 restart-api() {
   qualification_receipt
   assert_cd_frozen; assert_boundary
+  assert_api_instance q1
   "${k[@]}" rollout restart deployment/radar-api > "$OUTPUT/restart.txt"
   "${k[@]}" rollout status deployment/radar-api --timeout=180s >> "$OUTPUT/restart.txt"
+  api_identity
+  jq -n --slurpfile c "$INPUT" --slurpfile instance "$OUTPUT/api-instance.json" --arg now "$(date -u +%FT%TZ)" \
+    '{binding:$c[0].binding,image:$c[0].image,completedAt:$now,instance:$instance[0]}' > "$OUTPUT/restart.json"
   echo 'Keep the operator boundary; qualify Q2 on the final image before reopen-api.'
 }
 reopen-api() {
   qualification_receipt
   jq -e '.q2.passed==true' "$PROOFS" >/dev/null
   assert_cd_frozen; assert_boundary
+  assert_api_instance q2
   [[ $("${k[@]}" get deployment radar-api -o jsonpath='{.spec.template.spec.containers[0].image}') == $(jq -r .image "$INPUT") ]]
   local available
   available=$("${k[@]}" get deployment radar-api -o jsonpath='{.status.availableReplicas}')

@@ -4,6 +4,9 @@ jq '.maintenance={middleware:"base-maintenance-fixture",sources:["198.51.100.23/
  | .mcpDeployment="fixture-mcp" | .apiIngress="fixture-app"' input.json > enriched.json
 cp enriched.json input.json
 cp good-proofs.json proofs.json
+jq -n --slurpfile c input.json --arg now "$now" '{deploymentUid:"synthetic-api-deployment",generation:"2",
+  restartedAt:$now,podUid:"synthetic-api-pod",templateHash:"synthetic-template",containerId:"containerd://synthetic",
+  restartCount:"0",startedAt:$now,image:$c[0].image,imageID:("containerd://"+($c[0].image|split("@")[1]))}' > api-fixture.json
 cat > bin/kubectl <<'FAKE'
 #!/usr/bin/env bash
 set -eu
@@ -15,6 +18,15 @@ case "$*" in
   'get job '*conditions*)
     if [[ ${FAKE_STATE:-} == failed-job ]]; then echo Failed; else echo Complete; fi;;
   'get job '*) printf 'synthetic-job-uid\t%s\n' "$(jq -r .image "$INPUT")";;
+  'get pods -l app.kubernetes.io/name='*)
+    case ${FAKE_STATE:-} in
+      new-pod) change='.podUid="replacement"';;
+      crash) change='.restartCount="1"';;
+      new-container) change='.containerId="containerd://replacement"';;
+      new-template) change='.templateHash="replacement"';;
+      *) change='.';;
+    esac
+    jq -r "$change | [.podUid,.image,.templateHash,.containerId,.restartCount,.startedAt,.imageID,\"true\"]|@tsv" api-fixture.json;;
   'get pods -l '*imageID*)
     digest=$(jq -r '.image|split("@")[1]' "$INPUT")
     [[ ${FAKE_STATE:-} != foreign-image ]] || digest=sha256:$(printf 'c%.0s' {1..64})
@@ -35,6 +47,10 @@ case "$*" in
   'get service radar-api '*selector*)
     printf '{"app.kubernetes.io/name":"radar-immobilier","app.kubernetes.io/component":"api"}';;
   'get deployment fixture-mcp '*) jq -r .image "$INPUT";;
+  'get deployment radar-api '*metadata.uid*)
+    generation=2; [[ ${FAKE_STATE:-} != new-generation ]] || generation=3
+    printf 'synthetic-api-deployment\t%s\t%s\t1\n' "$generation" "$generation";;
+  'get deployment radar-api '*restartedAt*) jq -r .restartedAt api-fixture.json;;
   'get deployment radar-api '*availableReplicas*)
     if [[ ${FAKE_STATE:-} == unavailable ]]; then echo 0; else echo 1; fi;;
   'get deployment radar-api '*) jq -r .image "$INPUT";;
@@ -111,22 +127,27 @@ printf '\n' >> synthetic-receipt.json
 if invoke inspect; then echo 'Corrupted Job receipt accepted' >&2; exit 1; fi
 rg -qF 'Receipt hash mismatch' "result-$n.log"
 cp activation-input.json input.json
-jq -n --slurpfile c input.json --arg now "$now" '{reference:"synthetic-qualification",sha256:("f"*64),observedAt:$now,passed:true} as $q |
+jq -n --slurpfile c input.json --slurpfile instance api-fixture.json --arg now "$now" \
+  '{reference:"synthetic-qualification",sha256:("f"*64),observedAt:$now,passed:true,instance:$instance[0]} as $q |
   {binding:$c[0].binding,image:$c[0].image,q1:$q,q2:($q+{afterRestart:true}),
+    restart:{binding:$c[0].binding,image:$c[0].image,completedAt:$now,instance:$instance[0]},
     personal:{writerEpoch:"scoped",maintenanceBarrier:false},lotsOpen:false,mcpSuccessorDeployed:true}' > acceptance.json
 : > cluster-calls
 invoke reopen-api PROOFS="$testdir/acceptance.json"
 rg -q -- '--request-timeout=20s patch ingress fixture-app' cluster-calls
 if rg -- '--request-timeout=20s (scale|set|delete|rollout) ' cluster-calls; then exit 1; fi
 cp acceptance.json accepted.json
-for field in q2 q2.afterRestart binding.releaseId; do
+jq 'del(.q2,.restart)' accepted.json > first-qualification.json
+invoke restart-api PROOFS="$testdir/first-qualification.json"
+jq -e --slurpfile instance api-fixture.json '.instance==$instance[0] and (.completedAt|length>0)' "out-$n/restart.json" >/dev/null
+for field in q2 q2.afterRestart binding.releaseId restart restart.instance; do
   jq --arg field "$field" 'delpaths([$field|split(".")])' accepted.json > acceptance.json
   : > cluster-calls
   if invoke reopen-api PROOFS="$testdir/acceptance.json"; then echo 'Unqualified reopening accepted' >&2; exit 1; fi
   [[ ! -s cluster-calls ]]
 done
 cp accepted.json acceptance.json
-for state in unavailable replicas cron job new; do
+for state in unavailable replicas cron job new new-generation new-pod crash new-container new-template; do
   export FAKE_STATE=$state
   : > cluster-calls
   if invoke reopen-api PROOFS="$testdir/acceptance.json"; then echo "Unsafe reopening: $state" >&2; exit 1; fi
