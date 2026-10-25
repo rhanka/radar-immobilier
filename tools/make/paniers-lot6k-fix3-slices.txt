@@ -1,0 +1,4 @@
+fix(paniers): pass unknown fence states through historic SSE|api/src/routes/chat.ts api/src/services/facets/lots/lot-legacy-fence.ts
+test(paniers): preserve SSE frames across late fence read failures|api/src/routes/lot-cutover-stream.test.ts
+test(paniers): discriminate the simplified SSE fence model|tools/make/paniers-lot6k-mutation.sh tools/make/paniers-lot6k-run.sh tools/make/paniers-lot6-verify.sh
+chore(paniers): bundle third review corrections from their base|tools/make/paniers-lot6.mk tools/make/paniers-lot6k-fix-deliver.sh tools/make/paniers-lot6k-fix3-slices.txt

@@ -118,6 +118,7 @@ export async function readWorkspaceArchiveCity(
       .where(and(eq(facetStreams.workspaceId, workspaceId),
         or(eq(facetStreams.scope, "workspace"), and(eq(facetStreams.scope, "personal"),
           eq(facetStreams.ownerId, accountId))),
+        eq(facetStreams.targetType, "signal"),
         eq(facetStreams.citySlug, city), eq(facetStreams.facet, "archive"),
         isNull(facetStreams.basket)));
     const byTarget = new Map<string, WorkspaceArchiveState>();
