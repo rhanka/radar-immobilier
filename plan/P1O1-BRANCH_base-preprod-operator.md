@@ -35,7 +35,7 @@
 - [x] PR920: restart receipt records live generation/template/pod/container identity and times; reopening compares Q2 to that instance again.
 - [x] PR920: collect both terminal Job outcomes; failed verified receipts persist with nonzero exit and explicit read-only collect-job.
 - [x] PR920: offline K8s CI, 100 operator cases, eight operator/five runtime mutations and fresh bundle audit from c100e6cc passed.
-- [ ] PR920: complete the six deficient-role refusals and qualified image rehearsal on the delivered SHA.
+- [x] PR920: six refusals before barrier (release/five SQL rights), qualified activation, two init replays and unchanged SQL inspection/resume passed; report requires the final image SHA.
 - [x] Lot 0: inspect approved design, constraints and existing isolation tooling.
 - [x] Lot 1: bundle scripts and qualify TypeScript/JavaScript entry guards.
   - [x] Built API image emitted successful JSON receipts from all three JavaScript bundles.
@@ -65,11 +65,11 @@
   - [x] Synthetic image proof uses existing Postgres base and actual runtime bundles.
   - [x] Image rehearsal checks all three JSON receipts and byte-stable read-only inspection/resume.
 - [x] Lot 5: complete CI API suite, lint, typecheck and audit gate.
-  - [x] 3,632 API tests passed, zero failed, 76 conditionally skipped; all seven typechecks, lint and audit passed.
+  - [x] 3,686 API tests passed, zero failed, 76 conditionally skipped; all seven typechecks, lint and audit passed.
   - [x] Final immutable runner exited zero and removed only owned test resources.
   - [x] Corrected disposable archive to retain root API test helpers and full CI include list.
 - [x] Lot 6: runbook, review evidence, local backup, audited bundle and report.
-  - [x] 51 hermetic operator cases and static Job render passed; local backup and fresh-repository bundle audit passed.
+  - [x] 100 hermetic operator cases and static Job render passed; local backup and fresh-repository bundle audit passed.
   - [x] Root delivery report generated separately from the source payload; final receipt refresh follows the last metadata commit.
   - [x] Owner-input template and short-path prerequisites/inspection documented.
   - [x] Delivery pins initial origin/main and creates a separate bare backup plus fresh bundle audit.
