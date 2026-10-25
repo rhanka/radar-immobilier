@@ -33,7 +33,8 @@
 - [x] PR920: immutable image SHA gates execution; proofs, Job/pod digest and complete/termination receipts must agree.
 - [x] PR920: restart receipt records live generation/template/pod/container identity and times; reopening compares Q2 to that instance again.
 - [x] PR920: collect both terminal Job outcomes; failed verified receipts persist with nonzero exit and explicit read-only collect-job.
-- [ ] PR920: reproduce offline K8s CI, mutation tests and fresh bundle audit from c100e6cc.
+- [x] PR920: offline K8s CI, 100 operator cases, eight operator/five runtime mutations and fresh bundle audit from c100e6cc passed.
+- [ ] PR920: complete the six deficient-role refusals and qualified image rehearsal on the delivered SHA.
 - [x] Lot 0: inspect approved design, constraints and existing isolation tooling.
 - [x] Lot 1: bundle scripts and qualify TypeScript/JavaScript entry guards.
   - [x] Built API image emitted successful JSON receipts from all three JavaScript bundles.
@@ -59,7 +60,7 @@
   - [x] Collector derives coverage only after independent roster input and live closure checks.
 - [x] Lot 4: operator refusal/transport tests and image execution receipts.
   - [x] Hermetic operator Make tests cover refusals, literal values and no root/environment discovery.
-  - [x] Verification serializes Docker campaigns, polls at 60 seconds and monitors 8 GiB floor.
+  - [x] Verification queues on the shared lock, bounds waits to 30 seconds, rechecks all Docker consumers and monitors the 8 GiB floor.
   - [x] Synthetic image proof uses existing Postgres base and actual runtime bundles.
   - [x] Image rehearsal checks all three JSON receipts and byte-stable read-only inspection/resume.
 - [x] Lot 5: complete CI API suite, lint, typecheck and audit gate.
