@@ -95,7 +95,7 @@ export function createArtifactControl(
         limit: body.limit === undefined ? 20 : Number(body.limit),
         offset: body.offset === undefined ? 0 : Number(body.offset),
       } : body;
-      const outcome = await host.app.execute({ actorId, body: effective,
+      const outcome = await (host.execute ?? host.app.execute)({ actorId, body: effective,
         method: op === "meta" ? "GET" : "POST",
         path: op === "meta" ? `/meta/${String(artifactId)}` : `/${op}` }, invocation);
       if (!outcome.ok) {
@@ -111,7 +111,7 @@ export function createArtifactControl(
       const pinnedUrl = `https://${result.releaseId}.pinned.${contentBase}/`;
       const pinned = parseContentHost(new URL(pinnedUrl).host, contentBase);
       if (pinned?.kind !== "pinned" || pinned.releaseId !== result.releaseId) throw new Error("invalid content links");
-      return { status: 201, body: { artifactId, releaseId: result.releaseId, digest: manifest.digest,
+      return { status: 201, body: { ...result, artifactId, releaseId: result.releaseId, digest: manifest.digest,
         stableUrl, pinnedUrl } };
     },
   };
