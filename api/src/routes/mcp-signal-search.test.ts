@@ -9,6 +9,7 @@ describe("reserved MCP search GET contract", () => {
     expect(decode(`city=quebec&workspaceId=${workspace.toUpperCase()}&showDiscarded=1&limit=100`))
       .toEqual({ city: "quebec", workspaceId: workspace, showDiscarded: true, limit: 100 });
     expect(decode("city=quebec&showDiscarded=0&etape=&query=").showDiscarded).toBe(false);
+    expect(decode("city=saint-stanislas--des-chenaux").city).toBe("saint-stanislas--des-chenaux");
   });
   it.each(["sub=x", "tenant=x", "roles=x", "unknown=x", "city=montreal",
     "limit=1&limit=2", "showDiscarded=0&showDiscarded=1", "query=a&query=b",
@@ -18,7 +19,7 @@ describe("reserved MCP search GET contract", () => {
     "rejects ambiguous or non-wire input %s", (suffix) => {
       expect(() => decode(`city=quebec&${suffix}`)).toThrow("invalid_signal_search");
     });
-  it.each(["", "Quebec", "québec", "quebec/../x", "-quebec", "quebec--city"])(
+  it.each(["", "Quebec", "québec", "quebec/../x", "-quebec", "quebec-"])(
     "requires the normalized city slug %s", (city) => {
       expect(() => decode(`city=${encodeURIComponent(city)}`)).toThrow("invalid_signal_search");
     });

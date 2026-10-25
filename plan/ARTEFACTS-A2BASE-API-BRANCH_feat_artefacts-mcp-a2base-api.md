@@ -30,6 +30,7 @@
 - [x] Lot 0: read master/workflow/testing, approved design and both reviews; verify clean assigned branch.
 - [ ] T01: strict local request/response contract and GET decoder, compared with inert S0.
 - [x] T01 implementation: strict wire decoder and reserved response schema; unit cases written, qualification pending.
+- [x] Normalized city contract preserves real double-hyphen municipality/MRC slugs already retained by citySlug().
 - [ ] T03: approved-account workspace resolution (0/1/N, UUID, no substitution).
 - [x] T03 implementation and unit cases written; database qualification pending.
 - [ ] T04: revalidate the entire membership set and reject changed singleton.
