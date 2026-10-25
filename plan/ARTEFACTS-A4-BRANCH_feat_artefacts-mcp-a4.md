@@ -37,5 +37,6 @@
 - [x] Lot 4: 384 ordinary MCP tests; 3,838 API tests (76 configured pending); 158 host tests; six isolated composition/exchange cases; two killed mutants with restored controls; workspace typecheck/lint, audit gate and API build; actual P6 runtime proof.
 - [x] Lot 5: atomic commit audit and independent base-relative bundle import; the final report accompanies the bundle, recording its final SHA-256 without a recursive self-reference.
 - [x] Review fixes 0: real-backend disconnect probe, machine-wide build exclusion and correction-only delivery tooling.
+- [x] Review fixes 0b: closed-composition 503/size-only 413 tests; synthetic stdio audit assertion and README boundary; process-death mutation harness ready.
 - [ ] Review fixes 1: PostgreSQL recovery, retriable request errors, closed-composition status and synthetic stdio audit/docs.
 - [ ] Review fixes 2: MCP/composition/API CI collection, image, lint/typecheck and independently imported bundle.
