@@ -11,6 +11,7 @@ import type { RawDataSource } from "./raw-data.js";
 import {
   captureInvocationContext,
   getInvocationContext,
+  type InvocationContext,
 } from "./invocation-context.js";
 import { ALL_TOOL_DEFINITIONS } from "./tool-definitions.js";
 import { RadarSignalReadError } from "./signal-read-error.js";
@@ -46,6 +47,17 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
         const snapshot =
           getInvocationContext() ??
           captureInvocationContext({ auth: ctx.auth, data: ctx.data, raw: ctx.raw });
+        return invokeTool(def.name, args as Record<string, unknown>, snapshot);
+      },
+    );
+  }
+}
+
+/** Native wire result shared by composition and the contract-test registrar. */
+export async function invokeTool(name: string, args: Record<string, unknown>, snapshot: InvocationContext): Promise<ToolTextResult> {
+        const def = ALL_TOOL_DEFINITIONS.find((entry) => entry.name === name);
+        const handler = TOOL_HANDLERS[name];
+        if (!def || !handler) throw new Error(`missing_handler:${name}`);
         const correlationId = randomUUID();
         try {
           assertScope(snapshot.auth, def.scope);
@@ -74,9 +86,6 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
           result.isError = true;
           return result;
         }
-      },
-    );
-  }
 }
 
 /** Names of the tools registered in v0 (used by tests + docs). */
