@@ -2,7 +2,7 @@
 # Reuse BASE archive, ownership and cleanup guards without weakening them.
 set -euo pipefail
 mode=${1:?}
-case $mode in test|check|mutations|e2e|image) ;; *) exit 2;; esac
+case $mode in test|check|mutations|e2e|image|qualify) ;; *) exit 2;; esac
 source tools/make/base-api-guards.sh
 require_env
 require_scope
@@ -99,7 +99,7 @@ MONITOR=$!
 RUN_PID=$!
 wait "$RUN_PID"
 RUN_PID=
-if [[ $mode == image ]]; then
+if [[ $mode == image || $mode == qualify ]]; then
   context=$LOG_DIR/image-context
   mkdir -p "$context"
   mv "$LOG_DIR/runtime.tar" "$context/runtime.tar"
@@ -119,13 +119,13 @@ if [[ $mode == image ]]; then
   wait "$RUN_PID"
   RUN_PID=
   SCOPE=tests/integration/mcp-signal-search-network.e2e.spec.ts assert_tests_ran "$LOG_DIR/image-tests.tsv"
-  awk -F '\t' '$2 >= 7 && $3 == 0 && $4 == 0 {ok=1} END {exit !ok}' "$LOG_DIR/image-tests.tsv"
+  awk -F '\t' '$2 == 8 && $3 == 0 && $4 == 0 {ok=1} END {exit !ok}' "$LOG_DIR/image-tests.tsv"
   rm "$context/runtime.tar"
 fi
 [[ $mode == check ]] || assert_tests_ran "$LOG_DIR/tests.tsv"
 if [[ $mode == e2e ]]; then
   [[ $SCOPE == tests/integration/mcp-signal-search-network.e2e.spec.ts ]]
-  awk -F '\t' '$2 >= 7 && $3 == 0 && $4 == 0 {ok=1} END {exit !ok}' "$LOG_DIR/tests.tsv"
+  awk -F '\t' '$2 == 8 && $3 == 0 && $4 == 0 {ok=1} END {exit !ok}' "$LOG_DIR/tests.tsv"
 fi
 if [[ $mode != check ]]; then
   SCOPE=$MCP_SCOPE assert_tests_ran "$LOG_DIR/mcp-tests.tsv"

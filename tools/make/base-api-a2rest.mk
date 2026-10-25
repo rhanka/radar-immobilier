@@ -14,7 +14,7 @@ inspect:
 	@rtk bash -euc 'eval "$$CMD"'
 setup stage commit audit bundle:
 	@rtk bash tools/make/base-api-a2rest-deliver.sh $@
-test check mutations image:
+test check mutations image qualify:
 	@rtk bash tools/make/base-api-a2rest-verify.sh $@
 status:
 	@rtk bash -euc 'docker ps --format "{{.Names}}"; df -Pk .'
