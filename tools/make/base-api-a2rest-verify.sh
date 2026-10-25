@@ -119,6 +119,7 @@ if [[ $mode == image || $mode == qualify ]]; then
   mkdir -p "$image_evidence"
   docker run --rm --name "$PROJECT-image-proof" --network "${PROJECT}_default" --memory 4g \
     --label "com.docker.compose.project=$PROJECT" --label "org.radar.base.owner=$OWNER" \
+    --label com.docker.compose.service=api --label com.docker.compose.oneoff=True \
     -e NODE_ENV=test -e LOG_LEVEL=silent -e LOT_MIGRATION_DB_TEST=1 \
     -e POSTGRES_HOST=postgres -e POSTGRES_USER=radar -e POSTGRES_PASSWORD=synthetic-only -e POSTGRES_DB=radar \
     -e S3_ACCESS_KEY=synthetic -e S3_SECRET_KEY=synthetic -e S3_ENDPOINT=http://minio:9000 \
