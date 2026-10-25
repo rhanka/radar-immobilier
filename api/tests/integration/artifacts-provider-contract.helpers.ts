@@ -918,26 +918,12 @@ export function finalizationFaultPool(pool: pg.Pool, options: {
   return { pool: instrumented, evidence };
 }
 
-/**
- * Explicitly wired phase-injection joint for E3 cause classes whose SQL shape
- * r2 does not impose (schema-infrastructure, unqualified). Fails
- * `[missing-contract]` naming the joint and its owner instead of asserting an
- * optional LOCK TABLE / pg_catalog / SET LOCAL form. A conforming coordinator
- * using implicit PostgreSQL locks fails here by name, never on a form
- * assertion.
- */
-export async function requirePhaseInjectionBinding(): Promise<(input: {
-  pool: pg.Pool; phase: string; cause: unknown;
-}) => ReturnType<typeof finalizationFaultPool>> {
-  return requirePublicFunction(TESTING_SPECIFIER, "injectPhaseFault");
-}
-
 /** Observe committed state on a separate raw connection, with stable ordering. */
 export async function committedState(pool: pg.Pool): Promise<unknown> {
   const client = await pool.connect();
   try {
     const snapshot: Record<string, unknown> = {};
-    for (const table of ["artifacts", "releases", "artifact_current", "idempotency_keys",
+    for (const table of ["artifacts", "releases", "artifact_current", "operation_receipts",
       "artifact_access", "artifact_sources", "blob_ref_holders"]) {
       snapshot[table] = (await client.query(
         `SELECT to_jsonb(t) AS row FROM artifacts.${table} t ORDER BY to_jsonb(t)::text`)).rows;
