@@ -44,6 +44,7 @@
 - [x] Explicit test-base-adapter-e2e target requires seven non-skipped network cases; eleven bounded behavioral mutants cover authority, masking, revision/budget, projection and the closed binding.
 - [x] Image preparation written: locked dependencies, API declaration build and production-style bundles; network fixture imports compiled API/MCP entrypoints in the image, without source mounts or installs at runtime.
 - [x] Qualification can keep a single owned stack for static checks, explicit API/MCP scopes, eleven mutants with controls, declaration/bundle build and eight compiled-image network cases.
+- [x] Static runner proof PASS: require_scope accepts the explicit network suite and rejects the directory prefix from design review r2; mutation receipts include executed control counts.
 - [ ] Qualification: scoped checks and authority/masking mutations, no required skipped cases.
 
 ## Docs consolidation
