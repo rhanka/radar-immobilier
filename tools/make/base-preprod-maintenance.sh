@@ -160,7 +160,7 @@ collect-maintenance() {
       shutdown:{completedAt:$now,coveredInstanceIds:($roster[0]|map(.id))}})}' "$PROOFS" > "$OUTPUT/qualified-input.json"
   PROOFS=$OUTPUT/qualified-input.json
   require_proofs; assert_closed; assert_mcp
-  jq --slurpfile roster "$EXPECTED" '{binding,observations,evidence,databaseInspection,
+  jq --slurpfile roster "$EXPECTED" '{binding,image,observations,evidence,databaseInspection,
     expectedInstances:$roster[0]}' "$PROOFS" > "$OUTPUT/maintenance.json"
 }
 assert_mcp() {
