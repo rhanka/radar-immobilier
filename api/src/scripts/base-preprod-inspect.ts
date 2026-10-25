@@ -45,6 +45,8 @@ export async function inspect(workspaceId: string) {
         has_table_privilege(c.oid,'INSERT') AS insert,
         has_table_privilege(c.oid,'UPDATE') AS update,
         has_table_privilege(c.oid,'DELETE') AS delete,
+        (has_table_privilege(c.oid,'UPDATE') OR has_table_privilege(c.oid,'DELETE')
+          OR has_table_privilege(c.oid,'TRUNCATE')) AS lock_authority,
         pg_has_role(current_user,c.relowner,'USAGE') AS owner_effective
         FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace JOIN pg_roles r ON r.oid=c.relowner
         WHERE n.nspname='public' AND c.relkind IN ('r','p') AND c.relname IN (

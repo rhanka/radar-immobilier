@@ -56,7 +56,8 @@ try {
     return hash.digest("hex");
   };
   const before = await snapshot();
-  const bytes = execute("api/dist/scripts/base-preprod-job.js", [JSON.stringify({ action: "inspect", binding, args: [] })]);
+  const bytes = execute("api/dist/scripts/base-preprod-job.js", [JSON.stringify({ action: "inspect", binding,
+    database: { database: "radar", role: "radar", schema: "public" }, args: [] })]);
   const inspection = JSON.parse(bytes);
   assert.deepEqual(inspection.result.missingMigrations, []);
   assert.equal(inspection.result.approved.length, 2);
