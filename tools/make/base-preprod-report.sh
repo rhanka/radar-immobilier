@@ -76,6 +76,9 @@ down -v --remove-orphans des seules ressources possédées.
 Le contrôle de types a d'abord refusé une ligne potentiellement absente ; la
 correction et les relances sont conservées. La campagne finale complète la
 première campagne réussie après les derniers tests et gardes.
+Le premier build de correction a rencontré le cache Buildx en lecture seule ;
+son état est désormais dans le dossier de preuves autorisé. L'attente Docker
+est sérialisée par le verrou partagé, puis par le contrôle des consommateurs.
 Les données et droits réels du cluster, le digest publié, l'historique peuplé
 et les observations réseau préprod ne sont pas qualifiés par ces essais.
 La sélection d'une revue croisée supplémentaire reste selection-failed faute
