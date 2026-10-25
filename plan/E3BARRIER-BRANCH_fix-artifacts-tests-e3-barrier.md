@@ -28,6 +28,7 @@
 - [x] Test helpers only; isolated automated verification, no user UAT.
 
 ## Plan / Todo (lot-based)
+- [x] Resolve the packaged migration through the executor ESM export; the candidate intentionally has no CommonJS root export.
 - [x] Final receipt evidence: count/query operation_receipts using internal_key/receipt rather than the retired idempotency receipt store in all gated suites.
 - [x] Final B2/B4: supply the real compiled profile to legacy commit/MCP probes, preserving all assertions; diagnose subsequent production-composition requirements separately.
 - [x] Final A5/B3: inject binding/quota callback failures on the executed paths; E3 contends on a separate guard authority fixture after approval is already locked. Quota accounting remains uncovered.

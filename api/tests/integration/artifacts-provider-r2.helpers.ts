@@ -1,8 +1,6 @@
 import type pg from "pg";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { readFile } from "node:fs/promises";
-import { createRequire } from "node:module";
-import { pathToFileURL } from "node:url";
 import { createPostgresArtifactStore } from "@sentropic/artifacts/adapters/postgres";
 import { createLifecycleService } from "@sentropic/artifacts/server/lifecycle";
 import { createPublicationService, type PublicationBlobStore } from "@sentropic/artifacts/server/publication";
@@ -91,8 +89,8 @@ export async function composeCandidateHost(params: {
     "@sentropic/artifacts/server/gc", "createPostgresClaimGuardedRefs");
   const executor = await requirePublicFunction<(pool: pg.Pool) => unknown>(
     "@sentropic/artifacts/adapters/postgres-commit", "createPostgresCommitExecutor");
-  const entry = createRequire(import.meta.url).resolve("@sentropic/artifacts");
-  const migration = new URL("../migrations/0003_coordinator.sql", pathToFileURL(entry));
+  const entry = import.meta.resolve("@sentropic/artifacts/adapters/postgres-commit");
+  const migration = new URL("../../migrations/0003_coordinator.sql", entry);
   await pool.query(await readFile(migration, "utf8"));
   await initializeArtifactScope(pool, config.storageScope, config.orgId);
   const store = createPostgresArtifactStore(pool);
