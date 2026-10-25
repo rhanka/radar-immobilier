@@ -28,6 +28,7 @@
 - [x] Test helpers only; isolated automated verification, no user UAT.
 
 ## Plan / Todo (lot-based)
+- [x] Configure the documented 30-second cleanup lifetime and compare the stored publication receipt (releaseId/manifest) separately from its HTTP projection.
 - [x] Register cross-process race waits before execution, drain each once, and release/join both competitors before closing the worker.
 - [x] Replace inspection-race polling with one registered wait/release per public barrier point; historical arrival is not a fresh pause.
 - [x] Bind the published preparation-cleanup host (intents/refs/blobs/transactional claims), fix the A4 executor entrypoint, and observe the actual shared blob/deletion advisory lock.
