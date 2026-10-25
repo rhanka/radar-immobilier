@@ -73,7 +73,7 @@ export async function main(rawArgs: string[]): Promise<void> {
   }
 }
 
-const invoked = process.argv[1]?.endsWith("init-workspace-authority.ts") ?? false;
+const invoked = /(?:^|[/\\])init-workspace-authority\.(ts|js)$/.test(process.argv[1] ?? "");
 if (invoked) {
   main(process.argv.slice(2)).catch((error: unknown) => {
     process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
