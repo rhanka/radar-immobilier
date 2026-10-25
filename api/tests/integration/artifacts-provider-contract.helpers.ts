@@ -45,11 +45,7 @@ export const COMMIT_CONTRACT_SPECIFIER = "@sentropic/artifacts/server/commit-con
 export const OUTCOME_CONTRACT_SPECIFIER = "@sentropic/artifacts/server/outcome-contract";
 export const TESTING_SPECIFIER = "@sentropic/artifacts/testing";
 export const PROFILE_COMPILER_SPECIFIER = "@sentropic/artifacts/mcp-core";
-export const COORDINATOR_FACTORY_SPECIFIER = COMMIT_CONTRACT_SPECIFIER;
 export const PREPARATION_CLEANUP_SPECIFIER = "@sentropic/artifacts/server/object-intents";
-export const EXPECTED_COORDINATOR_CTOR = "createArtifactCommitCoordinator";
-export const EXPECTED_CLEANUP_BINDING =
-  "scheduleBoundedPreparationCleanup with attempt intent, cleanup-deadline and shared-blob observation";
 
 /** Frozen r2 selection for the Radar profile, deterministically ordered. */
 export const FROZEN_CAPABILITIES = [
@@ -212,8 +208,7 @@ export async function requireCommitBarrier(): Promise<CommitBarrier> {
  * Assert the frozen selection value plus the compiled profile digest.
  * The digest must equal the digest of the profile returned by
  * `compileArtifactsProfile`; any well-formed but unrelated hex digest is
- * rejected. Throws `[missing-contract] provider.selectCapabilities` (or
- * `provider.profileDigest`) while the provider predates the r2 line.
+ * rejected. A malformed Radar host is a contract violation.
  */
 export function requireSelectedProfile(host: unknown, expectedDigest: string): string {
   const record = host as Record<string, unknown> | null;
