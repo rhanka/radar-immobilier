@@ -30,12 +30,14 @@ it("exchanges over HTTP across isolated issuer, MCP and synthetic receiver witho
     const inventory = await (await rpc("tools/list", {})).json();
     expect(inventory.result.tools).toHaveLength(12);
     const search = await (await call("search_signals", { city: "longueuil" })).json();
-    expect(search.result.isError).not.toBe(true);
+    expect(search.result.isError, JSON.stringify(search)).not.toBe(true);
     expect(JSON.stringify(search)).toContain("synthetic-signal");
     expect(JSON.stringify(search)).not.toContain(f.subject);
     expect(f.issuer.issued).toHaveLength(1);
     expect(f.seen).toEqual(f.issuer.issued);
     expect(f.seen).not.toContain(f.subject);
+    const retired = await fetch(`${f.radarUrl}/api/graph-signals/longueuil`, { headers: { authorization: `Bearer ${f.issuer.issued[0]}` } });
+    expect(retired.status).toBe(404);
     const direct = await fetch(`${f.radarUrl}/api/graph-signals/longueuil`, { headers: { authorization: `Bearer ${f.subject}` } });
     expect(direct.status).toBe(401);
     const delegatedAtMcp = await rpc("tools/list", {}, f.issuer.issued[0]);
