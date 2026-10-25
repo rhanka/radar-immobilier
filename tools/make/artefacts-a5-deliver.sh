@@ -24,7 +24,7 @@ git merge-base --is-ancestor "$BASE" HEAD
 allowed() {
   [[ $1 != *..* && $1 != /* && ! -L $1 ]]
   case $1 in
-    packages/immo-mcp/*|packages/artifacts-host/*|package.json|package-lock.json|api/Dockerfile) ;;
+    packages/immo-mcp/*|packages/artifacts-host/*|package.json|package-lock.json|api/package.json|api/Dockerfile|api/src/artifacts/*) ;;
     tools/make/artefacts-a5*|tools/h4-mcp.mk|docs/operator/artefacts-mcp.md) ;;
     api/tests/*artifacts*|api/tests/integration/artifacts-*|api/drizzle/0024_artifacts_coordinator.sql|api/drizzle/meta/_journal.json) ;;
     plan/ARTEFACTS-A5-BRANCH_feat_artefacts-mcp-a5.md|RAPPORT-SOL-ARTEFACTS-A5.md) ;;
