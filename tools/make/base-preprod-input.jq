@@ -17,6 +17,7 @@ def valid:
   and (.binding.maintenanceAttemptId|uuid)
   and (.binding.releaseId|text and test("^[a-f0-9]{40}[:/][a-zA-Z0-9._:-]+$"))
   and (.reason|text) and (.repository|text and test("^[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+$"))
+  and (.database.database|text) and (.database.role|text) and (.database.schema|text)
   and (.backup|reference and (.sha256|sha) and (.restoredAt|fresh) and (.restoreReceiptSha256|sha))
   and (.operation|IN("inspect","init","attach","activate","resume"));
 valid
