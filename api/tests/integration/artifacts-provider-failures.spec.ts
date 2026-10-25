@@ -491,7 +491,8 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       assertOutcomeFailure(outcome, invocation.invocationId as string);
       expect(keyLockAttempts.keyLock).toBeGreaterThan(0);
       expect(outcome.failure).toMatchObject({ category: "conflict", retriable: false,
-        commitState: "not_committed", cause: { code: "55P03" }, phase: "key-lock" });
+        commitState: "not_committed", phase: "lock" });
+      expect((outcome.failure as { cause: unknown }).cause).toMatchObject({ code: "55P03" });
       expect(await projectOutcomeHttp(outcome)).toEqual({ status: 409, body: { error: "conflict" } });
       expect(await tableCount("releases")).toBe(releasesBefore);
       expect(await tableCount("operation_receipts")).toBe(keysBefore);
