@@ -137,6 +137,7 @@ describe("sessions and egress on 0.1.0", () => {
     const fixture = await createIsolatedExchangeFixture();
     const app = createImmoHttpApp({ ...CONFIG, dataMode: "real" }, {
       keySource,
+      authorize: async () => true,
       data: new HttpDataSource({ baseUrl: BASE_URL, fetchImpl: spy }),
       raw: new HttpRawDataSource({ baseUrl: BASE_URL, publicBaseUrl: BASE_URL, fetchImpl: spy }),
       exchange: exchangeDepsFor(fixture),
@@ -203,6 +204,7 @@ describe("sessions and egress on 0.1.0", () => {
     const fixture = await createIsolatedExchangeFixture();
     const app = createImmoHttpApp({ ...CONFIG, dataMode: "real" }, {
       keySource,
+      authorize: async () => true,
       data: new HttpDataSource({
         baseUrl: BASE_URL,
         fetchImpl: async (input, init) => {
