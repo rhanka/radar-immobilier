@@ -44,8 +44,9 @@ async function contextSample(db: Database, sub: string, workspaceId: string) {
       sample.lotAvailability = sample.availability;
     }
   }
-  const catalog = await readClassificationCatalog(db, sub, workspaceId);
-  if (sample.availability.state === "closed") catalog.availability = sample.availability;
+  const catalog = sample.availability.state === "closed"
+    ? { availability: sample.availability, profileId: null, digest: null, entries: null }
+    : await readClassificationCatalog(db, sub, workspaceId);
   return WorkspaceFacetContext.parse({ contractVersion: "facet-context-v2", workspaceId,
     semanticProfile: { lotReason: "required", correspondence: "sent", signalClassification: "separate_action",
       semanticContractVersion: "base-classification-v1" },
