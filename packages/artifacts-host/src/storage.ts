@@ -3,7 +3,7 @@ import type pg from "pg";
 export const ARTIFACTS_LIFECYCLE_WHEN = 1791200002000;
 export const ARTIFACTS_LIFECYCLE_HASH = "fdfbe97f84774b47a207e66915f7426926650e85b6dbb9a4d80272591df624fd";
 export const ARTIFACTS_COORDINATOR_WHEN = 1792000000000;
-export const ARTIFACTS_COORDINATOR_HASH = "3a262f1bb89cef5c276778e8c21c5e1e8b20d4229aee80e829d1f62815de30cf";
+export const ARTIFACTS_COORDINATOR_HASH = "7668c0ce6c7d60174bdfc0004f488ac6be58d59b1d52969b7ac5237040203f6c";
 
 /** No DDL at startup. A missing migration disables only artifact operations. */
 export async function initializeArtifactScope(

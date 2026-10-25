@@ -20,7 +20,7 @@ export async function cookie(sub: string) {
   return `radar_session=${await signSession({ sub }, { sessionSecret: auth.sessionSecret, ttlSeconds: 3600 })}`;
 }
 
-export async function startHarness(name: string) {
+export async function startHarness(name: string, subjects: readonly string[] = []) {
   const env = loadConfig();
   const params = { host: env.POSTGRES_HOST, port: env.POSTGRES_PORT, user: env.POSTGRES_USER,
     password: env.POSTGRES_PASSWORD, database: env.POSTGRES_DB };
@@ -29,6 +29,8 @@ export async function startHarness(name: string) {
   await admin.query(`CREATE DATABASE ${database}`);
   const pool = createArtifactsPool({ ...params, database });
   await migrate(drizzle(pool), { migrationsFolder });
+  for (const subject of subjects) await pool.query(
+    "INSERT INTO account_users (sub, status) VALUES ($1, 'approved')", [subject]);
   const config = { enabled: true as const, storageScope: "h2_scope", orgId: "h2_org",
     s3Bucket: `h2-artifacts-${name}`, s3Endpoint: env.S3_ENDPOINT, s3Region: "us-east-1",
     s3AccessKey: env.S3_ACCESS_KEY, s3SecretKey: env.S3_SECRET_KEY };
