@@ -64,11 +64,28 @@ guarded_down
   done
 ) 8>&- > "$LOG_DIR/disk-monitor.log" 2>&1 &
 MONITOR=$!
+if [[ ${A4_IMAGE:-0} == 1 ]]; then
+  image=$PROJECT:runtime
+  docker build --target runtime --build-arg "GIT_SHA=$(git --git-dir=tmp/a4-delivery.git rev-parse HEAD)" \
+    -t "$image" -f api/Dockerfile - < "$RUN_DIR/source.tar" > >(tee "$LOG_DIR/build.log") 2>&1 &
+  RUN_PID=$!
+  wait "$RUN_PID"
+  RUN_PID=
+  docker image inspect --format '{{.Id}}' "$image" > "$LOG_DIR/image-id.txt"
+fi
 if [[ ${A4_SERVICES:-0} == 1 ]]; then "${compose[@]}" up -d --wait postgres minio; fi
 printf '%s\n' "$CMD" > "$LOG_DIR/command.txt"
+if [[ ${A4_IMAGE:-0} == 1 ]]; then
+  docker run --rm --name "$PROJECT-image-probe" --network "${PROJECT}_default" \
+    --label "com.docker.compose.project=$PROJECT" --label "org.radar.base.owner=$OWNER" \
+    -v "$ROOT/tools/make/artefacts-a4-image-probe.mjs:/workspace/a4-image-probe.mjs:ro" \
+    -v "$LOG_DIR:/evidence" --entrypoint node "$image" a4-image-probe.mjs \
+    > >(tee "$LOG_DIR/run.log") 2>&1 &
+else
 "${compose[@]}" run --rm --no-deps -T -e A4_COMMAND="$CMD" api bash -euc \
   'tar --no-same-owner -xf /source.tar -C /workspace; chmod 755 /workspace; timeout --signal=TERM --kill-after=10 1800 bash -euc "$A4_COMMAND"' \
   > >(tee "$LOG_DIR/run.log") 2>&1 &
+fi
 RUN_PID=$!
 wait "$RUN_PID"
 RUN_PID=
