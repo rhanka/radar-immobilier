@@ -360,13 +360,13 @@ export const DOC_ENRICHMENT_BUDGET_MS = 2_000;
  *   restantes sont dégradées (servies sans métadonnée doc) au lieu de bloquer
  *   la réponse — l'endpoint répond TOUJOURS, même si S3 rame ou pend.
  */
-interface DocEnrichmentContext {
+export interface DocEnrichmentContext {
   readonly cache: Map<string, Promise<DocumentMetadata | null>>;
   readonly deadlineAt: number;
   exceeded: boolean;
 }
 
-function createDocEnrichmentContext(
+export function createDocEnrichmentContext(
   budgetMs: number = DOC_ENRICHMENT_BUDGET_MS,
 ): DocEnrichmentContext {
   return { cache: new Map(), deadlineAt: Date.now() + budgetMs, exceeded: false };
