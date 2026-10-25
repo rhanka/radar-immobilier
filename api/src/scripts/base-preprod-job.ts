@@ -9,13 +9,21 @@ import { loadConfig } from "../config.js";
 
 interface Invocation {
   action: "inspect" | "init" | "attach" | "activate" | "resume";
-  binding: { workspaceId: string | null; actorSub: string; maintenanceAttemptId: string; releaseId: string };
+  binding: { workspaceId: string | null; workspaceSlug?: string; actorSub: string; maintenanceAttemptId: string; releaseId: string };
   args: string[];
   database: { database: string; role: string; schema: string };
 }
 
 export async function runJob(invocation: Invocation) {
   if (!invocation.binding || !Array.isArray(invocation.args)) throw new Error("invalid_invocation");
+  if (invocation.action === "init") {
+    const slugs = invocation.args.filter((_, index) => index % 2 === 1
+      && invocation.args[index - 1] === "--workspace-slug");
+    if (invocation.binding.workspaceId !== null || !invocation.binding.workspaceSlug
+      || slugs.length !== 1 || slugs[0] !== invocation.binding.workspaceSlug) {
+      throw new Error("workspace_destination_mismatch");
+    }
+  }
   const handle = createDb(loadConfig());
   try {
     const [actual] = (await handle.db.execute(sql`SELECT current_database() AS database,
@@ -40,6 +48,16 @@ export async function runJob(invocation: Invocation) {
     if (child.error || child.status !== 0) throw new Error("operator_script_failed");
     result = JSON.parse(child.stdout) as unknown;
     if (!result || typeof result !== "object") throw new Error("operator_receipt_missing");
+    if (invocation.action === "init") {
+      const destination = result as { workspaceId?: string; workspaceSlug?: string };
+      const verification = createDb(loadConfig());
+      try {
+        const [row] = (await verification.db.execute(sql`SELECT slug FROM workspaces
+          WHERE id=${destination.workspaceId}`)).rows;
+        if (row?.slug !== invocation.binding.workspaceSlug) throw new Error("workspace_destination_mismatch");
+        destination.workspaceSlug = row.slug as string;
+      } finally { await verification.pool.end(); }
+    }
   }
   const complete = { action: invocation.action, binding: invocation.binding,
     observedAt: new Date().toISOString(), result };

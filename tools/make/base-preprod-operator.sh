@@ -26,6 +26,10 @@ inspect|init|attach|activate|resume)
   "${k[@]}" logs "job/$job" -c operator > "$OUTPUT/receipt.json"
   [[ $(sha256sum "$OUTPUT/receipt.json" | cut -d' ' -f1) == $(jq -r .sha256 "$OUTPUT/termination.json") ]] || fail 'Receipt hash mismatch'
   jq -e --slurpfile c "$INPUT" --arg action "$action" '.binding==$c[0].binding and .action==$action and (.result|type=="object")' "$OUTPUT/receipt.json" >/dev/null
+  if [[ $action == init ]]; then
+    jq -e --slurpfile c "$INPUT" '.result.workspaceSlug==$c[0].binding.workspaceSlug
+      and (.result.workspaceId|test("^[a-fA-F0-9]{8}(-[a-fA-F0-9]{4}){3}-[a-fA-F0-9]{12}$"))' "$OUTPUT/receipt.json" >/dev/null || fail 'Initialization receipt destination mismatch'
+  fi
   ;;
 delete-job)
   # Deletion is separate from successful collection, and needs the collected receipt.

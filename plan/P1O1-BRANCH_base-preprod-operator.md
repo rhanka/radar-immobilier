@@ -28,7 +28,7 @@
 - [x] No live UAT or cluster operations; namespace administrator executes later.
 
 ## Plan / Todo (lot-based)
-- [ ] PR920: reject mismatched initialization destinations before mutation.
+- [x] PR920: init requires a null UUID and identical declared/argument slug; returned UUID resolves to that slug, also checked at collection.
 - [ ] PR920: verify operation-specific SQL rights, including every table/row lock.
 - [ ] PR920: bind proofs and receipts to the executing release and image digest.
 - [ ] PR920: bind Q2 to the latest API restart, pod instance and configuration.
