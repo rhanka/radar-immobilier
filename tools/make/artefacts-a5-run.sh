@@ -34,6 +34,11 @@ done
 candidate_git=(git)
 if [[ -f $ROOT/tmp/a5-delivery.git/config ]]; then candidate_git+=(--git-dir="$ROOT/tmp/a5-delivery.git"); fi
 candidate=$("${candidate_git[@]}" rev-parse HEAD)
+"${candidate_git[@]}" show 5ea88ce1:api/drizzle/meta/_journal.json > "$LOG_DIR/baseline-journal.json"
+while IFS= read -r path; do
+  digest=$("${candidate_git[@]}" show "5ea88ce1:$path" | sha256sum | cut -d' ' -f1)
+  printf '%s  %s\n' "$digest" "$path"
+done < <("${candidate_git[@]}" ls-tree -r --name-only 5ea88ce1 -- api/drizzle) > "$LOG_DIR/baseline-migrations.sha256"
 printf '%s\n' "$candidate" > "$LOG_DIR/candidate-sha.txt"
 "${candidate_git[@]}" status --porcelain --untracked-files=all -- api packages tools .security \
   package.json package-lock.json tsconfig.base.json eslint.config.js > "$LOG_DIR/candidate-status.txt"
