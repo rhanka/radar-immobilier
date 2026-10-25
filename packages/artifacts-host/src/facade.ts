@@ -42,88 +42,13 @@ export function createMemoryCommitLedger(): {
   return { ledger: { record: (entry) => { entries.push(entry); } }, entries };
 }
 
-/**
- * Typed provider failure preserved below the provider HTTP layer (861C unit 7).
- * The provider HTTP app converts thrown causes into responses before the
- * facade sees them, so the facade cannot classify from the response alone.
- * Radar-owned wrappers below that layer (timeout blob store in
- * `s3-timeout.ts`, locked store in `storage.ts`) record the original cause
- * here; the facade drains it once per dispatch and lets it win over the
- * converted response. Async context binds each cause to its dispatch even
- * when one composed host serves concurrent callers.
- */
-export interface ProviderFailureProbe {
-  readonly record: (error: unknown) => void;
-  take(): unknown | undefined;
-  run<T>(work: () => Promise<T>): Promise<T>;
-}
-
-export function createMemoryProviderProbe(): ProviderFailureProbe {
-  const contexts = new AsyncLocalStorage<{ pending?: unknown }>();
-  return {
-    run: (work) => contexts.run({}, work),
-    record: (error: unknown): void => {
-      const context = contexts.getStore();
-      if (context) context.pending = error;
-    },
-    take: (): unknown | undefined => {
-      const context = contexts.getStore();
-      const failure = context?.pending;
-      if (context) delete context.pending;
-      return failure;
-    },
-  };
-}
-
 export interface ArtifactControlOptions {
-  readonly ledger?: CommitFailureLedger | undefined;
-  readonly nowMs?: (() => number) | undefined;
-  readonly probe?: ProviderFailureProbe | undefined;
+  readonly ledger?: CommitFailureLedger;
+  readonly nowMs?: () => number;
 }
 
-type ProviderFailureOverride =
-  | { readonly status: 503; readonly reason: "provider_unavailable" }
-  | { readonly status: 409; readonly reason: "provider_conflict" };
-
-function classifyProviderCause(error: unknown): ProviderFailureOverride | undefined {
-  const code = error !== null && typeof error === "object"
-    ? (error as { code?: unknown }).code
-    : undefined;
-  if (error instanceof ArtifactConnectionError || error instanceof ArtifactS3TimeoutError ||
-    code === "artifact_connection_lost" || code === "artifact_s3_timeout") {
-    return { status: 503, reason: "provider_unavailable" };
-  }
-  if (error instanceof Error && error.message.includes("artifact advisory lock timeout conflict")) {
-    return { status: 409, reason: "provider_conflict" };
-  }
-  return undefined;
-}
 type Host = NonNullable<Awaited<ReturnType<typeof composeArtifactHost>>>;
 const invalid = (): HttpResponse => ({ status: 400, body: { error: "invalid_request" } });
-
-function filesForPublication(raw: unknown) {
-  if (!Array.isArray(raw) || raw.length > 32) throw new Error("invalid files");
-  const files = raw.map((entry: unknown) => {
-    if (!entry || typeof entry !== "object") throw new Error("invalid file");
-    const file = entry as Record<string, unknown>;
-    if (typeof file.path !== "string" || typeof file.mimeType !== "string") throw new Error("invalid file");
-    if (("text" in file) === ("bytes" in file)) throw new Error("invalid bytes");
-    let bytes: number[];
-    if ("text" in file) {
-      if (typeof file.text !== "string") throw new Error("invalid text");
-      bytes = Array.from(new TextEncoder().encode(file.text));
-    } else {
-      if (!Array.isArray(file.bytes) || !file.bytes.every((b: unknown) =>
-        typeof b === "number" && Number.isInteger(b) && b >= 0 && b <= 255)) throw new Error("invalid bytes");
-      bytes = file.bytes;
-    }
-    return { path: file.path, mimeType: file.mimeType, bytes };
-  });
-  if (validatePublishFiles(files.map((f) => ({
-    path: f.path, mediaType: f.mimeType, sizeBytes: f.bytes.length,
-  }))).length) throw new Error("invalid publication");
-  return files;
-}
 
 export function createArtifactControl(
   host: Host,
