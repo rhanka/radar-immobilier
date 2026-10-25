@@ -8,44 +8,14 @@
 //   2. activation — enforcement starts only after an A2 receipt match;
 //   3. recovery — only a strict, exchange-capable target may replace it.
 import type { AuthConfig, StrictReceiverConfig } from "../config.js";
+import { decodeMcpSignalSearch, MCP_SIGNAL_SEARCH_PATH } from "../routes/mcp-signal-search.js";
 
-/** City slug accepted on the strict search route (canonical lowercase form). */
-const STRICT_CITY_PATTERN = /^[a-z0-9-]{1,128}$/;
-
-/** Aggregate path is never a strict search, even though it matches the shape. */
-const STRICT_EXCLUDED_CITY = "by-city";
-
-/**
- * Query keys the strict search route preserves (bounded existing behavior of
- * the per-city feed and its aggregate sibling).
- */
-const STRICT_SEARCH_QUERY_KEYS: ReadonlySet<string> = new Set([
-  "showDiscarded",
-  "dateFrom",
-  "dateTo",
-  "dateBasis",
-  "excludePiia",
-  "excludeDerogations",
-]);
-
-/**
- * Whether a request matches the strict search profile: GET on the canonical
- * per-city path with an allowlisted query. Encoded (`%`), uppercase,
- * trailing-slash, double-slash and aggregate variants never match — pass the
- * encoding-preserving pathname (from the raw request URL), not a decoded path.
- */
+/** The candidate authorizes only the reserved read-search contract. */
 export function isStrictSearchRequest(
-  method: string,
-  rawPath: string,
-  query: Record<string, string>,
+  method: string, rawPath: string, query: URLSearchParams,
 ): boolean {
-  if (method !== "GET") return false;
-  const prefix = "/api/graph-signals/";
-  if (!rawPath.startsWith(prefix)) return false;
-  const city = rawPath.slice(prefix.length);
-  if (city === STRICT_EXCLUDED_CITY) return false;
-  if (!STRICT_CITY_PATTERN.test(city)) return false;
-  return Object.keys(query).every((key) => STRICT_SEARCH_QUERY_KEYS.has(key));
+  if (method !== "GET" || rawPath !== MCP_SIGNAL_SEARCH_PATH) return false;
+  try { decodeMcpSignalSearch(query); return true; } catch { return false; }
 }
 
 /**

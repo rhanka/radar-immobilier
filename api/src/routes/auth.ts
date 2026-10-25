@@ -688,7 +688,7 @@ export function protect(
             now: nowFn(),
           });
           const rawPath = strictRequestPath(c.req.url) ?? "";
-          if (!isStrictSearchRequest(c.req.method, rawPath, c.req.query())) {
+          if (!isStrictSearchRequest(c.req.method, rawPath, new URL(c.req.url).searchParams)) {
             return c.json({ error: "delegated_scope_refused" }, 403);
           }
           if (!options.db) return c.json({ error: "unauthenticated" }, 401);
