@@ -14,7 +14,7 @@ echo "Evidence: $LOG_DIR"
 exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
 while :; do
   busy=$(docker ps --format '{{.Names}}' | awk '/^radar-test-/')
-  builds=$(pgrep -af '[d]ocker (build|buildx build|compose.* build)|[d]ocker-buildx build|[b]uildctl build' || true)
+  builds=$(pgrep -f '(^|/)[d]ocker (build|buildx build)|[d]ocker-buildx (build|buildx build|bake)|[b]uildctl build' || true)
   if [[ -z $busy && -z $builds ]] && flock -n 8; then break; fi
   printf 'Waiting 60s: Docker campaign busy\n%s\n%s\n' "$busy" "$builds"
   sleep 60
