@@ -85,6 +85,7 @@ async function connectHttp(mode: "http" | "simulation", scope = SCOPES) {
     scopesSupported: SCOPES.split(" "), port: 0, dataMode: mode === "http" ? "real" : "simulation",
   }, {
     keySource: { resolveKey: async () => publicKey },
+    authorize: async () => true,
     exchange: exchangeDepsFor(exchange),
     ...(mode === "http" ? {
       data: new HttpDataSource({ baseUrl: BASE_URL, fetchImpl: upstream }),
@@ -182,7 +183,7 @@ describe("deployed twelve-tool baseline", () => {
   );
 
   it("matches the complete discovery of the current stdio server factory", async () => {
-    const server = buildImmoServer({
+    const server = await buildImmoServer({
       IMMO_MCP_AUTH_STUB_SUB: "synthetic-user", IMMO_MCP_AUTH_STUB_TENANT: "radar",
       IMMO_MCP_AUTH_STUB_SCOPES: SCOPES,
     });
