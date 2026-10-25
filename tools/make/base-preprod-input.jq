@@ -1,4 +1,4 @@
-def text: type == "string" and length > 0 and length <= 512 and (test("[\\r\\n\\u0000]")|not);
+def text: type == "string" and length > 0 and length <= 512 and (explode|all(.[]; .>=32 and .!=127));
 def uuid: text and test("^[a-fA-F0-9]{8}(-[a-fA-F0-9]{4}){3}-[a-fA-F0-9]{12}$") and . != "00000000-0000-0000-0000-000000000000";
 def sha: type == "string" and test("^[a-f0-9]{64}$") and (test("^0+$")|not);
 def name: text and test("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$") and length <= 63;
