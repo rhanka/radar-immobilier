@@ -61,10 +61,12 @@ export interface ScopedSignalFacetsDeps {
   auth?: { enabled: boolean };
 }
 
+const SCOPED_PERSONAL_PREFIX = "/api/v1/workspaces/:workspaceId/signal-facets/personal/*";
+
 export function scopedSignalFacetsRoute(deps: ScopedSignalFacetsDeps): Hono {
   const app = new Hono();
-  app.use("/api/v1/workspaces/:workspaceId/signal-facets/*", privateSignalResponse);
-  app.use("/api/v1/workspaces/:workspaceId/signal-facets/*", async (c, next) => {
+  app.use(SCOPED_PERSONAL_PREFIX, privateSignalResponse);
+  app.use(SCOPED_PERSONAL_PREFIX, async (c, next) => {
     const session = c.get("session" as never) as { sub?: string; via?: string } | undefined;
     if (!deps.auth?.enabled || !session?.sub) return c.json({ error: "unauthenticated" }, 401);
     if (c.req.method !== "GET" && session.via === "bearer") {

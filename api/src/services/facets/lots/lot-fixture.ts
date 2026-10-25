@@ -5,7 +5,7 @@
 // Every identifier, city, and lot number is invented; no operational data.
 import { randomUUID } from "node:crypto";
 import { describe } from "vitest";
-import { lotDestinationState, lotVersions } from "../../../db/schema.js";
+import { lotCutoverState, lotDestinationState, lotVersions } from "../../../db/schema.js";
 import { setLotCapability, type LotCapability } from "./lot-capabilities.js";
 import {
   workspaceFixture,
@@ -31,6 +31,9 @@ export async function lotFixture(): Promise<LotFixture> {
   const f = await workspaceFixture();
   await f.db.insert(lotDestinationState).values({
     workspaceId: f.workspaceId, enabled: true, selectionBasket: SYNTHETIC_BASKET,
+  });
+  await f.db.insert(lotCutoverState).values({
+    workspaceId: f.workspaceId, maintenanceBarrier: true, destinationOpen: true,
   });
   for (const [suffix, canonical, noLot] of [
     ["aa", "lot-canonical-syn-6j-01", "SYN-6J-0001"],

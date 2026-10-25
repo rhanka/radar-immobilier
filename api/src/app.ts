@@ -31,9 +31,19 @@ import { dataQualityRoute, type DataQualityDeps } from "./routes/data-quality.js
 import { sourceCoverageRoute } from "./routes/source-coverage.js";
 import { sourceConsistencyRoute } from "./routes/source-consistency.js";
 import { prospectMarksRoute } from "./routes/prospect-marks.js";
+import { scopedLotCutoverRoute, type ScopedLotCutoverDeps } from "./routes/scoped-lot-cutover.js";
+import { scopedLotCutoverActivationRoute } from "./routes/scoped-lot-cutover-activation.js";
+import type { LegacyRetirementState } from "./services/facets/legacy-retirement.js";
+import { scopedLotFacetsRoute } from "./routes/scoped-lot-facets.js";
 import { signalFacetsRoute } from "./routes/signal-facets.js";
 import { privateSignalResponse } from "./services/facets/private-response.js";
 import { documentsRoute, type DocumentsDeps } from "./routes/documents.js";
+import { workspacesRoute } from "./routes/workspaces.js";
+import { scopedSignalFacetsRoute } from "./routes/scoped-signal-facets.js";
+import { scopedWorkspaceArchiveRoute } from "./routes/scoped-workspace-archive.js";
+import { scopedProjectionRevisionsRoute } from "./routes/scoped-projection-revisions.js";
+import { scopedProjectionEventsRoute } from "./routes/scoped-projection-events.js";
+import { scopedSignalRevealRoute } from "./routes/scoped-signal-reveal.js";
 
 export type AppDeps = HealthDeps &
   SourcesDeps &
@@ -71,6 +81,10 @@ export type AppDeps = HealthDeps &
      * When absent, authenticated mode mounts the closed control capability.
      */
     artifactsControl?: ControlRouteDeps;
+    /** Explicit operator mapping and qualified deployment retirement adapter. */
+    lotCutover?: Pick<ScopedLotCutoverDeps, "cutoverMapping" | "cutoverSafety">;
+    /** Durable server-only retirement; never derived from public input. */
+    legacyRetirement?: LegacyRetirementState;
   };
 
 /** Compose the Hono application from injected dependencies. */
@@ -101,6 +115,8 @@ export function createApp(deps: AppDeps): Hono {
 
   // Auth runs after the content gate, so protect still fronts every business
   // route. When `deps.auth` is absent or disabled both are inert no-ops.
+  app.use("/api/v1/workspaces/*", privateSignalResponse);
+  app.use("/api/v1/workspaces", privateSignalResponse);
   if (deps.auth) {
     app.use("*", protect(deps.auth, { db: deps.db }));
     // Pass db into authOptions so enrollment runs in production.
@@ -136,7 +152,7 @@ export function createApp(deps: AppDeps): Hono {
   }
 
   app.route("/", healthRoute(deps));
-  app.route("/", chatRoute());
+  app.route("/", chatRoute(deps.db));
   app.route("/", automationRoute());
   app.route("/", sourcesRoute(deps));
   app.route("/", ontologyRoute(deps));
@@ -149,8 +165,18 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", sourceCoverageRoute(deps));
   app.route("/", sourceConsistencyRoute({ db: deps.db }));
   app.route("/", documentsRoute(deps));
-  app.route("/", graphSignalsRoute(deps));
-  app.route("/", signalFacetsRoute(deps));
+  app.route("/", graphSignalsRoute(deps.legacyRetirement
+    ? { ...deps, retirement: deps.legacyRetirement }
+    : deps));
+  app.route("/", signalFacetsRoute(deps.legacyRetirement
+    ? { ...deps, retirement: deps.legacyRetirement }
+    : deps));
+  app.route("/", workspacesRoute(deps));
+  app.route("/", scopedSignalFacetsRoute(deps));
+  app.route("/", scopedWorkspaceArchiveRoute(deps));
+  app.route("/", scopedProjectionRevisionsRoute(deps));
+  app.route("/", scopedProjectionEventsRoute(deps));
+  app.route("/", scopedSignalRevealRoute(deps));
   app.route("/", graphRoute(deps));
   app.route("/", geoLotsRoute());
   app.route("/", geoZonesRoute({ db: deps.db }));
@@ -159,6 +185,17 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", signalsDetailRoute(deps));
   app.route("/", opportunitesRoute(deps));
   app.route("/", prospectMarksRoute(deps.auth?.enabled && deps.auth.sessionSecret ? { db: deps.db, sessionSecret: deps.auth.sessionSecret } : { db: deps.db }));
+  // 6K: scoped lot facets and cutover are mounted but self-gating. Lot
+  // reads and commands answer 503 until the workspace destination and
+  // scoped epoch are established, and stay closed until the explicit
+  // operator cutover opens the destination. Legacy mark traffic is fenced
+  // at the route layer (503/410) with a database trigger as backstop.
+  if (deps.db) {
+    const lotDeps = { db: deps.db, ...(deps.auth ? { auth: deps.auth } : {}) };
+    app.route("/", scopedLotFacetsRoute({ ...lotDeps, requireCutover: true }));
+    app.route("/", scopedLotCutoverRoute({ ...lotDeps, ...deps.lotCutover }));
+    app.route("/", scopedLotCutoverActivationRoute({ ...lotDeps, ...deps.lotCutover }));
+  }
 
   app.get("/", (c) => c.json({ name: "radar-immobilier-api", status: "up" }));
 

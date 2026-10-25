@@ -1,8 +1,10 @@
 /**
  * 6J scoped lot-facet routes: four independent facets on one stable target.
- * GATED: this router is not mounted in `app.ts` until the protected 6K
- * activation opens the destination. Legacy mark routes keep serving
- * unchanged behavior; nothing here retires them (6K owns that cutover).
+ * GATED (6K): mounted in `app.ts` but self-gating — reads and commands
+ * answer 503 until the workspace destination and scoped epoch are
+ * established, and the destination opens only through the explicit 6K
+ * cutover. Legacy mark routes keep serving unchanged behavior until the
+ * 6K retirement retires them.
  *
  * Mapping of the current `LotFichePanel.svelte` actions (unchanged until
  * the 6K cutover):
@@ -24,6 +26,7 @@ import {
   type ScopedLotFacetsDeps,
 } from "./scoped-lot-facets-common.js";
 import { scopedLotReadsRoute } from "./scoped-lot-reads.js";
+import { readLotCutover } from "../services/facets/lots/lot-cutover-status.js";
 
 export type { ScopedLotFacetsDeps } from "./scoped-lot-facets-common.js";
 
@@ -42,6 +45,10 @@ export function scopedLotFacetsRoute(deps: ScopedLotFacetsDeps): Hono {
     }
     if (!lotWorkspaceId.safeParse(c.req.param("workspaceId")).success) {
       return c.json({ error: "invalid_scoped_identity" }, 400);
+    }
+    if (deps.requireCutover && !c.req.path.includes("/cutover")) {
+      const status = await readLotCutover(deps.db, c.req.param("workspaceId"));
+      if (!status.destinationOpen) return c.json({ error: "lot_cutover_closed" }, 503);
     }
     return next();
   });
