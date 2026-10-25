@@ -45,6 +45,7 @@ import { scopedProjectionRevisionsRoute } from "./routes/scoped-projection-revis
 import { scopedProjectionEventsRoute } from "./routes/scoped-projection-events.js";
 import { scopedSignalRevealRoute } from "./routes/scoped-signal-reveal.js";
 import { classificationBoundary, scopedClassificationRoute } from "./routes/scoped-classification.js";
+import type { ClassificationOptions } from "./services/facets/classification-search.js";
 
 export type AppDeps = HealthDeps &
   SourcesDeps &
@@ -88,6 +89,8 @@ export type AppDeps = HealthDeps &
     lotCutover?: Pick<ScopedLotCutoverDeps, "cutoverMapping" | "cutoverSafety">;
     /** Durable server-only retirement; never derived from public input. */
     legacyRetirement?: LegacyRetirementState;
+    /** Operator-injected read signing configuration; absent keeps pagination closed. */
+    classification?: ClassificationOptions;
   };
 
 /** Compose the Hono application from injected dependencies. */
