@@ -32,6 +32,7 @@
 - [ ] T13: createApp/PostgreSQL authority, archives, races and cutover groups, separate commits.
 - [x] T13 authority group written against the production facade: current account approval, 0/1/N memberships, outsider and explicit destination refusals.
 - [x] T13 archive group written: personal/common OR masking, other-member privacy, reveal guards, identity keys, restoration and SQL read-only snapshots, hidden targets never enriched.
+- [x] T13 races group written: deterministic document barriers for membership/account/source/archive changes, explicit selector stability, plus an observed PostgreSQL lock wait followed by revocation.
 - [ ] T14: explicit MCP E2E runner, complete HTTP search through production facade and image evidence.
 - [ ] Qualification: scoped checks and authority/masking mutations, no required skipped cases.
 
