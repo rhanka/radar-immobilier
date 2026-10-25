@@ -20,7 +20,6 @@ mkdir -p "$RUN_DIR" "$LOG_DIR"
 printf 'Evidence: %s\n' "$LOG_DIR"
 printf '%s\n' "$SCOPE" > "$LOG_DIR/api-scope.txt"
 printf '%s\n' "$MCP_SCOPE" > "$LOG_DIR/mcp-scope.txt"
-git --git-dir="$ROOT/tmp/a2base-mcp-delivery.git" rev-parse HEAD > "$LOG_DIR/candidate-sha.txt"
 # Wait before acquiring the shared campaign lock, without touching another stack.
 while :; do
   names=$(docker ps --format '{{.Names}}')
@@ -34,6 +33,7 @@ flock -n 9 || exit 2
 exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
 flock -n 8 || exit 2
 [[ -z $(docker ps -q) ]]
+git --git-dir="$ROOT/tmp/a2base-mcp-delivery.git" rev-parse HEAD > "$LOG_DIR/candidate-sha.txt"
 OWNER=$(printf '%s' "$ROOT/$ENV" | sha256sum | cut -d' ' -f1)
 export COMPOSE_DISABLE_ENV_FILE=1
 unset COMPOSE_FILE COMPOSE_PROFILES COMPOSE_ENV_FILES
