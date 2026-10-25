@@ -57,6 +57,7 @@
 - [x] Machine-serialized runner written with explicit file scopes, a 60-second wait, disk monitoring, one-worker container configuration and inherited ownership-checked cleanup.
 - [x] Container checks and test-only S0 contract comparison written; API runtime has no MCP import.
 - [ ] Delivery: report qualified slices, commands/counts, per-commit numstat, remaining integration duties, exact SHA and isolated bundle audit/hash.
+- [x] Selective staging, 150-line audit, subject-only commits and bundle verification in a blank prerequisite-only repository have dedicated make targets; no shared Git writes or push.
 
 ## Docs consolidation
 - [ ] Record final evidence in `RAPPORT-SOL-A2BASE-API.md`; qualification does not close CT-9 or authorize activation.
