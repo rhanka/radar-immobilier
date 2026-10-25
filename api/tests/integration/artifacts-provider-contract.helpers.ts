@@ -580,14 +580,14 @@ export async function requirePreparationCleanupBinding(): Promise<PreparationCle
 
 /** Expected L4 observation seam; absence is a named prerequisite, never SQL guesswork. */
 export async function verifyPreparationCleanup(host: unknown, artifactId: string,
-  blobs: { listKeys(prefix: string): Promise<Iterable<string>> }, requireAttempts = true,
+  readBucketKeys: () => Promise<Iterable<string>>, requireAttempts = true,
   requireShared = false,
   options?: { readonly expectedInvocationIds?: readonly string[];
     readonly preparationsBeforeRefusal?: Awaited<ReturnType<PreparationCleanupBinding["inspectPreparations"]>>["attempts"];
     readonly s3KeysBefore?: ReadonlySet<string> | readonly string[] }): Promise<void> {
   const binding = await requirePreparationCleanupBinding();
   const before = await binding.inspectPreparations(host, artifactId);
-  const keysBefore = new Set(await blobs.listKeys(""));
+  const keysBefore = new Set(await readBucketKeys());
   for (const prepared of options?.preparationsBeforeRefusal ?? []) {
     const historical = before.attempts.find((attempt) => attempt.attemptId === prepared.attemptId);
     if (!historical || !Array.isArray(historical.blobKeys) || historical.invocationId !== prepared.invocationId ||
@@ -686,7 +686,7 @@ export async function verifyPreparationCleanup(host: unknown, artifactId: string
     }
   }
   await binding.scheduleBoundedPreparationCleanup(host, throughMs);
-  const keysAfter = new Set(await blobs.listKeys(""));
+  const keysAfter = new Set(await readBucketKeys());
   for (const key of before.protectedKeys) {
     if (!keysAfter.has(key)) throw new Error("[contract-violation] cleanup deleted a shared/protected blob");
   }
