@@ -47,6 +47,7 @@
 - [ ] T05c: expose canonical degraded card helper; explicit graph-signals/date-parity gates.
 - [x] T05b required suites completed: graph-signals 48, date parity 5, direct helper 2, workspace PG 7, all passing/no skips; outer campaign subsequently stopped on disk cutoff, so final campaign qualification remains open.
 - [x] T05c exports the unchanged degraded helper and adds parity with expired-budget canonical construction; its gate is pending.
+- [x] T05c gate passed with cleanup: 63 tests, zero failures/skips (48 graph-signals, 5 date parity, 3 helpers, 7 workspace PostgreSQL).
 - [ ] T06: authorized coherent city population and personal/common masking before enrichment.
 - [x] T06 coherent population and visibility cases written; no domain normalization or active mount is introduced.
 - [x] Unit authority/masking tests assert that hidden or unauthorized targets never reach document enrichment; reveal keeps all guards.
