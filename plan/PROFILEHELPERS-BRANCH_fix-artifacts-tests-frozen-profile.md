@@ -38,7 +38,7 @@
 - [x] Lot 3b: compose the r2 candidate app with real stores, domain writers and invocation-scoped locks.
 - [x] Lot 4: before/after Q1/Q2 candidate qualification and failure classification.
 - [x] Lot 5: full CI-equivalent API suite without candidate, lint and typecheck.
-- [ ] Lot 6: report, atomic history, bundle audit and test-stack cleanup.
+- [x] Lot 6: report, atomic history, bundle audit and test-stack cleanup.
 - [x] Candidate: Q1 31 failures and Q2 32 failures, zero skips; 57 invalid-profile failures become the actual missing public executor export.
 - [x] Preserve two quota/admission coverage gaps; separately probe all six absent public executor/cleanup/purge/E3 exports.
 - [x] Baseline: 3169 API tests pass, 533 skip, zero fail; all 69 acceptance cases skip.
