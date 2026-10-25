@@ -659,7 +659,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     const { host } = composed;
     const close = host["close"];
     try {
-      requireSelectedProfile(host, composed.profile.digest);
+      requireSelectedProfile(host, composed.profile.profileDigest);
       const execute = executeWithParity(host);
       const artifactId = await ensureVia(execute, allowAll(), "q2-conflict", "q2-conflict-ensure");
       const files = [{ path: "index.html", mimeType: "text/html", text: "hello" }];
@@ -778,7 +778,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     const host = composed.host;
     const close = host["close"];
     try {
-      requireSelectedProfile(host, composed.profile.digest);
+      requireSelectedProfile(host, composed.profile.profileDigest);
       const execute = executeWithParity(host, { privateMarkers: [parityMarker],
         secrets: [BUCKET, endpoint, accessKey, SCOPE, secretKey] });
       const artifactId = await ensureVia(execute, allowAll(), "q2-parity", "q2-parity-ensure");
