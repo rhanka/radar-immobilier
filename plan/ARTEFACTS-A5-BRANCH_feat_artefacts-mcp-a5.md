@@ -37,6 +37,6 @@
 - [ ] Qualify shared HTTP/MCP provider finalization, cross-process replay/conflict, restart, quota and denial persistence after A1 is available.
 - [x] Ordinary API: 3,838 passed, 76 pending; MCP: 398 passed; host: 158 passed; separate exchange service E2E: 1 passed.
 - [x] Typecheck, lint, security audit (66 gate tests) and API build; two authority/binding mutants killed.
-- [ ] Final source qualification after semantic-refusal correction; exact runtime recovery image proof.
+- [ ] Final source qualification; existing runtime recovery image proof. No new image without owner clarification.
 - [ ] Record exact package/image/configuration provenance, limitations, delivered SHA and independently audited bundle.
 - [ ] Independent consensus reviews, remote CI and A7 deployment receipts remain external integration gates.

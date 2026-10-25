@@ -105,7 +105,7 @@ if [[ ${A5_SERVICES:-0} == 1 ]]; then "${compose[@]}" up -d --wait postgres mini
 printf '%s\n' "$CMD" > "$LOG_DIR/command.txt"
 if [[ ${A5_IMAGE:-0} == 1 ]]; then
   chmod 777 "$LOG_DIR"
-  timeout --signal=TERM --kill-after=10 180 docker run --rm --name "$PROJECT-image-probe" --network "${PROJECT}_default" \
+  timeout --signal=TERM --kill-after=10 180 docker run --pull=never --rm --name "$PROJECT-image-probe" --network "${PROJECT}_default" \
     --label "com.docker.compose.project=$PROJECT" --label "org.radar.base.owner=$OWNER" \
     -v "$ROOT/tools/make/artefacts-a4-image-probe.mjs:/workspace/a4-image-probe.mjs:ro" \
     -v "$ROOT/tools/make/artefacts-a5-image-probe.mjs:/workspace/a5-image-probe.mjs:ro" \
