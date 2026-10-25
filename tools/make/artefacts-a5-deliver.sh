@@ -57,12 +57,13 @@ case $action in
     git -c core.hooksPath=/dev/null commit -m "$MSG";;
   audit) audit;;
   bundle)
-    audit > "$ROOT/tmp/a5-evidence/commit-audit.txt"
-    OUT=$ROOT/tmp/a5-evidence/artefacts-a5.bundle
+    audit > "$ROOT/tmp/a5-evidence/facade-commit-audit.txt"
+    OUT=$ROOT/tmp/a5-evidence/artefacts-a5-facade-0.2.0.bundle
     git bundle create "$OUT" "$BASE..HEAD"
     auditdir=$(mktemp -d "$ROOT/tmp/a5-evidence/bundle-audit.XXXXXX")
     independent() { env -u GIT_DIR -u GIT_WORK_TREE git -C "$auditdir" "$@"; }
     independent init --bare -q
+    [[ ! -e $auditdir/objects/info/alternates ]]
     independent fetch --no-tags --no-write-fetch-head "$ROOT" "$BASE:refs/heads/prerequisite"
     head=$(git rev-parse HEAD)
     ! independent cat-file -e "$head^{commit}" 2>/dev/null
