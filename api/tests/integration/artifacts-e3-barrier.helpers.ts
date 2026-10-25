@@ -1,4 +1,26 @@
 import type pg from "pg";
+import { arrived, type CommitBarrier, type CommitBarrierPoint,
+  type InvocationContextShape } from "./artifacts-provider-contract.helpers.js";
+
+/** Register the correlated wait inside the transport, before host.execute. */
+export function startCorrelatedBarrier<T>(barrier: CommitBarrier, point: CommitBarrierPoint,
+  start: (register: (invocation: InvocationContextShape) => void) => Promise<T>) {
+  let invocationId: string | undefined;
+  let paused = false;
+  let resolve!: () => void;
+  let reject!: (error: unknown) => void;
+  const reached = new Promise<void>((ok, fail) => { resolve = ok; reject = fail; });
+  const pending = start((invocation) => {
+    if (invocationId !== undefined) throw new Error("E3 transport dispatched more than once");
+    invocationId = invocation.invocationId;
+    void arrived(barrier, point, invocationId).then(() => { paused = true; resolve(); }, reject);
+  });
+  void pending.catch(reject);
+  void pending.then(() => reject(new Error("E3 operation settled before barrier")), () => {});
+  return { pending, reached, release() {
+    if (paused && invocationId) { paused = false; barrier.release(point, invocationId); }
+  } };
+}
 
 /** Observe real transactions; no query is replaced and no error is fabricated. */
 export function createBarrierFaultProbe(pool: pg.Pool) {
