@@ -4,7 +4,7 @@ import { createS3BlobStore } from "@sentropic/artifacts/adapters/s3";
 import { createPostgresCommitExecutor } from "@sentropic/artifacts/adapters/postgres-commit";
 import { compileArtifactsProfile, RADAR_ARTIFACTS_PROFILE } from "@sentropic/artifacts/mcp-core";
 import { createArtifactCommitCoordinator } from "@sentropic/artifacts/server/commit-contract";
-import type { HttpAppDeps } from "@sentropic/artifacts/http";
+import { projectArtifactHttpOutcome, type HttpAppDeps } from "@sentropic/artifacts/http";
 import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
 import type { PublicationBlobStore } from "@sentropic/artifacts/server/publication";
 import type { ArtifactsStorageConfig } from "./config.js";
@@ -72,12 +72,18 @@ export async function composeArtifactHost(
           `INSERT INTO artifacts.host_failures (invocation_id, actor_id, operation, reason, status, at_ms)
            VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (invocation_id) DO NOTHING`,
           [entry.invocationId, invocation.actorId, entry.operation, entry.reason, entry.status, Date.now()])
-          .catch((error: unknown) => { accountingFailure = error; options.onProviderFailure?.(error); });
+          .catch((error: unknown) => {
+            accountingFailure = error;
+            console.error(JSON.stringify({ kind: "artifacts.accounting_unavailable", invocationId: entry.invocationId }));
+            options.onProviderFailure?.(error);
+          });
       }
       return outcome;
     };
     let accountingFailure: unknown;
-    return { ...domain, app: { ...domain.app, execute }, execute, coordinator, blobs,
+    const handle: typeof domain.app.handle = async (request, invocation) =>
+      projectArtifactHttpOutcome(await execute(request, invocation));
+    return { ...domain, app: { ...domain.app, execute, handle }, execute, coordinator, blobs,
       get accountingFailure() { return accountingFailure; },
       cleanup, intents: domain.store, refs: domain.store,
       selectedCapabilities: domain.app.selectedCapabilities, profileDigest: domain.app.profileDigest,
