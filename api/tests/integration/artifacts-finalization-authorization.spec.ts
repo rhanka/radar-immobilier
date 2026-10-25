@@ -50,7 +50,7 @@ import {
   verifyPreparationCleanup,
   requireSelectedProfile,
   readPolicyStatusViaTransaction,
-  transactionQuery,
+  readPolicyRevisionViaTransaction,
   toGuardDecision,
   type AuthorizeCommit,
   type CommitBarrier,
@@ -149,7 +149,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
 
   function statusDriven(): AuthorizeCommit {
     return async (context, transaction) => {
-      const status = await readPolicyStatusViaTransaction(transaction);
+      const status = await readPolicyStatusViaTransaction(transaction, context);
       return status === "approved" ? authorizeTransaction(context, transaction)
         : toGuardDecision({ allowed: false, status: 403, body: { error: "account_not_approved", status: status ?? "unknown" } });
     };
@@ -385,7 +385,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       let revoked = false;
       const guard: AuthorizeCommit = async (context, transaction) => {
         expect(context.purpose).toBe("replay");
-        return revoked ? { allowed: false, reason: "unauthorized_at_commit",
+        return revoked ? { allowed: false, reason: "denied",
           publicCode: "account_not_approved", status: 403, retriable: false }
           : authorizeTransaction(context, transaction);
       };
@@ -557,11 +557,11 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
           try {
             await policyPool?.query("SELECT status FROM account_users WHERE sub = 'alice' FOR SHARE");
           } catch {
-            return { allowed: false, reason: "unauthorized_at_commit",
+            return { allowed: false, reason: "denied",
               publicCode: "capability_unavailable", status: 503, retriable: true };
           }
         }
-        const status = await readPolicyStatusViaTransaction(transaction);
+        const status = await readPolicyStatusViaTransaction(transaction, context);
         if (status !== "approved") {
           return toGuardDecision(
             { allowed: false, status: 403, body: { error: "account_not_approved", status: status ?? "unknown" } });
@@ -644,15 +644,13 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       await pool.query("CREATE TABLE IF NOT EXISTS test_policy_revision (id int PRIMARY KEY, rev text NOT NULL)");
       await pool.query("INSERT INTO test_policy_revision (id, rev) VALUES (1, 'q1-rev-1') ON CONFLICT (id) DO UPDATE SET rev = 'q1-rev-1'");
       const readRevisionViaTransaction = async (transaction: unknown): Promise<string> => {
-        const rows = await transactionQuery<{ rev: string }>(transaction,
-          "SELECT rev FROM test_policy_revision WHERE id = $1 FOR SHARE", [1]);
-        return rows.rows[0]?.rev ?? "";
+        return readPolicyRevisionViaTransaction(transaction);
       };
       const authorizeCommit: AuthorizeCommit = async (context, transaction) => {
         expect(transaction).toBeDefined();
         const current = await readRevisionViaTransaction(transaction);
         if (current !== "q1-rev-1") {
-          return { allowed: false, reason: "unauthorized_at_commit",
+          return { allowed: false, reason: "denied",
             publicCode: "capability_unavailable", status: 403, retriable: false };
         }
         return authorizeTransaction(context, transaction);
