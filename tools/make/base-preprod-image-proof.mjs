@@ -70,6 +70,12 @@ try {
   await pool.query("REVOKE INSERT ON facet_command_contexts FROM synthetic_operator");
   await refused("missing command context insertion");
   await pool.query("GRANT INSERT ON facet_command_contexts TO synthetic_operator");
+  await pool.query("REVOKE EXECUTE ON FUNCTION facet_swap_head_enforcement(uuid) FROM PUBLIC");
+  await refused("missing activation function execution");
+  await pool.query("GRANT EXECUTE ON FUNCTION facet_swap_head_enforcement(uuid) TO PUBLIC");
+  await pool.query("ALTER TABLE facet_events OWNER TO radar");
+  await refused("missing effective index owner");
+  await pool.query("ALTER TABLE facet_events OWNER TO synthetic_operator");
   const qualified = operator();
   assert.equal(qualified.status, 0, qualified.stderr);
   const activate = JSON.parse(qualified.stdout).result;
