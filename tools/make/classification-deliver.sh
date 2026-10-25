@@ -18,7 +18,7 @@ git merge-base --is-ancestor "$BASE" HEAD
 allowed() {
   [[ $1 != *..* && $1 != /* && ! -L $1 ]]
   case $1 in
-    api/src/services/facets/classification-*|api/src/routes/scoped-classification*|api/tests/integration/classification-*|tools/make/classification*|plan/PANIERSREAD-BRANCH_feat-api-paniers-read.md|RAPPORT-SOL-API-PANIERS-READ.md|api/src/app.ts) ;;
+    api/src/services/facets/classification-*|api/src/services/facets/projection-revisions-fixture.ts|api/src/routes/scoped-classification*|api/tests/integration/classification-*|tools/make/classification*|plan/PANIERSREAD-BRANCH_feat-api-paniers-read.md|RAPPORT-SOL-API-PANIERS-READ.md|api/src/app.ts) ;;
     *) echo "Outside classification scope: $1" >&2; return 2;;
   esac
 }
