@@ -55,6 +55,7 @@
 - [x] Missing/legacy/barrier epoch and unresolved-history refusals are covered by real createApp/PostgreSQL cases, including empty reveal requests.
 - [ ] Lot gate: unit tests, real createApp/PostgreSQL tests, named behavioral mutations, targeted lint/typecheck.
 - [x] Machine-serialized runner written with explicit file scopes, a 60-second wait, disk monitoring, one-worker container configuration and inherited ownership-checked cleanup.
+- [x] Eight named mutants prepared in the isolated container source copy, with a control before each, exact-byte restoration and a passing restored control required; execution pending.
 - [x] Container checks and test-only S0 contract comparison written; API runtime has no MCP import.
 - [ ] Delivery: report qualified slices, commands/counts, per-commit numstat, remaining integration duties, exact SHA and isolated bundle audit/hash.
 - [x] Selective staging, 150-line audit, subject-only commits and bundle verification in a blank prerequisite-only repository have dedicated make targets; no shared Git writes or push.
