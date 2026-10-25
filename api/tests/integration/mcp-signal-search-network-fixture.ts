@@ -72,7 +72,7 @@ export async function networkFixture(retirement: LegacyRetirementState = "retire
       auth, discarded: EMPTY_DISCARDED_SIGNALS, checkDb: async () => ({ ok: true }),
       checkObjectStore: async () => ({ ok: true }), legacyRetirement: retirement,
       mcpSignalSearch: { enabled } }));
-    const exchangeDeps = exchangeDepsFor(exchange, { fetchImpl: fetch });
+    const exchangeDeps = exchangeDepsFor(exchange, { fetchImpl: fetch, allowLoopbackHttp: true });
     mcpApp.route("/", createImmoHttpApp({ issuer: exchange.config.issuer, resource: exchange.config.mcpResource,
       requiredScopes: ["immo:read"], scopesSupported: ["immo:read", "immo:search"], port: 0, dataMode: "real",
       sessionIdleTimeoutMs: 1_800_000, sessionMaxLifetimeMs: 28_800_000 }, {
