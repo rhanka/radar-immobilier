@@ -30,9 +30,9 @@
 ## Plan / Todo (lot-based)
 - [x] PR920: init requires a null UUID and identical declared/argument slug; returned UUID resolves to that slug, also checked at collection.
 - [x] PR920: shared SQL matrix covers every operation; row-lock UPDATE and all five table locks gate proofs and the runtime before mutation.
-- [ ] PR920: bind proofs and receipts to the executing release and image digest.
+- [x] PR920: immutable image SHA gates execution; proofs, Job/pod digest and complete/termination receipts must agree.
 - [ ] PR920: bind Q2 to the latest API restart, pod instance and configuration.
-- [ ] PR920: retain failed Job receipts and their verified hashes.
+- [x] PR920: collect both terminal Job outcomes; failed verified receipts persist with nonzero exit and explicit read-only collect-job.
 - [ ] PR920: reproduce offline K8s CI, mutation tests and fresh bundle audit from c100e6cc.
 - [x] Lot 0: inspect approved design, constraints and existing isolation tooling.
 - [x] Lot 1: bundle scripts and qualify TypeScript/JavaScript entry guards.
