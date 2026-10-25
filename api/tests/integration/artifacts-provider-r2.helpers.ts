@@ -7,7 +7,7 @@ import type { ArtifactsStorageConfig } from "@radar/artifacts-host";
 import { initializeArtifactScope } from "../../../packages/artifacts-host/src/storage.js";
 import { requirePublicFunction, COMMIT_CONTRACT_SPECIFIER,
   type R2CommitCoordinator, type CompiledArtifactsProfile,
-  type InvocationContextShape } from "./artifacts-provider-contract.helpers.js";
+  type InvocationContextShape, type CoordinatorBarrierPoint } from "./artifacts-provider-contract.helpers.js";
 
 /** Host SQL is confined to the registered participant's leased connection. */
 export interface PolicyClient {
@@ -24,12 +24,14 @@ export async function readTestPolicyRevision(client: PolicyClient): Promise<stri
   return revision.rows[0].rev;
 }
 
-export async function createCandidateCoordinator(pool: pg.Pool, testObserver: unknown): Promise<R2CommitCoordinator> {
+export async function createCandidateCoordinator(pool: pg.Pool, testObserver: unknown,
+  testPoints?: readonly CoordinatorBarrierPoint[]): Promise<R2CommitCoordinator> {
   const create = await requirePublicFunction<(options: unknown) => R2CommitCoordinator>(
     COMMIT_CONTRACT_SPECIFIER, "createArtifactCommitCoordinator");
   const executor = await requirePublicFunction<(pool: pg.Pool) => unknown>(
     "@sentropic/artifacts/adapters/postgres", "createPostgresCommitExecutor");
   return create({ executor: executor(pool), testObserver,
+    ...(testPoints === undefined ? {} : { testPoints }),
     policy: { createParticipant(client: PolicyClient, transactionToken: string) {
       return {
         readRevision: () => readTestPolicyRevision(client),
