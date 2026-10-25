@@ -29,7 +29,7 @@ export const EXCHANGE_MAX_RESPONSE_BYTES = 16 * 1024;
 /** Delegated scope for the protected egress (only `search_signals`). */
 export const EXCHANGE_REQUIRED_SCOPE = "immo:search";
 /** Default policy revision recorded in the cache key. */
-export const EXCHANGE_DEFAULT_POLICY_REVISION = "p4-v1";
+export const EXCHANGE_DEFAULT_POLICY_REVISION = "a2base-search-v1";
 
 export interface ExchangeConfig {
   /** Token issuer expected on the delegated JWT (`iss`). */
