@@ -38,6 +38,6 @@
 - [x] Ordinary API: 3,838 passed, 76 pending; final MCP: 401 passed; host: 158 passed; separate exchange service E2E: 1 passed.
 - [x] Typecheck, lint, security audit (66 gate tests) and API build; two authority/binding mutants killed.
 - [x] Final source qualification on `4866e79b`, clean source status and preserved source archive; all ordinary quality gates pass.
-- [ ] Existing runtime recovery image proof. No new image without owner clarification.
+- [ ] Exact A5 runtime image qualification after A1 integration. Existing A4 recovery image proof cannot close this gate; no new image without owner clarification.
 - [ ] Record exact package/image/configuration provenance, limitations, delivered SHA and independently audited bundle.
 - [ ] Independent consensus reviews, remote CI and A7 deployment receipts remain external integration gates.
