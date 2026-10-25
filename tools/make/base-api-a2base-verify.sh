@@ -36,6 +36,17 @@ docker() {
 }
 compose=(docker compose --env-file /dev/null -p "$PROJECT" -f "$RUN_DIR/compose.yml")
 source tools/make/base-api-resources.sh
+# Docker can release an auto-removed operator's volume just after compose down.
+original_down=$(declare -f guarded_down)
+eval "${original_down/#guarded_down/a2base_down_once}"
+guarded_down() {
+  local attempt
+  for attempt in 1 2 3; do
+    a2base_down_once && return 0
+    sleep 1
+  done
+  return 1
+}
 source tools/make/base-api-compose.sh
 ACTION=test-api
 write_compose
