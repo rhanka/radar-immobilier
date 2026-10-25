@@ -5,7 +5,6 @@ import { composeArtifactHost } from "./composition.js";
 
 vi.mock("./storage.js", () => ({
   initializeArtifactScope: vi.fn().mockResolvedValue(undefined),
-  createLockedArtifactStore: () => ({ getArtifactAcl: async () => undefined }),
 }));
 vi.mock("@aws-sdk/client-s3", async (original) => {
   const sdk = await original<typeof import("@aws-sdk/client-s3")>();
@@ -14,7 +13,7 @@ vi.mock("@aws-sdk/client-s3", async (original) => {
 
 describe("artifact S3 composition", () => {
   it("uses the configured region and finite connection/request deadlines", async () => {
-    const host = await composeArtifactHost({} as pg.Pool, {
+    const host = await composeArtifactHost({ query: vi.fn().mockResolvedValue({ rows: [] }) } as unknown as pg.Pool, {
       enabled: true, storageScope: "scope", orgId: "org", s3Bucket: "test-bucket",
       s3Endpoint: "http://minio:9000", s3Region: "ca-central-1", s3AccessKey: "test", s3SecretKey: "test",
     });

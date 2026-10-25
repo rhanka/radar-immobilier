@@ -38,7 +38,7 @@ function blockedProvider() {
 }
 
 describe("commit-time authorization while the provider is blocked [T05 T13]", () => {
-  it.each(["ensure", "publish"])("accounts a post-success admission outage for %s", async (op) => {
+  it.each(["ensure", "publish"])("accounts admission unavailability before finalization for %s", async (op) => {
     let unavailable = false;
     const authority: AdmissionAuthority = {
       readActivation: () => live(), nowMs: () => NOW,
@@ -58,7 +58,7 @@ describe("commit-time authorization while the provider is blocked [T05 T13]", ()
     await expect(pending).resolves.toEqual(
       { status: 503, body: { error: "capability_unavailable" } });
     expect(entries).toEqual([{ op, actorId: "alice",
-      reason: "admission_unavailable", status: 503, atMs: NOW }]);
+      reason: "unauthorized_at_commit", status: 503, atMs: NOW }]);
   });
 
   it("refuses a publish suspended while the provider is blocked", async () => {
@@ -74,7 +74,7 @@ describe("commit-time authorization while the provider is blocked [T05 T13]", ()
     status = "suspended";
     gate.resolve({ status: 201, body: receiptBody() });
     expect(await pending).toEqual(
-      { status: 403, body: { error: "account_not_approved", status: "suspended" } });
+      { status: 403, body: { error: "account_not_approved" } });
     expect(entries).toEqual([{ invocationId: expect.any(String), op: "publish", actorId: "alice",
       reason: "unauthorized_at_commit", status: 403, atMs: NOW }]);
   });
