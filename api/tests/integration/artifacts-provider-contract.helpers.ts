@@ -105,6 +105,12 @@ export interface CommitBarrier {
 export type CoordinatorBarrierPoint = Exclude<CommitBarrierPoint,
   "before_blob_put" | "after_blob_put_before_verify" | "before_blob_readback">;
 
+interface PublicCommitBarrier extends CommitBarrier {
+  readonly observer: ((point: CommitBarrierPoint, invocationId: string) => Promise<void>) & {
+    arrive(point: CommitBarrierPoint, invocationId: string): void;
+  };
+}
+
 export type AuthorizePurpose = "finalize" | "replay";
 
 export interface AuthorizeCommitContext {
@@ -192,7 +198,7 @@ export async function requireOutcomeContract(): Promise<Record<string, unknown>>
  */
 export async function requireCommitBarrier(points?: readonly CoordinatorBarrierPoint[]): Promise<CommitBarrier> {
   const factory = await requirePublicFunction<
-    (options?: { readonly points: readonly CommitBarrierPoint[] }) => CommitBarrier
+    (options?: { readonly points: readonly CommitBarrierPoint[] }) => PublicCommitBarrier
   >(TESTING_SPECIFIER, "createArtifactCommitBarrier");
   const barrier = factory(points === undefined ? undefined : { points });
   if (barrier === null || typeof barrier !== "object" ||
