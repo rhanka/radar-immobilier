@@ -82,8 +82,8 @@ describe("check-archi FACE-2 — chaque payload servi PORTE regulatoryStatus", (
     const mocks = read("packages/immo-mcp/src/mocks.ts");
     expect(mocks).toContain('regulatoryStatus: "firm" | "anticipation"');
     const dataSource = read("packages/immo-mcp/src/data-source.ts");
-    const { parseSignalSearchResponse } = await import("../../../../packages/immo-mcp/src/signal-search-response.js");
-    const { signalSearchBody, signalSearchItem } = await import("../../../../packages/immo-mcp/src/signal-search-test-fixture.js");
+    const { parseSignalSearchResponse } = await import(resolve(REPO_ROOT, "packages/immo-mcp/src/signal-search-response.ts"));
+    const { signalSearchBody, signalSearchItem } = await import(resolve(REPO_ROOT, "packages/immo-mcp/src/signal-search-test-fixture.ts"));
     for (const regulatoryStatus of ["firm", "anticipation"]) {
       const body = signalSearchBody("synthetic-city", [signalSearchItem("synthetic-city", { regulatoryStatus })]);
       expect(parseSignalSearchResponse(body, { city: "synthetic-city", limit: 20 })[0]?.regulatoryStatus).toBe(regulatoryStatus);
