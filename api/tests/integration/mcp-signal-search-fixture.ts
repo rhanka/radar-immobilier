@@ -40,3 +40,10 @@ export function barrier() {
   const waiting = new Promise<void>((resolve) => { release = resolve; });
   return { waiting, release };
 }
+
+export async function businessSnapshot(f: SearchFixture) {
+  const tables = ["facet_events", "facet_heads", "facet_streams", "facet_event_bindings",
+    "facet_activation_state", "personal_projection_revisions", "workspace_projection_revisions", "prospect_marks"];
+  return Promise.all(tables.map(async (table) => (await f.data.pool.query(
+    `SELECT jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text) AS state FROM ${table} t`)).rows));
+}
