@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
+if [[ ${A4_FROZEN_RUNNER:-} != 1 ]]; then
+  mkdir -p tmp/a4-evidence
+  snapshot=$(mktemp "$PWD/tmp/a4-evidence/runner.XXXXXX")
+  cp "$0" "$snapshot"
+  export A4_FROZEN_RUNNER=1
+  exec bash "$snapshot"
+fi
 source tools/make/base-api-guards.sh
 require_env
 [[ $ENV == test-artefacts-a4 && $API_PORT == 18923 && $UI_PORT == 15923 && $MAILDEV_UI_PORT == 11923 ]]
@@ -23,6 +30,9 @@ flock -n 8 || { echo 'Machine Docker campaign lock held'; exit 2; }
 OWNER=$(printf '%s' "$ROOT/$ENV" | sha256sum | cut -d' ' -f1)
 mkdir -p "$HOME/.cache/radar-a4-docker"
 export DOCKER_CONFIG=$HOME/.cache/radar-a4-docker
+if [[ ! -e $DOCKER_CONFIG/cli-plugins ]]; then
+  ln -s "$HOME/.docker/cli-plugins" "$DOCKER_CONFIG/cli-plugins"
+fi
 export COMPOSE_DISABLE_ENV_FILE=1
 unset COMPOSE_FILE COMPOSE_PROFILES COMPOSE_ENV_FILES
 compose=(docker compose --env-file /dev/null -p "$PROJECT" -f "$RUN_DIR/compose.yml")
@@ -33,7 +43,7 @@ write_compose
 # A bounded source archive prevents any environment discovery in the container.
 git ls-files --cached --others --exclude-standard -- api packages ui tools radar/ontology \
   package.json package-lock.json tsconfig.base.json eslint.config.js \
-  deploy/k8s/41-immo-mcp-ingress.yaml .security > "$RUN_DIR/candidates"
+  deploy/k8s/41-immo-mcp-ingress.yaml deploy/k8s/scrape/run-chunks.sh .security > "$RUN_DIR/candidates"
 : > "$RUN_DIR/paths"
 while IFS= read -r path; do
   case /$path/ in */.env*|*/node_modules/*|*/dist/*|*/input/*|*/credentials*|*/secrets*) continue;; esac
@@ -68,7 +78,7 @@ guarded_down
 MONITOR=$!
 if [[ ${A4_IMAGE:-0} == 1 ]]; then
   image=$PROJECT:runtime
-  docker build --target runtime --build-arg "GIT_SHA=$(git --git-dir=tmp/a4-delivery.git rev-parse HEAD)" \
+  timeout --signal=TERM --kill-after=10 1800 docker build --target runtime --build-arg "GIT_SHA=$(git --git-dir=tmp/a4-delivery.git rev-parse HEAD)" \
     -t "$image" -f api/Dockerfile - < "$RUN_DIR/source.tar" > >(tee "$LOG_DIR/build.log") 2>&1 &
   RUN_PID=$!
   wait "$RUN_PID"
@@ -78,7 +88,8 @@ fi
 if [[ ${A4_SERVICES:-0} == 1 ]]; then "${compose[@]}" up -d --wait postgres minio; fi
 printf '%s\n' "$CMD" > "$LOG_DIR/command.txt"
 if [[ ${A4_IMAGE:-0} == 1 ]]; then
-  docker run --rm --name "$PROJECT-image-probe" --network "${PROJECT}_default" \
+  chmod 777 "$LOG_DIR"
+  timeout --signal=TERM --kill-after=10 180 docker run --rm --name "$PROJECT-image-probe" --network "${PROJECT}_default" \
     --label "com.docker.compose.project=$PROJECT" --label "org.radar.base.owner=$OWNER" \
     -v "$ROOT/tools/make/artefacts-a4-image-probe.mjs:/workspace/a4-image-probe.mjs:ro" \
     -v "$LOG_DIR:/evidence" --entrypoint node "$image" a4-image-probe.mjs \
