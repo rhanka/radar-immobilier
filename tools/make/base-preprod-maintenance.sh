@@ -212,6 +212,9 @@ reopen-api() {
   jq -e '.q2.passed==true' "$PROOFS" >/dev/null
   assert_cd_frozen; assert_boundary
   [[ $("${k[@]}" get deployment radar-api -o jsonpath='{.spec.template.spec.containers[0].image}') == $(jq -r .image "$INPUT") ]]
+  local available
+  available=$("${k[@]}" get deployment radar-api -o jsonpath='{.status.availableReplicas}')
+  [[ $available =~ ^[1-9][0-9]*$ ]] || fail 'Qualified API is not available'
   # All consumers except the qualified API must remain unavailable.
   "${k[@]}" get deployments -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.replicas}{"\n"}{end}' > "$OUTPUT/final-replicas.tsv"
   awk '$1!="radar-api" && $1!="radar-postgres" && $2!=0 {exit 1}' "$OUTPUT/final-replicas.tsv"
