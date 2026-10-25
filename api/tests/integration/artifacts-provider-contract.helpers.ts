@@ -877,6 +877,8 @@ export function proxyLeasedPool(pool: pg.Pool, handler: ProxyHandler<pg.Pool>): 
 }
 
 /** Instrument real leased clients; one fault, then pass through to expose retries. */
+export const finalizationPhaseFaults = new WeakMap<pg.Pool, (phase: string) => void>();
+
 export function finalizationFaultPool(pool: pg.Pool, options: {
   code: string; lockClass?: string; loseCommitAck?: boolean;
 }) {
@@ -938,6 +940,13 @@ export function finalizationFaultPool(pool: pg.Pool, options: {
     const value = Reflect.get(target, property, receiver);
     return typeof value === "function" ? value.bind(target) : value;
   } });
+  finalizationPhaseFaults.set(instrumented, (phase) => {
+    if (evidence.armed && evidence.injections === 0 && options.lockClass === phase) {
+      evidence.injections++;
+      evidence.phase = phase;
+      throw Object.assign(new Error(`private injected ${phase}`), { code: options.code });
+    }
+  });
   return { pool: instrumented, evidence };
 }
 
