@@ -6,14 +6,17 @@ import { inspect } from "./base-preprod-inspect.js";
 
 interface Invocation {
   action: "inspect" | "init" | "attach" | "activate" | "resume";
-  binding: { workspaceId: string; actorSub: string; maintenanceAttemptId: string; releaseId: string };
+  binding: { workspaceId: string | null; actorSub: string; maintenanceAttemptId: string; releaseId: string };
   args: string[];
 }
 
 export async function runJob(invocation: Invocation) {
   if (!invocation.binding || !Array.isArray(invocation.args)) throw new Error("invalid_invocation");
   let result: unknown;
-  if (invocation.action === "inspect") result = await inspect(invocation.binding.workspaceId);
+  if (invocation.action === "inspect") {
+    if (!invocation.binding.workspaceId) throw new Error("workspace_required");
+    result = await inspect(invocation.binding.workspaceId);
+  }
   else {
     const scripts = { init: "init-workspace-authority", attach: "attach-personal-history",
       activate: "base-api-personal-activation", resume: "base-api-personal-activation" };
