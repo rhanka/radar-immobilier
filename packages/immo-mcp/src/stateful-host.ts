@@ -15,6 +15,8 @@ export class ImmoStatefulHost implements StatefulMcpHost {
   constructor(private readonly router: Hono) {}
 
   retain(server: Server): void {
+    if (this.servers.has(server)) return;
+    server.registerCapabilities({ tools: { listChanged: true } });
     this.servers.add(server);
     if (this.admitted) {
       try { this.hooks!.register(server); }
