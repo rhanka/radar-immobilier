@@ -4,6 +4,9 @@ import { classificationFixture } from "./classification-fixture.js";
 import { bumpGraphSourceRevision } from "../../src/services/facets/projection-revisions.js";
 import { discoverFacetContext } from "../../src/services/facets/classification-discovery.js";
 import * as context from "../../src/services/facets/classification-context.js";
+import * as personalReader from "../../src/services/facets/scoped-reader.js";
+import { writeScopedPersonalFacet } from "../../src/services/facets/scoped-writer.js";
+import { randomUUID } from "node:crypto";
 
 function barrier() {
   let release!: () => void;
@@ -20,6 +23,31 @@ async function withDocument() {
   return f;
 }
 describeDb("classification races across real PostgreSQL connections", () => {
+  it("should retry a personal archive appended between the two BASE head readers", async () => {
+    const f = await classificationFixture();
+    const gate = barrier();
+    const original = personalReader.readScopedPersonalHeads;
+    const spy = vi.spyOn(personalReader, "readScopedPersonalHeads").mockImplementationOnce(async (...args) => {
+      const result = await original(...args);
+      await gate.wait();
+      return result;
+    });
+    try {
+      const reading = f.request("signal-facets/search?citySlug=synthetic-city&archive=include");
+      await gate.entered;
+      try {
+        await writeScopedPersonalFacet(f.data.db, f.data.contributor.sub, f.data.workspaceId, {
+          action: "discard", target: f.signal.target, reasonCode: "N-NON-RES", expectedHeadId: null,
+          displayedFingerprint: f.signal.fingerprint, commandKey: randomUUID(),
+        });
+      } finally { gate.release(); }
+      const response = await reading;
+      expect(response.status).toBe(200);
+      const body = await response.json();
+      expect(body.items[0].facets).toMatchObject({ personalHidden: true, personalHistoryState: "has_history" });
+      expect(body.counts.discarded).toBe(1);
+    } finally { gate.release(); spy.mockRestore(); }
+  });
   for (const authority of ["approval", "membership"] as const) {
     it(`should abandon the response when ${authority} is revoked during enrichment`, async () => {
       const f = await withDocument();
