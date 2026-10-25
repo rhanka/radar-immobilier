@@ -10,6 +10,10 @@ mkdir -p "$testdir/api/src/scripts"
 cp api/src/scripts/base-preprod-rights.json "$testdir/api/src/scripts/"
 cp tools/make/base-preprod*.sh tools/make/base-preprod*.jq "$testdir/tools/make/"
 cp deploy/base-preprod/operator.mk "$testdir/deploy/base-preprod/"
+if [[ -n ${BASE_PREPROD_MUTANT:-} ]]; then
+  source "$root/tools/make/base-preprod-mutate.sh"
+  apply_operator_mutation "$testdir"
+fi
 printf '%s\n' '$(error root_makefile_was_read)' > "$testdir/Makefile"
 printf '#!/bin/sh\nprintf unexpected >> "%s/cluster-calls"\nexit 1\n' "$testdir" > "$testdir/bin/kubectl"
 cp "$testdir/bin/kubectl" "$testdir/bin/gh"
@@ -46,7 +50,8 @@ jq -e '.spec.backoffLimit==0 and .spec.activeDeadlineSeconds==540
  and .spec.template.spec.containers[0].readinessProbe.exec.command==["/bin/false"]
  and (.spec.template.spec.containers[0].image|contains("@sha256:"))' "out-$n/job.json" >/dev/null
 cp input.json valid.json
-jq '.operation="init" | .workspaceSlug="other" | .binding.workspaceSlug="other"' valid.json > input.json
+jq '.operation="init" | .workspaceSlug="other" | .binding.workspaceSlug="other"
+ | .workspaceLabel="Other" | .moderators=["first","second"] | .managers=.moderators' valid.json > input.json
 reject render-job
 jq '.operation="init" | .binding.workspaceId=null | .workspaceSlug="other" | .binding.workspaceSlug="fixture"' valid.json > input.json
 reject render-job
@@ -102,6 +107,12 @@ jq -n --slurpfile c input.json --slurpfile ids expected.json --arg now "$now" '
 invoke render-job EXPECTED="$testdir/expected.json" PROOFS="$testdir/proofs.json"
 jq -e '.spec.template.spec.containers[0].command[2]|fromjson|.args|index("--evidence-json")!=null' "out-$n/job.json" >/dev/null
 cp proofs.json good-proofs.json
+for right in facet_event_bindings:lock_authority workspace_memberships:update facet_activation_state:update; do
+  relation=${right%:*}; privilege=${right#*:}
+  jq --arg relation "$relation" --arg privilege "$privilege" \
+    '(.databaseInspection.result.privileges[]|select(.relation==$relation)|.[$privilege])=false' good-proofs.json > proofs.json
+  reject render-job EXPECTED="$testdir/expected.json" PROOFS="$testdir/proofs.json"
+done
 while IFS=$'\t' read -r privilege relation; do
   jq --arg relation "$relation" --arg privilege "$privilege" \
     '(.databaseInspection.result.privileges[]|select(.relation==$relation)|.[$privilege])=false' good-proofs.json > proofs.json

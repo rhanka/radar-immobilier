@@ -13,6 +13,8 @@ k8s-validate:
 	@rtk bash tools/make/base-preprod-k8s.sh
 test-operator:
 	@rtk bash tools/make/base-preprod-operator.test.sh
+test-mutations:
+	@rtk proxy bash tools/make/base-preprod-mutations.sh
 inspect-host:
 	@rtk bash -c 'git status --short --branch; git rev-parse origin/main; command -v jq kubectl; df -h .; docker ps --format "{{.Names}}"; pgrep -af "docker (build|buildx build)" || true'
 stage:
