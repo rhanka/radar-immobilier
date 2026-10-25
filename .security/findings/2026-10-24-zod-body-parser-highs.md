@@ -1,6 +1,6 @@
 # Root Zod and body-parser high advisories
 
-- Status: body-parser fixed at 2.4.0; Zod blocked by the owner's no-major/no-peer-break constraint
+- Status: body-parser fixed at 2.4.0; Zod risk-accepted temporarily (owner sign-off 2026-10-25, expires 2026-11-08)
 - Severity: high for both advisories
 - Advisories: [GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5), [GHSA-27r3-jxmh-p828](https://github.com/advisories/GHSA-27r3-jxmh-p828)
 - body-parser published: 2026-10-23; detected and compatible fix applied: 2026-10-24
@@ -54,7 +54,7 @@ The audit marks every version below 4.6.6 affected, including installed 3.25.76.
 1. **Compatible upstream backport:** retain Zod 3 until a published 3.x security backport is available and the advisory recognizes it. Impact: no application migration, but the high finding remains blocking meanwhile. Acceptance: compatible installed tree and read-only audit showing the advisory removed.
 2. **Separately authorized Zod 4 migration:** migrate the five workspace consumers and replace/remove the Ollama/provider-utils 2.x dependency chain through a compatible Graphify/provider migration. Impact: schema, error/default behavior, JSON-schema and provider contract changes requiring dedicated API/domain/MCP/provider validation. Updating Graphify alone cannot fix the five direct Zod 3 consumers. Acceptance: no installed affected Zod instance, no invalid peers, full gates and zero high/critical findings.
 
-No major upgrade, peer override, risk acceptance, or security-register suppression was introduced. This is an explicit uncompleted security objective, not a successful zero-high remediation.
+No major upgrade, peer override or security-register suppression was introduced. The remediation itself does not reach zero high findings; the Zod exception below is a separate, time-boxed owner decision.
 
 ## Verification
 
@@ -73,3 +73,11 @@ No major upgrade, peer override, risk acceptance, or security-register suppressi
 - fast-uri moderate [GHSA-w74x-v6f9-j3xg](https://github.com/advisories/GHSA-w74x-v6f9-j3xg), [GHSA-wjr9-j795-jxcr](https://github.com/advisories/GHSA-wjr9-j795-jxcr); low [GHSA-xhq7-xmqj-769h](https://github.com/advisories/GHSA-xhq7-xmqj-769h), [GHSA-333x-w4r6-6crp](https://github.com/advisories/GHSA-333x-w4r6-6crp).
 - ip-address moderate [GHSA-rxp7-6hxx-x8q5](https://github.com/advisories/GHSA-rxp7-6hxx-x8q5).
 - All non-body-parser vulnerability records are identical before/after. The zero-high/critical condition is not met; Zod remains PR-blocking under `rules/security.md`. No push, remote CI result, merge, or deployment is claimed.
+
+## Risk acceptance (Zod GHSA-mrhx-c7xc-m3w5)
+
+- Decision: temporary risk acceptance of the Zod high advisory, so that merges are not blocked by this pre-existing finding while its remediation is prepared.
+- Sign-off: repository owner, 2026-10-25, through the conductor's decision request ("merge after the security PR, with a temporary owner-signed risk acceptance for zod and body-parser that expires once their fix is delivered"). body-parser no longer needs it: fixed above.
+- Scope: Zod 3.25.76 at the root only (single instance, consumers listed above). Any new Zod consumer or a new high/critical advisory is not covered.
+- Expiry: the first of (a) delivery of a patched Zod (compatible 3.x backport, or the Zod 4 migration of option 2), (b) 2026-11-08. At expiry the finding is PR-blocking again under `rules/security.md` unless the owner renews it explicitly.
+- Follow-up: choose between options 1 and 2 before expiry; option 2 needs its own design and owner authorization.
