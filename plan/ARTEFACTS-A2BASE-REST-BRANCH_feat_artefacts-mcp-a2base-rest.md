@@ -25,6 +25,7 @@
 
 ## Plan / Todo (lot-based)
 - [ ] T08: canonical domain projection and filters before limit; explicit shared-builder regressions and cross-retry budget.
+- [x] T08 code: port the removed MCP mapper to API, preserve canonical priorities and apply domain filters before limit; qualification pending.
 - [ ] T09: facade mounted after protect, default closed, private refusals and authorized empty success.
 - [ ] T13: createApp/PostgreSQL authority, archives, races and cutover groups, separate commits.
 - [ ] T14: explicit MCP E2E runner, complete HTTP search through production facade and image evidence.
