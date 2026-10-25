@@ -4,7 +4,7 @@ import { startHarness } from "./artifacts-h2.helpers.js";
 import { openProductionPeer } from "./artifacts-production-worker.helpers.js";
 
 export async function qualifyLastQuotaUnit() {
-  const h = await startHarness("quota_process");
+  const h = await startHarness("quotaprocess");
   let peer: Awaited<ReturnType<typeof openProductionPeer>> | undefined;
   try {
     await h.pool.query("INSERT INTO account_users (sub, status) VALUES ('alice', 'approved')");
@@ -35,7 +35,7 @@ export async function qualifyLastQuotaUnit() {
 }
 
 export async function qualifyAdmissionQuotaAccounting() {
-  const h = await startHarness("quota_admission");
+  const h = await startHarness("quotaadmission");
   try {
     await h.pool.query("INSERT INTO account_users (sub, status) VALUES ('alice', 'approved')");
     await h.pool.query("UPDATE artifacts.host_quotas SET operation_limit = 1, byte_limit = 0");
