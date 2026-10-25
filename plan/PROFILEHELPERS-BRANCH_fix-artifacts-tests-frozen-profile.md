@@ -1,7 +1,7 @@
 # Fix: frozen artifacts acceptance profile
 
 ## Objective
-- [ ] Align Q1/Q2 acceptance helpers with the candidate 0.2.0 public contract.
+- [x] Align Q1/Q2 acceptance helpers with the candidate 0.2.0 public contract.
 
 ## Scope / Guardrails
 - [x] Worktree: `tmp/artifacts-profile-helpers`; base `8d6aabb0`.
@@ -36,6 +36,11 @@
 - [x] Lot 3: public coordinator, provider composition and E3 binding probes.
 - [x] Lot 3a: replace unconditional constructor stubs and register leased policy reads.
 - [x] Lot 3b: compose the r2 candidate app with real stores, domain writers and invocation-scoped locks.
-- [ ] Lot 4: before/after Q1/Q2 candidate qualification and failure classification.
-- [ ] Lot 5: full CI-equivalent API suite without candidate, lint and typecheck.
+- [x] Lot 4: before/after Q1/Q2 candidate qualification and failure classification.
+- [x] Lot 5: full CI-equivalent API suite without candidate, lint and typecheck.
 - [ ] Lot 6: report, atomic history, bundle audit and test-stack cleanup.
+- [x] Candidate: Q1 31 failures and Q2 32 failures, zero skips; 57 invalid-profile failures become the actual missing public executor export.
+- [x] Preserve two quota/admission coverage gaps; separately probe all six absent public executor/cleanup/purge/E3 exports.
+- [x] Baseline: 3169 API tests pass, 533 skip, zero fail; all 69 acceptance cases skip.
+- [x] Baseline acceptance/workspace typechecks and lint pass; UI typecheck reports seven warnings and no errors.
+- [x] Composition and E3 behavior remain unqualified until their public upstream prerequisites ship; no provider acceptance success is claimed.
