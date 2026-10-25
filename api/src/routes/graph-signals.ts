@@ -51,6 +51,7 @@ import {
 } from "../services/graph/discarded-signals.js";
 import { resolveGraphSignalsViewer } from "./auth.js";
 import { privateSignalResponse } from "../services/facets/private-response.js";
+import { legacyFenceError, legacyFenceStatus, type LegacyRetirementState } from "../services/facets/legacy-retirement.js";
 import { targetFingerprint } from "../services/facets/target.js";
 import type { Database } from "../db/client.js";
 import type { ObjectStore } from "../storage/object-store.js";
@@ -80,6 +81,13 @@ export interface GraphSignalsDeps {
    * dev): the viewer is anonymous (null).
    */
   auth?: { enabled: boolean };
+  /**
+   * Legacy retirement fence. Absent (or `serving`) keeps current behavior.
+   * `cutover-closed` answers 503, `retired` answers 410 with the scoped
+   * successor; a 404 is never a retirement answer. Flipped only by the
+   * cutover activation through the CT-1/CT-2 handoff, never unilaterally.
+   */
+  retirement?: LegacyRetirementState;
 }
 
 /**
@@ -937,6 +945,11 @@ export function graphSignalsRoute(deps: GraphSignalsDeps): Hono {
 
   // GET /api/graph-signals/by-city
   app.get("/api/graph-signals/by-city", async (c) => {
+    const fence = legacyFenceStatus(deps.retirement);
+    if (fence !== null) {
+      return c.json({ ok: false, error: legacyFenceError(fence),
+        successor: "GET /api/v1/workspaces/:workspaceId/signal-facets/coherent-city?citySlug&mode=signal" }, fence);
+    }
     const dateFrom = c.req.query("dateFrom")?.trim() || undefined;
     const dateTo = c.req.query("dateTo")?.trim() || undefined;
     const scrape = c.req.query("dateBasis") === "scrap";
@@ -974,6 +987,11 @@ export function graphSignalsRoute(deps: GraphSignalsDeps): Hono {
 
   // GET /api/graph-signals/:city
   app.get("/api/graph-signals/:city", async (c) => {
+    const fence = legacyFenceStatus(deps.retirement);
+    if (fence !== null) {
+      return c.json({ ok: false, error: legacyFenceError(fence),
+        successor: "GET /api/v1/workspaces/:workspaceId/signal-facets/coherent-city?citySlug&mode=signal and GET /api/v1/workspaces/:workspaceId/signal-facets/reveal?citySlug&type&id for archived targets" }, fence);
+    }
     const city = c.req.param("city");
     // Un échec ici (DB down) est non-récupérable → 5xx légitime. L'enrichissement
     // documentaire, lui, est best-effort et NE DOIT PAS produire de 5xx.
