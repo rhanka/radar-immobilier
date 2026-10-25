@@ -18,14 +18,16 @@ LOG_DIR=$TASK_DIR/$(date -u +%Y%m%dT%H%M%S)-$$
 mkdir -p "$RUN_DIR" "$LOG_DIR"
 echo "Evidence: $LOG_DIR"
 git show c49bb854:package-lock.json > "$LOG_DIR/baseline-lock.json"
+exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
 while :; do
   names=$(docker ps --filter name=radar-test- --format '{{.Names}}')
-  [[ -n $names ]] || break
-  echo "WAIT: $names"
+  if [[ -z $names ]] && flock -n 8; then
+    if [[ -z $(docker ps --filter name=radar-test- -q) ]]; then break; fi
+    flock -u 8
+  fi
+  echo "WAIT: ${names:-machine Docker campaign lock held}"
   sleep 60
 done
-exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
-flock -n 8 || { echo 'Machine Docker campaign lock held'; exit 2; }
 [[ -z $(docker ps --filter name=radar-test- -q) ]]
 [[ $(df -Pk . | awk 'NR==2 {print $4}') -ge 8388608 ]]
 candidate_git=(git)
