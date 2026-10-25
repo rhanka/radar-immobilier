@@ -27,18 +27,18 @@ CREATE TABLE IF NOT EXISTS artifacts.operation_receipts (
   PRIMARY KEY (storage_scope_id, internal_key)
 );
 -- Radar-owned policy fencing and provisional quota accounting.
-CREATE TABLE artifacts.host_policy (
+CREATE TABLE IF NOT EXISTS artifacts.host_policy (
   storage_scope_id TEXT PRIMARY KEY REFERENCES artifacts.storage_scopes(id),
   revision TEXT NOT NULL
 );
-CREATE TABLE artifacts.host_quotas (
+CREATE TABLE IF NOT EXISTS artifacts.host_quotas (
   storage_scope_id TEXT PRIMARY KEY REFERENCES artifacts.storage_scopes(id),
   operation_limit BIGINT NOT NULL CHECK (operation_limit >= 0),
   byte_limit BIGINT NOT NULL CHECK (byte_limit >= 0),
   operations_used BIGINT NOT NULL DEFAULT 0 CHECK (operations_used >= 0),
   bytes_used BIGINT NOT NULL DEFAULT 0 CHECK (bytes_used >= 0)
 );
-CREATE TABLE artifacts.host_failures (
+CREATE TABLE IF NOT EXISTS artifacts.host_failures (
   invocation_id TEXT PRIMARY KEY,
   actor_id TEXT NOT NULL,
   operation TEXT NOT NULL,
