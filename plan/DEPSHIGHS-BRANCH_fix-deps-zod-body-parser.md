@@ -54,7 +54,7 @@
 - [ ] **Lot 4 — Astra PR912 corrections**
   - [x] Recover rescue Git at PR head `7eac7167`, preserve earlier delivery, and clean only campaign Docker resources.
   - [x] Deliver the existing Zod acceptance as exact registry rows with a stable root component identity.
-  - [ ] Deliver exact exception matching, UTC expiration, audit propagation, and closed failure on invalid input.
+  - [x] Deliver exact exception matching, UTC expiration, audit propagation, and closed failure on invalid input.
   - [ ] Deliver unit regressions for matching, expiry, severity thresholds, and the register layout.
   - [ ] Deliver regressions for propagation, component scope, malformed input, and the checked-in register.
   - [ ] Deliver the containerized CLI, CI Make wiring, and clarified acceptance status.
