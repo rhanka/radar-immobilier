@@ -44,6 +44,14 @@ jq -e '.spec.backoffLimit==0 and .spec.activeDeadlineSeconds==540
  and .spec.template.spec.containers[0].readinessProbe.exec.command==["/bin/false"]
  and (.spec.template.spec.containers[0].image|contains("@sha256:"))' "out-$n/job.json" >/dev/null
 cp input.json valid.json
+jq '.operation="init" | .workspaceSlug="other" | .binding.workspaceSlug="other"' valid.json > input.json
+reject render-job
+jq '.operation="init" | .binding.workspaceId=null | .workspaceSlug="other" | .binding.workspaceSlug="fixture"' valid.json > input.json
+reject render-job
+jq '.operation="init" | .binding.workspaceId=null | .workspaceSlug="fixture" | .binding.workspaceSlug="fixture"
+ | .workspaceLabel="Fixture" | .moderators=["first","second"] | .managers=.moderators' valid.json > input.json
+invoke render-job
+cp valid.json input.json
 for field in context image reason binding.actorSub binding.releaseId backup.reference; do
   jq --arg field "$field" 'setpath($field|split(".");"<OWNER_INPUT>")' valid.json > input.json
   reject activate
