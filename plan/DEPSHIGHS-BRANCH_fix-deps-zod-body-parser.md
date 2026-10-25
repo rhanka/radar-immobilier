@@ -63,6 +63,6 @@
   - [x] Append evidence and bundle identity to the French report; remove campaign containers and volumes.
 - [ ] **Lot 5 — Second-pass PR912 corrections (base `6a6c3d98`)**
   - [x] Replace the text reader with installed YAML parsing limited to the active exceptions section.
-  - [ ] Validate the explicit typed schema and reject every invalid row.
+  - [x] Validate the explicit typed schema and reject every invalid row.
   - [ ] Qualify signer/section/schema regressions, CLI failures, actual audit and CI quality tests.
   - [ ] Refresh the finding, audit the local bundle, append the report and clean the campaign.
