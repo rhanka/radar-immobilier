@@ -28,6 +28,7 @@ import { ImmoStatefulHost } from "./stateful-host.js";
 import { composeStatefulImmo } from "./registry/stateful-composition.js";
 import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-stateful";
 import { createAccountBinding } from "./account-binding.js";
+import { createArtifactBinding } from "./artifact-binding.js";
 
 /**
  * REMOTE transport for the immo MCP provider: Streamable HTTP (MCP SDK) behind an
@@ -447,7 +448,9 @@ async function main(): Promise<void> {
     };
   }
   const accounts = createAccountBinding(process.env);
-  const app = createImmoHttpApp(config, { data, raw, exchange, ...(accounts ? { authorize: accounts.authorize } : {}) });
+  const artifacts = await createArtifactBinding(process.env);
+  const app = createImmoHttpApp(config, { data, raw, exchange, ...(accounts ? { authorize: accounts.authorize } : {}),
+    ...(artifacts ? { artifacts: artifacts.binding } : {}) });
   const { serve } = await import("@hono/node-server");
   serve({ fetch: app.fetch, port: config.port });
   process.stderr.write(
