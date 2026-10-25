@@ -69,7 +69,8 @@ export async function mcpFixture() {
   };
   const deps = exchangeDepsFor(exchange);
   const mcp = createImmoHttpApp({ issuer: exchange.config.issuer, resource: exchange.config.mcpResource,
-    requiredScopes: ["immo:read"], scopesSupported: ["immo:read", "immo:search"], port: 0, dataMode: "real" }, {
+    requiredScopes: ["immo:read"], scopesSupported: ["immo:read", "immo:search"], port: 0, dataMode: "real",
+    sessionIdleTimeoutMs: 1_800_000, sessionMaxLifetimeMs: 28_800_000 }, {
     keySource: exchange.subjectKeySource, exchange: deps,
     data: new HttpDataSource({ baseUrl: exchange.config.apiAudience, fetchImpl: upstream }),
   });
@@ -77,10 +78,11 @@ export async function mcpFixture() {
   const connect = async (sub = data.contributor.sub, scope = "immo:read immo:search") => {
     const subject = await signSubjectToken(exchange.subjectPrivateKey, { sub, scope });
     const transport = new StreamableHTTPClientTransport(new URL(exchange.config.mcpResource), {
-      requestInit: { headers: { authorization: `Bearer ${subject}` } }, fetch: (input, init) => mcp.request(input, init) });
+      requestInit: { headers: { authorization: `Bearer ${subject}` } }, fetch: async (input, init) => mcp.request(input, init) });
     const client = new Client({ name: "a2base-integration", version: "1" });
     clients.push({ client, transport });
-    await client.connect(transport);
+    // SDK Transport declares sessionId optional without explicit undefined.
+    await client.connect(transport as Parameters<Client["connect"]>[0]);
     return { client, transport, subject };
   };
   const close = async () => {
