@@ -3,6 +3,45 @@ vi.mock("@sentropic/artifacts/http", async (original) => {
   const { withCandidateProfile } = await import("./artifacts-legacy-profile.helpers.js");
   return withCandidateProfile(await original<typeof import("@sentropic/artifacts/http")>());
 });
+
+it("denies a publication revoked during a key wait without a durable success", async () => {
+  const host = await composeArtifactHost(pool, storageConfig(), rawBlobs());
+  const control = createArtifactControl(host, SCOPE, BASE);
+  const holder = await pool.connect();
+  let pending: ReturnType<typeof control.handle> | undefined;
+  try {
+    const artifactId = await ensureArtifact(control, "guarded-revocation-ensure");
+    const key = "guarded-revocation";
+    const internalKey = deriveIdempotencyKey({ scope: SCOPE, sub: "alice", op: "publish", artifactId, clientKey: key });
+    const body = { artifactId, idempotencyKey: key,
+      files: [{ path: "index.html", mimeType: "text/html", text: "guarded revocation" }] };
+    await pool.query("INSERT INTO artifacts.operation_keys (storage_scope_id, internal_key) VALUES ($1, $2)", [SCOPE, internalKey]);
+    await holder.query("BEGIN");
+    await holder.query("SELECT 1 FROM artifacts.operation_keys WHERE storage_scope_id=$1 AND internal_key=$2 FOR UPDATE", [SCOPE, internalKey]);
+    const releases = await tableCount("releases");
+    const receipts = await tableCount("operation_receipts");
+    pending = control.handle("publish", "alice", body);
+    await expect.poll(async () => Number((await pool.query(
+      "SELECT count(*) FROM pg_stat_activity WHERE datname=current_database() AND wait_event_type='Lock'",
+    )).rows[0].count)).toBeGreaterThan(0);
+    await pool.query("UPDATE account_users SET status='suspended' WHERE sub='alice'");
+    await holder.query("ROLLBACK");
+    expect(await pending).toEqual({ status: 403, body: { error: "access_denied" } });
+    expect(await tableCount("releases")).toBe(releases);
+    expect(await tableCount("operation_receipts")).toBe(receipts);
+    expect((await pool.query("SELECT count(*) FROM artifacts.artifact_current WHERE artifact_id=$1", [artifactId])).rows[0].count).toBe("0");
+    await pool.query("UPDATE account_users SET status='approved' WHERE sub='alice'");
+    const retry = await control.handle("publish", "alice", body);
+    expect(retry.status).toBe(201);
+    expect(await tableCount("releases")).toBe(releases + 1);
+    expect(await tableCount("operation_receipts")).toBe(receipts + 1);
+  } finally {
+    await holder.query("ROLLBACK"); holder.release();
+    await pending?.catch(() => {});
+    await pool.query("UPDATE account_users SET status='approved' WHERE sub='alice'");
+    host.close();
+  }
+});
 import pg from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
