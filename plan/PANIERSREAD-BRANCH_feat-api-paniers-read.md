@@ -40,7 +40,7 @@
 - [x] P1-05 signed cursor (strict HMAC/keyring, opaque reader context, five minutes).
 - [x] P1-06 continuation (binding/error order, stable expiry, limit+1, size test).
 - [x] P1-07 coherent 6L1 orchestration (three total attempts, catalog revalidation).
-- [ ] P1-08 card projection.
+- [x] P1-08 card projection (one canonical cache/deadline, explicit DTO, 2 MiB).
 - [ ] P1-09 mounting.
 - [ ] P1-10 PostgreSQL privacy tests.
 - [ ] P1-11 races and pagination.
