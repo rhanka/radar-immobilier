@@ -1,0 +1,51 @@
+# Feature: Classification read API
+
+## Objective
+- [ ] Deliver the v4 signal context, search and state read contracts.
+
+## Scope / Guardrails
+- [x] Worktree `tmp/api-paniers-read`, base `600d78485965361c89109bf61eccaa0250cf7284`.
+- [x] Make only; no environment files, migrations, push or activation.
+- [x] Test mapping: ENV=test-api-paniers, API_PORT=18927, UI_PORT=15927, MAILDEV_UI_PORT=11927.
+- [x] One Docker campaign; local backup history; commits at most 150 changed lines.
+
+## Branch Scope Boundaries (MANDATORY)
+- [x] Allowed Paths: `api/src/services/facets/classification-*`, `api/src/routes/scoped-classification*`, `api/tests/integration/classification-*`, `tools/make/classification*`, this plan, delivery report.
+- [x] Forbidden Paths: `Makefile`, `docker-compose*.yml`, `rules/**`, bootstrap files, other plans, migrations, write/transport profiles.
+- [x] Conditional Paths: `api/src/app.ts`, mounting only under PANIERSREAD-EX1.
+
+## Feedback Loop
+- [x] PANIERSREAD-EX1: owner instruction assigns the integrator this workspace; preserve all mounts, add the closed read router; rollback removes that mount.
+- [ ] PS-04 H5 state binding waits for A6/A7; no transport activation in this branch.
+
+## Orchestration Mode (AI-selected)
+- [x] Single branch, sequential implementation and Docker verification.
+
+## UAT Management (in orchestration context)
+- [x] API-only synthetic qualification; root dev/UAT untouched.
+
+## Plan / Todo (lot-based)
+- [ ] P0-01 primitives and inputs.
+- [ ] P0-02 heads and count contracts.
+- [ ] P0-03 bounded canonical card.
+- [ ] P0-04 family context.
+- [ ] P0-05 nullable catalog.
+- [ ] P0-06 discovery 0/1/N.
+- [ ] P0-07 closed route.
+- [ ] P0-08 authority/context tests.
+- [ ] P1-01 population and native keys.
+- [ ] P1-02 scoped heads and archive union.
+- [ ] P1-03 counters.
+- [ ] P1-04 clock and order.
+- [ ] P1-05 signed cursor.
+- [ ] P1-06 continuation.
+- [ ] P1-07 coherent 6L1 orchestration.
+- [ ] P1-08 card projection.
+- [ ] P1-09 mounting.
+- [ ] P1-10 PostgreSQL privacy tests.
+- [ ] P1-11 races and pagination.
+- [ ] PS-01 current state DTO.
+- [ ] PS-02 reveal and guards.
+- [ ] PS-03 route and missing sources.
+- [ ] Gates: targeted contracts/algorithms, createApp/PostgreSQL, mutations, CI API suite, lint, typecheck.
+- [ ] Delivery: commit audit, clean-resource evidence, bundle imported in an empty audit repository, French report.
