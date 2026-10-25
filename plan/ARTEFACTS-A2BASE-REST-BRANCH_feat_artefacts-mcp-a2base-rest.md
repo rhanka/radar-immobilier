@@ -30,6 +30,7 @@
 - [x] T09 implementation: exact facade after protect with private headers before authentication, optional server-only binding absent at startup; inherited probes isolated from the production path.
 - [x] T09 real createApp/PostgreSQL fixture and empty/private/default-denial cases written; no local facade callback replaces the production route.
 - [ ] T13: createApp/PostgreSQL authority, archives, races and cutover groups, separate commits.
+- [x] T13 authority group written against the production facade: current account approval, 0/1/N memberships, outsider and explicit destination refusals.
 - [ ] T14: explicit MCP E2E runner, complete HTTP search through production facade and image evidence.
 - [ ] Qualification: scoped checks and authority/masking mutations, no required skipped cases.
 
