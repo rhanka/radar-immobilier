@@ -711,6 +711,8 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       user: env.POSTGRES_USER, password: env.POSTGRES_PASSWORD, database: DATABASE }, storageConfig());
     expect(worker.pid).not.toBe(process.pid);
     const barrierB = worker.barrier;
+    let runA: ReturnType<typeof startBarrierOperation> | undefined;
+    let runB: ReturnType<typeof startBarrierOperation> | undefined;
     try {
       requireSelectedProfile(hostA, composedA.profile.profileDigest);
       const executeA = requireHostExecute(hostA);
@@ -743,42 +745,14 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       const invBId = invB["invocationId"] as string;
       const releasesBefore = await tableCount("releases");
       const keysBefore = await tableCount("operation_receipts");
-      const drainPoints: readonly CommitBarrierPoint[] = [
-        ...PUBLISH_POINTS, "after_replay_lookup_before_guard",
-      ];
-      let settledB = false;
-      const pendingB = executeB({ method: "POST", path: "/publish", body: changedCommand
-        ? { ...body, files: [{ path: "different.html", mimeType: "text/html", text: "different command" }] } : body }, invB)
-        .finally(() => { settledB = true; });
-      const pumpB = (async () => {
-        const deadline = performance.now() + 1500;
-        while (!settledB) {
-          if (performance.now() > deadline) throw new Error("[contract-violation] commit barrier B did not progress");
-          for (const candidate of drainPoints) {
-            if (settledB || candidate === "before_key_lock") continue;
-            const arrived = await withTimeout(barrierB.waitUntilReached(candidate, invBId), 50);
-            if (arrived) barrierB.release(candidate, invBId);
-          }
-          await withTimeout(new Promise<void>((resolve) => setTimeout(resolve, 50)), 50);
-        }
-      })();
-      await barrierB.waitUntilReached("before_key_lock", invBId);
-      let settledA = false;
-      const pendingA = executeA({ method: "POST", path: "/publish", body }, invA)
-        .finally(() => { settledA = true; });
-      const pumpA = (async () => {
-        const deadline = performance.now() + 1500;
-        while (!settledA) {
-          if (performance.now() > deadline) throw new Error("[contract-violation] commit barrier A did not progress");
-          for (const candidate of drainPoints) {
-            if (settledA) break;
-            const arrived = await withTimeout(barrier.waitUntilReached(candidate, invAId), 50);
-            if (arrived) barrier.release(candidate, invAId);
-          }
-        }
-      })();
-      const winner = await pendingA as unknown as Record<string, unknown>;
-      await pumpA;
+      runB = startBarrierOperation(barrierB, invBId, () => executeB({ method: "POST", path: "/publish",
+        body: changedCommand ? { ...body, files: [{ path: "different.html", mimeType: "text/html",
+          text: "different command" }] } : body }, invB), "before_key_lock");
+      await runB.reached;
+      runA = startBarrierOperation(barrier, invAId,
+        () => executeA({ method: "POST", path: "/publish", body }, invA));
+      const winner = await runA.pending as Record<string, unknown>;
+      await runA.drained;
       expect(winner).toMatchObject({ ok: true });
       const cleanup = await requirePreparationCleanupBinding();
       const preparing = await cleanup.inspectPreparations(hostA, artifactId);
@@ -786,9 +760,9 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       expect(preparedLoser?.blobKeys.length).toBeGreaterThan(0);
       const preparedKeys = new Set(await rawBlobs().listKeys(`artifacts/${SCOPE}/`));
       for (const key of preparedLoser!.blobKeys) expect(preparedKeys.has(key)).toBe(true);
-      barrierB.release("before_key_lock", invBId);
-      const loser = await pendingB as unknown as Record<string, unknown>;
-      await pumpB;
+      runB.release();
+      const loser = await runB.pending as Record<string, unknown>;
+      await runB.drained;
       expect(loser).toMatchObject({ ok: !changedCommand });
       const winnerBody = ((winner as { result: unknown }).result as { body: unknown }).body;
       if (changedCommand) expect(loser.failure).toMatchObject({ category: "conflict" });
@@ -840,6 +814,8 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         }
       }
     } finally {
+      runA?.release(); runB?.release();
+      await Promise.allSettled([runA?.pending, runB?.pending]);
       if (typeof closeA === "function") (closeA as () => void)();
       await worker.close();
     }
