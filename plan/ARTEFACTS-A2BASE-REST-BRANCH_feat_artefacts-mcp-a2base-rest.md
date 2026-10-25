@@ -27,6 +27,7 @@
 - [x] No UI/UAT change; root checkout and stable dev data preserved.
 
 ## Plan / Todo (lot-based)
+- [x] Add a genuinely unactivated PostgreSQL fixture and missing/legacy epoch parity assertions against the production graph-signals route.
 - [x] Extract the existing legacy card read once; both callers share visibility, empty-city behavior, per-card degradation and one enrichment budget.
 - [x] T08: canonical domain projection and filters before limit; explicit shared-builder regressions and cross-retry budget.
 - [x] T08 code: port the removed MCP mapper to API, preserve canonical priorities and apply domain filters before limit; qualification pending.
