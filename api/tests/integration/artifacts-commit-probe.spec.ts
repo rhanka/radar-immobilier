@@ -123,13 +123,14 @@ describe("commit probe against the real provider stack [T05 T13]", () => {
     const control = createArtifactControl(broken, SCOPE, BASE, undefined, { ledger });
     try {
       const id = await ensureArtifact(control, "probe-s3-ensure");
-      expect(await tableCount("releases")).toBe(0);
+      const before = await tableCount("releases");
       const response = await control.handle("publish", "alice",
         { artifactId: id, files: [{ path: "index.html", mimeType: "text/html", text: "s3 timeout probe" }],
           idempotencyKey: "probe-s3" });
       expect(response).toEqual({ status: 503, body: { error: "capability_unavailable" } });
       expect(entries).toEqual([{ invocationId: expect.any(String), op: "publish", actorId: "alice",
         reason: "provider_unavailable", status: 503, atMs: expect.any(Number) }]);
+      expect(await tableCount("releases")).toBe(before);
     } finally {
       broken.close();
     }

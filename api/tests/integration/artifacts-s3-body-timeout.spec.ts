@@ -44,6 +44,8 @@ afterAll(async () => {
 
 describe("artifact stalled S3 body", () => {
   it("fails within the deadline and frees the lock and connection", async () => {
+    h.host.cleanup.stop();
+    await h.host.cleanup.runOnce();
     const raw = new S3Client({
       endpoint: `http://127.0.0.1:${port}`, forcePathStyle: true, region: "us-east-1",
       credentials: { accessKeyId: "test", secretAccessKey: "test" },
