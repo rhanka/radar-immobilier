@@ -34,6 +34,7 @@ services:
       POSTGRES_USER: radar
       POSTGRES_PASSWORD: synthetic-only
       POSTGRES_DB: radar
+      OPERATOR_IMAGE: local/synthetic-api@$(docker image inspect --format '{{.Id}}' radar-base-preprod-p1o1:qualified)
 networks:
   default:
     labels: {org.radar.base.owner: "$OWNER"}

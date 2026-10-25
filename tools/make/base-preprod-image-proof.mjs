@@ -57,6 +57,7 @@ try {
   };
   const before = await snapshot();
   const bytes = execute("api/dist/scripts/base-preprod-job.js", [JSON.stringify({ action: "inspect", binding,
+    image: process.env.OPERATOR_IMAGE,
     database: { database: "radar", role: "radar", schema: "public" }, args: [] })]);
   const inspection = JSON.parse(bytes);
   assert.deepEqual(inspection.result.missingMigrations, []);
