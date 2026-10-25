@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 [[ ${ENV:-} == test-base-preprod && $(git branch --show-current) == feat/base-preprod-operator ]]
-# Snapshot of origin/main at task bootstrap; other lanes may advance the shared ref.
+# Incremental correction base: the last delivered PR920 revision.
 base=c100e6cc0897bebc42c94157d8cb94f28348cab2
 git merge-base --is-ancestor "$base" HEAD
 isolated_git() { env -u GIT_DIR -u GIT_WORK_TREE git "$@"; }
