@@ -89,7 +89,7 @@ export async function mcpFixture() {
     } } finally {
       jwks.closeAllConnections();
       await new Promise<void>((resolve) => jwks.close(() => resolve()));
-      await data.close();
+      // The imported database fixture owns pool shutdown and database removal.
     }
   };
   return { data, signal, connect, close, receiver, exchange, requests, head,
