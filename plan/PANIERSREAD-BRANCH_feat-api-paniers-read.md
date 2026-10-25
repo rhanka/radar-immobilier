@@ -32,7 +32,7 @@
 - [x] P0-05 nullable catalog (guarded persisted associations, nullable labels, version).
 - [x] P0-06 discovery 0/1/N (whole membership set revalidated, transports closed).
 - [x] P0-07 closed route (private headers before authentication, no activation).
-- [ ] P0-08 authority/context tests.
+- [x] P0-08 authority/context tests (real createApp, PostgreSQL, 0/1/N).
 - [ ] P1-01 population and native keys.
 - [ ] P1-02 scoped heads and archive union.
 - [ ] P1-03 counters.
