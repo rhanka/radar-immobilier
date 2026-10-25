@@ -188,7 +188,7 @@ describe("sessions and egress on 0.1.0", () => {
     ]);
     expect(seen.map((request) => request.url)).toEqual([
       `${BASE_URL}/api/v1/mcp/facets/signals/search?city=longueuil&limit=20&showDiscarded=1`,
-      `${BASE_URL}/api/v1/mcp/facets/signals/search?city=longueuil&limit=20`,
+      `${BASE_URL}/api/v1/mcp/facets/signals/search?city=longueuil&limit=20&showDiscarded=0`,
       `${BASE_URL}/api/v1/mcp/facets/signals/search?city=longueuil&limit=20`,
     ]);
     for (const request of seen) {
