@@ -57,6 +57,18 @@ describeDb("MCP post-enrichment authority and projection races", () => {
     expect((await result.json()).result.cards[0].label).toBe("Updated source");
     expect(f.head).toHaveBeenCalledTimes(1);
   });
+  it("keeps an explicitly authorized workspace when another membership becomes active", async () => {
+    const f = await delayedSearch();
+    const response = f.search("&workspaceId=" + f.data.workspaceId);
+    await f.started.waiting;
+    try { await f.memberships([f.data.workspaceId, f.data.otherId]); }
+    finally { f.resume.release(); }
+    const result = await response;
+    expect(result.status).toBe(200);
+    const body = await result.json();
+    expect(body.result.workspaceId).toBe(f.data.workspaceId);
+    expect(body.result.cards[0].id).toBe(f.signal.node.id);
+  });
   it("reapplies common archive masking after an archive changes during enrichment", async () => {
     const f = await delayedSearch();
     const response = f.search();
