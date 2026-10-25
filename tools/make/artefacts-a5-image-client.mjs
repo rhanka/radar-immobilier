@@ -24,13 +24,14 @@ export async function openImageClient(environment, workspace) {
     .setSubject('alice').setIssuedAt().setExpirationTime('5m').sign(privateKey);
   let child, session, sequence = 0, logs = '';
   const post = async (method, params) => {
+    const notification = method.startsWith('notifications/');
     const response = await fetch(resource, { method: 'POST', headers: {
       authorization: `Bearer ${token}`, 'content-type': 'application/json', accept: 'application/json, text/event-stream',
       ...(session ? { 'mcp-session-id': session } : {}),
-    }, body: JSON.stringify({ jsonrpc: '2.0', id: ++sequence, method, params }), signal: AbortSignal.timeout(3000) });
-    assert.equal(response.status, 200, logs);
+    }, body: JSON.stringify({ jsonrpc: '2.0', ...(notification ? {} : { id: ++sequence }), method, params }), signal: AbortSignal.timeout(3000) });
+    assert.equal(response.status, notification ? 202 : 200, logs);
     if (method === 'initialize') session = response.headers.get('mcp-session-id');
-    return response.json();
+    return notification ? undefined : response.json();
   };
   const stop = async () => {
     if (child?.exitCode === null) { child.kill('SIGTERM'); await once(child, 'exit'); }
@@ -51,6 +52,7 @@ export async function openImageClient(environment, workspace) {
     assert.ok(ready, logs);
     await post('initialize', { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'a5-proof', version: '1' } });
     assert.ok(session);
+    await post('notifications/initialized', {});
   };
   try { await start(); } catch (error) { await stop(); upstream.close(); throw error; }
   return { issuer, resource, get logs() { return logs; },
