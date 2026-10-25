@@ -531,7 +531,7 @@ function buildSignalCard(
   };
 }
 
-async function toGraphSignalCard(
+export async function toGraphSignalCard(
   store: ObjectStore,
   node: Awaited<ReturnType<typeof getSignalNodesForCity>>[number],
   context: DocEnrichmentContext,
