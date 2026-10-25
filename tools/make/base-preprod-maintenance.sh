@@ -2,7 +2,7 @@
 permissions() {
   local resource verb
   : > "$OUTPUT/permissions.tsv"
-  for resource in deployments.apps replicasets.apps pods jobs.batch cronjobs.batch \
+  for resource in deployments.apps statefulsets.apps daemonsets.apps replicasets.apps pods jobs.batch cronjobs.batch \
     ingresses.networking.k8s.io endpointslices.discovery.k8s.io services networkpolicies.networking.k8s.io; do
     for verb in get list; do
       "${k[@]}" auth can-i "$verb" "$resource" >> "$OUTPUT/permissions.tsv" || fail "Required Kubernetes permission denied: $verb $resource"
@@ -135,7 +135,68 @@ assert_closed() {
   done
 }
 collect-maintenance() {
-  require_expected; require_proofs; assert_closed
+  require_expected; require_proofs; assert_closed; assert_mcp
   jq --slurpfile roster "$EXPECTED" '{binding,observations,evidence,databaseInspection,
     expectedInstances:$roster[0]}' "$PROOFS" > "$OUTPUT/maintenance.json"
+}
+assert_mcp() {
+  local deployment expected actual
+  deployment=$(jq -er '.mcpDeployment|select(test("^[a-z0-9-]+$"))' "$INPUT")
+  expected=$(jq -r .observations.mcpSuccessor.image "$PROOFS")
+  actual=$("${k[@]}" get deployment "$deployment" -o jsonpath='{.spec.template.spec.containers[0].image}')
+  [[ $actual == "$expected" ]] || fail 'Successor MCP image has not been deployed'
+}
+qualification_receipt() {
+  regular_json "${PROOFS:-}"
+  { sed '$d' tools/make/base-preprod-input.jq; cat tools/make/base-preprod-acceptance.jq; } > "$OUTPUT/acceptance-filter.jq"
+  jq -e --slurpfile input "$INPUT" -f "$OUTPUT/acceptance-filter.jq" "$PROOFS" >/dev/null || fail 'Bound API qualification required'
+}
+api_routes() {
+  local ingress patchpaths
+  ingress=$(jq -er '.apiIngress|select(test("^[a-z0-9-]+$"))' "$INPUT")
+  patchpaths='["/health","/api/v1/auth","/api/v1/workspaces"]'
+  if [[ ${1:-} == qualification ]]; then
+    patchpaths='["/health","/api/v1/auth","/api/v1/workspaces","/api/graph-signals","/api/v1/signal-facets"]'
+  fi
+  # Keep the operator middleware attached; only the final explicit reopening removes it.
+  jq -n --argjson paths "$patchpaths" '{spec:{rules:[{host:"preprod.immo.sent-tech.ca",http:{paths:
+    ($paths|map({path:.,pathType:"Prefix",backend:{service:{name:"radar-api",port:{number:3000}}}}))}}]}}' > "$OUTPUT/api-route-patch.json"
+  "${k[@]}" patch ingress "$ingress" --type=merge --patch-file "$OUTPUT/api-route-patch.json" >> "$OUTPUT/api.txt"
+}
+start-api() {
+  # Supply the collected activation receipt, not a Job=Complete assertion.
+  regular_json "${PROOFS:-}"
+  jq -e --slurpfile c "$INPUT" '.binding==$c[0].binding and (.action=="activate" or .action=="resume")
+    and .result.status=="open-success" and .result.epoch=="scoped" and .result.maintenanceBarrier==false' "$PROOFS" >/dev/null
+  assert_cd_frozen; assert_boundary
+  api_routes qualification
+  "${k[@]}" set image deployment/radar-api "api=$(jq -r .image "$INPUT")" > "$OUTPUT/api-image.txt"
+  "${k[@]}" scale deployment/radar-api --replicas=1 >> "$OUTPUT/api.txt"
+  "${k[@]}" rollout status deployment/radar-api --timeout=180s >> "$OUTPUT/api.txt"
+  echo 'Keep the operator boundary; qualify Q1 before restart-api.'
+}
+restart-api() {
+  qualification_receipt
+  assert_cd_frozen; assert_boundary
+  "${k[@]}" rollout restart deployment/radar-api > "$OUTPUT/restart.txt"
+  "${k[@]}" rollout status deployment/radar-api --timeout=180s >> "$OUTPUT/restart.txt"
+  echo 'Keep the operator boundary; qualify Q2 on the final image before reopen-api.'
+}
+reopen-api() {
+  qualification_receipt
+  jq -e '.q2.passed==true' "$PROOFS" >/dev/null
+  assert_cd_frozen; assert_boundary
+  [[ $("${k[@]}" get deployment radar-api -o jsonpath='{.spec.template.spec.containers[0].image}') == $(jq -r .image "$INPUT") ]]
+  # All consumers except the qualified API must remain unavailable.
+  "${k[@]}" get deployments -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.replicas}{"\n"}{end}' > "$OUTPUT/final-replicas.tsv"
+  awk '$1!="radar-api" && $1!="radar-postgres" && $2!=0 {exit 1}' "$OUTPUT/final-replicas.tsv"
+  api_routes
+  local ingress annotation middleware
+  ingress=$(jq -r .apiIngress "$INPUT")
+  middleware="radar-immobilier-preprod-$(jq -r .maintenance.middleware "$INPUT")@kubernetescrd"
+  annotation=$("${k[@]}" get ingress "$ingress" -o jsonpath='{.metadata.annotations.traefik\.ingress\.kubernetes\.io/router\.middlewares}')
+  jq -n --arg a "$annotation" --arg m "$middleware" '{metadata:{annotations:{
+    "traefik.ingress.kubernetes.io/router.middlewares":($a|split(",")|map(select(.!=$m))|join(","))}}}' > "$OUTPUT/reopen-patch.json"
+  "${k[@]}" patch ingress "$ingress" --type=merge --patch-file "$OUTPUT/reopen-patch.json" >> "$OUTPUT/api.txt"
+  echo 'API personal signals/baskets only; UI/MCP stopped, CronJobs suspended, CD frozen. Verify public paths and excluded surfaces.'
 }
