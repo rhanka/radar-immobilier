@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { URL } from "node:url";
 import { parseRegister, evaluateAudit } from "./audit-lib.mjs";
 
 const register = readFileSync(new URL("../../.security/vulnerability-register.yaml", import.meta.url), "utf8");

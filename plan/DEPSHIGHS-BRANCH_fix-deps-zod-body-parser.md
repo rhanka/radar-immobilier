@@ -64,6 +64,6 @@
 - [ ] **Lot 5 — Second-pass PR912 corrections (base `6a6c3d98`)**
   - [x] Replace the text reader with installed YAML parsing limited to the active exceptions section.
   - [x] Validate the explicit typed schema and reject every invalid row.
-  - [x] Deliver regressions for invalid signers, archived rows, missing fields, types, dates and YAML structures.
+  - [x] Deliver regressions for invalid signers, archived rows, missing fields, types, dates and YAML structures, with explicit Node imports for lint.
   - [ ] Qualify signer/section/schema regressions, CLI failures, actual audit and CI quality tests.
   - [ ] Refresh the finding, audit the local bundle, append the report and clean the campaign.
