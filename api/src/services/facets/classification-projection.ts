@@ -15,11 +15,11 @@ export function classificationQueryDigest(query: object, catalog: string) {
 }
 /** Three total attempts, including catalog drift; BASE remains the scope authority. */
 export async function readClassificationProjection<T>(db: Database, sub: string, workspaceId: string,
-  citySlug: string, query: object, readPayload: () => Promise<T>) {
+  citySlug: string, query: object, readPayload: (catalog: string) => Promise<T>) {
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
       const before = catalogVersion(await readClassificationCatalog(db, sub, workspaceId));
-      const result = await readCoherentProjection(db, sub, workspaceId, citySlug, "signal", readPayload, 1);
+      const result = await readCoherentProjection(db, sub, workspaceId, citySlug, "signal", () => readPayload(before), 1);
       const after = catalogVersion(await readClassificationCatalog(db, sub, workspaceId));
       const final = await readProjectionScope(db, sub, workspaceId, citySlug, "signal");
       if (before !== after || result.scope.token !== final.token) continue;
