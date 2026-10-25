@@ -26,8 +26,8 @@ const cases = [
     'issuedAt: now, expiresAt: now + 300']] },
   { id: 'final-authority', suite: 'tests/integration/classification-races.spec.ts', test: 'membership is revoked', edits: [
     [`${root}classification-projection.ts`,
-      'const result = await readCoherentProjection(db, sub, workspaceId, citySlug, "signal", readPayload, 1);',
-      'const scope = await readProjectionScope(db, sub, workspaceId, citySlug, "signal");\n      const result = { scope, payload: await readPayload() };'],
+      'const result = await readCoherentProjection(db, sub, workspaceId, citySlug, "signal", () => readPayload(before), 1);',
+      'const scope = await readProjectionScope(db, sub, workspaceId, citySlug, "signal");\n      const result = { scope, payload: await readPayload(before) };'],
     [`${root}classification-projection.ts`, 'const after = catalogVersion(await readClassificationCatalog(db, sub, workspaceId));', 'const after = before;'],
     [`${root}classification-projection.ts`, 'const final = await readProjectionScope(db, sub, workspaceId, citySlug, "signal");', 'const final = result.scope;'],
   ] },

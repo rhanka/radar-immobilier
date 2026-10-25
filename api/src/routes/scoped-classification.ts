@@ -21,7 +21,8 @@ export const classificationBoundary: MiddlewareHandler = async (c, next) => {
     const body = await c.res.clone().json().catch(() => null);
     if (body?.ok === false && typeof body.requestId === "string") return;
     const code = c.res.status === 401 ? "unauthenticated" : c.res.status === 403
-      ? body?.error === "account_not_approved" ? "account_not_approved" : "workspace_not_authorized" : "internal_error";
+      ? body?.error === "account_not_approved" ? "account_not_approved"
+        : body?.error === "delegated_scope_refused" ? "delegated_scope_refused" : "workspace_not_authorized" : "internal_error";
     const failure = classificationFailure(new ClassificationError(code));
     c.res = c.json(failure.body, failure.status);
   } catch (error) {
@@ -36,16 +37,17 @@ export function scopedClassificationRoute(deps: ClassificationDeps) {
     const failure = classificationFailure(error);
     return c.json(failure.body, failure.status);
   });
-  app.use("*", classificationBoundary);
-  app.use("*", async (c, next) => {
-    if (!isReadPath(c.req.path)) return next();
+  for (const suffix of ["facet-context", "signal-facets/search", "signal-facets/state"]) {
+    app.use(`${prefix}/${suffix}`, classificationBoundary);
+    app.use(`${prefix}/${suffix}`, async (c, next) => {
     const session = c.get("session" as never) as { sub?: string } | undefined;
     if (!deps.auth?.enabled || !session?.sub) throw new ClassificationError("unauthenticated");
     if (!WorkspaceId.safeParse(c.req.param("workspaceId")).success) throw new ClassificationError("invalid_query");
     const url = new URL(c.req.url);
     if (Buffer.byteLength(`${url.pathname}${url.search}`) > 16384) throw new ClassificationError("request_uri_too_long");
     await next();
-  });
+    });
+  }
   app.get(`${prefix}/facet-context`, async (c) => {
     decodeQuery(new URL(c.req.url).searchParams, z.object({}).strict());
     const session = c.get("session" as never) as { sub: string };
