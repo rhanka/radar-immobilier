@@ -18,6 +18,7 @@ const unavailable = async (): Promise<never> => { throw new Error("native_wire_d
 
 export interface ArtifactMcpBinding {
   readonly manifest: RegistryDefinition["manifest"];
+  readonly configuration: Readonly<{ storageScopeId: string }>;
   readonly tools: readonly Tool[];
   invoke(tool: string, args: unknown, request: VerifiedMcpRequest): Promise<CallToolResult>;
 }
@@ -36,6 +37,7 @@ export function bindArtifactProvider(options: {
   const authorizeCommit = options.authorizeCommit;
   const binding: ArtifactMcpBinding = Object.freeze({
     manifest: IMMO_ARTIFACT_MANIFEST,
+    configuration: Object.freeze({ storageScopeId: scope }),
     tools: Object.freeze(IMMO_ARTIFACT_MANIFEST.tools.map((tool) => Object.freeze({
       name: tool.name, description: tool.description, inputSchema: tool.inputSchema as Tool["inputSchema"],
       execution: { taskSupport: "forbidden" as const },
