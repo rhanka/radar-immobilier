@@ -25,12 +25,12 @@
 - [x] No UI/UAT change; root checkout and stable dev data preserved.
 
 ## Plan / Todo (lot-based)
-- [ ] T08: canonical domain projection and filters before limit; explicit shared-builder regressions and cross-retry budget.
+- [x] T08: canonical domain projection and filters before limit; explicit shared-builder regressions and cross-retry budget.
 - [x] T08 code: port the removed MCP mapper to API, preserve canonical priorities and apply domain filters before limit; qualification pending.
-- [ ] T09: facade mounted after protect, default closed, private refusals and authorized empty success.
+- [x] T09: facade mounted after protect, default closed, private refusals and authorized empty success.
 - [x] T09 implementation: exact facade after protect with private headers before authentication, optional server-only binding absent at startup; inherited probes isolated from the production path.
 - [x] T09 real createApp/PostgreSQL fixture and empty/private/default-denial cases written; no local facade callback replaces the production route.
-- [ ] T13: createApp/PostgreSQL authority, archives, races and cutover groups, separate commits.
+- [x] T13: createApp/PostgreSQL authority, archives, races and cutover groups, separate commits.
 - [x] T13 authority group written against the production facade: current account approval, 0/1/N memberships, outsider and explicit destination refusals.
 - [x] T13 archive group written: personal/common OR masking, other-member privacy, reveal guards, identity keys, restoration and SQL read-only snapshots, hidden targets never enriched.
 - [x] T13 races group written: deterministic document barriers for membership/account/source/archive changes, explicit selector stability, plus an observed PostgreSQL lock wait followed by revocation.
@@ -47,7 +47,9 @@
 - [x] Static runner proof PASS: require_scope accepts the explicit network suite and rejects the directory prefix from design review r2; mutation receipts include executed control counts.
 - [x] Reservation race reproduced: local flock available, global flock busy and a new E3 stack started after the empty-container observation. Retry the global reservation every 60 seconds and recheck containers while holding it; never start a second stack or treat reservation failure as qualification.
 - [x] Queue on the same global flock before observing container quiescence, retaining 60-second ownership checks; this prevents repeated new campaigns from taking each brief empty-container window. Earlier waits created no owned resources.
-- [ ] Qualification: scoped checks and authority/masking mutations, no required skipped cases.
+- [x] Qualification: scoped checks and authority/masking mutations, no required skipped cases.
+- [x] Campaign 20261025T222444-6-qualify: API/MCP/integration typechecks and lint PASS, 340 API cases/32 files, 95 MCP cases/13 files, zero failures/skips; eleven named mutants killed with 22 passing controls and exact restoration; eight socket E2E cases pass; documentary budget 2,031ms/one resolution; CT-8 and owned cleanup pass.
+- [x] Image build reached valid bundles/declaration output but Buildx attempted a write under read-only ~/.docker. Set BUILDX_CONFIG to the owned workspace evidence path and repeat only image qualification and the explicit T08 regressions; runtime source is unchanged.
 
 ## Docs consolidation
 - [ ] French companion report with evidence, per-commit numstat, delivered SHA and bundle hash.

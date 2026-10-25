@@ -107,6 +107,8 @@ if [[ $mode == image || $mode == qualify ]]; then
   cp tools/make/base-api-a2rest-image.Dockerfile "$context/Dockerfile"
   candidate=$(cat "$LOG_DIR/candidate-sha.txt")
   image=radar-a2base-rest:${candidate:0:12}
+  export BUILDX_CONFIG=$TASK_DIR/buildx
+  mkdir -p "$BUILDX_CONFIG"
   docker build --network=none --build-arg CANDIDATE_SHA="$candidate" -t "$image" "$context" > "$LOG_DIR/image-build.log" 2>&1
   docker image inspect --format '{{.Id}} {{json .RepoDigests}} {{index .Config.Labels "org.radar.a2base.candidate"}}' \
     "$image" > "$LOG_DIR/image-identity.txt"
