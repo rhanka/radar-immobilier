@@ -44,6 +44,7 @@
   - [x] Closure preserves inventories; collection refuses surviving processes and ready endpoints.
   - [x] Q1/restart/Q2 are separate from reopening; MCP successor deployment is required.
   - [x] Reopening rechecks stopped consumers/jobs; deletion compares the actual saved Job receipt.
+  - [x] Both old and operator Job deletion use Kubernetes UID preconditions.
   - [x] Collector derives coverage only after independent roster input and live closure checks.
 - [ ] Lot 4: operator refusal/transport tests and image execution receipts.
   - [x] Hermetic operator Make tests cover refusals, literal values and no root/environment discovery.
@@ -56,3 +57,4 @@
   - [x] Owner-input template and short-path prerequisites/inspection documented.
   - [x] Delivery pins initial origin/main and creates a separate bare backup plus fresh bundle audit.
   - [x] Maintenance observations, collector, protected resume and UID-bound Job termination documented.
+  - [x] Q1/Q2, exact retirement statuses and API-only restitution commands documented.
