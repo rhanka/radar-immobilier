@@ -1,10 +1,11 @@
+import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
+import { controlTestHost } from "./control-test-host.js";
 import { describe, expect, it, vi } from "vitest";
 import type { ActivationConfig } from "./activation.js";
 import type { AdmissionAuthority } from "./admission.js";
 import {
   createArtifactControl,
   createMemoryCommitLedger,
-  createMemoryProviderProbe,
 } from "./facade.js";
 import { ArtifactConnectionError } from "./idempotency.js";
 import { ArtifactS3TimeoutError } from "./s3-timeout.js";
@@ -33,13 +34,13 @@ describe("provider failure accounting [T05 T13]", () => {
       readActivation: () => live(), nowMs: () => NOW, readStatus: async () => "approved",
     };
     const handle = vi.fn(async (): Promise<ProviderBody> => { throw failure; });
-    const host = { app: { handle } } as unknown as Parameters<typeof createArtifactControl>[0];
+    const host = controlTestHost(handle);
     const { ledger, entries } = createMemoryCommitLedger();
     const response = await createArtifactControl(host, "scope", "pages.example.test", authority,
       { ledger, nowMs: () => NOW }).handle("publish", "alice", publishBody);
     expect(response).toEqual({ status: 503, body: { error: "capability_unavailable" } });
     expect(handle).toHaveBeenCalledTimes(1);
-    expect(entries).toEqual([{ op: "publish", actorId: "alice",
+    expect(entries).toEqual([{ invocationId: expect.any(String), op: "publish", actorId: "alice",
       reason: "provider_unavailable", status: 503, atMs: NOW }]);
   });
 
@@ -48,15 +49,15 @@ describe("provider failure accounting [T05 T13]", () => {
       readActivation: () => live(), nowMs: () => NOW, readStatus: async () => "approved",
     };
     const handle = vi.fn(async (): Promise<ProviderBody> => {
-      throw new Error("artifact advisory lock timeout conflict");
+      throw new ArtifactOperationError("command_conflict");
     });
-    const host = { app: { handle } } as unknown as Parameters<typeof createArtifactControl>[0];
+    const host = controlTestHost(handle);
     const { ledger, entries } = createMemoryCommitLedger();
     const response = await createArtifactControl(host, "scope", "pages.example.test", authority,
       { ledger, nowMs: () => NOW }).handle("ensure", "alice",
       { bindingName: "summer", idempotencyKey: "key" });
     expect(response).toEqual({ status: 409, body: { error: "conflict" } });
-    expect(entries).toEqual([{ op: "ensure", actorId: "alice",
+    expect(entries).toEqual([{ invocationId: expect.any(String), op: "ensure", actorId: "alice",
       reason: "provider_conflict", status: 409, atMs: NOW }]);
   });
 
@@ -66,19 +67,19 @@ describe("provider failure accounting [T05 T13]", () => {
     };
     const handle = vi.fn(async (): Promise<ProviderBody> =>
       ({ status: 409, body: { error: "conflict" } }));
-    const host = { app: { handle } } as unknown as Parameters<typeof createArtifactControl>[0];
+    const host = controlTestHost(handle);
     const { ledger, entries } = createMemoryCommitLedger();
     const response = await createArtifactControl(host, "scope", "pages.example.test", authority,
       { ledger, nowMs: () => NOW }).handle("ensure", "alice",
       { bindingName: "summer", idempotencyKey: "key" });
     expect(response).toEqual({ status: 409, body: { error: "conflict" } });
-    expect(entries).toEqual([{ op: "ensure", actorId: "alice",
+    expect(entries).toEqual([{ invocationId: expect.any(String), op: "ensure", actorId: "alice",
       reason: "provider_conflict", status: 409, atMs: NOW }]);
   });
 
   it.each(["meta", "list"])("never accounts a failed %s read", async (op) => {
     const handle = vi.fn(async (): Promise<ProviderBody> => { throw new ArtifactConnectionError(); });
-    const host = { app: { handle } } as unknown as Parameters<typeof createArtifactControl>[0];
+    const host = controlTestHost(handle);
     const { ledger, entries } = createMemoryCommitLedger();
     const response = await createArtifactControl(host, "scope", "pages.example.test", undefined,
       { ledger, nowMs: () => NOW }).handle(op, "alice", { artifactId: ARTIFACT });
