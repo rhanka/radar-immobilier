@@ -37,7 +37,6 @@ import {
   authorizeTransaction,
   buildInvocationContext,
   composeR2AcceptanceHost,
-  reportNotCovered,
   committedState,
   startArtifactWorker,
   arrived,
