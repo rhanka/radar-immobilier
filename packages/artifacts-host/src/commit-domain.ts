@@ -9,6 +9,8 @@ import { createPostgresClaimGuardedRefs } from "@sentropic/artifacts/server/gc";
 import { createPostgresPublicationUnitWriter, createPublicationService } from "@sentropic/artifacts/server/publication";
 import type { ArtifactInvocationContext, FinalizeTxClient } from "@sentropic/artifacts/server/commit-contract";
 import { classifyArtifactFailure } from "@sentropic/artifacts/server/outcome-contract";
+import { normalizeHostOutcome } from "./host-outcome.js";
+import { bindHostCoordinator } from "./host-coordinator.js";
 
 export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | "coordinator"> & {
   pool: pg.Pool; scope: string; blobs: HttpAppDeps["publication"]["blobs"];
@@ -18,12 +20,18 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
   const store = createPostgresArtifactStore(pool);
   const publication = createPublicationService({ state: store, blobs, intents: store });
   const keyDomain = new AsyncLocalStorage<ReturnType<typeof createRadarKeyDerivation>>();
+  const currentInvocation = new AsyncLocalStorage<ArtifactInvocationContext>();
   const artifact = new AsyncLocalStorage<string>();
   const lock = (table: string, column: string) => async (client: FinalizeTxClient) => {
     await client.query(`SELECT ${column} FROM artifacts.${table} WHERE ${column} = $1 FOR UPDATE`,
       [artifact.getStore()]);
   };
-  const app = createHttpArtifactApp({ profile, coordinator,
+  const guardedCoordinator = bindHostCoordinator(coordinator, () => {
+    const invocation = currentInvocation.getStore();
+    if (!invocation) throw new Error("artifact invocation unavailable");
+    return invocation.authorizeCommit;
+  });
+  const app = createHttpArtifactApp({ profile, coordinator: guardedCoordinator,
     derivation: { algorithm: "radar-derive-idempotency-v1", derive(input) {
       const binding = keyDomain.getStore();
       if (!binding) throw new Error("artifact key domain unavailable");
@@ -58,7 +66,8 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
       const actors = await pool.query<{ sub: string }>("SELECT sub FROM account_users ORDER BY sub");
       const binding = createRadarKeyDerivation({ storageScopeId: scope, actorIds: actors.rows.map((row) => row.sub) });
       const body = request.body as { artifactId?: string } | undefined;
-      return keyDomain.run(binding, () => artifact.run(body?.artifactId ?? "", () => app.execute(request, invocation)));
+      return normalizeHostOutcome(await currentInvocation.run(invocation, () => keyDomain.run(binding,
+        () => artifact.run(body?.artifactId ?? "", () => app.execute(request, invocation)))));
     } catch (cause) {
       return { ok: false, failure: classifyArtifactFailure(cause, { invocationId: invocation.invocationId,
         operation: request.path.slice(1), phase: "dispatch", commitState: "not_committed" }) };
