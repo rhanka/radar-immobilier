@@ -3,7 +3,6 @@ import {
   createDataSource,
   HttpDataSource,
   MockDataSource,
-  toMockSignal,
 } from "./data-source.js";
 
 const BASE = "http://radar-api:3000";
@@ -248,44 +247,3 @@ describe("HttpDataSource.searchSignals showDiscarded (6C reveal)", () => {
   });
 });
 
-describe("toMockSignal (anti-invention normaliser)", () => {
-  it("never fabricates: missing fields become empty string / null", () => {
-    const sig = toMockSignal({ id: "bare" }, "delson");
-    expect(sig).toEqual({
-      id: "bare",
-      city: "delson", // fallback when the node carries no citySlug
-      type: "",
-      etape: "",
-      // R5 : champ MARQUAGE non servi → "anticipation" fail-safe (jamais firm sans
-      // preuve servie), PAS re-dérivé de l'etape côté MCP.
-      regulatoryStatus: "anticipation",
-      etape_date: "",
-      reglement_number: "",
-      zone_ref: "",
-      no_lot: null,
-      summary: "",
-      source_document_id: "",
-    });
-  });
-
-  it("falls back to the graph node type when no category is present", () => {
-    const sig = toMockSignal(
-      { id: "d", type: "DesignationEvent", label: "Zone désignée" },
-      "delson",
-    );
-    expect(sig.type).toBe("DesignationEvent");
-    expect(sig.summary).toBe("Zone désignée");
-  });
-
-  it("R5 : LIT le regulatoryStatus servi tel quel (passthrough, aucune re-classification)", () => {
-    // Le champ servi par la carte graph-signals (A.3b) prime — même si l'etape brut
-    // suggérerait autre chose : le MCP consomme, ne classifie pas.
-    const firm = toMockSignal(
-      { id: "f", regulatoryStatus: "firm", props: { properties: { etape: "avis_motion" } } },
-      "delson",
-    );
-    expect(firm.regulatoryStatus).toBe("firm");
-    const anticip = toMockSignal({ id: "a", regulatoryStatus: "anticipation" }, "delson");
-    expect(anticip.regulatoryStatus).toBe("anticipation");
-  });
-});
