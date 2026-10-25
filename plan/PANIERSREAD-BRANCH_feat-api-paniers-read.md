@@ -25,7 +25,7 @@
 - [x] API-only synthetic qualification; root dev/UAT untouched.
 
 ## Plan / Todo (lot-based)
-- [ ] P0-01 primitives and inputs.
+- [x] P0-01 primitives and inputs (strict decoding and fixed public errors).
 - [ ] P0-02 heads and count contracts.
 - [ ] P0-03 bounded canonical card.
 - [ ] P0-04 family context.
