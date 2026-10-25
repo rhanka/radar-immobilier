@@ -5,7 +5,7 @@ import { describeDb } from "../../src/services/facets/workspace-archive-fixture.
 import { readMcpSignalCards } from "../../src/services/facets/mcp-signal-search.js";
 import { bumpGraphSourceRevision } from "../../src/services/facets/projection-revisions.js";
 import { writeWorkspaceArchiveFacet } from "../../src/services/facets/workspace-writer.js";
-import { searchFixture, barrier, type SearchFixture } from "./mcp-signal-search-fixture.js";
+import { searchFixture, barrier } from "./mcp-signal-search-fixture.js";
 
 async function delayedSearch() {
   const f = await searchFixture();
@@ -66,8 +66,3 @@ describeDb("MCP post-enrichment authority and projection races", () => {
     expect(f.head).toHaveBeenCalledTimes(1);
   });
 });
-
-export async function changeSource(f: SearchFixture, label: string) {
-  await f.data.pool.query("UPDATE graph_nodes SET label = $1 WHERE id = $2", [label, f.signal.node.id]);
-  await bumpGraphSourceRevision(f.data.db, "synthetic-city");
-}
