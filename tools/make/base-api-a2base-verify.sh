@@ -50,6 +50,16 @@ guarded_down() {
 source tools/make/base-api-compose.sh
 ACTION=test-api
 write_compose
+# Seed npm's integrity-checked download cache without mounting user configuration.
+if [[ -d $HOME/.npm/_cacache && ! -L $HOME/.npm/_cacache ]]; then
+  cat > "$RUN_DIR/cache.yml" <<YAML
+services:
+  api:
+    volumes:
+      - $HOME/.npm/_cacache:/download-cache:ro
+YAML
+  compose+=(-f "$RUN_DIR/cache.yml")
+fi
 archive_sources
 source tools/make/base-api-ci-archive.sh
 archive_ci_inputs
