@@ -17,6 +17,8 @@ test-mutations:
 	@rtk proxy bash tools/make/base-preprod-mutations.sh
 status:
 	@rtk bash tools/make/base-preprod-status.sh
+check-static:
+	@rtk bash -c 'for path in tools/make/base-preprod*.sh; do bash -n "$$path"; done; git diff c100e6cc HEAD --check'
 inspect-host:
 	@rtk bash -c 'git status --short --branch; git rev-parse origin/main; command -v jq kubectl; df -h .; docker ps --format "{{.Names}}"; pgrep -af "docker (build|buildx build)" || true'
 stage:
