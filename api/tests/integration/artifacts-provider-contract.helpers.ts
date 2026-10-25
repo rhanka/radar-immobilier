@@ -161,7 +161,7 @@ async function loadUpstream(specifier: string, entry: string): Promise<Record<st
     missingContract(entry, `upstream entry ${specifier} is not provided by the installed provider`);
   }
   if (loaded === null || (typeof loaded !== "object" && typeof loaded !== "function")) {
-    missingContract(entry, `upstream entry ${specifier} resolved to a non-module value`);
+    throw new Error(`[contract-violation] ${entry}: resolved to a non-module value`);
   }
   return loaded as Record<string, unknown>;
 }
@@ -219,10 +219,7 @@ export function requireSelectedProfile(host: unknown, expectedDigest: string): s
   const record = host as Record<string, unknown> | null;
   const selected = record !== null ? record["selectedCapabilities"] : undefined;
   if (!Array.isArray(selected)) {
-    missingContract(
-      "provider.selectCapabilities",
-      "explicit selectedCapabilities is required before compilation",
-    );
+    throw new Error("[contract-violation] host.selectedCapabilities is required");
   }
   const names = [...(selected as unknown[])].map(String).sort();
   if (!Object.isFrozen(selected)) {
@@ -238,7 +235,7 @@ export function requireSelectedProfile(host: unknown, expectedDigest: string): s
     (record?.["profile"] as Record<string, unknown> | undefined)?.["profileDigest"] ??
     (record?.["compiledProfile"] as Record<string, unknown> | undefined)?.["profileDigest"];
   if (typeof digest !== "string" || !/^(sha256:)?[a-f0-9]{64}$/.test(digest)) {
-    missingContract("provider.profileDigest", "compiled profile digest is required with the selection");
+    throw new Error("[contract-violation] host.profileDigest is required with the selection");
   }
   const expected = expectedDigest;
   if (digest !== expected) {
@@ -268,10 +265,7 @@ export function requireHostExecute(host: unknown): (
     const bound = nested as (request: unknown, invocation: unknown) => Promise<unknown>;
     return (request, invocation) => bound.call(app, request, invocation);
   }
-  missingContract(
-    "provider.execute",
-    "callable host.execute(request, invocation) (or host.app.execute) is required",
-  );
+  throw new Error("[contract-violation] callable host.execute or host.app.execute is required");
 }
 
 /**
@@ -548,18 +542,11 @@ export async function composeR2AcceptanceHost(params: {
  * S3 object counts must never be presented as cleanup proof.
  */
 export async function requirePreparationCleanupBinding(): Promise<PreparationCleanupBinding> {
-  const module = await loadUpstream(
-    PREPARATION_CLEANUP_SPECIFIER, "preparation-cleanup.scheduleBoundedPreparationCleanup");
-  if (typeof module["scheduleBoundedPreparationCleanup"] !== "function" ||
-      typeof module["inspectPreparations"] !== "function") {
-    missingContract(
-      "preparation-cleanup.scheduleBoundedPreparationCleanup",
-      `expected binding ${EXPECTED_CLEANUP_BINDING} from ${PREPARATION_CLEANUP_SPECIFIER} (owner Sentropic L4; spec r2 A6); raw S3 counts are not cleanup evidence`,
-    );
-  }
   return {
-    inspectPreparations: module["inspectPreparations"] as PreparationCleanupBinding["inspectPreparations"],
-    scheduleBoundedPreparationCleanup: module["scheduleBoundedPreparationCleanup"] as PreparationCleanupBinding["scheduleBoundedPreparationCleanup"],
+    inspectPreparations: await requirePublicFunction<PreparationCleanupBinding["inspectPreparations"]>(
+      PREPARATION_CLEANUP_SPECIFIER, "inspectPreparations"),
+    scheduleBoundedPreparationCleanup: await requirePublicFunction<PreparationCleanupBinding["scheduleBoundedPreparationCleanup"]>(
+      PREPARATION_CLEANUP_SPECIFIER, "scheduleBoundedPreparationCleanup"),
   };
 }
 
@@ -703,14 +690,12 @@ export async function requirePurgeRaceBinding(): Promise<{
   }>;
   inspectDeletionClaims(host: unknown): Promise<Array<{ claimId: string; state: string; blobKeys: string[] }>>;
 }> {
-  const module = await loadUpstream(TESTING_SPECIFIER, "testing.pausePurgeBeforeDelete");
-  if (typeof module["pausePurgeBeforeDelete"] !== "function" || typeof module["inspectDeletionClaims"] !== "function") {
-    missingContract("testing.pausePurgeBeforeDelete",
-      "Sentropic L4 must expose a correlated purge pause and durable deletion-claim inspection before external DELETE (spec r2 A4/A6)");
-  }
+  type Binding = Awaited<ReturnType<typeof requirePurgeRaceBinding>>;
   return {
-    pausePurgeBeforeDelete: module["pausePurgeBeforeDelete"] as Awaited<ReturnType<typeof requirePurgeRaceBinding>>["pausePurgeBeforeDelete"],
-    inspectDeletionClaims: module["inspectDeletionClaims"] as Awaited<ReturnType<typeof requirePurgeRaceBinding>>["inspectDeletionClaims"],
+    pausePurgeBeforeDelete: await requirePublicFunction<Binding["pausePurgeBeforeDelete"]>(
+      TESTING_SPECIFIER, "pausePurgeBeforeDelete"),
+    inspectDeletionClaims: await requirePublicFunction<Binding["inspectDeletionClaims"]>(
+      TESTING_SPECIFIER, "inspectDeletionClaims"),
   };
 }
 
@@ -948,12 +933,10 @@ export function finalizationFaultPool(pool: pg.Pool, options: {
  * using implicit PostgreSQL locks fails here by name, never on a form
  * assertion.
  */
-export async function requirePhaseInjectionBinding(phase: string): Promise<never> {
-  void phase;
-  missingContract(
-    `testing.injectPhaseFault.${phase}`,
-    `explicit phase-injection joint for E3 cause ${phase} is required (owner Sentropic L2/L3, spec r2 E3); optional LOCK TABLE / pg_catalog / SET LOCAL SQL must not be imposed on the provider`,
-  );
+export async function requirePhaseInjectionBinding(): Promise<(input: {
+  pool: pg.Pool; phase: string; cause: unknown;
+}) => ReturnType<typeof finalizationFaultPool>> {
+  return requirePublicFunction(TESTING_SPECIFIER, "injectPhaseFault");
 }
 
 /** Observe committed state on a separate raw connection, with stable ordering. */
