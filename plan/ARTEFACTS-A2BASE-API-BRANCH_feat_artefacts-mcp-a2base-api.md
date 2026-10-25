@@ -31,6 +31,7 @@
 - [ ] T01: strict local request/response contract and GET decoder, compared with inert S0.
 - [x] T01 implementation: strict wire decoder and reserved response schema; unit cases written, qualification pending.
 - [ ] T03: approved-account workspace resolution (0/1/N, UUID, no substitution).
+- [x] T03 implementation and unit cases written; database qualification pending.
 - [ ] T04: revalidate the entire membership set and reject changed singleton.
 - [x] T05 inventory before edits: context interface/factory at graph-signals lines 360/366; async canonical card at 545; synchronous degraded card at 573. Three export slices, no helper moves or duplicated implementation; keep existing builder/evidence dependencies in place.
 - [ ] T05a: expose per-request document context/factory; explicit graph-signals/date-parity gates.
