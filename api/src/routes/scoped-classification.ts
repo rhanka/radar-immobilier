@@ -2,11 +2,12 @@ import { Hono, type MiddlewareHandler } from "hono";
 import { z } from "zod";
 import type { Database } from "../db/client.js";
 import { ClassificationError, classificationFailure } from "../services/facets/classification-errors.js";
-import { decodeQuery, SignalQuery, WorkspaceId } from "../services/facets/classification-query.js";
+import { decodeQuery, SignalQuery, StateQuery, WorkspaceId } from "../services/facets/classification-query.js";
 import { readFacetContext } from "../services/facets/classification-context.js";
 import { FacetContextResponse } from "../services/facets/classification-context-contract.js";
 import { boundedClassificationJson, searchSignalClassifications, type ClassificationOptions } from "../services/facets/classification-search.js";
 import type { ObjectStore } from "../storage/object-store.js";
+import { readSignalClassification } from "../services/facets/classification-state.js";
 
 const prefix = "/api/v1/workspaces/:workspaceId";
 const isReadPath = (path: string) => /^\/api\/v1\/workspaces\/[^/]+\/(?:facet-context|signal-facets\/(?:search|state))$/.test(path);
@@ -57,6 +58,12 @@ export function scopedClassificationRoute(deps: ClassificationDeps) {
     const session = c.get("session" as never) as { sub: string };
     const result = await searchSignalClassifications(deps, session.sub, WorkspaceId.parse(c.req.param("workspaceId")), query);
     return c.newResponse(boundedClassificationJson(result, query.limit), 200, { "Content-Type": "application/json" });
+  });
+  app.get(`${prefix}/signal-facets/state`, async (c) => {
+    const query = decodeQuery(new URL(c.req.url).searchParams, StateQuery);
+    const session = c.get("session" as never) as { sub: string };
+    const result = await readSignalClassification(deps, session.sub, WorkspaceId.parse(c.req.param("workspaceId")), query);
+    return c.newResponse(boundedClassificationJson(result), 200, { "Content-Type": "application/json" });
   });
   return app;
 }
