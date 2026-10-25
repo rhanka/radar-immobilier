@@ -9,8 +9,10 @@ export const Day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((day) => {
 });
 const date = z.union([Day, z.string().datetime({ offset: true })]);
 const url = z.string().max(8192).url().refine((value) => {
-  const parsed = new URL(value);
-  return ["http:", "https:"].includes(parsed.protocol) && !parsed.username && !parsed.password;
+  try {
+    const parsed = new URL(value);
+    return ["http:", "https:"].includes(parsed.protocol) && !parsed.username && !parsed.password;
+  } catch { return false; }
 });
 const fields = z.enum(["label", "description", "sourceStage", "docRefs", "docRefs.title", "docRefs.excerpt"]);
 export const SignalCard = z.object({ label: z.string().max(1024), description: z.string().max(8000).nullable(),
