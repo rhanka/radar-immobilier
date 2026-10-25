@@ -43,6 +43,7 @@
 - [ ] T05c: expose canonical degraded card helper; explicit graph-signals/date-parity gates.
 - [ ] T06: authorized coherent city population and personal/common masking before enrichment.
 - [x] T06 coherent population and visibility cases written; no domain normalization or active mount is introduced.
+- [x] Unit authority/masking tests assert that hidden or unauthorized targets never reach document enrichment; reveal keeps all guards.
 - [x] Static fixture review respects the graph city/id primary key and snapshots facet/mark/activation state, including selections.
 - [ ] T07: read-only reveal, post-enrichment authority/revision checks and shared document context across bounded attempts.
 - [x] T07 deterministic createApp/PG races written for approval, membership set, graph source and common archive changes during document I/O; execution waits for canonical exports.
