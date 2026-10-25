@@ -2,9 +2,46 @@ import { randomUUID } from "node:crypto";
 import { expect, it } from "vitest";
 import { describeDb } from "../../src/services/facets/workspace-archive-fixture.js";
 import { writeScopedPersonalFacet } from "../../src/services/facets/scoped-writer.js";
+import { writeFacet } from "../../src/services/facets/writer.js";
+import { targetFingerprint } from "../../src/services/facets/target.js";
 import { networkFixture, networkSearch } from "./mcp-signal-search-network-fixture.js";
 
 describeDb("T14 complete MCP HTTP search through production facade", () => {
+  it.each(["missing", "legacy", "scoped"] as const)(
+    "returns stored documentary metadata and current human visibility with %s epoch", async (epoch) => {
+      const f = await networkFixture(epoch === "scoped" ? "retired" : "serving", true, epoch);
+      try {
+        const document = await f.documents.seed();
+        const props = { refs: [{ rawRef: document.storageKey }], properties: { etape: "adoption", zone_ref: "DOC-ZONE" } };
+        await f.data.pool.query("UPDATE graph_nodes SET props=$1 WHERE id=$2", [props, f.signal.node.id]);
+        const fingerprint = targetFingerprint({ ...f.signal.node, props });
+        const alice = await f.connect(), bob = await f.connect(f.data.outsider.sub);
+        const search = await networkSearch(alice.client, { etape: "adoption", query: "DOC-ZONE", limit: 1 });
+        expect(search.result.isError).not.toBe(true);
+        // Neither date nor docSha is in the graph: both must come from stored metadata.
+        expect(search.body.signals).toMatchObject([{ id: f.signal.node.id,
+          etape_date: document.publishedAt, source_document_id: document.sha256 }]);
+        const command = { action: "discard" as const, target: f.signal.target, expectedHeadId: null,
+          displayedFingerprint: fingerprint, reasonCode: "N-NON-RES", commandKey: randomUUID() };
+        if (epoch === "scoped") await writeScopedPersonalFacet(f.data.db, f.data.contributor.sub, f.data.workspaceId, command);
+        else await writeFacet(f.data.db, f.data.contributor.sub, command);
+        expect((await networkSearch(alice.client)).body.signals).toEqual([]);
+        expect((await networkSearch(bob.client)).body.signals).toMatchObject([{ source_document_id: document.sha256 }]);
+        expect((await networkSearch(alice.client, { showDiscarded: true })).body.signals)
+          .toMatchObject([{ etape_date: "2026-09-22", source_document_id: document.sha256 }]);
+        if (epoch !== "scoped") {
+          expect((await f.data.pool.query("SELECT writer_epoch FROM facet_activation_state")).rows)
+            .toEqual(epoch === "missing" ? [] : [{ writer_epoch: "legacy" }]);
+          expect((await f.data.pool.query("SELECT * FROM facet_streams")).rowCount).toBe(0);
+        }
+        await f.data.pool.query("UPDATE workspace_memberships SET status='revoked', revoked_at=now() WHERE account_id=$1", [f.data.contributor.id]);
+        const denied = await networkSearch(alice.client, { showDiscarded: true });
+        expect(denied.result.isError).toBe(true);
+        expect(denied.body).toMatchObject({ error: "workspace_missing", upstreamStatus: 403 });
+        expect(f.requests).toHaveLength(5);
+        expect(f.requests.every((r) => r.path === "/api/v1/mcp/facets/signals/search" && !r.cookie)).toBe(true);
+      } finally { await f.close(); }
+    });
   it("keeps original-bearer and exact-route refusals private on the real receiver", async () => {
     const f = await networkFixture();
     try {
