@@ -12,8 +12,10 @@ def valid:
   and (.image|text and test("^[a-z0-9./:_-]+@sha256:[a-f0-9]{64}$"))
   and (.image|split(":")|last|sha)
   and (.jobName|name and startswith("base-operator-"))
-  and ((.binding.workspaceId|uuid) or ((.operation=="init" or .operation=="inspect")
-    and .binding.workspaceId==null and (.workspaceSlug|text) and .binding.workspaceSlug==.workspaceSlug))
+  and (if .operation=="init" then
+    .binding.workspaceId==null and (.workspaceSlug|text) and .binding.workspaceSlug==.workspaceSlug
+    else ((.binding.workspaceId|uuid) or (.operation=="inspect"
+      and .binding.workspaceId==null and (.workspaceSlug|text) and .binding.workspaceSlug==.workspaceSlug)) end)
   and (.binding.actorSub|text)
   and (.binding.maintenanceAttemptId|uuid)
   and (.binding.releaseId|text and test("^[a-f0-9]{40}[:/][a-zA-Z0-9._:-]+$"))
