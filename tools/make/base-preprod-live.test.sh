@@ -115,6 +115,7 @@ rg -qF 'Running pod image digest mismatch' "result-$n.log"
 unset FAKE_STATE
 export FAKE_STATE=failed-job
 if invoke inspect; then echo 'Failed Job accepted' >&2; exit 1; fi
+[[ -s out-$n/receipt.json ]] || { echo 'Failed Job receipt was not retained' >&2; exit 1; }
 cmp synthetic-receipt.json "out-$n/receipt.json"
 [[ -s out-$n/checksums.txt ]]
 rg -qF 'Operator Job failed; verified receipt retained' "result-$n.log"
@@ -123,6 +124,22 @@ if invoke collect-job; then echo 'Failed collected Job accepted' >&2; exit 1; fi
 cmp synthetic-receipt.json "out-$n/receipt.json"
 if rg -- '--request-timeout=20s (create|patch|scale|set|delete|rollout) ' cluster-calls; then exit 1; fi
 unset FAKE_STATE
+cp input.json inspect-input.json
+jq '.operation="init" | .binding.workspaceId=null | .binding.workspaceSlug="fixture"
+  | .workspaceSlug="fixture"' input.json > init-input.json
+cp init-input.json input.json
+jq -c --slurpfile c input.json '.action="init" | .binding=$c[0].binding
+  | .result={workspaceId:"11111111-1111-4111-8111-111111111111",workspaceSlug:"other"}' synthetic-receipt.json > foreign-init.json
+cp synthetic-receipt.json inspect-receipt.json
+cp synthetic-termination.json inspect-termination.json
+cp foreign-init.json synthetic-receipt.json
+receipt_sha=$(sha256sum synthetic-receipt.json | cut -d' ' -f1)
+jq --slurpfile c input.json --arg sha "$receipt_sha" '.binding=$c[0].binding | .sha256=$sha' inspect-termination.json > synthetic-termination.json
+if invoke collect-job; then echo 'Foreign initialization receipt accepted' >&2; exit 1; fi
+rg -qF 'Initialization receipt destination mismatch' "result-$n.log"
+cp inspect-input.json input.json
+cp inspect-receipt.json synthetic-receipt.json
+cp inspect-termination.json synthetic-termination.json
 printf '\n' >> synthetic-receipt.json
 if invoke inspect; then echo 'Corrupted Job receipt accepted' >&2; exit 1; fi
 rg -qF 'Receipt hash mismatch' "result-$n.log"
