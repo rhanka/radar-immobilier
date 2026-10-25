@@ -68,3 +68,74 @@ assert_cd_frozen() {
   active_runs > "$OUTPUT/runs-current.jsonl"
   [[ ! -s $OUTPUT/runs-current.jsonl ]] || fail 'A nonterminal Actions run exists'
 }
+maintenance_inputs() {
+  jq -e '.maintenance as $m | ($m.middleware|test("^base-maintenance-[a-z0-9-]+$"))
+    and ($m.sources|length>0 and all(.[];test("^[a-fA-F0-9.:]+/[0-9]+$") and .!="0.0.0.0/0" and .!="::/0"))
+    and ($m.ingresses|length>0 and all(.[];test("^[a-z0-9-]+$")))' "$INPUT" >/dev/null || fail 'Maintenance boundary inputs required'
+}
+assert_boundary() {
+  maintenance_inputs
+  local ingress middleware annotation
+  middleware=$(jq -r .maintenance.middleware "$INPUT")
+  "${k[@]}" get middleware "$middleware" -o jsonpath='{.spec.ipAllowList.sourceRange}' > "$OUTPUT/network-sources.json"
+  jq -e --slurpfile c "$INPUT" 'sort==($c[0].maintenance.sources|sort)' "$OUTPUT/network-sources.json" >/dev/null
+  "${k[@]}" get ingresses -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' > "$OUTPUT/ingress-names.txt"
+  jq -Rse --slurpfile c "$INPUT" '(split("\n")|map(select(length>0))|sort)==($c[0].maintenance.ingresses|sort)' "$OUTPUT/ingress-names.txt" >/dev/null || fail 'Ingress coverage changed'
+  while IFS= read -r ingress; do
+    annotation=$("${k[@]}" get ingress "$ingress" -o jsonpath='{.metadata.annotations.traefik\.ingress\.kubernetes\.io/router\.middlewares}')
+    [[ ,$annotation, == *",radar-immobilier-preprod-$middleware@kubernetescrd,"* ]] || fail 'Ingress lacks operator boundary'
+  done < "$OUTPUT/ingress-names.txt"
+}
+close() {
+  maintenance_inputs; permissions; inventory; assert_cd_frozen
+  require_expected
+  # Preserve snapshots before touching replicas, schedules or routing annotations.
+  jq -n --slurpfile c "$INPUT" '{apiVersion:"traefik.io/v1alpha1",kind:"Middleware",
+    metadata:{name:$c[0].maintenance.middleware,namespace:$c[0].namespace},
+    spec:{ipAllowList:{sourceRange:$c[0].maintenance.sources}}}' > "$OUTPUT/middleware.json"
+  "${k[@]}" create -f "$OUTPUT/middleware.json" > "$OUTPUT/middleware-create.txt"
+  local ingress annotation name uid replicas images suspend schedule
+  while IFS= read -r ingress; do
+    annotation=$("${k[@]}" get ingress "$ingress" -o jsonpath='{.metadata.annotations.traefik\.ingress\.kubernetes\.io/router\.middlewares}')
+    jq -n --arg value "${annotation:+$annotation,}radar-immobilier-preprod-$(jq -r .maintenance.middleware "$INPUT")@kubernetescrd" \
+      '{metadata:{annotations:{"traefik.ingress.kubernetes.io/router.middlewares":$value}}}' > "$OUTPUT/ingress-patch.json"
+    "${k[@]}" patch ingress "$ingress" --type=merge --patch-file "$OUTPUT/ingress-patch.json" >> "$OUTPUT/closure.txt"
+  done < <(jq -r '.maintenance.ingresses[]' "$INPUT")
+  assert_boundary
+  # Freeze every namespace CronJob; the initial suspend state is retained in inventory.
+  while IFS=$'\t' read -r name uid suspend schedule images; do
+    "${k[@]}" patch cronjob "$name" --type=merge -p '{"spec":{"suspend":true}}' >> "$OUTPUT/closure.txt"
+  done < "$OUTPUT/cronjobs.tsv"
+  # Only named consumer deployments; never the database. All other workloads must stop explicitly.
+  while IFS=$'\t' read -r name uid replicas images; do
+    [[ $name != radar-postgres ]] || continue
+    "${k[@]}" scale "deployment/$name" --replicas=0 >> "$OUTPUT/closure.txt"
+  done < "$OUTPUT/deployments.apps.tsv"
+  echo 'Existing Jobs/external processes must finish or be explicitly stopped; collect-maintenance verifies closure.'
+}
+assert_closed() {
+  assert_cd_frozen; assert_boundary
+  local uid phase component operator
+  "${k[@]}" get pods -o jsonpath='{range .items[*]}{.metadata.uid}{"\t"}{.status.phase}{"\t"}{.metadata.labels.app\.kubernetes\.io/component}{"\t"}{.metadata.labels.radar\.sent-tech\.ca/operator}{"\n"}{end}' > "$OUTPUT/pods-current.tsv"
+  while IFS=$'\t' read -r uid phase component operator; do
+    jq -e --arg uid "$uid" 'all(.[];.id!=$uid)' "$EXPECTED" >/dev/null || fail 'An old instance still exists'
+    [[ $component == postgres || $phase == Succeeded || $phase == Failed ]] || fail 'A consumer or operator process is still running'
+  done < "$OUTPUT/pods-current.tsv"
+  "${k[@]}" get deployments -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.replicas}{"\n"}{end}' > "$OUTPUT/replicas-current.tsv"
+  awk '$1!="radar-postgres" && $2!=0 {exit 1}' "$OUTPUT/replicas-current.tsv" || fail 'Consumer deployment can restart'
+  "${k[@]}" get cronjobs -o jsonpath='{range .items[*]}{.spec.suspend}{"\n"}{end}' > "$OUTPUT/cron-current.txt"
+  if grep -vx true "$OUTPUT/cron-current.txt"; then fail 'CronJob is not suspended'; fi
+  "${k[@]}" get jobs -o jsonpath='{range .items[*]}{.status.active}{"\n"}{end}' > "$OUTPUT/jobs-current.txt"
+  if grep -E '[1-9]' "$OUTPUT/jobs-current.txt"; then fail 'An active Job remains'; fi
+  [[ $("${k[@]}" get service radar-api -o jsonpath='{.spec.publishNotReadyAddresses}') != true ]] || fail 'Service publishes unready addresses'
+  local service
+  for service in radar-api radar-ui radar-immo-mcp; do
+    "${k[@]}" get endpointslices -l "kubernetes.io/service-name=$service" -o jsonpath='{range .items[*]}{.endpoints}{"\n"}{end}' > "$OUTPUT/$service-endpoints.jsonl"
+    jq -se 'all(.[][]; .conditions.ready==false)' "$OUTPUT/$service-endpoints.jsonl" >/dev/null || fail 'A consumer endpoint is ready'
+  done
+}
+collect-maintenance() {
+  require_expected; require_proofs; assert_closed
+  jq --slurpfile roster "$EXPECTED" '{binding,observations,evidence,databaseInspection,
+    expectedInstances:$roster[0]}' "$PROOFS" > "$OUTPUT/maintenance.json"
+}
