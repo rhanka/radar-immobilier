@@ -11,7 +11,7 @@ import { workspaceFixture, workspaceSignal } from "../../src/services/facets/wor
 import { createDiscardedSignalsReader } from "../../src/services/facets/discarded-reader.js";
 import { facetActivationState } from "../../src/db/schema.js";
 import type { LegacyRetirementState } from "../../src/services/facets/legacy-retirement.js";
-import { legacyDataFixture } from "./mcp-signal-search-legacy-fixture.js";
+import { legacyDataFixture } from "./mcp-signal-search-legacy-data.js";
 import { networkDocumentStore } from "./mcp-signal-search-network-document.js";
 import { HttpDataSource } from "../../../packages/immo-mcp/src/data-source.js";
 import { createImmoHttpApp } from "../../../packages/immo-mcp/src/server-http.js";

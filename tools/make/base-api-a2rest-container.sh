@@ -29,12 +29,12 @@ if [[ $mode == check || $mode == mutations || $mode == image || $mode == qualify
 {"extends":"./tsconfig.json","compilerOptions":{"rootDir":"..","noEmit":true},"include":["src/**/*.ts","tests/integration/mcp-signal-search*.ts","tests/integration/a2base-mcp*.ts"],"exclude":["dist","node_modules"]}
 CONFIG
   node_modules/.bin/tsc --noEmit -p api/tsconfig.a2rest-tests.json
-  node_modules/.bin/eslint api/src/app.ts api/src/routes/mcp-signal-search*.ts \
+  node_modules/.bin/eslint api/src/app.ts api/src/routes/graph-signals.ts api/src/routes/mcp-signal-search*.ts \
     api/src/services/facets/mcp-signal-*.ts api/tests/integration/mcp-signal-search*.ts \
     api/tests/integration/a2base-mcp-fixture.ts tools/make/base-api-a2rest*.mjs
   for file in tools/make/base-api-a2rest*.sh; do bash -n "$file"; done
   for file in tools/make/base-api-a2rest*.mjs; do [[ ! -f $file ]] || node --check "$file"; done
-  [[ $mode != check ]] || exit
+  [[ $mode != check ]] || exit 0
 fi
 cd api
 node ../tools/make/base-api-ct8.mjs > /evidence/ct8.log

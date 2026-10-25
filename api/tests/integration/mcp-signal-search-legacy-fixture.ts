@@ -1,34 +1,12 @@
-import { randomUUID } from "node:crypto";
 import { vi } from "vitest";
 import { createApp } from "../../src/app.js";
-import { accountUsers, facetActivationState } from "../../src/db/schema.js";
-import { database } from "../../src/services/facets/scope-db-fixture.js";
+import { facetActivationState } from "../../src/db/schema.js";
 import { createDiscardedSignalsReader } from "../../src/services/facets/discarded-reader.js";
 import { workspaceSignal } from "../../src/services/facets/workspace-archive-fixture.js";
-import { initializeWorkspaceStore } from "../../src/services/workspaces/init-store.js";
 import type { ObjectStore } from "../../src/storage/object-store.js";
 import { MCP_SIGNAL_SEARCH_PATH } from "../../src/routes/mcp-signal-search.js";
 import { baseAuth, baseCookie } from "./base-api-fixture.js";
-
-/** No attachment, activation or scoped data is created, even transiently. */
-export async function legacyDataFixture() {
-  const handle = await database();
-  const moderator = { id: randomUUID(), sub: `synthetic-moderator-${randomUUID()}` };
-  const contributor = { id: randomUUID(), sub: `synthetic-contributor-${randomUUID()}` };
-  const outsider = { id: randomUUID(), sub: `synthetic-outsider-${randomUUID()}` };
-  for (const person of [moderator, contributor, outsider]) {
-    await handle.db.insert(accountUsers).values({ ...person, status: "approved" });
-  }
-  const init = (ids: string[]) => initializeWorkspaceStore(handle.db, {
-    workspaceSlug: `synthetic-${randomUUID()}`, workspaceLabel: "Unactivated search",
-    approvedAccountIds: ids, managerAccountIds: [moderator.id], moderatorAccountIds: [moderator.id],
-    actorAccountId: moderator.id, reason: "synthetic preactivation initialization",
-  });
-  const first = await init([moderator.id, contributor.id]);
-  const second = await init([moderator.id, outsider.id]);
-  return { ...handle, moderator, contributor, outsider,
-    workspaceId: first.workspaceId, otherId: second.workspaceId };
-}
+import { legacyDataFixture } from "./mcp-signal-search-legacy-data.js";
 
 export async function legacyFacadeFixture(epoch: "missing" | "legacy" = "missing") {
   const data = await legacyDataFixture();
