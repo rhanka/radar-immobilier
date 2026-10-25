@@ -28,6 +28,7 @@
 - [x] Test helpers only; isolated automated verification, no user UAT.
 
 ## Plan / Todo (lot-based)
+- [x] Final A1/A6: require ordinary retriable=false and classify invalid callable exports as contract violations.
 - [x] Lot 0: rules, predecessor report, branch, local upstream ABI and machine capacity.
 - [x] Lot 1: barrier factory/options and removal of the obsolete phase seam.
 - [x] Lot 1a: confirmed factory/options and transparent PostgreSQL fault observer.

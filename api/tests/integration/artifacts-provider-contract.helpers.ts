@@ -290,7 +290,8 @@ export function assertOutcomeFailure(outcome: unknown, expectedInvocationId?: st
     throw new Error("[contract-violation] provider.execute: failure category and publicCode are required");
   }
   if (typeof failure["httpStatus"] !== "number" ||
-    (failure["kind"] !== "ordinary" && typeof failure["retriable"] !== "boolean") ||
+    typeof failure["retriable"] !== "boolean" ||
+    (failure["kind"] === "ordinary" && failure["retriable"] !== false) ||
     typeof failure["operation"] !== "string" || typeof failure["phase"] !== "string" ||
     !["not_committed", "committed", "unknown"].includes(String(failure["commitState"]))) {
     throw new Error("[contract-violation] host.execute: incomplete failure before projection");
@@ -320,16 +321,10 @@ export function buildInvocationContext(params: {
  * stays private. Fails by name while the provider predates the r2 line.
  */
 export async function projectOutcomeHttp(outcome: unknown): Promise<{ status: number; body: unknown }> {
-  const http = await loadUpstream(
-    "@sentropic/artifacts/http", "http.projectArtifactHttpOutcome");
-  const project = http["projectArtifactHttpOutcome"];
-  if (typeof project !== "function") {
-    missingContract(
-      "http.projectArtifactHttpOutcome",
-      "projectArtifactHttpOutcome is not exported by the installed provider",
-    );
-  }
-  return (project as (candidate: unknown) => { status: number; body: unknown })(outcome);
+  const project = await requirePublicFunction<
+    (candidate: unknown) => { status: number; body: unknown }
+  >("@sentropic/artifacts/http", "projectArtifactHttpOutcome");
+  return project(outcome);
 }
 
 /** Wrap a test admission decision as an upstream commit-guard decision. */
@@ -366,7 +361,7 @@ export type OutcomeShape<T> =
   | { ok: true; result: T; invocationId: string; commitState: string; replayed: boolean }
   | { ok: false; failure: { category: string; publicCode: string; cause: unknown;
       invocationId: string; phase: string; operation: string; httpStatus: number;
-      retriable?: boolean; commitState: string } };
+      retriable: boolean; commitState: string } };
 export type ExecuteOutcome = ArtifactOutcome<HttpResponse>;
 
 /** The registered participant owns fence minting; a plain revision is invalid. */
@@ -443,15 +438,9 @@ export async function compileArtifactsProfile(input: {
       `[contract-violation] compileArtifactsProfile: expected exactly ${frozen.join(", ")}`,
     );
   }
-  const module = await loadUpstream(
-    PROFILE_COMPILER_SPECIFIER, "mcp-core.compileArtifactsProfile");
-  const compile = module["compileArtifactsProfile"];
-  if (typeof compile !== "function") {
-    missingContract(
-      "mcp-core.compileArtifactsProfile",
-      `upstream entry ${PROFILE_COMPILER_SPECIFIER} must export compileArtifactsProfile(input: ArtifactProviderProfile): CompiledArtifactsProfile (Sentropic spec r2 section 3.2)`,
-    );
-  }
+  const compile = await requirePublicFunction<
+    (candidate: unknown) => Promise<CompiledArtifactsProfile> | CompiledArtifactsProfile
+  >(PROFILE_COMPILER_SPECIFIER, "compileArtifactsProfile");
   const candidate = RADAR_ARTIFACTS_PROFILE;
   const compiled = await (compile as (
     candidate: unknown,
