@@ -115,7 +115,8 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
 
   async function failViaTransport(host: Record<string, unknown>,
     request: { method: string; path: string; body: Record<string, unknown> },
-    transport: "http" | "mcp", guard: AuthorizeCommit = allowAll()): Promise<Record<string, unknown>> {
+    transport: "http" | "mcp", guard: AuthorizeCommit = allowAll(),
+    onInvocation?: (invocation: InvocationContextShape) => void): Promise<Record<string, unknown>> {
     const execute = requireHostExecute(host);
     const observed: Record<string, unknown>[] = [];
     const ids: string[] = [];
@@ -123,6 +124,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     const observe = async (req: unknown, context: unknown) => {
       const invocation = context as InvocationContextShape;
       ids.push(invocation.invocationId);
+      onInvocation?.(invocation);
       const outcome = await execute(req, buildInvocationContext({ ...invocation,
         authorizeCommit: guard })) as Record<string, unknown>;
       observed.push(outcome);
