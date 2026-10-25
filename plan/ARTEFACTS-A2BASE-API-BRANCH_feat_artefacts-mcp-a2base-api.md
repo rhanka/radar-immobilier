@@ -5,7 +5,7 @@
 
 ## Scope / Guardrails
 - [x] Base: `c5fb85dbd77e12c0c4355a207de84ead0c3fa5d9`; lane: `tmp/a2base-api`; branch: `feat/artefacts-mcp-a2base-api`.
-- [x] Make only; no host runtime, new dependency, migration or environment-file read.
+- [x] Make only; no new dependency, migration or environment-file read; owner-authorized host static checks on resumption.
 - [x] Test environment: `test-a2base-api`; API/UI/Maildev ports: `18919/15919/11919`; ENV last.
 - [x] One Docker campaign machine-wide; wait 60 seconds between ownership checks; one worker; stop below 10 GiB; clean only owned resources.
 - [x] Shared Git remains read-only; use an ignored local Git directory with this worktree, subject-only Conventional Commits of at most 150 changed lines; no push.
@@ -68,6 +68,7 @@
 - [x] API and BASE regression campaign passed: 142 cases across 15 explicit files, no failures/skips, owned cleanup passed; static checks and mutations remain to qualify the lot.
 - [x] Two static campaigns stopped during npm install on TLS resets; host probes confirmed registry TLS failures too. Seed only the existing integrity-checked npm download cache read-only into container tmpfs, prefer cached bytes, retain npm ci and the unchanged lockfile; no user npm configuration is mounted.
 - [ ] Complete typecheck/lint and execute the eight mutation controls: registry TLS resets persist with cached downloads, and two read-only network probes outside isolation were not executed because automatic permission review timed out. Do not mark the lot accepted from the 142 passing functional cases alone.
+- [x] Resumption: reproduce four integration typing errors with locked dependencies without Docker; compare S0 defaults without assuming its inferred shape and pass real transactions to the revision helper in three race fixtures; targeted lint and API typecheck already pass.
 - [x] Scope audit confirms unchanged MCP/A3/H5, app/auth/startup, dependency manifests/lockfile and migration bytes; final delivery remains a bounded, inactive API candidate.
 - [x] Machine-serialized runner written with explicit file scopes, a 60-second wait, disk monitoring, one-worker container configuration and inherited ownership-checked cleanup.
 - [x] Eight named mutants prepared in the isolated container source copy, with a control before each, exact-byte restoration and a passing restored control required; execution pending.

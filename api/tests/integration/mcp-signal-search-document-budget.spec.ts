@@ -22,7 +22,7 @@ describeDb("MCP request documentary budget across coherent retries", () => {
     try {
       await f.data.pool.query(`UPDATE graph_nodes SET label = 'After drift', props = $1 WHERE id = $2`,
         [{ refs: [{ rawRef, docSha: rawRef }, { rawRef: "raw/synthetic/new.pdf", docSha: "new" }] }, f.signal.node.id]);
-      await bumpGraphSourceRevision(f.data.db, "synthetic-city");
+      await f.data.db.transaction((tx) => bumpGraphSourceRevision(tx, "synthetic-city"));
       const response = await pending;
       const elapsed = Date.now() - beginning;
       expect(response.status).toBe(200);
@@ -47,7 +47,7 @@ describeDb("MCP request documentary budget across coherent retries", () => {
       const nodes = await original(db, city);
       attempts += 1;
       await f.data.pool.query("UPDATE graph_nodes SET label = $1 WHERE id = $2", [`Drift ${attempts}`, f.signal.node.id]);
-      await bumpGraphSourceRevision(f.data.db, "synthetic-city");
+      await f.data.db.transaction((tx) => bumpGraphSourceRevision(tx, "synthetic-city"));
       return nodes;
     });
     try {

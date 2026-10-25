@@ -18,7 +18,7 @@ describe("API contract against inert S0", () => {
     for (const [key, value] of Object.entries(input)) {
       params.set(key, typeof value === "boolean" ? (value ? "1" : "0") : String(value));
     }
-    expect(decodeMcpSignalSearch(params)).toEqual({ ...s0, showDiscarded: s0.showDiscarded ?? false });
+    expect(decodeMcpSignalSearch(params)).toEqual({ showDiscarded: false, ...s0 });
   });
   it.each([0, 101, 1.5])("rejects the same out-of-bounds limit %s", (limit) => {
     expect(SuccessorSearchSignalsInputSchema.safeParse({ city: "quebec", limit }).success).toBe(false);

@@ -50,7 +50,7 @@ describeDb("MCP post-enrichment authority and projection races", () => {
     await f.started.waiting;
     try {
       await f.data.pool.query("UPDATE graph_nodes SET label = 'Updated source' WHERE id = $1", [f.signal.node.id]);
-      await bumpGraphSourceRevision(f.data.db, "synthetic-city");
+      await f.data.db.transaction((tx) => bumpGraphSourceRevision(tx, "synthetic-city"));
     } finally { f.resume.release(); }
     const result = await response;
     expect(result.status).toBe(200);
