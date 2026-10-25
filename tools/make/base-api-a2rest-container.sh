@@ -22,15 +22,16 @@ export default { envDir: false, test: {
 CONFIG
 POSTGRES_HOST=$(node --input-type=module -e 'import {lookup} from "node:dns/promises"; console.log((await lookup("postgres", {family:4})).address)')
 export POSTGRES_HOST
-if [[ $mode == check || $mode == mutations || $mode == image ]]; then
+if [[ $mode == check || $mode == mutations || $mode == image || $mode == qualify ]]; then
   npm run typecheck --workspace=api
   npm run typecheck --workspace=packages/immo-mcp
   cat > api/tsconfig.a2rest-tests.json <<'CONFIG'
-{"extends":"./tsconfig.json","compilerOptions":{"rootDir":"..","noEmit":true},"include":["src/**/*.ts","tests/integration/mcp-signal-search*.ts"],"exclude":["dist","node_modules"]}
+{"extends":"./tsconfig.json","compilerOptions":{"rootDir":"..","noEmit":true},"include":["src/**/*.ts","tests/integration/mcp-signal-search*.ts","tests/integration/a2base-mcp*.ts"],"exclude":["dist","node_modules"]}
 CONFIG
   node_modules/.bin/tsc --noEmit -p api/tsconfig.a2rest-tests.json
   node_modules/.bin/eslint api/src/app.ts api/src/routes/mcp-signal-search*.ts \
-    api/src/services/facets/mcp-signal-*.ts api/tests/integration/mcp-signal-search*.ts
+    api/src/services/facets/mcp-signal-*.ts api/tests/integration/mcp-signal-search*.ts \
+    api/tests/integration/a2base-mcp-fixture.ts tools/make/base-api-a2rest*.mjs
   for file in tools/make/base-api-a2rest*.sh; do bash -n "$file"; done
   for file in tools/make/base-api-a2rest*.mjs; do [[ ! -f $file ]] || node --check "$file"; done
   [[ $mode != check ]] || exit
@@ -47,8 +48,8 @@ cd ../packages/immo-mcp
   --reporter=default --reporter=json --outputFile.json=/evidence/mcp-tests.json $mcp_scope
 node ../../tools/make/base-api-results.mjs /evidence/mcp-tests.json | sed 's|^/workspace/packages/immo-mcp/||' > /evidence/mcp-tests.tsv
 cd /workspace
-if [[ $mode == mutations ]]; then node tools/make/base-api-a2rest-mutants.mjs; fi
-if [[ $mode == image ]]; then
+if [[ $mode == mutations || $mode == qualify ]]; then node tools/make/base-api-a2rest-mutants.mjs; fi
+if [[ $mode == image || $mode == qualify ]]; then
   npm run build --workspace=api
   node tools/make/base-api-a2rest-image.mjs
   tar -cf /evidence/runtime.tar --exclude=./tmp --exclude=./.git .
