@@ -3,11 +3,15 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { Hono } from "hono";
+import { randomUUID } from "node:crypto";
 import { resolveAuthContext } from "./auth-context.js";
 import { createDataSource } from "./data-source.js";
 import { createRawDataSource } from "./raw-data.js";
 import { IMMO_MCP_NAME, IMMO_MCP_VERSION } from "./meta.js";
-import { registerTools } from "./tools.js";
+import { ImmoStatefulHost } from "./stateful-host.js";
+import { composeStatefulImmo } from "./registry/stateful-composition.js";
+import { captureInvocationContext, runWithInvocationContext } from "./invocation-context.js";
 
 export { IMMO_MCP_NAME, IMMO_MCP_VERSION };
 
@@ -15,22 +19,38 @@ export { IMMO_MCP_NAME, IMMO_MCP_VERSION };
  * Builds a fully wired immo MCP server from env (auth stub + data source seam).
  * Exported so tests can drive it over an in-memory transport without stdio.
  */
-export function buildImmoServer(env: NodeJS.ProcessEnv = process.env): McpServer {
+export async function buildImmoServer(env: NodeJS.ProcessEnv = process.env): Promise<McpServer> {
   const auth = resolveAuthContext(env); // stub now, OAuth-ready
-  const data = createDataSource(env); // mock (default) | http seam
-  const raw = createRawDataSource(env); // mock (default) | radar API (RADAR_API_BASE_URL)
+  // Synthetic claims are confined to fixture data even if real URLs are inherited.
+  const data = createDataSource({});
+  const raw = createRawDataSource({});
   const server = new McpServer({ name: IMMO_MCP_NAME, version: IMMO_MCP_VERSION });
-  registerTools(server, { auth, data, raw });
+  const host = new ImmoStatefulHost(new Hono());
+  host.retain(server.server);
+  await composeStatefulImmo(host, async () => true);
+  const snapshot = captureInvocationContext({ auth, data, raw });
+  const connect = server.connect.bind(server);
+  server.connect = async (transport) => {
+    await connect(transport);
+    const onmessage = transport.onmessage;
+    transport.onmessage = (message, extra) => {
+      void runWithInvocationContext(snapshot, () => host.run({
+        principal: { issuer: "synthetic:stdio", sub: snapshot.auth.sub,
+          scopes: snapshot.auth.scopes, claims: [], attributes: {} },
+        resource: "synthetic:immo", correlationId: randomUUID(), signal: new AbortController().signal,
+      }, async () => { onmessage?.(message, extra); })).catch(() => transport.onerror?.(new Error("composition_unavailable")));
+    };
+  };
   return server;
 }
 
 async function main(): Promise<void> {
-  const server = buildImmoServer(process.env);
+  const server = await buildImmoServer(process.env);
   const transport = new StdioServerTransport();
   await server.connect(transport); // stdio: NEVER write to stdout outside the protocol
   process.stderr.write(
     `[immo-mcp] ready name=${IMMO_MCP_NAME} version=${IMMO_MCP_VERSION} ` +
-      `mode=${process.env.IMMO_MCP_DATA_MODE === "http" ? "http" : "mock"}\n`,
+      `mode=synthetic\n`,
   );
 }
 
