@@ -536,6 +536,54 @@ For recovery after a scoped epoch, keep the boundary and use protected forward
 `resume`; never recreate the old index, alter barriers by SQL, or roll back to
 an unqualified old image. Ambiguous/unreadable state stays closed.
 
+After successful activation, start a new qualified API under the same operator
+boundary. Keep 6K configuration absent. `start-api` routes health, auth and
+workspace paths directly to `radar-api:3000`; legacy signal routes are temporarily
+reachable only under the boundary for retirement checks. UI/MCP stay at zero.
+
+```sh
+rtk make -f deploy/base-preprod/operator.mk start-api INPUT='<OWNER_INPUT_JSON>' PROOFS='<FULL_ACTIVATION_RECEIPT_JSON>' OUTPUT='<NEW_RESTRICTED_START_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk restart-api INPUT='<OWNER_INPUT_JSON>' PROOFS='<Q1_ACCEPTANCE_JSON>' OUTPUT='<NEW_RESTART_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk reopen-api INPUT='<OWNER_INPUT_JSON>' PROOFS='<Q1_Q2_ACCEPTANCE_JSON>' OUTPUT='<NEW_REOPEN_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk delete-job INPUT='<EXACT_JOB_INPUT_JSON>' PROOFS='<SAVED_TERMINATION_JSON>' OUTPUT='<NEW_JOB_DELETION_DIR>' ENV=preprod
+```
+
+Q1/Q2 acceptance is a separate JSON document with exact `binding` and `image`,
+`personal:{writerEpoch:"scoped",maintenanceBarrier:false}`, `lotsOpen:false`,
+and `mcpSuccessorDeployed:true`. `q1` and `q2` each carry `reference`, `sha256`,
+UTC `observedAt` and `passed:true`; Q2 additionally requires `afterRestart:true`
+and an observation after Q1. Q1 is required to request the restart; both are
+required to reopen. Re-read durable states and actual served image in each pass.
+These fields summarize the referenced full tests; they never replace them.
+
+Under admitted browser sessions, qualify workspaces, coherent-city signals,
+personal baskets, archive/reason/reveal, idempotent replay, conflicts, scoped
+projections/SSE, two-member isolation and scoped refusal after revocation.
+Do not revoke the owner/moderator as a test. After restart, verify the retained
+authority and retirements again: `/api/graph-signals/:city`, `/api/graph-signals/by-city`
+and the old `/api/v1/signal-facets` endpoints must return **410**, not 404 or empty
+200. A closed retirement fence returns 503. `/api/graph/:city` is a separate
+mounted route and has no expected 410. Personal BASE lot reads remain
+**503 `lot_cutover_closed`**. Legacy prospect marks are not retired by 6H and
+remain excluded from this profile. No lot grants, mapping or 6K transition occurs.
+
+`reopen-api` rechecks the qualified API image, stopped other consumers, suspended
+schedules, no active Jobs and frozen CD, then exposes only health/auth/workspace
+prefixes on the preprod hostname. It removes only this attempt's maintenance
+middleware from the API Ingress, preserving other middlewares and TLS. The MCP
+Ingress stays restricted; UI/MCP remain stopped. Verify public paths and excluded
+surfaces immediately and retain the final receipt. Announce only personal
+signals/baskets API availability.
+
+CronJobs initially suspended stay suspended. Restore only initially active,
+individually qualified writers using the saved inventory and a separate explicit
+administrator change; this API-only recipe restores none automatically. Keep CD
+disabled until a separately delivered partial-profile reconciler preserves this
+routing, consumer set, writer authority and rollback constraints. A green rollout
+or Complete Job does not restore either launchers or public access. In an
+emergency, re-establish the boundary and stop affected consumers; preserve DB
+barriers and evidence. A database restore is a separate fully stopped operation.
+
 ## B5 standalone acceptance profile
 
 B5 proves the B1–B4 implementation through `createApp` and PostgreSQL,
