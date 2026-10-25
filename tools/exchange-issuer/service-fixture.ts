@@ -6,6 +6,7 @@ import { createIsolatedIssuer } from "./isolated-issuer.js";
 import { createImmoHttpApp } from "../../packages/immo-mcp/src/server-http.js";
 import { HttpDataSource } from "../../packages/immo-mcp/src/data-source.js";
 import { ExchangeCache, SingleFlightExchange } from "../../packages/immo-mcp/src/exchange-cache.js";
+import { signalSearchBody, signalSearchItem } from "../../packages/immo-mcp/src/signal-search-test-fixture.js";
 import { signSubjectToken, TEST_ISSUER, TEST_RESOURCE, TEST_API_AUDIENCE, TEST_WORKLOAD_SECRET } from "../../packages/immo-mcp/src/test-exchange-fixtures.js";
 
 export async function serviceFixture() {
@@ -31,7 +32,7 @@ export async function serviceFixture() {
     const issuerUrl = await listen(issuer.app);
     const radar = new Hono();
     const seen: string[] = [];
-    radar.get("/api/graph-signals/:city", async (c) => {
+    radar.use("/api/*", async (c, next) => {
       const token = (c.req.header("authorization") ?? "").replace(/^Bearer /, "");
       try {
         const { payload } = await jwtVerify(token, issuer.publicKey, { issuer: TEST_ISSUER, audience: TEST_API_AUDIENCE });
@@ -39,9 +40,13 @@ export async function serviceFixture() {
             (payload.act as { sub?: string })?.sub !== "immo-mcp-workload" || payload.client_id !== "immo-mcp-workload") {
           return c.json({ error: "forbidden" }, 403);
         }
-        seen.push(token);
-        return c.json({ nodes: [{ id: "synthetic-signal", type: "Signal", citySlug: c.req.param("city") }] });
+        return await next();
       } catch { return c.json({ error: "unauthorized" }, 401); }
+    });
+    radar.get("/api/v1/mcp/facets/signals/search", (c) => {
+      const city = c.req.query("city") ?? "";
+      seen.push((c.req.header("authorization") ?? "").replace(/^Bearer /, ""));
+      return c.json(signalSearchBody(city, [signalSearchItem(city, { id: "synthetic-signal" })]));
     });
     const radarUrl = await listen(radar);
     const jwks = createRemoteJWKSet(new URL(`${issuerUrl}/.well-known/jwks.json`));
