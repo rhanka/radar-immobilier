@@ -5,6 +5,7 @@ export const validDate = (value) => typeof value === "string" &&
   Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value;
 
 const object = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
+const nonEmpty = (value) => typeof value === "string" && value.trim().length > 0;
 const fields = ["id", "advisory", "cve", "scanner", "scanner_input", "component", "finding_kind", "affected",
   "embedded_path", "severity", "severity_source", "rationale", "finding_ref", "owner", "status", "resolved_on",
   "resolution_ref", "accepted_by", "accepted_on", "review_by", "expires", "removal_plan"];
@@ -35,28 +36,51 @@ export function parseRegister(text) {
       throw new Error("invalid register row identity or status");
     }
     ids.add(row.id);
+    const errors = rowErrors(row);
+    if (errors.length) throw new Error(`invalid exception ${row.id}: ${errors.join("; ")}`);
     return row;
   });
 }
 
-export function checkException(row, now) {
-  if (row.status !== "accepted") return { state: "ignored" };
+function rowErrors(row) {
   const errors = [];
-  for (const key of ["id", "advisory", "identifier", "version", "embedded_path", "component",
-    "owner", "accepted_by", "accepted_on", "review_by"]) {
-    if (!row[key]) errors.push(`missing ${key}`);
+  for (const key of ["id", "advisory", "identifier", "version", "embedded_path", "component", "scanner",
+    "scanner_input", "finding_kind", "severity", "severity_source", "owner", "status", "rationale", "finding_ref", "review_by",
+    ...(row.status === "accepted" ? ["accepted_by", "accepted_on", "expires"] : [])]) {
+    if (!nonEmpty(row[key])) errors.push(`missing or invalid ${key}: expected non-empty text`);
   }
-  if (row.scanner !== "npm-audit" || row.scanner_input !== "package-lock.json" || row.component !== "root npm workspace") {
+  for (const key of ["cve", "resolution_ref", "accepted_by"]) {
+    if (row[key] != null && !nonEmpty(row[key])) errors.push(`invalid ${key}: expected non-empty text`);
+  }
+  if (!["accepted", "proposed", "resolved"].includes(row.status)) errors.push("invalid status");
+  if (!["direct-advisory", "metavulnerability"].includes(row.finding_kind)) errors.push("invalid finding_kind");
+  if (!["info", "low", "medium", "moderate", "high", "critical"].includes(row.severity)) errors.push("invalid severity");
+  if (!nonEmpty(row.finding_ref) || !/^\.security\/findings\/[^\s]+\.md$/.test(row.finding_ref)) errors.push("invalid finding_ref");
+  if (!object(row.removal_plan) || Object.keys(row.removal_plan).some((key) => !["target", "action"].includes(key)) ||
+    !nonEmpty(row.removal_plan.target) || !nonEmpty(row.removal_plan.action)) errors.push("invalid removal_plan");
+  if (row.status === "resolved" && (!validDate(row.resolved_on) || !nonEmpty(row.resolution_ref))) {
+    errors.push("resolved exception requires resolved_on and resolution_ref");
+  }
+  if (row.status === "accepted" && (row.scanner !== "npm-audit" || row.scanner_input !== "package-lock.json" || row.component !== "root npm workspace")) {
     errors.push("exception must target npm-audit, root package-lock.json and root npm workspace");
   }
   if (!/^GHSA-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}$/i.test(row.advisory || "")) errors.push("invalid advisory");
-  for (const key of ["accepted_on", "review_by", "expires"]) {
-    if (row[key] && !validDate(row[key])) errors.push(`malformed ${key}: ${row[key]}`);
+  for (const key of ["accepted_on", "review_by", "expires", "resolved_on"]) {
+    if (row[key] != null && !validDate(row[key])) errors.push(`malformed ${key}: ${String(row[key])}`);
   }
-  if (!errors.length && (row.accepted_on > now || row.accepted_on > row.review_by)) {
-    errors.push("acceptance date is in the future or after review_by");
+  if (!errors.length && row.status === "accepted" && (row.accepted_on > row.review_by || row.accepted_on > row.expires)) {
+    errors.push("accepted_on is after review_by or expires");
+  }
+  return errors;
+}
+
+export function checkException(row, now) {
+  const errors = rowErrors(row);
+  if (row.status === "accepted" && row.accepted_on > now) {
+    errors.push("acceptance date is in the future");
   }
   if (errors.length) return { state: "malformed", errors };
-  if (now > row.review_by || (row.expires && now > row.expires)) return { state: "expired" };
+  if (row.status !== "accepted") return { state: "ignored" };
+  if (now > row.review_by || now > row.expires) return { state: "expired" };
   return { state: "valid" };
 }

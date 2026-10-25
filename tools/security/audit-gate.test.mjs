@@ -17,6 +17,10 @@ const row = (over = {}) => ({
   id: "EXC-2026-10-25-zod", advisory: ADVISORY, identifier: "zod", version: "3.25.76",
   embedded_path: "node_modules/zod", status: "accepted", accepted_by: "repository owner",
   component: "root npm workspace", owner: "repository owner", scanner: "npm-audit", scanner_input: "package-lock.json",
+  finding_kind: "direct-advisory", severity: "high", severity_source: "GitHub advisory",
+  rationale: "Temporary acceptance pending a compatible patch.",
+  finding_ref: ".security/findings/2026-10-24-zod-body-parser-highs.md",
+  removal_plan: { target: "patched Zod", action: "Upgrade and rescan." },
   accepted_on: "2026-10-25", review_by: "2026-11-08", expires: "2026-11-08", ...over,
 });
 const zodAudit = (severity = "high") => auditOf([entry("zod", "node_modules/zod", severity)]);
@@ -76,12 +80,17 @@ test("parseRegister reads the register field layout", () => {
     "schema_version: 1", "exceptions:", "  - id: EXC-2026-10-25-zod", `    advisory: ${ADVISORY}`,
     "    affected: { identifier: zod, version: 3.25.76 }", "    embedded_path: node_modules/zod",
     "    status: accepted", "    accepted_by: repository owner", '    accepted_on: "2026-10-25"',
-    '    review_by: "2026-11-08"', "",
+    '    review_by: "2026-11-08"', '    expires: "2026-11-08"', "    component: root npm workspace",
+    "    owner: repository owner", "    scanner: npm-audit", "    scanner_input: package-lock.json",
+    "    finding_kind: direct-advisory", "    severity: high", "    severity_source: GitHub advisory",
+    "    rationale: Temporary acceptance pending a compatible patch.",
+    "    finding_ref: .security/findings/2026-10-24-zod-body-parser-highs.md",
+    "    removal_plan: { target: patched Zod, action: Upgrade and rescan. }", "",
   ].join("\n"));
   assert.equal(rows.length, 1);
   for (const [key, value] of Object.entries({
     id: "EXC-2026-10-25-zod", advisory: ADVISORY, status: "accepted", embedded_path: "node_modules/zod",
-    accepted_by: "repository owner", accepted_on: "2026-10-25", review_by: "2026-11-08", expires: undefined,
+    accepted_by: "repository owner", accepted_on: "2026-10-25", review_by: "2026-11-08", expires: "2026-11-08",
     identifier: "zod", version: "3.25.76",
   })) assert.equal(rows[0][key], value);
 });
