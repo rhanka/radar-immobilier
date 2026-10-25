@@ -108,7 +108,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
     s3Bucket: BUCKET, s3Endpoint: endpoint, s3Region: "us-east-1",
     s3AccessKey: accessKey, s3SecretKey: secretKey });
 
-  async function tableCount(table: "releases" | "idempotency_keys" | "artifacts"): Promise<number> {
+  async function tableCount(table: "releases" | "operation_receipts" | "artifacts"): Promise<number> {
     return Number((await pool.query(`SELECT count(*) FROM artifacts.${table}`)).rows[0].count);
   }
 
@@ -331,7 +331,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
             "SELECT release_id FROM artifacts.artifact_current WHERE artifact_id = $1", [artifactId])).rows;
           expect(peerCurrent).toEqual([]);
           const peerKeys = Number((await peer.query(
-            "SELECT count(*) FROM artifacts.idempotency_keys WHERE key = $1", [internalKey])).rows[0].count);
+            "SELECT count(*) FROM artifacts.operation_receipts WHERE internal_key = $1", [internalKey])).rows[0].count);
           expect(peerKeys).toBe(0);
           const peerSnapshot = await committedState(peer);
           expect(peerSnapshot).toEqual(before);
@@ -497,12 +497,12 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       assertOutcomeFailure(denied, invocationId);
       await pool.query("UPDATE account_users SET status = 'approved' WHERE sub = 'alice'");
       const releasesBefore = await tableCount("releases");
-      const keysBefore = await tableCount("idempotency_keys");
+      const keysBefore = await tableCount("operation_receipts");
       const fresh = await execute({ method: "POST", path: "/publish", body },
         invocationFor(allowAll(), "reauth-fresh")) as unknown as Record<string, unknown>;
       expect(fresh).toMatchObject({ ok: true });
       expect(await tableCount("releases")).toBe(releasesBefore + 1);
-      expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
+      expect(await tableCount("operation_receipts")).toBe(keysBefore + 1);
       const releaseId = await currentReleaseId(artifactId);
       expect(typeof releaseId).toBe("string");
       const second = (await composeQ1Host(barrier));
@@ -522,7 +522,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         expect(mcpReplay).toMatchObject({ ok: true, status: 201 });
         expect((mcpReplay as { ok: true; data: unknown }).data).toEqual(httpBody);
         expect(await tableCount("releases")).toBe(releasesBefore + 1);
-        expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
+        expect(await tableCount("operation_receipts")).toBe(keysBefore + 1);
       } finally {
         (second.host["close"] as () => void)();
       }
@@ -589,7 +589,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       const invocation = invocationFor(authorizeCommit, mode);
       const invocationId = invocation["invocationId"] as string;
       const releasesBefore = await tableCount("releases");
-      const keysBefore = await tableCount("idempotency_keys");
+      const keysBefore = await tableCount("operation_receipts");
       const driven2 = startBarrierOperation(barrier, invocationId,
         () => execute({ method: "POST", path: "/publish", body }, invocation), "before_finalization_row_lock");
       const pending = driven2.pending;
@@ -614,7 +614,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
           category: "unauthorized_at_commit", retriable: false, commitState: "not_committed" });
       }
       expect(await tableCount("releases")).toBe(releasesBefore);
-      expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+      expect(await tableCount("operation_receipts")).toBe(keysBefore);
       expect(await currentReleaseId(artifactId)).toBeUndefined();
       fixtures.subjects = [ACTOR];
       fixtures.expiresAtMs = 3_600_000;
@@ -754,7 +754,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       const invAId = invA["invocationId"] as string;
       const invBId = invB["invocationId"] as string;
       const releasesBefore = await tableCount("releases");
-      const keysBefore = await tableCount("idempotency_keys");
+      const keysBefore = await tableCount("operation_receipts");
       const drainPoints: readonly CommitBarrierPoint[] = [
         ...PUBLISH_POINTS, "after_replay_lookup_before_guard",
       ];
@@ -809,9 +809,9 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         expect(worker.authorizations).toContainEqual({ invocationId: invBId, purpose: "replay" });
       }
       expect(await tableCount("releases")).toBe(releasesBefore + 1);
-      expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
+      expect(await tableCount("operation_receipts")).toBe(keysBefore + 1);
       const successRows = Number((await pool.query(
-        "SELECT count(*) FROM artifacts.idempotency_keys WHERE key = $1", [internalKey])).rows[0].count);
+        "SELECT count(*) FROM artifacts.operation_receipts WHERE internal_key = $1", [internalKey])).rows[0].count);
       expect(successRows).toBe(1);
       expect(cleanup).toBeDefined();
       const observed = await cleanup.inspectPreparations(hostA, artifactId);
@@ -931,7 +931,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         // retry with a fresh key would recreate the bytes and mask a success
         // that attached the deleted blob without repreparing it.
         const referenceSuccessRows = async (): Promise<number> => Number((await pool.query(
-          "SELECT count(*) FROM artifacts.idempotency_keys WHERE key = $1",
+          "SELECT count(*) FROM artifacts.operation_receipts WHERE internal_key = $1",
           [referenceInternalKey])).rows[0].count);
         if (!refusedBeforeResolution && (outcome as { ok?: unknown }).ok === false) {
           assertOutcomeFailure(outcome, reference.invocationId);
@@ -951,7 +951,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
           expect(receipt.releaseId).toEqual(expect.any(String));
           expect(await currentReleaseId(otherId)).toBe(receipt.releaseId);
           const durableReceipt = (await pool.query(
-            "SELECT result FROM artifacts.idempotency_keys WHERE key = $1", [referenceInternalKey])).rows;
+            "SELECT receipt AS result FROM artifacts.operation_receipts WHERE internal_key = $1", [referenceInternalKey])).rows;
           expect(durableReceipt).toEqual([{ result: receipt }]);
           const release = (await pool.query(
             "SELECT artifact_id, manifest, state FROM artifacts.releases WHERE id = $1", [receipt.releaseId])).rows[0];

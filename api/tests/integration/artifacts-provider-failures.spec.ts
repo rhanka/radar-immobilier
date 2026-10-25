@@ -84,7 +84,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     s3Bucket: BUCKET, s3Endpoint: endpoint, s3Region: "us-east-1",
     s3AccessKey: accessKey, s3SecretKey: secretKey });
 
-  async function tableCount(table: "releases" | "idempotency_keys" | "artifacts"): Promise<number> {
+  async function tableCount(table: "releases" | "operation_receipts" | "artifacts"): Promise<number> {
     return Number((await pool.query(`SELECT count(*) FROM artifacts.${table}`)).rows[0].count);
   }
 
@@ -383,7 +383,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
     try {
       const execute = executeWithParity(host);
       const before = await tableCount("artifacts");
-      const keysBefore = await tableCount("idempotency_keys");
+      const keysBefore = await tableCount("operation_receipts");
       armed.current = true;
       try {
         const invocation = invocationFor(allowAll(), "pool");
@@ -397,7 +397,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
         armed.current = false;
       }
       expect(await tableCount("artifacts")).toBe(before);
-      expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+      expect(await tableCount("operation_receipts")).toBe(keysBefore);
     } finally {
       if (typeof close === "function") (close as () => void)();
     }
@@ -475,7 +475,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       const locked = await holder.query("SELECT internal_key FROM artifacts.operation_keys WHERE storage_scope_id=$1 AND internal_key=$2 FOR UPDATE", [SCOPE, internalKey]);
       expect(locked.rows).toEqual([{ internal_key: internalKey }]);
       const releasesBefore = await tableCount("releases");
-      const keysBefore = await tableCount("idempotency_keys");
+      const keysBefore = await tableCount("operation_receipts");
       const invocation = invocationFor(allowAll(), "keylock");
       const outcome = await execute({ method: "POST", path: "/publish", body: { artifactId,
         files: [{ path: "index.html", mimeType: "text/html", text: "key lock conflict" }],
@@ -486,7 +486,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
         commitState: "not_committed", cause: { code: "55P03" }, phase: "key-lock" });
       expect(await projectOutcomeHttp(outcome)).toEqual({ status: 409, body: { error: "conflict" } });
       expect(await tableCount("releases")).toBe(releasesBefore);
-      expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+      expect(await tableCount("operation_receipts")).toBe(keysBefore);
     } finally {
       await holder.query("ROLLBACK"); holder.release(); (host["close"] as () => void)();
     }
@@ -511,7 +511,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       const setup = requireHostExecute(host);
       const artifactId = await ensureVia(setup, allowAll(), "q2-nonkey", "q2-nonkey-ensure");
       const releasesBefore = await tableCount("releases");
-      const keysBefore = await tableCount("idempotency_keys");
+      const keysBefore = await tableCount("operation_receipts");
       // Each transport uses an independent caller key and a rearmed injection,
       // with one correlated write-ledger entry per failed dispatch.
       for (const transport of ["http", "mcp"] as const) {
@@ -531,7 +531,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
           expect(probe.evidence.phase).toBe(lockClass);
           expect(probe.evidence.attempts).toBeLessThanOrEqual(1);
           expect(await tableCount("releases")).toBe(releasesBefore);
-          expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+          expect(await tableCount("operation_receipts")).toBe(keysBefore);
         } finally {
           probe.evidence.armed = false;
         }
@@ -700,7 +700,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
           "SELECT count(*) FROM artifacts.releases WHERE artifact_id = $1", [artifactId])).rows[0].count);
         expect(durable).toBe(1);
         expect(await tableCount("releases")).toBe(releasesBefore + 1);
-        const success = (await peer.query("SELECT result FROM artifacts.idempotency_keys WHERE key = $1", [internalKey])).rows;
+        const success = (await peer.query("SELECT receipt AS result FROM artifacts.operation_receipts WHERE internal_key = $1", [internalKey])).rows;
         expect(success).toHaveLength(1);
         durableReceipt = success[0].result;
         expect(durableReceipt).toBeDefined();
@@ -731,7 +731,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       expect(entries).toHaveLength(0);
       expect(await tableCount("releases")).toBe(releasesBefore + 1);
       const successRows = Number((await pool.query(
-        "SELECT count(*) FROM artifacts.idempotency_keys WHERE key = $1", [internalKey])).rows[0].count);
+        "SELECT count(*) FROM artifacts.operation_receipts WHERE internal_key = $1", [internalKey])).rows[0].count);
       expect(successRows).toBe(1);
     } finally {
       if (typeof close === "function") (close as () => void)();
@@ -756,7 +756,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
         invocationFor(allowAll(), "conflict-first")) as unknown as Record<string, unknown>;
       expect(first).toMatchObject({ ok: true });
       const releasesBefore = await tableCount("releases");
-      const keysBefore = await tableCount("idempotency_keys");
+      const keysBefore = await tableCount("operation_receipts");
       const invocation = invocationFor(allowAll(), "conflict-changed");
       const conflicted = await execute({ method: "POST", path: "/publish",
         body: { artifactId, files: [{ path: "index.html", mimeType: "text/html", text: "changed" }],
@@ -767,9 +767,9 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       const projected = await projectOutcomeHttp(conflicted);
       expect(projected).toEqual({ status: 409, body: { error: "conflict" } });
       expect(await tableCount("releases")).toBe(releasesBefore);
-      expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+      expect(await tableCount("operation_receipts")).toBe(keysBefore);
       const successRows = Number((await pool.query(
-        "SELECT count(*) FROM artifacts.idempotency_keys WHERE key = $1", [internalKey])).rows[0].count);
+        "SELECT count(*) FROM artifacts.operation_receipts WHERE internal_key = $1", [internalKey])).rows[0].count);
       expect(successRows).toBe(1);
     } finally {
       if (typeof close === "function") (close as () => void)();
@@ -965,7 +965,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       const execute = executeWithParity(host, { privateMarkers: [readMarker],
         secrets: [BUCKET, endpoint, accessKey, SCOPE, secretKey] });
       const artifactId = await ensureVia(execute, allowAll(), "q2-read", "q2-read-ensure");
-      const keysBefore = await tableCount("idempotency_keys");
+      const keysBefore = await tableCount("operation_receipts");
       const releasesBefore = await tableCount("releases");
       armed.current = true;
       try {
@@ -983,7 +983,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
         armed.current = false;
       }
       expect(armed.attempts).toBeGreaterThan(0);
-      expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+      expect(await tableCount("operation_receipts")).toBe(keysBefore);
       expect(await tableCount("releases")).toBe(releasesBefore);
       const seenTransactions: unknown[] = [];
       const guard: AuthorizeCommit = async (context, transaction) => {
