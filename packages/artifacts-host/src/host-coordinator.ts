@@ -5,7 +5,7 @@ export function bindHostCoordinator(coordinator: ArtifactCommitCoordinator, curr
   const bind = (request: FinalizeRequest): FinalizeRequest => ({ ...request,
     guard: async (context, transaction) => {
       const decision = await request.guard(context, transaction);
-      if (!decision.allowed) await currentGuard()(context, transaction);
+      if (!decision.allowed && request.operation === "publish") await currentGuard()(context, transaction);
       return decision;
     },
   });
