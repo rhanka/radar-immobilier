@@ -17,12 +17,6 @@ RUN_DIR=$TASK_DIR/runtime
 LOG_DIR=$TASK_DIR/$(date -u +%Y%m%dT%H%M%S)-$$
 mkdir -p "$RUN_DIR" "$LOG_DIR"
 echo "Evidence: $LOG_DIR"
-if [[ -f $ROOT/tmp/a5-delivery.git/config ]]; then
-  candidate=$(git --git-dir="$ROOT/tmp/a5-delivery.git" rev-parse HEAD)
-else
-  candidate=$(git rev-parse HEAD)
-fi
-printf '%s\n' "$candidate" > "$LOG_DIR/candidate-sha.txt"
 git show c49bb854:package-lock.json > "$LOG_DIR/baseline-lock.json"
 while :; do
   names=$(docker ps --filter name=radar-test- --format '{{.Names}}')
@@ -34,6 +28,15 @@ exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
 flock -n 8 || { echo 'Machine Docker campaign lock held'; exit 2; }
 [[ -z $(docker ps --filter name=radar-test- -q) ]]
 [[ $(df -Pk . | awk 'NR==2 {print $4}') -ge 8388608 ]]
+candidate_git=(git)
+if [[ -f $ROOT/tmp/a5-delivery.git/config ]]; then candidate_git+=(--git-dir="$ROOT/tmp/a5-delivery.git"); fi
+candidate=$("${candidate_git[@]}" rev-parse HEAD)
+printf '%s\n' "$candidate" > "$LOG_DIR/candidate-sha.txt"
+"${candidate_git[@]}" status --porcelain --untracked-files=all -- api packages tools .security \
+  package.json package-lock.json tsconfig.base.json eslint.config.js > "$LOG_DIR/candidate-status.txt"
+if [[ ${A5_IMAGE:-0} == 1 && -s $LOG_DIR/candidate-status.txt ]]; then
+  echo 'Runtime proof requires committed source bytes' >&2; exit 2
+fi
 OWNER=$(printf '%s' "$ROOT/$ENV" | sha256sum | cut -d' ' -f1)
 mkdir -p "$HOME/.cache/radar-a5-docker"
 export DOCKER_CONFIG=$HOME/.cache/radar-a5-docker
