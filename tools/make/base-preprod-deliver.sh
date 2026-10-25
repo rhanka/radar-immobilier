@@ -2,7 +2,7 @@
 set -euo pipefail
 [[ ${ENV:-} == test-base-preprod && $(git branch --show-current) == feat/base-preprod-operator ]]
 # Incremental correction base: the last delivered PR920 revision.
-base=c100e6cc0897bebc42c94157d8cb94f28348cab2
+base=b0cc044d32d756cec45070ace88392db5fc98b57
 git merge-base --is-ancestor "$base" HEAD
 isolated_git() { env -u GIT_DIR -u GIT_WORK_TREE git "$@"; }
 audit() {
@@ -33,7 +33,7 @@ bundle)
   [[ $(df -Pk . | awk 'NR==2 {print $4}') -ge 8388608 ]]
   out=tmp/base-preprod-evidence/delivery
   mkdir -p "$out"
-  payload=$out/base-preprod-pr920-fixes.bundle
+  payload=$out/base-preprod-pr920-r2.bundle
   git bundle create "$payload" "$base..HEAD"
   auditdir=$(mktemp -d "$out/audit.XXXXXX")
   isolated_git init --bare -q "$auditdir"
@@ -55,7 +55,7 @@ bundle)
   sha256sum "$payload"
   jq -n --arg head "$(git rev-parse HEAD)" --arg base "$base" --arg bundle "$(pwd -P)/$payload" \
     --arg sha256 "$(sha256sum "$payload" | cut -d' ' -f1)" --arg audit "$auditdir" --arg backup "$backupdir" \
-    '{head:$head,base:$base,bundle:$bundle,sha256:$sha256,audit:$audit,backup:$backup,verified:true}' > "$out/pr920-delivery.json"
+    '{head:$head,base:$base,bundle:$bundle,sha256:$sha256,audit:$audit,backup:$backup,verified:true}' > "$out/pr920-r2-delivery.json"
   git rev-parse HEAD;;
 audit)
   while IFS= read -r sha; do
