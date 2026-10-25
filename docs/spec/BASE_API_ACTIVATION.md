@@ -470,6 +470,70 @@ Do not exec into a scaled-down API Deployment. A compact termination receipt
 hashes the complete stdout receipt; collection checks both. Job Complete alone
 is insufficient. Keep the Job on any failure, and retain the full hashed evidence.
 
+Freeze and close before the first 6H transition. `freeze-cd` saves the workflow
+state, disables `build-push-images.yml`, and refuses remaining nonterminal runs.
+Only explicitly listed numeric `cancelRuns` are cancelled. Never toggle
+`PREPROD_CD_ENABLED`: its false branch can select the historical prod path.
+
+Author an independent `expected-instances.json` array from the initial inventory:
+each entry has `id` (old pod UID or external process identifier), `role`, and
+preferably image/owner metadata. Cover API, UI nginx, MCP, readers, writers,
+publishers, workers, SSE, requests/buffers and external launchers. The roster
+must be nonempty and unique. Do not derive it from maintenance evidence.
+
+```sh
+rtk make -f deploy/base-preprod/operator.mk freeze-cd INPUT='<OWNER_INPUT_JSON>' OUTPUT='<NEW_FREEZE_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk close INPUT='<OWNER_INPUT_JSON>' EXPECTED='<INDEPENDENT_ROSTER_JSON>' OUTPUT='<NEW_CLOSURE_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk stop-job INPUT='<INPUT_WITH_RECORDED_STOPJOB_NAME_AND_UID>' OUTPUT='<NEW_STOP_DIR>' ENV=preprod
+```
+
+Closure creates a dedicated Traefik IP allowlist and appends it to every
+inventoried application/MCP Ingress, preserving existing middleware chains.
+It saves original replicas/images, CronJob suspend states/schedules, Jobs,
+routes, relevant annotations and workflow state before changes. It suspends
+all namespace CronJobs and scales consumer Deployments to zero, leaving
+`radar-postgres` intact. Existing Jobs are not stopped by suspension: wait for
+completion or use the separate UID-preconditioned `stop-job` recipe. Explicitly
+stop other StatefulSet/DaemonSet/external consumers; the collector refuses any
+surviving process. This is process termination, not a claim of graceful drain.
+
+Verify the boundary from both excluded and admitted source addresses, including
+the real load-balancer/source-IP behavior. An admitted address must still need
+a business session. Preserve hostname/TLS/OIDC. An API-path allowlist alone is
+insufficient. Keep full route snapshots in restricted evidence storage, never
+environment dumps or document content.
+
+Prepare observation JSON with `binding` identical to the input, and
+`observations.networkAllowed`, `networkDenied`, `sessionRequired`,
+`externalStopped`, `streamsTerminated`, `mcpSuccessor`. Each attestation carries
+the same `binding`, `reference`, `sha256`, `observedAt` and `passed:true`;
+`mcpSuccessor` also carries its qualified image digest. Embed the complete
+post-closure inspect receipt as `databaseInspection`. Use actual observations,
+not synthetic campaign evidence. Timestamps are UTC ISO-8601 and at most
+24 hours old, including the backup restore rehearsal. The seven-day 6H runner
+limit remains unchanged; this operator vehicle uses a tighter freshness gate.
+
+```sh
+rtk make -f deploy/base-preprod/operator.mk collect-maintenance INPUT='<ACTIVATION_INPUT_JSON>' EXPECTED='<INDEPENDENT_ROSTER_JSON>' PROOFS='<ACTUAL_OBSERVATIONS_JSON>' OUTPUT='<NEW_MAINTENANCE_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk activate INPUT='<ACTIVATION_INPUT_JSON>' EXPECTED='<INDEPENDENT_ROSTER_JSON>' PROOFS='<COLLECTED_MAINTENANCE_JSON>' OUTPUT='<NEW_ACTIVATION_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk resume INPUT='<RESUME_INPUT_JSON>' EXPECTED='<INDEPENDENT_ROSTER_JSON>' PROOFS='<FRESH_COLLECTED_MAINTENANCE_JSON>' OUTPUT='<NEW_RESUME_DIR>' ENV=preprod
+```
+
+The collector verifies stopped old UIDs, no newly running consumers, zero
+consumer replicas, suspended schedules, no active Jobs, no ready consumer
+endpoints, API Service selector/no publishing of unready addresses, disabled CD
+and no nonterminal Actions runs. It checks DB migration/roster/attachment,
+manager, lock/drop/function/statistics authority and quiet transaction receipts.
+It derives drain/shutdown coverage from the independent roster after these
+controls; the separate stream/buffer/external observations remain mandatory.
+Activation/resume repeat live closure checks and verify that the configured MCP
+Deployment actually references the qualified successor digest. Reappearance
+invalidates the window. JSON declarations alone never establish real maintenance.
+
+For recovery after a scoped epoch, keep the boundary and use protected forward
+`resume`; never recreate the old index, alter barriers by SQL, or roll back to
+an unqualified old image. Ambiguous/unreadable state stays closed.
+
 ## B5 standalone acceptance profile
 
 B5 proves the B1–B4 implementation through `createApp` and PostgreSQL,
