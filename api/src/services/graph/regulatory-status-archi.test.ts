@@ -89,7 +89,7 @@ describe("check-archi FACE-2 — chaque payload servi PORTE regulatoryStatus", (
       expect(parseSignalSearchResponse(body, { city: "synthetic-city", limit: 20 })[0]?.regulatoryStatus).toBe(regulatoryStatus);
     }
     const missing = signalSearchBody("synthetic-city", [signalSearchItem("synthetic-city", { regulatoryStatus: undefined })]);
-    expect(() => parseSignalSearchResponse(missing, { city: "synthetic-city", limit: 20 })).toThrow("radar_api_bad_payload");
+    expect(() => parseSignalSearchResponse(missing, { city: "synthetic-city", limit: 20 })).toThrowError(expect.objectContaining({ code: "radar_api_bad_payload" }));
     // Découplage volontaire : le MCP ne dépend PAS du classifieur (le ré-importer/
     // ré-implémenter serait l'anti-pattern re-classifieur).
     expect(dataSource, "immo-mcp reste découplé de @radar/domain (passthrough only)").not.toContain(
