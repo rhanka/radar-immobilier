@@ -34,5 +34,5 @@
 - [x] Lot 1: published MCP tuple and required compatibility; API artifact service migration belongs to A5.
 - [x] Lot 2: single bridge, twelve bindings and session lifecycle.
 - [x] Lot 3: synthetic stdio and trusted account binding.
-- [ ] Lot 4: MCP/API suites, mutations, lint/typecheck and runtime image.
-- [ ] Lot 5: evidence report, atomic commit audit and independent bundle import.
+- [x] Lot 4: 384 ordinary MCP tests; 3,838 API tests (76 configured pending); 158 host tests; six isolated composition/exchange cases; two killed mutants with restored controls; workspace typecheck/lint, audit gate and API build; actual P6 runtime proof.
+- [x] Lot 5: atomic commit audit and independent base-relative bundle import; the final report accompanies the bundle, recording its final SHA-256 without a recursive self-reference.
