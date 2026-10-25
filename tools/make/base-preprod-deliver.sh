@@ -53,6 +53,9 @@ bundle)
   isolated_git -C "$backupdir" fsck --full --no-reflogs
   printf 'Local backup repository: %s\nFresh bundle audit: %s\nBase: %s\n' "$backupdir" "$auditdir" "$base"
   sha256sum "$payload"
+  jq -n --arg head "$(git rev-parse HEAD)" --arg base "$base" --arg bundle "$(pwd -P)/$payload" \
+    --arg sha256 "$(sha256sum "$payload" | cut -d' ' -f1)" --arg audit "$auditdir" --arg backup "$backupdir" \
+    '{head:$head,base:$base,bundle:$bundle,sha256:$sha256,audit:$audit,backup:$backup,verified:true}' > "$out/pr920-delivery.json"
   git rev-parse HEAD;;
 audit)
   while IFS= read -r sha; do
