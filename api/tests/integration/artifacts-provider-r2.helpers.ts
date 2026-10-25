@@ -1,6 +1,13 @@
 import type pg from "pg";
+import { AsyncLocalStorage } from "node:async_hooks";
+import { createPostgresArtifactStore } from "@sentropic/artifacts/adapters/postgres";
+import { createLifecycleService } from "@sentropic/artifacts/server/lifecycle";
+import { createPublicationService, type PublicationBlobStore } from "@sentropic/artifacts/server/publication";
+import type { ArtifactsStorageConfig } from "@radar/artifacts-host";
+import { initializeArtifactScope } from "../../../packages/artifacts-host/src/storage.js";
 import { requirePublicFunction, COMMIT_CONTRACT_SPECIFIER,
-  type R2CommitCoordinator } from "./artifacts-provider-contract.helpers.js";
+  type R2CommitCoordinator, type CompiledArtifactsProfile,
+  type InvocationContextShape } from "./artifacts-provider-contract.helpers.js";
 
 /** Host SQL is confined to the registered participant's leased connection. */
 export interface PolicyClient {
@@ -40,4 +47,71 @@ export async function createCandidateCoordinator(pool: pg.Pool, testObserver: un
       };
     } },
   });
+}
+
+/** Test composition only: production remains pinned to its published provider. */
+export async function composeCandidateHost(params: {
+  pool: pg.Pool; config: unknown; blobs: unknown;
+  profile: CompiledArtifactsProfile; coordinator: R2CommitCoordinator;
+}): Promise<Record<string, unknown>> {
+  const config = params.config as Extract<ArtifactsStorageConfig, { enabled: true }>;
+  const blobs = params.blobs as PublicationBlobStore;
+  const { pool, profile, coordinator } = params;
+  const createApp = await requirePublicFunction<(deps: unknown) => {
+    selectedCapabilities: readonly string[]; profileDigest: string;
+    execute(request: unknown, invocation: InvocationContextShape): Promise<unknown>;
+  }>("@sentropic/artifacts/http", "createHttpArtifactApp");
+  const derive = await requirePublicFunction<(config: unknown) => unknown>(
+    "@sentropic/artifacts/mcp-core", "createRadarKeyDerivation");
+  const legacy = await requirePublicFunction<(pool: pg.Pool) => unknown>(
+    "@sentropic/artifacts/adapters/postgres", "createPostgresLegacyArtifactRecords");
+  const unitWriter = await requirePublicFunction<(client: PolicyClient) => unknown>(
+    "@sentropic/artifacts/server/publication", "createPostgresPublicationUnitWriter");
+  const refs = await requirePublicFunction<(store: unknown, executor: unknown) => unknown>(
+    "@sentropic/artifacts/server/gc", "createPostgresClaimGuardedRefs");
+  const executor = await requirePublicFunction<(pool: pg.Pool) => unknown>(
+    "@sentropic/artifacts/adapters/postgres", "createPostgresCommitExecutor");
+  await initializeArtifactScope(pool, config.storageScope, config.orgId);
+  const store = createPostgresArtifactStore(pool);
+  const actors = await pool.query<{ sub: string }>("SELECT sub FROM account_users");
+  const publication = createPublicationService({ state: store, blobs, intents: store });
+  const artifact = new AsyncLocalStorage<string>();
+  const lock = (table: string, column: string) => async (client: PolicyClient) => {
+    await client.query(`SELECT ${column} FROM artifacts.${table} WHERE ${column} = $1 FOR UPDATE`,
+      [artifact.getStore()]);
+  };
+  const app = createApp({ profile, coordinator,
+    derivation: derive({ storageScopeId: config.storageScope, actorIds: actors.rows.map((row) => row.sub) }),
+    legacyRecords: legacy(pool),
+    ensureHost: {
+      readPolicyRevision: () => readTestPolicyRevision(pool as unknown as PolicyClient),
+      async lockBinding(client: PolicyClient, binding: { storageScopeId: string; ownerId: string; bindingName: string }) {
+        await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))",
+          [JSON.stringify([binding.storageScopeId, binding.ownerId, binding.bindingName])]);
+      },
+      resolveBinding(client: PolicyClient, binding: { storageScopeId: string; ownerId: string; bindingName: string }) {
+        return createPostgresArtifactStore(client as unknown as pg.Pool).ensureArtifact({ ...binding, profile: {} });
+      },
+      async abandonAttempt() { /* Ensure creates no external preparation objects. */ },
+    },
+    acls: store, lifecycle: createLifecycleService(store, undefined, store),
+    publication: { blobs, intents: store, refs: refs(store, executor(pool)),
+      createUnitWriter: unitWriter, getCurrent: publication.getCurrent,
+      locks: { "artifact-lifecycle": [lock("artifacts", "id")],
+        acl: [lock("artifact_access", "artifact_id")],
+        "current-pointer": [lock("artifact_current", "artifact_id")] } },
+    publicationUrls: (artifactId: string, releaseId: string) => ({
+      stableUrl: `https://${artifactId}.pages.example.test/`,
+      pinnedUrl: `https://${releaseId}.pinned.pages.example.test/`,
+    }),
+  });
+  return { app, store, publication, profile, coordinator, blobs,
+    selectedCapabilities: app.selectedCapabilities, profileDigest: app.profileDigest,
+    execute(request: Record<string, unknown>, invocation: InvocationContextShape) {
+      const body = request["body"] as { artifactId?: string } | undefined;
+      return artifact.run(body?.artifactId ?? "", () => app.execute({ ...request,
+        actorId: request["actorId"] ?? invocation.actorId }, invocation));
+    },
+    close() { /* The suite owns the injected pool and blob-store lifecycle. */ },
+  };
 }
