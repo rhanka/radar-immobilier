@@ -78,17 +78,23 @@ describe("check-archi FACE-2 — chaque payload servi PORTE regulatoryStatus", (
     expect(read("api/src/scripts/export-designation-events.ts")).toContain("regulatoryStatus: readRegulatoryStatus({");
   });
 
-  it("immo-mcp : MockSignal porte regulatoryStatus, LU en passthrough (0 dérivation, 0 dép @radar/domain)", () => {
+  it("keeps canonical regulatoryStatus through the API mapper and strict MCP passthrough", () => {
     const mocks = read("packages/immo-mcp/src/mocks.ts");
     expect(mocks).toContain('regulatoryStatus: "firm" | "anticipation"');
+    const mapper = read("api/src/services/facets/mcp-signal-result.ts");
+    expect(mapper).toContain("regulatoryStatus: node.regulatoryStatus,");
+    expect(mapper).not.toContain("deriveRegulatoryStatus(");
     const dataSource = read("packages/immo-mcp/src/data-source.ts");
-    // Passthrough du champ servi + fail-safe, jamais re-classifié.
-    expect(dataSource).toContain('regulatoryStatus: node.regulatoryStatus ?? "anticipation"');
-    // Découplage volontaire : le MCP ne dépend PAS du classifieur (le ré-importer/
-    // ré-implémenter serait l'anti-pattern re-classifieur).
-    expect(dataSource, "immo-mcp reste découplé de @radar/domain (passthrough only)").not.toContain(
-      "@radar/domain",
-    );
+    expect(dataSource).toContain("return parseSignalSearchResponse(body,");
+    const decoder = read("packages/immo-mcp/src/signal-search-response.ts");
+    expect(decoder).toContain('regulatoryStatus: z.enum(["firm", "anticipation"])');
+    expect(decoder).toContain("return parsed.data.signals;");
+    // A missing status is rejected by the wire contract, never reclassified.
+    expect(decoder).not.toContain(".default(");
+    for (const consumer of [dataSource, decoder]) {
+      expect(consumer).not.toContain("@radar/domain");
+      expect(consumer).not.toContain("deriveRegulatoryStatus(");
+    }
   });
 });
 
