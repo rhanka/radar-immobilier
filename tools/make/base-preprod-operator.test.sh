@@ -17,7 +17,7 @@ cd "$testdir"
 now=$(date -u +%FT%TZ)
 jq -n --arg now "$now" '{context:"synthetic-context",namespace:"radar-immobilier-preprod",
  image:("ghcr.io/fixture/api@sha256:"+("a"*64)),jobName:"base-operator-synthetic",operation:"inspect",
- repository:"fixture/repository",reason:"synthetic qualification",
+ repository:"fixture/repository",reason:"synthetic qualification",database:{database:"radar",role:"radar",schema:"public"},
  binding:{workspaceId:"11111111-1111-4111-8111-111111111111",actorSub:"opaque:fixture",
  maintenanceAttemptId:"22222222-2222-4222-8222-222222222222",releaseId:(("b"*40)+":synthetic")},
  backup:{reference:"synthetic-backup",sha256:("c"*64),restoredAt:$now,restoreReceiptSha256:("d"*64)}}' > input.json

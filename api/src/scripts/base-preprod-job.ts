@@ -3,15 +3,27 @@ import { createHash } from "node:crypto";
 import { writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { inspect } from "./base-preprod-inspect.js";
+import { sql } from "drizzle-orm";
+import { createDb } from "../db/client.js";
+import { loadConfig } from "../config.js";
 
 interface Invocation {
   action: "inspect" | "init" | "attach" | "activate" | "resume";
   binding: { workspaceId: string | null; actorSub: string; maintenanceAttemptId: string; releaseId: string };
   args: string[];
+  database: { database: string; role: string; schema: string };
 }
 
 export async function runJob(invocation: Invocation) {
   if (!invocation.binding || !Array.isArray(invocation.args)) throw new Error("invalid_invocation");
+  const handle = createDb(loadConfig());
+  try {
+    const [actual] = (await handle.db.execute(sql`SELECT current_database() AS database,
+      current_user AS role, current_schema() AS schema`)).rows;
+    for (const key of ["database", "role", "schema"] as const) {
+      if (!invocation.database?.[key] || actual?.[key] !== invocation.database[key]) throw new Error("database_identity_mismatch");
+    }
+  } finally { await handle.pool.end(); }
   let result: unknown;
   if (invocation.action === "inspect") {
     if (!invocation.binding.workspaceId) throw new Error("workspace_required");

@@ -23,7 +23,7 @@ $input[0] as $c |
        seccompProfile:{type:"RuntimeDefault"}},
      containers:[{name:"operator",image:$c.image,imagePullPolicy:"IfNotPresent",workingDir:"/workspace",
        command:["node","api/dist/scripts/base-preprod-job.js",
-         ({action:$action,binding:$c.binding,args:$args}|tojson)],
+         ({action:$action,binding:$c.binding,database:$c.database,args:$args}|tojson)],
        readinessProbe:{exec:{command:["/bin/false"]},periodSeconds:1},
        securityContext:{allowPrivilegeEscalation:false,readOnlyRootFilesystem:true,capabilities:{drop:["ALL"]}},
        resources:{requests:{cpu:"100m",memory:"128Mi"},limits:{cpu:"1",memory:"512Mi"}},
