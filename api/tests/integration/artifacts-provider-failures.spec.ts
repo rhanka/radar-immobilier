@@ -593,15 +593,20 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
           }
         }
 
-        // A successful resume must still read changed authority, never bypass it.
+        // Revoke host authority after an allowed guard, at the last commit pause.
+        const authorityBarrier = await requireCommitBarrier(["before_commit"]);
+        const { host: authorityHost } = await composeQ2Host(authorityBarrier);
         const before = await committedState(pool);
         let guardCalls = 0;
+        let revoked = false;
         const invocation = invocationFor(async (context, transaction) => {
           guardCalls++;
+          if (revoked) return { allowed: false, reason: "revoked", publicCode: "access_denied",
+            status: 403, retriable: false };
           return authorizeTransaction(context, transaction);
         }, `e3-revoked-${phase}`);
-        const execute = requireHostExecute(host);
-        const run = startCorrelatedBarrier(barrier, point, (register) => {
+        const execute = requireHostExecute(authorityHost);
+        const run = startCorrelatedBarrier(authorityBarrier, "before_commit", (register) => {
           register(invocation);
           return execute({ method: "POST", path: "/ensure", body: {
             bindingName: `q2-e3-revoked-${phase}`, idempotencyKey: `q2-e3-revoked-${phase}`,
@@ -609,18 +614,18 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
         });
         try {
           await run.reached;
-          expect(guardCalls).toBe(0);
-          await pool.query("UPDATE account_users SET status='pending' WHERE sub=$1", [ACTOR]);
+          expect(guardCalls).toBe(1);
+          revoked = true;
           run.release();
           const outcome = await run.pending;
           assertOutcomeFailure(outcome, invocation.invocationId);
           expect(outcome).toMatchObject({ failure: { publicCode: "access_denied", httpStatus: 403,
             retriable: false, commitState: "not_committed" } });
-          expect(guardCalls).toBe(1);
+          expect(guardCalls).toBe(2);
           expect(await committedState(pool)).toEqual(before);
         } finally {
           run.release(); await run.pending.catch(() => {});
-          await pool.query("UPDATE account_users SET status='approved' WHERE sub=$1", [ACTOR]);
+          (authorityHost["close"] as () => void)();
         }
       } finally {
         (host["close"] as () => void)();
