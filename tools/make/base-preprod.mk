@@ -15,6 +15,8 @@ test-operator:
 	@rtk bash tools/make/base-preprod-operator.test.sh
 test-mutations:
 	@rtk proxy bash tools/make/base-preprod-mutations.sh
+status:
+	@rtk bash tools/make/base-preprod-status.sh
 inspect-host:
 	@rtk bash -c 'git status --short --branch; git rev-parse origin/main; command -v jq kubectl; df -h .; docker ps --format "{{.Names}}"; pgrep -af "docker (build|buildx build)" || true'
 stage:
