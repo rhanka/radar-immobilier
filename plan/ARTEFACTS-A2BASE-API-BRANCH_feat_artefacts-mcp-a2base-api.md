@@ -66,6 +66,7 @@
 - [x] Workspace race barriers release on early refusal too, so negative mutations cannot leave their coordinator waiting for a callback that already failed.
 - [x] Membership-set races change only affected rows; activating a second membership leaves the chosen workspace revision unchanged, isolating the full-set revalidation requirement.
 - [x] The enrichment race explicitly requires the BASE token to remain identical when the second membership becomes active.
+- [x] A complementary race preserves an explicitly selected authorized workspace when another membership becomes active; omission remains ambiguous.
 - [x] Container checks and test-only S0 contract comparison written; API runtime has no MCP import.
 - [ ] Delivery: report qualified slices, commands/counts, per-commit numstat, remaining integration duties, exact SHA and isolated bundle audit/hash.
 - [x] Selective staging, 150-line audit, subject-only commits and bundle verification in a blank prerequisite-only repository have dedicated make targets; no shared Git writes or push.
