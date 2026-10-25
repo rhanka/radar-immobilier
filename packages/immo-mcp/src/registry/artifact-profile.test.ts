@@ -86,7 +86,7 @@ describe("artifact effective profile", () => {
     expect(validateListPagination(undefined, undefined)).toEqual([]);
   });
 
-  it("should record the pending upstream contracts without inventing them", () => {
+  it("should record the published provider contract revisions", () => {
     expect(REQUIRED_PROVIDER_CONTRACTS.finalizationAuthorization).toBe("artifacts-commit/v1");
     expect(REQUIRED_PROVIDER_CONTRACTS.typedFailure).toBe("artifacts-outcome/v1");
     expect(REQUIRED_PROVIDER_CONTRACTS.capabilitySelection).toBe("artifacts-profile/v1");

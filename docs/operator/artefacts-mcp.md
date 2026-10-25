@@ -68,3 +68,45 @@ Run `node tools/make/artefacts-a4-mutations.mjs` inside the isolated runner afte
 failed-binding mutants with named semantic failures and passing restoration
 controls. Ordinary MCP targets continue excluding service E2E; A5 owns their
 separate provider acceptance. A7 owns operational activation and recovery.
+# A5 guarded artifact composition
+
+The published MCP tuple is artifacts `0.2.0`, cluster-mesh `0.22.0`,
+mcp-auth `0.2.1` and resolved mcp-platform `0.4.0`. The complete Radar
+profile is compiled by the published provider before registry admission.
+Its immutable manifest binds all four selected schemas, caller keys,
+semantic rules and `immo:read`; the registry also binds the storage scope.
+The artifact wire envelope is 2 MiB, including JSON-RPC framing.
+
+`bindArtifactProvider` accepts the trusted shared application and a
+request-bound finalization authority factory. The stateful namespace then
+lists exactly twelve Immo tools plus the four artifact tools. Each call
+uses a fresh frozen invocation. Lower adapter dispatch stays closed;
+unselected operations fail before authority creation. Invalid bindings
+close the namespace before effects. Stdio remains fixture-only.
+
+**Activation remains unavailable in this delivery.** The production HTTP
+entrypoint has no artifact binding and exposes the preserved twelve tools.
+No environment value substitutes for that binding. The sixteen-tool tests
+use a contract double and qualify composition, not durable finalization.
+API/artifacts-host retain their existing artifacts `0.1.2` dependency
+until the coherent A1 migration is available.
+
+Before activation, the A1 integrator must deliver and qualify:
+
+- `composition.ts` and `facade.ts` using the guarded `0.2.0` application,
+  `handle(request, invocation)` and typed outcomes before projection.
+- A transaction-bound admission/quota participant, persistent failure
+  accounting and `artifacts.operation_receipts`, with registered technical
+  migrations under a conductor-recorded CT-1/CT-2 lease.
+- Identical HTTP/MCP scope and policy revision; replay authorization,
+  ordered-content conflicts, last-reservation races, restart and cleanup.
+- Enabled Q1/Q2/provider acceptance after PR #918, real-service H4 E2E,
+  then exact SHA/image/configuration and A7 applied-binding receipts.
+
+The isolated A5 entrypoint is `tools/make/artefacts-a5.mk`, with
+`API_PORT=18924 UI_PORT=15924 MAILDEV_UI_PORT=11924 ENV=test-artefacts-a5`
+as the final arguments. Its `run` target installs and executes `CMD` only
+inside the source archive container. `A5_SERVICES=1` requests synthetic
+PostgreSQL/S3; `A5_IMAGE=1 A5_SERVICES=1` exercises the actual runtime.
+Campaigns wait in 60-second intervals for every `radar-test-*` container,
+hold the machine lock, stop below 8 GiB and remove their own resources.
