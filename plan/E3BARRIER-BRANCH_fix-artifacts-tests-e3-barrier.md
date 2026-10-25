@@ -36,5 +36,6 @@
 - [x] Lot 3: A4 typed host binding and public seam calls (candidate execution pending).
 - [x] Lot 3a: release a paused barrier once, including A4 finally cleanup; require invocation IDs.
 - [x] Lot 3b: revoke host authority at before_commit after an allowed guard; require a second guard and rollback on resume.
+- [x] Lot 3c: preserve the public callable observer plus arrival method type at the dynamic factory boundary.
 - [ ] Lot 4: candidate missing-contract evidence; baseline API suite, lint and typecheck.
 - [ ] Lot 5: atomic history, report, audited bundle from the base and stack cleanup.
