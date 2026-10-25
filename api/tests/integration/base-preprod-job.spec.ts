@@ -1,18 +1,30 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({ execute: vi.fn(), end: vi.fn(), spawn: vi.fn(), write: vi.fn(), rights: vi.fn() }));
 vi.mock("../../src/scripts/base-preprod-rights.js", () => ({ assertPrivileges: mocks.rights }));
 vi.mock("../../src/config.js", () => ({ loadConfig: () => ({}) }));
 vi.mock("../../src/db/client.js", () => ({ createDb: () => ({ db: { execute: mocks.execute }, pool: { end: mocks.end } }) }));
 vi.mock("node:child_process", () => ({ spawnSync: mocks.spawn }));
-vi.mock("node:fs", async (original) => ({ ...await original<object>(), writeFileSync: mocks.write }));
+vi.mock("node:fs", async (original) => ({ ...await original<object>(), writeFileSync: mocks.write,
+  readFileSync: () => "b".repeat(40) }));
 const binding = { workspaceId: null, workspaceSlug: "fixture", actorSub: "opaque",
   maintenanceAttemptId: "22222222-2222-4222-8222-222222222222", releaseId: `${"b".repeat(40)}:fixture` };
 const invocation = { action: "init" as const, binding, args: ["--workspace-slug", "fixture"],
+  image: `ghcr.io/fixture/api@sha256:${"a".repeat(64)}`,
   database: { database: "radar", role: "radar", schema: "public" } };
-afterEach(() => { vi.resetAllMocks(); vi.restoreAllMocks(); process.exitCode = undefined; });
+beforeEach(() => { vi.stubEnv("GIT_SHA", "b".repeat(40)); vi.stubEnv("OPERATOR_IMAGE", invocation.image); });
+afterEach(() => { vi.resetAllMocks(); vi.restoreAllMocks(); vi.unstubAllEnvs(); process.exitCode = undefined; });
 
 describe("operator Job destination", () => {
+  it("should refuse foreign image releases before any database access or mutation", async () => {
+    const { runJob } = await import("../../src/scripts/base-preprod-job.js");
+    await expect(runJob({ ...invocation, binding: { ...binding, releaseId: `${"c".repeat(40)}:fixture` } }))
+      .rejects.toThrow("operator_image_release_mismatch");
+    vi.stubEnv("GIT_SHA", "c".repeat(40));
+    await expect(runJob(invocation)).rejects.toThrow("operator_image_release_mismatch");
+    expect(mocks.execute).not.toHaveBeenCalled();
+    expect(mocks.spawn).not.toHaveBeenCalled();
+  });
   it("should refuse insufficient SQL rights before invoking a mutating child", async () => {
     const { runJob } = await import("../../src/scripts/base-preprod-job.js");
     mocks.execute.mockResolvedValue({ rows: [invocation.database] });

@@ -1,6 +1,6 @@
 /** Bounded operator Job: complete JSON on stdout; compact, hashed termination receipt. */
 import { createHash } from "node:crypto";
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { inspect } from "./base-preprod-inspect.js";
 import { sql } from "drizzle-orm";
@@ -10,6 +10,7 @@ import { assertPrivileges } from "./base-preprod-rights.js";
 
 interface Invocation {
   action: "inspect" | "init" | "attach" | "activate" | "resume";
+  image: string;
   binding: { workspaceId: string | null; workspaceSlug?: string; actorSub: string; maintenanceAttemptId: string; releaseId: string };
   args: string[];
   database: { database: string; role: string; schema: string };
@@ -17,6 +18,10 @@ interface Invocation {
 
 export async function runJob(invocation: Invocation) {
   if (!invocation.binding || !Array.isArray(invocation.args)) throw new Error("invalid_invocation");
+  const releaseSha = readFileSync("/workspace/api/release-sha", "utf8").trim();
+  if (!/^[a-f0-9]{40}$/.test(releaseSha) || invocation.binding.releaseId.split(/[:/]/)[0] !== releaseSha
+    || process.env.GIT_SHA !== releaseSha || !/@sha256:[a-f0-9]{64}$/.test(invocation.image ?? "")
+    || process.env.OPERATOR_IMAGE !== invocation.image) throw new Error("operator_image_release_mismatch");
   if (invocation.action === "init") {
     const slugs = invocation.args.filter((_, index) => index % 2 === 1
       && invocation.args[index - 1] === "--workspace-slug");
@@ -61,11 +66,12 @@ export async function runJob(invocation: Invocation) {
       } finally { await verification.pool.end(); }
     }
   }
-  const complete = { action: invocation.action, binding: invocation.binding,
+  const complete = { action: invocation.action, binding: invocation.binding, image: invocation.image, releaseSha,
     observedAt: new Date().toISOString(), result };
   const bytes = `${JSON.stringify(complete)}\n`;
   process.stdout.write(bytes);
   const receipt = { action: invocation.action, binding: invocation.binding, status: "complete",
+    image: invocation.image, releaseSha,
     sha256: createHash("sha256").update(bytes).digest("hex"), bytes: Buffer.byteLength(bytes) };
   writeFileSync("/dev/termination-log", JSON.stringify(receipt));
   if ((invocation.action === "activate" || invocation.action === "resume")
