@@ -34,14 +34,11 @@ import { createAccountBinding } from "./account-binding.js";
  * OAuth 2.1 Resource Server (RFC 9728 PRM + RFC 6750 challenges) implemented by the
  * PUBLISHED packages @sentropic/mcp-auth (+ @sentropic/oauth-verify).
  *
- * This file is ADDITIVE: the stdio entrypoint's BEHAVIOUR (`server.ts`) is untouched —
- * only its two identity constants moved to the side-effect-free `meta.ts` (see that
- * file's comment: importing them from `server.ts` itself would pull its stdio
- * "run only as the bin" guard into THIS file's esbuild bundle, where a unified
- * `import.meta.url` post-bundling would make that guard spuriously fire). Both
- * transports share `registerTools` + the `ImmoMcpAuthContext` seam — only the AUTH
- * SOURCE differs:
- *   - stdio  → `resolveAuthContext(env)` (claims stubbed from env)
+ * Both transports compile the same twelve-tool stateful bridge and invoke the
+ * shared native handlers. Identity constants live in the side-effect-free
+ * `meta.ts`; importing the stdio entrypoint here would execute its bin guard
+ * after bundling. The authority sources differ:
+ *   - stdio  → `resolveAuthContext(env)` confined to synthetic fixture data
  *   - http   → claims of a validated bearer token (this file's `authContextFromMcp`).
  *
  * Domain data: `search_signals` is WIRED to the real radar API (the same
@@ -201,9 +198,8 @@ function sessionOwnerFromMcp(mcpAuth: McpAuthContext): SessionOwner {
 
 /**
  * True when the current request identity matches the session owner. The `sub`
- * must always match; the client is additionally required to match when BOTH
- * the session owner and the current request expose one (a refreshed token for
- * the same user keeps the session).
+ * must always match; client presence and value must remain identical. A
+ * refreshed token keeps the session only under that same owner binding.
  */
 function isSessionOwner(owner: SessionOwner, mcpAuth: McpAuthContext): boolean {
   if (mcpAuth.sub !== owner.sub) return false;
