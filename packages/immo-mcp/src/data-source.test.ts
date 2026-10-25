@@ -29,6 +29,3 @@ describe("MockDataSource.searchSignals (documents the bug)", () => {
     expect(out.length).toBeGreaterThan(0);
   });
 });
-
-
-
