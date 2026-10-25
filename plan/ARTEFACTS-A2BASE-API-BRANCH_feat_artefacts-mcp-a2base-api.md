@@ -59,6 +59,7 @@
 - [ ] T07: read-only reveal, post-enrichment authority/revision checks and shared document context across bounded attempts.
 - [x] T07 implementation uses canonical cards only after masking; lazy document context/cache/deadline lives outside the BASE retry callback; full-set authority is checked after enrichment and again before return.
 - [x] Isolated visibility run identified 401 from OIDC mock import order after loading the canonical route. Use valid signed browser sessions for DB qualification, retaining protect and current account approval; H4/A3 network qualification remains separate.
+- [x] T06/T07 focused campaign: 19 passed; two state-fixture failures confirmed immutable cutover guards. Create fresh unactivated workspaces for absent/legacy epoch cases instead of deleting or reverting activated state; no guard bypass.
 - [x] T07 deterministic createApp/PG races written for approval, membership set, graph source and common archive changes during document I/O; execution waits for canonical exports.
 - [x] T07 default 2,000ms cross-retry budget and persistent drift cases written with an explicit 1,000ms scheduling allowance outside documentary waiting.
 - [x] Missing/legacy/barrier epoch and unresolved-history refusals are covered by real createApp/PostgreSQL cases, including empty reveal requests.
