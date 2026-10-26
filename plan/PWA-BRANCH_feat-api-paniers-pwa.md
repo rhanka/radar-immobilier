@@ -103,3 +103,5 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
 - [x] Delivery: `api/src/artifacts/write-profile.test.ts`.
 
 - [x] Delivery: `api/src/artifacts/write-profile.ts`.
+
+- [x] Delivery: `api/src/config.ts`.
