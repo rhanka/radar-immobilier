@@ -68,3 +68,4 @@
 - [x] Astra A5 campaign teardown complete: no project containers, volumes or networks; deliver locally from 658663dd without push and preserve the companion report.
 - [x] Astra r2: bind entry admission to the configured workspace and retain its resolved identity.
 - [x] Astra r2: freeze HTTP call membership and refresh transaction authority after membership waits, including replay.
+- [x] Astra r2: carry immutable workspace authority through the production MCP binding.
