@@ -17,7 +17,8 @@
 ## Feedback Loop
 - [x] Second-pass discovery: reproduce eight PostgreSQL suspension races at the last membership await; revalidate approval with the BASE shared account lock before returning either membership sample; delivery range starts at `8c0ad35c`.
 - [ ] Second-pass mutations: final discovery approval and current rights checks must fail discriminating assertions, then pass after byte-exact restoration; retain the previous 15 mutants.
-- [ ] Second-pass account lock: a concurrent PostgreSQL `FOR UPDATE NOWAIT` must fail with `55P03` while either discovery membership transaction holds BASE approval; removing the shared lock must kill the test.
+- [x] Second-pass targeted acceptance: `631c384cf`, evidence `tmp/classification-evidence/20261026T080647-5-targeted`; 26 PostgreSQL/createApp tests passed without skips, API/test typecheck and lint passed, owned resources removed with volumes.
+- [x] Second-pass account lock: concurrent PostgreSQL `FOR UPDATE NOWAIT` fails with `55P03` while either discovery membership transaction holds BASE approval; the dedicated mutant remains part of final qualification.
 - [x] Second-pass context: compare current signal/lot rights under the BASE workspace lock and revalidate approval last; discard changed samples within three attempts; share transactional activation/cutover/destination availability logic.
 - [x] PANIERSREAD-EX3: owner-requested Astra B2 correction extends scope to the canonical parser in `api/src/routes/graph-signals.ts`; preserve persisted document metadata for degraded reads; rollback removes only parser/dedup metadata additions.
 - [x] Astra review corrections: six fixes qualified with discriminating tests and mutations; full CI API selection, lint/typecheck/build pass; local delivery range is `bf339830..HEAD`.
