@@ -26,6 +26,8 @@
 - [ ] Preserve historical BASE HTTP wrappers and lot isolation.
 
 ## Verification
+- [x] Add a serial Docker-only campaign with resource monitoring and guarded teardown.
+
 - [x] Document the transactional seam and qualify unchanged createApp BASE wrappers.
 
 - [x] Exercise real source and workspace waits, revoked authority and expired admissions.
