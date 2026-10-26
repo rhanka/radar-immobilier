@@ -12,7 +12,7 @@ import { resolveMcpSignalWorkspace, revalidateMcpSignalWorkspace } from "./mcp-s
 import { projectMcpSignalResults } from "./mcp-signal-result.js";
 import { EMPTY_DISCARDED_KEYS, EMPTY_DISCARDED_SIGNALS, type DiscardedSignalsPort } from "../graph/discarded-signals.js";
 import { legacyFenceError, legacyFenceStatus, type LegacyRetirementState } from "./legacy-retirement.js";
-import { LEGACY_EPOCH, SCOPED_EPOCH, ScopeError, maintenanceScopeError } from "./scope.js";
+import { LEGACY_EPOCH, SCOPED_EPOCH, ScopeError, ScopedMaintenanceError, maintenanceScopeError } from "./scope.js";
 
 const targetKey = (target: { citySlug: string | null; type: string; id: string }) =>
   JSON.stringify([target.citySlug, target.type, target.id]);
@@ -51,9 +51,7 @@ export async function readMcpSignalCards(
     await revalidateMcpSignalWorkspace(deps.db, sub, workspaceId, args.workspaceId);
     return { workspaceId, citySlug: args.city, cards: coherent.payload };
   } catch (error) {
-    if (error instanceof ScopeError && error.status === 503
-      && error.message.startsWith("scoped_facet_scope_unavailable:")
-      && await isMaintenanceBarrier(deps.db, workspaceId)) {
+    if (error instanceof ScopedMaintenanceError) {
       throw new ScopeError(503, maintenanceScopeError(workspaceId));
     }
     throw error;
@@ -62,12 +60,6 @@ export async function readMcpSignalCards(
 
 export class McpSignalLegacyFenceError extends Error {
   constructor(public status: 503 | 410) { super(legacyFenceError(status)); }
-}
-
-async function isMaintenanceBarrier(db: Database, workspaceId: string): Promise<boolean> {
-  const [row] = await db.select().from(facetActivationState)
-    .where(eq(facetActivationState.workspaceId, workspaceId));
-  return row?.maintenanceBarrier === true;
 }
 
 /** Sample the raw epoch: an absent row must never hide a maintenance barrier. */

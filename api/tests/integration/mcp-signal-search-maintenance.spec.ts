@@ -1,6 +1,6 @@
 import { expect, it, vi } from "vitest";
 import { describeDb } from "../../src/services/facets/workspace-archive-fixture.js";
-import { ScopeError } from "../../src/services/facets/scope.js";
+import { ScopeError, ScopedMaintenanceError } from "../../src/services/facets/scope.js";
 import { decodeSignalReadError } from "../../../packages/immo-mcp/src/signal-read-error.js";
 import { facadeFixture } from "./mcp-signal-search-facade-fixture.js";
 
@@ -69,7 +69,7 @@ describeDb("MCP maintenance barrier projects a retryable cutover", () => {
     let response: Response;
     try { response = await f.search("&showDiscarded=1"); }
     finally { spy.mockRestore(); }
-    expect(refusal).toBeInstanceOf(ScopeError);
+    expect(refusal).toBeInstanceOf(ScopedMaintenanceError);
     expect((await f.data.pool.query("SELECT maintenance_barrier FROM facet_activation_state WHERE workspace_id=$1",
       [f.data.workspaceId])).rows).toEqual([{ maintenance_barrier: false }]);
     expect(response.status).toBe(503);

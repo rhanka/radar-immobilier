@@ -30,6 +30,7 @@
 - [x] No UI/UAT change; root checkout and stable dev data preserved.
 
 ## Plan / Todo (lot-based)
+- [x] Third-pass regression 20261026T082745-5-test reproduces the reopen-before-translation defect on d98ec35a: two existing cases pass, new case returns scoped_facet_scope_unavailable. Carry ScopedMaintenanceError from one BASE activation-state sample through projection/archive guards; MCP maps the typed refusal without another state read. Add the reread mutant and lint all three BASE files; full qualification pending.
 - [x] Full qualification 20261026T074920-10-qualify passes 370 targeted API cases, full CI API 3903 passed/76 conditional skips, MCP 373, seventeen killed mutants/34 controls/150 executions and thirteen compiled-image cases. Final runner audit requires down -v --remove-orphans before image build, then a separate idle check before rebuilding synthetic dependencies and CT-8/schema bootstrap inside the image; rerun the image proof with runtime source unchanged.
 - [x] Campaign 20261026T074206-10-qualify caught inherited TS2379: omit the optional workspace barrier when absent instead of explicitly passing undefined under exactOptionalPropertyTypes; retain owned cleanup and rerun qualification.
 - [x] Extend mutation controls to workspace rebinding, entry/enrichment maintenance categories and the MCP decoder; retain thirteen existing mutants, lint the helper/decoder and require thirteen network/image cases. Preserve earlier bundles and audit only commits above 66ff7898.
