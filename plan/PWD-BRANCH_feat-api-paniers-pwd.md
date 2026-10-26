@@ -81,3 +81,5 @@ Qualify and integrate Muse's durable write persistence on PW-B after A5.
 - [x] Delivery slice 14: test(pw-d): add pw-write-digests.test.ts.
 
 - [x] Delivery slice 15: feat(pw-d): add pw-write-digests.ts.
+
+- [x] Delivery slice 16: feat(pw-d): add pw-write-errors.ts.
