@@ -44,4 +44,21 @@ describeDb("PW-A grant boundary", () => {
     expect(await content.json()).toEqual({ error: "unauthenticated" });
     expect(a.counters().confirms).toBe(0);
   });
+
+  it.each(["grant", "page"])("should return the exact authenticated %s expiry refusal", async (kind) => {
+    const a = await authorityFixture();
+    const iat = Math.floor(a.clock.now / 1000);
+    const token = await new SignJWT({ ...a.page.grant, grantKind: "write", permitsWrites: true,
+      iss: a.page.grant.issuer, aud: a.page.grant.audience, iat, exp: iat + 1 })
+      .setProtectedHeader({ alg: "HS256" }).sign(new TextEncoder().encode(a.writeH5.grantSecret));
+    a.clock.now = (iat + 1) * 1000;
+    if (kind === "page") a.page.pageExpiresAtMs = a.clock.now;
+    const response = await a.prepare({}, a.input.commandKey, token);
+    expect(response.status).toBe(401);
+    expect(await response.json()).toMatchObject({ operation: "facets.write-intents.prepare.v1",
+      error: { code: kind === "page" ? "page_session_expired" : "write_grant_expired",
+        action: "authenticate", attemptOutcome: "not_executed" } });
+    const count = await a.f.pool.query("SELECT count(*)::int AS n FROM pw_write_intents");
+    expect(count.rows[0].n).toBe(0);
+  });
 });

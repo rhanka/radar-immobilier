@@ -33,6 +33,8 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
 - [ ] Review delivery: commits above 467c145d and a fresh incremental bundle audit.
 - [x] Review SQL: bound preparation and owner reads; distinguish pre-commit
   cancellation from uncertain commit acknowledgement.
+- [x] Review expiry: preserve authenticated grant/P 401 refusals and reject
+  invalid signatures or crossed bindings before classifying expiration.
 - [x] Qualification fixes: complete the CSRF refusal envelope, use a canonical
   content host fixture, and type grant indexing and mutable AuthConfig fixtures.
 - [x] API: 4203 passed, 76 skipped; PW-A: 32 passed, zero skipped; seven

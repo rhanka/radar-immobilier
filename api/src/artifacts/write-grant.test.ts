@@ -44,7 +44,8 @@ describe("write grants", () => {
     }
     const limited = await mintWriteGrant(BASE, SECRET, 1000, 10_000);
     expect((await verifyWriteGrant(limited, BASE, SECRET, 2000))?.expiresAtMs).toBe(10_000);
-    expect(await verifyWriteGrant(limited, BASE, SECRET, 10_000)).toBeNull();
+    await expect(verifyWriteGrant(limited, BASE, SECRET, 10_000))
+      .rejects.toMatchObject({ status: 401, message: "write_grant_expired" });
   });
 
   it("should refuse read profile, wildcard, split subject, and expiry", async () => {
@@ -52,8 +53,21 @@ describe("write grants", () => {
     await expect(mintWriteGrant({ ...BASE, profileName: "demo" }, SECRET, 1_000)).rejects.toThrow();
     await expect(mintWriteGrant({ ...BASE, readerSub: "reader-bob" }, SECRET, 1_000)).rejects.toThrow();
     const token = await mintWriteGrant(BASE, SECRET, 1_000);
-    expect(await verifyWriteGrant(token, BASE, SECRET, 121_000)).toBeNull();
+    await expect(verifyWriteGrant(token, BASE, SECRET, 121_000))
+      .rejects.toMatchObject({ status: 401, message: "write_grant_expired" });
     expect(await verifyWriteGrant(`${token}x`, BASE, SECRET, 2_000)).toBeNull();
     expect(await verifyWriteGrant(token, { ...BASE, tier: "prod" }, SECRET, 2_000)).toBeNull();
+  });
+
+  it("should distinguish only authenticated and correctly bound grant expiration", async () => {
+    const token = await mintWriteGrant(BASE, SECRET, 1000);
+    await expect(verifyWriteGrant(token, BASE, SECRET, 121_000))
+      .rejects.toMatchObject({ status: 401, message: "write_grant_expired" });
+    expect(await verifyWriteGrant(`${token}x`, BASE, SECRET, 121_000)).toBeNull();
+    expect(await verifyWriteGrant(token, { ...BASE, sessionId: "other" }, SECRET, 121_000)).toBeNull();
+    const read = await new SignJWT({ ...BASE, grantKind: "read", permitsWrites: true,
+      iss: BASE.issuer, aud: BASE.audience, iat: 1, exp: 121 })
+      .setProtectedHeader({ alg: "HS256" }).sign(new TextEncoder().encode(SECRET));
+    expect(await verifyWriteGrant(read, BASE, SECRET, 121_000)).toBeNull();
   });
 });

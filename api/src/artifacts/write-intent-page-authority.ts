@@ -27,10 +27,11 @@ function assertPageAuthority(page: PageWriteAuthority | null, deps: PageWriteAut
   const expected = deps.grantIssuer;
   if (!deps.grantKeyId || !page || page.grant.issuer !== expected.issuer || page.grant.tier !== expected.tier
     || page.grant.audience !== expected.audience || page.grant.identityIssuer !== expected.identityIssuer
-    || page.pageExpiresAtMs <= nowMs || page.delegationExpiresAtMs <= nowMs
     || !page.pageInstanceId || !page.grant.sessionId) {
     throw new FacetError(403, "write_grant_required");
   }
+  if (page.pageExpiresAtMs <= nowMs) throw new FacetError(401, "page_session_expired");
+  if (page.delegationExpiresAtMs <= nowMs) throw new FacetError(401, "write_grant_expired");
 }
 
 export async function resolveWritePage(c: Context, deps: PageWriteAuthorityDeps,

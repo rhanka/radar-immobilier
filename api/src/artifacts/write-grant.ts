@@ -3,7 +3,8 @@
  * Read grants stay unchanged; this issuer binds the H5 page session (P)
  * and the identity issuer of the originating domain. No wildcards.
  */
-import { SignJWT, jwtVerify } from "jose";
+import { SignJWT, jwtVerify, errors, type JWTPayload } from "jose";
+import { FacetError } from "../services/facets/target.js";
 import { WRITE_GRANT_AUDIENCE, WRITE_GRANT_TTL_SECONDS, WRITE_PROFILE_NAME } from "./write-profile.js";
 import { assertWriteOperationsClosed } from "./write-profile.js";
 
@@ -75,14 +76,20 @@ export async function verifyWriteGrant(
     if (Buffer.byteLength(secret) < 32) return null;
     if (expected.audience !== WRITE_GRANT_AUDIENCE) return null;
     if (token.length === 0 || token.length > 4096) return null;
-    const { payload } = await jwtVerify(token, keyBytes(secret), {
+    let payload: JWTPayload;
+    try { ({ payload } = await jwtVerify(token, keyBytes(secret), {
       algorithms: ["HS256"],
       issuer: expected.issuer,
       audience: expected.audience ?? WRITE_GRANT_AUDIENCE,
       currentDate: new Date(nowMs),
       requiredClaims: ["exp", "iat", "sub", "jti"],
       maxTokenAge: WRITE_GRANT_TTL_SECONDS,
-    });
+    })); } catch (error) {
+      // JOSE checks signature/issuer/audience before reporting expired claims.
+      // Still validate every write binding before classifying this as expiry.
+      if (!(error instanceof errors.JWTExpired) || error.claim !== "exp") return null;
+      payload = error.payload;
+    }
     const claims = payload as unknown as Record<string, unknown>;
     if (payload.aud !== WRITE_GRANT_AUDIENCE) return null;
     if (typeof payload.exp !== "number" || typeof payload.iat !== "number"
@@ -106,6 +113,7 @@ export async function verifyWriteGrant(
     } catch {
       return null;
     }
+    if (payload.exp * 1000 <= nowMs) throw new FacetError(401, "write_grant_expired");
     return {
       issuer: expected.issuer ?? "",
       audience: WRITE_GRANT_AUDIENCE,
@@ -126,7 +134,8 @@ export async function verifyWriteGrant(
       operations: [...(claims.operations as string[])],
       expiresAtMs: (payload.exp as number) * 1000,
     };
-  } catch {
+  } catch (error) {
+    if (error instanceof FacetError) throw error;
     return null;
   }
 }
