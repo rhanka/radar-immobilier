@@ -26,6 +26,11 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
   - `api/tests/integration/pw-write-createapp.spec.ts`: PWA-EX1.
 
 ## Feedback Loop
+- [x] Astra fixes: enforce current workspace rights before summary bootstrap;
+  preserve technical owner management and normalize foreign management IDs.
+- [ ] Astra fixes: canonical prepare path, typed expiry, post-projection
+  authority/P validation, bounded SQL, PostgreSQL races and mutation proofs.
+- [ ] Review delivery: commits above 467c145d and a fresh incremental bundle audit.
 - [x] Qualification fixes: complete the CSRF refusal envelope, use a canonical
   content host fixture, and type grant indexing and mutable AuthConfig fixtures.
 - [x] API: 4203 passed, 76 skipped; PW-A: 32 passed, zero skipped; seven
