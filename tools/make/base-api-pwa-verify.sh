@@ -21,6 +21,12 @@ free_space() {
   [[ $(df -Pk "$ROOT" | awk 'NR==2 {print $4}') -ge 8388608 &&
      $(awk '/MemAvailable:/ {print $2}' /proc/meminfo) -ge 8388608 ]]
 }
+deadline=$((SECONDS + 21600))
+until [[ -f /home/antoinefa/src/radar-immobilier/.lanes/conductor/tmp/docker-free.flag ]]; do
+  (( SECONDS < deadline )) || { echo 'Docker reservation exceeded six hours'; exit 4; }
+  echo 'Docker reserved: checking the release flag again in three minutes'
+  sleep 180
+done
 exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
 until flock -w 10 8; do
   free_space || { echo 'STOP: less than 8 GiB disk or memory'; exit 3; }
