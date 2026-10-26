@@ -19,7 +19,10 @@ the preprod account-reader and A2 exchange bindings before image delivery.
   this branch file.
 - [x] Forbidden Paths: `Makefile`, `docker-compose*.yml`, `rules/**`,
   `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, other branch plans.
-- [x] Conditional Paths: none; no migrations or dependency changes.
+- [x] Conditional Paths: `api/tests/artifacts-blob-store.helpers.ts` under ARTEFACTSDLV-EX1; no migrations or dependencies.
+- [x] ARTEFACTSDLV-EX1 rationale: S3mock truncates same-key GET/PUT responses and blocks full qualification.
+  - [x] Impact: serialize only same-object I/O in the shared real-S3 fixture; preserve concurrent business calls, prefix validation and all assertions.
+  - [x] Rollback: revert the fixture queue after the emulator provides atomic same-key object operations.
 
 ## Feedback Loop
 - [x] Owner authorizes the two delivery corrections and local commits only.
@@ -55,7 +58,8 @@ the preprod account-reader and A2 exchange bindings before image delivery.
   - [ ] Repeat MCP, Q1/Q2/acceptance, lint, types and manifest qualification.
   - [x] Address review remarks and append the second-review delivery report.
   - [x] Record first final-run types/render success, fix the lint finding, and requeue qualification.
-  - [ ] External PW-A owner: release its idle PostgreSQL/MinIO stack; `i-cond` notified through h2a.
+  - [x] Conductor released the PW-A stack; complete qualification restarted at 21:13 UTC.
+  - [x] Verify S3mock atomic fixture: 12 five-way publications (60/60) and unchanged publication suite (3/3).
 
 ## Merge & Close
 - [x] No push or merge authorized by this task; return the final local SHA.
