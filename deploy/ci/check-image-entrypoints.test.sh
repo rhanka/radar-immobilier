@@ -78,8 +78,8 @@ absent_job() { printf '%s\n' '              node dist/scripts/absent.js __ARGS__
 run_ok "$ROOT" 'accepts the released manifests and api/Dockerfile'
 released="$(bash "$CHECK" "$ROOT" 2>&1)"
 # The original 19 plus the three P1 scripts and the O1 Job wrapper.
-grep -Fq ', 23 entrypoint(s))' <<<"$released" && ok 'counts the 23 active API entrypoints of api/Dockerfile' \
-  || bad "counts the 23 active API entrypoints of api/Dockerfile (got: $released)"
+grep -Fq ', 24 entrypoint(s))' <<<"$released" && ok 'counts the 24 active API entrypoints of api/Dockerfile' \
+  || bad "counts the 24 active API entrypoints of api/Dockerfile (got: $released)"
 
 for script in init-workspace-authority attach-personal-history base-api-personal-activation base-preprod-job; do
   fixture
