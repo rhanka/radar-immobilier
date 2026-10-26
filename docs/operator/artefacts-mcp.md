@@ -4,7 +4,7 @@ P6 keeps twelve tools on the existing OAuth-protected `/mcp` transport. The
 process compiles one provider through `createMcpRegistry` and installs one
 `createStatefulMcpNamespace` bridge. Artifact tools remain unselected.
 
-The MCP workspace pins `@sentropic/artifacts@0.2.0` and
+The MCP workspace pins `@sentropic/artifacts@0.2.1` and
 `@sentropic/cluster-mesh@0.22.0`. Mesh requires `mcp-auth@0.2.1` and
 `mcp-platform@0.4.0`; its contracts/events/stablelib dependencies are necessary
 transitives. `zod-to-json-schema@3.25.1` preserves the existing SDK descriptors.
@@ -70,7 +70,7 @@ controls. Ordinary MCP targets continue excluding service E2E; A5 owns their
 separate provider acceptance. A7 owns operational activation and recovery.
 # A5 shared artifact production composition
 
-API, artifacts-host and MCP use published artifacts `0.2.0`; the MCP tuple
+API, artifacts-host and MCP use published artifacts `0.2.1`; the MCP tuple
 also pins cluster-mesh `0.22.0`, mcp-auth `0.2.1` and resolves mcp-platform
 `0.4.0`. HTTP and MCP execute the same compiled four-operation profile and
 server scope. The caller key reaches the provider unchanged. A fresh immutable

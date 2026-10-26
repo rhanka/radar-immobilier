@@ -34,6 +34,7 @@
 ## Plan / Todo (lot-based)
 - [x] Artifacts 0.2.1: published integrity verified before container installation; exact API/host/MCP pins, four lock entries changed and audit gate passed (20261026T130511-18).
 - [x] Artifacts 0.2.1: HTTP, coordinator and dispatch use mapHostError; delete the coordinator denial wrapper and redundant error reclassification; retain phase diagnostics.
+- [x] Artifacts 0.2.1: align the provider registry, embedded configuration, tuple/image proofs and operator guide; assert exactly four lock changes from e9d4696c.
 - [ ] Artifacts 0.2.1: qualify both corrected acceptance cases, Q1/Q2/acceptance 31/32/6, CI-selected API, MCP, host, lint, types, audit and the sixteen-tool image.
 - [ ] Artifacts 0.2.1: deliver commits of at most 150 lines from e9d4696c, audit the bundle in a fresh repository and update the companion report without push.
 - [x] Read mandatory rules, approved A5/P7 design, CT clauses and A4 handoff.
