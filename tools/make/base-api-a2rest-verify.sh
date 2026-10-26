@@ -27,14 +27,21 @@ exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
 until flock -w 60 8; do
   printf '%s WAIT global campaign reservation\n' "$(date -u +%FT%TZ)" | tee -a "$LOG_DIR/wait.log"
 done
-while :; do
-  names=$(docker ps --format '{{.Names}}')
-  builds=$(pgrep -af '(^|/)(docker (build|buildx build)|docker-buildx build)( |$)' || true)
-  free=$(df -Pk "$ROOT" | awk 'NR==2 {print $4}')
-  if [[ -z $names && -z $builds && $free -ge 10485760 ]]; then break; fi
-  printf '%s WAIT containers=%s builds=%s freeKiB=%s\n' "$(date -u +%FT%TZ)" "$names" "$builds" "$free" | tee -a "$LOG_DIR/wait.log"
-  sleep 60
-done
+wait_for_machine() {
+  local phase=$1 names builds free
+  while :; do
+    names=$(docker ps --format '{{.Names}}')
+    builds=$(pgrep -af '(^|/)(docker (build|buildx build)|docker-buildx build)( |$)' || true)
+    free=$(df -Pk "$ROOT" | awk 'NR==2 {print $4}')
+    if [[ -z $names && -z $builds && $free -ge 10485760 ]]; then
+      printf '%s PASS idle phase=%s containers=0 builds=0 freeKiB=%s\n' "$(date -u +%FT%TZ)" "$phase" "$free" | tee -a "$LOG_DIR/machine-idle.log"
+      return
+    fi
+    printf '%s WAIT phase=%s containers=%s builds=%s freeKiB=%s\n' "$(date -u +%FT%TZ)" "$phase" "$names" "$builds" "$free" | tee -a "$LOG_DIR/wait.log"
+    sleep 60
+  done
+}
+wait_for_machine initial-stack
 git --git-dir="$ROOT/tmp/a2base-rest-delivery.git" rev-parse HEAD > "$LOG_DIR/candidate-sha.txt"
 OWNER=$(printf '%s' "$ROOT/$ENV" | sha256sum | cut -d' ' -f1)
 export COMPOSE_DISABLE_ENV_FILE=1
@@ -111,20 +118,16 @@ if [[ $mode == image || $mode == qualify ]]; then
   image=radar-a2base-rest:${candidate:0:12}
   export BUILDX_CONFIG=$TASK_DIR/buildx
   mkdir -p "$BUILDX_CONFIG"
-  # The owned dependency stack stays up; every other stack/build must be absent.
-  while :; do
-    foreign=$(docker ps --format '{{.Names}}|{{.Label "com.docker.compose.project"}}' |
-      awk -F '|' -v project="$PROJECT" '$2 != project')
-    builds=$(pgrep -af '(^|/)(docker (build|buildx build)|docker-buildx build)( |$)' || true)
-    [[ -n $foreign || -n $builds ]] || break
-    printf '%s WAIT before image containers=%s builds=%s\n' "$(date -u +%FT%TZ)" "$foreign" "$builds" | tee -a "$LOG_DIR/wait.log"
-    sleep 60
-  done
+  # No test container, including our dependencies, may coexist with a build.
+  guarded_down > "$LOG_DIR/pre-image-cleanup.log" 2>&1
+  wait_for_machine image-build
   docker build --network=none --build-arg CANDIDATE_SHA="$candidate" -t "$image" "$context" > "$LOG_DIR/image-build.log" 2>&1
   docker image inspect --format '{{.Id}} {{json .RepoDigests}} {{index .Config.Labels "org.radar.a2base.candidate"}}' \
     "$image" > "$LOG_DIR/image-identity.txt"
   image_evidence=$LOG_DIR/image-runtime
   mkdir -p "$image_evidence"
+  wait_for_machine image-stack
+  "${compose[@]}" up -d --wait postgres minio
   docker run --rm --name "$PROJECT-image-proof" --network "${PROJECT}_default" --memory 4g \
     --label "com.docker.compose.project=$PROJECT" --label "org.radar.base.owner=$OWNER" \
     --label com.docker.compose.service=api --label com.docker.compose.oneoff=True \
