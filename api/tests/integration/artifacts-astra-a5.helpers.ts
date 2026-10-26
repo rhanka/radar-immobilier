@@ -4,7 +4,8 @@ import { S3Client, CreateBucketCommand } from "@aws-sdk/client-s3";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { fileURLToPath } from "node:url";
-import { composeArtifactHost, createArtifactControl, createArtifactAdmissionAuthority } from "@radar/artifacts-host";
+import { composeArtifactHost, createArtifactControl, createArtifactAdmissionAuthority,
+  guardArtifactPool } from "@radar/artifacts-host";
 import type { PublicationBlobStore } from "@sentropic/artifacts/server/publication";
 import { loadConfig } from "../../src/config.js";
 import { createTestS3BlobStore } from "../artifacts-blob-store.helpers.js";
@@ -27,9 +28,9 @@ export async function startAstra(name: string, max = 5) {
     password: env.POSTGRES_PASSWORD, database: env.POSTGRES_DB };
   const admin = new pg.Pool(params);
   const database = `artifacts_astra_a5_${name}`;
-  const pool = new pg.Pool({ ...params, database, max, connectionTimeoutMillis: 200,
-    options: "-c lock_timeout=1000 -c statement_timeout=5000" });
-  const config = { enabled: true as const, storageScope: `astra_${name}`, orgId: "astra_org",
+  const pool = guardArtifactPool(new pg.Pool({ ...params, database, max, connectionTimeoutMillis: 200,
+    options: "-c lock_timeout=1000 -c statement_timeout=5000" }));
+  const config = { enabled: true as const, storageScope: WORKSPACE, orgId: "astra_org",
     s3Bucket: `astra-a5-${name}`, s3Endpoint: env.S3_ENDPOINT, s3Region: "us-east-1",
     s3AccessKey: env.S3_ACCESS_KEY, s3SecretKey: env.S3_SECRET_KEY };
   const s3 = new S3Client({ endpoint: config.s3Endpoint, forcePathStyle: true, region: config.s3Region,
@@ -62,7 +63,7 @@ export async function startAstra(name: string, max = 5) {
       await pool.query(`INSERT INTO artifacts.host_quotas (storage_scope_id, operation_limit, byte_limit)
         VALUES ($1,1000000,1000000000) ON CONFLICT DO NOTHING`, [config.storageScope]);
       return { host, control: createArtifactControl(host, config.storageScope, BASE,
-        createArtifactAdmissionAuthority(pool, live)) };
+        createArtifactAdmissionAuthority(pool, live, config.storageScope)) };
     };
     const durable = async () => (await pool.query(`SELECT
       (SELECT count(*) FROM artifacts.artifacts)::int AS artifacts,

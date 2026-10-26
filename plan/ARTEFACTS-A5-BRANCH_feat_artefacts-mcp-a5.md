@@ -72,3 +72,4 @@
 - [x] Astra r2: guard idle and reserved pg clients through callback and promise acquisitions; discard broken clients.
 - [x] Astra r2: classify both pg-pool saturation and connection-open timeouts as retryable unavailability.
 - [x] Astra r2: map HTTP admission and dispatch outages to redacted 503 responses on the complete control route.
+- [x] Astra r2: qualify foreign membership, replacement during upload, revoked replay and real HTTP pool saturation on PostgreSQL.
