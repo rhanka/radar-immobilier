@@ -26,6 +26,8 @@
 - [ ] Preserve historical BASE HTTP wrappers and lot isolation.
 
 ## Verification
+- [x] Add mandatory PW-D hooks, fresh source-fenced snapshots and final deadline checks.
+
 - [x] Add canonical digests, shared scope helpers and a synthetic transactional test port.
 
 
