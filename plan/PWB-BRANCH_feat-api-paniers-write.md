@@ -26,6 +26,8 @@
 - [ ] Preserve historical BASE HTTP wrappers and lot isolation.
 
 ## Verification
+- [x] Document the transactional seam and qualify unchanged createApp BASE wrappers.
+
 - [x] Exercise real source and workspace waits, revoked authority and expired admissions.
 
 - [x] Compare all BASE tables after expiry, audit failure, unrelated receipts and caller rollback.
