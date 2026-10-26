@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { randomBytes } from "node:crypto";
 import pg from "pg";
 import { ArtifactConnectionError, createArtifactsPool, withArtifactAdvisoryLock } from "@radar/artifacts-host";
 import { loadConfig } from "../../src/config.js";
@@ -15,15 +16,18 @@ beforeAll(() => {
 afterAll(async () => { await pool?.end(); await admin?.end(); });
 
 describe("artifact advisory lock connection loss", () => {
-  it("fails the pending operation with a typed error and frees the lock and pool", async () => {
-    const key = "cd".repeat(16);
+  it.each(["backend-termination", "client-end"])("fails the pending operation with a typed error and frees the lock and pool after %s", async (mode) => {
+    const key = randomBytes(16).toString("hex");
     let releaseGate!: () => void;
     const gate = new Promise<void>((resolve) => {
       releaseGate = resolve;
     });
     let started!: (pid: number) => void;
     const ready = new Promise<number>((resolve) => { started = resolve; });
+    let endConnection!: () => Promise<void>;
     const pending = withArtifactAdvisoryLock(pool, key, async (client) => {
+      // Fault injection closes the underlying Client; PoolClient omits end.
+      endConnection = () => (client as unknown as pg.Client).end();
       const pid = await client.query("SELECT pg_backend_pid() AS pid");
       started(pid.rows[0]?.pid as number);
       await gate;
@@ -33,8 +37,10 @@ describe("artifact advisory lock connection loss", () => {
     try {
       const backendPid = await ready;
       expect(backendPid).toBeGreaterThan(0);
-      await admin.query("SELECT pg_terminate_backend($1)", [backendPid]);
+      if (mode === "client-end") await endConnection();
+      else await admin.query("SELECT pg_terminate_backend($1)", [backendPid]);
       await rejected;
+      await expect(pending).rejects.toMatchObject({ code: "artifact_connection_lost", cause: expect.any(Error) });
     } finally {
       releaseGate();
     }

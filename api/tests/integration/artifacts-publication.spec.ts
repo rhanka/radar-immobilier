@@ -4,7 +4,7 @@ import { parseContentHost } from "@sentropic/artifacts/content/routing";
 import { startHarness, type Harness } from "./artifacts-h2.helpers.js";
 
 let h: Harness;
-beforeAll(async () => { h = await startHarness("publication"); });
+beforeAll(async () => { h = await startHarness("publication", ["alice", "bob"]); });
 afterAll(async () => { await h?.close(); });
 const ensure = (key = "ensure") => ({ bindingName: "summer", idempotencyKey: key });
 const file = { path: "index.html", mimeType: "text/html", text: "Été 🏠" };
@@ -32,8 +32,9 @@ describe("artifact Postgres and S3 publication", () => {
   });
   it("publishes exactly one release for five simultaneous retries and rejects parameter drift", async () => {
     const id = await artifactId();
-    const body = { artifactId: id, files: [file], idempotencyKey: "publish", paramsHash: "forged",
-      source: { kind: "base-commit", commit: "forged" } };
+    const body = { artifactId: id, files: [file], idempotencyKey: "publish" };
+    expect((await h.control.handle("publish", "alice", { ...body, paramsHash: "forged",
+      source: { kind: "base-commit", commit: "forged" } })).status).toBe(400);
     const results = await Promise.all(Array.from({ length: 5 }, () => h.control.handle("publish", "alice", body)));
     expect(results.map((r) => r.status)).toEqual(Array(5).fill(201));
     expect(new Set(results.map((r) => (r.body as { releaseId: string }).releaseId)).size).toBe(1);
@@ -50,7 +51,7 @@ describe("artifact Postgres and S3 publication", () => {
     expect(receipt.digest).toMatch(/^[a-f0-9]{64}$/);
     expect((await h.control.handle("publish", "alice", { ...body, files: [{ ...file, text: "changed" }] })).status).toBe(409);
     expect((await h.control.handle("publish", "alice", { ...body,
-      profile: JSON.parse('{"__proto__":{"title":"changed"}}') })).status).toBe(409);
+      profile: JSON.parse('{"__proto__":{"title":"changed"}}') })).status).toBe(400);
     const key1 = await h.control.handle("ensure", "alice", { bindingName: "shared-key", idempotencyKey: "same" });
     const key2 = await h.control.handle("ensure", "bob", { bindingName: "shared-key", idempotencyKey: "same" });
     expect((key1.body as { artifactId: string }).artifactId).not.toBe((key2.body as { artifactId: string }).artifactId);

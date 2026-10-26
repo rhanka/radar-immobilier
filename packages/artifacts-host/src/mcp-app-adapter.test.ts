@@ -1,3 +1,7 @@
+import { controlTestHost } from "./control-test-host.js";
+import { compileArtifactsProfile, RADAR_ARTIFACTS_PROFILE, createRadarKeyDerivation } from "@sentropic/artifacts/mcp-core";
+import type { HttpRequest } from "@sentropic/artifacts/http";
+import type { ArtifactInvocationContext } from "@sentropic/artifacts/server/commit-contract";
 import { describe, expect, it, vi } from "vitest";
 import type { ActivationConfig } from "./activation.js";
 import type { AdmissionAuthority } from "./admission.js";
@@ -22,17 +26,20 @@ function mcp(method: string, path: string, args: unknown): McpProviderRequest {
   return { method, path, args };
 }
 
-// Preparation-only provider mock: durable replay/conflict keyed by the
-// facade-derived internal key plus effective params hash. It stands in for
-// the real store and proves adapter wiring only, not provider persistence.
+// Transport-only double; command identity uses the published canonical codec.
 function createReplayHost() {
   const kept = new Map<string, { paramsHash: string; status: number; body: unknown }>();
   const bodies: Array<Record<string, unknown>> = [];
-  const handle = vi.fn(async (input: { body: Record<string, unknown> }) => {
-    const body = input.body;
+  const profile = compileArtifactsProfile(RADAR_ARTIFACTS_PROFILE);
+  const derivation = createRadarKeyDerivation({ storageScopeId: "scope", actorIds: ["alice", "bob"] });
+  const handle = vi.fn(async (input: HttpRequest, invocation: ArtifactInvocationContext) => {
+    const body = input.body as Record<string, unknown>;
     bodies.push(body);
-    const internal = body["idempotencyKey"] as string;
-    const hash = body["paramsHash"] as string;
+    const command = profile.validators.normalizeCommand({
+      capability: input.path === "/ensure" ? "artifacts_ensure" : "artifacts_publish",
+      args: body, authority: invocation, derivation });
+    const internal = command.identity.internalKey;
+    const hash = command.identity.commandHash;
     const prev = kept.get(internal);
     if (prev !== undefined) {
       if (prev.paramsHash === hash) return { status: prev.status, body: prev.body };
@@ -48,7 +55,7 @@ function createReplayHost() {
     kept.set(internal, { paramsHash: hash, status: response.status, body: response.body });
     return response;
   });
-  const host = { app: { handle } } as unknown as Parameters<typeof createArtifactControl>[0];
+  const host = controlTestHost(handle);
   return { host, handle, kept, bodies };
 }
 
@@ -76,7 +83,7 @@ describe("mcp adapter minimal profile", () => {
     const adapter = createMcpArtifactAdapter(control);
     const result = await adapter.execute(mcp("POST", "/publish", publishArgs()), { actorId: "alice" });
     expect(result).toEqual({ ok: true, status: 201,
-      data: { artifactId: ARTIFACT, releaseId: RELEASE, digest: DIGEST,
+      data: { artifactId: ARTIFACT, releaseId: RELEASE, manifest: JSON.stringify({ digest: DIGEST }), digest: DIGEST,
         stableUrl: `https://${ARTIFACT}.pages.example.test/`,
         pinnedUrl: `https://${RELEASE}.pinned.pages.example.test/` } });
     expect(handle).toHaveBeenCalledTimes(1);
@@ -308,7 +315,7 @@ describe("mcp adapter foreign metadata and pagination", () => {
       readActivation: () => live(), nowMs: () => NOW, readStatus: async () => "suspended",
     };
     const handle = vi.fn(async () => ({ status: 200, body: { artifacts: [], total: 0 } }));
-    const host = { app: { handle } } as unknown as Parameters<typeof createArtifactControl>[0];
+    const host = controlTestHost(handle);
     const adapter = createMcpArtifactAdapter(
       createArtifactControl(host, "scope", "pages.example.test", authority));
     const result = await adapter.execute(mcp("POST", "/list", { limit: 20, offset: 0 }),
@@ -350,7 +357,7 @@ describe("mcp adapter admission before dispatch", () => {
       readActivation: () => activation, nowMs: () => NOW, readStatus: async () => status,
     };
     const handle = vi.fn(async () => ({ status: 201, body: {} }));
-    const host = { app: { handle } } as unknown as Parameters<typeof createArtifactControl>[0];
+    const host = controlTestHost(handle);
     const adapter = createMcpArtifactAdapter(
       createArtifactControl(host, "scope", "pages.example.test", authority));
     const result = await adapter.execute(mcp("POST", "/publish", publishArgs()), { actorId: "alice" });
@@ -371,6 +378,6 @@ describe("mcp adapter admission before dispatch", () => {
     expect(shared.kept.size).toBe(1);
     expect(shared.bodies).toHaveLength(2);
     expect(shared.bodies[0]?.["idempotencyKey"]).toBe(shared.bodies[1]?.["idempotencyKey"]);
-    expect(shared.bodies[0]?.["paramsHash"]).toBe(shared.bodies[1]?.["paramsHash"]);
+    expect(shared.bodies.every((body) => !Object.hasOwn(body, "paramsHash"))).toBe(true);
   });
 });

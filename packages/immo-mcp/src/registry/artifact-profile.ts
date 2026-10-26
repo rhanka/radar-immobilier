@@ -8,7 +8,7 @@
 export const ARTIFACT_PROVIDER_ID = "sentropic.artifacts" as const;
 export const ARTIFACT_INVOCATION_SCOPE = "immo:read" as const;
 export const ARTIFACT_PROFILE_REVISION = "immo-artifacts.v1" as const;
-export const ARTIFACT_PROVIDER_VERSION = "0.1.4" as const;
+export const ARTIFACT_PROVIDER_VERSION = "0.2.1" as const;
 
 export const ARTIFACT_TOOL_NAMES = [
   "artifacts_ensure",
@@ -135,7 +135,8 @@ export function artifactEffectiveProfile() {
   };
 }
 
-export type ProviderContractStatus = "immo-artifacts.v1" | "pending-upstream";
+export type ProviderContractStatus = "immo-artifacts.v1" | "artifacts-profile/v1" |
+  "artifacts-commit/v1" | "artifacts-outcome/v1";
 
 export interface RequiredProviderContracts {
   readonly capabilitySelection: ProviderContractStatus;
@@ -146,11 +147,11 @@ export interface RequiredProviderContracts {
 }
 
 export const REQUIRED_PROVIDER_CONTRACTS: RequiredProviderContracts = {
-  capabilitySelection: "pending-upstream",
+  capabilitySelection: "artifacts-profile/v1",
   effectiveProfile: "immo-artifacts.v1",
   durableCommandIdentity: "immo-artifacts.v1",
-  finalizationAuthorization: "pending-upstream",
-  typedFailure: "pending-upstream",
+  finalizationAuthorization: "artifacts-commit/v1",
+  typedFailure: "artifacts-outcome/v1",
 };
 
 export function isArtifactToolName(name: string): name is ArtifactToolName {

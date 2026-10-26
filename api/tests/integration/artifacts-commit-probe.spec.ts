@@ -1,7 +1,66 @@
+import { inspectPreparations } from "@sentropic/artifacts/server/object-intents";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 vi.mock("@sentropic/artifacts/http", async (original) => {
   const { withCandidateProfile } = await import("./artifacts-legacy-profile.helpers.js");
   return withCandidateProfile(await original<typeof import("@sentropic/artifacts/http")>());
+});
+
+it("denies a publication revoked during a key wait without a durable success", async () => {
+  const host = await composeArtifactHost(pool, storageConfig(), rawBlobs());
+  const control = createArtifactControl(host, SCOPE, BASE);
+  const holder = await pool.connect();
+  let pending: ReturnType<typeof control.handle> | undefined;
+  try {
+    const artifactId = await ensureArtifact(control, "guarded-revocation-ensure");
+    const key = "guarded-revocation";
+    const internalKey = deriveIdempotencyKey({ scope: SCOPE, sub: "alice", op: "publish", artifactId, clientKey: key });
+    const body = { artifactId, idempotencyKey: key,
+      files: [{ path: "index.html", mimeType: "text/html", text: "guarded revocation" },
+        { path: "shared.css", mimeType: "text/css", text: "body {}" }] };
+    await pool.query("INSERT INTO artifacts.operation_keys (storage_scope_id, internal_key) VALUES ($1, $2)", [SCOPE, internalKey]);
+    await holder.query("BEGIN");
+    await holder.query("SELECT 1 FROM artifacts.operation_keys WHERE storage_scope_id=$1 AND internal_key=$2 FOR UPDATE", [SCOPE, internalKey]);
+    const releases = await tableCount("releases");
+    const receipts = await tableCount("operation_receipts");
+    pending = control.handle("publish", "alice", body);
+    await expect.poll(async () => Number((await pool.query(
+      "SELECT count(*) FROM pg_stat_activity WHERE datname=current_database() AND wait_event_type='Lock'",
+    )).rows[0].count)).toBeGreaterThan(0);
+    await pool.query("UPDATE account_users SET status='suspended' WHERE sub='alice'");
+    await holder.query("ROLLBACK");
+    const denied = await pending;
+    expect(denied, JSON.stringify(denied)).toEqual({ status: 403, body: { error: "account_not_approved" } });
+    expect(await tableCount("releases")).toBe(releases);
+    expect(await tableCount("operation_receipts")).toBe(receipts);
+    expect((await pool.query("SELECT count(*) FROM artifacts.artifact_current WHERE artifact_id=$1", [artifactId])).rows[0].count).toBe("0");
+    await pool.query("UPDATE account_users SET status='approved' WHERE sub='alice'");
+    const retry = await control.handle("publish", "alice", { ...body,
+      files: [{ ...body.files[0], text: "authorized winner" }, body.files[1]] });
+    expect(retry.status).toBe(201);
+    expect(await tableCount("releases")).toBe(releases + 1);
+    expect(await tableCount("operation_receipts")).toBe(receipts + 1);
+    host.close();
+    const restarted = await composeArtifactHost(pool, storageConfig(), rawBlobs());
+    try {
+      const now = Date.now();
+      await pool.query(`UPDATE artifacts.object_intents SET payload = payload ||
+        jsonb_build_object('preparedAtMs', $1::bigint, 'cleanupDeadlineMs', $2::bigint)
+        WHERE payload->>'artifactId' = $3 AND state <> 'done'`, [now - 2000, now - 1000, artifactId]);
+      const observed = await inspectPreparations(restarted, artifactId);
+      expect(observed.abandonedKeys.length).toBeGreaterThan(0);
+      expect(observed.protectedKeys.length).toBeGreaterThan(0);
+      await restarted.cleanup.runOnce();
+      const keys = new Set(await rawBlobs().listKeys(`artifacts/${SCOPE}/`));
+      for (const protectedKey of observed.protectedKeys) expect(keys.has(protectedKey)).toBe(true);
+      for (const abandonedKey of observed.abandonedKeys) expect(keys.has(abandonedKey)).toBe(false);
+      expect(restarted.cleanup.failure).toBeUndefined();
+    } finally { restarted.close(); }
+  } finally {
+    await holder.query("ROLLBACK"); holder.release();
+    await pending?.catch(() => {});
+    await pool.query("UPDATE account_users SET status='approved' WHERE sub='alice'");
+    host.close();
+  }
 });
 import pg from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
@@ -14,12 +73,11 @@ import {
   createArtifactControl,
   createArtifactsPool,
   createMemoryCommitLedger,
-  createMemoryProviderProbe,
   deriveIdempotencyKey,
-  type AdmissionAuthority,
 } from "@radar/artifacts-host";
 import { loadConfig } from "../../src/config.js";
 import { migrationsFolder } from "./artifacts-h2.helpers.js";
+import { seedArtifactMemberships } from "./artifacts-membership.helpers.js";
 
 const DATABASE = "artifacts_h2_commit_probe";
 const SCOPE = "probe_scope";
@@ -38,10 +96,6 @@ const rawBlobs = () => createTestS3BlobStore({ client: s3, bucket: BUCKET });
 const storageConfig = () => ({ enabled: true as const, storageScope: SCOPE, orgId: ORG,
   s3Bucket: BUCKET, s3Endpoint: endpoint, s3Region: "us-east-1",
   s3AccessKey: accessKey, s3SecretKey: secretKey });
-
-async function s3KeyCount(): Promise<number> {
-  return [...(await rawBlobs().listKeys(`artifacts/${SCOPE}/`))].length;
-}
 
 async function tableCount(table: string): Promise<number> {
   return Number((await pool.query(`SELECT count(*) FROM artifacts.${table}`)).rows[0].count);
@@ -64,10 +118,14 @@ beforeAll(async () => {
   pool = createArtifactsPool({ host: env.POSTGRES_HOST, port: env.POSTGRES_PORT,
     user: env.POSTGRES_USER, password: env.POSTGRES_PASSWORD, database: DATABASE });
   await migrate(drizzle(pool), { migrationsFolder });
+  await pool.query("INSERT INTO artifacts.storage_scopes (id, org_id) VALUES ($1, $2)", [SCOPE, ORG]);
+  await pool.query(`INSERT INTO artifacts.host_quotas (storage_scope_id, operation_limit, byte_limit)
+    VALUES ($1, 1000, 1000000)`, [SCOPE]);
   s3 = new S3Client({ endpoint, forcePathStyle: true, region: "us-east-1",
     credentials: { accessKeyId: accessKey, secretAccessKey: secretKey } });
   await s3.send(new CreateBucketCommand({ Bucket: BUCKET }));
   await pool.query("INSERT INTO account_users (sub, email, status) VALUES ('alice','alice@example.test','approved')");
+  await seedArtifactMemberships(pool);
 });
 
 afterAll(async () => {
@@ -81,20 +139,20 @@ afterAll(async () => {
 
 describe("commit probe against the real provider stack [T05 T13]", () => {
   it("maps a below-layer S3 timeout converted to 500 back to 503", async () => {
-    const probe = createMemoryProviderProbe();
     const { ledger, entries } = createMemoryCommitLedger();
     const broken = (await composeArtifactHost(pool, storageConfig(), { ...rawBlobs(),
-      async putBlob() { throw new ArtifactS3TimeoutError("blobs.putBlob"); } }, probe.record))!;
-    const control = createArtifactControl(broken, SCOPE, BASE, undefined, { ledger, probe });
+      async putBlob() { throw new ArtifactS3TimeoutError("blobs.putBlob"); } }))!;
+    const control = createArtifactControl(broken, SCOPE, BASE, undefined, { ledger });
     try {
       const id = await ensureArtifact(control, "probe-s3-ensure");
-      expect(await tableCount("releases")).toBe(0);
+      const before = await tableCount("releases");
       const response = await control.handle("publish", "alice",
         { artifactId: id, files: [{ path: "index.html", mimeType: "text/html", text: "s3 timeout probe" }],
           idempotencyKey: "probe-s3" });
       expect(response).toEqual({ status: 503, body: { error: "capability_unavailable" } });
-      expect(entries).toEqual([{ op: "publish", actorId: "alice",
+      expect(entries).toEqual([{ invocationId: expect.any(String), op: "publish", actorId: "alice",
         reason: "provider_unavailable", status: 503, atMs: expect.any(Number) }]);
+      expect(await tableCount("releases")).toBe(before);
     } finally {
       broken.close();
     }
@@ -111,16 +169,15 @@ describe("commit probe against the real provider stack [T05 T13]", () => {
       const value = Reflect.get(target, property, receiver);
       return typeof value === "function" ? value.bind(target) : value;
     } });
-    const probe = createMemoryProviderProbe();
     const { ledger, entries } = createMemoryCommitLedger();
-    const host = (await composeArtifactHost(flaky, storageConfig(), rawBlobs(), probe.record))!;
-    const control = createArtifactControl(host, SCOPE, BASE, undefined, { ledger, probe });
+    const host = (await composeArtifactHost(flaky, storageConfig(), rawBlobs()))!;
+    const control = createArtifactControl(host, SCOPE, BASE, undefined, { ledger });
     armed.current = true;
     try {
       const response = await control.handle("ensure", "alice",
         { bindingName: "probe-conn", idempotencyKey: "probe-conn" });
       expect(response).toEqual({ status: 503, body: { error: "capability_unavailable" } });
-      expect(entries).toEqual([{ op: "ensure", actorId: "alice",
+      expect(entries).toEqual([{ invocationId: expect.any(String), op: "ensure", actorId: "alice",
         reason: "provider_unavailable", status: 503, atMs: expect.any(Number) }]);
     } finally {
       armed.current = false;
@@ -129,26 +186,27 @@ describe("commit probe against the real provider stack [T05 T13]", () => {
   });
 
   it("keeps a below-layer lock conflict as 409 conflict", async () => {
-    const probe = createMemoryProviderProbe();
     const { ledger, entries } = createMemoryCommitLedger();
-    const host = (await composeArtifactHost(pool, storageConfig(), rawBlobs(), probe.record))!;
-    const control = createArtifactControl(host, SCOPE, BASE, undefined, { ledger, probe });
+    const host = (await composeArtifactHost(pool, storageConfig(), rawBlobs()))!;
+    const control = createArtifactControl(host, SCOPE, BASE, undefined, { ledger });
     try {
       const id = await ensureArtifact(control, "probe-lock-ensure");
       const clientKey = "probe-lock";
       const lockId = deriveIdempotencyKey(
-        { scope: SCOPE, sub: "alice", op: "publish", artifactId: id, clientKey }).slice(0, 16);
+        { scope: SCOPE, sub: "alice", op: "publish", artifactId: id, clientKey });
       const holder = await pool.connect();
       try {
-        await holder.query("SELECT pg_advisory_lock(('x' || $1)::bit(64)::bigint)", [lockId]);
+        await pool.query("INSERT INTO artifacts.operation_keys (storage_scope_id, internal_key) VALUES ($1, $2) ON CONFLICT DO NOTHING", [SCOPE, lockId]);
+        await holder.query("BEGIN");
+        await holder.query("SELECT 1 FROM artifacts.operation_keys WHERE storage_scope_id=$1 AND internal_key=$2 FOR UPDATE", [SCOPE, lockId]);
         const response = await control.handle("publish", "alice",
           { artifactId: id, files: [{ path: "index.html", mimeType: "text/html", text: "lock conflict probe" }],
             idempotencyKey: clientKey });
         expect(response).toEqual({ status: 409, body: { error: "conflict" } });
-        expect(entries).toEqual([{ op: "publish", actorId: "alice",
+        expect(entries).toEqual([{ invocationId: expect.any(String), op: "publish", actorId: "alice",
           reason: "provider_conflict", status: 409, atMs: expect.any(Number) }]);
       } finally {
-        await holder.query("SELECT pg_advisory_unlock(('x' || $1)::bit(64)::bigint)", [lockId]);
+        await holder.query("ROLLBACK");
         holder.release();
       }
     } finally {
@@ -156,81 +214,4 @@ describe("commit probe against the real provider stack [T05 T13]", () => {
     }
   });
 
-  it("documents the uncompensated residue of a publish revoked while blocked", async () => {
-    // Upstream gap: without a provider commit-time authorization hook the
-    // 403 below masks a committed publication. This test pins the leak; it
-    // must be inverted (no denied success) when finalization authorization lands.
-    const authority: AdmissionAuthority = {
-      readActivation: () => ({ enabled: true, subjects: ["alice"], expiresAtMs: Date.now() + 3_600_000 }),
-      nowMs: () => Date.now(),
-      readStatus: async (sub: string) =>
-        (await pool.query("SELECT status FROM account_users WHERE sub = $1", [sub])).rows[0]?.status ?? null,
-    };
-    const probe = createMemoryProviderProbe();
-    const { ledger, entries } = createMemoryCommitLedger();
-    const host = (await composeArtifactHost(pool, storageConfig(), rawBlobs(), probe.record))!;
-    const control = createArtifactControl(host, SCOPE, BASE, authority, { ledger, probe });
-    try {
-      const id = await ensureArtifact(control, "probe-revoke-ensure");
-      const clientKey = "probe-revoke";
-      const body = { artifactId: id,
-        files: [{ path: "index.html", mimeType: "text/html", text: "revoked while blocked" }],
-        idempotencyKey: clientKey };
-      const lockId = deriveIdempotencyKey(
-        { scope: SCOPE, sub: "alice", op: "publish", artifactId: id, clientKey }).slice(0, 16);
-      const releasesBefore = await tableCount("releases");
-      const keysBefore = await tableCount("idempotency_keys");
-      const s3Before = await s3KeyCount();
-      const holder = await pool.connect();
-      try {
-        await holder.query("SELECT pg_advisory_lock(('x' || $1)::bit(64)::bigint)", [lockId]);
-        const pending = control.handle("publish", "alice", body);
-        await expect.poll(async () => Number((await pool.query(
-          "SELECT count(*) FROM pg_locks WHERE locktype = 'advisory' AND NOT granted " +
-          "AND database = (SELECT oid FROM pg_database WHERE datname = current_database())",
-        )).rows[0].count)).toBe(1);
-        await pool.query("UPDATE account_users SET status = 'suspended' WHERE sub = 'alice'");
-        await holder.query("SELECT pg_advisory_unlock(('x' || $1)::bit(64)::bigint)", [lockId]);
-        const response = await pending;
-        expect(response).toEqual({ status: 403,
-          body: { error: "account_not_approved", status: "suspended" } });
-        expect(entries).toEqual([{ op: "publish", actorId: "alice",
-          reason: "unauthorized_at_commit", status: 403, atMs: expect.any(Number) }]);
-        expect(await tableCount("releases")).toBe(releasesBefore + 1);
-        expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
-        expect(await s3KeyCount()).toBeGreaterThan(s3Before);
-        expect(await control.handle("publish", "alice", body)).toEqual(response);
-      } finally {
-        await holder.query("SELECT pg_advisory_unlock(('x' || $1)::bit(64)::bigint)", [lockId]);
-        holder.release();
-        await pool.query("UPDATE account_users SET status = 'approved' WHERE sub = 'alice'");
-      }
-      const release = (await pool.query(
-        "SELECT id, state FROM artifacts.releases WHERE artifact_id = $1", [id],
-      )).rows[0];
-      expect(release.state).toBe("ready");
-      const current = (await pool.query(
-        "SELECT release_id FROM artifacts.artifact_current WHERE artifact_id = $1", [id],
-      )).rows;
-      expect(current).toEqual([{ release_id: release.id }]);
-      const stored = (await pool.query("SELECT key, result FROM artifacts.idempotency_keys")).rows;
-      expect(stored.some((row) => JSON.stringify(row.result).includes(release.id))).toBe(true);
-      const objectsAfter = await s3KeyCount();
-      const replayHost = (await composeArtifactHost(pool, storageConfig(), rawBlobs()))!;
-      try {
-        const replay = await createArtifactControl(replayHost, SCOPE, BASE, authority)
-          .handle("publish", "alice", body);
-        expect(replay.status).toBe(201);
-        expect((replay.body as { releaseId: string }).releaseId).toBe(release.id);
-        expect(await tableCount("releases")).toBe(releasesBefore + 1);
-        expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
-        expect(await s3KeyCount()).toBe(objectsAfter);
-        console.log("[commit-residue]", JSON.stringify({ release: release.state,
-          releasesAdded: 1, idempotencyAdded: 1, objectsAdded: objectsAfter - s3Before,
-          current, replay: replay.status, sameRelease: true }));
-      } finally { replayHost.close(); }
-    } finally {
-      host.close();
-    }
-  });
 });

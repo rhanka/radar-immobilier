@@ -23,6 +23,8 @@ SHELL := /bin/bash
 ENV ?=
 SCOPE ?=
 API_TEST_SCOPE = $(patsubst api/%,%,$(SCOPE))
+# Bound contention so CPU subprocess probes retain their original deadlines.
+API_TEST_MAX_WORKERS ?= 4
 API_PORT ?= 18895
 UI_PORT ?= 15895
 MAILDEV_UI_PORT ?= 11895
@@ -87,7 +89,7 @@ test-provider-acceptance: test-api ## Alias using the same fail-closed qualifica
 # API tsconfig excludes integration tests: explicitly check this delivery too.
 provider-acceptance-tsconfig: guard-env
 	@mkdir -p tmp/861c-provider-acceptance
-	@printf '%s\n' '{"extends":"../../tsconfig.base.json","compilerOptions":{"noEmit":true,"types":["node"]},"include":["../../api/tests/integration/artifacts-provider-acceptance.spec.ts","../../api/tests/integration/artifacts-finalization-authorization.spec.ts","../../api/tests/integration/artifacts-provider-failures.spec.ts","../../api/tests/integration/artifacts-provider-contract.helpers.ts"]}' > tmp/861c-provider-acceptance/tsconfig.json
+	@printf '%s\n' '{"extends":"../../tsconfig.base.json","compilerOptions":{"noEmit":true,"types":["node"]},"include":["../../api/tests/integration/artifacts-provider-acceptance.spec.ts","../../api/tests/integration/artifacts-finalization-authorization.spec.ts","../../api/tests/integration/artifacts-provider-failures.spec.ts","../../api/tests/integration/artifacts-provider-contract.helpers.ts","../../api/tests/integration/artifacts-provider-selection.spec.ts"]}' > tmp/861c-provider-acceptance/tsconfig.json
 	@printf '%s\n' \
 	  'const fs = require("node:fs"); const path = "tmp/861c-provider-acceptance/";' \
 	  'const config = JSON.parse(fs.readFileSync(path + "tsconfig.json")); config.compilerOptions.baseUrl = "../.."; config.compilerOptions.paths = {};' \
@@ -125,7 +127,7 @@ test-api: guard-env ## Run API tests (SCOPE=<path> for scoped runs)
 	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
 	mkdir -p $(EVIDENCE_DIR); rm -f $(EVIDENCE_DIR)/results.json; \
 	$(COMPOSE) up -d postgres minio || exit $$?; \
-	$(COMPOSE) run --rm -T -e ARTIFACTS_CONTENT_BASE $(TEST_ARTIFACT_ENV) -e ARTIFACTS_PROVIDER_ACCEPTANCE=$(ARTIFACTS_PROVIDER_ACCEPTANCE) api sh -c "npm ci && npm run db:migrate --workspace=api && npm run test --workspace=api -- $(API_TEST_SCOPE) $(ACCEPTANCE_REPORT)" 2>&1 | tee $(EVIDENCE_DIR)/test-api.log; \
+	$(COMPOSE) run --rm -T -e ARTIFACTS_CONTENT_BASE $(TEST_ARTIFACT_ENV) -e ARTIFACTS_PROVIDER_ACCEPTANCE=$(ARTIFACTS_PROVIDER_ACCEPTANCE) api sh -c "npm ci && npm run db:migrate --workspace=api && npm run test --workspace=api -- $(API_TEST_SCOPE) --maxWorkers=$(API_TEST_MAX_WORKERS) $(ACCEPTANCE_REPORT)" 2>&1 | tee $(EVIDENCE_DIR)/test-api.log; \
 	status=$${PIPESTATUS[0]}; \
 	$(call acceptance-check,test-api); \
 	exit $$status
@@ -135,7 +137,7 @@ test-host: guard-env ## Run artifact storage/publication suites (SCOPE=<path> fi
 	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
 	mkdir -p $(EVIDENCE_DIR); rm -f $(EVIDENCE_DIR)/results.json; \
 	$(COMPOSE) up -d postgres minio || exit $$?; \
-	$(COMPOSE) run --rm -T -e ARTIFACTS_CONTENT_BASE $(TEST_ARTIFACT_ENV) -e ARTIFACTS_PROVIDER_ACCEPTANCE=$(ARTIFACTS_PROVIDER_ACCEPTANCE) api sh -c "npm ci && npm run db:migrate --workspace=api && npm run test --workspace=@radar/artifacts-host $(HOST_ACCEPTANCE_REPORT) && npm run test --workspace=api -- $(API_TEST_SCOPE) $(ACCEPTANCE_REPORT)" 2>&1 | tee $(EVIDENCE_DIR)/test-host.log; \
+	$(COMPOSE) run --rm -T -e ARTIFACTS_CONTENT_BASE $(TEST_ARTIFACT_ENV) -e ARTIFACTS_PROVIDER_ACCEPTANCE=$(ARTIFACTS_PROVIDER_ACCEPTANCE) api sh -c "npm ci && npm run db:migrate --workspace=api && npm run test --workspace=@radar/artifacts-host $(HOST_ACCEPTANCE_REPORT) && npm run test --workspace=api -- $(API_TEST_SCOPE) --maxWorkers=$(API_TEST_MAX_WORKERS) $(ACCEPTANCE_REPORT)" 2>&1 | tee $(EVIDENCE_DIR)/test-host.log; \
 	status=$${PIPESTATUS[0]}; \
 	$(call acceptance-check,test-host); \
 	exit $$status

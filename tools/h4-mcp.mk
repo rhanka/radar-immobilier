@@ -67,19 +67,33 @@ guard: guard-env
 
 .PHONY: qualify-tuple
 qualify-tuple: guard ## P4 owns this target: strict dependency qualification
-	@echo "[h4-mcp] refused: qualify-tuple is implemented in P4" >&2; exit 1
+	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; \
+	$(COMPOSE) run --rm --no-deps -T --entrypoint '' api sh -ec \
+	'node tools/exchange-issuer/qualify-tuple.mjs && npm ci --ignore-scripts --strict-peer-deps && npm audit signatures'
 
 .PHONY: test-exchange-e2e
 test-exchange-e2e: guard ## P4 owns this target: isolated issuer exchange proof
-	@echo "[h4-mcp] refused: test-exchange-e2e is implemented in P4" >&2; exit 1
+	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; \
+	$(COMPOSE) run --rm --no-deps -T --entrypoint '' api sh -ec \
+	'npm ci --workspace=packages/immo-mcp --include-workspace-root && npm run test --workspace=packages/immo-mcp -- src/exchange.e2e.test.ts'
+
+.PHONY: test-exchange-mutations
+test-exchange-mutations: guard ## P4: isolated mutations with restoration controls
+	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; \
+	$(COMPOSE) run --rm --no-deps -T --entrypoint '' api sh -ec \
+	'npm ci --workspace=packages/immo-mcp --include-workspace-root && node tools/exchange-issuer/mutations.mjs'
 
 .PHONY: image-smoke
-image-smoke: guard ## P6 owns this target: built-image inspection
-	@echo "[h4-mcp] refused: image-smoke is implemented in P6" >&2; exit 1
+image-smoke: guard ## P6: inspect and exercise the actual final runtime image
+	@bash tools/make/artefacts-a4-image.sh
+
+.PHONY: qualify-p6-tuple
+qualify-p6-tuple: guard ## P6 exact published bytes and bounded lockfile closure
+	@CMD='npm ci --ignore-scripts --strict-peer-deps && node tools/make/artefacts-a4-tuple.mjs' bash tools/make/artefacts-a4-run.sh
 
 .PHONY: test-composition-e2e
 test-composition-e2e: guard ## P7 owns this target: provider finalization and typed-failure proof
-	@echo "[h4-mcp] refused: test-composition-e2e is implemented in P7" >&2; exit 1
+	@$(MAKE) -f tools/make/artefacts-a5.mk test-provider API_PORT=$(API_PORT) UI_PORT=$(UI_PORT) MAILDEV_UI_PORT=$(MAILDEV_UI_PORT) ENV=$(ENV)
 
 .PHONY: down
 down: guard-env ## Stop the stack and remove only this project's volumes/orphans

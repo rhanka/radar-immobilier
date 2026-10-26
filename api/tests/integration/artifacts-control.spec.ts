@@ -4,12 +4,14 @@ import { createApp } from "../../src/app.js";
 import type { ObjectStore } from "../../src/storage/object-store.js";
 import { schema } from "../../src/db/schema.js";
 import { auth, cookie, startHarness, type Harness } from "./artifacts-h2.helpers.js";
+import { seedArtifactMemberships } from "./artifacts-membership.helpers.js";
 
 let h: Harness;
 let app: ReturnType<typeof createApp>;
 beforeAll(async () => {
   h = await startHarness("control");
   await h.pool.query("INSERT INTO account_users (sub, email, status) VALUES ('alice','alice@example.test','approved'), ('bob','bob@example.test','approved'), ('pending','pending@example.test','pending')");
+  await seedArtifactMemberships(h.pool);
   app = makeApp(true);
 });
 afterAll(async () => { await h?.close(); });

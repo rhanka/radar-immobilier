@@ -37,7 +37,7 @@ COPY packages/radar-scoring/package.json packages/radar-scoring/
 COPY packages/radar-sources/package.json packages/radar-sources/
 COPY packages/immo-mcp/package.json packages/immo-mcp/
 COPY api/package.json api/
-RUN npm install --workspaces --include-workspace-root
+RUN npm ci --ignore-scripts --strict-peer-deps --workspaces --include-workspace-root
 COPY packages/artifacts-host packages/artifacts-host
 COPY packages/radar-domain packages/radar-domain
 COPY packages/radar-scoring packages/radar-scoring
@@ -71,6 +71,7 @@ RUN npm install --no-save esbuild@0.25.12 \
   "  entryPoints: [" \
   "    'api/src/index.ts'," \
   "    'api/src/artifacts/content-deny-server.ts'," \
+  "    'api/src/artifacts/content-reader-server.ts'," \
   "    'api/src/db/migrate.ts'," \
   "    'api/src/db/scripts/backfill-0004-tracking.ts'," \
   "    'api/src/scripts/project-graph-from-s3.ts'," \
@@ -114,6 +115,7 @@ RUN npm install --no-save esbuild@0.25.12 \
   "// smoke below fails the IMAGE BUILD, not prod, if resolution regresses)." \
   "await build({" \
   "  entryPoints: ['packages/immo-mcp/src/server-http.ts']," \
+  "  external: ['@sentropic/cluster-mesh', '@sentropic/cluster-mesh/*']," \
   "  bundle: true, platform: 'node', format: 'esm', target: 'node24'," \
   "  outdir: 'packages/immo-mcp/dist', outbase: 'packages/immo-mcp/src'," \
   "  logLevel: 'info'," \
@@ -149,6 +151,9 @@ COPY --from=build /workspace/api/package.json ./api/package.json
 # comment above + deploy/k8s/40-immo-mcp-http-deploy.yaml). Its deps are
 # already in ./node_modules (installed alongside api/'s in the build stage).
 COPY --from=build /workspace/packages/immo-mcp/dist ./packages/immo-mcp/dist
+# Stateful mesh loaders resolve installed package metadata and platform leaves at runtime.
+COPY --from=build /workspace/packages/immo-mcp/package.json ./packages/immo-mcp/package.json
+COPY --from=build /workspace/packages/immo-mcp/node_modules ./packages/immo-mcp/node_modules
 # Drizzle SQL migrations + journal. The migrate entrypoint (api/dist/db/migrate.js)
 # reads `migrationsFolder: "drizzle"` RELATIVE to its CWD, so the db-migrate Job
 # runs with workingDir /workspace/api and finds these files. Without this COPY

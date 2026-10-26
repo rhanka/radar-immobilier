@@ -14,16 +14,23 @@ export {
 } from "./activation.js";
 export {
   checkAdmission,
+  checkScopeMembership,
   createAdmissionAuthority,
+  createArtifactAdmissionAuthority,
   type AdmissionAuthority,
   type AdmissionDeniedBody,
   type AdmissionResult,
+  type MembershipQueryable,
 } from "./admission.js";
 export {
+  ARTIFACT_POOL_TIMEOUT_CODE,
   ArtifactConnectionError,
   computeParamsHash,
   createArtifactsPool,
   deriveIdempotencyKey,
+  guardArtifactPool,
+  isPoolAcquisitionTimeout,
+  normalizePoolAcquisitionError,
   withArtifactAdvisoryLock,
   type ArtifactsPoolParams,
   type IdempotencyKeyInput,
@@ -53,11 +60,18 @@ export { composeArtifactHost } from "./composition.js";
 export {
   createArtifactControl,
   createMemoryCommitLedger,
-  createMemoryProviderProbe,
   type ArtifactControl,
   type ArtifactControlOptions,
   type CommitFailureLedger,
   type CommitFailureReason,
   type CommitFailureRecord,
-  type ProviderFailureProbe,
 } from "./facade.js";
+export {
+  FROZEN_CAPABILITIES, RADAR_EFFECTIVE_PROFILE, assertFrozenSelection,
+  type ArtifactCapability, type RadarEffectiveProfile, type CompiledArtifactsProfile,
+} from "./profile.js";
+export {
+  POLICY_REVISION,
+  type AuthorizePurpose, type CommitOperation, type AuthorizeCommitContext,
+  type AuthorizeCommitDecision, type AuthorizeCommit,
+} from "./transaction-authority.js";
