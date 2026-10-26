@@ -7,6 +7,27 @@ import { writeWorkspaceArchiveFacet } from "../../src/services/facets/workspace-
 import { SignalStateResponse } from "../../src/services/facets/classification-state.js";
 
 describeDb("classification state HTTP and disappeared sources", () => {
+  it("should preserve persisted document dates on search and state when S3 is unavailable", async () => {
+    const f = await classificationFixture();
+    const sourceUrl = "https://docs.example.test/pv.pdf";
+    await f.data.pool.query("UPDATE graph_nodes SET props=$1::jsonb WHERE city_slug=$2 AND id=$3", [
+      JSON.stringify({ refs: [{ docSha: "a".repeat(64), rawRef: "raw/synthetic/doc.pdf", sourceUrl,
+        publishedAt: "2026-04-07", fetchedAt: "2026-04-08T10:00:00.000Z", excerpt: "Citation", page: 2 }] }),
+      f.signal.target.citySlug, f.signal.target.id]);
+    f.head.mockRejectedValue(new Error("Synthetic object store outage"));
+    for (const suffix of ["signal-facets/search?citySlug=synthetic-city",
+      `signal-facets/state?${new URLSearchParams(f.signal.target)}`]) {
+      const response = await f.request(suffix);
+      expect(response.status).toBe(200);
+      const body = await response.json();
+      const card = (body.item ?? body.items[0]).card;
+      expect(card.docRefs[0]).toMatchObject({ sourceUrl, documentUrl: null,
+        publishedAt: "2026-04-07", fetchedAt: "2026-04-08T10:00:00.000Z" });
+      expect(card.missingEvidence).not.toContain("documentDate");
+      expect(card.missingEvidence).not.toContain("pdfLink");
+    }
+    expect(f.head).toHaveBeenCalled();
+  });
   it("should retain inactive personal history after source loss and return 404 without authorized history", async () => {
     const f = await classificationFixture();
     const { data: d, signal: s } = f;

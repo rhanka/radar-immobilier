@@ -52,4 +52,23 @@ describe("bounded classification presentation", () => {
     facets.selection.pertinent!.reason = { profileId: "p", code: "N", verdict: "non_pertinent" };
     expect(SignalFacets.safeParse(facets).success).toBe(false);
   });
+  it("should keep persisted document dates when the object store enrichment is unavailable", () => {
+    const canonical = toDegradedSignalCard({ id: "id", type: "Signal", citySlug: "city", sourceRef: null,
+      createdAt: new Date("2026-01-01"), label: "Dated signal", props: { refs: [{
+        docSha: "d".repeat(64), sourceUrl: "https://docs.example.test/pv.pdf",
+        publishedAt: "2026-04-07", fetchedAt: "2026-04-08T10:00:00.000Z", page: 2, excerpt: "Citation" }] } });
+    const card = projectSignalCard(canonical, "2026-04-07");
+    expect(card.docRefs[0]).toMatchObject({ publishedAt: "2026-04-07", fetchedAt: "2026-04-08T10:00:00.000Z" });
+    expect(card.missingEvidence).not.toContain("documentDate");
+  });
+  it("should not report a missing pdf link when only the public source url remains", () => {
+    const canonical = toDegradedSignalCard({ id: "id", type: "Signal", citySlug: "city", sourceRef: null,
+      createdAt: new Date("2026-01-01"), label: "Linked signal", props: { refs: [{
+        docSha: "e".repeat(64), sourceUrl: "https://docs.example.test/pv.pdf", excerpt: "Citation" }] } });
+    const card = projectSignalCard(canonical, null);
+    expect(canonical.docRefs[0]?.documentUrl ?? null).toBeNull();
+    expect(canonical.docRefs[0]?.sourceUrl).toBe("https://docs.example.test/pv.pdf");
+    expect(card.docRefs[0]?.sourceUrl).toBe("https://docs.example.test/pv.pdf");
+    expect(card.missingEvidence).not.toContain("pdfLink");
+  });
 });
