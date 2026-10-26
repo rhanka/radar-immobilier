@@ -21,7 +21,7 @@ if [[ ${1:-all} != commit-slices ]]; then
     jq -e '.success and .numFailedTests == 0 and .numPassedTests > 0' "$full/$report.json" >/dev/null
   done
   jq -e '.numPendingTests == 0' "$full/scoped-tests.json" >/dev/null
-  jq -e 'length == 30 and all(.killed and .restored)' "$full/mutations.json" >/dev/null
+  jq -e 'length == 31 and all(.killed and .restored)' "$full/mutations.json" >/dev/null
   jq -e '.numPendingTests == 76' "$full/ci-tests.json" >/dev/null
   [[ $(cat "$full/status") == 0 ]]
   if [[ $(cat "$evidence/mode.txt") == mcp ]]; then
