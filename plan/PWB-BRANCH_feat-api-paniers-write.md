@@ -53,12 +53,13 @@
 
 - [x] Run scoped unit and PostgreSQL tests with no required skips.
 - [x] Run createApp plus PostgreSQL regressions.
-- [ ] Kill authority, expiry, snapshot, and replay mutations.
-- [ ] Run the API's complete CI include list, API typecheck, integration typecheck, build, and lint.
-- [ ] Audit every commit: Conventional Commit subject only, at most 150 changed lines.
-- [ ] Audit the incremental bundle in a fresh repository seeded only with the base.
-- [ ] Deliver the French qualification report, full SHA, numstat, bundle path and SHA-256.
-- [ ] Remove the isolated stack with volumes and orphans; verify no residual resources.
+- [x] Kill authority, expiry, snapshot, replay and digest mutations: green/red/green, restored SHA-256 identities verified.
+- [x] Run the complete CI API include list: 3923 passed, 76 conditional skips, zero failures; 38 required PW-B tests passed without skips.
+- [x] Pass API typecheck, BASE/PW-B integration typecheck, API build and complete API lint on `c718a52364b66b41cd6972f7e3b5ba0d27b9dc20`.
+- [x] Audit every commit: Conventional Commit subject only, at most 150 changed lines.
+- [x] Audit the incremental bundle in a fresh repository seeded only with the base.
+- [x] Deliver the local French qualification report with full SHA, numstat, bundle path and SHA-256.
+- [x] Remove the isolated stack with volumes and orphans; no residual project resources.
 
 ## Deferred integration
 
