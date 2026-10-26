@@ -12,7 +12,7 @@ const artifact: ArtifactActivationRequest = {
   finalizationContract: "test-finalization.v1", errorContract: "test-failure.v1",
 };
 const provider = (): ProviderDefinition => ({
-  id: "sentropic.artifacts", version: "0.2.0",
+  id: "sentropic.artifacts", version: "0.2.1",
   tools: ARTIFACT_SELECTION.map(({ tool }) => ({
     name: tool, scope: "immo:read", binding: { context: "artifact-service", registeredBy: "registerTools" },
   })),
