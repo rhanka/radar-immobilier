@@ -26,6 +26,8 @@
 - [ ] Preserve historical BASE HTTP wrappers and lot isolation.
 
 ## Verification
+- [x] Exercise real source and workspace waits, revoked authority and expired admissions.
+
 - [x] Compare all BASE tables after expiry, audit failure, unrelated receipts and caller rollback.
 
 - [x] Prove concurrent confirmation exclusion and atomic composite BASE transitions.
