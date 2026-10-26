@@ -28,6 +28,8 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
     PWA-EX3 permits their exact import from 0ab7d664 by merge only.
 
 ## Feedback Loop
+- [x] Second-pass static checks: normalize Hono's synchronous-or-async response
+  into a promise for the controlled confirmation race; runtime assertions stay unchanged.
 - [x] PWA-EX3: owner requires merging approved PW-D 0ab7d664 before repairs.
   Impact is its 23-file delta; no manual PW-D rewrite. Rollback preserves the
   source ref and reverts the merge with its first parent as mainline.
