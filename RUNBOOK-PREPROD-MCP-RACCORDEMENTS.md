@@ -92,3 +92,93 @@ and durable legacy retirement continue to govern each request.
 Optional LLM keys (`radar-llm-credentials/OPENAI_API_KEY`, `ANTHROPIC_API_KEY`),
 TEM (`radar-tem-credentials/SCW_TEM_SECRET_KEY`) and Obscura are not prerequisites
 for this read-search path. Keep existing bindings; no new credential is needed.
+
+## Operator preparation, before CD changes the image
+
+1. Hold the main deployment/CD until this checklist is signed off. Export
+   `OP_CONTEXT` (the approved preprod kube context), `OP_POSTGRES_POD`,
+   `OP_ADMIN_USER`, `OP_DATABASE`, `OP_RENDER` (non-secret render path),
+   `OP_OLD_API_IMAGE`, `OP_OLD_MCP_IMAGE` (currently served immutable images).
+   Never use shell tracing. Every command below is routed through Make and
+   pins `radar-immobilier-preprod`; no command targets prod or dev.
+
+   ```sh
+   rtk make -f tools/make/artefacts-delivery.mk manifests ENV=preprod
+   rtk make -f tools/make/artefacts-delivery.mk inspect CMD='kubectl --context "$OP_CONTEXT" -n radar-immobilier-preprod get deployment radar-api radar-immo-mcp -o custom-columns=NAME:.metadata.name,IMAGE:.spec.template.spec.containers[0].image' ENV=preprod
+   ```
+
+   Set `OP_RENDER=tmp/delivery-evidence/manifests/preprod.yaml`. Record the
+   current image references before proceeding; resolve mutable tags to their
+   currently running digest first. Keep the hold until the final probes pass.
+
+2. Create the dedicated DB role, once. The SQL grants column-scoped SELECT
+   only on `account_users` and `workspace_memberships`, no application writes,
+   migration rights or artifact access. It sets a 2s statement timeout and
+   read-only transactions. Inspect existing roles instead of recreating them.
+
+   ```sh
+   rtk make -f tools/make/artefacts-delivery.mk inspect CMD='kubectl --context "$OP_CONTEXT" -n radar-immobilier-preprod exec -i "$OP_POSTGRES_POD" -- psql -X -U "$OP_ADMIN_USER" -d "$OP_DATABASE" -v ON_ERROR_STOP=1 -v reader=immo_mcp_account_reader -v database="$OP_DATABASE" < tools/make/artefacts-delivery-account.sql' ENV=preprod
+   rtk make -f tools/make/artefacts-delivery.mk inspect CMD='kubectl --context "$OP_CONTEXT" -n radar-immobilier-preprod exec -it "$OP_POSTGRES_POD" -- psql -X -U "$OP_ADMIN_USER" -d "$OP_DATABASE" -c "\password immo_mcp_account_reader"' ENV=preprod
+   ```
+
+   Enter a newly generated password at the protected prompt. Store the URL
+   using this credential in the approved secret manager, then materialize a
+   mode-0600 file outside the repository at `OP_ACCOUNT_URL_FILE`. Do not print
+   it. Use `radar-postgres:5432` and the exact database; percent-encode URL
+   credentials. Both write-privilege query results must be false; audit PUBLIC
+   grants and role memberships if they are not. Use this role to verify both
+   SELECT queries from `packages/immo-mcp/src/account-binding.ts` succeed and
+   writes fail. The MCP pool also sets read-only mode and uses at most 2 clients.
+
+3. Have the preprod IdP owner register/verify the confidential workload client
+   `immo-mcp-workload`, distinct from the human connector and the API RP client.
+   Use the IdP's supported administration interface, not guessed schema SQL.
+   Enable RFC 8693 token exchange with client-secret-basic, only from an
+   approved human token for `https://preprod.immo.sent-tech.ca/mcp`, narrowing
+   to scope `immo:search` and API audience `https://preprod.immo.sent-tech.ca`.
+   The issued signed access JWT must have the same human `sub`, exact `iss`,
+   singleton API `aud`, `client_id=immo-mcp-workload`,
+   `act={"sub":"immo-mcp-workload"}`, no nested actor or `cnf`, and lifetime
+   at most 300 seconds, bounded by the human token's expiry. Confirm `/token`
+   and JWKS endpoints from discovery. An unsupported exchange is a delivery
+   blocker; the local synthetic issuer is never a deployment substitute.
+   Store its new confidential credential in a mode-0600 file outside the repo
+   at `OP_WORKLOAD_SECRET_FILE`. Create both opaque Kubernetes objects:
+
+   ```sh
+   rtk make -f tools/make/artefacts-delivery.mk inspect CMD='set -o pipefail; kubectl --context "$OP_CONTEXT" -n radar-immobilier-preprod create secret generic immo-mcp-account-reader --from-file=IMMO_MCP_ACCOUNT_DATABASE_URL="$OP_ACCOUNT_URL_FILE" --dry-run=client -o yaml | kubectl --context "$OP_CONTEXT" -n radar-immobilier-preprod apply --server-side --field-manager=mcp-operator -f -' ENV=preprod
+   rtk make -f tools/make/artefacts-delivery.mk inspect CMD='set -o pipefail; kubectl --context "$OP_CONTEXT" -n radar-immobilier-preprod create secret generic immo-mcp-workload --from-file=IMMO_MCP_WORKLOAD_CLIENT_SECRET="$OP_WORKLOAD_SECRET_FILE" --dry-run=client -o yaml | kubectl --context "$OP_CONTEXT" -n radar-immobilier-preprod apply --server-side --field-manager=mcp-operator -f -' ENV=preprod
+   ```
+
+   These pipes transmit secrets without displaying them. Do not tee them or
+   use `kubectl get secret -o yaml/json`. Delete local credential material using
+   the secret manager's cleanup procedure after provisioning.
+
+4. Apply the closed receiver CM, account network policy and preprod MCP CM
+   from the validated render, selecting exactly one object per operation:
+
+   ```sh
+   rtk make -f tools/make/artefacts-delivery.mk inspect CMD='set -o pipefail; awk -v target_kind=ConfigMap -v target_name=radar-mcp-receiver -f tools/make/artefacts-delivery-select.awk "$OP_RENDER" | kubectl --context "$OP_CONTEXT" -n radar-immobilier-preprod apply --server-side --field-manager=mcp-operator -f -' ENV=preprod
+   rtk make -f tools/make/artefacts-delivery.mk inspect CMD='set -o pipefail; awk -v target_kind=NetworkPolicy -v target_name=allow-immo-mcp-to-postgres -f tools/make/artefacts-delivery-select.awk "$OP_RENDER" | kubectl --context "$OP_CONTEXT" -n radar-immobilier-preprod apply --server-side --field-manager=mcp-operator -f -' ENV=preprod
+   rtk make -f tools/make/artefacts-delivery.mk inspect CMD='set -o pipefail; awk -v target_kind=ConfigMap -v target_name=immo-mcp-config -f tools/make/artefacts-delivery-select.awk "$OP_RENDER" | kubectl --context "$OP_CONTEXT" -n radar-immobilier-preprod apply --server-side --field-manager=mcp-operator -f -' ENV=preprod
+   ```
+
+   Existing `allow-immo-mcp-to-api` must allow MCP to API TCP/3000; the new
+   policy allows same-namespace MCP to PostgreSQL TCP/5432. Confirm DNS and
+   HTTPS/443 egress to the preprod IdP/JWKS/token endpoint under the cluster's
+   egress policies. No public PostgreSQL port or broad DB credential is needed.
+
+5. Reconcile BOTH Deployments' new bindings while retaining their current
+   images, before CD rolls the new image. The MCP Deployment is absent from
+   CD's reconcile whitelist, so skipping this step repeats the delivery defect.
+
+   ```sh
+   rtk make -f tools/make/artefacts-delivery.mk inspect CMD='set -o pipefail; test -n "$OP_OLD_API_IMAGE"; awk -v target_kind=Deployment -v target_name=radar-api -f tools/make/artefacts-delivery-select.awk "$OP_RENDER" | kubectl set image --local -f - "api=$OP_OLD_API_IMAGE" -o yaml | kubectl --context "$OP_CONTEXT" -n radar-immobilier-preprod apply --server-side --field-manager=mcp-operator --force-conflicts -f -' ENV=preprod
+   rtk make -f tools/make/artefacts-delivery.mk inspect CMD='set -o pipefail; test -n "$OP_OLD_MCP_IMAGE"; awk -v target_kind=Deployment -v target_name=radar-immo-mcp -f tools/make/artefacts-delivery-select.awk "$OP_RENDER" | kubectl set image --local -f - "mcp=$OP_OLD_MCP_IMAGE" -o yaml | kubectl --context "$OP_CONTEXT" -n radar-immobilier-preprod apply --server-side --field-manager=mcp-operator --force-conflicts -f -' ENV=preprod
+   rtk make -f tools/make/artefacts-delivery.mk inspect CMD='kubectl --context "$OP_CONTEXT" -n radar-immobilier-preprod rollout status deploy/radar-api; kubectl --context "$OP_CONTEXT" -n radar-immobilier-preprod rollout status deploy/radar-immo-mcp' ENV=preprod
+   ```
+
+   Verify Secret references by inspecting the Deployment spec, and Secret
+   existence using `kubectl get secret <name> -o name` only. Check the database
+   connection from the MCP pod using the configured reader, without printing
+   its URL. Metadata/readiness alone does not establish functional delivery.
