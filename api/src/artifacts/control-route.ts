@@ -37,6 +37,7 @@ export interface ControlRouteDeps {
    * commits already in flight need separate enforcement.
    */
   readonly readActivation?: (() => ActivationConfig) | undefined;
+  readonly storageScope?: string | undefined;
 }
 
 export const CONTROL_MAX_BODY_BYTES = 2 * 1024 * 1024;
@@ -69,10 +70,16 @@ async function guard(
   // A failed startup probe must not query the same unavailable database.
   if (!deps.backend) return jsonError(c, 503, { error: "capability_unavailable" });
   if (deps.readActivation) {
-    const admission = await checkAdmission(
-      createArtifactAdmissionAuthority(
-        deps.accounts as AccountStatusQueryable & MembershipQueryable, deps.readActivation), session.sub,
-    );
+    let admission;
+    try {
+      admission = await checkAdmission(
+        createArtifactAdmissionAuthority(
+          deps.accounts as AccountStatusQueryable & MembershipQueryable,
+          deps.readActivation, deps.storageScope), session.sub, deps.storageScope,
+      );
+    } catch {
+      return jsonError(c, 503, { error: "capability_unavailable" });
+    }
     if (!admission.allowed) {
       return c.json(admission.body, admission.status);
     }
@@ -121,15 +128,26 @@ export function controlRoute(deps: ControlRouteDeps): Hono {
   async function dispatch(op: ControlOp, c: Context, session: VerifiedSession, body: unknown) {
     if (deps.readActivation && (op === "ensure" || op === "publish")) {
       // Reread after the entry guard, immediately before storage dispatch.
-      const commit = await checkAdmission(
-        createArtifactAdmissionAuthority(
-          deps.accounts as AccountStatusQueryable & MembershipQueryable, deps.readActivation), session.sub,
-      );
+      let commit;
+      try {
+        commit = await checkAdmission(
+          createArtifactAdmissionAuthority(
+            deps.accounts as AccountStatusQueryable & MembershipQueryable,
+            deps.readActivation, deps.storageScope), session.sub, deps.storageScope,
+        );
+      } catch {
+        return jsonError(c, 503, { error: "capability_unavailable" });
+      }
       if (!commit.allowed) {
         return c.json(commit.body, commit.status);
       }
     }
-    const result = await backend.handle(op, session.sub, body);
+    let result;
+    try {
+      result = await backend.handle(op, session.sub, body);
+    } catch {
+      return jsonError(c, 503, { error: "capability_unavailable" });
+    }
     return c.json(result.body as object, result.status as ContentfulStatusCode);
   }
 
