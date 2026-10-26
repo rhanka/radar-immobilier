@@ -73,7 +73,7 @@ Qualification locale, zéro échec dans les campagnes finales :
 |---|---|
 | Démarrage réel + parcours réseau MCP | 17/17 ; avant correctif, 3 refus reproduisaient le blocage |
 | Suites ciblées recherche/A2-BASE | 146/146, aucune ignorée |
-| API complète, sélection CI sans filtre | 3536 réussis, 695 conditionnels ignorés ; aucun échec |
+| Campagne API de première correction, invalidée par la seconde revue | 3536 réussis, 695 ignorés ; couverture incomplète |
 | MCP hors service E2E, sélection habituelle | 406/406 |
 | Q1 / Q2 / acceptance, activation explicite | 31/31, 32/32, 6/6 |
 | SQL du runbook et autoriseur réel avec rôle restreint | 1/1 ; lectures, refus d'écriture, suspension et révocation |
@@ -83,9 +83,11 @@ Qualification locale, zéro échec dans les campagnes finales :
 Preuves : `tmp/delivery-evidence/20261026T165651-4` (reproduction),
 `20261026T165729-4` (17 tests), `20261026T170042-4` (campagne complète),
 `20261026T171330-4` (rôle SQL et manifests finaux).
-La campagne CI retire `LOT_MIGRATION_DB_TEST` comme la configuration CI ;
-les suites ciblées l'activent séparément. Les commandes et rapports JSON sont
-conservés. Un lancement intermédiaire avait réussi son test mais échoué dans
+Cette campagne avait retiré `LOT_MIGRATION_DB_TEST`, ce qui a ignoré 615 tests
+précédemment exécutés et les quatre nouveaux tests de démarrage. Elle ne
+qualifie donc pas l'API complète ; la section de seconde revue ci-dessous la
+remplace. Les commandes et rapports JSON sont conservés.
+Un lancement intermédiaire avait réussi son test mais échoué dans
 le lanceur modifié pendant son exécution ; le lanceur utilise désormais une
 copie figée et sa réexécution complète termine avec statut 0.
 Nettoyage `down -v --remove-orphans` limité au projet possédé ; aucun
@@ -100,7 +102,96 @@ Les Secrets, le cluster et un appel préprod réel n'ont pas été inspectés.
 La préparation des Deployments MCP/API et du reçu est indispensable : la CD
 actuelle ne réconcilie pas le Deployment MCP ni ce ConfigMap opérateur.
 
-Code qualifié : `2a463844e51c5f30c693dbf15cf16b4f2771fa01` ;
+Code qualifié à la première correction : `2a463844e51c5f30c693dbf15cf16b4f2771fa01` ;
 le commit suivant conserve ce rapport et la clôture documentaire locale.
 Tous les commits locaux respectent 150 lignes maximum, sujets Conventional,
 sans corps ni trailer. Le SHA final est fourni dans la réponse de livraison.
+
+## Corrections seconde revue livraison
+
+Reprise de `aadc52919e6e02c1c19c0db070273521306de6f1`, après lecture intégrale
+des revues `astra-artefacts-delivery-r2a.md` et `-r2b.md`. Le bilan API de la
+première correction est invalidé et rectifié ci-dessus.
+
+**Couverture API.** La commande précédente contenait explicitement
+`env -u LOT_MIGRATION_DB_TEST`. Les suites pilotées par `describeDb` étaient
+donc ignorées, indépendamment de la disponibilité de PostgreSQL. Le rapprochement
+des assertions JSON confirme exactement 615 passages de réussi à ignoré ;
+les quatre nouveaux cas de démarrage étaient également ignorés. Les campagnes
+ciblées n'annulaient pas cette perte. Le fichier
+`tmp/delivery-evidence/second-review-baseline.json` conserve les comptes.
+
+La cible reproductible utilise la sélection API de la CI, sans filtre de fichier,
+avec le même fichier Vitest, un worker et `LOT_MIGRATION_DB_TEST=1` explicite.
+Elle exécute les migrations et utilise PostgreSQL et S3 jetables. Son contrôle
+final exige au moins 4158 réussites API et au plus 76 tests ignorés, ainsi que
+69 réussites Q1/Q2/acceptance et 406 MCP sans test ignoré. Les 69 cas provider
+sont activés séparément par `ARTIFACTS_PROVIDER_ACCEPTANCE=1` ; les sept autres
+cas ignorés de la référence nécessitent des fixtures particulières.
+
+```sh
+rtk make -f tools/make/artefacts-delivery.mk qualify API_PORT=18927 UI_PORT=15927 MAILDEV_UI_PORT=11927 ENV=test-artefacts-dlv
+```
+
+**Sonde et workspace.** La requête MCP ne transmet plus `workspaceId`, absent
+du schéma public. L'assertion vérifie la forme réelle `{ city, count, signals }`,
+la ville, le compte et le signal attendu. Le workspace est vérifié à la frontière
+API : un second appel à la même façade, sans sélecteur explicite, utilise un
+jeton API délégué issu du même humain (`OP_API_AUTH_HEADER_FILE`). La sonde
+compare `workspaceId`, `citySlug`, `ok` et les signaux exacts aux résultats MCP,
+puis conserve cette réponse dans `api-search.json`. Aucun bearer humain ni
+cookie n'est envoyé à l'API. Le runbook précise le workspace actif unique et
+le refus réel `workspace_missing` après révocation de cette adhésion.
+
+Le test lance le script exact, avec curl et jq, contre MCP et le véritable
+entrypoint API sur sockets ; seul le routage des URL préprod est redirigé vers
+les listeners locaux. PostgreSQL, comptes, adhésions et signaux sont réels dans
+la base jetable ; l'IdP et toutes les identités sont synthétiques. Les trois
+états sans epoch, legacy et BASE passent. Mauvais workspace, signal absent et
+refus attendu à tort font échouer la sonde ; suspension et révocation refusent
+sans signaux, puis la restauration rend la recherche disponible. Les exports
+de preuve excluent les fichiers de credentials.
+
+Reproduction initiale : `tmp/delivery-evidence/20261026T201900-4/probe-red.json`
+(3 échecs). Rejeu ciblé corrigé : `20261026T202154-4/probe.json` (3 réussites).
+
+**Remarques des deux revues.** Les gardes d'activation, d'authentification,
+de maintenance et de reçu strict restent présentes. Les références Kubernetes,
+les valeurs fermées par défaut et le tuple client/audience/ressource/scope
+sont conservés et revérifiés localement. Les prérequis opérateur restent
+explicites : provisionnement des deux Secrets, qualification RFC 8693 par le
+responsable IdP, réconciliation des Deployments et reçu lié aux digests servis.
+Ces conditions ne sont pas démontrées par un IdP synthétique ni par le rendu
+des manifests ; aucun accès aux secrets, cluster ou déploiement réel effectué.
+
+**Qualification finale : bloquée par une pile étrangère, non validée.**
+La première tentative `20261026T202520-4` a réussi les migrations, les assertions
+des manifests et le typecheck des workspaces, puis s'est arrêtée au lint :
+`no-unsafe-finally` dans l'export des preuves du nouveau test. Le commit
+`ba0e2e4b` corrige ce défaut sans désactiver la règle. Aucun test API complet
+n'a été exécuté par cette tentative ; elle ne remplace pas la campagne invalide.
+
+Le relancement `tmp/delivery-evidence/20261026T203509-4` attend depuis 20:35 UTC
+le 26 octobre 2026. Au dernier constat, après plus de 30 minutes d'attente,
+`radar-test-api-paniers-pwa-postgres-1` et `radar-test-api-paniers-pwa-minio-1`
+restent actifs, malgré l'arrêt du conteneur API de cette autre campagne.
+Ils n'ont pas été arrêtés ni modifiés. Le conducteur `i-cond` a reçu le
+signalement via h2a, sans réponse au dernier relevé. Le lanceur reste actif :
+il prendra son instantané des sources seulement après libération de la pile,
+exécutera la cible complète, puis nettoiera son seul projet avec
+`down -v --remove-orphans`.
+
+| Vérification | Preuve disponible |
+|---|---|
+| Sonde exacte, vrai démarrage API, trois epochs et refus | 3/3 dans le rejeu ciblé ; fichiers de jetons exclus des exports |
+| Migrations, typecheck des workspaces | Réussis dans `20261026T202520-4` |
+| Kustomize base/préprod, dry-run client, isolation auth/H3, assertions YAML | Réussis |
+| Lint final corrigé, API complète avec DB, MCP, Q1/Q2/acceptance | Relancement en attente ; aucun résultat final revendiqué |
+| Retour aux 76 ignorés et récupération des 615 tests | Exigés par le lanceur, encore à démontrer |
+
+Responsable du déblocage : propriétaire de la pile PW-A, coordination `i-cond`.
+Acceptation restante : libérer cette pile depuis son propre lanceur, attendre
+le statut 0 et `qualification.json` du relancement, rapprocher ses assertions
+API de `20261026T161759-6/api-results.json`, confirmer tous les anciens tests
+réussis et les sept nouveaux cas, puis mettre à jour ce bilan avec les comptes
+API/MCP/provider et le nettoyage. Aucun push, merge ou déploiement effectué.
