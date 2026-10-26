@@ -74,7 +74,8 @@ export function mcpSignalSearchRoute(deps: {
       // Missing/legacy epoch: internal legacy cards. Open scoped epoch: BASE only.
       // Maintenance remains a retriable 503; a retired legacy reader stays 410.
       return c.json(await searchMcpSignals({ ...deps, db: deps.db,
-        afterWorkspaceResolve: deps.mcpSignalSearch?.afterWorkspaceResolve }, session.sub, args));
+        ...(deps.mcpSignalSearch?.afterWorkspaceResolve
+          ? { afterWorkspaceResolve: deps.mcpSignalSearch.afterWorkspaceResolve } : {}) }, session.sub, args));
     } catch (error) {
       if (error instanceof ScopeError || error instanceof WorkspaceError
         || error instanceof GraphSignalDiscardedReadError || error instanceof McpSignalLegacyFenceError) {
