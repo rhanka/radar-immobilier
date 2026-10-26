@@ -77,8 +77,22 @@ absent_job() { printf '%s\n' '              node dist/scripts/absent.js __ARGS__
 
 run_ok "$ROOT" 'accepts the released manifests and api/Dockerfile'
 released="$(bash "$CHECK" "$ROOT" 2>&1)"
-grep -Fq ', 19 entrypoint(s))' <<<"$released" && ok 'counts the 19 active API entrypoints of api/Dockerfile' \
-  || bad "counts the 19 active API entrypoints of api/Dockerfile (got: $released)"
+# The original 19 plus the three P1 scripts and the O1 Job wrapper.
+grep -Fq ', 23 entrypoint(s))' <<<"$released" && ok 'counts the 23 active API entrypoints of api/Dockerfile' \
+  || bad "counts the 23 active API entrypoints of api/Dockerfile (got: $released)"
+
+for script in init-workspace-authority attach-personal-history base-api-personal-activation base-preprod-job; do
+  fixture
+  cp "$ROOT/api/Dockerfile" "$CASE_ROOT/api/Dockerfile"
+  while IFS= read -r source; do
+    mkdir -p "$CASE_ROOT/$(dirname "$source")"
+    : > "$CASE_ROOT/$source"
+  done < <(grep -oE 'api/src/[A-Za-z0-9_./-]+\.ts' "$CASE_ROOT/api/Dockerfile" | sort -u)
+  printf 'command: ["node", "dist/scripts/%s.js"]\n' "$script" > "$CASE_ROOT/deploy/k8s/job.yaml"
+  run_ok "$CASE_ROOT" "ships the $script operator entrypoint"
+  sed -i "\#'api/src/scripts/$script.ts',#d" "$CASE_ROOT/api/Dockerfile"
+  run_bad "$CASE_ROOT" "rejects removal of the $script operator entrypoint" 'not an esbuild entrypoint'
+done
 
 fixture
 run_ok "$CASE_ROOT" 'accepts the untouched fixture'
