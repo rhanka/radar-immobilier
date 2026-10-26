@@ -28,6 +28,7 @@ export {
   computeParamsHash,
   createArtifactsPool,
   deriveIdempotencyKey,
+  guardArtifactPool,
   isPoolAcquisitionTimeout,
   normalizePoolAcquisitionError,
   withArtifactAdvisoryLock,

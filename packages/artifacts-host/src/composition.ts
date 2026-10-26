@@ -11,6 +11,7 @@ import type { ArtifactsStorageConfig } from "./config.js";
 import type { ActivationConfig } from "./activation.js";
 import { initializeArtifactScope } from "./storage.js";
 import { createHostPolicy, authorizeArtifactCommit } from "./commit-policy.js";
+import { guardArtifactPool } from "./idempotency.js";
 import { createCommitDomain } from "./commit-domain.js";
 import { startPreparationCleanup } from "./preparation-cleanup.js";
 import { projectArtifactWriteFailure } from "@sentropic/artifacts/server/outcome-contract";
@@ -30,6 +31,7 @@ export async function composeArtifactHost(
   injectedBlobs?: PublicationBlobStore,
   options: ArtifactHostOptions = {},
 ) {
+  guardArtifactPool(pool);
   await initializeArtifactScope(pool, config.storageScope, config.orgId);
   const policy = await createHostPolicy(pool, config.storageScope, options.readActivation);
   const coordinator = options.coordinator ?? createArtifactCommitCoordinator({

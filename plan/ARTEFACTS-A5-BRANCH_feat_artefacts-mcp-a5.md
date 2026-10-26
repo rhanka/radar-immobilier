@@ -69,3 +69,4 @@
 - [x] Astra r2: bind entry admission to the configured workspace and retain its resolved identity.
 - [x] Astra r2: freeze HTTP call membership and refresh transaction authority after membership waits, including replay.
 - [x] Astra r2: carry immutable workspace authority through the production MCP binding.
+- [x] Astra r2: guard idle and reserved pg clients through callback and promise acquisitions; discard broken clients.
