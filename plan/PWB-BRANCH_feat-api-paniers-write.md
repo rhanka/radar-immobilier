@@ -26,6 +26,8 @@
 - [ ] Preserve historical BASE HTTP wrappers and lot isolation.
 
 ## Verification
+- [x] Prove concurrent confirmation exclusion and atomic composite BASE transitions.
+
 - [x] Exercise moderation, independent restoration, private receipts and unresolved history.
 
 - [x] Exercise personal commits, stale heads, versions, tokens and expired admissions.
