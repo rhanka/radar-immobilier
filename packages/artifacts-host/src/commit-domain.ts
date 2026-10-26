@@ -8,10 +8,8 @@ import { createLifecycleService } from "@sentropic/artifacts/server/lifecycle";
 import { createPostgresClaimGuardedRefs } from "@sentropic/artifacts/server/gc";
 import { createPostgresPublicationUnitWriter, createPublicationService } from "@sentropic/artifacts/server/publication";
 import type { ArtifactInvocationContext, FinalizeTxClient } from "@sentropic/artifacts/server/commit-contract";
-import { ArtifactOperationError, classifyArtifactFailure } from "@sentropic/artifacts/server/outcome-contract";
-import { normalizeHostOutcome } from "./host-outcome.js";
-import { bindHostCoordinator } from "./host-coordinator.js";
-import { normalizePoolAcquisitionError } from "./idempotency.js";
+import { classifyArtifactFailure } from "@sentropic/artifacts/server/outcome-contract";
+import { mapHostError, normalizeHostOutcome } from "./host-outcome.js";
 
 export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | "coordinator"> & {
   pool: pg.Pool; scope: string; blobs: HttpAppDeps["publication"]["blobs"];
@@ -21,18 +19,12 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
   const store = createPostgresArtifactStore(pool);
   const publication = createPublicationService({ state: store, blobs, intents: store });
   const keyDomain = new AsyncLocalStorage<ReturnType<typeof createRadarKeyDerivation>>();
-  const currentInvocation = new AsyncLocalStorage<ArtifactInvocationContext>();
   const artifact = new AsyncLocalStorage<string>();
   const lock = (table: string, column: string) => async (client: FinalizeTxClient) => {
     await client.query(`SELECT ${column} FROM artifacts.${table} WHERE ${column} = $1 FOR UPDATE`,
       [artifact.getStore()]);
   };
-  const guardedCoordinator = bindHostCoordinator(coordinator, () => {
-    const invocation = currentInvocation.getStore();
-    if (!invocation) throw new Error("artifact invocation unavailable");
-    return invocation.authorizeCommit;
-  });
-  const app = createHttpArtifactApp({ profile, coordinator: guardedCoordinator,
+  const app = createHttpArtifactApp({ profile, coordinator, mapHostError,
     derivation: { algorithm: "radar-derive-idempotency-v1", derive(input) {
       const binding = keyDomain.getStore();
       if (!binding) throw new Error("artifact key domain unavailable");
@@ -67,17 +59,11 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
       const actors = await pool.query<{ sub: string }>("SELECT sub FROM account_users ORDER BY sub");
       const binding = createRadarKeyDerivation({ storageScopeId: scope, actorIds: actors.rows.map((row) => row.sub) });
       const body = request.body as { artifactId?: string } | undefined;
-      return normalizeHostOutcome(await currentInvocation.run(invocation, () => keyDomain.run(binding,
-        () => artifact.run(body?.artifactId ?? "", () => app.execute(request, invocation)))));
+      return normalizeHostOutcome(await keyDomain.run(binding,
+        () => artifact.run(body?.artifactId ?? "", () => app.execute(request, invocation))));
     } catch (cause) {
-      const normalized = normalizePoolAcquisitionError(cause);
-      if (normalized !== cause) {
-        return { ok: false, failure: classifyArtifactFailure(normalized, { invocationId: invocation.invocationId,
-          operation: request.path.slice(1), phase: "dispatch", commitState: "not_committed" },
-        () => new ArtifactOperationError("provider_unavailable", { cause: normalized })) };
-      }
       return { ok: false, failure: classifyArtifactFailure(cause, { invocationId: invocation.invocationId,
-        operation: request.path.slice(1), phase: "dispatch", commitState: "not_committed" }) };
+        operation: request.path.slice(1), phase: "dispatch", commitState: "not_committed" }, mapHostError) };
     }
   };
   return { app: { ...app, execute, handle: async (request, invocation) =>
