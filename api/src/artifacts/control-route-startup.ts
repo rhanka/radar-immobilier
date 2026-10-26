@@ -1,7 +1,7 @@
 import {
   composeArtifactHost, createArtifactControl, createArtifactsPool,
   resolveArtifactsStorageConfig, type ArtifactsConfigInput, type ArtifactsPoolParams,
-  createAdmissionAuthority, readActivationEnv, resolveActivationConfig,
+  createArtifactAdmissionAuthority, readActivationEnv, resolveActivationConfig,
 } from "@radar/artifacts-host";
 import type { AuthConfig } from "../config.js";
 import type { Logger } from "../logger.js";
@@ -34,7 +34,7 @@ export async function startArtifactControl(options: {
     const readActivation = () => resolveActivationConfig(readActivationEnv());
     const host = await composeArtifactHost(pool, parsed, undefined, { readActivation, contentBase });
     const backend = createArtifactControl(host, parsed.storageScope, contentBase,
-      createAdmissionAuthority(pool, readActivation));
+      createArtifactAdmissionAuthority(pool, readActivation));
     logger.info({ storageScope: parsed.storageScope, s3Bucket: parsed.s3Bucket }, "artifact control enabled");
     return { auth, accounts: pool, backend, readActivation };
   } catch (err) {
