@@ -48,3 +48,4 @@
 - [x] Astra A5: Implement server-resolved unique membership at common artifact admission.
 - [x] Astra A5: Recheck and lock scope membership on the coordinator connection, including replay.
 - [x] Astra A5: Use transactional approval in the HTTP commit guard without acquiring another pool client.
+- [x] Astra A5: Normalize actual pg-pool acquisition errors at dispatch, lock and outcome boundaries.
