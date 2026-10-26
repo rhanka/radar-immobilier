@@ -28,7 +28,7 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
 ## Feedback Loop
 - [x] Astra fixes: enforce current workspace rights before summary bootstrap;
   preserve technical owner management and normalize foreign management IDs.
-- [ ] Astra fixes: canonical prepare path, typed expiry, post-projection
+- [x] Astra fixes: canonical prepare path, typed expiry, post-projection
   authority/P validation, bounded SQL, PostgreSQL races and mutation proofs.
 - [ ] Review delivery: commits above 467c145d and a fresh incremental bundle audit.
 - [x] Review SQL: bound preparation and owner reads; distinguish pre-commit
@@ -43,6 +43,12 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
   retain manifests for every executed campaign input.
 - [x] Review audit: set the fresh repository HEAD to the imported payload before
   checking commit/tree equality and full object integrity.
+- [x] PWA-EX2: explicit review instruction permits isolated host unit tests while
+  Docker is reserved; copied sources/dependencies stay under ignored tmp, with
+  a separate npm cache. Rollback removes the unit runner and its temporary tree.
+- [x] Review qualification: 31 native unit tests, 54 PW-A tests with no skips,
+  4225 API passed/76 optional skipped, 165 ARTEFACTS and 406 MCP passed;
+  20 functional mutants killed/restored, lint/typechecks/build passed.
 - [x] Qualification fixes: complete the CSRF refusal envelope, use a canonical
   content host fixture, and type grant indexing and mutable AuthConfig fixtures.
 - [x] API: 4203 passed, 76 skipped; PW-A: 32 passed, zero skipped; seven
