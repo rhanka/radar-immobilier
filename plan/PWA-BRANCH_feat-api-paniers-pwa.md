@@ -26,6 +26,9 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
   - `api/tests/integration/pw-write-createapp.spec.ts`: PWA-EX1.
 
 ## Feedback Loop
+- [x] Second passes: enforce a monotonic five-second transaction deadline,
+  cancel the pinned PostgreSQL backend, await cancellation before release,
+  and refuse overdue callbacks before COMMIT without relabeling commit errors.
 - [x] Second passes: merge approved PW-D 0ab7d664 with both parents retained;
   pass authenticated P to its status budget and durable refusal projection,
   and carry the verified cookie expiry inside the confirmation proof.
