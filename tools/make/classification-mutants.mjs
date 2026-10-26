@@ -9,8 +9,39 @@ const privacy = 'tests/integration/classification-privacy.spec.ts';
 const cursor = 'src/services/facets/classification-cursor.test.ts';
 const counts = 'src/services/facets/classification-counts.test.ts';
 const cases = [
+  { id: 'discovery-membership-lock', suite: 'tests/integration/classification-discovery-races.spec.ts', test: 'memberships locked until each snapshot transaction commits', edits: [
+    [`${root}classification-discovery.ts`, '.for("share");', ';'],
+  ] },
+  { id: 'discovery-account-lock', suite: 'tests/integration/classification-authority-races.spec.ts', test: 'account locked until the membership transaction commits', edits: [
+    [`${root}classification-discovery.ts`, 'const accountId = await approvedAccountId(tx, sub, true);', 'const accountId = await approvedAccountId(tx, sub, false);'],
+  ] },
+  { id: 'discovery-final-approval', suite: 'tests/integration/classification-authority-races.spec.ts', test: 'suspension commits during the final membership await', edits: [
+    [`${root}classification-discovery.ts`, 'import { workspaceMemberships, workspaces }', 'import { accountUsers, workspaceMemberships, workspaces }'],
+    [`${root}classification-discovery.ts`, 'const accountId = await approvedAccountId(tx, sub, true);',
+      'const [account] = await tx.select({ id: accountUsers.id }).from(accountUsers).where(eq(accountUsers.sub, sub));\n    const accountId = account?.id ?? "";'],
+  ] },
+  { id: 'discovery-membership-snapshot', suite: 'tests/integration/classification-discovery-races.spec.ts', test: 'during final approval', edits: [
+    [`${root}classification-discovery.ts`, '    const accountId = await approvedAccountId(tx, sub, true);', '    const accountId = (await tx.select({ id: accountUsers.id }).from(accountUsers).where(eq(accountUsers.sub, sub)))[0].id;'],
+    [`${root}classification-discovery.ts`, 'import { workspaceMemberships, workspaces }', 'import { accountUsers, workspaceMemberships, workspaces }'],
+    [`${root}classification-discovery.ts`, '    return rows.sort', '    await approvedAccountId(tx, sub, true);\n    return rows.sort'],
+    [`${root}classification-discovery.ts`, '.for("share");', ';'],
+  ] },
+  { id: 'context-final-availability', suite: 'tests/integration/classification-final-context.spec.ts', test: 'closes after the second catalog read', edits: [
+    [`${root}classification-context.ts`,
+      'if (durableDigest !== digest({ availability: current.availability, lotAvailability: current.lotAvailability, selectionBasket: current.selectionBasket })) return null;',
+      'if (false) return null;'],
+  ] },
+  { id: 'state-coherent-refusals', suite: 'tests/integration/classification-state-races.spec.ts', test: 'should retry after stale', edits: [
+    [`${root}classification-projection.ts`, 'return { ok: false as const, error };',
+      'await readProjectionScope(db, sub, workspaceId, citySlug, "signal");\n            throw error;'],
+  ] },
+  { id: 'context-current-rights', suite: 'tests/integration/classification-authority-races.spec.ts', test: 'is withdrawn during the second scope read', edits: [
+    [`${root}classification-context.ts`,
+      'if (sample.access.moderateArchive !== current.access.moderateArchive || digest(sample.rights) !== digest(current.rights)) return null;',
+      'if (false) return null;'],
+  ] },
   { id: 'closed-context-authority', suite: 'tests/integration/classification-races.spec.ts', test: 'suspended account on the closed path', edits: [
-    [`${root}classification-context.ts`, '  await revalidateContextAuthority(db, sub, workspaceId);', '  // Mutation: omit final authority revalidation.'],
+    [`${root}classification-context.ts`, '  const current = await revalidateContextAuthority(db, sub, workspaceId);', '  const current = sample;'],
   ] },
   { id: 'durable-closure-resample', suite: 'tests/integration/classification-races.spec.ts', test: 'maintenance starts before', edits: [
     [`${root}classification-context.ts`,
@@ -50,8 +81,8 @@ const cases = [
     'issuedAt: now, expiresAt: now + 300']] },
   { id: 'final-authority', suite: 'tests/integration/classification-races.spec.ts', test: 'membership is revoked', edits: [
     [`${root}classification-projection.ts`,
-      'const result = await readCoherentProjection(db, sub, workspaceId, citySlug, "signal", () => readPayload(before), 1);',
-      'const scope = await readProjectionScope(db, sub, workspaceId, citySlug, "signal");\n      const result = { scope, payload: await readPayload(before) };'],
+      'const result = await readCoherentProjection(db, sub, workspaceId, citySlug, "signal", async () => {',
+      'const scope = await readProjectionScope(db, sub, workspaceId, citySlug, "signal");\n      const result = await (async (read, _attempts) => ({ scope, payload: await read() }))(async () => {'],
     [`${root}classification-projection.ts`, 'const after = catalogVersion(await readClassificationCatalog(db, sub, workspaceId));', 'const after = before;'],
     [`${root}classification-projection.ts`, 'const final = await readProjectionScope(db, sub, workspaceId, citySlug, "signal");', 'const final = result.scope;'],
   ] },

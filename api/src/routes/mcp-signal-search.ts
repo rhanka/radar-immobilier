@@ -1,6 +1,14 @@
-/** Reserved API contract only. Production mounting belongs to A3/T09. */
+/** Exact H4 facade. The integrator must explicitly enable this server-only binding. */
+import { Hono } from "hono";
 import { z } from "zod";
+import type { Database } from "../db/client.js";
+import type { ObjectStore } from "../storage/object-store.js";
 import { ScopeError } from "../services/facets/scope.js";
+import { WorkspaceError } from "../services/workspaces/types.js";
+import { searchMcpSignals, McpSignalLegacyFenceError } from "../services/facets/mcp-signal-search.js";
+import { GraphSignalDiscardedReadError } from "./graph-signals.js";
+import type { DiscardedSignalsPort } from "../services/graph/discarded-signals.js";
+import type { LegacyRetirementState } from "../services/facets/legacy-retirement.js";
 
 export const MCP_SIGNAL_SEARCH_PATH = "/api/v1/mcp/facets/signals/search";
 export const McpWorkspaceId = z.string().uuid().transform((value) => value.toLowerCase());
@@ -49,4 +57,32 @@ export function decodeMcpSignalSearch(params: URLSearchParams): McpSignalSearchA
   const parsed = McpSignalSearchInput.safeParse(values);
   if (!parsed.success) throw new ScopeError(400, "invalid_signal_search");
   return parsed.data;
+}
+
+export function mcpSignalSearchRoute(deps: {
+  db?: Database; store: ObjectStore; auth?: { enabled: boolean };
+  discarded?: DiscardedSignalsPort; legacyRetirement?: LegacyRetirementState;
+  mcpSignalSearch?: { enabled: boolean; afterWorkspaceResolve?: () => Promise<void> | void };
+}): Hono {
+  const app = new Hono();
+  app.get(MCP_SIGNAL_SEARCH_PATH, async (c) => {
+    const session = c.get("session" as never) as { sub?: string } | undefined;
+    if (!deps.auth?.enabled || !session?.sub) return c.json({ error: "unauthenticated" }, 401);
+    if (!deps.mcpSignalSearch?.enabled || !deps.db) return c.json({ error: "capability_unavailable" }, 503);
+    try {
+      const args = decodeMcpSignalSearch(new URL(c.req.url).searchParams);
+      // Missing/legacy epoch: internal legacy cards. Open scoped epoch: BASE only.
+      // Maintenance remains a retriable 503; a retired legacy reader stays 410.
+      return c.json(await searchMcpSignals({ ...deps, db: deps.db,
+        ...(deps.mcpSignalSearch?.afterWorkspaceResolve
+          ? { afterWorkspaceResolve: deps.mcpSignalSearch.afterWorkspaceResolve } : {}) }, session.sub, args));
+    } catch (error) {
+      if (error instanceof ScopeError || error instanceof WorkspaceError
+        || error instanceof GraphSignalDiscardedReadError || error instanceof McpSignalLegacyFenceError) {
+        return c.json({ error: error.message }, error.status);
+      }
+      return c.json({ error: "signal_search_unavailable" }, 503);
+    }
+  });
+  return app;
 }

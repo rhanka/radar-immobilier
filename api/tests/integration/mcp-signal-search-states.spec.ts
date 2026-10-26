@@ -32,7 +32,9 @@ describeDb("MCP BASE scope refusal states", () => {
     f.mount((sub, args) => readMcpSignalCards({ db: f.data.db, store: f.store }, sub, { ...args, city: "empty-city" }));
     const response = await f.search("&showDiscarded=1");
     expect(response.status).toBe(503);
-    expect(await response.json()).toEqual({ error: `scoped_facet_scope_unavailable:${workspaceId}` });
+    expect(await response.json()).toEqual({ error: state === "barrier"
+      ? `scoped_maintenance_in_progress:${workspaceId}`
+      : `scoped_facet_scope_unavailable:${workspaceId}` });
     expect(f.head).not.toHaveBeenCalled();
   });
   it("refuses unresolved personal history before returning empty or revealed cards", async () => {
