@@ -38,6 +38,7 @@
 - [x] Artifacts 0.2.1: both corrected acceptance cases and three mapper controls pass (20261026T130653-18); adapt mutation sites to the provider authority hook and mapHostError.
 - [x] Artifacts 0.2.1: foreign campaigns observed after preflight; recheck after source capture and stop the owned campaign on foreign test-stack intrusion instead of relying on the cooperative lock alone.
 - [x] Artifacts 0.2.1: add an actual-runner intrusion control that preserves real preflight observations, injects no foreign container, and requires signal 143 plus complete owned-resource cleanup.
+- [x] Artifacts 0.2.1: the intrusion control exposed asynchronous --rm volume release; retain ownership checks and retry bounded teardown until Docker reports no owned resources.
 - [ ] Artifacts 0.2.1: qualify both corrected acceptance cases, Q1/Q2/acceptance 31/32/6, CI-selected API, MCP, host, lint, types, audit and the sixteen-tool image.
 - [ ] Artifacts 0.2.1: deliver commits of at most 150 lines from e9d4696c, audit the bundle in a fresh repository and update the companion report without push.
 - [x] Read mandatory rules, approved A5/P7 design, CT clauses and A4 handoff.

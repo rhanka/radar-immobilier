@@ -59,6 +59,28 @@ export COMPOSE_DISABLE_ENV_FILE=1
 unset COMPOSE_FILE COMPOSE_PROFILES COMPOSE_ENV_FILES
 compose=(docker compose --env-file /dev/null -p "$PROJECT" -f "$RUN_DIR/compose.yml")
 source tools/make/base-api-resources.sh
+# Interrupted --rm clients can release their volume just after compose down.
+# Keep the shared ownership checks and wait for that observable settlement.
+cleanup() {
+  local status=$? settled=0 attempt
+  trap - EXIT INT TERM
+  [[ -z ${RUN_PID:-} ]] || { kill "$RUN_PID" 2>/dev/null || true; wait "$RUN_PID" 2>/dev/null || true; }
+  [[ -z ${MONITOR:-} ]] || { kill "$MONITOR" 2>/dev/null || true; wait "$MONITOR" 2>/dev/null || true; }
+  "${compose[@]}" logs --no-color > "$LOG_DIR/compose.log" 2>&1 || true
+  "${compose[@]}" ps -a > "$LOG_DIR/compose-state.log" 2>&1 || true
+  : > "$LOG_DIR/cleanup.log"
+  for attempt in 1 2 3 4 5; do
+    if guarded_down >> "$LOG_DIR/cleanup.log" 2>&1; then settled=1; break; fi
+    sleep 1
+  done
+  if [[ $settled != 1 ]]; then
+    echo 'Cleanup failed after bounded owned-resource settlement retries' | tee "$LOG_DIR/residuals.log" >&2
+    [[ $status != 0 ]] || status=1
+    rm -f "$LOG_DIR/result"
+  fi
+  printf '%s\n' "$status" > "$LOG_DIR/status"
+  exit "$status"
+}
 source tools/make/base-api-compose.sh
 ACTION=test-api
 write_compose
