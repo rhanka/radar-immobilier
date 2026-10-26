@@ -32,6 +32,10 @@
 - [x] Synthetic isolated tests only; root UAT remains unchanged.
 
 ## Plan / Todo (lot-based)
+- [x] Artifacts 0.2.1: published integrity verified before container installation; exact API/host/MCP pins, four lock entries changed and audit gate passed (20261026T130511-18).
+- [ ] Artifacts 0.2.1: use mapHostError at HTTP and coordinator boundaries; remove superseded local denial/error workarounds.
+- [ ] Artifacts 0.2.1: qualify both corrected acceptance cases, Q1/Q2/acceptance 31/32/6, CI-selected API, MCP, host, lint, types, audit and the sixteen-tool image.
+- [ ] Artifacts 0.2.1: deliver commits of at most 150 lines from e9d4696c, audit the bundle in a fresh repository and update the companion report without push.
 - [x] Read mandatory rules, approved A5/P7 design, CT clauses and A4 handoff.
 - [x] Compile the complete published profile and bind exactly four selected tools.
 - [x] Preserve twelve-tool parity and guarded startup; artifact request authority stays immutable (contract composition).
