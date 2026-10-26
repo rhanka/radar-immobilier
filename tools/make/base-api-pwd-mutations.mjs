@@ -69,7 +69,8 @@ for (const leg of tests) {
     if (hash(readFileSync(root + file)) !== digest) throw new Error(`Source not restored: ${file}`);
     return { file, sha256: digest };
   });
-  results.push({ name: leg.name, baseline: "passed", mutated: "assertion_failed", restored: "passed", identities });
+  results.push({ name: leg.name, expectedRefusal: leg.expected ?? null,
+    baseline: "passed", mutated: "assertion_failed", restored: "passed", identities });
   writeFileSync("/evidence/mutations.json", JSON.stringify(results, null, 2));
   process.stdout.write(`MUTATION ${leg.name}: baseline PASS, mutation KILLED, restored PASS\n`);
 }
