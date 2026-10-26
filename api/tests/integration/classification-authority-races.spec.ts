@@ -8,6 +8,20 @@ import { setMembershipCapability } from "../../src/services/workspaces/capabilit
 import { setLotCapability } from "../../src/services/facets/lots/lot-capabilities.js";
 
 describeDb("classification final authority races", () => {
+  it("should keep the account locked until the membership transaction commits", async () => {
+    const f = await classificationFixture();
+    const original = store.approvedAccountId;
+    const spy = vi.spyOn(store, "approvedAccountId").mockImplementation(async (...args) => {
+      const accountId = await original(...args);
+      await expect(f.data.pool.query("SELECT id FROM account_users WHERE id=$1 FOR UPDATE NOWAIT", [accountId]))
+        .rejects.toMatchObject({ code: "55P03" });
+      return accountId;
+    });
+    try {
+      expect((await discoverFacetContext(f.data.db, f.data.contributor.sub, "h5")).workspaces).toHaveLength(2);
+      expect(spy).toHaveBeenCalledTimes(2);
+    } finally { spy.mockRestore(); }
+  });
   for (const transport of ["h5", "mcp"] as const) {
     for (const selection of ["zero", "singleton", "many", "explicit"] as const) {
       it(`should refuse ${transport} ${selection} discovery when suspension commits during the final membership await`, async () => {
