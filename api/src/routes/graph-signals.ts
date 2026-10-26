@@ -254,6 +254,9 @@ function parseDocRefRecord(item: unknown, fallbackId: string): GraphSignalDocRef
     "source_ref",
   ]);
   const page = firstNumber(r, ["page", "pageNumber", "page_number"]);
+  const title = firstString(r, ["title", "documentTitle", "document_title"]);
+  const publishedAt = firstString(r, ["publishedAt", "published_at", "documentDate", "document_date"]);
+  const fetchedAt = firstString(r, ["fetchedAt", "fetched_at"]);
   const bbox = r.bbox ?? r.boundingBox ?? r.bounding_box;
   // Filet Radar : un PV auto-lié porte `provisional: true` + `linkSource`.
   const linkSource = firstString(r, ["linkSource", "link_source"]);
@@ -270,6 +273,9 @@ function parseDocRefRecord(item: unknown, fallbackId: string): GraphSignalDocRef
     ...(sourceUrl !== null ? { sourceUrl } : {}),
     ...(rawRef !== null ? { rawRef } : {}),
     ...(documentUrl !== null ? { documentUrl } : {}),
+    ...(title !== null ? { title } : {}),
+    ...(publishedAt !== null ? { publishedAt } : {}),
+    ...(fetchedAt !== null ? { fetchedAt } : {}),
     ...(bbox !== undefined ? { bbox } : {}),
     ...(provisional !== undefined ? { provisional } : {}),
     ...(linkSource !== null ? { linkSource } : {}),
@@ -320,6 +326,9 @@ function extractDocRefs(
       ref.rawRef ?? "",
       ref.documentUrl ?? "",
       ref.excerpt ?? "",
+      ref.title ?? "",
+      ref.publishedAt ?? "",
+      ref.fetchedAt ?? "",
     ].join("\u0000");
     if (seen.has(key)) return false;
     seen.add(key);
