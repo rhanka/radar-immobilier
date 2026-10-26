@@ -29,6 +29,7 @@
 - [x] No UI/UAT change; root checkout and stable dev data preserved.
 
 ## Plan / Todo (lot-based)
+- [x] Extend mutation controls to workspace rebinding, entry/enrichment maintenance categories and the MCP decoder; retain thirteen existing mutants, lint the helper/decoder and require thirteen network/image cases. Preserve earlier bundles and audit only commits above 66ff7898.
 - [x] Add production-facade workspace-switch regressions and entry/enrichment maintenance assertions through the MCP decoder; exercise real-storage maintenance over sockets for missing, legacy and scoped epochs.
 - [x] Bind the original scoped workspace and revalidate it before projection access; distinguish maintenance at entry and enrichment and decode it as a retryable MCP cutover. Baseline 20261026T073802-5-test reproduces the remaining 403-versus-409 defect in the inherited patch.
 - [ ] Qualify second-pass workspace binding and retryable maintenance with deterministic regressions, killed mutants and restored-byte controls; rerun affected suites, full CI API collection, MCP, graph-signals and compiled-image network proofs before/after 6H.
