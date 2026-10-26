@@ -35,8 +35,12 @@ the preprod account-reader and A2 exchange bindings before image delivery.
 - [x] Lot 0: read constraints, review and startup/deployment evidence.
 - [x] Lot 1: wire default-closed startup and test the real entrypoint.
   - [x] Red: three authorized epochs refused; green: startup/network suites pass.
-- [ ] Lot 2: reference account/exchange authority and document operator setup.
-- [ ] Lot 3: touched suites, CI API suite, MCP, Q1/Q2/acceptance, lint/types.
+- [x] Lot 2: reference account/exchange authority and document operator setup.
+  - [x] Required MCP secrets, shared workload refs, closed API receipt refs, DB ingress.
+  - [x] Pin the actual IdP token-route prefix; operator must qualify RFC 8693 support.
+- [x] Lot 3: touched suites, CI API suite, MCP, Q1/Q2/acceptance, lint/types.
+  - [x] 146 targeted; API 3536 passed/695 gated; MCP 406; Q1/Q2/acceptance 31/32/6.
+  - [x] Run the documented reader grants against PostgreSQL; authorization and write denial pass.
 - [ ] Lot 4: validate manifests, review changes, append delivery report.
 - [ ] Operator gate: provision/qualify preprod before any image rollout.
 

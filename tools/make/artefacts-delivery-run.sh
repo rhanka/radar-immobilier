@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
+if [[ ${DELIVERY_FROZEN_RUNNER:-0} != 1 ]]; then
+  mkdir -p tmp/delivery-evidence
+  snapshot=$(mktemp "$PWD/tmp/delivery-evidence/runner.XXXXXX")
+  cp "$0" "$snapshot"
+  export DELIVERY_FROZEN_RUNNER=1
+  exec bash "$snapshot"
+fi
 source tools/make/base-api-guards.sh
 require_env
 [[ $ENV == test-artefacts-dlv && $API_PORT == 18927 && $UI_PORT == 15927 && $MAILDEV_UI_PORT == 11927 ]]
@@ -34,6 +41,7 @@ while IFS= read -r path; do
   printf '%s\n' "$path" >> "$RUN_DIR/paths"
 done < "$RUN_DIR/candidates"
 tar --verbatim-files-from --no-recursion -cf "$RUN_DIR/source.tar" -T "$RUN_DIR/paths"
+cp --reflink=auto "$RUN_DIR/source.tar" "$LOG_DIR/source.tar"
 sha256sum "$RUN_DIR/source.tar" > "$LOG_DIR/source.sha256"
 git rev-parse HEAD > "$LOG_DIR/candidate-sha.txt"
 mkdir -p "$HOME/.cache/radar-a5-npm"
