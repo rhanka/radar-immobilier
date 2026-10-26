@@ -51,7 +51,8 @@ export function writeRefusal(c: Context, code: string, status: number,
   if (!Object.hasOwn(MESSAGES, code)) { code = "internal_error"; status = 500; attemptOutcome = "unknown"; }
   const action = actionFor(code, status, attemptOutcome === "unknown");
   if (status === 429) c.header("Retry-After", "2");
-  const verb = c.req.path.endsWith("/prepare") ? "prepare"
+  const verb = c.req.path === "/api/v1/artifacts/reader/facets/write-intents"
+    || c.req.path === "/write-intents" ? "prepare"
     : c.req.path.endsWith("/confirm") ? "confirm" : c.req.path.endsWith("/revoke") ? "revoke" : "status";
   return c.json({ operation: `facets.write-intents.${verb}.v1`, requestId: randomUUID(),
     error: { code, message: MESSAGES[code], action,

@@ -65,7 +65,7 @@ export async function authorityFixture() {
     { sessionSecret: baseAuth.sessionSecret, ttlSeconds: ttl, now: clock.now })}`;
   const request = (path: string, init: RequestInit = {}) => app.request(`${domain.appOrigin}${path}`, {
     ...init, headers: { host: new URL(domain.appOrigin).host, ...Object.fromEntries(new Headers(init.headers)) } });
-  const prepare = async (extra: Record<string, unknown> = {}, key = commandKey, token?: string) => request(`${H5}/prepare`, {
+  const prepare = async (extra: Record<string, unknown> = {}, key = commandKey, token?: string) => request(H5, {
     method: "POST", headers: { "content-type": "application/json", "idempotency-key": key,
       "x-preview-write-grant": token ?? await mintPageWriteGrant(page, writeH5, clock.now),
       "x-synthetic-page-proof": page.grant.sessionId }, body: JSON.stringify({ ...body, ...extra }) });

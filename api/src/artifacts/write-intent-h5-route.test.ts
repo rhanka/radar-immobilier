@@ -5,8 +5,12 @@ import { writeIntentH5Route } from "./write-intent-h5-route.js";
 describe("h5 write receiver", () => {
   it("should stay closed without authority and refuse command methods", async () => {
     const app = writeIntentH5Route(null);
-    expect((await app.request("/write-intents/prepare", { method: "POST" })).status).toBe(503);
-    expect((await app.request("/write-intents/prepare", { method: "GET" })).status).toBe(405);
+    const closed = await app.request("/write-intents", { method: "POST" });
+    expect(closed.status).toBe(503);
+    expect(await closed.json()).toMatchObject({ operation: "facets.write-intents.prepare.v1",
+      error: { code: "write_transport_closed", action: "contact_operator" } });
+    expect(closed.headers.get("cache-control")).toBe("private, no-store");
+    expect((await app.request("/write-intents", { method: "GET" })).status).toBe(405);
     expect((await app.request("/write-intents/some-id", { method: "POST" })).status).toBe(405);
   });
 });
