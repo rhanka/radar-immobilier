@@ -14,16 +14,22 @@ export {
 } from "./activation.js";
 export {
   checkAdmission,
+  checkScopeMembership,
   createAdmissionAuthority,
+  createArtifactAdmissionAuthority,
   type AdmissionAuthority,
   type AdmissionDeniedBody,
   type AdmissionResult,
+  type MembershipQueryable,
 } from "./admission.js";
 export {
+  ARTIFACT_POOL_TIMEOUT_CODE,
   ArtifactConnectionError,
   computeParamsHash,
   createArtifactsPool,
   deriveIdempotencyKey,
+  isPoolAcquisitionTimeout,
+  normalizePoolAcquisitionError,
   withArtifactAdvisoryLock,
   type ArtifactsPoolParams,
   type IdempotencyKeyInput,
