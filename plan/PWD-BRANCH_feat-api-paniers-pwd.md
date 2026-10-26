@@ -145,3 +145,4 @@ Qualify and integrate Muse's durable write persistence on PW-B after A5.
 - [x] Astra slice 05: regress lost refusals, fixed follow-up and expiry during final SQL wait.
 - [x] Astra slice 06: regress I/P spacing, sixty reads, reload and global quota rollback.
 - [x] Astra slice 07: regress preparation, foreign ownership, deadline and refusal audits.
+- [x] Astra slice 08: support serial scoped reproduction, exact-refusal mutations and bundle audit.
