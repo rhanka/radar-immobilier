@@ -3,7 +3,7 @@ vi.mock("@sentropic/artifacts/http", async (original) => {
   const { withCandidateProfile } = await import("./artifacts-legacy-profile.helpers.js");
   return withCandidateProfile(await original<typeof import("@sentropic/artifacts/http")>());
 });
-import { composeArtifactHost, createArtifactControl, createMemoryCommitLedger,
+import { composeArtifactHost, createArtifactControl, createMemoryCommitLedger, createArtifactAdmissionAuthority,
   type AdmissionAuthority } from "@radar/artifacts-host";
 import { createMcpArtifactAdapter } from "../../../packages/artifacts-host/src/mcp-app-adapter.js";
 import { controlRoute } from "../../src/artifacts/control-route.js";
@@ -61,26 +61,43 @@ describe("unexposed MCP adapter with the composed provider", () => {
   });
 
   it("counts a finalization admission outage once without a durable success", async () => {
-    let reads = 0;
-    const authority: AdmissionAuthority = {
-      nowMs: () => 0,
-      readActivation: () => ({ enabled: true, subjects: ["alice"], expiresAtMs: 100 }),
-      readStatus: async () => {
-        if (++reads === 3) throw new Error("private admission database cause");
-        return (await h.pool.query("SELECT status FROM account_users WHERE sub = 'alice'")).rows[0].status;
-      },
-    };
-    const { ledger, entries } = createMemoryCommitLedger();
-    const adapter = createMcpArtifactAdapter(createArtifactControl(
-      h.host, h.config.storageScope, "pages.example.test", authority, { ledger, nowMs: () => 0 }));
-    const before = await count();
-    expect(await adapter.execute({ method: "POST", path: "/ensure",
-      args: { bindingName: "outage", idempotencyKey: "outage" } }, { actorId: "alice" }))
-      .toEqual({ ok: false, status: 503, code: "capability_unavailable", retryable: true,
-        error: { error: "capability_unavailable" } });
-    expect(entries).toEqual([{ invocationId: expect.any(String), op: "ensure", actorId: "alice", reason: "unauthorized_at_commit",
-      status: 503, atMs: 0 }]);
-    expect(await count()).toEqual(before);
+    // Fail the authority query on the reserved coordinator client, after entry succeeds.
+    const unavailable = new Proxy(h.pool, { get(target, key) {
+      if (key === "connect") return async () => {
+        const client = await target.connect();
+        return new Proxy(client, { get(connection, property) {
+          if (property === "query") return (text: unknown, ...args: unknown[]) => {
+            if (typeof text === "string" && text.startsWith("SELECT id, status FROM account_users")) {
+              throw new Error("private admission database cause");
+            }
+            return Reflect.apply(connection.query, connection, [text, ...args]);
+          };
+          const value = Reflect.get(connection, property);
+          return typeof value === "function" ? value.bind(connection) : value;
+        } });
+      };
+      const value = Reflect.get(target, key);
+      return typeof value === "function" ? value.bind(target) : value;
+    } });
+    const host = await composeArtifactHost(unavailable, h.config, h.blobs);
+    try {
+      const authority = createArtifactAdmissionAuthority(h.pool, () => ({
+        enabled: true, subjects: ["alice"], expiresAtMs: Date.now() + 60_000,
+      }));
+      const { ledger, entries } = createMemoryCommitLedger();
+      const adapter = createMcpArtifactAdapter(createArtifactControl(
+        host, h.config.storageScope, "pages.example.test", authority, { ledger, nowMs: () => 0 }));
+      const before = await count();
+      expect(await adapter.execute({ method: "POST", path: "/ensure",
+        args: { bindingName: "outage", idempotencyKey: "outage" } }, { actorId: "alice" }))
+        .toEqual({ ok: false, status: 503, code: "capability_unavailable", retryable: true,
+          error: { error: "capability_unavailable" } });
+      expect(entries).toEqual([{ invocationId: expect.any(String), op: "ensure", actorId: "alice", reason: "unauthorized_at_commit",
+        status: 503, atMs: 0 }]);
+      expect(await count()).toEqual(before);
+    } finally {
+      host.close();
+    }
   });
 
   it.each(["http-first", "mcp-first"])("replays %s across separate compositions", async (direction) => {
