@@ -49,6 +49,7 @@ the preprod account-reader and A2 exchange bindings before image delivery.
   - [x] Reproduce the exact operator probe against real MCP/API sockets.
   - [x] Match the public MCP contract and prove workspace selection at the API boundary.
   - [x] Add a reproducible qualification target with explicit DB activation and coverage floors.
+  - [x] Document delegated boundary evidence, single-workspace selection and `workspace_missing` denial.
   - [ ] Restore `LOT_MIGRATION_DB_TEST=1`; compare full API results to the prior baseline.
   - [ ] Repeat MCP, Q1/Q2/acceptance, lint, types and manifest qualification.
   - [ ] Address review remarks and append the second-review delivery report.
