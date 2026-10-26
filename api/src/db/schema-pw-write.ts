@@ -109,6 +109,20 @@ export const pwWriteOutbox = pgTable("pw_write_outbox", {
   attempts: integer("attempts").notNull().default(0),
 });
 
+export const pwWriteRejections = pgTable("pw_write_rejections", {
+  intentId: uuid("intent_id").primaryKey(),
+  status: integer("status").notNull(),
+  code: text("code").notNull(),
+});
+
+export const pwWriteStatusBudgets = pgTable("pw_write_status_budgets", {
+  intentId: uuid("intent_id").notNull(),
+  pageSessionId: text("page_session_id").notNull(),
+  firstReadAt: timestamp("first_read_at", { withTimezone: true }).notNull(),
+  lastReadAt: timestamp("last_read_at", { withTimezone: true }).notNull(),
+  initialReads: integer("initial_reads").notNull(),
+}, (t) => ({ pk: primaryKey({ columns: [t.intentId, t.pageSessionId] }) }));
+
 export const pwWriteSchema = {
   pwWriteIntents,
   pwWriteKeyReservations,
@@ -118,4 +132,6 @@ export const pwWriteSchema = {
   pwWriteQuotaLedger,
   pwWriteAudit,
   pwWriteOutbox,
+  pwWriteRejections,
+  pwWriteStatusBudgets,
 };

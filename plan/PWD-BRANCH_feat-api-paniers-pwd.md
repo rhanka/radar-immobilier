@@ -139,3 +139,4 @@ Qualify and integrate Muse's durable write persistence on PW-B after A5.
 - [ ] Astra corrections: exact-refusal mutations, scoped and CI API gates, lint/typecheck.
 - [ ] Astra corrections: bounded commits, de81ef0e bundle audit, French report.
 - [x] Astra slice 01: scope corrective qualification without publication.
+- [x] Astra slice 02: persist I/P follow-up budgets and immutable public refusals.
