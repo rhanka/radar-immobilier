@@ -9,6 +9,27 @@ const privacy = 'tests/integration/classification-privacy.spec.ts';
 const cursor = 'src/services/facets/classification-cursor.test.ts';
 const counts = 'src/services/facets/classification-counts.test.ts';
 const cases = [
+  { id: 'closed-context-authority', suite: 'tests/integration/classification-races.spec.ts', test: 'suspended account on the closed path', edits: [
+    [`${root}classification-context.ts`, '  await revalidateContextAuthority(db, sub, workspaceId);', '  // Mutation: omit final authority revalidation.'],
+  ] },
+  { id: 'durable-closure-resample', suite: 'tests/integration/classification-races.spec.ts', test: 'maintenance starts before', edits: [
+    [`${root}classification-context.ts`,
+      '} else if (error instanceof ScopeError && error.message.startsWith("scoped_facet_scope_unavailable:")) {',
+      '} else if (false) {'],
+  ] },
+  { id: 'prototype-query', suite: 'src/services/facets/classification-query.test.ts', test: 'unknown __proto__ parameter', edits: [
+    [`${root}classification-query.ts`, 'const input: Record<string, unknown> = Object.create(null);', 'const input: Record<string, unknown> = {};'],
+    [`${root}classification-query.ts`, 'Object.defineProperty(input, key, { value, enumerable: true, configurable: true, writable: true });', 'input[key] = value;'],
+  ] },
+  { id: 'browser-auth-json', suite: 'tests/integration/classification-context.spec.ts', test: 'browser navigations on read routes', edits: [
+    ['api/src/routes/scoped-classification.ts', 'if (c.res.status >= 300 && c.res.status < 400) {', 'if (false) {'],
+  ] },
+  { id: 'persisted-document-dates', suite: 'tests/integration/classification-state.spec.ts', test: 'persisted document dates on search and state', edits: [
+    ['api/src/routes/graph-signals.ts', '    ...(publishedAt !== null ? { publishedAt } : {}),\n    ...(fetchedAt !== null ? { fetchedAt } : {}),', ''],
+  ] },
+  { id: 'source-url-evidence', suite: 'tests/integration/classification-state.spec.ts', test: 'persisted document dates on search and state', edits: [
+    [`${root}classification-card.ts`, 'pdfLink: docRefs.some((ref) => !!ref.documentUrl || !!ref.sourceUrl)', 'pdfLink: docRefs.some((ref) => !!ref.documentUrl)'],
+  ] },
   { id: 'personal-history-race', suite: 'tests/integration/classification-races.spec.ts', test: 'archive appended between', edits: [[`${root}classification-heads.ts`,
     'personalHistoryState: personal.length || archives?.personal ? "has_history" : "untouched",',
     'personalHistoryState: personal.length ? "has_history" : "untouched",']] },
