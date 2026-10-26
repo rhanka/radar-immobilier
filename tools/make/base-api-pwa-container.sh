@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd /workspace
-if [[ ${2:-full} == full ]]; then
+if [[ ${2:-full} == full || ${2:-full} == scoped ]]; then
 bash tools/make/base-api-container.sh test-api "$1"
 cp /evidence/tests.json /evidence/scoped-tests.json
 cp /evidence/tests.tsv /evidence/scoped-tests.tsv
+[[ ${2:-full} != scoped ]] || exit 0
 npm run typecheck --workspace=api
 npm run typecheck --workspace=packages/artifacts-host --workspace=packages/immo-mcp
 cat > api/tsconfig.pwa-tests.json <<'CONFIG'

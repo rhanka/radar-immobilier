@@ -8,8 +8,10 @@ ROOT=$(pwd -P)
 PROJECT=radar-$ENV
 ACTION=ci-api
 PWA_MODE=${PWA_MODE:-full}
-[[ $PWA_MODE == full || $PWA_MODE == mcp ]]
-SCOPE=${SCOPE:-$(git ls-files --cached --others --exclude-standard -- 'api/src/artifacts/write-*.test.ts' 'api/tests/integration/pw-write-authority*.spec.ts' | sed 's#^api/##')}
+[[ $PWA_MODE == full || $PWA_MODE == mcp || $PWA_MODE == scoped ]]
+SCOPE=${SCOPE:-$(git ls-files --cached --others --exclude-standard -- 'api/src/artifacts/write-*.test.ts' \
+  'api/tests/integration/pw-write-authority*.spec.ts' api/tests/integration/pw-write-createapp.spec.ts \
+  'api/src/services/facets/pw-write-*.test.ts' | sed 's#^api/##')}
 require_scope
 RUN_DIR=$ROOT/tmp/pwa-evidence/runtime
 LOG_DIR=$ROOT/tmp/pwa-evidence/$(date -u +%Y%m%dT%H%M%S)-campaign
@@ -22,22 +24,19 @@ free_space() {
      $(awk '/MemAvailable:/ {print $2}' /proc/meminfo) -ge 8388608 ]]
 }
 deadline=$((SECONDS + 21600))
-until [[ -f /home/antoinefa/src/radar-immobilier/.lanes/conductor/tmp/docker-free.flag ]]; do
-  (( SECONDS < deadline )) || { echo 'Docker reservation exceeded six hours'; exit 4; }
-  echo 'Docker reserved: checking the release flag again in three minutes'
-  sleep 180
-done
 exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
-until flock -w 10 8; do
-  free_space || { echo 'STOP: less than 8 GiB disk or memory'; exit 3; }
-  echo 'Waiting for the Docker campaign lock'
-done
 while :; do
+  (( SECONDS < deadline )) || { echo 'Docker reservation exceeded six hours'; exit 4; }
   free_space || { echo 'STOP: less than 8 GiB disk or memory'; exit 3; }
   running=$(docker ps --filter name=radar-test- --format '{{.Names}}')
-  builders=$(ps -eo comm=,args= | awk '$1 ~ /^(docker|buildctl)$/ && $0 ~ / (build|buildx) /')
-  [[ -n $running || -n $builders ]] || break
-  echo 'Waiting for radar test containers and Docker builds'; sleep 10
+  builders=$(ps -eo comm=,args= | awk '$1 ~ /^(docker|docker-buildx|buildctl)$/ && $0 ~ / (build|buildx) /')
+  if [[ -z $running && -z $builders ]] && flock -n 8; then
+    running=$(docker ps --filter name=radar-test- --format '{{.Names}}')
+    builders=$(ps -eo comm=,args= | awk '$1 ~ /^(docker|docker-buildx|buildctl)$/ && $0 ~ / (build|buildx) /')
+    [[ -n $running || -n $builders ]] || break
+    flock -u 8
+  fi
+  echo 'Waiting for radar test containers, Docker builds and campaign lock'; sleep 10
 done
 OWNER=$(printf '%s' "$ROOT/$ENV" | sha256sum | cut -d' ' -f1)
 export COMPOSE_DISABLE_ENV_FILE=1
@@ -94,5 +93,5 @@ docker image inspect --format '{{.Id}} {{json .RepoDigests}}' \
 RUN_PID=$!
 wait "$RUN_PID"
 RUN_PID=
-if [[ $PWA_MODE == full ]]; then assert_tests_ran "$LOG_DIR/tests.tsv"; fi
+if [[ $PWA_MODE != mcp ]]; then assert_tests_ran "$LOG_DIR/tests.tsv"; fi
 echo 'PASS PW-A campaign' > "$LOG_DIR/result"
