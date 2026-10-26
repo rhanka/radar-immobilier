@@ -9,6 +9,12 @@ describeDb("PW-D createApp wiring", () => {
   it("should keep unconfigured write transport closed and persist BASE on the app database", async () => {
     const { data, request } = await httpFixture();
     const input = await preparedSelect(data);
+    const prepare = await request("/api/v1/artifacts/reader/facets/write-intents",
+      data.contributor.sub, { method: "POST", headers: { "content-type": "application/json" }, body: "{}" });
+    expect(prepare.status).toBe(503);
+    expect(prepare.headers.get("cache-control")).toBe("private, no-store");
+    expect(await prepare.json()).toMatchObject({ operation: "facets.write-intents.prepare.v1",
+      error: { code: "write_transport_closed", action: "contact_operator" } });
     const row = await pwPrepared(data, input);
     const missing = await request(`/api/v1/artifacts/write-intents/${row.intentId}/confirm`,
       data.contributor.sub, { method: "POST", headers: { "content-type": "application/json" },

@@ -2,7 +2,6 @@ import { writeRefusal } from "./write-intent-refusal.js";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { readPwWriteStatus } from "../services/facets/pw-write-admission-durable.js";
-import { loadPwIntentForShare } from "../services/facets/pw-write-store.js";
 import { verifyWriteGrant } from "./write-grant.js";
 import { assertIdempotencyKey, assertWritePrepareBody } from "./write-intent-schemas.js";
 import { hasDuplicateJsonKeys } from "./write-intent-binding.js";
@@ -13,9 +12,7 @@ import type { Database } from "../db/client.js";
 import { FacetError } from "../services/facets/target.js";
 import { writeIntentError } from "./write-intent-errors.js";
 import { projectWriteIntentStatus } from "./write-intent-status.js";
-import { assertPwAuthorityOpen } from "../services/facets/pw-write-fences.js";
-import { eq, sql } from "drizzle-orm";
-import { pwWriteIntents } from "../db/schema-pw-write.js";
+import { readPageBoundWriteIntent } from "./write-intent-h5-authority.js";
 
 export interface H5WriteDeps extends PrepareDeps, PageWriteAuthorityDeps {
   db: Database;
@@ -32,7 +29,7 @@ export function writeIntentH5Route(deps: H5WriteDeps | null): Hono {
   });
   app.use("/write-intents/*", bodyLimit({ maxSize: 16 * 1024,
     onError: (c) => writeRefusal(c, "request_too_large", 413) }));
-  app.post("/write-intents/prepare", async (c) => {
+  app.post("/write-intents", async (c) => {
     if (!deps) return writeRefusal(c, "write_transport_closed", 503);
     try {
       if (c.req.header("content-encoding") !== undefined) return writeRefusal(c, "unsupported_media_type", 415);
@@ -58,33 +55,21 @@ export function writeIntentH5Route(deps: H5WriteDeps | null): Hono {
       return c.json({ operation: "facets.write-intents.prepare.v1", reader: { sub: grant.readerSub }, data }, created ? 201 : 200);
     } catch (error) { return writeIntentError(c, error); }
   });
-  app.all("/write-intents/prepare", (c) => writeRefusal(c, "method_not_allowed", 405));
+  app.all("/write-intents", (c) => writeRefusal(c, "method_not_allowed", 405));
   app.get("/write-intents/:intentId", async (c) => {
     if (!deps) return writeRefusal(c, "write_transport_closed", 503);
     try {
       const id = c.req.param("intentId");
       assertIdempotencyKey(id);
       // Poll uses the existing authenticated P, never mints or renews a grant.
-      const page = await resolveWritePage(c, deps, (deps.nowMs ?? Date.now)());
-      const row = await deps.db.transaction(async (tx) => {
-        await tx.execute(sql`SET LOCAL lock_timeout = '1s'`);
-        await tx.execute(sql`SET LOCAL statement_timeout = '5s'`);
-        const [observed] = await tx.select().from(pwWriteIntents).where(eq(pwWriteIntents.intentId, id));
-        if (!observed) throw new FacetError(404, "write_intent_not_found");
-        await assertPwAuthorityOpen(tx, observed.authorityReferences as Record<string, string>);
-        const row = await loadPwIntentForShare(tx, id);
-        const artifact = row.artifactRef as Record<string, unknown>;
-        if (row.pageSessionId !== page.grant.sessionId || row.pageInstanceId !== page.pageInstanceId
-          || artifact.artifactId !== page.grant.artifactId
-          || artifact.releaseId !== page.grant.releaseId
-          || artifact.host !== page.grant.host || artifact.profileName !== page.grant.profileName
-          || artifact.profileFingerprint !== page.grant.profileFingerprint
-          || artifact.policyRevision !== page.grant.policyRevision) throw new FacetError(403, "write_grant_required");
-        return row;
-      });
+      const { page, row } = await readPageBoundWriteIntent(c, deps, id);
       const status = await readPwWriteStatus(deps.db, id, canonicalWritePrincipal(page.grant), deps.nowMs ?? Date.now);
       const rejection = status.status === "rejected" ? await deps.readRejection?.(id) : undefined;
-      const data = await projectWriteIntentStatus(deps.db, row, status.status, rejection);
+      let data = await projectWriteIntentStatus(deps.db, row, status.status, rejection);
+      // Receipt projection can wait on BASE workspace rights. Revalidate only
+      // after it completes, so an acknowledged withdrawal masks that receipt.
+      const fresh = await readPageBoundWriteIntent(c, deps, id);
+      if (fresh.row.revokedAt !== null) data = await projectWriteIntentStatus(deps.db, fresh.row, "revoked");
       return c.json({ operation: "facets.write-intents.status.v1", reader: { sub: page.grant.readerSub }, data });
     } catch (error) { return writeIntentError(c, error); }
   });
