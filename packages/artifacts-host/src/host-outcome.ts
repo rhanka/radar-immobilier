@@ -13,7 +13,15 @@ export function normalizeHostOutcome(outcome: ArtifactOutcome<HttpResponse>): Ar
     cause = cause.cause;
   }
   const code = (cause as { code?: string } | null)?.code;
-  const mapped = code === "artifact_s3_timeout" || code === "artifact_pool_timeout";
+  const message = cause instanceof Error ? cause.message : String(cause ?? "");
+  const realPoolTimeout = code !== "artifact_pool_timeout" &&
+    /timeout exceeded when trying to connect/i.test(message);
+  if (realPoolTimeout) {
+    cause = Object.assign(new Error("artifact pool acquisition timed out", { cause }),
+      { code: "artifact_pool_timeout" });
+  }
+  const mappedCode = (cause as { code?: string } | null)?.code;
+  const mapped = mappedCode === "artifact_s3_timeout" || mappedCode === "artifact_pool_timeout";
   if (code === "artifact_s3_timeout") {
     const reportedPhase = (cause as { phase?: string }).phase;
     if (reportedPhase === "s3-request" || reportedPhase === "body-stream") phase = reportedPhase;
