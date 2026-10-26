@@ -9,14 +9,16 @@ export function writeIntentTransaction<T>(db: Database, work: (tx: WriteTx) => P
     const started = performance.now();
     await tx.execute(sql`SET LOCAL lock_timeout = '1s'`);
     await tx.execute(sql`SET LOCAL statement_timeout = '5s'`);
-    const { rows: [{ pid }] } = await tx.execute<{ pid: number }>(sql`SELECT pg_backend_pid() AS pid`);
+    const backend = await tx.execute<{ pid: number }>(sql`SELECT pg_backend_pid() AS pid`);
+    const pid = backend.rows[0]?.pid;
+    if (!pid || !Number.isSafeInteger(pid)) throw new PwWriteError(503, "write_fence_unavailable");
     let expired = false;
     let cancellation: Promise<unknown> | undefined;
     const timer = setTimeout(() => {
       expired = true;
       // Keep the transaction/backend pinned until cancellation has completed.
       // A failed cancellation still cannot let overdue work commit below.
-      cancellation = Promise.resolve(db.execute(sql`SELECT pg_cancel_backend(${pid})`)).catch(() => {});
+      cancellation = Promise.resolve().then(() => db.execute(sql`SELECT pg_cancel_backend(${pid})`)).catch(() => {});
     }, Math.max(1, 5000 - (performance.now() - started)));
     try {
       const result = await work(tx);
