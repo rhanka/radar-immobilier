@@ -220,18 +220,32 @@ for this read-search path. Keep existing bindings; no new credential is needed.
    connector flow, audience ending `/mcp`, scopes `immo:read immo:search`.
    Put the entire `Authorization: Bearer ...` header in a protected file outside
    the repository (`OP_AUTH_HEADER_FILE`); never put the token on the command
-   line. Export `OP_CITY`, `OP_WORKSPACE` and `OP_EXPECTED_SIGNAL` for a known
-   signal visible to that approved account. `OP_EVIDENCE_DIR` is a private
-   directory per probe. Run the exact Streamable HTTP initialize + tools/call:
+   line. For a successful probe, also provision `OP_API_AUTH_HEADER_FILE`, a
+   protected header file containing a short-lived **delegated API token** from
+   RFC 8693 exchange of that same human token with the registered workload.
+   Its audience is the API origin, with scope `immo:search`; never use the human
+   MCP bearer, a cookie or an admin credential for the API call. Obtain it via
+   the IdP owner's qualified exchange procedure from step 3, without printing
+   credentials. This direct boundary check supplements the actual MCP exchange.
+   Export `OP_CITY`, `OP_WORKSPACE` and `OP_EXPECTED_SIGNAL` for a known signal
+   visible to that account. The account must have exactly one active workspace:
+   the public MCP tool has no workspace selector. Multiple active memberships
+   fail with `workspace_ambiguous`; do not change the tool contract to bypass it.
+   `OP_EVIDENCE_DIR` is a private directory per probe. Run the exact script:
 
    ```sh
    rtk make -f tools/make/artefacts-delivery.mk inspect CMD='bash tools/make/artefacts-delivery-probe.sh' ENV=preprod
    ```
 
-   It checks both unauthenticated endpoints return 401 and verifies the actual
-   known signal and workspace in `search_signals`, rather than accepting an
-   empty success or discovery response. Repeat for designated legacy/missing
-   and BASE-open workspaces when those states exist in this deployment.
+   It checks both unauthenticated endpoints return 401. The public MCP result
+   is `{ city, count, signals }`, without `workspaceId`; the request sends only
+   the declared `city` argument. It checks the known signal, city and count,
+   then calls the same facade with the delegated API header and identical
+   city/default limit, without an explicit workspace selector. It verifies
+   `ok`, `workspaceId`, `citySlug` and exact signal equality against MCP, saving
+   the non-token response in `api-search.json`. A wrong workspace, missing
+   signal or changed projection fails qualification. Repeat for designated
+   legacy/missing and BASE-open workspaces when those states exist.
    Correlate the request with the API access trace: only
    `GET /api/v1/mcp/facets/signals/search` may serve search, with delegated
    authority, not a cookie or the original human bearer. The local regression
@@ -251,10 +265,12 @@ for this read-search path. Keep existing bindings; no new credential is needed.
     `OP_EXPECTED_ERROR=composition_account` and use a fresh evidence directory;
     repeat the probe and require denial with no signal payload. Restore approval.
     Revoke its test workspace membership, set
-    `OP_EXPECTED_ERROR=workspace_not_authorized`, repeat and require denial.
+    `OP_EXPECTED_ERROR=workspace_missing`, repeat and require denial.
     If the human token itself asserts that workspace, account composition can
     refuse earlier with `composition_account`; document the actual boundary.
-    Restore membership, unset `OP_EXPECTED_ERROR` and require success again.
+    Error probes need no delegated API header and must contain no signals.
+    Restore membership, unset `OP_EXPECTED_ERROR` and require success again
+    with a fresh delegated API header if the previous token has expired.
     Perform changes only on the designated test identity/workspace, recording
     their prior state. Keep the recorded receipt and all post-arming results
     with the target digests. Only then accept delivery and release the hold.
