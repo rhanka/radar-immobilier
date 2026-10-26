@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd /workspace
+if [[ ${2:-full} == full ]]; then
 bash tools/make/base-api-container.sh test-api "$1"
 cp /evidence/tests.json /evidence/scoped-tests.json
 cp /evidence/tests.tsv /evidence/scoped-tests.tsv
@@ -17,9 +18,13 @@ if [[ -f tools/make/base-api-pwa-mutations.mjs ]]; then node tools/make/base-api
 npm run test --workspace=api -- --config vitest.isolated.config.ts \
   --reporter=default --reporter=json --outputFile.json=/evidence/ci-tests.json
 node tools/make/base-api-results.mjs /evidence/ci-tests.json > /evidence/ci-tests.tsv
+else
+  bash tools/make/base-api-container.sh typecheck ''
+fi
 mkdir -p tmp
 printf '%s\n' 'export default { envDir: false, test: { maxWorkers: 1, fileParallelism: false } };' > tmp/pwa-packages.config.mjs
 for package in artifacts-host immo-mcp; do
+  if [[ ${2:-full} == mcp && $package == artifacts-host ]]; then continue; fi
   (cd "packages/$package"; ../../node_modules/.bin/vitest run --config /workspace/tmp/pwa-packages.config.mjs \
     --exclude '**/*.e2e.test.ts' --reporter=default --reporter=json \
     --outputFile.json="/evidence/$package-tests.json")

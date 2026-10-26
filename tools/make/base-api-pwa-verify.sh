@@ -7,12 +7,16 @@ require_env
 ROOT=$(pwd -P)
 PROJECT=radar-$ENV
 ACTION=ci-api
+PWA_MODE=${PWA_MODE:-full}
+[[ $PWA_MODE == full || $PWA_MODE == mcp ]]
 SCOPE=${SCOPE:-$(git ls-files --cached --others --exclude-standard -- 'api/src/artifacts/write-*.test.ts' 'api/tests/integration/pw-write-authority*.spec.ts' | sed 's#^api/##')}
 require_scope
 RUN_DIR=$ROOT/tmp/pwa-evidence/runtime
 LOG_DIR=$ROOT/tmp/pwa-evidence/$(date -u +%Y%m%dT%H%M%S)-campaign
 mkdir -p "$RUN_DIR" "$LOG_DIR"
 printf '%s\n' "$LOG_DIR" | tee "$ROOT/tmp/pwa-evidence/latest"
+printf '%s\n' "$LOG_DIR" > "$ROOT/tmp/pwa-evidence/latest-$PWA_MODE"
+printf '%s\n' "$PWA_MODE" > "$LOG_DIR/mode.txt"
 free_space() {
   [[ $(df -Pk "$ROOT" | awk 'NR==2 {print $4}') -ge 8388608 &&
      $(awk '/MemAvailable:/ {print $2}' /proc/meminfo) -ge 8388608 ]]
@@ -43,6 +47,17 @@ source tools/make/base-api-ci-archive.sh
 write_compose
 archive_sources
 archive_ci_inputs
+git ls-files --cached --others --exclude-standard -- 'packages/immo-mcp/config/*.json' \
+  'packages/immo-mcp/src/fixtures/*.json' tools/h4-mcp.mk deploy/k8s/41-immo-mcp-ingress.yaml \
+  | while IFS= read -r file; do
+    part=$file
+    while [[ $part != . ]]; do
+      [[ ! -L $part ]] || exit 2
+      if [[ $part == */* ]]; then part=${part%/*}; else part=.; fi
+    done
+    tar -rf "$RUN_DIR/source.tar" "$file"
+    printf '%s\n' "$file" >> "$LOG_DIR/archived-paths.txt"
+  done
 git ls-files --cached --others --exclude-standard -- 'api/tests/*.ts' | while IFS= read -r file; do
   relative=${file#api/tests/}
   [[ $relative != */* && ! -L $file ]] || continue
@@ -66,10 +81,10 @@ sha256sum "$LOG_DIR/target.diff" > "$LOG_DIR/target.sha256"
 MONITOR=$!
 "${compose[@]}" up -d --wait postgres minio
 "${compose[@]}" run --rm --no-deps -T api bash -ec \
-  'tar -xf /source.tar -C /workspace; exec bash tools/make/base-api-pwa-container.sh "$1"' -- "$SCOPE" \
+  'tar -xf /source.tar -C /workspace; exec bash tools/make/base-api-pwa-container.sh "$1" "$2"' -- "$SCOPE" "$PWA_MODE" \
   > >(tee "$LOG_DIR/campaign.log") 2>&1 &
 RUN_PID=$!
 wait "$RUN_PID"
 RUN_PID=
-assert_tests_ran "$LOG_DIR/tests.tsv"
+if [[ $PWA_MODE == full ]]; then assert_tests_ran "$LOG_DIR/tests.tsv"; fi
 echo 'PASS PW-A campaign' > "$LOG_DIR/result"
