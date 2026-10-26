@@ -4,7 +4,7 @@
  * effects; delegates to the PW-D guarded store without copying it.
  */
 import type { Database } from "../db/client.js";
-import { sql } from "drizzle-orm";
+import { writeIntentTransaction } from "./write-intent-transaction.js";
 import { approvedAccountId, resolveWorkspaceAccess } from "../services/workspaces/store.js";
 import { lockWorkspace } from "../services/workspaces/mutations.js";
 import { WorkspaceError } from "../services/workspaces/types.js";
@@ -92,9 +92,8 @@ export async function prepareWriteIntent(
     authorityReferences: deps.authorityReferences,
   });
   const command = toSignalInput(body, commandKey, expiresAtMs);
-  const stored = await db.transaction(async (tx) => {
+  const stored = await writeIntentTransaction(db, async (tx) => {
     // Bound waits just like admission; do not prepare after an authority wait expires.
-    await tx.execute(sql`SET LOCAL lock_timeout = '1s'`);
     await assertPwAuthorityOpen(tx, binding.authorityReferences);
     if ((deps.nowMs ?? Date.now)() >= expiresAtMs) throw new FacetError(401, "write_grant_expired");
     await lockWorkspace(tx, body.workspaceId);
