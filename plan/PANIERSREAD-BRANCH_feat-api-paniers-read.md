@@ -15,6 +15,7 @@
 - [x] Conditional Paths: `api/src/app.ts`, mounting only under PANIERSREAD-EX1.
 
 ## Feedback Loop
+- [ ] Third-pass context/state: reproduce closure after the second catalog and stale business refusals during real PostgreSQL writes through createApp.
 - [ ] Third-pass discovery: reproduce real BASE revocation and membership addition during final approval; deliver only commits above `4c801bab`.
 - [x] Second-pass discovery: reproduce eight PostgreSQL suspension races at the last membership await; revalidate approval with the BASE shared account lock before returning either membership sample; delivery range starts at `8c0ad35c`.
 - [x] Second-pass mutations: all 18 mutants killed by domain assertions, with 28 failing cases then 28 passing cases after byte-exact restoration; includes the previous 15 mutants, final discovery approval, account lock and current rights.
