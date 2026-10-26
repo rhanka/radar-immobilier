@@ -6,14 +6,14 @@ import { confirmPwSignalWrite } from "../../src/services/facets/pw-write-confirm
 import { httpFixture } from "./base-api-http-fixture.js";
 
 describeDb("PW-D createApp wiring", () => {
-  it("should mount no write-intent route and persist BASE on the app database", async () => {
+  it("should keep unconfigured write transport closed and persist BASE on the app database", async () => {
     const { data, request } = await httpFixture();
     const input = await preparedSelect(data);
     const row = await pwPrepared(data, input);
     const missing = await request(`/api/v1/artifacts/write-intents/${row.intentId}/confirm`,
       data.contributor.sub, { method: "POST", headers: { "content-type": "application/json" },
         body: JSON.stringify({ challengeToken: "x" }) });
-    expect([404, 405]).toContain(missing.status);
+    expect(missing.status).toBe(503);
     const result = await confirmPwSignalWrite(data.db, data.contributor.sub, row.intentId,
       input, { confirmation: pwConfirmation(row) });
     expect(result.event?.state).toBe("active");
