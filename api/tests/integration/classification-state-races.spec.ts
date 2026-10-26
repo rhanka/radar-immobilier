@@ -7,6 +7,53 @@ import { writeScopedPersonalFacet } from "../../src/services/facets/scoped-write
 import { revokeMembership } from "../../src/services/workspaces/mutations.js";
 
 describeDb("classification state business outcomes in coherent projections", () => {
+  it("should bound state retries when every heads read changes the personal revision", async () => {
+    const f = await classificationFixture();
+    const original = heads.readClassificationHeads;
+    let hidden = false;
+    let headId: string | null = null;
+    const spy = vi.spyOn(heads, "readClassificationHeads").mockImplementation(async (...args) => {
+      const result = await original(...args);
+      const common = { target: f.signal.target, expectedHeadId: headId,
+        displayedFingerprint: f.signal.fingerprint, commandKey: randomUUID() };
+      const written = await writeScopedPersonalFacet(f.data.db, f.data.contributor.sub, f.data.workspaceId,
+        hidden ? { ...common, action: "restore" } : { ...common, action: "discard", reasonCode: "N-NON-RES" });
+      headId = written!.id;
+      hidden = !hidden;
+      return result;
+    });
+    try {
+      const response = await f.request(`signal-facets/state?citySlug=synthetic-city&type=Signal&id=${f.signal.target.id}`);
+      const body = await response.json();
+      expect(response.status).toBe(503);
+      expect(body.error.code).toBe("projection_revision_unstable");
+      expect(body.item).toBeUndefined();
+      expect(body.snapshot).toBeUndefined();
+      expect(spy).toHaveBeenCalledTimes(3);
+    } finally { spy.mockRestore(); }
+  });
+  it("should retry after stale catalog even when the state refusal stays reveal_required", async () => {
+    const f = await classificationFixture();
+    await writeScopedPersonalFacet(f.data.db, f.data.contributor.sub, f.data.workspaceId, {
+      target: f.signal.target, expectedHeadId: null, displayedFingerprint: f.signal.fingerprint,
+      commandKey: randomUUID(), action: "discard", reasonCode: "N-NON-RES",
+    });
+    const original = heads.readClassificationHeads;
+    const spy = vi.spyOn(heads, "readClassificationHeads").mockImplementationOnce(async (...args) => {
+      const result = await original(...args);
+      await f.data.pool.query("INSERT INTO facet_reason_codes(profile_id,code,verdict) VALUES('immo-steve-2026-09','P-LATE-CATALOG','pertinent')");
+      return result;
+    });
+    try {
+      const response = await f.request(`signal-facets/state?citySlug=synthetic-city&type=Signal&id=${f.signal.target.id}`);
+      const body = await response.json();
+      expect(response.status).toBe(409);
+      expect(body.error.code).toBe("reveal_required");
+      expect(body.item).toBeUndefined();
+      expect(body.snapshot).toBeUndefined();
+      expect(spy).toHaveBeenCalledTimes(2);
+    } finally { spy.mockRestore(); }
+  });
   for (const outcome of ["reveal_required", "target_not_found"] as const) {
     for (const revoked of [false, true]) {
       it(`should ${revoked ? "refuse revoked access" : "retry"} after stale ${outcome} heads`, async () => {
