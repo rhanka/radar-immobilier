@@ -26,6 +26,9 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
   - `api/tests/integration/pw-write-createapp.spec.ts`: PWA-EX1.
 
 ## Feedback Loop
+- [x] Second passes: merge approved PW-D 0ab7d664 with both parents retained;
+  pass authenticated P to its status budget and durable refusal projection,
+  and carry the verified cookie expiry inside the confirmation proof.
 - [x] Astra fixes: enforce current workspace rights before summary bootstrap;
   preserve technical owner management and normalize foreign management IDs.
 - [x] Astra fixes: canonical prepare path, typed expiry, post-projection
