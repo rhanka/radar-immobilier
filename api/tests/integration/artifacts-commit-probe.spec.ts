@@ -76,6 +76,7 @@ import {
 } from "@radar/artifacts-host";
 import { loadConfig } from "../../src/config.js";
 import { migrationsFolder } from "./artifacts-h2.helpers.js";
+import { seedArtifactMemberships } from "./artifacts-membership.helpers.js";
 
 const DATABASE = "artifacts_h2_commit_probe";
 const SCOPE = "probe_scope";
@@ -123,6 +124,7 @@ beforeAll(async () => {
     credentials: { accessKeyId: accessKey, secretAccessKey: secretKey } });
   await s3.send(new CreateBucketCommand({ Bucket: BUCKET }));
   await pool.query("INSERT INTO account_users (sub, email, status) VALUES ('alice','alice@example.test','approved')");
+  await seedArtifactMemberships(pool);
 });
 
 afterAll(async () => {

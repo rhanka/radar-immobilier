@@ -57,3 +57,4 @@
 - [x] Astra A5: Add twelve semantic mutation controls with restored-source PostgreSQL baselines.
 - [x] Astra A5: Anchor review-fix delivery and fresh-repository bundle audit at 658663dd.
 - [x] Astra A5: 11/11 PostgreSQL regressions pass; propagate typed host refusals after publication waits and add the thirteenth mutation.
+- [x] Astra A5: supply explicit memberships for legitimate H2/production quota fixtures; preserve all Q1/Q2/acceptance assertions.

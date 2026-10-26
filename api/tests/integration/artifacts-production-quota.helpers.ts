@@ -2,12 +2,14 @@ import { expect } from "vitest";
 import { randomUUID } from "node:crypto";
 import { startHarness } from "./artifacts-h2.helpers.js";
 import { openProductionPeer } from "./artifacts-production-worker.helpers.js";
+import { seedArtifactMemberships } from "./artifacts-membership.helpers.js";
 
 export async function qualifyLastQuotaUnit() {
   const h = await startHarness("quotaprocess");
   let peer: Awaited<ReturnType<typeof openProductionPeer>> | undefined;
   try {
     await h.pool.query("INSERT INTO account_users (sub, status) VALUES ('alice', 'approved')");
+    await seedArtifactMemberships(h.pool);
     await h.pool.query("UPDATE artifacts.host_quotas SET operation_limit = 1, byte_limit = 0");
     peer = await openProductionPeer(h);
     expect(peer.pid).not.toBe(process.pid);
@@ -38,6 +40,7 @@ export async function qualifyAdmissionQuotaAccounting() {
   const h = await startHarness("quotaadmission");
   try {
     await h.pool.query("INSERT INTO account_users (sub, status) VALUES ('alice', 'approved')");
+    await seedArtifactMemberships(h.pool);
     await h.pool.query("UPDATE artifacts.host_quotas SET operation_limit = 1, byte_limit = 0");
     const invocationId = randomUUID();
     const request = { method: "POST", path: "/ensure", actorId: "alice",

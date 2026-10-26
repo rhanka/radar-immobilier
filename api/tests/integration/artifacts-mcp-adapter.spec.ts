@@ -8,12 +8,14 @@ import { composeArtifactHost, createArtifactControl, createMemoryCommitLedger,
 import { createMcpArtifactAdapter } from "../../../packages/artifacts-host/src/mcp-app-adapter.js";
 import { controlRoute } from "../../src/artifacts/control-route.js";
 import { auth, cookie, startHarness, type Harness } from "./artifacts-h2.helpers.js";
+import { seedArtifactMemberships } from "./artifacts-membership.helpers.js";
 
 let h: Harness;
 beforeAll(async () => {
   h = await startHarness("mcpadapter");
   await h.pool.query("INSERT INTO account_users (sub, email, status) VALUES " +
     "('alice','alice@example.test','approved'), ('bob','bob@example.test','approved')");
+  await seedArtifactMemberships(h.pool);
 });
 afterAll(async () => { await h?.close(); });
 

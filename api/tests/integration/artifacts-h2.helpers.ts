@@ -7,6 +7,7 @@ import { createTestS3BlobStore } from "../artifacts-blob-store.helpers.js";
 import { composeArtifactHost, createArtifactControl, createArtifactsPool } from "@radar/artifacts-host";
 import { loadConfig, type AuthConfig } from "../../src/config.js";
 import { signSession } from "../../src/services/auth/session.js";
+import { seedArtifactMemberships } from "./artifacts-membership.helpers.js";
 
 export const migrationsFolder = fileURLToPath(new URL("../../drizzle", import.meta.url));
 export const auth: AuthConfig = {
@@ -31,6 +32,7 @@ export async function startHarness(name: string, subjects: readonly string[] = [
   await migrate(drizzle(pool), { migrationsFolder });
   for (const subject of subjects) await pool.query(
     "INSERT INTO account_users (sub, status) VALUES ($1, 'approved')", [subject]);
+  await seedArtifactMemberships(pool);
   const config = { enabled: true as const, storageScope: "h2_scope", orgId: "h2_org",
     s3Bucket: `h2-artifacts-${name}`, s3Endpoint: env.S3_ENDPOINT, s3Region: "us-east-1",
     s3AccessKey: env.S3_ACCESS_KEY, s3SecretKey: env.S3_SECRET_KEY };
