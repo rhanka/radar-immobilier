@@ -182,3 +182,83 @@ for this read-search path. Keep existing bindings; no new credential is needed.
    existence using `kubectl get secret <name> -o name` only. Check the database
    connection from the MCP pod using the configured reader, without printing
    its URL. Metadata/readiness alone does not establish functional delivery.
+
+## Controlled rollout, A2 qualification and receipt
+
+6. After prerequisites, run the normal supervised preprod CD (including backup
+   and migrations) for the approved candidate. Keep the release acceptance
+   pending. Record `OP_API_IMAGE` and `OP_MCP_IMAGE` as the actual immutable
+   `sha256:<64 hex>` digests, not tags or Git SHAs. Verify the served pods:
+
+   ```sh
+   rtk make -f tools/make/artefacts-delivery.mk inspect CMD='kubectl --context "$OP_CONTEXT" -n radar-immobilier-preprod get pods -l app.kubernetes.io/name=radar-immobilier -o custom-columns=NAME:.metadata.name,READY:.status.containerStatuses[0].ready,IMAGE:.status.containerStatuses[0].imageID' ENV=preprod
+   ```
+
+   Compare the API and MCP imageIDs to the selected digests. A readiness pass
+   only checks API dependencies or MCP discovery; it does not qualify search.
+
+7. Build a non-secret `OP_RECEIVER_FILE` (outside the repo, suffix `.conf`) with
+   the exact receiver keys in the inventory: `MCP_SIGNAL_SEARCH_ENABLED=1`,
+   `STRICT_RECEIVER_ARMED=0`, workload pair, `STRICT_RECEIVER_ENVIRONMENT=preprod`,
+   and target `STRICT_RECEIVER_API_IMAGE`/`STRICT_RECEIVER_MCP_IMAGE` digests.
+   Do not copy credentials into it. Apply it, restart API (env is startup-only),
+   then perform the controlled A2 probe below. Keep the validation window
+   restricted to designated approved test users while the receiver is disarmed.
+
+   ```sh
+   rtk make -f tools/make/artefacts-delivery.mk inspect CMD='set -o pipefail; kubectl --context "$OP_CONTEXT" -n radar-immobilier-preprod create configmap radar-mcp-receiver --from-env-file="$OP_RECEIVER_FILE" --dry-run=client -o yaml | kubectl --context "$OP_CONTEXT" -n radar-immobilier-preprod apply --server-side --field-manager=mcp-operator -f -; kubectl --context "$OP_CONTEXT" -n radar-immobilier-preprod rollout restart deployment/radar-api; kubectl --context "$OP_CONTEXT" -n radar-immobilier-preprod rollout status deployment/radar-api' ENV=preprod
+   ```
+
+8. Provision a short-lived human token through the existing preprod OAuth/PKCE
+   connector flow, audience ending `/mcp`, scopes `immo:read immo:search`.
+   Put the entire `Authorization: Bearer ...` header in a protected file outside
+   the repository (`OP_AUTH_HEADER_FILE`); never put the token on the command
+   line. Export `OP_CITY`, `OP_WORKSPACE` and `OP_EXPECTED_SIGNAL` for a known
+   signal visible to that approved account. `OP_EVIDENCE_DIR` is a private
+   directory per probe. Run the exact Streamable HTTP initialize + tools/call:
+
+   ```sh
+   rtk make -f tools/make/artefacts-delivery.mk inspect CMD='bash tools/make/artefacts-delivery-probe.sh' ENV=preprod
+   ```
+
+   It checks both unauthenticated endpoints return 401 and verifies the actual
+   known signal and workspace in `search_signals`, rather than accepting an
+   empty success or discovery response. Repeat for designated legacy/missing
+   and BASE-open workspaces when those states exist in this deployment.
+   Correlate the request with the API access trace: only
+   `GET /api/v1/mcp/facets/signals/search` may serve search, with delegated
+   authority, not a cookie or the original human bearer. The local regression
+   suite covers all three epochs; it does not prove the real IdP was provisioned.
+
+9. Retain a digest-bound A2 receipt: time, target SHA, both served image digests,
+   issuer, API audience, workload pair, environment, route/schema/policy
+   revisions, expected signal/workspace and probe verdicts. After observing
+   exchange success, append ALL `STRICT_RECEIVER_RECEIPT_*` keys from the
+   inventory to `OP_RECEIVER_FILE`, matching that receipt exactly, and change
+   `STRICT_RECEIVER_ARMED=1`. Reapply with step 7's command and repeat step 8.
+   Merely copying target digests into receipt fields is not qualification.
+   A missing/mismatched field must stop API startup, not disable enforcement.
+
+10. Before releasing the hold, use the approved admin workflow to suspend the
+    designated test account. Reuse its still-valid token, set
+    `OP_EXPECTED_ERROR=composition_account` and use a fresh evidence directory;
+    repeat the probe and require denial with no signal payload. Restore approval.
+    Revoke its test workspace membership, set
+    `OP_EXPECTED_ERROR=workspace_not_authorized`, repeat and require denial.
+    If the human token itself asserts that workspace, account composition can
+    refuse earlier with `composition_account`; document the actual boundary.
+    Restore membership, unset `OP_EXPECTED_ERROR` and require success again.
+    Perform changes only on the designated test identity/workspace, recording
+    their prior state. Keep the recorded receipt and all post-arming results
+    with the target digests. Only then accept delivery and release the hold.
+
+## Closed recovery
+
+On any failed prerequisite or probe, stop delivery and keep/restore
+`MCP_SIGNAL_SEARCH_ENABLED=0` in the operator receiver CM; restart API to apply.
+Preserve an already armed receiver and its matching receipt. Do not unset its
+workload pair, disable enforcement, forward human bearers, or reopen legacy
+routes as recovery. A replacement target must preserve strict enforcement,
+exchange capability and stored data; qualify a matching digest-bound receipt.
+Do not delete volumes or application data. Missing credentials must be repaired
+out-of-band and MCP restarted, with the same probes repeated before acceptance.
