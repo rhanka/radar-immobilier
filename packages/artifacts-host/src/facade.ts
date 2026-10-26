@@ -89,12 +89,34 @@ export function createArtifactControl(
       const invocation = Object.freeze({ invocationId: randomUUID(), actorId, storageScopeId: scope,
         authorizeCommit: async (...args: Parameters<typeof authorizeArtifactCommit>) => {
           if (admission) {
-            let decision;
-            try { decision = await checkAdmission(admission, actorId); }
-            catch { return { allowed: false as const, reason: "unavailable" as const,
-              publicCode: "capability_unavailable", status: 503, retriable: true }; }
-            if (!decision.allowed) return { allowed: false as const, reason: "denied" as const,
-              publicCode: decision.body.error, status: decision.status, retriable: false };
+            const [context, transaction] = args;
+            const participant = (transaction as { participant?: {
+              checkApproval?: (input: { actorId: string; operation: string }) => Promise<{
+                approved?: unknown; publicCode?: unknown; status?: unknown }>;
+            } } | null | undefined)?.participant;
+            if (participant && typeof participant.checkApproval === "function") {
+              try {
+                const approval = await participant.checkApproval({ actorId, operation: context.operation });
+                if (approval && typeof approval.approved === "boolean" && approval.approved === false) {
+                  const publicCode = typeof approval.publicCode === "string" &&
+                    /^[a-z][a-z0-9_]{0,63}$/.test(approval.publicCode)
+                    ? approval.publicCode : "access_denied";
+                  const status = approval.status === 409 ? 409 : 403;
+                  return { allowed: false as const, reason: "denied" as const,
+                    publicCode, status, retriable: false };
+                }
+              } catch {
+                return { allowed: false as const, reason: "unavailable" as const,
+                  publicCode: "capability_unavailable", status: 503, retriable: true };
+              }
+            } else {
+              let decision;
+              try { decision = await checkAdmission(admission, actorId); }
+              catch { return { allowed: false as const, reason: "unavailable" as const,
+                publicCode: "capability_unavailable", status: 503, retriable: true }; }
+              if (!decision.allowed) return { allowed: false as const, reason: "denied" as const,
+                publicCode: decision.body.error, status: decision.status, retriable: false };
+            }
           }
           return authorizeArtifactCommit(...args);
         } });
