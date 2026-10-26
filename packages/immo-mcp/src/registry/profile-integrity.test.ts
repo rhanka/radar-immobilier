@@ -7,7 +7,7 @@ import type { ArtifactActivationRequest, ProviderDefinition } from "./mcp-regist
 const embedded = JSON.parse(readFileSync(new URL("../../config/immo-tools.v1.json", import.meta.url), "utf8"));
 const config = JSON.parse(readFileSync(new URL("../../config/immo-artifacts.v1.json", import.meta.url), "utf8"));
 const providers: ProviderDefinition[] = [{ ...embedded.provider, tools: embedded.tools }, {
-  id: "sentropic.artifacts", version: "0.1.4",
+  id: "sentropic.artifacts", version: "0.2.1",
   tools: ARTIFACT_SELECTION.map(({ tool }) => ({
     name: tool, scope: "immo:read", binding: { context: "artifact-service", registeredBy: "registerTools" },
   })),

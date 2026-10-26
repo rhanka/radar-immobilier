@@ -1,3 +1,4 @@
+import { controlTestHost } from "./control-test-host.js";
 import { describe, expect, it, vi } from "vitest";
 import type { ActivationConfig } from "./activation.js";
 import type { AdmissionAuthority } from "./admission.js";
@@ -28,7 +29,7 @@ function stubHost() {
   // this to a publication receipt instead of throwing before the assertions.
   const handle = vi.fn(async () => ({ status: 201,
     body: { artifactId: ARTIFACT, releaseId: RELEASE, manifest: JSON.stringify({ digest: DIGEST }) } }));
-  const host = { app: { handle } } as unknown as Parameters<typeof createArtifactControl>[0];
+  const host = controlTestHost(handle);
   return { host, handle };
 }
 
@@ -114,7 +115,7 @@ describe("commit-time authority reread [T05 T13]", () => {
   it("publishes with a complete receipt while admission holds", async () => {
     const { response, handle } = await publishWith(harness([live(), live()], ["approved", "approved"]));
     expect(response).toEqual({ status: 201,
-      body: { artifactId: ARTIFACT, releaseId: RELEASE, digest: DIGEST,
+      body: { artifactId: ARTIFACT, releaseId: RELEASE, manifest: JSON.stringify({ digest: DIGEST }), digest: DIGEST,
         stableUrl: `https://${ARTIFACT}.pages.example.test/`,
         pinnedUrl: `https://${RELEASE}.pinned.pages.example.test/` } });
     expect(handle).toHaveBeenCalledTimes(1);

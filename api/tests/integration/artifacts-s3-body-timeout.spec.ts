@@ -2,7 +2,7 @@ import { createServer, type Server } from "node:http";
 import type { AddressInfo, Socket } from "node:net";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { S3Client } from "@aws-sdk/client-s3";
-import { createS3BlobStore } from "@sentropic/artifacts/adapters/s3";
+import { createTestS3BlobStore } from "../artifacts-blob-store.helpers.js";
 import {
   ArtifactS3TimeoutError,
   createTimeoutBlobStore,
@@ -18,7 +18,7 @@ const sockets = new Set<Socket>();
 let requests = 0;
 
 beforeAll(async () => {
-  h = await startHarness("s3timeout");
+  h = await startHarness("s3timeout", ["alice"]);
   // Send headers with a large body, then stall: the exact gap where
   // requestTimeout no longer applies but body streaming hangs.
   server = createServer((_req, res) => {
@@ -44,13 +44,15 @@ afterAll(async () => {
 
 describe("artifact stalled S3 body", () => {
   it("fails within the deadline and frees the lock and connection", async () => {
+    h.host.cleanup.stop();
+    await h.host.cleanup.runOnce();
     const raw = new S3Client({
       endpoint: `http://127.0.0.1:${port}`, forcePathStyle: true, region: "us-east-1",
       credentials: { accessKeyId: "test", secretAccessKey: "test" },
       requestHandler: { requestTimeout: 5000, connectionTimeout: 3000, throwOnRequestTimeout: true },
     });
     const client = createTimeoutS3Client(raw, 1000);
-    const blobs = createTimeoutBlobStore(createS3BlobStore({ client, bucket: "stalled" }), 1000);
+    const blobs = createTimeoutBlobStore(createTestS3BlobStore({ client, bucket: "stalled" }), 1000);
     try {
       const keys = Array.from({ length: 5 }, (_, i) => `ef${i.toString(16).padStart(2, "0")}`.padEnd(32, "0"));
       await Promise.all(keys.map(async (key) => {

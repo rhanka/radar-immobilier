@@ -162,6 +162,13 @@
       "when": 1791900000000,
       "tag": "0023_facet_lot_versions_fence",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1792000000000,
+      "tag": "0024_artifacts_coordinator",
+      "breakpoints": true
     }
   ]
 }
