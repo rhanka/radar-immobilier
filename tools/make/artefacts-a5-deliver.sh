@@ -2,7 +2,7 @@
 set -euo pipefail
 action=${1:?}
 ROOT=$(pwd -P)
-BASE=$(git rev-parse 5ea88ce1)
+BASE=$(git rev-parse 658663dd)
 LOCAL=$ROOT/tmp/a5-delivery.git
 [[ $ENV == test-artefacts-a5 ]]
 if [[ $action == setup ]]; then
@@ -43,8 +43,6 @@ audit() {
     git show --format= --numstat "$sha" | stats
     git show -s --format='%H %s' "$sha"
   done < <(git rev-list --reverse --no-merges "$BASE..HEAD")
-  # Imported history is immutable under the owner-required merge/no-rewrite rule.
-  git log --reverse --format='%H %s' "$BASE..313fcf44" > "$ROOT/tmp/a5-evidence/imported-commit-audit.txt"
   git log --merges --format='%H %P %s' "$BASE..HEAD"
 }
 case $action in
@@ -57,10 +55,10 @@ case $action in
     git -c core.hooksPath=/dev/null commit -m "$MSG";;
   audit) audit;;
   bundle)
-    audit > "$ROOT/tmp/a5-evidence/facade-commit-audit.txt"
-    OUT=$ROOT/tmp/a5-evidence/artefacts-a5-facade-0.2.0.bundle
+    audit > "$ROOT/tmp/a5-evidence/astra-commit-audit.txt"
+    OUT=$ROOT/tmp/a5-evidence/artefacts-a5-astra-fixes.bundle
     git bundle create "$OUT" "$BASE..HEAD"
-    auditdir=$(mktemp -d "$ROOT/tmp/a5-evidence/bundle-audit.XXXXXX")
+    auditdir=$(mktemp -d "$ROOT/tmp/a5-evidence/astra-bundle-audit.XXXXXX")
     independent() { env -u GIT_DIR -u GIT_WORK_TREE git -C "$auditdir" "$@"; }
     independent init --bare -q
     [[ ! -e $auditdir/objects/info/alternates ]]
