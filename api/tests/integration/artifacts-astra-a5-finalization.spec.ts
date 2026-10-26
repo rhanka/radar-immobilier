@@ -40,7 +40,7 @@ describe("astra A5 transactional scope membership", () => {
       await h.pool.query("UPDATE workspace_memberships SET status='revoked', revoked_at=now()");
       release.resolve();
       const denied = await pending;
-      expect(denied).toMatchObject({ status: 403, body: { error: "workspace_membership_required" } });
+      expect(denied, JSON.stringify(denied)).toMatchObject({ status: 403, body: { error: "workspace_membership_required" } });
       expect(await h.durable()).toEqual(before);
       expect((await h.pool.query("SELECT count(*)::int AS n FROM artifacts.host_failures")).rows[0].n).toBeGreaterThan(0);
     } finally { release.resolve(); await pending; host.close(); }

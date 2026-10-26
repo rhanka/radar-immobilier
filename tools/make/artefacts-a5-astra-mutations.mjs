@@ -8,6 +8,9 @@ const pool = 'tests/integration/artifacts-astra-a5-pool-guard.spec.ts';
 const http = 'tests/integration/artifacts-astra-a5-http-admission.spec.ts';
 const host = 'packages/artifacts-host/src/';
 const mutations = [
+  { id: 'domain-denial-erases-host-code', file: `${host}host-coordinator.ts`,
+    from: 'if (!authority.allowed) return authority;', to: '', suite: tx,
+    expected: 'should roll back publication, receipt and quota when membership is revoked during upload' },
   { id: 'http-membership-omitted', file: 'api/src/artifacts/control-route.ts',
     from: 'createArtifactAdmissionAuthority(\n        deps.accounts',
     to: 'createAdmissionAuthority(\n        deps.accounts', setup: 'http-legacy-authority', suite: http,

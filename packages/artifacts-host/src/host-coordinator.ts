@@ -1,11 +1,14 @@
 import type { ArtifactCommitCoordinator, AuthorizeCommit, FinalizeRequest } from "@sentropic/artifacts/server/commit-contract";
 
-/** The request guard observes domain denials after waits, without overriding them. */
+/** Retain domain denials; propagate a fresh host refusal after publication waits. */
 export function bindHostCoordinator(coordinator: ArtifactCommitCoordinator, currentGuard: () => AuthorizeCommit) {
   const bind = (request: FinalizeRequest): FinalizeRequest => ({ ...request,
     guard: async (context, transaction) => {
       const decision = await request.guard(context, transaction);
-      if (!decision.allowed && request.operation === "publish") await currentGuard()(context, transaction);
+      if (!decision.allowed && request.operation === "publish") {
+        const authority = await currentGuard()(context, transaction);
+        if (!authority.allowed) return authority;
+      }
       return decision;
     },
   });
