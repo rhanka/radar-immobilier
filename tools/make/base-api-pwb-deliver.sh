@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Local-only delivery: bounded commits and a base-seeded independent bundle audit.
 set -euo pipefail
-BASE=8c0ad35c950e97a47c892b9b4b70d6b5428b823f
+BASE=b09a8ccccab5d7256c0a08b8b93979dbec57b65f
 [[ $(git branch --show-current) == feat/api-paniers-write ]]
 [[ ${ENV:-} == test-api-paniers-w ]]
 git merge-base --is-ancestor "$BASE" HEAD
@@ -10,7 +10,7 @@ git diff --cached --exit-code
 [[ -z $(git ls-files --others --exclude-standard) ]] || { echo 'Uncommitted delivery files'; exit 2; }
 root=$(pwd -P)
 head=$(git rev-parse HEAD)
-out=$root/tmp/pwb-evidence/delivery
+out=$root/tmp/pwb-evidence/delivery-review
 mkdir -p "$out"
 allowed() {
   case $1 in
@@ -45,7 +45,7 @@ git -C tmp/pwb-evidence/rescue.git fetch --no-tags "$root" HEAD:refs/heads/deliv
 audit_dir=$(mktemp -d "$out/audit.XXXXXX")
 git init --bare -q "$audit_dir"
 # Fetch the original pre-work backup, never the feature worktree, as prerequisite.
-git -C "$audit_dir" fetch --no-tags --no-write-fetch-head "$root/tmp/pwb-evidence/backup/base.bundle" HEAD:refs/heads/base
+git -C "$audit_dir" fetch --no-tags --no-write-fetch-head "$root/tmp/pwb-evidence/review-backup/b09a8ccc.bundle" HEAD:refs/heads/base
 [[ $(git -C "$audit_dir" rev-parse refs/heads/base) == "$BASE" ]]
 git -C "$audit_dir" symbolic-ref HEAD refs/heads/base
 if git -C "$audit_dir" cat-file -e "$head^{commit}" 2>/dev/null; then
