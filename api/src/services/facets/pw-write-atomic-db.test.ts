@@ -101,7 +101,7 @@ describeDb("PW-D atomicity", () => {
     const before = await baseState(f);
     for (let i = 0; i < 2; i++) expect(await f.db.transaction((tx) =>
       revokePwIntent(tx, row.intentId, f.contributor.id, confirmation.principal))).toEqual({ committed: true });
-    expect(await readPwWriteStatus(f.db, row.intentId, confirmation.principal))
+    expect(await readPwWriteStatus(f.db, row.intentId, confirmation.principal, row.pageSessionId))
       .toMatchObject({ status: "revoked", executionState: "committed" });
     const pending = await f.db.transaction((tx) => listPwPendingOutbox(tx, 10));
     expect(pending.map((r) => r.kind)).toEqual(["write_committed", "write_revoked"]);
