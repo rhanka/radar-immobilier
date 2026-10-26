@@ -38,8 +38,9 @@ for prod). Two consequences:
 - When the var is **not** `'true'`, the sequence above does **not** run: both
   backup and migrate are **skipped** and the deploy proceeds through the rest of
   its steps (reconcile / apply-mcp, then set-image) with no backup and no
-  migration. For a release carrying a pending schema change (e.g. drizzle `0011`)
-  that rolls new code onto an **un-migrated** DB. This staged arming is by design
+  migration. For a release carrying a pending schema change (e.g. drizzle `0011`),
+  that means new code rolls onto an **un-migrated** DB. This staged arming is by
+  design
   — prod ships **disarmed until the cutover**, so merging never arms prod as a
   side effect — but the skip is **never silent**: a disarmed run emits a loud
   `::warning::` (the `Warn if DB backup+migrate DISARMED …` step).
