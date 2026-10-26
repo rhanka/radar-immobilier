@@ -8,6 +8,7 @@ import { syntheticAdmission, preparedSelect, baseState, admitSyntheticWrite } fr
 import { readCommittedSignalReceipt } from "./signal-write-receipt.js";
 import { ScopeError } from "./scope.js";
 import { writeScopedPersonalFacet } from "./scoped-writer.js";
+import { assertMutationOutcome, writeMutationOutcome } from "./signal-write-mutation-probe.js";
 
 describeDb("PW-B transactional admission", () => {
   it("should close admission without PW-D instead of writing BASE", async () => {
@@ -30,8 +31,8 @@ describeDb("PW-B transactional admission", () => {
         reason: "synthetic PW-D consumption and quota" });
     };
     const clock = vi.fn().mockReturnValueOnce(0).mockReturnValueOnce(0).mockReturnValue(1_000);
-    await expect(coordinateSignalWrite(f.db, f.contributor.sub, request, port, clock))
-      .rejects.toMatchObject({ message: "challenge_expired" });
+    const observed = await writeMutationOutcome(coordinateSignalWrite(f.db, f.contributor.sub, request, port, clock));
+    assertMutationOutcome("expiry", observed, "challenge_expired");
     expect(await baseState(f)).toEqual(before);
   });
 

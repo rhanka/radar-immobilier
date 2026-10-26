@@ -4,6 +4,7 @@ import { describeDb, workspaceFixture, type WorkspaceFixture } from "./workspace
 import { preparedSelect, baseState, admitSyntheticWrite } from "./signal-write-fixture.js";
 import { readProjectionScope, bumpGraphSourceRevision } from "./projection-revisions.js";
 import { readCommittedSignalReceipt } from "./signal-write-receipt.js";
+import { assertMutationOutcome, writeMutationOutcome } from "./signal-write-mutation-probe.js";
 
 async function waitForBlocked(f: WorkspaceFixture, pid: number) {
   await vi.waitFor(async () => {
@@ -26,7 +27,7 @@ describeDb("PW-B PostgreSQL lock coverage", () => {
     try {
       await blocker.query("BEGIN");
       await blocker.query("SELECT pg_advisory_xact_lock(hashtext($1))", [`graph-city:${request.target.citySlug}`]);
-      outcome = admitSyntheticWrite(f.db, f.contributor.sub, request).catch((error: unknown) => error);
+      outcome = writeMutationOutcome(admitSyntheticWrite(f.db, f.contributor.sub, request));
       const { rows: [{ pid }] } = await blocker.query("SELECT pg_backend_pid() AS pid");
       await waitForBlocked(f, pid);
       // Another target changes the city's scope while this target's version stays identical.
@@ -35,7 +36,7 @@ describeDb("PW-B PostgreSQL lock coverage", () => {
       await blocker.query("UPDATE graph_source_revisions SET revision=revision+1 WHERE city_slug=$1",
         [request.target.citySlug]);
       await blocker.query("COMMIT");
-      expect(await outcome).toMatchObject({ message: "projection_revision_conflict" });
+      assertMutationOutcome("snapshot", await outcome as string, "projection_revision_conflict");
       expect(await baseState(f)).toEqual(before);
     } finally {
       await blocker.query("ROLLBACK"); blocker.release(); await outcome;
