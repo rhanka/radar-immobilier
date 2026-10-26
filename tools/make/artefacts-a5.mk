@@ -17,3 +17,6 @@ run: guard
 .PHONY: verify test-api-ci inspect-profile diagnose-provider test-runtime test-composition-contract test-provider migration-proof test-astra test-astra-mutations
 verify test-api-ci inspect-profile diagnose-provider test-runtime test-composition-contract test-provider migration-proof test-astra test-astra-mutations: guard
 	@bash tools/make/artefacts-a5-verify.sh $@
+.PHONY: test-astra-compatibility
+test-astra-compatibility: guard
+	@bash tools/make/artefacts-a5-verify.sh $@
