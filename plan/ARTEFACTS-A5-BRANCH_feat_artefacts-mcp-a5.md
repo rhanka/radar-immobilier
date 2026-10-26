@@ -61,3 +61,8 @@
 - [x] Astra A5: adapt HTTP query doubles and inject the admission outage on the real reserved coordinator client; retain refusal/accounting assertions.
 - [x] Astra A5: preserve the public participant fence type and assert the precise account refusal after a publication key wait.
 - [x] Astra A5: 23/23 compatibility tests pass; retain the participant type and qualify final gates under one Docker campaign lock.
+- [x] Astra A5 final source bca8578b: 11/11 PostgreSQL/S3 regressions, 13/13 correction mutants and restored controls; qualification 20261026T080743-18.
+- [x] Astra A5 frozen Q1/Q2/acceptance: 31/31, 32/32, 6/6; CI-selected API 3925 passed, 76 pending, zero failures; MCP 401/401 and host 151/151.
+- [x] Astra A5 typecheck, lint, API build, 66 audit tests, audit gate, two preserved authority mutants and published tuple/profile proofs pass.
+- [x] Astra A5 exact image 9621953e: sixteen tools, four artifact operations, restart/replay, ordered conflict, account/membership refusals and durable counts; 20261026T081420-18.
+- [x] Astra A5 campaign teardown complete: no project containers, volumes or networks; deliver locally from 658663dd without push and preserve the companion report.
