@@ -53,3 +53,4 @@
 - [x] Astra A5: Add real PostgreSQL/S3 fixtures and durable artifact, release, receipt and quota snapshots.
 - [x] Astra A5: Cover all four production MCP tools after expiry, cohort removal and missing/ambiguous membership.
 - [x] Astra A5: Cover synchronized upload revocation, full durable rollback, revoked replay and PostgreSQL row locks.
+- [x] Astra A5: Cover actual pg-pool saturation, single-client writes and HTTP route membership admission.
