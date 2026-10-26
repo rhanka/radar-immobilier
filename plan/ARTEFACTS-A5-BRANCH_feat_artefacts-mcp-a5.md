@@ -51,3 +51,4 @@
 - [x] Astra A5: Normalize actual pg-pool acquisition errors at dispatch, lock and outcome boundaries.
 - [x] Astra A5: Wire fresh common admission into the production MCP binding and HTTP control routes.
 - [x] Astra A5: Add real PostgreSQL/S3 fixtures and durable artifact, release, receipt and quota snapshots.
+- [x] Astra A5: Cover all four production MCP tools after expiry, cohort removal and missing/ambiguous membership.
