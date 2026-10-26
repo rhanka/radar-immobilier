@@ -74,3 +74,4 @@
 - [x] Astra r2: map HTTP admission and dispatch outages to redacted 503 responses on the complete control route.
 - [x] Astra r2: qualify foreign membership, replacement during upload, revoked replay and real HTTP pool saturation on PostgreSQL.
 - [x] Astra r2: prove process survival, retryable failure and recovery with real pg_terminate_backend cuts; reproduce opening timeout.
+- [x] Astra r2: prove activation expiration after an observed membership lock wait through the production MCP replay binding.
