@@ -2,6 +2,7 @@
 import { readFileSync, writeFileSync, openSync, closeSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
+import { stripVTControlCharacters } from "node:util";
 const root = "/workspace/api/src/services/facets/";
 const admission = "pw-write-admission-durable.ts";
 const tests = [
@@ -44,8 +45,14 @@ function run(leg, phase, failed) {
   if (failed && !log.includes("AssertionError")) {
     throw new Error(`Failure was not an assertion: ${leg.name}`);
   }
-  if (failed && leg.expected && !executed[0].failureMessages.join("\n").includes(leg.expected)) {
-    throw new Error(`Mutation missed the exact expected refusal ${leg.expected}: ${leg.name}`);
+  if (failed && leg.expected) {
+    // Vitest's JSON message abbreviates objects; the expected diff stays exact.
+    const plain = stripVTControlCharacters(log);
+    const expectedDiff = plain.match(/- Expected:\s*\n([\s\S]*?)\n\+ Received:/)?.[1]
+      ?? plain.split("\n").filter((line) => /^\s*-\s/.test(line)).join("\n");
+    if (!expectedDiff.includes(`"message": "${leg.expected}"`)) {
+      throw new Error(`Mutation missed the exact expected refusal ${leg.expected}: ${leg.name}`);
+    }
   }
 }
 for (const leg of tests) {

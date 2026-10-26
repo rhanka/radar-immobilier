@@ -151,3 +151,4 @@ Qualify and integrate Muse's durable write persistence on PW-B after A5.
 - [x] Astra slice 11: initialize bundle-audit repositories without a worktree option.
 - [x] Astra slice 12: wait up to three hours at two-minute intervals, never holding a lock needed by foreign stacks.
 - [x] Astra slice 13: reconcile new table reexports and requestId inference after 102 passing scoped tests.
+- [x] Astra slice 14: verify exact refusal from the assertion diff when Vitest abbreviates its JSON message.
