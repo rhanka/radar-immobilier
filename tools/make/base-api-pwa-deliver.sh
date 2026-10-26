@@ -75,7 +75,8 @@ audit_git fetch --no-tags --no-write-fetch-head "$ROOT" "$BASE:refs/heads/base"
 if audit_git cat-file -e "$head^{commit}" 2>/dev/null; then echo 'Payload present before import' >&2; exit 2; fi
 audit_git bundle verify "$out"
 audit_git fetch --no-tags --no-write-fetch-head "$out" HEAD:refs/heads/payload
-[[ $(audit_git rev-parse payload) == "$head" && $(audit_git rev-parse 'payload^{tree}') == "$tree" ]]
+audit_git symbolic-ref HEAD refs/heads/payload
+[[ $(audit_git rev-parse HEAD) == "$head" && $(audit_git rev-parse 'HEAD^{tree}') == "$tree" ]]
 for merge in 512ca686 39ed4f1b; do audit_git merge-base --is-ancestor "$merge" payload; done
 audit_git fsck --full --no-reflogs
 sha256sum "$out" | tee tmp/pwa-evidence/bundle-astra.sha256

@@ -41,6 +41,8 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
   keep functional-case, process exit and byte-identical restoration gates.
 - [x] Review delivery: isolate audit Git environment from the rescue repository;
   retain manifests for every executed campaign input.
+- [x] Review audit: set the fresh repository HEAD to the imported payload before
+  checking commit/tree equality and full object integrity.
 - [x] Qualification fixes: complete the CSRF refusal envelope, use a canonical
   content host fixture, and type grant indexing and mutable AuthConfig fixtures.
 - [x] API: 4203 passed, 76 skipped; PW-A: 32 passed, zero skipped; seven
