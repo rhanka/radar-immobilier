@@ -12,6 +12,7 @@ import {
   type SignalWriteInput,
 } from "./signal-write-operations.js";
 import { toWriteRefusal } from "./signal-write-receipt.js";
+import { assertMutationOutcome } from "./signal-write-mutation-probe.js";
 
 const FINGERPRINT = "a".repeat(64);
 const TOKEN = "b".repeat(64);
@@ -76,8 +77,8 @@ describe("signal write operations", () => {
     });
     expect(signalWriteOperationDigest(discard(["pertinent", "a_surveiller"])))
       .toBe(signalWriteOperationDigest(discard(["a_surveiller", "pertinent"])));
-    expect(signalWriteOperationDigest(selectInput({ expectedProjectionToken: "c".repeat(64) })))
-      .not.toBe(first);
+    const changed = signalWriteOperationDigest(selectInput({ expectedProjectionToken: "c".repeat(64) }));
+    assertMutationOutcome("digest", changed === first ? "same_digest" : "different_digest", "different_digest");
   });
 
   it("should enforce the admission window without extending it", () => {

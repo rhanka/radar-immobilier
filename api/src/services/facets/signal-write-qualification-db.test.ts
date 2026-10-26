@@ -4,6 +4,7 @@ import { describeDb, workspaceFixture, workspaceSignal } from "./workspace-archi
 import { admitSyntheticWrite as coordinateSignalWrite } from "./signal-write-fixture.js";
 import { preparedSelect, baseState } from "./signal-write-fixture.js";
 import { readProjectionScope } from "./projection-revisions.js";
+import { assertMutationOutcome, writeMutationOutcome } from "./signal-write-mutation-probe.js";
 
 describeDb("PW-B adversarial admission", () => {
   it("should refuse confirmation replay instead of replacing the prepared token", async () => {
@@ -18,8 +19,8 @@ describeDb("PW-B adversarial admission", () => {
       commandKey: randomUUID(), expiresAtMs: Date.now() + 60_000,
     };
     const first = await coordinateSignalWrite(f.db, f.contributor.sub, request);
-    await expect(coordinateSignalWrite(f.db, f.contributor.sub, request))
-      .rejects.toMatchObject({ message: "challenge_consumed" });
+    const replay = await writeMutationOutcome(coordinateSignalWrite(f.db, f.contributor.sub, request));
+    assertMutationOutcome("replay", replay, "challenge_consumed");
     await expect(coordinateSignalWrite(f.db, f.contributor.sub,
       { ...request, expectedProjectionToken: first.scopeAfter }))
       .rejects.toMatchObject({ message: "idempotency_key_conflict" });

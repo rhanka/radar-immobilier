@@ -13,9 +13,9 @@ node_modules/.bin/tsc --noEmit -p api/tsconfig.pwb-tests.json
 node_modules/.bin/eslint api tools/make/base-api-pwb*.mjs
 for file in tools/make/base-api-pwb*.sh; do bash -n "$file"; done
 npm run build --workspace=api
+bash tools/make/base-api-pwb-mutation.sh
 # Same npm script, Vitest include and exclude patterns as the CI API workspace.
-# Only worker concurrency and dotenv discovery differ for isolation.
+# Run after mutation restoration; only worker concurrency and dotenv discovery differ.
 npm run test --workspace=api -- --config vitest.isolated.config.ts \
   --reporter=default --reporter=json --outputFile.json=/evidence/ci-tests.json
 node tools/make/base-api-results.mjs /evidence/ci-tests.json > /evidence/ci-tests.tsv
-bash tools/make/base-api-pwb-mutation.sh

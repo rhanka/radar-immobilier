@@ -86,6 +86,7 @@ export async function readCommittedSignalReceipt(
 export function toWriteRefusal(error: unknown): WriteRefusal {
   const message = error instanceof Error ? error.message : "";
   const typed = error instanceof FacetError || error instanceof WorkspaceError || error instanceof ScopeError;
+  // Raw SQL/transport errors may come from COMMIT: only admission normalizes known pre-commit 55P03.
   if (!typed) return { status: 500, code: "internal_error", retryable: false };
   if (message.startsWith("scoped_facet_scope_unavailable:")) {
     return { status: 503, code: "signal_capability_unavailable", retryable: false };
