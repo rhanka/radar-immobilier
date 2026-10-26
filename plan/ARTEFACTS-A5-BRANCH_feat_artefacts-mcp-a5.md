@@ -45,3 +45,4 @@
 - [x] Exact A5 image qualification complete; default recovery still preserves twelve tools.
 - [x] Record exact package/image/configuration provenance and limitations. Pre-close bundle audited in fresh `bundle-audit.nMeWyC`; re-anchor the final documentation commit with the same audit procedure.
 - [ ] Independent consensus reviews, remote CI and A7 deployment receipts remain external integration gates.
+- [x] Astra A5: Implement server-resolved unique membership at common artifact admission.
