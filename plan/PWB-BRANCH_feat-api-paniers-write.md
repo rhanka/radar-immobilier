@@ -26,6 +26,8 @@
 - [ ] Preserve historical BASE HTTP wrappers and lot isolation.
 
 ## Verification
+- [x] Qualify strict operation variants, digest stability and masked internal errors.
+
 - [x] Add authorized immutable receipt consultation and closed public event projections.
 
 - [x] Add mandatory PW-D hooks, fresh source-fenced snapshots and final deadline checks.
