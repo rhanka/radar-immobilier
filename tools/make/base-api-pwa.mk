@@ -17,6 +17,8 @@ pwa-rescue:
 	@git -C tmp/pwa-evidence/rescue.git fsck --full
 pwa-qualify:
 	@bash tools/make/base-api-pwa-verify.sh
+pwa-unit:
+	@bash tools/make/base-api-pwa-unit.sh
 pwa-deliver:
 	@bash tools/make/base-api-pwa-deliver.sh
 pwa-commit-slices:
