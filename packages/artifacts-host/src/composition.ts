@@ -1,59 +1,94 @@
 import type pg from "pg";
 import { S3Client } from "@aws-sdk/client-s3";
 import { createS3BlobStore } from "@sentropic/artifacts/adapters/s3";
-import { createHttpArtifactApp } from "@sentropic/artifacts/http";
-import { createLifecycleService } from "@sentropic/artifacts/server/lifecycle";
-import { createPublicationService, type PublicationBlobStore } from "@sentropic/artifacts/server/publication";
-import type { ForkService } from "@sentropic/artifacts/server/fork";
-import type { ArtifactService } from "@sentropic/artifacts/server/service";
+import { createPostgresCommitExecutor } from "@sentropic/artifacts/adapters/postgres-commit";
+import { compileArtifactsProfile, RADAR_ARTIFACTS_PROFILE } from "@sentropic/artifacts/mcp-core";
+import { createArtifactCommitCoordinator } from "@sentropic/artifacts/server/commit-contract";
+import { projectArtifactHttpOutcome, type HttpAppDeps } from "@sentropic/artifacts/http";
+import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
+import type { PublicationBlobStore } from "@sentropic/artifacts/server/publication";
 import type { ArtifactsStorageConfig } from "./config.js";
-import { createLockedArtifactStore, initializeArtifactScope } from "./storage.js";
+import type { ActivationConfig } from "./activation.js";
+import { initializeArtifactScope } from "./storage.js";
+import { createHostPolicy, authorizeArtifactCommit } from "./commit-policy.js";
+import { guardArtifactPool } from "./idempotency.js";
+import { createCommitDomain } from "./commit-domain.js";
+import { startPreparationCleanup } from "./preparation-cleanup.js";
+import { projectArtifactWriteFailure } from "@sentropic/artifacts/server/outcome-contract";
 import { createTimeoutBlobStore, createTimeoutS3Client, S3_OPERATION_TIMEOUT_MS } from "./s3-timeout.js";
 
-const refuse = async (): Promise<never> => { throw new Error("capability unavailable"); };
-export const unavailableForks: ForkService = { fork: refuse, setState: refuse, track: refuse };
+export interface ArtifactHostOptions {
+  readonly profile?: HttpAppDeps["profile"];
+  readonly coordinator?: HttpAppDeps["coordinator"];
+  readonly readActivation?: () => ActivationConfig;
+  readonly contentBase?: string;
+  readonly onProviderFailure?: (error: unknown) => void;
+}
 
 export async function composeArtifactHost(
   pool: pg.Pool,
   config: Extract<ArtifactsStorageConfig, { enabled: true }>,
   injectedBlobs?: PublicationBlobStore,
-  onProviderFailure?: ((error: unknown) => void) | undefined,
+  options: ArtifactHostOptions = {},
 ) {
+  pool = guardArtifactPool(pool);
   await initializeArtifactScope(pool, config.storageScope, config.orgId);
-  const store = createLockedArtifactStore(pool, onProviderFailure);
-  const getAcl = store.getArtifactAcl;
-  store.getArtifactAcl = async (id) => {
-    const acl = await getAcl(id);
-    return acl?.storageScopeId === config.storageScope ? acl : undefined;
-  };
+  const policy = await createHostPolicy(pool, config.storageScope, options.readActivation);
+  const coordinator = options.coordinator ?? createArtifactCommitCoordinator({
+    executor: createPostgresCommitExecutor(pool), policy,
+  });
   const client = new S3Client({
     endpoint: config.s3Endpoint, region: config.s3Region, forcePathStyle: true,
     credentials: { accessKeyId: config.s3AccessKey, secretAccessKey: config.s3SecretKey },
     requestHandler: { requestTimeout: 5000, connectionTimeout: 3000, throwOnRequestTimeout: true },
   });
-  const timeoutClient = createTimeoutS3Client(client, S3_OPERATION_TIMEOUT_MS);
-  const baseBlobs = injectedBlobs ?? createS3BlobStore({ client: timeoutClient, bucket: config.s3Bucket });
-  // Bound every blob operation including body streaming after headers, so a
-  // stalled S3 response fails fast and frees the advisory lock + connection.
-  const blobs = createTimeoutBlobStore(baseBlobs, S3_OPERATION_TIMEOUT_MS, onProviderFailure);
-  const lifecycle = createLifecycleService(store, undefined, store);
-  const publication = createPublicationService({ state: store, blobs, intents: store, idempotency: store });
-  const artifacts: ArtifactService = {
-    async ensurePrivateView(input) {
-      if (input.actorUserId !== input.ownerId || input.storageScopeId !== config.storageScope) {
-        throw new Error("access denied");
+  const base = injectedBlobs ?? createS3BlobStore({ client: createTimeoutS3Client(client), bucket: config.s3Bucket });
+  const bounded = createTimeoutBlobStore(base, S3_OPERATION_TIMEOUT_MS, options.onProviderFailure);
+  const blobs: PublicationBlobStore = Object.fromEntries(
+    ["putBlob", "getBlob", "listKeys", "deleteBlob"].map((method) => [method, async (...args: unknown[]) => {
+      try { return await (bounded[method as keyof PublicationBlobStore] as (...a: unknown[]) => unknown)(...args); }
+      catch (cause) {
+        if ((cause as { code?: string } | null)?.code === "artifact_s3_timeout") {
+          throw new ArtifactOperationError("provider_unavailable", { cause });
+        }
+        throw cause;
       }
-      const { result, replayed } = await store.execute(input.idempotencyKey, input.paramsHash,
-        () => store.ensureArtifact({
-          storageScopeId: config.storageScope, ownerId: input.ownerId,
-          bindingName: input.bindingName, profile: {},
-        }));
-      return { ...result, replayed };
-    },
-  };
-  const app = createHttpArtifactApp({
-    parameterSchema: { declarations: [] }, artifacts, publication, lifecycle, forks: unavailableForks,
-    acls: store, sources: store, blobs,
-  });
-  return { app, store, publication, close: () => client.destroy() };
+    }]),
+  ) as unknown as PublicationBlobStore;
+  try {
+    const domain = await createCommitDomain({ pool, scope: config.storageScope, blobs, coordinator,
+      profile: options.profile ?? compileArtifactsProfile(RADAR_ARTIFACTS_PROFILE),
+      ...(options.contentBase ? { publicationUrls: (artifactId, releaseId) => ({
+        stableUrl: `https://${artifactId}.${options.contentBase}/`,
+        pinnedUrl: `https://${releaseId}.pinned.${options.contentBase}/`,
+      }) } : {}),
+    });
+    const cleanup = startPreparationCleanup(pool, domain.store, blobs, options.onProviderFailure);
+    const execute: typeof domain.execute = async (request, invocation) => {
+      const outcome = await domain.execute(request, invocation);
+      if (!outcome.ok) {
+        const entry = projectArtifactWriteFailure(outcome.failure, {
+          dispatched: true, write: request.method === "POST" && ["/ensure", "/publish"].includes(request.path),
+        });
+        if (entry) await pool.query(
+          `INSERT INTO artifacts.host_failures (invocation_id, actor_id, operation, reason, status, at_ms)
+           VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (invocation_id) DO NOTHING`,
+          [entry.invocationId, invocation.actorId, entry.operation, entry.reason, entry.status, Date.now()])
+          .catch((error: unknown) => {
+            accountingFailure = error;
+            console.error(JSON.stringify({ kind: "artifacts.accounting_unavailable", invocationId: entry.invocationId }));
+            options.onProviderFailure?.(error);
+          });
+      }
+      return outcome;
+    };
+    let accountingFailure: unknown;
+    const handle: typeof domain.app.handle = async (request, invocation) =>
+      projectArtifactHttpOutcome(await execute(request, invocation));
+    return { ...domain, app: { ...domain.app, execute, handle }, execute, coordinator, blobs,
+      get accountingFailure() { return accountingFailure; },
+      cleanup, intents: domain.store, refs: domain.store,
+      selectedCapabilities: domain.app.selectedCapabilities, profileDigest: domain.app.profileDigest,
+      authorizeCommit: authorizeArtifactCommit, close: () => { cleanup.stop(); client.destroy(); } };
+  } catch (error) { client.destroy(); throw error; }
 }
