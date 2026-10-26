@@ -10,7 +10,7 @@ for (const workspace of ['api', 'packages/artifacts-host']) {
 }
 const expected = [
   ['artifacts', '0.2.1', 'sha512-kjnky53W1LQxEWDree4uruLTv4ip3l1lX3oQwFz18gUU9hLtDd+i1+q5OEhQrbVyS8sx7Sn+JWSfHe2/wBQXrA=='],
-  ['cluster-mesh', '0.22.0', 'sha512-xy+3lnR6mwu7R8asatuUbXunuVmaAg2BWnEgGVHaI79BGNXZhQ7npvNWRoO5XnWzQZY67i0JxQ0gaQKjsXGVYQ=='],
+  ['cluster-mesh', '0.22.1', 'sha512-iwNigaE1/EOz92/ZrPRYfVAYMK5inzWV6G+Dgu8rGum8QuwyT7VjS44KylnkzMpBBPKDbQHTg83/kCZ6L0+Z2w=='],
   ['mcp-auth', '0.2.1'], ['mcp-platform', '0.4.0'],
 ];
 const receipts = [];
@@ -35,10 +35,17 @@ for (const [name, version, frozenIntegrity] of expected) {
     registrySignaturesPresent: true, provenanceUrl: metadata.dist.attestations.url });
 }
 const baseline = JSON.parse(readFileSync('/evidence/baseline-lock.json'));
-const allowedPaths = new Set(['api', 'packages/artifacts-host', 'packages/immo-mcp', 'node_modules/@sentropic/artifacts']);
+const clusterPath = 'packages/immo-mcp/node_modules/@sentropic/cluster-mesh';
+const allowedPaths = new Set(['packages/immo-mcp', clusterPath]);
 const changed = [...new Set([...Object.keys(baseline.packages), ...Object.keys(lock.packages)])]
   .filter((path) => JSON.stringify(baseline.packages[path]) !== JSON.stringify(lock.packages[path]));
 for (const path of changed) assert.ok(allowedPaths.has(path), `unrelated lockfile change: ${path}`);
-assert.equal(changed.length, 4);
+assert.equal(changed.length, 2);
+const expectedLock = structuredClone(baseline);
+expectedLock.packages['packages/immo-mcp'].dependencies['@sentropic/cluster-mesh'] = '0.22.1';
+for (const field of ['version', 'resolved', 'integrity']) {
+  expectedLock.packages[clusterPath][field] = lock.packages[clusterPath][field];
+}
+assert.deepEqual(lock, expectedLock, 'lockfile must change only the cluster-mesh pin and published bytes');
 writeFileSync('/evidence/tuple-proof.json', JSON.stringify({ receipts, changedLockEntries: changed }, null, 2));
 console.log(JSON.stringify({ passed: true, receipts, changedLockEntries: changed }, null, 2));
