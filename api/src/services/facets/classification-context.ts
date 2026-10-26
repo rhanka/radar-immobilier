@@ -53,7 +53,7 @@ async function revalidateContextAuthority(db: Database, sub: string, workspaceId
     const access = await resolveWorkspaceAccess(tx, workspaceId, sub);
     const rights = await resolveLotRights(tx, workspaceId, sub);
     await approvedAccountId(tx, sub, true);
-    return { access, rights };
+    return { access, rights, ...await durableAvailability(tx, workspaceId) };
   });
 }
 
@@ -64,6 +64,7 @@ async function contextSample(db: Database, sub: string, workspaceId: string) {
     const rights = await resolveLotRights(tx, workspaceId, sub);
     return { access, rights, ...await durableAvailability(tx, workspaceId) };
   });
+  const durableDigest = digest({ availability: sample.availability, lotAvailability: sample.lotAvailability, selectionBasket: sample.selectionBasket });
   if (sample.availability.state === "open") {
     try { await readProjectionScope(db, sub, workspaceId, "facet-context", "signal"); }
     catch (error) {
@@ -83,6 +84,7 @@ async function contextSample(db: Database, sub: string, workspaceId: string) {
     : await readClassificationCatalog(db, sub, workspaceId);
   const current = await revalidateContextAuthority(db, sub, workspaceId);
   if (sample.access.moderateArchive !== current.access.moderateArchive || digest(sample.rights) !== digest(current.rights)) return null;
+  if (durableDigest !== digest({ availability: current.availability, lotAvailability: current.lotAvailability, selectionBasket: current.selectionBasket })) return null;
   return WorkspaceFacetContext.parse({ contractVersion: "facet-context-v2", workspaceId,
     semanticProfile: { lotReason: "required", correspondence: "sent", signalClassification: "separate_action",
       semanticContractVersion: "base-classification-v1" },

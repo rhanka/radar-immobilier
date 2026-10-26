@@ -19,19 +19,25 @@ export async function readClassificationProjection<T>(db: Database, sub: string,
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
       const before = catalogVersion(await readClassificationCatalog(db, sub, workspaceId));
-      const result = await readCoherentProjection(db, sub, workspaceId, citySlug, "signal", () => readPayload(before), 1);
+      const result = await readCoherentProjection(db, sub, workspaceId, citySlug, "signal", async () => {
+        try { return { ok: true as const, value: await readPayload(before) }; }
+        catch (error) {
+          if (error instanceof ClassificationError && ["target_not_found", "reveal_required"].includes(error.code)) {
+            return { ok: false as const, error };
+          }
+          throw error;
+        }
+      }, 1);
       const after = catalogVersion(await readClassificationCatalog(db, sub, workspaceId));
       const final = await readProjectionScope(db, sub, workspaceId, citySlug, "signal");
       if (before !== after || result.scope.token !== final.token) continue;
+      if (!result.payload.ok) throw result.payload.error;
       const queryDigest = classificationQueryDigest(query, after);
       const snapshot = Snapshot.parse({ kind: "signal-projection-v1", baseToken: final.token,
         queryToken: digest({ baseToken: final.token, queryDigest }), queryDigest,
         projectionVersion: PROJECTION_VERSION, catalogVersion: after });
-      return { scope: final, snapshot, payload: result.payload };
+      return { scope: final, snapshot, payload: result.payload.value };
     } catch (error) {
-      if (error instanceof ClassificationError && ["target_not_found", "reveal_required"].includes(error.code)) {
-        await readProjectionScope(db, sub, workspaceId, citySlug, "signal");
-      }
       if (!(error instanceof ScopeError) || error.message !== "projection_revision_unstable") throw error;
     }
   }
