@@ -41,7 +41,9 @@ the preprod account-reader and A2 exchange bindings before image delivery.
 - [x] Lot 3: touched suites, CI API suite, MCP, Q1/Q2/acceptance, lint/types.
   - [x] 146 targeted; API 3536 passed/695 gated; MCP 406; Q1/Q2/acceptance 31/32/6.
   - [x] Run the documented reader grants against PostgreSQL; authorization and write denial pass.
-- [ ] Lot 4: validate manifests, review changes, append delivery report.
+- [x] Lot 4: validate manifests, review changes, append delivery report.
+  - [x] Kustomize base/preprod, client dry-run, YAML and isolation gates pass.
+  - [x] Commits audited; operator prerequisites remain explicit, no live delivery claimed.
 - [ ] Operator gate: provision/qualify preprod before any image rollout.
 
 ## Merge & Close
