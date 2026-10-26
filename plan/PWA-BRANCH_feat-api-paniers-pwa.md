@@ -26,6 +26,9 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
   - `api/tests/integration/pw-write-createapp.spec.ts`: PWA-EX1.
 
 ## Feedback Loop
+- [x] Second passes: mutation campaign exercises the cumulative deadline and
+  precommit guard, both final resolver expiry cases, authenticated cookie proof,
+  durable terminal projection and P binding; keep each restoration byte-identical.
 - [x] Second passes: HTTP regressions cover durable I/P rate refusals, terminal
   rejection without an external reader, and authenticated cookie expiry during
   confirmation SQL waits, with no BASE effect or consumed challenge.
