@@ -7,7 +7,7 @@ require_env
 ROOT=$(pwd -P)
 PROJECT=radar-$ENV
 ACTION=ci-api
-SCOPE=$(git ls-files --cached --others --exclude-standard -- api/src/services/facets/pw-write-*.test.ts api/src/services/facets/signal-write-*.test.ts api/tests/integration/pw-write-*.spec.ts | sed 's#^api/##')
+SCOPE=${PWD_SCOPE:-$(git ls-files --cached --others --exclude-standard -- api/src/services/facets/pw-write-*.test.ts api/src/services/facets/signal-write-*.test.ts api/tests/integration/pw-write-*.spec.ts | sed 's#^api/##')}
 require_scope
 RUN_DIR=$ROOT/tmp/pwd-evidence/runtime
 LOG_DIR=$ROOT/tmp/pwd-evidence/$(date -u +%Y%m%dT%H%M%S)-campaign
@@ -22,7 +22,7 @@ free_space() {
 while :; do
   free_space || { echo 'STOP: less than 8 GiB disk or available memory'; exit 3; }
   running=$(docker ps --filter name=radar-test- --format '{{.Names}}')
-  builders=$(ps -eo comm=,args= | awk '$1 ~ /^(docker|buildctl)$/ && $0 ~ / (build|buildx) /')
+  builders=$(ps -eo comm=,args= | awk '$1 ~ /^(docker|docker-buildx|buildctl)$/ && $0 ~ / (build|buildx) /')
   [[ -n $running || -n $builders ]] || break
   echo 'Waiting for radar test containers and Docker builds to finish'; sleep 10
 done
@@ -40,6 +40,10 @@ source tools/make/base-api-ci-archive.sh
 write_compose
 archive_sources
 archive_ci_inputs
+if [[ -f $ROOT/tmp/pwd-evidence/corrections/repro-once.tar ]]; then
+  tar -Af "$RUN_DIR/source.tar" "$ROOT/tmp/pwd-evidence/corrections/repro-once.tar"
+  mv "$ROOT/tmp/pwd-evidence/corrections/repro-once.tar" "$LOG_DIR/repro-source.tar"
+fi
 git ls-files --cached --others --exclude-standard -- 'api/tests/*.ts' \
   | while IFS= read -r file; do
     relative=${file#api/tests/}
@@ -65,7 +69,7 @@ git rev-parse HEAD > "$LOG_DIR/head.txt"
 MONITOR=$!
 "${compose[@]}" up -d --wait postgres minio
 "${compose[@]}" run --rm --no-deps -T api bash -ec \
-  'tar -xf /source.tar -C /workspace; exec bash tools/make/base-api-pwd-container.sh "$1"' -- "$SCOPE" \
+  'tar -xf /source.tar -C /workspace; exec bash tools/make/base-api-pwd-container.sh "$1" "$2"' -- "$SCOPE" "${PWD_MODE:-full}" \
   > >(tee "$LOG_DIR/campaign.log") 2>&1 &
 RUN_PID=$!
 wait "$RUN_PID"
