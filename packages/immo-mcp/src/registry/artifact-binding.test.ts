@@ -67,7 +67,7 @@ describe("P7 trusted artifact binding", () => {
       .toEqual({ error: "capability_unavailable", retryable: true });
     expect(JSON.stringify(result)).not.toContain("private driver");
     expect(h.execute).toHaveBeenCalledTimes(1);
-    expect(h.createGuard).toHaveBeenCalledExactlyOnceWith(authority);
+    expect(h.createGuard).toHaveBeenCalledExactlyOnceWith(authority, undefined);
   });
 
   it("should return a public refusal for semantic input errors without creating authority", async () => {
