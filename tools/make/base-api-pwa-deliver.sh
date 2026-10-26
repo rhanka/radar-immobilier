@@ -14,6 +14,19 @@ if [[ ${1:-all} != commit-slices ]]; then
   evidence=$(cat tmp/pwa-evidence/latest)
   [[ -f $evidence/result && $(cat "$evidence/status") == 0 ]]
   sha256sum --check --quiet "$evidence/files.sha256"
+  full=$(cat tmp/pwa-evidence/latest-full)
+  for report in ci-tests artifacts-host-tests scoped-tests; do
+    jq -e '.success and .numFailedTests == 0 and .numPassedTests > 0' "$full/$report.json" >/dev/null
+  done
+  jq -e '.numPendingTests == 0' "$full/scoped-tests.json" >/dev/null
+  jq -e 'length == 7 and all(.killed and .restored)' "$full/mutations.json" >/dev/null
+  if [[ $(cat "$evidence/mode.txt") == mcp ]]; then
+    jq -e '.success and .numFailedTests == 0 and .numPassedTests > 0' "$evidence/immo-mcp-tests.json" >/dev/null
+  fi
+  # MCP-only runner repairs change tooling; every application/test/package byte
+  # must still match the successful API, static, mutation and ARTEFACTS campaign.
+  awk '$2 !~ /^tools\/make\/base-api-pwa/ {print}' "$full/files.sha256" \
+    | sha256sum --check --quiet
 fi
 commit_file() {
   local file=$1 type=feat label
