@@ -68,7 +68,7 @@ export function projectSignalCard(card: GraphSignalCard, day: string | null, api
   }));
   const description = text(card.description, 8000, "description");
   const evidence = { description: !!description, citation: docRefs.some((ref) => !!ref.excerpt),
-    pdfLink: docRefs.some((ref) => !!ref.documentUrl), documentDate: docRefs.some((ref) => !!ref.publishedAt),
+    pdfLink: docRefs.some((ref) => !!ref.documentUrl || !!ref.sourceUrl), documentDate: docRefs.some((ref) => !!ref.publishedAt),
     page: docRefs.some((ref) => ref.page !== null), bbox: card.evidence.completeness.hasBbox };
   const missingEvidence = (Object.keys(evidence) as Array<keyof typeof evidence>).filter((key) => !evidence[key]);
   return SignalCard.parse({ label: text(card.label, 1024, "label"), description,
