@@ -43,6 +43,27 @@ export async function createHostPolicy(pool: pg.Pool, scope: string,
           "SELECT workspace_id FROM workspace_memberships WHERE account_id = $1 " +
             "AND status = 'active' AND revoked_at IS NULL FOR SHARE",
           [accountId]);
+        const freshActivation = readActivation?.();
+        const freshOpen = !freshActivation || (freshActivation.enabled &&
+          freshActivation.expiresAtMs > Date.now() && freshActivation.subjects.includes(actorId));
+        if (!freshOpen && freshActivation) {
+          if (!freshActivation.enabled || freshActivation.expiresAtMs <= Date.now()) {
+            return { approved: false as const, reason: "denied" as const,
+              publicCode: "activation_closed", status: 403 };
+          }
+          return { approved: false as const, reason: "denied" as const,
+            publicCode: "not_in_cohort", status: 403 };
+        }
+        if (!freshOpen) {
+          return { approved: false as const, reason: "denied" as const,
+            publicCode: "access_denied", status: 403 };
+        }
+        const freshAccount = await client.query<{ status: string }>(
+          "SELECT status FROM account_users WHERE sub = $1 FOR SHARE", [actorId]);
+        if (freshAccount.rows[0]?.status !== "approved") {
+          return { approved: false as const, reason: "denied" as const,
+            publicCode: "account_not_approved", status: 403 };
+        }
         const unique = [...new Set(memberships.rows.map((row) => String(row.workspace_id).toLowerCase()))];
         if (unique.length === 0) {
           return { approved: false as const, reason: "denied" as const,
@@ -52,7 +73,12 @@ export async function createHostPolicy(pool: pg.Pool, scope: string,
           return { approved: false as const, reason: "denied" as const,
             publicCode: "workspace_ambiguous", status: 409 };
         }
-        return { approved: true as const };
+        const workspaceId = unique[0]!;
+        if (readActivation !== undefined && workspaceId !== scope.toLowerCase()) {
+          return { approved: false as const, reason: "denied" as const,
+            publicCode: "workspace_membership_required", status: 403 };
+        }
+        return { approved: true as const, workspaceId };
       },
       async reserveQuota({ storageScopeId, bytes }) {
         if (storageScopeId !== scope) return { reserved: false };
