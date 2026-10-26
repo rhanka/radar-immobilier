@@ -20,3 +20,6 @@ verify test-api-ci inspect-profile diagnose-provider test-runtime test-compositi
 .PHONY: test-astra-compatibility
 test-astra-compatibility: guard
 	@bash tools/make/artefacts-a5-verify.sh $@
+.PHONY: qualify-astra
+qualify-astra: guard
+	@bash tools/make/artefacts-a5-verify.sh $@
