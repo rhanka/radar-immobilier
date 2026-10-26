@@ -42,20 +42,23 @@ exec /usr/bin/curl "\${args[@]}"
             OP_EVIDENCE_DIR: evidence, OP_CITY: "synthetic-city", OP_WORKSPACE: f.data.workspaceId,
             OP_EXPECTED_SIGNAL: f.signal.node.id, OP_EXPECTED_ERROR: "", ...overrides,
           } });
-          try { return { ...await invocation, evidence }; }
-          finally {
-            if (process.env.DELIVERY_PROBE_EVIDENCE_DIR) {
-              const saved = `${process.env.DELIVERY_PROBE_EVIDENCE_DIR}/${epoch}-${sequence}`;
-              await mkdir(saved, { recursive: true });
-              for (const file of ["request.json", "search.json", "api-search.json", "no-token.json", "api-no-token.json", "initialize.json"]) {
-                try {
-                  await copyFile(`${evidence}/${file}`, `${saved}/${file}`);
-                  await chmod(`${saved}/${file}`, 0o644); // Synthetic responses only; no credential files.
-                }
-                catch (error) { if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error; }
+          const outcome = await invocation.then(
+            (value) => ({ ok: true as const, value }),
+            (error: unknown) => ({ ok: false as const, error }),
+          );
+          if (process.env.DELIVERY_PROBE_EVIDENCE_DIR) {
+            const saved = `${process.env.DELIVERY_PROBE_EVIDENCE_DIR}/${epoch}-${sequence}`;
+            await mkdir(saved, { recursive: true });
+            for (const file of ["request.json", "search.json", "api-search.json", "no-token.json", "api-no-token.json", "initialize.json"]) {
+              try {
+                await copyFile(`${evidence}/${file}`, `${saved}/${file}`);
+                await chmod(`${saved}/${file}`, 0o644); // Synthetic responses only; no credential files.
               }
+              catch (error) { if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error; }
             }
           }
+          if (!outcome.ok) throw outcome.error;
+          return { ...outcome.value, evidence };
         };
         const success = await run();
         expect(success.stdout).toContain("PASS:");
