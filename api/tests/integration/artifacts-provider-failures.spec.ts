@@ -707,7 +707,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
       const env = (await import("../../src/config.js")).loadConfig();
       const peer = new (await import("pg")).default.Pool({ host: env.POSTGRES_HOST, port: env.POSTGRES_PORT,
         user: env.POSTGRES_USER, password: env.POSTGRES_PASSWORD, database: DATABASE });
-      let durableReceipt: unknown;
+      let durableReceipt!: { releaseId: string; manifest: string };
       try {
         const durable = Number((await peer.query(
           "SELECT count(*) FROM artifacts.releases WHERE artifact_id = $1", [artifactId])).rows[0].count);
@@ -715,17 +715,27 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
         expect(await tableCount("releases")).toBe(releasesBefore + 1);
         const success = (await peer.query("SELECT receipt AS result FROM artifacts.operation_receipts WHERE internal_key = $1", [internalKey])).rows;
         expect(success).toHaveLength(1);
-        durableReceipt = success[0].result;
-        expect(durableReceipt).toBeDefined();
+        durableReceipt = success[0].result as typeof durableReceipt;
+        const release = (await peer.query(
+          "SELECT id, manifest FROM artifacts.releases WHERE artifact_id = $1", [artifactId])).rows;
+        expect(release).toHaveLength(1);
+        expect(durableReceipt).toEqual({ releaseId: release[0].id, manifest: release[0].manifest });
       } finally { await peer.end(); }
       state.armed = false;
       const retry = await execute({ method: "POST", path: "/publish", body },
         invocationFor(allowAll(), "uncertain-retry")) as unknown as Record<string, unknown>;
       expect(retry).toMatchObject({ ok: true, replayed: true });
-      expect((retry.result as { body: unknown }).body).toMatchObject(durableReceipt as object);
+      const publicReplay = await projectOutcomeHttp(retry);
+      expect(publicReplay).toEqual({ status: 201, body: {
+        artifactId, releaseId: durableReceipt.releaseId, manifest: durableReceipt.manifest,
+        digest: (JSON.parse(durableReceipt.manifest) as { digest: string }).digest,
+        stableUrl: `https://${artifactId}.pages.example.test/`,
+        pinnedUrl: `https://${durableReceipt.releaseId}.pinned.pages.example.test/`,
+      } });
+      assertPublicBodyRedacted(publicReplay, publicReplay.body, [], [SCOPE, ACTOR]);
       // The first uncertain issue (503, commitState unknown) is distinct from
       // the legitimate receipt replay below: both transports converge on the
-      // same durable receipt with the same key and no new release.
+      // same public projection with the same key and no new release.
       const entries: Record<string, unknown>[] = [];
       const parityControl = createArtifactControl(host as never, SCOPE, BASE, undefined,
         { ledger: { record: (entry) => { entries.push(entry as unknown as Record<string, unknown>); } } });
@@ -735,17 +745,20 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
           "content-type": "application/json" }, body: JSON.stringify(body),
       });
       expect(httpReplay.status).toBe(201);
-      expect(await httpReplay.json()).toEqual((retry.result as { body: unknown }).body);
+      expect(await httpReplay.json()).toEqual(publicReplay.body);
       const adapter = createMcpArtifactAdapter(parityControl);
       const mcpReplay = await adapter.execute(
         { method: "POST", path: "/publish", args: body }, { actorId: ACTOR });
       expect(mcpReplay).toMatchObject({ ok: true, status: 201 });
-      expect((mcpReplay as { ok: true; data: unknown }).data).toEqual((retry.result as { body: unknown }).body);
+      expect((mcpReplay as { ok: true; data: unknown }).data).toEqual(publicReplay.body);
       expect(entries).toHaveLength(0);
       expect(await tableCount("releases")).toBe(releasesBefore + 1);
       const successRows = Number((await pool.query(
         "SELECT count(*) FROM artifacts.operation_receipts WHERE internal_key = $1", [internalKey])).rows[0].count);
       expect(successRows).toBe(1);
+      const receiptAfterReplay = (await pool.query(
+        "SELECT receipt FROM artifacts.operation_receipts WHERE internal_key = $1", [internalKey])).rows;
+      expect(receiptAfterReplay).toEqual([{ receipt: durableReceipt }]);
     } finally {
       if (typeof close === "function") (close as () => void)();
     }
