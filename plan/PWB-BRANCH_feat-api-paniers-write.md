@@ -18,7 +18,7 @@
 ## Execution
 
 - [x] Extract personal, workspace, and 6L1 executors without duplicating business logic.
-- [ ] Qualify strict operations and canonical operation digests.
+- [x] Qualify strict operations and canonical operation digests.
 - [ ] Enforce fresh READ COMMITTED snapshots under workspace/actor/key/city locks.
 - [ ] Require transactional PW-D authority, reservation, consumption, and audit hooks.
 - [ ] Reject consumed confirmations and unexpected BASE receipts; consult immutable receipts separately.
