@@ -75,13 +75,14 @@ data:
   IMMO_MCP_HTTP_PORT: "8848"
   # "http" → dataMode "real" in loadHttpConfig / audit context. Source SELECTION
   # is keyed off RADAR_API_BASE_URL (below), same var as the raw seam: with it
-  # set, `search_signals` targets the REAL /api/graph-signals/:city feed (the SAME
-  # signals the web app reads — D12). The other v0 DOMAIN tools (search_lots,
+  # set, `search_signals` targets the reserved MCP signal-search facade.
+  # The other v0 DOMAIN tools (search_lots,
   # get_lot_card, get_opportunity_dossier, list_documents, read_document_excerpt)
   # remain not_wired_yet (real lots/zones/PV are served by the raw tools below).
   IMMO_MCP_DATA_MODE: "http"
   # A2 delegated egress. The workload credential is operator-provisioned below.
   IMMO_MCP_API_AUDIENCE: "https://immo.sent-tech.ca"
+  IMMO_MCP_EXCHANGE_TOKEN_ENDPOINT: "https://auth.sent-tech.ca/api/v1/auth/oauth/token"
   IMMO_MCP_EXCHANGE_ENV: "production"
   IMMO_MCP_EXCHANGE_POLICY_REV: "a2base-search-v1"
   # ── Real radar-API wiring (search_signals + the 4 raw-data tools) ──────────
@@ -93,12 +94,9 @@ data:
   # default-deny, the mcp -> api:3000 hop is otherwise DROPPED.
   #  - raw tools call /api/geo/collections + /api/documents/raw → PUBLIC_PREFIXES
   #    (api/src/routes/auth.ts): public data, no session.
-  #  - search_signals calls /api/graph-signals which is SESSION-PROTECTED (D4):
-  #    it forwards the CURRENT USER's own bearer token (no machine credential, no
-  #    env secret here). The api ACCEPTS that user bearer (option A): it verifies
-  #    it against OUR IdP JWKS (derived from SENTROPIC_IDP_ISSUER on radar-api,
-  #    30-api.yaml — no new env), audience bounded to the app origin + `${origin}/mcp`,
-  #    then authorises the approved account → per-user, end-to-end.
+  #  - search_signals uses only GET /api/v1/mcp/facets/signals/search, with an
+  #    RFC 8693 delegated token for the API audience. It requires the account
+  #    reader, workload credential and explicitly enabled API capability.
   RADAR_API_BASE_URL: "http://radar-api:3000"
   # Public base used in the URLs handed back to the MCP client (get_pv_pdf):
   # the nginx ui pod proxies /api/* on this host to radar-api (50-ui.yaml).

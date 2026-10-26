@@ -7,7 +7,7 @@ export CMD
 run:
 	@bash tools/make/artefacts-delivery-run.sh
 inspect:
-	@rtk bash -euc 'eval "$$CMD"'
+	@rtk bash -euo pipefail -c 'eval "$$CMD"'
 commit:
 	@git commit -m "$(MSG)"
 manifests:
