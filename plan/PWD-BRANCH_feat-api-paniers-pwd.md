@@ -50,7 +50,11 @@ Qualify and integrate Muse's durable write persistence on PW-B after A5.
 - [x] Lot 1: merge A5, preserve both conflict sides, allocate suffix 0025.
 - [x] Lot 2: qualify durable challenge, fences, quota, audit/outbox primitives.
 - [x] Lot 3: PostgreSQL, createApp, mutation, lint and typecheck gates.
-- [ ] Lot 4: bounded local commits, independently imported bundle, French report.
+- [x] Lot 4: bounded local commits, independently imported bundle, French report.
+- [x] Qualification: 80 scoped tests, 4067 API tests passed, four killed/restored mutants.
+- [x] Static gates: workspace typecheck, PW-D test typecheck, global lint, API build.
+- [x] Delivery audit: base-seeded empty repository, bundle import, identical tree, full fsck.
+- [x] Source bytes match the tested archive; owned Docker resources removed.
 
 - [x] Delivery slice 01: docs(pw-d): declare integration and qualification scope.
 
