@@ -22,8 +22,8 @@ import { approvedAccountId, resolveWorkspaceAccess } from "../workspaces/store.j
 import { lockWorkspace } from "../workspaces/mutations.js";
 import { targetFingerprint, type SignalTarget } from "./target.js";
 import { facetEventResponse } from "./response.js";
-import { requireScopedEpoch, ScopeError } from "./scope.js";
-import { scopedEpochFor } from "./activation.js";
+import { ScopeError } from "./scope.js";
+import { requireScopedEpochFor } from "./activation.js";
 import { workspaceStreamHead } from "./workspace-streams.js";
 
 export interface WorkspaceArchiveHead {
@@ -73,7 +73,7 @@ export async function readWorkspaceArchiveState(
     await lockWorkspace(tx, workspaceId);
     const accountId = await approvedAccountId(tx, sub, true);
     const access = await resolveWorkspaceAccess(tx, workspaceId, sub);
-    requireScopedEpoch(await scopedEpochFor(tx, workspaceId), workspaceId);
+    await requireScopedEpochFor(tx, workspaceId);
     const [unresolved] = await tx.select({ id: facetEvents.id }).from(facetEvents)
       .leftJoin(facetEventBindings, eq(facetEventBindings.eventId, facetEvents.id))
       .where(and(eq(facetEvents.ownerId, accountId),
@@ -103,7 +103,7 @@ export async function readWorkspaceArchiveCity(
     await lockWorkspace(tx, workspaceId);
     const accountId = await approvedAccountId(tx, sub, true);
     const access = await resolveWorkspaceAccess(tx, workspaceId, sub);
-    requireScopedEpoch(await scopedEpochFor(tx, workspaceId), workspaceId);
+    await requireScopedEpochFor(tx, workspaceId);
     const [unresolved] = await tx.select({ id: facetEvents.id }).from(facetEvents)
       .leftJoin(facetEventBindings, eq(facetEventBindings.eventId, facetEvents.id))
       .where(and(eq(facetEvents.ownerId, accountId),

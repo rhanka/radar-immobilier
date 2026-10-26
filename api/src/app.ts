@@ -6,7 +6,7 @@ import {
   type AuthRouteOptions,
 } from "./routes/auth.js";
 import { healthRoute, type HealthDeps } from "./routes/health.js";
-import { contentGate } from "./artifacts/content-app.js";
+import { contentGate, type ContentReaderMount } from "./artifacts/content-app.js";
 import type { ContentHostConfig } from "./artifacts/content-config.js";
 import { controlRoute, type ControlRouteDeps } from "./artifacts/control-route.js";
 import { chatRoute } from "./routes/chat.js";
@@ -44,6 +44,9 @@ import { scopedWorkspaceArchiveRoute } from "./routes/scoped-workspace-archive.j
 import { scopedProjectionRevisionsRoute } from "./routes/scoped-projection-revisions.js";
 import { scopedProjectionEventsRoute } from "./routes/scoped-projection-events.js";
 import { scopedSignalRevealRoute } from "./routes/scoped-signal-reveal.js";
+import { mcpSignalSearchRoute } from "./routes/mcp-signal-search.js";
+import { classificationBoundary, scopedClassificationRoute } from "./routes/scoped-classification.js";
+import type { ClassificationOptions } from "./services/facets/classification-search.js";
 
 export type AppDeps = HealthDeps &
   SourcesDeps &
@@ -76,6 +79,8 @@ export type AppDeps = HealthDeps &
     geoListingTtlMs?: number;
     /** Artifact content dispatch (861c); absent/disabled keeps the chain. */
     contentHost?: ContentHostConfig;
+    /** Already bound reader; absent keeps content hosts closed. */
+    readerContent?: ContentReaderMount;
     /**
      * Artifact control plane (861c H2); mounted only when auth is enabled.
      * When absent, authenticated mode mounts the closed control capability.
@@ -85,6 +90,10 @@ export type AppDeps = HealthDeps &
     lotCutover?: Pick<ScopedLotCutoverDeps, "cutoverMapping" | "cutoverSafety">;
     /** Durable server-only retirement; never derived from public input. */
     legacyRetirement?: LegacyRetirementState;
+    /** Closed by default; server-only, separately qualified signal binding. */
+    mcpSignalSearch?: { enabled: boolean; afterWorkspaceResolve?: () => Promise<void> | void };
+    /** Operator-injected read signing configuration; absent keeps pagination closed. */
+    classification?: ClassificationOptions;
   };
 
 /** Compose the Hono application from injected dependencies. */
@@ -92,10 +101,11 @@ export function createApp(deps: AppDeps): Hono {
   const app = new Hono();
   app.use("/api/graph-signals/*", privateSignalResponse);
   app.use("/api/v1/signal-facets/*", privateSignalResponse);
+  app.use("/api/v1/mcp/facets/signals/*", privateSignalResponse);
 
   // Content hosts dispatch FIRST, before protect: never app auth or SPA.
   if (deps.contentHost?.enabled) {
-    app.use("*", contentGate(deps.contentHost.contentBase));
+    app.use("*", contentGate(deps.contentHost.contentBase, deps.readerContent));
   }
 
   // Control requests use the official cookie guard before general bearer auth.
@@ -117,6 +127,7 @@ export function createApp(deps: AppDeps): Hono {
   // route. When `deps.auth` is absent or disabled both are inert no-ops.
   app.use("/api/v1/workspaces/*", privateSignalResponse);
   app.use("/api/v1/workspaces", privateSignalResponse);
+  app.use("/api/v1/workspaces/*", classificationBoundary);
   if (deps.auth) {
     app.use("*", protect(deps.auth, { db: deps.db }));
     // Pass db into authOptions so enrollment runs in production.
@@ -177,6 +188,8 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", scopedProjectionRevisionsRoute(deps));
   app.route("/", scopedProjectionEventsRoute(deps));
   app.route("/", scopedSignalRevealRoute(deps));
+  app.route("/", mcpSignalSearchRoute(deps));
+  app.route("/", scopedClassificationRoute(deps));
   app.route("/", graphRoute(deps));
   app.route("/", geoLotsRoute());
   app.route("/", geoZonesRoute({ db: deps.db }));

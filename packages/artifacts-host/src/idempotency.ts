@@ -50,10 +50,10 @@ export function createArtifactsPool(
     password: params.password,
     database: params.database,
     connectionTimeoutMillis: 3000,
+    options: "-c lock_timeout=1000 -c statement_timeout=5000",
     max,
   });
-  pool.on("error", (error) => console.error("artifact pool idle client error", error.message));
-  return pool;
+  return guardArtifactPool(pool);
 }
 
 /** Typed failure for a Postgres connection lost while a client is reserved. */
@@ -63,6 +63,73 @@ export class ArtifactConnectionError extends Error {
     super(message, options);
     this.name = "ArtifactConnectionError";
   }
+}
+
+/** pg-pool emits a plain Error without code when acquisition times out. */
+export const ARTIFACT_POOL_TIMEOUT_CODE = "artifact_pool_timeout";
+
+export function isPoolAcquisitionTimeout(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) return false;
+  const code = (error as { code?: unknown }).code;
+  if (code === ARTIFACT_POOL_TIMEOUT_CODE) return true;
+  const message = error instanceof Error ? error.message : String(error);
+  return /timeout exceeded when trying to connect/i.test(message) ||
+    /connection terminated due to connection timeout/i.test(message);
+}
+
+/** Keep every reserved client from crashing the process on a network break. */
+const guardedPools = new WeakMap<pg.Pool, pg.Pool>();
+
+/** Use the returned view for reserved clients; the borrowed pool stays intact. */
+export function guardArtifactPool(pool: pg.Pool): pg.Pool {
+  const existing = guardedPools.get(pool);
+  if (existing) return existing;
+  if (typeof pool.connect !== "function") return pool;
+  pool.on?.("error", () => console.error("artifact pool idle client error"));
+  const originalConnect = pool.connect.bind(pool);
+  const protect = (client: pg.PoolClient): pg.PoolClient => {
+    let broken: Error | undefined;
+    const onError = (error: Error): void => {
+      broken ??= error;
+    };
+    client.on("error", onError);
+    const originalRelease = client.release.bind(client);
+    client.release = (error?: Error | boolean) => {
+      client.removeListener("error", onError);
+      originalRelease(error || broken);
+    };
+    return client;
+  };
+  // pool.query uses callback acquisition; the coordinator uses promises.
+  const connect = ((callback?: (error: Error | undefined, client?: pg.PoolClient,
+    release?: pg.PoolClient["release"]) => void) => {
+    if (!callback) return originalConnect().then(protect);
+    return originalConnect((error, client) => {
+      if (error || !client) return callback(error);
+      const guarded = protect(client);
+      callback(undefined, guarded, guarded.release);
+    });
+  }) as typeof pool.connect;
+  // Do not overwrite a borrowed pool's connect getter: instrumentation may
+  // delegate back to the underlying pool. Keep that delegation intact.
+  const guarded = new Proxy(pool, { get(target, key) {
+    if (key === "connect") return connect;
+    const value = Reflect.get(target, key, target) as unknown;
+    return typeof value === "function" ? value.bind(target) : value;
+  } });
+  guardedPools.set(pool, guarded);
+  guardedPools.set(guarded, guarded);
+  return guarded;
+}
+
+export function normalizePoolAcquisitionError(error: unknown): unknown {
+  if (isPoolAcquisitionTimeout(error)) {
+    const code = (error as { code?: unknown }).code;
+    if (code === ARTIFACT_POOL_TIMEOUT_CODE) return error;
+    return Object.assign(new Error("artifact pool acquisition timed out", { cause: error }),
+      { code: ARTIFACT_POOL_TIMEOUT_CODE });
+  }
+  return error;
 }
 
 const ADVISORY_KEY_RE = /^[0-9a-f]{16,}[0-9a-f]*$/i;
@@ -108,6 +175,7 @@ export async function withArtifactAdvisoryLock<T>(
   try {
     client = await pool.connect();
   } catch (error) {
+    if (isPoolAcquisitionTimeout(error)) throw normalizePoolAcquisitionError(error);
     if (isConnectionFailure(error)) {
       throw new ArtifactConnectionError("artifact postgres connection lost", { cause: error });
     }
@@ -134,13 +202,29 @@ export async function withArtifactAdvisoryLock<T>(
       new ArtifactConnectionError("artifact postgres connection lost", { cause: error }),
     );
   };
+  const onClientEnd = (): void => {
+    onClientError(new Error("artifact postgres connection ended"));
+  };
   client.on("error", onClientError);
+  client.on("end", onClientEnd);
   const guard = <U>(work: Promise<U>): Promise<U> => Promise.race([work, connectionLost]);
+  const guardedCleanup = async (work: Promise<unknown>): Promise<void> => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      await Promise.race([
+        guard(work),
+        new Promise<never>((_, reject) => {
+          timer = setTimeout(() => reject(new ArtifactConnectionError("artifact postgres connection lost",
+            { cause: new Error("artifact postgres cleanup timeout") })), 5000);
+        }),
+      ]);
+    } finally { clearTimeout(timer); }
+  };
   const cleanup = async (): Promise<void> => {
     try {
       // A dead session already released its advisory lock: never query it.
       if (locked && connectionError === null) {
-        await guard(client.query("SELECT pg_advisory_unlock(('x' || $1)::bit(64)::bigint)", [lockId]));
+        await guardedCleanup(client.query("SELECT pg_advisory_unlock(('x' || $1)::bit(64)::bigint)", [lockId]));
       }
       if (connectionError !== null) {
         throw new ArtifactConnectionError("artifact postgres connection lost", { cause: connectionError });
@@ -154,6 +238,7 @@ export async function withArtifactAdvisoryLock<T>(
       throw error;
     } finally {
       client.removeListener("error", onClientError);
+      client.removeListener("end", onClientEnd);
       // Pass an error to destroy the broken client instead of pooling it.
       if (connectionError instanceof Error) {
         client.release(connectionError);
@@ -179,7 +264,9 @@ export async function withArtifactAdvisoryLock<T>(
       await guard(client.query("COMMIT"));
     } catch (error) {
       if (connectionError === null) {
-        try { await guard(client.query("ROLLBACK")); } catch { discard = true; }
+        try {
+          await guardedCleanup(client.query("ROLLBACK"));
+        } catch { discard = true; }
       }
       if ((error as { code?: string }).code === "55P03") {
         throw new Error("artifact advisory lock timeout conflict", { cause: error });

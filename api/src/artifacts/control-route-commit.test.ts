@@ -37,6 +37,9 @@ function flippingAccounts(returns: Array<string | null>): { accounts: AccountSta
     calls,
     accounts: {
       async query(_text: string, params: unknown[] = []) {
+        if (_text.includes("FROM workspace_memberships")) {
+          return { rows: [{ status: "approved", workspace_id: "test-workspace" }] };
+        }
         calls.push(String(params[0]));
         const next = returns[Math.min(index++, returns.length - 1)]!;
         return { rows: next === null ? [] : [{ status: next }] };
@@ -89,7 +92,7 @@ describe("controlRoute commit-time reread [T05 T13]", () => {
     const accounts = flippingAccounts(["approved"]).accounts;
     const app = makeApp({
       accounts,
-      readActivation: () => (reads++ < 2 ? LIVE : EXPIRED),
+      readActivation: () => (reads++ < 3 ? LIVE : EXPIRED),
       backendCalls,
     });
     const res = await postEnsure(app, "sub-ok");
