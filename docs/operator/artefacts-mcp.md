@@ -103,6 +103,13 @@ Configure `ARTIFACTS_*` storage, `ARTIFACTS_CONTENT_BASE`,
 A string setting alone never supplies a provider binding: construction must
 verify the migrated shared service. No live deployment is performed here.
 
+In validation mode, `ARTIFACTS_STORAGE_SCOPE` is the bound workspace UUID.
+The server requires exactly one active membership and compares its workspace
+to that configured scope. A sole membership in another workspace grants no
+artifact access. The admitted workspace is frozen per call and checked again
+on the coordinator connection for finalization and replay, after membership
+lock waits and a fresh activation/cohort/expiry read.
+
 An operator must provision `artifacts.host_quotas` for the server scope with
 explicit `operation_limit` and `byte_limit`; no row grants no write quota.
 Limits are cumulative per storage scope. Each new ensure or publication

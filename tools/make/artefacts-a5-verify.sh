@@ -9,7 +9,7 @@ case ${1:?} in
     export CMD='npm ci --strict-peer-deps --ignore-scripts && npm run test --workspace=api -- tests/integration/artifacts-control.spec.ts tests/integration/artifacts-locks.spec.ts tests/integration/artifacts-mcp-adapter.spec.ts tests/integration/artifacts-publication.spec.ts tests/integration/artifacts-commit-probe.spec.ts tests/integration/artifacts-s3-body-timeout.spec.ts src/artifacts/control-route-commit.test.ts src/artifacts/control-cache.test.ts --maxWorkers=1 --reporter=json --outputFile=/evidence/compatibility-results.json' ;;
   test-astra)
     export A5_SERVICES=1
-    export CMD='npm ci --strict-peer-deps --ignore-scripts && npm run test --workspace=api -- tests/integration/artifacts-astra-a5-mcp-admission.spec.ts tests/integration/artifacts-astra-a5-finalization.spec.ts tests/integration/artifacts-astra-a5-pool-guard.spec.ts tests/integration/artifacts-astra-a5-http-admission.spec.ts --maxWorkers=1 --reporter=json --outputFile=/evidence/astra-results.json' ;;
+    export CMD='npm ci --strict-peer-deps --ignore-scripts && npm run test --workspace=api -- tests/integration/artifacts-astra-a5 --maxWorkers=1 --reporter=json --outputFile=/evidence/astra-results.json' ;;
   test-astra-mutations)
     export A5_SERVICES=1
     export CMD='npm ci --strict-peer-deps --ignore-scripts && node tools/make/artefacts-a5-astra-mutations.mjs' ;;
