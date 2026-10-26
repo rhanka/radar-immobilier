@@ -45,6 +45,12 @@ the preprod account-reader and A2 exchange bindings before image delivery.
   - [x] Kustomize base/preprod, client dry-run, YAML and isolation gates pass.
   - [x] Commits audited; operator prerequisites remain explicit, no live delivery claimed.
 - [ ] Operator gate: provision/qualify preprod before any image rollout.
+- [ ] Lot 5: resolve both second-review delivery blockers.
+  - [x] Reproduce the exact operator probe against real MCP/API sockets.
+  - [x] Match the public MCP contract and prove workspace selection at the API boundary.
+  - [ ] Restore `LOT_MIGRATION_DB_TEST=1`; compare full API results to the prior baseline.
+  - [ ] Repeat MCP, Q1/Q2/acceptance, lint, types and manifest qualification.
+  - [ ] Address review remarks and append the second-review delivery report.
 
 ## Merge & Close
 - [x] No push or merge authorized by this task; return the final local SHA.
