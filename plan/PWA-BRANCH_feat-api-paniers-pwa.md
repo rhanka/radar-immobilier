@@ -28,6 +28,10 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
     PWA-EX3 permits their exact import from 0ab7d664 by merge only.
 
 ## Feedback Loop
+- [x] Second-pass final campaign: 127 scoped tests (61 PW-A, 65 PW-D, one
+  createApp), zero skips; API 4254 passed/76 optional skipped; ARTEFACTS 165
+  and MCP 406 passed; all 26 mutants killed/restored. Static gates and build
+  pass; all owned Docker resources removed, no resource-floor stop.
 - [x] Second-pass static checks: normalize Hono's synchronous-or-async response
   into a promise for the controlled confirmation race; runtime assertions stay unchanged.
 - [x] PWA-EX3: owner requires merging approved PW-D 0ab7d664 before repairs.
