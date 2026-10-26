@@ -7,6 +7,12 @@
 export const SCOPED_PERSONAL = "personal" as const;
 export const LEGACY_EPOCH = "legacy" as const;
 export const SCOPED_EPOCH = "scoped" as const;
+export const SCOPED_MAINTENANCE_IN_PROGRESS = "scoped_maintenance_in_progress" as const;
+
+/** Distinct maintenance code: retryable, never confused with unavailable scope. */
+export function maintenanceScopeError(workspaceId: string): string {
+  return `${SCOPED_MAINTENANCE_IN_PROGRESS}:${workspaceId}`;
+}
 
 export type FacetWriterEpoch = typeof LEGACY_EPOCH | typeof SCOPED_EPOCH;
 
@@ -30,6 +36,13 @@ export class ScopeError extends Error {
     message: string,
   ) {
     super(message);
+  }
+}
+
+/** Preserve the sampled refusal while keeping the BASE scope error contract. */
+export class ScopedMaintenanceError extends ScopeError {
+  constructor(workspaceId: string) {
+    super(503, `scoped_facet_scope_unavailable:${workspaceId}`);
   }
 }
 
