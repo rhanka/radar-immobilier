@@ -30,7 +30,8 @@ curl -fsS "${auth[@]}" "$url" --data-binary "@$OP_EVIDENCE_DIR/request.json" \
   -o "$OP_EVIDENCE_DIR/search.json"
 if [[ -n ${OP_EXPECTED_ERROR:-} ]]; then
   jq -e --arg error "$OP_EXPECTED_ERROR" \
-    '.result.isError == true and ((.result.content[0].text | fromjson).error == $error)' \
+    '.result.isError == true and ((.result.content[0].text | fromjson) |
+      .error == $error and (has("signals") | not))' \
     "$OP_EVIDENCE_DIR/search.json" >/dev/null
 else
   : "${OP_EXPECTED_SIGNAL:?Known signal ID required to prove real data}"
