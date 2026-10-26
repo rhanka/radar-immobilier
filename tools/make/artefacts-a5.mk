@@ -26,3 +26,6 @@ qualify-astra: guard
 .PHONY: upgrade-provider
 upgrade-provider: guard
 	@bash tools/make/artefacts-a5-verify.sh $@
+.PHONY: test-runner-intrusion
+test-runner-intrusion: guard
+	@bash tools/make/artefacts-a5-runner-intrusion.test.sh
