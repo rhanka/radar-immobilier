@@ -9,11 +9,11 @@ import { assertIdempotencyKey } from "./write-intent-schemas.js";
 import { FacetError } from "../services/facets/target.js";
 import { PwWriteError } from "../services/facets/pw-write-errors.js";
 import { writeRefusal } from "./write-intent-refusal.js";
-import { sql } from "drizzle-orm";
+import { writeIntentTransaction } from "./write-intent-transaction.js";
 import { approvedAccountId, resolveWorkspaceAccess } from "../services/workspaces/store.js";
 import { lockWorkspace } from "../services/workspaces/mutations.js";
 import { WorkspaceError } from "../services/workspaces/types.js";
-import { isPersonalOperation } from "../services/facets/signal-write-operations.js";
+import { isPersonalOperation, type SignalWriteOperation } from "../services/facets/signal-write-operations.js";
 
 export interface WriteAppDeps extends AppGuardDeps {
   db: Database;
@@ -28,9 +28,7 @@ export async function ownedWriteIntent(c: Context, deps: WriteAppDeps, pass: App
   management = false) {
   const id = c.req.param("intentId");
   assertIdempotencyKey(id);
-  return deps.db.transaction(async (tx) => {
-    await tx.execute(sql`SET LOCAL lock_timeout = '1s'`);
-    await tx.execute(sql`SET LOCAL statement_timeout = '5s'`);
+  return writeIntentTransaction(deps.db, async (tx) => {
     const row = await loadPwIntentForShare(tx, id!);
     try { assertPwPrincipal(row, pass.principal); }
     catch (error) {
@@ -47,13 +45,11 @@ export async function ownedWriteIntent(c: Context, deps: WriteAppDeps, pass: App
 export async function canReadWriteIntentSummary(deps: WriteAppDeps, row: PwIntentRow,
   pass: AppGuardPass): Promise<boolean> {
   try {
-    return await deps.db.transaction(async (tx) => {
-      await tx.execute(sql`SET LOCAL lock_timeout = '1s'`);
-      await tx.execute(sql`SET LOCAL statement_timeout = '5s'`);
+    return await writeIntentTransaction(deps.db, async (tx) => {
       await lockWorkspace(tx, row.workspaceId);
       await approvedAccountId(tx, pass.principal.sub, true);
       const access = await resolveWorkspaceAccess(tx, row.workspaceId, pass.principal.sub);
-      return isPersonalOperation(row.operation) || access.moderateArchive;
+      return isPersonalOperation(row.operation as SignalWriteOperation) || access.moderateArchive;
     });
   } catch (error) {
     if (error instanceof WorkspaceError && ["account_not_approved", "workspace_membership_required",
