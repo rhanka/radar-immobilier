@@ -50,3 +50,4 @@
 - [x] Astra A5: Use transactional approval in the HTTP commit guard without acquiring another pool client.
 - [x] Astra A5: Normalize actual pg-pool acquisition errors at dispatch, lock and outcome boundaries.
 - [x] Astra A5: Wire fresh common admission into the production MCP binding and HTTP control routes.
+- [x] Astra A5: Add real PostgreSQL/S3 fixtures and durable artifact, release, receipt and quota snapshots.
