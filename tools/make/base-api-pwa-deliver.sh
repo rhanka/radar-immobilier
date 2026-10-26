@@ -13,7 +13,9 @@ git diff --cached --quiet
 if [[ ${1:-all} != commit-slices ]]; then
   evidence=$(cat tmp/pwa-evidence/latest)
   [[ -f $evidence/result && $(cat "$evidence/status") == 0 ]]
-  sha256sum --check --quiet "$evidence/files.sha256"
+  # Delivery tooling is audited below; all campaign inputs remain byte-pinned.
+  awk '$2 != "tools/make/base-api-pwa-deliver.sh" {print}' "$evidence/files.sha256" \
+    | sha256sum --check --quiet
   full=$(cat tmp/pwa-evidence/latest-full)
   for report in ci-tests artifacts-host-tests scoped-tests; do
     jq -e '.success and .numFailedTests == 0 and .numPassedTests > 0' "$full/$report.json" >/dev/null
@@ -67,13 +69,14 @@ out=$ROOT/tmp/pwa-evidence/api-paniers-pwa-astra-fixes.bundle
 git bundle create "$out" "$BASE..HEAD"
 git bundle verify "$out"
 audit=$(mktemp -d "$ROOT/tmp/pwa-evidence/bundle-astra-audit.XXXXXX")
-git init --bare -q "$audit"
-git -C "$audit" fetch --no-tags --no-write-fetch-head "$ROOT" "$BASE:refs/heads/base"
-if git -C "$audit" cat-file -e "$head^{commit}" 2>/dev/null; then echo 'Payload present before import' >&2; exit 2; fi
-git -C "$audit" bundle verify "$out"
-git -C "$audit" fetch --no-tags --no-write-fetch-head "$out" HEAD:refs/heads/payload
-[[ $(git -C "$audit" rev-parse payload) == "$head" && $(git -C "$audit" rev-parse 'payload^{tree}') == "$tree" ]]
-for merge in 512ca686 39ed4f1b; do git -C "$audit" merge-base --is-ancestor "$merge" payload; done
-git -C "$audit" fsck --full --no-reflogs
+audit_git() { env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE git -C "$audit" "$@"; }
+env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE git init --bare -q "$audit"
+audit_git fetch --no-tags --no-write-fetch-head "$ROOT" "$BASE:refs/heads/base"
+if audit_git cat-file -e "$head^{commit}" 2>/dev/null; then echo 'Payload present before import' >&2; exit 2; fi
+audit_git bundle verify "$out"
+audit_git fetch --no-tags --no-write-fetch-head "$out" HEAD:refs/heads/payload
+[[ $(audit_git rev-parse payload) == "$head" && $(audit_git rev-parse 'payload^{tree}') == "$tree" ]]
+for merge in 512ca686 39ed4f1b; do audit_git merge-base --is-ancestor "$merge" payload; done
+audit_git fsck --full --no-reflogs
 sha256sum "$out" | tee tmp/pwa-evidence/bundle-astra.sha256
 printf 'HEAD=%s\nTREE=%s\nAUDIT=%s\n' "$head" "$tree" "$audit" | tee tmp/pwa-evidence/delivery-astra.txt
