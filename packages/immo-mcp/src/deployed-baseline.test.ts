@@ -8,7 +8,9 @@ import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { createImmoHttpApp } from "./server-http.js";
 import { buildImmoServer } from "./server.js";
 import { HttpDataSource } from "./data-source.js";
+import { signalSearchBody, signalSearchItem } from "./signal-search-test-fixture.js";
 import { HttpRawDataSource } from "./raw-data.js";
+import { createIsolatedExchangeFixture, exchangeDepsFor } from "./test-exchange-fixtures.js";
 
 type ToolResult = { content: { type: string; text?: string }[]; isError?: boolean };
 type Capture = {
@@ -61,11 +63,17 @@ function normalize(result: ToolResult): ToolResult {
 }
 
 async function connectHttp(mode: "http" | "simulation", scope = SCOPES) {
-  const upstream: typeof fetch = async (input) => {
+  const exchange = await createIsolatedExchangeFixture();
+  const upstream: typeof fetch = async (input, init) => {
     const url = new URL(String(input));
     expect(url.origin).toBe(BASE_URL);
-    if (url.pathname === "/api/graph-signals/longueuil") {
-      return Response.json({ nodes: [{ id: "sig-synthetique-1", type: "reglement" }] });
+    if (url.pathname === "/api/v1/mcp/facets/signals/search") {
+      const delegated = new Headers(init?.headers).get("authorization")?.replace(/^Bearer /, "");
+      expect(exchange.issuedExchangedTokens).toContain(delegated);
+      return Response.json(signalSearchBody("longueuil", [signalSearchItem("longueuil", {
+        etape: "", regulatoryStatus: "anticipation", etape_date: "", reglement_number: "",
+        zone_ref: "", summary: "", source_document_id: "",
+      })]));
     }
     if (url.pathname.startsWith("/api/geo/collections/") || url.pathname === "/api/documents/raw") {
       return new Response(null, { status: 404 });
@@ -77,6 +85,8 @@ async function connectHttp(mode: "http" | "simulation", scope = SCOPES) {
     scopesSupported: SCOPES.split(" "), port: 0, dataMode: mode === "http" ? "real" : "simulation",
   }, {
     keySource: { resolveKey: async () => publicKey },
+    authorize: async () => true,
+    exchange: exchangeDepsFor(exchange),
     ...(mode === "http" ? {
       data: new HttpDataSource({ baseUrl: BASE_URL, fetchImpl: upstream }),
       raw: new HttpRawDataSource({ baseUrl: BASE_URL, publicBaseUrl: BASE_URL, fetchImpl: upstream }),
@@ -173,7 +183,7 @@ describe("deployed twelve-tool baseline", () => {
   );
 
   it("matches the complete discovery of the current stdio server factory", async () => {
-    const server = buildImmoServer({
+    const server = await buildImmoServer({
       IMMO_MCP_AUTH_STUB_SUB: "synthetic-user", IMMO_MCP_AUTH_STUB_TENANT: "radar",
       IMMO_MCP_AUTH_STUB_SCOPES: SCOPES,
     });

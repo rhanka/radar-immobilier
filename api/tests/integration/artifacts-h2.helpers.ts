@@ -7,6 +7,7 @@ import { createTestS3BlobStore } from "../artifacts-blob-store.helpers.js";
 import { composeArtifactHost, createArtifactControl, createArtifactsPool } from "@radar/artifacts-host";
 import { loadConfig, type AuthConfig } from "../../src/config.js";
 import { signSession } from "../../src/services/auth/session.js";
+import { seedArtifactMemberships } from "./artifacts-membership.helpers.js";
 
 export const migrationsFolder = fileURLToPath(new URL("../../drizzle", import.meta.url));
 export const auth: AuthConfig = {
@@ -20,7 +21,7 @@ export async function cookie(sub: string) {
   return `radar_session=${await signSession({ sub }, { sessionSecret: auth.sessionSecret, ttlSeconds: 3600 })}`;
 }
 
-export async function startHarness(name: string) {
+export async function startHarness(name: string, subjects: readonly string[] = []) {
   const env = loadConfig();
   const params = { host: env.POSTGRES_HOST, port: env.POSTGRES_PORT, user: env.POSTGRES_USER,
     password: env.POSTGRES_PASSWORD, database: env.POSTGRES_DB };
@@ -29,6 +30,9 @@ export async function startHarness(name: string) {
   await admin.query(`CREATE DATABASE ${database}`);
   const pool = createArtifactsPool({ ...params, database });
   await migrate(drizzle(pool), { migrationsFolder });
+  for (const subject of subjects) await pool.query(
+    "INSERT INTO account_users (sub, status) VALUES ($1, 'approved')", [subject]);
+  await seedArtifactMemberships(pool);
   const config = { enabled: true as const, storageScope: "h2_scope", orgId: "h2_org",
     s3Bucket: `h2-artifacts-${name}`, s3Endpoint: env.S3_ENDPOINT, s3Region: "us-east-1",
     s3AccessKey: env.S3_ACCESS_KEY, s3SecretKey: env.S3_SECRET_KEY };
@@ -36,6 +40,10 @@ export async function startHarness(name: string) {
     credentials: { accessKeyId: config.s3AccessKey, secretAccessKey: config.s3SecretKey } });
   await s3.send(new CreateBucketCommand({ Bucket: config.s3Bucket }));
   const blobs = createTestS3BlobStore({ client: s3, bucket: config.s3Bucket });
+  await pool.query("INSERT INTO artifacts.storage_scopes (id, org_id) VALUES ($1, $2)",
+    [config.storageScope, config.orgId]);
+  await pool.query(`INSERT INTO artifacts.host_quotas (storage_scope_id, operation_limit, byte_limit)
+    VALUES ($1, 1000000, 1000000000)`, [config.storageScope]);
   const host = (await composeArtifactHost(pool, config, blobs))!;
   const control = createArtifactControl(host, config.storageScope, "pages.example.test");
   return { pool, config, host, control, blobs,

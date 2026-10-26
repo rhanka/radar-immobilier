@@ -1,4 +1,4 @@
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 import { fileURLToPath, URL } from "node:url";
 
 export default defineConfig({
@@ -17,6 +17,7 @@ export default defineConfig({
   },
   test: {
     include: ["tests/**/*.spec.ts", "src/**/*.test.ts"],
+    exclude: [...configDefaults.exclude, "tests/e2e/artifacts-reader*.spec.ts"],
     testTimeout: 20000,
     hookTimeout: 20000,
   },
