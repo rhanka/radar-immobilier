@@ -132,11 +132,11 @@ Qualify and integrate Muse's durable write persistence on PW-B after A5.
 
 - [x] Delivery slice 38: chore(pw-d): add base-api-pwd.mk.
 
-- [ ] Astra corrections: persistent fixed I/P follow-up window plus global quota.
-- [ ] Astra corrections: typed terminal refusal independent of outbox delivery.
-- [ ] Astra corrections: independent application cookie deadline at final admission.
-- [ ] Astra corrections: normalized command keys, concealed revoke ownership, refusal audit.
-- [ ] Astra corrections: exact-refusal mutations, scoped and CI API gates, lint/typecheck.
+- [x] Astra corrections: persistent fixed I/P follow-up window plus global quota.
+- [x] Astra corrections: typed terminal refusal independent of outbox delivery.
+- [x] Astra corrections: independent application cookie deadline at final admission.
+- [x] Astra corrections: normalized command keys, concealed revoke ownership, refusal audit.
+- [x] Astra corrections: exact-refusal mutations, scoped and CI API gates, lint/typecheck.
 - [ ] Astra corrections: bounded commits, de81ef0e bundle audit, French report.
 - [x] Astra slice 01: scope corrective qualification without publication.
 - [x] Astra slice 02: persist I/P follow-up budgets and immutable public refusals.
@@ -152,3 +152,6 @@ Qualify and integrate Muse's durable write persistence on PW-B after A5.
 - [x] Astra slice 12: wait up to three hours at two-minute intervals, never holding a lock needed by foreign stacks.
 - [x] Astra slice 13: reconcile new table reexports and requestId inference after 102 passing scoped tests.
 - [x] Astra slice 14: verify exact refusal from the assertion diff when Vitest abbreviates its JSON message.
+- [x] Astra slice 15: qualify 102 scoped tests, 4089 API tests and seven killed/restored mutants.
+- [x] Astra qualification: typechecks, global lint, API build and CT-8 fresh/upgrade/replay pass.
+- [x] Astra cleanup: only owned containers, volume and network removed; no Docker work remains.
