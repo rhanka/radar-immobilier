@@ -19,8 +19,8 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import pg from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
-import { CreateBucketCommand, DeleteBucketCommand, S3Client } from "@aws-sdk/client-s3";
-import { createS3BlobStore } from "@sentropic/artifacts/adapters/s3";
+import { CreateBucketCommand, S3Client } from "@aws-sdk/client-s3";
+import { createTestS3BlobStore } from "../artifacts-blob-store.helpers.js";
 import {
   createArtifactControl,
   createArtifactsPool,
@@ -29,6 +29,8 @@ import {
 import { createMcpArtifactAdapter } from "../../../packages/artifacts-host/src/mcp-app-adapter.js";
 import { controlRoute } from "../../src/artifacts/control-route.js";
 import { auth, cookie, migrationsFolder } from "./artifacts-h2.helpers.js";
+import { cleanupArtifactTestResources, listTestBucketKeys } from "./artifacts-s3.helpers.js";
+import { createPurgeTestHost } from "./artifacts-purge-race.helpers.js";
 import { loadConfig } from "../../src/config.js";
 import { awaitWithPump, cleanupArtifactRace, assertPurgeEffects } from "./artifacts-race-cleanup.helpers.js";
 import {
@@ -36,7 +38,6 @@ import {
   authorizeTransaction,
   buildInvocationContext,
   composeR2AcceptanceHost,
-  reportNotCovered,
   committedState,
   startArtifactWorker,
   arrived,
@@ -50,7 +51,7 @@ import {
   verifyPreparationCleanup,
   requireSelectedProfile,
   readPolicyStatusViaTransaction,
-  transactionQuery,
+  readPolicyRevisionViaTransaction,
   toGuardDecision,
   type AuthorizeCommit,
   type CommitBarrier,
@@ -102,12 +103,12 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
   let databaseCreated = false;
   let bucketCreated = false;
 
-  const rawBlobs = () => createS3BlobStore({ client: s3, bucket: BUCKET });
+  const rawBlobs = () => createTestS3BlobStore({ client: s3, bucket: BUCKET });
   const storageConfig = () => ({ enabled: true as const, storageScope: SCOPE, orgId: ORG,
     s3Bucket: BUCKET, s3Endpoint: endpoint, s3Region: "us-east-1",
     s3AccessKey: accessKey, s3SecretKey: secretKey });
 
-  async function tableCount(table: "releases" | "idempotency_keys" | "artifacts"): Promise<number> {
+  async function tableCount(table: "releases" | "operation_receipts" | "artifacts"): Promise<number> {
     return Number((await pool.query(`SELECT count(*) FROM artifacts.${table}`)).rows[0].count);
   }
 
@@ -149,7 +150,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
 
   function statusDriven(): AuthorizeCommit {
     return async (context, transaction) => {
-      const status = await readPolicyStatusViaTransaction(transaction);
+      const status = await readPolicyStatusViaTransaction(transaction, context);
       return status === "approved" ? authorizeTransaction(context, transaction)
         : toGuardDecision({ allowed: false, status: 403, body: { error: "account_not_approved", status: status ?? "unknown" } });
     };
@@ -185,25 +186,15 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
   });
 
   afterAll(async () => {
-    try {
-      if (bucketCreated) {
-        for (const key of await rawBlobs().listKeys("artifacts/")) await rawBlobs().deleteBlob(key);
-        await s3.send(new DeleteBucketCommand({ Bucket: BUCKET }));
-      }
-    } finally {
-      s3?.destroy();
-      await pool?.end();
-      try {
-        if (databaseCreated) await admin.query(`DROP DATABASE ${DATABASE} WITH (FORCE)`);
-      } finally { await admin?.end(); }
-    }
+    await cleanupArtifactTestResources({ s3, bucket: bucketCreated ? BUCKET : undefined,
+      pool, admin, database: databaseCreated ? DATABASE : undefined });
   });
 
   async function assertPreparationCleanup(host: unknown, artifactId: string,
     expectedInvocationIds?: readonly string[],
     s3KeysBefore?: ReadonlySet<string> | readonly string[],
     preparationsBeforeRefusal?: Awaited<ReturnType<PreparationCleanupBinding["inspectPreparations"]>>["attempts"]): Promise<void> {
-    await verifyPreparationCleanup(host, artifactId, rawBlobs(), false, false,
+    await verifyPreparationCleanup(host, artifactId, () => listTestBucketKeys(s3, BUCKET), false, false,
       { ...(expectedInvocationIds === undefined ? {} : { expectedInvocationIds }),
         ...(s3KeysBefore === undefined ? {} : { s3KeysBefore }),
         ...(preparationsBeforeRefusal === undefined ? {} : { preparationsBeforeRefusal }) });
@@ -229,7 +220,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       let run: ReturnType<typeof startBarrierOperation> | undefined;
       let revocation: Promise<unknown> | undefined;
       try {
-        requireSelectedProfile(host, profile.digest);
+        requireSelectedProfile(host, profile.profileDigest);
         const execute = requireHostExecute(host);
         const tag = operation + "-" + point;
         let artifactId: string | undefined;
@@ -243,7 +234,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
           files: [{ path: "index.html", mimeType: "text/html", text: tag }] }
           : { bindingName: tag, idempotencyKey: tag };
         const before = await committedState(pool);
-        const s3Baseline = new Set(await rawBlobs().listKeys(""));
+        const s3Baseline = new Set(await listTestBucketKeys(s3, BUCKET));
         const invocation = invocationFor(statusDriven(), tag);
         run = startBarrierOperation(barrier, invocation.invocationId,
           () => execute({ method: "POST", path: "/" + operation, body }, invocation), point);
@@ -291,7 +282,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
     const host = composed.host;
     const close = host["close"];
     try {
-      requireSelectedProfile(host, composed.profile.digest);
+      requireSelectedProfile(host, composed.profile.profileDigest);
       const execute = requireHostExecute(host);
       const ensured = await execute({ method: "POST", path: "/ensure",
         body: { bindingName: "q1-inspect", idempotencyKey: "q1-inspect-ensure" } },
@@ -310,22 +301,10 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         const invocationId = invocation["invocationId"] as string;
         const before = await committedSnapshot(artifactId);
         await pool.query("UPDATE account_users SET status = 'suspended' WHERE sub = 'alice'");
-        let settled = false;
-        const pending = execute({ method: "POST", path: "/publish", body }, invocation)
-          .finally(() => { settled = true; });
-        const pump = (async () => {
-          const deadline = performance.now() + 1500;
-          while (!settled) {
-            if (performance.now() > deadline) throw new Error("[contract-violation] commit barrier did not progress");
-            for (const candidate of PUBLISH_POINTS) {
-              if (settled) break;
-              const arrived = await withTimeout(barrier.waitUntilReached(candidate, invocationId), 50);
-              if (arrived) barrier.release(candidate, invocationId);
-            }
-          }
-        })();
-        await pump;
-        const outcome = await pending as unknown as Record<string, unknown>;
+        const run = startBarrierOperation(barrier, invocationId,
+          () => execute({ method: "POST", path: "/publish", body }, invocation));
+        const outcome = await run.pending as Record<string, unknown>;
+        await run.drained;
         assertOutcomeFailure(outcome, invocationId);
         expect(outcome["failure"]).toMatchObject({
           category: "unauthorized_at_commit", retriable: false, commitState: "not_committed" });
@@ -340,7 +319,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
             "SELECT release_id FROM artifacts.artifact_current WHERE artifact_id = $1", [artifactId])).rows;
           expect(peerCurrent).toEqual([]);
           const peerKeys = Number((await peer.query(
-            "SELECT count(*) FROM artifacts.idempotency_keys WHERE key = $1", [internalKey])).rows[0].count);
+            "SELECT count(*) FROM artifacts.operation_receipts WHERE internal_key = $1", [internalKey])).rows[0].count);
           expect(peerKeys).toBe(0);
           const peerSnapshot = await committedState(peer);
           expect(peerSnapshot).toEqual(before);
@@ -395,7 +374,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       let revoked = false;
       const guard: AuthorizeCommit = async (context, transaction) => {
         expect(context.purpose).toBe("replay");
-        return revoked ? { allowed: false, reason: "unauthorized_at_commit",
+        return revoked ? { allowed: false, reason: "denied",
           publicCode: "account_not_approved", status: 403, retriable: false }
           : authorizeTransaction(context, transaction);
       };
@@ -482,7 +461,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
     const host = composed.host;
     const close = host["close"];
     try {
-      requireSelectedProfile(host, composed.profile.digest);
+      requireSelectedProfile(host, composed.profile.profileDigest);
       const execute = requireHostExecute(host);
       const ensured = await execute({ method: "POST", path: "/ensure",
         body: { bindingName: "q1-reauth", idempotencyKey: "q1-reauth-ensure" } },
@@ -506,12 +485,12 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       assertOutcomeFailure(denied, invocationId);
       await pool.query("UPDATE account_users SET status = 'approved' WHERE sub = 'alice'");
       const releasesBefore = await tableCount("releases");
-      const keysBefore = await tableCount("idempotency_keys");
+      const keysBefore = await tableCount("operation_receipts");
       const fresh = await execute({ method: "POST", path: "/publish", body },
         invocationFor(allowAll(), "reauth-fresh")) as unknown as Record<string, unknown>;
       expect(fresh).toMatchObject({ ok: true });
       expect(await tableCount("releases")).toBe(releasesBefore + 1);
-      expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
+      expect(await tableCount("operation_receipts")).toBe(keysBefore + 1);
       const releaseId = await currentReleaseId(artifactId);
       expect(typeof releaseId).toBe("string");
       const second = (await composeQ1Host(barrier));
@@ -531,7 +510,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         expect(mcpReplay).toMatchObject({ ok: true, status: 201 });
         expect((mcpReplay as { ok: true; data: unknown }).data).toEqual(httpBody);
         expect(await tableCount("releases")).toBe(releasesBefore + 1);
-        expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
+        expect(await tableCount("operation_receipts")).toBe(keysBefore + 1);
       } finally {
         (second.host["close"] as () => void)();
       }
@@ -556,7 +535,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
     const env = loadConfig();
     let policyPool: pg.Pool | undefined;
     try {
-      requireSelectedProfile(host, composed.profile.digest);
+      requireSelectedProfile(host, composed.profile.profileDigest);
       const execute = requireHostExecute(host);
       const fixtures = { subjects: [ACTOR], expiresAtMs: 3_600_000 };
       policyPool = new pg.Pool({ host: env.POSTGRES_HOST, port: env.POSTGRES_PORT,
@@ -567,11 +546,11 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
           try {
             await policyPool?.query("SELECT status FROM account_users WHERE sub = 'alice' FOR SHARE");
           } catch {
-            return { allowed: false, reason: "unauthorized_at_commit",
+            return { allowed: false, reason: "denied",
               publicCode: "capability_unavailable", status: 503, retriable: true };
           }
         }
-        const status = await readPolicyStatusViaTransaction(transaction);
+        const status = await readPolicyStatusViaTransaction(transaction, context);
         if (status !== "approved") {
           return toGuardDecision(
             { allowed: false, status: 403, body: { error: "account_not_approved", status: status ?? "unknown" } });
@@ -598,7 +577,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       const invocation = invocationFor(authorizeCommit, mode);
       const invocationId = invocation["invocationId"] as string;
       const releasesBefore = await tableCount("releases");
-      const keysBefore = await tableCount("idempotency_keys");
+      const keysBefore = await tableCount("operation_receipts");
       const driven2 = startBarrierOperation(barrier, invocationId,
         () => execute({ method: "POST", path: "/publish", body }, invocation), "before_finalization_row_lock");
       const pending = driven2.pending;
@@ -623,7 +602,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
           category: "unauthorized_at_commit", retriable: false, commitState: "not_committed" });
       }
       expect(await tableCount("releases")).toBe(releasesBefore);
-      expect(await tableCount("idempotency_keys")).toBe(keysBefore);
+      expect(await tableCount("operation_receipts")).toBe(keysBefore);
       expect(await currentReleaseId(artifactId)).toBeUndefined();
       fixtures.subjects = [ACTOR];
       fixtures.expiresAtMs = 3_600_000;
@@ -649,20 +628,18 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
     const host = composed.host;
     const close = host["close"];
     try {
-      requireSelectedProfile(host, composed.profile.digest);
+      requireSelectedProfile(host, composed.profile.profileDigest);
       const execute = requireHostExecute(host);
       await pool.query("CREATE TABLE IF NOT EXISTS test_policy_revision (id int PRIMARY KEY, rev text NOT NULL)");
       await pool.query("INSERT INTO test_policy_revision (id, rev) VALUES (1, 'q1-rev-1') ON CONFLICT (id) DO UPDATE SET rev = 'q1-rev-1'");
       const readRevisionViaTransaction = async (transaction: unknown): Promise<string> => {
-        const rows = await transactionQuery<{ rev: string }>(transaction,
-          "SELECT rev FROM test_policy_revision WHERE id = $1 FOR SHARE", [1]);
-        return rows.rows[0]?.rev ?? "";
+        return readPolicyRevisionViaTransaction(transaction);
       };
       const authorizeCommit: AuthorizeCommit = async (context, transaction) => {
         expect(transaction).toBeDefined();
         const current = await readRevisionViaTransaction(transaction);
         if (current !== "q1-rev-1") {
-          return { allowed: false, reason: "unauthorized_at_commit",
+          return { allowed: false, reason: "denied",
             publicCode: "capability_unavailable", status: 403, retriable: false };
         }
         return authorizeTransaction(context, transaction);
@@ -723,7 +700,6 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
   });
 
   it.each([false, true])("same-key S3 race across processes, changed command %s", async (changedCommand) => {
-    const raceKey = changedCommand ? "q1-race-changed" : "q1-race-identical";
     await requireCommitContract();
     await requireOutcomeContract();
     const barrier = await requireCommitBarrier();
@@ -737,15 +713,10 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
     const barrierB = worker.barrier;
     let invAId = "";
     let invBId = "";
-    let pendingA: Promise<unknown> | undefined;
-    let pendingB: Promise<unknown> | undefined;
-    let pumpA: Promise<void> | undefined;
-    let pumpB: Promise<void> | undefined;
-    const cleanupPoints: readonly CommitBarrierPoint[] = [
-      ...PUBLISH_POINTS, "after_replay_lookup_before_guard",
-    ];
+    let runA: ReturnType<typeof startBarrierOperation> | undefined;
+    let runB: ReturnType<typeof startBarrierOperation> | undefined;
     try {
-      requireSelectedProfile(hostA, composedA.profile.digest);
+      requireSelectedProfile(hostA, composedA.profile.profileDigest);
       const executeA = requireHostExecute(hostA);
       const executeB = worker.execute;
       const purposes: Array<{ invocationId: string; purpose: string }> = [];
@@ -760,77 +731,48 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       // competitors (A/B) of THIS variant.
       const variant = changedCommand ? "changed" : "same";
       const ensured = await executeA({ method: "POST", path: "/ensure",
-        body: { bindingName: raceKey, idempotencyKey: `${raceKey}-ensure` } },
-        invocationFor(authorizeCommit, `${raceKey}-ensure`));
+        body: { bindingName: `q1-race-${variant}`, idempotencyKey: `q1-race-ensure-${variant}` } },
+        invocationFor(authorizeCommit, `race-ensure-${variant}`));
       expect(ensured).toMatchObject({ ok: true });
       const artifactId = ((ensured as { result: unknown }).result as { body: { artifactId: string } })
         .body.artifactId;
       const body = { artifactId,
         files: [{ path: "index.html", mimeType: "text/html", text: `same-key race ${variant}` }],
-        idempotencyKey: raceKey };
+        idempotencyKey: `q1-race-${variant}` };
       const internalKey = deriveIdempotencyKey(
-        { scope: SCOPE, sub: ACTOR, op: "publish", artifactId, clientKey: raceKey });
-      const invA = invocationFor(authorizeCommit, `${raceKey}-a`);
-      const invB = invocationFor(authorizeCommit, `${raceKey}-b`);
+        { scope: SCOPE, sub: ACTOR, op: "publish", artifactId, clientKey: `q1-race-${variant}` });
+      const invA = invocationFor(authorizeCommit, `race-a-${variant}`);
+      const invB = invocationFor(authorizeCommit, `race-b-${variant}`);
       invAId = invA["invocationId"] as string;
       invBId = invB["invocationId"] as string;
       const releasesBefore = await tableCount("releases");
-      const keysBefore = await tableCount("idempotency_keys");
-      const drainPoints: readonly CommitBarrierPoint[] = [
-        ...PUBLISH_POINTS, "after_replay_lookup_before_guard",
-      ];
-      let settledB = false;
-      pendingB = executeB({ method: "POST", path: "/publish", body: changedCommand
-        ? { ...body, files: [{ path: "different.html", mimeType: "text/html", text: "different command" }] } : body }, invB)
-        .finally(() => { settledB = true; });
-      void pendingB.catch(() => {});
-      pumpB = (async () => {
-        const deadline = performance.now() + 1500;
-        while (!settledB) {
-          if (performance.now() > deadline) throw new Error("[contract-violation] commit barrier B did not progress");
-          for (const candidate of drainPoints) {
-            if (settledB || candidate === "before_key_lock") continue;
-            const arrived = await withTimeout(barrierB.waitUntilReached(candidate, invBId), 50);
-            if (arrived) barrierB.release(candidate, invBId);
-          }
-          await withTimeout(new Promise<void>((resolve) => setTimeout(resolve, 50)), 50);
-        }
-      })();
-      void pumpB.catch(() => {});
-      await awaitWithPump(
-        barrierB.waitUntilReached("before_key_lock", invBId),
-        pumpB!,
-        "before_key_lock/B",
-        5000,
-      );
-      let settledA = false;
-      pendingA = executeA({ method: "POST", path: "/publish", body }, invA)
-        .finally(() => { settledA = true; });
-      void pendingA.catch(() => {});
-      pumpA = (async () => {
-        const deadline = performance.now() + 1500;
-        while (!settledA) {
-          if (performance.now() > deadline) throw new Error("[contract-violation] commit barrier A did not progress");
-          for (const candidate of drainPoints) {
-            if (settledA) break;
-            const arrived = await withTimeout(barrier.waitUntilReached(candidate, invAId), 50);
-            if (arrived) barrier.release(candidate, invAId);
-          }
-        }
-      })();
-      void pumpA.catch(() => {});
-      const winner = (await awaitWithPump(pendingA!, pumpA!, "publish/A", 8000)) as unknown as Record<string, unknown>;
-      await pumpA;
-      expect(winner).toMatchObject({ ok: true });
+      const keysBefore = await tableCount("operation_receipts");
+      runB = startBarrierOperation(barrierB, invBId, () => executeB({ method: "POST", path: "/publish",
+        body: changedCommand ? { ...body, files: [{ path: "different.html", mimeType: "text/html",
+          text: "different command" }] } : body }, invB), "before_key_lock");
+      await awaitWithPump(runB.reached, runB.drained, "before_key_lock/B", 5000);
+      runA = startBarrierOperation(barrier, invAId,
+        () => executeA({ method: "POST", path: "/publish", body }, invA), "before_commit");
+      await awaitWithPump(runA.reached, runA.drained, "before_commit/A", 5000);
       const cleanup = await requirePreparationCleanupBinding();
       const preparing = await cleanup.inspectPreparations(hostA, artifactId);
+      // The public inventory excludes completed successes: observe both
+      // preparations before A commits, then retain B's failed history below.
+      expect(preparing.attempts.length).toBeGreaterThanOrEqual(2);
+      expect(preparing.attempts.map((attempt) => attempt.invocationId))
+        .toEqual(expect.arrayContaining([invAId, invBId]));
+      expect(new Set(preparing.attempts.map((attempt) => attempt.attemptId)).size).toBeGreaterThanOrEqual(2);
       const preparedLoser = preparing.attempts.find((attempt) => attempt.invocationId === invBId);
       expect(preparedLoser?.blobKeys.length).toBeGreaterThan(0);
-      const preparedKeys = new Set(await rawBlobs().listKeys(""));
+      const preparedKeys = new Set(await rawBlobs().listKeys(`artifacts/${SCOPE}/`));
       for (const key of preparedLoser!.blobKeys) expect(preparedKeys.has(key)).toBe(true);
-      barrierB.release("before_key_lock", invBId);
-      const loser = (await awaitWithPump(pendingB!, pumpB!, "publish/B", 8000)) as unknown as Record<string, unknown>;
-      await pumpB;
+      runA.release();
+      const winner = await awaitWithPump(runA.pending, runA.drained, "publish/A") as Record<string, unknown>;
+      await runA.drained;
+      expect(winner).toMatchObject({ ok: true });
+      runB.release();
+      const loser = await awaitWithPump(runB.pending, runB.drained, "publish/B") as Record<string, unknown>;
+      await runB.drained;
       expect(loser).toMatchObject({ ok: !changedCommand });
       const winnerBody = ((winner as { result: unknown }).result as { body: unknown }).body;
       if (changedCommand) expect(loser.failure).toMatchObject({ category: "conflict" });
@@ -839,17 +781,14 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         expect(worker.authorizations).toContainEqual({ invocationId: invBId, purpose: "replay" });
       }
       expect(await tableCount("releases")).toBe(releasesBefore + 1);
-      expect(await tableCount("idempotency_keys")).toBe(keysBefore + 1);
+      expect(await tableCount("operation_receipts")).toBe(keysBefore + 1);
       const successRows = Number((await pool.query(
-        "SELECT count(*) FROM artifacts.idempotency_keys WHERE key = $1", [internalKey])).rows[0].count);
+        "SELECT count(*) FROM artifacts.operation_receipts WHERE internal_key = $1", [internalKey])).rows[0].count);
       expect(successRows).toBe(1);
       expect(cleanup).toBeDefined();
+      await cleanup.scheduleBoundedPreparationCleanup(hostA,
+        Math.max(...preparing.attempts.map((attempt) => attempt.cleanupDeadlineMs)));
       const observed = await cleanup.inspectPreparations(hostA, artifactId);
-      // Both preparations of THIS variant must be attributed; a replayed
-      // durable success from the other variant cannot satisfy this.
-      expect(observed.attempts.length).toBeGreaterThanOrEqual(2);
-      expect(observed.attempts.map((attempt) => attempt.invocationId)).toEqual(expect.arrayContaining([invAId, invBId]));
-      expect(new Set(observed.attempts.map((attempt) => attempt.attemptId)).size).toBeGreaterThanOrEqual(2);
       // A6 allows the loser to finish cleanup before this observation: accept
       // an already-settled state, but keep the historical attribution and the
       // shared-blob retention proof.
@@ -861,11 +800,13 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         [invAId, invBId].includes(candidate.invocationId))) {
         expect(attempt.blobKeys.length).toBeGreaterThan(0);
       }
-      const keys = await rawBlobs().listKeys("artifacts/");
+      const keys = await listTestBucketKeys(s3, BUCKET);
       expect([...keys].length).toBeGreaterThan(0);
       const s3Keys = new Set([...keys]);
-      const winnerKeys = new Set(observed.attempts.find(
+      const winnerKeys = new Set(preparing.attempts.find(
         (attempt) => attempt.invocationId === invAId)?.blobKeys ?? []);
+      expect(winnerKeys.size).toBeGreaterThan(0);
+      for (const key of winnerKeys) expect(s3Keys.has(key)).toBe(true);
       const sharedSet = new Set(observed.protectedKeys);
       for (const attempt of observed.attempts.filter((candidate) =>
         [invAId, invBId].includes(candidate.invocationId))) {
@@ -882,8 +823,10 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         }
       }
     } finally {
+      runA?.release(); runB?.release();
       await cleanupArtifactRace([{ barrier, invocationId: invAId }, { barrier: barrierB, invocationId: invBId }],
-        cleanupPoints, [pendingA, pendingB, pumpA, pumpB],
+        [...PUBLISH_POINTS, "after_replay_lookup_before_guard"],
+        [runA?.pending, runB?.pending, runA?.drained, runB?.drained],
         () => { if (typeof closeA === "function") (closeA as () => void)(); }, () => worker.close());
     }
   });
@@ -893,6 +836,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
     const binding = await requirePurgeRaceBinding();
     const barrier = await requireCommitBarrier();
     const { host } = await composeQ1Host(barrier);
+    const purgeHost = await createPurgeTestHost(pool, SCOPE, rawBlobs());
     let paused: Awaited<ReturnType<typeof binding.pausePurgeBeforeDelete>> | undefined;
     let run: ReturnType<typeof startBarrierOperation> | undefined;
     try {
@@ -922,7 +866,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       const otherId = await seedActive(`purge-other-${order}`);
       const sharedKeys: string[] = [];
       const exclusiveKeys: string[] = [];
-      for (const key of await rawBlobs().listKeys("")) {
+      for (const key of await rawBlobs().listKeys(`artifacts/${SCOPE}/`)) {
         const text = new TextDecoder().decode(await rawBlobs().getBlob(key));
         if (text === collectableText) sharedKeys.push(key);
         if (text === `exclusive-${order}`) exclusiveKeys.push(key);
@@ -934,13 +878,13 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       if (order === "purge-first") {
         // Suspend the deletion of the collectable blob, then try to reference
         // the same bytes from the other active artifact while the claim holds.
-        paused = await binding.pausePurgeBeforeDelete(host, targetId);
+        paused = await binding.pausePurgeBeforeDelete(purgeHost, targetId);
         expect(paused.claimId.length).toBeGreaterThan(0);
         expect(paused.blobKeys.length).toBeGreaterThan(0);
         for (const key of sharedKeys) expect(paused.blobKeys).toContain(key);
         for (const key of exclusiveKeys) expect(paused.blobKeys).toContain(key);
-        expect(await binding.inspectDeletionClaims(host)).toContainEqual(
-          expect.objectContaining({ claimId: paused.claimId, state: "deleting" }));
+        expect(await binding.inspectDeletionClaims(purgeHost)).toContainEqual(
+          expect.objectContaining({ claimId: paused.claimId, state: "pending" }));
         const reference = invocationFor(allowAll(), `purge-reference-${order}`);
         const referenceKey = `purge-reference-${order}`;
         const referenceInternalKey = deriveIdempotencyKey(
@@ -966,7 +910,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         // retry with a fresh key would recreate the bytes and mask a success
         // that attached the deleted blob without repreparing it.
         const referenceSuccessRows = async (): Promise<number> => Number((await pool.query(
-          "SELECT count(*) FROM artifacts.idempotency_keys WHERE key = $1",
+          "SELECT count(*) FROM artifacts.operation_receipts WHERE internal_key = $1",
           [referenceInternalKey])).rows[0].count);
         if (!refusedBeforeResolution && (outcome as { ok?: unknown }).ok === false) {
           assertOutcomeFailure(outcome, reference.invocationId);
@@ -981,13 +925,16 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
           // still read back BEFORE the retry below recreates anything.
           expect(await referenceSuccessRows()).toBe(1);
           expect(await referenceReleaseCount()).toBe(releasesBeforeReference + 1);
-          const receipt = (outcome as { result: { body: { artifactId: string; releaseId: string } } }).result.body;
+          const receipt = (outcome as { result: { body: {
+            artifactId: string; releaseId: string; manifest: string;
+          } } }).result.body;
           expect(receipt.artifactId).toBe(otherId);
           expect(receipt.releaseId).toEqual(expect.any(String));
           expect(await currentReleaseId(otherId)).toBe(receipt.releaseId);
           const durableReceipt = (await pool.query(
-            "SELECT result FROM artifacts.idempotency_keys WHERE key = $1", [referenceInternalKey])).rows;
-          expect(durableReceipt).toEqual([{ result: receipt }]);
+            "SELECT receipt AS result FROM artifacts.operation_receipts WHERE internal_key = $1", [referenceInternalKey])).rows;
+          expect(durableReceipt).toEqual([{ result: { releaseId: receipt.releaseId, manifest: receipt.manifest } }]);
+          expect(JSON.parse(receipt.manifest).artifactId).toBe(receipt.artifactId);
           const release = (await pool.query(
             "SELECT artifact_id, manifest, state FROM artifacts.releases WHERE id = $1", [receipt.releaseId])).rows[0];
           expect(release).toMatchObject({ artifact_id: otherId, state: "ready" });
@@ -1023,7 +970,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
           method: "POST", path: "/publish",
           body: { ...referenceBody, idempotencyKey: `purge-held-${order}` } }, reference), "before_commit");
         await run.reached;
-        const purge = binding.pausePurgeBeforeDelete(host, targetId);
+        const purge = binding.pausePurgeBeforeDelete(purgeHost, targetId);
         let earlyPause: typeof paused;
         await withTimeout(purge.then((value) => { earlyPause = value; }), 100);
         if (earlyPause) for (const key of sharedKeys) expect(earlyPause.blobKeys).not.toContain(key);
@@ -1031,8 +978,8 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         expect(await run.pending).toMatchObject({ ok: true });
         paused = earlyPause ?? await purge;
         expect(paused.claimId.length).toBeGreaterThan(0);
-        expect(await binding.inspectDeletionClaims(host)).toContainEqual(
-          expect.objectContaining({ claimId: paused.claimId, state: "deleting" }));
+        expect(await binding.inspectDeletionClaims(purgeHost)).toContainEqual(
+          expect.objectContaining({ claimId: paused.claimId, state: "pending" }));
         // The target has exclusive bytes too, so purge can reach DELETE even
         // though the new committed reference protects the shared bytes.
         for (const key of sharedKeys) expect(paused.blobKeys).not.toContain(key);
@@ -1040,10 +987,10 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         paused.release();
         await paused.finished;
         paused = undefined;
-        const after = new Set(await rawBlobs().listKeys(""));
+        const after = new Set(await rawBlobs().listKeys(`artifacts/${SCOPE}/`));
         for (const key of sharedKeys) expect(after.has(key)).toBe(true);
       }
-      assertPurgeEffects(sharedKeys, exclusiveKeys, new Set(await rawBlobs().listKeys("")));
+      assertPurgeEffects(sharedKeys, exclusiveKeys, new Set(await rawBlobs().listKeys(`artifacts/${SCOPE}/`)));
       for (const key of sharedKeys) {
         expect(new TextDecoder().decode(await rawBlobs().getBlob(key))).toBe(collectableText);
       }
@@ -1054,21 +1001,13 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
     }
   });
 
-  it("last quota unit across processes is not covered without the H3 quota interface", () => {
-    reportNotCovered(
-      "q1-last-quota-unit",
-      "transaction-bound quota reservation/commit participant",
-      "H3 units 5-6",
-      "71f41b72",
-    );
+  it("reserves the last quota unit once across production processes and restart", async () => {
+    const { qualifyLastQuotaUnit } = await import("./artifacts-production-quota.helpers.js");
+    await qualifyLastQuotaUnit();
   });
 
-  it("transaction-bound admission accounting is not covered without the H3 quota interface", () => {
-    reportNotCovered(
-      "q1-admission-quota-accounting",
-      "quota-aware admission binding with policy-revision fence",
-      "H3 units 5-6",
-      "71f41b72",
-    );
+  it("rolls back denied quota and deduplicates durable admission accounting", async () => {
+    const { qualifyAdmissionQuotaAccounting } = await import("./artifacts-production-quota.helpers.js");
+    await qualifyAdmissionQuotaAccounting();
   });
 });
