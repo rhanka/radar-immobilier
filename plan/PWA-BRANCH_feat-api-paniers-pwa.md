@@ -49,3 +49,5 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
 - [x] Delivery: `api/src/app.ts`.
 
 - [x] Delivery: `api/src/artifacts/write-grant.test.ts`.
+
+- [x] Delivery: `api/src/artifacts/write-grant.ts`.
