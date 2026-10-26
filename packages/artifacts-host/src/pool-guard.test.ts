@@ -19,16 +19,15 @@ function fakePool(client: FakeClient) {
 describe("guardArtifactPool", () => {
   it("adds an idle error handler once", async () => {
     const client = new FakeClient();
-    const pool = fakePool(client);
+    const raw = fakePool(client);
+    const pool = guardArtifactPool(raw);
     guardArtifactPool(pool);
-    guardArtifactPool(pool);
-    expect((pool.on as ReturnType<typeof vi.fn>).mock.calls.length).toBe(1);
+    expect((raw.on as ReturnType<typeof vi.fn>).mock.calls.length).toBe(1);
   });
 
   it("releases a broken reserved client with an error", async () => {
     const client = new FakeClient();
-    const pool = fakePool(client);
-    guardArtifactPool(pool);
+    const pool = guardArtifactPool(fakePool(client));
     const reserved = await pool.connect();
     reserved.emit("error", new Error("terminating connection"));
     reserved.release();
@@ -39,8 +38,7 @@ describe("guardArtifactPool", () => {
 
   it("releases a healthy client without an error", async () => {
     const client = new FakeClient();
-    const pool = fakePool(client);
-    guardArtifactPool(pool);
+    const pool = guardArtifactPool(fakePool(client));
     const reserved = await pool.connect();
     reserved.release();
     expect(client.releaseSpy).toHaveBeenCalledTimes(1);
@@ -49,16 +47,32 @@ describe("guardArtifactPool", () => {
 
   it("guards callback acquisitions used by pool.query", async () => {
     const client = new FakeClient();
-    const pool = { on: vi.fn(), connect: (callback: (...args: unknown[]) => void) => {
+    const raw = { on: vi.fn(), connect: (callback: (...args: unknown[]) => void) => {
       callback(undefined, client, client.release);
     } } as unknown as pg.Pool;
-    guardArtifactPool(pool);
+    const pool = guardArtifactPool(raw);
     await new Promise<void>((resolve, reject) => pool.connect((error, reserved, release) => {
       if (error || !reserved) return reject(error ?? new Error("missing reserved client"));
       reserved.emit("error", new Error("connection terminated"));
       release();
       resolve();
     }));
+    expect(client.releaseSpy.mock.calls[0]?.[0]).toBeInstanceOf(Error);
+  });
+
+  it("preserves a delegating pool connect getter", async () => {
+    const client = new FakeClient();
+    const raw = fakePool(client);
+    const connect = raw.connect;
+    const delegated = new Proxy(raw, { get(target, key) {
+      if (key === "connect") return () => target.connect();
+      return Reflect.get(target, key, target);
+    } });
+    const pool = guardArtifactPool(delegated);
+    expect(raw.connect).toBe(connect);
+    const reserved = await pool.connect();
+    reserved.emit("error", new Error("connection terminated"));
+    reserved.release();
     expect(client.releaseSpy.mock.calls[0]?.[0]).toBeInstanceOf(Error);
   });
 });

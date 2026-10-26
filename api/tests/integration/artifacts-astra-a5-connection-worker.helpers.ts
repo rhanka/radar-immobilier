@@ -1,7 +1,7 @@
 import { fork } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
-import { composeArtifactHost } from "@radar/artifacts-host";
+import { composeArtifactHost, guardArtifactPool } from "@radar/artifacts-host";
 import { ALICE, live, type Astra } from "./artifacts-astra-a5.helpers.js";
 
 export async function openConnectionPeer(h: Astra) {
@@ -46,7 +46,7 @@ if (process.argv[2] === "--connection-peer") {
     try {
       let value: unknown;
       if (message.method === "init") {
-        pool = new pg.Pool(message.args.params);
+        pool = guardArtifactPool(new pg.Pool(message.args.params));
         scope = message.args.config.storageScope;
         host = await composeArtifactHost(pool, message.args.config, undefined,
           { readActivation: live, contentBase: "pages.example.test" });
