@@ -10,6 +10,7 @@
 - [x] Local backup Git only; subject-only commits at most 150 changed lines; audited prerequisite-only bundle import.
 
 ## Branch Scope Boundaries (MANDATORY)
+- [x] BRARTEFACTS-EX10: owner-authorized second-pass fixes from 66ff7898 allow only scope.ts maintenance error helpers and packages/immo-mcp/src/signal-read-error.ts plus its test, despite the general MCP exclusion. Preserve all other reader guards and error categories; revert the helper/decoder changes together if API-to-MCP retryability fails. Deliver a separate prerequisite-66ff7898 bundle without push.
 - [x] BRARTEFACTS-EX9: allow only api/src/services/graph/regulatory-status-archi.test.ts to follow the mapper's established API relocation; preserve canonical status passthrough and MCP classifier independence through the strict decoder. Impact is test-only; revert if the real mapper/HTTP regressions do not validate the invariant.
 - [x] BRARTEFACTS-EX8: allow api/src/routes/graph-signals.ts solely to extract its existing read-only card reader for server-side reuse; preserve HTTP status, filters, archives and enrichment behavior; revert extraction and adapter together if parity fails.
 - [x] **Allowed Paths**: API mcp-signal-search routes, mcp-signal-* services, mcp-signal-search* integration tests, tools/make/base-api-a2rest*, this plan.
@@ -28,6 +29,8 @@
 - [x] No UI/UAT change; root checkout and stable dev data preserved.
 
 ## Plan / Todo (lot-based)
+- [x] Bind the original scoped workspace and revalidate it before projection access; distinguish maintenance at entry and enrichment and decode it as a retryable MCP cutover. Baseline 20261026T073802-5-test reproduces the remaining 403-versus-409 defect in the inherited patch.
+- [ ] Qualify second-pass workspace binding and retryable maintenance with deterministic regressions, killed mutants and restored-byte controls; rerun affected suites, full CI API collection, MCP, graph-signals and compiled-image network proofs before/after 6H.
 - [x] Integration typecheck requires a defined synthetic S3 endpoint under exactOptionalPropertyTypes; reject missing fixture wiring explicitly before constructing the real S3 client.
 - [x] Reproduced Docker's label inequality filter returning no foreign containers despite a live foreign stack; inspect explicit project labels and wait before image build instead of trusting that filter.
 - [x] Targeted campaign 20261025T230043-5-test PASS: 82 API cases including eleven real-storage MCP network cases and 48/5/2 graph/date/budget regressions, plus eight MCP baseline cases; zero failures/skips and owned cleanup PASS. Add explicit legacy fence 503/410 and failing-archive parity assertions.

@@ -53,7 +53,7 @@ describeDb("T13 production facade cutover states", () => {
     await f.data.pool.query("DELETE FROM graph_nodes");
     const response = await f.search("&showDiscarded=1");
     expect(response.status).toBe(503);
-    expect(await response.json()).toEqual({ error: `scoped_facet_scope_unavailable:${workspaceId}` });
+    expect(await response.json()).toEqual({ error: `scoped_maintenance_in_progress:${workspaceId}` });
     expect(f.head).not.toHaveBeenCalled();
   });
   it("refuses unresolved history on the production facade without an empty success", async () => {

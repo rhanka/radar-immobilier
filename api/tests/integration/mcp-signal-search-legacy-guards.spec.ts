@@ -47,7 +47,7 @@ describeDb("Pre-6H facade authority and maintenance", () => {
     await f.data.pool.query("UPDATE facet_activation_state SET maintenance_barrier=true");
     const response = await f.search("&showDiscarded=1");
     expect(response.status).toBe(503);
-    expect(await response.json()).toEqual({ error: `scoped_facet_scope_unavailable:${f.data.workspaceId}` });
+    expect(await response.json()).toEqual({ error: `scoped_maintenance_in_progress:${f.data.workspaceId}` });
     expect(f.forViewer).not.toHaveBeenCalled();
     expect(f.head).not.toHaveBeenCalled();
   });
