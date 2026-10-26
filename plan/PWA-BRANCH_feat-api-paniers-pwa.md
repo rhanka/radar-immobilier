@@ -50,7 +50,9 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
 - [x] Lot 2: cookie-only, principal, CSRF and bounded application mounting.
 - [x] Lot 3: unit/PG/createApp, discriminating mutations, API CI parity,
   ARTEFACTS/MCP, lint and typecheck.
-- [ ] Lot 4: atomic commits, bundle from de81ef0e, isolated import audit/report.
+- [x] Lot 4: atomic commits, bundle from de81ef0e, isolated import audit/report.
+- [x] Delivery audit: seeded empty repository, payload absent before import,
+  identical HEAD/tree, retained merges, full fsck; source manifests verified.
 
 - [x] Delivery: `api/src/app.ts`.
 
