@@ -75,3 +75,5 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
 - [x] Delivery: `api/src/artifacts/write-intent-csrf.ts`.
 
 - [x] Delivery: `api/src/artifacts/write-intent-errors.ts`.
+
+- [x] Delivery: `api/src/artifacts/write-intent-h5-route.test.ts`.
