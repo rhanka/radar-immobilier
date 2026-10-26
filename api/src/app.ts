@@ -89,7 +89,7 @@ export type AppDeps = HealthDeps &
     /** Durable server-only retirement; never derived from public input. */
     legacyRetirement?: LegacyRetirementState;
     /** Closed by default; server-only, separately qualified signal binding. */
-    mcpSignalSearch?: { enabled: boolean };
+    mcpSignalSearch?: { enabled: boolean; afterWorkspaceResolve?: () => Promise<void> | void };
   };
 
 /** Compose the Hono application from injected dependencies. */

@@ -62,7 +62,7 @@ export function decodeMcpSignalSearch(params: URLSearchParams): McpSignalSearchA
 export function mcpSignalSearchRoute(deps: {
   db?: Database; store: ObjectStore; auth?: { enabled: boolean };
   discarded?: DiscardedSignalsPort; legacyRetirement?: LegacyRetirementState;
-  mcpSignalSearch?: { enabled: boolean };
+  mcpSignalSearch?: { enabled: boolean; afterWorkspaceResolve?: () => Promise<void> | void };
 }): Hono {
   const app = new Hono();
   app.get(MCP_SIGNAL_SEARCH_PATH, async (c) => {
@@ -73,7 +73,8 @@ export function mcpSignalSearchRoute(deps: {
       const args = decodeMcpSignalSearch(new URL(c.req.url).searchParams);
       // Missing/legacy epoch: internal legacy cards. Open scoped epoch: BASE only.
       // Maintenance remains a retriable 503; a retired legacy reader stays 410.
-      return c.json(await searchMcpSignals({ ...deps, db: deps.db }, session.sub, args));
+      return c.json(await searchMcpSignals({ ...deps, db: deps.db,
+        afterWorkspaceResolve: deps.mcpSignalSearch?.afterWorkspaceResolve }, session.sub, args));
     } catch (error) {
       if (error instanceof ScopeError || error instanceof WorkspaceError
         || error instanceof GraphSignalDiscardedReadError || error instanceof McpSignalLegacyFenceError) {
