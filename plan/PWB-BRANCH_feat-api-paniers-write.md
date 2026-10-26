@@ -26,6 +26,7 @@
 - [x] Preserve historical BASE HTTP wrappers and lot isolation.
 
 ## Verification
+- [x] Require exact structured outcomes for every mutation, including committed bypasses and restored refusal codes.
 - [x] Replace authority and digest false-positive probes with current-token commit and direct digest evidence.
 - [x] Add assertion-qualified mutation legs and independent local bundle verification.
 
