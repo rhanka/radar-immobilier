@@ -47,3 +47,5 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
 - [ ] Lot 4: atomic commits, bundle from de81ef0e, isolated import audit/report.
 
 - [x] Delivery: `api/src/app.ts`.
+
+- [x] Delivery: `api/src/artifacts/write-grant.test.ts`.
