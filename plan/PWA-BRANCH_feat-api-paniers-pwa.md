@@ -26,6 +26,9 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
   - `api/tests/integration/pw-write-createapp.spec.ts`: PWA-EX1.
 
 ## Feedback Loop
+- [x] Second passes: HTTP regressions cover durable I/P rate refusals, terminal
+  rejection without an external reader, and authenticated cookie expiry during
+  confirmation SQL waits, with no BASE effect or consumed challenge.
 - [x] Second passes: extend scoped verification to imported PW-D PostgreSQL
   suites and createApp; wait for foreign stacks/builds without holding the lock,
   with no obsolete external release flag and no host runtime.
