@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 action=${1:?}
-BASE=600d78485965361c89109bf61eccaa0250cf7284
+BASE=bf339830c688773cb222282073875f66336eb27b
 ROOT=$(pwd -P)
 [[ $ENV == test-api-paniers && $API_PORT == 18927 && $UI_PORT == 15927 && $MAILDEV_UI_PORT == 11927 ]]
 backup=$ROOT/tmp/classification-delivery.git
@@ -18,7 +18,7 @@ git merge-base --is-ancestor "$BASE" HEAD
 allowed() {
   [[ $1 != *..* && $1 != /* && ! -L $1 ]]
   case $1 in
-    api/src/services/facets/classification-*|api/src/services/facets/projection-revisions-fixture.ts|api/src/routes/scoped-classification*|api/tests/integration/classification-*|tools/make/classification*|plan/PANIERSREAD-BRANCH_feat-api-paniers-read.md|RAPPORT-SOL-API-PANIERS-READ.md|api/src/app.ts) ;;
+    api/src/services/facets/classification-*|api/src/services/facets/projection-revisions-fixture.ts|api/src/routes/scoped-classification*|api/src/routes/graph-signals.ts|api/tests/integration/classification-*|tools/make/classification*|plan/PANIERSREAD-BRANCH_feat-api-paniers-read.md|RAPPORT-SOL-API-PANIERS-READ.md|api/src/app.ts) ;;
     *) echo "Outside classification scope: $1" >&2; return 2;;
   esac
 }
