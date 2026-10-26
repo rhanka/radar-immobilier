@@ -13,6 +13,7 @@ vi.mock("../services/workspaces/store.js", () => ({
   approvedAccountId: async () => "owner-id", resolveWorkspaceAccess: f.access,
 }));
 vi.mock("../services/workspaces/mutations.js", () => ({ lockWorkspace: async () => {} }));
+vi.mock("drizzle-orm/node-postgres", () => ({ drizzle: (client: unknown) => client }));
 vi.mock("./write-intent-app-guard.js", () => ({
   guardWriteIntentAppSession: async () => f.pass,
   requireApprovedAppAccount: async () => null,
@@ -23,8 +24,9 @@ const id = "11111111-1111-4111-8111-111111111111";
 const row = { intentId: id, workspaceId: "workspace", principal: f.principal,
   operation: "facets.signals.personal.select.v1", challengeKeyId: "key",
   challengeId: "b".repeat(64), intentDigest: "a".repeat(64), expiresAt: new Date(60_000) };
-const tx = { execute: vi.fn().mockResolvedValue({ rows: [{ pid: 123 }] }) };
-const deps = { db: { transaction: async (run: (tx: unknown) => unknown) => run(tx) },
+const tx = { execute: vi.fn().mockResolvedValue({ rows: [] }) };
+const client = { release: vi.fn(), transaction: async (run: (tx: unknown) => unknown) => run(tx) };
+const deps = { db: { $client: { connect: async () => client } },
   domain: { identityIssuer: f.principal.issuer, tier: "prod",
     appOrigin: "https://immo.sent-tech.ca", clientId: "client" },
   nowMs: () => 1000, sessionSecret: "synthetic-secret-with-32-characters",
