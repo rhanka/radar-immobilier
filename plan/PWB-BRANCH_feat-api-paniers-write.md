@@ -12,7 +12,7 @@
 - [x] Conditional Paths: `scoped-writer.ts`, `workspace-writer.ts`, `projection-revisions.ts` for extracting shared transaction executors only.
 - [x] Conditional Paths: `tools/make/base-api-pwb*` and PW-B contract documentation for qualification and the PW-D integration seam.
 - [x] Forbidden Paths: migrations, schema, routes, unrelated services, root Makefile, compose files, rules, other branch plans, environment files.
-- [x] Environment: `ENV=test-api-paniers-w`, `API_PORT=18928`, `UI_PORT=15928`, `MAILDEV_UI_PORT=11928`.
+- [x] Environment: `ENV=test-api-paniers-w`, `API_PORT=18930`, `UI_PORT=15930`, `MAILDEV_UI_PORT=11930`.
 - [x] No push, deployment, activation, or migration authoring.
 
 ## Execution
@@ -26,6 +26,7 @@
 - [x] Preserve historical BASE HTTP wrappers and lot isolation.
 
 ## Verification
+- [x] Replace authority and digest false-positive probes with current-token commit and direct digest evidence.
 - [x] Add assertion-qualified mutation legs and independent local bundle verification.
 
 - [x] Add a serial Docker-only campaign with resource monitoring and guarded teardown.
