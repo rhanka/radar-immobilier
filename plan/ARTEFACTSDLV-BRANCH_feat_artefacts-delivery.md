@@ -39,7 +39,7 @@ the preprod account-reader and A2 exchange bindings before image delivery.
   - [x] Required MCP secrets, shared workload refs, closed API receipt refs, DB ingress.
   - [x] Pin the actual IdP token-route prefix; operator must qualify RFC 8693 support.
 - [x] Lot 3: touched suites, CI API suite, MCP, Q1/Q2/acceptance, lint/types.
-  - [x] 146 targeted; API 3536 passed/695 gated; MCP 406; Q1/Q2/acceptance 31/32/6.
+  - [x] Initial 146 targeted; API 3536/695 invalidated by second review; MCP 406; provider 31/32/6.
   - [x] Run the documented reader grants against PostgreSQL; authorization and write denial pass.
 - [x] Lot 4: validate manifests, review changes, append delivery report.
   - [x] Kustomize base/preprod, client dry-run, YAML and isolation gates pass.
@@ -53,7 +53,9 @@ the preprod account-reader and A2 exchange bindings before image delivery.
   - [x] Preserve probe failure evidence without throwing from a `finally` block.
   - [ ] Restore `LOT_MIGRATION_DB_TEST=1`; compare full API results to the prior baseline.
   - [ ] Repeat MCP, Q1/Q2/acceptance, lint, types and manifest qualification.
-  - [ ] Address review remarks and append the second-review delivery report.
+  - [x] Address review remarks and append the second-review delivery report.
+  - [x] Record first final-run types/render success, fix the lint finding, and requeue qualification.
+  - [ ] External PW-A owner: release its idle PostgreSQL/MinIO stack; `i-cond` notified through h2a.
 
 ## Merge & Close
 - [x] No push or merge authorized by this task; return the final local SHA.
