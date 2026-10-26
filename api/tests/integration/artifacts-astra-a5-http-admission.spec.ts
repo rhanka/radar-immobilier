@@ -6,7 +6,7 @@ import { ALICE, BASE, WORKSPACE, SECOND, live, startAstra, type Astra } from "./
 
 describe("astra A5 HTTP route membership admission", () => {
   let h: Astra;
-  beforeAll(async () => { h = await startAstra("http"); });
+  beforeAll(async () => { h = await startAstra("http", 1); });
   afterAll(async () => { await h?.close(); });
   it("should resolve membership at HTTP entry before dispatching reads", async () => {
     const { host } = await h.openHost();
@@ -27,6 +27,23 @@ describe("astra A5 HTTP route membership admission", () => {
         expect(await response.json()).toEqual({ error });
       }
     }
+    expect(await h.durable()).toEqual(before);
+  });
+
+  it("maps real pool saturation at the complete HTTP route to 503", async () => {
+    await h.memberships([WORKSPACE]);
+    const { host, control } = await h.openHost();
+    const before = await h.durable();
+    const held = await h.pool.connect();
+    try {
+      const route = controlRoute({ auth, accounts: h.pool, backend: control,
+        readActivation: live, storageScope: h.config.storageScope });
+      const response = await route.request("https://app.example.test/list", {
+        headers: { cookie: await cookie(ALICE), origin: auth.appBaseUrl },
+      });
+      expect(response.status).toBe(503);
+      expect(await response.json()).toEqual({ error: "capability_unavailable" });
+    } finally { held.release(); host.close(); }
     expect(await h.durable()).toEqual(before);
   });
 });
