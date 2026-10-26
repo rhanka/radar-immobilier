@@ -32,6 +32,9 @@ function stubAccounts(): AccountStatusQueryable {
   const statuses: Record<string, string> = { "sub-ok": "approved", bob: "approved", pending: "pending" };
   return {
     async query(_text: string, params: unknown[] = []) {
+      if (_text.includes("FROM workspace_memberships")) {
+        return { rows: [{ status: "approved", workspace_id: "test-workspace" }] };
+      }
       const sub = typeof params[0] === "string" ? params[0] : "?";
       const status = statuses[sub];
       return { rows: status === undefined ? [] : [{ status }] };

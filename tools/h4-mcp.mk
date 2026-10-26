@@ -93,7 +93,7 @@ qualify-p6-tuple: guard ## P6 exact published bytes and bounded lockfile closure
 
 .PHONY: test-composition-e2e
 test-composition-e2e: guard ## P7 owns this target: provider finalization and typed-failure proof
-	@echo "[h4-mcp] refused: test-composition-e2e is implemented in P7" >&2; exit 1
+	@$(MAKE) -f tools/make/artefacts-a5.mk test-provider API_PORT=$(API_PORT) UI_PORT=$(UI_PORT) MAILDEV_UI_PORT=$(MAILDEV_UI_PORT) ENV=$(ENV)
 
 .PHONY: down
 down: guard-env ## Stop the stack and remove only this project's volumes/orphans
