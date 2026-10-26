@@ -21,8 +21,8 @@ import {
 } from "../../db/schema.js";
 import { lockWorkspace } from "../workspaces/mutations.js";
 import { approvedAccountId, resolveWorkspaceAccess } from "../workspaces/store.js";
-import { scopedEpochFor } from "./activation.js";
-import { requireScopedEpoch, ScopeError } from "./scope.js";
+import { requireScopedEpochFor } from "./activation.js";
+import { ScopeError } from "./scope.js";
 import {
   SIGNAL_PROJECTION_MODE,
   sourceContentDigest,
@@ -114,7 +114,7 @@ export async function readProjectionScope(
     await lockWorkspace(tx, workspaceId);
     const accountId = await approvedAccountId(tx, sub, true);
     await resolveWorkspaceAccess(tx, workspaceId, sub);
-    requireScopedEpoch(await scopedEpochFor(tx, workspaceId), workspaceId);
+    await requireScopedEpochFor(tx, workspaceId);
     const [unresolved] = await tx.select({ id: facetEvents.id }).from(facetEvents)
       .leftJoin(facetEventBindings, eq(facetEventBindings.eventId, facetEvents.id))
       .where(and(eq(facetEvents.ownerId, accountId),
