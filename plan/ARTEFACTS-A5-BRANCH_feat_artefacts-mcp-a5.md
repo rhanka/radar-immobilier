@@ -59,3 +59,4 @@
 - [x] Astra A5: 11/11 PostgreSQL regressions pass; propagate typed host refusals after publication waits and add the thirteenth mutation.
 - [x] Astra A5: supply explicit memberships for legitimate H2/production quota fixtures; preserve all Q1/Q2/acceptance assertions.
 - [x] Astra A5: adapt HTTP query doubles and inject the admission outage on the real reserved coordinator client; retain refusal/accounting assertions.
+- [x] Astra A5: preserve the public participant fence type and assert the precise account refusal after a publication key wait.

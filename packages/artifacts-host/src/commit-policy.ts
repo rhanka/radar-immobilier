@@ -28,7 +28,7 @@ export async function createHostPolicy(pool: pg.Pool, scope: string,
         const revisionOk = revision.rows[0]?.revision === POLICY_REVISION;
         if (!revisionOk || !approvedAccount || !activationOpen) {
           let publicCode = "access_denied";
-          let status = 403;
+          const status = 403;
           if (revisionOk && approvedAccount && activation) {
             if (!activation.enabled || activation.expiresAtMs <= Date.now()) publicCode = "activation_closed";
             else if (!activation.subjects.includes(actorId)) publicCode = "not_in_cohort";
@@ -71,12 +71,9 @@ export async function createHostPolicy(pool: pg.Pool, scope: string,
 
 /** No authority is inferred from a stored receipt; replay rereads the participant. */
 export const authorizeArtifactCommit: AuthorizeCommit = async (context, transaction) => {
-  const participant = transaction.participant as {
-    readRevision: () => Promise<string>;
-    readAdmission: (input: unknown) => Promise<{ allowed: boolean; reason: string }>;
+  const participant = transaction.participant as typeof transaction.participant & {
     checkApproval?: (input: { actorId: string; operation: string }) => Promise<{
       approved: boolean; reason?: string; publicCode?: unknown; status?: unknown }>;
-    mintFence: (revision: string, invocationId: string) => unknown;
   };
   const revision = await participant.readRevision();
   if (revision !== context.policyRevision) {
