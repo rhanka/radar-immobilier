@@ -58,6 +58,10 @@ Lock timeout is 1 second; statement timeout is 5 seconds. Current wall time is
 sampled after source waits and after every write, scope read and audit hook.
 Equality with expiry is expired. Admission lasting at least 5 seconds rolls back.
 This bounds admission, not the arrival of a network acknowledgement after COMMIT.
+PostgreSQL `55P03` during transaction execution (including PW-D hooks) becomes
+`503 write_fence_unavailable`; the exception aborts the complete transaction.
+Normalization stays inside the execution callback, so COMMIT acknowledgement
+failures retain their original uncertain outcome and require receipt consultation.
 
 A pending intention encountering any existing BASE receipt or command context
 refuses `command_context_unresolved`; it never adopts an unrelated receipt.
