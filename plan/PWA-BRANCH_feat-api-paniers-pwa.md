@@ -24,8 +24,13 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
   - PW-B/PW-D implementations, migrations, A6 read contracts
 - **Conditional Paths**:
   - `api/tests/integration/pw-write-createapp.spec.ts`: PWA-EX1.
+  - Approved PW-D implementation, migration, tests, spec, tooling and plan:
+    PWA-EX3 permits their exact import from 0ab7d664 by merge only.
 
 ## Feedback Loop
+- [x] PWA-EX3: owner requires merging approved PW-D 0ab7d664 before repairs.
+  Impact is its 23-file delta; no manual PW-D rewrite. Rollback preserves the
+  source ref and reverts the merge with its first parent as mainline.
 - [x] Second-pass qualification: 127 scoped tests pass; strict typecheck requires
   an explicit backend-row guard before scheduling cancellation. Missing or
   invalid backend identity now fails closed with write_fence_unavailable.
