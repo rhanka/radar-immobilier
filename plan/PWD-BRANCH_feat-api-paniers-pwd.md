@@ -147,3 +147,4 @@ Qualify and integrate Muse's durable write persistence on PW-B after A5.
 - [x] Astra slice 07: regress preparation, foreign ownership, deadline and refusal audits.
 - [x] Astra slice 08: support serial scoped reproduction, exact-refusal mutations and bundle audit.
 - [x] Astra slice 09: document cookie provenance, follow-up ownership and terminal error persistence.
+- [x] Astra slice 10: keep rescue packaging independent from shared read-only Git metadata.

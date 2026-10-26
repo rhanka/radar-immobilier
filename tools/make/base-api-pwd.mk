@@ -34,3 +34,5 @@ pwd-tools-check:
 	@for file in tools/make/base-api-pwd*.sh; do bash -n "$$file" || exit; done
 pwd-corrections-deliver:
 	@bash tools/make/base-api-pwd-corrections-deliver.sh
+pwd-corrections-package-draft:
+	@PWD_PACKAGE_ONLY=1 bash tools/make/base-api-pwd-corrections-deliver.sh
