@@ -1,12 +1,14 @@
 import type { ArtifactCommitCoordinator, AuthorizeCommit, FinalizeRequest } from "@sentropic/artifacts/server/commit-contract";
 
-/** Retain domain denials; a fresh host refusal after waits wins for finalize and replay. */
+/** Retain domain denials; propagate a fresh host refusal after publication waits. */
 export function bindHostCoordinator(coordinator: ArtifactCommitCoordinator, currentGuard: () => AuthorizeCommit) {
   const bind = (request: FinalizeRequest): FinalizeRequest => ({ ...request,
     guard: async (context, transaction) => {
       const decision = await request.guard(context, transaction);
-      const authority = await currentGuard()(context, transaction);
-      if (!authority.allowed) return authority;
+      if (!decision.allowed && request.operation === "publish") {
+        const authority = await currentGuard()(context, transaction);
+        if (!authority.allowed) return authority;
+      }
       return decision;
     },
   });
