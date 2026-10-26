@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import type { z } from "zod";
 import type { Database } from "../../db/client.js";
 import { facetActivationState } from "../../db/schema.js";
-import { lockWorkspace } from "../workspaces/mutations.js";
+import { lockWorkspace, type MutationTx } from "../workspaces/mutations.js";
 import { approvedAccountId, resolveWorkspaceAccess } from "../workspaces/store.js";
 import { readProjectionScope } from "./projection-revisions.js";
 import { resolveLotRights } from "./lots/lot-capabilities.js";
@@ -26,28 +26,34 @@ async function readDurableAvailability(db: Database, sub: string, workspaceId: s
     await lockWorkspace(tx, workspaceId);
     await approvedAccountId(tx, sub, true);
     await resolveWorkspaceAccess(tx, workspaceId, sub);
-    const [state] = await tx.select().from(facetActivationState).where(eq(facetActivationState.workspaceId, workspaceId));
-    const availability = durableAvailabilityOf(state);
-    let lotAvailability = availability;
-    let selectionBasket: string | null = null;
-    if (availability.state === "open") {
-      const cutover = await readLotCutover(tx, workspaceId);
-      if (cutover.maintenanceBarrier) lotAvailability = { state: "closed", reason: "maintenance" };
-      else try { selectionBasket = (await requireOpenLotDestination(tx, workspaceId)).selectionBasket; }
-      catch (error) {
-        if (!(error instanceof ScopeError) || !error.message.startsWith("lot_destination_disabled:")) throw error;
-        lotAvailability = { state: "closed", reason: "not_configured" };
-      }
-    }
-    return { availability: Availability.parse(availability), lotAvailability: Availability.parse(lotAvailability), selectionBasket };
+    return durableAvailability(tx, workspaceId);
   });
 }
 
-async function revalidateContextAuthority(db: Database, sub: string, workspaceId: string): Promise<void> {
-  await db.transaction(async (tx) => {
+async function durableAvailability(tx: MutationTx, workspaceId: string) {
+  const [state] = await tx.select().from(facetActivationState).where(eq(facetActivationState.workspaceId, workspaceId));
+  const availability = durableAvailabilityOf(state);
+  let lotAvailability = availability;
+  let selectionBasket: string | null = null;
+  if (availability.state === "open") {
+    const cutover = await readLotCutover(tx, workspaceId);
+    if (cutover.maintenanceBarrier) lotAvailability = { state: "closed", reason: "maintenance" };
+    else try { selectionBasket = (await requireOpenLotDestination(tx, workspaceId)).selectionBasket; }
+    catch (error) {
+      if (!(error instanceof ScopeError) || !error.message.startsWith("lot_destination_disabled:")) throw error;
+      lotAvailability = { state: "closed", reason: "not_configured" };
+    }
+  }
+  return { availability: Availability.parse(availability), lotAvailability: Availability.parse(lotAvailability), selectionBasket };
+}
+
+async function revalidateContextAuthority(db: Database, sub: string, workspaceId: string) {
+  return db.transaction(async (tx) => {
     await lockWorkspace(tx, workspaceId);
+    const access = await resolveWorkspaceAccess(tx, workspaceId, sub);
+    const rights = await resolveLotRights(tx, workspaceId, sub);
     await approvedAccountId(tx, sub, true);
-    await resolveWorkspaceAccess(tx, workspaceId, sub);
+    return { access, rights };
   });
 }
 
@@ -56,20 +62,7 @@ async function contextSample(db: Database, sub: string, workspaceId: string) {
     await lockWorkspace(tx, workspaceId);
     const access = await resolveWorkspaceAccess(tx, workspaceId, sub);
     const rights = await resolveLotRights(tx, workspaceId, sub);
-    const [state] = await tx.select().from(facetActivationState).where(eq(facetActivationState.workspaceId, workspaceId));
-    const availability = durableAvailabilityOf(state);
-    let lotAvailability = availability;
-    let selectionBasket: string | null = null;
-    if (availability.state === "open") {
-      const cutover = await readLotCutover(tx, workspaceId);
-      if (cutover.maintenanceBarrier) lotAvailability = { state: "closed", reason: "maintenance" };
-      else try { selectionBasket = (await requireOpenLotDestination(tx, workspaceId)).selectionBasket; }
-      catch (error) {
-        if (!(error instanceof ScopeError) || !error.message.startsWith("lot_destination_disabled:")) throw error;
-        lotAvailability = { state: "closed", reason: "not_configured" };
-      }
-    }
-    return { access, rights, availability: Availability.parse(availability), lotAvailability: Availability.parse(lotAvailability), selectionBasket };
+    return { access, rights, ...await durableAvailability(tx, workspaceId) };
   });
   if (sample.availability.state === "open") {
     try { await readProjectionScope(db, sub, workspaceId, "facet-context", "signal"); }
@@ -88,7 +81,8 @@ async function contextSample(db: Database, sub: string, workspaceId: string) {
   const catalog = sample.availability.state === "closed"
     ? { availability: sample.availability, profileId: null, digest: null, entries: null }
     : await readClassificationCatalog(db, sub, workspaceId);
-  await revalidateContextAuthority(db, sub, workspaceId);
+  const current = await revalidateContextAuthority(db, sub, workspaceId);
+  if (sample.access.moderateArchive !== current.access.moderateArchive || digest(sample.rights) !== digest(current.rights)) return null;
   return WorkspaceFacetContext.parse({ contractVersion: "facet-context-v2", workspaceId,
     semanticProfile: { lotReason: "required", correspondence: "sent", signalClassification: "separate_action",
       semanticContractVersion: "base-classification-v1" },
@@ -105,8 +99,9 @@ async function contextSample(db: Database, sub: string, workspaceId: string) {
 export async function readFacetContext(db: Database, sub: string, workspaceId: string) {
   for (let attempt = 0; attempt < 3; attempt++) {
     const before = await contextSample(db, sub, workspaceId);
+    if (!before) continue;
     const after = await contextSample(db, sub, workspaceId);
-    if (digest(before) === digest(after)) return after;
+    if (after && digest(before) === digest(after)) return after;
   }
   throw new ClassificationError("projection_revision_unstable");
 }
