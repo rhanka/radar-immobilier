@@ -2,7 +2,7 @@ import { writeRefusal } from "./write-intent-refusal.js";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { guardWriteIntentAppSession, requireApprovedAppAccount } from "./write-intent-app-guard.js";
-import { challengeBootstrap, guardWriteIntentAppMutation, ownedWriteIntent,
+import { canReadWriteIntentSummary, challengeBootstrap, guardWriteIntentAppMutation, ownedWriteIntent,
   verifyAppChallenge, writeCsrf, type WriteAppDeps } from "./write-intent-app-authority.js";
 import { hasDuplicateJsonKeys } from "./write-intent-binding.js";
 import { writeIntentError } from "./write-intent-errors.js";
@@ -38,10 +38,10 @@ export function writeIntentAppRoute(deps: WriteAppDeps | null): Hono {
           && (c.req.header("sec-fetch-mode") !== "navigate" || c.req.header("sec-fetch-dest") !== "document"))) {
         return writeRefusal(c, "csrf_refused", 403);
       }
-      const row = await ownedWriteIntent(c, deps, pass);
+      const row = await ownedWriteIntent(c, deps, pass, path === api);
       const approved = await requireApprovedAppAccount(c, deps, pass.session.sub);
       if (approved?.status === 503) return approved;
-      if (approved || path === api) return c.json({ intentId: row.intentId, management: true,
+      if (approved || path === api || !await canReadWriteIntentSummary(deps, row, pass)) return c.json({ intentId: row.intentId, management: true,
         csrf: writeCsrf(deps, pass, row.intentId) });
       if (!deps.renderSummary) return writeRefusal(c, "write_transport_closed", 503);
       return deps.renderSummary(c, row, challengeBootstrap(row, deps, pass));
@@ -62,7 +62,7 @@ export function writeIntentAppRoute(deps: WriteAppDeps | null): Hono {
         || Object.keys(body).sort().join(",") !== (action === "confirm" ? "challengeToken" : "")) {
         throw new FacetError(400, "invalid_facet_command");
       }
-      const row = await ownedWriteIntent(c, deps, pass);
+      const row = await ownedWriteIntent(c, deps, pass, action === "revoke");
       if (action === "revoke") return deps.revoke
         ? c.json(await deps.revoke(row, pass.principal)) : writeRefusal(c, "write_transport_closed", 503);
       const approved = await requireApprovedAppAccount(c, deps, pass.session.sub);
