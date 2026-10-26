@@ -3,7 +3,7 @@
 set -euo pipefail
 [[ $ENV == test-api-paniers-pwa && $API_PORT == 18933 && $UI_PORT == 15933 && $MAILDEV_UI_PORT == 11933 ]]
 ROOT=$(pwd -P)
-BASE=467c145dd85c809f4f6ec12ff11433d5b2722883
+BASE=8d5aed2edcbc49dd9b63975a716b13322eb47364
 START=$BASE
 PLAN=plan/PWA-BRANCH_feat-api-paniers-pwa.md
 runner=(make --no-print-directory -f tools/make/base-api-pwa.mk)
@@ -21,7 +21,9 @@ if [[ ${1:-all} != commit-slices ]]; then
     jq -e '.success and .numFailedTests == 0 and .numPassedTests > 0' "$full/$report.json" >/dev/null
   done
   jq -e '.numPendingTests == 0' "$full/scoped-tests.json" >/dev/null
-  jq -e 'length == 20 and all(.killed and .restored)' "$full/mutations.json" >/dev/null
+  jq -e 'length == 26 and all(.killed and .restored)' "$full/mutations.json" >/dev/null
+  jq -e '.numPendingTests == 76' "$full/ci-tests.json" >/dev/null
+  [[ $(cat "$full/status") == 0 ]]
   if [[ $(cat "$evidence/mode.txt") == mcp ]]; then
     jq -e '.success and .numFailedTests == 0 and .numPassedTests > 0' "$evidence/immo-mcp-tests.json" >/dev/null
   fi
@@ -57,18 +59,22 @@ git diff --quiet
 git diff --cached --quiet
 while IFS= read -r commit; do
   message=$(git show -s --format=%B "$commit")
-  [[ $message != *$'\n'* && $message =~ ^(feat|fix|test|docs|chore)\(pw-a\):\ .+$ ]]
+  [[ $message != *$'\n'* && $message =~ ^(feat|fix|test|docs|chore)\(pw-[ad]\):\ .+$ ]]
   git show --format= --numstat "$commit" | awk '{n+=$1+$2; f++} END {exit !(n<=150 && f<=15)}'
   git show -s --format='%H %s' "$commit"
-done < <(git rev-list --reverse "$START..HEAD")
-for merge in 512ca686 39ed4f1b; do git merge-base --is-ancestor "$merge" HEAD; done
+done < <(git rev-list --reverse --no-merges "$START..HEAD")
+for merge in 512ca686 39ed4f1b 0ab7d664; do git merge-base --is-ancestor "$merge" HEAD; done
+mapfile -t merges < <(git rev-list --first-parent --merges "$BASE..HEAD")
+[[ ${#merges[@]} == 1 ]]
+[[ $(git show -s --format=%P "${merges[0]}") == "$BASE $(git rev-parse 0ab7d664)" ]]
+[[ $(git show -s --format=%B "${merges[0]}") == 'chore(pw-a): merge approved PW-D corrections' ]]
 [[ $(df -Pk . | awk 'NR==2 {print $4}') -ge 8388608 ]]
 head=$(git rev-parse HEAD)
 tree=$(git rev-parse 'HEAD^{tree}')
-out=$ROOT/tmp/pwa-evidence/api-paniers-pwa-astra-fixes.bundle
+out=$ROOT/tmp/pwa-evidence/api-paniers-pwa-fix2.bundle
 git bundle create "$out" "$BASE..HEAD"
 git bundle verify "$out"
-audit=$(mktemp -d "$ROOT/tmp/pwa-evidence/bundle-astra-audit.XXXXXX")
+audit=$(mktemp -d "$ROOT/tmp/pwa-evidence/bundle-fix2-audit.XXXXXX")
 audit_git() { env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE git -C "$audit" "$@"; }
 env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE git init --bare -q "$audit"
 audit_git fetch --no-tags --no-write-fetch-head "$ROOT" "$BASE:refs/heads/base"
@@ -77,7 +83,7 @@ audit_git bundle verify "$out"
 audit_git fetch --no-tags --no-write-fetch-head "$out" HEAD:refs/heads/payload
 audit_git symbolic-ref HEAD refs/heads/payload
 [[ $(audit_git rev-parse HEAD) == "$head" && $(audit_git rev-parse 'HEAD^{tree}') == "$tree" ]]
-for merge in 512ca686 39ed4f1b; do audit_git merge-base --is-ancestor "$merge" payload; done
+for merge in 512ca686 39ed4f1b 0ab7d664; do audit_git merge-base --is-ancestor "$merge" payload; done
 audit_git fsck --full --no-reflogs
-sha256sum "$out" | tee tmp/pwa-evidence/bundle-astra.sha256
-printf 'HEAD=%s\nTREE=%s\nAUDIT=%s\n' "$head" "$tree" "$audit" | tee tmp/pwa-evidence/delivery-astra.txt
+sha256sum "$out" | tee tmp/pwa-evidence/bundle-fix2.sha256
+printf 'HEAD=%s\nTREE=%s\nAUDIT=%s\n' "$head" "$tree" "$audit" | tee tmp/pwa-evidence/delivery-fix2.txt
