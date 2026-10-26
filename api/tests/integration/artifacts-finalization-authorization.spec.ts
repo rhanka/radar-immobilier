@@ -824,8 +824,8 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       }
     } finally {
       runA?.release(); runB?.release();
-      await cleanupArtifactRace([{ barrier, invocationId: invAId }, { barrier: barrierB, invocationId: invBId }],
-        [...PUBLISH_POINTS, "after_replay_lookup_before_guard"],
+      // A5 runners own release state; repeating settled remote releases rejects.
+      await cleanupArtifactRace([], [],
         [runA?.pending, runB?.pending, runA?.drained, runB?.drained],
         () => { if (typeof closeA === "function") (closeA as () => void)(); }, () => worker.close());
     }
