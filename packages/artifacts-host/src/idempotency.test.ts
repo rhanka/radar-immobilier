@@ -147,7 +147,7 @@ describe("withArtifactAdvisoryLock", () => {
     try {
       const error = Object.assign(new Error("idle connection lost"), { client: { password: "test-sensitive" } });
       expect(() => pool.emit("error", error)).not.toThrow();
-      expect(log).toHaveBeenCalledWith("artifact pool idle client error", "idle connection lost");
+      expect(log).toHaveBeenCalledWith("artifact pool idle client error");
     } finally { log.mockRestore(); await pool.end(); }
   });
 
@@ -171,5 +171,13 @@ describe("withArtifactAdvisoryLock", () => {
     expect(query).toHaveBeenLastCalledWith("ROLLBACK");
     expect(body).not.toHaveBeenCalled();
     expect(release).toHaveBeenCalledWith();
+  });
+
+  it("maps a connection-open timeout to a typed pool timeout", async () => {
+    const pool = {
+      connect: async () => { throw new Error("Connection terminated due to connection timeout"); },
+    } as unknown as pg.Pool;
+    await expect(withArtifactAdvisoryLock(pool, deriveIdempotencyKey(INPUT), async () => undefined))
+      .rejects.toMatchObject({ code: "artifact_pool_timeout" });
   });
 });
