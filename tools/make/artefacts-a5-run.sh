@@ -24,7 +24,7 @@ until flock -w 60 8; do
 done
 wait_machine() {
   while :; do
-    names=$(docker ps --format '{{.Names}}' | awk '/^radar-test-|^test-e2-int-qualification-/')
+    names=$(docker ps --format '{{.Names}}' | awk '/^radar-(test|e2e)-|^(test|e2e)-/')
     builds=$(pgrep -af '^docker (build|buildx build)|^/.*docker-buildx build' || true)
     [[ -n $names || -n $builds ]] || return 0
     echo "WAIT: $names $builds"
@@ -32,7 +32,7 @@ wait_machine() {
   done
 }
 wait_machine
-[[ -z $(docker ps --format '{{.Names}}' | awk '/^radar-test-|^test-e2-int-qualification-/') ]]
+[[ -z $(docker ps --format '{{.Names}}' | awk '/^radar-(test|e2e)-|^(test|e2e)-/') ]]
 [[ $(df -Pk . | awk 'NR==2 {print $4}') -ge 8388608 ]]
 [[ $(awk '/MemAvailable/ {print $2}' /proc/meminfo) -ge 8388608 ]]
 candidate_git=(git)
@@ -117,7 +117,7 @@ wait_machine
 (
   while sleep 1; do
     foreign=$(docker ps --format '{{.Names}}' |
-      awk -v project="$PROJECT" '/^radar-test-|^test-e2-int-qualification-/ && index($0, project "-") != 1 && index($0, project "_") != 1')
+      awk -v project="$PROJECT" '/^radar-(test|e2e)-|^(test|e2e)-/ && index($0, project "-") != 1 && index($0, project "_") != 1')
     if [[ -n $foreign ]]; then
       printf 'STOP: foreign test campaign started\n%s\n' "$foreign" > "$LOG_DIR/occupancy-stop.log"
       kill -TERM "$$"; exit

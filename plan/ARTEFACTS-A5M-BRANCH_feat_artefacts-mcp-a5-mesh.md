@@ -36,6 +36,7 @@
 - [x] Lot 1: common-v1 accepts comments/engram-live and rejects engram-memory/future modules; zero integration references in 1,485 files (`20261026T140259-18`).
 - [x] Qualification preflight: correct the lock verifier's ESLint global reference; retain the full-lock equality assertion.
 - [x] Extend occupancy guards to the observed foreign E2 qualification stack; guard both memory and disk at 8 GiB.
+- [x] Include every test/e2e stack service in the guard after observing E2 PostgreSQL alongside qualification clients; preserve all completed application proofs.
 - [ ] Prove foreign E2 intrusion and low-memory termination with real owned-resource teardown.
 - [ ] Lot 2: Q1/Q2/acceptance 31/32/6, MCP and CI-selected API suites.
 - [ ] Lot 2: typecheck, lint, build, audit tests and audit gate.
