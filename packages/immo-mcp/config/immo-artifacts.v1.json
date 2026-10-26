@@ -3,15 +3,16 @@
   "configVersion": "immo-artifacts.v1",
   "provider": {
     "id": "sentropic.artifacts",
-    "selectionStatus": "unselected",
-    "reason": "awaiting published capability-selection, effective-profile, finalization and typed-failure contracts"
+    "version": "0.2.1",
+    "selectionStatus": "guarded",
+    "reason": "selected only with the shared 0.2.1 host, current activation, migrated coordinator and explicit durable quota"
   },
   "requiredContracts": {
-    "capabilitySelection": "pending-upstream",
+    "capabilitySelection": "artifacts-profile/v1",
     "effectiveProfile": "immo-artifacts.v1",
     "durableCommandIdentity": "immo-artifacts.v1",
-    "finalizationAuthorization": "pending-upstream",
-    "typedFailure": "pending-upstream"
+    "finalizationAuthorization": "artifacts-commit/v1",
+    "typedFailure": "artifacts-outcome/v1"
   },
   "invocationScope": "immo:read",
   "selection": [

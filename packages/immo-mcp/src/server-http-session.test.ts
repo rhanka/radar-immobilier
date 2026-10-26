@@ -135,7 +135,7 @@ describe("mcp http session ownership", () => {
     expect(retry.status).toBe(200);
   });
 
-  it("keeps the session for the same subject with a refreshed token and forwards the new bearer", async () => {
+  it("keeps the session for the same subject with a refreshed token and forwards the new exchanged bearer", async () => {
     let lastAccessToken: string | undefined | null = null;
     class RecordingDataSource extends MockDataSource {
       override async searchSignals(
@@ -161,7 +161,9 @@ describe("mcp http session ownership", () => {
     }
     const data: ImmoDataSource & { lastAccessToken: string | undefined | null } =
       new RecordingDataSource();
-    const app = createImmoHttpApp(BASE_CONFIG, { keySource, data });
+    const { createIsolatedExchangeFixture, exchangeDepsFor } = await import("./test-exchange-fixtures.js");
+    const fixture = await createIsolatedExchangeFixture();
+    const app = createImmoHttpApp(BASE_CONFIG, { keySource, data, exchange: exchangeDepsFor(fixture) });
 
     const tokenA = await signToken({ sub: "user-1" });
     const sessionId = await initialize(app, tokenA);
@@ -181,7 +183,9 @@ describe("mcp http session ownership", () => {
       }),
     });
     expect(callRes.status).toBe(200);
-    expect(lastAccessToken).toBe(tokenA2);
+    expect(lastAccessToken).toBe(fixture.issuedExchangedTokens[0]);
+    expect(lastAccessToken).not.toBe(tokenA2);
+    expect(lastAccessToken).not.toBe(tokenA);
   });
 
   it("applies a removed scope to the next request on the same session", async () => {
