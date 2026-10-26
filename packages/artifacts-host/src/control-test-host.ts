@@ -2,7 +2,7 @@ import type { ArtifactInvocationContext } from "@sentropic/artifacts/server/comm
 import type { HttpRequest, HttpResponse } from "@sentropic/artifacts/http";
 import { ArtifactOperationError, classifyArtifactFailure } from "@sentropic/artifacts/server/outcome-contract";
 import type { createArtifactControl } from "./facade.js";
-import { normalizeHostOutcome } from "./host-outcome.js";
+import { mapHostError } from "./host-outcome.js";
 
 /** Transport-only double: real persistence and races are covered by the SQL suites. */
 export function controlTestHost(work: (request: HttpRequest, invocation: ArtifactInvocationContext) => Promise<HttpResponse>) {
@@ -24,9 +24,9 @@ export function controlTestHost(work: (request: HttpRequest, invocation: Artifac
       return { ok: true as const, result, invocationId: invocation.invocationId, commitState: "committed" as const,
         replayed: false };
     } catch (cause) {
-      return normalizeHostOutcome({ ok: false as const, failure: classifyArtifactFailure(cause,
+      return { ok: false as const, failure: classifyArtifactFailure(cause,
         { invocationId: invocation.invocationId, operation: request.path.slice(1),
-          phase: "dispatch", commitState: "not_committed" }) });
+          phase: "dispatch", commitState: "not_committed" }, mapHostError) };
     }
   } } } as unknown as Parameters<typeof createArtifactControl>[0];
 }
