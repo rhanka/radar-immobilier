@@ -3,7 +3,7 @@
 set -euo pipefail
 source tools/make/base-api-guards.sh
 require_env
-[[ $ENV == test-api-paniers-w && $API_PORT == 18928 && $UI_PORT == 15928 && $MAILDEV_UI_PORT == 11928 ]]
+[[ $ENV == test-api-paniers-w && $API_PORT == 18930 && $UI_PORT == 15930 && $MAILDEV_UI_PORT == 11930 ]]
 ROOT=$(pwd -P)
 PROJECT=radar-$ENV
 ACTION=ci-api

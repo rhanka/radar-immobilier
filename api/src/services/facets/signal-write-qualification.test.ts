@@ -1,4 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import type { Database } from "../../db/client.js";
+import { coordinateSignalWrite, type SignalWriteInput } from "./signal-write-admission.js";
 import { assertSignalWriteInput } from "./signal-write-operations.js";
 import { toWriteRefusal } from "./signal-write-receipt.js";
 
@@ -23,6 +25,14 @@ describe("PW-B strict contract", () => {
   });
   it("should mask unrecognized internal errors", () => {
     expect(toWriteRefusal(new Error("SQL private detail")))
+      .toEqual({ status: 500, code: "internal_error", retryable: false });
+  });
+  it("should preserve uncertain commit acknowledgement errors without claiming rollback", async () => {
+    const acknowledgement = Object.assign(new Error("synthetic commit acknowledgement failure"), { code: "55P03" });
+    const db = { transaction: vi.fn().mockRejectedValue(acknowledgement) } as unknown as Database;
+    await expect(coordinateSignalWrite(db, "synthetic", input as SignalWriteInput, {} as never))
+      .rejects.toBe(acknowledgement);
+    expect(toWriteRefusal(acknowledgement))
       .toEqual({ status: 500, code: "internal_error", retryable: false });
   });
 });
