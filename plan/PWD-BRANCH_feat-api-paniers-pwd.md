@@ -65,3 +65,5 @@ Qualify and integrate Muse's durable write persistence on PW-B after A5.
 - [x] Delivery slice 06: feat(pw-d): register schema.ts.
 
 - [x] Delivery slice 07: feat(pw-d): register artifacts-finalization-authorization.spec.ts.
+
+- [x] Delivery slice 08: test(pw-d): add pw-write-admission-db.test.ts.
