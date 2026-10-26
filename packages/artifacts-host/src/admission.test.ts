@@ -154,7 +154,7 @@ describe("createAdmissionAuthority", () => {
         return { rows: [{ status: "approved" }] };
       },
     }, () => live(), () => NOW);
-    await expect(checkAdmission(authority, "alice")).resolves.toEqual({ allowed: true });
+    await expect(checkAdmission(authority, "alice")).resolves.toEqual({ allowed: true, workspaceId: "" });
     expect(calls).toEqual([{
       text: "SELECT status FROM account_users WHERE sub = $1 LIMIT 1",
       params: ["alice"],

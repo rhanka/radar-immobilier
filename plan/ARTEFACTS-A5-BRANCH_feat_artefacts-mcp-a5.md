@@ -66,3 +66,4 @@
 - [x] Astra A5 typecheck, lint, API build, 66 audit tests, audit gate, two preserved authority mutants and published tuple/profile proofs pass.
 - [x] Astra A5 exact image 9621953e: sixteen tools, four artifact operations, restart/replay, ordered conflict, account/membership refusals and durable counts; 20261026T081420-18.
 - [x] Astra A5 campaign teardown complete: no project containers, volumes or networks; deliver locally from 658663dd without push and preserve the companion report.
+- [x] Astra r2: bind entry admission to the configured workspace and retain its resolved identity.
