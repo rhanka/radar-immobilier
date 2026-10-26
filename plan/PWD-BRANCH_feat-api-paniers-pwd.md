@@ -53,3 +53,5 @@ Qualify and integrate Muse's durable write persistence on PW-B after A5.
 - [ ] Lot 4: bounded local commits, independently imported bundle, French report.
 
 - [x] Delivery slice 01: docs(pw-d): declare integration and qualification scope.
+
+- [x] Delivery slice 02: feat(pw-d): add durable write persistence tables.
