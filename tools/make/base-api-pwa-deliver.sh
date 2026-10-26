@@ -3,8 +3,8 @@
 set -euo pipefail
 [[ $ENV == test-api-paniers-pwa && $API_PORT == 18933 && $UI_PORT == 15933 && $MAILDEV_UI_PORT == 11933 ]]
 ROOT=$(pwd -P)
-BASE=de81ef0ef30dd1ca0bf575498e342be525f5cc2d
-START=39ed4f1b94d1e9ec9c8bf0213baf1fa6aadcadb6
+BASE=467c145dd85c809f4f6ec12ff11433d5b2722883
+START=$BASE
 PLAN=plan/PWA-BRANCH_feat-api-paniers-pwa.md
 runner=(make --no-print-directory -f tools/make/base-api-pwa.mk)
 args=("API_PORT=$API_PORT" "UI_PORT=$UI_PORT" "MAILDEV_UI_PORT=$MAILDEV_UI_PORT" "ENV=$ENV")
@@ -19,7 +19,7 @@ if [[ ${1:-all} != commit-slices ]]; then
     jq -e '.success and .numFailedTests == 0 and .numPassedTests > 0' "$full/$report.json" >/dev/null
   done
   jq -e '.numPendingTests == 0' "$full/scoped-tests.json" >/dev/null
-  jq -e 'length == 7 and all(.killed and .restored)' "$full/mutations.json" >/dev/null
+  jq -e 'length == 20 and all(.killed and .restored)' "$full/mutations.json" >/dev/null
   if [[ $(cat "$evidence/mode.txt") == mcp ]]; then
     jq -e '.success and .numFailedTests == 0 and .numPassedTests > 0' "$evidence/immo-mcp-tests.json" >/dev/null
   fi
@@ -63,10 +63,10 @@ for merge in 512ca686 39ed4f1b; do git merge-base --is-ancestor "$merge" HEAD; d
 [[ $(df -Pk . | awk 'NR==2 {print $4}') -ge 8388608 ]]
 head=$(git rev-parse HEAD)
 tree=$(git rev-parse 'HEAD^{tree}')
-out=$ROOT/tmp/pwa-evidence/api-paniers-pwa.bundle
+out=$ROOT/tmp/pwa-evidence/api-paniers-pwa-astra-fixes.bundle
 git bundle create "$out" "$BASE..HEAD"
 git bundle verify "$out"
-audit=$(mktemp -d "$ROOT/tmp/pwa-evidence/bundle-audit.XXXXXX")
+audit=$(mktemp -d "$ROOT/tmp/pwa-evidence/bundle-astra-audit.XXXXXX")
 git init --bare -q "$audit"
 git -C "$audit" fetch --no-tags --no-write-fetch-head "$ROOT" "$BASE:refs/heads/base"
 if git -C "$audit" cat-file -e "$head^{commit}" 2>/dev/null; then echo 'Payload present before import' >&2; exit 2; fi
@@ -75,5 +75,5 @@ git -C "$audit" fetch --no-tags --no-write-fetch-head "$out" HEAD:refs/heads/pay
 [[ $(git -C "$audit" rev-parse payload) == "$head" && $(git -C "$audit" rev-parse 'payload^{tree}') == "$tree" ]]
 for merge in 512ca686 39ed4f1b; do git -C "$audit" merge-base --is-ancestor "$merge" payload; done
 git -C "$audit" fsck --full --no-reflogs
-sha256sum "$out" | tee tmp/pwa-evidence/bundle.sha256
-printf 'HEAD=%s\nTREE=%s\nAUDIT=%s\n' "$head" "$tree" "$audit" | tee tmp/pwa-evidence/delivery.txt
+sha256sum "$out" | tee tmp/pwa-evidence/bundle-astra.sha256
+printf 'HEAD=%s\nTREE=%s\nAUDIT=%s\n' "$head" "$tree" "$audit" | tee tmp/pwa-evidence/delivery-astra.txt
