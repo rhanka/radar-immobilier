@@ -36,6 +36,8 @@ for (const environment of ["base", "preprod"]) {
     assert.equal(config.IMMO_MCP_API_AUDIENCE, "https://preprod.immo.sent-tech.ca");
     assert.equal(config.IMMO_MCP_OAUTH_RESOURCE, `${config.IMMO_MCP_API_AUDIENCE}/mcp`);
     assert.equal(config.IMMO_MCP_OAUTH_ISSUER, "https://preprod.auth.sent-tech.ca");
+    assert.equal(config.IMMO_MCP_EXCHANGE_TOKEN_ENDPOINT,
+      "https://preprod.auth.sent-tech.ca/api/v1/auth/oauth/token");
     assert.equal(receiver.STRICT_RECEIVER_ENVIRONMENT, config.IMMO_MCP_EXCHANGE_ENV);
     assert.equal(config.IMMO_MCP_EXCHANGE_POLICY_REV, "a2base-search-v1");
   }

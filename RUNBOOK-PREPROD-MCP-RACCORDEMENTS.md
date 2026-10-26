@@ -29,7 +29,7 @@ bindings must remain present in addition to the two new MCP Secrets.
 | `IMMO_MCP_OAUTH_ISSUER` | CM `immo-mcp-config` | `https://preprod.auth.sent-tech.ca` | MCP startup throws |
 | `IMMO_MCP_OAUTH_RESOURCE` | CM `immo-mcp-config` | `https://preprod.immo.sent-tech.ca/mcp` | MCP startup throws |
 | `IMMO_MCP_EXCHANGE_ISSUER` | Optional override, deliberately unset | Falls back to the OAuth issuer above | Uses OAuth issuer |
-| `IMMO_MCP_EXCHANGE_TOKEN_ENDPOINT` | Optional override, deliberately unset | Derived as `https://preprod.auth.sent-tech.ca/token`; IdP owner must confirm discovery matches | Uses issuer + `/token` |
+| `IMMO_MCP_EXCHANGE_TOKEN_ENDPOINT` | CM `immo-mcp-config` | `https://preprod.auth.sent-tech.ca/api/v1/auth/oauth/token`; pinned to the IdP route, operator confirms against discovery | Code falls back to issuer + `/token`, which does not match the available IdP sources |
 | `IMMO_MCP_EXCHANGE_JWKS_URI` | Optional override, deliberately unset | Derived as `https://preprod.auth.sent-tech.ca/.well-known/jwks.json` | Uses exchange issuer + JWKS path |
 | `IMMO_MCP_OAUTH_JWKS_URI` | Optional override, deliberately unset | Same preprod JWKS URI | Uses OAuth issuer + JWKS path |
 | `IMMO_MCP_EXCHANGE_ENV` | CM `immo-mcp-config` | `preprod` | Falls back to `ENV`, then `unknown`; pin explicitly |
@@ -139,9 +139,16 @@ for this read-search path. Keep existing bindings; no new credential is needed.
    The issued signed access JWT must have the same human `sub`, exact `iss`,
    singleton API `aud`, `client_id=immo-mcp-workload`,
    `act={"sub":"immo-mcp-workload"}`, no nested actor or `cnf`, and lifetime
-   at most 300 seconds, bounded by the human token's expiry. Confirm `/token`
+   at most 300 seconds, bounded by the human token's expiry. Confirm the pinned token
    and JWKS endpoints from discovery. An unsupported exchange is a delivery
    blocker; the local synthetic issuer is never a deployment substitute.
+   The available sentropic source (`packages/auth-hono/src/oauth/wellknown-handler.ts`)
+   advertises only `authorization_code` and `client_credentials`; RFC 8693 was
+   not found in that OAuth implementation. The public discovery probe from this
+   workstation failed at TLS, so the running IdP's revision/capability remains
+   unverified. The IdP owner must deploy a qualified exchange-capable revision
+   if missing; registering a client alone cannot add this grant. Do not release
+   the image against an IdP that lacks it.
    Store its new confidential credential in a mode-0600 file outside the repo
    at `OP_WORKLOAD_SECRET_FILE`. Create both opaque Kubernetes objects:
 
