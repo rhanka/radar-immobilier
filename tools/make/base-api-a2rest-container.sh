@@ -31,6 +31,7 @@ CONFIG
   node_modules/.bin/tsc --noEmit -p api/tsconfig.a2rest-tests.json
   node_modules/.bin/eslint api/src/app.ts api/src/routes/graph-signals.ts api/src/routes/mcp-signal-search*.ts \
     api/src/services/facets/scope.ts packages/immo-mcp/src/signal-read-error{,.test}.ts \
+    api/src/services/facets/{activation,projection-revisions,workspace-reader}.ts \
     api/src/services/graph/regulatory-status-archi.test.ts \
     api/src/services/facets/mcp-signal-*.ts api/tests/integration/mcp-signal-search*.ts \
     api/tests/integration/a2base-mcp-fixture.ts tools/make/base-api-a2rest*.mjs
