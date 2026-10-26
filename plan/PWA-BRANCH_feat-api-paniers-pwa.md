@@ -125,3 +125,5 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
 - [x] Delivery: `tools/make/base-api-pwa-mutations.mjs`.
 
 - [x] Delivery: `tools/make/base-api-pwa-verify.sh`.
+
+- [x] Delivery: `tools/make/base-api-pwa.mk`.
