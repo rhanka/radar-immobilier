@@ -45,6 +45,8 @@ import { scopedProjectionRevisionsRoute } from "./routes/scoped-projection-revis
 import { scopedProjectionEventsRoute } from "./routes/scoped-projection-events.js";
 import { scopedSignalRevealRoute } from "./routes/scoped-signal-reveal.js";
 import { mcpSignalSearchRoute } from "./routes/mcp-signal-search.js";
+import { classificationBoundary, scopedClassificationRoute } from "./routes/scoped-classification.js";
+import type { ClassificationOptions } from "./services/facets/classification-search.js";
 
 export type AppDeps = HealthDeps &
   SourcesDeps &
@@ -90,6 +92,8 @@ export type AppDeps = HealthDeps &
     legacyRetirement?: LegacyRetirementState;
     /** Closed by default; server-only, separately qualified signal binding. */
     mcpSignalSearch?: { enabled: boolean; afterWorkspaceResolve?: () => Promise<void> | void };
+    /** Operator-injected read signing configuration; absent keeps pagination closed. */
+    classification?: ClassificationOptions;
   };
 
 /** Compose the Hono application from injected dependencies. */
@@ -123,6 +127,7 @@ export function createApp(deps: AppDeps): Hono {
   // route. When `deps.auth` is absent or disabled both are inert no-ops.
   app.use("/api/v1/workspaces/*", privateSignalResponse);
   app.use("/api/v1/workspaces", privateSignalResponse);
+  app.use("/api/v1/workspaces/*", classificationBoundary);
   if (deps.auth) {
     app.use("*", protect(deps.auth, { db: deps.db }));
     // Pass db into authOptions so enrollment runs in production.
@@ -184,6 +189,7 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", scopedProjectionEventsRoute(deps));
   app.route("/", scopedSignalRevealRoute(deps));
   app.route("/", mcpSignalSearchRoute(deps));
+  app.route("/", scopedClassificationRoute(deps));
   app.route("/", graphRoute(deps));
   app.route("/", geoLotsRoute());
   app.route("/", geoZonesRoute({ db: deps.db }));
