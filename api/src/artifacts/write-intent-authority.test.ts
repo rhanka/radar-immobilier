@@ -9,15 +9,16 @@ import {
 import { signSession, verifySession } from "../services/auth/session.js";
 import { mintWriteGrant, verifyWriteGrant } from "./write-grant.js";
 import { loadConfig } from "../config.js";
+import type { AuthConfig } from "../config.js";
 
-const AUTH = {
+const AUTH: AuthConfig = {
   enabled: true, issuer: "https://auth.sent-tech.ca", clientId: "client-1",
   clientSecret: "secret", redirectUri: "https://immo.sent-tech.ca/callback",
   scopes: "openid", appBaseUrl: "https://immo.sent-tech.ca",
   sessionSecret: "session-secret-32-bytes-long-pad!!",
   sessionTtlSeconds: 100, sessionAbsoluteTtlSeconds: 200,
   jwksUri: "", bearerAudiences: [],
-} as const;
+};
 
 describe("write identity domain", () => {
   it("should resolve the prod domain and compare full principals", () => {

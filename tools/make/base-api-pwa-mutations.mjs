@@ -10,8 +10,8 @@ const mutations = [
   ["csrf-token", "write-intent-app-authority.ts", "if (!verifyWriteIntentCsrf({", "if (false && !verifyWriteIntentCsrf({", guards, "isolated CSRF failures"],
   ["cookie-only", "write-intent-app-guard.ts", 'if (c.req.header("authorization") !== undefined)', "if (false)", guards, "Authorization on every app route"],
   ["grant-class", "write-grant.ts", 'claims.grantKind !== "write" || ', "", grant, "independent class, P and identity bindings"],
-  ["grant-page", "write-grant.ts", 'const want = (expected as Record<string, unknown>)[field];', 'const want = field === "sessionId" ? undefined : (expected as Record<string, unknown>)[field];', grant, "independent class, P and identity bindings"],
-  ["grant-identity", "write-grant.ts", 'const want = (expected as Record<string, unknown>)[field];', 'const want = field === "identityIssuer" ? undefined : (expected as Record<string, unknown>)[field];', grant, "independent class, P and identity bindings"],
+  ["grant-page", "write-grant.ts", 'const want = expected[field];', 'const want = field === "sessionId" ? undefined : expected[field];', grant, "independent class, P and identity bindings"],
+  ["grant-identity", "write-grant.ts", 'const want = expected[field];', 'const want = field === "identityIssuer" ? undefined : expected[field];', grant, "independent class, P and identity bindings"],
   ["replay-refusal", "write-intent-errors.ts", 'export function writeIntentError(c: Context, error: unknown): Response {', 'export function writeIntentError(c: Context, error: unknown): Response {\n  if (error instanceof Error && error.message === "challenge_consumed") return c.json({ success: true }, 200);', replay, "refuse replay exactly"],
 ];
 
