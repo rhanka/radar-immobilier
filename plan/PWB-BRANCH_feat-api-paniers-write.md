@@ -26,6 +26,7 @@
 - [x] Preserve historical BASE HTTP wrappers and lot isolation.
 
 ## Verification
+- [x] Reproduce two real `55P03` failures as `500 internal_error`, then normalize execution-only failures to `503 write_fence_unavailable`.
 - [x] Assert the actual PostgreSQL SQLSTATE `55P03` in both contention probes before checking the public refusal.
 - [x] Prepare a separate incremental delivery audit rooted exactly at `b09a8ccccab5d7256c0a08b8b93979dbec57b65f`.
 - [ ] Requalify all PW-B tests, five targeted mutations and CI API gates after the Astra corrections.

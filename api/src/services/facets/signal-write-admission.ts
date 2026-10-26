@@ -49,6 +49,30 @@ export async function executeSignalWriteInTx(
   tx: WriteTx, sub: string, input: SignalWriteInput, admission: SignalWriteAdmission,
   clock: () => number = Date.now,
 ): Promise<SignalWriteResult> {
+  try {
+    return await admitSignalWriteInTx(tx, sub, input, admission, clock);
+  } catch (error) {
+    // Only execution failures are known pre-commit; never catch COMMIT acknowledgement here.
+    const seen = new Set<unknown>();
+    let cause: unknown = error;
+    while (cause && typeof cause === "object" && !seen.has(cause)) {
+      seen.add(cause);
+      const detail = cause as { code?: unknown; cause?: unknown };
+      if (detail.code === "55P03") {
+        const refusal = new ScopeError(503, "write_fence_unavailable");
+        refusal.cause = error;
+        throw refusal;
+      }
+      cause = detail.cause;
+    }
+    throw error;
+  }
+}
+
+async function admitSignalWriteInTx(
+  tx: WriteTx, sub: string, input: SignalWriteInput, admission: SignalWriteAdmission,
+  clock: () => number,
+): Promise<SignalWriteResult> {
   assertSignalWriteInput(input);
   input = JSON.parse(JSON.stringify(input)) as SignalWriteInput;
   if (!admission || [admission.lockAuthority, admission.reserve, admission.consume,
