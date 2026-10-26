@@ -62,9 +62,18 @@ export function createArtifactControl(
       if (!["ensure", "publish", "meta", "list"].includes(op)) {
         return { status: 503, body: { error: "capability_unavailable" } };
       }
+      let frozenWorkspace: string | undefined;
       if (admission) {
-        const entry = await checkAdmission(admission, actorId);
+        let entry;
+        try {
+          entry = await checkAdmission(admission, actorId);
+        } catch {
+          const unavailable = { status: 503 as const, body: { error: "capability_unavailable" } };
+          Object.defineProperty(unavailable, "retryable", { value: true });
+          return unavailable;
+        }
         if (!entry.allowed) return { status: entry.status, body: entry.body };
+        frozenWorkspace = entry.workspaceId;
       }
       if (!raw || typeof raw !== "object" || Array.isArray(raw)) return invalid();
       const body = raw as Record<string, unknown>;
@@ -83,8 +92,19 @@ export function createArtifactControl(
       if (write && (typeof body.idempotencyKey !== "string" || !body.idempotencyKey.trim() ||
         body.idempotencyKey.length > 256)) return invalid();
       if (write && admission) {
-        const commit = await checkAdmission(admission, actorId);
+        let commit;
+        try {
+          commit = await checkAdmission(admission, actorId);
+        } catch {
+          const unavailable = { status: 503 as const, body: { error: "capability_unavailable" } };
+          Object.defineProperty(unavailable, "retryable", { value: true });
+          return unavailable;
+        }
         if (!commit.allowed) return { status: commit.status, body: commit.body };
+        if (frozenWorkspace !== undefined && commit.workspaceId !== frozenWorkspace) {
+          return { status: 403, body: { error: "workspace_membership_required" } };
+        }
+        frozenWorkspace = commit.workspaceId;
       }
       const invocation = Object.freeze({ invocationId: randomUUID(), actorId, storageScopeId: scope,
         authorizeCommit: async (...args: Parameters<typeof authorizeArtifactCommit>) => {
@@ -92,7 +112,7 @@ export function createArtifactControl(
             const [context, transaction] = args;
             const participant = (transaction as { participant?: {
               checkApproval?: (input: { actorId: string; operation: string }) => Promise<{
-                approved?: unknown; publicCode?: unknown; status?: unknown }>;
+                approved?: unknown; publicCode?: unknown; status?: unknown; workspaceId?: unknown }>;
             } } | null | undefined)?.participant;
             if (participant && typeof participant.checkApproval === "function") {
               try {
@@ -105,6 +125,11 @@ export function createArtifactControl(
                   return { allowed: false as const, reason: "denied" as const,
                     publicCode, status, retriable: false };
                 }
+                if (frozenWorkspace !== undefined && typeof approval?.workspaceId === "string" &&
+                  approval.workspaceId.toLowerCase() !== frozenWorkspace.toLowerCase()) {
+                  return { allowed: false as const, reason: "denied" as const,
+                    publicCode: "workspace_membership_required", status: 403, retriable: false };
+                }
               } catch {
                 return { allowed: false as const, reason: "unavailable" as const,
                   publicCode: "capability_unavailable", status: 503, retriable: true };
@@ -116,6 +141,10 @@ export function createArtifactControl(
                 publicCode: "capability_unavailable", status: 503, retriable: true }; }
               if (!decision.allowed) return { allowed: false as const, reason: "denied" as const,
                 publicCode: decision.body.error, status: decision.status, retriable: false };
+              if (frozenWorkspace !== undefined && decision.workspaceId !== frozenWorkspace) {
+                return { allowed: false as const, reason: "denied" as const,
+                  publicCode: "workspace_membership_required", status: 403, retriable: false };
+              }
             }
           }
           return authorizeArtifactCommit(...args);
