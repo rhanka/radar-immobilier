@@ -11,6 +11,7 @@ RUN_DIR=$TASK_DIR/runtime
 LOG_DIR=$TASK_DIR/$(date -u +%Y%m%dT%H%M%S)-$$
 mkdir -p "$RUN_DIR" "$LOG_DIR"
 echo "Evidence: $LOG_DIR"
+if [[ -d $TASK_DIR/manifests ]]; then cp -r "$TASK_DIR/manifests" "$LOG_DIR/"; fi
 exec 8>"$HOME/.cache/radar-docker-campaign.lock"
 until flock -w 30 8; do echo 'WAIT: Docker campaign lock'; done
 while [[ -n $(docker ps --filter name=radar-test- --format '{{.Names}}') ]]; do

@@ -142,13 +142,42 @@ spec:
           envFrom:
             - configMapRef:
                 name: radar-api
-            # Optional only for existing installs: absent keeps search disabled.
-            - configMapRef:
-                name: radar-mcp-receiver
-                optional: true
           env:
+            # Operator-owned activation/receipt; absent keeps search disabled.
             - name: MCP_SIGNAL_SEARCH_ENABLED
               valueFrom: { configMapKeyRef: { name: radar-mcp-receiver, key: MCP_SIGNAL_SEARCH_ENABLED, optional: true } }
+            - name: STRICT_RECEIVER_ARMED
+              valueFrom: { configMapKeyRef: { name: radar-mcp-receiver, key: STRICT_RECEIVER_ARMED, optional: true } }
+            - name: STRICT_RECEIVER_WORKLOAD_SUB
+              valueFrom: { configMapKeyRef: { name: radar-mcp-receiver, key: STRICT_RECEIVER_WORKLOAD_SUB, optional: true } }
+            - name: STRICT_RECEIVER_WORKLOAD_CLIENT_ID
+              valueFrom: { configMapKeyRef: { name: radar-mcp-receiver, key: STRICT_RECEIVER_WORKLOAD_CLIENT_ID, optional: true } }
+            - name: STRICT_RECEIVER_ENVIRONMENT
+              valueFrom: { configMapKeyRef: { name: radar-mcp-receiver, key: STRICT_RECEIVER_ENVIRONMENT, optional: true } }
+            - name: STRICT_RECEIVER_RECEIPT_ISSUER
+              valueFrom: { configMapKeyRef: { name: radar-mcp-receiver, key: STRICT_RECEIVER_RECEIPT_ISSUER, optional: true } }
+            - name: STRICT_RECEIVER_RECEIPT_API_AUDIENCE
+              valueFrom: { configMapKeyRef: { name: radar-mcp-receiver, key: STRICT_RECEIVER_RECEIPT_API_AUDIENCE, optional: true } }
+            - name: STRICT_RECEIVER_RECEIPT_WORKLOAD_SUB
+              valueFrom: { configMapKeyRef: { name: radar-mcp-receiver, key: STRICT_RECEIVER_RECEIPT_WORKLOAD_SUB, optional: true } }
+            - name: STRICT_RECEIVER_RECEIPT_WORKLOAD_CLIENT_ID
+              valueFrom: { configMapKeyRef: { name: radar-mcp-receiver, key: STRICT_RECEIVER_RECEIPT_WORKLOAD_CLIENT_ID, optional: true } }
+            - name: STRICT_RECEIVER_RECEIPT_ENVIRONMENT
+              valueFrom: { configMapKeyRef: { name: radar-mcp-receiver, key: STRICT_RECEIVER_RECEIPT_ENVIRONMENT, optional: true } }
+            - name: STRICT_RECEIVER_RECEIPT_ROUTE_PROFILE
+              valueFrom: { configMapKeyRef: { name: radar-mcp-receiver, key: STRICT_RECEIVER_RECEIPT_ROUTE_PROFILE, optional: true } }
+            - name: STRICT_RECEIVER_RECEIPT_SCHEMA_REVISION
+              valueFrom: { configMapKeyRef: { name: radar-mcp-receiver, key: STRICT_RECEIVER_RECEIPT_SCHEMA_REVISION, optional: true } }
+            - name: STRICT_RECEIVER_RECEIPT_POLICY_REVISION
+              valueFrom: { configMapKeyRef: { name: radar-mcp-receiver, key: STRICT_RECEIVER_RECEIPT_POLICY_REVISION, optional: true } }
+            - name: STRICT_RECEIVER_API_IMAGE
+              valueFrom: { configMapKeyRef: { name: radar-mcp-receiver, key: STRICT_RECEIVER_API_IMAGE, optional: true } }
+            - name: STRICT_RECEIVER_MCP_IMAGE
+              valueFrom: { configMapKeyRef: { name: radar-mcp-receiver, key: STRICT_RECEIVER_MCP_IMAGE, optional: true } }
+            - name: STRICT_RECEIVER_RECEIPT_API_IMAGE
+              valueFrom: { configMapKeyRef: { name: radar-mcp-receiver, key: STRICT_RECEIVER_RECEIPT_API_IMAGE, optional: true } }
+            - name: STRICT_RECEIVER_RECEIPT_MCP_IMAGE
+              valueFrom: { configMapKeyRef: { name: radar-mcp-receiver, key: STRICT_RECEIVER_RECEIPT_MCP_IMAGE, optional: true } }
             - name: POSTGRES_USER
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_USER } }
             - name: POSTGRES_PASSWORD
