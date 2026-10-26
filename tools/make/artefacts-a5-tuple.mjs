@@ -41,7 +41,7 @@ const changed = [...new Set([...Object.keys(baseline.packages), ...Object.keys(l
   .filter((path) => JSON.stringify(baseline.packages[path]) !== JSON.stringify(lock.packages[path]));
 for (const path of changed) assert.ok(allowedPaths.has(path), `unrelated lockfile change: ${path}`);
 assert.equal(changed.length, 2);
-const expectedLock = structuredClone(baseline);
+const expectedLock = globalThis.structuredClone(baseline);
 expectedLock.packages['packages/immo-mcp'].dependencies['@sentropic/cluster-mesh'] = '0.22.1';
 for (const field of ['version', 'resolved', 'integrity']) {
   expectedLock.packages[clusterPath][field] = lock.packages[clusterPath][field];

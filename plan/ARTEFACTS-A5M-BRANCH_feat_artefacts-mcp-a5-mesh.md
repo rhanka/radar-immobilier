@@ -33,7 +33,8 @@
 - [x] Lot 0: bind delivery helpers and isolated runner to the mesh task.
 - [x] Lot 1: published archive verified before installation; `20261026T140119-18/upgrade-integrity.json`.
 - [x] Lot 1: exact 0.22.1 pin; two lock entries, four replaced lines; strict full-lock comparison and audit gate pass.
-- [ ] Lot 1: prove frozen common-v1 contents and absence of Radar integration references.
+- [x] Lot 1: common-v1 accepts comments/engram-live and rejects engram-memory/future modules; zero integration references in 1,485 files (`20261026T140259-18`).
+- [x] Qualification preflight: correct the lock verifier's ESLint global reference; retain the full-lock equality assertion.
 - [ ] Lot 2: Q1/Q2/acceptance 31/32/6, MCP and CI-selected API suites.
 - [ ] Lot 2: typecheck, lint, build, audit tests and audit gate.
 - [ ] Lot 2: actual sixteen-tool runtime image, durable SQL/S3, replay/restart and revocation proofs.
