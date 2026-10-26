@@ -23,6 +23,11 @@ export type PwIntentRow = typeof pwWriteIntents.$inferSelect;
 /** Create the immutable intent, challenge and key reservation atomically. */
 export async function preparePwWriteIntent(tx: WriteTx, params: PwPrepareParams): Promise<PwIntentRow> {
   const key = params.binding.commandKey.toLowerCase();
+  assertSignalWriteInput(params.command);
+  if (key !== params.command.commandKey.toLowerCase()) {
+    throw new FacetError(400, "invalid_facet_command");
+  }
+  const command = { ...params.command, commandKey: key };
   const [reservation] = await tx.select().from(pwWriteKeyReservations).where(sql`
     ${pwWriteKeyReservations.actorId} = ${params.actorId} AND
     ${pwWriteKeyReservations.commandKey} = ${key}`);
@@ -38,7 +43,7 @@ export async function preparePwWriteIntent(tx: WriteTx, params: PwPrepareParams)
         ? Object.fromEntries(Object.entries(command).filter(([key]) => key !== "expiresAtMs")) : command,
     });
     if (reservation.operationDigest !== params.binding.operationDigest
-      || requestContext(params.binding, params.command) !== requestContext({
+      || requestContext(params.binding, command) !== requestContext({
         ...params.binding, principal: existing.principal as PwIntentBinding["principal"],
         pageSessionId: existing.pageSessionId, pageInstanceId: existing.pageInstanceId,
         artifactRef: existing.artifactRef as Record<string, unknown>,
@@ -53,18 +58,17 @@ export async function preparePwWriteIntent(tx: WriteTx, params: PwPrepareParams)
   if (actor?.sub !== params.binding.principal.sub) {
     throw new PwWriteError(403, "confirmation_identity_mismatch");
   }
-  assertSignalWriteInput(params.command);
-  if (signalWriteOperationDigest(params.command) !== params.binding.operationDigest
-    || params.operation !== params.command.operation
-    || params.workspaceId.toLowerCase() !== params.command.workspaceId.toLowerCase()
-    || params.citySlug !== params.command.target.citySlug
-    || pwDigest(params.target) !== pwDigest(params.command.target)
+  if (signalWriteOperationDigest(command) !== params.binding.operationDigest
+    || params.operation !== command.operation
+    || params.workspaceId.toLowerCase() !== command.workspaceId.toLowerCase()
+    || params.citySlug !== command.target.citySlug
+    || pwDigest(params.target) !== pwDigest(command.target)
     || pwDigest(params.artifactRef) !== pwDigest(params.binding.artifactRef)
-    || params.command.expectedProjectionToken !== params.binding.expectedProjectionToken
-    || params.command.expiresAtMs !== params.binding.expiresAtMs) {
+    || command.expectedProjectionToken !== params.binding.expectedProjectionToken
+    || command.expiresAtMs !== params.binding.expiresAtMs) {
     throw new FacetError(400, "invalid_facet_command");
   }
-  const digest = pwIntentDigest(params.binding, params.command);
+  const digest = pwIntentDigest(params.binding, command);
   const [row] = await tx.insert(pwWriteIntents).values({
     intentId: params.binding.intentId.toLowerCase(),
     invocationId: params.binding.invocationId.toLowerCase(),
@@ -81,7 +85,7 @@ export async function preparePwWriteIntent(tx: WriteTx, params: PwPrepareParams)
     grantReference: params.binding.grantReference,
     citySlug: params.citySlug,
     target: params.target as Record<string, unknown>,
-    command: params.command,
+    command,
     operationDigest: params.binding.operationDigest,
     intentDigest: digest,
     commandKey: key,
