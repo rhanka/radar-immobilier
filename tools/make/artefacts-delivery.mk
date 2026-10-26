@@ -3,9 +3,11 @@ SHELL := /bin/bash
 export ENV API_PORT UI_PORT MAILDEV_UI_PORT
 override CMD := $(value CMD)
 export CMD
-.PHONY: run inspect commit manifests
+.PHONY: run inspect commit manifests qualify
 run:
 	@bash tools/make/artefacts-delivery-run.sh
+qualify:
+	@bash tools/make/artefacts-delivery-qualify.sh
 inspect:
 	@rtk bash -euo pipefail -c 'eval "$$CMD"'
 commit:
