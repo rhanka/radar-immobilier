@@ -34,9 +34,9 @@ export async function startArtifactControl(options: {
     const readActivation = () => resolveActivationConfig(readActivationEnv());
     const host = await composeArtifactHost(pool, parsed, undefined, { readActivation, contentBase });
     const backend = createArtifactControl(host, parsed.storageScope, contentBase,
-      createArtifactAdmissionAuthority(pool, readActivation));
+      createArtifactAdmissionAuthority(pool, readActivation, parsed.storageScope));
     logger.info({ storageScope: parsed.storageScope, s3Bucket: parsed.s3Bucket }, "artifact control enabled");
-    return { auth, accounts: pool, backend, readActivation };
+    return { auth, accounts: pool, backend, readActivation, storageScope: parsed.storageScope };
   } catch (err) {
     logger.error({ err }, "artifact control unavailable; API remains available");
     return { auth, accounts: pool };
