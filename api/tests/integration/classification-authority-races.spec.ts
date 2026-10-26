@@ -13,8 +13,9 @@ describeDb("classification final authority races", () => {
     const original = store.approvedAccountId;
     const spy = vi.spyOn(store, "approvedAccountId").mockImplementation(async (...args) => {
       const accountId = await original(...args);
-      await expect(f.data.pool.query("SELECT id FROM account_users WHERE id=$1 FOR UPDATE NOWAIT", [accountId]))
-        .rejects.toMatchObject({ code: "55P03" });
+      const outcome = await f.data.pool.query("SELECT id FROM account_users WHERE id=$1 FOR UPDATE NOWAIT", [accountId])
+        .catch((error: unknown) => error);
+      expect(outcome).toMatchObject({ code: "55P03" });
       return accountId;
     });
     try {
@@ -40,10 +41,11 @@ describeDb("classification final authority races", () => {
           return result;
         });
         try {
-          await expect(discoverFacetContext(f.data.db, f.data.contributor.sub, transport,
-            selection === "explicit" ? f.data.workspaceId : undefined)).rejects.toMatchObject({
-            status: 403, message: "account_not_approved",
-          });
+          const outcome = await discoverFacetContext(f.data.db, f.data.contributor.sub, transport,
+            selection === "explicit" ? f.data.workspaceId : undefined).catch((error: unknown) => error);
+          expect(outcome).toMatchObject({ status: 403, message: "account_not_approved" });
+          expect(outcome).not.toHaveProperty("workspaces");
+          expect(outcome).not.toHaveProperty("selectedWorkspace");
           expect(calls).toBe(2);
         } finally { spy.mockRestore(); }
       });
