@@ -31,11 +31,16 @@ export interface ArtifactMcpBinding {
   invoke(tool: string, args: unknown, request: VerifiedMcpRequest): Promise<CallToolResult>;
 }
 
+export interface FrozenCallAuthority {
+  readonly workspaceId: string;
+  readonly scope: string;
+}
+
 /** A trusted host injects its shared app; this constructor supplies no persistence or policy fallback. */
 export function bindArtifactProvider(options: {
   readonly app: ArtifactsApp;
   readonly storageScopeId: string;
-  readonly authorizeCommit: (request: VerifiedMcpRequest) => AuthorizeCommit;
+  readonly authorizeCommit: (request: VerifiedMcpRequest, frozen?: FrozenCallAuthority) => AuthorizeCommit;
   readonly admission?: AdmissionAuthority | undefined;
 }): ArtifactMcpBinding {
   if (!options.storageScopeId.trim() || typeof options.authorizeCommit !== "function") {
@@ -60,18 +65,20 @@ export function bindArtifactProvider(options: {
         throw error;
       }
       if (!request.principal.scopes.includes(ARTIFACT_INVOCATION_SCOPE)) throw new Error("artifact_scope_denied");
+      let frozen: FrozenCallAuthority | undefined;
       if (admission) {
         let decision;
         try {
-          decision = await checkAdmission(admission, request.principal.sub);
+          decision = await checkAdmission(admission, request.principal.sub, scope);
         } catch {
           return refusal("capability_unavailable", true);
         }
         if (!decision.allowed) return refusal(decision.body.error, false);
+        frozen = Object.freeze({ workspaceId: decision.workspaceId, scope });
       }
       let authority: AuthorizeCommit;
       try {
-        authority = authorizeCommit(request);
+        authority = authorizeCommit(request, frozen);
         if (typeof authority !== "function") throw new Error("artifact_authority_unavailable");
       } catch { return refusal("capability_unavailable", true); }
       const invocation: ArtifactInvocationContext = Object.freeze({
