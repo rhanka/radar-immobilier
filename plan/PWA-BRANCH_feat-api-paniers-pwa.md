@@ -26,6 +26,12 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
   - `api/tests/integration/pw-write-createapp.spec.ts`: PWA-EX1.
 
 ## Feedback Loop
+- [x] Second passes: real PostgreSQL preparation waits on eight separate 800ms
+  statements after persistence; cancellation occurs at the cumulative deadline,
+  with exact 503/contact_operator/not_executed and no intent/key/audit/outbox.
+- [x] Second passes: suspend the fourth/final P resolver after receipt projection;
+  expire P or delegation while suspended and require the exact 401 envelope,
+  without a receipt while the independent BASE event remains readable.
 - [x] Second passes: enforce a monotonic five-second transaction deadline,
   cancel the pinned PostgreSQL backend, await cancellation before release,
   and refuse overdue callbacks before COMMIT without relabeling commit errors.

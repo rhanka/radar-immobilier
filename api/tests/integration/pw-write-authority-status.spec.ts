@@ -20,6 +20,7 @@ describeDb("PW-A status disclosure after receipt wait", () => {
       const before = await poll();
       expect(before.status).toBe(200);
       expect(await before.json()).toMatchObject({ data: { state: "committed", receipt: { event: { state: "active" } } } });
+      a.clock.now += 2000;
       const blocker = await a.f.pool.connect();
       let pending: Promise<Response> | undefined;
       try {
@@ -56,5 +57,42 @@ describeDb("PW-A status disclosure after receipt wait", () => {
       } finally {
         await blocker.query("ROLLBACK"); blocker.release(); await pending;
       }
+    });
+
+  it.each(["page", "delegation"] as const)(
+    "should hide the receipt when %s expires inside the final authenticated resolver", async (kind) => {
+      const a = await authorityFixture();
+      const id = (await (await a.prepare()).json()).data.intentId;
+      const cookie = await a.cookie();
+      const bootstrap = await (await a.request(`/artifact-write/intents/${id}`, { headers: { cookie } })).json();
+      const committed = await a.request(`${APP}/${id}/confirm`, { method: "POST",
+        headers: { cookie, origin: a.writeApp.domain.appOrigin, "content-type": "application/json",
+          "x-artifact-write-csrf": bootstrap.csrf }, body: JSON.stringify({ challengeToken: bootstrap.challengeToken }) });
+      expect(committed.status).toBe(200);
+      let release!: () => void;
+      let entered!: () => void;
+      const waiting = new Promise<void>((resolve) => { entered = resolve; });
+      const barrier = new Promise<void>((resolve) => { release = resolve; });
+      const resolve = a.writeH5.resolvePage;
+      let calls = 0;
+      a.writeH5.resolvePage = async (request) => {
+        if (++calls === 4) { entered(); await barrier; }
+        return resolve(request);
+      };
+      const pending = a.request(`${H5}/${id}`, { headers: { "x-synthetic-page-proof": a.page.grant.sessionId } });
+      try {
+        await waiting;
+        if (kind === "delegation") a.page.delegationExpiresAtMs = a.clock.now + 1000;
+        a.clock.now = kind === "page" ? a.page.pageExpiresAtMs : a.page.delegationExpiresAtMs;
+      } finally { release(); }
+      const response = await pending;
+      expect(response.status).toBe(401);
+      expect(await response.json()).toEqual({ operation: "facets.write-intents.status.v1", requestId: expect.any(String),
+        error: { code: kind === "page" ? "page_session_expired" : "write_grant_expired",
+          message: kind === "page" ? "Page session expired." : "Write grant expired.",
+          action: "authenticate", retryable: false, attemptOutcome: "not_executed" } });
+      expect(calls).toBe(4);
+      expect((await readCommittedSignalReceipt(a.f.db, a.f.contributor.sub, a.f.workspaceId,
+        a.input.commandKey))?.state).toBe("active");
     });
 });
