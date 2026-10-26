@@ -41,7 +41,11 @@ describeDb("PW-B pre-commit lock timeout", () => {
             WHERE $1 = ANY(pg_blocking_pids(pid))) AS blocked`, [pid]);
           expect(rows[0].blocked).toBe(true);
         }, { timeout: 800, interval: 5 });
-        expect(toWriteRefusal(await outcome))
+        const failure = await outcome;
+        let cause = failure;
+        while (cause instanceof Error && cause.cause) cause = cause.cause;
+        expect(cause).toMatchObject({ code: "55P03" });
+        expect(toWriteRefusal(failure))
           .toEqual({ status: 503, code: "write_fence_unavailable", retryable: false });
         expect(await baseState(f)).toEqual(before);
       } finally {
