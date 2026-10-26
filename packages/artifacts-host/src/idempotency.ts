@@ -66,6 +66,27 @@ export class ArtifactConnectionError extends Error {
   }
 }
 
+/** pg-pool emits a plain Error without code when acquisition times out. */
+export const ARTIFACT_POOL_TIMEOUT_CODE = "artifact_pool_timeout";
+
+export function isPoolAcquisitionTimeout(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) return false;
+  const code = (error as { code?: unknown }).code;
+  if (code === ARTIFACT_POOL_TIMEOUT_CODE) return true;
+  const message = error instanceof Error ? error.message : String(error);
+  return /timeout exceeded when trying to connect/i.test(message);
+}
+
+export function normalizePoolAcquisitionError(error: unknown): unknown {
+  if (isPoolAcquisitionTimeout(error)) {
+    const code = (error as { code?: unknown }).code;
+    if (code === ARTIFACT_POOL_TIMEOUT_CODE) return error;
+    return Object.assign(new Error("artifact pool acquisition timed out", { cause: error }),
+      { code: ARTIFACT_POOL_TIMEOUT_CODE });
+  }
+  return error;
+}
+
 const ADVISORY_KEY_RE = /^[0-9a-f]{16,}[0-9a-f]*$/i;
 
 const CONNECTION_FAILURE_CODES = new Set([
@@ -109,6 +130,7 @@ export async function withArtifactAdvisoryLock<T>(
   try {
     client = await pool.connect();
   } catch (error) {
+    if (isPoolAcquisitionTimeout(error)) throw normalizePoolAcquisitionError(error);
     if (isConnectionFailure(error)) {
       throw new ArtifactConnectionError("artifact postgres connection lost", { cause: error });
     }
