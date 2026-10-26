@@ -101,3 +101,5 @@ Qualify and integrate Muse's durable write persistence on PW-B after A5.
 - [x] Delivery slice 24: feat(pw-d): add pw-write-quotas.ts.
 
 - [x] Delivery slice 25: test(pw-d): add pw-write-refusals-db.test.ts.
+
+- [x] Delivery slice 26: feat(pw-d): add pw-write-rejection.ts.
