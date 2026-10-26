@@ -26,6 +26,8 @@
 - [ ] Preserve historical BASE HTTP wrappers and lot isolation.
 
 ## Verification
+- [x] Add assertion-qualified mutation legs and independent local bundle verification.
+
 - [x] Add a serial Docker-only campaign with resource monitoring and guarded teardown.
 
 - [x] Document the transactional seam and qualify unchanged createApp BASE wrappers.
