@@ -4,7 +4,7 @@ BASE=de81ef0ef30dd1ca0bf575498e342be525f5cc2d
 root=$(pwd -P)
 # The shared worktree metadata is read-only; commits live in the rescue repo.
 git() {
-  if [[ ${1:-} == -C ]]; then command git "$@";
+  if [[ ${1:-} == -C || ${1:-} == init ]]; then command git "$@";
   else command git --git-dir="$root/tmp/pwd-evidence/rescue.git" --work-tree="$root" "$@"; fi
 }
 [[ ${ENV:-} == test-api-paniers-pwd ]]
