@@ -23,3 +23,6 @@ test-astra-compatibility: guard
 .PHONY: qualify-astra
 qualify-astra: guard
 	@bash tools/make/artefacts-a5-verify.sh $@
+.PHONY: upgrade-provider
+upgrade-provider: guard
+	@bash tools/make/artefacts-a5-verify.sh $@
