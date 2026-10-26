@@ -165,3 +165,21 @@ BEGIN
 END $$;
 --> statement-breakpoint
 CREATE OR REPLACE TRIGGER pw_write_intents_immutable BEFORE UPDATE OR DELETE ON pw_write_intents FOR EACH ROW EXECUTE FUNCTION guard_pw_write_intent();
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS pw_write_rejections (
+  intent_id uuid PRIMARY KEY REFERENCES pw_write_intents(intent_id) ON DELETE RESTRICT,
+  status integer NOT NULL CHECK (status IN (409, 422)),
+  code text NOT NULL CHECK (code IN ('projection_revision_conflict', 'facet_head_conflict',
+    'facet_target_version_conflict', 'workspace_revision_conflict', 'invalid_reason_code', 'reason_code_required'))
+);
+--> statement-breakpoint
+CREATE OR REPLACE TRIGGER pw_write_rejections_immutable BEFORE UPDATE OR DELETE ON pw_write_rejections FOR EACH ROW EXECUTE FUNCTION guard_pw_write_append_only();
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS pw_write_status_budgets (
+  intent_id uuid NOT NULL REFERENCES pw_write_intents(intent_id) ON DELETE RESTRICT,
+  page_session_id text NOT NULL CHECK (page_session_id <> ''),
+  first_read_at timestamptz NOT NULL,
+  last_read_at timestamptz NOT NULL CHECK (last_read_at >= first_read_at),
+  initial_reads integer NOT NULL CHECK (initial_reads BETWEEN 1 AND 60),
+  PRIMARY KEY (intent_id, page_session_id)
+);
