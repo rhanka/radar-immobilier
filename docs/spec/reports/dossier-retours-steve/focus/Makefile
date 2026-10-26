@@ -8,11 +8,16 @@ CHROME ?= /home/antoinefa/.cache/ms-playwright/chromium-1243/chrome-linux64/chro
 CDP_PORT ?= 9243
 ENV ?= test-dossier-steve
 WORKDIR := /docs/spec/reports/dossier-retours-steve/focus
+# The YAML readers of decision-yaml.test.mjs (yaml, js-yaml) come from the repository
+# root node_modules (shared by every worktree), mounted read-only at /node_modules.
+# mapping.test.mjs reads api/src/db/schema.ts (read-only) to check the « existant » diagram.
+ROOT_NODE_MODULES ?= $(abspath $(shell git -C $(FOCUS_DIR) rev-parse --path-format=absolute --git-common-dir)/../node_modules)
 # La chaîne est importée, jamais recopiée : /kit porte le kit h2a, et les
 # dépendances sont celles de docs/architecture/focus (cible `deps` de sa Makefile).
 RUN = docker run --rm --network none --cpus=1.5 --memory=1536m --pids-limit=256 --user "$$(id -u):$$(id -g)" \
   -e NODE_OPTIONS=--max-old-space-size=1100 \
-  -v $(DOCS_DIR):/docs -v $(KIT_ROOT):/kit:ro -v $(CHAIN_DIR)/node_modules:/docs/node_modules:ro \
+  -v $(DOCS_DIR):/docs -v $(KIT_ROOT):/kit:ro -v $(CHAIN_DIR)/node_modules:/docs/node_modules:ro -v $(ROOT_NODE_MODULES):/node_modules:ro \
+  -v $(abspath $(DOCS_DIR)/../api/src/db/schema.ts):/api/src/db/schema.ts:ro \
   -w $(WORKDIR) $(NODE_IMAGE) node
 
 .PHONY: deps map test build browser chrome-run chrome-stop proofs
@@ -40,10 +45,11 @@ proofs:
 	test -s $(FOCUS_DIR)/.generated/browser-check.json
 	mkdir -p $(FOCUS_DIR)/../preuves
 	cp $(FOCUS_DIR)/.generated/browser-check.json $(FOCUS_DIR)/.generated/portable.json $(FOCUS_DIR)/../preuves/
-	cp $(FOCUS_DIR)/.generated/dossier-preview-*.png $(FOCUS_DIR)/.generated/scene-*.png $(FOCUS_DIR)/../preuves/
+	cp $(FOCUS_DIR)/.generated/dossier-preview-*.png $(FOCUS_DIR)/.generated/scene-*.png $(FOCUS_DIR)/.generated/graphique-*.png \
+	  $(FOCUS_DIR)/.generated/decision-*.png $(FOCUS_DIR)/.generated/sombre-*.png $(FOCUS_DIR)/.generated/zoom-*.png $(FOCUS_DIR)/../preuves/
 	node -e "const r=require('$(FOCUS_DIR)/.generated/browser-check.json'); \
 	  if(r.status!=='pass') throw Error('browser check did not pass'); \
-	  if(r.scenes.length!==5) throw Error('five scenes expected'); \
+	  if(r.scenes.length!==5) throw Error('five scenes expected (one per chapter marker)'); \
 	  if(r.consoleErrors.length||r.runtimeErrors.length) throw Error('console is not clean'); \
 	  if(r.externalRequests.length) throw Error('the page is not offline'); \
 	  console.log(JSON.stringify({scenes:r.scenes.map(s=>({id:s.sceneId,cards:s.cards,edges:s.edges,scale:s.initialScale})),choices:r.choices}))"
