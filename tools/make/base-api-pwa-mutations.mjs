@@ -53,7 +53,7 @@ for (const [name, file, before, after, scope, title] of mutations) {
     writeFileSync(path, original.replace(before, after));
     const { result, selected } = run(name, scope, title);
     if (result.status === 0 || !selected.some(test => test.status === "failed"
-      && test.failureMessages.some(message => /AssertionError|expected/i.test(message)))) {
+      && test.failureMessages.some(message => /AssertionError|expected|__VITEST_REJECTS__/i.test(message)))) {
       throw new Error(`Mutant survived or failed without its functional assertion: ${name}`);
     }
   } finally {
