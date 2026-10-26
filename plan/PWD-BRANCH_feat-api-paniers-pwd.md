@@ -131,3 +131,11 @@ Qualify and integrate Muse's durable write persistence on PW-B after A5.
 - [x] Delivery slice 37: chore(pw-d): add base-api-pwd-verify.sh.
 
 - [x] Delivery slice 38: chore(pw-d): add base-api-pwd.mk.
+
+- [ ] Astra corrections: persistent fixed I/P follow-up window plus global quota.
+- [ ] Astra corrections: typed terminal refusal independent of outbox delivery.
+- [ ] Astra corrections: independent application cookie deadline at final admission.
+- [ ] Astra corrections: normalized command keys, concealed revoke ownership, refusal audit.
+- [ ] Astra corrections: exact-refusal mutations, scoped and CI API gates, lint/typecheck.
+- [ ] Astra corrections: bounded commits, de81ef0e bundle audit, French report.
+- [x] Astra slice 01: scope corrective qualification without publication.
