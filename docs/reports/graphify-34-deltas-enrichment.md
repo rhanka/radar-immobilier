@@ -39,8 +39,11 @@ The producer reads the existing `graph_nodes` projection and reconstructs a
 complete city snapshot; it never reads raw documents and never calls an LLM.
 For `Signal` and `DesignationEvent` nodes it:
 
-- adds `effet_densifiant: "inconnu"` only when absent; it does not calculate a
-  density delta and does not overwrite a Geo-provided value;
+- leaves `effet_densifiant` absent when missing (equivalent to `"inconnu"` via
+  the Vivier default) and does not write a placeholder, because a present
+  placeholder would block the guarded Geo writer
+  (`api/src/services/graph/graphify-34-enrichment.ts:79-81`); it does not
+  calculate a density delta and does not overwrite a Geo-provided value;
 - fills missing `etape` with the existing deterministic `deriveEtape`;
 - persists `instrument` through the exact shared `instrumentFromSignal`
   function used by the live Vivier classification, rather than a copied
