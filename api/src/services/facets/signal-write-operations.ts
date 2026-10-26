@@ -143,3 +143,29 @@ export function assertSignalWriteInput(input: unknown): asserts input is SignalW
   if (!personal && (row.basket !== undefined || row.deselect !== undefined
     || row.expectedSelectionHeads !== undefined)) fail();
 }
+
+/** Content digest of the admitted order; the idempotency key stays identity. */
+export function signalWriteOperationDigest(input: SignalWriteInput): string {
+  assertSignalWriteInput(input);
+  const body: Record<string, unknown> = {
+    expectedHeadId: input.expectedHeadId, displayedFingerprint: input.displayedFingerprint,
+  };
+  for (const key of ["basket", "reasonCode", "deselect", "expectedSelectionHeads"] as const) {
+    if (input[key] !== undefined) body[key] = input[key];
+  }
+  if (input.deselect !== undefined) body.deselect = [...input.deselect].sort();
+  return digest({
+    version: "pw-signal-write-v1",
+    operation: input.operation,
+    workspace: input.workspaceId.toLowerCase(),
+    target: input.target,
+    body,
+    expectedProjectionToken: input.expectedProjectionToken,
+  });
+}
+
+/** Pre- and post-wait expiry control; expiry never extends the intent. */
+export function assertAdmissionWindow(nowMs: number, expiresAtMs: number): void {
+  if (!Number.isSafeInteger(nowMs) || !Number.isSafeInteger(expiresAtMs)) fail();
+  if (nowMs >= expiresAtMs) throw new FacetError(409, "challenge_expired");
+}
