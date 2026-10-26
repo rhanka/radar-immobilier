@@ -10,6 +10,13 @@ export interface PwConfirmation {
   intentDigest: string;
   expiresAtMs: number;
   keyId: string;
+  /** Authenticated application cookie expiry; independent of the challenge. */
+  sessionExpiresAtMs: number;
+}
+
+export function assertPwSession(proof: PwConfirmation, nowMs: number): void {
+  if (!Number.isSafeInteger(proof.sessionExpiresAtMs) || !Number.isSafeInteger(nowMs)
+    || nowMs >= proof.sessionExpiresAtMs) throw new PwWriteError(401, "session_expired");
 }
 
 export function assertPwPrincipal(row: PwIntentRow, principal: PwPrincipal): void {
