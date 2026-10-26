@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd /workspace
+sha256sum --check --quiet /evidence/files.sha256
 if [[ ${2:-full} == full || ${2:-full} == scoped ]]; then
 bash tools/make/base-api-container.sh test-api "$1"
 cp /evidence/tests.json /evidence/scoped-tests.json
