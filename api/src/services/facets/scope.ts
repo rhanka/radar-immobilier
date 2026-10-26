@@ -39,6 +39,13 @@ export class ScopeError extends Error {
   }
 }
 
+/** Preserve the sampled refusal while keeping the BASE scope error contract. */
+export class ScopedMaintenanceError extends ScopeError {
+  constructor(workspaceId: string) {
+    super(503, `scoped_facet_scope_unavailable:${workspaceId}`);
+  }
+}
+
 /** Canonical identity key: two workspaces never share a stream. */
 export function streamKey(identity: StreamIdentity): string {
   return JSON.stringify([
