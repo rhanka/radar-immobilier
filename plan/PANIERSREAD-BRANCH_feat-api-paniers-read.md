@@ -18,7 +18,7 @@
 - [x] PANIERSREAD-EX1: owner instruction assigns the integrator this workspace; preserve all mounts, add the closed read router; rollback removes that mount.
 - [x] PANIERSREAD-EX2: extend `projection-revisions-fixture.ts` with optional event fields to reuse the unresolved-history fixture for lot history; test-only, default unchanged; rollback removes optional fields.
 - [x] PS-04 handoff documented: H5 state binding waits for A6/A7; no transport activation in this branch.
-- [x] Qualified code SHA: `28ad1d2edb60439fee4cd230379103eddfd90463`; evidence `tmp/classification-evidence/20261025T233829-5-qualify`.
+- [x] Qualified code SHA: `f8a8079655eff3646d16e3ba459d7181fd0b2ac9`; evidence `tmp/classification-evidence/20261025T235202-5-qualify`.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch, sequential implementation and Docker verification.
@@ -49,5 +49,5 @@
 - [x] PS-01 current state DTO (shared canonical item projection, missing-source union).
 - [x] PS-02 reveal and guards (explicit reveal, separate restoration, error revalidation).
 - [x] PS-03 route and missing sources (typed reveal, absent source with/without history).
-- [x] Gates: 36 classification cases, full API suite (3874 passed; 76 conditional skips), eight killed/restored mutants, lint, typecheck and build.
+- [x] Gates: 37 classification cases, full API suite (3875 passed; 76 conditional skips), nine killed/restored mutants, lint, typecheck and build; includes the personal-archive read race.
 - [x] Delivery: bounded commit audit, owned-resource teardown, bundle imported and verified in an empty audit repository; separate French receipt carries the final bundle hash.
