@@ -44,17 +44,25 @@ export type HistoricalScopedCommand = Omit<FacetCommand, "expectedHeadId" | "dis
   displayedFingerprint?: never;
 };
 
+type ScopedTx = Parameters<Parameters<Database["transaction"]>[0]>[0];
+
 export async function writeScopedPersonalFacet(
   db: Database, sub: string, workspaceId: string, command: FacetCommand | HistoricalScopedCommand,
 ) {
   if (command.displayedFingerprint === undefined) {
     return recoverScopedHistoricalFacet(db, sub, workspaceId, command);
   }
+  return db.transaction((tx) => writeScopedPersonalFacetInTx(tx, sub, workspaceId, command));
+}
+
+/** Shared BASE executor; the caller owns commit, rollback, and isolation. */
+export async function writeScopedPersonalFacetInTx(
+  tx: ScopedTx, sub: string, workspaceId: string, command: FacetCommand,
+) {
   if (command.expectedHeadId === undefined) {
     throw new FacetError(400, "invalid_facet_command");
   }
   const key = command.commandKey.toLowerCase();
-  return db.transaction(async (tx) => {
     await lockWorkspace(tx, workspaceId);
     const accountId = await approvedAccountId(tx, sub, true);
     await resolveWorkspaceAccess(tx, workspaceId, sub);
@@ -173,7 +181,6 @@ export async function writeScopedPersonalFacet(
       ownerId: accountId, commandKey: key, workspaceId, status: "resolved", commandDigest,
     }).onConflictDoNothing();
     return result;
-  });
 }
 
 /**
