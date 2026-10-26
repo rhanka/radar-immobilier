@@ -75,3 +75,4 @@
 - [x] Astra r2: qualify foreign membership, replacement during upload, revoked replay and real HTTP pool saturation on PostgreSQL.
 - [x] Astra r2: prove process survival, retryable failure and recovery with real pg_terminate_backend cuts; reproduce opening timeout.
 - [x] Astra r2: prove activation expiration after an observed membership lock wait through the production MCP replay binding.
+- [x] Astra r2: retain a single ensure authority evaluation per coordinator guard; refresh activation inside the locked policy read.
