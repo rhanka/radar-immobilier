@@ -149,3 +149,4 @@ Qualify and integrate Muse's durable write persistence on PW-B after A5.
 - [x] Astra slice 09: document cookie provenance, follow-up ownership and terminal error persistence.
 - [x] Astra slice 10: keep rescue packaging independent from shared read-only Git metadata.
 - [x] Astra slice 11: initialize bundle-audit repositories without a worktree option.
+- [x] Astra slice 12: wait up to three hours at two-minute intervals, never holding a lock needed by foreign stacks.

@@ -13,18 +13,32 @@ RUN_DIR=$ROOT/tmp/pwd-evidence/runtime
 LOG_DIR=$ROOT/tmp/pwd-evidence/$(date -u +%Y%m%dT%H%M%S)-campaign
 mkdir -p "$RUN_DIR" "$LOG_DIR"
 exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
-until flock -w 10 8; do echo 'Waiting for another Docker campaign'; done
+WAIT_STARTED=$SECONDS
 free_space() {
   [[ $(df -Pk "$ROOT" | awk 'NR==2 {print $4}') -ge 8388608 &&
      $(awk '/MemAvailable:/ {print $2}' /proc/meminfo) -ge 8388608 ]]
 }
-# Wait without touching another campaign's containers, volumes, or builders.
+# Never hold the campaign lock while another agent still owns a test stack.
+# This lets its next qualification phase acquire the lock and finish cleanup.
 while :; do
   free_space || { echo 'STOP: less than 8 GiB disk or available memory'; exit 3; }
   running=$(docker ps --filter name=radar-test- --format '{{.Names}}')
   builders=$(ps -eo comm=,args= | awk '$1 ~ /^(docker|docker-buildx|buildctl)$/ && $0 ~ / (build|buildx) /')
-  [[ -n $running || -n $builders ]] || break
-  echo 'Waiting for radar test containers and Docker builds to finish'; sleep 10
+  if [[ -z $running && -z $builders ]] && flock -n 8; then
+    # Recheck after acquisition to close the race with a cooperating campaign.
+    running=$(docker ps --filter name=radar-test- --format '{{.Names}}')
+    if [[ -z $running ]]; then break; fi
+    flock -u 8
+  fi
+  if (( SECONDS - WAIT_STARTED >= 10800 )); then
+    echo 'STOP: three-hour wait limit reached' | tee -a "$LOG_DIR/waiting.log"
+    echo 4 > "$LOG_DIR/status"
+    exit 4
+  fi
+  printf '%s Waiting for foreign test stacks/builds or campaign lock: %s\n' \
+    "$(date -u +%FT%TZ)" "$running" | tee -a "$LOG_DIR/waiting.log"
+  sleep 60
+  sleep 60
 done
 OWNER=$(printf '%s' "$ROOT/$ENV" | sha256sum | cut -d' ' -f1)
 export COMPOSE_DISABLE_ENV_FILE=1
