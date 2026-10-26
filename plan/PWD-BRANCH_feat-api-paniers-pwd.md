@@ -125,3 +125,5 @@ Qualify and integrate Muse's durable write persistence on PW-B after A5.
 - [x] Delivery slice 36: chore(pw-d): add base-api-pwd-mutations.mjs.
 
 - [x] Delivery slice 37: chore(pw-d): add base-api-pwd-verify.sh.
+
+- [x] Delivery slice 38: chore(pw-d): add base-api-pwd.mk.
