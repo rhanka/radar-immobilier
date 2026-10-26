@@ -20,7 +20,7 @@ export interface WriteAppDeps extends AppGuardDeps {
   challengeKeys: ReadonlyMap<string, Uint8Array>;
   /** PW-C supplies rendering and command dispatch after its own qualification. */
   renderSummary?: (c: Context, row: PwIntentRow, bootstrap: { csrf: string; challengeToken: string }) => Response;
-  confirm?: (row: PwIntentRow, proof: PwConfirmation, sessionExpiresAtMs: number) => Promise<unknown>;
+  confirm?: (row: PwIntentRow, proof: PwConfirmation) => Promise<unknown>;
   revoke?: (row: PwIntentRow, principal: AppGuardPass["principal"]) => Promise<unknown>;
 }
 
@@ -94,5 +94,5 @@ export function verifyAppChallenge(token: unknown, row: PwIntentRow, deps: Write
   if (typeof token !== "string" || !verifyWriteChallengeToken(token, material, key)) {
     throw new FacetError(403, "challenge_invalid");
   }
-  return { ...material, principal: pass.principal };
+  return { ...material, principal: pass.principal, sessionExpiresAtMs: pass.session.exp * 1000 };
 }
