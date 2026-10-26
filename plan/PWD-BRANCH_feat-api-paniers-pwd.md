@@ -131,3 +131,28 @@ Qualify and integrate Muse's durable write persistence on PW-B after A5.
 - [x] Delivery slice 37: chore(pw-d): add base-api-pwd-verify.sh.
 
 - [x] Delivery slice 38: chore(pw-d): add base-api-pwd.mk.
+
+- [x] Astra corrections: persistent fixed I/P follow-up window plus global quota.
+- [x] Astra corrections: typed terminal refusal independent of outbox delivery.
+- [x] Astra corrections: independent application cookie deadline at final admission.
+- [x] Astra corrections: normalized command keys, concealed revoke ownership, refusal audit.
+- [x] Astra corrections: exact-refusal mutations, scoped and CI API gates, lint/typecheck.
+- [x] Astra corrections: bounded commits, de81ef0e bundle audit, French report.
+- [x] Astra slice 01: scope corrective qualification without publication.
+- [x] Astra slice 02: persist I/P follow-up budgets and immutable public refusals.
+- [x] Astra slice 03: enforce terminal refusal, session deadline and request audit in admission.
+- [x] Astra slice 04: normalize preparation keys and conceal foreign revocation ownership.
+- [x] Astra slice 05: regress lost refusals, fixed follow-up and expiry during final SQL wait.
+- [x] Astra slice 06: regress I/P spacing, sixty reads, reload and global quota rollback.
+- [x] Astra slice 07: regress preparation, foreign ownership, deadline and refusal audits.
+- [x] Astra slice 08: support serial scoped reproduction, exact-refusal mutations and bundle audit.
+- [x] Astra slice 09: document cookie provenance, follow-up ownership and terminal error persistence.
+- [x] Astra slice 10: keep rescue packaging independent from shared read-only Git metadata.
+- [x] Astra slice 11: initialize bundle-audit repositories without a worktree option.
+- [x] Astra slice 12: wait up to three hours at two-minute intervals, never holding a lock needed by foreign stacks.
+- [x] Astra slice 13: reconcile new table reexports and requestId inference after 102 passing scoped tests.
+- [x] Astra slice 14: verify exact refusal from the assertion diff when Vitest abbreviates its JSON message.
+- [x] Astra slice 15: qualify 102 scoped tests, 4089 API tests and seven killed/restored mutants.
+- [x] Astra qualification: typechecks, global lint, API build and CT-8 fresh/upgrade/replay pass.
+- [x] Astra cleanup: only owned containers, volume and network removed; no Docker work remains.
+- [x] Astra slice 16: audit the base-seeded corrective bundle and complete the French report.

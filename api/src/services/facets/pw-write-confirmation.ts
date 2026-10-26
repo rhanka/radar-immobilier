@@ -3,13 +3,20 @@ import type { PwIntentRow } from "./pw-write-store.js";
 import { pwIntentDigest, pwDigest, type PwPrincipal } from "./pw-write-digests.js";
 import { PwWriteError } from "./pw-write-errors.js";
 
-/** PW-A supplies these claims only after verifying the application challenge MAC. */
+/** PW-A verifies the challenge MAC and independently authenticates cookie expiry. */
 export interface PwConfirmation {
   principal: PwPrincipal;
   challengeId: string;
   intentDigest: string;
   expiresAtMs: number;
   keyId: string;
+  /** Authenticated application cookie expiry; independent of the challenge. */
+  sessionExpiresAtMs: number;
+}
+
+export function assertPwSession(proof: PwConfirmation, nowMs: number): void {
+  if (!Number.isSafeInteger(proof.sessionExpiresAtMs) || !Number.isSafeInteger(nowMs)
+    || nowMs >= proof.sessionExpiresAtMs) throw new PwWriteError(401, "session_expired");
 }
 
 export function assertPwPrincipal(row: PwIntentRow, principal: PwPrincipal): void {

@@ -32,7 +32,8 @@ export function pwParams(f: WorkspaceFixture, input: SignalWriteInput): PwPrepar
 export function pwConfirmation(row: PwIntentRow): PwConfirmation {
   return { principal: row.principal as PwConfirmation["principal"],
     challengeId: row.challengeId, intentDigest: row.intentDigest,
-    expiresAtMs: row.expiresAt.getTime(), keyId: row.challengeKeyId };
+    expiresAtMs: row.expiresAt.getTime(), keyId: row.challengeKeyId,
+    sessionExpiresAtMs: row.expiresAt.getTime() + 3600_000 };
 }
 
 export async function pwPrepared(f: WorkspaceFixture, input: SignalWriteInput) {

@@ -4,6 +4,7 @@ cd /workspace
 bash tools/make/base-api-container.sh test-api "$1"
 cp /evidence/tests.json /evidence/scoped-tests.json
 cp /evidence/tests.tsv /evidence/scoped-tests.tsv
+[[ ${2:-full} != scoped ]] || exit 0
 npm run typecheck --workspaces --if-present
 cat > api/tsconfig.pwd-tests.json <<'CONFIG'
 {"extends":"./tsconfig.json","compilerOptions":{"rootDir":"..","noEmit":true},"include":["src/**/*.ts","tests/integration/pw-write*.ts"],"exclude":["dist","node_modules"]}
