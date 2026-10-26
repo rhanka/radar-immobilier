@@ -38,7 +38,7 @@ while IFS= read -r sha; do
   [[ $files -ge 1 && $files -le 15 && $lines -le 150 ]]
   while IFS= read -r path; do
     case $path in
-      api/src/services/facets/pw-write*|api/src/db/schema-pw-write.ts|api/drizzle/0025_pw_write_persistence.sql|\
+      api/src/services/facets/pw-write*|api/src/db/schema-pw-write.ts|api/src/db/schema.ts|api/drizzle/0025_pw_write_persistence.sql|\
       docs/spec/PW_D_PERSISTENCE.md|plan/PWD-BRANCH_feat-api-paniers-pwd.md|tools/make/base-api-pwd*) ;;
       *) echo "Outside PW-D corrections: $path"; exit 2;;
     esac
