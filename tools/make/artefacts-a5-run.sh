@@ -22,13 +22,16 @@ exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
 until flock -w 60 8; do
   echo 'WAIT: machine Docker campaign lock held'
 done
-while :; do
-  names=$(docker ps --filter name=radar-test- --format '{{.Names}}')
-  builds=$(pgrep -af '^docker (build|buildx build)|^/.*docker-buildx build' || true)
-  [[ -n $names || -n $builds ]] || break
-  echo "WAIT: $names $builds"
-  sleep 60
-done
+wait_machine() {
+  while :; do
+    names=$(docker ps --filter name=radar-test- --format '{{.Names}}')
+    builds=$(pgrep -af '^docker (build|buildx build)|^/.*docker-buildx build' || true)
+    [[ -n $names || -n $builds ]] || return 0
+    echo "WAIT: $names $builds"
+    sleep 60
+  done
+}
+wait_machine
 [[ -z $(docker ps --filter name=radar-test- -q) ]]
 [[ $(df -Pk . | awk 'NR==2 {print $4}') -ge 8388608 ]]
 candidate_git=(git)
@@ -87,8 +90,15 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 guarded_down
+wait_machine
 (
-  while sleep 10; do
+  while sleep 1; do
+    foreign=$(docker ps --filter name=radar-test- --format '{{.Names}}' |
+      awk -v project="$PROJECT" 'index($0, project "-") != 1 && index($0, project "_") != 1')
+    if [[ -n $foreign ]]; then
+      printf 'STOP: foreign test campaign started\n%s\n' "$foreign" > "$LOG_DIR/occupancy-stop.log"
+      kill -TERM "$$"; exit
+    fi
     if [[ $(df -Pk "$ROOT" | awk 'NR==2 {print $4}') -lt 8388608 ]]; then
       echo 'STOP: less than 8 GiB free' > "$LOG_DIR/disk-stop.log"
       kill -TERM "$$"; exit
