@@ -32,6 +32,7 @@ export async function authorityFixture() {
     pageInstanceId: randomUUID(), pageExpiresAtMs: clock.now + 60_000,
     delegationExpiresAtMs: clock.now + 90_000, authorityReferences: {},
   };
+  page.grant = { ...page.grant, host: `${page.grant.artifactId}.pages.example.test` };
   page.authorityReferences = { tier: "preprod", policy: page.grant.policyRevision,
     release: page.grant.releaseId, delegation: randomUUID(), reader: f.contributor.id,
     grant: page.grant.jti, page_session: page.grant.sessionId };
