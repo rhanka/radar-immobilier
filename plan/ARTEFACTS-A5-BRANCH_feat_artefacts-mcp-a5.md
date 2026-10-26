@@ -79,3 +79,7 @@
 - [x] Astra r2: extend semantic mutations and test discovery; bind the image fixture to its workspace and audit delivery from 3ef57173.
 - [x] Astra r2: preserve delegated pool getters using a guarded view; adapter instrumentation and real connection-break regressions pass.
 - [x] Astra r2: preserve private 500 handling for unclassified backend errors; five route regressions pass; keep the first-pass delivery audit intact.
+- [x] Astra r2 final source 00e27239: 21/21 PostgreSQL regressions, 20/20 semantic mutants and restored controls; Q1/Q2/acceptance 31/31, 32/32, 6/6; API 3938 passed and 76 pending; MCP 401/401 and host 165/165 (20261026T094858-20).
+- [x] Astra r2: typecheck (zero errors, seven Svelte warnings), lint, API build, 66 audit tests, audit gate, two authority mutants and published tuple/profile proofs pass; migration, Track and lockfile remain unchanged from 3ef57173.
+- [x] Astra r2 image 657ce854: sixteen tools, SQL/S3 effects, restart/replay, ordered conflict, account/membership revocation and durable counters pass (20261026T094905-20); isolated containers, volumes and networks removed.
+- [x] Astra r2: pre-close bundle from 3ef57173 audited in fresh astra-bundle-audit.xwSEzQ; re-anchor this documentation-only commit with the same independent audit; local delivery only, no push.
