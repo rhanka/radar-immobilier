@@ -26,6 +26,8 @@
 - [ ] Preserve historical BASE HTTP wrappers and lot isolation.
 
 ## Verification
+- [x] Add canonical digests, shared scope helpers and a synthetic transactional test port.
+
 
 - [ ] Run scoped unit and PostgreSQL tests with no required skips.
 - [ ] Run createApp plus PostgreSQL regressions.
