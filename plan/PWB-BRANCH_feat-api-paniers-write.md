@@ -26,6 +26,8 @@
 - [ ] Preserve historical BASE HTTP wrappers and lot isolation.
 
 ## Verification
+- [x] Exercise moderation, independent restoration, private receipts and unresolved history.
+
 - [x] Exercise personal commits, stale heads, versions, tokens and expired admissions.
 
 - [x] Qualify strict operation variants, digest stability and masked internal errors.
