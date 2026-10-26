@@ -28,6 +28,8 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
     PWA-EX3 permits their exact import from 0ab7d664 by merge only.
 
 ## Feedback Loop
+- [x] Third-pass scoped campaign: 133 tests pass with zero skips, including
+  all five real PostgreSQL saturation/acquisition regressions and lease lifetime units.
 - [x] Third pass: lease within the global five-second budget and destroy only
   that socket on expiry; return late leases without work and preserve uncertain COMMIT errors.
 - [x] Third-pass reproduction: saturated-pool preparation exceeds eight seconds;
