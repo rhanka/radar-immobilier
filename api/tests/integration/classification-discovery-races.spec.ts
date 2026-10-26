@@ -8,6 +8,25 @@ import { addMembership, revokeMembership } from "../../src/services/workspaces/m
 import { initializeWorkspaceStore } from "../../src/services/workspaces/init-store.js";
 
 describeDb("classification atomic discovery membership snapshot", () => {
+  it("should keep active memberships locked until each snapshot transaction commits", async () => {
+    const f = await classificationFixture();
+    const original = f.data.db.transaction.bind(f.data.db);
+    let checked = 0;
+    const spy = vi.spyOn(f.data.db, "transaction").mockImplementation((callback, config) => original(async (tx) => {
+      const result = await callback(tx);
+      if (Array.isArray(result)) {
+        const outcome = await f.data.pool.query("SELECT workspace_id FROM workspace_memberships WHERE account_id=$1 AND status='active' FOR UPDATE NOWAIT",
+          [f.data.contributor.id]).catch((error: unknown) => error);
+        expect(outcome).toMatchObject({ code: "55P03" });
+        checked++;
+      }
+      return result;
+    }, config));
+    try {
+      expect((await discoverFacetContext(f.data.db, f.data.contributor.sub, "h5")).workspaces).toHaveLength(2);
+      expect(checked).toBe(2);
+    } finally { spy.mockRestore(); }
+  });
   for (const transport of ["h5", "mcp"] as const) {
     for (const selection of ["singleton", "many", "explicit"] as const) {
       for (const change of ["revocation", "addition"] as const) {
