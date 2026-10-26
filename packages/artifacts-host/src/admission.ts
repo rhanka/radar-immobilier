@@ -20,16 +20,19 @@ import type { ActivationConfig } from "./activation.js";
 export type AdmissionDeniedBody =
   | { readonly error: "activation_closed" }
   | { readonly error: "not_in_cohort" }
-  | { readonly error: "account_not_approved"; readonly status: string };
+  | { readonly error: "account_not_approved"; readonly status: string }
+  | { readonly error: "workspace_membership_required" }
+  | { readonly error: "workspace_ambiguous" };
 
 export type AdmissionResult =
   | { readonly allowed: true }
-  | { readonly allowed: false; readonly status: 403; readonly body: AdmissionDeniedBody };
+  | { readonly allowed: false; readonly status: 403 | 409; readonly body: AdmissionDeniedBody };
 
 export interface AdmissionAuthority {
   readonly readStatus: (sub: string) => Promise<string | null>;
   readonly readActivation: () => ActivationConfig;
   readonly nowMs?: (() => number) | undefined;
+  readonly readMemberships?: ((sub: string) => Promise<string[]>) | undefined;
 }
 
 export function createAdmissionAuthority(
@@ -42,6 +45,48 @@ export function createAdmissionAuthority(
     readActivation,
     ...(nowMs ? { nowMs } : {}),
   };
+}
+
+export interface MembershipQueryable {
+  query(
+    text: string,
+    params?: unknown[],
+  ): Promise<{ readonly rows: ReadonlyArray<Record<string, unknown>> }>;
+}
+
+export function createArtifactAdmissionAuthority(
+  accounts: AccountStatusQueryable & MembershipQueryable,
+  readActivation: () => ActivationConfig,
+  nowMs?: () => number,
+): AdmissionAuthority {
+  const base = createAdmissionAuthority(accounts, readActivation, nowMs);
+  return {
+    ...base,
+    readMemberships: async (sub: string): Promise<string[]> => {
+      const res = await accounts.query(
+        "SELECT workspace_id FROM workspace_memberships WHERE account_id = " +
+          "(SELECT id FROM account_users WHERE sub = $1) AND status = 'active' AND revoked_at IS NULL",
+        [sub],
+      );
+      const ids: string[] = [];
+      for (const row of res.rows) {
+        const raw = (row as Record<string, unknown>)["workspace_id"];
+        if (typeof raw === "string" && raw.length > 0) ids.push(raw);
+      }
+      return ids;
+    },
+  };
+}
+
+export function checkScopeMembership(memberships: readonly string[]): AdmissionResult {
+  const unique = [...new Set(memberships.map((entry) => entry.toLowerCase()))];
+  if (unique.length === 0) {
+    return { allowed: false, status: 403, body: { error: "workspace_membership_required" } };
+  }
+  if (unique.length !== 1) {
+    return { allowed: false, status: 409, body: { error: "workspace_ambiguous" } };
+  }
+  return { allowed: true };
 }
 
 function checkActivation(
@@ -75,6 +120,14 @@ export async function checkAdmission(
       status: 403,
       body: { error: "account_not_approved", status: status ?? "unknown" },
     };
+  }
+  const afterStatus = checkActivation(authority, sub);
+  if (!afterStatus.allowed) return afterStatus;
+  if (authority.readMemberships) {
+    const memberships = await authority.readMemberships(sub);
+    const membership = checkScopeMembership(memberships);
+    if (!membership.allowed) return membership;
+    return checkActivation(authority, sub);
   }
   return checkActivation(authority, sub);
 }
