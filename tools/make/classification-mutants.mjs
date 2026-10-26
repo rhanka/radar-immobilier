@@ -9,8 +9,16 @@ const privacy = 'tests/integration/classification-privacy.spec.ts';
 const cursor = 'src/services/facets/classification-cursor.test.ts';
 const counts = 'src/services/facets/classification-counts.test.ts';
 const cases = [
+  { id: 'discovery-final-approval', suite: 'tests/integration/classification-authority-races.spec.ts', test: 'suspension commits during the final membership await', edits: [
+    [`${root}classification-discovery.ts`, '    await approvedAccountId(tx, sub, true);', '    // Mutation: omit approval after the membership await.'],
+  ] },
+  { id: 'context-current-rights', suite: 'tests/integration/classification-authority-races.spec.ts', test: 'is withdrawn during the second scope read', edits: [
+    [`${root}classification-context.ts`,
+      'if (sample.access.moderateArchive !== current.access.moderateArchive || digest(sample.rights) !== digest(current.rights)) return null;',
+      'if (false) return null;'],
+  ] },
   { id: 'closed-context-authority', suite: 'tests/integration/classification-races.spec.ts', test: 'suspended account on the closed path', edits: [
-    [`${root}classification-context.ts`, '  await revalidateContextAuthority(db, sub, workspaceId);', '  // Mutation: omit final authority revalidation.'],
+    [`${root}classification-context.ts`, '  const current = await revalidateContextAuthority(db, sub, workspaceId);', '  const current = sample;'],
   ] },
   { id: 'durable-closure-resample', suite: 'tests/integration/classification-races.spec.ts', test: 'maintenance starts before', edits: [
     [`${root}classification-context.ts`,
