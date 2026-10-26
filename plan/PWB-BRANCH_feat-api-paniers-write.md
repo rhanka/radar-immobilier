@@ -26,6 +26,7 @@
 - [x] Preserve historical BASE HTTP wrappers and lot isolation.
 
 ## Verification
+- [x] Wait for the shared campaign lock with resource checks before testing, without touching other stacks.
 - [x] Add real audit-lock contention regressions for both transaction owners and preserve commit acknowledgement uncertainty.
 - [x] Require exact structured outcomes for every mutation, including committed bypasses and restored refusal codes.
 - [x] Replace authority and digest false-positive probes with current-token commit and direct digest evidence.
