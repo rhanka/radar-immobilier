@@ -15,6 +15,8 @@ import type { SignalWriteInput } from "./signal-write-admission.js";
 import { admitSyntheticWrite as coordinateSignalWrite } from "./signal-write-fixture.js";
 import { unresolvedRevisionFixture } from "./projection-revisions-fixture.js";
 import { readCommittedSignalReceipt } from "./signal-write-receipt.js";
+import { baseState } from "./signal-write-fixture.js";
+import { assertMutationOutcome, writeMutationOutcome } from "./signal-write-mutation-probe.js";
 
 async function eventCount(f: WorkspaceFixture): Promise<number> {
   return (await f.db.select({ id: facetEvents.id }).from(facetEvents)).length;
@@ -46,10 +48,18 @@ describeDb("PW-B workspace scope and receipt reads", () => {
   it("should refuse contributors while moderators archive and restore", async () => {
     const f = await workspaceFixture();
     const refused = await workspaceDiscard(f);
-    await expect(coordinateSignalWrite(f.db, f.contributor.sub, {
+    const stateBefore = await baseState(f);
+    const observed = await writeMutationOutcome(coordinateSignalWrite(f.db, f.contributor.sub, {
       ...refused, expectedProjectionToken: await tokenFor(
         f, f.contributor.sub, refused.target.citySlug),
-    })).rejects.toMatchObject({ status: 403, message: "workspace_capability_required" });
+    }).then(async (result) => {
+      // If authority is bypassed, every other precondition must allow a real commit.
+      expect(result.event).toMatchObject({ scope: "workspace", state: "active" });
+      expect((await baseState(f)).facet_commands).toHaveLength(stateBefore.facet_commands.length + 1);
+      return result;
+    }));
+    assertMutationOutcome("authority", observed, "workspace_capability_required");
+    expect(await baseState(f)).toEqual(stateBefore);
     const before = await eventCount(f);
     const committed = await coordinateSignalWrite(f.db, f.moderator.sub, refused);
     expect(committed.event).toMatchObject({ scope: "workspace", state: "active" });
