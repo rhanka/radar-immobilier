@@ -2,9 +2,16 @@
 import { readFileSync, writeFileSync, openSync, closeSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
+import { stripVTControlCharacters } from "node:util";
 const root = "/workspace/api/src/services/facets/";
 const admission = "pw-write-admission-durable.ts";
 const tests = [
+  { name: "status-budget", suite: "review", test: "fixed status window", expected: "write_rate_limited",
+    changes: [["pw-write-status-budget.ts", "const spacing = initial ? 2000 : 30_000;", "const spacing = 2000;"]] },
+  { name: "terminal-refusal", suite: "review", test: "terminal refusal after a lost response", expected: "projection_revision_conflict",
+    changes: [[admission, 'if (row.executionState === "rejected") {', 'if (false) {']] },
+  { name: "cookie-expiry", suite: "review", test: "only the application cookie expires", expected: "session_expired",
+    changes: [["pw-write-confirm.ts", "assertPwSession(confirmation, now);", "// Mutant: omit the final cookie expiry guard."]] },
   { name: "single-use", suite: "admission", test: "commit once, refuse replay",
     changes: [[admission, 'challengeState: "consumed", consumedAt:', 'challengeState: "pending", consumedAt:']] },
   { name: "replay", suite: "admission", test: "commit once, refuse replay",
@@ -34,8 +41,18 @@ function run(leg, phase, failed) {
   if (executed.length !== 1 || executed[0].status !== (failed ? "failed" : "passed")) {
     throw new Error(`Mutation did not execute exactly one assertion group: ${leg.name}/${phase}`);
   }
-  if (failed && !readFileSync(`${output}.log`, "utf8").includes("AssertionError")) {
+  const log = readFileSync(`${output}.log`, "utf8");
+  if (failed && !log.includes("AssertionError")) {
     throw new Error(`Failure was not an assertion: ${leg.name}`);
+  }
+  if (failed && leg.expected) {
+    // Vitest's JSON message abbreviates objects; the expected diff stays exact.
+    const plain = stripVTControlCharacters(log);
+    const expectedDiff = plain.match(/- Expected:\s*\n([\s\S]*?)\n\+ Received:/)?.[1]
+      ?? plain.split("\n").filter((line) => /^\s*-\s/.test(line)).join("\n");
+    if (!expectedDiff.includes(`"message": "${leg.expected}"`)) {
+      throw new Error(`Mutation missed the exact expected refusal ${leg.expected}: ${leg.name}`);
+    }
   }
 }
 for (const leg of tests) {
@@ -59,7 +76,8 @@ for (const leg of tests) {
     if (hash(readFileSync(root + file)) !== digest) throw new Error(`Source not restored: ${file}`);
     return { file, sha256: digest };
   });
-  results.push({ name: leg.name, baseline: "passed", mutated: "assertion_failed", restored: "passed", identities });
+  results.push({ name: leg.name, expectedRefusal: leg.expected ?? null,
+    baseline: "passed", mutated: "assertion_failed", restored: "passed", identities });
   writeFileSync("/evidence/mutations.json", JSON.stringify(results, null, 2));
   process.stdout.write(`MUTATION ${leg.name}: baseline PASS, mutation KILLED, restored PASS\n`);
 }
