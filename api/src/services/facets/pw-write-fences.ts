@@ -52,7 +52,13 @@ export async function assertPwAuthorityOpen(tx: WriteTx, fences: Partial<
 export async function revokePwIntent(tx: WriteTx, intentId: string,
   revokedBy: string, principal: PwPrincipal, reason = ""): Promise<{ committed: boolean }> {
   const row = await loadPwIntentForUpdate(tx, intentId);
-  assertPwPrincipal(row, principal);
+  try { assertPwPrincipal(row, principal); }
+  catch (error) {
+    if (error instanceof PwWriteError && error.message === "confirmation_identity_mismatch") {
+      throw new FacetError(404, "write_intent_not_found");
+    }
+    throw error;
+  }
   if (row.actorId !== revokedBy.toLowerCase()) throw new FacetError(404, "write_intent_not_found");
   if (row.revokedAt !== null) return { committed: row.executionState === "committed" };
   await tx.insert(pwWriteIntentTombstones)
