@@ -30,7 +30,7 @@
 - [x] Reproduce two real `55P03` failures as `500 internal_error`, then normalize execution-only failures to `503 write_fence_unavailable`.
 - [x] Assert the actual PostgreSQL SQLSTATE `55P03` in both contention probes before checking the public refusal.
 - [x] Prepare a separate incremental delivery audit rooted exactly at `b09a8ccccab5d7256c0a08b8b93979dbec57b65f`.
-- [ ] Requalify all PW-B tests, five targeted mutations and CI API gates after the Astra corrections.
+- [x] Requalify all PW-B tests, five targeted mutations and CI API gates after the Astra corrections.
 - [x] Wait for the shared campaign lock with resource checks before testing, without touching other stacks.
 - [x] Add real audit-lock contention regressions for both transaction owners and preserve commit acknowledgement uncertainty.
 - [x] Require exact structured outcomes for every mutation, including committed bypasses and restored refusal codes.
@@ -63,8 +63,8 @@
 - [x] Run scoped unit and PostgreSQL tests with no required skips.
 - [x] Run createApp plus PostgreSQL regressions.
 - [x] Kill authority, expiry, snapshot, replay and digest mutations: green/red/green, restored SHA-256 identities verified.
-- [x] Run the complete CI API include list: 3923 passed, 76 conditional skips, zero failures; 38 required PW-B tests passed without skips.
-- [x] Pass API typecheck, BASE/PW-B integration typecheck, API build and complete API lint on `c718a52364b66b41cd6972f7e3b5ba0d27b9dc20`.
+- [x] Run the complete CI API include list: 3926 passed, 76 conditional skips, zero failures; 41 required PW-B tests passed without skips.
+- [x] Pass API typecheck, BASE/PW-B integration typecheck, API build and complete API lint on `9e7c156ac62e962a6c87017a3fb35a2cf2830cf2`.
 - [x] Audit every commit: Conventional Commit subject only, at most 150 changed lines.
 - [x] Audit the incremental bundle in a fresh repository seeded only with the base.
 - [x] Deliver the local French qualification report with full SHA, numstat, bundle path and SHA-256.
@@ -74,4 +74,4 @@
 
 - [x] PW-D owns durable intentions, challenge state, immutable reservations, H5 fences, quota, and audit/outbox.
 - [x] PW-B supplies an executable transaction port, not a substitute store or activation path.
-- [x] Two-peer author-complementary review cannot be selected: Muse's exact author host/model/effort metadata is absent. No consensus is claimed.
+- [x] Reconcile both supplied Astra reviews: targeted authority/digest proofs and pre-commit lock timeout corrected; no new peer review claimed.
