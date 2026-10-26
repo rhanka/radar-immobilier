@@ -1,7 +1,7 @@
 # Chore: qualify cluster-mesh 0.22.1 on artifacts A5
 
 ## Objective
-- [ ] Upgrade only cluster-mesh to 0.22.1 and preserve the qualified A5 behavior.
+- [x] Upgrade only cluster-mesh to 0.22.1 and preserve the qualified A5 behavior.
 
 ## Scope / Guardrails
 - [x] Base: `4660e201864c8678ddf249e5255d050c17bf0296`; branch: `feat/artefacts-mcp-a5-mesh`.
@@ -37,9 +37,12 @@
 - [x] Qualification preflight: correct the lock verifier's ESLint global reference; retain the full-lock equality assertion.
 - [x] Extend occupancy guards to the observed foreign E2 qualification stack; guard both memory and disk at 8 GiB.
 - [x] Include every test/e2e stack service in the guard after observing E2 PostgreSQL alongside qualification clients; preserve all completed application proofs.
-- [ ] Prove foreign E2 intrusion and low-memory termination with real owned-resource teardown.
-- [ ] Lot 2: Q1/Q2/acceptance 31/32/6, MCP and CI-selected API suites.
-- [ ] Lot 2: typecheck, lint, build, audit tests and audit gate.
-- [ ] Lot 2: actual sixteen-tool runtime image, durable SQL/S3, replay/restart and revocation proofs.
-- [ ] Lot 3: audit atomic commits and bundle from the sole 4660e201 prerequisite in a fresh repository.
-- [ ] Lot 3: record exact evidence, delivered SHA, bundle path and SHA-256 in the French companion report.
+- [x] Guard controls: E2 intrusion and low memory pass with status 143 and zero owned resources (`intrusion-control.gD4Yye`, `memory-control.wSuqsb`).
+- [x] Lot 2: Q1/Q2/acceptance 31/32/6; PostgreSQL/S3 21/21 before/after 20 killed mutants; `20261026T145859-18`, source c702cbd9.
+- [x] Lot 2: API 3938 passed/76 pending, MCP 401/401, host 165/165; `20261026T152506-18`, source 0c783559; product diff from c702cbd9 is empty.
+- [x] Lot 2: typecheck (zero errors, seven Svelte warnings), lint, API build, 66 audit tests, audit gate and two authority mutants pass.
+- [x] Lot 2: HTTP exchange 1/1; `20261026T154219-18`; same committed source.
+- [x] Lot 2: sixteen-tool image f691e3fe, source 0c783559; SQL/S3, restart/replay, ordered conflict and revocations pass; `20261026T154322-18`.
+- [x] Lot 2: image and full-suite source archives are byte-identical; two foreign intrusions caused clean aborts, then all remaining suites completed.
+- [x] Lot 3: atomic commits and pre-close bundle audited from sole 4660e201 prerequisite in fresh `mesh-0221-bundle-audit.Jb4OrZ`; re-anchor this documentation-only commit with the same audit.
+- [x] Lot 3: French companion report records exact proofs and final delivery identity outside history, including the final bundle digest; no push.
