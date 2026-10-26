@@ -197,6 +197,11 @@ const envSchema = z.object({
     .int()
     .positive()
     .default(2_592_000),
+  /**
+   * PW identity tier: preprod or prod. Optional for the app, required to
+   * open PW. No default and no deduction from NODE_ENV, host, or origin.
+   */
+  PW_IDENTITY_TIER: z.preprocess((v) => v === "" ? undefined : v, z.enum(["preprod", "prod"]).optional()),
 
   // ── H4 P5 strict receiver (exchange-first) — non-secret wiring only ─────
   // Arming needs operator intent (STRICT_RECEIVER_ARMED=1) PLUS the A2
