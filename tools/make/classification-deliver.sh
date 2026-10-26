@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 action=${1:?}
-BASE=bf339830c688773cb222282073875f66336eb27b
+BASE=4c801bab3e0ec0c494690434306d72d5158dd01f
 ROOT=$(pwd -P)
 [[ $ENV == test-api-paniers && $API_PORT == 18927 && $UI_PORT == 15927 && $MAILDEV_UI_PORT == 11927 ]]
 backup=$ROOT/tmp/classification-delivery.git
@@ -48,7 +48,7 @@ case $action in
     done < <(git rev-list --reverse "$BASE..HEAD");;
   bundle)
     git diff --quiet; git diff --cached --quiet
-    out=$ROOT/tmp/classification-evidence/api-paniers-read-astra.bundle
+    out=$ROOT/tmp/classification-evidence/api-paniers-read-r3.bundle
     git bundle create "$out" "$BASE..HEAD"
     audit=$(mktemp -d "$ROOT/tmp/classification-evidence/bundle-audit.XXXXXX")
     independent() { env -u GIT_DIR -u GIT_WORK_TREE git -C "$audit" "$@"; }

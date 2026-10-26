@@ -44,6 +44,7 @@ import { scopedWorkspaceArchiveRoute } from "./routes/scoped-workspace-archive.j
 import { scopedProjectionRevisionsRoute } from "./routes/scoped-projection-revisions.js";
 import { scopedProjectionEventsRoute } from "./routes/scoped-projection-events.js";
 import { scopedSignalRevealRoute } from "./routes/scoped-signal-reveal.js";
+import { mcpSignalSearchRoute } from "./routes/mcp-signal-search.js";
 import { classificationBoundary, scopedClassificationRoute } from "./routes/scoped-classification.js";
 import type { ClassificationOptions } from "./services/facets/classification-search.js";
 
@@ -89,6 +90,8 @@ export type AppDeps = HealthDeps &
     lotCutover?: Pick<ScopedLotCutoverDeps, "cutoverMapping" | "cutoverSafety">;
     /** Durable server-only retirement; never derived from public input. */
     legacyRetirement?: LegacyRetirementState;
+    /** Closed by default; server-only, separately qualified signal binding. */
+    mcpSignalSearch?: { enabled: boolean; afterWorkspaceResolve?: () => Promise<void> | void };
     /** Operator-injected read signing configuration; absent keeps pagination closed. */
     classification?: ClassificationOptions;
   };
@@ -98,6 +101,7 @@ export function createApp(deps: AppDeps): Hono {
   const app = new Hono();
   app.use("/api/graph-signals/*", privateSignalResponse);
   app.use("/api/v1/signal-facets/*", privateSignalResponse);
+  app.use("/api/v1/mcp/facets/signals/*", privateSignalResponse);
 
   // Content hosts dispatch FIRST, before protect: never app auth or SPA.
   if (deps.contentHost?.enabled) {
@@ -184,6 +188,7 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", scopedProjectionRevisionsRoute(deps));
   app.route("/", scopedProjectionEventsRoute(deps));
   app.route("/", scopedSignalRevealRoute(deps));
+  app.route("/", mcpSignalSearchRoute(deps));
   app.route("/", scopedClassificationRoute(deps));
   app.route("/", graphRoute(deps));
   app.route("/", geoLotsRoute());
