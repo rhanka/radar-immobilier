@@ -30,6 +30,8 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
   content host fixture, and type grant indexing and mutable AuthConfig fixtures.
 - [x] API: 4203 passed, 76 skipped; PW-A: 32 passed, zero skipped; seven
   functional mutants killed and restored; ARTEFACTS host: 165 passed.
+- [x] MCP: repair the isolated archive inputs, then 406 passed, zero skipped.
+  Application bytes match the successful full campaign; tooling-only retry.
 - [x] PWA-EX1: inherited createApp assertion must expect the new closed 503
   mount rather than an absent route. Test-only impact; rollback these two lines.
 - [x] Execution and HTML summary remain PW-C; PW-A supplies guarded seams.
@@ -46,7 +48,7 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
 - [x] Lot 0: rules, inherited history and rescue bundle/uncommitted archive.
 - [x] Lot 1: strict grants, schemas, bindings and idempotent preparation.
 - [x] Lot 2: cookie-only, principal, CSRF and bounded application mounting.
-- [ ] Lot 3: unit/PG/createApp, discriminating mutations, API CI parity,
+- [x] Lot 3: unit/PG/createApp, discriminating mutations, API CI parity,
   ARTEFACTS/MCP, lint and typecheck.
 - [ ] Lot 4: atomic commits, bundle from de81ef0e, isolated import audit/report.
 
