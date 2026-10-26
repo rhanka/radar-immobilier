@@ -50,9 +50,9 @@ export async function authorityFixture() {
     accounts: f.pool, sessionSecret: baseAuth.sessionSecret, nowMs: () => clock.now,
     challengeKeys: new Map([["key-1", Buffer.alloc(32, 7)]]),
     renderSummary: (c, row, bootstrap) => c.json({ intentId: row.intentId, ...bootstrap }),
-    confirm: async (row, proof, expiry) => {
+    confirm: async (row, proof) => {
       confirms++;
-      sessionExpiry = expiry;
+      sessionExpiry = proof.sessionExpiresAtMs;
       return confirmPwSignalWrite(f.db, proof.principal.sub, row.intentId,
         row.command as SignalWriteInput, { confirmation: proof, clockMs: () => clock.now });
     },

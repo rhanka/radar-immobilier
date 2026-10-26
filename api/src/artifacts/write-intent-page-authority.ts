@@ -35,9 +35,9 @@ function assertPageAuthority(page: PageWriteAuthority | null, deps: PageWriteAut
 }
 
 export async function resolveWritePage(c: Context, deps: PageWriteAuthorityDeps,
-  nowMs: number): Promise<PageWriteAuthority> {
+  clock: () => number): Promise<PageWriteAuthority> {
   const page = await deps.resolvePage(c.req.raw);
-  assertPageAuthority(page, deps, nowMs);
+  assertPageAuthority(page, deps, clock());
   return page;
 }
 

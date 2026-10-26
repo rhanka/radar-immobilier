@@ -14,7 +14,7 @@ const deps = { grantKeyId: "key", grantIssuer: page.grant,
 it("should distinguish authenticated P expiry from missing page authority", async () => {
   const app = new Hono();
   app.get("/", async (c) => {
-    try { await resolveWritePage(c, deps, 5000); return c.json({ unexpected: true }); }
+    try { await resolveWritePage(c, deps, () => 5000); return c.json({ unexpected: true }); }
     catch (error) { return writeIntentError(c, error); }
   });
   const response = await app.request("/");

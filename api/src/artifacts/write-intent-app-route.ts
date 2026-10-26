@@ -68,8 +68,7 @@ export function writeIntentAppRoute(deps: WriteAppDeps | null): Hono {
       const approved = await requireApprovedAppAccount(c, deps, pass.session.sub);
       if (approved) return approved;
       const proof = verifyAppChallenge((body as { challengeToken: unknown }).challengeToken, row, deps, pass);
-      // PW-D's parallel revision will enforce this expiry again under its locks.
-      return deps.confirm ? c.json(await deps.confirm(row, proof, pass.session.exp * 1000))
+      return deps.confirm ? c.json(await deps.confirm(row, proof))
         : writeRefusal(c, "write_transport_closed", 503);
     } catch (error) { return writeIntentError(c, error); }
   });

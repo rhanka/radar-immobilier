@@ -16,8 +16,6 @@ import { readPageBoundWriteIntent } from "./write-intent-h5-authority.js";
 
 export interface H5WriteDeps extends PrepareDeps, PageWriteAuthorityDeps {
   db: Database;
-  /** PW-D terminal-refusal reader; no second persistence implementation here. */
-  readRejection?: (intentId: string) => Promise<{ code: string } | null>;
 }
 
 export function writeIntentH5Route(deps: H5WriteDeps | null): Hono {
@@ -44,7 +42,7 @@ export function writeIntentH5Route(deps: H5WriteDeps | null): Hono {
       const key = c.req.header("idempotency-key") ?? "";
       assertIdempotencyKey(key);
       assertWritePrepareBody(body);
-      const page = await resolveWritePage(c, deps, (deps.nowMs ?? Date.now)());
+      const page = await resolveWritePage(c, deps, deps.nowMs ?? Date.now);
       const grant = await verifyWriteGrant(c.req.header("x-preview-write-grant") ?? "",
         page.grant, deps.grantSecret, (deps.nowMs ?? Date.now)());
       if (!grant) throw new FacetError(403, "write_grant_required");
@@ -63,9 +61,9 @@ export function writeIntentH5Route(deps: H5WriteDeps | null): Hono {
       assertIdempotencyKey(id);
       // Poll uses the existing authenticated P, never mints or renews a grant.
       const { page, row } = await readPageBoundWriteIntent(c, deps, id);
-      const status = await readPwWriteStatus(deps.db, id, canonicalWritePrincipal(page.grant), deps.nowMs ?? Date.now);
-      const rejection = status.status === "rejected" ? await deps.readRejection?.(id) : undefined;
-      let data = await projectWriteIntentStatus(deps.db, row, status.status, rejection);
+      const status = await readPwWriteStatus(deps.db, id, canonicalWritePrincipal(page.grant),
+        page.grant.sessionId, deps.nowMs ?? Date.now);
+      let data = await projectWriteIntentStatus(deps.db, row, status.status, status.error);
       // Receipt projection can wait on BASE workspace rights. Revalidate only
       // after it completes, so an acknowledged withdrawal masks that receipt.
       const fresh = await readPageBoundWriteIntent(c, deps, id);

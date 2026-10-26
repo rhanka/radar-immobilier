@@ -14,7 +14,7 @@ export async function projectWriteIntentStatus(db: Database, row: PwIntentRow, s
       db, (row.principal as { sub: string }).sub, row.workspaceId, row.commandKey) },
     nextAction: "refresh_state" as const };
   if (state === "pending") return { intentId: row.intentId, state, expiresAt: row.expiresAt.toISOString() };
-  // PW-D's parallel revision supplies the persisted public code through this seam.
+  // Only PW-D's persisted public refusal may describe a terminal rejection.
   if (state === "rejected") {
     if (!rejection || !isWriteRefusalCode(rejection.code)) throw new PwWriteError(503, "write_authority_unavailable");
     return { intentId: row.intentId, state, error: { code: rejection.code } };
