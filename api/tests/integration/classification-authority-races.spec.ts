@@ -39,16 +39,16 @@ describeDb("classification final authority races", () => {
           contextResolved = true;
           return result;
         });
-        const original = store.approvedAccountId;
+        const original = f.data.db.transaction.bind(f.data.db);
         let calls = 0;
         let suspended = false;
-        const spy = vi.spyOn(store, "approvedAccountId").mockImplementation(async (...args) => {
+        const spy = vi.spyOn(f.data.db, "transaction").mockImplementation(async (callback, config) => {
           const final = selection === "zero" || selection === "many" ? ++calls === 2 : contextResolved;
           if (final && !suspended) {
             suspended = true;
             await f.data.pool.query("UPDATE account_users SET status='suspended' WHERE id=$1", [f.data.contributor.id]);
           }
-          return original(...args);
+          return original(callback, config);
         });
         try {
           const outcome = await discoverFacetContext(f.data.db, f.data.contributor.sub, transport,
