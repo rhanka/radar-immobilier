@@ -16,7 +16,8 @@
 
 ## Feedback Loop
 - [x] Second-pass discovery: reproduce eight PostgreSQL suspension races at the last membership await; revalidate approval with the BASE shared account lock before returning either membership sample; delivery range starts at `8c0ad35c`.
-- [ ] Second-pass mutations: final discovery approval and current rights checks must fail discriminating assertions, then pass after byte-exact restoration; retain the previous 15 mutants.
+- [x] Second-pass mutations: all 18 mutants killed by domain assertions, with 28 failing cases then 28 passing cases after byte-exact restoration; includes the previous 15 mutants, final discovery approval, account lock and current rights.
+- [x] Second-pass final acceptance: code `2a0132bb88ad1ca96d9976262e3d5897325a9a05`, evidence `tmp/classification-evidence/20261026T082806-5-qualify`; 3,899 API passes, 76 conditional skips, 61 classification passes without skips, 18 killed/restored mutants, lint/typecheck/build and owned-resource teardown passed.
 - [x] Second-pass targeted acceptance: `631c384cf`, evidence `tmp/classification-evidence/20261026T080647-5-targeted`; 26 PostgreSQL/createApp tests passed without skips, API/test typecheck and lint passed, owned resources removed with volumes.
 - [x] Second-pass qualification diagnosis: `20261026T081148-5-qualify` passes all 3,899 API tests, then rejects the lock mutant because Vitest reports a resolved `.rejects` check as `Error`; use direct domain assertions so the mutation gate requires and observes `AssertionError`.
 - [x] Second-pass account lock: concurrent PostgreSQL `FOR UPDATE NOWAIT` fails with `55P03` while either discovery membership transaction holds BASE approval; the dedicated mutant remains part of final qualification.
