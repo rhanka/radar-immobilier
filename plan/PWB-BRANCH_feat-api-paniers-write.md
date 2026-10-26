@@ -19,11 +19,11 @@
 
 - [x] Extract personal, workspace, and 6L1 executors without duplicating business logic.
 - [x] Qualify strict operations and canonical operation digests.
-- [ ] Enforce fresh READ COMMITTED snapshots under workspace/actor/key/city locks.
-- [ ] Require transactional PW-D authority, reservation, consumption, and audit hooks.
-- [ ] Reject consumed confirmations and unexpected BASE receipts; consult immutable receipts separately.
-- [ ] Check current authority and deadlines after waits; prove complete rollback.
-- [ ] Preserve historical BASE HTTP wrappers and lot isolation.
+- [x] Enforce fresh READ COMMITTED snapshots under workspace/actor/key/city locks.
+- [x] Require transactional PW-D authority, reservation, consumption, and audit hooks.
+- [x] Reject consumed confirmations and unexpected BASE receipts; consult immutable receipts separately.
+- [x] Check current authority and deadlines after waits; prove complete rollback.
+- [x] Preserve historical BASE HTTP wrappers and lot isolation.
 
 ## Verification
 - [x] Add assertion-qualified mutation legs and independent local bundle verification.
@@ -51,8 +51,8 @@
 - [x] Add canonical digests, shared scope helpers and a synthetic transactional test port.
 
 
-- [ ] Run scoped unit and PostgreSQL tests with no required skips.
-- [ ] Run createApp plus PostgreSQL regressions.
+- [x] Run scoped unit and PostgreSQL tests with no required skips.
+- [x] Run createApp plus PostgreSQL regressions.
 - [ ] Kill authority, expiry, snapshot, and replay mutations.
 - [ ] Run the API's complete CI include list, API typecheck, integration typecheck, build, and lint.
 - [ ] Audit every commit: Conventional Commit subject only, at most 150 changed lines.

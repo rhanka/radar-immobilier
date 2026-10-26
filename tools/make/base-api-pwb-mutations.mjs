@@ -13,7 +13,7 @@ const tests = [
   { name: "snapshot", suite: "locks", test: "after waiting for a city source refresh",
     changes: [[admission, "await lockCityGraph(tx, input.target.citySlug);", "/* late writer lock only */"]] },
   { name: "replay", suite: "qualification", test: "refuse confirmation replay",
-    changes: [[admission, "await admission.reserve(tx, { actorId, commandKey: key,\n    operationDigest: signalWriteOperationDigest(input) });", "void signalWriteOperationDigest(input);"],
+    changes: [[admission, "operationDigest: signalWriteOperationDigest(input) });", "operationDigest: signalWriteOperationDigest(input) }).catch(() => undefined);"],
       [admission, 'if (receipt || context) throw new FacetError(409, "command_context_unresolved");',
         'if (receipt) return { event: projectSignalWriteEvent((receipt.result as {event: unknown}).event), scopeBefore: "", scopeAfter: "" }; void context;']] },
   { name: "digest", suite: "qualification", test: "refuse confirmation replay",
