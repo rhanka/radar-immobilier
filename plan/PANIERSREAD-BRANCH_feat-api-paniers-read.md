@@ -19,7 +19,7 @@
 - [ ] Astra review corrections: qualify six fixes with discriminating tests and killed/restored mutations, full CI API selection, lint/typecheck, then audit local commits and bundle above `bf339830`.
 - [x] Review tooling: six additional killed/restored mutation scenarios, syntax/lint gates and delivery range based on `bf339830`.
 - [x] Review context: final authority revalidation on closed paths and durable resampling through the real PostgreSQL scope reader.
-- [ ] Review queries: reject unknown/repeated prototype parameters with typed unit and HTTP regression cases.
+- [x] Review queries: reject unknown/repeated prototype parameters with typed unit regression cases; the HTTP case accompanies the route refusal tests.
 - [ ] Review authentication: return typed private JSON refusals on all three browser read routes.
 - [ ] Review documents: preserve canonical persisted dates and validated source-link evidence, including search/state during S3 failure.
 - [x] PANIERSREAD-EX1: owner instruction assigns the integrator this workspace; preserve all mounts, add the closed read router; rollback removes that mount.

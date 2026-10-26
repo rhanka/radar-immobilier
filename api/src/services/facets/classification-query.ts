@@ -24,10 +24,10 @@ export type SignalQueryArgs = z.infer<typeof SignalQuery>;
 export const StateQuery = NativeTarget.extend({ reveal: z.boolean().default(false) });
 
 export function decodeQuery<T extends z.ZodTypeAny>(params: URLSearchParams, schema: T): z.infer<T> {
-  const input: Record<string, unknown> = {};
+  const input: Record<string, unknown> = Object.create(null);
   for (const [key, value] of params) {
     if (Object.hasOwn(input, key)) throw new ClassificationError("invalid_query");
-    input[key] = value;
+    Object.defineProperty(input, key, { value, enumerable: true, configurable: true, writable: true });
   }
   if (input.limit !== undefined) {
     if (!/^[1-9][0-9]*$/.test(String(input.limit))) throw new ClassificationError("invalid_query");
