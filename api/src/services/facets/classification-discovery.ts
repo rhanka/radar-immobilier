@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { Database } from "../../db/client.js";
-import { listWorkspacesForAccount } from "../workspaces/store.js";
+import { approvedAccountId, listWorkspacesForAccount } from "../workspaces/store.js";
 import { ClassificationError } from "./classification-errors.js";
 import { Availability, WorkspaceFacetContext } from "./classification-context-contract.js";
 import { WorkspaceId } from "./classification-query.js";
@@ -16,8 +16,12 @@ export const ConsumerFacetContext = z.object({ contractVersion: z.literal("facet
 }).strict().refine((value) => value.selectedWorkspace !== null || value.operations.length === 0);
 const binary = (left: string, right: string) => left < right ? -1 : left > right ? 1 : 0;
 async function memberships(db: Database, sub: string) {
-  return (await listWorkspacesForAccount(db, sub)).map(({ workspace }) => ({ workspaceId: workspace.id, label: workspace.label }))
-    .sort((a, b) => binary(a.label, b.label) || binary(a.workspaceId, b.workspaceId));
+  return db.transaction(async (tx) => {
+    const rows = await listWorkspacesForAccount(tx, sub);
+    await approvedAccountId(tx, sub, true);
+    return rows.map(({ workspace }) => ({ workspaceId: workspace.id, label: workspace.label }))
+      .sort((a, b) => binary(a.label, b.label) || binary(a.workspaceId, b.workspaceId));
+  });
 }
 /** Transport manifests remain closed until their own receiver is qualified. */
 export async function discoverFacetContext(db: Database, sub: string, transport: "mcp" | "h5", selector?: string) {

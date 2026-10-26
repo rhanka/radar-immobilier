@@ -15,7 +15,7 @@
 - [x] Conditional Paths: `api/src/app.ts`, mounting only under PANIERSREAD-EX1.
 
 ## Feedback Loop
-- [ ] Second-pass review: reproduce final discovery suspension and stale signal/lot rights on PostgreSQL; delivery range starts at `8c0ad35c`.
+- [x] Second-pass discovery: reproduce eight PostgreSQL suspension races at the last membership await; revalidate approval with the BASE shared account lock before returning either membership sample; delivery range starts at `8c0ad35c`.
 - [ ] Second-pass mutations: final discovery approval and current rights checks must fail discriminating assertions, then pass after byte-exact restoration; retain the previous 15 mutants.
 - [x] PANIERSREAD-EX3: owner-requested Astra B2 correction extends scope to the canonical parser in `api/src/routes/graph-signals.ts`; preserve persisted document metadata for degraded reads; rollback removes only parser/dedup metadata additions.
 - [x] Astra review corrections: six fixes qualified with discriminating tests and mutations; full CI API selection, lint/typecheck/build pass; local delivery range is `bf339830..HEAD`.
