@@ -55,3 +55,4 @@
 - [x] Astra A5: Cover synchronized upload revocation, full durable rollback, revoked replay and PostgreSQL row locks.
 - [x] Astra A5: Cover actual pg-pool saturation, single-client writes and HTTP route membership admission.
 - [x] Astra A5: Add twelve semantic mutation controls with restored-source PostgreSQL baselines.
+- [x] Astra A5: Anchor review-fix delivery and fresh-repository bundle audit at 658663dd.
