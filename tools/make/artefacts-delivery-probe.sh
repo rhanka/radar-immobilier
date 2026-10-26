@@ -23,8 +23,8 @@ auth+=(-H "mcp-session-id: $session" -H 'MCP-Protocol-Version: 2025-03-26')
 trap 'curl -fsS "${auth[@]}" -X DELETE "$url" >/dev/null 2>&1 || true' EXIT
 curl -fsS "${auth[@]}" -o /dev/null "$url" \
   --data '{"jsonrpc":"2.0","method":"notifications/initialized"}'
-jq -n --arg city "$OP_CITY" --arg workspace "$OP_WORKSPACE" \
-  '{jsonrpc:"2.0",id:2,method:"tools/call",params:{name:"search_signals",arguments:{city:$city,workspaceId:$workspace}}}' \
+jq -n --arg city "$OP_CITY" \
+  '{jsonrpc:"2.0",id:2,method:"tools/call",params:{name:"search_signals",arguments:{city:$city}}}' \
   > "$OP_EVIDENCE_DIR/request.json"
 curl -fsS "${auth[@]}" "$url" --data-binary "@$OP_EVIDENCE_DIR/request.json" \
   -o "$OP_EVIDENCE_DIR/search.json"
@@ -35,9 +35,20 @@ if [[ -n ${OP_EXPECTED_ERROR:-} ]]; then
     "$OP_EVIDENCE_DIR/search.json" >/dev/null
 else
   : "${OP_EXPECTED_SIGNAL:?Known signal ID required to prove real data}"
-  jq -e --arg id "$OP_EXPECTED_SIGNAL" --arg workspace "$OP_WORKSPACE" \
+  : "${OP_API_AUTH_HEADER_FILE:?Protected delegated API header for the same human subject}"
+  jq -e --arg id "$OP_EXPECTED_SIGNAL" --arg city "$OP_CITY" \
     '.result.isError != true and ((.result.content[0].text | fromjson) |
-      .workspaceId == $workspace and any(.signals[]; .id == $id))' \
+      .city == $city and (.signals | type) == "array" and
+      .count == (.signals | length) and any(.signals[]; .id == $id))' \
     "$OP_EVIDENCE_DIR/search.json" >/dev/null
+  # Workspace selection belongs to the facade, not the public MCP projection.
+  curl -fsS --header "@$OP_API_AUTH_HEADER_FILE" -H 'accept: application/json' \
+    "https://preprod.immo.sent-tech.ca/api/v1/mcp/facets/signals/search?city=$OP_CITY&limit=20" \
+    -o "$OP_EVIDENCE_DIR/api-search.json"
+  jq -se --arg city "$OP_CITY" --arg workspace "$OP_WORKSPACE" \
+    '(.[0].result.content[0].text | fromjson) as $mcp | .[1] |
+      .ok == true and .workspaceId == $workspace and .citySlug == $city and
+      .signals == $mcp.signals' \
+    "$OP_EVIDENCE_DIR/search.json" "$OP_EVIDENCE_DIR/api-search.json" >/dev/null
 fi
 echo 'PASS: preprod MCP search expectation and both unauthenticated 401 responses'
