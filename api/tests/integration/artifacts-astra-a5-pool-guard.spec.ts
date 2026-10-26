@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { randomUUID } from "node:crypto";
 import { ALICE, startAstra, type Astra } from "./artifacts-astra-a5.helpers.js";
-import { normalizeHostOutcome } from "../../../packages/artifacts-host/src/host-outcome.js";
+import { mapHostError } from "../../../packages/artifacts-host/src/host-outcome.js";
 import { withArtifactAdvisoryLock } from "../../../packages/artifacts-host/src/idempotency.js";
 import { classifyArtifactFailure } from "@sentropic/artifacts/server/outcome-contract";
 
@@ -32,8 +32,8 @@ describe("astra A5 real PostgreSQL pool acquisition", () => {
       expect(raw).toBeInstanceOf(Error);
       expect((raw as Error).message).toBe("timeout exceeded when trying to connect");
       expect((raw as { code?: unknown }).code).toBeUndefined();
-      const mapped = normalizeHostOutcome({ ok: false, failure: classifyArtifactFailure(raw,
-        { invocationId: randomUUID(), operation: "ensure", phase: "dispatch", commitState: "not_committed" }) });
+      const mapped = { ok: false, failure: classifyArtifactFailure(raw,
+        { invocationId: randomUUID(), operation: "ensure", phase: "dispatch", commitState: "not_committed" }, mapHostError) };
       expect(mapped).toMatchObject({ ok: false, failure: { category: "provider_unavailable", httpStatus: 503, retriable: true } });
       await expect(withArtifactAdvisoryLock(h.pool, "0123456789abcdef", async () => 1))
         .rejects.toMatchObject({ code: "artifact_pool_timeout", cause: { message: "timeout exceeded when trying to connect" } });
