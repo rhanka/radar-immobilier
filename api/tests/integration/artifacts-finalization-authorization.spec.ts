@@ -32,7 +32,7 @@ import { auth, cookie, migrationsFolder } from "./artifacts-h2.helpers.js";
 import { cleanupArtifactTestResources, listTestBucketKeys } from "./artifacts-s3.helpers.js";
 import { createPurgeTestHost } from "./artifacts-purge-race.helpers.js";
 import { loadConfig } from "../../src/config.js";
-import { awaitWithPump, cleanupArtifactRace, assertPurgeEffects } from "./artifacts-race-cleanup.helpers.js";
+import { assertPurgeEffects } from "./artifacts-race-cleanup.helpers.js";
 import {
   assertOutcomeFailure,
   authorizeTransaction,
