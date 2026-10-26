@@ -5,6 +5,7 @@ import { bodyLimit } from "hono/body-limit";
 import {
   checkAdmission,
   createArtifactAdmissionAuthority,
+  isPoolAcquisitionTimeout,
   isApprovedAccountStatus,
   readAccountStatus,
   type AccountStatusQueryable,
@@ -145,7 +146,8 @@ export function controlRoute(deps: ControlRouteDeps): Hono {
     let result;
     try {
       result = await backend.handle(op, session.sub, body);
-    } catch {
+    } catch (error) {
+      if (!isPoolAcquisitionTimeout(error)) throw error;
       return jsonError(c, 503, { error: "capability_unavailable" });
     }
     return c.json(result.body as object, result.status as ContentfulStatusCode);
