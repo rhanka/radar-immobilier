@@ -37,6 +37,8 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
   invalid signatures or crossed bindings before classifying expiration.
 - [x] Review H5: use the exact v7 prepare path and revalidate fences,
   revocation and authenticated P after receipt projection completes.
+- [x] Review runner: recognize Vitest's serialized promise rejection assertion;
+  keep functional-case, process exit and byte-identical restoration gates.
 - [x] Qualification fixes: complete the CSRF refusal envelope, use a canonical
   content host fixture, and type grant indexing and mutable AuthConfig fixtures.
 - [x] API: 4203 passed, 76 skipped; PW-A: 32 passed, zero skipped; seven
