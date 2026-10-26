@@ -59,3 +59,5 @@ Qualify and integrate Muse's durable write persistence on PW-B after A5.
 - [x] Delivery slice 03: feat(pw-d): enforce immutable records and outbox delivery.
 
 - [x] Delivery slice 04: feat(pw-d): register _journal.json.
+
+- [x] Delivery slice 05: feat(pw-d): register schema-pw-write.ts.
