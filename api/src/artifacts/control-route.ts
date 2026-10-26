@@ -4,12 +4,13 @@ import { getCookie } from "hono/cookie";
 import { bodyLimit } from "hono/body-limit";
 import {
   checkAdmission,
-  createAdmissionAuthority,
+  createArtifactAdmissionAuthority,
   isApprovedAccountStatus,
   readAccountStatus,
   type AccountStatusQueryable,
   type ActivationConfig,
   type ArtifactControl,
+  type MembershipQueryable,
 } from "@radar/artifacts-host";
 import type { AuthConfig } from "../config.js";
 import { controlCacheHeaders } from "./control-cache.js";
@@ -69,7 +70,8 @@ async function guard(
   if (!deps.backend) return jsonError(c, 503, { error: "capability_unavailable" });
   if (deps.readActivation) {
     const admission = await checkAdmission(
-      createAdmissionAuthority(deps.accounts, deps.readActivation), session.sub,
+      createArtifactAdmissionAuthority(
+        deps.accounts as AccountStatusQueryable & MembershipQueryable, deps.readActivation), session.sub,
     );
     if (!admission.allowed) {
       return c.json(admission.body, admission.status);
@@ -120,7 +122,8 @@ export function controlRoute(deps: ControlRouteDeps): Hono {
     if (deps.readActivation && (op === "ensure" || op === "publish")) {
       // Reread after the entry guard, immediately before storage dispatch.
       const commit = await checkAdmission(
-        createAdmissionAuthority(deps.accounts, deps.readActivation), session.sub,
+        createArtifactAdmissionAuthority(
+          deps.accounts as AccountStatusQueryable & MembershipQueryable, deps.readActivation), session.sub,
       );
       if (!commit.allowed) {
         return c.json(commit.body, commit.status);
