@@ -15,6 +15,9 @@ import { pwDigest, type PwPrincipal } from "./pw-write-digests.js";
 import { PwWriteError } from "./pw-write-errors.js";
 import { appendPwAudit } from "./pw-write-audit.js";
 import { appendPwOutbox } from "./pw-write-outbox.js";
+import { assertPwSession } from "./pw-write-confirmation.js";
+import { reservePwIntentStatus } from "./pw-write-status-budget.js";
+import { readPwRejection } from "./pw-write-rejection.js";
 
 export interface DurableAdmissionOptions {
   confirmation: PwConfirmation;
@@ -40,6 +43,7 @@ export function createDurableWriteAdmission(intentId: string,
       await assertPwAuthorityOpen(tx, observed.authorityReferences as Record<string, string>);
       const row = await loadPwIntentForUpdate(tx, normalized);
       assertPwConfirmation(row, confirmation);
+      assertPwSession(confirmation, clockMs());
       if (row.operation !== input.operation
         || pwDigest(row.command) !== pwDigest(input)
         || row.workspaceId !== input.workspaceId.toLowerCase()
@@ -60,6 +64,11 @@ export function createDurableWriteAdmission(intentId: string,
       }
       if (row.challengeState === "consumed") throw new FacetError(409, "challenge_consumed");
       if (await readPwTombstone(tx, normalized)) throw new FacetError(409, "write_intent_revoked");
+      if (row.executionState === "rejected") {
+        const refusal = await readPwRejection(tx, normalized);
+        if (!refusal) throw new PwWriteError(503, "write_fence_unavailable");
+        throw new PwWriteError(refusal.status, refusal.code);
+      }
       if (row.executionState !== "pending") throw new PwWriteError(409, "challenge_expired");
       const [key] = await tx.select().from(pwWriteKeyReservations).where(and(
         eq(pwWriteKeyReservations.actorId, reservation.actorId),
@@ -73,6 +82,7 @@ export function createDurableWriteAdmission(intentId: string,
       const row = await loadPwIntentForUpdate(tx, normalized);
       if (row.challengeState === "consumed") throw new FacetError(409, "challenge_consumed");
       const now = clockMs();
+      assertPwSession(confirmation, now);
       if (now >= row.expiresAt.getTime()) throw new FacetError(409, "challenge_expired");
       await reservePwAdmission(tx, `admission:reader:${row.actorId}:${row.workspaceId}`,
         `admission:workspace:${row.workspaceId}`, normalized);
@@ -103,15 +113,21 @@ export function createDurableWriteAdmission(intentId: string,
 
 /** Owner status read under a shared lock; receipt disclosure stays with PW-C. */
 export async function readPwWriteStatus(db: Database, intentId: string,
-  principal: PwPrincipal, clock: () => number = Date.now) {
+  principal: PwPrincipal, pageSessionId: string, clock: () => number = Date.now) {
   return db.transaction(async (tx) => {
     await tx.execute(sql`SET LOCAL lock_timeout = '1s'`);
     await tx.execute(sql`SET LOCAL statement_timeout = '5s'`);
     const row = await loadPwIntentForShare(tx, intentId);
     assertPwPrincipal(row, principal);
+    if (row.pageSessionId !== pageSessionId) throw new PwWriteError(404, "write_intent_not_found");
+    await reservePwIntentStatus(tx, row.intentId, pageSessionId, clock);
     await reservePwStatus(tx, `status:${pwReaderBucket(principal, row.workspaceId)}`);
-    return { intentId: row.intentId, status: pwIntentStatus(row, clock()),
+    const status = pwIntentStatus(row, clock());
+    const error = status === "rejected" ? await readPwRejection(tx, row.intentId) : null;
+    if (status === "rejected" && !error) throw new PwWriteError(503, "write_fence_unavailable");
+    return { intentId: row.intentId, status,
       executionState: row.executionState, expiresAt: row.expiresAt,
-      challengeState: row.challengeState };
+      challengeState: row.challengeState,
+      ...(error ? { error } : {}) };
   });
 }

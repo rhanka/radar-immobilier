@@ -7,6 +7,13 @@ export type PwWriteErrorCode =
   | "challenge_consumed"
   | "challenge_expired"
   | "challenge_invalid"
+  | "session_expired"
+  | "projection_revision_conflict"
+  | "facet_head_conflict"
+  | "facet_target_version_conflict"
+  | "workspace_revision_conflict"
+  | "invalid_reason_code"
+  | "reason_code_required"
   | "confirmation_identity_mismatch"
   | "write_intent_revoked"
   | "write_grant_revoked"
@@ -20,7 +27,7 @@ export type PwWriteErrorCode =
 
 export class PwWriteError extends Error {
   constructor(
-    public status: 400 | 403 | 404 | 409 | 422 | 429 | 503,
+    public status: 400 | 401 | 403 | 404 | 409 | 422 | 429 | 503,
     message: PwWriteErrorCode,
   ) {
     super(message);
