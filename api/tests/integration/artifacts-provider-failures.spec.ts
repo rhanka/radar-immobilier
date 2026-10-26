@@ -732,7 +732,11 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
         stableUrl: `https://${artifactId}.pages.example.test/`,
         pinnedUrl: `https://${durableReceipt.releaseId}.pinned.pages.example.test/`,
       } });
-      assertPublicBodyRedacted(publicReplay, publicReplay.body, [], [SCOPE, ACTOR]);
+      // Successful manifests retain their bound provenance; deployment credentials stay private.
+      expect(JSON.parse(durableReceipt.manifest)).toMatchObject({
+        artifactId, ownerId: ACTOR, storageScopeId: SCOPE,
+      });
+      assertPublicBodyRedacted(publicReplay, publicReplay.body, [], [BUCKET, endpoint, accessKey, secretKey]);
       // The first uncertain issue (503, commitState unknown) is distinct from
       // the legitimate receipt replay below: both transports converge on the
       // same public projection with the same key and no new release.
