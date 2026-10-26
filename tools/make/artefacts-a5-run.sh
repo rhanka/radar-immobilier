@@ -9,7 +9,7 @@ if [[ ${A5_FROZEN_RUNNER:-} != 1 ]]; then
 fi
 source tools/make/base-api-guards.sh
 require_env
-[[ $ENV == test-artefacts-a5 && $API_PORT == 18924 && $UI_PORT == 15924 && $MAILDEV_UI_PORT == 11924 ]]
+[[ $ENV == test-artefacts-a5m && $API_PORT == 18925 && $UI_PORT == 15925 && $MAILDEV_UI_PORT == 11925 ]]
 ROOT=$(pwd -P)
 PROJECT=radar-$ENV
 TASK_DIR=$ROOT/tmp/a5-evidence
@@ -17,7 +17,7 @@ RUN_DIR=$TASK_DIR/runtime
 LOG_DIR=$TASK_DIR/$(date -u +%Y%m%dT%H%M%S)-$$
 mkdir -p "$RUN_DIR" "$LOG_DIR"
 echo "Evidence: $LOG_DIR"
-git --git-dir="$ROOT/tmp/a5-delivery.git" show e9d4696c:package-lock.json > "$LOG_DIR/baseline-lock.json"
+git --git-dir="$ROOT/tmp/a5-delivery.git" show 4660e201:package-lock.json > "$LOG_DIR/baseline-lock.json"
 exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
 until flock -w 60 8; do
   echo 'WAIT: machine Docker campaign lock held'
