@@ -42,7 +42,7 @@ export async function readPwRejection(tx: WriteTx, intentId: string) {
 
 /** Called only after BASE has refused and rolled back; never overwrite a winner. */
 export async function recordPwRejection(tx: WriteTx, intentId: string, error: unknown,
-  requestId = randomUUID()): Promise<boolean> {
+  requestId: string = randomUUID()): Promise<boolean> {
   const refusal = pwTerminalRefusal(error);
   if (!refusal) return false;
   const row = await loadPwIntentForUpdate(tx, intentId);

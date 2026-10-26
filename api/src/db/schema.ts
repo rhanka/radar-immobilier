@@ -19,7 +19,7 @@ import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { pwWriteSchema } from "./schema-pw-write.js";
 export { pwWriteIntents, pwWriteKeyReservations, pwWriteReceiptLinks,
   pwWriteIntentTombstones, pwWriteAuthorityFences, pwWriteQuotaLedger,
-  pwWriteAudit, pwWriteOutbox } from "./schema-pw-write.js";
+  pwWriteAudit, pwWriteOutbox, pwWriteRejections, pwWriteStatusBudgets } from "./schema-pw-write.js";
 
 /**
  * PostGIS geometry column (SRID 4326). Represented in TS as WKT/EWKT text; the
