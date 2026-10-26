@@ -15,7 +15,8 @@ export function normalizeHostOutcome(outcome: ArtifactOutcome<HttpResponse>): Ar
   const code = (cause as { code?: string } | null)?.code;
   const message = cause instanceof Error ? cause.message : String(cause ?? "");
   const realPoolTimeout = code !== "artifact_pool_timeout" &&
-    /timeout exceeded when trying to connect/i.test(message);
+    (/timeout exceeded when trying to connect/i.test(message) ||
+      /connection terminated due to connection timeout/i.test(message));
   if (realPoolTimeout) {
     cause = Object.assign(new Error("artifact pool acquisition timed out", { cause }),
       { code: "artifact_pool_timeout" });
