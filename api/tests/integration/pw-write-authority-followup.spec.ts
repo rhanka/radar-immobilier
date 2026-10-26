@@ -54,9 +54,9 @@ describeDb("PW-A approved PW-D integration", () => {
       await blocker.query("BEGIN");
       await blocker.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", [JSON.stringify(["workspace", a.f.workspaceId])]);
       const { rows: [{ pid }] } = await blocker.query("SELECT pg_backend_pid() AS pid");
-      pending = a.request(`${APP}/${id}/confirm`, { method: "POST",
+      pending = Promise.resolve(a.request(`${APP}/${id}/confirm`, { method: "POST",
         headers: { cookie, origin: a.writeApp.domain.appOrigin, "content-type": "application/json",
-          "x-artifact-write-csrf": bootstrap.csrf }, body: JSON.stringify({ challengeToken: bootstrap.challengeToken }) });
+          "x-artifact-write-csrf": bootstrap.csrf }, body: JSON.stringify({ challengeToken: bootstrap.challengeToken }) }));
       await vi.waitFor(async () => {
         const { rows } = await a.f.pool.query(`SELECT EXISTS (SELECT FROM pg_stat_activity
           WHERE $1 = ANY(pg_blocking_pids(pid))) AS blocked`, [pid]);
