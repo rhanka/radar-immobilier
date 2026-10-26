@@ -3,7 +3,7 @@ import type { PwIntentRow } from "./pw-write-store.js";
 import { pwIntentDigest, pwDigest, type PwPrincipal } from "./pw-write-digests.js";
 import { PwWriteError } from "./pw-write-errors.js";
 
-/** PW-A supplies these claims only after verifying the application challenge MAC. */
+/** PW-A verifies the challenge MAC and independently authenticates cookie expiry. */
 export interface PwConfirmation {
   principal: PwPrincipal;
   challengeId: string;
