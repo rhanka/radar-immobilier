@@ -137,7 +137,7 @@ Qualify and integrate Muse's durable write persistence on PW-B after A5.
 - [x] Astra corrections: independent application cookie deadline at final admission.
 - [x] Astra corrections: normalized command keys, concealed revoke ownership, refusal audit.
 - [x] Astra corrections: exact-refusal mutations, scoped and CI API gates, lint/typecheck.
-- [ ] Astra corrections: bounded commits, de81ef0e bundle audit, French report.
+- [x] Astra corrections: bounded commits, de81ef0e bundle audit, French report.
 - [x] Astra slice 01: scope corrective qualification without publication.
 - [x] Astra slice 02: persist I/P follow-up budgets and immutable public refusals.
 - [x] Astra slice 03: enforce terminal refusal, session deadline and request audit in admission.
@@ -155,3 +155,4 @@ Qualify and integrate Muse's durable write persistence on PW-B after A5.
 - [x] Astra slice 15: qualify 102 scoped tests, 4089 API tests and seven killed/restored mutants.
 - [x] Astra qualification: typechecks, global lint, API build and CT-8 fresh/upgrade/replay pass.
 - [x] Astra cleanup: only owned containers, volume and network removed; no Docker work remains.
+- [x] Astra slice 16: audit the base-seeded corrective bundle and complete the French report.
