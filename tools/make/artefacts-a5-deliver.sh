@@ -55,7 +55,7 @@ case $action in
     git -c core.hooksPath=/dev/null commit -m "$MSG";;
   audit) audit;;
   bundle)
-    audit > "$ROOT/tmp/a5-evidence/astra-commit-audit.txt"
+    audit > "$ROOT/tmp/a5-evidence/astra-r2-commit-audit.txt"
     OUT=$ROOT/tmp/a5-evidence/artefacts-a5-astra-r2-fixes.bundle
     git bundle create "$OUT" "$BASE..HEAD"
     auditdir=$(mktemp -d "$ROOT/tmp/a5-evidence/astra-bundle-audit.XXXXXX")
