@@ -9,6 +9,9 @@ const privacy = 'tests/integration/classification-privacy.spec.ts';
 const cursor = 'src/services/facets/classification-cursor.test.ts';
 const counts = 'src/services/facets/classification-counts.test.ts';
 const cases = [
+  { id: 'discovery-account-lock', suite: 'tests/integration/classification-authority-races.spec.ts', test: 'account locked until the membership transaction commits', edits: [
+    [`${root}classification-discovery.ts`, '    await approvedAccountId(tx, sub, true);', '    await approvedAccountId(tx, sub, false);'],
+  ] },
   { id: 'discovery-final-approval', suite: 'tests/integration/classification-authority-races.spec.ts', test: 'suspension commits during the final membership await', edits: [
     [`${root}classification-discovery.ts`, '    await approvedAccountId(tx, sub, true);', '    // Mutation: omit approval after the membership await.'],
   ] },
