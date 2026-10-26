@@ -7,13 +7,14 @@ import { baseAuth, baseCookie } from "./base-api-fixture.js";
 import { searchFixture } from "./mcp-signal-search-fixture.js";
 
 export async function facadeFixture(options: { enabled?: boolean; retirement?: LegacyRetirementState;
-  store?: ObjectStore; authEnabled?: boolean } = {}) {
+  store?: ObjectStore; authEnabled?: boolean; afterWorkspaceResolve?: () => Promise<void> | void } = {}) {
   const f = await searchFixture();
   const auth = { ...baseAuth, enabled: options.authEnabled ?? true };
   const app = createApp({ db: f.data.db, store: options.store ?? f.store, auth,
     discarded: EMPTY_DISCARDED_SIGNALS, checkDb: async () => ({ ok: true }),
     checkObjectStore: async () => ({ ok: true }),
-    ...(options.enabled === undefined ? { mcpSignalSearch: { enabled: true } }
+    ...(options.enabled === undefined ? { mcpSignalSearch: { enabled: true,
+      ...(options.afterWorkspaceResolve ? { afterWorkspaceResolve: options.afterWorkspaceResolve } : {}) } }
       : options.enabled ? { mcpSignalSearch: { enabled: true } } : {}),
     ...(options.retirement ? { legacyRetirement: options.retirement } : {}),
   });
