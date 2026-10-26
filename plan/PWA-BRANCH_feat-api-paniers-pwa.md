@@ -28,6 +28,12 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
     PWA-EX3 permits their exact import from 0ab7d664 by merge only.
 
 ## Feedback Loop
+- [x] Third pass: lease within the global five-second budget and destroy only
+  that socket on expiry; return late leases without work and preserve uncertain COMMIT errors.
+- [x] Third-pass reproduction: saturated-pool preparation exceeds eight seconds;
+  delayed acquisition exceeds nine seconds and acquisition timeout returns 504.
+- [ ] Third-pass gates: PostgreSQL saturation/acquisition, functional mutations,
+  CI-equivalent API suite, lint/typecheck and fresh 07ef2757 bundle audit.
 - [x] Second-pass final campaign: 127 scoped tests (61 PW-A, 65 PW-D, one
   createApp), zero skips; API 4254 passed/76 optional skipped; ARTEFACTS 165
   and MCP 406 passed; all 26 mutants killed/restored. Static gates and build
