@@ -4,29 +4,10 @@ import type { ArtifactControl } from "./facade.js";
 import { validateBindingName } from "./publish-policy.js";
 
 /**
- * H4 P2 preparation: shared artifact command adapter (unexposed).
- *
- * Translates the four selected provider operations to the same
- * `ArtifactControl` facade as HTTP. No MCP tool is registered here and no
- * transport is wired; this module exports only pure translation.
- *
- * Preparation notes:
- * - Actor comes from verified request authority, never from arguments.
- * - Storage scope stays server-bound inside the facade; caller scope fields
- *   are refused before dispatch. A future provider host-context field must be
- *   bound from trusted configuration, not from caller input.
- * - Internal idempotency keys and effective parameter hashes use the shared
- *   server derivation in `facade.ts`/`idempotency.ts`; array order stays
- *   significant and the payload hash is never added to the internal key.
- * - Publication limits, defaults, fixed `inline-original` provenance and URL
- *   policy are preserved by delegating sanitized bodies to the facade.
- * - Requested `profile`/`parameters` are request data, not granted
- *   permissions; no grant is issued here.
- * - H3 admission travels with the injected facade (entry plus pre-dispatch
- *   and post-settle rereads). Provider finalization authorization after waits
- *   stays BLOCKED pending the upstream mechanism, same as H3 P2 unit 7.
- * - Typed provider outcomes are consumed via the facade sanitized response;
- *   internal causes are never serialized to MCP results.
+ * Four selected operations share the HTTP facade and its canonical provider codec.
+ * Verified actor and scope come from the host. One request-bound invocation
+ * supplies the finalization guard; typed outcomes retain retry classification
+ * and project public errors without serializing private causes.
  */
 
 export interface VerifiedMcpAuthority {
@@ -116,9 +97,8 @@ function toMcpResult(response: HttpResponse): McpResult {
   if (status >= 200 && status < 300) return { ok: true, status, data: body };
   const raw = isRecord(body) ? body["error"] : undefined;
   const code = typeof raw === "string" ? raw : "provider_error";
-  // Only a facade 503 (provider unavailability) is retryable; adapter-level
-  // refusals above already returned with retryable false.
-  return { ok: false, status, code, retryable: status === 503, error: body };
+  const retryable = (response as HttpResponse & { retryable?: boolean }).retryable === true;
+  return { ok: false, status, code, retryable, error: body };
 }
 
 function routeToOp(method: string, path: string):

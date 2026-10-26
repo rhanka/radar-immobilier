@@ -37,7 +37,7 @@ COPY packages/radar-scoring/package.json packages/radar-scoring/
 COPY packages/radar-sources/package.json packages/radar-sources/
 COPY packages/immo-mcp/package.json packages/immo-mcp/
 COPY api/package.json api/
-RUN npm install --workspaces --include-workspace-root
+RUN npm ci --ignore-scripts --strict-peer-deps --workspaces --include-workspace-root
 COPY packages/artifacts-host packages/artifacts-host
 COPY packages/radar-domain packages/radar-domain
 COPY packages/radar-scoring packages/radar-scoring

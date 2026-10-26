@@ -28,6 +28,7 @@ import { ImmoStatefulHost } from "./stateful-host.js";
 import { composeStatefulImmo } from "./registry/stateful-composition.js";
 import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-stateful";
 import { createAccountBinding } from "./account-binding.js";
+import { createArtifactBinding } from "./artifact-binding.js";
 
 /**
  * REMOTE transport for the immo MCP provider: Streamable HTTP (MCP SDK) behind an
@@ -214,6 +215,8 @@ function isSessionOwner(owner: SessionOwner, mcpAuth: McpAuthContext): boolean {
 
 /** Test/wiring overrides — keeps the prod path env-only while letting tests inject a key source. */
 export interface ImmoHttpDeps {
+  /** Trusted shared-service binding. No environment value can fabricate this capability. */
+  artifacts?: import("./registry/artifact-provider.js").ArtifactMcpBinding;
   /** Override the data source (default = `createDataSource({})` → MockDataSource). */
   data?: ImmoDataSource;
   /**
@@ -254,7 +257,7 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
 
   const app = new Hono();
   const host = new ImmoStatefulHost(app);
-  const ready = composeStatefulImmo(host, deps.authorize ?? (async () => data.mode !== "http" && raw.mode !== "http"))
+  const ready = composeStatefulImmo(host, deps.authorize ?? (async () => !deps.artifacts && data.mode !== "http" && raw.mode !== "http"), deps.artifacts)
     .then(() => true, () => false);
 
   // Preserve the historical discovery URL while 0.2 challenges advertise RFC 9728.
@@ -453,7 +456,9 @@ async function main(): Promise<void> {
     };
   }
   const accounts = createAccountBinding(process.env);
-  const app = createImmoHttpApp(config, { data, raw, exchange, ...(accounts ? { authorize: accounts.authorize } : {}) });
+  const artifacts = await createArtifactBinding(process.env);
+  const app = createImmoHttpApp(config, { data, raw, exchange, ...(accounts ? { authorize: accounts.authorize } : {}),
+    ...(artifacts ? { artifacts: artifacts.binding } : {}) });
   const { serve } = await import("@hono/node-server");
   serve({ fetch: app.fetch, port: config.port });
   process.stderr.write(
