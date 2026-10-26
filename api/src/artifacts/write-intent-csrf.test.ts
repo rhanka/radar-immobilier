@@ -2,15 +2,16 @@
 import { describe, expect, it } from "vitest";
 import { canonicalAppPrincipal, resolvePwIdentityDomain } from "./write-intent-principal.js";
 import { issueWriteIntentCsrf, verifyWriteIntentCsrf } from "./write-intent-csrf.js";
+import type { AuthConfig } from "../config.js";
 
-const AUTH = {
+const AUTH: AuthConfig = {
   enabled: true, issuer: "https://auth.sent-tech.ca", clientId: "client-1",
   clientSecret: "secret", redirectUri: "https://immo.sent-tech.ca/callback",
   scopes: "openid", appBaseUrl: "https://immo.sent-tech.ca",
   sessionSecret: "session-secret-32-bytes-long-pad!!",
   sessionTtlSeconds: 100, sessionAbsoluteTtlSeconds: 200,
   jwksUri: "", bearerAudiences: [],
-} as const;
+};
 
 describe("write csrf", () => {
   it("should bind csrf to origin, principal, cookie, and intent", () => {

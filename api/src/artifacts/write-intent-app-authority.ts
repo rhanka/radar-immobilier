@@ -8,6 +8,7 @@ import { assertAppMutationHeaders, type AppGuardDeps, type AppGuardPass } from "
 import { assertIdempotencyKey } from "./write-intent-schemas.js";
 import { FacetError } from "../services/facets/target.js";
 import { PwWriteError } from "../services/facets/pw-write-errors.js";
+import { writeRefusal } from "./write-intent-refusal.js";
 
 export interface WriteAppDeps extends AppGuardDeps {
   db: Database;
@@ -41,7 +42,7 @@ export function guardWriteIntentAppMutation(c: Context, deps: WriteAppDeps,
   if (!verifyWriteIntentCsrf({ token: c.req.header("x-artifact-write-csrf") ?? "",
     domain: deps.domain, principal: pass.principal, rawCookie: pass.rawCookie,
     intentId: c.req.param("intentId") ?? "", nowMs: (deps.nowMs ?? Date.now)(),
-    sessionSecret: deps.sessionSecret })) return c.json({ error: "csrf_refused" }, 403);
+    sessionSecret: deps.sessionSecret })) return writeRefusal(c, "csrf_refused", 403);
   return null;
 }
 

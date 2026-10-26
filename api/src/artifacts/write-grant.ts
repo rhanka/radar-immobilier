@@ -94,7 +94,7 @@ export async function verifyWriteGrant(
     const fields = ["tier", "host", "artifactId", "releaseId", "readerSub", "sessionId",
       "identityIssuer", "profileFingerprint", "policyRevision", "workspaceId", "citySlug", "jti"] as const;
     for (const field of fields) {
-      const want = (expected as Record<string, unknown>)[field];
+      const want = expected[field];
       if (want !== undefined && claims[field] !== want) return null;
       if (typeof claims[field] !== "string" || (claims[field] as string).length === 0) return null;
     }
