@@ -8,9 +8,10 @@ import { createLifecycleService } from "@sentropic/artifacts/server/lifecycle";
 import { createPostgresClaimGuardedRefs } from "@sentropic/artifacts/server/gc";
 import { createPostgresPublicationUnitWriter, createPublicationService } from "@sentropic/artifacts/server/publication";
 import type { ArtifactInvocationContext, FinalizeTxClient } from "@sentropic/artifacts/server/commit-contract";
-import { classifyArtifactFailure } from "@sentropic/artifacts/server/outcome-contract";
+import { ArtifactOperationError, classifyArtifactFailure } from "@sentropic/artifacts/server/outcome-contract";
 import { normalizeHostOutcome } from "./host-outcome.js";
 import { bindHostCoordinator } from "./host-coordinator.js";
+import { normalizePoolAcquisitionError } from "./idempotency.js";
 
 export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | "coordinator"> & {
   pool: pg.Pool; scope: string; blobs: HttpAppDeps["publication"]["blobs"];
@@ -69,6 +70,12 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
       return normalizeHostOutcome(await currentInvocation.run(invocation, () => keyDomain.run(binding,
         () => artifact.run(body?.artifactId ?? "", () => app.execute(request, invocation)))));
     } catch (cause) {
+      const normalized = normalizePoolAcquisitionError(cause);
+      if (normalized !== cause) {
+        return { ok: false, failure: classifyArtifactFailure(normalized, { invocationId: invocation.invocationId,
+          operation: request.path.slice(1), phase: "dispatch", commitState: "not_committed" },
+        () => new ArtifactOperationError("provider_unavailable", { cause: normalized })) };
+      }
       return { ok: false, failure: classifyArtifactFailure(cause, { invocationId: invocation.invocationId,
         operation: request.path.slice(1), phase: "dispatch", commitState: "not_committed" }) };
     }
