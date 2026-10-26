@@ -3,7 +3,7 @@
 set -euo pipefail
 action=${1:?}
 ROOT=$(pwd -P)
-BASE=$(git rev-parse d8f2cc06)
+BASE=$(git rev-parse 66ff7898)
 LOCAL=$ROOT/tmp/a2base-rest-delivery.git
 if [[ $action == setup ]]; then
   [[ $(git branch --show-current) == feat/artefacts-mcp-a2base-rest ]]
@@ -28,6 +28,7 @@ allowed() {
   case $1 in
     api/src/app.ts|api/src/routes/graph-signals.ts|api/src/routes/mcp-signal-search*|api/src/services/facets/mcp-signal-*) ;;
     api/src/services/graph/regulatory-status-archi.test.ts) ;;
+    api/src/services/facets/scope.ts|packages/immo-mcp/src/signal-read-error.ts|packages/immo-mcp/src/signal-read-error.test.ts) ;;
     api/tests/integration/mcp-signal-search*|api/tests/integration/a2base-mcp-fixture.ts|tools/make/base-api-a2rest*) ;;
     plan/ARTEFACTS-BRANCH_feat_artefacts-mcp.md|plan/ARTEFACTS-A2BASE-REST-BRANCH_feat_artefacts-mcp-a2base-rest.md) ;;
     *) echo "Out of scope: $1" >&2; return 2;;
@@ -67,8 +68,8 @@ case $action in
   audit) audit; git status --short;;
   bundle)
     git diff --quiet; git diff --cached --quiet
-    audit > tmp/a2base-rest-commit-audit.txt
-    OUT=$ROOT/tmp/a2base-rest-evidence/a2base-rest-astra-corrections.bundle
+    audit > tmp/a2base-rest-r2-commit-audit.txt
+    OUT=$ROOT/tmp/a2base-rest-evidence/a2base-rest-astra-r2-corrections.bundle
     mkdir -p "${OUT%/*}"
     [[ ! -L ${OUT%/*} && ! -L $OUT ]]
     git bundle create "$OUT" "$BASE..HEAD"
