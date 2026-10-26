@@ -16,15 +16,20 @@ vi.mock("../../src/services/facets/pw-write-prepare.js", async (importOriginal) 
 });
 
 describeDb("PW-A cumulative transaction budget", () => {
-  it("should cancel cumulative SQL waits and roll back the prepared intent with the exact refusal", async () => {
+  it.each([0, 4, 5])("should cancel cumulative SQL waits with %i held pool connections and roll back with the exact refusal", async (held) => {
     const a = await authorityFixture();
     const before = await baseState(a.f);
+    const clients = await Promise.all(Array.from({ length: held }, () => a.f.pool.connect()));
+    // With all five held, admission spends part of the SAME budget acquiring a connection.
+    const release = held === 5 ? setTimeout(() => clients.pop()!.release(), 1800) : undefined;
     waits.completed = 0;
     const started = performance.now();
-    const response = await a.prepare();
+    let response: Response;
+    try { response = await a.prepare(); }
+    finally { clearTimeout(release); for (const client of clients) client.release(); }
     expect(performance.now() - started).toBeLessThan(5800);
-    expect(waits.completed).toBeGreaterThanOrEqual(5);
-    expect(waits.completed).toBeLessThan(8);
+    expect(waits.completed).toBeGreaterThanOrEqual(held === 5 ? 3 : 5);
+    expect(waits.completed).toBeLessThan(held === 5 ? 5 : 8);
     expect(response.status).toBe(503);
     expect(await response.json()).toEqual({ operation: "facets.write-intents.prepare.v1", requestId: expect.any(String),
       error: { code: "write_fence_unavailable", message: "Write authority fence is unavailable.",
@@ -34,5 +39,32 @@ describeDb("PW-A cumulative transaction budget", () => {
       expect((await a.f.pool.query(`SELECT count(*)::int AS n FROM ${table}`)).rows[0].n).toBe(0);
     }
     expect((await a.f.pool.query("SELECT 1 AS alive")).rows).toEqual([{ alive: 1 }]);
+  });
+
+  it.each([3000, 10_000])("should refuse pool acquisition after its %ims timeout or the global deadline without late effects", async (timeout) => {
+    const a = await authorityFixture();
+    const before = await baseState(a.f);
+    a.f.pool.options.connectionTimeoutMillis = timeout;
+    const clients = await Promise.all(Array.from({ length: 5 }, () => a.f.pool.connect()));
+    const releaseAll = () => { for (const client of clients.splice(0)) client.release(); };
+    const safety = setTimeout(releaseAll, 6200);
+    waits.completed = 0;
+    const started = performance.now();
+    let response: Response;
+    try { response = await a.prepare(); }
+    finally { clearTimeout(safety); releaseAll(); }
+    expect(performance.now() - started).toBeLessThan(5800);
+    expect(response.status).toBe(503);
+    expect(await response.json()).toEqual({ operation: "facets.write-intents.prepare.v1", requestId: expect.any(String),
+      error: { code: "write_fence_unavailable", message: "Write authority fence is unavailable.",
+        action: "contact_operator", retryable: false, attemptOutcome: "not_executed" } });
+    // This query queues behind any late lease; it must be returned without executing work.
+    expect((await a.f.pool.query("SELECT 1 AS alive")).rows).toEqual([{ alive: 1 }]);
+    expect(a.f.pool.waitingCount).toBe(0);
+    expect(waits.completed).toBe(0);
+    expect(await baseState(a.f)).toEqual(before);
+    for (const table of ["pw_write_intents", "pw_write_key_reservations", "pw_write_audit", "pw_write_outbox"]) {
+      expect((await a.f.pool.query(`SELECT count(*)::int AS n FROM ${table}`)).rows[0].n).toBe(0);
+    }
   });
 });
