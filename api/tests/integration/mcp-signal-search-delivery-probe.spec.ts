@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { chmod, copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { promisify } from "node:util";
@@ -48,7 +48,10 @@ exec /usr/bin/curl "\${args[@]}"
               const saved = `${process.env.DELIVERY_PROBE_EVIDENCE_DIR}/${epoch}-${sequence}`;
               await mkdir(saved, { recursive: true });
               for (const file of ["request.json", "search.json", "api-search.json", "no-token.json", "api-no-token.json", "initialize.json"]) {
-                try { await copyFile(`${evidence}/${file}`, `${saved}/${file}`); }
+                try {
+                  await copyFile(`${evidence}/${file}`, `${saved}/${file}`);
+                  await chmod(`${saved}/${file}`, 0o644); // Synthetic responses only; no credential files.
+                }
                 catch (error) { if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error; }
               }
             }
