@@ -31,8 +31,8 @@
 ## Plan / Todo (lot-based)
 - [x] Lot 0: inspect mandatory rules, A5 reference report, CI test selection and assigned branch/base.
 - [x] Lot 0: bind delivery helpers and isolated runner to the mesh task.
-- [ ] Lot 1: verify published archive integrity before container installation.
-- [ ] Lot 1: exact 0.22.1 pin; lockfile changes only MCP workspace and cluster-mesh package entry.
+- [x] Lot 1: published archive verified before installation; `20261026T140119-18/upgrade-integrity.json`.
+- [x] Lot 1: exact 0.22.1 pin; two lock entries, four replaced lines; strict full-lock comparison and audit gate pass.
 - [ ] Lot 1: prove frozen common-v1 contents and absence of Radar integration references.
 - [ ] Lot 2: Q1/Q2/acceptance 31/32/6, MCP and CI-selected API suites.
 - [ ] Lot 2: typecheck, lint, build, audit tests and audit gate.

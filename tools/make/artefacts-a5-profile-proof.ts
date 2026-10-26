@@ -11,7 +11,7 @@ const mcp = read("packages/immo-mcp/package.json");
 const host = read("packages/artifacts-host/package.json");
 const api = read("api/package.json");
 assert.equal(mcp.dependencies["@sentropic/artifacts"], "0.2.1");
-assert.equal(mcp.dependencies["@sentropic/cluster-mesh"], "0.22.0");
+assert.equal(mcp.dependencies["@sentropic/cluster-mesh"], "0.22.1");
 assert.equal(host.dependencies["@sentropic/artifacts"], "0.2.1");
 assert.equal(api.dependencies["@sentropic/artifacts"], "0.2.1");
 assert.equal(config.provider.selectionStatus, "guarded");
