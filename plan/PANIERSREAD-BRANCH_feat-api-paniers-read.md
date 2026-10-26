@@ -16,7 +16,8 @@
 
 ## Feedback Loop
 - [x] PANIERSREAD-EX3: owner-requested Astra B2 correction extends scope to the canonical parser in `api/src/routes/graph-signals.ts`; preserve persisted document metadata for degraded reads; rollback removes only parser/dedup metadata additions.
-- [ ] Astra review corrections: qualify six fixes with discriminating tests and killed/restored mutations, full CI API selection, lint/typecheck, then audit local commits and bundle above `bf339830`.
+- [x] Astra review corrections: six fixes qualified with discriminating tests and mutations; full CI API selection, lint/typecheck/build pass; local delivery range is `bf339830..HEAD`.
+- [x] Review acceptance: code `c771f9c9c7d7b3413d916f7773490a034c9ff836`, evidence `tmp/classification-evidence/20261026T072625-5-qualify`; 3,885 API passes, 76 conditional skips, 47 classification passes without skips, 15 killed/restored mutants and owned-resource teardown.
 - [x] Review tooling: six additional killed/restored mutation scenarios, syntax/lint gates and delivery range based on `bf339830`.
 - [x] Review context: final authority revalidation on closed paths and durable resampling through the real PostgreSQL scope reader.
 - [x] Review queries: reject unknown/repeated prototype parameters with typed unit regression cases; the HTTP case accompanies the route refusal tests.

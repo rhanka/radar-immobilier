@@ -48,7 +48,7 @@ case $action in
     done < <(git rev-list --reverse "$BASE..HEAD");;
   bundle)
     git diff --quiet; git diff --cached --quiet
-    out=$ROOT/tmp/classification-evidence/api-paniers-read.bundle
+    out=$ROOT/tmp/classification-evidence/api-paniers-read-astra.bundle
     git bundle create "$out" "$BASE..HEAD"
     audit=$(mktemp -d "$ROOT/tmp/classification-evidence/bundle-audit.XXXXXX")
     independent() { env -u GIT_DIR -u GIT_WORK_TREE git -C "$audit" "$@"; }
