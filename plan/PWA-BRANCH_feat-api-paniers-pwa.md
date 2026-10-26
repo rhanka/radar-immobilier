@@ -28,6 +28,8 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
     PWA-EX3 permits their exact import from 0ab7d664 by merge only.
 
 ## Feedback Loop
+- [x] Third-pass static gates: API/packages/PW-A tests typecheck, global lint,
+  shell syntax and API build pass; archived inputs are verified inside the container.
 - [x] Third-pass scoped campaign: 133 tests pass with zero skips, including
   all five real PostgreSQL saturation/acquisition regressions and lease lifetime units.
 - [x] Third pass: lease within the global five-second budget and destroy only

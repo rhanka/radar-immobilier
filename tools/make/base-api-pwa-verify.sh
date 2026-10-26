@@ -28,10 +28,10 @@ exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
 while :; do
   (( SECONDS < deadline )) || { echo 'Docker reservation exceeded six hours'; exit 4; }
   free_space || { echo 'STOP: less than 8 GiB disk or memory'; exit 3; }
-  running=$(docker ps --filter name=radar-test- --format '{{.Names}}')
+  running=$(docker ps --filter name=test- --format '{{.Names}}')
   builders=$(ps -eo comm=,args= | awk '$1 ~ /^(docker|docker-buildx|buildctl)$/ && $0 ~ / (build|buildx) /')
   if [[ -z $running && -z $builders ]] && flock -n 8; then
-    running=$(docker ps --filter name=radar-test- --format '{{.Names}}')
+    running=$(docker ps --filter name=test- --format '{{.Names}}')
     builders=$(ps -eo comm=,args= | awk '$1 ~ /^(docker|docker-buildx|buildctl)$/ && $0 ~ / (build|buildx) /')
     [[ -n $running || -n $builders ]] || break
     flock -u 8
