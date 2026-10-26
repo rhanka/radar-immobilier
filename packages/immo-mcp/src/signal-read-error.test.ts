@@ -7,6 +7,7 @@ describe("public signal failures", () => {
     [410, "legacy_retired", "signal_route_retired", false, "contact_operator"],
     [404, "anything", "signal_endpoint_unavailable", false, "contact_operator"],
     [503, "scoped_facet_scope_unavailable:12345678-1234-4234-9234-123456789abc", "signal_capability_unavailable", false, "contact_operator"],
+    [503, "scoped_maintenance_in_progress:12345678-1234-4234-9234-123456789abc", "signal_cutover_in_progress", true, "retry_later"],
     [503, "personal_history_unresolved", "signal_history_unresolved", false, "contact_operator"],
     [503, "projection_revision_unstable", "signal_projection_unstable", true, "retry_later"],
     [401, "secret", "unauthenticated", false, "reconnect_account"],
