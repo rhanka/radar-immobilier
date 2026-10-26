@@ -3,14 +3,18 @@ import { PgDialect } from "drizzle-orm/pg-core";
 import { writeIntentTransaction } from "./write-intent-transaction.js";
 
 vi.mock("drizzle-orm/node-postgres", () => ({ drizzle: (client: unknown) => client }));
+vi.mock("pg", () => ({ default: { Client: class {
+  on() {} async connect() {} async query() {} async end() {}
+} } }));
 
 function fixture() {
   const execute = vi.fn().mockResolvedValue({ rows: [] });
   const release = vi.fn();
   const transaction = vi.fn(async (work: (tx: unknown) => unknown) => work({ execute }));
-  const client = { release, transaction };
+  const client = { release, transaction, on: vi.fn(), off: vi.fn(),
+    query: vi.fn().mockResolvedValue({ rows: [{ pid: 123 }] }) };
   const connect = vi.fn().mockResolvedValue(client);
-  return { db: { $client: { connect } }, execute, release, transaction, connect, client };
+  return { db: { $client: { connect, options: {} } }, execute, release, transaction, connect, client };
 }
 
 it("should set bounded SQL timeouts and normalize only pre-commit cancellations", async () => {

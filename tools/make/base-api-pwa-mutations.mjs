@@ -40,6 +40,8 @@ const mutations = [
     "src/artifacts/write-intent-transaction.test.ts", "destroy only the leased connection"],
   ["late-pool-lease", "write-intent-transaction.ts", "if (expired) { connection.release(); throw unavailable(); }", "",
     "src/artifacts/write-intent-transaction.test.ts", "return a late lease without beginning work"],
+  ["backend-termination", "write-intent-transaction.ts", 'control.query("SELECT pg_terminate_backend($1, 250)", [pid])',
+    "Promise.resolve()", "tests/integration/pw-write-authority-budget.spec.ts", "terminate the running backend"],
   ["page-clock-after-resolve", "write-intent-page-authority.ts",
     "const page = await deps.resolvePage(c.req.raw);\n  assertPageAuthority(page, deps, clock());",
     "const now = clock();\n  const page = await deps.resolvePage(c.req.raw);\n  assertPageAuthority(page, deps, now);",

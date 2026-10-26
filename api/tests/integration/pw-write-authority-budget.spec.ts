@@ -4,11 +4,18 @@ import { describeDb } from "../../src/services/facets/workspace-archive-fixture.
 import { baseState } from "../../src/services/facets/signal-write-fixture.js";
 import { authorityFixture } from "./pw-write-authority-fixture.js";
 
-const waits = vi.hoisted(() => ({ completed: 0 }));
+const waits = vi.hoisted(() => ({ completed: 0, long: false, pid: 0 }));
 vi.mock("../../src/services/facets/pw-write-prepare.js", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../src/services/facets/pw-write-prepare.js")>();
   return { ...actual, preparePwWriteIntentInTx: async (...args: Parameters<typeof actual.preparePwWriteIntentInTx>) => {
     const result = await actual.preparePwWriteIntentInTx(...args);
+    const backend = await args[0].execute<{ pid: number }>(sql`SELECT pg_backend_pid() AS pid`);
+    waits.pid = backend.rows[0]!.pid;
+    if (waits.long) {
+      await args[0].execute(sql`SELECT pg_sleep(2)`);
+      await args[0].execute(sql`SELECT pg_sleep(4.5)`);
+      return result;
+    }
     // Each statement is admissible alone; only their cumulative duration exceeds five seconds.
     for (let i = 0; i < 8; i++) { await args[0].execute(sql`SELECT pg_sleep(0.8)`); waits.completed++; }
     return result;
@@ -16,6 +23,27 @@ vi.mock("../../src/services/facets/pw-write-prepare.js", async (importOriginal) 
 });
 
 describeDb("PW-A cumulative transaction budget", () => {
+  it("should terminate the running backend and release its locks within the budget with a saturated pool", async () => {
+    const a = await authorityFixture();
+    const before = await baseState(a.f);
+    const clients = await Promise.all(Array.from({ length: 4 }, () => a.f.pool.connect()));
+    waits.long = true;
+    const started = performance.now();
+    try {
+      const response = await a.prepare();
+      expect(performance.now() - started).toBeLessThan(5800);
+      expect(response.status).toBe(503);
+      expect(await response.json()).toEqual({ operation: "facets.write-intents.prepare.v1", requestId: expect.any(String),
+        error: { code: "write_fence_unavailable", message: "Write authority fence is unavailable.",
+          action: "contact_operator", retryable: false, attemptOutcome: "not_executed" } });
+      const backend = await clients[0]!.query("SELECT count(*)::int AS n FROM pg_stat_activity WHERE pid=$1", [waits.pid]);
+      expect(backend.rows[0].n).toBe(0);
+    } finally { waits.long = false; for (const client of clients) client.release(); }
+    expect(await baseState(a.f)).toEqual(before);
+    for (const table of ["pw_write_intents", "pw_write_key_reservations", "pw_write_audit", "pw_write_outbox"]) {
+      expect((await a.f.pool.query(`SELECT count(*)::int AS n FROM ${table}`)).rows[0].n).toBe(0);
+    }
+  });
   it.each([0, 4, 5])("should cancel cumulative SQL waits with %i held pool connections and roll back with the exact refusal", async (held) => {
     const a = await authorityFixture();
     const before = await baseState(a.f);

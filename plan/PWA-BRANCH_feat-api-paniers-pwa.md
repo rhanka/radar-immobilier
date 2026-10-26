@@ -28,10 +28,13 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
     PWA-EX3 permits their exact import from 0ab7d664 by merge only.
 
 ## Feedback Loop
+- [x] Third-pass socket probe: PostgreSQL can keep pg_sleep and locks after
+  socket closure. Reserve an independent control connection before BEGIN and
+  bound backend termination to 250ms; require backend disappearance under saturation.
 - [x] Third-pass static gates: API/packages/PW-A tests typecheck, global lint,
   shell syntax and API build pass; archived inputs are verified inside the container.
-- [x] Third-pass scoped campaign: 133 tests pass with zero skips, including
-  all five real PostgreSQL saturation/acquisition regressions and lease lifetime units.
+- [x] Third-pass scoped campaign: 134 tests pass with zero skips, including
+  six real PostgreSQL saturation/acquisition/backend regressions and lease lifetime units.
 - [x] Third pass: lease within the global five-second budget and destroy only
   that socket on expiry; return late leases without work and preserve uncertain COMMIT errors.
 - [x] Third-pass reproduction: saturated-pool preparation exceeds eight seconds;
