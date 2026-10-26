@@ -113,3 +113,5 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
 - [x] Delivery: `api/tests/integration/pw-write-authority-guards.spec.ts`.
 
 - [x] Delivery: `api/tests/integration/pw-write-authority.spec.ts`.
+
+- [x] Delivery: `api/tests/integration/pw-write-createapp.spec.ts`.
