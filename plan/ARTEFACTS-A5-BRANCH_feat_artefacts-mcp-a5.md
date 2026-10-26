@@ -77,3 +77,4 @@
 - [x] Astra r2: prove activation expiration after an observed membership lock wait through the production MCP replay binding.
 - [x] Astra r2: retain a single ensure authority evaluation per coordinator guard; refresh activation inside the locked policy read.
 - [x] Astra r2: extend semantic mutations and test discovery; bind the image fixture to its workspace and audit delivery from 3ef57173.
+- [x] Astra r2: preserve delegated pool getters using a guarded view; adapter instrumentation and real connection-break regressions pass.
