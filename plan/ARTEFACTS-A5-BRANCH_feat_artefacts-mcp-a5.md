@@ -70,3 +70,4 @@
 - [x] Astra r2: freeze HTTP call membership and refresh transaction authority after membership waits, including replay.
 - [x] Astra r2: carry immutable workspace authority through the production MCP binding.
 - [x] Astra r2: guard idle and reserved pg clients through callback and promise acquisitions; discard broken clients.
+- [x] Astra r2: classify both pg-pool saturation and connection-open timeouts as retryable unavailability.
