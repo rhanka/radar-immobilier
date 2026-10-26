@@ -136,13 +136,13 @@ if [[ $mode == image || $mode == qualify ]]; then
   wait "$RUN_PID"
   RUN_PID=
   SCOPE=tests/integration/mcp-signal-search-network.e2e.spec.ts assert_tests_ran "$image_evidence/image-tests.tsv"
-  awk -F '\t' '$2 == 11 && $3 == 0 && $4 == 0 {ok=1} END {exit !ok}' "$image_evidence/image-tests.tsv"
+  awk -F '\t' '$2 == 13 && $3 == 0 && $4 == 0 {ok=1} END {exit !ok}' "$image_evidence/image-tests.tsv"
   rm "$context/runtime.tar"
 fi
 [[ $mode == check ]] || assert_tests_ran "$LOG_DIR/tests.tsv"
 if [[ $mode == e2e ]]; then
   [[ $SCOPE == tests/integration/mcp-signal-search-network.e2e.spec.ts ]]
-  awk -F '\t' '$2 == 11 && $3 == 0 && $4 == 0 {ok=1} END {exit !ok}' "$LOG_DIR/tests.tsv"
+  awk -F '\t' '$2 == 13 && $3 == 0 && $4 == 0 {ok=1} END {exit !ok}' "$LOG_DIR/tests.tsv"
 fi
 if [[ $mode != check ]]; then
   SCOPE=$MCP_SCOPE assert_tests_ran "$LOG_DIR/mcp-tests.tsv"
