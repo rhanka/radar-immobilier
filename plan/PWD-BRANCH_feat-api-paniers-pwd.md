@@ -55,3 +55,5 @@ Qualify and integrate Muse's durable write persistence on PW-B after A5.
 - [x] Delivery slice 01: docs(pw-d): declare integration and qualification scope.
 
 - [x] Delivery slice 02: feat(pw-d): add durable write persistence tables.
+
+- [x] Delivery slice 03: feat(pw-d): enforce immutable records and outbox delivery.

@@ -115,3 +115,53 @@ CREATE TABLE IF NOT EXISTS pw_write_outbox (
 --> statement-breakpoint
 CREATE INDEX IF NOT EXISTS pw_write_outbox_pending_idx ON pw_write_outbox (created_at) WHERE delivered_at IS NULL;
 --> statement-breakpoint
+CREATE OR REPLACE FUNCTION guard_pw_write_append_only() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  RAISE EXCEPTION 'pw write table is append-only';
+END $$;
+--> statement-breakpoint
+CREATE OR REPLACE TRIGGER pw_write_receipt_links_immutable BEFORE UPDATE OR DELETE ON pw_write_receipt_links FOR EACH ROW EXECUTE FUNCTION guard_pw_write_append_only();
+--> statement-breakpoint
+CREATE OR REPLACE TRIGGER pw_write_intent_tombstones_immutable BEFORE UPDATE OR DELETE ON pw_write_intent_tombstones FOR EACH ROW EXECUTE FUNCTION guard_pw_write_append_only();
+--> statement-breakpoint
+CREATE OR REPLACE TRIGGER pw_write_authority_fences_immutable BEFORE UPDATE OR DELETE ON pw_write_authority_fences FOR EACH ROW EXECUTE FUNCTION guard_pw_write_append_only();
+--> statement-breakpoint
+CREATE OR REPLACE TRIGGER pw_write_quota_ledger_immutable BEFORE UPDATE OR DELETE ON pw_write_quota_ledger FOR EACH ROW EXECUTE FUNCTION guard_pw_write_append_only();
+--> statement-breakpoint
+CREATE OR REPLACE TRIGGER pw_write_audit_immutable BEFORE UPDATE OR DELETE ON pw_write_audit FOR EACH ROW EXECUTE FUNCTION guard_pw_write_append_only();
+--> statement-breakpoint
+CREATE OR REPLACE FUNCTION guard_pw_write_outbox() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF TG_OP = 'UPDATE' AND OLD.id = NEW.id AND OLD.intent_id = NEW.intent_id AND OLD.kind = NEW.kind
+     AND OLD.payload = NEW.payload AND OLD.created_at = NEW.created_at
+     AND (OLD.delivered_at IS NULL OR OLD.delivered_at = NEW.delivered_at)
+     AND NEW.attempts = OLD.attempts + 1 THEN
+    RETURN NEW;
+  END IF;
+  RAISE EXCEPTION 'pw write outbox allows only delivery updates';
+END $$;
+--> statement-breakpoint
+DROP TRIGGER IF EXISTS pw_write_outbox_guarded ON pw_write_outbox;
+--> statement-breakpoint
+CREATE TRIGGER pw_write_outbox_guarded BEFORE UPDATE OR DELETE ON pw_write_outbox FOR EACH ROW EXECUTE FUNCTION guard_pw_write_outbox();
+--> statement-breakpoint
+CREATE OR REPLACE TRIGGER pw_write_key_reservations_immutable BEFORE UPDATE OR DELETE ON pw_write_key_reservations FOR EACH ROW EXECUTE FUNCTION guard_pw_write_append_only();
+--> statement-breakpoint
+CREATE OR REPLACE FUNCTION guard_pw_write_intent() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF TG_OP = 'DELETE' THEN RAISE EXCEPTION 'pw write intent is immutable'; END IF;
+  IF (to_jsonb(OLD) - ARRAY['execution_state','challenge_state','consumed_at','revoked_at','decided_at','target','command'])
+     IS DISTINCT FROM (to_jsonb(NEW) - ARRAY['execution_state','challenge_state','consumed_at','revoked_at','decided_at','target','command'])
+     OR (OLD.challenge_state = 'consumed' AND NEW.challenge_state <> 'consumed')
+     OR (OLD.execution_state <> 'pending' AND NEW.execution_state <> OLD.execution_state)
+     OR (OLD.revoked_at IS NOT NULL AND NEW.revoked_at IS DISTINCT FROM OLD.revoked_at)
+     OR (OLD.consumed_at IS NOT NULL AND NEW.consumed_at IS DISTINCT FROM OLD.consumed_at)
+     OR ((OLD.target IS DISTINCT FROM NEW.target OR OLD.command IS DISTINCT FROM NEW.command)
+       AND NOT (OLD.execution_state <> 'committed' AND OLD.expires_at < clock_timestamp() - interval '24 hours'
+         AND NEW.target = '{}'::jsonb AND NEW.command = '{}'::jsonb)) THEN
+    RAISE EXCEPTION 'pw write intent is immutable';
+  END IF;
+  RETURN NEW;
+END $$;
+--> statement-breakpoint
+CREATE OR REPLACE TRIGGER pw_write_intents_immutable BEFORE UPDATE OR DELETE ON pw_write_intents FOR EACH ROW EXECUTE FUNCTION guard_pw_write_intent();
