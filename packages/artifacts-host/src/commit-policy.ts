@@ -71,10 +71,7 @@ export async function createHostPolicy(pool: pg.Pool, scope: string,
 
 /** No authority is inferred from a stored receipt; replay rereads the participant. */
 export const authorizeArtifactCommit: AuthorizeCommit = async (context, transaction) => {
-  const participant = transaction.participant as typeof transaction.participant & {
-    checkApproval?: (input: { actorId: string; operation: string }) => Promise<{
-      approved: boolean; reason?: string; publicCode?: unknown; status?: unknown }>;
-  };
+  const participant = transaction.participant;
   const revision = await participant.readRevision();
   if (revision !== context.policyRevision) {
     return { allowed: false, reason: "revoked", publicCode: "access_denied", status: 403, retriable: false };
@@ -85,7 +82,8 @@ export const authorizeArtifactCommit: AuthorizeCommit = async (context, transact
   }
   if (typeof participant.checkApproval === "function") {
     try {
-      const detail = await participant.checkApproval({ actorId: context.actorId, operation: context.operation });
+      const detail = await participant.checkApproval({ actorId: context.actorId, operation: context.operation }) as {
+        approved: boolean; publicCode?: unknown; status?: unknown };
       if (!detail.approved && typeof detail.publicCode === "string" &&
         /^[a-z][a-z0-9_]{0,63}$/.test(detail.publicCode)) {
         const status = detail.status === 409 ? 409 : 403;

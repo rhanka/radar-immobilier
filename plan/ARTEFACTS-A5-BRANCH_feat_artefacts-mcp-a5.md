@@ -60,3 +60,4 @@
 - [x] Astra A5: supply explicit memberships for legitimate H2/production quota fixtures; preserve all Q1/Q2/acceptance assertions.
 - [x] Astra A5: adapt HTTP query doubles and inject the admission outage on the real reserved coordinator client; retain refusal/accounting assertions.
 - [x] Astra A5: preserve the public participant fence type and assert the precise account refusal after a publication key wait.
+- [x] Astra A5: 23/23 compatibility tests pass; retain the participant type and qualify final gates under one Docker campaign lock.
