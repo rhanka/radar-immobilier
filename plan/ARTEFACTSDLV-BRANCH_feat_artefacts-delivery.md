@@ -1,0 +1,43 @@
+# Fix: MCP delivery wiring
+
+## Objective
+Wire the qualified signal-search facade in the real API startup and prepare
+the preprod account-reader and A2 exchange bindings before image delivery.
+
+## Scope / Guardrails
+- [x] Work only in `tmp/artefacts-main-probe`, branch `feat/artefacts-delivery`.
+- [x] Make only; no Python, environment files, secret reads, push or deployment.
+- [x] Test mapping: `ENV=test-artefacts-dlv`, API 18927, UI 15927, Maildev 11927.
+- [x] One Docker campaign at a time; wait for foreign test containers.
+- [x] Commits at most 150 changed lines, Conventional subject only.
+
+## Branch Scope Boundaries (MANDATORY)
+- [x] Allowed Paths: `api/src/config.ts`, `api/src/index.ts`,
+  `api/tests/integration/mcp-signal-search-*`, `deploy/k8s/**`,
+  `deploy/overlays/preprod/**`, `tools/make/artefacts-delivery*`,
+  `RUNBOOK-PREPROD-MCP-RACCORDEMENTS.md`, `RAPPORT-SOL-ARTEFACTS-DELIVERY.md`,
+  this branch file.
+- [x] Forbidden Paths: `Makefile`, `docker-compose*.yml`, `rules/**`,
+  `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, other branch plans.
+- [x] Conditional Paths: none; no migrations or dependency changes.
+
+## Feedback Loop
+- [x] Owner authorizes the two delivery corrections and local commits only.
+- [x] Deployment wiring is an operator prerequisite; never read secret values.
+
+## Orchestration Mode (AI-selected)
+- [x] Mono-branch: corrections and final qualification in the existing worktree.
+
+## UAT Management (in orchestration context)
+- [x] No UI changes; use isolated automated qualification, preserve root UAT.
+
+## Plan / Todo (lot-based)
+- [x] Lot 0: read constraints, review and startup/deployment evidence.
+- [ ] Lot 1: wire default-closed startup and test the real entrypoint.
+- [ ] Lot 2: reference account/exchange authority and document operator setup.
+- [ ] Lot 3: touched suites, CI API suite, MCP, Q1/Q2/acceptance, lint/types.
+- [ ] Lot 4: validate manifests, review changes, append delivery report.
+- [ ] Operator gate: provision/qualify preprod before any image rollout.
+
+## Merge & Close
+- [x] No push or merge authorized by this task; return the final local SHA.
