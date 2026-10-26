@@ -71,3 +71,4 @@
 - [x] Astra r2: carry immutable workspace authority through the production MCP binding.
 - [x] Astra r2: guard idle and reserved pg clients through callback and promise acquisitions; discard broken clients.
 - [x] Astra r2: classify both pg-pool saturation and connection-open timeouts as retryable unavailability.
+- [x] Astra r2: map HTTP admission and dispatch outages to redacted 503 responses on the complete control route.
