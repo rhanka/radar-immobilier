@@ -31,7 +31,7 @@ export async function composeArtifactHost(
   injectedBlobs?: PublicationBlobStore,
   options: ArtifactHostOptions = {},
 ) {
-  guardArtifactPool(pool);
+  pool = guardArtifactPool(pool);
   await initializeArtifactScope(pool, config.storageScope, config.orgId);
   const policy = await createHostPolicy(pool, config.storageScope, options.readActivation);
   const coordinator = options.coordinator ?? createArtifactCommitCoordinator({

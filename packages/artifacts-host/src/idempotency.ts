@@ -78,11 +78,13 @@ export function isPoolAcquisitionTimeout(error: unknown): boolean {
 }
 
 /** Keep every reserved client from crashing the process on a network break. */
-const guardedPools = new WeakSet<object>();
+const guardedPools = new WeakMap<pg.Pool, pg.Pool>();
 
+/** Use the returned view for reserved clients; the borrowed pool stays intact. */
 export function guardArtifactPool(pool: pg.Pool): pg.Pool {
-  if (guardedPools.has(pool) || typeof pool.connect !== "function") return pool;
-  guardedPools.add(pool as object);
+  const existing = guardedPools.get(pool);
+  if (existing) return existing;
+  if (typeof pool.connect !== "function") return pool;
   pool.on?.("error", () => console.error("artifact pool idle client error"));
   const originalConnect = pool.connect.bind(pool);
   const protect = (client: pg.PoolClient): pg.PoolClient => {
@@ -99,7 +101,7 @@ export function guardArtifactPool(pool: pg.Pool): pg.Pool {
     return client;
   };
   // pool.query uses callback acquisition; the coordinator uses promises.
-  pool.connect = ((callback?: (error: Error | undefined, client?: pg.PoolClient,
+  const connect = ((callback?: (error: Error | undefined, client?: pg.PoolClient,
     release?: pg.PoolClient["release"]) => void) => {
     if (!callback) return originalConnect().then(protect);
     return originalConnect((error, client) => {
@@ -108,7 +110,16 @@ export function guardArtifactPool(pool: pg.Pool): pg.Pool {
       callback(undefined, guarded, guarded.release);
     });
   }) as typeof pool.connect;
-  return pool;
+  // Do not overwrite a borrowed pool's connect getter: instrumentation may
+  // delegate back to the underlying pool. Keep that delegation intact.
+  const guarded = new Proxy(pool, { get(target, key) {
+    if (key === "connect") return connect;
+    const value = Reflect.get(target, key, target) as unknown;
+    return typeof value === "function" ? value.bind(target) : value;
+  } });
+  guardedPools.set(pool, guarded);
+  guardedPools.set(guarded, guarded);
+  return guarded;
 }
 
 export function normalizePoolAcquisitionError(error: unknown): unknown {
