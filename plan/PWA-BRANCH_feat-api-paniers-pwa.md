@@ -30,7 +30,7 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
   preserve technical owner management and normalize foreign management IDs.
 - [x] Astra fixes: canonical prepare path, typed expiry, post-projection
   authority/P validation, bounded SQL, PostgreSQL races and mutation proofs.
-- [ ] Review delivery: commits above 467c145d and a fresh incremental bundle audit.
+- [x] Review delivery: commits above 467c145d and a fresh incremental bundle audit.
 - [x] Review SQL: bound preparation and owner reads; distinguish pre-commit
   cancellation from uncertain commit acknowledgement.
 - [x] Review expiry: preserve authenticated grant/P 401 refusals and reject
