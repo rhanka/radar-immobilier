@@ -5,6 +5,12 @@ import { createHash } from "node:crypto";
 const root = "/workspace/api/src/services/facets/";
 const admission = "pw-write-admission-durable.ts";
 const tests = [
+  { name: "status-budget", suite: "review", test: "fixed status window", expected: "write_rate_limited",
+    changes: [["pw-write-status-budget.ts", "const spacing = initial ? 2000 : 30_000;", "const spacing = 2000;"]] },
+  { name: "terminal-refusal", suite: "review", test: "terminal refusal after a lost response", expected: "projection_revision_conflict",
+    changes: [[admission, 'if (row.executionState === "rejected") {', 'if (false) {']] },
+  { name: "cookie-expiry", suite: "review", test: "only the application cookie expires", expected: "session_expired",
+    changes: [["pw-write-confirm.ts", "assertPwSession(confirmation, now);", "// Mutant: omit the final cookie expiry guard."]] },
   { name: "single-use", suite: "admission", test: "commit once, refuse replay",
     changes: [[admission, 'challengeState: "consumed", consumedAt:', 'challengeState: "pending", consumedAt:']] },
   { name: "replay", suite: "admission", test: "commit once, refuse replay",
@@ -34,8 +40,12 @@ function run(leg, phase, failed) {
   if (executed.length !== 1 || executed[0].status !== (failed ? "failed" : "passed")) {
     throw new Error(`Mutation did not execute exactly one assertion group: ${leg.name}/${phase}`);
   }
-  if (failed && !readFileSync(`${output}.log`, "utf8").includes("AssertionError")) {
+  const log = readFileSync(`${output}.log`, "utf8");
+  if (failed && !log.includes("AssertionError")) {
     throw new Error(`Failure was not an assertion: ${leg.name}`);
+  }
+  if (failed && leg.expected && !executed[0].failureMessages.join("\n").includes(leg.expected)) {
+    throw new Error(`Mutation missed the exact expected refusal ${leg.expected}: ${leg.name}`);
   }
 }
 for (const leg of tests) {
