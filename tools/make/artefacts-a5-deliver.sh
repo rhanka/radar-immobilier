@@ -2,7 +2,7 @@
 set -euo pipefail
 action=${1:?}
 ROOT=$(pwd -P)
-BASE=$(git rev-parse 658663dd)
+BASE=$(git rev-parse 3ef57173)
 LOCAL=$ROOT/tmp/a5-delivery.git
 [[ $ENV == test-artefacts-a5 ]]
 if [[ $action == setup ]]; then
@@ -39,7 +39,7 @@ audit() {
   local sha subject
   while IFS= read -r sha; do
     subject=$(git show -s --format=%B "$sha")
-    [[ $subject != *$'\n'* && $subject =~ ^(feat|fix|test|docs|chore|refacto)(\([a-z0-9-]+\))?:\ .+ ]]
+    [[ $subject != *$'\n'* && ${#subject} -le 72 && $subject =~ ^(feat|fix|test|docs|chore|refacto)(\([a-z0-9-]+\))?:\ .+ ]]
     git show --format= --numstat "$sha" | stats
     git show -s --format='%H %s' "$sha"
   done < <(git rev-list --reverse --no-merges "$BASE..HEAD")
@@ -56,7 +56,7 @@ case $action in
   audit) audit;;
   bundle)
     audit > "$ROOT/tmp/a5-evidence/astra-commit-audit.txt"
-    OUT=$ROOT/tmp/a5-evidence/artefacts-a5-astra-fixes.bundle
+    OUT=$ROOT/tmp/a5-evidence/artefacts-a5-astra-r2-fixes.bundle
     git bundle create "$OUT" "$BASE..HEAD"
     auditdir=$(mktemp -d "$ROOT/tmp/a5-evidence/astra-bundle-audit.XXXXXX")
     independent() { env -u GIT_DIR -u GIT_WORK_TREE git -C "$auditdir" "$@"; }

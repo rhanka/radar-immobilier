@@ -28,10 +28,10 @@ try {
   await db.query("INSERT INTO account_users (id, sub, status) VALUES ($1, 'alice', 'approved')", [workspace]);
   await db.query("INSERT INTO workspaces (id, slug, label) VALUES ($1, 'image', 'Image proof')", [workspace]);
   await db.query('INSERT INTO workspace_memberships (workspace_id, account_id) VALUES ($1, $1)', [workspace]);
-  await db.query("INSERT INTO artifacts.storage_scopes (id, org_id) VALUES ('image_scope', 'image_org')");
-  await db.query("INSERT INTO artifacts.host_quotas (storage_scope_id, operation_limit, byte_limit) VALUES ('image_scope', 10, 1000000)");
+  await db.query("INSERT INTO artifacts.storage_scopes (id, org_id) VALUES ($1, 'image_org')", [workspace]);
+  await db.query("INSERT INTO artifacts.host_quotas (storage_scope_id, operation_limit, byte_limit) VALUES ($1, 10, 1000000)", [workspace]);
   client = await openImageClient({ ...env, IMMO_MCP_ACCOUNT_DATABASE_URL: database, IMMO_MCP_ARTIFACT_DATABASE_URL: database,
-    ARTIFACTS_STORAGE_SCOPE: 'image_scope', ARTIFACTS_ORG_ID: 'image_org', ARTIFACTS_CONTENT_BASE: 'pages.example.test',
+    ARTIFACTS_STORAGE_SCOPE: workspace, ARTIFACTS_ORG_ID: 'image_org', ARTIFACTS_CONTENT_BASE: 'pages.example.test',
     ARTIFACTS_S3_BUCKET: bucket, ARTIFACTS_S3_ENDPOINT: 'http://minio:9000', ARTIFACTS_S3_REGION: 'us-east-1',
     ARTIFACTS_S3_ACCESS_KEY: 'synthetic', ARTIFACTS_S3_SECRET_KEY: 'synthetic', ARTIFACTS_CONTROL_MODE: 'validation',
     ARTIFACTS_VALIDATION_SUBJECTS: 'alice', ARTIFACTS_VALIDATION_UNTIL: new Date(Date.now() + 300000).toISOString(),
@@ -71,7 +71,7 @@ try {
   writeFileSync('/evidence/image-proof.json', JSON.stringify({ passed: true, imageSource: process.env.GIT_SHA, tuple, tools,
     durable, replayAfterRestart: true, orderedConflict: true, accountRevocationDenied: true, membershipRevocationDenied: true }, null, 2));
   writeFileSync('/evidence/runtime-config.json', JSON.stringify({ issuer: client.issuer, resource: client.resource,
-    storageScope: 'image_scope', contentBase: 'pages.example.test', activation: 'validation', selectedTools: 16 }, null, 2));
+    storageScope: workspace, contentBase: 'pages.example.test', activation: 'validation', selectedTools: 16 }, null, 2));
 } finally {
   if (client) { writeFileSync('/evidence/mcp-runtime.log', client.logs); await client.close(); }
   s3.destroy(); await db.end();
