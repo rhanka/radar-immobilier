@@ -3,6 +3,7 @@ import { describeDb } from "../../src/services/facets/scope-db-fixture.js";
 import { classificationFixture } from "./classification-fixture.js";
 import { discoverFacetContext } from "../../src/services/facets/classification-discovery.js";
 import * as store from "../../src/services/workspaces/store.js";
+import * as context from "../../src/services/facets/classification-context.js";
 import * as revisions from "../../src/services/facets/projection-revisions.js";
 import { setMembershipCapability } from "../../src/services/workspaces/capabilities.js";
 import { setLotCapability } from "../../src/services/facets/lots/lot-capabilities.js";
@@ -31,14 +32,23 @@ describeDb("classification final authority races", () => {
           await f.data.pool.query("UPDATE workspace_memberships SET status='revoked',revoked_at=now() WHERE account_id=$1 AND ($2 OR workspace_id=$3)",
             [f.data.contributor.id, selection === "zero", f.data.otherId]);
         }
-        const original = store.listWorkspacesForAccount;
+        let contextResolved = false;
+        const readContext = context.readFacetContext;
+        const contextSpy = vi.spyOn(context, "readFacetContext").mockImplementation(async (...args) => {
+          const result = await readContext(...args);
+          contextResolved = true;
+          return result;
+        });
+        const original = store.approvedAccountId;
         let calls = 0;
-        const spy = vi.spyOn(store, "listWorkspacesForAccount").mockImplementation(async (...args) => {
-          const result = await original(...args);
-          if (++calls === 2) {
+        let suspended = false;
+        const spy = vi.spyOn(store, "approvedAccountId").mockImplementation(async (...args) => {
+          const final = selection === "zero" || selection === "many" ? ++calls === 2 : contextResolved;
+          if (final && !suspended) {
+            suspended = true;
             await f.data.pool.query("UPDATE account_users SET status='suspended' WHERE id=$1", [f.data.contributor.id]);
           }
-          return result;
+          return original(...args);
         });
         try {
           const outcome = await discoverFacetContext(f.data.db, f.data.contributor.sub, transport,
@@ -46,8 +56,8 @@ describeDb("classification final authority races", () => {
           expect(outcome).toMatchObject({ status: 403, message: "account_not_approved" });
           expect(outcome).not.toHaveProperty("workspaces");
           expect(outcome).not.toHaveProperty("selectedWorkspace");
-          expect(calls).toBe(2);
-        } finally { spy.mockRestore(); }
+          expect(suspended).toBe(true);
+        } finally { spy.mockRestore(); contextSpy.mockRestore(); }
       });
     }
   }
