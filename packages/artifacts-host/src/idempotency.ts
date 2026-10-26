@@ -53,8 +53,7 @@ export function createArtifactsPool(
     options: "-c lock_timeout=1000 -c statement_timeout=5000",
     max,
   });
-  pool.on("error", (error) => console.error("artifact pool idle client error", error.message));
-  return pool;
+  return guardArtifactPool(pool);
 }
 
 /** Typed failure for a Postgres connection lost while a client is reserved. */
@@ -74,7 +73,42 @@ export function isPoolAcquisitionTimeout(error: unknown): boolean {
   const code = (error as { code?: unknown }).code;
   if (code === ARTIFACT_POOL_TIMEOUT_CODE) return true;
   const message = error instanceof Error ? error.message : String(error);
-  return /timeout exceeded when trying to connect/i.test(message);
+  return /timeout exceeded when trying to connect/i.test(message) ||
+    /connection terminated due to connection timeout/i.test(message);
+}
+
+/** Keep every reserved client from crashing the process on a network break. */
+const guardedPools = new WeakSet<object>();
+
+export function guardArtifactPool(pool: pg.Pool): pg.Pool {
+  if (guardedPools.has(pool) || typeof pool.connect !== "function") return pool;
+  guardedPools.add(pool as object);
+  pool.on?.("error", () => console.error("artifact pool idle client error"));
+  const originalConnect = pool.connect.bind(pool);
+  const protect = (client: pg.PoolClient): pg.PoolClient => {
+    let broken: Error | undefined;
+    const onError = (error: Error): void => {
+      broken ??= error;
+    };
+    client.on("error", onError);
+    const originalRelease = client.release.bind(client);
+    client.release = (error?: Error | boolean) => {
+      client.removeListener("error", onError);
+      originalRelease(error || broken);
+    };
+    return client;
+  };
+  // pool.query uses callback acquisition; the coordinator uses promises.
+  pool.connect = ((callback?: (error: Error | undefined, client?: pg.PoolClient,
+    release?: pg.PoolClient["release"]) => void) => {
+    if (!callback) return originalConnect().then(protect);
+    return originalConnect((error, client) => {
+      if (error || !client) return callback(error);
+      const guarded = protect(client);
+      callback(undefined, guarded, guarded.release);
+    });
+  }) as typeof pool.connect;
+  return pool;
 }
 
 export function normalizePoolAcquisitionError(error: unknown): unknown {
