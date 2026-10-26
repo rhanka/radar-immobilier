@@ -198,6 +198,9 @@ const envSchema = z.object({
     .positive()
     .default(2_592_000),
 
+  // Server-only facade activation; deployment qualification must opt in.
+  MCP_SIGNAL_SEARCH_ENABLED: z.enum(["0", "1"]).default("0").transform((v) => v === "1"),
+
   // ── H4 P5 strict receiver (exchange-first) — non-secret wiring only ─────
   // Arming needs operator intent (STRICT_RECEIVER_ARMED=1) PLUS the A2
   // receipt fields matching the receiver below exactly. Workload sub/client

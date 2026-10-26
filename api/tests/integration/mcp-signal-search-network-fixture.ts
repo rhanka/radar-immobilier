@@ -13,6 +13,7 @@ import { facetActivationState } from "../../src/db/schema.js";
 import type { LegacyRetirementState } from "../../src/services/facets/legacy-retirement.js";
 import { legacyDataFixture } from "./mcp-signal-search-legacy-data.js";
 import { networkDocumentStore } from "./mcp-signal-search-network-document.js";
+import { startSearchEntrypoint } from "./mcp-signal-search-startup.js";
 import { HttpDataSource } from "../../../packages/immo-mcp/src/data-source.js";
 import { createImmoHttpApp } from "../../../packages/immo-mcp/src/server-http.js";
 import { accountAuthorizer } from "../../../packages/immo-mcp/src/account-binding.js";
@@ -28,7 +29,7 @@ async function listen(app: Hono) {
 
 /** All three hops use sockets; no injected business results or local facade mounts. */
 export async function networkFixture(retirement: LegacyRetirementState = "retired", enabled = true,
-  epoch: "scoped" | "missing" | "legacy" = "scoped") {
+  epoch: "scoped" | "missing" | "legacy" = "scoped", realEntrypoint = false) {
   const data = epoch === "scoped" ? await workspaceFixture() : await legacyDataFixture();
   if (epoch === "legacy") await data.db.insert(facetActivationState).values({ workspaceId: data.workspaceId });
   const signal = await workspaceSignal(data);
@@ -39,6 +40,7 @@ export async function networkFixture(retirement: LegacyRetirementState = "retire
   const listeners: Awaited<ReturnType<typeof listen>>[] = [];
   const clients: { client: Client; transport: StreamableHTTPClientTransport }[] = [];
   let documents: Awaited<ReturnType<typeof networkDocumentStore>> | undefined;
+  let entrypoint: Awaited<ReturnType<typeof startSearchEntrypoint>> | undefined;
   const close = async () => {
     let failure: unknown;
     for (const { client, transport } of clients) {
@@ -52,6 +54,7 @@ export async function networkFixture(retirement: LegacyRetirementState = "retire
       catch (error) { failure ??= error; }
     }
     documents?.close();
+    await entrypoint?.close();
     if (failure) throw failure;
   };
   try {
@@ -82,7 +85,13 @@ export async function networkFixture(retirement: LegacyRetirementState = "retire
         cookie: c.req.header("cookie") ?? null });
       await next();
     });
-    apiApp.route("/", createApp({ db: data.db, store: documents.store,
+    if (realEntrypoint) {
+      entrypoint = await startSearchEntrypoint(data.name, auth, enabled);
+      apiApp.all("*", (c) => {
+        const url = new URL(c.req.url);
+        return fetch(new Request(entrypoint!.url + url.pathname + url.search, c.req.raw));
+      });
+    } else apiApp.route("/", createApp({ db: data.db, store: documents.store,
       auth, discarded: createDiscardedSignalsReader(data.db), checkDb: async () => ({ ok: true }),
       checkObjectStore: async () => ({ ok: true }), legacyRetirement: retirement,
       mcpSignalSearch: { enabled } }));
