@@ -110,16 +110,40 @@ describeDb("T14 complete MCP HTTP search through production facade", () => {
       expect(f.requests.every((r) => r.path === "/api/v1/mcp/facets/signals/search" && !r.cookie)).toBe(true);
     } finally { await f.close(); }
   });
-  it("keeps a warm exchange but refuses a newly closed epoch without empty success", async () => {
-    const f = await networkFixture();
+  it.each(["missing", "legacy", "scoped"] as const)(
+    "keeps maintenance retryable at entry and during enrichment with %s epoch", async (epoch) => {
+    const f = await networkFixture(epoch === "scoped" ? "retired" : "serving", true, epoch);
     try {
       const { client } = await f.connect();
       expect((await networkSearch(client)).result.isError).not.toBe(true);
       await f.data.pool.query("UPDATE facet_activation_state SET maintenance_barrier=true WHERE workspace_id=$1", [f.data.workspaceId]);
+      if (epoch === "missing") await f.data.pool.query(
+        "INSERT INTO facet_activation_state (workspace_id, maintenance_barrier) VALUES ($1, true)", [f.data.workspaceId]);
       const denied = await networkSearch(client);
       expect(denied.result.isError).toBe(true);
-      expect(denied.body).toMatchObject({ error: "signal_capability_unavailable", upstreamStatus: 503 });
+      expect(denied.body).toMatchObject({ error: "signal_cutover_in_progress", upstreamStatus: 503,
+        retryable: true, action: "retry_later" });
       expect(denied.body).not.toHaveProperty("signals");
+      expect(f.exchanges()).toBe(1);
+      await f.data.pool.query("UPDATE facet_activation_state SET maintenance_barrier=false WHERE workspace_id=$1", [f.data.workspaceId]);
+      const document = await f.documents.seed();
+      await f.data.pool.query("UPDATE graph_nodes SET source_ref=$1 WHERE id=$2", [document.storageKey, f.signal.node.id]);
+      const head = f.documents.store.head.bind(f.documents.store);
+      let barrierRaised = false;
+      f.documents.store.head = async (key) => {
+        const result = await head(key);
+        if (!barrierRaised) {
+          barrierRaised = true;
+          await f.data.pool.query("UPDATE facet_activation_state SET maintenance_barrier=true WHERE workspace_id=$1", [f.data.workspaceId]);
+        }
+        return result;
+      };
+      const interrupted = await networkSearch(client);
+      expect(barrierRaised).toBe(true);
+      expect(interrupted.result.isError).toBe(true);
+      expect(interrupted.body).toMatchObject({ error: "signal_cutover_in_progress", upstreamStatus: 503,
+        retryable: true, action: "retry_later" });
+      expect(interrupted.body).not.toHaveProperty("signals");
       expect(f.exchanges()).toBe(1);
     } finally { await f.close(); }
   });
