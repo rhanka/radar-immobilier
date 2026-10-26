@@ -26,6 +26,9 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
   - `api/tests/integration/pw-write-createapp.spec.ts`: PWA-EX1.
 
 ## Feedback Loop
+- [x] Second-pass qualification: 127 scoped tests pass; strict typecheck requires
+  an explicit backend-row guard before scheduling cancellation. Missing or
+  invalid backend identity now fails closed with write_fence_unavailable.
 - [x] Second passes: delivery gate requires 26 killed/restored mutants, exactly
   76 optional CI skips, a two-parent PW-D merge and subject-only atomic commits;
   produce an incremental 8d5aed2e bundle and seed only its base for import audit.
