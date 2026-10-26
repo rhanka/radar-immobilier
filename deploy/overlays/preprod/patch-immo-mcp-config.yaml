@@ -28,3 +28,5 @@ data:
   IMMO_MCP_OAUTH_ISSUER: "https://preprod.auth.sent-tech.ca"
   IMMO_MCP_OAUTH_RESOURCE: "https://preprod.immo.sent-tech.ca/mcp"
   RADAR_PUBLIC_BASE_URL: "https://preprod.immo.sent-tech.ca"
+  IMMO_MCP_API_AUDIENCE: "https://preprod.immo.sent-tech.ca"
+  IMMO_MCP_EXCHANGE_ENV: "preprod"

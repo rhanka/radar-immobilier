@@ -142,7 +142,13 @@ spec:
           envFrom:
             - configMapRef:
                 name: radar-api
+            # Optional only for existing installs: absent keeps search disabled.
+            - configMapRef:
+                name: radar-mcp-receiver
+                optional: true
           env:
+            - name: MCP_SIGNAL_SEARCH_ENABLED
+              valueFrom: { configMapKeyRef: { name: radar-mcp-receiver, key: MCP_SIGNAL_SEARCH_ENABLED, optional: true } }
             - name: POSTGRES_USER
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_USER } }
             - name: POSTGRES_PASSWORD

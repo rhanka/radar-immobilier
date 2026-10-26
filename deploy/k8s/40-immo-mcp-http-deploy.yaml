@@ -80,6 +80,10 @@ data:
   # get_lot_card, get_opportunity_dossier, list_documents, read_document_excerpt)
   # remain not_wired_yet (real lots/zones/PV are served by the raw tools below).
   IMMO_MCP_DATA_MODE: "http"
+  # A2 delegated egress. The workload credential is operator-provisioned below.
+  IMMO_MCP_API_AUDIENCE: "https://immo.sent-tech.ca"
+  IMMO_MCP_EXCHANGE_ENV: "production"
+  IMMO_MCP_EXCHANGE_POLICY_REV: "a2base-search-v1"
   # ── Real radar-API wiring (search_signals + the 4 raw-data tools) ──────────
   # Setting RADAR_API_BASE_URL points `search_signals` AND the raw tools
   # (get_zones_geojson / get_lots_geojson / get_grille_pdf / get_pv_pdf —
@@ -153,9 +157,17 @@ spec:
           envFrom:
             - configMapRef:
                 name: immo-mcp-config
-          # No secrets: this pod only VERIFIES bearer tokens against the IdP's
-          # public JWKS (remote-JWKS resource server) — it holds no client
-          # secret or signing key of its own.
+          # Required bindings: missing objects/keys prevent container startup.
+          # Create them BEFORE changing the image; see the delivery runbook.
+          env:
+            - name: IMMO_MCP_ACCOUNT_DATABASE_URL
+              valueFrom: { secretKeyRef: { name: immo-mcp-account-reader, key: IMMO_MCP_ACCOUNT_DATABASE_URL } }
+            - name: IMMO_MCP_WORKLOAD_CLIENT_SECRET
+              valueFrom: { secretKeyRef: { name: immo-mcp-workload, key: IMMO_MCP_WORKLOAD_CLIENT_SECRET } }
+            - name: IMMO_MCP_WORKLOAD_SUB
+              valueFrom: { configMapKeyRef: { name: radar-mcp-receiver, key: STRICT_RECEIVER_WORKLOAD_SUB } }
+            - name: IMMO_MCP_WORKLOAD_CLIENT_ID
+              valueFrom: { configMapKeyRef: { name: radar-mcp-receiver, key: STRICT_RECEIVER_WORKLOAD_CLIENT_ID } }
           readinessProbe:
             # `/mcp` itself always 401s without a bearer token (by design), so
             # probe the PRM well-known instead — it is served unauthenticated
