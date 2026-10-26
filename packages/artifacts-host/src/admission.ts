@@ -25,7 +25,7 @@ export type AdmissionDeniedBody =
   | { readonly error: "workspace_ambiguous" };
 
 export type AdmissionResult =
-  | { readonly allowed: true }
+  | { readonly allowed: true; readonly workspaceId: string }
   | { readonly allowed: false; readonly status: 403 | 409; readonly body: AdmissionDeniedBody };
 
 export interface AdmissionAuthority {
@@ -33,17 +33,20 @@ export interface AdmissionAuthority {
   readonly readActivation: () => ActivationConfig;
   readonly nowMs?: (() => number) | undefined;
   readonly readMemberships?: ((sub: string) => Promise<string[]>) | undefined;
+  readonly scope?: string | undefined;
 }
 
 export function createAdmissionAuthority(
   accounts: AccountStatusQueryable,
   readActivation: () => ActivationConfig,
   nowMs?: () => number,
+  scope?: string,
 ): AdmissionAuthority {
   return {
     readStatus: (sub) => readAccountStatus(accounts, sub),
     readActivation,
     ...(nowMs ? { nowMs } : {}),
+    ...(scope ? { scope } : {}),
   };
 }
 
@@ -57,9 +60,10 @@ export interface MembershipQueryable {
 export function createArtifactAdmissionAuthority(
   accounts: AccountStatusQueryable & MembershipQueryable,
   readActivation: () => ActivationConfig,
+  scope?: string,
   nowMs?: () => number,
 ): AdmissionAuthority {
-  const base = createAdmissionAuthority(accounts, readActivation, nowMs);
+  const base = createAdmissionAuthority(accounts, readActivation, nowMs, scope);
   return {
     ...base,
     readMemberships: async (sub: string): Promise<string[]> => {
@@ -78,7 +82,10 @@ export function createArtifactAdmissionAuthority(
   };
 }
 
-export function checkScopeMembership(memberships: readonly string[]): AdmissionResult {
+export function checkScopeMembership(
+  memberships: readonly string[],
+  expectedScope?: string,
+): AdmissionResult {
   const unique = [...new Set(memberships.map((entry) => entry.toLowerCase()))];
   if (unique.length === 0) {
     return { allowed: false, status: 403, body: { error: "workspace_membership_required" } };
@@ -86,7 +93,12 @@ export function checkScopeMembership(memberships: readonly string[]): AdmissionR
   if (unique.length !== 1) {
     return { allowed: false, status: 409, body: { error: "workspace_ambiguous" } };
   }
-  return { allowed: true };
+  const workspaceId = unique[0]!;
+  if (expectedScope !== undefined && expectedScope.trim() !== "" &&
+    workspaceId !== expectedScope.toLowerCase()) {
+    return { allowed: false, status: 403, body: { error: "workspace_membership_required" } };
+  }
+  return { allowed: true, workspaceId };
 }
 
 function checkActivation(
@@ -104,13 +116,15 @@ function checkActivation(
   if (!activation.subjects.includes(sub)) {
     return { allowed: false, status: 403, body: { error: "not_in_cohort" } };
   }
-  return { allowed: true };
+  return { allowed: true, workspaceId: authority.scope ?? "" };
 }
 
 export async function checkAdmission(
   authority: AdmissionAuthority,
   sub: string,
+  expectedScope?: string,
 ): Promise<AdmissionResult> {
+  const scope = expectedScope ?? authority.scope;
   const activation = checkActivation(authority, sub);
   if (!activation.allowed) return activation;
   const status = await authority.readStatus(sub);
@@ -125,9 +139,11 @@ export async function checkAdmission(
   if (!afterStatus.allowed) return afterStatus;
   if (authority.readMemberships) {
     const memberships = await authority.readMemberships(sub);
-    const membership = checkScopeMembership(memberships);
+    const membership = checkScopeMembership(memberships, scope);
     if (!membership.allowed) return membership;
-    return checkActivation(authority, sub);
+    const fresh = checkActivation(authority, sub);
+    if (!fresh.allowed) return fresh;
+    return membership;
   }
   return checkActivation(authority, sub);
 }
