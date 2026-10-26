@@ -1,6 +1,6 @@
 import pg from "pg";
-import { composeArtifactHost, readArtifactsEnv, resolveArtifactsStorageConfig,
-  readActivationEnv, resolveActivationConfig } from "@radar/artifacts-host";
+import { composeArtifactHost, createArtifactAdmissionAuthority, readArtifactsEnv,
+  resolveArtifactsStorageConfig, readActivationEnv, resolveActivationConfig } from "@radar/artifacts-host";
 import { bindArtifactProvider, IMMO_ARTIFACT_PROFILE } from "./registry/artifact-provider.js";
 import { ARTIFACT_INVOCATION_SCOPE } from "./registry/artifact-profile.js";
 
@@ -20,7 +20,9 @@ export async function createArtifactBinding(env: NodeJS.ProcessEnv) {
   try {
     const host = await composeArtifactHost(pool, config, undefined,
       { profile: IMMO_ARTIFACT_PROFILE, readActivation, contentBase });
+    const admission = createArtifactAdmissionAuthority(pool, readActivation);
     const binding = bindArtifactProvider({ app: host.app, storageScopeId: config.storageScope,
+      admission,
       authorizeCommit(request) {
         const actorId = request.principal.sub;
         return async (context, transaction) => {

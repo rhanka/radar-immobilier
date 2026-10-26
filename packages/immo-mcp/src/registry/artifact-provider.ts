@@ -5,6 +5,7 @@ import { compileArtifactsProfile, RADAR_ARTIFACTS_PROFILE, createArtifactsManife
 import type { ArtifactInvocationContext, AuthorizeCommit } from "@sentropic/artifacts/server/commit-contract";
 import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-stateful";
 import { computeManifestDigest, type RegistryDefinition } from "@sentropic/cluster-mesh/mcp/registry";
+import { checkAdmission, type AdmissionAuthority } from "@radar/artifacts-host";
 import { ARTIFACT_TOOL_NAMES, ARTIFACT_INVOCATION_SCOPE } from "./artifact-profile.js";
 
 // Compile the complete versioned contract, including semantic rules, before registry admission.
@@ -35,6 +36,7 @@ export function bindArtifactProvider(options: {
   readonly app: ArtifactsApp;
   readonly storageScopeId: string;
   readonly authorizeCommit: (request: VerifiedMcpRequest) => AuthorizeCommit;
+  readonly admission?: AdmissionAuthority | undefined;
 }): ArtifactMcpBinding {
   if (!options.storageScopeId.trim() || typeof options.authorizeCommit !== "function") {
     throw new Error("artifact_binding_incomplete");
@@ -42,6 +44,7 @@ export function bindArtifactProvider(options: {
   const executor = createArtifactsToolExecutor({ app: options.app, profile: IMMO_ARTIFACT_PROFILE });
   const scope = options.storageScopeId;
   const authorizeCommit = options.authorizeCommit;
+  const admission = options.admission;
   const binding: ArtifactMcpBinding = Object.freeze({
     manifest: IMMO_ARTIFACT_MANIFEST,
     configuration: Object.freeze({ storageScopeId: scope }),
@@ -57,6 +60,15 @@ export function bindArtifactProvider(options: {
         throw error;
       }
       if (!request.principal.scopes.includes(ARTIFACT_INVOCATION_SCOPE)) throw new Error("artifact_scope_denied");
+      if (admission) {
+        let decision;
+        try {
+          decision = await checkAdmission(admission, request.principal.sub);
+        } catch {
+          return refusal("capability_unavailable", true);
+        }
+        if (!decision.allowed) return refusal(decision.body.error, false);
+      }
       let authority: AuthorizeCommit;
       try {
         authority = authorizeCommit(request);
