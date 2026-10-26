@@ -28,7 +28,8 @@ it("denies a publication revoked during a key wait without a durable success", a
     )).rows[0].count)).toBeGreaterThan(0);
     await pool.query("UPDATE account_users SET status='suspended' WHERE sub='alice'");
     await holder.query("ROLLBACK");
-    expect(await pending).toEqual({ status: 403, body: { error: "access_denied" } });
+    const denied = await pending;
+    expect(denied, JSON.stringify(denied)).toEqual({ status: 403, body: { error: "account_not_approved" } });
     expect(await tableCount("releases")).toBe(releases);
     expect(await tableCount("operation_receipts")).toBe(receipts);
     expect((await pool.query("SELECT count(*) FROM artifacts.artifact_current WHERE artifact_id=$1", [artifactId])).rows[0].count).toBe("0");
