@@ -16,7 +16,7 @@
 
 ## Feedback Loop
 - [ ] Third-pass context/state: reproduce closure after the second catalog and stale business refusals during real PostgreSQL writes through createApp.
-- [ ] Third-pass discovery: reproduce real BASE revocation and membership addition during final approval; deliver only commits above `4c801bab`.
+- [x] Third-pass discovery: lock approval before the atomic, share-locked active membership query; revalidate selected access and the entire set; 12 BASE writer races reproduce stale results on `65b6d3162`.
 - [x] Second-pass discovery: reproduce eight PostgreSQL suspension races at the last membership await; revalidate approval with the BASE shared account lock before returning either membership sample; delivery range starts at `8c0ad35c`.
 - [x] Second-pass mutations: all 18 mutants killed by domain assertions, with 28 failing cases then 28 passing cases after byte-exact restoration; includes the previous 15 mutants, final discovery approval, account lock and current rights.
 - [x] Second-pass final acceptance: code `2a0132bb88ad1ca96d9976262e3d5897325a9a05`, evidence `tmp/classification-evidence/20261026T082806-5-qualify`; 3,899 API passes, 76 conditional skips, 61 classification passes without skips, 18 killed/restored mutants, lint/typecheck/build and owned-resource teardown passed.
