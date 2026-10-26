@@ -54,6 +54,24 @@ describeDb("classification context authority", () => {
     const body = await (await f.request("facet-context")).json();
     expect(body.context.signals.availability).toEqual({ state: "closed", reason: "maintenance" });
     expect(body.context.reasonCatalog).toEqual({ availability: { state: "closed", reason: "maintenance" }, profileId: null, digest: null, entries: null });
-    for (const query of ["?unknown=1", "?a=1&a=2"]) expect((await f.request(`facet-context${query}`)).status).toBe(400);
+    for (const query of ["?unknown=1", "?a=1&a=2", "?__proto__=x", "?__proto__=a&__proto__=b"]) {
+      const response = await f.request(`facet-context${query}`);
+      expect(response.status).toBe(400);
+      expect(await response.json()).toMatchObject({ ok: false, error: { code: "invalid_query" } });
+    }
+  });
+  it("should return a typed JSON unauthenticated refusal for browser navigations on read routes", async () => {
+    const f = await classificationFixture();
+    const paths = ["facet-context", "signal-facets/search?citySlug=synthetic-city",
+      `signal-facets/state?citySlug=synthetic-city&type=Signal&id=${f.signal.target.id}`];
+    for (const suffix of paths) {
+      const response = await f.app.request(`/api/v1/workspaces/${f.data.workspaceId}/${suffix}`,
+        { headers: { accept: "text/html" } });
+      expect(response.status).toBe(401);
+      const body = await response.json();
+      expect(body).toMatchObject({ ok: false, error: { code: "unauthenticated", action: "authenticate" } });
+      expect(typeof body.requestId).toBe("string");
+      expect(response.headers.get("cache-control")).toBe("private, no-store");
+    }
   });
 });

@@ -17,6 +17,11 @@ export const classificationBoundary: MiddlewareHandler = async (c, next) => {
   c.header("Vary", "Cookie, Authorization");
   try {
     await next();
+    if (c.res.status >= 300 && c.res.status < 400) {
+      const failure = classificationFailure(new ClassificationError("unauthenticated"));
+      c.res = c.json(failure.body, failure.status);
+      return;
+    }
     if (c.res.status < 400) return;
     const body = await c.res.clone().json().catch(() => null);
     if (body?.ok === false && typeof body.requestId === "string") return;
