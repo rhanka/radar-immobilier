@@ -12,12 +12,15 @@ require_scope
 RUN_DIR=$ROOT/tmp/pwb-evidence/runtime
 LOG_DIR=$ROOT/tmp/pwb-evidence/$(date -u +%Y%m%dT%H%M%S)-campaign
 mkdir -p "$RUN_DIR" "$LOG_DIR"
-exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
-flock -n 8 || { echo 'Another Docker campaign is active'; exit 2; }
 free_space() {
   [[ $(df -Pk "$ROOT" | awk 'NR==2 {print $4}') -ge 8388608 &&
      $(awk '/MemAvailable:/ {print $2}' /proc/meminfo) -ge 8388608 ]]
 }
+exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
+until flock -w 10 8; do
+  free_space || { echo 'STOP: less than 8 GiB disk or available memory'; exit 3; }
+  echo 'Waiting for the active Docker campaign lock'
+done
 # Wait without touching another campaign's containers, volumes, or builders.
 while :; do
   free_space || { echo 'STOP: less than 8 GiB disk or available memory'; exit 3; }
