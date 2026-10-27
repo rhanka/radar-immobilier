@@ -58,6 +58,7 @@ isolation, current authorization, transactional quotas and replay safety.
   - [ ] Typecheck, ESLint, API unit tests and PostgreSQL admission tests.
   - [ ] Isolation and authorization mutations.
   - [ ] Complete API suite matching CI.
+  - [x] Implemented: `feat(host): add general activation mode`.
 - [ ] **Lot 4 — Delivery**
   - [ ] Atomic commits, bundle audit and French results report.
   - [ ] Confirm own Docker project has no containers, networks or volumes.
