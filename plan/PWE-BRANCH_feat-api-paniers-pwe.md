@@ -32,6 +32,9 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] PWE-EX2 includes the existing surface DB test: require the authorized
+  receipt (section7.4), retain the no-challenge assertion and add masking after revoke.
+- [x] Keep negative receipt diagnostics limited to public fields, excluding CSRF bytes.
 - [x] Join the existing BASE receipt reader into a bounded read transaction,
   holding I/current-rights locks, auditing receipt reads and masking withdrawn rights.
 - [x] App result GET returns the immutable receipt under its existing cookie guard;

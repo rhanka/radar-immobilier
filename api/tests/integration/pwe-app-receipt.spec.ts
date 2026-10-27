@@ -41,7 +41,9 @@ async function committed(common = false) {
   const receipt = await confirmation.json();
   const get = () => h.app.request(url, { headers: { ...headers, "sec-fetch-site": "same-origin" } });
   const result = await get(); expect(result.status).toBe(200);
-  expect(await result.json()).toMatchObject({ state: "committed", commandId: receipt.commandId, receipt: receipt.receipt });
+  const data = await result.json();
+  expect({ state: data.state, commandId: data.commandId, receipt: data.receipt })
+    .toEqual({ state: "committed", commandId: receipt.commandId, receipt: receipt.receipt });
   return { ...h, id, mutation, get, post, receipt, boot };
 }
 
