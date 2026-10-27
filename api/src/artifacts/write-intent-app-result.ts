@@ -18,6 +18,7 @@ export async function readAppWriteIntentResult(deps: WriteAppDeps, observed: PwI
     const event = await readCommittedSignalReceiptInTx(tx, pass.principal.sub, row.workspaceId, row.commandKey);
     await appendPwAudit(tx, { intentId: row.intentId, invocationId: row.invocationId, commandId: row.commandKey,
       operation: row.operation, workspaceId: row.workspaceId, target: row.target,
+      scope: row.operation.includes(".workspace.") ? "workspace" : "personal",
       artifactRef: row.artifactRef as Record<string, unknown>, grantRef: row.grantReference,
       principal: pass.principal, operationDigest: row.operationDigest, intentDigest: row.intentDigest, result: "receipt_read" });
     if ((deps.nowMs ?? Date.now)() >= pass.session.exp * 1000) throw new PwWriteError(401, "session_expired");

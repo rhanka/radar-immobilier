@@ -32,6 +32,9 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Require five missing-receipt failures on the exact pre-fix route,
+  then five restored passes and byte equality, before the final full campaign.
+- [x] Lint every changed app/BASE read module; include the receipt-read audit scope.
 - [x] PWE-EX2 includes the existing surface DB test: require the authorized
   receipt (section7.4), retain the no-challenge assertion and add masking after revoke.
 - [x] Keep negative receipt diagnostics limited to public fields, excluding CSRF bytes.

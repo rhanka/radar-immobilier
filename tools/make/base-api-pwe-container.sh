@@ -32,12 +32,17 @@ check typecheck node_modules/.bin/tsc --noEmit -p api/tsconfig.pwe-tests.json
 shopt -s nullglob
 lint=(api/tests/integration/pwe-*.ts api/src/services/facets/pwe-*.ts
   api/src/artifacts/write-intent-page{,-budget,-harness}.ts
+  api/src/artifacts/write-intent-app-{route,authority,result,surface-db.test}.ts
+  api/src/services/facets/signal-write-receipt.ts
   api/src/artifacts/pwe-*.ts tools/make/base-api-pwe*.mjs)
 check eslint node_modules/.bin/eslint "${lint[@]}"
 cd api
 node ../tools/make/base-api-ct8.mjs > /evidence/ct8.log
 node ../tools/make/base-api-b2-setup.mjs > /evidence/db-setup.log
 read -r -a scopes <<< "${2//$'\n'/ }"
+if [[ $1 == full ]]; then
+  check app-result-regression node ../tools/make/base-api-pwe-app-result-regression.mjs
+fi
 check required ../node_modules/.bin/vitest run --config vitest.isolated.config.ts "${scopes[@]}" \
   --reporter=default --reporter=json --outputFile.json=/evidence/required.json
 if [[ $1 == full ]]; then
