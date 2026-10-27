@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 
 import type { DocumentDate } from "@radar/sources";
-import { mergeExtractions, type TextJsonGenerationClient } from "@sentropic/graphify";
+import { mergeExtractions, type TextJsonGenerationClient } from "@sentropic/engram";
 
 import type { Database } from "../../db/client.js";
 import type { ObjectStore } from "../../storage/object-store.js";

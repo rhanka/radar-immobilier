@@ -4,7 +4,7 @@ import {
   createGraphifyMesh,
   meshTextJsonClient,
   type GraphifyMesh,
-} from "@sentropic/graphify/llm-mesh";
+} from "@sentropic/engram/llm-mesh";
 import {
   CloudCodeRuntimeClient,
   CodexRuntimeClient,
