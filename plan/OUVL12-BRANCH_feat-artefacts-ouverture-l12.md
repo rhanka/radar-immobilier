@@ -117,6 +117,7 @@ isolation, current authorization, transactional quotas and replay safety.
   - [x] Add tenth-success ensure/publish replay probes through HTTP and MCP.
   - [x] Add last-unit concurrent S3 counting and nonrefunded quota-refusal probes.
   - [x] Implement a conditional atomic attempt reservation and retryable 429.
+  - [x] Restrict account-binding workspace exemption to explicit general mode.
   - [ ] Reproduce replay at the tenth success through HTTP and MCP façades.
   - [ ] Count S3 calls on the last concurrent attempt and exhausted durable quota.
   - [ ] Implement shared guarded replay and atomic pre-upload attempt admission.

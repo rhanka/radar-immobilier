@@ -92,7 +92,7 @@ describe("ouverture L2 artifact tools on the MCP binding", () => {
 
   it("admits stale workspace claims on artifact tools over HTTP but keeps business controls", async () => {
     const app = createImmoHttpApp(HTTP_CONFIG, { keySource: keys.keySource, artifacts: bound.binding,
-      authorize: accountAuthorizer(h.pool) });
+      authorize: accountAuthorizer(h.pool, h.bindingEnv) });
     const token = await signToken(keys.privateKey, {
       sub: ALICE, scope: "immo:read immo:search", workspaces: [STALE],
     });

@@ -33,12 +33,21 @@ describe("trusted account bindings", () => {
   });
 });
 describe("artifact tools in the general opening", () => {
+  it("should exempt stale workspace claims only in general mode", async () => {
+    for (const mode of ["general", "validation", "off"] as const) {
+      const query = vi.fn().mockResolvedValueOnce({ rows: [{ id: "id", status: "approved" }] })
+        .mockResolvedValueOnce({ rows: [] });
+      const authorize = accountAuthorizer({ query }, { ARTIFACTS_CONTROL_MODE: mode });
+      expect(await authorize("artifacts_ensure", request([workspace]))).toBe(mode === "general");
+      expect(query).toHaveBeenCalledTimes(mode === "general" ? 1 : 2);
+    }
+  });
   it("should admit an approved account whatever the workspace claims carry", async () => {
     for (const workspaces of [["default"], [], ["stale-workspace"],
       ["aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"],
       "not-an-array", undefined, [42]] as unknown[]) {
       const query = vi.fn().mockResolvedValue({ rows: [{ id: "id", status: "approved" }] });
-      const authorize = accountAuthorizer({ query });
+      const authorize = accountAuthorizer({ query }, { ARTIFACTS_CONTROL_MODE: "general" });
       for (const tool of ["artifacts_ensure", "artifacts_publish", "artifacts_list", "artifacts_get"]) {
         expect(await authorize(tool, request(workspaces as never)), `${tool} ${String(workspaces)}`)
           .toBe(true);
