@@ -41,6 +41,8 @@ isolation, current authorization, transactional quotas and replay safety.
   have not executed. Resume requires the foreign stack to finish and release.
 - [x] Repaired local queue control: stop proxy signals left child waiters;
   removed only this workspace's duplicates and added graceful file cancellation.
+- [x] Resumed at 14:50 UTC after the foreign stack stopped; acquired the shared
+  lock and verified no foreign test stack before starting the dedicated stack.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch integration; no cherry-pick.
@@ -60,6 +62,7 @@ isolation, current authorization, transactional quotas and replay safety.
   - [ ] Approved accounts bypass stale workspace claims for artifact tools.
   - [ ] Four tools, server identities, forged-field refusals and MCP tests.
 - [ ] **Lot 3 — Qualification**
+  - [x] Repair the rate-probe test double's account-query row type.
   - [x] Await quota promise results in unit assertions.
   - [x] Bind quota actor to the coordinator input, before approval reads.
   - [x] Require real publication with zero/two memberships and by both MCP actors.
