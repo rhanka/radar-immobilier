@@ -32,6 +32,9 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Add app-specific old-6L1 receipt mutation and target the actual executor
+  boundary on replay; preserve the full pre-fix source SHA in the regression receipt.
+- [x] Verify composite audit command references resolve all three committed events.
 - [x] Require five missing-receipt failures on the exact pre-fix route,
   then five restored passes and byte equality, before the final full campaign.
 - [x] Lint every changed app/BASE read module; include the receipt-read audit scope.
