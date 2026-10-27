@@ -64,6 +64,7 @@ isolation, current authorization, transactional quotas and replay safety.
 - [ ] **Lot 3 — Qualification**
   - [x] Repair the rate-probe test double's account-query row type.
   - [x] Grant the stale-claims fixture its business scope to reach account denial.
+  - [x] Derive PG harness types from MCP ports instead of undeclared API packages.
   - [x] Await quota promise results in unit assertions.
   - [x] Bind quota actor to the coordinator input, before approval reads.
   - [x] Require real publication with zero/two memberships and by both MCP actors.
