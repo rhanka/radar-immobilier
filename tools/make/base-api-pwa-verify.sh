@@ -64,7 +64,7 @@ write_compose
 [[ ${PWA_OFFLINE:-0} != 1 ]] || source tools/make/base-api-pwa-offline.sh
 archive_sources
 archive_ci_inputs
-git ls-files --cached --others --exclude-standard -- 'packages/immo-mcp/config/*.json' \
+git ls-files --cached --others --exclude-standard -- ui/package.json 'packages/immo-mcp/config/*.json' \
   'packages/immo-mcp/src/fixtures/*.json' tools/h4-mcp.mk deploy/k8s/41-immo-mcp-ingress.yaml \
   api/src/scripts/base-preprod-rights.json tools/make/artefacts-delivery-account.sql \
   tools/make/artefacts-delivery-probe.sh \

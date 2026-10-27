@@ -17,6 +17,9 @@ for file in tools/make/base-api-pwa*.sh; do bash -n "$file"; done
 npm run build --workspace=api
 printf '%s\n' 'PASS migration and static gates' > /evidence/sequence-static-result
 if [[ ${2:-1} == 1 ]]; then
+  npm run test --workspace=api -- tests/integration/artifacts-baskets-browser.spec.ts \
+    --config vitest.isolated.config.ts --reporter=default --reporter=json \
+    --outputFile.json=/evidence/browser-collection.json
   npm run test --workspace=api -- --config vitest.isolated.config.ts \
     --reporter=default --reporter=json --outputFile.json=/evidence/ci-tests.json
   node tools/make/base-api-results.mjs /evidence/ci-tests.json > /evidence/ci-tests.tsv
