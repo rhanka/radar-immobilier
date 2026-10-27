@@ -286,8 +286,9 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
         applyReaderContentHeaders(c);
         if (file.contentType.startsWith("text/html")) {
           const grant = presentedGrant(c);
-          c.header("Content-Security-Policy", releaseCspForHtml(text));
-          return c.html(injectGrantIntoHtml(text, grant));
+          const html = injectGrantIntoHtml(text, grant);
+          c.header("Content-Security-Policy", releaseCspForHtml(html));
+          return c.html(html);
         }
         c.header("Content-Type", file.contentType);
         return c.body(typeof file.body === "string" ? file.body : file.body as Uint8Array);
