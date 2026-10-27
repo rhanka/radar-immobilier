@@ -25,9 +25,11 @@ Qualify, repair and integrate the supplied PW-C implementation on 07ef2757.
   - `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, other branch plans.
   - PW-B/PW-D implementation, migrations and A6 read contracts.
 - **Conditional Paths**:
-  - None; no scope exception required.
+  - `api/tests/integration/pw-write-authority-rights.spec.ts`: PWC-EX1.
 
 ## Feedback Loop
+- [x] PWC-EX1: update two inherited strict management DTO expectations for
+  the new durable state field. Test-only impact; rollback removes that field.
 - [x] Cover prepared-header preservation on summary, management and login HTML.
 - [x] Supply the same synthetic database to createApp's shared route dependencies.
 - [x] Delivery: preserve prepared response headers on all three HTML documents.
