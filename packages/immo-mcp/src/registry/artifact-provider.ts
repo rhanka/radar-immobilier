@@ -24,6 +24,31 @@ const unavailable = async (): Promise<never> => { throw new Error("native_wire_d
 const refusal = (error: string, retryable: boolean): CallToolResult => ({ isError: true,
   content: [{ type: "text", text: JSON.stringify({ error, retryable }) }] });
 
+/**
+ * Caller-supplied identity fields are never honored (L12): the actor, owner
+ * and storage scope always come from the verified request and the server
+ * configuration. Rejected before profile validation so the refusal is stable
+ * whatever the upstream profile accepts.
+ */
+const FORGED_ARTIFACT_CALLER_FIELDS = new Set([
+  "actor",
+  "actorId",
+  "owner",
+  "ownerId",
+  "tenant",
+  "tenantId",
+  "storageScope",
+  "storageScopeId",
+  "paramsHash",
+  "internalIdempotencyKey",
+  "source",
+]);
+
+export function hasForgedArtifactCallerFields(args: unknown): boolean {
+  if (typeof args !== "object" || args === null || Array.isArray(args)) return false;
+  return Object.keys(args).some((key) => FORGED_ARTIFACT_CALLER_FIELDS.has(key));
+}
+
 export interface ArtifactMcpBinding {
   readonly manifest: RegistryDefinition["manifest"];
   readonly configuration: Readonly<{ storageScopeId: string }>;
@@ -59,6 +84,7 @@ export function bindArtifactProvider(options: {
     }))),
     async invoke(tool: string, args: unknown, request: VerifiedMcpRequest): Promise<CallToolResult> {
       // Selection/input refusal happens before minting any host authority.
+      if (hasForgedArtifactCallerFields(args)) return refusal("invalid_request", false);
       try { IMMO_ARTIFACT_PROFILE.validate(tool, args); }
       catch (error) {
         if (error instanceof ArtifactProfileInputError) return refusal(error.publicCode, error.retriable);
@@ -74,7 +100,9 @@ export function bindArtifactProvider(options: {
           return refusal("capability_unavailable", true);
         }
         if (!decision.allowed) return refusal(decision.body.error, false);
-        frozen = Object.freeze({ workspaceId: decision.workspaceId, scope });
+        // General opening reports no workspace: nothing is frozen, so the
+        // commit guard below cannot diverge from it.
+        if (decision.workspaceId !== "") frozen = Object.freeze({ workspaceId: decision.workspaceId, scope });
       }
       let authority: AuthorizeCommit;
       try {
