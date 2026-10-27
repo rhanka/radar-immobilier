@@ -9,5 +9,6 @@
   {"label":"missing exact name", "args":["ConfigMap","absent"], "output":""},
   {"label":"missing kind", "args":["CronJob"], "output":""},
   {"label":"empty exact name", "args":["ConfigMap",""], "output":"kind: ConfigMap\nmetadata:\n  namespace: missing-name\n"},
-  {"label":"empty prefix", "flags":["--name-prefix","","--names"], "args":["ConfigMap"], "output":"radar-api\nradar-ui-nginx-a\nradar-ui-nginx-b\n\n"}
+  {"label":"empty prefix", "flags":["--name-prefix","","--names"], "args":["ConfigMap"], "output":"radar-api\nradar-ui-nginx-a\nradar-ui-nginx-b\n\n"},
+  {"label":"empty kind does not select a missing kind", "args":[""], "output":""}
 ]
