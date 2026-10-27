@@ -11,7 +11,7 @@ network_inventory() {
   "${k[@]}" get cronjobs -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.jobTemplate.spec.template.spec.hostNetwork}{"\t"}{.spec.jobTemplate.spec.template.spec.containers[*].ports[*].hostPort}{"\t"}{.spec.jobTemplate.spec.template.spec.initContainers[*].ports[*].hostPort}{"\n"}{end}' >> "$OUTPUT/network-templates.tsv"
   "${k[@]}" api-resources --namespaced=true --verbs=list -o name > "$OUTPUT/network-resource-types.txt"
   while IFS= read -r resource; do
-    [[ $resource =~ ^[a-z0-9.]+$ ]] || fail 'Invalid network resource discovery'
+    [[ $resource =~ ^[a-z0-9.-]+$ ]] || fail 'Invalid network resource discovery'
     case $resource in ingresses.networking.k8s.io|networkpolicies.networking.k8s.io) continue;; esac
     if [[ $resource =~ ingress|gateway|route|proxy|virtualservice|virtualserver|transportserver|networkpolic|serviceimport|serviceexport ]]; then
       "${k[@]}" get "$resource" -o json | jq '{items:[.items[]|{name:.metadata.name,uid:.metadata.uid}]}' > "$OUTPUT/network-$resource.json"
@@ -40,14 +40,15 @@ assert_network() {
   local policies
   policies=$(jq -Sc '[.items[]|{metadata:(.metadata|{name,uid,resourceVersion}),spec}]|sort_by(.metadata.name)' "$OUTPUT/network-policies.json" | sha256sum | cut -d' ' -f1)
   printf '%s\n' "$policies" > "$OUTPUT/network-policies.sha256"
+  jq '.maintenance.networkIsolation' "$INPUT" > "$OUTPUT/network-isolation-receipt.json"
   { sed '$d' tools/make/base-preprod-input.jq; cat <<'JQ'
-.maintenance.networkIsolation as $p | $p|attestation and .passed==true
+. as $c | .maintenance.networkIsolation as $p | $p|attestation and .passed==true
   and .binding==$c.binding and .image==$c.image and .context==$c.context and .namespace==$c.namespace
   and .policySha256==$policies and .networkPolicyEnforced==true
   and .podIPDenied==true and .serviceIPDenied==true and .nodeOriginDenied==true
 JQ
   } > "$OUTPUT/network-proof.jq"
-  jq -e --arg policies "$policies" --argjson c "$(cat "$INPUT")" -f "$OUTPUT/network-proof.jq" "$INPUT" >/dev/null \
+  jq -e --arg policies "$policies" -f "$OUTPUT/network-proof.jq" "$INPUT" >/dev/null \
     || fail 'Fresh bound CNI enforcement probes required; direct pod access is unverified'
 }
 assert_namespace_endpoints() {

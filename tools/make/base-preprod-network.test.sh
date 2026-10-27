@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# Sourced by the hermetic operator fixture; all cluster commands are fake.
+cp input.json network-good-input.json
+for state in nodeport loadbalancer hostnetwork hostport template-hostport alternate-route extra-endpoint extra-legacy no-isolation allow-pods policy-change; do
+  export FAKE_STATE=$state
+  for action in activate start-api reopen-api; do
+    proofs=$testdir/proofs.json
+    [[ $action != start-api ]] || proofs=$testdir/activation-receipt.json
+    [[ $action != reopen-api ]] || proofs=$testdir/acceptance.json
+    : > cluster-calls
+    if invoke "$action" EXPECTED="$testdir/expected.json" PROOFS="$proofs"; then
+      echo "Network bypass accepted: $action $state" >&2; exit 1
+    fi
+    case $state in
+      nodeport|loadbalancer) error='Unqualified Service exposure';;
+      hostnetwork|hostport) error='Pod exposes hostNetwork or hostPort';;
+      template-hostport) error='Workload template exposes hostNetwork or hostPort';;
+      alternate-route) error='Unsupported alternate network route/policy';;
+      extra-endpoint) error='A consumer endpoint is ready';;
+      extra-legacy) error='A consumer legacy endpoint is ready';;
+      no-isolation|allow-pods) error='Consumer pod ingress is not isolated';;
+      policy-change) error='Fresh bound CNI enforcement probes required';;
+    esac
+    rg -qF "$error" "result-$n.log" || { cat "result-$n.log" >&2; exit 1; }
+    if rg -- '--request-timeout=20s (create|patch|scale|set|delete|rollout) ' cluster-calls; then exit 1; fi
+  done
+done
+unset FAKE_STATE
+for filter in 'del(.maintenance.networkIsolation)' '.maintenance.networkIsolation.networkPolicyEnforced=false' \
+  '.maintenance.networkIsolation.nodeOriginDenied=false' '.maintenance.networkIsolation.binding.actorSub="foreign"' \
+  '.maintenance.networkIsolation.observedAt="2000-01-01T00:00:00Z"'; do
+  jq "$filter" network-good-input.json > input.json
+  : > cluster-calls
+  if invoke start-api PROOFS="$testdir/activation-receipt.json"; then echo 'Unverified pod isolation accepted' >&2; exit 1; fi
+  rg -qF 'Fresh bound CNI enforcement probes required' "result-$n.log"
+  if rg -- '--request-timeout=20s (create|patch|scale|set|delete|rollout) ' cluster-calls; then exit 1; fi
+done
+cp network-good-input.json input.json
+# A qualified API endpoint can exist during Q1/Q2, never during closed maintenance.
+export FAKE_STATE=qualified-endpoint
+if invoke collect-maintenance EXPECTED="$testdir/expected.json" PROOFS="$testdir/proofs.json"; then exit 1; fi
+rg -qF 'A consumer endpoint is ready' "result-$n.log"
+invoke tunnel-api
+unset FAKE_STATE
+echo 'PASS alternate Services/routes, host ports, namespace endpoints, CNI evidence and qualification boundary'
