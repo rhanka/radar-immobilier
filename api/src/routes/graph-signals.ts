@@ -15,9 +15,19 @@
  *   Returns Signal + DesignationEvent nodes for one city.
  *   Response: { ok: true, citySlug, nodes: [{ id, type, label, citySlug, sourceRef, createdAt, props }] }
  *   Returns 404 when no signal nodes exist for the city.
+ *
+ * Discarded signals (lot 2, no storage): both routes hide the viewer discard
+ * set D(viewer) BEFORE aggregation and pagination — detail before cards and
+ * legacyProjection, by-city before aggregateGraphSignalProjectionRows. Keys
+ * are native (city_slug, type, id); the viewer comes from the verified session
+ * set by `protect`; the default port is empty (baseline parity).
+ * `showDiscarded=1` reveals the full population B(F) on both routes WITHOUT
+ * calling the port. A failing port (or a missing session while auth is
+ * enabled) is an error: 503 { ok: false, error: "discarded_signals_unavailable" }
+ * carrying neither nodes nor cities — never a silent full set.
  */
 
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
 import {
   classifyBPrime,
   readRegulatoryStatus,
@@ -32,6 +42,17 @@ import {
   getSignalNodesForCity,
   listCitiesWithSignalNodes,
 } from "../services/graph/graph-store.js";
+import {
+  EMPTY_DISCARDED_KEYS,
+  EMPTY_DISCARDED_SIGNALS,
+  filterDiscardedSignals,
+  type DiscardedSignalKey,
+  type DiscardedSignalsPort,
+} from "../services/graph/discarded-signals.js";
+import { resolveGraphSignalsViewer } from "./auth.js";
+import { privateSignalResponse } from "../services/facets/private-response.js";
+import { legacyFenceError, legacyFenceStatus, type LegacyRetirementState } from "../services/facets/legacy-retirement.js";
+import { targetFingerprint } from "../services/facets/target.js";
 import type { Database } from "../db/client.js";
 import type { ObjectStore } from "../storage/object-store.js";
 import {
@@ -51,6 +72,40 @@ export interface GraphSignalsDeps {
    * `DOC_ENRICHMENT_BUDGET_MS`. Surtout utile aux tests.
    */
   docEnrichmentBudgetMs?: number;
+  /** Native discard keys for the session viewer; empty by default. */
+  discarded?: DiscardedSignalsPort;
+  /**
+   * OIDC wiring. When auth is enabled the viewer MUST come from the verified
+   * session set by `protect`; a missing session is a wiring error (reject),
+   * never an anonymous viewer. Absent/disabled means open mode (tests, local
+   * dev): the viewer is anonymous (null).
+   */
+  auth?: { enabled: boolean };
+  /**
+   * Legacy retirement fence. Absent (or `serving`) keeps current behavior.
+   * `cutover-closed` answers 503, `retired` answers 410 with the scoped
+   * successor; a 404 is never a retirement answer. Flipped only by the
+   * cutover activation through the CT-1/CT-2 handoff, never unilaterally.
+   */
+  retirement?: LegacyRetirementState;
+}
+
+/**
+ * Resolve the viewer discard set once per request. `showDiscarded=1` reveals
+ * the full population WITHOUT calling the port. Any port failure rejects;
+ * callers answer 503 `discarded_signals_unavailable` (failure is an error,
+ * never an empty discarded set).
+ */
+async function readDiscardedKeys(
+  c: Context,
+  deps: GraphSignalsDeps,
+): Promise<ReadonlySet<DiscardedSignalKey>> {
+  if (c.req.query("showDiscarded") === "1") return EMPTY_DISCARDED_KEYS;
+  const viewer = resolveGraphSignalsViewer(c);
+  if (viewer === null && deps.auth?.enabled === true) {
+    throw new Error("graph-signals viewer unavailable (auth enabled, no session)");
+  }
+  return (deps.discarded ?? EMPTY_DISCARDED_SIGNALS).forViewer(viewer);
 }
 
 export interface GraphSignalDocRef {
@@ -81,6 +136,8 @@ export interface GraphSignalCard {
   label: string;
   citySlug: string | null;
   sourceRef: string | null;
+  /** Content fingerprint of the exact stored node served here (6B displayed-version capture). */
+  facetFingerprint: string;
   createdAt: string | null;
   description: string | null;
   publishedAt: string | null;
@@ -197,6 +254,9 @@ function parseDocRefRecord(item: unknown, fallbackId: string): GraphSignalDocRef
     "source_ref",
   ]);
   const page = firstNumber(r, ["page", "pageNumber", "page_number"]);
+  const title = firstString(r, ["title", "documentTitle", "document_title"]);
+  const publishedAt = firstString(r, ["publishedAt", "published_at", "documentDate", "document_date"]);
+  const fetchedAt = firstString(r, ["fetchedAt", "fetched_at"]);
   const bbox = r.bbox ?? r.boundingBox ?? r.bounding_box;
   // Filet Radar : un PV auto-lié porte `provisional: true` + `linkSource`.
   const linkSource = firstString(r, ["linkSource", "link_source"]);
@@ -213,6 +273,9 @@ function parseDocRefRecord(item: unknown, fallbackId: string): GraphSignalDocRef
     ...(sourceUrl !== null ? { sourceUrl } : {}),
     ...(rawRef !== null ? { rawRef } : {}),
     ...(documentUrl !== null ? { documentUrl } : {}),
+    ...(title !== null ? { title } : {}),
+    ...(publishedAt !== null ? { publishedAt } : {}),
+    ...(fetchedAt !== null ? { fetchedAt } : {}),
     ...(bbox !== undefined ? { bbox } : {}),
     ...(provisional !== undefined ? { provisional } : {}),
     ...(linkSource !== null ? { linkSource } : {}),
@@ -263,6 +326,9 @@ function extractDocRefs(
       ref.rawRef ?? "",
       ref.documentUrl ?? "",
       ref.excerpt ?? "",
+      ref.title ?? "",
+      ref.publishedAt ?? "",
+      ref.fetchedAt ?? "",
     ].join("\u0000");
     if (seen.has(key)) return false;
     seen.add(key);
@@ -303,13 +369,13 @@ export const DOC_ENRICHMENT_BUDGET_MS = 2_000;
  *   restantes sont dégradées (servies sans métadonnée doc) au lieu de bloquer
  *   la réponse — l'endpoint répond TOUJOURS, même si S3 rame ou pend.
  */
-interface DocEnrichmentContext {
+export interface DocEnrichmentContext {
   readonly cache: Map<string, Promise<DocumentMetadata | null>>;
   readonly deadlineAt: number;
   exceeded: boolean;
 }
 
-function createDocEnrichmentContext(
+export function createDocEnrichmentContext(
   budgetMs: number = DOC_ENRICHMENT_BUDGET_MS,
 ): DocEnrichmentContext {
   return { cache: new Map(), deadlineAt: Date.now() + budgetMs, exceeded: false };
@@ -459,6 +525,7 @@ function buildSignalCard(
     label: node.label,
     citySlug: node.citySlug,
     sourceRef: node.sourceRef,
+    facetFingerprint: targetFingerprint(node),
     createdAt: node.createdAt ? node.createdAt.toISOString() : null,
     description,
     publishedAt: firstPublishedAt,
@@ -473,7 +540,7 @@ function buildSignalCard(
   };
 }
 
-async function toGraphSignalCard(
+export async function toGraphSignalCard(
   store: ObjectStore,
   node: Awaited<ReturnType<typeof getSignalNodesForCity>>[number],
   context: DocEnrichmentContext,
@@ -499,7 +566,7 @@ async function toGraphSignalCard(
  * par doc-ref (cas non prévu), on renvoie quand même la carte sans enrichissement
  * S3 plutôt que de faire tomber toute la ville. Aucun accès store.
  */
-function toDegradedSignalCard(
+export function toDegradedSignalCard(
   node: Awaited<ReturnType<typeof getSignalNodesForCity>>[number],
 ): GraphSignalCard {
   const props = (node.props ?? {}) as Record<string, unknown>;
@@ -881,11 +948,49 @@ function mergeEvidenceWithDocRefs(
   };
 }
 
+export class GraphSignalDiscardedReadError extends Error {
+  readonly status = 503;
+  constructor(cause: unknown) { super("discarded_signals_unavailable", { cause }); }
+}
+
+/** Shared legacy read: native visibility before canonical cards, no HTTP or writes. */
+export async function readGraphSignalCards(
+  deps: GraphSignalsDeps, city: string,
+  readDiscarded: () => Promise<ReadonlySet<DiscardedSignalKey>>,
+) {
+  const stored = await getSignalNodesForCity(deps.db, city);
+  if (stored.length === 0) return [];
+  let discarded: ReadonlySet<DiscardedSignalKey>;
+  try { discarded = await readDiscarded(); }
+  catch (error) {
+    console.error("[graph-signals] discarded-signals port failed:", error);
+    throw new GraphSignalDiscardedReadError(error);
+  }
+  const nodes = filterDiscardedSignals(stored, discarded);
+  if (nodes.length === 0) return [];
+  const enrichment = createDocEnrichmentContext(deps.docEnrichmentBudgetMs);
+  const mapped = await Promise.all(nodes.map((n) =>
+    toGraphSignalCard(deps.store, n, enrichment, city).catch((error) => {
+      console.error(`[graph-signals] signal card build failed (city=${city} node=${n.id}):`, error);
+      return toDegradedSignalCard(n);
+    })));
+  if (enrichment.exceeded) {
+    console.warn(`[graph-signals] doc enrichment budget exceeded (city=${city}, nodes=${nodes.length}): responded with degraded doc refs`);
+  }
+  return mapped;
+}
+
 export function graphSignalsRoute(deps: GraphSignalsDeps): Hono {
   const app = new Hono();
+  app.use("/api/graph-signals/*", privateSignalResponse);
 
   // GET /api/graph-signals/by-city
   app.get("/api/graph-signals/by-city", async (c) => {
+    const fence = legacyFenceStatus(deps.retirement);
+    if (fence !== null) {
+      return c.json({ ok: false, error: legacyFenceError(fence),
+        successor: "GET /api/v1/workspaces/:workspaceId/signal-facets/coherent-city?citySlug&mode=signal" }, fence);
+    }
     const dateFrom = c.req.query("dateFrom")?.trim() || undefined;
     const dateTo = c.req.query("dateTo")?.trim() || undefined;
     const scrape = c.req.query("dateBasis") === "scrap";
@@ -900,42 +1005,46 @@ export function graphSignalsRoute(deps: GraphSignalsDeps): Hono {
           ...(excludeDerogations ? { excludeDerogations: true } : {}),
         }
       : undefined;
-    const cities = dateRange
-      ? await listCitiesWithSignalNodes(deps.db, dateRange)
-      : await listCitiesWithSignalNodes(deps.db);
+    // Discard native rows inside the store before counts and partitions.
+    let discarded: ReadonlySet<DiscardedSignalKey>;
+    try {
+      discarded = await readDiscardedKeys(c, deps);
+    } catch (error) {
+      console.error("[graph-signals] discarded-signals port failed:", error);
+      return c.json({ ok: false, error: "discarded_signals_unavailable" }, 503);
+    }
+    // Three explicit call shapes (not one options bag): the unfiltered
+    // branches keep the exact baseline invocation so metamorphic tests prove
+    // parity with the reference dataset; the filtered branch applies native
+    // keys before aggregation.
+    const cities = discarded.size > 0
+      ? await listCitiesWithSignalNodes(deps.db, dateRange, { discarded })
+      : dateRange
+        ? await listCitiesWithSignalNodes(deps.db, dateRange)
+        : await listCitiesWithSignalNodes(deps.db);
     const totalCount = cities.reduce((sum, city) => sum + city.signalCount, 0);
     return c.json({ ok: true, totalCount, cities });
   });
 
   // GET /api/graph-signals/:city
   app.get("/api/graph-signals/:city", async (c) => {
-    const city = c.req.param("city");
-    // Un échec ici (DB down) est non-récupérable → 5xx légitime. L'enrichissement
-    // documentaire, lui, est best-effort et NE DOIT PAS produire de 5xx.
-    const nodes = await getSignalNodesForCity(deps.db, city);
-    if (nodes.length === 0) {
-      return c.json({ ok: false, error: "no_signal_nodes", citySlug: city }, 404);
+    const fence = legacyFenceStatus(deps.retirement);
+    if (fence !== null) {
+      return c.json({ ok: false, error: legacyFenceError(fence),
+        successor: "GET /api/v1/workspaces/:workspaceId/signal-facets/coherent-city?citySlug&mode=signal and GET /api/v1/workspaces/:workspaceId/signal-facets/reveal?citySlug&type&id for archived targets" }, fence);
     }
-    // Résilience PAR NŒUD : un nœud dont la construction échoue est dégradé
-    // (carte sans enrichissement S3) plutôt que de faire tomber toute la ville.
-    // Le contexte d'enrichissement (cache + budget temps) est PAR REQUÊTE :
-    // tous les nœuds partagent les résolutions S3 et le même budget global.
-    const enrichment = createDocEnrichmentContext(deps.docEnrichmentBudgetMs);
-    const mapped = await Promise.all(
-      nodes.map((n) =>
-        toGraphSignalCard(deps.store, n, enrichment, city).catch((error) => {
-          console.error(
-            `[graph-signals] signal card build failed (city=${city} node=${n.id}):`,
-            error,
-          );
-          return toDegradedSignalCard(n);
-        }),
-      ),
-    );
-    if (enrichment.exceeded) {
-      console.warn(
-        `[graph-signals] doc enrichment budget exceeded (city=${city}, nodes=${nodes.length}): responded with degraded doc refs`,
-      );
+    const city = c.req.param("city");
+    let mapped: GraphSignalCard[];
+    try {
+      mapped = await readGraphSignalCards(deps, city, () => readDiscardedKeys(c, deps));
+    } catch (error) {
+      if (error instanceof GraphSignalDiscardedReadError) {
+        return c.json({ ok: false, error: error.message }, error.status);
+      }
+      throw error;
+    }
+    if (mapped.length === 0) {
+      return c.json({ ok: false, error: "no_signal_nodes", citySlug: city }, 404);
     }
     const legacyProjection = buildLegacyZmpProjection(
       mapped.map((node) => node.legacySubset),

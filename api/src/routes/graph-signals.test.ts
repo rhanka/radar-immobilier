@@ -10,11 +10,31 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { Hono } from "hono";
+import {
+  SignJWT,
+  generateKeyPair,
+  exportJWK,
+  createLocalJWKSet,
+  type JWK,
+  type JWTVerifyGetKey,
+} from "jose";
 import { buildRawDocumentRecord, rawMetaKey } from "@radar/sources";
+import { countsInvariant } from "@radar/domain";
 
 import { graphSignalsRoute } from "./graph-signals.js";
+import { createApp } from "../app.js";
+import { protect } from "./auth.js";
+import type { AuthConfig } from "../config.js";
 import type { Database } from "../db/client.js";
 import type { ObjectInfo, ObjectStore } from "../storage/object-store.js";
+import { signSession } from "../services/auth/session.js";
+import {
+  discardedSignalKey,
+  unionDiscardedSignals,
+  type DiscardedSignalKey,
+  type DiscardedSignalsPort,
+} from "../services/graph/discarded-signals.js";
 
 // Mock the graph-store module so tests do not touch Postgres.
 vi.mock("../services/graph/graph-store.js", async (importOriginal) => {
@@ -30,6 +50,8 @@ import {
   buildNodeRow,
   listCitiesWithSignalNodes,
   getSignalNodesForCity,
+  type GraphSignalProjectionRow,
+  type CitySignalCounts,
 } from "../services/graph/graph-store.js";
 import {
   SUTTON_A_IDS,
@@ -808,5 +830,516 @@ describe("GET /api/graph-signals/:city", () => {
     const body = (await res.json()) as { nodes: Array<{ etape: string | null; regulatoryStatus: string }> };
     expect(body.nodes[0]!.etape).toBeNull();
     expect(body.nodes[0]!.regulatoryStatus).toBe("anticipation");
+  });
+});
+
+function stubDiscarded(keys: DiscardedSignalKey[]) {
+  return { forViewer: vi.fn<DiscardedSignalsPort["forViewer"]>(async () => new Set(keys)) };
+}
+
+const routeWithDiscarded = (discarded: DiscardedSignalsPort, db = mockDb) =>
+  graphSignalsRoute({ db, store: new MemoryStore(), discarded });
+
+function lot2CityNodes() {
+  const props = { properties: { category: "rezonage", etape: "avis_motion", nb_unites_max: "6" } };
+  return [
+    makeNode("sig-keep", "drummondville", "Signal", props),
+    makeNode("sig-drop", "drummondville", "Signal", props),
+    makeNode("evt-drop", "drummondville", "DesignationEvent", props),
+    // Impossible in base (storage keys are city+id, so one city+id holds a
+    // single node): proves discard keys are type-sensitive — hiding the
+    // Signal must not hide the DesignationEvent sharing its id.
+    makeNode("sig-drop", "drummondville", "DesignationEvent", props),
+  ];
+}
+
+async function serveCity(nodes: ReturnType<typeof lot2CityNodes>, port?: DiscardedSignalsPort, query = "") {
+  vi.mocked(getSignalNodesForCity).mockResolvedValueOnce(
+    nodes as unknown as Awaited<ReturnType<typeof getSignalNodesForCity>>,
+  );
+  const app = port ? routeWithDiscarded(port) : freshRoute();
+  const res = await app.request(`/api/graph-signals/drummondville${query}`);
+  return { status: res.status, body: await res.json() };
+}
+
+describe("city detail with native discards", () => {
+  it.each([
+    { name: "empty port", dropped: [], query: "" },
+    { name: "two native keys", dropped: [1, 2], query: "" },
+    { name: "recreated nodes", dropped: [1, 2], query: "" },
+    { name: "showDiscarded=1", dropped: [1, 2], query: "?showDiscarded=1" },
+    { name: "showDiscarded=true", dropped: [1, 2], query: "?showDiscarded=true" },
+    { name: "all discarded", dropped: [0, 1, 2, 3], query: "" },
+  ])("matches the reference dataset with $name", async ({ name, dropped, query }) => {
+    const nodes = lot2CityNodes();
+    const port = stubDiscarded(dropped.map((i) => {
+      const n = nodes[i]!;
+      return discardedSignalKey(n.citySlug, n.type, n.id);
+    }));
+    if (name === "recreated nodes") nodes[1] = { ...nodes[1]!, label: "Recreated", props: {} };
+    const show = query === "?showDiscarded=1";
+    const kept = show ? nodes : nodes.filter((_, i) => !dropped.includes(i));
+    const reference = await serveCity(kept);
+    expect(reference.status).toBe(kept.length ? 200 : 404);
+    expect(await serveCity(nodes, port, query)).toEqual(reference);
+    expect(port.forViewer).toHaveBeenCalledTimes(show ? 0 : 1);
+    if (!show) expect(port.forViewer).toHaveBeenCalledWith(null);
+  });
+
+  it("uses the session viewer and ignores client-supplied viewer identities", async () => {
+    const port = stubDiscarded([]);
+    const app = new Hono();
+    app.use("*", async (c, next) => {
+      c.set("session" as never, { sub: "viewer-1" } as never);
+      await next();
+    });
+    app.route("/", routeWithDiscarded(port));
+    mockCityNodes(lot2CityNodes());
+    const res = await app.request("/api/graph-signals/drummondville?viewer=spoofed", {
+      headers: { "x-user-id": "spoofed" },
+    });
+    expect(res.status).toBe(200);
+    expect(port.forViewer).toHaveBeenCalledWith("viewer-1");
+  });
+
+  it("answers 503 discarded_signals_unavailable when the injected port rejects", async () => {
+    const nodes = lot2CityNodes();
+    const port: DiscardedSignalsPort = {
+      forViewer: async () => { throw new Error("unavailable"); },
+    };
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const { status, body } = await serveCity(nodes, port);
+      expect(status).toBe(503);
+      expect(body).toEqual({ ok: false, error: "discarded_signals_unavailable" });
+    } finally {
+      log.mockRestore();
+    }
+  });
+
+  it("never calls the port when the city has no nodes (404)", async () => {
+    const port = stubDiscarded([]);
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce([]);
+    const res = await routeWithDiscarded(port).request("/api/graph-signals/nowhere");
+    expect(res.status).toBe(404);
+    expect(port.forViewer).not.toHaveBeenCalled();
+  });
+});
+
+function lot2ProjectionRows(): GraphSignalProjectionRow[] {
+  const row = (id: string, citySlug: string, category: string, label: string): GraphSignalProjectionRow => ({
+    id, citySlug, type: "Signal", category, label, description: label,
+    etapeAnnote: "avis_motion", nbUnitesMax: "8", sourceRef: null,
+    props: { properties: { category, description: label, etape: "avis_motion", nb_unites_max: "8" } },
+  });
+  return [
+    row("qualified", "drummondville", "ppcmoi", "PPCMOI résidentiel"),
+    row("unknown", "drummondville", "rezonage", "Avis de motion"),
+    row("excluded", "drummondville", "piia", "PIIA centre commercial"),
+    row("drop", "drummondville", "ppcmoi", "PPCMOI résidentiel"),
+    { ...row("drop-event", "drummondville", "rezonage", "Avis de motion"), type: "DesignationEvent" },
+    row("drop", "sutton", "ppcmoi", "PPCMOI résidentiel"),
+  ];
+}
+
+async function serveCities(rows: GraphSignalProjectionRow[], port?: DiscardedSignalsPort, query = "") {
+  const actual = await vi.importActual<typeof import("../services/graph/graph-store.js")>(
+    "../services/graph/graph-store.js",
+  );
+  vi.mocked(listCitiesWithSignalNodes).mockImplementationOnce(actual.listCitiesWithSignalNodes);
+  // Only the DB projection is stubbed: the route and store filter both run.
+  const db = { select: () => ({ from: () => ({ where: async () => rows }) }) } as unknown as Database;
+  const app = graphSignalsRoute({ db, store: new MemoryStore(), ...(port ? { discarded: port } : {}) });
+  const res = await app.request(`/api/graph-signals/by-city${query}`);
+  const body = await res.json() as { totalCount: number; cities: CitySignalCounts[] };
+  return { status: res.status, body };
+}
+
+describe("by-city with native discards through the real store", () => {
+  it.each([
+    { name: "empty port", dropped: [], query: "" },
+    { name: "two native keys", dropped: [3, 4], query: "" },
+    { name: "recreated nodes", dropped: [3, 4], query: "" },
+    { name: "showDiscarded=1", dropped: [3, 4], query: "?showDiscarded=1" },
+    { name: "showDiscarded=true", dropped: [3, 4], query: "?showDiscarded=true" },
+    { name: "B display exclusions", dropped: [3, 4], query: "?excludePiia=1" },
+    { name: "all discarded", dropped: [0, 1, 2, 3, 4, 5], query: "" },
+  ])("matches the reference dataset with $name", async ({ name, dropped, query }) => {
+    const rows = lot2ProjectionRows();
+    const port = stubDiscarded(dropped.map((i) => {
+      const r = rows[i]!;
+      // Fixture rows always carry a city (projection rows allow null).
+      return discardedSignalKey(r.citySlug!, r.type, r.id);
+    }));
+    if (name === "recreated nodes") rows[3] = { ...rows[3]!, label: "Recreated", props: {} };
+    const show = query === "?showDiscarded=1";
+    const kept = show ? rows : rows.filter((_, i) => !dropped.includes(i));
+    const reference = await serveCities(kept, undefined, query);
+    const actual = await serveCities(rows, port, query);
+    expect(reference.status).toBe(200);
+    expect(actual).toEqual(reference);
+    expect(actual.body.totalCount).toBe(kept.length);
+    expect(port.forViewer).toHaveBeenCalledTimes(show ? 0 : 1);
+    for (const city of actual.body.cities) {
+      // The domain invariant already encodes total = qualified +
+      // residentialUnknown + excludedByReason; assert it once.
+      expect(countsInvariant(city.vivierV2Counts)).toBe(true);
+    }
+    if (name === "two native keys") {
+      expect(actual.body.cities[0]!.vivierV2Counts).toMatchObject({
+        total: 3, qualified: 1, residentialUnknown: 1,
+      });
+      expect(actual.body.cities.map((city) => city.signalCount)).toEqual([3, 1]);
+    }
+  });
+
+  it("uses the session viewer on by-city despite a forged query and header", async () => {
+    const port = stubDiscarded([]);
+    const app = new Hono();
+    app.use("*", async (c, next) => {
+      c.set("session" as never, { sub: "viewer-2" } as never);
+      await next();
+    });
+    app.route("/", routeWithDiscarded(port));
+    vi.mocked(listCitiesWithSignalNodes).mockResolvedValueOnce([]);
+    await app.request("/api/graph-signals/by-city?viewer=spoofed", { headers: { "x-user-id": "spoofed" } });
+    expect(port.forViewer).toHaveBeenCalledWith("viewer-2");
+  });
+
+  it("answers 503 discarded_signals_unavailable on by-city when the port rejects, without cities", async () => {
+    const rows = lot2ProjectionRows();
+    const port: DiscardedSignalsPort = {
+      forViewer: async () => { throw new Error("unavailable"); },
+    };
+    // No store mock is queued here: the route rejects before aggregating, so
+    // nothing may consume a queued implementation (it would leak into later tests).
+    const db = {
+      select: () => ({ from: () => ({ where: async () => rows }) }),
+    } as unknown as Database;
+    const app = graphSignalsRoute({ db, store: new MemoryStore(), discarded: port });
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const res = await app.request("/api/graph-signals/by-city");
+      expect(res.status).toBe(503);
+      expect(await res.json()).toEqual({ ok: false, error: "discarded_signals_unavailable" });
+      expect(listCitiesWithSignalNodes).not.toHaveBeenCalled();
+    } finally {
+      log.mockRestore();
+    }
+  });
+});
+
+const TEST_AUTH: AuthConfig = {
+  enabled: true,
+  issuer: "https://auth.example.test",
+  clientId: "radar-immobilier",
+  clientSecret: "test-secret",
+  redirectUri: "https://immo.example.test/api/v1/auth/oauth/callback",
+  scopes: "openid profile email",
+  appBaseUrl: "https://immo.example.test",
+  sessionSecret: "test-session-secret-32-bytes-padding!",
+  sessionTtlSeconds: 3600,
+  sessionAbsoluteTtlSeconds: 7200,
+  jwksUri: "https://auth.example.test/.well-known/jwks.json",
+  bearerAudiences: ["https://immo.example.test", "https://immo.example.test/mcp"],
+};
+
+/** Minimal account-status DB: `protect` only reads the status of one sub. */
+function accountDbWithStatus(status: string | null): Database {
+  const limit = async () => (status === null ? [] : [{ status }]);
+  const where = () => ({ limit });
+  const from = () => ({ where });
+  const select = () => ({ from });
+  return { select } as unknown as Database;
+}
+
+/**
+ * Real auth wiring for the discard routes: the `protect` middleware (same
+ * order as `createApp`: protect first, then the route) plus the real
+ * `graphSignalsRoute`. The graph store stays mocked; the account table is a
+ * stub returning one fixed status.
+ */
+function authedApp(opts: {
+  port: DiscardedSignalsPort;
+  accountStatus?: string | null;
+  bearerGetKey?: JWTVerifyGetKey;
+}): Hono {
+  const db = accountDbWithStatus(opts.accountStatus ?? "approved");
+  const app = new Hono();
+  app.use(
+    "*",
+    protect(TEST_AUTH, {
+      db,
+      ...(opts.bearerGetKey ? { bearerGetKey: opts.bearerGetKey } : {}),
+    }),
+  );
+  app.route(
+    "/",
+    graphSignalsRoute({
+      db: mockDb,
+      store: new MemoryStore(),
+      discarded: opts.port,
+      auth: TEST_AUTH,
+    }),
+  );
+  return app;
+}
+
+async function sessionCookie(sub: string): Promise<string> {
+  const token = await signSession(
+    { sub },
+    { sessionSecret: TEST_AUTH.sessionSecret, ttlSeconds: 3600 },
+  );
+  return `radar_session=${token}`;
+}
+
+/** Sign a user access token + return the matching local JWKS getter. */
+async function makeBearerToken(sub: string): Promise<{ accessToken: string; getKey: JWTVerifyGetKey }> {
+  const { publicKey, privateKey } = await generateKeyPair("EdDSA", { crv: "Ed25519" });
+  const pubJwk: JWK = await exportJWK(publicKey);
+  pubJwk.kid = "k1";
+  pubJwk.alg = "EdDSA";
+  const getKey = createLocalJWKSet({ keys: [pubJwk] });
+  const accessToken = await new SignJWT({})
+    .setProtectedHeader({ alg: "EdDSA", kid: "k1" })
+    .setIssuer(TEST_AUTH.issuer)
+    .setAudience("https://immo.example.test/mcp")
+    .setSubject(sub)
+    .setIssuedAt()
+    .setExpirationTime("5m")
+    .sign(privateKey);
+  return { accessToken, getKey };
+}
+
+function mockCityNodes(nodes: ReturnType<typeof makeNode>[]) {
+  vi.mocked(getSignalNodesForCity).mockResolvedValueOnce(
+    nodes as unknown as Awaited<ReturnType<typeof getSignalNodesForCity>>,
+  );
+}
+
+describe("session wiring through protect (detail and by-city)", () => {
+  it.each(["drummondville", "by-city"])("uses the verified cookie through createApp on %s", async (path) => {
+    const port = stubDiscarded([]);
+    const app = createApp({
+      db: accountDbWithStatus("approved"), store: new MemoryStore(),
+      auth: TEST_AUTH, discarded: port,
+      checkDb: async () => ({ ok: true }), checkObjectStore: async () => ({ ok: true }),
+    });
+    if (path === "by-city") vi.mocked(listCitiesWithSignalNodes).mockResolvedValueOnce([]);
+    else mockCityNodes(lot2CityNodes());
+    const res = await app.request(`/api/graph-signals/${path}?viewer=bob`, {
+      headers: { cookie: await sessionCookie("alice"), "x-user-id": "bob" },
+    });
+    expect(res.status).toBe(200);
+    expect(port.forViewer).toHaveBeenCalledExactlyOnceWith("alice");
+  });
+
+  it("resolves forViewer from the verified session cookie, ignoring spoofed identity hints", async () => {
+    const port = stubDiscarded([]);
+    const app = authedApp({ port });
+    mockCityNodes([makeNode("sig-001", "drummondville", "Signal")]);
+    const res = await app.request("/api/graph-signals/drummondville?viewer=bob", {
+      headers: { cookie: await sessionCookie("alice"), "x-user-id": "bob" },
+    });
+    expect(res.status).toBe(200);
+    expect(port.forViewer).toHaveBeenCalledWith("alice");
+  });
+
+  it("resolves forViewer from a verified user Bearer [REDACTED] an approved account", async () => {
+    const port = stubDiscarded([]);
+    const { accessToken, getKey } = await makeBearerToken("bob");
+    const app = authedApp({ port, bearerGetKey: getKey });
+    mockCityNodes([makeNode("sig-001", "drummondville", "Signal")]);
+    const res = await app.request("/api/graph-signals/drummondville?viewer=alice", {
+      headers: { authorization: `Bearer ${accessToken}` },
+    });
+    expect(res.status).toBe(200);
+    expect(port.forViewer).toHaveBeenCalledWith("bob");
+  });
+
+  it("resolves forViewer from the session cookie on by-city", async () => {
+    const port = stubDiscarded([]);
+    const app = authedApp({ port });
+    vi.mocked(listCitiesWithSignalNodes).mockResolvedValueOnce([]);
+    const res = await app.request("/api/graph-signals/by-city", {
+      headers: { cookie: await sessionCookie("viewer-2") },
+    });
+    expect(res.status).toBe(200);
+    expect(port.forViewer).toHaveBeenCalledWith("viewer-2");
+  });
+
+  it("refuses a pending account before the discard port (403, port untouched)", async () => {
+    const port = stubDiscarded([]);
+    const app = authedApp({ port, accountStatus: "pending" });
+    const res = await app.request("/api/graph-signals/drummondville", {
+      headers: { cookie: await sessionCookie("alice") },
+    });
+    expect(res.status).toBe(403);
+    expect(port.forViewer).not.toHaveBeenCalled();
+    expect(getSignalNodesForCity).not.toHaveBeenCalled();
+  });
+
+  it("serves anonymously in open mode (no session, auth disabled)", async () => {
+    const port = stubDiscarded([]);
+    mockCityNodes([makeNode("sig-001", "drummondville", "Signal")]);
+    const res = await routeWithDiscarded(port).request("/api/graph-signals/drummondville");
+    expect(res.status).toBe(200);
+    expect(port.forViewer).toHaveBeenCalledWith(null);
+  });
+
+  it("answers 503 when auth is enabled but no session reached the route (wiring error, never anonymous)", async () => {
+    const port = stubDiscarded([]);
+    const app = graphSignalsRoute({
+      db: mockDb,
+      store: new MemoryStore(),
+      discarded: port,
+      auth: TEST_AUTH,
+    });
+    mockCityNodes([makeNode("sig-001", "drummondville", "Signal")]);
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const res = await app.request("/api/graph-signals/drummondville");
+      expect(res.status).toBe(503);
+      expect(await res.json()).toEqual({ ok: false, error: "discarded_signals_unavailable" });
+      expect(port.forViewer).not.toHaveBeenCalled();
+    } finally {
+      log.mockRestore();
+    }
+  });
+});
+
+describe("discard union D(viewer) = common ∪ personal (detail)", () => {
+  const COMMON = new Set([discardedSignalKey("drummondville", "Signal", "sig-common")]);
+  const PERSONAL: Record<string, Set<DiscardedSignalKey>> = {
+    alice: new Set([discardedSignalKey("drummondville", "Signal", "sig-alice")]),
+    bob: new Set([discardedSignalKey("drummondville", "Signal", "sig-bob")]),
+  };
+  const forViewer = vi.fn<DiscardedSignalsPort["forViewer"]>(async (viewer) =>
+    unionDiscardedSignals(COMMON, viewer === null ? undefined : PERSONAL[viewer]),
+  );
+  const unionPort: DiscardedSignalsPort = { forViewer };
+
+  function unionNodes() {
+    const props = {};
+    return [
+      makeNode("sig-common", "drummondville", "Signal", props),
+      makeNode("sig-alice", "drummondville", "Signal", props),
+      makeNode("sig-bob", "drummondville", "Signal", props),
+      makeNode("sig-keep", "drummondville", "Signal", props),
+    ];
+  }
+
+  async function serveIds(app: Hono, query = "") {
+    const res = await app.request(`/api/graph-signals/drummondville${query}`);
+    const body = (await res.json()) as { nodes?: { id: string }[] };
+    return { status: res.status, ids: (body.nodes ?? []).map((n) => n.id), body };
+  }
+
+  it("isolates viewers on one app, then reveals the baseline for both", async () => {
+    let current: string | null = null;
+    const app = new Hono();
+    app.use("*", async (c, next) => {
+      if (current !== null) c.set("session" as never, { sub: current } as never);
+      await next();
+    });
+    app.route("/", graphSignalsRoute({ db: mockDb, store: new MemoryStore(), discarded: unionPort }));
+    for (let i = 0; i < 5; i++) mockCityNodes(unionNodes());
+
+    current = "alice";
+    const alice = await serveIds(app);
+    current = "bob";
+    const bob = await serveIds(app);
+    current = "alice";
+    const aliceAgain = await serveIds(app);
+    current = "alice";
+    const aliceReveal = await serveIds(app, "?showDiscarded=1");
+    current = "bob";
+    const bobReveal = await serveIds(app, "?showDiscarded=1");
+
+    expect(alice.status).toBe(200);
+    // Union: the common key stays hidden for alice although her personal
+    // scope omits it; her personal key hides too.
+    expect(alice.ids).toEqual(["sig-bob", "sig-keep"]);
+    expect(bob.ids).toEqual(["sig-alice", "sig-keep"]);
+    // Same app, no cross-viewer state: alice sees the same set again.
+    expect(aliceAgain).toEqual(alice);
+    // Reveal reproduces the full population for both viewers...
+    expect(aliceReveal.ids).toEqual(["sig-common", "sig-alice", "sig-bob", "sig-keep"]);
+    expect(bobReveal.ids).toEqual(aliceReveal.ids);
+    // ...without calling the port.
+    expect(forViewer.mock.calls.map(([viewer]) => viewer)).toEqual(["alice", "bob", "alice"]);
+  });
+});
+
+describe("discard union D(viewer) = common ∪ personal (by-city)", () => {
+  const keyOf = (row: { citySlug: string | null; type: string; id: string }) =>
+    discardedSignalKey(row.citySlug!, row.type, row.id);
+
+  it("hides common ∪ personal per viewer on one app, reveal restores both", async () => {
+    const rows = lot2ProjectionRows();
+    const COMMON = new Set([keyOf(rows[3]!)]);
+    const PERSONAL: Record<string, Set<DiscardedSignalKey>> = {
+      alice: new Set([keyOf(rows[0]!)]),
+      bob: new Set<DiscardedSignalKey>(),
+    };
+    const forViewer = vi.fn<DiscardedSignalsPort["forViewer"]>(async (viewer) =>
+      unionDiscardedSignals(COMMON, viewer === null ? undefined : PERSONAL[viewer]),
+    );
+
+    const db = {
+      select: () => ({ from: () => ({ where: async () => rows }) }),
+    } as unknown as Database;
+    let current: string | null = null;
+    const app = new Hono();
+    app.use("*", async (c, next) => {
+      if (current !== null) c.set("session" as never, { sub: current } as never);
+      await next();
+    });
+    app.route("/", graphSignalsRoute({ db, store: new MemoryStore(), discarded: { forViewer } }));
+
+    const actual = await vi.importActual<typeof import("../services/graph/graph-store.js")>(
+      "../services/graph/graph-store.js",
+    );
+    for (let i = 0; i < 5; i++) {
+      vi.mocked(listCitiesWithSignalNodes).mockImplementationOnce(actual.listCitiesWithSignalNodes);
+    }
+
+    async function serveTotals(query = "") {
+      const res = await app.request(`/api/graph-signals/by-city${query}`);
+      const body = (await res.json()) as { totalCount: number; cities: CitySignalCounts[] };
+      for (const city of body.cities) expect(countsInvariant(city.vivierV2Counts)).toBe(true);
+      return {
+        status: res.status,
+        total: body.totalCount,
+        counts: new Map(body.cities.map((city) => [city.citySlug, city.signalCount])),
+      };
+    }
+
+    current = "alice";
+    const alice = await serveTotals();
+    current = "bob";
+    const bob = await serveTotals();
+    current = "alice";
+    const aliceAgain = await serveTotals();
+    current = "alice";
+    const aliceReveal = await serveTotals("?showDiscarded=1");
+    current = "bob";
+    const bobReveal = await serveTotals("?showDiscarded=1");
+
+    // Baseline: drummondville 5, sutton 1.
+    expect(aliceReveal.total).toBe(6);
+    expect(bobReveal.total).toBe(6);
+    expect(bobReveal.counts).toEqual(aliceReveal.counts);
+    // Alice hides the common row plus her personal row (the common row stays
+    // hidden although her personal scope omits it); bob hides only common.
+    expect(alice.status).toBe(200);
+    expect(alice.total).toBe(4);
+    expect(alice.counts.get("drummondville")).toBe(3);
+    expect(bob.total).toBe(5);
+    expect(bob.counts.get("drummondville")).toBe(4);
+    expect(bob.counts.get("sutton")).toBe(1);
+    // No cross-viewer state on the shared app.
+    expect(aliceAgain).toEqual(alice);
+    expect(forViewer.mock.calls.map(([viewer]) => viewer)).toEqual(["alice", "bob", "alice"]);
   });
 });

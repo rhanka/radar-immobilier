@@ -27,11 +27,11 @@
   <div class="mb-2 flex items-center justify-between gap-2">
     <p class="text-sm font-semibold text-slate-950">{axisLabel}</p>
     {#if axisScore.availability === "non-disponible"}
-      <span class="shrink-0 rounded bg-slate-200 px-1.5 py-0.5 text-[11px] font-semibold text-slate-600">
+      <span class="shrink-0 rounded-sm bg-slate-200 px-1.5 py-0.5 text-[11px] font-semibold text-slate-600">
         Non disponible
       </span>
     {:else}
-      <span class="shrink-0 rounded bg-teal-600 px-1.5 py-0.5 text-[11px] font-semibold text-white">
+      <span class="shrink-0 rounded-sm bg-teal-600 px-1.5 py-0.5 text-[11px] font-semibold text-white">
         Niveau {axisScore.level}/5
       </span>
     {/if}
@@ -41,7 +41,7 @@
   <div class="mb-3 space-y-0.5">
     {#each [0, 1, 2, 3, 4, 5] as lvl}
       <div
-        class={`flex gap-2 rounded px-1.5 py-1 text-[11px] leading-4 ${
+        class={`flex gap-2 rounded-sm px-1.5 py-1 text-[11px] leading-4 ${
           axisScore.availability === "available" && axisScore.level === lvl
             ? "bg-teal-600 text-white"
             : "text-slate-600 odd:bg-slate-50"
@@ -55,7 +55,7 @@
 
   <!-- Rationale -->
   {#if axisScore.rationale}
-    <div class="mb-2 rounded bg-slate-50 px-2 py-1.5">
+    <div class="mb-2 rounded-sm bg-slate-50 px-2 py-1.5">
       <p class="text-[11px] italic leading-4 text-slate-600">{axisScore.rationale}</p>
     </div>
   {/if}
@@ -63,11 +63,11 @@
   <!-- Metadata footer -->
   <div class="flex flex-wrap items-center gap-1.5">
     <span
-      class={`rounded px-1.5 py-0.5 text-[11px] font-semibold ${confidenceClass(axisScore.confidence)}`}
+      class={`rounded-sm px-1.5 py-0.5 text-[11px] font-semibold ${confidenceClass(axisScore.confidence)}`}
     >
       Confiance : {confidenceLabel(axisScore.confidence)}
     </span>
-    <span class="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">
+    <span class="rounded-sm bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">
       Grille {axisScore.gridVersion}
     </span>
   </div>

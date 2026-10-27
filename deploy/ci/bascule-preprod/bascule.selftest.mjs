@@ -232,5 +232,50 @@ ok("refreshJobName — charset RFC1123 [a-z0-9-] uniquement", /^[a-z0-9-]+$/.tes
   ok("bascule-refresh.yml — the on-demand refresh stays OUTSIDE the bascule", standalone.includes('node "$CLI" force-refresh'));
 }
 
+// Exercise the real unquiesce command offline: every external call is captured.
+{
+  const cli = readFileSync(join(import.meta.dirname, "bascule.mjs"), "utf8");
+  const start = cli.indexOf("// UN-QUIESCE —");
+  const command = cli.slice(start, cli.indexOf("// S2 —", start)).replace(/^export /gm, "");
+  function unquiesce(env, recorded = true) {
+    const calls = [];
+    let error = null;
+    try {
+      vm.runInNewContext(`${command}\ncmdUnquiesce();`, {
+        quiesceTargets: () => ({ ns: "test-preprod" }), workdir: () => "/test", join,
+        existsSync: () => recorded,
+        readFileSync: () => JSON.stringify({ deployments: { "radar-api": 2 }, cronjobs: { refresh: false } }),
+        opt: (key, fallback) => env[key] || fallback,
+        log: () => {}, warn: () => {}, section: () => {},
+        die: (message) => { throw new Error(message); },
+        process: { exit: (code) => { throw new Error(`exit ${code}`); } },
+        run: (cmd, args) => { calls.push([cmd, ...args]); return { status: 0 }; },
+      });
+    } catch (e) { error = e.message; }
+    return { calls, error };
+  }
+  const success = { O_MIGRATE: "success", O_RESTORE: "success", O_DOCS: "success", O_RECON: "success" };
+  for (const key of ["O_MIGRATE", "O_RESTORE", "O_DOCS"]) {
+    for (const outcome of ["failure", "cancelled", "skipped", ""]) {
+      const r = unquiesce({ ...success, [key]: outcome });
+      ok(`unquiesce — ${key}=${outcome || "missing"} keeps preprod closed`, r.calls.length === 0 && /preprod stays closed/.test(r.error));
+    }
+  }
+  const missing = unquiesce({});
+  ok("unquiesce — all outcomes missing keeps preprod closed", missing.calls.length === 0 && /preprod stays closed/.test(missing.error));
+  eq("unquiesce — failure before quiesce changes nothing", unquiesce({ O_MIGRATE: "failure" }, false), { calls: [], error: null });
+  const resumed = unquiesce(success);
+  eq("unquiesce — successful restore resumes deployments and cronjobs", resumed, { calls: [
+    ["kubectl", "-n", "test-preprod", "scale", "deploy/radar-api", "--replicas=2"],
+    ["kubectl", "-n", "test-preprod", "rollout", "status", "deploy/radar-api", "--timeout=300s"],
+    ["kubectl", "-n", "test-preprod", "patch", "cronjob", "refresh", "-p", '{"spec":{"suspend":false}}'],
+  ], error: null });
+  const wf = readFileSync(join(import.meta.dirname, "../../../.github/workflows/bascule-preprod.yml"), "utf8");
+  const step = wf.slice(wf.indexOf("id: unquiesce"), wf.indexOf('run: node "$CLI" unquiesce'));
+  for (const key of ["O_MIGRATE", "O_RESTORE", "O_DOCS"]) {
+    ok(`unquiesce workflow forwards ${key}`, step.includes(`${key}:`));
+  }
+}
+
 console.log(`\nbascule.selftest — ${passed} passés, ${failed} échoués`);
 process.exit(failed ? 1 : 0);

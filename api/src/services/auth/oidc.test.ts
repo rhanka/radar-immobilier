@@ -7,6 +7,8 @@ import {
   createAuthFlowState,
   exchangeCode,
   fetchDiscovery,
+  verifyAccessToken,
+  verifyExchangedSearchToken,
   verifyIdToken,
   type FetchLike,
   type OidcDiscovery,
@@ -308,5 +310,124 @@ describe("verifyIdToken (JWKS, EdDSA)", () => {
         getKey: otherGetKey,
       }),
     ).rejects.toThrow();
+  });
+});
+
+describe("verifyExchangedSearchToken (H4 P5 strict receiver)", () => {
+  const EXCHANGE = {
+    issuer: AUTH.issuer,
+    apiAudience: "https://immo.example.test",
+    workloadSub: "immo-mcp-workload",
+    workloadClientId: "immo-mcp-workload",
+  };
+
+  async function makeExchanged(overrides: Record<string, unknown> = {}): Promise<{
+    presented: string;
+    getKey: ReturnType<typeof createLocalJWKSet>;
+  }> {
+    const { publicKey, privateKey } = await generateKeyPair("EdDSA", { crv: "Ed25519" });
+    const pubJwk: JWK = await exportJWK(publicKey);
+    pubJwk.kid = "ex-1";
+    pubJwk.alg = "EdDSA";
+    // Overrides win over the well-formed defaults: set each standard claim
+    // only when the caller did not supply it (later setters would overwrite).
+    const builder = new SignJWT({
+      scope: "immo:search",
+      client_id: EXCHANGE.workloadClientId,
+      act: { sub: EXCHANGE.workloadSub },
+      ...overrides,
+    }).setProtectedHeader({ alg: "EdDSA", kid: "ex-1", typ: "at+jwt" });
+    if (!("iss" in overrides)) builder.setIssuer(EXCHANGE.issuer);
+    if (!("aud" in overrides)) builder.setAudience(EXCHANGE.apiAudience);
+    if (!("sub" in overrides)) builder.setSubject("human-7");
+    if (!("iat" in overrides)) builder.setIssuedAt();
+    if (!("exp" in overrides)) builder.setExpirationTime("60s");
+    const presented = await builder.sign(privateKey);
+    return { presented, getKey: createLocalJWKSet({ keys: [pubJwk] }) };
+  }
+
+  async function rejected(overrides: Record<string, unknown>): Promise<string> {
+    const { presented, getKey } = await makeExchanged(overrides);
+    const err = await verifyExchangedSearchToken(presented, { ...EXCHANGE, getKey }).catch(
+      (e: unknown) => e,
+    );
+    expect(err).toBeInstanceOf(Error);
+    return (err as Error).message;
+  }
+
+  it("verifies a well-formed exchanged token and returns the human sub", async () => {
+    const { presented, getKey } = await makeExchanged();
+    const out = await verifyExchangedSearchToken(presented, { ...EXCHANGE, getKey });
+    expect(out.sub).toBe("human-7");
+  });
+
+  it("rejects the MCP audience and a foreign API audience (both confusions fail)", async () => {
+    expect(await rejected({ aud: "https://immo.example.test/mcp" })).toBe(
+      "strict_invalid_audience",
+    );
+    expect(await rejected({ aud: "https://immo.sent-tech.ca" })).toBe(
+      "strict_invalid_audience",
+    );
+  });
+
+  it("rejects a wrong issuer, actor, client and missing delegation", async () => {
+    expect(await rejected({ iss: "https://evil.test" })).toBe("strict_invalid_issuer");
+    expect(await rejected({ act: { sub: "evil-workload" } })).toBe("strict_invalid_actor");
+    expect(await rejected({ client_id: "evil-client" })).toBe("strict_invalid_client");
+    for (const act of [undefined, null, "immo-mcp-workload", { sub: EXCHANGE.workloadSub, act: { sub: "prior" } }]) {
+      expect(await rejected({ act })).toBe("strict_invalid_actor");
+    }
+    expect(await rejected({ sub: " " })).toBe("strict_invalid_subject");
+  });
+
+  it("rejects scope outside the search-only profile", async () => {
+    expect(await rejected({ scope: "immo:read" })).toBe("strict_scope_refused");
+    expect(await rejected({ scope: "immo:search immo:read" })).toBe("strict_scope_refused");
+    expect(await rejected({ scope: ["immo:search", false] })).toBe("strict_scope_refused");
+  });
+
+  it("accepts one API audience and refuses multiple or repeated audiences", async () => {
+    const { presented, getKey } = await makeExchanged({ aud: [EXCHANGE.apiAudience] });
+    expect(await verifyExchangedSearchToken(presented, { ...EXCHANGE, getKey })).toEqual({ sub: "human-7" });
+    for (const aud of [[EXCHANGE.apiAudience, EXCHANGE.apiAudience], [EXCHANGE.apiAudience, `${EXCHANGE.apiAudience}/mcp`]]) {
+      expect(await rejected({ aud })).toBe("strict_invalid_audience");
+    }
+  });
+
+  it("rejects overlong lifetime, expiry, proof binding and token type", async () => {
+    const nowS = Math.floor(Date.now() / 1000);
+    expect(await rejected({ iat: nowS - 300, exp: nowS + 1 })).toBe(
+      "strict_invalid_lifetime",
+    );
+    expect(await rejected({ exp: nowS - 10 })).toBe("strict_invalid_lifetime");
+    expect(await rejected({ cnf: { jkt: "abc" } })).toBe("strict_proof_binding_refused");
+    expect(await rejected({ token_type: "DPoP" })).toBe("strict_invalid_token_type");
+  });
+
+  it("rejects a service-user subject and an untrusted key", async () => {
+    expect(await rejected({ sub: EXCHANGE.workloadSub })).toBe(
+      "strict_service_user_refused",
+    );
+    const { presented } = await makeExchanged();
+    const { publicKey } = await generateKeyPair("EdDSA", { crv: "Ed25519" });
+    const otherJwk: JWK = await exportJWK(publicKey);
+    otherJwk.kid = "other";
+    otherJwk.alg = "EdDSA";
+    await expect(
+      verifyExchangedSearchToken(presented, {
+        ...EXCHANGE,
+        getKey: createLocalJWKSet({ keys: [otherJwk] }),
+      }),
+    ).rejects.toThrow("strict_invalid_signature");
+  });
+
+  it("flags delegation on the plain user path (search-route-only)", async () => {
+    const { presented, getKey } = await makeExchanged();
+    const via = await verifyAccessToken(presented, {
+      issuer: EXCHANGE.issuer,
+      audiences: [EXCHANGE.apiAudience, `${EXCHANGE.apiAudience}/mcp`],
+      getKey,
+    });
+    expect(via.delegated).toBe(true);
   });
 });

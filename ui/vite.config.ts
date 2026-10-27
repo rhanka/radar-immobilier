@@ -11,6 +11,9 @@ const qaHarness = process.env.QA_HARNESS === "1";
 const harnessInput = qaHarness
   ? {
       main: fileURLToPath(new URL("./index.html", import.meta.url)),
+      "maplibre-security": fileURLToPath(
+        new URL("./e2e-qa/harness/maplibre-security.html", import.meta.url),
+      ),
       "pdf-overlay": fileURLToPath(
         new URL("./e2e-qa/harness/pdf-overlay.html", import.meta.url),
       ),

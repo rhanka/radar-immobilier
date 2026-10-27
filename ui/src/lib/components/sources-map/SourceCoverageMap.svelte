@@ -625,7 +625,7 @@
     onReady={handleMapReady}
   >
     <svelte:fragment slot="overlay-top-left">
-      <div class="max-w-md rounded border border-slate-200 bg-white/95 px-3 py-2 text-xs shadow-sm">
+      <div class="max-w-md rounded-sm border border-slate-200 bg-white/95 px-3 py-2 text-xs shadow-xs">
         <label for="coverage-kpi-select" class="mb-1 block font-semibold text-slate-700">
           KPI de couverture
         </label>
@@ -634,7 +634,7 @@
           data-testid="coverage-kpi-select"
           bind:value={activeKpiId}
           on:change={syncCoverageUrl}
-          class="w-full rounded border border-slate-200 bg-white px-2 py-1 text-slate-700"
+          class="w-full rounded-sm border border-slate-200 bg-white px-2 py-1 text-slate-700"
         >
           {#each PALIER_KPIS_20 as kpi (kpi.id)}
             <option value={kpi.id}>{kpi.label}</option>
@@ -644,7 +644,7 @@
       </div>
       {#if !selectedCity && headline}
         <div
-          class="max-w-md rounded border border-slate-200 bg-white/95 px-3 py-2 text-xs shadow-sm"
+          class="max-w-md rounded-sm border border-slate-200 bg-white/95 px-3 py-2 text-xs shadow-xs"
           data-testid="province-headline"
         >
           <p class="font-semibold text-slate-700">{headlineText}</p>
@@ -656,7 +656,7 @@
         </div>
       {/if}
       {#if selectedCity && (zonesLoading || zonesError || geoNotices.length > 0)}
-        <div class="max-w-sm space-y-1 rounded border border-slate-200 bg-white/95 px-3 py-2 text-xs text-slate-700 shadow-sm">
+        <div class="max-w-sm flex flex-col gap-1 rounded-sm border border-slate-200 bg-white/95 px-3 py-2 text-xs text-slate-700 shadow-xs">
           <!-- Waiter/erreur/notices de la couche zones (parité Signaux). -->
           {#if zonesLoading}
             <p class="m-0 font-semibold text-slate-500">Chargement des zones…</p>
@@ -697,12 +697,12 @@
             {@const cell = kpiCellForCity(selectedCity, kpi.id, matrixRowBySlug)}
             <button
               type="button"
-              class={`mb-1 flex w-full items-center gap-2 rounded border px-2 py-2 text-left text-xs ${activeKpiId === kpi.id ? "border-teal-400 bg-teal-50" : "border-slate-100 bg-white hover:bg-slate-50"}`}
+              class={`mb-1 flex w-full items-center gap-2 rounded-sm border px-2 py-2 text-left text-xs ${activeKpiId === kpi.id ? "border-teal-400 bg-teal-50" : "border-slate-100 bg-white hover:bg-slate-50"}`}
               aria-pressed={activeKpiId === kpi.id}
               data-testid={`coverage-kpi-${kpi.id}`}
               on:click={() => { activeKpiId = kpi.id; syncCoverageUrl(); }}
             >
-              <span class="h-3 w-3 shrink-0 rounded-sm border border-slate-300" style={`background-color: ${PALIER_CELL_COLOR[cell.status]}`}></span>
+              <span class="h-3 w-3 shrink-0 rounded-xs border border-slate-300" style={`background-color: ${PALIER_CELL_COLOR[cell.status]}`}></span>
               <span class="min-w-0 flex-1 font-medium text-slate-700">{kpi.label}</span>
               <span class="shrink-0 text-slate-500">{palierCellStatusLabel(cell.status)}</span>
             </button>

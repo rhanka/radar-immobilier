@@ -126,6 +126,14 @@ lint: ## Lint across the workspace (ESLint flat config)
 audit: ## Run npm audit gate (fails on critical or high vulnerabilities)
 	npm audit --audit-level=critical
 
+.PHONY: audit-security
+audit-security: ## Run HIGH/CRITICAL audit gate with expiring register exceptions
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm --no-deps -T --entrypoint node api tools/security/audit-gate.mjs
+
+.PHONY: test-audit-security
+test-audit-security: ## Test audit matching and expiry without network access
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm --no-deps -T --entrypoint node api --test --test-concurrency=1 tools/security/*.test.mjs
+
 .PHONY: format
 format: ## Auto-format (prettier / dprint, defined later)
 	@echo "[format] no formatter wired yet — placeholder for a later branch"
@@ -196,6 +204,12 @@ test-api: ## Run API tests (SCOPE=<file> for scoped runs)
 .PHONY: test-ui
 test-ui: ## Run UI unit tests (SCOPE=<file> for scoped runs)
 	$(COMPOSE_RUN_API_NODEPS) npm run test --workspace=ui $(if $(SCOPE),-- $(SCOPE),)
+
+.PHONY: test-immo-mcp
+test-immo-mcp: ## Run isolated MCP tests (SCOPE=<file>, excludes service E2E)
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm --no-deps -T api sh -c "\
+	  npm ci && \
+	  npm run test --workspace=packages/immo-mcp -- --exclude '**/*.e2e.test.ts' $(SCOPE)"
 
 .PHONY: test-e2e
 test-e2e: ## Run Playwright e2e tests (E2E_SPEC=<file> for scoped runs)
@@ -388,6 +402,13 @@ k8s-validate: ## Validate the radar/sentropic-app manifests offline (no cluster)
 	@echo "[k8s-validate] every Job script is an esbuild entrypoint of api/Dockerfile…"
 	@bash deploy/ci/check-image-entrypoints.sh
 	@bash deploy/ci/check-image-entrypoints.test.sh >/dev/null
+	@echo "[k8s-validate] H3 preprod render stays disabled and isolated…"
+	@bash deploy/ci/check-h3-preprod-render.sh
+	@bash deploy/ci/check-h3-preprod-render.test.sh >/dev/null
+	@bash deploy/ci/check-h3-activation-render.test.sh >/dev/null
+	@bash deploy/ci/check-h3-transition-render.test.sh >/dev/null
+	@bash deploy/ci/check-h3-discrimination.test.sh >/dev/null
+	@bash deploy/ci/preflight-h3-preprod.test.sh >/dev/null
 	@if [ "$(K8S_VALIDATE_WITH_CLUSTER)" = "1" ]; then \
 	  echo "[k8s-validate] server-side dry-run (KUBECONFIG required)…"; \
 	  $(KUBECTL) apply --dry-run=server -k $(K8S_MANIFEST_DIR); \

@@ -199,7 +199,7 @@
   </div>
 
   <!-- Panneau retro-analyse -------------------------------------------------->
-  <div class="mb-8 rounded-lg border border-teal-200 bg-teal-50 p-5 shadow-sm">
+  <div class="mb-8 rounded-lg border border-teal-200 bg-teal-50 p-5 shadow-xs">
     <div class="mb-3 flex items-center gap-2">
       <Info class="h-4 w-4 shrink-0 text-teal-700" aria-hidden="true" />
       <h2 class="text-base font-semibold text-slate-950">Retro-analyse initiale</h2>
@@ -248,7 +248,7 @@
   </div>
 
   <!-- Recap de configuration (visible en permanence) ------------------------->
-  <div class="mb-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+  <div class="mb-6 rounded-lg border border-slate-200 bg-white p-4 shadow-xs">
     <h3 class="mb-3 text-sm font-semibold text-slate-700">Recap de configuration</h3>
     <dl class="grid grid-cols-2 gap-3 sm:grid-cols-3">
       <div class="rounded-md bg-slate-50 p-3">
@@ -287,7 +287,7 @@
 
   <!-- Recapitulatif de confirmation (demo stub) ------------------------------>
   {#if showSummary}
-    <div class="rounded-lg border border-amber-300 bg-amber-50 p-5 shadow-sm">
+    <div class="rounded-lg border border-amber-300 bg-amber-50 p-5 shadow-xs">
       <!-- Disclaimer demo -->
       <Alert
         tone="warning"
@@ -301,19 +301,19 @@
 
       <!-- Total + ville + fenetre -->
       <dl class="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div class="rounded-md bg-white p-3 shadow-sm">
+        <div class="rounded-md bg-white p-3 shadow-xs">
           <dt class="text-xs text-slate-500">Ville</dt>
           <dd class="mt-1 text-sm font-bold text-teal-800">{selectedMunicipality.name}</dd>
         </div>
-        <div class="rounded-md bg-white p-3 shadow-sm">
+        <div class="rounded-md bg-white p-3 shadow-xs">
           <dt class="text-xs text-slate-500">Sources selectionnees</dt>
           <dd class="mt-1 text-2xl font-bold text-teal-800">{summary.total}</dd>
         </div>
-        <div class="rounded-md bg-white p-3 shadow-sm">
+        <div class="rounded-md bg-white p-3 shadow-xs">
           <dt class="text-xs text-slate-500">Fenetre retro-analyse</dt>
           <dd class="mt-1 text-2xl font-bold text-teal-800">{retroWindow} mois</dd>
         </div>
-        <div class="rounded-md bg-white p-3 shadow-sm">
+        <div class="rounded-md bg-white p-3 shadow-xs">
           <dt class="text-xs text-slate-500">Signaux estimes (indicatif)</dt>
           <dd class="mt-1 text-2xl font-bold text-slate-700">
             ~{Math.round(estimatedSignals).toLocaleString("fr-CA")}

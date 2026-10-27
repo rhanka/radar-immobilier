@@ -591,7 +591,7 @@ if (!YAML) console.log("  info yaml package not resolvable — YAML parse checks
     g3At < wf.indexOf('node "$CLI" backup-secrets-fill') && g3At < fillAt && g3At < wf.indexOf('node "$CLI" backup-list'));
   ok("workflow — job budget per MODE: restore (dispatch or schedule) 330, else 180 (cap 360)",
     wf.includes("timeout-minutes: ${{ (github.event_name == 'schedule' || inputs.MODE == 'restore') && 330 || 180 }}"));
-  ok("workflow — un-quiesce: always(), own step budget, SKIP_QUIESCE passed to the CLI", /id: unquiesce\n\s+if: \$\{\{ always\(\)[^\n]*\n\s+timeout-minutes: 15\n\s+run: node "\$CLI" unquiesce/.test(wf) &&
+  ok("workflow — un-quiesce: always(), own step budget, SKIP_QUIESCE passed to the CLI", /id: unquiesce\n\s+if: \$\{\{ always\(\)[^\n]*\n\s+timeout-minutes: 15\n(?:\s+env:\n(?:\s+O_[A-Z]+: [^\n]*\n)+)?\s+run: node "\$CLI" unquiesce/.test(wf) &&
     wf.includes("SKIP_QUIESCE: ${{ inputs.SKIP_QUIESCE && 'true' || 'false' }}"));
   const qsAt = wf.indexOf("name: bascule-quiesce-state-");
   ok("workflow — quiesce-state uploaded right after the quiesce (recovery after a job timeout)", qsAt > wf.indexOf('node "$CLI" quiesce') &&
@@ -801,7 +801,8 @@ async function cliSuite() {
     [g3list, g3fill, g3job, g3cmd].every((r) => r.status === 1 && /GARDE G3/.test(r.stdout)) && readFileSync(kubectlLog, "utf8").length === beforeG3);
   eq("CLI confirm — today's CONFIRM accepted", spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "confirm"], { env, encoding: "utf8" }).status, 0);
   // un-quiesce: nothing recorded ⇒ nothing scaled (unless a declared manual quiesce)
-  const uqEnv = { ...env, BASCULE_WORKDIR: join(tmp, "uq-work"), UNQUIESCE_REPLICAS: "radar-api=2" };
+  const okOutcomes = { O_MIGRATE: "success", O_RESTORE: "success", O_DOCS: "success" };
+  const uqEnv = { ...env, ...okOutcomes, BASCULE_WORKDIR: join(tmp, "uq-work"), UNQUIESCE_REPLICAS: "radar-api=2" };
   const beforeUq = readFileSync(kubectlLog, "utf8").length;
   const uq = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "unquiesce"], { env: uqEnv, encoding: "utf8" });
   ok("CLI unquiesce — no quiesce recorded, SKIP_QUIESCE≠true ⇒ no-op (0 scale)", uq.status === 0 && !/scale/.test(readFileSync(kubectlLog, "utf8").slice(beforeUq)));
@@ -819,7 +820,7 @@ async function cliSuite() {
     writeFileSync(join(uqWork, "quiesce-state.json"), JSON.stringify({ deployments: { "radar-api": 1 },
       cronjobs: { "radar-refresh-pv": false, "radar-refresh-pending-watchdog": false } }));
     const uqFail = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "unquiesce"],
-      { env: { ...env, PATH: `${failBin}:${process.env.PATH}`, BASCULE_WORKDIR: uqWork }, encoding: "utf8" });
+      { env: { ...env, ...okOutcomes, PATH: `${failBin}:${process.env.PATH}`, BASCULE_WORKDIR: uqWork }, encoding: "utf8" });
     const fl = readFileSync(failLog, "utf8");
     ok("CLI unquiesce — failed CronJob patch ⇒ exit 1, named, remaining CronJobs still patched",
       uqFail.status === 1 && /patch cronjob\/radar-refresh-pv suspend=false/.test(uqFail.stdout + uqFail.stderr) &&
@@ -829,7 +830,7 @@ async function cliSuite() {
       'case "$*" in *"patch cronjob radar-refresh-pv "*) kill -TERM "$$" ;; esac', "exit 0", ""].join("\n"), { mode: 0o755 });
     writeFileSync(failLog, "");
     const uqSig = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "unquiesce"],
-      { env: { ...env, PATH: `${failBin}:${process.env.PATH}`, BASCULE_WORKDIR: uqWork }, encoding: "utf8" });
+      { env: { ...env, ...okOutcomes, PATH: `${failBin}:${process.env.PATH}`, BASCULE_WORKDIR: uqWork }, encoding: "utf8" });
     const sl = readFileSync(failLog, "utf8");
     ok("CLI unquiesce — CronJob patch killed by a signal ⇒ exit 1, named, remaining CronJobs still patched",
       uqSig.status === 1 && /patch cronjob\/radar-refresh-pv suspend=false/.test(uqSig.stdout + uqSig.stderr) &&

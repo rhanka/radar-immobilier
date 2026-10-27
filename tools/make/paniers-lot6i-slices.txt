@@ -1,0 +1,19 @@
+docs: declare workspace archive scope and delivery safeguards|plan/PANIERS6I-BRANCH_feat-paniers-6i-workspace-archive.md|0
+feat: allow workspace archive events in the facet store|api/drizzle/0019_facet_workspace_archive.sql api/drizzle/meta/_journal.json api/src/db/schema.ts api/src/services/facets/activation-bind.ts|0,1
+feat: resolve workspace archive streams under moderation|api/src/services/facets/workspace-streams.ts|0,1
+feat: read separated archive heads with effective hiding|api/src/services/facets/workspace-reader.ts|0,1,3
+feat: prepare atomic workspace transitions and conflict heads|writer-helpers|0,1,3
+feat: write workspace archives under moderator capability|api/src/services/facets/workspace-writer.ts|0,1,2,3
+feat: expose the scoped union discard port|api/src/services/facets/workspace-discarded.ts|0,1,2,3,4
+feat: expose guarded workspace archive routes without mounting|api/src/routes/scoped-workspace-archive.ts|0,1,2,3,4,5
+feat: capture workspace archive intentions in the UI client|ui/src/lib/signals/signal-facet-workspace.ts|0,1,2,3,4,5,6
+test: isolate synthetic workspace archive databases|api/src/services/facets/workspace-archive-fixture.ts|0,1,2,3,4,5,6
+test: qualify moderator archives and independent restoration|api/src/services/facets/workspace-archive-db.test.ts|0,1,2,3,4,5,6
+test: qualify receipt scope and private workspace projections|api/src/services/facets/workspace-receipts-db.test.ts api/src/services/facets/workspace-union-db.test.ts|0,1,2,3,4,5,6
+test: reject duplicate workspace terminals after index swap|api/src/services/facets/workspace-head-enforcement-db.test.ts|0,1,2,3,4,5,6
+test: qualify workspace archive HTTP authorization|api/src/routes/scoped-workspace-archive-db.test.ts|0,1,2,3,4,5,6
+test: qualify union filtering and UI archive intentions|api/src/services/facets/workspace-discarded.test.ts ui/src/lib/signals/signal-facet-workspace.test.ts|0,1,2,3,4,5,6,7
+chore: extend isolated verification with the 6I profile|tools/make/paniers-lot6.mk tools/make/paniers-lot6-verify.sh tools/make/paniers-lot6i-slices.txt|0,1,2,3,4,5,6,7
+test: prove five workspace archive regressions on source copies|tools/make/paniers-lot6i-mutation.sh|0,1,2,3,4,5,6,7
+chore: deliver size-checked and typechecked workspace commits|tools/make/paniers-lot6i-deliver.sh|0,1,2,3,4,5,6,7,8
+docs: record verified workspace archive delivery|tools/make/paniers-lot6i-deliver.sh tools/make/paniers-lot6i-slices.txt|0,1,2,3,4,5,6,7,8

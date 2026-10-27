@@ -914,6 +914,59 @@ describe("SignauxSelPanel — m7 accordéon Règlement et Normes", () => {
   });
 });
 
+describe("SignauxSelPanel — reglement bucket on failed signal read", () => {
+  it("should preserve geographic norms when signal reads are unavailable", async () => {
+    const zones = makeZonesResponse(["H-431"]);
+    const { getByTestId, getByText, queryByTestId, queryByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        detailError: "Projection du vivier indisponible.",
+        zonesResponse: zones,
+        lotsResponse: makeLotsResponse([
+          makeLot("100", { zoneCode: "H-431", normes: { hauteur: "12 m" } }),
+        ]),
+      },
+    });
+    expect(getByTestId("reglements-unavailable").textContent).toContain(
+      "Règlements indisponibles",
+    );
+    expect(getByTestId("reglements-bucket-count").textContent).toContain("n/d");
+    expect(
+      queryByText("Aucun règlement cité par les signaux de cette ville."),
+    ).toBeNull();
+    expect(queryByText("0 signaux")).toBeNull();
+    expect(queryByTestId("reglement-count")).toBeNull();
+    expect(getByTestId("reglement-normes-hint")).toBeTruthy();
+    expect(getByText("H-431", { selector: ".sel-entity-label" })).not.toBeNull();
+    await fireEvent.click(getByText("H-431", { selector: ".sel-entity-label" }));
+    expect(getByTestId("reglement-normes-grid").textContent).toContain("12 m");
+    expect(getByText("100", { selector: ".sel-entity-label" })).not.toBeNull();
+    expect(getByTestId("reglements-bucket-count").textContent).toContain("n/d");
+  });
+
+  it("should keep demo documents when signal counts are unavailable", () => {
+    const { getAllByTestId, getByTestId, queryByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity("sainte-martine", "Sainte-Martine"),
+        detailNodes: [],
+        detailError: "Projection du vivier indisponible.",
+      },
+    });
+    expect(getByTestId("reglements-unavailable")).toBeTruthy();
+    expect(getByTestId("reglements-bucket-count").textContent).toContain("n/d");
+    expect(queryByText("2019-342")).not.toBeNull();
+    expect(queryByText("Voir le PDF du règlement")).not.toBeNull();
+    expect(
+      queryByText("Aucun règlement cité par les signaux de cette ville."),
+    ).toBeNull();
+    expect(queryByText("0 signaux")).toBeNull();
+    for (const count of getAllByTestId("reglement-count")) {
+      expect(count.textContent).toContain("n/d");
+    }
+  });
+});
+
 // ── m8 — source de la zone (type + ouverture) ────────────────────────────────
 
 describe("SignauxSelPanel — m8 source de la zone", () => {

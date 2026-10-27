@@ -1,16 +1,20 @@
 /**
- * Tests fetch-with-timeout — borne temporelle + annulation externe.
+ * Tests fetch-with-timeout — time bound + external cancellation.
  *
- * Prouve les 3 propriétés qui corrigent le bug des vues carte :
- *  1. chemin nominal : passe la Response telle quelle (ISO) ;
- *  2. timeout dépassé → RequestTimeoutError (état d'erreur honnête, pas de
- *     spinner éternel) ;
- *  3. abort externe → AbortError d'origine relevée (réponse à IGNORER, distincte
- *     d'un timeout).
+ * Covers the 3 properties that fix the map-view bug:
+ *  1. nominal path: relays the Response untouched (ISO);
+ *  2. timeout exceeded → RequestTimeoutError (explicit error state, not an
+ *     endless spinner);
+ *  3. external abort → original AbortError rethrown (response to IGNORE,
+ *     distinct from a timeout).
+ * Plus the body bound of fetchJsonWithTimeout: headers at once but a stalled
+ * body still fails with RequestTimeoutError instead of hanging the caller.
  */
 import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   fetchWithTimeout,
+  fetchJsonWithTimeout,
+  readJsonErrorCode,
   RequestTimeoutError,
   isAbortError,
   DEFAULT_REQUEST_TIMEOUT_MS,
@@ -133,11 +137,113 @@ describe("fetchWithTimeout — annulation externe (anti-course)", () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it("isAbortError distingue abort et timeout", () => {
+  it("tells an abort apart from a timeout", () => {
     const abort = new Error("x");
     abort.name = "AbortError";
     expect(isAbortError(abort)).toBe(true);
     expect(isAbortError(new RequestTimeoutError("/x", 1))).toBe(false);
     expect(isAbortError(new Error("plain"))).toBe(false);
+  });
+});
+
+describe("fetchJsonWithTimeout — stalled body", () => {
+  /** Headers at once, body stalled: the stream never closes, like a hung body. */
+  function stalledBodyResponse(signal: AbortSignal | null | undefined, status = 200): Response {
+    return new Response(
+      new ReadableStream({
+        start(controller) {
+          signal?.addEventListener(
+            "abort",
+            () => controller.error(new DOMException("Aborted", "AbortError")),
+            { once: true },
+          );
+        },
+      }),
+      { status, headers: { "content-type": "application/json" } },
+    );
+  }
+
+  function stubStalledBody(status = 200): Promise<void> {
+    let notifyBodyRead!: () => void;
+    const bodyRead = new Promise<void>((resolve) => { notifyBodyRead = resolve; });
+    vi.stubGlobal(
+      "fetch",
+      async (_url: string, init?: RequestInit) => {
+        const response = stalledBodyResponse(init?.signal ?? undefined, status);
+        const readJson = response.json.bind(response);
+        vi.spyOn(response, "json").mockImplementation(() => {
+          notifyBodyRead();
+          return readJson();
+        });
+        return response;
+      },
+    );
+    return bodyRead;
+  }
+
+  it("times out when the headers arrive but the body stalls", async () => {
+    stubStalledBody();
+    await expect(fetchJsonWithTimeout("/api/x", { timeoutMs: 10 })).rejects.toBeInstanceOf(
+      RequestTimeoutError,
+    );
+  });
+
+  it("times out a stalled body on the error path instead of masking the status", async () => {
+    stubStalledBody(503);
+    await expect(fetchJsonWithTimeout("/api/x", { timeoutMs: 10 })).rejects.toBeInstanceOf(
+      RequestTimeoutError,
+    );
+  });
+
+  it.each([200, 503])("relays an external abort during a stalled %i body", async (status) => {
+    const bodyRead = stubStalledBody(status);
+    const controller = new AbortController();
+    const promise = fetchJsonWithTimeout("/api/x", {
+      signal: controller.signal,
+      timeoutMs: 10_000,
+    });
+    await bodyRead;
+    const reason = new DOMException("City changed", "AbortError");
+    controller.abort(reason);
+    await expect(promise).rejects.toBe(reason);
+  });
+
+  it("returns status, ok and the parsed body when the body arrives in time", async () => {
+    vi.stubGlobal(
+      "fetch",
+      async () => new Response(JSON.stringify({ ok: true }), { status: 200 }),
+    );
+    const res = await fetchJsonWithTimeout<{ ok: boolean }>("/api/x", { timeoutMs: 1000 });
+    expect(res.status).toBe(200);
+    expect(res.ok).toBe(true);
+    expect(res.json).toEqual({ ok: true });
+  });
+
+  it("reads an unreadable error body as null instead of masking the status", async () => {
+    vi.stubGlobal("fetch", async () => new Response("unavailable", { status: 503 }));
+    const res = await fetchJsonWithTimeout("/api/x", { timeoutMs: 1000 });
+    expect(res.status).toBe(503);
+    expect(res.ok).toBe(false);
+    expect(res.json).toBeNull();
+    expect(readJsonErrorCode(res.json)).toBeNull();
+  });
+
+  it("reads the server error code from a parsed error body", () => {
+    expect(readJsonErrorCode({ error: "discarded_signals_unavailable" })).toBe(
+      "discarded_signals_unavailable",
+    );
+    expect(readJsonErrorCode({ error: 42 })).toBeNull();
+    expect(readJsonErrorCode(null)).toBeNull();
+    expect(readJsonErrorCode("unavailable")).toBeNull();
+  });
+
+  it.each([200, 503])("releases the timer and external listener after a %i body", async (status) => {
+    vi.useFakeTimers();
+    const controller = new AbortController();
+    const removeListener = vi.spyOn(controller.signal, "removeEventListener");
+    vi.stubGlobal("fetch", async () => new Response("{}", { status }));
+    await fetchJsonWithTimeout("/api/x", { signal: controller.signal });
+    expect(vi.getTimerCount()).toBe(0);
+    expect(removeListener).toHaveBeenCalledWith("abort", expect.any(Function));
   });
 });

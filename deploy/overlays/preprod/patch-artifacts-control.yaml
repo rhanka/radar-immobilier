@@ -1,0 +1,14 @@
+# PREPROD artifact control-plane activation record (861c H3 unit 11).
+# Disabled by default: ARTIFACTS_CONTROL_MODE "off" closes the rehearsal even
+# with a complete storage configuration. Activation subjects, expiration and
+# storage coordinates are intentionally ABSENT here (absent/incomplete stays
+# closed); the operator provisions them out-of-band at activation time (see
+# docs/operator/h3-preprod-activation.md). Secrets are never committed: only
+# opaque Secret references exist (patch-artifacts-api-env.yaml).
+# Guarded by deploy/ci/check-h3-preprod-render.sh (CI + preflight).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: radar-api
+data:
+  ARTIFACTS_CONTROL_MODE: "off"
