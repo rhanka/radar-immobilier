@@ -55,6 +55,7 @@ isolation, current authorization, transactional quotas and replay safety.
   - [ ] Approved accounts bypass stale workspace claims for artifact tools.
   - [ ] Four tools, server identities, forged-field refusals and MCP tests.
 - [ ] **Lot 3 — Qualification**
+  - [x] Await quota promise results in unit assertions.
   - [x] Bind quota actor to the coordinator input, before approval reads.
   - [x] Require real publication with zero/two memberships and by both MCP actors.
   - [x] Repair the MCP test suite delimiter and remove an unused fixture argument.
