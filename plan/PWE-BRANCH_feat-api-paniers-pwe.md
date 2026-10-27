@@ -32,6 +32,9 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Real TCP recovery gate: 1 passed/0 failed/0 skipped; typecheck/lint passed.
+- [x] Add independent challenge/cookie expiry at I, BASE key, personal stream
+  and final outbox SQL waits, using the normal callback cookie and controlled time.
 - [x] C03 account/workspace and normal guard/remint cases passed; fix the
   TCP client's Host handling and explicit HTTP server type before requalification.
 - [x] Add full/mutation campaign phases, with isolated evidence for each
