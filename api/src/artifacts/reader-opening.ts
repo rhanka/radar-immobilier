@@ -31,7 +31,7 @@ export function createReaderOpening(deps: {
     if (!deps.auth.enabled || c.req.header("authorization")) return null;
     const token = parseCookieHeader(c.req.header("cookie"), SESSION_COOKIE_NAME);
     const session = token ? await verifySession(token, { sessionSecret: deps.auth.sessionSecret }) : null;
-    if (!session || typeof input.artifactId !== "string" || !/^[a-f0-9-]{36}$/.test(input.artifactId) ||
+    if (!session || typeof input.artifactId !== "string" || !/^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(input.artifactId) ||
       typeof input.binding !== "string" || !/^[a-f0-9]{64}$/.test(input.binding)) return null;
     const release = await deps.authority.getRelease(input.artifactId);
     const profile = await deps.authority.getProfile(input.artifactId);
