@@ -1,33 +1,16 @@
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { describe, expect, it } from "vitest";
-import { analyzeListCalls, excludedTestDirectories, repositoryTestFiles } from "./artifacts-listkeys-guard.helpers.js";
+import { type S3Client } from "@aws-sdk/client-s3";
+import { createS3BlobStore } from "@sentropic/artifacts/adapters/s3";
+import { createTestMemoryBlobStore } from "./artifacts-blob-store.helpers.js";
+import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
+import { describe, expect, it, vi } from "vitest";
 
-describe("S3 blob prefix test guard", () => {
-  it.each([
-    'await rawBlobs().listKeys("")', "await store.listKeys('')", "await store.listKeys(``)",
-    'await store.listKeys( /* missing prefix */ )', 'await store["listKeys"]("")',
-  ])("should reject an empty or omitted prefix in %s", (source) => {
-    expect(analyzeListCalls(source).invalid).toEqual([1]);
-  });
-
-  it("should allow scoped calls and ignore comments and string fixtures", () => {
-    expect(analyzeListCalls('store.listKeys(`artifacts/${scope}/`); // store.listKeys()\n' +
-      'const fixture = \'store.listKeys("")\';').invalid).toEqual([]);
-  });
-
-  it("should flag statically invalid listKeys prefixes in all API and package tests", () => {
-    const tests = repositoryTestFiles(fileURLToPath(new URL("../../", import.meta.url)));
-    const violations: string[] = [];
-    const nonStatic: string[] = [];
-    for (const path of tests) {
-      const result = analyzeListCalls(readFileSync(path, "utf8"), path);
-      violations.push(...result.invalid.map((line) => `${path}:${line}: listKeys requires a nonempty prefix without '..'`));
-      nonStatic.push(...result.nonStatic.map(({ line, expression }) => `${path}:${line}: ${expression}`));
-    }
-    console.info(`listKeys guard: scanned ${tests.length} tests/helpers; excluded directories: ${excludedTestDirectories.join(", ")}`);
-    console.info("Static analysis is partial; test blob store wrappers enforce every executed listKeys prefix.");
-    console.info(`listKeys arguments requiring review (${nonStatic.length}):\n${nonStatic.join("\n")}`);
-    expect(violations).toEqual([]);
+describe.each(["memory", "S3"] as const)("%s provider blob prefix contract", (kind) => {
+  it.each(["", "..", "artifacts/../", "artifacts/scope..name/"])("should refuse prefix %j before I/O", async (prefix) => {
+    const send = vi.fn();
+    const blobs = kind === "memory" ? await createTestMemoryBlobStore()
+      : createS3BlobStore({ client: { send } as unknown as S3Client, bucket: "prefix-test" });
+    await expect(blobs.listKeys(prefix)).rejects.toBeInstanceOf(ArtifactOperationError);
+    await expect(blobs.listKeys(prefix)).rejects.toMatchObject({ code: "invalid_blob_prefix", kind: "invalid_request" });
+    expect(send).not.toHaveBeenCalled();
   });
 });
