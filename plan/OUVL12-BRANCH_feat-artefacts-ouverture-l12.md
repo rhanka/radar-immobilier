@@ -43,11 +43,17 @@ isolation, current authorization, transactional quotas and replay safety.
 ## Feedback Loop
 - [x] Read both Astra reviews of PR #930 in full; owner requests the smallest
   shared correction, no push, and an incremental bundle from `c71fbdaf`.
-- [ ] Replace the commit-only minute debit with atomic admission attempts
+- [x] Replace the commit-only minute debit with atomic admission attempts
   before S3, never refunded; keep durable quotas transactional at commit.
-- [ ] Resolve committed replays through coordinator authorization before the
+- [x] Resolve committed replays through coordinator authorization before the
   minute bound, and return retryable temporary refusal for new capped writes.
-- [ ] Restrict the workspace-claim exemption to general mode and test both modes.
+- [x] Restrict the workspace-claim exemption to general mode and test both modes.
+- [x] Astra correction gates passed: host 187, MCP 416, PostgreSQL admission 19,
+  enabled acceptance 172, full API 3500 passed / 699 conditionally skipped.
+- [x] Seven mutants failed on their behavioral assertions and passed restored;
+  source SHA-256 checks matched the checkout after restoration.
+- [x] Review stack removed with volumes/orphans at 16:13 UTC; own controller
+  exited 0 and released the lock, then `radar-test-sec-hotfix-3` took its turn.
 - [x] Shared Git metadata is read-only: use local Git metadata and audit a bundle
   against the original base in a fresh repository; do not push.
 - [x] Owner instruction overrides commit trailers and report language.
@@ -57,7 +63,7 @@ isolation, current authorization, transactional quotas and replay safety.
   removed only this workspace's duplicates and added graceful file cancellation.
 - [x] Resumed at 14:50 UTC after the foreign stack stopped; acquired the shared
   lock and verified no foreign test stack before starting the dedicated stack.
-- [x] Qualification passed: host 190, MCP 415, admission PG 13, enabled artifact
+- [x] Initial qualification passed: host 190, MCP 415, admission PG 13, enabled artifact
   acceptance 166, API full 3494 passed / 699 conditionally skipped, no failures.
 - [x] Four mutation proofs passed baseline / failed assertions / passed restored;
   container sources matched the local checkout by SHA-256 after restoration.
@@ -76,7 +82,7 @@ isolation, current authorization, transactional quotas and replay safety.
   - [x] Merge main 0.2.2 in the local recovery repository.
 - [x] **Lot 1 — Host general admission**
   - [x] Activation, membership-independent admission and workspace decoupling.
-  - [x] Transactional global, actor and shared minute quotas with migration.
+  - [x] Transactional global/actor quotas and atomic minute attempt admission.
   - [x] Host unit tests.
 - [x] **Lot 2 — MCP general admission**
   - [x] Approved accounts bypass stale workspace claims for artifact tools.
@@ -113,7 +119,7 @@ isolation, current authorization, transactional quotas and replay safety.
 - [x] **Lot 4 — Delivery**
   - [x] Atomic commits, bundle audit and French results report.
   - [x] Confirm own Docker project has no containers, networks or volumes.
-- [ ] **Lot 5 — Astra review corrections (#930)**
+- [x] **Lot 5 — Astra review corrections (#930)**
   - [x] Add tenth-success ensure/publish replay probes through HTTP and MCP.
   - [x] Add last-unit concurrent S3 counting and nonrefunded quota-refusal probes.
   - [x] Normalize test bucket names separately from PostgreSQL database names.
@@ -136,8 +142,8 @@ isolation, current authorization, transactional quotas and replay safety.
   - [x] Preserve migration 0025's published bytes: editing its comments after
     setup changed the expected journal hash. Runtime attempt semantics are
     documented in code; no schema change or journal exception is required.
-  - [ ] Count S3 calls on the last concurrent attempt and exhausted durable quota.
-  - [ ] Implement shared guarded replay and atomic pre-upload attempt admission.
-  - [ ] Verify suspension denial and mode-specific account binding.
-  - [ ] Targeted gates, full API and discriminating restored-source mutations.
-  - [ ] Incremental bundle audit, report section and shared stack cleanup.
+  - [x] Count S3 calls on the last concurrent attempt and exhausted durable quota.
+  - [x] Implement shared guarded replay and atomic pre-upload attempt admission.
+  - [x] Verify suspension denial and mode-specific account binding.
+  - [x] Targeted gates, full API and discriminating restored-source mutations.
+  - [x] Incremental bundle audit, report section and shared stack cleanup.
