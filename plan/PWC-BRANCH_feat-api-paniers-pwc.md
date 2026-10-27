@@ -67,3 +67,5 @@ Qualify, repair and integrate the supplied PW-C implementation on 07ef2757.
 - [x] Delivery: feat(pw-c): bound automatic and manual intent follow-up.
 
 - [x] Delivery: test(pw-c): define page browser fixtures and elements.
+
+- [x] Delivery: test(pw-c): execute served page bytes in a browser harness.
