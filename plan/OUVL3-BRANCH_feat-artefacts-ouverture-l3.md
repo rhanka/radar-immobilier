@@ -43,6 +43,12 @@ Connect published release files and H5 reads to current account/workspace author
 - [x] Align mounted reader API denials with private reader isolation headers, keeping 401 before delegation. Targeted 21/0/0 passed; two browser readers matched 2/1 in 175/117 ms.
 - [x] Full qualification at `6365b696` passed all 10 gates by 15:59 UTC: 3215 API unit tests, 63 PostgreSQL reads, browser acceptance, 10 killed mutations and 4133 API CI tests. Evidence: `tmp/sol-l3-evidence/20261027T154538-5/`.
 - [x] Docker cleanup completed with exit 0; no L3 containers, volumes or networks remain. Runner exited and released its lock; foreign L12 campaign subsequently observed, untouched.
+- [x] Read both complete Astra reviews of PR #931 at `0e9c0cbe`; owner requests the bounded corrections below, no push, incremental bundle from that head.
+- [x] OUVL3-EX2: allow `api/src/routes/auth.ts` and its auth tests only for validated reader login resumption. Impact: optional, same-origin reader return target in the existing OIDC flow; rollback: remove that optional return path, leave login unchanged.
+- [ ] Authorize native transitive resources with a host/release/session-bound reader cookie; remove HTML query rewriting and normalize CSP input line endings.
+- [ ] Resolve readable historical pinned releases and scope authority versions to the relevant artifact/reader.
+- [ ] Preserve the existing basket error contracts and resume opening through the existing login flow.
+- [ ] Keep the Muse report only in local evidence; qualify browser imports, CRLF and consecutive publications, then all gates.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch, serialized implementation and Docker campaigns.

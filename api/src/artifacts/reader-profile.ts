@@ -34,9 +34,9 @@ export interface AuthorityReader {
   /** Current at completion; changes on any release, profile or ACL update.
    * Versions are never reused, including after a rollback (no ABA).
    */
-  readonly getAuthorizationVersion: (artifactId: string) => Promise<string | null>;
+  readonly getAuthorizationVersion: (artifactId: string, readerSub?: string, releaseId?: string) => Promise<string | null>;
   readonly getContentOrigin: (artifactId: string) => Promise<string | null>;
-  readonly getRelease: (artifactId: string) => Promise<ArtifactReleaseRef | null>;
+  readonly getRelease: (artifactId: string, releaseId?: string) => Promise<ArtifactReleaseRef | null>;
   readonly getProfile: (artifactId: string) => Promise<ReaderProfile | null>;
   /** Per-artifact access decision: the couple (readerSub, artifactId) is mandatory. */
   readonly getRights: (readerSub: string, artifactId: string) => Promise<ReaderRights | null>;

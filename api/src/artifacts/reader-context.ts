@@ -30,9 +30,9 @@ export async function adaptGrantToReader(
   authority: AuthorityReader,
 ): Promise<ApiReaderContext | null> {
   try {
-  const version = await authority.getAuthorizationVersion(grant.artifactId);
+  const version = await authority.getAuthorizationVersion(grant.artifactId, grant.readerSub, grant.releaseId);
   if (!version) return null;
-  const release = await authority.getRelease(grant.artifactId);
+  const release = await authority.getRelease(grant.artifactId, grant.releaseId);
   if (!release || release.artifactId !== grant.artifactId || release.releaseId !== grant.releaseId) return null;
   const profile = await authority.getProfile(grant.artifactId);
   if (!profile || profile.name !== grant.profileName) return null;
@@ -41,7 +41,7 @@ export async function adaptGrantToReader(
   const rights = await authority.getRights(grant.readerSub, grant.artifactId);
   if (!rights || !rights.approved || rights.readerSub !== grant.readerSub) return null;
   if (rights.artifactId !== grant.artifactId) return null;
-  if (await authority.getAuthorizationVersion(grant.artifactId) !== version) return null;
+  if (await authority.getAuthorizationVersion(grant.artifactId, grant.readerSub, grant.releaseId) !== version) return null;
   return {
     readerSub: grant.readerSub,
     sessionId: grant.sessionId,

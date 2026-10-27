@@ -41,7 +41,7 @@ export async function renewGrant(
   const verified = await verifyGrant(presented, deps.issuer, deps.secret, now());
   if (!verified) return null;
   if (isRevoked(verified.sessionId)) return null;
-  const version = await deps.authority.getAuthorizationVersion(verified.artifactId);
+  const version = await deps.authority.getAuthorizationVersion(verified.artifactId, verified.readerSub, verified.releaseId);
   if (!version) return null;
   // Page renewal checks per-artifact approval only; API capabilities gate
   // each operation separately, never the page itself.
@@ -52,7 +52,7 @@ export async function renewGrant(
   if (!profile || profile.name !== verified.profileName) return null;
   if (profile.policyRevision !== verified.policyRevision) return null;
   if (fingerprintReaderProfile(profile) !== verified.profileFingerprint) return null;
-  const release = await deps.authority.getRelease(verified.artifactId);
+  const release = await deps.authority.getRelease(verified.artifactId, verified.releaseId);
   if (!release || release.artifactId !== verified.artifactId || release.releaseId !== verified.releaseId) return null;
   // Freshness revalidation: approval or policy withdrawn during the waits
   // above must refuse signing even when the old grant has not expired.
@@ -63,14 +63,14 @@ export async function renewGrant(
   if (!freshProfile || freshProfile.name !== verified.profileName) return null;
   if (freshProfile.policyRevision !== verified.policyRevision) return null;
   if (fingerprintReaderProfile(freshProfile) !== verified.profileFingerprint) return null;
-  const freshRelease = await deps.authority.getRelease(verified.artifactId);
+  const freshRelease = await deps.authority.getRelease(verified.artifactId, verified.releaseId);
   if (!freshRelease || freshRelease.artifactId !== verified.artifactId || freshRelease.releaseId !== verified.releaseId) return null;
   const issuedAt = now();
   if (issuedAt >= verified.expiresAtMs || isRevoked(verified.sessionId)) return null;
   const next: GrantClaims = { ...deps.issuer, ...verified };
   const renewed = await mintGrant(next, deps.secret, issuedAt);
   // Fence every authority wait and signing itself with one authority version.
-  if (await deps.authority.getAuthorizationVersion(verified.artifactId) !== version) return null;
+  if (await deps.authority.getAuthorizationVersion(verified.artifactId, verified.readerSub, verified.releaseId) !== version) return null;
   return now() < verified.expiresAtMs && !isRevoked(verified.sessionId) ? renewed : null;
   } catch { return null; }
 }
