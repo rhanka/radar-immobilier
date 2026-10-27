@@ -69,6 +69,7 @@ Connect published release files and H5 reads to current account/workspace author
 - [x] Replace inline-block regex extraction with parse5's HTML tree; regress quoted greater-than/spaces and apparent scripts in attributes, comments and textareas. Browser acceptance follows below.
 - [x] Preserve the request URL's query when setting its sole grant; test repeated parameters and empty prior grants, and extend Chromium to compare the interpreted script hash and read baskets after parameterized navigation.
 - [x] Add two behavioral mutations restoring the old HTML regex and query-dropping redirect; retain before/after controls and byte-exact restoration alongside the ten existing mutations.
+- [x] First campaign passed typecheck/lint, 426 artifact units and 66 PostgreSQL tests; Chromium reached H5 200 but the fixture erased its script before the new hash assertion. Keep the DOM when rendering results, preserve the assertion and rerun all gates after guarded cleanup.
 - [ ] Qualify artifact units, PostgreSQL reader, Chromium, both corrective mutations and API CI under the shared lock; clean volumes and deliver a bundle from `a3aa18e0`.
 
 ## Orchestration Mode (AI-selected)
