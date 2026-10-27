@@ -24,6 +24,7 @@ free_space() {
      $(awk '/MemAvailable:/ {print $2}' /proc/meminfo) -ge 8388608 ]]
 }
 deadline=$((SECONDS + 21600))
+quiet_since=$SECONDS
 exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
 while :; do
   (( SECONDS < deadline )) || { echo 'Docker reservation exceeded six hours'; exit 4; }
@@ -33,10 +34,13 @@ while :; do
   if [[ -z $running && -z $builders ]] && flock -n 8; then
     running=$(docker ps --filter name=test- --format '{{.Names}}')
     builders=$(ps -eo comm=,args= | awk '$1 ~ /^(docker|docker-buildx|buildctl)$/ && $0 ~ / (build|buildx) /')
-    [[ -n $running || -n $builders ]] || break
+    if [[ -z $running && -z $builders ]] && (( SECONDS - quiet_since >= 60 )); then break; fi
+    [[ -z $running && -z $builders ]] || quiet_since=$SECONDS
     flock -u 8
+  else
+    quiet_since=$SECONDS
   fi
-  echo 'Waiting for radar test containers, Docker builds and campaign lock'; sleep 10
+  echo 'Waiting for 60s without test containers, Docker builds or campaign locks'; sleep 10
 done
 OWNER=$(printf '%s' "$ROOT/$ENV" | sha256sum | cut -d' ' -f1)
 export COMPOSE_DISABLE_ENV_FILE=1
@@ -83,6 +87,12 @@ sha256sum "$LOG_DIR/target.diff" > "$LOG_DIR/target.sha256"
 (
   while sleep 5; do
     free_space || { echo 'STOP: resource floor breached' > "$LOG_DIR/resource-stop.log"; kill -TERM "$$"; exit; }
+    foreign=$(docker ps --filter name=test- --format '{{.Names}} {{.Label "com.docker.compose.project"}}' \
+      | awk -v project="$PROJECT" '$2 != project {print $1}')
+    if [[ -n $foreign ]]; then
+      printf '%s\n' "$foreign" > "$LOG_DIR/foreign-stack-stop.log"
+      kill -TERM "$$"; exit
+    fi
   done
 ) 8>&- > "$LOG_DIR/resource-monitor.log" 2>&1 &
 MONITOR=$!
