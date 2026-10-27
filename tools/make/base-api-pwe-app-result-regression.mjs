@@ -22,7 +22,7 @@ function run(phase, failed) {
   assert.equal(cases.length, 5); assert.equal(report.numPendingTests, 0);
   assert.ok(cases.every((test) => test.status === (failed ? "failed" : "passed")));
   if (failed) assert.ok(cases.every((test) => test.failureMessages.some((message) =>
-    /AssertionError/.test(message) && /"(?:receipt|commandId)"/.test(message))), "Require missing-receipt assertions");
+    /AssertionError/.test(message) && message.includes("PW_E_APP_RECEIPT"))), "Require missing-receipt assertions");
   else assert.equal(report.success, true);
   return cases.map(({ fullName, status }) => ({ fullName, status }));
 }

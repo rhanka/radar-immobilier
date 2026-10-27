@@ -32,6 +32,8 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] The preserved route produced five missing-receipt assertion failures;
+  use a public diagnostic marker because Vitest abbreviates object fields in JSON messages.
 - [x] The first final attempt passed static gates but omitted the archived
   pre-fix text vector; include that tracked input explicitly before requalification.
 - [x] Foreign-container intrusion invalidated the same attempt; preserve its
