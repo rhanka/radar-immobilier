@@ -1,18 +1,14 @@
 import { createS3BlobStore } from "@sentropic/artifacts/adapters/s3";
+import { createRequire } from "node:module";
+import { pathToFileURL } from "node:url";
 
-type ListableBlobs = { listKeys(prefix: string): Promise<string[]> };
-
-/** Runtime contract shared by every test blob store, including memory doubles. */
-export function withTestBlobPrefixes<T extends ListableBlobs>(store: T): T {
-  return {
-    ...store,
-    async listKeys(prefix: string) {
-      if (typeof prefix !== "string" || prefix.length === 0 || prefix.includes("..")) {
-        throw new Error(`invalid blob prefix: ${String(prefix)}`);
-      }
-      return store.listKeys(prefix);
-    },
+/** The published memory double has no package subpath export. */
+export async function createTestMemoryBlobStore() {
+  const entry = pathToFileURL(createRequire(import.meta.url).resolve("@sentropic/artifacts"));
+  const { createMemoryBlobStore } = await import(new URL("./server/publication.js", entry).href) as {
+    createMemoryBlobStore: () => ReturnType<typeof createS3BlobStore>;
   };
+  return createMemoryBlobStore();
 }
 
 export function createTestS3BlobStore(options: Parameters<typeof createS3BlobStore>[0]) {
@@ -29,10 +25,10 @@ export function createTestS3BlobStore(options: Parameters<typeof createS3BlobSto
     void all.then(() => { if (pending.get(key)?.all === all) pending.delete(key); });
     return result;
   }
-  return withTestBlobPrefixes({
+  return {
     ...store,
     putBlob: (...args: Parameters<typeof store.putBlob>) => atomic(args[0], () => store.putBlob(...args), true),
     getBlob: (...args: Parameters<typeof store.getBlob>) => atomic(args[0], () => store.getBlob(...args)),
     deleteBlob: (...args: Parameters<typeof store.deleteBlob>) => atomic(args[0], () => store.deleteBlob(...args), true),
-  });
+  };
 }
