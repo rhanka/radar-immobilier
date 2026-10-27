@@ -44,10 +44,24 @@ No publication blocker remains; mcp-auth stays on its existing 0.2.1.
 - Production MCP parity: 12 wire definitions and 15 invalid-argument responses.
 - Raw HTTP/stdio non-finite inputs are refused before effects; finite controls pass.
 - Historical workspace/head GUIDs and lowercase normalization are preserved.
-- Full CI application test recipe: 7,709 passed, 701 conditional skips, 10 todo.
+- Full CI application test recipe: 7,823 passed, 701 conditional skips, 10 todo.
 - Initial failures and the scoped regressions are retained; no exclusions or timeouts changed.
 - All-workspace typecheck (7 Svelte warnings), lint, API/UI builds and bundle smoke pass.
 - All 67 security-gate tests pass. Focus trust controls and Mermaid bundle provenance pass.
 - npm audit covers the two resolved dependency trees, not image OS layers or deployed artifacts.
 - Focus provenance verifies installed KaTeX/DOMPurify; browser rendering is not claimed.
 - Evidence: task worktree `tmp/hotfix3-evidence/`; final French report delivered separately.
+
+## PR #932 review corrections
+
+- Reviewed base: 59d4c1bfbffddbf46ed31e059e6c7395a225d426; both Astra reports were read in full.
+- Explicit timestamp grammar preserves minute-only UTC and compact offsets without rewriting values or weakening calendar checks.
+- Existing scrape-status shards, raw-document metadata and classification-card documentary dates remain readable.
+- Listing URLs reject whitespace on the raw string; other accepted documentary URLs preserve their original value.
+- Integer checks retain diagnostic accumulation, finite unsafe integers and historical HTTP pagination coercion.
+- Infinity in a nonnumeric field retains invalid_type metadata; numeric D6 refusals remain enforced.
+- Native registrar primitives match an actual Zod 3 registrar; non-finite characterization assertions are discriminating.
+- 114 new regression tests compare against an isolated exact Zod 3.25.76 oracle; the bundled Zod 3 API mode also passes.
+- Complete application suite: 7,823 passed, 701 conditional skips, 10 todo; typecheck, lint, builds, smoke and security gates pass.
+- Both dependency trees remain unchanged and clean; no vulnerable oracle dependency is added to the workspace or delivered.
+- Incremental bundle, command evidence and French review-correction report are delivered externally; no push.
