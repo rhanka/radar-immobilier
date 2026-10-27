@@ -24,6 +24,7 @@
 - [x] Record rationale, impact and rollback before any conditional-path edit.
 
 ## Feedback Loop
+- [x] L2k: replace the graph client imports with the published Engram entrypoint.
 - [x] L2j: preserve source-parser and upstream validation diagnostics.
 - [x] L2i: preserve GUID inputs on scoped workspace and signal routes.
 - [x] L2h: preserve validation details on administrative HTTP routes.

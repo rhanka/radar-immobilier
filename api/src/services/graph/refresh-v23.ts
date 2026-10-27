@@ -1,4 +1,4 @@
-import type { Extraction, OntologyCitation } from "@sentropic/graphify";
+import type { Extraction, OntologyCitation } from "@sentropic/engram";
 
 import {
   containsNormalizedPdfExcerpt,
