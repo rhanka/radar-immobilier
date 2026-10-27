@@ -5,6 +5,8 @@ override GIT_WORK_TREE := $(CURDIR)
 export GIT_DIR GIT_WORK_TREE ENV FILES MSG
 override MSG := $(value MSG)
 .PHONY: bootstrap stage commit audit bundle test-operator test-workflow render check
+verify:
+	@rtk bash tools/make/bascule-fix-verify.sh
 bootstrap stage commit audit bundle:
 	@rtk bash tools/make/bascule-fix-deliver.sh $@
 test-operator:
