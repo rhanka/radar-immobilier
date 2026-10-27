@@ -32,6 +32,7 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Reject empty/missing required files, failed suites and every required skip.
 - [x] Add isolated source snapshots, offline tools and explicit lock release.
 - [ ] Runtime prerequisite: content-reader and index omit H5/read/write
   bindings; HW-01/HW-15/CT-9 require actual network integration, not fixtures.
