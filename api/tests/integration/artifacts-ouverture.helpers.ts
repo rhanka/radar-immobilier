@@ -86,7 +86,7 @@ export async function startOuverture(name: "host" | "mcp" | "commit" | "review_r
   const database = `artifacts_ouverture_${name}`;
   const pool = guardArtifactPool(new pg.Pool({ ...params, database }));
   const config = { enabled: true as const, storageScope: SCOPE, orgId: "ouverture_org",
-    s3Bucket: `ouverture-${name}`, s3Endpoint: env.S3_ENDPOINT, s3Region: "us-east-1",
+    s3Bucket: `ouverture-${name.replaceAll("_", "-")}`, s3Endpoint: env.S3_ENDPOINT, s3Region: "us-east-1",
     s3AccessKey: env.S3_ACCESS_KEY, s3SecretKey: env.S3_SECRET_KEY };
   const s3 = new S3Client({ endpoint: config.s3Endpoint, forcePathStyle: true, region: config.s3Region,
     credentials: { accessKeyId: config.s3AccessKey, secretAccessKey: config.s3SecretKey } });

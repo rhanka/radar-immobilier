@@ -116,6 +116,7 @@ isolation, current authorization, transactional quotas and replay safety.
 - [ ] **Lot 5 — Astra review corrections (#930)**
   - [x] Add tenth-success ensure/publish replay probes through HTTP and MCP.
   - [x] Add last-unit concurrent S3 counting and nonrefunded quota-refusal probes.
+  - [x] Normalize test bucket names separately from PostgreSQL database names.
   - [x] Implement a conditional atomic attempt reservation and retryable 429.
   - [x] Restrict account-binding workspace exemption to explicit general mode.
   - [x] Add publication receipt replay through coordinator locks and fresh ACLs.
