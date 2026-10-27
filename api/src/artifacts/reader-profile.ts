@@ -1,10 +1,9 @@
 /**
  * Reader profile / release / authority seam (ARTEFACTS A6/H5).
  *
- * Consumes A1's early profile/release/authority contract shape without
- * binding its real provider: every authority answer flows through the
- * injected `AuthorityReader` seam. Fixture-only success never closes
- * production integration; the Sol integrator binds the real provider.
+ * Every authority answer flows through the injected AuthorityReader port.
+ * reader-storage binds the runtime to PostgreSQL; the synthetic authority
+ * below is reserved for module tests.
  */
 
 import { createHash } from "node:crypto";
