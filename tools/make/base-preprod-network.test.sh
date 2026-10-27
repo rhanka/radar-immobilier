@@ -46,10 +46,37 @@ invoke tunnel-api
 unset FAKE_STATE
 cp network-policies.json network-original-policies.json
 jq '.items += [{metadata:{name:"controller-only",uid:"controller-policy",resourceVersion:"1"},
-  spec:{podSelector:{},policyTypes:["Ingress"],ingress:[{from:[{namespaceSelector:{matchLabels:{"kubernetes.io/metadata.name":"traefik"}},
+  spec:{podSelector:{matchLabels:{"app.kubernetes.io/component":"api"}},policyTypes:["Ingress"],ingress:[{from:[{namespaceSelector:{matchLabels:{"kubernetes.io/metadata.name":"traefik"}},
   podSelector:{matchLabels:{"app.kubernetes.io/name":"traefik"}}}]}]}},
   {metadata:{name:"database-only",uid:"db-policy",resourceVersion:"1"},
   spec:{podSelector:{matchLabels:{"app.kubernetes.io/component":"postgres"}},policyTypes:["Ingress"],ingress:[{}]}}]' network-original-policies.json > network-policies.json
+policy_sha=$(jq -Sc '[.items[]|{metadata:(.metadata|{name,uid,resourceVersion}),spec}]|sort_by(.metadata.name)' network-policies.json | sha256sum | cut -d' ' -f1)
+jq --arg sha "$policy_sha" '.maintenance.networkIsolation.policySha256=$sha' network-good-input.json > input.json
+for rule in '{}' '{"from":[]}' '{"from":[{}]}' '{"from":[{"podSelector":{}}]}' \
+  '{"from":[{"namespaceSelector":{}}]}' \
+  '{"from":[{"namespaceSelector":{"matchLabels":{"kubernetes.io/metadata.name":"other"}},"podSelector":{"matchLabels":{"component":"api"}}}]}' \
+  '{"from":[{"ipBlock":{"cidr":"0.0.0.0/0"}}]}'; do
+  jq --argjson rule "$rule" '.items[-1].spec.ingress=[$rule]' network-policies.json > database-policy.json
+  cp database-policy.json network-policies.json
+  policy_sha=$(jq -Sc '[.items[]|{metadata:(.metadata|{name,uid,resourceVersion}),spec}]|sort_by(.metadata.name)' network-policies.json | sha256sum | cut -d' ' -f1)
+  jq --arg sha "$policy_sha" '.maintenance.networkIsolation.policySha256=$sha' network-good-input.json > input.json
+  for action in close start-api; do
+    : > cluster-calls
+    if invoke "$action" EXPECTED="$testdir/expected.json" PROOFS="$testdir/activation-receipt.json"; then
+      echo 'Unbounded PostgreSQL ingress accepted' >&2; exit 1
+    fi
+    rg -qF 'Unbounded PostgreSQL ingress sources are forbidden' "result-$n.log"
+    if rg -- '--request-timeout=20s (create|patch|scale|set|delete|rollout) ' cluster-calls; then exit 1; fi
+  done
+done
+# A broad selector can also select PostgreSQL; it receives the same refusal.
+jq '.items[-1].spec.podSelector={}' network-policies.json > database-policy.json
+cp database-policy.json network-policies.json
+if invoke start-api PROOFS="$testdir/activation-receipt.json"; then exit 1; fi
+rg -qF 'Unbounded PostgreSQL ingress sources are forbidden' "result-$n.log"
+jq '.items[-1].spec.podSelector={matchLabels:{"app.kubernetes.io/component":"postgres"}}
+  | .items[-1].spec.ingress=[{from:[{podSelector:{matchLabels:{"app.kubernetes.io/component":"api"}}}]}]' network-policies.json > database-policy.json
+cp database-policy.json network-policies.json
 policy_sha=$(jq -Sc '[.items[]|{metadata:(.metadata|{name,uid,resourceVersion}),spec}]|sort_by(.metadata.name)' network-policies.json | sha256sum | cut -d' ' -f1)
 jq --arg sha "$policy_sha" '.maintenance.networkIsolation.policySha256=$sha' network-good-input.json > input.json
 invoke tunnel-api

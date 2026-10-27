@@ -42,4 +42,5 @@
 - [x] Astra verification setup: network/refusal/restoration runbook updated; full verifier can run in a normal fresh checkout with no delivery Git.
 - [x] Second pass baseline: read `astra-929-r2b.md` completely; backup Git and source tree match `d13986ce`; no cluster, Docker or push.
 - [ ] Second pass fixes: reject unbounded PostgreSQL policy sources and Traefik middleware annotations; no other mechanism.
+- [x] Second pass PostgreSQL: reject unbounded sources before mutation, including broad selectors; former positive policy is a negative test.
 - [ ] Second pass delivery: targeted tests, report section, atomic commit audit and incremental bundle from `d13986ce`.
