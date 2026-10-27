@@ -32,6 +32,8 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Add C01 commit/replay and rollback-winner tests with two connections,
+  observed blocking and exact durable effects before and after admission.
 - [x] Add durable PW-D/BASE fixtures, bounded SQL barrier observation and
   exact receipt/consumption/admission/audit/outbox effect counters for races.
 - [x] Run migration bootstrap from the API directory; the first runner
