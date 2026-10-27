@@ -85,8 +85,8 @@ describe("published basket page", () => {
     });
     expect(page.status).toBe(200);
     const html = await page.text();
-    expect(html).toContain(`/app.js?grant=`);
-    expect(html).toContain(`/styles.css?grant=`);
+    expect(html).toContain('src="/app.js"');
+    expect(html).toContain('href="/styles.css"');
     expect(page.headers.get("content-security-policy")).toContain("script-src 'self'");
     const js = await app.request(`http://${HOST}/app.js?grant=${grant}`, {
       headers: { host: HOST, cookie },
