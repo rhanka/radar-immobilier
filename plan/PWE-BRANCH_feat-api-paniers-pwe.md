@@ -32,6 +32,8 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Add durable PW-D/BASE fixtures, bounded SQL barrier observation and
+  exact receipt/consumption/admission/audit/outbox effect counters for races.
 - [x] Run migration bootstrap from the API directory; the first runner
   invocation stopped before test collection on its relative journal path.
 - [x] Reject empty/missing required files, failed suites and every required skip.
