@@ -1,10 +1,9 @@
 /**
  * Reader profile / release / authority seam (ARTEFACTS A6/H5).
  *
- * Consumes A1's early profile/release/authority contract shape without
- * binding its real provider: every authority answer flows through the
- * injected `AuthorityReader` seam. Fixture-only success never closes
- * production integration; the Sol integrator binds the real provider.
+ * Every authority answer flows through the injected AuthorityReader port.
+ * reader-storage binds the runtime to PostgreSQL; the synthetic authority
+ * below is reserved for module tests.
  */
 
 import { createHash } from "node:crypto";
@@ -35,9 +34,9 @@ export interface AuthorityReader {
   /** Current at completion; changes on any release, profile or ACL update.
    * Versions are never reused, including after a rollback (no ABA).
    */
-  readonly getAuthorizationVersion: (artifactId: string) => Promise<string | null>;
+  readonly getAuthorizationVersion: (artifactId: string, readerSub?: string, releaseId?: string) => Promise<string | null>;
   readonly getContentOrigin: (artifactId: string) => Promise<string | null>;
-  readonly getRelease: (artifactId: string) => Promise<ArtifactReleaseRef | null>;
+  readonly getRelease: (artifactId: string, releaseId?: string) => Promise<ArtifactReleaseRef | null>;
   readonly getProfile: (artifactId: string) => Promise<ReaderProfile | null>;
   /** Per-artifact access decision: the couple (readerSub, artifactId) is mandatory. */
   readonly getRights: (readerSub: string, artifactId: string) => Promise<ReaderRights | null>;

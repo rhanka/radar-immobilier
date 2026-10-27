@@ -164,6 +164,31 @@ describe("GET /api/v1/auth/login", () => {
 });
 
 describe("GET /api/v1/auth/oauth/callback", () => {
+  it.each([
+    "/api/v1/artifacts/reader/resume?origin=https%3A%2F%2Frelease.pinned.pages.example.test",
+    "https://foreign.test/", "//foreign.test/", "/api/v1/admin/users",
+    "/api/v1/artifacts/reader/resume?origin=x&origin=y",
+  ])("should resume only a validated local reader flow: %s", async (returnTo) => {
+    const login = authRoute(AUTH_ON, { discovery: DISCOVERY });
+    const response = await login.request("/api/v1/auth/login?" + new URLSearchParams({ returnTo }));
+    const encoded = readSetCookie(response, "radar_oauth_flow")!;
+    const flow = JSON.parse(decodeURIComponent(encoded));
+    const valid = returnTo.startsWith("/api/v1/artifacts/reader/resume?origin=https");
+    expect(flow.returnTo).toBe(valid ? returnTo : undefined);
+    const { idToken, getKey } = await makeIdToken({ nonce: flow.nonce, sub: "reader-after-login" });
+    const callback = authRoute(AUTH_ON, { discovery: DISCOVERY, getKey, fetchImpl: async () => ({
+      ok: true, status: 200, json: async () => ({ id_token: idToken }), text: async () => "",
+    }) });
+    // Revalidate even if the browser's plain flow cookie was substituted.
+    flow.returnTo = returnTo;
+    const result = await callback.request("/api/v1/auth/oauth/callback?" + new URLSearchParams({ code: "CODE", state: flow.state }), {
+      headers: { cookie: `radar_oauth_flow=${encodeURIComponent(JSON.stringify(flow))}` },
+    });
+    expect(result.status).toBe(302);
+    expect(result.headers.get("location")).toBe(valid ? new URL(returnTo, AUTH_ON.appBaseUrl).href : AUTH_ON.appBaseUrl);
+    expect(readSetCookie(result, "radar_session")).toBeTruthy();
+  });
+
   it("completes the flow: exchanges code, verifies id_token, sets session", async () => {
     const { idToken, getKey } = await makeIdToken({
       nonce: "NONCE",

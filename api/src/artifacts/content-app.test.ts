@@ -1,6 +1,7 @@
 import { Hono } from "hono";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { contentGate } from "./content-app.js";
+import { READER_CONTENT_HEADERS } from "./content-isolation.js";
 import { createApp } from "../app.js";
 import type { AuthConfig } from "../config.js";
 import type { Database } from "../db/client.js";
@@ -169,6 +170,21 @@ describe("contentGate on other hosts", () => {
 });
 
 describe("contentGate reader dispatch (A6/H5 seam)", () => {
+  it.each(["GET", "POST"])("should deny %s API calls with reader isolation before delegation", async (method) => {
+    const fetch = vi.fn(() => new Response("must not run"));
+    const gated = new Hono();
+    gated.use("*", contentGate(BASE, { fetch }));
+    for (const host of [STABLE, PINNED]) {
+      const response = await gated.request(`https://${host}/api/v1/workspaces`, { method, headers: { host } });
+      expect(response.status).toBe(401);
+      expect(await response.json()).toEqual({ error: "unauthenticated" });
+      for (const [name, value] of Object.entries(READER_CONTENT_HEADERS)) expect(response.headers.get(name)).toBe(value);
+      expect(response.headers.get("set-cookie")).toBeNull();
+      expect(response.headers.get("location")).toBeNull();
+    }
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
   it("delegates page paths to the mounted reader while /api stays denied", async () => {
     const reader = new Hono().get("*", (c) => c.text("reader"));
     const gated = new Hono();
