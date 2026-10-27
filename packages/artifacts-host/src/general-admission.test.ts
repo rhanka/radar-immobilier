@@ -56,7 +56,7 @@ describe("admission rate probe over a pool", () => {
     const accounts = {
       async query(text: string, params: unknown[] = []) {
         calls.push({ text, params });
-        if (text.includes("host_actor_rate")) return { rows: count === null ? [] : [{ count }] };
+        if (text.includes("host_actor_rate")) return { rows: count === null ? [] : [{ count, status: "approved" }] };
         return { rows: [{ status: "approved" }] };
       },
     };
