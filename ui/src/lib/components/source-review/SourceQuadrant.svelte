@@ -72,7 +72,7 @@
     : "high-value-low-complexity";
 </script>
 
-<section class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+<section class="rounded-lg border border-slate-200 bg-white p-4 shadow-xs">
   <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
     <div>
       <h1 class="text-sm font-semibold text-slate-950">Cadran sources</h1>
@@ -142,7 +142,7 @@
           >
             {plotted.labelIndex}
             <span
-              class="pointer-events-none invisible absolute left-1/2 top-full z-20 mt-2 w-52 -translate-x-1/2 rounded-md border border-slate-200 bg-white p-2 text-left text-[11px] leading-4 text-slate-700 shadow-sm transition-opacity opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+              class="pointer-events-none invisible absolute left-1/2 top-full z-20 mt-2 w-52 -translate-x-1/2 rounded-md border border-slate-200 bg-white p-2 text-left text-[11px] leading-4 text-slate-700 shadow-xs transition-opacity opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
             >
               <span class="font-semibold">{plotted.source.name}</span>
               <span class="mt-1 block text-slate-500">
@@ -179,7 +179,7 @@
     {#each plottedSources as plotted}
       <button
         type="button"
-        class={`inline-flex w-full max-w-full items-center gap-1 rounded border px-2 py-1 text-left ${
+        class={`inline-flex w-full max-w-full items-center gap-1 rounded-sm border px-2 py-1 text-left ${
           plotted.source.id === selectedSourceId
             ? "border-teal-700 bg-teal-50 text-teal-800"
             : "border-slate-200 bg-white text-slate-700"

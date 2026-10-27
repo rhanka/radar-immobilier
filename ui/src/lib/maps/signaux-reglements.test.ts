@@ -521,3 +521,92 @@ describe("reglementSourceViewerTitle — §3.1 : distinguer le PV source du PDF 
     expect(title).toContain("2021-45");
   });
 });
+
+describe("6D secondary parity — archive transitions keep distinct populations", () => {
+  it("removing the last signal for an ordinary regulation removes its panel entry", () => {
+    const zones = [zone("H-431", "https://ville.qc.ca/grille-h431.pdf")];
+    const before = aggregateReglements(
+      [node("a", { reglement_number: "2021-45", zone_ref: "H-431" })],
+      zones,
+    );
+    expect(before.map((entry) => entry.number)).toEqual(["2021-45"]);
+    // Last citing signal archived: no geographic-only entry is fabricated.
+    expect(aggregateReglements([], zones)).toEqual([]);
+  });
+
+  it("removing the last signal for a demo regulation keeps a zero-signal demo entry", () => {
+    const before = aggregateReglements([node("s1", { reglement_number: "275" })]);
+    expect(before).toHaveLength(1);
+    // All citing signals archived: the independent demo entry survives with
+    // zero signals, empty ids, no signal evidence and its demo PDF.
+    const [demo] = applyDemoReglementPdfUrls([], "calixa-lavallee");
+    expect(demo).toMatchObject({
+      number: "275",
+      signalCount: 0,
+      signalNodeIds: [],
+      evidenceNodeId: null,
+      regulatoryStatus: "firm",
+      reglementPdfUrl: DEMO_REGLEMENT_PDFS["calixa-lavallee"]![0]!.pdfUrl,
+    });
+    expect(demo!.zoneCodes).toEqual([]);
+    expect(demo!.grillePdfUrls).toEqual([]);
+  });
+
+  it("surviving entries keep their counts, order and zones after a co-signal archive", () => {
+    const zones = [zone("H-431", "https://ville.qc.ca/grille-h431.pdf")];
+    const full = [
+      node("a", { reglement_number: "2021-45", zone_ref: "H-431" }),
+      node("b", { reglement_number: "2021-45", zone_ref: "H-102" }),
+      node("c", { reglement_number: "A-1" }),
+    ];
+    expect(aggregateReglements(full, zones).map((entry) => entry.number)).toEqual([
+      "2021-45",
+      "A-1",
+    ]);
+    const after = aggregateReglements([full[1]!, full[2]!], zones);
+    expect(after.map((entry) => [entry.number, entry.signalCount])).toEqual([
+      ["2021-45", 1],
+      ["A-1", 1],
+    ]);
+    expect(after[0]!.signalNodeIds).toEqual(["b"]);
+  });
+
+  it("a signal outside the active vivier still enriches its zone", () => {
+    // Early-stage signals leave the panel but still feed zone enrichment,
+    // which reads pre-vivier authorized nodes.
+    const response = zonesResponse([zone("H-315")]);
+    const enriched = enrichGeoZonesWithSignalReglements(response, [
+      servedNode(
+        "early",
+        {
+          zone_ref: "H-315",
+          reglement_number: "756",
+          sourceUrl: "https://ville.delson.qc.ca/pv.pdf",
+        },
+        "avis_motion",
+        "anticipation",
+      ),
+    ]);
+    expect(enriched!.featureCollection.features[0]!.properties.reglementNumero).toBe("756");
+  });
+
+  it("geographic grids stay reachable through zones when the panel entry is gone", () => {
+    const zones = [zone("H-431", "https://ville.qc.ca/grille-h431.pdf")];
+    expect(aggregateReglements([], zones)).toEqual([]);
+    // The grid PDF remains served by the geographic layer itself.
+    expect(zones[0]!.properties.grillePdfUrl).toBe("https://ville.qc.ca/grille-h431.pdf");
+  });
+
+  it("reveal reproduces the baseline population exactly", () => {
+    const zones = [zone("H-431", "https://ville.qc.ca/grille-h431.pdf")];
+    const nodes = [
+      node("b", { reglement_number: "2021-45", zone_ref: "H-102" }),
+      node("a", { reglement_number: "2021-45", zone_ref: "H-431" }),
+    ];
+    const baseline = aggregateReglements(nodes, zones);
+    const revealed = aggregateReglements([...nodes], zones);
+    expect(revealed).toEqual(baseline);
+    expect(revealed.map((entry) => entry.signalNodeIds)).toEqual([["b", "a"]]);
+    expect(revealed).toHaveLength(1);
+  });
+});

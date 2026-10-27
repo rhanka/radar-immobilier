@@ -7,6 +7,7 @@
 //   POST /api/v1/admin/users/:sub/status  -> set approved/rejected/suspended
 //   POST /api/v1/admin/invitations       -> envoyer une invitation (admin only)
 //   GET  /api/v1/admin/invitations       -> lister les invitations (admin only)
+//   POST /api/v1/admin/invitations/:id/revoke -> revoke an invitation (admin only)
 //
 // All routes require an authenticated session with isAdmin === true in
 // account_users. Returns 401 if no session, 403 if not admin.
@@ -324,34 +325,10 @@ export function adminRoute(deps: AdminDeps): Hono {
       ...(note ? { note } : {}),
     });
 
-    // Réhabilitation : si un compte existe DÉJÀ pour cet email avec un statut
-    // négatif (rejected / suspended), une nouvelle invitation est une décision
-    // explicite de l'admin qui doit primer sur l'ancien statut. Sans ça, le
-    // login lirait toujours `account_users.status='rejected'` (la table de
-    // vérité côté `protect`/callback) et l'invité verrait « refusé » malgré
-    // l'invitation `pending`. On repasse le compte en `pending` : il sera
-    // auto-approuvé au prochain login OIDC via le flux invitation (auth.ts),
-    // ce qui évite d'accorder l'accès avant que l'invité ne se soit connecté.
-    const existingForEmail = await deps.db
-      .select()
-      .from(accountUsers)
-      .where(eq(accountUsers.email, email))
-      .limit(1);
-    const reinvited = existingForEmail[0];
-    if (reinvited && (reinvited.status === "rejected" || reinvited.status === "suspended")) {
-      await deps.db
-        .update(accountUsers)
-        .set({ status: "pending" })
-        .where(eq(accountUsers.sub, reinvited.sub));
-      await deps.db.insert(accountUserStatusEvents).values({
-        userSub: reinvited.sub,
-        fromStatus: reinvited.status,
-        toStatus: "pending",
-        actorSub: adminSub,
-        reason: "reinvited",
-        createdAt: at,
-      });
-    }
+    // No reactivation: a `suspended`/`rejected` account is NEVER moved by an
+    // invitation. Only an explicit admin status change reactivates it
+    // (POST /users/:sub/status). The invitation below is recorded for that
+    // email, but the login flow ignores it while the account stays negative.
 
     // Récupère le nom de l'admin pour personnaliser l'email
     const adminRows = await deps.db
@@ -400,6 +377,46 @@ export function adminRoute(deps: AdminDeps): Hono {
       .orderBy(desc(accountInvitations.invitedAt));
 
     return c.json({ ok: true, invitations });
+  });
+
+  /** Revoke a pending invitation (admin only). */
+  app.post("/api/v1/admin/invitations/:id/revoke", async (c) => {
+    const result = await requireAdmin(c, deps);
+    if (isResponse(result)) return result as Response;
+
+    const id = c.req.param("id");
+    if (!z.string().uuid().safeParse(id).success) {
+      return c.json({ error: "invalid_invitation_id" }, 400);
+    }
+    const rows = await deps.db
+      .select()
+      .from(accountInvitations)
+      .where(eq(accountInvitations.id, id))
+      .limit(1);
+    if (rows.length === 0) {
+      return c.json({ error: "not_found" }, 404);
+    }
+    const invitation = rows[0]!;
+    if (invitation.status !== "pending") {
+      return c.json(
+        { error: "invitation_not_pending", status: invitation.status },
+        409,
+      );
+    }
+
+    await deps.db
+      .update(accountInvitations)
+      .set({ status: "revoked" })
+      .where(eq(accountInvitations.id, id));
+
+    return c.json({
+      ok: true,
+      invitation: {
+        id: invitation.id,
+        email: invitation.email,
+        status: "revoked",
+      },
+    });
   });
 
   return app;

@@ -6,6 +6,8 @@ import {
   buildHoverCard,
   distinctDocCount,
   docIdentityOf,
+  rebuildSignalEvidence,
+  type OpenSignalEvidence,
 } from "./pdf-overlay-signals.js";
 import { extractSignalEvidence } from "./graph-signal-detail-client.js";
 import { signalColorAt } from "./pdf-signal-colors.js";
@@ -158,5 +160,90 @@ describe("buildHoverCard (#4)", () => {
     );
     expect(card.citation?.length).toBe(261); // 260 + ellipse
     expect(card.citation?.endsWith("…")).toBe(true);
+  });
+});
+
+describe("rebuildSignalEvidence (6D secondary parity)", () => {
+  const RAW = "raw/6d/pv.pdf";
+  const visible = (ids: string[]): Set<string> => new Set(ids);
+  const inFilter =
+    (ids: string[]) =>
+    (n: GraphSignalNode): boolean =>
+      ids.includes(n.id);
+
+  function opened(
+    currentId: string,
+    nodes: GraphSignalNode[],
+    filterIds: string[],
+  ): OpenSignalEvidence {
+    const current = nodes.find((n) => n.id === currentId);
+    if (!current) throw new Error(`missing fixture node ${currentId}`);
+    const evidence = extractSignalEvidence(current);
+    return {
+      title: current.label,
+      evidence,
+      signals: buildOverlaySignals(current, nodes, evidence.rawRef, inFilter(filterIds)),
+      nodeId: current.id,
+    };
+  }
+
+  it("drops an archived co-document signal from the rebuilt highlights", () => {
+    const active = opened("A", [pvSignal("A", RAW, 1), pvSignal("B", RAW, 3)], ["A", "B"]);
+    expect(active.signals.map((s) => s.id)).toEqual(["A", "B"]);
+    // B archived server-side: the refreshed authorized population omits it.
+    const rebuilt = rebuildSignalEvidence(active, [pvSignal("A", RAW, 1)], inFilter(["A"]), visible(["A"]));
+    expect(rebuilt?.nodeId).toBe("A");
+    expect(rebuilt?.signals.map((s) => s.id)).toEqual(["A"]);
+  });
+
+  it("closes when the opened target itself is archived", () => {
+    const active = opened("B", [pvSignal("A", RAW, 1), pvSignal("B", RAW, 3)], ["A", "B"]);
+    const rebuilt = rebuildSignalEvidence(active, [pvSignal("A", RAW, 1)], inFilter(["A"]), visible(["A"]));
+    expect(rebuilt).toBeNull();
+  });
+
+  it("closes when the target leaves the visible set while still authorized", () => {
+    const nodes = [pvSignal("A", RAW, 1), pvSignal("B", RAW, 3)];
+    const active = opened("B", nodes, ["A", "B"]);
+    expect(rebuildSignalEvidence(active, nodes, inFilter(["A"]), visible(["A"]))).toBeNull();
+  });
+
+  it("replaces stale evidence when citation, page or rawRef change", () => {
+    const active = opened("A", [pvSignal("A", RAW, 1)], ["A"]);
+    const changed = pvSignal("A", "raw/6d/pv-v2.pdf", 4, { excerpt: "new excerpt" });
+    changed.label = "Updated title";
+    const rebuilt = rebuildSignalEvidence(active, [changed], inFilter(["A"]), visible(["A"]));
+    expect(rebuilt?.title).toBe("Updated title");
+    expect(rebuilt?.evidence.rawRef).toBe("raw/6d/pv-v2.pdf");
+    expect(rebuilt?.evidence.page).toBe(4);
+    expect(rebuilt?.evidence.excerpt).toBe("new excerpt");
+    expect(rebuilt?.signals).toHaveLength(1);
+  });
+
+  it("reports an unknown target explicitly instead of an empty shell", () => {
+    const active = opened("A", [pvSignal("A", RAW, 1)], ["A"]);
+    const ghost: OpenSignalEvidence = { ...active, nodeId: "ghost" };
+    const rebuilt = rebuildSignalEvidence(ghost, [pvSignal("A", RAW, 1)], inFilter(["A"]), visible(["A", "ghost"]));
+    expect(rebuilt).toBeNull();
+  });
+
+  it("keeps ids, order and counts identical with no archives", () => {
+    const nodes = [pvSignal("A", RAW, 1), pvSignal("B", RAW, 3), pvSignal("C", "raw/6d/other.pdf", 1)];
+    const active = opened("A", nodes, ["A", "B", "C"]);
+    const rebuilt = rebuildSignalEvidence(active, nodes, inFilter(["A", "B", "C"]), visible(["A", "B", "C"]));
+    expect(rebuilt?.signals.map((s) => s.id)).toEqual(active.signals.map((s) => s.id));
+    expect(rebuilt?.signals).toHaveLength(active.signals.length);
+    expect(rebuilt?.signals).toEqual(active.signals);
+    expect(rebuilt?.evidence).toEqual(active.evidence);
+    expect(rebuilt?.title).toBe(active.title);
+  });
+
+  it("keeps authorized co-document signals outside the active filters", () => {
+    const nodes = [pvSignal("A", RAW, 1), pvSignal("B", RAW, 3)];
+    const active = opened("A", nodes, ["A", "B"]);
+    const rebuilt = rebuildSignalEvidence(active, nodes, inFilter(["A"]), visible(["A"]));
+    expect(rebuilt?.signals.map((signal) => [signal.id, signal.inFilter])).toEqual([
+      ["A", true], ["B", false],
+    ]);
   });
 });

@@ -41,6 +41,7 @@ export const publish = async (
 ): Promise<StreamFrame> => {
   const sequence = await nextSequence(streamId);
   const frame: StreamFrame = { streamId, type, sequence, data };
+  if (isStreamTypeRetired(streamId, type)) return frame;
 
   let buffer = buffers.get(streamId);
   if (!buffer) {
@@ -67,9 +68,24 @@ export const publish = async (
 /** Replay buffered frames for all known streams (newest streams last). */
 export const replayAll = (subscriber: Subscriber): void => {
   for (const buffer of buffers.values()) {
-    for (const frame of buffer) subscriber(frame);
+    for (const frame of buffer) {
+      if (!isStreamTypeRetired(frame.streamId, frame.type)) subscriber(frame);
+    }
   }
 };
+
+/**
+ * 6K: retire legacy mark/batch delivery on the shared prospect stream.
+ * Note frames (`prospect:note`) are unaffected. Idempotent.
+ */
+export const retireLegacyMarkDelivery = (): void => {
+  retireStreamTypes("prospect-marks", ["prospect:mark", "prospect:batch"]);
+};
+
+/** True once legacy mark/batch delivery has been retired. */
+export const isLegacyMarkDeliveryRetired = (): boolean =>
+  isStreamTypeRetired("prospect-marks", "prospect:mark")
+  && isStreamTypeRetired("prospect-marks", "prospect:batch");
 
 export const subscribe = (subscriber: Subscriber): (() => void) => {
   subscribers.add(subscriber);
@@ -77,3 +93,42 @@ export const subscribe = (subscriber: Subscriber): (() => void) => {
     subscribers.delete(subscriber);
   };
 };
+
+// ── 6K legacy mark retirement ────────────────────────────────────────────────
+// Retired delivery types are neither buffered nor broadcast, so neither new
+// nor reconnecting subscribers can receive retired payloads. Notes and
+// other types on the same stream keep flowing unchanged.
+
+/** Stream frame types retired by the 6K lot cutover. */
+const retiredTypes = new Set<string>();
+const retirementSubscribers = new Set<(streamId: string, types: string[]) => void>();
+
+/** Close queued delivery on connections that predate retirement. */
+export const subscribeRetirement = (subscriber: (streamId: string, types: string[]) => void): (() => void) => {
+  retirementSubscribers.add(subscriber);
+  return () => { retirementSubscribers.delete(subscriber); };
+};
+
+function retiredKey(streamId: string, type: string): string {
+  return `${streamId}::${type}`;
+}
+
+/** Stop buffering and broadcasting the given frame types on a stream. */
+export const retireStreamTypes = (streamId: string, types: string[]): void => {
+  const newlyRetired = types.filter((type) => !isStreamTypeRetired(streamId, type));
+  for (const type of types) {
+    retiredTypes.add(retiredKey(streamId, type));
+    const buffer = buffers.get(streamId);
+    if (buffer) {
+      const kept = buffer.filter((frame) => frame.type !== type);
+      buffers.set(streamId, kept);
+    }
+  }
+  if (newlyRetired.length > 0) {
+    for (const subscriber of retirementSubscribers) subscriber(streamId, newlyRetired);
+  }
+};
+
+/** True once the frame type has been retired on the stream. */
+export const isStreamTypeRetired = (streamId: string, type: string): boolean =>
+  retiredTypes.has(retiredKey(streamId, type));

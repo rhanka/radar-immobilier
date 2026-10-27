@@ -125,7 +125,7 @@
         type="button"
         aria-selected={scale === s.scale}
         title={s.hint}
-        class="-mb-px rounded-t px-3 py-1.5 text-sm font-medium transition-colors {scale === s.scale
+        class="-mb-px rounded-t-sm px-3 py-1.5 text-sm font-medium transition-colors {scale === s.scale
           ? 'border-x border-t border-slate-200 bg-white text-slate-800'
           : 'text-slate-500 hover:text-slate-700'}"
         onclick={() => (scale = s.scale)}

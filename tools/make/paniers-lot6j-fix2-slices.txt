@@ -1,0 +1,5 @@
+fix: preserve composite heads and unchanged archive observations|api/src/services/facets/lots/lot-apply.ts api/src/services/facets/lots/lot-command-result-db.test.ts
+fix: resolve lot source destination before pagination|api/src/services/facets/lots/lot-history.ts api/src/services/facets/lots/lot-source-navigation-db.test.ts
+test: cover composite no-op HTTP batches and exact replay|api/src/routes/scoped-lot-facets-db.test.ts
+test: detect three second-pass lot regressions on copies|tools/make/paniers-lot6.mk tools/make/paniers-lot6-verify.sh tools/make/paniers-lot6j-fix2-mutation.sh
+chore: deliver bounded second-pass lot correction commits|tools/make/paniers-lot6j-fix2-deliver.sh tools/make/paniers-lot6j-fix2-slices.txt

@@ -191,7 +191,7 @@
     <button
       type="button"
       aria-label="Actualiser le graphe"
-      class="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:opacity-40"
+      class="rounded-sm p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:opacity-40"
       onclick={() => void load(citySlug)}
       disabled={loading}
     >
@@ -238,7 +238,7 @@
       </div>
 
       <!-- SVG du graphe -->
-      <div class="overflow-auto rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div class="overflow-auto rounded-lg border border-slate-200 bg-white shadow-xs">
         <svg
           width={SVG_W}
           height={svgHeight}

@@ -1,0 +1,135 @@
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+
+const evidence = '/evidence/mutations';
+mkdirSync(evidence, { recursive: true });
+const root = 'api/src/services/facets/';
+const privacy = 'tests/integration/classification-privacy.spec.ts';
+const cursor = 'src/services/facets/classification-cursor.test.ts';
+const counts = 'src/services/facets/classification-counts.test.ts';
+const cases = [
+  { id: 'discovery-membership-lock', suite: 'tests/integration/classification-discovery-races.spec.ts', test: 'memberships locked until each snapshot transaction commits', edits: [
+    [`${root}classification-discovery.ts`, '.for("share");', ';'],
+  ] },
+  { id: 'discovery-account-lock', suite: 'tests/integration/classification-authority-races.spec.ts', test: 'account locked until the membership transaction commits', edits: [
+    [`${root}classification-discovery.ts`, 'const accountId = await approvedAccountId(tx, sub, true);', 'const accountId = await approvedAccountId(tx, sub, false);'],
+  ] },
+  { id: 'discovery-final-approval', suite: 'tests/integration/classification-authority-races.spec.ts', test: 'suspension commits during the final membership await', edits: [
+    [`${root}classification-discovery.ts`, 'import { workspaceMemberships, workspaces }', 'import { accountUsers, workspaceMemberships, workspaces }'],
+    [`${root}classification-discovery.ts`, 'const accountId = await approvedAccountId(tx, sub, true);',
+      'const [account] = await tx.select({ id: accountUsers.id }).from(accountUsers).where(eq(accountUsers.sub, sub));\n    const accountId = account?.id ?? "";'],
+  ] },
+  { id: 'discovery-membership-snapshot', suite: 'tests/integration/classification-discovery-races.spec.ts', test: 'during final approval', edits: [
+    [`${root}classification-discovery.ts`, '    const accountId = await approvedAccountId(tx, sub, true);', '    const accountId = (await tx.select({ id: accountUsers.id }).from(accountUsers).where(eq(accountUsers.sub, sub)))[0].id;'],
+    [`${root}classification-discovery.ts`, 'import { workspaceMemberships, workspaces }', 'import { accountUsers, workspaceMemberships, workspaces }'],
+    [`${root}classification-discovery.ts`, '    return rows.sort', '    await approvedAccountId(tx, sub, true);\n    return rows.sort'],
+    [`${root}classification-discovery.ts`, '.for("share");', ';'],
+  ] },
+  { id: 'context-final-availability', suite: 'tests/integration/classification-final-context.spec.ts', test: 'closes after the second catalog read', edits: [
+    [`${root}classification-context.ts`,
+      'if (durableDigest !== digest({ availability: current.availability, lotAvailability: current.lotAvailability, selectionBasket: current.selectionBasket })) return null;',
+      'if (false) return null;'],
+  ] },
+  { id: 'state-coherent-refusals', suite: 'tests/integration/classification-state-races.spec.ts', test: 'should retry after stale', edits: [
+    [`${root}classification-projection.ts`, 'return { ok: false as const, error };',
+      'await readProjectionScope(db, sub, workspaceId, citySlug, "signal");\n            throw error;'],
+  ] },
+  { id: 'context-current-rights', suite: 'tests/integration/classification-authority-races.spec.ts', test: 'is withdrawn during the second scope read', edits: [
+    [`${root}classification-context.ts`,
+      'if (sample.access.moderateArchive !== current.access.moderateArchive || digest(sample.rights) !== digest(current.rights)) return null;',
+      'if (false) return null;'],
+  ] },
+  { id: 'closed-context-authority', suite: 'tests/integration/classification-races.spec.ts', test: 'suspended account on the closed path', edits: [
+    [`${root}classification-context.ts`, '  const current = await revalidateContextAuthority(db, sub, workspaceId);', '  const current = sample;'],
+  ] },
+  { id: 'durable-closure-resample', suite: 'tests/integration/classification-races.spec.ts', test: 'maintenance starts before', edits: [
+    [`${root}classification-context.ts`,
+      '} else if (error instanceof ScopeError && error.message.startsWith("scoped_facet_scope_unavailable:")) {',
+      '} else if (false) {'],
+  ] },
+  { id: 'prototype-query', suite: 'src/services/facets/classification-query.test.ts', test: 'unknown __proto__ parameter', edits: [
+    [`${root}classification-query.ts`, 'const input: Record<string, unknown> = Object.create(null);', 'const input: Record<string, unknown> = {};'],
+    [`${root}classification-query.ts`, 'Object.defineProperty(input, key, { value, enumerable: true, configurable: true, writable: true });', 'input[key] = value;'],
+  ] },
+  { id: 'browser-auth-json', suite: 'tests/integration/classification-context.spec.ts', test: 'browser navigations on read routes', edits: [
+    ['api/src/routes/scoped-classification.ts', 'if (c.res.status >= 300 && c.res.status < 400) {', 'if (false) {'],
+  ] },
+  { id: 'persisted-document-dates', suite: 'tests/integration/classification-state.spec.ts', test: 'persisted document dates on search and state', edits: [
+    ['api/src/routes/graph-signals.ts', '    ...(publishedAt !== null ? { publishedAt } : {}),\n    ...(fetchedAt !== null ? { fetchedAt } : {}),', ''],
+  ] },
+  { id: 'source-url-evidence', suite: 'tests/integration/classification-state.spec.ts', test: 'persisted document dates on search and state', edits: [
+    [`${root}classification-card.ts`, 'pdfLink: docRefs.some((ref) => !!ref.documentUrl || !!ref.sourceUrl)', 'pdfLink: docRefs.some((ref) => !!ref.documentUrl)'],
+  ] },
+  { id: 'personal-history-race', suite: 'tests/integration/classification-races.spec.ts', test: 'archive appended between', edits: [[`${root}classification-heads.ts`,
+    'personalHistoryState: personal.length || archives?.personal ? "has_history" : "untouched",',
+    'personalHistoryState: personal.length ? "has_history" : "untouched",']] },
+  { id: 'personal-filter', suite: privacy, test: 'isolate two readers', edits: [[`${root}scoped-reader.ts`,
+    'eq(facetStreams.scope, "personal"), eq(facetStreams.ownerId, accountId),\n      eq(facetStreams.targetType',
+    'eq(facetStreams.scope, "personal"),\n      eq(facetStreams.targetType']] },
+  { id: 'common-archive', suite: privacy, test: 'isolate two readers', edits: [[`${root}classification-heads.ts`,
+    '[nativeKey(row.target), row]', '[nativeKey(row.target), { ...row, workspace: null }]']] },
+  { id: 'membership-union', suite: counts, test: 'eight-target oracle', edits: [[`${root}classification-counts.ts`,
+    'const selected = visible.filter(({ facets }) => active(facets, "pertinent") || active(facets, "a_surveiller")).length;',
+    'const selected = pertinent + watching;']] },
+  { id: 'cursor-context', suite: cursor, test: 'bind purpose', edits: [[`${root}classification-continuation.ts`,
+    'previous.contextDigest !== context', 'false']] },
+  { id: 'cursor-signature', suite: cursor, test: 'altered signatures', edits: [[`${root}classification-cursor.ts`,
+    '!timingSafeEqual(expected, actual)', 'false']] },
+  { id: 'cursor-expiry-extension', suite: cursor, test: 'initial expiry', edits: [[`${root}classification-continuation.ts`,
+    'issuedAt: previous?.issuedAt ?? now, expiresAt: previous?.expiresAt ?? now + 300',
+    'issuedAt: now, expiresAt: now + 300']] },
+  { id: 'final-authority', suite: 'tests/integration/classification-races.spec.ts', test: 'membership is revoked', edits: [
+    [`${root}classification-projection.ts`,
+      'const result = await readCoherentProjection(db, sub, workspaceId, citySlug, "signal", async () => {',
+      'const scope = await readProjectionScope(db, sub, workspaceId, citySlug, "signal");\n      const result = await (async (read, _attempts) => ({ scope, payload: await read() }))(async () => {'],
+    [`${root}classification-projection.ts`, 'const after = catalogVersion(await readClassificationCatalog(db, sub, workspaceId));', 'const after = before;'],
+    [`${root}classification-projection.ts`, 'const final = await readProjectionScope(db, sub, workspaceId, citySlug, "signal");', 'const final = result.scope;'],
+  ] },
+  { id: 'document-budget-reset', suite: 'tests/integration/classification-races.spec.ts', test: 'retry source/catalog drift', edits: [
+    [`${root}classification-search.ts`, 'const enrichment = createDocEnrichmentContext(2000);', 'let enrichment = createDocEnrichmentContext(2000);'],
+    [`${root}classification-search.ts`, 'const nodes = await readSignalPopulation', 'enrichment = createDocEnrichmentContext(2000);\n    const nodes = await readSignalPopulation'],
+  ] },
+];
+function run(entry, phase) {
+  const report = `${evidence}/${entry.id}-${phase}.json`;
+  const result = spawnSync('../node_modules/.bin/vitest', ['run', '--config', 'vitest.isolated.config.ts', entry.suite,
+    '-t', entry.test, '--reporter=json', `--outputFile=${report}`], { cwd: 'api', encoding: 'utf8', timeout: 180000 });
+  writeFileSync(`${evidence}/${entry.id}-${phase}.log`, `${result.stdout ?? ''}\n${result.stderr ?? ''}`);
+  if (result.error || result.signal) throw new Error(`${entry.id}: runner failure`);
+  const data = JSON.parse(readFileSync(report, 'utf8'));
+  const assertions = data.testResults.flatMap((suite) => suite.assertionResults).filter((test) => test.status !== 'pending' && test.status !== 'skipped');
+  if (!assertions.length || !assertions.every((test) => test.fullName.includes(entry.test))) throw new Error(`${entry.id}: wrong collection`);
+  if (phase === 'mutant') {
+    if (result.status === 0 || !assertions.some((test) => test.status === 'failed' && test.failureMessages.some((message) => /AssertionError/.test(message)))) {
+      throw new Error(`${entry.id}: no discriminating assertion failure`);
+    }
+  } else if (result.status !== 0 || !assertions.every((test) => test.status === 'passed')) throw new Error(`${entry.id}: restoration failed`);
+  return { exit: result.status, executed: assertions.length, failed: assertions.filter((test) => test.status === 'failed').length };
+}
+const results = [];
+for (const entry of cases) {
+  const originals = new Map(entry.edits.map(([path]) => [path, readFileSync(path, 'utf8')]));
+  try {
+    for (const [path, from, to] of entry.edits) {
+      const text = readFileSync(path, 'utf8');
+      if (text.split(from).length !== 2) throw new Error(`${entry.id}: ambiguous edit`);
+      writeFileSync(path, text.replace(from, to));
+    }
+    const edits = [...originals].map(([path, before]) => ({ path, before, after: readFileSync(path, 'utf8') }));
+    writeFileSync(`${evidence}/${entry.id}-edit.json`, JSON.stringify(edits, null, 2));
+    for (const [path, before] of originals) {
+      const diff = spawnSync('diff', ['-u', '--label', `a/${path}`, '--label', `b/${path}`, '-', path], { input: before, encoding: 'utf8' });
+      writeFileSync(`${evidence}/${entry.id}-${path.split('/').at(-1)}.diff`, diff.stdout);
+      const changed = diff.stdout.split('\n').filter((line) => /^[+-](?![+-])/.test(line)).length;
+      if (changed > 150) throw new Error('Mutation exceeds 150 lines');
+    }
+    const mutant = run(entry, 'mutant');
+    for (const [path, before] of originals) writeFileSync(path, before);
+    const restored = run(entry, 'restored');
+    results.push({ id: entry.id, suite: entry.suite, test: entry.test, mutant, restored,
+      originals: [...originals].map(([path, text]) => ({ path, sha256: createHash('sha256').update(text).digest('hex') })) });
+    writeFileSync(`${evidence}/results.json`, JSON.stringify(results, null, 2));
+    console.log(`KILLED and RESTORED ${entry.id}`);
+  } finally { for (const [path, before] of originals) writeFileSync(path, before); }
+}
