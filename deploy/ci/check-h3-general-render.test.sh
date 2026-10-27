@@ -48,3 +48,4 @@ bash "$CHECK" "$CASE" >/dev/null
 echo 'ok: mode-off rollback is accepted for both API and MCP'
 PASS=$((PASS + 1))
 echo "check-h3-general-render tests: $PASS passed, 0 failed"
+bash "$HERE/check-h3-activation-commands.test.sh"

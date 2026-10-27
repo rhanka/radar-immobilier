@@ -159,8 +159,8 @@ never log bearers, grants, tickets, cookie values or secret data.
   cookie or app redirect. Test without a grant and with a valid reader session.
   `/health` and `/livez` are deliberately probe exceptions.
 - Inspect HTML, subresources, H5 and denial responses: private/no-store cache,
-  `nosniff`, no-referrer, COOP `same-origin`, COEP `require-corp`, CORP
-  `same-origin`, restrictive CSP, including denied workers/frames/objects/forms.
+  `nosniff`, no-referrer, COOP/CORP `same-origin`, `X-Frame-Options: DENY`,
+  restrictive CSP, including denied workers/frames/objects/forms.
   Confirm release-script hashes match the interpreted code and H5 succeeds.
 - In browser network/cookie storage, confirm app session cookies stay on the
   app host; content cookies are host-only `__Host-` Secure/HttpOnly with no Domain.
