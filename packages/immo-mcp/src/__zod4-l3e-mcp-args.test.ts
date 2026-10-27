@@ -1,3 +1,4 @@
+import { z as bundledV3 } from "zod/v3";
 import { describe, expect, it } from "vitest";
 import { TOOL_DEFINITIONS } from "./tool-definitions.js";
 
@@ -6,6 +7,8 @@ import { TOOL_DEFINITIONS } from "./tool-definitions.js";
  * Freezes invalid-argument rejection, bbox tuple length, integer bounds
  * and the current handling of non-finite numbers (D6 changes acceptance).
  */
+const z3: typeof bundledV3 = process.env.ZOD3_REFERENCE
+  ? (await import(/* @vite-ignore */ process.env.ZOD3_REFERENCE)).z : bundledV3;
 function shapeOf(name: string) {
   const found = TOOL_DEFINITIONS.find((def) => def.name === name);
   if (!found) throw new Error(`missing tool ${name}`);
@@ -38,19 +41,17 @@ describe("l3e mcp argument characterization", () => {
     if (parsed?.success) expect(parsed.data).toBe(20);
   });
 
-  it("characterizes non-finite minArea handling before D6", () => {
-    const shape = shapeOf("search_lots");
-    const value = JSON.parse("1e400") as unknown;
-    expect(value).toBe(Number.POSITIVE_INFINITY);
-    const parsed = shape["minArea"]?.safeParse(value);
-    expect(typeof parsed?.success).toBe("boolean");
-  });
-
-  it("characterizes negative non-finite minArea handling before D6", () => {
-    const shape = shapeOf("search_lots");
-    const value = JSON.parse("-1e400") as unknown;
-    expect(value).toBe(Number.NEGATIVE_INFINITY);
-    const parsed = shape["minArea"]?.safeParse(value);
-    expect(typeof parsed?.success).toBe("boolean");
+  for (const lexeme of ["1e400", "-1e400"]) it("rejects non-finite minArea " + lexeme, () => {
+    const value = JSON.parse(lexeme) as number;
+    const previous = z3.number().positive().safeParse(value);
+    expect(previous.success).toBe(lexeme === "1e400");
+    if (!previous.success) expect(previous.error.issues.map((issue) => issue.message))
+      .toEqual(["Number must be greater than 0"]);
+    const parsed = shapeOf("search_lots")["minArea"]!.safeParse(value);
+    expect(parsed.success).toBe(false);
+    if (parsed.success) throw Error("non-finite minArea accepted");
+    expect(parsed.error.issues).toEqual([expect.objectContaining({
+      code: "invalid_type", expected: "number", path: [], message: "Number must be finite",
+    })]);
   });
 });
