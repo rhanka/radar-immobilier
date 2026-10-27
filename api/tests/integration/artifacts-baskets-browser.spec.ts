@@ -15,12 +15,13 @@ describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("published H
     const f = await publishedBaskets(h);
     const app = f.runtime();
     let statuses: Record<string, number> = {};
-    let requests: { host: string; cookie: string; cacheControl: string | null }[] = [];
+    let requests: { host: string; method: string; path: string; origin: string | null; cookie: string; cacheControl: string | null }[] = [];
     const server = await startBrowserHttps(getRequestListener(async (request) => {
       const url = new URL(request.url);
       const response = await app.fetch(request);
       statuses[url.pathname] = response.status;
-      requests.push({ host: url.host, cookie: request.headers.get("cookie") ?? "",
+      requests.push({ host: url.host, method: request.method, path: url.pathname, origin: request.headers.get("origin"),
+        cookie: request.headers.get("cookie") ?? "",
         cacheControl: response.headers.get("cache-control") });
       return response;
     }));
@@ -37,10 +38,30 @@ describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("published H
         const page = await context.newPage();
         const errors: string[] = [];
         page.on("pageerror", (error) => errors.push(error.message));
+        const diagnostics: unknown[] = [];
+        const pending: Promise<void>[] = [];
+        const redact = (value: string) => value.replace(/([?&](?:grant|ticket|binding)=)[^&\s"'<>]+/g, "$1[redacted]")
+          .replace(/eyJ[\w-]+\.[\w-]+\.[\w-]+/g, "[redacted]");
+        page.on("console", (message) => diagnostics.push({ console: message.type(), text: redact(message.text()) }));
+        page.on("requestfailed", (request) => diagnostics.push({ url: redact(request.url()), failure: request.failure() }));
+        page.on("response", (response) => {
+          const url = new URL(response.url());
+          diagnostics.push({ url: redact(url.href), status: response.status(),
+            csp: response.headers()["content-security-policy"], referrerPolicy: response.headers()["referrer-policy"] });
+          if (url.pathname.startsWith("/__reader/api/")) pending.push(response.text().then((body) => {
+            diagnostics.push({ h5: url.pathname, status: response.status(), body: redact(body) });
+          }, (error) => { diagnostics.push({ h5: url.pathname, error: String(error) }); }));
+        });
+        await page.addInitScript(() => addEventListener("securitypolicyviolation", (event) => {
+          console.error("CSP", event.effectiveDirective, event.blockedURI);
+        }));
+        let started = Date.now();
         try {
           await page.goto(`https://${f.host}/`);
+          started = Date.now();
           await page.getByRole("button", { name: "Autoriser et ouvrir" }).click();
           await page.waitForFunction((matched) => document.body.dataset.matched === String(matched), count, { timeout: 1500 });
+          console.log(JSON.stringify({ readerMatched: count, elapsedMs: Date.now() - started }));
           expect(await page.locator("body").getAttribute("data-cookies")).toBe("");
           expect(await page.locator("body").evaluate((body) => getComputedStyle(body).color)).toBe("rgb(17, 34, 51)");
           expect(page.url()).not.toContain("grant=");
@@ -53,6 +74,13 @@ describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("published H
             expect(request.cacheControl).toBe("private, no-store");
           }
           expect(errors).toEqual([]);
+        } catch (error) {
+          await Promise.allSettled(pending);
+          console.error(JSON.stringify({ elapsedMs: Date.now() - started, url: redact(page.url()),
+            body: redact(await page.locator("body").innerText()), errors: errors.map(redact), diagnostics,
+            requests: requests.map(({ cookie, ...request }) => ({ ...request,
+              appCookie: cookie.includes("radar_session="), readerCookie: cookie.includes("__Host-preview-session=") })) }, null, 2));
+          throw error;
         } finally { await context.close(); }
       }
     } finally {
