@@ -59,3 +59,5 @@ Qualify, repair and integrate the supplied PW-C implementation on 07ef2757.
 - [x] Delivery: feat(pw-c): define page gesture contracts and poll bounds.
 
 - [x] Delivery: feat(pw-c): validate gestures and create isolated app links.
+
+- [x] Delivery: feat(pw-c): prepare gestures with stable uncertain retries.
