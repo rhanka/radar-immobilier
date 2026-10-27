@@ -1,3 +1,4 @@
+import { contractInteger } from "@radar/domain";
 /**
  * 6J scoped lot reads: authorized target, collection projection, and
  * paginated destination/source history. No business mutation here.
@@ -58,8 +59,8 @@ export function scopedLotReadsRoute(deps: ScopedLotFacetsDeps): Hono {
       citySlug: z.string().min(1).max(128).regex(/^[a-z0-9-]+$/),
       canonicalId: z.string().min(1).max(512),
       mode: lotMode,
-      offset: z.coerce.number().int().min(0).default(0),
-      limit: z.coerce.number().int().min(1).max(100).default(20),
+      offset: contractInteger({ coerce: true }).min(0).default(0),
+      limit: contractInteger({ coerce: true }).min(1).max(100).default(20),
     }).safeParse({
       citySlug: c.req.query("citySlug"), canonicalId: c.req.query("canonicalId"),
       mode: c.req.query("mode"), offset: c.req.query("offset"), limit: c.req.query("limit"),
@@ -81,8 +82,8 @@ export function scopedLotReadsRoute(deps: ScopedLotFacetsDeps): Hono {
   app.get("/api/v1/workspaces/:workspaceId/lot-facets/source-history", async (c) => {
     const query = z.object({
       chainId: z.string().min(1).max(512),
-      offset: z.coerce.number().int().min(0).default(0),
-      limit: z.coerce.number().int().min(1).max(100).default(20),
+      offset: contractInteger({ coerce: true }).min(0).default(0),
+      limit: contractInteger({ coerce: true }).min(1).max(100).default(20),
     }).safeParse({
       chainId: c.req.query("chainId"),
       offset: c.req.query("offset"), limit: c.req.query("limit"),

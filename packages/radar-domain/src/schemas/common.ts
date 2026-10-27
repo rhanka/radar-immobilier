@@ -1,3 +1,4 @@
+import { contractDateTime } from "../contracts/validation-datetime.js";
 import { z } from "zod";
 
 /** Real vs simulation discriminator (pipeline-internal flag; English for infra/config interop). */
@@ -12,7 +13,7 @@ export type ModeT = z.infer<typeof Mode>;
 export const confidenceSchema = z.number().min(0).max(1);
 
 /** ISO-8601 datetime string. */
-export const isoDateTimeSchema = z.string().datetime();
+export const isoDateTimeSchema = contractDateTime();
 
 /** ISO-8601 date string (no time component), e.g. "2024-05-18". */
 export const isoDateSchema = z

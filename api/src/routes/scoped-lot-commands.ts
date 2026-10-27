@@ -28,7 +28,7 @@ export function scopedLotCommandsRoute(deps: ScopedLotFacetsDeps): Hono {
     app.post(`/api/v1/workspaces/:workspaceId/lot-facets/${scope}/commands`, async (c) => {
       const body = await c.req.json().catch(() => null);
       const parsed = lotSingleBodySchema.safeParse(body);
-      const key = z.string().uuid().transform((value) => value.toLowerCase())
+      const key = z.string().guid().transform((value) => value.toLowerCase())
         .safeParse(c.req.header("Idempotency-Key"));
       if (!parsed.success || !key.success) {
         return c.json({ error: "invalid_facet_command" }, 400);
@@ -50,7 +50,7 @@ export function scopedLotCommandsRoute(deps: ScopedLotFacetsDeps): Hono {
     app.post(`/api/v1/workspaces/:workspaceId/lot-facets/${scope}/commands/batch`, async (c) => {
       const body = await c.req.json().catch(() => null);
       const parsed = lotBatchSchema.safeParse(body);
-      const key = z.string().uuid().transform((value) => value.toLowerCase())
+      const key = z.string().guid().transform((value) => value.toLowerCase())
         .safeParse(c.req.header("Idempotency-Key"));
       if (!parsed.success || !key.success) {
         return c.json({ error: "invalid_facet_command" }, 400);

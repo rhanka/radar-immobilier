@@ -4,12 +4,12 @@ import { ScopeError } from "../scope.js";
 
 const text = z.string().min(1).max(256);
 const configSchema = z.object({
-  workspaceId: z.string().uuid(),
+  workspaceId: z.string().guid(),
   mapping: z.object({ mappingVersion: text, importerVersion: text,
     destinationsQualified: z.literal(true) }).strict(),
   maintenance: z.object({
-    maintenanceAttemptId: z.string().uuid(), releaseId: text,
-    instanceIds: z.array(text).min(1), evidence: z.unknown(),
+    maintenanceAttemptId: z.string().guid(), releaseId: text,
+    instanceIds: z.array(text).min(1), evidence: z.unknown().optional(),
     options: z.object({
       qualifiedEmptyManifest: z.boolean().optional(),
       emptyReadbackScope: z.object({ citySlugs: z.array(text).min(1),
