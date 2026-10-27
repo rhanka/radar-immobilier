@@ -9,7 +9,11 @@ if [[ ${A5_FROZEN_RUNNER:-} != 1 ]]; then
 fi
 source tools/make/base-api-guards.sh
 require_env
-[[ $ENV == test-artefacts-a5m && $API_PORT == 18925 && $UI_PORT == 15925 && $MAILDEV_UI_PORT == 11925 ]]
+case $ENV in
+  test-artefacts-a5m) [[ $API_PORT == 18925 && $UI_PORT == 15925 && $MAILDEV_UI_PORT == 11925 ]];;
+  test-artifacts-022) [[ $API_PORT == 18929 && $UI_PORT == 15929 && $MAILDEV_UI_PORT == 11929 ]];;
+  *) exit 2;;
+esac
 ROOT=$(pwd -P)
 PROJECT=radar-$ENV
 TASK_DIR=$ROOT/tmp/a5-evidence
@@ -17,7 +21,7 @@ RUN_DIR=$TASK_DIR/runtime
 LOG_DIR=$TASK_DIR/$(date -u +%Y%m%dT%H%M%S)-$$
 mkdir -p "$RUN_DIR" "$LOG_DIR"
 echo "Evidence: $LOG_DIR"
-git --git-dir="$ROOT/tmp/a5-delivery.git" show 4660e201:package-lock.json > "$LOG_DIR/baseline-lock.json"
+git show 9a723753607097c7758027eb5cc9a2071c8e0023:package-lock.json > "$LOG_DIR/baseline-lock.json"
 exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
 until flock -w 60 8; do
   echo 'WAIT: machine Docker campaign lock held'
@@ -36,7 +40,6 @@ wait_machine
 [[ $(df -Pk . | awk 'NR==2 {print $4}') -ge 8388608 ]]
 [[ $(awk '/MemAvailable/ {print $2}' /proc/meminfo) -ge 8388608 ]]
 candidate_git=(git)
-if [[ -f $ROOT/tmp/a5-delivery.git/config ]]; then candidate_git+=(--git-dir="$ROOT/tmp/a5-delivery.git"); fi
 candidate=$("${candidate_git[@]}" rev-parse HEAD)
 "${candidate_git[@]}" show 5ea88ce1:api/drizzle/meta/_journal.json > "$LOG_DIR/baseline-journal.json"
 while IFS= read -r path; do
