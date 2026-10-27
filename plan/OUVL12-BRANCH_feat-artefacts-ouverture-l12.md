@@ -63,6 +63,7 @@ isolation, current authorization, transactional quotas and replay safety.
   - [ ] Four tools, server identities, forged-field refusals and MCP tests.
 - [ ] **Lot 3 — Qualification**
   - [x] Repair the rate-probe test double's account-query row type.
+  - [x] Grant the stale-claims fixture its business scope to reach account denial.
   - [x] Await quota promise results in unit assertions.
   - [x] Bind quota actor to the coordinator input, before approval reads.
   - [x] Require real publication with zero/two memberships and by both MCP actors.
