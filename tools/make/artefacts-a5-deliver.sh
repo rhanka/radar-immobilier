@@ -2,15 +2,15 @@
 set -euo pipefail
 action=${1:?}
 ROOT=$(pwd -P)
-BASE=$(git rev-parse 3ef57173)
+BASE=$(git rev-parse 4660e201)
 LOCAL=$ROOT/tmp/a5-delivery.git
-[[ $ENV == test-artefacts-a5 ]]
+[[ $ENV == test-artefacts-a5m ]]
 if [[ $action == setup ]]; then
-  [[ $(git branch --show-current) == feat/artefacts-mcp-a5 && ! -e $LOCAL ]]
+  [[ $(git branch --show-current) == feat/artefacts-mcp-a5-mesh && ! -e $LOCAL ]]
   mkdir -p "$ROOT/tmp"
   git init --bare -q "$LOCAL"
-  git --git-dir="$LOCAL" fetch --no-tags --no-write-fetch-head "$ROOT" "$BASE:refs/heads/feat/artefacts-mcp-a5"
-  git --git-dir="$LOCAL" symbolic-ref HEAD refs/heads/feat/artefacts-mcp-a5
+  git --git-dir="$LOCAL" fetch --no-tags --no-write-fetch-head "$ROOT" "$BASE:refs/heads/feat/artefacts-mcp-a5-mesh"
+  git --git-dir="$LOCAL" symbolic-ref HEAD refs/heads/feat/artefacts-mcp-a5-mesh
   git --git-dir="$LOCAL" config core.bare false
   git --git-dir="$LOCAL" config core.worktree "$ROOT"
   git --git-dir="$LOCAL" config user.name Sol
@@ -27,7 +27,7 @@ allowed() {
     packages/immo-mcp/*|packages/artifacts-host/*|package.json|package-lock.json|api/package.json|api/Dockerfile|api/src/artifacts/*) ;;
     tools/make/artefacts-a5*|tools/h4-mcp.mk|docs/operator/artefacts-mcp.md) ;;
     api/tests/*artifacts*|api/tests/integration/artifacts-*|api/drizzle/0024_artifacts_coordinator.sql|api/drizzle/meta/_journal.json) ;;
-    plan/ARTEFACTS-A5-BRANCH_feat_artefacts-mcp-a5.md|RAPPORT-SOL-ARTEFACTS-A5.md) ;;
+    plan/ARTEFACTS-A5M-BRANCH_feat_artefacts-mcp-a5-mesh.md|RAPPORT-SOL-A5-MESH.md) ;;
     *) echo "Outside A5 scope: $1" >&2; exit 2;;
   esac
 }
@@ -55,10 +55,10 @@ case $action in
     git -c core.hooksPath=/dev/null commit -m "$MSG";;
   audit) audit;;
   bundle)
-    audit > "$ROOT/tmp/a5-evidence/astra-r2-commit-audit.txt"
-    OUT=$ROOT/tmp/a5-evidence/artefacts-a5-astra-r2-fixes.bundle
+    audit > "$ROOT/tmp/a5-evidence/mesh-0221-commit-audit.txt"
+    OUT=$ROOT/tmp/a5-evidence/artefacts-a5-cluster-mesh-0.22.1.bundle
     git bundle create "$OUT" "$BASE..HEAD"
-    auditdir=$(mktemp -d "$ROOT/tmp/a5-evidence/astra-bundle-audit.XXXXXX")
+    auditdir=$(mktemp -d "$ROOT/tmp/a5-evidence/mesh-0221-bundle-audit.XXXXXX")
     independent() { env -u GIT_DIR -u GIT_WORK_TREE git -C "$auditdir" "$@"; }
     independent init --bare -q
     [[ ! -e $auditdir/objects/info/alternates ]]
