@@ -32,6 +32,8 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Add normal-callback cookie bearer rejection on all four app surfaces,
+  independent Origin/CSRF/form/page-token refusals and valid confirm/revoke.
 - [x] Allow a short normal-login session TTL and controlled application clock
   to exercise the real /me remint policy while the original intent stays valid.
 - [x] C01/C04/C09/C10 scoped run: 21 passed/0 failed/0 skipped; correct the
