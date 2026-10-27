@@ -34,7 +34,7 @@
 ## Plan / Todo (lot-based)
 - [x] Lot 0: Read project rules and confirm branch, Make targets and isolation.
 - [x] Lot 1: Pin 0.2.2; npm changed only three workspace pins and the provider entry.
-- [ ] Lot 2: Installed adapters reject invalid prefixes with typed errors; retire static analysis.
+- [ ] Lot 2: Removed static analyzer; replace the test-only runtime prefix wrapper next.
 - [ ] Lot 3: Align current provider profile, qualification scripts and docs.
 - [ ] Lot 4: Pass typecheck, lint, unit tests and Docker artifacts integration.
 - [ ] Lot 5: Review changes, audit commits and deliver the uncommitted report.
