@@ -19,9 +19,6 @@ export async function createHostPolicy(pool: pg.Pool, scope: string,
   await pool.query("INSERT INTO artifacts.host_policy (storage_scope_id, revision) VALUES ($1, $2) ON CONFLICT DO NOTHING",
     [scope, POLICY_REVISION]);
   return { createParticipant(client, transactionToken) {
-    // Actor of the running transaction, stashed by checkApproval so the
-    // reservation below stays per-actor without changing the quota seam.
-    let approvalActor: string | undefined;
     return {
       async readRevision() {
         const result = await client.query<{ revision: string }>(
@@ -30,7 +27,6 @@ export async function createHostPolicy(pool: pg.Pool, scope: string,
         return result.rows[0].revision;
       },
       async checkApproval({ actorId }: { actorId: string }) {
-        approvalActor = actorId;
         const revision = await client.query<{ revision: string }>(
           "SELECT revision FROM artifacts.host_policy WHERE storage_scope_id = $1 FOR SHARE", [scope]);
         const account = await client.query<{ id: string; status: string }>(
@@ -101,15 +97,13 @@ export async function createHostPolicy(pool: pg.Pool, scope: string,
         }
         return { approved: true as const, workspaceId };
       },
-      async reserveQuota({ storageScopeId, bytes }) {
+      async reserveQuota({ storageScopeId, actorId, bytes }) {
         if (storageScopeId !== scope) return { reserved: false };
         const result = await client.query(
           `UPDATE artifacts.host_quotas SET operations_used = operations_used + 1, bytes_used = bytes_used + $2
            WHERE storage_scope_id = $1 AND operations_used < operation_limit AND bytes_used + $2 <= byte_limit`,
           [scope, bytes]);
         if (result.rowCount !== 1) return { reserved: false };
-        const actorId = approvalActor;
-        if (actorId === undefined) return { reserved: true };
         // Per-actor durable ceiling, auto-provisioned once from the global row
         // so no manual step per user is ever required; a missing global row
         // provisions nothing and the update below blocks the commit.
