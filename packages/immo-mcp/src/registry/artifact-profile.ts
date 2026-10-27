@@ -8,7 +8,7 @@
 export const ARTIFACT_PROVIDER_ID = "sentropic.artifacts" as const;
 export const ARTIFACT_INVOCATION_SCOPE = "immo:read" as const;
 export const ARTIFACT_PROFILE_REVISION = "immo-artifacts.v1" as const;
-export const ARTIFACT_PROVIDER_VERSION = "0.2.1" as const;
+export const ARTIFACT_PROVIDER_VERSION = "0.2.2" as const;
 
 export const ARTIFACT_TOOL_NAMES = [
   "artifacts_ensure",

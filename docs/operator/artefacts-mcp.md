@@ -4,12 +4,12 @@ P6 keeps twelve tools on the existing OAuth-protected `/mcp` transport. The
 process compiles one provider through `createMcpRegistry` and installs one
 `createStatefulMcpNamespace` bridge. Artifact tools remain unselected.
 
-The MCP workspace pins `@sentropic/artifacts@0.2.1` and
-`@sentropic/cluster-mesh@0.22.0`. Mesh requires `mcp-auth@0.2.1` and
+The current MCP workspace pins `@sentropic/artifacts@0.2.2` and
+`@sentropic/cluster-mesh@0.22.1`. Mesh requires `mcp-auth@0.2.1` and
 `mcp-platform@0.4.0`; its contracts/events/stablelib dependencies are necessary
 transitives. `zod-to-json-schema@3.25.1` preserves the existing SDK descriptors.
 The account port uses the existing pg dependency family. The API and artifact
-host retain their existing 0.1.2 provider until the A5 transport migration.
+host now share the 0.2.2 provider through the A5 transport composition below.
 P6 does not load that service or select an artifact capability. A5 must migrate
 `composition.ts`/`facade.ts` to `handle(request, invocation)`, the guarded
 coordinator and `artifacts.operation_receipts` before enabling four tools.
@@ -70,12 +70,18 @@ controls. Ordinary MCP targets continue excluding service E2E; A5 owns their
 separate provider acceptance. A7 owns operational activation and recovery.
 # A5 shared artifact production composition
 
-API, artifacts-host and MCP use published artifacts `0.2.1`; the MCP tuple
-also pins cluster-mesh `0.22.0`, mcp-auth `0.2.1` and resolves mcp-platform
+API, artifacts-host and MCP use published artifacts `0.2.2`; the MCP tuple
+also pins cluster-mesh `0.22.1`, mcp-auth `0.2.1` and resolves mcp-platform
 `0.4.0`. HTTP and MCP execute the same compiled four-operation profile and
 server scope. The caller key reaches the provider unchanged. A fresh immutable
 invocation supplies actor, scope and authorization; the provider owns canonical
 hashes, ordered command identity, finalization and guarded replay.
+
+Both 0.2.2 blob backends reject empty prefixes and prefixes containing `..`
+before enumeration or S3 I/O (`invalid_blob_prefix`, typed `invalid_request`).
+Radar relies on that provider contract and tests memory/S3 listing parity.
+Bucket-wide test inventories still use the S3 SDK directly to detect writes
+outside the configured artifact scope and to clean dedicated test buckets.
 
 The production MCP entrypoint constructs the trusted shared host when storage
 configuration and validation activation are complete. It then exposes twelve
