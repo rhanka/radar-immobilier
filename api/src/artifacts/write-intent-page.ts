@@ -175,7 +175,93 @@ const PW_PAGE_SCRIPT_PREPARE = `
 })();
 `;
 
-const PW_PAGE_SCRIPT_POLL = "";
+const PW_PAGE_SCRIPT_POLL = `
+(() => {
+  "use strict";
+  var STATUS = ${JSON.stringify(PW_PAGE_STATUS_PATH)};
+  var INTERVAL_MS = ${PW_PAGE_POLL_BOUNDS.intervalMs};
+  var WINDOW_MS = ${PW_PAGE_POLL_BOUNDS.windowMs};
+  var MAX_POLLS = ${PW_PAGE_POLL_BOUNDS.maxPolls};
+  var MANUAL_SPACING_MS = ${PW_PAGE_POLL_BOUNDS.manualSpacingMs};
+  var REQUEST_TIMEOUT_MS = ${PW_PAGE_POLL_BOUNDS.requestTimeoutMs};
+  var TERMINAL = { committed: 1, rejected: 1, expired: 1, revoked: 1 };
+  function $(sel) { return document.querySelector(sel); }
+  function say(text) { var n = $("#pw-write-note"); if (n) n.textContent = text; }
+  function reveal(id) { var n = $(id); if (n) n.hidden = false; }
+  function withTimeout(ms) {
+    if (typeof AbortController === "undefined") return {};
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, ms);
+    return { signal: ctrl.signal, done: function () { clearTimeout(timer); } };
+  }
+  var poll = { timer: null, inFlight: false, intentId: null, startedAt: 0, count: 0, stopped: true };
+  function stopPoll() {
+    poll.stopped = true;
+    if (poll.timer !== null) { clearTimeout(poll.timer); poll.timer = null; }
+  }
+  function schedule(ms) {
+    if (poll.timer !== null) clearTimeout(poll.timer);
+    poll.timer = setTimeout(tick, ms);
+  }
+  async function checkOnce(intentId) {
+    var gate = withTimeout(REQUEST_TIMEOUT_MS);
+    try {
+      var res = await fetch(STATUS + "?intentId=" + encodeURIComponent(intentId),
+        { credentials: "same-origin", headers: { accept: "application/json" }, signal: gate.signal });
+      var data = null;
+      try { data = await res.json(); } catch (err) { data = null; }
+      return { status: res.status, retryAfter: res.headers.get("retry-after"), data: data };
+    } finally {
+      if (gate.done) gate.done();
+    }
+  }
+  function codeOf(data) {
+    return data && data.error && typeof data.error.code === "string" ? data.error.code : null;
+  }
+  function handleStatus(out, manual) {
+    var code = codeOf(out.data);
+    var state = out.data && out.data.data ? out.data.data.state : null;
+    if (out.status === 200 && state && TERMINAL[state]) {
+      if (state === "committed") {
+        var receipt = out.data.data.receipt && out.data.data.receipt.event
+          ? out.data.data.receipt.event : {};
+        say("Confirmed " + (receipt.basket || "") + " (" + (receipt.state || "") + "). Refresh the target from the page.");
+        try { if (typeof window.__pwWriteOnCommitted === "function") window.__pwWriteOnCommitted(out.data.data); } catch (err) {}
+      } else if (state === "expired") {
+        say("Expired. Re-read the target, then prepare a new gesture.");
+      } else if (state === "revoked") {
+        say("Revoked. No confirmation of this intent is possible.");
+      } else {
+        say("Refused (" + (out.data.data.error ? out.data.data.error.code : state) + "). Re-read the target, then prepare a new gesture.");
+      }
+      stopPoll();
+      return;
+    }
+    if (out.status === 200) return;
+    if (out.status === 401) {
+      say(code === "write_grant_expired"
+        ? "The write grant expired. Re-read the target, then prepare a new gesture."
+        : "The page session ended. Sign in again on the page, then prepare a new gesture.");
+      stopPoll();
+      return;
+    }
+    if (out.status === 403) {
+      say("This page can no longer follow the intent. Open the management link in the application.");
+      stopPoll();
+      return;
+    }
+    if (out.status === 429) {
+      var wait = Math.min(60, Math.max(INTERVAL_MS / 1000, parseInt(out.retryAfter || "2", 10) || 2));
+      if (!manual) schedule(wait * 1000);
+      say("The follow-up is limited. Waiting " + wait + " seconds.");
+      return;
+    }
+    say("Result to verify. Use the manual check below.");
+    stopPoll();
+    reveal("#pw-write-manual");
+  }
+})();
+`;
 export const PW_PAGE_SCRIPT = `${PW_PAGE_SCRIPT_PREPARE}\n${PW_PAGE_SCRIPT_POLL}`;
 
 export const PW_PAGE_SCRIPT_HASH = createHash("sha256")
