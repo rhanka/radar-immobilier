@@ -17,7 +17,7 @@ export async function revisionFixture() {
   const row = await pwPrepared(f, input);
   const admission = () => createDurableWriteAdmission(row.intentId, { confirmation: pwConfirmation(row) });
   const execute = (port = admission()) => coordinateSignalWrite(f.db, f.contributor.sub, input, port);
-  const mutate = (kind: "personal" | "common" | "source" | "privateB", db = f.db) => {
+  const mutate = async (kind: "personal" | "common" | "source" | "privateB", db = f.db) => {
     const command = { target: other.target, expectedHeadId: null,
       displayedFingerprint: other.displayedFingerprint, commandKey: randomUUID() };
     if (kind === "source") return upsertGraph(db, input.target.citySlug,

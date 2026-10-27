@@ -32,6 +32,9 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] C01/C04/C09/C10 scoped run: 21 passed/0 failed/0 skipped; correct the
+  union-promise fixture type and rerun the static gate before acceptance.
+- [x] Expose the actual identity fixture application for normal-cookie guards.
 - [x] Add C09 shared-lock status reads during commit/rollback; expiration
   after the wait cannot overwrite a committed result or settle prematurely.
 - [x] Add rollback after each of three composed discard events, preserving
