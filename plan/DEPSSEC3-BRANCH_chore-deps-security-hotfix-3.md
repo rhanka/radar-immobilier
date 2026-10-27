@@ -16,6 +16,7 @@
 
 ## Branch Scope Boundaries (MANDATORY)
 - [x] Allowed Paths: root/workspace manifests and `package-lock.json`.
+- [x] Allowed Paths: `docs/architecture/focus/package.json` and its independent `package-lock.json` (Dependabot alert 147).
 - [x] Allowed Paths: Zod compatibility changes in `api/src/**`, `api/tests/**`, `packages/**`.
 - [x] Allowed Paths: `.security/**`, `tools/security/**`, `tools/zod4-*`.
 - [x] Allowed Paths: this plan and `RAPPORT-SOL-HOTFIX3.md`.
@@ -24,6 +25,7 @@
 - [x] Record rationale, impact and rollback before any conditional-path edit.
 
 ## Feedback Loop
+- [x] L2w: retain physical dependency-tree validation and negative checks for vulnerable or invalid instances.
 - [x] L2v: scope the historical SDK corpus to the native registrar; the newer production composition has its own wire contract.
 - [x] L2u: retain actual HTTP and stdio validation transport coverage.
 - [x] L2t: retain frozen MCP argument diagnostics and schema contract regressions.
@@ -66,7 +68,7 @@
   - [ ] Capture production-only and complete raw baseline audits in containers.
 - [ ] **Lot 1 — Minimal patch updates**
   - [ ] Update fast-uri and ip-address within their existing declared ranges.
-  - [ ] Update the existing KaTeX override to the first patched release.
+  - [ ] Pin patched KaTeX 0.18.2 in the independent Focus dependency tree.
   - [ ] Verify the generated lockfile diff and installed dependency tree.
 - [ ] **Lot 2 — Zod remediation**
   - [ ] Check published Sentropic compatibility and reuse the prepared migration.
