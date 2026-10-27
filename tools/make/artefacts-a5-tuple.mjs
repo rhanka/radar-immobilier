@@ -18,6 +18,7 @@ for (const [name, version, frozenIntegrity] of expected) {
   const id = '@sentropic/' + name;
   const entry = lock.packages[`packages/immo-mcp/node_modules/${id}`] ?? lock.packages[`node_modules/${id}`];
   assert.equal(entry.version, version);
+  assert.equal(new URL(entry.resolved).origin, 'https://registry.npmjs.org');
   if (name !== 'mcp-platform') assert.equal(manifest.dependencies[id], version);
   if (frozenIntegrity) assert.equal(entry.integrity, frozenIntegrity);
   const response = await fetch(`https://registry.npmjs.org/${id}/${version}`, { signal: AbortSignal.timeout(10000) });

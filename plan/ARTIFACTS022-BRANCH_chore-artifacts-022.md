@@ -37,6 +37,7 @@
 - [x] Lot 1: Pin 0.2.2; npm changed only three workspace pins and the provider entry.
 - [x] Lot 2: Removed redundant static/runtime guards; test published adapters directly.
 - [x] Lot 2: Assert native error projection through `mapHostError` and real S3 refusal.
+- [x] Lot 2: Use ESM resolution for the published memory double (no CommonJS export).
 - [x] Lot 3: Aligned current provider profile, qualification scripts and docs.
 - [ ] Lot 4: Pass typecheck, lint, unit tests and Docker artifacts integration.
 - [ ] Lot 5: Review changes, audit commits and deliver the uncommitted report.
