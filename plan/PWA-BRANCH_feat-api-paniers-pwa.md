@@ -30,6 +30,8 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
     PWA-EX3 permits their exact import from 0ab7d664 by merge only.
 
 ## Feedback Loop
+- [x] Shared-machine isolation: require 60 quiet seconds before starting and
+  stop only the owned campaign if a foreign test stack appears during execution.
 - [x] Main qualification inputs: include the imported operator rights JSON,
   account SQL and delivery shell probe in the archive; provide curl/jq in
   the disposable Node container so unchanged CI-selected tests can execute.
