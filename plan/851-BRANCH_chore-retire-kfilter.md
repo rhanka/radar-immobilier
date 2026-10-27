@@ -37,5 +37,5 @@
 - [x] Lot 5: atomic rescue commits and French report; bundle verification recorded in the adjacent delivery audit.
 - [x] Lot 6: reproduce corruption on jq 1.8.1; rawfile plus strict scalar validation; long and invalid fixtures.
 - [x] Lot 7: follow linked directories/files, reject Python extensions and traversal failures; acceptance witnesses.
-- [ ] Lot 8: selected last document without a final LF, with an asserted precondition.
+- [x] Lot 8: selected last document without a final LF, with an asserted precondition.
 - [ ] Lot 9: final shell/render checks, review-correction report and audited bundle above `86a6697e`.

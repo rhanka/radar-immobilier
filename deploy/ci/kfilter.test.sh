@@ -17,8 +17,8 @@ check() {
 jq -r '.[]' "$HERE/fixtures/kfilter/render.json" >"$T/lf"
 awk '{ printf "%s\r\n", $0 }' "$T/lf" >"$T/crlf"
 awk '{ printf "%s\r", $0 }' "$T/lf" >"$T/cr"
-awk '{ printf "%s%s", sep, $0; sep="\n" }' "$T/lf" >"$T/no-final-newline"
-for variant in lf crlf cr no-final-newline; do
+awk '{ printf "%s%s", sep, $0; sep="\n" }' "$T/lf" >"$T/no-trailing-blank-line"
+for variant in lf crlf cr no-trailing-blank-line; do
   while IFS= read -r test_case; do
     mapfile -t flags < <(jq -r '.flags // [] | .[]' <<<"$test_case")
     mapfile -t args < <(jq -r '.args[]' <<<"$test_case")
@@ -27,6 +27,26 @@ for variant in lf crlf cr no-final-newline; do
     check "$variant: $(jq -r '.label' <<<"$test_case")"
   done < <(jq -c '.[]' "$HERE/fixtures/kfilter/cases.json")
 done
+
+# A selected document ends directly at its name field: no separator and no LF.
+jq -j 'join("\n")' "$HERE/fixtures/kfilter/no-final-lf.json" >"$T/no-final-lf"
+test "$(tail -c 1 "$T/no-final-lf")" = f
+test "$(tail -n 1 "$T/no-final-lf")" = '  name: at-eof'
+PASS=$((PASS + 1)); echo 'ok: no-LF fixture ends at the selected name field'
+cat "$T/no-final-lf" >"$T/expected"
+printf '\n' >>"$T/expected"
+for mode in kind exact prefix; do
+  case "$mode" in
+    kind) args=("$T/no-final-lf" ConfigMap) ;;
+    exact) args=("$T/no-final-lf" ConfigMap at-eof) ;;
+    prefix) args=(--name-prefix at- "$T/no-final-lf" ConfigMap) ;;
+  esac
+  bash "$HERE/kfilter.sh" "${args[@]}" >"$T/actual"
+  check "selected document without final LF ($mode)"
+done
+printf 'at-eof\n' >"$T/expected"
+bash "$HERE/kfilter.sh" --names "$T/no-final-lf" ConfigMap >"$T/actual"
+check 'selected name without final LF'
 
 # Long literal lines place 2/3/4-byte characters across jq's 4096-byte buffers.
 while IFS= read -r fixture; do
