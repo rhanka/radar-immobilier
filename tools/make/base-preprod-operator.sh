@@ -11,7 +11,7 @@ case $action in
 validate) ;;
 render-job) render_job "$(jq -r .operation "$INPUT")";;
 collect-job) collect_job "$(jq -r .operation "$INPUT")";;
-permissions|inventory|freeze-cd|close|restore-ingresses|stop-job|collect-maintenance|start-api|restart-api|reopen-api)
+permissions|inventory|freeze-cd|close|restore-ingresses|stop-job|collect-maintenance|start-api|tunnel-api|restart-api|reopen-api)
   source tools/make/base-preprod-maintenance.sh
   "$action";;
 inspect|init|attach|activate|resume)

@@ -22,6 +22,7 @@ permissions() {
   done
   for verb in create delete; do "${k[@]}" auth can-i "$verb" jobs.batch >> "$OUTPUT/permissions.tsv"; done
   "${k[@]}" auth can-i create pods --subresource=exec >> "$OUTPUT/permissions.tsv"
+  "${k[@]}" auth can-i create pods --subresource=portforward >> "$OUTPUT/permissions.tsv"
   "${k[@]}" auth can-i get pods --subresource=log >> "$OUTPUT/permissions.tsv"
   "${k[@]}" auth can-i create services >> "$OUTPUT/permissions.tsv"
   gh api "repos/$repo" --jq '{permissions:{push:.permissions.push,admin:.permissions.admin,maintain:.permissions.maintain}}' > "$OUTPUT/github-permissions.json"
@@ -166,6 +167,11 @@ start-api() {
   "${k[@]}" rollout status deployment/radar-api --timeout=180s >> "$OUTPUT/api.txt"
   api_identity
   echo 'Public routes remain closed; use a namespace-admin tunnel and business session for Q1.'
+}
+tunnel-api() {
+  assert_cd_frozen; assert_boundary; api_identity
+  # Local-only transport; API business-session authorization still applies.
+  "${k[@]}" port-forward --address=127.0.0.1 service/radar-api 18872:3000
 }
 restart-api() {
   qualification_receipt
