@@ -1,7 +1,7 @@
 # Feature: Retire Python from preprod manifest filtering
 
 ## Objective
-- [ ] Replace the Python manifest filter with byte-preserving jq filtering (#851, #810).
+- [x] Replace the Python manifest filter with byte-preserving jq filtering (#851, #810).
 
 ## Scope / Guardrails
 - [x] Worktree: `tmp/kfilter-851`; branch: `chore/851-retire-kfilter`.
@@ -34,4 +34,4 @@
 - [x] Lot 2: frozen fixtures, 4 newline variants and independent full-render oracle.
 - [x] Lot 3: deny Python in deploy, update reconcile tests, README and CI.
 - [x] Lot 4: scoped shell tests, preprod render, scope/branch gates and review selection evidence.
-- [ ] Lot 5: atomic rescue commits, French report and verified portable bundle.
+- [x] Lot 5: atomic rescue commits and French report; bundle verification recorded in the adjacent delivery audit.
