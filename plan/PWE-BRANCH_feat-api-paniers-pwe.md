@@ -32,6 +32,8 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Allow a short normal-login session TTL and controlled application clock
+  to exercise the real /me remint policy while the original intent stays valid.
 - [x] C01/C04/C09/C10 scoped run: 21 passed/0 failed/0 skipped; correct the
   union-promise fixture type and rerun the static gate before acceptance.
 - [x] Expose the actual identity fixture application for normal-cookie guards.

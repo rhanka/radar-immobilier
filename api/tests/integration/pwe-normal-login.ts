@@ -9,9 +9,9 @@ import type { Database } from "../../src/db/client.js";
 import { baseAuth } from "./base-api-fixture.js";
 
 /** Synthetic IdP boundary; the RP flow cookie and session are never forged. */
-export async function normalLogin(domain: PwIdentityDomain, db: Database, sub: string) {
+export async function normalLogin(domain: PwIdentityDomain, db: Database, sub: string, ttlSeconds = 3600) {
   const now = Date.now();
-  const auth = { ...baseAuth, issuer: domain.identityIssuer, clientId: domain.clientId,
+  const auth = { ...baseAuth, sessionTtlSeconds: ttlSeconds, issuer: domain.identityIssuer, clientId: domain.clientId,
     appBaseUrl: domain.appOrigin, redirectUri: `${domain.appOrigin}/api/v1/auth/oauth/callback`,
     jwksUri: `${domain.identityIssuer}/jwks`, clientSecret: randomBytes(32).toString("hex"),
     sessionSecret: randomBytes(32).toString("hex") };
