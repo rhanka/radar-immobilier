@@ -26,7 +26,7 @@
 
 ## Astra review corrections (PR #932)
 - [x] A1/B1: preserve historical timestamps and persisted metadata/card reads.
-- [ ] A2: reject raw URL whitespace before normalization.
+- [x] A2: reject raw URL whitespace before normalization.
 - [x] A3/B2: preserve integer diagnostic accumulation and finite ranges.
 - [x] B3: retain nonnumeric type metadata for raw JSON infinities.
 - [ ] A4/B4: align all native registrar scalar diagnostics.
