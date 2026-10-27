@@ -21,7 +21,7 @@ process.on("message", (message: Start | "release") => {
 
 async function execute(message: Start) {
   const pool = new pg.Pool({ host: process.env.POSTGRES_HOST,
-    port: Number(process.env.POSTGRES_PORT), user: process.env.POSTGRES_USER,
+    port: Number(process.env.POSTGRES_PORT ?? "5432"), user: process.env.POSTGRES_USER,
     password: process.env.POSTGRES_PASSWORD, database: message.database, max: 2 });
   const db = drizzle(pool, { schema });
   let writes = 0;
@@ -48,7 +48,7 @@ async function execute(message: Start) {
     process.send!({ kind: "done", committed: false, writes,
       error: error instanceof Error ? error.message : "unexpected failure" });
   } finally {
-    await pool.end(); process.disconnect();
+    await pool.end(); process.disconnect!();
   }
 }
 process.send!({ kind: "ready", processId: process.pid });
