@@ -41,6 +41,13 @@ isolation, current authorization, transactional quotas and replay safety.
   - [x] Rollback: revert these fixture-only adjustments with the actor quotas.
 
 ## Feedback Loop
+- [x] Read both Astra reviews of PR #930 in full; owner requests the smallest
+  shared correction, no push, and an incremental bundle from `c71fbdaf`.
+- [ ] Replace the commit-only minute debit with atomic admission attempts
+  before S3, never refunded; keep durable quotas transactional at commit.
+- [ ] Resolve committed replays through coordinator authorization before the
+  minute bound, and return retryable temporary refusal for new capped writes.
+- [ ] Restrict the workspace-claim exemption to general mode and test both modes.
 - [x] Shared Git metadata is read-only: use local Git metadata and audit a bundle
   against the original base in a fresh repository; do not push.
 - [x] Owner instruction overrides commit trailers and report language.
@@ -106,3 +113,10 @@ isolation, current authorization, transactional quotas and replay safety.
 - [x] **Lot 4 — Delivery**
   - [x] Atomic commits, bundle audit and French results report.
   - [x] Confirm own Docker project has no containers, networks or volumes.
+- [ ] **Lot 5 — Astra review corrections (#930)**
+  - [ ] Reproduce replay at the tenth success through HTTP and MCP façades.
+  - [ ] Count S3 calls on the last concurrent attempt and exhausted durable quota.
+  - [ ] Implement shared guarded replay and atomic pre-upload attempt admission.
+  - [ ] Verify suspension denial and mode-specific account binding.
+  - [ ] Targeted gates, full API and discriminating restored-source mutations.
+  - [ ] Incremental bundle audit, report section and shared stack cleanup.
