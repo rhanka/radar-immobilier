@@ -139,7 +139,7 @@
     <!-- Score /100 headline + partial + cap -->
     <div class="mb-4 flex flex-wrap items-center gap-3">
       {#if result.tooThin}
-        <span class="rounded bg-slate-200 px-3 py-1 text-lg font-bold text-slate-500">
+        <span class="rounded-sm bg-slate-200 px-3 py-1 text-lg font-bold text-slate-500">
           Trop mince
         </span>
       {:else}
@@ -173,7 +173,7 @@
             >
               {#snippet trigger()}
                 <div
-                  class={`cursor-default rounded border px-3 py-2 transition ${
+                  class={`cursor-default rounded-sm border px-3 py-2 transition ${
                     effectiveAxisScore.availability === "non-disponible"
                       ? excludedInReal
                         ? "border-slate-200 bg-slate-100 opacity-60"

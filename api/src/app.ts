@@ -6,6 +6,9 @@ import {
   type AuthRouteOptions,
 } from "./routes/auth.js";
 import { healthRoute, type HealthDeps } from "./routes/health.js";
+import { contentGate, type ContentReaderMount } from "./artifacts/content-app.js";
+import type { ContentHostConfig } from "./artifacts/content-config.js";
+import { controlRoute, type ControlRouteDeps } from "./artifacts/control-route.js";
 import { chatRoute } from "./routes/chat.js";
 import { automationRoute } from "./routes/automation.js";
 import { sourcesRoute, type SourcesDeps } from "./routes/sources.js";
@@ -28,7 +31,22 @@ import { dataQualityRoute, type DataQualityDeps } from "./routes/data-quality.js
 import { sourceCoverageRoute } from "./routes/source-coverage.js";
 import { sourceConsistencyRoute } from "./routes/source-consistency.js";
 import { prospectMarksRoute } from "./routes/prospect-marks.js";
+import { scopedLotCutoverRoute, type ScopedLotCutoverDeps } from "./routes/scoped-lot-cutover.js";
+import { scopedLotCutoverActivationRoute } from "./routes/scoped-lot-cutover-activation.js";
+import type { LegacyRetirementState } from "./services/facets/legacy-retirement.js";
+import { scopedLotFacetsRoute } from "./routes/scoped-lot-facets.js";
+import { signalFacetsRoute } from "./routes/signal-facets.js";
+import { privateSignalResponse } from "./services/facets/private-response.js";
 import { documentsRoute, type DocumentsDeps } from "./routes/documents.js";
+import { workspacesRoute } from "./routes/workspaces.js";
+import { scopedSignalFacetsRoute } from "./routes/scoped-signal-facets.js";
+import { scopedWorkspaceArchiveRoute } from "./routes/scoped-workspace-archive.js";
+import { scopedProjectionRevisionsRoute } from "./routes/scoped-projection-revisions.js";
+import { scopedProjectionEventsRoute } from "./routes/scoped-projection-events.js";
+import { scopedSignalRevealRoute } from "./routes/scoped-signal-reveal.js";
+import { mcpSignalSearchRoute } from "./routes/mcp-signal-search.js";
+import { classificationBoundary, scopedClassificationRoute } from "./routes/scoped-classification.js";
+import type { ClassificationOptions } from "./services/facets/classification-search.js";
 
 export type AppDeps = HealthDeps &
   SourcesDeps &
@@ -59,14 +77,57 @@ export type AppDeps = HealthDeps &
     fetchImpl?: typeof fetch;
     geoBaseUrl?: string;
     geoListingTtlMs?: number;
+    /** Artifact content dispatch (861c); absent/disabled keeps the chain. */
+    contentHost?: ContentHostConfig;
+    /** Already bound reader; absent keeps content hosts closed. */
+    readerContent?: ContentReaderMount;
+    /**
+     * Artifact control plane (861c H2); mounted only when auth is enabled.
+     * When absent, authenticated mode mounts the closed control capability.
+     */
+    artifactsControl?: ControlRouteDeps;
+    /** Explicit operator mapping and qualified deployment retirement adapter. */
+    lotCutover?: Pick<ScopedLotCutoverDeps, "cutoverMapping" | "cutoverSafety">;
+    /** Durable server-only retirement; never derived from public input. */
+    legacyRetirement?: LegacyRetirementState;
+    /** Closed by default; server-only, separately qualified signal binding. */
+    mcpSignalSearch?: { enabled: boolean; afterWorkspaceResolve?: () => Promise<void> | void };
+    /** Operator-injected read signing configuration; absent keeps pagination closed. */
+    classification?: ClassificationOptions;
   };
 
 /** Compose the Hono application from injected dependencies. */
 export function createApp(deps: AppDeps): Hono {
   const app = new Hono();
+  app.use("/api/graph-signals/*", privateSignalResponse);
+  app.use("/api/v1/signal-facets/*", privateSignalResponse);
+  app.use("/api/v1/mcp/facets/signals/*", privateSignalResponse);
 
-  // Auth is wired first so the protect middleware runs before every business
+  // Content hosts dispatch FIRST, before protect: never app auth or SPA.
+  if (deps.contentHost?.enabled) {
+    app.use("*", contentGate(deps.contentHost.contentBase, deps.readerContent));
+  }
+
+  // Control requests use the official cookie guard before general bearer auth.
+  if (deps.auth?.enabled) {
+    if (deps.artifactsControl) {
+      app.route("/api/v1/artifacts/control", controlRoute(deps.artifactsControl));
+    } else {
+      // Closed capability: same identity guards and cache headers as the
+      // mounted route, without storage. The guard returns 503 after the
+      // cookie/origin checks, so no account query is needed here.
+      app.route("/api/v1/artifacts/control", controlRoute({
+        auth: deps.auth,
+        accounts: { query: async () => ({ rows: [] }) },
+      }));
+    }
+  }
+
+  // Auth runs after the content gate, so protect still fronts every business
   // route. When `deps.auth` is absent or disabled both are inert no-ops.
+  app.use("/api/v1/workspaces/*", privateSignalResponse);
+  app.use("/api/v1/workspaces", privateSignalResponse);
+  app.use("/api/v1/workspaces/*", classificationBoundary);
   if (deps.auth) {
     app.use("*", protect(deps.auth, { db: deps.db }));
     // Pass db into authOptions so enrollment runs in production.
@@ -102,7 +163,7 @@ export function createApp(deps: AppDeps): Hono {
   }
 
   app.route("/", healthRoute(deps));
-  app.route("/", chatRoute());
+  app.route("/", chatRoute(deps.db));
   app.route("/", automationRoute());
   app.route("/", sourcesRoute(deps));
   app.route("/", ontologyRoute(deps));
@@ -115,7 +176,20 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", sourceCoverageRoute(deps));
   app.route("/", sourceConsistencyRoute({ db: deps.db }));
   app.route("/", documentsRoute(deps));
-  app.route("/", graphSignalsRoute(deps));
+  app.route("/", graphSignalsRoute(deps.legacyRetirement
+    ? { ...deps, retirement: deps.legacyRetirement }
+    : deps));
+  app.route("/", signalFacetsRoute(deps.legacyRetirement
+    ? { ...deps, retirement: deps.legacyRetirement }
+    : deps));
+  app.route("/", workspacesRoute(deps));
+  app.route("/", scopedSignalFacetsRoute(deps));
+  app.route("/", scopedWorkspaceArchiveRoute(deps));
+  app.route("/", scopedProjectionRevisionsRoute(deps));
+  app.route("/", scopedProjectionEventsRoute(deps));
+  app.route("/", scopedSignalRevealRoute(deps));
+  app.route("/", mcpSignalSearchRoute(deps));
+  app.route("/", scopedClassificationRoute(deps));
   app.route("/", graphRoute(deps));
   app.route("/", geoLotsRoute());
   app.route("/", geoZonesRoute({ db: deps.db }));
@@ -124,6 +198,17 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", signalsDetailRoute(deps));
   app.route("/", opportunitesRoute(deps));
   app.route("/", prospectMarksRoute(deps.auth?.enabled && deps.auth.sessionSecret ? { db: deps.db, sessionSecret: deps.auth.sessionSecret } : { db: deps.db }));
+  // 6K: scoped lot facets and cutover are mounted but self-gating. Lot
+  // reads and commands answer 503 until the workspace destination and
+  // scoped epoch are established, and stay closed until the explicit
+  // operator cutover opens the destination. Legacy mark traffic is fenced
+  // at the route layer (503/410) with a database trigger as backstop.
+  if (deps.db) {
+    const lotDeps = { db: deps.db, ...(deps.auth ? { auth: deps.auth } : {}) };
+    app.route("/", scopedLotFacetsRoute({ ...lotDeps, requireCutover: true }));
+    app.route("/", scopedLotCutoverRoute({ ...lotDeps, ...deps.lotCutover }));
+    app.route("/", scopedLotCutoverActivationRoute({ ...lotDeps, ...deps.lotCutover }));
+  }
 
   app.get("/", (c) => c.json({ name: "radar-immobilier-api", status: "up" }));
 

@@ -36,7 +36,7 @@
       tabindex="0"
       role="button"
       aria-describedby={tooltipId}
-      class="cursor-help border-b border-dotted border-slate-400 focus:outline-none focus:ring-1 focus:ring-teal-400 focus:ring-offset-1 rounded-sm"
+      class="cursor-help border-b border-dotted border-slate-400 focus:outline-hidden focus:ring-1 focus:ring-teal-400 focus:ring-offset-1 rounded-xs"
       on:mouseenter={show}
       on:mouseleave={hide}
       on:focus={show}

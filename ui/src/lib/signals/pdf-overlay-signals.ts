@@ -283,3 +283,50 @@ export function buildOverlaySignals(
     };
   });
 }
+
+/**
+ * An open signal-bound evidence view, as held by the parent.
+ */
+export interface OpenSignalEvidence {
+  /** Display title captured when the signal was opened (node label). */
+  title: string;
+  /** Evidence resolved from the opened node at open time. */
+  evidence: SignalEvidence;
+  /** Co-document overlay signals resolved at open time. */
+  signals: OverlaySignal[];
+  /** Id of the opened signal (reconciliation anchor). */
+  nodeId: string;
+}
+
+/**
+ * 6D — rebuild open signal-bound evidence from the refreshed AUTHORIZED
+ * nodes. The primary reads apply the shared discard predicate server-side
+ * before aggregation, so `nodes` here already carries that population: this
+ * helper applies no independent archive algorithm and never re-derives
+ * visibility beyond the provided `visibleIds`.
+ *
+ * - Target absent from `nodes`, or outside `visibleIds` → `null`: the caller
+ *   closes the signal-bound view. An unknown target is explicit, never an
+ *   empty shell or a zero count.
+ * - Target present → title, evidence and co-document signals rebuilt from
+ *   the CURRENT node: an archived co-signal drops out of `signals`, and a
+ *   changed citation/page/rawRef replaces the old evidence.
+ * - Independent browsing (generic source documents, geographic grids) is
+ *   untouched: only signal-bound evidence resolves here.
+ */
+export function rebuildSignalEvidence(
+  active: OpenSignalEvidence,
+  nodes: readonly GraphSignalNode[],
+  isInFilter: (node: GraphSignalNode) => boolean,
+  visibleIds: ReadonlySet<string>,
+): OpenSignalEvidence | null {
+  const current = nodes.find((node) => node.id === active.nodeId);
+  if (!current || !visibleIds.has(current.id)) return null;
+  const evidence = extractSignalEvidence(current);
+  return {
+    title: current.label,
+    evidence,
+    signals: buildOverlaySignals(current, nodes, evidence.rawRef, isInFilter),
+    nodeId: current.id,
+  };
+}

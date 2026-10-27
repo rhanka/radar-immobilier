@@ -24,7 +24,7 @@
 
 <aside class="space-y-4">
   {#if selectedSource}
-    <section class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+    <section class="rounded-lg border border-slate-200 bg-white p-4 shadow-xs">
       <div class="mb-3 flex items-center justify-between gap-3">
         <div>
           <p class="text-[11px] font-semibold uppercase text-teal-700">
@@ -56,7 +56,7 @@
     </section>
   {/if}
 
-  <section class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+  <section class="rounded-lg border border-slate-200 bg-white p-4 shadow-xs">
     <div class="mb-3 flex items-center gap-2">
       <ClipboardList class="h-4 w-4 text-teal-700" aria-hidden="true" />
       <h2 class="text-sm font-semibold text-slate-950">Synthese reco</h2>
@@ -83,7 +83,7 @@
     </dl>
   </section>
 
-  <section class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+  <section class="rounded-lg border border-slate-200 bg-white p-4 shadow-xs">
     <div class="mb-3 flex items-center gap-2">
       <CircleDollarSign class="h-4 w-4 text-amber-700" aria-hidden="true" />
       <h2 class="text-sm font-semibold text-slate-950">Acces et couts a qualifier</h2>
@@ -108,7 +108,7 @@
     </div>
   </section>
 
-  <section class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+  <section class="rounded-lg border border-slate-200 bg-white p-4 shadow-xs">
     <div class="mb-3 flex items-center gap-2">
       <Handshake class="h-4 w-4 text-teal-700" aria-hidden="true" />
       <h2 class="text-sm font-semibold text-slate-950">A construire en premier</h2>

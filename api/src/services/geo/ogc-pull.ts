@@ -33,6 +33,7 @@
 
 import pg from "pg";
 import type { Database } from "../../db/client.js";
+import { lotSourceLockKey } from "../facets/lots/lot-source-serialization.js";
 import { normalizeZoneCode as normalizeZoneCodeUnified } from "./extract-refs.js";
 import { publicProvenanceFromProperties } from "./provenance.js";
 
@@ -148,6 +149,79 @@ export function zoneCanonicalId(citySlug: string, codeNorm: string): string {
   return `ogc:zones:${citySlug}:${codeNorm}`;
 }
 
+export interface OgcLotStoredRow {
+  id: string;
+  city_slug: string;
+  canonical_id: string;
+}
+
+export interface OgcLotStoredIdentity {
+  id: string;
+  citySlug: string;
+  canonicalId: string;
+}
+
+export interface OgcLotInsertDecision {
+  citySlug: string;
+  canonicalId: string;
+  noLotNorm: string;
+  rawRef: string;
+}
+
+export type OgcLotValidatedMutation =
+  | { kind: "update"; rowId: string; identity: { citySlug: string; canonicalId: string } }
+  | { kind: "insert"; decision: OgcLotInsertDecision };
+
+export function resolveOgcLotUpdateIdentity(stored: OgcLotStoredIdentity) {
+  return { citySlug: stored.citySlug, canonicalId: stored.canonicalId };
+}
+
+export function decideOgcLotInsert(citySlug: string, noLotNorm: string): OgcLotInsertDecision {
+  return {
+    citySlug,
+    canonicalId: lotCanonicalId(citySlug, noLotNorm),
+    noLotNorm,
+    rawRef: `ogc:${citySlug}:${noLotNorm}`,
+  };
+}
+
+// A row appearing after discovery uses its stored update identity.
+// upsertLotBatch locks the resulting identity on the same pg client before
+// rechecking, so a newly selected identity is never mutated unlocked.
+export function revalidateOgcLotInsertDecision(
+  decision: OgcLotInsertDecision,
+  updateRow: OgcLotStoredIdentity | null,
+): OgcLotValidatedMutation {
+  if (updateRow) {
+    return { kind: "update", rowId: updateRow.id, identity: resolveOgcLotUpdateIdentity(updateRow) };
+  }
+  return { kind: "insert", decision };
+}
+
+function toOgcLotStoredIdentity(row: OgcLotStoredRow | undefined): OgcLotStoredIdentity | null {
+  if (!row?.id || !row.city_slug || !row.canonical_id) return null;
+  return { id: row.id, citySlug: row.city_slug, canonicalId: row.canonical_id };
+}
+
+interface OgcLotPendingWrite {
+  noLotNorm: string;
+  geomJson: string | null;
+  evidence: string;
+  decision: OgcLotInsertDecision;
+  lockCitySlug: string;
+  lockCanonicalId: string;
+}
+
+/** Deterministic target order shared with lot-batch.ts. */
+function compareOgcLotLockTarget(
+  left: { citySlug: string; canonicalId: string },
+  right: { citySlug: string; canonicalId: string },
+): number {
+  const leftKey = JSON.stringify([left.citySlug, left.canonicalId]);
+  const rightKey = JSON.stringify([right.citySlug, right.canonicalId]);
+  return leftKey < rightKey ? -1 : leftKey > rightKey ? 1 : 0;
+}
+
 // ─── OGC Fetcher ─────────────────────────────────────────────────────────────
 
 /**
@@ -248,6 +322,9 @@ export async function upsertLotBatch(
     const today = todayIso();
     const now = nowIso();
 
+    // Phase 1 — discovery without mutation. The stored identity may differ
+    // from the derived canonical id: lock the stored identity when found.
+    const pending: OgcLotPendingWrite[] = [];
     for (const feature of features) {
       const rawNoLot =
         feature.properties?.["NO_LOT"] ??
@@ -263,23 +340,66 @@ export async function upsertLotBatch(
         ? JSON.stringify(feature.geometry)
         : null;
 
-      const canonId = lotCanonicalId(citySlug, noLotNorm);
-      const rawRef = `ogc:${citySlug}:${noLotNorm}`;
+      const decision = decideOgcLotInsert(citySlug, noLotNorm);
       const evidence = JSON.stringify([{
         source: "ogc-api",
         fetchedAt: now,
         ...publicProvenanceFromProperties(feature.properties),
       }]);
 
-      // Vérifier l'existence d'une version courante (known_to IS NULL)
-      const existing = await client.query<{ id: string }>(
-        `SELECT id FROM lot_versions
+      const discovered = await client.query<OgcLotStoredRow>(
+        `SELECT id, city_slug, canonical_id FROM lot_versions
          WHERE no_lot = $1 AND city_slug = $2 AND known_to IS NULL
          LIMIT 1`,
         [noLotNorm, citySlug],
       );
+      const preLockRow = toOgcLotStoredIdentity(discovered.rows[0]);
+      pending.push({
+        noLotNorm,
+        geomJson,
+        evidence,
+        decision,
+        lockCitySlug: preLockRow ? preLockRow.citySlug : decision.citySlug,
+        lockCanonicalId: preLockRow ? preLockRow.canonicalId : decision.canonicalId,
+      });
+    }
 
-      if (existing.rowCount && existing.rowCount > 0) {
+    // Every target lock is acquired on this same client, deduplicated and in
+    // lot-batch order, before any mutation. Transaction-scoped advisory locks
+    // are retained through COMMIT/ROLLBACK.
+    const lockTargets = new Map<string, { citySlug: string; canonicalId: string }>();
+    for (const item of pending) {
+      const key = lotSourceLockKey(item.lockCitySlug, item.lockCanonicalId);
+      if (!lockTargets.has(key)) {
+        lockTargets.set(key, { citySlug: item.lockCitySlug, canonicalId: item.lockCanonicalId });
+      }
+    }
+    for (const target of [...lockTargets.values()].sort(compareOgcLotLockTarget)) {
+      await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", [
+        lotSourceLockKey(target.citySlug, target.canonicalId),
+      ]);
+    }
+
+    // Phase 2 — revalidate under the lock, then mutate. A revalidation that
+    // changes the required lock set fails explicitly instead of mutating a
+    // newly selected, unlocked identity; the whole batch rolls back.
+    for (const item of pending) {
+      const { noLotNorm, geomJson, evidence, decision } = item;
+      const rechecked = await client.query<OgcLotStoredRow>(
+        `SELECT id, city_slug, canonical_id FROM lot_versions
+         WHERE no_lot = $1 AND city_slug = $2 AND known_to IS NULL
+         LIMIT 1`,
+        [noLotNorm, citySlug],
+      );
+      const updateRow = toOgcLotStoredIdentity(rechecked.rows[0]);
+      const requiredCitySlug = updateRow ? updateRow.citySlug : decision.citySlug;
+      const requiredCanonicalId = updateRow ? updateRow.canonicalId : decision.canonicalId;
+      if (requiredCitySlug !== item.lockCitySlug || requiredCanonicalId !== item.lockCanonicalId) {
+        throw new Error(`ogc_lot_source_lock_changed:${noLotNorm}`);
+      }
+      const validated = revalidateOgcLotInsertDecision(decision, updateRow);
+
+      if (validated.kind === "update") {
         if (geomJson) {
           await client.query(
             `UPDATE lot_versions
@@ -288,12 +408,12 @@ export async function upsertLotBatch(
                  raw_ref = $2,
                  evidence = $3::jsonb
              WHERE id = $4`,
-            [geomJson, rawRef, evidence, existing.rows[0]!.id],
+            [geomJson, decision.rawRef, evidence, validated.rowId],
           );
         } else {
           await client.query(
             `UPDATE lot_versions SET evidence = $1::jsonb WHERE id = $2`,
-            [evidence, existing.rows[0]!.id],
+            [evidence, validated.rowId],
           );
         }
         upserted++;
@@ -307,13 +427,13 @@ export async function upsertLotBatch(
                ($1, $2, $3, 'validated', $4::date, $5::timestamptz,
                 ST_SetSRID(ST_GeomFromGeoJSON($6), 4326), 'ogc-api', $7, $8::jsonb)`,
             [
-              canonId,
+              validated.decision.canonicalId,
               noLotNorm,
               citySlug,
               today,
               now,
               geomJson,
-              rawRef,
+              validated.decision.rawRef,
               evidence,
             ],
           );
@@ -326,12 +446,12 @@ export async function upsertLotBatch(
                ($1, $2, $3, 'validated', $4::date, $5::timestamptz,
                 'none', $6, $7::jsonb)`,
             [
-              canonId,
+              validated.decision.canonicalId,
               noLotNorm,
               citySlug,
               today,
               now,
-              rawRef,
+              validated.decision.rawRef,
               evidence,
             ],
           );

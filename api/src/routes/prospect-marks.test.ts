@@ -14,6 +14,7 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { prospectMarksRoute } from "./prospect-marks.js";
+import { lotCutoverState, lotLegacyFence } from "../db/schema.js";
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
@@ -92,7 +93,8 @@ const _VALID_AUTHOR_ID = "22222222-2222-2222-2222-222222222222";
 // Mock DB minimal (utilisé pour les requêtes auth — en open mode jamais appelé)
 const mockDb = {
   select: vi.fn().mockReturnValue({
-    from: vi.fn().mockReturnValue({
+    from: vi.fn().mockImplementation((table: unknown) => table === lotCutoverState ? Promise.resolve([])
+      : table === lotLegacyFence ? Promise.resolve([{ singleton: true, enabled: false }]) : {
       where: vi.fn().mockReturnValue({
         limit: vi.fn().mockResolvedValue([]),
       }),

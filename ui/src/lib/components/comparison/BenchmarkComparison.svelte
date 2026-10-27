@@ -28,7 +28,7 @@
   <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
     {#each ranked as track}
       <article
-        class={`rounded-lg border bg-white p-4 shadow-sm ${
+        class={`rounded-lg border bg-white p-4 shadow-xs ${
           track.rank === 1 ? "border-amber-300 ring-1 ring-amber-200" : "border-slate-200"
         }`}
       >
@@ -45,11 +45,11 @@
         </div>
         <div class="mt-2">
           {#if track.fabrication === "none"}
-            <span class="inline-flex items-center gap-1 rounded bg-emerald-100 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-700">
+            <span class="inline-flex items-center gap-1 rounded-sm bg-emerald-100 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-700">
               <ShieldCheck class="h-3 w-3" aria-hidden="true" /> Aucune fabrication
             </span>
           {:else}
-            <span class="inline-flex items-center gap-1 rounded bg-red-100 px-1.5 py-0.5 text-[11px] font-semibold text-red-700">
+            <span class="inline-flex items-center gap-1 rounded-sm bg-red-100 px-1.5 py-0.5 text-[11px] font-semibold text-red-700">
               <ShieldAlert class="h-3 w-3" aria-hidden="true" /> Fabrications
             </span>
           {/if}
@@ -84,7 +84,7 @@
             {#each track.scores as score}
               <td class="p-3 text-center">
                 <span
-                  class={`inline-block w-7 rounded ${
+                  class={`inline-block w-7 rounded-sm ${
                     score >= 5
                       ? "bg-emerald-100 text-emerald-800"
                       : score >= 3

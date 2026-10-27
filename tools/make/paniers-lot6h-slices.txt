@@ -1,0 +1,28 @@
+docs: declare personal attachment scope and delivery safeguards|plan/PANIERS6H-BRANCH_feat-paniers-6h-personal-attachment.md
+feat: define scoped streams and immutable bindings|sql:100
+feat: enforce complete chains and terminal registration|sql:200
+feat: protect the atomic head index and writer epoch swap|api/drizzle/0018_facet_scope_bindings.sql
+feat: register scoped attachment tables in the database schema|api/src/db/schema.ts api/drizzle/meta/_journal.json
+feat: define explicit personal scope and attachment inputs|api/src/services/facets/scope.ts api/src/services/facets/attachment-input.ts
+feat: attach personal histories with exact replay receipts|api/src/services/facets/attachment.ts
+feat: expose the explicit personal attachment operator script|api/src/scripts/attach-personal-history.ts
+test: qualify scope decisions and operator attachment inputs|api/src/services/facets/scope.test.ts api/src/services/facets/attachment.test.ts
+feat: qualify historical chains and bind receipt contexts|api/src/services/facets/activation.ts
+feat: read private heads through the activated stream registry|api/src/services/facets/scoped-reader.ts
+feat: bind whole histories and guard post-cutover readback|api/src/services/facets/activation-bind.ts api/src/services/facets/activation-open.ts
+feat: require protected delivery before personal activation|api/src/services/facets/activation-run.ts
+feat: append scoped transitions with terminal registration|api/src/services/facets/scoped-transition.ts
+feat: enforce scoped command heads versions and receipt access|api/src/services/facets/scoped-writer.ts
+feat: expose guarded personal facet routes without mounting them|api/src/routes/scoped-signal-facets.ts
+test: isolate synthetic cutover databases and chain qualification|api/src/services/facets/scope-db-fixture.ts api/src/services/facets/activation.test.ts
+test: verify attachment CLI replay and interrupted SQL swap|api/src/services/facets/attachment-db.test.ts api/src/services/facets/activation-rollback-db.test.ts
+test: verify migration preservation and activation recovery|api/src/services/facets/activation-db.test.ts
+test: reject duplicate streams incomplete bindings and conversion|api/src/services/facets/registry-db.test.ts api/tests/integration/facets-constraints.spec.ts
+test: qualify private scoped commands and historical recovery|api/src/services/facets/scoped-db.test.ts
+test: qualify scoped HTTP authorization and conflict responses|api/src/routes/scoped-signal-facets-db.test.ts
+fix: share workspace revision conflict semantics with SQL|api/src/services/workspaces/authority.ts api/src/services/workspaces/authority.test.ts api/src/services/workspaces/migration.test.ts
+feat: guard UI responses by viewer incarnation and workspace|ui/src/lib/signals/signal-facet-scope.ts ui/src/lib/signals/signal-facet-scope.test.ts
+feat: resolve MCP context and fence unavailable scoped search|packages/immo-mcp/src/workspace-context.ts packages/immo-mcp/src/data-source.ts
+test: preserve MCP URLs and refuse unavailable scoped delivery|packages/immo-mcp/src/workspace-context.test.ts
+test: extend isolated verification and restored source mutations|tools/make/paniers-lot6-verify.sh tools/make/paniers-lot6.mk tools/make/paniers-lot6h-mutation.sh
+chore: deliver checked personal attachment commit snapshots|tools/make/paniers-lot6h-deliver.sh tools/make/paniers-lot6h-slices.txt

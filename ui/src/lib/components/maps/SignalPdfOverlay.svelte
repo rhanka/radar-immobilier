@@ -375,6 +375,19 @@
     hoverCardAnchor = null;
   }
 
+  // Refetch can remove a co-signal or change the evidence shown in its card.
+  $: reconcileHoverCard(signals, resolveHoverCard);
+  function reconcileHoverCard(
+    currentSignals: OverlaySignal[],
+    resolve: (id: string) => HoverCardData | null,
+  ): void {
+    if (!hoverCard) return;
+    const signal = currentSignals.find((candidate) => candidate.id === hoverCard!.id);
+    const current = signal?.inFilter === false ? resolve(signal.id) : null;
+    if (current) hoverCard = current;
+    else closeHoverCardNow();
+  }
+
   // Liste effective des signaux à surligner. Avec `signals` non vide on est en
   // mode multi (LOT 2) ; sinon on synthétise un signal unique « courant » à
   // partir des props scalaires (LOT 1) — garde-fou de non-régression.
@@ -805,6 +818,11 @@
       );
       if (token !== loadToken) return;
 
+      // Page requests during dimension loading precede slot mounting.
+      // Initialize the window, scroll and render from the latest request.
+      const target = page && page >= 1 && page <= numPages ? page : initial;
+      currentPage = target;
+
       fitWidthScale = computeFitWidth(
         dimensions.length > 0
           ? Math.max(...dimensions.map((slot) => slot.baseWidth))
@@ -816,10 +834,10 @@
         width: slot.baseWidth * scale,
         height: slot.baseHeight * scale,
       }));
-      setRenderWindow(initial, false);
+      setRenderWindow(target, false);
       await tick();
-      pageSlotEls.get(initial)?.scrollIntoView({ behavior: "auto", block: "start" });
-      await renderPageSlot(initial);
+      pageSlotEls.get(target)?.scrollIntoView({ behavior: "auto", block: "start" });
+      await renderPageSlot(target);
       if (token !== loadToken) return;
       attachResizeObserver();
 
@@ -828,7 +846,7 @@
         recordPerf(url, performance.now() - startedAt, fromCache);
       }
       for (const pageNumber of renderWindow) {
-        if (pageNumber !== initial) schedulePageRender(pageNumber);
+        if (pageNumber !== target) schedulePageRender(pageNumber);
       }
     } catch (err) {
       if (token !== loadToken) return; // erreur d'un load dépassé : on ignore
@@ -1332,18 +1350,31 @@
     }
   }
 
-  // #91 — navigation vers un signal sur la MÊME page (ex. A16 → Rf51 page 2) :
-  // `page` ne change pas, mais le signal COURANT (signals[].current) change. On
-  // re-rend pour mettre à jour la mise en avant + recentrer sur le nouveau
-  // courant. Clé = id du signal marqué courant.
-  $: currentSignalId = effectiveSignals.find((s) => s.current)?.id ?? null;
-  let lastCurrentSignalId = currentSignalId;
-  $: if (currentSignalId !== lastCurrentSignalId) {
-    lastCurrentSignalId = currentSignalId;
-    // Ne re-rend que si la page ne va PAS changer (sinon double rendu) : le bloc
-    // `page` ci-dessus s'en charge quand la page diffère.
-    if (pdfDoc && (!page || page === currentPage)) {
-      schedulePageRender(currentPage);
+  // Highlight refresh when highlight inputs change (archived co-signal removed,
+  // citation edited on the same page, current switch without doc/page change).
+  // The previous current-only key missed removals and edits when the document,
+  // the page and the current id stayed identical, leaving stale badges and
+  // highlights on screen. Any highlight input change invalidates in-flight
+  // renders and re-renders the displayed window; in-flight slots abort on
+  // their render token.
+  $: highlightFingerprint = effectiveSignals
+    .map((item) =>
+      [
+        item.id,
+        item.excerpt ?? "",
+        item.page ?? "",
+        item.color,
+        item.current ? "1" : "0",
+        item.inFilter !== false ? "1" : "0",
+        item.label,
+      ].join("|"),
+    )
+    .join(";");
+  let lastHighlightFingerprint = highlightFingerprint;
+  $: if (highlightFingerprint !== lastHighlightFingerprint) {
+    lastHighlightFingerprint = highlightFingerprint;
+    if (pdfDoc) {
+      rerenderWindow();
     }
   }
 
