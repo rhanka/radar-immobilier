@@ -45,9 +45,9 @@ export type ProspectModeT = z.infer<typeof ProspectMode>;
 
 /** Marquage complet tel que stocké en base (append-only). */
 export const ProspectMark = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
 
-  lotVersionId: z.string().uuid(),
+  lotVersionId: z.string().guid(),
   noLot: z.string().min(1),
   citySlug: z.string().min(1),
 
@@ -55,10 +55,10 @@ export const ProspectMark = z.object({
   statut: ProspectStatut,
   mode: ProspectMode,
 
-  authorId: z.string().uuid(),
+  authorId: z.string().guid(),
 
-  supersedes: z.string().uuid().nullable().optional(),
-  supersededBy: z.string().uuid().nullable().optional(),
+  supersedes: z.string().guid().nullable().optional(),
+  supersededBy: z.string().guid().nullable().optional(),
 
   // Champs marché (null pour dimension pipeline)
   prixDemande: z.string().nullable().optional(),  // NUMERIC sérialisé en string par pg
@@ -75,14 +75,14 @@ export type ProspectMarkT = z.infer<typeof ProspectMark>;
  * Les champs marché (prix_demande, lien_annonce) sont interdits.
  */
 export const ProspectMarkPipelineInput = z.object({
-  lotVersionId: z.string().uuid(),
+  lotVersionId: z.string().guid(),
   noLot: z.string().min(1),
   citySlug: z.string().min(1),
   dimension: z.literal("pipeline"),
   statut: ProspectStatutPipeline,
   mode: ProspectMode.default("real"),
-  authorId: z.string().uuid(),
-  supersedes: z.string().uuid().optional(),
+  authorId: z.string().guid(),
+  supersedes: z.string().guid().optional(),
 });
 export type ProspectMarkPipelineInputT = z.infer<typeof ProspectMarkPipelineInput>;
 
@@ -91,14 +91,14 @@ export type ProspectMarkPipelineInputT = z.infer<typeof ProspectMarkPipelineInpu
  * Statut fixé à "en_vente". Prix et lien optionnels mais typés.
  */
 export const ProspectMarkMarcheInput = z.object({
-  lotVersionId: z.string().uuid(),
+  lotVersionId: z.string().guid(),
   noLot: z.string().min(1),
   citySlug: z.string().min(1),
   dimension: z.literal("marche"),
   statut: z.literal("en_vente"),
   mode: ProspectMode.default("real"),
-  authorId: z.string().uuid(),
-  supersedes: z.string().uuid().optional(),
+  authorId: z.string().guid(),
+  supersedes: z.string().guid().optional(),
   prixDemande: z.number().positive().optional(),
   lienAnnonce: z.string().url().optional(),
 });
@@ -115,10 +115,10 @@ export type ProspectMarkInputT = z.infer<typeof ProspectMarkInput>;
 
 /** Note persistée (append-only, immuable une fois insérée). */
 export const ProspectNote = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   noLot: z.string().min(1),
   citySlug: z.string().min(1),
-  authorId: z.string().uuid(),
+  authorId: z.string().guid(),
   body: z.string().min(1).max(10_000),
   mode: ProspectMode,
   createdAt: z.string().min(4),
@@ -129,7 +129,7 @@ export type ProspectNoteT = z.infer<typeof ProspectNote>;
 export const ProspectNoteInput = z.object({
   noLot: z.string().min(1),
   citySlug: z.string().min(1),
-  authorId: z.string().uuid(),
+  authorId: z.string().guid(),
   body: z.string().min(1).max(10_000),
   mode: ProspectMode.default("real"),
 });
@@ -146,7 +146,7 @@ export type ProspectNoteInputT = z.infer<typeof ProspectNoteInput>;
  * Tout accès doit être journalisé dans prospect_contact_access_log.
  */
 export const ProspectContact = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   noLot: z.string().min(1),
   citySlug: z.string().min(1),
 
@@ -158,9 +158,9 @@ export const ProspectContact = z.object({
 
   sourceInfo: z.string().max(200).nullable().optional(),
 
-  authorId: z.string().uuid(),
-  supersedes: z.string().uuid().nullable().optional(),
-  supersededBy: z.string().uuid().nullable().optional(),
+  authorId: z.string().guid(),
+  supersedes: z.string().guid().nullable().optional(),
+  supersededBy: z.string().guid().nullable().optional(),
   createdAt: z.string().min(4),
 });
 export type ProspectContactT = z.infer<typeof ProspectContact>;
@@ -174,8 +174,8 @@ export const ProspectContactInput = z.object({
   proprietaireCourriel: z.string().email().optional(),
   proprietaireAdresse: z.string().max(1000).optional(),
   sourceInfo: z.string().max(200).optional(),
-  authorId: z.string().uuid(),
-  supersedes: z.string().uuid().optional(),
+  authorId: z.string().guid(),
+  supersedes: z.string().guid().optional(),
 });
 export type ProspectContactInputT = z.infer<typeof ProspectContactInput>;
 
@@ -183,11 +183,11 @@ export type ProspectContactInputT = z.infer<typeof ProspectContactInput>;
 
 /** Entrée de journal d'accès à la couche PII. */
 export const ProspectContactAccessLogEntry = z.object({
-  id: z.string().uuid(),
-  contactId: z.string().uuid(),
-  accessorId: z.string().uuid(),
+  id: z.string().guid(),
+  contactId: z.string().guid(),
+  accessorId: z.string().guid(),
   action: z.string().min(1).max(50).default("view"),
   accessedAt: z.string().min(4),
-  context: z.record(z.unknown()).default({}),
+  context: z.record(z.string(), z.unknown()).default({}),
 });
 export type ProspectContactAccessLogEntryT = z.infer<typeof ProspectContactAccessLogEntry>;
