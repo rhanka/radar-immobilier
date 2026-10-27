@@ -53,3 +53,5 @@ Qualify, repair and integrate the supplied PW-C implementation on 07ef2757.
 - [x] Delivery: feat(pw-c): render summary and management documents.
 
 - [x] Delivery: feat(pw-c): wire exact application routes and document hooks.
+
+- [x] Delivery: test(pw-c): cover rendered documents and script policy.
