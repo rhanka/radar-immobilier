@@ -59,6 +59,12 @@ export function createReaderOpening(deps: {
   application.get("/approve", async (c) => {
     const input = await approval(c, c.req.query());
     if (!input) return c.json({ error: "unauthenticated" }, 401);
+    // no-referrer makes Chromium send Origin: null on the confirmation POST.
+    // Keep the same-origin CSRF check usable without sending referrers off-site.
+    c.header("Referrer-Policy", "same-origin");
+    // Chromium checks form-action on the 303 chain too. Only the authorized
+    // artifact origin may receive the redirect from this same-origin POST.
+    c.header("Content-Security-Policy", `default-src 'none'; form-action 'self' ${input.origin}; frame-ancestors 'none'; base-uri 'none'`);
     const release = await deps.authority.getRelease(input.artifactId);
     return c.html(`<!doctype html><html lang="fr"><meta charset="utf-8"><title>Ouvrir la page</title>` +
       `<h1>Autoriser la lecture de vos paniers</h1><p>Page : ${escape(input.artifactId)}</p>` +

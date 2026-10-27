@@ -61,7 +61,9 @@ describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("published H
           started = Date.now();
           await page.getByRole("button", { name: "Autoriser et ouvrir" }).click();
           await page.waitForFunction((matched) => document.body.dataset.matched === String(matched), count, { timeout: 1500 });
-          console.log(JSON.stringify({ readerMatched: count, elapsedMs: Date.now() - started }));
+          const elapsedMs = Date.now() - started;
+          await Promise.all(pending);
+          console.log(JSON.stringify({ readerMatched: count, elapsedMs, diagnostics }));
           expect(await page.locator("body").getAttribute("data-cookies")).toBe("");
           expect(await page.locator("body").evaluate((body) => getComputedStyle(body).color)).toBe("rgb(17, 34, 51)");
           expect(page.url()).not.toContain("grant=");
@@ -69,6 +71,8 @@ describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("published H
           expect(await page.evaluate(async () => (await fetch("/sw.js")).status)).toBe(404);
           expect(statuses).toMatchObject({ "/": 200, "/main.js": 200, "/style.css": 200,
             "/__reader/api/baskets.search.v1": 200 });
+          expect(requests.filter((request) => request.method === "POST"))
+            .toEqual([expect.objectContaining({ host: "app.example.test", origin: "https://app.example.test" })]);
           for (const request of requests) {
             if (request.host === f.host) expect(request.cookie).not.toContain("radar_session");
             expect(request.cacheControl).toBe("private, no-store");
