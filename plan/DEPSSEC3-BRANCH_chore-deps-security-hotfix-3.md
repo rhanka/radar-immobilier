@@ -1,8 +1,8 @@
 # Chore: Dependency security hotfix 3
 
 ## Objective
-- [ ] Resolve the fast-uri, ip-address, KaTeX and Zod alerts in one local branch.
-- [ ] Deliver raw before/after audits, CI-equivalent gates and a verified bundle.
+- [x] Resolve the fast-uri, ip-address, KaTeX and Zod alerts in one local branch.
+- [x] Deliver raw before/after audits, CI-equivalent gates and a verified bundle.
 
 ## Scope / Guardrails
 - [x] Make-only, Docker-only execution; no Python or environment-file reads.
@@ -25,6 +25,7 @@
 - [x] Record rationale, impact and rollback before any conditional-path edit.
 
 ## Feedback Loop
+- [x] L3d: pass all seven workspace suites (7709 tests), typecheck, lint, builds, smoke and security gates; retain initial failure evidence.
 - [x] L3c: preserve historical signal workspace and head GUIDs in four newer schemas; regress canonicalization and malformed identifiers.
 - [x] L3b: resolve historical Zod, Ollama and Focus findings with raw audit, installed-tree and bundle-provenance evidence.
 - [x] L3a: retain signed and expiring acceptance coverage in historical fixtures; the live register must reject any new Zod high.
@@ -84,14 +85,14 @@
   - [x] Check published Sentropic compatibility and reuse the prepared migration.
   - [x] Preserve API/domain/MCP validation and discovery contracts.
   - [x] Remove obsolete security exceptions only after raw findings disappear.
-- [ ] **Lot 3 — Qualification**
-  - [ ] Production-only and full after audits; security gate and its tests.
-  - [ ] All-workspace typecheck and lint.
-  - [ ] API/UI build and browser bundle smoke.
-  - [ ] Complete CI test command: API, UI, MCP and all packages.
-  - [ ] Independent review and reconciliation: conductor Astra max; no delegated review required.
-- [ ] **Lot 4 — Local delivery**
-  - [ ] Audit atomic commit sizes and single-line messages.
-  - [ ] Verify the base-to-head bundle in a fresh repository.
-  - [ ] Write the final French report with command results, SHA and bundle hash.
-  - [ ] Remove only this campaign's containers and volumes.
+- [x] **Lot 3 — Qualification**
+  - [x] Production-only and full after audits; security gate and its tests.
+  - [x] All-workspace typecheck and lint.
+  - [x] API/UI build and browser bundle smoke.
+  - [x] Complete CI test command: API, UI, MCP and all packages.
+  - [x] Review ownership handed to conductor Astra max; no delegated review or consensus claimed.
+- [x] **Lot 4 — Local delivery**
+  - [x] Audit atomic commit sizes and single-line messages.
+  - [x] Verify the base-to-head bundle in a fresh repository.
+  - [x] Write the final French report with command results, SHA and bundle hash.
+  - [x] Remove only this campaign's containers and volumes.
