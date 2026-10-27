@@ -7,9 +7,8 @@
  * logs. Old tabs keep their pinned release; a newer release never leaks
  * through an old grant.
  *
- * Sub-resources: served HTML rewrites relative src/href to carry the page
- * grant (?grant=...), so ordinary <script src> and <link> loads present the
- * same grant plus the session cookie. Published JavaScript calls H5 with
+ * Native files use the session scoped to a pinned release host, including
+ * module/CSS imports and dynamic scripts. Published JavaScript calls H5 with
  * fetch and the x-preview-grant header:
  *   const grant = new URLSearchParams(location.search).get("grant");
  *   fetch("/__reader/api/baskets.search.v1?workspaceId=...&citySlug=...", {
@@ -41,7 +40,7 @@ import {
 } from "./reader-operations.js";
 import { READER_EXAMPLE_HTML } from "./reader-example.js";
 import {
-  injectGrantIntoHtml,
+  normalizeReleaseHtml,
   normalizeReleasePath,
   releaseCspForHtml,
   type ReleaseFileProvider,
@@ -296,8 +295,7 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
             const grant = await mintGrant(session.resource!, deps.grantSecret, now());
             return c.redirect(`${c.req.path}?grant=${encodeURIComponent(grant)}`, 303);
           }
-          const grant = presentedGrant(c);
-          const html = injectGrantIntoHtml(text, grant);
+          const html = normalizeReleaseHtml(text);
           c.header("Content-Security-Policy", releaseCspForHtml(html));
           return c.html(html);
         }

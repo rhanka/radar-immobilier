@@ -50,6 +50,7 @@ Connect published release files and H5 reads to current account/workspace author
 - [ ] Preserve the existing basket error contracts and resume opening through the existing login flow.
 - [ ] Keep the Muse report only in local evidence; qualify browser imports, CRLF and consecutive publications, then all gates.
 - [x] Implement pinned-host opening and a sealed resource authority in the reader cookie; native files recheck current rights while H5 still requires its explicit grant. Acceptance pending below.
+- [x] Remove grant injection from HTML entirely; normalize CRLF/CR to LF before emission and CSP hashing. Inline source and native resource URLs remain intact.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch, serialized implementation and Docker campaigns.
