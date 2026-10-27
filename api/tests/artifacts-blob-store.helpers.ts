@@ -1,9 +1,11 @@
 import { createS3BlobStore } from "@sentropic/artifacts/adapters/s3";
+import { createRequire } from "node:module";
+import { pathToFileURL } from "node:url";
 
 /** The published memory double has no package subpath export. */
 export async function createTestMemoryBlobStore() {
-  const entry = import.meta.resolve("@sentropic/artifacts");
-  const { createMemoryBlobStore } = await import(new URL("./server/publication.js", entry).href) as {
+  const migration = createRequire(import.meta.url).resolve("@sentropic/artifacts/migrations/0003_coordinator.sql");
+  const { createMemoryBlobStore } = await import(new URL("../dist/server/publication.js", pathToFileURL(migration)).href) as {
     createMemoryBlobStore: () => ReturnType<typeof createS3BlobStore>;
   };
   return createMemoryBlobStore();
