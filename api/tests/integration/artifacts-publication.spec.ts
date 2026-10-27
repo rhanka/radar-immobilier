@@ -32,7 +32,9 @@ describe("artifact Postgres and S3 publication", () => {
     expect((await h.pool.query("SELECT count(*) FROM artifacts.artifacts")).rows[0].count).toBe("1");
     const restarted = (await composeArtifactHost(h.pool, h.config))!;
     const again = await createArtifactControl(restarted, h.config.storageScope, "pages.example.test")
-      .handle("ensure", "alice", ensure("restart"));
+      .handle("ensure", "alice", ensure("same-key"));
+    expect(again.status).toBe(201);
+    expect(again.body).toMatchObject({ replayed: true });
     expect((again.body as { artifactId: string }).artifactId).toBe(ids[0]);
     restarted.close();
   });
