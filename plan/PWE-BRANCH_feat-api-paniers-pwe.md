@@ -32,6 +32,8 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Add C09 shared-lock status reads during commit/rollback; expiration
+  after the wait cannot overwrite a committed result or settle prematurely.
 - [x] Add rollback after each of three composed discard events, preserving
   both selected heads and all receipts/revisions until the atomic retry succeeds.
 - [x] Add seven C10 SQL-trigger failure stages with whole-row rollback,
