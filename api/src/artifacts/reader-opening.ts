@@ -37,6 +37,8 @@ export function createReaderOpening(deps: {
     const origin = await deps.authority.getContentOrigin(input.artifactId);
     const rights = await deps.authority.getRights(session.sub, input.artifactId);
     if (!release || !profile || !origin || !rights?.approved) return null;
+    if (c.req.method === "POST" && (input.releaseId !== release.releaseId ||
+      input.profileFingerprint !== fingerprintReaderProfile(profile))) return null;
     return { browserBinding: input.binding, artifactId: release.artifactId, releaseId: release.releaseId,
       readerSub: session.sub, origin, profileName: profile.name, policyRevision: profile.policyRevision,
       profileFingerprint: fingerprintReaderProfile(profile), returnTarget: "/" };
@@ -51,6 +53,8 @@ export function createReaderOpening(deps: {
       `<p>Version : ${escape(input.releaseId)}. Cette page lit vos paniers avec vos droits actuels.</p>` +
       `<form method="post"><input type="hidden" name="artifactId" value="${escape(input.artifactId)}">` +
       `<input type="hidden" name="binding" value="${escape(input.browserBinding)}">` +
+      `<input type="hidden" name="releaseId" value="${escape(input.releaseId)}">` +
+      `<input type="hidden" name="profileFingerprint" value="${escape(input.profileFingerprint)}">` +
       `<button type="submit">Autoriser et ouvrir</button></form></html>`);
   });
   application.post("/approve", async (c) => {
