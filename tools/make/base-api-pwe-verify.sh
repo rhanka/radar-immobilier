@@ -4,7 +4,7 @@ source tools/make/base-api-guards.sh
 require_env
 [[ $ENV == test-api-paniers-pwe || $ENV == e2e-api-paniers-pwe ]]
 [[ $API_PORT == 18935 && $UI_PORT == 15935 && $MAILDEV_UI_PORT == 11935 ]]
-[[ ${PHASE:-pg} == pg || ${PHASE:-pg} == full || ${PHASE:-pg} == mutations ]]
+[[ ${PHASE:-pg} == pg || ${PHASE:-pg} == full || ${PHASE:-pg} == mutations || ${PHASE:-pg} == targeted ]]
 ROOT=$(pwd -P)
 git diff --quiet HEAD
 if [[ -z ${SCOPE:-} ]]; then
@@ -73,8 +73,8 @@ guarded_down
 printf '%s\n' "$LOG_DIR" | tee "$ROOT/tmp/pwe-evidence/latest"
 "${compose[@]}" up -d --wait postgres minio
 "${compose[@]}" run --rm --no-deps -T api bash -ec \
-  'tar -xf /source.tar -C /workspace; exec bash tools/make/base-api-pwe-container.sh "$1" "$2"' \
-  -- "${PHASE:-pg}" "$SCOPE" > >(tee "$LOG_DIR/campaign.log") 2>&1 &
+  'tar -xf /source.tar -C /workspace; exec bash tools/make/base-api-pwe-container.sh "$1" "$2" "$3"' \
+  -- "${PHASE:-pg}" "$SCOPE" "${MUTANTS:-}" > >(tee "$LOG_DIR/campaign.log") 2>&1 &
 RUN_PID=$!
 wait "$RUN_PID"
 RUN_PID=
