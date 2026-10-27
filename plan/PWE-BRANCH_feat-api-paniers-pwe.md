@@ -32,6 +32,8 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] First replica run: 2 passed/0 failed/0 skipped; fix the optional IPC
+  disconnect type before accepting the static gate; rerun remains required.
 - [x] Add C01 commit/rollback variants using two real child processes,
   separate pools, SQL wait observation and exact effect/rollback counters.
 - [x] Add an IPC-controlled replica worker with its own database pool.
