@@ -5,12 +5,12 @@ Connect published release files and H5 reads to current account/workspace author
 
 ## Scope / Guardrails
 - Preserve origin isolation, cookie boundaries, CSP and current authorization.
-- Use the standalone Make runner; never load environment files. Owner authorizes targeted host checks for the qualification fixes, without Docker.
+- Use the standalone Make runner; never load environment files. Owner authorizes Docker qualification under the shared campaign lock.
 - Worktree: `tmp/artefacts-ouv-l3`; root checkout remains untouched.
 - Tests: `ENV=test-artefacts-ouv-l3`, API 18935, UI 15935, Maildev 11935.
 - Hold the shared Docker campaign lock and wait for foreign test stacks.
 - Always remove this project's volumes and orphans; never touch foreign resources.
-- No push. Initial bundle: `9a723753`; qualification fix bundle: `2279b9ad`.
+- No push. Initial bundle: `9a723753`; first fixes: `2279b9ad`; browser product fixes: `60c10a1d`.
 - English Conventional Commits, at most 150 changed lines, no body or trailer.
 
 ## Branch Scope Boundaries (MANDATORY)
@@ -37,6 +37,8 @@ Connect published release files and H5 reads to current account/workspace author
 - [x] Replace browser route interception with loopback HTTPS and Chromium resolver rules; preserve cookies, CSP and all behavioral assertions. Conductor rerun pending.
 - [x] Targeted host Chromium regression passed (HTTPS redirects, CSS/JS, Secure cookie separation); strict helper typecheck passed. No Docker used for these corrections.
 - [x] Bootstrap qualification with curl, jq and openssl before tests; preserve all three delivery-probe cases. Host guard and simulated installer success/failure passed; real image rerun pending.
+- [x] Conductor requalified `60c10a1d`: all gates except browser passed, including 4131 API CI tests and 10 mutations.
+- [x] Instrument browser console, CSP, network, H5 bodies and server-side Origin, with credentials redacted. Reproduced POST Origin `null` and 403 `forbidden_origin` before published code or H5 runs.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch, serialized implementation and Docker campaigns.
