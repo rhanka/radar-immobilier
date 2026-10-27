@@ -131,6 +131,6 @@ describe("artifact effective profile", () => {
   });
 
   it("should expose the single qualified artifact provider version", () => {
-    expect(ARTIFACT_PROVIDER_VERSION).toBe("0.2.1");
+    expect(ARTIFACT_PROVIDER_VERSION).toBe("0.2.2");
   });
 });
