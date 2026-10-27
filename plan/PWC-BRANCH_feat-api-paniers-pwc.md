@@ -28,6 +28,9 @@ Qualify, repair and integrate the supplied PW-C implementation on 07ef2757.
   - `api/tests/integration/pw-write-authority-rights.spec.ts`: PWC-EX1.
 
 ## Feedback Loop
+- [x] Archive top-level API test files as well as integration tests; the
+  omitted blob-store helper prevented 19 suites from loading. Preserve the
+  original Vitest discovery and qualify every selected suite before delivery.
 - [x] Enforce content isolation headers on forwarded responses, preserving status,
   body and Retry-After; a raw upstream Response must not drop the local policy.
 - [x] PWC-EX1: update two inherited strict management DTO expectations for
