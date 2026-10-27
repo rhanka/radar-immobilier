@@ -1,3 +1,4 @@
+import { contractUrl } from "@radar/domain";
 /** Closed, inert S0 wire primitives; never imported by the live registrar. */
 import { z } from "zod";
 
@@ -48,8 +49,10 @@ export const OperationSchema = z.object({
 
 export const AskingPriceSchema = z.string().regex(/^\d{1,12}(\.\d{1,2})?$/)
   .refine((price) => /[1-9]/.test(price), "Price must be positive").nullable();
-export const ListingUrlSchema = z.string().max(2048).url().refine((value) => {
-  const url = new URL(value);
-  return ["http:", "https:"].includes(url.protocol)
-    && !url.username && !url.password && !/\s/.test(value);
-}, "Public HTTP(S) URL required").nullable();
+export const ListingUrlSchema = z.string().max(2048).refine((value) => {
+  if (/\s/.test(value)) return false;
+  try {
+    const url = new URL(value);
+    return ["http:", "https:"].includes(url.protocol) && !url.username && !url.password;
+  } catch { return false; }
+}, "Public HTTP(S) URL required").pipe(contractUrl()).nullable();
