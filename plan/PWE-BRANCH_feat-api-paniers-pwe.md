@@ -32,6 +32,8 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Add both C04/C05 orders for freshness, atomic import/projection and
+  repair transaction entrypoints; inventory confirms shared graph-store writers.
 - [x] Fixed C12 gate: 33 passed/0 failed/0 skipped, typecheck/lint passed.
 - [x] Add normal A-to-B login under one RP's existing keys; B cannot reveal
   I/A, while A's already-dispatched request retains its authenticated cookie.
