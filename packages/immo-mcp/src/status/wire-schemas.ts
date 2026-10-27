@@ -1,8 +1,9 @@
+import { contractUrl } from "@radar/domain";
 /** Closed, inert S0 wire primitives; never imported by the live registrar. */
 import { z } from "zod";
 
-export const WorkspaceIdSchema = z.string().uuid();
-export const HeadIdSchema = z.string().uuid().nullable();
+export const WorkspaceIdSchema = z.string().guid();
+export const HeadIdSchema = z.string().guid().nullable();
 export const FingerprintSchema = z.string().regex(/^[a-f0-9]{64}$/);
 export const CitySchema = z.string().min(1).max(128).regex(/^[a-z0-9-]+$/);
 export const ScopeSchema = z.enum(["personal", "common"]);
@@ -20,7 +21,7 @@ export const LotTargetSchema = z.object({
   citySlug: CitySchema, canonicalId: z.string().min(1).max(512),
 }).strict();
 export const DisplayedLotVersionSchema = z.object({
-  lot_version_id: z.string().uuid(), fingerprint: FingerprintSchema,
+  lot_version_id: z.string().guid(), fingerprint: FingerprintSchema,
 }).strict();
 export const SemanticProfileSchema = z.object({
   lotReason: z.enum(["required", "optional", "undecided"]),
@@ -48,8 +49,10 @@ export const OperationSchema = z.object({
 
 export const AskingPriceSchema = z.string().regex(/^\d{1,12}(\.\d{1,2})?$/)
   .refine((price) => /[1-9]/.test(price), "Price must be positive").nullable();
-export const ListingUrlSchema = z.string().max(2048).url().refine((value) => {
-  const url = new URL(value);
-  return ["http:", "https:"].includes(url.protocol)
-    && !url.username && !url.password && !/\s/.test(value);
-}, "Public HTTP(S) URL required").nullable();
+export const ListingUrlSchema = z.string().max(2048).refine((value) => {
+  if (/\s/.test(value)) return false;
+  try {
+    const url = new URL(value);
+    return ["http:", "https:"].includes(url.protocol) && !url.username && !url.password;
+  } catch { return false; }
+}, "Public HTTP(S) URL required").pipe(contractUrl()).nullable();

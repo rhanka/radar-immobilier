@@ -4,7 +4,7 @@ import { RadarSignalReadError } from "./signal-read-error.js";
 
 export const SIGNAL_SEARCH_PATH = "/api/v1/mcp/facets/signals/search";
 const city = z.string().regex(/^[a-z0-9]+(?:-+[a-z0-9]+)*$/).max(128);
-const workspace = z.string().uuid().refine((value) => value === value.toLowerCase());
+const workspace = z.string().guid().refine((value) => value === value.toLowerCase());
 const signal = z.object({
   id: z.string().min(1), city, type: z.string(), etape: z.string(),
   regulatoryStatus: z.enum(["firm", "anticipation"]), etape_date: z.string(),

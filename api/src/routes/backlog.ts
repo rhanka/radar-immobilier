@@ -1,3 +1,4 @@
+import { contractSafeParse } from "@radar/domain";
 /**
  * Backlog API — wired to the REAL track sidecar (WP6).
  *
@@ -117,7 +118,7 @@ export function trackItemToBacklog(item: TrackItem): BacklogItem {
   };
 }
 
-const addItemSchema = z.object({
+export const addItemSchema = z.object({
   titre: z.string().trim().min(1).max(200),
   description: z.string().trim().max(2000).optional(),
 });
@@ -240,7 +241,7 @@ export function backlogRoute(
 
   /** Add a request -> statut "a-faire" (runtime store). */
   app.post("/api/backlog/items", async (c) => {
-    const parsed = addItemSchema.safeParse(await c.req.json().catch(() => null));
+    const parsed = contractSafeParse(addItemSchema, await c.req.json().catch(() => null));
     if (!parsed.success) {
       return c.json({ error: "Invalid request", details: parsed.error.issues }, 400);
     }

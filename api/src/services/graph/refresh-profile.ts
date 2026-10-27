@@ -17,7 +17,7 @@ import {
   type NormalizedProjectConfig,
   type RegistryRecord,
   type TextJsonGenerationClient,
-} from "@sentropic/graphify";
+} from "@sentropic/engram";
 
 import {
   containsNormalizedPdfExcerpt,
@@ -120,7 +120,7 @@ function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): s
     ontology: { profile_id: context.profile.id, profile_version: context.profile.version,
       allowed_node_types: [...allowed], node_properties: properties, relation_signatures: relations },
     graph_contract: {
-      node_file_type: ["code", "concept", "document", "image", "paper", "rationale"],
+      node_file_type: ["code", "concept", "document", "image", "memory", "paper", "rationale"],
       edge_confidence: ["AMBIGUOUS", "EXTRACTED", "INFERRED"],
       entity_source_file: { const: chunk.originalKey },
       evidence_refs: { type: "array", items: { type: "string", references: "evidence[].id" },

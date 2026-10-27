@@ -1,4 +1,4 @@
-import type { Extraction, TextJsonGenerationClient } from "@sentropic/graphify";
+import type { Extraction, TextJsonGenerationClient } from "@sentropic/engram";
 
 import { normalizePdfExcerpt, type RefreshCorpusChunk } from "./refresh-corpus.js";
 import type { RefreshModel } from "./refresh-model-policy.js";

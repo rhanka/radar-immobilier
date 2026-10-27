@@ -1,3 +1,4 @@
+import { contractUrl } from "../../contracts/validation-url.js";
 import { z } from "zod";
 import { RegulatoryStageKind } from "./relations.js";
 
@@ -15,12 +16,28 @@ export const DensityUnit = z.enum(["log-ha", "logements", "cos", "ui-ha", "non-d
 export type DensityUnitT = z.infer<typeof DensityUnit>;
 export const GridFormat = z.enum(["pdf-table", "html", "gis-vector", "non-disponible"]);
 export type GridFormatT = z.infer<typeof GridFormat>;
+const prefixValue = z.string();
+const prefixToKindBase = z.record(z.string(), prefixValue);
+const prefixToKindGuarded = z.preprocess((raw, ctx) => {
+  if (typeof raw === "object" && raw !== null && !Array.isArray(raw)) {
+    for (const key of Object.keys(raw).filter((key) => key === "__proto__")) {
+      const entry = (raw as Record<string, unknown>)[key];
+      const parsed = prefixValue.safeParse(entry);
+      if (!parsed.success) {
+        for (const issue of parsed.error.issues) ctx.addIssue({ ...issue, path: [key, ...issue.path] });
+        return z.NEVER;
+      }
+    }
+  }
+  return raw;
+}, prefixToKindBase);
+
 export const ZoningRegime = z.object({
   codeScheme: z.object({
     /** Overrides the default QC zone regex (§2.2) for this city. */
     regex: z.string().min(1),
     /** Maps a code prefix to a coarse kind, e.g. { "H":"H", "Ha":"H", "Cv":"C" }. */
-    prefixToKind: z.record(z.string()),
+    prefixToKind: prefixToKindGuarded,
   }),
   densityUnit: DensityUnit,
   gridFormat: GridFormat,
@@ -90,8 +107,8 @@ export const SourceBinding = z.object({
   kind: SourceBindingKind,
   channel: z.object({
     engine: SourceEngine,
-    url: z.string().url().nullable().default(null),
-    selectors: z.record(z.unknown()).default({}),
+    url: contractUrl().nullable().default(null),
+    selectors: z.record(z.string(), z.unknown()).default({}),
   }),
   auth: z.enum(["none", "basic", "api-key", "session"]).default("none"),
   cadence: z.enum(["daily", "weekly", "monthly", "on-demand"]).default("weekly"),
@@ -121,7 +138,7 @@ export const CityProfile = z.object({
   }),
   zoningRegime: ZoningRegime,
   decisionProcess: DecisionProcess,
-  aliasOverrides: z.record(z.unknown()).default({}),
+  aliasOverrides: z.record(z.string(), z.unknown()).default({}),
   sources: z.array(SourceBinding).default([]),
 });
 export type CityProfileT = z.infer<typeof CityProfile>;
