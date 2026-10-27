@@ -30,6 +30,9 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
     PWA-EX3 permits their exact import from 0ab7d664 by merge only.
 
 ## Feedback Loop
+- [x] Preserve the imported delivery probe: expose the archived real tools at
+  /usr/bin/curl and /usr/bin/jq inside the disposable container; its three
+  real-socket cases pass without changing their assertions.
 - [x] Offline qualification preparation: seed a writable disposable npm cache from
   the read-only local cache; archive real curl/jq binaries and libraries with
   SHA-256 inputs and versions. Preserve the lockfile, test selection and assertions.
