@@ -138,3 +138,32 @@ Commandes à lancer (depuis la racine du dépôt) :
 
 1. `feat(reader): add basket operations to reader API`
    (`reader-operations.ts`, `reader-operations-baskets.test.ts`)
+2. `feat(reader): validate basket responses with existing contracts`
+   (`reader-responses.ts`, `reader-responses-baskets.test.ts`)
+3. `feat(reader): bridge H5 reader to basket services`
+   (`reader-baskets.ts`, `reader-baskets.test.ts`)
+4. `feat(reader): load persistent cursor keyring from env`
+   (`reader-cursor-keyring.ts`, `reader-cursor-keyring.test.ts`)
+5. `feat(reader): serve pinned release files with grant rewrite`
+   (`release-files.ts`, `release-files.test.ts`)
+6. `feat(reader): allow release sub-resources in content CSP`
+   (`content-isolation.ts`)
+7. `feat(reader): serve releases and basket reads with renewal`
+   (`content-serve.ts`)
+8. `feat(api): mount basket reader content in API`
+   (`index.ts`)
+9. `test(reader): cover published basket page acceptance`
+   (`content-serve-baskets.test.ts`)
+10. `docs(l3): add published basket page report`
+    (`RAPPORT-MUSE-OUV-L3.md`)
+
+## Points d'extension laissés ouverts
+
+- Autorité durable (releases/profils/ACL par artefact) : brancher une
+  implémentation `AuthorityReader` adossée au stock hôte une fois le candidat A6
+  réceptionné, à la place de `authority: undefined` dans `api/src/index.ts`.
+- Fichiers durables (PG/S3) : implémenter `ReleaseFileProvider` contre le stockage
+  hôte et l'injecter comme `releaseFiles`, après qualification de l'activation
+  `@sentropic/artifacts` (0.2.3 non intégré ici).
+- Révocation partagée et tickets multi-processus : brancher le store A6 dès
+  réception, sans changer les routes ci-dessus.
