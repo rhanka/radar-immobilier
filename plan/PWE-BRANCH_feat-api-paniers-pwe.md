@@ -32,6 +32,8 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Define separate verified-identity, normal-cookie, seven-fence,
+  cross-process consumption, admission-debit and status-expiry mutation legs.
 - [x] Add both C03 orders for account approval, membership and moderation,
   using public membership/capability revokers and the approval SQL row lock.
 - [x] Normal guard run found the form oracle expected 403 while the contract
