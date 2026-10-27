@@ -2,11 +2,9 @@
  * Published release files seam (ARTEFACTS L3, relecture 1).
  *
  * Serves the real HTML/CSS/JS set of the pinned release — never the static
- * example — under the same isolation headers. Sub-resources are authorized
- * because the served HTML rewrites relative src/href to carry the page
- * grant as a query (?grant=...): ordinary <script src> and <link> loads
- * then present the same grant plus the session cookie, so no custom header
- * is needed for static loads. Published JavaScript calls H5 with fetch and
+ * example — under the same isolation headers. Native resources, including
+ * transitive imports, use a sealed session on the pinned release host.
+ * HTML attributes and inline source are never rewritten. JavaScript calls H5 with fetch and
  * the x-preview-grant header (same pattern as the technical example):
  * - const grant = new URLSearchParams(location.search).get("grant")
  * - fetch("/__reader/api/baskets.search.v1?...", { headers: { "x-preview-grant": grant } })
@@ -37,7 +35,7 @@ export const RELEASE_CSP =
 
 /** Authorize only the inline bytes of this immutable release, never unsafe-inline. */
 export function releaseCspForHtml(html: string): string {
-  const hashes = (tag: string) => [...html.matchAll(new RegExp(`<${tag}\\b[^>]*>([\\s\\S]*?)<\\/${tag}\\s*>`, "gi"))]
+  const hashes = (tag: string) => [...normalizeReleaseHtml(html).matchAll(new RegExp(`<${tag}\\b[^>]*>([\\s\\S]*?)<\\/${tag}\\s*>`, "gi"))]
     .map((match) => `'sha256-${createHash("sha256").update(match[1]!).digest("base64")}'`).join(" ");
   return RELEASE_CSP.replace("script-src 'self'", `script-src 'self' ${hashes("script")}`)
     .replace("style-src 'self'", `style-src 'self' ${hashes("style")}`);
@@ -97,24 +95,7 @@ export function createMemoryReleaseFiles(
   };
 }
 
-/**
- * Rewrite relative src/href in served HTML so sub-resource loads carry the
- * page grant. Absolute, data:, hash and H5 API targets are left untouched.
- */
-export function injectGrantIntoHtml(html: string, grant: string): string {
-  if (!grant) return html;
-  const encoded = encodeURIComponent(grant);
-  return html.replace(/\b(src|href)\s*=\s*(["'])(.*?)\2/gi, (match, attr, quote, target) => {
-    const value = String(target);
-    if (
-      /^[a-z][a-z0-9+.-]*:/i.test(value.trim()) || value.startsWith("//") ||
-      value.startsWith("#") || value.startsWith("/__reader/") ||
-      value.startsWith("/api/") || value.includes("grant=")
-    ) {
-      return match;
-    }
-    const [path, fragment] = value.split("#", 2);
-    const separator = path!.includes("?") ? "&amp;" : "?";
-    return `${attr}=${quote}${path}${separator}grant=${encoded}${fragment === undefined ? "" : `#${fragment}`}${quote}`;
-  });
+/** Match HTML input preprocessing before hashing and emitting inline text. */
+export function normalizeReleaseHtml(html: string): string {
+  return html.replace(/\r\n?/g, "\n");
 }
