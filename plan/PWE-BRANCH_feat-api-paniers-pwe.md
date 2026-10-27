@@ -32,6 +32,10 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Add exact confirm-field refusals and immutable-summary effects; isolate
+  dispatch substitution, unknown BASE reason, autonomous consumption and audit mutants.
+- [x] Cancel the queued campaign before adding required variants; no owned
+  containers or test results existed for the cancelled wait.
 - [x] Record empty-machine startup and monitor owner labels throughout the
   campaign; any foreign stack stops only this project and invalidates its gate.
 - [x] Add app-specific old-6L1 receipt mutation and target the actual executor
