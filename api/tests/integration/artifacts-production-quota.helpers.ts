@@ -30,6 +30,8 @@ export async function qualifyLastQuotaUnit() {
     expect(replay).toMatchObject({ status: 201, body: { replayed: true } });
     expect(await count()).toEqual({ artifacts: 1, receipts: 1, used: 1 });
     await h.pool.query("UPDATE artifacts.host_quotas SET operation_limit = 2");
+    await h.pool.query("UPDATE artifacts.host_actor_quotas SET operation_limit = 2 " +
+      "WHERE storage_scope_id = $1 AND actor_id = 'alice'", [h.config.storageScope]);
     const loser = commands[1 - winner]!;
     expect(await peer.ensure(loser.bindingName, loser.idempotencyKey)).toMatchObject({ status: 201 });
     expect(await count()).toEqual({ artifacts: 2, receipts: 2, used: 2 });
@@ -62,6 +64,8 @@ export async function qualifyAdmissionQuotaAccounting() {
     expect(retry).toMatchObject({ ok: true, replayed: false });
     expect((await h.pool.query("SELECT operations_used FROM artifacts.host_quotas")).rows[0].operations_used).toBe("1");
     await h.pool.query("UPDATE artifacts.host_quotas SET operation_limit = 2");
+    await h.pool.query("UPDATE artifacts.host_actor_quotas SET operation_limit = 2 " +
+      "WHERE storage_scope_id = $1 AND actor_id = 'alice'", [h.config.storageScope]);
     await h.pool.query("UPDATE artifacts.host_policy SET revision = 'withdrawn-policy'");
     const staleHost = await h.host.execute({ ...request,
       body: { bindingName: "stale-policy", idempotencyKey: "stale-policy" } },
