@@ -1,7 +1,7 @@
 # Feature: Artifacts 0.2.2 qualification
 
 ## Objective
-- [ ] Upgrade the published artifacts package and qualify its blob-prefix contract.
+- [x] Upgrade the published artifacts package and qualify its blob-prefix contract.
 
 ## Scope / Guardrails
 - [x] Work in `tmp/artifacts-022`, branch `chore/artifacts-0.2.2`.
@@ -39,9 +39,11 @@
 - [x] Lot 2: Assert native error projection through `mapHostError` and real S3 refusal.
 - [x] Lot 2: Locate the unexported memory double via the exported migration path (Vitest lacks `import.meta.resolve`).
 - [x] Lot 3: Aligned current provider profile, qualification scripts and docs.
-- [ ] Lot 4: Pass typecheck, lint, unit tests and Docker artifacts integration.
+- [x] Lot 4: Typecheck/lint passed; API 3566, host 166, MCP 406, artifacts integration 153 passed.
 - [x] Lot 4: Add a sequential qualification command with per-check logs and exit codes.
 - [x] Lot 4: Typecheck passed; declare the Node URL global required by the tuple check.
 - [x] Lot 4: Host/MCP unit suites passed; migrate before API tests that probe a reachable DB.
-- [ ] Lot 5: Review changes, audit commits and deliver the uncommitted report.
+- [x] Lot 5: Reviewed scope/diff; audited commits; deliver local bundle and uncommitted report.
+- [x] Lot 5: Removed owned Docker resources with `down -v`; API has 7 optional skipped tests.
+- [x] Lot 5: Peer consensus unverified (live model catalog unavailable); no consensus claimed.
 - [ ] Conductor: push, run CI and merge with a merge commit.
