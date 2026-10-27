@@ -32,6 +32,8 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Expiry/quota run: 10 passed/0 failed/0 skipped; correct the evolving
+  array annotation in the quota fixture before accepting the static gate.
 - [x] Add shared no-op admission bursts across six P/grants/artifacts and
   across readers, replay without debit and accessible revoke after quota refusal.
 - [x] Real TCP recovery gate: 1 passed/0 failed/0 skipped; typecheck/lint passed.
