@@ -33,6 +33,7 @@ Connect published release files and H5 reads to current account/workspace author
 ## Feedback Loop
 - [x] OUVL3-EX1: add one migration for shared, expiring, single-use reader tickets. Reason: no durable A6 ticket implementation exists on main. Impact: additive table and migration journal; rollback: disable reader mounting, preserve stored data.
 - [x] Shared Git metadata is read-only; use `tmp/sol-l3.git` and audit the bundle in a fresh repository.
+- [ ] Blocked qualification: foreign test stacks remained active from 09:08 to 10:06 UTC. The queued runner was cancelled before creating resources; no foreign stack was touched. Dynamic gates below remain unaccepted.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch, serialized implementation and Docker campaigns.
@@ -42,8 +43,8 @@ Connect published release files and H5 reads to current account/workspace author
 
 ## Plan / Todo (lot-based)
 - [x] Lot 0: read instructions, inspect Muse build, merge origin/main 17f439c8.
-- [ ] Lot 1: connect basket contracts, durable release bytes and opening flow.
+- [x] Lot 1: implement basket contracts, durable release bytes and opening flow; qualification remains pending below.
 - [ ] Lot 2: typecheck, ESLint, reader/API unit tests, PostgreSQL reads.
 - [ ] Lot 3: published HTML/CSS/JS browser proof and persistent continuation.
 - [ ] Lot 4: discriminating isolation/authorization mutations and full API CI suite.
-- [ ] Lot 5: audit atomic commits, reconstruct bundle, record results and checksums.
+- [x] Lot 5: audit atomic commits, reconstruct bundle, record results and checksums separately in the owner report.
