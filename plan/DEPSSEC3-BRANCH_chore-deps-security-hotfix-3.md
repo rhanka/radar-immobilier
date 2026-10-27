@@ -25,6 +25,7 @@
 - [x] Record rationale, impact and rollback before any conditional-path edit.
 
 ## Feedback Loop
+- [x] L2aa: remove absent Graphify, Ollama and provider-utils 2.x low-finding rows after the Engram migration.
 - [x] L2z: remove the three temporary Zod acceptances after four clean raw audits and physical-tree validation.
 - [x] L1b: pin Focus KaTeX 0.18.2; reproduce the fixed trust behavior and verify the Mermaid core bundle uses installed KaTeX and DOMPurify.
 - [x] L2y: freeze composed HTTP non-finite refusals from the base; keep SDK stdio diagnostics and finite-number controls.
