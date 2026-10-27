@@ -1,6 +1,7 @@
 import type { Context, MiddlewareHandler } from "hono";
 import { applyContentDenyHeaders } from "./content-deny.js";
 import { parseContentHost } from "./content-host.js";
+import { applyReaderContentHeaders } from "./content-isolation.js";
 
 function deny(c: Context, status: 401 | 404, error: string): Response {
   applyContentDenyHeaders(c);
@@ -37,7 +38,11 @@ export function contentGate(contentBase: string, reader?: ContentReaderMount): M
       return next();
     }
     if (parseContentHost(c.req.header("host"), contentBase).kind === "other") return next();
-    if (path.startsWith("/api/")) return deny(c, 401, "unauthenticated");
+    if (path.startsWith("/api/")) {
+      if (!reader) return deny(c, 401, "unauthenticated");
+      applyReaderContentHeaders(c);
+      return c.json({ error: "unauthenticated" }, 401);
+    }
     if (reader) return reader.fetch(c.req.raw);
     return deny(c, 404, "not_found");
   };
