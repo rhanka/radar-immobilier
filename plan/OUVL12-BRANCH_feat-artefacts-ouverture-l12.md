@@ -131,6 +131,8 @@ isolation, current authorization, transactional quotas and replay safety.
     attempts on the old head; six new assertions fail against that baseline.
   - [x] Read replay storage scope on the leased client; the provider's publication
     authorization projection contains owner/state, not storage scope.
+  - [x] Acceptance exposed a new-key restart beyond the attempt budget in EX1's
+    fixture; restart now replays its committed key, asserting replayed=true.
   - [ ] Count S3 calls on the last concurrent attempt and exhausted durable quota.
   - [ ] Implement shared guarded replay and atomic pre-upload attempt admission.
   - [ ] Verify suspension denial and mode-specific account binding.
