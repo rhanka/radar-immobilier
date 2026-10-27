@@ -3,6 +3,10 @@ import { readArtifactsEnv } from "@radar/artifacts-host";
 import { createApp } from "./app.js";
 import { startArtifactControl } from "./artifacts/control-route-startup.js";
 import { contentHostAppOption, resolveContentHostConfig } from "./artifacts/content-config.js";
+import { createBasketReadOperation } from "./artifacts/reader-baskets.js";
+import { createReaderContentApp } from "./artifacts/content-serve.js";
+import { resolveReaderCursorKeyring } from "./artifacts/reader-cursor-keyring.js";
+import { createReaderOpening } from "./artifacts/reader-opening.js";
 import { loadConfig, resolveAuthConfig, resolveTemConfig } from "./config.js";
 import { createLogger } from "./logger.js";
 import { createDb, makeDbProbe } from "./db/client.js";
@@ -73,21 +77,54 @@ logger.info(
   contentHost.enabled ? "artifact content host enabled" : "artifact content host disabled (closed by default)",
 );
 
-// Optional artifact control plane (861c lot H2): storage + publication.
-// Absent ARTIFACTS_* stays disabled (control routes absent, current chain
-// unchanged). Partial configuration closes the capability; malformed supplied
-// values stop startup. No storage is initialized when authentication is off.
 const artifactsControl = await startArtifactControl({
   input: readArtifactsEnv(), auth, logger,
   contentBase: contentHost.enabled ? contentHost.contentBase : undefined,
   poolParams: {
-    host: config.POSTGRES_HOST,
-    port: config.POSTGRES_PORT,
-    user: config.POSTGRES_USER,
-    password: config.POSTGRES_PASSWORD,
-    database: config.POSTGRES_DB,
+    host: config.POSTGRES_HOST, port: config.POSTGRES_PORT, user: config.POSTGRES_USER,
+    password: config.POSTGRES_PASSWORD, database: config.POSTGRES_DB,
   },
 });
+
+// Share the publication host's scoped PostgreSQL authority and S3 blobs.
+const readerGrantSecret = (process.env["ARTIFACTS_READER_GRANT_SECRET"] ?? "").trim();
+const readerSessionSecret = (process.env["ARTIFACTS_READER_SESSION_SECRET"] ?? "").trim();
+const readerCursorKeyring = resolveReaderCursorKeyring(process.env);
+const readerIssuer = {
+  issuer: (process.env["ARTIFACTS_READER_ISSUER"] ?? (auth.enabled ? auth.appBaseUrl : "")).trim(),
+  audience: (process.env["ARTIFACTS_READER_AUDIENCE"] ?? (auth.enabled ? `${auth.appBaseUrl}/reader` : "")).trim(),
+  tier: (process.env["ARTIFACTS_READER_TIER"] ?? config.NODE_ENV).trim(),
+};
+const readerOpening = contentHost.enabled && artifactsControl?.readerStorage && auth.enabled &&
+  readerGrantSecret.length >= 32 && readerSessionSecret.length >= 32
+  ? createReaderOpening({ ...artifactsControl.readerStorage, auth, contentBase: contentHost.contentBase,
+    issuer: readerIssuer, grantSecret: readerGrantSecret, sessionSecret: readerSessionSecret }) : undefined;
+logger.info(
+  {
+    readerWired: !!readerOpening,
+    cursorKeyring: readerCursorKeyring ? "configured" : "absent",
+  },
+  readerOpening
+    ? readerCursorKeyring
+      ? "artifact reader mounted in API with basket bridge and cursor keyring"
+      : "artifact reader mounted in API without cursor keyring (search closed with transport_unavailable)"
+    : "artifact reader not mounted (closed by default)",
+);
+const readerContent = contentHost.enabled && artifactsControl?.readerStorage && readerGrantSecret.length >= 32 && readerSessionSecret.length >= 32
+  ? createReaderContentApp({
+    contentBase: contentHost.contentBase,
+    grantSecret: readerGrantSecret,
+    sessionSecret: readerSessionSecret,
+    issuer: readerIssuer,
+    ...(readerOpening ? { openingContent: readerOpening.content } : {}),
+    ...artifactsControl.readerStorage,
+    readOperation: createBasketReadOperation({
+      db: dbHandle.db,
+      store: objectStore,
+      ...(readerCursorKeyring ? { classification: { cursorKeyring: readerCursorKeyring } } : {}),
+    }),
+  })
+  : undefined;
 
 const durableRetirement = await readDurableLegacyRetirement(dbHandle.db).catch((error) => {
   logger.warn({ err: String(error) }, "durable retirement unreadable; starting closed");
@@ -110,6 +147,9 @@ const app = createApp({
   mcpSignalSearch: { enabled: config.MCP_SIGNAL_SEARCH_ENABLED },
   ...(durableRetirement ? { legacyRetirement: durableRetirement } : {}),
   ...contentHostAppOption(contentHost),
+  ...(readerContent ? { readerContent } : {}),
+  ...(readerOpening ? { readerOpening: readerOpening.application } : {}),
+  ...(readerCursorKeyring ? { classification: { cursorKeyring: readerCursorKeyring } } : {}),
   ...(artifactsControl ? { artifactsControl } : {}),
 });
 
