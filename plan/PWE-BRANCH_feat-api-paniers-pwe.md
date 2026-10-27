@@ -32,6 +32,13 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] PWE-EX2: the authorized app result GET omits the immutable receipt
+  (C08/section7.4), even after a committed command. Allow app-route,
+  app-authority, app-result and the shared read-only signal receipt primitive.
+  Impact: bounded owner/rights-checked reads only; no writer/session change.
+  Rollback: revert the app-result regression and read integration together.
+- [x] Preserve exact pre-fix app-route bytes from50a90b89 as a test vector
+  for an explicit negative/positive DB proof, never as a product fallback.
 - [x] Add explicit targeted mutation follow-up mode; reject empty selectors
   and preserve the complete API/inherited campaign as the final full gate.
 - [x] Add separate RR snapshot, same-RP subject, M11 executor/receipt,
