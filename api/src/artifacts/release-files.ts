@@ -11,11 +11,8 @@
  * - const grant = new URLSearchParams(location.search).get("grant")
  * - fetch("/__reader/api/baskets.search.v1?...", { headers: { "x-preview-grant": grant } })
  *
- * Durable binding (PostgreSQL/S3, @sentropic/artifacts activation) is an
- * explicit extension point: implement ReleaseFileProvider against the host
- * storage and pass it as ContentServeDeps.releaseFiles. Until then the
- * in-memory provider below covers unit/integration proofs. Do NOT integrate
- * @sentropic/artifacts 0.2.3 here (not yet published).
+ * reader-storage binds this port to committed PostgreSQL manifests and
+ * digest-verified S3 blobs. The in-memory provider below is for module tests.
  */
 import { READER_EXAMPLE_SCRIPT_HASH } from "./reader-example.js";
 import { createHash } from "node:crypto";
