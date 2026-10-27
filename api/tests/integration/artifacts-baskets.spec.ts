@@ -4,6 +4,8 @@ import { startHarness, type Harness } from "./artifacts-h2.helpers.js";
 import { publishedBaskets } from "./artifacts-baskets.helpers.js";
 import { promisify } from "node:util";
 import { execFile } from "node:child_process";
+import { randomUUID } from "node:crypto";
+import { createStoredReader } from "../../src/artifacts/reader-storage.js";
 
 describeDb("published basket reads against PostgreSQL and S3", () => {
   let h: Harness;
@@ -11,6 +13,15 @@ describeDb("published basket reads against PostgreSQL and S3", () => {
   afterAll(async () => { await h?.close(); });
   it("should isolate readers, validate workspaces and continue after runtime reconstruction", async () => {
     const f = await publishedBaskets(h);
+    const files = f.stored().releaseFiles;
+    expect(await files.getFile(randomUUID(), f.releaseId, "/index.html")).toBeNull();
+    expect(await files.getFile(f.artifactId, randomUUID(), "/index.html")).toBeNull();
+    const foreignScope = createStoredReader(h.pool, "foreign-scope", "pages.example.test", h.blobs);
+    expect(await foreignScope.releaseFiles.getFile(f.artifactId, f.releaseId, "/index.html")).toBeNull();
+    const corrupt = createStoredReader(h.pool, h.config.storageScope, "pages.example.test", {
+      getBlob: async (key) => { const bytes = (await h.blobs.getBlob(key))!.slice(); bytes[0] = bytes[0]! ^ 1; return bytes; },
+    });
+    expect(await corrupt.releaseFiles.getFile(f.artifactId, f.releaseId, "/index.html")).toBeNull();
     let app = f.runtime();
     const alice = await f.credentials(f.data.contributor.sub);
     const bob = await f.credentials(f.data.moderator.sub);
