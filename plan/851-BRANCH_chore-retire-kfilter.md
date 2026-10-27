@@ -12,7 +12,7 @@
 
 ## Branch Scope Boundaries (MANDATORY)
 - [x] Allowed Paths: `deploy/ci/kfilter*`, `deploy/ci/fixtures/kfilter/**`.
-- [x] Allowed Paths: `deploy/ci/reconcile-preprod*.sh`, `deploy/ci/check-no-python.sh`.
+- [x] Allowed Paths: `deploy/ci/reconcile-preprod*.sh`, `deploy/ci/check-no-python*.sh`.
 - [x] Allowed Paths: `deploy/ci/README.md`, this plan, `RAPPORT-SOL-KFILTER.md`.
 - [x] Forbidden Paths: `Makefile`, `docker-compose*.yml`, `rules/**`, agent entrypoints, other plans.
 - [x] Conditional Paths: `.github/workflows/ci.yml`, released by BR851-EX1.
@@ -35,3 +35,7 @@
 - [x] Lot 3: deny Python in deploy, update reconcile tests, README and CI.
 - [x] Lot 4: scoped shell tests, preprod render, scope/branch gates and review selection evidence.
 - [x] Lot 5: atomic rescue commits and French report; bundle verification recorded in the adjacent delivery audit.
+- [x] Lot 6: reproduce corruption on jq 1.8.1; rawfile plus strict scalar validation; long and invalid fixtures.
+- [ ] Lot 7: follow linked directories/files, reject Python extensions and traversal failures; acceptance witnesses.
+- [ ] Lot 8: selected last document without a final LF, with an asserted precondition.
+- [ ] Lot 9: final shell/render checks, review-correction report and audited bundle above `86a6697e`.

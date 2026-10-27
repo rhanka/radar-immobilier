@@ -28,6 +28,38 @@ for variant in lf crlf cr no-final-newline; do
   done < <(jq -c '.[]' "$HERE/fixtures/kfilter/cases.json")
 done
 
+# Long literal lines place 2/3/4-byte characters across jq's 4096-byte buffers.
+while IFS= read -r fixture; do
+  width="$(jq -r '.asciiBytes' <<<"$fixture")"
+  text="$(jq -r '.text' <<<"$fixture")"
+  printf -v padding '%*s' "$((width - 4))" ''
+  printf 'apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: utf8\ndata:\n  text: |\n    %s%s\n' \
+    "${padding// /x}" "$text" >"$T/expected"
+  bash "$HERE/kfilter.sh" "$T/expected" ConfigMap utf8 >"$T/actual"
+  check "UTF-8 literal at line byte $width: $text"
+done < <(jq -c '.[]' "$HERE/fixtures/kfilter/utf8-boundaries.json")
+
+# Invalid bytes after a matching document must fail before emitting ANY bytes,
+# including in names-only mode and when the selection itself has no match.
+while IFS= read -r fixture; do
+  label="$(jq -r '.label' <<<"$fixture")"
+  printf 'kind: ConfigMap\nmetadata:\n  name: utf8\n---\nkind: Service\ndata:\n  text: ' >"$T/invalid"
+  printf '%b' "$(jq -r '.octets' <<<"$fixture")" >>"$T/invalid"
+  for mode in selected absent names; do
+    case "$mode" in
+      selected) args=("$T/invalid" ConfigMap utf8) ;;
+      absent) args=("$T/invalid" Deployment) ;;
+      names) args=(--names "$T/invalid" ConfigMap) ;;
+    esac
+    if bash "$HERE/kfilter.sh" "${args[@]}" >"$T/actual" 2>"$T/error"; then
+      echo "FAIL: accepted $label ($mode)" >&2; exit 1
+    fi
+    test ! -s "$T/actual"
+    grep -q 'UTF-8' "$T/error"
+    PASS=$((PASS + 1)); echo "ok: rejects $label ($mode) without output"
+  done
+done < <(jq -c '.[]' "$HERE/fixtures/kfilter/invalid-utf8.json")
+
 # Kustomize's canonical LF output lets awk select full documents independently.
 kubectl kustomize --load-restrictor LoadRestrictionsNone "$HERE/../overlays/preprod" >"$T/render"
 while read -r kind mode name; do
