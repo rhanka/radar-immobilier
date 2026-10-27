@@ -100,9 +100,9 @@ describeDb("stored reader approval and single-use exchange", () => {
       const expired = await second.mint(input);
       await h.pool.query("UPDATE artifacts.reader_tickets SET expires_at=now()-interval '1 second'");
       expect(await first.consume(expired.ticket, input.browserBinding)).toBeNull();
-      const before = await authority.getAuthorizationVersion(f.artifactId);
+      const before = await authority.getAuthorizationVersion(f.artifactId, input.readerSub, f.releaseId);
       await h.pool.query("UPDATE account_users SET status='suspended' WHERE sub=$1", [input.readerSub]);
-      expect(await authority.getAuthorizationVersion(f.artifactId)).not.toBe(before);
+      expect(await authority.getAuthorizationVersion(f.artifactId, input.readerSub, f.releaseId)).not.toBe(before);
       expect((await authority.getRights(input.readerSub, f.artifactId))?.approved).toBe(false);
     } finally { await pool2.end(); }
   });
