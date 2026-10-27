@@ -104,8 +104,77 @@ const PW_PAGE_SCRIPT_PREPARE = `
     if (!opened) say("The popup was blocked. Use the application link above.");
     return opened;
   }
+  var pendingAttempt = null;
+  var preparing = false;
+  async function prepare(gesture, key) {
+    var problem = validGesture(gesture);
+    if (problem) { say("This gesture is incomplete (" + problem + ")."); return; }
+    preparing = true;
+    var gate = withTimeout(15000);
+    try {
+      var res = await fetch(PREPARE, { method: "POST", credentials: "same-origin",
+        headers: { "content-type": "application/json", "idempotency-key": key },
+        body: JSON.stringify(prepareBody(gesture)), signal: gate.signal });
+      var data = null;
+      try { data = await res.json(); } catch (err) { data = null; }
+      var code = data && data.error && typeof data.error.code === "string" ? data.error.code : null;
+      if ((res.status === 200 || res.status === 201) && data && data.data && data.data.intentId) {
+        pendingAttempt = null;
+        say(data.data.state === "committed" || data.data.state === "rejected"
+          || data.data.state === "expired" || data.data.state === "revoked"
+          ? "Already " + data.data.state + ". Follow the status once for the receipt."
+          : "Prepared. Open the application to confirm.");
+        openApp(data.data.confirmationUrl, data.data.managementUrl);
+        try {
+          if (typeof window.__pwWriteFollowUp === "function") window.__pwWriteFollowUp(data.data.intentId);
+        } catch (err) {}
+        return;
+      }
+      if (res.status >= 500 || ((res.status === 200 || res.status === 201) && !data?.data?.intentId)) {
+        pendingAttempt = { gesture: gesture, key: key };
+        say("Result to verify. Retry the exact gesture below before preparing another.");
+        reveal("#pw-write-retry");
+      } else if (code === "idempotency_key_conflict") {
+        say("This gesture conflicts with another prepared intent. Re-read the target first.");
+      } else if (res.status === 401) {
+        say("The page session ended. Sign in again on the page, then prepare a new gesture.");
+      } else if (res.status === 403) {
+        say("The page is not allowed to prepare this gesture.");
+      } else if (res.status === 429) {
+        say("Too many preparations. Wait, then try again explicitly.");
+      } else {
+        say("Preparation refused (" + (code || ("http " + res.status)) + "). Correct the gesture and try again.");
+      }
+    } catch (err) {
+      pendingAttempt = { gesture: gesture, key: key };
+      say("The request may still have reached the server. Retry the exact gesture below.");
+      reveal("#pw-write-retry");
+    } finally {
+      preparing = false;
+      if (gate.done) gate.done();
+    }
+  }
+  document.addEventListener("click", function (event) {
+    var el = event.target && event.target.closest
+      ? event.target.closest("[data-pw-gesture]") : null;
+    if (!el || el.disabled) return;
+    if (preparing || pendingAttempt) return;
+    var key = null;
+    try { key = crypto.randomUUID(); } catch (err) { say("This browser cannot mint gesture keys."); return; }
+    prepare(gestureFrom(el), key);
+  });
+  var retryBtn = $("#pw-write-retry");
+  if (retryBtn) retryBtn.addEventListener("click", function () {
+    if (!pendingAttempt || preparing) return;
+    var attempt = pendingAttempt;
+    pendingAttempt = null;
+    var box = $("#pw-write-retry");
+    if (box) box.hidden = true;
+    prepare(attempt.gesture, attempt.key);
+  });
 })();
 `;
+
 const PW_PAGE_SCRIPT_POLL = "";
 export const PW_PAGE_SCRIPT = `${PW_PAGE_SCRIPT_PREPARE}\n${PW_PAGE_SCRIPT_POLL}`;
 
