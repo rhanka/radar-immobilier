@@ -132,3 +132,4 @@ run_bad "$CASE_ROOT" 'rejects an overlay that does not render' 'cannot render'; 
 
 echo "check-h3-preprod-render tests: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]
+bash "$HERE/check-h3-general-render.test.sh"
