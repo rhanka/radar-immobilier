@@ -7,6 +7,7 @@ import { canReadWriteIntentSummary, challengeBootstrap, guardWriteIntentAppMutat
 import { hasDuplicateJsonKeys } from "./write-intent-binding.js";
 import { writeIntentError } from "./write-intent-errors.js";
 import { FacetError } from "../services/facets/target.js";
+import { pwIntentStatus } from "../services/facets/pw-write-fences.js";
 export type { WriteAppDeps } from "./write-intent-app-authority.js";
 
 /** Exact route mounts only: a disabled PW capability never intercepts the app. */
@@ -53,6 +54,7 @@ export function writeIntentAppRoute(deps: WriteAppDeps | null): Hono {
           return deps.renderManagement(c, row, { csrf: writeCsrf(deps, pass, row.intentId) });
         }
         return c.json({ intentId: row.intentId, management: true,
+          ...(path === api ? { state: pwIntentStatus(row, (deps.nowMs ?? Date.now)()) } : {}),
           csrf: writeCsrf(deps, pass, row.intentId) });
       }
       if (!deps.renderSummary) return writeRefusal(c, "write_transport_closed", 503);
