@@ -1,9 +1,19 @@
 #!/usr/bin/env bash
 # Sourced by the hermetic operator test in its private fixture workspace.
-jq '.maintenance={middleware:"base-maintenance-fixture",sources:["198.51.100.23/32"],ingresses:["fixture-app","fixture-mcp"]}
+jq '.maintenance={service:"base-maintenance-fixture",ingresses:["fixture-app","fixture-mcp"]}
  | .mcpDeployment="fixture-mcp" | .apiIngress="fixture-app"' input.json > enriched.json
 cp enriched.json input.json
 cp good-proofs.json proofs.json
+jq -n '{items:[
+  {metadata:{name:"fixture-app",uid:"app-uid",annotations:{"traefik.ingress.kubernetes.io/router.middlewares":"existing@kubernetescrd"}},
+   spec:{ingressClassName:"traefik",tls:[{secretName:"fixture-tls",hosts:["preprod.immo.sent-tech.ca"]}],
+    rules:[{host:"preprod.immo.sent-tech.ca",http:{paths:[{path:"/",pathType:"Prefix",backend:{service:{name:"radar-ui",port:{number:8080}}}}]}}]}},
+  {metadata:{name:"fixture-mcp",uid:"mcp-uid"},spec:{defaultBackend:{service:{name:"radar-immo-mcp",port:{number:3001}}}}}
+]}' > ingress-original.json
+jq '.items[].spec |= ((if has("defaultBackend") then .defaultBackend={service:{name:"base-maintenance-fixture",port:{number:80}}} else . end)
+  | (.rules[]?.http.paths[]?.backend)={service:{name:"base-maintenance-fixture",port:{number:80}}})' ingress-original.json > ingress-fixture.json
+jq -n --slurpfile c input.json '{metadata:{annotations:{"radar.sent-tech.ca/maintenance-attempt":$c[0].binding.maintenanceAttemptId}},
+  spec:{type:"ClusterIP",ports:[{name:"deny",port:80,targetPort:80,protocol:"TCP"}]}}' > deny-service-fixture.json
 jq -n --slurpfile c input.json --arg now "$now" '{deploymentUid:"synthetic-api-deployment",generation:"2",
   restartedAt:$now,podUid:"synthetic-api-pod",templateHash:"synthetic-template",containerId:"containerd://synthetic",
   restartCount:"0",startedAt:$now,image:$c[0].image,imageID:("containerd://"+($c[0].image|split("@")[1]))}' > api-fixture.json
@@ -14,7 +24,7 @@ printf '%s\n' "$*" >> cluster-calls
 shift 5
 case "$*" in
   'auth can-i '*) [[ ${FAKE_STATE:-} != denied ]] || { echo no; exit 1; }; echo yes;;
-  'api-resources '*) echo middlewares.traefik.io;;
+  'api-resources '*|'get middleware '*|'auth can-i '*middlewares.*) echo 'No Traefik CRD is installed' >&2; exit 1;;
   'get job '*conditions*)
     if [[ ${FAKE_STATE:-} == failed-job || ${FAKE_STATE:-} == failed-with-zero ]]; then echo Failed; else echo Complete; fi;;
   'get job '*) printf 'synthetic-job-uid\t%s\n' "$(jq -r .image "$INPUT")";;
@@ -39,9 +49,31 @@ case "$*" in
       old) printf 'synthetic-old-api\tRunning\tapi\t\n';;
       new) printf 'unexpected-new-uid\tRunning\tapi\t\n';;
     esac;;
-  'get ingresses '*) printf 'fixture-app\nfixture-mcp\n';;
-  'get ingress '*) printf 'radar-immobilier-preprod-base-maintenance-fixture@kubernetescrd';;
-  'get middleware '*) printf '["198.51.100.23/32"]';;
+  'get ingresses -o json')
+    case ${FAKE_STATE:-} in
+      coverage) change='.items += [.items[0]|.metadata.name="unexpected"]';;
+      bypass) change='.items[0].spec.rules[0].http.paths[0].backend.service.name="radar-api"';;
+      default-bypass) change='.items[1].spec.defaultBackend.service.name="radar-api"';;
+      *) change='.';;
+    esac
+    jq "$change" ingress-fixture.json;;
+  'patch ingress '*)
+    name=$3; patch=${!#}
+    if [[ $* == *'--type=json'* ]]; then
+      jq --arg name "$name" --slurpfile patch "$patch" '
+        (.items[]|select(.metadata.name==$name)) |=
+          (if .metadata.uid!=$patch[0][0].value or .spec!=$patch[0][1].value then error("concurrent change")
+           else .spec=$patch[0][2].value end)' ingress-fixture.json > ingress-next.json
+      mv ingress-next.json ingress-fixture.json
+    fi;;
+  'get service base-maintenance-fixture -o json')
+    if [[ ${FAKE_STATE:-} == deny-selector ]]; then jq '.spec.selector={app:"api"}' deny-service-fixture.json
+    else cat deny-service-fixture.json; fi;;
+  'get endpointslices -l kubernetes.io/service-name=base-maintenance-fixture -o json')
+    if [[ ${FAKE_STATE:-} == deny-endpoint ]]; then echo '{"items":[{"endpoints":[{"conditions":{"ready":true}}]}]}'
+    else echo '{"items":[]}'; fi;;
+  'get endpoints base-maintenance-fixture '*)
+    [[ ${FAKE_STATE:-} != deny-legacy ]] || echo '{"subsets":[{"addresses":[{"ip":"192.0.2.1"}]}]}';;
   'get service radar-api '*publishNotReadyAddresses*)
     [[ ${FAKE_STATE:-} != publish-unready ]] || printf true;;
   'get service radar-api '*selector*)
@@ -54,6 +86,8 @@ case "$*" in
   'get deployment radar-api '*availableReplicas*)
     if [[ ${FAKE_STATE:-} == unavailable ]]; then echo 0; else echo 1; fi;;
   'get deployment radar-api '*) jq -r .image "$INPUT";;
+  'get deployments.apps '*) printf 'radar-api\tapi-uid\t1\tfixture-api\nradar-ui\tui-uid\t1\tfixture-ui\nradar-immo-mcp\tmcp-uid\t1\tfixture-mcp\n';;
+  'get cronjobs.batch '*) printf 'fixture-refresh\tcron-uid\tfalse\t0 * * * *\tfixture-api\n';;
   'rollout restart deployment/radar-api') cp api-after-fixture.json api-fixture.json;;
   'get cronjobs '*) [[ ${FAKE_STATE:-} != cron ]] || echo false;;
   'get jobs '*) [[ ${FAKE_STATE:-} != job ]] || echo 1;;
@@ -75,10 +109,24 @@ esac
 exit 0
 FAKE
 chmod +x bin/kubectl bin/gh
+: > cluster-calls
+invoke permissions
+cp ingress-original.json ingress-fixture.json
+invoke close EXPECTED="$testdir/expected.json"
+closure_output=$testdir/out-$n
+jq -e --slurpfile original ingress-original.json '.ingresses|map({metadata:{name:.metadata.name,uid:.metadata.uid},spec})==($original[0].items|map({metadata:{name:.metadata.name,uid:.metadata.uid},spec}))' "$closure_output/ingress-snapshot.json" >/dev/null
+jq -e '.items[0].metadata.annotations["traefik.ingress.kubernetes.io/router.middlewares"]=="existing@kubernetescrd"
+  and .items[0].spec.tls[0].secretName=="fixture-tls"
+  and .items[1].spec.defaultBackend.service.name=="base-maintenance-fixture"' ingress-fixture.json >/dev/null
+rg -qF 'scale deployment/radar-api --replicas=0' cluster-calls
+rg -qF 'scale deployment/radar-ui --replicas=0' cluster-calls
+rg -qF 'scale deployment/radar-immo-mcp --replicas=0' cluster-calls
+rg -qF 'patch cronjob fixture-refresh' cluster-calls
+if rg 'api-resources|get middleware|auth can-i .*middlewares' cluster-calls; then exit 1; fi
 invoke collect-maintenance EXPECTED="$testdir/expected.json" PROOFS="$testdir/proofs.json"
 jq -e '.expectedInstances|length==2' "out-$n/maintenance.json" >/dev/null
 if rg -- '--request-timeout=20s (create|patch|scale|set|delete|rollout) ' cluster-calls; then exit 1; fi
-for state in old new cron job ready replicas publish-unready cd run; do
+for state in old new cron job ready replicas publish-unready cd run coverage bypass default-bypass deny-selector deny-endpoint deny-legacy; do
   export FAKE_STATE=$state
   : > cluster-calls
   if invoke activate EXPECTED="$testdir/expected.json" PROOFS="$testdir/proofs.json"; then
@@ -94,6 +142,11 @@ for state in old new cron job ready replicas publish-unready cd run; do
     publish-unready) expected_error='Service publishes unready addresses';;
     cd) expected_error='CD is not frozen';;
     run) expected_error='A nonterminal Actions run exists';;
+    coverage) expected_error='Ingress coverage changed';;
+    bypass|default-bypass) expected_error='Ingress lacks refusal backend';;
+    deny-selector) expected_error='Invalid refusal Service';;
+    deny-endpoint) expected_error='Refusal Service has endpoints';;
+    deny-legacy) expected_error='Refusal Service has legacy endpoints';;
   esac
   rg -qF "$expected_error" "result-$n.log" || { cat "result-$n.log" >&2; exit 1; }
   if rg -- '--request-timeout=20s (create|patch|scale|set|delete|rollout) ' cluster-calls; then exit 1; fi
