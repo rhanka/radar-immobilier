@@ -32,6 +32,9 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Add separate RR snapshot, same-RP subject, M11 executor/receipt,
+  M14 header/cookie and M15 reload/checkpoint/signature variants, with nonempty filters.
+- [x] Spy on grant issuance in real TCP receipt recovery: status must never sign.
 - [x] Preserve stale-response isolation when clearing request deadlines.
 - [x] Replace the now-redundant duplicate-start mutant with a discriminating
   focus-reset variant; record original/effective runner hashes and exact changes.

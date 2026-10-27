@@ -4,6 +4,7 @@ import { request as requestHttp, type Server } from "node:http";
 import { expect, it, vi } from "vitest";
 import { describeDb } from "../../src/services/facets/workspace-archive-fixture.js";
 import * as writer from "../../src/services/facets/scoped-writer.js";
+import * as issuer from "../../src/artifacts/write-intent-page-authority.js";
 import { bootstrapOf } from "../../src/artifacts/write-intent-app-surface-harness.js";
 import { readProjectionScope } from "../../src/services/facets/projection-revisions.js";
 import { identityFixture } from "./pwe-identity-fixture.js";
@@ -15,6 +16,7 @@ describeDb("PWE-08 C08 API TCP response loss", () => {
       appOrigin: "https://loss-app.example.test", clientId: "loss-pwe" };
     const h = await identityFixture(domain, randomUUID());
     const executor = vi.spyOn(writer, "writeScopedPersonalFacetInTx");
+    const signatures = vi.spyOn(issuer, "mintPageWriteGrant");
     let dropped = false;
     let cutStatus = 0;
     const server = serve({ hostname: "127.0.0.1", port: 0, fetch: async (request, bindings) => {
@@ -62,9 +64,11 @@ describeDb("PWE-08 C08 API TCP response loss", () => {
       expect(replay.status).toBe(409);
       expect(JSON.parse(replay.body)).toMatchObject({ error: { code: "challenge_consumed" } });
       expect(executor).toHaveBeenCalledTimes(1);
+      expect(signatures).not.toHaveBeenCalled();
       expect(await effects(h.h.f)).toEqual(ONE_COMMIT);
     } finally {
       executor.mockRestore();
+      signatures.mockRestore();
       server.closeAllConnections();
       await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
     }
