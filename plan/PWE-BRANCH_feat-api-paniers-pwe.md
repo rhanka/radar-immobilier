@@ -32,6 +32,9 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Scoped C02 gate: 3 passed/0 failed/0 skipped, typecheck and lint passed.
+- [x] Add C03 both orders for tier, policy, release, delegation, reader,
+  grant and page-session fences, with observed waits and durable-effect counts.
 - [x] Scoped C01 gate: 2 passed/0 failed/0 skipped, typecheck and lint passed.
 - [x] Add C02 both orders, confirmation rollback and stable repeated revoke.
 - [x] Add C01 commit/replay and rollback-winner tests with two connections,
