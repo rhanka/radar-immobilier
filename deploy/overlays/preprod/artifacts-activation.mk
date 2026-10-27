@@ -67,9 +67,4 @@ route: live
 	@bash deploy/ci/check-h3-preprod-render.sh "$(OUT)/render.yaml"
 	@$(KF) "$(OUT)/render.yaml" Ingress radar-artifact-content | $(KUBECTL) -n $(NAMESPACE) apply -f -
 rollback: live
-	@for name in radar-api immo-mcp-config; do \
-	  $(KUBECTL) -n $(NAMESPACE) patch configmap $$name --type merge -p '{"data":{"ARTIFACTS_CONTROL_MODE":"off"}}'; done
-	@$(KUBECTL) -n $(NAMESPACE) patch ingress radar-artifact-content --type json -p '[{"op":"replace","path":"/spec/rules/0/http/paths/0/backend/service/name","value":"radar-artifact-content-deny"},{"op":"replace","path":"/spec/rules/1/http/paths/0/backend/service/name","value":"radar-artifact-content-deny"}]'
-	@for name in radar-api radar-immo-mcp; do \
-	  $(KUBECTL) -n $(NAMESPACE) rollout restart deployment/$$name; \
-	  $(KUBECTL) -n $(NAMESPACE) rollout status deployment/$$name --timeout=180s; done
+	@bash deploy/ci/h3-rollback.sh "$(KUBECTL)"

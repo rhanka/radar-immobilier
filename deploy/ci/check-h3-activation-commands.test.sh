@@ -31,7 +31,22 @@ case "$1 $2" in
     touch "$H3_COMMAND_STATE/secret-$name"
     echo "secret/$name created" ;;
   'apply --server-side'|'apply -f') cat >/dev/null ;;
-  'rollout restart'|'rollout status'|'patch configmap'|'patch ingress') ;;
+  'get ingress')
+    [ "${H3_INGRESS_FAILURE:-0}" = 0 ] || exit 7
+    [ "${H3_INGRESS_ABSENT:-0}" = 1 ] || echo ingress/radar-artifact-content ;;
+  'get configmap') cat "$H3_COMMAND_STATE/mode-$3" ;;
+  'get pods')
+    if [[ "$*" = *component=api* ]]; then echo pod/api; else echo pod/mcp; fi ;;
+  'patch configmap') echo off >"$H3_COMMAND_STATE/mode-$3" ;;
+  'patch ingress') [ "${H3_CUTOFF_FAILURE:-0}" = 0 ] || exit 7 ;;
+  'rollout restart')
+    [ "${H3_RESTART_FAILURE:-}" != "$3" ] || exit 7
+    if [ "$3" = deployment/radar-api ]; then component=api; else component=mcp; fi
+    echo off >"$H3_COMMAND_STATE/runtime-$component" ;;
+  'rollout status') [ "${H3_ROLLOUT_FAILURE:-}" != "$3" ] || exit 7 ;;
+  'exec pod/api'|'exec pod/mcp')
+    component="${2#pod/}"
+    cat "$H3_COMMAND_STATE/runtime-$component" ;;
   *) echo "unexpected fake invocation: $*" >&2; exit 91 ;;
 esac
 SH
@@ -63,4 +78,36 @@ grep -Fq 'patch configmap radar-api --type merge -p {"data":{"ARTIFACTS_CONTROL_
 grep -Fq 'patch configmap immo-mcp-config --type merge -p {"data":{"ARTIFACTS_CONTROL_MODE":"off"}}' "$CASE_ROOT/calls"
 grep -Fq '"value":"radar-artifact-content-deny"' "$CASE_ROOT/calls"
 echo 'ok: rollback closes both modes and cuts content routes to denial'
-echo 'check-h3-activation-commands tests: 6 passed, 0 failed'
+rollback_case() {
+  : >"$CASE_ROOT/calls"
+  for component in api mcp; do echo general >"$CASE_ROOT/runtime-$component"; done
+}
+assert_closed() {
+  grep -Fxq off "$CASE_ROOT/runtime-api"
+  grep -Fxq off "$CASE_ROOT/runtime-mcp"
+  grep -Fq 'exec pod/api -- printenv ARTIFACTS_CONTROL_MODE' "$CASE_ROOT/calls"
+  grep -Fq 'exec pod/mcp -- printenv ARTIFACTS_CONTROL_MODE' "$CASE_ROOT/calls"
+}
+rollback_case
+H3_INGRESS_ABSENT=1 operator rollback >"$CASE_ROOT/rollback.log"
+! grep -q '^patch ingress' "$CASE_ROOT/calls"
+assert_closed
+echo 'ok: absent Ingress still closes and verifies both runtimes'
+rollback_case
+if H3_ROLLOUT_FAILURE=deployment/radar-api operator rollback >"$CASE_ROOT/failure.log" 2>&1; then exit 1; fi
+assert_closed
+awk '/rollout restart deployment\/radar-immo-mcp/{mcp=NR} /rollout status deployment\/radar-api/{if (!mcp || mcp>NR) exit 1}' "$CASE_ROOT/calls"
+echo 'ok: API readiness failure still restarts and verifies MCP; failure reported'
+for failure in H3_INGRESS_FAILURE H3_CUTOFF_FAILURE; do
+  rollback_case
+  if (export "$failure=1"; operator rollback) >"$CASE_ROOT/failure.log" 2>&1; then exit 1; fi
+  assert_closed
+done
+echo 'ok: transport/RBAC or cutoff failure cannot skip runtime closure'
+rollback_case
+if H3_RESTART_FAILURE=deployment/radar-api operator rollback >"$CASE_ROOT/failure.log" 2>&1; then exit 1; fi
+grep -Fxq general "$CASE_ROOT/runtime-api"
+grep -Fxq off "$CASE_ROOT/runtime-mcp"
+grep -Fq 'publication remains open or unverified' "$CASE_ROOT/failure.log"
+echo 'ok: stale general pod prevents a false rollback success; MCP still closes'
+echo 'check-h3-activation-commands tests: 10 passed, 0 failed'
