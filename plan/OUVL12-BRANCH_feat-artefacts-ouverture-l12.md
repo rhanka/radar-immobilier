@@ -31,6 +31,14 @@ isolation, current authorization, transactional quotas and replay safety.
   - Additional test runner files under `tools/`.
 - **Exception process**:
   - Record rationale, impact and rollback here before conditional changes.
+- **OUVL12-EX1 — existing artifact publication/quota fixtures**:
+  - [x] Allow `api/tests/integration/artifacts-publication.spec.ts` and
+    `artifacts-production-quota.helpers.ts` only when blocked by actor budgets.
+  - [x] Evidence: the full API run exhausts the ten-mutation minute window in
+    the publication test before its next distinct key; later cases inherit it.
+  - [x] Impact: isolate fixture rate windows and fund explicit actor quota
+    extensions alongside global extensions; keep production limits unchanged.
+  - [x] Rollback: revert these fixture-only adjustments with the actor quotas.
 
 ## Feedback Loop
 - [x] Shared Git metadata is read-only: use local Git metadata and audit a bundle
