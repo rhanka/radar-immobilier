@@ -32,6 +32,8 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Add both C04 orders for personal/common/source revisions and private B;
+  confirm holds the validated scope until commit and stale tokens cannot append.
 - [x] Add real personal/common/source writer fixtures with a transaction
   barrier before commit, preserving the public writer implementation.
 - [x] First replica run: 2 passed/0 failed/0 skipped; fix the optional IPC
