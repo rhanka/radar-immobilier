@@ -29,8 +29,15 @@ export function writeIntentAppRoute(deps: WriteAppDeps | null): Hono {
   for (const path of [summary, api]) app.get(path, async (c) => {
     if (!deps) return writeRefusal(c, "write_transport_closed", 503);
     try {
-      const pass = await guardWriteIntentAppSession(c, deps);
-      if (pass instanceof Response) return pass;
+      const failure: { code?: string } = {};
+      const pass = await guardWriteIntentAppSession(c, deps, failure);
+      if (pass instanceof Response) {
+        if (path === summary && deps.renderLogin && failure.code !== undefined
+          && ["unauthenticated", "session_expired"].includes(failure.code)) {
+          return deps.renderLogin(c);
+        }
+        return pass;
+      }
       const site = c.req.header("sec-fetch-site");
       if (path === api ? ((c.req.header("origin") !== undefined && c.req.header("origin") !== deps.domain.appOrigin)
         || (site !== undefined && site !== "same-origin"))
@@ -41,8 +48,13 @@ export function writeIntentAppRoute(deps: WriteAppDeps | null): Hono {
       const row = await ownedWriteIntent(c, deps, pass, path === api);
       const approved = await requireApprovedAppAccount(c, deps, pass.session.sub);
       if (approved?.status === 503) return approved;
-      if (approved || path === api || !await canReadWriteIntentSummary(deps, row, pass)) return c.json({ intentId: row.intentId, management: true,
-        csrf: writeCsrf(deps, pass, row.intentId) });
+      if (approved || path === api || !await canReadWriteIntentSummary(deps, row, pass)) {
+        if (path === summary && deps.renderManagement) {
+          return deps.renderManagement(c, row, { csrf: writeCsrf(deps, pass, row.intentId) });
+        }
+        return c.json({ intentId: row.intentId, management: true,
+          csrf: writeCsrf(deps, pass, row.intentId) });
+      }
       if (!deps.renderSummary) return writeRefusal(c, "write_transport_closed", 503);
       return deps.renderSummary(c, row, challengeBootstrap(row, deps, pass));
     } catch (error) { return writeIntentError(c, error); }
