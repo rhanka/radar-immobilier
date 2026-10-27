@@ -32,6 +32,8 @@ export interface ContentServeDeps {
   readonly now?: () => number;
   /** Optional revocation predicate; revoked sessions fail closed. */
   readonly isRevoked?: (sessionId: string) => boolean;
+  /** PW-C page write listener (prepare/status); absent keeps writes closed. */
+  readonly pageWrite?: Hono;
 }
 type AuthorizedReader = ApiReaderContext & { readonly validUntil: number; readonly authorityVersion: string };
 
@@ -97,6 +99,12 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     }
     return next();
   });
+
+  // PW-C page write listener owns the two page write operations. It runs
+  // after the parent gate and before the read-only operation dispatch; an
+  // absent listener keeps writes closed without disabling publication, page
+  // opening, or unrelated read operations.
+  if (deps.pageWrite) app.route("/", deps.pageWrite);
 
   app.all("/__reader/api/:op", async (c) => {
     const parsed = parseContentHost(c.req.header("host"), deps.contentBase);

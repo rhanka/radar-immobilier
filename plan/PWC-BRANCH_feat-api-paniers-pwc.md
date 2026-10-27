@@ -81,3 +81,5 @@ Qualify, repair and integrate the supplied PW-C implementation on 07ef2757.
 - [x] Delivery: feat(pw-c): forward page preparation and status to H5.
 
 - [x] Delivery: test(pw-c): verify listener authority and typed refusals.
+
+- [x] Delivery: feat(pw-c): mount page writes and proxy application routes.
