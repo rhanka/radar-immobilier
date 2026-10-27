@@ -4,7 +4,7 @@ ENV ?= test-artefacts-ouv-l3
 export ENV API_PORT UI_PORT MAILDEV_UI_PORT
 override CMD := $(value CMD)
 export CMD
-.PHONY: run inspect commit
+.PHONY: run inspect commit audit bundle
 run:
 	@rtk bash tools/make/artefacts-ouv-l3-run.sh
 inspect:
@@ -13,3 +13,7 @@ commit:
 	@test "$$(git --git-dir=tmp/sol-l3.git diff --cached --numstat | awk '{n+=$$1+$$2} END {print n}')" -le 150
 	@git --git-dir=tmp/sol-l3.git --work-tree=. diff --cached --check
 	@git --git-dir=tmp/sol-l3.git --work-tree=. -c core.hooksPath=/dev/null commit -m "$(MSG)"
+audit:
+	@rtk bash tools/make/artefacts-ouv-l3-deliver.sh audit
+bundle:
+	@rtk bash tools/make/artefacts-ouv-l3-deliver.sh bundle
