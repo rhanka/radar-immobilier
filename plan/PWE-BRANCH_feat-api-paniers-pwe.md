@@ -32,6 +32,9 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Normal guard run found the form oracle expected 403 while the contract
+  returns typed 415 unsupported_media_type; assert the exact refusal and zero effects.
+- [x] Normal /me remint, replica and revision reruns passed; typecheck/lint passed.
 - [x] Add actual /me sliding remint from a callback-issued cookie; old CSRF
   fails, fresh GET/click succeeds, no PW GET mints and I/challenge stay immutable.
 - [x] Add normal-callback cookie bearer rejection on all four app surfaces,
