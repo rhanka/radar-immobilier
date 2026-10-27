@@ -26,7 +26,7 @@ import {
   servedBodyLeaksCredentials,
 } from "./content-isolation.js";
 import { parseContentHost } from "./content-host.js";
-import { verifyGrant, type GrantIssuer } from "./preview-grant.js";
+import { mintGrant, verifyGrant, type GrantIssuer } from "./preview-grant.js";
 import { renewGrant } from "./preview-renewal.js";
 import { readSessionClaims } from "./preview-session.js";
 import { adaptGrantToReader, canInvoke, type ApiReaderContext } from "./reader-context.js";
@@ -98,17 +98,23 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
   async function authorityCurrent(reader: AuthorizedReader): Promise<boolean> {
     if (!deps.authority) return false;
     try {
-      return await deps.authority.getAuthorizationVersion(reader.artifactId) === reader.authorityVersion && stillOpen(reader);
+      return await deps.authority.getAuthorizationVersion(reader.artifactId, reader.readerSub, reader.releaseId) === reader.authorityVersion && stillOpen(reader);
     } catch { return false; }
   }
 
-  async function authorized(c: Context): Promise<AuthorizedReader | null> {
+  async function authorized(c: Context, resource = false): Promise<AuthorizedReader | null> {
     const grant = presentedGrant(c);
-    if (!grant) return null;
     const host = bareHost(c.req.header("host"));
-    const claims = await verifyGrant(grant, { ...deps.issuer, host }, deps.grantSecret, now());
-    if (!claims) return null;
     const session = readSessionClaims(c.req.header("cookie"), deps.sessionSecret, now());
+    const parsed = parseContentHost(c.req.header("host"), deps.contentBase);
+    const sealed = session?.resource;
+    // Cookie-only authority is restricted to native files on one pinned host.
+    // An explicitly presented invalid grant never falls back to the cookie.
+    const claims = grant ? await verifyGrant(grant, { ...deps.issuer, host }, deps.grantSecret, now())
+      : resource && parsed.kind === "pinned" && sealed?.host === host && sealed.releaseId === parsed.releaseId &&
+        sealed.issuer === deps.issuer.issuer && sealed.audience === deps.issuer.audience && sealed.tier === deps.issuer.tier
+        ? { ...sealed, expiresAtMs: session!.expiresAt } : null;
+    if (!claims) return null;
     if (!session || session.sid !== claims.sessionId || session.readerSub !== claims.readerSub || session.artifactId !== claims.artifactId) return null;
     const content = parseContentHost(c.req.header("host"), deps.contentBase);
     if (content.kind === "stable" && content.artifactId !== claims.artifactId) return null;
@@ -116,11 +122,11 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     if (deps.isRevoked?.(session.sid)) return null;
     if (!deps.authority) return null;
     try {
-      const version = await deps.authority.getAuthorizationVersion(claims.artifactId);
+      const version = await deps.authority.getAuthorizationVersion(claims.artifactId, claims.readerSub, claims.releaseId);
       if (!version) return null;
       const context = await adaptGrantToReader(claims, deps.authority);
       if (!context) return null;
-      if (await deps.authority.getAuthorizationVersion(claims.artifactId) !== version) return null;
+      if (await deps.authority.getAuthorizationVersion(claims.artifactId, claims.readerSub, claims.releaseId) !== version) return null;
       const reader = { ...context, validUntil: Math.min(claims.expiresAtMs, session.expiresAt), authorityVersion: version };
       return stillOpen(reader) ? reader : null;
     } catch { return null; }
@@ -265,7 +271,7 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
       applyReaderContentHeaders(c);
       return c.json({ error: "not_found" }, 404);
     }
-    const auth = await authorized(c);
+    const auth = await authorized(c, true);
     if (!auth) {
       applyReaderContentHeaders(c);
       if (deps.openingContent && !presentedGrant(c) && (c.req.path === "/" || c.req.path === "/index.html")) {
@@ -285,6 +291,11 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
         }
         applyReaderContentHeaders(c);
         if (file.contentType.startsWith("text/html")) {
+          if (!presentedGrant(c)) {
+            const session = readSessionClaims(c.req.header("cookie"), deps.sessionSecret, now())!;
+            const grant = await mintGrant(session.resource!, deps.grantSecret, now());
+            return c.redirect(`${c.req.path}?grant=${encodeURIComponent(grant)}`, 303);
+          }
           const grant = presentedGrant(c);
           const html = injectGrantIntoHtml(text, grant);
           c.header("Content-Security-Policy", releaseCspForHtml(html));
