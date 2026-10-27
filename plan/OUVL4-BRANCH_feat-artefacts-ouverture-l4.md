@@ -43,6 +43,7 @@
   - [x] Evolve H3 gates for general opening and mode-off rollback; retain the denial boundary checks.
   - [x] Adapt disabled/rehearsal/rollback fixtures and preserve mutation coverage.
   - [x] Check general configuration, routing and secret-reference mutations.
+  - [x] Verify operator recipes with a recording kubectl double, including key custody and rollback.
   - [ ] Run the existing `k8s-validate` recipe without reading `.env`.
   - [ ] Compare production render byte for byte with the baseline.
 - [ ] **Lot 4 — Operator delivery**
