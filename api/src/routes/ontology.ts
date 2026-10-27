@@ -1,3 +1,4 @@
+import { contractSafeParse } from "@radar/domain";
 import { Hono } from "hono";
 import { timingSafeEqual, createHash } from "node:crypto";
 
@@ -282,7 +283,7 @@ export function ontologyRoute(deps: OntologyDeps): Hono {
     }
 
     const city = c.req.param("city");
-    const parsed = ontologyPatchSchema.safeParse(
+    const parsed = contractSafeParse(ontologyPatchSchema,
       await c.req.json().catch(() => null),
     );
     if (!parsed.success) {

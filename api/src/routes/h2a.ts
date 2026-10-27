@@ -1,3 +1,4 @@
+import { contractSafeParse } from "@radar/domain";
 /**
  * EV10: Real h2a coordination journal API (Hono).
  *
@@ -20,7 +21,7 @@ import { z } from "zod";
 import { createJournalStore, type H2AJournalStore } from "../services/h2a/journal-store.js";
 import { RADAR_POLICIES, RADAR_SCOPE } from "../services/h2a/policy.js";
 
-const decisionSchema = z.object({
+export const decisionSchema = z.object({
   kind: z.enum(["qualifier", "surveiller", "approcher"]),
   entity: z.string().trim().min(1).max(200),
   rationale: z.string().trim().max(2000).optional(),
@@ -44,7 +45,7 @@ export function h2aRoute(store: H2AJournalStore = defaultStore): Hono {
 
   /** Record a PRINCIPAL decision + its CONDUCTOR acknowledgement. */
   app.post("/api/h2a/decisions", async (c) => {
-    const parsed = decisionSchema.safeParse(await c.req.json().catch(() => null));
+    const parsed = contractSafeParse(decisionSchema, await c.req.json().catch(() => null));
     if (!parsed.success) {
       return c.json({ error: "Invalid request", details: parsed.error.issues }, 400);
     }
