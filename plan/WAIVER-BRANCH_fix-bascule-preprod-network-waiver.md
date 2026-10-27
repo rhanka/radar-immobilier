@@ -27,4 +27,4 @@
 - [x] Lot 0: read the afternoon refusal report and branch from the requested main SHA.
 - [x] Lot 1: validate the namespace/reference/reason and record a waiver without weakening other checks.
 - [x] Lot 2: 266 hermetic operator cases pass, covering waiver receipts, namespace refusal, absence and preserved guards.
-- [ ] Lot 3: short report, atomic commit audit and verified incremental bundle.
+- [x] Lot 3: short report and atomic commit audit completed; bundle target verifies the incremental delivery by separate import.
