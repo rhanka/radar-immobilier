@@ -74,6 +74,8 @@ isolation, current authorization, transactional quotas and replay safety.
   - [x] Grant the stale-claims fixture its business scope to reach account denial.
   - [x] Derive PG harness types from MCP ports instead of undeclared API packages.
   - [x] Isolate publication fixture windows without changing the minute ceiling.
+  - [x] Enabled provider acceptance exposed two fixture actor ceilings left at
+    one after global budget extension; extend the dedicated actor budget too.
   - [x] Await quota promise results in unit assertions.
   - [x] Bind quota actor to the coordinator input, before approval reads.
   - [x] Require real publication with zero/two memberships and by both MCP actors.
