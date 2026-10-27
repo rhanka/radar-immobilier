@@ -35,4 +35,5 @@
 - [x] Astra lot 1: qualification uses checkout Git and source fingerprints, independently of delivery metadata.
 - [x] Astra lot 2: restore only the saved closed state with UID/resourceVersion preconditions.
 - [ ] Astra lot 3: control alternate routes, exposed ports and enforced consumer pod isolation; otherwise refuse.
+- [x] Astra network controls: read-only inventory, supported policy shape, bound CNI probes and namespace-wide endpoint roster implemented.
 - [ ] Astra lot 4: regression evidence, report correction section and audited incremental bundle.
