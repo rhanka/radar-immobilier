@@ -24,6 +24,7 @@
 - [x] Record rationale, impact and rollback before any conditional-path edit.
 
 ## Feedback Loop
+- [x] L2a: reuse the project validation DTO and error-tree contract from the prepared migration.
 - [x] DEPSSEC3-EX1: owner requires single-line commits without trailers; use the local Make runner.
 - [x] DEPSSEC3-EX2: owner requires a French delivery report; code and other documentation remain English.
 - [x] Shared Git metadata is read-only; use the explicitly authorized local fallback and bundle.

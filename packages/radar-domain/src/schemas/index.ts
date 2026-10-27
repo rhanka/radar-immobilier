@@ -15,3 +15,4 @@ export * from "./municipality.js";
 export * from "./scrape-status.js";
 export * from "./data-quality.js";
 export * from "./prospect-mark.js";
+export * from "../contracts/validation-dto.js";
