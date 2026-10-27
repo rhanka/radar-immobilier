@@ -14,16 +14,17 @@ export const BASKET_READER_PROFILE: ReaderProfile = {
 export function createStoredReader(pool: pg.Pool, scope: string, contentBase: string,
   blobs: Pick<PublicationBlobStore, "getBlob">): { authority: AuthorityReader; releaseFiles: ReleaseFileProvider;
     tickets: SharedReaderTickets; getArtifactIdForRelease: (releaseId: string) => Promise<string | null> } {
-  const artifact = async (id: string) => (await pool.query(
-    `SELECT a.*, a.xmin::text AS revision, c.release_id FROM artifacts.artifacts a
-     JOIN artifacts.artifact_current c ON c.artifact_id=a.id
-     JOIN artifacts.releases r ON r.id=c.release_id AND r.artifact_id=a.id
-     WHERE a.id=$1 AND a.storage_scope_id=$2 AND a.lifecycle_state='active' AND r.state='ready'`,
-    [id, scope])).rows[0];
+  const artifact = async (id: string, releaseId?: string) => (await pool.query(
+    `SELECT a.*, a.xmin::text AS revision, r.id AS release_id,
+       r.xmin::text AS release_revision, r.state AS release_state FROM artifacts.artifacts a
+     JOIN artifacts.releases r ON r.artifact_id=a.id AND r.id=COALESCE($3::uuid,
+       (SELECT release_id FROM artifacts.artifact_current WHERE artifact_id=a.id))
+     WHERE a.id=$1 AND a.storage_scope_id=$2 AND a.lifecycle_state='active' AND r.state IN ('ready','retired')`,
+    [id, scope, releaseId ?? null])).rows[0];
   const authority: AuthorityReader = {
     getContentOrigin: async (id) => await artifact(id) ? `https://${id}.${contentBase}` : null,
-    getRelease: async (id) => {
-      const row = await artifact(id);
+    getRelease: async (id, releaseId) => {
+      const row = await artifact(id, releaseId);
       return row ? { artifactId: row.id, releaseId: row.release_id, authorSub: row.owner_id } : null;
     },
     getProfile: async (id) => await artifact(id) ? BASKET_READER_PROFILE : null,
@@ -37,20 +38,21 @@ export function createStoredReader(pool: pg.Pool, scope: string, contentBase: st
       const approved = account.rowCount === 1 && allowed;
       return { readerSub, artifactId: id, approved, capabilities: approved ? BASKET_READER_PROFILE.capabilities : [] };
     },
-    getAuthorizationVersion: async (id) => {
-      const row = await artifact(id);
+    getAuthorizationVersion: async (id, readerSub, releaseId) => {
+      const row = await artifact(id, releaseId);
       if (!row) return null;
       // Row transaction identities fence delete/reinsert and restore-to-same-value races.
       const state = await pool.query(`SELECT
         (SELECT jsonb_agg(jsonb_build_array(principal_id, permission, xmin::text) ORDER BY principal_id)
-         FROM artifacts.artifact_access WHERE artifact_id=$1) AS acl,
-        (SELECT jsonb_agg(jsonb_build_array(sub, status, xmin::text) ORDER BY sub) FROM account_users) AS accounts`, [id]);
+         FROM artifacts.artifact_access WHERE artifact_id=$1 AND principal_id=$2) AS acl,
+        (SELECT jsonb_build_array(sub, status, xmin::text) FROM account_users WHERE sub=$2) AS account`,
+      [id, readerSub ?? null]);
       return createHash("sha256").update(JSON.stringify([row, state.rows[0], BASKET_READER_PROFILE])).digest("hex");
     },
   };
   return { authority, tickets: createSharedReaderTickets(pool),
     getArtifactIdForRelease: async (releaseId) => (await pool.query(`SELECT a.id FROM artifacts.artifacts a
-      JOIN artifacts.artifact_current c ON c.artifact_id=a.id WHERE c.release_id=$1
+      JOIN artifacts.releases r ON r.artifact_id=a.id WHERE r.id=$1 AND r.state IN ('ready','retired')
       AND a.storage_scope_id=$2 AND a.lifecycle_state='active'`, [releaseId, scope])).rows[0]?.id ?? null,
     releaseFiles: {
     getFile: async (artifactId, releaseId, path) => {
