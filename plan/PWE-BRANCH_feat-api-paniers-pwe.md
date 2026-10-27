@@ -32,6 +32,10 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Join the existing BASE receipt reader into a bounded read transaction,
+  holding I/current-rights locks, auditing receipt reads and masking withdrawn rights.
+- [x] App result GET returns the immutable receipt under its existing cookie guard;
+  no P, old-6L1 comparison, challenge remint or writer is involved.
 - [x] Add app receipt consultation after P/deadline expiry, consumed replay,
   no-op receipts and masking after approval/membership/moderation/intent withdrawal.
 - [x] PWE-EX2: the authorized app result GET omits the immutable receipt
