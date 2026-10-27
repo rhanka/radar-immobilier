@@ -15,6 +15,7 @@ import {
 } from "@radar/artifacts-host";
 import type { AuthConfig } from "../config.js";
 import { controlCacheHeaders } from "./control-cache.js";
+import type { createStoredReader } from "./reader-storage.js";
 import {
   SESSION_COOKIE_NAME,
   verifySession,
@@ -39,6 +40,7 @@ export interface ControlRouteDeps {
    */
   readonly readActivation?: (() => ActivationConfig) | undefined;
   readonly storageScope?: string | undefined;
+  readonly readerStorage?: ReturnType<typeof createStoredReader>;
 }
 
 export const CONTROL_MAX_BODY_BYTES = 2 * 1024 * 1024;
