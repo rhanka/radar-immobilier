@@ -11,7 +11,7 @@ import type { DiscardedSignalsPort } from "../services/graph/discarded-signals.j
 import type { LegacyRetirementState } from "../services/facets/legacy-retirement.js";
 
 export const MCP_SIGNAL_SEARCH_PATH = "/api/v1/mcp/facets/signals/search";
-export const McpWorkspaceId = z.string().uuid().transform((value) => value.toLowerCase());
+export const McpWorkspaceId = z.string().guid().transform((value) => value.toLowerCase());
 const city = z.string().min(1).max(128).regex(/^[a-z0-9]+(?:-+[a-z0-9]+)*$/);
 export const McpSignalSearchInput = z.object({
   city, etape: z.string().optional(), query: z.string().optional(),
