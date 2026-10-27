@@ -1,3 +1,4 @@
+import { contractUrl } from "../contracts/validation-url.js";
 import { contractInteger } from "../contracts/validation-number.js";
 import { contractDateTime } from "../contracts/validation-datetime.js";
 import { z } from "zod";
@@ -64,7 +65,7 @@ export const ScrapeStatus = z.object({
   /** ISO-8601 timestamp of the last collection run. */
   lastRunAt: contractDateTime().optional(),
   /** URL of the data source website. */
-  siteUrl: z.string().url().optional(),
+  siteUrl: contractUrl().optional(),
   dataQuality: ScrapeStatusDataQuality.optional(),
   notes: z.string().optional(),
 });

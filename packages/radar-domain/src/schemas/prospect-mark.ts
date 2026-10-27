@@ -1,3 +1,4 @@
+import { contractUrl } from "../contracts/validation-url.js";
 import { z } from "zod";
 
 /**
@@ -62,7 +63,7 @@ export const ProspectMark = z.object({
 
   // Champs marché (null pour dimension pipeline)
   prixDemande: z.string().nullable().optional(),  // NUMERIC sérialisé en string par pg
-  lienAnnonce: z.string().url().nullable().optional(),
+  lienAnnonce: contractUrl().nullable().optional(),
 
   createdAt: z.string().min(4),
 });
@@ -100,7 +101,7 @@ export const ProspectMarkMarcheInput = z.object({
   authorId: z.string().guid(),
   supersedes: z.string().guid().optional(),
   prixDemande: z.number().positive().optional(),
-  lienAnnonce: z.string().url().optional(),
+  lienAnnonce: contractUrl().optional(),
 });
 export type ProspectMarkMarcheInputT = z.infer<typeof ProspectMarkMarcheInput>;
 

@@ -1,3 +1,4 @@
+import { contractUrl } from "@radar/domain";
 import { contractParse, contractSafeParse } from "@radar/domain";
 import { z } from "zod";
 
@@ -36,7 +37,7 @@ export const PvIndexItem = z.object({
   /** Title / file name of the PV as displayed in the index. */
   title: z.string().min(1),
   /** Absolute URL of the PV document (HTML or PDF). */
-  url: z.string().url(),
+  url: contractUrl(),
   /**
    * ISO date when parseable from the title/context, else NON_DISPONIBLE.
    * Full dates yield "YYYY-MM-DD"; month-year-only labels yield "YYYY-MM".
