@@ -32,6 +32,8 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Add HW-04 same-sub issuer/tier cases from actual callback sessions and
+  verified grants, testing the comparator before foreign-cookie rejection.
 - [x] Persist intents from verified grants following normal callback sessions,
   with separate SQL stores and per-domain session/write/challenge key references.
 - [x] Scoped C03/C07 gate: 18 passed/0 failed/0 skipped, typecheck/lint passed.
