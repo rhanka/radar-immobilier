@@ -13,7 +13,8 @@ check() {
   fi
   PASS=$((PASS + 1)); echo "ok: $1"
 }
-cp "$HERE/fixtures/kfilter/render.yaml" "$T/lf"
+# Escaped JSON lines make intentional trailing whitespace visible in the fixture.
+jq -r '.[]' "$HERE/fixtures/kfilter/render.json" >"$T/lf"
 awk '{ printf "%s\r\n", $0 }' "$T/lf" >"$T/crlf"
 awk '{ printf "%s\r", $0 }' "$T/lf" >"$T/cr"
 awk '{ printf "%s%s", sep, $0; sep="\n" }' "$T/lf" >"$T/no-final-newline"
