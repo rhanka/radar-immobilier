@@ -12,7 +12,8 @@ export const BASKET_READER_PROFILE: ReaderProfile = {
 };
 
 export function createStoredReader(pool: pg.Pool, scope: string, contentBase: string,
-  blobs: Pick<PublicationBlobStore, "getBlob">): { authority: AuthorityReader; releaseFiles: ReleaseFileProvider; tickets: SharedReaderTickets } {
+  blobs: Pick<PublicationBlobStore, "getBlob">): { authority: AuthorityReader; releaseFiles: ReleaseFileProvider;
+    tickets: SharedReaderTickets; getArtifactIdForRelease: (releaseId: string) => Promise<string | null> } {
   const artifact = async (id: string) => (await pool.query(
     `SELECT a.*, a.xmin::text AS revision, c.release_id FROM artifacts.artifacts a
      JOIN artifacts.artifact_current c ON c.artifact_id=a.id
@@ -47,7 +48,11 @@ export function createStoredReader(pool: pg.Pool, scope: string, contentBase: st
       return createHash("sha256").update(JSON.stringify([row, state.rows[0], BASKET_READER_PROFILE])).digest("hex");
     },
   };
-  return { authority, tickets: createSharedReaderTickets(pool), releaseFiles: {
+  return { authority, tickets: createSharedReaderTickets(pool),
+    getArtifactIdForRelease: async (releaseId) => (await pool.query(`SELECT a.id FROM artifacts.artifacts a
+      JOIN artifacts.artifact_current c ON c.artifact_id=a.id WHERE c.release_id=$1
+      AND a.storage_scope_id=$2 AND a.lifecycle_state='active'`, [releaseId, scope])).rows[0]?.id ?? null,
+    releaseFiles: {
     getFile: async (artifactId, releaseId, path) => {
       const normalized = normalizeReleasePath(path);
       if (!normalized) return null;
