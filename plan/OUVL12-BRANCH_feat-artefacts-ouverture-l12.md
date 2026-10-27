@@ -36,6 +36,11 @@ isolation, current authorization, transactional quotas and replay safety.
 - [x] Shared Git metadata is read-only: use local Git metadata and audit a bundle
   against the original base in a fresh repository; do not push.
 - [x] Owner instruction overrides commit trailers and report language.
+- [x] blocked: the resumed qualification waited over three hours for the shared
+  machine; `test-e2-int-postgres-1` remained active. Test gates and mutations
+  have not executed. Resume requires the foreign stack to finish and release.
+- [x] Repaired local queue control: stop proxy signals left child waiters;
+  removed only this workspace's duplicates and added graceful file cancellation.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch integration; no cherry-pick.
