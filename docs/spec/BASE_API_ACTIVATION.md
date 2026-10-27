@@ -519,14 +519,16 @@ Closure requires no Traefik CRD or cluster-scoped installation. Set
 `maintenance.service` to a fresh `base-maintenance-<attempt>` Service name and
 `maintenance.ingresses` to **every** namespace Ingress, including content hosts.
 The tool refuses incomplete coverage. Before any routing mutation it saves
-`ingress-snapshot.json` (binding, image, name, UID, complete spec). Original
+`ingress-snapshot.json` (binding, image, name, UID, resourceVersion, complete spec). Original
 replicas/images, CronJob suspend states/schedules, Jobs, relevant annotations
 and workflow state are also retained. Restricted evidence is checksummed on exit.
 
 It creates a selectorless ClusterIP Service on port 80, checks that neither
 EndpointSlices nor legacy Endpoints contain addresses, and rewrites **all**
 Ingress path backends and default backends to that Service. JSON Patch tests
-the original UID and complete spec before replacing the spec. Hosts, TLS,
+the original UID, resourceVersion and complete spec before replacing the spec.
+Each patch response records the closed spec and resourceVersion in
+`closedIngresses` inside the snapshot. Hosts, TLS,
 Ingress class and annotations, including existing middleware chains, survive.
 All public callers, including the operator, receive refusal (normally HTTP
 503; controller handling of an empty backend can also produce 404). No status
@@ -549,6 +551,44 @@ copy credentials into evidence. The operator needs `pods/portforward` create
 authority for this tunnel. Keep full route snapshots in restricted evidence
 storage, never environment dumps or document content.
 
+Ingress routing alone does not close direct network paths. Before closure or
+API access, the tool inventories **all** namespace Services, EndpointSlices,
+legacy Endpoints, pod/workload host networking and discoverable alternative
+routes. It refuses NodePort, LoadBalancer, ExternalName, external IPs, nodePort
+fields, unready address publishing, hostNetwork and hostPort (including init
+containers and suspended workload templates). Nonempty alternative route or
+custom network-policy resources, including Gateway API/Traefik routes, are
+unsupported and refused; failed discovery/list permissions also fail closed.
+During closed maintenance, every ready endpoint must identify an inventoried
+database pod by name and UID. Q1/Q2 may additionally admit qualified API-image
+pods under the verified network boundary. There is no three-Service exception.
+
+The supported policy shape is namespace-wide default-deny ingress. Additive
+ingress grants may target database pods exclusively, or admit only Traefik
+pods (`app.kubernetes.io/name=traefik`) in namespace `traefik` or `kube-system`,
+using both pod and namespace selectors. Broad intra-namespace/UI/MCP grants,
+IP blocks and unsupported selectors are refused, even if currently unused.
+The tool **does not install or rewrite policies**. An administrator must prepare
+and independently verify this isolation before attempting maintenance; existing
+policies are never assumed compatible. Required permissions stay namespace-scoped.
+
+Supply `maintenance.networkIsolation`: an attestation with exact `binding`,
+`image`, `context`, `namespace`, immutable `reference`/`sha256`, fresh UTC
+`observedAt` (at most 24 hours), `passed:true`, `policySha256`, and true
+`networkPolicyEnforced`, `podIPDenied`, `serviceIPDenied`, `nodeOriginDenied`.
+`policySha256` hashes the newline-terminated canonical output of:
+`jq -Sc '[.items[]|{metadata:(.metadata|{name,uid,resourceVersion}),spec}]|sort_by(.metadata.name)'`
+on the live NetworkPolicy list. Inventory receipts retain that hash and the
+full attestation. The probes must exercise consumer-selected canaries/pods,
+direct pod IPs and Service IPs from same-node, other-node, cross-namespace and
+node-origin sources, plus public/alternative ports; keep the actual probe
+results and source/node coverage. Kubernetes policy acceptance is **not** proof
+that the CNI enforces it, and node-origin exceptions must be tested explicitly.
+The authenticated administrator tunnel remains the qualified exception.
+Missing/expired/foreign probes, changed policies, unsupported CNI or failed
+probes cause an explicit refusal. Do not set a boolean from inference. Cluster
+support and direct-network closure remain unverified until these real probes pass.
+
 If closure must be undone while consumers are still stopped, explicitly restore
 the saved complete specs, using the same binding/image and independent roster:
 
@@ -558,8 +598,16 @@ rtk make -f deploy/base-preprod/operator.mk restore-ingresses INPUT='<OWNER_INPU
 
 Restoration requires frozen CD, full closure, no surviving process/active Job,
 zero consumer replicas/endpoints and suspended CronJobs. It checks **all** saved
-Ingress UIDs before the first patch, tests UID/current spec on every patch,
-then compares every restored spec with the snapshot. It never restarts a
+Ingress UIDs before the first patch and compares **every** current spec with
+the closed state derived from the initial snapshot, as well as its saved
+post-closure resourceVersion. Host, TLS or metadata/version divergence is
+refused before any patch. Each restoration patch atomically tests the saved
+UID/resourceVersion/closed spec, then replaces only the spec. A concurrent
+write between preflight and patch fails explicitly; it is never accepted as
+the new baseline. Final readback compares the restored specs with the initial
+snapshot, ignoring the resourceVersion advanced by restoration itself.
+Old snapshots without complete `closedIngresses` versions are refused.
+The tool never restarts a
 consumer, unsuspends a schedule, reenables CD or changes database state. An
 identity/concurrent-change/readback failure retains evidence and requires
 inspection; no automatic rollback is attempted. The empty refusal Service can
