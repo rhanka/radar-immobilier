@@ -7,6 +7,7 @@ allowed() {
   case $1 in
     api/src/artifacts/write-intent-transaction.ts|api/drizzle/*) return 2;;
     api/src/artifacts/write-intent-page.ts|api/src/artifacts/write-intent-page-harness.ts|api/src/artifacts/write-intent-page-budget.ts) ;;
+    api/src/artifacts/write-intent-app-route.ts|api/src/artifacts/write-intent-app-authority.ts|api/src/artifacts/write-intent-app-result.ts|api/src/services/facets/signal-write-receipt.ts) ;;
     api/tests/integration/pwe-*.ts|e2e/tests/pwe/*|api/src/services/facets/pwe-*.ts|api/src/artifacts/pwe-*.ts) ;;
     tools/make/base-api-pwe*|plan/PWE-BRANCH_feat-api-paniers-pwe.md) ;;
     *) echo "Out of PW-E scope: $1" >&2; return 2;;
