@@ -31,7 +31,8 @@ describeDb("PW-A summary rights and technical management", () => {
       const management = await a.request(path, { headers: { cookie } });
       expect(management.status).toBe(200);
       const data = await management.json();
-      expect(data).toEqual({ intentId: id, management: true, csrf: expect.any(String) });
+      expect(data).toEqual({ intentId: id, management: true, csrf: expect.any(String),
+        ...(path.startsWith(APP) ? { state: "pending" } : {}) });
       if (path.startsWith(APP)) {
         const revoked = await a.request(`${APP}/${id}/revoke`, { method: "POST", headers: { cookie,
           origin: a.writeApp.domain.appOrigin, "content-type": "application/json",

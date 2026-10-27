@@ -9,6 +9,7 @@ allowed() {
   case $1 in
     api/src/artifacts/write-intent-transaction.ts) return 2;;
     api/src/artifacts/write-intent-*|api/src/artifacts/content-serve.ts|api/src/artifacts/content-serve.test.ts) ;;
+    api/tests/integration/pw-write-authority-rights.spec.ts) ;;
     ui/nginx/default.conf|deploy/k8s/nginx/default.conf|tools/make/base-api-pwc*) ;;
     plan/PWC-BRANCH_feat-api-paniers-pwc.md) ;;
     *) echo "Out of scope: $1" >&2; return 2;;
@@ -37,7 +38,7 @@ audit() {
     g show -s --format='%H %s' "$commit"
   done
   while IFS= read -r path; do allowed "$path"; done < <(g diff --name-only "$BASE" HEAD)
-  g diff --quiet HEAD -- api/src/artifacts tools/make/base-api-pwc* ui/nginx/default.conf deploy/k8s/nginx/default.conf plan/PWC-BRANCH_feat-api-paniers-pwc.md
+  g diff --quiet HEAD -- api/src/artifacts api/tests/integration/pw-write-authority-rights.spec.ts tools/make/base-api-pwc* ui/nginx/default.conf deploy/k8s/nginx/default.conf plan/PWC-BRANCH_feat-api-paniers-pwc.md
   g diff --quiet "$BASE" HEAD -- api/src/artifacts/write-intent-transaction.ts
 }
 case ${1:-} in

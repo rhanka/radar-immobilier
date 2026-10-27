@@ -22,7 +22,7 @@ check() {
   [[ $code == 0 ]] || overall=1
 }
 check typecheck npm run typecheck --workspace=api
-check eslint bash -ec 'node_modules/.bin/eslint api/src/artifacts/write-intent-*.ts api/src/artifacts/content-serve*.ts tools/make/base-api-pwc*.mjs'
+check eslint bash -ec 'node_modules/.bin/eslint api/src/artifacts/write-intent-*.ts api/src/artifacts/content-serve*.ts api/tests/integration/pw-write-authority-rights.spec.ts tools/make/base-api-pwc*.mjs'
 check build npm run build --workspace=api
 check nginx bash deploy/k8s/nginx/check-header-parity.sh
 check nginx-proxy node tools/make/base-api-pwc-nginx.mjs
