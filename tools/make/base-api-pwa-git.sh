@@ -4,6 +4,9 @@ set -euo pipefail
 git merge-base --is-ancestor 39ed4f1b HEAD
 allowed() {
   case $1 in
+    api/drizzle/0025_pw_write_persistence.sql|api/drizzle/0027_pw_write_persistence.sql|api/drizzle/meta/_journal.json|\
+    api/src/db/schema.ts|api/src/services/facets/pw-write-migration-db.test.ts|docs/spec/PW_D_PERSISTENCE.md|\
+    tools/make/base-api-pwd-commit.sh|tools/make/base-api-pwd-deliver.sh|tools/make/base-api-pwd-corrections-deliver.sh) ;;
     api/src/artifacts/write-*|api/src/app.ts|api/src/config.ts|api/tests/integration/pw-write-authority*|\
     api/tests/integration/pw-write-createapp.spec.ts|tools/make/base-api-pwa*|plan/PWA-BRANCH_feat-api-paniers-pwa.md) ;;
     *) echo "Out of scope: $1" >&2; return 2;;

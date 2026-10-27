@@ -8,7 +8,7 @@ ROOT=$(pwd -P)
 PROJECT=radar-$ENV
 ACTION=ci-api
 PWA_MODE=${PWA_MODE:-full}
-[[ $PWA_MODE == full || $PWA_MODE == mcp || $PWA_MODE == scoped ]]
+[[ $PWA_MODE == full || $PWA_MODE == mcp || $PWA_MODE == scoped || $PWA_MODE == sequence ]]
 SCOPE=${SCOPE:-$(git ls-files --cached --others --exclude-standard -- 'api/src/artifacts/write-*.test.ts' \
   'api/tests/integration/pw-write-authority*.spec.ts' api/tests/integration/pw-write-createapp.spec.ts \
   'api/src/services/facets/pw-write-*.test.ts' | sed 's#^api/##')}
@@ -108,7 +108,7 @@ MONITOR=$!
 docker image inspect --format '{{.Id}} {{json .RepoDigests}}' \
   node:24-bookworm-slim postgis/postgis:16-3.4 adobe/s3mock:3.12.0 > "$LOG_DIR/image-ids.txt"
 "${compose[@]}" run --rm --no-deps -T api bash -ec \
-  'tar -xf /source.tar -C /workspace; exec bash tools/make/base-api-pwa-container.sh "$1" "$2"' -- "$SCOPE" "$PWA_MODE" \
+  'tar -xf /source.tar -C /workspace; exec bash tools/make/base-api-pwa-container.sh "$1" "$2" "$3"' -- "$SCOPE" "$PWA_MODE" "${PWA_CI:-1}" \
   > >(tee "$LOG_DIR/campaign.log") 2>&1 &
 RUN_PID=$!
 wait "$RUN_PID"

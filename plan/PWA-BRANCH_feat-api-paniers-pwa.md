@@ -33,6 +33,9 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
     PW_D_PERSISTENCE.md and the three PW-D delivery/commit helpers: PWA-EX5.
 
 ## Feedback Loop
+- [x] Owner-targeted sequence runner checks fresh/upgrade/replay, all PW-A/PW-D
+  PostgreSQL cases and static gates; optional API CI is recorded explicitly.
+- [ ] Qualify 0027 and audit an incremental bundle from approved 509e664d.
 - [x] PWA-EX5: owner orders published quota 0025, reader tickets 0026,
   then PW-A persistence 0027. Merge main c189c188 after PRs 930/931,
   preserve all incoming SQL/journal bytes, rename approved DDL unchanged,
