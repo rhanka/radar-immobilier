@@ -24,6 +24,7 @@
 - [x] Record rationale, impact and rollback before any conditional-path edit.
 
 ## Feedback Loop
+- [x] L2o: retain full API issue payload and non-finite input regressions.
 - [x] L2n: preserve MCP scalar diagnostics, integer bounds and historical GUIDs.
 - [x] L2m: use native Zod 4 JSON Schema on the current stateful MCP composition.
 - [x] L2l: align graph mocks and integration imports with Engram.
