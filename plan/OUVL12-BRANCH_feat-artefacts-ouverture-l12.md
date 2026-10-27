@@ -126,7 +126,11 @@ isolation, current authorization, transactional quotas and replay safety.
   - [x] Remove minute mutations from commit policy; only durable quotas roll back.
   - [x] Update PG accounting to retain admitted attempts on later refusal;
     include direct publication replay suspension to exercise the coordinator.
-  - [ ] Reproduce replay at the tenth success through HTTP and MCP façades.
+  - [x] Reproduce replay at the tenth success through HTTP and MCP façades.
+  - [x] Reproduce three S3 uploads for one remaining unit and refunded failed
+    attempts on the old head; six new assertions fail against that baseline.
+  - [x] Read replay storage scope on the leased client; the provider's publication
+    authorization projection contains owner/state, not storage scope.
   - [ ] Count S3 calls on the last concurrent attempt and exhausted durable quota.
   - [ ] Implement shared guarded replay and atomic pre-upload attempt admission.
   - [ ] Verify suspension denial and mode-specific account binding.

@@ -34,8 +34,10 @@ export async function replayPublication(options: {
     async guard(context, transaction) {
       if (!client) throw new Error("publication replay transaction unavailable");
       const { state, acl } = await createPostgresPublicationUnitWriter(client).readAuthorization(artifactId);
+      const object = await client.query<{ storage_scope_id: string }>(
+        "SELECT storage_scope_id FROM artifacts.artifacts WHERE id=$1", [artifactId]);
       const verdict = decidePublishAuthorization({ lifecycleState: state, acl, actorId: context.actorId });
-      if (acl?.storageScopeId !== invocation.storageScopeId || !verdict.allowed) {
+      if (object.rows[0]?.storage_scope_id !== invocation.storageScopeId || !verdict.allowed) {
         return { allowed: false, reason: "denied", publicCode: "access_denied", status: 403, retriable: false };
       }
       return invocation.authorizeCommit(context, transaction);
