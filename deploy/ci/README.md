@@ -135,8 +135,32 @@ debugging, but this is **best-effort and voie-dependent**:
 | `rollback-release.sh` | Roll a Deployment back to a prior image. |
 | `reconcile-preprod.sh` | Targeted server-side apply of preprod manifests. |
 | `check-preprod-auth-isolation.sh` | Fails if the rendered preprod overlay carries a PROD auth value (PROD IdP/app host outside `preprod.`, client id `radar-immobilier`) or if ConfigMap `radar-api` does not pin the preprod OIDC keys. Run by CI and by `reconcile-preprod.sh` before any apply. |
-| `kfilter.py` | Manifest filter used by the reconcile step. |
+| `kfilter.sh`, `kfilter.jq` | jq manifest filter used by reconcile; retains the original YAML text, document order and fields. |
+| `check-no-python.sh` | CI guard rejecting Python source, bytecode and packages under `deploy/`, including linked paths (#851, #810). |
 | `*.test.sh` | Shell tests for the runners above. |
+
+The filter needs Bash, jq and iconv, available on the Ubuntu CD runner. Usage:
+`bash deploy/ci/kfilter.sh [--names] [--name-prefix P] <render> <Kind> [<name>]`.
+It uses the former canonical kustomize field scan (top-level `kind:` and the
+first two-space `name:`); it never parses or serializes YAML. Golden fixtures
+cover exact/prefix/name-only selection, empty results, missing names, literal
+blocks, tabs, Unicode and newline normalization. `kfilter.test.sh` also compares
+whole preprod documents against an independent awk selector. The hermetic
+reconcile suite rejects every attempted Python invocation.
+
+The entire input must decode as strict UTF-8 before the filter emits anything.
+`iconv -f UTF-8 -t UTF-16LE` validates Unicode scalar values; its output is
+discarded. An identity UTF-8 conversion would accept some out-of-range values.
+`jq --rawfile` then reads the original file without splitting multibyte characters
+at raw-input buffer boundaries. Fixtures include long literal lines, malformed
+sequences and a selected document ending at its name field without a final LF.
+
+The deploy guard follows linked directories with `find -L` and checks both each
+exposed filename and its resolved target (`realpath -e`). Matching ignores case
+for `.py`, `.pyw`, `.pyi`, `.pyc`, `.pyo`, `.pyd`, `.pyz`, `.pyzw`, `.whl` and
+`.egg`. Traversal errors, cycles and unresolved links fail the guard. Benign
+links, documentation such as `README.py.md` and ordinary directories named
+`cache.py` remain accepted. These native utilities are present on Ubuntu runners.
 
 ## Resumable whole-bucket inventory
 
