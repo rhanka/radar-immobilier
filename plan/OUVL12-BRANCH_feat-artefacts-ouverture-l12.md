@@ -123,6 +123,8 @@ isolation, current authorization, transactional quotas and replay safety.
   - [x] Remove façade rate probes; preserve the shared retryable 429 over HTTP/MCP.
   - [x] Delete the obsolete read-only rate authority and test atomic admission.
   - [x] Remove minute mutations from commit policy; only durable quotas roll back.
+  - [x] Update PG accounting to retain admitted attempts on later refusal;
+    include direct publication replay suspension to exercise the coordinator.
   - [ ] Reproduce replay at the tenth success through HTTP and MCP façades.
   - [ ] Count S3 calls on the last concurrent attempt and exhausted durable quota.
   - [ ] Implement shared guarded replay and atomic pre-upload attempt admission.
