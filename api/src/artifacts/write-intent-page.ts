@@ -260,8 +260,75 @@ const PW_PAGE_SCRIPT_POLL = `
     stopPoll();
     reveal("#pw-write-manual");
   }
+  async function tick() {
+    poll.timer = null;
+    if (poll.stopped) return;
+    if (poll.inFlight) { schedule(INTERVAL_MS); return; }
+    if (document.hidden) { schedule(INTERVAL_MS); return; }
+    var now = Date.now();
+    if ((now - poll.startedAt) >= WINDOW_MS || poll.count >= MAX_POLLS) {
+      stopPoll();
+      say("Result to verify. Use the manual check below.");
+      reveal("#pw-write-manual");
+      return;
+    }
+    poll.inFlight = true;
+    poll.count += 1;
+    var intentId = poll.intentId;
+    try {
+      var out = await checkOnce(intentId);
+      if (intentId !== poll.intentId) return;
+      handleStatus(out);
+      var state = out.data && out.data.data ? out.data.data.state : "";
+      if (!poll.stopped && !TERMINAL[state] && poll.timer === null) schedule(INTERVAL_MS);
+    } catch (err) {
+      if (intentId !== poll.intentId) return;
+      say("Result to verify. Use the manual check below.");
+      stopPoll();
+      reveal("#pw-write-manual");
+    } finally {
+      poll.inFlight = false;
+    }
+  }
+  function startPoll(intentId) {
+    if (poll.intentId === intentId) return;
+    stopPoll();
+    poll.intentId = intentId;
+    poll.startedAt = Date.now();
+    poll.count = 0;
+    poll.stopped = false;
+    schedule(INTERVAL_MS);
+  }
+  window.__pwWriteFollowUp = startPoll;
+  var manualBtn = $("#pw-write-manual");
+  if (manualBtn) manualBtn.addEventListener("click", async function () {
+    if (poll.intentId === null || poll.inFlight) return;
+    var now = Date.now();
+    if (now - (manualBtn.dataset.pwLast || 0) < MANUAL_SPACING_MS) {
+      say("Wait before checking again.");
+      return;
+    }
+    manualBtn.dataset.pwLast = now;
+    stopPoll();
+    var intentId = poll.intentId;
+    poll.inFlight = true;
+    try {
+      var out = await checkOnce(intentId);
+      if (intentId !== poll.intentId) return;
+      handleStatus(out, true);
+    } catch (err) {
+      if (intentId !== poll.intentId) return;
+      say("Result to verify. Try the manual check again later.");
+    } finally {
+      poll.inFlight = false;
+    }
+  });
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden && !poll.stopped && poll.timer === null && !poll.inFlight) schedule(INTERVAL_MS);
+  });
 })();
 `;
+
 export const PW_PAGE_SCRIPT = `${PW_PAGE_SCRIPT_PREPARE}\n${PW_PAGE_SCRIPT_POLL}`;
 
 export const PW_PAGE_SCRIPT_HASH = createHash("sha256")
