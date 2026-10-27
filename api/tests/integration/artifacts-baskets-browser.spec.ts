@@ -12,7 +12,7 @@ describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("published H
   beforeAll(async () => { h = await startHarness("l3browser", ["author-alice"]); });
   afterAll(async () => { await h?.close(); });
   it.each([{ eol: "\n", republish: false }, { eol: "\r\n", republish: false }, { eol: "\n", republish: true }])(
-    "should read each reader's baskets through native imports with $eol and republish=$republish", async ({ eol, republish }) => {
+    "should read baskets through quoted HTML attributes and parameterized navigation with $eol and republish=$republish", async ({ eol, republish }) => {
     const f = await publishedBaskets(h, { native: true, eol });
     let releases = [{ host: f.host, version: "one" }];
     if (republish) {
@@ -53,6 +53,7 @@ describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("published H
         const errors: string[] = [];
         page.on("pageerror", (error) => errors.push(error.message));
         const diagnostics: unknown[] = [];
+        let htmlCsp = "";
         const pending: Promise<void>[] = [];
         const redact = (value: string) => value.replace(/([?&](?:grant|ticket|binding)=)[^&\s"'<>]+/g, "$1[redacted]")
           .replace(/eyJ[\w-]+\.[\w-]+\.[\w-]+/g, "[redacted]");
@@ -60,6 +61,8 @@ describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("published H
         page.on("requestfailed", (request) => diagnostics.push({ url: redact(request.url()), failure: request.failure() }));
         page.on("response", (response) => {
           const url = new URL(response.url());
+          if (url.host.endsWith(".pages.example.test") && response.status() === 200 &&
+            response.headers()["content-type"]?.startsWith("text/html")) htmlCsp = response.headers()["content-security-policy"] ?? "";
           diagnostics.push({ url: redact(url.href), status: response.status(),
             csp: response.headers()["content-security-policy"], referrerPolicy: response.headers()["referrer-policy"] });
           if (url.pathname.startsWith("/__reader/api/")) pending.push(response.text().then((body) => {
@@ -83,8 +86,32 @@ describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("published H
           expect(await page.locator("body").getAttribute("data-inline-ready")).toBe("1");
           expect(await page.locator("body").getAttribute("data-dynamic-ready")).toBe("1");
           expect(await page.locator("body").getAttribute("data-version")).toBe(version);
+          expect(await page.locator("script[data-label]").getAttribute("data-label")).toBe("a>b");
+          const inlineHash = await page.locator("script[data-label]").evaluate(async (script) => {
+            const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(script.textContent ?? ""));
+            return btoa(String.fromCharCode(...new Uint8Array(hash)));
+          });
+          expect(htmlCsp).toContain(`'sha256-${inlineHash}'`);
           expect(await page.locator("body").evaluate((body) => getComputedStyle(body).color)).toBe("rgb(17, 34, 51)");
           expect(page.url()).not.toContain("grant=");
+          const navigation = new URL("/index.html", page.url());
+          navigation.searchParams.set("workspaceId", f.data.workspaceId);
+          navigation.searchParams.set("citySlug", "synthetic-city");
+          const h5 = page.waitForResponse((response) => new URL(response.url()).pathname === "/__reader/api/baskets.search.v1");
+          const navigationStarted = Date.now();
+          expect((await page.goto(navigation.href))?.status()).toBe(200);
+          await page.waitForFunction((matched) => document.body.dataset.matched === String(matched), count, { timeout: 1500 });
+          const result = await h5;
+          expect(result.status()).toBe(200);
+          expect((await result.json()).counts.matched).toBe(count);
+          expect(new URL(result.url()).searchParams.get("workspaceId")).toBe(f.data.workspaceId);
+          expect(new URL(result.url()).searchParams.get("citySlug")).toBe("synthetic-city");
+          expect(new URL(page.url()).searchParams.get("workspaceId")).toBe(f.data.workspaceId);
+          expect(new URL(page.url()).searchParams.get("citySlug")).toBe("synthetic-city");
+          expect(page.url()).not.toContain("grant=");
+          await Promise.all(pending);
+          console.log(JSON.stringify({ readerMatched: count, navigation: true,
+            elapsedMs: Date.now() - navigationStarted, diagnostics }));
           expect(await page.evaluate(async () => (await fetch("/api/v1/workspaces")).status)).toBe(401);
           expect(await page.evaluate(async () => (await fetch("/sw.js")).status)).toBe(404);
           expect(statuses).toMatchObject({ "/": 200, "/main.js": 200, "/style.css": 200,

@@ -39,9 +39,11 @@ export async function publishedBaskets(h: Harness, options: { native?: boolean; 
     { path: "index.html", mimeType: "text/html", text: '<!doctype html><link rel="stylesheet" href="/style.css"><body><script src="/main.js"></script></body>' },
     { path: "style.css", mimeType: "text/css", text: "body{color:rgb(17, 34, 51)}" },
     { path: "main.js", mimeType: "text/javascript", text:
-      `const grant=new URLSearchParams(location.search).get('grant');` +
-      `history.replaceState(null,'',location.pathname);` +
-      `fetch('/__reader/api/baskets.search.v1?${query}',{headers:{'x-preview-grant':grant}})` +
+      `const params=new URLSearchParams(location.search),grant=params.get('grant');params.delete('grant');` +
+      `history.replaceState(null,'',location.pathname+(params.size?'?'+params:''));` +
+      `const selection=location.pathname==='/index.html'?new URLSearchParams({workspaceId:params.get('workspaceId')??'',` +
+      `citySlug:params.get('citySlug')??'',basket:'pertinent'}):new URLSearchParams('${query}');` +
+      `fetch('/__reader/api/baskets.search.v1?'+selection,{headers:{'x-preview-grant':grant}})` +
       `.then(r=>r.json()).then(r=>{document.body.dataset.matched=String(r.counts.matched);` +
       `document.body.dataset.cookies=document.cookie;document.body.textContent=r.items.map(i=>i.target.id).join(',')});` },
   ];
@@ -51,7 +53,7 @@ export async function publishedBaskets(h: Harness, options: { native?: boolean; 
       's.src="/dynamic.js?v=1";', "s.onload=resolve;document.head.append(s);", "});",
       'document.body.dataset.inlineReady="1";'].join(options.eol ?? "\n");
     files[0]!.text = '<!doctype html><link rel="stylesheet" href="/style.css"><body data-version="one">' +
-      `<script>${inline}</script><script type="module" src="/main.js"></script></body>`;
+      `<script data-label="a>b" data-note='two words > three'>${inline}</script><script type = "module" src="/main.js"></script></body>`;
     files[1]!.text = '@import url("./theme.css");';
     files[2]!.text = 'import {readPage} from "./baskets.js";await window.dynamicLoaded;readPage();';
     files.push({ path: "baskets.js", mimeType: "text/javascript", text: `export function readPage(){${read}}` },

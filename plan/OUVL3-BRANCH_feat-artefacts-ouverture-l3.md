@@ -67,6 +67,7 @@ Connect published release files and H5 reads to current account/workspace author
 - [x] OUVL3-EX3: allow `api/package.json` and `package-lock.json` to promote existing parse5 7.3.0 to a direct runtime dependency for browser-compatible HTML parsing. Impact: existing parser/entities remain in production installs; rollback: remove that direct dependency with its parser call.
 - [ ] Extract inline text with the HTML parser and preserve every navigation parameter while changing only grant.
 - [x] Replace inline-block regex extraction with parse5's HTML tree; regress quoted greater-than/spaces and apparent scripts in attributes, comments and textareas. Browser acceptance follows below.
+- [x] Preserve the request URL's query when setting its sole grant; test repeated parameters and empty prior grants, and extend Chromium to compare the interpreted script hash and read baskets after parameterized navigation.
 - [ ] Qualify artifact units, PostgreSQL reader, Chromium, both corrective mutations and API CI under the shared lock; clean volumes and deliver a bundle from `a3aa18e0`.
 
 ## Orchestration Mode (AI-selected)

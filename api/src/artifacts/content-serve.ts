@@ -302,7 +302,9 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
           if (!presentedGrant(c)) {
             const session = readSessionClaims(c.req.header("cookie"), deps.sessionSecret, now())!;
             const grant = await mintGrant(session.resource!, deps.grantSecret, now());
-            return c.redirect(`${c.req.path}?grant=${encodeURIComponent(grant)}`, 303);
+            const target = new URL(c.req.url);
+            target.searchParams.set("grant", grant);
+            return c.redirect(`${target.pathname}${target.search}`, 303);
           }
           const html = normalizeReleaseHtml(text);
           c.header("Content-Security-Policy", releaseCspForHtml(html));

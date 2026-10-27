@@ -3,7 +3,7 @@ import { createReaderContentApp } from "./content-serve.js";
 import { createFixtureAuthority, fingerprintReaderProfile } from "./reader-profile.js";
 import { createMemoryReleaseFiles } from "./release-files.js";
 import { mintSessionCookie } from "./preview-session.js";
-import { mintGrant } from "./preview-grant.js";
+import { mintGrant, verifyGrant } from "./preview-grant.js";
 import { GRANT_SECRET, SESSION_SECRET, ISSUER, HOST } from "./reader-test-fixture.js";
 
 const artifactId = "123e4567-e89b-12d3-a456-426614174000";
@@ -14,6 +14,24 @@ const resource = { ...ISSUER, artifactId, releaseId, host, readerSub: "reader-al
     name: "demo", policyRevision: "pol-001", capabilities: ["geo.read", "signals.protected-read"] }) };
 
 describe("native pinned release resources", () => {
+  it.each(["", "&grant=&grant="])("should retain all navigation parameters when issuing only the grant (%s)", async (extra) => {
+    const app = createReaderContentApp({ contentBase: "pages.example.test", issuer: ISSUER,
+      grantSecret: GRANT_SECRET, sessionSecret: SESSION_SECRET, now: () => 60_000,
+      authority: createFixtureAuthority(), releaseFiles: createMemoryReleaseFiles([
+        { artifactId, releaseId, path: "/index.html", body: "<!doctype html><body>page</body>" }]) });
+    const cookie = mintSessionCookie({ sid: resource.sessionId, readerSub: resource.readerSub,
+      artifactId, createdAt: 1_000, expiresAt: 901_000, resource }, SESSION_SECRET).split(";")[0]!;
+    const source = new URL(`https://${host}/index.html?workspaceId=w&citySlug=valleyfield&tag=a&tag=b&note=a%3Eb+two${extra}`);
+    const response = await app.request(source.href, { headers: { host, cookie } });
+    expect(response.status).toBe(303);
+    const target = new URL(response.headers.get("location")!, source);
+    expect(target.origin + target.pathname).toBe(source.origin + source.pathname);
+    expect([...target.searchParams].filter(([key]) => key !== "grant"))
+      .toEqual([...source.searchParams].filter(([key]) => key !== "grant"));
+    expect(target.searchParams.getAll("grant")).toHaveLength(1);
+    expect(await verifyGrant(target.searchParams.get("grant")!, { ...ISSUER, host }, GRANT_SECRET, 60_000)).not.toBeNull();
+    expect((await app.request(target.href, { headers: { host, cookie } })).status).toBe(200);
+  });
   it("should authorize only sealed session files on the exact pinned release host", async () => {
     const authority = createFixtureAuthority();
     let revoked = false;
