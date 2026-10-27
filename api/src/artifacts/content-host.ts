@@ -33,7 +33,8 @@ function stripNumericPort(host: string): string {
 export function belongsToContentDomain(host: string | undefined, contentBase: string): boolean {
   const base = contentBase.trim().toLowerCase().replace(/\.$/, "");
   if (!host || !base || base.length > MAX_HOST_LENGTH) return false;
-  const name = stripNumericPort(host.trim().toLowerCase()).replace(/\.$/, "");
+  // Reserve malformed authorities without admitting them as artifact hosts.
+  const name = host.trim().toLowerCase().replace(/:.*$/, "").replace(/\.+$/, "");
   return name === base || name.endsWith(`.${base}`);
 }
 
