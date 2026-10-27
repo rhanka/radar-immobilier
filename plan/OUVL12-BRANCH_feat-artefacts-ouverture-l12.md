@@ -133,6 +133,9 @@ isolation, current authorization, transactional quotas and replay safety.
     authorization projection contains owner/state, not storage scope.
   - [x] Acceptance exposed a new-key restart beyond the attempt budget in EX1's
     fixture; restart now replays its committed key, asserting replayed=true.
+  - [x] Preserve migration 0025's published bytes: editing its comments after
+    setup changed the expected journal hash. Runtime attempt semantics are
+    documented in code; no schema change or journal exception is required.
   - [ ] Count S3 calls on the last concurrent attempt and exhausted durable quota.
   - [ ] Implement shared guarded replay and atomic pre-upload attempt admission.
   - [ ] Verify suspension denial and mode-specific account binding.
