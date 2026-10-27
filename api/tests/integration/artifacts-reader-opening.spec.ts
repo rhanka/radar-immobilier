@@ -12,6 +12,7 @@ describeDb("stored reader approval and single-use exchange", () => {
   afterAll(async () => { await h?.close(); });
   it("should require app confirmation and exchange once across independently composed readers", async () => {
     const f = await publishedBaskets(h);
+    const contentHost = `${f.releaseId}.pinned.pages.example.test`;
     const app = f.runtime();
     const request = (url: string, init?: RequestInit) => app.request(url, {
       ...init, headers: { host: new URL(url).host, ...init?.headers },
@@ -21,20 +22,21 @@ describeDb("stored reader approval and single-use exchange", () => {
     expect(entry.headers.get("location")).toBe("/__reader/start");
     const start = await request(`https://${f.host}/__reader/start`);
     expect(start.status).toBe(303);
+    expect(start.headers.get("location")).toBe(`https://${contentHost}/__reader/start`);
     const pinned = await request(`https://${f.releaseId}.pinned.pages.example.test/__reader/start`);
     expect(pinned.status).toBe(303);
     expect(new URL(pinned.headers.get("location")!).searchParams.get("artifactId")).toBe(f.artifactId);
     expect(new URL(pinned.headers.get("location")!).searchParams.get("origin"))
       .toBe(`https://${f.releaseId}.pinned.pages.example.test`);
-    const initialCookie = start.headers.get("set-cookie")!.split(";")[0]!;
-    expect(start.headers.get("set-cookie")).toContain("Secure; HttpOnly; SameSite=Lax");
-    const approvalUrl = start.headers.get("location")!;
+    const initialCookie = pinned.headers.get("set-cookie")!.split(";")[0]!;
+    expect(pinned.headers.get("set-cookie")).toContain("Secure; HttpOnly; SameSite=Lax");
+    const approvalUrl = pinned.headers.get("location")!;
     const appCookie = await cookie(f.data.contributor.sub);
     const summary = await request(approvalUrl, { headers: { cookie: appCookie } });
     expect(summary.status).toBe(200);
     expect(summary.headers.get("referrer-policy")).toBe("same-origin");
     expect(summary.headers.get("content-security-policy"))
-      .toBe(`default-src 'none'; form-action 'self' https://${f.host}; frame-ancestors 'none'; base-uri 'none'`);
+      .toBe(`default-src 'none'; form-action 'self' https://${contentHost}; frame-ancestors 'none'; base-uri 'none'`);
     expect(await summary.text()).toContain("Autoriser et ouvrir");
     const pinnedSummary = await request(pinned.headers.get("location")!, { headers: { cookie: appCookie } });
     expect(pinnedSummary.status).toBe(200);
@@ -69,7 +71,7 @@ describeDb("stored reader approval and single-use exchange", () => {
     const noBinding = await request(exchangeUrl);
     expect(noBinding.status).toBe(401);
     const exchanges = await Promise.all([app, f.runtime()].map((runtime) => runtime.request(exchangeUrl, {
-      headers: { host: f.host, cookie: initialCookie },
+      headers: { host: contentHost, cookie: initialCookie },
     })));
     expect(exchanges.map((response) => response.status).sort()).toEqual([303, 401]);
     const success = exchanges.find((response) => response.status === 303)!;
@@ -77,11 +79,11 @@ describeDb("stored reader approval and single-use exchange", () => {
     const sessionCookie = success.headers.getSetCookie().find((header) => header.startsWith("__Host-preview-session="))!;
     expect(sessionCookie).toContain("Secure; HttpOnly");
     expect(sessionCookie).not.toContain("radar_session");
-    const page = await request(`https://${f.host}${success.headers.get("location")}`, {
+    const page = await request(`https://${contentHost}${success.headers.get("location")}`, {
       headers: { cookie: sessionCookie.split(";")[0]! },
     });
     expect(page.status).toBe(200);
-    expect(await page.text()).toContain("/main.js?grant=");
+    expect(await page.text()).toContain('src="/main.js"');
     expect((await request(exchangeUrl, { headers: { cookie: initialCookie } })).status).toBe(401);
   });
   it("should retain single-use semantics on separate PostgreSQL connections and expire by DB time", async () => {

@@ -11,8 +11,20 @@ describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("published H
   let h: Harness;
   beforeAll(async () => { h = await startHarness("l3browser", ["author-alice"]); });
   afterAll(async () => { await h?.close(); });
-  it("should execute the S3-published script and read each reader's PostgreSQL baskets under CSP", async () => {
-    const f = await publishedBaskets(h);
+  it.each([{ eol: "\n", republish: false }, { eol: "\r\n", republish: false }, { eol: "\n", republish: true }])(
+    "should read each reader's baskets through native imports with $eol and republish=$republish", async ({ eol, republish }) => {
+    const f = await publishedBaskets(h, { native: true, eol });
+    let releases = [{ host: f.host, version: "one" }];
+    if (republish) {
+      const publication = await h.control.handle("publish", "author-alice", { artifactId: f.artifactId,
+        files: f.files.map((file) => ({ ...file, text: file.text.replace('data-version="one"', 'data-version="two"') })),
+        idempotencyKey: `${f.releaseId}-second` });
+      expect(publication.status).toBe(201);
+      const second = (publication.body as { releaseId: string }).releaseId;
+      expect(second).not.toBe(f.releaseId);
+      releases = [{ host: `${f.releaseId}.pinned.pages.example.test`, version: "one" },
+        { host: `${second}.pinned.pages.example.test`, version: "two" }];
+    }
     const app = f.runtime();
     let statuses: Record<string, number> = {};
     let requests: { host: string; method: string; path: string; origin: string | null; cookie: string; cacheControl: string | null }[] = [];
@@ -28,7 +40,9 @@ describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("published H
     let browser: Browser | undefined;
     try {
       browser = await chromium.launch({ headless: true, args: server.args });
-      for (const [sub, count] of [[f.data.contributor.sub, 2], [f.data.moderator.sub, 1]] as const) {
+      const openings = [[f.data.contributor.sub, 2], [f.data.moderator.sub, 1]].flatMap(([sub, count]) =>
+        releases.map((release) => ({ sub: sub as string, count: count as number, ...release })));
+      for (const { sub, count, host, version } of openings) {
         statuses = {};
         requests = [];
         // The certificate is ephemeral and restricted to this loopback fixture.
@@ -57,7 +71,8 @@ describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("published H
         }));
         let started = Date.now();
         try {
-          await page.goto(`https://${f.host}/`);
+          expect((await page.goto(`https://${host}/`))?.status()).toBe(200);
+          expect(new URL(page.url()).host).toBe("app.example.test");
           started = Date.now();
           await page.getByRole("button", { name: "Autoriser et ouvrir" }).click();
           await page.waitForFunction((matched) => document.body.dataset.matched === String(matched), count, { timeout: 1500 });
@@ -65,16 +80,20 @@ describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("published H
           await Promise.all(pending);
           console.log(JSON.stringify({ readerMatched: count, elapsedMs, diagnostics }));
           expect(await page.locator("body").getAttribute("data-cookies")).toBe("");
+          expect(await page.locator("body").getAttribute("data-inline-ready")).toBe("1");
+          expect(await page.locator("body").getAttribute("data-dynamic-ready")).toBe("1");
+          expect(await page.locator("body").getAttribute("data-version")).toBe(version);
           expect(await page.locator("body").evaluate((body) => getComputedStyle(body).color)).toBe("rgb(17, 34, 51)");
           expect(page.url()).not.toContain("grant=");
           expect(await page.evaluate(async () => (await fetch("/api/v1/workspaces")).status)).toBe(401);
           expect(await page.evaluate(async () => (await fetch("/sw.js")).status)).toBe(404);
           expect(statuses).toMatchObject({ "/": 200, "/main.js": 200, "/style.css": 200,
+            "/baskets.js": 200, "/theme.css": 200, "/dynamic.js": 200,
             "/__reader/api/baskets.search.v1": 200 });
           expect(requests.filter((request) => request.method === "POST"))
             .toEqual([expect.objectContaining({ host: "app.example.test", origin: "https://app.example.test" })]);
           for (const request of requests) {
-            if (request.host === f.host) expect(request.cookie).not.toContain("radar_session");
+            if (request.host.endsWith(".pages.example.test")) expect(request.cookie).not.toContain("radar_session");
             expect(request.cacheControl).toBe("private, no-store");
           }
           expect(errors).toEqual([]);
