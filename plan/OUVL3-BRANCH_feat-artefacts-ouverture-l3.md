@@ -52,6 +52,7 @@ Connect published release files and H5 reads to current account/workspace author
 - [x] Implement pinned-host opening and a sealed resource authority in the reader cookie; native files recheck current rights while H5 still requires its explicit grant. Acceptance pending below.
 - [x] Remove grant injection from HTML entirely; normalize CRLF/CR to LF before emission and CSP hashing. Inline source and native resource URLs remain intact.
 - [x] Add Chromium cases for module/CSS imports, dynamic scripts, LF/CRLF inline code and two successive pinned publications; adapt opening proof to canonical pinned sessions. Execution pending.
+- [x] Reuse classification query decoding and error projection for basket reads, including request IDs and internal errors; keep resource and non-basket contracts separate.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch, serialized implementation and Docker campaigns.

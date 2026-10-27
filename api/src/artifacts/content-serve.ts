@@ -33,6 +33,9 @@ import type { AuthorityReader } from "./reader-profile.js";
 import { validateReaderResponse } from "./reader-responses.js";
 import {
   isBasketOperation,
+  basketsContextParams,
+  basketsSearchParams,
+  basketsStateParams,
   isReaderOperation,
   operationMethod,
   validateOperationParams,
@@ -45,7 +48,8 @@ import {
   releaseCspForHtml,
   type ReleaseFileProvider,
 } from "./release-files.js";
-import { classificationFailure } from "../services/facets/classification-errors.js";
+import { ClassificationError, classificationFailure } from "../services/facets/classification-errors.js";
+import { decodeQuery } from "../services/facets/classification-query.js";
 
 export interface ContentServeDeps {
   readonly contentBase: string;
@@ -75,15 +79,6 @@ function bareHost(header: string | undefined): string {
 
 function presentedGrant(c: Context): string {
   return c.req.query("grant") ?? c.req.header("x-preview-grant") ?? "";
-}
-
-function coerceBasketQuery(raw: Record<string, string>): Record<string, unknown> {
-  const out: Record<string, unknown> = { ...raw };
-  if (typeof out.limit === "string" && /^[1-9][0-9]*$/.test(out.limit)) out.limit = Number(out.limit);
-  if (typeof out.reveal === "string" && (out.reveal === "true" || out.reveal === "false")) {
-    out.reveal = out.reveal === "true";
-  }
-  return out;
 }
 
 export function createReaderContentApp(deps: ContentServeDeps): Hono {
@@ -133,6 +128,23 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
 
   app.get("/livez", (c) => c.json({ status: "ok" }));
   app.get("/health", (c) => c.json({ status: "ok" }));
+
+  app.use("/__reader/api/*", async (c, next) => {
+    if (c.req.method !== "GET" || !isBasketOperation(c.req.path.slice("/__reader/api/".length))) return next();
+    try {
+      await next();
+      if (c.res.status < 400) return;
+      const body = await c.res.clone().json().catch(() => null);
+      if (body?.ok === false && typeof body.requestId === "string") return;
+      const code = c.res.status === 401 ? "unauthenticated" : c.res.status === 403 ? "capability_required"
+        : c.res.status === 400 ? "invalid_query" : c.res.status === 503 ? "transport_unavailable" : "internal_error";
+      const failure = classificationFailure(new ClassificationError(code));
+      c.res = c.json(failure.body, failure.status);
+    } catch (error) {
+      const failure = classificationFailure(error);
+      c.res = c.json(failure.body, failure.status);
+    }
+  });
 
   app.use("*", async (c, next) => {
     applyReaderContentHeaders(c);
@@ -205,25 +217,22 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     if (!canInvoke(auth, capability, auth.releaseId)) return c.json({ error: "forbidden" }, 403);
     if (!deps.readOperation) return c.json({ error: "capability_unavailable" }, 503);
     if (isBasketOperation(op)) {
-      if (Object.values(c.req.queries()).some((values) => values.length !== 1)) return c.json({ error: "invalid_params" }, 400);
-      const rawQuery = Object.fromEntries(
-        Object.entries(c.req.query()).filter(([key]) => key !== "grant"),
-      );
-      const checked = validateOperationParams(op, coerceBasketQuery(rawQuery));
-      if (!checked.ok) {
-        applyReaderContentHeaders(c);
-        return c.json({ error: "invalid_params" }, 400);
-      }
       applyReaderContentHeaders(c);
       if (!await authorityCurrent(auth)) return c.json({ error: "unauthenticated" }, 401);
       try {
-        const body = validateReaderResponse(op, await deps.readOperation(op, checked.params, auth), auth.readerSub);
+        const url = new URL(c.req.url);
+        if (Buffer.byteLength(url.pathname + url.search) > 16384) throw new ClassificationError("request_uri_too_long");
+        if (url.searchParams.getAll("grant").length > 1) throw new ClassificationError("invalid_query");
+        url.searchParams.delete("grant");
+        const schema = op === "baskets.context.v1" ? basketsContextParams : op === "baskets.search.v1"
+          ? basketsSearchParams : basketsStateParams;
+        const params = decodeQuery(url.searchParams, schema);
+        const body = validateReaderResponse(op, await deps.readOperation(op, params, auth), auth.readerSub);
         if (!stillOpen(auth)) return c.json({ error: "unauthenticated" }, 401);
         if (!await authorityCurrent(auth)) return c.json({ error: "unauthenticated" }, 401);
         return c.json(body);
       } catch (error) {
         const failure = classificationFailure(error);
-        if (failure.body.error.code === "internal_error") return c.json({ error: "capability_unavailable" }, 503);
         return c.json(failure.body, failure.status);
       }
     }
