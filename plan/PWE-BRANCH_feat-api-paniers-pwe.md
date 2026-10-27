@@ -32,6 +32,8 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Add app receipt consultation after P/deadline expiry, consumed replay,
+  no-op receipts and masking after approval/membership/moderation/intent withdrawal.
 - [x] PWE-EX2: the authorized app result GET omits the immutable receipt
   (C08/section7.4), even after a committed command. Allow app-route,
   app-authority, app-result and the shared read-only signal receipt primitive.
