@@ -40,7 +40,7 @@ Connect published release files and H5 reads to current account/workspace author
 - [x] Conductor requalified `60c10a1d`: all gates except browser passed, including 4131 API CI tests and 10 mutations.
 - [x] Instrument browser console, CSP, network, H5 bodies and server-side Origin, with credentials redacted. Reproduced POST Origin `null` and 403 `forbidden_origin` before published code or H5 runs.
 - [x] Fix approval response policies: same-origin referrers preserve CSRF Origin; form-action allows only the authorized artifact origin for Chromium's 303 chain. H5 returned 200 with two matched baskets in 182 ms; unchanged 1500 ms wait.
-- [ ] Align mounted reader API denials with private reader isolation headers; browser exposed `no-store` on the closed `/api/v1/workspaces` path.
+- [x] Align mounted reader API denials with private reader isolation headers, keeping 401 before delegation. Targeted 21/0/0 passed; two browser readers matched 2/1 in 175/117 ms. Full qualification pending.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch, serialized implementation and Docker campaigns.
