@@ -32,6 +32,9 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Add individual M04 key/P/6L1/deselection, M07 three-scope, M08 head/version,
+  M10 final cookie/challenge clock and M13 reader/workspace quota mutation legs.
+- [x] Keep deselection digest fixtures schema-valid with their matching head keys.
 - [x] Add current-6L1 head/version/catalogue refusals with zero durable effects,
   and separate key/P/6L1/deselection binding discriminators for mutation selection.
 - [x] Expiry/quota run: 10 passed/0 failed/0 skipped; correct the evolving
