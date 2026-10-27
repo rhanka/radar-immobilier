@@ -29,6 +29,15 @@ function stripNumericPort(host: string): string {
   return host.slice(0, colon);
 }
 
+/** Reserve the entire content domain, including labels without a valid UUID. */
+export function belongsToContentDomain(host: string | undefined, contentBase: string): boolean {
+  const base = contentBase.trim().toLowerCase().replace(/\.$/, "");
+  if (!host || !base || base.length > MAX_HOST_LENGTH) return false;
+  // Reserve malformed authorities without admitting them as artifact hosts.
+  const name = host.trim().toLowerCase().replace(/:.*$/, "").replace(/\.+$/, "");
+  return name === base || name.endsWith(`.${base}`);
+}
+
 export function parseContentHost(
   host: string | null | undefined,
   contentBase: string | null | undefined,
