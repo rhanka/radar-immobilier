@@ -25,7 +25,7 @@
     "@sentropic/chat-core": "^0.1.2",
     "@sentropic/geo": "^0.1.1",
     "@sentropic/geo-sources-americas": "^0.1.1",
-    "@sentropic/graphify": "0.18.0",
+    "@sentropic/graphify": "0.19.1",
     "@sentropic/h2a": "^0.26.1",
     "@sentropic/llm-mesh": "0.19.2",
     "@sentropic/llm-mesh-refresh": "npm:@sentropic/llm-mesh@0.19.2",
@@ -34,7 +34,7 @@
     "jose": "^6.2.3",
     "pg": "^8.12.0",
     "pino": "^9.3.0",
-    "zod": "^3.23.8"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/pg": "^8.11.6",
