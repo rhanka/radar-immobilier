@@ -15,7 +15,7 @@ import { GRANT_SECRET, ISSUER, SESSION_SECRET } from "../../src/artifacts/reader
 import type { ObjectStore } from "../../src/storage/object-store.js";
 import { auth, type Harness } from "./artifacts-h2.helpers.js";
 
-export async function publishedBaskets(h: Harness) {
+export async function publishedBaskets(h: Harness, options: { native?: boolean; eol?: string } = {}) {
   const data = await workspaceFixture();
   const first = await workspaceSignal(data, "First basket signal");
   const second = await workspaceSignal(data, "Second basket signal");
@@ -45,6 +45,19 @@ export async function publishedBaskets(h: Harness) {
       `.then(r=>r.json()).then(r=>{document.body.dataset.matched=String(r.counts.matched);` +
       `document.body.dataset.cookies=document.cookie;document.body.textContent=r.items.map(i=>i.target.id).join(',')});` },
   ];
+  if (options.native) {
+    const read = files[2]!.text;
+    const inline = ["window.dynamicLoaded=new Promise(resolve=>{", 'const s=document.createElement("script");',
+      's.src="/dynamic.js?v=1";', "s.onload=resolve;document.head.append(s);", "});",
+      'document.body.dataset.inlineReady="1";'].join(options.eol ?? "\n");
+    files[0]!.text = '<!doctype html><link rel="stylesheet" href="/style.css"><body data-version="one">' +
+      `<script>${inline}</script><script type="module" src="/main.js"></script></body>`;
+    files[1]!.text = '@import url("./theme.css");';
+    files[2]!.text = 'import {readPage} from "./baskets.js";await window.dynamicLoaded;readPage();';
+    files.push({ path: "baskets.js", mimeType: "text/javascript", text: `export function readPage(){${read}}` },
+      { path: "theme.css", mimeType: "text/css", text: "body{color:rgb(17,34,51)}" },
+      { path: "dynamic.js", mimeType: "text/javascript", text: 'document.body.dataset.dynamicReady="1";' });
+  }
   const published = await h.control.handle("publish", "author-alice", { artifactId, files, idempotencyKey: randomUUID() });
   expect(published.status).toBe(201);
   const releaseId = (published.body as { releaseId: string }).releaseId;
@@ -75,5 +88,5 @@ export async function publishedBaskets(h: Harness) {
     const cookie = mintSessionCookie({ sid, readerSub: sub, artifactId, createdAt: now, expiresAt: now + 900_000 }, SESSION_SECRET).split(";")[0]!;
     return { grant, cookie, host };
   };
-  return { data, first, second, artifactId, releaseId, host, stored, runtime, credentials };
+  return { data, first, second, artifactId, releaseId, host, files, stored, runtime, credentials };
 }
