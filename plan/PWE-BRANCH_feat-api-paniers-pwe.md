@@ -32,6 +32,8 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Add current-6L1 head/version/catalogue refusals with zero durable effects,
+  and separate key/P/6L1/deselection binding discriminators for mutation selection.
 - [x] Expiry/quota run: 10 passed/0 failed/0 skipped; correct the evolving
   array annotation in the quota fixture before accepting the static gate.
 - [x] Add shared no-op admission bursts across six P/grants/artifacts and
