@@ -50,7 +50,9 @@ describeDb("PWE-03 normal callback cookie guards", () => {
         expect((await send({ "x-artifact-write-csrf": token })).status).toBe(403);
       }
       expect((await send({ "x-artifact-write-csrf": undefined, "x-reader-csrf": boot.csrf as string })).status).toBe(403);
-      expect((await send({ "content-type": "application/x-www-form-urlencoded" })).status).toBe(403);
+      const form = await send({ "content-type": "application/x-www-form-urlencoded" });
+      expect(form.status).toBe(415);
+      expect(await form.json()).toMatchObject({ error: { code: "unsupported_media_type" } });
       expect(await effects(h.h.f)).toEqual(NO_EFFECTS);
       expect((await send({})).status).toBe(200);
       expect(await effects(h.h.f)).toEqual(action === "confirm" ? ONE_COMMIT : NO_EFFECTS);
