@@ -21,6 +21,7 @@
 - [x] OUVL4-EX2: owner-requested Astra corrections allow `api/src/artifacts/content-{host,app}.ts`, their tests and `deploy/ci/check-preprod-auth-isolation.test.sh`. Impact: reserve every content-domain host before app authentication and repair the moved-import mutation. Rollback: revert the correction commits; no production manifest change.
 - [ ] Astra host isolation, CI fixture, independent rollback closure and application-time image pins verified.
 - [x] Astra CI import mutation now removes the MCP directory base; all 25 auth-isolation checks pass with the missing-ConfigMap diagnostic retained.
+- [x] Astra rollback attempts both restarts before readiness waits, aggregates failures and verifies `off` in both ConfigMaps and every API/MCP pod; 10 operator checks pass, including absent Ingress, API readiness failure and stale runtime refusal.
 - [x] Requested content DNS names, TLS Secret and dedicated bucket are deployment coordinates to provision, not a claim of existing infrastructure.
 - [x] Runtime decision: API-mounted reader from L3; standalone `content-reader` has no production authority/storage composition.
 - [x] OUVL4-EX1: allow `deploy/k8s/immo-mcp/**` and existing 40/41 entrypoints. Evidence: plain requested Kustomize command refuses external file resources. Package unchanged files in a directory base; retain production paths as symlinks. Impact: resource loading only, byte-identical production files/render. Rollback: restore regular 40/41 files and the overlay's file imports.
