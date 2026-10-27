@@ -14,6 +14,7 @@ import { approvedAccountId, resolveWorkspaceAccess } from "../services/workspace
 import { lockWorkspace } from "../services/workspaces/mutations.js";
 import { WorkspaceError } from "../services/workspaces/types.js";
 import { isPersonalOperation, type SignalWriteOperation } from "../services/facets/signal-write-operations.js";
+import type { WriteTx } from "../services/facets/signal-write-scope.js";
 
 export interface WriteAppDeps extends AppGuardDeps {
   db: Database;
@@ -46,13 +47,17 @@ export async function ownedWriteIntent(c: Context, deps: WriteAppDeps, pass: App
 /** Rights loss keeps owner revocation available without releasing business data. */
 export async function canReadWriteIntentSummary(deps: WriteAppDeps, row: PwIntentRow,
   pass: AppGuardPass): Promise<boolean> {
+  return writeIntentTransaction(deps.db, (tx) => canReadWriteIntentSummaryInTx(tx, row, pass));
+}
+
+/** Shared current-rights guard for summary and receipt, retaining caller locks. */
+export async function canReadWriteIntentSummaryInTx(tx: WriteTx, row: PwIntentRow,
+  pass: AppGuardPass): Promise<boolean> {
   try {
-    return await writeIntentTransaction(deps.db, async (tx) => {
-      await lockWorkspace(tx, row.workspaceId);
-      await approvedAccountId(tx, pass.principal.sub, true);
-      const access = await resolveWorkspaceAccess(tx, row.workspaceId, pass.principal.sub);
-      return isPersonalOperation(row.operation as SignalWriteOperation) || access.moderateArchive;
-    });
+    await lockWorkspace(tx, row.workspaceId);
+    await approvedAccountId(tx, pass.principal.sub, true);
+    const access = await resolveWorkspaceAccess(tx, row.workspaceId, pass.principal.sub);
+    return isPersonalOperation(row.operation as SignalWriteOperation) || access.moderateArchive;
   } catch (error) {
     if (error instanceof WorkspaceError && ["account_not_approved", "workspace_membership_required",
       "workspace_not_found"].includes(error.message)) return false;
