@@ -1,3 +1,4 @@
+import { contractInteger } from "@radar/domain";
 /** Exact H4 facade. The integrator must explicitly enable this server-only binding. */
 import { Hono } from "hono";
 import { z } from "zod";
@@ -16,7 +17,7 @@ const city = z.string().min(1).max(128).regex(/^[a-z0-9]+(?:-+[a-z0-9]+)*$/);
 export const McpSignalSearchInput = z.object({
   city, etape: z.string().optional(), query: z.string().optional(),
   showDiscarded: z.boolean().default(false),
-  limit: z.number().int().min(1).max(100).default(20),
+  limit: contractInteger().min(1).max(100).default(20),
   workspaceId: McpWorkspaceId.optional(),
 }).strict();
 export type McpSignalSearchArgs = z.infer<typeof McpSignalSearchInput>;
