@@ -28,6 +28,8 @@ Qualify, repair and integrate the supplied PW-C implementation on 07ef2757.
   - `api/tests/integration/pw-write-authority-rights.spec.ts`: PWC-EX1.
 
 ## Feedback Loop
+- [x] Point archive discovery at the rebased rescue Git index; the shared
+  index still referenced host-coordinator.ts deleted by the approved base.
 - [x] Owner retarget: fetch approved PW-A 509e664d and rebase all 37 PW-C
   commits without conflicts; preserve 9316a877 under a rescue ref and bundle.
   Track bytes and the approved transaction implementation remain unchanged.
