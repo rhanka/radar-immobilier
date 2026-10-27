@@ -1,10 +1,6 @@
-# PREPROD artifact S3 credential bindings (861c H3 unit 11). Opaque references
-# only: values live in the operator-provisioned Secret radar-artifacts-preprod
-# (see deploy/k8s/secrets.example.yaml), never in git. Both entries are
-# optional so a missing Secret keeps the capability closed instead of
-# crash-looping the api on the next reconcile. Disabled by default together
-# with patch-artifacts-control.yaml (control mode off, no subjects, no
-# window, no storage coordinates).
+# Preprod API publication and reader bindings. Optional references keep the
+# application available when provisioning is incomplete; the capability closes.
+# Persist all signing keys across restarts and share them across API instances.
 - op: add
   path: /spec/template/spec/containers/0/env/-
   value:
@@ -22,4 +18,31 @@
       secretKeyRef:
         name: radar-artifacts-preprod
         key: ARTIFACTS_S3_SECRET_KEY
+        optional: true
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: ARTIFACTS_READER_GRANT_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: radar-artifacts-reader-preprod
+        key: ARTIFACTS_READER_GRANT_SECRET
+        optional: true
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: ARTIFACTS_READER_SESSION_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: radar-artifacts-reader-preprod
+        key: ARTIFACTS_READER_SESSION_SECRET
+        optional: true
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: CLASSIFICATION_CURSOR_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: radar-classification-cursor-preprod
+        key: CLASSIFICATION_CURSOR_SECRET
         optional: true

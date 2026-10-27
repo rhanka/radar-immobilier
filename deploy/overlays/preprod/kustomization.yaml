@@ -53,8 +53,8 @@ resources:
 # Isolated content-denial boundary (861c H3 unit 12, disabled by default:
 # operator-applied only, never reconciled by the CD).
   - artifact-content-deny.yaml
-# Content wildcard routing and network boundary (861c H3 unit 13, same
-# disabled-by-default ownership as unit 12).
+# Content routing is operator-applied; the denial boundary remains available
+# for rollback. The API reader uses the existing API ingress/egress policies.
   - artifact-content-networkpolicy.yaml
   - artifact-content-ingress.yaml
 
@@ -137,7 +137,7 @@ patches:
     path: patch-immo-mcp-config.yaml
 # Preprod host + TLS Secret on the UI `radar` and MCP `radar-immo-mcp`
 # Ingresses ONLY (named targets): the content Ingress
-# `radar-artifact-content` (861c H3 unit 13) keeps its wildcard hosts, which a
+# `radar-artifact-content` keeps its wildcard hosts, which a
 # blanket every-Ingress patch would overwrite with the app host.
   - target:
       kind: Ingress

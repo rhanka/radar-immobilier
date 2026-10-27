@@ -36,9 +36,9 @@
 - [x] **Lot 1 — Shared publication configuration**
   - [x] Configure API/MCP `general`, storage scope/org/bucket and content base.
   - [x] Bind MCP publication DB and S3 credentials with opaque Secret references.
-- [ ] **Lot 2 — Reader and routing**
-  - [ ] Bind persistent reader signing and cursor secrets, cursor key ID and approval runtime.
-  - [ ] Route stable and pinned content hosts to the API; preserve rollback denial boundary.
+- [x] **Lot 2 — Reader and routing**
+  - [x] Bind persistent reader signing and cursor secrets, cursor key ID and approval runtime.
+  - [x] Route stable and pinned content hosts to the API; preserve rollback denial boundary.
 - [ ] **Lot 3 — Offline gates**
   - [ ] Evolve H3 gates and retain disabled/rehearsal/rollback mutation coverage.
   - [ ] Check general configuration, routing and secret-reference mutations.
