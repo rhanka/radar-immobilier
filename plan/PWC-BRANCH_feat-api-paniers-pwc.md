@@ -28,6 +28,7 @@ Qualify, repair and integrate the supplied PW-C implementation on 07ef2757.
   - None; no scope exception required.
 
 ## Feedback Loop
+- [x] Supply the same synthetic database to createApp's shared route dependencies.
 - [x] Delivery: preserve prepared response headers on all three HTML documents.
 - [x] Preserve prepared Hono isolation headers when rendering HTML documents,
   including login and management; raw Responses had dropped COOP and no-store.
