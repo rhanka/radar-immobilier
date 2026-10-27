@@ -4,6 +4,7 @@ import { describeDb } from "../../src/services/facets/scope-db-fixture.js";
 import { createSharedReaderTickets } from "../../src/artifacts/reader-tickets.js";
 import { startHarness, cookie, type Harness } from "./artifacts-h2.helpers.js";
 import { publishedBaskets } from "./artifacts-baskets.helpers.js";
+import { fingerprintReaderProfile } from "../../src/artifacts/reader-profile.js";
 
 describeDb("stored reader approval and single-use exchange", () => {
   let h: Harness;
@@ -28,12 +29,20 @@ describeDb("stored reader approval and single-use exchange", () => {
     expect(summary.status).toBe(200);
     expect(await summary.text()).toContain("Autoriser et ouvrir");
     expect((await h.pool.query("SELECT count(*) FROM artifacts.reader_tickets")).rows[0].count).toBe("0");
-    const body = new URL(approvalUrl).searchParams.toString();
+    const fields = new URL(approvalUrl).searchParams;
+    fields.set("releaseId", f.releaseId);
+    fields.set("profileFingerprint", fingerprintReaderProfile((await f.stored().authority.getProfile(f.artifactId))!));
+    const body = fields.toString();
     const approve = (origin: string, cookieHeader = appCookie) => request(new URL(approvalUrl).origin + new URL(approvalUrl).pathname, {
       method: "POST", headers: { cookie: cookieHeader, origin, "content-type": "application/x-www-form-urlencoded" }, body,
     });
     expect((await approve("https://foreign.test")).status).toBe(403);
     expect((await approve("https://app.example.test", "")).status).toBe(401);
+    const substituted = await request(new URL(approvalUrl).origin + new URL(approvalUrl).pathname, {
+      method: "POST", headers: { cookie: appCookie, origin: "https://app.example.test",
+        "content-type": "application/x-www-form-urlencoded" }, body: body.replace(f.releaseId, "forged-release"),
+    });
+    expect(substituted.status).toBe(401);
     const confirmation = await approve("https://app.example.test");
     expect(confirmation.status).toBe(303);
     const exchangeUrl = confirmation.headers.get("location")!;
