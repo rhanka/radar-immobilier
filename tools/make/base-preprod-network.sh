@@ -31,6 +31,13 @@ assert_network() {
     all(.ingress[]?; (.from|length)>0 and all(.from[];
       keys==["podSelector"] and ((.podSelector.matchLabels//{})|length)>0)))' \
     "$OUTPUT/network-policies.json" >/dev/null || fail 'Unbounded PostgreSQL ingress sources are forbidden'
+  if jq -e '.maintenance.networkIsolation//{}|has("waiver")' "$INPUT" >/dev/null; then
+    { sed '$d' tools/make/base-preprod-input.jq; echo isolation_waiver; } > "$OUTPUT/network-waiver.jq"
+    jq -e -f "$OUTPUT/network-waiver.jq" "$INPUT" >/dev/null || fail 'Invalid preprod-only network isolation waiver'
+    jq '{binding,image,context,namespace,mode:"waived",waiver:.maintenance.networkIsolation.waiver}' \
+      "$INPUT" > "$OUTPUT/network-isolation-receipt.json"
+    return
+  fi
   # Default deny covers future pods. Additive grants may admit only the
   # known ingress controller, or target database pods exclusively.
   jq -e 'any(.items[].spec; .podSelector=={} and (.policyTypes|index("Ingress"))!=null and ((.ingress//[])|length)==0)
