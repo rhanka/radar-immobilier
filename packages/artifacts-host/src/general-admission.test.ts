@@ -1,7 +1,7 @@
-import { describe, expect, it } from "vitest";
-import { checkAdmission, createArtifactAdmissionAuthority, type AdmissionAuthority } from "./admission.js";
-import { closed, general, NOW, SCOPE, stubAuthority } from "./general-harness.js";
-import { HOST_ACTOR_RATE_LIMIT_PER_MINUTE } from "./commit-policy.js";
+import { describe, expect, it, vi } from "vitest";
+import { checkAdmission, type AdmissionAuthority } from "./admission.js";
+import { closed, NOW, SCOPE, stubAuthority } from "./general-harness.js";
+import { HOST_ACTOR_RATE_LIMIT_PER_MINUTE, reserveArtifactAttempt } from "./attempt-admission.js";
 
 describe("general admission without cohort or workspace", () => {
   it("admits an approved account outside any cohort with zero memberships", async () => {
@@ -50,29 +50,18 @@ describe("general admission without cohort or workspace", () => {
   });
 });
 
-describe("admission rate probe over a pool", () => {
-  function rateAuthority(count: string | null, scope: string | undefined = SCOPE) {
-    const calls: Array<{ text: string; params: unknown[] }> = [];
-    const accounts = {
-      async query(text: string, params: unknown[] = []) {
-        calls.push({ text, params });
-        if (text.includes("host_actor_rate")) return { rows: count === null ? [] : [{ count, status: "approved" }] };
-        return { rows: [{ status: "approved" }] };
-      },
-    };
-    return { authority: createArtifactAdmissionAuthority(accounts, () => general(), scope), calls };
-  }
-
-  it("reports limited at the ceiling and open below it", async () => {
+describe("atomic attempt admission over a pool", () => {
+  it("admits only returned reservations with server-owned scope and actor", async () => {
     expect(HOST_ACTOR_RATE_LIMIT_PER_MINUTE).toBe(10);
-    await expect(rateAuthority("10").authority.checkRate!("alice")).resolves.toBe(true);
-    await expect(rateAuthority("9").authority.checkRate!("alice")).resolves.toBe(false);
-    await expect(rateAuthority(null).authority.checkRate!("alice")).resolves.toBe(false);
+    const query = vi.fn().mockResolvedValueOnce({ rows: [{ count: 10 }] }).mockResolvedValueOnce({ rows: [] });
+    await expect(reserveArtifactAttempt({ query }, SCOPE, "alice")).resolves.toBe(true);
+    await expect(reserveArtifactAttempt({ query }, SCOPE, "alice")).resolves.toBe(false);
+    expect(query.mock.calls[0]![1]).toEqual([SCOPE, "alice", 10]);
   });
 
-  it("scopes the probe to the storage scope", async () => {
-    const { authority, calls } = rateAuthority("0");
-    await expect(authority.checkRate!("alice")).resolves.toBe(false);
-    expect(calls).toEqual([{ text: expect.stringContaining("host_actor_rate"), params: [SCOPE, "alice"] }]);
+  it("fails closed when the reservation store is unavailable", async () => {
+    const query = vi.fn().mockRejectedValue(new Error("private database failure"));
+    await expect(reserveArtifactAttempt({ query }, SCOPE, "alice"))
+      .rejects.toMatchObject({ kind: "admission_unavailable" });
   });
 });
