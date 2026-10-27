@@ -73,7 +73,7 @@ describe("per-actor durable quotas and the shared minute bound", () => {
     const { participant, texts } = await participantWith({});
     await participant.checkApproval?.({ actorId: "alice" } as never);
     await expect(participant.reserveQuota?.({ actorId: "alice", storageScopeId: SCOPE, bytes: 100 } as never))
-      .toEqual({ reserved: true });
+      .resolves.toEqual({ reserved: true });
     expect(texts.findIndex((text) => text.includes("UPDATE artifacts.host_quotas")))
       .toBeLessThan(texts.findIndex((text) => text.includes("host_actor_quotas")));
     expect(texts.some((text) => text.includes("host_actor_rate"))).toBe(true);
@@ -83,7 +83,7 @@ describe("per-actor durable quotas and the shared minute bound", () => {
     const { participant, texts } = await participantWith({ globalRowCount: 0 });
     await participant.checkApproval?.({ actorId: "alice" } as never);
     await expect(participant.reserveQuota?.({ actorId: "alice", storageScopeId: SCOPE, bytes: 100 } as never))
-      .toEqual({ reserved: false });
+      .resolves.toEqual({ reserved: false });
     expect(texts.some((text) => text.includes("host_actor_quotas"))).toBe(false);
   });
 
@@ -91,7 +91,7 @@ describe("per-actor durable quotas and the shared minute bound", () => {
     const { participant, texts } = await participantWith({ actorRowCount: 0 });
     await participant.checkApproval?.({ actorId: "alice" } as never);
     await expect(participant.reserveQuota?.({ actorId: "alice", storageScopeId: SCOPE, bytes: 100 } as never))
-      .toEqual({ reserved: false });
+      .resolves.toEqual({ reserved: false });
     expect(texts.some((text) => text.includes("host_actor_rate"))).toBe(false);
   });
 
@@ -99,17 +99,17 @@ describe("per-actor durable quotas and the shared minute bound", () => {
     const { participant } = await participantWith({ rateCount: HOST_ACTOR_RATE_LIMIT_PER_MINUTE });
     await participant.checkApproval?.({ actorId: "alice" } as never);
     await expect(participant.reserveQuota?.({ actorId: "alice", storageScopeId: SCOPE, bytes: 100 } as never))
-      .toEqual({ reserved: true });
+      .resolves.toEqual({ reserved: true });
     const over = await participantWith({ rateCount: HOST_ACTOR_RATE_LIMIT_PER_MINUTE + 1 });
     await over.participant.checkApproval?.({ actorId: "alice" } as never);
     await expect(over.participant.reserveQuota?.({ actorId: "alice", storageScopeId: SCOPE, bytes: 100 } as never))
-      .toEqual({ reserved: false });
+      .resolves.toEqual({ reserved: false });
   });
 
   it("reserves actor quotas before approval, matching the coordinator order", async () => {
     const { participant, texts } = await participantWith({});
     await expect(participant.reserveQuota?.({ actorId: "alice", storageScopeId: SCOPE, bytes: 100 } as never))
-      .toEqual({ reserved: true });
+      .resolves.toEqual({ reserved: true });
     expect(texts.some((text) => text.includes("host_actor_quotas"))).toBe(true);
     expect(texts.some((text) => text.includes("host_actor_rate"))).toBe(true);
   });
