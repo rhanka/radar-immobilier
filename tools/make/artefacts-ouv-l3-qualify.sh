@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Executed only inside the source-snapshot container by the standalone runner.
 set -uo pipefail
-[[ $PWD == /workspace && -d /evidence && ${NODE_ENV:-} == test ]]
+[[ $PWD == /workspace && -d /evidence && ${NODE_ENV:-} == test ]] || exit 2
 failed=0
 : > /evidence/gates.tsv
 record() {
@@ -11,6 +11,15 @@ record() {
   printf '%s\t%s\n' "$name" "$status" | tee -a /evidence/gates.tsv
   if [[ $status != 0 ]]; then failed=1; tail -70 "/evidence/$name.log"; fi
 }
+record runner-tools bash -euc '
+  export DEBIAN_FRONTEND=noninteractive
+  apt-get update
+  apt-get install -y --no-install-recommends curl jq openssl
+  test -x /usr/bin/curl
+  /usr/bin/curl --version
+  jq --version
+  openssl version
+'
 record typecheck npm run typecheck --workspaces --if-present
 record eslint npx --no-install eslint . --ignore-pattern 'tmp/**'
 record migrations npm run db:migrate --workspace=api
