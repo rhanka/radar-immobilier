@@ -33,6 +33,6 @@
 - [x] Lot 4: manual review and unavailable peer selection recorded; report, commit audit and verified bundle; no push.
 - [x] Astra lot 0: read both PR #929 reviews completely; fixes start at `76636465`, no push.
 - [x] Astra lot 1: qualification uses checkout Git and source fingerprints, independently of delivery metadata.
-- [ ] Astra lot 2: restore only the saved closed state with UID/resourceVersion preconditions.
+- [x] Astra lot 2: restore only the saved closed state with UID/resourceVersion preconditions.
 - [ ] Astra lot 3: control alternate routes, exposed ports and enforced consumer pod isolation; otherwise refuse.
 - [ ] Astra lot 4: regression evidence, report correction section and audited incremental bundle.

@@ -6,7 +6,7 @@ maintenance_inputs() {
     and (.apiIngress as $api | $m.ingresses|index($api)!=null)' "$INPUT" >/dev/null || fail 'Maintenance boundary inputs required'
 }
 read_ingresses() {
-  "${k[@]}" get ingresses -o json | jq '{items:[.items[]|{metadata:{name:.metadata.name,uid:.metadata.uid},spec}]}' > "$OUTPUT/ingresses-current.json"
+  "${k[@]}" get ingresses -o json | jq '{items:[.items[]|{metadata:(.metadata|{name,uid,resourceVersion}),spec}]}' > "$OUTPUT/ingresses-current.json"
   jq -e --slurpfile c "$INPUT" '([.items[].metadata.name]|sort)==($c[0].maintenance.ingresses|sort)' \
     "$OUTPUT/ingresses-current.json" >/dev/null || fail 'Ingress coverage changed'
 }
@@ -32,7 +32,7 @@ assert_boundary() {
 }
 close_routes() {
   read_ingresses
-  jq --slurpfile c "$INPUT" '{binding:$c[0].binding,image:$c[0].image,ingresses:.items}' \
+  jq --slurpfile c "$INPUT" '{binding:$c[0].binding,image:$c[0].image,ingresses:.items,closedIngresses:[]}' \
     "$OUTPUT/ingresses-current.json" > "$OUTPUT/ingress-snapshot.json"
   jq -n --slurpfile c "$INPUT" '{apiVersion:"v1",kind:"Service",
     metadata:{name:$c[0].maintenance.service,namespace:$c[0].namespace,
@@ -42,11 +42,16 @@ close_routes() {
   local ingress
   while IFS= read -r ingress; do
     jq --arg ingress "$ingress" --argjson deny "$(deny_backend)" '.ingresses[]|select(.metadata.name==$ingress)|
-      [{op:"test",path:"/metadata/uid",value:.metadata.uid},{op:"test",path:"/spec",value:.spec},
+      [{op:"test",path:"/metadata/uid",value:.metadata.uid},
+       {op:"test",path:"/metadata/resourceVersion",value:.metadata.resourceVersion},{op:"test",path:"/spec",value:.spec},
        {op:"replace",path:"/spec",value:(.spec|
         (if has("defaultBackend") then .defaultBackend=$deny else . end)|(.rules[]?.http.paths[]?.backend)=$deny)}]' \
       "$OUTPUT/ingress-snapshot.json" > "$OUTPUT/ingress-patch.json"
-    "${k[@]}" patch ingress "$ingress" --type=json --patch-file "$OUTPUT/ingress-patch.json" >> "$OUTPUT/closure.txt"
+    "${k[@]}" patch ingress "$ingress" --type=json --patch-file "$OUTPUT/ingress-patch.json" -o json \
+      | jq '{metadata:(.metadata|{name,uid,resourceVersion}),spec}' > "$OUTPUT/closed-$ingress.json" || fail 'Ingress changed during closure'
+    jq --slurpfile closed "$OUTPUT/closed-$ingress.json" '.closedIngresses += $closed' \
+      "$OUTPUT/ingress-snapshot.json" > "$OUTPUT/snapshot-next.json"
+    mv "$OUTPUT/snapshot-next.json" "$OUTPUT/ingress-snapshot.json"
   done < <(jq -r '.maintenance.ingresses[]' "$INPUT")
   assert_boundary
 }

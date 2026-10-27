@@ -9,7 +9,7 @@ jq -n '{items:[
    spec:{ingressClassName:"traefik",tls:[{secretName:"fixture-tls",hosts:["preprod.immo.sent-tech.ca"]}],
     rules:[{host:"preprod.immo.sent-tech.ca",http:{paths:[{path:"/",pathType:"Prefix",backend:{service:{name:"radar-ui",port:{number:8080}}}}]}}]}},
   {metadata:{name:"fixture-mcp",uid:"mcp-uid"},spec:{defaultBackend:{service:{name:"radar-immo-mcp",port:{number:3001}}}}}
-]}' > ingress-original.json
+] | map(.metadata.resourceVersion="1")}' > ingress-original.json
 jq '.items[].spec |= ((if has("defaultBackend") then .defaultBackend={service:{name:"base-maintenance-fixture",port:{number:80}}} else . end)
   | (.rules[]?.http.paths[]?.backend)={service:{name:"base-maintenance-fixture",port:{number:80}}})' ingress-original.json > ingress-fixture.json
 jq -n --slurpfile c input.json '{metadata:{annotations:{"radar.sent-tech.ca/maintenance-attempt":$c[0].binding.maintenanceAttemptId}},
@@ -59,18 +59,28 @@ case "$*" in
     esac
     jq "$change" ingress-fixture.json;;
   'patch ingress '*)
-    name=$3; patch=${!#}
-    if [[ $* == *'--type=json'* ]]; then
+    name=$3; command=$*
+    while [[ $# -gt 0 ]]; do
+      if [[ $1 == --patch-file ]]; then patch=$2; shift 2; else shift; fi
+    done
+    if [[ ${FAKE_STATE:-} == restore-race && $patch == *restore-patch.json ]]; then
+      jq '(.items[0].metadata.resourceVersion)="999"' ingress-fixture.json > ingress-next.json
+      mv ingress-next.json ingress-fixture.json
+    fi
+    if [[ $command == *'--type=json'* ]]; then
       jq --arg name "$name" --slurpfile patch "$patch" '
         (.items[]|select(.metadata.name==$name)) |=
-          (if .metadata.uid!=$patch[0][0].value or .spec!=$patch[0][1].value then error("concurrent change")
-           else .spec=$patch[0][2].value end)' ingress-fixture.json > ingress-next.json
+          (reduce $patch[0][] as $op (.; ($op.path|split("/")[1:]) as $path |
+            if $op.op=="test" then if getpath($path)!=$op.value then error("concurrent change") else . end
+            else setpath($path;$op.value) end) |
+            .metadata.resourceVersion=((.metadata.resourceVersion|tonumber)+1|tostring))' ingress-fixture.json > ingress-next.json
       mv ingress-next.json ingress-fixture.json
     else
       jq --arg name "$name" --slurpfile patch "$patch" '
         (.items[]|select(.metadata.name==$name)|.spec.rules)=$patch[0].spec.rules' ingress-fixture.json > ingress-next.json
       mv ingress-next.json ingress-fixture.json
-    fi;;
+    fi
+    if [[ $command == *' -o json' ]]; then jq --arg name "$name" '.items[]|select(.metadata.name==$name)' ingress-fixture.json; fi;;
   'get service base-maintenance-fixture -o json')
     if [[ ${FAKE_STATE:-} == deny-selector ]]; then jq '.spec.selector={app:"api"}' deny-service-fixture.json
     else cat deny-service-fixture.json; fi;;
@@ -130,9 +140,30 @@ rg -qF 'patch cronjob fixture-refresh' cluster-calls
 if rg 'api-resources|get middleware|auth can-i .*middlewares' cluster-calls; then exit 1; fi
 : > cluster-calls
 invoke restore-ingresses EXPECTED="$testdir/expected.json" ROUTES="$closure_output/ingress-snapshot.json"
-jq -e --slurpfile original ingress-original.json '.==$original[0]' ingress-fixture.json >/dev/null
+jq -e --slurpfile original ingress-original.json 'del(.items[].metadata.resourceVersion)==($original[0]|del(.items[].metadata.resourceVersion))' ingress-fixture.json >/dev/null
 invoke close EXPECTED="$testdir/expected.json"
 closure_output=$testdir/out-$n
+cp ingress-fixture.json restoration-baseline.json
+for change in '.items[0].spec.tls[0].secretName="concurrent-tls"' '.items[0].spec.rules[0].host="concurrent.invalid"' '.items[1].metadata.resourceVersion="999"'; do
+  jq "$change" restoration-baseline.json > ingress-fixture.json
+  cp ingress-fixture.json concurrent.json
+  : > cluster-calls
+  if invoke restore-ingresses EXPECTED="$testdir/expected.json" ROUTES="$closure_output/ingress-snapshot.json"; then
+    echo 'Concurrent Ingress modification overwritten' >&2; exit 1
+  fi
+  rg -qF 'Ingress diverged since closure' "result-$n.log"
+  cmp concurrent.json ingress-fixture.json
+  if rg -- '--request-timeout=20s patch ingress ' cluster-calls; then exit 1; fi
+done
+cp restoration-baseline.json ingress-fixture.json
+export FAKE_STATE=restore-race
+if invoke restore-ingresses EXPECTED="$testdir/expected.json" ROUTES="$closure_output/ingress-snapshot.json"; then
+  echo 'Ingress resourceVersion race ignored' >&2; exit 1
+fi
+rg -qF 'Ingress changed during restoration' "result-$n.log"
+jq -e --slurpfile before restoration-baseline.json '[.items[].spec]==[$before[0].items[].spec]' ingress-fixture.json >/dev/null
+cp restoration-baseline.json ingress-fixture.json
+unset FAKE_STATE
 for state in route-uid old replicas cron job ready; do
   export FAKE_STATE=$state
   : > cluster-calls
