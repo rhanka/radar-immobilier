@@ -45,7 +45,7 @@ export async function publishedBaskets(h: Harness, options: { native?: boolean; 
       `citySlug:params.get('citySlug')??'',basket:'pertinent'}):new URLSearchParams('${query}');` +
       `fetch('/__reader/api/baskets.search.v1?'+selection,{headers:{'x-preview-grant':grant}})` +
       `.then(r=>r.json()).then(r=>{document.body.dataset.matched=String(r.counts.matched);` +
-      `document.body.dataset.cookies=document.cookie;document.body.textContent=r.items.map(i=>i.target.id).join(',')});` },
+      `document.body.dataset.cookies=document.cookie;document.body.append(r.items.map(i=>i.target.id).join(','))});` },
   ];
   if (options.native) {
     const read = files[2]!.text;
