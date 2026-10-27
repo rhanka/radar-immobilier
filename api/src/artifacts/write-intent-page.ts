@@ -10,6 +10,7 @@
  */
 import { createHash } from "node:crypto";
 import { PW_PAGE_POLL_BOUNDS, PW_PAGE_PREPARE_PATH, PW_PAGE_STATUS_PATH } from "./write-intent-page-gesture.js";
+import { PW_PAGE_BUDGET_SCRIPT } from "./write-intent-page-budget.js";
 
 const PW_PAGE_SCRIPT_PREPARE = `
 (() => {
@@ -194,10 +195,13 @@ const PW_PAGE_SCRIPT_POLL = `
     var timer = setTimeout(function () { ctrl.abort(); }, ms);
     return { signal: ctrl.signal, done: function () { clearTimeout(timer); } };
   }
-  var poll = { timer: null, inFlight: false, intentId: null, startedAt: 0, count: 0, stopped: true };
+  var poll = { timer: null, inFlight: false, intentId: null, startedAt: 0, count: 0,
+    stopped: true, manualAt: 0, nextAt: 0, cacheOK: false, restoredLease: false };
+${PW_PAGE_BUDGET_SCRIPT}
   function stopPoll() {
     poll.stopped = true;
     if (poll.timer !== null) { clearTimeout(poll.timer); poll.timer = null; }
+    checkpointBudget();
   }
   function schedule(ms) {
     if (poll.timer !== null) clearTimeout(poll.timer);
@@ -252,6 +256,7 @@ const PW_PAGE_SCRIPT_POLL = `
     }
     if (out.status === 429) {
       var wait = Math.min(60, Math.max(INTERVAL_MS / 1000, parseInt(out.retryAfter || "2", 10) || 2));
+      poll.nextAt = Date.now() + wait * 1000;
       if (!manual) schedule(wait * 1000);
       say("The follow-up is limited. Waiting " + wait + " seconds.");
       return;
@@ -274,10 +279,13 @@ const PW_PAGE_SCRIPT_POLL = `
     }
     poll.inFlight = true;
     poll.count += 1;
+    poll.nextAt = now + REQUEST_TIMEOUT_MS;
+    if (!checkpointBudget()) { poll.inFlight = false; return; }
     var intentId = poll.intentId;
     try {
       var out = await checkOnce(intentId);
       if (intentId !== poll.intentId) return;
+      poll.nextAt = 0;
       handleStatus(out);
       var state = out.data && out.data.data ? out.data.data.state : "";
       if (!poll.stopped && !TERMINAL[state] && poll.timer === null) schedule(INTERVAL_MS);
@@ -288,30 +296,42 @@ const PW_PAGE_SCRIPT_POLL = `
       reveal("#pw-write-manual");
     } finally {
       poll.inFlight = false;
+      if (intentId === poll.intentId) {
+        poll.nextAt = Math.max(poll.nextAt, Date.now() + INTERVAL_MS);
+        checkpointBudget();
+      }
     }
   }
   function startPoll(intentId) {
     if (poll.intentId === intentId) return;
     stopPoll();
-    poll.intentId = intentId;
-    poll.startedAt = Date.now();
-    poll.count = 0;
-    poll.stopped = false;
-    schedule(INTERVAL_MS);
+    if (!restoreBudget(intentId)) return;
+    var now = Date.now();
+    if (poll.stopped || now >= poll.startedAt + WINDOW_MS || MAX_POLLS <= poll.count) {
+      stopPoll();
+      say("Result to verify. Use the manual check below.");
+      reveal("#pw-write-manual");
+      return;
+    }
+    schedule(Math.max(INTERVAL_MS, poll.nextAt - now));
   }
   window.__pwWriteFollowUp = startPoll;
   var manualBtn = $("#pw-write-manual");
   if (manualBtn) manualBtn.addEventListener("click", async function () {
+    if (!poll.cacheOK) return;
     if (poll.intentId === null || poll.inFlight) return;
     var now = Date.now();
-    if (now - (manualBtn.dataset.pwLast || 0) < MANUAL_SPACING_MS) {
+    if ((poll.restoredLease && now < poll.nextAt) || now - poll.manualAt < MANUAL_SPACING_MS) {
       say("Wait before checking again.");
       return;
     }
     manualBtn.dataset.pwLast = now;
+    poll.manualAt = now;
     stopPoll();
     var intentId = poll.intentId;
     poll.inFlight = true;
+    poll.nextAt = now + REQUEST_TIMEOUT_MS;
+    if (!checkpointBudget()) { poll.inFlight = false; return; }
     try {
       var out = await checkOnce(intentId);
       if (intentId !== poll.intentId) return;
@@ -321,6 +341,10 @@ const PW_PAGE_SCRIPT_POLL = `
       say("Result to verify. Try the manual check again later.");
     } finally {
       poll.inFlight = false;
+      if (intentId === poll.intentId) {
+        poll.nextAt = Math.max(poll.nextAt, poll.manualAt + MANUAL_SPACING_MS);
+        checkpointBudget();
+      }
     }
   });
   document.addEventListener("visibilitychange", function () {
