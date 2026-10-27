@@ -1,9 +1,11 @@
+import { contractInteger } from "@radar/domain";
+import { contractDateTime } from "@radar/domain";
 import { z } from "zod";
 import { Hash, Verdict } from "./classification-query.js";
 
 export const Reason = z.object({ profileId: z.string().min(1), code: z.string().min(1), verdict: Verdict }).strict();
-export const Head = z.object({ id: z.string().uuid(), state: z.enum(["active", "inactive"]),
-  createdAt: z.string().datetime({ offset: true }), reason: Reason.nullable() }).strict();
+export const Head = z.object({ id: z.string().guid(), state: z.enum(["active", "inactive"]),
+  createdAt: contractDateTime({ offset: true }), reason: Reason.nullable() }).strict();
 export const ArchiveHead = Head.extend({ changedSinceArchive: z.boolean().nullable() });
 export const SignalFacets = z.object({
   selection: z.object({ pertinent: Head.nullable(), a_surveiller: Head.nullable() }).strict(),
@@ -28,7 +30,7 @@ export const SignalFacets = z.object({
   if ((value.personalHistoryState === "has_history") !== history) invalid();
 });
 export type SignalFacetsDto = z.infer<typeof SignalFacets>;
-const count = z.number().int().nonnegative();
+const count = contractInteger().nonnegative();
 export const SignalCounts = z.object({ unit: z.literal("distinct_targets"),
   eligible: count, visible: count, discarded: count,
   discardedByScope: z.object({ personalOnly: count, workspaceOnly: count, both: count }).strict(),
@@ -49,6 +51,6 @@ export const SignalCounts = z.object({ unit: z.literal("distinct_targets"),
 export const Snapshot = z.object({ kind: z.literal("signal-projection-v1"),
   baseToken: Hash, queryToken: Hash, queryDigest: Hash,
   projectionVersion: z.string().min(1), catalogVersion: z.string().min(1) }).strict();
-export const Page = z.object({ limit: z.number().int().min(1).max(100),
+export const Page = z.object({ limit: contractInteger().min(1).max(100),
   nextCursor: z.string().max(4096).nullable(), truncated: z.boolean() }).strict()
   .refine((value) => value.truncated === (value.nextCursor !== null));
