@@ -1,3 +1,6 @@
+import { contractUrl } from "@radar/domain";
+import { contractDateTime } from "@radar/domain";
+import { contractParse } from "@radar/domain";
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import { DocumentDateSchema, type DocumentDate } from "./DocumentDate.js";
@@ -41,7 +44,7 @@ export const RawDocumentRecordSchema = z.object({
   /** Source id that produced the document (e.g. "avis-publics-valleyfield"). */
   source: z.string().min(1),
   /** Exact URL the bytes were fetched from (anti-invention: the real link). */
-  sourceUrl: z.string().url(),
+  sourceUrl: contractUrl(),
   /** Human title exposed by the source listing, when available. */
   title: z.string().min(1).optional(),
   /**
@@ -53,7 +56,7 @@ export const RawDocumentRecordSchema = z.object({
   /** SHA-256 hex digest of the raw bytes — the idempotency key. */
   sha256: z.string().regex(/^[a-f0-9]{64}$/),
   /** ISO timestamp of the fetch. */
-  fetchedAt: z.string().datetime(),
+  fetchedAt: contractDateTime(),
   /** Object-storage key under which the raw bytes live (`raw/<source>/<Y>/<M>/<D>/<sha>.<ext>`). */
   storageKey: z.string().min(1),
   /**
@@ -169,7 +172,7 @@ export function buildRawDocumentRecord(input: {
     sha256,
     contentType: input.contentType,
   });
-  return RawDocumentRecordSchema.parse({
+  return contractParse(RawDocumentRecordSchema, {
     id: rawDocumentId(input.source, sha256),
     source: input.source,
     sourceUrl: input.sourceUrl,
