@@ -564,7 +564,10 @@ database pod by name and UID. Q1/Q2 may additionally admit qualified API-image
 pods under the verified network boundary. There is no three-Service exception.
 
 The supported policy shape is namespace-wide default-deny ingress. Additive
-ingress grants may target database pods exclusively, or admit only Traefik
+ingress grants may target database pods exclusively from local pod selectors
+with nonempty `matchLabels` and no namespaceSelector/ipBlock; missing/empty
+`from` rules are refused. Policies without an explicit non-PostgreSQL component
+selector receive this same check. Other grants may admit only Traefik
 pods (`app.kubernetes.io/name=traefik`) in namespace `traefik` or `kube-system`,
 using both pod and namespace selectors. Broad intra-namespace/UI/MCP grants,
 IP blocks and unsupported selectors are refused, even if currently unused.
@@ -583,6 +586,8 @@ full attestation. The probes must exercise consumer-selected canaries/pods,
 direct pod IPs and Service IPs from same-node, other-node, cross-namespace and
 node-origin sources, plus public/alternative ports; keep the actual probe
 results and source/node coverage. Kubernetes policy acceptance is **not** proof
+of PostgreSQL isolation either: include its pod and Service IPs in these probes.
+Kubernetes policy acceptance is **not** proof
 that the CNI enforces it, and node-origin exceptions must be tested explicitly.
 The authenticated administrator tunnel remains the qualified exception.
 Missing/expired/foreign probes, changed policies, unsupported CNI or failed
