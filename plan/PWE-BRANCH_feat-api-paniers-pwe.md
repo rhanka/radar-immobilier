@@ -32,6 +32,9 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Add isolated source snapshots, offline tools and explicit lock release.
+- [ ] Runtime prerequisite: content-reader and index omit H5/read/write
+  bindings; HW-01/HW-15/CT-9 require actual network integration, not fixtures.
 - [x] Add selective commit and prerequisite-only incremental bundle auditing.
 - [x] Owner requested final PW-A integration before PW-E; intermediate bundle
   and report delivered, with 65 unit, 9 PG, 4396 API passes and 25 mutant kills.
