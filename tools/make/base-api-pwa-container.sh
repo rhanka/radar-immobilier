@@ -11,6 +11,9 @@ else
   fi
   dpkg-query -W curl jq > /evidence/system-package-versions.txt
 fi
+if [[ ${2:-full} == sequence ]]; then
+  exec bash tools/make/base-api-pwa-sequence-container.sh "$1" "${3:-1}"
+fi
 if [[ ${2:-full} == full || ${2:-full} == scoped ]]; then
 bash tools/make/base-api-container.sh test-api "$1"
 cp /evidence/tests.json /evidence/scoped-tests.json
