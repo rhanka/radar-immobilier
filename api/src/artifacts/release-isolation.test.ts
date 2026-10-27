@@ -13,6 +13,18 @@ async function token() {
       name: "demo", policyRevision: "pol-001", capabilities: ["geo.read", "signals.protected-read"] }) }, GRANT_SECRET, 1000);
 }
 describe("published release isolation", () => {
+  it.each(["script", "style"])("should hash interpreted %s text after quoted HTML attributes", (tag) => {
+    const text = tag === "script" ? 'window.note="a &gt; b";\nwindow.ready=true;' : 'body::after{content:"a > b"}\n';
+    const html = `<${tag} data-label="a>b" data-note='two words > three'>${text.replace(/\n/g, "\r\n")}</${tag}>`;
+    expect(releaseCspForHtml(html)).toContain(`'sha256-${createHash("sha256").update(text).digest("base64")}'`);
+  });
+  it("should ignore apparent inline blocks inside HTML attributes, comments and textareas", () => {
+    const html = '<div title="<script>attribute</script>"></div><!-- <script>comment</script> -->' +
+      '<textarea><script>textarea</script></textarea><script>window.ready=true;</script>';
+    const csp = releaseCspForHtml(html);
+    expect(csp.match(/sha256-/g)).toHaveLength(2);
+    expect(csp).toContain(`'sha256-${createHash("sha256").update("window.ready=true;").digest("base64")}'`);
+  });
   it("should hash LF, CRLF and CR inline scripts as the browser interprets them", () => {
     const script = '\nconst s=document.createElement("script");\ns.src="/dep.js?v=1";\n';
     const expected = createHash("sha256").update(script).digest("base64");

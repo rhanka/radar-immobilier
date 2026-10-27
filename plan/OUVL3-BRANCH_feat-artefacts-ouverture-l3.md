@@ -63,6 +63,11 @@ Connect published release files and H5 reads to current account/workspace author
 - [x] Eight Chromium reads reached the expected 2/1 counts in 120–170 ms; H5 and transitive resources returned 200, no CSP violations, unchanged 1500 ms timeout.
 - [x] Runner exited 0 with PASS; down -v removed all L3 containers, volumes and networks and released its lock. A subsequent foreign PWA campaign owns the lock and remains untouched.
 - [x] Delivery uses an audited incremental bundle from `0e9c0cbe`, reconstructed in a fresh repository; report and original Muse evidence remain outside Git. No push; shared Track unchanged.
+- [x] Read both complete second-pass Astra reviews at `a3aa18e0`; reproduce quoted-attribute extraction and identify dropped navigation parameters.
+- [x] OUVL3-EX3: allow `api/package.json` and `package-lock.json` to promote existing parse5 7.3.0 to a direct runtime dependency for browser-compatible HTML parsing. Impact: existing parser/entities remain in production installs; rollback: remove that direct dependency with its parser call.
+- [ ] Extract inline text with the HTML parser and preserve every navigation parameter while changing only grant.
+- [x] Replace inline-block regex extraction with parse5's HTML tree; regress quoted greater-than/spaces and apparent scripts in attributes, comments and textareas. Browser acceptance follows below.
+- [ ] Qualify artifact units, PostgreSQL reader, Chromium, both corrective mutations and API CI under the shared lock; clean volumes and deliver a bundle from `a3aa18e0`.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch, serialized implementation and Docker campaigns.
