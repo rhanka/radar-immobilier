@@ -79,14 +79,14 @@ export async function publishedBaskets(h: Harness, options: { native?: boolean; 
       checkDb: async () => ({ ok: true }), checkObjectStore: async () => ({ ok: true }),
       contentHost: { enabled: true, contentBase: "pages.example.test" }, readerContent, readerOpening: opening.application });
   };
-  const credentials = async (sub: string) => {
+  const credentials = async (sub: string, requestedRelease = releaseId, requestedHost = host) => {
     const now = Date.now();
     const sid = randomUUID();
-    const grant = await mintGrant({ ...ISSUER, host, artifactId, releaseId, readerSub: sub, sessionId: sid,
+    const grant = await mintGrant({ ...ISSUER, host: requestedHost, artifactId, releaseId: requestedRelease, readerSub: sub, sessionId: sid,
       profileName: BASKET_READER_PROFILE.name, policyRevision: BASKET_READER_PROFILE.policyRevision,
       profileFingerprint: fingerprintReaderProfile(BASKET_READER_PROFILE) }, GRANT_SECRET, now);
     const cookie = mintSessionCookie({ sid, readerSub: sub, artifactId, createdAt: now, expiresAt: now + 900_000 }, SESSION_SECRET).split(";")[0]!;
-    return { grant, cookie, host };
+    return { grant, cookie, host: requestedHost };
   };
   return { data, first, second, artifactId, releaseId, host, files, stored, runtime, credentials };
 }
