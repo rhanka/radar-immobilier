@@ -26,15 +26,15 @@ run_bad() {
 fixture() {
   mkdir -p "$ROOT/tmp"
   CASE_ROOT="$(mktemp -d "$ROOT/tmp/h3-disabled.XXXXXX")"
-  (cd "$ROOT" && cp -r --parents deploy/k8s deploy/overlays/preprod "$CASE_ROOT")
+  bash "$HERE/h3-disabled-fixture.sh" "$CASE_ROOT"
 }
 trap 'rm -rf "${CASE_ROOT:-}"' EXIT
 
-run_ok "$ROOT" 'accepts the released preprod overlay (activation disabled)'
+run_ok "$ROOT" 'accepts the released general-opening preprod overlay'
 
 # Compare the complete Service selector in every operator state.
 fixture
-"${KUBECTL:-kubectl}" kustomize --load-restrictor LoadRestrictionsNone "$ROOT/deploy/overlays/preprod" >"$CASE_ROOT/disabled.yaml"
+"${KUBECTL:-kubectl}" kustomize --load-restrictor LoadRestrictionsNone "$CASE_ROOT/deploy/overlays/preprod" >"$CASE_ROOT/disabled.yaml"
 sed '/ARTIFACTS_CONTROL_MODE:/a\  ARTIFACTS_CONTENT_BASE: pages.fixture.test\n  ARTIFACTS_STORAGE_SCOPE: fixture_scope\n  ARTIFACTS_ORG_ID: fixture_org\n  ARTIFACTS_S3_BUCKET: fixture-bucket\n  ARTIFACTS_S3_ENDPOINT: https://s3.fixture.test\n  ARTIFACTS_S3_REGION: fixture-region\n  ARTIFACTS_VALIDATION_SUBJECTS: fixture_subject\n  ARTIFACTS_VALIDATION_UNTIL: "2099-01-01T00:00:00Z"' "$CASE_ROOT/disabled.yaml" \
   | sed -e 's/artifacts-content-unverified.invalid/pages.fixture.test/g' \
     -e 's/radar-artifact-content-unverified-tls/fixture-content-tls/g' \
