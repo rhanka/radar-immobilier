@@ -30,6 +30,12 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
     PWA-EX3 permits their exact import from 0ab7d664 by merge only.
 
 ## Feedback Loop
+- [x] Final merged campaign 20261027T174812: 137 scoped tests, including
+  34 PostgreSQL authority cases and three real-socket delivery probes; zero skips.
+- [x] Final gates: 31 killed/restored mutants, API 4334/0/76, ARTEFACTS
+  165/0/0 and MCP 406/0/0; API/packages/tests typechecks, lint and build pass.
+- [x] Audited incremental 07ef2757 bundle in a fresh base-seeded repository;
+  all owned Docker resources removed with down -v --remove-orphans; lock released.
 - [x] Preserve the imported delivery probe: expose the archived real tools at
   /usr/bin/curl and /usr/bin/jq inside the disposable container; its three
   real-socket cases pass without changing their assertions.
@@ -61,7 +67,7 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
   that socket on expiry; return late leases without work and preserve uncertain COMMIT errors.
 - [x] Third-pass reproduction: saturated-pool preparation exceeds eight seconds;
   delayed acquisition exceeds nine seconds and acquisition timeout returns 504.
-- [ ] Third-pass gates: PostgreSQL saturation/acquisition, functional mutations,
+- [x] Third-pass gates: PostgreSQL saturation/acquisition, functional mutations,
   CI-equivalent API suite, lint/typecheck and fresh 07ef2757 bundle audit.
 - [x] Second-pass final campaign: 127 scoped tests (61 PW-A, 65 PW-D, one
   createApp), zero skips; API 4254 passed/76 optional skipped; ARTEFACTS 165
