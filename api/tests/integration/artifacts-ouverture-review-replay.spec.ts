@@ -65,6 +65,13 @@ describe("Astra review: committed replay before the minute bound", () => {
         expect(await h.durable()).toEqual(before);
         await h.setStatus(ALICE, "suspended");
         expect(await invoke(operation, args)).toMatchObject({ ok: false, data: { error: "account_not_approved" } });
+        if (operation === "publish") {
+          const raw = await h.host.execute({ method: "POST", path: "/publish", actorId: ALICE, body: args }, {
+            invocationId: `${prefix}-raw-replay`, actorId: ALICE, storageScopeId: SCOPE,
+            authorizeCommit: h.host.authorizeCommit,
+          });
+          expect(raw).toMatchObject({ ok: false, failure: { httpStatus: 403, publicCode: "account_not_approved" } });
+        }
         expect(await h.durable()).toEqual(before);
         expect(uploads).toBe(beforeUploads);
       });

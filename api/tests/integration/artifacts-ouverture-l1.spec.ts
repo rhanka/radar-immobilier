@@ -89,7 +89,7 @@ describe("ouverture L1 general admission on the host", () => {
     try {
       const denied = await h.control.handle("ensure", ALICE, { bindingName: "actor-capped", idempotencyKey: "actor-capped" });
       expect(denied.status).toBe(409);
-      expect(await h.durable()).toEqual(before);
+      expect(await h.durable()).toEqual({ ...before, rate: before.rate! + 1 });
     } finally {
       await h.pool.query("UPDATE artifacts.host_actor_quotas SET operation_limit = 1000000 WHERE storage_scope_id = $1 AND actor_id = $2",
         [SCOPE, ALICE]);
@@ -102,7 +102,7 @@ describe("ouverture L1 general admission on the host", () => {
       ON CONFLICT (storage_scope_id, actor_id, window_start) DO UPDATE SET count = 10`, [SCOPE, CAROL]);
     const before = await h.durable();
     const denied = await h.control.handle("ensure", CAROL, { bindingName: "rate-capped", idempotencyKey: "rate-capped" });
-    expect(denied).toMatchObject({ status: 403, body: { error: "rate_limited" } });
+    expect(denied).toMatchObject({ status: 429, body: { error: "rate_limited", retryable: true } });
     expect(await h.durable()).toEqual(before);
     await h.pool.query("DELETE FROM artifacts.host_actor_rate WHERE storage_scope_id = $1 AND actor_id = $2", [SCOPE, CAROL]);
     expect(await h.control.handle("ensure", CAROL, { bindingName: "rate-capped", idempotencyKey: "rate-capped" }))
