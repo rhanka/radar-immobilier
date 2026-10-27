@@ -28,9 +28,23 @@
   "mcpDeployment": "<SUCCESSOR_MCP_DEPLOYMENT_NAME>",
   "apiIngress": "<APPLICATION_INGRESS_NAME>",
   "maintenance": {
-    "middleware": "base-maintenance-<UNIQUE_ATTEMPT>",
-    "sources": ["<QUALIFIED_OPERATOR_SOURCE_CIDR>"],
-    "ingresses": ["<APPLICATION_INGRESS_NAME>", "<MCP_INGRESS_NAME>"]
+    "service": "base-maintenance-<UNIQUE_ATTEMPT>",
+    "ingresses": ["<APPLICATION_INGRESS_NAME>", "<MCP_INGRESS_NAME>"],
+    "networkIsolation": {
+      "binding": "<EXACT_BINDING_OBJECT>",
+      "image": "<EXACT_QUALIFIED_API_DIGEST>",
+      "context": "<EXACT_AUTHORIZED_CONTEXT>",
+      "namespace": "radar-immobilier-preprod",
+      "reference": "<IMMUTABLE_CNI_PROBE_RECEIPT>",
+      "sha256": "<CNI_PROBE_RECEIPT_SHA256>",
+      "observedAt": "<UTC_PROBE_TIMESTAMP>",
+      "policySha256": "<CANONICAL_POLICY_INVENTORY_SHA256>",
+      "passed": false,
+      "networkPolicyEnforced": false,
+      "podIPDenied": false,
+      "serviceIPDenied": false,
+      "nodeOriginDenied": false
+    }
   },
   "cancelRuns": []
 }

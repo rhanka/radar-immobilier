@@ -40,6 +40,8 @@ RETIRED_LAUNCHERS=(
   'Makefile|object-storage-docs-preprod-prove-conditional-write'
   'Makefile|object-storage-docs-preprod-copy'
   'Makefile|object-storage-docs-preprod-copy-canonical'
+  'Makefile|object-storage-docs-preprod-fence'
+  'Makefile|object-storage-minio-preprod-remove'
   'deploy/ci/object-storage-prod.mk|object-storage-docs-prod-fast-start'
   'deploy/ci/object-storage-prod.mk|object-storage-docs-prod-proof'
   'deploy/ci/object-storage-prod.mk|object-storage-docs-prod-copy'
