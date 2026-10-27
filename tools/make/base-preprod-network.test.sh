@@ -3,9 +3,11 @@
 cp input.json network-good-input.json
 for state in nodeport loadbalancer external-ip external-name node-port-field hostnetwork hostport template-hostport template-hostnetwork init-hostport alternate-route extra-endpoint extra-legacy no-isolation allow-pods policy-change; do
   export FAKE_STATE=$state
-  for action in activate start-api reopen-api; do
+  for action in close activate start-api restart-api reopen-api; do
+    [[ $action != close || ( $state != extra-endpoint && $state != extra-legacy ) ]] || continue
     proofs=$testdir/proofs.json
     [[ $action != start-api ]] || proofs=$testdir/activation-receipt.json
+    [[ $action != restart-api ]] || proofs=$testdir/first-qualification.json
     [[ $action != reopen-api ]] || proofs=$testdir/acceptance.json
     : > cluster-calls
     if invoke "$action" EXPECTED="$testdir/expected.json" PROOFS="$proofs"; then
