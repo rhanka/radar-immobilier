@@ -26,5 +26,5 @@
 ## Plan / Todo (lot-based)
 - [x] Lot 0: read the afternoon refusal report and branch from the requested main SHA.
 - [x] Lot 1: validate the namespace/reference/reason and record a waiver without weakening other checks.
-- [ ] Lot 2: test accepted/rejected/absent waiver and preserved guards.
+- [x] Lot 2: 266 hermetic operator cases pass, covering waiver receipts, namespace refusal, absence and preserved guards.
 - [ ] Lot 3: short report, atomic commit audit and verified incremental bundle.
