@@ -82,9 +82,24 @@ describe("D6 actual SDK byte transports", () => {
         const text = await response.text();
         const json = response.headers.get("content-type")?.includes("text/event-stream")
           ? text.split("\n").find((line) => line.startsWith("data: "))!.slice(6) : text;
-        assertD6(JSON.parse(json) as Rpc);
+        const message = JSON.parse(json) as Rpc;
+        expect(message.result).toEqual({ isError: true, content: [
+          { type: "text", text: expect.any(String) },
+        ] });
+        // Frozen from the current production HTTP composition on the base.
+        expect(JSON.parse(message.result.content[0]!.text)).toEqual({
+          error: "composition_invalid-arguments", tool: "search_lots",
+          correlationId: expect.any(String),
+        });
       }
       expect(search).not.toHaveBeenCalled();
+      const valid = await post(frame("1e308", 4));
+      expect(valid.status).toBe(200);
+      const validText = await valid.text();
+      const validJson = valid.headers.get("content-type")?.includes("text/event-stream")
+        ? validText.split("\n").find((line) => line.startsWith("data: "))!.slice(6) : validText;
+      expect((JSON.parse(validJson) as Rpc).result.isError).not.toBe(true);
+      expect(search).toHaveBeenCalledOnce();
     } finally { await app.request("/mcp", { method: "DELETE", headers }); }
   });
 });

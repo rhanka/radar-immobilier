@@ -25,6 +25,7 @@
 - [x] Record rationale, impact and rollback before any conditional-path edit.
 
 ## Feedback Loop
+- [x] L2y: freeze composed HTTP non-finite refusals from the base; keep SDK stdio diagnostics and finite-number controls.
 - [x] L1a: regenerate locks with fast-uri 3.1.9, ip-address 10.7.5, Zod 4.6.7 and Engram 0.21.2; retain CSV 7.0.3.
 - [x] L2x: retain the existing CSV 7.0.3 security override under Engram; its declared CSV 6.2.1 is affected by GHSA-8cw4-87c7-c6xx.
 - [x] L2w: retain physical dependency-tree validation and negative checks for vulnerable or invalid instances.
