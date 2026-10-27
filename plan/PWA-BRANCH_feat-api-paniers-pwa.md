@@ -30,6 +30,8 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
     PWA-EX3 permits their exact import from 0ab7d664 by merge only.
 
 ## Feedback Loop
+- [x] Final merge 681de8af retains exact parents 318b97fd and main 9a723753;
+  audit only newly authored first-parent commits and include imported history in the bundle.
 - [x] PWA-EX4: owner finalization requires merging main 9a723753 (106 commits),
   including ARTEFACTS A1-A6 and provider 0.2.1. Preserve PW-A/B/D bytes and
   the identical Track log; retain main's helper imports and pending purge claims.
