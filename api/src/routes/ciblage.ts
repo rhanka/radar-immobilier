@@ -1,3 +1,4 @@
+import { contractSafeParse } from "@radar/domain";
 import {
   CiblagePlanInput,
   CiblagePlanPatch,
@@ -123,7 +124,7 @@ export function ciblageRoute(
   });
 
   app.post("/api/ciblage", async (c) => {
-    const parsed = CiblagePlanInput.safeParse(
+    const parsed = contractSafeParse(CiblagePlanInput,
       await c.req.json().catch(() => null),
     );
     if (!parsed.success) {
@@ -150,7 +151,7 @@ export function ciblageRoute(
   });
 
   app.patch("/api/ciblage/:id", async (c) => {
-    const parsed = CiblagePlanPatch.safeParse(
+    const parsed = contractSafeParse(CiblagePlanPatch,
       await c.req.json().catch(() => null),
     );
     if (!parsed.success) {

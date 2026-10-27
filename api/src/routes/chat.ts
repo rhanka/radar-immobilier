@@ -1,3 +1,4 @@
+import { contractSafeParse } from "@radar/domain";
 /**
  * ÉV9 — Real chat HTTP/SSE endpoint (Hono).
  *
@@ -52,7 +53,7 @@ const chatTurnSchema = z.object({
   content: z.string(),
 });
 
-const createMessageSchema = z.object({
+export const createMessageSchema = z.object({
   providerId: z.string().min(1),
   model: z.string().min(1).optional(),
   messages: z.array(chatTurnSchema).min(1),
@@ -205,7 +206,7 @@ export function chatRoute(db?: Database): Hono {
 
   /** Start a streamed assistant turn; returns the streamId to subscribe to. */
   app.post("/api/chat/messages", async (c) => {
-    const parsed = createMessageSchema.safeParse(
+    const parsed = contractSafeParse(createMessageSchema,
       await c.req.json().catch(() => null),
     );
     if (!parsed.success) {
