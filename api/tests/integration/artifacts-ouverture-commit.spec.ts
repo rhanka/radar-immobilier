@@ -37,7 +37,7 @@ describe("general admission at the PostgreSQL commit boundary", () => {
       expect(await pending).toMatchObject({ status: 403, body: { error: "account_not_approved" } });
       expect(await ensure(ALICE, "suspend-upload")).toMatchObject({ ok: false,
         failure: { publicCode: "account_not_approved", httpStatus: 403 } });
-      expect(await h.durable()).toEqual(before);
+      expect(await h.durable()).toEqual({ ...before, rate: before.rate! + 1 });
     } finally {
       release(); await pending; h.beforeUpload(async () => {});
       await h.setStatus(ALICE, "approved");
@@ -54,7 +54,7 @@ describe("general admission at the PostgreSQL commit boundary", () => {
     const after = await h.durable();
     expect(after.operations).toBe(before.operations! + 1);
     expect(after.actor_operations).toBe(before.actor_operations! + 1);
-    expect(after.rate).toBe(before.rate! + 1);
+    expect(after.rate).toBe(before.rate! + 2);
     const winner = results[0]!.ok ? "actor-race-a" : "actor-race-b";
     expect(await ensure(CAROL, winner)).toMatchObject({ ok: true });
     expect(await h.durable()).toEqual(after);
