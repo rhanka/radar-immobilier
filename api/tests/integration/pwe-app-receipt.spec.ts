@@ -42,7 +42,8 @@ async function committed(common = false) {
   const get = () => h.app.request(url, { headers: { ...headers, "sec-fetch-site": "same-origin" } });
   const result = await get(); expect(result.status).toBe(200);
   const data = await result.json();
-  expect({ state: data.state, commandId: data.commandId, receipt: data.receipt })
+  expect({ state: data.state, commandId: data.commandId, receipt: data.receipt },
+    "PW_E_APP_RECEIPT missing immutable receipt or commandId")
     .toEqual({ state: "committed", commandId: receipt.commandId, receipt: receipt.receipt });
   return { ...h, id, mutation, get, post, receipt, boot };
 }
