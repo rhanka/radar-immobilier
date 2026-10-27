@@ -30,16 +30,16 @@ export const lotTargetSchema = z.object({
 }).strict();
 
 export const lotDisplayedVersionSchema = z.object({
-  lot_version_id: z.string().uuid(),
+  lot_version_id: z.string().guid(),
   fingerprint: z.string().length(64).regex(/^[a-f0-9]{64}$/),
 }).strict();
 
-export const lotExpectedHeadId = z.string().uuid().nullable();
+export const lotExpectedHeadId = z.string().guid().nullable();
 export const lotBasketId = z.string().min(1).max(256);
 export const lotReasonCode = z.string().max(128).regex(/^[A-Z0-9]+(-[A-Z0-9]+)*$/);
 export const lotDeselectEntry = z.object(
   { basket_id: lotBasketId, expected_head_id: lotExpectedHeadId }).strict();
-export const lotWorkspaceId = z.string().uuid();
+export const lotWorkspaceId = z.string().guid();
 export const lotMode = z.enum(["real", "simulation"]);
 
 export const lotMutationSchema = z.discriminatedUnion("action", [

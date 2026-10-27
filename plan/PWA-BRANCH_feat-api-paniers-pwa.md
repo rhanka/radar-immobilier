@@ -29,7 +29,15 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
   - Approved PW-D implementation, migration, tests, spec, tooling and plan:
     PWA-EX3 permits their exact import from 0ab7d664 by merge only.
 
+  - Migration rename, journal, schema.ts comment, PW-D migration test,
+    PW_D_PERSISTENCE.md and the three PW-D delivery/commit helpers: PWA-EX5.
+
 ## Feedback Loop
+- [x] PWA-EX5: owner orders published quota 0025, reader tickets 0026,
+  then PW-A persistence 0027. Merge main c189c188 after PRs 930/931,
+  preserve all incoming SQL/journal bytes, rename approved DDL unchanged,
+  and update its references and replay test. Revert the merge with first
+  parent as mainline for rollback; retain both histories and publish nothing.
 - [x] Final merged campaign 20261027T174812: 137 scoped tests, including
   34 PostgreSQL authority cases and three real-socket delivery probes; zero skips.
 - [x] Final gates: 31 killed/restored mutants, API 4334/0/76, ARTEFACTS

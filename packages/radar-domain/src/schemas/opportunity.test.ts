@@ -38,7 +38,7 @@ describe("EvidenceItem", () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       expect(
-        result.error.errors.some((e) =>
+        result.error.issues.some((e) =>
           e.message.includes("verified") || e.message.includes("url")
         )
       ).toBe(true);
@@ -210,7 +210,7 @@ describe("OpportunityDossier axes envelope (Task 10)", () => {
     const r = OpportunityDossier.safeParse(bad);
     expect(r.success).toBe(false);
     if (!r.success) {
-      expect(r.error.errors.some((e) => e.message.includes("invariant"))).toBe(true);
+      expect(r.error.issues.some((e) => e.message.includes("invariant"))).toBe(true);
     }
   });
 });

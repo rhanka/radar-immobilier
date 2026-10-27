@@ -1,4 +1,4 @@
-import type { TextJsonGenerationClient } from "@sentropic/graphify";
+import type { TextJsonGenerationClient } from "@sentropic/engram";
 import { describe, expect, it, vi } from "vitest";
 
 import { createRefreshModelPolicy, type RefreshModel, type RefreshModelReceipt } from "./refresh-model-policy.js";

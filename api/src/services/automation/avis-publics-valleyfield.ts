@@ -1,3 +1,4 @@
+import { contractDateTime } from "@radar/domain";
 import {
   AVIS_PUBLICS_SOURCE_URL,
   AVIS_PUBLICS_USER_AGENT,
@@ -5,6 +6,7 @@ import {
   type AvisPublicItemT,
 } from "@radar/sources";
 import { z } from "zod";
+import { contractParse } from "@radar/domain";
 
 /**
  * REAL public-source connector for the city of Salaberry-de-Valleyfield
@@ -35,7 +37,7 @@ const FETCH_TIMEOUT_MS = 15000;
 export const CollectResult = z.object({
   source: z.literal("avis-publics-valleyfield"),
   sourceUrl: z.string().url(),
-  fetchedAt: z.string().datetime(),
+  fetchedAt: contractDateTime(),
   count: z.number().int().nonnegative(),
   items: z.array(
     z.object({
@@ -115,7 +117,7 @@ export async function collectAvisPublicsValleyfield(
   try {
     const all: AvisPublicItemT[] = parseAvisPublics(html);
     const items = all.slice(0, limit);
-    const result = CollectResult.parse({
+    const result = contractParse(CollectResult, {
       source: base.source,
       sourceUrl: base.sourceUrl,
       fetchedAt,
