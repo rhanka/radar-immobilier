@@ -15,7 +15,7 @@ import {
   facetStreams,
   facetStreamAttachments,
 } from "../../db/schema.js";
-import { SCOPED_EPOCH } from "./scope.js";
+import { SCOPED_EPOCH, requireScopedEpoch, ScopedMaintenanceError } from "./scope.js";
 
 type ActivationTx = Parameters<Parameters<Database["transaction"]>[0]>[0];
 
@@ -46,12 +46,28 @@ export interface ActivationReceipt {
   epoch: typeof SCOPED_EPOCH;
 }
 
+async function activationStateFor(
+  db: Pick<Database, "select">, workspaceId: string,
+) {
+  const [row] = await db.select().from(facetActivationState)
+    .where(eq(facetActivationState.workspaceId, workspaceId));
+  return row;
+}
+
 export async function scopedEpochFor(
   db: Pick<Database, "select">, workspaceId: string,
 ): Promise<string | null> {
-  const [row] = await db.select().from(facetActivationState)
-    .where(eq(facetActivationState.workspaceId, workspaceId));
+  const row = await activationStateFor(db, workspaceId);
   return row?.maintenanceBarrier ? null : row?.writerEpoch ?? null;
+}
+
+/** Refuse from one sample; callers must never reconstruct a mutable cause. */
+export async function requireScopedEpochFor(
+  db: Pick<Database, "select">, workspaceId: string,
+): Promise<void> {
+  const row = await activationStateFor(db, workspaceId);
+  if (row?.maintenanceBarrier) throw new ScopedMaintenanceError(workspaceId);
+  requireScopedEpoch(row?.writerEpoch, workspaceId);
 }
 
 export interface ChainEvent {

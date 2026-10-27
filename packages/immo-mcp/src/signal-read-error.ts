@@ -49,6 +49,10 @@ export async function decodeSignalReadError(response: Response): Promise<RadarSi
   if (status === 410 && code === "legacy_retired") return new RadarSignalReadError("signal_route_retired", status);
   if (status === 503) {
     if (code === "legacy_cutover_closed") return new RadarSignalReadError("signal_cutover_in_progress", status);
+    if (typeof code === "string"
+      && /^scoped_maintenance_in_progress:[0-9a-f-]{36}$/i.test(code)) {
+      return new RadarSignalReadError("signal_cutover_in_progress", status);
+    }
     if (code === "capability_unavailable" ||
       (typeof code === "string" && /^scoped_facet_scope_unavailable:[0-9a-f-]{36}$/i.test(code))) {
       return new RadarSignalReadError("signal_capability_unavailable", status);
