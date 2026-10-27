@@ -62,10 +62,14 @@ while IFS= read -r commit; do
   [[ $message != *$'\n'* && $message =~ ^(feat|fix|test|docs|chore)\(pw-[ad]\):\ .+$ ]]
   git show --format= --numstat "$commit" | awk '{n+=$1+$2; f++} END {exit !(n<=150 && f<=15)}'
   git show -s --format='%H %s' "$commit"
-done < <(git rev-list --reverse --no-merges "$START..HEAD")
+done < <(git rev-list --reverse --first-parent --no-merges "$START..HEAD")
 for merge in 512ca686 39ed4f1b 0ab7d664; do git merge-base --is-ancestor "$merge" HEAD; done
 mapfile -t merges < <(git rev-list --first-parent --merges "$BASE..HEAD")
-[[ ${#merges[@]} == 0 ]]
+[[ ${#merges[@]} == 1 ]]
+[[ $(git show -s --format=%P "${merges[0]}") == \
+  '318b97fd559aa8afe8bbaa25cdd4aef83a5ff87e 9a723753607097c7758027eb5cc9a2071c8e0023' ]]
+[[ $(git show -s --format=%B "${merges[0]}") == 'chore(pw-a): merge origin/main 9a723753' ]]
+[[ $(git rev-parse HEAD:.track) == $(git rev-parse "$BASE:.track") ]]
 git merge-base --is-ancestor 4c3959b6 HEAD
 [[ $(df -Pk . | awk 'NR==2 {print $4}') -ge 8388608 ]]
 head=$(git rev-parse HEAD)
