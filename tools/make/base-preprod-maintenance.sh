@@ -130,8 +130,9 @@ collect-maintenance() {
       shutdown:{completedAt:$now,coveredInstanceIds:($roster[0]|map(.id))}})}' "$PROOFS" > "$OUTPUT/qualified-input.json"
   PROOFS=$OUTPUT/qualified-input.json
   require_proofs; assert_closed; assert_mcp
-  jq --slurpfile roster "$EXPECTED" '{binding,image,observations,evidence,databaseInspection,
-    expectedInstances:$roster[0]}' "$PROOFS" > "$OUTPUT/maintenance.json"
+  jq --slurpfile roster "$EXPECTED" --slurpfile isolation "$OUTPUT/network-isolation-receipt.json" \
+    '{binding,image,observations,evidence,databaseInspection,networkIsolation:$isolation[0],
+      expectedInstances:$roster[0]}' "$PROOFS" > "$OUTPUT/maintenance.json"
 }
 assert_mcp() {
   local deployment expected actual
