@@ -8,7 +8,7 @@
 -- and a missing global row provisions nothing (the commit stays blocked).
 -- artifacts.host_actor_rate holds one counter row per
 -- (storage_scope_id, actor_id, window_start) for the shared per-minute bound;
--- stale windows are deleted by the reserving transaction. Rejouable: every
+-- stale windows are deleted by the reserving transaction. Replayable: every
 -- statement is IF NOT EXISTS / ON CONFLICT guarded.
 CREATE TABLE IF NOT EXISTS artifacts.host_actor_quotas (
   storage_scope_id TEXT NOT NULL REFERENCES artifacts.storage_scopes(id),
