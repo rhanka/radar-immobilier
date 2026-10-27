@@ -32,6 +32,12 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] First combined campaign: 311 required passes/0 skips, API4474/0/76,
+  68 inherited and31 new mutants killed/restored; all static/build gates passed.
+- [x] PWE-EX1: reload and I-to-J-to-I reset the page's in-memory follow-up
+  budget (C12/HW-11). Allow page.ts, page-budget.ts and its VM harness only.
+  Impact: public counters across reload; no credentials or identity/session change.
+  Rollback: revert the budget helper, integration and regression commits together.
 - [x] Add individual M04 key/P/6L1/deselection, M07 three-scope, M08 head/version,
   M10 final cookie/challenge clock and M13 reader/workspace quota mutation legs.
 - [x] Keep deselection digest fixtures schema-valid with their matching head keys.
