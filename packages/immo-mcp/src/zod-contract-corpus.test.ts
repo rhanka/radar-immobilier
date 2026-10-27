@@ -2,7 +2,11 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import { buildImmoServer } from "./server.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { registerTools } from "./tools.js";
+import { MockDataSource } from "./data-source.js";
+import { MockRawDataSource } from "./raw-data.js";
+import { resolveAuthContext } from "./auth-context.js";
 
 const cases = [
   ["missing-city", "search_lots", {}],
@@ -28,9 +32,11 @@ const cases = [
   ["excerpt-id", "read_document_excerpt", { documentId: "" }],
 ] as const;
 const fixture = new URL("./fixtures/zod3-errors.json", import.meta.url);
-describe("actual MCP argument error text from main 8156568a", () => {
+describe("native MCP registrar argument error contract captured on 8156568a", () => {
   it("preserves complete SDK errors for every invalid argument family", async () => {
-    const server = buildImmoServer({});
+    const server = new McpServer({ name: "contract-corpus", version: "1" });
+    registerTools(server, { data: new MockDataSource(), raw: new MockRawDataSource(),
+      auth: resolveAuthContext({}) });
     const client = new Client({ name: "contract-corpus", version: "1" });
     const [a, b] = InMemoryTransport.createLinkedPair();
     const actual: Record<string, unknown> = {};

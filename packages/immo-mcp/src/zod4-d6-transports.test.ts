@@ -8,7 +8,8 @@ import { MockDataSource } from "./data-source.js";
 import { MockRawDataSource } from "./raw-data.js";
 import { resolveAuthContext } from "./auth-context.js";
 import { registerTools } from "./tools.js";
-import { createImmoHttpApp } from "./server-http.js";
+import { createImmoHttpApp, DEFAULT_SESSION_IDLE_TIMEOUT_MS,
+  DEFAULT_SESSION_MAX_LIFETIME_MS } from "./server-http.js";
 
 const initialize = { jsonrpc: "2.0", id: 1, method: "initialize", params: {
   protocolVersion: "2025-03-26", capabilities: {}, clientInfo: { name: "d6-test", version: "1" },
@@ -57,6 +58,8 @@ describe("D6 actual SDK byte transports", () => {
     const search = vi.spyOn(data, "searchLots");
     const app = createImmoHttpApp({ issuer, resource, requiredScopes: ["immo:read"],
       scopesSupported: ["immo:read", "immo:search"], port: 0, dataMode: "simulation",
+      sessionIdleTimeoutMs: DEFAULT_SESSION_IDLE_TIMEOUT_MS,
+      sessionMaxLifetimeMs: DEFAULT_SESSION_MAX_LIFETIME_MS,
     }, { data, keySource: { resolveKey: async () => publicKey } });
     const token = await new SignJWT({ scope: "immo:read immo:search", client_id: "d6-test" })
       .setProtectedHeader({ alg: "RS256" }).setIssuer(issuer).setAudience(resource)

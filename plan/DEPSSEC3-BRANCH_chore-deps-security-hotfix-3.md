@@ -24,6 +24,7 @@
 - [x] Record rationale, impact and rollback before any conditional-path edit.
 
 ## Feedback Loop
+- [x] L2v: scope the historical SDK corpus to the native registrar; the newer production composition has its own wire contract.
 - [x] L2u: retain actual HTTP and stdio validation transport coverage.
 - [x] L2t: retain frozen MCP argument diagnostics and schema contract regressions.
 - [x] L2s: retain upstream diagnostics, Engram behavior and default regressions.
