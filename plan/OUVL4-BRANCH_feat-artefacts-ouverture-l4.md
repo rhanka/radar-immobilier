@@ -46,6 +46,7 @@
   - [x] Check general configuration, routing and secret-reference mutations.
   - [x] Verify operator recipes with a recording kubectl double, including key custody and rollback.
   - [x] Make the exact requested default-loader Kustomize invocation pass; retain production MCP entrypoints as symlinks to byte-identical manifests.
+  - [x] Add coverage for default/restricted render equality and preserved production MCP entrypoints.
   - [ ] Run the existing `k8s-validate` recipe without reading `.env`.
   - [ ] Compare production render byte for byte with the baseline.
 - [ ] **Lot 4 — Operator delivery**

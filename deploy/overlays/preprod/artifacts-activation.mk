@@ -15,7 +15,7 @@ render:
 	@[[ "$(ARTIFACT_API_IMAGE)" =~ ^ghcr.io/rhanka/radar-api@sha256:[a-f0-9]{64}$$ ]]
 	@case "$(MODE)" in off|general) ;; *) exit 1;; esac
 	@mkdir -p "$(OUT)"
-	@$(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone deploy/overlays/preprod \
+	@$(KUBECTL) kustomize deploy/overlays/preprod \
 	  | sed -e 's/ARTIFACTS_CONTROL_MODE: general/ARTIFACTS_CONTROL_MODE: "$(MODE)"/g' \
 	    -e 's#ghcr.io/rhanka/radar-api:latest#$(ARTIFACT_API_IMAGE)#g' >"$(OUT)/render.yaml"
 	@bash deploy/ci/check-h3-preprod-render.sh "$(OUT)/render.yaml"

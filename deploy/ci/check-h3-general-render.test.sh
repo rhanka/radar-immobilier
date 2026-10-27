@@ -8,9 +8,14 @@ trap 'rm -rf "$CASE_ROOT"' EXIT
 CHECK="$HERE/check-h3-preprod-render.sh"
 GOOD="$CASE_ROOT/general.yaml"
 CASE="$CASE_ROOT/case.yaml"
-"${KUBECTL:-kubectl}" kustomize --load-restrictor LoadRestrictionsNone "$ROOT/deploy/overlays/preprod" >"$GOOD"
+"${KUBECTL:-kubectl}" kustomize "$ROOT/deploy/overlays/preprod" >"$GOOD"
+"${KUBECTL:-kubectl}" kustomize --load-restrictor LoadRestrictionsNone "$ROOT/deploy/overlays/preprod" >"$CASE_ROOT/unrestricted.yaml"
+cmp "$GOOD" "$CASE_ROOT/unrestricted.yaml"
+for entry in 40-immo-mcp-http-deploy.yaml 41-immo-mcp-ingress.yaml; do
+  cmp "$ROOT/deploy/k8s/$entry" "$ROOT/deploy/k8s/immo-mcp/$entry"
+done
 bash "$CHECK" "$GOOD"
-PASS=1
+PASS=3
 reject() {
   local mutation="$1" reason="$2" out
   cp "$GOOD" "$CASE"
