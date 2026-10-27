@@ -6,6 +6,8 @@ const app = "src/artifacts/write-intent-app-invariants-db.test.ts";
 const page = "src/artifacts/write-intent-page-regressions.test.ts";
 const browser = "src/artifacts/write-intent-app-script.test.ts";
 const mutations = [
+  ["M14-forwarded-headers", "artifacts/write-intent-page-listener.ts", "for (const [name, value] of Object.entries(READER_CONTENT_HEADERS)) headers.set(name, value);",
+    "", "src/artifacts/write-intent-page-listener.test.ts", "private headers on forwarded HTTP"],
   ["M16-management-state", "artifacts/write-intent-app-route.ts", "pwIntentStatus(row, (deps.nowMs ?? Date.now)())", '"pending"',
     "src/artifacts/write-intent-app-surface-db.test.ts", "confirm through the summary"],
   ["C02-revoke-upgrade", "artifacts/write-intent-app-dispatch.ts", "const live = await loadPwIntentForUpdate(tx, row.intentId);",
