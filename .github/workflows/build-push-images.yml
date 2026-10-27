@@ -197,14 +197,14 @@ jobs:
           push: true
           tags: ${{ steps.tags.outputs.tags }}
           provenance: false
-          # Stamp the short sha into the image (api/Dockerfile `ARG GIT_SHA`,
+          # Stamp the full SHA into the API image (api/Dockerfile `ARG GIT_SHA`,
           # placed LAST in the runtime stage so it never busts the cached COPY
           # layers). The api process surfaces it on /livez + /health; the deploy
           # job's "Assert served sha" step reads it back from the public URL to
-          # prove the rolled-out build is actually SERVED. The ui image ignores
-          # the arg (it declares no matching ARG) — harmless.
+          # prove the rolled-out build is actually SERVED. UI build.json and
+          # all image tags retain the short SHA used by CD.
           build-args: |
-            GIT_SHA=${{ steps.vars.outputs.sha }}
+            GIT_SHA=${{ matrix.service == 'api' && github.sha || steps.vars.outputs.sha }}
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,scope=${{ matrix.service }},mode=max
 
@@ -453,13 +453,14 @@ jobs:
       - name: Assert served sha
         env:
           SHA: ${{ steps.vars.outputs.sha }}
+          API_SHA: ${{ github.sha }}
           PUBLIC_ENDPOINT_HOST: ${{ vars.PUBLIC_ENDPOINT_HOST }}
         run: |
           set -euo pipefail
           host="${PUBLIC_ENDPOINT_HOST:-immo.sent-tech.ca}"
           api_url="https://${host}/health"      # api/mcp sha (nginx -> radar-api/health)
           ui_url="https://${host}/build.json"    # ui bundle sha (nginx static dist/build.json)
-          echo "asserting served sha == ${SHA} at ${api_url} AND ${ui_url}"
+          echo "asserting API SHA ${API_SHA} at ${api_url}, UI SHA ${SHA} at ${ui_url}"
           # Reads .sha from the JSON body regardless of HTTP status (/health can
           # be 503 on a db/objectStore blip while still serving the right build;
           # /build.json falls back to index.html until the new ui pod is live —
@@ -471,7 +472,7 @@ jobs:
           while :; do
             api_sha="$(fetch_sha "$api_url")"
             ui_sha="$(fetch_sha "$ui_url")"
-            if [ "$api_sha" = "$SHA" ] && [ "$ui_sha" = "$SHA" ]; then
+            if [ "$api_sha" = "$API_SHA" ] && [ "$ui_sha" = "$SHA" ]; then
               echo "served sha OK: api=${api_sha} ui=${ui_sha} — build ${SHA} is live at ${host}"
               exit 0
             fi
@@ -939,6 +940,7 @@ jobs:
       - name: Assert served sha (preprod)
         env:
           SHA: ${{ steps.vars.outputs.sha }}
+          API_SHA: ${{ github.sha }}
           PREPROD_ENDPOINT_HOST: ${{ vars.PREPROD_ENDPOINT_HOST }}
           # Threaded from the "Wait for rollouts" step: 'slow-healthy' when any
           # deployment warned (surge pod still Pending, old pod still serving) or
@@ -951,13 +953,13 @@ jobs:
           rollout_state="${ROLLOUT_STATE:-complete}"
           api_url="https://${host}/health"      # api/mcp sha (nginx -> radar-api/health)
           ui_url="https://${host}/build.json"    # ui bundle sha (nginx static dist/build.json)
-          echo "asserting served sha == ${SHA} at ${api_url} AND ${ui_url} (rollout_state=${rollout_state})"
+          echo "asserting API SHA ${API_SHA} at ${api_url}, UI SHA ${SHA} at ${ui_url} (rollout_state=${rollout_state})"
           fetch_sha() { curl -s --max-time 10 "$1" | jq -r '.sha // empty' 2>/dev/null || true; }
           deadline=$(( $(date +%s) + 180 ))
           while :; do
             api_sha="$(fetch_sha "$api_url")"
             ui_sha="$(fetch_sha "$ui_url")"
-            if [ "$api_sha" = "$SHA" ] && [ "$ui_sha" = "$SHA" ]; then
+            if [ "$api_sha" = "$API_SHA" ] && [ "$ui_sha" = "$SHA" ]; then
               echo "served vs pushed: api='${api_sha}' ui='${ui_sha}' pushed='${SHA}' — served == pushed"
               echo "served sha OK: api=${api_sha} ui=${ui_sha} — build ${SHA} is live at ${host}"
               exit 0
@@ -1226,7 +1228,7 @@ jobs:
         run: |
           set -euo pipefail
           SHA="${{ steps.vars.outputs.sha }}"
-          docker buildx build --push --provenance=false --build-arg "GIT_SHA=${SHA}" -f api/Dockerfile -t "${IMAGE_PREFIX}/radar-api:${SHA}" .
+          docker buildx build --push --provenance=false --build-arg "GIT_SHA=$(git rev-parse HEAD)" -f api/Dockerfile -t "${IMAGE_PREFIX}/radar-api:${SHA}" .
           docker buildx build --push --provenance=false --build-arg "GIT_SHA=${SHA}" -f ui/Dockerfile  -t "${IMAGE_PREFIX}/radar-ui:${SHA}" .
           api="$(docker buildx imagetools inspect "${IMAGE_PREFIX}/radar-api:${SHA}" --format '{{.Manifest.Digest}}')"
           ui="$(docker buildx imagetools inspect "${IMAGE_PREFIX}/radar-ui:${SHA}" --format '{{.Manifest.Digest}}')"
@@ -1522,6 +1524,7 @@ jobs:
       - name: Assert served sha (prod)
         env:
           SHA: ${{ steps.vars.outputs.sha }}
+          API_SHA: ${{ github.sha }}
           PUBLIC_ENDPOINT_HOST: ${{ vars.PUBLIC_ENDPOINT_HOST }}
         run: |
           set -euo pipefail
@@ -1530,7 +1533,7 @@ jobs:
           deadline=$(( $(date +%s) + 180 ))
           while :; do
             api_sha="$(fetch_sha "https://${host}/health")"; ui_sha="$(fetch_sha "https://${host}/build.json")"
-            if [ "$api_sha" = "$SHA" ] && [ "$ui_sha" = "$SHA" ]; then echo "served sha OK ${SHA}"; exit 0; fi
+            if [ "$api_sha" = "$API_SHA" ] && [ "$ui_sha" = "$SHA" ]; then echo "served sha OK api=${API_SHA} ui=${SHA}"; exit 0; fi
             if [ "$(date +%s)" -ge "$deadline" ]; then
               echo "::error title=Prod served sha mismatch::serves api='${api_sha:-<none>}' ui='${ui_sha:-<none>}' expected '${SHA}'."
               exit 1
