@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 source tools/make/base-preprod-api-identity.sh
 source tools/make/base-preprod-routing.sh
+source tools/make/base-preprod-restore.sh
 permissions() {
   local resource verb
   : > "$OUTPUT/permissions.tsv"
@@ -148,9 +149,6 @@ api_routes() {
   local ingress patchpaths
   ingress=$(jq -er '.apiIngress|select(test("^[a-z0-9-]+$"))' "$INPUT")
   patchpaths='["/health","/api/v1/auth","/api/v1/workspaces"]'
-  if [[ ${1:-} == qualification ]]; then
-    patchpaths='["/health","/api/v1/auth","/api/v1/workspaces","/api/graph-signals","/api/v1/signal-facets"]'
-  fi
   # Called only after Q2: public routes stay on the refusal Service during Q1/Q2.
   jq -n --argjson paths "$patchpaths" '{spec:{rules:[{host:"preprod.immo.sent-tech.ca",http:{paths:
     ($paths|map({path:.,pathType:"Prefix",backend:{service:{name:"radar-api",port:{number:3000}}}}))}}]}}' > "$OUTPUT/api-route-patch.json"
