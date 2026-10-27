@@ -78,7 +78,7 @@ export interface Ouverture {
   close: () => Promise<void>;
 }
 
-export async function startOuverture(name: "host" | "mcp" | "commit"): Promise<Ouverture> {
+export async function startOuverture(name: "host" | "mcp" | "commit" | "review_replay" | "review_attempts"): Promise<Ouverture> {
   const env = loadConfig();
   const params = { host: env.POSTGRES_HOST, port: env.POSTGRES_PORT, user: env.POSTGRES_USER,
     password: env.POSTGRES_PASSWORD, database: env.POSTGRES_DB };
