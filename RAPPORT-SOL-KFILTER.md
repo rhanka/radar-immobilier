@@ -20,7 +20,10 @@ Le workflow CD appelant reste inchangé ; le workflow qualité lance les nouveau
 tests et le garde. README et tests MCP sont actualisés ; les interpréteurs Python
 y sont remplacés par des doublures qui échouent à chaque invocation.
 
-| Vérification | Résultat final |
+Les résultats ci-dessous décrivent la livraison initiale `86a6697e` ; les
+corrections et résultats de la PR #928 figurent dans la dernière section.
+
+| Vérification | Résultat initial |
 |---|---|
 | Filtre : fixtures, 4 variantes de fins de ligne, rendu, erreurs CLI | PASSED — 60 |
 | Reconcile MCP hermétique, kubectl simulé | PASSED — 11 |
@@ -52,11 +55,65 @@ Commits du code : `422acecf`, `2b78ff82`, `80eef241`, `5639b88d`, `a3a5de14`.
 Chaque commit compte au plus 150 lignes modifiées, avec sujet Conventional Commit
 anglais de 72 caractères maximum, sans corps ni trailer.
 
-Le `.git` partagé étant en lecture seule, les commits sont dans
+Lors de la livraison initiale, le `.git` partagé étant en lecture seule, les commits ont été créés dans
 `tmp/kfilter-rescue.git`, branche `chore/851-retire-kfilter`. Le HEAD partagé
-reste à la base ; les modifications sont également présentes dans le worktree.
-Livraison : `tmp/kfilter-851.bundle` ; prérequis : la base ci-dessus.
+est resté à la base ; les modifications étaient également présentes dans le worktree.
+Livraison initiale : `tmp/kfilter-851.bundle` ; prérequis : la base ci-dessus.
 Son empreinte est dans `tmp/kfilter-851.bundle.sha256`. L’audit
 `tmp/kfilter-851-bundle-audit.txt` donne le SHA final incluant ce rapport,
 vérifie le bundle, le rejoue dans un dépôt distinct dépendant uniquement de la
 base, contrôle sa connectivité, son arbre, son périmètre et chaque commit.
+
+## Corrections revues astra
+
+Les revues `astra-928-a.md` et `astra-928-b.md`, sous
+`.lanes/conductor/tmp/revues/`, ont été lues intégralement. Leurs deux bloquants
+et leur remarque commune sur le LF final sont corrigés au-dessus de
+`86a6697e0347e576bde12614ba9df60e02c64c98`, sans réécrire les six commits initiaux.
+
+- **UTF-8** : corruption reproduite avec jq 1.8.1 à 4 094 octets ASCII avant `é`.
+  La lecture utilise désormais `--rawfile`. La validation native par
+  `iconv -f UTF-8 -t UTF-16LE` précède toute sortie : une conversion UTF-8
+  vers UTF-8 acceptait expérimentalement des valeurs hors Unicode.
+  Onze fixtures longues couvrent les caractères de 2/3/4 octets et plusieurs
+  frontières, ainsi que U+FFFD valide et les limites scalaires Unicode.
+  Dix encodages invalides (troncatures, octets isolés, surrogates, formes trop
+  longues, valeurs hors plage, séquences de 5/6 octets) échouent dans trois modes,
+  avec stdout vide, même après un document sélectionné et sans correspondance.
+- **Garde** : le contournement par répertoire lié et la casse `.PY` ont été
+  reproduits avant correction. `find -L` parcourt les répertoires liés ; les
+  noms exposés et cibles finales sont vérifiés, y compris les chaînes de liens
+  sans extension. Les dix extensions documentées sont comparées sans tenir
+  compte de la casse. Boucles, liens non résolus et erreurs de parcours échouent.
+  Les témoins acceptent les liens bénins, la documentation `README.py.md` et les
+  répertoires ordinaires `cache.py` / `cache.PYW`.
+- **LF final** : l'ancien témoin terminait par l'octet 10 ; il est renommé
+  `no-trailing-blank-line`. La nouvelle entrée termine exactement après
+  `name: at-eof`, sans séparateur ni LF. Deux préconditions vérifient sa dernière
+  ligne et son dernier octet avant les quatre comparaisons de sortie.
+
+| Vérification après correction | Résultat |
+|---|---|
+| Filtre, fixtures, rendu et erreurs | PASSED — 106 |
+| Garde anti-Python et témoins d'acceptation | PASSED — 23 |
+| Reconcile MCP hermétique | PASSED — 11 |
+| Isolation auth préprod | PASSED — 25 |
+| Total des assertions shell | PASSED — 165 ; FAILED — 0 |
+| Syntaxe Bash des six scripts, garde réel, rendu kustomize préprod | PASSED |
+| CI distante et tests applicatifs/E2E | SKIPPED — aucun push, périmètre shell |
+
+Commande : `rtk make -f tmp/kfilter-851.mk test guard syntax render ENV=test-kfilter-851`.
+Les objets, champs et options du reconcile, ainsi que les manifestes, sont inchangés.
+Aucun `.env` lu, exécutable Python lancé, conteneur démarré ou push effectué.
+Le README précise les dépendances natives déjà présentes et les extensions retenues.
+
+SHA du code corrigé et validé : `b75f23ad6d39e81108d02667b00fc35244a653a7`.
+Commits correctifs : `1b863f4b` (UTF-8), `11436903` (garde), `b75f23ad` (LF).
+Le commit documentaire suivant contient cette section et le README.
+Le HEAD partagé demeure à `86a6697e` ; les nouveaux commits sont dans
+`tmp/kfilter-rescue.git`, branche `chore/851-retire-kfilter`.
+Nouveau bundle : `tmp/kfilter-928-astra.bundle`, prérequis `86a6697e`.
+Empreinte : `tmp/kfilter-928-astra.bundle.sha256`.
+Audit : `tmp/kfilter-928-astra-bundle-audit.txt`, avec SHA final incluant le rapport,
+rejeu isolé, connectivité, identité de l'arbre, périmètre et limites de chaque
+commit (150 lignes, sujet Conventional de 72 caractères maximum, corps et trailer absents).

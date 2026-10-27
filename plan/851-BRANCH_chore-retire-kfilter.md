@@ -38,4 +38,4 @@
 - [x] Lot 6: reproduce corruption on jq 1.8.1; rawfile plus strict scalar validation; long and invalid fixtures.
 - [x] Lot 7: follow linked directories/files, reject Python extensions and traversal failures; acceptance witnesses.
 - [x] Lot 8: selected last document without a final LF, with an asserted precondition.
-- [ ] Lot 9: final shell/render checks, review-correction report and audited bundle above `86a6697e`.
+- [x] Lot 9: 165 shell assertions, syntax/render checks, review-correction report; delivery audit verifies the bundle above `86a6697e`.
