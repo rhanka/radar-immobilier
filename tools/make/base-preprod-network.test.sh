@@ -20,7 +20,8 @@ for state in nodeport loadbalancer external-ip external-name node-port-field hos
       alternate-route) error='Unsupported alternate network route/policy';;
       extra-endpoint) error='A consumer endpoint is ready';;
       extra-legacy) error='A consumer legacy endpoint is ready';;
-      no-isolation|allow-pods) error='Consumer pod ingress is not isolated';;
+      no-isolation) error='Consumer pod ingress is not isolated';;
+      allow-pods) error='Unbounded PostgreSQL ingress sources are forbidden';;
       policy-change) error='Fresh bound CNI enforcement probes required';;
     esac
     rg -qF "$error" "result-$n.log" || { cat "result-$n.log" >&2; exit 1; }
@@ -82,4 +83,20 @@ jq --arg sha "$policy_sha" '.maintenance.networkIsolation.policySha256=$sha' net
 invoke tunnel-api
 cp network-original-policies.json network-policies.json
 cp network-good-input.json input.json
+cp ingress-fixture.json middleware-baseline.json
+for annotation in 'traefik.ingress.kubernetes.io/router.middlewares=auth@file' \
+  'traefik.ingress.kubernetes.io/router.middlewares=auth@kubernetescrd' \
+  'traefik.example/extension=middleware:auth' 'traefik.example/extension=auth@file'; do
+  jq --arg key "${annotation%%=*}" --arg value "${annotation#*=}" \
+    '.items[0].metadata.annotations[$key]=$value' middleware-baseline.json > ingress-fixture.json
+  for action in close start-api; do
+    : > cluster-calls
+    if invoke "$action" EXPECTED="$testdir/expected.json" PROOFS="$testdir/activation-receipt.json"; then
+      echo 'Traefik middleware annotation accepted' >&2; exit 1
+    fi
+    rg -qF 'Traefik middleware annotations are forbidden' "result-$n.log"
+    if rg -- '--request-timeout=20s (create|patch|scale|set|delete|rollout) ' cluster-calls; then exit 1; fi
+  done
+done
+cp middleware-baseline.json ingress-fixture.json
 echo 'PASS alternate Services/routes, host ports, namespace endpoints, CNI evidence and qualification boundary'

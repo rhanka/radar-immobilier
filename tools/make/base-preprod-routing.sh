@@ -6,7 +6,10 @@ maintenance_inputs() {
     and (.apiIngress as $api | $m.ingresses|index($api)!=null)' "$INPUT" >/dev/null || fail 'Maintenance boundary inputs required'
 }
 read_ingresses() {
-  "${k[@]}" get ingresses -o json | jq '{items:[.items[]|{metadata:(.metadata|{name,uid,resourceVersion}),spec}]}' > "$OUTPUT/ingresses-current.json"
+  "${k[@]}" get ingresses -o json | jq 'if any(.items[]|(.metadata.annotations//{})|to_entries[];
+    (.key|test("^traefik[.]";"i")) and ((.key+" "+.value)|test("middleware|@[a-z0-9_-]+";"i")))
+    then error("Traefik middleware annotations are forbidden")
+    else {items:[.items[]|{metadata:(.metadata|{name,uid,resourceVersion}),spec}]} end' > "$OUTPUT/ingresses-current.json"
   jq -e --slurpfile c "$INPUT" '([.items[].metadata.name]|sort)==($c[0].maintenance.ingresses|sort)' \
     "$OUTPUT/ingresses-current.json" >/dev/null || fail 'Ingress coverage changed'
 }

@@ -529,7 +529,11 @@ Ingress path backends and default backends to that Service. JSON Patch tests
 the original UID, resourceVersion and complete spec before replacing the spec.
 Each patch response records the closed spec and resourceVersion in
 `closedIngresses` inside the snapshot. Hosts, TLS,
-Ingress class and annotations, including existing middleware chains, survive.
+Ingress class and supported annotations survive. Any Traefik middleware
+annotation, including `router.middlewares`, is refused before closure/startup;
+Traefik annotation keys/values containing `middleware` or provider references
+such as `auth@file`/`auth@kubernetescrd` are unsupported and refused. No middleware
+is resolved, followed, removed or implicitly trusted.
 All public callers, including the operator, receive refusal (normally HTTP
 503; controller handling of an empty backend can also produce 404). No status
 code alone proves closure: readback verifies the Service, zero endpoints and
@@ -585,8 +589,7 @@ on the live NetworkPolicy list. Inventory receipts retain that hash and the
 full attestation. The probes must exercise consumer-selected canaries/pods,
 direct pod IPs and Service IPs from same-node, other-node, cross-namespace and
 node-origin sources, plus public/alternative ports; keep the actual probe
-results and source/node coverage. Kubernetes policy acceptance is **not** proof
-of PostgreSQL isolation either: include its pod and Service IPs in these probes.
+results and source/node coverage, including PostgreSQL pod and Service IPs.
 Kubernetes policy acceptance is **not** proof
 that the CNI enforces it, and node-origin exceptions must be tested explicitly.
 The authenticated administrator tunnel remains the qualified exception.

@@ -5,7 +5,7 @@ jq '.maintenance={service:"base-maintenance-fixture",ingresses:["fixture-app","f
 cp enriched.json input.json
 cp good-proofs.json proofs.json
 jq -n '{items:[
-  {metadata:{name:"fixture-app",uid:"app-uid",annotations:{"traefik.ingress.kubernetes.io/router.middlewares":"existing@kubernetescrd"}},
+  {metadata:{name:"fixture-app",uid:"app-uid",annotations:{"traefik.ingress.kubernetes.io/router.priority":"42"}},
    spec:{ingressClassName:"traefik",tls:[{secretName:"fixture-tls",hosts:["preprod.immo.sent-tech.ca"]}],
     rules:[{host:"preprod.immo.sent-tech.ca",http:{paths:[{path:"/",pathType:"Prefix",backend:{service:{name:"radar-ui",port:{number:8080}}}}]}}]}},
   {metadata:{name:"fixture-mcp",uid:"mcp-uid"},spec:{defaultBackend:{service:{name:"radar-immo-mcp",port:{number:3001}}}}}
@@ -174,7 +174,7 @@ cp ingress-original.json ingress-fixture.json
 invoke close EXPECTED="$testdir/expected.json"
 closure_output=$testdir/out-$n
 jq -e --slurpfile original ingress-original.json '.ingresses|map({metadata:{name:.metadata.name,uid:.metadata.uid},spec})==($original[0].items|map({metadata:{name:.metadata.name,uid:.metadata.uid},spec}))' "$closure_output/ingress-snapshot.json" >/dev/null
-jq -e '.items[0].metadata.annotations["traefik.ingress.kubernetes.io/router.middlewares"]=="existing@kubernetescrd"
+jq -e '.items[0].metadata.annotations["traefik.ingress.kubernetes.io/router.priority"]=="42"
   and .items[0].spec.tls[0].secretName=="fixture-tls"
   and .items[1].spec.defaultBackend.service.name=="base-maintenance-fixture"' ingress-fixture.json >/dev/null
 rg -qF 'scale deployment/radar-api --replicas=0' cluster-calls
@@ -331,7 +331,7 @@ check_reopened_routes() {
     and [.items[0].spec.rules[0].http.paths[].path]==["/health","/api/v1/auth","/api/v1/workspaces"]
     and all(.items[0].spec.rules[0].http.paths[]; .backend.service.name=="radar-api" and .backend.service.port.number==3000)
     and .items[0].spec.tls[0].secretName=="fixture-tls"
-    and .items[0].metadata.annotations["traefik.ingress.kubernetes.io/router.middlewares"]=="existing@kubernetescrd"
+    and .items[0].metadata.annotations["traefik.ingress.kubernetes.io/router.priority"]=="42"
     and .items[1].spec.defaultBackend.service.name=="base-maintenance-fixture"' ingress-fixture.json >/dev/null
   cp closed-ingresses.json ingress-fixture.json
 }
