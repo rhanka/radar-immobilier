@@ -20,6 +20,7 @@
 ## Feedback Loop
 - [x] BR851-EX1: owner requests a deploy Python CI guard; modify only CI quality steps. Impact: reject `.py` paths under `deploy/`; rollback: revert the added steps.
 - [x] Shared Git metadata is read-only; owner authorizes a repo-local rescue repository and audited bundle.
+- [x] Harness review selection failed: no configured live mesh catalog; no peers dispatched or consensus claimed (local dossier under `tmp/`).
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch, sequential implementation; independent review per harness availability.
@@ -32,5 +33,5 @@
 - [x] Lot 1: replace and delete Python; preserve text, object selection and fields.
 - [x] Lot 2: frozen fixtures, 4 newline variants and independent full-render oracle.
 - [x] Lot 3: deny Python in deploy, update reconcile tests, README and CI.
-- [ ] Lot 4: scoped shell tests, preprod render, diff audit and review evidence.
+- [x] Lot 4: scoped shell tests, preprod render, scope/branch gates and review selection evidence.
 - [ ] Lot 5: atomic rescue commits, French report and verified portable bundle.
