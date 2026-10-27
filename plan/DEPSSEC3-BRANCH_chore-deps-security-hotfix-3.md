@@ -25,6 +25,7 @@
 - [x] Record rationale, impact and rollback before any conditional-path edit.
 
 ## Feedback Loop
+- [x] L2z: remove the three temporary Zod acceptances after four clean raw audits and physical-tree validation.
 - [x] L1b: pin Focus KaTeX 0.18.2; reproduce the fixed trust behavior and verify the Mermaid core bundle uses installed KaTeX and DOMPurify.
 - [x] L2y: freeze composed HTTP non-finite refusals from the base; keep SDK stdio diagnostics and finite-number controls.
 - [x] L1a: regenerate locks with fast-uri 3.1.9, ip-address 10.7.5, Zod 4.6.7 and Engram 0.21.2; retain CSV 7.0.3.
