@@ -8,30 +8,6 @@ trois lectures paniers du lecteur courant via H5. Les corrections 1, 2 et 3 de l
 relecture Astra sont intégrées. Aucun commit effectué. Aucun shell ni test lancé.
 Aucun fichier hors workspace modifié.
 
-## Modifications
-
-### Opérations lecteur paniers (correction 3)
-
-- `api/src/artifacts/reader-operations.ts` : ajout de `baskets.context.v1`,
-  `baskets.search.v1`, `baskets.state.v1` (conservation des trois opérations
-  existantes pour compatibilité). Nouveaux schémas stricts :
-  `basketsContextParams`, `basketsSearchParams` (`SignalQuery` + `workspaceId`),
-  `basketsStateParams` (`StateQuery` + `workspaceId`). Nouveau prédicat
-  `isBasketOperation`. Le `workspaceId` est toujours explicite, sans défaut.
-- `api/src/artifacts/reader-responses.ts` : validation des trois réponses avec
-  les contrats existants, sans nouveau stockage métier :
-  `baskets.context.v1` → `FacetContextResponse`,
-  `baskets.search.v1` → `SignalSearchResponse`,
-  `baskets.state.v1` → `SignalStateResponse`.
-  Les réponses Geo et signaux synthétiques restent inchangées.
-- `api/src/artifacts/reader-baskets.ts` (nouveau) : pont H5 → services, figé sur
-  `readFacetContext`, `searchSignalClassifications`, `readSignalClassification`.
-  Le pont transmet le `readerSub` vérifié et le `workspaceId` autorisé, vérifie
-  que la réponse appartient au workspace demandé (`Workspace mismatch` sinon) et
-  laisse propager `ClassificationError` (zéro membership, workspace étranger ou
-  révoqué → `workspace_not_authorized` ; plusieurs memberships → choix explicite
-  par `workspaceId`, sans valeur implicite).
-
 ### CSP, sous-ressources et appel H5 (correction 1)
 
 - `api/src/artifacts/content-isolation.ts` : CSP étendue aux fichiers de la
