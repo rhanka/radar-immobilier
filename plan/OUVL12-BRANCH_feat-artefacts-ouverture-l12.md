@@ -69,6 +69,7 @@ isolation, current authorization, transactional quotas and replay safety.
   - [x] Implemented: `test(host): cover general facade and rate probe`.
   - [x] Implemented: `test(host): cover actor quota reservations`.
   - [x] Implemented: `test(mcp): cover general claims and forged fields`.
+  - [x] Implemented: `test(api): add general artifact admission harness`.
 - [ ] **Lot 4 — Delivery**
   - [ ] Atomic commits, bundle audit and French results report.
   - [ ] Confirm own Docker project has no containers, networks or volumes.
