@@ -311,7 +311,7 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
           return c.html(html);
         }
         c.header("Content-Type", file.contentType);
-        return c.body(typeof file.body === "string" ? file.body : file.body as Uint8Array);
+        return c.body(typeof file.body === "string" ? file.body : new Uint8Array(file.body));
       }
     }
     if (!deps.releaseFiles && (c.req.path === "/" || c.req.path === "/index.html")) {

@@ -81,6 +81,7 @@ Connect published release files and H5 reads to current account/workspace author
 - [x] Main `f8007c0f` contains PR #930 head `50266d29`, observed at 21:12 UTC; Track events-contains retains all 1062 events of each parent. Preserve the reader SQL bytes and timestamp 1792100000000 after actor quotas 1792000001000.
 - [ ] Replay the complete journal on a fresh database and idempotently; qualify PostgreSQL reader, Chromium, typecheck/lint and API CI, clean the stack and deliver from `6d7fd6ac`.
 - [x] Add a fresh-database journal/hash/schema probe, an idempotent replay control and a PostgreSQL regression for ordered 0025/0026 records; prepare targeted qualification including unchanged Chromium acceptance and the full API CI inventory.
+- [x] First merged-main campaign applied/replayed all 26 migrations and passed Chromium; adapt byte responses to TypeScript 5.9's owned ArrayBuffer type and isolate the shared producer rate counter between independent reader test cases. Keep the production ten-attempt limit and all reader assertions unchanged, then requalify.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch, serialized implementation and Docker campaigns.
