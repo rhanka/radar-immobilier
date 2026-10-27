@@ -1,5 +1,15 @@
 import pg from "pg";
 import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-stateful";
+import { ARTIFACT_TOOL_NAMES } from "./registry/artifact-profile.js";
+
+/**
+ * General opening (artefacts-ouverture L2): the four artifact tools publish
+ * for every approved account. Stale workspace claims never block publication;
+ * the host admission (account status reread at entry, commit and replay, plus
+ * the shared storage rules) stays the governing gate. Business tools keep
+ * their membership controls unchanged.
+ */
+const ARTIFACT_TOOLS = new Set<string>(ARTIFACT_TOOL_NAMES);
 
 export interface AccountQuery {
   query(sql: string, args: unknown[]): Promise<{ rows: Record<string, unknown>[] }>;
@@ -24,6 +34,7 @@ export function accountAuthorizer(db: AccountQuery) {
     const rows = await read("SELECT id, status FROM account_users WHERE sub = $1 LIMIT 1", [request.principal.sub]);
     const account = rows.rows[0];
     if (account?.status !== "approved") return false;
+    if (ARTIFACT_TOOLS.has(_tool)) return true;
     const workspaces = request.principal.attributes.workspaces;
     if (!Array.isArray(workspaces) || workspaces.some((w) => typeof w !== "string")) return false;
     // The historical default is a transport placeholder, never a membership assertion.
