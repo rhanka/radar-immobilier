@@ -170,7 +170,7 @@ COPY --from=build /workspace/api/src/services/geo/fixtures ./api/fixtures
 # build context, not the build stage, which does not ship radar/).
 COPY radar/ontology ./radar/ontology
 ENV RADAR_ONTOLOGY_PROFILE_PATH=/workspace/radar/ontology/ontology-profile.yaml
-# Deployed build identity (short git sha). The CI build passes it
+# Deployed build identity (full 40-character git SHA). The CI build passes it
 # (`--build-arg GIT_SHA=<sha>`, see build-push-images.yml) and the running
 # process surfaces it on /livez and /health (the latter is the only API route
 # the UI nginx proxies publicly), so the CD deploy job can PROVE the rolled-out
@@ -180,7 +180,8 @@ ENV RADAR_ONTOLOGY_PROFILE_PATH=/workspace/radar/ontology/ontology-profile.yaml
 # new sha only rebuilds this tiny ENV layer, never the cached COPY layers above.
 ARG GIT_SHA=unknown
 ENV GIT_SHA=$GIT_SHA
-RUN printf '%s' "$GIT_SHA" > /workspace/api/release-sha
+RUN (test "$GIT_SHA" = unknown || (test "${#GIT_SHA}" = 40 && printf '%s\n' "$GIT_SHA" | grep -Eq '^[a-f0-9]{40}$')) \
+ && printf '%s' "$GIT_SHA" > /workspace/api/release-sha
 # H3 unit 9: single-image service selection. The entrypoint validates the
 # requested mode (`api` or `content-deny`) and refuses anything else at
 # startup. Manifests that set `command:` bypass it; the default stays the API.
