@@ -114,6 +114,7 @@ isolation, current authorization, transactional quotas and replay safety.
   - [x] Atomic commits, bundle audit and French results report.
   - [x] Confirm own Docker project has no containers, networks or volumes.
 - [ ] **Lot 5 — Astra review corrections (#930)**
+  - [x] Add tenth-success ensure/publish replay probes through HTTP and MCP.
   - [ ] Reproduce replay at the tenth success through HTTP and MCP façades.
   - [ ] Count S3 calls on the last concurrent attempt and exhausted durable quota.
   - [ ] Implement shared guarded replay and atomic pre-upload attempt admission.
