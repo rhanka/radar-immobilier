@@ -578,7 +578,9 @@ limit remains unchanged; this operator vehicle uses a tighter freshness gate.
 With CRD-free closure, `networkAllowed` attests authorized Job/tunnel access;
 `networkDenied` attests public refusal for all sources. `sessionRequired`
 attests business authorization and unauthenticated HTTP refusal through the
-tunnel. These existing receipt fields do not assert a public IP exception.
+tunnel (or the pre-closure session check, followed by the Job's business-actor
+checks while all consumers are stopped). These existing receipt fields do not
+assert a public IP exception.
 
 ```sh
 rtk make -f deploy/base-preprod/operator.mk collect-maintenance INPUT='<ACTIVATION_INPUT_JSON>' EXPECTED='<INDEPENDENT_ROSTER_JSON>' PROOFS='<ACTUAL_OBSERVATIONS_JSON>' OUTPUT='<NEW_MAINTENANCE_DIR>' ENV=preprod
