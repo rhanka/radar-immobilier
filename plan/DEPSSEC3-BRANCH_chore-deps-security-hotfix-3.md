@@ -24,6 +24,7 @@
 - [x] Record rationale, impact and rollback before any conditional-path edit.
 
 ## Feedback Loop
+- [x] L2f: reuse guarded special-key and enum-record regression coverage.
 - [x] L2e: reuse domain default and partial-record regression coverage.
 - [x] L2d: retain historical GUID acceptance in prospect domain schemas.
 - [x] L2c: migrate domain records, defaults and ontology identifiers.
