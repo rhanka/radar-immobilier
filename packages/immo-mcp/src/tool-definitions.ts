@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { mcpFinitePositiveField, mcpIntegerField, mcpString, mcpBoolean, mcpBbox } from "./zod4-shapes.js";
+import { mcpFinitePositiveField, mcpIntegerField, mcpString, mcpNonEmptyString, mcpBoolean, mcpBbox } from "./zod4-shapes.js";
 import { IMMO_SCOPES } from "./auth-context.js";
 import {
   RAW_GEOJSON_DEFAULT_LIMIT,
@@ -45,7 +45,7 @@ export const TOOL_DEFINITIONS: readonly ToolDefinition[] = [
     description:
       "Recherche de lots par ville et critères (zone, no_lot, superficie min). Read-only.",
     inputSchema: {
-      city: mcpString().min(1, { error: "String must contain at least 1 character(s)" }).describe("Ville (ex: longueuil, valleyfield)"),
+      city: mcpNonEmptyString().describe("Ville (ex: longueuil, valleyfield)"),
       zone: mcpString().optional().describe("Code de zonage (ex: H-203)"),
       no_lot: mcpString().optional().describe("Numéro de lot cadastral exact"),
       minArea: mcpFinitePositiveField({ optional: true, description: "Superficie minimale en m²" }),
@@ -58,8 +58,8 @@ export const TOOL_DEFINITIONS: readonly ToolDefinition[] = [
     title: "Get lot card",
     description: "Fiche détaillée d'un lot (zonage, superficie, signaux liés). Read-only.",
     inputSchema: {
-      city: mcpString().min(1, { error: "String must contain at least 1 character(s)" }),
-      no_lot: mcpString().min(1, { error: "String must contain at least 1 character(s)" }).describe("Numéro de lot cadastral exact"),
+      city: mcpNonEmptyString(),
+      no_lot: mcpNonEmptyString().describe("Numéro de lot cadastral exact"),
     },
     scope: IMMO_SCOPES.read,
   },
@@ -69,9 +69,8 @@ export const TOOL_DEFINITIONS: readonly ToolDefinition[] = [
     description:
       "Recherche de signaux réglementaires par ville (étape, mot-clé). Read-only.",
     inputSchema: {
-      city: mcpString().min(1, { error: "String must contain at least 1 character(s)" }),
-      etape: z
-        .string()
+      city: mcpNonEmptyString(),
+      etape: mcpString()
         .optional()
         .describe("Étape du processus (ex: avis_motion, adoption, consultation)"),
       query: mcpString().optional().describe("Mot-clé libre"),
@@ -88,8 +87,8 @@ export const TOOL_DEFINITIONS: readonly ToolDefinition[] = [
     description:
       "Dossier d'opportunité consolidé (score, lots et signaux liés, rationale). Read-only.",
     inputSchema: {
-      city: mcpString().min(1, { error: "String must contain at least 1 character(s)" }),
-      opportunityId: mcpString().min(1, { error: "String must contain at least 1 character(s)" }),
+      city: mcpNonEmptyString(),
+      opportunityId: mcpNonEmptyString(),
     },
     scope: IMMO_SCOPES.read,
   },
@@ -110,7 +109,7 @@ export const TOOL_DEFINITIONS: readonly ToolDefinition[] = [
     description:
       "Lit un extrait borné d'un document source. La sortie est passée par la redaction anti-PII. Read-only.",
     inputSchema: {
-      documentId: mcpString().min(1, { error: "String must contain at least 1 character(s)" }),
+      documentId: mcpNonEmptyString(),
       offset: mcpIntegerField({ min: 0, default: 0 }),
       maxChars: mcpIntegerField({ min: 1, max: 4000, default: 1200 }),
     },
@@ -130,7 +129,7 @@ export const RAW_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
       "numberMatched/numberReturned/truncated indiquent ce qui reste : si truncated, " +
       "resserrez le bbox. Read-only.",
     inputSchema: {
-      city: mcpString().min(1, { error: "String must contain at least 1 character(s)" }).describe("Ville (slug, ex: longueuil, valleyfield, delson)"),
+      city: mcpNonEmptyString().describe("Ville (slug, ex: longueuil, valleyfield, delson)"),
       bbox: bboxSchema,
       limit: limitSchema,
     },
@@ -148,16 +147,13 @@ export const RAW_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
       "par bbox. Filtres optionnels only4Plus/superficieMinM2 appliqués sur la page " +
       "récupérée. truncated=true → resserrez le bbox. Read-only.",
     inputSchema: {
-      city: mcpString().min(1, { error: "String must contain at least 1 character(s)" }).describe("Ville (slug, ex: longueuil, valleyfield, delson)"),
+      city: mcpNonEmptyString().describe("Ville (slug, ex: longueuil, valleyfield, delson)"),
       bbox: bboxSchema,
       limit: limitSchema,
-      only4Plus: z
-        .boolean()
+      only4Plus: mcpBoolean()
         .optional()
         .describe("Ne garder que les lots dont multifamilial4plus === true"),
-      superficieMinM2: z
-        .number()
-        .positive()
+      superficieMinM2: mcpFinitePositiveField({})
         .optional()
         .describe("Superficie minimale en m² (champ superficieM2)"),
     },
@@ -172,8 +168,8 @@ export const RAW_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
       "directement. Retourne found=false si la zone est inconnue, grillePdfUrl=null si la " +
       "zone existe sans grille. Read-only.",
     inputSchema: {
-      city: mcpString().min(1, { error: "String must contain at least 1 character(s)" }).describe("Ville (slug, ex: longueuil)"),
-      zone: mcpString().min(1, { error: "String must contain at least 1 character(s)" }).describe("Code de zonage (ex: H-203)"),
+      city: mcpNonEmptyString().describe("Ville (slug, ex: longueuil)"),
+      zone: mcpNonEmptyString().describe("Code de zonage (ex: H-203)"),
     },
     scope: IMMO_SCOPES.documentsRead,
   },
@@ -186,9 +182,7 @@ export const RAW_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
       "portée par les signaux/documents) + métadonnées (ville, content-type). " +
       "Le PDF lui-même n'est jamais inliné dans la réponse. Read-only.",
     inputSchema: {
-      rawRef: z
-        .string()
-        .min(1, { error: "String must contain at least 1 character(s)" })
+      rawRef: mcpNonEmptyString()
         .describe(
           "Référence brute du document (rawRef S3, ex: raw/proces-verbaux-longueuil/cas/<sha>.pdf ; " +
             "en mode mock: l'id de document, ex: doc-longueuil-pv-2026-04-14)",
@@ -209,9 +203,8 @@ export const RAW_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
       "le résultat (réservé au lien events, tool à venir). found=false si la grille de " +
       "normes n'est pas publiée pour la ville. Read-only.",
     inputSchema: {
-      muni_slug: mcpString().min(1, { error: "String must contain at least 1 character(s)" }).describe("Ville (slug, ex: longueuil)"),
-      zone_code: z
-        .string()
+      muni_slug: mcpNonEmptyString().describe("Ville (slug, ex: longueuil)"),
+      zone_code: mcpString()
         .optional()
         .describe("Code de zone — accepté mais no-op pour la provenance (muni-uniforme)"),
     },
@@ -231,17 +224,14 @@ export const RAW_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
       "internes préfixées « _ » (breadcrumbs) ne sont jamais exposées. decision_state=planned " +
       "n'est JAMAIS présenté comme adopté (planned ≠ decided). Read-only.",
     inputSchema: {
-      muni_slug: mcpString().min(1, { error: "String must contain at least 1 character(s)" }).describe("Ville (slug, ex: longueuil)"),
-      zone_code: z
-        .string()
+      muni_slug: mcpNonEmptyString().describe("Ville (slug, ex: longueuil)"),
+      zone_code: mcpString()
         .optional()
         .describe("Filtre : events liés à ce code de zone (exact, via zone_codes_resolus)"),
-      document_type: z
-        .string()
+      document_type: mcpString()
         .optional()
         .describe("Filtre exact : avis_motion|projet_reglement|adoption|entree_en_vigueur|abrogation"),
-      decision_state: z
-        .string()
+      decision_state: mcpString()
         .optional()
         .describe("Filtre exact : planned|decided"),
     },

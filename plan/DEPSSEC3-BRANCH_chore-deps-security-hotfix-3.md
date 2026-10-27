@@ -29,7 +29,7 @@
 - [x] A2: reject raw URL whitespace before normalization.
 - [x] A3/B2: preserve integer diagnostic accumulation and finite ranges.
 - [x] B3: retain nonnumeric type metadata for raw JSON infinities.
-- [ ] A4/B4: align all native registrar scalar diagnostics.
+- [x] A4/B4: align all native registrar scalar diagnostics.
 - [ ] A5: replace nondiscriminating non-finite assertions.
 - [x] B5: preserve accepted URL output verbatim.
 - [x] B coercions: preserve existing HTTP pagination acceptance.

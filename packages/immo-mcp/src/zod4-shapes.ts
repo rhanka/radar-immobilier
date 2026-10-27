@@ -2,13 +2,17 @@ import { z } from "zod";
 export type McpShape = Record<string, z.ZodType>;
 
 function scalarError(expected: string, input: unknown): string {
-  const received = input === null ? "null" : Array.isArray(input) ? "array" : typeof input;
+  const received = input === null ? "null" : typeof input === "number" && Number.isNaN(input) ? "nan" : Array.isArray(input) ? "array" : typeof input;
   return input === undefined ? "Required" : `Expected ${expected}, received ${received}`;
 }
 export const mcpString = () => z.string({ error: (issue) => scalarError("string", issue.input) });
+export const mcpNonEmptyString = () => mcpString().min(1, {
+  error: "String must contain at least 1 character(s)",
+  when: ({ value }) => typeof value === "string",
+});
 export const mcpBoolean = () => z.boolean({ error: (issue) => scalarError("boolean", issue.input) });
 export const mcpNumber = () => z.number({ error: (issue) =>
-  typeof issue.input === "number" && !Number.isFinite(issue.input)
+  typeof issue.input === "number" && !Number.isFinite(issue.input) && !Number.isNaN(issue.input)
     ? "Number must be finite" : scalarError("number", issue.input),
 });
 export const mcpBbox = () => z.tuple([mcpNumber(), mcpNumber(), mcpNumber(), mcpNumber()], {
