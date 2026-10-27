@@ -4,7 +4,7 @@ source tools/make/base-api-guards.sh
 require_env
 [[ $ENV == test-api-paniers-pwe || $ENV == e2e-api-paniers-pwe ]]
 [[ $API_PORT == 18935 && $UI_PORT == 15935 && $MAILDEV_UI_PORT == 11935 ]]
-[[ ${PHASE:-pg} == pg || ${PHASE:-pg} == full ]]
+[[ ${PHASE:-pg} == pg || ${PHASE:-pg} == full || ${PHASE:-pg} == mutations ]]
 ROOT=$(pwd -P)
 git diff --quiet HEAD
 if [[ -z ${SCOPE:-} ]]; then

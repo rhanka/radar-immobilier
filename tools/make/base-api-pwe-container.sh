@@ -42,5 +42,9 @@ if [[ $1 == full ]]; then
   check full npm test -- --config vitest.isolated.config.ts \
     --reporter=default --reporter=json --outputFile.json=/evidence/full.json
 fi
+if [[ $1 == full || $1 == mutations ]]; then
+  check inherited-mutants node ../tools/make/base-api-pwe-inherited-mutations.mjs
+  check pwe-mutants node ../tools/make/base-api-pwe-mutations.mjs
+fi
 check results node ../tools/make/base-api-pwe-results.mjs
 exit "$overall"

@@ -32,6 +32,8 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Add full/mutation campaign phases, with isolated evidence for each
+  inherited A/B/C/D mutation suite and protected transaction byte checks.
 - [x] Add a real TCP cut after the normal-cookie API commit, immutable H5
   receiver receipt despite stale 6L1, consumed replay and an executor spy.
   This API adapter test uses the synthetic P resolver and does not qualify images.
