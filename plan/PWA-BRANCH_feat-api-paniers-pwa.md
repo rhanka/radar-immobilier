@@ -226,6 +226,10 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
 
 - [x] Delivery: `tools/make/base-api-pwa.mk`.
 
+Wait-phase resource and reservation failures now retain their exit status and
+resource snapshot before any Docker stack is started. The 8 GiB floor remains
+unchanged; only this workspace's disposable dependency caches may be cleared.
+
 - [x] Delivery: `api/tests/integration/pw-write-authority-rights.spec.ts`.
 
 - [x] Delivery: `api/tests/integration/pw-write-authority-status.spec.ts`.

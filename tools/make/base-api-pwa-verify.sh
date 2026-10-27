@@ -23,12 +23,19 @@ free_space() {
   [[ $(df -Pk "$ROOT" | awk 'NR==2 {print $4}') -ge 8388608 &&
      $(awk '/MemAvailable:/ {print $2}' /proc/meminfo) -ge 8388608 ]]
 }
+stop_waiting() {
+  printf '%s\n' "$2" | tee "$LOG_DIR/wait-stop.log"
+  df -Pk "$ROOT" >> "$LOG_DIR/wait-stop.log"
+  awk '/MemAvailable:/ {print}' /proc/meminfo >> "$LOG_DIR/wait-stop.log"
+  printf '%s\n' "$1" > "$LOG_DIR/status"
+  exit "$1"
+}
 deadline=$((SECONDS + 21600))
 quiet_since=$SECONDS
 exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
 while :; do
-  (( SECONDS < deadline )) || { echo 'Docker reservation exceeded six hours'; exit 4; }
-  free_space || { echo 'STOP: less than 8 GiB disk or memory'; exit 3; }
+  (( SECONDS < deadline )) || stop_waiting 4 'Docker reservation exceeded six hours'
+  free_space || stop_waiting 3 'STOP: less than 8 GiB disk or memory'
   running=$(docker ps --filter name=test- --format '{{.Names}}')
   builders=$(ps -eo comm=,args= | awk '$1 ~ /^(docker|docker-buildx|buildctl)$/ && $0 ~ / (build|buildx) /')
   if [[ -z $running && -z $builders ]] && flock -n 8; then
