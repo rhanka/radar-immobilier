@@ -354,7 +354,15 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
   const handleMcp = async (c: Context): Promise<Response> => {
     let request: Request;
     try { request = await host.boundRequest(c.req.raw); }
-    catch { return c.json({ error: "invalid_request" }, 413); }
+    catch (error) {
+      if (error instanceof Error && error.message === "composition_unavailable") {
+        return c.json({ error: "composition_unavailable" }, 503);
+      }
+      if (error instanceof Error && error.message === "request_too_large") {
+        return c.json({ error: "invalid_request" }, 413);
+      }
+      throw error;
+    }
     const sessionId = c.req.header("mcp-session-id");
 
     if (sessionId) {

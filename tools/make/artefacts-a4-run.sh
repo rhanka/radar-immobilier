@@ -26,13 +26,18 @@ printf '%s\n' "$candidate" > "$LOG_DIR/candidate-sha.txt"
 git show 77cb9553:package-lock.json > "$LOG_DIR/baseline-lock.json"
 while :; do
   names=$(docker ps --filter name=radar-test- --format '{{.Names}}')
-  [[ -n $names ]] || break
-  echo "WAIT: $names"
-  sleep 60
+  builds=$(ps -C docker -C docker-buildx -o args= | grep -E '(docker|docker-buildx) (build|buildx build)( |$)' || true)
+  [[ -n $names || -n $builds ]] || break
+  printf 'WAIT: containers=%s builds=%s\n' "$names" "$builds"
+  sleep 10
 done
 exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
-flock -n 8 || { echo 'Machine Docker campaign lock held'; exit 2; }
+until flock -n 8; do
+  echo 'WAIT: machine Docker campaign lock held'
+  sleep 10
+done
 [[ -z $(docker ps --filter name=radar-test- -q) ]]
+[[ -z $(ps -C docker -C docker-buildx -o args= | grep -E '(docker|docker-buildx) (build|buildx build)( |$)' || true) ]]
 [[ $(df -Pk . | awk 'NR==2 {print $4}') -ge 8388608 ]]
 OWNER=$(printf '%s' "$ROOT/$ENV" | sha256sum | cut -d' ' -f1)
 mkdir -p "$HOME/.cache/radar-a4-docker"
@@ -99,6 +104,7 @@ if [[ ${A4_IMAGE:-0} == 1 ]]; then
   timeout --signal=TERM --kill-after=10 180 docker run --rm --name "$PROJECT-image-probe" --network "${PROJECT}_default" \
     --label "com.docker.compose.project=$PROJECT" --label "org.radar.base.owner=$OWNER" \
     -v "$ROOT/tools/make/artefacts-a4-image-probe.mjs:/workspace/a4-image-probe.mjs:ro" \
+    -v "$ROOT/tools/make/artefacts-a4-disconnect.mjs:/workspace/artefacts-a4-disconnect.mjs:ro" \
     -v "$LOG_DIR:/evidence" --entrypoint node "$image" a4-image-probe.mjs \
     > >(tee "$LOG_DIR/run.log") 2>&1 &
 else

@@ -2,7 +2,7 @@
 set -euo pipefail
 action=${1:?}
 ROOT=$(pwd -P)
-BASE=$(git rev-parse 77cb9553)
+BASE=$(git rev-parse c49bb854)
 LOCAL=$ROOT/tmp/a4-delivery.git
 [[ $ENV == test-artefacts-a4 ]]
 if [[ $action == setup ]]; then
@@ -55,8 +55,8 @@ case $action in
     git -c core.hooksPath=/dev/null commit -m "$MSG";;
   audit) audit;;
   bundle)
-    audit > "$ROOT/tmp/a4-evidence/commit-audit.txt"
-    OUT=$ROOT/tmp/a4-evidence/artefacts-a4.bundle
+    audit > "$ROOT/tmp/a4-evidence/review-fixes-commit-audit.txt"
+    OUT=$ROOT/tmp/a4-evidence/artefacts-a4-review-fixes.bundle
     git bundle create "$OUT" "$BASE..HEAD"
     auditdir=$(mktemp -d "$ROOT/tmp/a4-evidence/bundle-audit.XXXXXX")
     independent() { env -u GIT_DIR -u GIT_WORK_TREE git -C "$auditdir" "$@"; }
