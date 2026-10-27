@@ -167,3 +167,39 @@ des métadonnées privées absentes/périmées et une redirection Git héritée.
   restent conservés hors du sous-répertoire `astra/`.
 - Commits Conventional anglais ≤72 caractères, sans corps/trailer, ≤150 lignes
   chacun, dans `astra/backup.git`. Aucun push ni accès cluster effectué.
+
+## Corrections seconde passe
+
+La revue `astra-929-r2b.md` a été lue en entier. Cette série repart de
+`d13986ce592f72d30d7eabb7a33495be473757b3`, déjà présent dans le dépôt de secours
+et sur origin. Seuls les deux refus demandés ont été ajoutés au préflight.
+
+- **PostgreSQL :** toute politique susceptible de sélectionner PostgreSQL doit
+  borner chaque règle autorisante à des `podSelector` locaux avec `matchLabels`
+  non vide. Une règle `{}`, un `from` absent/vide, un pair vide, un sélecteur de
+  pods vide, un `namespaceSelector` ou un `ipBlock` sont refusés explicitement :
+  `Unbounded PostgreSQL ingress sources are forbidden`. Les sélecteurs larges
+  sans composant explicitement différent de PostgreSQL reçoivent le même
+  contrôle. `ingress: []` n’autorise aucun accès et reste un refus réseau valide.
+  L’ancien test positif `ingress: [{}]` est devenu négatif.
+- **Middlewares Traefik :** les annotations `router.middlewares` et les clés
+  ou valeurs d’annotations `traefik.*` mentionnant un middleware ou une
+  référence de fournisseur (`@file`, `@kubernetescrd`, etc.) provoquent le refus
+  `Traefik middleware annotations are forbidden`. Le contrôle précède toute
+  création, modification ou mise à l’échelle lors de `close` et `start-api`.
+  Aucun middleware n’est résolu ou supprimé, aucune autre mécanique ajoutée.
+
+Vérifications ciblées : `make -f tools/make/bascule-fix.mk check ENV=test-bascule-fix`
+et `make -f tools/make/bascule-fix.mk test-operator ENV=test-bascule-fix` :
+**PASSED, 242 cas opérateur, aucun échec final**. Les nouveaux cas vérifient les
+messages de refus et l’absence de toute commande mutante. Les annotations
+Traefik ordinaires, comme une priorité numérique, restent couvertes positivement.
+La régression PostgreSQL a été reproduite avant correction ; les résultats
+synthétiques et journaux sont dans `tmp/bascule-fix-evidence/astra-r2/`.
+
+Le nouveau bundle incrémental est `astra-r2/bascule-fix.bundle`, prérequis
+`d13986ce` ; `astra-r2/delivery.json` consigne le SHA final, l’empreinte SHA-256
+du bundle et son audit par import séparé, égalité SHA/arbre et `git fsck`.
+Chaque commit est Conventional anglais ≤72 caractères, sans corps ni trailer,
+≤150 lignes. Aucun push, accès cluster ou Docker ; aucun fichier d’environnement
+lu ni nouvelle qualification de l’état réel de préprod revendiquée.
