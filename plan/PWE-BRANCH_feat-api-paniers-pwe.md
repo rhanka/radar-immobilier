@@ -32,6 +32,9 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Scoped C03/C07 gate: 18 passed/0 failed/0 skipped, typecheck/lint passed.
+- [x] Add normal authRoute login/code+PKCE/callback/signature/session fixture;
+  no flow cookie or application principal is manufactured by the test.
 - [x] Add C07 concurrent equal/different/P preparation and renewed-grant retry;
   the winning P, durable challenge and original deadline cannot change.
 - [x] Scoped C02 gate: 3 passed/0 failed/0 skipped, typecheck and lint passed.
