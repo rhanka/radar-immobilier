@@ -25,6 +25,7 @@
 
 ## Feedback Loop
 - [x] User execution instructions override older commit-trailer guidance.
+- [x] Review qualification blocked: the foreign Docker campaign holds the machine lock; owner: conductor to coordinate release. No foreign resources changed.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch; dependency upgrade and behavioral qualification share one checkout.
@@ -49,4 +50,5 @@
 - [x] Review corrections: align the committed A5 runner baseline with 9a723753; keep strict tuple comparison.
 - [x] Review corrections: support test-artifacts-022 ports and use the current checkout's Git context.
 - [ ] Review corrections: requalify inspect-profile, verify and affected artifact suites through committed Make targets.
+- [x] Review corrections: report the blocked preflight, preserve skipped checks and deliver an incremental bundle.
 - [ ] Conductor: push, run CI and merge with a merge commit.
