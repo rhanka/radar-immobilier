@@ -7,7 +7,7 @@ MODE ?= off
 ARTIFACT_API_IMAGE ?=
 KUBECTL ?= kubectl
 KF := bash deploy/ci/kfilter.sh
-.PHONY: render live cursor-secret reader-secrets apply-runtime route rollback
+.PHONY: render live cursor-secret reader-secrets credentials apply-runtime route rollback
 live:
 	@test "$(ENV)" = preprod
 	@test -n "$${KUBECONFIG:-}" || { echo 'Explicit preprod KUBECONFIG required' >&2; exit 1; }
@@ -22,14 +22,16 @@ render:
 	@sha256sum "$(OUT)/render.yaml"
 # Create once. An existing Secret is retained without retrieving its data.
 cursor-secret: live
-	@if [ -n "$$($(KUBECTL) -n $(NAMESPACE) get secret radar-classification-cursor-preprod --ignore-not-found -o name)" ]; then \
+	@existing=$$($(KUBECTL) -n $(NAMESPACE) get secret radar-classification-cursor-preprod --ignore-not-found -o name); \
+	  if [ -n "$$existing" ]; then \
 	  echo 'Cursor Secret retained; reuse key ID preprod-v1'; exit 0; fi; \
 	  umask 077; keydir=$$(mktemp -d); trap 'rm -rf "$$keydir"' EXIT; \
 	  openssl rand -hex 32 >"$$keydir/CLASSIFICATION_CURSOR_SECRET"; \
 	  $(KUBECTL) -n $(NAMESPACE) create secret generic radar-classification-cursor-preprod \
 	    --from-file=CLASSIFICATION_CURSOR_SECRET="$$keydir/CLASSIFICATION_CURSOR_SECRET"
 reader-secrets: live
-	@if [ -n "$$($(KUBECTL) -n $(NAMESPACE) get secret radar-artifacts-reader-preprod --ignore-not-found -o name)" ]; then \
+	@existing=$$($(KUBECTL) -n $(NAMESPACE) get secret radar-artifacts-reader-preprod --ignore-not-found -o name); \
+	  if [ -n "$$existing" ]; then \
 	  echo 'Reader Secret retained'; exit 0; fi; \
 	  umask 077; keydir=$$(mktemp -d); trap 'rm -rf "$$keydir"' EXIT; \
 	  openssl rand -hex 32 >"$$keydir/ARTIFACTS_READER_GRANT_SECRET"; \
@@ -37,6 +39,18 @@ reader-secrets: live
 	  $(KUBECTL) -n $(NAMESPACE) create secret generic radar-artifacts-reader-preprod \
 	    --from-file=ARTIFACTS_READER_GRANT_SECRET="$$keydir/ARTIFACTS_READER_GRANT_SECRET" \
 	    --from-file=ARTIFACTS_READER_SESSION_SECRET="$$keydir/ARTIFACTS_READER_SESSION_SECRET"
+credentials: live
+	@existing=$$($(KUBECTL) -n $(NAMESPACE) get secret radar-artifacts-preprod --ignore-not-found -o name); \
+	  if [ -z "$$existing" ]; then \
+	  test -f "$(ARTIFACT_S3_ACCESS_KEY_FILE)"; test -f "$(ARTIFACT_S3_SECRET_KEY_FILE)"; \
+	  $(KUBECTL) -n $(NAMESPACE) create secret generic radar-artifacts-preprod \
+	    --from-file=ARTIFACTS_S3_ACCESS_KEY="$(ARTIFACT_S3_ACCESS_KEY_FILE)" \
+	    --from-file=ARTIFACTS_S3_SECRET_KEY="$(ARTIFACT_S3_SECRET_KEY_FILE)"; fi
+	@existing=$$($(KUBECTL) -n $(NAMESPACE) get secret immo-mcp-artifact-writer --ignore-not-found -o name); \
+	  if [ -z "$$existing" ]; then \
+	  test -f "$(ARTIFACT_DATABASE_URL_FILE)"; \
+	  $(KUBECTL) -n $(NAMESPACE) create secret generic immo-mcp-artifact-writer \
+	    --from-file=IMMO_MCP_ARTIFACT_DATABASE_URL="$(ARTIFACT_DATABASE_URL_FILE)"; fi
 apply-runtime: live
 	@bash deploy/ci/check-h3-preprod-render.sh "$(OUT)/render.yaml"
 	@for name in radar-api immo-mcp-config; do \
