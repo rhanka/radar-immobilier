@@ -40,5 +40,6 @@
 - [x] Lot 2: Use ESM resolution for the published memory double (no CommonJS export).
 - [x] Lot 3: Aligned current provider profile, qualification scripts and docs.
 - [ ] Lot 4: Pass typecheck, lint, unit tests and Docker artifacts integration.
+- [x] Lot 4: Add a sequential qualification command with per-check logs and exit codes.
 - [ ] Lot 5: Review changes, audit commits and deliver the uncommitted report.
 - [ ] Conductor: push, run CI and merge with a merge commit.
