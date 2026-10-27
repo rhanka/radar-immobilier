@@ -1,3 +1,4 @@
+import { contractSafeParse } from "@radar/domain";
 import { z } from "zod";
 
 import { extractIsoFromLabel, isRealIsoDate } from "./sources/proces-verbaux-parser.js";
@@ -55,7 +56,7 @@ export function extractDocumentHeaderDate(text: string): DocumentDate {
 
 /** Explicit metadata wins; legacy metadata is interpreted once and never changes clocks. */
 export function resolveDocumentDate(metadata: { documentDate?: unknown; publishedAt?: unknown }): DocumentDate {
-  const parsed = DocumentDateSchema.safeParse(metadata.documentDate);
+  const parsed = contractSafeParse(DocumentDateSchema, metadata.documentDate);
   if (!parsed.success) return documentDateFromPublishedAt(metadata.publishedAt);
   if (parsed.data.status === "known" && metadata.publishedAt !== undefined
     && metadata.publishedAt !== parsed.data.value) {
