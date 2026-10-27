@@ -5,6 +5,7 @@ import {
   type AvisPublicItemT,
 } from "@radar/sources";
 import { z } from "zod";
+import { contractParse } from "@radar/domain";
 
 /**
  * REAL public-source connector for the city of Salaberry-de-Valleyfield
@@ -115,7 +116,7 @@ export async function collectAvisPublicsValleyfield(
   try {
     const all: AvisPublicItemT[] = parseAvisPublics(html);
     const items = all.slice(0, limit);
-    const result = CollectResult.parse({
+    const result = contractParse(CollectResult, {
       source: base.source,
       sourceUrl: base.sourceUrl,
       fetchedAt,

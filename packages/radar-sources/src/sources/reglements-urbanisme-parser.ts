@@ -1,3 +1,4 @@
+import { contractSafeParse } from "@radar/domain";
 import { z } from "zod";
 
 /**
@@ -181,7 +182,7 @@ export function extractZones(text: string): ReglementZoneT[] {
  * and anti-invention: every bylaw number and zone code is verbatim from `text`.
  */
 export function parseReglementDocument(text: string): ReglementDocumentT {
-  const parsed = ReglementDocument.safeParse({
+  const parsed = contractSafeParse(ReglementDocument, {
     primaryNumero: extractPrimaryNumero(text),
     titre: extractTitre(text),
     bylaws: extractReglementBylaws(text),
@@ -232,7 +233,7 @@ export function parseReglementListing(html: string): ReglementListingEntryT[] {
     const slug = url.split("/reglements-municipaux/")[1] ?? "";
     if (!slug) continue;
     const numMatch = slug.match(/reglement-(\d{2,3}(?:-\d{1,3})?)\b/i);
-    const parsed = ReglementListingEntry.safeParse({
+    const parsed = contractSafeParse(ReglementListingEntry, {
       url,
       numero: numMatch?.[1] ?? REGLEMENT_NON_DISPONIBLE,
       slug,
