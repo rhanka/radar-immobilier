@@ -1,3 +1,4 @@
+import { contractInteger } from "@radar/domain";
 import { z } from "zod";
 import { ClassificationError } from "./classification-errors.js";
 
@@ -17,7 +18,7 @@ export const SignalQuery = z.object({
   personalHistory: z.enum(["any", "untouched", "has_history"]).default("any"),
   dateBasis: z.literal("document").default("document"),
   sort: z.literal("freshness_desc").default("freshness_desc"),
-  limit: z.number().int().min(1).max(100).default(20),
+  limit: contractInteger().min(1).max(100).default(20),
   cursor: z.string().min(1).max(4096).optional(),
 }).strict();
 export type SignalQueryArgs = z.infer<typeof SignalQuery>;
