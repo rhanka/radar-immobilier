@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 
-import type { TextJsonGenerationClient } from "@sentropic/graphify";
+import type { TextJsonGenerationClient } from "@sentropic/engram";
 
 import type { RefreshProvider } from "./refresh-mesh.js";
 import type { RefreshProfileChunk } from "./refresh-profile.js";

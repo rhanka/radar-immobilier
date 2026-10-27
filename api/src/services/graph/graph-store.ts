@@ -43,7 +43,7 @@ export {
 // Zod schema for graphify graph.json
 // ─────────────────────────────────────────────────────────────────────────────
 
-const passthroughPropsSchema = z.record(z.unknown());
+const passthroughPropsSchema = z.record(z.string(), z.unknown());
 
 /** A single node as emitted by graphify. */
 export const graphifyNodeSchema = z.object({
@@ -74,7 +74,7 @@ export const graphifyNodeSchema = z.object({
    * Some variants emit refs as string[] — strings are wrapped in { ref: s }.
    */
   refs: z
-    .array(z.union([z.record(z.unknown()), z.string().transform((s) => ({ ref: s }))]))
+    .array(z.union([z.record(z.string(), z.unknown()), z.string().transform((s) => ({ ref: s }))]))
     .optional(),
   /** Manual graphify extraction metadata kept nested in DB props. */
   properties: passthroughPropsSchema.optional(),
@@ -122,7 +122,7 @@ export const graphifyLinkSchema = z.preprocess(
      * uniform storage.
      */
     refs: z
-      .array(z.union([z.record(z.unknown()), z.string().transform((s) => ({ ref: s }))]))
+      .array(z.union([z.record(z.string(), z.unknown()), z.string().transform((s) => ({ ref: s }))]))
       .optional(),
     /** Manual graphify extraction metadata kept nested in DB props. */
     properties: passthroughPropsSchema.optional(),
