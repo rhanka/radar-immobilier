@@ -1,0 +1,7 @@
+# Directory base permits root-only Kustomize loading from the preprod overlay.
+# The parent 40/41 symlinks preserve the operator/production apply entrypoints.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - 40-immo-mcp-http-deploy.yaml
+  - 41-immo-mcp-ingress.yaml
