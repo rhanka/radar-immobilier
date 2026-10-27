@@ -33,8 +33,8 @@
 - [x] A5: replace nondiscriminating non-finite assertions.
 - [x] B5: preserve accepted URL output verbatim.
 - [x] B coercions: preserve existing HTTP pagination acceptance.
-- [ ] Requalify full suites, typecheck, lint, builds and raw audits under the Docker lease.
-- [ ] Deliver an incremental bundle from 59d4c1bf, report review corrections and clean Docker.
+- [x] Requalify full suites, typecheck, lint, builds and raw audits under the Docker lease.
+- [x] Deliver an incremental bundle from 59d4c1bf, report review corrections and clean Docker.
 
 ## Feedback Loop
 - [x] Astra native string checks use public refinements, preserve minLength metadata and match all 12 discovery definitions.
