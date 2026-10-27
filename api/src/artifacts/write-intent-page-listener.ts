@@ -11,7 +11,7 @@
  */
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
-import { applyReaderContentHeaders } from "./content-isolation.js";
+import { applyReaderContentHeaders, READER_CONTENT_HEADERS } from "./content-isolation.js";
 import { parseContentHost } from "./content-host.js";
 import { hasDuplicateJsonKeys } from "./write-intent-binding.js";
 import { FacetError } from "../services/facets/target.js";
@@ -63,6 +63,14 @@ function forwardHeaders(c: { req: { header: (name: string) => string | undefined
   return headers;
 }
 
+/** Keep typed upstream outcomes while enforcing the content response policy. */
+function forwardedResponse(response: Response): Response {
+  const headers = new Headers(response.headers);
+  for (const [name, value] of Object.entries(READER_CONTENT_HEADERS)) headers.set(name, value);
+  headers.set("Vary", "Cookie, Authorization");
+  return new Response(response.body, { status: response.status, headers });
+}
+
 export function pageWriteListenerRoute(deps: PageListenerDeps | null): Hono {
   const app = new Hono();
   app.use(PW_PAGE_PREPARE_PATH, bodyLimit({ maxSize: 16 * 1024,
@@ -106,8 +114,8 @@ export function pageWriteListenerRoute(deps: PageListenerDeps | null): Hono {
       const grant = await mintPageWriteGrant(page, deps, now);
       const headers = forwardHeaders(c, grant);
       headers.set("idempotency-key", key);
-      return await deps.forward(new Request(`${FORWARD_BASE}/write-intents`,
-        { method: "POST", headers, body: raw }));
+      return forwardedResponse(await deps.forward(new Request(`${FORWARD_BASE}/write-intents`,
+        { method: "POST", headers, body: raw })));
     } catch (error) {
       return writeIntentError(c, error);
     }
@@ -120,8 +128,8 @@ export function pageWriteListenerRoute(deps: PageListenerDeps | null): Hono {
       const id = c.req.query("intentId") ?? "";
       assertIdempotencyKey(id);
       await resolveWritePage(c, deps, deps.nowMs ?? Date.now);
-      return await deps.forward(new Request(`${FORWARD_BASE}/write-intents/${id}`,
-        { method: "GET", headers: forwardHeaders(c, null) }));
+      return forwardedResponse(await deps.forward(new Request(`${FORWARD_BASE}/write-intents/${id}`,
+        { method: "GET", headers: forwardHeaders(c, null) })));
     } catch (error) {
       return writeIntentError(c, error);
     }

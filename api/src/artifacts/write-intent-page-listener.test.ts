@@ -40,6 +40,21 @@ function prepareRequest(headers: Record<string, string> = {}, body: unknown = BO
 }
 
 describe("page write listener", () => {
+  it.each([201, 409, 429])("should preserve private headers on forwarded HTTP %s", async (status) => {
+    const body = JSON.stringify({ operation: "facets.write-intents.prepare.v1",
+      error: { code: "write_rate_limited" } });
+    const app = pageWriteListenerRoute(depsFor(async () => new Response(body, { status,
+      headers: { "content-type": "application/json", "retry-after": "7", "cache-control": "public" } })));
+    const response = await app.request(prepareRequest());
+    expect(response.status).toBe(status);
+    expect(await response.text()).toBe(body);
+    expect(response.headers.get("retry-after")).toBe("7");
+    expect(response.headers.get("cache-control")).toBe("private, no-store");
+    expect(response.headers.get("cross-origin-opener-policy")).toBe("same-origin");
+    expect(response.headers.get("vary")).toBe("Cookie, Authorization");
+    expect(response.headers.get("content-security-policy")).toContain("frame-ancestors 'none'");
+  });
+
   it("should stay closed without authority and refuse wrong methods", async () => {
     const app = pageWriteListenerRoute(null);
     const closed = await app.request(`${ORIGIN}${PW_PAGE_PREPARE_PATH}`, { method: "POST" });
