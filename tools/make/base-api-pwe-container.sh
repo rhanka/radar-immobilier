@@ -31,9 +31,9 @@ shopt -s nullglob
 lint=(api/tests/integration/pwe-*.ts api/src/services/facets/pwe-*.ts
   api/src/artifacts/pwe-*.ts tools/make/base-api-pwe*.mjs)
 check eslint node_modules/.bin/eslint "${lint[@]}"
-node tools/make/base-api-ct8.mjs > /evidence/ct8.log
-node tools/make/base-api-b2-setup.mjs > /evidence/db-setup.log
 cd api
+node ../tools/make/base-api-ct8.mjs > /evidence/ct8.log
+node ../tools/make/base-api-b2-setup.mjs > /evidence/db-setup.log
 read -r -a scopes <<< "${2//$'\n'/ }"
 check required ../node_modules/.bin/vitest run --config vitest.isolated.config.ts "${scopes[@]}" \
   --reporter=default --reporter=json --outputFile.json=/evidence/required.json
