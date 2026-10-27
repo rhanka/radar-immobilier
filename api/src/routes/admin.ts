@@ -1,3 +1,4 @@
+import { contractSafeParse } from "@radar/domain";
 // Admin routes — account approval workflow + invitations par email.
 //
 //   GET  /api/v1/admin/users            -> list all account_users (admin only)
@@ -52,7 +53,7 @@ function generateInvitationToken(): string {
 const AdminStatusTarget = z.enum(["approved", "rejected", "suspended"]);
 type AdminStatusTargetT = z.infer<typeof AdminStatusTarget>;
 
-const StatusBody = z.object({
+export const StatusBody = z.object({
   status: AdminStatusTarget,
   reason: z.string().trim().min(1).max(500).optional(),
 });
@@ -261,7 +262,7 @@ export function adminRoute(deps: AdminDeps): Hono {
       return c.json({ error: "invalid_json" }, 400);
     }
 
-    const parsed = StatusBody.safeParse(body);
+    const parsed = contractSafeParse(StatusBody, body);
     if (!parsed.success) {
       return c.json(
         { error: "validation_failed", detail: parsed.error.format() },
@@ -302,7 +303,7 @@ export function adminRoute(deps: AdminDeps): Hono {
       return c.json({ error: "invalid_json" }, 400);
     }
 
-    const parsed = InvitationBody.safeParse(body);
+    const parsed = contractSafeParse(InvitationBody, body);
     if (!parsed.success) {
       return c.json(
         { error: "validation_failed", detail: parsed.error.format() },
@@ -385,7 +386,7 @@ export function adminRoute(deps: AdminDeps): Hono {
     if (isResponse(result)) return result as Response;
 
     const id = c.req.param("id");
-    if (!z.string().uuid().safeParse(id).success) {
+    if (!z.string().guid().safeParse(id).success) {
       return c.json({ error: "invalid_invitation_id" }, 400);
     }
     const rows = await deps.db
