@@ -45,3 +45,5 @@ Qualify, repair and integrate the supplied PW-C implementation on 07ef2757.
 - [ ] Lot 4: atomic delivery, prerequisite-only bundle audit and report.
 
 - [x] Delivery: feat(pw-c): dispatch confirmation and serialize revocations.
+
+- [x] Delivery: feat(pw-c): serve the controlled application script.
