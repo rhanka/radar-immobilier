@@ -214,6 +214,7 @@ ${PW_PAGE_BUDGET_SCRIPT}
         { credentials: "same-origin", headers: { accept: "application/json" }, signal: gate.signal });
       var data = null;
       try { data = await res.json(); } catch (err) { data = null; }
+      if (intentId === poll.intentId) poll.nextAt = 0;
       return { status: res.status, retryAfter: res.headers.get("retry-after"), data: data };
     } finally {
       if (gate.done) gate.done();
@@ -285,7 +286,6 @@ ${PW_PAGE_BUDGET_SCRIPT}
     try {
       var out = await checkOnce(intentId);
       if (intentId !== poll.intentId) return;
-      poll.nextAt = 0;
       handleStatus(out);
       var state = out.data && out.data.data ? out.data.data.state : "";
       if (!poll.stopped && !TERMINAL[state] && poll.timer === null) schedule(INTERVAL_MS);

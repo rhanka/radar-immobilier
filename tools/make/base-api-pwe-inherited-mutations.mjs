@@ -1,6 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
+import { materializeInherited } from "./base-api-pwe-legacy-adjustments.mjs";
 
 const sha = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const protectedFile = "/workspace/api/src/artifacts/write-intent-transaction.ts";
@@ -12,12 +13,14 @@ for (const batch of ["pwa", "pwb", "pwd", "pwc"]) {
   mkdirSync(directory, { recursive: true });
   const source = `/workspace/tools/make/base-api-${batch}-mutations.mjs`;
   const bytes = readFileSync(source);
+  const materialized = materializeInherited(batch, bytes.toString());
   const isolated = `/tmp/pwe-inherited-${batch}.mjs`;
-  writeFileSync(isolated, bytes.toString().replaceAll("/evidence/", `${directory}/`));
+  writeFileSync(isolated, materialized.source.replaceAll("/evidence/", `${directory}/`));
   const result = spawnSync(process.execPath, [isolated], { cwd: "/workspace/api", encoding: "utf8", timeout: 900_000 });
   writeFileSync(`${directory}/campaign.log`, (result.stdout ?? "") + (result.stderr ?? ""));
   const restored = sha(readFileSync(protectedFile)) === sha(original);
-  receipts.push({ batch, scriptSha256: sha(bytes), status: result.status,
+  receipts.push({ batch, scriptSha256: sha(bytes), materializedSha256: sha(materialized.source),
+    adjustments: materialized.changes, status: result.status,
     signal: result.signal, error: result.error?.message ?? null, protectedBytesRestored: restored });
   writeFileSync("/evidence/inherited-mutants.json", JSON.stringify(receipts, null, 2));
   console.log(`Inherited ${batch}: exit ${result.status}; protected bytes restored=${restored}`);
