@@ -2,7 +2,7 @@ import { z } from "zod";
 import { Hash, Verdict } from "./classification-query.js";
 
 export const Reason = z.object({ profileId: z.string().min(1), code: z.string().min(1), verdict: Verdict }).strict();
-export const Head = z.object({ id: z.string().uuid(), state: z.enum(["active", "inactive"]),
+export const Head = z.object({ id: z.string().guid(), state: z.enum(["active", "inactive"]),
   createdAt: z.string().datetime({ offset: true }), reason: Reason.nullable() }).strict();
 export const ArchiveHead = Head.extend({ changedSinceArchive: z.boolean().nullable() });
 export const SignalFacets = z.object({
