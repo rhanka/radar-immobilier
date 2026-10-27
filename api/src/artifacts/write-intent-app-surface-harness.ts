@@ -22,6 +22,7 @@ type Fixture = Awaited<ReturnType<typeof workspaceFixture>>;
 export async function surface(f: Fixture,
   domain: Pick<PwIdentityDomain, "identityIssuer" | "tier"> = { identityIssuer: ISSUER, tier: "preprod" }) {
   const app = createApp({ checkDb: async () => ({ ok: true }), checkObjectStore: async () => ({ ok: true }),
+    db: f.db,
     store: {
       get: async () => { throw new Error("unexpected object read"); },
       head: async () => { throw new Error("unexpected object probe"); },
