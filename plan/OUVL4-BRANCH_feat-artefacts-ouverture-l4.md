@@ -33,9 +33,9 @@
 - [x] **Lot 0 — Baseline and scope**
   - [x] Read project rules, design/review and delivery reports; confirm branch/base.
   - [x] Save production render before modifications; initialize isolated Git metadata.
-- [ ] **Lot 1 — Shared publication configuration**
-  - [ ] Configure API/MCP `general`, storage scope/org/bucket and content base.
-  - [ ] Bind MCP publication DB and S3 credentials with opaque Secret references.
+- [x] **Lot 1 — Shared publication configuration**
+  - [x] Configure API/MCP `general`, storage scope/org/bucket and content base.
+  - [x] Bind MCP publication DB and S3 credentials with opaque Secret references.
 - [ ] **Lot 2 — Reader and routing**
   - [ ] Bind persistent reader signing and cursor secrets, cursor key ID and approval runtime.
   - [ ] Route stable and pinned content hosts to the API; preserve rollback denial boundary.
