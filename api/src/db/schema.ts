@@ -1155,6 +1155,6 @@ export const schema = {
   geoUnresolved,
   // WP3 LOT1 — Cohérence E2E
   consistencySnapshots,
-  // PW-D — write persistence (DDL in migration 0025, types in schema-pw-write)
+  // PW-D — write persistence (DDL in migration 0027, types in schema-pw-write)
   ...pwWriteSchema,
 };

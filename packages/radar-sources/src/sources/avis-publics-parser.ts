@@ -1,3 +1,5 @@
+import { contractUrl } from "@radar/domain";
+import { contractSafeParse } from "@radar/domain";
 import { z } from "zod";
 
 /**
@@ -56,7 +58,7 @@ export const AvisPublicItem = z.object({
   /** ISO date (YYYY-MM-DD) parsed from dateLabel when possible, else NON_DISPONIBLE. */
   dateIso: z.string().min(1),
   /** Absolute URL of the notice PDF. */
-  url: z.string().url(),
+  url: contractUrl(),
   /** Inferred notice kind. */
   type: AvisType,
   /** Bylaw / file references found in the title (e.g. "150-49"), if any. */
@@ -185,7 +187,7 @@ function parseAvisPublicsCraft(html: string): AvisPublicItemT[] {
     const dateLabel = dateMatch?.[1] ? decodeEntities(dateMatch[1]) : NON_DISPONIBLE;
     const dateIso = dateLabel === NON_DISPONIBLE ? NON_DISPONIBLE : frenchDateToIso(dateLabel);
 
-    const parsed = AvisPublicItem.safeParse({
+    const parsed = contractSafeParse(AvisPublicItem, {
       title,
       dateLabel: dateLabel || NON_DISPONIBLE,
       dateIso,
@@ -229,7 +231,7 @@ export function parseAvisPublicsWordpress(html: string): AvisPublicItemT[] {
     const body = stripTags(inner.replace(/<summary\b[^>]*>[\s\S]*?<\/summary>/i, ""));
     const bylaws = extractBylaws(`${title} ${body}`);
 
-    const parsed = AvisPublicItem.safeParse({
+    const parsed = contractSafeParse(AvisPublicItem, {
       title,
       dateLabel: NON_DISPONIBLE,
       dateIso: NON_DISPONIBLE,

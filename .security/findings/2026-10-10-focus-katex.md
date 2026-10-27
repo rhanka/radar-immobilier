@@ -1,35 +1,31 @@
 # KaTeX prototype-pollution gadget in docs/architecture/focus
 
-- Status: open — exception PROPOSED, UNSIGNED (accepted_by: null, accepted_on: null)
-- Severity: low (GitHub)
-- Advisory: GHSA-238p-pmpm-9mq7 / CVE-2026-103923 — katex `>=0.11.0 <0.18.2`, patched `0.18.2`
-- Owner: repository owner (to confirm)
-- Review by: 2026-11-09 (UTC)
-- Register rows: `EXC-2026-10-10-focus-katex`, `EXC-2026-10-10-focus-mermaid`
+- Status: resolved by security hotfix 3 on 2026-10-27.
+- Severity: low (GitHub).
+- Advisory: GHSA-238p-pmpm-9mq7 / CVE-2026-103923.
+- Affected: KaTeX >=0.11.0 <0.18.2; patched: 0.18.2.
 
-## Affected (`docs/architecture/focus/package-lock.json`)
+## Remediation
 
-- `katex@0.16.47` — `node_modules/katex`
-- `mermaid@11.17.2` — inherited (pins `katex ^0.16.47`)
+The independent Focus tree overrides katex to 0.18.2; the generated lockfile
+replaces 0.16.47. Mermaid stays on 11.17.2. The root workspace already used
+KaTeX 0.18.2 and keeps that version.
 
-The root workspace copy (chat-ui / svelte-streamdown / mermaid) is fixed in
-chore/deps-security-hotfix-2 (override `katex` -> `0.18.2`).
+Both raw Focus audits, production-only and complete, exit 0 with no findings.
+A clean Focus installation and npm ls --all pass. The advisory probe accepts
+inherited trust under baseline 0.16.47 and refuses it under 0.18.2; explicit
+trust and ordinary math remain positive controls.
 
-## Reachability
+The current render-mermaid.mjs builds mermaid.core.mjs from installed modules,
+rather than loading Mermaid's precompiled standalone artifact. Repeating that
+Vite bundle configuration confirms that the generated runtime includes the
+installed katex/dist/katex.mjs (0.18.2) and dompurify/dist/purify.es.mjs.
+The two proposed Focus register rows are therefore deleted without acceptance.
 
-Docs-only. Exploitation needs prior prototype pollution plus attacker-controlled
-math. Focus renders local documents offline: `render-mermaid.mjs` loads the
-precompiled `mermaid/dist/mermaid.min.js`, blocks HTTP/HTTPS, uses
-`securityLevel: 'strict'` and rejects dangerous SVG elements/attributes.
+## Evidence and limits
 
-## Why not fixed here
-
-An override of the `katex` package would not change the KaTeX code embedded in
-the precompiled `mermaid.min.js` (unverified), and 0.18 is outside Mermaid's
-`^0.16.47` range (Mermaid 12.1.0 keeps the same range).
-
-## Removal plan
-
-Upgrade Mermaid once it ships patched KaTeX, regenerate the Focus lockfile
-through `make -C docs/architecture/focus deps`, rebuild diagrams, rescan, delete
-the register rows.
+- Raw audits: task worktree tmp/hotfix3-evidence/audit-{before,after}-focus-*.
+- Trust probe: katex-probe.mjs and contract-probes.log in the same directory.
+- Bundle provenance: focus-runtime.mjs, focus-runtime.log and focus-runtime.json.
+- Browser rendering and deployed artifacts are not covered by this check.
+- See [the campaign finding](2026-10-27-dependency-security-hotfix-3.md).

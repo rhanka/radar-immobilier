@@ -57,8 +57,10 @@ refusals, including attempt exhaustion, retain the caller's requestId and record
 Preparation compares normalized binding/command keys before any reservation or
 prepare debit. Foreign revocation ownership is indistinguishable from absence.
 
-Migration `0025_pw_write_persistence` follows A5's published coordinator migration
-`0024`. Its unpublished suffix may be corrected during qualification; all earlier
-SQL bytes, timestamps and journal ordering remain frozen. Qualification exercises
-fresh installation, baseline through 0023, A5 upgrade, combined upgrade, migrator
-rerun and direct SQL replay. No activation or combined-image CT-9 claim is made.
+Migration `0027_pw_write_persistence` follows the published actor quota
+`0025_artifacts_actor_quotas` and reader ticket `0026_artifacts_reader_tickets`
+migrations. Its SQL bytes are unchanged from the approved PW-A candidate.
+All earlier SQL bytes, timestamps and journal ordering remain frozen.
+Qualification exercises fresh installation, coordinator 0024 through quotas
+and tickets, the PW-D upgrade, migrator rerun and direct SQL replay.
+No activation or combined-image CT-9 claim is made.

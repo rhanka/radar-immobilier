@@ -36,6 +36,7 @@ describe("existing handler binding parity", () => {
     };
     const handlers = new Map<string, Handler>();
     const server = {
+      server: { setRequestHandler: vi.fn() },
       registerTool: (tool: string, _metadata: unknown, handler: Handler) => handlers.set(tool, handler),
     } as unknown as McpServer;
     const stderr = vi.spyOn(process.stderr, "write").mockImplementation(() => true);

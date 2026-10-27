@@ -17,10 +17,10 @@ const target = z.object({
 const basket = z.enum(["pertinent", "a_surveiller"]);
 // The negative lookahead enforces the absolute end, including a final newline.
 const reasonCode = z.string().max(128).regex(/^[A-Z0-9]+(-[A-Z0-9]+)*(?![\s\S])/).optional();
-const expectedHeadId = z.string().uuid().nullable();
+const expectedHeadId = z.string().guid().nullable();
 const expectedSelectionHeads = z.object({
-  pertinent: z.string().uuid().nullable().optional(),
-  a_surveiller: z.string().uuid().nullable().optional(),
+  pertinent: z.string().guid().nullable().optional(),
+  a_surveiller: z.string().guid().nullable().optional(),
 }).strict().optional();
 const displayedFingerprint = z.string().length(64).regex(/^[a-f0-9]{64}$/);
 const discardSchema = z.object({
@@ -84,7 +84,7 @@ export function signalFacetsRoute(deps: SignalFacetsDeps): Hono {
       }
       const body = await c.req.json().catch(() => null);
       const parsed = schemas[action].safeParse(body);
-      const key = z.string().uuid().transform((value) => value.toLowerCase()).safeParse(c.req.header("Idempotency-Key"));
+      const key = z.string().guid().transform((value) => value.toLowerCase()).safeParse(c.req.header("Idempotency-Key"));
       if (!key.success) return c.json({ error: "invalid_facet_command" }, 400);
       const previousHead = headSchemas[action].safeParse(body);
       const historical = parsed.success ? null : previousHead.success

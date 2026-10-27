@@ -29,7 +29,7 @@ data:
   POSTGRES_HOST: "radar-postgres"
   POSTGRES_PORT: "5432"
   # Dedicated OVH BHS DOCS coordinates. Credentials are bound per workload
-  # through radar-graph-s3-credentials and radar-scrape-s3-credentials.
+  # through radar-graph-s3-credentials / radar-scrape-s3-credentials in prod, radar-docs-s3-credentials in preprod.
   GRAPH_S3_ENDPOINT: "https://s3.bhs.io.cloud.ovh.net"
   GRAPH_S3_REGION: "bhs"
   GRAPH_S3_BUCKET: "radar-immobilier-docs"

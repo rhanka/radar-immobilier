@@ -15,3 +15,7 @@ export * from "./municipality.js";
 export * from "./scrape-status.js";
 export * from "./data-quality.js";
 export * from "./prospect-mark.js";
+export * from "../contracts/validation-dto.js";
+export * from "../contracts/validation-datetime.js";
+export * from "../contracts/validation-number.js";
+export * from "../contracts/validation-url.js";

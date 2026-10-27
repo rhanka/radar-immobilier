@@ -5,9 +5,14 @@
  * responses and service-worker refusal on every path including fallbacks.
  * Embedding stays unavailable. Publisher/MCP credentials never enter
  * served bytes or headers.
+ *
+ * L3 release CSP: published HTML/CSS/JS sets load as same-origin
+ * sub-resources (script-src/style-src 'self') and call H5 over the same
+ * origin (connect-src 'self'). The technical example inline script stays
+ * allowed by hash. Workers, frames and objects stay refused.
  */
 import type { Context, MiddlewareHandler } from "hono";
-import { READER_EXAMPLE_SCRIPT_HASH } from "./reader-example.js";
+import { RELEASE_CSP } from "./release-files.js";
 
 export const READER_CONTENT_HEADERS: Record<string, string> = {
   "Cache-Control": "private, no-store",
@@ -16,7 +21,7 @@ export const READER_CONTENT_HEADERS: Record<string, string> = {
   "X-Frame-Options": "DENY",
   "Cross-Origin-Opener-Policy": "same-origin",
   "Cross-Origin-Resource-Policy": "same-origin",
-  "Content-Security-Policy": `default-src 'self'; script-src 'sha256-${READER_EXAMPLE_SCRIPT_HASH}'; worker-src 'none'; frame-ancestors 'none'; object-src 'none'`,
+  "Content-Security-Policy": RELEASE_CSP,
 };
 
 export function applyReaderContentHeaders(c: Context): void {

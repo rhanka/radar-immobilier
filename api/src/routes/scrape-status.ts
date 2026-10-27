@@ -1,3 +1,4 @@
+import { contractSafeParse } from "@radar/domain";
 import { Hono } from "hono";
 import { ScrapeStatus, ScrapeStatusSource, cityMaturity } from "@radar/domain";
 import type { ObjectStore } from "../storage/object-store.js";
@@ -81,7 +82,7 @@ export function scrapeStatusRoute(store: ObjectStore): Hono {
   app.put("/api/scrape-status/:city/:source", async (c) => {
     const source = c.req.param("source");
     // Validate source is one of the known enum values
-    const sourceCheck = ScrapeStatusSource.safeParse(source);
+    const sourceCheck = contractSafeParse(ScrapeStatusSource, source);
     if (!sourceCheck.success) {
       return c.json(
         {
@@ -100,7 +101,7 @@ export function scrapeStatusRoute(store: ObjectStore): Hono {
       return c.json({ ok: false, error: "invalid-json" }, 400);
     }
 
-    const parsed = ScrapeStatus.safeParse(body);
+    const parsed = contractSafeParse(ScrapeStatus, body);
     if (!parsed.success) {
       return c.json(
         { ok: false, error: "validation-failed", detail: parsed.error.format() },

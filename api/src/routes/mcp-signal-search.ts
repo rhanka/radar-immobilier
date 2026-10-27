@@ -1,3 +1,4 @@
+import { contractInteger } from "@radar/domain";
 /** Exact H4 facade. The integrator must explicitly enable this server-only binding. */
 import { Hono } from "hono";
 import { z } from "zod";
@@ -11,12 +12,12 @@ import type { DiscardedSignalsPort } from "../services/graph/discarded-signals.j
 import type { LegacyRetirementState } from "../services/facets/legacy-retirement.js";
 
 export const MCP_SIGNAL_SEARCH_PATH = "/api/v1/mcp/facets/signals/search";
-export const McpWorkspaceId = z.string().uuid().transform((value) => value.toLowerCase());
+export const McpWorkspaceId = z.string().guid().transform((value) => value.toLowerCase());
 const city = z.string().min(1).max(128).regex(/^[a-z0-9]+(?:-+[a-z0-9]+)*$/);
 export const McpSignalSearchInput = z.object({
   city, etape: z.string().optional(), query: z.string().optional(),
   showDiscarded: z.boolean().default(false),
-  limit: z.number().int().min(1).max(100).default(20),
+  limit: contractInteger().min(1).max(100).default(20),
   workspaceId: McpWorkspaceId.optional(),
 }).strict();
 export type McpSignalSearchArgs = z.infer<typeof McpSignalSearchInput>;

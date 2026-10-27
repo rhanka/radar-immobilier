@@ -16,9 +16,9 @@ export async function validateTicketForExchange(
   authority: AuthorityReader,
 ): Promise<PreviewTicket | null> {
   try {
-    const version = await authority.getAuthorizationVersion(ticket.artifactId);
+    const version = await authority.getAuthorizationVersion(ticket.artifactId, ticket.readerSub, ticket.releaseId);
     if (!version) return null;
-    const release = await authority.getRelease(ticket.artifactId);
+    const release = await authority.getRelease(ticket.artifactId, ticket.releaseId);
     if (!release || release.artifactId !== ticket.artifactId || release.releaseId !== ticket.releaseId) return null;
     const profile = await authority.getProfile(ticket.artifactId);
     if (!profile || profile.name !== ticket.profileName) return null;
@@ -27,7 +27,7 @@ export async function validateTicketForExchange(
     const rights = await authority.getRights(ticket.readerSub, ticket.artifactId);
     if (!rights || !rights.approved) return null;
     if (rights.readerSub !== ticket.readerSub || rights.artifactId !== ticket.artifactId) return null;
-    if (await authority.getAuthorizationVersion(ticket.artifactId) !== version) return null;
+    if (await authority.getAuthorizationVersion(ticket.artifactId, ticket.readerSub, ticket.releaseId) !== version) return null;
     return ticket;
   } catch {
     return null;

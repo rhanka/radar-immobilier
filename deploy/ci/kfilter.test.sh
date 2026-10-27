@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+# Golden fixtures plus an independent awk oracle over the actual preprod render.
+set -euo pipefail
+HERE="$(cd "$(dirname "$0")" && pwd)"
+T="$(mktemp -d)"
+trap 'rm -rf "$T"' EXIT
+PASS=0
+check() {
+  if ! cmp -s "$T/expected" "$T/actual"; then
+    echo "FAIL: $1" >&2
+    diff -u "$T/expected" "$T/actual" >&2 || true
+    exit 1
+  fi
+  PASS=$((PASS + 1)); echo "ok: $1"
+}
+# Escaped JSON lines make intentional trailing whitespace visible in the fixture.
+jq -r '.[]' "$HERE/fixtures/kfilter/render.json" >"$T/lf"
+awk '{ printf "%s\r\n", $0 }' "$T/lf" >"$T/crlf"
+awk '{ printf "%s\r", $0 }' "$T/lf" >"$T/cr"
+awk '{ printf "%s%s", sep, $0; sep="\n" }' "$T/lf" >"$T/no-trailing-blank-line"
+for variant in lf crlf cr no-trailing-blank-line; do
+  while IFS= read -r test_case; do
+    mapfile -t flags < <(jq -r '.flags // [] | .[]' <<<"$test_case")
+    mapfile -t args < <(jq -r '.args[]' <<<"$test_case")
+    jq -j '.output' <<<"$test_case" >"$T/expected"
+    bash "$HERE/kfilter.sh" "${flags[@]}" "$T/$variant" "${args[@]}" >"$T/actual"
+    check "$variant: $(jq -r '.label' <<<"$test_case")"
+  done < <(jq -c '.[]' "$HERE/fixtures/kfilter/cases.json")
+done
+
+# A selected document ends directly at its name field: no separator and no LF.
+jq -j 'join("\n")' "$HERE/fixtures/kfilter/no-final-lf.json" >"$T/no-final-lf"
+test "$(tail -c 1 "$T/no-final-lf")" = f
+test "$(tail -n 1 "$T/no-final-lf")" = '  name: at-eof'
+PASS=$((PASS + 1)); echo 'ok: no-LF fixture ends at the selected name field'
+cat "$T/no-final-lf" >"$T/expected"
+printf '\n' >>"$T/expected"
+for mode in kind exact prefix; do
+  case "$mode" in
+    kind) args=("$T/no-final-lf" ConfigMap) ;;
+    exact) args=("$T/no-final-lf" ConfigMap at-eof) ;;
+    prefix) args=(--name-prefix at- "$T/no-final-lf" ConfigMap) ;;
+  esac
+  bash "$HERE/kfilter.sh" "${args[@]}" >"$T/actual"
+  check "selected document without final LF ($mode)"
+done
+printf 'at-eof\n' >"$T/expected"
+bash "$HERE/kfilter.sh" --names "$T/no-final-lf" ConfigMap >"$T/actual"
+check 'selected name without final LF'
+
+# Long literal lines place 2/3/4-byte characters across jq's 4096-byte buffers.
+while IFS= read -r fixture; do
+  width="$(jq -r '.asciiBytes' <<<"$fixture")"
+  text="$(jq -r '.text' <<<"$fixture")"
+  printf -v padding '%*s' "$((width - 4))" ''
+  printf 'apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: utf8\ndata:\n  text: |\n    %s%s\n' \
+    "${padding// /x}" "$text" >"$T/expected"
+  bash "$HERE/kfilter.sh" "$T/expected" ConfigMap utf8 >"$T/actual"
+  check "UTF-8 literal at line byte $width: $text"
+done < <(jq -c '.[]' "$HERE/fixtures/kfilter/utf8-boundaries.json")
+
+# Invalid bytes after a matching document must fail before emitting ANY bytes,
+# including in names-only mode and when the selection itself has no match.
+while IFS= read -r fixture; do
+  label="$(jq -r '.label' <<<"$fixture")"
+  printf 'kind: ConfigMap\nmetadata:\n  name: utf8\n---\nkind: Service\ndata:\n  text: ' >"$T/invalid"
+  printf '%b' "$(jq -r '.octets' <<<"$fixture")" >>"$T/invalid"
+  for mode in selected absent names; do
+    case "$mode" in
+      selected) args=("$T/invalid" ConfigMap utf8) ;;
+      absent) args=("$T/invalid" Deployment) ;;
+      names) args=(--names "$T/invalid" ConfigMap) ;;
+    esac
+    if bash "$HERE/kfilter.sh" "${args[@]}" >"$T/actual" 2>"$T/error"; then
+      echo "FAIL: accepted $label ($mode)" >&2; exit 1
+    fi
+    test ! -s "$T/actual"
+    grep -q 'UTF-8' "$T/error"
+    PASS=$((PASS + 1)); echo "ok: rejects $label ($mode) without output"
+  done
+done < <(jq -c '.[]' "$HERE/fixtures/kfilter/invalid-utf8.json")
+
+# Kustomize's canonical LF output lets awk select full documents independently.
+kubectl kustomize --load-restrictor LoadRestrictionsNone "$HERE/../overlays/preprod" >"$T/render"
+while read -r kind mode name; do
+  pattern="$name"
+  flags=()
+  args=("$kind")
+  case "$mode" in
+    prefix) pattern="$name.*"; flags=(--name-prefix "$name") ;;
+    exact) args+=("$name") ;;
+    all) pattern='.*' ;;
+  esac
+  awk -v kind="$kind" -v wanted="$pattern" '
+    BEGIN { RS="\n---\n"; ORS="" }
+    $0 ~ ("(^|\n)kind: " kind "(\n|$)") &&
+    $0 ~ ("(^|\n)  name: " wanted "(\n|$)") {
+      sub(/\n+$/, ""); if (n++) print "---\n"; print $0 "\n"
+    }' "$T/render" >"$T/expected"
+  test -s "$T/expected"
+  bash "$HERE/kfilter.sh" "${flags[@]}" "$T/render" "${args[@]}" >"$T/actual"
+  check "preprod: $kind $mode $name (whole documents)"
+done <<'QUERIES'
+ConfigMap prefix radar-ui-nginx
+ConfigMap exact radar-api
+ConfigMap exact immo-mcp-config
+ConfigMap all unused
+Deployment exact radar-api
+Deployment exact radar-ui
+CronJob exact radar-consistency-snapshot
+QUERIES
+
+: >"$T/empty"
+: >"$T/expected"
+bash "$HERE/kfilter.sh" "$T/empty" ConfigMap >"$T/actual"
+check 'empty render emits no bytes'
+for invalid in unknown missing-prefix missing-args missing-file; do
+  case "$invalid" in
+    unknown) args=(--unknown) ;;
+    missing-prefix) args=(--name-prefix) ;;
+    missing-args) args=("$T/empty") ;;
+    missing-file) args=("$T/not-found" ConfigMap) ;;
+  esac
+  if bash "$HERE/kfilter.sh" "${args[@]}" >"$T/actual" 2>"$T/error"; then
+    echo "FAIL: accepted $invalid" >&2; exit 1
+  fi
+  test -s "$T/error"
+  PASS=$((PASS + 1)); echo "ok: rejects $invalid"
+done
+echo "PASS=$PASS FAIL=0"

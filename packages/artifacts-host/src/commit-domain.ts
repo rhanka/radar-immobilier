@@ -3,13 +3,16 @@ import type pg from "pg";
 import { createPostgresArtifactStore, createPostgresLegacyArtifactRecords } from "@sentropic/artifacts/adapters/postgres";
 import { createPostgresCommitExecutor } from "@sentropic/artifacts/adapters/postgres-commit";
 import { createHttpArtifactApp, projectArtifactHttpOutcome, type HttpAppDeps } from "@sentropic/artifacts/http";
-import { createRadarKeyDerivation } from "@sentropic/artifacts/mcp-core";
+import { ArtifactProfileInputError, createRadarKeyDerivation } from "@sentropic/artifacts/mcp-core";
 import { createLifecycleService } from "@sentropic/artifacts/server/lifecycle";
 import { createPostgresClaimGuardedRefs } from "@sentropic/artifacts/server/gc";
 import { createPostgresPublicationUnitWriter, createPublicationService } from "@sentropic/artifacts/server/publication";
-import type { ArtifactInvocationContext, FinalizeTxClient } from "@sentropic/artifacts/server/commit-contract";
-import { classifyArtifactFailure } from "@sentropic/artifacts/server/outcome-contract";
+import { CommitQuarantineError, type ArtifactInvocationContext, type FinalizeTxClient } from "@sentropic/artifacts/server/commit-contract";
+import { ArtifactOperationError, classifyArtifactFailure } from "@sentropic/artifacts/server/outcome-contract";
+import { assertArtifactReplayMigration } from "@sentropic/artifacts/server/idempotency";
 import { mapHostError, normalizeHostOutcome } from "./host-outcome.js";
+import { rateLimitedOutcome, reserveArtifactAttempt } from "./attempt-admission.js";
+import { replayPublication } from "./publication-replay.js";
 
 export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | "coordinator"> & {
   pool: pg.Pool; scope: string; blobs: HttpAppDeps["publication"]["blobs"];
@@ -20,6 +23,7 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
   const publication = createPublicationService({ state: store, blobs, intents: store });
   const keyDomain = new AsyncLocalStorage<ReturnType<typeof createRadarKeyDerivation>>();
   const artifact = new AsyncLocalStorage<string>();
+  const legacyRecords = createPostgresLegacyArtifactRecords(pool);
   const lock = (table: string, column: string) => async (client: FinalizeTxClient) => {
     await client.query(`SELECT ${column} FROM artifacts.${table} WHERE ${column} = $1 FOR UPDATE`,
       [artifact.getStore()]);
@@ -30,7 +34,7 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
       if (!binding) throw new Error("artifact key domain unavailable");
       return binding.derive(input);
     } },
-    legacyRecords: createPostgresLegacyArtifactRecords(pool),
+    legacyRecords,
     ensureHost: {
       async readPolicyRevision() {
         const result = await pool.query<{ revision: string }>(
@@ -60,10 +64,48 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
       const binding = createRadarKeyDerivation({ storageScopeId: scope, actorIds: actors.rows.map((row) => row.sub) });
       const body = request.body as { artifactId?: string } | undefined;
       return normalizeHostOutcome(await keyDomain.run(binding,
-        () => artifact.run(body?.artifactId ?? "", () => app.execute(request, invocation))));
+        () => artifact.run(body?.artifactId ?? "", async () => {
+          const write = request.method === "POST" && ["/ensure", "/publish"].includes(request.path);
+          if (write && invocation.actorId && invocation.storageScopeId === scope &&
+            request.actorId === invocation.actorId &&
+            (request.storageScopeId === undefined || request.storageScopeId === scope)) {
+            const args = { ...request.body as Record<string, unknown> };
+            if (args.storageScopeId !== undefined && args.storageScopeId !== scope) return app.execute(request, invocation);
+            delete args.storageScopeId;
+            const capability = `artifacts_${request.path.slice(1)}`;
+            const normalized = profile.validate(capability, args, request.idempotencyKey);
+            const command = profile.validators.normalizeCommand({ capability, args,
+              authority: { actorId: invocation.actorId, storageScopeId: scope }, derivation: binding,
+              ...(request.idempotencyKey === undefined ? {} : { envelopeKey: request.idempotencyKey }),
+            });
+            await assertArtifactReplayMigration(legacyRecords, command, invocation, String(normalized.idempotencyKey));
+            const existing = await pool.query(
+              "SELECT 1 FROM artifacts.operation_receipts WHERE storage_scope_id=$1 AND internal_key=$2",
+              [scope, command.identity.internalKey]);
+            if (existing.rows.length > 0) {
+              // This is a presence probe only. The coordinator rereads the receipt
+              // under locks and revalidates current rights, without reserving again.
+              if (command.operation === "publish") return replayPublication({ pool, coordinator, command, invocation,
+                ...(options.publicationUrls ? { publicationUrls: options.publicationUrls } : {}) });
+              return app.execute(request, invocation);
+            }
+            if (!await reserveArtifactAttempt(pool, scope, invocation.actorId)) {
+              return rateLimitedOutcome(invocation.invocationId, command.operation);
+            }
+          }
+          return app.execute(request, invocation);
+        })));
     } catch (cause) {
-      return { ok: false, failure: classifyArtifactFailure(cause, { invocationId: invocation.invocationId,
-        operation: request.path.slice(1), phase: "dispatch", commitState: "not_committed" }, mapHostError) };
+      const failure = classifyArtifactFailure(cause, { invocationId: invocation.invocationId,
+        operation: request.path.slice(1), phase: "dispatch", commitState: "not_committed" },
+      (error) => error instanceof ArtifactProfileInputError ? new ArtifactOperationError(error.category) : mapHostError(error));
+      if (cause instanceof CommitQuarantineError) {
+        const quarantine = { ...failure, kind: "operational" as const, category: "provider_unavailable" as const,
+          variant: "legacy_quarantine", httpStatus: 503, publicCode: "capability_unavailable", retriable: false };
+        Object.defineProperty(quarantine, "cause", { value: cause });
+        return { ok: false, failure: quarantine };
+      }
+      return { ok: false, failure };
     }
   };
   return { app: { ...app, execute, handle: async (request, invocation) =>

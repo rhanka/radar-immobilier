@@ -43,6 +43,7 @@ import {
 } from "../artifacts/strict-receiver.js";
 import type { Database } from "../db/client.js";
 import { accountUsers, accountInvitations } from "../db/schema.js";
+import { readerLoginReturn } from "../artifacts/reader-login-return.js";
 
 /** Transient cookie holding the per-login flow state until the callback. */
 const FLOW_COOKIE_NAME = "radar_oauth_flow";
@@ -198,7 +199,8 @@ export function authRoute(
       return c.json({ error: "idp_unreachable", detail: String(e) }, 502);
     }
 
-    const flow = createAuthFlowState();
+    const returnTo = readerLoginReturn(c.req.query("returnTo"), auth.appBaseUrl);
+    const flow = { ...createAuthFlowState(), ...(returnTo ? { returnTo } : {}) };
     // Stash the flow state (state/nonce/PKCE verifier) in a short-lived,
     // HttpOnly cookie; it is consumed and cleared at the callback.
     setCookie(c, FLOW_COOKIE_NAME, JSON.stringify(flow), {
@@ -265,7 +267,7 @@ export function authRoute(
     // The flow cookie is single-use regardless of outcome.
     deleteCookie(c, FLOW_COOKIE_NAME, { path: "/" });
 
-    let flow: { state: string; nonce: string; codeVerifier: string };
+    let flow: { state: string; nonce: string; codeVerifier: string; returnTo?: string };
     try {
       flow = JSON.parse(flowRaw);
     } catch {
@@ -419,7 +421,8 @@ export function authRoute(
 
     // Approved user (or DB-less fail-open path): set the session and land home.
     await mintSessionCookie(c, sessionClaims);
-    return c.redirect(auth.appBaseUrl || "/", 302);
+    const returnTo = readerLoginReturn(flow.returnTo, auth.appBaseUrl);
+    return c.redirect(returnTo ? new URL(returnTo, auth.appBaseUrl).href : auth.appBaseUrl || "/", 302);
   });
 
   app.get("/api/v1/auth/logout", (c) => {
