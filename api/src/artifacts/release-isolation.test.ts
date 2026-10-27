@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { createHash } from "node:crypto";
 import { makeApp, fixtureReaderDeps, GRANT_SECRET, HOST, ISSUER, SESSION_SECRET, credentials } from "./reader-test-fixture.js";
 import { createReaderContentApp } from "./content-serve.js";
 import { mintGrant } from "./preview-grant.js";
@@ -47,6 +48,19 @@ describe("published release isolation", () => {
       headers: { host: HOST, cookie: await credentials("reader-alice", "s1", 1000) } });
     expect(response.status).toBe(404);
     expect(await response.text()).not.toContain("publisher-secret");
+  });
+  it("should authorize the served inline bytes after resource rewriting", async () => {
+    const app = createReaderContentApp({ ...fixtureReaderDeps(), contentBase: "pages.example.test",
+      grantSecret: GRANT_SECRET, sessionSecret: SESSION_SECRET, issuer: ISSUER, now: () => 1000,
+      releaseFiles: { getFile: async () => ({ body: `<script>const template='<img src="/logo.png">';</script>`, contentType: "text/html" }) } });
+    const response = await app.request(`https://${HOST}/?grant=${await token()}`, {
+      headers: { host: HOST, cookie: await credentials("reader-alice", "s1", 1000) } });
+    expect(response.status).toBe(200);
+    const html = await response.text();
+    const script = html.match(/<script>([\s\S]*?)<\/script>/)![1]!;
+    expect(script).toContain("?grant=");
+    expect(response.headers.get("content-security-policy"))
+      .toContain(`'sha256-${createHash("sha256").update(script).digest("base64")}'`);
   });
   it("should reject duplicate operation parameters", async () => {
     const response = await makeApp().request(`https://${HOST}/__reader/api/baskets.context.v1?workspaceId=x&workspaceId=y&grant=${await token()}`, {
