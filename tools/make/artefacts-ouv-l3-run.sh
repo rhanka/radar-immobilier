@@ -25,7 +25,9 @@ source tools/make/base-api-compose.sh
 source tools/make/base-api-guards.sh
 ACTION=test-api
 write_compose
-git --git-dir=tmp/sol-l3.git --work-tree=. ls-files --cached --others --exclude-standard -- \
+GIT=(git)
+if [[ -d $ROOT/tmp/sol-l3.git ]]; then GIT=(git --git-dir="$ROOT/tmp/sol-l3.git" --work-tree="$ROOT"); fi
+"${GIT[@]}" ls-files --cached --others --exclude-standard -- \
   api packages ui tools deploy radar/ontology package.json package-lock.json \
   tsconfig.base.json eslint.config.js .security > "$RUN_DIR/candidates"
 : > "$RUN_DIR/paths"
@@ -36,7 +38,7 @@ while IFS= read -r path; do
 done < "$RUN_DIR/candidates"
 tar --verbatim-files-from --no-recursion -cf "$RUN_DIR/source.tar" -T "$RUN_DIR/paths"
 sha256sum "$RUN_DIR/source.tar" > "$LOG_DIR/source.sha256"
-git --git-dir=tmp/sol-l3.git rev-parse HEAD > "$LOG_DIR/candidate-sha.txt"
+"${GIT[@]}" rev-parse HEAD > "$LOG_DIR/candidate-sha.txt"
 mkdir -p "$HOME/.cache/radar-a5-npm"
 cat > "$RUN_DIR/cache.yml" <<YAML
 services:
