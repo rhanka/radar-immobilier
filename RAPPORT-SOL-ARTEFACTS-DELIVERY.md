@@ -1,4 +1,4 @@
-VERDICT: À CORRIGER
+VERDICT INITIAL (avant les corrections consignées plus bas) : À CORRIGER
 
 1. **BLOQUANT — La façade appelée par `search_signals` reste désactivée dans le véritable démarrage API.** Fichiers : `api/src/index.ts:97`, `api/src/routes/mcp-signal-search.ts:71`, `packages/immo-mcp/src/data-source.ts:235`.
 
@@ -109,6 +109,9 @@ sans corps ni trailer. Le SHA final est fourni dans la réponse de livraison.
 
 ## Corrections seconde revue livraison
 
+Qualification locale complète validée le 26 octobre 2026 à 22:11 UTC :
+API 4159 réussis / 76 ignorés, MCP 406/406, Q1/Q2/acceptance 69/69, zéro échec.
+
 Reprise de `aadc52919e6e02c1c19c0db070273521306de6f1`, après lecture intégrale
 des revues `astra-artefacts-delivery-r2a.md` et `-r2b.md`. Le bilan API de la
 première correction est invalidé et rectifié ci-dessus.
@@ -124,7 +127,7 @@ ciblées n'annulaient pas cette perte. Le fichier
 La cible reproductible utilise la sélection API de la CI, sans filtre de fichier,
 avec le même fichier Vitest, un worker et `LOT_MIGRATION_DB_TEST=1` explicite.
 Elle exécute les migrations et utilise PostgreSQL et S3 jetables. Son contrôle
-final exige au moins 4158 réussites API et au plus 76 tests ignorés, ainsi que
+final exige au moins 4159 réussites API et au plus 76 tests ignorés, ainsi que
 69 réussites Q1/Q2/acceptance et 406 MCP sans test ignoré. Les 69 cas provider
 sont activés séparément par `ARTIFACTS_PROVIDER_ACCEPTANCE=1` ; les sept autres
 cas ignorés de la référence nécessitent des fixtures particulières.
@@ -164,34 +167,91 @@ responsable IdP, réconciliation des Deployments et reçu lié aux digests servi
 Ces conditions ne sont pas démontrées par un IdP synthétique ni par le rendu
 des manifests ; aucun accès aux secrets, cluster ou déploiement réel effectué.
 
-**Qualification finale : bloquée par une pile étrangère, non validée.**
+**Qualification finale après libération de la machine.**
 La première tentative `20261026T202520-4` a réussi les migrations, les assertions
 des manifests et le typecheck des workspaces, puis s'est arrêtée au lint :
 `no-unsafe-finally` dans l'export des preuves du nouveau test. Le commit
 `ba0e2e4b` corrige ce défaut sans désactiver la règle. Aucun test API complet
 n'a été exécuté par cette tentative ; elle ne remplace pas la campagne invalide.
 
-Le relancement `tmp/delivery-evidence/20261026T203509-4` attend depuis 20:35 UTC
-le 26 octobre 2026. Au dernier constat, après plus de 30 minutes d'attente,
-`radar-test-api-paniers-pwa-postgres-1` et `radar-test-api-paniers-pwa-minio-1`
-restent actifs, malgré l'arrêt du conteneur API de cette autre campagne.
-Ils n'ont pas été arrêtés ni modifiés. Le conducteur `i-cond` a reçu le
-signalement via h2a, sans réponse au dernier relevé. Le lanceur reste actif :
-il prendra son instantané des sources seulement après libération de la pile,
-exécutera la cible complète, puis nettoiera son seul projet avec
-`down -v --remove-orphans`.
+Le conducteur a ensuite libéré la pile PW-A. La nouvelle campagne a démarré
+immédiatement le 26 octobre 2026 à 21:13 UTC, dans
+`tmp/delivery-evidence/20261026T211358-4`, sur les sources du commit
+`55d42538fb8f114e2bcb078ac2a91aca94fda55f`. Son `command.txt` conserve la
+commande intégrale, dont l'activation DB explicite ; `source.tar`,
+`source.sha256` et `candidate-sha.txt` identifient le candidat exécuté.
+Le typecheck et le lint corrigé sont passés avant la suite API complète.
+La sonde exacte repasse ses trois états dans cette campagne ;
+`probe-reconciliation.json` rapproche ses réponses réelles et démontre
+que l'ancienne assertion de workspace renvoie faux sur un succès MCP valide.
+La suspension et la révocation refusent sans signaux ; la restauration réussit.
+
+La campagne `211358-4` a récupéré les 615 tests, mais a terminé avec 4158 réussis,
+76 ignorés et un échec dans `artifacts-publication.spec.ts` : un des cinq appels
+simultanés recevait 503. Le diagnostic reproduit deux échecs sur douze publications
+dans `20261026T212627-4`. La trace `20261026T213313-4/publication-proof.log`
+montre un GET S3 HTTP 200, annoncé à six octets, interrompu avec `complete=false`
+pendant les PUT sur la même clé ; le flux checksum reste ensuite en attente
+jusqu'au délai `artifact_s3_timeout`, projeté en 503 `capability_unavailable`.
+Les résolutions DNS restent rapides.
+
+L'exception de périmètre `ARTEFACTSDLV-EX1` couvre le fixture partagé
+`api/tests/artifacts-blob-store.helpers.ts` : ses écritures sur un même objet
+sont exclusives face aux GET/PUT/DELETE pour préserver l'atomicité S3 dans S3mock.
+Les lectures restent parallèles et les clés distinctes indépendantes ; les cinq appels métier restent
+concurrents. Les assertions de statut, d'unicité, d'octets, de dérive et de
+validation des préfixes sont conservées. Le seuil de cinq secondes est conservé.
+Le code de production et les dépendances ne changent pas.
+
+La preuve `20261026T213527-4/publication-stress.json` confirme 12 publications
+à cinq appels, soit 60/60 succès, une seule release par itération et des octets
+vérifiés. La suite de publication inchangée passe 3/3 dans ce même rejeu.
+La campagne complète `20261026T213644-4` a confirmé la publication, puis détecté
+que la première queue sérialisait aussi les lectures du test de corps S3 bloqués.
+Le correctif `01b9cd9f` rétablit les lectures parallèles. Le rejeu
+`20261026T214701-4` confirme à nouveau 60/60 publications et 4/4 tests de
+publication/timeout, dont cinq requêtes simultanées et la fermeture des sockets.
+La campagne `20261026T214802-4` passe ces deux suites, mais atteint le délai
+de 20 secondes dans le cas de purge S3 valide de `artifacts-cleanup-regression.spec.ts`.
+Ce test utilise directement l'adaptateur, sans la fixture modifiée. Trois rejeux
+inchangés passent 36/36 dans `20261026T220111-4` ; l'incident reste conservé,
+sans augmentation du délai, retrait de cas ni classement en échec accepté.
+La qualification complète est relancée dans `20261026T220151-4` sur le même
+commit `01b9cd9f3e6286a84d68a2cd4a1e0720831bc5e0`.
+Les huit cas ajoutés depuis la référence sont les quatre cas de démarrage,
+le contrôle du rôle SQL et les trois cas de sonde.
 
 | Vérification | Preuve disponible |
 |---|---|
-| Sonde exacte, vrai démarrage API, trois epochs et refus | 3/3 dans le rejeu ciblé ; fichiers de jetons exclus des exports |
-| Migrations, typecheck des workspaces | Réussis dans `20261026T202520-4` |
+| Sonde exacte, vrai démarrage API, trois epochs et refus | 3/3 dans la campagne complète ; fichiers de jetons exclus des exports |
+| Migrations, typecheck des workspaces, lint final corrigé | Réussis dans `20261026T220151-4` |
 | Kustomize base/préprod, dry-run client, isolation auth/H3, assertions YAML | Réussis |
-| Lint final corrigé, API complète avec DB, MCP, Q1/Q2/acceptance | Relancement en attente ; aucun résultat final revendiqué |
-| Retour aux 76 ignorés et récupération des 615 tests | Exigés par le lanceur, encore à démontrer |
+| API complète avec DB | 4159 réussis, 76 ignorés, zéro échec |
+| MCP hors service E2E, sélection habituelle | 406/406, aucune ignorée |
+| Q1 / Q2 / acceptance, activation explicite | 31/31, 32/32, 6/6 ; aucune ignorée |
+| Retour aux 76 ignorés et récupération des 615 tests | Rapprochement assertion par assertion réussi |
 
-Responsable du déblocage : propriétaire de la pile PW-A, coordination `i-cond`.
-Acceptation restante : libérer cette pile depuis son propre lanceur, attendre
-le statut 0 et `qualification.json` du relancement, rapprocher ses assertions
-API de `20261026T161759-6/api-results.json`, confirmer tous les anciens tests
-réussis et les sept nouveaux cas, puis mettre à jour ce bilan avec les comptes
-API/MCP/provider et le nettoyage. Aucun push, merge ou déploiement effectué.
+`20261026T220151-4/qualification.json` valide les trois suites ; le lancement
+termine avec statut 0 et résultat `PASS`. Le rapprochement conserve le fichier,
+l'index et le nom complet de chaque assertion, y compris les noms dupliqués :
+
+| Campagne API | Réussis | Ignorés | Échecs |
+|---|---:|---:|---:|
+| Référence `20261026T161759-6` | 4151 | 76 | 0 |
+| Ancienne campagne invalidée `20261026T170042-4` | 3536 | 695 | 0 |
+| Finale `20261026T220151-4` | 4159 | 76 | 0 |
+
+`coverage-comparison.json` confirme les 615 réussites perdues toutes restaurées,
+les 619 anciens ignorés désormais exécutés (615 et quatre démarrages), les huit
+nouveaux cas et aucun ancien succès perdu. L'ensemble des 76 ignorés de référence
+est identique. `probe-reconciliation.json` confirme les signaux identiques aux
+deux frontières, l'ancienne assertion fausse, les refus sans signaux et la
+restauration réussie.
+
+Sources qualifiées : `01b9cd9f3e6286a84d68a2cd4a1e0720831bc5e0` ; archive
+SHA-256 `9ff3c3cadc3e311cc91d4814e19c9f13f941d05043e5f9cbab2d085caef1a132`.
+Seuls ce rapport et le plan changent après cette qualification. Le nettoyage
+`down -v --remove-orphans` est terminé ; aucun conteneur, volume ou réseau du
+projet ne subsiste. L'acceptation locale demandée est clôturée. Le gate opérateur
+préprod décrit plus haut reste requis avant livraison réelle. Aucun push, merge
+ou déploiement effectué.
