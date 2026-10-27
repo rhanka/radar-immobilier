@@ -70,6 +70,7 @@ isolation, current authorization, transactional quotas and replay safety.
   - [x] Implemented: `test(host): cover actor quota reservations`.
   - [x] Implemented: `test(mcp): cover general claims and forged fields`.
   - [x] Implemented: `test(api): add general artifact admission harness`.
+  - [x] Implemented: `test(api): cover general host admission on PostgreSQL`.
 - [ ] **Lot 4 — Delivery**
   - [ ] Atomic commits, bundle audit and French results report.
   - [ ] Confirm own Docker project has no containers, networks or volumes.
