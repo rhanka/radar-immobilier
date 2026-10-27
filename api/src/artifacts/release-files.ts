@@ -14,6 +14,7 @@
  */
 import { READER_EXAMPLE_SCRIPT_HASH } from "./reader-example.js";
 import { createHash } from "node:crypto";
+import { parse, type DefaultTreeAdapterMap } from "parse5";
 
 export interface ReleaseFile {
   readonly body: string | Uint8Array;
@@ -35,10 +36,18 @@ export const RELEASE_CSP =
 
 /** Authorize only the inline bytes of this immutable release, never unsafe-inline. */
 export function releaseCspForHtml(html: string): string {
-  const hashes = (tag: string) => [...normalizeReleaseHtml(html).matchAll(new RegExp(`<${tag}\\b[^>]*>([\\s\\S]*?)<\\/${tag}\\s*>`, "gi"))]
-    .map((match) => `'sha256-${createHash("sha256").update(match[1]!).digest("base64")}'`).join(" ");
-  return RELEASE_CSP.replace("script-src 'self'", `script-src 'self' ${hashes("script")}`)
-    .replace("style-src 'self'", `style-src 'self' ${hashes("style")}`);
+  const hashes = { script: [] as string[], style: [] as string[] };
+  const visit = (node: DefaultTreeAdapterMap["node"]): void => {
+    if ("tagName" in node && (node.tagName === "script" || node.tagName === "style")) {
+      const text = node.childNodes.map((child) => "value" in child ? child.value : "").join("");
+      hashes[node.tagName].push(`'sha256-${createHash("sha256").update(text).digest("base64")}'`);
+    }
+    if ("childNodes" in node) node.childNodes.forEach(visit);
+    if ("content" in node) visit(node.content);
+  };
+  visit(parse(normalizeReleaseHtml(html)));
+  return RELEASE_CSP.replace("script-src 'self'", `script-src 'self' ${hashes.script.join(" ")}`)
+    .replace("style-src 'self'", `style-src 'self' ${hashes.style.join(" ")}`);
 }
 
 const CONTENT_TYPES: Record<string, string> = {
