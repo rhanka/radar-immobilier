@@ -1,3 +1,4 @@
+import { contractUrl } from "@radar/domain";
 import { contractSafeParse } from "@radar/domain";
 import { z } from "zod";
 
@@ -202,7 +203,7 @@ export function parseReglementDocument(text: string): ReglementDocumentT {
 /** One bylaw detail-page entry parsed from the public HTML listing. */
 export const ReglementListingEntry = z.object({
   /** Absolute detail-page URL. */
-  url: z.string().url(),
+  url: contractUrl(),
   /** Bylaw number extracted from the slug (e.g. "150-51"), or REGLEMENT_NON_DISPONIBLE. */
   numero: z.string().min(1),
   /** Human-readable slug-derived title fragment (verbatim path tail). */

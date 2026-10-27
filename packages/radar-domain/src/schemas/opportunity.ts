@@ -1,3 +1,4 @@
+import { contractUrl } from "../contracts/validation-url.js";
 import { z } from "zod";
 import { Mode, Confidence } from "./common.js";
 import { AxesMap } from "./score.js";
@@ -18,7 +19,7 @@ export const EvidenceItem = z
     phase: Phase,
     sourceId: z.string().min(1),
     label: z.string().min(1),
-    url: z.string().url().optional(),
+    url: contractUrl().optional(),
     date: z.string().min(4),
     obtentionMode: z.enum([
       "download",
