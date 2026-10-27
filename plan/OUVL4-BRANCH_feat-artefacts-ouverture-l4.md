@@ -4,7 +4,7 @@
 - [x] Deliver L4 from base `c189c188640d2495e00011023d0875c3ee472759` for approved-account publication and published-page basket reads.
 
 ## Scope / Guardrails
-- [x] Follow the accepted opening design and L1/L2/L3 contracts; no application changes.
+- [x] Follow the accepted opening design and L1/L2/L3 contracts; application changes limited to owner-requested Astra isolation corrections under OUVL4-EX2.
 - [x] Work only in `tmp/artefacts-ouv-l4`, branch `feat/artefacts-ouverture-l4`.
 - [x] No cluster access, push, Python, environment-file reads or secret values.
 - [x] Make-only execution with `ENV` last; standalone ignored Makefile avoids root `.env` inclusion.
@@ -13,17 +13,18 @@
 
 ## Branch Scope Boundaries (MANDATORY)
 - [x] **Allowed Paths (implementation scope)**: `deploy/overlays/preprod/**`, `deploy/ci/*h3*`, `docs/runbooks/ARTIFACTS_PREPROD_ACTIVATION.md`, this plan; MCP packaging paths under exception OUVL4-EX1.
-- [x] **Forbidden Paths**: root `Makefile`, `docker-compose*.yml`, `rules/**`, agent bootstrap files, other plans, `.track/**`, application code, production manifests outside OUVL4-EX1 packaging.
+- [x] **Forbidden Paths**: root `Makefile`, `docker-compose*.yml`, `rules/**`, agent bootstrap files, other plans, `.track/**`, application code outside OUVL4-EX2, production manifests outside OUVL4-EX1 packaging.
 - [x] **Conditional Paths**: `deploy/k8s/**` only for a demonstrated blocker; prefer preprod patches.
 - [x] **Exception process**: record rationale, impact and rollback here before any exception.
 
 ## Feedback Loop
 - [x] OUVL4-EX2: owner-requested Astra corrections allow `api/src/artifacts/content-{host,app}.ts`, their tests and `deploy/ci/check-preprod-auth-isolation.test.sh`. Impact: reserve every content-domain host before app authentication and repair the moved-import mutation. Rollback: revert the correction commits; no production manifest change.
-- [ ] Astra host isolation, CI fixture, independent rollback closure and application-time image pins verified.
+- [x] Astra host isolation, CI fixture, independent rollback closure and application-time image pins verified.
 - [x] Astra CI import mutation now removes the MCP directory base; all 25 auth-isolation checks pass with the missing-ConfigMap diagnostic retained.
 - [x] Astra wildcard isolation reserves malformed content labels before app auth and refuses app/admin/auth/API paths; foreign hosts retain normal routing. Seven focused API suites pass (234 tests), after the baseline failed the new regressions.
 - [x] Astra rollback attempts both restarts before readiness waits, aggregates failures and verifies `off` in both ConfigMaps and every API/MCP pod; 10 operator checks pass, including absent Ingress, API readiness failure and stale runtime refusal.
 - [x] Astra operator apply/route require matching immutable API/MCP/denial images; mutable or divergent images trigger their expected diagnostics before cluster calls. All 13 operator checks pass; source/CD renders remain valid.
+- [x] Astra correction gates: auth-isolation 25, general render 24, disabled render 41, activation 19, transition 57, discrimination 6, preflight 5 and operator 13 checks pass; k8s-validate passes offline and production SHA-256 remains unchanged.
 - [x] Requested content DNS names, TLS Secret and dedicated bucket are deployment coordinates to provision, not a claim of existing infrastructure.
 - [x] Runtime decision: API-mounted reader from L3; standalone `content-reader` has no production authority/storage composition.
 - [x] OUVL4-EX1: allow `deploy/k8s/immo-mcp/**` and existing 40/41 entrypoints. Evidence: plain requested Kustomize command refuses external file resources. Package unchanged files in a directory base; retain production paths as symlinks. Impact: resource loading only, byte-identical production files/render. Rollback: restore regular 40/41 files and the overlay's file imports.
