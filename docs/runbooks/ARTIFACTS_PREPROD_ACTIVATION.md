@@ -3,7 +3,9 @@
 L4 enables the L1/L2 publication tools and L3 reader from PRs #930/#931.
 All commands run from the repository root through the standalone Makefile below;
 it never loads `.env`. Only the cluster operator executes the live targets.
-Set an explicit preprod `KUBECONFIG` in the operator session. The namespace is
+Set an explicit preprod `KUBECONFIG` in the operator session. Rollback needs
+pod-list and pod-exec permissions to verify only `ARTIFACTS_CONTROL_MODE` in
+each API/MCP pod; it never retrieves Secret data. The namespace is
 hardcoded to `radar-immobilier-preprod`; live targets also require `ENV=preprod`.
 Pause preprod CD during preparation: its reconcile will apply `general` from Git.
 
@@ -40,7 +42,8 @@ together through review before activation; do not substitute only live values.
 ## Operator prerequisites
 
 1. Record context, namespace, source commit and approved API image digest containing
-   both merged lots. Back up the preprod database and apply the normal migration
+   both merged lots and the wildcard-host gate correction delivered with this
+   runbook. Back up the preprod database and apply the normal migration
    chain through **0026**, including 0015/0016, 0024, 0025 actor quotas and 0026
    reader tickets. Record migration journal hashes. No destructive migration/reset.
 2. Create the private bucket and bucket-scoped read/write credentials restricted
@@ -116,6 +119,8 @@ below with the approved 64-character API image digest; never apply `:latest`.
    Existing MCP OAuth, account-reader and workload-secret bindings remain.
    Missing optional artifact secrets keep the app alive but close the capability;
    pod readiness alone therefore does not prove artifact availability.
+   `apply-runtime` and `route` independently reject mutable or divergent
+   API/MCP/denial images, including a render supplied directly in `OUT`.
 3. Check rollout/image digests, DB schema/remaining quotas and secret metadata.
    The API log must report the mounted reader and configured cursor keyring.
    Route content only after the API is ready with its content-host gate mounted.
@@ -161,6 +166,11 @@ never log bearers, grants, tickets, cookie values or secret data.
   `/api/*` must return 401 and app/admin paths a reader refusal, without an app
   cookie or app redirect. Test without a grant and with a valid reader session.
   `/health` and `/livez` are deliberately probe exceptions.
+- Repeat the isolation checks with nonexistent UUIDs and malformed labels,
+  including `not-a-uuid.preprod.immo-pages.sent-tech.ca` and
+  `nope.pinned.preprod.immo-pages.sent-tech.ca`. Check `/api/v1/auth/enroll`,
+  `/api/v1/auth/login`, `/api/geo/collections` and `/admin`: no app handler,
+  app cookie or redirect; isolation headers must remain present.
 - Inspect HTML, subresources, H5 and denial responses: private/no-store cache,
   `nosniff`, no-referrer, COOP/CORP `same-origin`, `X-Frame-Options: DENY`,
   restrictive CSP, including denied workers/frames/objects/forms.
@@ -178,8 +188,15 @@ Pause preprod CD immediately, then execute:
 make -f deploy/overlays/preprod/artifacts-activation.mk rollback ENV=preprod
 ```
 
-This sets **both** live control modes to `off`, sends both wildcard routes to
-the retained isolated denial Service and restarts API/MCP to reload environment.
+This attempts **both** live control modes at `off`, sends both wildcard routes
+to the retained isolated denial Service when the Ingress exists, and requests
+both API/MCP restarts before waiting for either rollout. An absent Ingress is
+accepted; lookup/patch/RBAC/transport failures are reported. Every closure step
+is attempted even after another fails. Success requires both rollouts, both
+ConfigMaps at `off`, and `ARTIFACTS_CONTROL_MODE=off` verified in every selected
+API/MCP pod, including old replicas. Any failure returns nonzero; a ConfigMap
+write alone never counts as a successful rollback. Resolve the reported failure
+and rerun rollback before declaring closure.
 Retest publication denial and refusal of existing content URLs on both host
 families. Route cutoff matters: mode `off` alone does not revoke existing reader
 grants. Already loaded files or committed publications cannot be recalled.
