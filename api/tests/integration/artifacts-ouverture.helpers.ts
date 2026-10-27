@@ -4,7 +4,6 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { fileURLToPath } from "node:url";
 import { generateKeyPair, SignJWT } from "jose";
-import type { KeyLike } from "jose";
 import type { TokenKeySource } from "@sentropic/oauth-verify";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import {
@@ -44,8 +43,8 @@ export const ISSUER = "https://auth.test.local";
 export const RESOURCE = "https://immo.test.local/mcp";
 
 export interface OuvertureKeys {
-  publicKey: KeyLike;
-  privateKey: KeyLike;
+  publicKey: Awaited<ReturnType<typeof generateKeyPair>>["publicKey"];
+  privateKey: Awaited<ReturnType<typeof generateKeyPair>>["privateKey"];
   keySource: TokenKeySource;
 }
 
@@ -54,7 +53,7 @@ export async function ouvertureKeys(): Promise<OuvertureKeys> {
   return { publicKey, privateKey, keySource: { resolveKey: async () => publicKey } };
 }
 
-export async function signToken(privateKey: KeyLike, overrides: Record<string, unknown> = {}): Promise<string> {
+export async function signToken(privateKey: OuvertureKeys["privateKey"], overrides: Record<string, unknown> = {}): Promise<string> {
   const { scope = "immo:read", sub = ALICE, ...rest } = overrides;
   return new SignJWT({ scope, client_id: "immo-cli", tid: "radar", ...rest })
     .setProtectedHeader({ alg: "RS256" })
@@ -68,6 +67,8 @@ export async function signToken(privateKey: KeyLike, overrides: Record<string, u
 
 export interface Ouverture {
   pool: pg.Pool;
+  host: Awaited<ReturnType<typeof composeArtifactHost>>;
+  beforeUpload: (hook: () => Promise<void>) => void;
   control: ReturnType<typeof createArtifactControl>;
   durable: () => Promise<Record<string, number>>;
   memberships: (ids: string[]) => Promise<void>;
@@ -76,7 +77,7 @@ export interface Ouverture {
   close: () => Promise<void>;
 }
 
-export async function startOuverture(name: "host" | "mcp"): Promise<Ouverture> {
+export async function startOuverture(name: "host" | "mcp" | "commit"): Promise<Ouverture> {
   const env = loadConfig();
   const params = { host: env.POSTGRES_HOST, port: env.POSTGRES_PORT, user: env.POSTGRES_USER,
     password: env.POSTGRES_PASSWORD, database: env.POSTGRES_DB };
@@ -116,7 +117,10 @@ export async function startOuverture(name: "host" | "mcp"): Promise<Ouverture> {
       await pool.query("UPDATE account_users SET status=$2 WHERE sub=$1", [sub, status]);
     };
     const blobs = createTestS3BlobStore({ client: s3, bucket: config.s3Bucket });
-    const host = await composeArtifactHost(pool, config, blobs, { readActivation: general, contentBase: BASE });
+    let uploadHook = async () => {};
+    const host = await composeArtifactHost(pool, config, { ...blobs, async putBlob(...args) {
+      await uploadHook(); return blobs.putBlob(...args);
+    } }, { readActivation: general, contentBase: BASE });
     hosts.push(host);
     await pool.query(`INSERT INTO artifacts.host_quotas (storage_scope_id, operation_limit, byte_limit)
       VALUES ($1,1000000,1000000000) ON CONFLICT DO NOTHING`, [config.storageScope]);
@@ -127,7 +131,10 @@ export async function startOuverture(name: "host" | "mcp"): Promise<Ouverture> {
       (SELECT count(*) FROM artifacts.releases)::int AS releases,
       (SELECT count(*) FROM artifacts.operation_receipts)::int AS receipts,
       (SELECT operations_used FROM artifacts.host_quotas)::int AS operations,
-      (SELECT bytes_used FROM artifacts.host_quotas)::int AS bytes`)).rows[0];
+      (SELECT bytes_used FROM artifacts.host_quotas)::int AS bytes,
+      (SELECT coalesce(sum(operations_used),0) FROM artifacts.host_actor_quotas)::int AS actor_operations,
+      (SELECT coalesce(sum(bytes_used),0) FROM artifacts.host_actor_quotas)::int AS actor_bytes,
+      (SELECT coalesce(sum(count),0) FROM artifacts.host_actor_rate)::int AS rate`)).rows[0];
     const bindingEnv: NodeJS.ProcessEnv = { ...process.env,
       IMMO_MCP_ARTIFACT_DATABASE_URL:
         `postgres://${encodeURIComponent(params.user)}:${encodeURIComponent(params.password)}@${params.host}:${params.port}/${database}`,
@@ -136,6 +143,7 @@ export async function startOuverture(name: "host" | "mcp"): Promise<Ouverture> {
       ARTIFACTS_S3_REGION: config.s3Region, ARTIFACTS_S3_ACCESS_KEY: config.s3AccessKey,
       ARTIFACTS_S3_SECRET_KEY: config.s3SecretKey, ARTIFACTS_CONTENT_BASE: BASE,
       ARTIFACTS_CONTROL_MODE: "general" };
-    return { pool, control, durable, memberships, setStatus, bindingEnv, close };
+    return { pool, host, beforeUpload: (hook) => { uploadHook = hook; }, control,
+      durable, memberships, setStatus, bindingEnv, close };
   } catch (error) { await close(); throw error; }
 }

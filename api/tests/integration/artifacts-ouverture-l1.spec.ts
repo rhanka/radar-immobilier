@@ -51,7 +51,8 @@ describe("ouverture L1 general admission on the host", () => {
   });
 
   it("enforces concurrent global ceilings without double charging replay", async () => {
-    await h.pool.query("UPDATE artifacts.host_quotas SET operation_limit = 1 WHERE storage_scope_id = $1", [SCOPE]);
+    const before = await h.durable();
+    await h.pool.query("UPDATE artifacts.host_quotas SET operation_limit = operations_used + 1 WHERE storage_scope_id = $1", [SCOPE]);
     try {
       const results = await Promise.all([
         h.control.handle("ensure", ALICE, { bindingName: "quota-a", idempotencyKey: "quota-a" }),
@@ -65,10 +66,10 @@ describe("ouverture L1 general admission on the host", () => {
         (SELECT count(*) FROM artifacts.artifacts)::int AS artifacts,
         (SELECT count(*) FROM artifacts.operation_receipts)::int AS receipts,
         (SELECT operations_used FROM artifacts.host_quotas)::int AS used`)).rows[0];
-      expect(await count()).toMatchObject({ used: 1 });
+      expect(await count()).toMatchObject({ used: before.operations! + 1 });
       const replay = await h.control.handle("ensure", ALICE, { bindingName: winner, idempotencyKey: winner });
       expect(replay.status).toBe(201);
-      expect((await count()).used).toBe(1);
+      expect((await count()).used).toBe(before.operations! + 1);
     } finally {
       await h.pool.query("UPDATE artifacts.host_quotas SET operation_limit = 1000000 WHERE storage_scope_id = $1", [SCOPE]);
     }
