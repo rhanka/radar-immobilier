@@ -75,3 +75,5 @@ Qualify, repair and integrate the supplied PW-C implementation on 07ef2757.
 - [x] Delivery: test(pw-c): cover terminal states and polling limits.
 
 - [x] Delivery: test(pw-c): discriminate page retries and follow-up races.
+
+- [x] Delivery: test(pw-c): require explicit app confirmation gestures.
