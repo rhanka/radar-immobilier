@@ -139,7 +139,7 @@ export function documentsRoute(deps: DocumentsDeps): Hono {
       headers["Content-Disposition"] = "attachment";
     }
 
-    return new Response(bytes, { headers });
+    return new Response(new Uint8Array(bytes), { headers });
   });
 
   return app;

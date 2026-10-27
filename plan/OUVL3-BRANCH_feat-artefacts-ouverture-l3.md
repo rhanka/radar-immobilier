@@ -26,7 +26,8 @@ Connect published release files and H5 reads to current account/workspace author
   - `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`
   - Other branch plans; producer admission and MCP tools.
 - **Conditional Paths**:
-  - `api/drizzle/0025_artifacts_reader_tickets.sql`, `api/drizzle/meta/_journal.json`
+  - `api/drizzle/0026_artifacts_reader_tickets.sql`, `api/drizzle/meta/_journal.json`
+  - `api/tests/integration/artifacts-migrations.spec.ts`
 - **Exception process**:
   - Declare bounded exceptions below before changing conditional paths.
 
@@ -75,6 +76,10 @@ Connect published release files and H5 reads to current account/workspace author
 - [x] Sixteen browser reads passed: eight openings in 115–173 ms and eight parameterized navigations in 67–89 ms; interpreted script hashes match CSP, H5 returns 200, no CSP violation, unchanged 1500 ms timeout.
 - [x] Restoring the old HTML extraction fails three behavioral cases; restoring the old redirect fails two. All before/after controls pass and every mutated file is restored byte-for-byte.
 - [x] Runner exited 0/PASS; down -v removed all L3 resources and the shared lock was available at 19:58:33 UTC. Deliver a fresh-repository-audited bundle from `a3aa18e0`, with unchanged runtime after qualification and no push.
+- [x] OUVL3-EX4: owner reserves reader migration 0026 after PR #930's actor quotas 0025, with PW-A following at 0027; allow its rename/journal adjustment and migration integration test. Impact: unchanged SQL bytes, reader idx 25 and original when 1792100000000; rollback before deployment must keep filename, tag and index together while preserving actor quotas.
+- [x] Merge main containing PR #930, preserve both Track event sets and move reader tickets to 0026 with a coherent journal.
+- [x] Main `f8007c0f` contains PR #930 head `50266d29`, observed at 21:12 UTC; Track events-contains retains all 1062 events of each parent. Preserve the reader SQL bytes and timestamp 1792100000000 after actor quotas 1792000001000.
+- [ ] Replay the complete journal on a fresh database and idempotently; qualify PostgreSQL reader, Chromium, typecheck/lint and API CI, clean the stack and deliver from `6d7fd6ac`.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch, serialized implementation and Docker campaigns.

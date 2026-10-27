@@ -8,7 +8,7 @@ import { FACET_PROFILE } from "../services/facets/codebook.js";
 import { readScopedReasonCodes, readScopedReveal } from "../services/facets/scoped-reveal.js";
 import { privateSignalResponse } from "../services/facets/private-response.js";
 
-const workspaceId = z.string().uuid();
+const workspaceId = z.string().guid();
 const citySlug = z.string().min(1).max(128).regex(/^[a-z0-9-]+$/);
 const nodeType = z.enum(["Signal", "DesignationEvent"]);
 const nodeId = z.string().min(1).max(512);

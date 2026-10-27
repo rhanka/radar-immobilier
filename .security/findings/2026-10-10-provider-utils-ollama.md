@@ -1,6 +1,17 @@
 # @ai-sdk/provider-utils 2.x under ollama-ai-provider
 
-- Status: open — exception PROPOSED, UNSIGNED (accepted_by: null, accepted_on: null)
+- Status: resolved by security hotfix 3 on 2026-10-27.
+
+## Resolution
+
+Engram 0.21.2 replaces Graphify 0.18.0. The clean installed tree and generated
+lockfile contain no Graphify, ollama-ai-provider or provider-utils 2.x.
+The existing csv-parse 7.0.3 override follows the new Engram package name.
+Both raw root audits report zero vulnerabilities. The three proposed Ollama
+rows are deleted without adding an exception or suppressing scanner output.
+See [the campaign finding](2026-10-27-dependency-security-hotfix-3.md).
+
+## Historical investigation (2026-10-10)
 - Severity: low (GitHub, CVSS 4.3)
 - Advisory: GHSA-866g-f22w-33x8 / CVE-2026-8769 — patched `3.0.28`, `4.0.33`, `5.0.1`
 - Owner: repository owner (to confirm)
