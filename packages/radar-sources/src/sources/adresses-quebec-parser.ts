@@ -1,3 +1,4 @@
+import { contractParse } from "@radar/domain";
 import { z } from "zod";
 
 /**
@@ -79,7 +80,7 @@ export function parseAdressesQuebec(json: string): AdressesQuebecT {
   try {
     parsed = JSON.parse(json) as RawFeatureCollection;
   } catch {
-    return AdressesQuebec.parse({ adresses: [] });
+    return contractParse(AdressesQuebec, { adresses: [] });
   }
 
   const features = Array.isArray(parsed.features) ? parsed.features : [];
@@ -91,7 +92,7 @@ export function parseAdressesQuebec(json: string): AdressesQuebecT {
     const nom = typeof props.nom === "string" ? props.nom.trim() : "";
     if (!code || !nom) continue;
     adresses.push(
-      AdresseQuebec.parse({
+      contractParse(AdresseQuebec, {
         code,
         nom,
         nbUnite: toCount(props.nbUnite),
@@ -99,5 +100,5 @@ export function parseAdressesQuebec(json: string): AdressesQuebecT {
     );
   }
 
-  return AdressesQuebec.parse({ adresses });
+  return contractParse(AdressesQuebec, { adresses });
 }

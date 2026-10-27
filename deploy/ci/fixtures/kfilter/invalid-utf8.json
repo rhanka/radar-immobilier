@@ -1,0 +1,12 @@
+[
+  {"label": "invalid leading byte", "octets": "\\377"},
+  {"label": "lone continuation", "octets": "\\200"},
+  {"label": "truncated two-byte sequence", "octets": "\\303"},
+  {"label": "truncated three-byte sequence", "octets": "\\342\\202"},
+  {"label": "truncated four-byte sequence", "octets": "\\360\\237\\222"},
+  {"label": "overlong NUL", "octets": "\\300\\200"},
+  {"label": "encoded surrogate", "octets": "\\355\\240\\200"},
+  {"label": "above Unicode scalar range", "octets": "\\364\\220\\200\\200"},
+  {"label": "five-byte sequence", "octets": "\\370\\210\\200\\200\\200"},
+  {"label": "six-byte sequence", "octets": "\\374\\204\\200\\200\\200\\200"}
+]

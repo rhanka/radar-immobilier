@@ -1,6 +1,19 @@
 # Root Zod and body-parser high advisories
 
-- Status: body-parser fixed at 2.4.0; Zod risk-accepted temporarily (owner sign-off 2026-10-25, expires 2026-11-08)
+- Status: resolved — Zod 4.6.7 in security hotfix 3; body-parser remains fixed at 2.4.0.
+
+## Security hotfix 3 resolution (2026-10-27)
+
+The five workspace consumers use Zod ^4.6.6, resolved to one physical 4.6.7
+instance. Engram 0.21.2 replaces Graphify/Ollama, removing the Zod 3-only peers.
+A clean install and npm ls --all pass; the physical-tree checker rejects affected
+Zod copies and invalid peers. Both raw root audits report zero vulnerabilities,
+without suppression. The three temporary Zod acceptance rows are deleted.
+The 12 production MCP definitions and 15 invalid-argument responses match the
+base; authenticated HTTP non-finite refusals preserve the base contract.
+See [the campaign finding](2026-10-27-dependency-security-hotfix-3.md) for evidence.
+
+## Historical investigation (2026-10-24 to 2026-10-25)
 - Severity: high for both advisories
 - Advisories: [GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5), [GHSA-27r3-jxmh-p828](https://github.com/advisories/GHSA-27r3-jxmh-p828)
 - body-parser published: 2026-10-23; detected and compatible fix applied: 2026-10-24

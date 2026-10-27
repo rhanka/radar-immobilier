@@ -1,0 +1,149 @@
+# Feature: General artifact admission, host and MCP
+
+## Objective
+Qualify L1/L2 general admission for approved accounts while preserving actor
+isolation, current authorization, transactional quotas and replay safety.
+
+## Scope / Guardrails
+- Integrate main at `17f439c8` before qualification; artifacts version 0.2.2.
+- Worktree: `tmp/artefacts-ouv-l12`; root UAT remains untouched.
+- Make-only execution; never read environment files; no Python or push.
+- Test ENV `test-artefacts-ouv-l12`; API/UI/Maildev ports 18937/15937/11937.
+- Wait for other test stacks; clean only this project with volume/orphan removal.
+- Preserve Muse's implementation; correct failures without weakening ACLs.
+- Commits contain at most 150 changed lines and an English subject only.
+
+## Branch Scope Boundaries (MANDATORY)
+- **Allowed Paths (implementation scope)**:
+  - `packages/artifacts-host/src/**`
+  - `packages/immo-mcp/src/**`
+  - `api/tests/integration/artifacts-ouverture*`
+  - `api/drizzle/0025_artifacts_actor_quotas.sql`
+  - `api/drizzle/meta/_journal.json`
+  - `plan/OUVL12-BRANCH_feat-artefacts-ouverture-l12.md`
+  - `RAPPORT-SOL-OUV-L12.md`
+- **Forbidden Paths (must not change in this branch)**:
+  - `Makefile`, `docker-compose*.yml`, `rules/**`
+  - `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`
+  - Other branch plans, reader/content implementation, `api/src/index.ts`
+- **Conditional Paths (allowed only with explicit exception)**:
+  - Existing API tests directly blocked by the new migration/quotas.
+  - Additional test runner files under `tools/`.
+- **Exception process**:
+  - Record rationale, impact and rollback here before conditional changes.
+- **OUVL12-EX1 — existing artifact publication/quota fixtures**:
+  - [x] Allow `api/tests/integration/artifacts-publication.spec.ts` and
+    `artifacts-production-quota.helpers.ts` only when blocked by actor budgets.
+  - [x] Evidence: the full API run exhausts the ten-mutation minute window in
+    the publication test before its next distinct key; later cases inherit it.
+  - [x] Impact: isolate fixture rate windows and fund explicit actor quota
+    extensions alongside global extensions; keep production limits unchanged.
+  - [x] Rollback: revert these fixture-only adjustments with the actor quotas.
+
+## Feedback Loop
+- [x] Read both Astra reviews of PR #930 in full; owner requests the smallest
+  shared correction, no push, and an incremental bundle from `c71fbdaf`.
+- [x] Replace the commit-only minute debit with atomic admission attempts
+  before S3, never refunded; keep durable quotas transactional at commit.
+- [x] Resolve committed replays through coordinator authorization before the
+  minute bound, and return retryable temporary refusal for new capped writes.
+- [x] Restrict the workspace-claim exemption to general mode and test both modes.
+- [x] Astra correction gates passed: host 187, MCP 416, PostgreSQL admission 19,
+  enabled acceptance 172, full API 3500 passed / 699 conditionally skipped.
+- [x] Seven mutants failed on their behavioral assertions and passed restored;
+  source SHA-256 checks matched the checkout after restoration.
+- [x] Review stack removed with volumes/orphans at 16:13 UTC; own controller
+  exited 0 and released the lock, then `radar-test-sec-hotfix-3` took its turn.
+- [x] Shared Git metadata is read-only: use local Git metadata and audit a bundle
+  against the original base in a fresh repository; do not push.
+- [x] Owner instruction overrides commit trailers and report language.
+- [x] Historical block: the earlier qualification waited over three hours while
+  `test-e2-int-postgres-1` remained active; resolved by the 14:50 UTC reprise.
+- [x] Repaired local queue control: stop proxy signals left child waiters;
+  removed only this workspace's duplicates and added graceful file cancellation.
+- [x] Resumed at 14:50 UTC after the foreign stack stopped; acquired the shared
+  lock and verified no foreign test stack before starting the dedicated stack.
+- [x] Initial qualification passed: host 190, MCP 415, admission PG 13, enabled artifact
+  acceptance 166, API full 3494 passed / 699 conditionally skipped, no failures.
+- [x] Four mutation proofs passed baseline / failed assertions / passed restored;
+  container sources matched the local checkout by SHA-256 after restoration.
+- [x] Shared lock released at 15:01 UTC after guarded down -v --remove-orphans;
+  inspection confirmed no owned containers, volumes or networks remained.
+
+## Orchestration Mode (AI-selected)
+- [x] Single branch integration; no cherry-pick.
+
+## UAT Management (in orchestration context)
+- [x] No UAT or deployment in L1/L2 qualification.
+
+## Plan / Todo (lot-based)
+- [x] **Lot 0 — Baseline & constraints**
+  - [x] Read rules, Muse report, design and prime review.
+  - [x] Merge main 0.2.2 in the local recovery repository.
+- [x] **Lot 1 — Host general admission**
+  - [x] Activation, membership-independent admission and workspace decoupling.
+  - [x] Transactional global/actor quotas and atomic minute attempt admission.
+  - [x] Host unit tests.
+- [x] **Lot 2 — MCP general admission**
+  - [x] Approved accounts bypass stale workspace claims for artifact tools.
+  - [x] Four tools, server identities, forged-field refusals and MCP tests.
+- [x] **Lot 3 — Qualification**
+  - [x] Repair the rate-probe test double's account-query row type.
+  - [x] Grant the stale-claims fixture its business scope to reach account denial.
+  - [x] Derive PG harness types from MCP ports instead of undeclared API packages.
+  - [x] Isolate publication fixture windows without changing the minute ceiling.
+  - [x] Enabled provider acceptance exposed two fixture actor ceilings left at
+    one after global budget extension; extend the dedicated actor budget too.
+  - [x] Await quota promise results in unit assertions.
+  - [x] Bind quota actor to the coordinator input, before approval reads.
+  - [x] Require real publication with zero/two memberships and by both MCP actors.
+  - [x] Repair the MCP test suite delimiter and remove an unused fixture argument.
+  - [x] Add direct PostgreSQL commit/replay and actor/minute concurrency probes.
+  - [x] Typecheck, ESLint, API unit tests and PostgreSQL admission tests.
+  - [x] Isolation and authorization mutations.
+  - [x] Complete API suite matching CI.
+  - [x] Implemented: `feat(host): add general activation mode`.
+  - [x] Implemented: `feat(host): reserve actor quotas with schema migration`.
+  - [x] Implemented: `feat(host): admit general accounts without cohort`.
+  - [x] Implemented: `feat(host): decouple workspace and probe actor rate`.
+  - [x] Implemented: `feat(mcp): admit approved accounts on artifact tools`.
+  - [x] Implemented: `feat(mcp): reject forged artifact caller identities`.
+  - [x] Implemented: `test(host): cover general activation parsing`.
+  - [x] Implemented: `test(host): cover general admission`.
+  - [x] Implemented: `test(host): cover general facade and rate probe`.
+  - [x] Implemented: `test(host): cover actor quota reservations`.
+  - [x] Implemented: `test(mcp): cover general claims and forged fields`.
+  - [x] Implemented: `test(api): add general artifact admission harness`.
+  - [x] Implemented: `test(api): cover general host admission on PostgreSQL`.
+  - [x] Implemented: `test(api): cover general MCP tools on PostgreSQL`.
+- [x] **Lot 4 — Delivery**
+  - [x] Atomic commits, bundle audit and French results report.
+  - [x] Confirm own Docker project has no containers, networks or volumes.
+- [x] **Lot 5 — Astra review corrections (#930)**
+  - [x] Add tenth-success ensure/publish replay probes through HTTP and MCP.
+  - [x] Add last-unit concurrent S3 counting and nonrefunded quota-refusal probes.
+  - [x] Normalize test bucket names separately from PostgreSQL database names.
+  - [x] Implement a conditional atomic attempt reservation and retryable 429.
+  - [x] Restrict account-binding workspace exemption to explicit general mode.
+  - [x] Add publication receipt replay through coordinator locks and fresh ACLs.
+  - [x] Share replay-before-attempt ordering in the host entry used by HTTP/MCP.
+  - [x] Remove façade rate probes; preserve the shared retryable 429 over HTTP/MCP.
+  - [x] Delete the obsolete read-only rate authority and test atomic admission.
+  - [x] Remove minute mutations from commit policy; only durable quotas roll back.
+  - [x] Update PG accounting to retain admitted attempts on later refusal;
+    include direct publication replay suspension to exercise the coordinator.
+  - [x] Reproduce replay at the tenth success through HTTP and MCP façades.
+  - [x] Reproduce three S3 uploads for one remaining unit and refunded failed
+    attempts on the old head; six new assertions fail against that baseline.
+  - [x] Read replay storage scope on the leased client; the provider's publication
+    authorization projection contains owner/state, not storage scope.
+  - [x] Acceptance exposed a new-key restart beyond the attempt budget in EX1's
+    fixture; restart now replays its committed key, asserting replayed=true.
+  - [x] Preserve migration 0025's published bytes: editing its comments after
+    setup changed the expected journal hash. Runtime attempt semantics are
+    documented in code; no schema change or journal exception is required.
+  - [x] Count S3 calls on the last concurrent attempt and exhausted durable quota.
+  - [x] Implement shared guarded replay and atomic pre-upload attempt admission.
+  - [x] Verify suspension denial and mode-specific account binding.
+  - [x] Targeted gates, full API and discriminating restored-source mutations.
+  - [x] Incremental bundle audit, report section and shared stack cleanup.

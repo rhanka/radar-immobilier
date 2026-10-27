@@ -1,5 +1,4 @@
-import { z } from "zod";
-import { zodToJsonSchema } from "zod-to-json-schema";
+import { convertInputShape, normalizeToolJsonSchema } from "../zod4-jsonschema.js";
 import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { createClusterMeshModules } from "@sentropic/cluster-mesh";
 import { createMcpRegistry, computeManifestDigest, type RegistryDefinition } from "@sentropic/cluster-mesh/mcp/registry";
@@ -19,7 +18,7 @@ export const IMMO_WIRE_LIMITS = Object.freeze({
 export const ARTIFACT_WIRE_LIMITS = Object.freeze({ ...IMMO_WIRE_LIMITS,
   maxRequestBytes: 2 * 1024 * 1024, maxArgumentBytes: 2 * 1024 * 1024 });
 export const IMMO_WIRE_TOOLS: readonly Tool[] = ALL_TOOL_DEFINITIONS.map((def) => {
-  const schema = zodToJsonSchema(z.object(def.inputSchema), { strictUnions: true });
+  const schema = normalizeToolJsonSchema(def.name, convertInputShape(def.inputSchema));
   return { name: def.name, title: def.title, description: def.description,
     inputSchema: schema as Tool["inputSchema"], execution: { taskSupport: "forbidden" } };
 });

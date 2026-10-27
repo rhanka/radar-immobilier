@@ -101,6 +101,10 @@ EXTRA='export FAKE_API_SHA=deadbee'; run_case still_failed; code=$CODE
 nz "$code" "G2: still-serving-failed aborts"
 outp | grep -q 'still serves the FAILED build' && ok "G2: names the ineffective-rollback cause" || bad "G2: no cause message"
 
+EXTRA='export FAKE_API_SHA=deadbee1234567890abcdef1234567890abcdef123'; run_case still_failed_full; code=$CODE
+nz "$code" "G2: full API identity matching failed short tag aborts"
+outp | grep -q 'still serves the FAILED build' && ok "G2: full identity is recognized" || bad "G2: full identity missed"
+
 echo ""
 echo "PASS=${PASS} FAIL=${FAIL}"
 [ "$FAIL" -eq 0 ]

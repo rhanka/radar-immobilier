@@ -31,7 +31,7 @@ const evidence = z.array(EvidenceItem).default([]);
 // Municipality — registry (`municipalities`), authoritative, not reconciled.
 // ─────────────────────────────────────────────────────────────────────────────
 export const OntoMunicipality = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   slug: citySlug,
   nomOfficiel: z.string().min(1),
   /** MAMH code, e.g. "70052" (Salaberry-de-Valleyfield). */
@@ -52,7 +52,7 @@ export type OntoMunicipalityT = z.infer<typeof OntoMunicipality>;
 export const ZoneKind = z.enum(["H", "C", "U", "I", "P", "A", "autre"]);
 export type ZoneKindT = z.infer<typeof ZoneKind>;
 export const OntoZone = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   citySlug,
   /** Displayed code at the active period, e.g. "H-609-4" (a dated alias, not the identity). */
   codeAffiche: z.string().min(1),
@@ -69,13 +69,13 @@ export type OntoZoneT = z.infer<typeof OntoZone>;
 // the AMENDS edge in projection, never hand-entered (§1.2, §4.2).
 // ─────────────────────────────────────────────────────────────────────────────
 export const OntoBylaw = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   citySlug,
   /** City-scoped number, e.g. "150-49", "2024-58". */
   numero: z.string().min(1),
   titre: z.string().nullable().default(null),
   /** Derived from the AMENDS edge (§4.2); null when the bylaw amends nothing. */
-  amendsBylawId: z.string().uuid().nullable().default(null),
+  amendsBylawId: z.string().guid().nullable().default(null),
   rawRef,
   recon: ReconBridge,
   evidence,
@@ -118,7 +118,7 @@ export const DesignationEventSubtype = z.enum([
 ]);
 export type DesignationEventSubtypeT = z.infer<typeof DesignationEventSubtype>;
 export const OntoDesignationEvent = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   citySlug,
   subtype: DesignationEventSubtype,
   /** Regulatory effect date (adoption / entry into force); null when only proposed. */
@@ -152,7 +152,7 @@ export type ConstraintKindT = z.infer<typeof ConstraintKind>;
 export const ConstraintConfidence = z.enum(["high", "medium", "low", "manual-check"]);
 export type ConstraintConfidenceT = z.infer<typeof ConstraintConfidence>;
 export const OntoConstraint = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   citySlug,
   kind: ConstraintKind,
   /** Provenance authority: CPTAQ / BDZI / GRHQ / municipal. */
@@ -171,7 +171,7 @@ export type OntoConstraintT = z.infer<typeof OntoConstraint>;
 // PDF graphies. Province-wide key, but carries citySlug for filtering (§4.6).
 // ─────────────────────────────────────────────────────────────────────────────
 export const OntoLot = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   /** Authoritative cadastre key (cadastre du Québec), e.g. "3819015". */
   noLot: z.string().min(1),
   citySlug,
@@ -186,13 +186,13 @@ export type OntoLotT = z.infer<typeof OntoLot>;
 // Adresse — registry (`adresses_qc`), province-wide key. LOCATED_AT links lots.
 // ─────────────────────────────────────────────────────────────────────────────
 export const OntoAdresse = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   /** Adresses Québec provincial key. */
   idAdresse: z.string().min(1),
   adresseComplete: z.string().min(1),
   citySlug,
   /** LOCATED_AT projection (Lot ↔ Adresse). */
-  lotIds: z.array(z.string().uuid()).default([]),
+  lotIds: z.array(z.string().guid()).default([]),
   rawRef,
   recon: ReconBridge,
   evidence,
@@ -209,11 +209,11 @@ export type ValuationSourceKindT = z.infer<typeof ValuationSourceKind>;
 export const OwnerStatus = z.enum(["non-disponible", "manual-check"]);
 export type OwnerStatusT = z.infer<typeof OwnerStatus>;
 export const OntoValuation = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   /** Role evaluation matricule (per-lot key). */
   matricule: z.string().min(1),
   /** Lot the valuation attaches to (VALUED_BY is per lot/matricule, not per zone). */
-  lotId: z.string().uuid(),
+  lotId: z.string().guid(),
   citySlug,
   sourceKind: ValuationSourceKind,
   /** Land value in CAD; null when not chiffré (anti-invention). */
@@ -249,7 +249,7 @@ export const SourceDocKind = z.enum([
 ]);
 export type SourceDocKindT = z.infer<typeof SourceDocKind>;
 export const OntoSource = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   kind: SourceDocKind,
   /** Authoritative raw S3 key (`raw/<kind>/<city>/<Y>/<M>/<D>/<sha>.<ext>`, §0.2). */
   rawRef,
@@ -275,11 +275,11 @@ export const OntoSignalKind = z.enum([
 ]);
 export type OntoSignalKindT = z.infer<typeof OntoSignalKind>;
 export const OntoSignal = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   citySlug,
   kind: OntoSignalKind,
   /** The DesignationEvent that raised this signal (RAISES_SIGNAL). */
-  designationEventId: z.string().uuid().nullable().default(null),
+  designationEventId: z.string().guid().nullable().default(null),
   summary: z.string().min(1),
   /**
    * Intentions/precedents are weak signals capped at "surveillance" and stay

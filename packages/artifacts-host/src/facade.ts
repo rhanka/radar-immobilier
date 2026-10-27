@@ -73,7 +73,9 @@ export function createArtifactControl(
           return unavailable;
         }
         if (!entry.allowed) return { status: entry.status, body: entry.body };
-        frozenWorkspace = entry.workspaceId;
+        // General opening reports no workspace: nothing is frozen and the
+        // commit reread below cannot diverge from it.
+        frozenWorkspace = entry.workspaceId === "" ? undefined : entry.workspaceId;
       }
       if (!raw || typeof raw !== "object" || Array.isArray(raw)) return invalid();
       const body = raw as Record<string, unknown>;
@@ -104,7 +106,7 @@ export function createArtifactControl(
         if (frozenWorkspace !== undefined && commit.workspaceId !== frozenWorkspace) {
           return { status: 403, body: { error: "workspace_membership_required" } };
         }
-        frozenWorkspace = commit.workspaceId;
+        if (commit.workspaceId !== "") frozenWorkspace = commit.workspaceId;
       }
       const invocation = Object.freeze({ invocationId: randomUUID(), actorId, storageScopeId: scope,
         authorizeCommit: async (...args: Parameters<typeof authorizeArtifactCommit>) => {
@@ -162,6 +164,9 @@ export function createArtifactControl(
           reason: entry.reason, status: entry.status, atMs: (options?.nowMs ?? Date.now)() });
       }
       const response = { ...projectArtifactHttpOutcome(outcome) };
+      if (!outcome.ok && outcome.failure.publicCode === "rate_limited") {
+        response.body = { error: "rate_limited", retryable: outcome.failure.retriable };
+      }
       Object.defineProperty(response, "retryable", { value: !outcome.ok && outcome.failure.retriable });
       if (op !== "publish" || response.status !== 201) return response;
       const result = response.body as { releaseId: string; manifest: string };

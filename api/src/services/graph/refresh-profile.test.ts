@@ -10,7 +10,7 @@ import {
   type Extraction,
   type TextJsonGenerationClient,
   type TextJsonGenerationInput,
-} from "@sentropic/graphify";
+} from "@sentropic/engram";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import type { RefreshCorpusChunk } from "./refresh-corpus.js";
@@ -629,7 +629,7 @@ describe("refresh profile extraction", () => {
       source_node_types: ["Source"], target_node_types: ["Bylaw", "DesignationEvent"],
     });
     expect(schema.graph_contract).toMatchObject({
-      node_file_type: ["code", "concept", "document", "image", "paper", "rationale"],
+      node_file_type: ["code", "concept", "document", "image", "memory", "paper", "rationale"],
       edge_confidence: ["AMBIGUOUS", "EXTRACTED", "INFERRED"],
     });
     expect(schema.graph_contract.evidence_refs).toMatchObject({

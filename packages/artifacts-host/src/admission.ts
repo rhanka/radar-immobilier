@@ -15,7 +15,7 @@ import {
   readAccountStatus,
   type AccountStatusQueryable,
 } from "./account-status.js";
-import type { ActivationConfig } from "./activation.js";
+import { isGeneralActivation, type ActivationConfig } from "./activation.js";
 
 export type AdmissionDeniedBody =
   | { readonly error: "activation_closed" }
@@ -104,19 +104,24 @@ export function checkScopeMembership(
 function checkActivation(
   authority: AdmissionAuthority,
   sub: string,
-): AdmissionResult {
+): { readonly result: AdmissionResult; readonly general: boolean } {
   const activation = authority.readActivation();
   if (!activation.enabled) {
-    return { allowed: false, status: 403, body: { error: "activation_closed" } };
+    return { result: { allowed: false, status: 403, body: { error: "activation_closed" } }, general: false };
+  }
+  if (isGeneralActivation(activation)) {
+    // General opening: every approved account publishes; storage stays a
+    // server-owned namespace, so no workspace is frozen here.
+    return { result: { allowed: true, workspaceId: "" }, general: true };
   }
   const now = authority.nowMs ? authority.nowMs() : Date.now();
   if (activation.expiresAtMs <= now) {
-    return { allowed: false, status: 403, body: { error: "activation_closed" } };
+    return { result: { allowed: false, status: 403, body: { error: "activation_closed" } }, general: false };
   }
   if (!activation.subjects.includes(sub)) {
-    return { allowed: false, status: 403, body: { error: "not_in_cohort" } };
+    return { result: { allowed: false, status: 403, body: { error: "not_in_cohort" } }, general: false };
   }
-  return { allowed: true, workspaceId: authority.scope ?? "" };
+  return { result: { allowed: true, workspaceId: authority.scope ?? "" }, general: false };
 }
 
 export async function checkAdmission(
@@ -126,7 +131,7 @@ export async function checkAdmission(
 ): Promise<AdmissionResult> {
   const scope = expectedScope ?? authority.scope;
   const activation = checkActivation(authority, sub);
-  if (!activation.allowed) return activation;
+  if (!activation.result.allowed) return activation.result;
   const status = await authority.readStatus(sub);
   if (!isApprovedAccountStatus(status)) {
     return {
@@ -136,14 +141,17 @@ export async function checkAdmission(
     };
   }
   const afterStatus = checkActivation(authority, sub);
-  if (!afterStatus.allowed) return afterStatus;
+  if (!afterStatus.result.allowed) return afterStatus.result;
+  // General mode requires no workspace: zero, one or several memberships all
+  // publish. The membership query is skipped, not merely ignored.
+  if (afterStatus.general) return afterStatus.result;
   if (authority.readMemberships) {
     const memberships = await authority.readMemberships(sub);
     const membership = checkScopeMembership(memberships, scope);
     if (!membership.allowed) return membership;
     const fresh = checkActivation(authority, sub);
-    if (!fresh.allowed) return fresh;
+    if (!fresh.result.allowed) return fresh.result;
     return membership;
   }
-  return checkActivation(authority, sub);
+  return checkActivation(authority, sub).result;
 }

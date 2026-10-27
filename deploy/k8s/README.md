@@ -202,14 +202,7 @@ they do not contain endpoint, region, bucket, path-style, or credential values.
 | Graph | `GRAPH_S3_ENDPOINT`, `GRAPH_S3_REGION`, `GRAPH_S3_BUCKET`, `GRAPH_S3_FORCE_PATH_STYLE` | `radar-graph-s3-credentials`: `GRAPH_S3_ACCESS_KEY`, `GRAPH_S3_SECRET_KEY` |
 | Scrape | `SCRAPE_S3_ENDPOINT`, `SCRAPE_S3_REGION`, `SCRAPE_S3_BUCKET`, `SCRAPE_S3_FORCE_PATH_STYLE` | `radar-scrape-s3-credentials`: `SCRAPE_S3_ACCESS_KEY`, `SCRAPE_S3_SECRET_KEY` |
 
-These references are non-optional so an incomplete binding fails before the
-container starts instead of falling back to the main store. They are
-prerequisites, not a deployment claim: the fresh preproduction `radar-api`
-ConfigMap does not yet contain either key family, the scrape Secret was absent,
-and production remains unverified. Do not dispatch these Jobs until the target
-namespace has been inventoried and all referenced keys have been validated.
-The armed refresh diagnostic remains on its existing binding pending that later
-cutover; this first slice deliberately does not edit or deploy it.
+These non-optional bindings apply to prod; preprod Jobs and refresh use the same `radar-api` coordinate keys with `radar-docs-s3-credentials` (`DOCS_S3_ACCESS_KEY` / `DOCS_S3_SECRET_KEY`).
 
 ## RAW/DOCS object-storage migration proof tool
 
