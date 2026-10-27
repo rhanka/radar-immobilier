@@ -31,6 +31,52 @@ describe("trusted account bindings", () => {
   it("should leave a missing binding unavailable", () => {
     expect(createAccountBinding({})).toBeUndefined();
   });
+describe("artifact tools in the general opening", () => {
+  it("should admit an approved account whatever the workspace claims carry", async () => {
+    for (const workspaces of [["default"], [], ["stale-workspace"],
+      ["aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"],
+      "not-an-array", undefined, [42]] as unknown[]) {
+      const query = vi.fn().mockResolvedValue({ rows: [{ id: "id", status: "approved" }] });
+      const authorize = accountAuthorizer({ query });
+      for (const tool of ["artifacts_ensure", "artifacts_publish", "artifacts_list", "artifacts_get"]) {
+        expect(await authorize(tool, request(workspaces as never)), `${tool} ${String(workspaces)}`)
+          .toBe(true);
+      }
+      // Approval is the only query; stale claims never reach the membership check.
+      expect(query).toHaveBeenCalledTimes(4);
+      expect(query.mock.calls[0]![1]).toEqual(["alice"]);
+    }
+  });
+
+  it("should still refuse suspended, pending and unknown accounts on artifact tools", async () => {
+    for (const [stored, calls] of [["suspended", 1], ["pending", 1], [undefined, 1]] as const) {
+      const query = vi.fn().mockResolvedValueOnce(
+        stored === undefined ? { rows: [] } : { rows: [{ id: "id", status: stored }] });
+      const authorize = accountAuthorizer({ query });
+      expect(await authorize("artifacts_publish", request(["stale-workspace"]))).toBe(false);
+      expect(query).toHaveBeenCalledTimes(calls);
+    }
+  });
+
+  it("should keep the membership controls on business tools", async () => {
+    const query = vi.fn().mockResolvedValueOnce({ rows: [{ id: "id", status: "approved" }] })
+      .mockResolvedValueOnce({ rows: [] });
+    const authorize = accountAuthorizer({ query });
+    expect(await authorize("search_signals",
+      request(["bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"]))).toBe(false);
+    expect(query).toHaveBeenCalledTimes(2);
+  });
+
+  it("should expose a sanitized retriable error when the approval query fails on artifact tools", async () => {
+    const query = vi.fn().mockRejectedValueOnce(new Error("postgres://private:secret@db.invalid/account"));
+    const error = await accountAuthorizer({ query })("artifacts_ensure", request(["stale"])).catch((cause) => cause);
+    expect(error).toBeInstanceOf(AccountBindingUnavailable);
+    expect(error).toMatchObject({ message: "account_binding_unavailable", retriable: true });
+    expect(String(error)).not.toContain("private");
+  });
+});
+
+describe("trusted account bindings", () => {
   it("should expose a sanitized retriable error for either database query failure", async () => {
     for (const membership of [false, true]) {
       const query = vi.fn();
