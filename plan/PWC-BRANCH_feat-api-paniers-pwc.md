@@ -49,3 +49,5 @@ Qualify, repair and integrate the supplied PW-C implementation on 07ef2757.
 - [x] Delivery: feat(pw-c): serve the controlled application script.
 
 - [x] Delivery: feat(pw-c): add escaped application document helpers.
+
+- [x] Delivery: feat(pw-c): render summary and management documents.
