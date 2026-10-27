@@ -116,6 +116,7 @@ isolation, current authorization, transactional quotas and replay safety.
 - [ ] **Lot 5 — Astra review corrections (#930)**
   - [x] Add tenth-success ensure/publish replay probes through HTTP and MCP.
   - [x] Add last-unit concurrent S3 counting and nonrefunded quota-refusal probes.
+  - [x] Implement a conditional atomic attempt reservation and retryable 429.
   - [ ] Reproduce replay at the tenth success through HTTP and MCP façades.
   - [ ] Count S3 calls on the last concurrent attempt and exhausted durable quota.
   - [ ] Implement shared guarded replay and atomic pre-upload attempt admission.
