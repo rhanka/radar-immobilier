@@ -1,3 +1,4 @@
+import { contractParse, contractSafeParse } from "@radar/domain";
 import { z } from "zod";
 
 /**
@@ -589,7 +590,7 @@ export function parsePvIndex(html: string, baseUrl: string): PvIndexItemT[] {
       ? title
       : `${title} ${fileName}`;
     const dateIso = extractIsoFromLabel(dateSource);
-    const parsed = PvIndexItem.safeParse({
+    const parsed = contractSafeParse(PvIndexItem, {
       title,
       url,
       dateIso,
@@ -1294,7 +1295,7 @@ export function scanHabitationSignals(pvText: string): PvHabitationSignalT[] {
     const selfRef = group.anchor?.locator === "annexe" ? group.anchor.reference : null;
 
     out.push(
-      PvHabitationSignal.parse({
+      contractParse(PvHabitationSignal, {
         locator: group.anchor?.locator ?? "document",
         reference: group.anchor?.reference ?? "",
         citation: trimExcerpt(pvText, group.firstHitIndex, 240),
@@ -1444,7 +1445,7 @@ export function detectZonageChange(pvText: string): ZonageChangeDetectionT {
     }
   }
 
-  return ZonageChangeDetection.parse({
+  return contractParse(ZonageChangeDetection, {
     avisDeMotion: foundAvisDeMotion,
     reglementNumbers: Array.from(new Set(allReglementNumbers)),
     changementZonage: foundChangement,

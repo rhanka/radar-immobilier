@@ -1,3 +1,4 @@
+import { contractParse } from "@radar/domain";
 import { z } from "zod";
 
 import { NON_DISPONIBLE } from "./avis-publics-parser.js";
@@ -85,7 +86,7 @@ function parseUnit(block: string): RoleEvaluationUnitT {
   const valeurTerrain = toCad(firstTag(block, "RL0402A"));
   const valeurDate = firstTag(block, "RL0401A") ?? NON_DISPONIBLE;
 
-  return RoleEvaluationUnit.parse({
+  return contractParse(RoleEvaluationUnit, {
     noLots,
     matricule,
     valeur,
@@ -107,5 +108,5 @@ export function parseRoleEvaluation(xml: string): RoleEvaluationT {
     if (block) units.push(parseUnit(block));
   }
 
-  return RoleEvaluation.parse({ codeMamh, year, units });
+  return contractParse(RoleEvaluation, { codeMamh, year, units });
 }

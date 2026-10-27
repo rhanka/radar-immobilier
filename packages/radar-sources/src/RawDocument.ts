@@ -1,3 +1,4 @@
+import { contractParse } from "@radar/domain";
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import { DocumentDateSchema, type DocumentDate } from "./DocumentDate.js";
@@ -169,7 +170,7 @@ export function buildRawDocumentRecord(input: {
     sha256,
     contentType: input.contentType,
   });
-  return RawDocumentRecordSchema.parse({
+  return contractParse(RawDocumentRecordSchema, {
     id: rawDocumentId(input.source, sha256),
     source: input.source,
     sourceUrl: input.sourceUrl,
