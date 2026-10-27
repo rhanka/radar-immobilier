@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { URL } from "node:url";
 import { parseRegister, evaluateAudit } from "./audit-lib.mjs";
 
-const register = readFileSync(new URL("../../.security/vulnerability-register.yaml", import.meta.url), "utf8");
+const register = readFileSync(new URL("./fixtures/legacy-zod3-register.yaml", import.meta.url), "utf8");
 const unsigned = (value) => register.replace("accepted_by: repository owner", `accepted_by: ${value}`);
 
 for (const value of ["null", "null # pending signature", "~", "", "# pending signature", '""', '"   "', "[]", "{}", "false", "123"]) {
