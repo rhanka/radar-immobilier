@@ -1,3 +1,4 @@
+import { contractDateTime } from "@radar/domain";
 import { contractSafeParse } from "@radar/domain";
 import { z } from "zod";
 
@@ -6,7 +7,7 @@ import { extractIsoFromLabel, isRealIsoDate } from "./sources/proces-verbaux-par
 export function isDocumentDateValue(value: string): boolean {
   return /^\d{4}-(0[1-9]|1[0-2])$/.test(value) || isRealIsoDate(value)
     || (isRealIsoDate(value.slice(0, 10))
-      && z.string().datetime({ offset: true }).safeParse(value).success);
+      && contractDateTime({ offset: true }).safeParse(value).success);
 }
 
 const evidence = z.object({ page: z.number().int().positive().optional(),

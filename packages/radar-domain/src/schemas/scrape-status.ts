@@ -1,3 +1,4 @@
+import { contractDateTime } from "../contracts/validation-datetime.js";
 import { z } from "zod";
 
 /**
@@ -60,7 +61,7 @@ export const ScrapeStatus = z.object({
   /** Percentage of documents collected vs. expected (0–100), if measurable. */
   coveragePct: z.number().min(0).max(100).optional(),
   /** ISO-8601 timestamp of the last collection run. */
-  lastRunAt: z.string().datetime().optional(),
+  lastRunAt: contractDateTime().optional(),
   /** URL of the data source website. */
   siteUrl: z.string().url().optional(),
   dataQuality: ScrapeStatusDataQuality.optional(),
