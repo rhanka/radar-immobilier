@@ -45,6 +45,13 @@ function rowFor(operation: string, extra: Record<string, unknown> = {}) {
 
 function appFor(render: (c: never) => Response) {
   const app = new Hono();
+  app.use("*", async (c, next) => {
+    c.header("Cross-Origin-Opener-Policy", "same-origin");
+    c.header("Cache-Control", "private, no-store");
+    c.header("Vary", "Cookie, Authorization");
+    c.header("X-Frame-Options", "DENY");
+    await next();
+  });
   app.get("/", (c) => render(c as never));
   return app;
 }
@@ -63,6 +70,18 @@ function bootstrapOf(html: string): Record<string, unknown> {
 }
 
 describe("write intent application documents", () => {
+  it.each(["summary", "management", "login"])("should preserve isolation headers on %s", async (kind) => {
+    const row = rowFor("facets.signals.personal.select.v1", { basket: "pertinent" });
+    const response = await appFor((c) => kind === "login" ? renderWriteIntentLogin(c)
+      : kind === "management" ? renderWriteIntentManagement(c, row, { csrf: "csrf" })
+        : renderWriteIntentSummary(c, row, { csrf: "csrf", challengeToken: "challenge" })).request("/");
+    expect(response.headers.get("cross-origin-opener-policy")).toBe("same-origin");
+    expect(response.headers.get("cache-control")).toBe("private, no-store");
+    expect(response.headers.get("vary")).toBe("Cookie, Authorization");
+    expect(response.headers.get("x-frame-options")).toBe("DENY");
+    expect(response.headers.get("content-security-policy")).toContain("frame-ancestors 'none'");
+  });
+
   it("should pin the served script bytes with the exported hash and CSP", async () => {
     const res = await appFor((c) => renderWriteIntentSummary(c, rowFor(
       "facets.signals.personal.select.v1", { basket: "pertinent" }),
