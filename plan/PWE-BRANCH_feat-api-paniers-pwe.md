@@ -32,6 +32,7 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Add selective commit and prerequisite-only incremental bundle auditing.
 - [x] Owner requested final PW-A integration before PW-E; intermediate bundle
   and report delivered, with 65 unit, 9 PG, 4396 API passes and 25 mutant kills.
 - [x] Read conception sections 7.4-7.9, CT-1-CT-9 and the full PW-E matrices.
