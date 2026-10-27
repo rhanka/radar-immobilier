@@ -1,6 +1,6 @@
 # Match the legacy scanner's first canonical kind/name field; retain YAML bytes.
 def field($pattern): [split("\n")[] | match($pattern) | .captures[0].string][0];
-gsub("\r\n?"; "\n")
+$render | gsub("\r\n?"; "\n")
 | ("\n" + .) | split("\n---[ \t]*(?=\n|$)"; "")
 | map(select(test("\\S"))
       | select(field("^kind:[ \t]+(\\S+)[ \t]*$") == $kind)

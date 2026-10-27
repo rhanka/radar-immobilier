@@ -17,6 +17,11 @@ if [ "$#" -lt 2 ]; then
 fi
 exact=false
 if [ "$#" -ge 3 ]; then exact=true; fi
-jq -jRs --arg kind "$2" --arg name "${3:-}" --arg prefix "$prefix" \
+# UTF-16LE rejects non-scalar values too; identity UTF-8 iconv accepts some.
+if ! iconv -f UTF-8 -t UTF-16LE "$1" >/dev/null; then
+  echo 'kfilter: cannot read strict UTF-8 input' >&2; exit 1
+fi
+# Rawfile decodes the whole buffer, preserving sequences across read boundaries.
+jq -jn --rawfile render "$1" --arg kind "$2" --arg name "${3:-}" --arg prefix "$prefix" \
   --argjson exact "$exact" --argjson names "$names" \
-  -f "$(dirname "$0")/kfilter.jq" "$1"
+  -f "$(dirname "$0")/kfilter.jq"
