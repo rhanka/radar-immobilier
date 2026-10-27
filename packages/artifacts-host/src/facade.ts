@@ -107,19 +107,6 @@ export function createArtifactControl(
           return { status: 403, body: { error: "workspace_membership_required" } };
         }
         if (commit.workspaceId !== "") frozenWorkspace = commit.workspaceId;
-        // Shared per-account minute bound, probed before S3; the commit
-        // transaction enforces it exactly. Reads never consume the bound.
-        if (admission.checkRate) {
-          let limited: boolean;
-          try {
-            limited = await admission.checkRate(actorId);
-          } catch {
-            const unavailable = { status: 503 as const, body: { error: "capability_unavailable" } };
-            Object.defineProperty(unavailable, "retryable", { value: true });
-            return unavailable;
-          }
-          if (limited) return { status: 403, body: { error: "rate_limited" } };
-        }
       }
       const invocation = Object.freeze({ invocationId: randomUUID(), actorId, storageScopeId: scope,
         authorizeCommit: async (...args: Parameters<typeof authorizeArtifactCommit>) => {
@@ -177,6 +164,9 @@ export function createArtifactControl(
           reason: entry.reason, status: entry.status, atMs: (options?.nowMs ?? Date.now)() });
       }
       const response = { ...projectArtifactHttpOutcome(outcome) };
+      if (!outcome.ok && outcome.failure.publicCode === "rate_limited") {
+        response.body = { error: "rate_limited", retryable: outcome.failure.retriable };
+      }
       Object.defineProperty(response, "retryable", { value: !outcome.ok && outcome.failure.retriable });
       if (op !== "publish" || response.status !== 201) return response;
       const result = response.body as { releaseId: string; manifest: string };
