@@ -28,6 +28,10 @@ Qualify, repair and integrate the supplied PW-C implementation on 07ef2757.
   - None; no scope exception required.
 
 ## Feedback Loop
+- [x] Preserve prepared Hono isolation headers when rendering HTML documents,
+  including login and management; raw Responses had dropped COOP and no-store.
+- [x] Complete createApp's required object-store boundary in the PG fixture;
+  every unexpected object operation fails instead of hiding an integration gap.
 - [x] Require an observable extra network request from the manual-loop mutant,
   rather than counting a timer that could return without fetching.
 - [x] Expose the durable technical state on owner management reads, without
