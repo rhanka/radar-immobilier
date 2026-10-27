@@ -28,6 +28,10 @@ Qualify, repair and integrate the supplied PW-C implementation on 07ef2757.
   - `api/tests/integration/pw-write-authority-rights.spec.ts`: PWC-EX1.
 
 ## Feedback Loop
+- [x] Final complete archive: typecheck, lint, build and nginx gates passed;
+  65 unit and 9 PostgreSQL cases passed without skips; API suite passed
+  4316 cases with 76 documented conditional skips and no failed suites. All
+  25 individual mutants were killed and restored byte-identically.
 - [x] Archive top-level API test files as well as integration tests; the
   omitted blob-store helper prevented 19 suites from loading. Preserve the
   original Vitest discovery and qualify every selected suite before delivery.
@@ -57,10 +61,10 @@ Qualify, repair and integrate the supplied PW-C implementation on 07ef2757.
 
 ## Plan / Todo (lot-based)
 - [x] Lot 0: rules, baseline, isolated ports and read-only shared Git.
-- [ ] Lot 1: application dispatch, documents and cookie/CSRF guards.
-- [ ] Lot 2: page preparation, listener and bounded follow-up.
-- [ ] Lot 3: unit/PostgreSQL, API suite, static gates and mutations.
-- [ ] Lot 4: atomic delivery, prerequisite-only bundle audit and report.
+- [x] Lot 1: application dispatch, documents and cookie/CSRF guards.
+- [x] Lot 2: page preparation, listener and bounded follow-up.
+- [x] Lot 3: unit/PostgreSQL, API suite, static gates and mutations.
+- [x] Lot 4: atomic delivery, prerequisite-only bundle audit and report.
 
 - [x] Delivery: feat(pw-c): dispatch confirmation and serialize revocations.
 
