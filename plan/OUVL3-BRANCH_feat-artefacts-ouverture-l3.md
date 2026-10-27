@@ -45,19 +45,24 @@ Connect published release files and H5 reads to current account/workspace author
 - [x] Docker cleanup completed with exit 0; no L3 containers, volumes or networks remain. Runner exited and released its lock; foreign L12 campaign subsequently observed, untouched.
 - [x] Read both complete Astra reviews of PR #931 at `0e9c0cbe`; owner requests the bounded corrections below, no push, incremental bundle from that head.
 - [x] OUVL3-EX2: allow `api/src/routes/auth.ts` and its auth tests only for validated reader login resumption. Impact: optional, same-origin reader return target in the existing OIDC flow; rollback: remove that optional return path, leave login unchanged.
-- [ ] Authorize native transitive resources with a host/release/session-bound reader cookie; remove HTML query rewriting and normalize CSP input line endings.
-- [ ] Resolve readable historical pinned releases and scope authority versions to the relevant artifact/reader.
-- [ ] Preserve the existing basket error contracts and resume opening through the existing login flow.
-- [ ] Keep the Muse report only in local evidence; qualify browser imports, CRLF and consecutive publications, then all gates.
-- [x] Implement pinned-host opening and a sealed resource authority in the reader cookie; native files recheck current rights while H5 still requires its explicit grant. Acceptance pending below.
+- [x] Authorize native transitive resources with a host/release/session-bound reader cookie; remove HTML query rewriting and normalize CSP input line endings.
+- [x] Resolve readable historical pinned releases and scope authority versions to the relevant artifact/reader.
+- [x] Preserve the existing basket error contracts and resume opening through the existing login flow.
+- [x] Keep the Muse report only in local evidence; qualify browser imports, CRLF and consecutive publications, then all gates.
+- [x] Implement pinned-host opening and a sealed resource authority in the reader cookie; native files recheck current rights while H5 still requires its explicit grant. Acceptance passed below.
 - [x] Remove grant injection from HTML entirely; normalize CRLF/CR to LF before emission and CSP hashing. Inline source and native resource URLs remain intact.
-- [x] Add Chromium cases for module/CSS imports, dynamic scripts, LF/CRLF inline code and two successive pinned publications; adapt opening proof to canonical pinned sessions. Execution pending.
+- [x] Add Chromium cases for module/CSS imports, dynamic scripts, LF/CRLF inline code and two successive pinned publications; adapt opening proof to canonical pinned sessions. Execution passed below.
 - [x] Reuse classification query decoding and error projection for basket reads, including request IDs and internal errors; keep resource and non-basket contracts separate.
 - [x] Route disconnected readers through existing OIDC login, retaining only a validated local resume path; restart on the validated pinned host to refresh expired browser binding.
 - [x] Add native-file boundary tests (reader/release/host substitution, missing or invalid grants, manifest misses, revocation) and compare all three read error envelopes with the existing routes.
 - [x] Add OIDC return-target tests and PostgreSQL regressions for fresh post-login binding and unrelated account/ACL changes during a blob read.
 - [x] Remove the Muse report from the tracked diff; preserve all 169 original lines in `tmp/sol-l3-evidence/RAPPORT-MUSE-OUV-L3.md`.
 - [x] Separate current artifact rights/profile from the publication pointer; add a regression for credentials issued before republishing, pointer-independent reads and subsequent ACL revocation.
+- [x] Targeted review regression passed: 429/0/0 across 48 files, with API typecheck; evidence `tmp/sol-l3-evidence/20261027T164902-5/`.
+- [x] Final full qualification at `1c0dc36c` passed all 10 gates before 17:25 UTC: 3225/0/369 API unit, 66/0/0 PostgreSQL, 3/0/0 Chromium, 10 killed mutations, 4146/0/79 API CI. Evidence: `tmp/sol-l3-evidence/20261027T170904-5/`.
+- [x] Eight Chromium reads reached the expected 2/1 counts in 120–170 ms; H5 and transitive resources returned 200, no CSP violations, unchanged 1500 ms timeout.
+- [x] Runner exited 0 with PASS; down -v removed all L3 containers, volumes and networks and released its lock. A subsequent foreign PWA campaign owns the lock and remains untouched.
+- [x] Delivery uses an audited incremental bundle from `0e9c0cbe`, reconstructed in a fresh repository; report and original Muse evidence remain outside Git. No push; shared Track unchanged.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch, serialized implementation and Docker campaigns.
