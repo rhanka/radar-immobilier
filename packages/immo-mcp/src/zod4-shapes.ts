@@ -6,10 +6,10 @@ function scalarError(expected: string, input: unknown): string {
   return input === undefined ? "Required" : `Expected ${expected}, received ${received}`;
 }
 export const mcpString = () => z.string({ error: (issue) => scalarError("string", issue.input) });
-export const mcpNonEmptyString = () => mcpString().min(1, {
-  error: "String must contain at least 1 character(s)",
-  when: ({ value }) => typeof value === "string",
-});
+export const mcpNonEmptyString = () => mcpString().refine(
+  (value) => typeof value !== "string" || value.length >= 1,
+  { message: "String must contain at least 1 character(s)" },
+).meta({ minLength: 1 });
 export const mcpBoolean = () => z.boolean({ error: (issue) => scalarError("boolean", issue.input) });
 export const mcpNumber = () => z.number({ error: (issue) =>
   typeof issue.input === "number" && !Number.isFinite(issue.input) && !Number.isNaN(issue.input)

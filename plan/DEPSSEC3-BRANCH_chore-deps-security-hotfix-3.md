@@ -37,6 +37,7 @@
 - [ ] Deliver an incremental bundle from 59d4c1bf, report review corrections and clean Docker.
 
 ## Feedback Loop
+- [x] Astra native string checks use public refinements, preserve minLength metadata and match all 12 discovery definitions.
 - [x] L3d: pass all seven workspace suites (7709 tests), typecheck, lint, builds, smoke and security gates; retain initial failure evidence.
 - [x] L3c: preserve historical signal workspace and head GUIDs in four newer schemas; regress canonicalization and malformed identifiers.
 - [x] L3b: resolve historical Zod, Ollama and Focus findings with raw audit, installed-tree and bundle-provenance evidence.
