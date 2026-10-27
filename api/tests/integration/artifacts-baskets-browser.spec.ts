@@ -1,8 +1,10 @@
-import { chromium } from "@playwright/test";
+import { chromium, type Browser } from "@playwright/test";
+import { getRequestListener } from "@hono/node-server";
 import { afterAll, beforeAll, expect, it } from "vitest";
 import { describeDb } from "../../src/services/facets/scope-db-fixture.js";
 import { cookie, startHarness, type Harness } from "./artifacts-h2.helpers.js";
 import { publishedBaskets } from "./artifacts-baskets.helpers.js";
+import { startBrowserHttps } from "./artifacts-baskets-browser.helpers.js";
 
 // Explicit opt-in: the default CI API image has no browser installed.
 describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("published HTML/CSS/JS Chromium acceptance", () => {
@@ -12,30 +14,29 @@ describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("published H
   it("should execute the S3-published script and read each reader's PostgreSQL baskets under CSP", async () => {
     const f = await publishedBaskets(h);
     const app = f.runtime();
-    const browser = await chromium.launch({ headless: true, args: ["--no-sandbox"] });
+    let statuses: Record<string, number> = {};
+    let requests: { host: string; cookie: string; cacheControl: string | null }[] = [];
+    const server = await startBrowserHttps(getRequestListener(async (request) => {
+      const url = new URL(request.url);
+      const response = await app.fetch(request);
+      statuses[url.pathname] = response.status;
+      requests.push({ host: url.host, cookie: request.headers.get("cookie") ?? "",
+        cacheControl: response.headers.get("cache-control") });
+      return response;
+    }));
+    let browser: Browser | undefined;
     try {
+      browser = await chromium.launch({ headless: true, args: server.args });
       for (const [sub, count] of [[f.data.contributor.sub, 2], [f.data.moderator.sub, 1]] as const) {
-        const context = await browser.newContext();
+        statuses = {};
+        requests = [];
+        // The certificate is ephemeral and restricted to this loopback fixture.
+        const context = await browser.newContext({ ignoreHTTPSErrors: true });
         const [name, value] = (await cookie(sub)).split("=") as [string, string];
         await context.addCookies([{ name, value, domain: "app.example.test", path: "/", secure: true, httpOnly: true, sameSite: "Lax" }]);
         const page = await context.newPage();
         const errors: string[] = [];
         page.on("pageerror", (error) => errors.push(error.message));
-        const statuses: Record<string, number> = {};
-        await page.route("https://**/*", async (route) => {
-          const request = route.request();
-          const requestHeaders = await request.allHeaders();
-          const requestHost = new URL(request.url()).host;
-          if (requestHost === f.host) expect(requestHeaders.cookie ?? "").not.toContain("radar_session");
-          const response = await app.request(request.url(), { method: request.method(), body: request.postDataBuffer(),
-            headers: { ...requestHeaders, host: requestHost } });
-          statuses[new URL(request.url()).pathname] = response.status;
-          expect(response.headers.get("cache-control")).toBe("private, no-store");
-          const headers = Object.fromEntries(response.headers);
-          if (response.headers.has("set-cookie")) headers["set-cookie"] = response.headers.getSetCookie().join("\n");
-          await route.fulfill({ status: response.status, headers,
-            body: Buffer.from(await response.arrayBuffer()) });
-        });
         try {
           await page.goto(`https://${f.host}/`);
           await page.getByRole("button", { name: "Autoriser et ouvrir" }).click();
@@ -47,9 +48,15 @@ describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("published H
           expect(await page.evaluate(async () => (await fetch("/sw.js")).status)).toBe(404);
           expect(statuses).toMatchObject({ "/": 200, "/main.js": 200, "/style.css": 200,
             "/__reader/api/baskets.search.v1": 200 });
+          for (const request of requests) {
+            if (request.host === f.host) expect(request.cookie).not.toContain("radar_session");
+            expect(request.cacheControl).toBe("private, no-store");
+          }
           expect(errors).toEqual([]);
         } finally { await context.close(); }
       }
-    } finally { await browser.close(); }
+    } finally {
+      try { await browser?.close(); } finally { await server.close(); }
+    }
   });
 });
