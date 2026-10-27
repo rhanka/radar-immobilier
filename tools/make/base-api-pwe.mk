@@ -6,8 +6,9 @@ UI_PORT ?= 15935
 MAILDEV_UI_PORT ?= 11935
 PHASE ?= pg
 SCOPE ?=
+MUTANTS ?=
 override MSG := $(value MSG)
-export ENV API_PORT UI_PORT MAILDEV_UI_PORT PHASE SCOPE FILES MSG
+export ENV API_PORT UI_PORT MAILDEV_UI_PORT PHASE SCOPE FILES MSG MUTANTS
 .PHONY: pwe-verify pwe-stage pwe-commit pwe-audit pwe-bundle
 pwe-verify:
 	rtk bash tools/make/base-api-pwe-verify.sh
