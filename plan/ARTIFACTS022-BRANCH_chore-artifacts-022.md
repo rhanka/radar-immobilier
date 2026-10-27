@@ -37,7 +37,7 @@
 - [x] Lot 1: Pin 0.2.2; npm changed only three workspace pins and the provider entry.
 - [x] Lot 2: Removed redundant static/runtime guards; test published adapters directly.
 - [x] Lot 2: Assert native error projection through `mapHostError` and real S3 refusal.
-- [x] Lot 2: Locate the unexported memory double via the exported migration path (Vitest lacks `import.meta.resolve`).
+- [x] Lot 2: Import the memory double through the public ESM publication export.
 - [x] Lot 3: Aligned current provider profile, qualification scripts and docs.
 - [x] Lot 4: Typecheck/lint passed; API 3566, host 166, MCP 406, artifacts integration 153 passed.
 - [x] Lot 4: Add a sequential qualification command with per-check logs and exit codes.
@@ -46,4 +46,7 @@
 - [x] Lot 5: Reviewed scope/diff; audited commits; deliver local bundle and uncommitted report.
 - [x] Lot 5: Removed owned Docker resources with `down -v`; API has 7 optional skipped tests.
 - [x] Lot 5: Peer consensus unverified (live model catalog unavailable); no consensus claimed.
+- [x] Review corrections: align the committed A5 runner baseline with 9a723753; keep strict tuple comparison.
+- [x] Review corrections: support test-artifacts-022 ports and use the current checkout's Git context.
+- [ ] Review corrections: requalify inspect-profile, verify and affected artifact suites through committed Make targets.
 - [ ] Conductor: push, run CI and merge with a merge commit.
