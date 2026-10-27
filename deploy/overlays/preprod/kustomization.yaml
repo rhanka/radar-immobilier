@@ -77,6 +77,13 @@ configMapGenerator:
 patches:
   - target:
       kind: ConfigMap
+      name: radar-mcp-receiver
+    patch: |
+      - op: replace
+        path: /data/STRICT_RECEIVER_ENVIRONMENT
+        value: preprod
+  - target:
+      kind: ConfigMap
       name: radar-api
     patch: |
       - op: replace

@@ -5,7 +5,6 @@ import { createPostgresCommitExecutor } from "@sentropic/artifacts/adapters/post
 import { compileArtifactsProfile, RADAR_ARTIFACTS_PROFILE } from "@sentropic/artifacts/mcp-core";
 import { createArtifactCommitCoordinator } from "@sentropic/artifacts/server/commit-contract";
 import { projectArtifactHttpOutcome, type HttpAppDeps } from "@sentropic/artifacts/http";
-import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
 import type { PublicationBlobStore } from "@sentropic/artifacts/server/publication";
 import type { ArtifactsStorageConfig } from "./config.js";
 import type { ActivationConfig } from "./activation.js";
@@ -13,6 +12,7 @@ import { initializeArtifactScope } from "./storage.js";
 import { createHostPolicy, authorizeArtifactCommit } from "./commit-policy.js";
 import { guardArtifactPool } from "./idempotency.js";
 import { createCommitDomain } from "./commit-domain.js";
+import { mapHostError } from "./host-outcome.js";
 import { startPreparationCleanup } from "./preparation-cleanup.js";
 import { projectArtifactWriteFailure } from "@sentropic/artifacts/server/outcome-contract";
 import { createTimeoutBlobStore, createTimeoutS3Client, S3_OPERATION_TIMEOUT_MS } from "./s3-timeout.js";
@@ -35,7 +35,7 @@ export async function composeArtifactHost(
   await initializeArtifactScope(pool, config.storageScope, config.orgId);
   const policy = await createHostPolicy(pool, config.storageScope, options.readActivation);
   const coordinator = options.coordinator ?? createArtifactCommitCoordinator({
-    executor: createPostgresCommitExecutor(pool), policy,
+    executor: createPostgresCommitExecutor(pool), policy, mapHostError,
   });
   const client = new S3Client({
     endpoint: config.s3Endpoint, region: config.s3Region, forcePathStyle: true,
@@ -43,18 +43,7 @@ export async function composeArtifactHost(
     requestHandler: { requestTimeout: 5000, connectionTimeout: 3000, throwOnRequestTimeout: true },
   });
   const base = injectedBlobs ?? createS3BlobStore({ client: createTimeoutS3Client(client), bucket: config.s3Bucket });
-  const bounded = createTimeoutBlobStore(base, S3_OPERATION_TIMEOUT_MS, options.onProviderFailure);
-  const blobs: PublicationBlobStore = Object.fromEntries(
-    ["putBlob", "getBlob", "listKeys", "deleteBlob"].map((method) => [method, async (...args: unknown[]) => {
-      try { return await (bounded[method as keyof PublicationBlobStore] as (...a: unknown[]) => unknown)(...args); }
-      catch (cause) {
-        if ((cause as { code?: string } | null)?.code === "artifact_s3_timeout") {
-          throw new ArtifactOperationError("provider_unavailable", { cause });
-        }
-        throw cause;
-      }
-    }]),
-  ) as unknown as PublicationBlobStore;
+  const blobs = createTimeoutBlobStore(base, S3_OPERATION_TIMEOUT_MS, options.onProviderFailure);
   try {
     const domain = await createCommitDomain({ pool, scope: config.storageScope, blobs, coordinator,
       profile: options.profile ?? compileArtifactsProfile(RADAR_ARTIFACTS_PROFILE),

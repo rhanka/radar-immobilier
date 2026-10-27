@@ -6,6 +6,7 @@ import { assertAttributedTestObjects } from "./artifacts-s3.helpers.js";
 import type pg from "pg";
 import { fork } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { closeArtifactWorker } from "./artifacts-race-cleanup.helpers.js";
 
 /**
  * Provisional r2 upstream contract bindings (Sentropic spec r2, section 3.2).
@@ -159,10 +160,20 @@ async function loadUpstream(specifier: string, entry: string): Promise<Record<st
   } catch (error) {
     const code = (error as { code?: unknown }).code;
     const message = error instanceof Error ? error.message : String(error);
-    const absent = code === "ERR_PACKAGE_PATH_NOT_EXPORTED" ||
-      (["MODULE_NOT_FOUND", "ERR_MODULE_NOT_FOUND"].includes(String(code)) && message.includes(specifier)) ||
-      (message.includes("Missing") && message.includes(specifier.replace("@sentropic/artifacts", ".")) &&
-        message.includes("@sentropic/artifacts"));
+    const parts = /^(@[^/]+\/[^/]+|[^/]+)(\/.*)?$/.exec(specifier);
+    const packageName = parts?.[1];
+    const subpath = `.${parts?.[2] ?? ""}`;
+    // Read the failing target before "imported from", never its importer.
+    const target = message.split(" imported from ")[0]!;
+    const absent = packageName !== undefined && (
+      (code === "ERR_PACKAGE_PATH_NOT_EXPORTED" &&
+        target.endsWith(`/node_modules/${packageName}/package.json`) &&
+        (target.startsWith(`Package subpath '${subpath}' is not defined by "exports" in `) ||
+          (subpath === "." && target.startsWith('No "exports" main defined in ')))) ||
+      (["MODULE_NOT_FOUND", "ERR_MODULE_NOT_FOUND"].includes(String(code)) &&
+        (message.startsWith(`Cannot find module '${specifier}'`) ||
+          message.startsWith(`Cannot find package '${packageName}'`))) ||
+      message === `Missing "${subpath}" specifier in "${packageName}" package`);
     if (!absent) throw error;
     missingContract(entry, `upstream entry ${specifier} is not provided by the installed provider`);
   }
@@ -1008,7 +1019,7 @@ export async function startArtifactWorker(database: pg.PoolConfig, config: unkno
       waitUntilReached: async (point: CommitBarrierPoint, id: string) => { await call("wait", point, id); },
       release: (point: CommitBarrierPoint, id: string) => { void call("release", point, id); },
     } satisfies CommitBarrier,
-    close: async () => { try { await call("close"); } finally { child.kill(); } },
+    close: () => closeArtifactWorker(child, () => call("close")),
   };
 }
 

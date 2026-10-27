@@ -8,8 +8,7 @@ import { createPublicationService, type PublicationBlobStore } from "@sentropic/
 import type { ArtifactsStorageConfig } from "@radar/artifacts-host";
 import { initializeArtifactScope } from "../../../packages/artifacts-host/src/storage.js";
 import { createPurgeTestHost } from "./artifacts-purge-race.helpers.js";
-import { normalizeHostOutcome } from "../../../packages/artifacts-host/src/host-outcome.js";
-import { bindHostCoordinator } from "../../../packages/artifacts-host/src/host-coordinator.js";
+import { mapHostError, normalizeHostOutcome } from "../../../packages/artifacts-host/src/host-outcome.js";
 import { requirePublicFunction, COMMIT_CONTRACT_SPECIFIER, finalizationPhaseFaults,
   type R2CommitCoordinator, type CompiledArtifactsProfile,
   type InvocationContextShape, type CoordinatorBarrierPoint } from "./artifacts-provider-contract.helpers.js";
@@ -42,7 +41,7 @@ export async function createCandidateCoordinator(pool: pg.Pool, testObserver: un
     COMMIT_CONTRACT_SPECIFIER, "createArtifactCommitCoordinator");
   const executor = await requirePublicFunction<(pool: pg.Pool) => unknown>(
     "@sentropic/artifacts/adapters/postgres-commit", "createPostgresCommitExecutor");
-  return create({ executor: executor(pool), testObserver,
+  return create({ executor: executor(pool), testObserver, mapHostError,
     ...(testPoints === undefined ? {} : { testPoints }),
     policy: { createParticipant(client: PolicyClient, transactionToken: string) {
       return {
@@ -106,8 +105,7 @@ export async function composeCandidateHost(params: {
     await client.query(`SELECT ${column} FROM artifacts.${table} WHERE ${column} = $1 FOR UPDATE`,
       [artifact.getStore()]);
   };
-  const app = createApp({ profile, coordinator: bindHostCoordinator(coordinator as never,
-    () => currentInvocation.getStore()!.authorizeCommit as never),
+  const app = createApp({ profile, coordinator, mapHostError,
     derivation: derive({ storageScopeId: config.storageScope, actorIds: actors.rows.map((row) => row.sub) }),
     legacyRecords: legacy(pool),
     ensureHost: {

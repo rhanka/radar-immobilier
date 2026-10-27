@@ -32,7 +32,7 @@ import { auth, cookie, migrationsFolder } from "./artifacts-h2.helpers.js";
 import { cleanupArtifactTestResources, listTestBucketKeys } from "./artifacts-s3.helpers.js";
 import { createPurgeTestHost } from "./artifacts-purge-race.helpers.js";
 import { loadConfig } from "../../src/config.js";
-import { assertPurgeEffects } from "./artifacts-race-cleanup.helpers.js";
+import { awaitWithPump, cleanupArtifactRace, assertPurgeEffects } from "./artifacts-race-cleanup.helpers.js";
 import {
   assertOutcomeFailure,
   authorizeTransaction,
@@ -711,6 +711,8 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       user: env.POSTGRES_USER, password: env.POSTGRES_PASSWORD, database: DATABASE }, storageConfig());
     expect(worker.pid).not.toBe(process.pid);
     const barrierB = worker.barrier;
+    let invAId = "";
+    let invBId = "";
     let runA: ReturnType<typeof startBarrierOperation> | undefined;
     let runB: ReturnType<typeof startBarrierOperation> | undefined;
     try {
@@ -741,17 +743,17 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         { scope: SCOPE, sub: ACTOR, op: "publish", artifactId, clientKey: `q1-race-${variant}` });
       const invA = invocationFor(authorizeCommit, `race-a-${variant}`);
       const invB = invocationFor(authorizeCommit, `race-b-${variant}`);
-      const invAId = invA["invocationId"] as string;
-      const invBId = invB["invocationId"] as string;
+      invAId = invA["invocationId"] as string;
+      invBId = invB["invocationId"] as string;
       const releasesBefore = await tableCount("releases");
       const keysBefore = await tableCount("operation_receipts");
       runB = startBarrierOperation(barrierB, invBId, () => executeB({ method: "POST", path: "/publish",
         body: changedCommand ? { ...body, files: [{ path: "different.html", mimeType: "text/html",
           text: "different command" }] } : body }, invB), "before_key_lock");
-      await runB.reached;
+      await awaitWithPump(runB.reached, runB.drained, "before_key_lock/B", 5000);
       runA = startBarrierOperation(barrier, invAId,
         () => executeA({ method: "POST", path: "/publish", body }, invA), "before_commit");
-      await runA.reached;
+      await awaitWithPump(runA.reached, runA.drained, "before_commit/A", 5000);
       const cleanup = await requirePreparationCleanupBinding();
       const preparing = await cleanup.inspectPreparations(hostA, artifactId);
       // The public inventory excludes completed successes: observe both
@@ -765,11 +767,11 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       const preparedKeys = new Set(await rawBlobs().listKeys(`artifacts/${SCOPE}/`));
       for (const key of preparedLoser!.blobKeys) expect(preparedKeys.has(key)).toBe(true);
       runA.release();
-      const winner = await runA.pending as Record<string, unknown>;
+      const winner = await awaitWithPump(runA.pending, runA.drained, "publish/A") as Record<string, unknown>;
       await runA.drained;
       expect(winner).toMatchObject({ ok: true });
       runB.release();
-      const loser = await runB.pending as Record<string, unknown>;
+      const loser = await awaitWithPump(runB.pending, runB.drained, "publish/B") as Record<string, unknown>;
       await runB.drained;
       expect(loser).toMatchObject({ ok: !changedCommand });
       const winnerBody = ((winner as { result: unknown }).result as { body: unknown }).body;
@@ -822,9 +824,10 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
       }
     } finally {
       runA?.release(); runB?.release();
-      await Promise.allSettled([runA?.pending, runB?.pending]);
-      if (typeof closeA === "function") (closeA as () => void)();
-      await worker.close();
+      // A5 runners own release state; repeating settled remote releases rejects.
+      await cleanupArtifactRace([], [],
+        [runA?.pending, runB?.pending, runA?.drained, runB?.drained],
+        () => { if (typeof closeA === "function") (closeA as () => void)(); }, () => worker.close());
     }
   });
 
@@ -881,7 +884,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         for (const key of sharedKeys) expect(paused.blobKeys).toContain(key);
         for (const key of exclusiveKeys) expect(paused.blobKeys).toContain(key);
         expect(await binding.inspectDeletionClaims(purgeHost)).toContainEqual(
-          expect.objectContaining({ claimId: paused.claimId, state: "deleting" }));
+          expect.objectContaining({ claimId: paused.claimId, state: "pending" }));
         const reference = invocationFor(allowAll(), `purge-reference-${order}`);
         const referenceKey = `purge-reference-${order}`;
         const referenceInternalKey = deriveIdempotencyKey(
@@ -976,7 +979,7 @@ describe.skipIf(!ENABLED)("finalization authorization Q1 (set ARTIFACTS_PROVIDER
         paused = earlyPause ?? await purge;
         expect(paused.claimId.length).toBeGreaterThan(0);
         expect(await binding.inspectDeletionClaims(purgeHost)).toContainEqual(
-          expect.objectContaining({ claimId: paused.claimId, state: "deleting" }));
+          expect.objectContaining({ claimId: paused.claimId, state: "pending" }));
         // The target has exclusive bytes too, so purge can reach DELETE even
         // though the new committed reference protects the shared bytes.
         for (const key of sharedKeys) expect(paused.blobKeys).not.toContain(key);

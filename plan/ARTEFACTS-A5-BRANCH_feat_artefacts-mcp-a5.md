@@ -32,6 +32,17 @@
 - [x] Synthetic isolated tests only; root UAT remains unchanged.
 
 ## Plan / Todo (lot-based)
+- [x] Artifacts 0.2.1: published integrity verified before container installation; exact API/host/MCP pins, four lock entries changed and audit gate passed (20261026T130511-18).
+- [x] Artifacts 0.2.1: HTTP, coordinator and dispatch use mapHostError; delete the coordinator denial wrapper and redundant error reclassification; retain phase diagnostics.
+- [x] Artifacts 0.2.1: align the provider registry, embedded configuration, tuple/image proofs and operator guide; assert exactly four lock changes from e9d4696c.
+- [x] Artifacts 0.2.1: both corrected acceptance cases and three mapper controls pass (20261026T130653-18); adapt mutation sites to the provider authority hook and mapHostError.
+- [x] Artifacts 0.2.1: foreign campaigns observed after preflight; recheck after source capture and stop the owned campaign on foreign test-stack intrusion instead of relying on the cooperative lock alone.
+- [x] Artifacts 0.2.1: add an actual-runner intrusion control that preserves real preflight observations, injects no foreign container, and requires signal 143 plus complete owned-resource cleanup.
+- [x] Artifacts 0.2.1: the intrusion control exposed asynchronous --rm volume release; retain ownership checks and retry bounded teardown until Docker reports no owned resources.
+- [x] Artifacts 0.2.1: corrected acceptance 2/2; full Q1/Q2/acceptance 31/32/6; API 3938 passed and 76 pending; MCP 401/401, host 165/165, exchange 1/1; lint/types/build/audit pass (20261026T130839-18, 20261026T131802-18).
+- [x] Artifacts 0.2.1: sixteen-tool image 02c363a6, source 9e982613, with restart/replay, ordered conflict and revocation refusals; 20261026T132713-18. Product sources remain identical to the full qualification.
+- [x] Artifacts 0.2.1: intrusion control passes from a08c04eb with expected signal 143, real owned-container teardown and zero resources (20261026T133802-21, intrusion-control.OKBUZU).
+- [x] Artifacts 0.2.1: pre-close bundle from e9d4696c audited in fresh provider-021-bundle-audit.7RPRHR; re-anchor this documentation-only closure with the same audit and record the final SHA/bundle digest in the companion report; no push.
 - [x] Read mandatory rules, approved A5/P7 design, CT clauses and A4 handoff.
 - [x] Compile the complete published profile and bind exactly four selected tools.
 - [x] Preserve twelve-tool parity and guarded startup; artifact request authority stays immutable (contract composition).

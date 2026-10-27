@@ -23,11 +23,20 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
   - `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, other branch plans
   - PW-B/PW-D implementations, migrations, A6 read contracts
 - **Conditional Paths**:
+  - `origin/main` incoming changes, including its other plans and infrastructure:
+    PWA-EX4 authorizes exact integration by merge, with the finalization test conflict resolved.
   - `api/tests/integration/pw-write-createapp.spec.ts`: PWA-EX1.
   - Approved PW-D implementation, migration, tests, spec, tooling and plan:
     PWA-EX3 permits their exact import from 0ab7d664 by merge only.
 
 ## Feedback Loop
+- [x] PWA-EX4: owner finalization requires merging main 9a723753 (106 commits),
+  including ARTEFACTS A1-A6 and provider 0.2.1. Preserve PW-A/B/D bytes and
+  the identical Track log; retain main's helper imports and pending purge claims.
+  Rollback reverts the merge with first parent as mainline, preserving both refs.
+- [x] Pre-main qualification on 318b97fd: PW-A 134/0/0 and 31 mutations pass;
+  static gates pass, API is 4260/1/76 on concurrent publication/S3mock. Main
+  already serializes conflicting same-key test blob writes; import that fix by merge.
 - [x] Third-pass socket probe: PostgreSQL can keep pg_sleep and locks after
   socket closure. Reserve an independent control connection before BEGIN and
   bound backend termination to 250ms; require backend disappearance under saturation.
