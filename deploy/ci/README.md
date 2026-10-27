@@ -135,8 +135,18 @@ debugging, but this is **best-effort and voie-dependent**:
 | `rollback-release.sh` | Roll a Deployment back to a prior image. |
 | `reconcile-preprod.sh` | Targeted server-side apply of preprod manifests. |
 | `check-preprod-auth-isolation.sh` | Fails if the rendered preprod overlay carries a PROD auth value (PROD IdP/app host outside `preprod.`, client id `radar-immobilier`) or if ConfigMap `radar-api` does not pin the preprod OIDC keys. Run by CI and by `reconcile-preprod.sh` before any apply. |
-| `kfilter.py` | Manifest filter used by the reconcile step. |
+| `kfilter.sh`, `kfilter.jq` | jq manifest filter used by reconcile; retains the original YAML text, document order and fields. |
+| `check-no-python.sh` | CI guard rejecting any `.py` file under `deploy/`, including nested paths and symlinks (#851, #810). |
 | `*.test.sh` | Shell tests for the runners above. |
+
+The filter needs Bash and jq, already available on the Ubuntu CD runner. Usage:
+`bash deploy/ci/kfilter.sh [--names] [--name-prefix P] <render> <Kind> [<name>]`.
+It uses the former canonical kustomize field scan (top-level `kind:` and the
+first two-space `name:`); it never parses or serializes YAML. Golden fixtures
+cover exact/prefix/name-only selection, empty results, missing names, literal
+blocks, tabs, Unicode and newline normalization. `kfilter.test.sh` also compares
+whole preprod documents against an independent awk selector. The hermetic
+reconcile suite rejects every attempted Python invocation.
 
 ## Resumable whole-bucket inventory
 

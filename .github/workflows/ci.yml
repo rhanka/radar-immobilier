@@ -18,6 +18,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Reject Python files under deploy
+        run: |
+          bash deploy/ci/check-no-python.sh
+          bash deploy/ci/check-no-python.test.sh
+
       - name: Validate compose files
         run: |
           docker compose -f docker-compose.yml -f docker-compose.dev.yml config -q
@@ -47,6 +52,9 @@ jobs:
 
       - name: Validate preprod reconcile immo-mcp branch (hermetic, fake kubectl)
         run: bash deploy/ci/reconcile-preprod-mcp.test.sh
+
+      - name: Validate manifest filter equivalence (fixtures and preprod render)
+        run: bash deploy/ci/kfilter.test.sh
 
       - name: Validate projection declared-changes inputs (offline, GH #817)
         run: bash deploy/ci/projection-declared-args.test.sh
