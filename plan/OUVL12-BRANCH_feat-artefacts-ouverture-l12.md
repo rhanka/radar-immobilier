@@ -44,13 +44,18 @@ isolation, current authorization, transactional quotas and replay safety.
 - [x] Shared Git metadata is read-only: use local Git metadata and audit a bundle
   against the original base in a fresh repository; do not push.
 - [x] Owner instruction overrides commit trailers and report language.
-- [x] blocked: the resumed qualification waited over three hours for the shared
-  machine; `test-e2-int-postgres-1` remained active. Test gates and mutations
-  have not executed. Resume requires the foreign stack to finish and release.
+- [x] Historical block: the earlier qualification waited over three hours while
+  `test-e2-int-postgres-1` remained active; resolved by the 14:50 UTC reprise.
 - [x] Repaired local queue control: stop proxy signals left child waiters;
   removed only this workspace's duplicates and added graceful file cancellation.
 - [x] Resumed at 14:50 UTC after the foreign stack stopped; acquired the shared
   lock and verified no foreign test stack before starting the dedicated stack.
+- [x] Qualification passed: host 190, MCP 415, admission PG 13, enabled artifact
+  acceptance 166, API full 3494 passed / 699 conditionally skipped, no failures.
+- [x] Four mutation proofs passed baseline / failed assertions / passed restored;
+  container sources matched the local checkout by SHA-256 after restoration.
+- [x] Shared lock released at 15:01 UTC after guarded down -v --remove-orphans;
+  inspection confirmed no owned containers, volumes or networks remained.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch integration; no cherry-pick.
@@ -62,14 +67,14 @@ isolation, current authorization, transactional quotas and replay safety.
 - [x] **Lot 0 — Baseline & constraints**
   - [x] Read rules, Muse report, design and prime review.
   - [x] Merge main 0.2.2 in the local recovery repository.
-- [ ] **Lot 1 — Host general admission**
-  - [ ] Activation, membership-independent admission and workspace decoupling.
-  - [ ] Transactional global, actor and shared minute quotas with migration.
-  - [ ] Host unit tests.
-- [ ] **Lot 2 — MCP general admission**
-  - [ ] Approved accounts bypass stale workspace claims for artifact tools.
-  - [ ] Four tools, server identities, forged-field refusals and MCP tests.
-- [ ] **Lot 3 — Qualification**
+- [x] **Lot 1 — Host general admission**
+  - [x] Activation, membership-independent admission and workspace decoupling.
+  - [x] Transactional global, actor and shared minute quotas with migration.
+  - [x] Host unit tests.
+- [x] **Lot 2 — MCP general admission**
+  - [x] Approved accounts bypass stale workspace claims for artifact tools.
+  - [x] Four tools, server identities, forged-field refusals and MCP tests.
+- [x] **Lot 3 — Qualification**
   - [x] Repair the rate-probe test double's account-query row type.
   - [x] Grant the stale-claims fixture its business scope to reach account denial.
   - [x] Derive PG harness types from MCP ports instead of undeclared API packages.
@@ -81,9 +86,9 @@ isolation, current authorization, transactional quotas and replay safety.
   - [x] Require real publication with zero/two memberships and by both MCP actors.
   - [x] Repair the MCP test suite delimiter and remove an unused fixture argument.
   - [x] Add direct PostgreSQL commit/replay and actor/minute concurrency probes.
-  - [ ] Typecheck, ESLint, API unit tests and PostgreSQL admission tests.
-  - [ ] Isolation and authorization mutations.
-  - [ ] Complete API suite matching CI.
+  - [x] Typecheck, ESLint, API unit tests and PostgreSQL admission tests.
+  - [x] Isolation and authorization mutations.
+  - [x] Complete API suite matching CI.
   - [x] Implemented: `feat(host): add general activation mode`.
   - [x] Implemented: `feat(host): reserve actor quotas with schema migration`.
   - [x] Implemented: `feat(host): admit general accounts without cohort`.
@@ -98,6 +103,6 @@ isolation, current authorization, transactional quotas and replay safety.
   - [x] Implemented: `test(api): add general artifact admission harness`.
   - [x] Implemented: `test(api): cover general host admission on PostgreSQL`.
   - [x] Implemented: `test(api): cover general MCP tools on PostgreSQL`.
-- [ ] **Lot 4 — Delivery**
-  - [ ] Atomic commits, bundle audit and French results report.
-  - [ ] Confirm own Docker project has no containers, networks or volumes.
+- [x] **Lot 4 — Delivery**
+  - [x] Atomic commits, bundle audit and French results report.
+  - [x] Confirm own Docker project has no containers, networks or volumes.
