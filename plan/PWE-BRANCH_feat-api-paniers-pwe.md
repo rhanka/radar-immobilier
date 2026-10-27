@@ -32,6 +32,8 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Add isolated process-local consumption and autonomous bucket-quota
+  variants; reject skipped selected mutant cases and retain their functional diagnostics.
 - [x] Add exact confirm-field refusals and immutable-summary effects; isolate
   dispatch substitution, unknown BASE reason, autonomous consumption and audit mutants.
 - [x] Cancel the queued campaign before adding required variants; no owned

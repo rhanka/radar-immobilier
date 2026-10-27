@@ -20,6 +20,9 @@ function run(name, scope, title, phase) {
     .filter((test) => test.fullName.includes(title));
   if (!selected.length) throw new Error(`No targeted assertion: ${name}/${phase}`);
   if (phase === "mutated") {
+    if (selected.some((test) => !["passed", "failed"].includes(test.status))) {
+      throw new Error(`Targeted mutation case was skipped: ${name}`);
+    }
     if (result.status !== 1 || !selected.some((test) => test.status === "failed"
       && test.failureMessages.some((message) => /AssertionError|__VITEST_REJECTS__/.test(message)))) {
       throw new Error(`No targeted functional red: ${name}`);
@@ -27,7 +30,8 @@ function run(name, scope, title, phase) {
   } else if (result.status !== 0 || selected.some((test) => test.status !== "passed") || !report.success) {
     throw new Error(`Green gate failed: ${name}/${phase}`);
   }
-  return selected.map(({ fullName, status }) => ({ fullName, status }));
+  return selected.map(({ fullName, status, failureMessages }) => ({ fullName, status,
+    ...(phase === "mutated" ? { failureMessages } : {}) }));
 }
 mkdirSync("/evidence/pwe-mutants", { recursive: true });
 const filter = new RegExp(process.env.PWE_MUTATION_FILTER ?? ".*");
