@@ -87,7 +87,7 @@ export const OpportunityDossier = z.object({
       confirmed: z.boolean().default(false),
       zonePolygonSource: ZonePolygonSource.default("hypothese-street-name"),
       assemblyClusterId: z.string().optional(),
-      metadata: z.record(z.unknown()).optional(),
+      metadata: z.record(z.string(), z.unknown()).optional(),
     })
   ),
   evidence: z.array(EvidenceItem),

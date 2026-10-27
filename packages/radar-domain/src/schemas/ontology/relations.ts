@@ -28,9 +28,9 @@ export type { OntoRelationTypeT } from "./relations-generated.js";
 export { RegulatoryStageKind, RegulatoryStageOutcome } from "./reglement-lifecycle.js";
 export type { RegulatoryStageKindT, RegulatoryStageOutcomeT } from "./reglement-lifecycle.js";
 export const RegulatoryStage = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   /** HAS_STAGE = FK relational vers le Bylaw (§4.2). */
-  bylawId: z.string().uuid(),
+  bylawId: z.string().guid(),
   kind: RegulatoryStageKind,
   occurredOn: isoDateSchema,
   outcome: RegulatoryStageOutcome.default("non-disponible"),
@@ -47,9 +47,9 @@ export type RegulatoryStageT = z.infer<typeof RegulatoryStage>;
 export const ConstraintHitTarget = z.enum(["lot", "zone"]);
 export type ConstraintHitTargetT = z.infer<typeof ConstraintHitTarget>;
 export const ConstraintHit = z.object({
-  constraintId: z.string().uuid(),
+  constraintId: z.string().guid(),
   targetKind: ConstraintHitTarget,
-  targetId: z.string().uuid(),
+  targetId: z.string().guid(),
   kind: ConstraintKind,
   source: z.string().min(1),
   date: isoDateSchema.nullable().default(null),
