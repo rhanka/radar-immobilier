@@ -4,6 +4,7 @@ source tools/make/base-api-guards.sh
 require_env
 [[ $ENV == test-api-paniers-pwc && $API_PORT == 18934 && $UI_PORT == 15934 && $MAILDEV_UI_PORT == 11934 ]]
 ROOT=$(pwd -P)
+export GIT_DIR=$ROOT/tmp/pwc-delivery.git GIT_WORK_TREE=$ROOT
 PROJECT=radar-$ENV
 ACTION=ci-api
 RUN_DIR=$ROOT/tmp/pwc-evidence/runtime
