@@ -42,7 +42,8 @@ export async function identityFixture(domain: PwIdentityDomain, sub: string, ttl
     store: { get: async () => { throw new Error("unexpected object read"); },
       head: async () => { throw new Error("unexpected object probe"); },
       put: async () => { throw new Error("unexpected object write"); } },
-    db: h.f.db, auth: login.auth,
+    db: h.f.db, auth: login.auth, writeH5: h.writeH5,
+    contentHost: { enabled: true, contentBase: "pages.example.test" },
     writeApp: createWriteAppSurface({ auth: login.auth, domain, accounts: h.f.pool, nowMs: () => h.clock.now,
       db: h.f.db, sessionSecret: login.auth.sessionSecret,
       challengeKeys: new Map([[h.writeH5.challengeKeyId, randomBytes(32)]]) }) });
