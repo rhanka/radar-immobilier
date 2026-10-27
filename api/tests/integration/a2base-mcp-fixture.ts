@@ -1,4 +1,4 @@
-/** Test-only facade mounting. Production normalization/mounting remain T08/T09. */
+/** Integrated production facade; transport failures remain explicit test injections. */
 import { createServer } from "node:http";
 import { once } from "node:events";
 import { exportJWK } from "jose";
@@ -6,10 +6,8 @@ import { Hono } from "hono";
 import { vi } from "vitest";
 import { createApp } from "../../src/app.js";
 import { strictReceiverTestAuth, strictReceiverTestConfig } from "../../src/artifacts/strict-receiver.js";
-import { decodeMcpSignalSearch, MCP_SIGNAL_SEARCH_PATH } from "../../src/routes/mcp-signal-search.js";
-import { readMcpSignalCards } from "../../src/services/facets/mcp-signal-search.js";
-import { ScopeError } from "../../src/services/facets/scope.js";
-import { WorkspaceError } from "../../src/services/workspaces/types.js";
+import { MCP_SIGNAL_SEARCH_PATH } from "../../src/routes/mcp-signal-search.js";
+import * as signalSearch from "../../src/services/facets/mcp-signal-search.js";
 import { privateSignalResponse } from "../../src/services/facets/private-response.js";
 import { workspaceFixture, workspaceSignal } from "../../src/services/facets/workspace-archive-fixture.js";
 import { EMPTY_DISCARDED_SIGNALS } from "../../src/services/graph/discarded-signals.js";
@@ -41,26 +39,14 @@ export async function mcpFixture(options: Pick<ImmoHttpDeps, "authorize"> = {}) 
   let status: number | undefined;
   let error = "";
   let reads = 0;
-  const app = createApp({ db: data.db, store, auth, discarded: EMPTY_DISCARDED_SIGNALS,
-    checkDb: async () => ({ ok: true }), checkObjectStore: async () => ({ ok: true }) });
-  app.get(MCP_SIGNAL_SEARCH_PATH, async (c) => {
+  const originalSearch = signalSearch.searchMcpSignals;
+  const business = vi.spyOn(signalSearch, "searchMcpSignals").mockImplementation(async (...args) => {
     reads++;
-    if (status) return c.json({ error, successor: "https://private.invalid/token" }, status as 503);
-    try {
-      const args = decodeMcpSignalSearch(new URL(c.req.url).searchParams);
-      const sub = (c.get("session" as never) as { sub: string }).sub;
-      const result = await readMcpSignalCards({ db: data.db, store }, sub, args);
-      // Synthetic cards exercise authority/visibility here; T08 owns real domain normalization.
-      const signals = result.cards.map((card) => ({ id: card.id, city: args.city, type: card.type,
-        etape: "", regulatoryStatus: card.regulatoryStatus, etape_date: card.publishedAt ?? "",
-        reglement_number: "", zone_ref: "", no_lot: null, summary: card.description ?? card.label ?? "",
-        source_document_id: card.sourceRef ?? "" })).slice(0, args.limit);
-      return c.json({ ok: true, workspaceId: result.workspaceId, citySlug: result.citySlug, signals });
-    } catch (failure) {
-      if (failure instanceof ScopeError || failure instanceof WorkspaceError) return c.json({ error: failure.message }, failure.status);
-      throw failure;
-    }
+    return originalSearch(...args);
   });
+  const app = createApp({ db: data.db, store, auth, discarded: EMPTY_DISCARDED_SIGNALS,
+    mcpSignalSearch: { enabled: true },
+    checkDb: async () => ({ ok: true }), checkObjectStore: async () => ({ ok: true }) });
   const receiver = new Hono();
   receiver.use(MCP_SIGNAL_SEARCH_PATH, privateSignalResponse);
   receiver.route("/", app);
@@ -68,6 +54,7 @@ export async function mcpFixture(options: Pick<ImmoHttpDeps, "authorize"> = {}) 
   const upstream: typeof fetch = async (input, init) => {
     const request = new Request(input, init);
     requests.push(request);
+    if (status) return Response.json({ error, successor: "https://private.invalid/token" }, { status });
     return receiver.request(request);
   };
   const deps = exchangeDepsFor(exchange);
@@ -93,6 +80,7 @@ export async function mcpFixture(options: Pick<ImmoHttpDeps, "authorize"> = {}) 
     try { for (const { client, transport } of clients) {
       try { await transport.terminateSession(); } finally { await client.close(); }
     } } finally {
+      business.mockRestore();
       jwks.closeAllConnections();
       await new Promise<void>((resolve) => jwks.close(() => resolve()));
       // The imported database fixture owns pool shutdown and database removal.

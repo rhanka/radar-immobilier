@@ -7,6 +7,7 @@ import { createStatefulMcpNamespace, type StatefulMcpHost, type VerifiedMcpReque
 import { ALL_TOOL_DEFINITIONS } from "../tool-definitions.js";
 import { getInvocationContext } from "../invocation-context.js";
 import { invokeTool } from "../tools.js";
+import { AccountBindingUnavailable } from "../account-binding.js";
 import { assertArtifactBinding, ARTIFACT_NATIVE_ADAPTER, type ArtifactMcpBinding } from "./artifact-provider.js";
 
 // GeoJSON may contain 2,000 features; budgets must not impose a smaller semantic limit.
@@ -43,6 +44,7 @@ export async function composeStatefulImmo(
   authorize: (tool: string, request: VerifiedMcpRequest) => Promise<boolean>,
   artifacts?: ArtifactMcpBinding,
 ) {
+  const unavailableAccounts = new WeakSet<VerifiedMcpRequest>();
   if (artifacts) assertArtifactBinding(artifacts);
   const modules = createClusterMeshModules();
   const registry = createMcpRegistry({ modules });
@@ -80,9 +82,16 @@ export async function composeStatefulImmo(
   const compiled = await registry.compile({ bindings: {}, compatibility });
   if (!compiled.ok) throw new Error(`composition_invalid:${JSON.stringify(compiled.diagnostics)}`);
   return createStatefulMcpNamespace(modules, {
-    host, registry: compiled.registry, authorize,
+    host, registry: compiled.registry,
     tools: artifacts ? [...IMMO_WIRE_TOOLS, ...artifacts.tools] : IMMO_WIRE_TOOLS,
     limits: artifacts ? ARTIFACT_WIRE_LIMITS : IMMO_WIRE_LIMITS,
+    async authorize(tool, request) {
+      try { return await authorize(tool, request); }
+      catch (error) {
+        if (error instanceof AccountBindingUnavailable) unavailableAccounts.add(request);
+        return false;
+      }
+    },
     async invoke(tool, args, request) {
       const snapshot = getInvocationContext();
       if (!snapshot || snapshot.auth.sub !== request.principal.sub) throw new Error("invocation_unavailable");
@@ -90,8 +99,12 @@ export async function composeStatefulImmo(
       return invokeTool(tool, args, snapshot);
     },
     formatRefusal(tool, refusal, context) {
-      const error = refusal.kind === "scope" ? `scope_denied:${refusal.missingScopes.join(",")}` : `composition_${refusal.kind}`;
-      return { isError: true, content: [{ type: "text", text: JSON.stringify({ error, tool, correlationId: context.correlationId }, null, 2) }] };
+      const retriable = refusal.kind === "account" && unavailableAccounts.delete(context);
+      const error = retriable ? "account_binding_unavailable"
+        : refusal.kind === "scope" ? `scope_denied:${refusal.missingScopes.join(",")}` : `composition_${refusal.kind}`;
+      return { isError: true, content: [{ type: "text", text: JSON.stringify({
+        error, tool, correlationId: context.correlationId, ...(retriable ? { retriable: true } : {}),
+      }, null, 2) }] };
     },
   });
 }

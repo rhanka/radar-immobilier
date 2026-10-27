@@ -6,6 +6,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { generateKeyPairSync } from 'node:crypto';
 import { once } from 'node:events';
 import { setTimeout as delay } from 'node:timers/promises';
+import { exerciseDisconnects } from './artefacts-a4-disconnect.mjs';
 /* global fetch, AbortSignal */
 const require = createRequire('/workspace/packages/immo-mcp/package.json');
 const { SignJWT } = require('jose');
@@ -43,7 +44,7 @@ const bearer = await new SignJWT({ client_id: 'synthetic-cli', scope: 'immo:read
 const child = spawn(process.execPath, ['packages/immo-mcp/dist/server-http.js'], {
   env: { PATH: process.env.PATH, NODE_ENV: 'test', IMMO_MCP_OAUTH_ISSUER: issuer,
     IMMO_MCP_OAUTH_RESOURCE: resource, RADAR_API_BASE_URL: issuer,
-    IMMO_MCP_ACCOUNT_DATABASE_URL: 'postgres://radar:synthetic-only@postgres:5432/radar' },
+    IMMO_MCP_ACCOUNT_DATABASE_URL: 'postgres://radar:synthetic-only@postgres:5432/radar?application_name=a4-mcp-account' },
   stdio: ['ignore', 'pipe', 'pipe'],
 });
 let logs = '';
@@ -82,11 +83,18 @@ try {
   assert.equal((await call()).isError, true); assert.equal(reads, 1);
   await db.query("UPDATE workspace_memberships SET status = 'active', revoked_at = NULL");
   assert.notEqual((await call()).isError, true); assert.equal(reads, 2);
+  await exerciseDisconnects({ db, child, call, readCount: () => reads });
+  assert.match(logs, /"kind":"immo-mcp.account","error":"account_binding_unavailable","retriable":true/);
+  assert.doesNotMatch(logs, /postgres:\/\/|terminating connection due to administrator command/);
   writeFileSync('/evidence/image-proof.json', JSON.stringify({ passed: true, tools: list.result.tools,
-    businessReads: reads, accountRevocationDenied: true, membershipRevocationDenied: true }));
+    businessReads: reads, accountRevocationDenied: true, membershipRevocationDenied: true,
+    idleDisconnectSurvived: true, activeDisconnectRetriable: true, sameSessionRecovered: true }));
   console.log('PASS actual runtime: 12 tools, one effect per allowed call, fresh account/membership refusals');
 } finally {
-  child.kill('SIGTERM'); await once(child, 'exit');
+  if (child.exitCode === null && child.signalCode === null) {
+    const exited = once(child, 'exit'); child.kill('SIGTERM'); await exited;
+  }
   writeFileSync('/evidence/mcp-runtime.log', logs);
+  await db.query('DROP TABLE workspace_memberships, account_users');
   await new Promise((done) => upstream.close(done)); await db.end();
 }
