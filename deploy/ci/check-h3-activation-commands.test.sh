@@ -110,4 +110,25 @@ grep -Fxq general "$CASE_ROOT/runtime-api"
 grep -Fxq off "$CASE_ROOT/runtime-mcp"
 grep -Fq 'publication remains open or unverified' "$CASE_ROOT/failure.log"
 echo 'ok: stale general pod prevents a false rollback success; MCP still closes'
-echo 'check-h3-activation-commands tests: 10 passed, 0 failed'
+operator render MODE=general ARTIFACT_API_IMAGE="$image" >"$CASE_ROOT/render.log"
+cp "$CASE_ROOT/output/render.yaml" "$CASE_ROOT/pinned.yaml"
+reject_image() {
+  local mutation="$1" reason="$2" target
+  cp "$CASE_ROOT/pinned.yaml" "$CASE_ROOT/output/render.yaml"
+  sed -i "$mutation" "$CASE_ROOT/output/render.yaml"
+  for target in apply-runtime route; do
+    : >"$CASE_ROOT/calls"
+    if operator "$target" >"$CASE_ROOT/failure.log" 2>&1; then exit 1; fi
+    grep -Fq "$reason" "$CASE_ROOT/failure.log"
+    [ ! -s "$CASE_ROOT/calls" ]
+  done
+}
+reject_image 's#ghcr.io/rhanka/radar-api@sha256:[a-f0-9]*#ghcr.io/rhanka/radar-api:latest#g' 'operator requires API/MCP/denial image digest pins'
+echo 'ok: general apply and route reject mutable images before any cluster call'
+other="ghcr.io/rhanka/radar-api@sha256:$(printf 'b%.0s' {1..64})"
+reject_image "/^  name: radar-immo-mcp$/,/^---$/{s#$image#$other#;}" 'operator requires matching API/MCP/denial image digests'
+echo 'ok: general apply and route reject divergent MCP/API images'
+cp "$CASE_ROOT/pinned.yaml" "$CASE_ROOT/output/render.yaml"
+operator apply-runtime route >"$CASE_ROOT/apply.log"
+echo 'ok: general apply and route accept matching pinned images'
+echo 'check-h3-activation-commands tests: 13 passed, 0 failed'
