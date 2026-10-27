@@ -1,3 +1,4 @@
+import { contractSafeParse } from "@radar/domain";
 /**
  * Routes — Marquage d'équipe Steve (Inc 2).
  *
@@ -56,6 +57,8 @@ import {
 } from "../services/prospect/marks-service.js";
 import { publish } from "../services/chat/stream-bus.js";
 import { legacyMarksFence } from "../services/facets/lots/lot-legacy-fence.js";
+import { lotMetaSchema } from "./prospect-marks-lotmeta.js";
+import { finitePositiveOptional } from "./finite-number.js";
 
 // ─── Constante SSE ────────────────────────────────────────────────────────────
 
@@ -66,25 +69,25 @@ export const PROSPECT_STREAM_ID = "prospect-marks";
 
 const ModeEnum = z.enum(["real", "simulation"] as const);
 
-const createMarkSchema = z.discriminatedUnion("dimension", [
+export const createMarkSchema = z.discriminatedUnion("dimension", [
   z.object({
-    lotVersionId: z.string().uuid(),
+    lotVersionId: z.string().guid(),
     noLot: z.string().min(1),
     citySlug: z.string().min(1),
     dimension: z.literal("pipeline"),
     statut: z.enum(["favori", "ecarte", "sollicite", "lettre_envoyee"]),
     mode: ModeEnum.default("real"),
-    authorId: z.string().uuid().optional(),
+    authorId: z.string().guid().optional(),
   }),
   z.object({
-    lotVersionId: z.string().uuid(),
+    lotVersionId: z.string().guid(),
     noLot: z.string().min(1),
     citySlug: z.string().min(1),
     dimension: z.literal("marche"),
     statut: z.literal("en_vente"),
     mode: ModeEnum.default("real"),
-    authorId: z.string().uuid().optional(),
-    prixDemande: z.number().positive().optional(),
+    authorId: z.string().guid().optional(),
+    prixDemande: finitePositiveOptional(),
     lienAnnonce: z.string().url().optional(),
   }),
 ]);
@@ -94,40 +97,40 @@ const NOTE_BODY_MAX = 10_000;
 // Création d'annotation — union discriminée sur `target_type` (contrat §6.1).
 // `signal_id`-au-create est enforce ICI (règle applicative), PAS en CHECK DB
 // (le CHECK d'ancre relâche la branche signal pour survivre au ON DELETE SET NULL).
-const createNoteSchema = z.discriminatedUnion("target_type", [
+export const createNoteSchema = z.discriminatedUnion("target_type", [
   z.object({
     target_type: z.literal("lot"),
     no_lot: z.string().min(1),
     city_slug: z.string().min(1),
     body: z.string().min(1).max(NOTE_BODY_MAX),
     mode: ModeEnum.default("real"),
-    authorId: z.string().uuid().optional(),
+    authorId: z.string().guid().optional(),
   }),
   z.object({
     target_type: z.literal("signal"),
-    signal_id: z.string().uuid(),
+    signal_id: z.string().guid(),
     // Contexte géo optionnel (si le signal résout vers un lot — géo-mapper).
     no_lot: z.string().min(1).optional(),
     city_slug: z.string().min(1).optional(),
     body: z.string().min(1).max(NOTE_BODY_MAX),
     mode: ModeEnum.default("real"),
-    authorId: z.string().uuid().optional(),
+    authorId: z.string().guid().optional(),
   }),
 ]);
 
 // Édition in-place (contrat §6.3) — author-only.
-const editNoteSchema = z.object({
+export const editNoteSchema = z.object({
   body: z.string().min(1).max(NOTE_BODY_MAX),
-  authorId: z.string().uuid().optional(),
+  authorId: z.string().guid().optional(),
 });
 
 // Suppression soft (contrat §6.4) — author-only.
 const deleteNoteSchema = z.object({
-  authorId: z.string().uuid().optional(),
+  authorId: z.string().guid().optional(),
 });
 
 // Lecture unifiée (contrat §6.2) — query discriminée sur `target_type`.
-const listNotesQuerySchema = z.discriminatedUnion("target_type", [
+export const listNotesQuerySchema = z.discriminatedUnion("target_type", [
   z.object({
     target_type: z.literal("lot"),
     no_lot: z.string().min(1),
@@ -135,20 +138,17 @@ const listNotesQuerySchema = z.discriminatedUnion("target_type", [
   }),
   z.object({
     target_type: z.literal("signal"),
-    signal_id: z.string().uuid(),
+    signal_id: z.string().guid(),
   }),
 ]);
 
-const batchMarkSchema = z.object({
-  lotVersionIds: z.array(z.string().uuid()).min(1).max(500),
-  lotMeta: z.record(
-    z.string().uuid(),
-    z.object({ noLot: z.string().min(1), citySlug: z.string().min(1) }),
-  ),
+export const batchMarkSchema = z.object({
+  lotVersionIds: z.array(z.string().guid()).min(1).max(500),
+  lotMeta: lotMetaSchema,
   dimension: z.enum(["pipeline", "marche"] as const),
   statut: z.enum(["favori", "ecarte", "sollicite", "lettre_envoyee", "en_vente"] as const),
   mode: ModeEnum.default("real"),
-  authorId: z.string().uuid().optional(),
+  authorId: z.string().guid().optional(),
 });
 
 // ─── Deps ─────────────────────────────────────────────────────────────────────
@@ -254,7 +254,7 @@ export function prospectMarksRoute(deps: ProspectMarksDeps): Hono {
   app.post("/api/v1/prospects/marks", async (c) => {
     const fenced = await legacyFenceResponse(c, deps);
     if (fenced) return fenced;
-    const parsed = createMarkSchema.safeParse(
+    const parsed = contractSafeParse(createMarkSchema,
       await c.req.json().catch(() => null),
     );
     if (!parsed.success) {
@@ -302,7 +302,7 @@ export function prospectMarksRoute(deps: ProspectMarksDeps): Hono {
   // ── POST /api/v1/prospects/notes (création, ancre lot|signal, §6.1) ───────
 
   app.post("/api/v1/prospects/notes", async (c) => {
-    const parsed = createNoteSchema.safeParse(
+    const parsed = contractSafeParse(createNoteSchema,
       await c.req.json().catch(() => null),
     );
     if (!parsed.success) {
@@ -356,7 +356,7 @@ export function prospectMarksRoute(deps: ProspectMarksDeps): Hono {
     if (!(await isApprovedReader(c, deps))) {
       return c.json({ error: "forbidden" }, 403);
     }
-    const parsed = listNotesQuerySchema.safeParse(c.req.query());
+    const parsed = contractSafeParse(listNotesQuerySchema, c.req.query());
     if (!parsed.success) {
       return c.json({ error: "Invalid query", details: parsed.error.issues }, 400);
     }
@@ -375,7 +375,7 @@ export function prospectMarksRoute(deps: ProspectMarksDeps): Hono {
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
       return c.json({ error: "id invalide" }, 400);
     }
-    const parsed = editNoteSchema.safeParse(await c.req.json().catch(() => null));
+    const parsed = contractSafeParse(editNoteSchema, await c.req.json().catch(() => null));
     if (!parsed.success) {
       return c.json({ error: "Invalid request", details: parsed.error.issues }, 400);
     }
@@ -415,7 +415,7 @@ export function prospectMarksRoute(deps: ProspectMarksDeps): Hono {
       return c.json({ error: "id invalide" }, 400);
     }
     // Body facultatif (authorId open-mode) — un body absent/vide est valide.
-    const parsed = deleteNoteSchema.safeParse(await c.req.json().catch(() => ({})));
+    const parsed = contractSafeParse(deleteNoteSchema, await c.req.json().catch(() => ({})));
     const bodyAuthorId = parsed.success ? parsed.data.authorId : undefined;
     const authorId = await resolveAuthorId(c, deps, bodyAuthorId);
     if (!authorId) {
@@ -445,9 +445,8 @@ export function prospectMarksRoute(deps: ProspectMarksDeps): Hono {
   app.post("/api/v1/prospects/marks/batch", async (c) => {
     const fenced = await legacyFenceResponse(c, deps);
     if (fenced) return fenced;
-    const parsed = batchMarkSchema.safeParse(
-      await c.req.json().catch(() => null),
-    );
+    const rawBody = await c.req.json().catch(() => null);
+    const parsed = contractSafeParse(batchMarkSchema, rawBody);
     if (!parsed.success) {
       return c.json({ error: "Invalid request", details: parsed.error.issues }, 400);
     }
