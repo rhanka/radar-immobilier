@@ -49,7 +49,7 @@ export async function identityFixture(domain: PwIdentityDomain, sub: string) {
   const summary = (cookie = login.cookie) => app.request(intent.confirmationUrl, {
     headers: { host: new URL(domain.appOrigin).host, cookie,
       "sec-fetch-site": "cross-site", "sec-fetch-mode": "navigate", "sec-fetch-dest": "document" } });
-  return { h, login, row, verified, writePrincipal: canonicalWritePrincipal(verified),
+  return { h, login, row, verified, app, intent, writePrincipal: canonicalWritePrincipal(verified),
     domain, summary, keyRefs: { session: `pwe-session-${domain.clientId}-v1`,
       write: h.writeH5.grantKeyId, challenge: h.writeH5.challengeKeyId } };
 }
