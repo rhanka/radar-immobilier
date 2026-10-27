@@ -7,7 +7,7 @@ MODE ?= off
 ARTIFACT_API_IMAGE ?=
 KUBECTL ?= kubectl
 KF := bash deploy/ci/kfilter.sh
-.PHONY: render live cursor-secret reader-secrets credentials apply-runtime route rollback
+.PHONY: render live cursor-secret reader-secrets credentials check-render apply-runtime route rollback
 live:
 	@test "$(ENV)" = preprod
 	@test -n "$${KUBECONFIG:-}" || { echo 'Explicit preprod KUBECONFIG required' >&2; exit 1; }
@@ -51,8 +51,10 @@ credentials: live
 	  test -f "$(ARTIFACT_DATABASE_URL_FILE)"; \
 	  $(KUBECTL) -n $(NAMESPACE) create secret generic immo-mcp-artifact-writer \
 	    --from-file=IMMO_MCP_ARTIFACT_DATABASE_URL="$(ARTIFACT_DATABASE_URL_FILE)"; fi
-apply-runtime: live
+check-render:
 	@bash deploy/ci/check-h3-preprod-render.sh "$(OUT)/render.yaml"
+	@awk -f deploy/ci/h3-render-common.awk -f deploy/ci/h3-operator-images.awk "$(OUT)/render.yaml"
+apply-runtime: live check-render
 	@for name in radar-api immo-mcp-config; do \
 	  $(KF) "$(OUT)/render.yaml" ConfigMap $$name | $(KUBECTL) -n $(NAMESPACE) apply --server-side --field-manager=cd-preprod --force-conflicts -f -; done
 	@for name in radar-artifact-content-deny; do \
@@ -63,8 +65,7 @@ apply-runtime: live
 	  $(KF) "$(OUT)/render.yaml" Deployment $$name | $(KUBECTL) -n $(NAMESPACE) apply --server-side --field-manager=cd-preprod --force-conflicts -f -; \
 	  $(KUBECTL) -n $(NAMESPACE) rollout restart deployment/$$name; \
 	  $(KUBECTL) -n $(NAMESPACE) rollout status deployment/$$name --timeout=180s; done
-route: live
-	@bash deploy/ci/check-h3-preprod-render.sh "$(OUT)/render.yaml"
+route: live check-render
 	@$(KF) "$(OUT)/render.yaml" Ingress radar-artifact-content | $(KUBECTL) -n $(NAMESPACE) apply -f -
 rollback: live
 	@bash deploy/ci/h3-rollback.sh "$(KUBECTL)"

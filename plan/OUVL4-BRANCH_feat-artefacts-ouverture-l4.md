@@ -23,6 +23,7 @@
 - [x] Astra CI import mutation now removes the MCP directory base; all 25 auth-isolation checks pass with the missing-ConfigMap diagnostic retained.
 - [x] Astra wildcard isolation reserves malformed content labels before app auth and refuses app/admin/auth/API paths; foreign hosts retain normal routing. Seven focused API suites pass (234 tests), after the baseline failed the new regressions.
 - [x] Astra rollback attempts both restarts before readiness waits, aggregates failures and verifies `off` in both ConfigMaps and every API/MCP pod; 10 operator checks pass, including absent Ingress, API readiness failure and stale runtime refusal.
+- [x] Astra operator apply/route require matching immutable API/MCP/denial images; mutable or divergent images trigger their expected diagnostics before cluster calls. All 13 operator checks pass; source/CD renders remain valid.
 - [x] Requested content DNS names, TLS Secret and dedicated bucket are deployment coordinates to provision, not a claim of existing infrastructure.
 - [x] Runtime decision: API-mounted reader from L3; standalone `content-reader` has no production authority/storage composition.
 - [x] OUVL4-EX1: allow `deploy/k8s/immo-mcp/**` and existing 40/41 entrypoints. Evidence: plain requested Kustomize command refuses external file resources. Package unchanged files in a directory base; retain production paths as symlinks. Impact: resource loading only, byte-identical production files/render. Rollback: restore regular 40/41 files and the overlay's file imports.
