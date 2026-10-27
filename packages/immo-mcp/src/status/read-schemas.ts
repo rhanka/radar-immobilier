@@ -31,7 +31,7 @@ export type GetLotFacetsInput = z.infer<typeof GetLotFacetsInputSchema>;
 
 /** Opaque cursor validation must bind these server-resolved values, including revocation. */
 export const ContinuationContextSchema = z.object({
-  accountId: z.string().uuid(), workspaceId: WorkspaceIdSchema,
+  accountId: z.string().guid(), workspaceId: WorkspaceIdSchema,
   authorityRevision: z.number().int().nonnegative(), city: CitySchema,
   kind: z.enum(["signal", "lot"]), mode: ModeSchema.nullable(), reveal: z.boolean(),
   limit: z.number().int().min(1).max(100), filterDigest: z.string().regex(/^[a-f0-9]{64}$/),

@@ -30,7 +30,7 @@ export const SignalCommandBodySchemas = {
   restore: z.object(observed).strict(),
 } as const;
 const envelope = { workspaceId: WorkspaceIdSchema, scope: ScopeSchema,
-  commandKey: z.string().uuid() };
+  commandKey: z.string().guid() };
 export const CommandSignalFacetInputSchema = z.union([
   z.object({ ...envelope, action: z.literal("select"), body: SignalCommandBodySchemas.select }).strict(),
   z.object({ ...envelope, action: z.literal("deselect"), body: SignalCommandBodySchemas.deselect }).strict(),

@@ -1,0 +1,23 @@
+{
+  "missing-city": {"content":[{"type":"text","text":"MCP error -32602: Input validation error: Invalid arguments for tool search_lots: Required at city"}],"isError":true},
+  "null-city": {"content":[{"type":"text","text":"MCP error -32602: Input validation error: Invalid arguments for tool search_lots: Expected string, received null at city"}],"isError":true},
+  "number-city": {"content":[{"type":"text","text":"MCP error -32602: Input validation error: Invalid arguments for tool search_lots: Expected string, received number at city"}],"isError":true},
+  "empty-city": {"content":[{"type":"text","text":"MCP error -32602: Input validation error: Invalid arguments for tool search_lots: String must contain at least 1 character(s) at city"}],"isError":true},
+  "min-area-type": {"content":[{"type":"text","text":"MCP error -32602: Input validation error: Invalid arguments for tool search_lots: Expected number, received string at minArea"}],"isError":true},
+  "min-area-zero": {"content":[{"type":"text","text":"MCP error -32602: Input validation error: Invalid arguments for tool search_lots: Number must be greater than 0 at minArea"}],"isError":true},
+  "min-area-negative": {"content":[{"type":"text","text":"MCP error -32602: Input validation error: Invalid arguments for tool search_lots: Number must be greater than 0 at minArea"}],"isError":true},
+  "limit-fraction-low": {"content":[{"type":"text","text":"MCP error -32602: Input validation error: Invalid arguments for tool search_lots: Expected integer, received float at limit\nNumber must be greater than or equal to 1 at limit"}],"isError":true},
+  "limit-fraction-high": {"content":[{"type":"text","text":"MCP error -32602: Input validation error: Invalid arguments for tool search_lots: Expected integer, received float at limit\nNumber must be less than or equal to 100 at limit"}],"isError":true},
+  "limit-string": {"content":[{"type":"text","text":"MCP error -32602: Input validation error: Invalid arguments for tool search_lots: Expected number, received string at limit"}],"isError":true},
+  "boolean-type": {"content":[{"type":"text","text":"MCP error -32602: Input validation error: Invalid arguments for tool search_signals: Expected boolean, received string at showDiscarded"}],"isError":true},
+  "bbox-null": {"content":[{"type":"text","text":"MCP error -32602: Input validation error: Invalid arguments for tool get_lots_geojson: Expected array, received null at bbox"}],"isError":true},
+  "bbox-type": {"content":[{"type":"text","text":"MCP error -32602: Input validation error: Invalid arguments for tool get_lots_geojson: Expected array, received string at bbox"}],"isError":true},
+  "bbox-short": {"content":[{"type":"text","text":"MCP error -32602: Input validation error: Invalid arguments for tool get_lots_geojson: Array must contain at least 4 element(s) at bbox"}],"isError":true},
+  "bbox-long": {"content":[{"type":"text","text":"MCP error -32602: Input validation error: Invalid arguments for tool get_lots_geojson: Array must contain at most 4 element(s) at bbox"}],"isError":true},
+  "bbox-child": {"content":[{"type":"text","text":"MCP error -32602: Input validation error: Invalid arguments for tool get_lots_geojson: Expected number, received string at bbox[0]"}],"isError":true},
+  "raw-limit-high": {"content":[{"type":"text","text":"MCP error -32602: Input validation error: Invalid arguments for tool get_lots_geojson: Number must be less than or equal to 2000 at limit"}],"isError":true},
+  "offset-fraction": {"content":[{"type":"text","text":"MCP error -32602: Input validation error: Invalid arguments for tool read_document_excerpt: Expected integer, received float at offset\nNumber must be greater than or equal to 0 at offset"}],"isError":true},
+  "offset-string": {"content":[{"type":"text","text":"MCP error -32602: Input validation error: Invalid arguments for tool read_document_excerpt: Expected number, received string at offset"}],"isError":true},
+  "excerpt-high": {"content":[{"type":"text","text":"MCP error -32602: Input validation error: Invalid arguments for tool read_document_excerpt: Number must be less than or equal to 4000 at maxChars"}],"isError":true},
+  "excerpt-id": {"content":[{"type":"text","text":"MCP error -32602: Input validation error: Invalid arguments for tool read_document_excerpt: String must contain at least 1 character(s) at documentId"}],"isError":true}
+}

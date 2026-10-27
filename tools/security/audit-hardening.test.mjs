@@ -4,19 +4,28 @@ import { readFileSync } from "node:fs";
 import { URL } from "node:url";
 import { collectFindings, evaluateAudit, parseRegister } from "./audit-lib.mjs";
 
-const register = readFileSync(new URL("../../.security/vulnerability-register.yaml", import.meta.url), "utf8");
+const register = readFileSync(new URL("./fixtures/legacy-zod3-register.yaml", import.meta.url), "utf8");
 const rows = parseRegister(register);
-const packages = JSON.parse(readFileSync(new URL("../../package-lock.json", import.meta.url))).packages;
+const packages = JSON.parse(readFileSync(new URL("./fixtures/legacy-zod3-packages.json", import.meta.url)));
 const entry = (name, severity, via) => ({ name, severity, via, nodes: [`node_modules/${name}`] });
 const zod = entry("zod", "high", [{ url: "https://github.com/advisories/GHSA-mrhx-c7xc-m3w5", severity: "high" }]);
 const audit = { vulnerabilities: { zod } };
 const run = (over = {}) => evaluateAudit({ audit, packages, registerRows: rows, now: "2026-10-25", ...over });
 
-test("checked-in register covers Zod through the final UTC acceptance day", () => {
+test("historical fixture covers affected Zod through the final UTC acceptance day", () => {
   assert.equal(rows.filter((row) => row.status === "accepted").length, 3);
   assert.equal(run().ok, true);
   assert.equal(run({ now: "2026-11-08" }).ok, true);
   assert.equal(run({ now: "2026-11-09" }).ok, false);
+});
+
+test("remediated checked-in register cannot suppress a Zod high", () => {
+  const current = parseRegister(readFileSync(new URL("../../.security/vulnerability-register.yaml", import.meta.url), "utf8"));
+  const installed = JSON.parse(readFileSync(new URL("../../package-lock.json", import.meta.url))).packages;
+  assert.equal(current.filter((row) => row.status === "accepted").length, 0);
+  assert.equal(current.some((row) => row.id.startsWith("EXC-2026-10-25-zod")), false);
+  assert.equal(evaluateAudit({ audit, packages: installed, registerRows: current, now: "2026-10-26" }).ok, false);
+  assert.equal(evaluateAudit({ audit: { vulnerabilities: {} }, packages: installed, registerRows: current, now: "2026-11-09" }).ok, true);
 });
 
 test("expired rows fail even when no finding currently matches", () => {

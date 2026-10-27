@@ -32,8 +32,22 @@ export type AxesMapT = z.infer<typeof AxesMap>;
 export const RecommendationCap = Action.extract(["surveiller", "qualifier-avec-expert", "monter-dossier-acquisition"]);
 export type RecommendationCapT = z.infer<typeof RecommendationCap>;
 
+const axesBase = z.partialRecord(Axis, AxisScore);
+
+const axesGuarded = z.preprocess((raw, ctx) => {
+  if (typeof raw === "object" && raw !== null && !Array.isArray(raw)) {
+    const allowed = new Set<string>(Axis.options);
+    const foreign = Object.keys(raw).filter((key) => !allowed.has(key));
+    if (foreign.length) {
+      ctx.addIssue({ code: "unrecognized_keys", keys: foreign });
+      return z.NEVER;
+    }
+  }
+  return raw;
+}, axesBase);
+
 export const OpportunityScore = z.object({
-  axes: z.record(Axis, AxisScore),
+  axes: axesGuarded,
   weightsVersion: z.string(),
   partial: z.boolean(),
   tooThin: z.boolean(),
