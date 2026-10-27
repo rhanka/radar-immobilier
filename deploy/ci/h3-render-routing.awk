@@ -40,7 +40,9 @@ function judge( i, v, labels, selector, podLabels) {
   if (kind == "Ingress" && name == "radar-artifact-content") {
     content++
     if (field("^  ingressClassName:") != "traefik") fail("Traefik ingress class required")
-    if (count("^            name: radar-artifact-content-deny$") != 2 || count("^            name:") != 2) fail("content routes only to the denial Service")
+    v = (phase == "general" ? "radar-api" : "radar-artifact-content-deny")
+    if (count("^            name: " v "$") != 2 || count("^            name:") != 2) fail("content routes only to the " (phase == "general" ? "reader API" : "denial Service"))
+    if (phase == "general" && count("^              name: http$") != 2) fail("content reader port must be http")
     if (count("^  - host:") != 2 || count("^    - [\047\"]?\\*\\.") != 2) fail("both wildcard levels must be present")
     for (i = 1; i <= n; i++) {
       if (buf[i] ~ /^  - host:/) hosts[++hostCount] = val(buf[i])

@@ -5,7 +5,7 @@ function judge( i, key, v, expected, keys, image, ef) {
   if (kind == "ConfigMap" && name == "radar-api") {
     cm++
     expected = (phase == "activation" ? "validation" : "off")
-    if (phase != "rollback" && field("^  ARTIFACTS_CONTROL_MODE:") != expected) fail("expected " expected ": no activation by default")
+    if (phase != "rollback" && phase != "general" && field("^  ARTIFACTS_CONTROL_MODE:") != expected) fail("expected " expected ": no activation by default")
     for (i = 1; i <= n; i++) if (buf[i] ~ /^  ARTIFACTS_/) {
       key = buf[i]; sub(/^  /, "", key); sub(/:.*/, "", key)
       v = val(buf[i]); config[key] = v
@@ -27,7 +27,7 @@ function judge( i, key, v, expected, keys, image, ef) {
       expected = "        - name: " key "\n          valueFrom:\n            secretKeyRef:\n              key: " key "\n              name: radar-artifacts-preprod\n              optional: true\n"
       if (!index(doc, expected)) fail("exact optional Secret reference missing for " key)
     }
-    if (count("^[ \t]*- name: ARTIFACTS_") != (phase == "rollback" ? 0 : 2)) fail("unexpected ARTIFACTS env override")
+    if (count("^[ \t]*- name: ARTIFACTS_") != (phase == "rollback" ? 0 : (phase == "general" ? 4 : 2))) fail("unexpected ARTIFACTS env override")
     if (phase == "rollback" && index(doc, "radar-artifacts-preprod")) fail("artifact Secret reference forbidden for H2 rollback")
     if (count("^[ \t]*envFrom:") != 1) fail("exact api envFrom required (single configMapRef radar-api)")
     if (count("configMapRef:") != 1) fail("exact api envFrom source required (single configMapRef radar-api)")
@@ -74,7 +74,7 @@ function judge( i, key, v, expected, keys, image, ef) {
     if (v != "    app.kubernetes.io/component: content-deny\n    app.kubernetes.io/name: radar-immobilier\n") fail("exact denial Service selector required")
     if (field("^    port:") != "3000" || field("^    targetPort:") != "http") fail("denial Service port mismatch")
   }
-  if (phase != "disabled" && ((kind == "Deployment" && name ~ /^radar-(api|ui|artifact-content-deny)$/) || kind ~ /^(Job|CronJob)$/)) {
+  if (phase != "disabled" && phase != "general" && ((kind == "Deployment" && name ~ /^radar-(api|ui|artifact-content-deny)$/) || kind ~ /^(Job|CronJob)$/)) {
     for (i = 1; i <= n; i++) if (buf[i] ~ /^[ \t]*(- )?image:/) {
       image = val(buf[i]); sub(/^.*@sha256:/, "", image)
       if (val(buf[i]) !~ /@sha256:/ || length(image) != 64 || image ~ /[^a-f0-9]/) fail("activation requires image digest pin")
