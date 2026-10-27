@@ -100,3 +100,69 @@ for annotation in 'traefik.ingress.kubernetes.io/router.middlewares=auth@file' \
 done
 cp middleware-baseline.json ingress-fixture.json
 echo 'PASS alternate Services/routes, host ports, namespace endpoints, CNI evidence and qualification boundary'
+cp input.json waiver-original-input.json
+jq '.maintenance.networkIsolation={waiver:{reference:"owner-preprod-preaccord-2026-10-27",
+  reason:"Conductor-authorized preprod cutover without CNI qualification"}}' input.json > waiver-input.json
+cp waiver-input.json input.json
+export FAKE_STATE=no-isolation
+invoke collect-maintenance EXPECTED="$testdir/expected.json" PROOFS="$testdir/proofs.json"
+jq -e --slurpfile c input.json '.mode=="waived" and .namespace=="radar-immobilier-preprod"
+  and .binding==$c[0].binding and .waiver==$c[0].maintenance.networkIsolation.waiver' "out-$n/network-isolation-receipt.json" >/dev/null
+jq -e '.networkIsolation.mode=="waived" and .networkIsolation.waiver.reason!=""' "out-$n/maintenance.json" >/dev/null
+rg -qF 'network-isolation-receipt.json' "out-$n/checksums.txt"
+invoke start-api PROOFS="$testdir/activation-receipt.json"
+# No declaration: the existing profile/CNI gate still refuses this cluster.
+jq 'del(.maintenance.networkIsolation.waiver)' waiver-input.json > input.json
+if invoke start-api PROOFS="$testdir/activation-receipt.json"; then exit 1; fi
+rg -qF 'Consumer pod ingress is not isolated' "result-$n.log"
+unset FAKE_STATE
+cp waiver-input.json input.json
+{ sed '$d' tools/make/base-preprod-input.jq; echo isolation_waiver; } > waiver-filter.jq
+for namespace in radar-immobilier radar-immobilier-prod another-namespace radar-immobilier-preprod-shadow; do
+  jq --arg ns "$namespace" '.namespace=$ns' waiver-input.json > input.json
+  : > cluster-calls
+  if invoke validate; then echo 'Waiver accepted outside preprod' >&2; exit 1; fi
+  [[ ! -s cluster-calls ]]
+  if jq -e -f waiver-filter.jq input.json >/dev/null; then exit 1; fi
+done
+for change in '.maintenance.networkIsolation.waiver=null' \
+  '.maintenance.networkIsolation.waiver.reference="unapproved"' \
+  '.maintenance.networkIsolation.waiver.reason="   "' \
+  'del(.maintenance.networkIsolation.waiver.reason)'; do
+  jq "$change" waiver-input.json > input.json
+  : > cluster-calls
+  if invoke validate; then echo 'Malformed waiver accepted' >&2; exit 1; fi
+  [[ ! -s cluster-calls ]]
+done
+cp waiver-input.json input.json
+for state in old new cron job replicas extra-endpoint extra-legacy allow-pods nodeport hostport; do
+  export FAKE_STATE=$state
+  : > cluster-calls
+  if invoke collect-maintenance EXPECTED="$testdir/expected.json" PROOFS="$testdir/proofs.json"; then
+    echo "Waiver bypassed retained guard: $state" >&2; exit 1
+  fi
+  case $state in
+    old) error='An old instance still exists';; new) error='A consumer or operator process is still running';;
+    cron) error='CronJob is not suspended';; job) error='An active Job remains';;
+    replicas) error='Consumer deployment can restart';; extra-endpoint) error='A consumer endpoint is ready';;
+    extra-legacy) error='A consumer legacy endpoint is ready';; allow-pods) error='Unbounded PostgreSQL ingress sources are forbidden';;
+    nodeport) error='Unqualified Service exposure';; hostport) error='Pod exposes hostNetwork or hostPort';;
+  esac
+  rg -qF "$error" "result-$n.log"
+  if rg -- '--request-timeout=20s (create|patch|scale|set|delete|rollout) ' cluster-calls; then exit 1; fi
+done
+unset FAKE_STATE
+jq '.items[0].metadata.annotations["traefik.ingress.kubernetes.io/router.middlewares"]="auth@file"' middleware-baseline.json > ingress-fixture.json
+if invoke start-api PROOFS="$testdir/activation-receipt.json"; then exit 1; fi
+rg -qF 'Traefik middleware annotations are forbidden' "result-$n.log"
+cp middleware-baseline.json ingress-fixture.json
+jq '.items[0].spec.rules[0].http.paths[0].backend.service.name="radar-api"' middleware-baseline.json > ingress-fixture.json
+if invoke start-api PROOFS="$testdir/activation-receipt.json"; then exit 1; fi
+rg -qF 'Ingress lacks refusal backend' "result-$n.log"
+cp middleware-baseline.json ingress-fixture.json
+jq '.binding.releaseId="1234567:short"' waiver-input.json > input.json
+: > cluster-calls
+if invoke validate; then echo 'Waiver bypassed full release SHA' >&2; exit 1; fi
+[[ ! -s cluster-calls ]]
+cp waiver-original-input.json input.json
+echo 'PASS preprod-only waiver receipts, rejection outside preprod, unchanged absence and retained guards'

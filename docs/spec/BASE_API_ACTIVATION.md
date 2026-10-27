@@ -597,6 +597,26 @@ Missing/expired/foreign probes, changed policies, unsupported CNI or failed
 probes cause an explicit refusal. Do not set a boolean from inference. Cluster
 support and direct-network closure remain unverified until these real probes pass.
 
+The conductor-authorized preprod exception may replace those consumer-policy
+and CNI-probe requirements with an explicit owner-input declaration:
+
+```json
+"networkIsolation": {"waiver": {
+  "reference": "owner-preprod-preaccord-2026-10-27",
+  "reason": "Conductor-authorized preprod cutover without CNI qualification"
+}}
+```
+
+Place this object under `maintenance`. The reference must match exactly and the
+reason must be nonblank bounded text. Any other namespace, invalid declaration
+or unapproved reference is refused; an absent waiver retains the strict path.
+The waiver does not bypass PostgreSQL source restrictions, routing/middleware,
+exposed-Service/host-port, stopped-consumer, schedule, endpoint-roster or image
+identity checks. `network-isolation-receipt.json` and `maintenance.json.networkIsolation`
+record `mode:"waived"`, the declaration, binding, image, context and namespace;
+the evidence checksums cover them. This is an authorization exception, not a
+positive CNI qualification. Other attestations and business authorization remain required.
+
 If closure must be undone while consumers are still stopped, explicitly restore
 the saved complete specs, using the same binding/image and independent roster:
 
