@@ -93,3 +93,97 @@ Use DNS-01 issuance or import a certificate; this overlay requests no automatic
 wildcard issuance. Confirm certificate chain/SANs and DNS from outside the cluster.
 Do not route these hosts to `radar-ui` or rewrite Host to the application host.
 Verify no parent-domain application cookie is sent to either content hostname.
+
+## Ordered activation
+
+Keep CD paused until provisioning and checks are complete. Replace `<digest>`
+below with the approved 64-character API image digest; never apply `:latest`.
+
+1. Complete backup/migrations, scope/quotas, bucket/IAM, secrets and DNS/TLS.
+2. Render **off**, retain its SHA-256, review its selected resources and image:
+
+   ```sh
+   make -f deploy/overlays/preprod/artifacts-activation.mk render ARTIFACT_API_IMAGE=ghcr.io/rhanka/radar-api@sha256:<digest> ENV=preprod
+   make -f deploy/overlays/preprod/artifacts-activation.mk apply-runtime ENV=preprod
+   ```
+
+   `apply-runtime` applies the rendered API/MCP ConfigMaps, denial Service and
+   policies, then the denial, API **and MCP Deployments**, restarting and awaiting
+   each rollout. It uses field manager `cd-preprod` so the next reconcile agrees.
+   Existing MCP OAuth, account-reader and workload-secret bindings remain.
+   Missing optional artifact secrets keep the app alive but close the capability;
+   pod readiness alone therefore does not prove artifact availability.
+3. Check rollout/image digests, DB schema/remaining quotas and secret metadata.
+   The API log must report the mounted reader and configured cursor keyring.
+   Route content only after the API is ready with its content-host gate mounted.
+4. Render **general**, review and retain this new render/hash, then apply it:
+
+   ```sh
+   make -f deploy/overlays/preprod/artifacts-activation.mk render MODE=general ARTIFACT_API_IMAGE=ghcr.io/rhanka/radar-api@sha256:<digest> ENV=preprod
+   make -f deploy/overlays/preprod/artifacts-activation.mk apply-runtime ENV=preprod
+   make -f deploy/overlays/preprod/artifacts-activation.mk route ENV=preprod
+   ```
+
+   `route` applies only Ingress `radar-artifact-content`, both wildcards to the
+   API. Do not apply the entire overlay or change production resources. The CD
+   applies both ConfigMaps and the API Deployment, but **not the MCP Deployment,
+   content Ingress, denial resources or network policies**. Those operator steps
+   are necessary even when a subsequent CD sets the correct MCP image.
+5. Run the checks below, record receipts and resume CD. Check that a subsequent
+   preprod reconcile retains both `general` values and the injected references;
+   no cluster-side check or reconcile receipt is supplied by offline delivery.
+
+## Acceptance before GO
+
+Use two separate browser profiles and two current approved accounts, A and B.
+Record source/image/render hashes, account aliases, status codes and observations;
+never log bearers, grants, tickets, cookie values or secret data.
+
+- Connect each account to preprod MCP with `immo:read`. `tools/list` must expose
+  `artifacts_ensure`, `artifacts_publish`, `artifacts_list`, `artifacts_get`.
+  Both accounts publish real HTML/CSS/JS using the same binding name and distinct
+  operation keys. Confirm distinct artifacts and no private cross-account access.
+- Give the readers authorized access to a shared test artifact using existing
+  artifact ACLs. Open its stable URL as each reader, complete app review/approval,
+  then follow the pinned release. Confirm actual HTML/CSS/JS execution and H5
+  context/search/state responses showing each reader's own authorized baskets.
+  An approved account without workspace membership may publish; basket reads
+  require an explicit authorized workspace, with no implicit `default`.
+- Use enough fixture results to obtain a search continuation. Read page one,
+  restart the API with the **same Secret and key ID**, then successfully read
+  the continuation; repeat across API instances if multiple replicas are used.
+  Confirm workspace revocation, foreign workspace and unapproved account fail.
+- On both stable and pinned hosts, GET/POST `/admin`, `/login`, `/auth/login`
+  and `/api/v1/workspaces` must never reach the app, admin or login UI;
+  `/api/*` must return 401 and app/admin paths a reader refusal, without an app
+  cookie or app redirect. Test without a grant and with a valid reader session.
+  `/health` and `/livez` are deliberately probe exceptions.
+- Inspect HTML, subresources, H5 and denial responses: private/no-store cache,
+  `nosniff`, no-referrer, COOP `same-origin`, COEP `require-corp`, CORP
+  `same-origin`, restrictive CSP, including denied workers/frames/objects/forms.
+  Confirm release-script hashes match the interpreted code and H5 succeeds.
+- In browser network/cookie storage, confirm app session cookies stay on the
+  app host; content cookies are host-only `__Host-` Secure/HttpOnly with no Domain.
+  No app cookie is exposed to published JavaScript or sent to content hosts;
+  no backend credential or S3 URL appears in served files or reader responses.
+
+## Rollback
+
+Pause preprod CD immediately, then execute:
+
+```sh
+make -f deploy/overlays/preprod/artifacts-activation.mk rollback ENV=preprod
+```
+
+This sets **both** live control modes to `off`, sends both wildcard routes to
+the retained isolated denial Service and restarts API/MCP to reload environment.
+Retest publication denial and refusal of existing content URLs on both host
+families. Route cutoff matters: mode `off` alone does not revoke existing reader
+grants. Already loaded files or committed publications cannot be recalled.
+Keep the bucket, DB rows, receipts, quota counters and persistent keys.
+
+Before resuming CD, change `ARTIFACTS_CONTROL_MODE` to `off` in **both**
+`patch-artifacts-control.yaml` and `patch-immo-mcp-config.yaml` through the normal
+review/commit delivery. The offline general gate accepts this paired closure.
+Otherwise the next reconcile reapplies `general`. Keep the content Ingress on
+denial until deliberate reactivation; CD does not reconcile that Ingress.

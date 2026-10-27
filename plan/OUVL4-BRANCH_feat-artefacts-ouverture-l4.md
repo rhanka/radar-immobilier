@@ -48,7 +48,7 @@
 - [ ] **Lot 4 — Operator delivery**
   - [x] Provide standalone Make targets for private key creation, reviewed renders, runtime/routing apply and rollback.
   - [x] Document runtime, provisioning, persistent secrets and both DNS/TLS wildcard levels.
-  - [ ] Document provisioning, DNS/TLS, selected-resource apply, image pins, tests and rollback.
+  - [x] Document provisioning, DNS/TLS, selected-resource apply, image pins, tests and rollback.
   - [ ] Audit commit sizes/messages and reconstruct the delivery bundle from the base.
   - [ ] Write the uncommitted French delivery report with operator responsibilities and limits.
 - [x] **Merge and close**: conductor-owned; no push, PR mutation or merge in this lot.
