@@ -69,7 +69,8 @@ export interface FetchCall {
   options: { method?: string; headers?: Record<string, string>; body?: string };
 }
 
-export function pageHarness() {
+export function pageHarness(options: { storage?: Map<string, string>; initialNow?: number; storageUnavailable?: boolean } = {}) {
+  const storage = options.storage ?? new Map<string, string>();
   const elements: Record<string, FakeElement> = {};
   for (const id of ["pw-write-note", "pw-write-open", "pw-write-retry",
     "pw-write-manual", "pw-bootstrap", "pw-receipt"]) {
@@ -82,7 +83,7 @@ export function pageHarness() {
   const opened: Array<{ url: string; target: string; features: string }> = [];
   const committed: unknown[] = [];
   const timers: Array<{ delay: number; fn: () => void; cleared: boolean }> = [];
-  let now = 1_000_000;
+  let now = options.initialNow ?? 1_000_000;
   let keys = 0;
   const documentStub = {
     hidden: false,
@@ -99,6 +100,16 @@ export function pageHarness() {
   const sandbox: Record<string, unknown> = {
     document: documentStub,
     window: {
+      sessionStorage: {
+        getItem: (key: string) => {
+          if (options.storageUnavailable) throw new Error("Synthetic storage unavailable");
+          return storage.get(key) ?? null;
+        },
+        setItem: (key: string, value: string) => {
+          if (options.storageUnavailable) throw new Error("Synthetic storage unavailable");
+          storage.set(key, value);
+        },
+      },
       open: (url: string, target: string, features: string) => {
         opened.push({ url, target, features });
         return null;
@@ -165,6 +176,9 @@ export function pageHarness() {
     },
     setHidden: (value: boolean): void => {
       documentStub.hidden = value;
+    },
+    dispatchVisibility: (): void => {
+      for (const fn of docListeners.visibilitychange ?? []) fn({});
     } };
 }
 
