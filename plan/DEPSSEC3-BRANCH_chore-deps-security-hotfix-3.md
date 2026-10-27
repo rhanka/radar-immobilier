@@ -25,6 +25,7 @@
 - [x] Record rationale, impact and rollback before any conditional-path edit.
 
 ## Feedback Loop
+- [x] L3c: preserve historical signal workspace and head GUIDs in four newer schemas; regress canonicalization and malformed identifiers.
 - [x] L3b: resolve historical Zod, Ollama and Focus findings with raw audit, installed-tree and bundle-provenance evidence.
 - [x] L3a: retain signed and expiring acceptance coverage in historical fixtures; the live register must reject any new Zod high.
 - [x] L2ab: remove Focus KaTeX and Mermaid proposed rows after clean audits, advisory controls and bundle-provenance checks.

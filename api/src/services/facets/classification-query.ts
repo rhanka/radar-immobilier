@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { ClassificationError } from "./classification-errors.js";
 
-export const WorkspaceId = z.string().uuid().transform((value) => value.toLowerCase());
+export const WorkspaceId = z.string().guid().transform((value) => value.toLowerCase());
 export const CitySlug = z.string().min(1).max(128).regex(/^[a-z0-9-]+$/);
 export const NativeTarget = z.object({ citySlug: CitySlug,
   type: z.enum(["Signal", "DesignationEvent"]), id: z.string().min(1).max(512) }).strict();
