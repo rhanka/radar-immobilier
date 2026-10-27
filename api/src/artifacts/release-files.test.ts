@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   contentTypeForPath,
   createMemoryReleaseFiles,
-  injectGrantIntoHtml,
+  normalizeReleaseHtml,
   normalizeReleasePath,
   RELEASE_CSP,
 } from "./release-files.js";
@@ -30,14 +30,10 @@ describe("published release files", () => {
     await expect(provider.getFile("a1", "r2", "/index.html")).resolves.toBeNull();
   });
 
-  it("should carry the page grant on relative sub-resources only", () => {
-    const html = `<link rel="stylesheet" href="/styles.css"><script src="/app.js"></script>` +
-      `<script src="https://evil.example/x.js"></script><a href="/__reader/api/baskets.search.v1">x</a>`;
-    const rewritten = injectGrantIntoHtml(html, "grant-value");
-    expect(rewritten).toContain(`/styles.css?grant=grant-value`);
-    expect(rewritten).toContain(`/app.js?grant=grant-value`);
-    expect(rewritten).toContain("https://evil.example/x.js");
-    expect(rewritten).not.toContain("/__reader/api/baskets.search.v1?grant=");
+  it("should preserve HTML and JavaScript URLs while normalizing input line endings", () => {
+    const html = '<script>\r\nconst s=document.createElement("script");\rs.src="/dep.js?v=1";\r\n</script>';
+    expect(normalizeReleaseHtml(html)).toBe(html.replace(/\r\n?/g, "\n"));
+    expect(normalizeReleaseHtml(html)).not.toContain("grant=");
   });
 
   it("should authorize release sub-resources and H5 calls without opening isolation", () => {
