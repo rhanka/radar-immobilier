@@ -32,6 +32,9 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Preserve stale-response isolation when clearing request deadlines.
+- [x] Replace the now-redundant duplicate-start mutant with a discriminating
+  focus-reset variant; record original/effective runner hashes and exact changes.
 - [x] Add both C04/C05 orders for freshness, atomic import/projection and
   repair transaction entrypoints; inventory confirms shared graph-store writers.
 - [x] Fixed C12 gate: 33 passed/0 failed/0 skipped, typecheck/lint passed.
