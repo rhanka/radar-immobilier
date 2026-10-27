@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd /workspace
+source tools/make/base-api-pwa-offline-container.sh
 npm ci --ignore-scripts --no-audit --no-fund > /evidence/install.log 2>&1
 node node_modules/esbuild/install.js >> /evidence/install.log 2>&1
 cat > api/vitest.isolated.config.ts <<'CONFIG'
