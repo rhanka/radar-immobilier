@@ -71,3 +71,5 @@ Qualify, repair and integrate the supplied PW-C implementation on 07ef2757.
 - [x] Delivery: test(pw-c): execute served page bytes in a browser harness.
 
 - [x] Delivery: test(pw-c): verify gestures, isolated links and exact retries.
+
+- [x] Delivery: test(pw-c): cover terminal states and polling limits.
