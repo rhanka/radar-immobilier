@@ -32,9 +32,8 @@ afterAll(async () => {
 describe("artifact test inventories on real S3", () => {
   it("should reject the former empty prefix and accept the artifact scope prefix", async () => {
     const blobs = rawBlobs();
-    // Reflect deliberately exercises the invalid upstream call without adding
-    // a forbidden direct call to the integration suite guarded by the AST test.
-    await expect(Reflect.apply(blobs.listKeys, blobs, [""])).rejects.toThrow("invalid blob prefix: ");
+    await expect(blobs.listKeys("")).rejects.toMatchObject({ code: "invalid_blob_prefix", kind: "invalid_request" });
+    await expect(blobs.listKeys("artifacts/../")).rejects.toMatchObject({ code: "invalid_blob_prefix" });
     const key = `${PREFIX}blobs/sha256/${"a".repeat(64)}`;
     await s3.send(new PutObjectCommand({ Bucket: BUCKET, Key: key, Body: "scoped fixture" }));
     await expect(blobs.listKeys(PREFIX)).resolves.toEqual([key]);
