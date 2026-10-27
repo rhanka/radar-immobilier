@@ -1,7 +1,7 @@
 # Feature: PW-C page and application write surfaces
 
 ## Objective
-Qualify, repair and integrate the supplied PW-C implementation on 07ef2757.
+Qualify PW-C on approved final PW-A 509e664d, preserving the original delivery.
 
 ## Scope / Guardrails
 - Make-only, Docker-only; no Python, environment-file reads or push.
@@ -33,8 +33,9 @@ Qualify, repair and integrate the supplied PW-C implementation on 07ef2757.
 - [x] Owner retarget: fetch approved PW-A 509e664d and rebase all 37 PW-C
   commits without conflicts; preserve 9316a877 under a rescue ref and bundle.
   Track bytes and the approved transaction implementation remain unchanged.
-- [ ] Requalify PW-C on final PW-A, including upstream CI fixtures and real
-  curl/jq tools from the approved offline runner; deliver a 509e664d bundle.
+- [x] Requalify PW-C on final PW-A: static gates, 65 unit and 9 PostgreSQL
+  cases passed; API CI 4396 passed/0 failed/76 conditional skips; all 25
+  mutants killed/restored. Cleanup passed; deliver a 509e664d bundle.
 - [x] Final complete archive: typecheck, lint, build and nginx gates passed;
   65 unit and 9 PostgreSQL cases passed without skips; API suite passed
   4316 cases with 76 documented conditional skips and no failed suites. All
