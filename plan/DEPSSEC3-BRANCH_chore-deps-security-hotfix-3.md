@@ -24,6 +24,7 @@
 - [x] Record rationale, impact and rollback before any conditional-path edit.
 
 ## Feedback Loop
+- [x] L2s: retain upstream diagnostics, Engram behavior and default regressions.
 - [x] L2r: preserve the frozen API payload corpus and bounded collection probes.
 - [x] L2q: retain batch-record rejection before writes and event publication.
 - [x] L2p: retain nested error-tree and scoped validation regressions.
