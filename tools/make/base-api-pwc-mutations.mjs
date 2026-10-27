@@ -6,6 +6,8 @@ const app = "src/artifacts/write-intent-app-invariants-db.test.ts";
 const page = "src/artifacts/write-intent-page-regressions.test.ts";
 const browser = "src/artifacts/write-intent-app-script.test.ts";
 const mutations = [
+  ["M16-management-state", "artifacts/write-intent-app-route.ts", "pwIntentStatus(row, (deps.nowMs ?? Date.now)())", '"pending"',
+    "src/artifacts/write-intent-app-surface-db.test.ts", "confirm through the summary"],
   ["C02-revoke-upgrade", "artifacts/write-intent-app-dispatch.ts", "const live = await loadPwIntentForUpdate(tx, row.intentId);",
     "const live = await loadPwIntentForShare(tx, row.intentId);", app, "simultaneous owner revocations"],
   ["M02-issuer", "services/facets/pw-write-confirmation.ts", "owner.issuer !== principal.issuer || ", "", app, "different identity domain"],
