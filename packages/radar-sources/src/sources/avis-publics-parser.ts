@@ -1,3 +1,4 @@
+import { contractUrl } from "@radar/domain";
 import { contractSafeParse } from "@radar/domain";
 import { z } from "zod";
 
@@ -57,7 +58,7 @@ export const AvisPublicItem = z.object({
   /** ISO date (YYYY-MM-DD) parsed from dateLabel when possible, else NON_DISPONIBLE. */
   dateIso: z.string().min(1),
   /** Absolute URL of the notice PDF. */
-  url: z.string().url(),
+  url: contractUrl(),
   /** Inferred notice kind. */
   type: AvisType,
   /** Bylaw / file references found in the title (e.g. "150-49"), if any. */
