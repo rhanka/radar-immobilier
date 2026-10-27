@@ -79,9 +79,12 @@ Connect published release files and H5 reads to current account/workspace author
 - [x] OUVL3-EX4: owner reserves reader migration 0026 after PR #930's actor quotas 0025, with PW-A following at 0027; allow its rename/journal adjustment and migration integration test. Impact: unchanged SQL bytes, reader idx 25 and original when 1792100000000; rollback before deployment must keep filename, tag and index together while preserving actor quotas.
 - [x] Merge main containing PR #930, preserve both Track event sets and move reader tickets to 0026 with a coherent journal.
 - [x] Main `f8007c0f` contains PR #930 head `50266d29`, observed at 21:12 UTC; Track events-contains retains all 1062 events of each parent. Preserve the reader SQL bytes and timestamp 1792100000000 after actor quotas 1792000001000.
-- [ ] Replay the complete journal on a fresh database and idempotently; qualify PostgreSQL reader, Chromium, typecheck/lint and API CI, clean the stack and deliver from `6d7fd6ac`.
+- [x] Replay the complete journal on a fresh database and idempotently; qualify PostgreSQL reader, Chromium, typecheck/lint and API CI, clean the stack and deliver from `6d7fd6ac`.
 - [x] Add a fresh-database journal/hash/schema probe, an idempotent replay control and a PostgreSQL regression for ordered 0025/0026 records; prepare targeted qualification including unchanged Chromium acceptance and the full API CI inventory.
 - [x] First merged-main campaign applied/replayed all 26 migrations and passed Chromium; adapt byte responses to TypeScript 5.9's owned ArrayBuffer type and isolate the shared producer rate counter between independent reader test cases. Keep the production ten-attempt limit and all reader assertions unchanged, then requalify.
+- [x] Final qualification on `b60e3738` passed all 12 gates: fresh application and identical replay of 26 migration hashes/timestamps, typecheck/lint, 10/0/0 PostgreSQL, 3/0/0 Chromium and 4307/0/79 API CI. Evidence: `tmp/sol-l3-evidence/20261027T212207-5/`.
+- [x] Exit 0/PASS and down -v completed; zero L3 containers, volumes or networks remain and the shared lock was available at 21:32:29 UTC.
+- [x] Deliver an incremental bundle from `6d7fd6ac` including main `f8007c0f`, audited in a fresh repository with the base's full ancestry; preserve Track and quota SQL, unchanged reader SQL bytes, no push.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch, serialized implementation and Docker campaigns.
