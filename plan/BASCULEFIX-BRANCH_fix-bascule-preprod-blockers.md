@@ -29,5 +29,5 @@
 - [x] Lot 0: read constraints and complete previous operator report.
 - [x] Lot 1: close all Ingress backends without CRDs; retain exact restoration and survivor guards.
 - [x] Lot 2: stamp full API SHA; preserve short tags and served-build/rollback guards.
-- [ ] Lot 3: operator regressions, workflow guards, offline kustomize rendering.
-- [ ] Lot 4: review, report, atomic commit audit and verified bundle; no push.
+- [x] Lot 3: operator regressions, workflow guards, offline kustomize rendering.
+- [x] Lot 4: manual review and unavailable peer selection recorded; report, commit audit and verified bundle; no push.
