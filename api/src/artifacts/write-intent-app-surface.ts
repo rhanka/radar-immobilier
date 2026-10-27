@@ -32,7 +32,7 @@ export function createWriteAppSurface(config: AppSurfaceConfig): WriteAppDeps {
     challengeKeys: config.challengeKeys,
     renderSummary: (c, row, bootstrap) => renderWriteIntentSummary(c, row, bootstrap),
     renderManagement: (c, row, bootstrap) => renderWriteIntentManagement(c, row, bootstrap),
-    renderLogin: () => renderWriteIntentLogin(),
+    renderLogin: (c) => renderWriteIntentLogin(c),
     confirm: (row: PwIntentRow, proof: PwConfirmation) => confirmWriteIntent(config.db, row, proof),
     revoke: (row: PwIntentRow, principal: AppGuardPass["principal"]) =>
       revokeWriteIntent(config.db, row, principal),
