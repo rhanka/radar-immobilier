@@ -4,6 +4,14 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 
 const mutations = [
+  ["html-inline-extraction", "api/src/artifacts/release-files.ts",
+    'visit(parse(normalizeReleaseHtml(html)));',
+    'for (const tag of ["script", "style"]) for (const match of normalizeReleaseHtml(html).matchAll(new RegExp("<" + tag + "\\\\b[^>]*>([\\\\s\\\\S]*?)<\\\\/" + tag + "\\\\s*>", "gi"))) hashes[tag].push("\\x27sha256-" + createHash("sha256").update(match[1]).digest("base64") + "\\x27");',
+    "src/artifacts/release-isolation.test.ts"],
+  ["navigation-query", "api/src/artifacts/content-serve.ts",
+    'return c.redirect(`${target.pathname}${target.search}`, 303);',
+    'return c.redirect(`${c.req.path}?grant=${encodeURIComponent(grant)}`, 303);',
+    "src/artifacts/reader-native-files.test.ts"],
   ["reader-substitution", "api/src/artifacts/reader-baskets.ts", /context.readerSub/g, '"author-alice"',
     "tests/integration/artifacts-baskets.spec.ts"],
   ["cookie-grant-binding", "api/src/artifacts/content-serve.ts",

@@ -68,6 +68,7 @@ Connect published release files and H5 reads to current account/workspace author
 - [ ] Extract inline text with the HTML parser and preserve every navigation parameter while changing only grant.
 - [x] Replace inline-block regex extraction with parse5's HTML tree; regress quoted greater-than/spaces and apparent scripts in attributes, comments and textareas. Browser acceptance follows below.
 - [x] Preserve the request URL's query when setting its sole grant; test repeated parameters and empty prior grants, and extend Chromium to compare the interpreted script hash and read baskets after parameterized navigation.
+- [x] Add two behavioral mutations restoring the old HTML regex and query-dropping redirect; retain before/after controls and byte-exact restoration alongside the ten existing mutations.
 - [ ] Qualify artifact units, PostgreSQL reader, Chromium, both corrective mutations and API CI under the shared lock; clean volumes and deliver a bundle from `a3aa18e0`.
 
 ## Orchestration Mode (AI-selected)
