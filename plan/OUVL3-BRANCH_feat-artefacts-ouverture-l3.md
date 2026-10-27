@@ -54,6 +54,7 @@ Connect published release files and H5 reads to current account/workspace author
 - [x] Add Chromium cases for module/CSS imports, dynamic scripts, LF/CRLF inline code and two successive pinned publications; adapt opening proof to canonical pinned sessions. Execution pending.
 - [x] Reuse classification query decoding and error projection for basket reads, including request IDs and internal errors; keep resource and non-basket contracts separate.
 - [x] Route disconnected readers through existing OIDC login, retaining only a validated local resume path; restart on the validated pinned host to refresh expired browser binding.
+- [x] Add native-file boundary tests (reader/release/host substitution, missing or invalid grants, manifest misses, revocation) and compare all three read error envelopes with the existing routes.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch, serialized implementation and Docker campaigns.
