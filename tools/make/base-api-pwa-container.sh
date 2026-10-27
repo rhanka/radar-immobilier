@@ -2,6 +2,11 @@
 set -euo pipefail
 cd /workspace
 sha256sum --check --quiet /evidence/files.sha256
+if ! command -v curl >/dev/null || ! command -v jq >/dev/null; then
+  apt-get update > /evidence/system-packages.log 2>&1
+  apt-get install -y --no-install-recommends curl jq >> /evidence/system-packages.log 2>&1
+fi
+dpkg-query -W curl jq > /evidence/system-package-versions.txt
 if [[ ${2:-full} == full || ${2:-full} == scoped ]]; then
 bash tools/make/base-api-container.sh test-api "$1"
 cp /evidence/tests.json /evidence/scoped-tests.json
