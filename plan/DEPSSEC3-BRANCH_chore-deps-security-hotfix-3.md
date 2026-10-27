@@ -25,6 +25,7 @@
 - [x] Record rationale, impact and rollback before any conditional-path edit.
 
 ## Feedback Loop
+- [x] L1b: pin Focus KaTeX 0.18.2; reproduce the fixed trust behavior and verify the Mermaid core bundle uses installed KaTeX and DOMPurify.
 - [x] L2y: freeze composed HTTP non-finite refusals from the base; keep SDK stdio diagnostics and finite-number controls.
 - [x] L1a: regenerate locks with fast-uri 3.1.9, ip-address 10.7.5, Zod 4.6.7 and Engram 0.21.2; retain CSV 7.0.3.
 - [x] L2x: retain the existing CSV 7.0.3 security override under Engram; its declared CSV 6.2.1 is affected by GHSA-8cw4-87c7-c6xx.
@@ -69,9 +70,9 @@
   - [x] Confirm branch/base and clean initial state.
   - [x] Prepare an environment-free Make/Compose runner and local Git fallback.
   - [x] Capture production-only and complete raw baseline audits in containers.
-- [ ] **Lot 1 — Minimal patch updates**
+- [x] **Lot 1 — Minimal patch updates**
   - [x] Update fast-uri and ip-address within their existing declared ranges.
-  - [ ] Pin patched KaTeX 0.18.2 in the independent Focus dependency tree.
+  - [x] Pin patched KaTeX 0.18.2 in the independent Focus dependency tree.
   - [x] Verify the generated lockfile diff and installed dependency tree.
 - [ ] **Lot 2 — Zod remediation**
   - [x] Check published Sentropic compatibility and reuse the prepared migration.
