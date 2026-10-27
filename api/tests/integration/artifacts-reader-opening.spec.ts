@@ -5,11 +5,50 @@ import { createSharedReaderTickets } from "../../src/artifacts/reader-tickets.js
 import { startHarness, cookie, type Harness } from "./artifacts-h2.helpers.js";
 import { publishedBaskets } from "./artifacts-baskets.helpers.js";
 import { fingerprintReaderProfile } from "../../src/artifacts/reader-profile.js";
+import { createStoredReader } from "../../src/artifacts/reader-storage.js";
+import { createReaderContentApp } from "../../src/artifacts/content-serve.js";
+import { GRANT_SECRET, SESSION_SECRET, ISSUER } from "../../src/artifacts/reader-test-fixture.js";
 
 describeDb("stored reader approval and single-use exchange", () => {
   let h: Harness;
   beforeAll(async () => { h = await startHarness("l3opening", ["author-alice"]); });
   afterAll(async () => { await h?.close(); });
+  it("should restart disconnected opening through existing login with a fresh binding", async () => {
+    const f = await publishedBaskets(h), app = f.runtime();
+    const origin = `https://${f.releaseId}.pinned.pages.example.test`;
+    const request = (url: string, cookieHeader = "") => app.request(url, { headers: { host: new URL(url).host, cookie: cookieHeader } });
+    const first = await request(origin + "/__reader/start");
+    const login = await request(first.headers.get("location")!);
+    expect(login.status).toBe(303);
+    const loginUrl = new URL(login.headers.get("location")!, "https://app.example.test");
+    expect(loginUrl.pathname).toBe("/api/v1/auth/login");
+    const resume = new URL(loginUrl.searchParams.get("returnTo")!, loginUrl.origin);
+    expect(resume.pathname).toBe("/api/v1/artifacts/reader/resume");
+    const restarted = await request(resume.href, await cookie(f.data.contributor.sub));
+    expect(restarted.headers.get("location")).toBe(origin + "/__reader/start");
+    const fresh = await request(restarted.headers.get("location")!);
+    expect(fresh.headers.get("set-cookie")).not.toBe(first.headers.get("set-cookie"));
+    expect((await request(fresh.headers.get("location")!, await cookie(f.data.contributor.sub))).status).toBe(200);
+    resume.searchParams.set("origin", "https://foreign.test");
+    expect((await request(resume.href)).status).toBe(404);
+  });
+
+  it("should keep a delayed read open across unrelated account and ACL changes", async () => {
+    const f = await publishedBaskets(h);
+    const storage = createStoredReader(h.pool, h.config.storageScope, "pages.example.test", { getBlob: async (key) => {
+      await h.pool.query("UPDATE account_users SET status='suspended' WHERE sub=$1", [f.data.outsider.sub]);
+      await h.pool.query("DELETE FROM artifacts.artifact_access WHERE artifact_id=$1 AND principal_id=$2", [f.artifactId, f.data.outsider.sub]);
+      return h.blobs.getBlob(key);
+    } });
+    const app = createReaderContentApp({ ...storage, contentBase: "pages.example.test", issuer: ISSUER,
+      grantSecret: GRANT_SECRET, sessionSecret: SESSION_SECRET });
+    const credential = await f.credentials(f.data.contributor.sub);
+    const url = `https://${f.host}/main.js?grant=${credential.grant}`;
+    const request = () => app.request(url, { headers: { host: f.host, cookie: credential.cookie } });
+    expect((await request()).status).toBe(200);
+    await h.pool.query("UPDATE account_users SET status='suspended' WHERE sub=$1", [f.data.contributor.sub]);
+    expect((await request()).status).toBe(401);
+  });
   it("should require app confirmation and exchange once across independently composed readers", async () => {
     const f = await publishedBaskets(h);
     const contentHost = `${f.releaseId}.pinned.pages.example.test`;
