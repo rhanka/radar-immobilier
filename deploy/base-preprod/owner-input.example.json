@@ -1,0 +1,36 @@
+{
+  "context": "<AUTHORIZED_KUBERNETES_CONTEXT>",
+  "namespace": "radar-immobilier-preprod",
+  "repository": "<GITHUB_OWNER>/<REPOSITORY>",
+  "image": "<API_REPOSITORY>@sha256:<QUALIFIED_IMAGE_DIGEST>",
+  "jobName": "base-operator-<UNIQUE_ATTEMPT_ACTION>",
+  "operation": "inspect",
+  "database": { "database": "<EXPECTED_DATABASE>", "role": "<EXPECTED_ROLE>", "schema": "public" },
+  "binding": {
+    "workspaceId": null,
+    "workspaceSlug": "agence-chaperon-immobilier",
+    "actorSub": "<APPROVED_OPERATOR_SUBJECT>",
+    "maintenanceAttemptId": "<NEW_ATTEMPT_UUID>",
+    "releaseId": "<FULL_RELEASE_SHA>:<QUALIFICATION_REFERENCE>"
+  },
+  "reason": "Activate scoped personal signals in preprod",
+  "workspaceSlug": "agence-chaperon-immobilier",
+  "workspaceLabel": "Agence Chaperon Immobilier",
+  "moderators": ["<OWNER_SUBJECT>", "<SECOND_MODERATOR_SUBJECT>"],
+  "managers": ["<OWNER_SUBJECT>", "<SECOND_MANAGER_SUBJECT>"],
+  "attachments": [{ "sub": "<EACH_APPROVED_SUBJECT>", "workspaceId": "<WORKSPACE_UUID_FROM_INIT_RECEIPT>" }],
+  "backup": {
+    "reference": "<IMMUTABLE_BACKUP_REFERENCE_WITHOUT_ACCESS_PARAMETERS>",
+    "sha256": "<BACKUP_SHA256>",
+    "restoredAt": "<UTC_RESTORE_REHEARSAL_TIMESTAMP>",
+    "restoreReceiptSha256": "<RESTORE_REHEARSAL_RECEIPT_SHA256>"
+  },
+  "mcpDeployment": "<SUCCESSOR_MCP_DEPLOYMENT_NAME>",
+  "apiIngress": "<APPLICATION_INGRESS_NAME>",
+  "maintenance": {
+    "middleware": "base-maintenance-<UNIQUE_ATTEMPT>",
+    "sources": ["<QUALIFIED_OPERATOR_SOURCE_CIDR>"],
+    "ingresses": ["<APPLICATION_INGRESS_NAME>", "<MCP_INGRESS_NAME>"]
+  },
+  "cancelRuns": []
+}
