@@ -30,6 +30,9 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
     PWA-EX3 permits their exact import from 0ab7d664 by merge only.
 
 ## Feedback Loop
+- [x] Main qualification inputs: include the imported operator rights JSON,
+  account SQL and delivery shell probe in the archive; provide curl/jq in
+  the disposable Node container so unchanged CI-selected tests can execute.
 - [x] Final merge 681de8af retains exact parents 318b97fd and main 9a723753;
   audit only newly authored first-parent commits and include imported history in the bundle.
 - [x] PWA-EX4: owner finalization requires merging main 9a723753 (106 commits),
