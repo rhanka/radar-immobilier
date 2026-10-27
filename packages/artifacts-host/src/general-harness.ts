@@ -29,7 +29,7 @@ export function stubAuthority(options: {
   return {
     authority: {
       readActivation: () => activations[Math.min(activationIndex++, activations.length - 1)]!,
-      readStatus: async (sub: string) => statuses[Math.min(statusIndex++, statuses.length - 1)]!,
+      readStatus: async () => statuses[Math.min(statusIndex++, statuses.length - 1)]!,
       nowMs: () => NOW,
       readMemberships: async (sub: string) => {
         membershipCalls.push(sub);

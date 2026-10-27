@@ -31,6 +31,7 @@ describe("trusted account bindings", () => {
   it("should leave a missing binding unavailable", () => {
     expect(createAccountBinding({})).toBeUndefined();
   });
+});
 describe("artifact tools in the general opening", () => {
   it("should admit an approved account whatever the workspace claims carry", async () => {
     for (const workspaces of [["default"], [], ["stale-workspace"],
