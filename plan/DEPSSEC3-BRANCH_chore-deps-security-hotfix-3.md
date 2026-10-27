@@ -25,6 +25,7 @@
 - [x] Record rationale, impact and rollback before any conditional-path edit.
 
 ## Feedback Loop
+- [x] L3a: retain signed and expiring acceptance coverage in historical fixtures; the live register must reject any new Zod high.
 - [x] L2ab: remove Focus KaTeX and Mermaid proposed rows after clean audits, advisory controls and bundle-provenance checks.
 - [x] L2aa: remove absent Graphify, Ollama and provider-utils 2.x low-finding rows after the Engram migration.
 - [x] L2z: remove the three temporary Zod acceptances after four clean raw audits and physical-tree validation.
