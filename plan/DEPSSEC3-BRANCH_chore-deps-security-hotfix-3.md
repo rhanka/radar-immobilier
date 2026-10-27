@@ -25,6 +25,7 @@
 - [x] Record rationale, impact and rollback before any conditional-path edit.
 
 ## Feedback Loop
+- [x] L2ab: remove Focus KaTeX and Mermaid proposed rows after clean audits, advisory controls and bundle-provenance checks.
 - [x] L2aa: remove absent Graphify, Ollama and provider-utils 2.x low-finding rows after the Engram migration.
 - [x] L2z: remove the three temporary Zod acceptances after four clean raw audits and physical-tree validation.
 - [x] L1b: pin Focus KaTeX 0.18.2; reproduce the fixed trust behavior and verify the Mermaid core bundle uses installed KaTeX and DOMPurify.
@@ -76,10 +77,10 @@
   - [x] Update fast-uri and ip-address within their existing declared ranges.
   - [x] Pin patched KaTeX 0.18.2 in the independent Focus dependency tree.
   - [x] Verify the generated lockfile diff and installed dependency tree.
-- [ ] **Lot 2 — Zod remediation**
+- [x] **Lot 2 — Zod remediation**
   - [x] Check published Sentropic compatibility and reuse the prepared migration.
   - [x] Preserve API/domain/MCP validation and discovery contracts.
-  - [ ] Remove obsolete security exceptions only after raw findings disappear.
+  - [x] Remove obsolete security exceptions only after raw findings disappear.
 - [ ] **Lot 3 — Qualification**
   - [ ] Production-only and full after audits; security gate and its tests.
   - [ ] All-workspace typecheck and lint.
