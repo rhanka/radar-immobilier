@@ -15,7 +15,7 @@ import {
   WorkspaceRevisionConflictError,
 } from "../services/workspaces/types.js";
 
-const uuid = z.string().uuid();
+const uuid = z.string().guid();
 const membershipBody = z.object({
   accountId: uuid,
   status: z.enum(["active", "revoked"]).optional(),
@@ -63,7 +63,7 @@ export function workspacesRoute(deps: WorkspacesRouteDeps): Hono {
   app.post("/api/v1/workspaces/:workspaceId/memberships", async (c) => {
     const session = c.get("session" as never) as { sub: string };
     const workspaceId = c.req.param("workspaceId");
-    if (!z.string().uuid().safeParse(workspaceId).success) {
+    if (!z.string().guid().safeParse(workspaceId).success) {
       return c.json({ error: "invalid_workspace_command" }, 400);
     }
     const body = membershipBody.safeParse(await c.req.json().catch(() => null));
