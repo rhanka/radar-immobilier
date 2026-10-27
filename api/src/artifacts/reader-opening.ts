@@ -15,6 +15,7 @@ export function createReaderOpening(deps: {
   auth: AuthConfig; contentBase: string; authority: AuthorityReader; tickets: SharedReaderTickets;
   issuer: GrantIssuer; grantSecret: string; sessionSecret: string;
   now?: () => number;
+  getArtifactIdForRelease?: (releaseId: string) => Promise<string | null>;
 }) {
   const application = new Hono();
   const content = new Hono();
@@ -37,10 +38,22 @@ export function createReaderOpening(deps: {
     const origin = await deps.authority.getContentOrigin(input.artifactId);
     const rights = await deps.authority.getRights(session.sub, input.artifactId);
     if (!release || !profile || !origin || !rights?.approved) return null;
+    let contentOrigin = origin;
+    if (input.origin !== undefined) {
+      if (typeof input.origin !== "string") return null;
+      try {
+        const url = new URL(input.origin);
+        if (url.protocol !== "https:" || url.origin !== input.origin) return null;
+        const host = parseContentHost(url.host, deps.contentBase);
+        if (!(host.kind === "stable" && host.artifactId === release.artifactId) &&
+          !(host.kind === "pinned" && host.releaseId === release.releaseId)) return null;
+        contentOrigin = input.origin;
+      } catch { return null; }
+    }
     if (c.req.method === "POST" && (input.releaseId !== release.releaseId ||
       input.profileFingerprint !== fingerprintReaderProfile(profile))) return null;
     return { browserBinding: input.binding, artifactId: release.artifactId, releaseId: release.releaseId,
-      readerSub: session.sub, origin, profileName: profile.name, policyRevision: profile.policyRevision,
+      readerSub: session.sub, origin: contentOrigin, profileName: profile.name, policyRevision: profile.policyRevision,
       profileFingerprint: fingerprintReaderProfile(profile), returnTarget: "/" };
   }
   application.get("/approve", async (c) => {
@@ -53,6 +66,7 @@ export function createReaderOpening(deps: {
       `<p>Version : ${escape(input.releaseId)}. Cette page lit vos paniers avec vos droits actuels.</p>` +
       `<form method="post"><input type="hidden" name="artifactId" value="${escape(input.artifactId)}">` +
       `<input type="hidden" name="binding" value="${escape(input.browserBinding)}">` +
+      `<input type="hidden" name="origin" value="${escape(input.origin)}">` +
       `<input type="hidden" name="releaseId" value="${escape(input.releaseId)}">` +
       `<input type="hidden" name="profileFingerprint" value="${escape(input.profileFingerprint)}">` +
       `<button type="submit">Autoriser et ouvrir</button></form></html>`);
@@ -66,11 +80,13 @@ export function createReaderOpening(deps: {
   });
   content.get("/__reader/start", async (c) => {
     const host = parseContentHost(c.req.header("host"), deps.contentBase);
-    if (host.kind !== "stable" || !deps.auth.enabled) return c.json({ error: "not_found" }, 404);
+    const artifactId = host.kind === "stable" ? host.artifactId : host.kind === "pinned"
+      ? await deps.getArtifactIdForRelease?.(host.releaseId) : null;
+    if (!artifactId || !deps.auth.enabled) return c.json({ error: "not_found" }, 404);
     const binding = randomBytes(32).toString("hex");
     c.header("Set-Cookie", `${PREVIEW_INIT_COOKIE}=${binding}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=60`);
     return c.redirect(`${deps.auth.appBaseUrl}/api/v1/artifacts/reader/approve?` +
-      new URLSearchParams({ artifactId: host.artifactId, binding }), 303);
+      new URLSearchParams({ artifactId, binding, origin: `https://${c.req.header("host")}` }), 303);
   });
   content.get("/__reader/exchange", async (c) => {
     applyReaderContentHeaders(c);
