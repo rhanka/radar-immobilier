@@ -10,7 +10,8 @@ export TMPDIR="$CASE_ROOT"
 CHECK="$HERE/check-h3-activation-render.sh"
 GOOD="$CASE_ROOT/good.yaml"
 CASE="$CASE_ROOT/case.yaml"
-"${KUBECTL:-kubectl}" kustomize --load-restrictor LoadRestrictionsNone "$ROOT/deploy/overlays/preprod" >"$GOOD"
+bash "$HERE/h3-disabled-fixture.sh" "$CASE_ROOT/repo"
+"${KUBECTL:-kubectl}" kustomize --load-restrictor LoadRestrictionsNone "$CASE_ROOT/repo/deploy/overlays/preprod" >"$GOOD"
 # These domains, IDs and digests belong ONLY to this disposable test render.
 sed -i '/ARTIFACTS_CONTROL_MODE:/a\  ARTIFACTS_CONTENT_BASE: pages.fixture.test\n  ARTIFACTS_STORAGE_SCOPE: fixture_scope\n  ARTIFACTS_ORG_ID: fixture_org\n  ARTIFACTS_S3_BUCKET: fixture-bucket\n  ARTIFACTS_S3_ENDPOINT: https://s3.fixture.test\n  ARTIFACTS_S3_REGION: fixture-region\n  ARTIFACTS_VALIDATION_SUBJECTS: fixture_subject\n  ARTIFACTS_VALIDATION_UNTIL: "2099-01-01T00:00:00Z"' "$GOOD"
 sed -i -e 's/ARTIFACTS_CONTROL_MODE: "off"/ARTIFACTS_CONTROL_MODE: validation/' \

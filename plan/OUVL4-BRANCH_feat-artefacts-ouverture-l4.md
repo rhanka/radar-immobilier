@@ -41,7 +41,7 @@
   - [x] Route stable and pinned content hosts to the API; preserve rollback denial boundary.
 - [ ] **Lot 3 — Offline gates**
   - [x] Evolve H3 gates for general opening and mode-off rollback; retain the denial boundary checks.
-  - [ ] Adapt disabled/rehearsal/rollback fixtures and preserve mutation coverage.
+  - [x] Adapt disabled/rehearsal/rollback fixtures and preserve mutation coverage.
   - [ ] Check general configuration, routing and secret-reference mutations.
   - [ ] Run the existing `k8s-validate` recipe without reading `.env`.
   - [ ] Compare production render byte for byte with the baseline.
