@@ -1,3 +1,4 @@
+import { contractDateTime } from "@radar/domain";
 import { z } from "zod";
 import type { GraphSignalCard } from "../../routes/graph-signals.js";
 import { Stage } from "./classification-query.js";
@@ -7,7 +8,7 @@ export const Day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((day) => {
   const date = new Date(`${day}T00:00:00Z`);
   return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === day;
 });
-const date = z.union([Day, z.string().datetime({ offset: true })]);
+const date = z.union([Day, contractDateTime({ offset: true })]);
 const url = z.string().max(8192).url().refine((value) => {
   try {
     const parsed = new URL(value);

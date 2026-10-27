@@ -1,3 +1,4 @@
+import { contractDateTime } from "@radar/domain";
 import { z } from "zod";
 import {
   AskingPriceSchema, CitySchema, DisplayedLotVersionSchema, FingerprintSchema,
@@ -9,7 +10,7 @@ const commonEvent = {
   id: z.string().guid(), facet: z.enum(["selection", "archive", "pipeline", "market"]),
   basket: z.string().nullable(), state: z.enum(["active", "inactive"]),
   reasonCode: z.string().nullable(), verdict: ReasonVerdictSchema.nullable(),
-  createdAt: z.string().datetime(),
+  createdAt: contractDateTime(),
 };
 export const SignalEventSchema = z.object({ ...commonEvent, target: SignalTargetSchema }).strict();
 export const LotEventSchema = z.object({ ...commonEvent, target: LotTargetSchema, mode: ModeSchema,

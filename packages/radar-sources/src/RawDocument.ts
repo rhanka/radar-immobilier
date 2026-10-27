@@ -1,3 +1,4 @@
+import { contractDateTime } from "@radar/domain";
 import { contractParse } from "@radar/domain";
 import { createHash } from "node:crypto";
 import { z } from "zod";
@@ -54,7 +55,7 @@ export const RawDocumentRecordSchema = z.object({
   /** SHA-256 hex digest of the raw bytes — the idempotency key. */
   sha256: z.string().regex(/^[a-f0-9]{64}$/),
   /** ISO timestamp of the fetch. */
-  fetchedAt: z.string().datetime(),
+  fetchedAt: contractDateTime(),
   /** Object-storage key under which the raw bytes live (`raw/<source>/<Y>/<M>/<D>/<sha>.<ext>`). */
   storageKey: z.string().min(1),
   /**

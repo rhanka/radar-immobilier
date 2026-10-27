@@ -1,3 +1,4 @@
+import { contractDateTime } from "@radar/domain";
 import {
   AVIS_PUBLICS_SOURCE_URL,
   AVIS_PUBLICS_USER_AGENT,
@@ -36,7 +37,7 @@ const FETCH_TIMEOUT_MS = 15000;
 export const CollectResult = z.object({
   source: z.literal("avis-publics-valleyfield"),
   sourceUrl: z.string().url(),
-  fetchedAt: z.string().datetime(),
+  fetchedAt: contractDateTime(),
   count: z.number().int().nonnegative(),
   items: z.array(
     z.object({
