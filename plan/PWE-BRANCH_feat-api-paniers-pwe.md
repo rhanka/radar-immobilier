@@ -32,6 +32,8 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Add actual /me sliding remint from a callback-issued cookie; old CSRF
+  fails, fresh GET/click succeeds, no PW GET mints and I/challenge stay immutable.
 - [x] Add normal-callback cookie bearer rejection on all four app surfaces,
   independent Origin/CSRF/form/page-token refusals and valid confirm/revoke.
 - [x] Allow a short normal-login session TTL and controlled application clock
