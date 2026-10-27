@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 [[ ${ENV:-} == test-bascule-fix ]]
-base=7510a0d1f3e89891f1f9dc58c786b18431c78037
+base=76636465d6fce99b323f843f8c639e86167b002c
 branch=fix/bascule-preprod-blockers
-out=$PWD/tmp/bascule-fix-evidence
+out=$PWD/tmp/bascule-fix-evidence/astra
 isolated_git() { env -u GIT_DIR -u GIT_WORK_TREE git "$@"; }
 audit_staged() {
   git diff --cached --check
