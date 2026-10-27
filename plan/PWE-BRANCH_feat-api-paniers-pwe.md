@@ -32,6 +32,8 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Add both C03 orders for account approval, membership and moderation,
+  using public membership/capability revokers and the approval SQL row lock.
 - [x] Normal guard run found the form oracle expected 403 while the contract
   returns typed 415 unsupported_media_type; assert the exact refusal and zero effects.
 - [x] Normal /me remint, replica and revision reruns passed; typecheck/lint passed.
