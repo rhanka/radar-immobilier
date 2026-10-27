@@ -1,11 +1,25 @@
 import { describe, expect, it } from "vitest";
-import { parseContentHost } from "./content-host.js";
+import { belongsToContentDomain, parseContentHost } from "./content-host.js";
 
 const BASE = "pages.example.net";
 const ARTIFACT = "123e4567-e89b-12d3-a456-426614174000";
 const RELEASE = "123e4567-e89b-12d3-a456-426614174001";
 const parse = (host?: string | null, base: string | null | undefined = BASE) =>
   parseContentHost(host, base);
+
+describe("belongsToContentDomain", () => {
+  it("should reserve malformed labels, nested labels and the apex", () => {
+    for (const host of [BASE, `not-a-uuid.${BASE}`, `nope.pinned.${BASE}`, `a.b.${BASE}`, `NOPE.${BASE.toUpperCase()}.:443`]) {
+      expect(belongsToContentDomain(host, BASE), host).toBe(true);
+    }
+  });
+  it("should preserve foreign hosts and an unconfigured base", () => {
+    for (const host of ["app.example.test", `nope.${BASE}.evil.test`, `nope.not${BASE}`, undefined]) {
+      expect(belongsToContentDomain(host, BASE)).toBe(false);
+    }
+    expect(belongsToContentDomain(`nope.${BASE}`, "")).toBe(false);
+  });
+});
 
 describe("parseContentHost", () => {
   it("classifies <artifactUuid>.<base> as the stable channel", () => {
