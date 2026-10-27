@@ -32,6 +32,8 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Persist intents from verified grants following normal callback sessions,
+  with separate SQL stores and per-domain session/write/challenge key references.
 - [x] Scoped C03/C07 gate: 18 passed/0 failed/0 skipped, typecheck/lint passed.
 - [x] Add normal authRoute login/code+PKCE/callback/signature/session fixture;
   no flow cookie or application principal is manufactured by the test.
