@@ -13,7 +13,7 @@
 
 ## Branch Scope Boundaries (MANDATORY)
 - [x] **Allowed Paths (implementation scope)**: `deploy/overlays/preprod/**`, `deploy/ci/*h3*`, `docs/runbooks/ARTIFACTS_PREPROD_ACTIVATION.md`, this plan; MCP packaging paths under exception OUVL4-EX1.
-- [x] **Forbidden Paths**: root `Makefile`, `docker-compose*.yml`, `rules/**`, agent bootstrap files, other plans, `.track/**`, application code, production manifests.
+- [x] **Forbidden Paths**: root `Makefile`, `docker-compose*.yml`, `rules/**`, agent bootstrap files, other plans, `.track/**`, application code, production manifests outside OUVL4-EX1 packaging.
 - [x] **Conditional Paths**: `deploy/k8s/**` only for a demonstrated blocker; prefer preprod patches.
 - [x] **Exception process**: record rationale, impact and rollback here before any exception.
 
@@ -21,7 +21,7 @@
 - [x] Requested content DNS names, TLS Secret and dedicated bucket are deployment coordinates to provision, not a claim of existing infrastructure.
 - [x] Runtime decision: API-mounted reader from L3; standalone `content-reader` has no production authority/storage composition.
 - [x] OUVL4-EX1: allow `deploy/k8s/immo-mcp/**` and existing 40/41 entrypoints. Evidence: plain requested Kustomize command refuses external file resources. Package unchanged files in a directory base; retain production paths as symlinks. Impact: resource loading only, byte-identical production files/render. Rollback: restore regular 40/41 files and the overlay's file imports.
-- [ ] Record independent review selection and reconcile any available findings.
+- [x] Review selection recorded as `selection-failed` (no live mesh catalog/two eligible Claude IDs); no sessions dispatched or consensus claimed. Candidate ready for conductor review.
 
 ## Orchestration Mode (AI-selected)
 - [x] One branch, sequential implementation; no push or merge authorized.
@@ -40,19 +40,19 @@
 - [x] **Lot 2 — Reader and routing**
   - [x] Bind persistent reader signing and cursor secrets, cursor key ID and approval runtime.
   - [x] Route stable and pinned content hosts to the API; preserve rollback denial boundary.
-- [ ] **Lot 3 — Offline gates**
+- [x] **Lot 3 — Offline gates**
   - [x] Evolve H3 gates for general opening and mode-off rollback; retain the denial boundary checks.
   - [x] Adapt disabled/rehearsal/rollback fixtures and preserve mutation coverage.
   - [x] Check general configuration, routing and secret-reference mutations.
   - [x] Verify operator recipes with a recording kubectl double, including key custody and rollback.
   - [x] Make the exact requested default-loader Kustomize invocation pass; retain production MCP entrypoints as symlinks to byte-identical manifests.
   - [x] Add coverage for default/restricted render equality and preserved production MCP entrypoints.
-  - [ ] Run the existing `k8s-validate` recipe without reading `.env`.
-  - [ ] Compare production render byte for byte with the baseline.
-- [ ] **Lot 4 — Operator delivery**
+  - [x] Run the existing `k8s-validate` recipe without reading `.env`; 158 offline checks pass.
+  - [x] Compare production render byte for byte with the baseline.
+- [x] **Lot 4 — Operator delivery**
   - [x] Provide standalone Make targets for private key creation, reviewed renders, runtime/routing apply and rollback.
   - [x] Document runtime, provisioning, persistent secrets and both DNS/TLS wildcard levels.
   - [x] Document provisioning, DNS/TLS, selected-resource apply, image pins, tests and rollback.
-  - [ ] Audit commit sizes/messages and reconstruct the delivery bundle from the base.
-  - [ ] Write the uncommitted French delivery report with operator responsibilities and limits.
+  - [x] Audit commit sizes/messages and reconstruct the delivery bundle from the base; repeat for final plan-only commit.
+  - [x] Write the uncommitted French delivery report with operator responsibilities and limits.
 - [x] **Merge and close**: conductor-owned; no push, PR mutation or merge in this lot.
