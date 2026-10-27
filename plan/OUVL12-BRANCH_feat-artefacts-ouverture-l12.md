@@ -64,6 +64,7 @@ isolation, current authorization, transactional quotas and replay safety.
   - [x] Implemented: `feat(host): decouple workspace and probe actor rate`.
   - [x] Implemented: `feat(mcp): admit approved accounts on artifact tools`.
   - [x] Implemented: `feat(mcp): reject forged artifact caller identities`.
+  - [x] Implemented: `test(host): cover general activation parsing`.
 - [ ] **Lot 4 — Delivery**
   - [ ] Atomic commits, bundle audit and French results report.
   - [ ] Confirm own Docker project has no containers, networks or volumes.
