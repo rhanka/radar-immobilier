@@ -41,7 +41,8 @@ write_compose
 source tools/make/base-api-pwa-offline.sh
 archive_sources
 archive_ci_inputs
-extra=(api/tests/*.ts api/src/scripts/base-preprod-rights.json tools/h4-mcp.mk
+extra=(tools/make/base-api-pwe-before-app-result.txt
+  api/tests/*.ts api/src/scripts/base-preprod-rights.json tools/h4-mcp.mk
   tools/make/artefacts-delivery-account.sql tools/make/artefacts-delivery-probe.sh
   deploy/k8s/41-immo-mcp-ingress.yaml packages/immo-mcp/config/*.json
   packages/immo-mcp/src/fixtures/*.json)
