@@ -12,7 +12,7 @@
 - [x] Conventional English subjects, at most 72 characters and 150 changed lines per commit, no body/trailer.
 
 ## Branch Scope Boundaries (MANDATORY)
-- [x] **Allowed Paths (implementation scope)**: `deploy/overlays/preprod/**`, `deploy/ci/*h3*`, `docs/runbooks/ARTIFACTS_PREPROD_ACTIVATION.md`, this plan.
+- [x] **Allowed Paths (implementation scope)**: `deploy/overlays/preprod/**`, `deploy/ci/*h3*`, `docs/runbooks/ARTIFACTS_PREPROD_ACTIVATION.md`, this plan; MCP packaging paths under exception OUVL4-EX1.
 - [x] **Forbidden Paths**: root `Makefile`, `docker-compose*.yml`, `rules/**`, agent bootstrap files, other plans, `.track/**`, application code, production manifests.
 - [x] **Conditional Paths**: `deploy/k8s/**` only for a demonstrated blocker; prefer preprod patches.
 - [x] **Exception process**: record rationale, impact and rollback here before any exception.
@@ -20,6 +20,7 @@
 ## Feedback Loop
 - [x] Requested content DNS names, TLS Secret and dedicated bucket are deployment coordinates to provision, not a claim of existing infrastructure.
 - [x] Runtime decision: API-mounted reader from L3; standalone `content-reader` has no production authority/storage composition.
+- [x] OUVL4-EX1: allow `deploy/k8s/immo-mcp/**` and existing 40/41 entrypoints. Evidence: plain requested Kustomize command refuses external file resources. Package unchanged files in a directory base; retain production paths as symlinks. Impact: resource loading only, byte-identical production files/render. Rollback: restore regular 40/41 files and the overlay's file imports.
 - [ ] Record independent review selection and reconcile any available findings.
 
 ## Orchestration Mode (AI-selected)
@@ -44,6 +45,7 @@
   - [x] Adapt disabled/rehearsal/rollback fixtures and preserve mutation coverage.
   - [x] Check general configuration, routing and secret-reference mutations.
   - [x] Verify operator recipes with a recording kubectl double, including key custody and rollback.
+  - [ ] Make the exact requested default-loader Kustomize invocation pass; verify production MCP entrypoint bytes.
   - [ ] Run the existing `k8s-validate` recipe without reading `.env`.
   - [ ] Compare production render byte for byte with the baseline.
 - [ ] **Lot 4 — Operator delivery**
