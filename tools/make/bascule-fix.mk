@@ -6,6 +6,8 @@ override MSG := $(value MSG)
 .PHONY: bootstrap stage commit audit bundle test-operator test-workflow render check
 verify:
 	@rtk bash tools/make/bascule-fix-verify.sh
+verify-clean-checkout:
+	@rtk bash tools/make/bascule-fix-clean-checkout.sh
 bootstrap stage commit audit bundle:
 	@GIT_DIR="$(CURDIR)/tmp/bascule-fix-evidence/astra/backup.git" GIT_WORK_TREE="$(CURDIR)" rtk bash tools/make/bascule-fix-deliver.sh $@
 qualification-identity:
