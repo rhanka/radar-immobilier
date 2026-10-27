@@ -32,6 +32,8 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Run migration bootstrap from the API directory; the first runner
+  invocation stopped before test collection on its relative journal path.
 - [x] Reject empty/missing required files, failed suites and every required skip.
 - [x] Add isolated source snapshots, offline tools and explicit lock release.
 - [ ] Runtime prerequisite: content-reader and index omit H5/read/write
