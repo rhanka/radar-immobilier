@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import { mintGrant } from "./preview-grant.js";
 import { fingerprintReaderProfile } from "./reader-profile.js";
 import { createReaderContentApp } from "./content-serve.js";
+import { PW_PAGE_PREPARE_PATH, PW_PAGE_STATUS_PATH } from "./write-intent-page-gesture.js";
+import { pageWriteListenerRoute } from "./write-intent-page-listener.js";
 
 import {
   GRANT_SECRET,
@@ -248,5 +250,29 @@ describe("authorized artifact content serving", () => {
     );
     expect((await request(app, "/__reader/api/geo.read.v1?collectionId=qc-zonage-valleyfield", cookie, grant)).status).toBe(401);
     expect(upstream).not.toHaveBeenCalled();
+  });
+});
+
+describe("page write listener mount", () => {
+  const base = { ...fixtureReaderDeps(), contentBase: "pages.example.test",
+    grantSecret: GRANT_SECRET, sessionSecret: SESSION_SECRET, issuer: ISSUER };
+  it("should own the page operations once mounted", async () => {
+    const app = createReaderContentApp({ ...base, pageWrite: pageWriteListenerRoute(null) });
+    const owned = await app.request(`https://${HOST}${PW_PAGE_PREPARE_PATH}`,
+      { method: "POST", headers: { host: HOST } });
+    expect(owned.status).toBe(503);
+    expect(await owned.json()).toMatchObject({ operation: "facets.write-intents.prepare.v1",
+      error: { code: "write_transport_closed" } });
+  });
+  it("should leave the operations unknown without the listener", async () => {
+    const app = createReaderContentApp({ ...base });
+    const fallback = await app.request(`https://${HOST}${PW_PAGE_PREPARE_PATH}`,
+      { method: "POST", headers: { host: HOST } });
+    expect(fallback.status).toBe(404);
+    expect(await fallback.json()).toEqual({ error: "unknown_operation" });
+    const status = await app.request(
+      `https://${HOST}${PW_PAGE_STATUS_PATH}?intentId=11111111-1111-4111-8111-111111111111`,
+      { headers: { host: HOST } });
+    expect(status.status).toBe(404);
   });
 });
