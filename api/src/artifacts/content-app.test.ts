@@ -121,6 +121,14 @@ describe("contentGate probes on a content host", () => {
 });
 
 describe("contentGate threat scenarios", () => {
+  it.each([`not-a-uuid.${BASE}:invalid`, `${STABLE}..`])(
+    "should contain malformed content authorities before app authentication on %s", async (host) => {
+      const response = await app.request(`http://${APP_HOST}/api/v1/auth/login`, { headers: { host } });
+      expect(response.status).toBe(401);
+      expectDenyHeaders(response);
+    },
+  );
+
   it("denies browser navigations without redirecting to login", async () => {
     expect((await app.request(`http://${APP_HOST}/api/v1/admin/users`, {
       headers: { accept: "text/html" },
@@ -170,6 +178,43 @@ describe("contentGate on other hosts", () => {
 });
 
 describe("contentGate reader dispatch (A6/H5 seam)", () => {
+  it.each([STABLE, PINNED, `not-a-uuid.${BASE}`, `nope.pinned.${BASE}`])(
+    "should isolate every wildcard host before application handlers on %s", async (host) => {
+      for (const method of ["GET", "POST"]) {
+        for (const path of ["/api/v1/auth/enroll", "/api/v1/auth/login", "/api/v1/workspaces", "/api/geo/collections", "/api", "/admin", "/app", "/auth/login", "/login"]) {
+          const fetch = vi.fn(() => new Response("must not run"));
+          const gated = new Hono();
+          gated.use("*", contentGate(BASE, { fetch }));
+          gated.all("*", (c) => c.redirect("/application-login"));
+          const response = await gated.request(`https://${host}${path}`, {
+            method, headers: { host, cookie: "radar_session=application-cookie" },
+          });
+          expect(response.status, `${method} ${path}`).toBe(path.startsWith("/api") ? 401 : 404);
+          for (const [name, value] of Object.entries(READER_CONTENT_HEADERS)) expect(response.headers.get(name)).toBe(value);
+          expect(response.headers.get("set-cookie")).toBeNull();
+          expect(response.headers.get("location")).toBeNull();
+          expect(fetch).not.toHaveBeenCalled();
+        }
+      }
+    },
+  );
+
+  it.each([`not-a-uuid.${BASE}`, `nope.pinned.${BASE}`])(
+    "should refuse malformed content hosts with and without a reader on %s", async (host) => {
+      const response = await app.request(`https://${host}/api/v1/auth/enroll`);
+      expect(response.status).toBe(401);
+      expectDenyHeaders(response);
+      const fetch = vi.fn(() => new Response("must not run"));
+      const gated = new Hono();
+      gated.use("*", contentGate(BASE, { fetch }));
+      const page = await gated.request(`https://${host}/index.html`, { headers: { host } });
+      expect(page.status).toBe(404);
+      expect(fetch).not.toHaveBeenCalled();
+      for (const [name, value] of Object.entries(READER_CONTENT_HEADERS)) expect(page.headers.get(name)).toBe(value);
+      expect(page.headers.get("set-cookie")).toBeNull();
+    },
+  );
+
   it.each(["GET", "POST"])("should deny %s API calls with reader isolation before delegation", async (method) => {
     const fetch = vi.fn(() => new Response("must not run"));
     const gated = new Hono();

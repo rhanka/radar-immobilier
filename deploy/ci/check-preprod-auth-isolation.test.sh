@@ -97,7 +97,7 @@ run_bad "$CASE_ROOT" 'rejects an MCP resource other than the preprod /mcp path' 
 fixture; sed -i 's#IMMO_MCP_OAUTH_ISSUER: "https://preprod.auth.sent-tech.ca"#IMMO_MCP_OAUTH_ISSUER: "https://idp.preprod.sent-tech.ca"#' "$CASE_ROOT/$MCP_PATCH"
 run_bad "$CASE_ROOT" 'rejects an MCP issuer that differs from the radar-api issuer' 'IMMO_MCP_OAUTH_ISSUER differs from ConfigMap/radar-api SENTROPIC_IDP_ISSUER'; rm -rf "$CASE_ROOT"
 
-fixture; sed -i '\#- ../../k8s/40-immo-mcp-http-deploy.yaml#d' "$CASE_ROOT/$OVERLAY"
+fixture; sed -i '\#- ../../k8s/immo-mcp$#d' "$CASE_ROOT/$OVERLAY"
 run_bad "$CASE_ROOT" 'rejects a render without ConfigMap immo-mcp-config (no vacuous pass)' 'ConfigMap/immo-mcp-config not found in the render'; rm -rf "$CASE_ROOT"
 
 # Ingress (operator-applied from this render): a PROD host or the PROD TLS
