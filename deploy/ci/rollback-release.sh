@@ -87,7 +87,7 @@ while :; do
   if [ -n "$api_sha" ] && [ -n "$ui_sha" ]; then
     # Healthy responses on both surfaces. If we know the failed sha, the endpoint
     # must NOT still be serving it (that would mean the rollback did not take).
-    if [ -n "$FAILED_REF" ] && [ "$api_sha" = "$FAILED_REF" ]; then
+    if [[ -n $FAILED_REF && ( $api_sha == "$FAILED_REF" || ( ${#FAILED_REF} == 7 && $api_sha == "$FAILED_REF"* ) ) ]]; then
       die "G2: endpoint still serves the FAILED build ${FAILED_REF} after rollback — rollback ineffective, page owner"
     fi
     log "G2 served-check OK — ${PUBLIC_HOST} healthy (api=${api_sha} ui=${ui_sha})"
