@@ -32,6 +32,8 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Add C01 commit/rollback variants using two real child processes,
+  separate pools, SQL wait observation and exact effect/rollback counters.
 - [x] Add an IPC-controlled replica worker with its own database pool.
 - [x] Verified identity gate: 3 passed/0 failed/0 skipped; typecheck/lint passed.
 - [x] Add HW-04 same-sub issuer/tier cases from actual callback sessions and
