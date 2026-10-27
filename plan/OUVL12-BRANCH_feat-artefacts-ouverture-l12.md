@@ -119,6 +119,7 @@ isolation, current authorization, transactional quotas and replay safety.
   - [x] Implement a conditional atomic attempt reservation and retryable 429.
   - [x] Restrict account-binding workspace exemption to explicit general mode.
   - [x] Add publication receipt replay through coordinator locks and fresh ACLs.
+  - [x] Share replay-before-attempt ordering in the host entry used by HTTP/MCP.
   - [ ] Reproduce replay at the tenth success through HTTP and MCP façades.
   - [ ] Count S3 calls on the last concurrent attempt and exhausted durable quota.
   - [ ] Implement shared guarded replay and atomic pre-upload attempt admission.
