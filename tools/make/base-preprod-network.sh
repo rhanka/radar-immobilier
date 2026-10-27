@@ -26,6 +26,11 @@ assert_network() {
     and all(.ports[]?; (.nodePort//0)==0))' "$OUTPUT/network-services.json" >/dev/null || fail 'Unqualified Service exposure (type, external address, nodePort or unready publishing)'
   awk -F '\t' '$5=="true" || $6~/[1-9]/ || $7~/[1-9]/ {exit 1}' "$OUTPUT/network-pods.tsv" || fail 'Pod exposes hostNetwork or hostPort'
   awk -F '\t' '$2=="true" || $3~/[1-9]/ || $4~/[1-9]/ {exit 1}' "$OUTPUT/network-templates.tsv" || fail 'Workload template exposes hostNetwork or hostPort'
+  # Without an explicit non-DB component selector, a policy may select PostgreSQL.
+  jq -e 'all(.items[].spec | select((.podSelector.matchLabels["app.kubernetes.io/component"]//"postgres")=="postgres");
+    all(.ingress[]?; (.from|length)>0 and all(.from[];
+      keys==["podSelector"] and ((.podSelector.matchLabels//{})|length)>0)))' \
+    "$OUTPUT/network-policies.json" >/dev/null || fail 'Unbounded PostgreSQL ingress sources are forbidden'
   # Default deny covers future pods. Additive grants may admit only the
   # known ingress controller, or target database pods exclusively.
   jq -e 'any(.items[].spec; .podSelector=={} and (.policyTypes|index("Ingress"))!=null and ((.ingress//[])|length)==0)
