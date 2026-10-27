@@ -1,0 +1,13 @@
+[
+  {"label":"exact name and literal text", "args":["ConfigMap","radar-api"], "output":"apiVersion: v1\ndata:\n  text: |\n    first line\n\n    --- is literal content\n    Montréal: \"quoted\"\nkind: ConfigMap\nmetadata:\n  name: radar-api\n  namespace: radar-immobilier-preprod\n"},
+  {"label":"prefix, tabs and document order", "flags":["--name-prefix","radar-ui-nginx"], "args":["ConfigMap"], "output":"apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: radar-ui-nginx-a\ndata:\n  value: '01'\n---\napiVersion: v1\nkind:\tConfigMap \t\nmetadata:\n  name:\tradar-ui-nginx-b \t\ndata:\n  value: \"true\"\n"},
+  {"label":"kind only", "args":["Deployment"], "output":"apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: radar-api\nspec:\n  template:\n    metadata:\n      name: nested-name\n"},
+  {"label":"all names including missing name", "flags":["--names"], "args":["ConfigMap"], "output":"radar-api\nradar-ui-nginx-a\nradar-ui-nginx-b\n\n"},
+  {"label":"names and prefix", "flags":["--names","--name-prefix","radar-ui-nginx"], "args":["ConfigMap"], "output":"radar-ui-nginx-a\nradar-ui-nginx-b\n"},
+  {"label":"reverse flag order and exact name", "flags":["--name-prefix","radar-ui-nginx","--names"], "args":["ConfigMap","radar-ui-nginx-b"], "output":"radar-ui-nginx-b\n"},
+  {"label":"exact name and prefix intersection", "flags":["--name-prefix","other"], "args":["ConfigMap","radar-api"], "output":""},
+  {"label":"missing exact name", "args":["ConfigMap","absent"], "output":""},
+  {"label":"missing kind", "args":["CronJob"], "output":""},
+  {"label":"empty exact name", "args":["ConfigMap",""], "output":"kind: ConfigMap\nmetadata:\n  namespace: missing-name\n"},
+  {"label":"empty prefix", "flags":["--name-prefix","","--names"], "args":["ConfigMap"], "output":"radar-api\nradar-ui-nginx-a\nradar-ui-nginx-b\n\n"}
+]
