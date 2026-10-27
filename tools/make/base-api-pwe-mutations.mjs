@@ -30,12 +30,15 @@ function run(name, scope, title, phase) {
   return selected.map(({ fullName, status }) => ({ fullName, status }));
 }
 mkdirSync("/evidence/pwe-mutants", { recursive: true });
-for (const [name, file, before, after, scope, title] of cases) {
+const filter = new RegExp(process.env.PWE_MUTATION_FILTER ?? ".*");
+const selectedCases = cases.filter(([name]) => filter.test(name));
+if (!selectedCases.length) throw new Error("Mutation filter selected no required variant");
+for (const [name, file, before, after, scope, title, expected = 1] of selectedCases) {
   const path = root + file;
   const original = readFileSync(path);
   const receipt = { name, file, scope, title, sha256: hash(original) };
   try {
-    if (original.toString().split(before).length !== 2) throw new Error(`Nonunique anchor: ${name}`);
+    if (original.toString().split(before).length !== expected + 1) throw new Error(`Nonunique anchor: ${name}`);
     receipt.baseline = run(name, scope, title, "baseline");
     try {
       writeFileSync(path, original.toString().replace(before, after));
