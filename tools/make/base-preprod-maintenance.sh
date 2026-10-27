@@ -88,6 +88,7 @@ stop-job() {
 close() {
   maintenance_inputs; permissions; inventory; assert_cd_frozen
   require_expected
+  assert_network
   close_routes
   local name uid replicas images suspend schedule
   # Freeze every namespace CronJob; the initial suspend state is retained in inventory.
@@ -177,6 +178,7 @@ tunnel-api() {
 restart-api() {
   qualification_receipt
   assert_cd_frozen; assert_boundary
+  assert_namespace_endpoints
   assert_api_instance q1
   cp "$OUTPUT/api-instance.json" "$OUTPUT/api-before-restart.json"
   "${k[@]}" rollout restart deployment/radar-api > "$OUTPUT/restart.txt"
