@@ -34,7 +34,7 @@
 - [x] Astra lot 0: read both PR #929 reviews completely; fixes start at `76636465`, no push.
 - [x] Astra lot 1: qualification uses checkout Git and source fingerprints, independently of delivery metadata.
 - [x] Astra lot 2: restore only the saved closed state with UID/resourceVersion preconditions.
-- [ ] Astra lot 3: control alternate routes, exposed ports and enforced consumer pod isolation; otherwise refuse.
+- [x] Astra lot 3: control alternate routes, exposed ports and enforced consumer pod isolation; otherwise refuse.
 - [x] Astra network controls: read-only inventory, supported policy shape, bound CNI probes and namespace-wide endpoint roster implemented.
 - [x] Astra network wiring: activation/start/restart/tunnel/reopening enforce the network boundary; added bypass regressions.
 - [ ] Astra lot 4: regression evidence, report correction section and audited incremental bundle.
