@@ -32,7 +32,7 @@ describeDb("PW-C application surface", () => {
     const management = await app.request(`https://${host}/api/v1/artifacts/write-intents/${row.intentId}`,
       { headers: { host, cookie: session } });
     expect(management.status).toBe(200);
-    expect(await management.json()).toMatchObject({ intentId: row.intentId, management: true });
+    expect(await management.json()).toMatchObject({ intentId: row.intentId, management: true, state: "pending" });
 
     const confirmUrl = `https://${host}${boot.confirmUrl as string}`;
     const confirmed = await post(app, host, confirmUrl, session,
@@ -42,6 +42,14 @@ describeDb("PW-C application surface", () => {
       state: "committed", commandId: input.commandKey,
       receipt: { event: { state: "active", basket: "pertinent" } },
       nextAction: "refresh_state" });
+
+    const result = await app.request(`https://${host}/api/v1/artifacts/write-intents/${row.intentId}`,
+      { headers: { host, cookie: session } });
+    expect(result.status).toBe(200);
+    const technical = await result.json();
+    expect(technical).toMatchObject({ intentId: row.intentId, management: true, state: "committed" });
+    expect(technical).not.toHaveProperty("receipt");
+    expect(technical).not.toHaveProperty("challengeToken");
 
     const replay = await post(app, host, confirmUrl, session,
       boot.csrf as string, { challengeToken: boot.challengeToken });

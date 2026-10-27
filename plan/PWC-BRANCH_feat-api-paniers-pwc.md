@@ -28,6 +28,8 @@ Qualify, repair and integrate the supplied PW-C implementation on 07ef2757.
   - None; no scope exception required.
 
 ## Feedback Loop
+- [x] Expose the durable technical state on owner management reads, without
+  a receipt or challenge, so recovery remains usable after page loss.
 - [x] Supplied implementation and complete Muse report reviewed.
 - [x] Baseline failures captured before corrections.
 
