@@ -4,6 +4,30 @@ const principal = "artifacts/write-intent-principal.ts";
 const confirmation = "services/facets/pw-write-confirmation.ts";
 const durable = "services/facets/pw-write-admission-durable.ts";
 export const cases = [
+  ...["commandKey", "pageInstanceId", "expectedProjectionToken"].map((field) => [
+    `M04-binding-${field}`, "services/facets/pw-write-digests.ts",
+    field === "commandKey" ? "commandKey: (binding.commandKey as string).toLowerCase(),"
+      : `${field}: binding.${field},`, "", "tests/integration/pwe-bindings.spec.ts", `bind ${field} independently`]),
+  ["M04-deselection-binding", "services/facets/signal-write-operations.ts",
+    'for (const key of ["basket", "reasonCode", "deselect", "expectedSelectionHeads"] as const) {\n    if (input[key] !== undefined) body[key] = input[key];\n  }\n  if (input.deselect !== undefined) body.deselect = [...input.deselect].sort();',
+    'for (const key of ["basket", "reasonCode"] as const) {\n    if (input[key] !== undefined) body[key] = input[key];\n  }',
+    "tests/integration/pwe-bindings.spec.ts", "different deselection masks"],
+  ...[["personal", "personalRevision: scope.personalRevision,"], ["common", "workspaceRevision: scope.workspaceRevision,"],
+    ["source", "sourceRevision: scope.sourceRevision,\n    sourceDigest: scope.sourceDigest,"]].map(([kind, anchor]) => [
+    `M07-${kind}-scope`, "services/facets/projection-scope.ts", anchor, "",
+    "tests/integration/pwe-revisions.spec.ts", `stale intent after the real ${kind} writer commits first`]),
+  ["M08-current-head", "services/facets/scoped-writer.ts", "if (conflicted)", "if (false)",
+    "tests/integration/pwe-business-guards.spec.ts", "typed head guard"],
+  ["M08-current-version", "services/facets/scoped-writer.ts", "if (fingerprint !== command.displayedFingerprint)", "if (false)",
+    "tests/integration/pwe-business-guards.spec.ts", "typed version guard"],
+  ["M10-final-cookie-clock", "services/facets/pw-write-confirm.ts", "const now = clockMs();", "const now = row.createdAt.getTime();",
+    "tests/integration/pwe-expiry-waits.spec.ts", "cookie expiry at the outbox wait"],
+  ["M10-final-challenge-clock", "services/facets/signal-write-admission.ts", "const now = clock();", "const now = started;",
+    "tests/integration/pwe-expiry-waits.spec.ts", "challenge expiry at the outbox wait"],
+  ...[["reader", "`admission:reader:${row.actorId}:${row.workspaceId}`", "six P grants"],
+    ["workspace", "`admission:workspace:${row.workspaceId}`", "workspace burst across readers"]].map(([kind, anchor, title]) => [
+    `M13-per-intent-${kind}`, durable, anchor, anchor.slice(0, -1) + ":${normalized}`",
+    "tests/integration/pwe-shared-quota.spec.ts", title]),
   ["M02-comparator-issuer", principal, "left.issuer === right.issuer && ", "", identity, "different issuer domain"],
   ["M02-comparator-tier", principal, " && left.tier === right.tier", "", identity, "different tier domain"],
   ["M02-owner-issuer", confirmation, "owner.issuer !== principal.issuer || ", "", identity, "different issuer domain"],

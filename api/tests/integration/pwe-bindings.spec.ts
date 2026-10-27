@@ -16,13 +16,13 @@ describeDb("PWE-04 immutable binding dimensions", () => {
       expect(pwIntentDigest({ ...params.binding, [field]: value }, params.command)).not.toBe(original);
     });
 
-  it("should bind different deselection masks with identical heads and command keys", async () => {
+  it("should bind different deselection masks with equal expected head values and command keys", async () => {
     const f = await workspaceFixture();
     const selected = await preparedSelect(f);
     const discard = { ...selected, operation: "facets.signals.personal.discard.v1" as const, basket: undefined,
-      reasonCode: "N-NON-RES", expectedSelectionHeads: { pertinent: null, a_surveiller: null } };
-    const first = signalWriteOperationDigest({ ...discard, deselect: ["pertinent"] });
-    const second = signalWriteOperationDigest({ ...discard, deselect: ["a_surveiller"] });
+      reasonCode: "N-NON-RES" };
+    const first = signalWriteOperationDigest({ ...discard, deselect: ["pertinent"], expectedSelectionHeads: { pertinent: null } });
+    const second = signalWriteOperationDigest({ ...discard, deselect: ["a_surveiller"], expectedSelectionHeads: { a_surveiller: null } });
     expect(first).not.toBe(second);
   });
 });
