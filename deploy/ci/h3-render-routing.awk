@@ -62,6 +62,7 @@ END {
     if (base == "" || base ~ /(^|\.)(invalid)$/ || base ~ /unverified|replace-me/) fail("unfilled content-domain placeholder in operator render")
     if (tlsSecret == "" || tlsSecret ~ /unverified|replace-me/) fail("unfilled content TLS Secret in operator render")
   }
+  if (phase == "general" && tlsSecret != "radar-artifact-content-preprod-tls") fail("preprod content TLS Secret required")
   if (hosts[1] != "*." base || hosts[2] != "*.pinned." base || tlsHosts[1] != hosts[1] || tlsHosts[2] != hosts[2]) fail("content domain/TLS wildcard mismatch or empty domain")
   exit(fails > 0)
 }
