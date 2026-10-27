@@ -30,7 +30,10 @@ source tools/make/base-api-ci-archive.sh
 write_compose
 archive_sources
 archive_ci_inputs
-tar -rf "$RUN_DIR/source.tar" deploy/k8s/nginx/check-header-parity.sh deploy/k8s/nginx/default.conf ui/nginx/default.conf
+pwc_tests=(api/tests/*.ts)
+for path in "${pwc_tests[@]}"; do [[ -f $path && ! -L $path ]]; done
+tar -rf "$RUN_DIR/source.tar" "${pwc_tests[@]}" deploy/k8s/nginx/check-header-parity.sh deploy/k8s/nginx/default.conf ui/nginx/default.conf
+printf '%s\n' "${pwc_tests[@]}" >> "$LOG_DIR/archived-paths.txt"
 sha256sum "$RUN_DIR/source.tar" > "$LOG_DIR/source.sha256"
 verify_ownership
 trap cleanup EXIT
