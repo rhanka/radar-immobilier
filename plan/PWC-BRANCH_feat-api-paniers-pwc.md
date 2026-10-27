@@ -43,3 +43,5 @@ Qualify, repair and integrate the supplied PW-C implementation on 07ef2757.
 - [ ] Lot 2: page preparation, listener and bounded follow-up.
 - [ ] Lot 3: unit/PostgreSQL, API suite, static gates and mutations.
 - [ ] Lot 4: atomic delivery, prerequisite-only bundle audit and report.
+
+- [x] Delivery: feat(pw-c): dispatch confirmation and serialize revocations.
