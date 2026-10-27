@@ -32,7 +32,22 @@ describeDb("stored reader approval and single-use exchange", () => {
     const appCookie = await cookie(f.data.contributor.sub);
     const summary = await request(approvalUrl, { headers: { cookie: appCookie } });
     expect(summary.status).toBe(200);
+    expect(summary.headers.get("referrer-policy")).toBe("same-origin");
+    expect(summary.headers.get("content-security-policy"))
+      .toBe(`default-src 'none'; form-action 'self' https://${f.host}; frame-ancestors 'none'; base-uri 'none'`);
     expect(await summary.text()).toContain("Autoriser et ouvrir");
+    const pinnedSummary = await request(pinned.headers.get("location")!, { headers: { cookie: appCookie } });
+    expect(pinnedSummary.status).toBe(200);
+    expect(pinnedSummary.headers.get("content-security-policy"))
+      .toContain(`form-action 'self' https://${f.releaseId}.pinned.pages.example.test;`);
+    for (const origin of ["https://foreign.test", `https://${f.host}.foreign.test`]) {
+      const forged = new URL(approvalUrl);
+      forged.searchParams.set("origin", origin);
+      const rejected = await request(forged.href, { headers: { cookie: appCookie } });
+      expect(rejected.status).toBe(401);
+      expect(rejected.headers.get("content-security-policy"))
+        .toBe("default-src 'none'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'");
+    }
     expect((await h.pool.query("SELECT count(*) FROM artifacts.reader_tickets")).rows[0].count).toBe("0");
     const fields = new URL(approvalUrl).searchParams;
     fields.set("releaseId", f.releaseId);
