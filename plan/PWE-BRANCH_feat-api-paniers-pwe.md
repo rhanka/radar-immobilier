@@ -32,6 +32,8 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Add explicit targeted mutation follow-up mode; reject empty selectors
+  and preserve the complete API/inherited campaign as the final full gate.
 - [x] Add separate RR snapshot, same-RP subject, M11 executor/receipt,
   M14 header/cookie and M15 reload/checkpoint/signature variants, with nonempty filters.
 - [x] Spy on grant issuance in real TCP receipt recovery: status must never sign.

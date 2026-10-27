@@ -15,6 +15,8 @@ CONFIG
 POSTGRES_HOST=$(node --input-type=module -e 'import {lookup} from "node:dns/promises"; console.log((await lookup("postgres", {family:4})).address)')
 export POSTGRES_HOST
 export PWE_REQUIRED_SCOPE="$2"
+export PWE_MUTATION_FILTER="${3:-.*}"
+if [[ $1 == targeted ]]; then [[ -n ${3:-} ]]; fi
 overall=0
 check() {
   local label=$1; shift
@@ -45,6 +47,8 @@ if [[ $1 == full ]]; then
 fi
 if [[ $1 == full || $1 == mutations ]]; then
   check inherited-mutants node ../tools/make/base-api-pwe-inherited-mutations.mjs
+fi
+if [[ $1 == full || $1 == mutations || $1 == targeted ]]; then
   check pwe-mutants node ../tools/make/base-api-pwe-mutations.mjs
 fi
 check results node ../tools/make/base-api-pwe-results.mjs
