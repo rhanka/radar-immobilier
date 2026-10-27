@@ -31,6 +31,6 @@
 - [x] Lot 0: read required rules, inspect old filter, reconcile, tests and CI.
 - [x] Lot 1: replace and delete Python; preserve text, object selection and fields.
 - [x] Lot 2: frozen fixtures, 4 newline variants and independent full-render oracle.
-- [ ] Lot 3: deny Python in deploy, update reconcile tests, README and CI.
+- [x] Lot 3: deny Python in deploy, update reconcile tests, README and CI.
 - [ ] Lot 4: scoped shell tests, preprod render, diff audit and review evidence.
 - [ ] Lot 5: atomic rescue commits, French report and verified portable bundle.
