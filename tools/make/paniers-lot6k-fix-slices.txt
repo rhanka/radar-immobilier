@@ -1,0 +1,9 @@
+fix(paniers): fence source versions until cutover opens|api/drizzle/0023_facet_lot_versions_fence.sql api/drizzle/meta/_journal.json
+fix(paniers): guard native and denormalized pending targets|api/src/services/facets/lots/lot-cutover-target.ts api/src/services/facets/lots/lot-city.ts
+test(paniers): keep late-qualified native history pending|api/src/services/facets/lots/lot-cutover-target-blocked-db.test.ts
+test(paniers): exclude pending aliases from city projections|api/src/services/facets/lots/lot-cutover-target-identities-db.test.ts
+test(paniers): resume over HTTP after reconciliation interruption|api/src/services/facets/lots/lot-cutover-sources-fence-db.test.ts
+test(paniers): cover stale source writers and migration replay|api/src/services/facets/lots/lot-cutover-recovery-db.test.ts api/src/services/facets/lots/lot-cutover-journal-db.test.ts
+fix(paniers): preserve legacy publications after database recovery|api/src/services/facets/lots/lot-legacy-fence.ts api/src/routes/chat.ts api/src/routes/prospect-marks.ts api/src/services/facets/lots/lot-legacy-fence.test.ts api/src/routes/lot-cutover-stream.test.ts
+chore(paniers): discriminate the review corrections on copies|tools/make/paniers-lot6k-mutation.sh tools/make/paniers-lot6k-run.sh tools/make/paniers-lot6-verify.sh tools/make/paniers-lot6k-slices.txt tools/make/paniers-lot6k-fix-slices.txt
+chore(paniers): package bounded review correction commits|tools/make/paniers-lot6.mk tools/make/paniers-lot6k-fix-deliver.sh

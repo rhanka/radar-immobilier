@@ -1,8 +1,13 @@
 import { serve } from "@hono/node-server";
+import { readArtifactsEnv } from "@radar/artifacts-host";
 import { createApp } from "./app.js";
+import { startArtifactControl } from "./artifacts/control-route-startup.js";
+import { contentHostAppOption, resolveContentHostConfig } from "./artifacts/content-config.js";
 import { loadConfig, resolveAuthConfig, resolveTemConfig } from "./config.js";
 import { createLogger } from "./logger.js";
 import { createDb, makeDbProbe } from "./db/client.js";
+import { readDurableLegacyRetirement } from "./services/facets/legacy-retirement.js";
+import { createDiscardedSignalsReader } from "./services/facets/discarded-reader.js";
 import { loadGeoKeyIndex } from "./services/sources/document-resolver.js";
 import {
   createObjectStore,
@@ -57,6 +62,38 @@ logger.info(
     : "Scaleway TEM mailer disabled (invitation links will be logged to stdout)",
 );
 
+// Optional artifact content origin (861c). Closed by default: unset or empty
+// keeps the current chain. An explicit but malformed ARTIFACTS_CONTENT_BASE
+// throws here and stops startup (fail-fast, never silently disabled).
+const contentHost = resolveContentHostConfig({
+  contentBase: process.env["ARTIFACTS_CONTENT_BASE"],
+});
+logger.info(
+  contentHost.enabled ? { contentBase: contentHost.contentBase } : { reason: contentHost.reason },
+  contentHost.enabled ? "artifact content host enabled" : "artifact content host disabled (closed by default)",
+);
+
+// Optional artifact control plane (861c lot H2): storage + publication.
+// Absent ARTIFACTS_* stays disabled (control routes absent, current chain
+// unchanged). Partial configuration closes the capability; malformed supplied
+// values stop startup. No storage is initialized when authentication is off.
+const artifactsControl = await startArtifactControl({
+  input: readArtifactsEnv(), auth, logger,
+  contentBase: contentHost.enabled ? contentHost.contentBase : undefined,
+  poolParams: {
+    host: config.POSTGRES_HOST,
+    port: config.POSTGRES_PORT,
+    user: config.POSTGRES_USER,
+    password: config.POSTGRES_PASSWORD,
+    database: config.POSTGRES_DB,
+  },
+});
+
+const durableRetirement = await readDurableLegacyRetirement(dbHandle.db).catch((error) => {
+  logger.warn({ err: String(error) }, "durable retirement unreadable; starting closed");
+  return "cutover-closed" as const;
+});
+
 const app = createApp({
   checkDb: makeDbProbe(dbHandle),
   checkObjectStore: makeObjectStoreProbe(objectStore),
@@ -67,8 +104,13 @@ const app = createApp({
   ...(geoKeyIndex ? { geoKeyIndex } : {}),
   ontologyWriteToken: config.RADAR_ONTOLOGY_WRITE_TOKEN,
   db: dbHandle.db,
+  discarded: createDiscardedSignalsReader(dbHandle.db),
   auth,
   tem,
+  mcpSignalSearch: { enabled: config.MCP_SIGNAL_SEARCH_ENABLED },
+  ...(durableRetirement ? { legacyRetirement: durableRetirement } : {}),
+  ...contentHostAppOption(contentHost),
+  ...(artifactsControl ? { artifactsControl } : {}),
 });
 
 // Ensure the raw-metadata bucket exists before serving RECUEIL collect requests.

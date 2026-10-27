@@ -1,0 +1,207 @@
+# Artifact storage/publication test runner (861c lots H1+H2).
+#
+# Standalone entry point: it NEVER includes the root Makefile (which reads
+# .env) and NEVER extends a compose file with `env_file`. Every compose
+# invocation runs with COMPOSE_DISABLE_ENV_FILE=1 and an explicit
+# --env-file /dev/null. Host-inherited overrides below are emptied so compose
+# `${VAR:-default}` interpolation falls back to the synthetic defaults in
+# docker-compose.yml; only those defaults plus the exported test ports and
+# ARTIFACTS_CONTENT_BASE reach the containers. Any ENV outside test-*/e2e-*
+# is refused.
+#
+# Usage (lot H2):
+#   make -f tools/artifact-host.mk test-host SCOPE=src/artifacts API_PORT=18897 UI_PORT=15897 MAILDEV_UI_PORT=11897 ENV=test-861c-h2
+#   make -f tools/artifact-host.mk test-host API_PORT=18897 UI_PORT=15897 MAILDEV_UI_PORT=11897 ENV=test-861c-h2
+#   make -f tools/artifact-host.mk test-mcp API_PORT=18897 UI_PORT=15897 MAILDEV_UI_PORT=11897 ENV=test-861c-h2
+#   make -f tools/artifact-host.mk typecheck API_PORT=18897 UI_PORT=15897 MAILDEV_UI_PORT=11897 ENV=test-861c-h2
+#   make -f tools/artifact-host.mk lint API_PORT=18897 UI_PORT=15897 MAILDEV_UI_PORT=11897 ENV=test-861c-h2
+#   make -f tools/artifact-host.mk image-smoke API_PORT=18897 UI_PORT=15897 MAILDEV_UI_PORT=11897 ENV=test-861c-h2
+#   make -f tools/artifact-host.mk down API_PORT=18897 UI_PORT=15897 MAILDEV_UI_PORT=11897 ENV=test-861c-h2
+
+SHELL := /bin/bash
+
+ENV ?=
+SCOPE ?=
+API_TEST_SCOPE = $(patsubst api/%,%,$(SCOPE))
+# Bound contention so CPU subprocess probes retain their original deadlines.
+API_TEST_MAX_WORKERS ?= 4
+API_PORT ?= 18895
+UI_PORT ?= 15895
+MAILDEV_UI_PORT ?= 11895
+ARTIFACTS_CONTENT_BASE ?=
+ARTIFACTS_TEST_CONFIG ?= 0
+ARTIFACTS_PROVIDER_ACCEPTANCE ?= 0
+EVIDENCE_DIR := tmp/artifact-host/$(ENV)
+ACCEPTANCE_NAMES := artifacts-provider-acceptance artifacts-finalization-authorization artifacts-provider-failures
+REQUIRED_SUITES := artifacts-provider-acceptance artifacts-finalization-authorization artifacts-provider-failures artifacts-mcp-adapter artifacts-commit-probe
+ACCEPTANCE_REPORT := $(if $(filter 1,$(ARTIFACTS_PROVIDER_ACCEPTANCE)),--reporter=default --reporter=json --outputFile.json=/workspace/$(EVIDENCE_DIR)/results.json,)
+HOST_ACCEPTANCE_REPORT := $(if $(filter 1,$(ARTIFACTS_PROVIDER_ACCEPTANCE)),-- --reporter=default --reporter=json --outputFile.json=/workspace/$(EVIDENCE_DIR)/results-host.json,)
+export API_PORT UI_PORT MAILDEV_UI_PORT ARTIFACTS_CONTENT_BASE
+override COMPOSE_PROJECT_NAME := radar-$(ENV)
+override COMPOSE_DISABLE_ENV_FILE := 1
+export COMPOSE_PROJECT_NAME COMPOSE_DISABLE_ENV_FILE
+export BUILDX_CONFIG := $(CURDIR)/tmp/artifact-host-buildx
+
+# Neutralize host-inherited values that docker-compose.yml interpolates into
+# the api container (which runs npm ci): empty forces each `${VAR:-default}`
+# to its synthetic default instead of a caller-shell secret or override.
+export POSTGRES_USER :=
+export POSTGRES_PASSWORD :=
+export POSTGRES_DB :=
+export S3_REGION :=
+export S3_BUCKET :=
+export S3_ACCESS_KEY :=
+export S3_SECRET_KEY :=
+export OPENAI_API_KEY :=
+export ANTHROPIC_API_KEY :=
+export GEMINI_API_KEY :=
+export GOOGLE_API_KEY :=
+export MISTRAL_API_KEY :=
+export COHERE_API_KEY :=
+
+# Effective compose project derives only from ENV: fixed command and -p flag
+# ignore inherited DOCKER_COMPOSE/COMPOSE/COMPOSE_PROJECT_NAME values.
+override DOCKER_COMPOSE := docker compose
+COMPOSE_FILES := -f docker-compose.yml -f docker-compose.test.yml
+override COMPOSE := $(DOCKER_COMPOSE) --env-file /dev/null -p radar-$(ENV) $(COMPOSE_FILES)
+TEST_ARTIFACT_ENV := $(if $(filter 1,$(ARTIFACTS_TEST_CONFIG)),-e ARTIFACTS_STORAGE_SCOPE=h2_suite -e ARTIFACTS_ORG_ID=h2_org -e ARTIFACTS_S3_BUCKET=h2-artifacts-suite -e ARTIFACTS_S3_ENDPOINT=http://minio:9000 -e ARTIFACTS_S3_REGION=us-east-1 -e ARTIFACTS_S3_ACCESS_KEY=test-access -e ARTIFACTS_S3_SECRET_KEY=test-secret -e ARTIFACTS_CONTENT_BASE=pages.example.test,)
+
+.PHONY: guard-env
+guard-env:
+	@case "$(ENV)" in \
+	  test-*|e2e-*) ;; \
+	  *) echo "[artifact-host] refused: ENV must be test-* or e2e-*, got '$(ENV)'" >&2; exit 1;; \
+	esac
+
+# Keep cleanup available even when a campaign must stop for low disk space.
+.PHONY: guard-disk
+guard-disk: guard-env
+	@df -h .
+	@df -Pk . | awk 'NR == 2 && $$4 < 10485760 { print "[artifact-host] refused: less than 10 GiB free" > "/dev/stderr"; exit 1 }'
+
+test-api test-host test-mcp test-provider-acceptance provider-acceptance-tsconfig typecheck lint build-api image-runtime-smoke image-smoke: guard-disk
+verify-provider-acceptance typecheck-provider-acceptance: guard-disk
+
+.PHONY: test-provider-acceptance typecheck-provider-acceptance provider-acceptance-tsconfig verify-provider-acceptance
+test-provider-acceptance: SCOPE := api/tests/integration/artifacts-provider-acceptance.spec.ts
+test-provider-acceptance: test-api ## Alias using the same fail-closed qualification gate
+
+# API tsconfig excludes integration tests: explicitly check this delivery too.
+provider-acceptance-tsconfig: guard-env
+	@mkdir -p tmp/861c-provider-acceptance
+	@printf '%s\n' '{"extends":"../../tsconfig.base.json","compilerOptions":{"noEmit":true,"types":["node"]},"include":["../../api/tests/integration/artifacts-provider-acceptance.spec.ts","../../api/tests/integration/artifacts-finalization-authorization.spec.ts","../../api/tests/integration/artifacts-provider-failures.spec.ts","../../api/tests/integration/artifacts-provider-contract.helpers.ts","../../api/tests/integration/artifacts-provider-selection.spec.ts"]}' > tmp/861c-provider-acceptance/tsconfig.json
+	@printf '%s\n' \
+	  'const fs = require("node:fs"); const path = "tmp/861c-provider-acceptance/";' \
+	  'const config = JSON.parse(fs.readFileSync(path + "tsconfig.json")); config.compilerOptions.baseUrl = "../.."; config.compilerOptions.paths = {};' \
+	  'for (const [entry, symbol] of [["commit-contract", "ArtifactInvocationContext"], ["outcome-contract", "ArtifactOutcome<T>"]]) {' \
+	  '  const specifier = "@sentropic/artifacts/server/" + entry; try { require.resolve(specifier); } catch (error) {' \
+	  '    if (!["ERR_PACKAGE_PATH_NOT_EXPORTED", "MODULE_NOT_FOUND"].includes(error.code)) throw error;' \
+	  '    console.log("[baseline-types-only] " + specifier + "; runtime acceptance remains required");' \
+	  '    const shape = entry === "commit-contract" ? "InvocationContextShape" : "OutcomeShape<T>";' \
+	  '    fs.writeFileSync(path + entry + ".d.ts", "export type " + symbol + " = import(\"../../api/tests/integration/artifacts-provider-contract.helpers.js\")." + shape + ";\n");' \
+	  '    config.compilerOptions.paths[specifier] = [path + entry + ".d.ts"];' \
+	  '  }' \
+	  '} fs.writeFileSync(path + "tsconfig.json", JSON.stringify(config));' > tmp/861c-provider-acceptance/prepare-types.cjs
+
+typecheck-provider-acceptance: provider-acceptance-tsconfig
+	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
+	$(COMPOSE) run --rm --no-deps -T api sh -c "npm ci && node tmp/861c-provider-acceptance/prepare-types.cjs && npx tsc -p tmp/861c-provider-acceptance/tsconfig.json"
+
+# Same quality commands as the standalone targets, with one dependency install.
+verify-provider-acceptance: provider-acceptance-tsconfig
+	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
+	$(COMPOSE) run --rm --no-deps -T api sh -c "npm ci && node tmp/861c-provider-acceptance/prepare-types.cjs && npx tsc -p tmp/861c-provider-acceptance/tsconfig.json && npm run typecheck --workspaces --if-present && npx eslint . --ignore-pattern 'tmp/**' && npm run build --workspace=api && test -s api/dist/index.d.ts"
+
+# Validate the API report, independently of the host workspace's test totals.
+# A pending/skipped assertion is not an executed acceptance case.
+define acceptance-check
+if [ "$(ARTIFACTS_PROVIDER_ACCEPTANCE)" = 1 ]; then \
+  if grep -q '\[acceptance-disabled\]' "$(EVIDENCE_DIR)/$(1).log"; then echo '[artifact-host] refused: acceptance suite reported disabled' >&2; exit 1; fi; \
+  if [ "$(1)" = test-host ]; then $(COMPOSE) run --rm --no-deps -T --entrypoint node api -e 'const fs=require("node:fs"); const r=JSON.parse(fs.readFileSync(process.argv[1])); for(const name of ["commit-authorization.test.ts","commit-failures.test.ts","mcp-app-adapter.test.ts"]){const cases=r.testResults.filter(t=>t.name.endsWith("/"+name)).flatMap(t=>t.assertionResults);if(!cases.length||cases.some(t=>!["passed","failed"].includes(t.status))){console.error("[artifact-host] refused: "+name+" has zero executed cases or skipped cases");process.exit(1);}}' -- '$(EVIDENCE_DIR)/results-host.json' || exit 1; fi; \
+  $(COMPOSE) run --rm --no-deps -T --entrypoint node api -e 'const fs=require("node:fs"); const raw=process.argv[1].split(/\s+/).filter(Boolean); const takesValue=new Set(["--maxWorkers","--workers","-w","--reporter","--outputFile","--shard","--project","--testTimeout","--hookTimeout"]); const paths=[]; for(let i=0;i<raw.length;i++){const t=raw[i]; if(t.startsWith("-")){ if(takesValue.has(t)||/^--[^=]+$$/.test(t)&&!t.includes("=")&&["--maxWorkers","--workers","--reporter","--outputFile","--shard","--project"].includes(t)) i++; continue;} if(/\.spec\.ts$$/.test(t)||t.includes("/")||t.startsWith("artifacts-")) paths.push(t); else if(!/^\d+$$/.test(t)) paths.push(t);} const required=process.argv[2].split(" ").filter(Boolean); const names=required.filter(n=>!paths.length || paths.some(f=>("api/tests/integration/"+n+".spec.ts").includes(f)||f.includes(n))); if(!names.length && paths.length){ console.error("[artifact-host] refused: scoped suite is not a required suite: "+paths.join(" ")); process.exit(1); } if(!names.length){ console.error("[artifact-host] refused: zero required suites selected"); process.exit(1); } const r=JSON.parse(fs.readFileSync(process.argv[3])); for(const n of names) { const cases=r.testResults.filter(t=>t.name.endsWith("/"+n+".spec.ts")).flatMap(t=>t.assertionResults); if(!cases.length || cases.some(t=>!["passed","failed"].includes(t.status))) { console.error("[artifact-host] refused: "+n+" has zero executed cases or skipped cases"); process.exit(1); } }' -- '$(SCOPE)' '$(REQUIRED_SUITES)' '$(EVIDENCE_DIR)/results.json' || exit 1; \
+fi
+endef
+
+.PHONY: test-api
+test-api: guard-env ## Run API tests (SCOPE=<path> for scoped runs)
+	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
+	mkdir -p $(EVIDENCE_DIR); rm -f $(EVIDENCE_DIR)/results.json; \
+	$(COMPOSE) up -d postgres minio || exit $$?; \
+	$(COMPOSE) run --rm -T -e ARTIFACTS_CONTENT_BASE $(TEST_ARTIFACT_ENV) -e ARTIFACTS_PROVIDER_ACCEPTANCE=$(ARTIFACTS_PROVIDER_ACCEPTANCE) api sh -c "npm ci && npm run db:migrate --workspace=api && npm run test --workspace=api -- $(API_TEST_SCOPE) --maxWorkers=$(API_TEST_MAX_WORKERS) $(ACCEPTANCE_REPORT)" 2>&1 | tee $(EVIDENCE_DIR)/test-api.log; \
+	status=$${PIPESTATUS[0]}; \
+	$(call acceptance-check,test-api); \
+	exit $$status
+
+.PHONY: test-host
+test-host: guard-env ## Run artifact storage/publication suites (SCOPE=<path> filters the api suite only)
+	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
+	mkdir -p $(EVIDENCE_DIR); rm -f $(EVIDENCE_DIR)/results.json; \
+	$(COMPOSE) up -d postgres minio || exit $$?; \
+	$(COMPOSE) run --rm -T -e ARTIFACTS_CONTENT_BASE $(TEST_ARTIFACT_ENV) -e ARTIFACTS_PROVIDER_ACCEPTANCE=$(ARTIFACTS_PROVIDER_ACCEPTANCE) api sh -c "npm ci && npm run db:migrate --workspace=api && npm run test --workspace=@radar/artifacts-host $(HOST_ACCEPTANCE_REPORT) && npm run test --workspace=api -- $(API_TEST_SCOPE) --maxWorkers=$(API_TEST_MAX_WORKERS) $(ACCEPTANCE_REPORT)" 2>&1 | tee $(EVIDENCE_DIR)/test-host.log; \
+	status=$${PIPESTATUS[0]}; \
+	$(call acceptance-check,test-host); \
+	exit $$status
+
+.PHONY: test-mcp
+test-mcp: guard-env ## Run the immo-mcp workspace suites (service E2E excluded)
+	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
+	$(COMPOSE) run --rm --no-deps -T api sh -c "npm ci && npm run test --workspace=@radar/immo-mcp -- --exclude '**/*.e2e.test.ts'"
+
+.PHONY: test-h3-proxy
+test-h3-proxy: guard-env ## Isolated nginx control-limit check (H3 unit 10, no compose stack)
+	bash tools/h3-nginx-control-limit.sh
+
+.PHONY: image-runtime-smoke
+image-runtime-smoke: guard-env ## Build the runtime image, smoke-test api + content-deny modes, refuse unknown mode (H3 unit 9)
+	sh tools/h3-image-runtime-smoke.sh
+
+.PHONY: test-h3-render
+test-h3-render: guard-env ## Offline H3 preprod render gate: activation disabled, isolated, no prod leakage (H3 units 11-14, no cluster)
+	bash deploy/ci/check-h3-preprod-render.sh
+	bash deploy/ci/check-h3-preprod-render.test.sh
+	bash deploy/ci/check-h3-activation-render.test.sh
+	bash deploy/ci/check-h3-transition-render.test.sh
+	bash deploy/ci/check-h3-discrimination.test.sh
+	bash deploy/ci/preflight-h3-preprod.test.sh
+
+.PHONY: check-h3-preparation-render check-h3-activation-render check-h3-rollback-render
+check-h3-preparation-render check-h3-activation-render check-h3-rollback-render: guard-env
+	@test -n "$(H3_RENDER)" && test -f "$(H3_RENDER)" || { echo 'Pass H3_RENDER=<canonical-render.yaml>' >&2; exit 1; }
+	bash deploy/ci/$@.sh "$(H3_RENDER)"
+
+.PHONY: image-smoke
+image-smoke: guard-env ## Build --target build, refuse .env*, smoke-boot API+MCP bundles, check api/drizzle
+	@set -e; trap 'docker image rm radar-artifact-host-smoke:local >/dev/null 2>&1 || true' EXIT INT TERM; \
+	if test -n "$$(find . -name '.env*' ! -name '.env.example' -print -quit)"; then \
+	  echo "[artifact-host] refused: .env* present in build context" >&2; exit 1; fi; \
+	docker build --target build -t radar-artifact-host-smoke:local -f api/Dockerfile .; \
+	docker run --rm radar-artifact-host-smoke:local sh -c 'test -s /workspace/api/drizzle/0015_artifacts_core.sql && test -s /workspace/api/drizzle/0016_artifacts_lifecycle.sql && echo "[artifact-host] api/drizzle present in image"'; \
+	status=0; docker run --rm -e PORT=18999 radar-artifact-host-smoke:local sh -c "timeout 6 node api/dist/index.js" || status=$$?; test $$status -eq 124; \
+	status=0; docker run --rm -e IMMO_MCP_OAUTH_ISSUER=https://idp.example -e IMMO_MCP_OAUTH_RESOURCE=https://immo.example/mcp -e IMMO_MCP_HTTP_PORT=18848 -e IMMO_MCP_DATA_MODE=mock radar-artifact-host-smoke:local sh -c "timeout 5 node packages/immo-mcp/dist/server-http.js" || status=$$?; test $$status -eq 124
+
+.PHONY: typecheck lint
+typecheck: guard-env ## Typecheck all workspaces using only the test stack
+	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
+	$(COMPOSE) run --rm --no-deps -T api sh -c "npm ci && npm run typecheck --workspaces --if-present"
+
+lint: guard-env ## Lint the workspace using only the test stack
+	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
+	$(COMPOSE) run --rm --no-deps -T api sh -c "npm ci && npx eslint . --ignore-pattern 'tmp/**'"
+
+.PHONY: build-api check-image-entrypoints
+build-api: guard-env ## Run the exact CI API build, including declaration emit
+	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
+	$(COMPOSE) run --rm --no-deps -T api sh -c "npm ci && npm run build --workspace=api"
+
+check-image-entrypoints: guard-env
+	bash deploy/ci/check-image-entrypoints.sh
+
+.PHONY: down
+down: guard-env ## Stop the stack and remove volumes/orphans
+	$(COMPOSE) down -v --remove-orphans
+
+.PHONY: inspect
+inspect: guard-env
+	docker ps -a --filter label=com.docker.compose.project=radar-$(ENV)
+	docker volume ls --filter label=com.docker.compose.project=radar-$(ENV)
+	docker network ls --filter label=com.docker.compose.project=radar-$(ENV)

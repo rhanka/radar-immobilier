@@ -1,0 +1,12 @@
+fix: canonicalize lot prices and validate missing reasons|commands-pre-result lot-values.ts lot-values.test.ts lot-commands.test.ts lot-plan.ts lot-authorize.ts api/src/routes/scoped-lot-facets-common.ts
+fix: expose lot source references and preserve unknown observations|api/drizzle/0021_facet_lot_history.sql api/src/db/schema.ts lot-response.ts lot-history.ts lot-reader.ts lot-importer-db.test.ts lot-source-navigation-db.test.ts
+refacto: retain every appended lot event and imported source link|lot-apply.ts writer-outcome batch-outcome lot-project.ts index.ts
+fix: return complete lot command and batch receipts|lot-writer.ts lot-batch.ts lot-commands.ts api/src/routes/scoped-lot-commands.ts http-basic lot-writer-db.test.ts lot-writer-replay-db.test.ts lot-writer-scope-db.test.ts lot-rights-db.test.ts lot-batch-db.test.ts lot-history-db.test.ts lot-history-privacy-db.test.ts
+test: qualify complete composite and unchanged batch results|lot-command-result-db.test.ts lot-batch-result-db.test.ts
+test: qualify HTTP replay and public source navigation|api/src/routes/scoped-lot-facets-db.test.ts api/src/routes/scoped-lot-source-navigation-db.test.ts
+fix: require distinct importer rights before writes and replay|lot-importer.ts lot-importer-rights-db.test.ts
+fix: reject contradictory lot deselection expectations|lot-transition.ts lot-duplicate-deselect-db.test.ts
+test: qualify equivalent lot price no-ops and batch counts|lot-price-noop-db.test.ts
+test: isolate CLI replay and preserve historical signal snapshots|api/src/services/workspaces/cli-db.test.ts api/src/services/facets/activation-db.test.ts
+test: run parallel API gates and seven copied-source proofs|tools/make/paniers-lot6.mk tools/make/paniers-lot6-verify.sh tools/make/paniers-lot6j-fix-mutation.sh
+chore: deliver bounded and typechecked lot review corrections|tools/make/paniers-lot6j-fix-deliver.sh tools/make/paniers-lot6j-fix-slices.txt

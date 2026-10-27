@@ -31,12 +31,14 @@
 FROM node:24-bookworm-slim AS build
 WORKDIR /workspace
 COPY package.json package-lock.json* tsconfig.base.json ./
+COPY packages/artifacts-host/package.json packages/artifacts-host/
 COPY packages/radar-domain/package.json packages/radar-domain/
 COPY packages/radar-scoring/package.json packages/radar-scoring/
 COPY packages/radar-sources/package.json packages/radar-sources/
 COPY packages/immo-mcp/package.json packages/immo-mcp/
 COPY api/package.json api/
-RUN npm install --workspaces --include-workspace-root
+RUN npm ci --ignore-scripts --strict-peer-deps --workspaces --include-workspace-root
+COPY packages/artifacts-host packages/artifacts-host
 COPY packages/radar-domain packages/radar-domain
 COPY packages/radar-scoring packages/radar-scoring
 COPY packages/radar-sources packages/radar-sources
@@ -62,12 +64,14 @@ RUN npm run typecheck --workspace=packages/immo-mcp
 # and the projection Job died with MODULE_NOT_FOUND (douleur D1).
 # Guard: deploy/ci/check-image-entrypoints.sh (run by `make k8s-validate`) fails
 # when a manifest/workflow runs a `dist/<path>.js` that is not listed here (GH #812).
-RUN npm install --no-save esbuild@0.24.0 \
+RUN npm install --no-save esbuild@0.25.12 \
  && printf '%s\n' \
   "import { build } from 'esbuild';" \
-  "await build({" \
+  "const apiBuild = await build({" \
   "  entryPoints: [" \
   "    'api/src/index.ts'," \
+  "    'api/src/artifacts/content-deny-server.ts'," \
+  "    'api/src/artifacts/content-reader-server.ts'," \
   "    'api/src/db/migrate.ts'," \
   "    'api/src/db/scripts/backfill-0004-tracking.ts'," \
   "    'api/src/scripts/project-graph-from-s3.ts'," \
@@ -82,6 +86,10 @@ RUN npm install --no-save esbuild@0.24.0 \
   "    'api/src/scripts/refresh-pv.ts'," \
   "    'api/src/scripts/refresh-pending-watchdog.ts'," \
   "    'api/src/scripts/repair-graph-city-key.ts'," \
+  "    'api/src/scripts/init-workspace-authority.ts'," \
+  "    'api/src/scripts/attach-personal-history.ts'," \
+  "    'api/src/scripts/base-api-personal-activation.ts'," \
+  "    'api/src/scripts/base-preprod-job.ts'," \
   "    'api/src/services/geo/run-geo-mapper.ts'," \
   "    'api/src/services/geo/run-populate-geo.ts'," \
   "    'api/src/services/consistency/run-consistency-snapshot.ts'," \
@@ -89,8 +97,12 @@ RUN npm install --no-save esbuild@0.24.0 \
   "  bundle: true, platform: 'node', format: 'esm', target: 'node24'," \
   "  outdir: 'api/dist', outbase: 'api/src', entryNames: '[dir]/[name]'," \
   "  logLevel: 'info'," \
+  "  metafile: true," \
   "  plugins: [{ name: 'ext', setup(b){ b.onResolve({ filter: /^[^.\/]/ }, a => a.path.startsWith('@radar/') ? null : ({ path: a.path, external: true })); } }]," \
   "});" \
+  "const deny = apiBuild.metafile.outputs['api/dist/artifacts/content-deny-server.js'];" \
+  "const allowedInputs = ['api/src/artifacts/content-deny-server.ts', 'api/src/artifacts/content-deny.ts'];" \
+  "if (Object.keys(deny.inputs).some(p => !allowedInputs.includes(p)) || deny.imports.some(i => !['hono', '@hono/node-server', 'node:http'].includes(i.path))) throw new Error('content-deny application dependency detected');" \
   "// SECOND, separate build call for packages/immo-mcp: its outbase ('src')" \
   "// is NOT under api/src, so it cannot share the entryPoints array above" \
   "// (outbase/entryNames there assume everything lives under api/src)." \
@@ -103,6 +115,7 @@ RUN npm install --no-save esbuild@0.24.0 \
   "// smoke below fails the IMAGE BUILD, not prod, if resolution regresses)." \
   "await build({" \
   "  entryPoints: ['packages/immo-mcp/src/server-http.ts']," \
+  "  external: ['@sentropic/cluster-mesh', '@sentropic/cluster-mesh/*']," \
   "  bundle: true, platform: 'node', format: 'esm', target: 'node24'," \
   "  outdir: 'packages/immo-mcp/dist', outbase: 'packages/immo-mcp/src'," \
   "  logLevel: 'info'," \
@@ -138,6 +151,9 @@ COPY --from=build /workspace/api/package.json ./api/package.json
 # comment above + deploy/k8s/40-immo-mcp-http-deploy.yaml). Its deps are
 # already in ./node_modules (installed alongside api/'s in the build stage).
 COPY --from=build /workspace/packages/immo-mcp/dist ./packages/immo-mcp/dist
+# Stateful mesh loaders resolve installed package metadata and platform leaves at runtime.
+COPY --from=build /workspace/packages/immo-mcp/package.json ./packages/immo-mcp/package.json
+COPY --from=build /workspace/packages/immo-mcp/node_modules ./packages/immo-mcp/node_modules
 # Drizzle SQL migrations + journal. The migrate entrypoint (api/dist/db/migrate.js)
 # reads `migrationsFolder: "drizzle"` RELATIVE to its CWD, so the db-migrate Job
 # runs with workingDir /workspace/api and finds these files. Without this COPY
@@ -164,6 +180,13 @@ ENV RADAR_ONTOLOGY_PROFILE_PATH=/workspace/radar/ontology/ontology-profile.yaml
 # new sha only rebuilds this tiny ENV layer, never the cached COPY layers above.
 ARG GIT_SHA=unknown
 ENV GIT_SHA=$GIT_SHA
+RUN printf '%s' "$GIT_SHA" > /workspace/api/release-sha
+# H3 unit 9: single-image service selection. The entrypoint validates the
+# requested mode (`api` or `content-deny`) and refuses anything else at
+# startup. Manifests that set `command:` bypass it; the default stays the API.
+COPY api/docker-entrypoint.sh ./api/docker-entrypoint.sh
+RUN chmod +x ./api/docker-entrypoint.sh
 USER radar
 EXPOSE 3000
-CMD ["node", "api/dist/index.js"]
+ENTRYPOINT ["/workspace/api/docker-entrypoint.sh"]
+CMD ["api"]

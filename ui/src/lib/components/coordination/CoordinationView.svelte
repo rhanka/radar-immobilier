@@ -182,7 +182,7 @@
           id="decision-kind"
           bind:value={decisionKind}
           disabled={disconnected || submitting}
-          class="mb-3 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-300 disabled:opacity-50"
+          class="mb-3 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-teal-400 focus:outline-hidden focus:ring-1 focus:ring-teal-300 disabled:opacity-50"
         >
           <option value="qualifier">Qualifier</option>
           <option value="surveiller">Surveiller</option>
@@ -196,7 +196,7 @@
           bind:value={entity}
           disabled={disconnected || submitting}
           placeholder="ex. H-609-4"
-          class="mb-3 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 placeholder-slate-400 focus:border-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-300 disabled:opacity-50"
+          class="mb-3 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 placeholder-slate-400 focus:border-teal-400 focus:outline-hidden focus:ring-1 focus:ring-teal-300 disabled:opacity-50"
         />
 
         <label class="mb-1 block text-xs font-medium text-slate-600" for="decision-rationale">Motif (optionnel)</label>
@@ -206,7 +206,7 @@
           disabled={disconnected || submitting}
           rows="2"
           placeholder="ex. potentiel de densification confirmé"
-          class="mb-3 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 placeholder-slate-400 focus:border-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-300 disabled:opacity-50"
+          class="mb-3 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 placeholder-slate-400 focus:border-teal-400 focus:outline-hidden focus:ring-1 focus:ring-teal-300 disabled:opacity-50"
         ></textarea>
 
         {#if formError}

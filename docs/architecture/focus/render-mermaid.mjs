@@ -1,8 +1,21 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
+import { build } from 'vite';
 import { missingMermaidLabels } from './mermaid-labels.mjs';
 const { graphs } = JSON.parse(await readFile('.generated/data.json', 'utf8'));
-const runtime = await readFile('node_modules/mermaid/dist/mermaid.min.js', 'utf8');
+// Mermaid's prebundled runtime embeds its own sanitizer and ignores overrides.
+const [bundle] = await build({
+  configFile: false, envFile: false, logLevel: 'silent',
+  build: { write: false, minify: true,
+    lib: { entry: 'node_modules/mermaid/dist/mermaid.core.mjs', name: 'mermaidRuntime', formats: ['iife'] },
+    rollupOptions: { output: { inlineDynamicImports: true } } },
+});
+const entry = bundle.output.find(chunk => chunk.type === 'chunk' && chunk.isEntry);
+const sanitizerModules = Object.keys(entry.modules).filter(path => path.includes('/node_modules/dompurify/'));
+if (!sanitizerModules.length) throw Error('Mermaid runtime must bundle the installed DOMPurify dependency');
+const runtime = `${entry.code}\nglobalThis.mermaid = mermaidRuntime.default;`;
+await writeFile('.generated/mermaid-runtime.js', runtime);
+const { version: dompurify } = JSON.parse(await readFile('node_modules/dompurify/package.json', 'utf8'));
 const base = 'http://127.0.0.1:9238';
 const page = await (await fetch(`${base}/json/new?about:blank`, { method: 'PUT' })).json();
 const ws = new WebSocket(page.webSocketDebuggerUrl);
@@ -46,5 +59,5 @@ try {
     rendered[graph.id] = { ...result, sourceHash: createHash('sha256').update(graph.source).digest('hex') };
   }
   await writeFile('.generated/mermaid.json', JSON.stringify(rendered));
-  console.log(JSON.stringify({ mermaid: '11.17.2', securityLevel: 'strict', diagrams: Object.keys(rendered).length, nodesGroupsAndLabels: 'all matched', network: 'blocked' }));
+  console.log(JSON.stringify({ mermaid: '11.17.2', dompurify, sanitizerModules, runtimeSha256: createHash('sha256').update(runtime).digest('hex'), securityLevel: 'strict', diagrams: Object.keys(rendered).length, nodesGroupsAndLabels: 'all matched', network: 'blocked' }));
 } finally { clearTimeout(timeout); ws.close(); await fetch(`${base}/json/close/${page.id}`); }

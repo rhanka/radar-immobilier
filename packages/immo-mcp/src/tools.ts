@@ -1,23 +1,21 @@
 import { randomUUID } from "node:crypto";
-import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import {
   assertScope,
   auditToolCall,
   hashInput,
-  IMMO_SCOPES,
-  redact,
   type ImmoMcpAuthContext,
 } from "./auth-context.js";
 import type { ImmoDataSource } from "./data-source.js";
+import type { RawDataSource } from "./raw-data.js";
 import {
-  assertValidBbox,
-  RAW_GEOJSON_DEFAULT_LIMIT,
-  RAW_GEOJSON_MAX_LIMIT,
-  type Bbox,
-  type RawDataSource,
-  type RawFeatureCollectionResult,
-} from "./raw-data.js";
+  captureInvocationContext,
+  getInvocationContext,
+  type InvocationContext,
+} from "./invocation-context.js";
+import { ALL_TOOL_DEFINITIONS } from "./tool-definitions.js";
+import { RadarSignalReadError } from "./signal-read-error.js";
+import { TOOL_HANDLERS, type ToolTextResult } from "./tool-handlers.js";
 
 export interface ToolContext {
   auth: ImmoMcpAuthContext;
@@ -26,414 +24,61 @@ export interface ToolContext {
   raw: RawDataSource;
 }
 
-type TextResult = {
-  content: { type: "text"; text: string }[];
-  isError?: boolean;
-};
-
-function jsonResult(payload: unknown, isError = false): TextResult {
-  const result: TextResult = {
-    content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
-  };
-  if (isError) result.isError = true;
-  return result;
-}
-
 /**
- * Hard char bound on GeoJSON tool answers (~1 MB serialized, compact JSON).
- * `limit`/`bbox` are the primary bounds; this is the last-resort guard so a
- * pathological page (huge multipolygons) can never flood the MCP client.
- */
-const MAX_GEOJSON_RESPONSE_CHARS = 1_000_000;
-
-/** GeoJSON results are serialized COMPACT (no indent): size matters here. */
-function geojsonResult(payload: RawFeatureCollectionResult): TextResult {
-  const text = JSON.stringify(payload);
-  if (text.length > MAX_GEOJSON_RESPONSE_CHARS) {
-    throw new Error(
-      `response_too_large: ${text.length} caractères (max ${MAX_GEOJSON_RESPONSE_CHARS}). ` +
-        "Réduisez limit ou resserrez bbox.",
-    );
-  }
-  return { content: [{ type: "text", text }] };
-}
-
-/**
- * Shared bound checks for the two GeoJSON tools: valid bbox when present,
- * and bbox REQUIRED past the default page size (anti "give me the whole
- * city" — 15 000+ lots would flood the context).
- */
-function checkGeoBounds(args: { bbox?: Bbox | undefined; limit: number }): void {
-  if (args.bbox) assertValidBbox(args.bbox);
-  if (args.limit > RAW_GEOJSON_DEFAULT_LIMIT && !args.bbox) {
-    throw new Error(
-      `bbox_required: limit > ${RAW_GEOJSON_DEFAULT_LIMIT} exige un bbox ` +
-        "[minLon, minLat, maxLon, maxLat] pour borner la réponse.",
-    );
-  }
-}
-
-/**
- * Wraps a tool handler with the cross-cutting concerns every immo tool needs:
- * scope check (from the auth CONTEXT, never from args), audit logging with an
- * input hash + correlationId, and uniform error shaping. The LLM-supplied
- * `args` are treated purely as query parameters.
- */
-function guarded<A>(
-  ctx: ToolContext,
-  toolName: string,
-  scope: string,
-  handler: (args: A) => Promise<TextResult>,
-): (args: A) => Promise<TextResult> {
-  return async (args: A) => {
-    const correlationId = randomUUID();
-    try {
-      assertScope(ctx.auth, scope);
-      auditToolCall(ctx.auth, toolName, hashInput(args), correlationId);
-      return await handler(args);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      // stderr only — never leak to the protocol stdout channel.
-      process.stderr.write(
-        `${JSON.stringify({
-          at: new Date().toISOString(),
-          kind: "immo-mcp.error",
-          tool: toolName,
-          correlationId,
-          message,
-        })}\n`,
-      );
-      return jsonResult({ error: message, tool: toolName, correlationId }, true);
-    }
-  };
-}
-
-/**
- * Registers every read-only tool on the server: the 6 v0 domain tools
- * (backed by `ctx.data`) + the 4 raw-data tools (backed by `ctx.raw` —
- * zones/lots GeoJSON, grille & PV PDFs). Shared by BOTH transports
- * (server.ts stdio and server-http.ts Streamable HTTP).
+ * SDK contract harness for baseline and handler-binding tests. Production HTTP
+ * and fixture stdio install the cluster-mesh bridge instead. Both paths call
+ * the same native handler function below with an immutable invocation snapshot.
  */
 export function registerTools(server: McpServer, ctx: ToolContext): void {
-  server.registerTool(
-    "search_lots",
-    {
-      title: "Search lots",
-      description:
-        "Recherche de lots par ville et critères (zone, no_lot, superficie min). Read-only.",
-      inputSchema: {
-        city: z.string().min(1).describe("Ville (ex: longueuil, valleyfield)"),
-        zone: z.string().optional().describe("Code de zonage (ex: H-203)"),
-        no_lot: z.string().optional().describe("Numéro de lot cadastral exact"),
-        minArea: z.number().positive().optional().describe("Superficie minimale en m²"),
-        limit: z.number().int().min(1).max(100).default(20),
+  for (const def of ALL_TOOL_DEFINITIONS) {
+    const handler = TOOL_HANDLERS[def.name];
+    if (!handler) throw new Error(`missing_handler:${def.name}`);
+    server.registerTool(
+      def.name,
+      { title: def.title, description: def.description, inputSchema: def.inputSchema },
+      async (args): Promise<ToolTextResult> => {
+        const snapshot =
+          getInvocationContext() ??
+          captureInvocationContext({ auth: ctx.auth, data: ctx.data, raw: ctx.raw });
+        return invokeTool(def.name, args as Record<string, unknown>, snapshot);
       },
-    },
-    guarded(ctx, "search_lots", IMMO_SCOPES.search, async (args) => {
-      const lots = await ctx.data.searchLots(args);
-      return jsonResult({ city: args.city, count: lots.length, lots });
-    }),
-  );
-
-  server.registerTool(
-    "get_lot_card",
-    {
-      title: "Get lot card",
-      description: "Fiche détaillée d'un lot (zonage, superficie, signaux liés). Read-only.",
-      inputSchema: {
-        city: z.string().min(1),
-        no_lot: z.string().min(1).describe("Numéro de lot cadastral exact"),
-      },
-    },
-    guarded(ctx, "get_lot_card", IMMO_SCOPES.read, async (args) => {
-      const card = await ctx.data.getLotCard(args);
-      if (!card) return jsonResult({ found: false, city: args.city, no_lot: args.no_lot });
-      return jsonResult({ found: true, lot: card });
-    }),
-  );
-
-  server.registerTool(
-    "search_signals",
-    {
-      title: "Search signals",
-      description:
-        "Recherche de signaux réglementaires par ville (étape, mot-clé). Read-only.",
-      inputSchema: {
-        city: z.string().min(1),
-        etape: z
-          .string()
-          .optional()
-          .describe("Étape du processus (ex: avis_motion, adoption, consultation)"),
-        query: z.string().optional().describe("Mot-clé libre"),
-        limit: z.number().int().min(1).max(100).default(20),
-      },
-    },
-    guarded(ctx, "search_signals", IMMO_SCOPES.search, async (args) => {
-      // Per-user auth (D4): forward the CURRENT user's token (from the verified
-      // auth CONTEXT, never from args) so the api applies its normal per-user auth.
-      const signals = await ctx.data.searchSignals(args, {
-        accessToken: ctx.auth.accessToken,
-      });
-      return jsonResult({ city: args.city, count: signals.length, signals });
-    }),
-  );
-
-  server.registerTool(
-    "get_opportunity_dossier",
-    {
-      title: "Get opportunity dossier",
-      description:
-        "Dossier d'opportunité consolidé (score, lots et signaux liés, rationale). Read-only.",
-      inputSchema: {
-        city: z.string().min(1),
-        opportunityId: z.string().min(1),
-      },
-    },
-    guarded(ctx, "get_opportunity_dossier", IMMO_SCOPES.read, async (args) => {
-      const dossier = await ctx.data.getOpportunityDossier(args);
-      if (!dossier) {
-        return jsonResult({ found: false, city: args.city, opportunityId: args.opportunityId });
-      }
-      return jsonResult({ found: true, dossier });
-    }),
-  );
-
-  server.registerTool(
-    "list_documents",
-    {
-      title: "List documents",
-      description:
-        "Liste les documents sources archivés (procès-verbaux, etc.) par ville. Read-only.",
-      inputSchema: {
-        city: z.string().optional(),
-        limit: z.number().int().min(1).max(100).default(20),
-      },
-    },
-    guarded(ctx, "list_documents", IMMO_SCOPES.documentsRead, async (args) => {
-      const documents = await ctx.data.listDocuments(args);
-      return jsonResult({ count: documents.length, documents });
-    }),
-  );
-
-  server.registerTool(
-    "read_document_excerpt",
-    {
-      title: "Read document excerpt",
-      description:
-        "Lit un extrait borné d'un document source. La sortie est passée par la redaction anti-PII. Read-only.",
-      inputSchema: {
-        documentId: z.string().min(1),
-        offset: z.number().int().min(0).default(0),
-        maxChars: z.number().int().min(1).max(4000).default(1200),
-      },
-    },
-    guarded(ctx, "read_document_excerpt", IMMO_SCOPES.documentsRead, async (args) => {
-      const body = await ctx.data.readDocumentBody(args.documentId);
-      if (!body) return jsonResult({ found: false, documentId: args.documentId });
-      const total = body.text.length;
-      const slice = body.text.slice(args.offset, args.offset + args.maxChars);
-      const excerpt = redact(slice); // anti-PII defence-in-depth
-      return jsonResult({
-        found: true,
-        documentId: args.documentId,
-        title: body.title,
-        offset: args.offset,
-        length: slice.length,
-        total_length: total,
-        truncated: args.offset + slice.length < total,
-        excerpt,
-      });
-    }),
-  );
-
-  // ── Raw-data tools (ad hoc representations côté client MCP) ───────────────
-  // Shared zod pieces. The DESCRIPTIONS are part of the contract: they are what
-  // guides claude.ai to stay within the size bounds (limit/bbox/truncated).
-  const bboxSchema = z
-    .tuple([z.number(), z.number(), z.number(), z.number()])
-    .optional()
-    .describe(
-      "Emprise [minLon, minLat, maxLon, maxLat] en WGS84 (ex: [-73.53, 45.52, -73.5, 45.55]). " +
-        "Obligatoire quand limit > 500.",
     );
-  const limitSchema = z
-    .number()
-    .int()
-    .min(1)
-    .max(RAW_GEOJSON_MAX_LIMIT)
-    .default(RAW_GEOJSON_DEFAULT_LIMIT)
-    .describe(
-      `Nombre max de features retournées (défaut ${RAW_GEOJSON_DEFAULT_LIMIT}, ` +
-        `max ${RAW_GEOJSON_MAX_LIMIT} — bbox obligatoire au-delà de ${RAW_GEOJSON_DEFAULT_LIMIT}).`,
-    );
+  }
+}
 
-  server.registerTool(
-    "get_zones_geojson",
-    {
-      title: "Get zones GeoJSON",
-      description:
-        "FeatureCollection GeoJSON des zones de zonage d'une ville (code de zone, kind, " +
-        "grille PDF et propriétés sources). Réponse BORNÉE : limit défaut 500 (max 2000), " +
-        "bbox [minLon,minLat,maxLon,maxLat] OBLIGATOIRE pour limit > 500. " +
-        "numberMatched/numberReturned/truncated indiquent ce qui reste : si truncated, " +
-        "resserrez le bbox. Read-only.",
-      inputSchema: {
-        city: z.string().min(1).describe("Ville (slug, ex: longueuil, valleyfield, delson)"),
-        bbox: bboxSchema,
-        limit: limitSchema,
-      },
-    },
-    guarded(ctx, "get_zones_geojson", IMMO_SCOPES.read, async (args) => {
-      checkGeoBounds(args);
-      return geojsonResult(await ctx.raw.getZonesGeojson(args));
-    }),
-  );
-
-  server.registerTool(
-    "get_lots_geojson",
-    {
-      title: "Get lots GeoJSON",
-      description:
-        "FeatureCollection GeoJSON des lots cadastraux d'une ville, enrichis server-side : " +
-        "zone jointe (zone.code/kind/densiteLogHa/usages/grillePdfUrl), zoneCode, " +
-        "multifamilial4plus (+ multifamilial4plusSource: grille|heuristique), superficieM2, " +
-        "tod/priorite quand la source les porte. Réponse BORNÉE : limit défaut 500 (max 2000), " +
-        "bbox OBLIGATOIRE pour limit > 500 ; une ville peut dépasser 15 000 lots — paginez " +
-        "par bbox. Filtres optionnels only4Plus/superficieMinM2 appliqués sur la page " +
-        "récupérée. truncated=true → resserrez le bbox. Read-only.",
-      inputSchema: {
-        city: z.string().min(1).describe("Ville (slug, ex: longueuil, valleyfield, delson)"),
-        bbox: bboxSchema,
-        limit: limitSchema,
-        only4Plus: z
-          .boolean()
-          .optional()
-          .describe("Ne garder que les lots dont multifamilial4plus === true"),
-        superficieMinM2: z
-          .number()
-          .positive()
-          .optional()
-          .describe("Superficie minimale en m² (champ superficieM2)"),
-      },
-    },
-    guarded(ctx, "get_lots_geojson", IMMO_SCOPES.read, async (args) => {
-      checkGeoBounds(args);
-      return geojsonResult(await ctx.raw.getLotsGeojson(args));
-    }),
-  );
-
-  server.registerTool(
-    "get_grille_pdf",
-    {
-      title: "Get grille de zonage PDF",
-      description:
-        "URL de la grille de zonage PDF (grillePdfUrl) d'une zone d'une ville, quand la " +
-        "source municipale la porte. L'URL retournée est publique : elle peut être lue " +
-        "directement. Retourne found=false si la zone est inconnue, grillePdfUrl=null si la " +
-        "zone existe sans grille. Read-only.",
-      inputSchema: {
-        city: z.string().min(1).describe("Ville (slug, ex: longueuil)"),
-        zone: z.string().min(1).describe("Code de zonage (ex: H-203)"),
-      },
-    },
-    guarded(ctx, "get_grille_pdf", IMMO_SCOPES.documentsRead, async (args) =>
-      jsonResult(await ctx.raw.getGrillePdf(args)),
-    ),
-  );
-
-  server.registerTool(
-    "get_pv_pdf",
-    {
-      title: "Get PV source PDF",
-      description:
-        "URL servie du procès-verbal source (PDF archivé) d'un signal, à partir de sa " +
-        "référence brute rawRef (ex: raw/proces-verbaux-<ville>/cas/<sha>.pdf, telle que " +
-        "portée par les signaux/documents) + métadonnées (ville, content-type). " +
-        "Le PDF lui-même n'est jamais inliné dans la réponse. Read-only.",
-      inputSchema: {
-        rawRef: z
-          .string()
-          .min(1)
-          .describe(
-            "Référence brute du document (rawRef S3, ex: raw/proces-verbaux-longueuil/cas/<sha>.pdf ; " +
-              "en mode mock: l'id de document, ex: doc-longueuil-pv-2026-04-14)",
-          ),
-      },
-    },
-    guarded(ctx, "get_pv_pdf", IMMO_SCOPES.documentsRead, async (args) =>
-      jsonResult(await ctx.raw.getPvPdf(args)),
-    ),
-  );
-
-  server.registerTool(
-    "get_reglement_provenance",
-    {
-      title: "Get règlement de zonage provenance",
-      description:
-        "Provenance du règlement de zonage en vigueur d'une ville — numéro, millésime, " +
-        "page source, URL publique du règlement — telle que geo la stampe sur la grille " +
-        "de normes (qc-zonage-norms), + la relation « modifie » (règlement ancien) quand " +
-        "servie. Passthrough VERBATIM : un champ absent = null, jamais deviné/dérivé ; seul " +
-        "reglement_url est l'URL publique (le breadcrumb interne _source_url n'est jamais " +
-        "exposé). La provenance est muni-uniforme : zone_code est accepté mais n'affecte pas " +
-        "le résultat (réservé au lien events, tool à venir). found=false si la grille de " +
-        "normes n'est pas publiée pour la ville. Read-only.",
-      inputSchema: {
-        muni_slug: z.string().min(1).describe("Ville (slug, ex: longueuil)"),
-        zone_code: z
-          .string()
-          .optional()
-          .describe("Code de zone — accepté mais no-op pour la provenance (muni-uniforme)"),
-      },
-    },
-    guarded(ctx, "get_reglement_provenance", IMMO_SCOPES.read, async (args) =>
-      jsonResult(
-        await ctx.raw.getReglementProvenance({ city: args.muni_slug, zone: args.zone_code }),
-      ),
-    ),
-  );
-
-  server.registerTool(
-    "query_zoning_events",
-    {
-      title: "Query zoning lifecycle events",
-      description:
-        "Timeline des events de cycle de vie du zonage d'une ville (avis de motion, " +
-        "projets de règlement, adoptions, entrées en vigueur, dérogations, CPTAQ…) servis " +
-        "par geo. Filtres exacts optionnels : zone_code (events liés à cette zone via " +
-        "zone_codes_resolus), document_type (avis_motion|projet_reglement|adoption|" +
-        "entree_en_vigueur|abrogation), decision_state (planned|decided). Chaque event est " +
-        "renvoyé VERBATIM (§2 : document_type, decision_state, type_instrument, bylaw_numero, " +
-        "date_iso, zone_codes_resolus, libelles_relation, url_pdf, provenance…) ; les clés " +
-        "internes préfixées « _ » (breadcrumbs) ne sont jamais exposées. decision_state=planned " +
-        "n'est JAMAIS présenté comme adopté (planned ≠ decided). Read-only.",
-      inputSchema: {
-        muni_slug: z.string().min(1).describe("Ville (slug, ex: longueuil)"),
-        zone_code: z
-          .string()
-          .optional()
-          .describe("Filtre : events liés à ce code de zone (exact, via zone_codes_resolus)"),
-        document_type: z
-          .string()
-          .optional()
-          .describe("Filtre exact : avis_motion|projet_reglement|adoption|entree_en_vigueur|abrogation"),
-        decision_state: z
-          .string()
-          .optional()
-          .describe("Filtre exact : planned|decided"),
-      },
-    },
-    guarded(ctx, "query_zoning_events", IMMO_SCOPES.read, async (args) =>
-      jsonResult(
-        await ctx.raw.queryZoningEvents({
-          city: args.muni_slug,
-          zoneCode: args.zone_code,
-          documentType: args.document_type,
-          decisionState: args.decision_state,
-        }),
-      ),
-    ),
-  );
+/** Native wire result shared by composition and the contract-test registrar. */
+export async function invokeTool(name: string, args: Record<string, unknown>, snapshot: InvocationContext): Promise<ToolTextResult> {
+        const def = ALL_TOOL_DEFINITIONS.find((entry) => entry.name === name);
+        const handler = TOOL_HANDLERS[name];
+        if (!def || !handler) throw new Error(`missing_handler:${name}`);
+        const correlationId = randomUUID();
+        try {
+          assertScope(snapshot.auth, def.scope);
+          auditToolCall(snapshot.auth, def.name, hashInput(args), correlationId);
+          return await handler(args as Record<string, unknown>, snapshot);
+        } catch (err) {
+          if (err instanceof RadarSignalReadError) {
+            const payload = err.toPublicPayload(def.name, correlationId);
+            process.stderr.write(`${JSON.stringify({ kind: "immo-mcp.error", ...payload })}\n`);
+            return { isError: true, content: [{ type: "text", text: JSON.stringify(payload) }] };
+          }
+          const message = err instanceof Error ? err.message : String(err);
+          // stderr only — never leak to the protocol stdout channel.
+          process.stderr.write(
+            `${JSON.stringify({
+              at: new Date().toISOString(),
+              kind: "immo-mcp.error",
+              tool: def.name,
+              correlationId,
+              message,
+            })}\n`,
+          );
+          const result: ToolTextResult = {
+            content: [{ type: "text", text: JSON.stringify({ error: message, tool: def.name, correlationId }, null, 2) }],
+          };
+          result.isError = true;
+          return result;
+        }
 }
 
 /** Names of the tools registered in v0 (used by tests + docs). */

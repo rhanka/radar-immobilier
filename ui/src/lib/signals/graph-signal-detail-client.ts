@@ -10,7 +10,8 @@
 import type { RegulatoryStatusT, VivierV2 } from "@radar/domain";
 
 import {
-  fetchWithTimeout,
+  fetchJsonWithTimeout,
+  readJsonErrorCode,
   RequestTimeoutError,
   DEFAULT_REQUEST_TIMEOUT_MS,
 } from "$lib/net/fetch-with-timeout.js";
@@ -517,6 +518,12 @@ export interface GraphSignalNode {
   label: string;
   citySlug: string | null;
   sourceRef: string | null;
+  /**
+   * Content fingerprint of the exact stored node served here (6B
+   * displayed-version capture). Optional: older cached payloads predate it;
+   * current servers always send it, including on degraded cards.
+   */
+  facetFingerprint?: string;
   createdAt: string | null;
   description?: string | null;
   publishedAt?: string | null;
@@ -558,6 +565,29 @@ export interface FetchGraphSignalDetailOptions {
    * périmée est IGNORÉE par l'appelant, pas transformée en erreur affichée.
    */
   signal?: AbortSignal;
+  /**
+   * Reveal discarded signals: `showDiscarded=1` returns the complete B(F)
+   * population. Hidden by default; forward this flag unchanged.
+   */
+  showDiscarded?: boolean;
+}
+
+/**
+ * HTTP failure of a graph-signals read. The message keeps the historical
+ * `<route>: <status>` shape; `status` plus the server `{error}` body field
+ * (`code`) let callers tell an explicit discarded-reader outage (503
+ * `discarded_signals_unavailable`, never an empty list) from other failures.
+ * A bare status is never enough: only the body code proves the outage.
+ */
+export class GraphSignalsHttpError extends Error {
+  readonly status: number;
+  readonly code: string | null;
+  constructor(message: string, status: number, code: string | null = null) {
+    super(message);
+    this.name = "GraphSignalsHttpError";
+    this.status = status;
+    this.code = code;
+  }
 }
 
 export async function fetchGraphSignalDetail(
@@ -567,18 +597,28 @@ export async function fetchGraphSignalDetail(
   opts: FetchGraphSignalDetailOptions = {},
 ): Promise<GraphSignalDetailResponse> {
   try {
-    const res = await fetchWithTimeout(
-      `${baseUrl}/api/graph-signals/${encodeURIComponent(citySlug)}`,
+    const suffix = opts.showDiscarded === true ? "?showDiscarded=1" : "";
+    // Bounded headers AND body: a stalled body still fails with
+    // `RequestTimeoutError` instead of blocking the caller forever.
+    const res = await fetchJsonWithTimeout<GraphSignalDetailResponse>(
+      `${baseUrl}/api/graph-signals/${encodeURIComponent(citySlug)}${suffix}`,
       { signal: opts.signal, timeoutMs },
     );
     if (!res.ok) {
-      // 404 = ville sans signaux dans la DB — état vide honnête
+      // 404 = city with no signal nodes in the DB — explicit empty state
       if (res.status === 404) {
         return { ok: false, citySlug, legacyProjection: null, nodes: [] };
       }
-      throw new Error(`graph-signals/${citySlug}: ${res.status}`);
+      throw new GraphSignalsHttpError(
+        `graph-signals/${citySlug}: ${res.status}`,
+        res.status,
+        readJsonErrorCode(res.json),
+      );
     }
-    return res.json();
+    if (res.json === null) {
+      throw new Error(`graph-signals/${citySlug}: empty JSON body`);
+    }
+    return res.json;
   } catch (err) {
     // Timeout interne → message dédié (contrat historique). Un abort EXTERNE
     // (AbortError) est relevé tel quel pour que l'appelant ignore la réponse.
@@ -688,7 +728,7 @@ function eventDateEpoch(dateStr: string | null): number {
  * Extrait, du détail signal, les RÈGLEMENTS rattachables à une zone, indexés par
  * `zoneRefComparableKey(zone_ref)`.
  *
- * Mécanique (rattachement HONNÊTE, même-nœud) : un nœud `DesignationEvent` qui
+ * Mécanique (rattachement vérifié, même-nœud) : un nœud `DesignationEvent` qui
  * porte à la fois un `reglement_number` ET un `zone_ref` structuré rattache ce
  * numéro (+ sa `sourceUrl` publique) à cette zone. Un nœud qui ne porte que l'un
  * des deux n'engendre AUCUN rattachement — on n'invente jamais de lien

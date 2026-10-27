@@ -20,7 +20,7 @@
    *  - NE touche PAS API/OIDC/PG/geo
    *  - NE déclenche PAS l'activation zonage-au-zoom (Phase 2)
    */
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
   import { Checkbox, IconButton } from "@sentropic/design-system-svelte";
   // §5 R2 point 2 — déclencheur chat = bulle DANS un carré (glyph lucide
   // `MessageSquare`, PAS `MessageCircle`). Le bouton vit dans la rangée de
@@ -52,15 +52,42 @@
   } from "$lib/signals/graph-signals-by-city-client.js";
   import {
     fetchGraphSignalDetail,
+    GraphSignalsHttpError,
     type GraphSignalNode,
     type LegacyZmpProjection,
     type SignalDocRef,
     type SignalEvidence,
   } from "$lib/signals/graph-signal-detail-client.js";
   import {
+    createCommandKey,
+    facetErrorMessage,
+    fetchCityFacets,
+    fetchReasonCodes,
+    indexFacetHeads,
+    isFacetWriteUnconfirmed,
+    postFacetCommand,
+    sameFacetTarget,
+    SignalFacetError,
+    type FacetAction,
+    type FacetCommandLaunch,
+    type FacetConflictNotice,
+    type FacetHeadsStatus,
+    type FacetTarget,
+    type ReasonCode,
+    type TargetFacetState,
+  } from "$lib/signals/signal-facets-client.js";
+
+  /**
+   * Outcome of one facet-area read. `stale` (superseded lease: the viewer or
+   * the city moved on) is not a failure — only `error` raises the banner.
+   */
+  type FacetReadOutcome = "ok" | "stale" | "error";
+  import { authStore } from "$lib/auth/auth-store.js";
+  import {
     buildOverlaySignals,
     buildNavSignals,
     buildHoverCard,
+    rebuildSignalEvidence,
     type OverlaySignal,
     type OverlayNavSignal,
     type HoverCardData,
@@ -532,6 +559,115 @@
   // ── Cache multi-villes : nœuds par ville ──────────────────────────────────
   /** Cache des nœuds détail par ville slug (pour recoloration aplats filtrée). */
   const detailCache = new Map<string, GraphSignalNode[]>();
+
+  // ── Personal baskets (lot 4) ──────────────────────────────────────────────
+  // Read city heads and reason codes only for authenticated, approved users
+  // with authentication enabled. Clear heads and detailCache on sub changes.
+  // Revealing discarded signals clears the cache and reloads all three reads.
+  const facetHeadsGuard = new RequestGuard();
+  const facetCodesGuard = new RequestGuard();
+  const EMPTY_FACET_HEADS: Map<string, TargetFacetState> = new Map();
+  // URL-only reveal: applyGeoRoute restores back/forward/reload state;
+  // the checkbox writes it through syncFilterRoute, never localStorage.
+  let showDiscarded = false;
+  let appliedShowDiscarded: boolean | null = null;
+  let facetCodes: ReasonCode[] | null = null;
+  let facetCodesLoading = false;
+  let facetCodesError: string | null = null;
+  let facetCodesSub: string | null = null;
+  let facetHeadsByCity = new Map<string, Map<string, TargetFacetState>>();
+  let facetHeadsStateByCity = new Map<string, FacetHeadsStatus>();
+  let appliedFacetContext: FacetCommandLaunch["viewerKey"] = null;
+  let facetReloadError: string | null = null;
+  /** True when the reload error follows a confirmed write (own banner title). */
+  let facetReloadAfterWrite = false;
+  let facetReloading = false;
+  let facetReloadToken = 0;
+  let undoOperationToken = 0;
+  const bulkGuard = new RequestGuard();
+  let discardedNotice: { target: FacetTarget; label: string } | null = null;
+  /** Parent-owned 409 refusal with its native target: outlives the card. */
+  let facetConflictNotice: FacetConflictNotice | null = null;
+  let discardedActionError: string | null = null;
+  let undoCommandKey: string | null = null;
+  let undoExpectedHeadId: string | null = null;
+  let undoDisplayedFingerprint: string | null = null;
+  let undoBusy = false;
+  let selPanel: {
+    focusSignalCard(id: string): void;
+    focusSignalsBucket(): void;
+  } | null = null;
+
+  function setFacetHeadsState(citySlug: string, status: FacetHeadsStatus): void {
+    const next = new Map(facetHeadsStateByCity);
+    next.set(citySlug, status);
+    facetHeadsStateByCity = next;
+  }
+
+  $: authState = $authStore;
+  $: currentUserSub = authState.user?.sub ?? null;
+  $: facetsAllowed =
+    authState.authenticated && !authState.authDisabled && authState.user?.status === "approved";
+  $: facetsNote = authState.authDisabled
+    ? "Classement indisponible quand l'authentification est désactivée."
+    : !authState.authenticated
+      ? "Connexion requise pour classer les signaux."
+      : authState.user?.status !== "approved"
+        ? "Compte non approuvé — le classement est réservé aux comptes approuvés."
+        : null;
+  $: activeFacetHeads = facetsAllowed && selectedCity
+    ? (facetHeadsByCity.get(selectedCity.municipality.slug) ?? EMPTY_FACET_HEADS)
+    : EMPTY_FACET_HEADS;
+
+  // Keep viewers isolated: clear heads, codes and details together on sub
+  // changes, then reload under the new viewer's request guards.
+  $: {
+    const sub = currentUserSub;
+    const context = `${sub ?? ""}/${facetsAllowed}`;
+    if (appliedFacetContext?.context !== context) {
+      const initial = appliedFacetContext === null;
+      appliedFacetContext = { context };
+      facetCodesSub = sub;
+      facetHeadsGuard.cancel();
+      facetCodesGuard.cancel();
+      detailGuard.cancel();
+      bulkGuard.cancel();
+      bulkLoadVersion += 1;
+      facetReloadToken += 1;
+      undoOperationToken += 1;
+      facetHeadsByCity = new Map();
+      facetHeadsStateByCity = new Map();
+      facetCodes = null;
+      facetCodesError = null;
+      facetCodesLoading = false;
+      facetReloadError = null;
+      facetReloading = false;
+      discardedNotice = null;
+      facetConflictNotice = null;
+      discardedActionError = null;
+      undoCommandKey = null;
+      undoExpectedHeadId = null;
+      undoDisplayedFingerprint = null;
+      undoBusy = false;
+      detailCache.clear();
+      detailNodes = [];
+      detailLegacyProjection = null;
+      facetReloadAfterWrite = false;
+      activeEvidence = null;
+      activeDocument = null;
+      activeSource = null;
+      hoveredEvidenceSignalId = null;
+      if (!initial) {
+        void load();
+        if (selectedCity) void loadDetailForCity(selectedCity.municipality.slug);
+      }
+      if (facetsAllowed && sub) {
+        void loadReasonCodes();
+        if (selectedCity) void loadFacetHeads(selectedCity.municipality.slug);
+      }
+    }
+  }
+
   let appliedGeoRouteKey: string | null = null;
   let pendingRouteZoneKey: string | null = null;
   let pendingRouteLotId: string | null = null;
@@ -595,8 +731,19 @@
       ).map((node) => node.id),
     );
     selectionState = reconcileVivierSelection(selectionState, allowedIds);
-    const evidenceId = retainProjectedSignalId(activeEvidence?.nodeId ?? null, allowedIds);
-    if (activeEvidence && evidenceId === null) activeEvidence = null;
+    // 6D — an open signal-bound evidence view follows the refreshed
+    // discard-consistent nodes: an archived target closes the view, an
+    // archived co-signal drops out of the rebuilt highlights, and a changed
+    // citation/page/rawRef replaces the old evidence. Independent browsing
+    // (activeSource/activeDocument) and geographic grids are preserved.
+    if (activeEvidence) {
+      activeEvidence = rebuildSignalEvidence(
+        activeEvidence,
+        detailNodes,
+        (node) => allowedIds.has(node.id),
+        allowedIds,
+      );
+    }
     hoveredEvidenceSignalId = retainProjectedSignalId(hoveredEvidenceSignalId, allowedIds);
   }
 
@@ -626,8 +773,13 @@
     return writeGeoFilters({
       axes: bAxesFromVivierKey(activeSubsetKey), exclusions: vivierBExclusions,
       timeRange, dateBasis, lots: lotDataFilter, zoneKinds: zoneKindFilter, zoneMillesime: zoneMillesimeFilter, lotsEnabled,
-      cptaqEnabled, citySearch, zoneSearch, lotSearch,
+      cptaqEnabled, citySearch, zoneSearch, lotSearch, showDiscarded,
     });
+  }
+
+  function handleToggleShowDiscarded(show: boolean): void {
+    showDiscarded = show;
+    syncFilterRoute();
   }
 
   function syncFilterRoute(): void {
@@ -1402,6 +1554,20 @@
     detailNodes = [];
     detailLegacyProjection = null;
     geoNotices = [];
+    // A new city owns its own notice state: never show, undo or reload the
+    // previous city's write here.
+    discardedNotice = null;
+    facetConflictNotice = null;
+    discardedActionError = null;
+    undoCommandKey = null;
+    undoExpectedHeadId = null;
+    undoDisplayedFingerprint = null;
+    facetReloadError = null;
+    facetReloadAfterWrite = false;
+    undoOperationToken += 1;
+    undoBusy = false;
+    facetReloadToken += 1;
+    facetReloading = false;
     // Contrat « lot suivant » : changement de ville → plus de lot caméra de
     // référence (le prochain lot cliqué est un PREMIER lot, cadrage existant).
     cameraLot = null;
@@ -1421,50 +1587,311 @@
     villeZoomed = true; // C1 — caméra cadrée sur la ville (état zoomé)
 
     // Les ressources partent EN PARALLÈLE avec leurs gardes anti-course :
-    // détail, zones/lots et sonde légère de disponibilité CPTAQ.
+    // Detail, zones/lots, CPTAQ availability, facet heads and the codebook
+    // (the codebook is loaded once per viewer).
     void loadDetailForCity(entry.municipality.slug);
     void loadGeoForCity(entry.municipality.slug);
     void probeCptaqAvailability(entry.municipality.slug);
+    void loadReasonCodes();
+    void loadFacetHeads(entry.municipality.slug);
   }
 
   /**
    * Charge le détail signaux (panneau droit) d'une ville avec garde anti-course
    * et timeout. Une réponse en retard/annulée (changement de ville) est ignorée ;
    * un échec bascule la couche en état d'erreur SANS toucher aux zones/lots.
+   * Forward the reveal unchanged; a 503 is explicit only with the
+   * discarded_signals_unavailable body code. Silent post-write re-reads keep
+   * the list in place (no spinner, no unmount) and only disable controls.
+   * Returns `stale` when superseded — never an error banner for that.
    */
-  async function loadDetailForCity(citySlug: string): Promise<void> {
+  async function loadDetailForCity(
+    citySlug: string,
+    opts: { silent?: boolean } = {},
+  ): Promise<FacetReadOutcome> {
     const lease = detailGuard.lease();
-    detailLoading = true;
+    const silent = opts.silent === true;
+    if (!silent) detailLoading = true;
     detailError = null;
     detailLegacyProjection = null;
     try {
       const res = await fetchGraphSignalDetail(citySlug, "", DEFAULT_REQUEST_TIMEOUT_MS, {
         signal: lease.signal,
+        ...(showDiscarded ? { showDiscarded: true as const } : {}),
       });
-      if (!lease.isCurrent()) return; // réponse périmée → on ignore
+      if (!lease.isCurrent()) return "stale"; // réponse périmée → on ignore
       if (!res.ok && res.nodes.length === 0) {
         // 404 — ville sans signaux graphify (état vide explicite, pas une erreur)
         detailNodes = [];
         detailLegacyProjection = null;
         detailError = null;
-        return;
+        reconcileToVisibleNodes();
+        return "ok";
       }
       detailNodes = res.nodes;
       detailLegacyProjection = res.legacyProjection;
       // Alimenter le cache multi-villes (recoloration aplats filtrée)
       detailCache.set(citySlug, res.nodes);
+      // Classification/reveal can remove signals: reconcile selection,
+      // hover and evidence against the visible nodes.
+      reconcileToVisibleNodes();
       // Ne pas auto-focaliser le 1er signal : l'utilisateur choisit lui-même
       // quel signal ouvrir (clic dans le panneau droit).
       updateGeoLayers();
+      return "ok";
     } catch (e) {
       // Abort (changement de ville) → réponse périmée à ignorer, pas une erreur.
-      if (!lease.isCurrent() || isAbortError(e)) return;
+      if (!lease.isCurrent() || isAbortError(e)) return "stale";
       console.warn("Signal detail load failed:", e);
-      detailError = "Signaux indisponibles.";
+      detailError =
+        e instanceof GraphSignalsHttpError &&
+        e.status === 503 &&
+        e.code === "discarded_signals_unavailable"
+          ? "Signaux écartés indisponibles (discarded_signals_unavailable) — rechargement impossible."
+          : "Signaux indisponibles.";
       detailLegacyProjection = null;
+      return "error";
     } finally {
       if (lease.isCurrent()) detailLoading = false;
     }
+  }
+
+  /**
+   * Read the reason codebook once per viewer. Unreadable codes disable the
+   * controls with a message while leaving signal reads available.
+   */
+  async function loadReasonCodes(): Promise<FacetReadOutcome> {
+    if (!facetsAllowed || !currentUserSub) return "stale";
+    if (facetCodes !== null && facetCodesSub === currentUserSub) return "ok";
+    if (facetCodesLoading) return "stale";
+    const lease = facetCodesGuard.lease();
+    const sub = currentUserSub;
+    facetCodesLoading = true;
+    facetCodesError = null;
+    try {
+      // GET reason-codes rejects query parameters with 400.
+      const res = await fetchReasonCodes("", { signal: lease.signal });
+      if (!lease.isCurrent()) return "stale";
+      facetCodes = res.codes;
+      facetCodesSub = sub;
+      return "ok";
+    } catch (err) {
+      if (!lease.isCurrent() || isAbortError(err)) return "stale";
+      console.warn("Facet reason codes load failed:", err);
+      facetCodes = null;
+      facetCodesError = "Codes de motif illisibles — classement indisponible.";
+      return "error";
+    } finally {
+      if (lease.isCurrent()) facetCodesLoading = false;
+    }
+  }
+
+  /**
+   * Read city heads under a dedicated request guard, without query params.
+   * Tracks a per-city read state so the panel hides badges and inactivates
+   * controls until `ready`. Failed head reads never prove archive presence.
+   */
+  async function loadFacetHeads(citySlug: string): Promise<FacetReadOutcome> {
+    if (!facetsAllowed || !currentUserSub) return "stale";
+    const lease = facetHeadsGuard.lease();
+    setFacetHeadsState(citySlug, "loading");
+    try {
+      const res = await fetchCityFacets("", citySlug, { signal: lease.signal });
+      if (!lease.isCurrent()) return "stale";
+      const next = new Map(facetHeadsByCity);
+      next.set(citySlug, indexFacetHeads(res.heads));
+      facetHeadsByCity = next;
+      setFacetHeadsState(citySlug, "ready");
+      return "ok";
+    } catch (err) {
+      if (!lease.isCurrent() || isAbortError(err)) return "stale";
+      console.warn("Facet heads load failed:", err);
+      setFacetHeadsState(citySlug, "error");
+      return "error";
+    }
+  }
+
+  /**
+   * After a confirmed write, reload detail (silently: the card stays mounted),
+   * heads and by-city in parallel under their guards — but only for the city
+   * still selected (by-city is re-read in all cases). A failed read gets a
+   * distinct recorded-but-not-reloaded message and a reads-only retry; a
+   * superseded read stays silent. `afterWrite` tags the banner context: a
+   * plain read (or a read retry with no prior write) must never announce a
+   * recorded write.
+   */
+  async function reloadAfterFacetWrite(
+    citySlug: string,
+    opts: { silentDetail?: boolean; includeCodes?: boolean; afterWrite?: boolean } = {},
+  ): Promise<boolean> {
+    if (selectedCity?.municipality.slug !== citySlug) {
+      await load();
+      return false;
+    }
+    const token = ++facetReloadToken;
+    const operationCity = citySlug;
+    facetReloadError = null;
+    facetReloadAfterWrite = false;
+    facetReloading = true;
+    try {
+      const currentAtStart = selectedCity?.municipality.slug === operationCity;
+      const outcomes = await Promise.all([
+        currentAtStart ? loadDetailForCity(operationCity, { silent: opts.silentDetail }) : Promise.resolve("stale" as FacetReadOutcome),
+        currentAtStart ? loadFacetHeads(operationCity) : Promise.resolve("stale" as FacetReadOutcome),
+        load(),
+        opts.includeCodes ? loadReasonCodes() : Promise.resolve("ok" as FacetReadOutcome),
+      ]);
+      if (token !== facetReloadToken) return false;
+      if (selectedCity?.municipality.slug !== operationCity) return false;
+      const ok = !outcomes.includes("error");
+      if (!ok) {
+        facetReloadError = "Les données affichées peuvent être périmées.";
+        facetReloadAfterWrite = opts.afterWrite === true;
+      }
+      return ok;
+    } finally {
+      if (token === facetReloadToken) facetReloading = false;
+    }
+  }
+
+  /** Publish confirmed writes only for their launching viewer, then reload. */
+  async function handleFacetSaved(
+    action: FacetAction,
+    target: FacetTarget,
+    launch?: FacetCommandLaunch,
+  ): Promise<void> {
+    const operationCity = target.citySlug;
+    if (launch && launch.viewerKey !== appliedFacetContext) return;
+    const label = detailNodes.find((node) => node.id === target.id)?.label ?? target.id;
+    detailCache.delete(operationCity);
+    // The notice shows as soon as the write is confirmed in the default
+    // view — whatever the re-reads report. The re-read outcome only drives
+    // the reload-error banner, so a hanging re-read never delays the notice.
+    if (action === "discard" && !showDiscarded && selectedCity?.municipality.slug === operationCity) {
+      discardedNotice = { target, label };
+      discardedActionError = null;
+      undoCommandKey = null;
+      undoExpectedHeadId = launch?.confirmedHeadId ?? null;
+      undoDisplayedFingerprint = launch?.displayedFingerprint ?? null;
+      undoOperationToken += 1;
+      undoBusy = false;
+    }
+    if (facetConflictNotice && sameFacetTarget(facetConflictNotice.target, target)) {
+      facetConflictNotice = null;
+    }
+    await reloadAfterFacetWrite(operationCity, { silentDetail: true, afterWrite: true });
+  }
+
+  /**
+   * Reload after a 409 head conflict: stale heads need a new intention. The
+   * launched target and its launch context (viewer) are checked against the
+   * current viewer and city before any reload or state change, reusing the
+   * existing viewer, city and reload-token guards (no new guard is added: the
+   * reload below still runs under facetReloadToken). A late conflict from
+   * another city only refreshes the by-city counters and preserves the open
+   * city state, while a current-city conflict is kept in the parent notice
+   * with its target so the post-reload detail removal cannot destroy it.
+   */
+  function handleFacetHeadsStale(
+    target: FacetTarget,
+    launch: FacetCommandLaunch,
+    message: string,
+  ): void {
+    if (launch && launch.viewerKey !== appliedFacetContext) return;
+    if (target.citySlug !== selectedCity?.municipality.slug) {
+      void load();
+      return;
+    }
+    facetConflictNotice = { target, message };
+    void reloadAfterFacetWrite(target.citySlug, { silentDetail: true, afterWrite: false });
+  }
+
+  /** Dismiss the parent-owned 409 refusal and return focus to the bucket. */
+  function handleDismissFacetConflict(): void {
+    facetConflictNotice = null;
+    selPanel?.focusSignalsBucket();
+  }
+
+  /** A read retry must not announce a recorded write. */
+  function handleRetryFacetReads(): void {
+    if (selectedCity) void reloadAfterFacetWrite(selectedCity.municipality.slug, { includeCodes: true, afterWrite: false });
+  }
+
+  /**
+   * Undo the discard with restore. Reuse the same key on retry, then reload
+   * after the confirmed write. Stale cities refresh counters only; stale
+   * viewers never affect the current viewer's reads or UI.
+   */
+  async function handleUndoDiscard(target: FacetTarget): Promise<void> {
+    if (undoBusy || !discardedNotice) return;
+    const operationToken = ++undoOperationToken;
+    const operationCity = target.citySlug;
+    const operationNotice = discardedNotice;
+    const operationSub = currentUserSub;
+    const operationViewer = appliedFacetContext;
+    const isCurrent = () => undoOperationToken === operationToken &&
+      appliedFacetContext === operationViewer && currentUserSub === operationSub &&
+      selectedCity?.municipality.slug === operationCity && discardedNotice === operationNotice;
+    undoBusy = true;
+    discardedActionError = null;
+    try {
+      if (!undoCommandKey) undoCommandKey = createCommandKey();
+      const commandKeyForOperation = undoCommandKey;
+      const expectedHeadId = undoExpectedHeadId;
+      const displayedFingerprint = undoDisplayedFingerprint;
+      if (displayedFingerprint === null) {
+        discardedActionError = "Données périmées — rechargez les données puis réessayez.";
+        await reloadAfterFacetWrite(operationCity, { silentDetail: true, afterWrite: false });
+        return;
+      }
+      await postFacetCommand("", "restore", { target, expectedHeadId, displayedFingerprint },
+        commandKeyForOperation);
+      if (isCurrent()) {
+        undoCommandKey = null;
+        undoExpectedHeadId = null;
+        undoDisplayedFingerprint = null;
+      }
+      if (appliedFacetContext !== operationViewer) return;
+      detailCache.delete(operationCity);
+      if (!isCurrent()) {
+        await load();
+        return;
+      }
+      await reloadAfterFacetWrite(operationCity, { silentDetail: true, afterWrite: true });
+      if (!isCurrent()) return;
+      discardedNotice = null;
+      await tick();
+      if (
+        undoOperationToken === operationToken &&
+        appliedFacetContext === operationViewer &&
+        currentUserSub === operationSub &&
+        selectedCity?.municipality.slug === operationCity
+      ) {
+        selPanel?.focusSignalCard(target.id);
+      }
+    } catch (err) {
+      if (!isCurrent()) return;
+      if (!isFacetWriteUnconfirmed(err)) undoCommandKey = null;
+      discardedActionError =
+        err instanceof SignalFacetError
+          ? facetErrorMessage(err)
+          : "Écriture non confirmée — Réessayer.";
+      if (err instanceof SignalFacetError
+        && (err.code === "facet_head_conflict" || err.code === "target_version_conflict")) {
+        await reloadAfterFacetWrite(operationCity, { silentDetail: true, afterWrite: false });
+      }
+    } finally {
+      if (undoOperationToken === operationToken) undoBusy = false;
+    }
+  }
+
+  function handleDismissDiscardedNotice(): void {
+    discardedNotice = null;
+    discardedActionError = null;
+    undoCommandKey = null;
+    undoExpectedHeadId = null;
+    undoDisplayedFingerprint = null;
+    selPanel?.focusSignalsBucket();
   }
 
   /** « Réessayer » du panneau : recharge uniquement le détail signaux. */
@@ -1482,6 +1909,7 @@
     // en retard ne repeindra la carte après « Fermer ».
     detailGuard.cancel();
     geoGuard.cancel();
+    facetHeadsGuard.cancel();
     resetCptaq();
     selectedCity = null;
     pendingRouteZoneKey = null;
@@ -1489,6 +1917,20 @@
     detailLegacyProjection = null;
     detailError = null;
     detailLoading = false;
+    // A closed selection owns no notice state: never show, undo or reload
+    // the previous city's write after « Fermer ».
+    discardedNotice = null;
+    facetConflictNotice = null;
+    discardedActionError = null;
+    undoCommandKey = null;
+    undoExpectedHeadId = null;
+    undoDisplayedFingerprint = null;
+    facetReloadError = null;
+    facetReloadAfterWrite = false;
+    undoOperationToken += 1;
+    undoBusy = false;
+    facetReloadToken += 1;
+    facetReloading = false;
     zonesError = null;
     lotsError = null;
     zonesLoading = false;
@@ -1876,6 +2318,13 @@
     if (appliedGeoRouteKey === key) return;
     appliedGeoRouteKey = key;
     const filters = readGeoFilters(route.state.filters);
+    // Every reveal transition clears details and reloads all three reads
+    // (back, forward, reload, checkbox), preserving server order. Heads are
+    // keyed by signal target and stay valid across the reveal — never wiped.
+    const nextShowDiscarded = filters.showDiscarded === true;
+    const revealChanged = appliedShowDiscarded !== null && appliedShowDiscarded !== nextShowDiscarded;
+    appliedShowDiscarded = nextShowDiscarded;
+    showDiscarded = nextShowDiscarded;
     const layersChanged = lotsEnabled !== filters.lotsEnabled;
     lotsEnabled = filters.lotsEnabled ?? true;
     // A relative period is resolved when read: only a different period reloads.
@@ -1902,7 +2351,16 @@
       else if (selectedCity && cptaqAvailable) void loadCptaq(selectedCity.municipality.slug);
     }
     applyActiveSubsetKey(subsetFromGeoFilters(route.state.filters));
-    if (dateChanged) void load();
+    if (revealChanged) {
+      detailCache.clear();
+      void load();
+      if (selectedCity) {
+        void loadDetailForCity(selectedCity.municipality.slug);
+        void loadFacetHeads(selectedCity.municipality.slug);
+      }
+    } else if (dateChanged) {
+      void load();
+    }
     updateGeoLayers();
 
     if (route.level === "region") {
@@ -2415,8 +2873,9 @@
 
   // ── Chargement API ─────────────────────────────────────────────────────────
   let bulkLoadVersion = 0;
-  async function load() {
+  async function load(): Promise<FacetReadOutcome> {
     const version = ++bulkLoadVersion;
+    const lease = bulkGuard.lease();
     loading = true;
     loadError = null;
     try {
@@ -2427,15 +2886,24 @@
         ...signalDocumentDateWindow(dateRange, dateBasis),
         excludePiia: vivierBExclusions.piiaSansProjetResidentiel,
         excludeDerogations: vivierBExclusions.derogationsMineures,
+        ...(showDiscarded ? { showDiscarded: true as const } : {}),
+        signal: lease.signal,
       });
-      if (version !== bulkLoadVersion) return;
+      if (version !== bulkLoadVersion || !lease.isCurrent()) return "stale";
       graphItems = res.cities;
+      return "ok";
     } catch (e) {
-      if (version !== bulkLoadVersion) return;
+      if (version !== bulkLoadVersion || !lease.isCurrent() || isAbortError(e)) return "stale";
       console.warn("Signals by city load failed:", e);
-      loadError = "Données des signaux indisponibles.";
+      loadError =
+        e instanceof GraphSignalsHttpError &&
+        e.status === 503 &&
+        e.code === "discarded_signals_unavailable"
+          ? "Données des signaux indisponibles — signaux écartés indisponibles (discarded_signals_unavailable)."
+          : "Données des signaux indisponibles.";
+      return "error";
     } finally {
-      if (version === bulkLoadVersion) loading = false;
+      if (version === bulkLoadVersion && lease.isCurrent()) loading = false;
     }
   }
 
@@ -2554,7 +3022,7 @@
     <svelte:fragment slot="overlay-bottom-left">
       {#if !selectedCity}
         <div
-          class="rounded border border-slate-200 bg-white/95 px-3 py-2 shadow-sm"
+          class="rounded-sm border border-slate-200 bg-white/95 px-3 py-2 shadow-xs"
           data-testid="map-legend-signaux"
         >
           <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Légende — signaux / ville</p>
@@ -2566,7 +3034,7 @@
               { color: "#e2e8f0", label: "Aucun signal (0)" },
             ] as item (item.label)}
               <li class="flex items-center gap-2 text-xs text-slate-600">
-                <span class="h-3 w-3 shrink-0 rounded-sm border border-slate-300" style="background-color: {item.color};"></span>
+                <span class="h-3 w-3 shrink-0 rounded-xs border border-slate-300" style="background-color: {item.color};"></span>
                 {item.label}
               </li>
             {/each}
@@ -2575,7 +3043,7 @@
       {:else}
         {#if affectationLegendEntries.length > 0}
           <div
-            class="rounded border border-slate-200 bg-white/95 px-3 py-2 shadow-sm"
+            class="rounded-sm border border-slate-200 bg-white/95 px-3 py-2 shadow-xs"
             data-testid="map-legend-zonage"
           >
             <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Zonage</p>
@@ -2611,13 +3079,13 @@
                       on:focus={() => mapApi?.setCptaqLegendEmphasis(true)}
                       on:blur={() => mapApi?.setCptaqLegendEmphasis(false)}
                     >
-                      <span class="h-3 w-3 shrink-0 rounded-sm border border-slate-300" style="background-color: {item.color};"></span>
+                      <span class="h-3 w-3 shrink-0 rounded-xs border border-slate-300" style="background-color: {item.color};"></span>
                       <span class:line-through={!cptaqEnabled}>{item.label}</span>
                     </button>
                   </li>
                 {:else}
                   <li class="flex items-center gap-2 text-xs text-slate-600">
-                    <span class="h-3 w-3 shrink-0 rounded-sm border border-slate-300" style="background-color: {item.color};"></span>
+                    <span class="h-3 w-3 shrink-0 rounded-xs border border-slate-300" style="background-color: {item.color};"></span>
                     {item.label}
                   </li>
                 {/if}
@@ -2642,14 +3110,14 @@
         {/if}
         {#if displayedLots.features.length > 0}
           <div
-            class="rounded border border-slate-200 bg-white/95 px-3 py-2 shadow-sm"
+            class="rounded-sm border border-slate-200 bg-white/95 px-3 py-2 shadow-xs"
             data-testid="map-legend-lots"
           >
             <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Lots</p>
             <ul class="space-y-1">
               {#each visibleLotLegendEntries as item (item.category)}
                 <li class="flex items-center gap-2 text-xs text-slate-600">
-                  <span class="h-3 w-3 shrink-0 rounded-sm border border-slate-300" style="background-color: {item.color};"></span>
+                  <span class="h-3 w-3 shrink-0 rounded-xs border border-slate-300" style="background-color: {item.color};"></span>
                   {item.label}
                 </li>
               {/each}
@@ -2675,7 +3143,7 @@
 
     <svelte:fragment slot="overlay-top-left">
       {#if selectedCity && (zonesLoading || lotsLoading || zonesError || lotsError || geoNotices.length > 0 || cptaqLoading || cptaqError)}
-        <div class="max-w-sm space-y-1 rounded border border-slate-200 bg-white/95 px-3 py-2 text-xs text-slate-700 shadow-sm">
+        <div class="max-w-sm flex flex-col gap-1 rounded-sm border border-slate-200 bg-white/95 px-3 py-2 text-xs text-slate-700 shadow-xs">
           <!-- Waiter PAR COUCHE : chacune affiche son propre état. -->
           {#if zonesLoading}
             <p class="m-0 font-semibold text-slate-500">Chargement des zones…</p>
@@ -2763,6 +3231,7 @@
        Lots ; leur état est porté ici (peinture carte, zéro refetch). ─────── -->
   <svelte:fragment slot="sel">
     <SignauxSelPanel
+      bind:this={selPanel}
       {selectedCity}
       detailNodes={filteredDetailNodes}
       unfilteredSignalCount={detailNodes.length}
@@ -2795,6 +3264,29 @@
       onRetryGeo={retryGeo}
       hoveredSignalId={hoveredEvidenceSignalId}
       onHoverSignal={setHoveredEvidenceSignal}
+      facetHeads={activeFacetHeads}
+      facetHeadsState={facetHeadsStateByCity.get(selectedCity?.municipality.slug ?? "") ?? "loading"}
+      facetReloading={facetReloading}
+      reasonCodes={facetCodes}
+      facetCodesError={facetCodesError}
+      facetCodesLoading={facetCodesLoading}
+      facetsAllowed={facetsAllowed}
+      facetsNote={facetsNote}
+      showDiscarded={showDiscarded}
+      onToggleShowDiscarded={handleToggleShowDiscarded}
+      onFacetSaved={handleFacetSaved}
+      facetViewerKey={appliedFacetContext}
+      facetReloadError={facetReloadError}
+      facetReloadAfterWrite={facetReloadAfterWrite}
+      onRetryFacetReads={handleRetryFacetReads}
+      onFacetHeadsStale={handleFacetHeadsStale}
+      facetConflictNotice={facetConflictNotice}
+      onDismissFacetConflict={handleDismissFacetConflict}
+      discardedNotice={discardedNotice}
+      discardedActionError={discardedActionError}
+      {undoBusy}
+      onUndoDiscard={handleUndoDiscard}
+      onDismissDiscardedNotice={handleDismissDiscardedNotice}
     />
   </svelte:fragment>
 </ViewLayout>

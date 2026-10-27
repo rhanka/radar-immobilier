@@ -12,10 +12,8 @@
 #   challenge was sent to prod.
 # - IMMO_MCP_OAUTH_ISSUER: same mechanism as prod, where the MCP issuer is the
 #   app's own IdP (prod: auth.sent-tech.ca for both radar-api and the MCP).
-#   search_signals forwards the user's bearer to radar-api, which only accepts
-#   tokens from SENTROPIC_IDP_ISSUER (preprod: preprod.auth.sent-tech.ca, see
-#   patch-radar-api-auth.yaml) with audience `${AUTH_CALLBACK_BASE_URL}/mcp`;
-#   a token from the PROD IdP would be rejected there.
+#   search_signals exchanges the human bearer for a delegated API token.
+#   Both hops use the preprod issuer, with distinct MCP and API audiences.
 # - RADAR_PUBLIC_BASE_URL: base of the URLs the MCP hands back (get_pv_pdf).
 #
 # Guarded by deploy/ci/check-preprod-auth-isolation.sh (CI + reconcile), which
@@ -28,3 +26,6 @@ data:
   IMMO_MCP_OAUTH_ISSUER: "https://preprod.auth.sent-tech.ca"
   IMMO_MCP_OAUTH_RESOURCE: "https://preprod.immo.sent-tech.ca/mcp"
   RADAR_PUBLIC_BASE_URL: "https://preprod.immo.sent-tech.ca"
+  IMMO_MCP_API_AUDIENCE: "https://preprod.immo.sent-tech.ca"
+  IMMO_MCP_EXCHANGE_TOKEN_ENDPOINT: "https://preprod.auth.sent-tech.ca/api/v1/auth/oauth/token"
+  IMMO_MCP_EXCHANGE_ENV: "preprod"

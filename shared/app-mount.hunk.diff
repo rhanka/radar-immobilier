@@ -1,0 +1,29 @@
+--- a/api/src/app.ts
++++ b/api/src/app.ts
+@@ -6,7 +6,7 @@
+   type AuthRouteOptions,
+ } from "./routes/auth.js";
+ import { healthRoute, type HealthDeps } from "./routes/health.js";
+-import { contentGate } from "./artifacts/content-app.js";
++import { contentGate, type ContentReaderMount } from "./artifacts/content-app.js";
+ import type { ContentHostConfig } from "./artifacts/content-config.js";
+ import { controlRoute, type ControlRouteDeps } from "./artifacts/control-route.js";
+ import { chatRoute } from "./routes/chat.js";
+@@ -66,6 +66,8 @@
+     geoListingTtlMs?: number;
+     /** Artifact content dispatch (861c); absent/disabled keeps the chain. */
+     contentHost?: ContentHostConfig;
++    /** Already bound reader; absent keeps content hosts closed. */
++    readerContent?: ContentReaderMount;
+     /**
+      * Artifact control plane (861c H2); mounted only when auth is enabled.
+      * When absent, authenticated mode mounts the closed control capability.
+@@ -81,7 +83,7 @@
+
+   // Content hosts dispatch FIRST, before protect: never app auth or SPA.
+   if (deps.contentHost?.enabled) {
+-    app.use("*", contentGate(deps.contentHost.contentBase));
++    app.use("*", contentGate(deps.contentHost.contentBase, deps.readerContent));
+   }
+
+   // Control requests use the official cookie guard before general bearer auth.

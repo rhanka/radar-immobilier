@@ -302,7 +302,7 @@
       <button
         type="button"
         aria-label="Actualiser"
-        class="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+        class="rounded-sm p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
         on:click={onReload}
         disabled={loading}
       >
@@ -313,7 +313,7 @@
     <div class="border-b border-slate-100 px-4 py-3">
       <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Affichage</p>
       <div
-        class="inline-flex overflow-hidden rounded border border-slate-200 bg-white text-xs shadow-sm"
+        class="inline-flex overflow-hidden rounded-sm border border-slate-200 bg-white text-xs shadow-xs"
         role="group"
         aria-label="Matrice affichée"
         data-testid="console-view-toggle"
@@ -356,7 +356,7 @@
     <div class="border-b border-slate-100 px-4 py-3">
       <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Périmètre</p>
       <div
-        class="inline-flex w-fit overflow-hidden rounded border border-slate-200 bg-white text-xs shadow-sm"
+        class="inline-flex w-fit overflow-hidden rounded-sm border border-slate-200 bg-white text-xs shadow-xs"
         role="group"
         aria-label="Périmètre des villes listées"
         data-testid="console-scope"
@@ -420,7 +420,7 @@
           placeholder="Rechercher une ville / MRC…"
           bind:value={query}
           on:input={syncConsoleUrl}
-          class="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-300"
+          class="w-full bg-transparent text-sm text-slate-700 outline-hidden placeholder:text-slate-300"
         />
         <span class="shrink-0 text-xs text-slate-400" data-testid="console-count">
           {filtered.length} ville{filtered.length !== 1 ? "s" : ""}
@@ -452,7 +452,7 @@
                   <div class="flex items-center gap-2">
                     <button
                       type="button"
-                      class="font-medium text-slate-800 underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      class="font-medium text-slate-800 underline-offset-2 hover:underline focus:outline-hidden focus:ring-2 focus:ring-teal-500"
                       aria-expanded={isSelected}
                       aria-label={`Ouvrir la couverture de ${city.cityName}`}
                       on:click={() => toggleSelectedCity(city)}
@@ -476,7 +476,7 @@
                       {@const tooltipId = `normes-detail-${city.citySlug}`}
                       <button
                         type="button"
-                        class="inline-flex h-6 w-6 items-center justify-center border-0 bg-transparent p-0 align-middle focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        class="inline-flex h-6 w-6 items-center justify-center border-0 bg-transparent p-0 align-middle focus:outline-hidden focus:ring-2 focus:ring-teal-500"
                         aria-label={`${layer.label} : ${layer.status}`}
                         aria-expanded={expandedNormesSlug === city.citySlug}
                         aria-controls={tooltipId}
@@ -487,7 +487,7 @@
                       >
                         <span
                           aria-hidden="true"
-                          class="inline-block h-3 w-3 rounded-sm border border-slate-300"
+                          class="inline-block h-3 w-3 rounded-xs border border-slate-300"
                           style="background-color: {layer.color};"
                         ></span>
                       </button>
@@ -495,14 +495,14 @@
                         <span
                           id={tooltipId}
                           role="tooltip"
-                          class="absolute left-1/2 top-full z-20 w-72 -translate-x-1/2 rounded bg-slate-900 p-2 text-left text-xs normal-case text-white shadow-lg"
+                          class="absolute left-1/2 top-full z-20 w-72 -translate-x-1/2 rounded-sm bg-slate-900 p-2 text-left text-xs normal-case text-white shadow-lg"
                         >
                           {layer.description}
                         </span>
                       {/if}
                     {:else}
                       <span
-                        class="inline-block h-3 w-3 rounded-sm border border-slate-300 align-middle"
+                        class="inline-block h-3 w-3 rounded-xs border border-slate-300 align-middle"
                         style="background-color: {layer.color};"
                         title={`${layer.label} : ${layer.status}`}
                         aria-label={`${layer.label} : ${layer.status}`}

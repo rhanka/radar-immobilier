@@ -71,7 +71,7 @@ const mapMocks = vi.hoisted(() => {
   return { instances, FakeMap };
 });
 
-vi.mock("maplibre-gl", () => ({ default: { Map: mapMocks.FakeMap } }));
+vi.mock("maplibre-gl", () => ({ Map: mapMocks.FakeMap }));
 
 // Fond satellite FORCÉ OFF : en jsdom `hostname === "localhost"` est allowlisté
 // (le vrai sélecteur activerait le satellite → import de @sentropic/geo-map-engine).

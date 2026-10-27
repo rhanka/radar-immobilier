@@ -1,0 +1,135 @@
+import { expect, it, vi } from "vitest";
+import { describeDb } from "../../src/services/facets/scope-db-fixture.js";
+import { classificationFixture } from "./classification-fixture.js";
+import { bumpGraphSourceRevision } from "../../src/services/facets/projection-revisions.js";
+import { discoverFacetContext } from "../../src/services/facets/classification-discovery.js";
+import * as context from "../../src/services/facets/classification-context.js";
+import * as personalReader from "../../src/services/facets/scoped-reader.js";
+import * as lotCapabilities from "../../src/services/facets/lots/lot-capabilities.js";
+import * as revisions from "../../src/services/facets/projection-revisions.js";
+import { writeScopedPersonalFacet } from "../../src/services/facets/scoped-writer.js";
+import { randomUUID } from "node:crypto";
+
+function barrier() {
+  let release!: () => void;
+  let enter!: () => void;
+  const entered = new Promise<void>((resolve) => { enter = resolve; });
+  const released = new Promise<void>((resolve) => { release = resolve; });
+  return { release, entered, wait: async () => { enter(); await released; return null; } };
+}
+async function withDocument() {
+  const f = await classificationFixture();
+  await f.data.pool.query("UPDATE graph_nodes SET props=$1::jsonb WHERE city_slug=$2 AND id=$3", [
+    JSON.stringify({ refs: [{ docSha: "f".repeat(64), rawRef: "raw/synthetic/doc.pdf", excerpt: "Citation", page: 3 }] }),
+    f.signal.target.citySlug, f.signal.target.id]);
+  return f;
+}
+describeDb("classification races across real PostgreSQL connections", () => {
+  it("should retry a personal archive appended between the two BASE head readers", async () => {
+    const f = await classificationFixture();
+    const gate = barrier();
+    const original = personalReader.readScopedPersonalHeads;
+    const spy = vi.spyOn(personalReader, "readScopedPersonalHeads").mockImplementationOnce(async (...args) => {
+      const result = await original(...args);
+      await gate.wait();
+      return result;
+    });
+    try {
+      const reading = f.request("signal-facets/search?citySlug=synthetic-city&archive=include");
+      await gate.entered;
+      try {
+        await writeScopedPersonalFacet(f.data.db, f.data.contributor.sub, f.data.workspaceId, {
+          action: "discard", target: f.signal.target, reasonCode: "N-NON-RES", expectedHeadId: null,
+          displayedFingerprint: f.signal.fingerprint, commandKey: randomUUID(),
+        });
+      } finally { gate.release(); }
+      const response = await reading;
+      expect(response.status).toBe(200);
+      const body = await response.json();
+      expect(body.items[0].facets).toMatchObject({ personalHidden: true, personalHistoryState: "has_history" });
+      expect(body.counts.discarded).toBe(1);
+    } finally { gate.release(); spy.mockRestore(); }
+  });
+  for (const authority of ["approval", "membership"] as const) {
+    it(`should abandon the response when ${authority} is revoked during enrichment`, async () => {
+      const f = await withDocument();
+      const gate = barrier();
+      f.head.mockImplementationOnce(gate.wait);
+      const reading = f.request("signal-facets/search?citySlug=synthetic-city");
+      await gate.entered;
+      try {
+        if (authority === "approval") await f.data.pool.query("UPDATE account_users SET status='pending' WHERE id=$1", [f.data.contributor.id]);
+        else await f.data.pool.query("UPDATE workspace_memberships SET status='revoked',revoked_at=now() WHERE account_id=$1 AND workspace_id=$2", [f.data.contributor.id, f.data.workspaceId]);
+      } finally { gate.release(); }
+      const response = await reading;
+      expect(response.status).toBe(403);
+      const body = await response.json();
+      expect(body.error.code).toBe(authority === "approval" ? "account_not_approved" : "workspace_not_authorized");
+      expect(body.items).toBeUndefined();
+      expect(body.snapshot).toBeUndefined();
+      expect(body.counts).toBeUndefined();
+    });
+  }
+  it("should retry source/catalog drift with one shared canonical document cache", async () => {
+    const f = await withDocument();
+    const gate = barrier();
+    f.head.mockImplementationOnce(gate.wait);
+    const reading = f.request("signal-facets/search?citySlug=synthetic-city");
+    await gate.entered;
+    try {
+      await f.data.pool.query("UPDATE graph_nodes SET label='Revised source' WHERE city_slug=$1 AND id=$2", [f.signal.target.citySlug, f.signal.target.id]);
+      await f.data.db.transaction((tx) => bumpGraphSourceRevision(tx, f.signal.target.citySlug));
+      await f.data.pool.query("INSERT INTO facet_reason_codes(profile_id,code,verdict) VALUES('immo-steve-2026-09','P-NEW-TEST','pertinent')");
+    } finally { gate.release(); }
+    const response = await reading;
+    expect(response.status).toBe(200);
+    expect((await response.json()).items[0].card.label).toBe("Revised source");
+    expect(f.head).toHaveBeenCalledTimes(1);
+  });
+  it("should reject a singleton selection when a second membership appears after the context await", async () => {
+    const f = await classificationFixture();
+    await f.data.pool.query("UPDATE workspace_memberships SET status='revoked',revoked_at=now() WHERE account_id=$1 AND workspace_id=$2", [f.data.contributor.id, f.data.otherId]);
+    const original = context.readFacetContext;
+    const spy = vi.spyOn(context, "readFacetContext").mockImplementationOnce(async (...args) => {
+      const result = await original(...args);
+      await f.data.pool.query("UPDATE workspace_memberships SET status='active',revoked_at=null WHERE account_id=$1 AND workspace_id=$2", [f.data.contributor.id, f.data.otherId]);
+      return result;
+    });
+    try { await expect(discoverFacetContext(f.data.db, f.data.contributor.sub, "h5")).rejects.toThrow("workspace_ambiguous"); }
+    finally { spy.mockRestore(); }
+  });
+  it("should refuse a suspended account on the closed path without disclosing context", async () => {
+    const f = await classificationFixture();
+    await f.data.pool.query("UPDATE facet_activation_state SET maintenance_barrier=true WHERE workspace_id=$1", [f.data.workspaceId]);
+    const original = lotCapabilities.resolveLotRights;
+    let calls = 0;
+    const spy = vi.spyOn(lotCapabilities, "resolveLotRights").mockImplementation(async (...args) => {
+      calls += 1;
+      const result = await original(...args);
+      if (calls === 2) await f.data.pool.query("UPDATE account_users SET status='suspended' WHERE id=$1", [f.data.contributor.id]);
+      return result;
+    });
+    try {
+      const response = await f.request("facet-context");
+      expect(response.status).toBe(403);
+      const body = await response.json();
+      expect(body.error.code).toBe("account_not_approved");
+      expect(body.context).toBeUndefined();
+    } finally { spy.mockRestore(); }
+  });
+  it("should render durable closure when maintenance starts before the projection scope read", async () => {
+    const f = await classificationFixture();
+    const original = revisions.readProjectionScope;
+    const spy = vi.spyOn(revisions, "readProjectionScope").mockImplementationOnce(async (...args) => {
+      await f.data.pool.query("UPDATE facet_activation_state SET maintenance_barrier=true WHERE workspace_id=$1", [f.data.workspaceId]);
+      return original(...args);
+    });
+    try {
+      const response = await f.request("facet-context");
+      expect(response.status).toBe(200);
+      const body = await response.json();
+      expect(body.context.signals.availability).toEqual({ state: "closed", reason: "maintenance" });
+      expect(body.context.reasonCatalog).toEqual({ availability: { state: "closed", reason: "maintenance" }, profileId: null, digest: null, entries: null });
+    } finally { spy.mockRestore(); }
+  });
+});

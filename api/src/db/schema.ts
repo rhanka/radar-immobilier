@@ -11,6 +11,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  unique,
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
@@ -764,7 +765,364 @@ export const refreshDocumentOutcomes = pgTable("refresh_document_outcomes", {
   byStatus: index("refresh_document_outcomes_status_idx").on(t.status),
 }));
 
+// Hand-authored CHECK constraints and composite reason FK: migration 0014.
+export const facetReasonCodes = pgTable("facet_reason_codes", {
+  profileId: text("profile_id").notNull(),
+  code: text("code").notNull(),
+  verdict: text("verdict").notNull(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.profileId, t.code] }),
+  classifiedCode: unique("facet_reason_codes_classified_key")
+    .on(t.profileId, t.code, t.verdict),
+}));
+
+// Partial indexes and immutability triggers are hand-authored in migration 0014.
+// 6I workspace archives carry a null business owner attributed to the
+// acting moderator (migration 0019); personal events keep owner = actor.
+// 6J lot events carry an explicit mode, the observed lot version, market
+// and pipeline values, and import-only provenance (migration 0021);
+// signal rows keep every lot column null.
+export const facetEvents = pgTable("facet_events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  scope: text("scope").notNull().default("personal"),
+  ownerId: uuid("owner_id").references(() => accountUsers.id),
+  actorId: uuid("actor_id").notNull().references(() => accountUsers.id),
+  targetType: text("target_type").notNull().default("signal"),
+  citySlug: text("city_slug").notNull(),
+  nodeType: text("node_type").notNull(),
+  nodeId: text("node_id").notNull(),
+  facet: text("facet").notNull(),
+  basket: text("basket"),
+  state: text("state").notNull(),
+  profileId: text("profile_id"),
+  reasonCode: text("reason_code"),
+  verdict: text("verdict"),
+  observedFingerprint: text("observed_fingerprint").notNull(),
+  commandKey: uuid("command_key").notNull(),
+  commandDigest: text("command_digest").notNull(),
+  mode: text("mode"),
+  observedLotVersion: uuid("observed_lot_version"),
+  askingPrice: numeric("asking_price", { precision: 14, scale: 2 }),
+  listingUrl: text("listing_url"),
+  pipelineStatus: text("pipeline_status"),
+  sourceAuthor: text("source_author"),
+  sourceCreatedAt: timestamp("source_created_at", { withTimezone: true }),
+  importRunId: uuid("import_run_id"),
+  sourceRowId: text("source_row_id"),
+  sourceChainId: text("source_chain_id"),
+  supersedes: uuid("supersedes").references((): AnyPgColumn => facetEvents.id),
+  supersededBy: uuid("superseded_by").references((): AnyPgColumn => facetEvents.id),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const facetCommands = pgTable("facet_commands", {
+  ownerId: uuid("owner_id").notNull().references(() => accountUsers.id),
+  commandKey: uuid("command_key").notNull(),
+  commandDigest: text("command_digest").notNull(),
+  result: jsonb("result").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({ pk: primaryKey({ columns: [t.ownerId, t.commandKey] }) }));
+
+// 6G workspace and membership authority. Explicit grants only: approval,
+// invitation, or global administration never implies membership or capability.
+// Partial indexes and the audit immutability trigger live in migration 0017.
+export const workspaces = pgTable("workspaces", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  slug: text("slug").notNull().unique(),
+  label: text("label").notNull(),
+  scope: text("scope").notNull().default("all-municipalities"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const workspaceMemberships = pgTable("workspace_memberships", {
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  accountId: uuid("account_id").notNull().references(() => accountUsers.id),
+  status: text("status").notNull().default("active"),
+  revision: integer("revision").notNull().default(1),
+  moderateArchive: boolean("moderate_archive").notNull().default(false),
+  manageMembers: boolean("manage_members").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
+}, (t) => ({ pk: primaryKey({ columns: [t.workspaceId, t.accountId] }) }));
+
+export const workspaceMembershipEvents = pgTable("workspace_membership_events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  accountId: uuid("account_id").notNull().references(() => accountUsers.id),
+  kind: text("kind").notNull(),
+  capability: text("capability"),
+  actorId: uuid("actor_id").notNull().references(() => accountUsers.id),
+  reason: text("reason").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// 6H scoped attachment and activation. Partial indexes, immutability guards,
+// the deferred binding check, and the protected index swap live in
+// migration 0018; existing facet tables are untouched.
+// 6J lot streams carry an explicit mode (migration 0021); signal streams
+// keep mode null so their uniqueness is unchanged.
+export const facetStreams = pgTable("facet_streams", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  scope: text("scope").notNull().default("personal"),
+  ownerId: uuid("owner_id").references(() => accountUsers.id),
+  targetType: text("target_type").notNull().default("signal"),
+  mode: text("mode"),
+  citySlug: text("city_slug").notNull(),
+  nodeType: text("node_type").notNull(),
+  nodeId: text("node_id").notNull(),
+  facet: text("facet").notNull(),
+  basket: text("basket"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const facetEventBindings = pgTable("facet_event_bindings", {
+  eventId: uuid("event_id").primaryKey().references(() => facetEvents.id),
+  streamId: uuid("stream_id").notNull().references(() => facetStreams.id),
+  boundAt: timestamp("bound_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const facetHeads = pgTable("facet_heads", {
+  streamId: uuid("stream_id").primaryKey().references(() => facetStreams.id),
+  eventId: uuid("event_id").notNull().unique().references(() => facetEvents.id),
+  boundAt: timestamp("bound_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const facetStreamAttachments = pgTable("facet_stream_attachments", {
+  accountId: uuid("account_id").primaryKey().references(() => accountUsers.id),
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  status: text("status").notNull(),
+  detail: jsonb("detail").notNull().default({}),
+  actorId: uuid("actor_id").notNull().references(() => accountUsers.id),
+  reason: text("reason").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  byWorkspace: index("facet_stream_attachments_workspace_idx").on(t.workspaceId),
+}));
+
+export const facetCommandContexts = pgTable("facet_command_contexts", {
+  ownerId: uuid("owner_id").notNull().references(() => accountUsers.id),
+  commandKey: uuid("command_key").notNull(),
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  status: text("status").notNull(),
+  commandDigest: text("command_digest"),
+  decidedAt: timestamp("decided_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.ownerId, t.commandKey] }),
+  byWorkspace: index("facet_command_contexts_workspace_idx").on(t.workspaceId),
+}));
+
+export const facetActivationState = pgTable("facet_activation_state", {
+  workspaceId: uuid("workspace_id").primaryKey().references(() => workspaces.id),
+  writerEpoch: text("writer_epoch").notNull().default("legacy"),
+  maintenanceBarrier: boolean("maintenance_barrier").notNull().default(false),
+  oldIndexDropped: boolean("old_index_dropped").notNull().default(false),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// 6J lot destination gate, import provenance, and distinct lot
+// capabilities (D4). Writes stay disabled until 6K enables the gate.
+// Partial indexes, append-only guards, and widened facet checks live in
+// migration 0021; prospect_marks is untouched.
+// 6K cutover state, append-only cutover events, immutable D5 dispositions,
+// and source-writer coverage live in migration 0022. The cutover fence
+// blocks legacy prospect_marks writes while a barrier is committed or the
+// destination is open; prospect_notes and contacts stay separate.
+export const lotDestinationState = pgTable("lot_destination_state", {
+  workspaceId: uuid("workspace_id").primaryKey().references(() => workspaces.id),
+  enabled: boolean("enabled").notNull().default(false),
+  selectionBasket: text("selection_basket"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const lotImportRuns = pgTable("lot_import_runs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  importKey: uuid("import_key").notNull(),
+  manifestSha: text("manifest_sha").notNull(),
+  mappingVersion: text("mapping_version").notNull(),
+  importerVersion: text("importer_version").notNull(),
+  sourceSnapshotId: text("source_snapshot_id").notNull(),
+  counts: jsonb("counts").notNull().default({}),
+  status: text("status").notNull().default("complete"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const lotSourceRows = pgTable("lot_source_rows", {
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  sourceId: text("source_id").notNull(),
+  chainId: text("chain_id").notNull(),
+  nativeTarget: text("native_target").notNull(),
+  disposition: text("disposition").notNull(),
+  diagnostics: text("diagnostics").array().notNull().default([]),
+  destination: jsonb("destination"),
+  observed: jsonb("observed").notNull(),
+  manifestSha: text("manifest_sha").notNull(),
+  importRunId: uuid("import_run_id").references(() => lotImportRuns.id),
+  importedAt: timestamp("imported_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.workspaceId, t.sourceId] }),
+  byChain: index("lot_source_rows_chain_idx").on(t.workspaceId, t.chainId),
+}));
+
+export const lotCapabilityGrants = pgTable("lot_capability_grants", {
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  accountId: uuid("account_id").notNull().references(() => accountUsers.id),
+  capability: text("capability").notNull(),
+  granted: boolean("granted").notNull().default(false),
+  revision: integer("revision").notNull().default(1),
+  actorId: uuid("actor_id").notNull().references(() => accountUsers.id),
+  reason: text("reason").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.workspaceId, t.accountId, t.capability] }),
+}));
+
+export const lotCapabilityEvents = pgTable("lot_capability_events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  accountId: uuid("account_id").notNull().references(() => accountUsers.id),
+  capability: text("capability").notNull(),
+  kind: text("kind").notNull(),
+  actorId: uuid("actor_id").notNull().references(() => accountUsers.id),
+  reason: text("reason").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  byWorkspace: index("lot_capability_events_workspace_idx").on(t.workspaceId, t.createdAt),
+}));
+
+/**
+ * 6K guarded cutover state: one row per workspace. The maintenance
+ * barrier is committed before any fencing; the destination opens only
+ * through the explicit operator activation. The SQL fence and the route
+ * layer read this row; legacy writes stay fenced once the barrier exists.
+ */
+export const lotCutoverState = pgTable("lot_cutover_state", {
+  workspaceId: uuid("workspace_id").primaryKey().references(() => workspaces.id),
+  maintenanceBarrier: boolean("maintenance_barrier").notNull().default(false),
+  destinationOpen: boolean("destination_open").notNull().default(false),
+  manifestSha: text("manifest_sha"),
+  activatedAt: timestamp("activated_at", { withTimezone: true }),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Existing singleton also fences transactions carrying an older snapshot. */
+export const lotLegacyFence = pgTable("lot_legacy_fence", {
+  singleton: boolean("singleton").primaryKey().default(true),
+  enabled: boolean("enabled").notNull().default(false),
+});
+
+/** 6K append-only audit of every cutover stage and D5 recording. */
+export const lotCutoverEvents = pgTable("lot_cutover_events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  stage: text("stage").notNull(),
+  detail: jsonb("detail").notNull().default({}),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  byWorkspace: index("lot_cutover_events_workspace_idx").on(t.workspaceId, t.createdAt),
+}));
+
+/**
+ * 6K immutable D5 dispositions: one moderator decision per conflicted
+ * target recorded against the exact manifest digest. A changed manifest
+ * or a revised decision is a new row set, never an overwrite.
+ */
+export const lotD5Dispositions = pgTable("lot_d5_dispositions", {
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  manifestSha: text("manifest_sha").notNull(),
+  targetKey: text("target_key").notNull(),
+  decision: text("decision").notNull(),
+  sourceId: text("source_id"),
+  reason: text("reason").notNull(),
+  recordedBy: uuid("recorded_by").notNull().references(() => accountUsers.id),
+  recordedAt: timestamp("recorded_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.workspaceId, t.manifestSha, t.targetKey] }),
+}));
+
+/**
+ * 6K source-writer coverage attestations: every supported lot_versions
+ * writer must be recorded as covered before activation. Seeded uncovered
+ * by migration 0022; deployment qualifies each writer against the
+ * canonical-target serialization protocol.
+ */
+export const lotSourceWriterCoverage = pgTable("lot_source_writer_coverage", {
+  writer: text("writer").primaryKey(),
+  covered: boolean("covered").notNull().default(false),
+  checkedAt: timestamp("checked_at", { withTimezone: true }).notNull().defaultNow(),
+  reason: text("reason").notNull().default(""),
+});
+
+/**
+ * 6L1 per-viewer personal projection revisions: one monotonic counter per
+ * (workspace, viewer, city, mode). Another member's personal mutation never
+ * touches this viewer's row, so it never invalidates this viewer's token.
+ * `mode` is restricted to `signal` until 6J/6K qualify lot modes.
+ */
+export const personalProjectionRevisions = pgTable("personal_projection_revisions", {
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  ownerId: uuid("owner_id").notNull().references(() => accountUsers.id),
+  citySlug: text("city_slug").notNull(),
+  mode: text("mode").notNull().default("signal"),
+  revision: integer("revision").notNull().default(0),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.workspaceId, t.ownerId, t.citySlug, t.mode] }),
+}));
+
+/**
+ * 6L1 shared workspace projection revisions: one monotonic counter per
+ * (workspace, city, mode), bumped by moderator archive transitions visible
+ * to every member.
+ */
+export const workspaceProjectionRevisions = pgTable("workspace_projection_revisions", {
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id),
+  citySlug: text("city_slug").notNull(),
+  mode: text("mode").notNull().default("signal"),
+  revision: integer("revision").notNull().default(0),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.workspaceId, t.citySlug, t.mode] }),
+}));
+
+/**
+ * 6L1 per-city graph source revisions: the content digest covers served
+ * signal content only (community excluded, like the 6B fingerprint), so a
+ * community-only refresh or a backdated identical import bumps nothing.
+ */
+export const graphSourceRevisions = pgTable("graph_source_revisions", {
+  citySlug: text("city_slug").primaryKey(),
+  revision: integer("revision").notNull().default(0),
+  contentDigest: text("content_digest").notNull().default(""),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const schema = {
+  facetCommands,
+  facetEvents,
+  facetReasonCodes,
+  facetStreams,
+  facetEventBindings,
+  facetHeads,
+  facetStreamAttachments,
+  facetCommandContexts,
+  facetActivationState,
+  personalProjectionRevisions,
+  workspaceProjectionRevisions,
+  graphSourceRevisions,
+  workspaces,
+  workspaceMemberships,
+  workspaceMembershipEvents,
+  lotDestinationState,
+  lotImportRuns,
+  lotSourceRows,
+  lotCapabilityGrants,
+  lotCapabilityEvents,
+  lotCutoverState,
+  lotCutoverEvents,
+  lotD5Dispositions,
+  lotSourceWriterCoverage,
   refreshDocumentOutcomes,
   sources,
   ingestions,

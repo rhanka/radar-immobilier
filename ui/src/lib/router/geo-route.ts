@@ -1,6 +1,12 @@
 export const GEO_REGION_KEY = "quebec";
 export const DEFAULT_GEO_MODE = "signal";
 export const FALLBACK_ZONE_PREFIX = "fallback:";
+/**
+ * URL key of the discarded-signals reveal (`filter.showDiscarded=1`).
+ * URL-only state: written by writeGeoFilters when true, never persisted to
+ * localStorage, forwarded verbatim to the detail and by-city reads.
+ */
+export const SHOW_DISCARDED_FILTER_KEY = "showDiscarded";
 
 export type GeoMode = "signal" | "data";
 export type GeoRegionKey = typeof GEO_REGION_KEY;

@@ -1,0 +1,18 @@
+{
+  "init": {
+    "read": ["account_users", "workspaces", "workspace_memberships"],
+    "insert": ["workspaces", "workspace_memberships", "workspace_membership_events"],
+    "update": ["account_users", "workspace_memberships"]
+  },
+  "attach": {
+    "read": ["account_users", "workspaces", "workspace_memberships", "facet_stream_attachments"],
+    "insert": ["facet_stream_attachments"],
+    "update": ["account_users", "workspace_memberships"]
+  },
+  "activate": {
+    "read": ["account_users", "workspace_memberships", "facet_events", "facet_commands", "facet_streams", "facet_event_bindings", "facet_heads", "facet_stream_attachments", "facet_command_contexts", "facet_activation_state", "facet_unresolved_events"],
+    "insert": ["facet_streams", "facet_event_bindings", "facet_heads", "facet_command_contexts", "facet_activation_state", "facet_unresolved_events"],
+    "update": ["account_users", "workspace_memberships", "facet_streams", "facet_stream_attachments", "facet_activation_state"],
+    "lock_authority": ["facet_events", "facet_commands", "facet_streams", "facet_event_bindings", "facet_heads"]
+  }
+}

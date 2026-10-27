@@ -52,6 +52,7 @@
     type ProspectMode,
     type PipelineStatus,
   } from "$lib/prospect/prospect-marks-client.js";
+  import type { LotFacetState } from "$lib/maps/lot-facet-counters.js";
   // §2 (PR2) : notes d'équipe unifiées (endpoint `/api/v1/prospects/notes`,
   // cible "lot") + temps réel SSE — réutilise les composants collab. Ouvert à
   // tous les approuvés (serveur = autorité author-only), indépendant du gate
@@ -90,6 +91,16 @@
 
   /** Mode d'origine des marquages posés depuis ce panneau (réel vs simulation). */
   export let mode: ProspectMode = "real";
+
+  /**
+   * 6K cutover seam. `null` (default) preserves the established legacy
+   * mark behavior exactly. When the operator activates the destination,
+   * the parent supplies the independent facet states and the panel shows
+   * them instead of the legacy marks; notes stay untouched.
+   */
+  export let facetState: Omit<LotFacetState, "key"> | null = null;
+  export let lotFacetsActive = false;
+  $: usingFacets = lotFacetsActive;
 
   // ── Dérivés réactifs ─────────────────────────────────────────────────────────
 
@@ -166,7 +177,11 @@
 
   $: {
     const key = noLot && citySlug ? `${citySlug}::${noLot}` : "";
-    if (key && key !== prospectRequestKey) {
+    if (usingFacets) {
+      prospectMarks = [];
+      prospectError = null;
+      prospectLoading = false;
+    } else if (key && key !== prospectRequestKey) {
       prospectRequestKey = key;
       void loadProspectState(noLot, citySlug);
     } else if (!key && prospectRequestKey) {
@@ -198,7 +213,7 @@
     prospectError = null;
     try {
       const state = await fetchProspectLotState(noLotValue, citySlugValue);
-      if (prospectRequestKey !== `${citySlugValue}::${noLotValue}`) return;
+      if (usingFacets || prospectRequestKey !== `${citySlugValue}::${noLotValue}`) return;
       prospectMarks = state.marks;
     } catch (e) {
       if (prospectRequestKey !== `${citySlugValue}::${noLotValue}`) return;
@@ -223,6 +238,7 @@
   ];
 
   async function setPipeline(statut: PipelineStatus): Promise<void> {
+    if (usingFacets) return;
     if (!allowMarquage || !lotVersionId || !noLot || !citySlug || prospectSaving) return;
     prospectSaving = true;
     prospectError = null;
@@ -237,6 +253,7 @@
   }
 
   async function toggleEnVente(): Promise<void> {
+    if (usingFacets) return;
     if (!allowMarquage || !lotVersionId || !noLot || !citySlug || prospectSaving) return;
     prospectSaving = true;
     prospectError = null;
@@ -681,20 +698,48 @@
           </div>
         {:else}
           <div class="space-y-3" data-testid="fiche-prospect-state">
-            <div class="flex flex-wrap gap-1.5">
-              {#if pipelineMark}
-                <Badge tone={pipelineMark.statut === "ecarte" ? "neutral" : "success"} class="text-xs">
-                  Pipeline : {prospectStatusLabel(pipelineMark.statut)}
-                </Badge>
+            {#if usingFacets}
+              {#if !facetState}
+                <p class="text-xs text-slate-500" role="status">Facettes indisponibles.</p>
               {:else}
-                <Badge tone="neutral" class="text-xs">Pipeline : non marqué</Badge>
+              <div class="flex flex-wrap gap-1.5" data-testid="fiche-facet-state">
+                <Badge tone={facetState?.selectionActive ? "success" : "neutral"} class="text-xs">
+                  Sélection : {facetState?.selectionActive ? "active" : "inactive"}
+                </Badge>
+                <Badge
+                  tone={facetState?.pipelineStatus ? "success" : "neutral"}
+                  class="text-xs"
+                >
+                  Pipeline : {facetState?.pipelineStatus === "sollicite"
+                    ? "Sollicité"
+                    : facetState?.pipelineStatus === "lettre_envoyee"
+                      ? "Lettre envoyée"
+                      : "inactif"}
+                </Badge>
+                <Badge tone={facetState?.marketActive ? "warning" : "neutral"} class="text-xs">
+                  Marché : {facetState?.marketActive ? "En vente" : "inactif"}
+                </Badge>
+                <Badge tone={facetState?.archivedActive ? "neutral" : "success"} class="text-xs">
+                  Archive : {facetState?.archivedActive ? "écarté" : "visible"}
+                </Badge>
+              </div>
               {/if}
-              {#if marketMark}
-                <Badge tone="warning" class="text-xs">Marché : {prospectStatusLabel(marketMark.statut)}</Badge>
-              {/if}
-            </div>
+            {:else}
+              <div class="flex flex-wrap gap-1.5">
+                {#if pipelineMark}
+                  <Badge tone={pipelineMark.statut === "ecarte" ? "neutral" : "success"} class="text-xs">
+                    Pipeline : {prospectStatusLabel(pipelineMark.statut)}
+                  </Badge>
+                {:else}
+                  <Badge tone="neutral" class="text-xs">Pipeline : non marqué</Badge>
+                {/if}
+                {#if marketMark}
+                  <Badge tone="warning" class="text-xs">Marché : {prospectStatusLabel(marketMark.statut)}</Badge>
+                {/if}
+              </div>
+            {/if}
 
-            {#if allowMarquage}
+            {#if allowMarquage && !usingFacets}
               <div class="space-y-2 border-t border-slate-100 pt-2" data-testid="fiche-prospect-edit">
                 <div class="flex flex-wrap gap-1.5">
                   {#each PIPELINE_ACTIONS as action (action.statut)}

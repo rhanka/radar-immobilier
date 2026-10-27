@@ -1,8 +1,9 @@
 # @radar/immo-mcp
 
-Provider **MCP (stdio)**, **read-only**, **mock-first** exposant les fonctions
-immobilières de radar-immobilier à tout client MCP standard (Claude.ai,
-Claude Desktop, mcp-wave, etc.).
+Read-only MCP provider with twelve tools over synthetic-only **stdio** and
+account-authorized **Streamable HTTP**. Stdio always uses fixtures and records
+`dataMode: "simulation"`, including when real API/storage settings are inherited.
+For HTTP account bindings and deployment, see the [P6 operator guide](../../docs/operator/artefacts-mcp.md).
 
 Cadrage : `docs/spec/mcp/immo-mcp-provider-v0.md` · plan : `docs/spec/reports/wp5-plateforme.md` (§A).
 
@@ -33,13 +34,10 @@ enregistrées. Les scopes `immo:notes:write` / `immo:decisions:propose` /
   (tenant/sub/tool/inputHash/correlationId) — jamais de payload brut.
 - **Anti-PII** : `redact()` scrub emails / téléphones / tokens d'invitation /
   identifiants de session ; `read_document_excerpt` y passe tout extrait.
-- **Mock-first + seam** : `createDataSource()` renvoie `MockDataSource` par
-  défaut ; avec `RADAR_API_BASE_URL` (même variable que le seam raw-data), il
-  renvoie `HttpDataSource` dont **`search_signals` est câblé au vrai flux**
-  `GET /api/graph-signals/:city` (les MÊMES signaux que l'app web — D12). Les
-  autres tools de domaine (`search_lots`, `get_lot_card`,
-  `get_opportunity_dossier`, `list_documents`, `read_document_excerpt`) restent
-  `not_wired_yet` (les lots/zones/PV réels passent par les tools raw-data).
+- **Data boundary**: stdio creates fixture sources with an empty environment.
+  Only HTTP uses `RADAR_API_BASE_URL` to select real signal/raw-data sources.
+  Its five other domain tools remain `not_wired_yet`; real account authorization
+  requires `IMMO_MCP_ACCOUNT_DATABASE_URL` and is rechecked for each invocation.
 
 ## Build / test / preuve
 
@@ -95,8 +93,9 @@ L'entrée `immo` suit exactement le même contrat stdio :
 
 | Var | Défaut | Rôle |
 |-----|--------|------|
-| `IMMO_MCP_DATA_MODE` | `mock` | libellé `dataMode` (audit/log) : `http` → `real`, sinon `simulation`. Ne pilote **pas** la sélection de source. |
-| `RADAR_API_BASE_URL` | — | **pilote la sélection** : présent → `HttpDataSource` (signaux réels + tools raw-data) ; absent → mocks |
+| `IMMO_MCP_DATA_MODE` | — | Ignored by stdio; audit mode is always `simulation`. |
+| `RADAR_API_BASE_URL` | — | Ignored by stdio; source selection is HTTP-only. |
+| `IMMO_MCP_ACCOUNT_DATABASE_URL` | — | Ignored by stdio; trusted account binding is HTTP-only. |
 | `IMMO_MCP_AUTH_STUB_SUB` | `demo-user` | claim `sub` (stub, **stdio uniquement**) |
 | `IMMO_MCP_AUTH_STUB_TENANT` | `radar` | claim `tenantId` (stub, **stdio uniquement**) |
 | `IMMO_MCP_AUTH_STUB_SCOPES` | `immo:read immo:search immo:documents:read` | scopes accordés (stub, **stdio uniquement**) |
@@ -104,8 +103,8 @@ L'entrée `immo` suit exactement le même contrat stdio :
 
 ## Mode REMOTE — Streamable HTTP + OAuth Resource Server (POC)
 
-`src/server-http.ts` est un **second** entrypoint (le stdio `server.ts` est inchangé)
-qui sert le même MCP sur **HTTP** derrière un **OAuth 2.1 Resource Server** :
+`src/server-http.ts` serves the same composed tools over **HTTP**, behind an
+**OAuth 2.1 Resource Server**. Stdio remains confined to synthetic fixtures.
 
 - transport **MCP Streamable HTTP** (`WebStandardStreamableHTTPServerTransport` du MCP SDK,
   mode *stateful* + `enableJsonResponse`) monté sur `POST/GET/DELETE /mcp` ;
@@ -116,7 +115,8 @@ qui sert le même MCP sur **HTTP** derrière un **OAuth 2.1 Resource Server** :
 - les **claims** du token validé sont mappés vers `ImmoMcpAuthContext` (`authContextFromMcp`) —
   c'est l'équivalent HTTP de `resolveAuthContext(env)` du mode stdio ; le scope-gating par tool
   (`assertScope`) reste appliqué. **Aucun** claim ne vient des arguments LLM.
-- **Données = mock** (la vraie API radar n'est PAS câblée dans ce POC).
+- **Data**: fixtures by default; `RADAR_API_BASE_URL` selects real sources.
+  Missing or unavailable account bindings deny real business calls before dispatch.
 
 > Écart vs brief assumé : le brief citait `createRequireServiceAuth`. C'est en réalité la
 > variante **service-à-service** (injection de ports JWKS *in-process*). Pour un RS MCP **externe**
@@ -127,12 +127,17 @@ qui sert le même MCP sur **HTTP** derrière un **OAuth 2.1 Resource Server** :
 
 | Var | Défaut | Rôle |
 |-----|--------|------|
+| `RADAR_API_BASE_URL` | — | Selects real signal/raw-data API sources (HTTP only). |
+| `IMMO_MCP_ACCOUNT_DATABASE_URL` | — | Trusted read-only account and membership database (HTTP only). |
+| `IMMO_MCP_DATA_MODE` | `mock` | Startup label; request audits follow the actual selected source mode. |
 | `IMMO_MCP_OAUTH_ISSUER` | — (**requis**) | issuer IdP / authorization server (ex. `https://auth.sent-tech.ca`) |
 | `IMMO_MCP_OAUTH_RESOURCE` | — (**requis**) | URI canonique de la ressource = `aud` attendu du token (ex. `https://immo-mcp.sent-tech.ca/mcp`) |
 | `IMMO_MCP_OAUTH_JWKS_URI` | `<issuer>/.well-known/jwks.json` | override du JWKS de vérif |
 | `IMMO_MCP_OAUTH_REQUIRED_SCOPE` | `immo:read` | gate de scope grossier sur la route `/mcp` |
 | `IMMO_MCP_OAUTH_SCOPES_SUPPORTED` | `immo:read immo:search immo:documents:read` | scopes annoncés dans le PRM |
 | `IMMO_MCP_HTTP_PORT` | `8848` | port d'écoute |
+| `IMMO_MCP_SESSION_IDLE_TIMEOUT_MS` | `1800000` (30 min) | inactivité max d'une session MCP avant fermeture + libération mémoire |
+| `IMMO_MCP_SESSION_MAX_LIFETIME_MS` | `28800000` (8 h) | durée de vie maximale d'une session MCP, même active |
 
 ### Lancer le serveur HTTP
 

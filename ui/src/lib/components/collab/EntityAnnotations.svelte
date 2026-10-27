@@ -82,7 +82,7 @@
           data-testid="annotation-item">
           {#if editingId === note.id}
             <textarea
-              class="w-full resize-none rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-700 focus:border-teal-400 focus:outline-none"
+              class="w-full resize-none rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-700 focus:border-teal-400 focus:outline-hidden"
               rows="2"
               bind:value={editDraft}
               disabled={busy}
@@ -137,7 +137,7 @@
   {#if canAnnotate}
     <div class="space-y-1">
       <textarea
-        class="w-full resize-none rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-700 focus:border-teal-400 focus:outline-none"
+        class="w-full resize-none rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-700 focus:border-teal-400 focus:outline-hidden"
         rows="2"
         placeholder="Ajouter une note…"
         bind:value={draft}

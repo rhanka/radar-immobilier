@@ -8,8 +8,9 @@ import {
   type JWK,
   type JWTVerifyGetKey,
 } from "jose";
-import { authRoute, protect } from "./auth.js";
-import type { AuthConfig } from "../config.js";
+import { authRoute, protect, pickValidInvitation, resolveGraphSignalsViewer } from "./auth.js";
+import { strictReceiverTestAuth, strictReceiverTestConfig } from "../artifacts/strict-receiver.js";
+import { loadConfig, resolveAuthConfig, type AuthConfig } from "../config.js";
 import type { OidcDiscovery, FetchLike } from "../services/auth/oidc.js";
 import { signSession, verifySession } from "../services/auth/session.js";
 
@@ -276,10 +277,10 @@ describe("GET /api/v1/auth/me", () => {
     expect(body.user.name).toBe("Carol");
   });
 
-  it("never invents isAdmin: a session without a matching DB account is NOT admin", async () => {
+  it("never invents isAdmin: a session without a matching DB account is 403, never admin", async () => {
     // Guard against "logged in as admin without enrollment": admin is only ever
     // sourced from account_users.isAdmin in the DB. A valid session with no DB
-    // row (or a non-admin row) must report no admin flag.
+    // row is treated as not approved (403, same body as other status refusals).
     const token = await signSession(
       { sub: "ghost", email: "fabien.antoine@gmail.com" },
       { sessionSecret: AUTH_ON.sessionSecret, ttlSeconds: 3600 },
@@ -289,10 +290,11 @@ describe("GET /api/v1/auth/me", () => {
     const res = await app.request("/api/v1/auth/me", {
       headers: { cookie: `radar_session=${token}` },
     });
-    const body = await res.json();
-    expect(body.authenticated).toBe(true);
-    expect(body.user.isAdmin).toBeUndefined();
-    expect(body.user.status).toBeUndefined();
+    expect(res.status).toBe(403);
+    expect(await res.json()).toEqual({
+      error: "account_not_approved",
+      status: "unknown",
+    });
   });
 });
 
@@ -945,7 +947,13 @@ function parseEqFilter(filter: unknown): { field: string; value: string } | null
  */
 function makeEnrollmentDb(
   initialUsers: { sub: string; email?: string; status: string; isAdmin: boolean }[] = [],
-  initialInvitations: { email: string; status: string }[] = [],
+  initialInvitations: {
+    id?: string;
+    email: string;
+    status: string;
+    expiresAt?: Date | string | null;
+    invitedAt?: Date | string | null;
+  }[] = [],
 ) {
   const users = [...initialUsers] as Record<string, unknown>[];
   const invitations = [...initialInvitations] as Record<string, unknown>[];
@@ -972,17 +980,19 @@ function makeEnrollmentDb(
       from: (table: unknown) => {
         const collection = collectionFor(table);
         return {
-          where: (filter: unknown) => ({
-            limit: (n: number) => {
-              const parsed = parseEqFilter(filter);
-              if (!parsed) return Promise.resolve(collection.slice(0, n));
-              return Promise.resolve(
-                collection
-                  .filter((u) => u[parsed.field] === parsed.value)
-                  .slice(0, n),
-              );
-            },
-          }),
+          where: (filter: unknown) => {
+            const parsed = parseEqFilter(filter);
+            const filtered = parsed
+              ? collection.filter((u) => u[parsed.field] === parsed.value)
+              : [...collection];
+            return {
+              limit: (n: number) => Promise.resolve(filtered.slice(0, n)),
+              then: (
+                resolve: (v: unknown[]) => unknown,
+                reject?: (e: unknown) => unknown,
+              ) => Promise.resolve(filtered).then(resolve, reject),
+            };
+          },
         };
       },
     }),
@@ -1023,7 +1033,13 @@ describe("enrollment — OIDC callback with DB", () => {
     sub: string;
     email?: string;
     existingUsers?: { sub: string; email?: string; status: string; isAdmin: boolean }[];
-    existingInvitations?: { email: string; status: string }[];
+    existingInvitations?: {
+      id?: string;
+      email: string;
+      status: string;
+      expiresAt?: Date | string | null;
+      invitedAt?: Date | string | null;
+    }[];
   }) {
     const { idToken, getKey } = await makeIdToken({
       nonce: "NONCE",
@@ -1096,24 +1112,19 @@ describe("enrollment — OIDC callback with DB", () => {
     expect(readSetCookie(res, "radar_session")).toBeTruthy();
   });
 
-  it("existing suspended user is redirected to /rejected WITH a session cookie", async () => {
+  it("existing suspended user keeps a session for the account status screen", async () => {
     const { res } = await makeCallback({
       sub: "suspended-user",
       existingUsers: [{ sub: "suspended-user", status: "suspended", isAdmin: false }],
     });
     expect(res.status).toBe(302);
     expect(res.headers.get("location")).toBe(`${AUTH_ON.appBaseUrl}/rejected`);
-    // The session cookie is now set even for non-approved users so the SPA can
-    // resolve /me to authenticated:true (status:suspended) and render the
-    // static RejectedView — `protect` still 403s every protected API route, so
-    // setting the cookie does NOT grant access; it only stops the ping-pong.
     expect(readSetCookie(res, "radar_session")).toBeTruthy();
   });
 
-  it("rejected user WITH a pending invitation is re-approved and lands on the app", async () => {
-    // Bug prod (fabien.antoine@gmail.com) : un compte 'rejected' réinvité voyait
-    // « refusé » au login car le callback ne consultait l'invitation que pour
-    // les statuts pending/invited. L'invitation pending doit PRIMER.
+  it("rejected user with a pending invitation keeps the rejected status", async () => {
+    // A suspended/rejected account is never reactivated by an invitation:
+    // only an explicit admin status change reactivates it.
     const { res, dbMock } = await makeCallback({
       sub: "rejected-then-reinvited",
       email: "comeback@example.com",
@@ -1125,28 +1136,182 @@ describe("enrollment — OIDC callback with DB", () => {
           isAdmin: false,
         },
       ],
-      existingInvitations: [{ email: "comeback@example.com", status: "pending" }],
+      existingInvitations: [
+        { id: "inv-1", email: "comeback@example.com", status: "pending" },
+      ],
     });
-    // Accès accordé : redirigé vers l'app, pas vers /rejected.
     expect(res.status).toBe(302);
-    expect(res.headers.get("location")).toBe(AUTH_ON.appBaseUrl);
+    expect(res.headers.get("location")).toBe(`${AUTH_ON.appBaseUrl}/rejected`);
     expect(readSetCookie(res, "radar_session")).toBeTruthy();
-
-    // Le compte est passé 'approved' via le flux invitation.
-    const userUpdate = dbMock._updates.find(
-      (u) => u.table === "account_users" && u.value === "rejected-then-reinvited",
-    );
-    expect(userUpdate).toBeDefined();
-    expect(userUpdate!.set).toMatchObject({ status: "approved", approvedBy: "invitation" });
-    expect((dbMock._users[0] as { status: string }).status).toBe("approved");
-
-    // L'invitation est marquée 'accepted'.
-    const invUpdate = dbMock._updates.find((u) => u.table === "account_invitations");
-    expect(invUpdate).toBeDefined();
-    expect(invUpdate!.set).toMatchObject({ status: "accepted" });
+    expect((dbMock._users[0] as { status: string }).status).toBe("rejected");
+    expect(
+      dbMock._updates.some((u) => u.table === "account_users"),
+    ).toBe(false);
+    // The invitation is left untouched (still pending, never consumed by id).
+    expect(
+      (dbMock._invitations[0] as { status: string }).status,
+    ).toBe("pending");
   });
 
-  it("rejected user WITHOUT a pending invitation still lands on /rejected", async () => {
+  it("suspended user with a pending invitation keeps the suspended status", async () => {
+    const { res, dbMock } = await makeCallback({
+      sub: "suspended-then-reinvited",
+      email: "back@example.com",
+      existingUsers: [
+        {
+          sub: "suspended-then-reinvited",
+          email: "back@example.com",
+          status: "suspended",
+          isAdmin: false,
+        },
+      ],
+      existingInvitations: [
+        { id: "inv-9", email: "back@example.com", status: "pending" },
+      ],
+    });
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe(`${AUTH_ON.appBaseUrl}/rejected`);
+    expect(readSetCookie(res, "radar_session")).toBeTruthy();
+    expect((dbMock._users[0] as { status: string }).status).toBe("suspended");
+    expect(
+      (dbMock._invitations[0] as { status: string }).status,
+    ).toBe("pending");
+  });
+
+  it("new user with a REVOKED invitation stays pending (invitation ignored)", async () => {
+    const { res, dbMock } = await makeCallback({
+      sub: "new-revoked",
+      email: "revoked@example.com",
+      existingInvitations: [
+        { id: "inv-r", email: "revoked@example.com", status: "revoked" },
+      ],
+    });
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe(`${AUTH_ON.appBaseUrl}/pending`);
+    expect(dbMock._inserted[0]!.status).toBe("pending");
+  });
+
+  it("new user with an EXPIRED invitation stays pending (expires_at honoured)", async () => {
+    const { res, dbMock } = await makeCallback({
+      sub: "new-expired",
+      email: "expired@example.com",
+      existingInvitations: [
+        {
+          id: "inv-e",
+          email: "expired@example.com",
+          status: "pending",
+          expiresAt: new Date("2020-01-01T00:00:00Z"),
+        },
+      ],
+    });
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe(`${AUTH_ON.appBaseUrl}/pending`);
+    expect(dbMock._inserted[0]!.status).toBe("pending");
+  });
+
+  it("acceptance consumes ONLY the retained invitation, by id", async () => {
+    const { res, dbMock } = await makeCallback({
+      sub: "new-chooses-valid",
+      email: "multi@example.com",
+      existingInvitations: [
+        { id: "inv-old-revoked", email: "multi@example.com", status: "revoked" },
+        {
+          id: "inv-valid",
+          email: "multi@example.com",
+          status: "pending",
+          invitedAt: new Date("2026-06-22T10:00:00Z"),
+        },
+      ],
+    });
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe(AUTH_ON.appBaseUrl);
+    const invUpdates = dbMock._updates.filter(
+      (u) => u.table === "account_invitations",
+    );
+    expect(invUpdates).toHaveLength(1);
+    expect(invUpdates[0]).toMatchObject({
+      field: "id",
+      value: "inv-valid",
+      set: expect.objectContaining({ status: "accepted" }),
+    });
+    // The revoked row is untouched.
+    expect(
+      (dbMock._invitations.find((r) => (r as { id: string }).id === "inv-old-revoked") as { status: string }).status,
+    ).toBe("revoked");
+  });
+
+  it("existing pending user with an EXPIRED invitation stays pending (not approved)", async () => {
+    const { res, dbMock } = await makeCallback({
+      sub: "pending-expired",
+      email: "pendexp@example.com",
+      existingUsers: [
+        {
+          sub: "pending-expired",
+          email: "pendexp@example.com",
+          status: "pending",
+          isAdmin: false,
+        },
+      ],
+      existingInvitations: [
+        {
+          id: "inv-x",
+          email: "pendexp@example.com",
+          status: "pending",
+          expiresAt: new Date("2020-01-01T00:00:00Z"),
+        },
+      ],
+    });
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe(`${AUTH_ON.appBaseUrl}/pending`);
+    expect((dbMock._users[0] as { status: string }).status).toBe("pending");
+  });
+
+  it("new user with a VALID invitation is approved and the invitation is consumed by id", async () => {
+    const { res, dbMock } = await makeCallback({
+      sub: "new-invited",
+      email: "invited@example.com",
+      existingInvitations: [
+        { id: "inv-ok", email: "invited@example.com", status: "pending" },
+      ],
+    });
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe(AUTH_ON.appBaseUrl);
+    expect(dbMock._inserted[0]!.status).toBe("approved");
+    const invUpdate = dbMock._updates.find(
+      (u) => u.table === "account_invitations",
+    );
+    expect(invUpdate).toMatchObject({
+      field: "id",
+      value: "inv-ok",
+      set: expect.objectContaining({ status: "accepted" }),
+    });
+  });
+
+  it("existing pending user with a VALID invitation is approved (by id)", async () => {
+    const { res, dbMock } = await makeCallback({
+      sub: "pending-invited",
+      email: "pendok@example.com",
+      existingUsers: [
+        {
+          sub: "pending-invited",
+          email: "pendok@example.com",
+          status: "pending",
+          isAdmin: false,
+        },
+      ],
+      existingInvitations: [
+        { id: "inv-p", email: "pendok@example.com", status: "pending" },
+      ],
+    });
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe(AUTH_ON.appBaseUrl);
+    expect((dbMock._users[0] as { status: string }).status).toBe("approved");
+    expect(
+      dbMock._updates.find((u) => u.table === "account_invitations"),
+    ).toMatchObject({ field: "id", value: "inv-p" });
+  });
+
+  it("rejected user without an invitation keeps a session for the status screen", async () => {
     const { res } = await makeCallback({
       sub: "stays-rejected",
       email: "nope@example.com",
@@ -1157,5 +1322,611 @@ describe("enrollment — OIDC callback with DB", () => {
     expect(res.status).toBe(302);
     expect(res.headers.get("location")).toBe(`${AUTH_ON.appBaseUrl}/rejected`);
     expect(readSetCookie(res, "radar_session")).toBeTruthy();
+  });
+});
+
+// ── Account-status enforcement (cookie path + /me) ──────────────────────────
+// Only "approved" grants access on protected routes. A missing account row is
+// treated as not approved (403). /me keeps identity and status in its 403
+// response so the SPA can render the account status screen.
+describe("account status enforcement — cookie path (protect) + /me", () => {
+  function protectedAppWithDb(
+    db: import("../db/client.js").Database,
+  ): Hono {
+    const app = new Hono();
+    app.use("*", protect(AUTH_ON, { db }));
+    app.get("/api/protected", (c) => c.json({ secret: true }));
+    return app;
+  }
+
+  async function sessionFor(sub: string): Promise<string> {
+    return signSession(
+      { sub },
+      { sessionSecret: AUTH_ON.sessionSecret, ttlSeconds: 3600 },
+    );
+  }
+
+  it("protect: missing account row → 403 account_not_approved (unknown)", async () => {
+    const db = makeEnrollmentDb([
+      { sub: "someone-else", status: "approved", isAdmin: false },
+    ]) as unknown as import("../db/client.js").Database;
+    const app = protectedAppWithDb(db);
+    const res = await app.request("/api/protected", {
+      headers: { cookie: `radar_session=${await sessionFor("ghost")}` },
+    });
+    expect(res.status).toBe(403);
+    expect(await res.json()).toEqual({
+      error: "account_not_approved",
+      status: "unknown",
+    });
+  });
+
+  it.each(["pending", "invited", "rejected", "suspended"])(
+    "protect: status %s → 403 account_not_approved",
+    async (status) => {
+      const db = makeEnrollmentDb([
+        { sub: "user-1", status, isAdmin: false },
+      ]) as unknown as import("../db/client.js").Database;
+      const app = protectedAppWithDb(db);
+      const res = await app.request("/api/protected", {
+        headers: { cookie: `radar_session=${await sessionFor("user-1")}` },
+      });
+      expect(res.status).toBe(403);
+      expect(await res.json()).toEqual({
+        error: "account_not_approved",
+        status,
+      });
+    },
+  );
+
+  it("protect: approved → 200", async () => {
+    const db = makeEnrollmentDb([
+      { sub: "user-1", status: "approved", isAdmin: false },
+    ]) as unknown as import("../db/client.js").Database;
+    const app = protectedAppWithDb(db);
+    const res = await app.request("/api/protected", {
+      headers: { cookie: `radar_session=${await sessionFor("user-1")}` },
+    });
+    expect(res.status).toBe(200);
+  });
+
+  it("/me: missing account row → 403 account_not_approved (unknown)", async () => {
+    const db = makeEnrollmentDb([
+      { sub: "someone-else", status: "approved", isAdmin: false },
+    ]) as unknown as import("../db/client.js").Database;
+    const app = authRoute(AUTH_ON, { discovery: DISCOVERY, db });
+    const res = await app.request("/api/v1/auth/me", {
+      headers: { cookie: `radar_session=${await sessionFor("ghost")}` },
+    });
+    expect(res.status).toBe(403);
+    expect(await res.json()).toEqual({
+      error: "account_not_approved",
+      status: "unknown",
+    });
+  });
+
+  it.each(["pending", "invited", "rejected", "suspended"])(
+    "/me: status %s returns 403 with the identity needed by the status screen",
+    async (status) => {
+      const db = makeEnrollmentDb([
+        { sub: "user-1", status, isAdmin: false },
+      ]) as unknown as import("../db/client.js").Database;
+      const app = authRoute(AUTH_ON, { discovery: DISCOVERY, db });
+      const res = await app.request("/api/v1/auth/me", {
+        headers: { cookie: `radar_session=${await sessionFor("user-1")}` },
+      });
+      expect(res.status).toBe(403);
+      expect(await res.json()).toEqual({
+        error: "account_not_approved",
+        status,
+        authenticated: true,
+        user: { sub: "user-1", status, isAdmin: false },
+      });
+      expect(readSetCookie(res, "radar_session")).toBeFalsy();
+    },
+  );
+
+  it("/me: approved → 200", async () => {
+    const db = makeEnrollmentDb([
+      { sub: "user-1", status: "approved", isAdmin: false },
+    ]) as unknown as import("../db/client.js").Database;
+    const app = authRoute(AUTH_ON, { discovery: DISCOVERY, db });
+    const res = await app.request("/api/v1/auth/me", {
+      headers: { cookie: `radar_session=${await sessionFor("user-1")}` },
+    });
+    expect(res.status).toBe(200);
+    expect((await res.json()).authenticated).toBe(true);
+  });
+
+});
+
+describe("pickValidInvitation — retained invitation (C)", () => {
+  const NOW = Date.parse("2026-06-22T12:00:00Z");
+
+  it("ignores revoked/accepted/expired rows", () => {
+    expect(
+      pickValidInvitation(
+        [
+          { id: "r", status: "revoked", expiresAt: null },
+          { id: "a", status: "accepted", expiresAt: null },
+          { id: "e", status: "expired", expiresAt: null },
+        ],
+        NOW,
+      ),
+    ).toBeNull();
+  });
+
+  it("ignores a pending row past expires_at, honours a live one", () => {
+    const kept = pickValidInvitation(
+      [
+        {
+          id: "old",
+          status: "pending",
+          expiresAt: new Date("2020-01-01T00:00:00Z"),
+        },
+        { id: "live", status: "pending", expiresAt: null },
+      ],
+      NOW,
+    );
+    expect(kept?.id).toBe("live");
+  });
+
+  it("treats expires_at == now as expired (strictly future required)", () => {
+    expect(
+      pickValidInvitation(
+        [
+          {
+            id: "edge",
+            status: "pending",
+            expiresAt: new Date(NOW),
+          },
+        ],
+        NOW,
+      ),
+    ).toBeNull();
+  });
+
+  it("returns null when nothing is valid", () => {
+    expect(pickValidInvitation([], NOW)).toBeNull();
+  });
+
+});
+
+describe("resolveGraphSignalsViewer — session sub for the discard port", () => {
+  async function viewerOf(sessionValue: unknown, present: boolean): Promise<string | null> {
+    let seen: string | null | "unset" = "unset";
+    const app = new Hono();
+    app.use("*", async (c, next) => {
+      if (present) c.set("session" as never, sessionValue as never);
+      await next();
+    });
+    app.get("/", (c) => {
+      seen = resolveGraphSignalsViewer(c);
+      return c.json({ ok: true });
+    });
+    await app.request("/");
+    expect(seen).not.toBe("unset");
+    return seen as string | null;
+  }
+
+  it("returns the session sub, else null", async () => {
+    expect(await viewerOf({ sub: "viewer-1" }, true)).toBe("viewer-1");
+    expect(await viewerOf(undefined, true)).toBeNull();
+    expect(await viewerOf({ sub: 42 }, true)).toBeNull();
+    expect(await viewerOf({ sub: "" }, true)).toBeNull();
+    expect(await viewerOf(null, false)).toBeNull();
+  });
+
+  it("returns the sub of an exchanged strict session (per-user discard intact)", async () => {
+    expect(await viewerOf({ sub: "mcp-user", via: "exchanged" }, true)).toBe("mcp-user");
+  });
+});
+
+describe("strict receiver — exchanged search and audience confusions (H4 P5)", () => {
+  const STRICT_AUTH = strictReceiverTestAuth(strictReceiverTestConfig());
+  const RESOLVED_BASE = {
+    NODE_ENV: "test",
+    POSTGRES_HOST: "localhost", POSTGRES_USER: "radar",
+    POSTGRES_PASSWORD: "pw", POSTGRES_DB: "radar",
+    S3_ENDPOINT: "http://localhost:9000", S3_ACCESS_KEY: "minio", S3_SECRET_KEY: "minio",
+    SENTROPIC_IDP_ISSUER: STRICT_AUTH.issuer,
+    SENTROPIC_OAUTH_CLIENT_ID: "radar-immobilier",
+    SENTROPIC_OAUTH_CLIENT_SECRET: "super-secret",
+    SENTROPIC_OAUTH_REDIRECT_URI: `${STRICT_AUTH.appBaseUrl}/api/v1/auth/oauth/callback`,
+    AUTH_CALLBACK_BASE_URL: STRICT_AUTH.appBaseUrl,
+    SESSION_SECRET: "session-signing-key-min-32-chars-x",
+    STRICT_RECEIVER_WORKLOAD_SUB: "immo-mcp-workload",
+    STRICT_RECEIVER_WORKLOAD_CLIENT_ID: "immo-mcp-workload",
+    STRICT_RECEIVER_ENVIRONMENT: "test",
+  };
+  const A2_RECEIPT = {
+    STRICT_RECEIVER_RECEIPT_ISSUER: STRICT_AUTH.issuer,
+    STRICT_RECEIVER_RECEIPT_API_AUDIENCE: STRICT_AUTH.appBaseUrl,
+    STRICT_RECEIVER_RECEIPT_WORKLOAD_SUB: "immo-mcp-workload",
+    STRICT_RECEIVER_RECEIPT_WORKLOAD_CLIENT_ID: "immo-mcp-workload",
+    STRICT_RECEIVER_RECEIPT_ENVIRONMENT: "test",
+    STRICT_RECEIVER_RECEIPT_ROUTE_PROFILE: "mcp-signals-search.get.v1",
+    STRICT_RECEIVER_RECEIPT_SCHEMA_REVISION: "scoped-signal-search.v1",
+    STRICT_RECEIVER_RECEIPT_POLICY_REVISION: "a2base-search-v1",
+    STRICT_RECEIVER_API_IMAGE: `sha256:${"a".repeat(64)}`,
+    STRICT_RECEIVER_MCP_IMAGE: `sha256:${"b".repeat(64)}`,
+    STRICT_RECEIVER_RECEIPT_API_IMAGE: `sha256:${"a".repeat(64)}`,
+    STRICT_RECEIVER_RECEIPT_MCP_IMAGE: `sha256:${"b".repeat(64)}`,
+  };
+
+  async function makeExchanged(
+    overrides: Record<string, unknown> = {},
+  ): Promise<{ presented: string; getKey: JWTVerifyGetKey }> {
+    const { publicKey, privateKey } = await generateKeyPair("EdDSA", { crv: "Ed25519" });
+    const pubJwk: JWK = await exportJWK(publicKey);
+    pubJwk.kid = "k1";
+    pubJwk.alg = "EdDSA";
+    const builder = new SignJWT({
+      scope: "immo:search",
+      client_id: "immo-mcp-workload",
+      act: { sub: "immo-mcp-workload" },
+      ...overrides,
+    }).setProtectedHeader({ alg: "EdDSA", kid: "k1" });
+    if (!("iss" in overrides)) builder.setIssuer(STRICT_AUTH.issuer);
+    if (!("aud" in overrides)) builder.setAudience("https://immo.example.test");
+    if (!("sub" in overrides)) builder.setSubject("mcp-user");
+    if (!("iat" in overrides)) builder.setIssuedAt();
+    if (!("exp" in overrides)) builder.setExpirationTime("5m");
+    return {
+      presented: await builder.sign(privateKey),
+      getKey: createLocalJWKSet({ keys: [pubJwk] }),
+    };
+  }
+
+  async function makeSubject(aud: string): Promise<{ presented: string; getKey: JWTVerifyGetKey }> {
+    const { publicKey, privateKey } = await generateKeyPair("EdDSA", { crv: "Ed25519" });
+    const pubJwk: JWK = await exportJWK(publicKey);
+    pubJwk.kid = "k1";
+    pubJwk.alg = "EdDSA";
+    const presented = await new SignJWT({ scope: "immo:search immo:read" })
+      .setProtectedHeader({ alg: "EdDSA", kid: "k1" })
+      .setIssuer(STRICT_AUTH.issuer)
+      .setAudience(aud)
+      .setSubject("mcp-user")
+      .setIssuedAt()
+      .setExpirationTime("5m")
+      .sign(privateKey);
+    return { presented, getKey: createLocalJWKSet({ keys: [pubJwk] }) };
+  }
+
+  type Db = import("../db/client.js").Database;
+  const approvedDb = () =>
+    makeEnrollmentDb([{ sub: "mcp-user", status: "approved", isAdmin: false }]) as unknown as Db;
+
+  function strictApp(
+    auth: AuthConfig = STRICT_AUTH,
+    db?: Db,
+    bearerGetKey?: JWTVerifyGetKey,
+  ): Hono {
+    const app = new Hono();
+    app.use(
+      "*",
+      protect(auth, {
+        ...(db ? { db } : {}),
+        ...(bearerGetKey ? { bearerGetKey } : {}),
+      }),
+    );
+    app.get("/api/v1/mcp/facets/signals/search", (c) => c.json({ ok: true, signals: [] }));
+    app.get("/api/graph-signals/:city", (c) => c.json({ ok: true, nodes: [] }));
+    app.get("/api/graph-signals/by-city", (c) => c.json({ ok: true, cities: [] }));
+    app.get("/api/v1/signal-facets/reason-codes", (c) => c.json({ ok: true, codes: [] }));
+    app.post("/api/v1/signal-facets/select", (c) => c.json({ ok: true }));
+    app.get("/api/admin/ping", (c) => c.json({ ok: true }));
+    app.get("/api/documents/raw", (c) => c.json({ ok: true }));
+    app.get("/health", (c) => c.json({ status: "ok" }));
+    return app;
+  }
+
+  it("serves the permitted search with a correct exchanged presentation, no cookie", async () => {
+    const { presented, getKey } = await makeExchanged();
+    const res = await strictApp(STRICT_AUTH, approvedDb(), getKey).request(
+      "/api/v1/mcp/facets/signals/search?city=drummondville",
+      { headers: { authorization: `Bearer ${presented}` } },
+    );
+    expect(res.status).toBe(200);
+    expect((await res.json()).ok).toBe(true);
+  });
+
+  it("refuses the MCP-audience subject presentation on the armed search route", async () => {
+    const { presented, getKey } = await makeSubject("https://immo.example.test/mcp");
+    const res = await strictApp(STRICT_AUTH, approvedDb(), getKey).request(
+      "/api/v1/mcp/facets/signals/search?city=drummondville",
+      { headers: { authorization: `Bearer ${presented}` } },
+    );
+    expect(res.status).toBe(401);
+    expect((await res.json()).error).toBe("unauthenticated");
+  });
+
+  it("refuses original subject tokens on every protected route after activation", async () => {
+    for (const aud of [STRICT_AUTH.appBaseUrl, `${STRICT_AUTH.appBaseUrl}/mcp`]) {
+      const { presented, getKey } = await makeSubject(aud);
+      for (const path of ["/api/admin/ping", "/api/v1/signal-facets/reason-codes"]) {
+        const res = await strictApp(STRICT_AUTH, approvedDb(), getKey).request(path, {
+          headers: { authorization: `Bearer ${presented}` },
+        });
+        expect(res.status).toBe(401);
+      }
+    }
+  });
+
+  it("refuses a foreign-environment API audience on this receiver", async () => {
+    const { presented, getKey } = await makeExchanged({ aud: "https://immo.sent-tech.ca" });
+    const res = await strictApp(STRICT_AUTH, approvedDb(), getKey).request(
+      "/api/v1/mcp/facets/signals/search?city=drummondville",
+      { headers: { authorization: `Bearer ${presented}` } },
+    );
+    expect(res.status).toBe(401);
+  });
+
+  it("refuses wrong actor, client and non-search scope", async () => {
+    for (const [overrides, status, error] of [
+      [{ act: { sub: "evil-workload" } }, 401, "unauthenticated"],
+      [{ client_id: "evil-client" }, 401, "unauthenticated"],
+      [{ scope: "immo:read" }, 403, "delegated_scope_refused"],
+    ] as const) {
+      const { presented, getKey } = await makeExchanged({ ...overrides });
+      const res = await strictApp(STRICT_AUTH, approvedDb(), getKey).request(
+        "/api/v1/mcp/facets/signals/search?city=drummondville",
+        { headers: { authorization: `Bearer ${presented}` } },
+      );
+      expect(res.status).toBe(status);
+      expect((await res.json()).error).toBe(error);
+    }
+  });
+
+  it("serves exchanged search before activation (disarmed A2 continuity)", async () => {
+    const unarmed = strictReceiverTestAuth(strictReceiverTestConfig({ enabled: false }));
+    const { presented, getKey } = await makeExchanged();
+    const res = await strictApp(unarmed, approvedDb(), getKey).request(
+      "/api/v1/mcp/facets/signals/search?city=drummondville",
+      { headers: { authorization: `Bearer ${presented}` } },
+    );
+    expect(res.status).toBe(200);
+    expect((await res.json()).ok).toBe(true);
+  });
+
+  it("accepts raw subject tokens before activation but refuses them after", async () => {
+    const unarmed = strictReceiverTestAuth(strictReceiverTestConfig({ enabled: false }));
+    const armed = strictReceiverTestAuth(strictReceiverTestConfig());
+    for (const aud of [unarmed.appBaseUrl, `${unarmed.appBaseUrl}/mcp`]) {
+      const { presented, getKey } = await makeSubject(aud);
+      const before = await strictApp(unarmed, approvedDb(), getKey).request(
+        "/api/v1/mcp/facets/signals/search?city=drummondville",
+        { headers: { authorization: `Bearer ${presented}` } },
+      );
+      expect(before.status).toBe(200);
+      const after = await strictApp(armed, approvedDb(), getKey).request(
+        "/api/v1/mcp/facets/signals/search?city=drummondville",
+        { headers: { authorization: `Bearer ${presented}` } },
+      );
+      expect(after.status).toBe(401);
+    }
+  });
+
+  it("fails closed when arming was requested with an invalid receipt", async () => {
+    const invalid = strictReceiverTestAuth(
+      strictReceiverTestConfig({ enabled: false, armingRequested: true }),
+    );
+    const { presented: exchanged, getKey: exchangedKey } = await makeExchanged();
+    const refusedExchanged = await strictApp(invalid, approvedDb(), exchangedKey).request(
+      "/api/v1/mcp/facets/signals/search?city=drummondville",
+      { headers: { authorization: `Bearer ${exchanged}` } },
+    );
+    expect(refusedExchanged.status).toBe(401);
+    expect((await refusedExchanged.json()).error).toBe("strict_receiver_receipt_invalid");
+    for (const aud of [invalid.appBaseUrl, `${invalid.appBaseUrl}/mcp`]) {
+      const { presented, getKey } = await makeSubject(aud);
+      const refusedRaw = await strictApp(invalid, approvedDb(), getKey).request(
+        "/api/v1/mcp/facets/signals/search?city=drummondville",
+        { headers: { authorization: `Bearer ${presented}` } },
+      );
+      expect(refusedRaw.status).toBe(401);
+      expect((await refusedRaw.json()).error).toBe("strict_receiver_receipt_invalid");
+    }
+  });
+
+  it("refuses an exchanged presentation for a suspended account", async () => {
+    const db = makeEnrollmentDb([
+      { sub: "mcp-user", status: "suspended", isAdmin: false },
+    ]) as unknown as Db;
+    const { presented, getKey } = await makeExchanged();
+    const res = await strictApp(STRICT_AUTH, db, getKey).request(
+      "/api/v1/mcp/facets/signals/search?city=drummondville",
+      { headers: { authorization: `Bearer ${presented}` } },
+    );
+    expect(res.status).toBe(403);
+    expect((await res.json()).error).toBe("account_not_approved");
+  });
+
+  it("keeps exchanged search working disarmed then armed via resolved config, no cookie", async () => {
+    const disarmed = resolveAuthConfig(
+      loadConfig({ ...RESOLVED_BASE, STRICT_RECEIVER_ARMED: "0" }),
+    );
+    expect(disarmed.strict?.enabled).toBe(false);
+    const armed = resolveAuthConfig(
+      loadConfig({
+        ...RESOLVED_BASE,
+        STRICT_RECEIVER_ARMED: "1",
+        ...A2_RECEIPT,
+      }),
+    );
+    expect(armed.strict?.enabled).toBe(true);
+    const { presented, getKey } = await makeExchanged();
+    const headers = { authorization: `Bearer ${presented}` };
+    const before = await strictApp(disarmed, approvedDb(), getKey).request(
+      "/api/v1/mcp/facets/signals/search?city=drummondville",
+      { headers },
+    );
+    expect(before.status).toBe(200);
+    const after = await strictApp(armed, approvedDb(), getKey).request(
+      "/api/v1/mcp/facets/signals/search?city=drummondville",
+      { headers },
+    );
+    expect(after.status).toBe(200);
+    for (const aud of armed.bearerAudiences) {
+      const raw = await makeSubject(aud);
+      for (const [auth, status] of [[disarmed, 200], [armed, 401]] as const) {
+        const res = await strictApp(auth, approvedDb(), raw.getKey).request(
+          "/api/v1/mcp/facets/signals/search?city=drummondville",
+          { headers: { authorization: `Bearer ${raw.presented}` } },
+        );
+        expect(res.status).toBe(status);
+      }
+    }
+  });
+
+  it("keeps exchanged search working disarmed without workload references", async () => {
+    const { presented, getKey } = await makeExchanged();
+    for (const workload of [
+      { STRICT_RECEIVER_WORKLOAD_SUB: "" },
+      { STRICT_RECEIVER_WORKLOAD_CLIENT_ID: "" },
+      { STRICT_RECEIVER_WORKLOAD_SUB: "", STRICT_RECEIVER_WORKLOAD_CLIENT_ID: "" },
+    ]) {
+      const auth = resolveAuthConfig(loadConfig({
+        ...RESOLVED_BASE, ...workload, STRICT_RECEIVER_ARMED: "0",
+      }));
+      const res = await strictApp(auth, approvedDb(), getKey).request(
+        "/api/v1/mcp/facets/signals/search?city=drummondville",
+        { headers: { authorization: `Bearer ${presented}` } },
+      );
+      expect(res.status).toBe(200);
+    }
+  });
+
+  it("never serves raw tokens when arming has an invalid or incomplete receipt", async () => {
+    const receiptKeys = Object.keys(A2_RECEIPT);
+    const variants = [
+      Object.fromEntries(receiptKeys.map((key) => [key, undefined])),
+      ...receiptKeys.flatMap((key) => [
+        { [key]: undefined }, { [key]: "" }, { [key]: "https://wrong.example.test" },
+      ]),
+    ];
+    for (const aud of STRICT_AUTH.bearerAudiences) {
+      const { presented, getKey } = await makeSubject(aud);
+      for (const variant of variants) {
+        let auth: AuthConfig;
+        try {
+          auth = resolveAuthConfig(loadConfig({
+            ...RESOLVED_BASE, ...A2_RECEIPT, ...variant, STRICT_RECEIVER_ARMED: "1",
+          }));
+        } catch (err) {
+          expect((err as Error).message).toBe("strict_receiver_receipt_invalid");
+          continue;
+        }
+        const res = await strictApp(auth, approvedDb(), getKey).request(
+          "/api/v1/mcp/facets/signals/search?city=drummondville",
+          { headers: { authorization: `Bearer ${presented}` } },
+        );
+        expect(res.status).toBe(401);
+        expect.unreachable("invalid arming must refuse startup");
+      }
+    }
+  });
+});
+
+describe("strict receiver — forbidden routes, methods and preserved behavior (H4 P5)", () => {
+  const STRICT_AUTH = strictReceiverTestAuth(strictReceiverTestConfig());
+
+  async function makeExchanged(): Promise<{ presented: string; getKey: JWTVerifyGetKey }> {
+    const { publicKey, privateKey } = await generateKeyPair("EdDSA", { crv: "Ed25519" });
+    const pubJwk: JWK = await exportJWK(publicKey);
+    pubJwk.kid = "k1";
+    pubJwk.alg = "EdDSA";
+    const presented = await new SignJWT({
+      scope: "immo:search",
+      client_id: "immo-mcp-workload",
+      act: { sub: "immo-mcp-workload" },
+    })
+      .setProtectedHeader({ alg: "EdDSA", kid: "k1" })
+      .setIssuer(STRICT_AUTH.issuer)
+      .setAudience("https://immo.example.test")
+      .setSubject("mcp-user")
+      .setIssuedAt()
+      .setExpirationTime("5m")
+      .sign(privateKey);
+    return { presented, getKey: createLocalJWKSet({ keys: [pubJwk] }) };
+  }
+
+  type Db = import("../db/client.js").Database;
+  const approvedDb = () =>
+    makeEnrollmentDb([{ sub: "mcp-user", status: "approved", isAdmin: false }]) as unknown as Db;
+
+  function strictApp(bearerGetKey?: JWTVerifyGetKey): Hono {
+    const app = new Hono();
+    app.use("*", protect(STRICT_AUTH, { db: approvedDb(), ...(bearerGetKey ? { bearerGetKey } : {}) }));
+    app.get("/api/v1/mcp/facets/signals/search", (c) => c.json({ ok: true, signals: [] }));
+    app.get("/api/graph-signals/:city", (c) => c.json({ ok: true, nodes: [] }));
+    app.get("/api/graph-signals/by-city", (c) => c.json({ ok: true, cities: [] }));
+    app.get("/api/v1/signal-facets/reason-codes", (c) => c.json({ ok: true, codes: [] }));
+    app.post("/api/v1/signal-facets/select", (c) => c.json({ ok: true }));
+    return app;
+  }
+
+  it("denies a valid delegated presentation on aggregate, facets and writes", async () => {
+    const { presented, getKey } = await makeExchanged();
+    const headers = { authorization: `Bearer ${presented}` };
+    for (const [path, method] of [
+      ["/api/graph-signals/by-city", "GET"],
+      ["/api/v1/signal-facets/reason-codes", "GET"],
+      ["/api/v1/signal-facets/select", "POST"],
+      ["/api/v1/mcp/facets/signals/search?city=drummondville", "POST"],
+    ] as const) {
+      const res = await strictApp(getKey).request(path, { method, headers });
+      expect(res.status).toBe(403);
+      expect((await res.json()).error).toBe("delegated_scope_refused");
+    }
+  });
+
+  it("denies encoded, case-varied, trailing-slash and double-slash variants", async () => {
+    const { presented, getKey } = await makeExchanged();
+    const headers = { authorization: `Bearer ${presented}` };
+    for (const path of [
+      "/api/graph-signals/%64rummondville",
+      "/api/graph-signals/Drummondville",
+      "/api/graph-signals/drummondville/",
+      "/api/graph-signals//drummondville",
+    ]) {
+      const res = await strictApp(getKey).request(path, { headers });
+      expect([401, 403, 404].includes(res.status)).toBe(true);
+    }
+  });
+
+  it("denies an unknown query key on the delegated search", async () => {
+    const { presented, getKey } = await makeExchanged();
+    const res = await strictApp(getKey).request("/api/graph-signals/drummondville?debug=1", {
+      headers: { authorization: `Bearer ${presented}` },
+    });
+    expect(res.status).toBe(403);
+  });
+
+  it("preserves cookie sessions on search, aggregate and facets under strict arming", async () => {
+    const cookie = `radar_session=${await signSession(
+      { sub: "mcp-user" },
+      { sessionSecret: STRICT_AUTH.sessionSecret, ttlSeconds: 3600 },
+    )}`;
+    for (const [path, method] of [
+      ["/api/v1/mcp/facets/signals/search?city=drummondville", "GET"],
+      ["/api/graph-signals/by-city", "GET"],
+      ["/api/v1/signal-facets/reason-codes", "GET"],
+    ] as const) {
+      const res = await strictApp().request(path, { method, headers: { cookie } });
+      expect(res.status).toBe(200);
+    }
+  });
+
+  it("preserves public routes without any identity under strict arming", async () => {
+    const app = new Hono();
+    app.use("*", protect(STRICT_AUTH, {}));
+    app.get("/livez", (c) => c.json({ status: "ok" }));
+    app.get("/api/geo/collections/:id/items", (c) => c.json({ type: "FeatureCollection" }));
+    app.get("/api/documents/raw", (c) => c.json({ ok: true }));
+    expect((await app.request("/livez")).status).toBe(200);
+    expect((await app.request("/api/geo/collections/qc-lots-x/items")).status).toBe(200);
+    expect((await app.request("/api/documents/raw?rawRef=raw%2Fabc.pdf")).status).toBe(200);
   });
 });

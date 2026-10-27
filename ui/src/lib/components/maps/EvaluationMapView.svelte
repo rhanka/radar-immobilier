@@ -88,6 +88,12 @@
     type ProspectMark,
     type ProspectStatus,
   } from "$lib/prospect/prospect-marks-client.js";
+  import {
+    computeLotFacetCounters,
+    facetCounterFor,
+    lotMatchesFacetFilter,
+    type LotFacetState,
+  } from "$lib/maps/lot-facet-counters.js";
   
 
   import { prioritizedCities } from "@radar/sources/municipalities";
@@ -206,6 +212,18 @@
   let prospectMarks: ProspectMark[] = [];
   let prospectFilter: ProspectStatus | "all" | "unmarked" = "all";
 
+  /**
+   * 6K cutover seam. `false` (default) preserves the established legacy
+   * mark behavior exactly. When the operator activates the destination,
+   * the parent supplies destination facet states and counters, filters,
+   * and map highlights switch to the independent facets.
+   */
+  export let lotFacetsActive = false;
+  export let lotFacetStates: LotFacetState[] = [];
+  $: facetStatesByKey = new Map(lotFacetStates.map((state) => [state.key, state]));
+  $: facetCounters = computeLotFacetCounters(lotFacetStates);
+  $: if (lotFacetsActive) prospectMarks = [];
+
   // ── Filtres carte (parité carte de référence) ──────────────────────────────
   // Catégorie EXCLUSIVE × usages ADDITIFS × superficie min. Chaque changement
   // ne fait que recalculer le STYLE des lots (aucun refetch) : les non-matchés
@@ -320,12 +338,18 @@
   const zonageGuard = new RequestGuard();
 
   async function loadProspectMarks(citySlug: string, lease: RequestLease): Promise<void> {
+    if (lotFacetsActive) {
+      prospectMarks = [];
+      prospectMarksError = null;
+      prospectMarksLoading = false;
+      return;
+    }
     prospectMarksLoading = true;
     prospectMarksError = null;
     prospectMarks = [];
     try {
       const marks = await fetchProspectMarksForZone(citySlug, undefined, { signal: lease.signal });
-      if (!lease.isCurrent()) return;
+      if (lotFacetsActive || !lease.isCurrent()) return;
       prospectMarks = marks;
     } catch (e) {
       if (!lease.isCurrent() || isAbortError(e)) return;
@@ -545,6 +569,7 @@
   $: filteredPolygonFeatures = polygonFeatures.filter((feature) => {
     if (prospectFilter === "all") return true;
     const key = lotKey(feature.properties.noLot, feature.properties.citySlug ?? selectedEvalCity?.slug ?? "");
+    if (lotFacetsActive) return lotMatchesFacetFilter(facetStatesByKey.get(key), prospectFilter);
     const marks = prospectMarks.filter((mark) => lotKey(mark.noLot, mark.citySlug) === key);
     const pipeline = activePipelineMark(marks);
     const market = activeMarketMark(marks);
@@ -553,6 +578,7 @@
   });
 
   function prospectCounterFor(filter: ProspectStatus | "all" | "unmarked"): number {
+    if (lotFacetsActive) return facetCounterFor(facetCounters, filter);
     if (filter === "all") return prospectCounters.all;
     if (filter === "unmarked") return prospectCounters.unmarked;
     return prospectCounters[filter];
@@ -698,7 +724,7 @@
         <button
           type="button"
           aria-label="Actualiser"
-          class="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+          class="rounded-sm p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
           on:click={() => { if (selectedEvalCity) selectEvalCity(selectedEvalCity); }}
           disabled={isLoadingEval}
         >
@@ -863,7 +889,7 @@
 
     <!-- ─── Panneau côte à côte : Zonage + Lots ───────────────────────────── -->
     {#if selectedEvalCity}
-      <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div class="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden">
         <!-- En-tête ville avec résumé -->
         <div class="border-b border-slate-100 px-4 py-3 flex items-center justify-between bg-teal-50">
           <div>
@@ -926,7 +952,7 @@
                   </span>
                   <button
                     type="button"
-                    class="rounded p-1 text-slate-400 transition-colors hover:bg-amber-50 hover:text-amber-700"
+                    class="rounded-sm p-1 text-slate-400 transition-colors hover:bg-amber-50 hover:text-amber-700"
                     on:click={reloadZonage}
                     aria-label="Recharger les changements de zonage"
                     title="Recharger"
@@ -1014,7 +1040,7 @@
                   </span>
                   <button
                     type="button"
-                    class="rounded p-1 text-slate-400 transition-colors hover:bg-amber-50 hover:text-amber-700"
+                    class="rounded-sm p-1 text-slate-400 transition-colors hover:bg-amber-50 hover:text-amber-700"
                     on:click={reloadLots}
                     aria-label="Recharger les lots"
                     title="Recharger"
@@ -1212,11 +1238,16 @@
                   {@const lotMarks = prospectMarksByLot.get(lotKey(feature.properties.noLot, feature.properties.citySlug ?? selectedEvalCity?.slug ?? "")) ?? []}
                   {@const lotPipelineMark = activePipelineMark(lotMarks)}
                   {@const lotMarketMark = activeMarketMark(lotMarks)}
+                  {@const lotFacet = lotFacetsActive
+                    ? facetStatesByKey.get(lotKey(feature.properties.noLot, feature.properties.citySlug ?? selectedEvalCity?.slug ?? ""))
+                    : null}
                   {@const paint = evalLotPaint(feature.properties, {
                     matched: lotMatchesEvalFilter(feature.properties, evalFilter),
                     selected: isLotSelected,
                     hovered: isHovered,
-                    marked: !!(lotPipelineMark || lotMarketMark),
+                    marked: lotFacetsActive
+                      ? !lotMatchesFacetFilter(lotFacet, "unmarked")
+                      : !!(lotPipelineMark || lotMarketMark),
                     el: null,
                   })}
                   {#if rings && rings.length > 0}
@@ -1276,6 +1307,10 @@
                     lot={selectedLot}
                     cityName={selectedEvalCity?.name ?? ""}
                     allowMarquage={true}
+                    {lotFacetsActive}
+                    facetState={lotFacetsActive ? facetStatesByKey.get(lotKey(
+                      selectedLot.properties.noLot,
+                      selectedLot.properties.citySlug ?? selectedEvalCity?.slug ?? "")) ?? null : null}
                     mode={isCarteSteve ? "simulation" : "real"}
                     onClose={() => { selectedLot = null; }}
                   />
@@ -1298,7 +1333,7 @@
       </div>
     {:else}
       <!-- En-tête signal -->
-      <div class="rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+      <div class="rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-xs">
         <div class="flex items-center justify-between gap-3 flex-wrap">
           <div>
             <h2 class="text-base font-semibold text-slate-900">
@@ -1330,7 +1365,7 @@
 
       {#if evalAvailable}
         <!-- Grille d'évaluation (5 axes) -->
-        <div class="rounded-xl border border-teal-200 bg-white shadow-sm overflow-hidden">
+        <div class="rounded-xl border border-teal-200 bg-white shadow-xs overflow-hidden">
           <div class="border-b border-teal-100 px-4 py-3 bg-teal-50 flex items-center gap-2">
             <BarChart3 class="h-4 w-4 text-teal-600" aria-hidden="true" />
             <span class="text-sm font-semibold text-teal-900">Grille d'évaluation /100</span>
@@ -1400,7 +1435,7 @@
         />
 
       {:else}
-        <div class="rounded-xl border border-slate-100 bg-white shadow-sm p-6">
+        <div class="rounded-xl border border-slate-100 bg-white shadow-xs p-6">
           <div class="flex items-start gap-3">
             <Info class="h-5 w-5 shrink-0 mt-0.5 text-slate-400" aria-hidden="true" />
             <div>

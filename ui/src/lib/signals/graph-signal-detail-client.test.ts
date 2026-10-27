@@ -2,13 +2,86 @@
  * Tests for extractDocRefs — the type-guard that parses props.refs from
  * graph_nodes into typed SignalDocRef[].
  */
-import { describe, it, expect } from "vitest";
+import { afterEach, describe, it, expect, vi } from "vitest";
 import {
   extractDocRefs,
   extractSignalEvidence,
   extractZoneReglements,
+  fetchGraphSignalDetail,
   type GraphSignalNode,
 } from "./graph-signal-detail-client.js";
+
+afterEach(() => vi.unstubAllGlobals());
+
+describe("fetchGraphSignalDetail — reveal", () => {
+  function stubFetch(handler: (url: string) => Response): string[] {
+    const calls: string[] = [];
+    vi.stubGlobal("fetch", async (url: string) => {
+      calls.push(url);
+      return handler(url);
+    });
+    return calls;
+  }
+
+  it("forwards the reveal verbatim (showDiscarded=1), default stays hidden", async () => {
+    const payload = { ok: true, citySlug: "ville-synth", legacyProjection: null, nodes: [] };
+    const calls = stubFetch(
+      () => new Response(JSON.stringify(payload), { status: 200 }),
+    );
+    await fetchGraphSignalDetail("ville-synth", "", 15_000, { showDiscarded: true });
+    expect(calls[0]).toBe("/api/graph-signals/ville-synth?showDiscarded=1");
+    await fetchGraphSignalDetail("ville-synth");
+    expect(calls[1]).toBe("/api/graph-signals/ville-synth");
+  });
+
+  it("keeps the 404 empty state and types other failures", async () => {
+    stubFetch(() => new Response("none", { status: 404 }));
+    await expect(fetchGraphSignalDetail("ville-synth")).resolves.toEqual({
+      ok: false,
+      citySlug: "ville-synth",
+      legacyProjection: null,
+      nodes: [],
+    });
+    stubFetch(() => new Response("unavailable", { status: 503 }));
+    const failure = await fetchGraphSignalDetail("ville-synth").catch((err) => err);
+    expect(failure?.name).toBe("GraphSignalsHttpError");
+    expect(failure?.status).toBe(503);
+  });
+
+  it("carries the server error body code, null when the body is unreadable", async () => {
+    stubFetch(
+      () => new Response(JSON.stringify({ error: "discarded_signals_unavailable" }), { status: 503 }),
+    );
+    const outage = await fetchGraphSignalDetail("ville-synth").catch((err) => err);
+    expect(outage?.status).toBe(503);
+    expect(outage?.code).toBe("discarded_signals_unavailable");
+    stubFetch(() => new Response("unavailable", { status: 503 }));
+    const bare = await fetchGraphSignalDetail("ville-synth").catch((err) => err);
+    expect(bare?.status).toBe(503);
+    expect(bare?.code).toBeNull();
+  });
+
+  it("fails a stalled body with the timeout message instead of hanging", async () => {
+    vi.stubGlobal(
+      "fetch",
+      async (_url: string, init?: RequestInit) =>
+        new Response(
+          new ReadableStream({
+            start(controller) {
+              init?.signal?.addEventListener(
+                "abort",
+                () => controller.error(new DOMException("Aborted", "AbortError")),
+                { once: true },
+              );
+            },
+          }),
+          { status: 200, headers: { "content-type": "application/json" } },
+        ),
+    );
+    const failure = await fetchGraphSignalDetail("ville-synth", "", 10).catch((err) => err);
+    expect(String(failure?.message)).toContain("timeout after 10ms");
+  });
+});
 
 describe("extractDocRefs", () => {
   it("returns [] when props has no refs key", () => {

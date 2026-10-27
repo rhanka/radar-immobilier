@@ -1,0 +1,12 @@
+# Operator-owned activation/receipt. CD must not overwrite qualification evidence.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: radar-mcp-receiver
+  namespace: radar-immobilier
+data:
+  MCP_SIGNAL_SEARCH_ENABLED: "0"
+  STRICT_RECEIVER_ARMED: "0"
+  STRICT_RECEIVER_WORKLOAD_SUB: "immo-mcp-workload"
+  STRICT_RECEIVER_WORKLOAD_CLIENT_ID: "immo-mcp-workload"
+  STRICT_RECEIVER_ENVIRONMENT: "production"

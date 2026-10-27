@@ -1,0 +1,12 @@
+--- a/api/docker-entrypoint.sh
++++ b/api/docker-entrypoint.sh
+@@ -12,6 +12,9 @@
+   api)
+     exec node api/dist/index.js
+     ;;
++  content-reader)
++    exec node api/dist/artifacts/content-reader-server.js
++    ;;
+   content-deny)
+     exec node api/dist/artifacts/content-deny-server.js
+     ;;
