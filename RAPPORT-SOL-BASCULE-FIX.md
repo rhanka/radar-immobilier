@@ -94,3 +94,76 @@ consensus indépendant n’est revendiqué ; aucun pair n’a été lancé.
 - Aucun fichier d’environnement lu, aucune exécution Python, aucune pile Docker
   démarrée ou arrêtée, aucun push. La qualification réelle et la nouvelle bascule
   nécessitent l’image reconstruite/publiée et leurs propres reçus opérateur.
+
+## Corrections revues astra
+
+Les deux revues de la PR #929, `astra-929-a.md` et `astra-929-b.md`, ont été
+lues en entier dans `.lanes/conductor/tmp/revues/` du checkout racine. Leurs
+deux constats bloquants et le constat non bloquant sont acceptés et corrigés.
+Cette série commence strictement après `76636465d6fce99b323f843f8c639e86167b002c`.
+
+**Restauration et concurrence.** Le snapshot conserve désormais UID et
+resourceVersion initiaux ainsi que les specs/versions renvoyées par chaque
+patch de fermeture. La restauration compare tous les Ingress à l’état fermé
+dérivé du snapshot initial et aux versions fermées sauvegardées. Un changement
+de host, TLS, UID ou version est refusé avant toute écriture. Les patchs testent
+atomiquement UID, resourceVersion et spec fermée sauvegardée ; une course après
+le contrôle préalable échoue explicitement. Aucun nouvel état concurrent
+n’est accepté comme base de restauration. Les anciennes sauvegardes dépourvues
+de versions fermées complètes sont refusées. Le readback vérifie les specs
+initiales en excluant uniquement la version avancée par la restauration.
+
+**Réseau hors Ingress.** L’outil inventorie tous les Services, EndpointSlices,
+anciens Endpoints et ports hôte des pods et modèles de workloads du namespace,
+ainsi que les types de routes disponibles. Il refuse NodePort, LoadBalancer,
+ExternalName, IP externes, champs nodePort, publication d’adresses non prêtes,
+hostNetwork/hostPort et routes/politiques alternatives non prises en charge.
+Le contrôle des endpoints couvre tout le namespace : pendant la maintenance,
+seuls les pods PostgreSQL inventoriés sont admis par nom/UID ; après activation,
+les pods API de l’image qualifiée peuvent être admis sous l’isolation vérifiée.
+Les refus réseau interviennent avant les mutations de fermeture ou le
+redémarrage de l’API, et sont revérifiés après son démarrage/redémarrage.
+
+La voie retenue reste un **contrôle avec refus documenté**, sans installation
+ni modification automatique de NetworkPolicy. Une politique default-deny
+d’Ingress couvrant tout le namespace est requise. Les autorisations additives
+doivent viser exclusivement PostgreSQL ou les pods Traefik avec sélecteurs de
+pod et de namespace stricts. Des règles plus larges, même inutilisées à cet
+instant, sont refusées. La simple présence de ces objets n’est pas une preuve
+de leur application : `maintenance.networkIsolation` doit porter des sondes CNI
+réelles récentes, liées au binding, à l’image, au contexte, au namespace et à
+l’empreinte exacte des politiques et de leurs versions. Ces sondes couvrent
+les IP de pods/Services et l’origine nœud, avec la couverture source/nœud
+décrite dans le runbook. Absence de support, de preuve ou divergence : refus.
+La compatibilité des politiques actuelles et le comportement réseau réel de
+la préprod restent `unverified` ; aucune qualification CNI n’est fabriquée.
+
+**Qualification sans Git privé.** Les substitutions `GIT_DIR/GIT_WORK_TREE`
+sont réservées aux opérations de livraison. Le vérificateur utilise le Git
+du checkout courant et conserve SHA, empreinte du diff et empreinte des
+sources, y compris les nouveaux fichiers. Le test couvre un checkout neuf,
+des métadonnées privées absentes/périmées et une redirection Git héritée.
+
+**Vérifications finales :**
+
+- `make -f tools/make/bascule-fix.mk verify-clean-checkout ENV=test-bascule-fix`
+  exécute la commande `verify` documentée dans un clone ordinaire propre,
+  dépourvu de `tmp/bascule-fix-evidence/backup.git`.
+- SHA qualifié : `4e5e24e16fc63a16a657d568f8721028eeb2c477`, diff vide ;
+  l’empreinte des sources correspond à celle du worktree de livraison.
+- PASSED : 219 cas opérateur, dont host/TLS/version concurrents, course au
+  patch, expositions directes, Service supplémentaire et sondes CNI absentes,
+  périmées ou étrangères ; 3 cas d’identité du checkout ; 8 cas d’identité
+  image ; 12 cas workflow ; 14 assertions rollback ; 47 cas points d’entrée ;
+  rendus préprod/production, isolation auth/H3 et syntaxe shell.
+- FAILED final : 0. Le test de concurrence a d’abord reproduit l’écrasement
+  avec l’ancienne restauration, puis passe avec les préconditions sauvegardées.
+- SKIPPED : `actionlint` absent ; image publiée, réseau/CNI réels, CI distante
+  et activation 6H non exécutés. Aucun Docker, fichier d’environnement ou Python.
+- Preuves et reçu du checkout propre : `tmp/bascule-fix-evidence/astra/fresh-qualification.json`.
+- Nouveau bundle incrémental : `tmp/bascule-fix-evidence/astra/bascule-fix.bundle`.
+  Son SHA de livraison et son SHA-256 sont dans `astra/delivery.json` ; audit
+  par import distinct, contrôle SHA/arbre et `git fsck`. Les reçus antérieurs
+  restent conservés hors du sous-répertoire `astra/`.
+- Commits Conventional anglais ≤72 caractères, sans corps/trailer, ≤150 lignes
+  chacun, dans `astra/backup.git`. Aucun push ni accès cluster effectué.
