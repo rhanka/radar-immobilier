@@ -1,7 +1,17 @@
 import type pg from "pg";
 import type { AuthorizeCommit, CommitPolicyParticipantFactory } from "@sentropic/artifacts/server/commit-contract";
-import type { ActivationConfig } from "./activation.js";
+import { isGeneralActivation, type ActivationConfig } from "./activation.js";
 import { POLICY_REVISION } from "./transaction-authority.js";
+
+/**
+ * Shared per-account mutation bound (L12, artefacts-ouverture): at most this
+ * many committed mutations per account and per minute, enforced transactionally
+ * in `reserveQuota` (no per-pod counter, replay-safe) and probed read-only
+ * before S3 through the admission authority. The durable per-actor ceiling in
+ * `artifacts.host_actor_quotas` auto-provisions from the global row on first
+ * commit: no manual step per user.
+ */
+export const HOST_ACTOR_RATE_LIMIT_PER_MINUTE = 10;
 
 /** Every policy read and provisional reservation uses the coordinator's client. */
 export async function createHostPolicy(pool: pg.Pool, scope: string,
@@ -9,6 +19,9 @@ export async function createHostPolicy(pool: pg.Pool, scope: string,
   await pool.query("INSERT INTO artifacts.host_policy (storage_scope_id, revision) VALUES ($1, $2) ON CONFLICT DO NOTHING",
     [scope, POLICY_REVISION]);
   return { createParticipant(client, transactionToken) {
+    // Actor of the running transaction, stashed by checkApproval so the
+    // reservation below stays per-actor without changing the quota seam.
+    let approvalActor: string | undefined;
     return {
       async readRevision() {
         const result = await client.query<{ revision: string }>(
@@ -17,12 +30,14 @@ export async function createHostPolicy(pool: pg.Pool, scope: string,
         return result.rows[0].revision;
       },
       async checkApproval({ actorId }: { actorId: string }) {
+        approvalActor = actorId;
         const revision = await client.query<{ revision: string }>(
           "SELECT revision FROM artifacts.host_policy WHERE storage_scope_id = $1 FOR SHARE", [scope]);
         const account = await client.query<{ id: string; status: string }>(
           "SELECT id, status FROM account_users WHERE sub = $1 FOR SHARE", [actorId]);
         const activation = readActivation?.();
-        const activationOpen = !activation || (activation.enabled &&
+        const general = activation !== undefined && isGeneralActivation(activation);
+        const activationOpen = !activation || general || (activation.enabled &&
           activation.expiresAtMs > Date.now() && activation.subjects.includes(actorId));
         const approvedAccount = account.rows[0]?.status === "approved";
         const revisionOk = revision.rows[0]?.revision === POLICY_REVISION;
@@ -37,6 +52,12 @@ export async function createHostPolicy(pool: pg.Pool, scope: string,
             publicCode = "account_not_approved";
           }
           return { approved: false as const, reason: "denied" as const, publicCode, status };
+        }
+        if (general) {
+          // General opening: approved accounts publish with zero, one or
+          // several memberships; the storage scope stays a server namespace.
+          // No workspace is reported, so no façade freezes it.
+          return { approved: true as const, workspaceId: "" };
         }
         const accountId = account.rows[0]?.id;
         const memberships = await client.query<{ workspace_id: string }>(
@@ -86,7 +107,39 @@ export async function createHostPolicy(pool: pg.Pool, scope: string,
           `UPDATE artifacts.host_quotas SET operations_used = operations_used + 1, bytes_used = bytes_used + $2
            WHERE storage_scope_id = $1 AND operations_used < operation_limit AND bytes_used + $2 <= byte_limit`,
           [scope, bytes]);
-        return { reserved: result.rowCount === 1 };
+        if (result.rowCount !== 1) return { reserved: false };
+        const actorId = approvalActor;
+        if (actorId === undefined) return { reserved: true };
+        // Per-actor durable ceiling, auto-provisioned once from the global row
+        // so no manual step per user is ever required; a missing global row
+        // provisions nothing and the update below blocks the commit.
+        await client.query(
+          `INSERT INTO artifacts.host_actor_quotas (storage_scope_id, actor_id, operation_limit, byte_limit)
+           SELECT $1, $2, operation_limit, byte_limit FROM artifacts.host_quotas WHERE storage_scope_id = $1
+           ON CONFLICT (storage_scope_id, actor_id) DO NOTHING`,
+          [scope, actorId]);
+        const actor = await client.query(
+          `UPDATE artifacts.host_actor_quotas SET operations_used = operations_used + 1, bytes_used = bytes_used + $3
+           WHERE storage_scope_id = $1 AND actor_id = $2
+             AND operations_used < operation_limit AND bytes_used + $3 <= byte_limit`,
+          [scope, actorId, bytes]);
+        if (actor.rowCount !== 1) return { reserved: false };
+        // Shared per-minute bound, enforced in the same transaction so
+        // concurrent commits serialize on the window row and replays (which
+        // never re-reserve) are never charged twice.
+        const window = await client.query<{ count: string | number }>(
+          `INSERT INTO artifacts.host_actor_rate (storage_scope_id, actor_id, window_start, count)
+           VALUES ($1, $2, date_trunc('minute', now()), 1)
+           ON CONFLICT (storage_scope_id, actor_id, window_start)
+           DO UPDATE SET count = artifacts.host_actor_rate.count + 1
+           RETURNING count`,
+          [scope, actorId]);
+        if (Number(window.rows[0]?.count) > HOST_ACTOR_RATE_LIMIT_PER_MINUTE) return { reserved: false };
+        await client.query(
+          `DELETE FROM artifacts.host_actor_rate
+           WHERE storage_scope_id = $1 AND actor_id = $2 AND window_start < date_trunc('minute', now())`,
+          [scope, actorId]);
+        return { reserved: true };
       },
       mintFence(policyRevision, invocationId) {
         return { fenceId: transactionToken, transactionId: transactionToken, invocationId, policyRevision };
