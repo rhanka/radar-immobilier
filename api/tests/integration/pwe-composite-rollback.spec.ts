@@ -37,6 +37,10 @@ describeDb("PWE-07 C10 composite event rollback", () => {
     expect(await effects(f)).toEqual(counts);
     await f.pool.query("DROP TRIGGER pwe_composite_failure ON facet_events; DROP FUNCTION pwe_composite_failure()");
     expect((await outcome(execute())).error).toBeNull();
+    const references = await f.pool.query(`SELECT a.command_id,count(e.id)::int AS events
+      FROM pw_write_audit a JOIN facet_events e ON e.command_key::text=a.command_id::text
+      WHERE a.intent_id=$1 AND a.result='committed' GROUP BY a.command_id`, [row.intentId]);
+    expect(references.rows).toEqual([{ command_id: row.commandKey, events: 3 }]);
     expect(await effects(f)).toEqual({ events: 5, commands: 3, links: 1, consumed: 1, audits: 1, outbox: 1, debits: 2 });
     expect((await outcome(execute())).error).toMatchObject({ message: "challenge_consumed" });
     expect(await effects(f)).toEqual({ events: 5, commands: 3, links: 1, consumed: 1, audits: 1, outbox: 1, debits: 2 });

@@ -32,6 +32,6 @@ finally { writeFileSync(source, original); }
 const positive = run("after", false);
 assert.equal(sha(readFileSync(source)), sha(original));
 writeFileSync("/evidence/app-result-regression.json", JSON.stringify({
-  beforeCommit: "50a90b89", beforeSha256: sha(before), restoredSha256: sha(original), negative, positive,
+  beforeCommit: "50a90b89bcdc67d1a733e1faac8795274dacc75f", beforeSha256: sha(before), restoredSha256: sha(original), negative, positive,
 }, null, 2));
 console.log("App result regression: 5 targeted before-fix failures; 5 restored passes; identical restored bytes");
