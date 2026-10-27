@@ -1,5 +1,6 @@
 import { extraCases } from "./base-api-pwe-extra-mutation-cases.mjs";
 import { transactionCases } from "./base-api-pwe-transaction-mutation-cases.mjs";
+import { storageCases } from "./base-api-pwe-storage-mutation-cases.mjs";
 const identity = "tests/integration/pwe-identity-domains.spec.ts";
 const normal = "tests/integration/pwe-normal-guards.spec.ts";
 const principal = "artifacts/write-intent-principal.ts";
@@ -7,6 +8,7 @@ const confirmation = "services/facets/pw-write-confirmation.ts";
 const durable = "services/facets/pw-write-admission-durable.ts";
 export const cases = [
   ...transactionCases,
+  ...storageCases,
   ...extraCases,
   ...["commandKey", "pageInstanceId", "expectedProjectionToken"].map((field) => [
     `M04-binding-${field}`, "services/facets/pw-write-digests.ts",
