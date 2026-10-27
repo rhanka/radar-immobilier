@@ -48,7 +48,8 @@ describeDb("PW-C application surface", () => {
     expect(result.status).toBe(200);
     const technical = await result.json();
     expect(technical).toMatchObject({ intentId: row.intentId, management: true, state: "committed" });
-    expect(technical).not.toHaveProperty("receipt");
+    expect(technical).toMatchObject({ commandId: input.commandKey,
+      receipt: { event: { state: "active", basket: "pertinent" } } });
     expect(technical).not.toHaveProperty("challengeToken");
 
     const replay = await post(app, host, confirmUrl, session,
@@ -63,6 +64,10 @@ describeDb("PW-C application surface", () => {
     expect(await revoked.json()).toMatchObject({ intentId: row.intentId,
       authorizationState: "revoked", commandState: "committed",
       revokedAt: expect.any(String) });
+    const withdrawn = await (await app.request(`https://${host}/api/v1/artifacts/write-intents/${row.intentId}`,
+      { headers: { host, cookie: session } })).json();
+    expect(withdrawn).toMatchObject({ state: "revoked" });
+    expect(withdrawn).not.toHaveProperty("receipt");
   });
 
   it("should refuse bearer use, foreign principals, and wrong methods", async () => {
