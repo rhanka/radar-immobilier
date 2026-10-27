@@ -57,6 +57,7 @@ Connect published release files and H5 reads to current account/workspace author
 - [x] Add native-file boundary tests (reader/release/host substitution, missing or invalid grants, manifest misses, revocation) and compare all three read error envelopes with the existing routes.
 - [x] Add OIDC return-target tests and PostgreSQL regressions for fresh post-login binding and unrelated account/ACL changes during a blob read.
 - [x] Remove the Muse report from the tracked diff; preserve all 169 original lines in `tmp/sol-l3-evidence/RAPPORT-MUSE-OUV-L3.md`.
+- [x] Separate current artifact rights/profile from the publication pointer; add a regression for credentials issued before republishing, pointer-independent reads and subsequent ACL revocation.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch, serialized implementation and Docker campaigns.
