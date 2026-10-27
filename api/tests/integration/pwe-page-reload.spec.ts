@@ -75,6 +75,14 @@ describe("PWE-09 C12 page reload budget", () => {
     expect(h.fetchCalls).toHaveLength(0); expect(h.pendingDelays()).toEqual([]);
   });
 
+  it("should stop before dispatch if the budget checkpoint becomes unavailable", async () => {
+    const storage = new Map<string, string>();
+    const h = pageHarness({ storage }); h.followUp(UUID);
+    storage.set = () => { throw new Error("Synthetic quota exhausted"); };
+    h.responders.push(() => statusOf(UUID, "pending")); await h.runTimer(); await manual(h);
+    expect(h.fetchCalls).toHaveLength(0); expect(h.pendingDelays()).toEqual([]);
+  });
+
   it.each(["unavailable", "corrupt"])("should keep polling closed when budget storage is %s", async (kind) => {
     const storage = new Map<string, string>();
     if (kind === "corrupt") {

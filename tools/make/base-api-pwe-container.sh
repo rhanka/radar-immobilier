@@ -29,6 +29,7 @@ check() {
 check typecheck node_modules/.bin/tsc --noEmit -p api/tsconfig.pwe-tests.json
 shopt -s nullglob
 lint=(api/tests/integration/pwe-*.ts api/src/services/facets/pwe-*.ts
+  api/src/artifacts/write-intent-page{,-budget,-harness}.ts
   api/src/artifacts/pwe-*.ts tools/make/base-api-pwe*.mjs)
 check eslint node_modules/.bin/eslint "${lint[@]}"
 cd api

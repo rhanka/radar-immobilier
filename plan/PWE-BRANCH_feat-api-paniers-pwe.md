@@ -32,6 +32,11 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Reproduce C12: 7 failed/1 passed/0 skipped on the original served
+  script, with typecheck/lint green and owned cleanup complete.
+- [x] Persist public per-I budget before dispatch; restore window/count,
+  manual cooldown and request deadline; invalid/unavailable storage keeps polling closed.
+- [x] Add checkpoint-write failure coverage and lint all three changed page files.
 - [x] First combined campaign: 311 required passes/0 skips, API4474/0/76,
   68 inherited and31 new mutants killed/restored; all static/build gates passed.
 - [x] PWE-EX1: reload and I-to-J-to-I reset the page's in-memory follow-up
