@@ -32,6 +32,9 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Add a real TCP cut after the normal-cookie API commit, immutable H5
+  receiver receipt despite stale 6L1, consumed replay and an executor spy.
+  This API adapter test uses the synthetic P resolver and does not qualify images.
 - [x] Add per-leg green/red/green mutation receipts; reject nonfunctional
   failures, empty selections and skipped selected cases; hash restored bytes.
 - [x] Define separate verified-identity, normal-cookie, seven-fence,
