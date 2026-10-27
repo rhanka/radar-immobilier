@@ -1,8 +1,8 @@
 /** Closed, inert S0 wire primitives; never imported by the live registrar. */
 import { z } from "zod";
 
-export const WorkspaceIdSchema = z.string().uuid();
-export const HeadIdSchema = z.string().uuid().nullable();
+export const WorkspaceIdSchema = z.string().guid();
+export const HeadIdSchema = z.string().guid().nullable();
 export const FingerprintSchema = z.string().regex(/^[a-f0-9]{64}$/);
 export const CitySchema = z.string().min(1).max(128).regex(/^[a-z0-9-]+$/);
 export const ScopeSchema = z.enum(["personal", "common"]);
@@ -20,7 +20,7 @@ export const LotTargetSchema = z.object({
   citySlug: CitySchema, canonicalId: z.string().min(1).max(512),
 }).strict();
 export const DisplayedLotVersionSchema = z.object({
-  lot_version_id: z.string().uuid(), fingerprint: FingerprintSchema,
+  lot_version_id: z.string().guid(), fingerprint: FingerprintSchema,
 }).strict();
 export const SemanticProfileSchema = z.object({
   lotReason: z.enum(["required", "optional", "undecided"]),
