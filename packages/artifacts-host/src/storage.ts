@@ -4,6 +4,14 @@ export const ARTIFACTS_LIFECYCLE_WHEN = 1791200002000;
 export const ARTIFACTS_LIFECYCLE_HASH = "fdfbe97f84774b47a207e66915f7426926650e85b6dbb9a4d80272591df624fd";
 export const ARTIFACTS_COORDINATOR_WHEN = 1792000000000;
 export const ARTIFACTS_COORDINATOR_HASH = "7668c0ce6c7d60174bdfc0004f488ac6be58d59b1d52969b7ac5237040203f6c";
+/**
+ * L12 per-actor quota tables (0025). Presence-gated, not hash-gated: the
+ * migration hash is assigned by drizzle at apply time, so the startup guard
+ * checks the relations instead of duplicating the digest. Fail closed either
+ * way: a missing 0025 disables artifact operations like any absent migration.
+ */
+export const ARTIFACTS_ACTOR_QUOTA_TABLE = "artifacts.host_actor_quotas";
+export const ARTIFACTS_ACTOR_RATE_TABLE = "artifacts.host_actor_rate";
 
 /** No DDL at startup. A missing migration disables only artifact operations. */
 export async function initializeArtifactScope(
@@ -23,6 +31,10 @@ export async function initializeArtifactScope(
     [ARTIFACTS_COORDINATOR_WHEN, ARTIFACTS_COORDINATOR_HASH],
   );
   if (!coordinator.rowCount) throw new Error("artifact schema unavailable: 0024 absent or hash mismatch");
+  const actorQuota = await pool.query("SELECT to_regclass('artifacts.host_actor_quotas') AS journal");
+  if (!actorQuota.rows[0]?.journal) throw new Error("artifact schema unavailable: 0025 absent");
+  const actorRate = await pool.query("SELECT to_regclass('artifacts.host_actor_rate') AS journal");
+  if (!actorRate.rows[0]?.journal) throw new Error("artifact schema unavailable: 0025 absent");
   await pool.query(
     "INSERT INTO artifacts.storage_scopes (id, org_id) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING",
     [scope, orgId],
