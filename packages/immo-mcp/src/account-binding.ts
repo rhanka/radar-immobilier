@@ -25,7 +25,7 @@ function logAccountDisconnect(): void {
 }
 
 /** Trusted read-only binding, queried for each call; caller arguments never supply identity. */
-export function accountAuthorizer(db: AccountQuery) {
+export function accountAuthorizer(db: AccountQuery, env: NodeJS.ProcessEnv = process.env) {
   const read: AccountQuery["query"] = async (sql, args) => {
     try { return await db.query(sql, args); }
     catch { throw new AccountBindingUnavailable(); }
@@ -34,7 +34,7 @@ export function accountAuthorizer(db: AccountQuery) {
     const rows = await read("SELECT id, status FROM account_users WHERE sub = $1 LIMIT 1", [request.principal.sub]);
     const account = rows.rows[0];
     if (account?.status !== "approved") return false;
-    if (ARTIFACT_TOOLS.has(_tool)) return true;
+    if (ARTIFACT_TOOLS.has(_tool) && env.ARTIFACTS_CONTROL_MODE?.trim() === "general") return true;
     const workspaces = request.principal.attributes.workspaces;
     if (!Array.isArray(workspaces) || workspaces.some((w) => typeof w !== "string")) return false;
     // The historical default is a transport placeholder, never a membership assertion.
@@ -56,5 +56,5 @@ export function createAccountBinding(env: NodeJS.ProcessEnv) {
     idleTimeoutMillis: 10_000, options: "-c default_transaction_read_only=on -c statement_timeout=2000" });
   // pg evicts the broken idle client before emitting; the next query opens a fresh connection.
   pool.on("error", logAccountDisconnect);
-  return { authorize: accountAuthorizer(pool), close: () => pool.end() };
+  return { authorize: accountAuthorizer(pool, env), close: () => pool.end() };
 }
