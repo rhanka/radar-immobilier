@@ -61,6 +61,7 @@ source tools/make/base-api-resources.sh
 source tools/make/base-api-compose.sh
 source tools/make/base-api-ci-archive.sh
 write_compose
+[[ ${PWA_OFFLINE:-0} != 1 ]] || source tools/make/base-api-pwa-offline.sh
 archive_sources
 archive_ci_inputs
 git ls-files --cached --others --exclude-standard -- 'packages/immo-mcp/config/*.json' \

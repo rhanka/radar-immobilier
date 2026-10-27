@@ -30,6 +30,9 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
     PWA-EX3 permits their exact import from 0ab7d664 by merge only.
 
 ## Feedback Loop
+- [x] Offline qualification preparation: seed a writable disposable npm cache from
+  the read-only local cache; archive real curl/jq binaries and libraries with
+  SHA-256 inputs and versions. Preserve the lockfile, test selection and assertions.
 - [x] Shared-machine isolation: require 60 quiet seconds before starting and
   stop only the owned campaign if a foreign test stack appears during execution.
 - [x] Main qualification inputs: include the imported operator rights JSON,
