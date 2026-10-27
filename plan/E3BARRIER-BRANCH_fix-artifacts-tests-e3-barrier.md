@@ -29,6 +29,10 @@
 - [x] Test helpers only; isolated automated verification, no user UAT.
 
 ## Plan / Todo (lot-based)
+- [x] PR918 verification setup: prepare eight native import probes and four public-barrier probes for the verified 0.2.0 candidate, with source hashes and a serialized runner.
+- [x] PR918 E3 cleanup: retain release requests across timeout/transport failure/early cleanup and release each late pause once; reproduce four failures with five focused regression cases before applying the fix.
+- [x] PR918 import classification: identify the requested package/subpath only; propagate transitive export errors, evaluation errors and present-but-invalid exports distinctly.
+- [x] PR918 second passes: compare the independent durable receipt to its business shape and compare sanitized public responses across direct/HTTP/MCP replays; require the candidate's public lock phase.
 - [x] Independently require every observed winner blob to survive loser cleanup, including the changed-command variant with no shared digest.
 - [x] Observe both race preparations before winner COMMIT (the public inventory excludes completed successes), then sweep the loser by its deadline and preserve shared bytes/history assertions.
 - [x] Preserve HTTP/MCP assertions and run a direct provider leg first for Q2 lock/E3 faults, so transport blockers cannot hide whether injections execute.
