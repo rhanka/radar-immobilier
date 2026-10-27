@@ -28,6 +28,8 @@ Qualify, repair and integrate the supplied PW-C implementation on 07ef2757.
   - None; no scope exception required.
 
 ## Feedback Loop
+- [x] Require an observable extra network request from the manual-loop mutant,
+  rather than counting a timer that could return without fetching.
 - [x] Expose the durable technical state on owner management reads, without
   a receipt or challenge, so recovery remains usable after page loss.
 - [x] Supplied implementation and complete Muse report reviewed.
