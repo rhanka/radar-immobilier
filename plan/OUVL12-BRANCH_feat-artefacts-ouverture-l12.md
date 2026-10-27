@@ -67,6 +67,7 @@ isolation, current authorization, transactional quotas and replay safety.
   - [x] Implemented: `test(host): cover general activation parsing`.
   - [x] Implemented: `test(host): cover general admission`.
   - [x] Implemented: `test(host): cover general facade and rate probe`.
+  - [x] Implemented: `test(host): cover actor quota reservations`.
 - [ ] **Lot 4 — Delivery**
   - [ ] Atomic commits, bundle audit and French results report.
   - [ ] Confirm own Docker project has no containers, networks or volumes.
