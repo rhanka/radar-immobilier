@@ -30,7 +30,7 @@
 ## Plan / Todo (lot-based)
 - [x] Lot 0: read required rules, inspect old filter, reconcile, tests and CI.
 - [x] Lot 1: replace and delete Python; preserve text, object selection and fields.
-- [ ] Lot 2: freeze representative expected outputs and assert filter equivalence.
+- [ ] Lot 2: frozen representative fixture outputs; add filter equivalence tests.
 - [ ] Lot 3: deny Python in deploy, update reconcile tests, README and CI.
 - [ ] Lot 4: scoped shell tests, preprod render, diff audit and review evidence.
 - [ ] Lot 5: atomic rescue commits, French report and verified portable bundle.
