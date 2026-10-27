@@ -73,7 +73,9 @@ export function createArtifactControl(
           return unavailable;
         }
         if (!entry.allowed) return { status: entry.status, body: entry.body };
-        frozenWorkspace = entry.workspaceId;
+        // General opening reports no workspace: nothing is frozen and the
+        // commit reread below cannot diverge from it.
+        frozenWorkspace = entry.workspaceId === "" ? undefined : entry.workspaceId;
       }
       if (!raw || typeof raw !== "object" || Array.isArray(raw)) return invalid();
       const body = raw as Record<string, unknown>;
@@ -104,7 +106,20 @@ export function createArtifactControl(
         if (frozenWorkspace !== undefined && commit.workspaceId !== frozenWorkspace) {
           return { status: 403, body: { error: "workspace_membership_required" } };
         }
-        frozenWorkspace = commit.workspaceId;
+        if (commit.workspaceId !== "") frozenWorkspace = commit.workspaceId;
+        // Shared per-account minute bound, probed before S3; the commit
+        // transaction enforces it exactly. Reads never consume the bound.
+        if (admission.checkRate) {
+          let limited: boolean;
+          try {
+            limited = await admission.checkRate(actorId);
+          } catch {
+            const unavailable = { status: 503 as const, body: { error: "capability_unavailable" } };
+            Object.defineProperty(unavailable, "retryable", { value: true });
+            return unavailable;
+          }
+          if (limited) return { status: 403, body: { error: "rate_limited" } };
+        }
       }
       const invocation = Object.freeze({ invocationId: randomUUID(), actorId, storageScopeId: scope,
         authorizeCommit: async (...args: Parameters<typeof authorizeArtifactCommit>) => {
