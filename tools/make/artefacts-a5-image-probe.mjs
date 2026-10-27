@@ -7,7 +7,7 @@ const require = createRequire('/workspace/packages/immo-mcp/package.json');
 const { Pool } = require('pg');
 const { S3Client, CreateBucketCommand } = require('@aws-sdk/client-s3');
 const tuple = {};
-for (const [name, version] of [['artifacts', '0.2.1'], ['cluster-mesh', '0.22.1'], ['mcp-auth', '0.2.1'], ['mcp-platform', '0.4.0']]) {
+for (const [name, version] of [['artifacts', '0.2.2'], ['cluster-mesh', '0.22.1'], ['mcp-auth', '0.2.1'], ['mcp-platform', '0.4.0']]) {
   const installed = ['/workspace/packages/immo-mcp/node_modules', '/workspace/node_modules']
     .map((base) => `${base}/@sentropic/${name}/package.json`).find(existsSync);
   assert.ok(installed, name); tuple[name] = JSON.parse(readFileSync(installed)).version;
