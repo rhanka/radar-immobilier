@@ -29,6 +29,9 @@ describe("page write invariant regressions", () => {
     h.responders.push(() => ({ status: 429, body: {}, retryAfter: "5" }));
     for (const fn of h.elements["pw-write-manual"]!.listeners.click ?? []) fn({});
     await h.flush();
+    h.responders.push(() => statusOf(UUID, "pending"));
+    await h.runTimer();
+    expect(h.fetchCalls.filter((call) => call.url.startsWith(PW_PAGE_STATUS_PATH))).toHaveLength(1);
     expect(h.pendingDelays()).toEqual([]);
   });
 
