@@ -60,6 +60,7 @@ isolation, current authorization, transactional quotas and replay safety.
   - [ ] Complete API suite matching CI.
   - [x] Implemented: `feat(host): add general activation mode`.
   - [x] Implemented: `feat(host): reserve actor quotas with schema migration`.
+  - [x] Implemented: `feat(host): admit general accounts without cohort`.
 - [ ] **Lot 4 — Delivery**
   - [ ] Atomic commits, bundle audit and French results report.
   - [ ] Confirm own Docker project has no containers, networks or volumes.

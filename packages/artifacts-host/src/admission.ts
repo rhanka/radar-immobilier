@@ -15,7 +15,8 @@ import {
   readAccountStatus,
   type AccountStatusQueryable,
 } from "./account-status.js";
-import type { ActivationConfig } from "./activation.js";
+import { isGeneralActivation, type ActivationConfig } from "./activation.js";
+import { HOST_ACTOR_RATE_LIMIT_PER_MINUTE } from "./commit-policy.js";
 
 export type AdmissionDeniedBody =
   | { readonly error: "activation_closed" }
@@ -34,6 +35,14 @@ export interface AdmissionAuthority {
   readonly nowMs?: (() => number) | undefined;
   readonly readMemberships?: ((sub: string) => Promise<string[]>) | undefined;
   readonly scope?: string | undefined;
+  /**
+   * Shared per-account mutation bound (L12): true when the account already
+   * reached the per-minute ceiling. Read-only probe before S3; the exact
+   * enforcement lives in the commit transaction (`reserveQuota`). Absent on
+   * authorities without a pool; callers skip the probe when absent. Rejects
+   * when the rate table is unavailable (fail closed at the call sites).
+   */
+  readonly checkRate?: ((sub: string) => Promise<boolean>) | undefined;
 }
 
 export function createAdmissionAuthority(
@@ -79,6 +88,15 @@ export function createArtifactAdmissionAuthority(
       }
       return ids;
     },
+    checkRate: async (sub: string): Promise<boolean> => {
+      const res = await accounts.query(
+        "SELECT count FROM artifacts.host_actor_rate WHERE storage_scope_id = $1 " +
+          "AND actor_id = $2 AND window_start = date_trunc('minute', now())",
+        [scope ?? null, sub],
+      );
+      const count = Number((res.rows[0] as Record<string, unknown> | undefined)?.["count"] ?? 0);
+      return Number.isFinite(count) && count >= HOST_ACTOR_RATE_LIMIT_PER_MINUTE;
+    },
   };
 }
 
@@ -104,19 +122,24 @@ export function checkScopeMembership(
 function checkActivation(
   authority: AdmissionAuthority,
   sub: string,
-): AdmissionResult {
+): { readonly result: AdmissionResult; readonly general: boolean } {
   const activation = authority.readActivation();
   if (!activation.enabled) {
-    return { allowed: false, status: 403, body: { error: "activation_closed" } };
+    return { result: { allowed: false, status: 403, body: { error: "activation_closed" } }, general: false };
+  }
+  if (isGeneralActivation(activation)) {
+    // General opening: every approved account publishes; storage stays a
+    // server-owned namespace, so no workspace is frozen here.
+    return { result: { allowed: true, workspaceId: "" }, general: true };
   }
   const now = authority.nowMs ? authority.nowMs() : Date.now();
   if (activation.expiresAtMs <= now) {
-    return { allowed: false, status: 403, body: { error: "activation_closed" } };
+    return { result: { allowed: false, status: 403, body: { error: "activation_closed" } }, general: false };
   }
   if (!activation.subjects.includes(sub)) {
-    return { allowed: false, status: 403, body: { error: "not_in_cohort" } };
+    return { result: { allowed: false, status: 403, body: { error: "not_in_cohort" } }, general: false };
   }
-  return { allowed: true, workspaceId: authority.scope ?? "" };
+  return { result: { allowed: true, workspaceId: authority.scope ?? "" }, general: false };
 }
 
 export async function checkAdmission(
@@ -126,7 +149,7 @@ export async function checkAdmission(
 ): Promise<AdmissionResult> {
   const scope = expectedScope ?? authority.scope;
   const activation = checkActivation(authority, sub);
-  if (!activation.allowed) return activation;
+  if (!activation.result.allowed) return activation.result;
   const status = await authority.readStatus(sub);
   if (!isApprovedAccountStatus(status)) {
     return {
@@ -136,14 +159,17 @@ export async function checkAdmission(
     };
   }
   const afterStatus = checkActivation(authority, sub);
-  if (!afterStatus.allowed) return afterStatus;
+  if (!afterStatus.result.allowed) return afterStatus.result;
+  // General mode requires no workspace: zero, one or several memberships all
+  // publish. The membership query is skipped, not merely ignored.
+  if (afterStatus.general) return afterStatus.result;
   if (authority.readMemberships) {
     const memberships = await authority.readMemberships(sub);
     const membership = checkScopeMembership(memberships, scope);
     if (!membership.allowed) return membership;
     const fresh = checkActivation(authority, sub);
-    if (!fresh.allowed) return fresh;
+    if (!fresh.result.allowed) return fresh.result;
     return membership;
   }
-  return checkActivation(authority, sub);
+  return checkActivation(authority, sub).result;
 }
