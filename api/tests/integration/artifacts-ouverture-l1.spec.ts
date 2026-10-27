@@ -16,6 +16,13 @@ describe("ouverture L1 general admission on the host", () => {
     await h.memberships([W1, W2]);
     const second = await h.control.handle("ensure", ALICE, { bindingName: "two-ws", idempotencyKey: "two-ws" });
     expect(second.status).toBe(201);
+    for (const [key, result] of [["zero-ws", first], ["two-ws", second]] as const) {
+      await h.memberships(key === "zero-ws" ? [] : [W1, W2]);
+      expect(await h.control.handle("publish", ALICE, {
+        artifactId: (result.body as { artifactId: string }).artifactId, idempotencyKey: `publish-${key}`,
+        files: [{ path: "index.html", mimeType: "text/html", text: `<h1>${key}</h1>` }],
+      })).toMatchObject({ status: 201 });
+    }
     await h.memberships([]);
   });
 

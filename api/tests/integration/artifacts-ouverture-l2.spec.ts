@@ -53,6 +53,14 @@ describe("ouverture L2 artifact tools on the MCP binding", () => {
       files: [{ path: "index.html", mimeType: "text/html", text: "<h1>ouverture</h1>" }] },
     bindingRequest(ALICE));
     expect(published.isError, JSON.stringify(published)).not.toBe(true);
+    const bobPublished = await bound.binding.invoke("artifacts_publish", {
+      artifactId: body(bob).artifactId, idempotencyKey: "mcp-page",
+      files: [{ path: "index.html", mimeType: "text/html", text: "<h1>Bob</h1>" }] }, bindingRequest(BOB));
+    expect(bobPublished.isError, JSON.stringify(bobPublished)).not.toBe(true);
+    expect(body(bobPublished).releaseId).not.toBe(body(published).releaseId);
+    const listed = await bound.binding.invoke("artifacts_list", { limit: 100 }, bindingRequest(BOB));
+    expect(JSON.stringify(body(listed))).toContain(body(bob).artifactId);
+    expect(JSON.stringify(body(listed))).not.toContain(body(alice).artifactId);
     const foreign = await bound.binding.invoke("artifacts_get", { artifactId: body(alice).artifactId },
       bindingRequest(BOB));
     const unknown = await bound.binding.invoke("artifacts_get", { artifactId: UNKNOWN_ARTIFACT },
@@ -109,6 +117,8 @@ describe("ouverture L2 artifact tools on the MCP binding", () => {
         arguments: { bindingName: "http-stale", idempotencyKey: "http-stale" } } }, sessionId)).json() as {
       result?: { isError?: boolean; content?: { text: string }[] } };
     expect(ensured.result?.isError).not.toBe(true);
+    expect(JSON.parse(ensured.result?.content?.[0]?.text ?? "{}"))
+      .toMatchObject({ artifactId: expect.any(String) });
     const business = await (await post({ jsonrpc: "2.0", id: 4, method: "tools/call",
       params: { name: "search_signals", arguments: { city: "longueuil" } } }, sessionId)).json() as {
       result?: { isError?: boolean; content?: { text: string }[] } };

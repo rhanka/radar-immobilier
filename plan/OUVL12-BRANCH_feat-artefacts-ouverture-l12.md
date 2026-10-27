@@ -55,6 +55,7 @@ isolation, current authorization, transactional quotas and replay safety.
   - [ ] Approved accounts bypass stale workspace claims for artifact tools.
   - [ ] Four tools, server identities, forged-field refusals and MCP tests.
 - [ ] **Lot 3 — Qualification**
+  - [x] Require real publication with zero/two memberships and by both MCP actors.
   - [x] Repair the MCP test suite delimiter and remove an unused fixture argument.
   - [x] Add direct PostgreSQL commit/replay and actor/minute concurrency probes.
   - [ ] Typecheck, ESLint, API unit tests and PostgreSQL admission tests.
