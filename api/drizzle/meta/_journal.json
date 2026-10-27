@@ -176,6 +176,13 @@
       "when": 1792000001000,
       "tag": "0025_artifacts_actor_quotas",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1792100000000,
+      "tag": "0026_artifacts_reader_tickets",
+      "breakpoints": true
     }
   ]
 }
