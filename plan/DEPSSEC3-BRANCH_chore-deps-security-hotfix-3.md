@@ -24,6 +24,7 @@
 - [x] Record rationale, impact and rollback before any conditional-path edit.
 
 ## Feedback Loop
+- [x] L2m: use native Zod 4 JSON Schema on the current stateful MCP composition.
 - [x] L2l: align graph mocks and integration imports with Engram.
 - [x] L2k: replace the graph client imports with the published Engram entrypoint.
 - [x] L2j: preserve source-parser and upstream validation diagnostics.
