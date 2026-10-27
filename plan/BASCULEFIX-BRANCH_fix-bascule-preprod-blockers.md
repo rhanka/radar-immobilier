@@ -36,4 +36,5 @@
 - [x] Astra lot 2: restore only the saved closed state with UID/resourceVersion preconditions.
 - [ ] Astra lot 3: control alternate routes, exposed ports and enforced consumer pod isolation; otherwise refuse.
 - [x] Astra network controls: read-only inventory, supported policy shape, bound CNI probes and namespace-wide endpoint roster implemented.
+- [x] Astra network wiring: activation/start/restart/tunnel/reopening enforce the network boundary; added bypass regressions.
 - [ ] Astra lot 4: regression evidence, report correction section and audited incremental bundle.

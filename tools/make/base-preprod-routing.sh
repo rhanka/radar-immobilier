@@ -15,6 +15,7 @@ deny_backend() {
 }
 assert_boundary() {
   maintenance_inputs
+  assert_network
   local service
   service=$(jq -r .maintenance.service "$INPUT")
   "${k[@]}" get service "$service" -o json > "$OUTPUT/deny-service-current.json"

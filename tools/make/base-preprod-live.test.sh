@@ -14,6 +14,13 @@ jq '.items[].spec |= ((if has("defaultBackend") then .defaultBackend={service:{n
   | (.rules[]?.http.paths[]?.backend)={service:{name:"base-maintenance-fixture",port:{number:80}}})' ingress-original.json > ingress-fixture.json
 jq -n --slurpfile c input.json '{metadata:{annotations:{"radar.sent-tech.ca/maintenance-attempt":$c[0].binding.maintenanceAttemptId}},
   spec:{type:"ClusterIP",ports:[{name:"deny",port:80,targetPort:80,protocol:"TCP"}]}}' > deny-service-fixture.json
+jq -n '{items:[{metadata:{name:"fixture-isolation",uid:"policy-uid",resourceVersion:"1"},
+  spec:{podSelector:{},policyTypes:["Ingress"],ingress:[]}}]}' > network-policies.json
+policy_sha=$(jq -Sc '[.items[]|{metadata:(.metadata|{name,uid,resourceVersion}),spec}]|sort_by(.metadata.name)' network-policies.json | sha256sum | cut -d' ' -f1)
+jq --arg sha "$policy_sha" --arg now "$now" '.maintenance.networkIsolation={binding:.binding,image:.image,context:.context,namespace:.namespace,
+  reference:"fixture-network-probes",sha256:("f"*64),observedAt:$now,passed:true,policySha256:$sha,
+  networkPolicyEnforced:true,podIPDenied:true,serviceIPDenied:true,nodeOriginDenied:true}' input.json > network-input.json
+cp network-input.json input.json
 jq -n --slurpfile c input.json --arg now "$now" '{deploymentUid:"synthetic-api-deployment",generation:"2",
   restartedAt:$now,podUid:"synthetic-api-pod",templateHash:"synthetic-template",containerId:"containerd://synthetic",
   restartCount:"0",startedAt:$now,image:$c[0].image,imageID:("containerd://"+($c[0].image|split("@")[1]))}' > api-fixture.json
@@ -24,7 +31,33 @@ printf '%s\n' "$*" >> cluster-calls
 shift 5
 case "$*" in
   'auth can-i '*) [[ ${FAKE_STATE:-} != denied ]] || { echo no; exit 1; }; echo yes;;
-  'api-resources '*|'get middleware '*|'auth can-i '*middlewares.*) echo 'No Traefik CRD is installed' >&2; exit 1;;
+  'api-resources --namespaced=true '*)
+    echo ingresses.networking.k8s.io
+    [[ ${FAKE_STATE:-} != alternate-route ]] || echo httproutes.gateway.networking.k8s.io;;
+  'get middleware '*|'auth can-i '*middlewares.*) echo 'No Traefik CRD is installed' >&2; exit 1;;
+  'get httproutes.gateway.networking.k8s.io '*) echo '{"items":[{"metadata":{"name":"bypass-route","uid":"route-uid"}}]}';;
+  'get services -o json')
+    kind=ClusterIP; [[ ${FAKE_STATE:-} != nodeport ]] || kind=NodePort; [[ ${FAKE_STATE:-} != loadbalancer ]] || kind=LoadBalancer
+    jq -n --arg kind "$kind" '{items:[{metadata:{name:"additional-service"},spec:{type:$kind,ports:[{port:3000}]}}]}'
+    ;;
+  'get networkpolicies -o json')
+    if [[ ${FAKE_STATE:-} == policy-change ]]; then jq '.items[0].metadata.resourceVersion="2"' network-policies.json
+    elif [[ ${FAKE_STATE:-} == no-isolation ]]; then echo '{"items":[]}'
+    elif [[ ${FAKE_STATE:-} == allow-pods ]]; then jq '.items += [{spec:{podSelector:{},ingress:[{}]}}]' network-policies.json
+    else cat network-policies.json; fi;;
+  'get pods '*hostNetwork*)
+    printf 'radar-postgres-0\tdb-uid\tpostgres\tfixture-db\tfalse\t\t\n'
+    if [[ ${FAKE_STATE:-} == hostnetwork ]]; then printf 'host-pod\thost-uid\tapi\tfixture-api\ttrue\t\t\n'; fi
+    if [[ ${FAKE_STATE:-} == hostport ]]; then printf 'host-pod\thost-uid\tapi\tfixture-api\tfalse\t3000\t\n'; fi
+    [[ ${FAKE_STATE:-} != qualified-endpoint ]] || printf 'api-pod\tapi-uid\tapi\t%s\tfalse\t\t\n' "$(jq -r .image "$INPUT")";;
+  'get deployments,statefulsets,daemonsets,jobs '*) [[ ${FAKE_STATE:-} != template-hostport ]] || printf 'radar-api\tfalse\t3000\t\n';;
+  'get endpointslices -o json')
+    if [[ ${FAKE_STATE:-} == ready || ${FAKE_STATE:-} == extra-endpoint ]]; then echo '{"items":[{"metadata":{"labels":{"kubernetes.io/service-name":"additional-service"}},"endpoints":[{"conditions":{"ready":true}}]}]}'
+    elif [[ ${FAKE_STATE:-} == qualified-endpoint ]]; then echo '{"items":[{"endpoints":[{"targetRef":{"kind":"Pod","name":"api-pod","uid":"api-uid"}}]}]}'
+    else echo '{"items":[]}'; fi;;
+  'get endpoints -o json')
+    if [[ ${FAKE_STATE:-} == extra-legacy ]]; then echo '{"items":[{"subsets":[{"addresses":[{"ip":"192.0.2.1"}]}]}]}'
+    else echo '{"items":[]}'; fi;;
   'get job '*conditions*)
     if [[ ${FAKE_STATE:-} == failed-job || ${FAKE_STATE:-} == failed-with-zero ]]; then echo Failed; else echo Complete; fi;;
   'get job '*) printf 'synthetic-job-uid\t%s\n' "$(jq -r .image "$INPUT")";;
@@ -137,7 +170,7 @@ rg -qF 'scale deployment/radar-api --replicas=0' cluster-calls
 rg -qF 'scale deployment/radar-ui --replicas=0' cluster-calls
 rg -qF 'scale deployment/radar-immo-mcp --replicas=0' cluster-calls
 rg -qF 'patch cronjob fixture-refresh' cluster-calls
-if rg 'api-resources|get middleware|auth can-i .*middlewares' cluster-calls; then exit 1; fi
+if rg 'api-resources --api-group|get middleware|auth can-i .*middlewares' cluster-calls; then exit 1; fi
 : > cluster-calls
 invoke restore-ingresses EXPECTED="$testdir/expected.json" ROUTES="$closure_output/ingress-snapshot.json"
 jq -e --slurpfile original ingress-original.json 'del(.items[].metadata.resourceVersion)==($original[0]|del(.items[].metadata.resourceVersion))' ingress-fixture.json >/dev/null
@@ -345,3 +378,4 @@ done
 export FAKE_STATE=denied
 if invoke permissions; then echo 'Permission refusal was ignored' >&2; exit 1; fi
 unset FAKE_STATE
+source tools/make/base-preprod-network.test.sh
