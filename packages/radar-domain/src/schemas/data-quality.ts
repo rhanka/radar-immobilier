@@ -1,3 +1,4 @@
+import { contractDateTime } from "../contracts/validation-datetime.js";
 import { z } from "zod";
 
 export const DataQualityState = z.enum(["unknown", "partial", "fresh", "stale"]);
@@ -6,7 +7,7 @@ export type DataQualityStateT = z.infer<typeof DataQualityState>;
 export const DataQualityFreshness = z.enum(["unknown", "fresh", "stale"]);
 export type DataQualityFreshnessT = z.infer<typeof DataQualityFreshness>;
 
-const NullableIsoDateTime = z.string().datetime().nullable();
+const NullableIsoDateTime = contractDateTime().nullable();
 
 export const DataQualityCollectionCounts = z.object({
   records: z.number().int().nonnegative(),
@@ -78,7 +79,7 @@ export type DataQualityGeoSummaryT = z.infer<typeof DataQualityGeoSummary>;
 
 export const DataQualityCitySummary = z.object({
   citySlug: z.string().min(1),
-  generatedAt: z.string().datetime(),
+  generatedAt: contractDateTime(),
   councilMinutes: DataQualityCollectionSummary,
   youtube: DataQualityCollectionSummary,
   ontology: DataQualityOntologySummary,
