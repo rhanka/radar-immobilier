@@ -25,6 +25,7 @@
 - [x] Record rationale, impact and rollback before any conditional-path edit.
 
 ## Feedback Loop
+- [x] L1a: regenerate locks with fast-uri 3.1.9, ip-address 10.7.5, Zod 4.6.7 and Engram 0.21.2; retain CSV 7.0.3.
 - [x] L2x: retain the existing CSV 7.0.3 security override under Engram; its declared CSV 6.2.1 is affected by GHSA-8cw4-87c7-c6xx.
 - [x] L2w: retain physical dependency-tree validation and negative checks for vulnerable or invalid instances.
 - [x] L2v: scope the historical SDK corpus to the native registrar; the newer production composition has its own wire contract.
@@ -52,7 +53,7 @@
 - [x] DEPSSEC3-EX1: owner requires single-line commits without trailers; use the local Make runner.
 - [x] DEPSSEC3-EX2: owner requires a French delivery report; code and other documentation remain English.
 - [x] Shared Git metadata is read-only; use the explicitly authorized local fallback and bundle.
-- [ ] Record published dependency blockers with exact versions and peer/dependency ranges.
+- [x] Engram 0.21.2 is published and accepts Zod ^4.6.6; no publication blocker.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch, one integrated qualification campaign.
@@ -68,19 +69,19 @@
   - [x] Prepare an environment-free Make/Compose runner and local Git fallback.
   - [x] Capture production-only and complete raw baseline audits in containers.
 - [ ] **Lot 1 — Minimal patch updates**
-  - [ ] Update fast-uri and ip-address within their existing declared ranges.
+  - [x] Update fast-uri and ip-address within their existing declared ranges.
   - [ ] Pin patched KaTeX 0.18.2 in the independent Focus dependency tree.
-  - [ ] Verify the generated lockfile diff and installed dependency tree.
+  - [x] Verify the generated lockfile diff and installed dependency tree.
 - [ ] **Lot 2 — Zod remediation**
-  - [ ] Check published Sentropic compatibility and reuse the prepared migration.
-  - [ ] Preserve API/domain/MCP validation and discovery contracts.
+  - [x] Check published Sentropic compatibility and reuse the prepared migration.
+  - [x] Preserve API/domain/MCP validation and discovery contracts.
   - [ ] Remove obsolete security exceptions only after raw findings disappear.
 - [ ] **Lot 3 — Qualification**
   - [ ] Production-only and full after audits; security gate and its tests.
   - [ ] All-workspace typecheck and lint.
   - [ ] API/UI build and browser bundle smoke.
   - [ ] Complete CI test command: API, UI, MCP and all packages.
-  - [ ] Independent review and reconciliation.
+  - [ ] Independent review and reconciliation: conductor Astra max; no delegated review required.
 - [ ] **Lot 4 — Local delivery**
   - [ ] Audit atomic commit sizes and single-line messages.
   - [ ] Verify the base-to-head bundle in a fresh repository.
