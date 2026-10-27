@@ -66,6 +66,10 @@ case "$*" in
           (if .metadata.uid!=$patch[0][0].value or .spec!=$patch[0][1].value then error("concurrent change")
            else .spec=$patch[0][2].value end)' ingress-fixture.json > ingress-next.json
       mv ingress-next.json ingress-fixture.json
+    else
+      jq --arg name "$name" --slurpfile patch "$patch" '
+        (.items[]|select(.metadata.name==$name)|.spec.rules)=$patch[0].spec.rules' ingress-fixture.json > ingress-next.json
+      mv ingress-next.json ingress-fixture.json
     fi;;
   'get service base-maintenance-fixture -o json')
     if [[ ${FAKE_STATE:-} == deny-selector ]]; then jq '.spec.selector={app:"api"}' deny-service-fixture.json
@@ -246,8 +250,19 @@ jq -n --slurpfile c input.json --slurpfile instance api-fixture.json --slurpfile
     restart:{binding:$c[0].binding,image:$c[0].image,q1:$q1,previousInstance:$before[0],
       completedAt:($now|fromdateiso8601-10|todateiso8601),instance:$instance[0]},
     personal:{writerEpoch:"scoped",maintenanceBarrier:false},lotsOpen:false,mcpSuccessorDeployed:true}' > acceptance.json
+cp ingress-fixture.json closed-ingresses.json
+check_reopened_routes() {
+  jq -e '.items[0].spec.rules[0].host=="preprod.immo.sent-tech.ca"
+    and [.items[0].spec.rules[0].http.paths[].path]==["/health","/api/v1/auth","/api/v1/workspaces"]
+    and all(.items[0].spec.rules[0].http.paths[]; .backend.service.name=="radar-api" and .backend.service.port.number==3000)
+    and .items[0].spec.tls[0].secretName=="fixture-tls"
+    and .items[0].metadata.annotations["traefik.ingress.kubernetes.io/router.middlewares"]=="existing@kubernetescrd"
+    and .items[1].spec.defaultBackend.service.name=="base-maintenance-fixture"' ingress-fixture.json >/dev/null
+  cp closed-ingresses.json ingress-fixture.json
+}
 : > cluster-calls
 invoke reopen-api PROOFS="$testdir/acceptance.json"
+check_reopened_routes
 rg -q -- '--request-timeout=20s patch ingress fixture-app' cluster-calls
 if rg -- '--request-timeout=20s (scale|set|delete|rollout) ' cluster-calls; then exit 1; fi
 cp acceptance.json accepted.json
@@ -281,6 +296,7 @@ jq --slurpfile restart "out-$n/restart.json" --arg observedAt "$(date -u +%FT%TZ
   '.restart=$restart[0] | .q2.observedAt=$observedAt' accepted.json > acceptance.json
 : > cluster-calls
 invoke reopen-api PROOFS="$testdir/acceptance.json"
+check_reopened_routes
 rg -q -- '--request-timeout=20s patch ingress fixture-app' cluster-calls
 for field in q2 q2.afterRestart binding.releaseId restart restart.instance restart.q1 restart.previousInstance; do
   jq --arg field "$field" 'delpaths([$field|split(".")])' accepted.json > acceptance.json
