@@ -89,3 +89,5 @@ Qualify, repair and integrate the supplied PW-C implementation on 07ef2757.
 - [x] Delivery: test(pw-c): qualify app confirmation and revocation on postgres.
 
 - [x] Delivery: test(pw-c): discriminate principals, CSRF and revoke races.
+
+- [x] Delivery: test(pw-c): add an isolated serial Docker campaign.
