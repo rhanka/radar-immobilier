@@ -26,7 +26,7 @@ import {
   resolveWatchIntervalMs,
 } from "../services/facets/projection-invalidation.js";
 
-const workspaceId = z.string().uuid();
+const workspaceId = z.string().guid();
 const city = z.string().min(1).max(128).regex(/^[a-z0-9-]+$/);
 const mode = z.enum(["signal"]);
 

@@ -24,6 +24,7 @@
 - [x] Record rationale, impact and rollback before any conditional-path edit.
 
 ## Feedback Loop
+- [x] L2i: preserve GUID inputs on scoped workspace and signal routes.
 - [x] L2h: preserve validation details on administrative HTTP routes.
 - [x] L2g: preserve prospect HTTP validation and bound raw batch diagnostics.
 - [x] L2f: reuse guarded special-key and enum-record regression coverage.
