@@ -6,15 +6,17 @@ import { verifySession } from "../../src/services/auth/session.js";
 import { canonicalAppPrincipal, type PwIdentityDomain } from "../../src/artifacts/write-intent-principal.js";
 import type { FetchLike } from "../../src/services/auth/oidc.js";
 import type { Database } from "../../src/db/client.js";
+import type { AuthConfig } from "../../src/config.js";
 import { baseAuth } from "./base-api-fixture.js";
 
 /** Synthetic IdP boundary; the RP flow cookie and session are never forged. */
-export async function normalLogin(domain: PwIdentityDomain, db: Database, sub: string, ttlSeconds = 3600) {
+export async function normalLogin(domain: PwIdentityDomain, db: Database, sub: string, ttlSeconds = 3600,
+  keys?: Pick<AuthConfig, "clientSecret" | "sessionSecret">) {
   const now = Date.now();
   const auth = { ...baseAuth, sessionTtlSeconds: ttlSeconds, issuer: domain.identityIssuer, clientId: domain.clientId,
     appBaseUrl: domain.appOrigin, redirectUri: `${domain.appOrigin}/api/v1/auth/oauth/callback`,
-    jwksUri: `${domain.identityIssuer}/jwks`, clientSecret: randomBytes(32).toString("hex"),
-    sessionSecret: randomBytes(32).toString("hex") };
+    jwksUri: `${domain.identityIssuer}/jwks`, clientSecret: keys?.clientSecret ?? randomBytes(32).toString("hex"),
+    sessionSecret: keys?.sessionSecret ?? randomBytes(32).toString("hex") };
   const pair = await generateKeyPair("EdDSA");
   const kid = randomUUID();
   const getKey = createLocalJWKSet({ keys: [{ ...await exportJWK(pair.publicKey), kid, alg: "EdDSA" }] });
@@ -65,8 +67,9 @@ export async function normalLogin(domain: PwIdentityDomain, db: Database, sub: s
   assert.equal(exchanges, 1);
   const header = response.headers.getSetCookie().find((value) => value.startsWith("radar_session="));
   assert.ok(header);
-  assert.match(header, /; Secure/i); assert.match(header, /; HttpOnly/i);
-  assert.doesNotMatch(header, /; Domain=/i);
+  assert.ok(/; Secure/i.test(header), "Session cookie must be Secure");
+  assert.ok(/; HttpOnly/i.test(header), "Session cookie must be HttpOnly");
+  assert.equal(/; Domain=/i.test(header), false, "Session cookie must remain host-only");
   const cookie = header.split(";")[0]!;
   const session = await verifySession(cookie.slice("radar_session=".length), { sessionSecret: auth.sessionSecret, now });
   assert.ok(session);

@@ -32,6 +32,9 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Fixed C12 gate: 33 passed/0 failed/0 skipped, typecheck/lint passed.
+- [x] Add normal A-to-B login under one RP's existing keys; B cannot reveal
+  I/A, while A's already-dispatched request retains its authenticated cookie.
 - [x] Reproduce C12: 7 failed/1 passed/0 skipped on the original served
   script, with typecheck/lint green and owned cleanup complete.
 - [x] Persist public per-I budget before dispatch; restore window/count,
