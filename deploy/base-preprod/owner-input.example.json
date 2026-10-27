@@ -28,8 +28,7 @@
   "mcpDeployment": "<SUCCESSOR_MCP_DEPLOYMENT_NAME>",
   "apiIngress": "<APPLICATION_INGRESS_NAME>",
   "maintenance": {
-    "middleware": "base-maintenance-<UNIQUE_ATTEMPT>",
-    "sources": ["<QUALIFIED_OPERATOR_SOURCE_CIDR>"],
+    "service": "base-maintenance-<UNIQUE_ATTEMPT>",
     "ingresses": ["<APPLICATION_INGRESS_NAME>", "<MCP_INGRESS_NAME>"]
   },
   "cancelRuns": []
