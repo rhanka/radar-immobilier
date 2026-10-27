@@ -36,6 +36,7 @@ Connect published release files and H5 reads to current account/workspace author
 - [x] Conductor qualified `2279b9ad`: typecheck, lint, 3213 API unit tests, 63 PostgreSQL reader tests and 10 mutations passed. Browser DNS and three missing-curl probe cases failed.
 - [x] Replace browser route interception with loopback HTTPS and Chromium resolver rules; preserve cookies, CSP and all behavioral assertions. Conductor rerun pending.
 - [x] Targeted host Chromium regression passed (HTTPS redirects, CSS/JS, Secure cookie separation); strict helper typecheck passed. No Docker used for these corrections.
+- [x] Bootstrap qualification with curl, jq and openssl before tests; preserve all three delivery-probe cases. Host guard and simulated installer success/failure passed; real image rerun pending.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch, serialized implementation and Docker campaigns.
