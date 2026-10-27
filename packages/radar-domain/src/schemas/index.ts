@@ -18,3 +18,4 @@ export * from "./prospect-mark.js";
 export * from "../contracts/validation-dto.js";
 export * from "../contracts/validation-datetime.js";
 export * from "../contracts/validation-number.js";
+export * from "../contracts/validation-url.js";

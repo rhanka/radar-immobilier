@@ -1,3 +1,4 @@
+import { contractUrl } from "@radar/domain";
 import { contractSafeParse } from "@radar/domain";
 /**
  * Routes — Marquage d'équipe Steve (Inc 2).
@@ -88,7 +89,7 @@ export const createMarkSchema = z.discriminatedUnion("dimension", [
     mode: ModeEnum.default("real"),
     authorId: z.string().guid().optional(),
     prixDemande: finitePositiveOptional(),
-    lienAnnonce: z.string().url().optional(),
+    lienAnnonce: contractUrl().optional(),
   }),
 ]);
 

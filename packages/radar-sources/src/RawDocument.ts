@@ -1,3 +1,4 @@
+import { contractUrl } from "@radar/domain";
 import { contractDateTime } from "@radar/domain";
 import { contractParse } from "@radar/domain";
 import { createHash } from "node:crypto";
@@ -43,7 +44,7 @@ export const RawDocumentRecordSchema = z.object({
   /** Source id that produced the document (e.g. "avis-publics-valleyfield"). */
   source: z.string().min(1),
   /** Exact URL the bytes were fetched from (anti-invention: the real link). */
-  sourceUrl: z.string().url(),
+  sourceUrl: contractUrl(),
   /** Human title exposed by the source listing, when available. */
   title: z.string().min(1).optional(),
   /**

@@ -1,3 +1,4 @@
+import { contractUrl } from "../../contracts/validation-url.js";
 import { z } from "zod";
 import { RegulatoryStageKind } from "./relations.js";
 
@@ -106,7 +107,7 @@ export const SourceBinding = z.object({
   kind: SourceBindingKind,
   channel: z.object({
     engine: SourceEngine,
-    url: z.string().url().nullable().default(null),
+    url: contractUrl().nullable().default(null),
     selectors: z.record(z.string(), z.unknown()).default({}),
   }),
   auth: z.enum(["none", "basic", "api-key", "session"]).default("none"),
