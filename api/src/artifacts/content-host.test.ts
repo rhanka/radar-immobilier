@@ -9,7 +9,7 @@ const parse = (host?: string | null, base: string | null | undefined = BASE) =>
 
 describe("belongsToContentDomain", () => {
   it("should reserve malformed labels, nested labels and the apex", () => {
-    for (const host of [BASE, `not-a-uuid.${BASE}`, `nope.pinned.${BASE}`, `a.b.${BASE}`, `NOPE.${BASE.toUpperCase()}.:443`]) {
+    for (const host of [BASE, `not-a-uuid.${BASE}`, `nope.pinned.${BASE}`, `a.b.${BASE}`, `NOPE.${BASE.toUpperCase()}.:443`, `nope.${BASE}:invalid`, `${ARTIFACT}.${BASE}..`]) {
       expect(belongsToContentDomain(host, BASE), host).toBe(true);
     }
   });

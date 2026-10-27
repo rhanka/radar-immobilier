@@ -121,6 +121,14 @@ describe("contentGate probes on a content host", () => {
 });
 
 describe("contentGate threat scenarios", () => {
+  it.each([`not-a-uuid.${BASE}:invalid`, `${STABLE}..`])(
+    "should contain malformed content authorities before app authentication on %s", async (host) => {
+      const response = await app.request(`http://${APP_HOST}/api/v1/auth/login`, { headers: { host } });
+      expect(response.status).toBe(401);
+      expectDenyHeaders(response);
+    },
+  );
+
   it("denies browser navigations without redirecting to login", async () => {
     expect((await app.request(`http://${APP_HOST}/api/v1/admin/users`, {
       headers: { accept: "text/html" },
