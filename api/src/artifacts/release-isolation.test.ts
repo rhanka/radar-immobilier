@@ -4,7 +4,7 @@ import { makeApp, fixtureReaderDeps, GRANT_SECRET, HOST, ISSUER, SESSION_SECRET,
 import { createReaderContentApp } from "./content-serve.js";
 import { mintGrant } from "./preview-grant.js";
 import { fingerprintReaderProfile, createFixtureAuthority } from "./reader-profile.js";
-import { injectGrantIntoHtml, releaseCspForHtml } from "./release-files.js";
+import { releaseCspForHtml } from "./release-files.js";
 
 async function token() {
   return mintGrant({ ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000",
@@ -13,13 +13,11 @@ async function token() {
       name: "demo", policyRevision: "pol-001", capabilities: ["geo.read", "signals.protected-read"] }) }, GRANT_SECRET, 1000);
 }
 describe("published release isolation", () => {
-  it("should rewrite quoted resources and place the grant before fragments", () => {
-    expect(injectGrantIntoHtml("<script SRC = '/main.js#part'></script>", "scoped"))
-      .toBe("<script SRC='/main.js?grant=scoped#part'></script>");
-    expect(injectGrantIntoHtml('<link href="/s.css?v=1">', "scoped"))
-      .toContain('/s.css?v=1&amp;grant=scoped');
-    for (const url of ["javascript:alert(1)", "blob:https://other.test/x", "HTTPS://other.test/x", "//other.test/x"]) {
-      expect(injectGrantIntoHtml(`<a href="${url}">x</a>`, "scoped")).not.toContain("grant=");
+  it("should hash LF, CRLF and CR inline scripts as the browser interprets them", () => {
+    const script = '\nconst s=document.createElement("script");\ns.src="/dep.js?v=1";\n';
+    const expected = createHash("sha256").update(script).digest("base64");
+    for (const eol of ["\n", "\r\n", "\r"]) {
+      expect(releaseCspForHtml(`<script>${script.replace(/\n/g, eol)}</script>`)).toContain(`'sha256-${expected}'`);
     }
   });
   it("should hash only release inline code and preserve external isolation", () => {
@@ -49,7 +47,7 @@ describe("published release isolation", () => {
     expect(response.status).toBe(404);
     expect(await response.text()).not.toContain("publisher-secret");
   });
-  it("should authorize the served inline bytes after resource rewriting", async () => {
+  it("should preserve inline source without injecting HTML entities or grants", async () => {
     const app = createReaderContentApp({ ...fixtureReaderDeps(), contentBase: "pages.example.test",
       grantSecret: GRANT_SECRET, sessionSecret: SESSION_SECRET, issuer: ISSUER, now: () => 1000,
       releaseFiles: { getFile: async () => ({ body: `<script>const template='<img src="/logo.png">';</script>`, contentType: "text/html" }) } });
@@ -58,7 +56,7 @@ describe("published release isolation", () => {
     expect(response.status).toBe(200);
     const html = await response.text();
     const script = html.match(/<script>([\s\S]*?)<\/script>/)![1]!;
-    expect(script).toContain("?grant=");
+    expect(script).toBe(`const template='<img src="/logo.png">';`);
     expect(response.headers.get("content-security-policy"))
       .toContain(`'sha256-${createHash("sha256").update(script).digest("base64")}'`);
   });
