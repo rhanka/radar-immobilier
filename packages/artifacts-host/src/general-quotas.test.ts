@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type pg from "pg";
-import { createHostPolicy, HOST_ACTOR_RATE_LIMIT_PER_MINUTE } from "./commit-policy.js";
+import { createHostPolicy } from "./commit-policy.js";
 import { POLICY_REVISION } from "./transaction-authority.js";
 import { general, SCOPE } from "./general-harness.js";
 
@@ -41,8 +41,8 @@ describe("general commit policy without memberships", () => {
   });
 });
 
-describe("per-actor durable quotas and the shared minute bound", () => {
-  function mockClient(script: { rateCount?: number | string; actorRowCount?: number; globalRowCount?: number }) {
+describe("per-actor durable quotas independent of attempt admission", () => {
+  function mockClient(script: { actorRowCount?: number; globalRowCount?: number }) {
     const texts: string[] = [];
     const client = {
       query: vi.fn(async (text: string) => {
@@ -52,10 +52,6 @@ describe("per-actor durable quotas and the shared minute bound", () => {
         if (text.includes("UPDATE artifacts.host_quotas")) return { rowCount: script.globalRowCount ?? 1, rows: [] };
         if (text.includes("INSERT INTO artifacts.host_actor_quotas")) return { rowCount: 1, rows: [] };
         if (text.includes("UPDATE artifacts.host_actor_quotas")) return { rowCount: script.actorRowCount ?? 1, rows: [] };
-        if (text.includes("INSERT INTO artifacts.host_actor_rate")) {
-          return { rowCount: 1, rows: [{ count: script.rateCount ?? 3 }] };
-        }
-        if (text.includes("DELETE FROM artifacts.host_actor_rate")) return { rowCount: 0, rows: [] };
         throw new Error(`unexpected query: ${text}`);
       }),
     };
@@ -69,14 +65,14 @@ describe("per-actor durable quotas and the shared minute bound", () => {
     return { participant: policy.createParticipant(client, "token"), texts };
   }
 
-  it("reserves the global, actor and minute rows in one transaction", async () => {
+  it("reserves global and actor ceilings without touching attempt counters", async () => {
     const { participant, texts } = await participantWith({});
     await participant.checkApproval?.({ actorId: "alice" } as never);
     await expect(participant.reserveQuota?.({ actorId: "alice", storageScopeId: SCOPE, bytes: 100 } as never))
       .resolves.toEqual({ reserved: true });
     expect(texts.findIndex((text) => text.includes("UPDATE artifacts.host_quotas")))
       .toBeLessThan(texts.findIndex((text) => text.includes("host_actor_quotas")));
-    expect(texts.some((text) => text.includes("host_actor_rate"))).toBe(true);
+    expect(texts.some((text) => text.includes("host_actor_rate"))).toBe(false);
   });
 
   it("blocks a commit when the global row is missing or exhausted", async () => {
@@ -95,22 +91,11 @@ describe("per-actor durable quotas and the shared minute bound", () => {
     expect(texts.some((text) => text.includes("host_actor_rate"))).toBe(false);
   });
 
-  it(`refuses past ${HOST_ACTOR_RATE_LIMIT_PER_MINUTE} mutations in the same minute`, async () => {
-    const { participant } = await participantWith({ rateCount: HOST_ACTOR_RATE_LIMIT_PER_MINUTE });
-    await participant.checkApproval?.({ actorId: "alice" } as never);
-    await expect(participant.reserveQuota?.({ actorId: "alice", storageScopeId: SCOPE, bytes: 100 } as never))
-      .resolves.toEqual({ reserved: true });
-    const over = await participantWith({ rateCount: HOST_ACTOR_RATE_LIMIT_PER_MINUTE + 1 });
-    await over.participant.checkApproval?.({ actorId: "alice" } as never);
-    await expect(over.participant.reserveQuota?.({ actorId: "alice", storageScopeId: SCOPE, bytes: 100 } as never))
-      .resolves.toEqual({ reserved: false });
-  });
-
   it("reserves actor quotas before approval, matching the coordinator order", async () => {
     const { participant, texts } = await participantWith({});
     await expect(participant.reserveQuota?.({ actorId: "alice", storageScopeId: SCOPE, bytes: 100 } as never))
       .resolves.toEqual({ reserved: true });
     expect(texts.some((text) => text.includes("host_actor_quotas"))).toBe(true);
-    expect(texts.some((text) => text.includes("host_actor_rate"))).toBe(true);
+    expect(texts.some((text) => text.includes("host_actor_rate"))).toBe(false);
   });
 });

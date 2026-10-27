@@ -3,16 +3,6 @@ import type { AuthorizeCommit, CommitPolicyParticipantFactory } from "@sentropic
 import { isGeneralActivation, type ActivationConfig } from "./activation.js";
 import { POLICY_REVISION } from "./transaction-authority.js";
 
-/**
- * Shared per-account mutation bound (L12, artefacts-ouverture): at most this
- * many committed mutations per account and per minute, enforced transactionally
- * in `reserveQuota` (no per-pod counter, replay-safe) and probed read-only
- * before S3 through the admission authority. The durable per-actor ceiling in
- * `artifacts.host_actor_quotas` auto-provisions from the global row on first
- * commit: no manual step per user.
- */
-export const HOST_ACTOR_RATE_LIMIT_PER_MINUTE = 10;
-
 /** Every policy read and provisional reservation uses the coordinator's client. */
 export async function createHostPolicy(pool: pg.Pool, scope: string,
   readActivation?: () => ActivationConfig): Promise<CommitPolicyParticipantFactory> {
@@ -118,21 +108,6 @@ export async function createHostPolicy(pool: pg.Pool, scope: string,
              AND operations_used < operation_limit AND bytes_used + $3 <= byte_limit`,
           [scope, actorId, bytes]);
         if (actor.rowCount !== 1) return { reserved: false };
-        // Shared per-minute bound, enforced in the same transaction so
-        // concurrent commits serialize on the window row and replays (which
-        // never re-reserve) are never charged twice.
-        const window = await client.query<{ count: string | number }>(
-          `INSERT INTO artifacts.host_actor_rate (storage_scope_id, actor_id, window_start, count)
-           VALUES ($1, $2, date_trunc('minute', now()), 1)
-           ON CONFLICT (storage_scope_id, actor_id, window_start)
-           DO UPDATE SET count = artifacts.host_actor_rate.count + 1
-           RETURNING count`,
-          [scope, actorId]);
-        if (Number(window.rows[0]?.count) > HOST_ACTOR_RATE_LIMIT_PER_MINUTE) return { reserved: false };
-        await client.query(
-          `DELETE FROM artifacts.host_actor_rate
-           WHERE storage_scope_id = $1 AND actor_id = $2 AND window_start < date_trunc('minute', now())`,
-          [scope, actorId]);
         return { reserved: true };
       },
       mintFence(policyRevision, invocationId) {
