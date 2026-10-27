@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, expect, it } from "vitest";
 import pg from "pg";
 import { describeDb } from "../../src/services/facets/scope-db-fixture.js";
 import { createSharedReaderTickets } from "../../src/artifacts/reader-tickets.js";
@@ -12,6 +12,11 @@ import { GRANT_SECRET, SESSION_SECRET, ISSUER } from "../../src/artifacts/reader
 describeDb("stored reader approval and single-use exchange", () => {
   let h: Harness;
   beforeAll(async () => { h = await startHarness("l3opening", ["author-alice"]); });
+  beforeEach(async () => {
+    // Independent reader scenarios share the same fixture producer.
+    await h.pool.query("DELETE FROM artifacts.host_actor_rate WHERE storage_scope_id=$1 AND actor_id=$2",
+      [h.config.storageScope, "author-alice"]);
+  });
   afterAll(async () => { await h?.close(); });
   it("should retain already issued pinned credentials independently of the current publication pointer", async () => {
     const f = await publishedBaskets(h);
