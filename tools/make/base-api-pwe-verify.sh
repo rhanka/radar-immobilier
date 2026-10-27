@@ -57,6 +57,7 @@ cleanup_pwe() {
   local status=$?
   trap - EXIT INT TERM
   [[ -z ${RUN_PID:-} ]] || { kill "$RUN_PID" 2>/dev/null || true; wait "$RUN_PID" 2>/dev/null || true; }
+  [[ -z ${MONITOR_PID:-} ]] || { kill "$MONITOR_PID" 2>/dev/null || true; wait "$MONITOR_PID" 2>/dev/null || true; }
   "${compose[@]}" logs --no-color > "$LOG_DIR/compose.log" 2>&1 || true
   "${compose[@]}" ps -a > "$LOG_DIR/compose-state.log" 2>&1 || true
   guarded_down > "$LOG_DIR/cleanup.log" 2>&1 || status=1
@@ -70,6 +71,21 @@ trap cleanup_pwe EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 guarded_down
+docker ps --format '{{.Names}}' > "$LOG_DIR/occupancy-start.txt"
+(
+  while sleep 1; do
+    if ! foreign=$(docker ps --format '{{.Names}} {{.Label "org.radar.base.owner"}}' |
+      awk -v owner="$OWNER" '$2 != owner {print $1}'); then
+      echo 'Docker occupancy could not be verified' > "$LOG_DIR/occupancy-stop.txt"
+      kill -TERM "$$"; exit
+    fi
+    if [[ -n $foreign ]]; then
+      printf 'Foreign stack appeared during the owned campaign\n%s\n' "$foreign" > "$LOG_DIR/occupancy-stop.txt"
+      kill -TERM "$$"; exit
+    fi
+  done
+) 8>&- > "$LOG_DIR/occupancy-monitor.log" 2>&1 &
+MONITOR_PID=$!
 printf '%s\n' "$LOG_DIR" | tee "$ROOT/tmp/pwe-evidence/latest"
 "${compose[@]}" up -d --wait postgres minio
 "${compose[@]}" run --rm --no-deps -T api bash -ec \

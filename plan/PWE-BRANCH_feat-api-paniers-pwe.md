@@ -32,6 +32,8 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Record empty-machine startup and monitor owner labels throughout the
+  campaign; any foreign stack stops only this project and invalidates its gate.
 - [x] Add app-specific old-6L1 receipt mutation and target the actual executor
   boundary on replay; preserve the full pre-fix source SHA in the regression receipt.
 - [x] Verify composite audit command references resolve all three committed events.
