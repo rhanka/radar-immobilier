@@ -32,6 +32,8 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] C03 account/workspace and normal guard/remint cases passed; fix the
+  TCP client's Host handling and explicit HTTP server type before requalification.
 - [x] Add full/mutation campaign phases, with isolated evidence for each
   inherited A/B/C/D mutation suite and protected transaction byte checks.
 - [x] Add a real TCP cut after the normal-cookie API commit, immutable H5
