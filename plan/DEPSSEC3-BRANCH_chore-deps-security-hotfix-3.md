@@ -25,6 +25,7 @@
 - [x] Record rationale, impact and rollback before any conditional-path edit.
 
 ## Feedback Loop
+- [x] L2x: retain the existing CSV 7.0.3 security override under Engram; its declared CSV 6.2.1 is affected by GHSA-8cw4-87c7-c6xx.
 - [x] L2w: retain physical dependency-tree validation and negative checks for vulnerable or invalid instances.
 - [x] L2v: scope the historical SDK corpus to the native registrar; the newer production composition has its own wire contract.
 - [x] L2u: retain actual HTTP and stdio validation transport coverage.
@@ -65,7 +66,7 @@
   - [x] Read project, workflow, security, testing and harness instructions.
   - [x] Confirm branch/base and clean initial state.
   - [x] Prepare an environment-free Make/Compose runner and local Git fallback.
-  - [ ] Capture production-only and complete raw baseline audits in containers.
+  - [x] Capture production-only and complete raw baseline audits in containers.
 - [ ] **Lot 1 — Minimal patch updates**
   - [ ] Update fast-uri and ip-address within their existing declared ranges.
   - [ ] Pin patched KaTeX 0.18.2 in the independent Focus dependency tree.
