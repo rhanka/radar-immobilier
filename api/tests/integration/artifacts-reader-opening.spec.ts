@@ -21,6 +21,11 @@ describeDb("stored reader approval and single-use exchange", () => {
     expect(entry.headers.get("location")).toBe("/__reader/start");
     const start = await request(`https://${f.host}/__reader/start`);
     expect(start.status).toBe(303);
+    const pinned = await request(`https://${f.releaseId}.pinned.pages.example.test/__reader/start`);
+    expect(pinned.status).toBe(303);
+    expect(new URL(pinned.headers.get("location")!).searchParams.get("artifactId")).toBe(f.artifactId);
+    expect(new URL(pinned.headers.get("location")!).searchParams.get("origin"))
+      .toBe(`https://${f.releaseId}.pinned.pages.example.test`);
     const initialCookie = start.headers.get("set-cookie")!.split(";")[0]!;
     expect(start.headers.get("set-cookie")).toContain("Secure; HttpOnly; SameSite=Lax");
     const approvalUrl = start.headers.get("location")!;
