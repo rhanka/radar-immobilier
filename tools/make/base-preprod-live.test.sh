@@ -38,7 +38,13 @@ case "$*" in
   'get httproutes.gateway.networking.k8s.io '*) echo '{"items":[{"metadata":{"name":"bypass-route","uid":"route-uid"}}]}';;
   'get services -o json')
     kind=ClusterIP; [[ ${FAKE_STATE:-} != nodeport ]] || kind=NodePort; [[ ${FAKE_STATE:-} != loadbalancer ]] || kind=LoadBalancer
-    jq -n --arg kind "$kind" '{items:[{metadata:{name:"additional-service"},spec:{type:$kind,ports:[{port:3000}]}}]}'
+    change='.'
+    case ${FAKE_STATE:-} in
+      external-ip) change='.items[0].spec.externalIPs=["192.0.2.1"]';;
+      external-name) change='.items[0].spec.type="ExternalName" | .items[0].spec.externalName="direct.invalid"';;
+      node-port-field) change='.items[0].spec.ports[0].nodePort=30080';;
+    esac
+    jq -n --arg kind "$kind" "{items:[{metadata:{name:\"additional-service\"},spec:{type:\$kind,ports:[{port:3000}]}}]} | $change"
     ;;
   'get networkpolicies -o json')
     if [[ ${FAKE_STATE:-} == policy-change ]]; then jq '.items[0].metadata.resourceVersion="2"' network-policies.json
@@ -50,7 +56,12 @@ case "$*" in
     if [[ ${FAKE_STATE:-} == hostnetwork ]]; then printf 'host-pod\thost-uid\tapi\tfixture-api\ttrue\t\t\n'; fi
     if [[ ${FAKE_STATE:-} == hostport ]]; then printf 'host-pod\thost-uid\tapi\tfixture-api\tfalse\t3000\t\n'; fi
     [[ ${FAKE_STATE:-} != qualified-endpoint ]] || printf 'api-pod\tapi-uid\tapi\t%s\tfalse\t\t\n' "$(jq -r .image "$INPUT")";;
-  'get deployments,statefulsets,daemonsets,jobs '*) [[ ${FAKE_STATE:-} != template-hostport ]] || printf 'radar-api\tfalse\t3000\t\n';;
+  'get deployments,statefulsets,daemonsets,jobs '*)
+    case ${FAKE_STATE:-} in
+      template-hostport) printf 'radar-api\tfalse\t3000\t\n';;
+      template-hostnetwork) printf 'radar-api\ttrue\t\t\n';;
+      init-hostport) printf 'radar-api\tfalse\t\t3000\n';;
+    esac;;
   'get endpointslices -o json')
     if [[ ${FAKE_STATE:-} == ready || ${FAKE_STATE:-} == extra-endpoint ]]; then echo '{"items":[{"metadata":{"labels":{"kubernetes.io/service-name":"additional-service"}},"endpoints":[{"conditions":{"ready":true}}]}]}'
     elif [[ ${FAKE_STATE:-} == qualified-endpoint ]]; then echo '{"items":[{"endpoints":[{"targetRef":{"kind":"Pod","name":"api-pod","uid":"api-uid"}}]}]}'
