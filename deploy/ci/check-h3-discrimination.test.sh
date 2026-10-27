@@ -9,7 +9,8 @@ trap 'rm -rf "$CASE_ROOT"' EXIT
 export TMPDIR="$CASE_ROOT"
 GOOD="$CASE_ROOT/good.yaml"
 CASE="$CASE_ROOT/case.yaml"
-"${KUBECTL:-kubectl}" kustomize --load-restrictor LoadRestrictionsNone "$ROOT/deploy/overlays/preprod" >"$GOOD"
+bash "$HERE/h3-disabled-fixture.sh" "$CASE_ROOT/repo"
+"${KUBECTL:-kubectl}" kustomize --load-restrictor LoadRestrictionsNone "$CASE_ROOT/repo/deploy/overlays/preprod" >"$GOOD"
 reject() {
   local mutation="$1" reason="$2" out
   cp "$GOOD" "$CASE"
