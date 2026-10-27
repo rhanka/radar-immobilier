@@ -2,6 +2,7 @@ import { controlTestHost } from "./control-test-host.js";
 import { describe, expect, it, vi } from "vitest";
 import type { AdmissionAuthority } from "./admission.js";
 import { createArtifactControl, createMemoryCommitLedger } from "./facade.js";
+import { rateLimitedOutcome } from "./attempt-admission.js";
 import { ARTIFACT, DIGEST, NOW, RELEASE, SCOPE, ensureBody, general, stubAuthority, stubHost } from "./general-harness.js";
 
 describe("general facade without frozen workspace", () => {
@@ -56,39 +57,15 @@ describe("general facade without frozen workspace", () => {
   });
 });
 
-describe("general facade rate probe before S3", () => {
-  it("refuses a write over the shared minute bound without dispatch", async () => {
-    const checkRate = vi.fn(async () => true);
+describe("general facade temporary admission refusal", () => {
+  it("preserves retryable rate refusal without recording a commit failure", async () => {
     const { authority } = stubAuthority({});
-    const limited = { ...authority, checkRate };
-    const { host, handle } = stubHost();
-    const response = await createArtifactControl(host, SCOPE, "pages.example.test", limited)
+    const { host } = stubHost();
+    const limited = { ...host, execute: vi.fn(async () => rateLimitedOutcome("id", "ensure")) };
+    const { ledger, entries } = createMemoryCommitLedger();
+    const response = await createArtifactControl(limited, SCOPE, "pages.example.test", authority, { ledger })
       .handle("ensure", "alice", ensureBody);
-    expect(response).toEqual({ status: 403, body: { error: "rate_limited" } });
-    expect(checkRate).toHaveBeenCalledWith("alice");
-    expect(handle).not.toHaveBeenCalled();
-  });
-
-  it("maps a rate probe outage to a retryable 503 without dispatch", async () => {
-    const checkRate = vi.fn(async (): Promise<boolean> => { throw new Error("rate store down"); });
-    const { authority } = stubAuthority({});
-    const failing = { ...authority, checkRate };
-    const { host, handle } = stubHost();
-    const response = await createArtifactControl(host, SCOPE, "pages.example.test", failing)
-      .handle("ensure", "alice", ensureBody);
-    expect(response).toEqual({ status: 503, body: { error: "capability_unavailable" } });
-    expect(handle).not.toHaveBeenCalled();
-  });
-
-  it("never probes the bound for reads", async () => {
-    const checkRate = vi.fn(async () => true);
-    const { authority } = stubAuthority({});
-    const probed = { ...authority, checkRate };
-    const handle = vi.fn(async () => ({ status: 200, body: { artifacts: [], total: 0 } }));
-    const host = controlTestHost(handle);
-    const response = await createArtifactControl(host, SCOPE, "pages.example.test", probed)
-      .handle("list", "alice", { limit: 20, offset: 0 });
-    expect(response.status).toBe(200);
-    expect(checkRate).not.toHaveBeenCalled();
+    expect(response).toMatchObject({ status: 429, body: { error: "rate_limited", retryable: true }, retryable: true });
+    expect(entries).toEqual([]);
   });
 });

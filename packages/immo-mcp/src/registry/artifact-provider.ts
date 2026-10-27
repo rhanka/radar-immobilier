@@ -103,17 +103,6 @@ export function bindArtifactProvider(options: {
         // General opening reports no workspace: nothing is frozen, so the
         // commit guard below cannot diverge from it.
         if (decision.workspaceId !== "") frozen = Object.freeze({ workspaceId: decision.workspaceId, scope });
-        // Shared per-account minute bound, probed before S3; the commit
-        // transaction enforces it exactly. Reads never consume the bound.
-        if ((tool === "artifacts_ensure" || tool === "artifacts_publish") && admission.checkRate) {
-          let limited: boolean;
-          try {
-            limited = await admission.checkRate(request.principal.sub);
-          } catch {
-            return refusal("capability_unavailable", true);
-          }
-          if (limited) return refusal("rate_limited", false);
-        }
       }
       let authority: AuthorizeCommit;
       try {
