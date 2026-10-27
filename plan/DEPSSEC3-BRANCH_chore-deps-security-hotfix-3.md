@@ -24,6 +24,7 @@
 - [x] Record rationale, impact and rollback before any conditional-path edit.
 
 ## Feedback Loop
+- [x] L2q: retain batch-record rejection before writes and event publication.
 - [x] L2p: retain nested error-tree and scoped validation regressions.
 - [x] L2o: retain full API issue payload and non-finite input regressions.
 - [x] L2n: preserve MCP scalar diagnostics, integer bounds and historical GUIDs.
