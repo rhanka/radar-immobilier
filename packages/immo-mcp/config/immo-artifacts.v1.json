@@ -3,9 +3,9 @@
   "configVersion": "immo-artifacts.v1",
   "provider": {
     "id": "sentropic.artifacts",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "selectionStatus": "guarded",
-    "reason": "selected only with the shared 0.2.1 host, current activation, migrated coordinator and explicit durable quota"
+    "reason": "selected only with the shared 0.2.2 host, current activation, migrated coordinator and explicit durable quota"
   },
   "requiredContracts": {
     "capabilitySelection": "artifacts-profile/v1",
