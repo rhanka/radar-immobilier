@@ -38,3 +38,4 @@
 - [x] Astra network controls: read-only inventory, supported policy shape, bound CNI probes and namespace-wide endpoint roster implemented.
 - [x] Astra network wiring: activation/start/restart/tunnel/reopening enforce the network boundary; added bypass regressions.
 - [ ] Astra lot 4: regression evidence, report correction section and audited incremental bundle.
+- [x] Astra verification setup: network/refusal/restoration runbook updated; full verifier can run in a normal fresh checkout with no delivery Git.
