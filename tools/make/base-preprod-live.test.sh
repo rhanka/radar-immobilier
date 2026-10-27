@@ -54,6 +54,7 @@ case "$*" in
       coverage) change='.items += [.items[0]|.metadata.name="unexpected"]';;
       bypass) change='.items[0].spec.rules[0].http.paths[0].backend.service.name="radar-api"';;
       default-bypass) change='.items[1].spec.defaultBackend.service.name="radar-api"';;
+      route-uid) change='.items[1].metadata.uid="replacement"';;
       *) change='.';;
     esac
     jq "$change" ingress-fixture.json;;
@@ -123,6 +124,25 @@ rg -qF 'scale deployment/radar-ui --replicas=0' cluster-calls
 rg -qF 'scale deployment/radar-immo-mcp --replicas=0' cluster-calls
 rg -qF 'patch cronjob fixture-refresh' cluster-calls
 if rg 'api-resources|get middleware|auth can-i .*middlewares' cluster-calls; then exit 1; fi
+: > cluster-calls
+invoke restore-ingresses EXPECTED="$testdir/expected.json" ROUTES="$closure_output/ingress-snapshot.json"
+jq -e --slurpfile original ingress-original.json '.==$original[0]' ingress-fixture.json >/dev/null
+invoke close EXPECTED="$testdir/expected.json"
+closure_output=$testdir/out-$n
+for state in route-uid old replicas cron job ready; do
+  export FAKE_STATE=$state
+  : > cluster-calls
+  if invoke restore-ingresses EXPECTED="$testdir/expected.json" ROUTES="$closure_output/ingress-snapshot.json"; then
+    echo "Unsafe route restoration: $state" >&2; exit 1
+  fi
+  if rg -- '--request-timeout=20s patch ingress ' cluster-calls; then exit 1; fi
+done
+unset FAKE_STATE
+jq '.binding.releaseId="foreign"' "$closure_output/ingress-snapshot.json" > foreign-routes.json
+: > cluster-calls
+if invoke restore-ingresses EXPECTED="$testdir/expected.json" ROUTES="$testdir/foreign-routes.json"; then exit 1; fi
+[[ ! -s cluster-calls ]]
+: > cluster-calls
 invoke collect-maintenance EXPECTED="$testdir/expected.json" PROOFS="$testdir/proofs.json"
 jq -e '.expectedInstances|length==2' "out-$n/maintenance.json" >/dev/null
 if rg -- '--request-timeout=20s (create|patch|scale|set|delete|rollout) ' cluster-calls; then exit 1; fi
@@ -203,6 +223,12 @@ printf '\n' >> synthetic-receipt.json
 if invoke inspect; then echo 'Corrupted Job receipt accepted' >&2; exit 1; fi
 rg -qF 'Receipt hash mismatch' "result-$n.log"
 cp activation-input.json input.json
+jq -n --slurpfile c input.json '{binding:$c[0].binding,action:"activate",
+  result:{workspaceId:$c[0].binding.workspaceId,sealedUnresolved:0,status:"open-success",epoch:"scoped",maintenanceBarrier:false}}' > activation-receipt.json
+: > cluster-calls
+invoke start-api PROOFS="$testdir/activation-receipt.json"
+if rg -- '--request-timeout=20s patch ingress ' cluster-calls; then echo 'Public route opened before Q1/Q2' >&2; exit 1; fi
+rg -qF 'scale deployment/radar-api --replicas=1' cluster-calls
 jq --arg now "$now" '.startedAt=($now|fromdateiso8601-20|todateiso8601)
   | .restartedAt=($now|fromdateiso8601-30|todateiso8601)' api-fixture.json > api-after-fixture.json
 cp api-after-fixture.json api-fixture.json
