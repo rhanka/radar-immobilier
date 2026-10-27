@@ -88,3 +88,64 @@ function documentShell(title: string, body: string, status: 200 | 401): Response
     "content-security-policy": APP_SUMMARY_CSP } });
 }
 
+/** Business summary for the current rights holder, with confirm + revoke. */
+export function renderWriteIntentSummary(c: Context, row: PwIntentRow,
+  bootstrap: { csrf: string; challengeToken: string }): Response {
+  const input = validatedCommand(row);
+  const copy = OPERATION_COPY[input.operation];
+  const target = input.target;
+  const boot = { csrf: bootstrap.csrf, challengeToken: bootstrap.challengeToken,
+    intentId: row.intentId, confirmUrl: `/api/v1/artifacts/write-intents/${row.intentId}/confirm`,
+    revokeUrl: `/api/v1/artifacts/write-intents/${row.intentId}/revoke`,
+    managementUrl: `/api/v1/artifacts/write-intents/${row.intentId}`,
+    expiresAt: row.expiresAt instanceof Date ? row.expiresAt.toISOString() : "" };
+  const body = `<h1>${escapeHtml(copy.title)}</h1>
+<p>${escapeHtml(copy.scope)}</p>
+<p>${escapeHtml(copy.effect)}</p>
+${definitionList([["Intent", row.intentId], ["Workspace", row.workspaceId],
+  ["City", input.target.citySlug], ["Target", `${target.type} ${target.id}`],
+  ["Operation", input.operation], ["Expires", boot.expiresAt],
+  ...describeCommand(input)])}
+<p>Confirm only what this page shows. The server rechecks everything on confirm.</p>
+<button id="pw-confirm" type="button">Confirm</button>
+<button id="pw-revoke" type="button">Revoke</button>
+<p id="pw-note" role="status"></p>
+<section id="pw-receipt" hidden>
+<h2>Receipt</h2>
+<dl><dt>Command</dt><dd id="pw-receipt-command"></dd>
+<dt>State</dt><dd id="pw-receipt-state"></dd>
+<dt>Basket</dt><dd id="pw-receipt-basket"></dd></dl>
+</section>
+<p id="pw-revoke-result" hidden>Revocation command state: <span id="pw-revoke-command"></span></p>
+<p id="pw-reload-box" hidden><a id="pw-reload" href="${escapeHtml(c.req.path)}">Reload the summary</a>, then act again explicitly.</p>
+<p id="pw-login-box" hidden><a href="${APP_LOGIN_PATH}">Sign in</a>, then reopen the confirmation link from the page.</p>
+<p id="pw-manage-box" hidden>Open the <a href="${escapeHtml(boot.managementUrl)}">management view</a> to check this intent.</p>
+<script id="pw-bootstrap" type="application/json">${escapeJsonForScript(boot)}</script>`;
+  return documentShell(copy.title, body, 200);
+}
+
+/** Technical management for the owner after rights loss: revoke only. */
+export function renderWriteIntentManagement(c: Context, row: PwIntentRow,
+  bootstrap: { csrf: string }): Response {
+  const boot = { csrf: bootstrap.csrf, intentId: row.intentId,
+    revokeUrl: `/api/v1/artifacts/write-intents/${row.intentId}/revoke`,
+    managementUrl: `/api/v1/artifacts/write-intents/${row.intentId}` };
+  const body = `<h1>Manage a write intent</h1>
+<p>Management only. No business summary is shown because the current account no longer holds the confirmation rights.</p>
+${definitionList([["Intent", row.intentId]])}
+<button id="pw-revoke" type="button">Revoke</button>
+<p id="pw-note" role="status"></p>
+<p id="pw-revoke-result" hidden>Revocation command state: <span id="pw-revoke-command"></span></p>
+<p id="pw-reload-box" hidden><a id="pw-reload" href="${escapeHtml(c.req.path)}">Reload</a>, then revoke again explicitly.</p>
+<p id="pw-login-box" hidden><a href="${APP_LOGIN_PATH}">Sign in</a>, then reopen the management link from the page.</p>
+<script id="pw-bootstrap" type="application/json">${escapeJsonForScript(boot)}</script>`;
+  return documentShell("Manage a write intent", body, 200);
+}
+
+/** Login document: fixed login link, then manual reopen of the page link. */
+export function renderWriteIntentLogin(): Response {
+  const body = `<h1>Sign in required</h1>
+<p>This confirmation page needs the normal application session.</p>
+<p><a href="${APP_LOGIN_PATH}">Sign in</a>, then reopen the confirmation link from the page. No confirmation happens automatically.</p>`;
+  return documentShell("Sign in required", body, 401);
+}
