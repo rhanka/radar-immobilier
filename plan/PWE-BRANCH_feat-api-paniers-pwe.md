@@ -32,6 +32,10 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] The first final attempt passed static gates but omitted the archived
+  pre-fix text vector; include that tracked input explicitly before requalification.
+- [x] Foreign-container intrusion invalidated the same attempt; preserve its
+  occupancy/cleanup receipts and remove only verified owned residual resources.
 - [x] Add isolated process-local consumption and autonomous bucket-quota
   variants; reject skipped selected mutant cases and retain their functional diagnostics.
 - [x] Add exact confirm-field refusals and immutable-summary effects; isolate
