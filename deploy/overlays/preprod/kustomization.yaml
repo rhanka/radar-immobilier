@@ -108,9 +108,8 @@ patches:
       kind: ConfigMap
       name: radar-api
     path: patch-radar-api-auth.yaml
-# Artifact control-plane activation record (861c H3 unit 11): control mode
-# off by default, no subjects, no window, no storage coordinates. Secrets
-# stay opaque operator-provisioned references (never committed).
+# General opening (L4): API/MCP settings must stay aligned. Provisioning and
+# operator-owned Deployment/routing apply are documented in the L4 runbook.
   - target:
       kind: ConfigMap
       name: radar-api
@@ -119,6 +118,10 @@ patches:
       kind: Deployment
       name: radar-api
     path: patch-artifacts-api-env.yaml
+  - target:
+      kind: Deployment
+      name: radar-immo-mcp
+    path: patch-artifacts-mcp-env.yaml
   - target:
       kind: ConfigMap
       name: radar-sentropic-auth
