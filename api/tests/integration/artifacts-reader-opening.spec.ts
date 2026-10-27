@@ -13,6 +13,24 @@ describeDb("stored reader approval and single-use exchange", () => {
   let h: Harness;
   beforeAll(async () => { h = await startHarness("l3opening", ["author-alice"]); });
   afterAll(async () => { await h?.close(); });
+  it("should retain already issued pinned credentials independently of the current publication pointer", async () => {
+    const f = await publishedBaskets(h);
+    const host = `${f.releaseId}.pinned.pages.example.test`;
+    const credential = await f.credentials(f.data.contributor.sub, f.releaseId, host);
+    const publication = await h.control.handle("publish", "author-alice", { artifactId: f.artifactId,
+      files: f.files.map((file) => ({ ...file, text: file.text + "\n" })), idempotencyKey: `${f.releaseId}-next` });
+    expect(publication.status).toBe(201);
+    expect((publication.body as { releaseId: string }).releaseId).not.toBe(f.releaseId);
+    const app = f.runtime();
+    const request = () => app.request(`https://${host}/main.js?grant=${credential.grant}`, {
+      headers: { host, cookie: credential.cookie } });
+    expect((await request()).status).toBe(200);
+    await h.pool.query("DELETE FROM artifacts.artifact_current WHERE artifact_id=$1", [f.artifactId]);
+    expect((await request()).status).toBe(200);
+    await h.pool.query("DELETE FROM artifacts.artifact_access WHERE artifact_id=$1 AND principal_id=$2", [f.artifactId, f.data.contributor.sub]);
+    expect((await request()).status).toBe(401);
+  });
+
   it("should restart disconnected opening through existing login with a fresh binding", async () => {
     const f = await publishedBaskets(h), app = f.runtime();
     const origin = `https://${f.releaseId}.pinned.pages.example.test`;

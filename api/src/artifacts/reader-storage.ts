@@ -21,15 +21,17 @@ export function createStoredReader(pool: pg.Pool, scope: string, contentBase: st
        (SELECT release_id FROM artifacts.artifact_current WHERE artifact_id=a.id))
      WHERE a.id=$1 AND a.storage_scope_id=$2 AND a.lifecycle_state='active' AND r.state IN ('ready','retired')`,
     [id, scope, releaseId ?? null])).rows[0];
+  const activeArtifact = async (id: string) => (await pool.query(`SELECT * FROM artifacts.artifacts
+    WHERE id=$1 AND storage_scope_id=$2 AND lifecycle_state='active'`, [id, scope])).rows[0];
   const authority: AuthorityReader = {
-    getContentOrigin: async (id) => await artifact(id) ? `https://${id}.${contentBase}` : null,
+    getContentOrigin: async (id) => await activeArtifact(id) ? `https://${id}.${contentBase}` : null,
     getRelease: async (id, releaseId) => {
       const row = await artifact(id, releaseId);
       return row ? { artifactId: row.id, releaseId: row.release_id, authorSub: row.owner_id } : null;
     },
-    getProfile: async (id) => await artifact(id) ? BASKET_READER_PROFILE : null,
+    getProfile: async (id) => await activeArtifact(id) ? BASKET_READER_PROFILE : null,
     getRights: async (readerSub, id) => {
-      const row = await artifact(id);
+      const row = await activeArtifact(id);
       if (!row) return null;
       const account = await pool.query("SELECT 1 FROM account_users WHERE sub=$1 AND status='approved'", [readerSub]);
       const acl = await pool.query("SELECT principal_id,permission FROM artifacts.artifact_access WHERE artifact_id=$1 AND principal_id=$2", [id, readerSub]);
