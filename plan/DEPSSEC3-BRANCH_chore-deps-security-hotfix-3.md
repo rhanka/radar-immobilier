@@ -24,6 +24,7 @@
 - [x] Record rationale, impact and rollback before any conditional-path edit.
 
 ## Feedback Loop
+- [x] L2d: retain historical GUID acceptance in prospect domain schemas.
 - [x] L2c: migrate domain records, defaults and ontology identifiers.
 - [x] L2b: preserve validation codes and metadata through public Zod schema APIs.
 - [x] L2a: reuse the project validation DTO and error-tree contract from the prepared migration.
