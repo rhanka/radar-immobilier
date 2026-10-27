@@ -22,6 +22,7 @@
  */
 
 import { z } from "zod";
+import { contractSafeParse } from "@radar/domain";
 import {
   getGeoSourceInventory,
 } from "@radar/sources";
@@ -33,14 +34,14 @@ import { publicProvenanceFromProperties } from "./provenance.js";
 export const LotProperties = z.object({
   noLot: z.string(),
   citySlug: z.string().optional(),
-  proof: z.record(z.unknown()).optional(),
-  immo_zone_lot_provenance: z.record(z.unknown()).optional(),
+  proof: z.record(z.string(), z.unknown()).optional(),
+  immo_zone_lot_provenance: z.record(z.string(), z.unknown()).optional(),
 });
 export type LotPropertiesT = z.infer<typeof LotProperties>;
 
 const GeoJsonGeometry = z.object({
   type: z.string(),
-  coordinates: z.unknown(),
+  coordinates: z.unknown().optional(),
 });
 
 export const LotFeature = z.object({
@@ -59,7 +60,7 @@ export type LotFeatureCollectionT = z.infer<typeof LotFeatureCollection>;
 // ─── Schéma de la réponse brute ArcGIS ────────────────────────────────────────
 
 /** Propriétés brutes retournées par le MapServer MRNF (peut contenir PII). */
-const ArcGisProperties = z.record(z.unknown());
+const ArcGisProperties = z.record(z.string(), z.unknown());
 
 const ArcGisFeature = z.object({
   type: z.literal("Feature"),
@@ -280,7 +281,7 @@ export async function lotsForCity(
   const raw: unknown = await response.json();
 
   // Tentative 1 : format GeoJSON natif (f=geojson)
-  const parsedGeoJson = ArcGisFeatureCollection.safeParse(raw);
+  const parsedGeoJson = contractSafeParse(ArcGisFeatureCollection, raw);
   if (parsedGeoJson.success) {
     const features: LotFeatureT[] = parsedGeoJson.data.features.map((f) =>
       normalizeFeature(
@@ -301,7 +302,7 @@ export async function lotsForCity(
   }
 
   // Tentative 2 : format ESRI JSON (f=json, fallback)
-  const parsedEsri = EsriJsonResponse.safeParse(raw);
+  const parsedEsri = contractSafeParse(EsriJsonResponse, raw);
   if (parsedEsri.success) {
     const features: LotFeatureT[] = parsedEsri.data.features.map((f) =>
       normalizeFeature(

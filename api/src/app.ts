@@ -83,6 +83,7 @@ export type AppDeps = HealthDeps &
     contentHost?: ContentHostConfig;
     /** Already bound reader; absent keeps content hosts closed. */
     readerContent?: ContentReaderMount;
+    readerOpening?: Hono;
     /**
      * Artifact control plane (861c H2); mounted only when auth is enabled.
      * When absent, authenticated mode mounts the closed control capability.
@@ -136,6 +137,7 @@ export function createApp(deps: AppDeps): Hono {
 
   // Auth runs after the content gate, so protect still fronts every business
   // route. When `deps.auth` is absent or disabled both are inert no-ops.
+  if (deps.auth?.enabled && deps.readerOpening) app.route("/api/v1/artifacts/reader", deps.readerOpening);
   app.use("/api/v1/workspaces/*", privateSignalResponse);
   app.use("/api/v1/workspaces", privateSignalResponse);
   app.use("/api/v1/workspaces/*", classificationBoundary);

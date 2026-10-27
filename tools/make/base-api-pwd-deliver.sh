@@ -14,7 +14,7 @@ merge=$(git rev-list --first-parent --merges -1 "$BASE..HEAD")
 [[ -n $merge && $(git rev-parse "$merge^1") == $(git rev-parse "$BASE") ]]
 git merge-base --is-ancestor origin/feat/artefacts-mcp-a5 "$merge"
 git diff --exit-code origin/feat/artefacts-mcp-a5 HEAD -- api/drizzle \
-  ':!api/drizzle/0025_pw_write_persistence.sql' ':!api/drizzle/meta/_journal.json'
+  ':!api/drizzle/0027_pw_write_persistence.sql' ':!api/drizzle/meta/_journal.json'
 : > "$out/commits.tsv"
 while IFS= read -r sha; do
   subject=$(git show -s --format=%s "$sha")
@@ -25,7 +25,7 @@ while IFS= read -r sha; do
   while IFS= read -r path; do
     case $path in
       api/src/services/facets/pw-write*|api/src/db/schema-pw-write.ts|api/src/db/schema.ts|\
-      api/drizzle/0025_pw_write_persistence.sql|api/drizzle/meta/_journal.json|\
+      api/drizzle/0027_pw_write_persistence.sql|api/drizzle/meta/_journal.json|\
       api/tests/integration/pw-write*|api/tests/integration/artifacts-finalization-authorization.spec.ts|\
       docs/spec/PW_D_PERSISTENCE.md|plan/PWD-BRANCH_feat-api-paniers-pwd.md|tools/make/base-api-pwd*) ;;
       *) echo "Outside PW-D scope: $path"; exit 2;;

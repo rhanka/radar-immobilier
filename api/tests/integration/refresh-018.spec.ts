@@ -4,7 +4,7 @@ import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { loadOntologyProfile, registryRecordsToExtraction,
-  type Extraction, type TextJsonGenerationClient } from "@sentropic/graphify";
+  type Extraction, type TextJsonGenerationClient } from "@sentropic/engram";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { loadConfig } from "../../src/config.js";
