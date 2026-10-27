@@ -71,8 +71,8 @@ function definitionList(rows: Array<[string, string]>): string {
     `<dt>${escapeHtml(term)}</dt><dd>${escapeHtml(value)}</dd>`).join("") + "</dl>";
 }
 
-function documentShell(title: string, body: string, status: 200 | 401): Response {
-  return new Response(`<!doctype html>
+function documentShell(c: Context, title: string, body: string, status: 200 | 401): Response {
+  return c.newResponse(`<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -84,8 +84,8 @@ function documentShell(title: string, body: string, status: 200 | 401): Response
 <script>${APP_SUMMARY_SCRIPT}</script>
 </body>
 </html>
-`, { status, headers: { "content-type": "text/html; charset=utf-8",
-    "content-security-policy": APP_SUMMARY_CSP } });
+`, status, { "content-type": "text/html; charset=utf-8",
+    "content-security-policy": APP_SUMMARY_CSP });
 }
 
 /** Business summary for the current rights holder, with confirm + revoke. */
@@ -121,7 +121,7 @@ ${definitionList([["Intent", row.intentId], ["Workspace", row.workspaceId],
 <p id="pw-login-box" hidden><a href="${APP_LOGIN_PATH}">Sign in</a>, then reopen the confirmation link from the page.</p>
 <p id="pw-manage-box" hidden>Open the <a href="${escapeHtml(boot.managementUrl)}">management view</a> to check this intent.</p>
 <script id="pw-bootstrap" type="application/json">${escapeJsonForScript(boot)}</script>`;
-  return documentShell(copy.title, body, 200);
+  return documentShell(c, copy.title, body, 200);
 }
 
 /** Technical management for the owner after rights loss: revoke only. */
@@ -139,13 +139,13 @@ ${definitionList([["Intent", row.intentId]])}
 <p id="pw-reload-box" hidden><a id="pw-reload" href="${escapeHtml(c.req.path)}">Reload</a>, then revoke again explicitly.</p>
 <p id="pw-login-box" hidden><a href="${APP_LOGIN_PATH}">Sign in</a>, then reopen the management link from the page.</p>
 <script id="pw-bootstrap" type="application/json">${escapeJsonForScript(boot)}</script>`;
-  return documentShell("Manage a write intent", body, 200);
+  return documentShell(c, "Manage a write intent", body, 200);
 }
 
 /** Login document: fixed login link, then manual reopen of the page link. */
-export function renderWriteIntentLogin(): Response {
+export function renderWriteIntentLogin(c: Context): Response {
   const body = `<h1>Sign in required</h1>
 <p>This confirmation page needs the normal application session.</p>
 <p><a href="${APP_LOGIN_PATH}">Sign in</a>, then reopen the confirmation link from the page. No confirmation happens automatically.</p>`;
-  return documentShell("Sign in required", body, 401);
+  return documentShell(c, "Sign in required", body, 401);
 }

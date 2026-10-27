@@ -130,7 +130,7 @@ describe("write intent application documents", () => {
 
   it("should serve the login document with the fixed login link", async () => {
     const app = new Hono();
-    app.get("/", () => renderWriteIntentLogin());
+    app.get("/", (c) => renderWriteIntentLogin(c));
     const response = await app.request("/");
     expect(response.status).toBe(401);
     const html = await response.text();
