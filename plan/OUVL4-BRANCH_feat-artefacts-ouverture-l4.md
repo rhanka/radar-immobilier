@@ -40,7 +40,8 @@
   - [x] Bind persistent reader signing and cursor secrets, cursor key ID and approval runtime.
   - [x] Route stable and pinned content hosts to the API; preserve rollback denial boundary.
 - [ ] **Lot 3 — Offline gates**
-  - [ ] Evolve H3 gates and retain disabled/rehearsal/rollback mutation coverage.
+  - [x] Evolve H3 gates for general opening and mode-off rollback; retain the denial boundary checks.
+  - [ ] Adapt disabled/rehearsal/rollback fixtures and preserve mutation coverage.
   - [ ] Check general configuration, routing and secret-reference mutations.
   - [ ] Run the existing `k8s-validate` recipe without reading `.env`.
   - [ ] Compare production render byte for byte with the baseline.
