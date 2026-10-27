@@ -229,6 +229,10 @@ jq -n --slurpfile c input.json '{binding:$c[0].binding,action:"activate",
 invoke start-api PROOFS="$testdir/activation-receipt.json"
 if rg -- '--request-timeout=20s patch ingress ' cluster-calls; then echo 'Public route opened before Q1/Q2' >&2; exit 1; fi
 rg -qF 'scale deployment/radar-api --replicas=1' cluster-calls
+: > cluster-calls
+invoke tunnel-api
+rg -qF 'port-forward --address=127.0.0.1 service/radar-api 18872:3000' cluster-calls
+if rg -- '--request-timeout=20s (create|patch|scale|set|delete|rollout) ' cluster-calls; then exit 1; fi
 jq --arg now "$now" '.startedAt=($now|fromdateiso8601-20|todateiso8601)
   | .restartedAt=($now|fromdateiso8601-30|todateiso8601)' api-fixture.json > api-after-fixture.json
 cp api-after-fixture.json api-fixture.json

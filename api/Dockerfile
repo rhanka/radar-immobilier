@@ -180,7 +180,7 @@ ENV RADAR_ONTOLOGY_PROFILE_PATH=/workspace/radar/ontology/ontology-profile.yaml
 # new sha only rebuilds this tiny ENV layer, never the cached COPY layers above.
 ARG GIT_SHA=unknown
 ENV GIT_SHA=$GIT_SHA
-RUN (test "$GIT_SHA" = unknown || printf '%s\n' "$GIT_SHA" | grep -Eq '^[a-f0-9]{40}$') \
+RUN (test "$GIT_SHA" = unknown || (test "${#GIT_SHA}" = 40 && printf '%s\n' "$GIT_SHA" | grep -Eq '^[a-f0-9]{40}$')) \
  && printf '%s' "$GIT_SHA" > /workspace/api/release-sha
 # H3 unit 9: single-image service selection. The entrypoint validates the
 # requested mode (`api` or `content-deny`) and refuses anything else at
