@@ -9,7 +9,7 @@ if [[ ${A5_FROZEN_RUNNER:-} != 1 ]]; then
 fi
 source tools/make/base-api-guards.sh
 require_env
-[[ $ENV == test-artefacts-a5 && $API_PORT == 18924 && $UI_PORT == 15924 && $MAILDEV_UI_PORT == 11924 ]]
+[[ $ENV == test-artefacts-a5m && $API_PORT == 18925 && $UI_PORT == 15925 && $MAILDEV_UI_PORT == 11925 ]]
 ROOT=$(pwd -P)
 PROJECT=radar-$ENV
 TASK_DIR=$ROOT/tmp/a5-evidence
@@ -17,14 +17,14 @@ RUN_DIR=$TASK_DIR/runtime
 LOG_DIR=$TASK_DIR/$(date -u +%Y%m%dT%H%M%S)-$$
 mkdir -p "$RUN_DIR" "$LOG_DIR"
 echo "Evidence: $LOG_DIR"
-git --git-dir="$ROOT/tmp/a5-delivery.git" show e9d4696c:package-lock.json > "$LOG_DIR/baseline-lock.json"
+git --git-dir="$ROOT/tmp/a5-delivery.git" show 4660e201:package-lock.json > "$LOG_DIR/baseline-lock.json"
 exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
 until flock -w 60 8; do
   echo 'WAIT: machine Docker campaign lock held'
 done
 wait_machine() {
   while :; do
-    names=$(docker ps --filter name=radar-test- --format '{{.Names}}')
+    names=$(docker ps --format '{{.Names}}' | awk '/^radar-(test|e2e)-|^(test|e2e)-/')
     builds=$(pgrep -af '^docker (build|buildx build)|^/.*docker-buildx build' || true)
     [[ -n $names || -n $builds ]] || return 0
     echo "WAIT: $names $builds"
@@ -32,8 +32,9 @@ wait_machine() {
   done
 }
 wait_machine
-[[ -z $(docker ps --filter name=radar-test- -q) ]]
+[[ -z $(docker ps --format '{{.Names}}' | awk '/^radar-(test|e2e)-|^(test|e2e)-/') ]]
 [[ $(df -Pk . | awk 'NR==2 {print $4}') -ge 8388608 ]]
+[[ $(awk '/MemAvailable/ {print $2}' /proc/meminfo) -ge 8388608 ]]
 candidate_git=(git)
 if [[ -f $ROOT/tmp/a5-delivery.git/config ]]; then candidate_git+=(--git-dir="$ROOT/tmp/a5-delivery.git"); fi
 candidate=$("${candidate_git[@]}" rev-parse HEAD)
@@ -115,14 +116,18 @@ guarded_down
 wait_machine
 (
   while sleep 1; do
-    foreign=$(docker ps --filter name=radar-test- --format '{{.Names}}' |
-      awk -v project="$PROJECT" 'index($0, project "-") != 1 && index($0, project "_") != 1')
+    foreign=$(docker ps --format '{{.Names}}' |
+      awk -v project="$PROJECT" '/^radar-(test|e2e)-|^(test|e2e)-/ && index($0, project "-") != 1 && index($0, project "_") != 1')
     if [[ -n $foreign ]]; then
       printf 'STOP: foreign test campaign started\n%s\n' "$foreign" > "$LOG_DIR/occupancy-stop.log"
       kill -TERM "$$"; exit
     fi
     if [[ $(df -Pk "$ROOT" | awk 'NR==2 {print $4}') -lt 8388608 ]]; then
       echo 'STOP: less than 8 GiB free' > "$LOG_DIR/disk-stop.log"
+      kill -TERM "$$"; exit
+    fi
+    if [[ $(awk '/MemAvailable/ {print $2}' /proc/meminfo) -lt 8388608 ]]; then
+      echo 'STOP: less than 8 GiB memory available' > "$LOG_DIR/memory-stop.log"
       kill -TERM "$$"; exit
     fi
   done
