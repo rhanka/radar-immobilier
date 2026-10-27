@@ -4,7 +4,6 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { fileURLToPath } from "node:url";
 import { generateKeyPair, SignJWT } from "jose";
-import type { TokenKeySource } from "@sentropic/oauth-verify";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import {
   composeArtifactHost,
@@ -12,7 +11,8 @@ import {
   createArtifactControl,
   guardArtifactPool,
 } from "@radar/artifacts-host";
-import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-stateful";
+import type { ArtifactMcpBinding } from "../../../packages/immo-mcp/src/registry/artifact-provider.js";
+import type { ImmoHttpDeps } from "../../../packages/immo-mcp/src/server-http.js";
 import { loadConfig } from "../../src/config.js";
 import { createTestS3BlobStore } from "../artifacts-blob-store.helpers.js";
 import { cleanupArtifactTestResources } from "./artifacts-s3.helpers.js";
@@ -26,6 +26,7 @@ export const STALE = "99999999-9999-4999-8999-999999999999";
 export const BASE = "pages.example.test";
 export const SCOPE = "ouverture_scope";
 export const UNKNOWN_ARTIFACT = "123e4567-e89b-12d3-a456-426614174009";
+type VerifiedMcpRequest = Parameters<ArtifactMcpBinding["invoke"]>[2];
 
 export const general = () => ({ enabled: true as const, subjects: [] as string[],
   expiresAtMs: Number.POSITIVE_INFINITY, mode: "general" as const });
@@ -45,7 +46,7 @@ export const RESOURCE = "https://immo.test.local/mcp";
 export interface OuvertureKeys {
   publicKey: Awaited<ReturnType<typeof generateKeyPair>>["publicKey"];
   privateKey: Awaited<ReturnType<typeof generateKeyPair>>["privateKey"];
-  keySource: TokenKeySource;
+  keySource: NonNullable<ImmoHttpDeps["keySource"]>;
 }
 
 export async function ouvertureKeys(): Promise<OuvertureKeys> {
