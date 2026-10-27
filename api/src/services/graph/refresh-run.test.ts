@@ -1,5 +1,5 @@
 import { buildRawDocumentRecord, rawMetaKey } from "@radar/sources";
-import type { Extraction } from "@sentropic/graphify";
+import type { Extraction } from "@sentropic/engram";
 import { describe, expect, it } from "vitest";
 
 import type { LiveScrapeCityRecap } from "../sources/live-scrape.js";

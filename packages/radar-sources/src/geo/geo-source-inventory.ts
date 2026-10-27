@@ -1,3 +1,4 @@
+import { contractUrl } from "@radar/domain";
 /**
  * GeoSourceInventory — modèle Zod pour l'inventaire des sources géographiques
  * (zonage + lots) par ville, prérequis du WP B (vertical géo).
@@ -41,7 +42,7 @@ export const GeoLayerDescriptor = z.object({
   quality: GeoDataQuality,
 
   /** Direct URL to the resource (CKAN API, PDF link, portal page…). Optional. */
-  url: z.string().url().optional(),
+  url: contractUrl().optional(),
 });
 export type GeoLayerDescriptorT = z.infer<typeof GeoLayerDescriptor>;
 
