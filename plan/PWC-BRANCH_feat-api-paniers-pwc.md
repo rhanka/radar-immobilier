@@ -93,3 +93,5 @@ Qualify, repair and integrate the supplied PW-C implementation on 07ef2757.
 - [x] Delivery: test(pw-c): add an isolated serial Docker campaign.
 
 - [x] Delivery: test(pw-c): require functional mutant kills and restorations.
+
+- [x] Delivery: chore(pw-c): audit local commits and incremental bundle delivery.
