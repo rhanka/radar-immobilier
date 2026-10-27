@@ -32,6 +32,8 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Add C07 concurrent equal/different/P preparation and renewed-grant retry;
+  the winning P, durable challenge and original deadline cannot change.
 - [x] Scoped C02 gate: 3 passed/0 failed/0 skipped, typecheck and lint passed.
 - [x] Add C03 both orders for tier, policy, release, delegation, reader,
   grant and page-session fences, with observed waits and durable-effect counts.
