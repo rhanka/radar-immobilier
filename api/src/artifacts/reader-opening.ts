@@ -27,6 +27,20 @@ export function createReaderOpening(deps: {
     c.header("Content-Security-Policy", "default-src 'none'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'");
     return next();
   });
+  async function readablePinnedOrigin(value: unknown): Promise<string | null> {
+    if (typeof value !== "string") return null;
+    try {
+      const url = new URL(value);
+      const host = parseContentHost(url.host, deps.contentBase);
+      return url.protocol === "https:" && url.origin === value && host.kind === "pinned" &&
+        await deps.getArtifactIdForRelease?.(host.releaseId) ? url.origin : null;
+    } catch { return null; }
+  }
+  application.get("/resume", async (c) => {
+    const origin = await readablePinnedOrigin(c.req.query("origin"));
+    // Restart at the content host so even a long login gets a fresh binding.
+    return origin ? c.redirect(`${origin}/__reader/start`, 303) : c.json({ error: "not_found" }, 404);
+  });
   async function approval(c: Context, input: Record<string, unknown>) {
     if (!deps.auth.enabled || c.req.header("authorization")) return null;
     const token = parseCookieHeader(c.req.header("cookie"), SESSION_COOKIE_NAME);
@@ -64,6 +78,13 @@ export function createReaderOpening(deps: {
       profileFingerprint: fingerprintReaderProfile(profile), returnTarget: "/" };
   }
   application.get("/approve", async (c) => {
+    const token = parseCookieHeader(c.req.header("cookie"), SESSION_COOKIE_NAME);
+    if (!token || !await verifySession(token, { sessionSecret: deps.auth.sessionSecret })) {
+      const origin = await readablePinnedOrigin(c.req.query("origin"));
+      if (!origin || !deps.auth.enabled || c.req.header("authorization")) return c.json({ error: "unauthenticated" }, 401);
+      const returnTo = "/api/v1/artifacts/reader/resume?" + new URLSearchParams({ origin });
+      return c.redirect("/api/v1/auth/login?" + new URLSearchParams({ returnTo }), 303);
+    }
     const input = await approval(c, c.req.query());
     if (!input) return c.json({ error: "unauthenticated" }, 401);
     // no-referrer makes Chromium send Origin: null on the confirmation POST.
