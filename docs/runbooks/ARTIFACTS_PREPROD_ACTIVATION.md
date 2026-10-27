@@ -13,6 +13,9 @@ The reader runs **inside `radar-api`**, on its existing port 3000. Route content
 directly to Service `radar-api:http`, preserving the original Host. Do not use
 the standalone `content-reader` entrypoint: it lacks the production DB/S3 wiring.
 The API host gate rejects app/API paths before app authentication or SPA routing.
+The overlay renders with plain `kubectl kustomize deploy/overlays/preprod`.
+MCP's shared directory base retains the production 40/41 paths as symlinks to
+unchanged manifests; the production base render remains byte-identical.
 
 | Concern | Required configuration |
 | --- | --- |
