@@ -2,7 +2,6 @@ import type { S3Client } from "@aws-sdk/client-s3";
 import { PassThrough } from "node:stream";
 import { buffer } from "node:stream/consumers";
 import { describe, expect, it, vi } from "vitest";
-import { withTestBlobPrefixes } from "../../../api/tests/artifacts-blob-store.helpers.js";
 import {
   ArtifactS3TimeoutError,
   createTimeoutBlobStore,
@@ -52,7 +51,7 @@ describe("s3 operation timeout", () => {
       getBlob: vi.fn((_key: string) => new Promise<Uint8Array>(() => {})),
       listKeys: vi.fn(async (_prefix: string) => ["artifacts/timeout/a"]),
     };
-    const blobs = createTimeoutBlobStore(withTestBlobPrefixes(inner), 20);
+    const blobs = createTimeoutBlobStore(inner, 20);
     await expect(blobs.getBlob("missing")).rejects.toBeInstanceOf(ArtifactS3TimeoutError);
     await expect(blobs.listKeys("artifacts/timeout/")).resolves.toEqual(["artifacts/timeout/a"]);
     expect(inner.listKeys).toHaveBeenCalledWith("artifacts/timeout/");
