@@ -12,11 +12,11 @@ import { authorityFixture } from "./pw-write-authority-fixture.js";
 import { normalLogin } from "./pwe-normal-login.js";
 
 /** Each identity domain has its own SQL store, session key and H5 write key. */
-export async function identityFixture(domain: PwIdentityDomain, sub: string) {
+export async function identityFixture(domain: PwIdentityDomain, sub: string, ttlSeconds = 3600) {
   const h = await authorityFixture();
   await h.f.pool.query("UPDATE account_users SET sub=$1 WHERE id=$2", [sub, h.f.contributor.id]);
   h.f.contributor.sub = sub;
-  const login = await normalLogin(domain, h.f.db, sub);
+  const login = await normalLogin(domain, h.f.db, sub, ttlSeconds);
   const h5Issuer = `https://h5.${domain.clientId}.example.test`;
   h.page.grant = { ...h.page.grant, issuer: h5Issuer, tier: domain.tier,
     identityIssuer: domain.identityIssuer, sub: login.session.sub, readerSub: login.session.sub };
@@ -43,7 +43,7 @@ export async function identityFixture(domain: PwIdentityDomain, sub: string) {
       head: async () => { throw new Error("unexpected object probe"); },
       put: async () => { throw new Error("unexpected object write"); } },
     db: h.f.db, auth: login.auth,
-    writeApp: createWriteAppSurface({ auth: login.auth, domain, accounts: h.f.pool,
+    writeApp: createWriteAppSurface({ auth: login.auth, domain, accounts: h.f.pool, nowMs: () => h.clock.now,
       db: h.f.db, sessionSecret: login.auth.sessionSecret,
       challengeKeys: new Map([[h.writeH5.challengeKeyId, randomBytes(32)]]) }) });
   const summary = (cookie = login.cookie) => app.request(intent.confirmationUrl, {
