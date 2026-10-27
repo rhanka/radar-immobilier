@@ -42,7 +42,7 @@
 - [ ] **Lot 3 — Offline gates**
   - [x] Evolve H3 gates for general opening and mode-off rollback; retain the denial boundary checks.
   - [x] Adapt disabled/rehearsal/rollback fixtures and preserve mutation coverage.
-  - [ ] Check general configuration, routing and secret-reference mutations.
+  - [x] Check general configuration, routing and secret-reference mutations.
   - [ ] Run the existing `k8s-validate` recipe without reading `.env`.
   - [ ] Compare production render byte for byte with the baseline.
 - [ ] **Lot 4 — Operator delivery**

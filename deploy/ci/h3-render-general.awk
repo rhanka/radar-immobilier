@@ -40,6 +40,8 @@ END {
     if (value == "" || value != settings["immo-mcp-config", key]) fail("API/MCP mismatch or missing " key)
   }
   if (settings["radar-api", "ARTIFACTS_CONTROL_MODE"] !~ /^(general|off)$/) fail("expected matching general or off modes")
+  if (settings["radar-api", "ARTIFACTS_STORAGE_SCOPE"] != "radar-immobilier-preprod" ||
+      settings["radar-api", "ARTIFACTS_ORG_ID"] != "radar-immobilier-preprod") fail("preprod storage namespace required")
   if (settings["radar-api", "ARTIFACTS_S3_ENDPOINT"] != "https://s3.bhs.io.cloud.ovh.net" ||
       settings["radar-api", "ARTIFACTS_S3_BUCKET"] != "radar-immobilier-artifacts-preprod" ||
       settings["radar-api", "ARTIFACTS_S3_REGION"] != "bhs") fail("preprod artifact storage coordinates required")
