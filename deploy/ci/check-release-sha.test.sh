@@ -14,7 +14,7 @@ for candidate in "$full" unknown; do
   GIT_SHA=$candidate bash -ec "$layer"
   [[ $(cat "$scratch/release-sha") == "$candidate" ]]
 done
-for candidate in "$short" '' "${full}a" "${full^^}" "${full:0:39}z"; do
+for candidate in "$short" '' "${full}a" "${full^^}" "${full:0:39}z" "$full"$'\nextra'; do
   rm -f "$scratch/release-sha"
   if GIT_SHA=$candidate bash -ec "$layer"; then echo "Invalid API build identity accepted: $candidate" >&2; exit 1; fi
   [[ ! -e $scratch/release-sha ]]
@@ -65,4 +65,4 @@ for step in 'Assert served sha' 'Assert served sha (preprod)' 'Assert served sha
     cases=$((cases+1))
   done
 done
-echo "PASS release identity layer (7 cases), short tags, full API build arguments, served-build guards ($cases cases)"
+echo "PASS release identity layer (8 cases), short tags, full API build arguments, served-build guards ($cases cases)"
