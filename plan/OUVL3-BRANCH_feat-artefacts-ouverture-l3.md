@@ -56,7 +56,7 @@ Connect published release files and H5 reads to current account/workspace author
 - [x] Route disconnected readers through existing OIDC login, retaining only a validated local resume path; restart on the validated pinned host to refresh expired browser binding.
 - [x] Add native-file boundary tests (reader/release/host substitution, missing or invalid grants, manifest misses, revocation) and compare all three read error envelopes with the existing routes.
 - [x] Add OIDC return-target tests and PostgreSQL regressions for fresh post-login binding and unrelated account/ACL changes during a blob read.
-- [x] Preserve the complete Muse report in ignored local evidence; remove obsolete tracked notes in bounded commits before dropping the file.
+- [x] Remove the Muse report from the tracked diff; preserve all 169 original lines in `tmp/sol-l3-evidence/RAPPORT-MUSE-OUV-L3.md`.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch, serialized implementation and Docker campaigns.
