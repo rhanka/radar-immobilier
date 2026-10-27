@@ -6,6 +6,9 @@ import { MockRawDataSource } from "./raw-data.js";
 import { buildImmoServer } from "./server.js";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { ImmoStatefulHost } from "./stateful-host.js";
+import { AccountBindingUnavailable } from "./account-binding.js";
 
 const config: ImmoHttpConfig = {
   issuer: "https://synthetic.test", resource: "https://synthetic.test/mcp", requiredScopes: ["immo:read"],
@@ -29,13 +32,39 @@ async function session(app: ReturnType<typeof createImmoHttpApp>, bearer: string
   expect(res.status).toBe(200);
   return res.headers.get("mcp-session-id")!;
 }
-async function call(app: ReturnType<typeof createImmoHttpApp>, bearer: string, sid: string) {
+async function call(app: ReturnType<typeof createImmoHttpApp>, bearer: string, sid: string, id = 2) {
   return app.request("/mcp", { method: "POST", headers: headers(bearer, sid), body: JSON.stringify({
-    jsonrpc: "2.0", id: 2, method: "tools/call", params: { name: "search_lots", arguments: { city: "longueuil" } },
+    jsonrpc: "2.0", id, method: "tools/call", params: { name: "search_lots", arguments: { city: "longueuil" } },
   }) });
 }
 
 describe("P6 composed effects", () => {
+  it("should return composition_unavailable for every method after a future binding fails", async () => {
+    const capture = vi.spyOn(ImmoStatefulHost.prototype, "bind");
+    try {
+      const app = createImmoHttpApp(config, { keySource: { resolveKey: async () => publicKey } });
+      const bearer = await token(); const sid = await session(app, bearer);
+      const host = capture.mock.contexts[0] as ImmoStatefulHost;
+      const future = new Server({ name: "failed", version: "1" });
+      vi.spyOn(future, "setRequestHandler").mockImplementation(() => { throw new Error("install_failed"); });
+      expect(() => host.retain(future)).toThrow("install_failed");
+      for (const method of ["POST", "GET", "DELETE"]) {
+        const res = await app.request("/mcp", { method, headers: headers(bearer, sid),
+          ...(method === "POST" ? { body: JSON.stringify(initializeBody) } : {}) });
+        expect(res.status).toBe(503);
+        expect(await res.json()).toEqual({ error: "composition_unavailable" });
+      }
+    } finally { capture.mockRestore(); }
+  });
+
+  it("should reserve HTTP 413 for an oversized request body", async () => {
+    const app = createImmoHttpApp(config, { keySource: { resolveKey: async () => publicKey } });
+    const bearer = await token(); const sid = await session(app, bearer);
+    const res = await app.request("/mcp", { method: "POST", headers: headers(bearer, sid), body: "x".repeat(256 * 1024 + 1) });
+    expect(res.status).toBe(413);
+    expect(await res.json()).toEqual({ error: "invalid_request" });
+  });
+
   it("should preserve the 2,000-feature result bound through native dispatch", async () => {
     const raw = new MockRawDataSource();
     const result = await raw.getZonesGeojson({ city: "longueuil" });
@@ -76,8 +105,25 @@ describe("P6 composed effects", () => {
     const denied = await (await call(app, bearer, sid)).json();
     expect(denied.result.isError).toBe(true);
     expect(denied.result.content[0].text).toContain("composition_account");
+    expect(JSON.parse(denied.result.content[0].text)).not.toHaveProperty("retriable");
     expect(authorize).toHaveBeenCalledTimes(2);
     expect(effect).toHaveBeenCalledTimes(1);
+  });
+
+  it("should keep a retriable account failure local to one concurrent invocation", async () => {
+    const data = new MockDataSource(); const effect = vi.spyOn(data, "searchLots");
+    const authorize = vi.fn().mockRejectedValueOnce(new AccountBindingUnavailable()).mockResolvedValue(true);
+    const app = createImmoHttpApp(config, { data, authorize, keySource: { resolveKey: async () => publicKey } });
+    const bearer = await token(); const sid = await session(app, bearer);
+    const responses = await Promise.all([call(app, bearer, sid, 21), call(app, bearer, sid, 22)]);
+    const results = await Promise.all(responses.map(async (res) => (await res.json()).result));
+    const failed = results.filter((result) => result.isError === true);
+    expect(failed).toHaveLength(1);
+    expect(JSON.parse(failed[0].content[0].text)).toMatchObject({ error: "account_binding_unavailable", retriable: true });
+    expect(effect).toHaveBeenCalledTimes(1);
+    expect(authorize).toHaveBeenCalledTimes(2);
+    expect((await (await call(app, bearer, sid)).json()).result.isError).not.toBe(true);
+    expect(effect).toHaveBeenCalledTimes(2);
   });
 
   it("should deny a missing real account binding and lookup failure before business calls", async () => {
@@ -107,6 +153,7 @@ describe("P6 composed effects", () => {
 
   it("should confine synthetic stdio claims to fixtures despite inherited storage and API settings", async () => {
     const outbound = vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("network forbidden"));
+    const audit = vi.spyOn(process.stderr, "write").mockReturnValue(true);
     const server = await buildImmoServer({ RADAR_API_BASE_URL: "https://real-storage.invalid",
       IMMO_MCP_DATA_MODE: "http", ARTIFACTS_STORAGE_SCOPE: "real", DATABASE_URL: "postgres://real.invalid/db" });
     const client = new Client({ name: "test", version: "1" });
@@ -119,6 +166,10 @@ describe("P6 composed effects", () => {
       const result = await client.callTool({ name: "get_zones_geojson", arguments: { city: "longueuil" } });
       expect(result.isError).not.toBe(true);
       expect(outbound).not.toHaveBeenCalled();
-    } finally { await client.close(); await server.close(); outbound.mockRestore(); }
+      const events = audit.mock.calls.map(([line]) => JSON.parse(String(line)))
+        .filter((event) => event.kind === "immo-mcp.audit");
+      expect(events).toHaveLength(1);
+      expect(events[0]).toMatchObject({ tool: "get_zones_geojson", dataMode: "simulation" });
+    } finally { await client.close(); await server.close(); outbound.mockRestore(); audit.mockRestore(); }
   });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { accountAuthorizer, createAccountBinding } from "./account-binding.js";
+import { AccountBindingUnavailable, accountAuthorizer, createAccountBinding } from "./account-binding.js";
 import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-stateful";
 
 const workspace = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
@@ -30,5 +30,17 @@ describe("trusted account bindings", () => {
   });
   it("should leave a missing binding unavailable", () => {
     expect(createAccountBinding({})).toBeUndefined();
+  });
+  it("should expose a sanitized retriable error for either database query failure", async () => {
+    for (const membership of [false, true]) {
+      const query = vi.fn();
+      if (membership) query.mockResolvedValueOnce({ rows: [{ id: "id", status: "approved" }] });
+      query.mockRejectedValueOnce(new Error("postgres://private:secret@database.invalid/account"));
+      const error = await accountAuthorizer({ query })("get_lots_geojson", request([workspace])).catch((cause) => cause);
+      expect(error).toBeInstanceOf(AccountBindingUnavailable);
+      expect(error).toMatchObject({ message: "account_binding_unavailable", retriable: true });
+      expect(String(error)).not.toContain("private");
+      expect(error.cause).toBeUndefined();
+    }
   });
 });

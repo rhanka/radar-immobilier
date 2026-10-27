@@ -21,7 +21,7 @@ export { IMMO_MCP_NAME, IMMO_MCP_VERSION };
  * Exported so tests can drive it over an in-memory transport without stdio.
  */
 export async function buildImmoServer(env: NodeJS.ProcessEnv = process.env): Promise<McpServer> {
-  const auth = resolveAuthContext(env); // stub now, OAuth-ready
+  const auth = { ...resolveAuthContext(env), dataMode: "simulation" as const };
   // Synthetic claims are confined to fixture data even if real URLs are inherited.
   const data = createDataSource({});
   const raw = createRawDataSource({});

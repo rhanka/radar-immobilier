@@ -86,6 +86,10 @@ RUN npm install --no-save esbuild@0.25.12 \
   "    'api/src/scripts/refresh-pv.ts'," \
   "    'api/src/scripts/refresh-pending-watchdog.ts'," \
   "    'api/src/scripts/repair-graph-city-key.ts'," \
+  "    'api/src/scripts/init-workspace-authority.ts'," \
+  "    'api/src/scripts/attach-personal-history.ts'," \
+  "    'api/src/scripts/base-api-personal-activation.ts'," \
+  "    'api/src/scripts/base-preprod-job.ts'," \
   "    'api/src/services/geo/run-geo-mapper.ts'," \
   "    'api/src/services/geo/run-populate-geo.ts'," \
   "    'api/src/services/consistency/run-consistency-snapshot.ts'," \
@@ -176,6 +180,7 @@ ENV RADAR_ONTOLOGY_PROFILE_PATH=/workspace/radar/ontology/ontology-profile.yaml
 # new sha only rebuilds this tiny ENV layer, never the cached COPY layers above.
 ARG GIT_SHA=unknown
 ENV GIT_SHA=$GIT_SHA
+RUN printf '%s' "$GIT_SHA" > /workspace/api/release-sha
 # H3 unit 9: single-image service selection. The entrypoint validates the
 # requested mode (`api` or `content-deny`) and refuses anything else at
 # startup. Manifests that set `command:` bypass it; the default stays the API.

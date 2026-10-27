@@ -30,7 +30,7 @@ export async function revisionFixture(): Promise<WorkspaceFixture> {
 }
 
 /** Preserve pre-cutover history for a member admitted after activation. */
-export async function unresolvedRevisionFixture(): Promise<{
+export async function unresolvedRevisionFixture(eventFields: Partial<typeof facetEvents.$inferInsert> = {}): Promise<{
   db: WorkspaceFixture["db"]; workspaceId: string;
   contributor: WorkspaceFixture["contributor"]; moderator: WorkspaceFixture["moderator"];
 }> {
@@ -49,7 +49,7 @@ export async function unresolvedRevisionFixture(): Promise<{
   await db.insert(facetEvents).values({ ownerId: contributor.id, actorId: contributor.id,
     citySlug: "synthetic-city", nodeType: "Signal", nodeId: randomUUID(), facet: "selection",
     basket: "pertinent", state: "active", observedFingerprint: "a".repeat(64),
-    commandKey: randomUUID(), commandDigest: "c".repeat(64) });
+    commandKey: randomUUID(), commandDigest: "c".repeat(64), ...eventFields });
   const attach = (accountId: string) => attachPersonalHistory(db, {
     actorAccountId: moderator.id, reason: "synthetic attachment", entries: [{ accountId, workspaceId }],
   });

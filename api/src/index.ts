@@ -107,6 +107,7 @@ const app = createApp({
   discarded: createDiscardedSignalsReader(dbHandle.db),
   auth,
   tem,
+  mcpSignalSearch: { enabled: config.MCP_SIGNAL_SEARCH_ENABLED },
   ...(durableRetirement ? { legacyRetirement: durableRetirement } : {}),
   ...contentHostAppOption(contentHost),
   ...(artifactsControl ? { artifactsControl } : {}),

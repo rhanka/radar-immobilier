@@ -409,6 +409,217 @@ evidence, qualified mapping, drain proof, old-instance shutdown proof, writer
 coverage, manifest and D5 dispositions, deployment access and target database
 identity. B5, final reviews, remote CI and combined delivery keep their scope.
 
+## Preprod short path: P1/O1 operator vehicle
+
+This section governs the preprod personal-signals/baskets path
+(6G + attachments + 6H), with 6K closed. It delivers an administrator-operated vehicle, not a
+deployment or an activation receipt. **Do not open 6H until the successor MCP
+adapter for `search_signals` is deployed and qualified.** UI-H, P2/6K and the MCP
+implementation are separate deliveries. UI and MCP remain unavailable during
+this API-only window; CD remains frozen by default.
+
+Use `deploy/base-preprod/operator.mk` from the repository root. It includes no
+other Makefile, discovers no environment file and runs no host Node/Python.
+Prerequisites are GNU Make, Bash, jq, kubectl, gh, RTK and an authorized namespace
+administrator. The conductor needs no exec/admin identity. Never extract a Secret,
+print container environments, transfer cookies/bearers, or put access parameters
+in references. The Job consumes existing ConfigMap/Secret **references** only.
+
+Prepare owner JSON outside Git using `deploy/base-preprod/owner-input.example.json`.
+Every angle-bracket value is deliberately rejected until replaced. Subjects are
+opaque explicit inputs. Preserve immutable per-action input files and evidence.
+Remove optional fields that are not yet applicable (especially attachments before
+initialization), rather than leaving unused placeholders in the input document.
+`database` must match the effective database name, role and schema. The release
+reference starts with the full 40-character SHA and points to the qualified image
+digest dossier. Supply backup SHA-256 and a restore-rehearsal receipt/timestamp;
+this tool neither dumps nor restores the operational database.
+
+The operator image must be built with `GIT_SHA` equal to the **full** release
+SHA. `/workspace/api/release-sha` is written in the image layer and checked
+before any database connection; an environment override cannot change that
+identity. Images stamped with a short SHA must be rebuilt for this vehicle.
+Use the published platform manifest digest observed in the pod's `imageID`,
+not a multi-platform index or a local image configuration ID. Collection
+compares the input, Job template, pod specification, runtime digest, full
+receipt and termination receipt. A mismatch retains the boundary and fails.
+
+Initially bind the target workspace slug with `workspaceId:null` for inspection
+and initialization. The initializer creates or resolves its UUID; copy the actual
+`result.workspaceId` into subsequent inputs. Never invent a destination UUID.
+Use a fresh `jobName` per action. Set `operation` to the exact script action.
+An `init` input with any non-null workspace UUID is refused, including replay.
+The returned UUID is resolved back to the declared slug before emitting the
+receipt; collection checks `result.workspaceSlug` as well.
+The two distinct subjects in `moderators` and `managers` must be the same approved
+pair. Include **every** approved account in attachments, including empty history.
+
+The examples below are templates for the administrator, not commands executed
+against preprod by this delivery. Every OUTPUT is a new absolute directory.
+
+```sh
+rtk make -f deploy/base-preprod/operator.mk validate INPUT='<OWNER_INPUT_JSON>' OUTPUT='<NEW_VALIDATION_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk permissions INPUT='<OWNER_INPUT_JSON>' OUTPUT='<NEW_PERMISSION_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk inventory INPUT='<OWNER_INPUT_JSON>' OUTPUT='<NEW_INVENTORY_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk render-job INPUT='<INSPECT_INPUT_JSON>' OUTPUT='<NEW_RENDER_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk inspect INPUT='<INSPECT_INPUT_JSON>' OUTPUT='<NEW_INSPECTION_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk init INPUT='<INIT_INPUT_JSON>' OUTPUT='<NEW_INIT_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk attach INPUT='<ATTACH_INPUT_JSON>' OUTPUT='<NEW_ATTACHMENT_DIR>' ENV=preprod
+```
+
+Inspection performs a repeatable-read, read-only transaction: identity, release
+migration hashes, approved `id/sub/status`, workspace identities, memberships,
+separate capabilities, attachments and discrepancies, global 6H/6K states,
+effective table/lock/function/index-owner privileges and transaction counts.
+It does not query documents, event payloads, account names/emails, connection
+parameters or other sessions' SQL. A missing migration/table fails closed;
+inspection never migrates or repairs it. Compare the readback with the ratified
+roster/grants; excess grants require the audited membership command.
+
+All Jobs use the qualified API digest, `/workspace`, `radar-app`, no automounted
+service-account token, uid/gid 1001, no privilege escalation, no retry, 540-second
+deadline and permanent `/bin/false` readiness. Check `radar-api`'s selector and
+`publishNotReadyAddresses`, and verify no ready EndpointSlice selects the Job.
+Do not exec into a scaled-down API Deployment. A compact termination receipt
+hashes the complete stdout receipt; collection checks both. Job Complete alone
+is insufficient. Keep the Job on any failure, and retain the full hashed evidence.
+Both Complete and Failed outcomes trigger collection. A nonzero script outcome
+still fails the Make command after retaining its verified receipt, including
+`activation-committed-readback-pending`. To recover receipts without creating
+or mutating any Job, use a fresh OUTPUT directory:
+
+```sh
+rtk make -f deploy/base-preprod/operator.mk collect-job INPUT='<EXACT_JOB_INPUT_JSON>' OUTPUT='<NEW_COLLECTION_DIR>' ENV=preprod
+```
+
+Freeze and close before the first 6H transition. `freeze-cd` saves the workflow
+state, disables `build-push-images.yml`, and refuses remaining nonterminal runs.
+Only explicitly listed numeric `cancelRuns` are cancelled. Never toggle
+`PREPROD_CD_ENABLED`: its false branch can select the historical prod path.
+
+Author an independent `expected-instances.json` array from the initial inventory:
+each entry has `id` (old pod UID or external process identifier), `role`, and
+preferably image/owner metadata. Cover API, UI nginx, MCP, readers, writers,
+publishers, workers, SSE, requests/buffers and external launchers. The roster
+must be nonempty and unique. Do not derive it from maintenance evidence.
+
+```sh
+rtk make -f deploy/base-preprod/operator.mk freeze-cd INPUT='<OWNER_INPUT_JSON>' OUTPUT='<NEW_FREEZE_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk close INPUT='<OWNER_INPUT_JSON>' EXPECTED='<INDEPENDENT_ROSTER_JSON>' OUTPUT='<NEW_CLOSURE_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk stop-job INPUT='<INPUT_WITH_RECORDED_STOPJOB_NAME_AND_UID>' OUTPUT='<NEW_STOP_DIR>' ENV=preprod
+```
+
+Closure creates a dedicated Traefik IP allowlist and appends it to every
+inventoried application/MCP Ingress, preserving existing middleware chains.
+It saves original replicas/images, CronJob suspend states/schedules, Jobs,
+routes, relevant annotations and workflow state before changes. It suspends
+all namespace CronJobs and scales consumer Deployments to zero, leaving
+`radar-postgres` intact. Existing Jobs are not stopped by suspension: wait for
+completion or use the separate UID-preconditioned `stop-job` recipe. Explicitly
+stop other StatefulSet/DaemonSet/external consumers; the collector refuses any
+surviving process. This is process termination, not a claim of graceful drain.
+
+Verify the boundary from both excluded and admitted source addresses, including
+the real load-balancer/source-IP behavior. An admitted address must still need
+a business session. Preserve hostname/TLS/OIDC. An API-path allowlist alone is
+insufficient. Keep full route snapshots in restricted evidence storage, never
+environment dumps or document content.
+
+Prepare observation JSON with `binding` and `image` identical to the input, and
+`observations.networkAllowed`, `networkDenied`, `sessionRequired`,
+`externalStopped`, `streamsTerminated`, `mcpSuccessor`. Each attestation carries
+the same `binding`, `reference`, `sha256`, `observedAt` and `passed:true`;
+`mcpSuccessor` also carries its qualified image digest. Embed the complete
+post-closure inspect receipt as `databaseInspection`. Use actual observations,
+not synthetic campaign evidence. Timestamps are UTC ISO-8601 and at most
+24 hours old, including the backup restore rehearsal. The seven-day 6H runner
+limit remains unchanged; this operator vehicle uses a tighter freshness gate.
+
+```sh
+rtk make -f deploy/base-preprod/operator.mk collect-maintenance INPUT='<ACTIVATION_INPUT_JSON>' EXPECTED='<INDEPENDENT_ROSTER_JSON>' PROOFS='<ACTUAL_OBSERVATIONS_JSON>' OUTPUT='<NEW_MAINTENANCE_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk activate INPUT='<ACTIVATION_INPUT_JSON>' EXPECTED='<INDEPENDENT_ROSTER_JSON>' PROOFS='<COLLECTED_MAINTENANCE_JSON>' OUTPUT='<NEW_ACTIVATION_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk resume INPUT='<RESUME_INPUT_JSON>' EXPECTED='<INDEPENDENT_ROSTER_JSON>' PROOFS='<FRESH_COLLECTED_MAINTENANCE_JSON>' OUTPUT='<NEW_RESUME_DIR>' ENV=preprod
+```
+
+The collector verifies stopped old UIDs, no newly running consumers, zero
+consumer replicas, suspended schedules, no active Jobs, no ready consumer
+endpoints, API Service selector/no publishing of unready addresses, disabled CD
+and no nonterminal Actions runs. It checks DB migration/roster/attachment,
+manager, lock/drop/function/statistics authority and quiet transaction receipts.
+`base-preprod-rights.json` is the shared per-operation SQL matrix. SELECT FOR
+SHARE/UPDATE needs UPDATE, which DELETE/TRUNCATE lock authority cannot replace.
+Activation requires all five ACCESS EXCLUSIVE locks (including bindings),
+context insertion, state updates, function execution and effective index-owner
+authority. The Job rechecks actual rights before launching any mutating child;
+missing privileges never trigger automatic grants or barrier persistence.
+It derives drain/shutdown coverage from the independent roster after these
+controls; the separate stream/buffer/external observations remain mandatory.
+Activation/resume repeat live closure checks and verify that the configured MCP
+Deployment actually references the qualified successor digest. Reappearance
+invalidates the window. JSON declarations alone never establish real maintenance.
+
+For recovery after a scoped epoch, keep the boundary and use protected forward
+`resume`; never recreate the old index, alter barriers by SQL, or roll back to
+an unqualified old image. Ambiguous/unreadable state stays closed.
+
+After successful activation, start a new qualified API under the same operator
+boundary. Keep 6K configuration absent. `start-api` routes health, auth and
+workspace paths directly to `radar-api:3000`; legacy signal routes are temporarily
+reachable only under the boundary for retirement checks. UI/MCP stay at zero.
+
+```sh
+rtk make -f deploy/base-preprod/operator.mk start-api INPUT='<OWNER_INPUT_JSON>' PROOFS='<FULL_ACTIVATION_RECEIPT_JSON>' OUTPUT='<NEW_RESTRICTED_START_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk restart-api INPUT='<OWNER_INPUT_JSON>' PROOFS='<Q1_ACCEPTANCE_JSON>' OUTPUT='<NEW_RESTART_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk reopen-api INPUT='<OWNER_INPUT_JSON>' PROOFS='<Q1_Q2_ACCEPTANCE_JSON>' OUTPUT='<NEW_REOPEN_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk delete-job INPUT='<EXACT_JOB_INPUT_JSON>' PROOFS='<SAVED_TERMINATION_JSON>' OUTPUT='<NEW_JOB_DELETION_DIR>' ENV=preprod
+```
+
+Q1/Q2 acceptance is a separate JSON document with exact `binding` and `image`,
+`personal:{writerEpoch:"scoped",maintenanceBarrier:false}`, `lotsOpen:false`,
+and `mcpSuccessorDeployed:true`. `q1` and `q2` each carry `reference`, `sha256`,
+UTC `observedAt` and `passed:true`; Q2 additionally requires `afterRestart:true`
+and an observation after Q1. Q1 is required to request the restart; both are
+required to reopen. Re-read durable states and actual served image in each pass.
+Each qualification also carries `instance`, copied from the relevant
+`api-instance.json`: deployment UID/generation, template hash, restart annotation,
+pod UID, container ID, restart count, start time, image and runtime image ID.
+`restart-api` verifies Q1 against the live instance, then writes `restart.json`
+after rollout. Embed that full object as `restart` in Q2 acceptance and copy
+its `instance` into `q2.instance`. Q2 must be observed after the restart
+completion, container start and restart annotation. Reopening compares Q2 to
+the live instance again: another rollout, configuration change, replacement
+pod or container restart invalidates Q2 even with the same digest and attempt.
+Requalify Q1/restart/Q2 for the current instance; never reuse an older receipt.
+These fields summarize the referenced full tests; they never replace them.
+
+Under admitted browser sessions, qualify workspaces, coherent-city signals,
+personal baskets, archive/reason/reveal, idempotent replay, conflicts, scoped
+projections/SSE, two-member isolation and scoped refusal after revocation.
+Do not revoke the owner/moderator as a test. After restart, verify the retained
+authority and retirements again: `/api/graph-signals/:city`, `/api/graph-signals/by-city`
+and the old `/api/v1/signal-facets` endpoints must return **410**, not 404 or empty
+200. A closed retirement fence returns 503. `/api/graph/:city` is a separate
+mounted route and has no expected 410. Personal BASE lot reads remain
+**503 `lot_cutover_closed`**. Legacy prospect marks are not retired by 6H and
+remain excluded from this profile. No lot grants, mapping or 6K transition occurs.
+
+`reopen-api` rechecks the qualified API image, stopped other consumers, suspended
+schedules, no active Jobs and frozen CD, then exposes only health/auth/workspace
+prefixes on the preprod hostname. It removes only this attempt's maintenance
+middleware from the API Ingress, preserving other middlewares and TLS. The MCP
+Ingress stays restricted; UI/MCP remain stopped. Verify public paths and excluded
+surfaces immediately and retain the final receipt. Announce only personal
+signals/baskets API availability.
+
+CronJobs initially suspended stay suspended. Restore only initially active,
+individually qualified writers using the saved inventory and a separate explicit
+administrator change; this API-only recipe restores none automatically. Keep CD
+disabled until a separately delivered partial-profile reconciler preserves this
+routing, consumer set, writer authority and rollback constraints. A green rollout
+or Complete Job does not restore either launchers or public access. In an
+emergency, re-establish the boundary and stop affected consumers; preserve DB
+barriers and evidence. A database restore is a separate fully stopped operation.
+
 ## B5 standalone acceptance profile
 
 B5 proves the B1–B4 implementation through `createApp` and PostgreSQL,
