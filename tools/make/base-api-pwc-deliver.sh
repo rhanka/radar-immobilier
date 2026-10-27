@@ -2,7 +2,7 @@
 # Local rescue history only; never writes the shared Git directory or pushes.
 set -euo pipefail
 ROOT=$(pwd -P)
-BASE=07ef2757a80c168938e888f52c6925c9f8138016
+BASE=509e664d422cba43bd9d27f9488afe6ad7eba9b9
 REPO=$ROOT/tmp/pwc-delivery.git
 g() { git --git-dir="$REPO" --work-tree="$ROOT" "$@"; }
 allowed() {
@@ -56,7 +56,7 @@ case ${1:-} in
   bundle)
     audit
     mkdir -p tmp/pwc-evidence
-    bundle=$ROOT/tmp/pwc-evidence/api-paniers-pwc.bundle
+    bundle=$ROOT/tmp/pwc-evidence/api-paniers-pwc-on-pwa-final.bundle
     [[ ! -L $bundle ]]
     g bundle create "$bundle" "$BASE..HEAD"
     audit_repo=$(mktemp -d "$ROOT/tmp/pwc-evidence/bundle-audit.XXXXXX")
