@@ -1,3 +1,4 @@
+import { contractInteger } from "@radar/domain";
 /**
  * 6G workspace routes: list the caller's workspaces and manage memberships.
  * Membership changes require a browser session holding the management
@@ -21,7 +22,7 @@ const membershipBody = z.object({
   status: z.enum(["active", "revoked"]).optional(),
   moderateArchive: z.boolean().optional(),
   manageMembers: z.boolean().optional(),
-  expectedRevision: z.number().int().min(1).nullish(),
+  expectedRevision: contractInteger().min(1).nullish(),
 }).strict().refine((body) => body.status !== "revoked"
   || (body.moderateArchive === undefined && body.manageMembers === undefined));
 

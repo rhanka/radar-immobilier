@@ -27,12 +27,12 @@
 ## Astra review corrections (PR #932)
 - [x] A1/B1: preserve historical timestamps and persisted metadata/card reads.
 - [ ] A2: reject raw URL whitespace before normalization.
-- [ ] A3/B2: preserve integer diagnostic accumulation and finite ranges.
-- [ ] B3: retain nonnumeric type metadata for raw JSON infinities.
+- [x] A3/B2: preserve integer diagnostic accumulation and finite ranges.
+- [x] B3: retain nonnumeric type metadata for raw JSON infinities.
 - [ ] A4/B4: align all native registrar scalar diagnostics.
 - [ ] A5: replace nondiscriminating non-finite assertions.
 - [ ] B5: preserve accepted URL output verbatim.
-- [ ] B coercions: preserve existing HTTP pagination acceptance.
+- [x] B coercions: preserve existing HTTP pagination acceptance.
 - [ ] Requalify full suites, typecheck, lint, builds and raw audits under the Docker lease.
 - [ ] Deliver an incremental bundle from 59d4c1bf, report review corrections and clean Docker.
 

@@ -1,3 +1,4 @@
+import { contractInteger } from "@radar/domain";
 import { contractDateTime } from "@radar/domain";
 import { z } from "zod";
 import { Hash, Verdict } from "./classification-query.js";
@@ -29,7 +30,7 @@ export const SignalFacets = z.object({
   if ((value.personalHistoryState === "has_history") !== history) invalid();
 });
 export type SignalFacetsDto = z.infer<typeof SignalFacets>;
-const count = z.number().int().nonnegative();
+const count = contractInteger().nonnegative();
 export const SignalCounts = z.object({ unit: z.literal("distinct_targets"),
   eligible: count, visible: count, discarded: count,
   discardedByScope: z.object({ personalOnly: count, workspaceOnly: count, both: count }).strict(),
@@ -50,6 +51,6 @@ export const SignalCounts = z.object({ unit: z.literal("distinct_targets"),
 export const Snapshot = z.object({ kind: z.literal("signal-projection-v1"),
   baseToken: Hash, queryToken: Hash, queryDigest: Hash,
   projectionVersion: z.string().min(1), catalogVersion: z.string().min(1) }).strict();
-export const Page = z.object({ limit: z.number().int().min(1).max(100),
+export const Page = z.object({ limit: contractInteger().min(1).max(100),
   nextCursor: z.string().max(4096).nullable(), truncated: z.boolean() }).strict()
   .refine((value) => value.truncated === (value.nextCursor !== null));

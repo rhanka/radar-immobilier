@@ -1,3 +1,4 @@
+import { contractInteger } from "@radar/domain";
 /**
  * Named, versioned reader API operations (ARTEFACTS A6/H5).
  *
@@ -14,7 +15,7 @@ export type ReaderOperationName = (typeof READER_OPERATIONS)[number];
 
 const geoParams = z.object({
   collectionId: z.string().regex(/^qc-(zonage|lots)-[a-z0-9-]+$/),
-  limit: z.number().int().min(1).max(100).default(10),
+  limit: contractInteger().min(1).max(100).default(10),
 }).strict();
 
 const signalsParams = z.object({

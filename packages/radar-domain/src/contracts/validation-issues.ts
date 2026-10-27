@@ -42,7 +42,8 @@ export function legacyIssue(issue: Record<string, unknown>, schema?: z.ZodType, 
     const expected = issue.expected === "int" ? "integer" : issue.expected === "record" ? "object" : issue.expected;
     extra = { expected, received: issue.expected === "int" ? "float" : type };
     if (issue.received === "NaN") extra.received = "nan";
-    if (typeof input === "number" && !Number.isFinite(input) && !Number.isNaN(input)) {
+    if ((issue.expected === "number" || issue.expected === "int")
+      && typeof input === "number" && !Number.isFinite(input) && !Number.isNaN(input)) {
       return { code: "not_finite", path, message: "Number must be finite" };
     }
   } else if (code === "invalid_format") {
