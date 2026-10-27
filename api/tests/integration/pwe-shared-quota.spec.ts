@@ -9,12 +9,14 @@ import { coordinateSignalWrite } from "../../src/services/facets/signal-write-ad
 import { createDurableWriteAdmission } from "../../src/services/facets/pw-write-admission-durable.js";
 import { revokePwIntent } from "../../src/services/facets/pw-write-fences.js";
 import { effects, outcome } from "./pwe-fixture.js";
+import type { SignalWriteInput } from "../../src/services/facets/signal-write-operations.js";
 
 describeDb("PWE-09 C12 shared durable no-op quotas", () => {
   it("should aggregate reader admission across six P grants and artifacts and charge each no-op once", async () => {
     const f = await workspaceFixture();
     const selected = await preparedSelect(f);
-    const inputs = [];
+    const inputs: { input: SignalWriteInput; row: Awaited<ReturnType<typeof preparePwWriteIntentGuarded>>;
+      proof: ReturnType<typeof pwConfirmation> }[] = [];
     for (let index = 0; index < 6; index++) {
       const input = { ...selected, operation: "facets.signals.personal.restore.v1" as const,
         basket: undefined, commandKey: randomUUID() };
