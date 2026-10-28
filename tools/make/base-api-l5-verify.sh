@@ -4,17 +4,20 @@ source tools/make/base-api-guards.sh
 require_env
 [[ $ENV == test-api-paniers-pwe || $ENV == e2e-api-paniers-pwe ]]
 [[ $API_PORT == 18935 && $UI_PORT == 15935 && $MAILDEV_UI_PORT == 11935 ]]
-[[ ${PHASE:-pg} == pg || ${PHASE:-pg} == full || ${PHASE:-pg} == mutations || ${PHASE:-pg} == targeted ]]
+[[ ${PHASE:-pg} == pg || ${PHASE:-pg} == full || ${PHASE:-pg} == mutations || ${PHASE:-pg} == targeted || ${PHASE:-pg} == proxy ]]
 ROOT=$(pwd -P)
 git diff --quiet HEAD
 if [[ -z ${SCOPE:-} ]]; then
   SCOPE=$(git ls-files -- 'api/src/artifacts/write-*.test.ts' \
     'api/src/services/facets/pw-write-*.test.ts' 'api/src/services/facets/signal-write-*.test.ts' \
     'api/tests/integration/pw-write*.spec.ts' 'api/tests/integration/pwe-*.spec.ts' \
+    'api/tests/integration/pwcr-*.spec.ts' \
     'api/src/artifacts/published-write*.test.ts' 'api/tests/integration/l5-*.spec.ts' \
     'api/tests/integration/artifacts-baskets.spec.ts' 'api/tests/integration/artifacts-reader-opening.spec.ts' | sed 's#^api/##')
 fi
-require_scope
+if [[ ${PHASE:-pg} == proxy ]]; then
+  [[ $SCOPE == tests/integration/pwcr-proxy.acceptance.ts && -f api/$SCOPE ]]
+else require_scope; fi
 PROJECT=radar-$ENV
 ACTION=ci-api
 RUN_DIR=$ROOT/tmp/l5-evidence/runtime
@@ -32,10 +35,16 @@ source tools/make/base-api-resources.sh
 source tools/make/base-api-compose.sh
 source tools/make/base-api-ci-archive.sh
 write_compose
+if [[ ${PHASE:-pg} == proxy ]]; then
+  source tools/make/base-api-pwc-review-proxy.sh
+  write_review_proxy_compose
+fi
 source tools/make/base-api-pwa-offline.sh
 archive_sources
 archive_ci_inputs
 extra=(tools/make/base-api-pwe-before-app-result.txt ui/package.json
+  ui/nginx/default.conf deploy/k8s/nginx/default.conf
+  deploy/overlays/preprod/nginx/default.conf deploy/overlays/preprod/kustomization.yaml
   api/tests/*.ts api/src/scripts/base-preprod-rights.json tools/h4-mcp.mk
   tools/make/artefacts-delivery-account.sql tools/make/artefacts-delivery-probe.sh
   deploy/k8s/immo-mcp/41-immo-mcp-ingress.yaml packages/immo-mcp/config/*.json
@@ -53,6 +62,7 @@ cleanup_pwe() {
   trap - EXIT INT TERM
   [[ -z ${RUN_PID:-} ]] || { kill "$RUN_PID" 2>/dev/null || true; wait "$RUN_PID" 2>/dev/null || true; }
   [[ -z ${MONITOR_PID:-} ]] || { kill "$MONITOR_PID" 2>/dev/null || true; wait "$MONITOR_PID" 2>/dev/null || true; }
+  [[ -z ${PROXY_PID:-} ]] || { kill "$PROXY_PID" 2>/dev/null || true; wait "$PROXY_PID" 2>/dev/null || true; }
   "${compose[@]}" logs --no-color > "$LOG_DIR/compose.log" 2>&1 || true
   "${compose[@]}" ps -a > "$LOG_DIR/compose-state.log" 2>&1 || true
   guarded_down > "$LOG_DIR/cleanup.log" 2>&1 || status=1
@@ -83,9 +93,17 @@ docker ps --format '{{.Names}}' > "$LOG_DIR/occupancy-start.txt"
 MONITOR_PID=$!
 printf '%s\n' "$LOG_DIR" | tee "$ROOT/tmp/l5-evidence/latest"
 "${compose[@]}" up -d --wait postgres minio
-"${compose[@]}" run --rm --no-deps -T api bash -ec \
+"${compose[@]}" run --rm --no-deps --use-aliases -T api bash -ec \
   'tar -xf /source.tar -C /workspace; exec bash tools/make/base-api-l5-container.sh "$1" "$2" "$3"' \
   -- "${PHASE:-pg}" "$SCOPE" "${MUTANTS:-}" > >(tee "$LOG_DIR/campaign.log") 2>&1 &
 RUN_PID=$!
+if [[ ${PHASE:-pg} == proxy ]]; then
+  (
+    while [[ ! -f $LOG_DIR/proxy-ready ]]; do kill -0 "$RUN_PID" || exit 1; sleep 1; done
+    "${compose[@]}" up -d --wait proxy-compose proxy-cluster proxy-preprod
+  ) 7>&- 8>&- > "$LOG_DIR/proxy-start.log" 2>&1 &
+  PROXY_PID=$!
+fi
 wait "$RUN_PID"
 RUN_PID=
+[[ -z ${PROXY_PID:-} ]] || { wait "$PROXY_PID"; PROXY_PID=; }
