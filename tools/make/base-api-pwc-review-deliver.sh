@@ -7,7 +7,7 @@ g() { git -C "$ROOT" "$@"; }
 allowed() {
   case $1 in
     api/src/artifacts/write-intent-transaction.ts|api/drizzle/*) return 2;;
-    api/src/artifacts/*|api/src/index.ts|api/src/services/facets/pw-write-fences.ts) ;;
+    api/src/artifacts/*) ;;
     api/tests/integration/pwcr-*.ts|tools/make/base-api-pwc-review*|plan/PWCR-BRANCH_feat-api-paniers-pwc-review.md) ;;
     api/tests/integration/pwe-app-receipt.spec.ts) ;;
     deploy/overlays/preprod/nginx/default.conf|ui/nginx/default.conf|deploy/k8s/nginx/default.conf) ;;
