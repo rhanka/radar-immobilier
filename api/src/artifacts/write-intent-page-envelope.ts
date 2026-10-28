@@ -7,7 +7,8 @@ export function validPwPageEnvelope(value: unknown, expected: {
   const record = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
   const keys = (v: Record<string, unknown>, allowed: string[]) => Object.keys(v).every((key) => allowed.includes(key));
   const uuid = (v: unknown) => typeof v === "string" && /^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(v);
-  const date = (v: unknown) => typeof v === "string" && /^\d{4}-\d\d-\d\dT/.test(v) && Number.isFinite(Date.parse(v));
+  const date = (v: unknown) => typeof v === "string" &&
+    /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?(?:Z|[+-]\d\d:\d\d)$/.test(v) && Number.isFinite(Date.parse(v));
   if (!record(value) || !keys(value, ["operation", "reader", "data"]) ||
     value.operation !== `facets.write-intents.${expected.verb}.v1` || !record(value.reader) ||
     !keys(value.reader, ["sub"]) || value.reader.sub !== expected.readerSub || !record(value.data)) return false;
@@ -36,7 +37,9 @@ export function validPwPageEnvelope(value: unknown, expected: {
   if (event.facet === "selection" ? event.scope !== "personal" || !["pertinent", "a_surveiller"].includes(String(event.basket))
     : event.basket !== null) return false;
   if (event.reason !== null && (!record(event.reason) || !keys(event.reason, ["profileId", "code", "verdict"]) ||
-    typeof event.reason.profileId !== "string" || typeof event.reason.code !== "string" ||
+    typeof event.reason.profileId !== "string" || event.reason.profileId.length === 0 ||
+    typeof event.reason.code !== "string" || event.reason.code.length === 0 ||
     event.reason.verdict !== (event.facet === "archive" ? "non_pertinent" : event.basket))) return false;
-  return event.state !== "inactive" || event.reason === null;
+  return (event.state !== "inactive" || event.reason === null) &&
+    !(event.facet === "archive" && event.state === "active" && event.reason === null);
 }
