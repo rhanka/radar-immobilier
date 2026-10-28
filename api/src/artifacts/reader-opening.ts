@@ -11,6 +11,7 @@ import { parseContentHost } from "./content-host.js";
 import { applyReaderContentHeaders } from "./content-isolation.js";
 import type { SharedReaderTickets } from "./reader-tickets.js";
 import type { PwIdentityDomain } from "./write-intent-principal.js";
+import { samePwIdentityDomain } from "./write-intent-principal.js";
 
 export function createReaderOpening(deps: {
   auth: AuthConfig; contentBase: string; authority: AuthorityReader; tickets: SharedReaderTickets;
@@ -148,7 +149,7 @@ export function createReaderOpening(deps: {
       profileFingerprint: ticket.profileFingerprint };
     const grant = await mintGrant(resource, deps.grantSecret, now);
     const writeIdentity = ticket.writeIdentity && deps.writeDomain &&
-      JSON.stringify(ticket.writeIdentity) === JSON.stringify(deps.writeDomain) &&
+      samePwIdentityDomain(ticket.writeIdentity, deps.writeDomain) &&
       await deps.permitsWrite?.(ticket.artifactId, ticket.releaseId) ? deps.writeDomain : undefined;
     c.header("Set-Cookie", mintSessionCookie({ sid, readerSub: ticket.readerSub, artifactId: ticket.artifactId,
       createdAt: now, expiresAt: now + 900_000, resource,
