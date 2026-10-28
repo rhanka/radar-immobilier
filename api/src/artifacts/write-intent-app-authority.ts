@@ -21,7 +21,7 @@ export interface WriteAppDeps extends AppGuardDeps {
   challengeKeys: ReadonlyMap<string, Uint8Array>;
   /** PW-C supplies rendering and command dispatch after its own qualification. */
   renderSummary?: (c: Context, row: PwIntentRow, bootstrap: { csrf: string; challengeToken: string }) => Response;
-  renderManagement?: (c: Context, row: PwIntentRow, bootstrap: { csrf: string }) => Response;
+  renderManagement?: (c: Context, row: PwIntentRow, bootstrap: { csrf: string; result?: Record<string, unknown> }) => Response;
   renderLogin?: (c: Context) => Response;
   confirm?: (row: PwIntentRow, proof: PwConfirmation) => Promise<unknown>;
   revoke?: (row: PwIntentRow, principal: AppGuardPass["principal"]) => Promise<unknown>;
