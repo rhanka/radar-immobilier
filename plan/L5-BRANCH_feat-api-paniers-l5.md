@@ -56,6 +56,7 @@
 - [x] Touched reader/application replay 104718-pg passes 270 cases without skips, with typecheck/lint and CT-8. Browser expiry waits use the latest actually issued read grant, avoiding dependence on navigation duration or JWT second rounding.
 - [x] Add two actual-SQL wait regressions for P/delegation expiry during the newly added final disclosure guard; stop the intermediate image campaign before final qualification rather than omit this boundary.
 - [x] Both late-expiry regressions reproduce 200 disclosure instead of 401 in 105436-pg. Reuse the synchronous page authority validator after the final rights wait, without adding another asynchronous resolver.
+- [x] Candidate 17b093bc passes 272 touched tests and all 27 browser cases. The delivery gate accepts an empty idempotent EXIT cleanup log only after the two mandatory nonempty per-host down logs and campaign status 0; retain raw evidence unchanged and replay the exact final HEAD image after this tool-only commit.
 - [x] Lot 0: merge approved PW-A and main; preserve Track event blob identity.
 - [x] Lot 1: bind verified approval provenance, explicit release write request and private page bootstrap.
 - [x] Implementation and targeted PG proof: actual one-use ticket provenance, explicit workspace, matching signed read grant and no publisher privileges.
