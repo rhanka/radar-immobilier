@@ -43,19 +43,15 @@ export interface PwPageGesture {
   readonly expectedProjectionToken: string;
 }
 
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const HEX64_PATTERN = /^[a-f0-9]{64}$/;
-const CITY_PATTERN = /^[a-z0-9-]{1,128}$/;
-const BASKETS = ["pertinent", "a_surveiller"];
-
-function fail(message: string): never {
-  throw new Error(`invalid gesture: ${message}`);
-}
-
 /** Client-side shape check; the server revalidates everything strictly. */
-export function buildPagePrepareBody(gesture: PwPageGesture): Record<string, unknown> {
+function pagePrepareBody(gesture: PwPageGesture, operations: readonly string[]): Record<string, unknown> {
+  const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const HEX64_PATTERN = /^[a-f0-9]{64}$/;
+  const CITY_PATTERN = /^[a-z0-9-]{1,128}$/;
+  const BASKETS = ["pertinent", "a_surveiller"];
+  function fail(message: string): never { throw new Error(`invalid gesture: ${message}`); }
   if (gesture === null || typeof gesture !== "object" || Array.isArray(gesture)) fail("gesture");
-  if (!PW_PAGE_OPERATIONS.includes(gesture.operation as PwPageOperation)) fail("operation");
+  if (!operations.includes(gesture.operation)) fail("operation");
   if (typeof gesture.workspaceId !== "string" || !UUID_PATTERN.test(gesture.workspaceId)) fail("workspaceId");
   const target = gesture.target;
   if (target === null || typeof target !== "object" || Array.isArray(target)) fail("target");
@@ -96,4 +92,10 @@ export function buildPagePrepareBody(gesture: PwPageGesture): Record<string, unk
   if (deselect !== undefined) body.deselect = deselect;
   if (gesture.expectedSelectionHeads !== undefined) body.expectedSelectionHeads = gesture.expectedSelectionHeads;
   return body;
+}
+
+/** The browser and exported helper share one self-contained implementation. */
+export const PW_PAGE_BUILD_BODY_SOURCE = pagePrepareBody.toString();
+export function buildPagePrepareBody(gesture: PwPageGesture): Record<string, unknown> {
+  return pagePrepareBody(gesture, PW_PAGE_OPERATIONS);
 }
