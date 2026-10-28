@@ -19,6 +19,16 @@ stop() {
 trap stop INT TERM
 target=l5-verify; pointer=latest
 if [[ $phase == images ]]; then target=l5-images; pointer=latest-images; fi
+quiet_docker() {
+  local quiet_since=$SECONDS active
+  echo 'Waiting for a continuously empty minute after foreign probes'
+  while (( SECONDS - quiet_since < 60 )); do
+    if ! active=$(docker ps -q) || [[ -n $active ]]; then quiet_since=$SECONDS; fi
+    sleep 2
+  done
+}
+prior=$(cat "tmp/l5-evidence/$pointer" 2>/dev/null || true)
+if [[ -s $prior/occupancy-stop.txt || -s $prior/foreign-stack.txt ]]; then quiet_docker; fi
 while :; do
   previous=$(cat "tmp/l5-evidence/$pointer" 2>/dev/null || true)
   set +e
@@ -37,6 +47,9 @@ while :; do
   if [[ $current != "$previous" && ( -s $current/occupancy-stop.txt || -s $current/foreign-stack.txt ) ]]; then
     printf '%s\t%s\t%s\n' "$phase" "$code" "$current" >> "$controller/foreign-retries.tsv"
     echo 'Foreign interruption retained; waiting for departure before retrying'
+    # Short-lived foreign probe containers can recur between two empty snapshots.
+    # Require a quiet minute after an intrusion; never set a departure deadline.
+    quiet_docker
     continue
   fi
   printf 'Qualification needs investigation: %s exit=%s evidence=%s\n' "$phase" "$code" "$current"
