@@ -7,7 +7,7 @@ MODE ?= off
 ARTIFACT_API_IMAGE ?=
 KUBECTL ?= kubectl
 KF := bash deploy/ci/kfilter.sh
-.PHONY: render live cursor-secret reader-secrets credentials check-render apply-runtime route rollback
+.PHONY: render test-render live cursor-secret reader-secrets credentials check-render apply-runtime route rollback
 live:
 	@test "$(ENV)" = preprod
 	@test -n "$${KUBECONFIG:-}" || { echo 'Explicit preprod KUBECONFIG required' >&2; exit 1; }
@@ -16,10 +16,17 @@ render:
 	@case "$(MODE)" in off|general) ;; *) exit 1;; esac
 	@mkdir -p "$(OUT)"
 	@$(KUBECTL) kustomize deploy/overlays/preprod \
-	  | sed -e 's/ARTIFACTS_CONTROL_MODE: general/ARTIFACTS_CONTROL_MODE: "$(MODE)"/g' \
+	  | sed -E -e 's/^(  ARTIFACTS_CONTROL_MODE: )("off"|off|"general"|general)$$/\1"$(MODE)"/' \
 	    -e 's#ghcr.io/rhanka/radar-api:latest#$(ARTIFACT_API_IMAGE)#g' >"$(OUT)/render.yaml"
+	@for name in radar-api immo-mcp-config; do \
+	  $(KF) "$(OUT)/render.yaml" ConfigMap $$name \
+	    | awk -v expected='"$(MODE)"' '/^  ARTIFACTS_CONTROL_MODE:/ { seen++; if ($$2 != expected) bad=1 } END { exit(bad || seen != 1) }' \
+	    || { echo "FAIL: ConfigMap/$$name must render ARTIFACTS_CONTROL_MODE=$(MODE)" >&2; exit 1; }; \
+	  done
 	@bash deploy/ci/check-h3-preprod-render.sh "$(OUT)/render.yaml"
 	@sha256sum "$(OUT)/render.yaml"
+test-render:
+	@KUBECTL="$(KUBECTL)" bash deploy/ci/check-h3-general-render.test.sh
 # Create once. An existing Secret is retained without retrieving its data.
 cursor-secret: live
 	@existing=$$($(KUBECTL) -n $(NAMESPACE) get secret radar-classification-cursor-preprod --ignore-not-found -o name); \

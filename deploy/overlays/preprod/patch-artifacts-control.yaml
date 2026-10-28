@@ -5,7 +5,7 @@ kind: ConfigMap
 metadata:
   name: radar-api
 data:
-  ARTIFACTS_CONTROL_MODE: "general"
+  ARTIFACTS_CONTROL_MODE: "off"
   ARTIFACTS_STORAGE_SCOPE: "radar-immobilier-preprod"
   ARTIFACTS_ORG_ID: "radar-immobilier-preprod"
   ARTIFACTS_S3_BUCKET: "radar-immobilier-artifacts-preprod"
