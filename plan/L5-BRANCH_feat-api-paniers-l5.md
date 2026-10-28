@@ -18,6 +18,7 @@
 - [x] Allowed Paths: api/src/artifacts/**, api/src/index.ts, api/src/services/facets/pw-write-fences.ts, api/tests/integration/l5-*.ts, tools/make/base-api-l5*, plan/L5-BRANCH_feat-api-paniers-l5.md.
 - [x] Forbidden Paths: api/src/artifacts/write-intent-transaction.ts, api/drizzle/**, Makefile, docker-compose*.yml, rules/**, agent bootstrap files, other branch plans, .track/**.
 - [x] Conditional Paths: none; upstream merge imports are preserved and audited separately from own changes.
+- [x] BRL5-EX1: owner-required touched regression maintenance permits api/tests/integration/pw-write-authority.spec.ts, pw-write-authority-status.spec.ts, pwcr-app-status.spec.ts and pwcr-listener-h5.spec.ts. Rationale: post-confirm replies now use the controlled receipt envelope, and the disclosure guard adds an earlier workspace wait. Impact: test expectations and the existing SQL barrier placement only; rollback: revert these exact test hunks and rerun the affected suites.
 
 ## Feedback Loop
 - [x] Two independent read-only design reviews: authority/provenance and runtime-image/browser evidence.
@@ -51,6 +52,7 @@
 - [x] Second-pass delivery gate requires current source identity, all required files without skips, touched reader tests, 27 browser cases on exact HEAD images, both host cleanups and a main-only import of the named branch ref.
 - [x] Add post-COMMIT session-expiry regression: failed disclosure must direct same-intent consultation and must never label the already committed execution as not executed.
 - [x] Keep post-COMMIT consultation errors outside the admission-error mapper: return an unknown disclosure outcome with read-status recovery rather than not-executed.
+- [x] Full required replay 104126-pg identifies four inherited test files requiring contract maintenance: read receipt.event from the controlled envelope and acquire the projection barrier after the new initial disclosure guard, preserving actual SQL waits and all withdrawal assertions.
 - [x] Lot 0: merge approved PW-A and main; preserve Track event blob identity.
 - [x] Lot 1: bind verified approval provenance, explicit release write request and private page bootstrap.
 - [x] Implementation and targeted PG proof: actual one-use ticket provenance, explicit workspace, matching signed read grant and no publisher privileges.

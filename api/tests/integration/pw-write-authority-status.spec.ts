@@ -2,6 +2,7 @@ import { expect, it, vi } from "vitest";
 import { describeDb } from "../../src/services/facets/workspace-archive-fixture.js";
 import { revokePwAuthority } from "../../src/services/facets/pw-write-fences.js";
 import { readCommittedSignalReceipt } from "../../src/services/facets/signal-write-receipt.js";
+import * as receiptReader from "../../src/services/facets/signal-write-receipt.js";
 import { authorityFixture, APP, H5 } from "./pw-write-authority-fixture.js";
 
 describeDb("PW-A status disclosure after receipt wait", () => {
@@ -24,10 +25,16 @@ describeDb("PW-A status disclosure after receipt wait", () => {
       const blocker = await a.f.pool.connect();
       let pending: Promise<Response> | undefined;
       try {
-        await blocker.query("BEGIN");
-        await blocker.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))",
-          [JSON.stringify(["workspace", a.f.workspaceId])]);
         const { rows: [{ pid }] } = await blocker.query("SELECT pg_backend_pid() AS pid");
+        const original = receiptReader.readCommittedSignalReceipt;
+        vi.spyOn(receiptReader, "readCommittedSignalReceipt").mockImplementationOnce(async (...args) => {
+          // The first disclosure guard also locks the workspace. Install this
+          // SQL barrier only when projection starts, after that guard releases I.
+          await blocker.query("BEGIN");
+          await blocker.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))",
+            [JSON.stringify(["workspace", a.f.workspaceId])]);
+          return original(...args);
+        });
         pending = Promise.resolve(poll());
         await vi.waitFor(async () => {
           const { rows } = await a.f.pool.query(`SELECT EXISTS (SELECT FROM pg_stat_activity
@@ -55,7 +62,7 @@ describeDb("PW-A status disclosure after receipt wait", () => {
         expect((await readCommittedSignalReceipt(a.f.db, a.f.contributor.sub, a.f.workspaceId,
           a.input.commandKey))?.state).toBe("active");
       } finally {
-        await blocker.query("ROLLBACK"); blocker.release(); await pending;
+        await blocker.query("ROLLBACK"); blocker.release(); await pending; vi.restoreAllMocks();
       }
     });
 

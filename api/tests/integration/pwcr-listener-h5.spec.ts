@@ -40,7 +40,7 @@ describeDb("PW-C real listener to H5 contract", () => {
       { headers: { host: h.page.grant.host } });
     expect(status.status).toBe(200);
     expect(await status.json()).toMatchObject({ reader: { sub: h.f.contributor.sub },
-      data: { intentId: data.intentId, state: "committed", commandId: h.input.commandKey, receipt: { event: receipt.event } } });
+      data: { intentId: data.intentId, state: "committed", commandId: h.input.commandKey, receipt: receipt.receipt } });
     expect(await effects(h.f)).toEqual(committedEffects); expect(h.counters().confirms).toBe(1);
   });
 });
