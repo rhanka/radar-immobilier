@@ -86,8 +86,14 @@ export function writeIntentAppRoute(deps: WriteAppDeps | null): Hono {
       await deps.confirm(row, proof);
       // Admission locks ended at COMMIT. Consult the durable result under
       // current disclosure rights; never reuse the writer's returned event.
-      const result = await readAppWriteIntentResult(deps, row, pass);
-      return c.json({ intentId: row.intentId, ...result.data });
+      try {
+        const result = await readAppWriteIntentResult(deps, row, pass);
+        return c.json({ intentId: row.intentId, ...result.data });
+      } catch {
+        // A failed post-commit consultation cannot classify execution as
+        // not_executed. Preserve I and require authorized receipt recovery.
+        return writeRefusal(c, "write_outcome_unknown", 504, "unknown", "confirm");
+      }
     } catch (error) { return writeIntentError(c, error); }
   });
   for (const path of [summary, api, `${api}/confirm`, `${api}/revoke`]) {
