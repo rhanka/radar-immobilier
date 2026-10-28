@@ -33,11 +33,23 @@ export async function imagePublication(contentBase: string) {
         pwBasket:basket,pwExpectedHead:selection[basket]?.id??"",pwFingerprint:item.displayedFingerprint,
         pwToken:data.snapshot.baseToken});
       button.disabled=false; document.body.dataset.readReady="1";
+      document.querySelectorAll("[data-pw-extra]").forEach(function(extra) {
+        Object.assign(extra.dataset, {pwOperation:"facets.signals."+extra.dataset.pwExtra+".v1",
+          pwWorkspace:data.workspaceId,pwCity:item.target.citySlug,pwType:item.target.type,pwId:item.target.id,
+          pwExpectedHead:"",pwFingerprint:item.displayedFingerprint,pwToken:data.snapshot.baseToken});
+        if (/select$/.test(extra.dataset.pwExtra)) extra.dataset.pwBasket="pertinent";
+        if (/discard$/.test(extra.dataset.pwExtra)) extra.dataset.pwReason="N-NON-RES";
+        extra.disabled=false;
+      });
     }
     refresh().catch(error=>{document.body.dataset.failure=error.message;});
   `;
+  const extras = ["personal.select", "personal.deselect", "personal.discard", "personal.restore",
+    "workspace.discard", "workspace.restore"].map((operation) =>
+    `<button disabled data-pw-gesture data-pw-extra="${operation}">Prepare ${operation}</button>`).join("");
   const html = `<!doctype html><html lang="en" data-pw-workspace="${h.f.workspaceId}"><meta charset="utf-8"><title>Published basket actions</title>` +
     '<h1>Published basket actions</h1><button id="prepare" disabled data-pw-gesture>Prepare selection</button>' +
+    extras +
     '<p id="pw-write-note"></p><div id="pw-write-open" hidden></div>' +
     '<button id="pw-write-retry" hidden>Retry</button><button id="pw-write-manual" hidden>Check status</button>' +
     '<pre id="pw-page-receipt"></pre><pre id="pw-live-state"></pre><pre id="pw-live-cards"></pre><pre id="pw-live-counts"></pre>' +
