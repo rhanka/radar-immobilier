@@ -28,13 +28,13 @@
 ## Plan / Todo (lot-based)
 - [x] **Lot 0 — Base et preuves**
   - [x] Lire règles, preuves, code natif et méthode debug/test.
-  - [ ] Capturer les tests natifs de référence.
+  - [x] Capturer les tests natifs de référence : 266 cas réussis.
 - [ ] **Lot 1 — Sonde et chemins exposés**
   - [ ] Reproduction rouge de la cause démontrée et des diagnostics masqués.
   - [ ] Sonde versionnée, chemins publics inclus dans les préfixes API seuls, tests verts.
-- [ ] **Lot 2 — UTC et erreurs explicites**
-  - [ ] Reproduction rouge des décalages et du refus silencieux.
-  - [ ] Normalisation à la construction, diagnostic des preuves non UTC, tests verts.
+- [x] **Lot 2 — UTC et erreurs explicites**
+  - [x] Reproduction rouge des décalages et du refus silencieux.
+  - [x] Normalisation à la construction, diagnostic des preuves non UTC, tests verts.
 - [ ] **Lot 3 — Rollback initialisé**
   - [ ] Reproduction rouge de l'appel sans contexte et du chemin de récupération.
   - [ ] Entrée native initialisée et répétition de rollback réussie au premier appel.
