@@ -81,7 +81,7 @@ fi
 if [[ $1 == full || $1 == mutations || $1 == targeted || $1 == review ]]; then
   check review-mutants node ../tools/make/base-api-l5-review-mutations.mjs
 fi
-if [[ $1 == full || $1 == mutations || $1 == targeted ]]; then
+if [[ $1 == full || $1 == mutations || $1 == targeted || $1 == l5 ]]; then
   check l5-mutants node ../tools/make/base-api-l5-mutations.mjs
 fi
 check results node ../tools/make/base-api-pwe-results.mjs
