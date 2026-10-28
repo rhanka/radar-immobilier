@@ -14,3 +14,7 @@ services:
     entrypoint: [node]
     volumes:
       - ../..:/work:ro
+  operator:
+    extends: fixture
+    network_mode: host
+    entrypoint: [node, deploy/base-preprod/public-cli.mjs]
