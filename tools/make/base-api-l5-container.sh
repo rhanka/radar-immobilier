@@ -45,6 +45,7 @@ lint=(api/tests/integration/pwe-*.ts api/src/services/facets/pwe-*.ts
 check eslint node_modules/.bin/eslint "${lint[@]}"
 cd api
 node ../tools/make/base-api-ct8.mjs > /evidence/ct8.log
+check ct8-staged node ../tools/make/base-api-l5-ct8.mjs
 node ../tools/make/base-api-b2-setup.mjs > /evidence/db-setup.log
 read -r -a scopes <<< "${2//$'\n'/ }"
 if [[ $1 == full ]]; then
