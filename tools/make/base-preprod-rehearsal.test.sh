@@ -11,6 +11,7 @@ invoke freeze-cd; mark freeze-cd
 cp ingress-original.json ingress-fixture.json
 invoke close EXPECTED="$testdir/expected.json"; mark close
 closure_snapshot=$testdir/out-$n/ingress-snapshot.json
+closure_sha=$(sha256sum "$closure_snapshot"|cut -d' ' -f1)
 jq -nc --slurpfile c input.json --arg at "$(date -u +%FT%TZ)" '{action:"activate",binding:$c[0].binding,image:$c[0].image,
  releaseSha:($c[0].binding.releaseId|split(":")[0]),observedAt:$at,result:{workspaceId:$c[0].binding.workspaceId,
  sealedUnresolved:0,pendingReceipts:0,status:"open-success",epoch:"scoped",maintenanceBarrier:false}}' > synthetic-receipt.json

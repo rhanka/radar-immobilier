@@ -113,7 +113,7 @@ case "$*" in
     while [[ $# -gt 0 ]]; do
       if [[ $1 == --patch-file ]]; then patch=$2; shift 2; else shift; fi
     done
-    if [[ ${FAKE_STATE:-} == restore-race && $patch == *restore-patch.json ]]; then
+    if [[ ( ${FAKE_STATE:-} == restore-race && $patch == *restore-patch.json ) || ( ${FAKE_STATE:-} == reclose-race && $patch == *reclose-patch.json ) ]]; then
       jq '(.items[0].metadata.resourceVersion)="999"' ingress-fixture.json > ingress-next.json
       mv ingress-next.json ingress-fixture.json
     fi
@@ -163,6 +163,7 @@ case "$*" in
   'get jobs '*) [[ ${FAKE_STATE:-} != job ]] || echo 1;;
   'get endpointslices '*) [[ ${FAKE_STATE:-} != ready ]] || printf '[{"conditions":{"ready":true}}]\n';;
   'scale deployment/radar-api --replicas='*)
+    [[ ${FAKE_STATE:-} != reclose-scale-fail ]] || exit 1
     [[ ${BASE_PREPROD_REHEARSAL:-} != 1 ]] || printf '%s\n' "${3##*=}" > api-replicas-fixture;;
   'get deployments '*)
     if [[ ${FAKE_STATE:-} == replicas ]];then printf 'radar-ui\t1\n';
