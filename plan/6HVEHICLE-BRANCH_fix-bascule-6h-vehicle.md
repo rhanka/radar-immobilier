@@ -38,9 +38,9 @@
 - [x] **Lot 3 — Rollback initialisé**
   - [x] Reproduction rouge de l’appel sans contexte et du chemin de récupération.
   - [x] Entrée native initialisée et répétition de rollback réussie au premier appel.
-- [ ] **Lot 4 — Actions et durée du gel**
-  - [ ] Reproduction rouge du message anonyme et du gel trop court.
-  - [ ] Identité du run bloquant, préflight de fenêtre, tests verts.
+- [x] **Lot 4 — Actions et durée du gel**
+  - [x] Reproduction rouge du message anonyme et du gel trop court.
+  - [x] Identité du run bloquant, préflight de fenêtre, tests verts.
 - [ ] **Lot 5 — Répétition et livraison**
   - [ ] Activation → Q1 → redémarrage → Q2 → preuve → filtre natif → réouverture → lectures authentifiées simulées.
   - [ ] Runbook anglais et rapport français avec limites.

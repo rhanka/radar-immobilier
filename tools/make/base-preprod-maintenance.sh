@@ -3,6 +3,7 @@ source tools/make/base-preprod-api-identity.sh
 source tools/make/base-preprod-network.sh
 source tools/make/base-preprod-routing.sh
 source tools/make/base-preprod-restore.sh
+source tools/make/base-preprod-actions.sh
 permissions() {
   local resource verb
   : > "$OUTPUT/permissions.tsv"
@@ -50,9 +51,10 @@ inventory() {
 }
 active_runs() {
   gh api --paginate "repos/$repo/actions/runs?per_page=100" \
-    --jq '.workflow_runs[] | select(.status!="completed") | {id,status,head_sha,path}'
+    --jq '.workflow_runs[] | select(.status!="completed") | {id,status,head_sha,path,name,head_branch}'
 }
 freeze-cd() {
+  require_operator_context; require_change_freeze
   permissions
   inventory
   gh api --method PUT "repos/$repo/actions/workflows/build-push-images.yml/disable" > "$OUTPUT/freeze.txt"
@@ -62,14 +64,15 @@ freeze-cd() {
     gh run cancel "$run" --repo "$repo" >> "$OUTPUT/cancel.txt"
   done < <(jq -r '.cancelRuns[]? | select(type=="number")' "$INPUT")
   active_runs > "$OUTPUT/runs-after-freeze.jsonl"
-  [[ ! -s $OUTPUT/runs-after-freeze.jsonl ]] || fail 'Nonterminal Actions runs remain; wait or explicitly cancel and re-inspect'
+  assert_no_actions "$OUTPUT/runs-after-freeze.jsonl" 'Nonterminal Actions runs remain; wait or explicitly cancel and re-inspect'
   assert_cd_frozen
 }
 assert_cd_frozen() {
   require_operator_context
+  require_change_freeze
   [[ $(gh api "repos/$repo/actions/workflows/build-push-images.yml" --jq .state) == disabled_manually ]] || fail 'CD is not frozen'
   active_runs > "$OUTPUT/runs-current.jsonl"
-  [[ ! -s $OUTPUT/runs-current.jsonl ]] || fail 'A nonterminal Actions run exists'
+  assert_no_actions "$OUTPUT/runs-current.jsonl" 'A nonterminal Actions run exists'
 }
 delete_job_uid() {
   local name=$1 uid=$2
