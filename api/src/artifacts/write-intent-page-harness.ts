@@ -162,9 +162,9 @@ export function pageHarness(options: { storage?: Map<string, string>; initialNow
     URLSearchParams,
   };
   runInNewContext(PW_PAGE_SCRIPT, sandbox);
-  const window = sandbox.window as { __pwWriteOnCommitted: (data: unknown) => Promise<void> };
+  const window = sandbox.window as { __pwWriteOnCommitted: (data: unknown, current?: () => boolean) => Promise<void> };
   const onCommitted = window.__pwWriteOnCommitted;
-  window.__pwWriteOnCommitted = async (data) => { committed.push(data); return onCommitted(data); };
+  window.__pwWriteOnCommitted = async (data, current) => { committed.push(data); return onCommitted(data, current); };
   const flush = async (): Promise<void> => {
     for (let i = 0; i < 40; i += 1) await Promise.resolve();
   };
