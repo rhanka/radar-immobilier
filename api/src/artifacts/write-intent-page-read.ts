@@ -11,9 +11,20 @@ export const PW_PAGE_READ_SCRIPT = `
   function show(id,value) { var node=document.querySelector(id); if(node) node.textContent=JSON.stringify(value); }
   async function read(operation,params) {
     if(!boot.readGrant) throw new Error("Read authority unavailable");
-    var controller=typeof AbortController!=="undefined"?new AbortController():null, timer;
+    var controller=typeof AbortController!=="undefined"?new AbortController():null, timer, active=true;
     try {
       return await Promise.race([(async function() {
+        // Renew only on a demanded read. Background-tab expiry recovers through
+        // the same pinned P, with current authority checked by the reader host.
+        var renewal=await fetch("/__reader/renew",{method:"POST",credentials:"same-origin",
+          headers:{"x-preview-grant":boot.readGrant},signal:controller?.signal});
+        if(renewal.status===401) renewal=await fetch("/__reader/renew",{method:"POST",credentials:"same-origin",
+          headers:{},signal:controller?.signal});
+        var renewed=await renewal.json();
+        if(!active || !renewal.ok || typeof renewed.grant!=="string" || !renewed.grant || renewed.grant.length>4096) {
+          throw new Error("Read authority unavailable");
+        }
+        boot.readGrant=renewed.grant;
         var response=await fetch("/__reader/api/baskets."+operation+".v1?"+new URLSearchParams(params),
           {credentials:"same-origin",headers:{"x-preview-grant":boot.readGrant},signal:controller?.signal});
         var data=await response.json();
@@ -21,9 +32,9 @@ export const PW_PAGE_READ_SCRIPT = `
           !data.snapshot || !/^[a-f0-9]{64}$/.test(data.snapshot.baseToken)) throw new Error("Read unavailable");
         return data;
       })(),new Promise(function(resolve,reject) {
-        timer=setTimeout(function(){if(controller) controller.abort();reject(new Error("Read timed out"));},15000);
+        timer=setTimeout(function(){active=false;reject(new Error("Read timed out"));if(controller) controller.abort();},15000);
       })]);
-    } finally { clearTimeout(timer); }
+    } finally { active=false;clearTimeout(timer); }
   }
   function params(g) { return {workspaceId:boot.workspaceId,citySlug:g.target.citySlug,type:g.target.type,id:g.target.id,
     reveal:g.operation && (g.operation.indexOf(".restore.")!==-1 || g.operation.indexOf(".discard.")!==-1)?"true":"false"}; }
