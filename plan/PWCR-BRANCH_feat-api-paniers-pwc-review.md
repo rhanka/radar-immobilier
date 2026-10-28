@@ -33,4 +33,5 @@
 - [ ] Lot 3: served page/script/CSP, targeted pre-read and coherent post-receipt refresh.
 - [ ] Lot 4: strict listener response projection and browser identity/intent validation.
 - [ ] Lot 5: preserve uncertain prepare keys and manual Retry-After budgets.
+- [x] Lot 5 implementation: retry refusal retains the original body/key; Retry-After persists the later manual deadline.
 - [ ] Lot 6: unit/PG/API/proxy tests, discriminating mutations, audited bundle and French report.
