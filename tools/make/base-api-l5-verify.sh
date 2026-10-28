@@ -44,7 +44,7 @@ archive_ci_inputs
 extra=(tools/make/base-api-pwe-before-app-result.txt
   api/tests/*.ts api/src/scripts/base-preprod-rights.json tools/h4-mcp.mk
   tools/make/artefacts-delivery-account.sql tools/make/artefacts-delivery-probe.sh
-  deploy/k8s/41-immo-mcp-ingress.yaml packages/immo-mcp/config/*.json
+  deploy/k8s/immo-mcp/41-immo-mcp-ingress.yaml packages/immo-mcp/config/*.json
   packages/immo-mcp/src/fixtures/*.json)
 for path in "${extra[@]}"; do
   [[ -f $path && ! -L $path ]]
