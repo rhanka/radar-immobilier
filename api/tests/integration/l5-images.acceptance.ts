@@ -4,7 +4,7 @@ import { afterAll, beforeAll, expect, it } from "vitest";
 import { imagePublication } from "./l5-image-publication.js";
 import { imageNetwork } from "./l5-image-network.js";
 import { L5_DOMAIN } from "./l5-fixture.js";
-import { effects } from "./pwe-fixture.js";
+import { effects, ONE_COMMIT } from "./pwe-fixture.js";
 
 let h: Awaited<ReturnType<typeof imagePublication>>;
 let network: Awaited<ReturnType<typeof imageNetwork>>;
@@ -96,7 +96,7 @@ it.each([0, 1])("should read and confirm a published write through normal image 
     }
     expect(receipt.state).toBe("committed");
     const after = await effects(h.f); expect(after.events).toBe(before.events! + 1);
-    expect(after.debits).toBe(before.debits! + 1);
+    for (const [key, delta] of Object.entries(ONE_COMMIT)) expect(after[key], key).toBe(before[key]! + delta);
     await page.bringToFront();
     await page.waitForFunction(() => {
       const receipt = document.querySelector("#pw-page-receipt")?.textContent;
