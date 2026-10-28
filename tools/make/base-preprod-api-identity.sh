@@ -12,6 +12,8 @@ api_identity() {
   [[ -n $uid && -n $hash && -n $container && -n $started && $count =~ ^[0-9]+$ && $ready == true
     && $image == "$(jq -r .image "$INPUT")" && ( ${image_id##*@} == "${image##*@}"
     || $image_id == "containerd://${image##*@}" || $image_id == "docker://${image##*@}" ) ]] || fail 'API container image/instance is not qualified'
+  [[ -z $restarted ]] || restarted=$(utc_timestamp "$restarted" "instance.restartedAt")
+  started=$(utc_timestamp "$started" "instance.startedAt")
   jq -n --arg deploymentUid "$deployment" --arg generation "$generation" --arg restartedAt "$restarted" \
     --arg podUid "$uid" --arg templateHash "$hash" --arg containerId "$container" --arg restartCount "$count" \
     --arg startedAt "$started" --arg image "$image" --arg imageID "$image_id" \
