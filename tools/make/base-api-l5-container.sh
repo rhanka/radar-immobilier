@@ -45,6 +45,7 @@ lint=(api/tests/integration/pwe-*.ts api/src/services/facets/pwe-*.ts
   api/src/artifacts/write-intent-{page-authority,page-listener,h5-route}.ts api/src/index.ts
   api/src/services/facets/pw-write-fences.ts
   api/src/artifacts/write-intent-page{,-budget,-harness}.ts
+  api/src/artifacts/write-intent-{page-read,review-reread.test,app-terminal-db.test}.ts
   api/src/artifacts/write-intent-app-{route,authority,result,surface-db.test}.ts
   api/src/services/facets/signal-write-receipt.ts
   api/src/artifacts/pwe-*.ts tools/make/base-api-pwe*.mjs tools/make/base-api-l5*.mjs)
@@ -67,7 +68,7 @@ check required ../node_modules/.bin/vitest run --config vitest.isolated.config.t
   --reporter=default --reporter=json --outputFile.json=/evidence/required.json
 if [[ $1 == full ]]; then
   check build npm run build
-  check full npm test -- --config vitest.isolated.config.ts \
+  check full npm test -- --config vitest.full.config.ts \
     --reporter=default --reporter=json --outputFile.json=/evidence/full.json
 fi
 if [[ $1 == full || $1 == mutations || $1 == inherited ]]; then
