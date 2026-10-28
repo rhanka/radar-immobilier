@@ -1,4 +1,5 @@
 [
+  {"name":"health","path":"/health","expected":200},
   {"name":"session","path":"/api/v1/auth/me","expected":200},
   {"name":"workspaces","path":"/api/v1/workspaces","expected":200},
   {"name":"personal-heads","path":"/api/v1/workspaces/:workspaceId/signal-facets/personal/cities/:citySlug","expected":200},
@@ -7,9 +8,6 @@
   {"name":"projection-revisions","path":"/api/v1/workspaces/:workspaceId/signal-facets/projection-revisions?citySlug=:citySlug&mode=signal","expected":200},
   {"name":"reason-codes","path":"/api/v1/workspaces/:workspaceId/signal-facets/reason-codes","expected":200},
   {"name":"facet-context","path":"/api/v1/workspaces/:workspaceId/facet-context","expected":200},
-  {"name":"legacy-city-retired","path":"/api/graph-signals/:citySlug","expected":410},
-  {"name":"legacy-cities-retired","path":"/api/graph-signals/by-city","expected":410},
-  {"name":"legacy-facets-retired","path":"/api/v1/signal-facets/cities/:citySlug","expected":410},
   {"name":"lots-stay-closed","path":"/api/v1/workspaces/:workspaceId/lot-facets/heads?citySlug=:citySlug&mode=personal","expected":503},
   {"name":"unauthenticated-workspaces","path":"/api/v1/workspaces","expected":401,"credentials":"omit"}
 ]
