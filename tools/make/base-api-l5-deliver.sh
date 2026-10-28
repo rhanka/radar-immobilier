@@ -30,12 +30,18 @@ audit() {
   local commit path
   g merge-base --is-ancestor "$BASE" HEAD
   g merge-base --is-ancestor "$IMPORTED" HEAD
-  for commit in $(g rev-list --reverse "$IMPORTED..HEAD"); do
+  # Imported PW-C/PW-A/main histories retain their own audits. Inspect this
+  # lane's first-parent commits, plus the files changed by merge resolutions.
+  for commit in $(g rev-list --first-parent --reverse "$IMPORTED..HEAD"); do
     subject "$(g show -s --format=%B "$commit")"
-    g show --format= --numstat "$commit" | stats
+    if [[ $(g show -s --format=%P "$commit" | wc -w) == 1 ]]; then
+      g show --format= --numstat "$commit" | stats
+      while IFS= read -r path; do allowed "$path"; done < <(g show --format= --name-only "$commit")
+    else
+      while IFS= read -r path; do [[ -z $path ]] || allowed "$path"; done < <(g show --format= --cc --name-only "$commit")
+    fi
     g show -s --format='%H %s' "$commit"
   done
-  while IFS= read -r path; do allowed "$path"; done < <(g diff --name-only "$IMPORTED" HEAD)
   g diff --quiet HEAD
   g diff --quiet "$IMPORTED" HEAD -- api/drizzle api/src/artifacts/write-intent-transaction.ts .track
 }

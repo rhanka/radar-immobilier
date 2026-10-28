@@ -6,6 +6,9 @@
 ## Scope / Guardrails
 - [x] Owner authorizes L5, PW-E completion and upstream merges; no push, no new login/session category, no BASE reimplementation.
 - [x] Frozen imported base: 5dc6fa3da80da35f7ca9536bdd8323854647726e, including PW-E c276209c, PW-A cfb3ecfe and main 62dd3553.
+- [x] Qualified PW-C handoff: 8d86392a; merge 1a9a8c8e. Current PW-A be3e06c4 and main 26a78195 imported by merges 09498fe8 and 8ea25cc5.
+- [x] Track event blob remains identical (5be59da6) across all imported parents and merge results; no acceptance freshness is claimed.
+- [x] Merge resolutions preserve L3 release serving, actual read dispatch, mandatory P proofs, closed reply projection and fresh BASE reads.
 - [x] Repository-local worktree tmp/l5; Make only, ENV last, no environment-file reads or host Node/Python.
 - [x] Test environments test-api-paniers-pwe and e2e-api-paniers-pwe; API 18935, UI 15935, Maildev 11935.
 - [x] Shared Docker lock, wait for foreign stacks, one owned stack, down -v --remove-orphans and release lock.
