@@ -28,6 +28,7 @@
 
 ## Plan / Todo (lot-based)
 - [ ] Lot 1: locked application status, receipt recovery and separate execution/revocation terminal HTML.
+- [x] Lot 1 implementation: status computed under I lock; authorized committed receipt survives revocation; terminal HTML has no confirm button.
 - [ ] Lot 2: active preprod nginx routes, HTTPS public origin, mandatory P instance/CSRF.
 - [ ] Lot 3: served page/script/CSP, targeted pre-read and coherent post-receipt refresh.
 - [ ] Lot 4: strict listener response projection and browser identity/intent validation.
