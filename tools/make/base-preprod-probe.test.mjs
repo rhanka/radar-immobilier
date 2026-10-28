@@ -86,3 +86,10 @@ test('limite la configuration publique à la préprod et au SHA complet', () => 
   assert.throws(() => probeConfig({ ...input, binding: { ...input.binding, releaseId: 'short' } }, 'q1'));
   assert.throws(() => probeConfig(input, 'rollback'));
 });
+
+test('arrête les lectures dès le premier échec de transport constaté', async () => {
+  let calls = 0;
+  const result = await publicQualification(fixtureConfig, publicCases, async () => { calls++; throw new TypeError(); });
+  assert.equal(result.passed, false);
+  assert.equal(calls, 1);
+});
