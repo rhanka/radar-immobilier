@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 source tools/make/base-api-pwa-offline-container.sh
+printf '#!/bin/bash\nexec /pwa-tools/lib64/ld-linux-x86-64.so.2 --library-path /pwa-tools/usr/lib/x86_64-linux-gnu:/pwa-tools/lib/x86_64-linux-gnu /pwa-tools/usr/bin/openssl "$@"\n' > /pwa-bin/openssl
+chmod 755 /pwa-bin/openssl
+export OPENSSL_CONF=/dev/null
+openssl version >> /evidence/system-package-versions.txt
 npm ci --ignore-scripts --no-audit --no-fund > /evidence/install.log 2>&1
 node node_modules/esbuild/install.js >> /evidence/install.log 2>&1
 # Browser setup is separate from the application runtime image under test.
