@@ -35,9 +35,9 @@
 - [x] **Lot 2 — UTC et erreurs explicites**
   - [x] Reproduction rouge des décalages et du refus silencieux.
   - [x] Normalisation à la construction, diagnostic des preuves non UTC, tests verts.
-- [ ] **Lot 3 — Rollback initialisé**
-  - [ ] Reproduction rouge de l'appel sans contexte et du chemin de récupération.
-  - [ ] Entrée native initialisée et répétition de rollback réussie au premier appel.
+- [x] **Lot 3 — Rollback initialisé**
+  - [x] Reproduction rouge de l’appel sans contexte et du chemin de récupération.
+  - [x] Entrée native initialisée et répétition de rollback réussie au premier appel.
 - [ ] **Lot 4 — Actions et durée du gel**
   - [ ] Reproduction rouge du message anonyme et du gel trop court.
   - [ ] Identité du run bloquant, préflight de fenêtre, tests verts.
