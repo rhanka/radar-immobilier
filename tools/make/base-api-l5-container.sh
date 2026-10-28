@@ -9,6 +9,10 @@ import config from './vitest.config.js';
 export default { ...config, envDir: false,
   test: { ...config.test, fileParallelism: false, maxWorkers: 1 } };
 CONFIG
+cat > api/vitest.full.config.ts <<'CONFIG'
+import config from './vitest.isolated.config.js';
+export default { ...config, test: { ...config.test, fileParallelism: true, maxWorkers: 2 } };
+CONFIG
 if [[ $1 == proxy ]]; then
   sed -i "s/maxWorkers: 1/maxWorkers: 1, include: ['tests\\/integration\\/pwcr-proxy.acceptance.ts']/" api/vitest.isolated.config.ts
 fi
@@ -19,6 +23,7 @@ POSTGRES_HOST=$(node --input-type=module -e 'import {lookup} from "node:dns/prom
 export POSTGRES_HOST
 export PWE_REQUIRED_SCOPE="$2"
 export PWE_MUTATION_FILTER="${3:-.*}"
+if [[ $1 == inherited ]]; then export PWCR_INHERITED_BATCH_FILTER="${3:-.*}"; fi
 if [[ $1 == targeted ]]; then [[ -n ${3:-} ]]; fi
 overall=0
 check() {
@@ -48,6 +53,12 @@ node ../tools/make/base-api-ct8.mjs > /evidence/ct8.log
 check ct8-staged node ../tools/make/base-api-l5-ct8.mjs
 node ../tools/make/base-api-b2-setup.mjs > /evidence/db-setup.log
 read -r -a scopes <<< "${2//$'\n'/ }"
+if [[ $1 == api ]]; then
+  check build npm run build
+  check full npm test -- --config vitest.full.config.ts \
+    --reporter=default --reporter=json --outputFile.json=/evidence/full.json
+  exit "$overall"
+fi
 if [[ $1 == full ]]; then
   check app-result-regression node ../tools/make/base-api-pwe-app-result-regression.mjs
 fi
@@ -58,7 +69,7 @@ if [[ $1 == full ]]; then
   check full npm test -- --config vitest.isolated.config.ts \
     --reporter=default --reporter=json --outputFile.json=/evidence/full.json
 fi
-if [[ $1 == full || $1 == mutations ]]; then
+if [[ $1 == full || $1 == mutations || $1 == inherited ]]; then
   check inherited-mutants node ../tools/make/base-api-pwc-review-inherited.mjs
 fi
 if [[ $1 == full || $1 == mutations || $1 == targeted ]]; then
