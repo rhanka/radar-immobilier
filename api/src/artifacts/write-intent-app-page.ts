@@ -132,7 +132,7 @@ export function renderWriteIntentManagement(c: Context, row: PwIntentRow,
     managementUrl: `/api/v1/artifacts/write-intents/${row.intentId}` };
   const result = bootstrap.result ?? {};
   const body = `<h1>Manage a write intent</h1>
-<p>Review execution and revocation separately. Receipt details require your current access rights.</p>
+<p>${result.receipt ? "Recorded result. Review execution and revocation separately." : "Management only. No confirmation is available from this document."}</p>
 ${definitionList([["Intent", row.intentId], ["State", String(result.state ?? "unknown")],
     ["Execution", String(result.executionState ?? "unknown")], ["Revocation", String(result.revocationState ?? "unknown")]])}
 ${result.receipt ? `<section id="pw-recovered-receipt"><h2>Recorded receipt</h2><pre>${escapeHtml(JSON.stringify(result.receipt))}</pre>` +
