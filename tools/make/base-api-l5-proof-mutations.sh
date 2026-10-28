@@ -18,8 +18,13 @@ for tuple in pwa:31 pwb:5 pwd:7 pwc:25; do
   if [[ $batch == pwa ]]; then
     original_hash=$(sha256sum tools/make/base-api-pwc-review-inherited.mjs | cut -d' ' -f1)
     legacy_hash=$(sha256sum tools/make/base-api-l5-legacy.mjs | cut -d' ' -f1)
-    jq -e --arg original "$original_hash" --arg legacy "$legacy_hash" '.status==0 and .signal==null and
-      .originalSha256==$original and .legacySha256==$legacy' "$directory/l5-inherited-harness.json" >/dev/null
+    # Batch-level success above is independent of later batches interrupted by Docker.
+    # Still require the wrapper exit to agree with every recorded batch result.
+    jq -e --arg original "$original_hash" --arg legacy "$legacy_hash" \
+      --slurpfile batches "$directory/inherited-mutants.json" '.signal==null and
+      .originalSha256==$original and .legacySha256==$legacy and
+      .status==(if any($batches[0][];.status!=0 or .signal!=null or .error!=null
+        or (.protectedBytesRestored|not)) then 1 else 0 end)' "$directory/l5-inherited-harness.json" >/dev/null
   fi
   receipt="$directory/$batch-mutants/mutations.json"
   jq -e --argjson count "$count" 'length==$count and ([.[].name]|unique|length)==$count' "$receipt" >/dev/null
