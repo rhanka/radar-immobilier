@@ -9,6 +9,8 @@ export function validPwPageEnvelope(value: unknown, expected: {
   const uuid = (v: unknown) => typeof v === "string" && /^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(v);
   const date = (v: unknown) => typeof v === "string" &&
     /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?(?:Z|[+-]\d\d:\d\d)$/.test(v) && Number.isFinite(Date.parse(v));
+  if (typeof expected.readerSub !== "string" || expected.readerSub.length === 0 ||
+    typeof expected.appOrigin !== "string" || !expected.appOrigin.startsWith("https://")) return false;
   if (!record(value) || !keys(value, ["operation", "reader", "data"]) ||
     value.operation !== `facets.write-intents.${expected.verb}.v1` || !record(value.reader) ||
     !keys(value.reader, ["sub"]) || value.reader.sub !== expected.readerSub || !record(value.data)) return false;
