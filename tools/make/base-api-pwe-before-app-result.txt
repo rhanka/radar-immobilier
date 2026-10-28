@@ -1,1 +1,1 @@
-...(path === api ? { state: result.state } : {})
+...(path === api ? { ...result, receipt: undefined } : {})
