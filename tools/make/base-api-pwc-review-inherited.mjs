@@ -8,7 +8,10 @@ const protectedFile = "/workspace/api/src/artifacts/write-intent-transaction.ts"
 const original = readFileSync(protectedFile);
 const receipts = [];
 let failed = false;
-for (const batch of ["pwa", "pwb", "pwd", "pwc"]) {
+const filter = new RegExp(process.env.PWCR_INHERITED_BATCH_FILTER ?? ".*");
+const batches = ["pwa", "pwb", "pwd", "pwc"].filter((batch) => filter.test(batch));
+if (!batches.length) throw new Error("No inherited batch selected");
+for (const batch of batches) {
   const directory = `/evidence/${batch}-mutants`;
   mkdirSync(directory, { recursive: true });
   const source = `/workspace/tools/make/base-api-${batch}-mutations.mjs`;
