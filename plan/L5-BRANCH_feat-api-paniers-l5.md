@@ -34,7 +34,7 @@
 - [x] Automated browser qualification only; root UAT and dev data remain untouched.
 
 ## Plan / Todo (lot-based)
-- [ ] Troisième passe #938 : corriger uniquement le contrat proxy, M11 et son adaptateur, le rechargement après révocation incertaine et les discriminants stricts ; requalifier les surfaces concernées et livrer le bundle r3 sans push avant 16:00 UTC.
+- [x] Troisième passe #938 : contrat proxy, M11 et son adaptateur, rechargement après révocation incertaine et discriminants stricts corrigés. La livraison r3 exige les matrices PW, trois variantes nginx et 52 mutants dans l5-r3-bundle ; résultats et limites consignés dans RAPPORT-SOL-PWC.md.
 - [x] Régressions ajoutées sur le HTML exact du rendu de gestion avec DOM réel, sans élément de gestion artificiel ; tableaux à un élément refusés sur les six discriminants concernés.
 - [x] PR 938 second-pass implementation: page disclosure rights after waits, post-commit application consultation, renewable read grants, bounded application POSTs/bootstrap and targeted regressions. Exact-image qualification and final bundle are enforced by l5-r2-bundle; results are recorded in RAPPORT-SOL-PWC.md, Second pass #938.
 - [x] Reproduce post-COMMIT continuation withdrawal with actual PostgreSQL membership, artifact ACL and moderation changes; retain exactly one committed command.
