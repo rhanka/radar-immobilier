@@ -17,14 +17,6 @@ import { WorkspaceError } from "../services/workspaces/types.js";
 import { PwWriteError } from "../services/facets/pw-write-errors.js";
 import { writeIntentTransaction } from "./write-intent-transaction.js";
 
-export interface CommittedWriteIntent {
-  readonly intentId: string;
-  readonly state: "committed";
-  readonly commandId: string;
-  readonly receipt: { readonly event: unknown };
-  readonly nextAction: "refresh_state";
-}
-
 export interface RevokedWriteIntent {
   readonly intentId: string;
   readonly authorizationState: "revoked";
@@ -34,13 +26,11 @@ export interface RevokedWriteIntent {
 
 /** Execute the prepared command exactly once; replay stays 409 consumed. */
 export async function confirmWriteIntent(db: Database, row: PwIntentRow,
-  proof: PwConfirmation): Promise<CommittedWriteIntent> {
+  proof: PwConfirmation): Promise<void> {
   assertSignalWriteInput(row.command);
   const principal = row.principal as PwPrincipal;
-  const result = await confirmPwSignalWrite(db, principal.sub, row.intentId,
+  await confirmPwSignalWrite(db, principal.sub, row.intentId,
     row.command as SignalWriteInput, { confirmation: proof });
-  return { intentId: row.intentId, state: "committed", commandId: row.commandKey,
-    receipt: { event: result.event }, nextAction: "refresh_state" };
 }
 
 /**
