@@ -71,7 +71,9 @@ describeDb("PWE-08 C08 application receipt consultation", () => {
       const result = await h.get(); expect(result.status).toBe(200);
       const data = await result.json();
       expect(data).toMatchObject({ management: true, state: loss === "intent" ? "revoked" : "committed" });
-      expect(data).not.toHaveProperty("receipt"); expect(data).not.toHaveProperty("challengeToken");
-      expect(data).not.toHaveProperty("commandId"); expect(await effects(h.h.f)).toEqual(before);
+      if (loss === "intent") expect(data).toMatchObject({ executionState: "committed", revocationState: "revoked",
+        commandId: h.receipt.commandId, receipt: h.receipt.receipt });
+      else { expect(data).not.toHaveProperty("receipt"); expect(data).not.toHaveProperty("commandId"); }
+      expect(data).not.toHaveProperty("challengeToken"); expect(await effects(h.h.f)).toEqual(before);
     });
 });
