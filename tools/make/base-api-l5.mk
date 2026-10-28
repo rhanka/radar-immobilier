@@ -26,4 +26,4 @@ l5-resume:
 	rtk bash tools/make/base-api-l5-resume.sh
 .PHONY: l5-proof
 l5-proof:
-	rtk bash tools/make/base-api-l5-proof.sh "$(API_EVIDENCE)" "$(MUTATION_EVIDENCE)" "$(PROXY_EVIDENCE)" "$(IMAGE_EVIDENCE)"
+	rtk bash tools/make/base-api-l5-proof.sh "$(API_EVIDENCE)" "$(MUTATION_EVIDENCE)" "$(PROXY_EVIDENCE)" "$(IMAGE_EVIDENCE)" "$(REQUIRED_EVIDENCE)"
