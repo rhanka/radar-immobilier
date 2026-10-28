@@ -19,12 +19,20 @@ export const APP_SUMMARY_SCRIPT = `
   function say(text) { var n = $("pw-note"); if (n) n.textContent = text; }
   function reveal(id) { var n = $(id); if (n) n.hidden = false; }
   async function post(url, body) {
-    var res = await fetch(url, { method: "POST", credentials: "same-origin",
-      headers: { "content-type": "application/json", "x-artifact-write-csrf": boot.csrf },
-      body: JSON.stringify(body) });
-    var data = null;
-    try { data = await res.json(); } catch (err) { data = null; }
-    return { status: res.status, retryAfter: res.headers.get("retry-after"), data: data };
+    var controller=typeof AbortController!=="undefined"?new AbortController():null, timer;
+    try {
+      return await Promise.race([(async function() {
+        var res = await fetch(url, { method: "POST", credentials: "same-origin",
+          ...(controller?{signal:controller.signal}:{}),
+          headers: { "content-type": "application/json", "x-artifact-write-csrf": boot.csrf },
+          body: JSON.stringify(body) });
+        var data = null;
+        try { data = await res.json(); } catch (err) { data = null; }
+        return { status: res.status, retryAfter: res.headers.get("retry-after"), data: data };
+      })(),new Promise(function(resolve,reject) {
+        timer=setTimeout(function(){reject(new Error("Result timed out"));if(controller) controller.abort();},15000);
+      })]);
+    } finally { clearTimeout(timer); }
   }
   function codeOf(out) {
     return out.data && out.data.error && typeof out.data.error.code === "string"
@@ -37,7 +45,7 @@ export const APP_SUMMARY_SCRIPT = `
       try {
         var out = await post(boot.confirmUrl, { challengeToken: boot.challengeToken });
         var code = codeOf(out);
-        if (out.status === 200 && out.data && out.data.state === "committed") {
+        if (out.status === 200 && out.data && out.data.state === "committed" && out.data.receipt) {
           var event = out.data.receipt && out.data.receipt.event ? out.data.receipt.event : {};
           $("pw-receipt").hidden = false;
           $("pw-receipt-command").textContent = String(out.data.commandId || "");
@@ -45,6 +53,9 @@ export const APP_SUMMARY_SCRIPT = `
           $("pw-receipt-basket").textContent = String(event.basket || "");
           say("Recorded. Refresh the target from the page.");
           try { if (typeof window.__pwWriteOnCommitted === "function") window.__pwWriteOnCommitted(out.data); } catch (err) {}
+        } else if (out.status === 200 && out.data && out.data.executionState === "committed") {
+          say("Recorded. Current rights do not allow viewing the receipt. Consult this intent in the application.");
+          reveal("pw-manage-box");
         } else if (code === "challenge_consumed") {
           say("Already confirmed. Read the intent status instead of confirming again.");
         } else if (code === "challenge_expired" || code === "write_intent_revoked") {
@@ -93,6 +104,7 @@ export const APP_SUMMARY_SCRIPT = `
         }
       } catch (err) {
         say("Result to verify. Read the intent status before any new gesture.");
+        reveal("pw-manage-box");
       } finally {
         revokeBtn.disabled = false;
       }
