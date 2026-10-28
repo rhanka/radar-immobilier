@@ -49,6 +49,7 @@ export async function publicQualification(config, cases, fetchRequest = fetch) {
   for (const spec of cases) {
     if (wanted && !wanted.has(spec.name)) continue;
     bodies[spec.name] = await readCheck(checks, spec, config, fetchRequest);
+    if (checks.at(-1)?.passed !== true) break;
     if (spec.name === 'session' && bodies.session.authenticated !== true) break;
   }
   const auth = bodies.session ?? {}, workspaces = bodies.workspaces?.workspaces;
