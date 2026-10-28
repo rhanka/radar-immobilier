@@ -21,7 +21,7 @@ services:
     volumes:
       - $RUN_DIR/offline-tools.tar:/offline-tools.tar:ro
       - $PWA_NPM_SEED:/offline-npm-seed:ro
-    tmpfs: ["/pwa-npm-cache:size=1024m"]
+    tmpfs: ["/pwa-npm-cache:size=2048m"]
     environment:
       PWA_OFFLINE: '1'
 YAML

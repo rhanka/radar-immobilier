@@ -6,11 +6,13 @@ export {
   type ArtifactsStorageConfig,
 } from "./config.js";
 export {
+  isGeneralActivation,
   readActivationEnv,
   resolveActivationConfig,
   type ActivationConfig,
   type ActivationConfigInput,
   type ActivationDisabledReason,
+  type ActivationMode,
 } from "./activation.js";
 export {
   checkAdmission,

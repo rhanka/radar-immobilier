@@ -1,0 +1,5 @@
+{
+  "node_modules/zod": { "version": "3.25.76" },
+  "node_modules/ollama-ai-provider": { "version": "1.2.0" },
+  "node_modules/ollama-ai-provider/node_modules/@ai-sdk/provider-utils": { "version": "2.2.8" }
+}

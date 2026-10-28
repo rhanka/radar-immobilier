@@ -1,3 +1,4 @@
+import { contractDateTime } from "@radar/domain";
 import { z } from "zod";
 import {
   AskingPriceSchema, CitySchema, DisplayedLotVersionSchema, FingerprintSchema,
@@ -6,17 +7,17 @@ import {
 } from "./wire-schemas.js";
 
 const commonEvent = {
-  id: z.string().uuid(), facet: z.enum(["selection", "archive", "pipeline", "market"]),
+  id: z.string().guid(), facet: z.enum(["selection", "archive", "pipeline", "market"]),
   basket: z.string().nullable(), state: z.enum(["active", "inactive"]),
   reasonCode: z.string().nullable(), verdict: ReasonVerdictSchema.nullable(),
-  createdAt: z.string().datetime(),
+  createdAt: contractDateTime(),
 };
 export const SignalEventSchema = z.object({ ...commonEvent, target: SignalTargetSchema }).strict();
 export const LotEventSchema = z.object({ ...commonEvent, target: LotTargetSchema, mode: ModeSchema,
   pipelineStatus: z.enum(["sollicite", "lettre_envoyee"]).nullable(),
   askingPrice: AskingPriceSchema, listingUrl: ListingUrlSchema,
   displayedVersion: DisplayedLotVersionSchema,
-  source: z.object({ importRunId: z.string().uuid(), sourceRowId: z.string().nullable(),
+  source: z.object({ importRunId: z.string().guid(), sourceRowId: z.string().nullable(),
     sourceChainId: z.string().nullable() }).strict().nullable(),
 }).strict();
 const ReasonCatalogEntrySchema = z.object({
@@ -81,7 +82,7 @@ export const GetLotFacetsOutputSchema = z.object({ ...page, mode: ModeSchema,
   items: z.array(lotItem).max(100) }).strict().superRefine(pageIssues);
 
 /** A receipt is a historical command snapshot; a separate read refreshes current state. */
-const receipt = { commandKey: z.string().uuid(), replayed: z.boolean(),
+const receipt = { commandKey: z.string().guid(), replayed: z.boolean(),
   stateKind: z.literal("command_snapshot") };
 export const CommandSignalFacetOutputSchema = z.object({ ...receipt,
   event: SignalEventSchema.nullable() }).strict();

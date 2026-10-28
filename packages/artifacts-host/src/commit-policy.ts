@@ -1,6 +1,6 @@
 import type pg from "pg";
 import type { AuthorizeCommit, CommitPolicyParticipantFactory } from "@sentropic/artifacts/server/commit-contract";
-import type { ActivationConfig } from "./activation.js";
+import { isGeneralActivation, type ActivationConfig } from "./activation.js";
 import { POLICY_REVISION } from "./transaction-authority.js";
 
 /** Every policy read and provisional reservation uses the coordinator's client. */
@@ -22,7 +22,8 @@ export async function createHostPolicy(pool: pg.Pool, scope: string,
         const account = await client.query<{ id: string; status: string }>(
           "SELECT id, status FROM account_users WHERE sub = $1 FOR SHARE", [actorId]);
         const activation = readActivation?.();
-        const activationOpen = !activation || (activation.enabled &&
+        const general = activation !== undefined && isGeneralActivation(activation);
+        const activationOpen = !activation || general || (activation.enabled &&
           activation.expiresAtMs > Date.now() && activation.subjects.includes(actorId));
         const approvedAccount = account.rows[0]?.status === "approved";
         const revisionOk = revision.rows[0]?.revision === POLICY_REVISION;
@@ -37,6 +38,12 @@ export async function createHostPolicy(pool: pg.Pool, scope: string,
             publicCode = "account_not_approved";
           }
           return { approved: false as const, reason: "denied" as const, publicCode, status };
+        }
+        if (general) {
+          // General opening: approved accounts publish with zero, one or
+          // several memberships; the storage scope stays a server namespace.
+          // No workspace is reported, so no façade freezes it.
+          return { approved: true as const, workspaceId: "" };
         }
         const accountId = account.rows[0]?.id;
         const memberships = await client.query<{ workspace_id: string }>(
@@ -80,13 +87,28 @@ export async function createHostPolicy(pool: pg.Pool, scope: string,
         }
         return { approved: true as const, workspaceId };
       },
-      async reserveQuota({ storageScopeId, bytes }) {
+      async reserveQuota({ storageScopeId, actorId, bytes }) {
         if (storageScopeId !== scope) return { reserved: false };
         const result = await client.query(
           `UPDATE artifacts.host_quotas SET operations_used = operations_used + 1, bytes_used = bytes_used + $2
            WHERE storage_scope_id = $1 AND operations_used < operation_limit AND bytes_used + $2 <= byte_limit`,
           [scope, bytes]);
-        return { reserved: result.rowCount === 1 };
+        if (result.rowCount !== 1) return { reserved: false };
+        // Per-actor durable ceiling, auto-provisioned once from the global row
+        // so no manual step per user is ever required; a missing global row
+        // provisions nothing and the update below blocks the commit.
+        await client.query(
+          `INSERT INTO artifacts.host_actor_quotas (storage_scope_id, actor_id, operation_limit, byte_limit)
+           SELECT $1, $2, operation_limit, byte_limit FROM artifacts.host_quotas WHERE storage_scope_id = $1
+           ON CONFLICT (storage_scope_id, actor_id) DO NOTHING`,
+          [scope, actorId]);
+        const actor = await client.query(
+          `UPDATE artifacts.host_actor_quotas SET operations_used = operations_used + 1, bytes_used = bytes_used + $3
+           WHERE storage_scope_id = $1 AND actor_id = $2
+             AND operations_used < operation_limit AND bytes_used + $3 <= byte_limit`,
+          [scope, actorId, bytes]);
+        if (actor.rowCount !== 1) return { reserved: false };
+        return { reserved: true };
       },
       mintFence(policyRevision, invocationId) {
         return { fenceId: transactionToken, transactionId: transactionToken, invocationId, policyRevision };

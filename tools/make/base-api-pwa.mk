@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 export ENV API_PORT UI_PORT MAILDEV_UI_PORT SCOPE PWA_MODE
-export PWA_OFFLINE PWA_NPM_SEED
+export PWA_OFFLINE PWA_NPM_SEED PWA_CI
 export FILES MSG
 override PWA_COMMAND := $(value CMD)
 export PWA_COMMAND
@@ -28,3 +28,7 @@ pwa-stage:
 	@bash tools/make/base-api-pwa-git.sh stage
 pwa-commit:
 	@bash tools/make/base-api-pwa-git.sh commit
+
+.PHONY: pwa-sequence-deliver
+pwa-sequence-deliver:
+	@bash tools/make/base-api-pwa-sequence-deliver.sh
