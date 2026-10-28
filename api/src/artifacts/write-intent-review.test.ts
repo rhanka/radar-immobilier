@@ -35,11 +35,11 @@ it.each(["confirmationUrl", "managementUrl", "statusUrl"])("should refuse a fore
   await h.clickGesture(GESTURES[1]!); expect(h.fetchCalls).toHaveLength(1);
 });
 
-it("should keep the original uncertain body/key through a refused retry", async () => {
+it.each([401, 403, 409, 429])("should keep the original uncertain body/key through a refused retry HTTP %s", async (status) => {
   const h = pageHarness(); h.responders.push(() => { throw new Error("response lost"); });
   await h.clickGesture(GESTURES[0]!);
   const first = h.fetchCalls[0]!;
-  h.responders.push(() => ({ status: 429, body: { error: { code: "write_rate_limited" } } }));
+  h.responders.push(() => ({ status, body: { error: { code: "write_rate_limited" } } }));
   for (const fn of h.elements["pw-write-retry"]!.listeners.click ?? []) fn({}); await h.flush();
   await h.clickGesture(GESTURES[1]!); expect(h.fetchCalls).toHaveLength(2);
   h.responders.push(() => prepared(UUID));
@@ -48,6 +48,28 @@ it("should keep the original uncertain body/key through a refused retry", async 
   expect(h.fetchCalls.every((call) => call.options.body === first.options.body &&
     call.options.headers?.["idempotency-key"] === first.options.headers?.["idempotency-key"])).toBe(true);
   expect(h.readCalls).toHaveLength(1);
+});
+
+it.each(["oversize", "malformed", "media"])("should bound and refuse %s upstream payloads", async (kind) => {
+  const raw = kind === "oversize" ? JSON.stringify({ private: "x".repeat(16 * 1024) }) : "{";
+  const upstream = new Response(raw, { headers: { "content-type": kind === "media" ? "text/html" : "application/json" } });
+  const app = new Hono().get("/", (c) => projectPageWriteResponse(c, upstream, expected));
+  const response = await app.request("/");
+  expect(response.status).toBe(502);
+  expect(await response.json()).toMatchObject({ error: { code: "upstream_bad_payload", attemptOutcome: "unknown" } });
+});
+
+it("should project public replies without upstream cookies, redirects or CORS authority", async () => {
+  const value = statusOf(UUID, "committed").body;
+  const app = new Hono().get("/", (c) => projectPageWriteResponse(c, Response.json(value, { headers: {
+    "set-cookie": "private=never", location: "https://foreign.example.test", "access-control-allow-origin": "*",
+    "x-private": "never",
+  } }), expected));
+  const response = await app.request("/"); expect(response.status).toBe(200);
+  expect(await response.json()).toEqual(value);
+  for (const name of ["set-cookie", "location", "access-control-allow-origin", "x-private"]) {
+    expect(response.headers.get(name)).toBeNull();
+  }
 });
 
 it("should apply a manual Retry-After of sixty seconds without restarting automatic polling", async () => {
