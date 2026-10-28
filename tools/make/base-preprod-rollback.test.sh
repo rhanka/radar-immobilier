@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Reprise de rollback entièrement simulée, au premier appel du point d'entrée natif.
+rm -f refusal-service-exists
 invoke close EXPECTED="$testdir/expected.json"
 rollback_routes=$testdir/out-$n/ingress-snapshot.json
 : > cluster-calls

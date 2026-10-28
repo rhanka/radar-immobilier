@@ -191,6 +191,7 @@ source tools/make/base-preprod-actions.test.sh
 invoke permissions
 cp ingress-original.json ingress-fixture.json
 source tools/make/base-preprod-rollback.test.sh
+rm -f refusal-service-exists
 invoke close EXPECTED="$testdir/expected.json"
 closure_output=$testdir/out-$n
 jq -e --slurpfile original ingress-original.json '.ingresses|map({metadata:{name:.metadata.name,uid:.metadata.uid},spec})==($original[0].items|map({metadata:{name:.metadata.name,uid:.metadata.uid},spec}))' "$closure_output/ingress-snapshot.json" >/dev/null
@@ -205,6 +206,7 @@ if rg 'api-resources --api-group|get middleware|auth can-i .*middlewares' cluste
 : > cluster-calls
 invoke restore-ingresses EXPECTED="$testdir/expected.json" ROUTES="$closure_output/ingress-snapshot.json"
 jq -e --slurpfile original ingress-original.json 'del(.items[].metadata.resourceVersion)==($original[0]|del(.items[].metadata.resourceVersion))' ingress-fixture.json >/dev/null
+rm -f refusal-service-exists
 invoke close EXPECTED="$testdir/expected.json"
 closure_output=$testdir/out-$n
 cp ingress-fixture.json restoration-baseline.json

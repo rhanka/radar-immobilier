@@ -158,13 +158,15 @@ qualification_receipt() {
   { sed '$d' tools/make/base-preprod-input.jq; cat tools/make/base-preprod-acceptance.jq; } > "$OUTPUT/acceptance-filter.jq"
   jq -e --slurpfile input "$INPUT" -f "$OUTPUT/acceptance-filter.jq" "$PROOFS" >/dev/null || fail 'Bound API qualification required'
 }
-api_routes() {
-  local ingress patchpaths
-  ingress=$(jq -er '.apiIngress|select(test("^[a-z0-9-]+$"))' "$INPUT")
-  patchpaths='["/health","/api/v1/auth","/api/v1/workspaces"]'
-  # Called only after Q2: public routes stay on the refusal Service during Q1/Q2.
+render_api_routes() {
+  local patchpaths='["/health","/api/v1/auth","/api/v1/workspaces"]'
   jq -n --argjson paths "$patchpaths" '{spec:{rules:[{host:"preprod.immo.sent-tech.ca",http:{paths:
     ($paths|map({path:.,pathType:"Prefix",backend:{service:{name:"radar-api",port:{number:3000}}}}))}}]}}' > "$OUTPUT/api-route-patch.json"
+}
+api_routes() {
+  local ingress
+  ingress=$(jq -er '.apiIngress|select(test("^[a-z0-9-]+$"))' "$INPUT")
+  render_api_routes
   "${k[@]}" patch ingress "$ingress" --type=merge --patch-file "$OUTPUT/api-route-patch.json" >> "$OUTPUT/api.txt"
 }
 start-api() {
