@@ -1,4 +1,4 @@
-import { writeFileSync } from "node:fs";
+import { existsSync, writeFileSync } from "node:fs";
 import { chromium, type Browser } from "@playwright/test";
 import { afterAll, beforeAll, expect, it } from "vitest";
 import { imagePublication } from "./l5-image-publication.js";
@@ -29,8 +29,16 @@ beforeAll(async () => {
     "--host-resolver-rules=MAP preprod.immo.sent-tech.ca 127.0.0.1, MAP preprod.auth.sent-tech.ca 127.0.0.1, MAP *.sent-tech.ca 127.0.0.1, MAP *.reader.test 127.0.0.1"] });
 }, 60_000);
 afterAll(async () => {
+  if (h) {
+    writeFileSync("/evidence/runtime-stop-request", "Stop image clients before fixture database teardown\n");
+    const deadline = Date.now() + 20_000;
+    while (!existsSync("/evidence/runtime-stopped")) {
+      if (Date.now() > deadline) throw new Error("Runtime shutdown was not acknowledged");
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+  }
   await browser?.close(); await network?.close(); await h?.close();
-});
+}, 30_000);
 
 
 it.each([0, 1])("should read and confirm a published write through normal image login for reader %s", async (reader) => {
@@ -88,9 +96,8 @@ it.each([0, 1])("should read and confirm a published write through normal image 
     if (reader === 0) {
       const lostBefore = network.lostResponses();
       network.loseNextConfirmResponse();
-      const lost = app.waitForEvent("requestfailed", { predicate: (request) => request.url().endsWith(`/${id}/confirm`) });
-      await app.locator("#pw-confirm").click(); await lost;
-      expect(network.lostResponses()).toBe(lostBefore + 1);
+      await app.locator("#pw-confirm").click();
+      await expect.poll(() => network.lostResponses(), { timeout: 3000 }).toBe(lostBefore + 1);
       receipt = await app.evaluate(async (intentId) =>
         (await fetch(`/api/v1/artifacts/write-intents/${intentId}`)).json(), id);
     } else {
