@@ -32,3 +32,7 @@ test-freeze-time:
 	@rtk bash tools/make/base-preprod-freeze-time.test.sh fractions
 	@rtk bash tools/make/base-preprod-freeze-time.test.sh invalid
 	@rtk bash tools/make/base-preprod-freeze-time.test.sh recovery
+.PHONY: test-reclose-mutations
+test-reclose-mutations:
+	@[[ "$(ENV)" == test-* ]]
+	@rtk bash tools/make/base-preprod-reclose-mutations.sh
