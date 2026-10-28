@@ -21,14 +21,18 @@ target=l5-verify; pointer=latest
 if [[ $phase == images ]]; then target=l5-images; pointer=latest-images; fi
 quiet_docker() {
   local quiet_since=$SECONDS active
-  echo 'Waiting for a continuously empty minute after foreign probes'
-  while (( SECONDS - quiet_since < 60 )); do
+  echo 'Waiting for ten continuously empty minutes after recurring foreign probes'
+  while (( SECONDS - quiet_since < 600 )); do
     if ! active=$(docker ps -q) || [[ -n $active ]]; then quiet_since=$SECONDS; fi
     sleep 2
   done
 }
 prior=$(cat "tmp/l5-evidence/$pointer" 2>/dev/null || true)
-if [[ -s $prior/occupancy-stop.txt || -s $prior/foreign-stack.txt ]]; then quiet_docker; fi
+recent_intrusion=0
+if [[ -s $controller/foreign-retries.tsv ]]; then
+  recent_intrusion=$(( $(date +%s) - $(stat -c %Y "$controller/foreign-retries.tsv") < 600 ))
+fi
+if [[ -s $prior/occupancy-stop.txt || -s $prior/foreign-stack.txt || $recent_intrusion == 1 ]]; then quiet_docker; fi
 while :; do
   previous=$(cat "tmp/l5-evidence/$pointer" 2>/dev/null || true)
   set +e
@@ -48,7 +52,7 @@ while :; do
     printf '%s\t%s\t%s\n' "$phase" "$code" "$current" >> "$controller/foreign-retries.tsv"
     echo 'Foreign interruption retained; waiting for departure before retrying'
     # Short-lived foreign probe containers can recur between two empty snapshots.
-    # Require a quiet minute after an intrusion; never set a departure deadline.
+    # Require sustained quiet after an intrusion; never set a departure deadline.
     quiet_docker
     continue
   fi
