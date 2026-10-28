@@ -48,3 +48,31 @@ test('utilise GET et refuse toute méthode mutatrice avant le transport', async 
   assert.equal(checks[0].passed, true);
   assert.equal(checks[1].failurePhase, 'configuration');
 });
+
+const { readFileSync } = await import('node:fs');
+const { publicQualification } = await import('../../deploy/base-preprod/public-probe.mjs');
+const { fixtureFetch, fixtureConfig } = await import('./base-preprod-probe-fixture.mjs');
+const publicCases = JSON.parse(readFileSync(new URL('../../deploy/base-preprod/public-checks.json', import.meta.url), 'utf8'));
+test('qualifie Q1 et Q2 authentifiés simulés sans exporter de valeur privée', async () => {
+  for (const phase of ['q1', 'q2']) {
+    const cfg = { ...fixtureConfig, phase };
+    const result = await publicQualification(cfg, publicCases, fixtureFetch(cfg, publicCases));
+    assert.equal(result.passed, true);
+    assert.equal(result.checks.length, publicCases.length);
+    assert.equal(result.projectionRevisionReadable, true);
+    assert.equal(JSON.stringify(result).includes('sensitive-fixture-only'), false);
+    assert.equal(result.businessMutations, 0);
+  }
+});
+test('limite le préflight aux trois lectures de disponibilité et de session', async () => {
+  const cfg = { ...fixtureConfig, phase: 'preflight' };
+  const result = await publicQualification(cfg, publicCases, fixtureFetch(cfg, publicCases));
+  assert.equal(result.passed, true);
+  assert.deepEqual(result.checks.map(x => x.name), ['health', 'session', 'workspaces']);
+});
+test('refuse Q1 lorsque le JSON de coherent-city est inexploitable', async () => {
+  const result = await publicQualification(fixtureConfig, publicCases,
+    fixtureFetch(fixtureConfig, publicCases, { 'coherent-city': 'non-json' }));
+  assert.equal(result.passed, false);
+  assert.equal(result.checks.find(x => x.name === 'coherent-city').failurePhase, 'json-parse');
+});
