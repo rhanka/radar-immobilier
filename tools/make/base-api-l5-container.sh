@@ -45,6 +45,7 @@ lint=(api/tests/integration/pwe-*.ts api/src/services/facets/pwe-*.ts
   api/src/artifacts/reader-opening.ts api/src/artifacts/preview-{tickets,session}.ts
   api/src/artifacts/content-serve.ts
   api/src/artifacts/write-intent-{page-authority,page-listener,h5-route}.ts api/src/index.ts
+  api/src/artifacts/write-intent-page-authority.test.ts
   api/src/services/facets/pw-write-fences.ts
   api/src/artifacts/write-intent-page{,-budget,-harness}.ts
   api/src/artifacts/write-intent-page-envelope{,.test}.ts
