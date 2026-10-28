@@ -5,7 +5,7 @@ import { projectPageWriteResponse } from "./write-intent-page-response.js";
 import { GESTURES, pageHarness, prepared, statusOf, UUID } from "./write-intent-page-harness.js";
 
 const expected = { verb: "status" as const, readerSub: "reader", appOrigin: "https://app.example.test", intentId: UUID };
-it.each(["reader", "operation", "intent", "receipt", "private", "state"])("should refuse a %s-invalid status before announcing success", async (change) => {
+it.each(["reader", "operation", "intent", "receipt", "private", "state", "rejection"])("should refuse a %s-invalid status before announcing success", async (change) => {
   const value = statusOf(UUID, "committed").body as unknown as {
     operation: string; reader: { sub: string }; data: Record<string, unknown>;
   };
@@ -16,6 +16,7 @@ it.each(["reader", "operation", "intent", "receipt", "private", "state"])("shoul
   if (change === "receipt") delete value.data.receipt;
   if (change === "private") value.data.challengeToken = "private-never-allowed";
   if (change === "state") value.data.state = "successful";
+  if (change === "rejection") value.data = { intentId: UUID, state: "rejected", error: { code: "private-never-allowed" } };
   expect(validPwPageEnvelope(value, expected)).toBe(false);
   const app = new Hono().get("/", (c) => projectPageWriteResponse(c, Response.json(value), expected));
   const response = await app.request("/"); expect(response.status).toBe(502);
