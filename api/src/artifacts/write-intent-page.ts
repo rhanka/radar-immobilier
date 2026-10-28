@@ -60,8 +60,8 @@ const PW_PAGE_SCRIPT_PREPARE = `
       if (new Set(g.deselect).size !== g.deselect.length) return "deselect";
       for (var i = 0; i < g.deselect.length; i += 1) if (!BASKETS[g.deselect[i]]) return "deselect";
     }
-    if (g.expectedSelectionHeads !== undefined && g.expectedSelectionHeads !== null
-      && (typeof g.expectedSelectionHeads !== "object" || Array.isArray(g.expectedSelectionHeads))) {
+    if (g.expectedSelectionHeads !== undefined
+      && (g.expectedSelectionHeads === null || typeof g.expectedSelectionHeads !== "object" || Array.isArray(g.expectedSelectionHeads))) {
       return "expectedSelectionHeads";
     }
     if (g.expectedSelectionHeads) for (var basket in g.expectedSelectionHeads) {
