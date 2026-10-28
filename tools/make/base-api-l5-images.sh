@@ -48,6 +48,7 @@ trap cleanup_images EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 guarded_down
+printf '%s\n' "$CAMPAIGN_DIR" > "$ROOT/tmp/l5-evidence/latest-images"
 source tools/make/base-api-pwa-offline.sh
 archive_sources
 archive_ci_inputs

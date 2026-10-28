@@ -21,3 +21,6 @@ l5-bundle:
 	rtk bash tools/make/base-api-l5-deliver.sh bundle
 l5-images:
 	rtk bash tools/make/base-api-l5-images.sh
+.PHONY: l5-resume
+l5-resume:
+	rtk bash tools/make/base-api-l5-resume.sh
