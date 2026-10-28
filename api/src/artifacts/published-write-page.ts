@@ -3,6 +3,7 @@ import { sql } from "drizzle-orm";
 import type { Database } from "../db/client.js";
 import { FacetError } from "../services/facets/target.js";
 import type { PwIdentityDomain } from "./write-intent-principal.js";
+import { samePwIdentityDomain } from "./write-intent-principal.js";
 import { readSessionClaims } from "./preview-session.js";
 import { parseContentHost } from "./content-host.js";
 import type { GrantIssuer } from "./preview-grant.js";
@@ -44,7 +45,7 @@ export function createPublishedWritePage(options: PublishedWritePageOptions) {
     const host = request.headers.get("host") ?? new URL(request.url).host;
     const parsed = parseContentHost(host, options.contentBase);
     if (!session || !resource || !session.writeIdentity || parsed.kind !== "pinned" ||
-      JSON.stringify(session.writeIdentity) !== JSON.stringify(options.domain) ||
+      !samePwIdentityDomain(session.writeIdentity, options.domain) ||
       resource.host !== host || resource.releaseId !== parsed.releaseId ||
       resource.sessionId !== session.sid || resource.readerSub !== session.readerSub ||
       resource.artifactId !== session.artifactId || resource.issuer !== options.readIssuer.issuer ||
