@@ -57,7 +57,7 @@ describe("page write invariant regressions", () => {
     await h.clickGesture(GESTURES[0]!);
     await h.runTimer();
     h.followUp("22222222-2222-4222-8222-222222222222");
-    resolve(statusOf(UUID, "committed", { receipt: { event: {} } }));
+    resolve(statusOf(UUID, "committed"));
     await h.flush();
     expect(h.committed).toEqual([]);
     expect(h.pendingDelays()).toEqual([PW_PAGE_POLL_BOUNDS.intervalMs]);
