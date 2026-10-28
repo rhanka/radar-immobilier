@@ -152,6 +152,7 @@ const PW_PAGE_SCRIPT_PREPARE = `
       reveal("#pw-write-retry");
     } finally {
       preparing = false;
+      if (pendingAttempt) reveal("#pw-write-retry");
       if (gate.done) gate.done();
     }
   }
@@ -168,7 +169,6 @@ const PW_PAGE_SCRIPT_PREPARE = `
   if (retryBtn) retryBtn.addEventListener("click", function () {
     if (!pendingAttempt || preparing) return;
     var attempt = pendingAttempt;
-    pendingAttempt = null;
     var box = $("#pw-write-retry");
     if (box) box.hidden = true;
     prepare(attempt.gesture, attempt.key);
@@ -257,7 +257,8 @@ ${PW_PAGE_BUDGET_SCRIPT}
     }
     if (out.status === 429) {
       var wait = Math.min(60, Math.max(INTERVAL_MS / 1000, parseInt(out.retryAfter || "2", 10) || 2));
-      poll.nextAt = Date.now() + wait * 1000;
+      poll.nextAt = Math.max(poll.nextAt, Date.now() + wait * 1000);
+      poll.restoredLease = true;
       if (!manual) schedule(wait * 1000);
       say("The follow-up is limited. Waiting " + wait + " seconds.");
       return;
