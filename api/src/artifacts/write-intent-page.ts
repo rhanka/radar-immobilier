@@ -11,6 +11,7 @@
 import { createHash } from "node:crypto";
 import { PW_PAGE_POLL_BOUNDS, PW_PAGE_PREPARE_PATH, PW_PAGE_STATUS_PATH } from "./write-intent-page-gesture.js";
 import { PW_PAGE_BUDGET_SCRIPT } from "./write-intent-page-budget.js";
+import { validPwPageEnvelope } from "./write-intent-page-envelope.js";
 
 const PW_PAGE_SCRIPT_PREPARE = `
 (() => {
@@ -20,6 +21,9 @@ const PW_PAGE_SCRIPT_PREPARE = `
   var HEX64 = /^[a-f0-9]{64}$/;
   var CITY = /^[a-z0-9-]{1,128}$/;
   var BASKETS = { pertinent: 1, a_surveiller: 1 };
+  var validateEnvelope = ${validPwPageEnvelope.toString()};
+  var boot = {};
+  try { boot = JSON.parse(document.querySelector("#pw-page-bootstrap").textContent); } catch (err) {}
   function $(sel) { return document.querySelector(sel); }
   function say(text) { var n = $("#pw-write-note"); if (n) n.textContent = text; }
   function reveal(id) { var n = $(id); if (n) n.hidden = false; }
@@ -52,11 +56,15 @@ const PW_PAGE_SCRIPT_PREPARE = `
       || g.reasonCode.length > 128)) return "reasonCode";
     if (g.deselect !== undefined) {
       if (!Array.isArray(g.deselect) || g.deselect.length > 2) return "deselect";
+      if (new Set(g.deselect).size !== g.deselect.length) return "deselect";
       for (var i = 0; i < g.deselect.length; i += 1) if (!BASKETS[g.deselect[i]]) return "deselect";
     }
     if (g.expectedSelectionHeads !== undefined && g.expectedSelectionHeads !== null
       && (typeof g.expectedSelectionHeads !== "object" || Array.isArray(g.expectedSelectionHeads))) {
       return "expectedSelectionHeads";
+    }
+    if (g.expectedSelectionHeads) for (var basket in g.expectedSelectionHeads) {
+      if (!BASKETS[basket] || (g.expectedSelectionHeads[basket] !== null && !UUID.test(g.expectedSelectionHeads[basket]))) return "expectedSelectionHeads";
     }
     if (g.expectedHeadId !== null && g.expectedHeadId !== undefined && !UUID.test(g.expectedHeadId)) return "expectedHeadId";
     if (typeof g.displayedFingerprint !== "string" || !HEX64.test(g.displayedFingerprint)) return "displayedFingerprint";
@@ -113,19 +121,27 @@ const PW_PAGE_SCRIPT_PREPARE = `
     preparing = true;
     var gate = withTimeout(15000);
     try {
+      if (!boot.pageInstanceId || !boot.csrf || typeof window.__pwReadGesture !== "function") throw new Error("Page bootstrap unavailable");
+      // Only a new intention rereads its target. An uncertain retry keeps its exact body/key.
+      if (!pendingAttempt) gesture = await window.__pwReadGesture(gesture);
+      var freshProblem = validGesture(gesture);
+      if (freshProblem) throw new Error("Target state unavailable");
       var res = await fetch(PREPARE, { method: "POST", credentials: "same-origin",
-        headers: { "content-type": "application/json", "idempotency-key": key },
+        headers: { "content-type": "application/json", "idempotency-key": key,
+          "x-reader-instance": boot.pageInstanceId, "x-reader-csrf": boot.csrf },
         body: JSON.stringify(prepareBody(gesture)), signal: gate.signal });
       var data = null;
       try { data = await res.json(); } catch (err) { data = null; }
       var code = data && data.error && typeof data.error.code === "string" ? data.error.code : null;
-      if ((res.status === 200 || res.status === 201) && data && data.data && data.data.intentId) {
+      if ((res.status === 200 || res.status === 201) && validateEnvelope(data,
+        {verb:"prepare",readerSub:boot.readerSub,appOrigin:boot.appOrigin})) {
         pendingAttempt = null;
         say(data.data.state === "committed" || data.data.state === "rejected"
           || data.data.state === "expired" || data.data.state === "revoked"
           ? "Already " + data.data.state + ". Follow the status once for the receipt."
           : "Prepared. Open the application to confirm.");
         openApp(data.data.confirmationUrl, data.data.managementUrl);
+        if (typeof window.__pwWritePrepared === "function") window.__pwWritePrepared(data.data.intentId, gesture);
         try {
           if (typeof window.__pwWriteFollowUp === "function") window.__pwWriteFollowUp(data.data.intentId);
         } catch (err) {}
@@ -186,6 +202,9 @@ const PW_PAGE_SCRIPT_POLL = `
   var MANUAL_SPACING_MS = ${PW_PAGE_POLL_BOUNDS.manualSpacingMs};
   var REQUEST_TIMEOUT_MS = ${PW_PAGE_POLL_BOUNDS.requestTimeoutMs};
   var TERMINAL = { committed: 1, rejected: 1, expired: 1, revoked: 1 };
+  var validateEnvelope = ${validPwPageEnvelope.toString()};
+  var boot = {};
+  try { boot = JSON.parse(document.querySelector("#pw-page-bootstrap").textContent); } catch (err) {}
   function $(sel) { return document.querySelector(sel); }
   function say(text) { var n = $("#pw-write-note"); if (n) n.textContent = text; }
   function reveal(id) { var n = $(id); if (n) n.hidden = false; }
@@ -214,6 +233,10 @@ ${PW_PAGE_BUDGET_SCRIPT}
         { credentials: "same-origin", headers: { accept: "application/json" }, signal: gate.signal });
       var data = null;
       try { data = await res.json(); } catch (err) { data = null; }
+      if (res.status === 200 && !validateEnvelope(data,
+        {verb:"status",readerSub:boot.readerSub,appOrigin:boot.appOrigin,intentId:intentId})) {
+        return {status:502,data:{error:{code:"upstream_bad_payload"}}};
+      }
       if (intentId === poll.intentId) poll.nextAt = 0;
       return { status: res.status, retryAfter: res.headers.get("retry-after"), data: data };
     } finally {
@@ -223,7 +246,7 @@ ${PW_PAGE_BUDGET_SCRIPT}
   function codeOf(data) {
     return data && data.error && typeof data.error.code === "string" ? data.error.code : null;
   }
-  function handleStatus(out, manual) {
+  async function handleStatus(out, manual) {
     var code = codeOf(out.data);
     var state = out.data && out.data.data ? out.data.data.state : null;
     if (out.status === 200 && state && TERMINAL[state]) {
@@ -231,7 +254,10 @@ ${PW_PAGE_BUDGET_SCRIPT}
         var receipt = out.data.data.receipt && out.data.data.receipt.event
           ? out.data.data.receipt.event : {};
         say("Confirmed " + (receipt.basket || "") + " (" + (receipt.state || "") + "). Refresh the target from the page.");
-        try { if (typeof window.__pwWriteOnCommitted === "function") window.__pwWriteOnCommitted(out.data.data); } catch (err) {}
+        try {
+          if (typeof window.__pwWriteOnCommitted !== "function") throw new Error("Display needs refresh");
+          await window.__pwWriteOnCommitted(out.data.data);
+        } catch (err) { say("Classification recorded; display needs refresh. Keep the receipt and use the application link."); }
       } else if (state === "expired") {
         say("Expired. Re-read the target, then prepare a new gesture.");
       } else if (state === "revoked") {
@@ -287,7 +313,7 @@ ${PW_PAGE_BUDGET_SCRIPT}
     try {
       var out = await checkOnce(intentId);
       if (intentId !== poll.intentId) return;
-      handleStatus(out);
+      await handleStatus(out);
       var state = out.data && out.data.data ? out.data.data.state : "";
       if (!poll.stopped && !TERMINAL[state] && poll.timer === null) schedule(INTERVAL_MS);
     } catch (err) {
@@ -336,7 +362,7 @@ ${PW_PAGE_BUDGET_SCRIPT}
     try {
       var out = await checkOnce(intentId);
       if (intentId !== poll.intentId) return;
-      handleStatus(out, true);
+      await handleStatus(out, true);
     } catch (err) {
       if (intentId !== poll.intentId) return;
       say("Result to verify. Try the manual check again later.");
