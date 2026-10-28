@@ -82,8 +82,12 @@ export function writeIntentAppRoute(deps: WriteAppDeps | null): Hono {
       const approved = await requireApprovedAppAccount(c, deps, pass.session.sub);
       if (approved) return approved;
       const proof = verifyAppChallenge((body as { challengeToken: unknown }).challengeToken, row, deps, pass);
-      return deps.confirm ? c.json(await deps.confirm(row, proof))
-        : writeRefusal(c, "write_transport_closed", 503);
+      if (!deps.confirm) return writeRefusal(c, "write_transport_closed", 503);
+      await deps.confirm(row, proof);
+      // Admission locks ended at COMMIT. Consult the durable result under
+      // current disclosure rights; never reuse the writer's returned event.
+      const result = await readAppWriteIntentResult(deps, row, pass);
+      return c.json({ intentId: row.intentId, ...result.data });
     } catch (error) { return writeIntentError(c, error); }
   });
   for (const path of [summary, api, `${api}/confirm`, `${api}/revoke`]) {

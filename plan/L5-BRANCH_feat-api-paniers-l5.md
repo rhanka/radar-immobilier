@@ -38,6 +38,7 @@
 - [x] Add controlled-clock page regressions for grant recovery before a new gesture and committed state/search refresh beyond 55 seconds; refusal must create no new intent.
 - [x] Specify read-only sealed-P recovery boundaries: exact pinned host, reader/session/artifact/profile, current ACL, same-origin POST and unexpired P; an explicitly invalid grant never falls back implicitly.
 - [x] Both page-status withdrawals reproduce on the unchanged runtime (103331-pg). Reuse the application disclosure guard after the final P resolution with workspace/approval locks and operation-specific moderation.
+- [x] Confirmation discards the execution return value and consults the durable result after COMMIT under current rights. Withdrawal preserves committed technical state without disclosing a business receipt or rerunning the command.
 - [x] Lot 0: merge approved PW-A and main; preserve Track event blob identity.
 - [x] Lot 1: bind verified approval provenance, explicit release write request and private page bootstrap.
 - [x] Implementation and targeted PG proof: actual one-use ticket provenance, explicit workspace, matching signed read grant and no publisher privileges.
