@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 ROOT=$(pwd -P)
-BASE=37f21d3d82dffed1b51bec3f06632983cba0bd09
+BASE=26a78195ad17f8b80907074a91d6cb43ef6ac3dd
 IMPORTED=5dc6fa3da80da35f7ca9536bdd8323854647726e
 g() { git -C "$ROOT" "$@"; }
 allowed() {
@@ -58,7 +58,7 @@ case ${1:-} in
     jq -e --arg head "$(g rev-parse HEAD)" '.qualified and .head==$head and .mutations.total==139 and .browser.imagePassed==10 and .browser.legacyReadPassed==3' tmp/l5-evidence/qualification.json >/dev/null
     audit
     mkdir -p tmp/l5-evidence
-    bundle=$ROOT/tmp/l5-evidence/api-paniers-l5.bundle
+    bundle=$ROOT/tmp/l5-evidence/api-paniers-combined.bundle
     [[ ! -L $bundle ]]
     g bundle create "$bundle" "$BASE..HEAD"
     target=$(mktemp -d "$ROOT/tmp/l5-evidence/bundle-audit.XXXXXX")
