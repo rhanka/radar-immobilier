@@ -6,6 +6,7 @@ controller="$PWD/tmp/l5-evidence/controller"
 mkdir -p "$controller"
 exec 9>"$controller/qualification.lock"
 flock 9
+printf '%s\n' "$$" > "$controller/pid"
 child=
 stop() {
   trap - INT TERM

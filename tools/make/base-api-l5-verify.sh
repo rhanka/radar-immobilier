@@ -25,6 +25,8 @@ LOG_DIR=$ROOT/tmp/l5-evidence/$(date -u +%Y%m%dT%H%M%S)-${PHASE:-pg}
 mkdir -p "$RUN_DIR" "$LOG_DIR"
 source tools/make/base-api-l5-lock.sh
 acquire_l5_lock
+git diff --quiet HEAD
+SOURCE_HEAD=$(git rev-parse HEAD)
 [[ $(df -Pk "$ROOT" | awk 'NR==2 {print $4}') -ge 8388608 ]]
 [[ $(awk '/MemAvailable:/ {print $2}' /proc/meminfo) -ge 8388608 ]]
 OWNER=$(printf '%s' "$ROOT/$ENV" | sha256sum | cut -d' ' -f1)
@@ -54,8 +56,10 @@ for path in "${extra[@]}"; do
   tar -rf "$RUN_DIR/source.tar" "$path"
   printf '%s\n' "$path" >> "$LOG_DIR/archived-paths.txt"
 done
+[[ $(git rev-parse HEAD) == "$SOURCE_HEAD" ]]
+git diff --quiet HEAD
 sha256sum "$RUN_DIR/source.tar" > "$LOG_DIR/source.sha256"
-git rev-parse HEAD > "$LOG_DIR/head.txt"
+printf '%s\n' "$SOURCE_HEAD" > "$LOG_DIR/head.txt"
 printf '%s\n' "$SCOPE" > "$LOG_DIR/scope.txt"
 cleanup_pwe() {
   local status=$?
