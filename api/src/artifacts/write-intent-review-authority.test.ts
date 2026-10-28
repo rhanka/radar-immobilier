@@ -11,7 +11,7 @@ function fixture() {
   const grant = { issuer: "https://h5.example.test", audience: "radar-artifact-write", tier: "preprod",
     identityIssuer: "https://auth.example.test", jti: UUID, sessionId: "P-1", sub: "reader", readerSub: "reader",
     artifactId: UUID, releaseId: UUID, host, profileName: "h5-signal-write-v2", profileFingerprint: HEX64,
-    policyRevision: "v1", workspaceId: UUID, citySlug: "demo-town", operations: [body.operation] };
+    policyRevision: "v1", workspaceId: UUID, citySlug: "demo-town", operations: ["facets.signals.personal.select.v1"] };
   const forward = vi.fn(async (_request: Request) => Response.json(prepared(UUID).body, { status: 201, headers: { "set-cookie": "private=never" } }));
   const deps: PageListenerDeps = { applicationOrigin: "https://app.example.test", contentBase: "pages.example.test",
     grantIssuer: grant, grantKeyId: "key-1", grantSecret: "k".repeat(40), nowMs: () => 1000,
