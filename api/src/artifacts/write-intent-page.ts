@@ -9,7 +9,7 @@
  * application surface under the normal session plus the PW CSRF token.
  */
 import { createHash } from "node:crypto";
-import { PW_PAGE_POLL_BOUNDS, PW_PAGE_PREPARE_PATH, PW_PAGE_STATUS_PATH } from "./write-intent-page-gesture.js";
+import { PW_PAGE_BUILD_BODY_SOURCE, PW_PAGE_OPERATIONS, PW_PAGE_POLL_BOUNDS, PW_PAGE_PREPARE_PATH, PW_PAGE_STATUS_PATH } from "./write-intent-page-gesture.js";
 import { PW_PAGE_BUDGET_SCRIPT } from "./write-intent-page-budget.js";
 import { validPwPageEnvelope } from "./write-intent-page-envelope.js";
 import { PW_PAGE_READ_SCRIPT } from "./write-intent-page-read.js";
@@ -18,10 +18,8 @@ const PW_PAGE_SCRIPT_PREPARE = `
 (() => {
   "use strict";
   var PREPARE = ${JSON.stringify(PW_PAGE_PREPARE_PATH)};
-  var UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  var HEX64 = /^[a-f0-9]{64}$/;
-  var CITY = /^[a-z0-9-]{1,128}$/;
-  var BASKETS = { pertinent: 1, a_surveiller: 1 };
+  var buildBody = ${PW_PAGE_BUILD_BODY_SOURCE};
+  var operations = ${JSON.stringify(PW_PAGE_OPERATIONS)};
   var validateEnvelope = ${validPwPageEnvelope.toString()};
   var boot = {};
   try { boot = JSON.parse(document.querySelector("#pw-page-bootstrap").textContent); } catch (err) {}
@@ -44,46 +42,9 @@ const PW_PAGE_SCRIPT_PREPARE = `
     return gesture;
   }
   function validGesture(g) {
-    if (!g || BASKETS[g.basket] === undefined && g.basket !== undefined) return "basket";
-    if (["facets.signals.personal.select.v1", "facets.signals.personal.deselect.v1",
-      "facets.signals.personal.discard.v1", "facets.signals.personal.restore.v1",
-      "facets.signals.workspace.discard.v1", "facets.signals.workspace.restore.v1"]
-      .indexOf(g.operation) === -1) return "operation";
-    if (typeof g.workspaceId !== "string" || !UUID.test(g.workspaceId)) return "workspaceId";
-    if (!g.target || typeof g.target.citySlug !== "string" || !CITY.test(g.target.citySlug)) return "citySlug";
-    if (g.target.type !== "Signal" && g.target.type !== "DesignationEvent") return "type";
-    if (typeof g.target.id !== "string" || g.target.id.length < 1 || g.target.id.length > 512) return "id";
-    if (g.reasonCode !== undefined && (typeof g.reasonCode !== "string" || g.reasonCode.length < 1
-      || g.reasonCode.length > 128)) return "reasonCode";
-    if (g.deselect !== undefined) {
-      if (!Array.isArray(g.deselect) || g.deselect.length > 2) return "deselect";
-      if (new Set(g.deselect).size !== g.deselect.length) return "deselect";
-      for (var i = 0; i < g.deselect.length; i += 1) if (!BASKETS[g.deselect[i]]) return "deselect";
-    }
-    if (g.expectedSelectionHeads !== undefined
-      && (g.expectedSelectionHeads === null || typeof g.expectedSelectionHeads !== "object" || Array.isArray(g.expectedSelectionHeads))) {
-      return "expectedSelectionHeads";
-    }
-    if (g.expectedSelectionHeads) for (var basket in g.expectedSelectionHeads) {
-      if (!BASKETS[basket] || (g.expectedSelectionHeads[basket] !== null && !UUID.test(g.expectedSelectionHeads[basket]))) return "expectedSelectionHeads";
-    }
-    if (g.expectedHeadId !== null && g.expectedHeadId !== undefined && !UUID.test(g.expectedHeadId)) return "expectedHeadId";
-    if (typeof g.displayedFingerprint !== "string" || !HEX64.test(g.displayedFingerprint)) return "displayedFingerprint";
-    if (typeof g.expectedProjectionToken !== "string" || !HEX64.test(g.expectedProjectionToken)) return "expectedProjectionToken";
-    return null;
+    try { buildBody(g, operations); return null; } catch (err) { return err.message; }
   }
-  function prepareBody(g) {
-    var body = { operation: g.operation, workspaceId: g.workspaceId,
-      target: { citySlug: g.target.citySlug, type: g.target.type, id: g.target.id },
-      expectedHeadId: g.expectedHeadId === undefined ? null : g.expectedHeadId,
-      displayedFingerprint: g.displayedFingerprint,
-      expectedProjectionToken: g.expectedProjectionToken };
-    if (g.basket !== undefined) body.basket = g.basket;
-    if (g.reasonCode !== undefined) body.reasonCode = g.reasonCode;
-    if (g.deselect !== undefined) body.deselect = g.deselect.slice().sort();
-    if (g.expectedSelectionHeads !== undefined) body.expectedSelectionHeads = g.expectedSelectionHeads;
-    return body;
-  }
+  function prepareBody(g) { return buildBody(g, operations); }
   function withTimeout(ms) {
     if (typeof AbortController === "undefined") return {};
     var ctrl = new AbortController();
