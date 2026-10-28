@@ -31,6 +31,8 @@ it.each(["confirmationUrl", "managementUrl", "statusUrl"])("should refuse a fore
   const h = pageHarness(); h.responders.push(() => ({ status: 201, body: value }));
   await h.clickGesture(GESTURES[0]!);
   expect(h.opened).toHaveLength(0); expect(h.seenFollowUp).toHaveLength(0);
+  expect(h.elements["pw-write-note"]!.textContent).toContain("verify");
+  await h.clickGesture(GESTURES[1]!); expect(h.fetchCalls).toHaveLength(1);
 });
 
 it("should keep the original uncertain body/key through a refused retry", async () => {
