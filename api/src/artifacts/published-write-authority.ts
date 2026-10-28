@@ -65,7 +65,10 @@ export async function readPublishedWriteAuthority(tx: WriteTx,
 export async function lockPublishedWriteAuthority(tx: WriteTx,
   references: Record<string, string | undefined>, exact = true): Promise<void> {
   const raw = references["reader_runtime"];
-  if (raw === undefined) return; // Synthetic PW port users have no L3 publication.
+  if (raw === undefined) {
+    if (references["policy"] === PUBLISHED_WRITE_POLICY) throw new PwWriteError(503, "write_authority_unavailable");
+    return; // Synthetic PW port users have no L3 publication.
+  }
   let binding: PublishedWriteBinding;
   try { binding = JSON.parse(raw) as PublishedWriteBinding; }
   catch { throw new PwWriteError(503, "write_authority_unavailable"); }
