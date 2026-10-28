@@ -39,7 +39,9 @@ expected=$(git ls-files -- 'api/src/artifacts/write-*.test.ts' \
   'api/tests/integration/artifacts-baskets.spec.ts' 'api/tests/integration/artifacts-reader-opening.spec.ts' | sed 's#^api/##' | sort)
 [[ $(tr ' ' '\n' < "$required/scope.txt" | sed '/^$/d' | sort) == "$expected" ]]
 check_source "$images"
-[[ $(cat "$images/head.txt") == "$head" && -s $images/final-cleanup.log ]]
+# EXIT cleanup is idempotent and can be empty after both per-host down -v.
+# Their nonempty removal logs remain mandatory below, along with status 0.
+[[ $(cat "$images/head.txt") == "$head" && -f $images/final-cleanup.log ]]
 image=$(cat "$images/image-id.txt")
 for host in pages.sent-tech.ca pages.reader.test; do
   count=12; [[ $host != pages.sent-tech.ca ]] || count=15
