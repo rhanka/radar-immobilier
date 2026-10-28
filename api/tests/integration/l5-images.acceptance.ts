@@ -29,6 +29,7 @@ afterAll(async () => {
   await browser?.close(); await network?.close(); await h?.close();
 });
 
+
 it.each([0, 1])("should read and confirm a published write through normal image login for reader %s", async (reader) => {
   const context = await browser.newContext();
   const page = await context.newPage();
@@ -135,3 +136,59 @@ it.each([0, 1])("should read and confirm a published write through normal image 
       normalOidcExchanges: network.exchanges(), before, after, navigation, requests }, null, 2));
   } finally { await context.close(); }
 });
+it("should execute all six published gestures and close on a real ACL withdrawal", async () => {
+  const context = await browser.newContext(), page = await context.newPage();
+  const receipts = [];
+  try {
+    await page.goto(`${h.origin}/`);
+    await page.getByRole("button", { name: "Reader B" }).click();
+    await page.getByRole("button", { name: "Autoriser et ouvrir" }).click();
+    await page.waitForFunction(() => document.body.dataset.readReady === "1");
+    for (const operation of ["personal.deselect", "personal.select", "personal.discard",
+      "personal.restore", "workspace.discard", "workspace.restore"]) {
+      const before = await effects(h.f), popup = context.waitForEvent("page");
+      await page.getByRole("button", { name: `Prepare ${operation}`, exact: true }).click();
+      const app = await popup;
+      try {
+        await app.locator("#pw-confirm").waitFor({ state: "visible" });
+        expect(await effects(h.f)).toEqual(before);
+        const id = new URL(app.url()).pathname.split("/").at(-1)!;
+        const post = app.waitForResponse((response) => response.url().endsWith(`/${id}/confirm`));
+        await app.locator("#pw-confirm").click();
+        const response = await post;
+        expect(response.status()).toBe(200);
+        const receipt = await response.json(); receipts.push({ operation, id, receipt });
+        const after = await effects(h.f);
+        for (const [key, delta] of Object.entries(ONE_COMMIT)) expect(after[key], key).toBe(before[key]! + delta);
+        await page.bringToFront();
+        await page.waitForFunction((intentId) => {
+          const note = document.querySelector("#pw-page-receipt")?.textContent;
+          return note && JSON.parse(note).intentId === intentId;
+        }, id);
+        await expect.poll(async () => {
+          const raw = await page.locator("#pw-live-state").textContent();
+          const state = JSON.parse(raw ?? "{}").facets;
+          if (operation.endsWith("discard")) return state?.archive[operation.split(".")[0]!]?.state;
+          if (operation.endsWith("restore")) return state?.archive[operation.split(".")[0]!]?.state;
+          return state?.selection.pertinent?.state;
+        }).toBe(operation.endsWith("deselect") || operation.endsWith("restore") ? "inactive" : "active");
+      } finally { await app.close(); }
+    }
+    const before = await effects(h.f), popup = context.waitForEvent("page");
+    await page.getByRole("button", { name: "Prepare personal.select", exact: true }).click();
+    const app = await popup;
+    await app.locator("#pw-confirm").waitFor({ state: "visible" });
+    const id = new URL(app.url()).pathname.split("/").at(-1)!;
+    await h.f.pool.query("DELETE FROM artifacts.artifact_access WHERE artifact_id=$1 AND principal_id=$2",
+      [h.artifactId, h.f.moderator.sub]);
+    const denied = app.waitForResponse((response) => response.url().endsWith(`/${id}/confirm`));
+    await app.locator("#pw-confirm").click(); expect((await denied).status()).toBe(403);
+    await app.reload();
+    expect(await app.locator("#pw-confirm").count()).toBe(0);
+    const revoke = app.waitForResponse((response) => response.url().endsWith(`/${id}/revoke`));
+    await app.locator("#pw-revoke").click(); expect((await revoke).status()).toBe(200);
+    expect(await effects(h.f)).toEqual(before);
+    writeFileSync("/evidence/browser-six-operations.json", JSON.stringify({ imageSha: process.env.L5_IMAGE_SHA,
+      contentBase, receipts, revokedIntent: id, effects: before }, null, 2));
+  } finally { await context.close(); }
+}, 60_000);
