@@ -171,6 +171,7 @@ chmod +x bin/kubectl bin/gh
 : > cluster-calls
 invoke permissions
 cp ingress-original.json ingress-fixture.json
+source tools/make/base-preprod-rollback.test.sh
 invoke close EXPECTED="$testdir/expected.json"
 closure_output=$testdir/out-$n
 jq -e --slurpfile original ingress-original.json '.ingresses|map({metadata:{name:.metadata.name,uid:.metadata.uid},spec})==($original[0].items|map({metadata:{name:.metadata.name,uid:.metadata.uid},spec}))' "$closure_output/ingress-snapshot.json" >/dev/null
