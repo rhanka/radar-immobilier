@@ -1,7 +1,7 @@
 # Feature: Published reader write integration
 
 ## Objective
-- [ ] Connect the real L3 published reader to PW prepare, polling and explicit application confirmation; finish PW-E on final runtime images.
+- [x] Connect the real L3 published reader to PW prepare, polling and explicit application confirmation; finish PW-E on final runtime images.
 
 ## Scope / Guardrails
 - [x] Owner authorizes L5, PW-E completion and upstream merges; no push, no new login/session category, no BASE reimplementation.
@@ -32,25 +32,26 @@
 
 ## Plan / Todo (lot-based)
 - [x] Lot 0: merge approved PW-A and main; preserve Track event blob identity.
-- [ ] Lot 1: bind verified approval provenance, explicit release write request and private page bootstrap.
+- [x] Lot 1: bind verified approval provenance, explicit release write request and private page bootstrap.
 - [x] Implementation and targeted PG proof: actual one-use ticket provenance, explicit workspace, matching signed read grant and no publisher privileges.
-- [ ] Lot 2: wire listener, H receiver and application confirmation using existing PW/BASE contracts.
+- [x] Lot 2: wire listener, H receiver and application confirmation using existing PW/BASE contracts.
 - [x] Corrected PW-C script is served by the published runtime; private P instance/CSRF and canonical HTML recovery links are wired.
-- [ ] Lot 3: lock actual artifact authority in prepare/admission/disclosure; qualify discriminating failures and races.
+- [x] Lot 3: lock actual artifact authority in prepare/admission/disclosure; qualify discriminating failures and races.
 - [x] Actual SQL ACL withdrawal, lost-response receipt recovery and technical owner revocation pass in the deployed image.
-- [ ] Lot 4: PostgreSQL, API CI, required matrices and mutations on merged candidate without required skips.
-- [ ] Lot 5: exact runtime image, real OIDC browser, persisted published page read/prepare/app-confirm and CT-9.
+- [x] Lot 4: PostgreSQL, API CI, required matrices and mutations on merged candidate without required skips.
+- [x] Lot 5: exact runtime image, real OIDC browser, persisted published page read/prepare/app-confirm and CT-9.
 - [x] Image candidate c8d42b5c: ten browser cases pass without skips on same-site/cross-site hosts, including six operations and BASE/read closure variants. Final HEAD replay remains required.
 - [x] Three inherited published-read cases are selected explicitly; their TLS helper now receives the archived OpenSSL executable and libraries in the disposable browser runner.
 - [x] Browser campaign 20261028T070555 on 46b4917d: ten real-image cases plus three inherited read regressions pass, no required skips; CT-9 covered on both hosts.
 - [x] Corrected runtime f0597917 passes all thirteen browser cases (090811-images); preserve each host's cleanup log separately from the idempotent EXIT cleanup before final proof aggregation.
 - [x] Bound service shutdown after completed assertions to two seconds; observed 25-second Compose stop exceeded the unchanged 20-second teardown barrier. Do not extend test deadlines.
-- [ ] Astra r2b: isolate asynchronous reread ownership, bound reads/body consumption, and cover terminal HTML under current rights.
+- [x] Astra r2b: isolate asynchronous reread ownership, bound reads/body consumption, and cover terminal HTML under current rights.
 - [x] Seven deterministic r2b reproductions fail on unchanged runtime (071040-pg); reads now bound fetch plus JSON consumption and reject obsolete gesture display updates.
 - [x] Terminal status stops its own budget before rereading; continuation versions and request ownership prevent late I from stopping J, clearing J's request or replacing J's display.
 - [x] Terminal HTML regressions cover committed, revoked and committed-then-revoked documents: original receipt under current rights, distinct execution/revocation, no confirmation/challenge, no receipt after membership withdrawal.
 - [x] Targeted replay passes all seven suspended-read reproductions and 23 existing page regressions; terminal tests check issued challenge bytes/private bootstrap rather than a reference in the shared script.
-- [ ] Lot 6: audit own commits, unique combined bundle from main 26a78195, French combined delivery report and cleanup receipts.
+- [x] Lot 6: audit own commits, unique combined bundle from main 26a78195, French combined delivery report and cleanup receipts.
+- [x] Qualified 86a0f3bf: 397 required, 4712 API (79 conditional skips), 139 killed/restored mutants, three nginx and thirteen browser cases. Main-only bundle import, HEAD/tree and fsck pass; root delivery report rendered. The bundle gate requires fresh exact-HEAD images after this documentation commit.
 - [x] Owner final delivery scope supersedes the earlier 37f21d3d bundle base; fetched main remains 26a78195 and is already an ancestor.
 - [x] Qualification explicitly lints the new read/HTML regressions; inherited stale-status mutation retains its fault at the versioned continuation boundary. Global API uses two isolated workers in one owned stack.
 - [x] Targeted lint includes the merged L3 content-serving composition in addition to the published runtime and all r2b changes.
