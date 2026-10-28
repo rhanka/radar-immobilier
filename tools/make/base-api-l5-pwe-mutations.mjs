@@ -12,7 +12,7 @@ const result = spawnSync(process.execPath, [script], { stdio: "inherit", cwd: "/
 writeFileSync("/evidence/l5-pwe-harness.json", JSON.stringify({
   engineSha256: createHash("sha256").update(original).digest("hex"),
   casesSha256: createHash("sha256").update(readFileSync("/workspace/tools/make/base-api-l5-pwe-cases.mjs")).digest("hex"),
-  adjustment: "M02 tier removal targets only samePwPrincipal, leaving the L5 domain comparator intact",
+  adjustment: "M02 reste limité à samePwPrincipal ; M11 hérite de l’ancre et de l’injection await vérifiées par l’adaptateur L5",
   caseNames: cases.map(([name]) => name), status: result.status, signal: result.signal,
 }, null, 2));
 if (result.error || result.signal || result.status !== 0) process.exitCode = 1;
