@@ -10,6 +10,7 @@ allowed() {
     api/src/artifacts/*) ;;
     api/tests/integration/pwcr-*.ts|tools/make/base-api-pwc-review*|plan/PWCR-BRANCH_feat-api-paniers-pwc-review.md) ;;
     api/tests/integration/pwe-app-receipt.spec.ts) ;;
+    api/tests/integration/pw-write-authority-rights.spec.ts) ;;
     deploy/overlays/preprod/nginx/default.conf|ui/nginx/default.conf|deploy/k8s/nginx/default.conf) ;;
     *) echo "Out of L5 scope: $1" >&2; return 2;;
   esac
