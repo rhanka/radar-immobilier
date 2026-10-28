@@ -176,8 +176,8 @@ export function pageHarness(options: { storage?: Map<string, string>; initialNow
     for (const fn of docListeners.click ?? []) fn({ target: button });
     await flush();
   };
-  const runTimer = async (): Promise<void> => {
-    const next = timers.find((timer) => !timer.cleared);
+  const runTimer = async (delay?: number): Promise<void> => {
+    const next = timers.find((timer) => !timer.cleared && (delay === undefined || timer.delay === delay));
     if (next) {
       next.cleared = true;
       next.fn();
