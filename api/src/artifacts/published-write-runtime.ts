@@ -33,10 +33,10 @@ export function createPublishedWriteRuntime(options: {
     sessionSecret: options.sessionSecret, grantSecret, readIssuer: options.readIssuer, permitsWrite });
   const h5 = { ...page, db: options.db, challengeKeyId: "published-write-v1",
     confirmationBaseUrl: `${domain.appOrigin}/artifact-write/intents`,
-    managementBaseUrl: `${domain.appOrigin}/api/v1/artifacts/write-intents`,
+    managementBaseUrl: `${domain.appOrigin}/artifact-write/intents`,
     statusBaseUrl: `${domain.appOrigin}/api/v1/artifacts/reader/facets/write-intents` };
   const receiver = writeIntentH5Route(h5);
-  const pageWrite = pageWriteListenerRoute({ ...page, contentBase: options.contentBase,
+  const pageWrite = pageWriteListenerRoute({ ...page, contentBase: options.contentBase, applicationOrigin: domain.appOrigin,
     forward: (request) => Promise.resolve(receiver.fetch(request)) });
   for (const path of [PW_BOOTSTRAP_PATH, PW_SCRIPT_PATH]) pageWrite.get(path, async (c) => {
     c.header("Cache-Control", "private, no-store");
