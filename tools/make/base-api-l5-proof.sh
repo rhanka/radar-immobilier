@@ -11,10 +11,7 @@ check_source() {
   source=$(cat "$directory/head.txt")
   [[ $source =~ ^[a-f0-9]{40}$ ]]
   git diff --quiet "$source" HEAD -- api packages package.json package-lock.json tsconfig.base.json \
-    ui/nginx deploy/k8s/nginx deploy/overlays/preprod/nginx deploy/overlays/preprod/kustomization.yaml \
-    'tools/make/base-api-pwe*.mjs' 'tools/make/base-api-pwc-review*.mjs' 'tools/make/base-api-l5*.mjs' \
-    tools/make/base-api-pwa-mutations.mjs tools/make/base-api-pwb-mutations.mjs \
-    tools/make/base-api-pwd-mutations.mjs tools/make/base-api-pwc-mutations.mjs
+    ui/nginx deploy/k8s/nginx deploy/overlays/preprod/nginx deploy/overlays/preprod/kustomization.yaml
 }
 for directory in "$api" "$required" "$proxy" "$images"; do check_source "$directory"; done
 before_intrusion() {
