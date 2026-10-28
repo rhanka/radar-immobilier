@@ -3,6 +3,7 @@ source tools/make/base-preprod-api-identity.sh
 source tools/make/base-preprod-network.sh
 source tools/make/base-preprod-routing.sh
 source tools/make/base-preprod-restore.sh
+source tools/make/base-preprod-reclose.sh
 source tools/make/base-preprod-actions.sh
 permissions() {
   local resource verb
