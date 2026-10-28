@@ -1,7 +1,8 @@
 # Entrée locale isolée : aucune inclusion du Makefile racine ni de dotenv.
 SHELL := /bin/bash
 .SHELLFLAGS := -euo pipefail -c
-unexport GIT_DIR GIT_WORK_TREE KUBECONFIG
+unexport GIT_DIR GIT_WORK_TREE
+export KUBECONFIG := /dev/null
 export ENV
 .PHONY: test-operator test-time check
 test-operator:
@@ -13,3 +14,11 @@ test-time:
 	@rtk bash tools/make/base-preprod-time.test.sh rejection
 check:
 	@rtk bash -ec 'for file in tools/make/base-preprod*.sh; do bash -n "$$file"; done; git diff --check'
+.PHONY: test test-paths test-probe rehearse
+test: test-operator test-time test-paths test-probe
+test-paths:
+	@rtk bash tools/make/base-preprod-paths.test.sh
+test-probe:
+	@rtk bash tools/make/base-preprod-probe.test.sh
+rehearse: test-paths
+	@rtk bash tools/make/base-preprod-rehearse.sh

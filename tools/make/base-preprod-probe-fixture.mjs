@@ -14,6 +14,9 @@ export function fixtureFetch(config, cases, overrides = {}) {
     'unauthenticated-workspaces': { error: 'unauthenticated' },
   };
   return async (path, options) => {
+    const pathname = path.split('?')[0];
+    const prefixes = config.exposedPrefixes ?? ['/health', '/api/v1/auth', '/api/v1/workspaces'];
+    if (!prefixes.some(prefix => pathname === prefix || pathname.startsWith(prefix + '/'))) return Response.json({ error: 'fixture_route_closed' }, { status: 503 });
     const spec = cases.find(x => resolvePath(x.path, config) === path && (x.credentials ?? 'include') === options.credentials);
     if (!spec || options.method !== 'GET') throw new Error('Requête imprévue dans la fixture');
     const body = overrides[spec.name] ?? bodies[spec.name];

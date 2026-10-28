@@ -171,6 +171,7 @@ exit 0
 FAKE
 chmod +x bin/kubectl bin/gh
 : > cluster-calls
+if [[ ${BASE_PREPROD_REHEARSAL:-} == 1 ]];then source tools/make/base-preprod-rehearsal.test.sh; return;fi
 source tools/make/base-preprod-public.test.sh
 source tools/make/base-preprod-actions.test.sh
 invoke permissions
