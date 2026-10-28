@@ -7,7 +7,7 @@ import { GRANT_SECRET, SESSION_SECRET, ISSUER } from "./reader-test-fixture.js";
 
 const artifactId = "123e4567-e89b-12d3-a456-426614174000";
 const releaseId = "123e4567-e89b-12d3-a456-426614174001";
-const host = `${releaseId}.pinned.pages.example.test`, origin = `https://${host}`;
+const host = `${releaseId}.pinned.pages.example.test`;
 const resource = { ...ISSUER, host, artifactId, releaseId, readerSub: "reader-alice", sessionId: "sealed",
   profileName: "demo", policyRevision: "pol-001", profileFingerprint: fingerprintReaderProfile({
     name: "demo", policyRevision: "pol-001", capabilities: ["geo.read", "signals.protected-read"] }) };
