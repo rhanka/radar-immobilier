@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 source tools/make/base-preprod-api-identity.sh
+source tools/make/base-preprod-network.sh
+source tools/make/base-preprod-routing.sh
+source tools/make/base-preprod-restore.sh
 permissions() {
   local resource verb
   : > "$OUTPUT/permissions.tsv"
   for resource in deployments.apps statefulsets.apps daemonsets.apps replicasets.apps pods jobs.batch cronjobs.batch \
-    ingresses.networking.k8s.io endpointslices.discovery.k8s.io services networkpolicies.networking.k8s.io; do
+    ingresses.networking.k8s.io endpointslices.discovery.k8s.io endpoints services networkpolicies.networking.k8s.io; do
     for verb in get list; do
       "${k[@]}" auth can-i "$verb" "$resource" >> "$OUTPUT/permissions.tsv" || fail "Required Kubernetes permission denied: $verb $resource"
     done
@@ -20,12 +23,9 @@ permissions() {
   done
   for verb in create delete; do "${k[@]}" auth can-i "$verb" jobs.batch >> "$OUTPUT/permissions.tsv"; done
   "${k[@]}" auth can-i create pods --subresource=exec >> "$OUTPUT/permissions.tsv"
+  "${k[@]}" auth can-i create pods --subresource=portforward >> "$OUTPUT/permissions.tsv"
   "${k[@]}" auth can-i get pods --subresource=log >> "$OUTPUT/permissions.tsv"
-  "${k[@]}" api-resources --api-group=traefik.io -o name > "$OUTPUT/traefik-resources.txt"
-  grep -qx middlewares.traefik.io "$OUTPUT/traefik-resources.txt" || fail 'Traefik middleware CRD unavailable'
-  for verb in get create patch delete; do
-    "${k[@]}" auth can-i "$verb" middlewares.traefik.io >> "$OUTPUT/permissions.tsv"
-  done
+  "${k[@]}" auth can-i create services >> "$OUTPUT/permissions.tsv"
   gh api "repos/$repo" --jq '{permissions:{push:.permissions.push,admin:.permissions.admin,maintain:.permissions.maintain}}' > "$OUTPUT/github-permissions.json"
   gh api "repos/$repo/actions/workflows/build-push-images.yml" --jq '{id,state,path}' > "$OUTPUT/workflow.json"
   gh api "repos/$repo/actions/runs?per_page=1" --jq '{total_count}' > "$OUTPUT/actions-readable.json"
@@ -46,6 +46,7 @@ inventory() {
   active_runs > "$OUTPUT/runs-initial.jsonl"
   jq '{backup,binding,image}' "$INPUT" > "$OUTPUT/backup-reference.json"
   date -u +%FT%TZ > "$OUTPUT/observed-at.txt"
+  network_inventory
 }
 active_runs() {
   gh api --paginate "repos/$repo/actions/runs?per_page=100" \
@@ -84,40 +85,12 @@ stop-job() {
   [[ $actual == "$uid" ]] || fail 'Recorded Job identity changed'
   delete_job_uid "$name" "$uid"
 }
-maintenance_inputs() {
-  jq -e '.maintenance as $m | ($m.middleware|test("^base-maintenance-[a-z0-9-]+$"))
-    and ($m.sources|length>0 and all(.[];test("^[a-fA-F0-9.:]+/[0-9]+$") and .!="0.0.0.0/0" and .!="::/0"))
-    and ($m.ingresses|length>0 and all(.[];test("^[a-z0-9-]+$")))' "$INPUT" >/dev/null || fail 'Maintenance boundary inputs required'
-}
-assert_boundary() {
-  maintenance_inputs
-  local ingress middleware annotation
-  middleware=$(jq -r .maintenance.middleware "$INPUT")
-  "${k[@]}" get middleware "$middleware" -o jsonpath='{.spec.ipAllowList.sourceRange}' > "$OUTPUT/network-sources.json"
-  jq -e --slurpfile c "$INPUT" 'sort==($c[0].maintenance.sources|sort)' "$OUTPUT/network-sources.json" >/dev/null
-  "${k[@]}" get ingresses -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' > "$OUTPUT/ingress-names.txt"
-  jq -Rse --slurpfile c "$INPUT" '(split("\n")|map(select(length>0))|sort)==($c[0].maintenance.ingresses|sort)' "$OUTPUT/ingress-names.txt" >/dev/null || fail 'Ingress coverage changed'
-  while IFS= read -r ingress; do
-    annotation=$("${k[@]}" get ingress "$ingress" -o jsonpath='{.metadata.annotations.traefik\.ingress\.kubernetes\.io/router\.middlewares}')
-    [[ ,$annotation, == *",radar-immobilier-preprod-$middleware@kubernetescrd,"* ]] || fail 'Ingress lacks operator boundary'
-  done < "$OUTPUT/ingress-names.txt"
-}
 close() {
   maintenance_inputs; permissions; inventory; assert_cd_frozen
   require_expected
-  # Preserve snapshots before touching replicas, schedules or routing annotations.
-  jq -n --slurpfile c "$INPUT" '{apiVersion:"traefik.io/v1alpha1",kind:"Middleware",
-    metadata:{name:$c[0].maintenance.middleware,namespace:$c[0].namespace},
-    spec:{ipAllowList:{sourceRange:$c[0].maintenance.sources}}}' > "$OUTPUT/middleware.json"
-  "${k[@]}" create -f "$OUTPUT/middleware.json" > "$OUTPUT/middleware-create.txt"
-  local ingress annotation name uid replicas images suspend schedule
-  while IFS= read -r ingress; do
-    annotation=$("${k[@]}" get ingress "$ingress" -o jsonpath='{.metadata.annotations.traefik\.ingress\.kubernetes\.io/router\.middlewares}')
-    jq -n --arg value "${annotation:+$annotation,}radar-immobilier-preprod-$(jq -r .maintenance.middleware "$INPUT")@kubernetescrd" \
-      '{metadata:{annotations:{"traefik.ingress.kubernetes.io/router.middlewares":$value}}}' > "$OUTPUT/ingress-patch.json"
-    "${k[@]}" patch ingress "$ingress" --type=merge --patch-file "$OUTPUT/ingress-patch.json" >> "$OUTPUT/closure.txt"
-  done < <(jq -r '.maintenance.ingresses[]' "$INPUT")
-  assert_boundary
+  assert_network
+  close_routes
+  local name uid replicas images suspend schedule
   # Freeze every namespace CronJob; the initial suspend state is retained in inventory.
   while IFS=$'\t' read -r name uid suspend schedule images; do
     "${k[@]}" patch cronjob "$name" --type=merge -p '{"spec":{"suspend":true}}' >> "$OUTPUT/closure.txt"
@@ -146,11 +119,7 @@ assert_closed() {
   [[ $("${k[@]}" get service radar-api -o jsonpath='{.spec.publishNotReadyAddresses}') != true ]] || fail 'Service publishes unready addresses'
   "${k[@]}" get service radar-api -o jsonpath='{.spec.selector}' > "$OUTPUT/api-selector.json"
   jq -e '.["app.kubernetes.io/name"]=="radar-immobilier" and .["app.kubernetes.io/component"]=="api"' "$OUTPUT/api-selector.json" >/dev/null || fail 'Unexpected API Service selector'
-  local service
-  for service in radar-api radar-ui radar-immo-mcp; do
-    "${k[@]}" get endpointslices -l "kubernetes.io/service-name=$service" -o jsonpath='{range .items[*]}{.endpoints}{"\n"}{end}' > "$OUTPUT/$service-endpoints.jsonl"
-    jq -se 'all(.[][]; .conditions.ready==false)' "$OUTPUT/$service-endpoints.jsonl" >/dev/null || fail 'A consumer endpoint is ready'
-  done
+  assert_namespace_endpoints closed
 }
 collect-maintenance() {
   require_expected; regular_json "${PROOFS:-}"
@@ -161,8 +130,9 @@ collect-maintenance() {
       shutdown:{completedAt:$now,coveredInstanceIds:($roster[0]|map(.id))}})}' "$PROOFS" > "$OUTPUT/qualified-input.json"
   PROOFS=$OUTPUT/qualified-input.json
   require_proofs; assert_closed; assert_mcp
-  jq --slurpfile roster "$EXPECTED" '{binding,image,observations,evidence,databaseInspection,
-    expectedInstances:$roster[0]}' "$PROOFS" > "$OUTPUT/maintenance.json"
+  jq --slurpfile roster "$EXPECTED" --slurpfile isolation "$OUTPUT/network-isolation-receipt.json" \
+    '{binding,image,observations,evidence,databaseInspection,networkIsolation:$isolation[0],
+      expectedInstances:$roster[0]}' "$PROOFS" > "$OUTPUT/maintenance.json"
 }
 assert_mcp() {
   local deployment expected actual
@@ -180,10 +150,7 @@ api_routes() {
   local ingress patchpaths
   ingress=$(jq -er '.apiIngress|select(test("^[a-z0-9-]+$"))' "$INPUT")
   patchpaths='["/health","/api/v1/auth","/api/v1/workspaces"]'
-  if [[ ${1:-} == qualification ]]; then
-    patchpaths='["/health","/api/v1/auth","/api/v1/workspaces","/api/graph-signals","/api/v1/signal-facets"]'
-  fi
-  # Keep the operator middleware attached; only the final explicit reopening removes it.
+  # Called only after Q2: public routes stay on the refusal Service during Q1/Q2.
   jq -n --argjson paths "$patchpaths" '{spec:{rules:[{host:"preprod.immo.sent-tech.ca",http:{paths:
     ($paths|map({path:.,pathType:"Prefix",backend:{service:{name:"radar-api",port:{number:3000}}}}))}}]}}' > "$OUTPUT/api-route-patch.json"
   "${k[@]}" patch ingress "$ingress" --type=merge --patch-file "$OUTPUT/api-route-patch.json" >> "$OUTPUT/api.txt"
@@ -195,21 +162,30 @@ start-api() {
     and .result.workspaceId==$c[0].binding.workspaceId and .result.sealedUnresolved==0
     and .result.status=="open-success" and .result.epoch=="scoped" and .result.maintenanceBarrier==false' "$PROOFS" >/dev/null
   assert_cd_frozen; assert_boundary
-  api_routes qualification
+  assert_namespace_endpoints closed
   "${k[@]}" set image deployment/radar-api "api=$(jq -r .image "$INPUT")" > "$OUTPUT/api-image.txt"
   "${k[@]}" scale deployment/radar-api --replicas=1 >> "$OUTPUT/api.txt"
   "${k[@]}" rollout status deployment/radar-api --timeout=180s >> "$OUTPUT/api.txt"
   api_identity
-  echo 'Keep the operator boundary; qualify Q1 before restart-api.'
+  assert_boundary; assert_namespace_endpoints
+  echo 'Public routes remain closed; use a namespace-admin tunnel and business session for Q1.'
+}
+tunnel-api() {
+  assert_cd_frozen; assert_boundary; api_identity
+  assert_namespace_endpoints
+  # Local-only transport; API business-session authorization still applies.
+  "${k[@]}" port-forward --address=127.0.0.1 service/radar-api 18872:3000
 }
 restart-api() {
   qualification_receipt
   assert_cd_frozen; assert_boundary
+  assert_namespace_endpoints
   assert_api_instance q1
   cp "$OUTPUT/api-instance.json" "$OUTPUT/api-before-restart.json"
   "${k[@]}" rollout restart deployment/radar-api > "$OUTPUT/restart.txt"
   "${k[@]}" rollout status deployment/radar-api --timeout=180s >> "$OUTPUT/restart.txt"
   api_identity
+  assert_boundary; assert_namespace_endpoints
   jq -n --slurpfile c "$INPUT" --slurpfile q1 "$PROOFS" --slurpfile before "$OUTPUT/api-before-restart.json" \
     --slurpfile instance "$OUTPUT/api-instance.json" --arg now "$(date -u +%FT%TZ)" \
     '{binding:$c[0].binding,image:$c[0].image,q1:$q1[0].q1,previousInstance:$before[0],
@@ -238,13 +214,7 @@ reopen-api() {
     [[ $phase == Succeeded || $phase == Failed || $component == postgres
       || ( $component == api && $image == "$(jq -r .image "$INPUT")" ) ]] || fail 'Unqualified consumer restarted'
   done < "$OUTPUT/final-pods.tsv"
+  assert_network; assert_namespace_endpoints
   api_routes
-  local ingress annotation middleware
-  ingress=$(jq -r .apiIngress "$INPUT")
-  middleware="radar-immobilier-preprod-$(jq -r .maintenance.middleware "$INPUT")@kubernetescrd"
-  annotation=$("${k[@]}" get ingress "$ingress" -o jsonpath='{.metadata.annotations.traefik\.ingress\.kubernetes\.io/router\.middlewares}')
-  jq -n --arg a "$annotation" --arg m "$middleware" '{metadata:{annotations:{
-    "traefik.ingress.kubernetes.io/router.middlewares":($a|split(",")|map(select(.!=$m))|join(","))}}}' > "$OUTPUT/reopen-patch.json"
-  "${k[@]}" patch ingress "$ingress" --type=merge --patch-file "$OUTPUT/reopen-patch.json" >> "$OUTPUT/api.txt"
   echo 'API personal signals/baskets only; UI/MCP stopped, CronJobs suspended, CD frozen. Verify public paths and excluded surfaces.'
 }

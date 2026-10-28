@@ -439,6 +439,12 @@ The operator image must be built with `GIT_SHA` equal to the **full** release
 SHA. `/workspace/api/release-sha` is written in the image layer and checked
 before any database connection; an environment override cannot change that
 identity. Images stamped with a short SHA must be rebuilt for this vehicle.
+CI passes the full commit SHA to the API Dockerfile, including build-at-tag;
+the Dockerfile rejects nonempty release identities other than 40 lowercase hex
+characters (`unknown` remains the local-build default, refused by the operator).
+Image tags and UI `build.json` keep seven characters. CD compares API `/health`
+against the full SHA and UI against the short SHA; rollback recognizes either
+full API identities or their failed seven-character release tag.
 Use the published platform manifest digest observed in the pod's `imageID`,
 not a multi-platform index or a local image configuration ID. Collection
 compares the input, Job template, pod specification, runtime digest, full
@@ -509,21 +515,132 @@ rtk make -f deploy/base-preprod/operator.mk close INPUT='<OWNER_INPUT_JSON>' EXP
 rtk make -f deploy/base-preprod/operator.mk stop-job INPUT='<INPUT_WITH_RECORDED_STOPJOB_NAME_AND_UID>' OUTPUT='<NEW_STOP_DIR>' ENV=preprod
 ```
 
-Closure creates a dedicated Traefik IP allowlist and appends it to every
-inventoried application/MCP Ingress, preserving existing middleware chains.
-It saves original replicas/images, CronJob suspend states/schedules, Jobs,
-routes, relevant annotations and workflow state before changes. It suspends
+Closure requires no Traefik CRD or cluster-scoped installation. Set
+`maintenance.service` to a fresh `base-maintenance-<attempt>` Service name and
+`maintenance.ingresses` to **every** namespace Ingress, including content hosts.
+The tool refuses incomplete coverage. Before any routing mutation it saves
+`ingress-snapshot.json` (binding, image, name, UID, resourceVersion, complete spec). Original
+replicas/images, CronJob suspend states/schedules, Jobs, relevant annotations
+and workflow state are also retained. Restricted evidence is checksummed on exit.
+
+It creates a selectorless ClusterIP Service on port 80, checks that neither
+EndpointSlices nor legacy Endpoints contain addresses, and rewrites **all**
+Ingress path backends and default backends to that Service. JSON Patch tests
+the original UID, resourceVersion and complete spec before replacing the spec.
+Each patch response records the closed spec and resourceVersion in
+`closedIngresses` inside the snapshot. Hosts, TLS,
+Ingress class and supported annotations survive. Any Traefik middleware
+annotation, including `router.middlewares`, is refused before closure/startup;
+Traefik annotation keys/values containing `middleware` or provider references
+such as `auth@file`/`auth@kubernetescrd` are unsupported and refused. No middleware
+is resolved, followed, removed or implicitly trusted.
+All public callers, including the operator, receive refusal (normally HTTP
+503; controller handling of an empty backend can also produce 404). No status
+code alone proves closure: readback verifies the Service, zero endpoints and
+every backend again. The operator Job remains never-ready and unexposed.
+The tool then suspends
 all namespace CronJobs and scales consumer Deployments to zero, leaving
 `radar-postgres` intact. Existing Jobs are not stopped by suspension: wait for
 completion or use the separate UID-preconditioned `stop-job` recipe. Explicitly
 stop other StatefulSet/DaemonSet/external consumers; the collector refuses any
 surviving process. This is process termination, not a claim of graceful drain.
 
-Verify the boundary from both excluded and admitted source addresses, including
-the real load-balancer/source-IP behavior. An admitted address must still need
-a business session. Preserve hostname/TLS/OIDC. An API-path allowlist alone is
-insufficient. Keep full route snapshots in restricted evidence storage, never
-environment dumps or document content.
+Verify refusal from independent external sources across all public hosts/paths.
+Use the namespace-admin Job for maintenance: namespace administration never
+replaces the approved business actor, membership or operation-specific rights.
+After activation, Q1/Q2 use a namespace-admin loopback tunnel to the qualified
+API, still requiring an authenticated business session; public routes remain
+on the refusal Service until Q2 passes. Preserve hostname/TLS/OIDC and do not
+copy credentials into evidence. The operator needs `pods/portforward` create
+authority for this tunnel. Keep full route snapshots in restricted evidence
+storage, never environment dumps or document content.
+
+Ingress routing alone does not close direct network paths. Before closure or
+API access, the tool inventories **all** namespace Services, EndpointSlices,
+legacy Endpoints, pod/workload host networking and discoverable alternative
+routes. It refuses NodePort, LoadBalancer, ExternalName, external IPs, nodePort
+fields, unready address publishing, hostNetwork and hostPort (including init
+containers and suspended workload templates). Nonempty alternative route or
+custom network-policy resources, including Gateway API/Traefik routes, are
+unsupported and refused; failed discovery/list permissions also fail closed.
+During closed maintenance, every ready endpoint must identify an inventoried
+database pod by name and UID. Q1/Q2 may additionally admit qualified API-image
+pods under the verified network boundary. There is no three-Service exception.
+
+The supported policy shape is namespace-wide default-deny ingress. Additive
+ingress grants may target database pods exclusively from local pod selectors
+with nonempty `matchLabels` and no namespaceSelector/ipBlock; missing/empty
+`from` rules are refused. Policies without an explicit non-PostgreSQL component
+selector receive this same check. Other grants may admit only Traefik
+pods (`app.kubernetes.io/name=traefik`) in namespace `traefik` or `kube-system`,
+using both pod and namespace selectors. Broad intra-namespace/UI/MCP grants,
+IP blocks and unsupported selectors are refused, even if currently unused.
+The tool **does not install or rewrite policies**. An administrator must prepare
+and independently verify this isolation before attempting maintenance; existing
+policies are never assumed compatible. Required permissions stay namespace-scoped.
+
+Supply `maintenance.networkIsolation`: an attestation with exact `binding`,
+`image`, `context`, `namespace`, immutable `reference`/`sha256`, fresh UTC
+`observedAt` (at most 24 hours), `passed:true`, `policySha256`, and true
+`networkPolicyEnforced`, `podIPDenied`, `serviceIPDenied`, `nodeOriginDenied`.
+`policySha256` hashes the newline-terminated canonical output of:
+`jq -Sc '[.items[]|{metadata:(.metadata|{name,uid,resourceVersion}),spec}]|sort_by(.metadata.name)'`
+on the live NetworkPolicy list. Inventory receipts retain that hash and the
+full attestation. The probes must exercise consumer-selected canaries/pods,
+direct pod IPs and Service IPs from same-node, other-node, cross-namespace and
+node-origin sources, plus public/alternative ports; keep the actual probe
+results and source/node coverage, including PostgreSQL pod and Service IPs.
+Kubernetes policy acceptance is **not** proof
+that the CNI enforces it, and node-origin exceptions must be tested explicitly.
+The authenticated administrator tunnel remains the qualified exception.
+Missing/expired/foreign probes, changed policies, unsupported CNI or failed
+probes cause an explicit refusal. Do not set a boolean from inference. Cluster
+support and direct-network closure remain unverified until these real probes pass.
+
+The conductor-authorized preprod exception may replace those consumer-policy
+and CNI-probe requirements with an explicit owner-input declaration:
+
+```json
+"networkIsolation": {"waiver": {
+  "reference": "owner-preprod-preaccord-2026-10-27",
+  "reason": "Conductor-authorized preprod cutover without CNI qualification"
+}}
+```
+
+Place this object under `maintenance`. The reference must match exactly and the
+reason must be nonblank bounded text. Any other namespace, invalid declaration
+or unapproved reference is refused; an absent waiver retains the strict path.
+The waiver does not bypass PostgreSQL source restrictions, routing/middleware,
+exposed-Service/host-port, stopped-consumer, schedule, endpoint-roster or image
+identity checks. `network-isolation-receipt.json` and `maintenance.json.networkIsolation`
+record `mode:"waived"`, the declaration, binding, image, context and namespace;
+the evidence checksums cover them. This is an authorization exception, not a
+positive CNI qualification. Other attestations and business authorization remain required.
+
+If closure must be undone while consumers are still stopped, explicitly restore
+the saved complete specs, using the same binding/image and independent roster:
+
+```sh
+rtk make -f deploy/base-preprod/operator.mk restore-ingresses INPUT='<OWNER_INPUT_JSON>' EXPECTED='<INDEPENDENT_ROSTER_JSON>' ROUTES='<CLOSURE_DIR>/ingress-snapshot.json' OUTPUT='<NEW_RESTORATION_DIR>' ENV=preprod
+```
+
+Restoration requires frozen CD, full closure, no surviving process/active Job,
+zero consumer replicas/endpoints and suspended CronJobs. It checks **all** saved
+Ingress UIDs before the first patch and compares **every** current spec with
+the closed state derived from the initial snapshot, as well as its saved
+post-closure resourceVersion. Host, TLS or metadata/version divergence is
+refused before any patch. Each restoration patch atomically tests the saved
+UID/resourceVersion/closed spec, then replaces only the spec. A concurrent
+write between preflight and patch fails explicitly; it is never accepted as
+the new baseline. Final readback compares the restored specs with the initial
+snapshot, ignoring the resourceVersion advanced by restoration itself.
+Old snapshots without complete `closedIngresses` versions are refused.
+The tool never restarts a
+consumer, unsuspends a schedule, reenables CD or changes database state. An
+identity/concurrent-change/readback failure retains evidence and requires
+inspection; no automatic rollback is attempted. The empty refusal Service can
+remain inert. After a scoped transition, recovery remains forward-only; exact
+route restoration does not authorize restarting legacy consumers.
 
 Prepare observation JSON with `binding` and `image` identical to the input, and
 `observations.networkAllowed`, `networkDenied`, `sessionRequired`,
@@ -534,6 +651,12 @@ post-closure inspect receipt as `databaseInspection`. Use actual observations,
 not synthetic campaign evidence. Timestamps are UTC ISO-8601 and at most
 24 hours old, including the backup restore rehearsal. The seven-day 6H runner
 limit remains unchanged; this operator vehicle uses a tighter freshness gate.
+With CRD-free closure, `networkAllowed` attests authorized Job/tunnel access;
+`networkDenied` attests public refusal for all sources. `sessionRequired`
+attests business authorization and unauthenticated HTTP refusal through the
+tunnel (or the pre-closure session check, followed by the Job's business-actor
+checks while all consumers are stopped). These existing receipt fields do not
+assert a public IP exception.
 
 ```sh
 rtk make -f deploy/base-preprod/operator.mk collect-maintenance INPUT='<ACTIVATION_INPUT_JSON>' EXPECTED='<INDEPENDENT_ROSTER_JSON>' PROOFS='<ACTUAL_OBSERVATIONS_JSON>' OUTPUT='<NEW_MAINTENANCE_DIR>' ENV=preprod
@@ -563,12 +686,13 @@ For recovery after a scoped epoch, keep the boundary and use protected forward
 an unqualified old image. Ambiguous/unreadable state stays closed.
 
 After successful activation, start a new qualified API under the same operator
-boundary. Keep 6K configuration absent. `start-api` routes health, auth and
-workspace paths directly to `radar-api:3000`; legacy signal routes are temporarily
-reachable only under the boundary for retirement checks. UI/MCP stay at zero.
+boundary. Keep 6K configuration absent. `start-api` leaves every public Ingress
+on the refusal Service; the qualified API and legacy retirement checks are
+reachable through the administrator tunnel. UI/MCP stay at zero.
 
 ```sh
 rtk make -f deploy/base-preprod/operator.mk start-api INPUT='<OWNER_INPUT_JSON>' PROOFS='<FULL_ACTIVATION_RECEIPT_JSON>' OUTPUT='<NEW_RESTRICTED_START_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk tunnel-api INPUT='<OWNER_INPUT_JSON>' OUTPUT='<NEW_TUNNEL_DIR>' ENV=preprod
 rtk make -f deploy/base-preprod/operator.mk restart-api INPUT='<OWNER_INPUT_JSON>' PROOFS='<Q1_ACCEPTANCE_JSON>' OUTPUT='<NEW_RESTART_DIR>' ENV=preprod
 rtk make -f deploy/base-preprod/operator.mk reopen-api INPUT='<OWNER_INPUT_JSON>' PROOFS='<Q1_Q2_ACCEPTANCE_JSON>' OUTPUT='<NEW_REOPEN_DIR>' ENV=preprod
 rtk make -f deploy/base-preprod/operator.mk delete-job INPUT='<EXACT_JOB_INPUT_JSON>' PROOFS='<SAVED_TERMINATION_JSON>' OUTPUT='<NEW_JOB_DELETION_DIR>' ENV=preprod
@@ -592,7 +716,7 @@ pod or container restart invalidates Q2 even with the same digest and attempt.
 Requalify Q1/restart/Q2 for the current instance; never reuse an older receipt.
 These fields summarize the referenced full tests; they never replace them.
 
-Under admitted browser sessions, qualify workspaces, coherent-city signals,
+Under authenticated sessions through the administrator tunnel, qualify workspaces, coherent-city signals,
 personal baskets, archive/reason/reveal, idempotent replay, conflicts, scoped
 projections/SSE, two-member isolation and scoped refusal after revocation.
 Do not revoke the owner/moderator as a test. After restart, verify the retained
@@ -605,9 +729,9 @@ remain excluded from this profile. No lot grants, mapping or 6K transition occur
 
 `reopen-api` rechecks the qualified API image, stopped other consumers, suspended
 schedules, no active Jobs and frozen CD, then exposes only health/auth/workspace
-prefixes on the preprod hostname. It removes only this attempt's maintenance
-middleware from the API Ingress, preserving other middlewares and TLS. The MCP
-Ingress stays restricted; UI/MCP remain stopped. Verify public paths and excluded
+prefixes on the preprod hostname, preserving existing annotations and TLS.
+All other Ingress backends remain on the refusal Service; UI/MCP remain stopped.
+Verify public paths and excluded
 surfaces immediately and retain the final receipt. Announce only personal
 signals/baskets API availability.
 

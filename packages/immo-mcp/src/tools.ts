@@ -16,6 +16,7 @@ import {
 import { ALL_TOOL_DEFINITIONS } from "./tool-definitions.js";
 import { RadarSignalReadError } from "./signal-read-error.js";
 import { TOOL_HANDLERS, type ToolTextResult } from "./tool-handlers.js";
+import { installNormalizedListHandler } from "./zod4-list-handler.js";
 
 export interface ToolContext {
   auth: ImmoMcpAuthContext;
@@ -30,10 +31,11 @@ export interface ToolContext {
  * the same native handler function below with an immutable invocation snapshot.
  */
 export function registerTools(server: McpServer, ctx: ToolContext): void {
+  const registrations = [];
   for (const def of ALL_TOOL_DEFINITIONS) {
     const handler = TOOL_HANDLERS[def.name];
     if (!handler) throw new Error(`missing_handler:${def.name}`);
-    server.registerTool(
+    const registered = server.registerTool(
       def.name,
       { title: def.title, description: def.description, inputSchema: def.inputSchema },
       async (args): Promise<ToolTextResult> => {
@@ -43,7 +45,9 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
         return invokeTool(def.name, args as Record<string, unknown>, snapshot);
       },
     );
+    registrations.push({ definition: def, registered });
   }
+  installNormalizedListHandler(server, registrations);
 }
 
 /** Native wire result shared by composition and the contract-test registrar. */
