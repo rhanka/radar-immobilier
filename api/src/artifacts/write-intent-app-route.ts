@@ -2,7 +2,7 @@ import { writeRefusal } from "./write-intent-refusal.js";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { guardWriteIntentAppSession, requireApprovedAppAccount } from "./write-intent-app-guard.js";
-import { canReadWriteIntentSummary, challengeBootstrap, guardWriteIntentAppMutation, ownedWriteIntent,
+import { challengeBootstrap, guardWriteIntentAppMutation, ownedWriteIntent,
   verifyAppChallenge, writeCsrf, type WriteAppDeps } from "./write-intent-app-authority.js";
 import { hasDuplicateJsonKeys } from "./write-intent-binding.js";
 import { writeIntentError } from "./write-intent-errors.js";
@@ -49,8 +49,8 @@ export function writeIntentAppRoute(deps: WriteAppDeps | null): Hono {
       const observed = await ownedWriteIntent(c, deps, pass, path === api);
       const approved = await requireApprovedAppAccount(c, deps, pass.session.sub);
       if (approved?.status === 503) return approved;
-      const { row, data: result } = await readAppWriteIntentResult(deps, observed, pass);
-      if (approved || path === api || result.state !== "pending" || !await canReadWriteIntentSummary(deps, row, pass)) {
+      const { row, data: result, canRead } = await readAppWriteIntentResult(deps, observed, pass);
+      if (approved || path === api || result.state !== "pending" || !canRead) {
         if (path === summary && deps.renderManagement) {
           return deps.renderManagement(c, row, { csrf: writeCsrf(deps, pass, row.intentId), result });
         }

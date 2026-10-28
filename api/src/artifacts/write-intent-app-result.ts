@@ -13,11 +13,12 @@ export async function readAppWriteIntentResult(deps: WriteAppDeps, observed: PwI
   return writeIntentTransaction(deps.db, async (tx) => {
     const row = await loadPwIntentForShare(tx, observed.intentId);
     assertPwPrincipal(row, pass.principal);
+    const canRead = await canReadWriteIntentSummaryInTx(tx, row, pass);
+    if ((deps.nowMs ?? Date.now)() >= pass.session.exp * 1000) throw new PwWriteError(401, "session_expired");
     // Linearize the public status while holding I; never expire a stale pending row.
     const state = { state: pwIntentStatus(row, (deps.nowMs ?? Date.now)()), executionState: row.executionState,
       revocationState: row.revokedAt === null ? "active" : "revoked" };
-    if (row.executionState !== "committed"
-      || !await canReadWriteIntentSummaryInTx(tx, row, pass)) return { row, data: state };
+    if (row.executionState !== "committed" || !canRead) return { row, data: state, canRead };
     // The BASE reader validates its receipt/context and current scope, never old 6L1.
     const event = await readCommittedSignalReceiptInTx(tx, pass.principal.sub, row.workspaceId, row.commandKey);
     await appendPwAudit(tx, { intentId: row.intentId, invocationId: row.invocationId, commandId: row.commandKey,
@@ -26,6 +27,6 @@ export async function readAppWriteIntentResult(deps: WriteAppDeps, observed: PwI
       artifactRef: row.artifactRef as Record<string, unknown>, grantRef: row.grantReference,
       principal: pass.principal, operationDigest: row.operationDigest, intentDigest: row.intentDigest, result: "receipt_read" });
     if ((deps.nowMs ?? Date.now)() >= pass.session.exp * 1000) throw new PwWriteError(401, "session_expired");
-    return { row, data: { ...state, commandId: row.commandKey, receipt: { event }, nextAction: "refresh_state" as const } };
+    return { row, data: { ...state, commandId: row.commandKey, receipt: { event }, nextAction: "refresh_state" as const }, canRead };
   });
 }
