@@ -104,7 +104,7 @@ export const APP_SUMMARY_SCRIPT = `
         }
       } catch (err) {
         say("Result to verify. Read the intent status before any new gesture.");
-        reveal("pw-manage-box");
+        reveal("pw-reload-box");
       } finally {
         revokeBtn.disabled = false;
       }
