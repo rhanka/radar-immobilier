@@ -7,9 +7,10 @@ override EXPECTED := $(value EXPECTED)
 override PROOFS := $(value PROOFS)
 override ROUTES := $(value ROUTES)
 override OUTPUT := $(value OUTPUT)
-export INPUT EXPECTED PROOFS ROUTES OUTPUT ENV
-.PHONY: help validate render-job collect-job inspect init attach activate resume permissions inventory preflight freeze-cd close verify-closed restore-ingresses stop-job collect-maintenance start-api tunnel-api restart-api reopen-api delete-job
+override PUBLIC_PHASE := $(value PUBLIC_PHASE)
+export INPUT EXPECTED PROOFS ROUTES OUTPUT PUBLIC_PHASE ENV
+.PHONY: help public-probe validate render-job collect-job inspect init attach activate resume permissions inventory preflight freeze-cd close verify-closed restore-ingresses stop-job collect-maintenance start-api tunnel-api restart-api reopen-api delete-job
 help:
 	@echo 'Explicit INPUT=<absolute owner JSON> OUTPUT=<new evidence directory> ENV=preprod required; see BASE_API_ACTIVATION.md.'
-validate render-job collect-job inspect init attach activate resume permissions inventory preflight freeze-cd close verify-closed restore-ingresses stop-job collect-maintenance start-api tunnel-api restart-api reopen-api delete-job:
+public-probe validate render-job collect-job inspect init attach activate resume permissions inventory preflight freeze-cd close verify-closed restore-ingresses stop-job collect-maintenance start-api tunnel-api restart-api reopen-api delete-job:
 	@rtk bash "$(OPERATOR_ROOT)/tools/make/base-preprod-operator.sh" $@
