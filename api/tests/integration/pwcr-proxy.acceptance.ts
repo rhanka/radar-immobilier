@@ -51,7 +51,7 @@ it.each([["compose", 8080], ["cluster", 8080], ["preprod", 8080]])("should route
     ...headers, origin, "content-type": "application/json", "x-artifact-write-csrf": boot.csrf,
   }, body: JSON.stringify({ challengeToken: boot.challengeToken }) });
   expect(confirmed.status).toBe(200);
-  expect(await confirmed.json()).toMatchObject({ event: { scope: "personal", facet: "selection", state: "active" } });
+  expect(await confirmed.json()).toMatchObject({ receipt: { event: { scope: "personal", facet: "selection", state: "active" } } });
   const refused = await proxyRequest(`${base}/artifact-write/intents/${id}`, { headers: { ...headers, authorization: "Bearer foreign" } });
   expect(refused.status).toBe(401); expect(refused.headers.get("cache-control")).toBe("private, no-store");
   const returned = await proxyRequest(`${base}${APP}/${id}`, { headers });
