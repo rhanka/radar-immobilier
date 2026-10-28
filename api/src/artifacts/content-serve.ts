@@ -50,6 +50,7 @@ import {
 } from "./release-files.js";
 import { ClassificationError, classificationFailure } from "../services/facets/classification-errors.js";
 import { decodeQuery } from "../services/facets/classification-query.js";
+import type { WritePageSurface } from "./write-intent-page-surface.js";
 
 export interface ContentServeDeps {
   readonly contentBase: string;
@@ -65,6 +66,7 @@ export interface ContentServeDeps {
   readonly isRevoked?: (sessionId: string) => boolean;
   /** PW-C page write listener (prepare/status); absent keeps writes closed. */
   readonly pageWrite?: Hono;
+  readonly writePageSurface?: WritePageSurface;
 }
 type AuthorizedReader = ApiReaderContext & { readonly validUntil: number; readonly authorityVersion: string };
 
@@ -198,6 +200,18 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
   });
 
   if (deps.openingContent) app.route("/", deps.openingContent);
+  if (!deps.readOperation && deps.writePageSurface) for (const operation of ["state", "search"] as const) app.get(`/__reader/api/baskets.${operation}.v1`, async (c) => {
+    if (!deps.writePageSurface) return c.json({ error: "capability_unavailable" }, 503);
+    const reader = await authorized(c);
+    if (!reader || !canInvoke(reader, "signals.protected-read", reader.releaseId)) return c.json({ error: "unauthenticated" }, 401);
+    try {
+      const params = new URL(c.req.url).searchParams;
+      params.delete("grant");
+      const body = await deps.writePageSurface.read(operation, params, reader);
+      if (!await authorityCurrent(reader)) return c.json({ error: "unauthenticated" }, 401);
+      return c.json(body);
+    } catch (error) { const failure = classificationFailure(error); return c.json(failure.body, failure.status); }
+  });
 
   app.all("/__reader/api/:op", async (c) => {
     const parsed = parseContentHost(c.req.header("host"), deps.contentBase);
@@ -320,6 +334,12 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
         c.header("Content-Type", file.contentType);
         return c.body(typeof file.body === "string" ? file.body : new Uint8Array(file.body));
       }
+    }
+    if (!deps.releaseFiles && deps.writePageSurface && (c.req.path === "/" || c.req.path === "/index.html")) {
+      const response = await deps.writePageSurface.document(c.req.raw, auth);
+      if (!await authorityCurrent(auth)) return c.json({ error: "unauthenticated" }, 401);
+      c.header("Content-Security-Policy", response.headers.get("content-security-policy") ?? "default-src 'none'");
+      return response;
     }
     if (!deps.releaseFiles && (c.req.path === "/" || c.req.path === "/index.html")) {
       applyReaderContentHeaders(c);
