@@ -48,6 +48,7 @@
   - [x] Aucun push ni fusion ; revues conducteur astra et wonder hors livraison locale.
 - [ ] **Lot 6 — Seconde passe Fable et astra (#940)**
   - [x] Reproduire en rouge fractions UTC, diagnostic de champ et récupération tardive.
+  - [x] Fractions acceptées, champ invalide nommé ; reclose-api tardif admis sous gel actif.
   - [ ] Reproduire le refus sans mutation de close après réouverture.
   - [ ] Ajouter reclose-api, snapshot actualisé et tests de concurrence.
   - [ ] Raccorder le test de contexte et qualifier la récupération complète tardive.
