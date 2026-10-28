@@ -19,6 +19,7 @@ printf '#!/bin/sh\nprintf unexpected >> "%s/cluster-calls"\nexit 1\n' "$testdir"
 cp "$testdir/bin/kubectl" "$testdir/bin/gh"
 cp "$testdir/bin/kubectl" "$testdir/bin/docker"
 chmod +x "$testdir/bin/"*
+fixture_host_path=$PATH
 export PATH="$testdir/bin:$PATH"
 cd "$testdir"
 now=$(date -u +%FT%TZ)
