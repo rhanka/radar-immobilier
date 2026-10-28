@@ -46,7 +46,7 @@
   - [x] Runbook anglais et rapport français avec limites.
   - [x] Tests natifs, contrôles statiques, revue finale, commits contrôlés et bundle vérifié.
   - [x] Aucun push ni fusion ; revues conducteur astra et wonder hors livraison locale.
-- [ ] **Lot 6 — Seconde passe Fable et astra (#940)**
+- [x] **Lot 6 — Seconde passe Fable et astra (#940)**
   - [x] Reproduire en rouge fractions UTC, diagnostic de champ et récupération tardive.
   - [x] Fractions acceptées, champ invalide nommé ; reclose-api tardif admis sous gel actif.
   - [x] Dates nulles, non textuelles et +00:00 refusées avec le champ nommé.
@@ -59,4 +59,4 @@
   - [x] Raccorder le test de contexte et qualifier la récupération complète tardive.
   - [x] Documenter la requalification réelle du dump ; aucune exécution en préprod.
   - [x] Rapport de seconde passe rédigé avec les preuves et les limites opérationnelles.
-  - [ ] Vérifier le bundle r2 descendant d’ec867041 ; aucun push.
+  - [x] Vérifier le bundle r2 descendant d’ec867041 ; aucun push.
