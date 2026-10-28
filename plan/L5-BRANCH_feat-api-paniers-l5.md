@@ -33,8 +33,12 @@
 ## Plan / Todo (lot-based)
 - [x] Lot 0: merge approved PW-A and main; preserve Track event blob identity.
 - [ ] Lot 1: bind verified approval provenance, explicit release write request and private page bootstrap.
+- [x] Implementation and targeted PG proof: actual one-use ticket provenance, explicit workspace, matching signed read grant and no publisher privileges.
 - [ ] Lot 2: wire listener, H receiver and application confirmation using existing PW/BASE contracts.
+- [x] Corrected PW-C script is served by the published runtime; private P instance/CSRF and canonical HTML recovery links are wired.
 - [ ] Lot 3: lock actual artifact authority in prepare/admission/disclosure; qualify discriminating failures and races.
+- [x] Actual SQL ACL withdrawal, lost-response receipt recovery and technical owner revocation pass in the deployed image.
 - [ ] Lot 4: PostgreSQL, API CI, required matrices and mutations on merged candidate without required skips.
 - [ ] Lot 5: exact runtime image, real OIDC browser, persisted published page read/prepare/app-confirm and CT-9.
+- [x] Image candidate c8d42b5c: ten browser cases pass without skips on same-site/cross-site hosts, including six operations and BASE/read closure variants. Final HEAD replay remains required.
 - [ ] Lot 6: audit own commits, incremental bundle from 37f21d3d, French L5/PW-E final report and cleanup receipts.

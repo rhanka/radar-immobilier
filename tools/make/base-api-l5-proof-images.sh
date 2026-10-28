@@ -33,5 +33,5 @@ for host in pages.sent-tech.ca pages.reader.test; do
     jq -e --arg head "$head" --arg variant "$variant" '.imageSha==$head and .variant==$variant' \
       "$directory/browser-closure-$variant.json" >/dev/null
   done
-  [[ -s $directory/runtime-stopped && -s $directory/cleanup.log ]]
+  [[ -f $directory/runtime-stopped && -s $directory/runtime-stop.log && -s $directory/cleanup.log ]]
 done
