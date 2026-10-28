@@ -127,7 +127,7 @@ case "$*" in
       mv ingress-next.json ingress-fixture.json
     else
       jq --arg name "$name" --slurpfile patch "$patch" '
-        (.items[]|select(.metadata.name==$name)|.spec.rules)=$patch[0].spec.rules' ingress-fixture.json > ingress-next.json
+        (.items[]|select(.metadata.name==$name)|.spec.rules)=$patch[0].spec.rules | (.items[]|select(.metadata.name==$name)|.metadata.resourceVersion)|=(tonumber+1|tostring)' ingress-fixture.json > ingress-next.json
       mv ingress-next.json ingress-fixture.json
     fi
     if [[ $command == *' -o json' ]]; then jq --arg name "$name" '.items[]|select(.metadata.name==$name)' ingress-fixture.json; fi;;
@@ -162,7 +162,11 @@ case "$*" in
   'get cronjobs '*) [[ ${FAKE_STATE:-} != cron ]] || echo false;;
   'get jobs '*) [[ ${FAKE_STATE:-} != job ]] || echo 1;;
   'get endpointslices '*) [[ ${FAKE_STATE:-} != ready ]] || printf '[{"conditions":{"ready":true}}]\n';;
-  'get deployments '*) [[ ${FAKE_STATE:-} != replicas ]] || printf 'radar-ui\t1\n';;
+  'scale deployment/radar-api --replicas='*)
+    [[ ${BASE_PREPROD_REHEARSAL:-} != 1 ]] || printf '%s\n' "${3##*=}" > api-replicas-fixture;;
+  'get deployments '*)
+    if [[ ${FAKE_STATE:-} == replicas ]];then printf 'radar-ui\t1\n';
+    elif [[ ${BASE_PREPROD_REHEARSAL:-} == 1 ]];then printf 'radar-api\t%s\n' "$(cat api-replicas-fixture)";fi;;
 esac
 exit 0
 FAKE
