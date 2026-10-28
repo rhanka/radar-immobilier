@@ -16,8 +16,10 @@ export async function imageNetwork(subjects: string[]) {
   const codes = new Map<string, { nonce: string; challenge: string; sub: string }>();
   const issuer = L5_DOMAIN.identityIssuer, callback = `${L5_DOMAIN.appOrigin}/api/v1/auth/oauth/callback`;
   const traffic: Array<{ host: string; path: string; method: string; site?: string; mode?: string;
-    dest?: string; cookieNames: string[]; status: number }> = [];
+    dest?: string; cookieNames: string[]; status: number; responseLost: boolean;
+    isolation: { csp: string; coop: string; cache: string } }> = [];
   let exchanges = 0;
+  let loseConfirm = false, lostResponses = 0;
   const server = createServer({ key: readFileSync("/tls/key.pem"), cert: readFileSync("/tls/cert.pem") }, async (req, res) => {
     try {
       const host = req.headers.host ?? "", url = new URL(req.url ?? "/", `https://${host}`);
@@ -62,18 +64,27 @@ export async function imageNetwork(subjects: string[]) {
       const upstream = httpRequest({ hostname: "runtime", port: 3000, path: req.url, method: req.method,
         headers: req.headers }, (response) => {
         const field = (name: string) => typeof req.headers[name] === "string" ? req.headers[name] as string : undefined;
+        const site = field("sec-fetch-site"), mode = field("sec-fetch-mode"), dest = field("sec-fetch-dest");
+        const responseLost = loseConfirm && url.pathname.endsWith("/confirm") && response.statusCode === 200;
         traffic.push({ host, path: url.pathname, method: req.method ?? "GET", status: response.statusCode ?? 0,
-          ...(field("sec-fetch-site") ? { site: field("sec-fetch-site") } : {}),
-          ...(field("sec-fetch-mode") ? { mode: field("sec-fetch-mode") } : {}),
-          ...(field("sec-fetch-dest") ? { dest: field("sec-fetch-dest") } : {}),
+          ...(site ? { site } : {}), ...(mode ? { mode } : {}), ...(dest ? { dest } : {}),
+          responseLost, isolation: { csp: String(response.headers["content-security-policy"] ?? ""),
+            coop: String(response.headers["cross-origin-opener-policy"] ?? ""),
+            cache: String(response.headers["cache-control"] ?? "") },
           cookieNames: (req.headers.cookie ?? "").split(";").map((part) => part.trim().split("=")[0]!).filter(Boolean) });
+        if (responseLost) {
+          loseConfirm = false; lostResponses++;
+          response.on("end", () => res.destroy()); response.resume(); return;
+        }
         res.writeHead(response.statusCode ?? 502, response.headers); response.pipe(res);
       });
       upstream.on("error", () => { res.writeHead(502); res.end(); }); req.pipe(upstream);
     } catch { res.writeHead(500); res.end("Synthetic IdP protocol assertion failed"); }
   });
   server.listen(443, "0.0.0.0"); await once(server, "listening");
-  return { traffic, exchanges: () => exchanges, close: async () => {
+  return { traffic, exchanges: () => exchanges, lostResponses: () => lostResponses,
+    loseNextConfirmResponse: () => { assert.equal(loseConfirm, false); loseConfirm = true; },
+    close: async () => {
     await new Promise<void>((resolve) => { server.close(() => resolve()); server.closeAllConnections(); });
   } };
 }

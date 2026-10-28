@@ -59,10 +59,21 @@ it.each([0, 1])("should read and confirm a published write through normal image 
     expect(await app.evaluate(() => window.opener)).toBeNull();
     const id = new URL(app.url()).pathname.split("/").at(-1)!;
     const body = await page.content(); expect(body).not.toMatch(/challengeToken|radar_session=/);
-    const post = app.waitForResponse((response) => response.url().endsWith(`/${id}/confirm`));
-    await app.locator("#pw-confirm").click(); const confirmed = await post;
-    expect(confirmed.status()).toBe(200);
-    const receipt = await confirmed.json(); expect(receipt.state).toBe("committed");
+    let receipt: Record<string, unknown>;
+    if (reader === 0) {
+      const lostBefore = network.lostResponses();
+      network.loseNextConfirmResponse();
+      const lost = app.waitForEvent("requestfailed", { predicate: (request) => request.url().endsWith(`/${id}/confirm`) });
+      await app.locator("#pw-confirm").click(); await lost;
+      expect(network.lostResponses()).toBe(lostBefore + 1);
+      receipt = await app.evaluate(async (intentId) =>
+        (await fetch(`/api/v1/artifacts/write-intents/${intentId}`)).json(), id);
+    } else {
+      const post = app.waitForResponse((response) => response.url().endsWith(`/${id}/confirm`));
+      await app.locator("#pw-confirm").click(); const confirmed = await post;
+      expect(confirmed.status()).toBe(200); receipt = await confirmed.json();
+    }
+    expect(receipt.state).toBe("committed");
     const after = await effects(h.f); expect(after.events).toBe(before.events! + 1);
     expect(after.debits).toBe(before.debits! + 1);
     await page.bringToFront();
@@ -91,6 +102,9 @@ it.each([0, 1])("should read and confirm a published write through normal image 
     const navigation = requests.find((request) => request.path === `/artifact-write/intents/${id}`)!;
     expect(navigation).toMatchObject({ method: "GET", site: contentBase.endsWith("sent-tech.ca") ? "same-site" : "cross-site",
       mode: "navigate", dest: "document", status: 200 });
+    expect(navigation.isolation.coop).toBe("same-origin");
+    expect(navigation.isolation.csp).toContain("frame-ancestors 'none'");
+    expect(navigation.isolation.cache).toContain("no-store");
     expect(requests.filter((request) => request.host === h.pageHost).every((request) => !request.cookieNames.includes("radar_session"))).toBe(true);
     writeFileSync(`/evidence/browser-reader-${reader}.json`, JSON.stringify({ reader, contentBase, imageSha: process.env.L5_IMAGE_SHA,
       normalOidcExchanges: network.exchanges(), before, after, navigation, requests }, null, 2));
