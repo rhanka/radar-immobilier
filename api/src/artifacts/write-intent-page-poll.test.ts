@@ -20,7 +20,9 @@ describe("write intent page follow-up", () => {
     h.responders.push(() => prepared(UUID));
     h.responders.push(() => statusOf(UUID, "pending"));
     h.responders.push(() => statusOf(UUID, "committed",
-      { commandId: UUID, receipt: { event: { state: "active", basket: "pertinent" } },
+      { commandId: UUID, receipt: { event: { id: UUID, createdAt: new Date(1_000_000).toISOString(),
+          scope: "personal", facet: "selection", state: "active", basket: "pertinent", reason: null,
+          observedFingerprint: "a".repeat(64) } },
         nextAction: "refresh_state" }));
     await h.clickGesture(GESTURES[0]!);
     expect(h.pendingDelays()).toEqual([PW_PAGE_POLL_BOUNDS.intervalMs]);
