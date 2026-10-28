@@ -15,6 +15,7 @@
 - [x] Allowed Paths: api/src/artifacts/**, api/tests/integration/pwcr-*.ts, tools/make/base-api-pwc-review*, plan/PWCR-BRANCH_feat-api-paniers-pwc-review.md, deploy/overlays/preprod/nginx/default.conf, ui/nginx/default.conf, deploy/k8s/nginx/default.conf.
 - [x] Forbidden Paths: api/src/artifacts/write-intent-transaction.ts, api/drizzle/**, api/src/index.ts, Makefile, docker-compose*.yml, rules/**, agent bootstrap, other plans, .track/**.
 - [x] Conditional Paths: none. PWCR-EX1: owner explicitly requires the deployed preprod nginx fix; impact exact PW routes only; rollback these location blocks.
+- [x] PWCR-EX2: update api/tests/integration/pwe-app-receipt.spec.ts's superseded post-commit revoke expectation; no business-rights checks removed; rollback the assertion only.
 
 ## Feedback Loop
 - [x] Read Astra A and B in full, including B's detailed root report; findings accepted and reproduced through discriminating tests.
