@@ -53,7 +53,7 @@ export async function canReadWriteIntentSummary(deps: WriteAppDeps, row: PwInten
 
 /** Shared current-rights guard for summary and receipt, retaining caller locks. */
 export async function canReadWriteIntentSummaryInTx(tx: WriteTx, row: PwIntentRow,
-  pass: AppGuardPass): Promise<boolean> {
+  pass: Pick<AppGuardPass, "principal">): Promise<boolean> {
   try {
     await lockPublishedWriteAuthority(tx, row.authorityReferences as Record<string, string>, false);
     await lockWorkspace(tx, row.workspaceId);
