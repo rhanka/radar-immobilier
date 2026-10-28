@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { APP_SUMMARY_SCRIPT } from "./write-intent-app-script.js";
 import { FakeElement } from "./write-intent-page-harness.js";
 
-function harness(status = 200, data: unknown = { state: "committed" }) {
+function harness(status = 200, data: unknown = { state: "committed", receipt: { event: null } }) {
   const elements: Record<string, FakeElement> = {};
   for (const id of ["pw-bootstrap", "pw-confirm", "pw-revoke", "pw-note",
     "pw-receipt", "pw-receipt-command", "pw-receipt-state", "pw-receipt-basket",
@@ -15,6 +15,7 @@ function harness(status = 200, data: unknown = { state: "committed" }) {
   runInNewContext(APP_SUMMARY_SCRIPT, {
     document: { getElementById: (id: string) => elements[id] },
     window: { __pwWriteOnCommitted: (receipt: unknown) => receipts.push(receipt) },
+    setTimeout, clearTimeout,
     fetch: async (url: string, init: RequestInit) => {
       requests.push({ url, init });
       return { status, headers: { get: () => null }, json: async () => data };
@@ -22,12 +23,20 @@ function harness(status = 200, data: unknown = { state: "committed" }) {
   });
   const click = async () => {
     for (const fn of elements["pw-confirm"]!.listeners.click ?? []) fn({});
-    for (let i = 0; i < 10; i += 1) await Promise.resolve();
+    for (let i = 0; i < 20; i += 1) await Promise.resolve();
   };
   return { elements, requests, receipts, click };
 }
 
 describe("controlled application write gestures", () => {
+  it("should show technical committed state without inventing a business receipt", async () => {
+    const h = harness(200, { state: "committed", executionState: "committed" });
+    await h.click();
+    expect(h.elements["pw-note"]!.textContent).toContain("Recorded. Current rights");
+    expect(h.elements["pw-receipt"]!.hidden).toBe(true);
+    expect(h.elements["pw-manage-box"]!.hidden).toBe(false);
+    expect(h.receipts).toEqual([]);
+  });
   it("should send nothing until an explicit confirmation click", async () => {
     const h = harness();
     expect(h.requests).toEqual([]);
