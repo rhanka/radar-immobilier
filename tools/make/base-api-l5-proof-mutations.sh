@@ -49,5 +49,14 @@ for tuple in pwe:52 review:16 l5:3; do
     engine_hash=$(sha256sum tools/make/base-api-pwc-review-mutations.mjs | cut -d' ' -f1)
     jq -e --arg cases "$cases_hash" --arg engine "$engine_hash" '.status==0 and .signal==null and
       .casesSha256==$cases and .engineSha256==$engine' "$directory/l5-mutation-harness.json" >/dev/null
+  else
+    engine=base-api-pwe-mutations.mjs
+    [[ $group != review ]] || engine=base-api-pwc-review-mutations.mjs
+    engine_hash=$(sha256sum "tools/make/$engine" | cut -d' ' -f1)
+    cases_hash=$(sha256sum "tools/make/base-api-l5-$group-cases.mjs" | cut -d' ' -f1)
+    jq -e --arg cases "$cases_hash" --arg engine "$engine_hash" \
+      --slurpfile results "$directory/$kind-mutants/results.json" '.status==0 and .signal==null and
+        .casesSha256==$cases and .engineSha256==$engine and
+        (.caseNames|sort)==($results[0]|map(.name)|sort)' "$directory/l5-$group-harness.json" >/dev/null
   fi
 done
