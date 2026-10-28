@@ -11,8 +11,13 @@ export async function connectTarget(url, WebSocketClass, onEvent) {
     clearTimeout(request.timer); pending.delete(message.id);
     message.error ? request.reject(new Error('cdp_command_failed')) : request.resolve(message.result);
   });
+  socket.addEventListener('close', () => {
+    for (const request of pending.values()) { clearTimeout(request.timer); request.reject(new Error('cdp_connection_closed')); }
+    pending.clear();
+  });
   await new Promise((resolve, reject) => {
     const timer = setTimeout(() => { socket.close(); reject(new Error('cdp_connection_timeout')); }, 5000);
+    socket.addEventListener('close', () => { clearTimeout(timer); reject(new Error('cdp_connection_closed')); }, { once: true });
     socket.addEventListener('open', () => { clearTimeout(timer); resolve(); }, { once: true });
     socket.addEventListener('error', () => { clearTimeout(timer); socket.close(); reject(new Error('cdp_connection_failed')); }, { once: true });
   });

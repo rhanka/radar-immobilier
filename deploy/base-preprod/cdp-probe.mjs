@@ -34,7 +34,7 @@ export async function runCdpQualification(config, cases, transport = {}) {
   } catch (error) {
     const allowed = ['dedicated_tab_creation_failed', 'invalid_dedicated_target', 'invalid_dedicated_socket',
       'public_origin_unavailable', 'probe_evaluation_failed', 'cdp_timeout', 'cdp_command_failed',
-      'cdp_send_failed', 'cdp_connection_timeout', 'cdp_connection_failed'];
+      'cdp_connection_closed', 'cdp_send_failed', 'cdp_connection_timeout', 'cdp_connection_failed'];
     result = { passed: false, error: allowed.includes(error.message) ? error.message : 'cdp_transport_failed' };
   } finally {
     client?.close();
