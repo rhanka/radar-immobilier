@@ -35,6 +35,7 @@
 - [x] Reproduce post-COMMIT continuation withdrawal with actual PostgreSQL membership, artifact ACL and moderation changes; retain exactly one committed command.
 - [x] Add exact-served-script reproductions for suspended application confirmation/revocation and L5 bootstrap, covering transport and JSON body separately.
 - [x] Refresh fixture 6L1 after granting moderation; type the shared prepare port with the six-operation contract. Initial campaign reproduces membership/ACL disclosure and all six missing browser deadlines.
+- [x] Add controlled-clock page regressions for grant recovery before a new gesture and committed state/search refresh beyond 55 seconds; refusal must create no new intent.
 - [x] Lot 0: merge approved PW-A and main; preserve Track event blob identity.
 - [x] Lot 1: bind verified approval provenance, explicit release write request and private page bootstrap.
 - [x] Implementation and targeted PG proof: actual one-use ticket provenance, explicit workspace, matching signed read grant and no publisher privileges.
