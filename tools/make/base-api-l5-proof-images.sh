@@ -7,8 +7,15 @@ migration_count=$(jq '.entries|length' api/drizzle/meta/_journal.json)
 for host in pages.sent-tech.ca pages.reader.test; do
   directory="$images/$host"
   tests_passed "$directory" browser
-  jq -e '.numPassedTests==5 and .numPendingTests==0 and
+  expected=5; [[ $host != pages.sent-tech.ca ]] || expected=8
+  jq -e --argjson expected "$expected" '.numPassedTests==$expected and .numPendingTests==0 and
     all(.testResults[].assertionResults[];.status=="passed")' "$directory/browser.json" >/dev/null
+  jq -e '[.testResults[]|select(.name|endswith("/l5-images.acceptance.ts"))|.assertionResults[]]|
+    length==5 and all(.[];.status=="passed")' "$directory/browser.json" >/dev/null
+  if [[ $host == pages.sent-tech.ca ]]; then
+    jq -e '[.testResults[]|select(.name|endswith("/artifacts-baskets-browser.spec.ts"))|.assertionResults[]]|
+      length==3 and all(.[];.status=="passed")' "$directory/browser.json" >/dev/null
+  fi
   for service in runtime runtime-base runtime-read; do
     [[ $(cat "$directory/$service-release-sha.txt") == "$head" ]]
     [[ $(cat "$directory/$service-image-id.txt") == "$image_id" ]]

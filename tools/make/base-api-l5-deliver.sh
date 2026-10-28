@@ -55,7 +55,7 @@ case ${1:-} in
     g -c core.hooksPath=/dev/null -c commit.gpgsign=false commit -m "$MSG";;
   audit) audit;;
   bundle)
-    jq -e --arg head "$(g rev-parse HEAD)" '.qualified and .head==$head and .mutations.total==139 and .browser.passed==10' tmp/l5-evidence/qualification.json >/dev/null
+    jq -e --arg head "$(g rev-parse HEAD)" '.qualified and .head==$head and .mutations.total==139 and .browser.imagePassed==10 and .browser.legacyReadPassed==3' tmp/l5-evidence/qualification.json >/dev/null
     audit
     mkdir -p tmp/l5-evidence
     bundle=$ROOT/tmp/l5-evidence/api-paniers-l5.bundle

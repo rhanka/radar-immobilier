@@ -58,6 +58,6 @@ jq -n --arg head "$(git rev-parse HEAD)" --arg api "$api" --arg mutants "$mutant
   --arg requiredDir "$required" --arg imageId "$(cat "$images/image-id.txt")" --slurpfile required "$required/required.json" --slurpfile full "$api/full.json" \
   '{qualified:true,head:$head,imageId:$imageId,required:{passed:$required[0].numPassedTests,failed:0,skipped:0},
     api:{passed:$full[0].numPassedTests,failed:0,skipped:$full[0].numPendingTests},proxy:{passed:3,failed:0,skipped:0},
-    browser:{passed:10,failed:0,skipped:0},mutations:{pwa:31,pwb:5,pwd:7,pwc:25,pwe:52,review:16,l5:3,total:139},
+    browser:{passed:13,imagePassed:10,legacyReadPassed:3,failed:0,skipped:0},mutations:{pwa:31,pwb:5,pwd:7,pwc:25,pwe:52,review:16,l5:3,total:139},
     evidence:{required:$requiredDir,api:$api,mutations:$mutants,proxy:$proxy,images:$images}}' > tmp/l5-evidence/qualification.json
 cat tmp/l5-evidence/qualification.json
