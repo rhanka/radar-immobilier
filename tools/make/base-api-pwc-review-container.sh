@@ -22,6 +22,7 @@ POSTGRES_HOST=$(node --input-type=module -e 'import {lookup} from "node:dns/prom
 export POSTGRES_HOST
 export PWE_REQUIRED_SCOPE="$2"
 export PWE_MUTATION_FILTER="${3:-.*}"
+if [[ $1 == inherited ]]; then export PWCR_INHERITED_BATCH_FILTER="${3:-.*}"; fi
 if [[ $1 == targeted ]]; then [[ -n ${3:-} ]]; fi
 overall=0
 check() {
