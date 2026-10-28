@@ -4,11 +4,10 @@ import { describeDb } from "../../src/services/facets/workspace-archive-fixture.
 import { bootstrapOf } from "../../src/artifacts/write-intent-app-surface-harness.js";
 import { mintSessionCookie, readSessionClaims } from "../../src/artifacts/preview-session.js";
 import { l5Fixture, L5_DOMAIN, L5_P_KEY } from "./l5-fixture.js";
+import { effects as baseEffects } from "./pwe-fixture.js";
 
 async function effects(h: Awaited<ReturnType<typeof l5Fixture>>) {
-  return (await h.f.pool.query(`SELECT (SELECT count(*) FROM facet_events)::int AS personal,
-    (SELECT count(*) FROM workspace_facet_events)::int AS common,
-    (SELECT count(*) FROM signal_write_receipts)::int AS receipts`)).rows;
+  return baseEffects(h.f);
 }
 const appHeaders = (h: Awaited<ReturnType<typeof l5Fixture>>) => ({ host: new URL(L5_DOMAIN.appOrigin).host, cookie: h.login.cookie });
 async function summary(h: Awaited<ReturnType<typeof l5Fixture>>, id: string) {
@@ -36,7 +35,7 @@ describeDb("L5 published reader write runtime", () => {
       const boot = await summary(h, data.intentId); expect(await effects(h)).toEqual(before);
       const response = await confirm(h, data.intentId, boot); expect(response.status).toBe(200);
       const receipt = await response.json(), after = await effects(h);
-      expect(after[0].personal).toBe(before[0].personal + 1);
+      expect(after.events).toBe(before.events! + 1);
       expect((await confirm(h, data.intentId, boot)).status).toBe(409);
       h.f.pool.options.max = 1;
       const status = await h.app.request(`${h.origin}/__reader/api/facets.write-intents.status.v1?intentId=${data.intentId}`, { headers: h.headers });
