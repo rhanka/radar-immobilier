@@ -9,8 +9,11 @@ import config from './vitest.config.js';
 export default { ...config, envDir: false,
   test: { ...config.test, fileParallelism: false, maxWorkers: 1 } };
 CONFIG
+if [[ $1 == proxy ]]; then
+  sed -i "s/maxWorkers: 1/maxWorkers: 1, include: ['tests\\/integration\\/pwcr-proxy.acceptance.ts']/" api/vitest.isolated.config.ts
+fi
 cat > api/tsconfig.pwe-tests.json <<'CONFIG'
-{"extends":"./tsconfig.json","compilerOptions":{"rootDir":"..","noEmit":true},"include":["src/**/*.ts","tests/integration/pwe-*.ts","tests/integration/l5-*.ts"],"exclude":["dist","node_modules"]}
+{"extends":"./tsconfig.json","compilerOptions":{"rootDir":"..","noEmit":true},"include":["src/**/*.ts","tests/integration/pwe-*.ts","tests/integration/pwcr-*.ts","tests/integration/l5-*.ts"],"exclude":["dist","node_modules"]}
 CONFIG
 POSTGRES_HOST=$(node --input-type=module -e 'import {lookup} from "node:dns/promises"; console.log((await lookup("postgres", {family:4})).address)')
 export POSTGRES_HOST
@@ -31,7 +34,7 @@ check() {
 check typecheck node_modules/.bin/tsc --noEmit -p api/tsconfig.pwe-tests.json
 shopt -s nullglob
 lint=(api/tests/integration/pwe-*.ts api/src/services/facets/pwe-*.ts
-  api/tests/integration/l5-*.ts api/src/artifacts/published-write*.ts
+  api/tests/integration/l5-*.ts api/tests/integration/pwcr-*.ts api/src/artifacts/published-write*.ts
   api/src/artifacts/reader-opening.ts api/src/artifacts/preview-{tickets,session}.ts
   api/src/artifacts/write-intent-{page-authority,page-listener,h5-route}.ts api/src/index.ts
   api/src/services/facets/pw-write-fences.ts
@@ -55,10 +58,11 @@ if [[ $1 == full ]]; then
     --reporter=default --reporter=json --outputFile.json=/evidence/full.json
 fi
 if [[ $1 == full || $1 == mutations ]]; then
-  check inherited-mutants node ../tools/make/base-api-pwe-inherited-mutations.mjs
+  check inherited-mutants node ../tools/make/base-api-pwc-review-inherited.mjs
 fi
 if [[ $1 == full || $1 == mutations || $1 == targeted ]]; then
   check pwe-mutants node ../tools/make/base-api-pwe-mutations.mjs
+  check review-mutants node ../tools/make/base-api-pwc-review-mutations.mjs
 fi
 check results node ../tools/make/base-api-pwe-results.mjs
 exit "$overall"
