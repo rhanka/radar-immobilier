@@ -10,11 +10,14 @@ import { mintSessionCookie, parseCookieHeader, PREVIEW_INIT_COOKIE } from "./pre
 import { parseContentHost } from "./content-host.js";
 import { applyReaderContentHeaders } from "./content-isolation.js";
 import type { SharedReaderTickets } from "./reader-tickets.js";
+import type { PwIdentityDomain } from "./write-intent-principal.js";
 
 export function createReaderOpening(deps: {
   auth: AuthConfig; contentBase: string; authority: AuthorityReader; tickets: SharedReaderTickets;
   issuer: GrantIssuer; grantSecret: string; sessionSecret: string;
   now?: () => number;
+  writeDomain?: PwIdentityDomain;
+  permitsWrite?: (artifactId: string, releaseId: string) => Promise<boolean>;
   getArtifactIdForRelease?: (releaseId: string) => Promise<string | null>;
 }) {
   const application = new Hono();
@@ -73,7 +76,10 @@ export function createReaderOpening(deps: {
     }
     if (c.req.method === "POST" && (input.releaseId !== release.releaseId ||
       input.profileFingerprint !== fingerprintReaderProfile(profile))) return null;
-    return { browserBinding: input.binding, artifactId: release.artifactId, releaseId: release.releaseId,
+    const writeIdentity = deps.writeDomain && await deps.permitsWrite?.(release.artifactId, release.releaseId)
+      ? deps.writeDomain : undefined;
+    return { ...(writeIdentity ? { writeIdentity } : {}), browserBinding: input.binding,
+      artifactId: release.artifactId, releaseId: release.releaseId,
       readerSub: session.sub, origin: contentOrigin, profileName: profile.name, policyRevision: profile.policyRevision,
       profileFingerprint: fingerprintReaderProfile(profile), returnTarget: "/" };
   }
@@ -98,6 +104,7 @@ export function createReaderOpening(deps: {
       `<h1>Autoriser la lecture de vos paniers</h1><p>Page : ${escape(input.artifactId)}</p>` +
       `<p>Auteur : ${escape(release?.authorSub ?? "")}</p>` +
       `<p>Version : ${escape(input.releaseId)}. Cette page lit vos paniers avec vos droits actuels.</p>` +
+      (input.writeIdentity ? `<p>Cette page peut préparer des actions. Chaque écriture exige votre confirmation dans l’application.</p>` : "") +
       `<form method="post"><input type="hidden" name="artifactId" value="${escape(input.artifactId)}">` +
       `<input type="hidden" name="binding" value="${escape(input.browserBinding)}">` +
       `<input type="hidden" name="origin" value="${escape(input.origin)}">` +
@@ -140,8 +147,12 @@ export function createReaderOpening(deps: {
       sessionId: sid, profileName: ticket.profileName, policyRevision: ticket.policyRevision,
       profileFingerprint: ticket.profileFingerprint };
     const grant = await mintGrant(resource, deps.grantSecret, now);
+    const writeIdentity = ticket.writeIdentity && deps.writeDomain &&
+      JSON.stringify(ticket.writeIdentity) === JSON.stringify(deps.writeDomain) &&
+      await deps.permitsWrite?.(ticket.artifactId, ticket.releaseId) ? deps.writeDomain : undefined;
     c.header("Set-Cookie", mintSessionCookie({ sid, readerSub: ticket.readerSub, artifactId: ticket.artifactId,
-      createdAt: now, expiresAt: now + 900_000, resource }, deps.sessionSecret));
+      createdAt: now, expiresAt: now + 900_000, resource,
+      ...(writeIdentity ? { writeIdentity } : {}) }, deps.sessionSecret));
     c.header("Set-Cookie", `${PREVIEW_INIT_COOKIE}=; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=0`, { append: true });
     return c.redirect(`/?grant=${encodeURIComponent(grant)}`, 303);
   });
