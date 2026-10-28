@@ -20,6 +20,9 @@ apply_operator_mutation() {
       sed -i '/^  and \.q2.instance==\.restart.instance/i\  end)' "$dir/tools/make/base-preprod-acceptance.jq";;
     failed-receipt) sed -i '/wait_job || true/a\  [[ $(tail -n1 "$OUTPUT/wait.txt") != Failed ]] || fail "Job not complete"' "$dir/tools/make/base-preprod-operator.sh";;
     init-receipt) sed -i '/^  if \[\[ \$action == init/,/^  fi$/d' "$dir/tools/make/base-preprod-collect.sh";;
+    reclose-scale) sed -i '/scale deployment\/radar-api --replicas=0/d' "$dir/tools/make/base-preprod-reclose.sh";;
+    reclose-snapshot) sed -i '/-f tools\/make\/base-preprod-reclose.jq/c\  :' "$dir/tools/make/base-preprod-reclose.sh";;
+    reclose-version) sed -i '\|path:"/metadata/resourceVersion"|d' "$dir/tools/make/base-preprod-reclose.sh";;
     *) exit 2;;
   esac
 }
