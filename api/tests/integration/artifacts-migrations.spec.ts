@@ -11,7 +11,7 @@ import { auth, cookie } from "./artifacts-h2.helpers.js";
 import { startHarness, migrationsFolder, type Harness } from "./artifacts-h2.helpers.js";
 
 const journal = JSON.parse(readFileSync(new URL("../../drizzle/meta/_journal.json", import.meta.url), "utf8")) as {
-  entries: { tag: string; when: number }[];
+  entries: { idx: number; tag: string; when: number }[];
 };
 const artifactEntries = ["0015_artifacts_core", "0016_artifacts_lifecycle"].map((tag) => {
   const entry = journal.entries.find((item) => item.tag === tag);
@@ -23,6 +23,19 @@ let h: Harness;
 beforeAll(async () => { h = await startHarness("migrations"); });
 afterAll(async () => { await h?.close(); });
 describe("artifact journal and startup guard", () => {
+  it("should apply actor quotas 0025 before reader tickets 0026", async () => {
+    const quota = journal.entries.find((entry) => entry.tag === "0025_artifacts_actor_quotas")!;
+    const reader = journal.entries.find((entry) => entry.tag === "0026_artifacts_reader_tickets")!;
+    expect([quota.idx, reader.idx]).toEqual([24, 25]);
+    expect(reader.when).toBeGreaterThan(quota.when);
+    for (const entry of [quota, reader]) {
+      const sql = readFileSync(new URL(`../../drizzle/${entry.tag}.sql`, import.meta.url));
+      const rows = (await h.pool.query("SELECT hash FROM drizzle.__drizzle_migrations WHERE created_at = $1", [entry.when])).rows;
+      expect(rows).toEqual([{ hash: createHash("sha256").update(sql).digest("hex") }]);
+    }
+    const tables = await h.pool.query("SELECT to_regclass('artifacts.host_actor_quotas') AS quotas, to_regclass('artifacts.host_actor_rate') AS rate, to_regclass('artifacts.reader_tickets') AS tickets");
+    expect(tables.rows[0]).toEqual({ quotas: expect.any(String), rate: expect.any(String), tickets: expect.any(String) });
+  });
   it("installs both package hashes, replays cleanly and repairs a missing journal row", async () => {
     const before = (await h.pool.query("SELECT hash, created_at FROM drizzle.__drizzle_migrations ORDER BY id")).rows;
     expect(before).toHaveLength(journal.entries.length);

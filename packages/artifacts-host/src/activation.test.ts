@@ -71,14 +71,15 @@ describe("resolveActivationConfig validation mode", () => {
   it("enables a complete cohort inside its window and dedupes subjects", () => {
     expect(
       resolveActivationConfig({ ...FULL, validationSubjects: " alice ,bob,alice " }, NOW),
-    ).toEqual({ enabled: true, subjects: ["alice", "bob"], expiresAtMs: Date.parse(FUTURE) });
+    ).toEqual({ enabled: true, subjects: ["alice", "bob"], expiresAtMs: Date.parse(FUTURE),
+      mode: "validation" });
   });
 
   it("accepts an absolute timestamp with milliseconds and an explicit offset", () => {
     expect(resolveActivationConfig({ ...FULL,
       validationUntil: "2026-10-21T19:00:00.123-05:00",
     }, NOW)).toEqual({ enabled: true, subjects: ["alice", "bob"],
-      expiresAtMs: Date.parse("2026-10-22T00:00:00.123Z") });
+      expiresAtMs: Date.parse("2026-10-22T00:00:00.123Z"), mode: "validation" });
   });
 
   it("stops on a malformed mode, even when the rest is missing", () => {
@@ -132,5 +133,26 @@ describe("readActivationEnv", () => {
       validationSubjects: "alice",
       validationUntil: FUTURE,
     });
+  });
+});
+
+describe("resolveActivationConfig general mode", () => {
+  it("opens with the mode alone: no cohort, no expiry", () => {
+    expect(resolveActivationConfig({ controlMode: "general" }, NOW)).toEqual({
+      enabled: true, subjects: [], expiresAtMs: Number.POSITIVE_INFINITY, mode: "general",
+    });
+  });
+
+  it("accepts a padded mode and keeps supplied cohort details without requiring them", () => {
+    expect(resolveActivationConfig({ controlMode: "  general ", validationSubjects: "alice",
+      validationUntil: FUTURE }, NOW)).toEqual({ enabled: true, subjects: ["alice"],
+      expiresAtMs: Date.parse(FUTURE), mode: "general" });
+  });
+
+  it("stops on malformed cohort details even in general mode", () => {
+    expect(() => resolveActivationConfig({ controlMode: "general", validationSubjects: "a,,b" }, NOW))
+      .toThrow("invalid ARTIFACTS_VALIDATION_SUBJECTS");
+    expect(() => resolveActivationConfig({ controlMode: "general", validationUntil: "not-a-date" }, NOW))
+      .toThrow("invalid ARTIFACTS_VALIDATION_UNTIL");
   });
 });

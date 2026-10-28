@@ -8,6 +8,7 @@
  * custom content.
  */
 import { openSession, sealSession } from "./preview-aead.js";
+import type { GrantClaims } from "./preview-grant.js";
 
 export const PREVIEW_INIT_COOKIE = "__Host-preview-init";
 export const PREVIEW_SESSION_COOKIE = "__Host-preview-session";
@@ -19,6 +20,8 @@ export interface PreviewSessionClaims {
   readonly artifactId: string;
   readonly createdAt: number;
   readonly expiresAt: number;
+  /** Native resources only: host/release-bound authority sealed by the host. */
+  readonly resource?: GrantClaims;
 }
 
 function hostCookie(name: string, value: string, maxAgeSeconds: number): string {
