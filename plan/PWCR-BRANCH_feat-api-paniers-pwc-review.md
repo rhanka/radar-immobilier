@@ -9,6 +9,7 @@
 - [x] Make only, ENV last; no environment-file reads, host Node or Python.
 - [x] test-api-paniers-pwe / e2e-api-paniers-pwe; API 18935, UI 15935, Maildev 11935.
 - [x] Shared Docker lock, one owned stack, down -v --remove-orphans, unlock.
+- [x] On this shared host, also reserve the existing Sentropic E2_LOCK through a read-only descriptor; release it over any foreign live stack so its cleanup can proceed.
 - [x] Own commits <=150 lines, Conventional English subject <=72 characters, no body/trailer.
 
 ## Branch Scope Boundaries (MANDATORY)
