@@ -39,3 +39,10 @@ it.each(["origin", "x-reader-instance", "x-reader-csrf"])("should require the ex
     expect(await response.json()).toMatchObject({ error: { code: "csrf_refused", attemptOutcome: "not_executed" } });
   }
 });
+it("should keep private isolation headers on an oversized preparation", async () => {
+  const h = fixture(), response = await h.app.request(new Request(h.request(), { body: JSON.stringify("a".repeat(17_000)) }));
+  expect(response.status).toBe(413); expect(h.forward).not.toHaveBeenCalled();
+  expect(response.headers.get("cache-control")).toBe("private, no-store");
+  expect(response.headers.get("cross-origin-opener-policy")).toBe("same-origin");
+  expect(response.headers.get("content-security-policy")).toContain("frame-ancestors 'none'");
+});
