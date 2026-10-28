@@ -83,13 +83,14 @@ const PW_PAGE_SCRIPT_PREPARE = `
     if (problem) { say("This gesture is incomplete (" + problem + ")."); return; }
     preparing = true;
     var dispatched = false;
-    var gate = withTimeout(15000);
+    var gate = {};
     try {
       if (!boot.pageInstanceId || !boot.csrf || typeof window.__pwReadGesture !== "function") throw new Error("Page bootstrap unavailable");
       // Only a new intention rereads its target. An uncertain retry keeps its exact body/key.
       if (!pendingAttempt) gesture = await window.__pwReadGesture(gesture);
       var freshProblem = validGesture(gesture);
       if (freshProblem) throw new Error("Target state unavailable");
+      gate = withTimeout(15000);
       dispatched = true;
       var res = await fetch(PREPARE, { method: "POST", credentials: "same-origin",
         headers: { "content-type": "application/json", "idempotency-key": key,
