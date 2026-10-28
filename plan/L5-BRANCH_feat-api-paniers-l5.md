@@ -50,6 +50,7 @@
 - [x] Browser status case commits a workspace discard, withdraws moderation while preserving membership and observes a receipt-free 403 on P; explicit authorized restore returns the fixture to its original archive state.
 - [x] Second-pass delivery gate requires current source identity, all required files without skips, touched reader tests, 27 browser cases on exact HEAD images, both host cleanups and a main-only import of the named branch ref.
 - [x] Add post-COMMIT session-expiry regression: failed disclosure must direct same-intent consultation and must never label the already committed execution as not executed.
+- [x] Keep post-COMMIT consultation errors outside the admission-error mapper: return an unknown disclosure outcome with read-status recovery rather than not-executed.
 - [x] Lot 0: merge approved PW-A and main; preserve Track event blob identity.
 - [x] Lot 1: bind verified approval provenance, explicit release write request and private page bootstrap.
 - [x] Implementation and targeted PG proof: actual one-use ticket provenance, explicit workspace, matching signed read grant and no publisher privileges.
