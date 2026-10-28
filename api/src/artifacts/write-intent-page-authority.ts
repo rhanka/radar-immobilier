@@ -2,6 +2,7 @@ import type { Context } from "hono";
 import type { WriteGrantClaims, WriteGrantIssuer } from "./write-grant.js";
 import { mintWriteGrant } from "./write-grant.js";
 import { FacetError } from "../services/facets/target.js";
+import type { WritePrepareBody } from "./write-intent-schemas.js";
 
 /** Trusted H5 adapter output, after authenticating P and current write rights.
  * This is a separate write authority contract; A6 read claims remain unchanged.
@@ -18,7 +19,7 @@ export interface PageWriteAuthority {
 export interface PageWriteAuthorityDeps {
   grantIssuer: WriteGrantIssuer & { identityIssuer: string };
   grantKeyId: string;
-  resolvePage: (request: Request) => Promise<PageWriteAuthority | null>;
+  resolvePage: (request: Request, scope?: WritePrepareBody) => Promise<PageWriteAuthority | null>;
   grantSecret: string;
 }
 
@@ -35,8 +36,8 @@ function assertPageAuthority(page: PageWriteAuthority | null, deps: PageWriteAut
 }
 
 export async function resolveWritePage(c: Context, deps: PageWriteAuthorityDeps,
-  clock: () => number): Promise<PageWriteAuthority> {
-  const page = await deps.resolvePage(c.req.raw);
+  clock: () => number, scope?: WritePrepareBody): Promise<PageWriteAuthority> {
+  const page = await deps.resolvePage(c.req.raw, scope);
   assertPageAuthority(page, deps, clock());
   return page;
 }

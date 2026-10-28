@@ -42,7 +42,7 @@ export function writeIntentH5Route(deps: H5WriteDeps | null): Hono {
       const key = c.req.header("idempotency-key") ?? "";
       assertIdempotencyKey(key);
       assertWritePrepareBody(body);
-      const page = await resolveWritePage(c, deps, deps.nowMs ?? Date.now);
+      const page = await resolveWritePage(c, deps, deps.nowMs ?? Date.now, body);
       const grant = await verifyWriteGrant(c.req.header("x-preview-write-grant") ?? "",
         page.grant, deps.grantSecret, (deps.nowMs ?? Date.now)());
       if (!grant) throw new FacetError(403, "write_grant_required");
