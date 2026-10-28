@@ -48,9 +48,13 @@ jq -e 'all(.[]; .baseline.expected==.baseline.observed and .restored.expected==.
 jq -e 'all(.[]; .baseline=="passed" and .mutated=="assertion_failed" and .restored=="passed")' "$prefix/pwd-mutants/mutations.json" >/dev/null
 for tuple in "$pwe/pwe:52" "$review/pwcr:16"; do
   directory=${tuple%/*}; kind=${tuple##*/}; count=${kind##*:}; kind=${kind%:*}
-  before_intrusion "$directory" "$directory/$kind-mutants.log"
+  label=pwe-mutants; [[ $kind != pwcr ]] || label=review-mutants
+  before_intrusion "$directory" "$directory/$label.log"
   if [[ $kind == pwe ]]; then command_passed "$directory" pwe-mutants; else command_passed "$directory" review-mutants; fi
   jq -e --argjson count "$count" 'length==$count and ([.[].name]|unique|length)==$count and all(.[]; .killed and (.baseline|length)>0 and (.restored|length)>0 and all(.baseline[]; .status=="passed") and all(.restored[]; .status=="passed") and all(.mutated[]; .status=="passed" or .status=="failed") and any(.mutated[]; .status=="failed"))' "$directory/$kind-mutants/results.json" >/dev/null
+done
+for directory in "$prefix" "$proxy" "$pwc" "$pwe" "$review"; do
+  [[ $(cat "$directory/status") == 0 && -s $directory/lock-release.txt ]]
 done
 jq -n --arg head "$(git rev-parse HEAD)" --arg apiSource "$(cat "$api/head.txt")" \
   --arg apiTree "$(git rev-parse HEAD:api)" --arg packagesTree "$(git rev-parse HEAD:packages)" \
