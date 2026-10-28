@@ -30,6 +30,7 @@ describeDb("L5 published reader write runtime", () => {
       const before = await effects(h), key = randomUUID();
       const prepared = await h.prepare({}, h.body, key); expect(prepared.status).toBe(201);
       const data = (await prepared.json()).data;
+      expect(data.managementUrl).toBe(`${L5_DOMAIN.appOrigin}/artifact-write/intents/${data.intentId}`);
       expect(JSON.stringify(data)).not.toMatch(/challengeToken|csrf|radar_session|writeIdentity/);
       expect(await effects(h)).toEqual(before);
       const boot = await summary(h, data.intentId); expect(await effects(h)).toEqual(before);
@@ -41,7 +42,9 @@ describeDb("L5 published reader write runtime", () => {
       const status = await h.app.request(`${h.origin}/__reader/api/facets.write-intents.status.v1?intentId=${data.intentId}`, { headers: h.headers });
       expect(status.status).toBe(200);
       expect(await status.json()).toMatchObject({ data: { state: "committed", commandId: receipt.commandId, receipt: receipt.receipt } });
-      const recovered = await h.app.request(data.managementUrl, { headers: appHeaders(h) });
+      const terminal = await h.app.request(data.managementUrl, { headers: appHeaders(h) });
+      expect(await terminal.text()).not.toContain('id="pw-confirm"');
+      const recovered = await h.app.request(`${L5_DOMAIN.appOrigin}/api/v1/artifacts/write-intents/${data.intentId}`, { headers: appHeaders(h) });
       expect(await recovered.json()).toMatchObject({ state: "committed", commandId: receipt.commandId, receipt: receipt.receipt });
       expect(await effects(h)).toEqual(after);
     } finally { await h.close(); }
