@@ -22,7 +22,7 @@ export const L5_ENV = { PW_IDENTITY_TIER: "preprod", PW_WRITE_GRANT_SECRET: "w".
 export const L5_READ = { issuer: L5_DOMAIN.appOrigin, audience: "l5-reader", tier: "preprod" };
 export const L5_READ_KEY = "r".repeat(40), L5_P_KEY = "p".repeat(40);
 
-export async function l5Fixture(write = true) {
+export async function l5Publication(write = true) {
   const f = await workspaceFixture();
   const signal = await workspaceSignal(f, "Published reader signal");
   const author = `author-${randomUUID()}`;
@@ -50,6 +50,16 @@ export async function l5Fixture(write = true) {
   const pageHost = `${releaseId}.pinned.pages.example.test`, origin = `https://${pageHost}`;
   for (const person of [f.contributor, f.moderator, f.outsider]) await f.pool.query(
     "INSERT INTO artifacts.artifact_access(artifact_id,principal_id,permission) VALUES($1,$2,'read')", [artifactId, person.sub]);
+  return { f, signal, author, scope, artifactId, releaseId, pageHost, origin, control, blobs,
+    async close() {
+      for (const key of await blobs.listKeys(`artifacts/${scope}/`)) await blobs.deleteBlob(key);
+      host.close(); s3.destroy();
+    } };
+}
+
+export async function l5Fixture(write = true) {
+  const publication = await l5Publication(write);
+  const { f, signal, author, scope, artifactId, releaseId, pageHost, origin, blobs } = publication;
   const login = await normalLogin(L5_DOMAIN, f.db, f.contributor.sub);
   const storage = createStoredReader(f.pool, scope, "pages.example.test", blobs);
   const runtime = createPublishedWriteRuntime({ db: f.db, auth: login.auth, accounts: f.pool, storage, scope,
@@ -87,8 +97,5 @@ export async function l5Fixture(write = true) {
       "content-type": "application/json", "idempotency-key": key, "x-reader-instance": privatePage?.pageInstanceId ?? "",
       "x-reader-csrf": privatePage?.csrf ?? "", ...extra }, body: JSON.stringify(input) });
   return { f, signal, author, scope, artifactId, releaseId, origin, pageHost, headers, cookie, login, runtime, app,
-    body, prepare, bootstrap, privatePage, async close() {
-      for (const key of await blobs.listKeys(`artifacts/${scope}/`)) await blobs.deleteBlob(key);
-      host.close(); s3.destroy();
-    } };
+    body, prepare, bootstrap, privatePage, close: publication.close };
 }
