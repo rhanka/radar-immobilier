@@ -35,7 +35,11 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
 ## Feedback Loop
 - [x] Owner-targeted sequence runner checks fresh/upgrade/replay, all PW-A/PW-D
   PostgreSQL cases and static gates; optional API CI is recorded explicitly.
-- [ ] Qualify 0027 and audit an incremental bundle from approved 509e664d.
+- [x] Qualify 0027 and audit an incremental bundle from approved 509e664d.
+- [x] Campaign 20261027T235341: CT8 fresh/upgrade/rerun retains 27 hashes;
+  134 scoped tests pass without skips, API 4482/0/79; static gates pass.
+- [x] Fresh base-seeded bundle import preserves HEAD/tree, main's journal
+  prefix and SQL blobs; owned down -v completes and the shared lock is free.
 - [x] Include the unchanged UI workspace manifest for the API suite's locked
   Playwright import; preserve its browser opt-in, lockfile and assertions.
 - [x] PWA-EX5: owner orders published quota 0025, reader tickets 0026,
