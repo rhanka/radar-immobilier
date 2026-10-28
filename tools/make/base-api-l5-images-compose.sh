@@ -67,6 +67,15 @@ services:
       PW_IDENTITY_TIER: preprod
       PW_WRITE_GRANT_SECRET: wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
       PW_CHALLENGE_SECRET: cccccccccccccccccccccccccccccccccccccccc
+  runtime-base:
+    extends: {service: runtime}
+    environment:
+      ARTIFACTS_CONTENT_BASE: ""
+      ARTIFACTS_STORAGE_SCOPE: ""
+  runtime-read:
+    extends: {service: runtime}
+    environment:
+      PW_WRITE_GRANT_SECRET: ""
 YAML
   compose+=(-f "$RUN_DIR/runtime.yml")
 }

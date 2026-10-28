@@ -20,6 +20,7 @@ export async function imageNetwork(subjects: string[]) {
     isolation: { csp: string; coop: string; cache: string } }> = [];
   let exchanges = 0;
   let loseConfirm = false, lostResponses = 0;
+  let runtime = "runtime";
   const server = createServer({ key: readFileSync("/tls/key.pem"), cert: readFileSync("/tls/cert.pem") }, async (req, res) => {
     try {
       const host = req.headers.host ?? "", url = new URL(req.url ?? "/", `https://${host}`);
@@ -61,7 +62,7 @@ export async function imageNetwork(subjects: string[]) {
         }
         res.writeHead(404); return res.end();
       }
-      const upstream = httpRequest({ hostname: "runtime", port: 3000, path: req.url, method: req.method,
+      const upstream = httpRequest({ hostname: runtime, port: 3000, path: req.url, method: req.method,
         headers: req.headers }, (response) => {
         const field = (name: string) => typeof req.headers[name] === "string" ? req.headers[name] as string : undefined;
         const site = field("sec-fetch-site"), mode = field("sec-fetch-mode"), dest = field("sec-fetch-dest");
@@ -84,6 +85,7 @@ export async function imageNetwork(subjects: string[]) {
   server.listen(443, "0.0.0.0"); await once(server, "listening");
   return { traffic, exchanges: () => exchanges, lostResponses: () => lostResponses,
     loseNextConfirmResponse: () => { assert.equal(loseConfirm, false); loseConfirm = true; },
+    setRuntime: (name: "runtime" | "runtime-base" | "runtime-read") => { runtime = name; },
     close: async () => {
     await new Promise<void>((resolve) => { server.close(() => resolve()); server.closeAllConnections(); });
   } };

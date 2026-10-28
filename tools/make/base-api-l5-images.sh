@@ -92,10 +92,15 @@ for CONTENT_BASE in pages.sent-tech.ca pages.reader.test; do
   done
   [[ -f $LOG_DIR/fixture-ready.json ]]
   image_runtime_compose
-  "${compose[@]}" up -d --no-deps runtime
+  "${compose[@]}" up -d --no-deps runtime runtime-base runtime-read
   wait "$RUN_PID" || { tail -70 "$LOG_DIR/browser.log"; exit 1; }
   RUN_PID=
-  jq -e '.numPassedTests==3 and .numFailedTests==0 and .numPendingTests==0' "$LOG_DIR/browser.json"
+  jq -e '.numPassedTests==5 and .numFailedTests==0 and .numPendingTests==0' "$LOG_DIR/browser.json"
+  for service in runtime runtime-base runtime-read; do
+    "${compose[@]}" exec -T "$service" cat api/release-sha > "$LOG_DIR/$service-release-sha.txt"
+    [[ $(cat "$LOG_DIR/$service-release-sha.txt") == "$CANDIDATE" ]]
+  done
+  "${compose[@]}" exec -T runtime sh -ec 'sha256sum api/drizzle/*.sql api/drizzle/meta/_journal.json' > "$LOG_DIR/image-migrations.sha256"
   "${compose[@]}" exec -T runtime cat api/release-sha > "$LOG_DIR/release-sha.txt"
   [[ $(cat "$LOG_DIR/release-sha.txt") == "$CANDIDATE" ]]
   "${compose[@]}" logs --no-color > "$LOG_DIR/compose.log"
