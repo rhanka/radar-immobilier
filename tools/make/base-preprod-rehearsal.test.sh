@@ -45,8 +45,20 @@ mark proof
 jq -e --slurpfile input input.json -f exact-native-filter.jq acceptance.json > native-filter-result.json
 mark native-filter
 invoke reopen-api PROOFS="$testdir/acceptance.json"; mark reopen-api
-source tools/make/base-preprod-reclose.test.sh
 for path in input.json q1.json q2.json acceptance.json exact-native-filter.jq native-filter-result.json ingress-fixture.json cluster-calls;do cp "$path" "$rehearsal/";done
-jq -n --slurpfile c input.json --slurpfile ingress ingress-fixture.json '{kind:"fixture-only",status:"native-reopened-awaiting-auth",binding:$c[0].binding,
+jq -n --slurpfile c input.json --slurpfile ingress ingress-fixture.json '{kind:"fixture-only",status:"native-reopened-awaiting-auth",lateReopenBy:(now|floor-1|todateiso8601),binding:$c[0].binding,
  image:$c[0].image,exposedPrefixes:[$ingress[0].items[].spec.rules[]?.http.paths[]?|select(.backend.service.name=="radar-api")|.path]}' > "$rehearsal/summary.json"
+# Les lectures CDP sont simulées dans Node sans réseau, avant la récupération native.
+(
+  cd "$root"
+  PATH="$fixture_host_path" bash tools/make/base-preprod-probe.test.sh rehearsal
+) > "$root/tmp/vehicle-evidence/rehearsal-authenticated.json" 2> "$root/tmp/vehicle-evidence/rehearsal-transport.log"
+jq -e '.q1.passed and .q2.passed and (.lateQ1.passed|not) and .lateQ1.ownedTargetClosed' "$root/tmp/vehicle-evidence/rehearsal-authenticated.json" >/dev/null
+mark q1-authenticated; mark q2-authenticated; mark q1-late-failure
+source tools/make/base-preprod-reclose.test.sh
+cp cluster-calls "$rehearsal/cluster-calls"
+cp "$reclosed_snapshot" "$rehearsal/reclosed-snapshot.json"
+cp ingress-fixture.json "$rehearsal/restored-ingresses.json"
+jq '.status="native-restored" | .recovery={reclosed:true,verifiedClosed:true,restored:true}' "$rehearsal/summary.json" > "$rehearsal/final-summary.json"
+mv "$rehearsal/final-summary.json" "$rehearsal/summary.json"
 printf 'PASS répétition native : activation → Q1 → redémarrage → Q2 → filtre → réouverture\n'
