@@ -36,6 +36,7 @@
 
 ## Plan / Todo (lot-based)
 - [x] Quatrième passe #938 : témoin négatif limité au GET courant, identité du POST contrôlée ; recherche des runners/mutants encore obsolètes. Qualification complète et livraison exigées par l5-r4-bundle, résultats dans RAPPORT-SOL-PWC.md.
+- [x] Rejeu complet : les deux mutants d’horloge hérités visent directement le résolveur avec une attente contrôlée, car la nouvelle barrière finale de divulgation masque leur défaut dans le parcours HTTP. Aucun changement produit ; les tests HTTP de divulgation restent requis.
 - [x] Troisième passe #938 : contrat proxy, M11 et son adaptateur, rechargement après révocation incertaine et discriminants stricts corrigés. La livraison r3 exige les matrices PW, trois variantes nginx et 52 mutants dans l5-r3-bundle ; résultats et limites consignés dans RAPPORT-SOL-PWC.md.
 - [x] Régressions ajoutées sur le HTML exact du rendu de gestion avec DOM réel, sans élément de gestion artificiel ; tableaux à un élément refusés sur les six discriminants concernés.
 - [x] PR 938 second-pass implementation: page disclosure rights after waits, post-commit application consultation, renewable read grants, bounded application POSTs/bootstrap and targeted regressions. Exact-image qualification and final bundle are enforced by l5-r2-bundle; results are recorded in RAPPORT-SOL-PWC.md, Second pass #938.

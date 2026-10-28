@@ -20,12 +20,15 @@ export function materializeInherited(batch, source) {
     const pattern = new RegExp(`  \\["${name}",[\\s\\S]*?(?=\\n  \\[|\\n\\];)`, "g");
     const matches = [...result.source.matchAll(pattern)];
     assert.equal(matches.length, 1, `Unique inherited case: ${name}`);
-    const replacement = matches[0][0].replaceAll("deps.resolvePage(c.req.raw);",
-      "deps.resolvePage(c.req.raw, scope, tx);");
-    assert.notEqual(replacement, matches[0][0]);
+    const kind = name === "page-clock-after-resolve" ? "page" : "delegation";
+    const replacement = [name, "write-intent-page-authority.ts",
+      "const page = await deps.resolvePage(c.req.raw, scope, tx);\n  assertPageAuthority(page, deps, clock());",
+      "const now = clock();\n  const page = await deps.resolvePage(c.req.raw, scope, tx);\n  assertPageAuthority(page, deps, now);",
+      "src/artifacts/write-intent-page-authority.test.ts",
+      `${kind} expirée pendant la résolution authentifiée`];
     result.changes.push({ name, original: matches[0][0], replacement,
-      reason: "Keep the stale-clock fault while preserving caller scope and transaction arguments" });
-    result.source = result.source.replace(matches[0][0], replacement);
+      reason: "Vérifier l’horloge du résolveur sans masquer le défaut par la barrière de divulgation ultérieure" });
+    result.source = result.source.replace(matches[0][0], `  ${JSON.stringify(replacement)},`);
   }
   return result;
 }
