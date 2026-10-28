@@ -1,4 +1,5 @@
-import { existsSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { chromium, type Browser } from "@playwright/test";
 import { afterAll, beforeAll, expect, it } from "vitest";
 import { imagePublication } from "./l5-image-publication.js";
@@ -13,6 +14,14 @@ let browser: Browser;
 const contentBase = process.env.L5_CONTENT_BASE!;
 beforeAll(async () => {
   h = await imagePublication(contentBase);
+  const entries = JSON.parse(readFileSync("drizzle/meta/_journal.json", "utf8")).entries as Array<{ tag: string; when: number }>;
+  const expected = entries.map((entry) => ({ hash: createHash("sha256")
+    .update(readFileSync(`drizzle/${entry.tag}.sql`)).digest("hex"), created_at: String(entry.when) }));
+  const history = (await h.f.pool.query("SELECT hash,created_at::text FROM drizzle.__drizzle_migrations ORDER BY id")).rows;
+  expect(history).toEqual(expected);
+  expect(entries.at(-1)?.tag).toBe("0027_pw_write_persistence");
+  writeFileSync("/evidence/image-database-migrations.json", JSON.stringify({
+    imageSha: process.env.L5_IMAGE_SHA, database: h.f.name, entries, history }, null, 2));
   network = await imageNetwork([h.f.contributor.sub, h.f.moderator.sub]);
   writeFileSync("/evidence/fixture-ready.json", JSON.stringify({ database: h.f.name, scope: h.scope }));
   for (const service of ["runtime", "runtime-base", "runtime-read"]) {
