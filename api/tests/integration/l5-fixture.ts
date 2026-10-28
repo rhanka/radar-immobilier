@@ -87,7 +87,9 @@ export async function l5Fixture(write = true) {
   expect(exchanged.status).toBe(303);
   const cookie = exchanged.headers.getSetCookie().find((value) => value.startsWith("__Host-preview-session="))!.split(";")[0]!;
   const headers = { host: pageHost, cookie };
-  const bootstrap = await app.request(`${origin}/__reader/api/facets.write.bootstrap.v1`, { headers });
+  const readGrant = new URL(exchanged.headers.get("location")!, origin).searchParams.get("grant")!;
+  const bootstrap = await app.request(`${origin}/__reader/api/facets.write.bootstrap.v1?workspaceId=${f.workspaceId}`,
+    { headers: { ...headers, "x-preview-grant": readGrant } });
   const privatePage = bootstrap.ok ? await bootstrap.json() : null;
   const projection = await readProjectionScope(f.db, f.contributor.sub, f.workspaceId, signal.target.citySlug, "signal");
   const body = { operation: "facets.signals.personal.select.v1", workspaceId: f.workspaceId, target: signal.target,
@@ -97,5 +99,5 @@ export async function l5Fixture(write = true) {
       "content-type": "application/json", "idempotency-key": key, "x-reader-instance": privatePage?.pageInstanceId ?? "",
       "x-reader-csrf": privatePage?.csrf ?? "", ...extra }, body: JSON.stringify(input) });
   return { f, signal, author, scope, artifactId, releaseId, origin, pageHost, headers, cookie, login, runtime, app,
-    body, prepare, bootstrap, privatePage, close: publication.close };
+    body, prepare, bootstrap, privatePage, readGrant, close: publication.close };
 }

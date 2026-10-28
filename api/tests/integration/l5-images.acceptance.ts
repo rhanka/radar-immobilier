@@ -66,12 +66,26 @@ it.each([0, 1])("should read and confirm a published write through normal image 
     const after = await effects(h.f); expect(after.events).toBe(before.events! + 1);
     expect(after.debits).toBe(before.debits! + 1);
     await page.bringToFront();
-    await page.waitForFunction(() => document.body.dataset.confirmed === "1", null, { timeout: 1900 });
+    await page.waitForFunction(() => {
+      const receipt = document.querySelector("#pw-page-receipt")?.textContent;
+      const state = document.querySelector("#pw-live-state")?.textContent;
+      const counts = document.querySelector("#pw-live-counts")?.textContent;
+      return receipt && JSON.parse(receipt).state === "committed" && state && counts;
+    }, null, { timeout: 6000 });
+    const state = JSON.parse(await page.locator("#pw-live-state").textContent() ?? "{}");
+    expect(state.facets.selection.pertinent.state).toBe("active");
+    expect(state.facets.selection.a_surveiller.state).toBe("active");
     const restored = await app.evaluate(async (intentId) => {
       const response = await fetch(`/api/v1/artifacts/write-intents/${intentId}`); return response.json();
     }, id);
     expect(restored).toMatchObject({ state: "committed", commandId: receipt.commandId, receipt: receipt.receipt });
-    await app.locator("#pw-confirm").click();
+    const replay = await app.evaluate(async (intentId) => {
+      const boot = JSON.parse(document.querySelector("#pw-bootstrap")!.textContent!);
+      return (await fetch(`/api/v1/artifacts/write-intents/${intentId}/confirm`, { method: "POST",
+        headers: { "content-type": "application/json", "x-artifact-write-csrf": boot.csrf },
+        body: JSON.stringify({ challengeToken: boot.challengeToken }) })).status;
+    }, id);
+    expect(replay).toBe(409);
     await expect.poll(() => effects(h.f), { timeout: 1500 }).toEqual(after);
     const requests = network.traffic.slice(start);
     const navigation = requests.find((request) => request.path === `/artifact-write/intents/${id}`)!;
