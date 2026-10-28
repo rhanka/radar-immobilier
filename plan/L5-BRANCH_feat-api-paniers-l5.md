@@ -42,6 +42,7 @@
 - [x] Application POSTs bound fetch plus JSON to 15 seconds, release controls and expose same-intent recovery on uncertainty; late replies cannot update the document. Technical committed state renders without an empty business receipt.
 - [x] L5 bootstrap bounds fetch and body consumption to 15 seconds before installing any script/bootstrap node; late transport/body completion cannot install write controls.
 - [x] Each demanded PW read renews the read grant; a 401 explicitly retries cookie-only recovery under the existing sealed pinned P and current reader authority. One 15-second deadline covers renewal/recovery/read and bodies; polling never extends P or write authority.
+- [x] Scoped qualification explicitly lints every second-pass runtime change and new regression; retain original required matrices without rerunning unrelated API/mutation campaigns.
 - [x] Lot 0: merge approved PW-A and main; preserve Track event blob identity.
 - [x] Lot 1: bind verified approval provenance, explicit release write request and private page bootstrap.
 - [x] Implementation and targeted PG proof: actual one-use ticket provenance, explicit workspace, matching signed read grant and no publisher privileges.

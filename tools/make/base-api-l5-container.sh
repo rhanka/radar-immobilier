@@ -47,7 +47,8 @@ lint=(api/tests/integration/pwe-*.ts api/src/services/facets/pwe-*.ts
   api/src/services/facets/pw-write-fences.ts
   api/src/artifacts/write-intent-page{,-budget,-harness}.ts
   api/src/artifacts/write-intent-{page-read,review-reread.test,app-terminal-db.test}.ts
-  api/src/artifacts/write-intent-app-{route,authority,result,surface-db.test}.ts
+  api/src/artifacts/write-intent-app-{route,authority,result,dispatch,script,script.test,deadline.test,surface-db.test}.ts
+  api/src/artifacts/write-intent-h5-authority.ts api/src/artifacts/write-intent-review-renewal.test.ts
   api/src/services/facets/signal-write-receipt.ts
   api/src/artifacts/pwe-*.ts tools/make/base-api-pwe*.mjs tools/make/base-api-l5*.mjs)
 check eslint node_modules/.bin/eslint "${lint[@]}"
