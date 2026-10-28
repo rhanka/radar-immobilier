@@ -13,14 +13,8 @@ CAMPAIGN_DIR=$ROOT/tmp/l5-evidence/$(date -u +%Y%m%dT%H%M%S)-images
 LOG_DIR=$CAMPAIGN_DIR
 mkdir -p "$RUN_DIR" "$LOG_DIR"
 echo "Evidence: $CAMPAIGN_DIR"
-exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
-while :; do
-  if [[ -z $(docker ps -q) ]] && flock -w 1 8; then
-    [[ -n $(docker ps -q) ]] || break
-    flock -u 8
-  fi
-  echo 'Waiting for shared Docker lock and absence of foreign stacks'; sleep 10
-done
+source tools/make/base-api-l5-lock.sh
+acquire_l5_lock
 export COMPOSE_DISABLE_ENV_FILE=1
 export DOCKER_CONFIG="$HOME/.cache/radar-l5-docker"
 export BUILDX_CONFIG="$DOCKER_CONFIG/buildx"
@@ -44,7 +38,7 @@ cleanup_images() {
   [[ -z ${MONITOR:-} ]] || { kill "$MONITOR" 2>/dev/null || true; wait "$MONITOR" 2>/dev/null || true; }
   "${compose[@]}" logs --no-color > "$LOG_DIR/compose.log" 2>&1 || true
   guarded_down > "$LOG_DIR/cleanup.log" 2>&1 || code=1
-  flock -u 8
+  release_l5_lock
   printf 'Shared campaign lock released\n' > "$CAMPAIGN_DIR/lock-release.txt"
   printf '%s\n' "$code" > "$CAMPAIGN_DIR/status"
   exit "$code"
@@ -65,7 +59,7 @@ printf '%s\n' "$CANDIDATE" > "$CAMPAIGN_DIR/head.txt"
     foreign=$(docker ps --format '{{.Names}} {{.Label "org.radar.base.owner"}}' | awk -v owner="$OWNER" '$2!=owner{print $1}') || exit
     if [[ -n $foreign ]]; then printf '%s\n' "$foreign" > "$CAMPAIGN_DIR/foreign-stack.txt"; kill -TERM "$$"; exit; fi
   done
-) 8>&- &
+) 7>&- 8>&- &
 MONITOR=$!
 docker build --target runtime --build-arg "GIT_SHA=$CANDIDATE" -t "$PROJECT:runtime" \
   -f api/Dockerfile - < "$RUN_DIR/source.tar" > "$CAMPAIGN_DIR/image-build.log" 2>&1 || {
