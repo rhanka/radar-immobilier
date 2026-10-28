@@ -817,37 +817,100 @@ part of namespace-admin qualification; they are not public-probe requests.
 Keep unperformed retirement checks explicitly unverified. UI/MCP and all other
 surfaces remain excluded from this API-only reopening profile.
 
+Freeze timestamps `maintenance.changeFreeze.startsAt`, `.endsAt` and
+`maintenance.reopenBy` accept UTC `Z` with optional fractional seconds, retained
+when comparing instants. Offsets, including `+00:00`, are rejected. Invalid
+values name the offending JSON field; the example makes this contract explicit.
 ### Recovery and local rehearsal
 
-Never source maintenance helper functions as an operational entrypoint: their
-repository, Kubernetes and evidence context must be initialized by operator.mk.
+Never source maintenance helpers as an operational entrypoint. Their repository,
+Kubernetes and evidence context is initialized by operator.mk. `verify-closed`
+only verifies an existing closure; it cannot close a reopened API.
+
+If a public authenticated check fails after `reopen-api`, immediately use the
+native recovery action below. Do not run `close` again: an existing refusal
+Service makes initial closure fail before any write, preserving the original
+snapshot. Keep CD frozen and the conductor's no-push/no-merge agreement active.
 
 ```sh
+rtk make -f deploy/base-preprod/operator.mk reclose-api INPUT='<OWNER_INPUT_JSON>' EXPECTED='<INDEPENDENT_ROSTER_JSON>' ROUTES='<ORIGINAL_CLOSURE_DIR>/ingress-snapshot.json' OUTPUT='<NEW_RECLOSURE_DIR>' ENV=preprod
 rtk make -f deploy/base-preprod/operator.mk verify-closed INPUT='<OWNER_INPUT_JSON>' EXPECTED='<INDEPENDENT_ROSTER_JSON>' OUTPUT='<NEW_RECOVERY_CHECK_DIR>' ENV=preprod
-rtk make -f deploy/base-preprod/operator.mk restore-ingresses INPUT='<OWNER_INPUT_JSON>' EXPECTED='<INDEPENDENT_ROSTER_JSON>' ROUTES='<EXACT_CLOSURE_SNAPSHOT_JSON>' OUTPUT='<NEW_ROUTE_RESTORE_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk restore-ingresses INPUT='<OWNER_INPUT_JSON>' EXPECTED='<INDEPENDENT_ROSTER_JSON>' ROUTES='<NEW_RECLOSURE_DIR>/ingress-snapshot.json' OUTPUT='<NEW_ROUTE_RESTORE_DIR>' ENV=preprod
 ```
 
-Database restoration is a separate, explicitly authorized, fully stopped Make
-operation. Do not restore a database for a guard refusal before any activation
-mutation. Re-read durable state; use protected resume for a known coherent
-scoped state. Recovery may finish after `reopenBy` while the conductor's freeze
-is still active; new forward actions remain refused. Ingress restoration keeps
-its exact snapshot, UID/resourceVersion tests and readback. If the agreement
-itself expires, obtain its explicit extension; never pretend CD is frozen.
+`reclose-api` accepts only the bound original closure snapshot and the exact
+rendered API-only profile, or the same API Ingress already closed by a partial
+recovery. Every other Ingress must still have its exact closed spec and UID.
+It checks the refusal Service and its empty endpoints, then patches the API
+Ingress with atomic tests of the current UID, resourceVersion and complete spec.
+It replaces that spec with the saved closed spec, scales `radar-api` to zero,
+waits for rollout status and checks both the routing boundary and full closure.
+Unexpected specs/identities are refused before any write; a patch race stops
+before scaling. Retry the same native action after an interrupted recovery;
+never manufacture a new initial snapshot from a partially reopened state.
+
+The original snapshot remains unchanged. Successful reclosure writes
+`<NEW_RECLOSURE_DIR>/ingress-snapshot.json`: its original `ingresses` are
+preserved and `closedIngresses` contains freshly read resourceVersions.
+**Use this new snapshot for restoration.** The initial closed versions are
+stale after reopening/reclosure and must not be used to bypass restoration's
+strict comparison. Restoring original routes leaves consumers stopped,
+CronJobs suspended and CD frozen; separately qualify and reopen the intended
+operational state before re-enabling CD.
+
+Recovery actions `reclose-api`, `verify-closed` and `restore-ingresses` remain
+allowed after `reopenBy` while the explicit change freeze is still active.
+Activation, initial closure and reopening remain forbidden after `reopenBy`.
+If the freeze itself expires, obtain its explicit extension; never pretend CD
+is frozen. Restoring the operational database remains a separate authorized, fully stopped
+Make operation, after closure verification. Do not restore for a guard refusal
+before any activation mutation; re-read durable state instead.
 
 ```sh
 rtk make -f tools/make/bascule-6h-vehicle.mk test ENV=test-bascule-6h-vehicle
 rtk make -f tools/make/bascule-6h-vehicle.mk rehearse ENV=test-bascule-6h-vehicle
+rtk make -f tools/make/bascule-6h-vehicle.mk test-reclose-mutations ENV=test-bascule-6h-vehicle
 ```
 
-The rehearsal chains native activation, Q1, restart, Q2, proof, native filter,
-reopening, and both simulated authenticated CDP probes. Cluster/GitHub binaries
-are fixtures; Node runs without network and each Compose project ends with
-`down -v`. It is not a real-cluster or real-Chrome qualification.
-Backup freshness rules are unchanged: `backup.restoredAt` is the timestamp of
-a completed qualified rehearsal, never the current time. This patch adds no
-backup expiry waiver or new operational authorization.
+`test` includes the previously standalone missing-context test and the freeze
+fraction/field/recovery checks. The rehearsal chains native activation, Q1,
+restart, Q2, proof, the unchanged native filter, reopening, both simulated
+authenticated CDP probes, then a simulated late Q1 failure and native
+`reclose-api -> verify-closed -> restore-ingresses`. A fixture deadline is moved
+into the past after reopening to exercise late recovery deterministically.
+It also checks foreign/divergent snapshots, concurrent versions and retry after
+an interrupted API stop. Kubernetes and GitHub calls use fixtures. Node runs
+without network. Each Compose project ends with `down -v`; no real cluster,
+Chrome or database is qualified. The mutation target must reject omission of
+the API stop, snapshot validation or resourceVersion test.
 
+### Restore qualification before the 29 October window
+
+The existing completed restore rehearsal, dated 28 October 2026 at 07:29:10 UTC,
+expires on **29 October at 07:29:10 UTC**, before the planned 09:00 UTC cutover.
+There is no backup expiry waiver. Without a new real qualification, stop before
+maintenance. This vehicle intentionally neither dumps nor restores a database.
+
+Use the separately approved Make database procedure to requalify the chosen
+immutable dump: verify its availability and SHA-256, restore it completely into
+an isolated temporary database with failure-on-error, then compare schema and
+per-table counts with its reference receipt. Retain the successful restore and
+comparison output, the actual UTC completion time and temporary-database cleanup.
+A checksum-only check or changing a timestamp is not a restore qualification.
+
+Prepare a new immutable owner input: `backup.reference` and `backup.sha256`
+identify the dump actually restored, `backup.restoredAt` is that real completion
+time, and `backup.restoreReceiptSha256` hashes the new successful receipt.
+Then run the native acceptance prerequisites, with a new OUTPUT each time:
+
+```sh
+rtk make -f deploy/base-preprod/operator.mk validate INPUT='<REQUALIFIED_OWNER_INPUT_JSON>' OUTPUT='<NEW_VALIDATION_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk preflight INPUT='<REQUALIFIED_OWNER_INPUT_JSON>' OUTPUT='<NEW_PREFLIGHT_DIR>' ENV=preprod
+```
+
+These read-only native checks enforce the existing 24-hour guard; they do not
+perform or replace the restore rehearsal. Never set `backup.restoredAt` from
+inference or from the current time without a completed genuine rehearsal.
 ## B5 standalone acceptance profile
 
 B5 proves the B1–B4 implementation through `createApp` and PostgreSQL,
