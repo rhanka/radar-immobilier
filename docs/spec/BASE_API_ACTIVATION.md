@@ -744,6 +744,110 @@ or Complete Job does not restore either launchers or public access. In an
 emergency, re-establish the boundary and stop affected consumers; preserve DB
 barriers and evidence. A database restore is a separate fully stopped operation.
 
+## Vehicle safeguards after 28 October 2026
+
+Prerequisites include GNU date, Bash and jq. All examples use the standalone
+entrypoint; it never loads the root
+Makefile or an environment file. Prepare a fresh immutable INPUT and a new
+absolute OUTPUT for each action. Keep the same binding throughout one attempt.
+
+### Repository freeze and window preflight
+
+**No push and no merge is allowed anywhere in the repository during the
+entire cutover window, including public qualification and rollback.** Disabling
+`Build & push images` does not disable PR CI. A branch push can therefore
+invalidate the native no-nonterminal-Actions guard while CD is frozen.
+
+Record the conductor agreement in `maintenance.changeFreeze`: a nonempty
+`reference`, `noPushOrMerge: true`, UTC `startsAt` and UTC `endsAt`. Set
+`maintenance.reopenBy` to the deadline for reopening **and re-enabling CD**,
+including the measured rollback budget. The agreement must already be active
+and cover at least that deadline. The example input deliberately keeps the
+acknowledgement false. This is an explicit operational agreement, not a claim
+that GitHub repository writes have been technically locked.
+
+```sh
+rtk make -f deploy/base-preprod/operator.mk preflight INPUT='<OWNER_INPUT_JSON>' OUTPUT='<NEW_PREFLIGHT_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk public-probe INPUT='<OWNER_INPUT_JSON>' PUBLIC_PHASE=preflight OUTPUT='<NEW_SESSION_PREFLIGHT_DIR>' ENV=preprod
+```
+
+Preflight is read-only. It retains the inventory, checks the full Actions list
+and confirms the agreement still covers the window after inventory. Freeze,
+closure, activation/resume, API start, restart and reopening retain the native
+live guards. Blocking Actions errors identify each run by id, workflow and
+branch. Wait for completion or cancel only individually authorized runs, then
+inspect again; never convert this check into automatic blanket cancellation.
+Keep `PREPROD_CD_ENABLED` unchanged.
+
+### UTC acceptance and the public probe
+
+API instance capture converts Kubernetes restart/start timestamps to canonical
+UTC `Z`; live-instance comparison uses that same representation. External
+proofs containing ISO timestamps with an offset are rejected explicitly, naming
+the JSON field, before the unchanged native acceptance filter runs. Do not edit
+a timestamp to change the event order or replace the filter with a success flag.
+The local rehearsal executes the exact native filter before reopening.
+
+Authenticated checks under maintenance remain the default. A separately recorded
+owner override may defer them until immediately after reopening in preprod;
+keep that override and the limited server/database/unauthenticated scope in the
+under-maintenance receipts. A public-probe success never substitutes for
+unperformed write, replay, SSE, isolation or revocation qualifications.
+
+```sh
+rtk make -f deploy/base-preprod/operator.mk public-probe INPUT='<OWNER_INPUT_JSON>' PUBLIC_PHASE=q1 OUTPUT='<NEW_PUBLIC_Q1_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk public-probe INPUT='<OWNER_INPUT_JSON>' PUBLIC_PHASE=q2 OUTPUT='<NEW_PUBLIC_Q2_DIR>' ENV=preprod
+```
+
+The probe needs Docker Compose, the pinned Node image, and the owner's existing
+Chrome session at loopback CDP port 9222. It creates its own tab with PUT
+`/json/new` and closes only that tab in `finally`. The controller never calls
+cookie or credential APIs and never exports credentials or response bodies.
+JSON is read inside that Chrome tab; only the filtered receipt leaves it.
+No generic Network or Page event subscription is enabled. Requests are GET on
+the public preprod origin; receipts distinguish transport, redirects, body-read,
+JSON and response-schema failures without raw error messages. A transport-stage
+failure alone does not establish whether CORS or another network cause is involved.
+
+`public-checks.json` is the public probe's sole path list. Every path must match
+the rendered `/health`, `/api/v1/auth` or `/api/v1/workspaces` prefixes.
+`projection-revisions` is already covered by the workspace prefix. Do not add
+extra public routes to make a probe pass. Legacy retirement 410 checks remain
+part of namespace-admin qualification; they are not public-probe requests.
+Keep unperformed retirement checks explicitly unverified. UI/MCP and all other
+surfaces remain excluded from this API-only reopening profile.
+
+### Recovery and local rehearsal
+
+Never source maintenance helper functions as an operational entrypoint: their
+repository, Kubernetes and evidence context must be initialized by operator.mk.
+
+```sh
+rtk make -f deploy/base-preprod/operator.mk verify-closed INPUT='<OWNER_INPUT_JSON>' EXPECTED='<INDEPENDENT_ROSTER_JSON>' OUTPUT='<NEW_RECOVERY_CHECK_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk restore-ingresses INPUT='<OWNER_INPUT_JSON>' EXPECTED='<INDEPENDENT_ROSTER_JSON>' ROUTES='<EXACT_CLOSURE_SNAPSHOT_JSON>' OUTPUT='<NEW_ROUTE_RESTORE_DIR>' ENV=preprod
+```
+
+Database restoration is a separate, explicitly authorized, fully stopped Make
+operation. Do not restore a database for a guard refusal before any activation
+mutation. Re-read durable state; use protected resume for a known coherent
+scoped state. Recovery may finish after `reopenBy` while the conductor's freeze
+is still active; new forward actions remain refused. Ingress restoration keeps
+its exact snapshot, UID/resourceVersion tests and readback. If the agreement
+itself expires, obtain its explicit extension; never pretend CD is frozen.
+
+```sh
+rtk make -f tools/make/bascule-6h-vehicle.mk test ENV=test-bascule-6h-vehicle
+rtk make -f tools/make/bascule-6h-vehicle.mk rehearse ENV=test-bascule-6h-vehicle
+```
+
+The rehearsal chains native activation, Q1, restart, Q2, proof, native filter,
+reopening, and both simulated authenticated CDP probes. Cluster/GitHub binaries
+are fixtures; Node runs without network and each Compose project ends with
+`down -v`. It is not a real-cluster or real-Chrome qualification.
+Backup freshness rules are unchanged: `backup.restoredAt` is the timestamp of
+a completed qualified rehearsal, never the current time. This patch adds no
+backup expiry waiver or new operational authorization.
+
 ## B5 standalone acceptance profile
 
 B5 proves the B1–B4 implementation through `createApp` and PostgreSQL,
