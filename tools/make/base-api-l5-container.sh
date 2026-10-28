@@ -63,6 +63,7 @@ fi
 if [[ $1 == full || $1 == mutations || $1 == targeted ]]; then
   check pwe-mutants node ../tools/make/base-api-pwe-mutations.mjs
   check review-mutants node ../tools/make/base-api-pwc-review-mutations.mjs
+  check l5-mutants node ../tools/make/base-api-l5-mutations.mjs
 fi
 check results node ../tools/make/base-api-pwe-results.mjs
 exit "$overall"

@@ -1,10 +1,24 @@
 import { expect, it } from "vitest";
 import { describeDb } from "../../src/services/facets/workspace-archive-fixture.js";
 import { PW_PAGE_SCRIPT } from "../../src/artifacts/write-intent-page.js";
-import { l5Fixture } from "./l5-fixture.js";
+import { l5Fixture, L5_READ, L5_READ_KEY } from "./l5-fixture.js";
+import { mintGrant, verifyGrant } from "../../src/artifacts/preview-grant.js";
 import { effects } from "./pwe-fixture.js";
 
 describeDb("L5 private bootstrap scope", () => {
+  it("should reject a valid signed read grant bound to another reader", async () => {
+    const h = await l5Fixture();
+    try {
+      const verified = await verifyGrant(h.readGrant, { ...L5_READ, host: h.pageHost }, L5_READ_KEY, Date.now());
+      expect(verified).not.toBeNull();
+      const { expiresAtMs: _expires, ...claims } = verified!;
+      const foreign = await mintGrant({ ...claims, readerSub: h.f.moderator.sub }, L5_READ_KEY, Date.now());
+      expect(await verifyGrant(foreign, { ...L5_READ, host: h.pageHost }, L5_READ_KEY, Date.now())).not.toBeNull();
+      const response = await h.app.request(`${h.origin}/__reader/api/facets.write.bootstrap.v1?workspaceId=${h.f.workspaceId}`,
+        { headers: { ...h.headers, "x-preview-grant": foreign } });
+      expect(response.status).toBe(401);
+    } finally { await h.close(); }
+  });
   it("should serve the exact corrected PW script for the reader rather than the author", async () => {
     const h = await l5Fixture();
     try {
