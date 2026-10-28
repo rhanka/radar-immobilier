@@ -13,7 +13,14 @@ for tuple in pwa:31 pwb:5 pwd:7 pwc:25; do
   before_intrusion "$directory" "$directory/$batch-mutants/campaign.log"
   hash=$(sha256sum "tools/make/base-api-$batch-mutations.mjs" | cut -d' ' -f1)
   jq -e --arg batch "$batch" --arg hash "$hash" 'any(.[];.batch==$batch and .status==0 and
-    .scriptSha256==$hash and .protectedBytesRestored)' "$directory/inherited-mutants.json" >/dev/null
+    .scriptSha256==$hash and .protectedBytesRestored and
+    (.materializedSha256|test("^[a-f0-9]{64}$")))' "$directory/inherited-mutants.json" >/dev/null
+  if [[ $batch == pwa ]]; then
+    original_hash=$(sha256sum tools/make/base-api-pwc-review-inherited.mjs | cut -d' ' -f1)
+    legacy_hash=$(sha256sum tools/make/base-api-l5-legacy.mjs | cut -d' ' -f1)
+    jq -e --arg original "$original_hash" --arg legacy "$legacy_hash" '.status==0 and .signal==null and
+      .originalSha256==$original and .legacySha256==$legacy' "$directory/l5-inherited-harness.json" >/dev/null
+  fi
   receipt="$directory/$batch-mutants/mutations.json"
   jq -e --argjson count "$count" 'length==$count and ([.[].name]|unique|length)==$count' "$receipt" >/dev/null
   case $batch in
@@ -38,6 +45,9 @@ for tuple in pwe:52 review:16 l5:3; do
       any(.mutated[];.status=="failed" and any(.failureMessages[];test("AssertionError|__VITEST_REJECTS__"))))' \
     "$directory/$kind-mutants/results.json" >/dev/null
   if [[ $group == l5 ]]; then
-    jq -e '.status==0 and .signal==null' "$directory/l5-mutation-harness.json" >/dev/null
+    cases_hash=$(sha256sum tools/make/base-api-l5-cases.mjs | cut -d' ' -f1)
+    engine_hash=$(sha256sum tools/make/base-api-pwc-review-mutations.mjs | cut -d' ' -f1)
+    jq -e --arg cases "$cases_hash" --arg engine "$engine_hash" '.status==0 and .signal==null and
+      .casesSha256==$cases and .engineSha256==$engine' "$directory/l5-mutation-harness.json" >/dev/null
   fi
 done

@@ -28,6 +28,7 @@ tests_passed() {
   jq -e '.success and .numFailedTests==0 and .numFailedTestSuites==0 and .numPassedTests>0' "$1/$2.json" >/dev/null
 }
 for label in typecheck eslint ct8-staged app-result-regression required build; do command_passed "$required" "$label"; done
+before_intrusion "$required" "$required/results.tsv"
 for label in typecheck eslint ct8-staged build full; do command_passed "$api" "$label"; done
 tests_passed "$required" required; tests_passed "$api" full
 jq -e '.numPendingTests==0' "$required/required.json" >/dev/null
