@@ -54,3 +54,4 @@
 - [x] Correct the mutation adapter's no-regex-spaces lint finding before restarting final qualification; no runtime change.
 - [x] Repeated foreign probe intrusions are retained and discarded as full qualifications; after intrusion, retry waits for ten continuously empty minutes without any departure deadline or foreign cleanup.
 - [x] Candidate d9e0d16e: typecheck/lint/build, CT-8 and 397 required cases pass with zero skips before intrusion in 072553-full. Retain these completed components; rerun API CI and mutations separately.
+- [x] Recover verified owned resources under the radar lock before waiting for Docker quiet; interrupted runner leftovers cannot deadlock the controller's empty-machine wait.
