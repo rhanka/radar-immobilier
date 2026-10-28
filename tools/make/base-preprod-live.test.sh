@@ -171,6 +171,7 @@ exit 0
 FAKE
 chmod +x bin/kubectl bin/gh
 : > cluster-calls
+source tools/make/base-preprod-public.test.sh
 source tools/make/base-preprod-actions.test.sh
 invoke permissions
 cp ingress-original.json ingress-fixture.json

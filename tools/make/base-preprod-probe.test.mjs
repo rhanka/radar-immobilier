@@ -76,3 +76,13 @@ test('refuse Q1 lorsque le JSON de coherent-city est inexploitable', async () =>
   assert.equal(result.passed, false);
   assert.equal(result.checks.find(x => x.name === 'coherent-city').failurePhase, 'json-parse');
 });
+
+const { probeConfig } = await import('../../deploy/base-preprod/public-cli.mjs');
+test('limite la configuration publique à la préprod et au SHA complet', () => {
+  const input = { namespace: 'radar-immobilier-preprod', binding: {
+    workspaceId: fixtureConfig.workspaceId, actorSub: fixtureConfig.actorSub, releaseId: fixtureConfig.releaseSha + ':fixture' } };
+  assert.equal(probeConfig(input, 'q1').origin, 'https://preprod.immo.sent-tech.ca');
+  assert.throws(() => probeConfig({ ...input, namespace: 'radar-immobilier' }, 'q1'), { message: 'invalid_probe_input' });
+  assert.throws(() => probeConfig({ ...input, binding: { ...input.binding, releaseId: 'short' } }, 'q1'));
+  assert.throws(() => probeConfig(input, 'rollback'));
+});

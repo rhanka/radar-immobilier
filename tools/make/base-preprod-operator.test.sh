@@ -17,6 +17,7 @@ fi
 printf '%s\n' '$(error root_makefile_was_read)' > "$testdir/Makefile"
 printf '#!/bin/sh\nprintf unexpected >> "%s/cluster-calls"\nexit 1\n' "$testdir" > "$testdir/bin/kubectl"
 cp "$testdir/bin/kubectl" "$testdir/bin/gh"
+cp "$testdir/bin/kubectl" "$testdir/bin/docker"
 chmod +x "$testdir/bin/"*
 export PATH="$testdir/bin:$PATH"
 cd "$testdir"
