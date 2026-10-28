@@ -12,6 +12,7 @@ import { createHash } from "node:crypto";
 import { PW_PAGE_POLL_BOUNDS, PW_PAGE_PREPARE_PATH, PW_PAGE_STATUS_PATH } from "./write-intent-page-gesture.js";
 import { PW_PAGE_BUDGET_SCRIPT } from "./write-intent-page-budget.js";
 import { validPwPageEnvelope } from "./write-intent-page-envelope.js";
+import { PW_PAGE_READ_SCRIPT } from "./write-intent-page-read.js";
 
 const PW_PAGE_SCRIPT_PREPARE = `
 (() => {
@@ -119,6 +120,7 @@ const PW_PAGE_SCRIPT_PREPARE = `
     var problem = validGesture(gesture);
     if (problem) { say("This gesture is incomplete (" + problem + ")."); return; }
     preparing = true;
+    var dispatched = false;
     var gate = withTimeout(15000);
     try {
       if (!boot.pageInstanceId || !boot.csrf || typeof window.__pwReadGesture !== "function") throw new Error("Page bootstrap unavailable");
@@ -126,6 +128,7 @@ const PW_PAGE_SCRIPT_PREPARE = `
       if (!pendingAttempt) gesture = await window.__pwReadGesture(gesture);
       var freshProblem = validGesture(gesture);
       if (freshProblem) throw new Error("Target state unavailable");
+      dispatched = true;
       var res = await fetch(PREPARE, { method: "POST", credentials: "same-origin",
         headers: { "content-type": "application/json", "idempotency-key": key,
           "x-reader-instance": boot.pageInstanceId, "x-reader-csrf": boot.csrf },
@@ -163,9 +166,11 @@ const PW_PAGE_SCRIPT_PREPARE = `
         say("Preparation refused (" + (code || ("http " + res.status)) + "). Correct the gesture and try again.");
       }
     } catch (err) {
-      pendingAttempt = { gesture: gesture, key: key };
-      say("The request may still have reached the server. Retry the exact gesture below.");
-      reveal("#pw-write-retry");
+      if (dispatched) {
+        pendingAttempt = { gesture: gesture, key: key };
+        say("The request may still have reached the server. Retry the exact gesture below.");
+        reveal("#pw-write-retry");
+      } else say("Target refresh failed. Re-read the page before preparing another gesture.");
     } finally {
       preparing = false;
       if (pendingAttempt) reveal("#pw-write-retry");
@@ -380,7 +385,7 @@ ${PW_PAGE_BUDGET_SCRIPT}
 })();
 `;
 
-export const PW_PAGE_SCRIPT = `${PW_PAGE_SCRIPT_PREPARE}\n${PW_PAGE_SCRIPT_POLL}`;
+export const PW_PAGE_SCRIPT = `${PW_PAGE_READ_SCRIPT}\n${PW_PAGE_SCRIPT_PREPARE}\n${PW_PAGE_SCRIPT_POLL}`;
 
 export const PW_PAGE_SCRIPT_HASH = createHash("sha256")
   .update(PW_PAGE_SCRIPT).digest("base64");
