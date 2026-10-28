@@ -55,7 +55,7 @@ export function writeIntentAppRoute(deps: WriteAppDeps | null): Hono {
           return deps.renderManagement(c, row, { csrf: writeCsrf(deps, pass, row.intentId), result });
         }
         return c.json({ intentId: row.intentId, management: true,
-          csrf: writeCsrf(deps, pass, row.intentId), ...result });
+          csrf: writeCsrf(deps, pass, row.intentId), ...(path === api ? result : {}) });
       }
       if (!deps.renderSummary) return writeRefusal(c, "write_transport_closed", 503);
       return deps.renderSummary(c, row, challengeBootstrap(row, deps, pass));

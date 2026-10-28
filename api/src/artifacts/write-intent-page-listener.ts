@@ -68,8 +68,6 @@ function forwardHeaders(c: { req: { header: (name: string) => string | undefined
 
 export function pageWriteListenerRoute(deps: PageListenerDeps | null): Hono {
   const app = new Hono();
-  app.use(PW_PAGE_PREPARE_PATH, bodyLimit({ maxSize: 16 * 1024,
-    onError: (c) => writeRefusal(c, "request_too_large", 413, "not_executed", "prepare") }));
   for (const path of [PW_PAGE_PREPARE_PATH, PW_PAGE_STATUS_PATH]) {
     app.use(path, async (c, next) => {
       c.header("Cache-Control", "private, no-store");
@@ -78,7 +76,8 @@ export function pageWriteListenerRoute(deps: PageListenerDeps | null): Hono {
       await next();
     });
   }
-  app.post(PW_PAGE_PREPARE_PATH, async (c) => {
+  app.post(PW_PAGE_PREPARE_PATH, bodyLimit({ maxSize: 16 * 1024,
+    onError: (c) => writeRefusal(c, "request_too_large", 413, "not_executed", "prepare") }), async (c) => {
     if (!deps) return writeRefusal(c, "write_transport_closed", 503, "not_executed", "prepare");
     if (foreignHost(c, deps.contentBase)) return c.json({ error: "not_found" }, 404);
     try {
