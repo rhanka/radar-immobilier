@@ -44,3 +44,9 @@ it("should not dispatch prepare or reserve an uncertain key when the targeted re
   h.responders.push(() => prepared(UUID)); await h.clickGesture(GESTURES[0]!);
   expect(h.readCalls).toHaveLength(2); expect(h.fetchCalls).toHaveLength(1);
 });
+it("should explicitly reveal the targeted archive for restore and its post-commit refresh", async () => {
+  const h = pageHarness(); h.responders.push(() => prepared(UUID)); await h.clickGesture(GESTURES[3]!);
+  expect(new URL(h.readCalls[0]!.url, "https://page.test").searchParams.get("reveal")).toBe("true");
+  h.responders.push(() => statusOf(UUID, "committed")); await h.runTimer();
+  expect(new URL(h.readCalls[1]!.url, "https://page.test").searchParams.get("reveal")).toBe("true");
+});

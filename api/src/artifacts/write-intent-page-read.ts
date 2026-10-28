@@ -17,7 +17,8 @@ export const PW_PAGE_READ_SCRIPT = `
       !data.snapshot || !/^[a-f0-9]{64}$/.test(data.snapshot.baseToken)) throw new Error("Read unavailable");
     return data;
   }
-  function params(g) { return {workspaceId:boot.workspaceId,citySlug:g.target.citySlug,type:g.target.type,id:g.target.id}; }
+  function params(g) { return {workspaceId:boot.workspaceId,citySlug:g.target.citySlug,type:g.target.type,id:g.target.id,
+    reveal:g.operation && (g.operation.indexOf(".restore.")!==-1 || g.operation.indexOf(".discard.")!==-1)?"true":"false"}; }
   async function state(g) {
     if(g.workspaceId!==boot.workspaceId) throw new Error("Workspace mismatch");
     var result=await read("state",params(g)), item=result.item;
