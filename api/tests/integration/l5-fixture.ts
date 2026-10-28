@@ -93,7 +93,7 @@ export async function l5Fixture(write = true) {
     { headers: { ...headers, "x-preview-grant": readGrant } });
   const privatePage = bootstrap.ok ? await bootstrap.json() : null;
   const projection = await readProjectionScope(f.db, f.contributor.sub, f.workspaceId, signal.target.citySlug, "signal");
-  const body = { operation: "facets.signals.personal.select.v1", workspaceId: f.workspaceId, target: signal.target,
+  const body: WritePrepareBody = { operation: "facets.signals.personal.select.v1", workspaceId: f.workspaceId, target: signal.target,
     basket: "pertinent", expectedHeadId: null, displayedFingerprint: signal.fingerprint, expectedProjectionToken: projection.token };
   const prepare = (extra: Record<string, string> = {}, input: WritePrepareBody = body, key = randomUUID()) => app.request(
     `${origin}/__reader/api/facets.write-intents.prepare.v1`, { method: "POST", headers: { ...headers, origin,
