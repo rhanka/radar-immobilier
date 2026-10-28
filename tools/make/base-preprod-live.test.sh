@@ -12,6 +12,10 @@ jq -n '{items:[
     rules:[{host:"preprod.immo.sent-tech.ca",http:{paths:[{path:"/",pathType:"Prefix",backend:{service:{name:"radar-ui",port:{number:8080}}}}]}}]}},
   {metadata:{name:"fixture-mcp",uid:"mcp-uid"},spec:{defaultBackend:{service:{name:"radar-immo-mcp",port:{number:3001}}}}}
 ] | map(.metadata.resourceVersion="1")}' > ingress-original.json
+if [[ ${VEHICLE_RECOVERY_CASE:-all} != deadline ]];then
+  jq '.items[0].metadata.annotations["fixture.sent-tech.ca/originalTimestamp"]="2026-10-28T12:34:29-04:00"' ingress-original.json > opaque-ingress.json
+  cp opaque-ingress.json ingress-original.json
+fi
 jq '.items[].spec |= ((if has("defaultBackend") then .defaultBackend={service:{name:"base-maintenance-fixture",port:{number:80}}} else . end)
   | (.rules[]?.http.paths[]?.backend)={service:{name:"base-maintenance-fixture",port:{number:80}}})' ingress-original.json > ingress-fixture.json
 jq -n --slurpfile c input.json '{metadata:{annotations:{"radar.sent-tech.ca/maintenance-attempt":$c[0].binding.maintenanceAttemptId}},
