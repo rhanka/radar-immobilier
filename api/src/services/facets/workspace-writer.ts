@@ -57,6 +57,13 @@ type WorkspaceTx = Parameters<Parameters<Database["transaction"]>[0]>[0];
 export async function writeWorkspaceArchiveFacet(
   db: Database, sub: string, workspaceId: string, command: WorkspaceArchiveCommand,
 ) {
+  return db.transaction((tx) => writeWorkspaceArchiveFacetInTx(tx, sub, workspaceId, command));
+}
+
+/** Shared BASE executor; the caller owns commit, rollback, and isolation. */
+export async function writeWorkspaceArchiveFacetInTx(
+  tx: WorkspaceTx, sub: string, workspaceId: string, command: WorkspaceArchiveCommand,
+) {
   if (command.action !== "discard" && command.action !== "restore") {
     throw new FacetError(400, "invalid_facet_command");
   }
@@ -75,7 +82,6 @@ export async function writeWorkspaceArchiveFacet(
     throw new FacetError(400, "invalid_facet_command");
   }
   const key = command.commandKey.toLowerCase();
-  return db.transaction(async (tx) => {
     await lockWorkspace(tx, workspaceId);
     const actorId = await approvedAccountId(tx, sub, true);
     const access = await resolveWorkspaceAccess(tx, workspaceId, sub);
@@ -140,7 +146,6 @@ export async function writeWorkspaceArchiveFacet(
       ownerId: actorId, commandKey: key, workspaceId, status: "resolved", commandDigest,
     }).onConflictDoNothing();
     return result;
-  });
 }
 
 /** Authorized conflict disclosure: the workspace head only, never personal state. */

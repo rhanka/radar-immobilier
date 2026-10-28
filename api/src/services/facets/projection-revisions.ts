@@ -106,11 +106,17 @@ export interface ProjectionRead extends ProjectionScope {
 export async function readProjectionScope(
   db: Database, sub: string, workspaceId: string, citySlug: string, mode: string,
 ): Promise<ProjectionRead> {
+  return db.transaction((tx) => readProjectionScopeInTx(tx, sub, workspaceId, citySlug, mode));
+}
+
+/** Authorized scope in the caller's snapshot, without a nested transaction. */
+export async function readProjectionScopeInTx(
+  tx: RevisionTx, sub: string, workspaceId: string, citySlug: string, mode: string,
+): Promise<ProjectionRead> {
   if (mode !== SIGNAL_PROJECTION_MODE) throw new ScopeError(400, "unsupported_projection_mode");
   if (typeof citySlug !== "string" || citySlug.length === 0) {
     throw new ScopeError(400, "invalid_scoped_identity");
   }
-  return db.transaction(async (tx) => {
     await lockWorkspace(tx, workspaceId);
     const accountId = await approvedAccountId(tx, sub, true);
     await resolveWorkspaceAccess(tx, workspaceId, sub);
@@ -148,7 +154,6 @@ export async function readProjectionScope(
       manageMembers: membership.manageMembers,
     };
     return { ...scope, token: projectionToken(scope) };
-  });
 }
 
 export interface CoherentProjection<T> {

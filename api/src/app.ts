@@ -7,6 +7,8 @@ import {
 } from "./routes/auth.js";
 import { healthRoute, type HealthDeps } from "./routes/health.js";
 import { contentGate, type ContentReaderMount } from "./artifacts/content-app.js";
+import { writeIntentH5Route } from "./artifacts/write-intent-h5-route.js";
+import { writeIntentAppRoute } from "./artifacts/write-intent-app-route.js";
 import type { ContentHostConfig } from "./artifacts/content-config.js";
 import { controlRoute, type ControlRouteDeps } from "./artifacts/control-route.js";
 import { chatRoute } from "./routes/chat.js";
@@ -95,6 +97,9 @@ export type AppDeps = HealthDeps &
     mcpSignalSearch?: { enabled: boolean; afterWorkspaceResolve?: () => Promise<void> | void };
     /** Operator-injected read signing configuration; absent keeps pagination closed. */
     classification?: ClassificationOptions;
+    /** PW-A write authority; absent keeps prepare/status/confirm closed. */
+    writeH5?: Parameters<typeof writeIntentH5Route>[0] | undefined;
+    writeApp?: Parameters<typeof writeIntentAppRoute>[0] | undefined;
   };
 
 /** Compose the Hono application from injected dependencies. */
@@ -123,6 +128,12 @@ export function createApp(deps: AppDeps): Hono {
       }));
     }
   }
+
+  // PW-A write authority: H5 prepare/status and application confirm/revoke.
+  // Mounted after contentGate and before protect; absent deps stay closed
+  // (503) and never fall back to protect, PUBLIC_PREFIXES, or CORS.
+  app.route("/api/v1/artifacts/reader/facets", writeIntentH5Route(deps.writeH5 ?? null));
+  app.route("/", writeIntentAppRoute(deps.writeApp ?? null));
 
   // Auth runs after the content gate, so protect still fronts every business
   // route. When `deps.auth` is absent or disabled both are inert no-ops.
