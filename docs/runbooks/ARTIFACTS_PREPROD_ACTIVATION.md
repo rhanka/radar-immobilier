@@ -7,7 +7,8 @@ Set an explicit preprod `KUBECONFIG` in the operator session. Rollback needs
 pod-list and pod-exec permissions to verify only `ARTIFACTS_CONTROL_MODE` in
 each API/MCP pod; it never retrieves Secret data. The namespace is
 hardcoded to `radar-immobilier-preprod`; live targets also require `ENV=preprod`.
-Pause preprod CD during preparation: its reconcile will apply `general` from Git.
+Pause preprod CD during controlled activation: its reconcile reapplies the modes
+committed in Git, currently `off` for both API and MCP.
 
 ## Runtime and coordinates
 
@@ -105,6 +106,17 @@ Verify no parent-domain application cookie is sent to either content hostname.
 Keep CD paused until provisioning and checks are complete. Replace `<digest>`
 below with the approved 64-character API image digest; never apply `:latest`.
 
+When resuming from Git **off**, retain `off` in both
+`patch-artifacts-control.yaml` and `patch-immo-mcp-config.yaml` until deliberate
+activation. Verify effective `off` in every API/MCP pod before installing S3
+publication credentials. The standalone `render` target explicitly converts
+either Git mode (`off` or `general`) to the requested `MODE` and checks each
+rendered ConfigMap. Thus step 4 works directly from Git off; no preliminary Git
+edit is needed to render or apply `general` while CD is paused. Rendering only
+writes `OUT/render.yaml` and never changes Git or the cluster. Pause the CD
+workflow through the operator procedure; never set `PREPROD_CD_ENABLED=false`,
+which would route delivery to production.
+
 1. Complete backup/migrations, scope/quotas, bucket/IAM, secrets and DNS/TLS.
 2. Render **off**, retain its SHA-256, review its selected resources and image:
 
@@ -137,7 +149,10 @@ below with the approved 64-character API image digest; never apply `:latest`.
    applies both ConfigMaps and the API Deployment, but **not the MCP Deployment,
    content Ingress, denial resources or network policies**. Those operator steps
    are necessary even when a subsequent CD sets the correct MCP image.
-5. Run the checks below, record receipts and resume CD. Check that a subsequent
+5. Run the checks below and record receipts. Before resuming CD, deliver
+   `ARTIFACTS_CONTROL_MODE: general` in **both** Git patches through normal
+   review/commit delivery; otherwise the next reconcile restores `off/off`.
+   Resume CD and check that a subsequent
    preprod reconcile retains both `general` values and the injected references;
    no cluster-side check or reconcile receipt is supplied by offline delivery.
 
