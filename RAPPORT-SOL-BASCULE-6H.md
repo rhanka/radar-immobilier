@@ -116,3 +116,114 @@ La garde de sauvegarde de 24 heures est conservée : la qualification enregistr�
 le 28/10 à 07:29:10 UTC expire le 29/10 à 07:29:10 UTC, avant la fenêtre de
 09:00 UTC. Ne pas rafraîchir artificiellement `backup.restoredAt` ; une nouvelle
 qualification réelle ou une décision séparée effectivement supportée sera requise.
+
+## Correctifs véhicule, seconde passe
+
+Seconde passe de PR #940, base exacte `ec8670419085098c82b3bb587a7d36f5807838fe`.
+Les rapports Fable 5.1 (`fable-940.md`) et astra (`astra-940.md`) ont été lus
+intégralement. Corrections exclusivement locales, dans la copie de livraison
+`tmp/bascule-6h/tmp/vehicle-fix-delivery-check`, sur `fix/bascule-6h-vehicle`.
+Le worktree initial reste au dernier état accessible ; aucun de ses changements
+non commités n'a été écrasé. Aucun push, accès préprod, sauvegarde ou restauration
+réelle, lecture de fichier d'environnement, export de cookie ou de jeton.
+
+### Blocages Fable et astra : récupération native après réouverture
+
+Le défaut est reproduit en rouge : `close` post-réouverture tentait de recréer
+le Service existant (`AlreadyExists`), et l'entrée Make `reclose-api` manquait.
+La garde de gel refusait aussi cette récupération après `reopenBy` malgré un
+accord encore actif. Preuves : `r2/close-after-reopen-red.log`,
+`r2/reclose-missing-red.log` et `r2/freeze-recovery-red.log`.
+
+`close` refuse maintenant le Service existant avant toute écriture et avant
+la création d'un nouveau snapshot. Les gardes de réseau et de middleware sont
+conservées. Le nouveau `reclose-api` natif :
+
+- exige le snapshot de fermeture lié au même binding et à la même image ;
+- vérifie le Service de refus sans endpoints, les identités et les specs ;
+- admet uniquement le profil API seule rendu par le véhicule, ou sa fermeture
+  exacte déjà appliquée lors d'une récupération interrompue ;
+- applique des tests JSON-patch UID, resourceVersion et spec avant remplacement
+  par la spec fermée, puis scale `radar-api` à zéro et attend son rollout ;
+- exécute `assert_boundary` et `assert_closed`, puis écrit un nouveau snapshot.
+
+Les specs originales restent inchangées ; seules les versions fermées relues
+sont actualisées dans `closedIngresses`. `restore-ingresses` consomme ce nouveau
+snapshot, jamais les versions périmées du premier snapshot. Le filtre natif
+et les trois préfixes publics restent inchangés ; aucun garde applicatif,
+de réseau ou de sauvegarde n'a été désactivé.
+
+Les actions `reclose-api`, `verify-closed` et `restore-ingresses` sont classées
+récupération : elles restent autorisées après `reopenBy` tant que le gel est
+actif. Activation, fermeture initiale et réouverture tardives restent refusées.
+Un gel expiré refuse aussi la récupération. `verify-closed` reste un constat,
+et les helpers privés ne sont pas des entrées opérationnelles.
+
+### Câblage du contexte et fractions de seconde
+
+`base-preprod-context.test.sh` est maintenant exécuté par la cible `test`, via
+`test-context`. Le refus avant tout appel gh d'un helper non initialisé passe.
+Les trois tests rouges du gel reproduisent le rejet des fractions Z, le message
+sans champ et le refus de récupération tardive. Ils passent après correction.
+Les fractions sont conservées dans la comparaison des instants ; les dates
+invalides nomment `maintenance.changeFreeze.startsAt`, `.endsAt` ou
+`maintenance.reopenBy`. Les décalages, y compris `+00:00`, restent refusés : les
+entrées exigent UTC `Z`, contrat rendu explicite dans l'exemple et le runbook.
+
+### Répétition et refus qualifiés localement
+
+La répétition exécute le véhicule natif sur fixtures, jusqu'au filtre natif exact
+et à `reopen-api`, puis les sondes CDP authentifiées simulées Q1/Q2. Elle produit
+ensuite un reçu de sonde simulée en échec, observé après l'échéance de fixture,
+puis enchaîne `reclose-api → verify-closed → restore-ingresses` avec succès.
+L'échéance est déplacée dans le passé dans l'owner-input privé de fixture après
+réouverture ; aucune horloge ni preuve de qualification réelle n'est modifiée.
+
+La matrice refuse sans écriture snapshots étrangers, fermetures incomplètes,
+UID ou specs divergents, activation/réouverture tardives et gel expiré. Une course
+resourceVersion fait échouer le patch avant scale. Une interruption du scale
+laisse les routes fermées ; la même action reprend sans helper et sans recréer
+le Service. Les tests contrôlent les quatre opérations du patch, les versions,
+les replicas et le SHA-256 inchangé du snapshot original. Les copies de fixture
+sont réinitialisées entre la matrice de fautes et le parcours nominal.
+
+Validation locale verte : **280 cas natifs, 15 tests Node, deux contrôles UTC,
+trois modes de contrôle du gel, le test de contexte et onze chemins publics**.
+La répétition donne `nativeFilter:true`, Q1/Q2 simulés réussis, `lateQ1:false`
+attendu, puis `reclosed:true`, `verifiedClosed:true`, `restored:true`.
+Les trois mutations ciblées (scale, validation du snapshot, test resourceVersion)
+sont rejetées ; les exécutions avant/après passent et les sources sont inchangées.
+Contrôles Bash et diff propres. Journaux sous
+`tmp/bascule-6h/tmp/vehicle-fix-delivery-check/tmp/vehicle-evidence/` :
+`r2/full-green.log`, `r2/reclose-mutations.log`, `r2/reclose-mutations/`,
+`rehearsal-native.log` et `rehearsal-complete.json`.
+Chaque pile Compose propre aux tests finit par `down -v` ; Node reste sans réseau.
+
+### Prérequis ferme pour le 29/10 à 09:00 UTC
+
+La qualification existante du dump de 07:16, achevée le 28/10 à 07:29:10 UTC,
+expire le **29/10 à 07:29:10 UTC**, avant la fenêtre de 09:00. La garde de
+24 heures est inchangée et aucune dérogation de sauvegarde n'a été ajoutée.
+
+Marche à suivre avant toute maintenance, non exécutée dans cette passe : vérifier
+la disponibilité et le SHA-256 du dump immuable choisi ; via la procédure Make
+d'administration PostgreSQL approuvée, le restaurer réellement dans une base
+temporaire isolée avec arrêt sur erreur ; comparer schéma et comptes par table
+au reçu de référence ; conserver les sorties de succès, l'heure UTC réelle de
+fin et la preuve de suppression de la base temporaire. Produire le nouveau SHA-256
+du reçu, puis un owner-input immuable dont `backup.reference` et `backup.sha256`
+désignent ce dump, `backup.restoredAt` cette fin réelle et
+`backup.restoreReceiptSha256` le nouveau reçu. Exécuter ensuite les entrées natives
+`operator.mk validate`, puis `operator.mk preflight`, chacune avec un OUTPUT neuf.
+Le véhicule ne fournit aucune action de restauration PostgreSQL : ces validations
+acceptent le prérequis qualifié, elles ne le réalisent pas. Si la requalification
+réelle manque, NO-GO avant fermeture. Un nouvel horodatage seul est invalide.
+
+### Livraison et unverified
+
+Bundle r2 demandé : `tmp/bascule-6h/bascule-6h-vehicle-fix-r2.bundle`, ref
+`refs/heads/fix/bascule-6h-vehicle`, strictement au-dessus d'`ec867041`.
+Le runbook anglais décrit la re-fermeture native et le snapshot à transmettre.
+Restent `unverified` : Chrome et cluster réels, restauration réelle, cause exacte
+du TypeError historique, CI distante et revues de cette seconde passe. Les autres
+remarques non demandées sur le véhicule CDP demeurent hors de cette correction.
