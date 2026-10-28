@@ -217,7 +217,7 @@ export function prepared(intentId: string, state = "pending") {
     data: { intentId, invocationId: UUID, state,
       expiresAt: new Date(1_000_000 + 120_000).toISOString(),
       confirmationUrl: `https://app.example.test/artifact-write/intents/${intentId}`,
-      managementUrl: `https://app.example.test/api/v1/artifacts/write-intents/${intentId}`,
+      managementUrl: `https://app.example.test/artifact-write/intents/${intentId}`,
       statusUrl: `https://app.example.test/api/v1/artifacts/reader/facets/write-intents/${intentId}` } } };
 }
 

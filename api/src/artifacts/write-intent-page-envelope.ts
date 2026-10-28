@@ -21,7 +21,7 @@ export function validPwPageEnvelope(value: unknown, expected: {
     return keys(data, ["intentId", "invocationId", "state", "expiresAt", "confirmationUrl", "managementUrl", "statusUrl"]) &&
       uuid(data.invocationId) && date(data.expiresAt) &&
       data.confirmationUrl === `${expected.appOrigin}/artifact-write/intents/${id}` &&
-      data.managementUrl === `${expected.appOrigin}/api/v1/artifacts/write-intents/${id}` &&
+      data.managementUrl === `${expected.appOrigin}/artifact-write/intents/${id}` &&
       data.statusUrl === `${expected.appOrigin}/api/v1/artifacts/reader/facets/write-intents/${id}`;
   }
   if (data.state === "pending") return keys(data, ["intentId", "state", "expiresAt"]) && date(data.expiresAt);
