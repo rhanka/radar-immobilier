@@ -35,6 +35,7 @@ source tools/make/base-api-resources.sh
 source tools/make/base-api-compose.sh
 source tools/make/base-api-ci-archive.sh
 source tools/make/base-api-l5-images-compose.sh
+source tools/make/base-api-l5-image-archive.sh
 write_compose
 cleanup_images() {
   local code=$?
@@ -56,7 +57,7 @@ guarded_down
 source tools/make/base-api-pwa-offline.sh
 archive_sources
 archive_ci_inputs
-tar -rf "$RUN_DIR/source.tar" api/Dockerfile api/docker-entrypoint.sh
+image_archive_inputs
 sha256sum "$RUN_DIR/source.tar" > "$CAMPAIGN_DIR/source.sha256"
 printf '%s\n' "$CANDIDATE" > "$CAMPAIGN_DIR/head.txt"
 (
