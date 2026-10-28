@@ -27,3 +27,6 @@ l5-resume:
 .PHONY: l5-proof
 l5-proof:
 	rtk bash tools/make/base-api-l5-proof.sh "$(API_EVIDENCE)" "$(MUTATION_EVIDENCE)" "$(PROXY_EVIDENCE)" "$(IMAGE_EVIDENCE)" "$(REQUIRED_EVIDENCE)"
+.PHONY: l5-r2-bundle
+l5-r2-bundle:
+	REQUIRED_EVIDENCE="$(REQUIRED_EVIDENCE)" READER_EVIDENCE="$(READER_EVIDENCE)" IMAGE_EVIDENCE="$(IMAGE_EVIDENCE)" rtk bash tools/make/base-api-l5-r2-deliver.sh
