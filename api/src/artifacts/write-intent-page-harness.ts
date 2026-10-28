@@ -85,6 +85,8 @@ export function pageHarness(options: { storage?: Map<string, string>; initialNow
   const responders: Array<(call: FetchCall) => unknown> = [];
   const readCalls: FetchCall[] = [];
   const readResponders: Array<(call: FetchCall) => unknown> = [];
+  const renewCalls: FetchCall[] = [];
+  const renewResponders: Array<(call: FetchCall) => unknown> = [];
   let currentGesture = GESTURES[0]!;
   const readFixture = (url: string) => {
     const g = currentGesture;
@@ -140,9 +142,11 @@ export function pageHarness(options: { storage?: Map<string, string>; initialNow
     crypto: { randomUUID: () => `00000000-0000-4000-8000-${String(keys += 1).padStart(12, "0")}` },
     fetch: async (url: string, options: FetchCall["options"]) => {
       const isRead = url.startsWith("/__reader/api/baskets.");
-      (isRead ? readCalls : fetchCalls).push({ url, options });
-      const responder = (isRead ? readResponders : responders).shift() ??
-        (isRead ? () => readFixture(url) : () => ({ status: 500, body: null }));
+      const isRenew = url === "/__reader/renew";
+      (isRead ? readCalls : isRenew ? renewCalls : fetchCalls).push({ url, options });
+      const responder = (isRead ? readResponders : isRenew ? renewResponders : responders).shift() ??
+        (isRead ? () => readFixture(url) : isRenew ? () => ({ status: 200, body: { grant: "fresh-read" } })
+          : () => ({ status: 500, body: null }));
       const out = await responder({ url, options }) as { status: number; body: unknown; retryAfter?: string };
       return {
         status: out.status,
@@ -187,7 +191,7 @@ export function pageHarness(options: { storage?: Map<string, string>; initialNow
   const pendingDelays = (): number[] => timers.filter((timer) => !timer.cleared)
     .map((timer) => timer.delay);
   const seenFollowUp: string[] = [];
-  return { elements, fetchCalls, responders, readCalls, readResponders, opened, committed, seenFollowUp,
+  return { elements, fetchCalls, responders, readCalls, readResponders, renewCalls, renewResponders, opened, committed, seenFollowUp,
     pendingDelays, clickGesture, runTimer, flush,
     hookFollowUp: (): void => {
       (sandbox.window as { __pwWriteFollowUp?: unknown }).__pwWriteFollowUp =
