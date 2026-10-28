@@ -57,8 +57,8 @@
   - [ ] Push and open a PR, require green CI, merge with a merge commit and preserve the branch.
   - [ ] Verify the deployed off modes, then persist the S3 credentials without opening publication.
   - [ ] Record deployment, resource names and remaining S3/acceptance work in the requested report.
-- [ ] **Lot 3 — PR #937 operator-render correction (offline only)**
+- [x] **Lot 3 — PR #937 operator-render correction (offline only)**
   - [x] Render the requested off/general mode for both API and MCP, regardless of the Git off/general baseline, and explicitly verify both values.
   - [x] Exercise the real operator render command for both modes and negative cases through the existing CI suite: 25 H3 render checks and 18 operator checks pass with `make -f deploy/overlays/preprod/artifacts-activation.mk test-render ENV=test-artifacts-activation`.
   - [x] Document resumption from Git off; update DNS/TLS evidence and the local report without accessing the cluster.
-  - [ ] Commit without trailers, verify an incremental bundle based on `656c043904ae7e0df95b11a7c85c0265522aae62`, and deliver without pushing.
+  - [x] Commit without trailers, verify `pr937-fix.bundle` with ref `refs/heads/ops/artifacts-preprod-hold` and prerequisite `656c043904ae7e0df95b11a7c85c0265522aae62`, and deliver without pushing; `git bundle verify` passes.
