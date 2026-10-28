@@ -42,3 +42,46 @@ export async function readCheck(checks, spec, config, fetchRequest = fetch) {
     return {};
   }
 }
+
+export async function publicQualification(config, cases, fetchRequest = fetch) {
+  const checks = [], bodies = Object.create(null);
+  const wanted = config.phase === 'preflight' ? new Set(['health', 'session', 'workspaces']) : null;
+  for (const spec of cases) {
+    if (wanted && !wanted.has(spec.name)) continue;
+    bodies[spec.name] = await readCheck(checks, spec, config, fetchRequest);
+    if (spec.name === 'session' && bodies.session.authenticated !== true) break;
+  }
+  const auth = bodies.session ?? {}, workspaces = bodies.workspaces?.workspaces;
+  const access = Array.isArray(workspaces) ? workspaces.find(x => x.workspace?.id === config.workspaceId) : null;
+  const identity = { authenticated: auth.authenticated === true, approved: auth.user?.status === 'approved',
+    actorMatches: auth.user?.sub === config.actorSub, authDisabled: auth.authDisabled === true };
+  const semantic = (name, passed) => {
+    const row = checks.find(x => x.name === name);
+    if (row) { row.semanticPassed = passed; if (!passed) { row.passed = false; row.failurePhase ??= 'response-schema'; } }
+  };
+  semantic('health', bodies.health?.sha === config.releaseSha);
+  semantic('session', identity.authenticated && identity.approved && identity.actorMatches && !identity.authDisabled);
+  semantic('workspaces', !!access && access.manageMembers === true);
+  const personal = bodies['personal-heads'], archive = bodies['archive-heads'], coherent = bodies['coherent-city'];
+  const counts = { personalHeads: Array.isArray(personal?.heads) ? personal.heads.length : null,
+    archiveHeads: Array.isArray(archive?.heads) ? archive.heads.length : null,
+    reasonCodes: Array.isArray(bodies['reason-codes']?.codes) ? bodies['reason-codes'].codes.length : null };
+  const coherentMatches = coherent?.ok === true && Array.isArray(coherent.signals)
+    && coherent.counts?.visible === coherent.signals.length
+    && coherent.counts?.total === coherent.counts?.visible + coherent.counts?.hidden;
+  const revisions = bodies['projection-revisions']?.revisions;
+  const projectionRevisionReadable = bodies['projection-revisions']?.ok === true
+    && ['personal', 'workspace', 'source'].every(key => Number.isInteger(revisions?.[key]) && revisions[key] >= 0);
+  if (!wanted) {
+    semantic('personal-heads', counts.personalHeads === 0);
+    semantic('archive-heads', counts.archiveHeads === 0);
+    semantic('coherent-city', coherentMatches);
+    semantic('projection-revisions', projectionRevisionReadable);
+    semantic('reason-codes', counts.reasonCodes > 0);
+    semantic('facet-context', bodies['facet-context']?.ok === true);
+    semantic('lots-stay-closed', bodies['lots-stay-closed']?.error === 'lot_cutover_closed');
+  }
+  return { passed: checks.length === (wanted ? wanted.size : cases.length) && checks.every(x => x.passed), identity,
+    workspace: { matched: !!access, manageMembers: access?.manageMembers === true }, checks,
+    counts, coherentMatches, projectionRevisionReadable, businessMutations: 0 };
+}
