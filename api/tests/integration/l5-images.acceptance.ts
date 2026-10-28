@@ -5,6 +5,7 @@ import { imagePublication } from "./l5-image-publication.js";
 import { imageNetwork } from "./l5-image-network.js";
 import { L5_DOMAIN } from "./l5-fixture.js";
 import { effects, ONE_COMMIT } from "./pwe-fixture.js";
+import { imageClosure } from "./l5-image-closures.js";
 
 let h: Awaited<ReturnType<typeof imagePublication>>;
 let network: Awaited<ReturnType<typeof imageNetwork>>;
@@ -194,3 +195,7 @@ it("should execute all six published gestures and close on a real ACL withdrawal
       contentBase, receipts, revokedIntent: id, effects: before }, null, 2));
   } finally { await context.close(); }
 }, 60_000);
+
+it.each(["base", "read"] as const)("should preserve CT-9 under the %s image closure", async (variant) => {
+  await imageClosure(variant, browser, network, h);
+}, 30_000);
