@@ -17,7 +17,7 @@
 ## Branch Scope Boundaries (MANDATORY)
 - [x] Allowed Paths: api/src/artifacts/**, api/src/index.ts, api/src/services/facets/pw-write-fences.ts, api/tests/integration/l5-*.ts, tools/make/base-api-l5*, plan/L5-BRANCH_feat-api-paniers-l5.md.
 - [x] Forbidden Paths: api/src/artifacts/write-intent-transaction.ts, api/drizzle/**, Makefile, docker-compose*.yml, rules/**, agent bootstrap files, other branch plans, .track/**.
-- [x] Conditional Paths: none; upstream merge imports are preserved and audited separately from own changes.
+- [x] Conditional Paths: the four regression files enumerated in BRL5-EX1 below; upstream merge imports are preserved and audited separately from own changes.
 - [x] BRL5-EX1: owner-required touched regression maintenance permits api/tests/integration/pw-write-authority.spec.ts, pw-write-authority-status.spec.ts, pwcr-app-status.spec.ts and pwcr-listener-h5.spec.ts. Rationale: post-confirm replies now use the controlled receipt envelope, and the disclosure guard adds an earlier workspace wait. Impact: test expectations and the existing SQL barrier placement only; rollback: revert these exact test hunks and rerun the affected suites.
 
 ## Feedback Loop
@@ -32,7 +32,7 @@
 - [x] Automated browser qualification only; root UAT and dev data remain untouched.
 
 ## Plan / Todo (lot-based)
-- [ ] PR 938 second pass: current page disclosure rights after waits, post-commit application disclosure, renewable read grants, bounded application POSTs/bootstrap, targeted regressions and exact-image browser qualification.
+- [x] PR 938 second-pass implementation: page disclosure rights after waits, post-commit application consultation, renewable read grants, bounded application POSTs/bootstrap and targeted regressions. Exact-image qualification and final bundle are enforced by l5-r2-bundle; results are recorded in RAPPORT-SOL-PWC.md, Second pass #938.
 - [x] Reproduce post-COMMIT continuation withdrawal with actual PostgreSQL membership, artifact ACL and moderation changes; retain exactly one committed command.
 - [x] Add exact-served-script reproductions for suspended application confirmation/revocation and L5 bootstrap, covering transport and JSON body separately.
 - [x] Refresh fixture 6L1 after granting moderation; type the shared prepare port with the six-operation contract. Initial campaign reproduces membership/ACL disclosure and all six missing browser deadlines.
