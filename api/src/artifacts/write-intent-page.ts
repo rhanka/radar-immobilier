@@ -113,8 +113,10 @@ const PW_PAGE_SCRIPT_PREPARE = `
     preparing = true;
     var gate = withTimeout(15000);
     try {
+      var privateHeaders = typeof window.__pwWriteCredentials === "function"
+        ? await window.__pwWriteCredentials(gesture) : {};
       var res = await fetch(PREPARE, { method: "POST", credentials: "same-origin",
-        headers: { "content-type": "application/json", "idempotency-key": key },
+        headers: Object.assign({ "content-type": "application/json", "idempotency-key": key }, privateHeaders),
         body: JSON.stringify(prepareBody(gesture)), signal: gate.signal });
       var data = null;
       try { data = await res.json(); } catch (err) { data = null; }

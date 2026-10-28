@@ -30,7 +30,6 @@ export interface PageListenerDeps extends PageWriteAuthorityDeps {
 }
 
 const INTERNAL_HEADERS = ["x-preview-write-grant", "x-preview-session"];
-const FORWARD_BASE = "https://page-write.internal";
 
 function ownOrigin(url: string): string | null {
   try {
@@ -59,6 +58,10 @@ function forwardHeaders(c: { req: { header: (name: string) => string | undefined
   headers.set("content-type", "application/json");
   const cookie = c.req.header("cookie");
   if (cookie !== undefined) headers.set("cookie", cookie);
+  for (const name of ["origin", "x-reader-instance", "x-reader-csrf"]) {
+    const value = c.req.header(name);
+    if (value !== undefined) headers.set(name, value);
+  }
   if (grant !== null) headers.set("x-preview-write-grant", grant);
   return headers;
 }
@@ -109,12 +112,11 @@ export function pageWriteListenerRoute(deps: PageListenerDeps | null): Hono {
       const key = c.req.header("idempotency-key") ?? "";
       assertIdempotencyKey(key);
       assertWritePrepareBody(body);
-      const now = (deps.nowMs ?? Date.now)();
-      const page = await resolveWritePage(c, deps, () => now);
-      const grant = await mintPageWriteGrant(page, deps, now);
+      const page = await resolveWritePage(c, deps, deps.nowMs ?? Date.now, body);
+      const grant = await mintPageWriteGrant(page, deps, (deps.nowMs ?? Date.now)());
       const headers = forwardHeaders(c, grant);
       headers.set("idempotency-key", key);
-      return forwardedResponse(await deps.forward(new Request(`${FORWARD_BASE}/write-intents`,
+      return forwardedResponse(await deps.forward(new Request(`${ownOrigin(c.req.url)}/write-intents`,
         { method: "POST", headers, body: raw })));
     } catch (error) {
       return writeIntentError(c, error);
@@ -128,7 +130,7 @@ export function pageWriteListenerRoute(deps: PageListenerDeps | null): Hono {
       const id = c.req.query("intentId") ?? "";
       assertIdempotencyKey(id);
       await resolveWritePage(c, deps, deps.nowMs ?? Date.now);
-      return forwardedResponse(await deps.forward(new Request(`${FORWARD_BASE}/write-intents/${id}`,
+      return forwardedResponse(await deps.forward(new Request(`${ownOrigin(c.req.url)}/write-intents/${id}`,
         { method: "GET", headers: forwardHeaders(c, null) })));
     } catch (error) {
       return writeIntentError(c, error);
