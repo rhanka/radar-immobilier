@@ -32,14 +32,16 @@ export async function imagePublication(contentBase: string) {
         pwWorkspace:data.workspaceId,pwCity:item.target.citySlug,pwType:item.target.type,pwId:item.target.id,
         pwBasket:basket,pwExpectedHead:selection[basket]?.id??"",pwFingerprint:item.displayedFingerprint,
         pwToken:data.snapshot.baseToken});
-      button.disabled=false; document.body.dataset.readReady="1";
+      var writable=!!window.__pwWriteReady;
+      button.disabled=!writable; document.body.dataset.readReady="1";
+      if (!writable) document.querySelector("#pw-write-note").textContent="Read only: writing unavailable.";
       document.querySelectorAll("[data-pw-extra]").forEach(function(extra) {
         Object.assign(extra.dataset, {pwOperation:"facets.signals."+extra.dataset.pwExtra+".v1",
           pwWorkspace:data.workspaceId,pwCity:item.target.citySlug,pwType:item.target.type,pwId:item.target.id,
           pwExpectedHead:"",pwFingerprint:item.displayedFingerprint,pwToken:data.snapshot.baseToken});
         if (/select$/.test(extra.dataset.pwExtra)) extra.dataset.pwBasket="pertinent";
         if (/discard$/.test(extra.dataset.pwExtra)) extra.dataset.pwReason="N-NON-RES";
-        extra.disabled=false;
+        extra.disabled=!writable;
       });
     }
     refresh().catch(error=>{document.body.dataset.failure=error.message;});

@@ -25,7 +25,7 @@ export async function imageClosure(variant: "base" | "read", browser: Browser,
             basket: button.pwBasket, expectedHeadId: button.pwExpectedHead || null,
             displayedFingerprint: button.pwFingerprint, expectedProjectionToken: button.pwToken }) })).json();
       });
-      expect(closed).toMatchObject({ error: { code: "write_transport_closed" }, outcome: "not_executed" });
+      expect(closed).toMatchObject({ error: { code: "write_transport_closed", attemptOutcome: "not_executed" } });
       expect(await effects(h.f)).toEqual(before);
     } else {
       await page.waitForURL(`${L5_DOMAIN.appOrigin}/`);

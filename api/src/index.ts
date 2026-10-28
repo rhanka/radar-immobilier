@@ -8,6 +8,7 @@ import { createReaderContentApp } from "./artifacts/content-serve.js";
 import { resolveReaderCursorKeyring } from "./artifacts/reader-cursor-keyring.js";
 import { createReaderOpening } from "./artifacts/reader-opening.js";
 import { createPublishedWriteRuntime } from "./artifacts/published-write-runtime.js";
+import { pageWriteListenerRoute } from "./artifacts/write-intent-page-listener.js";
 import { loadConfig, resolveAuthConfig, resolveTemConfig } from "./config.js";
 import { createLogger } from "./logger.js";
 import { createDb, makeDbProbe } from "./db/client.js";
@@ -122,7 +123,7 @@ const readerContent = contentHost.enabled && artifactsControl?.readerStorage && 
     grantSecret: readerGrantSecret,
     sessionSecret: readerSessionSecret,
     issuer: readerIssuer,
-    ...(publishedWrite ? { pageWrite: publishedWrite.pageWrite } : {}),
+    pageWrite: publishedWrite?.pageWrite ?? pageWriteListenerRoute(null),
     ...(readerOpening ? { openingContent: readerOpening.content } : {}),
     ...artifactsControl.readerStorage,
     readOperation: createBasketReadOperation({
