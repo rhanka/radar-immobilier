@@ -22,3 +22,13 @@ test-probe:
 	@rtk bash tools/make/base-preprod-probe.test.sh
 rehearse: test-paths
 	@rtk bash tools/make/base-preprod-rehearse.sh
+.PHONY: test-context test-freeze-time
+test: test-context test-freeze-time
+test-context:
+	@[[ "$(ENV)" == test-* ]]
+	@rtk bash tools/make/base-preprod-context.test.sh
+test-freeze-time:
+	@[[ "$(ENV)" == test-* ]]
+	@rtk bash tools/make/base-preprod-freeze-time.test.sh fractions
+	@rtk bash tools/make/base-preprod-freeze-time.test.sh invalid
+	@rtk bash tools/make/base-preprod-freeze-time.test.sh recovery
