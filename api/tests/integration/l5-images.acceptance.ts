@@ -1,0 +1,84 @@
+import { writeFileSync } from "node:fs";
+import { chromium, type Browser } from "@playwright/test";
+import { afterAll, beforeAll, expect, it } from "vitest";
+import { imagePublication } from "./l5-image-publication.js";
+import { imageNetwork } from "./l5-image-network.js";
+import { L5_DOMAIN } from "./l5-fixture.js";
+import { effects } from "./pwe-fixture.js";
+
+let h: Awaited<ReturnType<typeof imagePublication>>;
+let network: Awaited<ReturnType<typeof imageNetwork>>;
+let browser: Browser;
+const contentBase = process.env.L5_CONTENT_BASE!;
+beforeAll(async () => {
+  h = await imagePublication(contentBase);
+  network = await imageNetwork([h.f.contributor.sub, h.f.moderator.sub]);
+  writeFileSync("/evidence/fixture-ready.json", JSON.stringify({ database: h.f.name, scope: h.scope }));
+  const deadline = Date.now() + 30_000;
+  while (true) {
+    const response = await fetch("http://runtime:3000/health").catch(() => null);
+    if (response?.ok) { expect((await response.json()).sha).toBe(process.env.L5_IMAGE_SHA); break; }
+    if (Date.now() > deadline) throw new Error("Exact runtime image did not become healthy");
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  browser = await chromium.launch({ headless: true, args: ["--no-sandbox", "--no-proxy-server",
+    `--ignore-certificate-errors-spki-list=${process.env.L5_CERT_SPKI}`,
+    "--host-resolver-rules=MAP preprod.immo.sent-tech.ca 127.0.0.1, MAP preprod.auth.sent-tech.ca 127.0.0.1, MAP *.sent-tech.ca 127.0.0.1, MAP *.reader.test 127.0.0.1"] });
+}, 60_000);
+afterAll(async () => {
+  await browser?.close(); await network?.close(); await h?.close();
+});
+
+it.each([0, 1])("should read and confirm a published write through normal image login for reader %s", async (reader) => {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  try {
+    const before = await effects(h.f), start = network.traffic.length;
+    await page.goto(`${h.origin}/`);
+    await page.getByRole("button", { name: reader === 0 ? "Reader A" : "Reader B" }).click({ timeout: 1500 });
+    await page.getByRole("button", { name: "Autoriser et ouvrir" }).click({ timeout: 1500 });
+    await page.waitForFunction(() => document.body.dataset.readReady === "1", null, { timeout: 1500 });
+    expect(new URL(page.url()).host).toBe(h.pageHost);
+    const initial = JSON.parse(await page.locator("body").getAttribute("data-selection") ?? "{}");
+    expect(initial[reader === 0 ? "pertinent" : "a_surveiller"]?.state).toBe("active");
+    expect(initial[reader === 0 ? "a_surveiller" : "pertinent"]).toBeNull();
+    expect(await page.evaluate(() => document.cookie)).toBe("");
+    const cookies = await context.cookies();
+    for (const name of ["radar_session", "__Host-preview-session"]) {
+      const cookie = cookies.find((value) => value.name === name)!;
+      expect(cookie.secure && cookie.httpOnly).toBe(true); expect(cookie.sameSite).toBe("Lax");
+      expect(cookie.domain.startsWith(".")).toBe(false);
+      expect(cookie.domain).toBe(name === "radar_session" ? new URL(L5_DOMAIN.appOrigin).host : h.pageHost);
+    }
+    const popup = context.waitForEvent("page", { timeout: 2000 });
+    await page.getByRole("button", { name: "Prepare selection" }).click();
+    const app = await popup;
+    await app.waitForURL(`${L5_DOMAIN.appOrigin}/artifact-write/intents/*`, { timeout: 1500 });
+    await app.locator("#pw-confirm").waitFor({ state: "visible", timeout: 1500 });
+    expect(await effects(h.f)).toEqual(before);
+    expect(await app.evaluate(() => window.opener)).toBeNull();
+    const id = new URL(app.url()).pathname.split("/").at(-1)!;
+    const body = await page.content(); expect(body).not.toMatch(/challengeToken|radar_session=/);
+    const post = app.waitForResponse((response) => response.url().endsWith(`/${id}/confirm`));
+    await app.locator("#pw-confirm").click(); const confirmed = await post;
+    expect(confirmed.status()).toBe(200);
+    const receipt = await confirmed.json(); expect(receipt.state).toBe("committed");
+    const after = await effects(h.f); expect(after.events).toBe(before.events! + 1);
+    expect(after.debits).toBe(before.debits! + 1);
+    await page.bringToFront();
+    await page.waitForFunction(() => document.body.dataset.confirmed === "1", null, { timeout: 1900 });
+    const restored = await app.evaluate(async (intentId) => {
+      const response = await fetch(`/api/v1/artifacts/write-intents/${intentId}`); return response.json();
+    }, id);
+    expect(restored).toMatchObject({ state: "committed", commandId: receipt.commandId, receipt: receipt.receipt });
+    await app.locator("#pw-confirm").click();
+    await expect.poll(() => effects(h.f), { timeout: 1500 }).toEqual(after);
+    const requests = network.traffic.slice(start);
+    const navigation = requests.find((request) => request.path === `/artifact-write/intents/${id}`)!;
+    expect(navigation).toMatchObject({ method: "GET", site: contentBase.endsWith("sent-tech.ca") ? "same-site" : "cross-site",
+      mode: "navigate", dest: "document", status: 200 });
+    expect(requests.filter((request) => request.host === h.pageHost).every((request) => !request.cookieNames.includes("radar_session"))).toBe(true);
+    writeFileSync(`/evidence/browser-reader-${reader}.json`, JSON.stringify({ reader, contentBase, imageSha: process.env.L5_IMAGE_SHA,
+      normalOidcExchanges: network.exchanges(), before, after, navigation, requests }, null, 2));
+  } finally { await context.close(); }
+});
