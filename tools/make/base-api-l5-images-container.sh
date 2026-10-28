@@ -8,8 +8,11 @@ node_modules/.bin/playwright install --with-deps --only-shell chromium > /eviden
 cat > api/vitest.image.config.ts <<'CONFIG'
 import config from './vitest.config.js';
 export default {...config,envDir:false,test:{...config.test,
-  include:['tests/integration/l5-images.acceptance.ts'],fileParallelism:false,maxWorkers:1}};
+  include:['tests/integration/l5-images.acceptance.ts',
+    ...(process.env.L5_CONTENT_BASE==='pages.sent-tech.ca'?['tests/integration/artifacts-baskets-browser.spec.ts']:[])],
+  fileParallelism:false,maxWorkers:1}};
 CONFIG
+export ARTIFACTS_BROWSER_ACCEPTANCE=1
 cd api
 ../node_modules/.bin/vitest run --config vitest.image.config.ts --reporter=default \
   --reporter=json --outputFile.json=/evidence/browser.json
