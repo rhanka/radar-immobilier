@@ -15,7 +15,8 @@
  *     headers: { "x-preview-grant": grant },
  *   });
  * Grant renewal is available at POST /__reader/renew (presented grant in
- * header, session cookie required) before the 55 s expiry.
+ * header, session cookie required) before the 55 s expiry. After expiry, a
+ * same-origin POST without a grant can recover from a current sealed pinned P.
  */
 import { Hono, type Context } from "hono";
 import {
@@ -174,8 +175,20 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     }
     const presented = presentedGrant(c);
     if (!presented) {
-      applyReaderContentHeaders(c);
-      return c.json({ error: "unauthenticated" }, 401);
+      // Recovery adopts only the already approved, sealed resource. It cannot
+      // choose a reader, release or profile, nor renew the page session itself.
+      const host = c.req.header("host");
+      const site = c.req.header("sec-fetch-site");
+      if (c.req.header("origin") !== `https://${host}` || (site !== undefined && site !== "same-origin")) {
+        return c.json({ error: "forbidden_origin" }, 403);
+      }
+      const reader = await authorized(c, true);
+      if (!reader) return c.json({ error: "unauthenticated" }, 401);
+      const session = readSessionClaims(c.req.header("cookie"), deps.sessionSecret, now());
+      if (!session?.resource) return c.json({ error: "unauthenticated" }, 401);
+      const grant = await mintGrant(session.resource, deps.grantSecret, now());
+      if (!await authorityCurrent(reader)) return c.json({ error: "unauthenticated" }, 401);
+      return c.json({ grant });
     }
     const host = bareHost(c.req.header("host"));
     const claims = await verifyGrant(presented, { ...deps.issuer, host }, deps.grantSecret, now());
