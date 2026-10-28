@@ -16,7 +16,7 @@ describeDb("PW-C real listener to H5 contract", () => {
       forward: (request) => {
         const headers = new Headers(request.headers);
         headers.set("x-synthetic-page-proof", h.page.grant.sessionId);
-        return receiver.request(new Request(request, { headers }));
+        return Promise.resolve(receiver.request(new Request(request, { headers })));
       } });
     const origin = `https://${h.page.grant.host}`, headers = { host: h.page.grant.host, origin,
       "x-reader-instance": h.page.pageInstanceId, "x-reader-csrf": h.page.csrfToken,
