@@ -16,7 +16,8 @@ export function validPwPageEnvelope(value: unknown, expected: {
     !keys(value.reader, ["sub"]) || value.reader.sub !== expected.readerSub || !record(value.data)) return false;
   const data = value.data, id = data.intentId;
   if (!uuid(id) || (expected.intentId !== undefined && id !== expected.intentId) ||
-    !["pending", "committed", "rejected", "expired", "revoked"].includes(String(data.state))) return false;
+    !(data.state === "pending" || data.state === "committed" || data.state === "rejected" ||
+      data.state === "expired" || data.state === "revoked")) return false;
   if (expected.verb === "prepare") {
     return keys(data, ["intentId", "invocationId", "state", "expiresAt", "confirmationUrl", "managementUrl", "statusUrl"]) &&
       uuid(data.invocationId) && date(data.expiresAt) &&
@@ -33,10 +34,10 @@ export function validPwPageEnvelope(value: unknown, expected: {
   const event = data.receipt.event;
   if (event === null) return true; // BASE's authorized no-op receipt.
   if (!record(event) || !keys(event, ["id", "createdAt", "scope", "facet", "basket", "state", "reason", "observedFingerprint"]) ||
-    !uuid(event.id) || !date(event.createdAt) || !["personal", "workspace"].includes(String(event.scope)) ||
-    !["selection", "archive"].includes(String(event.facet)) || !["active", "inactive"].includes(String(event.state)) ||
+    !uuid(event.id) || !date(event.createdAt) || !(event.scope === "personal" || event.scope === "workspace") ||
+    !(event.facet === "selection" || event.facet === "archive") || !(event.state === "active" || event.state === "inactive") ||
     typeof event.observedFingerprint !== "string" || !/^[a-f0-9]{64}$/.test(event.observedFingerprint)) return false;
-  if (event.facet === "selection" ? event.scope !== "personal" || !["pertinent", "a_surveiller"].includes(String(event.basket))
+  if (event.facet === "selection" ? event.scope !== "personal" || !(event.basket === "pertinent" || event.basket === "a_surveiller")
     : event.basket !== null) return false;
   if (event.reason !== null && (!record(event.reason) || !keys(event.reason, ["profileId", "code", "verdict"]) ||
     typeof event.reason.profileId !== "string" || event.reason.profileId.length === 0 ||
