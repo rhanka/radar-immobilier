@@ -7,7 +7,7 @@ import { readProjectionScope } from "../../src/services/facets/projection-revisi
 import type { WritePrepareBody } from "../../src/artifacts/write-intent-schemas.js";
 
 describeDb("PR 938 post-commit disclosure", () => {
-  it.each(["membership", "artifact ACL", "moderation"])("should return only committed technical state after %s withdrawal", async (loss) => {
+  it.each(["membership", "artifact ACL", "moderation", "session expiry"])("should disclose no receipt after post-commit %s", async (loss) => {
     const h = await l5Fixture();
     let release = () => {};
     try {
@@ -40,7 +40,8 @@ describeDb("PR 938 post-commit disclosure", () => {
           "x-artifact-write-csrf": String(boot.csrf) }, body: JSON.stringify({ challengeToken: boot.challengeToken }),
       });
       await vi.waitFor(() => expect(committed).toBe(true), { timeout: 1500, interval: 10 });
-      if (loss === "artifact ACL") await h.f.pool.query(
+      if (loss === "session expiry") h.runtime.application.nowMs = () => Date.now() + 86400000;
+      else if (loss === "artifact ACL") await h.f.pool.query(
         "DELETE FROM artifacts.artifact_access WHERE artifact_id=$1 AND principal_id=$2", [h.artifactId, h.f.contributor.sub]);
       else await h.f.pool.query(loss === "membership"
         ? "DELETE FROM workspace_memberships WHERE workspace_id=$1 AND account_id=$2"
@@ -48,9 +49,14 @@ describeDb("PR 938 post-commit disclosure", () => {
       [h.f.workspaceId, h.f.contributor.id]);
       release();
       const response = await pending;
-      expect(response.status).toBe(200);
-      expect(await response.json()).toEqual({ intentId: data.intentId, state: "committed",
-        executionState: "committed", revocationState: "active" });
+      if (loss === "session expiry") {
+        expect(response.status).toBe(504);
+        expect(await response.json()).toMatchObject({ error: { code: "write_outcome_unknown", attemptOutcome: "unknown", action: "read_status" } });
+      } else {
+        expect(response.status).toBe(200);
+        expect(await response.json()).toEqual({ intentId: data.intentId, state: "committed",
+          executionState: "committed", revocationState: "active" });
+      }
       const after = await effects(h.f);
       for (const [key, delta] of Object.entries(ONE_COMMIT)) expect(after[key], key).toBe(before[key]! + delta);
     } finally { release(); await h.close(); }
