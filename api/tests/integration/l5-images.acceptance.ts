@@ -50,8 +50,10 @@ it.each([0, 1])("should read and confirm a published write through normal image 
       expect(cookie.domain.startsWith(".")).toBe(false);
       expect(cookie.domain).toBe(name === "radar_session" ? new URL(L5_DOMAIN.appOrigin).host : h.pageHost);
     }
-    const popup = context.waitForEvent("page", { timeout: 2000 });
+    if (reader === 1) await page.evaluate(() => { window.open = () => null; });
+    const popup = context.waitForEvent("page", { timeout: 5000 });
     await page.getByRole("button", { name: "Prepare selection" }).click();
+    if (reader === 1) await page.getByRole("link", { name: "Open in the application", exact: true }).click();
     const app = await popup;
     await app.waitForURL(`${L5_DOMAIN.appOrigin}/artifact-write/intents/*`, { timeout: 1500 });
     await app.locator("#pw-confirm").waitFor({ state: "visible", timeout: 1500 });
@@ -59,6 +61,25 @@ it.each([0, 1])("should read and confirm a published write through normal image 
     expect(await app.evaluate(() => window.opener)).toBeNull();
     const id = new URL(app.url()).pathname.split("/").at(-1)!;
     const body = await page.content(); expect(body).not.toMatch(/challengeToken|radar_session=/);
+    const guards = await app.evaluate(async (intentId) => {
+      const boot = JSON.parse(document.querySelector("#pw-bootstrap")!.textContent!);
+      const results = [];
+      for (const credentials of ["omit", "same-origin"] as const) {
+        results.push((await fetch(`/artifact-write/intents/${intentId}`, {
+          credentials, headers: { authorization: "Bearer synthetic" } })).status);
+      }
+      for (const csrf of ["", boot.csrf + "x"]) {
+        results.push((await fetch(`/api/v1/artifacts/write-intents/${intentId}/confirm`, { method: "POST",
+          headers: { "content-type": "application/json", "x-artifact-write-csrf": csrf },
+          body: JSON.stringify({ challengeToken: boot.challengeToken }) })).status);
+      }
+      return results;
+    }, id);
+    expect(guards).toEqual([401, 401, 403, 403]);
+    expect(await page.evaluate(async (url) =>
+      fetch(url, { credentials: "include" }).then(() => "leaked", () => "blocked"),
+    `${L5_DOMAIN.appOrigin}/artifact-write/intents/${id}`)).toBe("blocked");
+    expect(await effects(h.f)).toEqual(before);
     let receipt: Record<string, unknown>;
     if (reader === 0) {
       const lostBefore = network.lostResponses();
@@ -98,6 +119,10 @@ it.each([0, 1])("should read and confirm a published write through normal image 
     }, id);
     expect(replay).toBe(409);
     await expect.poll(() => effects(h.f), { timeout: 1500 }).toEqual(after);
+    await context.clearCookies({ name: "__Host-preview-session" });
+    const withoutP = await app.evaluate(async (intentId) =>
+      (await fetch(`/api/v1/artifacts/write-intents/${intentId}`)).json(), id);
+    expect(withoutP).toMatchObject({ state: "committed", receipt: receipt.receipt });
     const requests = network.traffic.slice(start);
     const navigation = requests.find((request) => request.path === `/artifact-write/intents/${id}`)!;
     expect(navigation).toMatchObject({ method: "GET", site: contentBase.endsWith("sent-tech.ca") ? "same-site" : "cross-site",
