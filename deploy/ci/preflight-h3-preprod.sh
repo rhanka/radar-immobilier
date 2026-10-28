@@ -29,7 +29,7 @@ done
 
 bash "$HERE/check-h3-preprod-render.sh" "$ROOT"
 bash "$HERE/check-preprod-auth-isolation.sh" "$ROOT" >/dev/null
-echo "preflight: offline render gates passed (activation stays disabled)"
+echo "preflight: offline render gates passed (no changes applied)"
 
 if [ "$LIVE" -eq 0 ]; then
   echo "preflight: offline only (--live required for cluster probes)"
