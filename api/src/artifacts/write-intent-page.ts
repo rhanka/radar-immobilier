@@ -150,7 +150,7 @@ const PW_PAGE_SCRIPT_PREPARE = `
         } catch (err) {}
         return;
       }
-      if (res.status >= 500 || ((res.status === 200 || res.status === 201) && !data?.data?.intentId)) {
+      if (res.status >= 500 || res.status === 200 || res.status === 201) {
         pendingAttempt = { gesture: gesture, key: key };
         say("Result to verify. Retry the exact gesture below before preparing another.");
         reveal("#pw-write-retry");
