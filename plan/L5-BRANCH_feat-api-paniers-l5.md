@@ -19,6 +19,8 @@
 - [x] Forbidden Paths: api/src/artifacts/write-intent-transaction.ts, api/drizzle/**, Makefile, docker-compose*.yml, rules/**, agent bootstrap files, other branch plans, .track/**.
 - [x] Conditional Paths: the four regression files enumerated in BRL5-EX1 below; upstream merge imports are preserved and audited separately from own changes.
 - [x] BRL5-EX1: owner-required touched regression maintenance permits api/tests/integration/pw-write-authority.spec.ts, pw-write-authority-status.spec.ts, pwcr-app-status.spec.ts and pwcr-listener-h5.spec.ts. Rationale: post-confirm replies now use the controlled receipt envelope, and the disclosure guard adds an earlier workspace wait. Impact: test expectations and the existing SQL barrier placement only; rollback: revert these exact test hunks and rerun the affected suites.
+- [x] BRL5-EX2 : la troisième passe autorise explicitement api/tests/integration/pwcr-proxy.acceptance.ts et tools/make/base-api-pwe-extra-mutation-cases.mjs. Motif : contrat receipt.event et ancre M11 devenus obsolètes. Impact : attendu proxy et injection dans la copie de test uniquement ; retour arrière : annuler ces deux corrections et rejouer les campagnes concernées.
+- [x] La consigne de troisième passe remplace la langue des nouveaux sujets de commit par le français ; les limites atomiques, le format Conventional et l'absence de corps ou de trailer restent appliqués.
 
 ## Feedback Loop
 - [x] Two independent read-only design reviews: authority/provenance and runtime-image/browser evidence.
