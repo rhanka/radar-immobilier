@@ -33,6 +33,7 @@
 ## Plan / Todo (lot-based)
 - [ ] PR 938 second pass: current page disclosure rights after waits, post-commit application disclosure, renewable read grants, bounded application POSTs/bootstrap, targeted regressions and exact-image browser qualification.
 - [x] Reproduce post-COMMIT continuation withdrawal with actual PostgreSQL membership, artifact ACL and moderation changes; retain exactly one committed command.
+- [x] Add exact-served-script reproductions for suspended application confirmation/revocation and L5 bootstrap, covering transport and JSON body separately.
 - [x] Lot 0: merge approved PW-A and main; preserve Track event blob identity.
 - [x] Lot 1: bind verified approval provenance, explicit release write request and private page bootstrap.
 - [x] Implementation and targeted PG proof: actual one-use ticket provenance, explicit workspace, matching signed read grant and no publisher privileges.
