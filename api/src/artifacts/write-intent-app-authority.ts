@@ -14,12 +14,16 @@ import { approvedAccountId, resolveWorkspaceAccess } from "../services/workspace
 import { lockWorkspace } from "../services/workspaces/mutations.js";
 import { WorkspaceError } from "../services/workspaces/types.js";
 import { isPersonalOperation, type SignalWriteOperation } from "../services/facets/signal-write-operations.js";
+import type { WriteTx } from "../services/facets/signal-write-scope.js";
+import { lockPublishedWriteAuthority } from "./published-write-authority.js";
 
 export interface WriteAppDeps extends AppGuardDeps {
   db: Database;
   challengeKeys: ReadonlyMap<string, Uint8Array>;
   /** PW-C supplies rendering and command dispatch after its own qualification. */
   renderSummary?: (c: Context, row: PwIntentRow, bootstrap: { csrf: string; challengeToken: string }) => Response;
+  renderManagement?: (c: Context, row: PwIntentRow, bootstrap: { csrf: string; result?: Record<string, unknown> }) => Response;
+  renderLogin?: (c: Context) => Response;
   confirm?: (row: PwIntentRow, proof: PwConfirmation) => Promise<unknown>;
   revoke?: (row: PwIntentRow, principal: AppGuardPass["principal"]) => Promise<unknown>;
 }
@@ -44,14 +48,20 @@ export async function ownedWriteIntent(c: Context, deps: WriteAppDeps, pass: App
 /** Rights loss keeps owner revocation available without releasing business data. */
 export async function canReadWriteIntentSummary(deps: WriteAppDeps, row: PwIntentRow,
   pass: AppGuardPass): Promise<boolean> {
+  return writeIntentTransaction(deps.db, (tx) => canReadWriteIntentSummaryInTx(tx, row, pass));
+}
+
+/** Shared current-rights guard for summary and receipt, retaining caller locks. */
+export async function canReadWriteIntentSummaryInTx(tx: WriteTx, row: PwIntentRow,
+  pass: Pick<AppGuardPass, "principal">): Promise<boolean> {
   try {
-    return await writeIntentTransaction(deps.db, async (tx) => {
-      await lockWorkspace(tx, row.workspaceId);
-      await approvedAccountId(tx, pass.principal.sub, true);
-      const access = await resolveWorkspaceAccess(tx, row.workspaceId, pass.principal.sub);
-      return isPersonalOperation(row.operation as SignalWriteOperation) || access.moderateArchive;
-    });
+    await lockPublishedWriteAuthority(tx, row.authorityReferences as Record<string, string>, false);
+    await lockWorkspace(tx, row.workspaceId);
+    await approvedAccountId(tx, pass.principal.sub, true);
+    const access = await resolveWorkspaceAccess(tx, row.workspaceId, pass.principal.sub);
+    return isPersonalOperation(row.operation as SignalWriteOperation) || access.moderateArchive;
   } catch (error) {
+    if (error instanceof PwWriteError && error.message === "write_authority_unavailable") return false;
     if (error instanceof WorkspaceError && ["account_not_approved", "workspace_membership_required",
       "workspace_not_found"].includes(error.message)) return false;
     throw error;
