@@ -1,0 +1,185 @@
+-- PW-D write persistence: intents, single-use challenges, key reservations,
+-- receipt links, tombstones, authority fences, quota ledger, audit, outbox.
+CREATE TABLE IF NOT EXISTS pw_write_intents (
+  intent_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  invocation_id uuid NOT NULL UNIQUE DEFAULT gen_random_uuid(),
+  operation text NOT NULL CHECK (operation IN (
+    'facets.signals.personal.select.v1', 'facets.signals.personal.deselect.v1',
+    'facets.signals.personal.discard.v1', 'facets.signals.personal.restore.v1',
+    'facets.signals.workspace.discard.v1', 'facets.signals.workspace.restore.v1')),
+  workspace_id uuid NOT NULL REFERENCES workspaces(id) ON DELETE RESTRICT,
+  actor_id uuid NOT NULL REFERENCES account_users(id) ON DELETE RESTRICT,
+  principal jsonb NOT NULL,
+  artifact_ref jsonb NOT NULL,
+  authority_references jsonb NOT NULL,
+  challenge_key_id text NOT NULL CHECK (challenge_key_id <> ''),
+  page_session_id text NOT NULL CHECK (page_session_id <> ''),
+  page_instance_id text NOT NULL CHECK (page_instance_id <> ''),
+  grant_reference text NOT NULL CHECK (grant_reference <> ''),
+  city_slug text NOT NULL CHECK (city_slug <> ''),
+  target jsonb NOT NULL,
+  command jsonb NOT NULL,
+  operation_digest text NOT NULL CHECK (operation_digest ~ '^[a-f0-9]{64}$'),
+  intent_digest text NOT NULL CHECK (intent_digest ~ '^[a-f0-9]{64}$'),
+  command_key uuid NOT NULL,
+  expected_projection_token text NOT NULL CHECK (expected_projection_token ~ '^[a-f0-9]{64}$'),
+  expires_at timestamptz NOT NULL,
+  execution_state text NOT NULL DEFAULT 'pending' CHECK (execution_state IN (
+    'pending', 'committed', 'rejected', 'expired')),
+  challenge_id text NOT NULL UNIQUE CHECK (challenge_id ~ '^[a-f0-9]{64}$'),
+  challenge_state text NOT NULL DEFAULT 'pending' CHECK (challenge_state IN ('pending', 'consumed')),
+  consumed_at timestamptz,
+  revoked_at timestamptz,
+  decided_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS pw_write_key_reservations (
+  actor_id uuid NOT NULL REFERENCES account_users(id) ON DELETE RESTRICT,
+  command_key uuid NOT NULL,
+  intent_id uuid NOT NULL UNIQUE REFERENCES pw_write_intents(intent_id) ON DELETE RESTRICT,
+  operation_digest text NOT NULL CHECK (operation_digest ~ '^[a-f0-9]{64}$'),
+  expires_at timestamptz NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (actor_id, command_key)
+);
+--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS pw_write_intents_actor_key_idx ON pw_write_intents (actor_id, command_key);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS pw_write_receipt_links (
+  intent_id uuid PRIMARY KEY REFERENCES pw_write_intents(intent_id) ON DELETE RESTRICT,
+  owner_id uuid NOT NULL REFERENCES account_users(id) ON DELETE RESTRICT,
+  command_key uuid NOT NULL,
+  workspace_id uuid NOT NULL REFERENCES workspaces(id) ON DELETE RESTRICT,
+  FOREIGN KEY (owner_id, command_key) REFERENCES facet_commands(owner_id, command_key) ON DELETE RESTRICT,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS pw_write_intent_tombstones (
+  intent_id uuid PRIMARY KEY REFERENCES pw_write_intents(intent_id) ON DELETE RESTRICT,
+  revoked_at timestamptz NOT NULL DEFAULT now(),
+  revoked_by uuid NOT NULL REFERENCES account_users(id) ON DELETE RESTRICT,
+  reason text NOT NULL DEFAULT '' CHECK (char_length(reason) <= 512)
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS pw_write_authority_fences (
+  kind text NOT NULL CHECK (kind IN (
+    'tier', 'grant', 'reader', 'page_session', 'delegation', 'release', 'policy')),
+  reference text NOT NULL CHECK (reference <> '' AND char_length(reference) <= 512),
+  revoked_at timestamptz NOT NULL DEFAULT now(),
+  reason text NOT NULL DEFAULT '' CHECK (char_length(reason) <= 512),
+  PRIMARY KEY (kind, reference)
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS pw_write_quota_ledger (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  kind text NOT NULL CHECK (kind IN ('attempt', 'admission', 'prepare', 'status')),
+  bucket text NOT NULL CHECK (bucket <> '' AND char_length(bucket) <= 512),
+  intent_id uuid REFERENCES pw_write_intents(intent_id) ON DELETE RESTRICT,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS pw_write_quota_ledger_bucket_idx ON pw_write_quota_ledger (kind, bucket, created_at);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS pw_write_audit (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  request_id uuid NOT NULL,
+  intent_id uuid NOT NULL REFERENCES pw_write_intents(intent_id) ON DELETE RESTRICT,
+  invocation_id uuid NOT NULL,
+  command_id uuid,
+  operation text NOT NULL,
+  workspace_id uuid NOT NULL REFERENCES workspaces(id) ON DELETE RESTRICT,
+  target jsonb,
+  scope text CHECK (scope IS NULL OR scope IN ('personal', 'workspace')),
+  artifact_ref jsonb NOT NULL DEFAULT '{}'::jsonb,
+  grant_ref text,
+  principal jsonb NOT NULL,
+  operation_digest text NOT NULL CHECK (operation_digest ~ '^[a-f0-9]{64}$'),
+  intent_digest text CHECK (intent_digest IS NULL OR intent_digest ~ '^[a-f0-9]{64}$'),
+  decided_at timestamptz NOT NULL DEFAULT now(),
+  result text NOT NULL CHECK (result IN (
+    'committed', 'replay_denied', 'denied', 'unknown', 'receipt_read', 'revoked', 'expired'))
+);
+--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS pw_write_audit_intent_idx ON pw_write_audit (intent_id, decided_at);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS pw_write_outbox (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  intent_id uuid NOT NULL REFERENCES pw_write_intents(intent_id) ON DELETE RESTRICT,
+  kind text NOT NULL CHECK (kind IN ('write_committed', 'write_revoked', 'write_rejected')),
+  payload jsonb NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  delivered_at timestamptz,
+  attempts integer NOT NULL DEFAULT 0 CHECK (attempts >= 0)
+);
+--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS pw_write_outbox_pending_idx ON pw_write_outbox (created_at) WHERE delivered_at IS NULL;
+--> statement-breakpoint
+CREATE OR REPLACE FUNCTION guard_pw_write_append_only() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  RAISE EXCEPTION 'pw write table is append-only';
+END $$;
+--> statement-breakpoint
+CREATE OR REPLACE TRIGGER pw_write_receipt_links_immutable BEFORE UPDATE OR DELETE ON pw_write_receipt_links FOR EACH ROW EXECUTE FUNCTION guard_pw_write_append_only();
+--> statement-breakpoint
+CREATE OR REPLACE TRIGGER pw_write_intent_tombstones_immutable BEFORE UPDATE OR DELETE ON pw_write_intent_tombstones FOR EACH ROW EXECUTE FUNCTION guard_pw_write_append_only();
+--> statement-breakpoint
+CREATE OR REPLACE TRIGGER pw_write_authority_fences_immutable BEFORE UPDATE OR DELETE ON pw_write_authority_fences FOR EACH ROW EXECUTE FUNCTION guard_pw_write_append_only();
+--> statement-breakpoint
+CREATE OR REPLACE TRIGGER pw_write_quota_ledger_immutable BEFORE UPDATE OR DELETE ON pw_write_quota_ledger FOR EACH ROW EXECUTE FUNCTION guard_pw_write_append_only();
+--> statement-breakpoint
+CREATE OR REPLACE TRIGGER pw_write_audit_immutable BEFORE UPDATE OR DELETE ON pw_write_audit FOR EACH ROW EXECUTE FUNCTION guard_pw_write_append_only();
+--> statement-breakpoint
+CREATE OR REPLACE FUNCTION guard_pw_write_outbox() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF TG_OP = 'UPDATE' AND OLD.id = NEW.id AND OLD.intent_id = NEW.intent_id AND OLD.kind = NEW.kind
+     AND OLD.payload = NEW.payload AND OLD.created_at = NEW.created_at
+     AND (OLD.delivered_at IS NULL OR OLD.delivered_at = NEW.delivered_at)
+     AND NEW.attempts = OLD.attempts + 1 THEN
+    RETURN NEW;
+  END IF;
+  RAISE EXCEPTION 'pw write outbox allows only delivery updates';
+END $$;
+--> statement-breakpoint
+DROP TRIGGER IF EXISTS pw_write_outbox_guarded ON pw_write_outbox;
+--> statement-breakpoint
+CREATE TRIGGER pw_write_outbox_guarded BEFORE UPDATE OR DELETE ON pw_write_outbox FOR EACH ROW EXECUTE FUNCTION guard_pw_write_outbox();
+--> statement-breakpoint
+CREATE OR REPLACE TRIGGER pw_write_key_reservations_immutable BEFORE UPDATE OR DELETE ON pw_write_key_reservations FOR EACH ROW EXECUTE FUNCTION guard_pw_write_append_only();
+--> statement-breakpoint
+CREATE OR REPLACE FUNCTION guard_pw_write_intent() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF TG_OP = 'DELETE' THEN RAISE EXCEPTION 'pw write intent is immutable'; END IF;
+  IF (to_jsonb(OLD) - ARRAY['execution_state','challenge_state','consumed_at','revoked_at','decided_at','target','command'])
+     IS DISTINCT FROM (to_jsonb(NEW) - ARRAY['execution_state','challenge_state','consumed_at','revoked_at','decided_at','target','command'])
+     OR (OLD.challenge_state = 'consumed' AND NEW.challenge_state <> 'consumed')
+     OR (OLD.execution_state <> 'pending' AND NEW.execution_state <> OLD.execution_state)
+     OR (OLD.revoked_at IS NOT NULL AND NEW.revoked_at IS DISTINCT FROM OLD.revoked_at)
+     OR (OLD.consumed_at IS NOT NULL AND NEW.consumed_at IS DISTINCT FROM OLD.consumed_at)
+     OR ((OLD.target IS DISTINCT FROM NEW.target OR OLD.command IS DISTINCT FROM NEW.command)
+       AND NOT (OLD.execution_state <> 'committed' AND OLD.expires_at < clock_timestamp() - interval '24 hours'
+         AND NEW.target = '{}'::jsonb AND NEW.command = '{}'::jsonb)) THEN
+    RAISE EXCEPTION 'pw write intent is immutable';
+  END IF;
+  RETURN NEW;
+END $$;
+--> statement-breakpoint
+CREATE OR REPLACE TRIGGER pw_write_intents_immutable BEFORE UPDATE OR DELETE ON pw_write_intents FOR EACH ROW EXECUTE FUNCTION guard_pw_write_intent();
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS pw_write_rejections (
+  intent_id uuid PRIMARY KEY REFERENCES pw_write_intents(intent_id) ON DELETE RESTRICT,
+  status integer NOT NULL CHECK (status IN (409, 422)),
+  code text NOT NULL CHECK (code IN ('projection_revision_conflict', 'facet_head_conflict',
+    'facet_target_version_conflict', 'workspace_revision_conflict', 'invalid_reason_code', 'reason_code_required'))
+);
+--> statement-breakpoint
+CREATE OR REPLACE TRIGGER pw_write_rejections_immutable BEFORE UPDATE OR DELETE ON pw_write_rejections FOR EACH ROW EXECUTE FUNCTION guard_pw_write_append_only();
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS pw_write_status_budgets (
+  intent_id uuid NOT NULL REFERENCES pw_write_intents(intent_id) ON DELETE RESTRICT,
+  page_session_id text NOT NULL CHECK (page_session_id <> ''),
+  first_read_at timestamptz NOT NULL,
+  last_read_at timestamptz NOT NULL CHECK (last_read_at >= first_read_at),
+  initial_reads integer NOT NULL CHECK (initial_reads BETWEEN 1 AND 60),
+  PRIMARY KEY (intent_id, page_session_id)
+);
