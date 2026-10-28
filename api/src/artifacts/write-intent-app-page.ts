@@ -126,13 +126,17 @@ ${definitionList([["Intent", row.intentId], ["Workspace", row.workspaceId],
 
 /** Technical management for the owner after rights loss: revoke only. */
 export function renderWriteIntentManagement(c: Context, row: PwIntentRow,
-  bootstrap: { csrf: string }): Response {
+  bootstrap: { csrf: string; result?: Record<string, unknown> }): Response {
   const boot = { csrf: bootstrap.csrf, intentId: row.intentId,
     revokeUrl: `/api/v1/artifacts/write-intents/${row.intentId}/revoke`,
     managementUrl: `/api/v1/artifacts/write-intents/${row.intentId}` };
+  const result = bootstrap.result ?? {};
   const body = `<h1>Manage a write intent</h1>
-<p>Management only. No business summary is shown because the current account no longer holds the confirmation rights.</p>
-${definitionList([["Intent", row.intentId]])}
+<p>Review execution and revocation separately. Receipt details require your current access rights.</p>
+${definitionList([["Intent", row.intentId], ["State", String(result.state ?? "unknown")],
+    ["Execution", String(result.executionState ?? "unknown")], ["Revocation", String(result.revocationState ?? "unknown")]])}
+${result.receipt ? `<section id="pw-recovered-receipt"><h2>Recorded receipt</h2><pre>${escapeHtml(JSON.stringify(result.receipt))}</pre>` +
+    `<p>Command: ${escapeHtml(String(result.commandId))}</p></section>` : ""}
 <button id="pw-revoke" type="button">Revoke</button>
 <p id="pw-note" role="status"></p>
 <p id="pw-revoke-result" hidden>Revocation command state: <span id="pw-revoke-command"></span></p>

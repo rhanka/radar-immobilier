@@ -7,7 +7,6 @@ import { canReadWriteIntentSummary, challengeBootstrap, guardWriteIntentAppMutat
 import { hasDuplicateJsonKeys } from "./write-intent-binding.js";
 import { writeIntentError } from "./write-intent-errors.js";
 import { FacetError } from "../services/facets/target.js";
-import { pwIntentStatus } from "../services/facets/pw-write-fences.js";
 import { readAppWriteIntentResult } from "./write-intent-app-result.js";
 export type { WriteAppDeps } from "./write-intent-app-authority.js";
 
@@ -47,20 +46,15 @@ export function writeIntentAppRoute(deps: WriteAppDeps | null): Hono {
           && (c.req.header("sec-fetch-mode") !== "navigate" || c.req.header("sec-fetch-dest") !== "document"))) {
         return writeRefusal(c, "csrf_refused", 403);
       }
-      let row = await ownedWriteIntent(c, deps, pass, path === api);
+      const observed = await ownedWriteIntent(c, deps, pass, path === api);
       const approved = await requireApprovedAppAccount(c, deps, pass.session.sub);
       if (approved?.status === 503) return approved;
-      if (approved || path === api || !await canReadWriteIntentSummary(deps, row, pass)) {
-        let result: Record<string, unknown> = {};
-        if (path === api && !approved) {
-          const read = await readAppWriteIntentResult(deps, row, pass);
-          row = read.row; result = read.data;
-        }
+      const { row, data: result } = await readAppWriteIntentResult(deps, observed, pass);
+      if (approved || path === api || result.state !== "pending" || !await canReadWriteIntentSummary(deps, row, pass)) {
         if (path === summary && deps.renderManagement) {
-          return deps.renderManagement(c, row, { csrf: writeCsrf(deps, pass, row.intentId) });
+          return deps.renderManagement(c, row, { csrf: writeCsrf(deps, pass, row.intentId), result });
         }
         return c.json({ intentId: row.intentId, management: true,
-          ...(path === api ? { state: pwIntentStatus(row, (deps.nowMs ?? Date.now)()) } : {}),
           csrf: writeCsrf(deps, pass, row.intentId), ...result });
       }
       if (!deps.renderSummary) return writeRefusal(c, "write_transport_closed", 503);
