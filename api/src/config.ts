@@ -197,6 +197,11 @@ const envSchema = z.object({
     .int()
     .positive()
     .default(2_592_000),
+  /**
+   * PW identity tier: preprod or prod. Optional for the app, required to
+   * open PW. No default and no deduction from NODE_ENV, host, or origin.
+   */
+  PW_IDENTITY_TIER: z.preprocess((v) => v === "" ? undefined : v, z.enum(["preprod", "prod"]).optional()),
 
   // Server-only facade activation; deployment qualification must opt in.
   MCP_SIGNAL_SEARCH_ENABLED: z.enum(["0", "1"]).default("0").transform((v) => v === "1"),
