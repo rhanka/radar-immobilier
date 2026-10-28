@@ -22,7 +22,7 @@ export function grantImageReviews(current: () => ImageReview) {
   it.each(["gesture", "confirmation"])("should recover real expired read authority before %s beyond 55 seconds", async (stage) => {
     const fixture = current(), { h, network } = fixture, { context, page } = await openPublished(fixture);
     try {
-      const expiresAt = await page.evaluate(() => {
+      let expiresAt = await page.evaluate(() => {
         const boot = JSON.parse(document.querySelector("#pw-page-bootstrap")!.textContent!);
         const payload = boot.readGrant.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
         return JSON.parse(atob(payload)).exp * 1000;
@@ -34,12 +34,17 @@ export function grantImageReviews(current: () => ImageReview) {
       const before = await effects(h.f), start = network.traffic.length;
       if (stage === "gesture") await waitForExpiry();
       const popup = context.waitForEvent("page");
+      const renewed = page.waitForResponse((response) => response.url().endsWith("/__reader/renew") && response.status() === 200);
       await page.getByRole("button", { name: stage === "gesture" ? "Prepare personal.deselect" : "Prepare personal.select", exact: true }).click();
       const app = await popup;
       await app.locator("#pw-confirm").waitFor({ state: "visible", timeout: 1500 });
       const id = new URL(app.url()).pathname.split("/").at(-1)!;
       expect(await effects(h.f)).toEqual(before);
-      if (stage === "confirmation") await waitForExpiry();
+      const { grant } = await (await renewed).json();
+      if (stage === "confirmation") {
+        expiresAt = JSON.parse(Buffer.from(grant.split(".")[1], "base64url").toString("utf8")).exp * 1000;
+        await waitForExpiry();
+      }
       const post = app.waitForResponse((response) => response.url().endsWith(`/${id}/confirm`));
       await app.locator("#pw-confirm").click();
       const confirmed = await post; expect(confirmed.status()).toBe(200);
