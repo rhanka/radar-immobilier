@@ -28,6 +28,13 @@
   "mcpDeployment": "<SUCCESSOR_MCP_DEPLOYMENT_NAME>",
   "apiIngress": "<APPLICATION_INGRESS_NAME>",
   "maintenance": {
+    "reopenBy": "<UTC_DEADLINE_INCLUDING_ROLLBACK_AND_CD_REENABLE>",
+    "changeFreeze": {
+      "reference": "<CONDUCTOR_NO_PUSH_NO_MERGE_AGREEMENT>",
+      "noPushOrMerge": false,
+      "startsAt": "<UTC_FREEZE_START>",
+      "endsAt": "<UTC_FREEZE_END_AT_OR_AFTER_REOPEN_DEADLINE>"
+    },
     "service": "base-maintenance-<UNIQUE_ATTEMPT>",
     "ingresses": ["<APPLICATION_INGRESS_NAME>", "<MCP_INGRESS_NAME>"],
     "networkIsolation": {
