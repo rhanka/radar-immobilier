@@ -98,6 +98,9 @@ for CONTENT_BASE in pages.sent-tech.ca pages.reader.test; do
   image_runtime_compose
   "${compose[@]}" up -d --no-deps runtime runtime-base runtime-read
   for service in runtime runtime-base runtime-read; do
+    container=$("${compose[@]}" ps -q "$service")
+    docker container inspect --format '{{.Image}}' "$container" > "$LOG_DIR/$service-image-id.txt"
+    [[ $(cat "$LOG_DIR/$service-image-id.txt") == "$IMAGE_ID" ]]
     "${compose[@]}" exec -T "$service" cat api/release-sha > "$LOG_DIR/$service-release-sha.txt"
     [[ $(cat "$LOG_DIR/$service-release-sha.txt") == "$CANDIDATE" ]]
   done
