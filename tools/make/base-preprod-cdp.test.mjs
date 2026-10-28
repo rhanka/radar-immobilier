@@ -11,16 +11,16 @@ test('Q1 et Q2 CDP ne créent et ferment que leur onglet dédié', async () => {
     const cfg = { ...config, phase }, transport = cdpFixture(cfg, cases);
     const result = await runCdpQualification(cfg, cases, transport);
     assert.equal(result.passed, true); assert.equal(result.ownedTargetClosed, true);
+    assert.equal(transport.trace.some(x => x.method === 'Network.enable' || x.method === 'Page.enable'), false);
     assert.deepEqual(transport.trace.filter(x => x.path), [
       { method: 'PUT', path: '/json/new' }, { method: 'GET', path: '/json/close/owned-fixture' }]);
     assert.equal(result.cookiesExported, false); assert.equal(result.tokensExported, false);
     assert.equal(JSON.stringify(result).includes('sensitive-fixture-only'), false);
   }
 });
-test('ferme l’onglet et garde le diagnostic CORS après échec de révisions', async () => {
+test('ferme l’onglet et identifie la phase après échec de révisions', async () => {
   const result = await runCdpQualification(config, cases, cdpFixture(config, cases, 'network'));
   assert.equal(result.passed, false); assert.equal(result.ownedTargetClosed, true);
-  assert.equal(result.networkFailures[0].corsError, 'MissingAllowOriginHeader');
   assert.equal(result.checks.find(x => x.name === 'projection-revisions').failurePhase, 'fetch');
   assert.equal(JSON.stringify(result).includes('sensitive-fixture-only'), false);
 });

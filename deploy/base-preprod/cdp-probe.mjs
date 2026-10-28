@@ -1,4 +1,4 @@
-import { connectTarget, networkObserver } from './cdp-client.mjs';
+import { connectTarget } from './cdp-client.mjs';
 import { resolvePath, readCheck, publicQualification } from './public-probe.mjs';
 
 export async function runCdpQualification(config, cases, transport = {}) {
@@ -6,7 +6,6 @@ export async function runCdpQualification(config, cases, transport = {}) {
   const base = new URL(transport.cdpBase ?? 'http://127.0.0.1:9222');
   const pause = transport.pause ?? (ms => new Promise(resolve => setTimeout(resolve, ms)));
   if (base.protocol !== 'http:' || !['127.0.0.1', 'localhost'].includes(base.hostname)) throw new Error('cdp_loopback_required');
-  const network = networkObserver(config, cases);
   let targetId, client, result = { passed: false }, ownedTargetClosed = false;
   try {
     const created = await request(new URL('/json/new?about:blank', base), { method: 'PUT', signal: AbortSignal.timeout(5000) });
@@ -17,8 +16,7 @@ export async function runCdpQualification(config, cases, transport = {}) {
     const socketUrl = new URL(tab.webSocketDebuggerUrl);
     if (socketUrl.protocol !== 'ws:' || socketUrl.hostname !== base.hostname || socketUrl.port !== base.port
       || socketUrl.pathname !== `/devtools/page/${targetId}`) throw new Error('invalid_dedicated_socket');
-    client = await connectTarget(socketUrl, WebSocketClass, network.observe);
-    await client.call('Network.enable'); await client.call('Page.enable');
+    client = await connectTarget(socketUrl, WebSocketClass);
     await client.call('Page.navigate', { url: config.origin + '/api/v1/auth/me' });
     let ready = false;
     for (let attempt = 0; attempt < 20; attempt++) {
@@ -43,6 +41,6 @@ export async function runCdpQualification(config, cases, transport = {}) {
     }
   }
   return { observedAt: new Date().toISOString(), phase: config.phase, ...result,
-    passed: result.passed === true && ownedTargetClosed, networkFailures: network.failures,
+    passed: result.passed === true && ownedTargetClosed,
     creation: 'PUT /json/new', ownedTargetClosed, cookiesExported: false, tokensExported: false };
 }

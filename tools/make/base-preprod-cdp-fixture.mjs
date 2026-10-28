@@ -7,10 +7,6 @@ export function cdpFixture(config, cases, failure = '') {
   const context = vm.createContext({ location: { origin: 'null' }, document: { readyState: 'complete' }, AbortSignal,
     fetch: async (path, options) => {
       if (failure === 'network' && path.includes('projection-revisions')) {
-        emit({ method: 'Network.requestWillBeSent', params: { requestId: 'owned-request', request: {
-          url: config.origin + path, headers: { Cookie: 'sensitive-fixture-only' } } } });
-        emit({ method: 'Network.loadingFailed', params: { requestId: 'owned-request', errorText: 'net::ERR_FAILED',
-          blockedReason: 'origin', corsErrorStatus: { corsError: 'MissingAllowOriginHeader' } } });
         throw new TypeError('sensitive-fixture-only');
       }
       return business(path, options);
