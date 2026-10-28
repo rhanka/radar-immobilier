@@ -2,7 +2,7 @@
 # Complete tracked Docker COPY inputs; no environment/credential discovery.
 image_archive_inputs() {
   local path
-  git ls-files -- api packages package.json package-lock.json tsconfig.base.json \
+  git ls-files -- api packages ui/package.json package.json package-lock.json tsconfig.base.json \
     radar/ontology/ontology-profile.yaml > "$RUN_DIR/image-candidates"
   : > "$RUN_DIR/image-paths"
   while IFS= read -r path; do
