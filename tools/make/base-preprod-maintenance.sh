@@ -66,6 +66,7 @@ freeze-cd() {
   assert_cd_frozen
 }
 assert_cd_frozen() {
+  require_operator_context
   [[ $(gh api "repos/$repo/actions/workflows/build-push-images.yml" --jq .state) == disabled_manually ]] || fail 'CD is not frozen'
   active_runs > "$OUTPUT/runs-current.jsonl"
   [[ ! -s $OUTPUT/runs-current.jsonl ]] || fail 'A nonterminal Actions run exists'
@@ -120,6 +121,12 @@ assert_closed() {
   "${k[@]}" get service radar-api -o jsonpath='{.spec.selector}' > "$OUTPUT/api-selector.json"
   jq -e '.["app.kubernetes.io/name"]=="radar-immobilier" and .["app.kubernetes.io/component"]=="api"' "$OUTPUT/api-selector.json" >/dev/null || fail 'Unexpected API Service selector'
   assert_namespace_endpoints closed
+}
+verify-closed() {
+  require_expected
+  assert_closed
+  jq -n --slurpfile c "$INPUT" --arg at "$(date -u +%FT%TZ)" '{binding:$c[0].binding,image:$c[0].image,observedAt:$at,closed:true}' > "$OUTPUT/closed.json"
+  echo 'Fermeture vérifiée ; contexte natif initialisé, restauration séparée autorisée par le runbook.'
 }
 collect-maintenance() {
   require_expected; regular_json "${PROOFS:-}"
