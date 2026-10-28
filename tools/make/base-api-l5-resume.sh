@@ -27,20 +27,6 @@ mkdir -p "$LOG_DIR"
 source tools/make/base-api-guards.sh
 source tools/make/base-api-l5-lock.sh
 recover_l5_resources
-quiet_docker() {
-  local quiet_since=$SECONDS active
-  echo 'Waiting for ten continuously empty minutes after recurring foreign probes'
-  while (( SECONDS - quiet_since < 600 )); do
-    if ! active=$(docker ps -q) || [[ -n $active ]]; then quiet_since=$SECONDS; fi
-    sleep 2
-  done
-}
-prior=$(cat "tmp/l5-evidence/$pointer" 2>/dev/null || true)
-recent_intrusion=0
-if [[ -s $controller/foreign-retries.tsv ]]; then
-  recent_intrusion=$(( $(date +%s) - $(stat -c %Y "$controller/foreign-retries.tsv") < 600 ))
-fi
-if [[ -s $prior/occupancy-stop.txt || -s $prior/foreign-stack.txt || $recent_intrusion == 1 ]]; then quiet_docker; fi
 while :; do
   previous=$(cat "tmp/l5-evidence/$pointer" 2>/dev/null || true)
   set +e
@@ -59,9 +45,6 @@ while :; do
   if [[ $current != "$previous" && ( -s $current/occupancy-stop.txt || -s $current/foreign-stack.txt ) ]]; then
     printf '%s\t%s\t%s\n' "$phase" "$code" "$current" >> "$controller/foreign-retries.tsv"
     echo 'Foreign interruption retained; waiting for departure before retrying'
-    # Short-lived foreign probe containers can recur between two empty snapshots.
-    # Require sustained quiet after an intrusion; never set a departure deadline.
-    quiet_docker
     continue
   fi
   printf 'Qualification needs investigation: %s exit=%s evidence=%s\n' "$phase" "$code" "$current"
