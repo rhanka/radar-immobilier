@@ -3,18 +3,22 @@ import { describeDb } from "../../src/services/facets/workspace-archive-fixture.
 import { bootstrapOf } from "../../src/artifacts/write-intent-app-surface-harness.js";
 import { l5Fixture, L5_DOMAIN } from "./l5-fixture.js";
 import { effects, ONE_COMMIT } from "./pwe-fixture.js";
+import { readProjectionScope } from "../../src/services/facets/projection-revisions.js";
+import type { WritePrepareBody } from "../../src/artifacts/write-intent-schemas.js";
 
 describeDb("PR 938 post-commit disclosure", () => {
   it.each(["membership", "artifact ACL", "moderation"])("should return only committed technical state after %s withdrawal", async (loss) => {
     const h = await l5Fixture();
     let release = () => {};
     try {
-      let body = h.body;
+      let body: WritePrepareBody = h.body;
       if (loss === "moderation") {
         await h.f.pool.query("UPDATE workspace_memberships SET moderate_archive=true WHERE workspace_id=$1 AND account_id=$2",
           [h.f.workspaceId, h.f.contributor.id]);
         const { basket: _basket, ...base } = body;
-        body = { ...base, operation: "facets.signals.workspace.discard.v1", reasonCode: "N-NON-RES" } as typeof body;
+        const projection = await readProjectionScope(h.f.db, h.f.contributor.sub, h.f.workspaceId, h.signal.target.citySlug, "signal");
+        body = { ...base, operation: "facets.signals.workspace.discard.v1", reasonCode: "N-NON-RES",
+          expectedProjectionToken: projection.token };
       }
       const prepared = await h.prepare({}, body);
       expect(prepared.status).toBe(201);

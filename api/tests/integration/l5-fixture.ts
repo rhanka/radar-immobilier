@@ -15,6 +15,7 @@ import { createApp } from "../../src/app.js";
 import { normalLogin } from "./pwe-normal-login.js";
 import { readProjectionScope } from "../../src/services/facets/projection-revisions.js";
 import type { ObjectStore } from "../../src/storage/object-store.js";
+import type { WritePrepareBody } from "../../src/artifacts/write-intent-schemas.js";
 
 export const L5_DOMAIN = { identityIssuer: "https://preprod.auth.sent-tech.ca", tier: "preprod" as const,
   appOrigin: "https://preprod.immo.sent-tech.ca", clientId: "l5-synthetic" };
@@ -94,7 +95,7 @@ export async function l5Fixture(write = true) {
   const projection = await readProjectionScope(f.db, f.contributor.sub, f.workspaceId, signal.target.citySlug, "signal");
   const body = { operation: "facets.signals.personal.select.v1", workspaceId: f.workspaceId, target: signal.target,
     basket: "pertinent", expectedHeadId: null, displayedFingerprint: signal.fingerprint, expectedProjectionToken: projection.token };
-  const prepare = (extra: Record<string, string> = {}, input = body, key = randomUUID()) => app.request(
+  const prepare = (extra: Record<string, string> = {}, input: WritePrepareBody = body, key = randomUUID()) => app.request(
     `${origin}/__reader/api/facets.write-intents.prepare.v1`, { method: "POST", headers: { ...headers, origin,
       "content-type": "application/json", "idempotency-key": key, "x-reader-instance": privatePage?.pageInstanceId ?? "",
       "x-reader-csrf": privatePage?.csrf ?? "", ...extra }, body: JSON.stringify(input) });

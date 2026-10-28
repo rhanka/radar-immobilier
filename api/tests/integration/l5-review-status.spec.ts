@@ -3,6 +3,7 @@ import { describeDb } from "../../src/services/facets/workspace-archive-fixture.
 import { bootstrapOf } from "../../src/artifacts/write-intent-app-surface-harness.js";
 import { l5Fixture, L5_DOMAIN } from "./l5-fixture.js";
 import { effects } from "./pwe-fixture.js";
+import { readProjectionScope } from "../../src/services/facets/projection-revisions.js";
 
 describeDb("PR 938 page disclosure authority", () => {
   it.each(["moderation", "membership during final resolution"])("should mask a committed workspace receipt after %s loss", async (loss) => {
@@ -12,7 +13,9 @@ describeDb("PR 938 page disclosure authority", () => {
       await h.f.pool.query("UPDATE workspace_memberships SET moderate_archive=true WHERE workspace_id=$1 AND account_id=$2",
         [h.f.workspaceId, h.f.contributor.id]);
       const { basket: _basket, ...base } = h.body;
-      const prepared = await h.prepare({}, { ...base, operation: "facets.signals.workspace.discard.v1", reasonCode: "N-NON-RES" });
+      const projection = await readProjectionScope(h.f.db, h.f.contributor.sub, h.f.workspaceId, h.signal.target.citySlug, "signal");
+      const prepared = await h.prepare({}, { ...base, operation: "facets.signals.workspace.discard.v1", reasonCode: "N-NON-RES",
+        expectedProjectionToken: projection.token });
       expect(prepared.status).toBe(201);
       const { data } = await prepared.json();
       const headers = { host: new URL(L5_DOMAIN.appOrigin).host, cookie: h.login.cookie };
@@ -22,6 +25,7 @@ describeDb("PR 938 page disclosure authority", () => {
         method: "POST", headers: { ...headers, origin: L5_DOMAIN.appOrigin, "content-type": "application/json",
           "x-artifact-write-csrf": String(boot.csrf) }, body: JSON.stringify({ challengeToken: boot.challengeToken }),
       });
+      expect(await confirmed.clone().json()).toMatchObject({ state: "committed" });
       expect(confirmed.status).toBe(200);
       expect(await confirmed.json()).toHaveProperty("receipt.event");
       const before = await effects(h.f);
