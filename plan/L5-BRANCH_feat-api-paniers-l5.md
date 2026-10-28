@@ -52,3 +52,4 @@
 - [x] Owner final delivery scope supersedes the earlier 37f21d3d bundle base; fetched main remains 26a78195 and is already an ancestor.
 - [x] Qualification explicitly lints the new read/HTML regressions; inherited stale-status mutation retains its fault at the versioned continuation boundary. Global API uses two isolated workers in one owned stack.
 - [x] Correct the mutation adapter's no-regex-spaces lint finding before restarting final qualification; no runtime change.
+- [x] Repeated foreign probe intrusions are retained and discarded as full qualifications; after intrusion, retry waits for a continuously empty minute without any departure deadline or foreign cleanup.
