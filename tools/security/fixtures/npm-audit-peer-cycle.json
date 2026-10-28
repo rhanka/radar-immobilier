@@ -1,0 +1,41 @@
+{
+  "auditReportVersion": 2,
+  "vulnerabilities": {
+    "@example/build-plugin": {
+      "name": "@example/build-plugin",
+      "severity": "low",
+      "isDirect": true,
+      "via": ["@example/build-inspector", "merge-helper"],
+      "effects": ["@example/build-inspector"],
+      "range": "*",
+      "nodes": ["node_modules/@example/build-plugin"],
+      "fixAvailable": false
+    },
+    "@example/build-inspector": {
+      "name": "@example/build-inspector",
+      "severity": "low",
+      "isDirect": false,
+      "via": ["@example/build-plugin"],
+      "effects": ["@example/build-plugin"],
+      "range": "*",
+      "nodes": ["node_modules/@example/build-inspector"],
+      "fixAvailable": false
+    },
+    "merge-helper": {
+      "name": "merge-helper",
+      "severity": "low",
+      "isDirect": false,
+      "via": [{
+        "source": 1234567, "name": "merge-helper", "dependency": "merge-helper",
+        "title": "Example merge advisory", "url": "https://github.com/advisories/GHSA-aaaa-bbbb-cccc",
+        "severity": "low", "cwe": ["CWE-1321"],
+        "cvss": { "score": 5.3, "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N" },
+        "range": ">=4.2.0 <=4.3.1"
+      }],
+      "effects": ["@example/build-plugin"],
+      "range": ">=4.2.0",
+      "nodes": ["node_modules/merge-helper"],
+      "fixAvailable": false
+    }
+  }
+}
