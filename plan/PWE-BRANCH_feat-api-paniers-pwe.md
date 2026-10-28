@@ -32,6 +32,10 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Full7a0c066f:334 required/0 failures/0 skips; API4497/0/76;
+  inherited68 and51 PW-E mutants restored, with one rejected Domain variant.
+- [x] Move identity fixture creation from beforeAll into the targeted test body;
+  preserve every cookie/domain assertion and forbid a hook failure from counting as a kill.
 - [x] The preserved route produced five missing-receipt assertion failures;
   use a public diagnostic marker because Vitest abbreviates object fields in JSON messages.
 - [x] The first final attempt passed static gates but omitted the archived
