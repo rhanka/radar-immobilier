@@ -66,8 +66,8 @@ describeDb("PW-C application surface", () => {
       revokedAt: expect.any(String) });
     const withdrawn = await (await app.request(`https://${host}/api/v1/artifacts/write-intents/${row.intentId}`,
       { headers: { host, cookie: session } })).json();
-    expect(withdrawn).toMatchObject({ state: "revoked" });
-    expect(withdrawn).not.toHaveProperty("receipt");
+    expect(withdrawn).toMatchObject({ state: "revoked", executionState: "committed", revocationState: "revoked",
+      commandId: input.commandKey, receipt: technical.receipt });
   });
 
   it("should refuse bearer use, foreign principals, and wrong methods", async () => {

@@ -50,7 +50,7 @@ describe("page write listener", () => {
     const response = await app.request(prepareRequest());
     expect(response.status).toBe(status);
     expect(await response.json()).toMatchObject(status === 201 ? { data: { intentId: UUID } } : { error: { code: "write_rate_limited" } });
-    expect(response.headers.get("retry-after")).toBe("7");
+    expect(response.headers.get("retry-after")).toBe(status === 429 ? "7" : null);
     expect(response.headers.get("cache-control")).toBe("private, no-store");
     expect(response.headers.get("cross-origin-opener-policy")).toBe("same-origin");
     expect(response.headers.get("vary")).toBe("Cookie, Authorization");
