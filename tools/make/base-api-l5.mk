@@ -33,3 +33,6 @@ l5-r2-bundle:
 .PHONY: l5-r3-bundle
 l5-r3-bundle:
 	REQUIRED_EVIDENCE="$(REQUIRED_EVIDENCE)" PROXY_EVIDENCE="$(PROXY_EVIDENCE)" rtk bash tools/make/base-api-l5-r3-deliver.sh
+.PHONY: l5-r4-bundle
+l5-r4-bundle:
+	FULL_EVIDENCE="$(FULL_EVIDENCE)" rtk bash tools/make/base-api-l5-r4-deliver.sh
