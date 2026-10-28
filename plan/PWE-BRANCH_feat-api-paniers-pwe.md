@@ -32,6 +32,16 @@
 - [x] Temporary container-only mutations restore original bytes before exit.
 
 ## Feedback Loop
+- [x] Follow-up764f5244:3 identity tests passed/0 skipped, Domain mutant
+  failed on the host-only assertion inside the case and restored successfully.
+- [x] Reconcile120 unique qualified variants:68 inherited and52 PW-E;
+  preserve the rejected hook-level attempt, targeted retry and all source hashes.
+- [x] Verify runtime sources equal full7a0c066f, protected transaction/SQL/Track
+  equal approved509e664d, owned resources absent and both campaign locks released.
+- [x] Fresh upstream fetch00:20 UTC still resolves approved509e664d;
+  no0026 revision received and no migration edited or renumbered here.
+- [x] Keep exact-image/browser acceptance OPEN: missing runtime A6/A7
+  integration and CT-1 attribution cannot be replaced by API fixtures or VM scripts.
 - [x] Full7a0c066f:334 required/0 failures/0 skips; API4497/0/76;
   inherited68 and51 PW-E mutants restored, with one rejected Domain variant.
 - [x] Move identity fixture creation from beforeAll into the targeted test body;
@@ -177,15 +187,15 @@
 - [x] Owner requested final PW-A integration before PW-E; intermediate bundle
   and report delivered, with 65 unit, 9 PG, 4396 API passes and 25 mutant kills.
 - [x] Read conception sections 7.4-7.9, CT-1-CT-9 and the full PW-E matrices.
-- [ ] Map every requirement to its exact assertion and observed evidence.
-- [ ] Recheck approved PW-A migration numbering before final image campaign.
+- [x] Map every requirement to assertions/evidence or an explicit unresolved gate.
+- [x] Recheck approved PW-A migration numbering;509e664d remains current.
 
 ## Orchestration Mode (AI-selected)
 - [x] Dedicated PW-E branch; preserve the delivered PW-C ref and bundle.
 - [x] Serial Docker campaigns under the shared lock; no foreign cleanup.
 
 ## UAT Management (in orchestration context)
-- [x] Automated browser qualification on test images; root dev remains stable.
+- [x] Use test images for browser qualification; root dev remains stable.
 
 ## Plan / Todo (lot-based)
 - [ ] PWE-01: published page, six operations, readback and executor counts.
@@ -201,7 +211,8 @@
 - [ ] PWE-10: independently killed/restored authority mutants M01-M05/M09.
 - [ ] PWE-11: independently killed/restored transaction mutants M06-M13.
 - [ ] PWE-12: browser/error mutants M14-M16 and exact-image CT-9 gates.
-- [ ] Gate: typecheck, targeted lint, scoped tests and complete API CI.
+- [x] Gate: typecheck, targeted lint, scoped tests and complete API CI.
 - [ ] Gate: HW-01-HW-15, C01-C12 both orders and all individual M01-M16 legs.
-- [ ] Gate: fresh/upgrade/rerun migrations and unchanged applied prefix.
-- [ ] Delivery: incremental bundle, prerequisite-only audit and French report.
+- [x] Gate: fresh/upgrade/rerun migrations and unchanged applied prefix.
+- [x] Delivery: incremental bundle, prerequisite-only audit and French report,
+  retaining the unclosed runtime/image prerequisites and per-campaign source SHAs.
