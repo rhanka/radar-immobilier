@@ -4,8 +4,10 @@ import { materializeInherited as previous } from "./base-api-pwe-legacy-adjustme
 /** Retain each inherited fault after response projection and locked result moves. */
 export function materializeInherited(batch, source) {
   const result = previous(batch, source);
-  if (batch !== "pwc") return result;
-  const replacements = [
+  const replacements = batch === "pwa" ? [
+    ["summary-membership", "write-intent-app-route.ts", " || !canRead", "",
+      "src/artifacts/write-intent-app-review.test.ts", "membership loss with approval intact"],
+  ] : batch === "pwc" ? [
     ["M14-forwarded-headers", "artifacts/write-intent-page-listener.ts",
       "applyReaderContentHeaders(c);", "", "src/artifacts/write-intent-page-listener.test.ts",
       "private headers on forwarded HTTP"],
@@ -15,7 +17,7 @@ export function materializeInherited(batch, source) {
     ["M16-old-result", "artifacts/write-intent-page.ts",
       "if (intentId !== poll.intentId) return;\n      await handleStatus(out);", "await handleStatus(out);",
       "src/artifacts/write-intent-page-regressions.test.ts", "late result"],
-  ];
+  ] : [];
   for (const row of replacements) {
     const expression = new RegExp(`  \\["${row[0]}",[\\s\\S]*?(?=\\n  \\[|\\n\\];)`, "g");
     const matches = [...result.source.matchAll(expression)];
