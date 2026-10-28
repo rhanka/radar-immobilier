@@ -13,7 +13,7 @@ import { requireScopedEpoch, ScopeError } from "./scope.js";
 import { FacetError } from "./target.js";
 import { WorkspaceError } from "../workspaces/types.js";
 import { lockWorkspace } from "../workspaces/mutations.js";
-import { readScopeTokenInTx } from "./signal-write-scope.js";
+import { readScopeTokenInTx, type WriteTx } from "./signal-write-scope.js";
 import { Reason } from "./classification-contracts.js";
 
 const ReceiptEvent = z.object({
@@ -56,7 +56,13 @@ export interface WriteRefusal {
 export async function readCommittedSignalReceipt(
   db: Database, sub: string, workspaceId: string, commandKey: string,
 ): Promise<SignalWriteEvent | null> {
-  return db.transaction(async (tx) => {
+  return db.transaction((tx) => readCommittedSignalReceiptInTx(tx, sub, workspaceId, commandKey));
+}
+
+/** Same authorized immutable projection in the caller's bounded read transaction. */
+export async function readCommittedSignalReceiptInTx(
+  tx: WriteTx, sub: string, workspaceId: string, commandKey: string,
+): Promise<SignalWriteEvent | null> {
   await lockWorkspace(tx, workspaceId);
   const key = commandKey.toLowerCase();
   const accountId = await approvedAccountId(tx, sub, true);
@@ -79,7 +85,6 @@ export async function readCommittedSignalReceipt(
     || !Object.hasOwn(result, "event")) throw new FacetError(409, "command_context_unresolved");
   await readScopeTokenInTx(tx, sub, workspaceId, city);
   return projectSignalWriteEvent(result.event);
-  });
 }
 
 /** Map a BASE refusal to its PW section 7.7 code; unknown stays masked. */

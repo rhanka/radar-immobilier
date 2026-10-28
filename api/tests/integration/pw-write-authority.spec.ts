@@ -53,7 +53,7 @@ describeDb("PW-A authority through createApp and PostgreSQL", () => {
         "x-artifact-write-csrf": bootstrap.csrf }, body: JSON.stringify({ challengeToken: bootstrap.challengeToken }) });
     const committed = await confirm();
     expect(committed.status).toBe(200);
-    expect((await committed.json()).event.state).toBe("active");
+    expect((await committed.json()).receipt.event.state).toBe("active");
     const replay = await confirm();
     expect(replay.status).toBe(409);
     expect(await replay.json()).toMatchObject({ error: { code: "challenge_consumed" } });

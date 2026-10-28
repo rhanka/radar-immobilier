@@ -47,11 +47,15 @@ function servedOnApp(c: Context, appOrigin: string): boolean {
 
 /** Session gate shared by summary, management, confirm, and revoke. */
 export async function guardWriteIntentAppSession(
-  c: Context, deps: AppGuardDeps,
+  c: Context, deps: AppGuardDeps, probe?: { code?: string },
 ): Promise<AppGuardPass | Response> {
+  const refuse = (code: "cookie_required" | "unauthenticated" | "session_expired", status: 401) => {
+    if (probe) probe.code = code;
+    return writeRefusal(c, code, status);
+  };
   privateHeaders(c);
   if (c.req.header("authorization") !== undefined) {
-    return writeRefusal(c, "cookie_required", 401);
+    return refuse("cookie_required", 401);
   }
   if (!deps.auth.enabled) return writeRefusal(c, "write_transport_closed", 503);
   if (deps.sessionSecret !== deps.auth.sessionSecret || Buffer.byteLength(deps.sessionSecret) < 32
@@ -62,12 +66,12 @@ export async function guardWriteIntentAppSession(
     return writeRefusal(c, "write_transport_closed", 503);
   }
   const rawCookie = getCookie(c, SESSION_COOKIE_NAME);
-  if (!rawCookie) return writeRefusal(c, "unauthenticated", 401);
+  if (!rawCookie) return refuse("unauthenticated", 401);
   const session = await verifySession(rawCookie, {
     sessionSecret: deps.sessionSecret,
     now: (deps.nowMs ?? Date.now)(),
   });
-  if (!session || session.exp * 1000 <= (deps.nowMs ?? Date.now)()) return writeRefusal(c, "session_expired", 401);
+  if (!session || session.exp * 1000 <= (deps.nowMs ?? Date.now)()) return refuse("session_expired", 401);
   return { session, principal: canonicalAppPrincipal(session, deps.domain), rawCookie };
 }
 

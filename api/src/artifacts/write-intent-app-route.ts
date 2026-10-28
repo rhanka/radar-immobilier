@@ -2,11 +2,12 @@ import { writeRefusal } from "./write-intent-refusal.js";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { guardWriteIntentAppSession, requireApprovedAppAccount } from "./write-intent-app-guard.js";
-import { canReadWriteIntentSummary, challengeBootstrap, guardWriteIntentAppMutation, ownedWriteIntent,
+import { challengeBootstrap, guardWriteIntentAppMutation, ownedWriteIntent,
   verifyAppChallenge, writeCsrf, type WriteAppDeps } from "./write-intent-app-authority.js";
 import { hasDuplicateJsonKeys } from "./write-intent-binding.js";
 import { writeIntentError } from "./write-intent-errors.js";
 import { FacetError } from "../services/facets/target.js";
+import { readAppWriteIntentResult } from "./write-intent-app-result.js";
 export type { WriteAppDeps } from "./write-intent-app-authority.js";
 
 /** Exact route mounts only: a disabled PW capability never intercepts the app. */
@@ -29,8 +30,15 @@ export function writeIntentAppRoute(deps: WriteAppDeps | null): Hono {
   for (const path of [summary, api]) app.get(path, async (c) => {
     if (!deps) return writeRefusal(c, "write_transport_closed", 503);
     try {
-      const pass = await guardWriteIntentAppSession(c, deps);
-      if (pass instanceof Response) return pass;
+      const failure: { code?: string } = {};
+      const pass = await guardWriteIntentAppSession(c, deps, failure);
+      if (pass instanceof Response) {
+        if (path === summary && deps.renderLogin && failure.code !== undefined
+          && ["unauthenticated", "session_expired"].includes(failure.code)) {
+          return deps.renderLogin(c);
+        }
+        return pass;
+      }
       const site = c.req.header("sec-fetch-site");
       if (path === api ? ((c.req.header("origin") !== undefined && c.req.header("origin") !== deps.domain.appOrigin)
         || (site !== undefined && site !== "same-origin"))
@@ -38,11 +46,17 @@ export function writeIntentAppRoute(deps: WriteAppDeps | null): Hono {
           && (c.req.header("sec-fetch-mode") !== "navigate" || c.req.header("sec-fetch-dest") !== "document"))) {
         return writeRefusal(c, "csrf_refused", 403);
       }
-      const row = await ownedWriteIntent(c, deps, pass, path === api);
+      const observed = await ownedWriteIntent(c, deps, pass, path === api);
       const approved = await requireApprovedAppAccount(c, deps, pass.session.sub);
       if (approved?.status === 503) return approved;
-      if (approved || path === api || !await canReadWriteIntentSummary(deps, row, pass)) return c.json({ intentId: row.intentId, management: true,
-        csrf: writeCsrf(deps, pass, row.intentId) });
+      const { row, data: result, canRead } = await readAppWriteIntentResult(deps, observed, pass);
+      if (approved || path === api || result.state !== "pending" || !canRead) {
+        if (path === summary && deps.renderManagement) {
+          return deps.renderManagement(c, row, { csrf: writeCsrf(deps, pass, row.intentId), result });
+        }
+        return c.json({ intentId: row.intentId, management: true,
+          csrf: writeCsrf(deps, pass, row.intentId), ...(path === api ? result : {}) });
+      }
       if (!deps.renderSummary) return writeRefusal(c, "write_transport_closed", 503);
       return deps.renderSummary(c, row, challengeBootstrap(row, deps, pass));
     } catch (error) { return writeIntentError(c, error); }
@@ -68,8 +82,18 @@ export function writeIntentAppRoute(deps: WriteAppDeps | null): Hono {
       const approved = await requireApprovedAppAccount(c, deps, pass.session.sub);
       if (approved) return approved;
       const proof = verifyAppChallenge((body as { challengeToken: unknown }).challengeToken, row, deps, pass);
-      return deps.confirm ? c.json(await deps.confirm(row, proof))
-        : writeRefusal(c, "write_transport_closed", 503);
+      if (!deps.confirm) return writeRefusal(c, "write_transport_closed", 503);
+      await deps.confirm(row, proof);
+      // Admission locks ended at COMMIT. Consult the durable result under
+      // current disclosure rights; never reuse the writer's returned event.
+      try {
+        const result = await readAppWriteIntentResult(deps, row, pass);
+        return c.json({ intentId: row.intentId, ...result.data });
+      } catch {
+        // A failed post-commit consultation cannot classify execution as
+        // not_executed. Preserve I and require authorized receipt recovery.
+        return writeRefusal(c, "write_outcome_unknown", 504, "unknown", "confirm");
+      }
     } catch (error) { return writeIntentError(c, error); }
   });
   for (const path of [summary, api, `${api}/confirm`, `${api}/revoke`]) {

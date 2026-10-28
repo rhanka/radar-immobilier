@@ -2,9 +2,47 @@ import { expect, it, vi } from "vitest";
 import { describeDb } from "../../src/services/facets/workspace-archive-fixture.js";
 import { revokePwAuthority } from "../../src/services/facets/pw-write-fences.js";
 import { readCommittedSignalReceipt } from "../../src/services/facets/signal-write-receipt.js";
+import * as receiptReader from "../../src/services/facets/signal-write-receipt.js";
+import * as disclosure from "../../src/artifacts/write-intent-app-authority.js";
 import { authorityFixture, APP, H5 } from "./pw-write-authority-fixture.js";
 
 describeDb("PW-A status disclosure after receipt wait", () => {
+  it.each(["page", "delegation"] as const)("should refuse %s expiry during the final disclosure-rights wait", async (kind) => {
+    const a = await authorityFixture(), id = (await (await a.prepare()).json()).data.intentId, cookie = await a.cookie();
+    const boot = await (await a.request(`/artifact-write/intents/${id}`, { headers: { cookie } })).json();
+    const committed = await a.request(`${APP}/${id}/confirm`, { method: "POST", headers: {
+      cookie, origin: a.writeApp.domain.appOrigin, "content-type": "application/json", "x-artifact-write-csrf": boot.csrf,
+    }, body: JSON.stringify({ challengeToken: boot.challengeToken }) });
+    expect(committed.status).toBe(200);
+    const blocker = await a.f.pool.connect();
+    const { rows: [{ pid }] } = await blocker.query("SELECT pg_backend_pid() AS pid");
+    const original = disclosure.canReadWriteIntentSummaryInTx;
+    let calls = 0, pending: Promise<Response> | undefined;
+    vi.spyOn(disclosure, "canReadWriteIntentSummaryInTx").mockImplementation(async (...args) => {
+      if (++calls === 2) {
+        await blocker.query("BEGIN");
+        await blocker.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))",
+          [JSON.stringify(["workspace", a.f.workspaceId])]);
+      }
+      return original(...args);
+    });
+    try {
+      if (kind === "delegation") a.page.delegationExpiresAtMs = a.clock.now + 1000;
+      pending = a.request(`${H5}/${id}`, { headers: { "x-synthetic-page-proof": a.page.grant.sessionId } });
+      await vi.waitFor(async () => {
+        const { rows } = await a.f.pool.query(`SELECT EXISTS (SELECT FROM pg_stat_activity
+          WHERE $1 = ANY(pg_blocking_pids(pid))) AS blocked`, [pid]);
+        expect(rows[0].blocked).toBe(true);
+      }, { timeout: 800, interval: 5 });
+      a.clock.now = kind === "page" ? a.page.pageExpiresAtMs : a.page.delegationExpiresAtMs;
+      await blocker.query("ROLLBACK");
+      const result = await pending;
+      expect(result.status).toBe(401);
+      expect(await result.json()).toMatchObject({ error: { code: kind === "page" ? "page_session_expired" : "write_grant_expired" } });
+      expect(calls).toBe(2);
+      expect(a.counters().confirms).toBe(1);
+    } finally { await blocker.query("ROLLBACK"); blocker.release(); await pending; vi.restoreAllMocks(); }
+  });
   it.each(["intent", "grant", "page_session", "expiry"] as const)(
     "should mask the receipt when %s withdrawal completes during projection", async (kind) => {
       const a = await authorityFixture();
@@ -24,10 +62,16 @@ describeDb("PW-A status disclosure after receipt wait", () => {
       const blocker = await a.f.pool.connect();
       let pending: Promise<Response> | undefined;
       try {
-        await blocker.query("BEGIN");
-        await blocker.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))",
-          [JSON.stringify(["workspace", a.f.workspaceId])]);
         const { rows: [{ pid }] } = await blocker.query("SELECT pg_backend_pid() AS pid");
+        const original = receiptReader.readCommittedSignalReceipt;
+        vi.spyOn(receiptReader, "readCommittedSignalReceipt").mockImplementationOnce(async (...args) => {
+          // The first disclosure guard also locks the workspace. Install this
+          // SQL barrier only when projection starts, after that guard releases I.
+          await blocker.query("BEGIN");
+          await blocker.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))",
+            [JSON.stringify(["workspace", a.f.workspaceId])]);
+          return original(...args);
+        });
         pending = Promise.resolve(poll());
         await vi.waitFor(async () => {
           const { rows } = await a.f.pool.query(`SELECT EXISTS (SELECT FROM pg_stat_activity
@@ -55,7 +99,7 @@ describeDb("PW-A status disclosure after receipt wait", () => {
         expect((await readCommittedSignalReceipt(a.f.db, a.f.contributor.sub, a.f.workspaceId,
           a.input.commandKey))?.state).toBe("active");
       } finally {
-        await blocker.query("ROLLBACK"); blocker.release(); await pending;
+        await blocker.query("ROLLBACK"); blocker.release(); await pending; vi.restoreAllMocks();
       }
     });
 
