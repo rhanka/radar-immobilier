@@ -30,7 +30,9 @@
 - [ ] Lot 1: locked application status, receipt recovery and separate execution/revocation terminal HTML.
 - [x] Lot 1 implementation: status computed under I lock; authorized committed receipt survives revocation; terminal HTML has no confirm button.
 - [ ] Lot 2: active preprod nginx routes, HTTPS public origin, mandatory P instance/CSRF.
+- [x] Lot 2 implementation: preprod locations, canonical Host HTTPS and timing-safe private P proof checks.
 - [ ] Lot 3: served page/script/CSP, targeted pre-read and coherent post-receipt refresh.
+- [x] Lot 3 implementation: authenticated content composition serves exact PW bytes/hash and reuses BASE state/search readers under the selected workspace.
 - [ ] Lot 4: strict listener response projection and browser identity/intent validation.
 - [ ] Lot 5: preserve uncertain prepare keys and manual Retry-After budgets.
 - [x] Lot 5 implementation: retry refusal retains the original body/key; Retry-After persists the later manual deadline.
