@@ -38,9 +38,9 @@ assert_boundary() {
     and all(.rules[]?.http.paths[]?; .backend==$deny))' "$OUTPUT/ingresses-current.json" >/dev/null || fail 'Ingress lacks refusal backend'
 }
 close_routes() {
+  read_ingresses
   "${k[@]}" get service "$(jq -r .maintenance.service "$INPUT")" --ignore-not-found -o json > "$OUTPUT/refusal-service-existing.json"
   jq -se 'length==0' "$OUTPUT/refusal-service-existing.json" >/dev/null || fail 'Refusal Service already exists; use reclose-api with the original ROUTES snapshot'
-  read_ingresses
   jq --slurpfile c "$INPUT" '{binding:$c[0].binding,image:$c[0].image,ingresses:.items,closedIngresses:[]}' \
     "$OUTPUT/ingresses-current.json" > "$OUTPUT/ingress-snapshot.json"
   jq -n --slurpfile c "$INPUT" '{apiVersion:"v1",kind:"Service",
