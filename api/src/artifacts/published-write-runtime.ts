@@ -9,7 +9,7 @@ import { PUBLISHED_WRITE_DECLARATION, PUBLISHED_WRITE_FILE } from "./published-w
 import { pageWriteListenerRoute } from "./write-intent-page-listener.js";
 import { writeIntentH5Route } from "./write-intent-h5-route.js";
 import { createWriteAppSurface } from "./write-intent-app-surface.js";
-import { PW_PAGE_SCRIPT } from "./write-intent-page.js";
+import { PUBLISHED_WRITE_SCRIPT, publishedWriteBootstrap } from "./published-write-bootstrap.js";
 import { writeIntentError } from "./write-intent-errors.js";
 
 export function createPublishedWriteRuntime(options: {
@@ -44,14 +44,12 @@ export function createPublishedWriteRuntime(options: {
     try {
       const reader = await page.authenticate(c.req.raw);
       if (!reader) return c.json({ error: "unauthenticated" }, 401);
-      if (path === PW_BOOTSTRAP_PATH) return c.json({ pageInstanceId: reader.instance, csrf: reader.csrf });
+      if (path === PW_BOOTSTRAP_PATH) return c.json(await publishedWriteBootstrap(c.req.raw, {
+        db: options.db, page, readIssuer: options.readIssuer, readGrantSecret: options.readGrantSecret,
+        appOrigin: domain.appOrigin,
+      }));
       c.header("Content-Type", "text/javascript; charset=utf-8");
-      return c.body(`window.__pwWriteCredentials = async function () {
-        const response = await fetch(${JSON.stringify(PW_BOOTSTRAP_PATH)}, {credentials:"same-origin"});
-        if (!response.ok) throw new Error("write_bootstrap_unavailable");
-        const body = await response.json();
-        return {"x-reader-instance":body.pageInstanceId,"x-reader-csrf":body.csrf};
-      };\n${PW_PAGE_SCRIPT}`);
+      return c.body(PUBLISHED_WRITE_SCRIPT);
     } catch (error) { return writeIntentError(c, error); }
   });
   return { domain, permitsWrite, pageWrite, h5,
