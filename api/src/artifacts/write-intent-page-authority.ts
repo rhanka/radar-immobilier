@@ -26,7 +26,7 @@ export interface PageWriteAuthorityDeps {
   grantSecret: string;
 }
 
-function assertPageAuthority(page: PageWriteAuthority | null, deps: PageWriteAuthorityDeps,
+export function assertPageAuthority(page: PageWriteAuthority | null, deps: PageWriteAuthorityDeps,
   nowMs: number): asserts page is PageWriteAuthority {
   const expected = deps.grantIssuer;
   if (!deps.grantKeyId || !page || page.grant.issuer !== expected.issuer || page.grant.tier !== expected.tier
