@@ -31,6 +31,7 @@
 - [x] Automated browser qualification only; root UAT and dev data remain untouched.
 
 ## Plan / Todo (lot-based)
+- [ ] PR 938 second pass: current page disclosure rights after waits, post-commit application disclosure, renewable read grants, bounded application POSTs/bootstrap, targeted regressions and exact-image browser qualification.
 - [x] Lot 0: merge approved PW-A and main; preserve Track event blob identity.
 - [x] Lot 1: bind verified approval provenance, explicit release write request and private page bootstrap.
 - [x] Implementation and targeted PG proof: actual one-use ticket provenance, explicit workspace, matching signed read grant and no publisher privileges.
