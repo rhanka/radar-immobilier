@@ -16,6 +16,7 @@
 - [x] Forbidden Paths: api/src/artifacts/write-intent-transaction.ts, api/drizzle/**, api/src/index.ts, Makefile, docker-compose*.yml, rules/**, agent bootstrap, other plans, .track/**.
 - [x] Conditional Paths: none. PWCR-EX1: owner explicitly requires the deployed preprod nginx fix; impact exact PW routes only; rollback these location blocks.
 - [x] PWCR-EX2: update api/tests/integration/pwe-app-receipt.spec.ts's superseded post-commit revoke expectation; no business-rights checks removed; rollback the assertion only.
+- [x] PWCR-EX3: update api/tests/integration/pw-write-authority-rights.spec.ts for the two public technical execution/revocation fields required by Astra B4; exact no-business-data equality and all revoke guards retained; rollback these expected fields only.
 
 ## Feedback Loop
 - [x] Read Astra A and B in full, including B's detailed root report; findings accepted and reproduced through discriminating tests.
