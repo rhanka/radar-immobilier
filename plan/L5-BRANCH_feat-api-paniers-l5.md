@@ -21,6 +21,7 @@
 - [x] BRL5-EX1: owner-required touched regression maintenance permits api/tests/integration/pw-write-authority.spec.ts, pw-write-authority-status.spec.ts, pwcr-app-status.spec.ts and pwcr-listener-h5.spec.ts. Rationale: post-confirm replies now use the controlled receipt envelope, and the disclosure guard adds an earlier workspace wait. Impact: test expectations and the existing SQL barrier placement only; rollback: revert these exact test hunks and rerun the affected suites.
 - [x] BRL5-EX2 : la troisième passe autorise explicitement api/tests/integration/pwcr-proxy.acceptance.ts et tools/make/base-api-pwe-extra-mutation-cases.mjs. Motif : contrat receipt.event et ancre M11 devenus obsolètes. Impact : attendu proxy et injection dans la copie de test uniquement ; retour arrière : annuler ces deux corrections et rejouer les campagnes concernées.
 - [x] La consigne de troisième passe remplace la langue des nouveaux sujets de commit par le français ; les limites atomiques, le format Conventional et l'absence de corps ou de trailer restent appliqués.
+- [x] BRL5-EX3 : la quatrième passe autorise tools/make/base-api-pwe-app-result-regression.mjs et base-api-pwe-before-app-result.txt. Motif : supprimer le contrat POST historique du témoin et isoler la perte de restitution au GET. Impact : copies de test uniquement ; retour arrière : annuler ces fichiers et rejouer le témoin puis PHASE=full.
 
 ## Feedback Loop
 - [x] Two independent read-only design reviews: authority/provenance and runtime-image/browser evidence.
@@ -34,6 +35,7 @@
 - [x] Automated browser qualification only; root UAT and dev data remain untouched.
 
 ## Plan / Todo (lot-based)
+- [x] Quatrième passe #938 : témoin négatif limité au GET courant, identité du POST contrôlée ; recherche des runners/mutants encore obsolètes. Qualification complète et livraison exigées par l5-r4-bundle, résultats dans RAPPORT-SOL-PWC.md.
 - [x] Troisième passe #938 : contrat proxy, M11 et son adaptateur, rechargement après révocation incertaine et discriminants stricts corrigés. La livraison r3 exige les matrices PW, trois variantes nginx et 52 mutants dans l5-r3-bundle ; résultats et limites consignés dans RAPPORT-SOL-PWC.md.
 - [x] Régressions ajoutées sur le HTML exact du rendu de gestion avec DOM réel, sans élément de gestion artificiel ; tableaux à un élément refusés sur les six discriminants concernés.
 - [x] PR 938 second-pass implementation: page disclosure rights after waits, post-commit application consultation, renewable read grants, bounded application POSTs/bootstrap and targeted regressions. Exact-image qualification and final bundle are enforced by l5-r2-bundle; results are recorded in RAPPORT-SOL-PWC.md, Second pass #938.
