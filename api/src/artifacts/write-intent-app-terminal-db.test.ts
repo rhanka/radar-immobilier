@@ -38,7 +38,8 @@ describeDb("PW-C terminal HTML consultation", () => {
         expect(response.headers.get("content-type")).toContain("text/html");
         const html = await response.text();
         expect(html).not.toContain('id="pw-confirm"');
-        expect(html).not.toContain("challengeToken");
+        expect(html).not.toContain(String(boot.challengeToken));
+        expect(bootstrapOf(html)).not.toHaveProperty("challengeToken");
         expect(bootstrapOf(html)).not.toHaveProperty("confirmUrl");
         expect(html).toContain(`<dt>Execution</dt><dd>${committed ? "committed" : "pending"}</dd>`);
         expect(html).toContain(`<dt>Revocation</dt><dd>${revoked ? "revoked" : "active"}</dd>`);
