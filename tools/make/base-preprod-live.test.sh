@@ -131,6 +131,11 @@ case "$*" in
       mv ingress-next.json ingress-fixture.json
     fi
     if [[ $command == *' -o json' ]]; then jq --arg name "$name" '.items[]|select(.metadata.name==$name)' ingress-fixture.json; fi;;
+  'create -f '*deny-service.json)
+    [[ ! -e refusal-service-exists ]] || { echo 'AlreadyExists' >&2;exit 1; }
+    : >refusal-service-exists;;
+  'get service base-maintenance-fixture --ignore-not-found -o json')
+    [[ ! -e refusal-service-exists ]] || cat deny-service-fixture.json;;
   'get service base-maintenance-fixture -o json')
     if [[ ${FAKE_STATE:-} == deny-selector ]]; then jq '.spec.selector={app:"api"}' deny-service-fixture.json
     else cat deny-service-fixture.json; fi;;

@@ -49,7 +49,7 @@
 - [ ] **Lot 6 — Seconde passe Fable et astra (#940)**
   - [x] Reproduire en rouge fractions UTC, diagnostic de champ et récupération tardive.
   - [x] Fractions acceptées, champ invalide nommé ; reclose-api tardif admis sous gel actif.
-  - [ ] Reproduire le refus sans mutation de close après réouverture.
+  - [x] Reproduire le refus sans mutation de close après réouverture (create tenté, AlreadyExists).
   - [ ] Ajouter reclose-api, snapshot actualisé et tests de concurrence.
   - [ ] Raccorder le test de contexte et qualifier la récupération complète tardive.
   - [ ] Documenter la requalification réelle du dump ; aucune exécution en préprod.
