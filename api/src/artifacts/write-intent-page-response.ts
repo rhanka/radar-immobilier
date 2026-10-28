@@ -1,6 +1,6 @@
 import type { Context } from "hono";
 import { validPwPageEnvelope } from "./write-intent-page-envelope.js";
-import { isWriteRefusalCode, writeRefusal } from "./write-intent-refusal.js";
+import { isWriteRefusalCode, writeRefusal, WRITE_REFUSAL_CODES } from "./write-intent-refusal.js";
 
 /** Bound the actual stream, then project only a closed public envelope. */
 export async function projectPageWriteResponse(c: Context, response: Response,
@@ -31,7 +31,7 @@ export async function projectPageWriteResponse(c: Context, response: Response,
       return result;
     }
     if (![200, 201].includes(response.status) || (expected.verb === "status" && response.status !== 200) ||
-      !validPwPageEnvelope(value, expected)) return bad();
+      !validPwPageEnvelope(value, expected, WRITE_REFUSAL_CODES)) return bad();
     return c.json(value, response.status as 200);
   } catch { return bad(); }
 }

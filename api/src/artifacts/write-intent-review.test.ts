@@ -2,6 +2,7 @@ import { expect, it } from "vitest";
 import { Hono } from "hono";
 import { validPwPageEnvelope } from "./write-intent-page-envelope.js";
 import { projectPageWriteResponse } from "./write-intent-page-response.js";
+import { WRITE_REFUSAL_CODES } from "./write-intent-refusal.js";
 import { GESTURES, pageHarness, prepared, statusOf, UUID } from "./write-intent-page-harness.js";
 
 const expected = { verb: "status" as const, readerSub: "reader", appOrigin: "https://app.example.test", intentId: UUID };
@@ -24,6 +25,14 @@ it.each(["reader", "operation", "intent", "receipt", "private", "state", "reject
   expect(JSON.stringify(body)).not.toContain("private-never-allowed");
   const h = pageHarness(); h.responders.push(() => ({ status: 200, body: value })); h.followUp(UUID); await h.runTimer();
   expect(h.committed).toHaveLength(0); expect(h.elements["pw-write-note"]!.textContent).toContain("verify");
+});
+
+it.each(["challenge_expired", "facet_head_conflict"])("should preserve the registered terminal refusal %s", async (code) => {
+  const value = statusOf(UUID, "rejected", { error: { code } }).body;
+  expect(validPwPageEnvelope(value, expected, WRITE_REFUSAL_CODES)).toBe(true);
+  const app = new Hono().get("/", (c) => projectPageWriteResponse(c, Response.json(value), expected));
+  const response = await app.request("/"); expect(response.status).toBe(200);
+  expect(await response.json()).toEqual(value);
 });
 
 it.each(["confirmationUrl", "managementUrl", "statusUrl"])("should refuse a foreign %s before opening any app link", async (field) => {

@@ -3,7 +3,7 @@
  */
 export function validPwPageEnvelope(value: unknown, expected: {
   verb: "prepare" | "status"; readerSub: string; appOrigin: string; intentId?: string;
-}): boolean {
+}, refusalCodes: readonly string[] = []): boolean {
   const record = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
   const keys = (v: Record<string, unknown>, allowed: string[]) => Object.keys(v).every((key) => allowed.includes(key));
   const uuid = (v: unknown) => typeof v === "string" && /^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(v);
@@ -27,7 +27,7 @@ export function validPwPageEnvelope(value: unknown, expected: {
   if (data.state === "pending") return keys(data, ["intentId", "state", "expiresAt"]) && date(data.expiresAt);
   if (data.state === "expired" || data.state === "revoked") return keys(data, ["intentId", "state"]);
   if (data.state === "rejected") return keys(data, ["intentId", "state", "error"]) && record(data.error) &&
-    keys(data.error, ["code"]) && typeof data.error.code === "string";
+    keys(data.error, ["code"]) && typeof data.error.code === "string" && refusalCodes.includes(data.error.code);
   if (!keys(data, ["intentId", "state", "commandId", "receipt", "nextAction"]) || !uuid(data.commandId) ||
     data.nextAction !== "refresh_state" || !record(data.receipt) || !keys(data.receipt, ["event"])) return false;
   const event = data.receipt.event;

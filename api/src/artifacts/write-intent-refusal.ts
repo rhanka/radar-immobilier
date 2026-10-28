@@ -41,6 +41,8 @@ function actionFor(code: string, status: number, unknown: boolean): string {
   return status === 422 ? "correct_and_confirm" : "correct_request";
 }
 
+export const WRITE_REFUSAL_CODES: readonly string[] = Object.freeze(Object.keys(MESSAGES));
+
 export function isWriteRefusalCode(code: unknown): code is string {
   return typeof code === "string" && Object.hasOwn(MESSAGES, code);
 }
