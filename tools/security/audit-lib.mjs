@@ -11,14 +11,17 @@ export function collectFindings(audit, packages = {}) {
   if (audit?.error || !vulns || typeof vulns !== "object" || Array.isArray(vulns)) {
     throw new Error("unrecognized npm audit format (want `vulnerabilities` without error)");
   }
-  const advisories = (name, chain = []) => {
+  const advisories = (name, visited = new Set()) => {
     const entry = vulns[name];
     if (!entry || !LEVELS.includes(entry.severity) || !Array.isArray(entry.via) || !entry.via.length ||
-      !Array.isArray(entry.nodes) || !entry.nodes.length || chain.includes(name)) {
+      !Array.isArray(entry.nodes) || !entry.nodes.length) {
       throw new Error(`malformed npm audit entry or dependency chain: ${name}`);
     }
+    // npm can report peer dependency cycles; inspect each reachable entry once.
+    if (visited.has(name)) return [];
+    visited.add(name);
     return entry.via.flatMap((via) => {
-      if (typeof via === "string") return advisories(via, [...chain, name]);
+      if (typeof via === "string") return advisories(via, visited);
       const id = via?.url?.match(/GHSA-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}(?=$|[/?#])/i)?.[0];
       const severity = via?.severity || entry.severity;
       if (!id || !LEVELS.includes(severity)) throw new Error(`malformed npm advisory: ${name}`);
@@ -29,6 +32,7 @@ export function collectFindings(audit, packages = {}) {
   for (const [name, entry] of Object.entries(vulns)) {
     if (entry?.name !== name) throw new Error(`mismatching audit package: ${name}`);
     const leaves = new Map(advisories(name).map((leaf) => [leaf.advisory, leaf]));
+    if (!leaves.size) throw new Error(`npm audit dependency chain has no advisory: ${name}`);
     for (const node of entry.nodes) {
       if (typeof node !== "string" || !node.startsWith("node_modules/") && !node.startsWith("./node_modules/")) {
         throw new Error(`invalid audit node: ${name}`);
