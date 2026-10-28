@@ -22,21 +22,27 @@ RUN_DIR=$ROOT/tmp/pwc-review-evidence/runtime
 LOG_DIR=$ROOT/tmp/pwc-review-evidence/$(date -u +%Y%m%dT%H%M%S)-${PHASE:-pg}
 mkdir -p "$RUN_DIR" "$LOG_DIR"
 exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
+interproject_lock="$HOME/.cache-tmp/sentropic-docker.lock"
+interproject=0
+if [[ -e $interproject_lock ]]; then
+  [[ -f $interproject_lock && ! -L $interproject_lock ]]
+  # Join the existing E2_LOCK protocol without modifying its file.
+  exec 7<"$interproject_lock"
+  interproject=1
+fi
 while :; do
+  [[ $interproject == 0 ]] || flock -x 7
   running=$(docker ps --format '{{.Names}}')
   if [[ -z $running ]] && flock -w 1 8; then
-    # Other projects do not share this lock: do not enter between batch jobs.
-    echo 'Shared lock acquired; requiring sixty seconds of empty Docker'
-    for ((sample=0; sample<60; sample++)); do
-      running=$(docker ps --format '{{.Names}}')
-      [[ -z $running ]] || break
-      sleep 1
-    done
+    running=$(docker ps --format '{{.Names}}')
     [[ -n $running ]] || break
     flock -u 8
   fi
+  # A foreign cleanup may need E2_LOCK: never retain it over a live stack.
+  [[ $interproject == 0 ]] || flock -u 7
   echo 'Waiting for the shared lock and an empty Docker machine'; sleep 10
 done
+printf 'Radar lock held; interproject reservation=%s; Docker empty\n' "$interproject" > "$LOG_DIR/reservation.txt"
 [[ $(df -Pk "$ROOT" | awk 'NR==2 {print $4}') -ge 8388608 ]]
 [[ $(awk '/MemAvailable:/ {print $2}' /proc/meminfo) -ge 8388608 ]]
 OWNER=$(printf '%s' "$ROOT/$ENV" | sha256sum | cut -d' ' -f1)
@@ -77,8 +83,9 @@ cleanup_pwe() {
   "${compose[@]}" logs --no-color > "$LOG_DIR/compose.log" 2>&1 || true
   "${compose[@]}" ps -a > "$LOG_DIR/compose-state.log" 2>&1 || true
   guarded_down > "$LOG_DIR/cleanup.log" 2>&1 || status=1
+  [[ $interproject == 0 ]] || flock -u 7
   flock -u 8
-  printf 'Shared campaign lock released\n' > "$LOG_DIR/lock-release.txt"
+  printf 'Shared campaign locks released\n' > "$LOG_DIR/lock-release.txt"
   printf '%s\n' "$status" > "$LOG_DIR/status"
   exit "$status"
 }
@@ -100,7 +107,7 @@ docker ps --format '{{.Names}}' > "$LOG_DIR/occupancy-start.txt"
       kill -TERM "$$"; exit
     fi
   done
-) 8>&- > "$LOG_DIR/occupancy-monitor.log" 2>&1 &
+) 7>&- 8>&- > "$LOG_DIR/occupancy-monitor.log" 2>&1 &
 MONITOR_PID=$!
 printf '%s\n' "$LOG_DIR" | tee "$ROOT/tmp/pwc-review-evidence/latest"
 "${compose[@]}" up -d --wait postgres minio
@@ -112,7 +119,7 @@ if [[ ${PHASE:-pg} == proxy ]]; then
   (
     while [[ ! -f $LOG_DIR/proxy-ready ]]; do kill -0 "$RUN_PID" || exit 1; sleep 1; done
     "${compose[@]}" up -d --wait proxy-compose proxy-cluster proxy-preprod
-  ) 8>&- > "$LOG_DIR/proxy-start.log" 2>&1 &
+  ) 7>&- 8>&- > "$LOG_DIR/proxy-start.log" 2>&1 &
   PROXY_PID=$!
 fi
 wait "$RUN_PID"
