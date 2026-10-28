@@ -10,6 +10,7 @@ invoke preflight; mark preflight
 invoke freeze-cd; mark freeze-cd
 cp ingress-original.json ingress-fixture.json
 invoke close EXPECTED="$testdir/expected.json"; mark close
+closure_snapshot=$testdir/out-$n/ingress-snapshot.json
 jq -nc --slurpfile c input.json --arg at "$(date -u +%FT%TZ)" '{action:"activate",binding:$c[0].binding,image:$c[0].image,
  releaseSha:($c[0].binding.releaseId|split(":")[0]),observedAt:$at,result:{workspaceId:$c[0].binding.workspaceId,
  sealedUnresolved:0,pendingReceipts:0,status:"open-success",epoch:"scoped",maintenanceBarrier:false}}' > synthetic-receipt.json
@@ -44,6 +45,7 @@ mark proof
 jq -e --slurpfile input input.json -f exact-native-filter.jq acceptance.json > native-filter-result.json
 mark native-filter
 invoke reopen-api PROOFS="$testdir/acceptance.json"; mark reopen-api
+source tools/make/base-preprod-reclose.test.sh
 for path in input.json q1.json q2.json acceptance.json exact-native-filter.jq native-filter-result.json ingress-fixture.json cluster-calls;do cp "$path" "$rehearsal/";done
 jq -n --slurpfile c input.json --slurpfile ingress ingress-fixture.json '{kind:"fixture-only",status:"native-reopened-awaiting-auth",binding:$c[0].binding,
  image:$c[0].image,exposedPrefixes:[$ingress[0].items[].spec.rules[]?.http.paths[]?|select(.backend.service.name=="radar-api")|.path]}' > "$rehearsal/summary.json"
