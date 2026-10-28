@@ -1,7 +1,7 @@
 # Feature: Préparation fiable du véhicule 6H préprod
 
 ## Objective
-- [ ] Livrer les quatre correctifs et la répétition complète locale, sans préprod ni push.
+- [x] Livrer les quatre correctifs et la répétition complète locale, sans préprod ni push.
 
 ## Scope / Guardrails
 - [x] Worktree dédié `tmp/bascule-6h-fix`, branche `fix/bascule-6h-vehicle`, base origin/main.
@@ -23,15 +23,15 @@
 - [x] Une branche, corrections successives limitées et commits atomiques.
 
 ## UAT Management (in orchestration context)
-- [x] Aucun UAT et aucune action en préprod ; fixtures et navigateur local uniquement.
+- [x] Aucun UAT et aucune action en préprod ; fixtures CDP uniquement ; aucun navigateur réel contacté.
 
 ## Plan / Todo (lot-based)
 - [x] **Lot 0 — Base et preuves**
   - [x] Lire règles, preuves, code natif et méthode debug/test.
   - [x] Capturer les tests natifs de référence : 266 cas réussis.
-- [ ] **Lot 1 — Sonde et chemins exposés**
-  - [ ] Reproduction rouge de la cause démontrée et des diagnostics masqués.
-  - [ ] Sonde versionnée, chemins publics inclus dans les préfixes API seuls, tests verts.
+- [x] **Lot 1 — Sonde et chemins exposés**
+  - [x] Diagnostics masqués reproduits en rouge ; cause historique du TypeError toujours non établie.
+  - [x] Sonde versionnée, chemins publics inclus dans les préfixes API seuls, tests verts.
 - [x] **Lot 2 — UTC et erreurs explicites**
   - [x] Reproduction rouge des décalages et du refus silencieux.
   - [x] Normalisation à la construction, diagnostic des preuves non UTC, tests verts.
@@ -41,8 +41,8 @@
 - [x] **Lot 4 — Actions et durée du gel**
   - [x] Reproduction rouge du message anonyme et du gel trop court.
   - [x] Identité du run bloquant, préflight de fenêtre, tests verts.
-- [ ] **Lot 5 — Répétition et livraison**
-  - [ ] Activation → Q1 → redémarrage → Q2 → preuve → filtre natif → réouverture → lectures authentifiées simulées.
-  - [ ] Runbook anglais et rapport français avec limites.
-  - [ ] Tests natifs, contrôles statiques, revue finale, commits contrôlés et bundle vérifié.
-  - [ ] Aucun push ni fusion ; revues conducteur astra et wonder hors livraison locale.
+- [x] **Lot 5 — Répétition et livraison**
+  - [x] Activation → Q1 → redémarrage → Q2 → preuve → filtre natif → réouverture → lectures authentifiées simulées.
+  - [x] Runbook anglais et rapport français avec limites.
+  - [x] Tests natifs, contrôles statiques, revue finale, commits contrôlés et bundle vérifié.
+  - [x] Aucun push ni fusion ; revues conducteur astra et wonder hors livraison locale.
