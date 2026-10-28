@@ -88,7 +88,7 @@ export function createPublishedWritePage(options: PublishedWritePageOptions) {
       readerSub: session.readerSub, artifactId: session.artifactId, releaseId: resource.releaseId,
       host: resource.host, profileName: WRITE_PROFILE_NAME, profileFingerprint: digest(PUBLISHED_WRITE_POLICY),
       policyRevision: PUBLISHED_WRITE_POLICY, ...scope, operations: SIGNAL_WRITE_OPERATIONS },
-    pageInstanceId: instance, pageExpiresAtMs: session.expiresAt, delegationExpiresAtMs: session.expiresAt,
+    csrfToken: csrf, pageInstanceId: instance, pageExpiresAtMs: session.expiresAt, delegationExpiresAtMs: session.expiresAt,
     authorityReferences: { tier: options.domain.tier, policy: PUBLISHED_WRITE_POLICY,
       release: `${options.scope}:${resource.releaseId}`, delegation: jti,
       reader: digest([options.domain, session.readerSub]), grant: jti, page_session: session.sid,
