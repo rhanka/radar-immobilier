@@ -29,3 +29,11 @@ data:
   IMMO_MCP_API_AUDIENCE: "https://preprod.immo.sent-tech.ca"
   IMMO_MCP_EXCHANGE_TOKEN_ENDPOINT: "https://preprod.auth.sent-tech.ca/api/v1/auth/oauth/token"
   IMMO_MCP_EXCHANGE_ENV: "preprod"
+  # Must match radar-api: one physical namespace shared by all approved users.
+  ARTIFACTS_CONTROL_MODE: "general"
+  ARTIFACTS_STORAGE_SCOPE: "radar-immobilier-preprod"
+  ARTIFACTS_ORG_ID: "radar-immobilier-preprod"
+  ARTIFACTS_S3_BUCKET: "radar-immobilier-artifacts-preprod"
+  ARTIFACTS_S3_ENDPOINT: "https://s3.bhs.io.cloud.ovh.net"
+  ARTIFACTS_S3_REGION: "bhs"
+  ARTIFACTS_CONTENT_BASE: "preprod.immo-pages.sent-tech.ca"
