@@ -30,3 +30,6 @@ l5-proof:
 .PHONY: l5-r2-bundle
 l5-r2-bundle:
 	REQUIRED_EVIDENCE="$(REQUIRED_EVIDENCE)" READER_EVIDENCE="$(READER_EVIDENCE)" IMAGE_EVIDENCE="$(IMAGE_EVIDENCE)" rtk bash tools/make/base-api-l5-r2-deliver.sh
+.PHONY: l5-r3-bundle
+l5-r3-bundle:
+	REQUIRED_EVIDENCE="$(REQUIRED_EVIDENCE)" PROXY_EVIDENCE="$(PROXY_EVIDENCE)" rtk bash tools/make/base-api-l5-r3-deliver.sh
