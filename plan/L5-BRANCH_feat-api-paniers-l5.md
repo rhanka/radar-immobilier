@@ -51,6 +51,7 @@
 - [ ] Lot 6: audit own commits, unique combined bundle from main 26a78195, French combined delivery report and cleanup receipts.
 - [x] Owner final delivery scope supersedes the earlier 37f21d3d bundle base; fetched main remains 26a78195 and is already an ancestor.
 - [x] Qualification explicitly lints the new read/HTML regressions; inherited stale-status mutation retains its fault at the versioned continuation boundary. Global API uses two isolated workers in one owned stack.
+- [x] Targeted lint includes the merged L3 content-serving composition in addition to the published runtime and all r2b changes.
 - [x] Correct the mutation adapter's no-regex-spaces lint finding before restarting final qualification; no runtime change.
 - [x] Repeated foreign probe intrusions are retained and discarded as full qualifications; retries wait for the shared locks and an empty Docker machine without any departure deadline or foreign cleanup.
 - [x] Candidate d9e0d16e: typecheck/lint/build, CT-8 and 397 required cases pass with zero skips before intrusion in 072553-full. Retain these completed components; rerun API CI and mutations separately.
