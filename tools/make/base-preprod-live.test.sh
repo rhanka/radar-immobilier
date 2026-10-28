@@ -3,6 +3,8 @@
 jq '.maintenance={service:"base-maintenance-fixture",ingresses:["fixture-app","fixture-mcp"]}
  | .mcpDeployment="fixture-mcp" | .apiIngress="fixture-app"' input.json > enriched.json
 cp enriched.json input.json
+jq --arg now "$now" '.maintenance.reopenBy=($now|fromdateiso8601+3600|todateiso8601) | .maintenance.changeFreeze={reference:"fixture-owner-freeze",noPushOrMerge:true,startsAt:($now|fromdateiso8601-60|todateiso8601),endsAt:($now|fromdateiso8601+7200|todateiso8601)}' input.json > freeze-input.json
+cp freeze-input.json input.json
 cp good-proofs.json proofs.json
 jq -n '{items:[
   {metadata:{name:"fixture-app",uid:"app-uid",annotations:{"traefik.ingress.kubernetes.io/router.priority":"42"}},
@@ -162,13 +164,14 @@ printf 'gh %s\n' "$*" >> cluster-calls
 case "$*" in
   *'--jq .state'*)
     if [[ ${FAKE_STATE:-} == cd ]]; then echo active; else echo disabled_manually; fi;;
-  *'/actions/runs?per_page=100'*) [[ ${FAKE_STATE:-} != run ]] || echo '{"id":123,"status":"in_progress"}';;
+  *'/actions/runs?per_page=100'*) [[ ${FAKE_STATE:-} != run ]] || echo '{"id":123,"status":"in_progress","name":"CI fixture","path":".github/workflows/ci.yml","head_branch":"fixture/pr"}';;
   *) echo '{}';;
 esac
 exit 0
 FAKE
 chmod +x bin/kubectl bin/gh
 : > cluster-calls
+source tools/make/base-preprod-actions.test.sh
 invoke permissions
 cp ingress-original.json ingress-fixture.json
 source tools/make/base-preprod-rollback.test.sh
