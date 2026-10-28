@@ -7,8 +7,9 @@ import { samePwIdentityDomain } from "./write-intent-principal.js";
 import { readSessionClaims } from "./preview-session.js";
 import { parseContentHost } from "./content-host.js";
 import type { GrantIssuer } from "./preview-grant.js";
-import type { AuthorityReader } from "./reader-profile.js";
-import { adaptGrantToReader } from "./reader-context.js";
+import { fingerprintReaderProfile, type AuthorityReader } from "./reader-profile.js";
+import { BASKET_READER_PROFILE } from "./reader-storage.js";
+import type { WriteTx } from "../services/facets/signal-write-scope.js";
 import { writeIntentTransaction } from "./write-intent-transaction.js";
 import { PUBLISHED_WRITE_POLICY, readPublishedWriteAuthority } from "./published-write-authority.js";
 import { WRITE_GRANT_AUDIENCE, WRITE_PROFILE_NAME, SIGNAL_WRITE_OPERATIONS } from "./write-profile.js";
@@ -38,7 +39,7 @@ export function createPublishedWritePage(options: PublishedWritePageOptions) {
   const grantIssuer = { issuer: options.domain.appOrigin, audience: WRITE_GRANT_AUDIENCE,
     tier: options.domain.tier, identityIssuer: options.domain.identityIssuer };
 
-  async function authenticate(request: Request) {
+  async function authenticate(request: Request, tx?: WriteTx) {
     if (request.headers.has("authorization") || request.headers.has("x-reader-sub")) return null;
     const session = readSessionClaims(request.headers.get("cookie"), options.sessionSecret, clock());
     const resource = session?.resource;
@@ -50,19 +51,21 @@ export function createPublishedWritePage(options: PublishedWritePageOptions) {
       resource.sessionId !== session.sid || resource.readerSub !== session.readerSub ||
       resource.artifactId !== session.artifactId || resource.issuer !== options.readIssuer.issuer ||
       resource.audience !== options.readIssuer.audience || resource.tier !== options.readIssuer.tier ||
-      !await adaptGrantToReader(resource, options.authority) ||
-      !await options.permitsWrite(session.artifactId, resource.releaseId)) return null;
-    const binding = await writeIntentTransaction(options.db, (tx) => readPublishedWriteAuthority(tx, {
+      resource.profileName !== BASKET_READER_PROFILE.name || resource.policyRevision !== BASKET_READER_PROFILE.policyRevision ||
+      resource.profileFingerprint !== fingerprintReaderProfile(BASKET_READER_PROFILE) ||
+      (!tx && !await options.permitsWrite(session.artifactId, resource.releaseId))) return null;
+    const read = (connection: WriteTx) => readPublishedWriteAuthority(connection, {
       scope: options.scope, artifactId: session.artifactId, releaseId: resource.releaseId, readerSub: session.readerSub,
-    }));
+    });
+    const binding = tx ? await read(tx) : await writeIntentTransaction(options.db, read);
     if (session.expiresAt <= clock()) throw new FacetError(401, "page_session_expired");
     const instance = digest(["instance", session.sid, resource.host]);
     const csrf = digest(["csrf", session.sid, resource.host, instance]);
     return { session, resource, binding, instance, csrf };
   }
 
-  async function resolvePage(request: Request, body?: WritePrepareBody): Promise<PageWriteAuthority | null> {
-    const page = await authenticate(request);
+  async function resolvePage(request: Request, body?: WritePrepareBody, tx?: WriteTx): Promise<PageWriteAuthority | null> {
+    const page = await authenticate(request, tx);
     if (!page) return null;
     const { session, resource, binding, instance, csrf } = page;
     if (request.method === "POST" && (request.headers.get("origin") !== `https://${resource.host}` ||
@@ -74,7 +77,7 @@ export function createPublishedWritePage(options: PublishedWritePageOptions) {
       const url = new URL(request.url);
       const id = url.searchParams.get("intentId") ?? url.pathname.split("/").at(-1) ?? "";
       if (!/^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(id)) return null;
-      const result = await options.db.execute(sql`SELECT workspace_id,city_slug FROM pw_write_intents
+      const result = await (tx ?? options.db).execute(sql`SELECT workspace_id,city_slug FROM pw_write_intents
         WHERE intent_id=${id}::uuid AND page_session_id=${session.sid} AND page_instance_id=${instance}`);
       const row = result.rows[0];
       if (!row) return null;

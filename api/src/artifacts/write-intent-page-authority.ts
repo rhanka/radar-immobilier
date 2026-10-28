@@ -3,6 +3,7 @@ import type { WriteGrantClaims, WriteGrantIssuer } from "./write-grant.js";
 import { mintWriteGrant } from "./write-grant.js";
 import { FacetError } from "../services/facets/target.js";
 import type { WritePrepareBody } from "./write-intent-schemas.js";
+import type { WriteTx } from "../services/facets/signal-write-scope.js";
 
 /** Trusted H5 adapter output, after authenticating P and current write rights.
  * This is a separate write authority contract; A6 read claims remain unchanged.
@@ -19,7 +20,7 @@ export interface PageWriteAuthority {
 export interface PageWriteAuthorityDeps {
   grantIssuer: WriteGrantIssuer & { identityIssuer: string };
   grantKeyId: string;
-  resolvePage: (request: Request, scope?: WritePrepareBody) => Promise<PageWriteAuthority | null>;
+  resolvePage: (request: Request, scope?: WritePrepareBody, tx?: WriteTx) => Promise<PageWriteAuthority | null>;
   grantSecret: string;
 }
 
@@ -36,8 +37,8 @@ function assertPageAuthority(page: PageWriteAuthority | null, deps: PageWriteAut
 }
 
 export async function resolveWritePage(c: Context, deps: PageWriteAuthorityDeps,
-  clock: () => number, scope?: WritePrepareBody): Promise<PageWriteAuthority> {
-  const page = await deps.resolvePage(c.req.raw, scope);
+  clock: () => number, scope?: WritePrepareBody, tx?: WriteTx): Promise<PageWriteAuthority> {
+  const page = await deps.resolvePage(c.req.raw, scope, tx);
   assertPageAuthority(page, deps, clock());
   return page;
 }
