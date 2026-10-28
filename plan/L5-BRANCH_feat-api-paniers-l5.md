@@ -40,6 +40,7 @@
 - [x] Both page-status withdrawals reproduce on the unchanged runtime (103331-pg). Reuse the application disclosure guard after the final P resolution with workspace/approval locks and operation-specific moderation.
 - [x] Confirmation discards the execution return value and consults the durable result after COMMIT under current rights. Withdrawal preserves committed technical state without disclosing a business receipt or rerunning the command.
 - [x] Application POSTs bound fetch plus JSON to 15 seconds, release controls and expose same-intent recovery on uncertainty; late replies cannot update the document. Technical committed state renders without an empty business receipt.
+- [x] L5 bootstrap bounds fetch and body consumption to 15 seconds before installing any script/bootstrap node; late transport/body completion cannot install write controls.
 - [x] Lot 0: merge approved PW-A and main; preserve Track event blob identity.
 - [x] Lot 1: bind verified approval provenance, explicit release write request and private page bootstrap.
 - [x] Implementation and targeted PG proof: actual one-use ticket provenance, explicit workspace, matching signed read grant and no publisher privileges.

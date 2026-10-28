@@ -37,10 +37,17 @@ export const PUBLISHED_WRITE_SCRIPT = `
   var workspaceId = document.documentElement.dataset.pwWorkspace;
   window.__pwWriteReady = (async function () {
     if (!readGrant || !workspaceId) throw new Error("Select an authorized workspace");
-    var response = await fetch(${JSON.stringify(PW_BOOTSTRAP_PATH)}+"?"+new URLSearchParams({workspaceId:workspaceId}),
-      {credentials:"same-origin",headers:{"x-preview-grant":readGrant}});
-    if (!response.ok) throw new Error("Write bootstrap unavailable");
-    var body = await response.json();
+    var controller=typeof AbortController!=="undefined"?new AbortController():null, timer, body;
+    try {
+      body=await Promise.race([(async function() {
+        var response = await fetch(${JSON.stringify(PW_BOOTSTRAP_PATH)}+"?"+new URLSearchParams({workspaceId:workspaceId}),
+          {credentials:"same-origin",headers:{"x-preview-grant":readGrant},signal:controller?.signal});
+        if (!response.ok) throw new Error("Write bootstrap unavailable");
+        return await response.json();
+      })(),new Promise(function(resolve,reject) {
+        timer=setTimeout(function(){reject(new Error("Write bootstrap timed out"));if(controller) controller.abort();},15000);
+      })]);
+    } finally { clearTimeout(timer); }
     var node = document.createElement("script");
     node.id = "pw-page-bootstrap"; node.type = "application/json"; node.textContent = JSON.stringify(body);
     document.documentElement.appendChild(node);
