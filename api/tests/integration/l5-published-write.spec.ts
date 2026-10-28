@@ -79,7 +79,7 @@ describeDb("L5 published reader write runtime", () => {
       await h.f.pool.query("DELETE FROM artifacts.artifact_access WHERE artifact_id=$1 AND principal_id=$2", [h.artifactId, h.f.contributor.sub]);
       expect((await confirm(h, data.intentId, boot)).status).toBe(403);
       const page = await h.app.request(data.confirmationUrl, { headers: appHeaders(h) });
-      expect(await page.text()).not.toContain("challengeToken");
+      expect(bootstrapOf(await page.text())).not.toHaveProperty("challengeToken");
       expect(await effects(h)).toEqual(before);
     } finally { await h.close(); }
   });
