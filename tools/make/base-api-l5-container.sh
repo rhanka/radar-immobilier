@@ -24,7 +24,7 @@ export POSTGRES_HOST
 export PWE_REQUIRED_SCOPE="$2"
 export PWE_MUTATION_FILTER="${3:-.*}"
 if [[ $1 == inherited ]]; then export PWCR_INHERITED_BATCH_FILTER="${3:-.*}"; fi
-if [[ $1 == targeted ]]; then [[ -n ${3:-} ]]; fi
+if [[ $1 == targeted || $1 == pwe ]]; then [[ -n ${3:-} ]]; fi
 overall=0
 check() {
   local label=$1; shift
@@ -72,8 +72,10 @@ fi
 if [[ $1 == full || $1 == mutations || $1 == inherited ]]; then
   check inherited-mutants node ../tools/make/base-api-l5-inherited.mjs
 fi
+if [[ $1 == full || $1 == mutations || $1 == targeted || $1 == pwe ]]; then
+  check pwe-mutants node ../tools/make/base-api-l5-pwe-mutations.mjs
+fi
 if [[ $1 == full || $1 == mutations || $1 == targeted ]]; then
-  check pwe-mutants node ../tools/make/base-api-pwe-mutations.mjs
   check review-mutants node ../tools/make/base-api-pwc-review-mutations.mjs
   check l5-mutants node ../tools/make/base-api-l5-mutations.mjs
 fi
