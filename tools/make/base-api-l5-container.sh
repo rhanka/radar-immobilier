@@ -41,6 +41,7 @@ check typecheck node_modules/.bin/tsc --noEmit -p api/tsconfig.pwe-tests.json
 shopt -s nullglob
 lint=(api/tests/integration/pwe-*.ts api/src/services/facets/pwe-*.ts
   api/tests/integration/l5-*.ts api/tests/integration/pwcr-*.ts api/src/artifacts/published-write*.ts
+  api/tests/integration/pw-write-authority{,-status}.spec.ts
   api/src/artifacts/reader-opening.ts api/src/artifacts/preview-{tickets,session}.ts
   api/src/artifacts/content-serve.ts
   api/src/artifacts/write-intent-{page-authority,page-listener,h5-route}.ts api/src/index.ts

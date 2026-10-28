@@ -9,6 +9,7 @@ allowed() {
     api/src/artifacts/write-intent-transaction.ts|api/drizzle/*) return 2;;
     api/src/artifacts/*|api/src/index.ts|api/src/services/facets/pw-write-fences.ts) ;;
     api/tests/integration/l5-*.ts|tools/make/base-api-l5*|plan/L5-BRANCH_feat-api-paniers-l5.md) ;;
+    api/tests/integration/pw-write-authority.spec.ts|api/tests/integration/pw-write-authority-status.spec.ts|api/tests/integration/pwcr-app-status.spec.ts|api/tests/integration/pwcr-listener-h5.spec.ts) ;;
     *) echo "Out of L5 scope: $1" >&2; return 2;;
   esac
   [[ $1 != *..* && ! -L $1 ]]
