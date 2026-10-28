@@ -6,7 +6,7 @@ import { FakeElement } from "./write-intent-page-harness.js";
 it.each(["confirm transport", "confirm body", "revoke transport", "revoke body"])(
   "should release controls and expose same-intent recovery after suspended %s", async (scenario) => {
     const nodes: Record<string, FakeElement> = {};
-    for (const id of ["pw-bootstrap", "pw-confirm", "pw-revoke", "pw-note", "pw-manage-box", "pw-receipt"]) {
+    for (const id of ["pw-bootstrap", "pw-confirm", "pw-revoke", "pw-note", "pw-manage-box", "pw-reload-box", "pw-receipt"]) {
       nodes[id] = new FakeElement(id);
     }
     nodes["pw-bootstrap"]!.textContent = JSON.stringify({ csrf: "csrf", challengeToken: "challenge",
@@ -37,7 +37,7 @@ it.each(["confirm transport", "confirm body", "revoke transport", "revoke body"]
     for (let i = 0; i < 20; i++) await Promise.resolve();
     expect(button.disabled).toBe(false);
     expect(nodes["pw-note"]!.textContent).toContain("Result to verify");
-    expect(nodes["pw-manage-box"]!.hidden).toBe(false);
+    expect(nodes[scenario.startsWith("confirm") ? "pw-manage-box" : "pw-reload-box"]!.hidden).toBe(false);
     const note = nodes["pw-note"]!.textContent;
     release(null);
     for (let i = 0; i < 20; i++) await Promise.resolve();
