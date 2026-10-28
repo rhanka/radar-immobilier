@@ -59,7 +59,8 @@ describe("controlled application write gestures", () => {
   });
 
   it.each([403, 409, 429, 504])("should never project HTTP %s as committed", async (status) => {
-    const h = harness(status, { state: "committed", commandId: "untrusted" });
+    const h = harness(status, { state: "committed", commandId: "untrusted",
+      receipt: { event: { state: "active", basket: "pertinent" } } });
     await h.click();
     expect(h.requests).toHaveLength(1);
     expect(h.receipts).toEqual([]);
