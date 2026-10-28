@@ -26,6 +26,7 @@ export interface PublishedWritePageOptions {
   sessionSecret: string;
   grantSecret: string;
   readIssuer: GrantIssuer;
+  permitsWrite: (artifactId: string, releaseId: string) => Promise<boolean>;
   nowMs?: () => number;
 }
 
@@ -48,7 +49,8 @@ export function createPublishedWritePage(options: PublishedWritePageOptions) {
       resource.sessionId !== session.sid || resource.readerSub !== session.readerSub ||
       resource.artifactId !== session.artifactId || resource.issuer !== options.readIssuer.issuer ||
       resource.audience !== options.readIssuer.audience || resource.tier !== options.readIssuer.tier ||
-      !await adaptGrantToReader(resource, options.authority)) return null;
+      !await adaptGrantToReader(resource, options.authority) ||
+      !await options.permitsWrite(session.artifactId, resource.releaseId)) return null;
     const binding = await writeIntentTransaction(options.db, (tx) => readPublishedWriteAuthority(tx, {
       scope: options.scope, artifactId: session.artifactId, releaseId: resource.releaseId, readerSub: session.readerSub,
     }));
