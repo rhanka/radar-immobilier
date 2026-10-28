@@ -7,7 +7,7 @@ export function materializeInherited(batch, source) {
       "if (intentId !== poll.intentId || version !== pollVersion) return;\n      await handleStatus(out, false, function () { return intentId === poll.intentId && version === pollVersion; });",
       "await handleStatus(out, false, function () { return intentId === poll.intentId && version === pollVersion; });",
       "src/artifacts/write-intent-page-regressions.test.ts", "late result"];
-    const expression = /  \["M16-old-result",[\s\S]*?(?=\n  \[|\n\];)/g;
+    const expression = / {2}\["M16-old-result",[\s\S]*?(?=\n {2}\[|\n\];)/g;
     const matches = [...result.source.matchAll(expression)];
     assert.equal(matches.length, 1, "Unique inherited stale-status case");
     result.changes.push({ name: row[0], original: matches[0][0], replacement: row,
