@@ -1,4 +1,4 @@
-import { beforeAll, expect, it } from "vitest";
+import { expect, it } from "vitest";
 import { describeDb } from "../../src/services/facets/workspace-archive-fixture.js";
 import { assertPwPrincipal } from "../../src/services/facets/pw-write-confirmation.js";
 import { samePwPrincipal } from "../../src/artifacts/write-intent-principal.js";
@@ -7,10 +7,11 @@ import { identityFixture } from "./pwe-identity-fixture.js";
 import { effects, NO_EFFECTS } from "./pwe-fixture.js";
 
 describeDb("PWE-03a HW-04 verified identity domains", () => {
-  let domains: Awaited<ReturnType<typeof identityFixture>>[];
-  beforeAll(async () => {
+  let cached: Awaited<ReturnType<typeof identityFixture>>[] | undefined;
+  async function getDomains() {
+    if (cached) return cached;
     const sub = "pwe-same-subject";
-    domains = [];
+    const domains: Awaited<ReturnType<typeof identityFixture>>[] = [];
     for (const domain of [
       { identityIssuer: "https://idp-a.example.test", tier: "preprod" as const,
         appOrigin: "https://app-a.example.test", clientId: "client-a" },
@@ -19,9 +20,12 @@ describeDb("PWE-03a HW-04 verified identity domains", () => {
       { identityIssuer: "https://idp-a.example.test", tier: "prod" as const,
         appOrigin: "https://app-c.example.test", clientId: "client-c" },
     ]) domains.push(await identityFixture(domain, sub));
-  });
+    cached = domains;
+    return domains;
+  }
 
   it("should construct equal app/write principals despite a distinct H5 issuer", async () => {
+    const domains = await getDomains();
     expect(new Set(domains.map((item) => item.h.f.name)).size).toBe(3);
     expect(new Set(domains.flatMap((item) => [item.login.auth.sessionSecret, item.h.writeH5.grantSecret])).size).toBe(6);
     for (const item of domains) {
@@ -38,6 +42,7 @@ describeDb("PWE-03a HW-04 verified identity domains", () => {
 
   it.each([{ index: 1, dimension: "issuer" }, { index: 2, dimension: "tier" }])(
     "should reject the same sub from a different $dimension domain before the route guard", async ({ index, dimension }) => {
+      const domains = await getDomains();
       const owner = domains[0]!;
       const foreign = domains[index]!;
       expect(owner.login.principal.sub).toBe(foreign.login.principal.sub);
