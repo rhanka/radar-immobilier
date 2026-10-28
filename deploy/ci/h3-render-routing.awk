@@ -40,7 +40,9 @@ function judge( i, v, labels, selector, podLabels) {
   if (kind == "Ingress" && name == "radar-artifact-content") {
     content++
     if (field("^  ingressClassName:") != "traefik") fail("Traefik ingress class required")
-    if (count("^            name: radar-artifact-content-deny$") != 2 || count("^            name:") != 2) fail("content routes only to the denial Service")
+    v = (phase == "general" ? "radar-api" : "radar-artifact-content-deny")
+    if (count("^            name: " v "$") != 2 || count("^            name:") != 2) fail("content routes only to the " (phase == "general" ? "reader API" : "denial Service"))
+    if (phase == "general" && count("^              name: http$") != 2) fail("content reader port must be http")
     if (count("^  - host:") != 2 || count("^    - [\047\"]?\\*\\.") != 2) fail("both wildcard levels must be present")
     for (i = 1; i <= n; i++) {
       if (buf[i] ~ /^  - host:/) hosts[++hostCount] = val(buf[i])
@@ -60,6 +62,7 @@ END {
     if (base == "" || base ~ /(^|\.)(invalid)$/ || base ~ /unverified|replace-me/) fail("unfilled content-domain placeholder in operator render")
     if (tlsSecret == "" || tlsSecret ~ /unverified|replace-me/) fail("unfilled content TLS Secret in operator render")
   }
+  if (phase == "general" && tlsSecret != "radar-artifact-content-preprod-tls") fail("preprod content TLS Secret required")
   if (hosts[1] != "*." base || hosts[2] != "*.pinned." base || tlsHosts[1] != hosts[1] || tlsHosts[2] != hosts[2]) fail("content domain/TLS wildcard mismatch or empty domain")
   exit(fails > 0)
 }
