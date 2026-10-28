@@ -13,6 +13,7 @@ it("should read current heads, fingerprint and 6L1 before two successive gesture
   const h = pageHarness(); h.hookFollowUp();
   h.readResponders.push(() => current("b".repeat(64), "c".repeat(64), null));
   h.responders.push(() => prepared(UUID)); await h.clickGesture(GESTURES[0]!);
+  expect(h.readCalls).toHaveLength(1);
   expect(h.readCalls[0]!.url).toContain("baskets.state.v1?");
   expect(h.readCalls[0]!.url).toContain("id=sig-1");
   expect(JSON.parse(h.fetchCalls[0]!.options.body!)).toMatchObject({ expectedHeadId: null,
@@ -31,6 +32,7 @@ it("should keep the receipt when post-commit refresh fails", async () => {
   const committed = statusOf(UUID, "committed");
   h.responders.push(() => committed); h.readResponders.push(() => { throw new Error("Read unavailable"); });
   await h.runTimer();
+  expect(h.elements["pw-page-receipt"]!.textContent).not.toBe("");
   expect(JSON.parse(h.elements["pw-page-receipt"]!.textContent)).toEqual(committed.body.data);
   expect(h.elements["pw-write-note"]!.textContent).toContain("recorded; display needs refresh");
   expect(h.pendingDelays()).toEqual([]);
