@@ -5,7 +5,7 @@ Travail exclusivement local du 28/10/2026, sur la branche
 Base récupérée depuis origin/main : `26a78195ad17f8b80907074a91d6cb43ef6ac3dd`.
 Le fetch initial a réussi à 17:18 UTC ; les contrôles distants ultérieurs ont
 renvoyé EOF. Une tête distante plus récente reste `unverified`.
-Trois demandes système ont expiré dans la revue automatique des permissions.
+Les demandes système ont expiré dans la revue automatique des permissions.
 La finition a été qualifiée dans la copie locale de livraison
 `tmp/bascule-6h/tmp/vehicle-fix-delivery-check` ; la synchronisation du worktree
 initial reste bloquée par cet accès système, sans refus de sécurité motivé.
@@ -94,6 +94,8 @@ La répétition complète aboutit à `passed:true`, `nativeFilter:true`, Q1 et Q
 simulés réussis, et fermeture des deux onglets dédiés. Les vérifications Bash,
 `git diff --check`, branche et périmètre harness passent. L'import d'un bundle
 intermédiaire dans un dépôt initialement réduit au commit de base a réussi.
+Les mêmes tests ont ensuite réussi dans un import complet du bundle,
+sans modification du code testé, avec nettoyage des piles en sortie.
 Les preuves finales sont dans
 `tmp/bascule-6h/tmp/vehicle-fix-delivery-check/tmp/vehicle-evidence/` :
 `delivery-tests.log`, `rehearsal-complete.json`, `harness-check-*.json`.
