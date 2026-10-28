@@ -20,16 +20,8 @@ ACTION=ci-api
 RUN_DIR=$ROOT/tmp/l5-evidence/runtime
 LOG_DIR=$ROOT/tmp/l5-evidence/$(date -u +%Y%m%dT%H%M%S)-${PHASE:-pg}
 mkdir -p "$RUN_DIR" "$LOG_DIR"
-exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
-while :; do
-  running=$(docker ps --format '{{.Names}}')
-  if [[ -z $running ]] && flock -w 1 8; then
-    running=$(docker ps --format '{{.Names}}')
-    [[ -n $running ]] || break
-    flock -u 8
-  fi
-  echo 'Waiting for the shared lock and an empty Docker machine'; sleep 10
-done
+source tools/make/base-api-l5-lock.sh
+acquire_l5_lock
 [[ $(df -Pk "$ROOT" | awk 'NR==2 {print $4}') -ge 8388608 ]]
 [[ $(awk '/MemAvailable:/ {print $2}' /proc/meminfo) -ge 8388608 ]]
 OWNER=$(printf '%s' "$ROOT/$ENV" | sha256sum | cut -d' ' -f1)
@@ -64,7 +56,7 @@ cleanup_pwe() {
   "${compose[@]}" logs --no-color > "$LOG_DIR/compose.log" 2>&1 || true
   "${compose[@]}" ps -a > "$LOG_DIR/compose-state.log" 2>&1 || true
   guarded_down > "$LOG_DIR/cleanup.log" 2>&1 || status=1
-  flock -u 8
+  release_l5_lock
   printf 'Shared campaign lock released\n' > "$LOG_DIR/lock-release.txt"
   printf '%s\n' "$status" > "$LOG_DIR/status"
   exit "$status"
@@ -87,7 +79,7 @@ docker ps --format '{{.Names}}' > "$LOG_DIR/occupancy-start.txt"
       kill -TERM "$$"; exit
     fi
   done
-) 8>&- > "$LOG_DIR/occupancy-monitor.log" 2>&1 &
+) 7>&- 8>&- > "$LOG_DIR/occupancy-monitor.log" 2>&1 &
 MONITOR_PID=$!
 printf '%s\n' "$LOG_DIR" | tee "$ROOT/tmp/l5-evidence/latest"
 "${compose[@]}" up -d --wait postgres minio
