@@ -41,7 +41,7 @@ lint=(api/tests/integration/pwe-*.ts api/src/services/facets/pwe-*.ts
   api/src/artifacts/write-intent-page{,-budget,-harness}.ts
   api/src/artifacts/write-intent-app-{route,authority,result,surface-db.test}.ts
   api/src/services/facets/signal-write-receipt.ts
-  api/src/artifacts/pwe-*.ts tools/make/base-api-pwe*.mjs)
+  api/src/artifacts/pwe-*.ts tools/make/base-api-pwe*.mjs tools/make/base-api-l5*.mjs)
 check eslint node_modules/.bin/eslint "${lint[@]}"
 cd api
 node ../tools/make/base-api-ct8.mjs > /evidence/ct8.log

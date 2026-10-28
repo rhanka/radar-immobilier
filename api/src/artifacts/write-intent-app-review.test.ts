@@ -25,6 +25,7 @@ vi.mock("./write-intent-app-guard.js", () => ({
 
 const id = "11111111-1111-4111-8111-111111111111";
 const row = { intentId: id, workspaceId: "workspace", principal: f.principal,
+  authorityReferences: {}, executionState: "pending", revokedAt: null,
   operation: "facets.signals.personal.select.v1", challengeKeyId: "key",
   challengeId: "b".repeat(64), intentDigest: "a".repeat(64), expiresAt: new Date(60_000) };
 const tx = { execute: vi.fn().mockResolvedValue({ rows: [] }) };
