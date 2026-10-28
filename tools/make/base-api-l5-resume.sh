@@ -19,6 +19,14 @@ stop() {
 trap stop INT TERM
 target=l5-verify; pointer=latest
 if [[ $phase == images ]]; then target=l5-images; pointer=latest-images; fi
+ROOT=$(pwd -P)
+RUN_DIR=$ROOT/tmp/l5-evidence/runtime
+[[ $phase != images ]] || RUN_DIR=$ROOT/tmp/l5-evidence/images-runtime
+LOG_DIR=$controller/recovery-$phase-$(date -u +%Y%m%dT%H%M%S)
+mkdir -p "$LOG_DIR"
+source tools/make/base-api-guards.sh
+source tools/make/base-api-l5-lock.sh
+recover_l5_resources
 quiet_docker() {
   local quiet_since=$SECONDS active
   echo 'Waiting for ten continuously empty minutes after recurring foreign probes'
