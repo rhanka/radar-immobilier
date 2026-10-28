@@ -22,6 +22,12 @@ while :; do
   echo 'Waiting for shared Docker lock and absence of foreign stacks'; sleep 10
 done
 export COMPOSE_DISABLE_ENV_FILE=1
+export DOCKER_CONFIG="$HOME/.cache/radar-l5-docker"
+export BUILDX_CONFIG="$DOCKER_CONFIG/buildx"
+mkdir -p "$BUILDX_CONFIG"
+if [[ -d $HOME/.docker/cli-plugins && ! -e $DOCKER_CONFIG/cli-plugins ]]; then
+  ln -s "$HOME/.docker/cli-plugins" "$DOCKER_CONFIG/cli-plugins"
+fi
 unset COMPOSE_FILE COMPOSE_PROFILES COMPOSE_ENV_FILES
 compose=(docker compose --env-file /dev/null -p "$PROJECT" -f "$RUN_DIR/compose.yml")
 ACTION=ci-api
