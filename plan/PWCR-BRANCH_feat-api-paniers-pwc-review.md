@@ -35,6 +35,7 @@
 - [ ] Lot 3: served page/script/CSP, targeted pre-read and coherent post-receipt refresh.
 - [x] Lot 3 implementation: authenticated content composition serves exact PW bytes/hash and reuses BASE state/search readers under the selected workspace.
 - [ ] Lot 4: strict listener response projection and browser identity/intent validation.
+- [x] Lot 4 implementation: closed envelopes and canonical app document links; real listener/H5/BASE contract test added.
 - [ ] Lot 5: preserve uncertain prepare keys and manual Retry-After budgets.
 - [x] Lot 5 implementation: retry refusal retains the original body/key; Retry-After persists the later manual deadline.
 - [ ] Lot 6: unit/PG/API/proxy tests, discriminating mutations, audited bundle and French report.
