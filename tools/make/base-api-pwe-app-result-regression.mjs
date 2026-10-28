@@ -10,7 +10,7 @@ const current = original.toString();
 const anchor = "...(path === api ? result : {})";
 const fragment = readFileSync("/workspace/tools/make/base-api-pwe-before-app-result.txt", "utf8").trim();
 assert.equal(current.split(anchor).length, 2, "Projection GET unique");
-assert.equal(fragment, "...(path === api ? { state: result.state } : {})");
+assert.equal(fragment, "...(path === api ? { ...result, receipt: undefined } : {})");
 const before = Buffer.from(current.replace(anchor, fragment));
 const post = '  for (const action of ["confirm", "revoke"] as const)';
 assert.equal(current.split(post).length, 2, "Section POST unique");
@@ -40,7 +40,7 @@ finally { writeFileSync(source, original); }
 const positive = run("after", false);
 assert.equal(sha(readFileSync(source)), sha(original));
 writeFileSync("/evidence/app-result-regression.json", JSON.stringify({
-  mutation: "Retirer seulement la restitution du reçu et du commandId au GET",
+  mutation: "Retirer seulement la restitution du reçu au GET",
   postBytesUnchanged: true, beforeSha256: sha(before), restoredSha256: sha(original), negative, positive,
 }, null, 2));
 console.log("Témoin GET : cinq échecs fonctionnels attendus, cinq succès après restauration ; POST inchangé");
