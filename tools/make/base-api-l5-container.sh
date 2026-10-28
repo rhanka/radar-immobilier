@@ -70,7 +70,7 @@ if [[ $1 == full ]]; then
     --reporter=default --reporter=json --outputFile.json=/evidence/full.json
 fi
 if [[ $1 == full || $1 == mutations || $1 == inherited ]]; then
-  check inherited-mutants node ../tools/make/base-api-pwc-review-inherited.mjs
+  check inherited-mutants node ../tools/make/base-api-l5-inherited.mjs
 fi
 if [[ $1 == full || $1 == mutations || $1 == targeted ]]; then
   check pwe-mutants node ../tools/make/base-api-pwe-mutations.mjs
