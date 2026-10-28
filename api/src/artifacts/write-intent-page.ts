@@ -185,6 +185,7 @@ const PW_PAGE_SCRIPT_POLL = `
   }
   var poll = { timer: null, inFlight: false, intentId: null, startedAt: 0, count: 0,
     stopped: true, manualAt: 0, nextAt: 0, cacheOK: false, restoredLease: false };
+  var pollVersion = 0;
 ${PW_PAGE_BUDGET_SCRIPT}
   function stopPoll() {
     poll.stopped = true;
@@ -195,7 +196,7 @@ ${PW_PAGE_BUDGET_SCRIPT}
     if (poll.timer !== null) clearTimeout(poll.timer);
     poll.timer = setTimeout(tick, ms);
   }
-  async function checkOnce(intentId) {
+  async function checkOnce(intentId, version) {
     var gate = withTimeout(REQUEST_TIMEOUT_MS);
     try {
       var res = await fetch(STATUS + "?intentId=" + encodeURIComponent(intentId),
@@ -206,7 +207,7 @@ ${PW_PAGE_BUDGET_SCRIPT}
         {verb:"status",readerSub:boot.readerSub,appOrigin:boot.appOrigin,intentId:intentId},refusalCodes)) {
         return {status:502,data:{error:{code:"upstream_bad_payload"}}};
       }
-      if (intentId === poll.intentId) poll.nextAt = 0;
+      if (intentId === poll.intentId && version === pollVersion) poll.nextAt = 0;
       return { status: res.status, retryAfter: res.headers.get("retry-after"), data: data };
     } finally {
       if (gate.done) gate.done();
@@ -215,18 +216,21 @@ ${PW_PAGE_BUDGET_SCRIPT}
   function codeOf(data) {
     return data && data.error && typeof data.error.code === "string" ? data.error.code : null;
   }
-  async function handleStatus(out, manual) {
+  async function handleStatus(out, manual, current) {
     var code = codeOf(out.data);
     var state = out.data && out.data.data ? out.data.data.state : null;
     if (out.status === 200 && state && TERMINAL[state]) {
+      // Status is complete. Rereading the projection must not lease the next intent's follow-up.
+      stopPoll();
+      poll.inFlight = false;
       if (state === "committed") {
         var receipt = out.data.data.receipt && out.data.data.receipt.event
           ? out.data.data.receipt.event : {};
         say("Confirmed " + (receipt.basket || "") + " (" + (receipt.state || "") + "). Refresh the target from the page.");
         try {
           if (typeof window.__pwWriteOnCommitted !== "function") throw new Error("Display needs refresh");
-          await window.__pwWriteOnCommitted(out.data.data);
-        } catch (err) { say("Classification recorded; display needs refresh. Keep the receipt and use the application link."); }
+          await window.__pwWriteOnCommitted(out.data.data, current);
+        } catch (err) { if (current()) say("Classification recorded; display needs refresh. Keep the receipt and use the application link."); }
       } else if (state === "expired") {
         say("Expired. Re-read the target, then prepare a new gesture.");
       } else if (state === "revoked") {
@@ -234,7 +238,6 @@ ${PW_PAGE_BUDGET_SCRIPT}
       } else {
         say("Refused (" + (out.data.data.error ? out.data.data.error.code : state) + "). Re-read the target, then prepare a new gesture.");
       }
-      stopPoll();
       return;
     }
     if (out.status === 200) return;
@@ -274,25 +277,28 @@ ${PW_PAGE_BUDGET_SCRIPT}
       reveal("#pw-write-manual");
       return;
     }
-    poll.inFlight = true;
+    var flight = {};
+    poll.inFlight = flight;
     poll.count += 1;
     poll.nextAt = now + REQUEST_TIMEOUT_MS;
     if (!checkpointBudget()) { poll.inFlight = false; return; }
     var intentId = poll.intentId;
+    var version = pollVersion;
     try {
-      var out = await checkOnce(intentId);
-      if (intentId !== poll.intentId) return;
-      await handleStatus(out);
+      var out = await checkOnce(intentId, version);
+      if (intentId !== poll.intentId || version !== pollVersion) return;
+      await handleStatus(out, false, function () { return intentId === poll.intentId && version === pollVersion; });
+      if (intentId !== poll.intentId || version !== pollVersion) return;
       var state = out.data && out.data.data ? out.data.data.state : "";
       if (!poll.stopped && !TERMINAL[state] && poll.timer === null) schedule(INTERVAL_MS);
     } catch (err) {
-      if (intentId !== poll.intentId) return;
+      if (intentId !== poll.intentId || version !== pollVersion) return;
       say("Result to verify. Use the manual check below.");
       stopPoll();
       reveal("#pw-write-manual");
     } finally {
-      poll.inFlight = false;
-      if (intentId === poll.intentId) {
+      if (poll.inFlight === flight) poll.inFlight = false;
+      if (intentId === poll.intentId && version === pollVersion) {
         poll.nextAt = Math.max(poll.nextAt, Date.now() + INTERVAL_MS);
         checkpointBudget();
       }
@@ -300,6 +306,7 @@ ${PW_PAGE_BUDGET_SCRIPT}
   }
   function startPoll(intentId) {
     if (poll.intentId === intentId) return;
+    pollVersion += 1;
     stopPoll();
     if (!restoreBudget(intentId)) return;
     var now = Date.now();
@@ -325,19 +332,21 @@ ${PW_PAGE_BUDGET_SCRIPT}
     poll.manualAt = now;
     stopPoll();
     var intentId = poll.intentId;
-    poll.inFlight = true;
+    var version = pollVersion;
+    var flight = {};
+    poll.inFlight = flight;
     poll.nextAt = now + REQUEST_TIMEOUT_MS;
     if (!checkpointBudget()) { poll.inFlight = false; return; }
     try {
-      var out = await checkOnce(intentId);
-      if (intentId !== poll.intentId) return;
-      await handleStatus(out, true);
+      var out = await checkOnce(intentId, version);
+      if (intentId !== poll.intentId || version !== pollVersion) return;
+      await handleStatus(out, true, function () { return intentId === poll.intentId && version === pollVersion; });
     } catch (err) {
-      if (intentId !== poll.intentId) return;
+      if (intentId !== poll.intentId || version !== pollVersion) return;
       say("Result to verify. Try the manual check again later.");
     } finally {
-      poll.inFlight = false;
-      if (intentId === poll.intentId) {
+      if (poll.inFlight === flight) poll.inFlight = false;
+      if (intentId === poll.intentId && version === pollVersion) {
         poll.nextAt = Math.max(poll.nextAt, poll.manualAt + MANUAL_SPACING_MS);
         checkpointBudget();
       }
