@@ -30,7 +30,7 @@ export async function readPageBoundWriteIntent(c: Context, deps: H5WriteDeps, id
     // Run after the final P resolution. Retain the workspace/approval locks
     // through disclosure; workspace operations also require current moderation.
     if (!await canReadWriteIntentSummaryInTx(tx, row, { principal: canonicalWritePrincipal(page.grant) })) {
-      throw new FacetError(403, "write_authority_unavailable");
+      throw new FacetError(403, "capability_required");
     }
     return { row, page };
   });
