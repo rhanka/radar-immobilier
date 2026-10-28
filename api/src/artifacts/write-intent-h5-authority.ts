@@ -6,7 +6,7 @@ import { assertPwPrincipal } from "../services/facets/pw-write-confirmation.js";
 import { loadPwIntentForShare } from "../services/facets/pw-write-store.js";
 import { FacetError } from "../services/facets/target.js";
 import { canonicalWritePrincipal } from "./write-intent-principal.js";
-import { resolveWritePage } from "./write-intent-page-authority.js";
+import { assertPageAuthority, resolveWritePage } from "./write-intent-page-authority.js";
 import type { H5WriteDeps } from "./write-intent-h5-route.js";
 import { writeIntentTransaction } from "./write-intent-transaction.js";
 import { canReadWriteIntentSummaryInTx } from "./write-intent-app-authority.js";
@@ -32,6 +32,7 @@ export async function readPageBoundWriteIntent(c: Context, deps: H5WriteDeps, id
     if (!await canReadWriteIntentSummaryInTx(tx, row, { principal: canonicalWritePrincipal(page.grant) })) {
       throw new FacetError(403, "capability_required");
     }
+    assertPageAuthority(page, deps, (deps.nowMs ?? Date.now)());
     return { row, page };
   });
 }
