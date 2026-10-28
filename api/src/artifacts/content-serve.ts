@@ -21,6 +21,8 @@ import {
   type ReaderOperationName,
 } from "./reader-operations.js";
 import { READER_EXAMPLE_HTML } from "./reader-example.js";
+import type { WritePageSurface } from "./write-intent-page-surface.js";
+import { classificationFailure } from "../services/facets/classification-errors.js";
 
 export interface ContentServeDeps {
   readonly contentBase: string;
@@ -34,6 +36,7 @@ export interface ContentServeDeps {
   readonly isRevoked?: (sessionId: string) => boolean;
   /** PW-C page write listener (prepare/status); absent keeps writes closed. */
   readonly pageWrite?: Hono;
+  readonly writePageSurface?: WritePageSurface;
 }
 type AuthorizedReader = ApiReaderContext & { readonly validUntil: number; readonly authorityVersion: string };
 
@@ -105,6 +108,18 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
   // absent listener keeps writes closed without disabling publication, page
   // opening, or unrelated read operations.
   if (deps.pageWrite) app.route("/", deps.pageWrite);
+  for (const operation of ["state", "search"] as const) app.get(`/__reader/api/baskets.${operation}.v1`, async (c) => {
+    if (!deps.writePageSurface) return c.json({ error: "capability_unavailable" }, 503);
+    const reader = await authorized(c);
+    if (!reader || !canInvoke(reader, "signals.protected-read", reader.releaseId)) return c.json({ error: "unauthenticated" }, 401);
+    try {
+      const params = new URL(c.req.url).searchParams;
+      params.delete("grant");
+      const body = await deps.writePageSurface.read(operation, params, reader);
+      if (!await authorityCurrent(reader)) return c.json({ error: "unauthenticated" }, 401);
+      return c.json(body);
+    } catch (error) { const failure = classificationFailure(error); return c.json(failure.body, failure.status); }
+  });
 
   app.all("/__reader/api/:op", async (c) => {
     const parsed = parseContentHost(c.req.header("host"), deps.contentBase);
@@ -180,6 +195,12 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     }
     applyReaderContentHeaders(c);
     c.header("Content-Type", "text/html; charset=utf-8");
+    if (deps.writePageSurface) {
+      const response = await deps.writePageSurface.document(c.req.raw, auth);
+      if (!await authorityCurrent(auth)) return c.json({ error: "unauthenticated" }, 401);
+      c.header("Content-Security-Policy", response.headers.get("content-security-policy") ?? "default-src 'none'");
+      return response;
+    }
     return c.html(READER_EXAMPLE_HTML);
   });
 
