@@ -32,6 +32,7 @@ for arg in --apply --write --unknown; do
   echo "ok: rejects $arg"
 done
 (cd "$ROOT" && cp -r --parents deploy/ci deploy/k8s deploy/overlays/preprod "$CASE_ROOT/repo")
+bash "$HERE/h3-disabled-fixture.sh" "$CASE_ROOT/repo"
 CONTROL="$CASE_ROOT/repo/deploy/overlays/preprod/patch-artifacts-control.yaml"
 cp "$CONTROL" "$CASE_ROOT/control.backup"
 sed -i 's/ARTIFACTS_CONTROL_MODE: "off"/ARTIFACTS_CONTROL_MODE: validation/' "$CONTROL"
