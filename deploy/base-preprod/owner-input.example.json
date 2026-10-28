@@ -22,18 +22,18 @@
   "backup": {
     "reference": "<IMMUTABLE_BACKUP_REFERENCE_WITHOUT_ACCESS_PARAMETERS>",
     "sha256": "<BACKUP_SHA256>",
-    "restoredAt": "<UTC_RESTORE_REHEARSAL_TIMESTAMP>",
+    "restoredAt": "<UTC_Z_REAL_RESTORE_COMPLETED_AT_NOT_+00:00>",
     "restoreReceiptSha256": "<RESTORE_REHEARSAL_RECEIPT_SHA256>"
   },
   "mcpDeployment": "<SUCCESSOR_MCP_DEPLOYMENT_NAME>",
   "apiIngress": "<APPLICATION_INGRESS_NAME>",
   "maintenance": {
-    "reopenBy": "<UTC_DEADLINE_INCLUDING_ROLLBACK_AND_CD_REENABLE>",
+    "reopenBy": "<UTC_Z_DEADLINE_ROLLBACK_CD_OPTIONAL_FRACTION_NOT_+00:00>",
     "changeFreeze": {
       "reference": "<CONDUCTOR_NO_PUSH_NO_MERGE_AGREEMENT>",
       "noPushOrMerge": false,
-      "startsAt": "<UTC_FREEZE_START>",
-      "endsAt": "<UTC_FREEZE_END_AT_OR_AFTER_REOPEN_DEADLINE>"
+      "startsAt": "<UTC_Z_FREEZE_START_OPTIONAL_FRACTION_NOT_+00:00>",
+      "endsAt": "<UTC_Z_FREEZE_END_GE_REOPEN_BY_OPTIONAL_FRACTION_NOT_+00:00>"
     },
     "service": "base-maintenance-<UNIQUE_ATTEMPT>",
     "ingresses": ["<APPLICATION_INGRESS_NAME>", "<MCP_INGRESS_NAME>"],
@@ -44,7 +44,7 @@
       "namespace": "radar-immobilier-preprod",
       "reference": "<IMMUTABLE_CNI_PROBE_RECEIPT>",
       "sha256": "<CNI_PROBE_RECEIPT_SHA256>",
-      "observedAt": "<UTC_PROBE_TIMESTAMP>",
+      "observedAt": "<UTC_Z_PROBE_TIMESTAMP_NOT_+00:00>",
       "policySha256": "<CANONICAL_POLICY_INVENTORY_SHA256>",
       "passed": false,
       "networkPolicyEnforced": false,

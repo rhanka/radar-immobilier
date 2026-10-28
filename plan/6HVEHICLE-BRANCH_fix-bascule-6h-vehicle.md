@@ -56,5 +56,5 @@
   - [x] Ajouter reclose-api, snapshot actualisé et tests de concurrence.
   - [x] Trois mutations de récupération rejetées ; baseline et restauration passent.
   - [x] Raccorder le test de contexte et qualifier la récupération complète tardive.
-  - [ ] Documenter la requalification réelle du dump ; aucune exécution en préprod.
+  - [x] Documenter la requalification réelle du dump ; aucune exécution en préprod.
   - [ ] Vérifier le bundle r2 descendant d’ec867041 ; aucun push.
