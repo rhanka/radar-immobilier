@@ -26,6 +26,7 @@ if [[ ${VEHICLE_ACTION_CASE:-all} != identity ]];then
     echo 'ÉCHEC : mutation avant validation du gel' >&2;exit 1
   fi
 fi
+source tools/make/base-preprod-actions-time.test.sh
 source tools/make/base-preprod-freeze.test.sh
 cp "$actions_input" input.json
 printf 'PASS Actions : run identifié et fenêtre entière protégée\n'

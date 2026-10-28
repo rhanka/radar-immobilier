@@ -165,6 +165,11 @@ cat > bin/gh <<'FAKE'
 #!/usr/bin/env bash
 set -eu
 printf 'gh %s\n' "$*" >> cluster-calls
+if [[ ${FAKE_STATE:-} == expire-after-actions && "$*" == *'/actions/runs?per_page=100'* ]];then
+  jq '.maintenance.reopenBy=(now|floor-1|todateiso8601)' "$INPUT" > expired-window.json
+  mv expired-window.json "$INPUT"
+  exit 0
+fi
 case "$*" in
   *'--jq .state'*)
     if [[ ${FAKE_STATE:-} == cd ]]; then echo active; else echo disabled_manually; fi;;

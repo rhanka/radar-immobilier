@@ -57,6 +57,7 @@ freeze-cd() {
   require_operator_context; require_change_freeze
   permissions
   inventory
+  require_change_freeze
   gh api --method PUT "repos/$repo/actions/workflows/build-push-images.yml/disable" > "$OUTPUT/freeze.txt"
   # Never change PREPROD_CD_ENABLED; disabling does not cancel existing runs.
   local run
@@ -72,6 +73,7 @@ assert_cd_frozen() {
   require_change_freeze
   [[ $(gh api "repos/$repo/actions/workflows/build-push-images.yml" --jq .state) == disabled_manually ]] || fail 'CD is not frozen'
   active_runs > "$OUTPUT/runs-current.jsonl"
+  require_change_freeze
   assert_no_actions "$OUTPUT/runs-current.jsonl" 'A nonterminal Actions run exists'
 }
 delete_job_uid() {
