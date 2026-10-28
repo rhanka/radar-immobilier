@@ -12,6 +12,7 @@ import { createHash } from "node:crypto";
 import { PW_PAGE_BUILD_BODY_SOURCE, PW_PAGE_OPERATIONS, PW_PAGE_POLL_BOUNDS, PW_PAGE_PREPARE_PATH, PW_PAGE_STATUS_PATH } from "./write-intent-page-gesture.js";
 import { PW_PAGE_BUDGET_SCRIPT } from "./write-intent-page-budget.js";
 import { validPwPageEnvelope } from "./write-intent-page-envelope.js";
+import { WRITE_REFUSAL_CODES } from "./write-intent-refusal.js";
 import { PW_PAGE_READ_SCRIPT } from "./write-intent-page-read.js";
 
 const PW_PAGE_SCRIPT_PREPARE = `
@@ -169,6 +170,7 @@ const PW_PAGE_SCRIPT_POLL = `
   var REQUEST_TIMEOUT_MS = ${PW_PAGE_POLL_BOUNDS.requestTimeoutMs};
   var TERMINAL = { committed: 1, rejected: 1, expired: 1, revoked: 1 };
   var validateEnvelope = ${validPwPageEnvelope.toString()};
+  var refusalCodes = ${JSON.stringify(WRITE_REFUSAL_CODES)};
   var boot = {};
   try { boot = JSON.parse(document.querySelector("#pw-page-bootstrap").textContent); } catch (err) {}
   function $(sel) { return document.querySelector(sel); }
@@ -200,7 +202,7 @@ ${PW_PAGE_BUDGET_SCRIPT}
       var data = null;
       try { data = await res.json(); } catch (err) { data = null; }
       if (res.status === 200 && !validateEnvelope(data,
-        {verb:"status",readerSub:boot.readerSub,appOrigin:boot.appOrigin,intentId:intentId})) {
+        {verb:"status",readerSub:boot.readerSub,appOrigin:boot.appOrigin,intentId:intentId},refusalCodes)) {
         return {status:502,data:{error:{code:"upstream_bad_payload"}}};
       }
       if (intentId === poll.intentId) poll.nextAt = 0;
