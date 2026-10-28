@@ -47,6 +47,7 @@
 - [x] Exact-image browser transport can suspend either headers or JSON after draining a real runtime response; this fault injection changes no product authority or executor.
 - [x] Browser expiry cases observe the real server JWT cutoff before preparing and before confirming, with normal OIDC/P, exactly one command, recovered BASE state/cards/counts and both 401/200 renewal responses.
 - [x] Browser deadline cases use a controlled browser clock, real runtime commits and suspended TLS headers/body: same-intent receipt recovery, released controls and settled bootstrap with no installed write reader.
+- [x] Browser status case commits a workspace discard, withdraws moderation while preserving membership and observes a receipt-free 403 on P; explicit authorized restore returns the fixture to its original archive state.
 - [x] Lot 0: merge approved PW-A and main; preserve Track event blob identity.
 - [x] Lot 1: bind verified approval provenance, explicit release write request and private page bootstrap.
 - [x] Implementation and targeted PG proof: actual one-use ticket provenance, explicit workspace, matching signed read grant and no publisher privileges.
