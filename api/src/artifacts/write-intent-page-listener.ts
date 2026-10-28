@@ -107,7 +107,8 @@ export function pageWriteListenerRoute(deps: PageListenerDeps | null): Hono {
       const page = await resolveWritePage(c, deps, deps.nowMs ?? Date.now);
       const csrf = Buffer.from(c.req.header("x-reader-csrf") ?? "");
       const expected = Buffer.from(page.csrfToken ?? "");
-      if (page.grant.host !== new URL(origin).host || c.req.header("x-reader-instance") !== page.pageInstanceId ||
+      if (page.grant.host !== new URL(publicOrigin(c.req.header("host"), deps.contentBase)!).host ||
+        c.req.header("x-reader-instance") !== page.pageInstanceId ||
         expected.length < 32 || csrf.length !== expected.length || !timingSafeEqual(csrf, expected)) {
         throw new FacetError(403, "csrf_refused");
       }
