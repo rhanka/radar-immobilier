@@ -20,3 +20,6 @@ pwcr-audit:
 	rtk bash tools/make/base-api-pwc-review-deliver.sh audit
 pwcr-bundle:
 	rtk bash tools/make/base-api-pwc-review-deliver.sh bundle
+.PHONY: pwcr-proof
+pwcr-proof:
+	rtk bash tools/make/base-api-pwc-review-proof.sh "$(API_EVIDENCE)" "$(PREFIX_EVIDENCE)" "$(PROXY_EVIDENCE)" "$(PWC_EVIDENCE)" "$(PWE_EVIDENCE)" "$(REVIEW_EVIDENCE)"

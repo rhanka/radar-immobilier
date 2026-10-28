@@ -52,6 +52,7 @@ case ${1:-} in
     g -c core.hooksPath=/dev/null -c commit.gpgsign=false commit -m "$MSG";;
   audit) audit;;
   bundle)
+    jq -e --arg head "$(g rev-parse HEAD)" '.qualified and .head==$head and .mutations.total==136' tmp/pwc-review-evidence/qualification.json >/dev/null
     audit
     mkdir -p tmp/pwc-review-evidence
     bundle=$ROOT/tmp/pwc-review-evidence/api-paniers-pwc-corrected.bundle
