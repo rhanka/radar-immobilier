@@ -11,7 +11,7 @@ override MSG := $(value MSG)
 export ENV API_PORT UI_PORT MAILDEV_UI_PORT PHASE SCOPE FILES MSG MUTANTS
 .PHONY: pwcr-verify pwcr-stage pwcr-commit pwcr-audit pwcr-bundle
 pwcr-verify:
-	rtk bash tools/make/base-api-pwcr-verify.sh
+	rtk bash tools/make/base-api-pwc-review-verify.sh
 pwcr-stage:
 	rtk bash tools/make/base-api-pwc-review-deliver.sh stage
 pwcr-commit:
