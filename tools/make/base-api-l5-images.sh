@@ -38,8 +38,8 @@ cleanup_images() {
   trap - EXIT INT TERM
   [[ -z ${RUN_PID:-} ]] || { kill "$RUN_PID" 2>/dev/null || true; wait "$RUN_PID" 2>/dev/null || true; }
   [[ -z ${MONITOR:-} ]] || { kill "$MONITOR" 2>/dev/null || true; wait "$MONITOR" 2>/dev/null || true; }
-  "${compose[@]}" logs --no-color > "$LOG_DIR/compose.log" 2>&1 || true
-  guarded_down > "$LOG_DIR/cleanup.log" 2>&1 || code=1
+  "${compose[@]}" logs --no-color > "$CAMPAIGN_DIR/final-compose.log" 2>&1 || true
+  guarded_down > "$CAMPAIGN_DIR/final-cleanup.log" 2>&1 || code=1
   release_l5_lock
   printf 'Shared campaign lock released\n' > "$CAMPAIGN_DIR/lock-release.txt"
   printf '%s\n' "$code" > "$CAMPAIGN_DIR/status"
