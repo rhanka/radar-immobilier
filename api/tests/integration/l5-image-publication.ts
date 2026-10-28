@@ -19,6 +19,7 @@ export async function imagePublication(contentBase: string) {
     const grant = new URLSearchParams(location.search).get("grant");
     history.replaceState(null,"",location.pathname);
     async function refresh() {
+      await window.__pwWriteReady;
       const response = await fetch("/__reader/api/baskets.state.v1?" + ${JSON.stringify(params.toString())},
         {headers:{"x-preview-grant":grant}});
       const data = await response.json();
@@ -33,13 +34,13 @@ export async function imagePublication(contentBase: string) {
         pwToken:data.snapshot.baseToken});
       button.disabled=false; document.body.dataset.readReady="1";
     }
-    window.__pwWriteOnCommitted = async function(){await refresh();document.body.dataset.confirmed="1";};
     refresh().catch(error=>{document.body.dataset.failure=error.message;});
   `;
-  const html = '<!doctype html><html lang="en"><meta charset="utf-8"><title>Published basket actions</title>' +
+  const html = `<!doctype html><html lang="en" data-pw-workspace="${h.f.workspaceId}"><meta charset="utf-8"><title>Published basket actions</title>` +
     '<h1>Published basket actions</h1><button id="prepare" disabled data-pw-gesture>Prepare selection</button>' +
     '<p id="pw-write-note"></p><div id="pw-write-open" hidden></div>' +
     '<button id="pw-write-retry" hidden>Retry</button><button id="pw-write-manual" hidden>Check status</button>' +
+    '<pre id="pw-page-receipt"></pre><pre id="pw-live-state"></pre><pre id="pw-live-cards"></pre><pre id="pw-live-counts"></pre>' +
     '<script src="/__reader/write.js"></script><script src="/actions.js"></script></html>';
   const published = await h.control.handle("publish", h.author, { artifactId: h.artifactId, idempotencyKey: randomUUID(), files: [
     { path: "index.html", mimeType: "text/html", text: html },
