@@ -29,7 +29,7 @@ describeDb("PW-C Astra application status recovery", () => {
       h.clock.now = Date.parse(data.expiresAt) + 1; release();
       const result = await pending; expect(result.status).toBe(200);
       expect(await result.json()).toMatchObject({ state: "committed", executionState: "committed",
-        revocationState: "active", commandId: h.input.commandKey, receipt: { event: receipt.event } });
+        revocationState: "active", commandId: h.input.commandKey, receipt: receipt.receipt });
       expect(h.counters().confirms).toBe(1);
     } finally { release(); await pending; }
   });
@@ -47,7 +47,7 @@ describeDb("PW-C Astra application status recovery", () => {
     const result = await h.request(`${APP}/${data.intentId}`, { headers: { cookie } });
     const body = await result.json();
     expect(body).toMatchObject({ state: "revoked", revocationState: "revoked", executionState: commit ? "committed" : "pending" });
-    if (commit) expect(body).toMatchObject({ commandId: h.input.commandKey, receipt: { event: receipt.event } });
+    if (commit) expect(body).toMatchObject({ commandId: h.input.commandKey, receipt: receipt.receipt });
     else expect(body).not.toHaveProperty("receipt");
     expect(body).not.toHaveProperty("challengeToken"); expect(await effects(h.f)).toEqual(before);
     expect(h.counters().confirms).toBe(commit ? 1 : 0);
