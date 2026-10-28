@@ -54,6 +54,7 @@
 - [x] Keep post-COMMIT consultation errors outside the admission-error mapper: return an unknown disclosure outcome with read-status recovery rather than not-executed.
 - [x] Full required replay 104126-pg identifies four inherited test files requiring contract maintenance: read receipt.event from the controlled envelope and acquire the projection barrier after the new initial disclosure guard, preserving actual SQL waits and all withdrawal assertions.
 - [x] Touched reader/application replay 104718-pg passes 270 cases without skips, with typecheck/lint and CT-8. Browser expiry waits use the latest actually issued read grant, avoiding dependence on navigation duration or JWT second rounding.
+- [x] Add two actual-SQL wait regressions for P/delegation expiry during the newly added final disclosure guard; stop the intermediate image campaign before final qualification rather than omit this boundary.
 - [x] Lot 0: merge approved PW-A and main; preserve Track event blob identity.
 - [x] Lot 1: bind verified approval provenance, explicit release write request and private page bootstrap.
 - [x] Implementation and targeted PG proof: actual one-use ticket provenance, explicit workspace, matching signed read grant and no publisher privileges.
