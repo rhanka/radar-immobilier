@@ -10,7 +10,9 @@ git diff --quiet HEAD
 if [[ -z ${SCOPE:-} ]]; then
   SCOPE=$(git ls-files -- 'api/src/artifacts/write-*.test.ts' \
     'api/src/services/facets/pw-write-*.test.ts' 'api/src/services/facets/signal-write-*.test.ts' \
-    'api/tests/integration/pw-write*.spec.ts' 'api/tests/integration/pwe-*.spec.ts' | sed 's#^api/##')
+    'api/tests/integration/pw-write*.spec.ts' 'api/tests/integration/pwe-*.spec.ts' \
+    'api/src/artifacts/published-write*.test.ts' 'api/tests/integration/l5-*.spec.ts' \
+    'api/tests/integration/artifacts-baskets.spec.ts' 'api/tests/integration/artifacts-reader-opening.spec.ts' | sed 's#^api/##')
 fi
 require_scope
 PROJECT=radar-$ENV
