@@ -51,6 +51,7 @@
   - [x] Fractions acceptées, champ invalide nommé ; reclose-api tardif admis sous gel actif.
   - [x] Reproduire le refus sans mutation de close après réouverture (create tenté, AlreadyExists).
   - [x] close refuse le Service existant avant toute écriture ; rendu API partagé sans mutation.
+  - [x] Entrée reclose-api manquante reproduite ; fixture de replicas et resourceVersion fidèle.
   - [ ] Ajouter reclose-api, snapshot actualisé et tests de concurrence.
   - [ ] Raccorder le test de contexte et qualifier la récupération complète tardive.
   - [ ] Documenter la requalification réelle du dump ; aucune exécution en préprod.
