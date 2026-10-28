@@ -87,7 +87,7 @@ describe("page write listener", () => {
     expect(await response.json()).toMatchObject({ data: { intentId: UUID } });
     expect(seen).toHaveLength(1);
     const forwarded = seen[0]!;
-    expect(forwarded.url).toBe("https://page-write.internal/write-intents");
+    expect(forwarded.url).toBe(`${ORIGIN}/write-intents`);
     expect(forwarded.headers.get("x-preview-write-grant")).toMatch(/^eyJ/);
     expect(forwarded.headers.get("x-preview-session")).toBeNull();
     expect(forwarded.headers.get("cookie")).toBe("page=1");
@@ -124,7 +124,7 @@ describe("page write listener", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({ data: { intentId: UUID, state: "pending" } });
     expect(seen).toHaveLength(1);
-    expect(seen[0]!.url).toBe(`https://page-write.internal/write-intents/${UUID}`);
+    expect(seen[0]!.url).toBe(`${ORIGIN}/write-intents/${UUID}`);
     expect(seen[0]!.headers.get("x-preview-write-grant")).toBeNull();
     expect(seen[0]!.headers.get("cookie")).toBe("page=1");
     const missing = await app.request(`${ORIGIN}${PW_PAGE_STATUS_PATH}`, { headers: { host: HOST } });
