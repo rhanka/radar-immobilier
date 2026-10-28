@@ -14,12 +14,14 @@ beforeAll(async () => {
   h = await imagePublication(contentBase);
   network = await imageNetwork([h.f.contributor.sub, h.f.moderator.sub]);
   writeFileSync("/evidence/fixture-ready.json", JSON.stringify({ database: h.f.name, scope: h.scope }));
-  const deadline = Date.now() + 30_000;
-  while (true) {
-    const response = await fetch("http://runtime:3000/health").catch(() => null);
-    if (response?.ok) { expect((await response.json()).sha).toBe(process.env.L5_IMAGE_SHA); break; }
-    if (Date.now() > deadline) throw new Error("Exact runtime image did not become healthy");
-    await new Promise((resolve) => setTimeout(resolve, 100));
+  for (const service of ["runtime", "runtime-base", "runtime-read"]) {
+    const deadline = Date.now() + 30_000;
+    while (true) {
+      const response = await fetch(`http://${service}:3000/health`).catch(() => null);
+      if (response?.ok) { expect((await response.json()).sha).toBe(process.env.L5_IMAGE_SHA); break; }
+      if (Date.now() > deadline) throw new Error(`Exact runtime image ${service} did not become healthy`);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
   }
   browser = await chromium.launch({ headless: true, args: ["--no-sandbox", "--no-proxy-server",
     `--ignore-certificate-errors-spki-list=${process.env.L5_CERT_SPKI}`,
