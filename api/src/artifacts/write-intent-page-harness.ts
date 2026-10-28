@@ -73,13 +73,32 @@ export function pageHarness(options: { storage?: Map<string, string>; initialNow
   const storage = options.storage ?? new Map<string, string>();
   const elements: Record<string, FakeElement> = {};
   for (const id of ["pw-write-note", "pw-write-open", "pw-write-retry",
-    "pw-write-manual", "pw-bootstrap", "pw-receipt"]) {
+    "pw-write-manual", "pw-bootstrap", "pw-receipt", "pw-page-bootstrap", "pw-page-receipt",
+    "pw-live-state", "pw-live-cards", "pw-live-counts"]) {
     elements[id] = new FakeElement(id);
   }
   elements["pw-write-manual"]!.dataset = {};
+  elements["pw-page-bootstrap"]!.textContent = JSON.stringify({ pageInstanceId: "instance-1", csrf: "c".repeat(40),
+    readerSub: "reader", appOrigin: "https://app.example.test", workspaceId: UUID, readGrant: "synthetic-read" });
   const docListeners: Record<string, Array<(event: unknown) => void>> = {};
   const fetchCalls: FetchCall[] = [];
   const responders: Array<(call: FetchCall) => unknown> = [];
+  const readCalls: FetchCall[] = [];
+  const readResponders: Array<(call: FetchCall) => unknown> = [];
+  let currentGesture = GESTURES[0]!;
+  const readFixture = (url: string) => {
+    const g = currentGesture;
+    const selections = g.pwExpectedHeads ? JSON.parse(g.pwExpectedHeads) : {};
+    const head = (id?: string | null) => id ? { id, state: "active" } : null;
+    return { status: 200, body: { ok: true, workspaceId: g.pwWorkspace, snapshot: { baseToken: g.pwToken },
+      ...(url.includes("baskets.search") ? { items: [], counts: { matched: 0 } } : {
+        item: { target: { citySlug: g.pwCity, type: g.pwType, id: g.pwId }, displayedFingerprint: g.pwFingerprint,
+          facets: { selection: { pertinent: head(selections.pertinent ?? (g.pwBasket === "pertinent" ? g.pwExpectedHead : null)),
+            a_surveiller: head(selections.a_surveiller ?? (g.pwBasket === "a_surveiller" ? g.pwExpectedHead : null)) },
+          archive: { personal: g.pwOperation.includes(".personal.") ? head(g.pwExpectedHead) : null,
+            workspace: g.pwOperation.includes(".workspace.") ? head(g.pwExpectedHead) : null } } },
+      }) } };
+  };
   const opened: Array<{ url: string; target: string; features: string }> = [];
   const committed: unknown[] = [];
   const timers: Array<{ delay: number; fn: () => void; cleared: boolean }> = [];
@@ -120,11 +139,14 @@ export function pageHarness(options: { storage?: Map<string, string>; initialNow
     },
     crypto: { randomUUID: () => `00000000-0000-4000-8000-${String(keys += 1).padStart(12, "0")}` },
     fetch: async (url: string, options: FetchCall["options"]) => {
-      fetchCalls.push({ url, options });
-      const responder = responders.shift() ?? (() => ({ status: 500, body: null }));
+      const isRead = url.startsWith("/__reader/api/baskets.");
+      (isRead ? readCalls : fetchCalls).push({ url, options });
+      const responder = (isRead ? readResponders : responders).shift() ??
+        (isRead ? () => readFixture(url) : () => ({ status: 500, body: null }));
       const out = await responder({ url, options }) as { status: number; body: unknown; retryAfter?: string };
       return {
         status: out.status,
+        ok: out.status >= 200 && out.status < 300,
         headers: { get: (name: string) => (name === "retry-after" ? out.retryAfter ?? null : null) },
         json: async () => out.body,
       };
@@ -136,13 +158,18 @@ export function pageHarness(options: { storage?: Map<string, string>; initialNow
     clearTimeout: (id: number): void => {
       if (timers[id]) timers[id]!.cleared = true;
     },
-    Date: { now: () => now },
+    Date: { now: () => now, parse: Date.parse },
+    URLSearchParams,
   };
   runInNewContext(PW_PAGE_SCRIPT, sandbox);
+  const window = sandbox.window as { __pwWriteOnCommitted: (data: unknown) => Promise<void> };
+  const onCommitted = window.__pwWriteOnCommitted;
+  window.__pwWriteOnCommitted = async (data) => { committed.push(data); return onCommitted(data); };
   const flush = async (): Promise<void> => {
-    for (let i = 0; i < 10; i += 1) await Promise.resolve();
+    for (let i = 0; i < 40; i += 1) await Promise.resolve();
   };
   const clickGesture = async (dataset: GestureDataset): Promise<void> => {
+    currentGesture = dataset;
     const button = new FakeElement();
     button.selector = "[data-pw-gesture]";
     button.dataset = { ...dataset };
@@ -160,7 +187,7 @@ export function pageHarness(options: { storage?: Map<string, string>; initialNow
   const pendingDelays = (): number[] => timers.filter((timer) => !timer.cleared)
     .map((timer) => timer.delay);
   const seenFollowUp: string[] = [];
-  return { elements, fetchCalls, responders, opened, committed, seenFollowUp,
+  return { elements, fetchCalls, responders, readCalls, readResponders, opened, committed, seenFollowUp,
     pendingDelays, clickGesture, runTimer, flush,
     hookFollowUp: (): void => {
       (sandbox.window as { __pwWriteFollowUp?: unknown }).__pwWriteFollowUp =
@@ -169,6 +196,8 @@ export function pageHarness(options: { storage?: Map<string, string>; initialNow
         };
     },
     followUp: (intentId: string): void => {
+      (sandbox.window as { __pwWritePrepared: (id: string, gesture: unknown) => void }).__pwWritePrepared(intentId,
+        { workspaceId: UUID, target: { citySlug: "demo-town", type: "Signal", id: "sig-1" } });
       (sandbox.window as { __pwWriteFollowUp: (id: string) => void }).__pwWriteFollowUp(intentId);
     },
     setNow: (value: number): void => {
@@ -184,14 +213,17 @@ export function pageHarness(options: { storage?: Map<string, string>; initialNow
 
 export function prepared(intentId: string, state = "pending") {
   return { status: 201, body: { operation: "facets.write-intents.prepare.v1",
+    reader: { sub: "reader" },
     data: { intentId, invocationId: UUID, state,
       expiresAt: new Date(1_000_000 + 120_000).toISOString(),
       confirmationUrl: `https://app.example.test/artifact-write/intents/${intentId}`,
-      managementUrl: `https://app.example.test/api/v1/artifacts/write-intents/${intentId}`,
-      statusUrl: `https://h5.example.test/api/v1/artifacts/write-intents/${intentId}` } } };
+      managementUrl: `https://app.example.test/artifact-write/intents/${intentId}`,
+      statusUrl: `https://app.example.test/api/v1/artifacts/reader/facets/write-intents/${intentId}` } } };
 }
 
 export function statusOf(intentId: string, state: string, extra: Record<string, unknown> = {}) {
+  const terminal = state === "committed" ? { commandId: UUID, nextAction: "refresh_state", receipt: { event: null } } : {};
   return { status: 200, body: { operation: "facets.write-intents.status.v1",
-    data: { intentId, state, ...extra } } };
+    reader: { sub: "reader" }, data: { intentId, state, ...(state === "pending" ? { expiresAt: new Date(1_120_000).toISOString() } : {}),
+      ...terminal, ...extra } } };
 }

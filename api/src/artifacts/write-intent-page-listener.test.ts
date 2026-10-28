@@ -2,6 +2,7 @@
 // demand-only grant and never lets the content forge server proof headers.
 import { describe, expect, it, vi } from "vitest";
 import { pageWriteListenerRoute, type PageListenerDeps } from "./write-intent-page-listener.js";
+import { prepared, statusOf } from "./write-intent-page-harness.js";
 import { PW_PAGE_PREPARE_PATH, PW_PAGE_STATUS_PATH } from "./write-intent-page-gesture.js";
 import type { PageWriteAuthority } from "./write-intent-page-authority.js";
 
@@ -12,12 +13,12 @@ const SECRET = "0123456789abcdef0123456789abcdef";
 const GRANT = { issuer: "https://h5.example.test", audience: "radar-artifact-write",
   tier: "preprod", identityIssuer: "https://auth.example.test",
   jti: UUID, sessionId: "page-session", sub: "reader", readerSub: "reader",
-  artifactId: "artifact-1", releaseId: "release-1", host: "pages.example.test",
+  artifactId: "artifact-1", releaseId: "release-1", host: `${UUID}.pages.example.test`,
   profileName: "h5-signal-write-v2", profileFingerprint: "fp-1", policyRevision: "policy-1",
   workspaceId: UUID, citySlug: "demo-town",
   operations: ["facets.signals.personal.select.v1"] };
 
-const PAGE = { grant: GRANT, pageInstanceId: "instance-1", pageExpiresAtMs: 60_000,
+const PAGE = { grant: GRANT, pageInstanceId: "instance-1", csrfToken: "c".repeat(40), pageExpiresAtMs: 60_000,
   delegationExpiresAtMs: 60_000, authorityReferences: {} } as PageWriteAuthority;
 
 const BODY = { operation: "facets.signals.personal.select.v1", workspaceId: UUID,
@@ -29,26 +30,27 @@ const ORIGIN = `https://${HOST}`;
 
 function depsFor(forward: (req: Request) => Promise<Response>,
   page: PageWriteAuthority | null = PAGE): PageListenerDeps {
-  return { contentBase: "pages.example.test", grantIssuer: GRANT, grantKeyId: "key-1",
+  return { contentBase: "pages.example.test", applicationOrigin: "https://app.example.test", grantIssuer: GRANT, grantKeyId: "key-1",
     grantSecret: SECRET, resolvePage: async () => page, forward, nowMs: () => 1000 };
 }
 
 function prepareRequest(headers: Record<string, string> = {}, body: unknown = BODY): Request {
   return new Request(`${ORIGIN}${PW_PAGE_PREPARE_PATH}`,
     { method: "POST", headers: { host: HOST, "content-type": "application/json",
-      "idempotency-key": UUID, ...headers }, body: JSON.stringify(body) });
+      "idempotency-key": UUID, origin: ORIGIN, "x-reader-instance": PAGE.pageInstanceId,
+      "x-reader-csrf": PAGE.csrfToken!, ...headers }, body: JSON.stringify(body) });
 }
 
 describe("page write listener", () => {
   it.each([201, 409, 429])("should preserve private headers on forwarded HTTP %s", async (status) => {
-    const body = JSON.stringify({ operation: "facets.write-intents.prepare.v1",
-      error: { code: "write_rate_limited" } });
+    const body = JSON.stringify(status === 201 ? prepared(UUID).body : {
+      operation: "facets.write-intents.prepare.v1", error: { code: "write_rate_limited", attemptOutcome: "not_executed" } });
     const app = pageWriteListenerRoute(depsFor(async () => new Response(body, { status,
       headers: { "content-type": "application/json", "retry-after": "7", "cache-control": "public" } })));
     const response = await app.request(prepareRequest());
     expect(response.status).toBe(status);
-    expect(await response.text()).toBe(body);
-    expect(response.headers.get("retry-after")).toBe("7");
+    expect(await response.json()).toMatchObject(status === 201 ? { data: { intentId: UUID } } : { error: { code: "write_rate_limited" } });
+    expect(response.headers.get("retry-after")).toBe(status === 429 ? "7" : null);
     expect(response.headers.get("cache-control")).toBe("private, no-store");
     expect(response.headers.get("cross-origin-opener-policy")).toBe("same-origin");
     expect(response.headers.get("vary")).toBe("Cookie, Authorization");
@@ -77,8 +79,7 @@ describe("page write listener", () => {
     const seen: Request[] = [];
     const forward = async (req: Request): Promise<Response> => {
       seen.push(req);
-      return new Response(JSON.stringify({ operation: "facets.write-intents.prepare.v1",
-        data: { intentId: UUID } }), { status: 201,
+      return new Response(JSON.stringify(prepared(UUID).body), { status: 201,
         headers: { "content-type": "application/json" } });
     };
     const app = pageWriteListenerRoute(depsFor(forward));
@@ -114,8 +115,7 @@ describe("page write listener", () => {
     const seen: Request[] = [];
     const forward = async (req: Request): Promise<Response> => {
       seen.push(req);
-      return new Response(JSON.stringify({ operation: "facets.write-intents.status.v1",
-        data: { intentId: UUID, state: "pending" } }), { status: 200,
+      return new Response(JSON.stringify(statusOf(UUID, "pending").body), { status: 200,
         headers: { "content-type": "application/json" } });
     };
     const app = pageWriteListenerRoute(depsFor(forward));

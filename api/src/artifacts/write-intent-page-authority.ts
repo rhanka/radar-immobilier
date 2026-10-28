@@ -10,6 +10,8 @@ import type { WriteTx } from "../services/facets/signal-write-scope.js";
  * Never populate it from content parameters or a read bootstrap alone.
  */
 export interface PageWriteAuthority {
+  /** Private P bootstrap proof; required by the browser-facing listener. */
+  csrfToken?: string;
   grant: WriteGrantClaims;
   pageInstanceId: string;
   pageExpiresAtMs: number;
