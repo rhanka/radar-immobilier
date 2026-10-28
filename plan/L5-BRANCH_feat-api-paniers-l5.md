@@ -41,4 +41,5 @@
 - [ ] Lot 4: PostgreSQL, API CI, required matrices and mutations on merged candidate without required skips.
 - [ ] Lot 5: exact runtime image, real OIDC browser, persisted published page read/prepare/app-confirm and CT-9.
 - [x] Image candidate c8d42b5c: ten browser cases pass without skips on same-site/cross-site hosts, including six operations and BASE/read closure variants. Final HEAD replay remains required.
+- [x] Three inherited published-read cases are selected explicitly; their TLS helper now receives the archived OpenSSL executable and libraries in the disposable browser runner.
 - [ ] Lot 6: audit own commits, incremental bundle from 37f21d3d, French L5/PW-E final report and cleanup receipts.

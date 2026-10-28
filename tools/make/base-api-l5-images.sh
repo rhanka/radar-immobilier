@@ -52,6 +52,12 @@ trap 'exit 143' TERM
 guarded_down
 printf '%s\n' "$CAMPAIGN_DIR" > "$ROOT/tmp/l5-evidence/latest-images"
 source tools/make/base-api-pwa-offline.sh
+mapfile -t openssl_libraries < <(ldd /usr/bin/openssl |
+  awk '/=> \// {print $3} /^[[:space:]]*\/.*ld-linux/ {print $1}' | sort -u)
+openssl_inputs=(/usr/bin/openssl "${openssl_libraries[@]}")
+tar -C / --dereference -rf "$RUN_DIR/offline-tools.tar" "${openssl_inputs[@]#/}"
+sha256sum "${openssl_inputs[@]}" >> "$CAMPAIGN_DIR/offline-system-inputs.sha256"
+sha256sum "$RUN_DIR/offline-tools.tar" > "$CAMPAIGN_DIR/offline-tools.sha256"
 archive_sources
 archive_ci_inputs
 image_archive_inputs
