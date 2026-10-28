@@ -8,6 +8,7 @@ import { L5_DOMAIN } from "./l5-fixture.js";
 import { effects, ONE_COMMIT } from "./pwe-fixture.js";
 import { imageClosure } from "./l5-image-closures.js";
 import { grantImageReviews } from "./l5-review-image-grants.js";
+import { deadlineImageReviews } from "./l5-review-image-deadlines.js";
 
 let h: Awaited<ReturnType<typeof imagePublication>>;
 let network: Awaited<ReturnType<typeof imageNetwork>>;
@@ -157,6 +158,7 @@ it.each([0, 1])("should read and confirm a published write through normal image 
   } finally { await context.close(); }
 });
 grantImageReviews(() => ({ h, network, browser }));
+deadlineImageReviews(() => ({ h, network, browser }));
 
 it("should execute all six published gestures and close on a real ACL withdrawal", async () => {
   const context = await browser.newContext(), page = await context.newPage();
