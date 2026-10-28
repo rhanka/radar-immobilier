@@ -11,9 +11,9 @@
 - [x] Commits sur une ligne, sans corps ni trailer ; aucun push ni fusion.
 
 ## Branch Scope Boundaries (MANDATORY)
-- [x] Allowed Paths: `tools/make/base-preprod*`, `tools/make/bascule-6h-vehicle*`, `deploy/base-preprod/*`, `docs/spec/BASE_API_ACTIVATION.md`, `RAPPORT-SOL-BASCULE-6H.md`, `plan/6HVEHICLE-BRANCH_fix-bascule-6h-vehicle.md`.
-- [x] Forbidden Paths: `Makefile`, `docker-compose*.yml`, `rules/**`, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, autres plans, code applicatif et migrations.
-- [x] Conditional Paths: aucun écart nécessaire ; aucune dépendance ajoutée.
+- [x] **Allowed Paths**: `tools/make/base-preprod*`, `tools/make/bascule-6h-vehicle*`, `deploy/base-preprod/*`, `docs/spec/BASE_API_ACTIVATION.md`, `RAPPORT-SOL-BASCULE-6H.md`, `plan/6HVEHICLE-BRANCH_fix-bascule-6h-vehicle.md`.
+- [x] **Forbidden Paths**: `Makefile`, `docker-compose*.yml`, `rules/**`, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, autres plans, code applicatif et migrations.
+- [x] **Conditional Paths**: aucun écart nécessaire ; aucune dépendance ajoutée.
 
 ## Feedback Loop
 - [x] Le journal historique ne contient pas le message réseau ni l'erreur JSON ; ne pas inventer une cause historique.
