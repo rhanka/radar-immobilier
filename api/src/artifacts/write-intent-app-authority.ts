@@ -15,6 +15,7 @@ import { lockWorkspace } from "../services/workspaces/mutations.js";
 import { WorkspaceError } from "../services/workspaces/types.js";
 import { isPersonalOperation, type SignalWriteOperation } from "../services/facets/signal-write-operations.js";
 import type { WriteTx } from "../services/facets/signal-write-scope.js";
+import { lockPublishedWriteAuthority } from "./published-write-authority.js";
 
 export interface WriteAppDeps extends AppGuardDeps {
   db: Database;
@@ -54,11 +55,13 @@ export async function canReadWriteIntentSummary(deps: WriteAppDeps, row: PwInten
 export async function canReadWriteIntentSummaryInTx(tx: WriteTx, row: PwIntentRow,
   pass: AppGuardPass): Promise<boolean> {
   try {
+    await lockPublishedWriteAuthority(tx, row.authorityReferences as Record<string, string>, false);
     await lockWorkspace(tx, row.workspaceId);
     await approvedAccountId(tx, pass.principal.sub, true);
     const access = await resolveWorkspaceAccess(tx, row.workspaceId, pass.principal.sub);
     return isPersonalOperation(row.operation as SignalWriteOperation) || access.moderateArchive;
   } catch (error) {
+    if (error instanceof PwWriteError && error.message === "write_authority_unavailable") return false;
     if (error instanceof WorkspaceError && ["account_not_approved", "workspace_membership_required",
       "workspace_not_found"].includes(error.message)) return false;
     throw error;
