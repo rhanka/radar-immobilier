@@ -27,6 +27,14 @@ source tools/make/base-api-l5-lock.sh
 acquire_l5_lock
 git diff --quiet HEAD
 SOURCE_HEAD=$(git rev-parse HEAD)
+FIRST_TRACK=$(git rev-parse 'approved/main^1')
+git merge-base --is-ancestor "$FIRST_TRACK" HEAD
+FIRST_COUNT=$(git show "$FIRST_TRACK:api/drizzle/meta/_journal.json" | jq -er '.entries|length')
+cmp <(git show "$FIRST_TRACK:api/drizzle/meta/_journal.json" | jq -c '.entries') \
+  <(jq -c --argjson count "$FIRST_COUNT" '.entries[:$count]' api/drizzle/meta/_journal.json)
+mapfile -t first_sql < <(git show "$FIRST_TRACK:api/drizzle/meta/_journal.json" | jq -r '.entries[].tag| "api/drizzle/"+. +".sql"')
+git diff --quiet "$FIRST_TRACK" HEAD -- "${first_sql[@]}"
+jq -n --arg head "$FIRST_TRACK" --argjson count "$FIRST_COUNT" '{head:$head,count:$count}' > "$LOG_DIR/first-track.json"
 [[ $(df -Pk "$ROOT" | awk 'NR==2 {print $4}') -ge 8388608 ]]
 [[ $(awk '/MemAvailable:/ {print $2}' /proc/meminfo) -ge 8388608 ]]
 OWNER=$(printf '%s' "$ROOT/$ENV" | sha256sum | cut -d' ' -f1)
