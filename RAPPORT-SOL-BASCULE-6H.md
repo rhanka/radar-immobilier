@@ -191,6 +191,9 @@ Validation locale verte : **280 cas natifs, 15 tests Node, deux contrôles UTC,
 trois modes de contrôle du gel, le test de contexte et onze chemins publics**.
 La répétition donne `nativeFilter:true`, Q1/Q2 simulés réussis, `lateQ1:false`
 attendu, puis `reclosed:true`, `verifiedClosed:true`, `restored:true`.
+Les mêmes cibles passent depuis un import propre du bundle r2, basé uniquement
+sur ec867041. Les contrôles harness de branche et de périmètre passent ; le
+runtime épinglé est Node 24.22.1 avec WebSocket global, sans contact Chrome.
 Les trois mutations ciblées (scale, validation du snapshot, test resourceVersion)
 sont rejetées ; les exécutions avant/après passent et les sources sont inchangées.
 Contrôles Bash et diff propres. Journaux sous
