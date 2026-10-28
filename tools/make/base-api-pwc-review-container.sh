@@ -9,6 +9,12 @@ import config from './vitest.config.js';
 export default { ...config, envDir: false,
   test: { ...config.test, fileParallelism: false, maxWorkers: 1 } };
 CONFIG
+if [[ $1 == proxy ]]; then
+  cat >> api/vitest.isolated.config.ts <<'CONFIG'
+// Select the acceptance module explicitly; ordinary API CI has no proxy dependency.
+CONFIG
+  sed -i "s/maxWorkers: 1/maxWorkers: 1, include: ['tests\/integration\/pwcr-proxy.acceptance.ts']/" api/vitest.isolated.config.ts
+fi
 cat > api/tsconfig.pwe-tests.json <<'CONFIG'
 {"extends":"./tsconfig.json","compilerOptions":{"rootDir":"..","noEmit":true},"include":["src/**/*.ts","tests/integration/pwe-*.ts","tests/integration/pwcr-*.ts"],"exclude":["dist","node_modules"]}
 CONFIG
