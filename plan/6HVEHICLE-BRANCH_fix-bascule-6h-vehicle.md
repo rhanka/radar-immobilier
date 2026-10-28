@@ -49,6 +49,7 @@
 - [ ] **Lot 6 — Seconde passe Fable et astra (#940)**
   - [x] Reproduire en rouge fractions UTC, diagnostic de champ et récupération tardive.
   - [x] Fractions acceptées, champ invalide nommé ; reclose-api tardif admis sous gel actif.
+  - [x] Dates nulles, non textuelles et +00:00 refusées avec le champ nommé.
   - [x] Reproduire le refus sans mutation de close après réouverture (create tenté, AlreadyExists).
   - [x] close refuse le Service existant avant toute écriture ; rendu API partagé sans mutation.
   - [x] Entrée reclose-api manquante reproduite ; fixture de replicas et resourceVersion fidèle.
