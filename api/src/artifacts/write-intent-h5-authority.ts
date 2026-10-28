@@ -9,6 +9,7 @@ import { canonicalWritePrincipal } from "./write-intent-principal.js";
 import { resolveWritePage } from "./write-intent-page-authority.js";
 import type { H5WriteDeps } from "./write-intent-h5-route.js";
 import { writeIntentTransaction } from "./write-intent-transaction.js";
+import { canReadWriteIntentSummaryInTx } from "./write-intent-app-authority.js";
 
 /** Reusable disclosure fence, including a fresh authenticated P after SQL waits. */
 export async function readPageBoundWriteIntent(c: Context, deps: H5WriteDeps, id: string) {
@@ -26,6 +27,11 @@ export async function readPageBoundWriteIntent(c: Context, deps: H5WriteDeps, id
       || artifact.profileFingerprint !== page.grant.profileFingerprint
       || artifact.policyRevision !== page.grant.policyRevision) throw new FacetError(403, "write_grant_required");
     assertPwPrincipal(row, canonicalWritePrincipal(page.grant));
+    // Run after the final P resolution. Retain the workspace/approval locks
+    // through disclosure; workspace operations also require current moderation.
+    if (!await canReadWriteIntentSummaryInTx(tx, row, { principal: canonicalWritePrincipal(page.grant) })) {
+      throw new FacetError(403, "write_authority_unavailable");
+    }
     return { row, page };
   });
 }
