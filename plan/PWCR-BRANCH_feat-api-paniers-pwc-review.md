@@ -1,7 +1,7 @@
 # Feature: PW-C Astra review corrections
 
 ## Objective
-- [ ] Resolve every finding in both Astra PW-C reviews and deliver the corrected incremental bundle before resuming L5.
+- [x] Resolve every finding in both Astra PW-C reviews and deliver the corrected incremental bundle before resuming L5.
 
 ## Scope / Guardrails
 - [x] Owner priority change interrupts L5. Keep its work isolated; no push.
@@ -30,14 +30,22 @@
 - [x] Automated isolated qualification only; root dev/UAT remains untouched.
 
 ## Plan / Todo (lot-based)
-- [ ] Lot 1: locked application status, receipt recovery and separate execution/revocation terminal HTML.
+- [x] Lot 1: locked application status, receipt recovery and separate execution/revocation terminal HTML.
 - [x] Lot 1 implementation: status computed under I lock; authorized committed receipt survives revocation; terminal HTML has no confirm button.
-- [ ] Lot 2: active preprod nginx routes, HTTPS public origin, mandatory P instance/CSRF.
+- [x] Lot 2: active preprod nginx routes, HTTPS public origin, mandatory P instance/CSRF.
 - [x] Lot 2 implementation: preprod locations, canonical Host HTTPS and timing-safe private P proof checks.
-- [ ] Lot 3: served page/script/CSP, targeted pre-read and coherent post-receipt refresh.
+- [x] Lot 3: served page/script/CSP, targeted pre-read and coherent post-receipt refresh.
 - [x] Lot 3 implementation: authenticated content composition serves exact PW bytes/hash and reuses BASE state/search readers under the selected workspace.
-- [ ] Lot 4: strict listener response projection and browser identity/intent validation.
+- [x] Lot 4: strict listener response projection and browser identity/intent validation.
 - [x] Lot 4 implementation: closed envelopes and canonical app document links; real listener/H5/BASE contract test added.
-- [ ] Lot 5: preserve uncertain prepare keys and manual Retry-After budgets.
+- [x] Lot 5: preserve uncertain prepare keys and manual Retry-After budgets.
 - [x] Lot 5 implementation: retry refusal retains the original body/key; Retry-After persists the later manual deadline.
-- [ ] Lot 6: unit/PG/API/proxy tests, discriminating mutations, audited bundle and French report.
+- [x] Lot 6: unit/PG/API/proxy tests, discriminating mutations, audited bundle and French report.
+
+## Qualification closure
+- [x] Required unit/PostgreSQL: 369 passed, zero failed/skipped; API CI: 4532 passed, zero failed, 76 unrelated conditional skips.
+- [x] Typecheck, lint, build and CT-8 fresh/upgrade reruns pass; three real nginx routes pass without skips.
+- [x] All 136 campaign entries killed and byte-restored: PWA 31, PWB 5, PWD 7, PWC 25, PWE 52, review 16.
+- [x] Final mutation campaign 20261028T043555-mutations passes with down -v and both locks released.
+- [x] Completed API commands precede the later foreign interruption; runtime/dependency/configuration tree equality is checked by pwcr-proof.
+- [x] Qualified bundle is gated by current-HEAD proof and audited from the base-only prerequisite; root French report delivered separately.
