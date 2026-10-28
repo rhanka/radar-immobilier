@@ -15,6 +15,8 @@ mkdir -p "$RUN_DIR" "$LOG_DIR"
 echo "Evidence: $CAMPAIGN_DIR"
 source tools/make/base-api-l5-lock.sh
 acquire_l5_lock
+git diff --quiet HEAD
+CANDIDATE=$(git rev-parse HEAD)
 export COMPOSE_DISABLE_ENV_FILE=1
 export DOCKER_CONFIG="$HOME/.cache/radar-l5-docker"
 export BUILDX_CONFIG="$DOCKER_CONFIG/buildx"
@@ -53,6 +55,8 @@ source tools/make/base-api-pwa-offline.sh
 archive_sources
 archive_ci_inputs
 image_archive_inputs
+[[ $(git rev-parse HEAD) == "$CANDIDATE" ]]
+git diff --quiet HEAD
 sha256sum "$RUN_DIR/source.tar" > "$CAMPAIGN_DIR/source.sha256"
 printf '%s\n' "$CANDIDATE" > "$CAMPAIGN_DIR/head.txt"
 (
