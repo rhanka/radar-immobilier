@@ -11,6 +11,7 @@ allowed() {
     api/tests/integration/l5-*.ts|tools/make/base-api-l5*|plan/L5-BRANCH_feat-api-paniers-l5.md) ;;
     api/tests/integration/pw-write-authority.spec.ts|api/tests/integration/pw-write-authority-status.spec.ts|api/tests/integration/pwcr-app-status.spec.ts|api/tests/integration/pwcr-listener-h5.spec.ts) ;;
     api/tests/integration/pwcr-proxy.acceptance.ts|tools/make/base-api-pwe-extra-mutation-cases.mjs) ;;
+    tools/make/base-api-pwe-app-result-regression.mjs|tools/make/base-api-pwe-before-app-result.txt) ;;
     *) echo "Out of L5 scope: $1" >&2; return 2;;
   esac
   [[ $1 != *..* && ! -L $1 ]]
