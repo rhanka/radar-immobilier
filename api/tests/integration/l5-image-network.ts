@@ -21,6 +21,8 @@ export async function imageNetwork(subjects: string[]) {
   let exchanges = 0;
   let loseConfirm = false, lostResponses = 0;
   let runtime = "runtime";
+  let suspended: { path: string; stage: "transport" | "body" } | null = null;
+  let suspensions = 0;
   const server = createServer({ key: readFileSync("/tls/key.pem"), cert: readFileSync("/tls/cert.pem") }, async (req, res) => {
     try {
       const host = req.headers.host ?? "", url = new URL(req.url ?? "/", `https://${host}`);
@@ -77,6 +79,18 @@ export async function imageNetwork(subjects: string[]) {
           loseConfirm = false; lostResponses++;
           response.on("end", () => res.destroy()); response.resume(); return;
         }
+        if (suspended?.path === url.pathname && response.statusCode === 200) {
+          const { stage } = suspended; suspended = null; suspensions++;
+          // Drain the actual runtime response (including a committed command),
+          // then hold only the synthetic TLS connection to the browser.
+          response.resume();
+          if (stage === "body") {
+            const headers = { ...response.headers };
+            delete headers["content-length"]; delete headers["transfer-encoding"];
+            res.writeHead(200, headers); res.flushHeaders(); res.write('{"suspended":');
+          }
+          return;
+        }
         res.writeHead(response.statusCode ?? 502, response.headers); response.pipe(res);
       });
       upstream.on("error", () => { res.writeHead(502); res.end(); }); req.pipe(upstream);
@@ -84,6 +98,10 @@ export async function imageNetwork(subjects: string[]) {
   });
   server.listen(443, "0.0.0.0"); await once(server, "listening");
   return { traffic, exchanges: () => exchanges, lostResponses: () => lostResponses,
+    suspendNext: (path: string, stage: "transport" | "body") => {
+      assert.equal(suspended, null); suspended = { path, stage };
+    },
+    suspensions: () => suspensions,
     loseNextConfirmResponse: () => { assert.equal(loseConfirm, false); loseConfirm = true; },
     setRuntime: (name: "runtime" | "runtime-base" | "runtime-read") => { runtime = name; },
     close: async () => {
