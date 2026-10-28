@@ -25,7 +25,13 @@ exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
 while :; do
   running=$(docker ps --format '{{.Names}}')
   if [[ -z $running ]] && flock -w 1 8; then
-    running=$(docker ps --format '{{.Names}}')
+    # Other projects do not share this lock: do not enter between batch jobs.
+    echo 'Shared lock acquired; requiring sixty seconds of empty Docker'
+    for ((sample=0; sample<60; sample++)); do
+      running=$(docker ps --format '{{.Names}}')
+      [[ -z $running ]] || break
+      sleep 1
+    done
     [[ -n $running ]] || break
     flock -u 8
   fi
