@@ -6,8 +6,8 @@
  * authenticates the page (P) through the injected write authority, mints a
  * write grant on prepare demand only, and forwards server-to-server with the
  * verified grant plus the page proof extracted from the cookie. Polling never
- * mints or renews a grant. Receiver responses travel back untouched so typed
- * refusals survive to the page.
+ * mints or renews a grant. Receiver responses are validated and projected;
+ * only public typed refusals and bounded Retry-After survive to the page.
  */
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
