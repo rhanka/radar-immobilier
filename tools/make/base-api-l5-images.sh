@@ -113,7 +113,7 @@ for CONTENT_BASE in pages.sent-tech.ca pages.reader.test; do
   "${compose[@]}" exec -T runtime sh -ec 'sha256sum api/drizzle/*.sql api/drizzle/meta/_journal.json' > "$LOG_DIR/image-migrations.sha256"
   while kill -0 "$RUN_PID" 2>/dev/null; do
     if [[ -f $LOG_DIR/runtime-stop-request ]]; then
-      "${compose[@]}" stop runtime runtime-base runtime-read > "$LOG_DIR/runtime-stop.log" 2>&1
+      "${compose[@]}" stop --timeout 2 runtime runtime-base runtime-read > "$LOG_DIR/runtime-stop.log" 2>&1
       touch "$LOG_DIR/runtime-stopped"
       break
     fi
