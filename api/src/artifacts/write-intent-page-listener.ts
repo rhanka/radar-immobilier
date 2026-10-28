@@ -11,7 +11,9 @@
  */
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
-import { applyReaderContentHeaders, READER_CONTENT_HEADERS } from "./content-isolation.js";
+import { applyReaderContentHeaders } from "./content-isolation.js";
+import { timingSafeEqual } from "node:crypto";
+import { projectPageWriteResponse } from "./write-intent-page-response.js";
 import { parseContentHost } from "./content-host.js";
 import { hasDuplicateJsonKeys } from "./write-intent-binding.js";
 import { FacetError } from "../services/facets/target.js";
@@ -22,6 +24,7 @@ import { assertIdempotencyKey, assertWritePrepareBody } from "./write-intent-sch
 import { PW_PAGE_PREPARE_PATH, PW_PAGE_STATUS_PATH } from "./write-intent-page-gesture.js";
 
 export interface PageListenerDeps extends PageWriteAuthorityDeps {
+  applicationOrigin: string;
   /** Content base used to refuse non-content hosts, like the read dispatch. */
   contentBase: string;
   /** Fixed H receiver; same-process sub-app or server-to-server fetch. */
@@ -32,9 +35,9 @@ export interface PageListenerDeps extends PageWriteAuthorityDeps {
 const INTERNAL_HEADERS = ["x-preview-write-grant", "x-preview-session"];
 const FORWARD_BASE = "https://page-write.internal";
 
-function ownOrigin(url: string): string | null {
+function publicOrigin(host: string | undefined, base: string): string | null {
   try {
-    return new URL(url).origin;
+    return parseContentHost(host, base).kind === "other" ? null : new URL(`https://${host}`).origin;
   } catch {
     return null;
   }
@@ -63,14 +66,6 @@ function forwardHeaders(c: { req: { header: (name: string) => string | undefined
   return headers;
 }
 
-/** Keep typed upstream outcomes while enforcing the content response policy. */
-function forwardedResponse(response: Response): Response {
-  const headers = new Headers(response.headers);
-  for (const [name, value] of Object.entries(READER_CONTENT_HEADERS)) headers.set(name, value);
-  headers.set("Vary", "Cookie, Authorization");
-  return new Response(response.body, { status: response.status, headers });
-}
-
 export function pageWriteListenerRoute(deps: PageListenerDeps | null): Hono {
   const app = new Hono();
   app.use(PW_PAGE_PREPARE_PATH, bodyLimit({ maxSize: 16 * 1024,
@@ -89,7 +84,7 @@ export function pageWriteListenerRoute(deps: PageListenerDeps | null): Hono {
     try {
       assertNoInternalHeaders(c);
       const origin = c.req.header("origin");
-      if (origin !== undefined && origin !== ownOrigin(c.req.url)) {
+      if (!origin || origin !== publicOrigin(c.req.header("host"), deps.contentBase)) {
         throw new FacetError(403, "csrf_refused");
       }
       if (c.req.header("content-encoding") !== undefined) {
@@ -109,13 +104,19 @@ export function pageWriteListenerRoute(deps: PageListenerDeps | null): Hono {
       const key = c.req.header("idempotency-key") ?? "";
       assertIdempotencyKey(key);
       assertWritePrepareBody(body);
-      const now = (deps.nowMs ?? Date.now)();
-      const page = await resolveWritePage(c, deps, () => now);
-      const grant = await mintPageWriteGrant(page, deps, now);
+      const page = await resolveWritePage(c, deps, deps.nowMs ?? Date.now);
+      const csrf = Buffer.from(c.req.header("x-reader-csrf") ?? "");
+      const expected = Buffer.from(page.csrfToken ?? "");
+      if (page.grant.host !== new URL(origin).host || c.req.header("x-reader-instance") !== page.pageInstanceId ||
+        expected.length < 32 || csrf.length !== expected.length || !timingSafeEqual(csrf, expected)) {
+        throw new FacetError(403, "csrf_refused");
+      }
+      const grant = await mintPageWriteGrant(page, deps, (deps.nowMs ?? Date.now)());
       const headers = forwardHeaders(c, grant);
       headers.set("idempotency-key", key);
-      return forwardedResponse(await deps.forward(new Request(`${FORWARD_BASE}/write-intents`,
-        { method: "POST", headers, body: raw })));
+      return projectPageWriteResponse(c, await deps.forward(new Request(`${FORWARD_BASE}/write-intents`,
+        { method: "POST", headers, body: raw })), { verb: "prepare", readerSub: page.grant.readerSub,
+        appOrigin: deps.applicationOrigin });
     } catch (error) {
       return writeIntentError(c, error);
     }
@@ -127,9 +128,10 @@ export function pageWriteListenerRoute(deps: PageListenerDeps | null): Hono {
       assertNoInternalHeaders(c);
       const id = c.req.query("intentId") ?? "";
       assertIdempotencyKey(id);
-      await resolveWritePage(c, deps, deps.nowMs ?? Date.now);
-      return forwardedResponse(await deps.forward(new Request(`${FORWARD_BASE}/write-intents/${id}`,
-        { method: "GET", headers: forwardHeaders(c, null) })));
+      const page = await resolveWritePage(c, deps, deps.nowMs ?? Date.now);
+      return projectPageWriteResponse(c, await deps.forward(new Request(`${FORWARD_BASE}/write-intents/${id}`,
+        { method: "GET", headers: forwardHeaders(c, null) })), { verb: "status", readerSub: page.grant.readerSub,
+        appOrigin: deps.applicationOrigin, intentId: id });
     } catch (error) {
       return writeIntentError(c, error);
     }
