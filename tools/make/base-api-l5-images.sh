@@ -95,7 +95,7 @@ for CONTENT_BASE in pages.sent-tech.ca pages.reader.test; do
   "${compose[@]}" up -d --no-deps runtime
   wait "$RUN_PID" || { tail -70 "$LOG_DIR/browser.log"; exit 1; }
   RUN_PID=
-  jq -e '.numPassedTests==2 and .numFailedTests==0 and .numPendingTests==0' "$LOG_DIR/browser.json"
+  jq -e '.numPassedTests==3 and .numFailedTests==0 and .numPendingTests==0' "$LOG_DIR/browser.json"
   "${compose[@]}" exec -T runtime cat api/release-sha > "$LOG_DIR/release-sha.txt"
   [[ $(cat "$LOG_DIR/release-sha.txt") == "$CANDIDATE" ]]
   "${compose[@]}" logs --no-color > "$LOG_DIR/compose.log"
