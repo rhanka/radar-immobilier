@@ -20,7 +20,7 @@ import {
 import { readScopedPersonalHeads } from "../services/facets/scoped-reader.js";
 import { readWorkspaceArchiveCity } from "../services/facets/workspace-reader.js";
 
-const workspaceId = z.string().uuid();
+const workspaceId = z.string().guid();
 const city = z.string().min(1).max(128).regex(/^[a-z0-9-]+$/);
 const mode = z.enum(["signal"]);
 

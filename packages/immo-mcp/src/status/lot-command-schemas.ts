@@ -32,7 +32,7 @@ export const LotCommandItemSchema = z.object({
   }
 });
 const envelope = { workspaceId: WorkspaceIdSchema, scope: ScopeSchema,
-  commandKey: z.string().uuid(), mode: ModeSchema };
+  commandKey: z.string().guid(), mode: ModeSchema };
 export const CommandLotFacetInputSchema = z.object({
   ...envelope, body: LotCommandItemSchema,
 }).strict().superRefine((input, ctx) => {

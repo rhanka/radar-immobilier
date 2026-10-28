@@ -6,9 +6,14 @@ def bound($b): .binding == $b;
 def fresh: type == "string" and (try (sub("\\.[0-9]+Z$";"Z")|fromdateiso8601 as $t | $t <= now and $t >= now-86400) catch false);
 def reference: .reference|text and (test("\\?|://[^/]*@|[Bb]earer |[Tt]oken=" )|not);
 def attestation: reference and (.sha256|sha) and (.observedAt|fresh);
+def isolation_waiver:
+  .namespace=="radar-immobilier-preprod"
+  and (.maintenance.networkIsolation.waiver | type=="object" and keys==["reason","reference"]
+    and .reference=="owner-preprod-preaccord-2026-10-27" and (.reason|text and test("\\S")));
 def valid:
   ([..|strings|test("<|>|placeholder|replace.me|changeme|todo|\\$\\{";"i")]|any|not)
   and (.context|text) and .namespace == "radar-immobilier-preprod"
+  and (if (.maintenance.networkIsolation//{}|has("waiver")) then isolation_waiver else true end)
   and (.image|text and test("^[a-z0-9./:_-]+@sha256:[a-f0-9]{64}$"))
   and (.image|split(":")|last|sha)
   and (.jobName|name and startswith("base-operator-"))

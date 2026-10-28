@@ -18,7 +18,7 @@ commit_slice() {
 }
 git add -- "$plan"
 commit_slice 'docs(pw-d): declare integration and qualification scope'
-migration=api/drizzle/0025_pw_write_persistence.sql
+migration=api/drizzle/0027_pw_write_persistence.sql
 blob=$(awk '/^CREATE OR REPLACE FUNCTION guard_pw_write_append_only/{exit} {print}' "$migration" | git hash-object -w --stdin)
 git update-index --add --cacheinfo "100644,$blob,$migration"
 commit_slice 'feat(pw-d): add durable write persistence tables'

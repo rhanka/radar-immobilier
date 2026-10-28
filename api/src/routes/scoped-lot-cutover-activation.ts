@@ -37,7 +37,7 @@ const decisionSchema = z.object({
   reason: z.string().min(1).max(1024),
 }).strict();
 
-const dispositionsBodySchema = z.object({
+export const dispositionsBodySchema = z.object({
   manifestSha: z.string().length(64).regex(/^[a-f0-9]{64}$/),
   decisions: z.array(decisionSchema).min(1).max(200),
 }).strict();

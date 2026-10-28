@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { composeArtifactHost, createArtifactControl } from "@radar/artifacts-host";
 import { parseContentHost } from "@sentropic/artifacts/content/routing";
 import { startHarness, type Harness } from "./artifacts-h2.helpers.js";
@@ -6,6 +6,7 @@ import { startHarness, type Harness } from "./artifacts-h2.helpers.js";
 let h: Harness;
 beforeAll(async () => { h = await startHarness("publication", ["alice", "bob"]); });
 afterAll(async () => { await h?.close(); });
+beforeEach(async () => { await h.pool.query("DELETE FROM artifacts.host_actor_rate"); });
 const ensure = (key = "ensure") => ({ bindingName: "summer", idempotencyKey: key });
 const file = { path: "index.html", mimeType: "text/html", text: "Été 🏠" };
 async function artifactId() {
@@ -20,13 +21,20 @@ describe("artifact Postgres and S3 publication", () => {
     expect(responses.map((r) => r.status)).toEqual(Array(10).fill(201));
     const ids = responses.map((r) => (r.body as { artifactId: string }).artifactId);
     expect(new Set(ids).size).toBe(1);
+    // Start the next fixture window after the ten distinct commits. Keep the
+    // production rate bound intact while testing further retries and restart.
+    expect((await h.pool.query("SELECT count FROM artifacts.host_actor_rate WHERE actor_id='alice'"))
+      .rows).toEqual([{ count: 10 }]);
+    await h.pool.query("UPDATE artifacts.host_actor_rate SET window_start = window_start - interval '1 minute'");
     const replays = await Promise.all(Array.from({ length: 10 }, () =>
       h.control.handle("ensure", "alice", ensure("same-key"))));
     expect(replays.map((r) => (r.body as { artifactId: string }).artifactId)).toEqual(Array(10).fill(ids[0]));
     expect((await h.pool.query("SELECT count(*) FROM artifacts.artifacts")).rows[0].count).toBe("1");
     const restarted = (await composeArtifactHost(h.pool, h.config))!;
     const again = await createArtifactControl(restarted, h.config.storageScope, "pages.example.test")
-      .handle("ensure", "alice", ensure("restart"));
+      .handle("ensure", "alice", ensure("same-key"));
+    expect(again.status).toBe(201);
+    expect(again.body).toMatchObject({ replayed: true });
     expect((again.body as { artifactId: string }).artifactId).toBe(ids[0]);
     restarted.close();
   });
@@ -63,6 +71,7 @@ describe("artifact Postgres and S3 publication", () => {
   });
   it("leaves neither release nor current pointer when S3 fails", async () => {
     const ensured = await h.control.handle("ensure", "alice", { bindingName: "failure", idempotencyKey: "failure" });
+    expect(ensured.status).toBe(201);
     const id = (ensured.body as { artifactId: string }).artifactId;
     const broken = (await composeArtifactHost(h.pool, h.config, { ...h.blobs,
       async putBlob() { throw new Error("injected S3 failure"); } }))!;

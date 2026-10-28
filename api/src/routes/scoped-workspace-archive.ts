@@ -30,9 +30,9 @@ const target = z.object({
   id: z.string().min(1).max(512),
 }).strict();
 const reasonCode = z.string().max(128).regex(/^[A-Z0-9]+(-[A-Z0-9]+)*$/);
-const expectedHeadId = z.string().uuid().nullable();
+const expectedHeadId = z.string().guid().nullable();
 const displayedFingerprint = z.string().length(64).regex(/^[a-f0-9]{64}$/);
-const workspaceId = z.string().uuid();
+const workspaceId = z.string().guid();
 const city = z.string().min(1).max(128).regex(/^[a-z0-9-]+$/);
 
 const discardSchema = z.object({
@@ -81,7 +81,7 @@ export function scopedWorkspaceArchiveRoute(deps: ScopedWorkspaceArchiveDeps): H
       const body = await c.req.json().catch(() => null);
       const schema = action === "discard" ? discardSchema : restoreSchema;
       const parsed = schema.safeParse(body);
-      const key = z.string().uuid().transform((value) => value.toLowerCase())
+      const key = z.string().guid().transform((value) => value.toLowerCase())
         .safeParse(c.req.header("Idempotency-Key"));
       if (!parsed.success || !key.success) {
         return c.json({ error: "invalid_facet_command" }, 400);

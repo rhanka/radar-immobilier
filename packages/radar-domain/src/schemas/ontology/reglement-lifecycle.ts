@@ -54,7 +54,7 @@ export const OntoRelation = z.object({
   target: z.union([
     // A1-safe : le n° de règlement vit dans la CIBLE, jamais dans l'identité d'event (§5).
     z.object({ reglementNumero: z.string().min(1) }),
-    z.object({ nodeId: z.string().uuid() }),
+    z.object({ nodeId: z.string().guid() }),
   ]),
   /** Libellé verbatim émis par geo (matériau du typage) ; null pour lifecycle_predecessor (dérivé n°+ordre-stages). */
   fromLibelle: z.string().nullable().default(null),

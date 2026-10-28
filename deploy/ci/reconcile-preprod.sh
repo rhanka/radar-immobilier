@@ -71,7 +71,7 @@ kubectl kustomize --load-restrictor LoadRestrictionsNone deploy/overlays/preprod
 #     applied below, before any diff/apply (fail-closed, set -e).
 bash deploy/ci/check-preprod-auth-isolation.sh "$RENDER"
 
-kf() { python3 deploy/ci/kfilter.py "$@"; }
+kf() { bash deploy/ci/kfilter.sh "$@"; }
 
 # immo-mcp-config document of the render, byte-for-byte, WITHOUT Python (owner
 # rule: no Python in repos/jobs; node is on the runner). kustomize separates

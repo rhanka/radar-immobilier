@@ -29,7 +29,24 @@ Qualify and correct the uncommitted PW-A authority layer on 39ed4f1b.
   - Approved PW-D implementation, migration, tests, spec, tooling and plan:
     PWA-EX3 permits their exact import from 0ab7d664 by merge only.
 
+  - Migration rename, journal, schema.ts comment, PW-D migration test,
+    PW_D_PERSISTENCE.md and the three PW-D delivery/commit helpers: PWA-EX5.
+
 ## Feedback Loop
+- [x] Owner-targeted sequence runner checks fresh/upgrade/replay, all PW-A/PW-D
+  PostgreSQL cases and static gates; optional API CI is recorded explicitly.
+- [x] Qualify 0027 and audit an incremental bundle from approved 509e664d.
+- [x] Campaign 20261027T235341: CT8 fresh/upgrade/rerun retains 27 hashes;
+  134 scoped tests pass without skips, API 4482/0/79; static gates pass.
+- [x] Fresh base-seeded bundle import preserves HEAD/tree, main's journal
+  prefix and SQL blobs; owned down -v completes and the shared lock is free.
+- [x] Include the unchanged UI workspace manifest for the API suite's locked
+  Playwright import; preserve its browser opt-in, lockfile and assertions.
+- [x] PWA-EX5: owner orders published quota 0025, reader tickets 0026,
+  then PW-A persistence 0027. Merge main c189c188 after PRs 930/931,
+  preserve all incoming SQL/journal bytes, rename approved DDL unchanged,
+  and update its references and replay test. Revert the merge with first
+  parent as mainline for rollback; retain both histories and publish nothing.
 - [x] Final merged campaign 20261027T174812: 137 scoped tests, including
   34 PostgreSQL authority cases and three real-socket delivery probes; zero skips.
 - [x] Final gates: 31 killed/restored mutants, API 4334/0/76, ARTEFACTS

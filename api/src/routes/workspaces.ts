@@ -1,3 +1,4 @@
+import { contractInteger } from "@radar/domain";
 /**
  * 6G workspace routes: list the caller's workspaces and manage memberships.
  * Membership changes require a browser session holding the management
@@ -15,13 +16,13 @@ import {
   WorkspaceRevisionConflictError,
 } from "../services/workspaces/types.js";
 
-const uuid = z.string().uuid();
+const uuid = z.string().guid();
 const membershipBody = z.object({
   accountId: uuid,
   status: z.enum(["active", "revoked"]).optional(),
   moderateArchive: z.boolean().optional(),
   manageMembers: z.boolean().optional(),
-  expectedRevision: z.number().int().min(1).nullish(),
+  expectedRevision: contractInteger().min(1).nullish(),
 }).strict().refine((body) => body.status !== "revoked"
   || (body.moderateArchive === undefined && body.manageMembers === undefined));
 
@@ -63,7 +64,7 @@ export function workspacesRoute(deps: WorkspacesRouteDeps): Hono {
   app.post("/api/v1/workspaces/:workspaceId/memberships", async (c) => {
     const session = c.get("session" as never) as { sub: string };
     const workspaceId = c.req.param("workspaceId");
-    if (!z.string().uuid().safeParse(workspaceId).success) {
+    if (!z.string().guid().safeParse(workspaceId).success) {
       return c.json({ error: "invalid_workspace_command" }, 400);
     }
     const body = membershipBody.safeParse(await c.req.json().catch(() => null));

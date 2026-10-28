@@ -6,6 +6,7 @@ import {
 import type { AuthConfig } from "../config.js";
 import type { Logger } from "../logger.js";
 import type { ControlRouteDeps } from "./control-route.js";
+import { createStoredReader } from "./reader-storage.js";
 
 export async function startArtifactControl(options: {
   input: ArtifactsConfigInput;
@@ -36,7 +37,8 @@ export async function startArtifactControl(options: {
     const backend = createArtifactControl(host, parsed.storageScope, contentBase,
       createArtifactAdmissionAuthority(pool, readActivation, parsed.storageScope));
     logger.info({ storageScope: parsed.storageScope, s3Bucket: parsed.s3Bucket }, "artifact control enabled");
-    return { auth, accounts: pool, backend, readActivation, storageScope: parsed.storageScope };
+    return { auth, accounts: pool, backend, readActivation, storageScope: parsed.storageScope,
+      readerStorage: createStoredReader(pool, parsed.storageScope, contentBase, host.blobs) };
   } catch (err) {
     logger.error({ err }, "artifact control unavailable; API remains available");
     return { auth, accounts: pool };
