@@ -39,6 +39,12 @@ function ownOrigin(url: string): string | null {
   }
 }
 
+/** TLS terminates before Hono; only the routed Host selects the HTTPS origin. */
+function contentOrigin(c: { req: { url: string; header: (name: string) => string | undefined } }): string | null {
+  const host = c.req.header("host") ?? new URL(c.req.url).host;
+  return ownOrigin(`https://${host}`);
+}
+
 /** The page operations never serve another host, like the read dispatch. */
 function foreignHost(c: { req: { header: (name: string) => string | undefined } },
   contentBase: string): boolean {
@@ -92,7 +98,7 @@ export function pageWriteListenerRoute(deps: PageListenerDeps | null): Hono {
     try {
       assertNoInternalHeaders(c);
       const origin = c.req.header("origin");
-      if (origin !== undefined && origin !== ownOrigin(c.req.url)) {
+      if (origin !== undefined && origin !== contentOrigin(c)) {
         throw new FacetError(403, "csrf_refused");
       }
       if (c.req.header("content-encoding") !== undefined) {
@@ -116,7 +122,7 @@ export function pageWriteListenerRoute(deps: PageListenerDeps | null): Hono {
       const grant = await mintPageWriteGrant(page, deps, (deps.nowMs ?? Date.now)());
       const headers = forwardHeaders(c, grant);
       headers.set("idempotency-key", key);
-      return forwardedResponse(await deps.forward(new Request(`${ownOrigin(c.req.url)}/write-intents`,
+      return forwardedResponse(await deps.forward(new Request(`${contentOrigin(c)}/write-intents`,
         { method: "POST", headers, body: raw })));
     } catch (error) {
       return writeIntentError(c, error);
@@ -130,7 +136,7 @@ export function pageWriteListenerRoute(deps: PageListenerDeps | null): Hono {
       const id = c.req.query("intentId") ?? "";
       assertIdempotencyKey(id);
       await resolveWritePage(c, deps, deps.nowMs ?? Date.now);
-      return forwardedResponse(await deps.forward(new Request(`${ownOrigin(c.req.url)}/write-intents/${id}`,
+      return forwardedResponse(await deps.forward(new Request(`${contentOrigin(c)}/write-intents/${id}`,
         { method: "GET", headers: forwardHeaders(c, null) })));
     } catch (error) {
       return writeIntentError(c, error);
