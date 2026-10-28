@@ -4,8 +4,8 @@
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 TARGET="${1:-$(cd "$HERE/../.." && pwd)}"
-PHASE="${H3_RENDER_PHASE:-disabled}"
-case "$PHASE" in disabled|preparation|activation|rollback) ;; *) echo 'FAIL: unknown render phase' >&2; exit 1;; esac
+PHASE="${H3_RENDER_PHASE:-auto}"
+case "$PHASE" in auto|general|disabled|preparation|activation|rollback) ;; *) echo 'FAIL: unknown render phase' >&2; exit 1;; esac
 if [ -f "$TARGET" ]; then
   RENDER="$TARGET"
 elif [ -d "$TARGET" ]; then
@@ -22,7 +22,14 @@ elif [ -d "$TARGET" ]; then
 else
   echo "FAIL: $TARGET is neither a render file nor a repo root" >&2; exit 1
 fi
+if [ "$PHASE" = auto ]; then
+  PHASE=disabled
+  if grep -q '^  ARTIFACTS_READER_TIER:' "$RENDER"; then PHASE=general; fi
+fi
 status=0
+if [ "$PHASE" = general ]; then
+  awk -f "$HERE/h3-render-common.awk" -f "$HERE/h3-render-general.awk" "$RENDER" || status=1
+fi
 awk -v phase="$PHASE" -f "$HERE/h3-render-common.awk" -f "$HERE/h3-render-workload.awk" "$RENDER" || status=1
 awk -v phase="$PHASE" -f "$HERE/h3-render-common.awk" -f "$HERE/h3-render-routing.awk" "$RENDER" || status=1
 [ "$status" -eq 0 ] || exit 1

@@ -1,14 +1,18 @@
-# PREPROD artifact control-plane activation record (861c H3 unit 11).
-# Disabled by default: ARTIFACTS_CONTROL_MODE "off" closes the rehearsal even
-# with a complete storage configuration. Activation subjects, expiration and
-# storage coordinates are intentionally ABSENT here (absent/incomplete stays
-# closed); the operator provisions them out-of-band at activation time (see
-# docs/operator/h3-preprod-activation.md). Secrets are never committed: only
-# opaque Secret references exist (patch-artifacts-api-env.yaml).
-# Guarded by deploy/ci/check-h3-preprod-render.sh (CI + preflight).
+# Preprod general opening. Provision these coordinates BEFORE CD reconciliation;
+# see docs/runbooks/ARTIFACTS_PREPROD_ACTIVATION.md. No user allowlist or window.
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: radar-api
 data:
-  ARTIFACTS_CONTROL_MODE: "off"
+  ARTIFACTS_CONTROL_MODE: "general"
+  ARTIFACTS_STORAGE_SCOPE: "radar-immobilier-preprod"
+  ARTIFACTS_ORG_ID: "radar-immobilier-preprod"
+  ARTIFACTS_S3_BUCKET: "radar-immobilier-artifacts-preprod"
+  ARTIFACTS_S3_ENDPOINT: "https://s3.bhs.io.cloud.ovh.net"
+  ARTIFACTS_S3_REGION: "bhs"
+  ARTIFACTS_CONTENT_BASE: "preprod.immo-pages.sent-tech.ca"
+  ARTIFACTS_READER_ISSUER: "https://preprod.immo.sent-tech.ca"
+  ARTIFACTS_READER_AUDIENCE: "https://preprod.immo.sent-tech.ca/reader"
+  ARTIFACTS_READER_TIER: "preprod"
+  CLASSIFICATION_CURSOR_KEY_ID: "preprod-v1"
