@@ -263,55 +263,42 @@ function destUpToDate(entry, d) {
   return !!de && (de === normEtag(entry.etag) || de === normEtag(entry.backupEtag));
 }
 
-// versionsIndex = null when the version listing is not permitted: then an entry
-// with a recorded versionId is checked by HEAD at that exact version. Unpinned
-// entries use HEAD on the current object (ETag + size must agree).
+// Pure classification: matching destination content costs no per-object calls.
+// Recon forces pinned size-drift candidates through HEAD even with matching ETag.
 //
 // `excluded` entries (prefixes the backup deliberately skips, BACKUP_EXCLUDE_PREFIXES:
 // the backup is still `complete`) are treated as the backup treats them: not
 // required, counted apart (`excluded`) and logged. Any other state that is not
 // `backed-up` (pending, failed: never in a complete backup) stays `notInBackup`
 // and blocks.
-function planDocsRestore({ inventory, versionsIndex, destIndex }) {
-  const createdAtMs = Date.parse(inventory.createdAt);
+function planDocsRestore({ inventory, destIndex, verifyPinned = false }) {
   const plan = { objects: 0, upToDate: 0, excluded: 0, notInBackup: 0, unresolved: 0, unresolvedReasons: {}, toCopy: [], needsHead: [], bytesToCopy: 0, how: {},
     inventoryAnomalies: [], expectedSizes: new Map() };
-  for (let e of inventory.objects) {
+  const entries = new Map();
+  for (const e of inventory.objects) {
     plan.objects += 1;
     if (e.state === 'excluded') { plan.excluded += 1; continue; }
     if (e.state !== 'backed-up') { plan.notInBackup += 1; continue; }
-    let c;
-    if (e.versionId && versionsIndex) {
-      c = chooseVersion(e, versionsIndex.get(e.key), createdAtMs);
-      if (c.error) {
-        plan.unresolved += 1;
-        plan.unresolvedReasons[c.error] = (plan.unresolvedReasons[c.error] || 0) + 1;
+    entries.set(e.key, { ...e, size: Number(e.size), backupEtag: normEtag(e.backupEtag) });
+  }
+  for (const key of [...entries.keys()].sort()) {
+    const e = entries.get(key);
+    const d = destIndex.get(key);
+    if (!verifyPinned || !e.versionId) {
+      const matchesBackup = d && e.backupEtag && normEtag(d.ETag) === e.backupEtag;
+      if (matchesBackup || destUpToDate(e, d)) {
+        if (matchesBackup && Number(d.Size) !== e.size) {
+          acceptSelection(plan, e, { inventoryAnomaly: { inventorySize: e.size, versionSize: Number(d.Size) } });
+        }
+        plan.upToDate += 1;
         continue;
       }
-      e = acceptSelection(plan, e, c);
-    } else if (e.versionId) {
-      plan.needsHead.push(e);
-      continue;
     }
-    if (destUpToDate(e, destIndex.get(e.key))) { plan.upToDate += 1; continue; }
-    if (!versionsIndex) {
-      if (normEtag(e.backupEtag)) {
-        plan.needsHead.push({ key: e.key, size: Number(e.size), backupEtag: normEtag(e.backupEtag) });
-      } else {
-        plan.unresolved += 1;
-        plan.unresolvedReasons['no-backup-etag'] = (plan.unresolvedReasons['no-backup-etag'] || 0) + 1;
-      }
-      continue;
-    }
-    c = c || chooseVersion(e, versionsIndex.get(e.key), createdAtMs);
-    if (c.error) {
+    if (e.versionId || e.backupEtag) plan.needsHead.push(e);
+    else {
       plan.unresolved += 1;
-      plan.unresolvedReasons[c.error] = (plan.unresolvedReasons[c.error] || 0) + 1;
-      continue;
+      plan.unresolvedReasons['no-backup-etag'] = (plan.unresolvedReasons['no-backup-etag'] || 0) + 1;
     }
-    plan.toCopy.push({ key: e.key, versionId: c.versionId, size: Number(e.size) });
-    plan.bytesToCopy += Number(e.size) || 0;
-    plan.how[c.how] = (plan.how[c.how] || 0) + 1;
   }
   return plan;
 }
@@ -665,24 +652,14 @@ async function resolveByHead(copier, cfg, plan, destIndex) {
 async function runDocs({ cfg, reader, copier, log }) {
   const manifest = await loadPinnedManifest(reader, cfg);
   const inventory = await loadInventory(reader, cfg, manifest);
-  // The copy identity reads <backup>/docs/* (the reader only sees pg/, manifests/,
-  // docs-inventory/). On OVH a versioned read is a GetObject/CopyObject with
-  // versionId: no distinct GetObjectVersion permission is assumed anywhere.
-  let versionsIndex = null;
-  try {
-    versionsIndex = indexVersions(await listAllVersions(copier, cfg.backupBucket, LAYOUT.docsPrefix));
-  } catch (e) {
-    if (!(e && (e.name === 'AccessDenied' || (e.$metadata && e.$metadata.httpStatusCode === 403)))) throw e;
-    log('WARN version listing of <backup>/docs/ not permitted to the copy identity: recorded versions and unpinned current objects checked by HEAD');
-  }
   const sortedKeys = inventory.objects.filter((e) => e.state === 'backed-up').map((e) => e.key).sort();
   const destIndex = await listDestSharded(copier, cfg.dstBucket, sortedKeys);
-  const plan = planDocsRestore({ inventory, versionsIndex, destIndex });
+  const plan = planDocsRestore({ inventory, destIndex });
   if (plan.needsHead.length) await resolveByHead(copier, cfg, plan, destIndex);
   log(`PLAN date=${cfg.date} inventory=${plan.objects} up_to_date=${plan.upToDate} to_copy=${plan.toCopy.length} ` +
     `bytes_to_copy=${plan.bytesToCopy} excluded=${plan.excluded} not_in_backup=${plan.notInBackup} unresolved=${plan.unresolved} ` +
     `reasons=${JSON.stringify(plan.unresolvedReasons)} how=${JSON.stringify(plan.how)} dest_objects=${destIndex.size} ` +
-    `versions_listed=${versionsIndex !== null} dry=${cfg.dry}`);
+    `dry=${cfg.dry}`);
   const base = { step: 'docs', date: cfg.date, dry: cfg.dry, inventory: plan.objects, upToDate: plan.upToDate, toCopy: plan.toCopy.length,
     bytesToCopy: plan.bytesToCopy, excluded: plan.excluded, notInBackup: plan.notInBackup, unresolved: plan.unresolved, unresolvedReasons: plan.unresolvedReasons,
     ...anomalyReport(plan, log) };
@@ -732,7 +709,7 @@ async function runRecon({ cfg, reader, copier, log }) {
   // version history or issuing one HEAD for every object in a large inventory.
   const candidates = inventory.objects.filter(e => e.state === 'backed-up' && e.versionId &&
     destIndex.has(e.key) && Number(destIndex.get(e.key).Size) !== Number(e.size));
-  const plan = planDocsRestore({ inventory: { ...inventory, objects: candidates }, versionsIndex: null, destIndex });
+  const plan = planDocsRestore({ inventory: { ...inventory, objects: candidates }, destIndex, verifyPinned: true });
   if (plan.needsHead.length) await resolveByHead(copier, cfg, plan, destIndex);
   const recon = reconInventory(inventory, destIndex, plan.expectedSizes);
   recon.ok = recon.ok && plan.unresolved === 0;
