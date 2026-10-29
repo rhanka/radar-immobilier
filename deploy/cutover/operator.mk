@@ -11,7 +11,7 @@ override CYCLE_ID := $(value CYCLE_ID)
 override OUTPUT := $(value OUTPUT)
 override BUILD_RUN := $(value BUILD_RUN)
 override SHA := $(value SHA)
-export ENV RELEASE RUN MODE BACKUP_ID CYCLE_ID OUTPUT BUILD_RUN SHA
+export ENV RELEASE RUN MODE BACKUP_ID CYCLE_ID OUTPUT BUILD_RUN SHA TEST_PATTERN
 export COMPOSE_DISABLE_ENV_FILE := 1
 override COMPOSE := docker compose --env-file /dev/null -p radar-test-cutover -f $(CUTOVER_ROOT)/deploy/cutover/test.compose.yml
 .PHONY: help run status resume lock release-lock report-refs force-refresh test lint typecheck test-api down ps commit syntax

@@ -17,7 +17,7 @@ while :; do
   echo 'Waiting for the active Docker test stack'; sleep 30
 done
 case ${1:-} in
-  test) command='apt-get update -qq && apt-get install -y -qq bash make jq curl gettext-base >/dev/null && npm ci --ignore-scripts --silent && node --test tools/make/cutover*.test.mjs && node deploy/ci/bascule-preprod/backup.selftest.mjs';;
+  test) command='apt-get update -qq && apt-get install -y -qq bash make jq curl gettext-base >/dev/null && npm ci --ignore-scripts --silent && node --test --test-name-pattern="${TEST_PATTERN:-.}" tools/make/cutover*.test.mjs && node deploy/ci/bascule-preprod/backup.selftest.mjs';;
   lint) command='npm ci --ignore-scripts --silent && npx eslint .';;
   typecheck) command='npm ci --ignore-scripts --silent && npm run typecheck --workspaces --if-present';;
   test-api)
