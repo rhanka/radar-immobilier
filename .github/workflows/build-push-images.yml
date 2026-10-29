@@ -1156,95 +1156,42 @@ jobs:
           environment: preprod
 
   promote-prod:
-    name: Promote tag to prod (by digest)
-    runs-on: ubuntu-latest
-    # 30 (was 15): the promotion now also runs the fail-closed backup (≤15m) and
-    # the DB migrate (≤10m poll) ahead of set-image, so 15m could time the job out
-    # mid-sequence.
-    timeout-minutes: 30
+    name: Promote rehearsed release through cutover
     if: startsWith(github.ref, 'refs/tags/v')
-    # Enforced prod credential boundary (§2.4): the prod kubeconfig lives in the
-    # GitHub Environment `production` (restricted to tag refs + required
-    # reviewer), so a job triggered by `main` can never reach it. PROVISIONING
-    # that environment (create env, move KUBE_CONFIG_DATA into it, set the
-    # tag-ref + reviewer rules) is a CUTOVER step — doing it early would break the
-    # current main->prod `deploy` job. The reference is authored now; the env is
-    # provisioned atomically at cutover (DESIGN §2.4). Until then a v* tag would
-    # resolve the repo-level secret (this whole job only lands on main AT the
-    # cutover merge, so that pre-state never actually runs).
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
     environment: production
     permissions:
       contents: read
-      deployments: write
-      packages: write
+      actions: read
     concurrency:
-      # Never cancel an in-flight prod promote — queue instead. This is
-      # load-bearing now that the promotion runs backup+migrate before set-image:
-      # cancel-in-progress would kill the CI step mid-migration without running the
-      # abort's delete-job, leaving an in-cluster Job (bounded only by the base
-      # activeDeadlineSeconds). Queueing keeps each promotion's backup→migrate→
-      # set-image sequence atomic. (Preprod, under the top-level cancel-in-progress:
-      # true group, CAN be cancelled mid-migrate; that is tolerated because the
-      # migrate Job self-terminates via activeDeadlineSeconds and drizzle is
-      # idempotent, so the next run replays cleanly.)
       group: promote-prod
       cancel-in-progress: false
-    env:
-      NAMESPACE: radar-immobilier
     steps:
-      - name: Checkout (full history for ancestry check)
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Short SHA + tag
-        id: vars
-        run: |
-          echo "sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
-          echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
-
-      # GUARD 1 — appartenance-à-main (§2.3, revue #5): digest-exists ≠ commit on
-      # main. A workflow_dispatch build of a feature branch produces a
-      # radar-<svc>:<sha7> image; tagging that commit would promote NON-merged,
-      # NON-CI code. The CI guarantee at tag-time IS that <sha7> was built+CI'd on
-      # main — ancestry is what ties the tag to it.
-      - name: Guard — tagged commit is an ancestor of origin/main
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: v1.31.0
+      - name: Resolve the original successful main build run
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           git fetch --no-tags origin main
-          if git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
-            echo "ancestry OK — $GITHUB_SHA is on origin/main"
-          else
-            echo "::error title=Promote refused — tag not on main::commit $GITHUB_SHA (tag ${{ steps.vars.outputs.tag }}) is NOT an ancestor of origin/main. Only main-merged, CI-validated commits may reach prod."
-            exit 1
-          fi
-
-      # GUARD 2 — tag protection must REALLY exist (§2.3): don't ASSUME a v* tag
-      # is protected. Advisory (warn, don't hard-fail on API hiccups): flags if no
-      # tag ruleset guards v* so an unreviewed tag can't silently reach prod.
-      - name: Guard — verify tag protection ruleset exists
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -uo pipefail
-          rules="$(gh api "repos/${GITHUB_REPOSITORY}/rulesets" --jq '[.[] | select(.target=="tag")] | length' 2>/dev/null || echo ERR)"
-          if [ "$rules" = ERR ]; then
-            echo "::warning title=Tag-protection unverified::could not query rulesets (token scope?). Ensure a tag ruleset protects v* before relying on this path."
-          elif [ "${rules:-0}" -ge 1 ]; then
-            echo "tag ruleset present (${rules})"
-          else
-            echo "::warning title=No tag ruleset::no tag-target ruleset found — a v* tag can currently be pushed without review. Configure tag protection before the cutover."
-          fi
-
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v4
-        with:
-          version: v1.31.0
-
-      - name: Configure kubeconfig (prod, from environment secret)
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+          build_run=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/build-push-images.yml/runs?head_sha=$GITHUB_SHA&status=success" --jq '[.workflow_runs[]|select(.head_branch=="main")]|first|.id')
+          [[ $build_run =~ ^[0-9]+$ ]]
+          mkdir -p cutover-release
+          gh run download "$build_run" --name "cutover-release-$GITHUB_SHA" --dir cutover-release
+          jq -e --arg sha "$GITHUB_SHA" '.gitSha==$sha and .dataMigration=="6h"' cutover-release/release.json >/dev/null
+          echo "Promoting immutable release from build run $build_run"
+      - name: Configure namespace-scoped production identity
         env:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         run: |
+          set -euo pipefail
           mkdir -p "$HOME/.kube"
           if printf '%s' "$KUBE_CONFIG_DATA" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
             printf '%s' "$KUBE_CONFIG_DATA" | base64 -d > "$HOME/.kube/config"
@@ -1252,14 +1199,6 @@ jobs:
             printf '%s' "$KUBE_CONFIG_DATA" > "$HOME/.kube/config"
           fi
           chmod 600 "$HOME/.kube/config"
-
-      - name: Login to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
       # DIGEST RESOLUTION (§2.3, revue #4) — build-once: resolve the IMMUTABLE
       # sha256 digests of the images already built on main for this commit's
       # <sha7> tag. Missing digest = the <sha7> tag aged out of GHCR (retention)
