@@ -401,6 +401,41 @@ async function suite() {
   // docs
   const docsEnv = (manSha, extra = {}) => baseEnv({ BR_STEP: "docs", BACKUP_DATE: D, PIN_MANIFEST_SHA256: manSha, COPIER_ACCESS_KEY: "c", COPIER_SECRET_KEY: "c",
     DST_BUCKET: DST, FORBIDDEN_DST_BUCKETS: PROD, COPY_GRANTEE: "1901410700457444:user-x", COPY_CONCURRENCY: "2", ...extra });
+  for (const [value, expected] of [[undefined, 48], ["invalid", 48], ["0", 1], ["999", 64]]) {
+    eq("readConfig — bounded concurrency for " + value, br.readConfig(docsEnv("a".repeat(64), { COPY_CONCURRENCY: value }), "docs").concurrency, expected);
+  }
+  {
+    const { s, manSha } = fixture();
+    const policy = { ...copierPolicy, failShard: true, copyAttempts: 3 };
+    const r = await step({ s, env: docsEnv(manSha), copier: policy });
+    eq("docs — shard failure falls back to full sequential listing without losing extras", [policy.failShard, r.code, r.t.recon?.extra, r.t.destListCalls], [false, 0, 1, s.counts.ListObjectsV2Command]);
+    eq("docs — successful SDK copy retries counted from metadata", r.t.copyRetries, 4);
+  }
+  {
+    const { s, manSha } = fixture();
+    const r = await step({ s, env: docsEnv(manSha), copier: { ...copierPolicy, failCopyKey: "raw/a b.pdf", copyAttempts: 3 } });
+    eq("docs — copy failure keeps processing, counts SDK retries and fails recon", [r.code, r.t.copied, r.t.copyErrors, r.t.copyRetries, r.t.recon?.ok], [1, 1, 1, 4, false]);
+  }
+  {
+    const { s, manSha } = fixture();
+    s.put(B, "docs/raw/b.pdf-neighbor", "BBBB-at-D");
+    s.b.get(B).delete("docs/raw/b.pdf");
+    const r = await step({ s, env: docsEnv(manSha) });
+    eq("docs — prefix-neighbor versions never substitute for the exact candidate", [r.code, r.t.unresolvedReasons, s.copies.length], [2, { "no-version": 1 }, 0]);
+  }
+  {
+    const { s, inventory, manifest } = fixture({ rewriteBAfterD: false });
+    for (let n = 0; n < 8; n++) {
+      const key = `raw/unpinned-${n}.pdf`; const obj = s.put(B, "docs/" + key, "unpinned");
+      inventory.objects.push({ key, size: obj.Size, backupEtag: obj.ETag, state: "backed-up", versionId: null });
+    }
+    inventory.counts.objects = manifest.docs.objects = inventory.objects.length;
+    const inv = JSON.stringify(inventory); manifest.docs.inventorySha256 = sha(inv);
+    const man = JSON.stringify(manifest);
+    s.put(B, br.keysFor(D).inventory, inv); s.put(B, br.keysFor(D).manifest, man);
+    const r = await step({ s, env: docsEnv(sha(man), { COPY_CONCURRENCY: "64" }), copier: copierNoVersions });
+    eq("docs — one denied version probe switches every unpinned worker to HEAD", [r.code, s.counts.ListObjectVersionsCommand, r.t.headChecked, r.t.copied], [0, 1, 10, 10]);
+  }
   {
     const { s, manSha } = fixture({ inventorySizeMismatch: true, extraAnomalies: 600 });
     const r = await step({ s, env: docsEnv(manSha, { DOCS_DRY: "1" }) });
