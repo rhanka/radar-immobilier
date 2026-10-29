@@ -8,6 +8,7 @@ import { appendPwAudit } from "./pw-write-audit.js";
 import { appendPwOutbox } from "./pw-write-outbox.js";
 import { assertPwPrincipal } from "./pw-write-confirmation.js";
 import type { PwPrincipal } from "./pw-write-digests.js";
+import { lockPublishedWriteAuthority } from "../../artifacts/published-write-authority.js";
 
 export type PwAuthorityKind =
   | "tier" | "grant" | "reader" | "page_session" | "delegation" | "release" | "policy";
@@ -33,7 +34,7 @@ async function fenced(tx: WriteTx, kind: PwAuthorityKind, reference: string): Pr
 
 /** Normative fence order; no network I/O, references re-read after waits. */
 export async function assertPwAuthorityOpen(tx: WriteTx, fences: Partial<
-  Record<PwAuthorityKind, string>>): Promise<void> {
+  Record<PwAuthorityKind, string>> & Record<string, string | undefined>): Promise<void> {
   for (const kind of PW_FENCE_ORDER) {
     const reference = fences[kind];
     if (typeof reference !== "string" || reference.length === 0) {
@@ -46,6 +47,7 @@ export async function assertPwAuthorityOpen(tx: WriteTx, fences: Partial<
         : kind === "page_session" ? "page_session_revoked" : "write_authority_unavailable");
     }
   }
+  await lockPublishedWriteAuthority(tx, fences);
 }
 
 /** Revoke by intentId; serialized with confirm on the same exclusive lock. */

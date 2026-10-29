@@ -9,12 +9,15 @@
  */
 import { openSession, sealSession } from "./preview-aead.js";
 import type { GrantClaims } from "./preview-grant.js";
+import type { PwIdentityDomain } from "./write-intent-principal.js";
 
 export const PREVIEW_INIT_COOKIE = "__Host-preview-init";
 export const PREVIEW_SESSION_COOKIE = "__Host-preview-session";
 export const PREVIEW_SESSION_TTL_MS = 15 * 60_000;
 
 export interface PreviewSessionClaims {
+  /** Attributed at verified application approval, never inferred from a read grant. */
+  readonly writeIdentity?: PwIdentityDomain;
   readonly sid: string;
   readonly readerSub: string;
   readonly artifactId: string;
