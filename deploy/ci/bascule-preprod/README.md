@@ -16,17 +16,19 @@ prod → restore préprod → migrations → copie docs → recon → flip servi
 > `BASCULE_SCHEDULE_ENABLED` (unchanged gate). A `workflow_dispatch` keeps its
 > inputs (default `chain`). Slot rationale: section "Daily schedule (04:00 UTC)".
 
-> **CD-native v2 (toute action de prod pilotée par du code, 0 owner-in-the-loop)** —
-> l'apply du bundle prod (2 SealedSecrets + VAP + RBAC T1 + RO-role + CronJob dump)
-> se fait **au merge sur `main`** (`.github/workflows/bascule-bundle-cd.yml`,
-> cred permanent `KUBE_CONFIG_DATA_PROD` = SA `radar-ci-bascule-prod`), plus aucun
-> token éphémère, plus aucun `kubectl apply` owner-direct, plus aucune
-> matérialisation GH-secret des 2 creds (SealedSecrets committées, matérialisées
-> par le controller sealed-secrets in-cluster). La bascule tourne en
-> **planification quotidienne** (04:00 UTC, `bascule-preprod.yml`, `schedule`) ; le refresh reste
-> GH-triggerable à la demande (`bascule-refresh.yml`), découplé de la bascule.
-> Flux complet, install 1×, secrets GH devenus supprimables et gestes éliminés :
-> **`CD_NATIVE_MIGRATION.md`**.
+> **CD-native v2:** the prod bundle (2 SealedSecrets, VAP, T1 RBAC, read-only
+> role and dump CronJob) is applied on merge to `main`
+> (`.github/workflows/bascule-bundle-cd.yml`) using permanent credential
+> `KUBE_CONFIG_DATA_PROD` (SA `radar-ci-bascule-prod`); its two SealedSecrets are
+> materialized by the in-cluster controller, without owner-direct apply or GitHub
+> copies of those two credentials. See **`CD_NATIVE_MIGRATION.md`**.
+> The daily restore (04:00 UTC, `bascule-preprod.yml`) also uses a **permanent SA
+> token with no expiration**, per owner decision of 2026-10-29:
+> `KUBE_CONFIG_DATA_BASCULE_PREPROD` uses Secret `radar-ci-bascule-preprod-token`.
+> Rotate manually by deleting/recreating that preprod Secret, rebuilding the
+> base64 kubeconfig and replacing the GitHub value; verify identity, RBAC and the
+> next restore as described in [CRED_CYCLE.md](CRED_CYCLE.md#preprod-bascule-ci-kubeconfig).
+> On-demand refresh remains separate (`bascule-refresh.yml`).
 
 ## RUNNER KUBECTL-ONLY (contrat owner + co-val i-infra, NON négociable)
 
@@ -157,7 +159,7 @@ matched by the exact `DUMP_PREFIX`). Debt: no automatic rollback (noted in the P
 
 | Clé | Type | Contenu / usage |
 | --- | --- | --- |
-| `KUBE_CONFIG_DATA_BASCULE_PREPROD` | secret | kubeconfig base64 **préprod** — token **DÉDIÉ moindre-privilège** (SA `radar-ci-bascule-preprod`), **PAS** le secret partagé `KUBE_CONFIG_DATA` (scope plus large : build-push-images / run-job / k8s-apply-mcp / rollback). Pilotage par défaut. |
+| `KUBE_CONFIG_DATA_BASCULE_PREPROD` | secret | Base64 **preprod** kubeconfig; dedicated permanent token for SA `radar-ci-bascule-preprod`, from Secret `radar-ci-bascule-preprod-token`. Separate from the broader shared `KUBE_CONFIG_DATA`. No expiration; manual rotation and recovery checks in [CRED_CYCLE.md](CRED_CYCLE.md#preprod-bascule-ci-kubeconfig). Default workflow identity. |
 | `KUBE_CONFIG_DATA_PROD_TRIGGER` | secret | kubeconfig base64 **PROD** (token name-scopé patch `radar-db-backup-prod` + VAP suspend-only, SA `radar-ci-trigger-prod`) → `DUMP_KUBECONFIG`, utilisé **UNIQUEMENT** sur les 2 patch cronjob prod. Non requis en DRY. **Renommé v2** (le nom `KUBE_CONFIG_DATA_PROD` désigne désormais la SA d'apply du bundle). |
 | `BHS` / `S3_REGION` / `PROD_DOCS` / `PREPROD_DOCS` / `DUMP_BUCKET` / `DUMP_PREFIX` | var | endpoint + buckets + préfixe dump (`postgres/prod/sets`), rendus dans les Jobs. **NON secrets.** |
 | `DUMP_CRONJOB` / `DUMP_CRONJOB_NAMESPACE` | var | CronJob dump owner (défauts `radar-db-backup-prod` / `radar-immobilier`). |
