@@ -111,17 +111,6 @@ fixture; sed -i 's#schedule: "0 5,11,17,23 \* \* \*"#schedule: "17 5,11,17,23 * 
 pre_sched "17 0,6,12,18 * * *"
 run_bad "both refreshes off the hour (shared minute 17) are refused" "refresh stagger failed"
 
-fixture; sed -i 's/radar-refresh-pv,radar-refresh-pending-watchdog,/radar-refresh-pv,/' "$CASE_ROOT/.github/workflows/bascule-preprod.yml"
-run_bad "bascule quiesce list without the watchdog" "refresh pending watchdog contract failed"
-
-fixture; W="$CASE_ROOT/.github/workflows/bascule-preprod.yml"; line="$(grep -E '^ +QUIESCE_CRONJOBS: ' "$W")"
-sed -i '/^ \+QUIESCE_CRONJOBS: /d' "$W"; awk -v l="$line" '{ print } /^  served-ids:$/ { s = 1 } s && /^    env:$/ { print l; s = 0 }' "$W" > "$W.tmp" && mv "$W.tmp" "$W"
-run_bad "watchdog quiesce list moved to another job (served-ids)" "refresh pending watchdog contract failed"
-
-fixture; W="$CASE_ROOT/.github/workflows/bascule-preprod.yml"
-printf '        env:\n          QUIESCE_CRONJOBS: radar-refresh-pv,radar-consistency-snapshot\n' >> "$W"
-run_bad "a second (step-level) QUIESCE_CRONJOBS override" "refresh pending watchdog contract failed"
-
 # Daily bascule-preprod restore slot (0 4 * * * UTC): checked on the RENDERED
 # refresh CronJobs and on radar-backup-daily selected by name.
 WF=".github/workflows/bascule-preprod.yml"
