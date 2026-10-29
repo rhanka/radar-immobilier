@@ -134,7 +134,7 @@ const D1 = "2026-09-25";
 const NOW_FRESH = Date.parse("2026-09-26T12:00:00Z");
 const NOW_STALE = Date.parse("2026-09-27T08:00:00Z"); // dump 02:23 D → 29.6 h
 
-function fixture({ tamperDump = false, rewriteBAfterD = true, inventorySizeMismatch = false, extraAnomalies = 0 } = {}) {
+function fixture({ tamperDump = false, rewriteBAfterD = true, inventorySizeMismatch = false, extraAnomalies = 0, unpinA = false } = {}) {
   const s = new Store();
   const dump = Buffer.from("PGDMP-fake-custom-archive-bytes-0123456789");
   const dumpV = s.put(B, `pg/${D}/radar.dump`, tamperDump ? Buffer.concat([dump, Buffer.from("x")]) : dump);
@@ -148,7 +148,7 @@ function fixture({ tamperDump = false, rewriteBAfterD = true, inventorySizeMisma
     format: "radar-backup-docs-inventory/v1", date: D, createdAt: "2026-09-26T03:40:00.000Z",
     sourceBucket: PROD, backupBucket: B, backupPrefix: "docs/", counts: { objects: 3 },
     objects: [
-      { key: "raw/a b.pdf", size: inventorySizeMismatch ? 790337 : a.Size, etag: a.ETag, state: "backed-up", backupEtag: a.ETag, versionId: a.VersionId },
+      { key: "raw/a b.pdf", size: inventorySizeMismatch ? 790337 : a.Size, etag: a.ETag, state: "backed-up", backupEtag: a.ETag, versionId: unpinA ? null : a.VersionId },
       { key: "raw/b.pdf", size: bD.Size, etag: bD.ETag, state: "backed-up", backupEtag: bD.ETag, versionId: null },
       { key: "raw/c.pdf", size: c.Size, etag: c.ETag, state: "backed-up", backupEtag: c.ETag, versionId: null },
     ],
@@ -517,6 +517,46 @@ async function suite() {
     }
   }
   {
+    const { s, manSha } = fixture({ inventorySizeMismatch: true, rewriteBAfterD: false, unpinA: true });
+    const r = await step({ s, env: docsEnv(manSha), copier: copierNoVersions });
+    eq("docs — 403 HEAD fallback tolerates unpinned size drift and reconciles actual bytes",
+      [r.code, r.t.recon?.ok, r.t.bytesToCopy, r.t.inventoryAnomalies, s.counts.ListObjectVersionsCommand],
+      [0, true, 797549, [{ keySha256: sha("raw/a b.pdf"), inventorySize: 790337, versionSize: 797540 }], 1]);
+    ok("docs — 403 size anomaly receipt and logs hash the key", !(r.logs.join("\n") + JSON.stringify(r.t)).includes("raw/a b.pdf"));
+    for (const defect of ["etag", "gone"]) {
+      s.b.get(DST).delete("raw/a b.pdf"); s.copies.length = 0;
+      if (defect === "etag") s.latest(B, "docs/raw/a b.pdf").ETag = '"wrong"';
+      else s.b.get(B).delete("docs/raw/a b.pdf");
+      const bad = await step({ s, env: docsEnv(manSha), copier: copierNoVersions });
+      eq("docs — 403 unpinned " + defect + " refuses before copying", [bad.code, bad.t.unresolved, s.copies.length], [2, 1, 0]);
+    }
+  }
+  for (const copier of [copierPolicy, copierNoVersions]) {
+    const { s, manSha } = fixture({ inventorySizeMismatch: true, rewriteBAfterD: false, unpinA: true });
+    const restored = await step({ s, env: docsEnv(manSha), copier });
+    const anomaly = { keySha256: sha("raw/a b.pdf"), inventorySize: 790337, versionSize: 797540 };
+    const env = { ...docsEnv(manSha), BR_STEP: "recon" };
+    const rec = await step({ s, env, copier });
+    eq("docs then standalone recon — unpinned drift uses selected size with listing or 403 HEAD",
+      [restored.code, rec.code, rec.t.inventoryAnomalies], [0, 0, [anomaly]]);
+    eq("recon — unpinned drift checks the backup even when the destination ETag matches",
+      [rec.t.versionsResolved, rec.t.headChecked], copier === copierPolicy ? [1, 0] : [0, 1]);
+    s.latest(DST, "raw/a b.pdf").ETag = '"rechunked-multipart"';
+    const rechunked = await step({ s, env, copier });
+    eq("recon — unpinned drift permits a re-chunked destination ETag", [rechunked.code, rechunked.t.inventoryAnomalies], [0, [anomaly]]);
+    s.latest(DST, "raw/a b.pdf").Size += 1;
+    const corrupt = await step({ s, env, copier });
+    eq("recon — unpinned drift rejects a destination size different from the backup version", [corrupt.code, corrupt.t.sizeMismatch], [1, 1]);
+    s.latest(DST, "raw/a b.pdf").Size -= 1;
+    s.latest(DST, "raw/a b.pdf").ETag = s.latest(B, "docs/raw/a b.pdf").ETag;
+    for (const defect of ["etag", "gone"]) {
+      if (defect === "etag") s.latest(B, "docs/raw/a b.pdf").ETag = '"wrong"';
+      else s.b.get(B).delete("docs/raw/a b.pdf");
+      const bad = await step({ s, env, copier });
+      eq("recon — unpinned " + defect + " fails despite matching destination ETag", bad.code, 1);
+    }
+  }
+  {
     const { s, manSha } = fixture();
     const dry = await step({ s, env: docsEnv(manSha, { DOCS_DRY: "1" }) });
     eq("docs DRY — plan: 1 up to date, 2 to copy, 0 copy done", [dry.code, dry.t.upToDate, dry.t.toCopy, s.copies.length], [0, 1, 2, 0]);
@@ -554,7 +594,7 @@ async function suite() {
     // others checked by HEAD — b rewritten after D ⇒ current differs ⇒ refusal.
     const { s, manSha } = fixture();
     const r = await step({ s, env: docsEnv(manSha), copier: copierNoVersions });
-    eq("docs — no version listing + object rewritten since D ⇒ refused before any copy", [r.code, s.copies.length, r.t.unresolvedReasons], [2, 0, { "current-differs": 1 }]);
+    eq("docs — no version listing + object rewritten since D ⇒ refused before any copy", [r.code, s.copies.length, r.t.unresolvedReasons], [2, 0, { "etag-not-found": 1 }]);
     ok("docs — fallback announced in the log", r.logs.some((l) => /version listing .* not permitted/.test(l)));
   }
   {

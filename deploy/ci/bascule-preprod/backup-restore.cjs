@@ -266,14 +266,14 @@ function destUpToDate(entry, d) {
 }
 
 // Pure classification: matching destination content costs no per-object calls.
-// Recon forces pinned size-drift candidates through HEAD even with matching ETag.
+// Recon verifies size-drift candidates against the backup even with matching ETag.
 //
 // `excluded` entries (prefixes the backup deliberately skips, BACKUP_EXCLUDE_PREFIXES:
 // the backup is still `complete`) are treated as the backup treats them: not
 // required, counted apart (`excluded`) and logged. Any other state that is not
 // `backed-up` (pending, failed: never in a complete backup) stays `notInBackup`
 // and blocks.
-function planDocsRestore({ inventory, destIndex, verifyPinned = false }) {
+function planDocsRestore({ inventory, destIndex, verifyCandidates = false }) {
   const plan = { objects: 0, upToDate: 0, excluded: 0, notInBackup: 0, unresolved: 0, unresolvedReasons: {}, toCopy: [], needsHead: [], bytesToCopy: 0, how: {},
     inventoryAnomalies: [], expectedSizes: new Map() };
   const entries = new Map();
@@ -286,7 +286,7 @@ function planDocsRestore({ inventory, destIndex, verifyPinned = false }) {
   for (const key of [...entries.keys()].sort()) {
     const e = entries.get(key);
     const d = destIndex.get(key);
-    if (!verifyPinned || !e.versionId) {
+    if (!verifyCandidates) {
       const matchesBackup = d && e.backupEtag && normEtag(d.ETag) === e.backupEtag;
       if (matchesBackup || destUpToDate(e, d)) {
         if (matchesBackup && Number(d.Size) !== e.size) {
@@ -652,13 +652,9 @@ async function resolveCandidates(copier, cfg, plan, destIndex, { resolveVersions
       if (!c) {
         if (counters) counters.headChecked += 1;
         const h = await headOrNull(copier, cfg.backupBucket, LAYOUT.docsPrefix + e.key, e.versionId);
-        if (e.versionId) {
-          c = chooseVersion(e, h ? [{ versionId: String(e.versionId), etag: normEtag(h.ETag), size: Number(h.ContentLength) }] : []);
-          if (!c.error) c.how = 'version-id-head-checked';
-        } else {
-          c = h && Number(h.ContentLength) === e.size && normEtag(h.ETag) === e.backupEtag
-            ? { versionId: null, how: 'current-etag-checked' } : { error: h ? 'current-differs' : 'no-current' };
-        }
+        c = chooseVersion(e, h ? [{ versionId: e.versionId ? String(e.versionId) : null,
+          etag: normEtag(h.ETag), size: Number(h.ContentLength) }] : []);
+        if (!c.error) c.how = e.versionId ? 'version-id-head-checked' : 'current-etag-checked';
       }
       if (c.error) {
         plan.unresolved += 1;
@@ -737,12 +733,14 @@ async function runRecon({ cfg, reader, copier, log }) {
   const counters = { destListCalls: 0, headChecked: 0, versionsResolved: 0, copyRetries: 0 };
   const sortedKeys = inventory.objects.filter((e) => e.state === 'backed-up').map((e) => e.key).sort();
   const destIndex = await listDestSharded(copier, cfg.dstBucket, sortedKeys, counters);
-  // Only mismatching sizes require a versioned HEAD: avoid relisting the entire
-  // version history or issuing one HEAD for every object in a large inventory.
-  const candidates = inventory.objects.filter(e => e.state === 'backed-up' && e.versionId &&
+  // Only mismatching sizes require backup verification: resolve unpinned entries
+  // by ETag, with the same HEAD fallback as docs when version listing is denied.
+  const candidates = inventory.objects.filter(e => e.state === 'backed-up' &&
     destIndex.has(e.key) && Number(destIndex.get(e.key).Size) !== Number(e.size));
-  const plan = planDocsRestore({ inventory: { ...inventory, objects: candidates }, destIndex, verifyPinned: true });
-  if (plan.needsHead.length) await resolveCandidates(copier, cfg, plan, destIndex, { counters });
+  const plan = planDocsRestore({ inventory: { ...inventory, objects: candidates }, destIndex, verifyCandidates: true });
+  if (plan.needsHead.length) await resolveCandidates(copier, cfg, plan, destIndex, {
+    resolveVersions: true, createdAtMs: Date.parse(inventory.createdAt), log, counters,
+  });
   const recon = reconInventory(inventory, destIndex, plan.expectedSizes);
   recon.ok = recon.ok && plan.unresolved === 0;
   log(`${recon.ok ? 'RECON OK' : 'RECON FAIL'} date=${cfg.date} checked=${recon.checked} missing=${recon.missing} ` +
