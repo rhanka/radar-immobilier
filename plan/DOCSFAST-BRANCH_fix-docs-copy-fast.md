@@ -18,6 +18,7 @@
 ## Feedback Loop
 - [x] Root-cause evidence: global backup version listing, two sequential destination listings, and 36,282 copies with concurrency 8; approved design supplies the replacement algorithm.
 - [x] No new design decisions; operational timing remains an estimate until an owner-authorized live run.
+- [x] Attention: independent consensus review remains conductor-owned; exact author model/effort metadata are unavailable for harness selection. Local review recorded in ignored `tmp/docs-copy-fast-review.md`; no consensus claimed.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch, sequential implementation; conductor owns PR and live operations.
@@ -36,5 +37,8 @@
   - [x] Existing 165 restoration assertions pass unchanged; fake S3 supports StartAfter, per-key versions and call counters.
   - [x] Volume: 2 GET, 864 destination pages, 36,182 HEAD, 100 per-key version lists, 36,282 copies; zero global version lists or per-object calls on 231,401 up-to-date entries. Resume, missing pin and size drift pass; restoration suite 179/179.
   - [x] Shard fallback, copy retry/error counters, prefix-neighbor isolation and shared 403 capability probe pass; restoration suite 188/188.
-- [ ] Lot 5 — Replay backup/bascule selftests, CI controller pattern with empty HOME, lint, typecheck; remove test volumes.
-- [ ] Lot 6 — Review exact diff, commit atomically, push branch without force; no PR.
+- [x] Lot 5 — Replay backup/bascule selftests, CI controller pattern with empty HOME, lint, typecheck; remove test volumes.
+  - [x] Backup 265/265; restoration 188/188; inter-tenant bascule 92/92; CI controller pattern 11/11 with initially empty HOME.
+  - [x] Python guard and its 23 checks pass; lint and all workspace typechecks pass (zero errors, seven Svelte CSS warnings).
+  - [x] `make -f deploy/cutover/operator.mk down ENV=test-cutover` removed both module volumes and the test network with `down -v --remove-orphans`.
+- [x] Lot 6 — Review exact scoped diff and prepare atomic, attribution-free commits for the owner-authorized `git push -u origin fix/docs-copy-fast`; no PR.
