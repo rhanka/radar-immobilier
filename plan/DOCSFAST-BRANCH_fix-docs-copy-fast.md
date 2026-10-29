@@ -35,5 +35,6 @@
 - [x] Lot 4 — Preserve existing assertions; add simulated volume, resume and integrity regressions.
   - [x] Existing 165 restoration assertions pass unchanged; fake S3 supports StartAfter, per-key versions and call counters.
   - [x] Volume: 2 GET, 864 destination pages, 36,182 HEAD, 100 per-key version lists, 36,282 copies; zero global version lists or per-object calls on 231,401 up-to-date entries. Resume, missing pin and size drift pass; restoration suite 179/179.
+  - [x] Shard fallback, copy retry/error counters, prefix-neighbor isolation and shared 403 capability probe pass; restoration suite 188/188.
 - [ ] Lot 5 — Replay backup/bascule selftests, CI controller pattern with empty HOME, lint, typecheck; remove test volumes.
 - [ ] Lot 6 — Review exact diff, commit atomically, push branch without force; no PR.
