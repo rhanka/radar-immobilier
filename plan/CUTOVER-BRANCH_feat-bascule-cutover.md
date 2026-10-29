@@ -20,6 +20,7 @@
 - [x] Conditional Paths: shared domain services only for a demonstrated blocker; declare an exception first.
 
 ## Feedback Loop
+- [ ] Blocked — shared Docker campaign owner: release `radar-test-api-paniers-pwe` and the machine campaign lock, then run standalone `test`, `test-api`, `typecheck` and `lint` on `ENV=test-cutover`. No unrelated stack was stopped.
 - [x] Existing bundle/backup provisioning also mutates captured schedules; apply the approved shared-lock mechanism there and retain its namespace boundary.
 - [x] CUTOVER-EX1: allow `api/Dockerfile` solely to bundle the required migration entrypoint; no runtime base change; rollback by reverting that entry.
 - [ ] Lot 0 (owner/infrastructure): repair only `radar-bascule/KUBE_CONFIG_DATA_BASCULE_PREPROD`, verify dedicated identity and reads, complete old restoration before replacement installation. Remote actions excluded by owner instruction.
@@ -34,6 +35,7 @@
 - [ ] **Lot 1 — Standalone entry and release**
   - [x] Read rules, design and addendum; confirm clean feature branch.
   - [x] Fixed environment mapping, strict manifest, generated build artifact.
+  - [x] Standalone `syntax` gate: Bash/POSIX shell parsing, jq filter compilation and Git whitespace checks.
   - [ ] Isolated validation tests; no dotenv loading.
 - [ ] **Lot 2 — Lock and recovery**
   - [x] Atomic lock, sanitized snapshot, checkpoints, liveness and CAS takeover.
