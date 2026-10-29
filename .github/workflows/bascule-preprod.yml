@@ -96,71 +96,20 @@ jobs:
           path: .bascule-work/backup-list.json
           include-hidden-files: true
           if-no-files-found: error
-        run: node "$CLI" served-refs
-
-      - name: e2e — artefact immo-served-refs-<CYCLE_ID> (for the served-ids job)
-        if: ${{ !inputs.DRY_RUN && env.MODE != 'list' && env.CYCLE_ID != '' }}
+      - name: Extract references (separate from cutover availability gate)
+        if: env.MODE == 'restore' && env.CYCLE_ID != ''
+        run: make -f deploy/cutover/operator.mk report-refs ENV=preprod
+      - name: Publish served references
+        if: env.MODE == 'restore' && env.CYCLE_ID != ''
         uses: actions/upload-artifact@v4
         with:
           name: immo-served-refs-${{ inputs.CYCLE_ID }}
-          path: ${{ github.workspace }}/.bascule-work/served-refs/
+          path: .bascule-work/served-refs/
+          include-hidden-files: true
           if-no-files-found: error
-          retention-days: 7
-          overwrite: true
-
-      # ── Failure AFTER a successful S2 (inherited from the chain, unchanged):
-      # the un-quiesce put preprod back in service on the database of day D while
-      # docs/recon/flip may be incomplete, and nothing rolled back. The summary
-      # says it explicitly, with the G1 rollback procedure (debt noted in the PR).
-      - name: Failure after S2 — summary (preprod state + G1 rollback procedure)
-        if: ${{ failure() && !inputs.DRY_RUN && env.MODE != 'list' && (steps.restore_chain.outcome == 'success' || steps.restore_backup.outcome == 'success') }}
-        env:
-          O_MIGRATE: ${{ steps.migrate.outcome }}
-          O_DOCS: ${{ env.MODE == 'restore' && steps.docs_backup.outcome || steps.docs_chain.outcome }}
-          O_RECON: ${{ env.MODE == 'restore' && steps.recon_backup.outcome || steps.recon_chain.outcome }}
-          O_FLIP: ${{ steps.flip.outcome }}
-          O_UNQUIESCE: ${{ steps.unquiesce.outcome }}
-          O_SMOKE: ${{ steps.smoke.outcome }}
-        run: node "$CLI" failure-summary
-
-      # ── Rollback DURABLE : les DUMPS ne transitent plus par le runner ──────
-      # Le dump prod (S1, CronJob owner) ET le dump rollback préprod (G1, Job)
-      # vivent dans le bucket de backups (radar-immobilier-backups-preprod) —
-      # DURABLES, hors workdir éphémère. On n'uploade en artefact GitHub que les
-      # POINTEURS/états (clés S3 + T1 + quiesce/recon), en `if: always()` pour la
-      # traçabilité même sur échec. Restaurer le rollback : rejouer le Job restore
-      # avec DUMP_KEY = contenu de LATEST_PREPROD_ROLLBACK_KEY.txt (voir README).
-      # MODE=restore adds backup-pin.json (backup date + manifest/dump sha256).
-      - name: Rollback pointeurs + états (clés S3, PAS de dump runner)
-        if: ${{ always() && !inputs.DRY_RUN && env.MODE != 'list' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: bascule-rollback-${{ github.run_id }}
-          path: |
-            ${{ github.workspace }}/.bascule-work/T1.txt
-            ${{ github.workspace }}/.bascule-work/LATEST_PROD_DUMP_KEY.txt
-            ${{ github.workspace }}/.bascule-work/LATEST_PREPROD_ROLLBACK_KEY.txt
-            ${{ github.workspace }}/.bascule-work/quiesce-state.json
-            ${{ github.workspace }}/.bascule-work/recon.ok.json
-            ${{ github.workspace }}/.bascule-work/backup-pin.json
-          if-no-files-found: warn
-          retention-days: 7
-
-  # ═══════════════════════════════════════════════════════════════════════════
-  # e2e CONTRACT (CYCLE_ID set by bascule-e2e.yml) — two jobs WITHOUT any cluster
-  # credential (the kubeconfigs stay in `bascule`):
-  #   served-ids  immo-served-canonical-ids-<CYCLE_ID>: zone ids immo references,
-  #               computed with the PUBLISHED builder @sentropic/geo (same pin as
-  #               the geo leg, installed outside the workspace) from the artefact
-  #               immo-served-refs-<CYCLE_ID> (O1: extracted read-only from the
-  #               restored preprod DB by the `bascule` job; no HTTP endpoint).
-  #   cycle-leg   cycle-leg-immo-<CYCLE_ID>: `legs.immo` (run, sha, MODE, backup
-  #               date + sha256, verdict pg/s3). Reports only, always runs.
-  # A standalone or scheduled bascule (CYCLE_ID empty) never runs them.
-  # ═══════════════════════════════════════════════════════════════════════════
   served-ids:
     needs: bascule
-    if: ${{ inputs.CYCLE_ID != '' && !inputs.DRY_RUN && (inputs.MODE || 'chain') != 'list' && needs.bascule.result == 'success' }}
+    if: ${{ inputs.CYCLE_ID != '' && !inputs.DRY_RUN && (inputs.MODE || 'restore') != 'list' && needs.bascule.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
@@ -206,14 +155,14 @@ jobs:
 
   cycle-leg:
     needs: [bascule, served-ids]
-    if: ${{ always() && inputs.CYCLE_ID != '' && (inputs.MODE || 'chain') != 'list' }}
+    if: ${{ always() && inputs.CYCLE_ID != '' && (inputs.MODE || 'restore') != 'list' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       contents: read
     env:
       CYCLE_ID: ${{ inputs.CYCLE_ID }}
-      MODE: ${{ inputs.MODE || 'chain' }}
+      MODE: ${{ inputs.MODE || 'restore' }}
       BACKUP_ID: ${{ needs.bascule.outputs.backup_id }}
       BACKUP_DATE: ${{ needs.bascule.outputs.backup_date }}
       MANIFEST_SHA256: ${{ needs.bascule.outputs.manifest_sha256 }}
