@@ -411,6 +411,11 @@ identity. B5, final reviews, remote CI and combined delivery keep their scope.
 
 ## Operational cutover
 
+Use the [sequential cutover runbook](../../deploy/cutover/README.md).
+The standalone command restores API, UI, MCP, every captured ingress and original
+schedule states. The former API-only P1/O1 vehicle and Q1/Q2 ceremony are retired.
+The qualification history above and B5 acceptance below remain historical evidence;
+operational installation and preprod acceptance are separate owner prerequisites.
 ## B5 standalone acceptance profile
 
 B5 proves the B1–B4 implementation through `createApp` and PostgreSQL,

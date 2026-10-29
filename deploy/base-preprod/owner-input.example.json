@@ -1,15 +1,3 @@
-{
-  "context": "<AUTHORIZED_KUBERNETES_CONTEXT>",
-  "namespace": "radar-immobilier-preprod",
-  "repository": "<GITHUB_OWNER>/<REPOSITORY>",
-  "image": "<API_REPOSITORY>@sha256:<QUALIFIED_IMAGE_DIGEST>",
-  "jobName": "base-operator-<UNIQUE_ATTEMPT_ACTION>",
-  "operation": "inspect",
-  "database": { "database": "<EXPECTED_DATABASE>", "role": "<EXPECTED_ROLE>", "schema": "public" },
-  "binding": {
-    "workspaceId": null,
-    "workspaceSlug": "agence-chaperon-immobilier",
-    "actorSub": "<APPROVED_OPERATOR_SUBJECT>",
     "maintenanceAttemptId": "<NEW_ATTEMPT_UUID>",
     "releaseId": "<FULL_RELEASE_SHA>:<QUALIFICATION_REFERENCE>"
   },
