@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "actorSub": "<APPROVED_PRODUCTION_ACCOUNT_SUBJECT>",
+  "workspaceSlug": "agence-chaperon-immobilier",
+  "workspaceLabel": "Agence Chaperon Immobilier",
+  "accounts": [
+    {
+      "sub": "<APPROVED_PRODUCTION_ACCOUNT_SUBJECT>",
+      "destination": "agence-chaperon-immobilier",
+      "moderateArchive": true,
+      "manageMembers": true
+    }
+  ]
+}

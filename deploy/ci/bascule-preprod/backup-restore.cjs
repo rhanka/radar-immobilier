@@ -5,7 +5,7 @@
 // (deploy/ci/backup/: pg/<D>/radar.dump, docs/, docs-inventory/<D>.json,
 // manifests/<D>.json, manifests/latest.json).
 //
-// This file is NEVER run on the GitHub runner. restore-mode.mjs embeds it
+// This file is NEVER run on the GitHub runner. cutover-jobs.sh embeds it
 // verbatim into the Job templates (`node -e`, image radar-api = Node +
 // @aws-sdk/client-s3, 0 python, 0 new image) and the pod picks its step from
 // BR_STEP:

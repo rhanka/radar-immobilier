@@ -119,10 +119,8 @@ export function combine(outcomes) {
 
 // legs.immo verdict from the step outcomes of the `bascule` job.
 export function immoVerdict(mode, o) {
-  if (mode === "restore") {
-    return { pg: combine([o.restoreBackup, o.migrate]), s3: combine([o.docsBackup, o.reconBackup, o.smoke]) };
-  }
-  return { pg: combine([o.dump, o.restoreChain, o.migrate]), s3: combine([o.docsChain, o.reconChain, o.smoke]) };
+  if (mode !== "restore") throw new Error("invalid MODE for a cycle leg");
+  return { pg: combine([o.restoreBackup, o.migrate]), s3: combine([o.docsBackup, o.reconBackup, o.smoke]) };
 }
 
 export function buildImmoLeg({ cycleId, runId, gitSha, repo = LEG_REPO, mode, backup, outcomes, servedIdsSha256 }) {
@@ -130,7 +128,7 @@ export function buildImmoLeg({ cycleId, runId, gitSha, repo = LEG_REPO, mode, ba
   const sha = String(gitSha ?? "").trim().toLowerCase();
   if (!/^[0-9a-f]{7,40}$/.test(sha)) throw new Error("invalid commit sha");
   if (servedIdsSha256 !== null && servedIdsSha256 !== undefined && !SHA_RE.test(servedIdsSha256)) throw new Error("invalid served_ids_sha256");
-  if (!["chain", "restore"].includes(mode)) throw new Error("invalid MODE for a cycle leg");
+  if (mode !== "restore") throw new Error("invalid MODE for a cycle leg");
   let b = null;
   if (mode === "restore" && backup && DATE_RE.test(String(backup.date ?? ""))) {
     b = {
@@ -270,7 +268,7 @@ function cmdCycleLeg(argv) {
       runId: envOr("GITHUB_RUN_ID", ""),
       gitSha: envOr("GITHUB_SHA", ""),
       repo: envOr("GITHUB_REPOSITORY", LEG_REPO),
-      mode: envOr("MODE", "chain"),
+      mode: envOr("MODE", "restore"),
       backup: {
         id: envOr("BACKUP_ID", ""), date: envOr("BACKUP_DATE", ""), manifestSha256: envOr("MANIFEST_SHA256", ""),
         pgSha256: envOr("PG_SHA256", ""), dumpStartedAt: envOr("DUMP_STARTED_AT", ""),
