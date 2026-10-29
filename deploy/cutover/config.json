@@ -1,0 +1,26 @@
+{
+  "server": "https://hlhedx.c1.bhs5.k8s.ovh.net",
+  "required": ["radar-api", "radar-ui", "radar-immo-mcp"],
+  "cronjobs": ["radar-refresh-pv", "radar-refresh-pending-watchdog", "radar-consistency-snapshot", "radar-populate-geo-daily"],
+  "preprod": {
+    "namespace": "radar-immobilier-preprod",
+    "url": "https://preprod.immo.sent-tech.ca",
+    "database": "radar",
+    "documents": "radar-immobilier-docs-preprod"
+  },
+  "prod": {
+    "namespace": "radar-immobilier",
+    "url": "https://immo.sent-tech.ca",
+    "database": "radar",
+    "documents": "radar-immobilier-docs"
+  },
+  "storage": {
+    "endpoint": "https://s3.bhs.io.cloud.ovh.net",
+    "region": "bhs",
+    "backupBucket": "radar-immobilier-backup",
+    "readerSecret": "radar-backup-reader-preprod",
+    "copySecret": "radar-backup-restore-docs",
+    "dbSecret": "radar-db-credentials",
+    "backupSecret": "radar-backup-s3-credentials"
+  }
+}
