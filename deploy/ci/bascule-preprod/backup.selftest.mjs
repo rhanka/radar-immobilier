@@ -366,3 +366,123 @@ async function suite() {
     const rec = await step({ s, env: { ...docsEnv(manSha), BR_STEP: "recon" } });
     eq("recon — object deleted after the restore ⇒ fail", [rec.code, rec.t.missing], [1, 1]);
   }
+}
+
+// ═════════════════════════════ runner pure functions ══════════════════════════
+eq("basculeMode — default restore", basculeMode({}), "restore");
+throws("basculeMode — unknown refused", () => basculeMode({ MODE: "wipe" }));
+eq("validateBackupIdInput — latest", validateBackupIdInput("", D), "latest");
+throws("validateBackupIdInput — quote refused", () => validateBackupIdInput('2026-09-26"', D));
+eq("validateCycleId — orchestrator id", validateCycleId("iso-prod-2026-09-26-t0abc"), "iso-prod-2026-09-26-t0abc");
+throws("validateCycleId — space refused", () => validateCycleId("a b"));
+eq("indentBlock — empty lines kept empty", indentBlock("a\n\nb", 2), "  a\n\n  b");
+throws("assertYamlSafeVars — quote refused", () => assertYamlSafeVars({ X: 'a"b' }));
+ok("assertYamlSafeVars — BR_SCRIPT skipped", assertYamlSafeVars({ BR_SCRIPT: 'a"b', Y: "ok" }));
+throws("assertScriptEmbeddable — placeholder pattern refused", () => assertScriptEmbeddable("x ${NAMESPACE} y"));
+ok("safeReason — no workflow command, one line", !/::|\n/.test(safeReason("a\n::error::x")));
+{
+  const U1 = "11111111-1111-4111-8111-111111111111";
+  const U0 = "00000000-0000-4000-8000-000000000000";
+  const own = (uid) => [{ kind: "Job", name: "radar-db-restore-backup", uid, controller: true }];
+  const pods = { items: [
+    { metadata: { creationTimestamp: "2026-09-26T10:00:00Z", ownerReferences: own(U1) }, status: { initContainerStatuses: [{ name: "fetch", state: { terminated: { message: '{"ok":false,"reason":"old"}' } } }] } },
+    { metadata: { creationTimestamp: "2026-09-26T11:00:00Z", ownerReferences: own(U1) }, status: { initContainerStatuses: [{ name: "fetch", state: { terminated: { message: '{"ok":true,"step":"fetch-dump"}' } } }], containerStatuses: [{ name: "restore", state: { running: {} } }] } },
+    // pod of a PREVIOUS instance of the same Job name (deleted, still listed), newest of all
+    { metadata: { creationTimestamp: "2026-09-26T12:00:00Z", ownerReferences: own(U0), labels: { "batch.kubernetes.io/controller-uid": U0 } }, status: { initContainerStatuses: [{ name: "fetch", state: { terminated: { message: '{"ok":true,"step":"stale"}' } } }] } },
+  ] };
+  eq("pickTerminationMessage — newest pod OF THIS Job instance, init container", parseTermination(pickTerminationMessage(pods, "fetch", U1)), { ok: true, step: "fetch-dump" });
+  eq("pickTerminationMessage — a pod of an older instance is never read", parseTermination(pickTerminationMessage({ items: [pods.items[2]] }, "fetch", U1)), null);
+  eq("pickTerminationMessage — no Job uid ⇒ nothing read (no guess)", pickTerminationMessage(pods, "fetch", null), null);
+  eq("pickTerminationMessage — none", pickTerminationMessage(pods, "restore", U1), null);
+  ok("podOfJob — controller-uid label accepted (legacy or batch.kubernetes.io)", podOfJob({ metadata: { labels: { "controller-uid": U1 } } }, U1) &&
+    podOfJob({ metadata: { labels: { "batch.kubernetes.io/controller-uid": U1 } } }, U1) && !podOfJob({ metadata: { labels: { "controller-uid": U0 } } }, U1));
+}
+throws("validatePin — bad sha refused", () => validatePin({ ok: true, date: D, manifestSha256: "x", pgSha256: "a".repeat(64), pgSizeBytes: 1, backupId: "latest" }));
+throws("validatePin — not ok refused", () => validatePin({ ok: false }));
+eq("JOBS — stable Job names", JOBS.db, "radar-db-restore-backup");
+
+// ═════════════════════════════ script under `node -e` ═════════════════════════
+const SCRIPT = readFileSync(join(DIR, "backup-restore.cjs"), "utf8");
+ok("backup-restore.cjs — embeddable (no ${UPPER} sequence)", assertScriptEmbeddable(SCRIPT));
+{
+  const term = join(tmp, "node-e.json");
+  const r = spawnSync(process.execPath, ["-e", SCRIPT], { cwd: tmp, env: { PATH: process.env.PATH, BR_STEP: "resolve", TERMINATION_LOG: term }, encoding: "utf8" });
+  const t = existsSync(term) ? JSON.parse(readFileSync(term, "utf8")) : null;
+  eq("node -e — main triggered, exit 1 without the SDK, verdict written", [r.status, t && t.ok, /client-s3/.test(t && t.reason)], [1, false, true]);
+  const r2 = spawnSync(process.execPath, ["-e", SCRIPT], { cwd: tmp, env: { PATH: process.env.PATH, BR_STEP: "bogus", TERMINATION_LOG: term }, encoding: "utf8" });
+  eq("node -e — unknown step refused (exit 2)", r2.status, 2);
+}
+
+// ═════════════════════════════ templates render ═══════════════════════════════
+function render(tmpl, vars) {
+  let text = readFileSync(join(DIR, tmpl), "utf8");
+  for (const [k, v] of Object.entries(vars)) text = text.split(`\${${k}}`).join(v);
+  return { text, leftover: text.match(/\$\{[A-Z0-9_]+\}/g) };
+}
+let YAML = null;
+try { YAML = (await import("yaml")).default; } catch { YAML = null; }
+const common = { NAMESPACE: "radar-immobilier-preprod", IMAGE: "ghcr.io/rhanka/radar-api@sha256:" + "a".repeat(64), READER_SECRET: "radar-backup-reader-preprod",
+  S3_ENDPOINT: "https://s3.bhs.io.cloud.ovh.net", S3_REGION: "bhs", S3_FORCE_PATH_STYLE: "true", EXPECTED_BACKUP_BUCKET: B, TTL_SECONDS: "3600",
+  BR_SCRIPT: indentBlock(SCRIPT, 14) };
+const renders = {
+  "backup-read-job.tmpl.yaml": { ...common, JOB_NAME: JOBS.resolve, BR_STEP: "resolve", BACKUP_ID: "latest", ALLOW_STALE_BACKUP: "false", MAX_AGE_HOURS: "24" },
+  "db-restore-backup-job.tmpl.yaml": { ...common, DUMP_IMAGE: "postgis/postgis:16-3.4", BACKUP_DATE: D, PIN_MANIFEST_SHA256: "a".repeat(64), PIN_PG_SHA256: "b".repeat(64),
+    DB_SECRET: "radar-db-credentials", PGHOST: "radar-postgres", EXPECTED_DATABASE: "radar", RESTORE_ASSERT_DB: "1" },
+  "docs-restore-backup-job.tmpl.yaml": { ...common, JOB_NAME: JOBS.docs, BR_STEP: "docs", COPY_SECRET: "radar-backup-restore-docs", BACKUP_DATE: D, PIN_MANIFEST_SHA256: "a".repeat(64),
+    DST_BUCKET: DST, FORBIDDEN_DST_BUCKETS: PROD, COPY_GRANTEE: "g", COPY_CONCURRENCY: "8", DOCS_DRY: "0" },
+};
+for (const [tmpl, vars] of Object.entries(renders)) {
+  const { text, leftover } = render(tmpl, vars);
+  ok(`${tmpl} — no leftover placeholder`, !leftover);
+  const m = text.match(/command: \["node", "-e"\]\n {10}args:\n {12}- \|\n([\s\S]*?)\n {10}env:/);
+  const back = m ? m[1].split("\n").map((l) => l.replace(/^ {14}/, "")).join("\n") : "";
+  ok(`${tmpl} — embedded script recovered byte-identical`, back.trimEnd() === SCRIPT.trimEnd());
+  ok(`${tmpl} — carries the bascule label (G2 exclusion + netpol)`, /sentropic\.io\/bascule:/.test(text));
+  if (YAML) {
+    const doc = YAML.parse(text);
+    const pod = doc.spec.template.spec;
+    const node = [...(pod.initContainers || []), ...pod.containers].find((c) => c.command && c.command[0] === "node");
+    ok(`${tmpl} — YAML parses, node -e arg == script`, node && node.args[0].trimEnd() === SCRIPT.trimEnd());
+    ok(`${tmpl} — automountServiceAccountToken false`, pod.automountServiceAccountToken === false);
+  }
+}
+if (!YAML) console.log("  info yaml package not resolvable — YAML parse checks skipped (structure checks done)");
+
+// ═════════════════════════════ served-ids.mjs ═════════════════════════════════
+eq("mapOutcome — skipped ⇒ failure", mapOutcome("skipped"), "failure");
+eq("combine — all success", combine(["success", "success"]), "success");
+eq("combine — one pending", combine(["success", ""]), "pending");
+eq("immoVerdict — restore", immoVerdict("restore", { restoreBackup: "success", migrate: "success", docsBackup: "success", reconBackup: "success", smoke: "failure" }), { pg: "success", s3: "failure" });
+{
+  const leg = buildImmoLeg({ cycleId: "c1", runId: "42", gitSha: "abcdef1234", mode: "restore",
+    backup: { id: "latest", date: D, manifestSha256: "a".repeat(64), pgSha256: "b".repeat(64), dumpStartedAt: "2026-09-26T02:23:05Z" },
+    outcomes: { restoreBackup: "success", migrate: "success", docsBackup: "success", reconBackup: "success", smoke: "success" }, servedIdsSha256: null });
+  eq("buildImmoLeg — legs.immo shape", [leg.run_id, leg.sha_main, leg.backup.date, leg.t1, leg.verdict, leg.served_ids_artifact],
+    ["42", "abcdef1", D, "2026-09-26T02:23:05.000Z", { pg: "success", s3: "success" }, "immo-served-canonical-ids-c1"]);
+  throws("buildImmoLeg — list mode refused", () => buildImmoLeg({ cycleId: "c1", runId: "1", gitSha: "abcdef1", mode: "list" }));
+}
+eq("artefact names", [servedIdsArtifactName("c1"), cycleLegArtifactName("c1")], ["immo-served-canonical-ids-c1", "cycle-leg-immo-c1"]);
+throws("normalizeRawRefs — bad slug refused", () => normalizeRawRefs({ zones: [{ citySlug: "Bad Slug", zoneCode: "A1" }] }));
+eq("normalizeRawRefs — empty code dropped, lots ignored", (({ zones, dropped, lotsIgnored }) => [zones.length, dropped, lotsIgnored])(normalizeRawRefs({ zones: [{ citySlug: "laval", zoneCode: "A1" }, { citySlug: "laval", zoneCode: " " }], lots: [{}] })), [1, 1, 1]);
+throws("assertServedZoneIds — unsorted refused", () => assertServedZoneIds(["ogc:zones:b:1", "ogc:zones:a:1"]));
+throws("assertServedZoneIds — empty refused", () => assertServedZoneIds([]));
+{
+  const d = join(tmp, "served");
+  mkdirSync(d, { recursive: true });
+  const text = "ogc:zones:laval:A-1\n";
+  writeFileSync(join(d, "served-ids.txt"), text);
+  writeFileSync(join(d, "served-ids.txt.sha256"), sha256FileLine(sha(Buffer.from(text))));
+  eq("readServedIdsSha — consistent artefact", readServedIdsSha(d), sha(Buffer.from(text)));
+  eq("readServedIdsSha — absent artefact ⇒ null", readServedIdsSha(join(tmp, "nope")), null);
+}
+
+// ═════════════════════════════ e2e O1: served refs (restored DB → ConfigMaps) ═
+const REFS_TSV = "laval\tA-1\nsutton\tZ9\nlaval\tA-1\nBad Slug\tX\nmontreal\tC408\nlaval\t\n";
+{
+  const p = sr.parseRefsTsv(REFS_TSV);
+  eq("served-refs — rows validated, deduplicated, byte-sorted", [p.lines, p.rejected], [["laval\tA-1", "montreal\tC408", "sutton\tZ9"], 2]);
+  eq("served-refs — sources parsed", sr.parseSources("geo_resolutions\t12\nzone_versions\t3400\n"), { geo_resolutions: 12, zone_versions: 3400 });
+  eq("served-refs — splitParts", sr.splitParts(Buffer.alloc(10), 4).map((b) => b.length), [4, 4, 2]);
+  throws("served-refs — empty result refused (fail-closed)", () => sr.buildPayload({ lines: [], rejected: 0, sources: {}, cycleId: "c1", maxParts: 4, prefix: "immo-served-refs", now: Date.now }));
+}
+async function refsSuite() {
