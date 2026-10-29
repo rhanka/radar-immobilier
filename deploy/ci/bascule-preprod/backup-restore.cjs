@@ -214,7 +214,7 @@ function indexVersions(versions, prefix = LAYOUT.docsPrefix) {
 }
 
 // Which backup version of a `backed-up` inventory entry holds the content of D:
-//   1. the recorded versionId (size and ETag must agree);
+//   1. the recorded versionId (ETag must agree; size drift is an inventory anomaly);
 //   2. else a version whose ETag = the inventory backupEtag and size = the entry
 //      size: the newest one written not after the inventory, else the oldest
 //      identical one written later (same ETag + size = same content).
@@ -224,13 +224,13 @@ function chooseVersion(entry, versions, inventoryCreatedAtMs) {
   const size = Number(entry.size);
   if (entry.versionId) {
     const exact = list.find((v) => v.versionId === String(entry.versionId));
-    if (exact) {
-      if (exact.size !== size) return { error: 'size-mismatch' };
-      if (want && exact.etag && exact.etag !== want) return { error: 'etag-mismatch' };
-      return { versionId: exact.versionId, how: 'version-id' };
-    }
+    if (!exact) return { error: 'version-gone' };
+    if (!want || !exact.etag || exact.etag !== want) return { error: 'etag-mismatch' };
+    if (!Number.isSafeInteger(exact.size) || exact.size < 0) return { error: 'invalid-version-size' };
+    return { versionId: exact.versionId, how: 'version-id',
+      ...(exact.size !== size ? { inventoryAnomaly: { inventorySize: size, versionSize: exact.size } } : {}) };
   }
-  if (!want) return { error: entry.versionId ? 'version-gone' : 'no-backup-etag' };
+  if (!want) return { error: 'no-backup-etag' };
   const same = list.filter((v) => v.etag === want && v.size === size);
   if (!same.length) return { error: list.length ? 'etag-not-found' : 'no-version' };
   const before = same.filter((v) => Number.isFinite(v.lastModified) && v.lastModified <= inventoryCreatedAtMs)
@@ -240,7 +240,21 @@ function chooseVersion(entry, versions, inventoryCreatedAtMs) {
   return { versionId: later[0].versionId, how: 'etag-identical-later' };
 }
 
-// Preprod already holds the content of D: same size AND same ETag (source or backup copy).
+function acceptSelection(plan, entry, selection) {
+  if (!selection.inventoryAnomaly) return entry;
+  const anomaly = { keySha256: crypto.createHash('sha256').update(entry.key).digest('hex'), ...selection.inventoryAnomaly };
+  plan.inventoryAnomalies.push(anomaly);
+  plan.expectedSizes.set(entry.key, anomaly.versionSize);
+  return { ...entry, size: anomaly.versionSize };
+}
+
+function anomalyReport(plan, log) {
+  for (const anomaly of plan.inventoryAnomalies) log('WARN inventory-size-anomaly ' + JSON.stringify(anomaly));
+  return { inventoryAnomalyCount: plan.inventoryAnomalies.length, inventoryAnomalies: plan.inventoryAnomalies.slice(0, 10),
+    inventoryAnomaliesTruncated: plan.inventoryAnomalies.length > 10 };
+}
+
+// Destination already holds the selected content: same size and source/backup ETag.
 function destUpToDate(entry, d) {
   if (!d || Number(d.Size) !== Number(entry.size)) return false;
   const de = normEtag(d.ETag);
@@ -248,9 +262,8 @@ function destUpToDate(entry, d) {
 }
 
 // versionsIndex = null when the version listing is not permitted: then an entry
-// with a recorded versionId is copied by that id (CopyObject fails if it is
-// gone; the recon checks the size), and an entry without one goes to `needsHead`
-// (current version accepted only if its ETag + size are the inventory's).
+// with a recorded versionId is checked by HEAD at that exact version. Unpinned
+// entries use HEAD on the current object (ETag + size must agree).
 //
 // `excluded` entries (prefixes the backup deliberately skips, BACKUP_EXCLUDE_PREFIXES:
 // the backup is still `complete`) are treated as the backup treats them: not
@@ -259,18 +272,28 @@ function destUpToDate(entry, d) {
 // and blocks.
 function planDocsRestore({ inventory, versionsIndex, destIndex }) {
   const createdAtMs = Date.parse(inventory.createdAt);
-  const plan = { objects: 0, upToDate: 0, excluded: 0, notInBackup: 0, unresolved: 0, unresolvedReasons: {}, toCopy: [], needsHead: [], bytesToCopy: 0, how: {} };
-  for (const e of inventory.objects) {
+  const plan = { objects: 0, upToDate: 0, excluded: 0, notInBackup: 0, unresolved: 0, unresolvedReasons: {}, toCopy: [], needsHead: [], bytesToCopy: 0, how: {},
+    inventoryAnomalies: [], expectedSizes: new Map() };
+  for (let e of inventory.objects) {
     plan.objects += 1;
     if (e.state === 'excluded') { plan.excluded += 1; continue; }
     if (e.state !== 'backed-up') { plan.notInBackup += 1; continue; }
+    let c;
+    if (e.versionId && versionsIndex) {
+      c = chooseVersion(e, versionsIndex.get(e.key), createdAtMs);
+      if (c.error) {
+        plan.unresolved += 1;
+        plan.unresolvedReasons[c.error] = (plan.unresolvedReasons[c.error] || 0) + 1;
+        continue;
+      }
+      e = acceptSelection(plan, e, c);
+    } else if (e.versionId) {
+      plan.needsHead.push(e);
+      continue;
+    }
     if (destUpToDate(e, destIndex.get(e.key))) { plan.upToDate += 1; continue; }
     if (!versionsIndex) {
-      if (e.versionId) {
-        plan.toCopy.push({ key: e.key, versionId: String(e.versionId), size: Number(e.size) });
-        plan.bytesToCopy += Number(e.size) || 0;
-        plan.how['version-id-unlisted'] = (plan.how['version-id-unlisted'] || 0) + 1;
-      } else if (normEtag(e.backupEtag)) {
+      if (normEtag(e.backupEtag)) {
         plan.needsHead.push({ key: e.key, size: Number(e.size), backupEtag: normEtag(e.backupEtag) });
       } else {
         plan.unresolved += 1;
@@ -278,7 +301,7 @@ function planDocsRestore({ inventory, versionsIndex, destIndex }) {
       }
       continue;
     }
-    const c = chooseVersion(e, versionsIndex.get(e.key), createdAtMs);
+    c = c || chooseVersion(e, versionsIndex.get(e.key), createdAtMs);
     if (c.error) {
       plan.unresolved += 1;
       plan.unresolvedReasons[c.error] = (plan.unresolvedReasons[c.error] || 0) + 1;
@@ -295,7 +318,7 @@ function planDocsRestore({ inventory, versionsIndex, destIndex }) {
 // a server-side copy of a multipart object may re-chunk). Extra preprod objects
 // (newer than D) are tolerated and counted: the restore is additive. `excluded`
 // entries are not required (counted apart), as in planDocsRestore.
-function reconInventory(inventory, destIndex) {
+function reconInventory(inventory, destIndex, expectedSizes = new Map()) {
   const r = { checked: 0, missing: 0, sizeMismatch: 0, excluded: 0, notInBackup: 0, extra: 0 };
   const keys = new Set();
   for (const e of inventory.objects) {
@@ -305,7 +328,7 @@ function reconInventory(inventory, destIndex) {
     r.checked += 1;
     const d = destIndex.get(e.key);
     if (!d) r.missing += 1;
-    else if (Number(d.Size) !== Number(e.size)) r.sizeMismatch += 1;
+    else if (Number(d.Size) !== (expectedSizes.get(e.key) ?? Number(e.size))) r.sizeMismatch += 1;
   }
   for (const k of destIndex.keys()) if (!keys.has(k)) r.extra += 1;
   r.ok = r.missing === 0 && r.sizeMismatch === 0 && r.notInBackup === 0;
@@ -429,8 +452,8 @@ async function getJsonWithSha(c, Bucket, Key) {
   try { json = JSON.parse(got.buf.toString('utf8')); } catch { json = null; }
   return { json, sha256: sha256Hex(got.buf), versionId: got.versionId, bytes: got.buf.length };
 }
-async function headOrNull(c, Bucket, Key) {
-  try { return await c.s3.send(new c.sdk.HeadObjectCommand({ Bucket, Key })); } catch (e) { if (isNotFound(e)) return null; throw e; }
+async function headOrNull(c, Bucket, Key, VersionId) {
+  try { return await c.s3.send(new c.sdk.HeadObjectCommand({ Bucket, Key, ...(VersionId ? { VersionId } : {}) })); } catch (e) { if (isNotFound(e)) return null; throw e; }
 }
 async function listAll(c, Bucket, Prefix) {
   const all = [];
@@ -575,12 +598,26 @@ async function runFetchDump({ cfg, reader, log }) {
 // Entries without a recorded version when versions cannot be listed: HEAD the
 // current backup copy (copy identity, GetObject on docs/*); accepted only when
 // its size and ETag are the inventory's (same content as at D).
-async function resolveByHead(copier, cfg, plan) {
+async function resolveByHead(copier, cfg, plan, destIndex) {
   let next = 0;
   const worker = async () => {
     while (next < plan.needsHead.length) {
-      const e = plan.needsHead[next++];
-      const h = await headOrNull(copier, cfg.backupBucket, LAYOUT.docsPrefix + e.key);
+      let e = plan.needsHead[next++];
+      const h = await headOrNull(copier, cfg.backupBucket, LAYOUT.docsPrefix + e.key, e.versionId);
+      if (e.versionId) {
+        const c = chooseVersion(e, h ? [{ versionId: String(e.versionId), etag: normEtag(h.ETag), size: Number(h.ContentLength) }] : []);
+        if (c.error) {
+          plan.unresolved += 1;
+          plan.unresolvedReasons[c.error] = (plan.unresolvedReasons[c.error] || 0) + 1;
+          continue;
+        }
+        e = acceptSelection(plan, e, c);
+        if (destUpToDate(e, destIndex.get(e.key))) { plan.upToDate += 1; continue; }
+        plan.toCopy.push({ key: e.key, versionId: String(e.versionId), size: Number(e.size) });
+        plan.bytesToCopy += Number(e.size);
+        plan.how['version-id-head-checked'] = (plan.how['version-id-head-checked'] || 0) + 1;
+        continue;
+      }
       if (h && Number(h.ContentLength) === e.size && normEtag(h.ETag) === e.backupEtag) {
         plan.toCopy.push({ key: e.key, versionId: null, size: e.size });
         plan.bytesToCopy += e.size;
@@ -607,17 +644,18 @@ async function runDocs({ cfg, reader, copier, log }) {
     versionsIndex = indexVersions(await listAllVersions(copier, cfg.backupBucket, LAYOUT.docsPrefix));
   } catch (e) {
     if (!(e && (e.name === 'AccessDenied' || (e.$metadata && e.$metadata.httpStatusCode === 403)))) throw e;
-    log('WARN version listing of <backup>/docs/ not permitted to the copy identity: recorded versionIds used as is, others checked by HEAD');
+    log('WARN version listing of <backup>/docs/ not permitted to the copy identity: recorded versions and unpinned current objects checked by HEAD');
   }
   const destIndex = await destIndexOf(copier, cfg.dstBucket);
   const plan = planDocsRestore({ inventory, versionsIndex, destIndex });
-  if (plan.needsHead.length) await resolveByHead(copier, cfg, plan);
+  if (plan.needsHead.length) await resolveByHead(copier, cfg, plan, destIndex);
   log(`PLAN date=${cfg.date} inventory=${plan.objects} up_to_date=${plan.upToDate} to_copy=${plan.toCopy.length} ` +
     `bytes_to_copy=${plan.bytesToCopy} excluded=${plan.excluded} not_in_backup=${plan.notInBackup} unresolved=${plan.unresolved} ` +
     `reasons=${JSON.stringify(plan.unresolvedReasons)} how=${JSON.stringify(plan.how)} dest_objects=${destIndex.size} ` +
     `versions_listed=${versionsIndex !== null} dry=${cfg.dry}`);
   const base = { step: 'docs', date: cfg.date, dry: cfg.dry, inventory: plan.objects, upToDate: plan.upToDate, toCopy: plan.toCopy.length,
-    bytesToCopy: plan.bytesToCopy, excluded: plan.excluded, notInBackup: plan.notInBackup, unresolved: plan.unresolved, unresolvedReasons: plan.unresolvedReasons };
+    bytesToCopy: plan.bytesToCopy, excluded: plan.excluded, notInBackup: plan.notInBackup, unresolved: plan.unresolved, unresolvedReasons: plan.unresolvedReasons,
+    ...anomalyReport(plan, log) };
   if (plan.excluded > 0) log(`NOTE ${plan.excluded} inventory object(s) excluded by the backup itself (excluded prefixes): not required, not restored`);
   if (plan.notInBackup > 0 || plan.unresolved > 0) {
     log(`DOCS REFUSED — ${plan.notInBackup} inventory object(s) not in the backup of ${cfg.date}, ${plan.unresolved} without a restorable version (fail-closed)`);
@@ -648,7 +686,7 @@ async function runDocs({ cfg, reader, copier, log }) {
     }
   };
   await Promise.all(Array.from({ length: Math.min(cfg.concurrency, plan.toCopy.length) }, () => worker()));
-  const recon = reconInventory(inventory, await destIndexOf(copier, cfg.dstBucket));
+  const recon = reconInventory(inventory, await destIndexOf(copier, cfg.dstBucket), plan.expectedSizes);
   const ok = copyErrors === 0 && recon.ok;
   log(`${ok ? 'DOCS OK' : 'DOCS FAIL'} date=${cfg.date} copied=${copied} copy_errors=${copyErrors} recon.checked=${recon.checked} ` +
     `recon.missing=${recon.missing} recon.size_mismatch=${recon.sizeMismatch} dest_extra=${recon.extra} (additive: extra objects kept)`);
@@ -658,10 +696,18 @@ async function runDocs({ cfg, reader, copier, log }) {
 async function runRecon({ cfg, reader, copier, log }) {
   const manifest = await loadPinnedManifest(reader, cfg);
   const inventory = await loadInventory(reader, cfg, manifest);
-  const recon = reconInventory(inventory, await destIndexOf(copier, cfg.dstBucket));
+  const destIndex = await destIndexOf(copier, cfg.dstBucket);
+  // Only mismatching sizes require a versioned HEAD: avoid relisting the entire
+  // version history or issuing one HEAD for every object in a large inventory.
+  const candidates = inventory.objects.filter(e => e.state === 'backed-up' && e.versionId &&
+    destIndex.has(e.key) && Number(destIndex.get(e.key).Size) !== Number(e.size));
+  const plan = planDocsRestore({ inventory: { ...inventory, objects: candidates }, versionsIndex: null, destIndex });
+  if (plan.needsHead.length) await resolveByHead(copier, cfg, plan, destIndex);
+  const recon = reconInventory(inventory, destIndex, plan.expectedSizes);
+  recon.ok = recon.ok && plan.unresolved === 0;
   log(`${recon.ok ? 'RECON OK' : 'RECON FAIL'} date=${cfg.date} checked=${recon.checked} missing=${recon.missing} ` +
     `size_mismatch=${recon.sizeMismatch} excluded=${recon.excluded} not_in_backup=${recon.notInBackup} dest_extra=${recon.extra}`);
-  return { exitCode: recon.ok ? EXIT.OK : EXIT.ERROR, termination: { ok: recon.ok, step: 'recon', date: cfg.date, ...recon } };
+  return { exitCode: recon.ok ? EXIT.OK : EXIT.ERROR, termination: { ok: recon.ok, step: 'recon', date: cfg.date, ...recon, ...anomalyReport(plan, log) } };
 }
 
 const STEPS = { resolve: runResolve, list: runList, 'fetch-dump': runFetchDump, docs: runDocs, recon: runRecon };
