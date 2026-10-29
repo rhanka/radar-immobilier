@@ -3,6 +3,8 @@
 jq '.maintenance={service:"base-maintenance-fixture",ingresses:["fixture-app","fixture-mcp"]}
  | .mcpDeployment="fixture-mcp" | .apiIngress="fixture-app"' input.json > enriched.json
 cp enriched.json input.json
+jq --arg now "$now" '.maintenance.reopenBy=($now|fromdateiso8601+3600|todateiso8601) | .maintenance.changeFreeze={reference:"fixture-owner-freeze",noPushOrMerge:true,startsAt:($now|fromdateiso8601-60|todateiso8601),endsAt:($now|fromdateiso8601+7200|todateiso8601)}' input.json > freeze-input.json
+cp freeze-input.json input.json
 cp good-proofs.json proofs.json
 jq -n '{items:[
   {metadata:{name:"fixture-app",uid:"app-uid",annotations:{"traefik.ingress.kubernetes.io/router.priority":"42"}},
@@ -10,6 +12,10 @@ jq -n '{items:[
     rules:[{host:"preprod.immo.sent-tech.ca",http:{paths:[{path:"/",pathType:"Prefix",backend:{service:{name:"radar-ui",port:{number:8080}}}}]}}]}},
   {metadata:{name:"fixture-mcp",uid:"mcp-uid"},spec:{defaultBackend:{service:{name:"radar-immo-mcp",port:{number:3001}}}}}
 ] | map(.metadata.resourceVersion="1")}' > ingress-original.json
+if [[ ${VEHICLE_RECOVERY_CASE:-all} != deadline ]];then
+  jq '.items[0].metadata.annotations["fixture.sent-tech.ca/originalTimestamp"]="2026-10-28T12:34:29-04:00"' ingress-original.json > opaque-ingress.json
+  cp opaque-ingress.json ingress-original.json
+fi
 jq '.items[].spec |= ((if has("defaultBackend") then .defaultBackend={service:{name:"base-maintenance-fixture",port:{number:80}}} else . end)
   | (.rules[]?.http.paths[]?.backend)={service:{name:"base-maintenance-fixture",port:{number:80}}})' ingress-original.json > ingress-fixture.json
 jq -n --slurpfile c input.json '{metadata:{annotations:{"radar.sent-tech.ca/maintenance-attempt":$c[0].binding.maintenanceAttemptId}},
@@ -107,7 +113,7 @@ case "$*" in
     while [[ $# -gt 0 ]]; do
       if [[ $1 == --patch-file ]]; then patch=$2; shift 2; else shift; fi
     done
-    if [[ ${FAKE_STATE:-} == restore-race && $patch == *restore-patch.json ]]; then
+    if [[ ( ${FAKE_STATE:-} == restore-race && $patch == *restore-patch.json ) || ( ${FAKE_STATE:-} == reclose-race && $patch == *reclose-patch.json ) ]]; then
       jq '(.items[0].metadata.resourceVersion)="999"' ingress-fixture.json > ingress-next.json
       mv ingress-next.json ingress-fixture.json
     fi
@@ -121,10 +127,15 @@ case "$*" in
       mv ingress-next.json ingress-fixture.json
     else
       jq --arg name "$name" --slurpfile patch "$patch" '
-        (.items[]|select(.metadata.name==$name)|.spec.rules)=$patch[0].spec.rules' ingress-fixture.json > ingress-next.json
+        (.items[]|select(.metadata.name==$name)|.spec.rules)=$patch[0].spec.rules | (.items[]|select(.metadata.name==$name)|.metadata.resourceVersion)|=(tonumber+1|tostring)' ingress-fixture.json > ingress-next.json
       mv ingress-next.json ingress-fixture.json
     fi
     if [[ $command == *' -o json' ]]; then jq --arg name "$name" '.items[]|select(.metadata.name==$name)' ingress-fixture.json; fi;;
+  'create -f '*deny-service.json)
+    [[ ! -e refusal-service-exists ]] || { echo 'AlreadyExists' >&2;exit 1; }
+    : >refusal-service-exists;;
+  'get service base-maintenance-fixture --ignore-not-found -o json')
+    [[ ! -e refusal-service-exists ]] || cat deny-service-fixture.json;;
   'get service base-maintenance-fixture -o json')
     if [[ ${FAKE_STATE:-} == deny-selector ]]; then jq '.spec.selector={app:"api"}' deny-service-fixture.json
     else cat deny-service-fixture.json; fi;;
@@ -151,7 +162,12 @@ case "$*" in
   'get cronjobs '*) [[ ${FAKE_STATE:-} != cron ]] || echo false;;
   'get jobs '*) [[ ${FAKE_STATE:-} != job ]] || echo 1;;
   'get endpointslices '*) [[ ${FAKE_STATE:-} != ready ]] || printf '[{"conditions":{"ready":true}}]\n';;
-  'get deployments '*) [[ ${FAKE_STATE:-} != replicas ]] || printf 'radar-ui\t1\n';;
+  'scale deployment/radar-api --replicas='*)
+    [[ ${FAKE_STATE:-} != reclose-scale-fail ]] || exit 1
+    [[ ${BASE_PREPROD_REHEARSAL:-} != 1 ]] || printf '%s\n' "${3##*=}" > api-replicas-fixture;;
+  'get deployments '*)
+    if [[ ${FAKE_STATE:-} == replicas ]];then printf 'radar-ui\t1\n';
+    elif [[ ${BASE_PREPROD_REHEARSAL:-} == 1 ]];then printf 'radar-api\t%s\n' "$(cat api-replicas-fixture)";fi;;
 esac
 exit 0
 FAKE
@@ -159,18 +175,28 @@ cat > bin/gh <<'FAKE'
 #!/usr/bin/env bash
 set -eu
 printf 'gh %s\n' "$*" >> cluster-calls
+if [[ ${FAKE_STATE:-} == expire-after-actions && "$*" == *'/actions/runs?per_page=100'* ]];then
+  jq '.maintenance.reopenBy=(now|floor-1|todateiso8601)' "$INPUT" > expired-window.json
+  mv expired-window.json "$INPUT"
+  exit 0
+fi
 case "$*" in
   *'--jq .state'*)
     if [[ ${FAKE_STATE:-} == cd ]]; then echo active; else echo disabled_manually; fi;;
-  *'/actions/runs?per_page=100'*) [[ ${FAKE_STATE:-} != run ]] || echo '{"id":123,"status":"in_progress"}';;
+  *'/actions/runs?per_page=100'*) [[ ${FAKE_STATE:-} != run ]] || echo '{"id":123,"status":"in_progress","name":"CI fixture","path":".github/workflows/ci.yml","head_branch":"fixture/pr"}';;
   *) echo '{}';;
 esac
 exit 0
 FAKE
 chmod +x bin/kubectl bin/gh
 : > cluster-calls
+if [[ ${BASE_PREPROD_REHEARSAL:-} == 1 ]];then source tools/make/base-preprod-rehearsal.test.sh; return;fi
+source tools/make/base-preprod-public.test.sh
+source tools/make/base-preprod-actions.test.sh
 invoke permissions
 cp ingress-original.json ingress-fixture.json
+source tools/make/base-preprod-rollback.test.sh
+rm -f refusal-service-exists
 invoke close EXPECTED="$testdir/expected.json"
 closure_output=$testdir/out-$n
 jq -e --slurpfile original ingress-original.json '.ingresses|map({metadata:{name:.metadata.name,uid:.metadata.uid},spec})==($original[0].items|map({metadata:{name:.metadata.name,uid:.metadata.uid},spec}))' "$closure_output/ingress-snapshot.json" >/dev/null
@@ -185,6 +211,7 @@ if rg 'api-resources --api-group|get middleware|auth can-i .*middlewares' cluste
 : > cluster-calls
 invoke restore-ingresses EXPECTED="$testdir/expected.json" ROUTES="$closure_output/ingress-snapshot.json"
 jq -e --slurpfile original ingress-original.json 'del(.items[].metadata.resourceVersion)==($original[0]|del(.items[].metadata.resourceVersion))' ingress-fixture.json >/dev/null
+rm -f refusal-service-exists
 invoke close EXPECTED="$testdir/expected.json"
 closure_output=$testdir/out-$n
 cp ingress-fixture.json restoration-baseline.json

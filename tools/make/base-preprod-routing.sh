@@ -16,9 +16,7 @@ read_ingresses() {
 deny_backend() {
   jq -n --arg service "$(jq -r .maintenance.service "$INPUT")" '{service:{name:$service,port:{number:80}}}'
 }
-assert_boundary() {
-  maintenance_inputs
-  assert_network
+assert_refusal_service() {
   local service
   service=$(jq -r .maintenance.service "$INPUT")
   "${k[@]}" get service "$service" -o json > "$OUTPUT/deny-service-current.json"
@@ -29,6 +27,11 @@ assert_boundary() {
   jq -e 'all(.items[]; ((.endpoints//[])|length)==0)' "$OUTPUT/deny-slices.json" >/dev/null || fail 'Refusal Service has endpoints'
   "${k[@]}" get endpoints "$service" --ignore-not-found -o json > "$OUTPUT/deny-endpoints.json"
   jq -se 'length==0 or (length==1 and ((.[0].subsets//[])|length)==0)' "$OUTPUT/deny-endpoints.json" >/dev/null || fail 'Refusal Service has legacy endpoints'
+}
+assert_boundary() {
+  maintenance_inputs
+  assert_network
+  assert_refusal_service
   read_ingresses
   jq -e --argjson deny "$(deny_backend)" 'all(.items[].spec;
     (if has("defaultBackend") then .defaultBackend==$deny else true end)
@@ -36,6 +39,8 @@ assert_boundary() {
 }
 close_routes() {
   read_ingresses
+  "${k[@]}" get service "$(jq -r .maintenance.service "$INPUT")" --ignore-not-found -o json > "$OUTPUT/refusal-service-existing.json"
+  jq -se 'length==0' "$OUTPUT/refusal-service-existing.json" >/dev/null || fail 'Refusal Service already exists; use reclose-api with the original ROUTES snapshot'
   jq --slurpfile c "$INPUT" '{binding:$c[0].binding,image:$c[0].image,ingresses:.items,closedIngresses:[]}' \
     "$OUTPUT/ingresses-current.json" > "$OUTPUT/ingress-snapshot.json"
   jq -n --slurpfile c "$INPUT" '{apiVersion:"v1",kind:"Service",
