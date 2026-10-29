@@ -29,6 +29,7 @@
 ## Plan / Todo (lot-based)
 - [x] Lot 0 — Read rules/skills, confirm clean branch/base and inspect incident/code.
 - [ ] Lot 1 — Restore matching pinned ETag, report hashed size anomalies, preserve integrity guards and reconciliation.
+  - [x] Restore/recon implementation passes 163 assertions, with version listing and HEAD-only permissions; wrapper receipt propagation remains.
 - [x] Lot 2 — Record size from the exact copied backup version; regression-test concurrent source and backup rewrites (265 backup selftest assertions pass).
 - [ ] Lot 3 — Replay offline backup/bascule selftests, cutover controller gates, lint and typecheck; down -v.
 - [ ] Lot 4 — Review final diff, commit atomically, push branch without force; leave PR to conductor.
