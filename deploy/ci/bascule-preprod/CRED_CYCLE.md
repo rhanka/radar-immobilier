@@ -13,6 +13,49 @@ i-cond (immo) holds this record so recovery is verifiable at any time — no per
 backup identities (last section) follow the owner rule "no SealedSecret committed":
 their source of truth is a GitHub Environment + `.env`, and the CD writes them.
 
+## Preprod bascule CI kubeconfig
+
+**Owner decision, 2026-10-29 (~11:00 UTC): no credential expiration.**
+`KUBE_CONFIG_DATA_BASCULE_PREPROD` authenticates as ServiceAccount
+`radar-ci-bascule-preprod` in namespace `radar-immobilier-preprod` using the
+permanent token from Secret `radar-ci-bascule-preprod-token` (type
+`kubernetes.io/service-account-token`). Its manifest is
+`secret-ci-bascule-preprod-token.yaml`; Kubernetes supplies the token and CA.
+The token has no expiration (`exp` claim absent). It remains valid until revoked
+by deleting its Secret or ServiceAccount. Do not use `kubectl create token`.
+
+The previous GitHub value, installed on 2026-09-22 at 01:14 UTC, used a temporary
+TokenRequest token that expired on 2026-10-20 and broke the daily restore.
+The permanent credential keeps the existing SA's RBAC; no permissions are added.
+
+**Manual rotation** (also on suspected exposure):
+
+1. With the tenant admin kubeconfig, explicit preprod context and namespace,
+   delete only `radar-ci-bascule-preprod-token`, then recreate it from its manifest.
+   Deletion revokes the previous token immediately; wait for `.data.token` to be
+   populated before exporting the replacement. Never use `~/.kube/config` (prod).
+2. Build a preprod-only kubeconfig using the new token and the same API server
+   and CA as before. Encode the YAML once as single-line base64, matching
+   `.github/workflows/bascule-preprod.yml` (`base64 -d`). Store it outside git in
+   a mode-0600 file; never print the token or kubeconfig or put either in logs.
+3. Verify the new credential, then have the conductor replace the value of
+   GitHub secret `KUBE_CONFIG_DATA_BASCULE_PREPROD` from that file.
+
+**Verify recovery:** decode the file to a temporary mode-0600 file outside git
+and pass it explicitly via `kubectl --kubeconfig <file>` for every check.
+`auth whoami` must return
+`system:serviceaccount:radar-immobilier-preprod:radar-ci-bascule-preprod`;
+`-n radar-immobilier-preprod get deploy radar-api` must succeed.
+Check `auth can-i` for deployments get/watch/patch and scale get/patch/update;
+CronJobs get/patch; Jobs get/list/watch/create/delete; pods get/list; Secrets
+get/update on the three workflow names; and ConfigMaps get on
+`immo-served-refs-0` through `immo-served-refs-3`. The CI SA cannot read or rotate
+its own token Secret. Confirm the new JWT has no `exp` without printing it.
+Jobs are deleted before apply recreates them; patch permission is not required.
+After the conductor updates GitHub, verify the workflow's target-cluster preflight
+and the next daily restore complete successfully. Keep `PREPROD_CD_ENABLED` and
+`BASCULE_SCHEDULE_ENABLED` unchanged. Delete the temporary decoded file afterward.
+
 ## Minted secrets (ns radar-immobilier, materialized at GO by the k8s lane)
 
 | secret (k8s name, hyphen) | keys | consumer | source |
