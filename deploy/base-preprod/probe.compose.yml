@@ -1,0 +1,20 @@
+services:
+  fixture:
+    image: node@sha256:be8204d4bd327363357f532187b752ff62759c31bedf98e9e18fc08c9cbd605c
+    pull_policy: missing
+    network_mode: none
+    user: "1000:1000"
+    working_dir: /work
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 64
+    mem_limit: 128m
+    cpus: 1
+    entrypoint: [node]
+    volumes:
+      - ../..:/work:ro
+  operator:
+    extends: fixture
+    network_mode: host
+    entrypoint: [node, deploy/base-preprod/public-cli.mjs]

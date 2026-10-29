@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Shared operator guards. Owner JSON is data, never sourced or interpolated into code.
+source tools/make/base-preprod-time.sh
 fail() { echo "$1" >&2; exit 2; }
 regular_json() {
   local path=$1 part=$1
@@ -10,6 +11,10 @@ regular_json() {
     part=$(dirname -- "$part")
   done
   jq -se 'length == 1' "$path" >/dev/null || fail 'Exactly one JSON document required'
+  require_utc_timestamps "$path"
+}
+require_operator_context() {
+  [[ ${operator_context_initialized:-} == true && -n ${repo:-} && -n ${job:-} && -d ${OUTPUT:-} ]] && declare -p k >/dev/null 2>&1 || fail 'Contexte opérateur absent ; utiliser make -f deploy/base-preprod/operator.mk verify-closed'
 }
 operator_inputs() {
   [[ ${ENV:-} == preprod ]] || fail 'ENV=preprod required'
@@ -25,6 +30,7 @@ operator_inputs() {
   k=(kubectl --context "$(jq -r .context "$INPUT")" --namespace radar-immobilier-preprod --request-timeout=20s)
   repo=$(jq -r .repository "$INPUT")
   job=$(jq -r .jobName "$INPUT")
+  operator_context_initialized=true
   jq '{binding,image,backup,context,namespace,jobName}' "$INPUT" > "$OUTPUT/binding.json"
 }
 require_expected() {

@@ -744,6 +744,173 @@ or Complete Job does not restore either launchers or public access. In an
 emergency, re-establish the boundary and stop affected consumers; preserve DB
 barriers and evidence. A database restore is a separate fully stopped operation.
 
+## Vehicle safeguards after 28 October 2026
+
+Prerequisites include GNU date, Bash and jq. All examples use the standalone
+entrypoint; it never loads the root
+Makefile or an environment file. Prepare a fresh immutable INPUT and a new
+absolute OUTPUT for each action. Keep the same binding throughout one attempt.
+
+### Repository freeze and window preflight
+
+**No push and no merge is allowed anywhere in the repository during the
+entire cutover window, including public qualification and rollback.** Disabling
+`Build & push images` does not disable PR CI. A branch push can therefore
+invalidate the native no-nonterminal-Actions guard while CD is frozen.
+
+Record the conductor agreement in `maintenance.changeFreeze`: a nonempty
+`reference`, `noPushOrMerge: true`, UTC `startsAt` and UTC `endsAt`. Set
+`maintenance.reopenBy` to the deadline for reopening **and re-enabling CD**,
+including the measured rollback budget. The agreement must already be active
+and cover at least that deadline. The example input deliberately keeps the
+acknowledgement false. This is an explicit operational agreement, not a claim
+that GitHub repository writes have been technically locked.
+
+```sh
+rtk make -f deploy/base-preprod/operator.mk preflight INPUT='<OWNER_INPUT_JSON>' OUTPUT='<NEW_PREFLIGHT_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk public-probe INPUT='<OWNER_INPUT_JSON>' PUBLIC_PHASE=preflight OUTPUT='<NEW_SESSION_PREFLIGHT_DIR>' ENV=preprod
+```
+
+Preflight is read-only. It retains the inventory, checks the full Actions list
+and confirms the agreement still covers the window after inventory. Freeze,
+closure, activation/resume, API start, restart and reopening retain the native
+live guards. Blocking Actions errors identify each run by id, workflow and
+branch. Wait for completion or cancel only individually authorized runs, then
+inspect again; never convert this check into automatic blanket cancellation.
+Keep `PREPROD_CD_ENABLED` unchanged.
+
+### UTC acceptance and the public probe
+
+API instance capture converts Kubernetes restart/start timestamps to canonical
+UTC `Z`; live-instance comparison uses that same representation. External
+proofs containing ISO timestamps with an offset are rejected explicitly, naming
+the JSON field, before the unchanged native acceptance filter runs. Do not edit
+a timestamp to change the event order or replace the filter with a success flag.
+The local rehearsal executes the exact native filter before reopening.
+
+Authenticated checks under maintenance remain the default. A separately recorded
+owner override may defer them until immediately after reopening in preprod;
+keep that override and the limited server/database/unauthenticated scope in the
+under-maintenance receipts. A public-probe success never substitutes for
+unperformed write, replay, SSE, isolation or revocation qualifications.
+
+```sh
+rtk make -f deploy/base-preprod/operator.mk public-probe INPUT='<OWNER_INPUT_JSON>' PUBLIC_PHASE=q1 OUTPUT='<NEW_PUBLIC_Q1_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk public-probe INPUT='<OWNER_INPUT_JSON>' PUBLIC_PHASE=q2 OUTPUT='<NEW_PUBLIC_Q2_DIR>' ENV=preprod
+```
+
+The probe needs Docker Compose, the pinned Node image, and the owner's existing
+Chrome session at loopback CDP port 9222. It creates its own tab with PUT
+`/json/new` and closes only that tab in `finally`. The controller never calls
+cookie or credential APIs and never exports credentials or response bodies.
+JSON is read inside that Chrome tab; only the filtered receipt leaves it.
+No generic Network or Page event subscription is enabled. Requests are GET on
+the public preprod origin; receipts distinguish transport, redirects, body-read,
+JSON and response-schema failures without raw error messages. A transport-stage
+failure alone does not establish whether CORS or another network cause is involved.
+
+`public-checks.json` is the public probe's sole path list. Every path must match
+the rendered `/health`, `/api/v1/auth` or `/api/v1/workspaces` prefixes.
+`projection-revisions` is already covered by the workspace prefix. Do not add
+extra public routes to make a probe pass. Legacy retirement 410 checks remain
+part of namespace-admin qualification; they are not public-probe requests.
+Keep unperformed retirement checks explicitly unverified. UI/MCP and all other
+surfaces remain excluded from this API-only reopening profile.
+
+Freeze timestamps `maintenance.changeFreeze.startsAt`, `.endsAt` and
+`maintenance.reopenBy` accept UTC `Z` with optional fractional seconds, retained
+when comparing instants. Offsets, including `+00:00`, are rejected. Invalid
+values name the offending JSON field; the example makes this contract explicit.
+### Recovery and local rehearsal
+
+Never source maintenance helpers as an operational entrypoint. Their repository,
+Kubernetes and evidence context is initialized by operator.mk. `verify-closed`
+only verifies an existing closure; it cannot close a reopened API.
+
+If a public authenticated check fails after `reopen-api`, immediately use the
+native recovery action below. Do not run `close` again: an existing refusal
+Service makes initial closure fail before any write, preserving the original
+snapshot. Keep CD frozen and the conductor's no-push/no-merge agreement active.
+
+```sh
+rtk make -f deploy/base-preprod/operator.mk reclose-api INPUT='<OWNER_INPUT_JSON>' EXPECTED='<INDEPENDENT_ROSTER_JSON>' ROUTES='<ORIGINAL_CLOSURE_DIR>/ingress-snapshot.json' OUTPUT='<NEW_RECLOSURE_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk verify-closed INPUT='<OWNER_INPUT_JSON>' EXPECTED='<INDEPENDENT_ROSTER_JSON>' OUTPUT='<NEW_RECOVERY_CHECK_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk restore-ingresses INPUT='<OWNER_INPUT_JSON>' EXPECTED='<INDEPENDENT_ROSTER_JSON>' ROUTES='<NEW_RECLOSURE_DIR>/ingress-snapshot.json' OUTPUT='<NEW_ROUTE_RESTORE_DIR>' ENV=preprod
+```
+
+`reclose-api` accepts only the bound original closure snapshot and the exact
+rendered API-only profile, or the same API Ingress already closed by a partial
+recovery. Every other Ingress must still have its exact closed spec and UID.
+It checks the refusal Service and its empty endpoints, then patches the API
+Ingress with atomic tests of the current UID, resourceVersion and complete spec.
+It replaces that spec with the saved closed spec, scales `radar-api` to zero,
+waits for rollout status and checks both the routing boundary and full closure.
+Unexpected specs/identities are refused before any write; a patch race stops
+before scaling. Retry the same native action after an interrupted recovery;
+never manufacture a new initial snapshot from a partially reopened state.
+
+The original snapshot remains unchanged. Successful reclosure writes
+`<NEW_RECLOSURE_DIR>/ingress-snapshot.json`: its original `ingresses` are
+preserved and `closedIngresses` contains freshly read resourceVersions.
+**Use this new snapshot for restoration.** The initial closed versions are
+stale after reopening/reclosure and must not be used to bypass restoration's
+strict comparison. Restoring original routes leaves consumers stopped,
+CronJobs suspended and CD frozen; separately qualify and reopen the intended
+operational state before re-enabling CD.
+
+Recovery actions `reclose-api`, `verify-closed` and `restore-ingresses` remain
+allowed after `reopenBy` while the explicit change freeze is still active.
+Activation, initial closure and reopening remain forbidden after `reopenBy`.
+If the freeze itself expires, obtain its explicit extension; never pretend CD
+is frozen. Restoring the operational database remains a separate authorized, fully stopped
+Make operation, after closure verification. Do not restore for a guard refusal
+before any activation mutation; re-read durable state instead.
+
+```sh
+rtk make -f tools/make/bascule-6h-vehicle.mk test ENV=test-bascule-6h-vehicle
+rtk make -f tools/make/bascule-6h-vehicle.mk rehearse ENV=test-bascule-6h-vehicle
+rtk make -f tools/make/bascule-6h-vehicle.mk test-reclose-mutations ENV=test-bascule-6h-vehicle
+```
+
+`test` includes the previously standalone missing-context test and the freeze
+fraction/field/recovery checks. The rehearsal chains native activation, Q1,
+restart, Q2, proof, the unchanged native filter, reopening, both simulated
+authenticated CDP probes, then a simulated late Q1 failure and native
+`reclose-api -> verify-closed -> restore-ingresses`. A fixture deadline is moved
+into the past after reopening to exercise late recovery deterministically.
+It also checks foreign/divergent snapshots, concurrent versions and retry after
+an interrupted API stop. Kubernetes and GitHub calls use fixtures. Node runs
+without network. Each Compose project ends with `down -v`; no real cluster,
+Chrome or database is qualified. The mutation target must reject omission of
+the API stop, snapshot validation or resourceVersion test.
+
+### Restore qualification before the 29 October window
+
+The existing completed restore rehearsal, dated 28 October 2026 at 07:29:10 UTC,
+expires on **29 October at 07:29:10 UTC**, before the planned 09:00 UTC cutover.
+There is no backup expiry waiver. Without a new real qualification, stop before
+maintenance. This vehicle intentionally neither dumps nor restores a database.
+
+Use the separately approved Make database procedure to requalify the chosen
+immutable dump: verify its availability and SHA-256, restore it completely into
+an isolated temporary database with failure-on-error, then compare schema and
+per-table counts with its reference receipt. Retain the successful restore and
+comparison output, the actual UTC completion time and temporary-database cleanup.
+A checksum-only check or changing a timestamp is not a restore qualification.
+
+Prepare a new immutable owner input: `backup.reference` and `backup.sha256`
+identify the dump actually restored, `backup.restoredAt` is that real completion
+time, and `backup.restoreReceiptSha256` hashes the new successful receipt.
+Then run the native acceptance prerequisites, with a new OUTPUT each time:
+
+```sh
+rtk make -f deploy/base-preprod/operator.mk validate INPUT='<REQUALIFIED_OWNER_INPUT_JSON>' OUTPUT='<NEW_VALIDATION_DIR>' ENV=preprod
+rtk make -f deploy/base-preprod/operator.mk preflight INPUT='<REQUALIFIED_OWNER_INPUT_JSON>' OUTPUT='<NEW_PREFLIGHT_DIR>' ENV=preprod
+```
+
+These read-only native checks enforce the existing 24-hour guard; they do not
+perform or replace the restore rehearsal. Never set `backup.restoredAt` from
+inference or from the current time without a completed genuine rehearsal.
 ## B5 standalone acceptance profile
 
 B5 proves the B1–B4 implementation through `createApp` and PostgreSQL,
