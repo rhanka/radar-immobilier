@@ -54,3 +54,39 @@ test('wrong cluster refuses without any mutations', () => {
   try { assert.notEqual(f.run().status, 0); assert.equal(f.calls().some(c => c.includes('create')), false); }
   finally { f.cleanup(); }
 });
+test('daily restoration pins deployed digests and skips the 6H hook', () => {
+  const f = fixture();
+  try {
+    success(f.run('run', ['RELEASE=deployed', 'MODE=restore']));
+    assert.equal(f.state().objects.some(o => o.kind === 'Job' && o.metadata.name.endsWith('-data')), false);
+    assert.equal(JSON.parse(f.state().objects.find(o => o.metadata.name === 'radar-cutover-receipt').data.receipt).release.dataMigration, null);
+  } finally { f.cleanup(); }
+});
+test('explicit resume retries a terminated data migration through protected forward resume', () => {
+  const f = fixture({ failJob: 'data' });
+  try {
+    assert.notEqual(f.run().status, 0);
+    const run = record(f).run;
+    const state = f.state(); state.failJob = null;
+    writeFileSync(join(f.dir, 'state.json'), JSON.stringify(state));
+    success(f.run('resume', [`RUN=${run}`]));
+    assert.equal(f.state().objects.filter(o => o.kind === 'Job' && o.metadata.name.endsWith('-restore')).length, 1);
+    assert.equal(f.state().objects.filter(o => o.kind === 'Job' && o.metadata.name.endsWith('-data')).length, 2);
+  } finally { f.cleanup(); }
+});
+for (const step of ['restore', 'backup', 'ddl', 'data']) {
+  for (const edge of ['before-create', 'after-create', 'before-started', 'after-started', 'before-completed', 'after-completed']) {
+    test(`interruption remains recoverable without repeating restoration: ${step}/${edge}`, () => {
+      const f = fixture({ crash: { step, edge } });
+      try {
+        assert.notEqual(f.run().status, 0);
+        const run = record(f).run;
+        const result = f.run('resume', [`RUN=${run}`]);
+        if (edge === 'before-create' || edge.endsWith('started')) {
+          assert.notEqual(result.status, 0); assert.ok(lock(f));
+        } else success(result);
+        assert.ok(f.state().objects.filter(o => o.kind === 'Job' && o.metadata.name.endsWith('-restore')).length <= 1);
+      } finally { f.cleanup(); }
+    });
+  }
+}
