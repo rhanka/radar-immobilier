@@ -96,13 +96,17 @@ function client(store, policy) {
         const all = [];
         for (const k of [...m.keys()].filter((x) => !i.Prefix || x.startsWith(i.Prefix)).sort()) {
           const vs = m.get(k);
-          vs.forEach((v, idx) => all.push({ Key: k, VersionId: v.VersionId, ETag: v.ETag, Size: v.Size, LastModified: v.LastModified, IsLatest: idx === vs.length - 1 }));
+          [...vs].reverse().forEach((v, idx) => all.push({ Key: k, VersionId: v.VersionId, ETag: v.ETag, Size: v.Size, LastModified: v.LastModified, IsLatest: idx === 0 }));
         }
-        const start = i.KeyMarker ? Number(i.KeyMarker) : 0;
+        const start = i.KeyMarker ? (i.VersionIdMarker
+          ? all.findIndex((v) => v.Key === i.KeyMarker && v.VersionId === i.VersionIdMarker) + 1
+          : all.findIndex((v) => v.Key > i.KeyMarker)) : 0;
+        if (start < 0) return { Versions: [], IsTruncated: false };
         const limit = i.MaxKeys || 3;
         const page = all.slice(start, start + limit);
         const more = start + limit < all.length;
-        return { Versions: page, DeleteMarkers: [], IsTruncated: more, NextKeyMarker: more ? String(start + limit) : undefined, NextVersionIdMarker: more ? "x" : undefined };
+        const last = page.at(-1);
+        return { Versions: page, DeleteMarkers: [], IsTruncated: more, NextKeyMarker: more ? last.Key : undefined, NextVersionIdMarker: more ? last.VersionId : undefined };
       }
       if (cmd instanceof sdk.CopyObjectCommand) {
         const m = /^\/([^/]+)\/(.+?)(?:\?versionId=(.+))?$/.exec(i.CopySource);
@@ -415,6 +419,21 @@ async function suite() {
     const { s, manSha } = fixture();
     const r = await step({ s, env: docsEnv(manSha), copier: { ...copierPolicy, failCopyKey: "raw/a b.pdf", copyAttempts: 3 } });
     eq("docs — copy failure keeps processing, counts SDK retries and fails recon", [r.code, r.t.copied, r.t.copyErrors, r.t.copyRetries, r.t.recon?.ok], [1, 1, 1, 4, false]);
+  }
+  {
+    const { s, manSha } = fixture();
+    const original = s.versions(B, "docs/raw/b.pdf")[0];
+    for (let n = 0; n < 1000; n++) s.put(B, "docs/raw/b.pdf", "later-" + n, "2026-09-28T01:00:00Z");
+    for (let n = 0; n < 1001; n++) s.put(B, "docs/raw/b.pdf-neighbor", "BBBB-at-D");
+    const r = await step({ s, env: docsEnv(manSha) });
+    const pages = s.calls.filter((c) => c.name === "ListObjectVersionsCommand");
+    eq("docs — paginated history restores the exact key using both S3 markers",
+      [r.code, r.t.recon?.ok, s.copies.find((c) => c.key === "raw/b.pdf")?.versionId, pages.length,
+        pages[1]?.KeyMarker, pages[1]?.VersionIdMarker],
+      [0, true, original.VersionId, 3, "docs/raw/b.pdf", s.versions(B, "docs/raw/b.pdf")[2].VersionId]);
+    s.b.get(B).delete("docs/raw/b.pdf"); s.b.get(DST).delete("raw/b.pdf");
+    const missing = await step({ s, env: docsEnv(manSha) });
+    eq("docs — paginated prefix neighbors cannot replace a missing exact key", [missing.code, missing.t.unresolvedReasons], [2, { "no-version": 1 }]);
   }
   {
     const { s, manSha } = fixture();

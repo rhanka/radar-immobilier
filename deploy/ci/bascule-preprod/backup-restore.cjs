@@ -456,8 +456,21 @@ async function listAll(c, Bucket, Prefix, counters) {
   return all;
 }
 async function listVersionsFor(c, Bucket, key) {
-  const out = await c.s3.send(new c.sdk.ListObjectVersionsCommand({ Bucket, Prefix: LAYOUT.docsPrefix + key, MaxKeys: 1000 }));
-  return indexVersions(out.Versions).get(key) || [];
+  const Prefix = LAYOUT.docsPrefix + key;
+  const versions = [];
+  let KeyMarker; let VersionIdMarker;
+  for (let page = 0; page < 1000; page++) {
+    const out = await c.s3.send(new c.sdk.ListObjectVersionsCommand({ Bucket, Prefix, MaxKeys: 1000,
+      ...(KeyMarker ? { KeyMarker, ...(VersionIdMarker ? { VersionIdMarker } : {}) } : {}) }));
+    versions.push(...indexVersions((out.Versions || []).filter((v) => v.Key === Prefix)).get(key) || []);
+    if (!out.IsTruncated) return versions;
+    if (!out.NextKeyMarker || (out.NextKeyMarker === KeyMarker && out.NextVersionIdMarker === VersionIdMarker)) {
+      throw failed('backup version pagination did not advance');
+    }
+    KeyMarker = out.NextKeyMarker;
+    VersionIdMarker = out.NextVersionIdMarker;
+  }
+  throw failed('backup version pagination exceeded 1000 pages');
 }
 async function downloadWithSha(c, Bucket, Key, VersionId, file) {
   const got = await c.s3.send(new c.sdk.GetObjectCommand(VersionId ? { Bucket, Key, VersionId } : { Bucket, Key }));
