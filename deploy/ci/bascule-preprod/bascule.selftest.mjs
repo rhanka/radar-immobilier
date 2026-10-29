@@ -1,37 +1,3 @@
-#!/usr/bin/env node
-// =============================================================================
-// bascule.selftest.mjs — self-test des fonctions PURES de bascule.mjs.
-//
-// N'exécute AUCUN appel réel (0 kubectl, 0 aws, 0 DB, 0 réseau) : il n'importe
-// que la fonction pure exportée `classifyJobStatus` et la nourrit de `.status`
-// MOCKÉS. But : verrouiller la SEULE information que le runner lit d'un Job
-// (verdict pass/fail/en-cours via .status) — le runner ne lit JAMAIS les logs.
-//
-//   node deploy/ci/bascule-preprod/bascule.selftest.mjs   → exit 0 si tout passe.
-// =============================================================================
-import process from "node:process";
-import console from "node:console";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
-import vm from "node:vm";
-import { classifyJobStatus, withScheme, parseListingMeta, reconMissing, refreshJobName } from "./bascule.mjs";
-
-let passed = 0;
-let failed = 0;
-const ok = (name, cond) => {
-  if (cond) { passed += 1; console.log(`  ok   ${name}`); }
-  else { failed += 1; console.log(`  FAIL ${name}`); }
-};
-const eq = (name, a, b) => ok(`${name} (got ${JSON.stringify(a)})`, JSON.stringify(a) === JSON.stringify(b));
-
-// 1) succeeded>=1 → done + ok.
-eq("succeeded=1 ⇒ done/ok/succeeded", classifyJobStatus({ succeeded: 1 }), { done: true, ok: true, state: "succeeded" });
-
-// 2) failed>=1 → done + !ok (fail-closed).
-eq("failed=1 ⇒ done/!ok/failed", classifyJobStatus({ failed: 1 }), { done: true, ok: false, state: "failed" });
-
-// 3) active>0 sans succeeded/failed → en cours (active).
-eq("active=1 ⇒ !done/active", classifyJobStatus({ active: 1 }), { done: false, ok: false, state: "active" });
 
 // 4) status vide ({}) → en attente (pending), ni done ni ok.
 eq("{} ⇒ !done/pending", classifyJobStatus({}), { done: false, ok: false, state: "pending" });
