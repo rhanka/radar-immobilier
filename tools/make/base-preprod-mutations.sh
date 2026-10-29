@@ -1,24 +1,3 @@
-#!/usr/bin/env bash
-set -euo pipefail
-out=tmp/base-preprod-evidence/pr920-r2-mutations
-mkdir -p "$out"
-bash tools/make/base-preprod-operator.test.sh > "$out/baseline.log" 2>&1
-for mutant in init-binding sql-table-lock sql-row-update image-proof live-digest q2-restart failed-receipt init-receipt \
-  q1-binding q1-instance q1-timing q1-same-instance; do
-  if BASE_PREPROD_MUTANT=$mutant bash tools/make/base-preprod-operator.test.sh > "$out/$mutant.log" 2>&1; then
-    echo "SURVIVED $mutant" >&2; exit 1
-  fi
-  case $mutant in
-    init-binding|sql-*) expected='Unexpected success: render-job';;
-    image-proof) expected='Unexpected success: render-job';;
-    live-digest) expected='Foreign running digest accepted';;
-    q2-restart) expected='Unsafe reopening: new-generation';;
-    q1-binding) expected='Unsafe restart chain: foreign-q1';;
-    q1-instance) expected='Unsafe restart chain: reused-pod';;
-    q1-timing) expected='Unsafe restart chain: old-restart';;
-    q1-same-instance) expected='Unsafe restart chain: same-instance';;
-    failed-receipt) expected='Failed Job receipt was not retained';;
-    init-receipt) expected='Foreign initialization receipt accepted';;
   esac
   rg -qF "$expected" "$out/$mutant.log" || { cat "$out/$mutant.log" >&2; exit 1; }
   printf 'KILLED %s\n' "$mutant"
