@@ -109,7 +109,7 @@ concurrency:
   # Cancel superseded builds on the same ref (a newer push to main / re-dispatch
   # makes the in-flight build redundant).
   group: build-push-images-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   REGISTRY: ghcr.io
@@ -208,6 +208,19 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,scope=${{ matrix.service }},mode=max
 
+      - name: Record immutable cutover image
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+          SERVICE: ${{ matrix.service }}
+        run: |
+          jq -n --arg sha "$GITHUB_SHA" --arg digest "$DIGEST" \
+            '{gitSha:$sha,digest:$digest}' > "cutover-$SERVICE.json"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cutover-image-${{ matrix.service }}-${{ github.sha }}
+          path: cutover-${{ matrix.service }}.json
+
       - name: Summary
         run: |
           {
@@ -218,6 +231,30 @@ jobs:
             echo "digest: ${{ steps.build.outputs.digest }}"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+
+  cutover-release:
+    needs: build-push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: cutover-image-*-${{ github.sha }}
+          merge-multiple: true
+      - name: Generate release manifest
+        env:
+          GIT_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          export API_DIGEST=$(jq -er --arg sha "$GIT_SHA" 'select(.gitSha==$sha).digest' cutover-api.json)
+          export UI_DIGEST=$(jq -er --arg sha "$GIT_SHA" 'select(.gitSha==$sha).digest' cutover-ui.json)
+          fail(){ echo 'Release manifest refused' >&2; exit 1; }
+          source tools/make/cutover-release.sh
+          generate_release release.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cutover-release-${{ github.sha }}
+          path: release.json
 
   deploy:
     name: Deploy to cluster
@@ -340,6 +377,12 @@ jobs:
             } else {
               core.setOutput('id', String(dep.data.id));
             }
+
+      - name: Acquire namespace change lock
+        uses: ./deploy/cutover/lock-action
+        with:
+          action: lock
+          environment: prod
 
       - name: Apply immo-mcp declarative config
         # MUST run before "Roll deployments to pushed sha": see the file header
@@ -560,6 +603,13 @@ jobs:
   # the SA namespace scope is the real deploy frontier (DESIGN §2.4), and the
   # served-sha assert on the PREPROD URL is what proves the preprod build.
   # ===========================================================================
+      - name: Release namespace change lock
+        if: always() && env.CUTOVER_LOCK_RUN != ''
+        uses: ./deploy/cutover/lock-action
+        with:
+          action: release-lock
+          environment: prod
+
   deploy-preprod:
     name: Deploy to preprod cluster
     needs: build-push
@@ -701,6 +751,12 @@ jobs:
           curl -fsSL "$url" | tar -xz -C "$tmp" s5cmd
           sudo install -m 0755 "$tmp/s5cmd" /usr/local/bin/s5cmd
           s5cmd version
+
+      - name: Acquire namespace change lock
+        uses: ./deploy/cutover/lock-action
+        with:
+          action: lock
+          environment: preprod
 
       - name: Backup DB before release (fail-closed)
         if: vars.BACKUP_BEFORE_RELEASE_ENABLED == 'true'
@@ -1092,96 +1148,50 @@ jobs:
   # Environment `production` (tag refs + reviewer) that makes THIS the sole prod
   # path. Held until owner GO.
   # ===========================================================================
+      - name: Release namespace change lock
+        if: always() && env.CUTOVER_LOCK_RUN != ''
+        uses: ./deploy/cutover/lock-action
+        with:
+          action: release-lock
+          environment: preprod
+
   promote-prod:
-    name: Promote tag to prod (by digest)
-    runs-on: ubuntu-latest
-    # 30 (was 15): the promotion now also runs the fail-closed backup (≤15m) and
-    # the DB migrate (≤10m poll) ahead of set-image, so 15m could time the job out
-    # mid-sequence.
-    timeout-minutes: 30
+    name: Promote rehearsed release through cutover
     if: startsWith(github.ref, 'refs/tags/v')
-    # Enforced prod credential boundary (§2.4): the prod kubeconfig lives in the
-    # GitHub Environment `production` (restricted to tag refs + required
-    # reviewer), so a job triggered by `main` can never reach it. PROVISIONING
-    # that environment (create env, move KUBE_CONFIG_DATA into it, set the
-    # tag-ref + reviewer rules) is a CUTOVER step — doing it early would break the
-    # current main->prod `deploy` job. The reference is authored now; the env is
-    # provisioned atomically at cutover (DESIGN §2.4). Until then a v* tag would
-    # resolve the repo-level secret (this whole job only lands on main AT the
-    # cutover merge, so that pre-state never actually runs).
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
     environment: production
     permissions:
       contents: read
-      deployments: write
-      packages: write
+      actions: read
     concurrency:
-      # Never cancel an in-flight prod promote — queue instead. This is
-      # load-bearing now that the promotion runs backup+migrate before set-image:
-      # cancel-in-progress would kill the CI step mid-migration without running the
-      # abort's delete-job, leaving an in-cluster Job (bounded only by the base
-      # activeDeadlineSeconds). Queueing keeps each promotion's backup→migrate→
-      # set-image sequence atomic. (Preprod, under the top-level cancel-in-progress:
-      # true group, CAN be cancelled mid-migrate; that is tolerated because the
-      # migrate Job self-terminates via activeDeadlineSeconds and drizzle is
-      # idempotent, so the next run replays cleanly.)
       group: promote-prod
       cancel-in-progress: false
-    env:
-      NAMESPACE: radar-immobilier
     steps:
-      - name: Checkout (full history for ancestry check)
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Short SHA + tag
-        id: vars
-        run: |
-          echo "sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
-          echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
-
-      # GUARD 1 — appartenance-à-main (§2.3, revue #5): digest-exists ≠ commit on
-      # main. A workflow_dispatch build of a feature branch produces a
-      # radar-<svc>:<sha7> image; tagging that commit would promote NON-merged,
-      # NON-CI code. The CI guarantee at tag-time IS that <sha7> was built+CI'd on
-      # main — ancestry is what ties the tag to it.
-      - name: Guard — tagged commit is an ancestor of origin/main
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: v1.31.0
+      - name: Resolve the original successful main build run
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           git fetch --no-tags origin main
-          if git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
-            echo "ancestry OK — $GITHUB_SHA is on origin/main"
-          else
-            echo "::error title=Promote refused — tag not on main::commit $GITHUB_SHA (tag ${{ steps.vars.outputs.tag }}) is NOT an ancestor of origin/main. Only main-merged, CI-validated commits may reach prod."
-            exit 1
-          fi
-
-      # GUARD 2 — tag protection must REALLY exist (§2.3): don't ASSUME a v* tag
-      # is protected. Advisory (warn, don't hard-fail on API hiccups): flags if no
-      # tag ruleset guards v* so an unreviewed tag can't silently reach prod.
-      - name: Guard — verify tag protection ruleset exists
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -uo pipefail
-          rules="$(gh api "repos/${GITHUB_REPOSITORY}/rulesets" --jq '[.[] | select(.target=="tag")] | length' 2>/dev/null || echo ERR)"
-          if [ "$rules" = ERR ]; then
-            echo "::warning title=Tag-protection unverified::could not query rulesets (token scope?). Ensure a tag ruleset protects v* before relying on this path."
-          elif [ "${rules:-0}" -ge 1 ]; then
-            echo "tag ruleset present (${rules})"
-          else
-            echo "::warning title=No tag ruleset::no tag-target ruleset found — a v* tag can currently be pushed without review. Configure tag protection before the cutover."
-          fi
-
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v4
-        with:
-          version: v1.31.0
-
-      - name: Configure kubeconfig (prod, from environment secret)
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+          build_run=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/build-push-images.yml/runs?head_sha=$GITHUB_SHA&status=success" --jq '[.workflow_runs[]|select(.head_branch=="main")]|first|.id')
+          [[ $build_run =~ ^[0-9]+$ ]]
+          mkdir -p cutover-release
+          gh run download "$build_run" --name "cutover-release-$GITHUB_SHA" --dir cutover-release
+          jq -e --arg sha "$GITHUB_SHA" '.gitSha==$sha and .dataMigration=="6h"' cutover-release/release.json >/dev/null
+          echo "Promoting immutable release from build run $build_run"
+      - name: Configure namespace-scoped production identity
         env:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         run: |
+          set -euo pipefail
           mkdir -p "$HOME/.kube"
           if printf '%s' "$KUBE_CONFIG_DATA" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
             printf '%s' "$KUBE_CONFIG_DATA" | base64 -d > "$HOME/.kube/config"
@@ -1189,414 +1199,5 @@ jobs:
             printf '%s' "$KUBE_CONFIG_DATA" > "$HOME/.kube/config"
           fi
           chmod 600 "$HOME/.kube/config"
-
-      - name: Login to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      # DIGEST RESOLUTION (§2.3, revue #4) — build-once: resolve the IMMUTABLE
-      # sha256 digests of the images already built on main for this commit's
-      # <sha7> tag. Missing digest = the <sha7> tag aged out of GHCR (retention)
-      # or was never built → fall back to build-at-tag below. Both api AND ui.
-      - name: Resolve image digests (api + ui)
-        id: digests
-        run: |
-          set -uo pipefail
-          SHA="${{ steps.vars.outputs.sha }}"
-          resolve() { docker buildx imagetools inspect "${IMAGE_PREFIX}/$1:${SHA}" --format '{{.Manifest.Digest}}' 2>/dev/null; }
-          api="$(resolve radar-api || true)"; ui="$(resolve radar-ui || true)"
-          echo "api=${api:-<none>}  ui=${ui:-<none>}"
-          if [ -z "$api" ] || [ -z "$ui" ]; then
-            echo "resolved=false" >> "$GITHUB_OUTPUT"
-            echo "::warning title=Digest missing — will build-at-tag::radar-api/ui:${SHA} not resolvable in GHCR (aged-out or never built)."
-          else
-            echo "resolved=true" >> "$GITHUB_OUTPUT"
-            echo "api=${api}" >> "$GITHUB_OUTPUT"
-            echo "ui=${ui}" >> "$GITHUB_OUTPUT"
-          fi
-
-      # FALLBACK build-at-tag (GO-cond §4/§5) — ONLY when the digest aged out.
-      # Rebuilds api/ui FROM THE TAGGED COMMIT (this checkout) and pushes
-      # radar-<svc>:<sha7>, then re-resolves. Removes the hard dependency on
-      # GHCR retention. Deterministic input: same source + same GIT_SHA.
-      - name: Fallback — build at tag (only if digest aged out)
-        if: steps.digests.outputs.resolved != 'true'
-        id: buildtag
-        run: |
-          set -euo pipefail
-          SHA="${{ steps.vars.outputs.sha }}"
-          docker buildx build --push --provenance=false --build-arg "GIT_SHA=$(git rev-parse HEAD)" -f api/Dockerfile -t "${IMAGE_PREFIX}/radar-api:${SHA}" .
-          docker buildx build --push --provenance=false --build-arg "GIT_SHA=${SHA}" -f ui/Dockerfile  -t "${IMAGE_PREFIX}/radar-ui:${SHA}" .
-          api="$(docker buildx imagetools inspect "${IMAGE_PREFIX}/radar-api:${SHA}" --format '{{.Manifest.Digest}}')"
-          ui="$(docker buildx imagetools inspect "${IMAGE_PREFIX}/radar-ui:${SHA}" --format '{{.Manifest.Digest}}')"
-          echo "api=${api}" >> "$GITHUB_OUTPUT"
-          echo "ui=${ui}" >> "$GITHUB_OUTPUT"
-
-      - name: Select digests (resolved or rebuilt)
-        id: pick
-        run: |
-          set -eu
-          if [ "${{ steps.digests.outputs.resolved }}" = "true" ]; then
-            echo "api=${{ steps.digests.outputs.api }}" >> "$GITHUB_OUTPUT"
-            echo "ui=${{ steps.digests.outputs.ui }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "api=${{ steps.buildtag.outputs.api }}" >> "$GITHUB_OUTPUT"
-            echo "ui=${{ steps.buildtag.outputs.ui }}" >> "$GITHUB_OUTPUT"
-          fi
-
-      # Pre-flight (§2.4): same OVH apiserver host as preprod → the host check
-      # alone can't tell prod from preprod; the POSITIVE proof (get deploy in the
-      # radar-immobilier namespace, reachable only by the prod-scoped SA) + the
-      # `environment: production` credential boundary are what scope this to prod.
-      - name: Pre-flight — assert target cluster (prod)
-        env:
-          EXPECTED_KUBE_APISERVER_HOST: ${{ vars.EXPECTED_KUBE_APISERVER_HOST }}
-        run: |
-          set -euo pipefail
-          expected="${EXPECTED_KUBE_APISERVER_HOST:-hlhedx.c1.bhs5.k8s.ovh.net}"
-          server="$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
-          host="${server#*://}"; host="${host%%/*}"; host="${host%%:*}"
-          echo "apiserver host ${host:-<none>} / expected ${expected}"
-          if [ "$host" != "$expected" ]; then
-            echo "::error title=Wrong cluster — promote refused::kubeconfig targets '${host:-<none>}' not '${expected}'. Nothing applied."
-            exit 1
-          fi
-          kubectl -n "$NAMESPACE" get deploy radar-api radar-ui -o name
-
-      - name: Create GitHub deployment (prod, tag)
-        id: deployment
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const dep = await github.rest.repos.createDeployment({
-              owner: context.repo.owner, repo: context.repo.repo,
-              ref: context.sha, environment: 'production',
-              required_contexts: [], auto_merge: false,
-              transient_environment: false, production_environment: true,
-              description: `promote ${process.env.GITHUB_REF_NAME} -> radar-immobilier`,
-            });
-            core.setOutput('id', dep.data && dep.data.id !== undefined ? String(dep.data.id) : '');
-
-      # BACKUP-BEFORE-RELEASE (§1(a)) — PROD, PREPARED BUT DISARMED. Same
-      # fail-closed pg_dump → external S3 as preprod, ahead of the digest
-      # set-image, so a failed prod backup aborts the promotion. OWNER-GATED and
-      # SEPARATE from preprod: it stays SKIPPED until the repo variable
-      # BACKUP_BEFORE_RELEASE_PROD_ENABLED == 'true' (default off), and prod also
-      # needs the `batch/jobs` grant on the PROD deployer SA + the in-cluster
-      # radar-backup-s3-credentials secret + prod bucket/cred — all owner-
-      # provisioned at the prod cutover. Authored now so the call is ready; arming
-      # is a deliberate, later owner step (never a side effect of this merge).
-      # Keys are env-scoped (BACKUP_ENV=prod) so prod and preprod backups never
-      # collide in a shared bucket.
-      #
-      # LOUD-WARN when DISARMED (B1): backup AND migrate are both gated on this
-      # var. Prod is DISARMED by design until the cutover, so a `v*` promotion
-      # today rolls with NEITHER a pre-migration backup NOR the pending migrations
-      # applied — for a schema-change promotion (e.g. drizzle 0011) that serves new
-      # code on an un-migrated DB. Make the skip loud; arming stays a deliberate
-      # owner step (runbook: arm BACKUP_BEFORE_RELEASE_PROD_ENABLED before promoting
-      # a release that carries a pending migration).
-      - name: Warn if DB backup+migrate DISARMED (prod)
-        if: vars.BACKUP_BEFORE_RELEASE_PROD_ENABLED != 'true'
-        run: |
-          echo "::warning title=DB backup+migrate DISARMED (prod)::BACKUP_BEFORE_RELEASE_PROD_ENABLED is not 'true' — this promotion rolls WITHOUT a pre-migration backup AND WITHOUT applying pending migrations. Arm it before promoting any schema-change release."
-
-      - name: Install s5cmd
-        if: vars.BACKUP_BEFORE_RELEASE_PROD_ENABLED == 'true'
-        run: |
-          set -euo pipefail
-          ver=2.2.2
-          url="https://github.com/peak/s5cmd/releases/download/v${ver}/s5cmd_${ver}_Linux-64bit.tar.gz"
-          tmp="$(mktemp -d)"
-          curl -fsSL "$url" | tar -xz -C "$tmp" s5cmd
-          sudo install -m 0755 "$tmp/s5cmd" /usr/local/bin/s5cmd
-          s5cmd version
-
-      - name: Backup DB before promote (fail-closed)
-        if: vars.BACKUP_BEFORE_RELEASE_PROD_ENABLED == 'true'
-        env:
-          BACKUP_ENV: prod
-          BACKUP_TAG: ${{ steps.vars.outputs.sha }}
-          NAMESPACE: ${{ env.NAMESPACE }}
-          BACKUP_S3_BUCKET: ${{ vars.BACKUP_S3_BUCKET }}
-          BACKUP_S3_ENDPOINT: ${{ vars.BACKUP_S3_ENDPOINT }}
-          BACKUP_S3_REGION: ${{ vars.BACKUP_S3_REGION }}
-          BACKUP_RETAIN_COUNT: ${{ vars.BACKUP_RETAIN_COUNT }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.BACKUP_S3_ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_S3_SECRET_KEY }}
-        run: bash deploy/ci/run-db-backup.sh
-
-      # MIGRATE DB (fail-closed) — AFTER the pre-migration prod backup, BEFORE
-      # set-image. Same contract as preprod, but pinned to the IMMUTABLE DIGEST the
-      # promotion deploys (the <sha7> tag may have aged out of the registry, so prod
-      # uses the resolved digest — invariant: the migrate image == the exact image
-      # this path deploys). Fail-closed: a failed/timed-out migration ABORTS the
-      # promotion before set-image, so prod never rolls onto an un-migrated DB.
-      # Idempotent (drizzle journal). Order: backup → migrate → set-image → assert.
-      - name: Migrate DB before promote (fail-closed)
-        if: vars.BACKUP_BEFORE_RELEASE_PROD_ENABLED == 'true'
-        env:
-          SHA: ${{ steps.vars.outputs.sha }}
-          DIG_API: ${{ steps.pick.outputs.api }}
-        run: |
-          set -euo pipefail
-          : "${SHA:?SHA is empty — refusing to name/apply the migrate Job}"
-          : "${DIG_API:?DIG_API is empty — refusing to pin the migrate image to an empty digest}"
-          JOB="radar-db-migrate-${SHA}"
-          tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
-          cp deploy/k8s/36-db-migrate-job.yaml "$tmp/job.yaml"
-          # Overlay: pin the migrate image to the exact digest promoted to prod,
-          # scope it to the prod namespace, and give the immutable Job a per-sha name.
-          {
-            echo "apiVersion: kustomize.config.k8s.io/v1beta1"
-            echo "kind: Kustomization"
-            echo "resources: [job.yaml]"
-            echo "namespace: ${NAMESPACE}"
-            echo "nameSuffix: \"-${SHA}\""  # quoted: an all-digit sha7 (e.g. 85055419) would parse as a negative integer
-            echo "images:"
-            echo "  - name: ghcr.io/rhanka/radar-api"
-            echo "    newName: ${IMAGE_PREFIX}/radar-api"
-            echo "    digest: \"${DIG_API}\""
-          } > "$tmp/kustomization.yaml"
-          kubectl -n "$NAMESPACE" delete job "$JOB" --ignore-not-found
-          kubectl kustomize "$tmp" | kubectl -n "$NAMESPACE" apply -f -
-          # Fail-closed poll: Complete=go, Failed=abort, timeout=abort.
-          deadline=$((SECONDS + 600))
-          while :; do
-            complete="$(kubectl -n "$NAMESPACE" get job "$JOB" -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}' 2>/dev/null || true)"
-            failed="$(kubectl -n "$NAMESPACE" get job "$JOB" -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}' 2>/dev/null || true)"
-            if [ "$complete" = "True" ]; then
-              echo "db-migrate: Job $JOB Complete"
-              # Bounded summary written by dist/db/migrate.js (status + NOTICE counts, e.g. 0013
-              # deleted NULL-city rows — GH #812); readable without pods/log.
-              echo "db-migrate summary: $(kubectl -n "$NAMESPACE" get pods -l job-name="$JOB" -o 'jsonpath={range .items[*]}{.status.containerStatuses[0].state.terminated.message}{end}' 2>/dev/null || true)"
-              break
-            fi
-            if [ "$failed" = "True" ]; then
-              echo "::error title=DB migrate FAILED (prod)::$JOB — aborting promotion BEFORE set-image"
-              echo "db-migrate summary: $(kubectl -n "$NAMESPACE" get pods -l job-name="$JOB" -o 'jsonpath={range .items[*]}{.status.containerStatuses[0].state.terminated.message}{end}' 2>/dev/null || true)"
-              kubectl -n "$NAMESPACE" logs "job/$JOB" --tail=80 || true
-              # Backstop: kill the in-cluster Job so a hung migration (blocked
-              # ALTER/CREATE INDEX) actually stops — the `exit 1` only ends the CI
-              # poller, not the pod. Pairs with the Job's activeDeadlineSeconds.
-              kubectl -n "$NAMESPACE" delete job "$JOB" --ignore-not-found || true
-              exit 1
-            fi
-            if [ "$SECONDS" -ge "$deadline" ]; then
-              echo "::error title=DB migrate TIMEOUT (prod)::$JOB did not complete in 600s — aborting BEFORE set-image"
-              kubectl -n "$NAMESPACE" logs "job/$JOB" --tail=80 || true
-              # Backstop: kill the in-cluster Job so a hung migration (blocked
-              # ALTER/CREATE INDEX) actually stops — the `exit 1` only ends the CI
-              # poller, not the pod. Pairs with the Job's activeDeadlineSeconds.
-              kubectl -n "$NAMESPACE" delete job "$JOB" --ignore-not-found || true
-              exit 1
-            fi
-            sleep 5
-          done
-
-      # Drift self-heal (prod): reassert 40-immo-mcp declarative config. Moved to
-      # run AFTER the DB migrate (B2 fix): 40-immo-mcp pins `radar-api:latest` with
-      # a Recreate strategy, so applying it rolls the MCP pods onto the new code —
-      # that must happen only AFTER the schema is migrated, never before. Still
-      # BEFORE set-image, so the digest set-image below stays the last word and is
-      # not clobbered (l.40 constraint preserved). Guarded — skips if absent.
-      - name: Apply immo-mcp declarative config
-        run: |
-          set -eu
-          if kubectl -n "$NAMESPACE" get deploy radar-immo-mcp >/dev/null 2>&1; then
-            kubectl -n "$NAMESPACE" apply -f deploy/k8s/40-immo-mcp-http-deploy.yaml
-          else
-            echo "radar-immo-mcp absent — skipping immo-mcp config apply"
-          fi
-
-      # PROMOTE — pin prod to the IMMUTABLE digest (not the mutable <sha7> tag):
-      # true build-once, survives tag GC of <sha7>.
-      - name: Promote — set prod images to digest
-        id: promote
-        env:
-          DIG_API: ${{ steps.pick.outputs.api }}
-          DIG_UI: ${{ steps.pick.outputs.ui }}
-        run: |
-          set -eu
-          kubectl -n "$NAMESPACE" set image deploy/radar-api api="${IMAGE_PREFIX}/radar-api@${DIG_API}"
-          kubectl -n "$NAMESPACE" set image deploy/radar-ui  ui="${IMAGE_PREFIX}/radar-ui@${DIG_UI}"
-          if kubectl -n "$NAMESPACE" get deploy radar-immo-mcp >/dev/null 2>&1; then
-            kubectl -n "$NAMESPACE" set image deploy/radar-immo-mcp mcp="${IMAGE_PREFIX}/radar-api@${DIG_API}"
-          fi
-
-      # §6-prod DEPLOY REFRESH CRONJOB (prod) — jumeau prod de l'étape préprod :
-      # applique + dé-suspend `radar-refresh-pv` (05:00, 11:00, 17:00, 23:00 UTC)
-      # et son gardien `radar-refresh-pending-watchdog` (toutes les 5 min, SA/Role
-      # dans deploy/k8s/10-rbac.yaml) dans radar-immobilier via
-      # l'overlay refresh-cronjobs-prod. Placée APRÈS la promotion des images :
-      # le CronJob doit porter exactement l'empreinte que les Deployments
-      # viennent de recevoir, jamais une plus ancienne ni une plus récente.
-      #
-      # Épinglage par EMPREINTE (et non par tag `<sha7>` comme en préprod) : la
-      # prod est build-once et survit au GC des tags. Le rendu passe par la cible
-      # `render-prod` de refresh-018.mk — la MÊME que la CI exécute dans
-      # `verify-renders` sur chaque PR. Trois conséquences voulues :
-      #   - ce qui est appliqué est ce que la CI a vérifié, au caractère près ;
-      #   - la cible refuse un IMAGE_REF qui n'est pas une empreinte `@sha256:`,
-      #     et refuse un rendu portant encore le placeholder fail-loud ou
-      #     `:latest` — un apply non épinglé est impossible, pas seulement
-      #     improbable ;
-      #   - plus de binaire kustomize à télécharger : `kubectl kustomize` suffit.
-      #
-      # GARDE : `REFRESH_CRONJOB_PROD_ENABLED`. Tant qu'elle n'est pas définie à
-      # 'true', l'étape est sautée et la promotion continue — l'étape suivante
-      # le dit à voix haute. L'armement n'est PAS un effet de bord d'une fusion :
-      # c'est un acte owner, et ses préalables (Secrets runtime + bootstrap
-      # keyring, PVC, Role appliqué, marge de quota) sont dans
-      # deploy/ci/README.md, « Armer le rafraîchissement de production ».
-      - name: Deploy refresh CronJobs (prod)
-        if: ${{ vars.REFRESH_CRONJOB_PROD_ENABLED == 'true' }}
-        env:
-          DIG_API: ${{ steps.pick.outputs.api }}
-        run: |
-          set -euo pipefail
-          render="$(mktemp)"
-          trap 'rm -f "$render"' EXIT
-          make -f deploy/k8s/refresh-cronjobs/refresh-018.mk render-prod \
-            IMAGE_REF="${IMAGE_PREFIX}/radar-api@${DIG_API}" RENDER_OUT="$render"
-          kubectl -n "$NAMESPACE" apply -f "$render"
-          echo "Causal PV refresh deployed to ${NAMESPACE} (radar-api@${DIG_API}):"
-          kubectl -n "$NAMESPACE" get cronjob radar-refresh-pv \
-            -o custom-columns=NAME:.metadata.name,SUSPEND:.spec.suspend,SCHEDULE:.spec.schedule,IMAGE:.spec.jobTemplate.spec.template.spec.containers[0].image
-          # Preuve d'état, pas de log d'intention : le CronJob live doit être
-          # actif ET porter l'empreinte promue, sinon la promotion est rouge.
-          live_suspend="$(kubectl -n "$NAMESPACE" get cronjob radar-refresh-pv -o jsonpath='{.spec.suspend}')"
-          live_image="$(kubectl -n "$NAMESPACE" get cronjob radar-refresh-pv -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].image}')"
-          if [ "$live_suspend" = "true" ] || [ "$live_image" != "${IMAGE_PREFIX}/radar-api@${DIG_API}" ]; then
-            echo "::error title=Refresh CronJob not armed as expected::suspend='${live_suspend}' image='${live_image}' expected image='${IMAGE_PREFIX}/radar-api@${DIG_API}'"
-            exit 1
-          fi
-          echo "refresh CronJob armed: suspend=${live_suspend}, image=${live_image}"
-          # Même preuve pour le gardien des pods Pending, rendu par le même overlay.
-          dog_suspend="$(kubectl -n "$NAMESPACE" get cronjob radar-refresh-pending-watchdog -o jsonpath='{.spec.suspend}')"
-          dog_image="$(kubectl -n "$NAMESPACE" get cronjob radar-refresh-pending-watchdog -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].image}')"
-          if [ "$dog_suspend" = "true" ] || [ "$dog_image" != "${IMAGE_PREFIX}/radar-api@${DIG_API}" ]; then
-            echo "::error title=Refresh pending watchdog not armed as expected::suspend='${dog_suspend}' image='${dog_image}' expected image='${IMAGE_PREFIX}/radar-api@${DIG_API}'"
-            exit 1
-          fi
-          echo "refresh pending watchdog armed: suspend=${dog_suspend}, image=${dog_image}"
-
-      # Le saut de l'étape ci-dessus est SILENCIEUX par défaut : une promotion
-      # verte ne prouve alors rien sur le rafraîchissement. Même parti pris que
-      # le « Warn if DB backup+migrate DISARMED » : désarmé n'est pas une faute,
-      # mais ne doit jamais être invisible.
-      - name: Warn if refresh CronJob DISARMED (prod)
-        if: ${{ vars.REFRESH_CRONJOB_PROD_ENABLED != 'true' }}
-        run: |
-          echo "::warning title=Refresh CronJob DISARMED (prod)::REFRESH_CRONJOB_PROD_ENABLED is not 'true' — radar-refresh-pv was NOT deployed to radar-immobilier by this promotion. Production is not refreshing PV to signals. See deploy/ci/README.md, 'Armer le rafraîchissement de production'."
-
-      - name: Wait for rollouts
-        run: |
-          set -eu
-          kubectl -n "$NAMESPACE" rollout status deploy/radar-api --timeout=180s
-          kubectl -n "$NAMESPACE" rollout status deploy/radar-ui  --timeout=180s
-          if kubectl -n "$NAMESPACE" get deploy radar-immo-mcp >/dev/null 2>&1; then
-            kubectl -n "$NAMESPACE" rollout status deploy/radar-immo-mcp --timeout=120s \
-              || echo "::warning title=radar-immo-mcp rollout incomplete::optional connector — api/ui unaffected"
-          fi
-
-      # Same two public-path proofs as the legacy prod deploy: TLS serial (right
-      # cluster/LB) + served-sha. /health .sha is the GIT sha (build-arg), NOT the
-      # digest, so assert served-sha == the tagged commit's <sha7> (§2.3 #9).
-      - name: Post-deploy — TLS serial (public path == deployed LB)
-        env:
-          PUBLIC_HOST: ${{ vars.PUBLIC_ENDPOINT_HOST }}
-          EXPECTED_LB_IP: ${{ vars.EXPECTED_OVH_LB_IP }}
-        run: |
-          set -euo pipefail
-          host="${PUBLIC_HOST:-immo.sent-tech.ca}"; lb_ip="${EXPECTED_LB_IP:-51.79.100.177}"
-          serial_of() { echo | openssl s_client -connect "$1:443" -servername "$host" 2>/dev/null | openssl x509 -noout -serial 2>/dev/null | cut -d= -f2; }
-          sn_dns="$(serial_of "$host")"; sn_lb="$(serial_of "$lb_ip")"
-          echo "serial dns=${sn_dns:-<none>} lb=${sn_lb:-<none>}"
-          if [ -z "$sn_dns" ] || [ -z "$sn_lb" ] || [ "$sn_dns" != "$sn_lb" ]; then
-            echo "::error title=Prod TLS proof failed::${host} not served by ${lb_ip} (serials ${sn_dns} vs ${sn_lb})."
-            exit 1
-          fi
-
-      - name: Assert served sha (prod)
-        env:
-          SHA: ${{ steps.vars.outputs.sha }}
-          API_SHA: ${{ github.sha }}
-          PUBLIC_ENDPOINT_HOST: ${{ vars.PUBLIC_ENDPOINT_HOST }}
-        run: |
-          set -euo pipefail
-          host="${PUBLIC_ENDPOINT_HOST:-immo.sent-tech.ca}"
-          fetch_sha() { curl -s --max-time 10 "$1" | jq -r '.sha // empty' 2>/dev/null || true; }
-          deadline=$(( $(date +%s) + 180 ))
-          while :; do
-            api_sha="$(fetch_sha "https://${host}/health")"; ui_sha="$(fetch_sha "https://${host}/build.json")"
-            if [ "$api_sha" = "$API_SHA" ] && [ "$ui_sha" = "$SHA" ]; then echo "served sha OK api=${API_SHA} ui=${SHA}"; exit 0; fi
-            if [ "$(date +%s)" -ge "$deadline" ]; then
-              echo "::error title=Prod served sha mismatch::serves api='${api_sha:-<none>}' ui='${ui_sha:-<none>}' expected '${SHA}'."
-              exit 1
-            fi
-            sleep 10
-          done
-
-      - name: Deployment status — success
-        if: success() && steps.deployment.outputs.id != ''
-        uses: actions/github-script@v7
-        env:
-          DEPLOYMENT_ID: ${{ steps.deployment.outputs.id }}
-          SHA: ${{ steps.vars.outputs.sha }}
-          TAG: ${{ steps.vars.outputs.tag }}
-        with:
-          script: |
-            await github.rest.repos.createDeploymentStatus({
-              owner: context.repo.owner, repo: context.repo.repo,
-              deployment_id: Number(process.env.DEPLOYMENT_ID), state: 'success',
-              environment_url: 'https://immo.sent-tech.ca',
-              description: `promoted ${process.env.TAG} (sha ${process.env.SHA}) by digest`,
-            });
-
-      - name: Summary
-        if: always()
-        run: |
-          {
-            echo "### Promoted \`${{ steps.vars.outputs.tag }}\` -> \`${NAMESPACE}\` (by digest)"
-            echo ""
-            echo '```'
-            echo "radar-api -> ${IMAGE_PREFIX}/radar-api@${{ steps.pick.outputs.api }}"
-            echo "radar-ui  -> ${IMAGE_PREFIX}/radar-ui@${{ steps.pick.outputs.ui }}"
-            echo "git sha   -> ${{ steps.vars.outputs.sha }}"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      # ROLLBACK-ON-FAILED-RELEASE (§1(b)) — PROD, PREPARED BUT DISARMED. Same
-      # image-only auto-rollback as preprod, scoped to a promote-health failure
-      # (steps.promote.conclusion != 'skipped'). Owner-gated + SEPARATE arming:
-      # stays SKIPPED until ROLLBACK_ON_FAILURE_PROD_ENABLED == 'true' (default
-      # off). Authored now so the call is ready; arming is a deliberate owner step
-      # at the prod cutover, never a side effect of this merge. Same migration
-      # seam as preprod (breaking migration → owner-gated DB-restore, not this).
-      - name: Rollback prod on failed promote (image-only)
-        if: ${{ failure() && steps.promote.conclusion != 'skipped' && vars.ROLLBACK_ON_FAILURE_PROD_ENABLED == 'true' }}
-        env:
-          NAMESPACE: ${{ env.NAMESPACE }}
-          ROLLBACK_ENV: prod
-          DEPLOYMENTS: radar-api radar-ui
-          PUBLIC_HOST: ${{ vars.PUBLIC_ENDPOINT_HOST || 'immo.sent-tech.ca' }}
-          FAILED_REF: ${{ steps.vars.outputs.sha }}
-        run: bash deploy/ci/rollback-release.sh
-
-      - name: Deployment status — failure
-        if: failure() && steps.deployment.outputs.id != ''
-        uses: actions/github-script@v7
-        env:
-          DEPLOYMENT_ID: ${{ steps.deployment.outputs.id }}
-          TAG: ${{ steps.vars.outputs.tag }}
-        with:
-          script: |
-            await github.rest.repos.createDeploymentStatus({
-              owner: context.repo.owner, repo: context.repo.repo,
-              deployment_id: Number(process.env.DEPLOYMENT_ID), state: 'failure',
-              description: `promote ${process.env.TAG} failed`,
-            });
+      - name: Sequential cutover (same manifest as rehearsal)
+        run: make -f deploy/cutover/operator.mk run RELEASE=cutover-release/release.json ENV=prod
