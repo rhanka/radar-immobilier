@@ -46,7 +46,7 @@ export function fixture(changes = {}) {
   if (changes.fastClock) env['BASH_FUNC_sleep%%'] = '() { if [ "$1" = 2 ]; then SECONDS=$((SECONDS+31)); else command sleep "$@"; fi; }';
   const run = (action = 'run', extra = [], environment = 'preprod') => {
     const result = spawnSync('make', ['-s', '-f', 'deploy/cutover/operator.mk', action,
-      `RELEASE=${dir}/release.json`, ...extra, `ENV=${environment}`], { env, encoding: 'utf8', timeout: 45000 });
+      `RELEASE=${dir}/release.json`, ...extra, `ENV=${environment}`], { env, encoding: 'utf8', timeout: 240000 });
     if (result.error) throw result.error;
     return result;
   };

@@ -38,6 +38,7 @@
 - [x] PR #942 refresh CI fix: all 21 Quality gates steps passed in order on 2026-10-29; 8,098 workspace tests passed, controller/backup and watchdog regressions passed, all campaign containers/networks/volumes removed. Evidence: `tmp/quality-replay/{summary.log,replay.log}`.
 - [x] The owner's CI-fix instruction authorizes an attribution-free commit and normal push to `origin feat/bascule-cutover`, superseding the original no-push guard.
 - [x] PR #942 cache CI fix: create the campaign lock's parent before opening it; no other branch-modified script opens this lock. Empty-HOME replay (local Compose located through `DOCKER_CONFIG`) and the exact CI step each passed 11 Node tests and 143 backup checks; syntax passed and both stacks were removed with volumes.
+- [x] PR #942 timeout CI fix: raise only the hermetic fixture's Make subprocess timeout from 45,000 to 240,000 ms; no associated Node test timeout exists. Exact CI step passed with an initially empty HOME (11 Node tests and 143 backup checks); `down -v` completed.
 - [ ] Lot 0 (owner/infrastructure): repair only `radar-bascule/KUBE_CONFIG_DATA_BASCULE_PREPROD`, verify dedicated identity and reads, complete old restoration before replacement installation. Remote actions excluded by owner instruction.
 
 ## Orchestration Mode (AI-selected)
