@@ -11,7 +11,7 @@ trap 'exit 130' INT
 trap 'exit 143' TERM
 while :; do
   if ! flock -w 30 8; then echo 'Waiting for Docker campaign lock'; continue; fi
-  busy=$(docker ps --format '{{.Names}}' | awk '/^radar-test-|^radar-e2e-/ && !/^radar-test-cutover-/')
+  busy=$(docker ps --format '{{.Label "com.docker.compose.project"}}' | awk 'NF && $0!="radar-test-cutover"')
   [[ -n $busy ]] || break
   flock -u 8
   echo 'Waiting for the active Docker test stack'; sleep 30
