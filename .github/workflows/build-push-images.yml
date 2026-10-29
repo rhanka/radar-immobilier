@@ -378,6 +378,12 @@ jobs:
               core.setOutput('id', String(dep.data.id));
             }
 
+      - name: Acquire namespace change lock
+        uses: ./deploy/cutover/lock-action
+        with:
+          action: lock
+          environment: prod
+
       - name: Apply immo-mcp declarative config
         # MUST run before "Roll deployments to pushed sha": see the file header
         # ("CONFIG DURABILITY") for why the ordering (apply, then set-image)
@@ -597,6 +603,11 @@ jobs:
   # the SA namespace scope is the real deploy frontier (DESIGN §2.4), and the
   # served-sha assert on the PREPROD URL is what proves the preprod build.
   # ===========================================================================
+      - name: Release namespace change lock
+        if: always() && env.CUTOVER_LOCK_RUN != ''
+        uses: ./deploy/cutover/lock-action
+        with:
+          action: release-lock
   deploy-preprod:
     name: Deploy to preprod cluster
     needs: build-push
