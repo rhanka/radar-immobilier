@@ -109,7 +109,7 @@ concurrency:
   # Cancel superseded builds on the same ref (a newer push to main / re-dispatch
   # makes the in-flight build redundant).
   group: build-push-images-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   REGISTRY: ghcr.io
@@ -208,6 +208,19 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,scope=${{ matrix.service }},mode=max
 
+      - name: Record immutable cutover image
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+          SERVICE: ${{ matrix.service }}
+        run: |
+          jq -n --arg sha "$GITHUB_SHA" --arg digest "$DIGEST" \
+            '{gitSha:$sha,digest:$digest}' > "cutover-$SERVICE.json"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cutover-image-${{ matrix.service }}-${{ github.sha }}
+          path: cutover-${{ matrix.service }}.json
+
       - name: Summary
         run: |
           {
@@ -218,6 +231,30 @@ jobs:
             echo "digest: ${{ steps.build.outputs.digest }}"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+
+  cutover-release:
+    needs: build-push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: cutover-image-*-${{ github.sha }}
+          merge-multiple: true
+      - name: Generate release manifest
+        env:
+          GIT_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          export API_DIGEST=$(jq -er --arg sha "$GIT_SHA" 'select(.gitSha==$sha).digest' cutover-api.json)
+          export UI_DIGEST=$(jq -er --arg sha "$GIT_SHA" 'select(.gitSha==$sha).digest' cutover-ui.json)
+          fail(){ echo 'Release manifest refused' >&2; exit 1; }
+          source tools/make/cutover-release.sh
+          generate_release release.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cutover-release-${{ github.sha }}
+          path: release.json
 
   deploy:
     name: Deploy to cluster
