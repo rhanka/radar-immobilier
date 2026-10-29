@@ -17,7 +17,7 @@ const file = path.join(dir, 'state.json');
 const s = JSON.parse(fs.readFileSync(file));
 const save = () => fs.writeFileSync(file, JSON.stringify(s));
 if (s.apiLost && tool === 'kubectl' && args[0] !== 'config') process.exit(1);
-const out = value => process.stdout.write(typeof value === 'string' ? value : JSON.stringify(value));
+const out = value => fs.writeFileSync(1, typeof value === 'string' ? value : JSON.stringify(value));
 const key = kind => ({ configmap: 'ConfigMap', configmaps: 'ConfigMap', deployment: 'Deployment', deployments: 'Deployment',
   job: 'Job', jobs: 'Job', pods: 'Pod', service: 'Service', services: 'Service', cronjob: 'CronJob', cronjobs: 'CronJob',
   ingress: 'Ingress', ingresses: 'Ingress', endpoints: 'Endpoints', replicasets: 'ReplicaSet', networkpolicy: 'NetworkPolicy' })[kind];
