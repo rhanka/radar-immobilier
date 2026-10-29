@@ -1,14 +1,3 @@
-#!/usr/bin/env bash
-# One machine-wide campaign, no root Makefile, host runtime or environment discovery.
-set -euo pipefail
-action=${1:-}
-[[ ${ENV:-} == test-base-preprod && ${API_PORT:-} == 18925 && ${UI_PORT:-} == 15925 && ${MAILDEV_UI_PORT:-} == 11925 ]]
-export COMPOSE_DISABLE_ENV_FILE=1
-unset COMPOSE_FILE COMPOSE_ENV_FILES COMPOSE_PROFILES
-ROOT=$(pwd -P)
-TASK_DIR=$ROOT/tmp/base-preprod-evidence
-export BUILDX_CONFIG=$TASK_DIR/buildx-cache
-mkdir -p "$BUILDX_CONFIG"
 RUN_DIR=$TASK_DIR/runtime
 LOG_DIR=$TASK_DIR/$(date -u +%Y%m%dT%H%M%S)-$action
 mkdir -p "$RUN_DIR" "$LOG_DIR"
