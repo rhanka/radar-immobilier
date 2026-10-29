@@ -22,7 +22,6 @@ export const REFS_JOB = "radar-bascule-served-refs";
 export const PART_KEY = "refs.tsv.gz.part";
 export const META_KEY = "meta.json";
 const sha256 = (b) => createHash("sha256").update(b).digest("hex");
-const K8S_NAME_RE = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/;
 
 // ConfigMaps (kubectl get -o json objects, in part order) → verified gzip + TSV.
 export function assembleRefs(configMaps, { cycleId }) {
