@@ -1,0 +1,1 @@
+...(path === api ? { ...result, receipt: undefined } : {})

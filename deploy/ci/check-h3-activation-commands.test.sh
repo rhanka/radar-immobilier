@@ -10,7 +10,13 @@ export KUBECONFIG="$CASE_ROOT/nonexistent-config"
 cat >"$CASE_ROOT/kubectl" <<'SH'
 #!/usr/bin/env bash
 set -euo pipefail
-if [ "$1" = kustomize ]; then exec "$H3_REAL_KUBECTL" "$@"; fi
+if [ "$1" = kustomize ]; then
+  if [ -n "${H3_RENDER_SOURCE_MODE:-}" ]; then
+    "$H3_REAL_KUBECTL" "$@" | sed -E "s/^(  ARTIFACTS_CONTROL_MODE: ).*/\1$H3_RENDER_SOURCE_MODE/"
+    exit 0
+  fi
+  exec "$H3_REAL_KUBECTL" "$@"
+fi
 [ "$1" = -n ] && [ "$2" = radar-immobilier-preprod ] || exit 90
 shift 2
 printf '%s\n' "$*" >>"$H3_COMMAND_STATE/calls"
@@ -65,8 +71,27 @@ if H3_METADATA_FAILURE=1 operator cursor-secret >"$CASE_ROOT/failure.log" 2>&1; 
 [ "$(grep -c '^create secret' "$CASE_ROOT/calls")" = 2 ]
 echo 'ok: metadata failure stops secret creation'
 image="ghcr.io/rhanka/radar-api@sha256:$(printf 'a%.0s' {1..64})"
-operator render OUT="$CASE_ROOT/output" ARTIFACT_API_IMAGE="$image" >"$CASE_ROOT/render.log"
-grep -Fq 'ARTIFACTS_CONTROL_MODE: "off"' "$CASE_ROOT/output/render.yaml"
+assert_modes() {
+  for name in radar-api immo-mcp-config; do
+    bash deploy/ci/kfilter.sh "$CASE_ROOT/output/render.yaml" ConfigMap "$name" \
+      | grep -Fxq "  ARTIFACTS_CONTROL_MODE: \"$1\""
+  done
+}
+for mode in off general; do
+  operator render MODE="$mode" ARTIFACT_API_IMAGE="$image" >"$CASE_ROOT/render.log"
+  assert_modes "$mode"
+  echo "ok: real operator render MODE=$mode produces $mode for API and MCP"
+done
+H3_RENDER_SOURCE_MODE=general operator render MODE=off ARTIFACT_API_IMAGE="$image" >"$CASE_ROOT/render.log"
+assert_modes off
+echo 'ok: operator renders off for API and MCP from a general source'
+if operator render MODE=validation ARTIFACT_API_IMAGE="$image" >"$CASE_ROOT/failure.log" 2>&1; then exit 1; fi
+echo 'ok: operator rejects unsupported requested modes'
+if H3_RENDER_SOURCE_MODE=validation operator render MODE=general ARTIFACT_API_IMAGE="$image" >"$CASE_ROOT/failure.log" 2>&1; then exit 1; fi
+grep -Fq 'must render ARTIFACTS_CONTROL_MODE=general' "$CASE_ROOT/failure.log"
+echo 'ok: operator rejects a rendered ConfigMap that differs from the requested mode'
+operator render ARTIFACT_API_IMAGE="$image" >"$CASE_ROOT/render.log"
+assert_modes off
 if operator render ARTIFACT_API_IMAGE=ghcr.io/rhanka/radar-api:latest >"$CASE_ROOT/failure.log" 2>&1; then exit 1; fi
 echo 'ok: reviewed image digest required; first render keeps publication off'
 operator apply-runtime route >"$CASE_ROOT/apply.log"
@@ -131,4 +156,4 @@ echo 'ok: general apply and route reject divergent MCP/API images'
 cp "$CASE_ROOT/pinned.yaml" "$CASE_ROOT/output/render.yaml"
 operator apply-runtime route >"$CASE_ROOT/apply.log"
 echo 'ok: general apply and route accept matching pinned images'
-echo 'check-h3-activation-commands tests: 13 passed, 0 failed'
+echo 'check-h3-activation-commands tests: 18 passed, 0 failed'

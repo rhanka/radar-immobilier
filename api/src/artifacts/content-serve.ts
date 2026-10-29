@@ -15,7 +15,8 @@
  *     headers: { "x-preview-grant": grant },
  *   });
  * Grant renewal is available at POST /__reader/renew (presented grant in
- * header, session cookie required) before the 55 s expiry.
+ * header, session cookie required) before the 55 s expiry. After expiry, a
+ * same-origin POST without a grant can recover from a current sealed pinned P.
  */
 import { Hono, type Context } from "hono";
 import {
@@ -50,6 +51,7 @@ import {
 } from "./release-files.js";
 import { ClassificationError, classificationFailure } from "../services/facets/classification-errors.js";
 import { decodeQuery } from "../services/facets/classification-query.js";
+import type { WritePageSurface } from "./write-intent-page-surface.js";
 
 export interface ContentServeDeps {
   readonly contentBase: string;
@@ -63,6 +65,9 @@ export interface ContentServeDeps {
   readonly now?: () => number;
   /** Optional revocation predicate; revoked sessions fail closed. */
   readonly isRevoked?: (sessionId: string) => boolean;
+  /** PW-C page write listener (prepare/status); absent keeps writes closed. */
+  readonly pageWrite?: Hono;
+  readonly writePageSurface?: WritePageSurface;
 }
 type AuthorizedReader = ApiReaderContext & { readonly validUntil: number; readonly authorityVersion: string };
 
@@ -156,6 +161,11 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     return next();
   });
 
+  // PW-C page write listener owns the two page write operations. It runs
+  // after the parent gate and before the read-only operation dispatch; an
+  // absent listener keeps writes closed without disabling publication, page
+  // opening, or unrelated read operations.
+  if (deps.pageWrite) app.route("/", deps.pageWrite);
   app.post("/__reader/renew", async (c) => {
     const parsed = parseContentHost(c.req.header("host"), deps.contentBase);
     if (parsed.kind === "other") return c.json({ error: "not_found" }, 404);
@@ -165,8 +175,20 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     }
     const presented = presentedGrant(c);
     if (!presented) {
-      applyReaderContentHeaders(c);
-      return c.json({ error: "unauthenticated" }, 401);
+      // Recovery adopts only the already approved, sealed resource. It cannot
+      // choose a reader, release or profile, nor renew the page session itself.
+      const host = c.req.header("host");
+      const site = c.req.header("sec-fetch-site");
+      if (c.req.header("origin") !== `https://${host}` || (site !== undefined && site !== "same-origin")) {
+        return c.json({ error: "forbidden_origin" }, 403);
+      }
+      const reader = await authorized(c, true);
+      if (!reader) return c.json({ error: "unauthenticated" }, 401);
+      const session = readSessionClaims(c.req.header("cookie"), deps.sessionSecret, now());
+      if (!session?.resource) return c.json({ error: "unauthenticated" }, 401);
+      const grant = await mintGrant(session.resource, deps.grantSecret, now());
+      if (!await authorityCurrent(reader)) return c.json({ error: "unauthenticated" }, 401);
+      return c.json({ grant });
     }
     const host = bareHost(c.req.header("host"));
     const claims = await verifyGrant(presented, { ...deps.issuer, host }, deps.grantSecret, now());
@@ -191,6 +213,18 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
   });
 
   if (deps.openingContent) app.route("/", deps.openingContent);
+  if (!deps.readOperation && deps.writePageSurface) for (const operation of ["state", "search"] as const) app.get(`/__reader/api/baskets.${operation}.v1`, async (c) => {
+    if (!deps.writePageSurface) return c.json({ error: "capability_unavailable" }, 503);
+    const reader = await authorized(c);
+    if (!reader || !canInvoke(reader, "signals.protected-read", reader.releaseId)) return c.json({ error: "unauthenticated" }, 401);
+    try {
+      const params = new URL(c.req.url).searchParams;
+      params.delete("grant");
+      const body = await deps.writePageSurface.read(operation, params, reader);
+      if (!await authorityCurrent(reader)) return c.json({ error: "unauthenticated" }, 401);
+      return c.json(body);
+    } catch (error) { const failure = classificationFailure(error); return c.json(failure.body, failure.status); }
+  });
 
   app.all("/__reader/api/:op", async (c) => {
     const parsed = parseContentHost(c.req.header("host"), deps.contentBase);
@@ -313,6 +347,12 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
         c.header("Content-Type", file.contentType);
         return c.body(typeof file.body === "string" ? file.body : new Uint8Array(file.body));
       }
+    }
+    if (!deps.releaseFiles && deps.writePageSurface && (c.req.path === "/" || c.req.path === "/index.html")) {
+      const response = await deps.writePageSurface.document(c.req.raw, auth);
+      if (!await authorityCurrent(auth)) return c.json({ error: "unauthenticated" }, 401);
+      c.header("Content-Security-Policy", response.headers.get("content-security-policy") ?? "default-src 'none'");
+      return response;
     }
     if (!deps.releaseFiles && (c.req.path === "/" || c.req.path === "/index.html")) {
       applyReaderContentHeaders(c);
