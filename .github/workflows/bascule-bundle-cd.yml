@@ -327,12 +327,13 @@ jobs:
           environment: prod
 
   apply-backup:
+    needs: apply-bundle
     runs-on: ubuntu-latest
     timeout-minutes: 75
     # Two switches: the bundle CD is armed (the permanent SA exists) AND the k8s
     # lane armed the backup AFTER re-applying rbac-ci-bascule-prod.yaml (the new
     # name-scoped verbs). Merging can never red main against an old Role.
-    if: vars.BASCULE_BUNDLE_CD_ENABLED == 'true' && vars.BACKUP_DAILY_CD_ENABLED == 'true'
+    if: always() && vars.BASCULE_BUNDLE_CD_ENABLED == 'true' && vars.BACKUP_DAILY_CD_ENABLED == 'true'
     # SECRET VAULT `radar-backup-prod` (created by the k8s lane: deployment branch = main
     # ONLY, no required reviewer, so the merge push stays automatic): holds the three
     # backup identities (secrets RADAR_BACKUP_{WRITER,READER,PURGER}_{ACCESS,SECRET}_KEY)
