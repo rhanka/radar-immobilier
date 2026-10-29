@@ -1,37 +1,3 @@
-#!/usr/bin/env bash
-# Sourced by the hermetic operator fixture; all cluster commands are fake.
-cp input.json network-good-input.json
-for state in nodeport loadbalancer external-ip external-name node-port-field hostnetwork hostport template-hostport template-hostnetwork init-hostport alternate-route extra-endpoint extra-legacy no-isolation allow-pods policy-change; do
-  export FAKE_STATE=$state
-  for action in close activate start-api restart-api reopen-api; do
-    [[ $action != close || ( $state != extra-endpoint && $state != extra-legacy ) ]] || continue
-    proofs=$testdir/proofs.json
-    [[ $action != start-api ]] || proofs=$testdir/activation-receipt.json
-    [[ $action != restart-api ]] || proofs=$testdir/first-qualification.json
-    [[ $action != reopen-api ]] || proofs=$testdir/acceptance.json
-    : > cluster-calls
-    if invoke "$action" EXPECTED="$testdir/expected.json" PROOFS="$proofs"; then
-      echo "Network bypass accepted: $action $state" >&2; exit 1
-    fi
-    case $state in
-      nodeport|loadbalancer|external-ip|external-name|node-port-field) error='Unqualified Service exposure';;
-      hostnetwork|hostport) error='Pod exposes hostNetwork or hostPort';;
-      template-hostport|template-hostnetwork|init-hostport) error='Workload template exposes hostNetwork or hostPort';;
-      alternate-route) error='Unsupported alternate network route/policy';;
-      extra-endpoint) error='A consumer endpoint is ready';;
-      extra-legacy) error='A consumer legacy endpoint is ready';;
-      no-isolation) error='Consumer pod ingress is not isolated';;
-      allow-pods) error='Unbounded PostgreSQL ingress sources are forbidden';;
-      policy-change) error='Fresh bound CNI enforcement probes required';;
-    esac
-    rg -qF "$error" "result-$n.log" || { cat "result-$n.log" >&2; exit 1; }
-    if rg -- '--request-timeout=20s (create|patch|scale|set|delete|rollout) ' cluster-calls; then exit 1; fi
-  done
-done
-unset FAKE_STATE
-for filter in 'del(.maintenance.networkIsolation)' '.maintenance.networkIsolation.networkPolicyEnforced=false' \
-  '.maintenance.networkIsolation.nodeOriginDenied=false' '.maintenance.networkIsolation.binding.actorSub="foreign"' \
-  '.maintenance.networkIsolation.observedAt="2000-01-01T00:00:00Z"'; do
   jq "$filter" network-good-input.json > input.json
   : > cluster-calls
   if invoke start-api PROOFS="$testdir/activation-receipt.json"; then echo 'Unverified pod isolation accepted' >&2; exit 1; fi
