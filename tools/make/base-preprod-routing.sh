@@ -1,28 +1,3 @@
-#!/usr/bin/env bash
-# No controller extensions: public routes terminate at a selectorless Service.
-maintenance_inputs() {
-  jq -e '.maintenance as $m | ($m.service|test("^base-maintenance-[a-z0-9-]+$") and length<=63)
-    and ($m.ingresses|length>0 and length==(unique|length) and all(.[];test("^[a-z0-9-]+$")))
-    and (.apiIngress as $api | $m.ingresses|index($api)!=null)' "$INPUT" >/dev/null || fail 'Maintenance boundary inputs required'
-}
-read_ingresses() {
-  "${k[@]}" get ingresses -o json | jq 'if any(.items[]|(.metadata.annotations//{})|to_entries[];
-    (.key|test("^traefik[.]";"i")) and ((.key+" "+.value)|test("middleware|@[a-z0-9_-]+";"i")))
-    then error("Traefik middleware annotations are forbidden")
-    else {items:[.items[]|{metadata:(.metadata|{name,uid,resourceVersion}),spec}]} end' > "$OUTPUT/ingresses-current.json"
-  jq -e --slurpfile c "$INPUT" '([.items[].metadata.name]|sort)==($c[0].maintenance.ingresses|sort)' \
-    "$OUTPUT/ingresses-current.json" >/dev/null || fail 'Ingress coverage changed'
-}
-deny_backend() {
-  jq -n --arg service "$(jq -r .maintenance.service "$INPUT")" '{service:{name:$service,port:{number:80}}}'
-}
-assert_refusal_service() {
-  local service
-  service=$(jq -r .maintenance.service "$INPUT")
-  "${k[@]}" get service "$service" -o json > "$OUTPUT/deny-service-current.json"
-  jq -e --slurpfile c "$INPUT" '.metadata.annotations["radar.sent-tech.ca/maintenance-attempt"]==$c[0].binding.maintenanceAttemptId
-    and .spec.type=="ClusterIP" and ((.spec.selector//{})|length)==0
-    and .spec.ports==[{name:"deny",port:80,targetPort:80,protocol:"TCP"}]' "$OUTPUT/deny-service-current.json" >/dev/null || fail 'Invalid refusal Service'
   "${k[@]}" get endpointslices -l "kubernetes.io/service-name=$service" -o json > "$OUTPUT/deny-slices.json"
   jq -e 'all(.items[]; ((.endpoints//[])|length)==0)' "$OUTPUT/deny-slices.json" >/dev/null || fail 'Refusal Service has endpoints'
   "${k[@]}" get endpoints "$service" --ignore-not-found -o json > "$OUTPUT/deny-endpoints.json"
