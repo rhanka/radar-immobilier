@@ -173,6 +173,8 @@ render-prod:
 #   - GARDIEN DES PODS PENDING (refresh-watchdog.awk) : le CronJob
 #     radar-refresh-pending-watchdog est rendu, actif, câblé sur le label du pod
 #     de passage, et le Job de passage garde `backoffLimit: 0`.
+# Cutover suspension/drainage is covered by the controller tests in Quality gates;
+# the engine captures every CronJob instead of consuming QUIESCE_CRONJOBS.
 # Les tests de mutation de ces blocs : verify-renders.test.sh (CI).
 
 .PHONY: verify-renders
@@ -236,11 +238,6 @@ verify-renders:
 	  diff -u "$$tmp/preprod.contract" "$$tmp/prod.contract" \
 	    || { echo "refresh overlay parity failed: preprod and prod diverge outside the four intended differences (namespace, memory envelope, S3 binding, refresh hour list) — see the diff above (< preprod, > prod)" >&2; exit 1; }; \
 	  wf="$(ROOT)/.github/workflows/bascule-preprod.yml"; \
-	  test "$$(grep -cE '^ +QUIESCE_CRONJOBS:' "$$wf")" -eq 1 \
-	    || { echo "refresh pending watchdog contract failed: QUIESCE_CRONJOBS must be set exactly once in $$wf (job bascule env), no job- or step-level override" >&2; exit 1; }; \
-	  quiesce="$$(awk '/^  [A-Za-z0-9_-]+:$$/ { job = $$1 } job == "bascule:" && /^    env:$$/ { inenv = 1; next } inenv && /^    [A-Za-z]/ { inenv = 0 } inenv && /^      QUIESCE_CRONJOBS: / { sub(/^      QUIESCE_CRONJOBS: */, ""); print }' "$$wf")"; \
-	  case ",$$quiesce," in *,radar-refresh-pv,*) ;; *) echo "refresh pending watchdog contract failed: QUIESCE_CRONJOBS of .github/workflows/bascule-preprod.yml must list radar-refresh-pv (got: $$quiesce)" >&2; exit 1;; esac; \
-	  case ",$$quiesce," in *,radar-refresh-pending-watchdog,*) ;; *) echo "refresh pending watchdog contract failed: QUIESCE_CRONJOBS of .github/workflows/bascule-preprod.yml must list radar-refresh-pending-watchdog, or an active watchdog Job trips the bascule G2 guard (got: $$quiesce)" >&2; exit 1;; esac; \
 	  awk -v min_minutes=$(REFRESH_STAGGER_MIN_MINUTES) -f "$(STAGGER_AWK)" "$$tmp/preprod.yaml" "$$tmp/prod.yaml" \
 	    || { echo "refresh stagger failed: the closest prod and preprod refresh starts must be at least $(REFRESH_STAGGER_MIN_MINUTES) minutes apart (incident 2026-10-09)" >&2; exit 1; }; \
 	  crons="$$(awk -f "$(BASCULE_CRONS_AWK)" "$$wf")" \
