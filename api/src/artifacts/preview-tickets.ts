@@ -9,10 +9,12 @@
  */
 import { randomBytes } from "node:crypto";
 import { fingerprintReaderProfile, type ReaderProfile } from "./reader-profile.js";
+import type { PwIdentityDomain } from "./write-intent-principal.js";
 
 export const PREVIEW_TICKET_TTL_MS = 60_000;
 
 export interface PreviewTicket {
+  readonly writeIdentity?: PwIdentityDomain;
   readonly browserBinding: string;
   readonly ticket: string;
   readonly origin: string;
@@ -27,6 +29,7 @@ export interface PreviewTicket {
 }
 
 export interface TicketMint {
+  readonly writeIdentity?: PwIdentityDomain;
   readonly browserBinding: string;
   readonly origin: string;
   readonly artifactId: string;

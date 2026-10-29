@@ -7,6 +7,8 @@ import { createBasketReadOperation } from "./artifacts/reader-baskets.js";
 import { createReaderContentApp } from "./artifacts/content-serve.js";
 import { resolveReaderCursorKeyring } from "./artifacts/reader-cursor-keyring.js";
 import { createReaderOpening } from "./artifacts/reader-opening.js";
+import { createPublishedWriteRuntime } from "./artifacts/published-write-runtime.js";
+import { pageWriteListenerRoute } from "./artifacts/write-intent-page-listener.js";
 import { loadConfig, resolveAuthConfig, resolveTemConfig } from "./config.js";
 import { createLogger } from "./logger.js";
 import { createDb, makeDbProbe } from "./db/client.js";
@@ -95,10 +97,15 @@ const readerIssuer = {
   audience: (process.env["ARTIFACTS_READER_AUDIENCE"] ?? (auth.enabled ? `${auth.appBaseUrl}/reader` : "")).trim(),
   tier: (process.env["ARTIFACTS_READER_TIER"] ?? config.NODE_ENV).trim(),
 };
+const publishedWrite = contentHost.enabled && artifactsControl?.readerStorage && artifactsControl.storageScope
+  ? createPublishedWriteRuntime({ db: dbHandle.db, auth, accounts: artifactsControl.accounts,
+    storage: artifactsControl.readerStorage, scope: artifactsControl.storageScope, contentBase: contentHost.contentBase,
+    readIssuer: readerIssuer, readGrantSecret: readerGrantSecret, sessionSecret: readerSessionSecret, env: process.env }) : null;
 const readerOpening = contentHost.enabled && artifactsControl?.readerStorage && auth.enabled &&
   readerGrantSecret.length >= 32 && readerSessionSecret.length >= 32
   ? createReaderOpening({ ...artifactsControl.readerStorage, auth, contentBase: contentHost.contentBase,
-    issuer: readerIssuer, grantSecret: readerGrantSecret, sessionSecret: readerSessionSecret }) : undefined;
+    issuer: readerIssuer, grantSecret: readerGrantSecret, sessionSecret: readerSessionSecret,
+    ...(publishedWrite ? { writeDomain: publishedWrite.domain, permitsWrite: publishedWrite.permitsWrite } : {}) }) : undefined;
 logger.info(
   {
     readerWired: !!readerOpening,
@@ -116,6 +123,7 @@ const readerContent = contentHost.enabled && artifactsControl?.readerStorage && 
     grantSecret: readerGrantSecret,
     sessionSecret: readerSessionSecret,
     issuer: readerIssuer,
+    pageWrite: publishedWrite?.pageWrite ?? pageWriteListenerRoute(null),
     ...(readerOpening ? { openingContent: readerOpening.content } : {}),
     ...artifactsControl.readerStorage,
     readOperation: createBasketReadOperation({
@@ -149,6 +157,7 @@ const app = createApp({
   ...contentHostAppOption(contentHost),
   ...(readerContent ? { readerContent } : {}),
   ...(readerOpening ? { readerOpening: readerOpening.application } : {}),
+  ...(publishedWrite ? { writeH5: publishedWrite.h5, writeApp: publishedWrite.application } : {}),
   ...(readerCursorKeyring ? { classification: { cursorKeyring: readerCursorKeyring } } : {}),
   ...(artifactsControl ? { artifactsControl } : {}),
 });
