@@ -1,0 +1,43 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync, existsSync } from 'node:fs';
+import YAML from 'yaml';
+const workflow = name => YAML.parse(readFileSync(`.github/workflows/${name}`, 'utf8'));
+test('daily and inter-tenant interfaces use the engine with protected arming unchanged', () => {
+  const w = workflow('bascule-preprod.yml');
+  assert.equal(w.on.schedule[0].cron, '0 4 * * *');
+  assert.ok(w.jobs.bascule.if.includes("vars.BASCULE_SCHEDULE_ENABLED == 'true'"));
+  assert.equal(w.jobs.bascule.environment, 'radar-bascule');
+  assert.equal(w.jobs.bascule['timeout-minutes'], 330);
+  const inputs = w.on.workflow_dispatch.inputs;
+  for (const name of ['MODE', 'BACKUP_ID', 'CYCLE_ID', 'CONFIRM', 'DRY_RUN']) assert.ok(inputs[name]);
+  assert.deepEqual(inputs.MODE.options, ['restore', 'list']);
+  assert.equal(inputs.SKIP_FLIP, undefined); assert.equal(inputs.SKIP_QUIESCE, undefined);
+  assert.ok(w.jobs.bascule.steps.find(s => s.id === 'engine').run.includes('RELEASE=deployed'));
+  for (const name of ['served-ids', 'cycle-leg']) assert.equal(JSON.stringify(w.jobs[name]).includes('secrets.'), false);
+});
+test('all competing workflows acquire before mutations and release through always', () => {
+  for (const [file, jobs] of [['build-push-images.yml', ['deploy', 'deploy-preprod']],
+    ['rollback.yml', ['rollback-preprod', 'rollback-prod']], ['run-job.yaml', ['run']], ['k8s-apply-mcp.yaml', ['apply']],
+    ['bascule-bundle-cd.yml', ['apply-bundle', 'apply-backup']]]) {
+    const w = workflow(file);
+    for (const name of jobs) {
+      const steps = w.jobs[name].steps;
+      const acquire = steps.findIndex(s => s.uses === './deploy/cutover/lock-action' && s.with.action === 'lock');
+      const release = steps.findIndex(s => s.uses === './deploy/cutover/lock-action' && s.with.action === 'release-lock');
+      assert.ok(acquire >= 0 && release > acquire, `${file}/${name}`);
+      assert.ok(steps[release].if.includes('always()'));
+    }
+  }
+  const build = workflow('build-push-images.yml');
+  assert.equal(build.concurrency['cancel-in-progress'], false);
+  const promotion = JSON.stringify(build.jobs['promote-prod']);
+  assert.ok(promotion.includes('operator.mk run RELEASE=cutover-release/release.json ENV=prod'));
+  assert.equal(promotion.includes('docker/build-push-action'), false);
+  assert.equal(build.jobs['promote-prod'].environment, 'production');
+});
+test('retired executable vehicles have no fallback entry', () => {
+  for (const file of ['deploy/base-preprod/operator.mk', 'deploy/ci/bascule-preprod/bascule.mjs',
+    'deploy/ci/bascule-preprod/restore-mode.mjs', 'tools/make/base-preprod-maintenance.sh']) assert.equal(existsSync(file), false);
+  assert.equal(readFileSync('deploy/cutover/operator.mk', 'utf8').includes('include .env'), false);
+});
