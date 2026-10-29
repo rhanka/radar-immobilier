@@ -273,9 +273,9 @@ function volumeFixture() {
       throw new Error("unexpected volume command");
     } finally { stats.active[name] -= 1; }
   } };
-  const run = async () => br.runStep({
+  const run = async (extra = {}) => br.runStep({
     env: baseEnv({ BR_STEP: "docs", BACKUP_DATE: D, PIN_MANIFEST_SHA256: sha(manifest), COPIER_ACCESS_KEY: "c", COPIER_SECRET_KEY: "c",
-      DST_BUCKET: DST, FORBIDDEN_DST_BUCKETS: PROD, COPY_GRANTEE: "volume-grantee", TERMINATION_LOG: join(tmp, "volume.json") }),
+      DST_BUCKET: DST, FORBIDDEN_DST_BUCKETS: PROD, COPY_GRANTEE: "volume-grantee", TERMINATION_LOG: join(tmp, "volume.json"), ...extra }),
     sdk, clients: { reader, copier }, log: () => {},
   });
   return { run, reset, state, upToDate, total };
@@ -633,6 +633,13 @@ async function suite() {
   stats = v.reset();
   const again = await v.run();
   eq("volume — resume issues zero per-object calls and zero copies", [again.exitCode, again.termination.copied, stats.calls.HeadObjectCommand || 0, stats.calls.ListObjectVersionsCommand || 0, stats.calls.CopyObjectCommand || 0], [0, 0, 0, 0, 0]);
+  for (const concurrency of [1, 2, 8, 64]) {
+    stats = v.reset();
+    const bounded = await v.run({ COPY_CONCURRENCY: String(concurrency) });
+    eq("volume — listing concurrency " + concurrency + " respects the worker bound without losing keys or extras",
+      [bounded.exitCode, stats.maxActive.ListObjectsV2Command, stats.starts.size, bounded.termination.recon.checked, bounded.termination.recon.extra],
+      [0, Math.min(16, concurrency), 16, v.total, 152220]);
+  }
   v.state.missing = v.upToDate;
   stats = v.reset(true);
   const missing = await v.run();
