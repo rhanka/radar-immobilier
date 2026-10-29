@@ -80,7 +80,8 @@ function client(store, policy) {
         const m = store.b.get(i.Bucket) || new Map();
         const all = [...m.keys()].filter((k) => !i.Prefix || k.startsWith(i.Prefix)).sort()
           .map((k) => { const v = store.latest(i.Bucket, k); return { Key: k, Size: v.Size, ETag: v.ETag, LastModified: v.LastModified }; });
-        const start = i.ContinuationToken ? Number(i.ContinuationToken) : 0;
+        const start = i.ContinuationToken ? Number(i.ContinuationToken) : all.findIndex((o) => !i.StartAfter || o.Key > i.StartAfter);
+        if (start < 0) return { Contents: [], IsTruncated: false };
         const page = all.slice(start, start + 2);
         const more = start + 2 < all.length;
         return { Contents: page, IsTruncated: more, NextContinuationToken: more ? String(start + 2) : undefined };

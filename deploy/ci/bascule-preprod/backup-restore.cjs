@@ -457,10 +457,11 @@ async function getJsonWithSha(c, Bucket, Key) {
 async function headOrNull(c, Bucket, Key, VersionId) {
   try { return await c.s3.send(new c.sdk.HeadObjectCommand({ Bucket, Key, ...(VersionId ? { VersionId } : {}) })); } catch (e) { if (isNotFound(e)) return null; throw e; }
 }
-async function listAll(c, Bucket, Prefix) {
+async function listAll(c, Bucket, Prefix, counters) {
   const all = [];
   let ContinuationToken;
   do {
+    if (counters) counters.destListCalls += 1;
     const out = await c.s3.send(new c.sdk.ListObjectsV2Command({ Bucket, Prefix, ContinuationToken }));
     for (const o of out.Contents || []) all.push(o);
     ContinuationToken = out.IsTruncated ? out.NextContinuationToken : undefined;
@@ -515,9 +516,35 @@ async function loadInventory(c, cfg, manifest) {
   try { inv = JSON.parse(got.buf.toString('utf8')); } catch { inv = null; }
   return checkInventory(inv, { manifest, date: cfg.date, sha256: sha256Hex(got.buf) });
 }
-async function destIndexOf(c, bucket) {
+async function destIndexOf(c, bucket, counters) {
   const idx = new Map();
-  for (const o of await listAll(c, bucket, undefined)) idx.set(o.Key, o);
+  for (const o of await listAll(c, bucket, undefined, counters)) idx.set(o.Key, { Size: o.Size, ETag: normEtag(o.ETag) });
+  return idx;
+}
+
+// Disjoint (start, end] ranges include every destination key, including extras.
+// Pagination stays sequential within each shard; failed shards trigger a full
+// sequential read only after all outstanding shard requests have settled.
+async function listDestSharded(c, bucket, sortedKeys, counters) {
+  const pivots = Array.from({ length: 15 }, (_, i) => sortedKeys[Math.floor(sortedKeys.length * (i + 1) / 16)])
+    .filter((key) => key !== undefined);
+  const bounds = [undefined, ...new Set(pivots), undefined];
+  const idx = new Map();
+  const shards = await Promise.allSettled(bounds.slice(1).map(async (end, shard) => {
+    let ContinuationToken;
+    do {
+      if (counters) counters.destListCalls += 1;
+      const out = await c.s3.send(new c.sdk.ListObjectsV2Command({
+        Bucket: bucket, StartAfter: bounds[shard], ContinuationToken, MaxKeys: 1000,
+      }));
+      for (const o of out.Contents || []) {
+        if (end !== undefined && o.Key > end) return;
+        idx.set(o.Key, { Size: o.Size, ETag: normEtag(o.ETag) });
+      }
+      ContinuationToken = out.IsTruncated ? out.NextContinuationToken : undefined;
+    } while (ContinuationToken);
+  }));
+  if (shards.some((s) => s.status === 'rejected')) return destIndexOf(c, bucket, counters);
   return idx;
 }
 
@@ -648,7 +675,8 @@ async function runDocs({ cfg, reader, copier, log }) {
     if (!(e && (e.name === 'AccessDenied' || (e.$metadata && e.$metadata.httpStatusCode === 403)))) throw e;
     log('WARN version listing of <backup>/docs/ not permitted to the copy identity: recorded versions and unpinned current objects checked by HEAD');
   }
-  const destIndex = await destIndexOf(copier, cfg.dstBucket);
+  const sortedKeys = inventory.objects.filter((e) => e.state === 'backed-up').map((e) => e.key).sort();
+  const destIndex = await listDestSharded(copier, cfg.dstBucket, sortedKeys);
   const plan = planDocsRestore({ inventory, versionsIndex, destIndex });
   if (plan.needsHead.length) await resolveByHead(copier, cfg, plan, destIndex);
   log(`PLAN date=${cfg.date} inventory=${plan.objects} up_to_date=${plan.upToDate} to_copy=${plan.toCopy.length} ` +
@@ -688,7 +716,7 @@ async function runDocs({ cfg, reader, copier, log }) {
     }
   };
   await Promise.all(Array.from({ length: Math.min(cfg.concurrency, plan.toCopy.length) }, () => worker()));
-  const recon = reconInventory(inventory, await destIndexOf(copier, cfg.dstBucket), plan.expectedSizes);
+  const recon = reconInventory(inventory, await listDestSharded(copier, cfg.dstBucket, sortedKeys), plan.expectedSizes);
   const ok = copyErrors === 0 && recon.ok;
   log(`${ok ? 'DOCS OK' : 'DOCS FAIL'} date=${cfg.date} copied=${copied} copy_errors=${copyErrors} recon.checked=${recon.checked} ` +
     `recon.missing=${recon.missing} recon.size_mismatch=${recon.sizeMismatch} dest_extra=${recon.extra} (additive: extra objects kept)`);
@@ -698,7 +726,8 @@ async function runDocs({ cfg, reader, copier, log }) {
 async function runRecon({ cfg, reader, copier, log }) {
   const manifest = await loadPinnedManifest(reader, cfg);
   const inventory = await loadInventory(reader, cfg, manifest);
-  const destIndex = await destIndexOf(copier, cfg.dstBucket);
+  const sortedKeys = inventory.objects.filter((e) => e.state === 'backed-up').map((e) => e.key).sort();
+  const destIndex = await listDestSharded(copier, cfg.dstBucket, sortedKeys);
   // Only mismatching sizes require a versioned HEAD: avoid relisting the entire
   // version history or issuing one HEAD for every object in a large inventory.
   const candidates = inventory.objects.filter(e => e.state === 'backed-up' && e.versionId &&
