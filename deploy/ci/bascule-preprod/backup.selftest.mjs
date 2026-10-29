@@ -479,6 +479,23 @@ async function suite() {
     const corrupt = await step({ s, env: { ...docsEnv(manSha), BR_STEP: "recon" }, copier });
     eq("recon — wrong restored size still fails", corrupt.code, 1);
   }
+  {
+    const { s, inventory, manifest } = fixture({ inventorySizeMismatch: true });
+    inventory.objects[0].versionId = null;
+    const inv = JSON.stringify(inventory); manifest.docs.inventorySha256 = sha(inv);
+    const man = JSON.stringify(manifest);
+    s.put(B, br.keysFor(D).inventory, inv); s.put(B, br.keysFor(D).manifest, man);
+    const r = await step({ s, env: docsEnv(sha(man)) });
+    const anomaly = { keySha256: sha("raw/a b.pdf"), inventorySize: 790337, versionSize: 797540 };
+    eq("docs — matching unpinned ETag tolerates size drift with a hashed receipt and correct recon",
+      [r.code, r.t.inventoryAnomalyCount, r.t.inventoryAnomalies, r.t.recon?.ok, s.latest(DST, "raw/a b.pdf")?.Size],
+      [0, 1, [anomaly], true, 797540]);
+    ok("docs — unpinned anomaly never exposes its key", !(r.logs.join("\n") + JSON.stringify(r.t)).includes("raw/a b.pdf"));
+    s.b.get(DST).delete("raw/a b.pdf"); s.latest(B, "docs/raw/a b.pdf").ETag = '"wrong"';
+    s.copies.length = 0;
+    const bad = await step({ s, env: docsEnv(sha(man)) });
+    eq("docs — different unpinned ETag refuses before copying despite size drift", [bad.code, bad.t.unresolvedReasons, s.copies.length], [2, { "etag-not-found": 1 }, 0]);
+  }
   for (const copier of [copierPolicy, copierNoVersions]) {
     for (const defect of ["etag", "gone"]) {
       const { s, manSha } = fixture({ inventorySizeMismatch: true, rewriteBAfterD: false });
