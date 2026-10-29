@@ -215,9 +215,9 @@ function indexVersions(versions, prefix = LAYOUT.docsPrefix) {
 
 // Which backup version of a `backed-up` inventory entry holds the content of D:
 //   1. the recorded versionId (ETag must agree; size drift is an inventory anomaly);
-//   2. else a version whose ETag = the inventory backupEtag and size = the entry
-//      size: the newest one written not after the inventory, else the oldest
-//      identical one written later (same ETag + size = same content).
+//   2. else a version whose ETag = the inventory backupEtag: the newest one
+//      written not after the inventory, else the oldest identical one written
+//      later. Size drift is an inventory anomaly for either selection rule.
 function chooseVersion(entry, versions, inventoryCreatedAtMs) {
   const list = versions || [];
   const want = normEtag(entry.backupEtag);
@@ -231,13 +231,15 @@ function chooseVersion(entry, versions, inventoryCreatedAtMs) {
       ...(exact.size !== size ? { inventoryAnomaly: { inventorySize: size, versionSize: exact.size } } : {}) };
   }
   if (!want) return { error: 'no-backup-etag' };
-  const same = list.filter((v) => v.etag === want && v.size === size);
+  const same = list.filter((v) => v.etag === want);
   if (!same.length) return { error: list.length ? 'etag-not-found' : 'no-version' };
   const before = same.filter((v) => Number.isFinite(v.lastModified) && v.lastModified <= inventoryCreatedAtMs)
     .sort((a, b) => b.lastModified - a.lastModified);
-  if (before.length) return { versionId: before[0].versionId, how: 'etag-before-inventory' };
   const later = [...same].sort((a, b) => (a.lastModified || 0) - (b.lastModified || 0));
-  return { versionId: later[0].versionId, how: 'etag-identical-later' };
+  const selected = before[0] || later[0];
+  if (!Number.isSafeInteger(selected.size) || selected.size < 0) return { error: 'invalid-version-size' };
+  return { versionId: selected.versionId, how: before.length ? 'etag-before-inventory' : 'etag-identical-later',
+    ...(selected.size !== size ? { inventoryAnomaly: { inventorySize: size, versionSize: selected.size } } : {}) };
 }
 
 function acceptSelection(plan, entry, selection) {
