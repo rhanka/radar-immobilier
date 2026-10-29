@@ -1,14 +1,3 @@
-#!/usr/bin/env bash
-set -euo pipefail
-[[ ${ENV:-} == test-bascule-fix ]]
-out=$PWD/tmp/bascule-fix-evidence/astra
-mkdir -p "$out"
-bash tools/make/bascule-fix-identity.sh > "$out/qualified-checkout.json"
-date -u +%FT%TZ > "$out/verified-at.txt"
-for target in check test-qualification test-operator test-workflow render; do
-  if make --no-print-directory -f tools/make/bascule-fix.mk "$target" ENV="$ENV" > "$out/$target.log" 2>&1; then
-    printf 'PASSED %s\n' "$target"
-    tail -n 3 "$out/$target.log"
   else
     printf 'FAILED %s\n' "$target" >&2
     tail -n 30 "$out/$target.log" >&2
