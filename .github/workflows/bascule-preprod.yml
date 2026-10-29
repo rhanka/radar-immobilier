@@ -67,125 +67,35 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Configure kubeconfig PROD (déclencheur dump S1)
-        if: ${{ !inputs.DRY_RUN && env.MODE == 'chain' }}
+      - uses: azure/setup-kubectl@v4
+      - name: Configure dedicated preprod credential
         env:
-          KUBE_CONFIG_B64: ${{ secrets.KUBE_CONFIG_DATA_PROD_TRIGGER }}
+          KUBE_CONFIG_DATA_BASCULE_PREPROD: ${{ secrets.KUBE_CONFIG_DATA_BASCULE_PREPROD }}
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.kube"
-          printf '%s' "$KUBE_CONFIG_B64" | base64 -d > "$HOME/.kube/config-prod"
-          chmod 600 "$HOME/.kube/config-prod"
-          echo "DUMP_KUBECONFIG=$HOME/.kube/config-prod" >> "$GITHUB_ENV"
-
-      # Contrôle POSITIF du cluster PROD (kubeconfig dump) — LOCAL (config view,
-      # aucun appel API : le token est name-scopé patch-only). Refuse si le
-      # kubeconfig prod ne cible pas le cluster attendu.
-      - name: Pre-flight — assert PROD cluster (kubeconfig dump)
-        if: ${{ !inputs.DRY_RUN && env.MODE == 'chain' }}
-        env:
-          EXPECTED_KUBE_APISERVER_HOST_PROD: ${{ vars.EXPECTED_KUBE_APISERVER_HOST_PROD || vars.EXPECTED_KUBE_APISERVER_HOST }}
-        run: |
-          set -euo pipefail
-          DEFAULT_HOST='hlhedx.c1.bhs5.k8s.ovh.net'
-          expected="${EXPECTED_KUBE_APISERVER_HOST_PROD:-$DEFAULT_HOST}"
-          server="$(kubectl --kubeconfig "$HOME/.kube/config-prod" config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
-          host="${server#*://}"; host="${host%%/*}"; host="${host%%:*}"
-          echo "PROD kubeconfig apiserver host : ${host:-<none>}"
-          echo "expected PROD apiserver host   : ${expected}"
-          if [ "$host" != "$expected" ]; then
-            echo "::error title=Wrong PROD cluster — bascule refused::dump kubeconfig targets '${host:-<none>}' but expected '${expected}'."
-            exit 1
+          if printf '%s' "$KUBE_CONFIG_DATA_BASCULE_PREPROD" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
+            printf '%s' "$KUBE_CONFIG_DATA_BASCULE_PREPROD" | base64 -d > "$HOME/.kube/config"
+          else
+            printf '%s' "$KUBE_CONFIG_DATA_BASCULE_PREPROD" > "$HOME/.kube/config"
           fi
-          echo "pre-flight PROD cluster OK — ${expected} (déclencheur dump S1)"
-
-      # ── S0 ────────────────────────────────────────────────────────────────
-      - name: S0 preflight (binaires + secrets + EXPECTED_DATABASE)
-        if: ${{ env.MODE == 'chain' }}
-        run: node "$CLI" preflight
-
-      # docs-sync Secret REWRITTEN BY THE BASCULE (no k8s watcher), BEFORE the
-      # quiesce and any destructive step (like the backup Secrets below): a missing
-      # GitHub secret, pre-created Secret or RBAC fails here, never after S2.
-      # Values from the environment secrets (guard ^[0-9a-f]{32,64}$, fail-closed)
-      # → `kubectl replace` of the pre-created Secret (--dry-run=server first; 0600
-      # file in a 0700 temp dir; never argv/log). Durable least-privilege
-      # credential: not blanked afterwards. DRY_RUN: server dry-run only (nothing
-      # written). MODE=restore signs its copy with radar-backup-restore-docs.
-      - name: docs-sync Secret — rewrite from GitHub (MODE=chain, before the quiesce)
-        id: docs_secret_fill
-        if: ${{ env.MODE == 'chain' && !inputs.DRY_RUN }}
-        env:
-          RADAR_DOCS_SYNC_ACCESS_KEY: ${{ secrets.RADAR_DOCS_SYNC_ACCESS_KEY }}
-          RADAR_DOCS_SYNC_SECRET_KEY: ${{ secrets.RADAR_DOCS_SYNC_SECRET_KEY }}
-        run: node "$CLI" docs-secret-fill
-
-      - name: docs-sync Secret — check only (MODE=chain DRY, server dry-run, nothing written)
-        if: ${{ env.MODE == 'chain' && inputs.DRY_RUN }}
-        env:
-          RADAR_DOCS_SYNC_ACCESS_KEY: ${{ secrets.RADAR_DOCS_SYNC_ACCESS_KEY }}
-          RADAR_DOCS_SYNC_SECRET_KEY: ${{ secrets.RADAR_DOCS_SYNC_SECRET_KEY }}
-        run: node "$CLI" docs-secret-fill --check
-
-      - name: S0 preflight (MODE=restore|list — backup bucket + identities)
-        if: ${{ env.MODE != 'chain' }}
-        run: node "$CLI" preflight-backup
-
-      # Dedicated preprod identities REWRITTEN by the bascule before first use
-      # (same mechanism as docs-sync: pre-created Secrets, `kubectl replace
-      # --dry-run=server` then `replace`, keys guarded ^[0-9a-f]{32,64}$, values via
-      # env: only, never argv/log). list: radar-backup-reader-preprod; restore: +
-      # radar-backup-restore-docs. BACKUP_BUCKET = fixed value from the var.
-      - name: Write backup Secrets from GitHub (environment radar-bascule)
-        if: ${{ env.MODE != 'chain' }}
+          chmod 600 "$HOME/.kube/config"
+      - name: Restore on deployed images (no 6H hook, no refresh)
+        id: engine
         env:
           RADAR_BACKUP_READER_PREPROD_ACCESS_KEY: ${{ secrets.RADAR_BACKUP_READER_PREPROD_ACCESS_KEY }}
           RADAR_BACKUP_READER_PREPROD_SECRET_KEY: ${{ secrets.RADAR_BACKUP_READER_PREPROD_SECRET_KEY }}
           RADAR_BACKUP_RESTORE_DOCS_ACCESS_KEY: ${{ secrets.RADAR_BACKUP_RESTORE_DOCS_ACCESS_KEY }}
           RADAR_BACKUP_RESTORE_DOCS_SECRET_KEY: ${{ secrets.RADAR_BACKUP_RESTORE_DOCS_SECRET_KEY }}
-        run: node "$CLI" backup-secrets-fill
-
-      # ══════════════ MODE=list : read-only, nothing else runs ══════════════
-      - name: backup-list (Job read-only — backups available)
-        if: ${{ env.MODE == 'list' }}
-        run: node "$CLI" backup-list
-
-      - name: backup-list artefact (backup-list-immo-<CYCLE_ID|run_id>)
-        if: ${{ env.MODE == 'list' }}
+        run: make -f deploy/cutover/operator.mk run RELEASE=deployed ENV=preprod
+      - name: Publish backup list adapter
+        if: env.MODE == 'list'
         uses: actions/upload-artifact@v4
         with:
           name: backup-list-immo-${{ inputs.CYCLE_ID || github.run_id }}
-          path: ${{ github.workspace }}/.bascule-work/backup-list.json
+          path: .bascule-work/backup-list.json
+          include-hidden-files: true
           if-no-files-found: error
-          retention-days: 7
-
-      # ══════════════ MODE=restore : R0 resolve BEFORE any mutation ══════════════
-      # Read-only Job: BACKUP_ID → date D, manifest status 'complete', 24 h guard
-      # for `latest` (ALLOW_STALE_BACKUP), dump sidecar sha256 + sizes → PIN
-      # (backup-pin.json) re-checked by every later Job. A refusal stops here:
-      # preprod is never quiesced for a backup that cannot be restored.
-      - name: R0 backup-resolve (Job read-only — BACKUP_ID → date + guards + PIN)
-        id: resolve
-        if: ${{ env.MODE == 'restore' }}
-        run: node "$CLI" backup-resolve
-
-      # ── S0.b (advisory) — prédiction précoce de la mémoire de collecte ─────
-      # Job PRÉPROD (read-only) qui liste `runs/` de PROD_DOCS : prédit si la copie
-      # S3 amènera la mémoire de collecte → delta. ADVISORY : `continue-on-error`
-      # rend le Job non bloquant (le runner ne lit que .status). Information only:
-      # the bascule itself never refreshes.
-      - name: S0.b precheck-runs (advisory, Job cible PROD_DOCS)
-        if: ${{ env.MODE == 'chain' }}
-        continue-on-error: true
-        run: node "$CLI" precheck-runs --prod
-
-      # ══════════════ DRY_RUN : rien de destructif ══════════════
-      # 0 S3 runner : la copie réelle n'est PAS jouée en DRY (dispatchée en
-      # exécution). Le signal DRY = Job recon informatif (dest ⊇ src, verdict).
-      - name: S3 copy-docs (DRY — copie non jouée)
-        if: ${{ inputs.DRY_RUN && env.MODE == 'chain' }}
-        env:
-          DRY: "1"
         run: node "$CLI" copy-docs
 
       - name: S3b recon (Job informatif en DRY)
