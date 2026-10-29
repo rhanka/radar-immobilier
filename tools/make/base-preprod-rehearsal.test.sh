@@ -1,14 +1,3 @@
-#!/usr/bin/env bash
-# Enchaînement natif, uniquement dans le workspace privé aux binaires de fixture.
-rehearsal=$root/tmp/vehicle-evidence/rehearsal-native
-mkdir -p "$rehearsal"
-: > "$rehearsal/sequence.txt"
-mark(){ printf '%s\n' "$1" >> "$rehearsal/sequence.txt"; }
-jq '.ownerOverride={reference:"fixture-owner-override",authenticatedQualification:"immediately-after-reopen"}' input.json > rehearsal-input.json
-cp rehearsal-input.json input.json
-invoke preflight; mark preflight
-invoke freeze-cd; mark freeze-cd
-cp ingress-original.json ingress-fixture.json
 invoke close EXPECTED="$testdir/expected.json"; mark close
 closure_snapshot=$testdir/out-$n/ingress-snapshot.json
 closure_sha=$(sha256sum "$closure_snapshot"|cut -d' ' -f1)
