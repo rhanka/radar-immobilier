@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fixture } from './cutover-fixture.mjs';
+const clone = value => JSON.parse(JSON.stringify(value));
 function update(f, transform) {
   const state = f.state(); transform(state); writeFileSync(join(f.dir, 'state.json'), JSON.stringify(state));
 }
@@ -32,13 +33,21 @@ test('unknown active Job with zero active counter is refused and never deleted',
     assert.equal(JSON.stringify(f.state().objects.find(o => o.kind === 'Ingress').spec).includes('base-maintenance-'), false);
   } finally { f.cleanup(); }
 });
+test('unsupported workload controllers cause a named refusal before workload changes', () => {
+  const f = fixture({ controllers: [{ kind: 'DaemonSet', metadata: { name: 'unexpected-daemon' } }] });
+  try {
+    const result = f.run(); assert.notEqual(result.status, 0);
+    assert.ok(result.stderr.includes('DaemonSet/unexpected-daemon'), result.stdout + result.stderr);
+    assert.equal(f.calls().some(c => c.includes('patch')), false);
+  } finally { f.cleanup(); }
+});
 test('ACME solver routes are excluded and partial route restoration is reclosed on conflict', () => {
   const f = fixture({ ingressConflict: 'second' });
   try {
     update(f, s => {
       const original = s.objects.find(o => o.kind === 'Ingress');
-      s.objects.push({ ...structuredClone(original), metadata: { name: 'second', uid: 'second-uid', resourceVersion: '1' } });
-      s.objects.push({ ...structuredClone(original), metadata: { name: 'solver', uid: 'solver-uid', resourceVersion: '1',
+      s.objects.push({ ...clone(original), metadata: { name: 'second', uid: 'second-uid', resourceVersion: '1' } });
+      s.objects.push({ ...clone(original), metadata: { name: 'solver', uid: 'solver-uid', resourceVersion: '1',
         labels: { 'acme.cert-manager.io/http01-solver': 'true' } } });
     });
     assert.notEqual(f.run().status, 0);

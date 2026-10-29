@@ -6,6 +6,7 @@ const { setInterval } = require('node:timers');
 const fs = require('node:fs');
 const yaml = require('yaml');
 const path = require('node:path');
+const { URL } = require('node:url');
 const [tool, ...input] = process.argv.slice(2);
 const dir = process.env.CUTOVER_TEST_STATE;
 if (!dir) process.exit(90);
@@ -59,7 +60,7 @@ if (args[0] === 'port-forward') {
 }
 if (args[0] === 'rollout') process.exit(s.missingMcp && args.includes('deployment/radar-immo-mcp') ? 1 : 0);
 if (args[0] === 'get') {
-  if (args[1].includes(',')) { out({ items: [] }); process.exit(); }
+  if (args[1].includes(',')) { out({ items: s.controllers || [] }); process.exit(); }
   let objects = s.objects.filter(o => o.kind === key(args[1]));
   if (args[2] && !args[2].startsWith('-')) objects = objects.filter(o => o.metadata.name === args[2]);
   if (args.includes('-l')) objects = objects.filter(o => o.metadata.labels?.['job-name'] === value('-l').split('=')[1]);
