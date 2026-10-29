@@ -49,7 +49,7 @@ job_observe() {
 }
 run_job() {
   local step=$1 deadline=$2 budget=$3 name uid existing
-  name="cutover-${RUN:0:8}-$step"
+  name="cutover-$RUN-$step"
   existing=$(jq -c --arg step "$step" '.jobs[$step]//null' "$WORK/record.json")
   if [[ ${RECOVERING:-0} == 1 && $step =~ ^(ddl|data)$ && $existing != null ]]; then
     local previous
@@ -65,7 +65,7 @@ run_job() {
         .jobHistory=((.jobHistory//[])+[.jobs[$step]])|del(.jobs[$step])' "$WORK/record.json" > "$WORK/next.json"
       mv "$WORK/next.json" "$WORK/record.json"; record_save
       existing=null
-      name="cutover-${RUN:0:8}-$(jq '.jobHistory|length' "$WORK/record.json")-$step"
+      name="cutover-$RUN-$(jq '.jobHistory|length' "$WORK/record.json")-$step"
     fi
   fi
   if [[ $existing != null ]]; then
@@ -116,8 +116,11 @@ stop_operation_jobs() {
   while read -r row; do
     name=$(jq -r .name <<< "$row"); uid=$(jq -r .uid <<< "$row")
     [[ $uid != null ]] || {
-      uid=$("${k[@]}" get job "$name" --ignore-not-found -o json | jq -r '.metadata.uid//empty') || return 1
-      [[ -n $uid ]] || continue
+      "${k[@]}" get job "$name" --ignore-not-found -o json > "$WORK/stop-job.json" || return 1
+      [[ -s $WORK/stop-job.json ]] || continue
+      jq -e --arg run "$RUN" --arg hash "$(jq -r .hash <<< "$row")" \
+        '.metadata.labels["sentropic.io/bascule"]==$run and .metadata.annotations["cutover-spec-sha256"]==$hash' "$WORK/stop-job.json" >/dev/null || return 1
+      uid=$(jq -r .metadata.uid "$WORK/stop-job.json")
     }
     if ! job_pods_ended "$name" "$uid"; then
       delete_job_uid "$name" "$uid"
