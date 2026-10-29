@@ -44,3 +44,5 @@
 - [x] Lot 6 — Review exact scoped diff and prepare atomic, attribution-free commits for the owner-authorized `git push -u origin fix/docs-copy-fast`; no PR.
 - [x] Review correction 1 — Page per-key versions with both S3 markers, reject stalled or excessive pagination, retain exact-key versions only; >1,000-version and paginated-neighbor regressions reproduced the failure and pass after the fix.
 - [x] Review correction 2 — Match unpinned versions by ETag, tolerate valid size drift with the existing hashed anomaly receipt and reconciliation size; reproduce the failure, verify restoration, and retain refusal before copies for differing ETags.
+- [x] Review correction 3 — Send StartAfter only on a shard's first page; both S3 fakes enforce its absence with continuation tokens. Multi-page extras and the volume-call budget fail before the fix and pass afterwards.
+- [x] Review validation — Backup 265/265, restoration 194/194, inter-tenant bascule 92/92, controller CI pattern 11/11 with initially empty HOME, Python guard 23/23, lint and all workspace typechecks pass; test module volumes and network removed with `down -v --remove-orphans`.
