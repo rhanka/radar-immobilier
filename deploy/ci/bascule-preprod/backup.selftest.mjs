@@ -122,13 +122,13 @@ const D1 = "2026-09-25";
 const NOW_FRESH = Date.parse("2026-09-26T12:00:00Z");
 const NOW_STALE = Date.parse("2026-09-27T08:00:00Z"); // dump 02:23 D → 29.6 h
 
-function fixture({ tamperDump = false, rewriteBAfterD = true } = {}) {
+function fixture({ tamperDump = false, rewriteBAfterD = true, inventorySizeMismatch = false, extraAnomalies = 0 } = {}) {
   const s = new Store();
   const dump = Buffer.from("PGDMP-fake-custom-archive-bytes-0123456789");
   const dumpV = s.put(B, `pg/${D}/radar.dump`, tamperDump ? Buffer.concat([dump, Buffer.from("x")]) : dump);
   s.put(B, `pg/${D}/radar.dump.sha256`, `${sha(dump)}  radar.dump\n`);
   // docs: a (versionId recorded), b (no versionId; rewritten AFTER D), c (preprod already current)
-  const a = s.put(B, "docs/raw/a b.pdf", "AAAA-content", "2026-09-20T01:00:00Z");
+  const a = s.put(B, "docs/raw/a b.pdf", inventorySizeMismatch ? Buffer.alloc(797540, "a") : "AAAA-content", "2026-09-20T01:00:00Z");
   const bD = s.put(B, "docs/raw/b.pdf", "BBBB-at-D", "2026-09-21T01:00:00Z");
   const c = s.put(B, "docs/raw/c.pdf", "CCCC", "2026-09-22T01:00:00Z");
   if (rewriteBAfterD) s.put(B, "docs/raw/b.pdf", "BBBB-rewritten-later!", "2026-09-28T01:00:00Z");
@@ -136,11 +136,17 @@ function fixture({ tamperDump = false, rewriteBAfterD = true } = {}) {
     format: "radar-backup-docs-inventory/v1", date: D, createdAt: "2026-09-26T03:40:00.000Z",
     sourceBucket: PROD, backupBucket: B, backupPrefix: "docs/", counts: { objects: 3 },
     objects: [
-      { key: "raw/a b.pdf", size: a.Size, etag: a.ETag, state: "backed-up", backupEtag: a.ETag, versionId: a.VersionId },
+      { key: "raw/a b.pdf", size: inventorySizeMismatch ? 790337 : a.Size, etag: a.ETag, state: "backed-up", backupEtag: a.ETag, versionId: a.VersionId },
       { key: "raw/b.pdf", size: bD.Size, etag: bD.ETag, state: "backed-up", backupEtag: bD.ETag, versionId: null },
       { key: "raw/c.pdf", size: c.Size, etag: c.ETag, state: "backed-up", backupEtag: c.ETag, versionId: null },
     ],
   };
+  for (let i = 0; i < extraAnomalies; i++) {
+    const key = "raw/anomaly-" + i + ".pdf";
+    const v = s.put(B, "docs/" + key, "a");
+    inventory.objects.push({ key, size: 2, etag: v.ETag, state: "backed-up", backupEtag: v.ETag, versionId: v.VersionId });
+  }
+  inventory.counts.objects = inventory.objects.length;
   const invBuf = Buffer.from(JSON.stringify(inventory));
   s.put(B, `docs-inventory/${D}.json`, invBuf);
   const manifest = {
@@ -150,7 +156,7 @@ function fixture({ tamperDump = false, rewriteBAfterD = true } = {}) {
       tocEntries: 189, dumpStartedAt: "2026-09-26T02:23:05Z" },
     schema: { status: "ok", migrationsApplied: 11, lastMigration: { id: 11, tag: "0011_geo" } },
     code: { servedSha: "a4a2c00" },
-    docs: { status: "complete", objects: 3, inventoryKey: `docs-inventory/${D}.json`, inventorySha256: sha(invBuf) },
+    docs: { status: "complete", objects: inventory.objects.length, inventoryKey: `docs-inventory/${D}.json`, inventorySha256: sha(invBuf) },
   };
   const manBuf = Buffer.from(JSON.stringify(manifest, null, 2));
   s.put(B, `manifests/${D}.json`, manBuf);
@@ -222,8 +228,10 @@ eq("chooseDate — latest → latestComplete (not the newest partial)",
   const created = Date.parse("2026-09-26T03:40:00Z");
   eq("chooseVersion — recorded versionId", br.chooseVersion({ size: 5, backupEtag: '"e1"', versionId: "v1" }, vs, created), { versionId: "v1", how: "version-id" });
   eq("chooseVersion — rewritten since D → ETag of the inventory", br.chooseVersion({ size: 5, backupEtag: '"e1"', versionId: null }, vs, created), { versionId: "v1", how: "etag-before-inventory" });
-  eq("chooseVersion — recorded version expired, identical ETag kept", br.chooseVersion({ size: 5, backupEtag: '"e1"', versionId: "gone" }, vs, created).versionId, "v1");
-  eq("chooseVersion — size mismatch on recorded version", br.chooseVersion({ size: 9, backupEtag: '"e1"', versionId: "v1" }, vs, created), { error: "size-mismatch" });
+  eq("chooseVersion — missing pinned version refused even with identical alternative", br.chooseVersion({ size: 5, backupEtag: '"e1"', versionId: "gone" }, vs, created), { error: "version-gone" });
+  eq("chooseVersion — matching pinned ETag tolerates inventory size anomaly", br.chooseVersion({ size: 9, backupEtag: '"e1"', versionId: "v1" }, vs, created), { versionId: "v1", how: "version-id", inventoryAnomaly: { inventorySize: 9, versionSize: 5 } });
+  eq("chooseVersion — mismatching pinned ETag refused", br.chooseVersion({ size: 9, backupEtag: '"wrong"', versionId: "v1" }, vs, created), { error: "etag-mismatch" });
+  eq("chooseVersion — missing pinned ETag refused", br.chooseVersion({ size: 5, backupEtag: '"e1"', versionId: "v1" }, [{ ...vs[0], etag: "" }], created), { error: "etag-mismatch" });
   eq("chooseVersion — ETag not found", br.chooseVersion({ size: 5, backupEtag: '"zz"', versionId: null }, vs, created), { error: "etag-not-found" });
   eq("chooseVersion — no version at all", br.chooseVersion({ size: 5, backupEtag: '"e1"' }, undefined, created), { error: "no-version" });
   eq("copySourceFor — encoded key + versionId", br.copySourceFor(B, "raw/a b.pdf", "v 1"), `/${B}/docs/raw/a%20b.pdf?versionId=v%201`);
@@ -311,6 +319,39 @@ async function suite() {
   // docs
   const docsEnv = (manSha, extra = {}) => baseEnv({ BR_STEP: "docs", BACKUP_DATE: D, PIN_MANIFEST_SHA256: manSha, COPIER_ACCESS_KEY: "c", COPIER_SECRET_KEY: "c",
     DST_BUCKET: DST, FORBIDDEN_DST_BUCKETS: PROD, COPY_GRANTEE: "1901410700457444:user-x", COPY_CONCURRENCY: "2", ...extra });
+  {
+    const { s, manSha } = fixture({ inventorySizeMismatch: true, extraAnomalies: 600 });
+    const r = await step({ s, env: docsEnv(manSha, { DOCS_DRY: "1" }) });
+    eq("docs — many size anomalies remain nonblocking with bounded receipt samples", [r.code, r.t.inventoryAnomalyCount, r.t.inventoryAnomalies?.length, r.t.inventoryAnomaliesTruncated], [0, 601, 10, true]);
+    ok("docs — many anomalies fit the termination message and wrapper output buffer",
+      Buffer.byteLength(JSON.stringify(r.t)) < br.TERMINATION_MAX_BYTES && Buffer.byteLength(r.logs.join("\n")) < 65536);
+  }
+  for (const copier of [copierPolicy, copierNoVersions]) {
+    const { s, manSha } = fixture({ inventorySizeMismatch: true, rewriteBAfterD: false });
+    const anomaly = { keySha256: sha("raw/a b.pdf"), inventorySize: 790337, versionSize: 797540 };
+    const dry = await step({ s, env: docsEnv(manSha, { DOCS_DRY: "1" }), copier });
+    eq("docs — inventory size anomaly remains preparable in dry mode", [dry.code, dry.t.inventoryAnomalyCount, s.copies.length], [0, 1, 0]);
+    const r = await step({ s, env: docsEnv(manSha), copier });
+    eq("docs — matching pinned ETag restores actual bytes despite wrong inventory size", [r.code, r.t.recon?.ok, s.latest(DST, "raw/a b.pdf")?.Size], [0, true, 797540]);
+    eq("docs — hashed inventory anomaly retained in verdict", r.t.inventoryAnomalies, [anomaly]);
+    ok("docs — size anomaly logs/verdict never expose the object key", !(r.logs.join("\n") + JSON.stringify(r.t)).includes("raw/a b.pdf"));
+    const again = await step({ s, env: docsEnv(manSha), copier });
+    eq("docs — anomalous inventory is idempotent", [again.code, again.t.copied, again.t.inventoryAnomalyCount], [0, 0, 1]);
+    const rec = await step({ s, env: { ...docsEnv(manSha), BR_STEP: "recon" }, copier });
+    eq("recon — validates pinned size and reports inventory anomaly", [rec.code, rec.t.inventoryAnomalies], [0, [anomaly]]);
+    if (s.latest(DST, "raw/a b.pdf")) s.latest(DST, "raw/a b.pdf").Size += 1;
+    const corrupt = await step({ s, env: { ...docsEnv(manSha), BR_STEP: "recon" }, copier });
+    eq("recon — wrong restored size still fails", corrupt.code, 1);
+  }
+  for (const copier of [copierPolicy, copierNoVersions]) {
+    for (const defect of ["etag", "gone"]) {
+      const { s, manSha } = fixture({ inventorySizeMismatch: true, rewriteBAfterD: false });
+      if (defect === "etag") s.latest(B, "docs/raw/a b.pdf").ETag = '"wrong"';
+      else s.b.get(B).delete("docs/raw/a b.pdf");
+      const r = await step({ s, env: docsEnv(manSha), copier });
+      eq("docs — pinned " + defect + " integrity failure refuses before copying", [r.code, s.copies.length, r.t.unresolved], [2, 0, 1]);
+    }
+  }
   {
     const { s, manSha } = fixture();
     const dry = await step({ s, env: docsEnv(manSha, { DOCS_DRY: "1" }) });
