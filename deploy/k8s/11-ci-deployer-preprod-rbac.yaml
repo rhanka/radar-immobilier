@@ -110,6 +110,10 @@ rules:
   - apiGroups: [""]
     resources: ["configmaps"]
     verbs: ["get", "list", "create", "patch", "update"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["radar-change-lock"]
+    verbs: ["delete"]
   # PVC KEYRING REFRESH (2026-09-14, correctif du CD cassé) — CAUSE MESURÉE : le
   # PVC `radar-refresh-keyring` (deploy/k8s/34-refresh-keyring-pvc.yaml, introduit
   # par T2 #683/#685) a été ajouté aux `resources:` de l'overlay

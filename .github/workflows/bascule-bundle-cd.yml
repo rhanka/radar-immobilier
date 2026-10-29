@@ -167,6 +167,10 @@ jobs:
       # create + name-scoped get/patch/update). The in-cluster sealed-secrets
       # controller decrypts them and materializes the core Secrets radar-db-ro-prod
       # + radar-pra-admin-prod. This runner never sees the plaintext.
+      - uses: ./deploy/cutover/lock-action
+        with:
+          action: lock
+          environment: prod
       - name: Apply SealedSecrets (radar-db-ro-prod + radar-pra-admin-prod)
         run: |
           set -euo pipefail
@@ -316,9 +320,15 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
   # ── Daily prod backup (deploy/ci/backup/) — independent job ──────────────────
+      - uses: ./deploy/cutover/lock-action
+        if: always() && env.CUTOVER_LOCK_RUN != ''
+        with:
+          action: release-lock
+          environment: prod
+
   apply-backup:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 75
     # Two switches: the bundle CD is armed (the permanent SA exists) AND the k8s
     # lane armed the backup AFTER re-applying rbac-ci-bascule-prod.yaml (the new
     # name-scoped verbs). Merging can never red main against an old Role.
@@ -394,6 +404,10 @@ jobs:
       # Fail-closed: every check (10 GitHub values present, single-line, keys of the
       # expected charset/length, S3 endpoint/region = the pinned BHS target, bucket
       # variables = the CronJob guards, the 3 Secrets exist) runs before any write.
+      - uses: ./deploy/cutover/lock-action
+        with:
+          action: lock
+          environment: prod
       - name: Write backup Secrets from GitHub (radar-backup-writer + -reader + -purger)
         env:
           RADAR_BACKUP_WRITER_ACCESS_KEY: ${{ secrets.RADAR_BACKUP_WRITER_ACCESS_KEY }}
@@ -531,6 +545,7 @@ jobs:
           set -euo pipefail
           job="radar-backup-manual-$(date -u +%Y%m%d%H%M%S)"
           kubectl -n "$NAMESPACE" create job "$job" --from=cronjob/radar-backup-daily
+          kubectl -n "$NAMESPACE" wait --for=condition=complete "job/$job" --timeout=3600s
           echo "started job/${job} — verdict in-cluster (Job .status + manifests/latest.json); the runner reads no backup content."
 
       - name: Summary
@@ -544,3 +559,8 @@ jobs:
             echo "- CronJob: radar-backup-daily (23 2 * * * UTC, Forbid) → s3://radar-immobilier-backup"
             echo "- CronJob: radar-backup-freshness (53 6 * * * UTC) — a failed Job = stale or not complete for too long"
           } >> "$GITHUB_STEP_SUMMARY"
+      - uses: ./deploy/cutover/lock-action
+        if: always() && env.CUTOVER_LOCK_RUN != ''
+        with:
+          action: release-lock
+          environment: prod
