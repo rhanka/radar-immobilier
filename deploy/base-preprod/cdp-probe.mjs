@@ -1,3 +1,4 @@
+/* global AbortSignal, URL, WebSocket, fetch, setTimeout */
 import { connectTarget } from './cdp-client.mjs';
 import { resolvePath, readCheck, publicQualification } from './public-probe.mjs';
 
