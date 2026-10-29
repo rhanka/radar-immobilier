@@ -246,3 +246,123 @@ eq("chooseDate — latest → latestComplete (not the newest partial)",
 throwsCode("readConfig — docs into the backup bucket refused", () => br.readConfig(baseEnv({ BACKUP_DATE: D, PIN_MANIFEST_SHA256: "a".repeat(64), COPIER_ACCESS_KEY: "c", COPIER_SECRET_KEY: "c", DST_BUCKET: B }), "docs"), 2);
 throwsCode("readConfig — docs into a production bucket refused", () => br.readConfig(baseEnv({ BACKUP_DATE: D, PIN_MANIFEST_SHA256: "a".repeat(64), COPIER_ACCESS_KEY: "c", COPIER_SECRET_KEY: "c", DST_BUCKET: PROD, FORBIDDEN_DST_BUCKETS: PROD }), "docs"), 2);
 throwsCode("readConfig — empty FORBIDDEN_DST_BUCKETS refused (never 'nothing forbidden')", () => br.readConfig(baseEnv({ BACKUP_DATE: D, PIN_MANIFEST_SHA256: "a".repeat(64), COPIER_ACCESS_KEY: "c", COPIER_SECRET_KEY: "c", DST_BUCKET: DST, FORBIDDEN_DST_BUCKETS: " , " }), "recon"), 2);
+eq("forbiddenDstBuckets — frozen prod docs + PROD_DOCS + backup bucket, deduplicated", forbiddenDstBuckets({ prodDocs: PROD, backupBucket: B }), `${PROD},${B}`);
+eq("forbiddenDstBuckets — another PROD_DOCS keeps the frozen one", forbiddenDstBuckets({ prodDocs: "other-prod-docs", backupBucket: B, extra: "x-1,  " }), `${FROZEN_PROD_DOCS_BUCKETS[0]},other-prod-docs,${B},x-1`);
+throws("forbiddenDstBuckets — PROD_DOCS empty refused (MODE=restore)", () => forbiddenDstBuckets({ prodDocs: "", backupBucket: B }));
+throws("forbiddenDstBuckets — malformed name refused", () => forbiddenDstBuckets({ prodDocs: PROD, backupBucket: B, extra: 'a"b' }));
+throwsCode("readConfig — reader Secret bucket ≠ expected refused", () => br.readConfig(baseEnv({ BACKUP_BUCKET: "other-bucket" }), "resolve"), 2);
+throwsCode("readConfig — invalid PIN refused", () => br.readConfig(baseEnv({ BACKUP_DATE: D, PIN_MANIFEST_SHA256: "nope", PIN_PG_SHA256: "a".repeat(64) }), "fetch-dump"), 2);
+
+// ═════════════════════════════ steps against the fake ═════════════════════════
+async function suite() {
+  // resolve
+  {
+    const { s, manSha, dump } = fixture();
+    const r = await step({ s, env: baseEnv({ BR_STEP: "resolve", BACKUP_ID: "latest" }) });
+    eq("resolve latest — exit 0", r.code, 0);
+    eq("resolve latest — PIN date/sha", [r.t.date, r.t.manifestSha256 === manSha, r.t.pgSha256 === sha(dump), r.t.source], [D, true, true, "latestComplete"]);
+    ok("resolve — termination message fits 4 KiB", Buffer.byteLength(JSON.stringify(r.t)) < 4096);
+    ok("resolve — logs carry no doc key", !r.logs.join("\n").includes("raw/"));
+    const pin = validatePin(r.t);
+    eq("validatePin — accepts the resolve verdict", pin.date, D);
+    const st = await step({ s, env: baseEnv({ BR_STEP: "resolve", BACKUP_ID: "latest" }), now: NOW_STALE });
+    eq("resolve latest > 24 h — refused (exit 2)", st.code, 2);
+    ok("resolve stale — reason in the termination message", /ALLOW_STALE_BACKUP/.test(st.t.reason) && st.t.ok === false);
+    const ov = await step({ s, env: baseEnv({ BR_STEP: "resolve", BACKUP_ID: "latest", ALLOW_STALE_BACKUP: "true" }), now: NOW_STALE });
+    eq("resolve latest > 24 h + ALLOW_STALE_BACKUP — accepted", [ov.code, ov.t.staleOverridden], [0, true]);
+    const ex = await step({ s, env: baseEnv({ BR_STEP: "resolve", BACKUP_ID: D }), now: NOW_STALE });
+    eq("resolve explicit date > 24 h — accepted, age logged", [ex.code, ex.t.stale, ex.t.ageBlocking], [0, true, false]);
+    const pa = await step({ s, env: baseEnv({ BR_STEP: "resolve", BACKUP_ID: D1 }) });
+    eq("resolve partial backup — refused (complete required)", pa.code, 2);
+    const gone = await step({ s, env: baseEnv({ BR_STEP: "resolve", BACKUP_ID: "2026-09-01" }) });
+    eq("resolve purged/absent date — refused", gone.code, 2);
+  }
+  {
+    const { s } = fixture();
+    s.put(B, `pg/${D}/radar.dump.sha256`, `${"b".repeat(64)}  radar.dump\n`);
+    const r = await step({ s, env: baseEnv({ BR_STEP: "resolve" }) });
+    eq("resolve — sidecar sha256 ≠ manifest ⇒ fail", r.code, 1);
+  }
+  // list
+  {
+    const { s } = fixture();
+    const r = await step({ s, env: baseEnv({ BR_STEP: "list" }) });
+    eq("list — exit 0, 2 backups, newest first", [r.code, r.t.count, r.t.backups.map((b) => b.date)], [0, 2, [D, D1]]);
+    const l = validateListing(r.t);
+    eq("validateListing — statuses", l.backups.map((b) => b.status), ["complete", "partial"]);
+    ok("formatBackupTable — marks latest complete", formatBackupTable(l).text.includes(`${D} *`));
+  }
+  // fetch-dump
+  {
+    const { s, manSha, dump } = fixture();
+    const work = join(tmp, "work-ok");
+    const r = await step({ s, env: baseEnv({ BR_STEP: "fetch-dump", BACKUP_DATE: D, PIN_MANIFEST_SHA256: manSha, PIN_PG_SHA256: sha(dump), WORK_DIR: work }) });
+    eq("fetch-dump — exit 0", r.code, 0);
+    ok("fetch-dump — dump bytes identical", readFileSync(join(work, "radar.dump")).equals(dump));
+    ok("fetch-dump — backup.env facts", /EXPECTED_TOC_ENTRIES=189/.test(readFileSync(join(work, "backup.env"), "utf8")));
+    const pinBad = await step({ s, env: baseEnv({ BR_STEP: "fetch-dump", BACKUP_DATE: D, PIN_MANIFEST_SHA256: "c".repeat(64), PIN_PG_SHA256: sha(dump), WORK_DIR: join(tmp, "w2") }) });
+    eq("fetch-dump — manifest changed since resolve ⇒ refused", pinBad.code, 2);
+  }
+  {
+    const { s, manSha, dump } = fixture({ tamperDump: true });
+    const r = await step({ s, env: baseEnv({ BR_STEP: "fetch-dump", BACKUP_DATE: D, PIN_MANIFEST_SHA256: manSha, PIN_PG_SHA256: sha(dump), WORK_DIR: join(tmp, "w3") }) });
+    eq("fetch-dump — tampered dump (size/sha) ⇒ restore refused", r.code, 1);
+  }
+  // docs
+  const docsEnv = (manSha, extra = {}) => baseEnv({ BR_STEP: "docs", BACKUP_DATE: D, PIN_MANIFEST_SHA256: manSha, COPIER_ACCESS_KEY: "c", COPIER_SECRET_KEY: "c",
+    DST_BUCKET: DST, FORBIDDEN_DST_BUCKETS: PROD, COPY_GRANTEE: "1901410700457444:user-x", COPY_CONCURRENCY: "2", ...extra });
+  {
+    const { s, manSha } = fixture();
+    const dry = await step({ s, env: docsEnv(manSha, { DOCS_DRY: "1" }) });
+    eq("docs DRY — plan: 1 up to date, 2 to copy, 0 copy done", [dry.code, dry.t.upToDate, dry.t.toCopy, s.copies.length], [0, 1, 2, 0]);
+    const r = await step({ s, env: docsEnv(manSha) });
+    eq("docs — exit 0, 2 copies, recon ok", [r.code, r.t.copied, r.t.recon.ok], [0, 2, true]);
+    ok("docs — b.pdf restored to its content AT D (not the later rewrite)", s.latest(DST, "raw/b.pdf").body.toString() === "BBBB-at-D");
+    ok("docs — a b.pdf copied by recorded versionId + grant", s.copies.some((c) => c.key === "raw/a b.pdf" && c.versionId && c.grant === "id=1901410700457444:user-x"));
+    ok("docs — additive: preprod object newer than D kept", !!s.latest(DST, "runs/extra-newer-than-D.json"));
+    eq("docs — extra counted in recon", r.t.recon.extra, 1);
+    ok("docs — logs carry no doc key", !r.logs.join("\n").includes("raw/"));
+    const again = await step({ s, env: docsEnv(manSha) });
+    eq("docs — idempotent re-run: 0 copy", [again.code, again.t.copied], [0, 0]);
+    const rec = await step({ s, env: { ...docsEnv(manSha), BR_STEP: "recon" } });
+    eq("recon — preprod ⊇ inventory(D)", [rec.code, rec.t.ok], [0, true]);
+  }
+  {
+    const { s, manSha } = fixture();
+    // make b unresolvable: drop every backup version of b.pdf
+    s.b.get(B).delete("docs/raw/b.pdf");
+    const r = await step({ s, env: docsEnv(manSha) });
+    eq("docs — an unrestorable object ⇒ refused before any copy", [r.code, s.copies.length, r.t.unresolved], [2, 0, 1]);
+  }
+  {
+    const { s, manSha } = fixture();
+    const wrong = await br.runStep({
+      env: { ...docsEnv(manSha), TERMINATION_LOG: join(tmp, "t-wrong.json") }, sdk,
+      clients: { reader: client(s, readerPolicy), copier: client(s, readerPolicy) }, now: () => NOW_FRESH, log: () => {},
+    }).then((x) => x.exitCode, (e) => e.exitCode ?? 1);
+    eq("docs — the reader (no docs/*, no preprod) as copy identity ⇒ fails (identity split enforced)", wrong, 1);
+  }
+  {
+    // copy signer without ListBucketVersions: recorded versionIds used as is, the
+    // others checked by HEAD — b rewritten after D ⇒ current differs ⇒ refusal.
+    const { s, manSha } = fixture();
+    const r = await step({ s, env: docsEnv(manSha), copier: copierNoVersions });
+    eq("docs — no version listing + object rewritten since D ⇒ refused before any copy", [r.code, s.copies.length, r.t.unresolvedReasons], [2, 0, { "current-differs": 1 }]);
+    ok("docs — fallback announced in the log", r.logs.some((l) => /version listing .* not permitted/.test(l)));
+  }
+  {
+    const { s, manSha } = fixture({ rewriteBAfterD: false });
+    s.b.get(DST).delete("raw/b.pdf");
+    const r = await step({ s, env: docsEnv(manSha), copier: copierNoVersions });
+    eq("docs — no version listing, current = D content ⇒ recorded versionId + HEAD-checked current copied, recon ok",
+      [r.code, r.t.copied, r.t.recon.ok, s.copies.map((c) => [c.key, !!c.versionId]).sort()], [0, 2, true, [["raw/a b.pdf", true], ["raw/b.pdf", false]]]);
+  }
+  {
+    const { s, manSha } = fixture();
+    const before = await step({ s, env: { ...docsEnv(manSha), BR_STEP: "recon" } });
+    eq("recon — before the restore: a missing, b size differs ⇒ fail", [before.code, before.t.missing, before.t.sizeMismatch], [1, 1, 1]);
+    await step({ s, env: docsEnv(manSha) });
+    s.b.get(DST).delete("raw/c.pdf");
+    const rec = await step({ s, env: { ...docsEnv(manSha), BR_STEP: "recon" } });
+    eq("recon — object deleted after the restore ⇒ fail", [rec.code, rec.t.missing], [1, 1]);
+  }
