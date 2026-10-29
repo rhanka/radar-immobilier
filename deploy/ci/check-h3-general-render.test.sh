@@ -15,7 +15,9 @@ for entry in 40-immo-mcp-http-deploy.yaml 41-immo-mcp-ingress.yaml; do
   cmp "$ROOT/deploy/k8s/$entry" "$ROOT/deploy/k8s/immo-mcp/$entry"
 done
 bash "$CHECK" "$GOOD"
-PASS=3
+sed -i 's/ARTIFACTS_CONTROL_MODE: "off"/ARTIFACTS_CONTROL_MODE: general/g' "$GOOD"
+bash "$CHECK" "$GOOD"
+PASS=4
 reject() {
   local mutation="$1" reason="$2" out
   cp "$GOOD" "$CASE"

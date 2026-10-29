@@ -16,6 +16,12 @@ export interface PwIdentityDomain {
   readonly clientId: string;
 }
 
+/** JSONB ticket payloads need semantic equality, independent of key order. */
+export function samePwIdentityDomain(left: PwIdentityDomain, right: PwIdentityDomain): boolean {
+  return left.identityIssuer === right.identityIssuer && left.tier === right.tier &&
+    left.appOrigin === right.appOrigin && left.clientId === right.clientId;
+}
+
 const PROD_APP = "https://immo.sent-tech.ca";
 const PROD_IDP = "https://auth.sent-tech.ca";
 const PREPROD_APP = "https://preprod.immo.sent-tech.ca";
