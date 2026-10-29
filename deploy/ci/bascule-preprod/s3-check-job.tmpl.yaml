@@ -1,32 +1,3 @@
-# =============================================================================
-# s3-check-job.tmpl.yaml — CHECK S3 verdict-only (freshness / recon / runs).
-#
-# RUNNER KUBECTL-ONLY : le runner ne touche plus S3 (0 cred S3 runner ; OVH n'a
-# pas de scope list-only → toute cred runner pourrait GET le dump PII). Les 3
-# vérifs S3 sont ce Job PRÉPROD (aws-cli, cred in-cluster) qui fait le
-# LIST + diff DANS le pod (0 HEAD/GET) et renvoie UNIQUEMENT un exit code (0/non-0).
-# Le runner ne lit que `.status` (JAMAIS `kubectl logs` ni le stdout du pod, qui
-# porteraient clés/listings). Runner PII-free, logs runner compris.
-#
-#   CHECK_MODE=freshness : poll interne (jusqu'à CHECK_TIMEOUT_SEC) un dump FRAIS
-#       sous s3://CHECK_BUCKET/CHECK_PREFIX (récursif) : LastModified epoch >
-#       CHECK_T1_EPOCH, clé ⊇ CHECK_EXPECTED_DATABASE, suffixe CHECK_KEY_SUFFIX,
-#       Size>0. Secret = radar-backups-reader-preprod (RO-reader backups, S3_*).
-#   CHECK_MODE=recon     : DIFF LIST-only (0 HEAD/GET) — dual `s3api list-objects-v2`
-#       paginé SRC vs DST, compare Key+Size → dest ⊇ src ? (exit 0) sinon exit 1.
-#       (l'ancien `s3 sync --dryrun` HEADait les objets source = 403 ACL prod.)
-#       Secret = radar-s3-credentials (LIST prod+préprod docs, S3_*).
-#   CHECK_MODE=runs      : `s3api list runs/` ; peuplé = exit 0 ; VIDE réel = exit 1 ;
-#       LIST échoué (config/cred) = exit 2 (messages distincts, erreur NON masquée).
-#
-# ROOT CAUSE (confirmé k8s + i-infra) des faux-négatifs DRY (2262 objets non vus)
-# = endpoint SANS schéma : BHS = host nu `s3.bhs.io.cloud.ovh.net` → aws-cli errore
-# sur --endpoint-url → `length(Contents)` rend None (faux « vide ») + recon rc≠0.
-# Fix (SUFFISANT, minimal) : schéma https:// via withScheme() (bascule.mjs,
-# S3_ENDPOINT) — s'applique aux 4 Jobs, les 3 modes partagent `common` → couvre
-# AUSSI freshness (S1). PAS de path-style (inutile, BHS indifférent). On ne masque
-# plus les erreurs (rc capturé, « échec config/cred/endpoint » distinct de « vide »).
-#
 # FAIL-CLOSED : backoffLimit 0 + restartPolicy Never = un seul essai.
 #
 # Placeholders rendus par bascule.mjs (dispatchS3Check) : ${JOB_NAME} ${NAMESPACE}
