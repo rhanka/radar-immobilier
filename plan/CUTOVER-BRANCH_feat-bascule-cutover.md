@@ -14,10 +14,14 @@
 ## Branch Scope Boundaries (MANDATORY)
 - [x] Allowed Paths: `deploy/cutover/**`, `tools/make/cutover*`, `api/src/scripts/database-cutover*`, `api/tests/**cutover**`, `plan/CUTOVER-BRANCH_feat-bascule-cutover.md`.
 - [x] Allowed Paths: `.github/workflows/**`, `deploy/ci/bascule-preprod/**`, `deploy/k8s/11-ci-deployer-preprod-rbac.yaml`, `deploy/ci/db-backup-job.tmpl.yaml`, `deploy/base-preprod/**`, `tools/make/base-preprod*`, `BASE_API_ACTIVATION.md`, `docs/**`.
+- [x] Allowed Paths: `tools/make/bascule*` for retirement of superseded vehicle-only verifiers and launchers.
+- [x] Allowed Paths: `deploy/ci/backup/RESTORE.md` for the existing restoration runbook link.
 - [x] Forbidden Paths: root `Makefile`, root `docker-compose*.yml`, `rules/**`, agent entrypoints, other branch plans, `.env*`, domain SQL migrations.
 - [x] Conditional Paths: shared domain services only for a demonstrated blocker; declare an exception first.
 
 ## Feedback Loop
+- [x] Existing bundle/backup provisioning also mutates captured schedules; apply the approved shared-lock mechanism there and retain its namespace boundary.
+- [x] CUTOVER-EX1: allow `api/Dockerfile` solely to bundle the required migration entrypoint; no runtime base change; rollback by reverting that entry.
 - [ ] Lot 0 (owner/infrastructure): repair only `radar-bascule/KUBE_CONFIG_DATA_BASCULE_PREPROD`, verify dedicated identity and reads, complete old restoration before replacement installation. Remote actions excluded by owner instruction.
 
 ## Orchestration Mode (AI-selected)
@@ -29,26 +33,27 @@
 ## Plan / Todo (lot-based)
 - [ ] **Lot 1 — Standalone entry and release**
   - [x] Read rules, design and addendum; confirm clean feature branch.
-  - [ ] Fixed environment mapping, strict manifest, generated build artifact.
+  - [x] Fixed environment mapping, strict manifest, generated build artifact.
   - [ ] Isolated validation tests; no dotenv loading.
 - [ ] **Lot 2 — Lock and recovery**
-  - [ ] Atomic lock, sanitized snapshot, checkpoints, liveness and CAS takeover.
-  - [ ] Lock every competing workflow for its whole mutation interval.
+  - [x] Atomic lock, sanitized snapshot, checkpoints, liveness and CAS takeover.
+  - [x] Lock every competing workflow for its whole mutation interval.
   - [ ] Concurrency, stale executor and same-release refusal tests.
 - [ ] **Lot 3 — Closure and restoration**
-  - [ ] Fixed inventory, network checks, UID-protected closure and drainage.
-  - [ ] Pinned additive documents before closure, bounded database restore.
+  - [x] Fixed inventory, network checks, UID-protected closure and drainage.
+  - [x] Pinned additive documents before closure, bounded database restore.
   - [ ] Race, interruption, pin and deadline tests.
 - [ ] **Lot 4 — Schema and data migration**
-  - [ ] Destination backup in both environments and bounded sanitized Jobs.
-  - [ ] Validate approved production-subject roster; initialize missing state only; protected resume.
+  - [x] Destination backup in both environments and bounded sanitized Jobs.
+  - [x] Validate approved production-subject roster; initialize missing state only; protected resume.
   - [ ] PostgreSQL legacy/partial/scoped/revoked/6K regression tests.
 - [ ] **Lot 5 — Restart and complete reopening**
-  - [ ] Pin all required services and application CronJobs; require MCP.
-  - [ ] Private/public smoke; CAS all ingress specs; restore original schedules.
+  - [x] Pin all required services and application CronJobs; require MCP.
+  - [x] Private/public smoke; CAS all ingress specs; restore original schedules.
   - [ ] Identity, authentication, conflict and reclosure tests.
 - [ ] **Lot 6 — Caller replacement and removal**
-  - [ ] Daily deployed release with null data hook; preserve list/restore reporting interfaces.
-  - [ ] Remove superseded vehicle and orchestration; update runbooks and RBAC.
+  - [x] Daily deployed release with null data hook; preserve list/restore reporting interfaces.
+  - [x] Remove superseded vehicle and orchestration; update runbooks and RBAC.
   - [ ] ESLint across the repository, controller tests and migration integration tests green.
   - [ ] Review final diff and commit all authorized work; no push.
+  - [x] Delivery checkpoint: scope and implementation prepared; runtime gates waiting for the shared Docker campaign.
