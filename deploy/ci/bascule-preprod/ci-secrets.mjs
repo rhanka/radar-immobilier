@@ -91,7 +91,6 @@ export function secretNameFor(spec, env) {
 // Specs written for a MODE (docs-sync: chain; backup reader: list + restore;
 // copy signer: restore).
 export function specsForMode(mode) {
-  if (mode === "chain") return ["docs-sync"];
   if (mode === "list") return ["backup-reader"];
   if (mode === "restore") return ["backup-reader", "backup-restore-docs"];
   throw new Error(`unknown MODE ${mode}`);
@@ -187,20 +186,13 @@ export function makeCiSecrets(h) {
 
   // MODE=chain, BEFORE the quiesce: a missing GitHub secret, Secret or RBAC fails
   // before any destructive step. `--check` (DRY_RUN): server dry-run only.
-  function cmdDocsFill() {
-    const checkOnly = process.argv.includes("--check");
-    section(`docs-sync Secret — ${checkOnly ? "check (DRY: server dry-run, nothing written)" : "rewrite"} from GitHub (environment radar-bascule)`);
-    writeSecret("docs-sync", { checkOnly });
-  }
-
   function cmdBackupFill() {
-    const mode = String(process.env.MODE || "chain").trim();
+    const mode = String(process.env.MODE || "restore").trim();
     let specs;
     try { specs = specsForMode(mode); } catch (e) { die(e.message); }
-    if (mode === "chain") die("backup-secrets-fill is for MODE=restore|list.");
     section(`backup Secrets — rewrite from GitHub (environment radar-bascule): ${specs.join(", ")}`);
     for (const spec of specs) writeSecret(spec);
   }
 
-  return { commands: { "docs-secret-fill": cmdDocsFill, "backup-secrets-fill": cmdBackupFill } };
+  return { commands: { "backup-secrets-fill": cmdBackupFill } };
 }
