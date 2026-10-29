@@ -7,22 +7,24 @@ const clone = value => JSON.parse(JSON.stringify(value));
 function update(f, transform) {
   const state = f.state(); transform(state); writeFileSync(join(f.dir, 'state.json'), JSON.stringify(state));
 }
-test('long owned refresh is foreground-deleted by UID after bounded shared grace', () => {
-  const f = fixture({ fastClock: true });
-  try {
-    update(f, s => {
-      s.objects.push({ kind: 'Job', metadata: { name: 'long-refresh', uid: 'long-refresh-uid',
-        ownerReferences: [{ kind: 'CronJob', controller: true, uid: 'uid-radar-refresh-pv' }] }, status: { active: 1 } });
-      s.objects.push({ kind: 'Pod', metadata: { name: 'refresh-consumer', uid: 'refresh-pod',
-        ownerReferences: [{ kind: 'Job', controller: true, uid: 'long-refresh-uid' }] }, status: { phase: 'Running' } });
-    });
-    const result = f.run(); assert.equal(result.status, 0, result.stdout + result.stderr);
-    assert.equal(f.state().objects.some(o => o.metadata.uid === 'long-refresh-uid'), false);
-    assert.ok(f.calls().some(c => c.includes('delete') && c.some(a => a.endsWith('/jobs/long-refresh'))));
-    const receipt = JSON.parse(f.state().objects.find(o => o.metadata.name === 'radar-cutover-receipt').data.receipt);
-    assert.ok(receipt.consumers.includes('refresh-pod'));
-  } finally { f.cleanup(); }
-});
+for (const cronjob of ['radar-refresh-pv', 'radar-refresh-pending-watchdog']) {
+  test(`long owned ${cronjob} is foreground-deleted by UID after bounded shared grace`, () => {
+    const f = fixture({ fastClock: true });
+    try {
+      update(f, s => {
+        s.objects.push({ kind: 'Job', metadata: { name: 'long-refresh', uid: 'long-refresh-uid',
+          ownerReferences: [{ kind: 'CronJob', controller: true, uid: `uid-${cronjob}` }] }, status: { active: 1 } });
+        s.objects.push({ kind: 'Pod', metadata: { name: 'refresh-consumer', uid: 'refresh-pod',
+          ownerReferences: [{ kind: 'Job', controller: true, uid: 'long-refresh-uid' }] }, status: { phase: 'Running' } });
+      });
+      const result = f.run(); assert.equal(result.status, 0, result.stdout + result.stderr);
+      assert.equal(f.state().objects.some(o => o.metadata.uid === 'long-refresh-uid'), false);
+      assert.ok(f.calls().some(c => c.includes('delete') && c.some(a => a.endsWith('/jobs/long-refresh'))));
+      const receipt = JSON.parse(f.state().objects.find(o => o.metadata.name === 'radar-cutover-receipt').data.receipt);
+      assert.ok(receipt.consumers.includes('refresh-pod'));
+    } finally { f.cleanup(); }
+  });
+}
 test('unknown active Job with zero active counter is refused and never deleted', () => {
   const f = fixture();
   try {

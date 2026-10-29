@@ -26,7 +26,8 @@ export function fixture(changes = {}) {
   }
   const cj = object('CronJob', 'radar-refresh-pv', { suspend: false, jobTemplate: { spec: { template: { spec: {
     containers: [{ name: 'refresh', image: 'ghcr.io/rhanka/radar-api:old' }], initContainers: [{ name: 'init', image: 'ghcr.io/rhanka/radar-api:old' }] } } } } });
-  objects.push(cj, object('CronJob', 'originally-suspended', { suspend: true, jobTemplate: cj.spec.jobTemplate }));
+  objects.push(cj, object('CronJob', 'radar-refresh-pending-watchdog', cj.spec),
+    object('CronJob', 'originally-suspended', { suspend: true, jobTemplate: cj.spec.jobTemplate }));
   objects.push(object('Ingress', 'application', { tls: [{ hosts: ['preprod.immo.sent-tech.ca'], secretName: 'existing-tls' }],
     defaultBackend: { service: { name: 'radar-ui', port: { number: 8080 } } },
     rules: [{ host: 'preprod.immo.sent-tech.ca', http: { paths: [{ path: '/', pathType: 'Prefix', backend: { service: { name: 'radar-ui', port: { number: 8080 } } } }] } }] }));

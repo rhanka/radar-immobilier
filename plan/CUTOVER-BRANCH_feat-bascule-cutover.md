@@ -33,6 +33,10 @@
 - [x] CUTOVER-EX1: allow `api/Dockerfile` solely to bundle the required migration entrypoint; no runtime base change; rollback by reverting that entry.
 - [x] CUTOVER-EX2: allow `deploy/ci/check-image-entrypoints.test.sh` to expect the 25 entrypoints required by CUTOVER-EX1; assertion and label only; rollback by reverting this test update.
 - [x] PR #942 CI fix: reproduce the stale count, update count/comment/labels, and pass the complete offline `k8s-validate` gate with `ENV=test-cutover`, dotenv inclusion removed from a temporary Makefile, and cluster validation disabled.
+- [x] CUTOVER-EX3: allow `deploy/k8s/refresh-cronjobs/{refresh-018.mk,verify-renders.test.sh}` to retire the obsolete workflow quiesce-list contract; controller tests enforce watchdog suspension and restoration instead; rollback by reverting this fix.
+- [x] CUTOVER-EX4: allow `api/vitest.config.ts` to bound shared PostgreSQL/S3 contention to two workers after four 20-second hook failures during the mandatory full replay on a 32-CPU host; retain all tests and deadlines; rollback by reverting the worker cap.
+- [x] PR #942 refresh CI fix: all 21 Quality gates steps passed in order on 2026-10-29; 8,098 workspace tests passed, controller/backup and watchdog regressions passed, all campaign containers/networks/volumes removed. Evidence: `tmp/quality-replay/{summary.log,replay.log}`.
+- [x] The owner's CI-fix instruction authorizes an attribution-free commit and normal push to `origin feat/bascule-cutover`, superseding the original no-push guard.
 - [ ] Lot 0 (owner/infrastructure): repair only `radar-bascule/KUBE_CONFIG_DATA_BASCULE_PREPROD`, verify dedicated identity and reads, complete old restoration before replacement installation. Remote actions excluded by owner instruction.
 
 ## Orchestration Mode (AI-selected)

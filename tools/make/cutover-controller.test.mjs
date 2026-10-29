@@ -15,10 +15,12 @@ test('one command restores all services/routes/schedule states with fixed bounde
     const creation = f.state().jobCreation;
     assert.equal(creation.find(j => j.step === 'docs').closed, false);
     assert.equal(creation.find(j => j.step === 'restore').closed, true);
+    assert.ok(creation.filter(j => j.closed).every(j => j.watchdogSuspended === true));
     assert.ok(creation.findIndex(j => j.step === 'backup') < creation.findIndex(j => j.step === 'ddl'));
     assert.deepEqual(objects.find(o => o.kind === 'Ingress').spec, original);
     assert.equal(objects.find(o => o.metadata.name === 'originally-suspended').spec.suspend, true);
     assert.equal(objects.find(o => o.metadata.name === 'radar-refresh-pv').spec.suspend, false);
+    assert.equal(objects.find(o => o.metadata.name === 'radar-refresh-pending-watchdog').spec.suspend, false);
     assert.equal(objects.find(o => o.metadata.name === 'radar-immo-mcp').spec.template.spec.containers[0].image, f.release.apiImage);
     for (const job of objects.filter(o => o.kind === 'Job')) {
       assert.equal(job.spec.backoffLimit, 0); assert.equal(job.spec.ttlSecondsAfterFinished, undefined);
@@ -37,6 +39,7 @@ for (const change of [{ badSha: true }, { anonymous200: true }, { publicFailure:
       assert.equal(record(f).executor.state, 'stopped');
       assert.ok(JSON.stringify(f.state().objects.find(o => o.kind === 'Ingress').spec).includes('base-maintenance-'));
       assert.equal(f.state().objects.find(o => o.metadata.name === 'radar-refresh-pv').spec.suspend, true);
+      assert.equal(f.state().objects.find(o => o.metadata.name === 'radar-refresh-pending-watchdog').spec.suspend, true);
       assert.notEqual(f.run().status, 0, 'identical release must not adopt lock');
     } finally { f.cleanup(); }
   });
@@ -58,6 +61,7 @@ test('daily restoration pins deployed digests and skips the 6H hook', () => {
   const f = fixture();
   try {
     success(f.run('run', ['RELEASE=deployed', 'MODE=restore']));
+    assert.ok(f.state().jobCreation.filter(j => j.closed).every(j => j.watchdogSuspended === true));
     assert.equal(f.state().objects.some(o => o.kind === 'Job' && o.metadata.name.endsWith('-data')), false);
     assert.equal(JSON.parse(f.state().objects.find(o => o.metadata.name === 'radar-cutover-receipt').data.receipt).release.dataMigration, null);
   } finally { f.cleanup(); }

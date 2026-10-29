@@ -18,6 +18,8 @@ export default defineConfig({
   test: {
     include: ["tests/**/*.spec.ts", "src/**/*.test.ts"],
     exclude: [...configDefaults.exclude, "tests/e2e/artifacts-reader*.spec.ts"],
+    // Integration files share PostgreSQL and S3; bound their startup contention.
+    maxWorkers: 2,
     testTimeout: 20000,
     hookTimeout: 20000,
   },
