@@ -20,8 +20,8 @@
 //               (sha256 must equal the PIN), downloads pg/D/radar.dump streaming a
 //               sha256, refuses unless it equals the manifest, the sidecar and the PIN.
 //   docs        docs restore Job: reader = manifest + inventory (pg/, manifests/,
-//               docs-inventory/ only); copy identity = version listing of
-//               <backup>/docs/, preprod listing and the copies. Restores into the preprod
+//               docs-inventory/ only); copy identity = candidate HEAD/version
+//               resolution, sharded preprod listing and copies. Restores into the preprod
 //               docs bucket the docs state AT DAY D from docs-inventory/D.json by
 //               server-side CopyObject from <backup>/docs/<key>?versionId=<v> (the
 //               version whose ETag is the inventory's when the key was rewritten
@@ -402,8 +402,8 @@ function readConfig(env, step) {
     cfg.dstBucket = req('DST_BUCKET');
     cfg.grantee = String(env.COPY_GRANTEE || '').trim();
     cfg.dry = String(env.DOCS_DRY || '0').trim() === '1';
-    const c = Math.floor(Number(env.COPY_CONCURRENCY || '8'));
-    cfg.concurrency = Number.isFinite(c) ? Math.max(1, Math.min(32, c)) : 8;
+    const c = Math.floor(Number(env.COPY_CONCURRENCY || '48'));
+    cfg.concurrency = Number.isFinite(c) ? Math.max(1, Math.min(64, c)) : 48;
     const forbidden = String(env.FORBIDDEN_DST_BUCKETS || '').split(',').map((s) => s.trim()).filter(Boolean);
     // The runner always names the production docs bucket: an empty list means a
     // mis-rendered Job, never "nothing forbidden".
@@ -664,17 +664,18 @@ async function resolveCandidates(copier, cfg, plan, destIndex, { resolveVersions
 async function runDocs({ cfg, reader, copier, log }) {
   const manifest = await loadPinnedManifest(reader, cfg);
   const inventory = await loadInventory(reader, cfg, manifest);
+  const counters = { destListCalls: 0, headChecked: 0, versionsResolved: 0, copyRetries: 0 };
   const sortedKeys = inventory.objects.filter((e) => e.state === 'backed-up').map((e) => e.key).sort();
-  const destIndex = await listDestSharded(copier, cfg.dstBucket, sortedKeys);
+  const destIndex = await listDestSharded(copier, cfg.dstBucket, sortedKeys, counters);
   const plan = planDocsRestore({ inventory, destIndex });
-  if (plan.needsHead.length) await resolveCandidates(copier, cfg, plan, destIndex, { resolveVersions: true, createdAtMs: Date.parse(inventory.createdAt), log });
+  if (plan.needsHead.length) await resolveCandidates(copier, cfg, plan, destIndex, { resolveVersions: true, createdAtMs: Date.parse(inventory.createdAt), log, counters });
   log(`PLAN date=${cfg.date} inventory=${plan.objects} up_to_date=${plan.upToDate} to_copy=${plan.toCopy.length} ` +
     `bytes_to_copy=${plan.bytesToCopy} excluded=${plan.excluded} not_in_backup=${plan.notInBackup} unresolved=${plan.unresolved} ` +
     `reasons=${JSON.stringify(plan.unresolvedReasons)} how=${JSON.stringify(plan.how)} dest_objects=${destIndex.size} ` +
     `dry=${cfg.dry}`);
   const base = { step: 'docs', date: cfg.date, dry: cfg.dry, inventory: plan.objects, upToDate: plan.upToDate, toCopy: plan.toCopy.length,
     bytesToCopy: plan.bytesToCopy, excluded: plan.excluded, notInBackup: plan.notInBackup, unresolved: plan.unresolved, unresolvedReasons: plan.unresolvedReasons,
-    ...anomalyReport(plan, log) };
+    ...anomalyReport(plan, log), ...counters };
   if (plan.excluded > 0) log(`NOTE ${plan.excluded} inventory object(s) excluded by the backup itself (excluded prefixes): not required, not restored`);
   if (plan.notInBackup > 0 || plan.unresolved > 0) {
     log(`DOCS REFUSED — ${plan.notInBackup} inventory object(s) not in the backup of ${cfg.date}, ${plan.unresolved} without a restorable version (fail-closed)`);
@@ -691,43 +692,46 @@ async function runDocs({ cfg, reader, copier, log }) {
     while (next < plan.toCopy.length) {
       const item = plan.toCopy[next++];
       try {
-        await copier.s3.send(new copier.sdk.CopyObjectCommand({
+        const out = await copier.s3.send(new copier.sdk.CopyObjectCommand({
           Bucket: cfg.dstBucket, Key: item.key, CopySource: copySourceFor(cfg.backupBucket, item.key, item.versionId),
           MetadataDirective: 'COPY', ...grant,
         }));
+        counters.copyRetries += Math.max(0, (out.$metadata?.attempts || 1) - 1);
         copied += 1;
       } catch (e) {
+        counters.copyRetries += Math.max(0, (e.$metadata?.attempts || 1) - 1);
         copyErrors += 1;
         if (errorsLogged < 5) { errorsLogged += 1; log(`copy error ${errName(e)} (object key not logged)`); }
       }
       const done = copied + copyErrors;
-      if (done % 1000 === 0) log(`progress ${done}/${plan.toCopy.length}`);
+      if (done % 5000 === 0) log(`progress ${done}/${plan.toCopy.length}`);
     }
   };
   await Promise.all(Array.from({ length: Math.min(cfg.concurrency, plan.toCopy.length) }, () => worker()));
-  const recon = reconInventory(inventory, await listDestSharded(copier, cfg.dstBucket, sortedKeys), plan.expectedSizes);
+  const recon = reconInventory(inventory, await listDestSharded(copier, cfg.dstBucket, sortedKeys, counters), plan.expectedSizes);
   const ok = copyErrors === 0 && recon.ok;
   log(`${ok ? 'DOCS OK' : 'DOCS FAIL'} date=${cfg.date} copied=${copied} copy_errors=${copyErrors} recon.checked=${recon.checked} ` +
     `recon.missing=${recon.missing} recon.size_mismatch=${recon.sizeMismatch} dest_extra=${recon.extra} (additive: extra objects kept)`);
-  return { exitCode: ok ? EXIT.OK : EXIT.ERROR, termination: { ok, ...base, copied, copyErrors, recon } };
+  return { exitCode: ok ? EXIT.OK : EXIT.ERROR, termination: { ok, ...base, ...counters, copied, copyErrors, recon } };
 }
 
 async function runRecon({ cfg, reader, copier, log }) {
   const manifest = await loadPinnedManifest(reader, cfg);
   const inventory = await loadInventory(reader, cfg, manifest);
+  const counters = { destListCalls: 0, headChecked: 0, versionsResolved: 0, copyRetries: 0 };
   const sortedKeys = inventory.objects.filter((e) => e.state === 'backed-up').map((e) => e.key).sort();
-  const destIndex = await listDestSharded(copier, cfg.dstBucket, sortedKeys);
+  const destIndex = await listDestSharded(copier, cfg.dstBucket, sortedKeys, counters);
   // Only mismatching sizes require a versioned HEAD: avoid relisting the entire
   // version history or issuing one HEAD for every object in a large inventory.
   const candidates = inventory.objects.filter(e => e.state === 'backed-up' && e.versionId &&
     destIndex.has(e.key) && Number(destIndex.get(e.key).Size) !== Number(e.size));
   const plan = planDocsRestore({ inventory: { ...inventory, objects: candidates }, destIndex, verifyPinned: true });
-  if (plan.needsHead.length) await resolveCandidates(copier, cfg, plan, destIndex);
+  if (plan.needsHead.length) await resolveCandidates(copier, cfg, plan, destIndex, { counters });
   const recon = reconInventory(inventory, destIndex, plan.expectedSizes);
   recon.ok = recon.ok && plan.unresolved === 0;
   log(`${recon.ok ? 'RECON OK' : 'RECON FAIL'} date=${cfg.date} checked=${recon.checked} missing=${recon.missing} ` +
     `size_mismatch=${recon.sizeMismatch} excluded=${recon.excluded} not_in_backup=${recon.notInBackup} dest_extra=${recon.extra}`);
-  return { exitCode: recon.ok ? EXIT.OK : EXIT.ERROR, termination: { ok: recon.ok, step: 'recon', date: cfg.date, ...recon, ...anomalyReport(plan, log) } };
+  return { exitCode: recon.ok ? EXIT.OK : EXIT.ERROR, termination: { ok: recon.ok, step: 'recon', date: cfg.date, ...recon, ...anomalyReport(plan, log), ...counters } };
 }
 
 const STEPS = { resolve: runResolve, list: runList, 'fetch-dump': runFetchDump, docs: runDocs, recon: runRecon };
@@ -735,7 +739,7 @@ const STEPS = { resolve: runResolve, list: runList, 'fetch-dump': runFetchDump, 
 function makeClient(sdk, cfg, creds) {
   return new sdk.S3Client({
     endpoint: cfg.endpoint, region: cfg.region, forcePathStyle: cfg.forcePathStyle,
-    credentials: creds, maxAttempts: 5,
+    credentials: creds, maxAttempts: 3,
     requestChecksumCalculation: 'WHEN_REQUIRED', responseChecksumValidation: 'WHEN_REQUIRED',
   });
 }
