@@ -1,17 +1,3 @@
-/* global AbortSignal, fetch */
-// Contrôles HTTP sans export de corps, cookie, jeton ou message de parsing.
-export function resolvePath(path, config) {
-  return path.replaceAll(':workspaceId', encodeURIComponent(config.workspaceId))
-    .replaceAll(':citySlug', encodeURIComponent(config.citySlug));
-}
-export async function readCheck(checks, spec, config, fetchRequest = fetch) {
-  const path = resolvePath(spec.path, config);
-  const row = { name: spec.name, path, method: 'GET', status: 0, expected: spec.expected, passed: false };
-  let phase = 'configuration';
-  try {
-    if ((spec.method ?? 'GET') !== 'GET' || !path.startsWith('/') || path.startsWith('//') || path.includes('\\')) throw new TypeError();
-    phase = 'fetch';
-    const r = await fetchRequest(path, { method: 'GET', credentials: spec.credentials ?? 'include',
       cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(12000) });
     row.status = r.status;
     const mime = (r.headers.get('content-type') ?? '').split(';')[0].toLowerCase();
