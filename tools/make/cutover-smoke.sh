@@ -70,6 +70,8 @@ start_forward() {
 }
 maintenance_probe() {
   local row host path code
+  code=$(curl -q -sS --max-time 3 -o /dev/null -w '%{http_code}' "$URL/" 2>/dev/null) || return 1
+  [[ $code == 404 || $code == 503 ]] || return 1
   while read -r row; do
     host=$(jq -r '.host' <<< "$row"); path=$(jq -r '.path' <<< "$row")
     [[ -n $host && $host != null ]] || return 1
