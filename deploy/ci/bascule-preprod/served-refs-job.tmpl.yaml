@@ -1,7 +1,7 @@
 # =============================================================================
 # served-refs-job.tmpl.yaml — e2e O1: zone references immo holds, read from the
 # RESTORED preprod database, published for the runner through ConfigMaps.
-# Dispatched after S7 when CYCLE_ID is set (MODE=restore|chain, not DRY).
+# Dispatched separately after successful cutover when CYCLE_ID is set.
 #
 #   initContainer `extract` (postgis, psql, PGOPTIONS default_transaction_read_only=on
 #                 → READ ONLY): canonical zone ids referenced by geo_resolutions
