@@ -3,6 +3,7 @@ set -euo pipefail
 [[ ${ENV:-} == test-cutover ]]
 export COMPOSE_DISABLE_ENV_FILE=1
 unset COMPOSE_FILE COMPOSE_ENV_FILES COMPOSE_PROFILES
+mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}"
 exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
 compose=(docker compose --env-file /dev/null -p radar-test-cutover -f deploy/cutover/test.compose.yml)
 cleanup() { "${compose[@]}" down -v --remove-orphans >/dev/null; }
