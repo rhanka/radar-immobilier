@@ -20,7 +20,8 @@
 - [x] Conditional Paths: shared domain services only for a demonstrated blocker; declare an exception first.
 
 ## Feedback Loop
-- [ ] Blocked — shared Docker campaign owner: release `radar-test-api-paniers-pwe` and the machine campaign lock, then run standalone `test`, `test-api`, `typecheck` and `lint` on `ENV=test-cutover`. No unrelated stack was stopped.
+- [x] Remove the retired `radar-test-api-paniers-pwe` containers and test volumes through the authorized Make cleanup target.
+- [x] Validation fix: install Make in the controller test container; first runtime pass exposed 44 `spawn make ENOENT` failures.
 - [x] Existing bundle/backup provisioning also mutates captured schedules; apply the approved shared-lock mechanism there and retain its namespace boundary.
 - [x] CUTOVER-EX1: allow `api/Dockerfile` solely to bundle the required migration entrypoint; no runtime base change; rollback by reverting that entry.
 - [ ] Lot 0 (owner/infrastructure): repair only `radar-bascule/KUBE_CONFIG_DATA_BASCULE_PREPROD`, verify dedicated identity and reads, complete old restoration before replacement installation. Remote actions excluded by owner instruction.
