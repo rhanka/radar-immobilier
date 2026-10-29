@@ -112,3 +112,9 @@ make -f deploy/cutover/operator.mk lint ENV=test-cutover
 Each campaign takes the machine Docker lock, uses no published port, waits for
 other test stacks and always runs `down -v`. Kubernetes and HTTP boundaries are
 fake; adapter tests use isolated real PostgreSQL databases. Lint runs `eslint .`.
+
+Typechecking covers every workspace. `test-api` runs the release adapter and
+existing 6H activation/attachment and 6K cutover regression suites.
+
+For a focused controller reproduction, pass `TEST_PATTERN='<test-name regex>'`
+to `test`; omit it for the complete campaign. Backup/reporting self-tests always run.
