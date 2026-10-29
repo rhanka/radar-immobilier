@@ -1,9 +1,3 @@
-# bascule-preprod — bascule PROD → PRÉPROD (« iso-prod »)
-
-Bascule **rejouable par la CI immo / l'owner SANS IA** (OPS-3) : déclencheur dump
-prod → restore préprod → migrations → copie docs → recon → flip serving → smoke. **0 Python.**
-
-> **No refresh in the bascule** (owner decision: "a restore is a restore"). The
 > refresh lives in its own CronJob `radar-refresh-pv` (its own schedule) and in
 > `bascule-refresh.yml` (on demand) — never triggered by the bascule.
 >
