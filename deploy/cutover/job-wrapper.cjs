@@ -11,7 +11,7 @@ try { fs.unlinkSync('/tmp/cutover-child.json'); } catch { /* A previous verdict 
 if (process.env.CUTOVER_EXPECTED_DATABASE && (process.env.POSTGRES_DB !== process.env.CUTOVER_EXPECTED_DATABASE
   || process.env.POSTGRES_HOST !== 'radar-postgres')) process.exit(1);
 const result = spawnSync(command[0], command.slice(1), {
-  env: { ...process.env, TERMINATION_LOG: '/tmp/cutover-child.json' },
+  env: { ...process.env, DOTENV_CONFIG_PATH: '/dev/null', TERMINATION_LOG: '/tmp/cutover-child.json' },
   stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 65536,
   timeout: Number(process.env.CUTOVER_TIMEOUT) * 1000,
 });
