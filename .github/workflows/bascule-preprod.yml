@@ -7,146 +7,50 @@ on:
   workflow_dispatch:
     inputs:
       CONFIRM:
-        description: "GO owner — motif exact iso-prod-AAAA-MM-JJ (doit être la date du jour)"
-        required: true
+        description: Legacy cross-tenant dispatcher correlation (no date token required)
+        required: false
         type: string
       DRY_RUN:
-        description: "true = preflight + plan de copie + recon + smoke, RIEN de destructif"
-        required: true
+        description: List verified backups without closing workloads
+        required: false
         type: boolean
         default: true
-      SKIP_FLIP:
-        description: "true = ne pas jouer S5 (flip serving) — pas isolé si la CI n'a pas le kubectl préprod"
-        required: false
-        type: boolean
-        default: false
-      SKIP_QUIESCE:
-        description: "true = quiesce préprod fait à la main (owner/k8s) ; l'UN-QUIESCE reste automatisé (via UNQUIESCE_REPLICAS)"
-        required: false
-        type: boolean
-        default: false
       MODE:
-        description: "chain = live dump (default) · restore = FROM a daily backup (BACKUP_ID) · list = backups available (read-only)"
+        description: Restore from a pinned backup, or list available backups
         required: false
         type: choice
-        options: [chain, restore, list]
-        default: chain
+        options: [restore, list]
+        default: restore
       BACKUP_ID:
-        description: "MODE=restore — 'latest' (latest complete backup, refused if older than 24 h) or a date YYYY-MM-DD (age not blocking)"
+        description: latest or explicit YYYY-MM-DD
         required: false
         type: string
         default: latest
       ALLOW_STALE_BACKUP:
-        description: "MODE=restore — true = accept a 'latest' backup older than 24 h"
+        description: Legacy dispatcher input; latest always enforces 24-hour freshness
         required: false
         type: boolean
         default: false
       CYCLE_ID:
-        description: "e2e immo+geo cycle id (set by bascule-e2e.yml, ^[A-Za-z0-9._-]{1,100}$); empty = standalone bascule"
+        description: Optional cross-tenant reporting cycle identifier
         required: false
         type: string
         default: ""
-
-# Jamais deux bascules en parallèle (write préprod).
 concurrency:
   group: bascule-preprod
   cancel-in-progress: false
-
 permissions:
   contents: read
-
 jobs:
   bascule:
-    # ARMEMENT PLANIFICATION (CD-native-v2) : un dispatch manuel tourne TOUJOURS
-    # (GO owner = l'input CONFIRM) ; un déclenchement PLANIFIÉ ne joue la bascule
-    # QUE si armé par la lane k8s via vars.BASCULE_SCHEDULE_ENABLED == 'true' (OFF
-    # par défaut). La planification est ce qui rend la bascule automatique (0
-    # dispatch manuel) ; la variable d'armement empêche un env pas-encore-prêt de
-    # basculer tout seul dès la fusion.
     if: ${{ github.event_name != 'schedule' || vars.BASCULE_SCHEDULE_ENABLED == 'true' }}
     runs-on: ubuntu-latest
-    # Environment `radar-bascule` (main-only, created by k8s) covers the WHOLE job,
-    # every MODE (chain included): it holds the GitHub secrets the bascule
-    # rewrites into its pre-created Secrets before any destructive step —
-    # RADAR_DOCS_SYNC_* → radar-docs-src-preprod (chain), RADAR_BACKUP_READER_PREPROD_*
-    # → radar-backup-reader-preprod (list, restore), RADAR_BACKUP_RESTORE_DOCS_* →
-    # radar-backup-restore-docs (restore). A chain run therefore needs this
-    # environment, its secrets, the pre-created Secret and the RBAC
-    # (rbac-ci-bascule-preprod-docs-secret.yaml) BEFORE the merge is exercised.
     environment: radar-bascule
-    # Budget per MODE (GitHub cap 360). chain: 180 min (sum of the runner-side Job
-    # waits: dump 33 + G1 20 + restore 30 + migrate 15 + docs 30 + recon 2 × 10 +
-    # quiesce 5 + un-quiesce 10 + served-refs 15 ≈ 178 min; no refresh). restore
-    # (also every scheduled run):
-    # 330 min > the sum of the runner-side Job waits (R0 10 + quiesce 5 + G1 20 +
-    # restore 30 + migrate 15 + docs 125 + recon 15 + G4 recon 15 + un-quiesce 10 +
-    # served-refs 15 ≈ 260 min). A hung Job therefore ends by its OWN Node timeout
-    # (a step failure: the `always()` un-quiesce then runs with its full budget).
-    # A job-level timeout is a CANCELLATION: GitHub still starts `always()` steps,
-    # but only for a short grace period — the un-quiesce (rollout waits) is not
-    # guaranteed to finish. Recovery then: `node bascule.mjs unquiesce` with the
-    # quiesce-state.json of the artefact bascule-quiesce-state-<run_id> (uploaded
-    # right after the quiesce) — README "Timeouts and the un-quiesce".
-    timeout-minutes: ${{ (github.event_name == 'schedule' || inputs.MODE == 'restore') && 330 || 180 }}
-    # Consumed by the served-ids / cycle-leg jobs (e2e contract, CYCLE_ID set).
-    # Values are validated by restore-mode.mjs before being written.
-    outputs:
-      backup_id: ${{ steps.resolve.outputs.backup_id }}
-      backup_date: ${{ steps.resolve.outputs.backup_date }}
-      manifest_sha256: ${{ steps.resolve.outputs.manifest_sha256 }}
-      pg_sha256: ${{ steps.resolve.outputs.pg_sha256 }}
-      dump_started_at: ${{ steps.resolve.outputs.dump_started_at }}
-      o_dump: ${{ steps.dump.outcome }}
-      o_restore_chain: ${{ steps.restore_chain.outcome }}
-      o_restore_backup: ${{ steps.restore_backup.outcome }}
-      o_migrate: ${{ steps.migrate.outcome }}
-      o_docs_chain: ${{ steps.docs_chain.outcome }}
-      o_recon_chain: ${{ steps.recon_chain.outcome }}
-      o_docs_backup: ${{ steps.docs_backup.outcome }}
-      o_recon_backup: ${{ steps.recon_backup.outcome }}
-      o_smoke: ${{ steps.smoke.outcome }}
+    timeout-minutes: 330
     env:
-      # ── GO owner + anti-rejeu (CONFIRM_EXPECTED calculé au pas 'compute') ──
-      CONFIRM: ${{ inputs.CONFIRM }}
-      # ── MODE (chain | restore | list) + restore-from-backup parameters ────
-      # A SCHEDULED run (no inputs) is MODE=restore from the LATEST complete
-      # backup: BACKUP_ID latest (= latestComplete), ALLOW_STALE_BACKUP false (the
-      # 24 h freshness guard refuses an older backup: nothing is quiesced then).
-      # A dispatch keeps its inputs (default chain). Every value is re-validated
-      # in Node before use (never interpolated into a shell).
-      MODE: ${{ github.event_name == 'schedule' && 'restore' || inputs.MODE || 'chain' }}
+      MODE: ${{ inputs.DRY_RUN && 'list' || inputs.MODE || 'restore' }}
       BACKUP_ID: ${{ inputs.BACKUP_ID || 'latest' }}
-      ALLOW_STALE_BACKUP: ${{ github.event_name != 'schedule' && inputs.ALLOW_STALE_BACKUP && 'true' || 'false' }}
       CYCLE_ID: ${{ inputs.CYCLE_ID }}
-      # Daily backup bucket + dedicated preprod identities (NAMES only here): the
-      # pre-created Secrets radar-backup-reader-preprod (pg/, manifests/,
-      # docs-inventory/) and radar-backup-restore-docs (S3' copy signer, docs/) are
-      # rewritten by this job from the environment secrets (step "Write backup
-      # Secrets"). See deploy/ci/bascule-preprod/README.md "Restore from a backup".
-      BACKUP_BUCKET: ${{ vars.BASCULE_BACKUP_BUCKET || 'radar-immobilier-backup' }}
-      BACKUP_READER_SECRET: ${{ vars.BASCULE_BACKUP_READER_SECRET || 'radar-backup-reader-preprod' }}
-      BACKUP_DOCS_COPY_SECRET: ${{ vars.BASCULE_BACKUP_DOCS_COPY_SECRET || 'radar-backup-restore-docs' }}
-      BACKUP_MAX_AGE_HOURS: ${{ vars.BASCULE_BACKUP_MAX_AGE_HOURS || '24' }}
-      # ── RUNNER KUBECTL-ONLY (0 cred S3, 0 cred DB) ────────────────────────
-      # Le runner ne se connecte à AUCUNE DB ET NE TOUCHE PLUS S3 : plus de
-      # BASCULE_PROD_PG*/BASCULE_PREPROD_PG* NI de BASCULE_S3_LIST_AWS_*/AWS_*
-      # (OVH n'a pas de scope S3 list-only → toute cred S3 runner pourrait GET le
-      # dump PII). Les 3 vérifs S3 (freshness/recon/runs) + la copie docs +
-      # restore/rollback sont des Jobs PRÉPROD verdict-only, creds via secretKeyRef
-      # in-cluster (radar-pra-admin S3-only, radar-db-credentials, radar-docs-s3-credentials).
-      # Ne restent ici que des PARAMÈTRES NON secrets (endpoint/buckets rendus
-      # dans les Jobs). AUCUN AWS_* / secret S3 côté runner.
-      BHS: ${{ vars.BASCULE_BHS_ENDPOINT }}
-      S3_REGION: ${{ vars.BASCULE_AWS_REGION }}
-      PROD_DOCS: ${{ vars.BASCULE_PROD_DOCS_BUCKET }}
-      PREPROD_DOCS: ${{ vars.BASCULE_PREPROD_DOCS_BUCKET }}
-      # ── Dump prod (déclencheur T1) : CronJob owner + bucket de backups ─────
-      DUMP_BUCKET: ${{ vars.BASCULE_DUMP_BUCKET }}
-      DUMP_PREFIX: ${{ vars.BASCULE_DUMP_PREFIX || 'postgres/prod/sets' }}
-      DUMP_CRONJOB: ${{ vars.BASCULE_DUMP_CRONJOB || 'radar-db-backup-prod' }}
-      DUMP_CRONJOB_NAMESPACE: ${{ vars.BASCULE_DUMP_CRONJOB_NAMESPACE || 'radar-immobilier' }}
-      # ── Docs-sync Option A (NON secrets : nom de Secret + grantee id) ──
-      # Secret radar-docs-src-preprod (docs-sync identity): PRE-CREATED by k8s,
       # rewritten by this job before the quiesce at every run (see environment above).
       # DOCS_SYNC_GRANTEE = canonical id radar-docs préprod (GrantFullControl).
       DOCS_SYNC_READ_SECRET: ${{ vars.BASCULE_DOCS_SYNC_READ_SECRET || 'radar-docs-src-preprod' }}
