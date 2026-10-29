@@ -20,6 +20,7 @@
     "backupBucket": "radar-immobilier-backup",
     "readerSecret": "radar-backup-reader-preprod",
     "copySecret": "radar-backup-restore-docs",
+    "copyGrantee": "1901410700457444:user-Wq74B63YQum8",
     "dbSecret": "radar-db-credentials",
     "backupSecret": "radar-backup-s3-credentials"
   }
