@@ -529,7 +529,8 @@ async function listDestSharded(c, bucket, sortedKeys, counters) {
     do {
       if (counters) counters.destListCalls += 1;
       const out = await c.s3.send(new c.sdk.ListObjectsV2Command({
-        Bucket: bucket, StartAfter: bounds[shard], ContinuationToken, MaxKeys: 1000,
+        Bucket: bucket, MaxKeys: 1000,
+        ...(ContinuationToken ? { ContinuationToken } : { StartAfter: bounds[shard] }),
       }));
       for (const o of out.Contents || []) {
         if (end !== undefined && o.Key > end) return;

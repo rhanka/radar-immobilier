@@ -80,6 +80,7 @@ function client(store, policy) {
       }
       if (cmd instanceof sdk.ListObjectsV2Command) {
         if (!can("list", i.Bucket)) throw denied();
+        if (i.ContinuationToken && i.StartAfter !== undefined) throw new Error("StartAfter must be omitted after the first page");
         if (policy.failShard && i.StartAfter) { policy.failShard = false; throw new Error("simulated shard failure"); }
         const m = store.b.get(i.Bucket) || new Map();
         const all = [...m.keys()].filter((k) => !i.Prefix || k.startsWith(i.Prefix)).sort()
@@ -241,7 +242,8 @@ function volumeFixture() {
     await Promise.resolve(); // Expose concurrent sends without real latency.
     try {
       if (cmd instanceof sdk.ListObjectsV2Command) {
-        stats.starts.add(i.StartAfter);
+        if (i.ContinuationToken && i.StartAfter !== undefined) throw new Error("StartAfter must be omitted after the first page");
+        if (!i.ContinuationToken) stats.starts.add(i.StartAfter);
         const start = i.ContinuationToken ? Number(i.ContinuationToken) : i.StartAfter ? positionOf(i.StartAfter) + 1 : 0;
         const end = Math.min(start + 1000, destination);
         const Contents = Array.from({ length: end - start }, (_, offset) => {
@@ -407,6 +409,15 @@ async function suite() {
     DST_BUCKET: DST, FORBIDDEN_DST_BUCKETS: PROD, COPY_GRANTEE: "1901410700457444:user-x", COPY_CONCURRENCY: "2", ...extra });
   for (const [value, expected] of [[undefined, 48], ["invalid", 48], ["0", 1], ["999", 64]]) {
     eq("readConfig — bounded concurrency for " + value, br.readConfig(docsEnv("a".repeat(64), { COPY_CONCURRENCY: value }), "docs").concurrency, expected);
+  }
+  {
+    const { s, manSha } = fixture();
+    for (let n = 0; n < 8; n++) s.put(DST, `zz/extra-${n}`, "extra");
+    const r = await step({ s, env: docsEnv(manSha) });
+    const pages = s.calls.filter((c) => c.name === "ListObjectsV2Command");
+    const continued = pages.filter((c) => c.ContinuationToken);
+    eq("docs — multi-page shards omit StartAfter with continuation tokens and preserve every extra",
+      [r.code, r.t.recon?.extra, continued.length >= 4, continued.every((c) => !Object.hasOwn(c, "StartAfter"))], [0, 9, true, true]);
   }
   {
     const { s, manSha } = fixture();
