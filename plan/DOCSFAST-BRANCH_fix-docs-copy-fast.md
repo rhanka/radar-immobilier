@@ -43,3 +43,4 @@
   - [x] `make -f deploy/cutover/operator.mk down ENV=test-cutover` removed both module volumes and the test network with `down -v --remove-orphans`.
 - [x] Lot 6 — Review exact scoped diff and prepare atomic, attribution-free commits for the owner-authorized `git push -u origin fix/docs-copy-fast`; no PR.
 - [x] Review correction 1 — Page per-key versions with both S3 markers, reject stalled or excessive pagination, retain exact-key versions only; >1,000-version and paginated-neighbor regressions reproduced the failure and pass after the fix.
+- [x] Review correction 2 — Match unpinned versions by ETag, tolerate valid size drift with the existing hashed anomaly receipt and reconciliation size; reproduce the failure, verify restoration, and retain refusal before copies for differing ETags.
