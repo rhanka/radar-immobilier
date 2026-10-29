@@ -15,3 +15,34 @@ const result = spawnSync(command[0], command.slice(1), {
   stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 65536,
   timeout: Number(process.env.CUTOVER_TIMEOUT) * 1000,
 });
+let raw = {};
+try { raw = JSON.parse(fs.readFileSync('/tmp/cutover-child.json', 'utf8')); }
+catch { try { raw = JSON.parse(result.stdout.toString().trim()); } catch { /* No readable verdict. */ } }
+const clean = { ok: result.status === 0 && !result.error };
+for (const key of ['date', 'backupId', 'dumpStartedAt', 'startedAt']) {
+  if (typeof raw[key] === 'string' && /^(latest|\d{4}-\d\d-\d\d(?:T[0-9:.]+Z)?)$/.test(raw[key])) clean[key] = raw[key];
+}
+for (const key of ['manifestSha256', 'pgSha256', 'codeSha']) {
+  if (typeof raw[key] === 'string' && /^[a-f0-9]{7,64}$/.test(raw[key])) clean[key] = raw[key];
+}
+for (const key of ['pgSizeBytes', 'docsObjects', 'migrations', 'ageHours', 'copied', 'missing', 'sizeMismatch', 'sealedUnresolved', 'streamsBound', 'pendingReceipts']) {
+  if (Number.isFinite(raw[key]) && raw[key] >= 0) clean[key] = raw[key];
+}
+for (const key of ['stale', 'staleOverridden', 'maintenanceBarrier']) {
+  if (typeof raw[key] === 'boolean') clean[key] = raw[key];
+}
+if (raw.status === 'open-success') clean.status = raw.status;
+if (raw.epoch === 'scoped') clean.epoch = raw.epoch;
+// Backup listing is already normalized by the in-cluster backup library; re-allowlist it here.
+if (Array.isArray(raw.backups)) {
+  clean.backups = raw.backups.slice(0, 20).map(b => Object.fromEntries(Object.entries(b).filter(([k, v]) =>
+    ['date', 'status', 'pgBytes', 'pgSha256', 'migrations', 'lastTag', 'docs', 'code', 'startedAt'].includes(k)
+    && (v === null || typeof v === 'number' || (typeof v === 'string' && /^[a-zA-Z0-9_.:-]{1,80}$/.test(v))))));
+  for (const key of ['bucket', 'latest', 'latestComplete']) {
+    if (typeof raw[key] === 'string' && /^[a-z0-9.-]{1,80}$/.test(raw[key])) clean[key] = raw[key];
+  }
+  clean.count = Number(raw.count) || 0;
+  clean.truncated = raw.truncated === true;
+}
+fs.writeFileSync(file, JSON.stringify(clean));
+process.exitCode = clean.ok ? 0 : 1;
