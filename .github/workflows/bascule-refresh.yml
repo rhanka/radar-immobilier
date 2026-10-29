@@ -25,24 +25,18 @@ jobs:
     timeout-minutes: 420
     steps:
       - uses: actions/checkout@v4
-          chmod 600 "$HOME/.kube/config"
-
-      - name: Pre-flight — assert preprod cluster + namespace
+      - uses: azure/setup-kubectl@v4
+      - name: Configure dedicated preprod deployer
         env:
-          EXPECTED_KUBE_APISERVER_HOST: ${{ vars.EXPECTED_KUBE_APISERVER_HOST }}
+          KUBE_CONFIG_DATA_PREPROD: ${{ secrets.KUBE_CONFIG_DATA_PREPROD }}
         run: |
           set -euo pipefail
-          DEFAULT_HOST='hlhedx.c1.bhs5.k8s.ovh.net'
-          expected="${EXPECTED_KUBE_APISERVER_HOST:-$DEFAULT_HOST}"
-          server="$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
-          host="${server#*://}"; host="${host%%/*}"; host="${host%%:*}"
-          echo "kubeconfig apiserver host : ${host:-<none>}"
-          echo "expected apiserver host   : ${expected}"
-          if [ "$host" != "$expected" ]; then
-            echo "::error title=Wrong cluster — refresh refused::kubeconfig targets '${host:-<none>}' but expected '${expected}'."; exit 1
+          mkdir -p "$HOME/.kube"
+          if printf '%s' "$KUBE_CONFIG_DATA_PREPROD" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
+            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" | base64 -d > "$HOME/.kube/config"
+          else
+            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" > "$HOME/.kube/config"
           fi
-          kubectl -n "$PREPROD_NAMESPACE" get cronjob "$REFRESH_CRONJOB" -o name
-          echo "pre-flight OK — ${expected} / ${PREPROD_NAMESPACE} / cronjob ${REFRESH_CRONJOB}"
-
-      - name: Force preprod refresh (precipitate radar-refresh-pv)
-        run: node "$CLI" force-refresh
+          chmod 600 "$HOME/.kube/config"
+      - name: Force refresh under namespace lock
+        run: make -f deploy/cutover/operator.mk force-refresh ENV=preprod
