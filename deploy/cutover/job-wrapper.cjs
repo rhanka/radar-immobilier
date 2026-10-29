@@ -25,14 +25,22 @@ for (const key of ['date', 'backupId', 'dumpStartedAt', 'startedAt']) {
 for (const key of ['manifestSha256', 'pgSha256', 'codeSha']) {
   if (typeof raw[key] === 'string' && /^[a-f0-9]{7,64}$/.test(raw[key])) clean[key] = raw[key];
 }
-for (const key of ['pgSizeBytes', 'docsObjects', 'migrations', 'ageHours', 'copied', 'missing', 'sizeMismatch', 'sealedUnresolved', 'streamsBound', 'pendingReceipts']) {
+for (const key of ['pgSizeBytes', 'docsObjects', 'migrations', 'ageHours', 'copied', 'missing', 'sizeMismatch', 'sealedUnresolved', 'streamsBound', 'pendingReceipts', 'inventoryAnomalyCount']) {
   if (Number.isFinite(raw[key]) && raw[key] >= 0) clean[key] = raw[key];
 }
-for (const key of ['stale', 'staleOverridden', 'maintenanceBarrier']) {
+for (const key of ['stale', 'staleOverridden', 'maintenanceBarrier', 'inventoryAnomaliesTruncated']) {
   if (typeof raw[key] === 'boolean') clean[key] = raw[key];
 }
 if (raw.status === 'open-success') clean.status = raw.status;
 if (raw.epoch === 'scoped') clean.epoch = raw.epoch;
+if (Array.isArray(raw.inventoryAnomalies)) {
+  clean.inventoryAnomalies = raw.inventoryAnomalies.slice(0, 10).filter(a =>
+    a && /^[a-f0-9]{64}$/.test(a.keySha256) && typeof a.keySha256 === 'string' &&
+    Number.isSafeInteger(a.inventorySize) && a.inventorySize >= 0 &&
+    Number.isSafeInteger(a.versionSize) && a.versionSize >= 0)
+    .map(a => ({ keySha256: a.keySha256, inventorySize: a.inventorySize, versionSize: a.versionSize }));
+  clean.inventoryAnomaliesTruncated = raw.inventoryAnomaliesTruncated === true || raw.inventoryAnomalies.length > 10;
+}
 // Backup listing is already normalized by the in-cluster backup library; re-allowlist it here.
 if (Array.isArray(raw.backups)) {
   clean.backups = raw.backups.slice(0, 20).map(b => Object.fromEntries(Object.entries(b).filter(([k, v]) =>

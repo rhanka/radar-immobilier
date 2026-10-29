@@ -7,11 +7,17 @@ const lock = f => f.state().objects.find(o => o.metadata.name === 'radar-change-
 const record = f => JSON.parse(lock(f).data.record);
 function success(result) { assert.equal(result.status, 0, result.stdout + result.stderr); }
 test('one command restores all services/routes/schedule states with fixed bounded Jobs', () => {
-  const f = fixture({ transient: 1 });
+  const inventoryAnomalies = [{ keySha256: 'a'.repeat(64), inventorySize: 790337, versionSize: 797540 }];
+  const f = fixture({ transient: 1, inventoryAnomalies });
   try {
     const original = f.state().objects.find(o => o.kind === 'Ingress').spec;
     success(f.run()); assert.equal(lock(f), undefined);
     const objects = f.state().objects;
+    const receipt = JSON.parse(objects.find(o => o.metadata.name === 'radar-cutover-receipt').data.receipt);
+    for (const step of ['docs', 'recon']) {
+      assert.equal(receipt.jobs[step].verdict.inventoryAnomalyCount, 1);
+      assert.deepEqual(receipt.jobs[step].verdict.inventoryAnomalies, inventoryAnomalies);
+    }
     const creation = f.state().jobCreation;
     assert.equal(creation.find(j => j.step === 'docs').closed, false);
     assert.equal(creation.find(j => j.step === 'restore').closed, true);

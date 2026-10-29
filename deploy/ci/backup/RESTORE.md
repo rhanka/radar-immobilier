@@ -95,7 +95,21 @@ For each `backed-up` entry:
    `createdAt`.
 2. `$S5 cp --version-id <v> "$B/docs/<key>" <local>` and write it to the target
    bucket under `<key>` (with the target's own writer identity).
-3. Check the size equals `size`.
+3. Check the restored size against the selected version. For a recorded
+   `versionId`, require that exact version to exist and its ETag to equal
+   `backupEtag`. A different inventory `size` is a nonblocking inventory anomaly:
+   use the verified version's size for copying and reconciliation. Missing
+   versions or mismatching/missing ETags remain refusals. Unpinned entries still
+   require both the recorded ETag and size.
+
+Older inventories could combine a source-listing size with a later copy's ETag
+and version when the source changed between listing and copy. The docs and recon
+Jobs report `inventoryAnomalyCount` and `inventoryAnomalies` containing only
+`keySha256`, `inventorySize`, and `versionSize`. Receipts retain at most ten
+samples with `inventoryAnomaliesTruncated`; Job logs retain the same bounded
+samples and the total count to stay within the wrapper's output buffer. No
+document key is emitted. Reconciliation still rejects a restored
+size that differs from the verified version's size.
 
 Restore into an empty bucket (or prefix): objects created after D are then
 naturally absent. The previous content of a key rewritten after D is kept only

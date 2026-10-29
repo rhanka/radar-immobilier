@@ -249,8 +249,10 @@ function acceptSelection(plan, entry, selection) {
 }
 
 function anomalyReport(plan, log) {
-  for (const anomaly of plan.inventoryAnomalies) log('WARN inventory-size-anomaly ' + JSON.stringify(anomaly));
-  return { inventoryAnomalyCount: plan.inventoryAnomalies.length, inventoryAnomalies: plan.inventoryAnomalies.slice(0, 10),
+  const samples = plan.inventoryAnomalies.slice(0, 10);
+  for (const anomaly of samples) log('WARN inventory-size-anomaly ' + JSON.stringify(anomaly));
+  if (plan.inventoryAnomalies.length > samples.length) log('WARN inventory-size-anomalies total=' + plan.inventoryAnomalies.length + ' samples=' + samples.length);
+  return { inventoryAnomalyCount: plan.inventoryAnomalies.length, inventoryAnomalies: samples,
     inventoryAnomaliesTruncated: plan.inventoryAnomalies.length > 10 };
 }
 

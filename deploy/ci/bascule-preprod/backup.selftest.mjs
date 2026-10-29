@@ -122,7 +122,7 @@ const D1 = "2026-09-25";
 const NOW_FRESH = Date.parse("2026-09-26T12:00:00Z");
 const NOW_STALE = Date.parse("2026-09-27T08:00:00Z"); // dump 02:23 D → 29.6 h
 
-function fixture({ tamperDump = false, rewriteBAfterD = true, inventorySizeMismatch = false } = {}) {
+function fixture({ tamperDump = false, rewriteBAfterD = true, inventorySizeMismatch = false, extraAnomalies = 0 } = {}) {
   const s = new Store();
   const dump = Buffer.from("PGDMP-fake-custom-archive-bytes-0123456789");
   const dumpV = s.put(B, `pg/${D}/radar.dump`, tamperDump ? Buffer.concat([dump, Buffer.from("x")]) : dump);
@@ -141,6 +141,12 @@ function fixture({ tamperDump = false, rewriteBAfterD = true, inventorySizeMisma
       { key: "raw/c.pdf", size: c.Size, etag: c.ETag, state: "backed-up", backupEtag: c.ETag, versionId: null },
     ],
   };
+  for (let i = 0; i < extraAnomalies; i++) {
+    const key = "raw/anomaly-" + i + ".pdf";
+    const v = s.put(B, "docs/" + key, "a");
+    inventory.objects.push({ key, size: 2, etag: v.ETag, state: "backed-up", backupEtag: v.ETag, versionId: v.VersionId });
+  }
+  inventory.counts.objects = inventory.objects.length;
   const invBuf = Buffer.from(JSON.stringify(inventory));
   s.put(B, `docs-inventory/${D}.json`, invBuf);
   const manifest = {
@@ -150,7 +156,7 @@ function fixture({ tamperDump = false, rewriteBAfterD = true, inventorySizeMisma
       tocEntries: 189, dumpStartedAt: "2026-09-26T02:23:05Z" },
     schema: { status: "ok", migrationsApplied: 11, lastMigration: { id: 11, tag: "0011_geo" } },
     code: { servedSha: "a4a2c00" },
-    docs: { status: "complete", objects: 3, inventoryKey: `docs-inventory/${D}.json`, inventorySha256: sha(invBuf) },
+    docs: { status: "complete", objects: inventory.objects.length, inventoryKey: `docs-inventory/${D}.json`, inventorySha256: sha(invBuf) },
   };
   const manBuf = Buffer.from(JSON.stringify(manifest, null, 2));
   s.put(B, `manifests/${D}.json`, manBuf);
@@ -313,6 +319,13 @@ async function suite() {
   // docs
   const docsEnv = (manSha, extra = {}) => baseEnv({ BR_STEP: "docs", BACKUP_DATE: D, PIN_MANIFEST_SHA256: manSha, COPIER_ACCESS_KEY: "c", COPIER_SECRET_KEY: "c",
     DST_BUCKET: DST, FORBIDDEN_DST_BUCKETS: PROD, COPY_GRANTEE: "1901410700457444:user-x", COPY_CONCURRENCY: "2", ...extra });
+  {
+    const { s, manSha } = fixture({ inventorySizeMismatch: true, extraAnomalies: 600 });
+    const r = await step({ s, env: docsEnv(manSha, { DOCS_DRY: "1" }) });
+    eq("docs — many size anomalies remain nonblocking with bounded receipt samples", [r.code, r.t.inventoryAnomalyCount, r.t.inventoryAnomalies?.length, r.t.inventoryAnomaliesTruncated], [0, 601, 10, true]);
+    ok("docs — many anomalies fit the termination message and wrapper output buffer",
+      Buffer.byteLength(JSON.stringify(r.t)) < br.TERMINATION_MAX_BYTES && Buffer.byteLength(r.logs.join("\n")) < 65536);
+  }
   for (const copier of [copierPolicy, copierNoVersions]) {
     const { s, manSha } = fixture({ inventorySizeMismatch: true, rewriteBAfterD: false });
     const anomaly = { keySha256: sha("raw/a b.pdf"), inventorySize: 790337, versionSize: 797540 };

@@ -24,7 +24,9 @@ const key = kind => ({ configmap: 'ConfigMap', configmaps: 'ConfigMap', deployme
 const find = (kind, name) => s.objects.find(o => o.kind === key(kind) && o.metadata.name === name);
 const value = flag => args[args.indexOf(flag) + 1];
 const jobVerdict = step => step === 'resolve' ? { ok: true, date: '2026-10-29', backupId: 'latest',
-  manifestSha256: 'd'.repeat(64), pgSha256: 'e'.repeat(64), pgSizeBytes: 1024 } : step === 'data' ?
+  manifestSha256: 'd'.repeat(64), pgSha256: 'e'.repeat(64), pgSizeBytes: 1024 } :
+  (step === 'docs' || step === 'recon') && s.inventoryAnomalies ? { ok: true,
+    inventoryAnomalies: s.inventoryAnomalies, inventoryAnomalyCount: s.inventoryAnomalies.length, inventoryAnomaliesTruncated: false } : step === 'data' ?
   { ok: true, status: 'open-success', epoch: 'scoped', sealedUnresolved: 0, maintenanceBarrier: false } : { ok: true };
 function crash(step, edge) {
   if (s.crash?.step === step && s.crash?.edge === edge) {
