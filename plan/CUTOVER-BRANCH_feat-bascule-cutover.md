@@ -56,4 +56,4 @@
   - [x] Remove superseded vehicle and orchestration; update runbooks and RBAC.
   - [ ] ESLint across the repository, controller tests and migration integration tests green.
   - [ ] Review final diff and commit all authorized work; no push.
-  - [x] Delivery checkpoint: lot 6, atomic commit 41; runtime gates pending.
+  - [x] Delivery checkpoint: lot 6, atomic commit 42; runtime gates pending.
