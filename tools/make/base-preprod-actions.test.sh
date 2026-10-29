@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # Surcharges de fixture uniquement : aucune commande réelle ne sort de ce workspace.
 actions_input=$testdir/actions-input.json
 cp input.json "$actions_input"
