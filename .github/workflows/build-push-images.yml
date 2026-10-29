@@ -1199,46 +1199,5 @@ jobs:
             printf '%s' "$KUBE_CONFIG_DATA" > "$HOME/.kube/config"
           fi
           chmod 600 "$HOME/.kube/config"
-      - name: Summary
-        if: always()
-        run: |
-          {
-            echo "### Promoted \`${{ steps.vars.outputs.tag }}\` -> \`${NAMESPACE}\` (by digest)"
-            echo ""
-            echo '```'
-            echo "radar-api -> ${IMAGE_PREFIX}/radar-api@${{ steps.pick.outputs.api }}"
-            echo "radar-ui  -> ${IMAGE_PREFIX}/radar-ui@${{ steps.pick.outputs.ui }}"
-            echo "git sha   -> ${{ steps.vars.outputs.sha }}"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      # ROLLBACK-ON-FAILED-RELEASE (§1(b)) — PROD, PREPARED BUT DISARMED. Same
-      # image-only auto-rollback as preprod, scoped to a promote-health failure
-      # (steps.promote.conclusion != 'skipped'). Owner-gated + SEPARATE arming:
-      # stays SKIPPED until ROLLBACK_ON_FAILURE_PROD_ENABLED == 'true' (default
-      # off). Authored now so the call is ready; arming is a deliberate owner step
-      # at the prod cutover, never a side effect of this merge. Same migration
-      # seam as preprod (breaking migration → owner-gated DB-restore, not this).
-      - name: Rollback prod on failed promote (image-only)
-        if: ${{ failure() && steps.promote.conclusion != 'skipped' && vars.ROLLBACK_ON_FAILURE_PROD_ENABLED == 'true' }}
-        env:
-          NAMESPACE: ${{ env.NAMESPACE }}
-          ROLLBACK_ENV: prod
-          DEPLOYMENTS: radar-api radar-ui
-          PUBLIC_HOST: ${{ vars.PUBLIC_ENDPOINT_HOST || 'immo.sent-tech.ca' }}
-          FAILED_REF: ${{ steps.vars.outputs.sha }}
-        run: bash deploy/ci/rollback-release.sh
-
-      - name: Deployment status — failure
-        if: failure() && steps.deployment.outputs.id != ''
-        uses: actions/github-script@v7
-        env:
-          DEPLOYMENT_ID: ${{ steps.deployment.outputs.id }}
-          TAG: ${{ steps.vars.outputs.tag }}
-        with:
-          script: |
-            await github.rest.repos.createDeploymentStatus({
-              owner: context.repo.owner, repo: context.repo.repo,
-              deployment_id: Number(process.env.DEPLOYMENT_ID), state: 'failure',
-              description: `promote ${process.env.TAG} failed`,
-            });
+      - name: Sequential cutover (same manifest as rehearsal)
+        run: make -f deploy/cutover/operator.mk run RELEASE=cutover-release/release.json ENV=prod
