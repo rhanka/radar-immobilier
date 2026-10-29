@@ -19,10 +19,10 @@ done
 case ${1:-} in
   test) command='apt-get update -qq && apt-get install -y -qq bash make jq curl gettext-base >/dev/null && npm ci --ignore-scripts --silent && node --test tools/make/cutover*.test.mjs && node deploy/ci/bascule-preprod/backup.selftest.mjs';;
   lint) command='npm ci --ignore-scripts --silent && npx eslint .';;
-  typecheck) command='npm ci --ignore-scripts --silent && npm run typecheck --workspace=api';;
+  typecheck) command='npm ci --ignore-scripts --silent && npm run typecheck --workspaces --if-present';;
   test-api)
     "${compose[@]}" up -d --wait postgres
-    command='npm ci --ignore-scripts --silent && npm run db:migrate --workspace=api && npm run test --workspace=api -- tests/integration/database-cutover.spec.ts';;
+    command='npm ci --ignore-scripts --silent && npm run db:migrate --workspace=api && npm run test --workspace=api -- tests/integration/database-cutover.spec.ts src/services/facets/activation src/services/facets/attachment src/services/facets/base-api-personal-activation src/services/facets/base-api-activation src/services/facets/lots/lot-cutover --maxWorkers=2';;
   *) exit 2;;
 esac
 "${compose[@]}" run --rm --no-deps -T api bash -ec "$command"
