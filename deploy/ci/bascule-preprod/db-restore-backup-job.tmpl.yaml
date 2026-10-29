@@ -13,8 +13,8 @@
 #                           --clean --if-exists --single-transaction --exit-on-error.
 #                           DB creds = ${DB_SECRET} as libpq PG* (never a password URI).
 #
-# Guards G2 (quiesce) and G1 (rollback of the preprod DB) run BEFORE this Job
-# (bascule.mjs), exactly as in the chain mode. Fail-closed: backoffLimit 0,
+# The shared cutover closure is verified BEFORE and DURING this Job.
+# The destination recovery backup runs before DDL. Fail-closed: backoffLimit 0,
 # restartPolicy Never, single transaction = all or nothing.
 # Runner = kubectl only (.status + termination message of `fetch`, never logs).
 #
@@ -109,6 +109,7 @@ ${BR_SCRIPT}
               set -euo pipefail
               # shellcheck disable=SC1091
               . /work/backup.env
+              [ "$PGDATABASE" = "$EXPECTED_DATABASE" ] || exit 2
               echo "[restore] backup date=$BACKUP_DATE sha256=$PG_SHA256 (verified by fetch)"
               pg_restore --list /work/radar.dump > /tmp/toc.txt
               toc="$(grep -c '^[0-9]' /tmp/toc.txt || true)"

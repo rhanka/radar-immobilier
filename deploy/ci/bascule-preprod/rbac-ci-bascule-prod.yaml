@@ -76,6 +76,10 @@ rules:
     resourceNames: ["radar-db-ro-role-sql", "radar-backup-daily-script"]
   # serviceaccounts (SA trigger T1) :
   - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "update", "delete"]
+    resourceNames: ["radar-change-lock"]
+  - apiGroups: [""]
     resources: ["serviceaccounts"]
     verbs: ["create"]
   - apiGroups: [""]

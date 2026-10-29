@@ -1,10 +1,10 @@
 # Restore a backup of date D
 
 **Into preprod, automated:** `.github/workflows/bascule-preprod.yml` with
-`MODE=restore` (`BACKUP_ID=latest` or a date) does §0–§2 below in-cluster (dump
-sha256 verified before `pg_restore`, docs state at D from the inventory by
-server-side copy, recon), then migrate, flip and smoke; `MODE=list` lists the
-available backups. See `../bascule-preprod/README.md` "Restore from a backup". The
+`MODE=restore` (`BACKUP_ID=latest` or a date) calls the sequential controller
+in [the cutover runbook](../../cutover/README.md). It restores pinned documents
+and PostgreSQL, migrates Drizzle, restarts API/UI/MCP and restores all captured
+routes and original schedule states; `MODE=list` lists available backups. The
 manual procedure below stays the reference for any other target.
 
 Identities:

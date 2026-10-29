@@ -76,6 +76,10 @@ jobs:
           kubectl -n "$NAMESPACE" get deploy radar-api -o name
           echo "pre-flight OK — ${expected} / namespace ${NAMESPACE}"
 
+      - uses: ./deploy/cutover/lock-action
+        with:
+          action: lock
+          environment: prod
       - name: Apply immo-mcp manifests
         run: |
           kubectl apply \
@@ -104,3 +108,8 @@ jobs:
       - name: Smoke check PRM through the ingress
         run: |
           curl -sf https://immo.sent-tech.ca/mcp/.well-known/oauth-protected-resource | head -c 200
+      - uses: ./deploy/cutover/lock-action
+        if: always() && env.CUTOVER_LOCK_RUN != ''
+        with:
+          action: release-lock
+          environment: prod

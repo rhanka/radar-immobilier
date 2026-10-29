@@ -292,6 +292,10 @@ jobs:
 
       # Jobs are immutable : on supprime une éventuelle instance précédente avant
       # de ré-appliquer (sinon `apply` échoue sur un Job terminé/existant).
+      - uses: ./deploy/cutover/lock-action
+        with:
+          action: lock
+          environment: ${{ env.TARGET }}
       - name: Apply job (delete previous, then apply)
         id: apply
         env:
@@ -623,3 +627,8 @@ jobs:
           fi
           echo "--- status ---"
           kubectl -n "$NAMESPACE" get "job/${JOB_NAME}" -o wide || true
+      - uses: ./deploy/cutover/lock-action
+        if: always() && env.CUTOVER_LOCK_RUN != ''
+        with:
+          action: release-lock
+          environment: ${{ env.TARGET }}
