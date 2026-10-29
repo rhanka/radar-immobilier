@@ -1,3 +1,4 @@
+/* global Response */
 import { resolvePath } from '../../deploy/base-preprod/public-probe.mjs';
 export const fixtureConfig = { phase: 'q1', workspaceId: '11111111-1111-4111-8111-111111111111',
   actorSub: 'opaque:fixture', citySlug: 'fixture-city', releaseSha: 'b'.repeat(40) };
