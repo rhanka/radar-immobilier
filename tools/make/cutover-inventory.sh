@@ -31,10 +31,9 @@ inventory() {
   "${k[@]}" get cronjobs -o json > "$WORK/cronjobs.json"
   "${k[@]}" get ingresses -o json > "$WORK/ingresses.json"
   "${k[@]}" get statefulsets,daemonsets,horizontalpodautoscalers -o json > "$WORK/controllers.json"
-  jq -e 'all(.items[]; (.kind=="StatefulSet" and .metadata.name=="radar-postgres")
-    or (.kind=="HorizontalPodAutoscaler" and .spec.scaleTargetRef.kind=="Deployment"
-      and .spec.scaleTargetRef.name=="radar-api" and .spec.minReplicas==1
-      and all(.spec.metrics[]?;.type=="Resource")))' "$WORK/controllers.json" >/dev/null || fail 'Unsupported workload controller or autoscaler'
+  local unsupported
+  unsupported=$(jq -r -f tools/make/cutover-controllers.jq "$WORK/controllers.json")
+  [[ -z $unsupported ]] || fail "Unsupported workload controller or autoscaler: $unsupported"
   "${k[@]}" api-resources --namespaced=true --verbs=list -o name > "$WORK/resource-types"
   while read -r resource; do
     if [[ $resource =~ scaledobjects|scaledjobs|verticalpodautoscalers|rollouts\. ]]; then
