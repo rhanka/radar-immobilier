@@ -13,3 +13,8 @@ restore, quiesce, unquiesce, API-only reopening or live-dump chain controller.
 document restoration and inter-tenant artifacts offline. Run it through the
 standalone `test` target. Credential rotation remains documented in `CRED_CYCLE.md`.
 The dated migration/incident capture documents are historical records.
+
+The daily restore uses a permanent ServiceAccount token with no expiration (owner
+decision 2026-10-29): `KUBE_CONFIG_DATA_BASCULE_PREPROD` is built from Secret
+`radar-ci-bascule-preprod-token`. Rotation and recovery checks are in
+[CRED_CYCLE.md](CRED_CYCLE.md#preprod-bascule-ci-kubeconfig).
