@@ -1,17 +1,3 @@
-#!/usr/bin/env node
-// =============================================================================
-// bascule.mjs — BASCULE PROD → PRÉPROD (« iso-prod »), CLI natif, 0 Python.
-//
-// Orchestre, en Node pur (aucune IA au runtime), la séquence S0→S7 : dump prod
-// (déclencheur) → restore préprod → migrations → copie docs → recon → flip
-// serving → smoke (NO refresh: a restore is a restore). Rejouable par la CI immo / l'owner
-// SANS IA (OPS-3), avec des gardes fail-closed en Node.
-//
-// DATA-PLANE 100% CLUSTER-SIDE, RUNNER KUBECTL-ONLY (contrat owner + co-val
-// i-infra, NON négociable) : AUCUNE donnée PII, AUCUNE cred S3, AUCUN listing/clé
-// ne transite ni n'est lu par le runner GitHub (OVH n'a pas de scope S3 list-only
-// → toute cred S3 runner pourrait GET le dump PII → 0 cred S3 runner). Le runner
-// ne fait QUE du kubectl (2 kubeconfigs : préprod par défaut + PROD pour le seul
 // trigger dump) + `curl` /health (smoke, ni S3 ni PII) :
 //   - kubectl : patch cronjob (suspend), dispatch/OBSERVE Jobs (.status SEUL,
 //     JAMAIS `kubectl logs`), scale (quiesce), flip (set-env).
