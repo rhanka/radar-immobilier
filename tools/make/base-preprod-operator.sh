@@ -9,9 +9,10 @@ trap 'find "$OUTPUT" -type f ! -name checksums.txt -exec sha256sum "{}" + > "$OU
 source tools/make/base-preprod-collect.sh
 case $action in
 validate) ;;
+public-probe) bash tools/make/base-preprod-public.sh;;
 render-job) render_job "$(jq -r .operation "$INPUT")";;
 collect-job) collect_job "$(jq -r .operation "$INPUT")";;
-permissions|inventory|freeze-cd|close|restore-ingresses|stop-job|collect-maintenance|start-api|tunnel-api|restart-api|reopen-api)
+permissions|inventory|preflight|freeze-cd|close|reclose-api|verify-closed|restore-ingresses|stop-job|collect-maintenance|start-api|tunnel-api|restart-api|reopen-api)
   source tools/make/base-preprod-maintenance.sh
   "$action";;
 inspect|init|attach|activate|resume)

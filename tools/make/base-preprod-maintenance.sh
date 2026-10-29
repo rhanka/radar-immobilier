@@ -3,6 +3,8 @@ source tools/make/base-preprod-api-identity.sh
 source tools/make/base-preprod-network.sh
 source tools/make/base-preprod-routing.sh
 source tools/make/base-preprod-restore.sh
+source tools/make/base-preprod-reclose.sh
+source tools/make/base-preprod-actions.sh
 permissions() {
   local resource verb
   : > "$OUTPUT/permissions.tsv"
@@ -50,11 +52,13 @@ inventory() {
 }
 active_runs() {
   gh api --paginate "repos/$repo/actions/runs?per_page=100" \
-    --jq '.workflow_runs[] | select(.status!="completed") | {id,status,head_sha,path}'
+    --jq '.workflow_runs[] | select(.status!="completed") | {id,status,head_sha,path,name,head_branch}'
 }
 freeze-cd() {
+  require_operator_context; require_change_freeze
   permissions
   inventory
+  require_change_freeze
   gh api --method PUT "repos/$repo/actions/workflows/build-push-images.yml/disable" > "$OUTPUT/freeze.txt"
   # Never change PREPROD_CD_ENABLED; disabling does not cancel existing runs.
   local run
@@ -62,13 +66,16 @@ freeze-cd() {
     gh run cancel "$run" --repo "$repo" >> "$OUTPUT/cancel.txt"
   done < <(jq -r '.cancelRuns[]? | select(type=="number")' "$INPUT")
   active_runs > "$OUTPUT/runs-after-freeze.jsonl"
-  [[ ! -s $OUTPUT/runs-after-freeze.jsonl ]] || fail 'Nonterminal Actions runs remain; wait or explicitly cancel and re-inspect'
+  assert_no_actions "$OUTPUT/runs-after-freeze.jsonl" 'Nonterminal Actions runs remain; wait or explicitly cancel and re-inspect'
   assert_cd_frozen
 }
 assert_cd_frozen() {
+  require_operator_context
+  require_change_freeze
   [[ $(gh api "repos/$repo/actions/workflows/build-push-images.yml" --jq .state) == disabled_manually ]] || fail 'CD is not frozen'
   active_runs > "$OUTPUT/runs-current.jsonl"
-  [[ ! -s $OUTPUT/runs-current.jsonl ]] || fail 'A nonterminal Actions run exists'
+  require_change_freeze
+  assert_no_actions "$OUTPUT/runs-current.jsonl" 'A nonterminal Actions run exists'
 }
 delete_job_uid() {
   local name=$1 uid=$2
@@ -121,6 +128,12 @@ assert_closed() {
   jq -e '.["app.kubernetes.io/name"]=="radar-immobilier" and .["app.kubernetes.io/component"]=="api"' "$OUTPUT/api-selector.json" >/dev/null || fail 'Unexpected API Service selector'
   assert_namespace_endpoints closed
 }
+verify-closed() {
+  require_expected
+  assert_closed
+  jq -n --slurpfile c "$INPUT" --arg at "$(date -u +%FT%TZ)" '{binding:$c[0].binding,image:$c[0].image,observedAt:$at,closed:true}' > "$OUTPUT/closed.json"
+  echo 'Fermeture vérifiée ; contexte natif initialisé, restauration séparée autorisée par le runbook.'
+}
 collect-maintenance() {
   require_expected; regular_json "${PROOFS:-}"
   # Bind declarations to the independently inventoried roster. Live checks still follow.
@@ -146,13 +159,15 @@ qualification_receipt() {
   { sed '$d' tools/make/base-preprod-input.jq; cat tools/make/base-preprod-acceptance.jq; } > "$OUTPUT/acceptance-filter.jq"
   jq -e --slurpfile input "$INPUT" -f "$OUTPUT/acceptance-filter.jq" "$PROOFS" >/dev/null || fail 'Bound API qualification required'
 }
-api_routes() {
-  local ingress patchpaths
-  ingress=$(jq -er '.apiIngress|select(test("^[a-z0-9-]+$"))' "$INPUT")
-  patchpaths='["/health","/api/v1/auth","/api/v1/workspaces"]'
-  # Called only after Q2: public routes stay on the refusal Service during Q1/Q2.
+render_api_routes() {
+  local patchpaths='["/health","/api/v1/auth","/api/v1/workspaces"]'
   jq -n --argjson paths "$patchpaths" '{spec:{rules:[{host:"preprod.immo.sent-tech.ca",http:{paths:
     ($paths|map({path:.,pathType:"Prefix",backend:{service:{name:"radar-api",port:{number:3000}}}}))}}]}}' > "$OUTPUT/api-route-patch.json"
+}
+api_routes() {
+  local ingress
+  ingress=$(jq -er '.apiIngress|select(test("^[a-z0-9-]+$"))' "$INPUT")
+  render_api_routes
   "${k[@]}" patch ingress "$ingress" --type=merge --patch-file "$OUTPUT/api-route-patch.json" >> "$OUTPUT/api.txt"
 }
 start-api() {
