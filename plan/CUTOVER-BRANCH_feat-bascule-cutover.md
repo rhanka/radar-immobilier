@@ -31,6 +31,8 @@
 - [x] Final cleanup: no Compose containers, volumes or networks remain for the retired PWE or cutover campaigns. Evidence: `tmp/cutover-evidence/validation.md` and its linked logs.
 - [x] Existing bundle/backup provisioning also mutates captured schedules; apply the approved shared-lock mechanism there and retain its namespace boundary.
 - [x] CUTOVER-EX1: allow `api/Dockerfile` solely to bundle the required migration entrypoint; no runtime base change; rollback by reverting that entry.
+- [x] CUTOVER-EX2: allow `deploy/ci/check-image-entrypoints.test.sh` to expect the 25 entrypoints required by CUTOVER-EX1; assertion and label only; rollback by reverting this test update.
+- [x] PR #942 CI fix: reproduce the stale count, update count/comment/labels, and pass the complete offline `k8s-validate` gate with `ENV=test-cutover`, dotenv inclusion removed from a temporary Makefile, and cluster validation disabled.
 - [ ] Lot 0 (owner/infrastructure): repair only `radar-bascule/KUBE_CONFIG_DATA_BASCULE_PREPROD`, verify dedicated identity and reads, complete old restoration before replacement installation. Remote actions excluded by owner instruction.
 
 ## Orchestration Mode (AI-selected)
