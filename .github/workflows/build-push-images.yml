@@ -608,6 +608,8 @@ jobs:
         uses: ./deploy/cutover/lock-action
         with:
           action: release-lock
+          environment: prod
+
   deploy-preprod:
     name: Deploy to preprod cluster
     needs: build-push
@@ -749,6 +751,12 @@ jobs:
           curl -fsSL "$url" | tar -xz -C "$tmp" s5cmd
           sudo install -m 0755 "$tmp/s5cmd" /usr/local/bin/s5cmd
           s5cmd version
+
+      - name: Acquire namespace change lock
+        uses: ./deploy/cutover/lock-action
+        with:
+          action: lock
+          environment: preprod
 
       - name: Backup DB before release (fail-closed)
         if: vars.BACKUP_BEFORE_RELEASE_ENABLED == 'true'
@@ -1140,6 +1148,13 @@ jobs:
   # Environment `production` (tag refs + reviewer) that makes THIS the sole prod
   # path. Held until owner GO.
   # ===========================================================================
+      - name: Release namespace change lock
+        if: always() && env.CUTOVER_LOCK_RUN != ''
+        uses: ./deploy/cutover/lock-action
+        with:
+          action: release-lock
+          environment: preprod
+
   promote-prod:
     name: Promote tag to prod (by digest)
     runs-on: ubuntu-latest
