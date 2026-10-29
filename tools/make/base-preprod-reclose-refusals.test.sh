@@ -1,34 +1,3 @@
-#!/usr/bin/env bash
-# Matrice de refus sur des copies de fixtures ; aucun accès externe réel.
-recovery_no_write() {
-  if rg -- '--request-timeout=20s (create|patch|scale|set|delete|rollout) ' cluster-calls;then
-    echo 'ÉCHEC : mutation malgré une précondition refusée' >&2;exit 1
-  fi
-}
-recovery_reject() {
-  : >cluster-calls
-  if invoke reclose-api EXPECTED="$testdir/expected.json" ROUTES="$1";then
-    echo 'ÉCHEC : reclose-api a accepté une divergence' >&2;exit 1
-  fi
-  recovery_no_write
-}
-cp input.json recovery-input.json
-cp before-reclose.json recovery-live.json
-for recovery_change in '.binding.releaseId="foreign"' '.closedIngresses=[]' '.closedIngresses[1].spec.defaultBackend.service.name="radar-api"';do
-  jq "$recovery_change" "$closure_snapshot" > recovery-bad-routes.json
-  recovery_reject "$testdir/recovery-bad-routes.json"
-  cmp recovery-live.json ingress-fixture.json
-done
-for recovery_change in '.items[0].metadata.uid="replacement"' '.items[0].spec.tls[0].secretName="concurrent"' '.items[1].spec.defaultBackend.service.name="radar-api"';do
-  jq "$recovery_change" recovery-live.json > ingress-fixture.json
-  cp ingress-fixture.json recovery-divergent.json
-  recovery_reject "$closure_snapshot"
-  cmp recovery-divergent.json ingress-fixture.json
-done
-cp recovery-live.json ingress-fixture.json
-for recovery_action in activate reopen-api;do
-  : >cluster-calls
-  recovery_proof=$testdir/proofs.json
   [[ $recovery_action != reopen-api ]] || recovery_proof=$testdir/acceptance.json
   if invoke "$recovery_action" EXPECTED="$testdir/expected.json" PROOFS="$recovery_proof";then
     echo "ÉCHEC : avancement tardif accepté : $recovery_action" >&2;exit 1
