@@ -55,9 +55,14 @@ run_job() {
     local previous
     previous=$("${k[@]}" get job "$(jq -r .name <<< "$existing")" -o json) || fail 'Migration outcome unknown'
     if jq -e 'any(.status.conditions[]?;.type=="Failed" and .status=="True")' <<< "$previous" >/dev/null; then
-      [[ $(jq -r .metadata.uid <<< "$previous") == "$(jq -r .uid <<< "$existing")" ]] || fail 'Failed migration UID changed'
-      job_pods_ended "$(jq -r .name <<< "$existing")" "$(jq -r .uid <<< "$existing")" || fail 'Previous migration still has consumers'
-      jq --arg step "$step" '.jobHistory=((.jobHistory//[])+[.jobs[$step]])|del(.jobs[$step])' "$WORK/record.json" > "$WORK/next.json"
+      local observed_uid
+      observed_uid=$(jq -r .metadata.uid <<< "$previous")
+      [[ $(jq -r .uid <<< "$existing") == null || $observed_uid == "$(jq -r .uid <<< "$existing")" ]] || fail 'Failed migration UID changed'
+      jq -e --arg run "$RUN" --arg hash "$(jq -r .hash <<< "$existing")" \
+        '.metadata.labels["sentropic.io/bascule"]==$run and .metadata.annotations["cutover-spec-sha256"]==$hash' <<< "$previous" >/dev/null || fail 'Failed migration identity conflict'
+      job_pods_ended "$(jq -r .name <<< "$existing")" "$observed_uid" || fail 'Previous migration still has consumers'
+      jq --arg step "$step" --arg uid "$observed_uid" '.jobs[$step].uid=$uid|
+        .jobHistory=((.jobHistory//[])+[.jobs[$step]])|del(.jobs[$step])' "$WORK/record.json" > "$WORK/next.json"
       mv "$WORK/next.json" "$WORK/record.json"; record_save
       existing=null
       name="cutover-${RUN:0:8}-$(jq '.jobHistory|length' "$WORK/record.json")-$step"
