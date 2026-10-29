@@ -17,7 +17,7 @@
 # message (verdict JSON <= 4 KiB written by backup-restore.cjs: dates, statuses,
 # sizes, sha256 — never a doc key, a row or a credential). Never `kubectl logs`.
 #
-# Placeholders (rendered by restore-mode.mjs): ${JOB_NAME} ${NAMESPACE} ${IMAGE}
+# Placeholders (rendered by cutover-jobs.sh): ${JOB_NAME} ${NAMESPACE} ${IMAGE}
 # ${BR_STEP} ${READER_SECRET} ${S3_ENDPOINT} ${S3_REGION} ${S3_FORCE_PATH_STYLE}
 # ${EXPECTED_BACKUP_BUCKET} ${BACKUP_ID} ${ALLOW_STALE_BACKUP} ${MAX_AGE_HOURS}
 # ${TTL_SECONDS}, plus the BR_SCRIPT placeholder under `args:` (= backup-restore.cjs,

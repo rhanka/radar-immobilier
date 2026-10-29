@@ -1,0 +1,19 @@
+name: Namespace change lock
+description: Exclude competing cutover, deployment and writer operations
+inputs:
+  environment:
+    description: Fixed cutover environment
+    required: true
+  action:
+    description: lock or release-lock
+    required: true
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        LOCK_ENV: ${{ inputs.environment }}
+        LOCK_ACTION: ${{ inputs.action }}
+      run: |
+        env -u NAMESPACE -u PREPROD_NAMESPACE make -f deploy/cutover/operator.mk \
+          "$LOCK_ACTION" RUN="${CUTOVER_LOCK_RUN:-}" ENV="$LOCK_ENV"

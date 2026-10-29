@@ -1,639 +1,115 @@
-# bascule-preprod — BASCULE PROD → PRÉPROD (« iso-prod »), rejouable SANS IA.
-#
-# Enchaîne S0→S5 + S7 (cf. deploy/ci/bascule-preprod/bascule.mjs) : restore
-# préprod → migrations → copie docs → recon → flip serving → smoke. NO REFRESH in
-# the bascule (owner decision: "a restore is a restore"): the refresh lives in
-# its own CronJob radar-refresh-pv and in bascule-refresh.yml, never triggered by
-# the bascule. Toute la LOGIQUE + les GARDES fail-closed sont en Node ; ce
-# workflow reste fin (installe les outils, câble les secrets, appelle le CLI
-# dans l'ordre). AUCUNE IA au runtime.
-#
-# RUNNER KUBECTL-ONLY (contrat owner + co-val i-infra) : AUCUNE PII, AUCUNE cred
-# S3, AUCUN listing/clé ne transite ni n'est lu par le runner GitHub (OVH n'a pas
-# de scope S3 list-only). Le runner ne fait QUE kubectl (patch cronjob suspend,
-# dispatch + OBSERVE .status des Jobs — JAMAIS `kubectl logs`, scale quiesce, flip
-# set-env) + curl /health (smoke). Les 3 vérifs S3 (freshness/recon/runs) + la
-# copie docs + restore/rollback sont des Jobs PRÉPROD verdict-only (creds via
-# secretKeyRef in-cluster). dump prod = CronJob owner (radar-db-backup-prod).
-# 0 cred S3 runner / 0 pg_dump / 0 pg_restore / 0 s5cmd / 0 aws sur le runner.
-#
-# GO owner matérialisé = l'input CONFIRM (GARDE G3, motif iso-prod-AAAA-MM-JJ),
-# recoupé au jour courant (anti-rejeu). DRY_RUN=true par défaut = un dispatch nu
-# ne fait RIEN de destructif (preflight + plan de copie + recon + smoke).
-#
-# S5 (flip) ISOLABLE via SKIP_FLIP : si la CI n'a pas encore le RBAC kubectl
-# préprod pour muter l'env, mettre SKIP_FLIP=true — le flip est alors le seul pas
-# porté hors-CI (owner / enabler k8s).
-#
-# MODE (input, default `chain` for a dispatch). A SCHEDULED run is ALWAYS
-# `restore` from the LATEST `complete` backup (BACKUP_ID latest =
-# manifests/latest.json latestComplete, 24 h freshness guard active, refused
-# otherwise), with the auto-CONFIRM of the day — the source is the last verified
-# backup, never a live prod dump.
-#   chain   (dispatch only) LIVE dump S1 → restore → …. Changed by the
-#           restore work: the job runs in the environment `radar-bascule`, G3 is
-#           checked first in every MODE, and the docs-sync Secret is rewritten from
-#           GitHub BEFORE the quiesce (DRY: server dry-run only).
-#   restore restore preprod FROM a daily backup of radar-immobilier-backup
-#           (BACKUP_ID = latest | YYYY-MM-DD): S0 → R0 resolve (read-only guards,
-#           before quiesce) → QUIESCE → S2 restore pg/<D>/radar.dump (G2 + G1, no S1)
-#           → S2c migrate → S3' docs state at D (docs-inventory/<D>.json, server-side
-#           copy) → S3b' recon vs inventory → S5 flip → UN-QUIESCE → S7 smoke. No
-#           refresh. `latest` older than 24 h is refused unless ALLOW_STALE_BACKUP;
-#           an explicit date is never blocked by its age. Same runner contract
-#           (kubectl only). Logic: deploy/ci/bascule-preprod/restore-mode.mjs.
-#   list    read-only: backups available (date, status, size, schema, sha).
-# CYCLE_ID (optional, set by the e2e orchestrator bascule-e2e.yml): publishes
-#   cycle-leg-immo-<CYCLE_ID> (+ immo-served-canonical-ids-<CYCLE_ID>), or
-#   backup-list-immo-<CYCLE_ID> in MODE=list.
+# Daily backup restoration and cross-tenant reporting share the cutover engine.
 name: bascule-preprod (iso-prod)
-# The e2e orchestrator correlates its dispatch with MODE + CYCLE_ID in the run name.
-# A scheduled run is `restore` (no inputs on a schedule event).
-run-name: "bascule-preprod ${{ github.event_name == 'schedule' && 'restore' || inputs.MODE || 'chain' }} ${{ inputs.CYCLE_ID }}"
-
+run-name: "bascule-preprod ${{ github.event_name == 'schedule' && 'restore' || inputs.MODE || 'restore' }} ${{ inputs.CYCLE_ID }}"
 on:
-  # CD-native-v2 : la bascule est AUTOMATISÉE par une planification QUOTIDIENNE,
-  # 04:00 UTC, à l'heure pile (demande owner 2026-10-10 « remettre la sync prod
-  # vers preprod (restore daily) » ; hebdomadaire dimanche 03:17 UTC du
-  # 2026-09-26 au 2026-10-10). Why 04:00 UTC: after the daily prod backup
-  # (radar-backup-daily, 02:23 UTC, 7-45 min observed), so the latest complete
-  # backup is normally the backup of the day; R0 refuses a latest complete
-  # backup older than 24 h before any quiesce (age check, no same-day check).
-  # Configured starts: 60 min before the prod refresh (05:00), 120 min before
-  # the preprod refresh (06:00), on none of their start hours (node shared with
-  # prod); restores observed 18-50 min. A preprod refresh Job still running
-  # from 00:00 is deleted by the quiesce (QUIESCE_CRONJOBS below); the
-  # un-quiesce patches the recorded CronJob suspend back. A late GitHub start or
-  # a long restore can overlap the prod refresh (not measured, not bounded).
-  # Guard on the rendered schedules: deploy/k8s/refresh-cronjobs/bascule-window.awk
-  # (refresh-018.mk verify-renders); slot table: deploy/ci/bascule-preprod/README.md.
-  # GitHub interdit une variable de dépôt dans le littéral cron → la CADENCE est
-  # figée ici ; l'ARMEMENT est la variable de dépôt BASCULE_SCHEDULE_ENABLED (voir
-  # `if` du job `bascule`), OFF par défaut, pour qu'une fusion ne déclenche jamais
-  # une bascule prod planifiée avant que l'env ne soit prêt. Le workflow_dispatch
-  # ci-dessous reste (1re fois / à la demande). The scheduled run is MODE=restore
-  # from the latest complete backup (see the job env), never a refresh.
   schedule:
     - cron: '0 4 * * *'
   workflow_dispatch:
     inputs:
       CONFIRM:
-        description: "GO owner — motif exact iso-prod-AAAA-MM-JJ (doit être la date du jour)"
-        required: true
+        description: Legacy cross-tenant dispatcher correlation (no date token required)
+        required: false
         type: string
       DRY_RUN:
-        description: "true = preflight + plan de copie + recon + smoke, RIEN de destructif"
-        required: true
+        description: List verified backups without closing workloads
+        required: false
         type: boolean
         default: true
-      SKIP_FLIP:
-        description: "true = ne pas jouer S5 (flip serving) — pas isolé si la CI n'a pas le kubectl préprod"
-        required: false
-        type: boolean
-        default: false
-      SKIP_QUIESCE:
-        description: "true = quiesce préprod fait à la main (owner/k8s) ; l'UN-QUIESCE reste automatisé (via UNQUIESCE_REPLICAS)"
-        required: false
-        type: boolean
-        default: false
       MODE:
-        description: "chain = live dump (default) · restore = FROM a daily backup (BACKUP_ID) · list = backups available (read-only)"
+        description: Restore from a pinned backup, or list available backups
         required: false
         type: choice
-        options: [chain, restore, list]
-        default: chain
+        options: [restore, list]
+        default: restore
       BACKUP_ID:
-        description: "MODE=restore — 'latest' (latest complete backup, refused if older than 24 h) or a date YYYY-MM-DD (age not blocking)"
+        description: latest or explicit YYYY-MM-DD
         required: false
         type: string
         default: latest
       ALLOW_STALE_BACKUP:
-        description: "MODE=restore — true = accept a 'latest' backup older than 24 h"
+        description: Legacy dispatcher input; latest always enforces 24-hour freshness
         required: false
         type: boolean
         default: false
       CYCLE_ID:
-        description: "e2e immo+geo cycle id (set by bascule-e2e.yml, ^[A-Za-z0-9._-]{1,100}$); empty = standalone bascule"
+        description: Optional cross-tenant reporting cycle identifier
         required: false
         type: string
         default: ""
-
-# Jamais deux bascules en parallèle (write préprod).
 concurrency:
   group: bascule-preprod
   cancel-in-progress: false
-
 permissions:
   contents: read
-
 jobs:
   bascule:
-    # ARMEMENT PLANIFICATION (CD-native-v2) : un dispatch manuel tourne TOUJOURS
-    # (GO owner = l'input CONFIRM) ; un déclenchement PLANIFIÉ ne joue la bascule
-    # QUE si armé par la lane k8s via vars.BASCULE_SCHEDULE_ENABLED == 'true' (OFF
-    # par défaut). La planification est ce qui rend la bascule automatique (0
-    # dispatch manuel) ; la variable d'armement empêche un env pas-encore-prêt de
-    # basculer tout seul dès la fusion.
     if: ${{ github.event_name != 'schedule' || vars.BASCULE_SCHEDULE_ENABLED == 'true' }}
     runs-on: ubuntu-latest
-    # Environment `radar-bascule` (main-only, created by k8s) covers the WHOLE job,
-    # every MODE (chain included): it holds the GitHub secrets the bascule
-    # rewrites into its pre-created Secrets before any destructive step —
-    # RADAR_DOCS_SYNC_* → radar-docs-src-preprod (chain), RADAR_BACKUP_READER_PREPROD_*
-    # → radar-backup-reader-preprod (list, restore), RADAR_BACKUP_RESTORE_DOCS_* →
-    # radar-backup-restore-docs (restore). A chain run therefore needs this
-    # environment, its secrets, the pre-created Secret and the RBAC
-    # (rbac-ci-bascule-preprod-docs-secret.yaml) BEFORE the merge is exercised.
     environment: radar-bascule
-    # Budget per MODE (GitHub cap 360). chain: 180 min (sum of the runner-side Job
-    # waits: dump 33 + G1 20 + restore 30 + migrate 15 + docs 30 + recon 2 × 10 +
-    # quiesce 5 + un-quiesce 10 + served-refs 15 ≈ 178 min; no refresh). restore
-    # (also every scheduled run):
-    # 330 min > the sum of the runner-side Job waits (R0 10 + quiesce 5 + G1 20 +
-    # restore 30 + migrate 15 + docs 125 + recon 15 + G4 recon 15 + un-quiesce 10 +
-    # served-refs 15 ≈ 260 min). A hung Job therefore ends by its OWN Node timeout
-    # (a step failure: the `always()` un-quiesce then runs with its full budget).
-    # A job-level timeout is a CANCELLATION: GitHub still starts `always()` steps,
-    # but only for a short grace period — the un-quiesce (rollout waits) is not
-    # guaranteed to finish. Recovery then: `node bascule.mjs unquiesce` with the
-    # quiesce-state.json of the artefact bascule-quiesce-state-<run_id> (uploaded
-    # right after the quiesce) — README "Timeouts and the un-quiesce".
-    timeout-minutes: ${{ (github.event_name == 'schedule' || inputs.MODE == 'restore') && 330 || 180 }}
-    # Consumed by the served-ids / cycle-leg jobs (e2e contract, CYCLE_ID set).
-    # Values are validated by restore-mode.mjs before being written.
-    outputs:
-      backup_id: ${{ steps.resolve.outputs.backup_id }}
-      backup_date: ${{ steps.resolve.outputs.backup_date }}
-      manifest_sha256: ${{ steps.resolve.outputs.manifest_sha256 }}
-      pg_sha256: ${{ steps.resolve.outputs.pg_sha256 }}
-      dump_started_at: ${{ steps.resolve.outputs.dump_started_at }}
-      o_dump: ${{ steps.dump.outcome }}
-      o_restore_chain: ${{ steps.restore_chain.outcome }}
-      o_restore_backup: ${{ steps.restore_backup.outcome }}
-      o_migrate: ${{ steps.migrate.outcome }}
-      o_docs_chain: ${{ steps.docs_chain.outcome }}
-      o_recon_chain: ${{ steps.recon_chain.outcome }}
-      o_docs_backup: ${{ steps.docs_backup.outcome }}
-      o_recon_backup: ${{ steps.recon_backup.outcome }}
-      o_smoke: ${{ steps.smoke.outcome }}
+    timeout-minutes: 330
     env:
-      # ── GO owner + anti-rejeu (CONFIRM_EXPECTED calculé au pas 'compute') ──
-      CONFIRM: ${{ inputs.CONFIRM }}
-      # ── MODE (chain | restore | list) + restore-from-backup parameters ────
-      # A SCHEDULED run (no inputs) is MODE=restore from the LATEST complete
-      # backup: BACKUP_ID latest (= latestComplete), ALLOW_STALE_BACKUP false (the
-      # 24 h freshness guard refuses an older backup: nothing is quiesced then).
-      # A dispatch keeps its inputs (default chain). Every value is re-validated
-      # in Node before use (never interpolated into a shell).
-      MODE: ${{ github.event_name == 'schedule' && 'restore' || inputs.MODE || 'chain' }}
+      MODE: ${{ inputs.DRY_RUN && 'list' || inputs.MODE || 'restore' }}
       BACKUP_ID: ${{ inputs.BACKUP_ID || 'latest' }}
-      ALLOW_STALE_BACKUP: ${{ github.event_name != 'schedule' && inputs.ALLOW_STALE_BACKUP && 'true' || 'false' }}
       CYCLE_ID: ${{ inputs.CYCLE_ID }}
-      # Daily backup bucket + dedicated preprod identities (NAMES only here): the
-      # pre-created Secrets radar-backup-reader-preprod (pg/, manifests/,
-      # docs-inventory/) and radar-backup-restore-docs (S3' copy signer, docs/) are
-      # rewritten by this job from the environment secrets (step "Write backup
-      # Secrets"). See deploy/ci/bascule-preprod/README.md "Restore from a backup".
-      BACKUP_BUCKET: ${{ vars.BASCULE_BACKUP_BUCKET || 'radar-immobilier-backup' }}
-      BACKUP_READER_SECRET: ${{ vars.BASCULE_BACKUP_READER_SECRET || 'radar-backup-reader-preprod' }}
-      BACKUP_DOCS_COPY_SECRET: ${{ vars.BASCULE_BACKUP_DOCS_COPY_SECRET || 'radar-backup-restore-docs' }}
-      BACKUP_MAX_AGE_HOURS: ${{ vars.BASCULE_BACKUP_MAX_AGE_HOURS || '24' }}
-      # ── RUNNER KUBECTL-ONLY (0 cred S3, 0 cred DB) ────────────────────────
-      # Le runner ne se connecte à AUCUNE DB ET NE TOUCHE PLUS S3 : plus de
-      # BASCULE_PROD_PG*/BASCULE_PREPROD_PG* NI de BASCULE_S3_LIST_AWS_*/AWS_*
-      # (OVH n'a pas de scope S3 list-only → toute cred S3 runner pourrait GET le
-      # dump PII). Les 3 vérifs S3 (freshness/recon/runs) + la copie docs +
-      # restore/rollback sont des Jobs PRÉPROD verdict-only, creds via secretKeyRef
-      # in-cluster (radar-pra-admin S3-only, radar-db-credentials, radar-docs-s3-credentials).
-      # Ne restent ici que des PARAMÈTRES NON secrets (endpoint/buckets rendus
-      # dans les Jobs). AUCUN AWS_* / secret S3 côté runner.
-      BHS: ${{ vars.BASCULE_BHS_ENDPOINT }}
-      S3_REGION: ${{ vars.BASCULE_AWS_REGION }}
-      PROD_DOCS: ${{ vars.BASCULE_PROD_DOCS_BUCKET }}
-      PREPROD_DOCS: ${{ vars.BASCULE_PREPROD_DOCS_BUCKET }}
-      # ── Dump prod (déclencheur T1) : CronJob owner + bucket de backups ─────
-      DUMP_BUCKET: ${{ vars.BASCULE_DUMP_BUCKET }}
-      DUMP_PREFIX: ${{ vars.BASCULE_DUMP_PREFIX || 'postgres/prod/sets' }}
-      DUMP_CRONJOB: ${{ vars.BASCULE_DUMP_CRONJOB || 'radar-db-backup-prod' }}
-      DUMP_CRONJOB_NAMESPACE: ${{ vars.BASCULE_DUMP_CRONJOB_NAMESPACE || 'radar-immobilier' }}
-      # ── Docs-sync Option A (NON secrets : nom de Secret + grantee id) ──
-      # Secret radar-docs-src-preprod (docs-sync identity): PRE-CREATED by k8s,
-      # rewritten by this job before the quiesce at every run (see environment above).
-      # DOCS_SYNC_GRANTEE = canonical id radar-docs préprod (GrantFullControl).
-      DOCS_SYNC_READ_SECRET: ${{ vars.BASCULE_DOCS_SYNC_READ_SECRET || 'radar-docs-src-preprod' }}
-      DOCS_SYNC_GRANTEE: ${{ vars.BASCULE_DOCS_SYNC_GRANTEE || '1901410700457444:user-Wq74B63YQum8' }}
-      # ── Contrôle positif source + cible cluster + smoke ───────────────────
-      EXPECTED_DATABASE: ${{ vars.BASCULE_EXPECTED_DATABASE }}
-      PREPROD_NAMESPACE: ${{ vars.BASCULE_PREPROD_NAMESPACE || 'radar-immobilier-preprod' }}
-      # Quiesce / drain / G2 / un-quiesce targets (default of bascule.mjs quiesceTargets()
-      # PLUS radar-refresh-pending-watchdog, PR #838): the watchdog CronJob launches a
-      # short Job every 5 min in preprod; left active, such a Job trips the G2
-      # "Job batch ACTIF" refusal. Set here, not in bascule.mjs, so that this change
-      # does not touch deploy/ci/bascule-preprod/** (which re-applies the prod bundle).
-      QUIESCE_CRONJOBS: radar-refresh-pv,radar-refresh-pending-watchdog,radar-consistency-snapshot,radar-populate-geo-daily
-      PREPROD_HEALTH_URL: ${{ vars.BASCULE_PREPROD_HEALTH_URL }}
-      # Repli d'un-quiesce quand le quiesce est fait à la main (SKIP_QUIESCE) :
-      # aucun état enregistré → l'un-quiesce scale-back à partir de cette carte.
-      # Without SKIP_QUIESCE=true and without a recorded quiesce, the un-quiesce
-      # does nothing (a refusal before the quiesce never scales preprod).
-      UNQUIESCE_REPLICAS: ${{ vars.BASCULE_UNQUIESCE_REPLICAS }}
-      SKIP_QUIESCE: ${{ inputs.SKIP_QUIESCE && 'true' || 'false' }}
-      BASCULE_WORKDIR: ${{ github.workspace }}/.bascule-work
-      CLI: deploy/ci/bascule-preprod/bascule.mjs
+    outputs:
+      backup_id: ${{ steps.engine.outputs.backup_id }}
+      backup_date: ${{ steps.engine.outputs.backup_date }}
+      manifest_sha256: ${{ steps.engine.outputs.manifest_sha256 }}
+      pg_sha256: ${{ steps.engine.outputs.pg_sha256 }}
+      dump_started_at: ${{ steps.engine.outputs.dump_started_at }}
+      o_restore_backup: ${{ steps.engine.outputs.o_restore }}
+      o_migrate: ${{ steps.engine.outputs.o_ddl }}
+      o_docs_backup: ${{ steps.engine.outputs.o_docs }}
+      o_recon_backup: ${{ steps.engine.outputs.o_recon }}
+      o_smoke: ${{ steps.engine.outputs.o_reopen }}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Compute CONFIRM_EXPECTED (anti-rejeu = date du jour UTC) + auto-CONFIRM planifié
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-        run: |
-          set -euo pipefail
-          today="iso-prod-$(date -u +%F)"
-          echo "CONFIRM_EXPECTED=${today}" >> "$GITHUB_ENV"
-          # CD-native-v2 : un run PLANIFIÉ n'a pas d'input CONFIRM (inputs.* vides
-          # hors workflow_dispatch) → la PLANIFICATION EST le GO (0 owner-in-the-loop).
-          # On matérialise le CONFIRM du jour pour que la GARDE G3 passe (le motif
-          # anti-rejeu reste la date du jour). Un dispatch manuel garde le CONFIRM
-          # tapé par l'owner (env de job depuis inputs.CONFIRM), inchangé.
-          if [ "$EVENT_NAME" = "schedule" ]; then
-            echo "CONFIRM=${today}" >> "$GITHUB_ENV"
-            echo "auto-CONFIRM (schedule) = ${today}"
-          fi
-
-      - name: Setup Node 22
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "22"
-
-      # G3 in EVERY MODE (chain, restore, list; DRY included), before any kubectl
-      # write, Secret write or Job. The CLI re-checks it before each Secret write
-      # and each Job.
-      - name: G3 CONFIRM (anti-replay, every MODE)
-        run: node "$CLI" confirm
-
-      # e2e contract: a malformed CYCLE_ID fails BEFORE any kubectl action.
-      - name: e2e — validate CYCLE_ID
-        if: ${{ env.CYCLE_ID != '' }}
-        run: node deploy/ci/bascule-preprod/served-ids.mjs validate-cycle-id
-
-      # RUNNER KUBECTL-ONLY : plus AUCUN outil de données/S3 sur le runner (0
-      # postgresql-client, 0 s5cmd, 0 aws). Le runner ne fait que kubectl (pilotage
-      # + dispatch/observe Jobs) + curl (smoke /health). pg_dump/pg_restore/aws-cli
-      # vivent dans les Jobs préprod (postgis:16-3.4, amazon/aws-cli) et le CronJob
-      # owner du dump prod. AUCUN téléchargement d'outil S3 ici.
-
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v4
-
-      - name: Configure kubeconfig (préprod)
-        # Token DÉDIÉ moindre-privilège (SA radar-ci-bascule-preprod), PAS le secret
-        # PARTAGÉ KUBE_CONFIG_DATA (scope plus large, utilisé par d'autres workflows :
-        # build-push-images / run-job / k8s-apply-mcp / rollback).
+      - uses: azure/setup-kubectl@v4
+      - name: Configure dedicated preprod credential
         env:
-          KUBE_CONFIG_B64: ${{ secrets.KUBE_CONFIG_DATA_BASCULE_PREPROD }}
+          KUBE_CONFIG_DATA_BASCULE_PREPROD: ${{ secrets.KUBE_CONFIG_DATA_BASCULE_PREPROD }}
         run: |
+          set -euo pipefail
           mkdir -p "$HOME/.kube"
-          printf '%s' "$KUBE_CONFIG_B64" | base64 -d > "$HOME/.kube/config"
+          if printf '%s' "$KUBE_CONFIG_DATA_BASCULE_PREPROD" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
+            printf '%s' "$KUBE_CONFIG_DATA_BASCULE_PREPROD" | base64 -d > "$HOME/.kube/config"
+          else
+            printf '%s' "$KUBE_CONFIG_DATA_BASCULE_PREPROD" > "$HOME/.kube/config"
+          fi
           chmod 600 "$HOME/.kube/config"
-
-      # Contrôle POSITIF du cluster cible AVANT tout write kubectl (identique au
-      # pré-vol de run-job.yaml / build-push-images.yml).
-      - name: Pre-flight — assert target cluster
-        env:
-          EXPECTED_KUBE_APISERVER_HOST: ${{ vars.EXPECTED_KUBE_APISERVER_HOST }}
-        run: |
-          set -euo pipefail
-          DEFAULT_HOST='hlhedx.c1.bhs5.k8s.ovh.net'
-          expected="${EXPECTED_KUBE_APISERVER_HOST:-$DEFAULT_HOST}"
-          server="$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
-          host="${server#*://}"; host="${host%%/*}"; host="${host%%:*}"
-          echo "kubeconfig apiserver host : ${host:-<none>}"
-          echo "expected apiserver host   : ${expected}"
-          if [ "$host" != "$expected" ]; then
-            echo "::error title=Wrong cluster — bascule refused::kubeconfig targets '${host:-<none>}' but expected '${expected}'."
-            exit 1
-          fi
-          kubectl -n "$PREPROD_NAMESPACE" get deploy radar-api -o name
-          echo "pre-flight cluster OK — ${expected} / ${PREPROD_NAMESPACE}"
-
-      # ── DUAL-KUBECONFIG (déclencheur dump S1 = cluster/namespace PROD) ──────
-      # Le déclencheur S1 patche le CronJob `radar-db-backup-prod` dans la PROD
-      # (`radar-immobilier`) : le kubeconfig préprod par défaut n'a PAS le RBAC
-      # prod (403). On monte un kubeconfig PROD DÉDIÉ dans un FICHIER SÉPARÉ
-      # (secret KUBE_CONFIG_DATA_PROD_TRIGGER = token name-scopé patch de CE
-      # CronJob + VAP suspend-only, SA radar-ci-trigger-prod) et on exporte
-      # DUMP_KUBECONFIG (lu par bascule.mjs, utilisé UNIQUEMENT sur les 2 patch
-      # cronjob prod ; tout le reste reste sur le kubeconfig préprod par défaut).
-      # RENOMMAGE CD-native-v2 : ce token 0-foothold s'appelait KUBE_CONFIG_DATA_PROD ;
-      # ce nom désigne désormais la SA d'APPLY du bundle (radar-ci-bascule-prod),
-      # d'où KUBE_CONFIG_DATA_PROD_TRIGGER pour le déclencheur name-scopé.
-      # Joué HORS DRY (pas de token prod avant l'apply ; le DRY ne trigger pas ;
-      # un run PLANIFIÉ n'est pas DRY → le déclencheur joue).
-      # MODE=restore|list: no S1 → no PROD kubeconfig at all.
-      - name: Configure kubeconfig PROD (déclencheur dump S1)
-        if: ${{ !inputs.DRY_RUN && env.MODE == 'chain' }}
-        env:
-          KUBE_CONFIG_B64: ${{ secrets.KUBE_CONFIG_DATA_PROD_TRIGGER }}
-        run: |
-          set -euo pipefail
-          mkdir -p "$HOME/.kube"
-          printf '%s' "$KUBE_CONFIG_B64" | base64 -d > "$HOME/.kube/config-prod"
-          chmod 600 "$HOME/.kube/config-prod"
-          echo "DUMP_KUBECONFIG=$HOME/.kube/config-prod" >> "$GITHUB_ENV"
-
-      # Contrôle POSITIF du cluster PROD (kubeconfig dump) — LOCAL (config view,
-      # aucun appel API : le token est name-scopé patch-only). Refuse si le
-      # kubeconfig prod ne cible pas le cluster attendu.
-      - name: Pre-flight — assert PROD cluster (kubeconfig dump)
-        if: ${{ !inputs.DRY_RUN && env.MODE == 'chain' }}
-        env:
-          EXPECTED_KUBE_APISERVER_HOST_PROD: ${{ vars.EXPECTED_KUBE_APISERVER_HOST_PROD || vars.EXPECTED_KUBE_APISERVER_HOST }}
-        run: |
-          set -euo pipefail
-          DEFAULT_HOST='hlhedx.c1.bhs5.k8s.ovh.net'
-          expected="${EXPECTED_KUBE_APISERVER_HOST_PROD:-$DEFAULT_HOST}"
-          server="$(kubectl --kubeconfig "$HOME/.kube/config-prod" config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
-          host="${server#*://}"; host="${host%%/*}"; host="${host%%:*}"
-          echo "PROD kubeconfig apiserver host : ${host:-<none>}"
-          echo "expected PROD apiserver host   : ${expected}"
-          if [ "$host" != "$expected" ]; then
-            echo "::error title=Wrong PROD cluster — bascule refused::dump kubeconfig targets '${host:-<none>}' but expected '${expected}'."
-            exit 1
-          fi
-          echo "pre-flight PROD cluster OK — ${expected} (déclencheur dump S1)"
-
-      # ── S0 ────────────────────────────────────────────────────────────────
-      - name: S0 preflight (binaires + secrets + EXPECTED_DATABASE)
-        if: ${{ env.MODE == 'chain' }}
-        run: node "$CLI" preflight
-
-      # docs-sync Secret REWRITTEN BY THE BASCULE (no k8s watcher), BEFORE the
-      # quiesce and any destructive step (like the backup Secrets below): a missing
-      # GitHub secret, pre-created Secret or RBAC fails here, never after S2.
-      # Values from the environment secrets (guard ^[0-9a-f]{32,64}$, fail-closed)
-      # → `kubectl replace` of the pre-created Secret (--dry-run=server first; 0600
-      # file in a 0700 temp dir; never argv/log). Durable least-privilege
-      # credential: not blanked afterwards. DRY_RUN: server dry-run only (nothing
-      # written). MODE=restore signs its copy with radar-backup-restore-docs.
-      - name: docs-sync Secret — rewrite from GitHub (MODE=chain, before the quiesce)
-        id: docs_secret_fill
-        if: ${{ env.MODE == 'chain' && !inputs.DRY_RUN }}
-        env:
-          RADAR_DOCS_SYNC_ACCESS_KEY: ${{ secrets.RADAR_DOCS_SYNC_ACCESS_KEY }}
-          RADAR_DOCS_SYNC_SECRET_KEY: ${{ secrets.RADAR_DOCS_SYNC_SECRET_KEY }}
-        run: node "$CLI" docs-secret-fill
-
-      - name: docs-sync Secret — check only (MODE=chain DRY, server dry-run, nothing written)
-        if: ${{ env.MODE == 'chain' && inputs.DRY_RUN }}
-        env:
-          RADAR_DOCS_SYNC_ACCESS_KEY: ${{ secrets.RADAR_DOCS_SYNC_ACCESS_KEY }}
-          RADAR_DOCS_SYNC_SECRET_KEY: ${{ secrets.RADAR_DOCS_SYNC_SECRET_KEY }}
-        run: node "$CLI" docs-secret-fill --check
-
-      - name: S0 preflight (MODE=restore|list — backup bucket + identities)
-        if: ${{ env.MODE != 'chain' }}
-        run: node "$CLI" preflight-backup
-
-      # Dedicated preprod identities REWRITTEN by the bascule before first use
-      # (same mechanism as docs-sync: pre-created Secrets, `kubectl replace
-      # --dry-run=server` then `replace`, keys guarded ^[0-9a-f]{32,64}$, values via
-      # env: only, never argv/log). list: radar-backup-reader-preprod; restore: +
-      # radar-backup-restore-docs. BACKUP_BUCKET = fixed value from the var.
-      - name: Write backup Secrets from GitHub (environment radar-bascule)
-        if: ${{ env.MODE != 'chain' }}
+      - name: Restore on deployed images (no 6H hook, no refresh)
+        id: engine
         env:
           RADAR_BACKUP_READER_PREPROD_ACCESS_KEY: ${{ secrets.RADAR_BACKUP_READER_PREPROD_ACCESS_KEY }}
           RADAR_BACKUP_READER_PREPROD_SECRET_KEY: ${{ secrets.RADAR_BACKUP_READER_PREPROD_SECRET_KEY }}
           RADAR_BACKUP_RESTORE_DOCS_ACCESS_KEY: ${{ secrets.RADAR_BACKUP_RESTORE_DOCS_ACCESS_KEY }}
           RADAR_BACKUP_RESTORE_DOCS_SECRET_KEY: ${{ secrets.RADAR_BACKUP_RESTORE_DOCS_SECRET_KEY }}
-        run: node "$CLI" backup-secrets-fill
-
-      # ══════════════ MODE=list : read-only, nothing else runs ══════════════
-      - name: backup-list (Job read-only — backups available)
-        if: ${{ env.MODE == 'list' }}
-        run: node "$CLI" backup-list
-
-      - name: backup-list artefact (backup-list-immo-<CYCLE_ID|run_id>)
-        if: ${{ env.MODE == 'list' }}
+        run: make -f deploy/cutover/operator.mk run RELEASE=deployed ENV=preprod
+      - name: Publish backup list adapter
+        if: env.MODE == 'list'
         uses: actions/upload-artifact@v4
         with:
           name: backup-list-immo-${{ inputs.CYCLE_ID || github.run_id }}
-          path: ${{ github.workspace }}/.bascule-work/backup-list.json
+          path: .bascule-work/backup-list.json
+          include-hidden-files: true
           if-no-files-found: error
-          retention-days: 7
-
-      # ══════════════ MODE=restore : R0 resolve BEFORE any mutation ══════════════
-      # Read-only Job: BACKUP_ID → date D, manifest status 'complete', 24 h guard
-      # for `latest` (ALLOW_STALE_BACKUP), dump sidecar sha256 + sizes → PIN
-      # (backup-pin.json) re-checked by every later Job. A refusal stops here:
-      # preprod is never quiesced for a backup that cannot be restored.
-      - name: R0 backup-resolve (Job read-only — BACKUP_ID → date + guards + PIN)
-        id: resolve
-        if: ${{ env.MODE == 'restore' }}
-        run: node "$CLI" backup-resolve
-
-      # ── S0.b (advisory) — prédiction précoce de la mémoire de collecte ─────
-      # Job PRÉPROD (read-only) qui liste `runs/` de PROD_DOCS : prédit si la copie
-      # S3 amènera la mémoire de collecte → delta. ADVISORY : `continue-on-error`
-      # rend le Job non bloquant (le runner ne lit que .status). Information only:
-      # the bascule itself never refreshes.
-      - name: S0.b precheck-runs (advisory, Job cible PROD_DOCS)
-        if: ${{ env.MODE == 'chain' }}
-        continue-on-error: true
-        run: node "$CLI" precheck-runs --prod
-
-      # ══════════════ DRY_RUN : rien de destructif ══════════════
-      # 0 S3 runner : la copie réelle n'est PAS jouée en DRY (dispatchée en
-      # exécution). Le signal DRY = Job recon informatif (dest ⊇ src, verdict).
-      - name: S3 copy-docs (DRY — copie non jouée)
-        if: ${{ inputs.DRY_RUN && env.MODE == 'chain' }}
-        env:
-          DRY: "1"
-        run: node "$CLI" copy-docs
-
-      - name: S3b recon (Job informatif en DRY)
-        if: ${{ inputs.DRY_RUN && env.MODE == 'chain' }}
-        continue-on-error: true
-        run: node "$CLI" recon
-
-      # MODE=restore DRY: full read-only plan of the docs state at D (every
-      # inventory object restorable from the backup?), 0 copy.
-      - name: S3' docs-restore (DRY — plan only, 0 copy)
-        if: ${{ inputs.DRY_RUN && env.MODE == 'restore' }}
-        env:
-          DRY: "1"
-        run: node "$CLI" docs-restore
-
-      # ══════════════ EXÉCUTION : séquence complète fail-closed ══════════════
-      # QUIESCE — enregistre les replicas d'origine puis scale 0 + suspend, et
-      # attend le drain, pour que la GARDE G2 de S2 passe. (Owner peut le faire à
-      # la main via SKIP_QUIESCE ; l'UN-QUIESCE plus bas reste automatisé.)
-      - name: QUIESCE consommateurs préprod (avant S2)
-        id: quiesce
-        if: ${{ !inputs.DRY_RUN && !inputs.SKIP_QUIESCE && env.MODE != 'list' }}
-        run: node "$CLI" quiesce
-
-      # The recorded replicas leave the runner right away: if a job-level timeout
-      # (a cancellation) cuts the `always()` un-quiesce, this file is what
-      # `node bascule.mjs unquiesce` needs to put preprod back.
-      - name: quiesce-state artefact (bascule-quiesce-state-<run_id>)
-        if: ${{ always() && steps.quiesce.outcome != 'skipped' && !inputs.DRY_RUN && env.MODE != 'list' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: bascule-quiesce-state-${{ github.run_id }}
-          path: ${{ github.workspace }}/.bascule-work/quiesce-state.json
-          if-no-files-found: warn
-          retention-days: 7
-
-      - name: S1 dump prod (DÉCLENCHEUR T1 — patch CronJob + Job freshness)
-        id: dump
-        if: ${{ !inputs.DRY_RUN && env.MODE == 'chain' }}
-        run: node "$CLI" dump
-
-      - name: S2 restore préprod (G2 quiesce + G1 Job rollback + Jobs restore)
-        id: restore_chain
-        if: ${{ !inputs.DRY_RUN && env.MODE == 'chain' }}
-        run: node "$CLI" restore
-
-      - name: S2 restore préprod FROM backup (G2 + G1 + Job pg/<D>/radar.dump, sha256 verified)
-        id: restore_backup
-        if: ${{ !inputs.DRY_RUN && env.MODE == 'restore' }}
-        run: node "$CLI" restore-backup
-
-      - name: S2c migrate préprod (iso-prod, Job in-cluster)
-        id: migrate
-        if: ${{ !inputs.DRY_RUN && env.MODE != 'list' }}
-        run: node "$CLI" migrate
-
-      # docs-sync = Job radar-api (aws-sdk CopyObject + grant), reads the Secret
-      # rewritten before the quiesce (step docs_secret_fill).
-      - name: S3 copy-docs (Job radar-api aws-sdk CopyObject + grant, additif)
-        id: docs_chain
-        if: ${{ !inputs.DRY_RUN && env.MODE == 'chain' }}
-        run: node "$CLI" copy-docs
-
-      - name: S3b recon (Job list-objects-v2 diff Key+Size — dest ⊇ src, fatal)
-        id: recon_chain
-        if: ${{ !inputs.DRY_RUN && env.MODE == 'chain' }}
-        run: node "$CLI" recon
-
-      # MODE=restore: docs state at D from docs-inventory/<D>.json, server-side
-      # CopyObject from the backup bucket (versioned), additive; then recon
-      # preprod ⊇ inventory(D). G4 (flip) re-runs this recon.
-      - name: S3' docs-restore FROM backup (Job server-side CopyObject, state at D, additive)
-        id: docs_backup
-        if: ${{ !inputs.DRY_RUN && env.MODE == 'restore' }}
-        run: node "$CLI" docs-restore
-
-      - name: S3b' recon-backup (Job — preprod docs ⊇ docs-inventory(D), Key+Size, fatal)
-        id: recon_backup
-        if: ${{ !inputs.DRY_RUN && env.MODE == 'restore' }}
-        run: node "$CLI" recon-backup
-
-      # S5 ISOLABLE : dépend du kubectl préprod (RBAC enabler k8s).
-      - name: S5 flip serving (retrait GEO_DOCUMENTS_REPOINT — G4 recon)
-        id: flip
-        if: ${{ !inputs.DRY_RUN && !inputs.SKIP_FLIP && env.MODE != 'list' }}
-        run: node "$CLI" flip
-
-      # UN-QUIESCE — rétablit préprod (scale-back aux replicas enregistrés +
-      # rollout status) APRÈS le flip et AVANT le smoke. `if: always()` : joué
-      # Runs after failures too; Node keeps preprod closed unless migration
-      # and database/document restoration succeeded. The workflow forwards
-      # outcomes only. No-op if no quiesce was recorded in this run
-      # (and SKIP_QUIESCE≠true). Own budget: 2 rollouts × ROLLOUT_TIMEOUT 300 s.
-      - name: UN-QUIESCE consommateurs préprod (reprise — après S5, avant S7)
-        id: unquiesce
-        if: ${{ always() && !inputs.DRY_RUN && env.MODE != 'list' }}
-        timeout-minutes: 15
-        env:
-          O_MIGRATE: ${{ steps.migrate.outcome }}
-          O_RESTORE: ${{ env.MODE == 'restore' && steps.restore_backup.outcome || steps.restore_chain.outcome }}
-          O_DOCS: ${{ env.MODE == 'restore' && steps.docs_backup.outcome || steps.docs_chain.outcome }}
-        run: node "$CLI" unquiesce
-
-      # NO S6: the bascule never refreshes (owner decision: "a restore is a
-      # restore"). The refresh is the CronJob radar-refresh-pv (its own schedule)
-      # or bascule-refresh.yml on demand — never triggered by this workflow.
-
-      # ── S7 : smoke (read-only ; joué aussi en DRY) ─────────────────────────
-      - name: S7 smoke préprod/health (db.ok + objectStore.ok)
-        id: smoke
-        if: ${{ env.MODE != 'list' }}
-        run: node "$CLI" smoke
-
-      # ── e2e O1 (CYCLE_ID set, not DRY): zone references immo holds, read
-      # READ-ONLY from the RESTORED preprod DB by a Job, published through the
-      # pre-created ConfigMaps immo-served-refs-<n>, reassembled here (configmaps
-      # get), handed to the job `served-ids` as an artefact. No HTTP endpoint.
-      - name: e2e — served refs (Job read-only on the restored DB → ConfigMaps)
-        id: served_refs
-        if: ${{ !inputs.DRY_RUN && env.MODE != 'list' && env.CYCLE_ID != '' }}
-        run: node "$CLI" served-refs
-
-      - name: e2e — artefact immo-served-refs-<CYCLE_ID> (for the served-ids job)
-        if: ${{ !inputs.DRY_RUN && env.MODE != 'list' && env.CYCLE_ID != '' }}
+      - name: Extract references (separate from cutover availability gate)
+        if: env.MODE == 'restore' && env.CYCLE_ID != ''
+        run: make -f deploy/cutover/operator.mk report-refs ENV=preprod
+      - name: Publish served references
+        if: env.MODE == 'restore' && env.CYCLE_ID != ''
         uses: actions/upload-artifact@v4
         with:
           name: immo-served-refs-${{ inputs.CYCLE_ID }}
-          path: ${{ github.workspace }}/.bascule-work/served-refs/
+          path: .bascule-work/served-refs/
+          include-hidden-files: true
           if-no-files-found: error
-          retention-days: 7
-          overwrite: true
-
-      # ── Failure AFTER a successful S2 (inherited from the chain, unchanged):
-      # the un-quiesce put preprod back in service on the database of day D while
-      # docs/recon/flip may be incomplete, and nothing rolled back. The summary
-      # says it explicitly, with the G1 rollback procedure (debt noted in the PR).
-      - name: Failure after S2 — summary (preprod state + G1 rollback procedure)
-        if: ${{ failure() && !inputs.DRY_RUN && env.MODE != 'list' && (steps.restore_chain.outcome == 'success' || steps.restore_backup.outcome == 'success') }}
-        env:
-          O_MIGRATE: ${{ steps.migrate.outcome }}
-          O_DOCS: ${{ env.MODE == 'restore' && steps.docs_backup.outcome || steps.docs_chain.outcome }}
-          O_RECON: ${{ env.MODE == 'restore' && steps.recon_backup.outcome || steps.recon_chain.outcome }}
-          O_FLIP: ${{ steps.flip.outcome }}
-          O_UNQUIESCE: ${{ steps.unquiesce.outcome }}
-          O_SMOKE: ${{ steps.smoke.outcome }}
-        run: node "$CLI" failure-summary
-
-      # ── Rollback DURABLE : les DUMPS ne transitent plus par le runner ──────
-      # Le dump prod (S1, CronJob owner) ET le dump rollback préprod (G1, Job)
-      # vivent dans le bucket de backups (radar-immobilier-backups-preprod) —
-      # DURABLES, hors workdir éphémère. On n'uploade en artefact GitHub que les
-      # POINTEURS/états (clés S3 + T1 + quiesce/recon), en `if: always()` pour la
-      # traçabilité même sur échec. Restaurer le rollback : rejouer le Job restore
-      # avec DUMP_KEY = contenu de LATEST_PREPROD_ROLLBACK_KEY.txt (voir README).
-      # MODE=restore adds backup-pin.json (backup date + manifest/dump sha256).
-      - name: Rollback pointeurs + états (clés S3, PAS de dump runner)
-        if: ${{ always() && !inputs.DRY_RUN && env.MODE != 'list' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: bascule-rollback-${{ github.run_id }}
-          path: |
-            ${{ github.workspace }}/.bascule-work/T1.txt
-            ${{ github.workspace }}/.bascule-work/LATEST_PROD_DUMP_KEY.txt
-            ${{ github.workspace }}/.bascule-work/LATEST_PREPROD_ROLLBACK_KEY.txt
-            ${{ github.workspace }}/.bascule-work/quiesce-state.json
-            ${{ github.workspace }}/.bascule-work/recon.ok.json
-            ${{ github.workspace }}/.bascule-work/backup-pin.json
-          if-no-files-found: warn
-          retention-days: 7
-
-  # ═══════════════════════════════════════════════════════════════════════════
-  # e2e CONTRACT (CYCLE_ID set by bascule-e2e.yml) — two jobs WITHOUT any cluster
-  # credential (the kubeconfigs stay in `bascule`):
-  #   served-ids  immo-served-canonical-ids-<CYCLE_ID>: zone ids immo references,
-  #               computed with the PUBLISHED builder @sentropic/geo (same pin as
-  #               the geo leg, installed outside the workspace) from the artefact
-  #               immo-served-refs-<CYCLE_ID> (O1: extracted read-only from the
-  #               restored preprod DB by the `bascule` job; no HTTP endpoint).
-  #   cycle-leg   cycle-leg-immo-<CYCLE_ID>: `legs.immo` (run, sha, MODE, backup
-  #               date + sha256, verdict pg/s3). Reports only, always runs.
-  # A standalone or scheduled bascule (CYCLE_ID empty) never runs them.
-  # ═══════════════════════════════════════════════════════════════════════════
   served-ids:
     needs: bascule
-    if: ${{ inputs.CYCLE_ID != '' && !inputs.DRY_RUN && (inputs.MODE || 'chain') != 'list' && needs.bascule.result == 'success' }}
+    if: ${{ inputs.CYCLE_ID != '' && !inputs.DRY_RUN && (inputs.MODE || 'restore') != 'list' && needs.bascule.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
@@ -679,14 +155,14 @@ jobs:
 
   cycle-leg:
     needs: [bascule, served-ids]
-    if: ${{ always() && inputs.CYCLE_ID != '' && (inputs.MODE || 'chain') != 'list' }}
+    if: ${{ always() && inputs.CYCLE_ID != '' && (inputs.MODE || 'restore') != 'list' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       contents: read
     env:
       CYCLE_ID: ${{ inputs.CYCLE_ID }}
-      MODE: ${{ inputs.MODE || 'chain' }}
+      MODE: ${{ inputs.MODE || 'restore' }}
       BACKUP_ID: ${{ needs.bascule.outputs.backup_id }}
       BACKUP_DATE: ${{ needs.bascule.outputs.backup_date }}
       MANIFEST_SHA256: ${{ needs.bascule.outputs.manifest_sha256 }}
