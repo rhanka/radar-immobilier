@@ -1,10 +1,3 @@
-#!/usr/bin/env bash
-# Exercise the documented verifier in an ordinary clean checkout, without backup Git.
-set -euo pipefail
-[[ ${ENV:-} == test-bascule-fix ]]
-out=$PWD/tmp/bascule-fix-evidence/astra
-revision=$(git --git-dir="$out/backup.git" rev-parse HEAD)
-checkout=$(mktemp -d "$out/checkout.XXXXXX")
 git clone --no-local --quiet "$out/backup.git" "$checkout"
 [[ ! -e $checkout/tmp/bascule-fix-evidence ]]
 if ! make --no-print-directory -C "$checkout" -f tools/make/bascule-fix.mk verify ENV="$ENV" > "$out/clean-verify.log" 2>&1; then
