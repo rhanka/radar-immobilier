@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # Read only projected identities, stdout and termination metadata; never recreate a Job.
 collect_job() {
   local action=$1 uid image image_id code job_uid job_image release_sha condition
