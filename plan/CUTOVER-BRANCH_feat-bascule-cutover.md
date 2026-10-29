@@ -22,6 +22,7 @@
 ## Feedback Loop
 - [x] Remove the retired `radar-test-api-paniers-pwe` containers and test volumes through the authorized Make cleanup target.
 - [x] Validation fix: install Make in the controller test container; first runtime pass exposed 44 `spawn make ENOENT` failures.
+- [x] Run typechecking across every workspace and include existing 6H activation/attachment and 6K cutover regressions in the isolated PostgreSQL target.
 - [x] Existing bundle/backup provisioning also mutates captured schedules; apply the approved shared-lock mechanism there and retain its namespace boundary.
 - [x] CUTOVER-EX1: allow `api/Dockerfile` solely to bundle the required migration entrypoint; no runtime base change; rollback by reverting that entry.
 - [ ] Lot 0 (owner/infrastructure): repair only `radar-bascule/KUBE_CONFIG_DATA_BASCULE_PREPROD`, verify dedicated identity and reads, complete old restoration before replacement installation. Remote actions excluded by owner instruction.
