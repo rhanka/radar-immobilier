@@ -1,3 +1,4 @@
+/* global Buffer, URL, process */
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { runCdpQualification } from './cdp-probe.mjs';

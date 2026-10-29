@@ -1,3 +1,4 @@
+/* global Event, EventTarget, MessageEvent, queueMicrotask */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { connectTarget } from '../../deploy/base-preprod/cdp-client.mjs';

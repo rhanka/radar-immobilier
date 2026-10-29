@@ -1,3 +1,4 @@
+/* global Headers, Response, URL */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readCheck } from '../../deploy/base-preprod/public-probe.mjs';

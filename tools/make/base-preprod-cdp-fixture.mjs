@@ -1,3 +1,4 @@
+/* global AbortSignal, Event, EventTarget, MessageEvent, Response, URL, queueMicrotask */
 import vm from 'node:vm';
 import { fixtureFetch } from './base-preprod-probe-fixture.mjs';
 export function cdpFixture(config, cases, failure = '') {
@@ -12,6 +13,7 @@ export function cdpFixture(config, cases, failure = '') {
       return business(path, options);
     } });
   class Socket extends EventTarget {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- the fixture exposes the live socket to the test
     constructor() { super(); socket = this; queueMicrotask(() => this.dispatchEvent(new Event('open'))); }
     send(data) {
       const { id, method, params } = JSON.parse(data);

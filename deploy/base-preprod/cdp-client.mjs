@@ -1,3 +1,4 @@
+/* global clearTimeout, setTimeout */
 // Client CDP borné à la cible dédiée ; aucun en-tête ni corps réseau conservé.
 export async function connectTarget(url, WebSocketClass) {
   const socket = new WebSocketClass(url), pending = new Map();
@@ -9,7 +10,7 @@ export async function connectTarget(url, WebSocketClass) {
     const request = pending.get(message.id);
     if (!request) return;
     clearTimeout(request.timer); pending.delete(message.id);
-    message.error ? request.reject(new Error('cdp_command_failed')) : request.resolve(message.result);
+    if (message.error) request.reject(new Error('cdp_command_failed')); else request.resolve(message.result);
   });
   socket.addEventListener('close', () => {
     for (const request of pending.values()) { clearTimeout(request.timer); request.reject(new Error('cdp_connection_closed')); }

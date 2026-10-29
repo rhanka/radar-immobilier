@@ -1,3 +1,4 @@
+/* global AbortSignal, fetch */
 // Contrôles HTTP sans export de corps, cookie, jeton ou message de parsing.
 export function resolvePath(path, config) {
   return path.replaceAll(':workspaceId', encodeURIComponent(config.workspaceId))
