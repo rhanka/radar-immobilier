@@ -25,4 +25,4 @@ case ${1:-} in
     command='npm ci --ignore-scripts --silent && npm run db:migrate --workspace=api && npm run test --workspace=api -- tests/integration/database-cutover.spec.ts src/services/facets/activation src/services/facets/attachment src/services/facets/base-api-personal-activation src/services/facets/base-api-activation src/services/facets/lots/lot-cutover --maxWorkers=2';;
   *) exit 2;;
 esac
-"${compose[@]}" run --rm --no-deps -T api bash -ec "$command"
+"${compose[@]}" run --rm --no-deps -T -e TEST_PATTERN api bash -ec "$command"

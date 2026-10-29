@@ -26,6 +26,7 @@
 - [x] Validation fix: synchronously flush Kubernetes fixture JSON before process exit; cover responses larger than the stdout pipe buffer after 18 truncation failures.
 - [x] Lint fix: restore the backup self-test's filesystem import and delete the retired reporting name validator.
 - [x] Allow focused controller reproductions with `TEST_PATTERN` while retaining the complete default campaign and unconditional backup self-test.
+- [x] Explicitly forward `TEST_PATTERN` into the isolated container instead of relying on Compose to inherit host variables.
 - [x] Existing bundle/backup provisioning also mutates captured schedules; apply the approved shared-lock mechanism there and retain its namespace boundary.
 - [x] CUTOVER-EX1: allow `api/Dockerfile` solely to bundle the required migration entrypoint; no runtime base change; rollback by reverting that entry.
 - [ ] Lot 0 (owner/infrastructure): repair only `radar-bascule/KUBE_CONFIG_DATA_BASCULE_PREPROD`, verify dedicated identity and reads, complete old restoration before replacement installation. Remote actions excluded by owner instruction.
