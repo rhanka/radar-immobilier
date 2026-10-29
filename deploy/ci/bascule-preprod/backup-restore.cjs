@@ -455,17 +455,9 @@ async function listAll(c, Bucket, Prefix, counters) {
   } while (ContinuationToken);
   return all;
 }
-async function listAllVersions(c, Bucket, Prefix) {
-  const all = [];
-  let KeyMarker; let VersionIdMarker;
-  do {
-    const out = await c.s3.send(new c.sdk.ListObjectVersionsCommand({ Bucket, Prefix, KeyMarker, VersionIdMarker }));
-    for (const v of out.Versions || []) all.push(v);
-    const more = !!out.IsTruncated;
-    KeyMarker = more ? out.NextKeyMarker : undefined;
-    VersionIdMarker = more ? out.NextVersionIdMarker : undefined;
-  } while (KeyMarker);
-  return all;
+async function listVersionsFor(c, Bucket, key) {
+  const out = await c.s3.send(new c.sdk.ListObjectVersionsCommand({ Bucket, Prefix: LAYOUT.docsPrefix + key, MaxKeys: 1000 }));
+  return indexVersions(out.Versions).get(key) || [];
 }
 async function downloadWithSha(c, Bucket, Key, VersionId, file) {
   const got = await c.s3.send(new c.sdk.GetObjectCommand(VersionId ? { Bucket, Key, VersionId } : { Bucket, Key }));
@@ -611,42 +603,62 @@ async function runFetchDump({ cfg, reader, log }) {
   return { exitCode: EXIT.OK, termination: { ok: true, step: 'fetch-dump', date: cfg.date, pgSha256: got.sha256, pgSizeBytes: got.size } };
 }
 
-// Entries without a recorded version when versions cannot be listed: HEAD the
-// current backup copy (copy identity, GetObject on docs/*); accepted only when
-// its size and ETag are the inventory's (same content as at D).
-async function resolveByHead(copier, cfg, plan, destIndex) {
+// Resolve every candidate before copying. Probe version-list permission once;
+// concurrent unpinned workers await that verdict before issuing more listings.
+async function resolveCandidates(copier, cfg, plan, destIndex, { resolveVersions = false, createdAtMs, log, counters } = {}) {
   let next = 0;
+  let listingAllowed = resolveVersions;
+  let probe;
+  const list = async (e) => {
+    try { return await listVersionsFor(copier, cfg.backupBucket, e.key); } catch (err) {
+      if (!(err.name === 'AccessDenied' || err.$metadata?.httpStatusCode === 403)) throw err;
+      if (listingAllowed) log('WARN version listing of <backup>/docs/ not permitted to the copy identity: recorded versions and unpinned current objects checked by HEAD');
+      listingAllowed = false;
+      return null;
+    }
+  };
+  const versionsFor = async (e) => {
+    if (!probe) { probe = list(e); return probe; }
+    await probe;
+    return listingAllowed ? list(e) : null;
+  };
   const worker = async () => {
     while (next < plan.needsHead.length) {
       let e = plan.needsHead[next++];
-      const h = await headOrNull(copier, cfg.backupBucket, LAYOUT.docsPrefix + e.key, e.versionId);
-      if (e.versionId) {
-        const c = chooseVersion(e, h ? [{ versionId: String(e.versionId), etag: normEtag(h.ETag), size: Number(h.ContentLength) }] : []);
-        if (c.error) {
-          plan.unresolved += 1;
-          plan.unresolvedReasons[c.error] = (plan.unresolvedReasons[c.error] || 0) + 1;
-          continue;
+      let c;
+      if (!e.versionId && resolveVersions) {
+        const versions = await versionsFor(e);
+        if (versions) {
+          c = chooseVersion(e, versions, createdAtMs);
+          if (!c.error && counters) counters.versionsResolved += 1;
         }
-        e = acceptSelection(plan, e, c);
-        if (destUpToDate(e, destIndex.get(e.key))) { plan.upToDate += 1; continue; }
-        plan.toCopy.push({ key: e.key, versionId: String(e.versionId), size: Number(e.size) });
-        plan.bytesToCopy += Number(e.size);
-        plan.how['version-id-head-checked'] = (plan.how['version-id-head-checked'] || 0) + 1;
+      }
+      if (!c) {
+        if (counters) counters.headChecked += 1;
+        const h = await headOrNull(copier, cfg.backupBucket, LAYOUT.docsPrefix + e.key, e.versionId);
+        if (e.versionId) {
+          c = chooseVersion(e, h ? [{ versionId: String(e.versionId), etag: normEtag(h.ETag), size: Number(h.ContentLength) }] : []);
+          if (!c.error) c.how = 'version-id-head-checked';
+        } else {
+          c = h && Number(h.ContentLength) === e.size && normEtag(h.ETag) === e.backupEtag
+            ? { versionId: null, how: 'current-etag-checked' } : { error: h ? 'current-differs' : 'no-current' };
+        }
+      }
+      if (c.error) {
+        plan.unresolved += 1;
+        plan.unresolvedReasons[c.error] = (plan.unresolvedReasons[c.error] || 0) + 1;
         continue;
       }
-      if (h && Number(h.ContentLength) === e.size && normEtag(h.ETag) === e.backupEtag) {
-        plan.toCopy.push({ key: e.key, versionId: null, size: e.size });
-        plan.bytesToCopy += e.size;
-        plan.how['current-etag-checked'] = (plan.how['current-etag-checked'] || 0) + 1;
-      } else {
-        plan.unresolved += 1;
-        const why = h ? 'current-differs' : 'no-current';
-        plan.unresolvedReasons[why] = (plan.unresolvedReasons[why] || 0) + 1;
-      }
+      e = acceptSelection(plan, e, c);
+      if (destUpToDate(e, destIndex.get(e.key))) { plan.upToDate += 1; continue; }
+      plan.toCopy.push({ key: e.key, versionId: c.versionId, size: e.size });
+      plan.bytesToCopy += e.size;
+      plan.how[c.how] = (plan.how[c.how] || 0) + 1;
     }
   };
   await Promise.all(Array.from({ length: Math.min(cfg.concurrency, plan.needsHead.length) }, () => worker()));
   plan.needsHead = [];
+  plan.toCopy.sort((a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0);
 }
 
 async function runDocs({ cfg, reader, copier, log }) {
@@ -655,7 +667,7 @@ async function runDocs({ cfg, reader, copier, log }) {
   const sortedKeys = inventory.objects.filter((e) => e.state === 'backed-up').map((e) => e.key).sort();
   const destIndex = await listDestSharded(copier, cfg.dstBucket, sortedKeys);
   const plan = planDocsRestore({ inventory, destIndex });
-  if (plan.needsHead.length) await resolveByHead(copier, cfg, plan, destIndex);
+  if (plan.needsHead.length) await resolveCandidates(copier, cfg, plan, destIndex, { resolveVersions: true, createdAtMs: Date.parse(inventory.createdAt), log });
   log(`PLAN date=${cfg.date} inventory=${plan.objects} up_to_date=${plan.upToDate} to_copy=${plan.toCopy.length} ` +
     `bytes_to_copy=${plan.bytesToCopy} excluded=${plan.excluded} not_in_backup=${plan.notInBackup} unresolved=${plan.unresolved} ` +
     `reasons=${JSON.stringify(plan.unresolvedReasons)} how=${JSON.stringify(plan.how)} dest_objects=${destIndex.size} ` +
@@ -710,7 +722,7 @@ async function runRecon({ cfg, reader, copier, log }) {
   const candidates = inventory.objects.filter(e => e.state === 'backed-up' && e.versionId &&
     destIndex.has(e.key) && Number(destIndex.get(e.key).Size) !== Number(e.size));
   const plan = planDocsRestore({ inventory: { ...inventory, objects: candidates }, destIndex, verifyPinned: true });
-  if (plan.needsHead.length) await resolveByHead(copier, cfg, plan, destIndex);
+  if (plan.needsHead.length) await resolveCandidates(copier, cfg, plan, destIndex);
   const recon = reconInventory(inventory, destIndex, plan.expectedSizes);
   recon.ok = recon.ok && plan.unresolved === 0;
   log(`${recon.ok ? 'RECON OK' : 'RECON FAIL'} date=${cfg.date} checked=${recon.checked} missing=${recon.missing} ` +
