@@ -1,7 +1,7 @@
 # Feature: Sequential database cutover
 
 ## Objective
-- [ ] Implement the approved cutover design and overriding addendum, without remote execution.
+- [x] Implement the approved cutover design and overriding addendum, without remote execution.
 
 ## Scope / Guardrails
 - [x] Use the existing `tmp/bascule-cutover` worktree on `feat/bascule-cutover`.
@@ -27,6 +27,8 @@
 - [x] Lint fix: restore the backup self-test's filesystem import and delete the retired reporting name validator.
 - [x] Allow focused controller reproductions with `TEST_PATTERN` while retaining the complete default campaign and unconditional backup self-test.
 - [x] Explicitly forward `TEST_PATTERN` into the isolated container instead of relying on Compose to inherit host variables.
+- [x] Local validation (2026-10-29): syntax, repository ESLint, seven-workspace typecheck, 54 controller tests, 143 backup/reporting checks and 208 unit/PostgreSQL tests in 30 files passed. Seven non-blocking Svelte CSS warnings remain.
+- [x] Final cleanup: no Compose containers, volumes or networks remain for the retired PWE or cutover campaigns. Evidence: `tmp/cutover-evidence/validation.md` and its linked logs.
 - [x] Existing bundle/backup provisioning also mutates captured schedules; apply the approved shared-lock mechanism there and retain its namespace boundary.
 - [x] CUTOVER-EX1: allow `api/Dockerfile` solely to bundle the required migration entrypoint; no runtime base change; rollback by reverting that entry.
 - [ ] Lot 0 (owner/infrastructure): repair only `radar-bascule/KUBE_CONFIG_DATA_BASCULE_PREPROD`, verify dedicated identity and reads, complete old restoration before replacement installation. Remote actions excluded by owner instruction.
@@ -38,30 +40,30 @@
 - [x] No remote UAT; operational acceptance remains an owner action after installation.
 
 ## Plan / Todo (lot-based)
-- [ ] **Lot 1 — Standalone entry and release**
+- [x] **Lot 1 — Standalone entry and release**
   - [x] Read rules, design and addendum; confirm clean feature branch.
   - [x] Fixed environment mapping, strict manifest, generated build artifact.
   - [x] Standalone `syntax` gate: Bash/POSIX shell parsing, jq filter compilation and Git whitespace checks.
-  - [ ] Isolated validation tests; no dotenv loading.
-- [ ] **Lot 2 — Lock and recovery**
+  - [x] Isolated validation tests; no dotenv loading.
+- [x] **Lot 2 — Lock and recovery**
   - [x] Atomic lock, sanitized snapshot, checkpoints, liveness and CAS takeover.
   - [x] Lock every competing workflow for its whole mutation interval.
-  - [ ] Concurrency, stale executor and same-release refusal tests.
-- [ ] **Lot 3 — Closure and restoration**
+  - [x] Concurrency, stale executor and same-release refusal tests.
+- [x] **Lot 3 — Closure and restoration**
   - [x] Fixed inventory, network checks, UID-protected closure and drainage.
   - [x] Pinned additive documents before closure, bounded database restore.
-  - [ ] Race, interruption, pin and deadline tests.
-- [ ] **Lot 4 — Schema and data migration**
+  - [x] Race, interruption, pin and deadline tests.
+- [x] **Lot 4 — Schema and data migration**
   - [x] Destination backup in both environments and bounded sanitized Jobs.
   - [x] Validate approved production-subject roster; initialize missing state only; protected resume.
-  - [ ] PostgreSQL legacy/partial/scoped/revoked/6K regression tests.
-- [ ] **Lot 5 — Restart and complete reopening**
+  - [x] PostgreSQL legacy/partial/scoped/revoked/6K regression tests.
+- [x] **Lot 5 — Restart and complete reopening**
   - [x] Pin all required services and application CronJobs; require MCP.
   - [x] Private/public smoke; CAS all ingress specs; restore original schedules.
-  - [ ] Identity, authentication, conflict and reclosure tests.
-- [ ] **Lot 6 — Caller replacement and removal**
+  - [x] Identity, authentication, conflict and reclosure tests.
+- [x] **Lot 6 — Caller replacement and removal**
   - [x] Daily deployed release with null data hook; preserve list/restore reporting interfaces.
   - [x] Remove superseded vehicle and orchestration; update runbooks and RBAC.
-  - [ ] ESLint across the repository, controller tests and migration integration tests green.
-  - [ ] Review final diff and commit all authorized work; no push.
-  - [x] Delivery checkpoint: lot 5, atomic commit 4; runtime gates pending.
+  - [x] ESLint across the repository, controller tests and migration integration tests green.
+  - [x] Review final diff and commit all authorized work; no push.
+  - [x] Local delivery validated; infrastructure lot 0 and installed-environment acceptance remain owner-controlled.
