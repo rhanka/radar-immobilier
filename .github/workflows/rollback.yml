@@ -55,6 +55,10 @@ jobs:
             printf '%s' "$KUBE_CONFIG_DATA_PREPROD" > "$HOME/.kube/config"
           fi
           chmod 600 "$HOME/.kube/config"
+      - uses: ./deploy/cutover/lock-action
+        with:
+          action: lock
+          environment: preprod
       - name: Rollback (image-only)
         env:
           NAMESPACE: radar-immobilier-preprod
@@ -65,6 +69,12 @@ jobs:
         run: |
           echo "::warning title=Manual rollback (preprod)::reason: ${{ inputs.reason }}"
           bash deploy/ci/rollback-release.sh
+
+      - uses: ./deploy/cutover/lock-action
+        if: always() && env.CUTOVER_LOCK_RUN != ''
+        with:
+          action: release-lock
+          environment: preprod
 
   rollback-prod:
     if: inputs.environment == 'prod'
@@ -89,6 +99,10 @@ jobs:
             printf '%s' "$KUBE_CONFIG_DATA" > "$HOME/.kube/config"
           fi
           chmod 600 "$HOME/.kube/config"
+      - uses: ./deploy/cutover/lock-action
+        with:
+          action: lock
+          environment: prod
       - name: Rollback (image-only)
         env:
           NAMESPACE: radar-immobilier
@@ -99,3 +113,8 @@ jobs:
         run: |
           echo "::warning title=Manual rollback (prod)::reason: ${{ inputs.reason }}"
           bash deploy/ci/rollback-release.sh
+      - uses: ./deploy/cutover/lock-action
+        if: always() && env.CUTOVER_LOCK_RUN != ''
+        with:
+          action: release-lock
+          environment: prod
