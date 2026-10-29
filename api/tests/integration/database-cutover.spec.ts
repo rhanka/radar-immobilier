@@ -65,6 +65,19 @@ describeDb("release database cutover adapter", () => {
     const before = await snapshot(f);
     await expect(f.run()).rejects.toThrow(); expect(await snapshot(f)).toBe(before);
   });
+  it.each(["membership", "capability"])("should never regrant revoked legacy %s during initialization", async (right) => {
+    const f = await seeded();
+    const ws = (await f.pool.query("INSERT INTO workspaces(slug,label) VALUES($1,$2) RETURNING id", [f.plan.workspaceSlug, f.plan.workspaceLabel])).rows[0];
+    await f.pool.query("INSERT INTO workspace_memberships(workspace_id,account_id,status,revision,moderate_archive,manage_members) VALUES($1,$2,'active',1,true,true)", [ws.id, f.actor.id]);
+    if (right === "membership") {
+      await f.pool.query("INSERT INTO workspace_memberships(workspace_id,account_id,status,revision,revoked_at) VALUES($1,$2,'revoked',2,now())", [ws.id, f.member.id]);
+    } else {
+      await f.pool.query("UPDATE workspace_memberships SET manage_members=false WHERE account_id=$1", [f.actor.id]);
+      await f.pool.query("INSERT INTO workspace_membership_events(workspace_id,account_id,kind,capability,actor_id,reason) VALUES($1,$2,'capability_revoked','manage_members',$2,'synthetic revocation')", [ws.id, f.actor.id]);
+    }
+    const before = await snapshot(f);
+    await expect(f.run()).rejects.toThrow(); expect(await snapshot(f)).toBe(before);
+  });
   it("should reject a preprod-IdP substitution or conflicting destination before writes", async () => {
     const f = await seeded(); const before = await snapshot(f);
     await expect(migrateDatabaseCutover(f.db, { ...f.plan, actorSub: "preprod-idp-subject" }, f.evidence)).rejects.toThrow();
