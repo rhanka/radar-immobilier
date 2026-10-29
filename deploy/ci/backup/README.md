@@ -34,6 +34,13 @@ manifests/D.json             THE record of backup D (see below)
 manifests/latest.json        pointer: newest backup + latestComplete + firstBackupDate
 ```
 
+For a newly copied `backed-up` document, inventory `size` comes from a HEAD of
+the exact backup `VersionId` returned by `CopyObject`. The HEAD ETag must match
+the copy result before the object is marked backed up. Source listing metadata
+(`etag`, `lastModified`) can precede a concurrent source rewrite; listing size
+must never be combined with a later copy's version/ETag. Already-current entries
+use the size and version from the same backup version listing.
+
 `manifests/D.json` holds: `status`, start/end times, dump key + sha256 + size +
 TOC entry count, PostgreSQL / PostGIS / pg_dump versions, globals key + sha256,
 schema version (applied drizzle migrations count + last migration
