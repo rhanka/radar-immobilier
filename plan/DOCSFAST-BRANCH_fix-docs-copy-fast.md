@@ -31,7 +31,7 @@
 - [x] Lot 2 — Classify without per-object calls; verify only candidates before copying.
   - [x] Pure classification and hashed destination size anomalies; remove global version listing.
   - [x] Candidate verification pool with per-key unpinned resolution and run-wide HEAD fallback.
-- [ ] Lot 3 — Apply concurrency/retry bounds and receipt counters; update render documentation.
+- [x] Lot 3 — Apply concurrency/retry bounds and receipt counters; update render documentation.
 - [ ] Lot 4 — Preserve existing assertions; add simulated volume, resume and integrity regressions.
 - [ ] Lot 5 — Replay backup/bascule selftests, CI controller pattern with empty HOME, lint, typecheck; remove test volumes.
 - [ ] Lot 6 — Review exact diff, commit atomically, push branch without force; no PR.
