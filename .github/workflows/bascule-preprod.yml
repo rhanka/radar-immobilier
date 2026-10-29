@@ -51,118 +51,22 @@ jobs:
       MODE: ${{ inputs.DRY_RUN && 'list' || inputs.MODE || 'restore' }}
       BACKUP_ID: ${{ inputs.BACKUP_ID || 'latest' }}
       CYCLE_ID: ${{ inputs.CYCLE_ID }}
-      # rewritten by this job before the quiesce at every run (see environment above).
-      # DOCS_SYNC_GRANTEE = canonical id radar-docs préprod (GrantFullControl).
-      DOCS_SYNC_READ_SECRET: ${{ vars.BASCULE_DOCS_SYNC_READ_SECRET || 'radar-docs-src-preprod' }}
-      DOCS_SYNC_GRANTEE: ${{ vars.BASCULE_DOCS_SYNC_GRANTEE || '1901410700457444:user-Wq74B63YQum8' }}
-      # ── Contrôle positif source + cible cluster + smoke ───────────────────
-      EXPECTED_DATABASE: ${{ vars.BASCULE_EXPECTED_DATABASE }}
-      PREPROD_NAMESPACE: ${{ vars.BASCULE_PREPROD_NAMESPACE || 'radar-immobilier-preprod' }}
-      # Quiesce / drain / G2 / un-quiesce targets (default of bascule.mjs quiesceTargets()
-      # PLUS radar-refresh-pending-watchdog, PR #838): the watchdog CronJob launches a
-      # short Job every 5 min in preprod; left active, such a Job trips the G2
-      # "Job batch ACTIF" refusal. Set here, not in bascule.mjs, so that this change
-      # does not touch deploy/ci/bascule-preprod/** (which re-applies the prod bundle).
-      QUIESCE_CRONJOBS: radar-refresh-pv,radar-refresh-pending-watchdog,radar-consistency-snapshot,radar-populate-geo-daily
-      PREPROD_HEALTH_URL: ${{ vars.BASCULE_PREPROD_HEALTH_URL }}
-      # Repli d'un-quiesce quand le quiesce est fait à la main (SKIP_QUIESCE) :
-      # aucun état enregistré → l'un-quiesce scale-back à partir de cette carte.
-      # Without SKIP_QUIESCE=true and without a recorded quiesce, the un-quiesce
-      # does nothing (a refusal before the quiesce never scales preprod).
-      UNQUIESCE_REPLICAS: ${{ vars.BASCULE_UNQUIESCE_REPLICAS }}
-      SKIP_QUIESCE: ${{ inputs.SKIP_QUIESCE && 'true' || 'false' }}
-      BASCULE_WORKDIR: ${{ github.workspace }}/.bascule-work
-      CLI: deploy/ci/bascule-preprod/bascule.mjs
+    outputs:
+      backup_id: ${{ steps.engine.outputs.backup_id }}
+      backup_date: ${{ steps.engine.outputs.backup_date }}
+      manifest_sha256: ${{ steps.engine.outputs.manifest_sha256 }}
+      pg_sha256: ${{ steps.engine.outputs.pg_sha256 }}
+      dump_started_at: ${{ steps.engine.outputs.dump_started_at }}
+      o_restore_backup: ${{ steps.engine.outputs.o_restore }}
+      o_migrate: ${{ steps.engine.outputs.o_ddl }}
+      o_docs_backup: ${{ steps.engine.outputs.o_docs }}
+      o_recon_backup: ${{ steps.engine.outputs.o_recon }}
+      o_smoke: ${{ steps.engine.outputs.o_reopen }}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Compute CONFIRM_EXPECTED (anti-rejeu = date du jour UTC) + auto-CONFIRM planifié
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-        run: |
-          set -euo pipefail
-          today="iso-prod-$(date -u +%F)"
-          echo "CONFIRM_EXPECTED=${today}" >> "$GITHUB_ENV"
-          # CD-native-v2 : un run PLANIFIÉ n'a pas d'input CONFIRM (inputs.* vides
-          # hors workflow_dispatch) → la PLANIFICATION EST le GO (0 owner-in-the-loop).
-          # On matérialise le CONFIRM du jour pour que la GARDE G3 passe (le motif
-          # anti-rejeu reste la date du jour). Un dispatch manuel garde le CONFIRM
-          # tapé par l'owner (env de job depuis inputs.CONFIRM), inchangé.
-          if [ "$EVENT_NAME" = "schedule" ]; then
-            echo "CONFIRM=${today}" >> "$GITHUB_ENV"
-            echo "auto-CONFIRM (schedule) = ${today}"
-          fi
-
-      - name: Setup Node 22
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "22"
-
-      # G3 in EVERY MODE (chain, restore, list; DRY included), before any kubectl
-      # write, Secret write or Job. The CLI re-checks it before each Secret write
-      # and each Job.
-      - name: G3 CONFIRM (anti-replay, every MODE)
-        run: node "$CLI" confirm
-
-      # e2e contract: a malformed CYCLE_ID fails BEFORE any kubectl action.
-      - name: e2e — validate CYCLE_ID
-        if: ${{ env.CYCLE_ID != '' }}
-        run: node deploy/ci/bascule-preprod/served-ids.mjs validate-cycle-id
-
-      # RUNNER KUBECTL-ONLY : plus AUCUN outil de données/S3 sur le runner (0
-      # postgresql-client, 0 s5cmd, 0 aws). Le runner ne fait que kubectl (pilotage
-      # + dispatch/observe Jobs) + curl (smoke /health). pg_dump/pg_restore/aws-cli
-      # vivent dans les Jobs préprod (postgis:16-3.4, amazon/aws-cli) et le CronJob
-      # owner du dump prod. AUCUN téléchargement d'outil S3 ici.
-
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v4
-
-      - name: Configure kubeconfig (préprod)
-        # Token DÉDIÉ moindre-privilège (SA radar-ci-bascule-preprod), PAS le secret
-        # PARTAGÉ KUBE_CONFIG_DATA (scope plus large, utilisé par d'autres workflows :
-        # build-push-images / run-job / k8s-apply-mcp / rollback).
-        env:
-          KUBE_CONFIG_B64: ${{ secrets.KUBE_CONFIG_DATA_BASCULE_PREPROD }}
-        run: |
-          mkdir -p "$HOME/.kube"
-          printf '%s' "$KUBE_CONFIG_B64" | base64 -d > "$HOME/.kube/config"
-          chmod 600 "$HOME/.kube/config"
-
-      # Contrôle POSITIF du cluster cible AVANT tout write kubectl (identique au
-      # pré-vol de run-job.yaml / build-push-images.yml).
-      - name: Pre-flight — assert target cluster
-        env:
-          EXPECTED_KUBE_APISERVER_HOST: ${{ vars.EXPECTED_KUBE_APISERVER_HOST }}
-        run: |
-          set -euo pipefail
-          DEFAULT_HOST='hlhedx.c1.bhs5.k8s.ovh.net'
-          expected="${EXPECTED_KUBE_APISERVER_HOST:-$DEFAULT_HOST}"
-          server="$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
-          host="${server#*://}"; host="${host%%/*}"; host="${host%%:*}"
-          echo "kubeconfig apiserver host : ${host:-<none>}"
-          echo "expected apiserver host   : ${expected}"
-          if [ "$host" != "$expected" ]; then
-            echo "::error title=Wrong cluster — bascule refused::kubeconfig targets '${host:-<none>}' but expected '${expected}'."
-            exit 1
-          fi
-          kubectl -n "$PREPROD_NAMESPACE" get deploy radar-api -o name
-          echo "pre-flight cluster OK — ${expected} / ${PREPROD_NAMESPACE}"
-
-      # ── DUAL-KUBECONFIG (déclencheur dump S1 = cluster/namespace PROD) ──────
-      # Le déclencheur S1 patche le CronJob `radar-db-backup-prod` dans la PROD
-      # (`radar-immobilier`) : le kubeconfig préprod par défaut n'a PAS le RBAC
-      # prod (403). On monte un kubeconfig PROD DÉDIÉ dans un FICHIER SÉPARÉ
-      # (secret KUBE_CONFIG_DATA_PROD_TRIGGER = token name-scopé patch de CE
-      # CronJob + VAP suspend-only, SA radar-ci-trigger-prod) et on exporte
-      # DUMP_KUBECONFIG (lu par bascule.mjs, utilisé UNIQUEMENT sur les 2 patch
-      # cronjob prod ; tout le reste reste sur le kubeconfig préprod par défaut).
-      # RENOMMAGE CD-native-v2 : ce token 0-foothold s'appelait KUBE_CONFIG_DATA_PROD ;
-      # ce nom désigne désormais la SA d'APPLY du bundle (radar-ci-bascule-prod),
-      # d'où KUBE_CONFIG_DATA_PROD_TRIGGER pour le déclencheur name-scopé.
-      # Joué HORS DRY (pas de token prod avant l'apply ; le DRY ne trigger pas ;
-      # un run PLANIFIÉ n'est pas DRY → le déclencheur joue).
-      # MODE=restore|list: no S1 → no PROD kubeconfig at all.
       - name: Configure kubeconfig PROD (déclencheur dump S1)
         if: ${{ !inputs.DRY_RUN && env.MODE == 'chain' }}
         env:
