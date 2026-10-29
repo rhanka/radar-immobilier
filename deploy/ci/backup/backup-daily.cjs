@@ -341,9 +341,9 @@ function buildInventory({ date, createdAt, sourceBucket, backupBucket, excludePr
       lastModified: o.LastModified ? new Date(o.LastModified).toISOString() : null,
     };
     const c = copied.get(o.Key);
-    if (c) return { ...base, state: 'backed-up', backupEtag: c.etag, versionId: c.versionId };
+    if (c) return { ...base, size: c.size, state: 'backed-up', backupEtag: c.etag, versionId: c.versionId };
     const d = dstIndex.get(o.Key);
-    if (upToDate(o, d)) return { ...base, state: 'backed-up', backupEtag: d.ETag || null, versionId: d.VersionId || null };
+    if (upToDate(o, d)) return { ...base, size: Number(d.Size), state: 'backed-up', backupEtag: d.ETag || null, versionId: d.VersionId || null };
     const state = failed.has(o.Key) ? 'failed' : excludePrefixes.some((p) => o.Key.startsWith(p)) ? 'excluded' : 'pending';
     return { ...base, state, backupEtag: null, versionId: null };
   });
@@ -783,7 +783,18 @@ async function backupDocs(ctx, date, srcObjs) {
           Bucket: cfg.backupBucket, Key: LAYOUT.docsPrefix + o.Key,
           CopySource: '/' + cfg.sourceBucket + '/' + encodeKey(o.Key), MetadataDirective: 'COPY',
         }), { kind: 'body', bytes: Number(o.Size), signal: stop.signal });
-        copied.set(o.Key, { etag: (out.CopyObjectResult && out.CopyObjectResult.ETag) || null, versionId: out.VersionId || null });
+        // The source may change after its listing. CopyObject returns no size:
+        // read the EXACT copied backup version, never the mutable current key.
+        const versionId = out.VersionId;
+        if (!versionId) throw new Error('CopyVersionMissing');
+        const head = await s3send(ctx, new ctx.sdk.HeadObjectCommand({
+          Bucket: cfg.backupBucket, Key: LAYOUT.docsPrefix + o.Key, VersionId: versionId,
+        }), { signal: stop.signal });
+        const size = Number(head.ContentLength);
+        if (!Number.isSafeInteger(size) || size < 0 || !head.ETag || head.ETag !== out.CopyObjectResult?.ETag) {
+          throw new Error('CopyMetadataMismatch');
+        }
+        copied.set(o.Key, { size, etag: head.ETag, versionId });
       } catch (e) {
         if (stop.signal.aborted && (e === stop.signal.reason || isStopped(e) || (e && e.name === 'AbortError'))) {
           interrupted += 1;

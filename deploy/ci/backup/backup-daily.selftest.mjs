@@ -110,8 +110,8 @@ class FakeS3 {
     if (!l) throw s3err('NoSuchKey', 404);
     return { Body: Readable.from([l.body]), ContentLength: l.body.length, ETag: l.etag, VersionId: l.id };
   }
-  async opHeadObject({ Bucket, Key }) {
-    const l = this.latest(this.b(Bucket), Key);
+  async opHeadObject({ Bucket, Key, VersionId }) {
+    const l = VersionId ? this.b(Bucket).keys.get(Key)?.find(v => v.id === VersionId && !v.deleteMarker) : this.latest(this.b(Bucket), Key);
     if (!l) throw s3err('NotFound', 404);
     return { ContentLength: l.body.length, ETag: l.etag, VersionId: l.id };
   }
@@ -418,6 +418,31 @@ throwsCode('assertBuckets: unexpected backup bucket → exit 2', () => lib.asser
 throwsCode('assertBuckets: unexpected source bucket → exit 2', () => lib.assertBuckets(lib.readConfig({ ...envFor('/w'), SOURCE_DOCS_BUCKET: 'other' })), 2);
 
 // ═════════════════════════════════════════════════════════════════════════════
+console.log('# runBackup — inventory follows the copied version through concurrent rewrites');
+{
+  const { clock, fake } = mkWorld();
+  const key = DOC_KEYS[0];
+  const copiedBody = Buffer.alloc(797540, 'a');
+  let copiedVersion;
+  fake.hooks.CopyObject = async (input) => {
+    if (input.Key !== 'docs/' + key) return;
+    fake.write(DOCS, key, copiedBody); // source changed AFTER ListObjectsV2
+    const out = await fake.opCopyObject(input);
+    copiedVersion = out.VersionId;
+    fake.seed(BK, input.Key, 'concurrent later backup version'); // HEAD must use the copy's versionId
+    return out;
+  };
+  const { dir } = makeWork('2026-09-26');
+  const result = await run(fake, clock, envFor(dir));
+  eq('concurrent rewrites — backup complete', [result.code, result.r?.manifest.status], [0, 'complete']);
+  const inventory = JSON.parse(fake.text(BK, 'docs-inventory/2026-09-26.json'));
+  const entry = inventory.objects.find(o => o.key === key);
+  eq('inventory size/ETag/version describe exactly the copied version', [entry.size, entry.backupEtag, entry.versionId], [copiedBody.length, '"' + md5hex(copiedBody) + '"', copiedVersion]);
+  eq('inventory totalBytes uses copied sizes', inventory.counts.totalBytes, inventory.objects.reduce((n, o) => n + o.size, 0));
+  ok('HEAD targets the copy result version rather than the latest backup object', fake.calls.some(c => c.op === 'HeadObject' && c.input.Key === 'docs/' + key && c.input.VersionId === copiedVersion));
+  fs.rmSync(dir, { recursive: true, force: true });
+}
+
 console.log('# runBackup — first run with 210 days of un-purged history');
 {
   const { clock, fake } = mkWorld();
