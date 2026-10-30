@@ -13,10 +13,11 @@
 ## Branch Scope Boundaries (MANDATORY)
 - [x] Allowed Paths: `tools/make/cutover*`, `deploy/cutover/**`, `deploy/ci/bascule-preprod/backup*`, `deploy/ci/bascule-preprod/db-restore-backup-job.tmpl.yaml`, this plan.
 - [x] Forbidden Paths: root `Makefile`, `docker-compose*.yml`, `rules/**`, agent entry points, other branch plans, client materials.
-- [x] Conditional Paths: `.github/workflows/build-push-images.yml` through CUTOVERFAST-EX1.
+- [x] Conditional Paths: `.github/workflows/build-push-images.yml` through CUTOVERFAST-EX1; `.github/workflows/ci.yml` through CUTOVERFAST-EX2.
 
 ## Feedback Loop
 - [x] CUTOVERFAST-EX1: owner requests mandatory prepare CI gate; impact is a blocking preparation job; rollback reverts this branch's workflow changes.
+- [x] CUTOVERFAST-EX2: include new prepared-cutover acceptance tests in the existing CI test pattern; impact is local fake-cluster coverage time; rollback restores the previous pattern.
 - [x] Keep the existing daily `MODE=restore` path as explicitly required by the design.
 - [x] Prepared API smoke checks health, release SHA and anonymous refusal; full UI/MCP smoke remains at cutover.
 - [x] Runner polls cluster Jobs for up to 50 minutes: the stated runner wall budget of five minutes contradicts waiting for 25–40 minute Jobs.
