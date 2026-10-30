@@ -86,10 +86,12 @@ reopen() {
   restore_schedules
   verify_restored
   local job uid name
+  # Reopening needs every operation Job terminated without live consumers. A Failed
+  # Job is terminal too: a rollback after a refused step must still reopen.
   while read -r job; do
     name=$(jq -r .name <<< "$job"); uid=$(jq -r .uid <<< "$job")
     "${k[@]}" get job "$name" -o json | jq -e --arg uid "$uid" \
-      '.metadata.uid==$uid and any(.status.conditions[]?;.type=="Complete" and .status=="True")' >/dev/null || fail 'Final Job evidence is not complete'
+      '.metadata.uid==$uid and any(.status.conditions[]?;(.type=="Complete" or .type=="Failed") and .status=="True")' >/dev/null || fail 'Final Job evidence is not terminal'
     job_pods_ended "$name" "$uid" || fail 'An operation Job still has live consumers'
   done < <(jq -c '.jobs[]' "$WORK/record.json")
   checkpoint reopen completed

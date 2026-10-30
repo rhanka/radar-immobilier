@@ -162,10 +162,11 @@ test('budget exhaustion after closure rolls back automatically and reopens', () 
   const f = fixture();
   try {
     success(f.run('prepare'));
-    const state = f.state(); state.hangJob = 'recon'; save(f, state);
+    // The first private health probe after closure stalls; recovery probes pass.
+    const state = f.state(); state.privateTransient = 1; save(f, state);
     const ingress = clone(object(f, 'application').spec);
-    // Time jumps only once the closure-started budget exists.
-    f.env['BASH_FUNC_sleep%%'] = '() { if [ -n "${FAST_DEADLINE:-}" ]; then SECONDS=$((SECONDS+300)); else command sleep "$@"; fi; }';
+    // Time jumps only once the closure-started budget exists and the stalled probe was served.
+    f.env['BASH_FUNC_sleep%%'] = '() { if [ -n "${FAST_DEADLINE:-}" ] && grep -q \'"privateTransient":0\' "$CUTOVER_TEST_STATE/state.json"; then SECONDS=$((SECONDS+300)); else command sleep "$@"; fi; }';
     const result = f.run('run', ['MODE=run']);
     assert.notEqual(result.status, 0);
     assert.ok(result.stderr.includes('automatic rollback'), result.stderr);
@@ -176,6 +177,91 @@ test('budget exhaustion after closure rolls back automatically and reopens', () 
     assert.equal(object(f, 'radar-refresh-pv').spec.suspend, false);
     const receipt = JSON.parse(object(f, 'radar-cutover-receipt').data.receipt);
     assert.equal(receipt.checkpoints.switch, 'rolled-back');
-    assert.equal(receipt.jobHistory.at(-1).outcome, 'stopped');
+    assert.ok(Object.values(receipt.jobs).every(j => j.outcome === 'completed'));
+  } finally { f.cleanup(); }
+});
+test('cutover re-checks documents before closure with the preparation budget', () => {
+  // 30/10 incident: recon needs about 98 s; the post-closure 60 s Job (40 s wrapper) failed.
+  const f = fixture({ jobSeconds: { recon: 98 } });
+  try {
+    success(f.run('prepare'));
+    const before = f.state().jobCreation.length;
+    success(f.run('run', ['MODE=run']));
+    const recon = f.state().jobCreation.slice(before).filter(j => j.step === 'recon');
+    assert.deepEqual(recon.map(j => j.closed), [false]);
+    const run = JSON.parse(object(f, 'radar-cutover-receipt').data.receipt).run;
+    assert.equal(object(f, `cutover-${run}-recon`).spec.activeDeadlineSeconds, 840);
+    assert.equal(object(f, 'radar-db-credentials').data.POSTGRES_DB, Buffer.from('radar_next').toString('base64'));
+  } finally { f.cleanup(); }
+});
+test('a recon failure refuses the cutover before any closure', () => {
+  const f = fixture({ jobSeconds: { recon: 98 } });
+  try {
+    success(f.run('prepare'));
+    const ingress = clone(object(f, 'application').spec);
+    const state = f.state(); state.jobSeconds.recon = 900; save(f, state);
+    const result = f.run('run', ['MODE=run']);
+    assert.notEqual(result.status, 0);
+    assert.ok(result.stderr.includes('-recon'), result.stderr);
+    assert.deepEqual(object(f, 'application').spec, ingress);
+    assert.equal(object(f, 'radar-change-lock'), undefined);
+    assert.equal(object(f, 'radar-db-credentials').data.POSTGRES_DB, Buffer.from('radar').toString('base64'));
+  } finally { f.cleanup(); }
+});
+// Closed cutover interrupted before the database switch, as on 30/10 (switch never started).
+function closedBeforeSwitch(f) {
+  success(f.run('prepare'));
+  const ingress = clone(object(f, 'application').spec);
+  const state = f.state(); state.crash = { step: 'switch', edge: 'before-started' }; save(f, state);
+  assert.notEqual(f.run('run', ['MODE=run']).status, 0);
+  assert.ok(JSON.stringify(object(f, 'application').spec).includes('base-maintenance-'));
+  return { ingress, record: JSON.parse(object(f, 'radar-change-lock').data.record) };
+}
+function failedJob(f, record, phase) {
+  const state = f.state();
+  const name = `cutover-${record.run}-refused`, uid = 'uid-refused-job';
+  state.objects.push({ kind: 'Job', metadata: { name, uid, labels: { 'sentropic.io/bascule': record.run } },
+    status: { conditions: [{ type: 'Failed', status: 'True' }], failed: 1 } });
+  state.objects.push({ kind: 'Pod', metadata: { name: `${name}-pod`, uid: 'uid-refused-pod', labels: { 'job-name': name },
+    ownerReferences: [{ kind: 'Job', controller: true, uid }] }, status: { phase } });
+  const lock = state.objects.find(o => o.metadata.name === 'radar-change-lock');
+  const r = JSON.parse(lock.data.record);
+  r.jobs.refused = { name, uid, hash: 'h', outcome: 'failed' };
+  lock.data.record = JSON.stringify(r);
+  save(f, state);
+}
+test('rollback reopens when the record holds a terminated Failed Job', () => {
+  const f = fixture();
+  try {
+    const { ingress, record } = closedBeforeSwitch(f);
+    failedJob(f, record, 'Failed');
+    success(f.run('rollback', [`RUN=${record.run}`, 'MODE=run']));
+    assert.deepEqual(object(f, 'application').spec, ingress);
+    assert.equal(object(f, 'radar-change-lock'), undefined);
+    assert.equal(object(f, 'radar-refresh-pv').spec.suspend, false);
+    assert.equal(JSON.parse(object(f, 'radar-cutover-receipt').data.receipt).checkpoints.switch, 'rolled-back');
+  } finally { f.cleanup(); }
+});
+test('rollback stays closed while a Failed Job still has a live consumer', () => {
+  const f = fixture();
+  try {
+    const { record } = closedBeforeSwitch(f);
+    failedJob(f, record, 'Running');
+    const result = f.run('rollback', [`RUN=${record.run}`, 'MODE=run']);
+    assert.notEqual(result.status, 0);
+    assert.ok(result.stderr.includes('live consumers'), result.stderr);
+    assert.ok(JSON.stringify(object(f, 'application').spec).includes('base-maintenance-'));
+    assert.ok(object(f, 'radar-change-lock'));
+  } finally { f.cleanup(); }
+});
+test('rollback before the database switch keeps the live database without a rejected request', () => {
+  const f = fixture();
+  try {
+    const { ingress, record } = closedBeforeSwitch(f);
+    const result = f.run('rollback', [`RUN=${record.run}`, 'MODE=run']);
+    success(result);
+    assert.equal(result.stderr.includes('The request is invalid'), false, result.stderr);
+    assert.equal(object(f, 'radar-db-credentials').data.POSTGRES_DB, Buffer.from('radar').toString('base64'));
+    assert.deepEqual(object(f, 'application').spec, ingress);
   } finally { f.cleanup(); }
 });
