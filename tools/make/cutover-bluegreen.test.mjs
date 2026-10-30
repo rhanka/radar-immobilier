@@ -355,3 +355,13 @@ test('a release without the manifest of a workload refuses before creating the p
     assert.equal(f.state().objects.some(o => o.kind === 'Deployment' && o.metadata.name.endsWith('-prepared')), false);
   } finally { f.cleanup(); }
 });
+test('the rehearsal version check answers same when the release is already served, changed otherwise', () => {
+  const same = fixture();
+  try {
+    const result = same.run('rehearse-check');
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(result.stdout.trim(), 'same');
+  } finally { same.cleanup(); }
+  const changed = fixture({ previousSha: '9'.repeat(40) });
+  try { assert.equal(changed.run('rehearse-check').stdout.trim(), 'changed'); } finally { changed.cleanup(); }
+});

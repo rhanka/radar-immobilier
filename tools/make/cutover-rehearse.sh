@@ -12,9 +12,19 @@
 set -euo pipefail
 [[ ${ENV:-} == preprod ]] || { echo 'Rehearsal is preprod-only' >&2; exit 2; }
 [[ -n ${RELEASE:-} ]] || { echo 'RELEASE=<release.json> is required' >&2; exit 2; }
-[[ ${#CUTOVER_PROBE_TOKEN} -ge 32 ]] || { echo 'CUTOVER_PROBE_TOKEN (32+ characters) is required' >&2; exit 2; }
 CONFIG=deploy/cutover/config.json
-NS=$(jq -r .preprod.namespace "$CONFIG"); URL=$(jq -r .preprod.url "$CONFIG")
+URL=$(jq -r .preprod.url "$CONFIG")
+if [[ ${1:-} == check ]]; then
+  # Version-change guard for the CI: "same" when the served build already is the release (a re-run
+  # of the same main workflow) -> the rehearsal is skipped (neutral); "changed" otherwise.
+  served=$(mktemp)
+  code=$(curl -q -sS --max-time 15 -o "$served" -w '%{http_code}' "$URL/health" 2>/dev/null || echo 000)
+  if [[ ${code%% *} == 200 ]] && jq -e --slurpfile r "$RELEASE" '.sha==$r[0].gitSha' "$served" >/dev/null 2>&1; then echo same; else echo changed; fi
+  rm -f "$served"
+  exit 0
+fi
+[[ ${#CUTOVER_PROBE_TOKEN} -ge 32 ]] || { echo 'CUTOVER_PROBE_TOKEN (32+ characters) is required' >&2; exit 2; }
+NS=$(jq -r .preprod.namespace "$CONFIG")
 OUT=${OUTPUT:-.bascule-work/rehearsal}
 mkdir -p "$OUT"
 red=0

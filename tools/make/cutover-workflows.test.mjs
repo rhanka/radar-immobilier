@@ -61,7 +61,7 @@ test('the preprod CI/CD rehearses the zero-downtime cutover after preparation, w
   assert.equal(job['timeout-minutes'], 80);
   const steps = JSON.stringify(job.steps);
   assert.ok(job.steps.some(s => s.run === 'make -f deploy/cutover/operator.mk rehearse RELEASE=cutover-release/release.json OUTPUT=rehearsal ENV=preprod'));
-  assert.ok(job.steps.some(s => s.uses?.startsWith('actions/upload-artifact') && s.if === 'always()'));
+  assert.ok(job.steps.some(s => s.uses?.startsWith('actions/upload-artifact') && s.if === "always() && steps.change.outputs.state == 'changed'"));
   assert.equal(steps.includes('continue-on-error'), false);
   const rehearse = readFileSync('tools/make/cutover-rehearse.sh', 'utf8');
   assert.ok(rehearse.includes('SAMEDB=1 OBSERVE=60') && rehearse.includes('OBSERVE=120 DRILL=1'));
@@ -100,4 +100,14 @@ test('once the slots are adopted, deploy-preprod delegates the release to the bl
   const reconcile = readFileSync('deploy/ci/reconcile-preprod.sh', 'utf8');
   assert.ok(reconcile.includes('RECONCILE_CONFIG_ONLY'));
   assert.ok(readFileSync('tools/make/cutover-rehearse.sh', 'utf8').includes('version change'), 'the rehearsal requires previous != release');
+});
+test('a re-run on the same SHA skips the rehearsal (neutral, job summary) instead of failing', () => {
+  const job = workflow('build-push-images.yml').jobs['rehearse-preprod-bluegreen'];
+  const change = job.steps.find(s => s.id === 'change');
+  assert.ok(change.run.includes('operator.mk rehearse-check RELEASE=cutover-release/release.json ENV=preprod'));
+  const rehearse = job.steps.find(s => s.run === 'make -f deploy/cutover/operator.mk rehearse RELEASE=cutover-release/release.json OUTPUT=rehearsal ENV=preprod');
+  assert.equal(rehearse.if, "steps.change.outputs.state == 'changed'");
+  const skipped = job.steps.find(s => s.if === "steps.change.outputs.state == 'same'");
+  assert.ok(skipped.run.includes('GITHUB_STEP_SUMMARY') && skipped.run.includes('::notice'));
+  assert.equal(JSON.stringify(skipped).includes('exit 1'), false, 'neutral, never red');
 });
