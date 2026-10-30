@@ -6,13 +6,17 @@
     "namespace": "radar-immobilier-preprod",
     "url": "https://preprod.immo.sent-tech.ca",
     "database": "radar",
-    "documents": "radar-immobilier-docs-preprod"
+    "documents": "radar-immobilier-docs-preprod",
+    "recoveryBucket": "sentropic-pgbackup-preprod",
+    "restoreResources": {"requests": {"cpu": "250m", "memory": "1Gi"}, "limits": {"cpu": "1500m", "memory": "2Gi"}}
   },
   "prod": {
     "namespace": "radar-immobilier",
     "url": "https://immo.sent-tech.ca",
     "database": "radar",
-    "documents": "radar-immobilier-docs"
+    "documents": "radar-immobilier-docs",
+    "recoveryBucket": "sentropic-pgbackup",
+    "restoreResources": {"requests": {"cpu": "250m", "memory": "1Gi"}, "limits": {"cpu": "1500m", "memory": "2Gi"}}
   },
   "storage": {
     "endpoint": "https://s3.bhs.io.cloud.ovh.net",

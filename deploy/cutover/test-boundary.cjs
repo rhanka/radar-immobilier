@@ -2,6 +2,7 @@
 /* global require */
 /* eslint-disable @typescript-eslint/no-require-imports */
 const process = require('node:process');
+const { Buffer } = require('node:buffer');
 const { setInterval } = require('node:timers');
 const fs = require('node:fs');
 const yaml = require('yaml');
@@ -20,11 +21,15 @@ if (s.apiLost && tool === 'kubectl' && args[0] !== 'config') process.exit(1);
 const out = value => fs.writeFileSync(1, typeof value === 'string' ? value : JSON.stringify(value));
 const key = kind => ({ configmap: 'ConfigMap', configmaps: 'ConfigMap', deployment: 'Deployment', deployments: 'Deployment',
   job: 'Job', jobs: 'Job', pods: 'Pod', service: 'Service', services: 'Service', cronjob: 'CronJob', cronjobs: 'CronJob',
-  ingress: 'Ingress', ingresses: 'Ingress', endpoints: 'Endpoints', replicasets: 'ReplicaSet', networkpolicy: 'NetworkPolicy' })[kind];
+  ingress: 'Ingress', ingresses: 'Ingress', endpoints: 'Endpoints', replicasets: 'ReplicaSet', networkpolicy: 'NetworkPolicy', secret: 'Secret' })[kind];
 const find = (kind, name) => s.objects.find(o => o.kind === key(kind) && o.metadata.name === name);
 const value = flag => args[args.indexOf(flag) + 1];
-const jobVerdict = step => step === 'resolve' ? { ok: true, date: '2026-10-29', backupId: 'latest',
-  manifestSha256: 'd'.repeat(64), pgSha256: 'e'.repeat(64), pgSizeBytes: 1024 } :
+const jobVerdict = (step, job) => ['database', 'destination', 'reset', 'discard'].includes(step)
+  ? { ok: true, database: job.spec.template.spec.containers[0].env.find(e => e.name === 'POSTGRES_DB')?.value
+    || Buffer.from(find('secret', 'radar-db-credentials').data.POSTGRES_DB, 'base64').toString(), migrations: 25 }
+  : step === 'resolve' ? { ok: true, date: '2026-10-29', backupId: 'latest', ageHours: 1,
+    dumpStartedAt: '2026-10-29T01:00:00Z', migrations: 25,
+    manifestSha256: 'd'.repeat(64), pgSha256: 'e'.repeat(64), pgSizeBytes: 1024, ...s.pinOverride } :
   (step === 'docs' || step === 'recon') && s.inventoryAnomalies ? { ok: true,
     inventoryAnomalies: s.inventoryAnomalies, inventoryAnomalyCount: s.inventoryAnomalies.length, inventoryAnomaliesTruncated: false } : step === 'data' ?
   { ok: true, status: 'open-success', epoch: 'scoped', sealedUnresolved: 0, maintenanceBarrier: false } : { ok: true };
@@ -61,6 +66,7 @@ if (args[0] === 'port-forward') {
   setInterval(() => {}, 1000); return;
 }
 if (args[0] === 'rollout') process.exit(s.missingMcp && args.includes('deployment/radar-immo-mcp') ? 1 : 0);
+if (args[0] === 'wait') process.exit();
 if (args[0] === 'get') {
   if (args[1].includes(',')) { out({ items: s.controllers || [] }); process.exit(); }
   let objects = s.objects.filter(o => o.kind === key(args[1]));
@@ -85,12 +91,13 @@ if (args[0] === 'create' || args[0] === 'replace' || args[0] === 'apply') {
     const step = o.metadata.name.split('-').at(-1);
     crash(step, 'before-create');
     (s.jobCreation ||= []).push({ step, closed: s.objects.some(x => x.kind === 'Ingress' && JSON.stringify(x.spec).includes('base-maintenance-')),
+      lockHeld: !!find('configmap', 'radar-change-lock'), preparedStatus: find('configmap', 'radar-prepared-db')?.data.status,
       watchdogSuspended: find('cronjob', 'radar-refresh-pending-watchdog')?.spec.suspend });
     o.status = s.hangJob === step ? { active: 1 } : { conditions: [{ type: s.failJob === step ? 'Failed' : 'Complete', status: 'True' }], succeeded: s.failJob === step ? 0 : 1 };
     persist(o);
     persist({ kind: 'Pod', metadata: { name: `${o.metadata.name}-pod`, labels: { 'job-name': o.metadata.name },
       ownerReferences: [{ kind: 'Job', controller: true, uid: o.metadata.uid }] }, status: { phase: s.hangJob === step ? 'Running' : 'Succeeded',
-      containerStatuses: [{ name: 'result', state: { terminated: { message: JSON.stringify(jobVerdict(step)) } } }] } });
+      containerStatuses: [{ name: 'result', state: { terminated: { message: JSON.stringify(jobVerdict(step, o)) } } }] } });
   }
   if (o.kind === 'ConfigMap' && o.metadata.name === 'radar-change-lock') {
     const r = JSON.parse(o.data.record);
@@ -129,7 +136,9 @@ if (args[0] === 'patch') {
     const endpoint = find('endpoints', o.metadata.name);
     if (endpoint) endpoint.subsets = o.spec.replicas ? [{ addresses: [{ ip: '10.0.0.1' }] }] : [];
   }
-  persist(o); save(); out(o); process.exit();
+  persist(o); save(); out(o);
+  if (o.kind === 'Secret') crash('switch', 'after-patch');
+  process.exit();
 }
 if (args[0] === 'delete') {
   const raw = args.includes('--raw'); const name = raw ? value('--raw').split('/').at(-1) : args[2];

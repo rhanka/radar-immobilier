@@ -256,6 +256,40 @@ jobs:
           name: cutover-release-${{ github.sha }}
           path: release.json
 
+  prepare-preprod-db:
+    name: Prepare preprod database for cutover
+    needs: [build-push, cutover-release]
+    # Same arming as deploy-preprod: a disarmed preprod CD never prepares (variable read only).
+    if: github.ref == 'refs/heads/main' && vars.PREPROD_CD_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: cutover-release-${{ github.sha }}
+          path: cutover-release
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: v1.31.0
+      - name: Configure namespace-scoped preprod identity
+        env:
+          KUBE_CONFIG_DATA_PREPROD: ${{ secrets.KUBE_CONFIG_DATA_PREPROD }}
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p "$HOME/.kube"
+          if printf '%s' "$KUBE_CONFIG_DATA_PREPROD" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
+            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" | base64 -d > "$HOME/.kube/config"
+          else
+            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" > "$HOME/.kube/config"
+          fi
+      - name: Prepare restore, migrations, 6H and isolated smoke
+        run: make -f deploy/cutover/operator.mk prepare RELEASE=cutover-release/release.json ENV=preprod
+
   deploy:
     name: Deploy to cluster
     needs: build-push
@@ -612,7 +646,7 @@ jobs:
 
   deploy-preprod:
     name: Deploy to preprod cluster
-    needs: build-push
+    needs: [build-push, prepare-preprod-db]
     runs-on: ubuntu-latest
     # Rollouts and public-path proofs retain bounded deployment headroom.
     timeout-minutes: 45
@@ -1199,5 +1233,7 @@ jobs:
             printf '%s' "$KUBE_CONFIG_DATA" > "$HOME/.kube/config"
           fi
           chmod 600 "$HOME/.kube/config"
+      - name: Prepare production recovery backup and verify live migrations
+        run: make -f deploy/cutover/operator.mk prepare RELEASE=cutover-release/release.json ENV=prod
       - name: Sequential cutover (same manifest as rehearsal)
         run: make -f deploy/cutover/operator.mk run RELEASE=cutover-release/release.json ENV=prod
