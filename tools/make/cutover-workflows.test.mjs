@@ -3,14 +3,20 @@ import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import YAML from 'yaml';
 const workflow = name => YAML.parse(readFileSync(`.github/workflows/${name}`, 'utf8'));
-test('main deployment requires successful prepare with no tolerated restore or migration failure', () => {
+test('main deployment rehearses preparation without gating the preprod rollout on it', () => {
   const w = workflow('build-push-images.yml');
   const job = w.jobs['prepare-preprod-db'];
+  const deploy = w.jobs['deploy-preprod'];
   assert.deepEqual(job.needs, ['build-push', 'cutover-release']);
   assert.equal(job['timeout-minutes'], 50);
   assert.equal(job.if, "github.ref == 'refs/heads/main' && vars.PREPROD_CD_ENABLED == 'true'");
-  assert.equal(job.if, w.jobs['deploy-preprod'].if, 'prepare shares the preprod CD arming');
-  assert.ok(w.jobs['deploy-preprod'].needs.includes('prepare-preprod-db'));
+  assert.deepEqual(deploy.needs, ['build-push', 'prepare-preprod-db']);
+  assert.equal(deploy.if, `!cancelled() && needs.build-push.result == 'success' && ${job.if}`, 'deploy shares the preprod CD arming');
+  assert.equal(JSON.stringify(deploy).includes('needs.prepare-preprod-db.outputs'), false);
+  const report = deploy.steps[0];
+  assert.equal(report.if, "needs.prepare-preprod-db.result != 'success'");
+  assert.ok(report.run.includes('::warning') && report.run.includes('GITHUB_STEP_SUMMARY'));
+  assert.equal(JSON.stringify(report).includes('exit 1'), false);
   assert.ok(job.steps.some(s => s.run === 'make -f deploy/cutover/operator.mk prepare RELEASE=cutover-release/release.json ENV=preprod'));
   assert.equal(JSON.stringify(job).includes('continue-on-error'), false);
 });
