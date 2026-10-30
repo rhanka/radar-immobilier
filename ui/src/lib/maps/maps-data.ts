@@ -50,7 +50,8 @@ export interface CityMapEntry {
  * from the API response get count=0 — never fabricated.
  * City/coordinate data from QC_MUNICIPALITIES.
  *
- * @param graphItems — items from GET /api/graph-signals/by-city.
+ * @param graphItems — items from the scoped by-city aggregate
+ *   (GET /api/v1/workspaces/:ws/signal-facets/by-city).
  * @param options.maxCities — limit the number of returned cities.
  */
 export function buildCityMapEntries(

@@ -1,6 +1,14 @@
-# E2E surcharge: build production images, run Playwright suite against
-# them. No source mounts. Apply with:
+# E2E surcharge: production images (api, ui) on synthetic data, driven by
+# the real-stack Playwright suite (ui/e2e-real). No source mounts on the
+# application services. Apply with:
 #   docker compose -f docker-compose.yml -f docker-compose.e2e.yml ...
+# Entry point: `make test-e2e ENV=test-e2e` (test-* ENV only, always down -v).
+#
+# Every value below is a synthetic, test-only literal: auth is enabled by
+# presence only (no IdP is ever contacted, the suite mints its own session
+# with the API session signer) and must never point at preprod or prod.
+
+x-e2e-session-secret: &e2e-session-secret e2e-only-synthetic-session-secret-not-a-credential
 
 services:
   api:
@@ -8,9 +16,21 @@ services:
       context: .
       dockerfile: api/Dockerfile
     image: radar-immobilier-api:${API_VERSION:-local}
-    command: []                   # use Dockerfile CMD
+    entrypoint: ["/workspace/api/docker-entrypoint.sh"]
+    command: ["api"]
     environment:
       NODE_ENV: production
+      SESSION_SECRET: *e2e-session-secret
+      SENTROPIC_IDP_ISSUER: https://auth.e2e.invalid
+      SENTROPIC_OAUTH_CLIENT_ID: radar-e2e
+      SENTROPIC_OAUTH_CLIENT_SECRET: e2e-only-not-a-credential
+      SENTROPIC_OAUTH_REDIRECT_URI: http://ui:8080/api/v1/auth/oauth/callback
+      AUTH_CALLBACK_BASE_URL: http://ui:8080
+      MCP_SIGNAL_SEARCH_ENABLED: "1"
+    networks:
+      radar:
+        # The UI nginx proxies /api/ to the in-cluster service name.
+        aliases: [radar-api]
 
   ui:
     build:
@@ -18,15 +38,50 @@ services:
       dockerfile: ui/Dockerfile
     image: radar-immobilier-ui:${UI_VERSION:-local}
     command: []
-    networks: [radar]
-
-  e2e:
-    image: radar-immobilier-e2e:${E2E_VERSION:-local}
     depends_on:
       api: { condition: service_started }
-      ui:  { condition: service_started }
-    environment:
-      PLAYWRIGHT_UI_BASE_URL: http://ui:5173
-      PLAYWRIGHT_API_BASE_URL: http://api:3000
-      PLAYWRIGHT_MAILDEV_API_URL: http://maildev:1080
     networks: [radar]
+
+  # Playwright runner: stock Node image with the repo mounted read-write and
+  # dependencies in named volumes (never on the host). It migrates and seeds
+  # the synthetic database, then drives the UI served by the production image.
+  e2e:
+    image: node:24-bookworm-slim
+    working_dir: /workspace
+    profiles: [e2e]
+    entrypoint: ["bash", "tools/make/e2e-real-runner.sh"]
+    volumes:
+      - .:/workspace
+      - e2e-root-node-modules:/workspace/node_modules
+      - e2e-api-node-modules:/workspace/api/node_modules
+      - e2e-ui-node-modules:/workspace/ui/node_modules
+      - e2e-mcp-node-modules:/workspace/packages/immo-mcp/node_modules
+      - e2e-state:/e2e-state
+    environment:
+      NODE_ENV: test
+      # Runners without IPv6 egress (browser download): prefer IPv4.
+      NODE_OPTIONS: --dns-result-order=ipv4first
+      DOTENV_CONFIG_PATH: /dev/null
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-radar}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme-dev-only}
+      POSTGRES_DB: ${POSTGRES_DB:-radar}
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: synthetic
+      S3_SECRET_KEY: synthetic
+      E2E_SESSION_SECRET: *e2e-session-secret
+      E2E_STATE_DIR: /e2e-state
+      # The browser reaches the UI through a loopback relay so the page runs
+      # in a secure context (crypto.randomUUID), as production does over HTTPS.
+      PLAYWRIGHT_UI_BASE_URL: http://localhost:8080
+      E2E_UI_UPSTREAM: ui:8080
+      PLAYWRIGHT_API_BASE_URL: http://api:3000
+    networks: [radar]
+
+volumes:
+  e2e-root-node-modules:
+  e2e-api-node-modules:
+  e2e-ui-node-modules:
+  e2e-mcp-node-modules:
+  e2e-state:

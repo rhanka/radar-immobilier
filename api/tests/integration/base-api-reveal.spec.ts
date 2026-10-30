@@ -69,7 +69,9 @@ describeDb("base-api composed reveal and restoration", () => {
     const reveal = await f.request(url);
     expect(reveal.status).toBe(200);
     const displayed = await reveal.json();
-    expect(displayed.signal).toMatchObject({ id: f.signal.node.id, label: f.signal.node.label });
+    expect(displayed.signal).toMatchObject({ id: f.signal.node.id, label: f.signal.node.label,
+      facetFingerprint: f.signal.fingerprint });
+    expect(displayed.signal.classification).toBeTypeOf("object");
     expect(displayed.effectiveDiscarded).toBe(true);
     expect(displayed.displayedFingerprint).toBe(f.signal.fingerprint);
     expect(displayed.heads.workspace.state).toBe("active");

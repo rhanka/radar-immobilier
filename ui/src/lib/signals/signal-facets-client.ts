@@ -1,14 +1,15 @@
 /**
- * Client for POST/GET /api/v1/signal-facets (personal signal baskets).
+ * Client for the scoped personal signal baskets (6H):
+ * POST /api/v1/workspaces/:ws/signal-facets/personal/{select,deselect,discard,restore},
+ * GET  /api/v1/workspaces/:ws/signal-facets/reason-codes and
+ * GET  /api/v1/workspaces/:ws/signal-facets/personal/cities/:city.
  *
- * Contract mirror of `api/src/routes/signal-facets.ts`:
- * - writes POST /api/v1/signal-facets/{select,deselect,discard,restore} with
- *   strict bodies {target:{citySlug,type,id}, basket?, reasonCode?} plus an
- *   `Idempotency-Key: crypto.randomUUID()` header (one key per intention,
- *   reused when retrying the same intention), same-origin session cookie;
- * - reads GET reason-codes and cities/:city with NO query string (any query
- *   parameter is a server 400);
- * - a write answers {ok, event|null}; failures carry the server error code.
+ * Contract mirror of `api/src/routes/scoped-signal-facets.ts`: strict bodies
+ * {target:{citySlug,type,id}, basket?, reasonCode?, expectedHeadId,
+ * displayedFingerprint} plus an `Idempotency-Key: crypto.randomUUID()` header
+ * (one key per intention, reused when retrying the same intention),
+ * same-origin session cookie. Reads carry NO query string. The workspace is
+ * always explicit (`SignalScope`): it is never defaulted or inferred.
  *
  * The target is the native graph identity (node.citySlug, node.type,
  * node.id). A node without citySlug has no target (no controls). The
@@ -22,7 +23,11 @@ import {
   RequestTimeoutError,
   DEFAULT_REQUEST_TIMEOUT_MS,
 } from "$lib/net/fetch-with-timeout.js";
-import type { GraphSignalNode } from "./graph-signal-detail-client.js";
+import {
+  scopedSignalFacetsPath,
+  type GraphSignalNode,
+  type SignalScope,
+} from "./graph-signal-detail-client.js";
 
 export type FacetBasket = "pertinent" | "a_surveiller";
 export type FacetVerdict = "pertinent" | "a_surveiller" | "non_pertinent";
@@ -237,17 +242,14 @@ export function readJsonErrorCurrent(body: unknown): unknown {
   return (body as { current?: unknown }).current ?? null;
 }
 
-function requestUrl(baseUrl: string, path: string): string {
-  return `${baseUrl}${path}`;
-}
-
 /**
- * POST one facet command. The caller owns the idempotency key: mint one per
- * intention with createCommandKey() and pass the SAME key when retrying that
- * intention. Returns the resulting event (null when the command is a no-op).
+ * POST one facet command in the explicit workspace. The caller owns the
+ * idempotency key: mint one per intention with createCommandKey() and pass
+ * the SAME key when retrying that intention. Returns the resulting event
+ * (null when the command is a no-op).
  */
 export async function postFacetCommand(
-  baseUrl: string,
+  scope: SignalScope,
   action: FacetAction,
   body: FacetCommandBody,
   commandKey: string,
@@ -258,7 +260,7 @@ export async function postFacetCommand(
   let res: JsonFetchResult<{ event?: unknown }>;
   try {
     res = await fetchJsonWithTimeout<{ event?: unknown }>(
-      requestUrl(baseUrl, `/api/v1/signal-facets/${action}`),
+      scopedSignalFacetsPath(scope, `personal/${action}`),
       {
         signal: opts.signal,
         timeoutMs: opts.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS,
@@ -285,6 +287,25 @@ export async function postFacetCommand(
   return res.json.event ?? null;
 }
 
+/** A facet command bound to the workspace captured when the screen launched it. */
+export type FacetCommandPoster = (
+  action: FacetAction,
+  body: FacetCommandBody,
+  commandKey: string,
+  opts?: FacetRequestOptions,
+) => Promise<unknown>;
+
+/** Bind commands to one explicit workspace. */
+export function bindFacetCommand(scope: SignalScope): FacetCommandPoster {
+  const bound = { ...scope };
+  return (action, body, commandKey, opts) => postFacetCommand(bound, action, body, commandKey, opts);
+}
+
+/** Without a workspace no command leaves the browser. */
+export const refuseUnscopedFacetCommand: FacetCommandPoster = async () => {
+  throw new SignalFacetError(null, "missing_scoped_context", "missing_scoped_context");
+};
+
 export interface ReasonCodesResponse {
   profileId: string;
   codes: ReasonCode[];
@@ -292,11 +313,11 @@ export interface ReasonCodesResponse {
 
 /** GET reason-codes with no query string (any parameter is a server 400). */
 export async function fetchReasonCodes(
-  baseUrl: string,
+  scope: SignalScope,
   opts: FacetRequestOptions = {},
 ): Promise<ReasonCodesResponse> {
   const res = await fetchJsonWithTimeout<{ profileId: string; codes: ReasonCode[] }>(
-    requestUrl(baseUrl, "/api/v1/signal-facets/reason-codes"),
+    scopedSignalFacetsPath(scope, "reason-codes"),
     {
       signal: opts.signal,
       timeoutMs: opts.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS,
@@ -318,12 +339,12 @@ export interface CityFacetsResponse {
 
 /** GET cities/:city with no query string (any parameter is a server 400). */
 export async function fetchCityFacets(
-  baseUrl: string,
+  scope: SignalScope,
   city: string,
   opts: FacetRequestOptions = {},
 ): Promise<CityFacetsResponse> {
   const res = await fetchJsonWithTimeout<{ heads: FacetHead[] }>(
-    requestUrl(baseUrl, `/api/v1/signal-facets/cities/${encodeURIComponent(city)}`),
+    scopedSignalFacetsPath(scope, `personal/cities/${encodeURIComponent(city)}`),
     {
       signal: opts.signal,
       timeoutMs: opts.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS,
@@ -339,10 +360,14 @@ export async function fetchCityFacets(
  * error code. A null status (network/timeout) is unconfirmed: same-key retry.
  */
 export function isFacetWriteUnconfirmed(error: unknown): boolean {
+  if (error instanceof SignalFacetError && error.code === "missing_scoped_context") return false;
   return !(error instanceof SignalFacetError) || error.status === null || error.status >= 500;
 }
 
 export function facetErrorMessage(error: SignalFacetError): string {
+  if (error.code === "missing_scoped_context") {
+    return "Espace de travail non sélectionné — classement indisponible.";
+  }
   if (isFacetWriteUnconfirmed(error)) return "Écriture non confirmée — Réessayer.";
   switch (error.status) {
     case 401:

@@ -7,6 +7,7 @@ import { WorkspaceError } from "../services/workspaces/types.js";
 import { FACET_PROFILE } from "../services/facets/codebook.js";
 import { readScopedReasonCodes, readScopedReveal } from "../services/facets/scoped-reveal.js";
 import { privateSignalResponse } from "../services/facets/private-response.js";
+import { buildScopedSignalCards, type ScopedSignalCardDeps } from "../services/facets/scoped-signal-cards.js";
 
 const workspaceId = z.string().guid();
 const citySlug = z.string().min(1).max(128).regex(/^[a-z0-9-]+$/);
@@ -16,7 +17,7 @@ const REVEAL_PATH = "/api/v1/workspaces/:workspaceId/signal-facets/reveal";
 const REASON_CODES_PATH = "/api/v1/workspaces/:workspaceId/signal-facets/reason-codes";
 const REVEAL_GUARDED = [REVEAL_PATH, REASON_CODES_PATH];
 
-export interface ScopedSignalRevealDeps {
+export interface ScopedSignalRevealDeps extends ScopedSignalCardDeps {
   db: Database;
   auth?: { enabled: boolean };
 }
@@ -48,7 +49,13 @@ export function scopedSignalRevealRoute(deps: ScopedSignalRevealDeps): Hono {
     try {
       const revealed = await readScopedReveal(deps.db, session.sub,
         c.req.param("workspaceId"), params.data);
-      return c.json({ ok: true, ...revealed });
+      // The re-read node also carries its server card fields, derived from
+      // that same stored version, so the UI shows it without reclassifying.
+      const { signal } = revealed;
+      const [card] = await buildScopedSignalCards(deps, [{ ...signal,
+        createdAt: signal.createdAt === null ? new Date(0) : new Date(signal.createdAt) }], signal.citySlug);
+      return c.json({ ok: true, ...revealed,
+        signal: { ...card!, ...signal, facetFingerprint: revealed.displayedFingerprint } });
     } catch (error) {
       if (error instanceof WorkspaceError || error instanceof ScopeError) {
         return c.json({ error: error.message }, error.status);

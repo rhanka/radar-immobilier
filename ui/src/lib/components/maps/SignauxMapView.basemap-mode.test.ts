@@ -46,13 +46,16 @@ vi.mock("$lib/signals/graph-signal-detail-client.js", async (importOriginal) => 
     await importOriginal<typeof import("$lib/signals/graph-signal-detail-client.js")>();
   return {
     ...actual,
-    fetchGraphSignalDetail: vi.fn(async (citySlug: string) => ({
-      ok: true,
-      citySlug,
-      legacyProjection: null,
-      nodes: [],
+    fetchGraphSignalDetail: vi.fn(async (_scope: unknown, citySlug: string) => ({
+      citySlug, token: "token", legacyProjection: null, nodes: [], heads: [],
+      counts: { total: 0, hidden: 0, visible: 0, selected: 0 },
     })),
   };
+});
+
+vi.mock("$lib/signals/workspace-client.js", async (importOriginal) => {
+  const { readyWorkspaceModule } = await import("./test-stubs/workspace-context-ready.js");
+  return readyWorkspaceModule(await importOriginal());
 });
 
 import SignauxMapView from "./SignauxMapView.svelte";

@@ -33,7 +33,8 @@
     type ZoneMillesimeFilter,
   } from "$lib/maps/zone-millesime-filter.js";
   import {
-    postFacetCommand,
+    refuseUnscopedFacetCommand,
+    type FacetCommandPoster,
     type FacetAction,
     type FacetCommandLaunch,
     type FacetConflictNotice,
@@ -77,7 +78,7 @@
   export let facetsNote: string | null = null;
   export let showDiscarded = false;
   export let onToggleShowDiscarded: (show: boolean) => void = () => {};
-  export let facetPostCommand: typeof postFacetCommand = postFacetCommand;
+  export let facetPostCommand: FacetCommandPoster = refuseUnscopedFacetCommand;
   export let facetViewerKey: FacetCommandLaunch["viewerKey"] = null;
   export let onFacetSaved: (
     action: FacetAction,
