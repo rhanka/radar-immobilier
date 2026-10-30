@@ -127,3 +127,17 @@ test('prepare drains owned refresh for at most ten minutes without killing it', 
     assert.equal(f.calls().some(c => c.includes('delete') && c.some(a => a.endsWith('/jobs/draining-refresh'))), false);
   } finally { f.cleanup(); }
 });
+test('resume reconciles a database switch whose checkpoint response was lost', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    const state = f.state(); state.crash = { step: 'switch', edge: 'after-patch' }; save(f, state);
+    assert.notEqual(f.run('run', ['MODE=run']).status, 0);
+    const record = JSON.parse(object(f, 'radar-change-lock').data.record);
+    assert.equal(record.checkpoints.switch, 'started');
+    success(f.run('resume', [`RUN=${record.run}`]));
+    assert.equal(object(f, 'radar-db-credentials').data.POSTGRES_DB, Buffer.from('radar_next').toString('base64'));
+    assert.equal(f.state().jobCreation.filter(j => j.step === 'restore').length, 1);
+    assert.equal(object(f, 'radar-change-lock'), undefined);
+  } finally { f.cleanup(); }
+});
