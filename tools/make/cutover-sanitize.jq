@@ -27,6 +27,6 @@ else . end
 | if $step=="data" then
     .spec.template.spec.containers[0].env += [{name:"CUTOVER_EVIDENCE",value:({
       run:$r[0].run,release:$r[0].release.gitSha,
-      instances:(if $r[0].kind=="prepare" then ["prepared-disposable-database"] else $r[0].consumers end),
-      completedAt:($r[0].closedAt//$r[0].preparedStartedAt)}|tojson)}]
+      instances:(if $r[0].kind=="prepare" then $r[0].preparedConsumers else $r[0].consumers end),
+      completedAt:($r[0].closedAt//$r[0].preparedDrainedAt)}|tojson)}]
   else . end
