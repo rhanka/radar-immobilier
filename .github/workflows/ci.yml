@@ -23,6 +23,11 @@ jobs:
           bash deploy/ci/check-no-python.sh
           bash deploy/ci/check-no-python.test.sh
 
+      - name: Reject retired unscoped signal routes in the UI (6H)
+        run: |
+          bash deploy/ci/check-ui-scoped-signal-routes.sh
+          bash deploy/ci/check-ui-scoped-signal-routes.test.sh
+
       - name: Validate compose files
         run: |
           docker compose -f docker-compose.yml -f docker-compose.dev.yml config -q
