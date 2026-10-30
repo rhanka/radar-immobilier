@@ -18,6 +18,8 @@ deployed_release() {
   validate_release "$WORK/release.json"; save_release "$WORK/release.json"
 }
 restore_stage() {
+  # Fail before any closure when the recovery backup bucket is not writable.
+  run_job probe 170 180
   if jq -e '.checkpoints.close!=null' "$WORK/record.json" >/dev/null; then close_once; fi
   run_job destination 60 90
   [[ $ENV == preprod ]] || return 0
@@ -41,7 +43,7 @@ restore_stage() {
 }
 migrate_stage() {
   run_job backup 840 900
-  jq --arg ref "s3://$(jq -r .storage.backupBucket "$CONFIG")/db-backups/cutover-$ENV-$RUN.sql.gz" \
+  jq --arg ref "s3://$(jq -r --arg e "$ENV" '.[$e].recoveryBucket' "$CONFIG")/db-backups/cutover-$ENV-$RUN.sql.gz" \
     '.recoveryReference=$ref' "$WORK/record.json" > "$WORK/next.json"
   mv "$WORK/next.json" "$WORK/record.json"; record_save
   run_job ddl 540 600
