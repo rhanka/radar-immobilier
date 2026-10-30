@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { workspaceContext } from "$lib/signals/workspace-client.js";
 import {
   buildPalierMatrixLive,
   cityBCount,
@@ -322,5 +323,44 @@ describe("geoCellFor — mapping kpi_id → couche coverage (lock conducteur)", 
       normes: { state: "verified", freshness: "fresh", measured: true, zoneCount: 3, zonesWithGrille: 3 },
     });
     expect(geoCellFor("kpi03", measured).status).toBe("complete");
+  });
+});
+
+describe("buildPalierMatrixLive — scoped default reads (6H)", () => {
+  const WS = "11111111-1111-4111-8111-111111111111";
+
+  afterEach(() => {
+    workspaceContext.reset();
+    vi.unstubAllGlobals();
+  });
+
+  it("reads the scoped by-city aggregate in the explicit workspace", async () => {
+    const calls: string[] = [];
+    vi.stubGlobal("fetch", async (url: string) => {
+      calls.push(url);
+      const body = url === "/api/v1/workspaces"
+        ? { ok: true, workspaces: [{ workspace: { id: WS, slug: "w", label: "W", scope: "all-municipalities" },
+          accountId: WS, moderateArchive: false, manageMembers: false }] }
+        : { ok: true, totalCount: 0, cities: [] };
+      return new Response(JSON.stringify(body), { status: 200, headers: { "content-type": "application/json" } });
+    });
+    await workspaceContext.load("sub-a");
+    await buildPalierMatrixLive({ coverageFetcher: async () => { throw new Error("no coverage"); } });
+    const aggregate = calls.filter((url) => url !== "/api/v1/workspaces");
+    expect(aggregate).toHaveLength(3);
+    expect(aggregate.every((url) => url.startsWith(`/api/v1/workspaces/${WS}/signal-facets/by-city`))).toBe(true);
+  });
+
+  it("is unavailable without a workspace and issues no aggregate read", async () => {
+    const calls: string[] = [];
+    vi.stubGlobal("fetch", async (url: string) => {
+      calls.push(url);
+      return new Response(JSON.stringify({ ok: true, workspaces: [] }), { status: 200,
+        headers: { "content-type": "application/json" } });
+    });
+    await workspaceContext.load("sub-a");
+    await expect(buildPalierMatrixLive({ coverageFetcher: async () => { throw new Error("no coverage"); } }))
+      .rejects.toThrow(/Aucun espace de travail/);
+    expect(calls).toEqual(["/api/v1/workspaces"]);
   });
 });

@@ -1,19 +1,40 @@
 /**
- * Tests for extractDocRefs — the type-guard that parses props.refs from
- * graph_nodes into typed SignalDocRef[].
+ * Tests for the scoped city reads (coherent-city, reveal) and for
+ * extractDocRefs — the type-guard that parses props.refs from graph_nodes
+ * into typed SignalDocRef[].
  */
 import { afterEach, describe, it, expect, vi } from "vitest";
 import {
+  appendRevealedNodes,
   extractDocRefs,
   extractSignalEvidence,
   extractZoneReglements,
   fetchGraphSignalDetail,
+  fetchRevealedSignal,
+  GraphSignalsHttpError,
+  scopedReadErrorMessage,
   type GraphSignalNode,
 } from "./graph-signal-detail-client.js";
 
 afterEach(() => vi.unstubAllGlobals());
 
-describe("fetchGraphSignalDetail — reveal", () => {
+const WS = "11111111-1111-4111-8111-111111111111";
+const SCOPE = { workspaceId: WS };
+const FP = "a".repeat(64);
+
+function coherentBody(signals: unknown[], extra: Record<string, unknown> = {}) {
+  return { ok: true, workspaceId: WS, citySlug: "ville-synth", mode: "signal", token: "tok-1",
+    revisions: {}, heads: [], selection: [], signals,
+    legacyProjection: { version: "legacy-zmp-v1", a: { count: 0, signalIds: [] } },
+    counts: { total: signals.length, hidden: 0, visible: signals.length, selected: 0 }, ...extra };
+}
+
+function servedNode(id: string, extra: Record<string, unknown> = {}) {
+  return { id, type: "Signal", citySlug: "ville-synth", label: `label ${id}`, props: {},
+    sourceRef: null, facetFingerprint: FP, ...extra };
+}
+
+describe("fetchGraphSignalDetail — scoped coherent read", () => {
   function stubFetch(handler: (url: string) => Response): string[] {
     const calls: string[] = [];
     vi.stubGlobal("fetch", async (url: string) => {
@@ -23,42 +44,51 @@ describe("fetchGraphSignalDetail — reveal", () => {
     return calls;
   }
 
-  it("forwards the reveal verbatim (showDiscarded=1), default stays hidden", async () => {
-    const payload = { ok: true, citySlug: "ville-synth", legacyProjection: null, nodes: [] };
-    const calls = stubFetch(
-      () => new Response(JSON.stringify(payload), { status: 200 }),
-    );
-    await fetchGraphSignalDetail("ville-synth", "", 15_000, { showDiscarded: true });
-    expect(calls[0]).toBe("/api/graph-signals/ville-synth?showDiscarded=1");
-    await fetchGraphSignalDetail("ville-synth");
-    expect(calls[1]).toBe("/api/graph-signals/ville-synth");
+  it("reads the scoped coherent-city route, never a legacy route", async () => {
+    const calls = stubFetch(() => new Response(JSON.stringify(coherentBody([servedNode("sig-1")])), { status: 200 }));
+    const detail = await fetchGraphSignalDetail(SCOPE, "ville-synth");
+    expect(calls).toEqual([
+      `/api/v1/workspaces/${WS}/signal-facets/coherent-city?citySlug=ville-synth&mode=signal`,
+    ]);
+    expect(calls[0]).not.toContain("/api/graph-signals/");
+    expect(detail.token).toBe("tok-1");
+    expect(detail.nodes.map((node) => node.id)).toEqual(["sig-1"]);
+    expect(detail.nodes[0]!.facetFingerprint).toBe(FP);
   });
 
-  it("keeps the 404 empty state and types other failures", async () => {
-    stubFetch(() => new Response("none", { status: 404 }));
-    await expect(fetchGraphSignalDetail("ville-synth")).resolves.toEqual({
-      ok: false,
-      citySlug: "ville-synth",
-      legacyProjection: null,
-      nodes: [],
-    });
-    stubFetch(() => new Response("unavailable", { status: 503 }));
-    const failure = await fetchGraphSignalDetail("ville-synth").catch((err) => err);
-    expect(failure?.name).toBe("GraphSignalsHttpError");
-    expect(failure?.status).toBe(503);
+  it("never fabricates absent card fields", async () => {
+    stubFetch(() => new Response(JSON.stringify(coherentBody([servedNode("sig-1")])), { status: 200 }));
+    const [node] = (await fetchGraphSignalDetail(SCOPE, "ville-synth")).nodes;
+    expect(node!.description).toBeUndefined();
+    expect(node!.docRefs).toBeUndefined();
+    expect(node!.classification).toBeUndefined();
+    expect(node!.createdAt).toBeNull();
   });
 
-  it("carries the server error body code, null when the body is unreadable", async () => {
-    stubFetch(
-      () => new Response(JSON.stringify({ error: "discarded_signals_unavailable" }), { status: 503 }),
-    );
-    const outage = await fetchGraphSignalDetail("ville-synth").catch((err) => err);
+  it("keeps an authorized empty city (200, no signal) as an explicit empty state", async () => {
+    stubFetch(() => new Response(JSON.stringify(coherentBody([])), { status: 200 }));
+    const detail = await fetchGraphSignalDetail(SCOPE, "ville-synth");
+    expect(detail.nodes).toEqual([]);
+  });
+
+  it("types refusals and unavailable scopes with their body code, never an empty list", async () => {
+    stubFetch(() => new Response(JSON.stringify({ error: "scoped_facet_scope_unavailable" }), { status: 503 }));
+    const outage = await fetchGraphSignalDetail(SCOPE, "ville-synth").catch((err) => err);
+    expect(outage).toBeInstanceOf(GraphSignalsHttpError);
     expect(outage?.status).toBe(503);
-    expect(outage?.code).toBe("discarded_signals_unavailable");
+    expect(outage?.code).toBe("scoped_facet_scope_unavailable");
+    expect(scopedReadErrorMessage(outage)).toContain("scoped_facet_scope_unavailable");
     stubFetch(() => new Response("unavailable", { status: 503 }));
-    const bare = await fetchGraphSignalDetail("ville-synth").catch((err) => err);
-    expect(bare?.status).toBe(503);
+    const bare = await fetchGraphSignalDetail(SCOPE, "ville-synth").catch((err) => err);
     expect(bare?.code).toBeNull();
+    stubFetch(() => new Response(JSON.stringify({ error: "workspace_not_authorized" }), { status: 403 }));
+    const refused = await fetchGraphSignalDetail(SCOPE, "ville-synth").catch((err) => err);
+    expect(scopedReadErrorMessage(refused)).toMatch(/Accès refusé/);
+  });
+
+  it("refuses a malformed payload instead of rendering it", async () => {
+    stubFetch(() => new Response(JSON.stringify({ ok: true, signals: [{ id: "x" }] }), { status: 200 }));
+    await expect(fetchGraphSignalDetail(SCOPE, "ville-synth")).rejects.toThrow(/invalid response/);
   });
 
   it("fails a stalled body with the timeout message instead of hanging", async () => {
@@ -78,8 +108,38 @@ describe("fetchGraphSignalDetail — reveal", () => {
           { status: 200, headers: { "content-type": "application/json" } },
         ),
     );
-    const failure = await fetchGraphSignalDetail("ville-synth", "", 10).catch((err) => err);
+    const failure = await fetchGraphSignalDetail(SCOPE, "ville-synth", { timeoutMs: 10 }).catch((err) => err);
     expect(String(failure?.message)).toContain("timeout after 10ms");
+  });
+});
+
+describe("fetchRevealedSignal — archived target", () => {
+  it("reads the scoped reveal route and carries the reveal fingerprint", async () => {
+    const calls: string[] = [];
+    vi.stubGlobal("fetch", async (url: string) => {
+      calls.push(url);
+      return new Response(JSON.stringify({ ok: true, target: {}, signal: servedNode("sig-9", { facetFingerprint: undefined }),
+        displayedFingerprint: "b".repeat(64), heads: { personal: { id: "h-1", state: "active", reasonCode: "N-ADMIN" },
+          workspace: null }, effectiveDiscarded: true }), { status: 200 });
+    });
+    const revealed = await fetchRevealedSignal(SCOPE, { citySlug: "ville-synth", type: "Signal", id: "sig-9" });
+    expect(calls).toEqual([
+      `/api/v1/workspaces/${WS}/signal-facets/reveal?citySlug=ville-synth&type=Signal&id=sig-9`,
+    ]);
+    expect(revealed.node.facetFingerprint).toBe("b".repeat(64));
+    expect(revealed.heads.personal?.id).toBe("h-1");
+  });
+
+  it("extends the A authority with revealed Z/M/P members in order", () => {
+    const detail = { citySlug: "c", token: "t", heads: [], counts: { total: 1, hidden: 1, visible: 1, selected: 0 },
+      nodes: [servedNode("a") as GraphSignalNode],
+      legacyProjection: { version: "legacy-zmp-v1" as const, a: { count: 1, signalIds: ["a"] } } };
+    const revealedNode = servedNode("b", { legacySubset: { version: "legacy-zmp-v1", signalId: "b",
+      flags: { z: true, m: true, p: true } } }) as GraphSignalNode;
+    const merged = appendRevealedNodes(detail, [{ node: revealedNode, displayedFingerprint: FP,
+      heads: { personal: null, workspace: null }, effectiveDiscarded: true }]);
+    expect(merged.nodes.map((node) => node.id)).toEqual(["a", "b"]);
+    expect(merged.legacyProjection).toEqual({ version: "legacy-zmp-v1", a: { count: 2, signalIds: ["a", "b"] } });
   });
 });
 
