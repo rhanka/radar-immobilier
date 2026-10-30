@@ -107,20 +107,24 @@ render_prepared_stack() {
     metadata:{name:"radar-ui-nginx-prepared",namespace:$ns,labels:(.metadata.labels//{}|.["sentropic.io/slot"]="prepared")},
     data:(.data|map_values(gsub("http://radar-api:3000";"http://radar-api-prepared:3000")))}' >> "$WORK/prepared-stack.jsonl"
   for name in "${PREPARED_NAMES[@]}"; do
+    # Workload spec from the release manifests (#611: env, secretKeyRef, probes, resources reach
+    # preprod); only the replica count comes from the running canonical Deployment.
+    release_object Deployment "$name" > "$WORK/release-deployment.json"
     "${k[@]}" get deployment "$name" -o json > "$WORK/canonical-deployment.json"
     "${k[@]}" get service "$name" -o json > "$WORK/canonical-service.json"
-    jq -c --slurpfile r "$WORK/record.json" --arg ns "$NS" --arg db "$db" --arg l "$SLOT_LABEL" --arg cfg "$cfg" '
+    jq -c --slurpfile r "$WORK/record.json" --arg ns "$NS" --arg db "$db" --arg l "$SLOT_LABEL" --arg cfg "$cfg" \
+      --argjson replicas "$(jq '.spec.replicas//1' "$WORK/canonical-deployment.json")" '
       def images: if (.image|test("^ghcr.io/rhanka/radar-api[:@]")) then .image=$r[0].release.apiImage
         elif (.image|test("^ghcr.io/rhanka/radar-ui[:@]")) then .image=$r[0].release.uiImage else . end;
       .metadata.name as $name|
       {apiVersion:"apps/v1",kind:"Deployment",
        metadata:{name:($name+"-prepared"),namespace:$ns,labels:(.metadata.labels//{}|.[$l]="prepared"),
          annotations:{"sentropic.io/prepared-run":$r[0].run,"sentropic.io/prepared-db":$db,"sentropic.io/prepared-config":$cfg}},
-       spec:{replicas:(.spec.replicas//1),strategy:.spec.strategy,
+       spec:{replicas:$replicas,strategy:.spec.strategy,
          selector:{matchLabels:(.spec.selector.matchLabels|.[$l]="prepared")},
          template:(.spec.template|.metadata.labels=((.metadata.labels//{})|.[$l]="prepared"|del(.["pod-template-hash"]))|
            .metadata.annotations=((.metadata.annotations//{})|.["sentropic.io/prepared-run"]=$r[0].run)|
-           .spec.terminationGracePeriodSeconds=30|
+           .spec.terminationGracePeriodSeconds=(.spec.terminationGracePeriodSeconds//30)|
            (.spec.containers[],.spec.initContainers[]?) |= (images|
              if $name=="radar-ui" then . else
                .env=((.env//[])|map(select(.name!="POSTGRES_DB" and .name!="RADAR_API_BASE_URL"))
@@ -129,10 +133,46 @@ render_prepared_stack() {
              end)|
            .spec.volumes=((.spec.volumes//[])|map(if .configMap.name=="radar-ui-nginx"
              then .configMap.name="radar-ui-nginx-prepared" else . end)))}}' \
-      "$WORK/canonical-deployment.json" >> "$WORK/prepared-stack.jsonl"
+      "$WORK/release-deployment.json" >> "$WORK/prepared-stack.jsonl"
     jq -c --arg ns "$NS" --arg l "$SLOT_LABEL" '{apiVersion:"v1",kind:"Service",
       metadata:{name:(.metadata.name+"-prepared"),namespace:$ns,labels:(.metadata.labels//{}|.[$l]="prepared")},
       spec:{type:"ClusterIP",ports:.spec.ports,selector:(.spec.selector|.[$l]="prepared")}}' \
       "$WORK/canonical-service.json" >> "$WORK/prepared-stack.jsonl"
   done
+}
+# Release manifests (#611): the workloads of the delivered commit, rendered with kustomize from the
+# `manifests` directories of config.json. The prepared slot is built from them and the promotion
+# applies them to the canonical slot, so a manifest change (env, secretKeyRef, probes, resources,
+# grace period) reaches the environment through the cutover. The checkout must be that commit.
+release_manifests() {
+  [[ -s $WORK/release-manifests.json ]] && return 0
+  local sha dir
+  sha=$(git rev-parse HEAD 2>/dev/null || true)
+  [[ -z $sha || $sha == "$(jq -r .release.gitSha "$WORK/record.json")" ]] ||
+    fail "release_manifests_mismatch: checkout $sha is not the release commit; check out the release before the cutover"
+  : > "$WORK/release-manifests.yaml"
+  while read -r dir; do
+    "${k[@]}" kustomize --load-restrictor LoadRestrictionsNone "$dir" >> "$WORK/release-manifests.yaml" ||
+      fail "Release manifests not renderable: $dir"
+    printf '\n---\n' >> "$WORK/release-manifests.yaml"
+  done < <(jq -r --arg e "$ENV" '.[$e].manifests[]' "$CONFIG")
+  "${k[@]}" create --dry-run=client -f "$WORK/release-manifests.yaml" -o json |
+    jq -c '[if .kind=="List" then .items[] else . end]' > "$WORK/release-manifests.json" || fail 'Release manifests unreadable'
+}
+release_find() {
+  # release_find <kind> <name>: the release object, or null. A rollback carries the specs that
+  # ran before the promotion it reverts (.releaseSpecs), not a rendering of another commit.
+  if jq -e '.releaseSpecs!=null' "$WORK/record.json" >/dev/null; then
+    jq -c --arg key "$1/$2" '.releaseSpecs[$key]' "$WORK/record.json"
+    return
+  fi
+  release_manifests
+  jq -c --arg kind "$1" --arg name "$2" '[.[]|select(.kind==$kind and .metadata.name==$name)]|first' "$WORK/release-manifests.json"
+}
+release_object() {
+  # release_object <kind> <name>: the release object, or a refusal.
+  local object
+  object=$(release_find "$1" "$2")
+  [[ $object != null && -n $object ]] || fail "release_manifest_missing: $1/$2"
+  printf '%s\n' "$object"
 }

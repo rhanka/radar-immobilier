@@ -39,6 +39,19 @@ export function fixture(changes = {}) {
       // With a previousSha the running Pods serve an older build (previous release).
       imageID: changes.previousSha ? `ghcr.io/rhanka/radar-${image}@sha256:${'9'.repeat(64)}` : image === 'ui' ? release.uiImage : release.apiImage }] }; objects.push(pod);
   }
+  // Release manifests (#611): the delivered commit's workloads, distinguishable from the live ones.
+  const manifestDeployments = [['radar-api', 'api', 'api'], ['radar-ui', 'ui', 'ui'], ['radar-immo-mcp', 'mcp', 'api']].map(([name, container, image]) => {
+    const labels = { 'app.kubernetes.io/name': 'radar-immobilier', 'app.kubernetes.io/component': container === 'mcp' ? 'mcp' : image };
+    return { apiVersion: 'apps/v1', kind: 'Deployment', metadata: { name, labels }, spec: { replicas: 1, selector: { matchLabels: labels },
+      strategy: { type: container === 'mcp' ? 'Recreate' : 'RollingUpdate' },
+      template: { metadata: { labels }, spec: { containers: [{ name: container, image: `ghcr.io/rhanka/radar-${image}:release`,
+        resources: RESOURCES[container], env: [{ name: 'FROM_RELEASE_MANIFEST', value: '1' }] }] } } } };
+  });
+  const manifestCronJob = { apiVersion: 'batch/v1', kind: 'CronJob', metadata: { name: 'radar-refresh-pv' }, spec: { suspend: false,
+    jobTemplate: { spec: { template: { spec: { containers: [{ name: 'refresh', image: 'ghcr.io/rhanka/radar-api:release',
+      env: [{ name: 'FROM_RELEASE_MANIFEST', value: '1' }] }] } } } } } };
+  const releaseManifests = { 'deploy/overlays/preprod': manifestDeployments, 'deploy/k8s/refresh-cronjobs': [manifestCronJob],
+    'deploy/k8s': manifestDeployments, 'deploy/k8s/immo-mcp': [] };
   const cj = object('CronJob', 'radar-refresh-pv', { suspend: false, jobTemplate: { spec: { template: { spec: {
     containers: [{ name: 'refresh', image: 'ghcr.io/rhanka/radar-api:old' }], initContainers: [{ name: 'init', image: 'ghcr.io/rhanka/radar-api:old' }] } } } } });
   objects.push(cj, object('CronJob', 'radar-refresh-pending-watchdog', cj.spec),
@@ -61,7 +74,7 @@ export function fixture(changes = {}) {
   objects.push(object('NetworkPolicy', 'allow-bascule-to-postgres', { podSelector: { matchLabels: { 'app.kubernetes.io/component': 'postgres' } },
     ingress: [{ ports: [{ port: 5432 }], from: [{ podSelector: { matchLabels: { 'app.kubernetes.io/name': 'radar-immobilier' },
       matchExpressions: [{ key: 'sentropic.io/bascule', operator: 'Exists' }] } }] }] }));
-  writeFileSync(join(dir, 'state.json'), JSON.stringify({ objects, release, url: 'https://preprod.immo.sent-tech.ca', ...changes }));
+  writeFileSync(join(dir, 'state.json'), JSON.stringify({ objects, release, releaseManifests, url: 'https://preprod.immo.sent-tech.ca', ...changes }));
   writeFileSync(join(dir, 'release.json'), JSON.stringify(release));
   const env = { ...process.env, PATH: `${bin}:${process.env.PATH}`, CUTOVER_TEST_STATE: dir };
   delete env.NAMESPACE; delete env.PREPROD_NAMESPACE; delete env.GITHUB_RUN_ID;
