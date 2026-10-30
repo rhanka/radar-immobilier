@@ -39,7 +39,7 @@ for (const key of ['databaseSizes', 'sessionsByDb']) {
 }
 const timings = numberMap(raw.timings, /^[a-zA-Z]{1,32}$/, 16);
 if (timings) clean.timings = timings;
-for (const key of ['maxConnections', 'logContainers', 'logBytes', 'destListCalls', 'headChecked', 'versionsResolved', 'copyRetries']) {
+for (const key of ['maxConnections', 'volumeUsedBytes', 'liveDbBytes', 'walBytes', 'logContainers', 'logBytes', 'destListCalls', 'headChecked', 'versionsResolved', 'copyRetries']) {
   if (Number.isFinite(raw[key]) && raw[key] >= 0) clean[key] = raw[key];
 }
 // Probe verification: acknowledged writes per application database, as bounded seq ranges.
@@ -54,7 +54,7 @@ if (Array.isArray(raw.podUids)) clean.podUids = raw.podUids.slice(0, 64).filter(
 if (Array.isArray(raw.destListCallsPerShard)) {
   clean.destListCallsPerShard = raw.destListCallsPerShard.slice(0, 64).filter(n => Number.isSafeInteger(n) && n >= 0);
 }
-for (const key of ['stale', 'staleOverridden', 'maintenanceBarrier', 'inventoryAnomaliesTruncated']) {
+for (const key of ['walFromSetting', 'stale', 'staleOverridden', 'maintenanceBarrier', 'inventoryAnomaliesTruncated']) {
   if (typeof raw[key] === 'boolean') clean[key] = raw[key];
 }
 if (raw.status === 'open-success') clean.status = raw.status;

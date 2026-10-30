@@ -241,7 +241,7 @@ test('daily staging builds the template under the lock and refuses while a prepa
     const template = object(f, 'radar-template-db').data;
     assert.equal(template.status, 'ready');
     assert.deepEqual(f.state().jobCreation.map(j => j.step).filter(s => s !== 'database'),
-      ['resolve', 'tplreset', 'restore', 'docs', 'tplseal']);
+      ['resolve', 'volume0', 'tplreset', 'restore', 'docs', 'tplseal']);
     const restore = f.state().objects.find(o => o.kind === 'Job' && o.metadata.name.endsWith('-restore'));
     assert.equal(restore.spec.template.spec.containers[0].env.find(e => e.name === 'PGDATABASE').value, 'radar_tpl');
     assert.equal(object(f, 'radar-change-lock'), undefined);
@@ -251,7 +251,7 @@ test('daily staging builds the template under the lock and refuses while a prepa
     save(f, state);
     assert.notEqual(f.run('stage', ['RELEASE=deployed']).status, 0);
     const short = f.state(); short.objects = short.objects.filter(o => o.metadata.name !== 'radar-prepared-db');
-    short.pvcMeasure = '3000000000 5000000000 21474836480\n'; save(f, short);
+    short.volume = { volumeUsedBytes: 19000000000 }; save(f, short);
     const refused = f.run('stage', ['RELEASE=deployed']);
     assert.notEqual(refused.status, 0);
     assert.match(refused.stderr, /volume_insufficient/);

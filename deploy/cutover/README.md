@@ -211,7 +211,7 @@ values only; the merged verdicts land in the lock record, the prepared stamp and
 ### PostgreSQL volume expansion (one-time, operator)
 
 The template, the prepared database and the live database share one volume.
-Required size: max(10 GiB, 3 x live database + 2 GiB). The StatefulSet
+Required size: see below. The StatefulSet
 `volumeClaimTemplates` field is immutable, so the claim itself is patched
 (compare-and-swap on its UID and current size, never shrunk):
 
@@ -221,10 +221,16 @@ make -f deploy/cutover/operator.mk pvc-expand SIZE=12Gi ENV=preprod # explicit, 
 make -f deploy/cutover/operator.mk pvc-verify ENV=preprod
 ```
 
-When the claim reports `FileSystemResizePending`, restart `radar-postgres-0`
-once, outside any cutover window (owner-scheduled), then run `pvc-verify`:
-it reads `df` and the live database size inside the Pod and requires free space
-of at least 2 x database + 2 GiB. Staging refuses to start before this lot.
+Occupancy is measured in SQL by a `volume` Job (every database plus the WAL:
+`pg_ls_waldir` when granted, else the `max_wal_size` ceiling) and compared to the
+claim `status.capacity`; no Role grants `pods/exec`. The target size is
+max(10 GiB, used + 2 x live database + 2 GiB). When the claim reports
+`FileSystemResizePending`, restart `radar-postgres-0` once, outside any cutover
+window (owner-scheduled), then run `pvc-verify`: it requires free capacity of at
+least 2 x live database + 2 GiB. Staging refuses `volume_insufficient` otherwise.
+`pvc-expand` and `slots-adopt` need the one-time Role of `rbac-adopt-<env>.yaml`
+(claim patch, orphaning delete of the canonical Deployments, deletion of unnamed
+ReplicaSets): install it for these acts, then remove it.
 
 ### Slot adoption (one-time, operator)
 
@@ -414,7 +420,8 @@ arming) or on manual dispatch. `PREPROD_CD_ENABLED` and
 ### Live application order (operator; nothing is applied by this branch)
 
 1. Install `rbac-preprod.yaml`, `rbac-prod.yaml`, `rbac-logs-preprod.yaml`,
-   `rbac-logs-prod.yaml`; preprod: create Secret `radar-cutover-probe`
+   `rbac-logs-prod.yaml` (permanent) and, only for steps 3 and 4,
+   `rbac-adopt-preprod.yaml` / `rbac-adopt-prod.yaml` (removed afterwards); preprod: create Secret `radar-cutover-probe`
    (`CUTOVER_PROBE_TOKEN`, 32+ characters, also as the GitHub secret
    `CUTOVER_PROBE_TOKEN`) and set `CUTOVER_PROBE_ENABLED=true` in the preprod
    `radar-api` ConfigMap.

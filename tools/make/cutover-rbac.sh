@@ -29,11 +29,15 @@ rbac_rights() {
     /^[a-z]/ { rules = 0; next }
     { bad = 1; exit 2 }
     END { if (bad || count == 0) exit 2 }
-  ' "deploy/cutover/rbac-$ENV.yaml"
+  ' "${1:-deploy/cutover/rbac-$ENV.yaml}"
 }
 rbac_preflight() {
+  # rbac_preflight [adopt]: the permanent Role, plus the one-time adoption Role when asked.
   local verb resource group sub name label i=0 rights
   rights=$(rbac_rights) || fail "Unreadable RBAC manifest deploy/cutover/rbac-$ENV.yaml"
+  if [[ ${1:-} == adopt ]]; then
+    rights+=$'\n'$(rbac_rights "deploy/cutover/rbac-adopt-$ENV.yaml") || fail "Unreadable RBAC manifest deploy/cutover/rbac-adopt-$ENV.yaml"
+  fi
   rm -f "$WORK"/rbac-missing.*
   while IFS='|' read -r verb resource group sub name; do
     i=$((i+1))

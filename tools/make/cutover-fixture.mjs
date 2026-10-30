@@ -46,8 +46,9 @@ export function fixture(changes = {}) {
   objects.push(object('Ingress', 'application', { tls: [{ hosts: ['preprod.immo.sent-tech.ca'], secretName: 'existing-tls' }],
     defaultBackend: { service: { name: 'radar-ui', port: { number: 8080 } } },
     rules: [{ host: 'preprod.immo.sent-tech.ca', http: { paths: [{ path: '/', pathType: 'Prefix', backend: { service: { name: 'radar-ui', port: { number: 8080 } } } }] } }] }));
-  objects.push({ ...object('PersistentVolumeClaim', 'postgres-data-radar-postgres-0', { resources: { requests: { storage: '5Gi' } } }),
-    status: { capacity: { storage: '5Gi' } } });
+  // Expanded volume by default (Lot 1 applied); pvcSize models the original 5 Gi claim.
+  objects.push({ ...object('PersistentVolumeClaim', 'postgres-data-radar-postgres-0', { resources: { requests: { storage: changes.pvcSize || '20Gi' } } }),
+    status: { capacity: { storage: changes.pvcSize || '20Gi' } } });
   objects.push({ ...object('ConfigMap', 'radar-ui-nginx', {}), data: { 'default.conf':
     'location /api/ { proxy_pass http://radar-api:3000; }\nlocation = /health { proxy_pass http://radar-api:3000/health; }\n' } });
   // Preprod quota as measured on 2026-10-30 (limits.cpu 3 / used 1350m, limits.memory 6Gi / used 1920Mi, pods 20 / 4).

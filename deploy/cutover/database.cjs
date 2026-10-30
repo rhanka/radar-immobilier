@@ -67,6 +67,20 @@ const OPERATIONS = {
     return { migrations };
   },
   database: c => measure(c),
+  // Volume occupancy without any shell in the PostgreSQL Pod: every database plus the WAL
+  // (pg_ls_waldir when granted, else the max_wal_size ceiling), compared to the claim capacity.
+  async volume(c) {
+    const total = Number((await c.query('SELECT sum(pg_database_size(datname))::bigint AS n FROM pg_database')).rows[0].n);
+    const live = Number((await c.query('SELECT pg_database_size(current_database())::bigint AS n')).rows[0].n);
+    let walBytes, walFromSetting = false;
+    try {
+      walBytes = Number((await c.query('SELECT coalesce(sum(size), 0)::bigint AS n FROM pg_ls_waldir()')).rows[0].n);
+    } catch {
+      walFromSetting = true;
+      walBytes = Number((await c.query("SELECT pg_size_bytes(current_setting('max_wal_size'))::bigint AS n")).rows[0].n);
+    }
+    return { volumeUsedBytes: total + walBytes, liveDbBytes: live, walBytes, walFromSetting };
+  },
   // Preprod switch: from frozenAt the live database accepts no write. New sessions start
   // read-only (25006 on write); sessions opened before the change are terminated (57P01) and
   // read back as gone. The API answers both with an explicit 503 maintenance_read_only.
