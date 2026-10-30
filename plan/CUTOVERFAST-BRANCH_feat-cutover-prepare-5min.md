@@ -29,7 +29,7 @@
 ## Plan / Todo (lot-based)
 - [x] Lot 0: read rules, confirm branch, identify isolated Make targets.
 - [ ] Lot 1: bulk version resolution and sweep exclusion, backup selftests (9,418 unpinned candidates, 268 pages).
-- [ ] Lot 2: explicit database identity, disposable parallel restore, scoped Secret patch RBAC.
+- [ ] Lot 2: database identity Jobs and Secret patch RBAC implemented; disposable parallel restore follows.
 - [ ] Lot 3: prepare lifecycle, stamp, isolated smoke and cleanup.
 - [ ] Lot 4: prepared verification, switch, rollback and early writer suspension.
 - [ ] Lot 5: mandatory CI preparation gate and fake-cluster acceptance tests.
