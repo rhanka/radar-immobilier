@@ -716,11 +716,14 @@ try { YAML = (await import("yaml")).default; } catch { YAML = null; }
 const common = { NAMESPACE: "radar-immobilier-preprod", IMAGE: "ghcr.io/rhanka/radar-api@sha256:" + "a".repeat(64), READER_SECRET: "radar-backup-reader-preprod",
   S3_ENDPOINT: "https://s3.bhs.io.cloud.ovh.net", S3_REGION: "bhs", S3_FORCE_PATH_STYLE: "true", EXPECTED_BACKUP_BUCKET: B, TTL_SECONDS: "3600",
   BR_SCRIPT: indentBlock(SCRIPT, 14) };
+const RESTORE_RES = JSON.parse(readFileSync(join(DIR, "../../cutover/config.json"), "utf8")).preprod.restoreResources;
 const renders = {
   "backup-read-job.tmpl.yaml": { ...common, JOB_NAME: JOBS.resolve, BR_STEP: "resolve", BACKUP_ID: "latest", ALLOW_STALE_BACKUP: "false", MAX_AGE_HOURS: "24" },
   "db-restore-backup-job.tmpl.yaml": { ...common, DUMP_IMAGE: "postgis/postgis:16-3.4", BACKUP_DATE: D, PIN_MANIFEST_SHA256: "a".repeat(64), PIN_PG_SHA256: "b".repeat(64),
     DB_SECRET: "radar-db-credentials", PGHOST: "radar-postgres", EXPECTED_DATABASE: "radar", RESTORE_ASSERT_DB: "1",
-    RESTORE_SCRIPT: indentBlock(readFileSync(join(DIR, "../../cutover/atomic-restore.sh"), "utf8"), 14) },
+    RESTORE_SCRIPT: indentBlock(readFileSync(join(DIR, "../../cutover/atomic-restore.sh"), "utf8"), 14),
+    RESTORE_REQUEST_CPU: RESTORE_RES.requests.cpu, RESTORE_REQUEST_MEMORY: RESTORE_RES.requests.memory,
+    RESTORE_LIMIT_CPU: RESTORE_RES.limits.cpu, RESTORE_LIMIT_MEMORY: RESTORE_RES.limits.memory },
   "docs-restore-backup-job.tmpl.yaml": { ...common, JOB_NAME: JOBS.docs, BR_STEP: "docs", COPY_SECRET: "radar-backup-restore-docs", BACKUP_DATE: D, PIN_MANIFEST_SHA256: "a".repeat(64),
     DST_BUCKET: DST, FORBIDDEN_DST_BUCKETS: PROD, COPY_GRANTEE: "g", COPY_CONCURRENCY: "48", DOCS_DRY: "0" },
 };
@@ -737,6 +740,10 @@ for (const [tmpl, vars] of Object.entries(renders)) {
     const node = [...(pod.initContainers || []), ...pod.containers].find((c) => c.command && c.command[0] === "node");
     ok(`${tmpl} — YAML parses, node -e arg == script`, node && node.args[0].trimEnd() === SCRIPT.trimEnd());
     ok(`${tmpl} — automountServiceAccountToken false`, pod.automountServiceAccountToken === false);
+    if (tmpl === "db-restore-backup-job.tmpl.yaml") {
+      eq("db-restore-backup-job — restore resources fit the preprod quota (config.json)",
+        pod.containers.find((c) => c.name === "restore").resources, { requests: { cpu: "250m", memory: "1Gi" }, limits: { cpu: "1500m", memory: "2Gi" } });
+    }
   }
 }
 if (!YAML) console.log("  info yaml package not resolvable — YAML parse checks skipped (structure checks done)");

@@ -32,7 +32,11 @@ render_template() {
   case $step in
     resolve|list) template=deploy/ci/bascule-preprod/backup-read-job.tmpl.yaml;;
     docs|recon) template=deploy/ci/bascule-preprod/docs-restore-backup-job.tmpl.yaml;;
-    restore) template=deploy/ci/bascule-preprod/db-restore-backup-job.tmpl.yaml;;
+    restore)
+      template=deploy/ci/bascule-preprod/db-restore-backup-job.tmpl.yaml
+      # Per-environment sizing that fits the namespace ResourceQuota; pg_restore keeps -j 4.
+      export RESTORE_REQUEST_CPU RESTORE_REQUEST_MEMORY RESTORE_LIMIT_CPU RESTORE_LIMIT_MEMORY
+      IFS=$'\t' read -r RESTORE_REQUEST_CPU RESTORE_REQUEST_MEMORY RESTORE_LIMIT_CPU RESTORE_LIMIT_MEMORY < <(jq -er --arg e "$ENV" '.[$e].restoreResources|[.requests.cpu,.requests.memory,.limits.cpu,.limits.memory]|select(all(type=="string" and test("^[0-9]+(m|Mi|Gi)?$")))|@tsv' "$CONFIG") || fail 'Missing restore Job resources';;
     backup)
       template=deploy/ci/db-backup-job.tmpl.yaml
       export UPLOAD_IMAGE=peakcom/s5cmd:v2.2.2 BACKUP_S3_ENDPOINT=$S3_ENDPOINT BACKUP_S3_REGION=$S3_REGION
@@ -59,7 +63,7 @@ render_template() {
   RESTORE_SCRIPT=$(sed 's/^/              /' deploy/cutover/atomic-restore.sh)
   if [[ $step == refs ]]; then BR_SCRIPT=$(sed 's/^/              /' deploy/ci/bascule-preprod/served-refs.cjs); fi
   # Only known placeholders; runtime libpq variables remain in the original script.
-  envsubst '${JOB_NAME} ${NAMESPACE} ${IMAGE} ${DUMP_IMAGE} ${TTL_SECONDS} ${PGHOST} ${DB_SECRET} ${S3_ENDPOINT} ${S3_REGION} ${EXPECTED_BACKUP_BUCKET} ${READER_SECRET} ${COPY_SECRET} ${BR_STEP} ${BACKUP_ID} ${ALLOW_STALE_BACKUP} ${MAX_AGE_HOURS} ${S3_FORCE_PATH_STYLE} ${BACKUP_DATE} ${PIN_MANIFEST_SHA256} ${PIN_PG_SHA256} ${EXPECTED_DATABASE} ${RESTORE_ASSERT_DB} ${DST_BUCKET} ${FORBIDDEN_DST_BUCKETS} ${COPY_GRANTEE} ${COPY_CONCURRENCY} ${DOCS_DRY} ${BR_SCRIPT} ${RESTORE_SCRIPT} ${UPLOAD_IMAGE} ${BACKUP_S3_ENDPOINT} ${BACKUP_S3_REGION} ${BACKUP_S3_BUCKET} ${S3_SECRET} ${KEY} ${CYCLE_ID} ${REFS_CONFIGMAP_PREFIX} ${REFS_CONFIGMAP_COUNT} ${REFS_WRITER_SA}' < "$template"
+  envsubst '${JOB_NAME} ${NAMESPACE} ${IMAGE} ${DUMP_IMAGE} ${TTL_SECONDS} ${PGHOST} ${DB_SECRET} ${S3_ENDPOINT} ${S3_REGION} ${EXPECTED_BACKUP_BUCKET} ${READER_SECRET} ${COPY_SECRET} ${BR_STEP} ${BACKUP_ID} ${ALLOW_STALE_BACKUP} ${MAX_AGE_HOURS} ${S3_FORCE_PATH_STYLE} ${BACKUP_DATE} ${PIN_MANIFEST_SHA256} ${PIN_PG_SHA256} ${EXPECTED_DATABASE} ${RESTORE_ASSERT_DB} ${DST_BUCKET} ${FORBIDDEN_DST_BUCKETS} ${COPY_GRANTEE} ${COPY_CONCURRENCY} ${DOCS_DRY} ${BR_SCRIPT} ${RESTORE_SCRIPT} ${RESTORE_REQUEST_CPU} ${RESTORE_REQUEST_MEMORY} ${RESTORE_LIMIT_CPU} ${RESTORE_LIMIT_MEMORY} ${UPLOAD_IMAGE} ${BACKUP_S3_ENDPOINT} ${BACKUP_S3_REGION} ${BACKUP_S3_BUCKET} ${S3_SECRET} ${KEY} ${CYCLE_ID} ${REFS_CONFIGMAP_PREFIX} ${REFS_CONFIGMAP_COUNT} ${REFS_WRITER_SA}' < "$template"
 }
 sanitize_job() {
   jq --rawfile wrapper deploy/cutover/job-wrapper.cjs --rawfile shellWrapper deploy/cutover/shell-wrapper.sh \
