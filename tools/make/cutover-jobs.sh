@@ -49,6 +49,12 @@ job_observe() {
 }
 run_job() {
   local step=$1 deadline=$2 budget=$3 name uid existing
+  if [[ -n ${FAST_DEADLINE:-} ]]; then
+    local remaining=$((FAST_DEADLINE-SECONDS-5))
+    ((remaining>20)) || fail 'Insufficient cutover budget for another verification Job'
+    ((deadline<=remaining)) || deadline=$remaining
+    ((budget<=remaining)) || budget=$remaining
+  fi
   name="cutover-$RUN-$step"
   existing=$(jq -c --arg step "$step" '.jobs[$step]//null' "$WORK/record.json")
   if [[ ${RECOVERING:-0} == 1 && $step =~ ^(ddl|data)$ && $existing != null ]]; then

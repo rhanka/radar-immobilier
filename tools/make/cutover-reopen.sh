@@ -2,6 +2,7 @@
 restart_services() {
   local row name uid current desired deadline=$((SECONDS+600)) remaining
   [[ ${MODE:-run} == restore ]] || deadline=$((SECONDS+90))
+  if [[ -n ${FAST_DEADLINE:-} ]] && ((FAST_DEADLINE<deadline)); then deadline=$FAST_DEADLINE; fi
   checkpoint restart started
   while read -r row; do
     name=$(jq -r .name <<< "$row"); uid=$(jq -r .uid <<< "$row")
