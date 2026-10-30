@@ -213,3 +213,21 @@ test('a ConfigMap changed after prepare restarts the prepared slot before any sw
     assert.equal(f.state().created.filter(c => c.name === 'radar-api-prepared').length, 2);
   } finally { f.cleanup(); }
 });
+test('a rollback of the rollback re-promotes the new release on its retained database, unfreezing it first', () => {
+  const f = fixture({ previousSha: '9'.repeat(40) });
+  try {
+    success(f.run('prepare'));
+    success(f.run('run', ['MODE=run']));
+    const a = receipt(f);
+    success(f.run('rollback', [`RUN=${a.run}`, 'MODE=run']));
+    const b = receipt(f);
+    assert.equal(db(f), 'radar');
+    success(f.run('rollback', [`RUN=${b.run}`, 'MODE=run']));
+    const c = receipt(f);
+    assert.equal(c.rollbackOf, b.run);
+    assert.equal(db(f), 'radar_next', 'the new release is back on the database promoted first');
+    assert.equal(object(f, 'radar-api', 'Deployment').spec.template.spec.containers[0].image, f.release.apiImage);
+    assert.equal(f.state().jobCreation.filter(j => j.step === 'unfreezeprev').length, 2);
+    for (const name of SERVICES) assert.equal(slotOf(f, name), 'main');
+  } finally { f.cleanup(); }
+});

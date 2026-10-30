@@ -58,13 +58,15 @@ test('the preprod CI/CD rehearses the zero-downtime cutover after preparation, w
   assert.deepEqual(job.needs, ['prepare-preprod-db', 'deploy-preprod'], 'never concurrent with the canonical deploy (shared lock)');
   assert.equal(job.if, `${w.jobs['prepare-preprod-db'].if} && needs.prepare-preprod-db.outputs.slots == 'adopted'`,
     'same PREPROD_CD_ENABLED arming (read only), only once the slots are adopted');
-  assert.equal(job['timeout-minutes'], 50);
+  assert.equal(job['timeout-minutes'], 80);
   const steps = JSON.stringify(job.steps);
   assert.ok(job.steps.some(s => s.run === 'make -f deploy/cutover/operator.mk rehearse RELEASE=cutover-release/release.json OUTPUT=rehearsal ENV=preprod'));
   assert.ok(job.steps.some(s => s.uses?.startsWith('actions/upload-artifact') && s.if === 'always()'));
   assert.equal(steps.includes('continue-on-error'), false);
   const rehearse = readFileSync('tools/make/cutover-rehearse.sh', 'utf8');
   assert.ok(rehearse.includes('SAMEDB=1 OBSERVE=60') && rehearse.includes('OBSERVE=120 DRILL=1'));
+  assert.ok(rehearse.includes('scenario rollback preprod rollback RUN=') && rehearse.includes('scenario repromote preprod rollback RUN='),
+    'rollback after promotion and re-promotion are rehearsed');
 });
 test('daily staging is a dispatchable workflow armed by its own variable, never by the protected ones', () => {
   const w = workflow('bascule-stage-preprod.yml');

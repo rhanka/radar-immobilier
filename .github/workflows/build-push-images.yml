@@ -310,7 +310,8 @@ jobs:
     # Same arming as prepare/deploy-preprod (variable read only, never written).
     if: github.ref == 'refs/heads/main' && vars.PREPROD_CD_ENABLED == 'true' && needs.prepare-preprod-db.outputs.slots == 'adopted'
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    # Four scenarios (release with drill, rollback, re-promotion, same database): ~35 min.
+    timeout-minutes: 80
     permissions:
       contents: read
       actions: read

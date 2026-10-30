@@ -419,6 +419,9 @@ make -f deploy/cutover/operator.mk rehearse RELEASE=cutover-release/release.json
 Scenarios, each under the read and writer probes and judged by
 `probe-verify.mjs`: `preprod` (`run OBSERVE=120 DRILL=1`, previous -> new
 release: freeze, prepared database, routing drill back to the previous build),
+`rollback` (`rollback RUN=<preprod run>`: the previous release rebuilt on the
+retained database, which is unfrozen first, while the promoted one is frozen),
+`repromote` (`rollback RUN=<rollback run>`: the new release back on its database),
 then `samedb` (`run SAMEDB=1 OBSERVE=60`, the production path on the now
 migrated live database). Red when the prepared stamp is not `restorePath=clone`
 with `restoreSeconds <= 300`, when the previous and new releases are the same
