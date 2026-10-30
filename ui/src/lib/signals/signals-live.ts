@@ -5,7 +5,7 @@
  * direct read of Signal and DesignationEvent nodes from graph_nodes (graphify
  * pipeline, ~197 villes / 1 141 nœuds).
  *
- * GET /api/graph-signals/by-city → cities with ≥1 signal node
+ * GET /api/v1/workspaces/:ws/signal-facets/by-city → cities with ≥1 signal node
  * GET /api/v1/workspaces/:ws/signal-facets/coherent-city → visible nodes of one city
  *
  * Anti-invention: a city with signalCount === 0 is skipped (no detail fetch,
@@ -45,7 +45,7 @@ export interface LiveSignalsClients {
 export function scopedLiveSignalsClients(scope: SignalScope): LiveSignalsClients {
   const bound = { ...scope };
   return {
-    fetchGraphSignalsByCity: () => fetchGraphSignalsByCity(bound.baseUrl ?? ""),
+    fetchGraphSignalsByCity: () => fetchGraphSignalsByCity(bound),
     fetchGraphSignalDetail: (citySlug) => fetchGraphSignalDetail(bound, citySlug),
   };
 }

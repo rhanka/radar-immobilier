@@ -1,8 +1,8 @@
 /**
- * Client for GET /api/graph-signals/by-city
- *
- * Returns aggregate Signal + DesignationEvent counts per city from graph_nodes
- * (graphify pipeline, ~197 villes), NOT the old ontology project-state.
+ * Client for GET /api/v1/workspaces/:ws/signal-facets/by-city (6H scoped
+ * aggregate): Signal + DesignationEvent counts per city from graph_nodes,
+ * counted under the explicit workspace visibility (an effectively discarded
+ * target is not counted unless `showDiscarded=1`).
  */
 
 import type { DocumentDateBasis, VivierV2Counts } from "@radar/domain";
@@ -11,7 +11,11 @@ import {
   fetchJsonWithTimeout,
   readJsonErrorCode,
 } from "$lib/net/fetch-with-timeout.js";
-import { GraphSignalsHttpError } from "./graph-signal-detail-client.js";
+import {
+  GraphSignalsHttpError,
+  scopedSignalFacetsPath,
+  type SignalScope,
+} from "./graph-signal-detail-client.js";
 
 export interface GraphSignalCityItem {
   citySlug: string;
@@ -66,7 +70,7 @@ export interface GraphSignalsByCityOptions {
 }
 
 export async function fetchGraphSignalsByCity(
-  baseUrl = "",
+  scope: SignalScope,
   opts: GraphSignalsByCityOptions = {},
 ): Promise<GraphSignalsByCityResponse> {
   const params = new URLSearchParams();
@@ -80,7 +84,7 @@ export async function fetchGraphSignalsByCity(
   // Bounded headers AND body: a stalled body still fails with
   // `RequestTimeoutError` instead of blocking the caller forever.
   const res = await fetchJsonWithTimeout<GraphSignalsByCityResponse>(
-    `${baseUrl}/api/graph-signals/by-city${qs ? `?${qs}` : ""}`,
+    scopedSignalFacetsPath(scope, `by-city${qs ? `?${qs}` : ""}`),
     {
       signal: opts.signal,
       timeoutMs: opts.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS,
@@ -88,13 +92,13 @@ export async function fetchGraphSignalsByCity(
   );
   if (!res.ok) {
     throw new GraphSignalsHttpError(
-      `graph-signals/by-city: ${res.status}`,
+      `by-city: ${res.status}`,
       res.status,
       readJsonErrorCode(res.json),
     );
   }
   if (res.json === null) {
-    throw new GraphSignalsHttpError("graph-signals/by-city: empty JSON body", res.status, null);
+    throw new GraphSignalsHttpError("by-city: empty JSON body", res.status, null);
   }
   return res.json;
 }

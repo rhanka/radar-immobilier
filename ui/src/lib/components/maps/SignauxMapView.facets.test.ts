@@ -258,13 +258,13 @@ describe("SignauxMapView — viewer isolation", () => {
 describe("SignauxMapView — unavailable archive reads", () => {
   it("shows an explicit 503 error for detail and counters", async () => {
     vi.mocked(fetchGraphSignalDetail).mockRejectedValue(
-      new GraphSignalsHttpError("graph-signals/x: 503", 503, "discarded_signals_unavailable"),
+      new GraphSignalsHttpError("coherent-city/x: 503", 503, "personal_history_unresolved"),
     );
     vi.mocked(fetchGraphSignalsByCity).mockRejectedValue(
-      new GraphSignalsHttpError("graph-signals/by-city: 503", 503, "discarded_signals_unavailable"),
+      new GraphSignalsHttpError("by-city: 503", 503, "personal_history_unresolved"),
     );
     render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
-    await waitFor(() => expect(screen.getAllByText(/discarded_signals_unavailable/)).toHaveLength(2));
+    await waitFor(() => expect(screen.getAllByText(/personal_history_unresolved/)).toHaveLength(2));
     expect(screen.queryByRole("button", { name: /First zonage signal/ })).toBeNull();
   });
 
@@ -653,6 +653,7 @@ describe("SignauxMapView — workspace context (6H)", () => {
     expect(vi.mocked(fetchGraphSignalDetail)).not.toHaveBeenCalled();
     expect(vi.mocked(fetchCityFacets)).not.toHaveBeenCalled();
     expect(vi.mocked(fetchReasonCodes)).not.toHaveBeenCalled();
+    expect(vi.mocked(fetchGraphSignalsByCity)).not.toHaveBeenCalled();
   });
 
   it("reloads the current city in the newly selected workspace", async () => {
