@@ -14,16 +14,15 @@ const save = (f, state) => writeFileSync(join(f.dir, 'state.json'), JSON.stringi
 const success = r => assert.equal(r.status, 0, r.stdout + r.stderr);
 function covered(rules, { verb, resource, group, name }) {
   return rules.some(r => r.apiGroups.includes(group) && r.resources.includes(resource) && r.verbs.includes(verb)
-    // A named create is enforceable only on a subresource of a named object (pods/exec).
-    && (!r.resourceNames || (name && (!['list', 'create', 'watch'].includes(verb) || (verb === 'create' && resource.includes('/')))
-      && r.resourceNames.includes(name))));
+    && (!r.resourceNames || (name && !['list', 'create', 'watch'].includes(verb) && r.resourceNames.includes(name))));
 }
 function accesses(f) {
   const file = join(f.dir, 'access');
   return existsSync(file) ? readFileSync(file, 'utf8').trim().split('\n').map(l => JSON.parse(l)) : [];
 }
-function uncovered(env, list) {
-  const rules = role(env).rules;
+function uncovered(env, list, oneTime = false) {
+  const rules = [...role(env).rules, ...(oneTime ? YAML.parseAllDocuments(readFileSync(`deploy/cutover/rbac-adopt-${env}.yaml`, 'utf8'))
+    .map(d => d.toJS()).find(d => d?.kind === 'Role').rules : [])];
   return [...new Set(list.filter(a => !covered(rules, a)).map(a => `${a.verb} ${a.resource}.${a.group} ${a.name}`))];
 }
 test('the preflight right list is exactly the Role of each rbac-<env>.yaml', () => {
@@ -39,16 +38,21 @@ test('the preflight right list is exactly the Role of each rbac-<env>.yaml', () 
   }
 });
 test('every Kubernetes access of volume expansion, staging, prepare, blue/green cutover, rollback and daily restore is granted by rbac-preprod.yaml', () => {
-  const daily = fixture({ apiResources: AUTOSCALERS, unadopted: true });
-  let dailyAccesses;
+  const daily = fixture({ apiResources: AUTOSCALERS, unadopted: true, pvcSize: '5Gi' });
+  let dailyAccesses, oneTime;
   try {
+    // One-time operator acts: the permanent Role plus rbac-adopt-preprod.yaml.
     success(daily.run('slots-adopt'));
+    success(daily.run('pvc-expand'));
+    oneTime = accesses(daily);
+    assert.deepEqual(uncovered('preprod', oneTime, true), []);
+    assert.notDeepEqual(uncovered('preprod', oneTime), [], 'adoption needs the one-time Role');
     success(daily.run('run', ['RELEASE=deployed', 'MODE=restore']));
-    dailyAccesses = accesses(daily);
+    dailyAccesses = accesses(daily).slice(oneTime.length);
   } finally { daily.cleanup(); }
   const f = fixture({ apiResources: AUTOSCALERS, previousSha: '9'.repeat(40) });
   try {
-    success(f.run('pvc-expand'));
+    success(f.run('pvc-verify'));
     success(f.run('stage', ['RELEASE=deployed']));
     success(f.run('prepare'));
     success(f.run('run', ['MODE=run', 'DRILL=1']));

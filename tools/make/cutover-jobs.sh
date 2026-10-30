@@ -98,9 +98,10 @@ render_job() {
   render_template "$step" > "$WORK/template.yaml"
   # Client dry-run only parses the manifest. No server mutation precedes checkpoint.
   "${k[@]}" create --dry-run=client -f "$WORK/template.yaml" -o json > "$WORK/template.json"
-  if [[ $step =~ ^(destination|database|identity|clone|discard|tplreset|tplseal|freeze|unfreeze|unfreezeprev|probeverify)$ ]]; then
+  if [[ $step =~ ^(destination|database|identity|clone|discard|tplreset|tplseal|freeze|unfreeze|unfreezeprev|probeverify|volume[0-9]*)$ ]]; then
     local operation=${step%prev}
     [[ $step != identity ]] || operation=database
+    [[ $step != volume* ]] || operation=volume
     [[ $step != destination || -n ${TARGET_DB:-} ]] || operation=database
     jq --rawfile database deploy/cutover/database.cjs --arg step "$operation" --arg target "${TARGET_DB:-}" \
       --arg probe "$(jq -r '.probeRun//""' "$WORK/record.json")" '
