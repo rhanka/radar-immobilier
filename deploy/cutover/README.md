@@ -459,7 +459,9 @@ retained database, which is unfrozen first, while the promoted one is frozen),
 then `samedb` (`run SAMEDB=1 OBSERVE=60`, the production path on the now
 migrated live database). Red when the prepared stamp is not `restorePath=clone`
 with `restoreSeconds <= 300`, when the previous and new releases are the same
-(no version change), and per scenario when the run fails, `probe-verify.mjs`
+(no version change; a re-run of the same main workflow is detected first by
+`rehearse-check` and the rehearsal steps are skipped, neutral, with a job summary),
+and per scenario when the run fails, `probe-verify.mjs`
 reports a violation, a prepared Deployment is left, a `logGaps` entry exists, or
 the sessions exceed 80 % of `max_connections`. A run interrupted after its
 promotion started is completed by `resume RUN=<uuid>` at once (the scenario stays
