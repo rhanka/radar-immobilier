@@ -114,7 +114,7 @@ refusal; the existing full UI/MCP smoke runs during cutover.
 | Application role owns every application schema and may `CREATE EXTENSION postgis` | preprod PostgreSQL | the atomic restore drops and recreates them |
 | PostgreSQL PVC holds both `radar` and `radar_next` plus WAL/temporary space; today 5 Gi in `deploy/k8s/20-postgres-postgis.yaml` | preprod namespace | measure both database sizes; expand the PVC if they do not fit twice |
 | Restore Job within quota: requests 250m CPU / 1 Gi, limits 1500m CPU / 2 Gi (`restoreResources`; no 4-CPU node needed) | preprod `preprod-cap` ResourceQuota | Job admitted; keep 1500m CPU and 2 Gi of limits free |
-| `rbac-preprod.yaml`, `rbac-prod.yaml` and `../ci/bascule-preprod/rbac-ci-bascule-prod.yaml` installed (Secret patch on `radar-db-credentials`, `radar-api-prepared` lifecycle, Job create/delete) | both namespaces | `kubectl auth can-i` by the cutover identity |
+| `rbac-preprod.yaml`, `rbac-prod.yaml` and `../ci/bascule-preprod/rbac-ci-bascule-prod.yaml` installed (Secret patch on `radar-db-credentials`, `radar-api-prepared` lifecycle, Job create/delete, get/list of KEDA `scaledobjects`/`scaledjobs`/`httpscaledobjects`, `verticalpodautoscalers` and Argo `rollouts`) | both namespaces | `prepare` and `run` check every right of the Role with `kubectl auth can-i` before any lock and fail with the missing rights |
 | `radar-backup-s3-credentials` can write and list the environment's `recoveryBucket` (`config.json`: preprod `sentropic-pgbackup-preprod`, prod `sentropic-pgbackup`) | both namespaces | the `probe` Job runs before closure and fails early otherwise |
 
 The adapter rejects absent/unapproved accounts, conflicting workspaces or
