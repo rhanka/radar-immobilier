@@ -33,6 +33,59 @@ const jobVerdict = (step, job) => ['database', 'destination', 'reset', 'discard'
   (step === 'docs' || step === 'recon') && s.inventoryAnomalies ? { ok: true,
     inventoryAnomalies: s.inventoryAnomalies, inventoryAnomalyCount: s.inventoryAnomalies.length, inventoryAnomaliesTruncated: false } : step === 'data' ?
   { ok: true, status: 'open-success', epoch: 'scoped', sealedUnresolved: 0, maintenanceBarrier: false } : { ok: true };
+// RBAC access log: every API access the controller performs, as {verb, resource, group, name}.
+const RESOURCES = { configmap: ['configmaps', ''], configmaps: ['configmaps', ''], secret: ['secrets', ''], service: ['services', ''],
+  services: ['services', ''], pods: ['pods', ''], 'pods/portforward': ['pods/portforward', ''], endpoints: ['endpoints', ''], deployment: ['deployments', 'apps'],
+  deployments: ['deployments', 'apps'], replicasets: ['replicasets', 'apps'], statefulsets: ['statefulsets', 'apps'],
+  daemonsets: ['daemonsets', 'apps'], horizontalpodautoscalers: ['horizontalpodautoscalers', 'autoscaling'],
+  job: ['jobs', 'batch'], jobs: ['jobs', 'batch'], cronjob: ['cronjobs', 'batch'], cronjobs: ['cronjobs', 'batch'],
+  ingress: ['ingresses', 'networking.k8s.io'], ingresses: ['ingresses', 'networking.k8s.io'],
+  networkpolicy: ['networkpolicies', 'networking.k8s.io'] };
+const KIND_RESOURCE = { ConfigMap: 'configmaps', Secret: 'secrets', Service: 'services', Deployment: 'deployments', Job: 'jobs' };
+function resourceOf(token) {
+  if (RESOURCES[token]) return RESOURCES[token];
+  const dot = token.indexOf('.');
+  return dot > 0 ? [token.slice(0, dot), token.slice(dot + 1)] : [token, '?'];
+}
+function access(verb, token, name = '') {
+  const [resource, group] = resourceOf(token);
+  fs.appendFileSync(path.join(dir, 'access'), `${JSON.stringify({ verb, resource, group, name })}\n`);
+}
+if (tool === 'kubectl' && !args.includes('--dry-run=client')) {
+  const named = args[2] && !args[2].startsWith('-') ? args[2] : '';
+  if (args[0] === 'get') for (const t of args[1].split(',')) access(named && !args.includes('-l') ? 'get' : 'list', t, named);
+  if (['create', 'replace', 'apply'].includes(args[0]) && args.includes('-f')) {
+    const o = yaml.parse(fs.readFileSync(args[args.indexOf('-f') + 1], 'utf8'));
+    const token = KIND_RESOURCE[o.kind] || o.kind;
+    if (args[0] === 'create') access('create', token);
+    if (args[0] === 'replace') access('update', token, o.metadata.name);
+    if (args[0] === 'apply') { access('get', token, o.metadata.name); access('create', token); access('patch', token, o.metadata.name); }
+  }
+  if (args[0] === 'patch') access('patch', args[1], args[2]);
+  if (args[0] === 'delete' && args.includes('--raw')) {
+    const parts = args[args.indexOf('--raw') + 1].split('/');
+    const group = parts[1] === 'apis' ? parts[2] : '';
+    access('delete', `${parts.at(-2)}${group ? `.${group}` : ''}`, parts.at(-1));
+  } else if (args[0] === 'delete') access('delete', args[1], args[2]);
+  if (args[0] === 'rollout' || args[0] === 'wait') {
+    const [kind, name] = args.find(a => a.includes('/') && !a.startsWith('--')).split('/');
+    for (const verb of ['get', 'list', 'watch']) access(verb, kind, verb === 'get' ? name : '');
+  }
+  if (args[0] === 'port-forward') {
+    const [kind, name] = args.find(a => /^(service|pod|deployment)\//.test(a)).split('/');
+    access('get', { service: 'services', deployment: 'deployments' }[kind] || 'pods', name);
+    access('list', 'pods'); access('create', 'pods/portforward');
+  }
+}
+if (tool === 'kubectl' && args.includes('--dry-run=client') && args[0] === 'create' && args[1] === 'job') {
+  access('get', 'cronjobs', args.find(a => a.startsWith('--from=')).split('/')[1]);
+}
+if (args[0] === 'auth' && args[1] === 'can-i') {
+  const sub = args.find(a => a.startsWith('--subresource='))?.split('=')[1];
+  const right = `${args[2]} ${args[3].split('/')[0]}${sub ? `/${sub}` : ''}`;
+  process.exit((s.deniedRights || []).includes(right) ? 1 : 0);
+}
+if (args[0] === 'api-resources') { out((s.apiResources || []).map(r => `${r}\n`).join('')); process.exit(); }
 function crash(step, edge) {
   if (s.crash?.step === step && s.crash?.edge === edge) {
     s.crash = null; save(); process.kill(process.ppid, 'SIGKILL'); process.exit(99);
@@ -54,13 +107,13 @@ if (tool === 'curl') {
   if (s.anonymous200 && route === '/api/v1/workspaces') code = 200;
   if (s.publicFailure && publicProbe) code = 403;
   if (s.transient && route === '/health') { code = 503; s.transient--; save(); }
+  if (s.privateTransient && !publicProbe && route === '/health') { code = 503; s.privateTransient--; save(); }
   fs.writeFileSync(input[input.indexOf('-o') + 1], typeof body === 'string' ? body : JSON.stringify(body));
   if (input.includes('-D')) fs.writeFileSync(input[input.indexOf('-D') + 1], headers);
   if (input.includes('-w')) out(`${code} ${type}`);
   process.exit();
 }
 if (args[0] === 'config') { out(s.server || 'https://hlhedx.c1.bhs5.k8s.ovh.net'); process.exit(); }
-if (args[0] === 'api-resources') process.exit();
 if (args[0] === 'port-forward') {
   out(`Forwarding from 127.0.0.1:${args.includes('service/radar-ui') ? 18080 : 18848} -> service\n`);
   setInterval(() => {}, 1000); return;
@@ -70,6 +123,11 @@ if (args[0] === 'wait') process.exit();
 if (args[0] === 'get') {
   if (args[1].includes(',')) { out({ items: s.controllers || [] }); process.exit(); }
   let objects = s.objects.filter(o => o.kind === key(args[1]));
+  if (key(args[1]) === 'Pod' && !args.includes('-l') && args[2]?.startsWith('-')) {
+    // Schedule states observed by each full Pod listing (drain polls included).
+    (s.podReads ||= []).push({ watchdog: find('cronjob', 'radar-refresh-pending-watchdog')?.spec.suspend,
+      refresh: find('cronjob', 'radar-refresh-pv')?.spec.suspend }); save();
+  }
   if (args[2] && !args[2].startsWith('-')) objects = objects.filter(o => o.metadata.name === args[2]);
   if (args.includes('-l')) objects = objects.filter(o => o.metadata.labels?.['job-name'] === value('-l').split('=')[1]);
   if (!objects.length && args[2] && !args[2].startsWith('-')) process.exit(args.includes('--ignore-not-found') ? 0 : 1);
@@ -93,11 +151,14 @@ if (args[0] === 'create' || args[0] === 'replace' || args[0] === 'apply') {
     (s.jobCreation ||= []).push({ step, closed: s.objects.some(x => x.kind === 'Ingress' && JSON.stringify(x.spec).includes('base-maintenance-')),
       lockHeld: !!find('configmap', 'radar-change-lock'), preparedStatus: find('configmap', 'radar-prepared-db')?.data.status,
       watchdogSuspended: find('cronjob', 'radar-refresh-pending-watchdog')?.spec.suspend });
-    o.status = s.hangJob === step ? { active: 1 } : { conditions: [{ type: s.failJob === step ? 'Failed' : 'Complete', status: 'True' }], succeeded: s.failJob === step ? 0 : 1 };
+    // jobSeconds models real duration: the wrapper timeout (or deadline) kills a slower child.
+    const limit = Number(o.spec.template.spec.containers[0].env?.find(e => e.name === 'CUTOVER_TIMEOUT')?.value ?? o.spec.activeDeadlineSeconds);
+    const failed = s.failJob === step || s.jobSeconds?.[step] > limit;
+    o.status = s.hangJob === step ? { active: 1 } : { conditions: [{ type: failed ? 'Failed' : 'Complete', status: 'True' }], succeeded: failed ? 0 : 1 };
     persist(o);
     persist({ kind: 'Pod', metadata: { name: `${o.metadata.name}-pod`, labels: { 'job-name': o.metadata.name },
-      ownerReferences: [{ kind: 'Job', controller: true, uid: o.metadata.uid }] }, status: { phase: s.hangJob === step ? 'Running' : 'Succeeded',
-      containerStatuses: [{ name: 'result', state: { terminated: { message: JSON.stringify(jobVerdict(step, o)) } } }] } });
+      ownerReferences: [{ kind: 'Job', controller: true, uid: o.metadata.uid }] }, status: { phase: s.hangJob === step ? 'Running' : failed ? 'Failed' : 'Succeeded',
+      containerStatuses: [{ name: 'result', state: { terminated: { message: JSON.stringify(failed ? { ok: false } : jobVerdict(step, o)) } } }] } });
   }
   if (o.kind === 'ConfigMap' && o.metadata.name === 'radar-change-lock') {
     const r = JSON.parse(o.data.record);
@@ -124,7 +185,10 @@ if (args[0] === 'patch') {
   else for (const op of patch) {
     const parts = op.path.slice(1).split('/').map(p => p.replaceAll('~1', '/').replaceAll('~0', '~'));
     const last = parts.pop(); let parent = o; for (const p of parts) parent = parent[p];
-    if (op.op === 'test' && JSON.stringify(parent[last]) !== JSON.stringify(op.value)) process.exit(1);
+    if (op.op === 'test' && JSON.stringify(parent[last]) !== JSON.stringify(op.value)) {
+      // Same 422 rendering as kubectl for a failed JSON-patch test operation.
+      process.stderr.write('The request is invalid: the server rejected our request due to an error in our request\n'); process.exit(1);
+    }
     if (op.op === 'remove') delete parent[last];
     if (op.op === 'add' || op.op === 'replace') parent[last] = op.value;
   }

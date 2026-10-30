@@ -48,6 +48,10 @@ and prepared verification. Exhausting it alone never keeps the site closed:
 operation Jobs are stopped, the previous database and images are restored
 (automatic rollback), the private smoke runs and routes reopen; the command
 still exits non-zero. Any other failure stays closed for explicit recovery.
+Prepared verification includes the preprod document re-check (`recon`): it
+lists the whole preprod bucket (about 100 s), so it runs after writers are
+suspended and before closure, with the preparation deadline (840 s). The
+database switch refuses without that completed evidence.
 
 Preprod preparation copies documents additively into the live preprod document
 bucket before closure (additive copy, no deletion); this is kept
@@ -110,7 +114,7 @@ refusal; the existing full UI/MCP smoke runs during cutover.
 | Application role owns every application schema and may `CREATE EXTENSION postgis` | preprod PostgreSQL | the atomic restore drops and recreates them |
 | PostgreSQL PVC holds both `radar` and `radar_next` plus WAL/temporary space; today 5 Gi in `deploy/k8s/20-postgres-postgis.yaml` | preprod namespace | measure both database sizes; expand the PVC if they do not fit twice |
 | Restore Job within quota: requests 250m CPU / 1 Gi, limits 1500m CPU / 2 Gi (`restoreResources`; no 4-CPU node needed) | preprod `preprod-cap` ResourceQuota | Job admitted; keep 1500m CPU and 2 Gi of limits free |
-| `rbac-preprod.yaml`, `rbac-prod.yaml` and `../ci/bascule-preprod/rbac-ci-bascule-prod.yaml` installed (Secret patch on `radar-db-credentials`, `radar-api-prepared` lifecycle, Job create/delete) | both namespaces | `kubectl auth can-i` by the cutover identity |
+| `rbac-preprod.yaml`, `rbac-prod.yaml` and `../ci/bascule-preprod/rbac-ci-bascule-prod.yaml` installed (Secret patch on `radar-db-credentials`, `radar-api-prepared` lifecycle, Job create/delete, get/list of KEDA `scaledobjects`/`scaledjobs`/`httpscaledobjects`, `verticalpodautoscalers` and Argo `rollouts`) | both namespaces | `prepare` and `run` check every right of the Role with `kubectl auth can-i` before any lock and fail with the missing rights |
 | `radar-backup-s3-credentials` can write and list the environment's `recoveryBucket` (`config.json`: preprod `sentropic-pgbackup-preprod`, prod `sentropic-pgbackup`) | both namespaces | the `probe` Job runs before closure and fails early otherwise |
 
 The adapter rejects absent/unapproved accounts, conflicting workspaces or
@@ -135,6 +139,11 @@ resource-version comparison. A foreign host or unknown executor stays refused.
 Writer-workflow orphan locks also use `resume RUN`; failed cutovers retain their
 record and stay closed. Explicit rollback selects the previous database and
 previous immutable images, runs smoke and reopens. No automatic rollback occurs.
+The database selection is a compare-and-set from the prepared database, else a
+proof that the previous database is already selected (switch never started);
+the expected mismatch is not reported. Reopening requires every recorded Job to
+be terminal (Complete or Failed) with no live Pod, so a rollback after a refused
+Job reopens.
 
 After a caught failure, known database Jobs must stop. Missing Job evidence or
 unreachable Kubernetes means **unknown**, never success. A successful recorded
