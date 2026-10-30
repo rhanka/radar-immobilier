@@ -52,6 +52,15 @@ migrate_stage() {
   fi
 }
 execute_stages() {
+  if [[ ${MODE:-run} != restore ]]; then
+    execute_stage 1 'Verify prepared database' verify_prepared_release
+    execute_stage 2 Close close_once
+    execute_stage 3 'Switch database' switch_db
+    execute_stage 4 'Restart API, UI and MCP' restart_services
+    execute_stage 5 'Quick private test' private_smoke
+    printf '6/6 Reopen\n'; checkpoint stage-6 started; reopen
+    return
+  fi
   execute_stage 1 Restore restore_stage
   execute_stage 2 Close close_once
   execute_stage 3 Migrate migrate_stage
