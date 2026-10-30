@@ -21,7 +21,10 @@
 # Placeholders: ${NAMESPACE} ${IMAGE} ${DUMP_IMAGE} ${READER_SECRET} ${S3_ENDPOINT}
 # ${S3_REGION} ${S3_FORCE_PATH_STYLE} ${EXPECTED_BACKUP_BUCKET} ${BACKUP_DATE}
 # ${PIN_MANIFEST_SHA256} ${PIN_PG_SHA256} ${DB_SECRET} ${PGHOST} ${EXPECTED_DATABASE}
-# ${RESTORE_ASSERT_DB} ${TTL_SECONDS}, plus the BR_SCRIPT placeholder under the
+# ${RESTORE_ASSERT_DB} ${TTL_SECONDS} ${RESTORE_REQUEST_CPU} ${RESTORE_REQUEST_MEMORY}
+# ${RESTORE_LIMIT_CPU} ${RESTORE_LIMIT_MEMORY} (per-environment `restoreResources` in
+# deploy/cutover/config.json, sized for the namespace ResourceQuota; pg_restore -j 4
+# keeps four workers within that CPU limit), plus the BR_SCRIPT placeholder under the
 # `fetch` args and the RESTORE_SCRIPT placeholder under the `restore` args (never
 # written as placeholders in a comment: they span many lines). The $VAR of the
 # restore shell are RUNTIME variables (no braces).
@@ -130,8 +133,8 @@ ${RESTORE_SCRIPT}
               drop:
                 - ALL
           resources:
-            requests: { cpu: "4", memory: 2Gi }
-            limits: { cpu: "4", memory: 2Gi }
+            requests: { cpu: "${RESTORE_REQUEST_CPU}", memory: "${RESTORE_REQUEST_MEMORY}" }
+            limits: { cpu: "${RESTORE_LIMIT_CPU}", memory: "${RESTORE_LIMIT_MEMORY}" }
           volumeMounts:
             - { name: work, mountPath: /work }
             - { name: tmp, mountPath: /tmp }
