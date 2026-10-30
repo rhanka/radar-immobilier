@@ -24,16 +24,19 @@ test('prepare stamps ready without closing live services and releases the lock d
     assert.deepEqual([restore.closed, restore.lockHeld, restore.preparedStatus, restore.watchdogSuspended], [false, false, 'preparing', true]);
     for (const job of f.state().objects.filter(o => o.kind === 'Job' && /-(restore|ddl|data)$/.test(o.metadata.name))) {
       const env = job.spec.template.spec.containers[0].env;
-      assert.equal(env.find(e => e.name === 'POSTGRES_DB').value, 'radar_next');
-      if (job.metadata.name.endsWith('-restore')) {
-        assert.equal(env.find(e => e.name === 'PGDATABASE').value, 'radar_next');
+      const restore = job.metadata.name.endsWith('-restore');
+      // No staged template yet: the backup is restored into the template, then cloned.
+      assert.equal(env.find(e => e.name === 'POSTGRES_DB').value, restore ? 'radar_tpl' : 'radar_next');
+      if (restore) {
+        assert.equal(env.find(e => e.name === 'PGDATABASE').value, 'radar_tpl');
+        assert.deepEqual(['RESTORE_JOBS', 'RESTORE_TUNED'].map(n => env.find(e => e.name === n).value), ['2', '1']);
         assert.equal(env.find(e => e.name === 'LIVE_DB').value, 'radar');
         assert.deepEqual(job.spec.template.spec.containers[0].resources,
           { requests: { cpu: '250m', memory: '1Gi' }, limits: { cpu: '1500m', memory: '2Gi' } });
       }
       if (job.metadata.name.endsWith('-data')) {
         const evidence = JSON.parse(env.find(e => e.name === 'CUTOVER_EVIDENCE').value);
-        const pods = f.state().objects.filter(o => o.kind === 'Pod' && /-(restore|ddl)-pod$/.test(o.metadata.name));
+        const pods = f.state().objects.filter(o => o.kind === 'Pod' && /-(clone|ddl)-pod$/.test(o.metadata.name));
         assert.deepEqual(evidence.instances.sort(), pods.map(p => p.metadata.uid).sort());
         assert.equal(evidence.instances.length, 2);
       }
@@ -56,7 +59,9 @@ for (const step of ['restore', 'ddl', 'data']) test(`prepare fails pipeline and 
   try {
     assert.notEqual(f.run('prepare').status, 0);
     assert.equal(object(f, 'radar-prepared-db').data.status, 'failed');
-    assert.ok(f.state().jobCreation.some(j => j.step === 'discard'));
+    // The disposable target exists only once cloned; a failed staging marks the template failed.
+    assert.equal(f.state().jobCreation.some(j => j.step === 'discard'), step !== 'restore');
+    if (step === 'restore') assert.equal(object(f, 'radar-template-db').data.status, 'failed');
     assert.equal(object(f, 'radar-refresh-pv').spec.suspend, false);
     assert.equal(object(f, 'radar-api').spec.replicas, 1);
     assert.equal(f.state().jobCreation.some(j => j.closed), false);
@@ -309,5 +314,53 @@ test('rollback before the database switch keeps the live database without a reje
     assert.equal(result.stderr.includes('The request is invalid'), false, result.stderr);
     assert.equal(object(f, 'radar-db-credentials').data.POSTGRES_DB, Buffer.from('radar').toString('base64'));
     assert.deepEqual(object(f, 'application').spec, ingress);
+  } finally { f.cleanup(); }
+});
+const job = (f, step) => f.state().jobCreation.filter(j => j.step === step).length;
+test('prepare clones a staged template matching the pin, and stages first on a mismatch', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    let stamp = object(f, 'radar-prepared-db').data;
+    assert.equal(stamp.restorePath, 'stage+clone');
+    assert.deepEqual([job(f, 'restore'), job(f, 'docs'), job(f, 'recon'), job(f, 'clone')], [1, 1, 0, 1], 'no duplicate recon after docs');
+    const template = object(f, 'radar-template-db').data;
+    assert.deepEqual([template.status, template.date, template.pgSha256, template.sizeBytes], ['ready', '2026-10-29', 'e'.repeat(64), '281512198']);
+    // Same pin: clone path, the only document work is one reconciliation.
+    success(f.run('prepare'));
+    stamp = object(f, 'radar-prepared-db').data;
+    assert.equal(stamp.restorePath, 'clone');
+    assert.ok(Number(stamp.restoreSeconds) >= 0 && Number(stamp.restoreSeconds) <= 300, stamp.restoreSeconds);
+    assert.deepEqual([job(f, 'restore'), job(f, 'docs'), job(f, 'recon'), job(f, 'clone')], [1, 1, 1, 2]);
+    // A newer backup than the staged template: stage first, reported as such.
+    const state = f.state(); state.pinOverride = { date: '2026-10-30', pgSha256: 'f'.repeat(64) }; save(f, state);
+    success(f.run('prepare'));
+    assert.equal(object(f, 'radar-prepared-db').data.restorePath, 'stage+clone');
+    assert.equal(object(f, 'radar-template-db').data.date, '2026-10-30');
+    assert.deepEqual([job(f, 'restore'), job(f, 'clone')], [2, 3]);
+  } finally { f.cleanup(); }
+});
+test('daily staging builds the template under the lock and refuses while a preparation runs or the volume is short', () => {
+  const f = fixture();
+  try {
+    success(f.run('stage', ['RELEASE=deployed']));
+    const template = object(f, 'radar-template-db').data;
+    assert.equal(template.status, 'ready');
+    assert.deepEqual(f.state().jobCreation.map(j => j.step).filter(s => s !== 'database'),
+      ['resolve', 'tplreset', 'restore', 'docs', 'tplseal']);
+    const restore = f.state().objects.find(o => o.kind === 'Job' && o.metadata.name.endsWith('-restore'));
+    assert.equal(restore.spec.template.spec.containers[0].env.find(e => e.name === 'PGDATABASE').value, 'radar_tpl');
+    assert.equal(object(f, 'radar-change-lock'), undefined);
+    assert.equal(object(f, 'radar-refresh-pv').spec.suspend, false);
+    const state = f.state();
+    state.objects.push({ kind: 'ConfigMap', metadata: { name: 'radar-prepared-db', uid: 'p', resourceVersion: '1' }, data: { status: 'preparing' } });
+    save(f, state);
+    assert.notEqual(f.run('stage', ['RELEASE=deployed']).status, 0);
+    const short = f.state(); short.objects = short.objects.filter(o => o.metadata.name !== 'radar-prepared-db');
+    short.pvcMeasure = '3000000000 5000000000 21474836480\n'; save(f, short);
+    const refused = f.run('stage', ['RELEASE=deployed']);
+    assert.notEqual(refused.status, 0);
+    assert.match(refused.stderr, /volume_insufficient/);
+    assert.equal(object(f, 'radar-template-db').data.status, 'ready', 'a refused staging never touches the ready template');
   } finally { f.cleanup(); }
 });

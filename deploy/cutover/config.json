@@ -6,6 +6,7 @@
     "namespace": "radar-immobilier-preprod",
     "url": "https://preprod.immo.sent-tech.ca",
     "database": "radar",
+    "templateDb": "radar_tpl",
     "documents": "radar-immobilier-docs-preprod",
     "recoveryBucket": "sentropic-pgbackup-preprod",
     "restoreResources": {"requests": {"cpu": "250m", "memory": "1Gi"}, "limits": {"cpu": "1500m", "memory": "2Gi"}}

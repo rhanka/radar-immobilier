@@ -250,3 +250,36 @@ The last-applied annotation is kept, so a later client-side `kubectl apply` of
 the unlabelled manifests (the CI MCP apply included) keeps the slot labels; the
 manifests deliberately do not carry the label, because an apply that changes a
 Deployment selector before adoption would be rejected (immutable field).
+
+### Staged template and clone (restore in under five minutes)
+
+`T_restore` runs from the start of `resolve` to the `destination` verdict on the
+prepared database. Restoring the archive inside that window took about 885 s;
+the restore now happens earlier, once a day, into a template database:
+
+```sh
+make -f deploy/cutover/operator.mk stage RELEASE=deployed ENV=preprod
+```
+
+`stage` (preprod only, under `radar-change-lock`, refused while a preparation
+is `preparing` or when free volume space is below 2 x database + 2 GiB) pins the
+latest complete backup, stamps `radar-template-db` as `building`, drops and
+recreates `radar_tpl` (`tplreset`), restores the archive into it with
+`pg_restore -j 2`, `maintenance_work_mem=128MB`, `synchronous_commit=off` and a
+`vacuumdb --analyze-only` pass, copies the documents (with their internal
+reconciliation), then seals it (`tplseal`: `ALLOW_CONNECTIONS false`, sessions
+terminated) and stamps `ready` with the backup date, fingerprints, migration
+count and size. A rerun starts by dropping the template.
+
+`prepare` pins the backup; when the template stamp is `ready` and matches the
+pin it runs `clone` (`DROP DATABASE IF EXISTS <target>`, then
+`CREATE DATABASE <target> TEMPLATE radar_tpl STRATEGY FILE_COPY`), one `recon`,
+`ddl`, `data` and `destination`. Otherwise it stages first
+(`restorePath=stage+clone`, about 15 minutes, reported) and skips the separate
+`recon` because staging already reconciled the documents. The prepared stamp
+records `restorePath` and `restoreSeconds`; the CI rehearsal fails when
+`restoreSeconds` exceeds 300 or `restorePath` is not `clone`.
+
+The destination listing (`docs`, `recon`) uses 64 shards listed 64 at a time
+(`LIST_CONCURRENCY`, independent of the copy workers): the sequential depth per
+shard drops from about 27 pages to about 7 on the preprod bucket.
