@@ -1,18 +1,21 @@
 /**
  * signals-live.test.ts — the real T1 feed is derived from graph_nodes
- * (GET /api/graph-signals/*), with NO synthetic/simulation fixtures.
+ * (scoped aggregate + coherent-city reads), with NO synthetic/simulation fixtures.
  * Cities with 0 signal nodes are skipped (anti-invention).
  */
 import { describe, expect, it, vi } from "vitest";
 
+const WS = "11111111-1111-4111-8111-111111111111";
+
 import { Signal } from "@radar/domain";
 
 import type { GraphSignalsByCityResponse } from "./graph-signals-by-city-client.js";
-import type { GraphSignalDetailResponse } from "./graph-signal-detail-client.js";
+import { GraphSignalsHttpError, type GraphSignalDetailResponse } from "./graph-signal-detail-client.js";
 import {
   citiesWithSignalNodes,
   loadLiveSignals,
   mapGraphSignalNodeToSignal,
+  scopedLiveSignalsClients,
 } from "./signals-live.js";
 
 /**
@@ -46,9 +49,9 @@ const byCity = (
 };
 
 const detail = (
-  citySlug: string,
+  _citySlug: string,
   nodes: GraphSignalDetailResponse["nodes"],
-): GraphSignalDetailResponse => ({ ok: true, citySlug, legacyProjection: null, nodes });
+): Pick<GraphSignalDetailResponse, "nodes"> => ({ nodes });
 
 const makeNode = (
   id: string,
@@ -169,5 +172,29 @@ describe("loadLiveSignals", () => {
     const signals = await loadLiveSignals({ fetchGraphSignalsByCity, fetchGraphSignalDetail });
     expect(signals).toEqual([]);
     expect(fetchGraphSignalDetail).not.toHaveBeenCalled();
+  });
+});
+
+describe("loadLiveSignals — scoped refusals (6H)", () => {
+  it.each([401, 403, 503])("a %s on a city read makes the feed unavailable, never partial", async (status) => {
+    const fetchGraphSignalsByCity = vi.fn(async () =>
+      byCity({ citySlug: "a", signalCount: 1 }, { citySlug: "b", signalCount: 1 }));
+    const fetchGraphSignalDetail = vi.fn(async (citySlug: string) => {
+      if (citySlug === "a") return detail("a", [makeNode("sig-a", "a")]);
+      throw new GraphSignalsHttpError(`coherent-city/${citySlug}: ${status}`, status, "scoped_facet_scope_unavailable");
+    });
+    await expect(loadLiveSignals({ fetchGraphSignalsByCity, fetchGraphSignalDetail }))
+      .rejects.toMatchObject({ status });
+  });
+
+  it("scoped clients read coherent-city in the explicit workspace", async () => {
+    const calls: string[] = [];
+    vi.stubGlobal("fetch", async (url: string) => {
+      calls.push(url);
+      return new Response(JSON.stringify({ ok: true, token: "t", heads: [], signals: [], counts: {} }), { status: 200 });
+    });
+    await scopedLiveSignalsClients({ workspaceId: WS }).fetchGraphSignalDetail("ville-a");
+    expect(calls).toEqual([`/api/v1/workspaces/${WS}/signal-facets/coherent-city?citySlug=ville-a&mode=signal`]);
+    vi.unstubAllGlobals();
   });
 });

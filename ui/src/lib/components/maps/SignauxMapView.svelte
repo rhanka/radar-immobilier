@@ -51,24 +51,28 @@
     fetchGraphSignalsByCity,
   } from "$lib/signals/graph-signals-by-city-client.js";
   import {
+    appendRevealedNodes,
     fetchGraphSignalDetail,
-    GraphSignalsHttpError,
+    fetchRevealedSignal,
+    scopedReadErrorMessage,
     type GraphSignalNode,
     type LegacyZmpProjection,
     type SignalDocRef,
     type SignalEvidence,
   } from "$lib/signals/graph-signal-detail-client.js";
   import {
+    bindFacetCommand,
     createCommandKey,
     facetErrorMessage,
     fetchCityFacets,
     fetchReasonCodes,
     indexFacetHeads,
     isFacetWriteUnconfirmed,
-    postFacetCommand,
+    refuseUnscopedFacetCommand,
     sameFacetTarget,
     SignalFacetError,
     type FacetAction,
+    type FacetCommandPoster,
     type FacetCommandLaunch,
     type FacetConflictNotice,
     type FacetHeadsStatus,
@@ -83,6 +87,7 @@
    */
   type FacetReadOutcome = "ok" | "stale" | "error";
   import { authStore } from "$lib/auth/auth-store.js";
+  import { workspaceContext, workspaceUnavailableMessage } from "$lib/signals/workspace-client.js";
   import {
     buildOverlaySignals,
     buildNavSignals,
@@ -606,15 +611,24 @@
 
   $: authState = $authStore;
   $: currentUserSub = authState.user?.sub ?? null;
+  // 6H: every signal read and command is scoped to the explicit workspace
+  // owned by App; without one no scoped request is issued.
+  $: workspaceState = $workspaceContext;
+  $: scopedWorkspaceId = workspaceState.context.workspaceId;
+  $: workspaceNote = scopedWorkspaceId === null ? workspaceUnavailableMessage(workspaceState) : null;
+  $: facetPostCommand = (scopedWorkspaceId === null
+    ? refuseUnscopedFacetCommand
+    : bindFacetCommand({ workspaceId: scopedWorkspaceId })) as FacetCommandPoster;
   $: facetsAllowed =
-    authState.authenticated && !authState.authDisabled && authState.user?.status === "approved";
+    authState.authenticated && !authState.authDisabled && authState.user?.status === "approved"
+    && scopedWorkspaceId !== null;
   $: facetsNote = authState.authDisabled
     ? "Classement indisponible quand l'authentification est désactivée."
     : !authState.authenticated
       ? "Connexion requise pour classer les signaux."
       : authState.user?.status !== "approved"
         ? "Compte non approuvé — le classement est réservé aux comptes approuvés."
-        : null;
+        : workspaceNote;
   $: activeFacetHeads = facetsAllowed && selectedCity
     ? (facetHeadsByCity.get(selectedCity.municipality.slug) ?? EMPTY_FACET_HEADS)
     : EMPTY_FACET_HEADS;
@@ -623,7 +637,7 @@
   // changes, then reload under the new viewer's request guards.
   $: {
     const sub = currentUserSub;
-    const context = `${sub ?? ""}/${facetsAllowed}`;
+    const context = `${sub ?? ""}/${facetsAllowed}/${scopedWorkspaceId ?? ""}`;
     if (appliedFacetContext?.context !== context) {
       const initial = appliedFacetContext === null;
       appliedFacetContext = { context };
@@ -1611,23 +1625,41 @@
   ): Promise<FacetReadOutcome> {
     const lease = detailGuard.lease();
     const silent = opts.silent === true;
+    const workspaceId = scopedWorkspaceId;
+    if (workspaceId === null) {
+      // No explicit workspace: no scoped request, an explicit unavailable
+      // state (never an empty list).
+      detailGuard.cancel();
+      detailNodes = [];
+      detailLegacyProjection = null;
+      detailLoading = false;
+      detailError = workspaceNote ?? "Signaux indisponibles.";
+      return "error";
+    }
     if (!silent) detailLoading = true;
     detailError = null;
     detailLegacyProjection = null;
     try {
-      const res = await fetchGraphSignalDetail(citySlug, "", DEFAULT_REQUEST_TIMEOUT_MS, {
+      const scope = { workspaceId };
+      let res = await fetchGraphSignalDetail(scope, citySlug, {
         signal: lease.signal,
-        ...(showDiscarded ? { showDiscarded: true as const } : {}),
+        timeoutMs: DEFAULT_REQUEST_TIMEOUT_MS,
       });
       if (!lease.isCurrent()) return "stale"; // réponse périmée → on ignore
-      if (!res.ok && res.nodes.length === 0) {
-        // 404 — ville sans signaux graphify (état vide explicite, pas une erreur)
-        detailNodes = [];
-        detailLegacyProjection = null;
-        detailError = null;
-        reconcileToVisibleNodes();
-        return "ok";
+      if (showDiscarded) {
+        // Archived targets never come from the city read: each one is
+        // re-read through `reveal`, whose fingerprint drives its restore.
+        const archived = res.heads.filter((head) => head.effectiveDiscarded);
+        const revealed = await Promise.all(archived.map((head) =>
+          fetchRevealedSignal(scope, head.target, {
+            signal: lease.signal,
+            timeoutMs: DEFAULT_REQUEST_TIMEOUT_MS,
+          })));
+        if (!lease.isCurrent()) return "stale";
+        res = appendRevealedNodes(res, revealed);
       }
+      // 200 with no node: city without graphify signals (explicit empty
+      // state, not an error).
       detailNodes = res.nodes;
       detailLegacyProjection = res.legacyProjection;
       // Alimenter le cache multi-villes (recoloration aplats filtrée)
@@ -1643,12 +1675,7 @@
       // Abort (changement de ville) → réponse périmée à ignorer, pas une erreur.
       if (!lease.isCurrent() || isAbortError(e)) return "stale";
       console.warn("Signal detail load failed:", e);
-      detailError =
-        e instanceof GraphSignalsHttpError &&
-        e.status === 503 &&
-        e.code === "discarded_signals_unavailable"
-          ? "Signaux écartés indisponibles (discarded_signals_unavailable) — rechargement impossible."
-          : "Signaux indisponibles.";
+      detailError = scopedReadErrorMessage(e);
       detailLegacyProjection = null;
       return "error";
     } finally {
@@ -1661,7 +1688,7 @@
    * controls with a message while leaving signal reads available.
    */
   async function loadReasonCodes(): Promise<FacetReadOutcome> {
-    if (!facetsAllowed || !currentUserSub) return "stale";
+    if (!facetsAllowed || !currentUserSub || scopedWorkspaceId === null) return "stale";
     if (facetCodes !== null && facetCodesSub === currentUserSub) return "ok";
     if (facetCodesLoading) return "stale";
     const lease = facetCodesGuard.lease();
@@ -1670,7 +1697,7 @@
     facetCodesError = null;
     try {
       // GET reason-codes rejects query parameters with 400.
-      const res = await fetchReasonCodes("", { signal: lease.signal });
+      const res = await fetchReasonCodes({ workspaceId: scopedWorkspaceId }, { signal: lease.signal });
       if (!lease.isCurrent()) return "stale";
       facetCodes = res.codes;
       facetCodesSub = sub;
@@ -1692,11 +1719,11 @@
    * controls until `ready`. Failed head reads never prove archive presence.
    */
   async function loadFacetHeads(citySlug: string): Promise<FacetReadOutcome> {
-    if (!facetsAllowed || !currentUserSub) return "stale";
+    if (!facetsAllowed || !currentUserSub || scopedWorkspaceId === null) return "stale";
     const lease = facetHeadsGuard.lease();
     setFacetHeadsState(citySlug, "loading");
     try {
-      const res = await fetchCityFacets("", citySlug, { signal: lease.signal });
+      const res = await fetchCityFacets({ workspaceId: scopedWorkspaceId }, citySlug, { signal: lease.signal });
       if (!lease.isCurrent()) return "stale";
       const next = new Map(facetHeadsByCity);
       next.set(citySlug, indexFacetHeads(res.heads));
@@ -1844,7 +1871,7 @@
         await reloadAfterFacetWrite(operationCity, { silentDetail: true, afterWrite: false });
         return;
       }
-      await postFacetCommand("", "restore", { target, expectedHeadId, displayedFingerprint },
+      await facetPostCommand("restore", { target, expectedHeadId, displayedFingerprint },
         commandKeyForOperation);
       if (isCurrent()) {
         undoCommandKey = null;
@@ -2876,13 +2903,23 @@
   async function load(): Promise<FacetReadOutcome> {
     const version = ++bulkLoadVersion;
     const lease = bulkGuard.lease();
+    const workspaceId = scopedWorkspaceId;
+    if (workspaceId === null) {
+      // No explicit workspace: counters stay unavailable, no scoped request.
+      bulkGuard.cancel();
+      graphItems = [];
+      loading = false;
+      loadError = workspaceNote ?? "Données des signaux indisponibles.";
+      return "error";
+    }
     loading = true;
     loadError = null;
     try {
       // #4 — les comptes BULK (rail + badges de TOUTES les villes) deviennent
       // date-cohérents avec le filtre date actif → fin du 0/50 (parité globale,
       // pas seulement la ville sélectionnée). Sans borne = all-time (Illimité).
-      const res = await fetchGraphSignalsByCity("", {
+      // 6H : agrégat scopé dans l'espace de travail explicite.
+      const res = await fetchGraphSignalsByCity({ workspaceId }, {
         ...signalDocumentDateWindow(dateRange, dateBasis),
         excludePiia: vivierBExclusions.piiaSansProjetResidentiel,
         excludeDerogations: vivierBExclusions.derogationsMineures,
@@ -2895,12 +2932,7 @@
     } catch (e) {
       if (version !== bulkLoadVersion || !lease.isCurrent() || isAbortError(e)) return "stale";
       console.warn("Signals by city load failed:", e);
-      loadError =
-        e instanceof GraphSignalsHttpError &&
-        e.status === 503 &&
-        e.code === "discarded_signals_unavailable"
-          ? "Données des signaux indisponibles — signaux écartés indisponibles (discarded_signals_unavailable)."
-          : "Données des signaux indisponibles.";
+      loadError = `Données des signaux indisponibles — ${scopedReadErrorMessage(e)}`;
       return "error";
     } finally {
       if (version === bulkLoadVersion && lease.isCurrent()) loading = false;
@@ -3275,6 +3307,7 @@
       showDiscarded={showDiscarded}
       onToggleShowDiscarded={handleToggleShowDiscarded}
       onFacetSaved={handleFacetSaved}
+      {facetPostCommand}
       facetViewerKey={appliedFacetContext}
       facetReloadError={facetReloadError}
       facetReloadAfterWrite={facetReloadAfterWrite}
