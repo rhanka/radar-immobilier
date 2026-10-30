@@ -16,6 +16,7 @@ source tools/make/cutover-prepared.sh
 source tools/make/cutover-prepare.sh
 source tools/make/cutover-prepared-smoke.sh
 source tools/make/cutover-switch.sh
+source tools/make/cutover-rbac.sh
 cutover_config
 [[ -z ${CYCLE_ID:-} || $CYCLE_ID =~ ^[A-Za-z0-9._-]{1,100}$ ]] || fail 'Invalid cycle identifier'
 WORK=$(mktemp -d)
@@ -58,7 +59,7 @@ trap 'exit 130' INT
 trap 'exit 143' TERM
 cluster_preflight
 case ${1:-} in
-  prepare) prepare_database;;
+  prepare) validate_release "${RELEASE:-}"; rbac_preflight; prepare_database;;
   rollback) lock_resume; rollback_stages;;
   status)
     "${k[@]}" get configmap radar-change-lock --ignore-not-found -o json > "$WORK/lock.json"
@@ -85,6 +86,7 @@ case ${1:-} in
     [[ ${MODE:-run} != restore || $ENV == preprod ]] || fail 'Daily restore is preprod-only'
     [[ ${BACKUP_ID:-latest} == latest || ${BACKUP_ID:-} =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || fail 'Invalid backup selection'
     if [[ ${RELEASE:-} != deployed ]]; then validate_release "${RELEASE:-}"; fi
+    rbac_preflight
     lock_acquire
     jq --arg mode "${MODE:-run}" '.mode=$mode' "$WORK/record.json" > "$WORK/next.json"
     mv "$WORK/next.json" "$WORK/record.json"; record_save
