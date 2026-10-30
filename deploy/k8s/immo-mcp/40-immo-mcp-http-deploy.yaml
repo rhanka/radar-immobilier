@@ -160,6 +160,9 @@ spec:
           env:
             - name: IMMO_MCP_ACCOUNT_DATABASE_URL
               valueFrom: { secretKeyRef: { name: immo-mcp-account-reader, key: IMMO_MCP_ACCOUNT_DATABASE_URL } }
+            # Live database selected by the cutover (only POSTGRES_DB is patched); role URLs follow it.
+            - name: IMMO_MCP_DATABASE_NAME
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
             - name: IMMO_MCP_WORKLOAD_CLIENT_SECRET
               valueFrom: { secretKeyRef: { name: immo-mcp-workload, key: IMMO_MCP_WORKLOAD_CLIENT_SECRET } }
             - name: IMMO_MCP_WORKLOAD_SUB
