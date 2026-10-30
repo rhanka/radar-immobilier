@@ -4,6 +4,8 @@
 # release, from the previous release to the new one, every scenario under the read and writer
 # probes and judged by probe-verify.mjs:
 #   preprod  OBSERVE=120 DRILL=1   previous -> new: freeze, prepared database, routing drill;
+#   rollback  rollback RUN=<preprod>  new -> previous after promotion (unfreeze of the retained DB);
+#   repromote rollback RUN=<rollback> previous -> new again (rollback of the rollback);
 #   samedb   SAMEDB=1 OBSERVE=60   new on the (now migrated) live database: the production path.
 # Plus the restore criterion of the prepared stamp (restorePath=clone, restoreSeconds<=300) and
 # the post-run state (no prepared slot left, no log gap, sessions <= 80 % of max_connections).
@@ -66,5 +68,18 @@ scenario preprod preprod run OBSERVE=120 DRILL=1
 if jq -e '.previousRelease.gitSha != .release.gitSha' "$OUT/preprod-receipt.json" >/dev/null 2>&1; then
   verdict "version change: OK $(jq -r '.previousRelease.gitSha[0:7]+" -> "+.release.gitSha[0:7]' "$OUT/preprod-receipt.json")"
 else verdict 'version change: RED previous release == release (nothing switched between versions)'; red=1; fi
+# Rollback after promotion (R2/R4 path in preprod): rebuild the previous release on the retained
+# database (unfrozen first, writes reopened), freeze the promoted one, switch and promote; then
+# re-promote the new release the same way (rollback of the rollback).
+promoted_run() { jq -r 'select(.checkpoints.promote=="completed")|.run' "$OUT/$1-receipt.json" 2>/dev/null || true; }
+run_a=$(promoted_run preprod)
+if [[ -n $run_a ]]; then
+  scenario rollback preprod rollback RUN="$run_a"
+  jq -e --arg a "$run_a" '.rollbackOf==$a and any(.jobs|keys[]; .=="unfreezeprev")' "$OUT/rollback-receipt.json" >/dev/null ||
+    { verdict 'rollback: RED no rollback receipt with the unfreeze of the retained database'; red=1; }
+  run_b=$(promoted_run rollback)
+  if [[ -n $run_b ]]; then scenario repromote preprod rollback RUN="$run_b"
+  else verdict 'repromote: RED rollback not promoted'; red=1; fi
+else verdict 'rollback: RED previous scenario not promoted'; red=1; fi
 scenario samedb samedb run SAMEDB=1 OBSERVE=60
 exit "$red"
