@@ -75,9 +75,9 @@ trap 'exit 143' TERM
 cluster_preflight
 case ${1:-} in
   prepare) validate_release "${RELEASE:-}"; rbac_preflight; require_slots; prepare_database;;
-  pvc-expand) rbac_preflight; pvc_expand;;
+  pvc-expand) rbac_preflight adopt; pvc_expand;;
   pvc-verify) rbac_preflight; pvc_verify;;
-  slots-adopt) rbac_preflight; slots_adopt;;
+  slots-adopt) rbac_preflight adopt; slots_adopt;;
   stage) rbac_preflight; stage_command;;
   probe-verify)
     # Rehearsal: acknowledged probe writes per database, read back by a Job (writer probe run id PROBE).

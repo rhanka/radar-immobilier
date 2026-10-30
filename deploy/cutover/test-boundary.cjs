@@ -29,6 +29,7 @@ const envOf = (job, name) => job.spec.template.spec.containers[0].env?.find(e =>
 const jobVerdict = (step, job) => step === 'tplseal' ? { ok: true, sizeBytes: 281512198 }
   : step === 'freeze' ? (s.frozenAt = new Date().toISOString(), save(), { ok: true, freezeStartedAt: s.frozenAt, frozenAt: s.frozenAt })
   : step.startsWith('unfreeze') ? (s.unfrozen = (s.unfrozen || 0) + 1, save(), { ok: true, unfrozenAt: new Date().toISOString() })
+  : step.startsWith('volume') ? { ok: true, volumeUsedBytes: 4000000000, liveDbBytes: 3000000000, walBytes: 1000000000, ...s.volume }
   : step === 'probeverify' ? { ok: true, probe: s.probeRanges || { radar: [], radar_next: [] } }
   : step.startsWith('logs') ? { ok: true, podUids: JSON.parse(envOf(job, 'LOG_PODS')).map(p => p.uid).slice(s.logsMissing ? 1 : 0) }
   : ['database', 'identity', 'destination', 'clone', 'tplreset', 'discard'].includes(step)
@@ -79,7 +80,6 @@ if (tool === 'kubectl' && !args.includes('--dry-run=client')) {
     const [kind, name] = args.find(a => a.includes('/') && !a.startsWith('--')).split('/');
     for (const verb of ['get', 'list', 'watch']) access(verb, kind, verb === 'get' ? name : '');
   }
-  if (args[0] === 'exec') { access('get', 'pods', args[1]); access('create', 'pods/exec', args[1]); }
   if (args[0] === 'port-forward') {
     const [kind, name] = args.find(a => /^(service|pod|deployment)\//.test(a)).split('/');
     access('get', { service: 'services', deployment: 'deployments' }[kind] || 'pods', name);
@@ -150,7 +150,6 @@ if (tool === 'curl') {
   if (input.includes('-w')) out(`${code} ${type}`);
   process.exit();
 }
-if (args[0] === 'exec') { out(s.pvcMeasure ?? '3000000000 20000000000 21474836480\n'); process.exit(); }
 if (args[0] === 'config') { out(s.server || 'https://hlhedx.c1.bhs5.k8s.ovh.net'); process.exit(); }
 if (args[0] === 'port-forward') {
   // One local port per forwarded resource; curl resolves it back to the serving Pods.
