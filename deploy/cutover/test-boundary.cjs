@@ -71,6 +71,11 @@ if (args[0] === 'wait') process.exit();
 if (args[0] === 'get') {
   if (args[1].includes(',')) { out({ items: s.controllers || [] }); process.exit(); }
   let objects = s.objects.filter(o => o.kind === key(args[1]));
+  if (key(args[1]) === 'Pod' && !args.includes('-l') && args[2]?.startsWith('-')) {
+    // Schedule states observed by each full Pod listing (drain polls included).
+    (s.podReads ||= []).push({ watchdog: find('cronjob', 'radar-refresh-pending-watchdog')?.spec.suspend,
+      refresh: find('cronjob', 'radar-refresh-pv')?.spec.suspend }); save();
+  }
   if (args[2] && !args[2].startsWith('-')) objects = objects.filter(o => o.metadata.name === args[2]);
   if (args.includes('-l')) objects = objects.filter(o => o.metadata.labels?.['job-name'] === value('-l').split('=')[1]);
   if (!objects.length && args[2] && !args[2].startsWith('-')) process.exit(args.includes('--ignore-not-found') ? 0 : 1);
