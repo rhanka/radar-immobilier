@@ -1,40 +1,35 @@
 import { describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/svelte";
 import { tick } from "svelte";
-import { CITY_SLUG, NODES, NODE_FINGERPRINT, OTHER_CITY_SLUG, setAuth, deferred, cityRoute, mockDetailByCity, openFirstSignalCard } from "./SignauxMapView.facets.fixtures.js";
+import { CITY_SLUG, detailOf, NODES, NODE_FINGERPRINT, OTHER_CITY_SLUG, setAuth, deferred, cityRoute, mockDetailByCity, openFirstSignalCard } from "./SignauxMapView.facets.fixtures.js";
 import SignauxMapView from "./SignauxMapView.svelte";
 import { fetchGraphSignalsByCity } from "$lib/signals/graph-signals-by-city-client.js";
-import { fetchGraphSignalDetail, GraphSignalsHttpError } from "$lib/signals/graph-signal-detail-client.js";
+import { fetchGraphSignalDetail, fetchRevealedSignal, GraphSignalsHttpError } from "$lib/signals/graph-signal-detail-client.js";
+import { readyWorkspaceState, setTestWorkspaceState, TEST_WORKSPACE_ID } from "./test-stubs/workspace-context-ready.js";
 import { fetchCityFacets, fetchReasonCodes, postFacetCommand, SignalFacetError, type FacetHead } from "$lib/signals/signal-facets-client.js";
 
-describe("SignauxMapView — reveal forwarding", () => {
-  it("forwards showDiscarded=1 to detail and by-city, default stays hidden", async () => {
+describe("SignauxMapView — scoped reveal of archived targets", () => {
+  it("reads the city in the explicit workspace and reveals archived targets only on demand", async () => {
+    const archivedHead = { target: { citySlug: CITY_SLUG, type: "Signal", id: "sig-archived" },
+      personal: { id: "head-archived", state: "active", reasonCode: "N-ADMIN" }, workspace: null,
+      effectiveDiscarded: true };
+    vi.mocked(fetchGraphSignalDetail).mockResolvedValue({ ...detailOf(CITY_SLUG, NODES), heads: [archivedHead] });
+    vi.mocked(fetchRevealedSignal).mockResolvedValue({
+      node: { ...NODES[0]!, id: "sig-archived", label: "Archived zonage signal", facetFingerprint: "c".repeat(64) },
+      displayedFingerprint: "c".repeat(64), heads: { personal: archivedHead.personal, workspace: null },
+      effectiveDiscarded: true });
     const view = render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all&filter.showDiscarded=1") } });
-    await waitFor(() => expect(vi.mocked(fetchGraphSignalDetail)).toHaveBeenCalled());
-    expect(vi.mocked(fetchGraphSignalDetail)).toHaveBeenCalledWith(
-      CITY_SLUG,
-      "",
-      expect.anything(),
-      expect.objectContaining({ showDiscarded: true }),
-    );
-    expect(vi.mocked(fetchGraphSignalsByCity)).toHaveBeenCalledWith(
-      "",
-      expect.objectContaining({ showDiscarded: true }),
-    );
+    await waitFor(() => expect(vi.mocked(fetchRevealedSignal)).toHaveBeenCalled());
+    expect(vi.mocked(fetchGraphSignalDetail).mock.calls[0]![0]).toEqual({ workspaceId: TEST_WORKSPACE_ID });
+    expect(vi.mocked(fetchGraphSignalDetail).mock.calls[0]![1]).toBe(CITY_SLUG);
+    expect(vi.mocked(fetchRevealedSignal)).toHaveBeenCalledWith({ workspaceId: TEST_WORKSPACE_ID },
+      archivedHead.target, expect.anything());
 
     vi.mocked(fetchGraphSignalDetail).mockClear();
-    vi.mocked(fetchGraphSignalsByCity).mockClear();
+    vi.mocked(fetchRevealedSignal).mockClear();
     await view.rerender({ geoRoute: cityRoute("?filter.period=all") });
     await waitFor(() => expect(vi.mocked(fetchGraphSignalDetail)).toHaveBeenCalled());
-    const detailOpts = vi.mocked(fetchGraphSignalDetail).mock.calls[0]![3] as Record<string, unknown>;
-    expect(detailOpts.showDiscarded).toBeUndefined();
-    const bulkOpts = vi.mocked(fetchGraphSignalsByCity).mock.calls[0]![1] as Record<string, unknown>;
-    expect(bulkOpts.showDiscarded).toBeUndefined();
-    vi.mocked(fetchGraphSignalDetail).mockClear();
-    await view.rerender({ geoRoute: cityRoute("?filter.period=all&filter.showDiscarded=1") });
-    await waitFor(() => expect(vi.mocked(fetchGraphSignalDetail)).toHaveBeenCalledWith(
-      CITY_SLUG, "", expect.anything(), expect.objectContaining({ showDiscarded: true }),
-    ));
+    expect(vi.mocked(fetchRevealedSignal)).not.toHaveBeenCalled();
     expect(localStorage.getItem("showDiscarded")).toBeNull();
     expect(localStorage.getItem("filter.showDiscarded")).toBeNull();
   });
@@ -57,9 +52,7 @@ describe("SignauxMapView — write then three re-reads", () => {
     const detailCalls = vi.mocked(fetchGraphSignalDetail).mock.calls.length;
     const headsCalls = vi.mocked(fetchCityFacets).mock.calls.length;
     const bulkCalls = vi.mocked(fetchGraphSignalsByCity).mock.calls.length;
-    vi.mocked(fetchGraphSignalDetail).mockResolvedValue({
-      ok: true, citySlug: CITY_SLUG, legacyProjection: null, nodes: NODES.slice(1),
-    });
+    vi.mocked(fetchGraphSignalDetail).mockResolvedValue(detailOf(CITY_SLUG, NODES.slice(1)));
     vi.mocked(fetchGraphSignalsByCity).mockResolvedValue({
       ok: true, totalCount: 1,
       cities: [{ citySlug: CITY_SLUG, signalCount: 1, subsetCounts: {} }],
@@ -126,7 +119,7 @@ describe("SignauxMapView — write then three re-reads", () => {
       | undefined;
     expect(bulkOptions).toMatchObject({});
     expect("signal" in (bulkOptions ?? {})).toBe(true);
-    detailPending.resolve({ ok: true, citySlug: CITY_SLUG, legacyProjection: null, nodes: NODES });
+    detailPending.resolve(detailOf(CITY_SLUG, NODES));
     headsPending.resolve({ heads: [] });
     bulkPending.resolve({ ok: true, totalCount: 2, cities: [] });
     await waitFor(() =>
@@ -265,23 +258,31 @@ describe("SignauxMapView — viewer isolation", () => {
 describe("SignauxMapView — unavailable archive reads", () => {
   it("shows an explicit 503 error for detail and counters", async () => {
     vi.mocked(fetchGraphSignalDetail).mockRejectedValue(
-      new GraphSignalsHttpError("graph-signals/x: 503", 503, "discarded_signals_unavailable"),
+      new GraphSignalsHttpError("coherent-city/x: 503", 503, "personal_history_unresolved"),
     );
     vi.mocked(fetchGraphSignalsByCity).mockRejectedValue(
-      new GraphSignalsHttpError("graph-signals/by-city: 503", 503, "discarded_signals_unavailable"),
+      new GraphSignalsHttpError("by-city: 503", 503, "personal_history_unresolved"),
     );
     render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
-    await waitFor(() => expect(screen.getAllByText(/discarded_signals_unavailable/)).toHaveLength(2));
+    await waitFor(() => expect(screen.getAllByText(/personal_history_unresolved/)).toHaveLength(2));
     expect(screen.queryByRole("button", { name: /First zonage signal/ })).toBeNull();
   });
 
-  it("shows the generic message for a 503 without the outage body code", async () => {
+  it("names the scoped 503 code, never an empty list", async () => {
     vi.mocked(fetchGraphSignalDetail).mockRejectedValue(
-      new GraphSignalsHttpError("graph-signals/x: 503", 503, "maintenance"),
+      new GraphSignalsHttpError("coherent-city/x: 503", 503, "scoped_facet_scope_unavailable"),
     );
     render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
-    await waitFor(() => expect(screen.getByText("Signaux indisponibles.")).toBeTruthy());
-    expect(screen.queryByText(/discarded_signals_unavailable/)).toBeNull();
+    await waitFor(() => expect(screen.getByText(/Signaux indisponibles \(scoped_facet_scope_unavailable\)/)).toBeTruthy());
+    expect(screen.queryByRole("button", { name: /First zonage signal/ })).toBeNull();
+  });
+
+  it("shows the session state for a refused scoped read", async () => {
+    vi.mocked(fetchGraphSignalDetail).mockRejectedValue(
+      new GraphSignalsHttpError("coherent-city/x: 401", 401, "unauthenticated"),
+    );
+    render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
+    await waitFor(() => expect(screen.getByText(/Session expirée/)).toBeTruthy());
   });
 });
 
@@ -640,5 +641,29 @@ describe("SignauxMapView — Annuler restores with one key per retry", () => {
       displayedFingerprint: NODE_FINGERPRINT,
     });
     expect(restores[0]![3]).toBe(restores[1]![3]);
+  });
+});
+
+describe("SignauxMapView — workspace context (6H)", () => {
+  it("issues no scoped request without a workspace and shows the unavailable state", async () => {
+    setTestWorkspaceState({ ...readyWorkspaceState(), status: "missing", workspaces: [],
+      context: { viewerKey: { context: "tester-1" }, workspaceId: null } });
+    render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
+    await waitFor(() => expect(screen.getAllByText(/Aucun espace de travail/).length).toBeGreaterThan(0));
+    expect(vi.mocked(fetchGraphSignalDetail)).not.toHaveBeenCalled();
+    expect(vi.mocked(fetchCityFacets)).not.toHaveBeenCalled();
+    expect(vi.mocked(fetchReasonCodes)).not.toHaveBeenCalled();
+    expect(vi.mocked(fetchGraphSignalsByCity)).not.toHaveBeenCalled();
+  });
+
+  it("reloads the current city in the newly selected workspace", async () => {
+    render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
+    await waitFor(() => expect(vi.mocked(fetchGraphSignalDetail)).toHaveBeenCalled());
+    vi.mocked(fetchGraphSignalDetail).mockClear();
+    const other = "22222222-2222-4222-8222-222222222222";
+    setTestWorkspaceState({ ...readyWorkspaceState(),
+      context: { viewerKey: { context: "tester-1" }, workspaceId: other } });
+    await waitFor(() => expect(vi.mocked(fetchGraphSignalDetail)).toHaveBeenCalledWith(
+      { workspaceId: other }, CITY_SLUG, expect.anything()));
   });
 });

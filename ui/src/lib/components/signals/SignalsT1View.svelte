@@ -1,12 +1,10 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import { HelpCircle } from "@lucide/svelte";
   import { Alert, Button, Select, Popover } from "@sentropic/design-system-svelte";
   import { filterByStatus, sortSignals, markApprofondir } from "$lib/signals/feed.js";
   import type { SortKey, SortDir } from "$lib/signals/feed.js";
-  import { fetchGraphSignalsByCity } from "$lib/signals/graph-signals-by-city-client.js";
-  import { fetchGraphSignalDetail } from "$lib/signals/graph-signal-detail-client.js";
-  import { loadLiveSignals } from "$lib/signals/signals-live.js";
+  import { workspaceContext, workspaceUnavailableMessage } from "$lib/signals/workspace-client.js";
+  import { loadLiveSignals, scopedLiveSignalsClients } from "$lib/signals/signals-live.js";
   import type { SignalT, SignalStatusT } from "@radar/domain";
   import SignalRow from "./SignalRow.svelte";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
@@ -15,25 +13,37 @@
   export let onApprofondir: (s: SignalT) => void = () => {};
 
   // ── Signaux RÉELS chargés depuis graph_nodes (Signal+DesignationEvent) ───────
-  //   Plus aucun signal simulé : le fil reflète les vrais changements de zonage
-  //   détectés via GET /api/graph-signals/by-city + /api/graph-signals/:city.
-  //   Pipeline graphify (~197 villes, ~1141 nœuds). Persistance hors-périmètre ÉV3.
+  //   Lecture scopée 6H : agrégat par ville + lecture cohérente par ville dans
+  //   l'espace de travail EXPLICITE (jamais déduit). Sans espace sélectionné,
+  //   aucune requête scopée ne part et le fil affiche « indisponible ».
   let signals: SignalT[] = [];
   let loading = true;
   let loadError: string | null = null;
 
-  onMount(async () => {
-    try {
-      signals = await loadLiveSignals({
-        fetchGraphSignalsByCity,
-        fetchGraphSignalDetail,
-      });
-    } catch (e) {
-      loadError = e instanceof Error ? e.message : String(e);
-    } finally {
+  $: workspaceState = $workspaceContext;
+  $: workspaceId = workspaceState.context.workspaceId;
+  $: workspaceNote = workspaceId === null ? workspaceUnavailableMessage(workspaceState) : null;
+  let loadedFor: string | null | undefined = undefined;
+  $: if (workspaceId !== loadedFor) void loadFor(workspaceId);
+
+  async function loadFor(id: string | null): Promise<void> {
+    loadedFor = id;
+    signals = [];
+    loadError = null;
+    if (id === null) {
       loading = false;
+      return;
     }
-  });
+    loading = true;
+    try {
+      const result = await loadLiveSignals(scopedLiveSignalsClients({ workspaceId: id }));
+      if (loadedFor === id) signals = result;
+    } catch (e) {
+      if (loadedFor === id) loadError = e instanceof Error ? e.message : String(e);
+    } finally {
+      if (loadedFor === id) loading = false;
+    }
+  }
 
   // ── Contrôles ────────────────────────────────────────────────────────────────
   let sortMode: "score" | "vision" = "score";
@@ -191,7 +201,11 @@
     </header>
 
     <!-- Bandeau état du chargement / mode réel -->
-    {#if loadError}
+    {#if workspaceNote}
+      <div class="mb-4">
+        <Alert tone="warning" title="Signaux indisponibles." message={workspaceNote} />
+      </div>
+    {:else if loadError}
       <div class="mb-4">
         <Alert
           tone="error"

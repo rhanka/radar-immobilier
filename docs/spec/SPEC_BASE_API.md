@@ -74,6 +74,22 @@ Moderator-only common archive, same path family as personal facets:
   Archived targets (effectiveDiscarded) are hidden from `signals`; each
   served node carries `facetFingerprint` computed exactly like the command
   `displayedFingerprint` so the snapshot supports a follow-up command.
+  6H: each served node also carries the server card fields built from that
+  same stored node by the canonical card builder (`description`,
+  `publishedAt`, `docRefs`, `evidence`, `classification`, `legacySubset`,
+  `bPrime`, `etape`, `regulatoryStatus`, `createdAt`), and the response
+  carries `legacyProjection` derived from the served nodes, so the UI never
+  reclassifies. `reveal` serves the same card fields on its `signal`.
+- `GET /api/v1/workspaces/:workspaceId/signal-facets/by-city?dateFrom&dateTo&dateBasis&excludePiia&excludeDerogations&showDiscarded`
+  → `{ ok, totalCount, cities: [{ citySlug, signalCount, subsetCounts, vivierV2Counts }] }`.
+  Scoped successor of the retired `GET /api/graph-signals/by-city`, same
+  wire shape and query parameters (`dateFrom`/`dateTo` `YYYY-MM-DD`,
+  `dateBasis=document|scrap`, flags `=1`; anything else is
+  `invalid_by_city_query`, 400). Same aggregate service, under the session,
+  approved account, active membership and open scoped epoch guards (closed
+  epoch or unresolved personal history: 503). Targets effectively discarded
+  for the workspace (viewer personal archive or workspace archive) are not
+  counted; `showDiscarded=1` counts the full population.
 
 ### 1.5 `api/src/routes/scoped-projection-events.ts` — session-only SSE
 

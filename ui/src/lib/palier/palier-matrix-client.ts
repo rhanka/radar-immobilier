@@ -3,7 +3,7 @@
  *
  * Binding LIVE (lock conducteur « matrix-clientside-live ») :
  *  - Le SCOPE B (cohorte), le DÉNOMINATEUR et les cohortes de RÉCENCE se
- *    calculent CÔTÉ CLIENT depuis /api/graph-signals/by-city (date-aware, comme
+ *    calculent CÔTÉ CLIENT depuis l’agrégat scopé by-city (date-aware, comme
  *    la vue Signaux). Dans le navigateur SSO de l'owner, ça rend SON 127/36 live.
  *    On NE hardcode PAS ces nombres depuis l'artefact offline recette.
  *  - Les CELLULES immo (kpi04 PV, kpi20 recall) + le flag priorité viennent de
@@ -21,6 +21,7 @@ import {
   type GraphSignalCityItem,
   type GraphSignalsByCityResponse,
 } from "$lib/signals/graph-signals-by-city-client.js";
+import { requireScopedWorkspace } from "$lib/signals/workspace-client.js";
 import {
   B_SUBSET_KEY,
   countForVivierCity,
@@ -350,7 +351,11 @@ function isoDaysBefore(now: Date, days: number): string {
 const REC_RANK: Record<RecencyBand, number> = { lt3mo: 0, lt6mo: 1, older: 2 };
 
 export interface BuildPalierMatrixLiveOptions {
-  /** Injectable pour les tests ; défaut = fetch /api/graph-signals/by-city. */
+  /**
+   * Injectable pour les tests ; défaut = agrégat scopé
+   * /api/v1/workspaces/:ws/signal-facets/by-city dans l’espace de travail
+   * explicite (jamais déduit) : sans espace, la matrice est indisponible.
+   */
   fetcher?: (opts: {
     dateFrom?: string | null;
     dateTo?: string | null;
@@ -375,8 +380,12 @@ export interface BuildPalierMatrixLiveOptions {
 export async function buildPalierMatrixLive(
   opts: BuildPalierMatrixLiveOptions = {},
 ): Promise<PalierMatrix> {
-  const fetcher =
-    opts.fetcher ?? ((o) => fetchGraphSignalsByCity("", o));
+  // One explicit workspace captured for the three reads of this build.
+  let workspace: Promise<string> | null = null;
+  const fetcher = opts.fetcher ?? (async (o: { dateFrom?: string | null; dateTo?: string | null }) => {
+    workspace ??= requireScopedWorkspace();
+    return fetchGraphSignalsByCity({ workspaceId: await workspace }, o);
+  });
   const now = opts.now ?? new Date();
   const subset = opts.subset ?? "B";
 
