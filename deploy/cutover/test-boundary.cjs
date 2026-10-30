@@ -41,7 +41,8 @@ const RESOURCES = { configmap: ['configmaps', ''], configmaps: ['configmaps', ''
   daemonsets: ['daemonsets', 'apps'], horizontalpodautoscalers: ['horizontalpodautoscalers', 'autoscaling'],
   job: ['jobs', 'batch'], jobs: ['jobs', 'batch'], cronjob: ['cronjobs', 'batch'], cronjobs: ['cronjobs', 'batch'],
   ingress: ['ingresses', 'networking.k8s.io'], ingresses: ['ingresses', 'networking.k8s.io'],
-  networkpolicy: ['networkpolicies', 'networking.k8s.io'], pvc: ['persistentvolumeclaims', ''] };
+  networkpolicy: ['networkpolicies', 'networking.k8s.io'], pvc: ['persistentvolumeclaims', ''],
+  endpointslices: ['endpointslices', 'discovery.k8s.io'] };
 const KIND_RESOURCE = { ConfigMap: 'configmaps', Secret: 'secrets', Service: 'services', Deployment: 'deployments', Job: 'jobs' };
 function resourceOf(token) {
   if (RESOURCES[token]) return RESOURCES[token];
@@ -125,6 +126,7 @@ if (args[0] === 'rollout') process.exit(s.missingMcp && args.includes('deploymen
 if (args[0] === 'wait') process.exit();
 if (args[0] === 'get') {
   if (args[1].includes(',')) { out({ items: s.controllers || [] }); process.exit(); }
+  if (args[1] === 'endpointslices') { out(slicesOf(find('service', value('-l').split('=')[1]))); process.exit(); }
   let objects = s.objects.filter(o => o.kind === key(args[1]));
   if (key(args[1]) === 'Pod' && !args.includes('-l') && args[2]?.startsWith('-')) {
     // Schedule states observed by each full Pod listing (drain polls included).
@@ -135,6 +137,33 @@ if (args[0] === 'get') {
   if (args.includes('-l')) objects = objects.filter(o => o.metadata.labels?.['job-name'] === value('-l').split('=')[1]);
   if (!objects.length && args[2] && !args[2].startsWith('-')) process.exit(args.includes('--ignore-not-found') ? 0 : 1);
   out(args[2]?.startsWith('-') || !args[2] ? { items: objects } : objects[0]); process.exit();
+}
+// A Deployment write replaces its ReplicaSet and Pods; Pods carry the template labels and images.
+function rollout(d) {
+  const owned = s.objects.filter(r => r.kind === 'ReplicaSet' && r.metadata.ownerReferences?.some(x => x.uid === d.metadata.uid))
+    .map(r => r.metadata.uid);
+  s.objects = s.objects.filter(x => !owned.includes(x.metadata.uid)
+    && !(x.kind === 'Pod' && x.metadata.ownerReferences?.some(r => owned.includes(r.uid))));
+  if (!d.spec.replicas) return;
+  const generation = s.rolloutSeq = (s.rolloutSeq || 0) + 1;
+  const rs = { kind: 'ReplicaSet', metadata: { name: `${d.metadata.name}-rs${generation}`, uid: `uid-rs-${generation}`,
+    labels: d.spec.template.metadata?.labels || {}, ownerReferences: [{ kind: 'Deployment', controller: true, uid: d.metadata.uid }] },
+  spec: { selector: d.spec.selector, template: d.spec.template } };
+  s.objects.push(rs);
+  for (let i = 0; i < d.spec.replicas; i++) {
+    s.objects.push({ kind: 'Pod', metadata: { name: `${d.metadata.name}-pod${generation}-${i}`, uid: `uid-pod-${generation}-${i}`,
+      labels: { ...(d.spec.template.metadata?.labels || {}), 'pod-template-hash': `h${generation}` },
+      ownerReferences: [{ kind: 'ReplicaSet', controller: true, uid: rs.metadata.uid }] },
+    spec: { containers: d.spec.template.spec.containers },
+    status: { phase: 'Running', containerStatuses: d.spec.template.spec.containers.map(c => ({ name: c.name, ready: true, imageID: c.image })) } });
+  }
+}
+// EndpointSlices are derived from the Service selector and the Running Pods.
+function slicesOf(service) {
+  const selector = service?.spec.selector || {};
+  const pods = s.objects.filter(p => p.kind === 'Pod' && p.status?.phase === 'Running' && !s.unready?.includes(p.metadata.labels?.['sentropic.io/slot'])
+    && Object.entries(selector).every(([k, v]) => p.metadata.labels?.[k] === v));
+  return { items: [{ endpoints: pods.map(p => ({ targetRef: { kind: 'Pod', name: p.metadata.name, uid: p.metadata.uid }, conditions: { ready: true } })) }] };
 }
 function persist(o) {
   o.metadata.uid ||= `uid-${o.kind}-${o.metadata.name}`;
@@ -169,7 +198,14 @@ if (args[0] === 'create' || args[0] === 'replace' || args[0] === 'apply') {
       crash(step, `before-${checkpoint}`);
     }
   }
-  persist(o); save(); out(o);
+  if (o.kind === 'Deployment' && !current) {
+    o.metadata.generation = 1;
+    o.status = { replicas: o.spec.replicas, readyReplicas: o.spec.replicas, updatedReplicas: o.spec.replicas,
+      availableReplicas: o.spec.replicas, observedGeneration: 1 };
+  }
+  persist(o);
+  if (o.kind === 'Deployment' && !current) rollout(o);
+  save(); out(o);
   if (s.apiLostAfterRestore && o.kind === 'Job' && o.metadata.name.endsWith('-restore')) { s.apiLost = true; save(); }
   if (o.kind === 'Job') crash(o.metadata.name.split('-').at(-1), 'after-create');
   if (o.kind === 'ConfigMap' && o.metadata.name === 'radar-change-lock') {
@@ -182,6 +218,7 @@ if (args[0] === 'create' || args[0] === 'replace' || args[0] === 'apply') {
 if (args[0] === 'patch') {
   const o = find(args[1], args[2]); if (!o) process.exit(1);
   const patch = JSON.parse(value('-p'));
+  if (o.kind === 'Service' && s.serviceConflict === o.metadata.name) process.exit(1);
   if (o.kind === 'Ingress' && s.ingressConflict === o.metadata.name &&
     patch.some(p => p.op === 'replace' && p.path === '/spec' && !JSON.stringify(p.value).includes('base-maintenance-'))) process.exit(1);
   if (args.includes('--type=merge')) Object.assign(o.data, patch.data);
@@ -199,7 +236,7 @@ if (args[0] === 'patch') {
     o.metadata.generation = (o.metadata.generation || 1) + 1;
     o.status = { replicas: o.spec.replicas, readyReplicas: o.spec.replicas, updatedReplicas: o.spec.replicas,
       availableReplicas: o.spec.replicas, observedGeneration: o.metadata.generation };
-    s.objects = s.objects.filter(p => !(p.kind === 'Pod' && p.metadata.name === `${o.metadata.name}-consumer`));
+    rollout(o);
     const endpoint = find('endpoints', o.metadata.name);
     if (endpoint) endpoint.subsets = o.spec.replicas ? [{ addresses: [{ ip: '10.0.0.1' }] }] : [];
   }
@@ -215,7 +252,18 @@ if (args[0] === 'delete') {
   const kind = raw ? key(value('--raw').split('/').at(-2)) : key(args[1]);
   const o = s.objects.find(x => x.kind === kind && x.metadata.name === name);
   if (o && raw && JSON.parse(fs.readFileSync(value('-f'))).preconditions.uid !== o.metadata.uid) process.exit(1);
-  s.objects = s.objects.filter(x => x !== o && !x.metadata.ownerReferences?.some(r => r.uid === o?.metadata.uid));
+  (s.deletions ||= []).push({ kind, name });
+  if (o && raw && JSON.parse(fs.readFileSync(value('-f'))).propagationPolicy === 'Orphan') {
+    for (const x of s.objects) if (x.metadata.ownerReferences) x.metadata.ownerReferences = x.metadata.ownerReferences.filter(r => r.uid !== o.metadata.uid);
+    s.objects = s.objects.filter(x => x !== o);
+  } else if (o) {
+    const gone = new Set([o.metadata.uid]);
+    for (let grew = true; grew;) {
+      grew = false;
+      for (const x of s.objects) if (!gone.has(x.metadata.uid) && x.metadata.ownerReferences?.some(r => gone.has(r.uid))) { gone.add(x.metadata.uid); grew = true; }
+    }
+    s.objects = s.objects.filter(x => x !== o && !gone.has(x.metadata.uid));
+  }
   save(); process.exit();
 }
 process.stderr.write('Unsupported fake call'); process.exit(91);

@@ -18,6 +18,7 @@ source tools/make/cutover-prepared-smoke.sh
 source tools/make/cutover-switch.sh
 source tools/make/cutover-rbac.sh
 source tools/make/cutover-pvc.sh
+source tools/make/cutover-slots.sh
 cutover_config
 [[ -z ${CYCLE_ID:-} || $CYCLE_ID =~ ^[A-Za-z0-9._-]{1,100}$ ]] || fail 'Invalid cycle identifier'
 WORK=$(mktemp -d)
@@ -63,6 +64,7 @@ case ${1:-} in
   prepare) validate_release "${RELEASE:-}"; rbac_preflight; prepare_database;;
   pvc-expand) rbac_preflight; pvc_expand;;
   pvc-verify) rbac_preflight; pvc_verify;;
+  slots-adopt) rbac_preflight; slots_adopt;;
   rollback) lock_resume; rollback_stages;;
   status)
     "${k[@]}" get configmap radar-change-lock --ignore-not-found -o json > "$WORK/lock.json"
