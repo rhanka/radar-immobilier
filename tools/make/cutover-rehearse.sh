@@ -20,6 +20,14 @@ mkdir -p "$OUT"
 red=0
 k() { kubectl --request-timeout=15s -n "$NS" "$@"; }
 verdict() { printf '%s\n' "$*" | tee -a "$OUT/verdict.txt"; }
+# Every probe run of this rehearsal shares one prefix: its abandoned writes can be proven.
+CHAIN="rh-$(date -u +%s)"
+# A pending retained-database entry is never overwritten: one that the conductor has not
+# acknowledged (operator rollback) stops the rehearsal cleanly before any change.
+pending=$(k get configmap radar-retained-db --ignore-not-found -o json | jq -c '[.data.entries//"[]"|fromjson|.[]|select(.status=="pending")]' 2>/dev/null || echo '[]')
+if [[ $(jq length <<< "${pending:-[]}") != 0 ]]; then
+  verdict "retained database: RED pending entries need the conductor ack first: $pending"; exit 1
+fi
 stamp=$(k get configmap radar-prepared-db -o json | jq -c .data)
 printf '%s\n' "$stamp" | jq '{status,restorePath,restoreSeconds,targetDb,gitSha}' > "$OUT/prepared-stamp.json"
 if jq -e '.restorePath=="clone" and (.restoreSeconds|tonumber? // 99999) <= 300' <<< "$stamp" >/dev/null; then
@@ -40,7 +48,7 @@ recover_promotion() {
 # scenario <name> <samedb|preprod> <operator target> [make arguments...]
 scenario() {
   local name=$1 mode=$2 target=$3 probe pids status=0; shift 3
-  probe="rh-$(date -u +%s)-$name"
+  probe="$CHAIN-$name"
   : > "$OUT/$name-reads.jsonl"; : > "$OUT/$name-writes.jsonl"
   node deploy/cutover/availability-probe.mjs "$URL" "$OUT/$name-reads.jsonl" & pids=$!
   node deploy/cutover/writer-probe.mjs "$URL" "$probe" "$OUT/$name-writes.jsonl" & pids="$pids $!"
@@ -71,13 +79,25 @@ else verdict 'version change: RED previous release == release (nothing switched 
 # database (unfrozen first, writes reopened), freeze the promoted one, switch and promote; then
 # re-promote the new release the same way (rollback of the rollback).
 promoted_run() { jq -r 'select(.checkpoints.promote=="completed")|.run' "$OUT/$1-receipt.json" 2>/dev/null || true; }
+probe_ack() {
+  # The rollback scenarios abandon (at least) their own probe writes: acknowledged only when the
+  # probe rows explain every abandoned tuple; the proof lands in radar-retained-db and here.
+  local run
+  run=$(jq -r 'select((.abandoned.tuples//0) != 0)|.run' "$OUT/$1-receipt.json" 2>/dev/null || true)
+  [[ -n $run ]] || return 0
+  if make -s -f deploy/cutover/operator.mk ack-probe RUN="$run" PROBE="$CHAIN" ENV=preprod 2>&1 | tee "$OUT/$1-ack.log"; then
+    verdict "$1 abandoned writes: OK $(tail -1 "$OUT/$1-ack.log")"
+  else verdict "$1 abandoned writes: RED not explained by the probe; conductor ack required"; red=1; fi
+  k get configmap radar-retained-db -o json | jq '.data.entries|fromjson' > "$OUT/retained-db.json" || true
+}
 run_a=$(promoted_run preprod)
 if [[ -n $run_a ]]; then
   scenario rollback preprod rollback RUN="$run_a"
+  probe_ack rollback
   jq -e --arg a "$run_a" '.rollbackOf==$a and any(.jobs|keys[]; .=="unfreezeprev")' "$OUT/rollback-receipt.json" >/dev/null ||
     { verdict 'rollback: RED no rollback receipt with the unfreeze of the retained database'; red=1; }
   run_b=$(promoted_run rollback)
-  if [[ -n $run_b ]]; then scenario repromote preprod rollback RUN="$run_b"
+  if [[ -n $run_b ]]; then scenario repromote preprod rollback RUN="$run_b"; probe_ack repromote
   else verdict 'repromote: RED rollback not promoted'; red=1; fi
 else verdict 'rollback: RED previous scenario not promoted'; red=1; fi
 scenario samedb samedb run SAMEDB=1 OBSERVE=60

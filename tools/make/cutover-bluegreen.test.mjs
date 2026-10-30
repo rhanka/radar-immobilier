@@ -13,6 +13,7 @@ const receipt = f => JSON.parse(object(f, 'radar-cutover-receipt').data.receipt)
 const lock = f => object(f, 'radar-change-lock');
 const calls = f => f.calls().map(c => c.join(' '));
 const SERVICES = ['radar-api', 'radar-immo-mcp', 'radar-ui'];
+const entries = f => JSON.parse(object(f, 'radar-retained-db')?.data.entries ?? '[]');
 const servicePatches = f => f.calls().map((c, i) => ({ c, i })).filter(({ c }) => c.includes('patch') && c.includes('service'))
   .map(({ c, i }) => ({ i, name: c[c.indexOf('service') + 1], to: JSON.parse(c[c.indexOf('-p') + 1]).at(-1).value }))
   .filter(p => p.name.startsWith('radar-'));
@@ -243,8 +244,9 @@ test('a rollback after promotion records the abandoned writes; the next prepare 
     success(f.run('rollback', [`RUN=${a.run}`, 'MODE=run']));
     const b = receipt(f);
     assert.deepEqual([b.abandoned.db, b.abandoned.tuples], ['radar_next', 7]);
-    const retained = object(f, 'radar-retained-db').data;
-    assert.deepEqual([retained.status, retained.db, retained.run, retained.abandonedTuples], ['pending', 'radar_next', b.run, '7']);
+    const [entry] = entries(f);
+    assert.deepEqual([entry.status, entry.db, entry.run, entry.tuples], ['pending', 'radar_next', b.run, 7]);
+    assert.ok(entry.since, 'the baseline time of the original switch is kept');
     const refused = f.run('prepare');
     assert.notEqual(refused.status, 0);
     assert.match(refused.stderr, /retained_db_unacknowledged/);
@@ -252,7 +254,7 @@ test('a rollback after promotion records the abandoned writes; the next prepare 
     const ack = f.run('ack', [`RUN=${b.run}`]);
     assert.equal(ack.status, 0, ack.stderr);
     assert.match(ack.stdout, /radar_next: 7 abandoned written tuples/);
-    assert.equal(object(f, 'radar-retained-db').data.status, 'acknowledged');
+    assert.deepEqual(entries(f).map(e => [e.status, e.acknowledgement.by]), [['acknowledged', 'operator']]);
     success(f.run('prepare'));
   } finally { f.cleanup(); }
 });
@@ -262,8 +264,8 @@ test('a return to main before promotion records the writes made through the prep
     success(f.run('prepare'));
     const state = f.state(); state.preparedStale = true; save(f, state);
     assert.notEqual(f.run('run', ['MODE=run']).status, 0);
-    const retained = object(f, 'radar-retained-db').data;
-    assert.deepEqual([retained.status, retained.db, retained.abandonedTuples], ['pending', 'radar_next', '3']);
+    const [entry] = entries(f);
+    assert.deepEqual([entry.status, entry.db, entry.tuples], ['pending', 'radar_next', 3]);
   } finally { f.cleanup(); }
 });
 test('the change lock is awaited for a bounded time instead of failing at once', () => {
@@ -282,5 +284,38 @@ test('the change lock is awaited for a bounded time instead of failing at once',
     assert.notEqual(refused.status, 0);
     assert.match(refused.stderr, /A competing operation holds the lock/);
     assert.equal(lock(f).metadata.uid, 'uid-held', 'waiting never adopts a lock');
+  } finally { f.cleanup(); }
+});
+test('the rehearsal acknowledges its own abandoned writes only when its probe rows explain them; entries are never overwritten', () => {
+  const f = fixture({ previousSha: '9'.repeat(40), writeStats: { radar: 100, radar_next: 0 } });
+  try {
+    success(f.run('prepare'));
+    success(f.run('run', ['MODE=run']));
+    const a = receipt(f);
+    let state = f.state(); state.writeStats.radar_next = 40; save(f, state);
+    success(f.run('rollback', [`RUN=${a.run}`, 'MODE=run']));
+    const b = receipt(f);
+    // Unexplained: fewer probe rows than abandoned tuples -> stays pending, conductor ack required.
+    state = f.state(); state.probeRows = 12; save(f, state);
+    const refused = f.run('ack-probe', [`RUN=${b.run}`, 'PROBE=rh-1700000000']);
+    assert.notEqual(refused.status, 0);
+    assert.match(refused.stderr, /abandoned_writes_unexplained/);
+    assert.equal(entries(f)[0].status, 'pending');
+    // A second abandonment (rollback of the rollback) appends: the pending entry survives.
+    state = f.state(); state.writeStats.radar = 130; save(f, state);
+    success(f.run('rollback', [`RUN=${b.run}`, 'MODE=run']));
+    const c = receipt(f);
+    assert.deepEqual(entries(f).map(e => [e.run, e.db, e.status]), [[b.run, 'radar_next', 'pending'], [c.run, 'radar', 'pending']]);
+    // Explained by the probe rows: acknowledged with the proof attached.
+    state = f.state(); state.probeRows = 40; save(f, state);
+    const ok = f.run('ack-probe', [`RUN=${b.run}`, 'PROBE=rh-1700000000']);
+    assert.equal(ok.status, 0, ok.stderr);
+    const acked = entries(f).find(e => e.run === b.run);
+    assert.deepEqual([acked.status, acked.acknowledgement.by, acked.acknowledgement.proof],
+      ['acknowledged', 'rehearsal-probe', { probePrefix: 'rh-1700000000', probeRows: 40, tuples: 40 }]);
+    const job = f.state().objects.filter(o => o.kind === 'Job' && o.metadata.name.endsWith('-probecount')).at(-1);
+    const env = Object.fromEntries(job.spec.template.spec.containers[0].env.map(e => [e.name, e.value]));
+    assert.deepEqual([env.TARGET_DB, env.PROBE_RUN, env.PROBE_SINCE], ['radar_next', 'rh-1700000000', acked.since]);
+    assert.equal(entries(f).find(e => e.run === c.run).status, 'pending', 'only the proven entry is acknowledged');
   } finally { f.cleanup(); }
 });

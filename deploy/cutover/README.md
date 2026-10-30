@@ -382,12 +382,16 @@ it and promotes it, without outage. Abandoned writes (preprod): a return to the 
 database, before promotion (switch back) or after it (`rollback RUN=`), leaves the
 writes acknowledged by the abandoned database behind. They are counted as written
 tuples (`pg_stat_database`, against the baseline taken before the switch; `-1`
-when unknown), recorded in the receipt (`abandoned`) and in `radar-retained-db`;
-the next `prepare` refuses `retained_db_unacknowledged` instead of replacing that
-database until the conductor reviews the receipt and runs
+when unknown), recorded in the receipt (`abandoned`) and appended, never overwritten,
+as an entry of `radar-retained-db`; the next `prepare` refuses
+`retained_db_unacknowledged` instead of replacing a database with a pending entry.
+After an operator rollback the conductor reviews the receipt and runs
 `make -f deploy/cutover/operator.mk ack RUN=<uuid> ENV=preprod`. The rehearsal
-rollback scenarios therefore leave a pending receipt (at least their own probe
-writes) that the conductor acknowledges before the next preparation; the probe
+acknowledges its own rollback entries itself (`ack-probe RUN=<uuid> PROBE=<prefix>`)
+only when the rows of its probe runs written in that database since the baseline
+explain every abandoned tuple; the proof (prefix, probe rows, tuples) is stored in
+the entry and in the rehearsal artifacts. Otherwise, or when a pending entry not
+from the probe exists, the rehearsal fails and the conductor acknowledges. The probe
 verdict is red when probe writes acknowledged by the abandoned database are not
 detected (`abandoned-undetected`). The maintenance page remains only for the
 daily `MODE=restore`. The API stops gracefully on SIGTERM

@@ -32,6 +32,7 @@ const jobVerdict = (step, job) => step === 'tplseal' ? { ok: true, sizeBytes: 28
   : step.startsWith('volume') ? { ok: true, volumeUsedBytes: 4000000000, liveDbBytes: 3000000000, walBytes: 1000000000, ...s.volume }
   : step.startsWith('writestats') ? (s.writeCalls = (s.writeCalls || 0) + 1, save(), { ok: true, writeStats: Object.fromEntries(['radar', 'radar_next']
     .map(db => [db, (s.writeStats?.[db] ?? 0) + (s.writeCalls > 1 ? (s.writeGrowth?.[db] ?? 0) : 0)])) })
+  : step === 'probecount' ? { ok: true, probeRows: s.probeRows ?? 1000 }
   : step === 'probeverify' ? { ok: true, probe: s.probeRanges || { radar: [], radar_next: [] } }
   : step.startsWith('logs') ? { ok: true, podUids: JSON.parse(envOf(job, 'LOG_PODS')).map(p => p.uid).slice(s.logsMissing ? 1 : 0) }
   : ['database', 'identity', 'destination', 'clone', 'tplreset', 'discard'].includes(step)
