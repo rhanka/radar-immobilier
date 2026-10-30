@@ -48,6 +48,10 @@ and prepared verification. Exhausting it alone never keeps the site closed:
 operation Jobs are stopped, the previous database and images are restored
 (automatic rollback), the private smoke runs and routes reopen; the command
 still exits non-zero. Any other failure stays closed for explicit recovery.
+Prepared verification includes the preprod document re-check (`recon`): it
+lists the whole preprod bucket (about 100 s), so it runs after writers are
+suspended and before closure, with the preparation deadline (840 s). The
+database switch refuses without that completed evidence.
 
 Preprod preparation copies documents additively into the live preprod document
 bucket before closure (additive copy, no deletion); this is kept
@@ -135,6 +139,11 @@ resource-version comparison. A foreign host or unknown executor stays refused.
 Writer-workflow orphan locks also use `resume RUN`; failed cutovers retain their
 record and stay closed. Explicit rollback selects the previous database and
 previous immutable images, runs smoke and reopens. No automatic rollback occurs.
+The database selection is a compare-and-set from the prepared database, else a
+proof that the previous database is already selected (switch never started);
+the expected mismatch is not reported. Reopening requires every recorded Job to
+be terminal (Complete or Failed) with no live Pod, so a rollback after a refused
+Job reopens.
 
 After a caught failure, known database Jobs must stop. Missing Job evidence or
 unreachable Kubernetes means **unknown**, never success. A successful recorded
