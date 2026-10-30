@@ -90,3 +90,17 @@ slots_adopt() {
   for name in "${SLOT_SERVICES[@]}"; do adopt_deployment "$name"; done
   lock_delete
 }
+slots_adopted() {
+  # Every canonical Deployment selects and labels slot=main and every canonical Service selects
+  # by slot: the prepared Pods (slot=prepared) can then never be routed before a switch.
+  local name
+  for name in "${SLOT_SERVICES[@]}"; do
+    "${k[@]}" get deployment "$name" -o json | jq -e --arg l "$SLOT_LABEL" '
+      .spec.selector.matchLabels[$l]=="main" and .spec.template.metadata.labels[$l]=="main"' >/dev/null 2>&1 || return 1
+    "${k[@]}" get service "$name" -o json | jq -e --arg l "$SLOT_LABEL" '
+      .spec.selector[$l]=="main" or .spec.selector[$l]=="prepared"' >/dev/null 2>&1 || return 1
+  done
+}
+require_slots() {
+  slots_adopted || fail 'slots_not_adopted: run slots-adopt (one-time, operator) before any blue/green preparation or cutover'
+}

@@ -74,7 +74,7 @@ trap 'exit 130' INT
 trap 'exit 143' TERM
 cluster_preflight
 case ${1:-} in
-  prepare) validate_release "${RELEASE:-}"; rbac_preflight; prepare_database;;
+  prepare) validate_release "${RELEASE:-}"; rbac_preflight; require_slots; prepare_database;;
   pvc-expand) rbac_preflight; pvc_expand;;
   pvc-verify) rbac_preflight; pvc_verify;;
   slots-adopt) rbac_preflight; slots_adopt;;
@@ -89,7 +89,7 @@ case ${1:-} in
     jq -e '.probe and (.probeTruncated|not)' "$WORK/verdict.json" > /dev/null || fail 'Probe ranges unreadable or truncated'
     jq .probe "$WORK/verdict.json" > "${OUTPUT:-.bascule-work}/probe-ranges.json"
     lock_delete;;
-  rollback) rbac_preflight; rollback_command;;
+  rollback) rbac_preflight; require_slots; rollback_command;;
   status)
     "${k[@]}" get configmap radar-change-lock --ignore-not-found -o json > "$WORK/lock.json"
     if [[ ! -s $WORK/lock.json ]]; then printf 'No active change operation\n'; exit; fi
@@ -116,6 +116,7 @@ case ${1:-} in
     [[ ${BACKUP_ID:-latest} == latest || ${BACKUP_ID:-} =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || fail 'Invalid backup selection'
     if [[ ${RELEASE:-} != deployed ]]; then validate_release "${RELEASE:-}"; fi
     rbac_preflight
+    [[ ${MODE:-run} != run ]] || require_slots
     [[ ${MODE:-run} != restore ]] || ! prepared_stack_present || fail 'prepared_stack_present: run or discard the prepared slot before the daily restore'
     lock_acquire
     jq --arg mode "${MODE:-run}" '.mode=$mode' "$WORK/record.json" > "$WORK/next.json"
