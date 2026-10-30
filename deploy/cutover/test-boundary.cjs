@@ -136,7 +136,9 @@ if (args[0] === 'patch') {
     const endpoint = find('endpoints', o.metadata.name);
     if (endpoint) endpoint.subsets = o.spec.replicas ? [{ addresses: [{ ip: '10.0.0.1' }] }] : [];
   }
-  persist(o); save(); out(o); process.exit();
+  persist(o); save(); out(o);
+  if (o.kind === 'Secret') crash('switch', 'after-patch');
+  process.exit();
 }
 if (args[0] === 'delete') {
   const raw = args.includes('--raw'); const name = raw ? value('--raw').split('/').at(-1) : args[2];
