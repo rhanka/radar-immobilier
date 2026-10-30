@@ -187,6 +187,10 @@ spec:
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
             - name: POSTGRES_DB
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
+            # Cutover rehearsal writer probe (preprod): enabled by CUTOVER_PROBE_ENABLED=true in the
+            # radar-api ConfigMap; the token Secret is optional and absent in production.
+            - name: CUTOVER_PROBE_TOKEN
+              valueFrom: { secretKeyRef: { name: radar-cutover-probe, key: CUTOVER_PROBE_TOKEN, optional: true } }
             # Complete OVH canonical DOCS binding. Coordinates and credentials come from
             # one bucket-scoped Secret; no ConfigMap or generic-key fallback.
             - name: S3_ENDPOINT

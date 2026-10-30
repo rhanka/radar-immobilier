@@ -27,8 +27,9 @@ const find = (kind, name) => s.objects.find(o => o.kind === key(kind) && o.metad
 const value = flag => args[args.indexOf(flag) + 1];
 const envOf = (job, name) => job.spec.template.spec.containers[0].env?.find(e => e.name === name)?.value;
 const jobVerdict = (step, job) => step === 'tplseal' ? { ok: true, sizeBytes: 281512198 }
-  : step === 'freeze' ? (s.frozenAt = new Date().toISOString(), save(), { ok: true, frozenAt: s.frozenAt })
+  : step === 'freeze' ? (s.frozenAt = new Date().toISOString(), save(), { ok: true, freezeStartedAt: s.frozenAt, frozenAt: s.frozenAt })
   : step.startsWith('unfreeze') ? (s.unfrozen = (s.unfrozen || 0) + 1, save(), { ok: true, unfrozenAt: new Date().toISOString() })
+  : step === 'probeverify' ? { ok: true, probe: s.probeRanges || { radar: [], radar_next: [] } }
   : step.startsWith('logs') ? { ok: true, podUids: JSON.parse(envOf(job, 'LOG_PODS')).map(p => p.uid).slice(s.logsMissing ? 1 : 0) }
   : ['database', 'identity', 'destination', 'clone', 'tplreset', 'discard'].includes(step)
   ? { ok: true, database: job.spec.template.spec.containers[0].env.find(e => e.name === 'POSTGRES_DB')?.value
