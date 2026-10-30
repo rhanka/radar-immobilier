@@ -2,6 +2,7 @@ import { mkdtempSync, writeFileSync, readFileSync, rmSync, mkdirSync } from 'nod
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { Buffer } from 'node:buffer';
 export function fixture(changes = {}) {
   const dir = mkdtempSync(join(tmpdir(), 'cutover-test-'));
   const bin = join(dir, 'bin'); mkdirSync(bin);

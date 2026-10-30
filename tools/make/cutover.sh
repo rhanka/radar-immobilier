@@ -24,7 +24,7 @@ ACQUIRED=0
 cleanup() {
   local code=$?
   trap - EXIT INT TERM
-  unset FAST_DEADLINE
+  unset FAST_DEADLINE REQUEST_DEADLINE
   stop_forwards
   if [[ ${PREPARING:-0} == 1 && $code != 0 ]]; then
     (set -e; prepare_failed) || printf 'Prepared cleanup incomplete; slot remains blocked\n' >&2

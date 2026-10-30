@@ -2,6 +2,7 @@
 /* global require */
 /* eslint-disable @typescript-eslint/no-require-imports */
 const process = require('node:process');
+const { Buffer } = require('node:buffer');
 const { setInterval } = require('node:timers');
 const fs = require('node:fs');
 const yaml = require('yaml');
