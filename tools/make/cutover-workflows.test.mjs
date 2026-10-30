@@ -8,7 +8,8 @@ test('main deployment requires successful prepare with no tolerated restore or m
   const job = w.jobs['prepare-preprod-db'];
   assert.deepEqual(job.needs, ['build-push', 'cutover-release']);
   assert.equal(job['timeout-minutes'], 50);
-  assert.equal(job.if, "github.ref == 'refs/heads/main'");
+  assert.equal(job.if, "github.ref == 'refs/heads/main' && vars.PREPROD_CD_ENABLED == 'true'");
+  assert.equal(job.if, w.jobs['deploy-preprod'].if, 'prepare shares the preprod CD arming');
   assert.ok(w.jobs['deploy-preprod'].needs.includes('prepare-preprod-db'));
   assert.ok(job.steps.some(s => s.run === 'make -f deploy/cutover/operator.mk prepare RELEASE=cutover-release/release.json ENV=preprod'));
   assert.equal(JSON.stringify(job).includes('continue-on-error'), false);
