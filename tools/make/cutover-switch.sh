@@ -139,7 +139,9 @@ verify_prepared_release() {
   if samedb; then db=$(jq -r .liveDb "$WORK/record.json"); else db=$(jq -r .targetDb "$WORK/record.json"); fi
   record_set '.samedb=$same|.slotDb=$db' --argjson same "$(samedb && echo true || echo false)" --arg db "$db"
   # The slot must run the release on the selected database; otherwise it is (re)started.
-  if ! "${k[@]}" get deployment radar-api-prepared --ignore-not-found -o json | jq -e --slurpfile r "$WORK/record.json" '
+  # An absent slot gives no JSON at all (jq -e may then succeed): presence is checked first.
+  if ! prepared_stack_present || ! "${k[@]}" get deployment radar-api-prepared -o json | jq -e --slurpfile r "$WORK/record.json" \
+      --arg cfg "$(prepared_config_sha)" '.metadata.annotations["sentropic.io/prepared-config"]==$cfg and
       .metadata.annotations["sentropic.io/prepared-db"]==$r[0].slotDb and
       .spec.template.spec.containers[0].image==$r[0].release.apiImage' >/dev/null 2>&1; then
     prepared_stack_retire

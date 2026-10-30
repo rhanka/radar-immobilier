@@ -189,3 +189,27 @@ test('prepared Pods are never selected by the canonical Services; a partial swit
     assert.equal(lock(f), undefined);
   } finally { f.cleanup(); }
 });
+test('after a promotion, SAMEDB=1 runs on the promoted (migrated) live database with the consumed stamp', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    success(f.run('run', ['MODE=run']));
+    assert.equal(object(f, 'radar-prepared-db').data.status, 'consumed');
+    success(f.run('run', ['MODE=run', 'SAMEDB=1']));
+    const run = receipt(f);
+    assert.deepEqual([run.samedb, run.liveDb, run.targetDb], [true, 'radar_next', 'radar_next']);
+    assert.equal(f.state().created.filter(c => c.name === 'radar-api-prepared').at(-1).db, 'radar_next');
+    assert.ok(f.state().objects.some(o => o.kind === 'Job' && o.metadata.name === `cutover-${run.run}-destination`), 'live migrations checked');
+  } finally { f.cleanup(); }
+});
+test('a ConfigMap changed after prepare restarts the prepared slot before any switch', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    const state = f.state();
+    state.objects.find(o => o.kind === 'ConfigMap' && o.metadata.name === 'radar-api').data.NEW_SETTING = 'changed';
+    save(f, state);
+    success(f.run('run', ['MODE=run']));
+    assert.equal(f.state().created.filter(c => c.name === 'radar-api-prepared').length, 2);
+  } finally { f.cleanup(); }
+});

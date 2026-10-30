@@ -402,39 +402,50 @@ sessions on the other slot answer 404 and the client re-initializes.
   10 s; a mixed window above 2 s; a drill not back on the previous build within
   5 s.
 
-### CI/CD rehearsal (preprod)
+### CI/CD release and rehearsal (preprod)
 
-`build-push-images.yml` job `rehearse-preprod-bluegreen` (same
-`PREPROD_CD_ENABLED` arming, read only; after `prepare-preprod-db` and, while it
-still sets the canonical images, after `deploy-preprod`, since both take
-`radar-change-lock`) runs:
+`prepare-preprod-db` reads `make -f deploy/cutover/operator.mk slots-status ENV=preprod`
+(`adopted` or `legacy`). Legacy (slots not adopted yet): no preparation,
+`deploy-preprod` keeps its direct migrate + roll path. Adopted (conductor
+decision): `prepare` runs, `deploy-preprod` applies the configuration only
+(`RECONCILE_CONFIG_ONLY=1`: ConfigMaps, no Deployment or CronJob apply, no MCP
+roll, no migration, no `set-image`, no served-SHA assertion) and the job
+`rehearse-preprod-bluegreen` performs the preprod release itself:
 
 ```sh
 make -f deploy/cutover/operator.mk rehearse RELEASE=cutover-release/release.json OUTPUT=rehearsal ENV=preprod
 ```
 
-It is red when the prepared stamp is not `restorePath=clone` with
-`restoreSeconds <= 300`, and for each scenario (`SAMEDB=1 OBSERVE=60`, then
-`OBSERVE=120 DRILL=1`) when the run fails, `probe-verify.mjs` reports a
-violation, a prepared Deployment is left, or the sessions exceed 80 % of
-`max_connections`. Receipts, probe lines and verdicts are uploaded as the
-`cutover-rehearsal-<sha>` artifact. `bascule-stage-preprod.yml` stages the
-template daily at 05:00 UTC when `vars.BASCULE_STAGE_ENABLED == 'true'` (owner
-arming) or on manual dispatch. `PREPROD_CD_ENABLED` and
-`BASCULE_SCHEDULE_ENABLED` are never written.
+Scenarios, each under the read and writer probes and judged by
+`probe-verify.mjs`: `preprod` (`run OBSERVE=120 DRILL=1`, previous -> new
+release: freeze, prepared database, routing drill back to the previous build),
+then `samedb` (`run SAMEDB=1 OBSERVE=60`, the production path on the now
+migrated live database). Red when the prepared stamp is not `restorePath=clone`
+with `restoreSeconds <= 300`, when the previous and new releases are the same
+(no version change), and per scenario when the run fails, `probe-verify.mjs`
+reports a violation, a prepared Deployment is left, a `logGaps` entry exists, or
+the sessions exceed 80 % of `max_connections`. A run interrupted after its
+promotion started is completed by `resume RUN=<uuid>` at once (the scenario stays
+red). A prepared slot whose ConfigMaps changed since its start (configuration
+fingerprint) is restarted before any switch. Evidence is uploaded as
+`cutover-rehearsal-<sha>`. `bascule-stage-preprod.yml` stages the template daily
+at 05:00 UTC when `vars.BASCULE_STAGE_ENABLED == 'true'` (owner arming) or on
+manual dispatch. `PREPROD_CD_ENABLED` and `BASCULE_SCHEDULE_ENABLED` are never
+written.
 
 ### Live application order (operator; nothing is applied by this branch)
 
 1. Install `rbac-preprod.yaml`, `rbac-prod.yaml`, `rbac-logs-preprod.yaml`,
-   `rbac-logs-prod.yaml` (permanent) and, only for steps 3 and 4,
-   `rbac-adopt-preprod.yaml` / `rbac-adopt-prod.yaml` (removed afterwards); preprod: create Secret `radar-cutover-probe`
+   `rbac-logs-prod.yaml` (permanent); preprod: create Secret `radar-cutover-probe`
    (`CUTOVER_PROBE_TOKEN`, 32+ characters, also as the GitHub secret
    `CUTOVER_PROBE_TOKEN`) and set `CUTOVER_PROBE_ENABLED=true` in the preprod
    `radar-api` ConfigMap.
-2. Deploy a release containing migration 0028 and the API changes (graceful
-   stop, 503 mapping, probe route).
-3. `pvc-expand` / `pvc-verify` (preprod; restart `radar-postgres-0` once if the
-   resize is pending).
-4. `slots-adopt DRAIN=15` in preprod, then in production.
-5. `stage RELEASE=deployed` (or dispatch `bascule-stage-preprod.yml`), then
-   `prepare` and `run` per release; arm `BASCULE_STAGE_ENABLED` when ready.
+2. From a checkout of this branch, BEFORE its merge: install
+   `rbac-adopt-<env>.yaml`, run `pvc-expand` / `pvc-verify` (preprod; restart
+   `radar-postgres-0` once if the resize is pending) and `slots-adopt DRAIN=15`
+   (preprod, then production), then remove `rbac-adopt-<env>.yaml`. Until then,
+   `prepare`, `run` and `rollback` refuse `slots_not_adopted` and the preprod CI
+   keeps the legacy path.
+3. Merge and deploy (migration 0028, graceful stop, 503 mapping, probe route).
+4. `stage RELEASE=deployed` (or dispatch `bascule-stage-preprod.yml`), then arm
+   `BASCULE_STAGE_ENABLED` when ready.
