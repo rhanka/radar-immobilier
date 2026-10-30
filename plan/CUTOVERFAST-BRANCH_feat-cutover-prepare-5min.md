@@ -33,5 +33,5 @@
 - [ ] Lot 3: prepare lifecycle, ownership, freshness, isolated API smoke and cleanup implemented; validation pending.
 - [ ] Lot 4: prepared verification, switch, rollback and early writer suspension wired; validation pending.
 - [ ] Lot 5: mandatory CI preparation gate and fake-cluster acceptance tests.
-- [ ] Lot 6: existing controller suite, empty-HOME checks, API suite, lint, typecheck, down -v.
+- [ ] Lot 6: empty-HOME controller execution and daily/bascule selftests wired; API suite, lint, typecheck, down -v pending.
 - [ ] Lot 7: selective atomic commits and push; no PR.
