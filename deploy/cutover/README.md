@@ -28,6 +28,10 @@ switch: a compare-and-swap JSON patch changes only `POSTGRES_DB`. Old databases
 are retained. Production preparation takes a recovery backup and verifies the
 live release migration hashes; production cutover changes images only.
 
+Restores drop every GRANT (`--no-privileges`); the `ddl` step runs the API
+migrator, which re-asserts the restricted MCP role privileges on the prepared
+database. The MCP role URLs follow `POSTGRES_DB` after the switch restart.
+
 Both restore paths run `atomic-restore.sh`: every application schema is dropped
 with `CASCADE` and recreated, then the archive is replayed without `--clean`, so
 a snapshot with fewer migrations than the destination restores and a rerun is
