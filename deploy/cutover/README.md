@@ -232,3 +232,21 @@ When the claim reports `FileSystemResizePending`, restart `radar-postgres-0`
 once, outside any cutover window (owner-scheduled), then run `pvc-verify`:
 it reads `df` and the live database size inside the Pod and requires free space
 of at least 2 x database + 2 GiB. Staging refuses to start before this lot.
+
+### Slot adoption (one-time, operator)
+
+```sh
+make -f deploy/cutover/operator.mk slots-adopt DRAIN=15 ENV=preprod
+```
+
+Under `radar-change-lock`, for `radar-api`, `radar-immo-mcp` then `radar-ui`:
+delete the Deployment with `propagationPolicy: Orphan` (UID precondition; the
+running ReplicaSet keeps serving), recreate it with selector and template label
+`sentropic.io/slot=main`, wait Ready, add `slot=main` to the Service selector
+(JSON-patch `test` on the whole selector), wait until the EndpointSlices list
+only `slot=main` Pods, wait `DRAIN` seconds, then delete the orphaned
+ReplicaSet. A rerun skips completed steps. MCP sessions re-initialize once.
+The last-applied annotation is kept, so a later client-side `kubectl apply` of
+the unlabelled manifests (the CI MCP apply included) keeps the slot labels; the
+manifests deliberately do not carry the label, because an apply that changes a
+Deployment selector before adoption would be rejected (immutable field).
