@@ -56,7 +56,8 @@ test('the preprod CI/CD rehearses the zero-downtime cutover after preparation, w
   const w = workflow('build-push-images.yml');
   const job = w.jobs['rehearse-preprod-bluegreen'];
   assert.deepEqual(job.needs, ['prepare-preprod-db', 'deploy-preprod'], 'never concurrent with the canonical deploy (shared lock)');
-  assert.equal(job.if, w.jobs['prepare-preprod-db'].if, 'same PREPROD_CD_ENABLED arming, read only');
+  assert.equal(job.if, `${w.jobs['prepare-preprod-db'].if} && needs.prepare-preprod-db.outputs.slots == 'adopted'`,
+    'same PREPROD_CD_ENABLED arming (read only), only once the slots are adopted');
   assert.equal(job['timeout-minutes'], 50);
   const steps = JSON.stringify(job.steps);
   assert.ok(job.steps.some(s => s.run === 'make -f deploy/cutover/operator.mk rehearse RELEASE=cutover-release/release.json OUTPUT=rehearsal ENV=preprod'));
@@ -77,4 +78,24 @@ test('daily staging is a dispatchable workflow armed by its own variable, never 
       assert.equal(new RegExp(`(gh variable set ${name}|vars\\.${name}\\s*=[^=])`).test(text), false, `${file} never writes ${name}`);
     }
   }
+});
+test('once the slots are adopted, deploy-preprod delegates the release to the blue/green cutover; legacy path otherwise', () => {
+  const w = workflow('build-push-images.yml');
+  const prepare = w.jobs['prepare-preprod-db'];
+  assert.equal(prepare.outputs.slots, '${{ steps.slots.outputs.state }}');
+  assert.ok(prepare.steps.some(s => s.id === 'slots' && s.run.includes('operator.mk slots-status ENV=preprod')));
+  assert.equal(prepare.steps.find(s => s.run === 'make -f deploy/cutover/operator.mk prepare RELEASE=cutover-release/release.json ENV=preprod').if,
+    "steps.slots.outputs.state == 'adopted'");
+  const deploy = w.jobs['deploy-preprod'];
+  assert.equal(deploy.env.SLOTS, '${{ needs.prepare-preprod-db.outputs.slots }}');
+  for (const name of ['Roll preprod deployments to pushed sha', 'Wait for rollouts', 'Assert served sha (preprod)']) {
+    assert.match(deploy.steps.find(s => s.name === name).if, /env\.SLOTS != 'adopted'/, name);
+  }
+  assert.match(deploy.steps.find(s => s.name === 'Migrate DB before release (fail-closed)').if, /env\.SLOTS != 'adopted'/);
+  assert.match(deploy.steps.find(s => s.name === 'Deploy refresh CronJobs (preprod)').if, /env\.SLOTS != 'adopted'/);
+  assert.equal(deploy.steps.find(s => s.name.startsWith('Reconcile preprod manifests')).env.RECONCILE_CONFIG_ONLY,
+    "${{ env.SLOTS == 'adopted' && '1' || '0' }}");
+  const reconcile = readFileSync('deploy/ci/reconcile-preprod.sh', 'utf8');
+  assert.ok(reconcile.includes('RECONCILE_CONFIG_ONLY'));
+  assert.ok(readFileSync('tools/make/cutover-rehearse.sh', 'utf8').includes('version change'), 'the rehearsal requires previous != release');
 });

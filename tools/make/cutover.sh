@@ -79,6 +79,10 @@ case ${1:-} in
   pvc-verify) rbac_preflight; pvc_verify;;
   slots-adopt) rbac_preflight adopt; slots_adopt;;
   stage) rbac_preflight; stage_command;;
+  slots-status)
+    # CI guard: "adopted" delegates the release to the blue/green cutover; "legacy" keeps the old path.
+    rbac_preflight
+    if slots_adopted; then echo adopted; else echo legacy; fi;;
   probe-verify)
     # Rehearsal: acknowledged probe writes per database, read back by a Job (writer probe run id PROBE).
     [[ $ENV == preprod && ${PROBE:-} =~ ^[a-z0-9-]{1,64}$ ]] || fail 'probe-verify needs ENV=preprod and PROBE=<run id>'

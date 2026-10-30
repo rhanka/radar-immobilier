@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
-# Preprod CI/CD rehearsal of the zero-downtime cutover (R3). Two scenarios on the release
-# just prepared, each under the read and writer probes, each judged by probe-verify.mjs:
-#   1. SAMEDB=1 OBSERVE=60: the production path (one database, images only, no freeze);
-#   2. OBSERVE=120 DRILL=1: the preprod path (freeze, prepared database, routing drill).
-# Plus the restore criterion of the prepared stamp (restorePath=clone, restoreSeconds<=300)
-# and the post-run state (no prepared slot left, sessions <= 80 % of max_connections).
+# Preprod CI/CD rehearsal and release of the zero-downtime cutover (R3). Once the slots are
+# adopted, deploy-preprod no longer rolls the canonical slot: this rehearsal IS the preprod
+# release, from the previous release to the new one, every scenario under the read and writer
+# probes and judged by probe-verify.mjs:
+#   preprod  OBSERVE=120 DRILL=1   previous -> new: freeze, prepared database, routing drill;
+#   samedb   SAMEDB=1 OBSERVE=60   new on the (now migrated) live database: the production path.
+# Plus the restore criterion of the prepared stamp (restorePath=clone, restoreSeconds<=300) and
+# the post-run state (no prepared slot left, no log gap, sessions <= 80 % of max_connections).
 set -euo pipefail
 [[ ${ENV:-} == preprod ]] || { echo 'Rehearsal is preprod-only' >&2; exit 2; }
 [[ -n ${RELEASE:-} ]] || { echo 'RELEASE=<release.json> is required' >&2; exit 2; }
@@ -23,14 +25,26 @@ if jq -e '.restorePath=="clone" and (.restoreSeconds|tonumber? // 99999) <= 300'
 else
   verdict "restore: RED path=$(jq -r .restorePath <<< "$stamp") seconds=$(jq -r .restoreSeconds <<< "$stamp") (criterion: clone, <= 300 s)"; red=1
 fi
+recover_promotion() {
+  # A run interrupted after its promotion started keeps the lock: complete it (documented resume),
+  # so neither the next chain nor the daily restore stays blocked; the scenario stays red.
+  local run
+  run=$(k get configmap radar-change-lock --ignore-not-found -o json | jq -r '(.data.record//"{}"|fromjson)|
+    select(.checkpoints.promote!=null)|.run' 2>/dev/null || true)
+  [[ -n $run ]] || return 0
+  verdict "recovery: resume RUN=$run (promotion interrupted)"
+  make -s -f deploy/cutover/operator.mk resume RUN="$run" ENV=preprod 2>&1 | tee -a "$OUT/recovery.log" || true
+}
+# scenario <name> <samedb|preprod> <operator target> [make arguments...]
 scenario() {
-  local name=$1 mode=$2 probe pids status=0; shift 2
+  local name=$1 mode=$2 target=$3 probe pids status=0; shift 3
   probe="rh-$(date -u +%s)-$name"
   : > "$OUT/$name-reads.jsonl"; : > "$OUT/$name-writes.jsonl"
   node deploy/cutover/availability-probe.mjs "$URL" "$OUT/$name-reads.jsonl" & pids=$!
   node deploy/cutover/writer-probe.mjs "$URL" "$probe" "$OUT/$name-writes.jsonl" & pids="$pids $!"
   sleep 10
-  make -s -f deploy/cutover/operator.mk run RELEASE="$RELEASE" MODE=run "$@" ENV=preprod 2>&1 | tee "$OUT/$name-run.log" || status=1
+  make -s -f deploy/cutover/operator.mk "$target" RELEASE="$RELEASE" MODE=run "$@" ENV=preprod 2>&1 | tee "$OUT/$name-run.log" ||
+    { status=1; recover_promotion; }
   sleep 10
   # shellcheck disable=SC2086
   kill -TERM $pids; wait $pids || true
@@ -42,10 +56,15 @@ scenario() {
   fi
   jq -e '[.jobs.database.verdict.sessionsByDb//{}|to_entries[].value]|add as $n|
     ($n//0) <= 0.8*(.jobs.database.verdict.maxConnections//0)' "$OUT/$name-receipt.json" >/dev/null || status=1
+  jq -e '(.logGaps//[])|length==0' "$OUT/$name-receipt.json" >/dev/null || status=1
   if k get deployment radar-api-prepared --ignore-not-found -o name | grep -q .; then status=1; fi
   if ((status == 0)); then verdict "$name: OK $(jq -c .stats "$OUT/$name-verdict.json")"
   else verdict "$name: RED $(jq -c '.violations//{}|map_values(.count)' "$OUT/$name-verdict.json" 2>/dev/null)"; red=1; fi
 }
-scenario samedb samedb SAMEDB=1 OBSERVE=60
-scenario preprod preprod OBSERVE=120 DRILL=1
+scenario preprod preprod run OBSERVE=120 DRILL=1
+# The rehearsal must exercise a version change: previous release != new release.
+if jq -e '.previousRelease.gitSha != .release.gitSha' "$OUT/preprod-receipt.json" >/dev/null 2>&1; then
+  verdict "version change: OK $(jq -r '.previousRelease.gitSha[0:7]+" -> "+.release.gitSha[0:7]' "$OUT/preprod-receipt.json")"
+else verdict 'version change: RED previous release == release (nothing switched between versions)'; red=1; fi
+scenario samedb samedb run SAMEDB=1 OBSERVE=60
 exit "$red"

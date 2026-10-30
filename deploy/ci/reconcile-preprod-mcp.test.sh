@@ -167,5 +167,13 @@ if [ "$first_rc" -ne 0 ] && [ "$RC" -eq 0 ] && clean && has "$CALLS" 'patch rv=1
   ok 'patch failure then same-image retry: the retry still rolls the pod'
 else bad "patch failure + retry (first rc=$first_rc, retry rc=$RC): $(calls)"; fi
 
+# Blue/green slots adopted: configuration only. No roll of radar-immo-mcp, no Deployment or
+# CronJob apply (workloads change through the cutover promotion, never by a direct roll).
+state 100 100; RECONCILE_CONFIG_ONLY=1 run configonly present 0 1
+if [ "$RC" -eq 0 ] && clean && has "$CALLS" 'apply immo-mcp-config' && ! grep -q '^patch' "$CALLS" \
+  && [ "$(grep -c '^apply radar-api$' "$CALLS")" = 1 ] && ! grep -q '^apply radar-ui$\|^apply radar-consistency-snapshot' "$CALLS"; then
+  ok 'slots adopted: ConfigMaps applied, no roll, no Deployment or CronJob apply'
+else bad "config only (rc=$RC): $(calls)"; fi
+
 echo "PASS=$PASS FAIL=$FAIL"
 [ "$FAIL" -eq 0 ]
