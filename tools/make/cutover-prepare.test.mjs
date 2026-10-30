@@ -88,3 +88,19 @@ test('rollback patches the previous database and previous images after failed cu
     assert.equal(f.calls().filter(c => c.includes('patch') && c.includes('secret')).length, 2);
   } finally { f.cleanup(); }
 });
+test('production prepares a recovery backup and cutover changes images without restore or migration', () => {
+  const f = fixture({ url: 'https://immo.sent-tech.ca' });
+  try {
+    const state = f.state();
+    const ingress = state.objects.find(o => o.kind === 'Ingress');
+    ingress.spec.rules[0].host = 'immo.sent-tech.ca'; ingress.spec.tls[0].hosts = ['immo.sent-tech.ca'];
+    save(f, state);
+    success(f.run('prepare', [], 'prod'));
+    assert.equal(object(f, 'radar-prepared-db').data.targetDb, 'radar');
+    success(f.run('run', ['MODE=run'], 'prod'));
+    const steps = f.state().jobCreation.map(j => j.step);
+    assert.equal(steps.filter(s => s === 'backup').length, 1);
+    assert.ok(steps.every(s => !['restore', 'ddl', 'data', 'docs', 'recon'].includes(s)));
+    assert.equal(f.calls().some(c => c.includes('patch') && c.includes('secret')), false);
+  } finally { f.cleanup(); }
+});
