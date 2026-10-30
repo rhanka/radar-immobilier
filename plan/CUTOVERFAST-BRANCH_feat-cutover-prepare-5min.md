@@ -37,6 +37,9 @@
 - [x] Backup selftests: 215 restore checks, 265 daily-backup checks, 92 inter-tenant bascule checks; no failures.
 - [x] Typecheck, lint (including final changed test files), shell/JQ syntax, whitespace checks and 23 no-Python guard checks passed.
 - [x] Dedicated test stack removed with `operator.mk down` (`down -v --remove-orphans`); no deployment or live duration measurement performed.
+- [x] 2026-10-30 preprod restore failure: atomic schema reset + replay without `--clean`, shared by daily and prepared restore; failed restore/backup relaunchable by `resume`.
+- [x] 2026-10-30 recovery backup 403: per-environment `recoveryBucket`, write/list probe Job before closure.
+- [x] PostgreSQL integration test restores a 13-migration archive onto 27 migrations with 20 dependent foreign keys.
 
 ## Orchestration Mode
 - [x] Mono-branch, sequential implementation lots.
@@ -53,3 +56,4 @@
 - [x] Lot 5: CI gate and fake-cluster preparation, failures, freshness, switch, rollback and schedule tests implemented and validated locally.
 - [x] Lot 6: empty-HOME controller suite, backup/bascule selftests, API suite, lint, typecheck, syntax and down -v passed.
 - [x] Lot 7: selective atomic commits pushed to `origin/feat/cutover-prepare-5min` without force; no PR created.
+- [x] Lot 8: atomic relaunchable restore, per-environment recovery bucket with early probe, infrastructure prerequisites table.
