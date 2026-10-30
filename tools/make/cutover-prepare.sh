@@ -18,6 +18,8 @@ prepare_database() {
       .recoveryReference=("postgres://radar-postgres/"+.liveDb) else . end' \
     "$WORK/record.json" > "$WORK/next.json"
   mv "$WORK/next.json" "$WORK/record.json"; record_save
+  # A database holding abandoned acknowledged writes is never replaced before the conductor ack.
+  [[ $ENV != preprod ]] || retained_gate "$(jq -r .targetDb "$WORK/record.json")"
   prepared_write preparing
   PREPARING=1
   RECORD_MAP=radar-prepared-db

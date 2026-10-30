@@ -35,6 +35,13 @@ test('database preparation checks CREATEDB, protects live identity and verifies 
     const migrated = run('destination', 'radar', { POSTGRES_DB: 'radar' });
     assert.equal(migrated.status, 0, migrated.stderr);
     assert.ok(JSON.parse(migrated.stdout).migrations > 0);
+    const volume = run('volume', '');
+    assert.equal(volume.status, 0, volume.stderr);
+    const v = JSON.parse(volume.stdout);
+    assert.ok(v.volumeUsedBytes >= v.liveDbBytes + v.walBytes && v.liveDbBytes > 0 && v.walBytes > 0, volume.stdout);
+    const stats = run('writestats', '');
+    assert.equal(stats.status, 0, stats.stderr);
+    assert.ok(Number.isInteger(JSON.parse(stats.stdout).writeStats.radar));
     assert.equal(run('discard', 'radar_next').status, 0);
     assert.equal((await c.query('SELECT current_database() AS name')).rows[0].name, 'radar');
   } finally {

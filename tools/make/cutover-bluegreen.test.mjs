@@ -231,3 +231,36 @@ test('a rollback of the rollback re-promotes the new release on its retained dat
     for (const name of SERVICES) assert.equal(slotOf(f, name), 'main');
   } finally { f.cleanup(); }
 });
+test('a rollback after promotion records the abandoned writes; the next prepare keeps that database until ack', () => {
+  const f = fixture({ previousSha: '9'.repeat(40), writeStats: { radar: 100, radar_next: 0 } });
+  try {
+    success(f.run('prepare'));
+    success(f.run('run', ['MODE=run']));
+    const a = receipt(f);
+    const state = f.state(); state.writeStats.radar_next = 7; save(f, state);
+    success(f.run('rollback', [`RUN=${a.run}`, 'MODE=run']));
+    const b = receipt(f);
+    assert.deepEqual([b.abandoned.db, b.abandoned.tuples], ['radar_next', 7]);
+    const retained = object(f, 'radar-retained-db').data;
+    assert.deepEqual([retained.status, retained.db, retained.run, retained.abandonedTuples], ['pending', 'radar_next', b.run, '7']);
+    const refused = f.run('prepare');
+    assert.notEqual(refused.status, 0);
+    assert.match(refused.stderr, /retained_db_unacknowledged/);
+    assert.equal(f.state().jobCreation.filter(j => j.step === 'clone').length, 1, 'the retained database is not replaced');
+    const ack = f.run('ack', [`RUN=${b.run}`]);
+    assert.equal(ack.status, 0, ack.stderr);
+    assert.match(ack.stdout, /radar_next: 7 abandoned written tuples/);
+    assert.equal(object(f, 'radar-retained-db').data.status, 'acknowledged');
+    success(f.run('prepare'));
+  } finally { f.cleanup(); }
+});
+test('a return to main before promotion records the writes made through the prepared slot', () => {
+  const f = fixture({ writeGrowth: { radar_next: 3 } });
+  try {
+    success(f.run('prepare'));
+    const state = f.state(); state.preparedStale = true; save(f, state);
+    assert.notEqual(f.run('run', ['MODE=run']).status, 0);
+    const retained = object(f, 'radar-retained-db').data;
+    assert.deepEqual([retained.status, retained.db, retained.abandonedTuples], ['pending', 'radar_next', '3']);
+  } finally { f.cleanup(); }
+});
