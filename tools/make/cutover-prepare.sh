@@ -5,6 +5,8 @@ prepare_database() {
   prepared_available
   save_release "$RELEASE"
   inventory
+  # Production backs up before preparing: prove the recovery bucket is writable first.
+  [[ $ENV == preprod ]] || run_job probe 170 180
   checkpoint suspend started
   stop_schedules
   run_job database 30 45
