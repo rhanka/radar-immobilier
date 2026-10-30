@@ -93,7 +93,10 @@ schema_n atomic_next
 upgrade_to_n_plus_k atomic_next
 if run_restore atomic_next atomic_next atomic_next "$work/radar.dump" > "$work/refused.out" 2>&1; then fail 'live database accepted as target'; fi
 [[ $(q atomic_next 'SELECT count(*) FROM drizzle.__drizzle_migrations') == 27 ]] || fail 'refused target was modified'
+rm -f /tmp/cutover-metrics
 run_restore atomic_next atomic_next atomic_live "$work/radar.dump" > "$work/next.out"
+grep -Eq "^restoreMs=[0-9]+$" /tmp/cutover-metrics || fail "restore duration not measured"
+grep -Eq "^top1Ms=[0-9]+$" /tmp/cutover-metrics || fail "slowest restore items not measured"
 assert_snapshot atomic_next
 run_restore atomic_next atomic_next atomic_live "$work/radar.dump" > "$work/next-rerun.out"
 assert_snapshot atomic_next

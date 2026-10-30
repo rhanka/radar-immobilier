@@ -195,3 +195,22 @@ keys, relaunch, truncated-archive rollback, prepared `-j 4` target) on PostgreSQ
 
 For a focused controller reproduction, pass `TEST_PATTERN='<test-name regex>'`
 to `test`; omit it for the complete campaign. Backup/reporting self-tests always run.
+
+## Zero-downtime cutover (blue/green)
+
+Design: blue/green by Service selector, data restore from a staged template
+database, rehearsed in the preprod CI/CD. Every step below is code delivered in
+this directory; nothing is applied to a cluster by CI or by the builder. Live
+applications (RBAC, volume expansion, slot adoption, arming) are operator acts.
+
+### Measurements (receipts)
+
+The `database` Job reports `databaseSizes`, `sessionsByDb` and
+`maxConnections`. The `docs` and `recon` Jobs report `timings` (`listMs`,
+`planMs`, `copyMs`, `reconListMs`), `destListCalls` and
+`destListCallsPerShard`. A restore into a prepared or template database
+reports `restoreMs`, the ten slowest archive items (`top1Ms`..`top10Ms`, from a
+timestamped `pg_restore --verbose`) and cgroup CPU deltas (`cpu_usage_usec`,
+`cpu_nr_throttled`, `cpu_throttled_usec`). Job wrappers keep bounded numeric
+values only; the merged verdicts land in the lock record, the prepared stamp and
+`radar-cutover-receipt`.
