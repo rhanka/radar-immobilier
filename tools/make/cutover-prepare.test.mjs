@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fixture } from './cutover-fixture.mjs';
+import { Buffer } from 'node:buffer';
+const clone = value => JSON.parse(JSON.stringify(value));
 const success = r => assert.equal(r.status, 0, r.stdout + r.stderr);
 const object = (f, name) => f.state().objects.find(o => o.metadata.name === name);
 const save = (f, state) => writeFileSync(join(f.dir, 'state.json'), JSON.stringify(state));
@@ -63,10 +65,10 @@ test('cutover refuses stale and mismatched prepared stamps before closure', () =
   const f = fixture();
   try {
     success(f.run('prepare'));
-    const original = structuredClone(f.state());
+    const original = clone(f.state());
     for (const change of [{ preparedAt: '2020-01-01T00:00:00Z' }, { gitSha: 'f'.repeat(40) },
       { manifestSha256: 'f'.repeat(64) }, { pgSha256: 'f'.repeat(64) }, { status: 'preparing' }, { targetDb: 'radar' }]) {
-      const state = structuredClone(original);
+      const state = clone(original);
       Object.assign(state.objects.find(o => o.metadata.name === 'radar-prepared-db').data, change); save(f, state);
       assert.notEqual(f.run('run', ['MODE=run']).status, 0, JSON.stringify(change));
       assert.equal(JSON.stringify(object(f, 'application').spec).includes('base-maintenance-'), false);
@@ -74,7 +76,7 @@ test('cutover refuses stale and mismatched prepared stamps before closure', () =
       assert.equal(object(f, 'radar-refresh-pv').spec.suspend, false);
     }
     for (const pinOverride of [{ ageHours: 27 }, { date: '2026-10-30' }]) {
-      const state = structuredClone(original); state.pinOverride = pinOverride; save(f, state);
+      const state = clone(original); state.pinOverride = pinOverride; save(f, state);
       assert.notEqual(f.run('run', ['MODE=run']).status, 0);
       assert.equal(JSON.stringify(object(f, 'application').spec).includes('base-maintenance-'), false);
     }
