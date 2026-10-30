@@ -90,8 +90,17 @@ sanitize_job() {
 # NetworkPolicies apply), `sentropic.io/slot=prepared`, literal POSTGRES_DB, release images,
 # replicas equal to the current canonical count (HPA-scaled count included).
 PREPARED_NAMES=(radar-api radar-immo-mcp radar-ui)
+prepared_config_sha() {
+  # Fingerprint of the configuration the prepared Pods read at start: a later ConfigMap change
+  # (deploy reconcile) makes the slot stale and it is restarted before any switch.
+  local cm
+  for cm in radar-api immo-mcp-config radar-ui-nginx; do
+    "${k[@]}" get configmap "$cm" --ignore-not-found -o json | jq -cS '.data//{}'
+  done | sha256sum | cut -c1-16
+}
 render_prepared_stack() {
-  local db=$1 name
+  local db=$1 name cfg
+  cfg=$(prepared_config_sha)
   : > "$WORK/prepared-stack.jsonl"
   "${k[@]}" get configmap radar-ui-nginx -o json | jq -c --arg ns "$NS" '{apiVersion:"v1",kind:"ConfigMap",
     metadata:{name:"radar-ui-nginx-prepared",namespace:$ns,labels:(.metadata.labels//{}|.["sentropic.io/slot"]="prepared")},
@@ -99,13 +108,13 @@ render_prepared_stack() {
   for name in "${PREPARED_NAMES[@]}"; do
     "${k[@]}" get deployment "$name" -o json > "$WORK/canonical-deployment.json"
     "${k[@]}" get service "$name" -o json > "$WORK/canonical-service.json"
-    jq -c --slurpfile r "$WORK/record.json" --arg ns "$NS" --arg db "$db" --arg l "$SLOT_LABEL" '
+    jq -c --slurpfile r "$WORK/record.json" --arg ns "$NS" --arg db "$db" --arg l "$SLOT_LABEL" --arg cfg "$cfg" '
       def images: if (.image|test("^ghcr.io/rhanka/radar-api[:@]")) then .image=$r[0].release.apiImage
         elif (.image|test("^ghcr.io/rhanka/radar-ui[:@]")) then .image=$r[0].release.uiImage else . end;
       .metadata.name as $name|
       {apiVersion:"apps/v1",kind:"Deployment",
        metadata:{name:($name+"-prepared"),namespace:$ns,labels:(.metadata.labels//{}|.[$l]="prepared"),
-         annotations:{"sentropic.io/prepared-run":$r[0].run,"sentropic.io/prepared-db":$db}},
+         annotations:{"sentropic.io/prepared-run":$r[0].run,"sentropic.io/prepared-db":$db,"sentropic.io/prepared-config":$cfg}},
        spec:{replicas:(.spec.replicas//1),strategy:.spec.strategy,
          selector:{matchLabels:(.spec.selector.matchLabels|.[$l]="prepared")},
          template:(.spec.template|.metadata.labels=((.metadata.labels//{})|.[$l]="prepared"|del(.["pod-template-hash"]))|

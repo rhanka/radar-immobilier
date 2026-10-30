@@ -153,7 +153,9 @@ if [ "$MCP_PRESENT" = 1 ]; then
   : "${mcp_cm_rv:?immo-mcp-config has no resourceVersion after apply}"
   mcp_tpl_rv="$(kubectl -n "$NAMESPACE" get deploy radar-immo-mcp \
     -o jsonpath='{.spec.template.metadata.annotations.sentropic\.dev/immo-mcp-config-rv}')"
-  if [ "$mcp_tpl_rv" != "$mcp_cm_rv" ]; then
+  if [ "${RECONCILE_CONFIG_ONLY:-0}" = 1 ]; then
+    echo "blue/green slots adopted: radar-immo-mcp is not rolled here (the prepared slot reads the new ConfigMap)"
+  elif [ "$mcp_tpl_rv" != "$mcp_cm_rv" ]; then
     echo "immo-mcp-config rv ${mcp_cm_rv} != pod template rv '${mcp_tpl_rv}' — rolling radar-immo-mcp"
     kubectl -n "$NAMESPACE" patch deploy radar-immo-mcp --type merge \
       -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"sentropic.dev/immo-mcp-config-rv\":\"${mcp_cm_rv}\"}}}}}"
@@ -161,6 +163,13 @@ if [ "$MCP_PRESENT" = 1 ]; then
 fi
 
 # 5. CronJob (#611 securityContext).
+# Blue/green slots adopted (RECONCILE_CONFIG_ONLY=1): ConfigMaps only. The canonical workloads and
+# CronJob images change through the cutover promotion, never by a direct roll (no outage).
+if [ "${RECONCILE_CONFIG_ONLY:-0}" = 1 ]; then
+  echo "reconcile OK — configuration only (blue/green slots adopted; workloads change through the cutover)."
+  exit 0
+fi
+
 kf "$RENDER" CronJob radar-consistency-snapshot \
   | kubectl apply --server-side --field-manager="$FM" --force-conflicts -f -
 
