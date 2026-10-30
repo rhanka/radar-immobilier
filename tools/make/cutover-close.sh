@@ -56,6 +56,28 @@ stop_deployments() {
       '[{"op":"add","path":"/spec/replicas","value":0}]'
   done < <(jq -c '.deployments[]' "$WORK/record.json")
 }
+suspend_writers() {
+  local mode=${1:-kill} deadline=$((SECONDS+600)) row name uid
+  checkpoint suspend started
+  stop_schedules
+  while :; do
+    owned_refresh_jobs > "$WORK/refresh-jobs.json"
+    [[ $(jq length "$WORK/refresh-jobs.json") != 0 ]] || break
+    if [[ $mode == kill ]]; then
+      while read -r row; do
+        name=$(jq -r .name <<< "$row"); uid=$(jq -r .uid <<< "$row")
+        delete_job_uid "$name" "$uid"
+        until job_pods_ended "$name" "$uid"; do
+          ((SECONDS<deadline)) || fail 'Refresh writer termination deadline exceeded'
+          sleep 2
+        done
+      done < <(jq -c '.[]' "$WORK/refresh-jobs.json")
+    fi
+    ((SECONDS<deadline)) || fail 'Refresh writer drain exceeded ten minutes'
+    sleep 2
+  done
+  checkpoint suspend completed
+}
 owned_refresh_jobs() {
   "${k[@]}" get jobs -o json | jq --slurpfile r "$WORK/record.json" \
     --slurpfile cfg "$CONFIG" '[.items[]|select(any(.status.conditions[]?;
@@ -94,7 +116,7 @@ verify_closed() {
   maintenance_probe || return 1
 }
 close_once() {
-  local deadline grace remaining row REQUEST_DEADLINE
+  local deadline row REQUEST_DEADLINE
   deadline=$((SECONDS+240))
   REQUEST_DEADLINE=$deadline
   checkpoint close started
@@ -105,13 +127,6 @@ close_once() {
     "${k[@]}" get service "base-maintenance-$RUN" -o json | jq -e '(.spec.selector//{}|length)==0' >/dev/null || fail 'Maintenance Service conflict'
   fi
   stop_schedules; routes_maintenance; stop_deployments
-  grace=$((SECONDS+60))
-  while :; do
-    remember_consumers
-    remaining=$(owned_refresh_jobs)
-    [[ $(jq length <<< "$remaining") != 0 && $SECONDS -lt $grace ]] || break
-    sleep 2
-  done
   if ((SECONDS+120 < deadline)); then deadline=$((SECONDS+120)); fi
   while :; do
     while read -r row; do delete_job_uid "$(jq -r .name <<< "$row")" "$(jq -r .uid <<< "$row")"; done < <(owned_refresh_jobs | jq -c '.[]')
