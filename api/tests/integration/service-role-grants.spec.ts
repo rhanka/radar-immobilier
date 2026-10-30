@@ -81,6 +81,25 @@ describe("restricted MCP role grants", () => {
     });
   });
 
+  it("never lets the writer update authorization columns, even after an earlier broader grant", async () => {
+    // Earlier revision granted UPDATE (id) and UPDATE (workspace_id); a replay must converge.
+    await pool.query(`GRANT UPDATE (id) ON public.account_users TO ${IMMO_MCP_ARTIFACT_WRITER_ROLE}`);
+    await pool.query(`GRANT UPDATE (workspace_id) ON public.workspace_memberships TO ${IMMO_MCP_ARTIFACT_WRITER_ROLE}`);
+    await applyServiceRoleGrants(pool);
+    const columns = await pool.query(`SELECT table_name::text AS t, column_name::text AS c
+      FROM information_schema.column_privileges
+      WHERE grantee = $1 AND privilege_type = 'UPDATE' AND table_schema = 'public' ORDER BY 1, 2`,
+    [IMMO_MCP_ARTIFACT_WRITER_ROLE]);
+    expect(columns.rows).toEqual([{ t: "account_users", c: "created_at" }, { t: "workspace_memberships", c: "created_at" }]);
+    for (const [table, column] of [["account_users", "status"], ["account_users", "id"], ["account_users", "sub"],
+      ["workspace_memberships", "workspace_id"], ["workspace_memberships", "status"],
+      ["workspace_memberships", "account_id"], ["workspace_memberships", "revoked_at"]]) {
+      await expect(asRole(IMMO_MCP_ARTIFACT_WRITER_ROLE, (c) =>
+        c.query(`UPDATE public.${table} SET ${column} = ${column}`)), `${table}.${column}`)
+        .rejects.toThrow(/permission denied for table/);
+    }
+  });
+
   it("keeps account tables non-writable and restores the account reader column reads", async () => {
     await stripPrivileges();
     await applyServiceRoleGrants(pool);
