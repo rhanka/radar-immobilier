@@ -49,7 +49,44 @@ reset_schemas() {
 }
 if [ -n "$TARGET_DB" ]; then
   reset_schemas | psql -X --no-psqlrc -v ON_ERROR_STOP=1 --single-transaction --quiet --file=-
-  pg_restore --no-owner --no-privileges --exit-on-error -j 4 --dbname="$PGDATABASE" "$dump"
+  # Measurement: per-item durations from timestamped --verbose output, cgroup CPU before/after.
+  metrics=${CUTOVER_METRICS:-/tmp/cutover-metrics}
+  cpu_stat() { awk -v p="$1" '{print p $1 "=" $2}' /sys/fs/cgroup/cpu.stat 2>/dev/null || true; }
+  cpu_stat before_ > /tmp/cpu-before
+  # Template staging (RESTORE_TUNED=1): fewer workers on the shared PostgreSQL, larger index memory,
+  # asynchronous commit for the bulk load, then planner statistics (copied by every clone).
+  if [ "${RESTORE_TUNED:-0}" = 1 ]; then export PGOPTIONS="-c maintenance_work_mem=128MB -c synchronous_commit=off"; fi
+  started=$EPOCHREALTIME
+  set +e
+  pg_restore --no-owner --no-privileges --exit-on-error --verbose -j "${RESTORE_JOBS:-4}" --dbname="$PGDATABASE" "$dump" 2>&1 >/dev/null |
+    while IFS= read -r line; do printf '%s %s\n' "$EPOCHREALTIME" "$line"; done > /tmp/restore-verbose.log
+  status=${PIPESTATUS[0]}
+  set -e
+  if [ "$status" != 0 ]; then grep -v ' pg_restore: \(launching\|finished\|processing\) ' /tmp/restore-verbose.log | tail -20 >&2; exit "$status"; fi
+  ended=$EPOCHREALTIME
+  analyze_ms=0
+  if [ "${RESTORE_TUNED:-0}" = 1 ]; then
+    unset PGOPTIONS
+    analyzed=$EPOCHREALTIME
+    vacuumdb --analyze-only --jobs="${RESTORE_JOBS:-4}" --quiet --dbname="$PGDATABASE"
+    analyze_ms=$(awk -v a="$analyzed" -v b="$EPOCHREALTIME" 'BEGIN{printf "%d", (b-a)*1000}')
+  fi
+  awk '$3=="launching" && $4=="item" {start[$5]=$1; $1=$2=$3=$4=""; name[$5]=$0}
+    $3=="finished" && $4=="item" && ($5 in start) {printf "%d %s\n", ($1-start[$5])*1000, name[$5]}' \
+    /tmp/restore-verbose.log | sort -rn | head -10 > /tmp/restore-top
+  sed 's/^/[restore] top-item-ms /' /tmp/restore-top
+  {
+    printf 'restoreMs=%d\n' "$(awk -v a="$started" -v b="$ended" 'BEGIN{printf "%d", (b-a)*1000}')"
+    printf 'analyzeMs=%d\n' "$analyze_ms"
+    awk '{printf "top%dMs=%d\n", NR, $1}' /tmp/restore-top
+    cpu_stat after_
+    cat /tmp/cpu-before
+  } | awk -F= '{d[$1]=$2} END {
+      for (k in d) if (k !~ /^(before|after)_/) print k "=" d[k]
+      split("usage_usec nr_throttled throttled_usec", ks, " ")
+      for (i in ks) if (("after_" ks[i]) in d) print "cpu_" ks[i] "=" (d["after_" ks[i]] - d["before_" ks[i]])
+    }' > "$metrics"
+  sed 's/^/[restore] metric /' "$metrics"
   echo "[restore] ok — archive loaded into prepared database $PGDATABASE"
   exit 0
 fi

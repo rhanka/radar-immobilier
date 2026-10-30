@@ -20,14 +20,39 @@ try { raw = JSON.parse(fs.readFileSync('/tmp/cutover-child.json', 'utf8')); }
 catch { try { raw = JSON.parse(result.stdout.toString().trim()); } catch { /* No readable verdict. */ } }
 const clean = { ok: result.status === 0 && !result.error };
 if (raw.database === 'radar' || raw.database === 'radar_next') clean.database = raw.database;
-for (const key of ['date', 'backupId', 'dumpStartedAt', 'startedAt']) {
+for (const key of ['date', 'backupId', 'dumpStartedAt', 'startedAt', 'freezeStartedAt', 'frozenAt', 'unfrozenAt']) {
   if (typeof raw[key] === 'string' && /^(latest|\d{4}-\d\d-\d\d(?:T[0-9:.]+Z)?)$/.test(raw[key])) clean[key] = raw[key];
 }
 for (const key of ['manifestSha256', 'pgSha256', 'codeSha']) {
   if (typeof raw[key] === 'string' && /^[a-f0-9]{7,64}$/.test(raw[key])) clean[key] = raw[key];
 }
-for (const key of ['pgSizeBytes', 'docsObjects', 'migrations', 'ageHours', 'copied', 'missing', 'sizeMismatch', 'sealedUnresolved', 'streamsBound', 'pendingReceipts', 'inventoryAnomalyCount']) {
+for (const key of ['pgSizeBytes', 'sizeBytes', 'docsObjects', 'migrations', 'ageHours', 'copied', 'missing', 'sizeMismatch', 'sealedUnresolved', 'streamsBound', 'pendingReceipts', 'inventoryAnomalyCount']) {
   if (Number.isFinite(raw[key]) && raw[key] >= 0) clean[key] = raw[key];
+}
+// Measurement maps: bounded name → non-negative number (database sizes, sessions, phase timings).
+const numberMap = (value, pattern, limit) => value && typeof value === 'object' && !Array.isArray(value)
+  ? Object.fromEntries(Object.entries(value).filter(([k, v]) => pattern.test(k) && Number.isFinite(v) && v >= 0).slice(0, limit))
+  : undefined;
+for (const key of ['databaseSizes', 'sessionsByDb']) {
+  const map = numberMap(raw[key], /^[a-z_][a-z0-9_]{0,62}$/, 16);
+  if (map) clean[key] = map;
+}
+const timings = numberMap(raw.timings, /^[a-zA-Z]{1,32}$/, 16);
+if (timings) clean.timings = timings;
+for (const key of ['maxConnections', 'logContainers', 'logBytes', 'destListCalls', 'headChecked', 'versionsResolved', 'copyRetries']) {
+  if (Number.isFinite(raw[key]) && raw[key] >= 0) clean[key] = raw[key];
+}
+// Probe verification: acknowledged writes per application database, as bounded seq ranges.
+if (raw.probe && typeof raw.probe === 'object') {
+  const ranges = list => (Array.isArray(list) ? list : []).slice(0, 64).filter(r => Array.isArray(r) && r.length === 2
+    && r.every(n => Number.isSafeInteger(n) && n >= 0) && r[0] <= r[1]).map(r => [r[0], r[1]]);
+  clean.probe = { radar: ranges(raw.probe.radar), radar_next: ranges(raw.probe.radar_next) };
+  clean.probeTruncated = ['radar', 'radar_next'].some(n => Array.isArray(raw.probe[n]) && raw.probe[n].length > 64);
+}
+// Log export: the Pod UIDs whose every container log is in the verified manifest.
+if (Array.isArray(raw.podUids)) clean.podUids = raw.podUids.slice(0, 64).filter(u => typeof u === 'string' && /^[a-zA-Z0-9-]{1,64}$/.test(u));
+if (Array.isArray(raw.destListCallsPerShard)) {
+  clean.destListCallsPerShard = raw.destListCallsPerShard.slice(0, 64).filter(n => Number.isSafeInteger(n) && n >= 0);
 }
 for (const key of ['stale', 'staleOverridden', 'maintenanceBarrier', 'inventoryAnomaliesTruncated']) {
   if (typeof raw[key] === 'boolean') clean[key] = raw[key];

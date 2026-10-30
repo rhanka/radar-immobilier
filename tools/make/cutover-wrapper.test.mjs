@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Buffer } from 'node:buffer';
-import { readFileSync, rmSync } from 'node:fs';
+import { readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 test('wrapper suppresses arbitrary SQL/errors/notices and allowlists termination fields', () => {
   const wrapper = readFileSync('deploy/cutover/job-wrapper.cjs', 'utf8');
@@ -45,4 +45,26 @@ test('shell wrapper preserves failure status and suppresses command output', () 
     assert.deepEqual(JSON.parse(readFileSync('/dev/termination-log', 'utf8')), { ok: status === 0 });
   }
   rmSync('/dev/termination-log');
+});
+test('wrappers keep bounded numeric measurements only', () => {
+  const wrapper = readFileSync('deploy/cutover/job-wrapper.cjs', 'utf8');
+  const raw = { databaseSizes: { radar: 281512198, radar_next: 1, 'Bad Name': 5, leak: 'x' }, sessionsByDb: { radar: 7 },
+    maxConnections: 100, destListCalls: 436, destListCallsPerShard: [27, 'x', -1, 28], timings: { listMs: 95000, 'bad-key': 1 } };
+  const command = [process.execPath, '-e', 'console.log(' + JSON.stringify(JSON.stringify(raw)) + ')'];
+  const result = spawnSync(process.execPath, ['-e', wrapper], { encoding: 'utf8', env: { ...process.env,
+    CUTOVER_COMMAND: JSON.stringify(command), CUTOVER_TIMEOUT: '5' } });
+  assert.equal(result.status, 0);
+  const clean = JSON.parse(readFileSync('/dev/termination-log', 'utf8'));
+  assert.deepEqual(clean.databaseSizes, { radar: 281512198, radar_next: 1 });
+  assert.deepEqual([clean.sessionsByDb, clean.maxConnections, clean.destListCalls], [{ radar: 7 }, 100, 436]);
+  assert.deepEqual(clean.destListCallsPerShard, [27, 28]);
+  assert.deepEqual(clean.timings, { listMs: 95000 });
+  const shell = readFileSync('deploy/cutover/shell-wrapper.sh', 'utf8');
+  writeFileSync('/tmp/cutover-metrics', 'restoreMs=535000\ntop1Ms=120000\ncpu_throttled_usec=42\nleak=secret value\nnegative=-3\n');
+  try {
+    const run = spawnSync('sh', ['-c', shell, '--', 'true'], { encoding: 'utf8' });
+    assert.equal(run.status, 0);
+    assert.deepEqual(JSON.parse(readFileSync('/dev/termination-log', 'utf8')),
+      { ok: true, restoreMs: 535000, top1Ms: 120000, cpu_throttled_usec: 42 });
+  } finally { rmSync('/tmp/cutover-metrics'); rmSync('/dev/termination-log'); }
 });

@@ -19,14 +19,15 @@ by build-run ID and never rebuilds images. `dataMigration` accepts only `"6h"`
 or `null`; changing it selects the sole approved hook, never arbitrary code.
 OCI revision labels are not required (approved addendum).
 
-Release cutover verifies prepared state, closes, switches, restarts, tests and
-reopens. No dump restoration or migration runs during release cutover.
-Preprod preparation restores into the other database of `radar` / `radar_next`
-in the same instance, using `pg_restore -j 4`, then runs DDL, protected 6H and
-an isolated `radar-api-prepared` smoke. The live Secret remains untouched until
-switch: a compare-and-swap JSON patch changes only `POSTGRES_DB`. Old databases
-are retained. Production preparation takes a recovery backup and verifies the
-live release migration hashes; production cutover changes images only.
+Release cutover is blue/green and never closes a route (see "Release cutover:
+switch, freeze, promotion, rollback, logs"). No dump restoration or migration
+runs during release cutover. Preprod preparation clones the staged template into
+the other database of `radar` / `radar_next` in the same instance, then runs
+DDL, protected 6H and starts the prepared slot with its private smoke. The live
+Secret remains untouched until promotion: a compare-and-swap JSON patch changes
+only `POSTGRES_DB`. Old databases are retained. Production preparation takes a
+recovery backup and verifies the live release migration hashes; production
+cutover changes images only.
 
 Restores drop every GRANT (`--no-privileges`); the `ddl` step runs the API
 migrator, which re-asserts the restricted MCP role privileges on the prepared
@@ -36,30 +37,23 @@ Both restore paths run `atomic-restore.sh`: every application schema is dropped
 with `CASCADE` and recreated, then the archive is replayed without `--clean`, so
 a snapshot with fewer migrations than the destination restores and a rerun is
 idempotent. The daily live restore keeps the reset and the replay in one
-transaction (COMMIT only after the whole archive was read); the prepared
-disposable database commits the reset, then loads with `pg_restore -j 4`.
+transaction (COMMIT only after the whole archive was read); the template
+database commits the reset, then loads with `pg_restore -j 2` (tuned).
 Recovery backups go to the per-environment `recoveryBucket` in `config.json`;
 a write/list `probe` Job runs before any closure and fails early.
 The restore Job uses the per-environment `restoreResources` of `config.json`
 (requests 250m CPU / 1 Gi, limits 1500m CPU / 2 Gi), which fits the preprod
-`preprod-cap` ResourceQuota and LimitRange; `pg_restore` keeps `-j 4`.
-Preparation runs before any closure, so its duration is outside the five minutes.
+`preprod-cap` ResourceQuota and LimitRange.
 Preparation records `recoveryReference` for rollback: the production recovery
 backup object, or the retained previous preprod database.
 
-The five-minute (295 s) budget starts at the effective closure, after preflight
-and prepared verification. Exhausting it alone never keeps the site closed:
-operation Jobs are stopped, the previous database and images are restored
-(automatic rollback), the private smoke runs and routes reopen; the command
-still exits non-zero. Any other failure stays closed for explicit recovery.
 Prepared verification includes the preprod document re-check (`recon`): it
-lists the whole preprod bucket (about 100 s), so it runs after writers are
-suspended and before closure, with the preparation deadline (840 s). The
-database switch refuses without that completed evidence.
+lists the preprod bucket, so it runs after writers are suspended and before any
+switch, with the preparation deadline (840 s).
 
-Preprod preparation copies documents additively into the live preprod document
-bucket before closure (additive copy, no deletion); this is kept
-deliberately so the cutover never waits on document copy.
+Documents are copied additively into the live preprod document bucket by the
+template staging (additive copy, no deletion), so the cutover never waits on
+document copy.
 
 `radar-prepared-db` records preparation ownership, status, backup fingerprints,
 release SHA, migration count and smoke result. Cutover refuses unless the stamp
@@ -67,18 +61,18 @@ is ready, at most 24 hours old, matches the release and current latestComplete
 backup, and the dump is at most 26 hours old. Re-run prepare for a stale stamp.
 Preparation releases `radar-change-lock` during long-running cluster Jobs; a
 preparing stamp prevents a release cutover from consuming incomplete work.
-Preparation failures stop owned Jobs, delete the smoke Deployment, discard the
-disposable database, restore schedules and mark the slot failed. Uncertain
-cleanup leaves it blocked. Both prepare and cutover suspend schedules before
-document work; prepare drains active refresh Jobs for up to ten minutes,
-cutover deletes them immediately by UID. Sweep cursors under
+Preparation failures stop owned Jobs, export the logs of and delete the prepared
+slot, discard the disposable database, restore schedules and mark the slot
+failed. Uncertain cleanup leaves it blocked. Prepare, staging and release
+cutover suspend schedules and drain active refresh Jobs for up to ten minutes;
+the daily restore deletes them immediately by UID. Sweep cursors under
 `refresh/018/sweep/` are excluded from copy and reconciliation.
 
 The `prepare-preprod-db` CI job blocks deployment on restore, DDL, 6H or smoke
 failure. Its runner polls cluster Jobs for up to 50 minutes. This is incompatible
 with the design's simultaneous five-minute runner wall-time budget; no long work
-runs on the runner. The prepared smoke checks API health, SHA and anonymous
-refusal; the existing full UI/MCP smoke runs during cutover.
+runs on the runner. The prepared smoke is the full UI/API/MCP smoke through the
+prepared Services; the public smoke runs again after the switch.
 
 ## Installation (infrastructure/application owners)
 
@@ -140,14 +134,13 @@ Use `ENV=prod` for production recovery. A repeated `run` never adopts a lock.
 release, backup pins, Job UIDs and checkpoints. It has no automatic expiry.
 Takeover requires an ended local process or terminal GitHub run and an atomic
 resource-version comparison. A foreign host or unknown executor stays refused.
-Writer-workflow orphan locks also use `resume RUN`; failed cutovers retain their
-record and stay closed. Explicit rollback selects the previous database and
-previous immutable images, runs smoke and reopens. No automatic rollback occurs.
-The database selection is a compare-and-set from the prepared database, else a
-proof that the previous database is already selected (switch never started);
-the expected mismatch is not reported. Reopening requires every recorded Job to
-be terminal (Complete or Failed) with no live Pod, so a rollback after a refused
-Job reopens.
+Writer-workflow orphan locks also use `resume RUN`. A release cutover never
+closes: its recovery (automatic switch back before promotion, `resume` after,
+`rollback`) is described under "Release cutover". The database selection is a
+compare-and-set from the expected database, else a proof that the target is
+already selected; the expected mismatch is not reported. A daily restore that
+fails stays closed for explicit recovery; reopening requires every recorded Job
+to be terminal (Complete or Failed) with no live Pod.
 
 After a caught failure, known database Jobs must stop. Missing Job evidence or
 unreachable Kubernetes means **unknown**, never success. A successful recorded
@@ -199,3 +192,236 @@ keys, relaunch, truncated-archive rollback, prepared `-j 4` target) on PostgreSQ
 
 For a focused controller reproduction, pass `TEST_PATTERN='<test-name regex>'`
 to `test`; omit it for the complete campaign. Backup/reporting self-tests always run.
+
+## Zero-downtime cutover (blue/green)
+
+Design: blue/green by Service selector, data restore from a staged template
+database, rehearsed in the preprod CI/CD. Every step below is code delivered in
+this directory; nothing is applied to a cluster by CI or by the builder. Live
+applications (RBAC, volume expansion, slot adoption, arming) are operator acts.
+
+### Measurements (receipts)
+
+The `database` Job reports `databaseSizes`, `sessionsByDb` and
+`maxConnections`. The `docs` and `recon` Jobs report `timings` (`listMs`,
+`planMs`, `copyMs`, `reconListMs`), `destListCalls` and
+`destListCallsPerShard`. A restore into a prepared or template database
+reports `restoreMs`, the ten slowest archive items (`top1Ms`..`top10Ms`, from a
+timestamped `pg_restore --verbose`) and cgroup CPU deltas (`cpu_usage_usec`,
+`cpu_nr_throttled`, `cpu_throttled_usec`). Job wrappers keep bounded numeric
+values only; the merged verdicts land in the lock record, the prepared stamp and
+`radar-cutover-receipt`.
+
+### PostgreSQL volume expansion (one-time, operator)
+
+The template, the prepared database and the live database share one volume.
+Required size: max(10 GiB, 3 x live database + 2 GiB). The StatefulSet
+`volumeClaimTemplates` field is immutable, so the claim itself is patched
+(compare-and-swap on its UID and current size, never shrunk):
+
+```sh
+make -f deploy/cutover/operator.mk pvc-expand ENV=preprod          # computed size
+make -f deploy/cutover/operator.mk pvc-expand SIZE=12Gi ENV=preprod # explicit, refused below the computed size
+make -f deploy/cutover/operator.mk pvc-verify ENV=preprod
+```
+
+When the claim reports `FileSystemResizePending`, restart `radar-postgres-0`
+once, outside any cutover window (owner-scheduled), then run `pvc-verify`:
+it reads `df` and the live database size inside the Pod and requires free space
+of at least 2 x database + 2 GiB. Staging refuses to start before this lot.
+
+### Slot adoption (one-time, operator)
+
+```sh
+make -f deploy/cutover/operator.mk slots-adopt DRAIN=15 ENV=preprod
+```
+
+Under `radar-change-lock`, for `radar-api`, `radar-immo-mcp` then `radar-ui`:
+delete the Deployment with `propagationPolicy: Orphan` (UID precondition; the
+running ReplicaSet keeps serving), recreate it with selector and template label
+`sentropic.io/slot=main`, wait Ready, add `slot=main` to the Service selector
+(JSON-patch `test` on the whole selector), wait until the EndpointSlices list
+only `slot=main` Pods, wait `DRAIN` seconds, then delete the orphaned
+ReplicaSet. A rerun skips completed steps. MCP sessions re-initialize once.
+The last-applied annotation is kept, so a later client-side `kubectl apply` of
+the unlabelled manifests (the CI MCP apply included) keeps the slot labels; the
+manifests deliberately do not carry the label, because an apply that changes a
+Deployment selector before adoption would be rejected (immutable field).
+
+### Staged template and clone (restore in under five minutes)
+
+`T_restore` runs from the start of `resolve` to the `destination` verdict on the
+prepared database. Restoring the archive inside that window took about 885 s;
+the restore now happens earlier, once a day, into a template database:
+
+```sh
+make -f deploy/cutover/operator.mk stage RELEASE=deployed ENV=preprod
+```
+
+`stage` (preprod only, under `radar-change-lock`, refused while a preparation
+is `preparing` or when free volume space is below 2 x database + 2 GiB) pins the
+latest complete backup, stamps `radar-template-db` as `building`, drops and
+recreates `radar_tpl` (`tplreset`), restores the archive into it with
+`pg_restore -j 2`, `maintenance_work_mem=128MB`, `synchronous_commit=off` and a
+`vacuumdb --analyze-only` pass, copies the documents (with their internal
+reconciliation), then seals it (`tplseal`: `ALLOW_CONNECTIONS false`, sessions
+terminated) and stamps `ready` with the backup date, fingerprints, migration
+count and size. A rerun starts by dropping the template.
+
+`prepare` pins the backup; when the template stamp is `ready` and matches the
+pin it runs `clone` (`DROP DATABASE IF EXISTS <target>`, then
+`CREATE DATABASE <target> TEMPLATE radar_tpl STRATEGY FILE_COPY`), one `recon`,
+`ddl`, `data` and `destination`. Otherwise it stages first
+(`restorePath=stage+clone`, about 15 minutes, reported) and skips the separate
+`recon` because staging already reconciled the documents. The prepared stamp
+records `restorePath` and `restoreSeconds`; the CI rehearsal fails when
+`restoreSeconds` exceeds 300 or `restorePath` is not `clone`.
+
+The destination listing (`docs`, `recon`) uses 64 shards listed 64 at a time
+(`LIST_CONCURRENCY`, independent of the copy workers): the sequential depth per
+shard drops from about 27 pages to about 7 on the preprod bucket.
+
+### Prepared slot
+
+After `destination`, `prepare` starts the prepared slot: `radar-api-prepared`,
+`radar-immo-mcp-prepared` and `radar-ui-prepared` Deployments plus internal
+Services of the same names and `radar-ui-nginx-prepared` (the UI nginx
+ConfigMap with `proxy_pass http://radar-api-prepared:3000`). Pods keep the
+canonical component labels (NetworkPolicies apply), carry
+`sentropic.io/slot=prepared`, a literal `POSTGRES_DB=<targetDb>`, the release
+images and `terminationGracePeriodSeconds: 30`; the prepared MCP calls
+`RADAR_API_BASE_URL=http://radar-api-prepared:3000`. Replicas equal the
+current canonical count (an HPA-scaled count included). A quota preflight
+reads every ResourceQuota status and refuses `quota_insufficient` before
+creating anything. The full private smoke (UI, build SHA, API health, anonymous
+refusal, MCP bearer challenge and metadata) runs through the prepared Services;
+the canonical Services and Ingresses are untouched. The slot stays Ready for the
+switch; a new preparation deletes a previous slot first, a failed preparation
+deletes it, and the daily `MODE=restore` refuses `prepared_stack_present`.
+
+### Release cutover: switch, freeze, promotion, rollback, logs
+
+```sh
+make -f deploy/cutover/operator.mk run RELEASE=cutover-release/release.json OBSERVE=600 DRAIN=15 ENV=preprod
+make -f deploy/cutover/operator.mk run RELEASE=cutover-release/release.json SAMEDB=1 OBSERVE=60 ENV=preprod
+make -f deploy/cutover/operator.mk run RELEASE=cutover-release/release.json OBSERVE=120 DRILL=1 ENV=preprod
+make -f deploy/cutover/operator.mk run RELEASE=cutover-release/release.json ENV=prod
+```
+
+No route is ever closed. Under `radar-change-lock`, `run` (MODE=run) executes:
+
+1. Verify the prepared stamp (release, backup pin, migrations), record the
+   deployed release as `.previousRelease`, run `recon` (preprod) and check the
+   prepared slot is Ready on the selected database (`SAMEDB=1`: the live
+   database, images only, the production path; otherwise the prepared one) and
+   restarts it when it is not. Writer schedules are suspended and in-flight
+   refresh Jobs drain (at most ten minutes).
+2. Preprod without `SAMEDB`: `freeze` Job on the live database
+   (`ALTER DATABASE ... SET default_transaction_read_only = on`, sessions opened
+   before terminated and read back as gone) records `frozenAt`. From then on a
+   write answers 503 `{"error":"maintenance_read_only"}` with `Retry-After: 5`
+   (SQLSTATE 25006 / 57P01 mapped by `api/src/lifecycle/maintenance.ts`); reads
+   are served. Production: one shared database, no freeze.
+3. Switch: one JSON patch per Service with a `test` on the current
+   `sentropic.io/slot` value (radar-api, radar-immo-mcp, radar-ui), then wait
+   until every EndpointSlice lists only `slot=prepared` Pods; the mixed window is
+   recorded (`switches[].mixedWindowMs`). Public `/health` and `/build.json` must
+   serve the release (`firstGreenAt`, `freezeWindowMs` = first green - frozenAt),
+   then the full public smoke runs. Any failure switches back (reverse order),
+   unfreezes and exits non-zero.
+4. Retention `OBSERVE` seconds (default 600): the public build is re-checked
+   every 5 s; a degradation switches back. `DRILL=1`: switch back to `main`, the
+   previous build must be served within 5 s (`drill.backMs`; preprod writes stay
+   503 while frozen), then switch to `prepared` again.
+5. Promotion (`checkpoints.promote`): export the `main` logs; preprod: CAS the
+   Secret `POSTGRES_DB` live -> target and remove `GEO_DOCUMENTS_REPOINT`; patch
+   the canonical images and the template annotation
+   `sentropic.io/promoted-run=<RUN>` (a new ReplicaSet even for the same SHA),
+   require new Ready Pods with another `pod-template-hash`, smoke the canonical
+   Deployments through port-forwards and check the database identity (`database`
+   Job); switch the Services back to `main`, wait the EndpointSlices and `DRAIN`
+   seconds (default 15), export the `prepared` logs, delete the prepared slot.
+6. Patch CronJob images, restore the schedules, verify, mark the preprod
+   prepared stamp `consumed`, save `radar-cutover-receipt`, release the lock.
+
+Logs (R5): the `logs*` Jobs (`logs-export-job.tmpl.yaml`, `logs-export.cjs`,
+ServiceAccount from `rbac-logs-<env>.yaml`) read the current and previous log of
+every container of the recorded Pods through the Kubernetes API and write
+`s3://<recoveryBucket>/cutover-logs/<env>/<RUN>/<slot><n>/<pod>/<container>[.previous].log.gz`
+plus `manifest.json` (sha256, bytes, lines, first/last timestamp), each object
+re-read and verified. A deletion or re-roll refuses until the verdict lists
+every recorded Pod UID.
+
+Recovery: a failure before promotion returns routing to `main`, unfreezes and
+restores the schedules automatically. A failure after promotion started keeps
+the lock: `resume RUN=<uuid>` completes the promotion idempotently.
+`rollback RUN=<uuid>` with that run's lock still present (interrupted before
+promotion) switches back and unfreezes. After a promoted run, `rollback RUN=`
+rebuilds a prepared slot from `.previousRelease` (production: the same database;
+preprod: the retained previous database, unfrozen first, while the current one
+is frozen; writes made on the promoted database are not carried), switches to
+it and promotes it, without outage. The maintenance page remains only for the
+daily `MODE=restore`. The API stops gracefully on SIGTERM
+(`api/src/lifecycle/graceful.ts`: stop accepting, close SSE streams, wait for
+in-flight requests up to 25 s; `terminationGracePeriodSeconds: 30`). MCP
+sessions on the other slot answer 404 and the client re-initializes.
+
+### Probes (rehearsal evidence)
+
+- `availability-probe.mjs <url> <out.jsonl>`: 5 Hz on `/health`, `/build.json`
+  and `/.well-known/oauth-protected-resource/mcp` (status, latency, served SHA,
+  transport error or timeout).
+- `writer-probe.mjs <url> <probe-run> <out.jsonl>`: 5 writes/s to
+  `POST /api/internal/cutover-probe` (bearer `CUTOVER_PROBE_TOKEN` from the
+  optional Secret `radar-cutover-probe`; the route answers 404 unless
+  `CUTOVER_PROBE_ENABLED=true` in the `radar-api` ConfigMap, preprod only). Each
+  acknowledged write is a row of `cutover_probe_writes` (migration 0028) and the
+  answer names the database that stored it.
+- `make -f deploy/cutover/operator.mk probe-verify PROBE=<probe-run> OUTPUT=<dir> ENV=preprod`:
+  a `probeverify` Job reads the acknowledged rows of `radar` and `radar_next` back
+  as sequence ranges (`<dir>/probe-ranges.json`).
+- `probe-verify.mjs <reads> <writes> <receipt> <ranges> <samedb|preprod>`: the
+  verdict. Red on any read transport error, timeout, 5xx or gap above 1 s; a
+  served SHA other than the release after the first green response (outside the
+  drill); a lost write (acknowledged, absent from the database that acked it);
+  `samedb`: any refused write; `preprod`: an acknowledgement from the live
+  database after `frozenAt`, a refusal other than 503 `maintenance_read_only`, a
+  503 outside [`freezeStartedAt`, first green] (+ drill), a freeze window above
+  10 s; a mixed window above 2 s; a drill not back on the previous build within
+  5 s.
+
+### CI/CD rehearsal (preprod)
+
+`build-push-images.yml` job `rehearse-preprod-bluegreen` (same
+`PREPROD_CD_ENABLED` arming, read only; after `prepare-preprod-db` and, while it
+still sets the canonical images, after `deploy-preprod`, since both take
+`radar-change-lock`) runs:
+
+```sh
+make -f deploy/cutover/operator.mk rehearse RELEASE=cutover-release/release.json OUTPUT=rehearsal ENV=preprod
+```
+
+It is red when the prepared stamp is not `restorePath=clone` with
+`restoreSeconds <= 300`, and for each scenario (`SAMEDB=1 OBSERVE=60`, then
+`OBSERVE=120 DRILL=1`) when the run fails, `probe-verify.mjs` reports a
+violation, a prepared Deployment is left, or the sessions exceed 80 % of
+`max_connections`. Receipts, probe lines and verdicts are uploaded as the
+`cutover-rehearsal-<sha>` artifact. `bascule-stage-preprod.yml` stages the
+template daily at 05:00 UTC when `vars.BASCULE_STAGE_ENABLED == 'true'` (owner
+arming) or on manual dispatch. `PREPROD_CD_ENABLED` and
+`BASCULE_SCHEDULE_ENABLED` are never written.
+
+### Live application order (operator; nothing is applied by this branch)
+
+1. Install `rbac-preprod.yaml`, `rbac-prod.yaml`, `rbac-logs-preprod.yaml`,
+   `rbac-logs-prod.yaml`; preprod: create Secret `radar-cutover-probe`
+   (`CUTOVER_PROBE_TOKEN`, 32+ characters, also as the GitHub secret
+   `CUTOVER_PROBE_TOKEN`) and set `CUTOVER_PROBE_ENABLED=true` in the preprod
+   `radar-api` ConfigMap.
+2. Deploy a release containing migration 0028 and the API changes (graceful
+   stop, 503 mapping, probe route).
+3. `pvc-expand` / `pvc-verify` (preprod; restart `radar-postgres-0` once if the
+   resize is pending).
+4. `slots-adopt DRAIN=15` in preprod, then in production.
+5. `stage RELEASE=deployed` (or dispatch `bascule-stage-preprod.yml`), then
+   `prepare` and `run` per release; arm `BASCULE_STAGE_ENABLED` when ready.

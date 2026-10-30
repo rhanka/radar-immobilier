@@ -23,6 +23,7 @@ prepared_write() {
       migrations:(($r.jobs.destination.verdict.migrations//0)|tostring),
       liveDb:$r.liveDb,targetDb:($r.targetDb//$r.liveDb),preparedAt:$at,
       recoveryReference:($r.recoveryReference//""),
+      restorePath:($r.restore.path//""),restoreSeconds:(($r.restore.seconds//"")|tostring),
       smoke:(if $status=="ready" then "pass" else $status end)}' "$WORK/prepared.json" > "$WORK/prepared-next.json"
   "${k[@]}" "$verb" -f "$WORK/prepared-next.json" >/dev/null
 }

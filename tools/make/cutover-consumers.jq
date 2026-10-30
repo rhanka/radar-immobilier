@@ -25,6 +25,8 @@ $r[0] as $record |
   select(operationJob($record;.)|not) | select(refreshJob($record;.)|not) |
   {name:.metadata.name,uid:.metadata.uid,known:false}] +
 [.items[] | select(.status.phase!="Succeeded" and .status.phase!="Failed") |
+  # The prepared slot never consumes the live database outside a cutover run (which owns it).
+  select(.metadata.labels["sentropic.io/slot"]!="prepared") |
   select(controller(.;"StatefulSet").name!="radar-postgres") |
   select(operationPod($record;$jobs[0];.)|not) |
   {name:.metadata.name,uid:.metadata.uid,
