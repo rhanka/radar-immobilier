@@ -5,8 +5,8 @@
  * direct read of Signal and DesignationEvent nodes from graph_nodes (graphify
  * pipeline, ~197 villes / 1 141 nœuds).
  *
- * GET /api/graph-signals/by-city → cities with ≥1 signal node
- * GET /api/graph-signals/:city   → Signal+DesignationEvent nodes for one city
+ * GET /api/v1/workspaces/:ws/signal-facets/by-city → cities with ≥1 signal node
+ * GET /api/v1/workspaces/:ws/signal-facets/coherent-city → visible nodes of one city
  *
  * Anti-invention: a city with signalCount === 0 is skipped (no detail fetch,
  * no fabricated signal). When no city has nodes the feed is legitimately empty.
@@ -18,13 +18,17 @@ import {
   type SignalT,
 } from "@radar/domain";
 
-import type {
-  GraphSignalCityItem,
-  GraphSignalsByCityResponse,
+import {
+  fetchGraphSignalsByCity,
+  type GraphSignalCityItem,
+  type GraphSignalsByCityResponse,
 } from "./graph-signals-by-city-client.js";
-import type {
-  GraphSignalNode,
-  GraphSignalDetailResponse,
+import {
+  fetchGraphSignalDetail,
+  GraphSignalsHttpError,
+  type GraphSignalNode,
+  type GraphSignalDetailResponse,
+  type SignalScope,
 } from "./graph-signal-detail-client.js";
 
 // Re-export types so downstream consumers can import from this module.
@@ -34,7 +38,16 @@ export type { GraphSignalNode, GraphSignalDetailResponse };
 /** Minimal client surface this module depends on (injected in tests). */
 export interface LiveSignalsClients {
   fetchGraphSignalsByCity: () => Promise<GraphSignalsByCityResponse>;
-  fetchGraphSignalDetail: (citySlug: string) => Promise<GraphSignalDetailResponse>;
+  fetchGraphSignalDetail: (citySlug: string) => Promise<Pick<GraphSignalDetailResponse, "nodes">>;
+}
+
+/** Clients bound to one explicit workspace (never defaulted). */
+export function scopedLiveSignalsClients(scope: SignalScope): LiveSignalsClients {
+  const bound = { ...scope };
+  return {
+    fetchGraphSignalsByCity: () => fetchGraphSignalsByCity(bound),
+    fetchGraphSignalDetail: (citySlug) => fetchGraphSignalDetail(bound, citySlug),
+  };
 }
 
 /**
@@ -110,12 +123,22 @@ export async function loadLiveSignals(
       result.value.nodes.forEach((node, i) => {
         signals.push(mapGraphSignalNodeToSignal(node, i));
       });
+    } else if (isScopeRefusal(result.reason)) {
+      // A session refusal or an unavailable scope concerns every city: the
+      // feed is unavailable, never silently empty or partial.
+      throw result.reason;
     }
-    // Rejected (network error, 404): skip silently — anti-invention.
+    // Other per-city failures (network): skipped — anti-invention.
   }
 
   signals.sort((a, b) =>
     a.detectedAt < b.detectedAt ? 1 : a.detectedAt > b.detectedAt ? -1 : 0,
   );
   return signals;
+}
+
+/** 401/403/503 on a scoped read: the whole feed is refused or unavailable. */
+function isScopeRefusal(error: unknown): boolean {
+  return error instanceof GraphSignalsHttpError
+    && (error.status === 401 || error.status === 403 || error.status === 503);
 }
