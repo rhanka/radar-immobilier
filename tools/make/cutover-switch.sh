@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 verify_prepared_release() {
-  if jq -e '.checkpoints.switch=="completed"' "$WORK/record.json" >/dev/null; then return; fi
+  if jq -e '.checkpoints.close!=null and .prepared!=null' "$WORK/record.json" >/dev/null; then
+    jq -e '.release.gitSha==.prepared.gitSha and .targetDb==.prepared.targetDb' "$WORK/record.json" >/dev/null || fail 'Recovery prepared identity changed'
+    return
+  fi
   verify_prepared
   if ! jq -e '.previousRelease!=null' "$WORK/record.json" >/dev/null; then
     cp "$WORK/record.json" "$WORK/intended-release.json"
@@ -32,7 +35,9 @@ rollback_stages() {
   jq -e '.previousRelease!=null and .checkpoints.close!=null and .prepared!=null' "$WORK/record.json" >/dev/null || fail 'No prepared cutover to roll back'
   close_once
   if [[ $ENV == preprod ]]; then
-    patch_database "$(jq -r .prepared.targetDb "$WORK/record.json")" "$(jq -r .liveDb "$WORK/record.json")"
+    local previous
+    previous=$(jq -r .liveDb "$WORK/record.json")
+    patch_database "$(jq -r .prepared.targetDb "$WORK/record.json")" "$previous" || patch_database "$previous" "$previous"
   fi
   jq '.release=.previousRelease|.checkpoints.switch="rolled-back"' "$WORK/record.json" > "$WORK/next.json"
   mv "$WORK/next.json" "$WORK/record.json"; record_save
