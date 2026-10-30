@@ -3,6 +3,7 @@ services:
     image: postgis/postgis:16-3.4
     environment: {POSTGRES_USER: radar, POSTGRES_PASSWORD: synthetic-only, POSTGRES_DB: radar}
     tmpfs: [/var/lib/postgresql/data]
+    volumes: [./:/cutover:ro]
     networks:
       default:
         aliases: [radar-postgres]
