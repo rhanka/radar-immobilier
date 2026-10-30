@@ -399,6 +399,8 @@ rollback_promoted() {
   mv "$WORK/next.json" "$WORK/record.json"; record_save
   SAMEDB=$(jq -r 'if .samedb then 1 else 0 end' "$WORK/receipt.json")
   inventory
+  # Capacity facts for the receipt (sessions vs max_connections), as for a release run.
+  run_job database 30 45
   suspend_writers drain
   record_set '.samedb=$s|.slotDb=(if $s then .liveDb else .targetDb end)' --argjson s "$( ((SAMEDB==1)) || [[ $ENV == prod ]] && echo true || echo false)"
   prepared_stack_retire
