@@ -60,8 +60,19 @@ suspend_writers() {
   local mode=${1:-kill} deadline=$((SECONDS+600)) row name uid
   [[ $mode != kill ]] || deadline=$((SECONDS+40))
   checkpoint suspend started
+  # Every recorded CronJob (watchdog included) is suspended and read back before any wait;
+  # a failure restores the original schedule states from the inventory record.
   stop_schedules
+  schedules_suspended || fail 'Writer schedules are not suspended'
   while :; do
+    if [[ $mode != kill ]]; then
+      # Drain waits only for live writers: terminated Pods (Error/Completed) never count.
+      live_refresh_writers > "$WORK/refresh-writers.json"
+      [[ $(jq length "$WORK/refresh-writers.json") != 0 ]] || break
+      ((SECONDS<deadline)) || fail "Refresh writer drain exceeded ten minutes; live writers: $(jq -r 'map(.kind+"/"+.name+"("+.phase+")")|join(", ")' "$WORK/refresh-writers.json")"
+      sleep 2
+      continue
+    fi
     owned_refresh_jobs > "$WORK/refresh-jobs.json"
     [[ $(jq length "$WORK/refresh-jobs.json") != 0 ]] || break
     if [[ $mode == kill ]]; then
@@ -78,6 +89,17 @@ suspend_writers() {
     sleep 2
   done
   checkpoint suspend completed
+}
+schedules_suspended() {
+  "${k[@]}" get cronjobs -o json | jq -e --slurpfile r "$WORK/record.json" '. as $live|
+    all($r[0].cronjobs[]; .uid as $uid|any($live.items[]; .metadata.uid==$uid and .spec.suspend==true))' >/dev/null
+}
+live_refresh_writers() {
+  # Pods are read before Jobs so that a Job created in between counts as a starting writer.
+  "${k[@]}" get pods -o json > "$WORK/writer-pods-now.json"
+  "${k[@]}" get jobs -o json > "$WORK/writer-jobs-now.json"
+  jq -c --slurpfile r "$WORK/record.json" --slurpfile cfg "$CONFIG" --slurpfile jobs "$WORK/writer-jobs-now.json" \
+    -f tools/make/cutover-writers.jq "$WORK/writer-pods-now.json"
 }
 owned_refresh_jobs() {
   "${k[@]}" get jobs -o json | jq --slurpfile r "$WORK/record.json" \
