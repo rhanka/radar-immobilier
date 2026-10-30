@@ -319,3 +319,39 @@ test('the rehearsal acknowledges its own abandoned writes only when its probe ro
     assert.equal(entries(f).find(e => e.run === c.run).status, 'pending', 'only the proven entry is acknowledged');
   } finally { f.cleanup(); }
 });
+test('the prepared slot and the promotion use the release manifests (#611); a rollback restores the previous specs', () => {
+  const f = fixture({ previousSha: '9'.repeat(40) });
+  const marked = c => (c.env || []).some(e => e.name === 'FROM_RELEASE_MANIFEST');
+  try {
+    const state = f.state(); state.objects.find(o => o.kind === 'Deployment' && o.metadata.name === 'radar-api').spec.replicas = 2; save(f, state);
+    success(f.run('prepare'));
+    for (const name of SERVICES) {
+      assert.ok(marked(object(f, `${name}-prepared`, 'Deployment').spec.template.spec.containers[0]), `${name}: prepared from the release manifest`);
+    }
+    success(f.run('run', ['MODE=run']));
+    const api = object(f, 'radar-api', 'Deployment');
+    assert.ok(marked(api.spec.template.spec.containers[0]), 'the canonical slot receives the release spec');
+    assert.equal(api.spec.template.spec.containers[0].image, f.release.apiImage);
+    assert.deepEqual([api.spec.replicas, api.spec.selector.matchLabels['sentropic.io/slot'], api.spec.template.metadata.labels['sentropic.io/slot']], [2, 'main', 'main']);
+    const cron = object(f, 'radar-refresh-pv', 'CronJob');
+    assert.ok(marked(cron.spec.jobTemplate.spec.template.spec.containers[0]), 'CronJob spec from the release');
+    assert.equal(cron.spec.suspend, false, 'original schedule state restored');
+    const promoted = receipt(f);
+    assert.ok(promoted.previousSpecs['Deployment/radar-api'] && promoted.previousSpecs['CronJob/radar-refresh-pv']);
+    success(f.run('rollback', [`RUN=${promoted.run}`, 'MODE=run']));
+    const back = object(f, 'radar-api', 'Deployment').spec.template.spec.containers[0];
+    assert.equal(marked(back), false, 'the rollback restores the spec that ran before');
+    assert.equal(back.image, promoted.previousRelease.apiImage);
+  } finally { f.cleanup(); }
+});
+test('a release without the manifest of a workload refuses before creating the prepared slot', () => {
+  const f = fixture();
+  try {
+    const state = f.state(); state.releaseManifests['deploy/overlays/preprod'] = state.releaseManifests['deploy/overlays/preprod']
+      .filter(d => d.metadata.name !== 'radar-ui'); save(f, state);
+    const result = f.run('prepare');
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /release_manifest_missing: Deployment\/radar-ui/);
+    assert.equal(f.state().objects.some(o => o.kind === 'Deployment' && o.metadata.name.endsWith('-prepared')), false);
+  } finally { f.cleanup(); }
+});
