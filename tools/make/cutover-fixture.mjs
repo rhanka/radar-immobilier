@@ -16,14 +16,21 @@ export function fixture(changes = {}) {
   const objects = [];
   objects.push({ ...object('Secret', 'radar-db-credentials', {}),
     data: { POSTGRES_DB: Buffer.from('radar').toString('base64'), POSTGRES_USER: 'synthetic-user', POSTGRES_PASSWORD: 'synthetic-only' } });
+  // Canonical slot: adopted (`sentropic.io/slot=main`) unless the test models the pre-adoption state.
+  const slot = changes.unadopted ? {} : { 'sentropic.io/slot': 'main' };
   for (const [name, container, image] of [['radar-api', 'api', 'api'], ['radar-ui', 'ui', 'ui'], ['radar-immo-mcp', 'mcp', 'api']]) {
-    objects.push(object('Deployment', name, { replicas: 1, template: { spec: { containers: [{ name: container, image: `ghcr.io/rhanka/radar-${image}:old` }] } } }));
+    const component = container === 'mcp' ? 'mcp' : image;
+    const labels = { 'app.kubernetes.io/name': 'radar-immobilier', 'app.kubernetes.io/component': component };
+    objects.push(object('Deployment', name, { replicas: 1, selector: { matchLabels: { ...labels, ...slot } },
+      template: { metadata: { labels: { ...labels, ...slot } }, spec: { containers: [{ name: container, image: `ghcr.io/rhanka/radar-${image}:old` }] } } }));
+    const service = object('Service', name, { selector: { ...labels, ...slot }, ports: [{ name: 'http', port: 80 }] });
+    service.metadata.uid = `uid-svc-${name}`; objects.push(service);
     objects.push(object('Endpoints', name, {}));
-    const rs = object('ReplicaSet', `${name}-rs`, {});
+    const rs = object('ReplicaSet', `${name}-rs`, { selector: { matchLabels: { ...labels, ...slot } } });
     rs.metadata.ownerReferences = [{ kind: 'Deployment', controller: true, uid: `uid-${name}` }]; objects.push(rs);
     const pod = object('Pod', `${name}-consumer`, {});
     pod.metadata.ownerReferences = [{ kind: 'ReplicaSet', controller: true, uid: rs.metadata.uid }];
-    pod.metadata.labels = { 'app.kubernetes.io/component': container === 'mcp' ? 'mcp' : image };
+    pod.metadata.labels = { ...labels, ...slot };
     pod.status = { phase: 'Running', containerStatuses: [{ name: container, ready: true,
       imageID: image === 'ui' ? release.uiImage : release.apiImage }] }; objects.push(pod);
   }
