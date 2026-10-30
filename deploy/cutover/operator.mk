@@ -11,13 +11,14 @@ override CYCLE_ID := $(value CYCLE_ID)
 override OUTPUT := $(value OUTPUT)
 override BUILD_RUN := $(value BUILD_RUN)
 override SHA := $(value SHA)
-export ENV RELEASE RUN MODE BACKUP_ID CYCLE_ID OUTPUT BUILD_RUN SHA TEST_PATTERN
+override SIZE := $(value SIZE)
+export ENV RELEASE RUN MODE BACKUP_ID CYCLE_ID OUTPUT BUILD_RUN SHA SIZE TEST_PATTERN
 export COMPOSE_DISABLE_ENV_FILE := 1
 override COMPOSE := docker compose --env-file /dev/null -p radar-test-cutover -f $(CUTOVER_ROOT)/deploy/cutover/test.compose.yml
-.PHONY: help run prepare rollback status resume lock release-lock report-refs force-refresh test lint typecheck test-api down ps commit syntax
+.PHONY: help run prepare rollback status resume lock release-lock report-refs force-refresh pvc-expand pvc-verify test lint typecheck test-api down ps commit syntax
 help:
 	@echo 'run RELEASE=<release.json> ENV=preprod|prod; status; resume RUN=<uuid>'
-run prepare rollback status resume lock release-lock report-refs force-refresh:
+run prepare rollback status resume lock release-lock report-refs force-refresh pvc-expand pvc-verify:
 	@cd "$(CUTOVER_ROOT)" && bash tools/make/cutover.sh $@
 download-release:
 	@cd "$(CUTOVER_ROOT)" && bash tools/make/cutover-download.sh

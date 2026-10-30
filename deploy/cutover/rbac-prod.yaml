@@ -70,6 +70,15 @@ rules:
     resources: [configmaps]
     resourceNames: [radar-change-lock]
     verbs: [delete]
+  # Lot 1: one-time volume expansion and in-Pod measurement of the PostgreSQL volume.
+  - apiGroups: [""]
+    resources: [persistentvolumeclaims]
+    resourceNames: [postgres-data-radar-postgres-0]
+    verbs: [get, patch]
+  - apiGroups: [""]
+    resources: [pods/exec]
+    resourceNames: [radar-postgres-0]
+    verbs: [create]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
