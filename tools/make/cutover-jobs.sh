@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 # Jobs own all DB/S3 credentials. The controller reads status, never raw logs.
 job_verdict() {
+  # Every successful container verdict of the Job's Pod, init containers first, merged
+  # (a measurement container adds its metrics to the fetch verdict).
   local name=$1 uid=$2
   "${k[@]}" get pods -l "job-name=$name" -o json | jq -ce --arg uid "$uid" '
     [.items[]|select(any(.metadata.ownerReferences[]?;.kind=="Job" and .controller==true and .uid==$uid))|
-      (.status.containerStatuses//[])[],(.status.initContainerStatuses//[])[]|
-      .state.terminated.message? // empty|fromjson? | select(.ok==true)]|last' > "$WORK/verdict.json"
+      (.status.initContainerStatuses//[])[],(.status.containerStatuses//[])[]|
+      .state.terminated.message? // empty|fromjson? | select(.ok==true)]|add' > "$WORK/verdict.json"
 }
 job_pods_ended() {
   "${k[@]}" get pods -l "job-name=$1" -o json | jq -e --arg uid "$2" '

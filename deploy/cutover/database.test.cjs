@@ -15,6 +15,10 @@ test('database preparation checks CREATEDB, protects live identity and verifies 
       env: { ...process.env, POSTGRES_HOST: 'radar-postgres', CUTOVER_DB_OPERATION: operation, TARGET_DB: target, ...extra } });
   try {
     await c.query("CREATE ROLE cutover_no_createdb LOGIN PASSWORD 'synthetic-limited-only'");
+    const measured = run('database', '');
+    assert.equal(measured.status, 0, measured.stderr);
+    const facts = JSON.parse(measured.stdout);
+    assert.ok(facts.databaseSizes.radar > 0 && facts.maxConnections > 0 && facts.sessionsByDb.radar >= 1, measured.stdout);
     assert.notEqual(run('reset', 'radar_next', { POSTGRES_USER: 'cutover_no_createdb', POSTGRES_PASSWORD: 'synthetic-limited-only' }).status, 0);
     assert.notEqual(run('reset', 'radar').status, 0, 'live database cannot be dropped');
     const reset = run('reset', 'radar_next');
