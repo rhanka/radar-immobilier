@@ -34,6 +34,8 @@ export function fixture(changes = {}) {
   objects.push(object('Ingress', 'application', { tls: [{ hosts: ['preprod.immo.sent-tech.ca'], secretName: 'existing-tls' }],
     defaultBackend: { service: { name: 'radar-ui', port: { number: 8080 } } },
     rules: [{ host: 'preprod.immo.sent-tech.ca', http: { paths: [{ path: '/', pathType: 'Prefix', backend: { service: { name: 'radar-ui', port: { number: 8080 } } } }] } }] }));
+  objects.push({ ...object('PersistentVolumeClaim', 'postgres-data-radar-postgres-0', { resources: { requests: { storage: '5Gi' } } }),
+    status: { capacity: { storage: '5Gi' } } });
   objects.push({ ...object('ConfigMap', 'radar-api', {}), data: { GEO_DOCUMENTS_REPOINT: 'old' } });
   objects.push({ ...object('ConfigMap', 'radar-cutover-6h', {}), data: { 'plan.json': JSON.stringify({ version: 1,
     actorSub: 'synthetic-production-subject', workspaceSlug: 'synthetic', accounts: [{ sub: 'synthetic-production-subject' }] }) } });

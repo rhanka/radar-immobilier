@@ -214,3 +214,21 @@ timestamped `pg_restore --verbose`) and cgroup CPU deltas (`cpu_usage_usec`,
 `cpu_nr_throttled`, `cpu_throttled_usec`). Job wrappers keep bounded numeric
 values only; the merged verdicts land in the lock record, the prepared stamp and
 `radar-cutover-receipt`.
+
+### PostgreSQL volume expansion (one-time, operator)
+
+The template, the prepared database and the live database share one volume.
+Required size: max(10 GiB, 3 x live database + 2 GiB). The StatefulSet
+`volumeClaimTemplates` field is immutable, so the claim itself is patched
+(compare-and-swap on its UID and current size, never shrunk):
+
+```sh
+make -f deploy/cutover/operator.mk pvc-expand ENV=preprod          # computed size
+make -f deploy/cutover/operator.mk pvc-expand SIZE=12Gi ENV=preprod # explicit, refused below the computed size
+make -f deploy/cutover/operator.mk pvc-verify ENV=preprod
+```
+
+When the claim reports `FileSystemResizePending`, restart `radar-postgres-0`
+once, outside any cutover window (owner-scheduled), then run `pvc-verify`:
+it reads `df` and the live database size inside the Pod and requires free space
+of at least 2 x database + 2 GiB. Staging refuses to start before this lot.
