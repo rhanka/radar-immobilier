@@ -214,7 +214,7 @@ function volumeFixture() {
     const position = 1 + Math.floor(n * (destination - 2) / total);
     indexes[position] = n;
     return { key: keyFor(position), size: 10, etag: `"source-${n}"`, backupEtag: `"backup-${n}"`,
-      state: "backed-up", versionId: n < total - 100 ? `v${n}` : null };
+      state: "backed-up", versionId: n < total - 9418 ? `v${n}` : null };
   });
   const inventory = JSON.stringify({ format: br.LAYOUT.inventoryFormat, date: D, createdAt: `${D}T03:40:00Z`, counts: { objects: total }, objects });
   const manifest = JSON.stringify({ ...fixture().manifest, docs: { objects: total, inventoryKey: br.keysFor(D).inventory, inventorySha256: sha(inventory) } });
@@ -262,10 +262,14 @@ function volumeFixture() {
         return { ContentLength: n === state.drift ? 11 : 10, ETag: `"backup-${n}"`, VersionId: `v${n}` };
       }
       if (cmd instanceof sdk.ListObjectVersionsCommand) {
-        return { Versions: [{ Key: i.Prefix, Size: 10, ETag: `"backup-${n}"`, VersionId: `v${n}`, LastModified: `${D}T03:00:00Z` }], IsTruncated: false };
+        const start = i.KeyMarker ? objects.findIndex(o => "docs/" + o.key === i.KeyMarker) + 1 : 0;
+        const end = Math.min(start + 1000, total);
+        return { Versions: objects.slice(start, end).map((o, offset) => ({ Key: "docs/" + o.key,
+          Size: 10, ETag: `"backup-${start + offset}"`, VersionId: `v${start + offset}`, LastModified: `${D}T03:00:00Z` })),
+          IsTruncated: end < total, NextKeyMarker: "docs/" + objects[end - 1].key, NextVersionIdMarker: `v${end - 1}` };
       }
       if (cmd instanceof sdk.CopyObjectCommand) {
-        if ((stats.calls.HeadObjectCommand || 0) + (stats.calls.ListObjectVersionsCommand || 0) !== total - upToDate) stats.earlyCopies += 1;
+        if ((stats.calls.HeadObjectCommand || 0) !== total - upToDate - 9418 || stats.calls.ListObjectVersionsCommand !== Math.ceil(total / 1000)) stats.earlyCopies += 1;
         if (i.CopySource !== br.copySourceFor(B, objects[n].key, `v${n}`) || i.MetadataDirective !== "COPY" || i.GrantFullControl !== "id=volume-grantee") stats.badCopies += 1;
         copied.add(n);
         return { $metadata: { attempts: 1 } };
@@ -336,6 +340,11 @@ eq("chooseDate — latest → latestComplete (not the newest partial)",
   eq("planDocsRestore — excluded entry skipped (not a refusal), counted apart", [pEx.excluded, pEx.notInBackup, pEx.unresolved, pEx.upToDate, pEx.toCopy.length], [1, 0, 0, 1, 0]);
   const pPend = br.planDocsRestore({ inventory: { ...invEx, objects: [{ key: "p", size: 1, state: "pending" }] }, versionsIndex: new Map(), destIndex: new Map() });
   eq("planDocsRestore — pending entry still blocks (notInBackup)", [pPend.notInBackup, pPend.excluded], [1, 0]);
+  const sweep = { objects: [{ key: "refresh/018/sweep/cursor.json", size: 4, state: "pending" }] };
+  const sweepPlan = br.planDocsRestore({ inventory: sweep, destIndex: new Map() });
+  const sweepRecon = br.reconInventory(sweep, new Map());
+  eq("sweep cursor — mutable control state is excluded even without a backup", [sweepPlan.excluded,
+    sweepPlan.notInBackup, sweepPlan.needsHead.length, sweepRecon.ok, sweepRecon.excluded], [1, 0, 0, true, 1]);
   const big = br.buildListing({ bucket: B, latest: null, manifests: Array.from({ length: 80 }, (_, k) => ({ date: `2026-0${1 + (k % 9)}-${String(1 + (k % 28)).padStart(2, "0")}`, status: "complete", pg: { sizeBytes: 1, sha256: "a".repeat(64) } })), maxBytes: 1500 });
   ok("buildListing — truncated to fit the termination message", big.truncated && Buffer.byteLength(JSON.stringify(big)) <= 1500);
 }
@@ -621,13 +630,13 @@ async function suite() {
   let stats = v.reset();
   const r = await v.run();
   eq("volume — restores 267,683 objects with 36,282 copies and additive recon", [r.exitCode, r.termination.upToDate, r.termination.copied, r.termination.recon.ok, r.termination.recon.extra], [0, 231401, 36282, true, 152220]);
-  eq("volume — two pinned input GETs, candidate HEADs, per-key version lists and copies", [stats.calls.GetObjectCommand, stats.calls.HeadObjectCommand, stats.calls.ListObjectVersionsCommand, stats.calls.CopyObjectCommand], [2, 36182, 100, 36282]);
-  eq("volume — zero global version listings or per-object calls on up-to-date objects", [stats.globalVersions, stats.upToDateCalls], [0, 0]);
+  eq("volume — 9,418 unpinned candidates resolved with page-count version calls", [stats.calls.GetObjectCommand, stats.calls.HeadObjectCommand, stats.calls.ListObjectVersionsCommand, stats.calls.CopyObjectCommand], [2, 26864, 268, 36282]);
+  eq("volume — bulk listings have no per-object calls on up-to-date objects", [stats.globalVersions, stats.upToDateCalls], [268, 0]);
   ok("volume — both destination listings use at most 872 calls", stats.calls.ListObjectsV2Command <= 2 * (420 + 16));
   eq("volume — 16 distinct shard starts and 16 concurrent shard requests", [stats.starts.size, stats.maxActive.ListObjectsV2Command], [16, 16]);
   eq("volume — default worker concurrency 48 for HEAD and copy", [stats.maxActive.HeadObjectCommand, stats.maxActive.CopyObjectCommand], [48, 48]);
   eq("volume — all candidates verified before copying, pinned sources and ACL preserved", [stats.earlyCopies, stats.badCopies], [0, 0]);
-  eq("volume — receipt counters match observed calls", [r.termination.destListCalls, r.termination.headChecked, r.termination.versionsResolved, r.termination.copyRetries], [stats.calls.ListObjectsV2Command, 36182, 100, 0]);
+  eq("volume — receipt counters match observed calls", [r.termination.destListCalls, r.termination.headChecked, r.termination.versionsResolved, r.termination.copyRetries], [stats.calls.ListObjectsV2Command, 26864, 9418, 0]);
   ok("volume — complete receipt stays under 3,900 bytes", Buffer.byteLength(JSON.stringify(r.termination)) < br.TERMINATION_MAX_BYTES);
   console.log("  volume calls " + JSON.stringify(stats.calls));
   stats = v.reset();
