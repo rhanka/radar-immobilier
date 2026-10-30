@@ -28,6 +28,8 @@ import { geoFeaturesRoute, type GeoFeaturesDeps } from "./routes/geo-features.js
 import { geoCollectionsRoute } from "./routes/geo-collections.js";
 import { signalsDetailRoute } from "./routes/signals-detail.js";
 import { opportunitesRoute } from "./routes/opportunites.js";
+import { handleAppError } from "./lifecycle/maintenance.js";
+import type { Graceful } from "./lifecycle/graceful.js";
 import { adminRoute } from "./routes/admin.js";
 import { dataQualityRoute, type DataQualityDeps } from "./routes/data-quality.js";
 import { sourceCoverageRoute } from "./routes/source-coverage.js";
@@ -79,6 +81,8 @@ export type AppDeps = HealthDeps &
     fetchImpl?: typeof fetch;
     geoBaseUrl?: string;
     geoListingTtlMs?: number;
+    /** Cutover graceful stop: in-flight tracking and SSE closing (absent in tests). */
+    graceful?: Graceful;
     /** Artifact content dispatch (861c); absent/disabled keeps the chain. */
     contentHost?: ContentHostConfig;
     /** Already bound reader; absent keeps content hosts closed. */
@@ -105,6 +109,9 @@ export type AppDeps = HealthDeps &
 /** Compose the Hono application from injected dependencies. */
 export function createApp(deps: AppDeps): Hono {
   const app = new Hono();
+  // Zero-downtime cutover: graceful stop first, explicit 503 while the database is frozen.
+  if (deps.graceful) app.use("*", deps.graceful.middleware);
+  app.onError(handleAppError);
   app.use("/api/graph-signals/*", privateSignalResponse);
   app.use("/api/v1/signal-facets/*", privateSignalResponse);
   app.use("/api/v1/mcp/facets/signals/*", privateSignalResponse);

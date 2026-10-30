@@ -25,7 +25,7 @@ case ${1:-} in
     "${compose[@]}" up -d --wait postgres
     "${compose[@]}" exec -T postgres bash -s < deploy/cutover/parallel-restore.test.sh
     "${compose[@]}" exec -T postgres bash /cutover/atomic-restore.test.sh
-    command='npm ci --ignore-scripts --silent && npm run db:migrate --workspace=api && node --test deploy/cutover/database.test.cjs && npm run test --workspace=api -- tests/integration/database-cutover.spec.ts src/services/facets/activation src/services/facets/attachment src/services/facets/base-api-personal-activation src/services/facets/base-api-activation src/services/facets/lots/lot-cutover --maxWorkers=2';;
+    command='npm ci --ignore-scripts --silent && npm run db:migrate --workspace=api && node --test deploy/cutover/database.test.cjs && npm run test --workspace=api -- tests/integration/database-cutover.spec.ts src/services/facets/activation src/services/facets/attachment src/services/facets/base-api-personal-activation src/services/facets/base-api-activation src/services/facets/lots/lot-cutover src/lifecycle --maxWorkers=2';;
   *) exit 2;;
 esac
 "${compose[@]}" run --rm --no-deps -T -e TEST_PATTERN api bash -ec "$command"
