@@ -326,8 +326,10 @@ No route is ever closed. Under `radar-change-lock`, `run` (MODE=run) executes:
    (`ALTER DATABASE ... SET default_transaction_read_only = on`, sessions opened
    before terminated and read back as gone) records `frozenAt`. From then on a
    write answers 503 `{"error":"maintenance_read_only"}` with `Retry-After: 5`
-   (SQLSTATE 25006 / 57P01 mapped by `api/src/lifecycle/maintenance.ts`); reads
-   are served. Production: one shared database, no freeze.
+   (SQLSTATE 25006 / 57P01 mapped by `api/src/lifecycle/maintenance.ts`, also when a
+   route catches the error itself; every pooled client, idle or checked out, keeps
+   an error listener so a terminated session never crashes the API); reads are
+   served. Production: one shared database, no freeze.
 3. Switch: one JSON patch per Service with a `test` on the current
    `sentropic.io/slot` value (radar-api, radar-immo-mcp, radar-ui), then wait
    until every EndpointSlice lists only `slot=prepared` Pods; the mixed window is
