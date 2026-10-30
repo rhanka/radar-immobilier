@@ -29,6 +29,12 @@ test('prepare stamps ready without closing live services and releases the lock d
         assert.equal(env.find(e => e.name === 'PGDATABASE').value, 'radar_next');
         assert.equal(job.spec.template.spec.containers[0].resources.limits.cpu, '4');
       }
+      if (job.metadata.name.endsWith('-data')) {
+        const evidence = JSON.parse(env.find(e => e.name === 'CUTOVER_EVIDENCE').value);
+        const pods = f.state().objects.filter(o => o.kind === 'Pod' && /-(restore|ddl)-pod$/.test(o.metadata.name));
+        assert.deepEqual(evidence.instances.sort(), pods.map(p => p.metadata.uid).sort());
+        assert.equal(evidence.instances.length, 2);
+      }
     }
     const before = f.state().jobCreation.length;
     success(f.run('run', ['MODE=run']));
