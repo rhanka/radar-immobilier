@@ -44,7 +44,7 @@ record_save() {
   # Every write compares the last read resource version and current executor.
   local current
   (( $(wc -c < "$WORK/record.json") < 750000 )) || fail 'Recovery inventory exceeds ConfigMap safety bound'
-  current=$("${k[@]}" get configmap radar-change-lock -o json)
+  current=$("${k[@]}" get configmap "${RECORD_MAP:-radar-change-lock}" -o json)
   jq -e --arg run "$RUN" --argjson executor "$EXECUTOR" \
     '(.data.record|fromjson)|.run==$run and .executor==$executor' <<< "$current" >/dev/null || fail 'Execution ownership changed'
   jq --slurpfile record "$WORK/record.json" '.data.record=($record[0]|tojson)' <<< "$current" > "$WORK/next-lock.json"
