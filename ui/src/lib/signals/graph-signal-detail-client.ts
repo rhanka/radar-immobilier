@@ -1,10 +1,10 @@
 /**
- * Client for GET /api/graph-signals/:city
+ * Scoped signal reads for one city (6H):
+ * GET /api/v1/workspaces/:ws/signal-facets/coherent-city (visible nodes plus
+ * archive heads, one coherent snapshot) and .../reveal for archived targets.
  *
- * Fetches Signal + DesignationEvent nodes for one city from graph_nodes
- * (graphify pipeline, ~197 villes), NOT the old ontology project-state.
- *
- * Anti-invention: returns 404 when no signal nodes exist for the city.
+ * Anti-invention: an authorized city without signal nodes is an explicit
+ * empty state; a refusal or an unavailable scope is an error, never a list.
  */
 
 import type { RegulatoryStatusT, VivierV2 } from "@radar/domain";
@@ -551,11 +551,38 @@ export interface LegacyZmpProjection {
   a: { count: number; signalIds: string[] };
 }
 
+/** Explicit workspace scope of one read or command; never defaulted. */
+export interface SignalScope {
+  workspaceId: string;
+  /** API origin prefix; empty for same-origin. */
+  baseUrl?: string;
+}
+
+/** Scoped signal-facet path of one workspace. */
+export function scopedSignalFacetsPath(scope: SignalScope, suffix: string): string {
+  if (scope.workspaceId.length === 0) throw new Error("missing_scoped_context");
+  return `${scope.baseUrl ?? ""}/api/v1/workspaces/${encodeURIComponent(scope.workspaceId)}/signal-facets/${suffix}`;
+}
+
+/** One archive head row of the coherent read (personal and workspace scopes). */
+export interface CoherentArchiveHead {
+  target: { citySlug: string; type: string; id: string };
+  personal: { id: string; state: string; reasonCode: string | null } | null;
+  workspace: { id: string; state: string; reasonCode: string | null } | null;
+  effectiveDiscarded: boolean;
+}
+
 export interface GraphSignalDetailResponse {
-  ok: boolean;
   citySlug: string;
+  /** 6L1 revision token acknowledged with this snapshot. */
+  token: string;
+  /** Legacy A authority derived server-side from the same served nodes. */
   legacyProjection: LegacyZmpProjection | null;
+  /** Visible nodes: effectively discarded targets are never served here. */
   nodes: GraphSignalNode[];
+  /** Archive heads of the city; archived targets open through `reveal`. */
+  heads: CoherentArchiveHead[];
+  counts: { total: number; hidden: number; visible: number; selected: number };
 }
 
 export interface FetchGraphSignalDetailOptions {
@@ -565,19 +592,14 @@ export interface FetchGraphSignalDetailOptions {
    * périmée est IGNORÉE par l'appelant, pas transformée en erreur affichée.
    */
   signal?: AbortSignal;
-  /**
-   * Reveal discarded signals: `showDiscarded=1` returns the complete B(F)
-   * population. Hidden by default; forward this flag unchanged.
-   */
-  showDiscarded?: boolean;
+  timeoutMs?: number;
 }
 
 /**
- * HTTP failure of a graph-signals read. The message keeps the historical
- * `<route>: <status>` shape; `status` plus the server `{error}` body field
- * (`code`) let callers tell an explicit discarded-reader outage (503
- * `discarded_signals_unavailable`, never an empty list) from other failures.
- * A bare status is never enough: only the body code proves the outage.
+ * HTTP failure of a scoped signal read. `status` plus the server `{error}`
+ * body field (`code`) let callers tell a session refusal (401/403) from an
+ * unavailable scope (503: `scoped_facet_scope_unavailable`,
+ * `personal_history_unresolved`, maintenance), which is never an empty list.
  */
 export class GraphSignalsHttpError extends Error {
   readonly status: number;
@@ -590,43 +612,156 @@ export class GraphSignalsHttpError extends Error {
   }
 }
 
-export async function fetchGraphSignalDetail(
-  citySlug: string,
-  baseUrl = "",
-  timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS,
-  opts: FetchGraphSignalDetailOptions = {},
-): Promise<GraphSignalDetailResponse> {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
+ * Accept one served node as-is: identity and label are required (the
+ * fingerprint when present must be a string); every other field is passed
+ * through only when the server sent
+ * it (never filled in client-side).
+ */
+export function parseServedSignalNode(value: unknown): GraphSignalNode {
+  if (!isRecord(value)
+    || typeof value.id !== "string" || value.id.length === 0
+    || typeof value.type !== "string" || typeof value.label !== "string"
+    || (value.facetFingerprint !== undefined && typeof value.facetFingerprint !== "string")
+    || (value.citySlug !== null && typeof value.citySlug !== "string")) {
+    throw new Error("invalid_signal_node");
+  }
+  return {
+    ...(value as unknown as GraphSignalNode),
+    sourceRef: typeof value.sourceRef === "string" ? value.sourceRef : null,
+    createdAt: typeof value.createdAt === "string" ? value.createdAt : null,
+    props: isRecord(value.props) ? value.props : {},
+  };
+}
+
+async function readScoped<T>(
+  url: string, label: string, opts: FetchGraphSignalDetailOptions,
+): Promise<T> {
   try {
-    const suffix = opts.showDiscarded === true ? "?showDiscarded=1" : "";
     // Bounded headers AND body: a stalled body still fails with
     // `RequestTimeoutError` instead of blocking the caller forever.
-    const res = await fetchJsonWithTimeout<GraphSignalDetailResponse>(
-      `${baseUrl}/api/graph-signals/${encodeURIComponent(citySlug)}${suffix}`,
-      { signal: opts.signal, timeoutMs },
-    );
+    const timeoutMs = opts.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS;
+    const res = await fetchJsonWithTimeout<T>(url, { signal: opts.signal, timeoutMs });
     if (!res.ok) {
-      // 404 = city with no signal nodes in the DB — explicit empty state
-      if (res.status === 404) {
-        return { ok: false, citySlug, legacyProjection: null, nodes: [] };
-      }
-      throw new GraphSignalsHttpError(
-        `graph-signals/${citySlug}: ${res.status}`,
-        res.status,
-        readJsonErrorCode(res.json),
-      );
+      throw new GraphSignalsHttpError(`${label}: ${res.status}`, res.status, readJsonErrorCode(res.json));
     }
-    if (res.json === null) {
-      throw new Error(`graph-signals/${citySlug}: empty JSON body`);
-    }
+    if (res.json === null) throw new Error(`${label}: empty JSON body`);
     return res.json;
   } catch (err) {
-    // Timeout interne → message dédié (contrat historique). Un abort EXTERNE
-    // (AbortError) est relevé tel quel pour que l'appelant ignore la réponse.
+    // Timeout interne → message dédié. Un abort EXTERNE (AbortError) est
+    // relevé tel quel pour que l'appelant ignore la réponse.
     if (err instanceof RequestTimeoutError) {
-      throw new Error(`graph-signals/${citySlug}: timeout after ${timeoutMs}ms`);
+      throw new Error(`${label}: timeout after ${opts.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS}ms`);
     }
     throw err;
   }
+}
+
+/**
+ * `GET /api/v1/workspaces/:ws/signal-facets/coherent-city?citySlug&mode=signal`:
+ * one coherent read per city. An authorized empty city is a 200 with no
+ * signal (explicit empty state); every refusal is an error, never a list.
+ */
+export async function fetchGraphSignalDetail(
+  scope: SignalScope,
+  citySlug: string,
+  opts: FetchGraphSignalDetailOptions = {},
+): Promise<GraphSignalDetailResponse> {
+  const query = new URLSearchParams({ citySlug, mode: "signal" });
+  const label = `coherent-city/${citySlug}`;
+  const body = await readScoped<Record<string, unknown>>(
+    scopedSignalFacetsPath(scope, `coherent-city?${query.toString()}`), label, opts);
+  if (!isRecord(body) || typeof body.token !== "string" || !Array.isArray(body.signals)
+    || !Array.isArray(body.heads) || !isRecord(body.counts)) {
+    throw new Error(`${label}: invalid response`);
+  }
+  return {
+    citySlug,
+    token: body.token,
+    legacyProjection: isRecord(body.legacyProjection)
+      ? body.legacyProjection as unknown as LegacyZmpProjection : null,
+    nodes: body.signals.map(parseServedSignalNode),
+    heads: body.heads as CoherentArchiveHead[],
+    counts: body.counts as GraphSignalDetailResponse["counts"],
+  };
+}
+
+export interface RevealedSignal {
+  /** Re-read archived node; `facetFingerprint` is the reveal fingerprint. */
+  node: GraphSignalNode;
+  displayedFingerprint: string;
+  heads: { personal: CoherentArchiveHead["personal"]; workspace: CoherentArchiveHead["workspace"] };
+  effectiveDiscarded: boolean;
+}
+
+/**
+ * `GET .../signal-facets/reveal?citySlug&type&id`: authorized re-read of one
+ * archived target. A restore must carry the fingerprint returned here.
+ */
+export async function fetchRevealedSignal(
+  scope: SignalScope,
+  target: { citySlug: string; type: string; id: string },
+  opts: FetchGraphSignalDetailOptions = {},
+): Promise<RevealedSignal> {
+  const query = new URLSearchParams({ citySlug: target.citySlug, type: target.type, id: target.id });
+  const label = `reveal/${target.citySlug}/${target.id}`;
+  const body = await readScoped<Record<string, unknown>>(
+    scopedSignalFacetsPath(scope, `reveal?${query.toString()}`), label, opts);
+  if (!isRecord(body) || typeof body.displayedFingerprint !== "string" || !isRecord(body.heads)) {
+    throw new Error(`${label}: invalid response`);
+  }
+  const node = parseServedSignalNode({ ...(isRecord(body.signal) ? body.signal : {}),
+    facetFingerprint: body.displayedFingerprint });
+  return {
+    node,
+    displayedFingerprint: body.displayedFingerprint,
+    heads: body.heads as RevealedSignal["heads"],
+    effectiveDiscarded: body.effectiveDiscarded === true,
+  };
+}
+
+/**
+ * Show-discarded view: append re-read archived nodes after the visible ones.
+ * The legacy A authority is extended from the server Z/M/P flags those
+ * revealed nodes carry, in the same order, so the A projection stays the
+ * server's exact id list; a revealed node without flags leaves it as-is
+ * (the projection then reports itself unavailable, never partial).
+ */
+export function appendRevealedNodes(
+  detail: GraphSignalDetailResponse, revealed: readonly RevealedSignal[],
+): GraphSignalDetailResponse {
+  if (revealed.length === 0) return detail;
+  const extra = revealed.map((item) => item.node);
+  const authority = detail.legacyProjection;
+  const extraIds = extra.filter((node) => {
+    const flags = node.legacySubset?.flags;
+    return flags !== undefined && flags.z && flags.m && flags.p;
+  }).map((node) => node.id);
+  return {
+    ...detail,
+    nodes: [...detail.nodes, ...extra],
+    legacyProjection: authority === null ? null : {
+      version: authority.version,
+      a: { count: authority.a.count + extraIds.length, signalIds: [...authority.a.signalIds, ...extraIds] },
+    },
+  };
+}
+
+/**
+ * French copy of a failed scoped read: a session refusal, a refused
+ * workspace or an unavailable scope; never phrased as "no signal".
+ */
+export function scopedReadErrorMessage(error: unknown): string {
+  if (error instanceof GraphSignalsHttpError) {
+    if (error.status === 401) return "Session expirée — reconnectez-vous pour afficher les signaux.";
+    if (error.status === 403) return "Accès refusé à cet espace de travail — signaux indisponibles.";
+    if (error.status === 503) return `Signaux indisponibles (${error.code ?? "service_unavailable"}).`;
+  }
+  return "Signaux indisponibles.";
 }
 
 // ── Règlements rattachables à une zone (sourcés du graphe-signal) ─────────────

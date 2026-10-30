@@ -9,6 +9,7 @@ import {
   deferred,
   mockDetailByCity,
   openFirstSignalCard,
+  detailOf,
 } from "./SignauxMapView.facets.fixtures.js";
 import SignauxMapView from "./SignauxMapView.svelte";
 import { fetchGraphSignalsByCity } from "$lib/signals/graph-signals-by-city-client.js";
@@ -65,12 +66,7 @@ describe("SignauxMapView — 6A expected heads", () => {
     vi.mocked(postFacetCommand).mockRejectedValueOnce(
       new SignalFacetError(409, "facet_head_conflict", undefined, { version: null, heads: [] }));
     // Another tab archived sig-1: the post-409 reload drops it from detail.
-    vi.mocked(fetchGraphSignalDetail).mockResolvedValue({
-      ok: true,
-      citySlug: CITY_SLUG,
-      legacyProjection: null,
-      nodes: NODES.filter((node) => node.id !== "sig-1"),
-    });
+    vi.mocked(fetchGraphSignalDetail).mockResolvedValue(detailOf(CITY_SLUG, NODES.filter((node) => node.id !== "sig-1")));
     await fireEvent.click(screen.getByTestId("facet-discard-submit"));
     const conflict = await screen.findByTestId("facet-conflict-notice");
     expect(conflict.textContent).toContain("Signal sig-1");
