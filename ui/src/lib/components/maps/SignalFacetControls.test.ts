@@ -97,8 +97,8 @@ describe("SignalFacetControls — discard requires a code", () => {
     await fireEvent.click(submit);
     await waitFor(() => expect(onSaved).toHaveBeenCalledWith("discard", { viewerKey: null, displayedFingerprint: FINGERPRINT, confirmedHeadId: null }));
     expect(postCommand).toHaveBeenCalledTimes(1);
-    expect(postCommand.mock.calls[0]![1]).toBe("discard");
-    expect(postCommand.mock.calls[0]![2]).toEqual({ target: TARGET, reasonCode: "N-ADMIN",
+    expect(postCommand.mock.calls[0]![0]).toBe("discard");
+    expect(postCommand.mock.calls[0]![1]).toEqual({ target: TARGET, reasonCode: "N-ADMIN",
       expectedHeadId: null, displayedFingerprint: FINGERPRINT });
   });
 
@@ -117,7 +117,7 @@ describe("SignalFacetControls — discard requires a code", () => {
     await fireEvent.click(screen.getByTestId("facet-discard-submit"));
     await waitFor(() => expect(onSaved).toHaveBeenCalledWith("discard", { viewerKey: null, displayedFingerprint: FINGERPRINT, confirmedHeadId: null }));
     expect(postCommand).toHaveBeenCalledTimes(2);
-    expect(postCommand.mock.calls[0]![3]).not.toBe(postCommand.mock.calls[1]![3]);
+    expect(postCommand.mock.calls[0]![2]).not.toBe(postCommand.mock.calls[1]![2]);
   });
 });
 
@@ -135,7 +135,7 @@ describe("SignalFacetControls — baskets and restoration", () => {
       expect(screen.queryByTestId("facet-state-pertinent")).toBeNull();
       await fireEvent.click(screen.getByTestId("facet-retry"));
       await waitFor(() => expect(onSaved).toHaveBeenCalledWith("select", { viewerKey: null, displayedFingerprint: FINGERPRINT, confirmedHeadId: null }));
-      expect(postCommand.mock.calls[0]![3]).toBe(postCommand.mock.calls[1]![3]);
+      expect(postCommand.mock.calls[0]![2]).toBe(postCommand.mock.calls[1]![2]);
     },
   );
 
@@ -158,7 +158,7 @@ describe("SignalFacetControls — baskets and restoration", () => {
     });
     await fireEvent.click(screen.getByTestId("facet-toggle-pertinent"));
     await waitFor(() => expect(onSaved).toHaveBeenCalledWith("select", { viewerKey: null, displayedFingerprint: FINGERPRINT, confirmedHeadId: null }));
-    expect(postCommand.mock.calls[0]![2]).toEqual({
+    expect(postCommand.mock.calls[0]![1]).toEqual({
       target: TARGET,
       basket: "pertinent",
       reasonCode: "P-DENSITE",
@@ -174,8 +174,8 @@ describe("SignalFacetControls — baskets and restoration", () => {
     expect(screen.getByTestId("facet-state-pertinent").textContent).toContain("P-DENSITE");
     await fireEvent.click(screen.getByTestId("facet-toggle-pertinent"));
     await waitFor(() => expect(postCommand).toHaveBeenCalledTimes(1));
-    expect(postCommand.mock.calls[0]![1]).toBe("deselect");
-    expect(postCommand.mock.calls[0]![2]).toEqual({ target: TARGET, basket: "pertinent",
+    expect(postCommand.mock.calls[0]![0]).toBe("deselect");
+    expect(postCommand.mock.calls[0]![1]).toEqual({ target: TARGET, basket: "pertinent",
       expectedHeadId: "head-1", displayedFingerprint: FINGERPRINT });
   });
 
@@ -194,7 +194,7 @@ describe("SignalFacetControls — baskets and restoration", () => {
     expect(update.disabled).toBe(false);
     await fireEvent.click(update);
     await waitFor(() => expect(postCommand).toHaveBeenCalled());
-    expect(postCommand.mock.calls[0]!.slice(1, 3)).toEqual(["select", { target: TARGET, basket,
+    expect(postCommand.mock.calls[0]!.slice(0, 2)).toEqual(["select", { target: TARGET, basket,
       expectedHeadId: null, displayedFingerprint: FINGERPRINT }]);
   });
 
@@ -223,8 +223,8 @@ describe("SignalFacetControls — baskets and restoration", () => {
     expect(screen.queryByTestId("facet-discard-submit")).toBeNull();
     await fireEvent.click(screen.getByTestId("facet-restore"));
     await waitFor(() => expect(onSaved).toHaveBeenCalledWith("restore", { viewerKey: null, displayedFingerprint: FINGERPRINT, confirmedHeadId: null }));
-    expect(postCommand.mock.calls[0]![1]).toBe("restore");
-    expect(postCommand.mock.calls[0]![2]).toEqual({ target: TARGET, expectedHeadId: "archive-1",
+    expect(postCommand.mock.calls[0]![0]).toBe("restore");
+    expect(postCommand.mock.calls[0]![1]).toEqual({ target: TARGET, expectedHeadId: "archive-1",
       displayedFingerprint: FINGERPRINT });
   });
 
@@ -313,7 +313,7 @@ describe("SignalFacetControls — expected heads (6A)", () => {
     });
     await fireEvent.click(screen.getByTestId("facet-discard-submit"));
     await waitFor(() => expect(postCommand).toHaveBeenCalledTimes(1));
-    expect(postCommand.mock.calls[0]![2]).toMatchObject({ expectedHeadId: "archive-old" });
+    expect(postCommand.mock.calls[0]![1]).toMatchObject({ expectedHeadId: "archive-old" });
   });
 
   it("surfaces a head conflict distinctly and asks the parent to reload", async () => {
@@ -363,7 +363,7 @@ describe("SignalFacetControls — displayed fingerprint (6B)", () => {
     const { postCommand } = renderControls();
     await fireEvent.click(screen.getByTestId("facet-toggle-pertinent"));
     await waitFor(() => expect(postCommand).toHaveBeenCalledTimes(1));
-    expect(postCommand.mock.calls[0]![2]).toMatchObject({ displayedFingerprint: FINGERPRINT });
+    expect(postCommand.mock.calls[0]![1]).toMatchObject({ displayedFingerprint: FINGERPRINT });
   });
 
   it("surfaces a version conflict distinctly and asks the parent to reload", async () => {
