@@ -22,7 +22,7 @@ const out = value => fs.writeFileSync(1, typeof value === 'string' ? value : JSO
 const key = kind => ({ configmap: 'ConfigMap', configmaps: 'ConfigMap', deployment: 'Deployment', deployments: 'Deployment',
   job: 'Job', jobs: 'Job', pods: 'Pod', service: 'Service', services: 'Service', cronjob: 'CronJob', cronjobs: 'CronJob',
   ingress: 'Ingress', ingresses: 'Ingress', endpoints: 'Endpoints', replicasets: 'ReplicaSet', networkpolicy: 'NetworkPolicy', secret: 'Secret',
-  pvc: 'PersistentVolumeClaim' })[kind];
+  pvc: 'PersistentVolumeClaim', resourcequotas: 'ResourceQuota' })[kind];
 const find = (kind, name) => s.objects.find(o => o.kind === key(kind) && o.metadata.name === name);
 const value = flag => args[args.indexOf(flag) + 1];
 const jobVerdict = (step, job) => step === 'tplseal' ? { ok: true, sizeBytes: 281512198 }
@@ -43,7 +43,7 @@ const RESOURCES = { configmap: ['configmaps', ''], configmaps: ['configmaps', ''
   job: ['jobs', 'batch'], jobs: ['jobs', 'batch'], cronjob: ['cronjobs', 'batch'], cronjobs: ['cronjobs', 'batch'],
   ingress: ['ingresses', 'networking.k8s.io'], ingresses: ['ingresses', 'networking.k8s.io'],
   networkpolicy: ['networkpolicies', 'networking.k8s.io'], pvc: ['persistentvolumeclaims', ''],
-  endpointslices: ['endpointslices', 'discovery.k8s.io'] };
+  endpointslices: ['endpointslices', 'discovery.k8s.io'], resourcequotas: ['resourcequotas', ''] };
 const KIND_RESOURCE = { ConfigMap: 'configmaps', Secret: 'secrets', Service: 'services', Deployment: 'deployments', Job: 'jobs' };
 function resourceOf(token) {
   if (RESOURCES[token]) return RESOURCES[token];

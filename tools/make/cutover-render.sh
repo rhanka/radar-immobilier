@@ -77,3 +77,44 @@ sanitize_job() {
     "$WORK/job.json" > "$WORK/sanitized.json"
   mv "$WORK/sanitized.json" "$WORK/job.json"
 }
+# Prepared slot: one Deployment and one internal Service per canonical component, plus
+# the UI nginx ConfigMap re-pointed at radar-api-prepared. Same component labels (the
+# NetworkPolicies apply), `sentropic.io/slot=prepared`, literal POSTGRES_DB, release images,
+# replicas equal to the current canonical count (HPA-scaled count included).
+PREPARED_NAMES=(radar-api radar-immo-mcp radar-ui)
+render_prepared_stack() {
+  local db=$1 name
+  : > "$WORK/prepared-stack.jsonl"
+  "${k[@]}" get configmap radar-ui-nginx -o json | jq -c --arg ns "$NS" '{apiVersion:"v1",kind:"ConfigMap",
+    metadata:{name:"radar-ui-nginx-prepared",namespace:$ns,labels:(.metadata.labels//{}|.["sentropic.io/slot"]="prepared")},
+    data:(.data|map_values(gsub("http://radar-api:3000";"http://radar-api-prepared:3000")))}' >> "$WORK/prepared-stack.jsonl"
+  for name in "${PREPARED_NAMES[@]}"; do
+    "${k[@]}" get deployment "$name" -o json > "$WORK/canonical-deployment.json"
+    "${k[@]}" get service "$name" -o json > "$WORK/canonical-service.json"
+    jq -c --slurpfile r "$WORK/record.json" --arg ns "$NS" --arg db "$db" --arg l "$SLOT_LABEL" '
+      def images: if (.image|test("^ghcr.io/rhanka/radar-api[:@]")) then .image=$r[0].release.apiImage
+        elif (.image|test("^ghcr.io/rhanka/radar-ui[:@]")) then .image=$r[0].release.uiImage else . end;
+      .metadata.name as $name|
+      {apiVersion:"apps/v1",kind:"Deployment",
+       metadata:{name:($name+"-prepared"),namespace:$ns,labels:(.metadata.labels//{}|.[$l]="prepared"),
+         annotations:{"sentropic.io/prepared-run":$r[0].run,"sentropic.io/prepared-db":$db}},
+       spec:{replicas:(.spec.replicas//1),strategy:.spec.strategy,
+         selector:{matchLabels:(.spec.selector.matchLabels|.[$l]="prepared")},
+         template:(.spec.template|.metadata.labels=((.metadata.labels//{})|.[$l]="prepared"|del(.["pod-template-hash"]))|
+           .metadata.annotations=((.metadata.annotations//{})|.["sentropic.io/prepared-run"]=$r[0].run)|
+           .spec.terminationGracePeriodSeconds=30|
+           (.spec.containers[],.spec.initContainers[]?) |= (images|
+             if $name=="radar-ui" then . else
+               .env=((.env//[])|map(select(.name!="POSTGRES_DB" and .name!="RADAR_API_BASE_URL"))
+                 +[{name:"POSTGRES_DB",value:$db}]
+                 +(if $name=="radar-immo-mcp" then [{name:"RADAR_API_BASE_URL",value:"http://radar-api-prepared:3000"}] else [] end))
+             end)|
+           .spec.volumes=((.spec.volumes//[])|map(if .configMap.name=="radar-ui-nginx"
+             then .configMap.name="radar-ui-nginx-prepared" else . end)))}}' \
+      "$WORK/canonical-deployment.json" >> "$WORK/prepared-stack.jsonl"
+    jq -c --arg ns "$NS" --arg l "$SLOT_LABEL" '{apiVersion:"v1",kind:"Service",
+      metadata:{name:(.metadata.name+"-prepared"),namespace:$ns,labels:(.metadata.labels//{}|.[$l]="prepared")},
+      spec:{type:"ClusterIP",ports:.spec.ports,selector:(.spec.selector|.[$l]="prepared")}}' \
+      "$WORK/canonical-service.json" >> "$WORK/prepared-stack.jsonl"
+  done
+}
