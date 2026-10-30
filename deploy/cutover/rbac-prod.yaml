@@ -12,6 +12,13 @@ metadata:
   name: radar-cutover
   namespace: radar-immobilier
 rules:
+  - apiGroups: [apps]
+    resources: [deployments]
+    verbs: [create]
+  - apiGroups: [apps]
+    resources: [deployments]
+    resourceNames: [radar-api-prepared]
+    verbs: [delete]
   - apiGroups: [""]
     resources: [secrets]
     resourceNames: [radar-db-credentials]
