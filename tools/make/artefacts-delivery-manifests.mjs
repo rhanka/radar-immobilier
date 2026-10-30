@@ -28,6 +28,9 @@ for (const environment of ["base", "preprod"]) {
       assert.deepEqual(mcp.env.find((entry) => entry.name === name)?.valueFrom?.secretKeyRef,
         { name: secret, key: name });
     }
+    // Role URLs follow the live database selected by the cutover (POSTGRES_DB).
+    assert.deepEqual(mcp.env.find((entry) => entry.name === "IMMO_MCP_DATABASE_NAME")?.valueFrom?.secretKeyRef,
+      { name: "radar-db-credentials", key: "POSTGRES_DB" });
     for (const suffix of ["SUB", "CLIENT_ID"]) {
       assert.deepEqual(mcp.env.find((entry) => entry.name === `IMMO_MCP_WORKLOAD_${suffix}`)?.valueFrom?.configMapKeyRef,
         { name: "radar-mcp-receiver", key: `STRICT_RECEIVER_WORKLOAD_${suffix}` });
