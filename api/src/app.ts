@@ -28,7 +28,7 @@ import { geoFeaturesRoute, type GeoFeaturesDeps } from "./routes/geo-features.js
 import { geoCollectionsRoute } from "./routes/geo-collections.js";
 import { signalsDetailRoute } from "./routes/signals-detail.js";
 import { opportunitesRoute } from "./routes/opportunites.js";
-import { handleAppError } from "./lifecycle/maintenance.js";
+import { handleAppError, maintenanceGuard } from "./lifecycle/maintenance.js";
 import { cutoverProbeRoute } from "./routes/cutover-probe.js";
 import type { Graceful } from "./lifecycle/graceful.js";
 import { adminRoute } from "./routes/admin.js";
@@ -114,6 +114,7 @@ export function createApp(deps: AppDeps): Hono {
   const app = new Hono();
   // Zero-downtime cutover: graceful stop first, explicit 503 while the database is frozen.
   if (deps.graceful) app.use("*", deps.graceful.middleware);
+  app.use("*", maintenanceGuard);
   app.onError(handleAppError);
   app.use("/api/graph-signals/*", privateSignalResponse);
   app.use("/api/v1/signal-facets/*", privateSignalResponse);
