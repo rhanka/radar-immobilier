@@ -7,7 +7,9 @@ Local execution consumes installed namespace Secrets. No Python is used.
 
 ```sh
 make -f deploy/cutover/operator.mk download-release BUILD_RUN=<BUILD_RUN_ID> SHA=<FULL_GIT_SHA> ENV=preprod
+make -f deploy/cutover/operator.mk prepare RELEASE=cutover-release/release.json ENV=preprod
 make -f deploy/cutover/operator.mk run RELEASE=cutover-release/release.json ENV=preprod
+make -f deploy/cutover/operator.mk prepare RELEASE=cutover-release/release.json ENV=prod
 make -f deploy/cutover/operator.mk run RELEASE=cutover-release/release.json ENV=prod
 ```
 
@@ -17,11 +19,33 @@ by build-run ID and never rebuilds images. `dataMigration` accepts only `"6h"`
 or `null`; changing it selects the sole approved hook, never arbitrary code.
 OCI revision labels are not required (approved addendum).
 
-The six printed stages restore, close, migrate, restart, test and reopen.
-Production skips the production-to-preprod restore. Both destinations receive
-a current recovery backup before DDL. Document copies are additive and pinned
-to the resolved production backup, prepared before closure. Production is only
-a backup source during preprod restoration. No refresh is triggered.
+Release cutover verifies prepared state, closes, switches, restarts, tests and
+reopens. No dump restoration or migration runs during release cutover.
+Preprod preparation restores into the other database of `radar` / `radar_next`
+in the same instance, using `pg_restore -j 4`, then runs DDL, protected 6H and
+an isolated `radar-api-prepared` smoke. The live Secret remains untouched until
+switch: a compare-and-swap JSON patch changes only `POSTGRES_DB`. Old databases
+are retained. Production preparation takes a recovery backup and verifies the
+live release migration hashes; production cutover changes images only.
+
+`radar-prepared-db` records preparation ownership, status, backup fingerprints,
+release SHA, migration count and smoke result. Cutover refuses unless the stamp
+is ready, at most 24 hours old, matches the release and current latestComplete
+backup, and the dump is at most 26 hours old. Re-run prepare for a stale stamp.
+Preparation releases `radar-change-lock` during long-running cluster Jobs; a
+preparing stamp prevents a release cutover from consuming incomplete work.
+Preparation failures stop owned Jobs, delete the smoke Deployment, discard the
+disposable database, restore schedules and mark the slot failed. Uncertain
+cleanup leaves it blocked. Both prepare and cutover suspend schedules before
+document work; prepare drains active refresh Jobs for up to ten minutes,
+cutover deletes them immediately by UID. Sweep cursors under
+`refresh/018/sweep/` are excluded from copy and reconciliation.
+
+The `prepare-preprod-db` CI job blocks deployment on restore, DDL, 6H or smoke
+failure. Its runner polls cluster Jobs for up to 50 minutes. This is incompatible
+with the design's simultaneous five-minute runner wall-time budget; no long work
+runs on the runner. The prepared smoke checks API health, SHA and anonymous
+refusal; the existing full UI/MCP smoke runs during cutover.
 
 ## Installation (infrastructure/application owners)
 
@@ -38,8 +62,8 @@ a backup source during preprod restoration. No refresh is triggered.
 3. Preserve the restored `allow-bascule-to-postgres` NetworkPolicy; the
    controller checks it and stamps every Job Pod with the application label and
    `sentropic.io/bascule=<operation UUID>`. No CNI attestation is requested.
-4. Verify the fixed public installation values in `config.json`, database
-   `radar`, destination document buckets and upload rights for `db-backups/`.
+4. Verify the fixed public installation values in `config.json`, the live
+   database selected by the Secret, destination buckets and backup upload rights.
    Install the referenced database, backup-upload, backup-reader and document-copy
    Secrets. Local operators do not read their data. The daily workflow fills only
    its existing named reader/copy Secrets through `ci-secrets.mjs` under the lock.
@@ -50,6 +74,12 @@ a backup source during preprod restoration. No refresh is triggered.
    No production roster was supplied or invented in this implementation.
 6. Build a release containing `database-cutover.js`. Rehearse it and observe the
    next scheduled run. Both protected GitHub variables remain unchanged.
+7. Grant the application database role `CREATEDB` (asserted before reset).
+   Measure both database sizes and available WAL/temporary space before use;
+   expand the current 5 Gi PostgreSQL PVC if it cannot hold both databases.
+   Restore requests four CPUs and 2 Gi memory. Install the updated namespace
+   RBAC, including patch-only access to `radar-db-credentials` and lifecycle
+   access for the temporary prepared Deployment. No Secret read is required.
 
 The adapter rejects absent/unapproved accounts, conflicting workspaces or
 destinations and revoked rights. It creates declared missing initialization
@@ -62,6 +92,7 @@ tests; cutover smoke checks availability, image identity and anonymous refusal.
 ```sh
 make -f deploy/cutover/operator.mk status ENV=preprod
 make -f deploy/cutover/operator.mk resume RUN=<ORIGINAL_UUID> ENV=preprod
+make -f deploy/cutover/operator.mk rollback RUN=<ORIGINAL_UUID> ENV=preprod
 ```
 
 Use `ENV=prod` for production recovery. A repeated `run` never adopts a lock.
@@ -70,7 +101,8 @@ release, backup pins, Job UIDs and checkpoints. It has no automatic expiry.
 Takeover requires an ended local process or terminal GitHub run and an atomic
 resource-version comparison. A foreign host or unknown executor stays refused.
 Writer-workflow orphan locks also use `resume RUN`; failed cutovers retain their
-record and stay closed. No automatic database or image rollback occurs.
+record and stay closed. Explicit rollback selects the previous database and
+previous immutable images, runs smoke and reopens. No automatic rollback occurs.
 
 After a caught failure, known database Jobs must stop. Missing Job evidence or
 unreachable Kubernetes means **unknown**, never success. A successful recorded
