@@ -6,7 +6,10 @@ import { authStore, type AuthState } from "$lib/auth/auth-store.js";
 import { buildCityMapEntries } from "$lib/maps/maps-data.js";
 import { parseGeoQuery, type GeoRoute } from "$lib/router/geo-route.js";
 import type { GeoZonesResponse } from "$lib/maps/geo-zones-client.js";
-import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
+import type {
+  GraphSignalDetailResponse,
+  GraphSignalNode,
+} from "$lib/signals/graph-signal-detail-client.js";
 
 vi.mock("$lib/components/maps/GeoCityMapBase.svelte", async () => {
   const stub = await import("./test-stubs/GeoCityMapBaseStub.svelte");
@@ -48,23 +51,28 @@ vi.mock("$lib/signals/graph-signals-by-city-client.js", async (importOriginal) =
   return { ...actual, fetchGraphSignalsByCity: vi.fn(async () => ({ cities: [] })) };
 });
 
+vi.mock("$lib/signals/workspace-client.js", async (importOriginal) => {
+  const { readyWorkspaceModule } = await import("./test-stubs/workspace-context-ready.js");
+  return readyWorkspaceModule(await importOriginal());
+});
+
 vi.mock("$lib/signals/graph-signal-detail-client.js", async (importOriginal) => {
   const actual =
     await importOriginal<typeof import("$lib/signals/graph-signal-detail-client.js")>();
   return {
     ...actual,
-    fetchGraphSignalDetail: vi.fn(async (citySlug: string) => ({
-      ok: true,
-      citySlug,
-      legacyProjection: null,
-      nodes: [],
+    fetchGraphSignalDetail: vi.fn(async (_scope: unknown, citySlug: string) => ({
+      citySlug, token: "token", legacyProjection: null, nodes: [], heads: [],
+      counts: { total: 0, hidden: 0, visible: 0, selected: 0 },
     })),
+    fetchRevealedSignal: vi.fn(),
   };
 });
 
 vi.mock("$lib/signals/signal-facets-client.js", async (importOriginal) => {
   const actual =
     await importOriginal<typeof import("$lib/signals/signal-facets-client.js")>();
+  const postFacetCommand = vi.fn(async () => ({ id: "event-1" }));
   return {
     ...actual,
     fetchReasonCodes: vi.fn(async () => ({
@@ -75,7 +83,10 @@ vi.mock("$lib/signals/signal-facets-client.js", async (importOriginal) => {
       ],
     })),
     fetchCityFacets: vi.fn(async () => ({ heads: [] })),
-    postFacetCommand: vi.fn(async () => ({ id: "event-1" })),
+    postFacetCommand,
+    // Bound commands go through the mocked transport, scope first.
+    bindFacetCommand: (scope: { workspaceId: string }) =>
+      (...args: unknown[]) => (postFacetCommand as (...all: unknown[]) => Promise<unknown>)(scope, ...args),
   };
 });
 
@@ -120,6 +131,7 @@ vi.mock("$lib/maps/lots-client.js", async (importOriginal) => {
 });
 
 import { fetchAllLots } from "$lib/maps/lots-client.js";
+import { readyWorkspaceState, setTestWorkspaceState } from "./test-stubs/workspace-context-ready.js";
 import { loadSignauxZones } from "$lib/maps/signaux-zones-loader.js";
 import { fetchGraphSignalsByCity } from "$lib/signals/graph-signals-by-city-client.js";
 import { fetchGraphSignalDetail } from "$lib/signals/graph-signal-detail-client.js";
@@ -207,14 +219,22 @@ export function cityRoute(search: string, slug: string = CITY_SLUG): GeoRoute {
   return { level: "city", citySlug: slug, state: parseGeoQuery(search) };
 }
 
+/** Scoped coherent-city answer for one city (no archived target). */
+export function detailOf(
+  citySlug: string,
+  nodes: GraphSignalNode[],
+  legacyProjection: GraphSignalDetailResponse["legacyProjection"] = null,
+): GraphSignalDetailResponse {
+  return {
+    citySlug, token: `token-${citySlug}`, legacyProjection, nodes, heads: [],
+    counts: { total: nodes.length, hidden: 0, visible: nodes.length, selected: 0 },
+  };
+}
+
 /** Detail populations answered per city, so city switches change the list. */
 export function mockDetailByCity(): void {
-  vi.mocked(fetchGraphSignalDetail).mockImplementation(async (citySlug: string) => ({
-    ok: true,
-    citySlug,
-    legacyProjection: null,
-    nodes: citySlug === OTHER_CITY_SLUG ? OTHER_NODES : NODES,
-  }));
+  vi.mocked(fetchGraphSignalDetail).mockImplementation(async (_scope, citySlug: string) =>
+    detailOf(citySlug, citySlug === OTHER_CITY_SLUG ? OTHER_NODES : NODES));
 }
 
 function setSearch(search: string): void {
@@ -227,12 +247,7 @@ function mockPopulations(): void {
     totalCount: 2,
     cities: [{ citySlug: CITY_SLUG, signalCount: 2, subsetCounts: {} }],
   });
-  vi.mocked(fetchGraphSignalDetail).mockResolvedValue({
-    ok: true,
-    citySlug: CITY_SLUG,
-    legacyProjection: null,
-    nodes: NODES,
-  });
+  vi.mocked(fetchGraphSignalDetail).mockResolvedValue(detailOf(CITY_SLUG, NODES));
 }
 
 afterEach(() => {
@@ -244,6 +259,7 @@ afterEach(() => {
 beforeEach(() => {
   Element.prototype.scrollIntoView = vi.fn();
   setAuth("tester-1");
+  setTestWorkspaceState(readyWorkspaceState());
   vi.mocked(fetchGraphSignalsByCity).mockReset();
   vi.mocked(fetchGraphSignalDetail).mockReset();
   vi.mocked(fetchCityFacets).mockReset();

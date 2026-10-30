@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/svelte";
 import { tick } from "svelte";
-import { CITY_SLUG, NODES, cityRoute, deferred, openFirstSignalCard, setAuth } from "./SignauxMapView.facets.fixtures.js";
+import { CITY_SLUG, detailOf, NODES, cityRoute, deferred, openFirstSignalCard, setAuth } from "./SignauxMapView.facets.fixtures.js";
 import SignauxMapView from "./SignauxMapView.svelte";
 import { fetchGraphSignalDetail } from "$lib/signals/graph-signal-detail-client.js";
 import { fetchCityFacets, fetchReasonCodes, postFacetCommand, type FacetHead } from "$lib/signals/signal-facets-client.js";
@@ -56,9 +56,7 @@ describe("SignauxMapView — facet regression paths", () => {
   });
 
   it("should offer reveal after detail 404 only when heads prove active archives", async () => {
-    vi.mocked(fetchGraphSignalDetail).mockResolvedValue({
-      ok: false, citySlug: CITY_SLUG, legacyProjection: null, nodes: [],
-    });
+    vi.mocked(fetchGraphSignalDetail).mockResolvedValue(detailOf(CITY_SLUG, []));
     vi.mocked(fetchCityFacets).mockResolvedValue({ heads: [archiveHead] });
     render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
     expect(await screen.findByTestId("facet-all-archived")).toBeTruthy();
@@ -67,9 +65,7 @@ describe("SignauxMapView — facet regression paths", () => {
   });
 
   it("should retain the ordinary empty message without active archive heads", async () => {
-    vi.mocked(fetchGraphSignalDetail).mockResolvedValue({
-      ok: false, citySlug: CITY_SLUG, legacyProjection: null, nodes: [],
-    });
+    vi.mocked(fetchGraphSignalDetail).mockResolvedValue(detailOf(CITY_SLUG, []));
     vi.mocked(fetchCityFacets).mockResolvedValue({ heads: [{ ...archiveHead, state: "inactive" }] });
     render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
     expect(await screen.findByText("Aucun signal indexé pour cette ville.")).toBeTruthy();
@@ -96,7 +92,7 @@ describe("SignauxMapView — facet regression paths", () => {
     await waitFor(() => expect(vi.mocked(fetchGraphSignalDetail).mock.results.at(-1)?.value).toBe(pending.promise));
     expect(screen.getByTestId("signal-facet-controls")).toBe(controls);
     expect((button as HTMLButtonElement).disabled).toBe(true);
-    pending.resolve({ ok: true, citySlug: CITY_SLUG, legacyProjection: null, nodes: NODES });
+    pending.resolve(detailOf(CITY_SLUG, NODES));
     await waitFor(() => expect((button as HTMLButtonElement).disabled).toBe(false));
     expect(screen.getByTestId("signal-facet-controls")).toBe(controls);
     expect(controls.contains(document.activeElement)).toBe(true);
@@ -111,7 +107,7 @@ describe("SignauxMapView — facet regression paths", () => {
     await waitFor(() => expect(vi.mocked(fetchGraphSignalDetail).mock.results.at(-1)?.value).toBe(pending.promise));
     await view.rerender({ geoRoute: cityRoute("?filter.period=all&filter.showDiscarded=1") });
     await waitFor(() => expect(vi.mocked(fetchGraphSignalDetail).mock.results.at(-1)?.value).not.toBe(pending.promise));
-    pending.resolve({ ok: false, citySlug: CITY_SLUG, legacyProjection: null, nodes: [] });
+    pending.resolve(detailOf(CITY_SLUG, []));
     await tick();
     await tick();
     expect(screen.queryByTestId("facet-reload-error")).toBeNull();
@@ -134,9 +130,9 @@ describe("SignauxMapView — facet regression paths", () => {
     await waitFor(() =>
       expect(vi.mocked(fetchGraphSignalDetail).mock.results.at(-1)?.value).toBe(silent.promise),
     );
-    silent.resolve({ ok: true, citySlug: CITY_SLUG, legacyProjection: null, nodes: NODES });
+    silent.resolve(detailOf(CITY_SLUG, NODES));
     await waitFor(() => expect(screen.queryByText("Chargement des signaux…")).toBeNull());
-    reveal.resolve({ ok: true, citySlug: CITY_SLUG, legacyProjection: null, nodes: NODES });
+    reveal.resolve(detailOf(CITY_SLUG, NODES));
     await tick();
     await tick();
   });
