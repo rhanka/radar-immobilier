@@ -40,6 +40,8 @@
 - [x] 2026-10-30 preprod restore failure: atomic schema reset + replay without `--clean`, shared by daily and prepared restore; failed restore/backup relaunchable by `resume`.
 - [x] 2026-10-30 recovery backup 403: per-environment `recoveryBucket`, write/list probe Job before closure.
 - [x] PostgreSQL integration test restores a 13-migration archive onto 27 migrations with 20 dependent foreign keys.
+- [x] Restore Job sized per environment (250m/1Gi requests, 1500m/2Gi limits) for the preprod ResourceQuota; `-j 4` kept.
+- [x] PR #946 review: prepare job armed by `PREPROD_CD_ENABLED` (read only); budget starts at closure with automatic rollback and reopening on exhaustion; prepare records `recoveryReference`; additive docs copy documented.
 
 ## Orchestration Mode
 - [x] Mono-branch, sequential implementation lots.

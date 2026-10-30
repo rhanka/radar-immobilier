@@ -36,6 +36,22 @@ transaction (COMMIT only after the whole archive was read); the prepared
 disposable database commits the reset, then loads with `pg_restore -j 4`.
 Recovery backups go to the per-environment `recoveryBucket` in `config.json`;
 a write/list `probe` Job runs before any closure and fails early.
+The restore Job uses the per-environment `restoreResources` of `config.json`
+(requests 250m CPU / 1 Gi, limits 1500m CPU / 2 Gi), which fits the preprod
+`preprod-cap` ResourceQuota and LimitRange; `pg_restore` keeps `-j 4`.
+Preparation runs before any closure, so its duration is outside the five minutes.
+Preparation records `recoveryReference` for rollback: the production recovery
+backup object, or the retained previous preprod database.
+
+The five-minute (295 s) budget starts at the effective closure, after preflight
+and prepared verification. Exhausting it alone never keeps the site closed:
+operation Jobs are stopped, the previous database and images are restored
+(automatic rollback), the private smoke runs and routes reopen; the command
+still exits non-zero. Any other failure stays closed for explicit recovery.
+
+Preprod preparation copies documents additively into the live preprod document
+bucket before closure (additive copy, no deletion); this is kept
+deliberately so the cutover never waits on document copy.
 
 `radar-prepared-db` records preparation ownership, status, backup fingerprints,
 release SHA, migration count and smoke result. Cutover refuses unless the stamp
@@ -93,7 +109,7 @@ refusal; the existing full UI/MCP smoke runs during cutover.
 | Application role has `CREATEDB` (`ALTER ROLE <app role> CREATEDB`) | preprod PostgreSQL | `reset` refuses with `createdb_required` otherwise |
 | Application role owns every application schema and may `CREATE EXTENSION postgis` | preprod PostgreSQL | the atomic restore drops and recreates them |
 | PostgreSQL PVC holds both `radar` and `radar_next` plus WAL/temporary space; today 5 Gi in `deploy/k8s/20-postgres-postgis.yaml` | preprod namespace | measure both database sizes; expand the PVC if they do not fit twice |
-| Restore Job capacity: 4 CPUs and 2 Gi memory | preprod nodes | scheduling of the `restore` Job |
+| Restore Job within quota: requests 250m CPU / 1 Gi, limits 1500m CPU / 2 Gi (`restoreResources`; no 4-CPU node needed) | preprod `preprod-cap` ResourceQuota | Job admitted; keep 1500m CPU and 2 Gi of limits free |
 | `rbac-preprod.yaml`, `rbac-prod.yaml` and `../ci/bascule-preprod/rbac-ci-bascule-prod.yaml` installed (Secret patch on `radar-db-credentials`, `radar-api-prepared` lifecycle, Job create/delete) | both namespaces | `kubectl auth can-i` by the cutover identity |
 | `radar-backup-s3-credentials` can write and list the environment's `recoveryBucket` (`config.json`: preprod `sentropic-pgbackup-preprod`, prod `sentropic-pgbackup`) | both namespaces | the `probe` Job runs before closure and fails early otherwise |
 
