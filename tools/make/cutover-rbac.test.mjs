@@ -71,7 +71,7 @@ test('every Kubernetes access of production prepare and cutover is granted by rb
   } finally { f.cleanup(); }
 });
 test('a missing RBAC right fails prepare and cutover before any lock or mutation, listing the rights', () => {
-  const f = fixture({ deniedRights: ['list httpscaledobjects.http.keda.sh', 'create pods/portforward'] });
+  const f = fixture({ apiResources: AUTOSCALERS, deniedRights: ['list httpscaledobjects.http.keda.sh', 'create pods/portforward'] });
   try {
     for (const [action, extra] of [['prepare', []], ['run', ['MODE=run']]]) {
       const result = f.run(action, extra);
@@ -82,5 +82,29 @@ test('a missing RBAC right fails prepare and cutover before any lock or mutation
     }
     assert.equal(accesses(f).length, 0);
     assert.equal(f.state().objects.some(o => o.metadata.name === 'radar-change-lock'), false);
+  } finally { f.cleanup(); }
+});
+test('KEDA rules pair each resource with its own API group only', () => {
+  for (const env of ['preprod', 'prod']) {
+    const rules = role(env).rules;
+    const groupsOf = resource => rules.filter(r => r.resources.includes(resource)).flatMap(r => r.apiGroups);
+    assert.deepEqual(groupsOf('scaledobjects'), ['keda.sh']);
+    assert.deepEqual(groupsOf('scaledjobs'), ['keda.sh']);
+    assert.deepEqual(groupsOf('httpscaledobjects'), ['http.keda.sh']);
+  }
+});
+test('preflight skips Role types the server does not serve and still refuses served denied rights', () => {
+  // Only KEDA is installed: Argo rollouts and VPA are absent, and can-i would answer no for them.
+  const f = fixture({ apiResources: ['scaledobjects.keda.sh', 'scaledjobs.keda.sh', 'httpscaledobjects.http.keda.sh'] });
+  try {
+    success(f.run('prepare'));
+    const asked = f.calls().filter(c => c.includes('can-i')).map(c => c[c.indexOf('can-i') + 2]);
+    assert.ok(asked.includes('httpscaledobjects.http.keda.sh'));
+    for (const absent of ['rollouts.argoproj.io', 'verticalpodautoscalers.autoscaling.k8s.io',
+      'httpscaledobjects.keda.sh', 'scaledobjects.http.keda.sh']) assert.ok(!asked.includes(absent), absent);
+    const state = f.state(); state.deniedRights = ['get scaledjobs.keda.sh']; save(f, state);
+    const result = f.run('run', ['MODE=run']);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /Missing RBAC rights.*get scaledjobs\.keda\.sh/);
   } finally { f.cleanup(); }
 });
