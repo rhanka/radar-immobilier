@@ -12,7 +12,8 @@ render_template() {
   S3_ENDPOINT=$(jq -r .storage.endpoint "$CONFIG"); S3_REGION=$(jq -r .storage.region "$CONFIG")
   EXPECTED_BACKUP_BUCKET=$(jq -r .storage.backupBucket "$CONFIG")
   READER_SECRET=$(jq -r .storage.readerSecret "$CONFIG"); COPY_SECRET=$(jq -r .storage.copySecret "$CONFIG")
-  export BR_SCRIPT BR_STEP=$step JOB_NAME=cutover-placeholder BACKUP_ID=${BACKUP_ID:-latest} ALLOW_STALE_BACKUP=false MAX_AGE_HOURS=26 S3_FORCE_PATH_STYLE=true
+  export BR_SCRIPT BR_STEP=$step JOB_NAME=cutover-placeholder BACKUP_ID=${BACKUP_ID:-latest} ALLOW_STALE_BACKUP=false MAX_AGE_HOURS=24 S3_FORCE_PATH_STYLE=true
+  if jq -e '.kind=="prepare" or .mode=="run"' "$WORK/record.json" >/dev/null; then MAX_AGE_HOURS=26; fi
   export BACKUP_DATE PIN_MANIFEST_SHA256 PIN_PG_SHA256 EXPECTED_DATABASE RESTORE_ASSERT_DB=1
   BACKUP_DATE=$(jq -r '.pin.date//""' "$WORK/record.json")
   PIN_MANIFEST_SHA256=$(jq -r '.pin.manifestSha256//""' "$WORK/record.json")
