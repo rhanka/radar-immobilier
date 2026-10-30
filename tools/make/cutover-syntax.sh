@@ -5,6 +5,7 @@ for file in tools/make/cutover*.sh; do bash -n "$file"; done
 sh -n deploy/cutover/shell-wrapper.sh
 git diff --check
 jq -e . deploy/cutover/config.json >/dev/null
+jq -n -e -f tools/make/cutover-sessions.jq >/dev/null 2>&1 || [[ $? == 1 ]]
 printf '%s\n' '{"items":[]}' | jq -f tools/make/cutover-controllers.jq >/dev/null
 jq -n --arg env preprod --argjson d '[{"items":[]}]' --argjson c '[{"items":[]}]' \
   --argjson i '[{"items":[]}]' --argjson cfg '[]' -f tools/make/cutover-snapshot.jq >/dev/null

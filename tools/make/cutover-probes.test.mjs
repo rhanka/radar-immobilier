@@ -2,6 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { evaluate } from '../../deploy/cutover/probe-verify.mjs';
 import { probeOnce } from '../../deploy/cutover/availability-probe.mjs';
@@ -95,4 +96,13 @@ test('writes acknowledged by an abandoned database must be detected by the recei
   assert.equal(undetected.stats.abandonedProbeWrites, 15);
   const detected = evaluate({ availability, writes, receipt: receipt({ abandoned: { db: 'radar', tuples: 15 } }), ranges, mode: 'preprod' });
   assert.equal(detected.violations['abandoned-undetected'], undefined);
+});
+test('the sessions criterion requires max_connections instead of passing on 0 <= 0', () => {
+  const judge = verdict => spawnSync('jq', ['-e', '-f', 'tools/make/cutover-sessions.jq'],
+    { input: JSON.stringify({ jobs: { database: { verdict } } }), encoding: 'utf8' }).status;
+  assert.equal(judge({ maxConnections: 100, sessionsByDb: { radar: 30, radar_next: 10 } }), 0);
+  assert.notEqual(judge({ maxConnections: 100, sessionsByDb: { radar: 81 } }), 0, 'above 80 %');
+  assert.notEqual(judge({ sessionsByDb: {} }), 0, 'missing max_connections');
+  assert.notEqual(judge({ maxConnections: 0 }), 0, 'zero max_connections');
+  assert.notEqual(spawnSync('jq', ['-e', '-f', 'tools/make/cutover-sessions.jq'], { input: '{}', encoding: 'utf8' }).status, 0, 'no database verdict');
 });
