@@ -99,6 +99,14 @@ const OPERATIONS = {
     }
     throw Error('writable_sessions_remain');
   },
+  // Written tuples per application database (pg_stat_database): a rollback compares them to the
+  // baseline taken before the switch to detect acknowledged writes it abandons.
+  async writestats(c) {
+    const writeStats = {};
+    for (const row of (await c.query(`SELECT datname AS name, (tup_inserted + tup_updated + tup_deleted)::bigint AS n
+      FROM pg_stat_database WHERE datname IN ('radar', 'radar_next')`)).rows) writeStats[row.name] = Number(row.n);
+    return { writeStats };
+  },
   // Rehearsal: acknowledged probe writes present in each application database, as seq ranges.
   async probeverify() {
     const run = env.PROBE_RUN;

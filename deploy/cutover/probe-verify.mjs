@@ -41,13 +41,19 @@ export function evaluate({ availability, writes, receipt, ranges, mode }) {
     if (mode === 'samedb' || !explicit) flag(w.code === 0 ? 'write-error' : w.code >= 500 ? 'write-5xx' : 'write-refused', w);
     else if (!(within(w.t, freezeWindow) || (drill && within(w.t, drill)))) flag('write-503-outside-freeze', w);
   }
+  // A rollback abandons the writes acknowledged by the database it leaves: they must be detected.
+  const abandonedProbeWrites = receipt.abandoned ? writes.filter(w => w.code === 200 && w.db === receipt.abandoned.db).length : 0;
+  if (abandonedProbeWrites > 0 && !(receipt.abandoned.tuples > 0 || receipt.abandoned.tuples === -1)) {
+    flag('abandoned-undetected', { abandonedProbeWrites, abandoned: receipt.abandoned });
+  }
   for (const s of switches) if (!(s.mixedWindowMs <= 2000)) flag('mixed-window', s);
   if (mode === 'preprod' && !(receipt.freezeWindowMs <= 10000)) flag('freeze-window', { freezeWindowMs: receipt.freezeWindowMs });
   if (receipt.drill && !(receipt.drill.backMs <= 5000)) flag('drill-back', receipt.drill);
   const acked = writes.filter(w => w.code === 200).length;
   return { ok: Object.keys(violations).length === 0, violations,
     stats: { reads: availability.length, writes: writes.length, acked, refused503: writes.filter(w => w.code === 503).length,
-      freezeWindowMs: receipt.freezeWindowMs ?? null, mixedWindowMs: switches.map(s => s.mixedWindowMs) } };
+      freezeWindowMs: receipt.freezeWindowMs ?? null, mixedWindowMs: switches.map(s => s.mixedWindowMs),
+      abandonedProbeWrites, abandonedTuples: receipt.abandoned?.tuples ?? null } };
 }
 const lines = file => (existsSync(file) ? readFileSync(file, 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l)) : []);
 if (import.meta.url === `file://${process.argv[1]}`) {

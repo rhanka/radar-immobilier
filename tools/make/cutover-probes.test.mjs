@@ -88,3 +88,11 @@ test('probe-verify reads acknowledged write ranges back through a Job', () => {
     assert.equal(job.spec.template.spec.containers[0].env.find(e => e.name === 'PROBE_RUN').value, 'rehearsal-1');
   } finally { f.cleanup(); }
 });
+test('writes acknowledged by an abandoned database must be detected by the receipt', () => {
+  const { availability, writes, ranges } = clean();
+  const undetected = evaluate({ availability, writes, receipt: receipt({ abandoned: { db: 'radar', tuples: 0 } }), ranges, mode: 'preprod' });
+  assert.ok(undetected.violations['abandoned-undetected']);
+  assert.equal(undetected.stats.abandonedProbeWrites, 15);
+  const detected = evaluate({ availability, writes, receipt: receipt({ abandoned: { db: 'radar', tuples: 15 } }), ranges, mode: 'preprod' });
+  assert.equal(detected.violations['abandoned-undetected'], undefined);
+});

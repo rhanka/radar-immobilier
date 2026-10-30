@@ -81,6 +81,49 @@ prepared_stack_retire() {
   prepared_stack_delete
   finish_pod_logs "$LOG_STEP"
 }
+# Abandoned writes (preprod, conductor decision): a return to the previous database leaves the
+# acknowledged writes of the abandoned one behind. They are counted (pg_stat_database written
+# tuples since the baseline taken before the switch), recorded in the receipt and in
+# radar-retained-db; the next prepare refuses to replace that database until `ack`.
+write_stats() {
+  run_job "writestats$(jq '[.jobs|keys[]|select(startswith("writestats"))]|length' "$WORK/record.json")" 30 45
+}
+record_write_baseline() {
+  samedb && return 0
+  write_stats
+  record_set '.writeBaseline=$v[0].writeStats' --slurpfile v "$WORK/verdict.json"
+}
+record_abandoned() {
+  # record_abandoned <abandoned database> <baseline written tuples or null>
+  local abandoned=$1 baseline=$2 tuples
+  write_stats
+  tuples=$(jq -r --arg db "$abandoned" --argjson base "$baseline" \
+    '.writeStats[$db] as $now|if ($base|type)!="number" or ($now|type)!="number" or $now<$base then -1 else $now-$base end' "$WORK/verdict.json")
+  record_set '.abandoned={db:$db,tuples:$t,measuredAt:$at}' --arg db "$abandoned" --argjson t "$tuples" --arg at "$(iso_ms)"
+  ((tuples != 0)) || return 0
+  printf 'Abandoned writes on %s: %s tuples (-1 = unknown); acknowledge with: ack RUN=%s\n' "$abandoned" "$tuples" "$RUN" >&2
+  jq -n --arg ns "$NS" --arg db "$abandoned" --arg run "$RUN" --arg t "$tuples" --arg at "$(iso_ms)" \
+    '{apiVersion:"v1",kind:"ConfigMap",metadata:{name:"radar-retained-db",namespace:$ns},
+      data:{status:"pending",db:$db,run:$run,abandonedTuples:$t,measuredAt:$at}}' > "$WORK/retained.json"
+  "${k[@]}" apply -f "$WORK/retained.json" >/dev/null
+}
+retained_gate() {
+  # retained_gate <database about to be replaced>
+  "${k[@]}" get configmap radar-retained-db --ignore-not-found -o json > "$WORK/retained-now.json"
+  [[ -s $WORK/retained-now.json ]] || return 0
+  jq -e --arg db "$1" '.data.status=="pending" and .data.db==$db' "$WORK/retained-now.json" >/dev/null || return 0
+  fail "retained_db_unacknowledged: $1 holds $(jq -r .data.abandonedTuples "$WORK/retained-now.json") abandoned written tuples (run $(jq -r .data.run "$WORK/retained-now.json")); review that receipt, then: make -f deploy/cutover/operator.mk ack RUN=$(jq -r .data.run "$WORK/retained-now.json") ENV=$ENV"
+}
+ack_retained() {
+  [[ ${RUN:-} =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$ ]] || fail 'RUN must identify the cutover that abandoned the writes'
+  "${k[@]}" get configmap radar-retained-db -o json > "$WORK/retained-now.json" || fail 'No retained database receipt'
+  jq -e --arg run "$RUN" '.data.run==$run and .data.status=="pending"' "$WORK/retained-now.json" >/dev/null ||
+    fail 'No pending retained database receipt for this RUN'
+  jq -r '.data|"Retained database \(.db): \(.abandonedTuples) abandoned written tuples measured \(.measuredAt) (run \(.run))"' "$WORK/retained-now.json"
+  "${k[@]}" patch configmap radar-retained-db --type=merge \
+    -p "$(jq -n --arg at "$(iso_ms)" '{data:{status:"acknowledged",acknowledgedAt:$at}}')" >/dev/null
+  printf 'Acknowledged: the next prepare may replace it\n'
+}
 served_matches() {
   # The public routes serve the expected API and UI builds.
   local result
@@ -119,6 +162,10 @@ back_to_main() {
   # Routing back first (reads and writes served by the previous release), then writes reopen.
   # The live selectors decide (a partially applied switch included), not the recorded slot.
   back_to_main_routing
+  # Writes acknowledged by the prepared slot after the switch stay on the abandoned database.
+  if ! samedb && jq -e 'any(.switches[]?; .to=="prepared") and .abandoned==null' "$WORK/record.json" >/dev/null; then
+    record_abandoned "$(jq -r .targetDb "$WORK/record.json")" "$(jq -c --arg db "$(jq -r .targetDb "$WORK/record.json")" '.writeBaseline[$db]' "$WORK/record.json")"
+  fi
   if jq -e '.frozenAt!=null and .unfrozenAt==null' "$WORK/record.json" >/dev/null; then
     JOB_POLL=0.5 run_job unfreeze 60 90
     record_set '.unfrozenAt=$v[0].unfrozenAt' --slurpfile v "$WORK/verdict.json"
@@ -152,6 +199,7 @@ verify_prepared_release() {
     "${k[@]}" rollout status "deployment/$name-prepared" --timeout=300s >/dev/null || fail "Prepared slot not Ready: $name"
     wait_slices "$name-prepared" prepared
   done
+  record_write_baseline
 }
 freeze_stage() {
   samedb && return 0
@@ -270,6 +318,10 @@ promote_stage() {
 }
 finalize_stage() {
   local row name uid current desired
+  # A rollback after promotion abandons the writes made on the promoted database (resume included).
+  if ! samedb && jq -e '.rollbackOf!=null and .abandoned==null' "$WORK/record.json" >/dev/null; then
+    record_abandoned "$(jq -r .liveDb "$WORK/record.json")" "$(jq -c .abandonBaseline "$WORK/record.json")"
+  fi
   while read -r row; do
     name=$(jq -r .name <<< "$row"); uid=$(jq -r .uid <<< "$row")
     current=$("${k[@]}" get cronjob "$name" -o json)
@@ -354,6 +406,9 @@ rollback_promoted() {
     record_set '.freezeDb=.targetDb'
     JOB_POLL=0.5 run_job unfreezeprev 60 90
     record_set 'del(.freezeDb)'
+    # Writes on the promoted database since the original switch are abandoned by this rollback.
+    record_set '.abandonBaseline=$b' --argjson b "$(jq -c --arg db "$(jq -r .liveDb "$WORK/record.json")" '.writeBaseline[$db]' "$WORK/receipt.json")"
+    record_write_baseline
   fi
   execute_stage 2 'Freeze live writes' freeze_stage
   execute_stage 3 'Switch to prepared slot' switch_stage
