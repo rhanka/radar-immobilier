@@ -1,7 +1,7 @@
 # Feature: Prepared database cutover under five minutes
 
 ## Objective
-- [ ] Apply the approved `conception-cutover-fast.clean.md` without redesign.
+- [x] Apply the approved `conception-cutover-fast.clean.md`, with the simple interpretations recorded below.
 
 ## Scope / Guardrails
 - [x] Worktree `tmp/cutover-5min`, branch `feat/cutover-prepare-5min`, base `05c418f7`.
@@ -31,9 +31,14 @@
 - [x] The shared release budget starts before cluster preflight, including identity checks in the five-minute bound.
 - [x] Prepared 6H drain/shutdown evidence uses observed, terminated restore/DDL Pod UIDs and the observed drain timestamp.
 - [x] Daily restore and its recovery are preprod-only; production uses the prepared, image-only release path.
-- [ ] Local PostgreSQL integration: parallel custom-archive restore, CREATEDB refusal, live-database protection and release migration hash verification.
+- [x] Local PostgreSQL integration: parallel custom-archive restore, CREATEDB refusal, live-database protection and release migration hash verification.
+- [x] Successful full validation: 67 controller tests with empty HOME, 208 API tests across 30 files, and the PostgreSQL database guard integration test.
+- [x] Successful final replay after the 6H evidence correction: 18 selected controller checks, including production refusal and interrupted-switch recovery.
+- [x] Backup selftests: 215 restore checks, 265 daily-backup checks, 92 inter-tenant bascule checks; no failures.
+- [x] Typecheck, lint (including final changed test files), shell/JQ syntax, whitespace checks and 23 no-Python guard checks passed.
+- [x] Dedicated test stack removed with `operator.mk down` (`down -v --remove-orphans`); no deployment or live duration measurement performed.
 
-## Orchestration Mode (AI-selected)
+## Orchestration Mode
 - [x] Mono-branch, sequential implementation lots.
 
 ## UAT Management (in orchestration context)
@@ -42,9 +47,9 @@
 ## Plan / Todo (lot-based)
 - [x] Lot 0: read rules, confirm branch, identify isolated Make targets.
 - [x] Lot 1: bulk version resolution and sweep exclusion, backup selftests (9,418 unpinned candidates, 268 pages).
-- [ ] Lot 2: database identity, explicit target env, parallel restore and Secret patch RBAC implemented; validation pending.
-- [ ] Lot 3: prepare lifecycle, ownership, freshness, isolated API smoke and cleanup implemented; validation pending.
-- [ ] Lot 4: prepared verification, switch, rollback and early writer suspension wired; validation pending.
-- [ ] Lot 5: CI gate and fake-cluster preparation, failures, freshness, switch, rollback and schedule tests implemented; validation pending.
-- [ ] Lot 6: empty-HOME controller execution and daily/bascule selftests wired; API suite, lint, typecheck, down -v pending.
-- [ ] Lot 7: selective atomic commits and push; no PR.
+- [x] Lot 2: database identity, explicit target env, parallel restore and Secret patch RBAC implemented and validated locally.
+- [x] Lot 3: prepare lifecycle, ownership, freshness, isolated API smoke and cleanup implemented and validated locally.
+- [x] Lot 4: prepared verification, switch, rollback and early writer suspension implemented and validated locally.
+- [x] Lot 5: CI gate and fake-cluster preparation, failures, freshness, switch, rollback and schedule tests implemented and validated locally.
+- [x] Lot 6: empty-HOME controller suite, backup/bascule selftests, API suite, lint, typecheck, syntax and down -v passed.
+- [x] Lot 7: selective atomic commits pushed to `origin/feat/cutover-prepare-5min` without force; no PR created.
