@@ -52,3 +52,29 @@ test('retired executable vehicles have no fallback entry', () => {
     'deploy/ci/bascule-preprod/restore-mode.mjs', 'tools/make/base-preprod-maintenance.sh']) assert.equal(existsSync(file), false);
   assert.equal(readFileSync('deploy/cutover/operator.mk', 'utf8').includes('include .env'), false);
 });
+test('the preprod CI/CD rehearses the zero-downtime cutover after preparation, with the same arming', () => {
+  const w = workflow('build-push-images.yml');
+  const job = w.jobs['rehearse-preprod-bluegreen'];
+  assert.deepEqual(job.needs, ['prepare-preprod-db', 'deploy-preprod'], 'never concurrent with the canonical deploy (shared lock)');
+  assert.equal(job.if, w.jobs['prepare-preprod-db'].if, 'same PREPROD_CD_ENABLED arming, read only');
+  assert.equal(job['timeout-minutes'], 50);
+  const steps = JSON.stringify(job.steps);
+  assert.ok(job.steps.some(s => s.run === 'make -f deploy/cutover/operator.mk rehearse RELEASE=cutover-release/release.json OUTPUT=rehearsal ENV=preprod'));
+  assert.ok(job.steps.some(s => s.uses?.startsWith('actions/upload-artifact') && s.if === 'always()'));
+  assert.equal(steps.includes('continue-on-error'), false);
+  const rehearse = readFileSync('tools/make/cutover-rehearse.sh', 'utf8');
+  assert.ok(rehearse.includes('SAMEDB=1 OBSERVE=60') && rehearse.includes('OBSERVE=120 DRILL=1'));
+});
+test('daily staging is a dispatchable workflow armed by its own variable, never by the protected ones', () => {
+  const w = workflow('bascule-stage-preprod.yml');
+  assert.ok(w.on.workflow_dispatch !== undefined);
+  assert.equal(w.on.schedule[0].cron, '0 5 * * *');
+  assert.equal(w.jobs.stage.if, "${{ github.event_name != 'schedule' || vars.BASCULE_STAGE_ENABLED == 'true' }}");
+  assert.ok(w.jobs.stage.steps.some(s => s.run === 'make -f deploy/cutover/operator.mk stage RELEASE=deployed ENV=preprod'));
+  for (const file of ['build-push-images.yml', 'bascule-stage-preprod.yml', 'bascule-preprod.yml']) {
+    const text = readFileSync(`.github/workflows/${file}`, 'utf8').split('\n').filter(l => !/^\s*#/.test(l)).join('\n');
+    for (const name of ['PREPROD_CD_ENABLED', 'BASCULE_SCHEDULE_ENABLED']) {
+      assert.equal(new RegExp(`(gh variable set ${name}|vars\\.${name}\\s*=[^=])`).test(text), false, `${file} never writes ${name}`);
+    }
+  }
+});
