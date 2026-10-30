@@ -18,34 +18,48 @@ function fakes({ corrupt = false } = {}) {
     'radar-api-pod1/migrate': '2026-10-30T11:59:00.000Z migrated\n',
     'radar-ui-pod1/ui': '2026-10-30T12:00:01.000Z nginx\n',
   };
-  const objects = new Map();
-  return { objects,
+  const objects = new Map(), events = [], ends = [];
+  return { objects, events, end: () => { events.push('containers exited'); for (const e of ends) e(); },
     k8s: { getPod: async name => pods[name] || null,
-      getLog: async (name, container, previous) => logs[`${name}/${container}${previous ? '/previous' : ''}`] ?? null },
+      // A followed stream ends only when the container exits (after SIGTERM and the drain).
+      openLog: (name, container, { previous, follow }) => {
+        const text = logs[`${name}/${container}${previous ? '/previous' : ''}`] ?? null;
+        return { opened: Promise.resolve(true), text: follow && text !== null
+          ? new Promise(resolve => ends.push(() => resolve(`${text}2026-10-30T12:06:00.000Z SIGTERM: draining\n`)))
+          : Promise.resolve(text) };
+      } },
     s3: { put: async (key, body) => { objects.set(key, Buffer.from(body)); },
       get: async key => (corrupt && key.endsWith('.gz') ? Buffer.from('tampered') : objects.get(key)) } };
 }
-test('log export stores current and previous logs of every container with a verified manifest', async () => {
+test('log export opens every follow stream before any deletion and keeps the lines written until the container exits', async () => {
   const f = fakes();
-  const verdict = await exportLogs({ pods: [{ name: 'radar-api-pod1', uid: 'uid-1' }, { name: 'radar-ui-pod1', uid: 'uid-2' }],
-    prefix: 'cutover-logs/preprod/run/main0', k8s: f.k8s, s3: f.s3 });
+  const running = exportLogs({ pods: [{ name: 'radar-api-pod1', uid: 'uid-1' }, { name: 'radar-ui-pod1', uid: 'uid-2' }],
+    prefix: 'cutover-logs/preprod/run/main0', k8s: f.k8s, s3: f.s3, onOpen: () => f.events.push('streams open') });
+  await new Promise(resolve => setTimeout(resolve, 20));
+  assert.deepEqual(f.events, ['streams open'], 'readiness precedes the deletion; nothing written yet');
+  f.end();
+  const verdict = await running;
   assert.equal(verdict.ok, true);
   assert.deepEqual(verdict.podUids, ['uid-1', 'uid-2']);
   assert.equal(verdict.logContainers, 4, 'api current + previous, migrate init container, ui');
   const manifest = JSON.parse(f.objects.get('cutover-logs/preprod/run/main0/manifest.json'));
   assert.equal(verdict.manifestSha256, sha(f.objects.get('cutover-logs/preprod/run/main0/manifest.json')));
   const api = manifest.pods[0].containers.find(c => c.container === 'api' && !c.previous);
-  assert.deepEqual([api.lines, api.firstAt, api.lastAt], [2, '2026-10-30T12:00:00.000Z', '2026-10-30T12:05:00.000Z']);
-  assert.equal(api.sha256, sha(f.objects.get(api.key)));
+  assert.deepEqual([api.lines, api.firstAt, api.lastAt], [3, '2026-10-30T12:00:00.000Z', '2026-10-30T12:06:00.000Z']);
+  assert.match(gunzipSync(f.objects.get(api.key)).toString(), /SIGTERM: draining/);
   assert.match(gunzipSync(f.objects.get('cutover-logs/preprod/run/main0/radar-api-pod1/api.previous.log.gz')).toString(), /crashed once/);
 });
 test('log export refuses a missing or replaced Pod and a sha256 mismatch on re-read', async () => {
   const f = fakes();
-  const missing = await exportLogs({ pods: [{ name: 'radar-api-pod1', uid: 'uid-1' }, { name: 'radar-api-pod2', uid: 'uid-9' },
+  const missing = exportLogs({ pods: [{ name: 'radar-api-pod1', uid: 'uid-1' }, { name: 'radar-api-pod2', uid: 'uid-9' },
     { name: 'radar-ui-pod1', uid: 'uid-replaced' }], prefix: 'p', k8s: f.k8s, s3: f.s3 });
-  assert.equal(missing.ok, false);
-  assert.deepEqual(missing.podUids, ['uid-1']);
+  await new Promise(resolve => setTimeout(resolve, 10)); f.end();
+  const verdict = await missing;
+  assert.equal(verdict.ok, false);
+  assert.deepEqual(verdict.podUids, ['uid-1']);
   assert.deepEqual(JSON.parse(f.objects.get('p/manifest.json')).missing, ['uid-9', 'uid-replaced']);
   const corrupt = fakes({ corrupt: true });
-  await assert.rejects(exportLogs({ pods: [{ name: 'radar-ui-pod1', uid: 'uid-2' }], prefix: 'q', k8s: corrupt.k8s, s3: corrupt.s3 }), /sha256 mismatch/);
+  const failing = exportLogs({ pods: [{ name: 'radar-ui-pod1', uid: 'uid-2' }], prefix: 'q', k8s: corrupt.k8s, s3: corrupt.s3 });
+  await new Promise(resolve => setTimeout(resolve, 10)); corrupt.end();
+  await assert.rejects(failing, /sha256 mismatch/);
 });

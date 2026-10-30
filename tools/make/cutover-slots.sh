@@ -75,17 +75,25 @@ adopt_deployment() {
     select(([.metadata.ownerReferences[]?|select(.controller==true)]|length)==0)|
     select(.spec.selector.matchLabels["app.kubernetes.io/component"]==$c and .spec.selector.matchLabels[$l]==null)|
     {name:.metadata.name,uid:.metadata.uid}' > "$WORK/orphans.jsonl"
+  # R5: the orphaned Pods are followed by the log export until their containers exit.
+  "${k[@]}" get pods -o json | jq -c --slurpfile o <(jq -s . "$WORK/orphans.jsonl") '[.items[]|
+    select(any(.metadata.ownerReferences[]?; .kind=="ReplicaSet" and (.uid as $u|any($o[0][]; .uid==$u))))|
+    {name:.metadata.name,uid:.metadata.uid}]' > "$WORK/orphan-pods.json"
+  start_pod_logs orphan "$(cat "$WORK/orphan-pods.json")"
   while read -r current; do
     jq -n --arg uid "$(jq -r .uid <<< "$current")" \
       '{apiVersion:"v1",kind:"DeleteOptions",propagationPolicy:"Background",preconditions:{uid:$uid}}' > "$WORK/orphan-rs.json"
     "${k[@]}" delete --raw "/apis/apps/v1/namespaces/$NS/replicasets/$(jq -r .name <<< "$current")" -f "$WORK/orphan-rs.json" >/dev/null ||
       fail 'Orphaned ReplicaSet deletion refused'
   done < "$WORK/orphans.jsonl"
+  finish_pod_logs "$LOG_STEP"
   printf 'Adopted %s on slot=main\n' "$name"
 }
 slots_adopt() {
   # One-time, under the change lock; rerunnable after any interruption.
   lock_acquire adopt
+  # The log export Job of the orphaned Pods runs the deployed API image.
+  deployed_release
   local name
   for name in "${SLOT_SERVICES[@]}"; do adopt_deployment "$name"; done
   lock_delete

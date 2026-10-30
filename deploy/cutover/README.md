@@ -351,12 +351,18 @@ No route is ever closed. Under `radar-change-lock`, `run` (MODE=run) executes:
    prepared stamp `consumed`, save `radar-cutover-receipt`, release the lock.
 
 Logs (R5): the `logs*` Jobs (`logs-export-job.tmpl.yaml`, `logs-export.cjs`,
-ServiceAccount from `rbac-logs-<env>.yaml`) read the current and previous log of
-every container of the recorded Pods through the Kubernetes API and write
+ServiceAccount from `rbac-logs-<env>.yaml`) start BEFORE the recorded Pods are
+re-rolled or deleted, follow (`follow=true`) the log of every container until the
+container exits (the SIGTERM drain lines included) and add the previous instance.
+The Job Pod is Ready only once every stream is open: no deletion or re-roll starts
+before. They write
 `s3://<recoveryBucket>/cutover-logs/<env>/<RUN>/<slot><n>/<pod>/<container>[.previous].log.gz`
 plus `manifest.json` (sha256, bytes, lines, first/last timestamp), each object
-re-read and verified. A deletion or re-roll refuses until the verdict lists
-every recorded Pod UID.
+re-read and verified. The verdict must list every recorded Pod UID, else the
+command stops (no further deletion). On `resume`, an export whose Pods are already
+gone and whose manifest is incomplete is recorded in the receipt as `logGaps`
+(the rehearsal fails on any gap). Slot adoption follows the orphaned ReplicaSet
+Pods the same way before deleting them.
 
 Recovery: a failure before promotion returns routing to `main`, unfreezes and
 restores the schedules automatically. A failure after promotion started keeps

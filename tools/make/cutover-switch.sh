@@ -32,21 +32,54 @@ slot_pods() {
     select(.metadata.labels[$l]==$slot and (.metadata.labels["app.kubernetes.io/component"]|IN("api","mcp","ui")))|
     select(.status.phase=="Running" or .status.phase=="Pending")|{name:.metadata.name,uid:.metadata.uid}]'
 }
-export_slot_logs() {
-  # R5: every container log of the slot is in the verified manifest before any of its Pods goes.
-  local slot=$1 step pods
-  step="logs${slot}$(jq '[.jobs|keys[]|select(startswith("logs"))]|length' "$WORK/record.json")"
-  pods=$(slot_pods "$slot")
+# R5: the log export Job follows every container of the recorded Pods; its streams open BEFORE
+# the Pods are deleted or re-rolled and close only when each container has exited, so the
+# SIGTERM drain lines are kept. Its readiness (all streams open) gates the deletion; the
+# verified manifest must then list every recorded Pod.
+start_pod_logs() {
+  # start_pod_logs <label> <pods JSON [{name,uid}]>: sets LOG_STEP ("" when nothing to export).
+  local label=$1 pods=$2 name deadline
+  LOG_STEP=
   [[ $(jq length <<< "$pods") != 0 ]] || return 0
-  record_set '.logPods[$step]=$pods' --arg step "$step" --argjson pods "$pods"
-  run_job "$step" 300 330
-  jq -e --argjson pods "$pods" '(.podUids//[]) as $done|all($pods[]; .uid as $u|$done|index($u))' "$WORK/verdict.json" >/dev/null ||
-    fail "Log manifest misses a recorded Pod of slot=$slot; deletion refused"
+  LOG_STEP="logs${label}$(jq '[.jobs|keys[]|select(startswith("logs"))]|length' "$WORK/record.json")"
+  record_set '.logPods[$step]=$pods' --arg step "$LOG_STEP" --argjson pods "$pods"
+  JOB_DETACH=1 run_job "$LOG_STEP" 600 630
+  name=$(jq -r --arg s "$LOG_STEP" '.jobs[$s].name' "$WORK/record.json")
+  deadline=$((SECONDS+120))
+  until "${k[@]}" get pods -l "job-name=$name" -o json | jq -e 'any(.items[];
+      .status.phase=="Succeeded" or any(.status.conditions[]?; .type=="Ready" and .status=="True"))' >/dev/null; do
+    ((SECONDS < deadline)) || fail "Log streams of $label not open; deletion refused"
+    sleep 1
+  done
+}
+finish_pod_logs() {
+  # finish_pod_logs <step> [gap]: wait for the streams to close; with "gap" (recovery of a deletion
+  # that already happened) an incomplete export is recorded in the receipt instead of failing.
+  local step=$1 tolerate=${2:-}
+  [[ -n $step ]] || return 0
+  if (set -e; observe_job "$step" 630
+      jq -e --slurpfile r "$WORK/record.json" --arg s "$step" '(.podUids//[]) as $done|
+        all($r[0].logPods[$s][]; .uid as $u|$done|index($u))' "$WORK/verdict.json" >/dev/null); then
+    record_set '.logsVerified=((.logsVerified//[])+[$s]|unique)' --arg s "$step"
+    return 0
+  fi
+  [[ $tolerate == gap ]] || fail "Log manifest misses a recorded Pod ($step)"
+  record_set '.logGaps=((.logGaps//[])+[$s]|unique)' --arg s "$step"
+  printf 'Log export incomplete for %s: recorded in the receipt (logGaps)\n' "$step" >&2
+}
+reconcile_log_exports() {
+  # Recovery: an export whose deletion already happened but whose manifest was never verified.
+  local step
+  for step in $(jq -r '(.logsVerified//[]) as $v|(.logGaps//[]) as $g|.logPods//{}|keys[] as $k|
+      select(($v|index($k)) == null and ($g|index($k)) == null)|$k' "$WORK/record.json"); do
+    finish_pod_logs "$step" gap
+  done
 }
 prepared_stack_retire() {
   prepared_stack_present || return 0
-  export_slot_logs prepared
+  start_pod_logs prepared "$(slot_pods prepared)"
   prepared_stack_delete
+  finish_pod_logs "$LOG_STEP"
 }
 served_matches() {
   # The public routes serve the expected API and UI builds.
@@ -74,15 +107,18 @@ switch_services() {
     --arg to "$to" --arg at "$(iso_ms)" --argjson ms "$(( $(now_ms) - started ))"
   printf 'Routing on slot=%s (mixed window %s ms)\n' "$to" "$(jq -r '.switches[-1].mixedWindowMs' "$WORK/record.json")"
 }
-back_to_main() {
-  # Routing back first (reads and writes served by the previous release), then writes reopen.
-  # The live selectors decide (a partially applied switch included), not the recorded slot.
+back_to_main_routing() {
   local svc
   for svc in "${SLOT_SERVICES[@]}"; do
     if "${k[@]}" get service "$svc" -o json | jq -e --arg l "$SLOT_LABEL" '.spec.selector[$l]=="prepared"' >/dev/null; then
-      switch_services prepared main; break
+      switch_services prepared main; return
     fi
   done
+}
+back_to_main() {
+  # Routing back first (reads and writes served by the previous release), then writes reopen.
+  # The live selectors decide (a partially applied switch included), not the recorded slot.
+  back_to_main_routing
   if jq -e '.frozenAt!=null and .unfrozenAt==null' "$WORK/record.json" >/dev/null; then
     JOB_POLL=0.5 run_job unfreeze 60 90
     record_set '.unfrozenAt=$v[0].unfrozenAt' --slurpfile v "$WORK/verdict.json"
@@ -206,22 +242,28 @@ reroll_canonical() {
 promote_stage() {
   # Order: export canonical logs, select the database, re-roll canonical, verify, route back,
   # drain, export prepared logs, delete the prepared slot.
-  jq -e '.promotion.mainLogs==true' "$WORK/record.json" >/dev/null || {
-    export_slot_logs main; record_set '.promotion.mainLogs=true'; }
+  # The canonical Pods are followed by the export from before the re-roll until they exit.
+  local main_logs=
+  if ! jq -e '.promotion|has("mainLogsStep")' "$WORK/record.json" >/dev/null 2>&1; then
+    start_pod_logs main "$(slot_pods main)"; main_logs=$LOG_STEP
+    record_set '.promotion.mainLogsStep=$s' --arg s "$main_logs"
+  fi
   if ! samedb; then
     select_database "$(jq -r .liveDb "$WORK/record.json")" "$(jq -r .targetDb "$WORK/record.json")" || fail 'Database selection failed'
     "${k[@]}" patch configmap radar-api --type=merge -p '{"data":{"GEO_DOCUMENTS_REPOINT":null}}' >/dev/null
   fi
   reroll_canonical
+  finish_pod_logs "$main_logs"
   canonical_smoke
   run_job identity 30 45
   jq -e --slurpfile r "$WORK/record.json" '.database==(if $r[0].samedb then $r[0].liveDb else $r[0].targetDb end)' \
     "$WORK/verdict.json" >/dev/null || fail 'Canonical database identity mismatch'
-  [[ $(jq -r '.slot//"main"' "$WORK/record.json") == main ]] || switch_services prepared main
+  back_to_main_routing
   wait_served "$(jq -r .release.apiServedSha "$WORK/record.json")" "$(jq -r .release.uiServedSha "$WORK/record.json")" 30 ||
     fail 'Promoted canonical slot not served'
   drain_pause
   prepared_stack_retire
+  reconcile_log_exports
   checkpoint promote completed
 }
 finalize_stage() {
