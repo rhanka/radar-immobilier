@@ -76,7 +76,13 @@ switch_services() {
 }
 back_to_main() {
   # Routing back first (reads and writes served by the previous release), then writes reopen.
-  if [[ $(jq -r '.slot//"main"' "$WORK/record.json") == prepared ]]; then switch_services prepared main; fi
+  # The live selectors decide (a partially applied switch included), not the recorded slot.
+  local svc
+  for svc in "${SLOT_SERVICES[@]}"; do
+    if "${k[@]}" get service "$svc" -o json | jq -e --arg l "$SLOT_LABEL" '.spec.selector[$l]=="prepared"' >/dev/null; then
+      switch_services prepared main; break
+    fi
+  done
   if jq -e '.frozenAt!=null and .unfrozenAt==null' "$WORK/record.json" >/dev/null; then
     JOB_POLL=0.5 run_job unfreeze 60 90
     record_set '.unfrozenAt=$v[0].unfrozenAt' --slurpfile v "$WORK/verdict.json"

@@ -291,7 +291,11 @@ current canonical count (an HPA-scaled count included). A quota preflight
 reads every ResourceQuota status and refuses `quota_insufficient` before
 creating anything. The full private smoke (UI, build SHA, API health, anonymous
 refusal, MCP bearer challenge and metadata) runs through the prepared Services;
-the canonical Services and Ingresses are untouched. The slot stays Ready for the
+the canonical Services and Ingresses are untouched. `prepare`, `run` and `rollback` refuse
+`slots_not_adopted` before creating anything (lock included) unless every canonical
+Deployment selects and labels `sentropic.io/slot=main` and every canonical
+Service selects by slot: an unadopted Service selects only the component labels
+and would route real traffic to prepared Pods. The slot stays Ready for the
 switch; a new preparation deletes a previous slot first, a failed preparation
 deletes it, and the daily `MODE=restore` refuses `prepared_stack_present`.
 
