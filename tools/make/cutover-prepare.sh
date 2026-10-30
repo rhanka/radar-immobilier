@@ -47,8 +47,8 @@ prepare_database() {
 }
 prepared_data_evidence() {
   "${k[@]}" get pods -o json > "$WORK/prepared-writers.json"
-  jq -e --slurpfile r "$WORK/record.json" 'all(["restore","ddl"][]; . as $step|
-    any(.items[]; .status.phase=="Succeeded" and any(.metadata.ownerReferences[]?;
+  jq -e --slurpfile r "$WORK/record.json" '. as $pods|all(["restore","ddl"][]; . as $step|
+    any($pods.items[]; .status.phase=="Succeeded" and any(.metadata.ownerReferences[]?;
       .kind=="Job" and .controller==true and .uid==$r[0].jobs[$step].uid)))' \
     "$WORK/prepared-writers.json" >/dev/null || fail 'Missing terminated prepared-writer evidence'
   jq --slurpfile pods "$WORK/prepared-writers.json" --arg at "$(date -u +%FT%TZ)" '
