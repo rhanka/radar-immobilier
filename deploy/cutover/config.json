@@ -6,13 +6,15 @@
     "namespace": "radar-immobilier-preprod",
     "url": "https://preprod.immo.sent-tech.ca",
     "database": "radar",
-    "documents": "radar-immobilier-docs-preprod"
+    "documents": "radar-immobilier-docs-preprod",
+    "recoveryBucket": "sentropic-pgbackup-preprod"
   },
   "prod": {
     "namespace": "radar-immobilier",
     "url": "https://immo.sent-tech.ca",
     "database": "radar",
-    "documents": "radar-immobilier-docs"
+    "documents": "radar-immobilier-docs",
+    "recoveryBucket": "sentropic-pgbackup"
   },
   "storage": {
     "endpoint": "https://s3.bhs.io.cloud.ovh.net",
