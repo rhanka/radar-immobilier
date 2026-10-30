@@ -22,6 +22,7 @@ prepared_write() {
       pgSha256:($r.pin.pgSha256//""),gitSha:$r.release.gitSha,
       migrations:(($r.jobs.destination.verdict.migrations//0)|tostring),
       liveDb:$r.liveDb,targetDb:($r.targetDb//$r.liveDb),preparedAt:$at,
+      recoveryReference:($r.recoveryReference//""),
       smoke:(if $status=="ready" then "pass" else $status end)}' "$WORK/prepared.json" > "$WORK/prepared-next.json"
   "${k[@]}" "$verb" -f "$WORK/prepared-next.json" >/dev/null
 }
@@ -47,11 +48,13 @@ verify_prepared() {
     and ($d.preparedAt|fromdateiso8601) <= $now
     and $now-($d.preparedAt|fromdateiso8601)<=86400
     and ($d.migrations|tonumber)>0
+    and ($d.recoveryReference//""|test("^(s3|postgres)://"))
     and ($d.targetDb=="radar" or $d.targetDb=="radar_next")' "$WORK/prepared.json" >/dev/null || fail 'Prepared stamp is stale, failed or mismatched'
   cp "$WORK/prepared.json" "$WORK/verified-prepared.json"
   run_job database 30 45
   jq --slurpfile db "$WORK/verdict.json" --slurpfile p "$WORK/verified-prepared.json" '
-    .liveDb=$db[0].database|.targetDb=$p[0].data.targetDb|.prepared=$p[0].data' \
+    .liveDb=$db[0].database|.targetDb=$p[0].data.targetDb|.prepared=$p[0].data|
+    .recoveryReference=$p[0].data.recoveryReference' \
     "$WORK/record.json" > "$WORK/next.json"
   mv "$WORK/next.json" "$WORK/record.json"; record_save
   jq -e --arg env "$ENV" '.prepared.liveDb==.liveDb and
