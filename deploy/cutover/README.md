@@ -28,6 +28,15 @@ switch: a compare-and-swap JSON patch changes only `POSTGRES_DB`. Old databases
 are retained. Production preparation takes a recovery backup and verifies the
 live release migration hashes; production cutover changes images only.
 
+Both restore paths run `atomic-restore.sh`: every application schema is dropped
+with `CASCADE` and recreated, then the archive is replayed without `--clean`, so
+a snapshot with fewer migrations than the destination restores and a rerun is
+idempotent. The daily live restore keeps the reset and the replay in one
+transaction (COMMIT only after the whole archive was read); the prepared
+disposable database commits the reset, then loads with `pg_restore -j 4`.
+Recovery backups go to the per-environment `recoveryBucket` in `config.json`;
+a write/list `probe` Job runs before any closure and fails early.
+
 `radar-prepared-db` records preparation ownership, status, backup fingerprints,
 release SHA, migration count and smoke result. Cutover refuses unless the stamp
 is ready, at most 24 hours old, matches the release and current latestComplete
@@ -74,12 +83,19 @@ refusal; the existing full UI/MCP smoke runs during cutover.
    No production roster was supplied or invented in this implementation.
 6. Build a release containing `database-cutover.js`. Rehearse it and observe the
    next scheduled run. Both protected GitHub variables remain unchanged.
-7. Grant the application database role `CREATEDB` (asserted before reset).
-   Measure both database sizes and available WAL/temporary space before use;
-   expand the current 5 Gi PostgreSQL PVC if it cannot hold both databases.
-   Restore requests four CPUs and 2 Gi memory. Install the updated namespace
-   RBAC, including patch-only access to `radar-db-credentials` and lifecycle
-   access for the temporary prepared Deployment. No Secret read is required.
+7. Complete the infrastructure prerequisites below. This branch ships manifests
+   and documentation only; nothing is applied by the controller or by CI.
+
+### Infrastructure prerequisites (owner: infrastructure)
+
+| Prerequisite | Where | Check before use |
+|---|---|---|
+| Application role has `CREATEDB` (`ALTER ROLE <app role> CREATEDB`) | preprod PostgreSQL | `reset` refuses with `createdb_required` otherwise |
+| Application role owns every application schema and may `CREATE EXTENSION postgis` | preprod PostgreSQL | the atomic restore drops and recreates them |
+| PostgreSQL PVC holds both `radar` and `radar_next` plus WAL/temporary space; today 5 Gi in `deploy/k8s/20-postgres-postgis.yaml` | preprod namespace | measure both database sizes; expand the PVC if they do not fit twice |
+| Restore Job capacity: 4 CPUs and 2 Gi memory | preprod nodes | scheduling of the `restore` Job |
+| `rbac-preprod.yaml`, `rbac-prod.yaml` and `../ci/bascule-preprod/rbac-ci-bascule-prod.yaml` installed (Secret patch on `radar-db-credentials`, `radar-api-prepared` lifecycle, Job create/delete) | both namespaces | `kubectl auth can-i` by the cutover identity |
+| `radar-backup-s3-credentials` can write and list the environment's `recoveryBucket` (`config.json`: preprod `sentropic-pgbackup-preprod`, prod `sentropic-pgbackup`) | both namespaces | the `probe` Job runs before closure and fails early otherwise |
 
 The adapter rejects absent/unapproved accounts, conflicting workspaces or
 destinations and revoked rights. It creates declared missing initialization
@@ -107,6 +123,8 @@ previous immutable images, runs smoke and reopens. No automatic rollback occurs.
 After a caught failure, known database Jobs must stop. Missing Job evidence or
 unreachable Kubernetes means **unknown**, never success. A successful recorded
 restore is reconciled and never replayed because its checkpoint was interrupted.
+A `restore`, `backup`, `ddl` or `data` Job that ended **Failed** is relaunched by
+`resume` under a new Job name; the restore reset makes that relaunch idempotent.
 Routes return to maintenance after a reopening/public-smoke failure; schedules
 remain suspended. Maintenance Services remain on failure and are deleted only
 when no ingress references them after complete reopening.
@@ -146,7 +164,9 @@ other test stacks and always runs `down -v`. Kubernetes and HTTP boundaries are
 fake; adapter tests use isolated real PostgreSQL databases. Lint runs `eslint .`.
 
 Typechecking covers every workspace. `test-api` runs the release adapter and
-existing 6H activation/attachment and 6K cutover regression suites.
+existing 6H activation/attachment and 6K cutover regression suites, plus
+`atomic-restore.test.sh` (N-migration archive onto N+k with dependent foreign
+keys, relaunch, truncated-archive rollback, prepared `-j 4` target) on PostgreSQL.
 
 For a focused controller reproduction, pass `TEST_PATTERN='<test-name regex>'`
 to `test`; omit it for the complete campaign. Backup/reporting self-tests always run.
