@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 restart_services() {
   local row name uid current desired deadline=$((SECONDS+600)) remaining
+  [[ ${MODE:-run} == restore ]] || deadline=$((SECONDS+90))
+  if [[ -n ${FAST_DEADLINE:-} ]] && ((FAST_DEADLINE<deadline)); then deadline=$FAST_DEADLINE; fi
   checkpoint restart started
   while read -r row; do
     name=$(jq -r .name <<< "$row"); uid=$(jq -r .uid <<< "$row")
@@ -21,7 +23,7 @@ restart_services() {
     patch_spec cronjob "$name" "$uid" "$(jq -c .spec <<< "$current")" "$desired"
   done < <(jq -c --slurpfile cfg "$CONFIG" '.cronjobs[]|select(.name as $n|$cfg[0].cronjobs|index($n))' "$WORK/record.json")
   while read -r name; do
-    remaining=$((deadline-SECONDS)); ((remaining>0)) || fail 'Required rollouts exceeded shared deadline'
+    remaining=$((deadline-SECONDS)); ((remaining>0)) || { budget_check; fail 'Required rollouts exceeded shared deadline'; }
     "${k[@]}" rollout status "deployment/$name" --timeout="${remaining}s" >/dev/null || fail "Required rollout failed: $name"
   done < <(jq -r '.required[]' "$CONFIG")
   verify_required
