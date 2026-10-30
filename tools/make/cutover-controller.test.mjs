@@ -72,17 +72,16 @@ test('daily restoration pins deployed digests and skips the 6H hook', () => {
     assert.equal(JSON.parse(f.state().objects.find(o => o.metadata.name === 'radar-cutover-receipt').data.receipt).release.dataMigration, null);
   } finally { f.cleanup(); }
 });
-test('production uses the same engine and backs up before DDL while skipping source restoration', () => {
+test('production rejects daily restoration because prepared releases are image-only', () => {
   const f = fixture({ url: 'https://immo.sent-tech.ca' });
   try {
     const state = f.state();
     const ingress = state.objects.find(o => o.kind === 'Ingress');
     ingress.spec.rules[0].host = 'immo.sent-tech.ca'; ingress.spec.tls[0].hosts = ['immo.sent-tech.ca'];
     writeFileSync(join(f.dir, 'state.json'), JSON.stringify(state));
-    success(f.run('run', [], 'prod'));
-    const steps = f.state().jobCreation.map(j => j.step);
-    for (const step of ['resolve', 'docs', 'recon', 'restore']) assert.equal(steps.includes(step), false);
-    assert.ok(steps.indexOf('backup') < steps.indexOf('ddl')); assert.ok(steps.includes('data'));
+    assert.notEqual(f.run('run', [], 'prod').status, 0);
+    assert.equal(f.calls().some(c => c.includes('create')), false);
+    assert.deepEqual(f.state().jobCreation || [], []);
   } finally { f.cleanup(); }
 });
 test('explicit resume retries a terminated data migration through protected forward resume', () => {
