@@ -55,7 +55,6 @@
     fetchGraphSignalDetail,
     fetchRevealedSignal,
     scopedReadErrorMessage,
-    GraphSignalsHttpError,
     type GraphSignalNode,
     type LegacyZmpProjection,
     type SignalDocRef,
@@ -2904,13 +2903,23 @@
   async function load(): Promise<FacetReadOutcome> {
     const version = ++bulkLoadVersion;
     const lease = bulkGuard.lease();
+    const workspaceId = scopedWorkspaceId;
+    if (workspaceId === null) {
+      // No explicit workspace: counters stay unavailable, no scoped request.
+      bulkGuard.cancel();
+      graphItems = [];
+      loading = false;
+      loadError = workspaceNote ?? "Données des signaux indisponibles.";
+      return "error";
+    }
     loading = true;
     loadError = null;
     try {
       // #4 — les comptes BULK (rail + badges de TOUTES les villes) deviennent
       // date-cohérents avec le filtre date actif → fin du 0/50 (parité globale,
       // pas seulement la ville sélectionnée). Sans borne = all-time (Illimité).
-      const res = await fetchGraphSignalsByCity("", {
+      // 6H : agrégat scopé dans l'espace de travail explicite.
+      const res = await fetchGraphSignalsByCity({ workspaceId }, {
         ...signalDocumentDateWindow(dateRange, dateBasis),
         excludePiia: vivierBExclusions.piiaSansProjetResidentiel,
         excludeDerogations: vivierBExclusions.derogationsMineures,
@@ -2923,12 +2932,7 @@
     } catch (e) {
       if (version !== bulkLoadVersion || !lease.isCurrent() || isAbortError(e)) return "stale";
       console.warn("Signals by city load failed:", e);
-      loadError =
-        e instanceof GraphSignalsHttpError &&
-        e.status === 503 &&
-        e.code === "discarded_signals_unavailable"
-          ? "Données des signaux indisponibles — signaux écartés indisponibles (discarded_signals_unavailable)."
-          : "Données des signaux indisponibles.";
+      loadError = `Données des signaux indisponibles — ${scopedReadErrorMessage(e)}`;
       return "error";
     } finally {
       if (version === bulkLoadVersion && lease.isCurrent()) loading = false;
