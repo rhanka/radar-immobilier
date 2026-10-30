@@ -79,6 +79,16 @@ case ${1:-} in
   pvc-verify) rbac_preflight; pvc_verify;;
   slots-adopt) rbac_preflight; slots_adopt;;
   stage) rbac_preflight; stage_command;;
+  probe-verify)
+    # Rehearsal: acknowledged probe writes per database, read back by a Job (writer probe run id PROBE).
+    [[ $ENV == preprod && ${PROBE:-} =~ ^[a-z0-9-]{1,64}$ ]] || fail 'probe-verify needs ENV=preprod and PROBE=<run id>'
+    rbac_preflight; lock_acquire probe; deployed_release
+    record_set '.probeRun=$p' --arg p "$PROBE"
+    run_job probeverify 60 90
+    mkdir -p "${OUTPUT:-.bascule-work}"
+    jq -e '.probe and (.probeTruncated|not)' "$WORK/verdict.json" > /dev/null || fail 'Probe ranges unreadable or truncated'
+    jq .probe "$WORK/verdict.json" > "${OUTPUT:-.bascule-work}/probe-ranges.json"
+    lock_delete;;
   rollback) rbac_preflight; rollback_command;;
   status)
     "${k[@]}" get configmap radar-change-lock --ignore-not-found -o json > "$WORK/lock.json"

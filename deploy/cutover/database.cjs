@@ -79,10 +79,34 @@ const OPERATIONS = {
     for (let attempt = 0; attempt < 10; attempt++) {
       await c.query(`SELECT pg_terminate_backend(pid, 3000) FROM (${writable}) s`, [target, since]);
       if ((await c.query(writable, [target, since])).rows.length === 0) {
-        return { frozenAt: (await c.query('SELECT clock_timestamp() AS at')).rows[0].at.toISOString() };
+        return { freezeStartedAt: since.toISOString(),
+          frozenAt: (await c.query('SELECT clock_timestamp() AS at')).rows[0].at.toISOString() };
       }
     }
     throw Error('writable_sessions_remain');
+  },
+  // Rehearsal: acknowledged probe writes present in each application database, as seq ranges.
+  async probeverify() {
+    const run = env.PROBE_RUN;
+    if (!/^[a-z0-9-]{1,64}$/.test(run || '')) throw Error();
+    const probe = {};
+    for (const name of ['radar', 'radar_next']) {
+      const d = new Client({ host: env.POSTGRES_HOST, user: env.POSTGRES_USER, password: env.POSTGRES_PASSWORD, database: name });
+      try {
+        await d.connect();
+        const seqs = (await d.query(`SELECT seq FROM cutover_probe_writes WHERE run=$1 ORDER BY seq`, [run])).rows.map(r => r.seq);
+        const ranges = [];
+        for (const seq of seqs) {
+          if (ranges.length && ranges.at(-1)[1] === seq - 1) ranges.at(-1)[1] = seq; else ranges.push([seq, seq]);
+        }
+        probe[name] = ranges;
+      } catch (e) {
+        // An absent database or a schema without the probe table holds no acknowledged write.
+        if (e.code !== '3D000' && e.code !== '42P01') throw e;
+        probe[name] = [];
+      } finally { await d.end().catch(() => {}); }
+    }
+    return { probe };
   },
   // Rollback before promotion: writes again, and pooled read-only sessions reconnect writable.
   async unfreeze(c) {

@@ -361,3 +361,27 @@ daily `MODE=restore`. The API stops gracefully on SIGTERM
 (`api/src/lifecycle/graceful.ts`: stop accepting, close SSE streams, wait for
 in-flight requests up to 25 s; `terminationGracePeriodSeconds: 30`). MCP
 sessions on the other slot answer 404 and the client re-initializes.
+
+### Probes (rehearsal evidence)
+
+- `availability-probe.mjs <url> <out.jsonl>`: 5 Hz on `/health`, `/build.json`
+  and `/.well-known/oauth-protected-resource/mcp` (status, latency, served SHA,
+  transport error or timeout).
+- `writer-probe.mjs <url> <probe-run> <out.jsonl>`: 5 writes/s to
+  `POST /api/internal/cutover-probe` (bearer `CUTOVER_PROBE_TOKEN` from the
+  optional Secret `radar-cutover-probe`; the route answers 404 unless
+  `CUTOVER_PROBE_ENABLED=true` in the `radar-api` ConfigMap, preprod only). Each
+  acknowledged write is a row of `cutover_probe_writes` (migration 0028) and the
+  answer names the database that stored it.
+- `make -f deploy/cutover/operator.mk probe-verify PROBE=<probe-run> OUTPUT=<dir> ENV=preprod`:
+  a `probeverify` Job reads the acknowledged rows of `radar` and `radar_next` back
+  as sequence ranges (`<dir>/probe-ranges.json`).
+- `probe-verify.mjs <reads> <writes> <receipt> <ranges> <samedb|preprod>`: the
+  verdict. Red on any read transport error, timeout, 5xx or gap above 1 s; a
+  served SHA other than the release after the first green response (outside the
+  drill); a lost write (acknowledged, absent from the database that acked it);
+  `samedb`: any refused write; `preprod`: an acknowledgement from the live
+  database after `frozenAt`, a refusal other than 503 `maintenance_read_only`, a
+  503 outside [`freezeStartedAt`, first green] (+ drill), a freeze window above
+  10 s; a mixed window above 2 s; a drill not back on the previous build within
+  5 s.

@@ -102,9 +102,11 @@ render_job() {
     local operation=${step%prev}
     [[ $step != identity ]] || operation=database
     [[ $step != destination || -n ${TARGET_DB:-} ]] || operation=database
-    jq --rawfile database deploy/cutover/database.cjs --arg step "$operation" --arg target "${TARGET_DB:-}" '
+    jq --rawfile database deploy/cutover/database.cjs --arg step "$operation" --arg target "${TARGET_DB:-}" \
+      --arg probe "$(jq -r '.probeRun//""' "$WORK/record.json")" '
       .spec.template.spec.containers[0].command=["node","-e",$database]|
-      .spec.template.spec.containers[0].env += [{name:"CUTOVER_DB_OPERATION",value:$step},{name:"TARGET_DB",value:$target}]' \
+      .spec.template.spec.containers[0].env += [{name:"CUTOVER_DB_OPERATION",value:$step},{name:"TARGET_DB",value:$target},
+        {name:"PROBE_RUN",value:$probe}]' \
       "$WORK/template.json" > "$WORK/identity.json"
     mv "$WORK/identity.json" "$WORK/template.json"
   fi
