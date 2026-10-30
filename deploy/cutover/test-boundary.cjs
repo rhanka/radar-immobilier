@@ -107,6 +107,7 @@ if (tool === 'curl') {
   if (s.anonymous200 && route === '/api/v1/workspaces') code = 200;
   if (s.publicFailure && publicProbe) code = 403;
   if (s.transient && route === '/health') { code = 503; s.transient--; save(); }
+  if (s.privateTransient && !publicProbe && route === '/health') { code = 503; s.privateTransient--; save(); }
   fs.writeFileSync(input[input.indexOf('-o') + 1], typeof body === 'string' ? body : JSON.stringify(body));
   if (input.includes('-D')) fs.writeFileSync(input[input.indexOf('-D') + 1], headers);
   if (input.includes('-w')) out(`${code} ${type}`);
@@ -150,11 +151,14 @@ if (args[0] === 'create' || args[0] === 'replace' || args[0] === 'apply') {
     (s.jobCreation ||= []).push({ step, closed: s.objects.some(x => x.kind === 'Ingress' && JSON.stringify(x.spec).includes('base-maintenance-')),
       lockHeld: !!find('configmap', 'radar-change-lock'), preparedStatus: find('configmap', 'radar-prepared-db')?.data.status,
       watchdogSuspended: find('cronjob', 'radar-refresh-pending-watchdog')?.spec.suspend });
-    o.status = s.hangJob === step ? { active: 1 } : { conditions: [{ type: s.failJob === step ? 'Failed' : 'Complete', status: 'True' }], succeeded: s.failJob === step ? 0 : 1 };
+    // jobSeconds models real duration: the wrapper timeout (or deadline) kills a slower child.
+    const limit = Number(o.spec.template.spec.containers[0].env?.find(e => e.name === 'CUTOVER_TIMEOUT')?.value ?? o.spec.activeDeadlineSeconds);
+    const failed = s.failJob === step || s.jobSeconds?.[step] > limit;
+    o.status = s.hangJob === step ? { active: 1 } : { conditions: [{ type: failed ? 'Failed' : 'Complete', status: 'True' }], succeeded: failed ? 0 : 1 };
     persist(o);
     persist({ kind: 'Pod', metadata: { name: `${o.metadata.name}-pod`, labels: { 'job-name': o.metadata.name },
-      ownerReferences: [{ kind: 'Job', controller: true, uid: o.metadata.uid }] }, status: { phase: s.hangJob === step ? 'Running' : 'Succeeded',
-      containerStatuses: [{ name: 'result', state: { terminated: { message: JSON.stringify(jobVerdict(step, o)) } } }] } });
+      ownerReferences: [{ kind: 'Job', controller: true, uid: o.metadata.uid }] }, status: { phase: s.hangJob === step ? 'Running' : failed ? 'Failed' : 'Succeeded',
+      containerStatuses: [{ name: 'result', state: { terminated: { message: JSON.stringify(failed ? { ok: false } : jobVerdict(step, o)) } } }] } });
   }
   if (o.kind === 'ConfigMap' && o.metadata.name === 'radar-change-lock') {
     const r = JSON.parse(o.data.record);
@@ -181,7 +185,10 @@ if (args[0] === 'patch') {
   else for (const op of patch) {
     const parts = op.path.slice(1).split('/').map(p => p.replaceAll('~1', '/').replaceAll('~0', '~'));
     const last = parts.pop(); let parent = o; for (const p of parts) parent = parent[p];
-    if (op.op === 'test' && JSON.stringify(parent[last]) !== JSON.stringify(op.value)) process.exit(1);
+    if (op.op === 'test' && JSON.stringify(parent[last]) !== JSON.stringify(op.value)) {
+      // Same 422 rendering as kubectl for a failed JSON-patch test operation.
+      process.stderr.write('The request is invalid: the server rejected our request due to an error in our request\n'); process.exit(1);
+    }
     if (op.op === 'remove') delete parent[last];
     if (op.op === 'add' || op.op === 'replace') parent[last] = op.value;
   }
