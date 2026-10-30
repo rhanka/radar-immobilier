@@ -659,13 +659,27 @@ jobs:
     # can never red a main push against a not-yet-provisioned preprod deployer.
     # (`gh variable set PREPROD_CD_ENABLED --body true`.) Variables are allowed
     # in `if:`; secrets are not — hence a variable, not the secret itself.
-    if: github.ref == 'refs/heads/main' && vars.PREPROD_CD_ENABLED == 'true'
+    # prepare-preprod-db is a rehearsal: its failure (e.g. a long refresh still
+    # draining) is reported below but never blocks the preprod rollout. No prepare
+    # output is read. always() lets this job run when prepare failed or was skipped.
+    if: always() && needs.build-push.result == 'success' && github.ref == 'refs/heads/main' && vars.PREPROD_CD_ENABLED == 'true'
     permissions:
       contents: read
       deployments: write
     env:
       NAMESPACE: radar-immobilier-preprod
     steps:
+      - name: Report prepare rehearsal outcome
+        if: needs.prepare-preprod-db.result != 'success'
+        env:
+          PREPARE_RESULT: ${{ needs.prepare-preprod-db.result }}
+        run: |
+          echo "::warning title=Preprod preparation rehearsal::prepare-preprod-db ended '${PREPARE_RESULT}'; preprod is deployed anyway (the rehearsal does not gate the rollout)."
+          {
+            echo '### Preprod preparation rehearsal'
+            echo "prepare-preprod-db result: \`${PREPARE_RESULT}\`. The rollout continues; inspect that job before the next cutover."
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Checkout
         uses: actions/checkout@v4
 
