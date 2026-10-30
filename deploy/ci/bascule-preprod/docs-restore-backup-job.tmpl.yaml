@@ -3,22 +3,28 @@
 # restore into the preprod docs bucket the docs state AT DAY D, from the backup.
 #
 # BR_STEP=docs  : manifests/<D>.json (sha256 == PIN) → docs-inventory/<D>.json
-#                 (sha256 == manifest) → ListObjectVersions(<backup>/docs/) → plan:
+#                 (sha256 == manifest) → 16-shard destination listing → plan:
 #                 every `backed-up` inventory entry whose preprod copy is not already
-#                 the same content (size + ETag) is copied SERVER-SIDE (CopyObject,
+#                 the same content (backup ETag, or legacy size + ETag) is verified
+#                 by pinned HEAD or per-key version listing, then copied SERVER-SIDE
+#                 (COPY_CONCURRENCY default 48, bounded 1–64; CopyObject,
 #                 0 byte through the pod) from <backup>/docs/<key>?versionId=<v>, v =
 #                 the recorded version, else the version whose ETag is the inventory's
 #                 (object rewritten since D). ADDITIVE (no delete). Then recon
 #                 dest ⊇ inventory(D) (Key + Size). DOCS_DRY=1 = plan only, no copy.
 #                 Any inventory object not in the backup or without a restorable
-#                 version ⇒ refusal (exit 2) before the first copy.
+#                 version ⇒ refusal (exit 2) before the first copy. Size drift with
+#                 matching backup ETag is reported by hash; recon uses actual size.
+#                 Final recon uses the same sharded listing (sequential fallback
+#                 on shard errors); receipt counters expose list/HEAD/version calls
+#                 and SDK copy retries (maxAttempts 3). Re-runs copy only the remainder.
 # BR_STEP=recon : recon only (G4 re-check right before the flip).
 #
 # Identities (keys S3_ACCESS_KEY / S3_SECRET_KEY):
 #   reader ${READER_SECRET} (radar-backup-reader-preprod, + key BACKUP_BUCKET):
 #          manifest + inventory only (GetObject on pg/*, manifests/*, docs-inventory/*).
 #   copy   ${COPY_SECRET} (radar-backup-restore-docs, OVH user
-#          radar-backup-restore-preprod): lists the versions of <backup>/docs/
+#          radar-backup-restore-preprod): lists candidate versions of <backup>/docs/<key>
 #          (ListBucketVersions; if refused, recorded versionIds are used and the
 #          others checked by HEAD), SIGNS the server-side CopyObject (GetObject on
 #          <backup>/docs/* — on OVH a read with versionId is a GetObject, there is no
