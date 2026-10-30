@@ -23,6 +23,7 @@
 - [x] Infrastructure prerequisites: CREATEDB (asserted by reset), PVC capacity for two databases (5 Gi today), updated namespace RBAC.
 - [x] Keep the short claim lock outside the ten-minute drain; suspend schedules immediately after inventory, then drain after slot claim/release.
 - [x] Release cutover enforces a shared 295-second work budget; cleanup can exceed it to preserve closed recovery state after failure.
+- [ ] Local PostgreSQL integration: parallel custom-archive restore, CREATEDB refusal, live-database protection and release migration hash verification.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch, sequential implementation lots.
