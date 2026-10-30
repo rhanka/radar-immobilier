@@ -4,15 +4,17 @@ import { composeArtifactHost, createArtifactAdmissionAuthority, guardArtifactPoo
 import { bindArtifactProvider, IMMO_ARTIFACT_PROFILE,
   type FrozenCallAuthority } from "./registry/artifact-provider.js";
 import { ARTIFACT_INVOCATION_SCOPE } from "./registry/artifact-profile.js";
+import { bindDatabaseName } from "./database-url.js";
 
 /** Trusted production composition; configuration supplies storage, never caller authority. */
 export async function createArtifactBinding(env: NodeJS.ProcessEnv) {
   const config = resolveArtifactsStorageConfig(readArtifactsEnv(env));
   const readActivation = () => resolveActivationConfig(readActivationEnv(env));
   if (!config.enabled || !readActivation().enabled) return undefined;
-  const url = env.IMMO_MCP_ARTIFACT_DATABASE_URL;
+  const roleUrl = env.IMMO_MCP_ARTIFACT_DATABASE_URL;
   const contentBase = env.ARTIFACTS_CONTENT_BASE;
-  if (!url || !contentBase) throw new Error("artifact_binding_incomplete");
+  if (!roleUrl || !contentBase) throw new Error("artifact_binding_incomplete");
+  const url = bindDatabaseName(roleUrl, env.IMMO_MCP_DATABASE_NAME);
   const origin = new URL(`https://${contentBase}/`);
   if (origin.host !== contentBase || origin.hostname !== contentBase || origin.pathname !== "/" ||
     origin.username || origin.password || origin.search || origin.hash) throw new Error("artifact_content_base_invalid");
