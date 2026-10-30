@@ -43,7 +43,7 @@ restore_stage() {
 }
 migrate_stage() {
   run_job backup 840 900
-  jq --arg ref "s3://$(jq -r --arg e "$ENV" '.[$e].recoveryBucket' "$CONFIG")/db-backups/cutover-$ENV-$RUN.sql.gz" \
+  jq --arg ref "$(recovery_backup_reference)" \
     '.recoveryReference=$ref' "$WORK/record.json" > "$WORK/next.json"
   mv "$WORK/next.json" "$WORK/record.json"; record_save
   run_job ddl 540 600
@@ -57,9 +57,7 @@ execute_stages() {
   if [[ ${MODE:-run} != restore ]]; then
     execute_stage 1 'Verify prepared database' verify_prepared_release
     execute_stage 2 Close close_once
-    execute_stage 3 'Switch database' switch_db
-    execute_stage 4 'Restart API, UI and MCP' restart_services
-    execute_stage 5 'Quick private test' private_smoke
+    fast_release_stages
     printf '6/6 Reopen\n'; checkpoint stage-6 started; reopen
     return
   fi
@@ -70,9 +68,42 @@ execute_stages() {
   execute_stage 5 'Quick private test' private_smoke
   printf '6/6 Reopen\n'; checkpoint stage-6 started; reopen
 }
+fast_release_stages() {
+  # The five-minute budget starts at the effective closure. Its exhaustion alone
+  # never keeps the site closed: the previous release is restored and reopened.
+  local code
+  rm -f "$WORK/budget-exhausted"
+  FAST_DEADLINE=$((SECONDS+295))
+  set +e
+  (
+    set -e
+    trap stop_forwards EXIT
+    execute_stage 3 'Switch database' switch_db
+    execute_stage 4 'Restart API, UI and MCP' restart_services
+    execute_stage 5 'Quick private test' private_smoke
+  )
+  code=$?
+  set -e
+  unset FAST_DEADLINE
+  ((code != 0)) || return 0
+  [[ -f $WORK/budget-exhausted ]] || exit "$code"
+  printf 'Five-minute budget exhausted after closure; automatic rollback and reopening\n' >&2
+  stop_operation_jobs || fail 'Database Job termination unknown; remain closed'
+  # Stopped (never completed) Jobs are kept as history, outside the final completion evidence.
+  jq '.jobHistory=((.jobHistory//[])+[.jobs[]|select(.outcome!="completed")|.outcome="stopped"])|
+    .jobs|=with_entries(select(.value.outcome=="completed"))' "$WORK/record.json" > "$WORK/next.json"
+  mv "$WORK/next.json" "$WORK/record.json"; record_save
+  rollback_stages
+  printf 'Rolled back and reopened on the previous release after budget exhaustion\n' >&2
+  exit 1
+}
 execute_stage() {
   printf '%s/6 %s\n' "$1" "$2"
   checkpoint "stage-$1" started
   "$3"
   checkpoint "stage-$1" completed
+}
+recovery_backup_reference() {
+  printf 's3://%s/db-backups/cutover-%s-%s.sql.gz' \
+    "$(jq -r --arg e "$ENV" '.[$e].recoveryBucket' "$CONFIG")" "$ENV" "$RUN"
 }

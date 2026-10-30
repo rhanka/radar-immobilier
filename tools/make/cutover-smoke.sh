@@ -8,7 +8,7 @@ http_check() {
   local base=$1 path=$2 expected=$3 kind=$4 deadline=$5 result code type remaining
   if [[ -n ${FAST_DEADLINE:-} ]] && ((FAST_DEADLINE<deadline)); then deadline=$FAST_DEADLINE; fi
   while :; do
-    remaining=$((deadline-SECONDS)); ((remaining>0)) || fail "Smoke deadline: $path"
+    remaining=$((deadline-SECONDS)); ((remaining>0)) || { budget_check; fail "Smoke deadline: $path"; }
     result=$(curl -q -sS --max-time "$remaining" --connect-timeout 3 -D "$WORK/headers" -o "$WORK/body" \
       -H "Host: ${URL#https://}" -w '%{http_code} %{content_type}' "$base$path" 2>/dev/null) || result='000 transport'
     code=${result%% *}; type=${result#* }

@@ -12,7 +12,8 @@ prepare_database() {
   run_job database 30 45
   jq --arg at "$(date -u +%FT%TZ)" --slurpfile db "$WORK/verdict.json" --arg env "$ENV" '
     .liveDb=$db[0].database|.preparedStartedAt=$at|
-    if $env=="preprod" then .targetDb=(if .liveDb=="radar" then "radar_next" else "radar" end) else . end' \
+    if $env=="preprod" then .targetDb=(if .liveDb=="radar" then "radar_next" else "radar" end)|
+      .recoveryReference=("postgres://radar-postgres/"+.liveDb) else . end' \
     "$WORK/record.json" > "$WORK/next.json"
   mv "$WORK/next.json" "$WORK/record.json"; record_save
   prepared_write preparing
@@ -35,7 +36,8 @@ prepare_database() {
   else
     run_job backup 840 900
     # Production preparation verifies the live schema; it never restores it.
-    jq '.targetDb=.liveDb' "$WORK/record.json" > "$WORK/next.json"
+    # Rollback references this backup (fast release path has no migrate stage).
+    jq --arg ref "$(recovery_backup_reference)" '.targetDb=.liveDb|.recoveryReference=$ref' "$WORK/record.json" > "$WORK/next.json"
     mv "$WORK/next.json" "$WORK/record.json"; record_save
   fi
   run_job destination 60 90

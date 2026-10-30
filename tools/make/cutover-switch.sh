@@ -32,7 +32,8 @@ switch_db() {
   checkpoint switch completed
 }
 rollback_stages() {
-  jq -e '.previousRelease!=null and .checkpoints.close!=null and .prepared!=null' "$WORK/record.json" >/dev/null || fail 'No prepared cutover to roll back'
+  jq -e '.previousRelease!=null and .checkpoints.close!=null and .prepared!=null and (.recoveryReference//""|length>0)' "$WORK/record.json" >/dev/null || fail 'No prepared cutover to roll back'
+  printf 'Rollback recovery reference: %s\n' "$(jq -r .recoveryReference "$WORK/record.json")"
   close_once
   if [[ $ENV == preprod ]]; then
     local previous

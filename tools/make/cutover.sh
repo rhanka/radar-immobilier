@@ -56,7 +56,6 @@ cleanup() {
 trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
-if [[ ${1:-} == run && ${MODE:-run} == run ]]; then FAST_DEADLINE=$((SECONDS+295)); fi
 cluster_preflight
 case ${1:-} in
   prepare) prepare_database;;
@@ -109,7 +108,6 @@ case ${1:-} in
     lock_resume
     MODE=$(jq -r '.mode//"run"' "$WORK/record.json")
     [[ $MODE != restore || $ENV == preprod ]] || fail 'Daily restore recovery is preprod-only'
-    [[ $MODE == restore ]] || FAST_DEADLINE=$((SECONDS+295))
     RECOVERING=1
     if [[ $(jq -r .kind "$WORK/record.json") == writer ]]; then
       writer_release

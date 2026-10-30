@@ -36,6 +36,7 @@ job_observe() {
       fail "Job failed: $name (sanitized; inspect in cluster)"
     fi
     if ((SECONDS>=deadline)); then
+      if [[ -n ${FAST_DEADLINE:-} ]] && ((SECONDS+5>=FAST_DEADLINE)); then budget_exhausted; fi
       delete_job_uid "$name" "$uid"
       local termination=$((SECONDS+120))
       until job_pods_ended "$name" "$uid"; do
@@ -51,7 +52,7 @@ run_job() {
   local step=$1 deadline=$2 budget=$3 name uid existing
   if [[ -n ${FAST_DEADLINE:-} ]]; then
     local remaining=$((FAST_DEADLINE-SECONDS-5))
-    ((remaining>20)) || fail 'Insufficient cutover budget for another verification Job'
+    ((remaining>20)) || budget_exhausted
     ((deadline<=remaining)) || deadline=$remaining
     ((budget<=remaining)) || budget=$remaining
   fi
