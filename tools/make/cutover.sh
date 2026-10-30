@@ -97,6 +97,7 @@ case ${1:-} in
     [[ ${BACKUP_ID:-latest} == latest || ${BACKUP_ID:-} =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || fail 'Invalid backup selection'
     if [[ ${RELEASE:-} != deployed ]]; then validate_release "${RELEASE:-}"; fi
     rbac_preflight
+    [[ ${MODE:-run} != restore ]] || ! prepared_stack_present || fail 'prepared_stack_present: run or discard the prepared slot before the daily restore'
     lock_acquire
     jq --arg mode "${MODE:-run}" '.mode=$mode' "$WORK/record.json" > "$WORK/next.json"
     mv "$WORK/next.json" "$WORK/record.json"; record_save
