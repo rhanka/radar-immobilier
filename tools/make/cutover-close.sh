@@ -58,6 +58,7 @@ stop_deployments() {
 }
 suspend_writers() {
   local mode=${1:-kill} deadline=$((SECONDS+600)) row name uid
+  [[ $mode != kill ]] || deadline=$((SECONDS+40))
   checkpoint suspend started
   stop_schedules
   while :; do
@@ -118,6 +119,7 @@ verify_closed() {
 close_once() {
   local deadline row REQUEST_DEADLINE
   deadline=$((SECONDS+240))
+  [[ ${MODE:-run} == restore ]] || deadline=$((SECONDS+80))
   REQUEST_DEADLINE=$deadline
   checkpoint close started
   # The checkpoint precedes even maintenance-Service creation.

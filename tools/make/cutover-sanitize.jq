@@ -1,6 +1,6 @@
 if $step=="ddl" or $step=="data" or $step=="destination" then
   .spec.template.spec.containers[0].env |=
-    (map(select(.name!="POSTGRES_DB")) +
+    ((.//[]|map(select(.name!="POSTGRES_DB"))) +
       [{name:"POSTGRES_DB",value:($r[0].targetDb//$r[0].liveDb//"radar")},
        {name:"CUTOVER_EXPECTED_DATABASE",value:($r[0].targetDb//$r[0].liveDb//"radar")}])
 else . end

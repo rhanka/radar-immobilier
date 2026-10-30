@@ -84,6 +84,8 @@ case ${1:-} in
     [[ ${BACKUP_ID:-latest} == latest || ${BACKUP_ID:-} =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || fail 'Invalid backup selection'
     if [[ ${RELEASE:-} != deployed ]]; then validate_release "${RELEASE:-}"; fi
     lock_acquire
+    jq --arg mode "${MODE:-run}" '.mode=$mode' "$WORK/record.json" > "$WORK/next.json"
+    mv "$WORK/next.json" "$WORK/record.json"; record_save
     if [[ ${GITHUB_ACTIONS:-} == true && $ENV == preprod && ${MODE:-} =~ ^(restore|list)$ ]]; then
       node deploy/cutover/secrets-cli.mjs
     fi
@@ -102,6 +104,7 @@ case ${1:-} in
     execute_stages;;
   resume)
     lock_resume
+    MODE=$(jq -r '.mode//"run"' "$WORK/record.json")
     RECOVERING=1
     if [[ $(jq -r .kind "$WORK/record.json") == writer ]]; then
       writer_release

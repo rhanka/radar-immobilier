@@ -5,6 +5,7 @@ prepare_database() {
   prepared_available
   save_release "$RELEASE"
   inventory
+  suspend_writers drain
   run_job database 30 45
   jq --arg at "$(date -u +%FT%TZ)" --slurpfile db "$WORK/verdict.json" --arg env "$ENV" '
     .liveDb=$db[0].database|.preparedStartedAt=$at|
@@ -15,7 +16,6 @@ prepare_database() {
   PREPARING=1
   RECORD_MAP=radar-prepared-db
   lock_delete
-  suspend_writers drain
   if [[ $ENV == preprod ]]; then
     pin_backup
     run_job docs 7200 7500
