@@ -49,9 +49,8 @@
   import MapLegend from "$lib/components/maps/MapLegend.svelte";
   import GrillesView from "$lib/components/scoring/GrillesView.svelte";
   import { fetchSignalDetail, type DesignationEventDetail } from "$lib/signals/signal-detail-client.js";
-  import { fetchGraphSignalsByCity } from "$lib/signals/graph-signals-by-city-client.js";
-  import { fetchGraphSignalDetail } from "$lib/signals/graph-signal-detail-client.js";
-  import { loadLiveSignals } from "$lib/signals/signals-live.js";
+  import { workspaceContext, workspaceUnavailableMessage } from "$lib/signals/workspace-client.js";
+  import { loadLiveSignals, scopedLiveSignalsClients } from "$lib/signals/signals-live.js";
   import {
     resolveToken,
     LOT_4PLUS_TOD_TOKEN,
@@ -164,14 +163,33 @@
 
   let cityEntries: CitySignalEntry[] = [];
   let signalsLoading = true;
+  let signalsError: string | null = null;
+  let signalsMounted = false;
 
-  // Chargement des signaux réels au montage (pipeline graph_nodes, ~197 villes)
-  async function loadSignalEntries(): Promise<void> {
+  // 6H : lecture scopée dans l'espace de travail EXPLICITE. Sans espace, aucune
+  // requête scopée ne part ; un refus ou un scope indisponible s'affiche comme
+  // « indisponible », jamais comme une liste vide.
+  $: workspaceState = $workspaceContext;
+  $: signalsWorkspaceId = workspaceState.context.workspaceId;
+  $: signalsUnavailable = signalsWorkspaceId === null
+    ? workspaceUnavailableMessage(workspaceState)
+    : signalsError;
+  let signalsLoadedFor: string | null | undefined = undefined;
+  $: if (signalsMounted && signalsWorkspaceId !== signalsLoadedFor) void loadSignalEntries(signalsWorkspaceId);
+
+  // Chargement des signaux réels (pipeline graph_nodes, ~197 villes)
+  async function loadSignalEntries(workspaceId: string | null): Promise<void> {
+    signalsLoadedFor = workspaceId;
+    cityEntries = [];
+    signalsError = null;
+    if (workspaceId === null) {
+      signalsLoading = false;
+      return;
+    }
+    signalsLoading = true;
     try {
-      const allSignals = await loadLiveSignals({
-        fetchGraphSignalsByCity,
-        fetchGraphSignalDetail,
-      });
+      const allSignals = await loadLiveSignals(scopedLiveSignalsClients({ workspaceId }));
+      if (signalsLoadedFor !== workspaceId) return;
       // Grouper par ville depuis l'index des villes prioritisées
       // L'id des signaux graph_nodes est "gn-{citySlug}-{index}"
       const allCities = prioritizedCities();
@@ -193,9 +211,10 @@
       }
       cityEntries = entries;
     } catch {
-      // En cas d'erreur, on laisse cityEntries vide (état honnête)
+      // Refus ou scope indisponible : état « indisponible », jamais une liste vide.
+      if (signalsLoadedFor === workspaceId) signalsError = "Lecture scopée des signaux impossible.";
     } finally {
-      signalsLoading = false;
+      if (signalsLoadedFor === workspaceId) signalsLoading = false;
     }
   }
 
@@ -461,7 +480,7 @@
       // Passe par selectEvalCity → garde anti-course commune (evalGuard).
       selectEvalCity(first);
     }
-    void loadSignalEntries();
+    signalsMounted = true;
   });
 
   // ── Projection SVG des polygones GeoJSON ──────────────────────────────────
@@ -802,7 +821,11 @@
       Signaux réels · Villes suivies
     </div>
 
-    {#if signalsLoading}
+    {#if signalsUnavailable}
+      <div class="p-4">
+        <Alert tone="warning" title="Signaux indisponibles." message={signalsUnavailable} />
+      </div>
+    {:else if signalsLoading}
       <div class="p-4 text-xs text-slate-400">Chargement des signaux…</div>
     {:else if cityEntries.length === 0}
       <div class="p-4">

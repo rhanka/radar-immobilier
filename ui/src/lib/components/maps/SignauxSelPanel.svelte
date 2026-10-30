@@ -36,7 +36,8 @@
     buildFacetTarget,
     emptyTargetFacetState,
     facetStateKey,
-    postFacetCommand,
+    refuseUnscopedFacetCommand,
+    type FacetCommandPoster,
     type FacetAction,
     type FacetCommandLaunch,
     type FacetConflictNotice,
@@ -221,7 +222,7 @@
   export let facetsNote: string | null = null;
   export let showDiscarded = false;
   export let onToggleShowDiscarded: (show: boolean) => void = () => {};
-  export let facetPostCommand: typeof postFacetCommand = postFacetCommand;
+  export let facetPostCommand: FacetCommandPoster = refuseUnscopedFacetCommand;
   /** Context identity forwarded through each command's onSaved callback. */
   export let facetViewerKey: FacetCommandLaunch["viewerKey"] = null;
   export let onFacetSaved: (

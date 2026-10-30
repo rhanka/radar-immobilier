@@ -39,10 +39,20 @@ describeDb("6L1 projection revision HTTP contract", () => {
     expect(tokenRes.headers.get("cache-control")).toBe("private, no-store");
     const before = await tokenRes.json() as { token: string };
     const fresh = await member.request(`${base}/coherent-city?citySlug=${target.citySlug}&mode=signal`);
-    const freshCity = await fresh.json() as { signals: Array<{ id: string; label: string }>;
+    const freshCity = await fresh.json() as {
+      signals: Array<{ id: string; label: string; classification?: unknown; legacySubset?: unknown;
+        facetFingerprint: string; createdAt: string | null }>;
+      legacyProjection: { version: string; a: { count: number; signalIds: string[] } };
       counts: { total: number; hidden: number; visible: number; selected: number } };
     expect(freshCity.counts).toEqual({ total: 1, hidden: 0, visible: 1, selected: 0 });
     expect(freshCity.signals).toMatchObject([{ id: target.id, label: "Synthetic 6L1 signal" }]);
+    // Server card fields derived from the same stored node: the UI never
+    // reclassifies, and the fingerprint stays the 6B command fingerprint.
+    expect(freshCity.signals[0]!.classification).toBeTypeOf("object");
+    expect(freshCity.signals[0]!.legacySubset).toMatchObject({ version: "legacy-zmp-v1", signalId: target.id });
+    expect(freshCity.signals[0]!.facetFingerprint).toBe(fingerprint);
+    expect(freshCity.signals[0]!.createdAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    expect(freshCity.legacyProjection.version).toBe("legacy-zmp-v1");
     const privateArchive = await writeScopedPersonalFacet(f.db, f.contributor.sub, f.workspaceId,
       { action: "discard", target, reasonCode: "N-NON-RES", expectedHeadId: null,
         displayedFingerprint: fingerprint, commandKey: randomUUID() });

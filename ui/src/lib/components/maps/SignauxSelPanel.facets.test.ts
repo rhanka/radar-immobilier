@@ -11,7 +11,7 @@ import type { MunicipalityT } from "@radar/domain";
 import type { CityMapEntry } from "$lib/maps/maps-data.js";
 import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
 import { createSelectionBucketState, makeKey } from "$lib/maps/selection-bucket.js";
-import type { FacetHeadsStatus, TargetFacetState, postFacetCommand } from "$lib/signals/signal-facets-client.js";
+import type { FacetHeadsStatus, TargetFacetState, FacetCommandPoster } from "$lib/signals/signal-facets-client.js";
 import Harness from "./SignauxSelPanelHarness.svelte";
 
 vi.mock("$lib/collab/annotations-client.js", () => ({
@@ -173,7 +173,7 @@ describe("SignauxSelPanel — reveal checkbox gating", () => {
 
 describe("SignauxSelPanel — controls and discard notice", () => {
   it("mounts the controls in the unfolded card and reports saves", async () => {
-    const postCommand = vi.fn<typeof postFacetCommand>(async () => null);
+    const postCommand = vi.fn<FacetCommandPoster>(async () => null);
     const onFacetSaved = vi.fn();
     render(Harness, {
       props: {
@@ -200,7 +200,7 @@ describe("SignauxSelPanel — controls and discard notice", () => {
       type: "DesignationEvent",
       id: "sig-1",
     });
-    expect(postCommand.mock.calls[0]![2]).toEqual({
+    expect(postCommand.mock.calls[0]![1]).toEqual({
       target: { citySlug: "delson", type: "DesignationEvent", id: "sig-1" },
       reasonCode: "N-ADMIN",
       expectedHeadId: null,
