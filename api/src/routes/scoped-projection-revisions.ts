@@ -1,9 +1,8 @@
 /**
- * 6L1 scoped projection-revision routes: authorized staleness detection
- * and coherent city reload.
- * GATED: this router is not mounted in `app.ts` until the protected 6H
- * activation opens the scope. Legacy readers keep serving unchanged
- * behavior; nothing here retires them (6K/6L own that cutover).
+ * 6L1 scoped projection-revision routes: authorized staleness detection,
+ * coherent city reload, and the scoped by-city aggregate (6H) that replaces
+ * the retired legacy aggregate read. Every route enforces the session, the
+ * approved account, the active membership and the open scoped epoch.
  */
 import { Hono } from "hono";
 import { z } from "zod";
@@ -22,11 +21,20 @@ import {
   readProjectionScope,
 } from "../services/facets/projection-revisions.js";
 import { readScopedPersonalHeads } from "../services/facets/scoped-reader.js";
+import { readScopedByCity } from "../services/facets/scoped-by-city.js";
 import { readWorkspaceArchiveCity } from "../services/facets/workspace-reader.js";
 
 const workspaceId = z.string().guid();
 const city = z.string().min(1).max(128).regex(/^[a-z0-9-]+$/);
 const mode = z.enum(["signal"]);
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+const flag = z.literal("1");
+const byCityQuery = z.object({
+  dateFrom: isoDate.optional(), dateTo: isoDate.optional(),
+  dateBasis: z.enum(["document", "scrap"]).optional(),
+  excludePiia: flag.optional(), excludeDerogations: flag.optional(), showDiscarded: flag.optional(),
+});
+const BY_CITY_PATH = "/api/v1/workspaces/:workspaceId/signal-facets/by-city";
 
 export interface ScopedProjectionRevisionsDeps extends ScopedSignalCardDeps {
   db: Database;
@@ -46,6 +54,7 @@ function revisionsOf(scope: { personalRevision: number; workspaceRevision: numbe
 const SCOPED_REVISION_GUARDED = [
   "/api/v1/workspaces/:workspaceId/signal-facets/projection-revisions",
   "/api/v1/workspaces/:workspaceId/signal-facets/coherent-city",
+  "/api/v1/workspaces/:workspaceId/signal-facets/by-city",
 ];
 
 export function scopedProjectionRevisionsRoute(deps: ScopedProjectionRevisionsDeps): Hono {
@@ -140,6 +149,39 @@ export function scopedProjectionRevisionsRoute(deps: ScopedProjectionRevisionsDe
         token: coherent.scope.token, revisions: revisionsOf(coherent.scope),
         heads, selection, signals, legacyProjection,
         counts: { total, hidden, visible: signals.length, selected } });
+    } catch (error) {
+      if (error instanceof WorkspaceError || error instanceof ScopeError) {
+        return c.json({ error: error.message }, error.status);
+      }
+      if (error instanceof FacetError) return c.json({ error: error.message }, error.status);
+      throw error;
+    }
+  });
+  // Scoped by-city aggregate: same wire shape and query parameters as the
+  // retired legacy aggregate, under the scoped guards and visibility.
+  app.get(BY_CITY_PATH, async (c) => {
+    const params = byCityQuery.safeParse({
+      dateFrom: c.req.query("dateFrom") || undefined, dateTo: c.req.query("dateTo") || undefined,
+      dateBasis: c.req.query("dateBasis") || undefined,
+      excludePiia: c.req.query("excludePiia") || undefined,
+      excludeDerogations: c.req.query("excludeDerogations") || undefined,
+      showDiscarded: c.req.query("showDiscarded") || undefined,
+    });
+    if (!params.success) return c.json({ error: "invalid_by_city_query" }, 400);
+    const q = params.data;
+    const filtered = q.dateFrom || q.dateTo || q.dateBasis === "scrap" || q.excludePiia || q.excludeDerogations;
+    const dateRange = filtered ? {
+      ...(q.dateFrom ? { dateFrom: q.dateFrom } : {}),
+      ...(q.dateTo ? { dateTo: q.dateTo } : {}),
+      ...(q.dateBasis === "scrap" ? { dateBasis: "scrap" as const } : {}),
+      ...(q.excludePiia ? { excludePiia: true } : {}),
+      ...(q.excludeDerogations ? { excludeDerogations: true } : {}),
+    } : undefined;
+    const session = c.get("session" as never) as { sub: string };
+    try {
+      const result = await readScopedByCity(deps.db, session.sub, c.req.param("workspaceId"),
+        { ...(dateRange ? { dateRange } : {}), showDiscarded: q.showDiscarded === "1" });
+      return c.json({ ok: true, totalCount: result.totalCount, cities: result.cities });
     } catch (error) {
       if (error instanceof WorkspaceError || error instanceof ScopeError) {
         return c.json({ error: error.message }, error.status);
