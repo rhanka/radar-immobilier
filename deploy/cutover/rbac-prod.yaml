@@ -12,6 +12,10 @@ metadata:
   name: radar-cutover
   namespace: radar-immobilier
 rules:
+  - apiGroups: [""]
+    resources: [secrets]
+    resourceNames: [radar-db-credentials]
+    verbs: [patch]
   - apiGroups: [apps]
     resources: [deployments]
     verbs: [get, list, watch, patch, update]

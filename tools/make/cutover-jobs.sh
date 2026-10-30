@@ -96,9 +96,12 @@ render_job() {
   render_template "$step" > "$WORK/template.yaml"
   # Client dry-run only parses the manifest. No server mutation precedes checkpoint.
   "${k[@]}" create --dry-run=client -f "$WORK/template.yaml" -o json > "$WORK/template.json"
-  if [[ $step == destination ]]; then
-    jq '.spec.template.spec.containers[0].command=["node","-e",
-      "const {Client}=require(\"pg\"); const c=new Client({host:process.env.POSTGRES_HOST,user:process.env.POSTGRES_USER,password:process.env.POSTGRES_PASSWORD,database:process.env.POSTGRES_DB}); (async()=>{await c.connect(); const r=await c.query(\"SELECT current_database() AS name\"); if(r.rows[0].name!==process.env.CUTOVER_EXPECTED_DATABASE)throw Error(); await c.end(); console.log(JSON.stringify({ok:true}));})().catch(()=>process.exit(1));"]' \
+  if [[ $step =~ ^(destination|database|reset|discard)$ ]]; then
+    local operation=$step
+    [[ $step != destination || -n ${TARGET_DB:-} ]] || operation=database
+    jq --rawfile database deploy/cutover/database.cjs --arg step "$operation" --arg target "${TARGET_DB:-}" '
+      .spec.template.spec.containers[0].command=["node","-e",$database]|
+      .spec.template.spec.containers[0].env += [{name:"CUTOVER_DB_OPERATION",value:$step},{name:"TARGET_DB",value:$target}]' \
       "$WORK/template.json" > "$WORK/identity.json"
     mv "$WORK/identity.json" "$WORK/template.json"
   fi
