@@ -153,6 +153,8 @@ if (tool === 'curl') {
   if (input.includes('-w')) out(`${code} ${type}`);
   process.exit();
 }
+// Rendered release manifests per kustomize directory (fixture: releaseManifests).
+if (args[0] === 'kustomize') { out({ apiVersion: 'v1', kind: 'List', items: s.releaseManifests?.[args.at(-1)] || [] }); process.exit(); }
 if (args[0] === 'config') { out(s.server || 'https://hlhedx.c1.bhs5.k8s.ovh.net'); process.exit(); }
 if (args[0] === 'port-forward') {
   // One local port per forwarded resource; curl resolves it back to the serving Pods.
@@ -220,7 +222,9 @@ function persist(o) {
   if (index < 0) s.objects.push(o); else s.objects[index] = o;
 }
 if (args[0] === 'create' || args[0] === 'replace' || args[0] === 'apply') {
-  let o = yaml.parse(fs.readFileSync(value('-f'), 'utf8'));
+  // Multi-document input (rendered release manifests) parses to a List, like kubectl.
+  const docs = yaml.parseAllDocuments(fs.readFileSync(value('-f'), 'utf8')).map(d => d.toJS()).filter(Boolean);
+  let o = docs.length === 1 ? docs[0] : { apiVersion: 'v1', kind: 'List', items: docs.flatMap(d => (d.kind === 'List' ? d.items : [d])) };
   if (args.includes('--dry-run=client')) { out(o); process.exit(); }
   const current = s.objects.find(x => x.kind === o.kind && x.metadata.name === o.metadata.name);
   if (args[0] === 'create' && current) process.exit(1);

@@ -318,7 +318,8 @@ canonical_smoke() {
   stop_forwards
 }
 reroll_canonical() {
-  # Images and a per-run template annotation: a new ReplicaSet even on an identical SHA.
+  # The release manifest spec (#611) with the live selector and replica count, the release images
+  # and a per-run template annotation: a new ReplicaSet even on an identical SHA.
   local name current desired
   for name in "${SLOT_SERVICES[@]}"; do
     if ! jq -e --arg n "$name" '.promotion.oldHashes[$n]!=null' "$WORK/record.json" >/dev/null; then
@@ -327,11 +328,14 @@ reroll_canonical() {
           .metadata.labels["pod-template-hash"]]|first//""')"
     fi
     current=$("${k[@]}" get deployment "$name" -o json)
-    desired=$(jq --slurpfile r "$WORK/record.json" '.spec|
+    release_object Deployment "$name" > "$WORK/release-deployment.json"
+    desired=$(jq --slurpfile r "$WORK/record.json" --argjson live "$current" --arg l "$SLOT_LABEL" '.spec|
+      .selector=$live.spec.selector|.replicas=$live.spec.replicas|
+      .template.metadata.labels=((.template.metadata.labels//{})|.[$l]="main")|
       .template.metadata.annotations=((.template.metadata.annotations//{})|.["sentropic.io/promoted-run"]=$r[0].run)|
       (.template.spec.containers[],.template.spec.initContainers[]?) |=
         (if (.image|test("^ghcr.io/rhanka/radar-api[:@]")) then .image=$r[0].release.apiImage
-          elif (.image|test("^ghcr.io/rhanka/radar-ui[:@]")) then .image=$r[0].release.uiImage else . end)' <<< "$current")
+          elif (.image|test("^ghcr.io/rhanka/radar-ui[:@]")) then .image=$r[0].release.uiImage else . end)' "$WORK/release-deployment.json")
     patch_spec deployment "$name" "$(jq -r .metadata.uid <<< "$current")" "$(jq -c .spec <<< "$current")" "$desired"
   done
   for name in "${SLOT_SERVICES[@]}"; do
@@ -346,6 +350,19 @@ reroll_canonical() {
 promote_stage() {
   # Order: export canonical logs, select the database, re-roll canonical, verify, route back,
   # drain, export prepared logs, delete the prepared slot.
+  # The specs running before the promotion travel in the receipt: a later rollback restores them.
+  if ! jq -e '.previousSpecs!=null' "$WORK/record.json" >/dev/null; then
+    local spec_name specs='{}'
+    for spec_name in "${SLOT_SERVICES[@]}"; do
+      specs=$(jq -c --argjson d "$("${k[@]}" get deployment "$spec_name" -o json)" \
+        '.["Deployment/"+$d.metadata.name]={kind:"Deployment",metadata:{name:$d.metadata.name},spec:$d.spec}' <<< "$specs")
+    done
+    while read -r spec_name; do
+      specs=$(jq -c --argjson c "$("${k[@]}" get cronjob "$spec_name" -o json)" \
+        '.["CronJob/"+$c.metadata.name]={kind:"CronJob",metadata:{name:$c.metadata.name},spec:$c.spec}' <<< "$specs")
+    done < <(jq -r --slurpfile cfg "$CONFIG" '.cronjobs[]|select(.name as $n|$cfg[0].cronjobs|index($n))|.name' "$WORK/record.json")
+    record_set '.previousSpecs=$s' --argjson s "$specs"
+  fi
   # The canonical Pods are followed by the export from before the re-roll until they exit.
   local main_logs=
   if ! jq -e '.promotion|has("mainLogsStep")' "$WORK/record.json" >/dev/null 2>&1; then
@@ -380,7 +397,10 @@ finalize_stage() {
   while read -r row; do
     name=$(jq -r .name <<< "$row"); uid=$(jq -r .uid <<< "$row")
     current=$("${k[@]}" get cronjob "$name" -o json)
-    desired=$(jq --slurpfile r "$WORK/record.json" '.spec|
+    # The release manifest of the CronJob when the release ships one (#611), else the live spec;
+    # always suspended here (restore_schedules below sets the original state).
+    desired=$(jq --slurpfile r "$WORK/record.json" --argjson release "$(release_find CronJob "$name")" '
+      (if $release then $release.spec else .spec end)|.suspend=true|
       (.jobTemplate.spec.template.spec.containers[],.jobTemplate.spec.template.spec.initContainers[]?) |=
         (if (.image|test("^ghcr.io/rhanka/radar-api[:@]")) then .image=$r[0].release.apiImage else . end)' <<< "$current")
     patch_spec cronjob "$name" "$uid" "$(jq -c .spec <<< "$current")" "$desired"
@@ -448,7 +468,7 @@ rollback_promoted() {
   jq -e --arg run "$original" '.run==$run and .checkpoints.promote=="completed" and .previousRelease!=null' "$WORK/receipt.json" >/dev/null ||
     fail 'RUN is not the last promoted cutover'
   lock_acquire cutover
-  jq --slurpfile x "$WORK/receipt.json" '$x[0] as $x|.mode="run"|.rollbackOf=$x.run|.release=$x.previousRelease|.previousRelease=$x.release|
+  jq --slurpfile x "$WORK/receipt.json" '$x[0] as $x|.mode="run"|.rollbackOf=$x.run|.releaseSpecs=$x.previousSpecs|.release=$x.previousRelease|.previousRelease=$x.release|
     .environment=$x.environment|.liveDb=(if $x.samedb then $x.liveDb else $x.targetDb end)|.targetDb=$x.liveDb' \
     "$WORK/record.json" > "$WORK/next.json"
   mv "$WORK/next.json" "$WORK/record.json"; record_save

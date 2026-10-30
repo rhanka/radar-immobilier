@@ -288,6 +288,18 @@ shard drops from about 27 pages to about 7 on the preprod bucket.
 
 ### Prepared slot
 
+Workload specs come from the release manifests (#611): `prepare` and `run` render
+the `manifests` directories of `config.json` with `kubectl kustomize` (preprod:
+`deploy/overlays/preprod` and `deploy/k8s/refresh-cronjobs`; production:
+`deploy/k8s` and `deploy/k8s/immo-mcp`) from the checkout, which must be the
+release commit (`release_manifests_mismatch` otherwise). The prepared Deployments
+are built from them, and the promotion applies the release Deployment specs (live
+selector and replica count kept) and the release CronJob specs to the canonical
+slot, so env, `secretKeyRef`, probes, resources or grace period changes reach the
+environment; a workload absent from the rendering refuses
+`release_manifest_missing`. The promotion records the specs that ran before
+(`previousSpecs`); a rollback rebuilds from those, never from another commit.
+
 After `destination`, `prepare` starts the prepared slot: `radar-api-prepared`,
 `radar-immo-mcp-prepared` and `radar-ui-prepared` Deployments plus internal
 Services of the same names and `radar-ui-nginx-prepared` (the UI nginx
@@ -430,7 +442,8 @@ sessions on the other slot answer 404 and the client re-initializes.
 `deploy-preprod` keeps its direct migrate + roll path. Adopted (conductor
 decision): `prepare` runs, `deploy-preprod` applies the configuration only
 (`RECONCILE_CONFIG_ONLY=1`: ConfigMaps, no Deployment or CronJob apply, no MCP
-roll, no migration, no `set-image`, no served-SHA assertion) and the job
+roll, no migration, no `set-image`, no served-SHA assertion; the workload specs
+of the release manifests arrive through the cutover promotion) and the job
 `rehearse-preprod-bluegreen` performs the preprod release itself:
 
 ```sh
