@@ -21,7 +21,8 @@
     expectedHeadIdFor,
     facetErrorMessage,
     isFacetWriteUnconfirmed,
-    postFacetCommand,
+    refuseUnscopedFacetCommand,
+    type FacetCommandPoster,
     SignalFacetError,
     type FacetAction,
     type FacetBasket,
@@ -54,7 +55,7 @@
     message: string,
   ) => void = () => {};
   /** Injectable for tests; defaults to the real facet client. */
-  export let postCommand: typeof postFacetCommand = postFacetCommand;
+  export let postCommand: FacetCommandPoster = refuseUnscopedFacetCommand;
   /** Parent-owned viewer identity, captured before each command. */
   export let viewerKey: FacetCommandLaunch["viewerKey"] = null;
   /** The parent purges its caches and re-reads detail, heads and by-city. */
@@ -146,7 +147,7 @@
     busy = true;
     error = null;
     try {
-      const event = await postCommand("", action, fullBody, commandKey!);
+      const event = await postCommand(action, fullBody, commandKey!);
       commandKey = null;
       lastIntent = null;
       if (viewerAtStart !== viewerKey) return;

@@ -6,13 +6,14 @@
  * feeds it. It replays the API-frozen transport bytes
  * (`api/tests/fixtures/graphify/legacy-filter-a/route-transport.golden.json`,
  * written by `api/src/routes/legacy-filter-a-transport-golden.test.ts`) through
- * the REAL client `fetchGraphSignalDetail` — served by a stubbed `fetch`, so the
+ * the REAL client `fetchGraphSignalDetail` (scoped coherent-city envelope) —
+ * served by a stubbed `fetch`, so the
  * bytes really cross the client parse — and then through the exact projection
  * call SignauxMapView makes (`projectNodesForVivierKey(detailNodes,
  * detailLegacyProjection, activeSubsetKey)`, SignauxMapView.svelte:549).
  *
  * Covered at that frontier: nominal members/order per legacy subset, the empty
- * city, the 404 shape, and corrupt/absent authority or membership (fail-closed).
+ * city, scoped refusals, and corrupt/absent authority or membership (fail-closed).
  * If the `legacySubset` / `legacyProjection` mapping regresses on EITHER side of
  * the wire, this test and its API twin go red — a layer-local golden cannot.
  *
@@ -44,9 +45,21 @@ const golden = JSON.parse(readFileSync(apiFixture("route-transport.golden.json")
 };
 const expected = expectedFixture as { projectionMembers: Record<string, string[]> };
 
-/** Serve `body` as the response bytes of GET /api/graph-signals/:city. */
+const WS = "11111111-1111-4111-8111-111111111111";
+
+/**
+ * Serve `body` on the scoped coherent-city wire (6H). The frozen golden
+ * nodes and authority are carried verbatim; only the envelope is the scoped
+ * one (`signals`, `token`, `heads`, `counts`).
+ */
 function serve(status: number, body: unknown): void {
-  const bytes = JSON.stringify(body);
+  const payload = body as { nodes?: unknown[]; legacyProjection?: unknown } | null;
+  const wire = status >= 200 && status < 300 && payload && Array.isArray(payload.nodes)
+    ? { ok: true, token: "token", heads: [], selection: [], signals: payload.nodes,
+      ...(payload.legacyProjection === undefined ? {} : { legacyProjection: payload.legacyProjection }),
+      counts: { total: payload.nodes.length, hidden: 0, visible: payload.nodes.length, selected: 0 } }
+    : body;
+  const bytes = JSON.stringify(wire);
   vi.stubGlobal(
     "fetch",
     vi.fn(async () => ({
@@ -57,10 +70,10 @@ function serve(status: number, body: unknown): void {
   );
 }
 
-/** What SignauxMapView holds after loadDetailForCity (SignauxMapView.svelte:1019). */
+/** What SignauxMapView holds after loadDetailForCity. */
 async function loadCity(status: number, body: unknown): Promise<GraphSignalDetailResponse> {
   serve(status, body);
-  return fetchGraphSignalDetail(golden.city);
+  return fetchGraphSignalDetail({ workspaceId: WS }, golden.city);
 }
 
 /** The exact projection call the view makes on the fetched response. */
@@ -101,15 +114,13 @@ describe("legacy Filter A transport golden — the served payload feeds the disp
 });
 
 describe("legacy Filter A transport golden — fail-closed at the wire", () => {
-  it("404 yields the honest empty state, and the projection is unavailable", async () => {
-    const res = await loadCity(404, golden.notFound404);
-    expect(res).toEqual({ ok: false, citySlug: golden.city, legacyProjection: null, nodes: [] });
-    expect(projectNodesForVivierKey(res.nodes, res.legacyProjection, "z|m|p")).toEqual(unavailable);
+  it("a scoped 404 is an error, never an empty map", async () => {
+    await expect(loadCity(404, { error: "workspace_not_found" })).rejects.toThrow(/404/);
   });
 
   it("a 5xx is an error, never a silently empty map", async () => {
     serve(500, { ok: false });
-    await expect(fetchGraphSignalDetail(golden.city)).rejects.toThrow(/500/);
+    await expect(fetchGraphSignalDetail({ workspaceId: WS }, golden.city)).rejects.toThrow(/500/);
   });
 
   it("a payload served WITHOUT legacyProjection is fail-closed on z|m|p", async () => {
