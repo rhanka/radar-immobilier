@@ -31,10 +31,18 @@ BEGIN
     GRANT USAGE ON SCHEMA artifacts TO ${IMMO_MCP_ARTIFACT_WRITER_ROLE};
     GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA artifacts TO ${IMMO_MCP_ARTIFACT_WRITER_ROLE};
     GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA artifacts TO ${IMMO_MCP_ARTIFACT_WRITER_ROLE};
-    -- Account admission: column reads plus the column UPDATE that SELECT ... FOR SHARE requires.
+    -- Account admission: column reads, plus the UPDATE on one column that
+    -- SELECT ... FOR SHARE requires. The column is created_at on both tables:
+    -- workspace_memberships has a composite key (workspace_id, account_id) and
+    -- every key or authorization column (id, sub, status, workspace_id,
+    -- account_id, revoked_at, capability flags) would let the writer rewrite
+    -- identity or membership scope. created_at is an audit timestamp that no
+    -- authorization path reads. Table-level REVOKE first also removes any
+    -- column UPDATE granted earlier, so replays converge to this exact set.
     GRANT USAGE ON SCHEMA public TO ${IMMO_MCP_ARTIFACT_WRITER_ROLE};
-    GRANT SELECT (id, sub, status), UPDATE (id) ON public.account_users TO ${IMMO_MCP_ARTIFACT_WRITER_ROLE};
-    GRANT SELECT (account_id, workspace_id, status, revoked_at), UPDATE (workspace_id)
+    REVOKE UPDATE ON public.account_users, public.workspace_memberships FROM ${IMMO_MCP_ARTIFACT_WRITER_ROLE};
+    GRANT SELECT (id, sub, status), UPDATE (created_at) ON public.account_users TO ${IMMO_MCP_ARTIFACT_WRITER_ROLE};
+    GRANT SELECT (account_id, workspace_id, status, revoked_at), UPDATE (created_at)
       ON public.workspace_memberships TO ${IMMO_MCP_ARTIFACT_WRITER_ROLE};
   END IF;
 END
