@@ -34,6 +34,8 @@ test('preprod blue/green: freeze, switch callers first, promotion re-rolls canon
     const all = calls(f);
     const secret = all.findIndex(c => / patch secret radar-db-credentials/.test(c));
     const reroll = all.findIndex((c, i) => i > secret && / patch deployment radar-api /.test(c));
+    const mainLogs = all.findIndex(c => c.includes('job-name=cutover-') && c.includes('-logsmain0'));
+    assert.ok(mainLogs > 0 && mainLogs < reroll, 'the canonical Pods are followed before the re-roll');
     assert.ok(secret > 0 && reroll > secret);
     assert.equal(db(f), 'radar_next');
     // Same SHA: the per-run annotation still forces a new ReplicaSet on every canonical Deployment.
@@ -113,14 +115,14 @@ test('a log manifest missing a Pod refuses every deletion; resume completes the 
     assert.notEqual(failed.status, 0);
     assert.match(failed.stderr, /Log manifest misses a recorded Pod/);
     assert.ok(lock(f), 'promotion started: the lock is retained');
-    assert.ok(object(f, 'radar-api-prepared', 'Deployment'));
-    assert.equal(object(f, 'radar-api', 'Deployment').spec.template.metadata.annotations, undefined, 'canonical untouched');
+    assert.ok(object(f, 'radar-api-prepared', 'Deployment'), 'no further deletion after an incomplete manifest');
     for (const name of SERVICES) assert.equal(slotOf(f, name), 'prepared', 'the release keeps being served');
     const record = JSON.parse(lock(f).data.record);
     const fixed = f.state(); fixed.logsMissing = false; save(f, fixed);
     success(f.run('resume', [`RUN=${record.run}`]));
     for (const name of SERVICES) assert.equal(slotOf(f, name), 'main');
     assert.equal(lock(f), undefined);
+    assert.deepEqual(receipt(f).logGaps, ['logsmain0'], 'the unrecoverable gap is explicit in the receipt');
   } finally { f.cleanup(); }
 });
 test('rollback of an interrupted run routes back to main and unfreezes the live database', () => {

@@ -91,7 +91,13 @@ run_job() {
   fi
   jq --arg step "$step" --arg uid "$uid" '.jobs[$step].uid=$uid' "$WORK/record.json" > "$WORK/next.json"
   mv "$WORK/next.json" "$WORK/record.json"; record_save
-  job_observe "$step" "$name" "$uid" "$budget"
+  # JOB_DETACH=1: started only; the caller observes it later with observe_job.
+  [[ ${JOB_DETACH:-0} == 1 ]] || job_observe "$step" "$name" "$uid" "$budget"
+}
+observe_job() {
+  local step=$1 budget=$2
+  job_observe "$step" "$(jq -r --arg s "$step" '.jobs[$s].name' "$WORK/record.json")" \
+    "$(jq -r --arg s "$step" '.jobs[$s].uid' "$WORK/record.json")" "$budget"
 }
 render_job() {
   local step=$1 name=$2 deadline=$3
