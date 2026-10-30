@@ -35,7 +35,7 @@ pin_backup() {
   run_job resolve 60 90
   jq -e '.ok==true and (.date|test("^[0-9]{4}-[0-9]{2}-[0-9]{2}$"))
     and (.pgSha256|test("^[a-f0-9]{64}$")) and (.manifestSha256|test("^[a-f0-9]{64}$"))
-    and .pgSizeBytes>0 and .ageHours<=26' "$WORK/verdict.json" >/dev/null || fail 'Invalid or stale backup pin'
+    and .pgSizeBytes>0 and (.ageHours|type=="number") and .ageHours>=0 and .ageHours<=26' "$WORK/verdict.json" >/dev/null || fail 'Invalid or stale backup pin'
   jq --slurpfile pin "$WORK/verdict.json" '.pin=$pin[0]' "$WORK/record.json" > "$WORK/next.json"
   mv "$WORK/next.json" "$WORK/record.json"; record_save
 }
