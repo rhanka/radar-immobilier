@@ -8,7 +8,7 @@ export function fixture(changes = {}) {
   const bin = join(dir, 'bin'); mkdirSync(bin);
   const boundary = resolve('deploy/cutover/test-boundary.cjs');
   for (const tool of ['kubectl', 'curl']) writeFileSync(join(bin, tool),
-    `#!/bin/sh\ncase "$*" in *port-forward*) exec node '${boundary}' '${tool}' "$@";; esac\nexec flock -F '${dir}/mutex' node '${boundary}' '${tool}' "$@"\n`, { mode: 0o755 });
+    `#!/bin/sh\ncase "$*" in *port-forward*|*auth?can-i*) exec node '${boundary}' '${tool}' "$@";; esac\nexec flock -F '${dir}/mutex' node '${boundary}' '${tool}' "$@"\n`, { mode: 0o755 });
   const sha = 'a'.repeat(40);
   const release = { version: 1, gitSha: sha, apiImage: `ghcr.io/rhanka/radar-api@sha256:${'b'.repeat(64)}`,
     uiImage: `ghcr.io/rhanka/radar-ui@sha256:${'c'.repeat(64)}`, apiServedSha: sha, uiServedSha: sha.slice(0, 7), dataMigration: '6h' };
