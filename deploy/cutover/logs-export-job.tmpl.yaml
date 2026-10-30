@@ -1,7 +1,7 @@
-# Cutover log export (R5): copies the current and previous logs of every container of the
-# listed Pods to the recovery bucket, with a re-read sha256 manifest, BEFORE those Pods are
-# deleted or re-rolled. Rendered by tools/make/cutover-render.sh (steps `logsmain`,
-# `logsprep`); the controller only reads Job status and sanitized termination messages.
+# Cutover log export (R5): follows the current log of every container of the listed Pods until
+# the container exits (started before any deletion, Ready once every stream is open), adds the
+# previous instance, then writes a re-read sha256 manifest. Rendered by cutover-render.sh (steps
+# `logs*`); the controller only reads Job status, readiness and sanitized termination messages.
 # Placeholders: ${JOB_NAME} ${NAMESPACE} ${IMAGE} ${TTL_SECONDS} ${LOG_PODS} ${LOG_PREFIX}
 # ${BACKUP_S3_ENDPOINT} ${BACKUP_S3_REGION} ${BACKUP_S3_BUCKET} ${S3_SECRET}, plus the
 # LOG_SCRIPT placeholder under the container args (multi-line, never written in a comment).
@@ -51,6 +51,7 @@ ${LOG_SCRIPT}
             - { name: AWS_EC2_METADATA_DISABLED, value: "true" }
             - { name: LOG_PODS, value: '${LOG_PODS}' }
             - { name: LOG_PREFIX, value: "${LOG_PREFIX}" }
+            - { name: LOG_READY_FILE, value: "/tmp/streams-open" }
             - { name: LOG_BUCKET, value: "${BACKUP_S3_BUCKET}" }
             - { name: S3_ENDPOINT, value: "${BACKUP_S3_ENDPOINT}" }
             - { name: S3_REGION, value: "${BACKUP_S3_REGION}" }
@@ -64,6 +65,10 @@ ${LOG_SCRIPT}
             capabilities:
               drop:
                 - ALL
+          # Ready once every follow stream is open: the controller deletes nothing before.
+          readinessProbe:
+            exec: { command: ["cat", "/tmp/streams-open"] }
+            periodSeconds: 1
           resources:
             requests: { cpu: 20m, memory: 96Mi }
             limits: { cpu: 200m, memory: 256Mi }

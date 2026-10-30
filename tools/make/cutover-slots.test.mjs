@@ -23,8 +23,11 @@ test('slot adoption orphans, recreates on slot=main, moves the Service selector,
       const orphaned = calls.findIndex(c => c.includes(`/deployments/${name}`) && c.includes('delete'));
       const selected = calls.findIndex(c => c.includes(`patch service ${name}`));
       const removed = calls.findIndex(c => c.includes(`/replicasets/${name}-rs`));
+      const followed = calls.findIndex((c, i) => i > selected && c.includes('job-name=cutover-') && /-logsorphan[0-9]/.test(c));
+      assert.ok(followed > selected && followed < removed, `${name}: orphan logs followed before the ReplicaSet deletion`);
       assert.ok(orphaned >= 0 && orphaned < selected && selected < removed, `${name}: ${orphaned} < ${selected} < ${removed}`);
     }
+    assert.equal(f.state().jobCreation.filter(j => j.step.startsWith('logsorphan')).length, 3);
     assert.equal(get(f, 'ConfigMap', 'radar-change-lock'), undefined);
     const before = f.calls().length;
     assert.equal(f.run('slots-adopt', ['DRAIN=0']).status, 0, 'rerun');
