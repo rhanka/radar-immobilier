@@ -17,7 +17,9 @@ render_template() {
   BACKUP_DATE=$(jq -r '.pin.date//""' "$WORK/record.json")
   PIN_MANIFEST_SHA256=$(jq -r '.pin.manifestSha256//""' "$WORK/record.json")
   PIN_PG_SHA256=$(jq -r '.pin.pgSha256//""' "$WORK/record.json")
-  EXPECTED_DATABASE=$(jq -r --arg e "$ENV" '.[$e].database' "$CONFIG")
+  EXPECTED_DATABASE=$(jq -r '.targetDb//.liveDb//"radar"' "$WORK/record.json")
+  export TARGET_DB
+  TARGET_DB=$(jq -r '.targetDb//""' "$WORK/record.json")
   export DST_BUCKET FORBIDDEN_DST_BUCKETS COPY_GRANTEE COPY_CONCURRENCY=${COPY_CONCURRENCY:-48} DOCS_DRY=0
   COPY_GRANTEE=$(jq -r .storage.copyGrantee "$CONFIG")
   DST_BUCKET=$(jq -r --arg e "$ENV" '.[$e].documents' "$CONFIG")
@@ -31,14 +33,14 @@ render_template() {
       export UPLOAD_IMAGE=peakcom/s5cmd:v2.2.2 BACKUP_S3_ENDPOINT=$S3_ENDPOINT BACKUP_S3_REGION=$S3_REGION
       export BACKUP_S3_BUCKET=$EXPECTED_BACKUP_BUCKET S3_SECRET KEY="db-backups/cutover-$ENV-$RUN.sql.gz"
       S3_SECRET=$(jq -r .storage.backupSecret "$CONFIG");;
-    ddl|destination) template=deploy/k8s/36-db-migrate-job.yaml;;
+    ddl|destination|database|reset|discard) template=deploy/k8s/36-db-migrate-job.yaml;;
     data) template=deploy/cutover/data-migrate-job.tmpl.yaml;;
     refs)
       template=deploy/ci/bascule-preprod/served-refs-job.tmpl.yaml
       export REFS_CONFIGMAP_PREFIX=immo-served-refs REFS_CONFIGMAP_COUNT=4 REFS_WRITER_SA=radar-bascule-refs-writer;;
     *) fail 'Unknown fixed Job operation';;
   esac
-  if [[ $step == ddl || $step == destination ]]; then
+  if [[ $step =~ ^(ddl|destination|database|reset|discard)$ ]]; then
     sed 's/^  namespace: radar-immobilier$/  namespace: ${NAMESPACE}/' "$template" > "$WORK/ddl-template.yaml"
     template=$WORK/ddl-template.yaml
   fi
