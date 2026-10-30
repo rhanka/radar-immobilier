@@ -112,3 +112,46 @@ for (const step of ['restore', 'backup', 'ddl', 'data']) {
     });
   }
 }
+test('daily restoration probes and writes the recovery backup to the preprod bucket', () => {
+  const f = fixture();
+  try {
+    success(f.run('run', ['RELEASE=deployed', 'MODE=restore']));
+    const creation = f.state().jobCreation;
+    const probe = creation.findIndex(j => j.step === 'probe');
+    assert.ok(probe >= 0 && probe < creation.findIndex(j => j.closed));
+    const jobs = f.state().objects.filter(o => o.kind === 'Job');
+    for (const step of ['probe', 'backup']) {
+      const spec = JSON.stringify(jobs.find(o => o.metadata.name.endsWith(`-${step}`)).spec);
+      assert.ok(spec.includes('s3://sentropic-pgbackup-preprod/db-backups/cutover-preprod-'), step);
+      assert.ok(!spec.includes('radar-immobilier-backup/db-backups'), step);
+    }
+    const receipt = JSON.parse(f.state().objects.find(o => o.metadata.name === 'radar-cutover-receipt').data.receipt);
+    assert.match(receipt.recoveryReference, /^s3:\/\/sentropic-pgbackup-preprod\/db-backups\//);
+  } finally { f.cleanup(); }
+});
+test('unwritable recovery bucket fails before closure and reopens nothing', () => {
+  const f = fixture({ failJob: 'probe' });
+  try {
+    const original = f.state().objects.find(o => o.kind === 'Ingress').spec;
+    assert.notEqual(f.run().status, 0);
+    assert.equal(lock(f), undefined);
+    assert.equal(f.state().jobCreation.some(j => j.closed), false);
+    assert.equal(f.state().jobCreation.some(j => ['docs', 'restore', 'backup'].includes(j.step)), false);
+    assert.deepEqual(f.state().objects.find(o => o.kind === 'Ingress').spec, original);
+    assert.equal(f.state().objects.find(o => o.metadata.name === 'radar-refresh-pv').spec.suspend, false);
+  } finally { f.cleanup(); }
+});
+for (const step of ['restore', 'backup']) {
+  test(`explicit resume relaunches a failed ${step} Job under a new name`, () => {
+    const f = fixture({ failJob: step });
+    try {
+      assert.notEqual(f.run().status, 0);
+      const run = record(f).run;
+      const state = f.state(); state.failJob = null;
+      writeFileSync(join(f.dir, 'state.json'), JSON.stringify(state));
+      success(f.run('resume', [`RUN=${run}`]));
+      const names = f.state().objects.filter(o => o.kind === 'Job' && o.metadata.name.endsWith(`-${step}`)).map(o => o.metadata.name);
+      assert.deepEqual(names.sort(), [`cutover-${run}-1-${step}`, `cutover-${run}-${step}`].sort());
+    } finally { f.cleanup(); }
+  });
+}
