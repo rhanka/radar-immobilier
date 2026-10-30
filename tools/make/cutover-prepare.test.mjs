@@ -27,6 +27,7 @@ test('prepare stamps ready without closing live services and releases the lock d
       assert.equal(env.find(e => e.name === 'POSTGRES_DB').value, 'radar_next');
       if (job.metadata.name.endsWith('-restore')) {
         assert.equal(env.find(e => e.name === 'PGDATABASE').value, 'radar_next');
+        assert.equal(env.find(e => e.name === 'LIVE_DB').value, 'radar');
         assert.equal(job.spec.template.spec.containers[0].resources.limits.cpu, '4');
       }
       if (job.metadata.name.endsWith('-data')) {
@@ -113,6 +114,9 @@ test('production prepares a recovery backup and cutover changes images without r
     success(f.run('run', ['MODE=run'], 'prod'));
     const steps = f.state().jobCreation.map(j => j.step);
     assert.equal(steps.filter(s => s === 'backup').length, 1);
+    assert.ok(steps.indexOf('probe') >= 0 && steps.indexOf('probe') < steps.indexOf('backup'));
+    const backup = f.state().objects.find(o => o.kind === 'Job' && o.metadata.name.endsWith('-backup'));
+    assert.ok(JSON.stringify(backup.spec).includes('s3://sentropic-pgbackup/db-backups/cutover-prod-'));
     assert.ok(steps.every(s => !['restore', 'ddl', 'data', 'docs', 'recon'].includes(s)));
     assert.equal(f.calls().some(c => c.includes('patch') && c.includes('secret')), false);
   } finally { f.cleanup(); }
