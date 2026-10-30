@@ -34,8 +34,14 @@ rbac_rights() {
 rbac_preflight() {
   local verb resource group sub name label i=0 rights
   rights=$(rbac_rights) || fail "Unreadable RBAC manifest deploy/cutover/rbac-$ENV.yaml"
+  # A type the API server does not serve (CRD not installed, or a group x resource
+  # pair that does not exist) has nothing to authorize: can-i would answer "no".
+  # Partial discovery (an unavailable aggregated API) still lists the served core types.
+  "${k[@]}" api-resources -o name > "$WORK/rbac-served" || [[ -s $WORK/rbac-served ]] || fail 'Cannot list served API resources'
+  grep -qxF configmaps "$WORK/rbac-served" && grep -qxF jobs.batch "$WORK/rbac-served" || fail 'Served API resource discovery is incomplete'
   rm -f "$WORK"/rbac-missing.*
   while IFS='|' read -r verb resource group sub name; do
+    grep -qxF "$resource${group:+.$group}" "$WORK/rbac-served" || continue
     i=$((i+1))
     label="$verb $resource${group:+.$group}${sub:+/$sub}${name:+ $name}"
     (
