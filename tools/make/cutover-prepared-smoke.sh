@@ -46,7 +46,7 @@ prepared_stack_delete() {
 prepared_stack_up() {
   local db=$1 name row
   render_prepared_stack "$db"
-  if prepared_stack_present; then prepared_stack_delete; fi
+  ! prepared_stack_present || fail 'Prepared slot still present; retire it (logs exported) first'
   prepared_quota_preflight
   while read -r row; do
     printf '%s' "$row" > "$WORK/prepared-object.json"

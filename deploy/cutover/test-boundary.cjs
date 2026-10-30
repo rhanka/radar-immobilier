@@ -25,8 +25,12 @@ const key = kind => ({ configmap: 'ConfigMap', configmaps: 'ConfigMap', deployme
   pvc: 'PersistentVolumeClaim', resourcequotas: 'ResourceQuota' })[kind];
 const find = (kind, name) => s.objects.find(o => o.kind === key(kind) && o.metadata.name === name);
 const value = flag => args[args.indexOf(flag) + 1];
+const envOf = (job, name) => job.spec.template.spec.containers[0].env?.find(e => e.name === name)?.value;
 const jobVerdict = (step, job) => step === 'tplseal' ? { ok: true, sizeBytes: 281512198 }
-  : ['database', 'destination', 'clone', 'tplreset', 'discard'].includes(step)
+  : step === 'freeze' ? (s.frozenAt = new Date().toISOString(), save(), { ok: true, frozenAt: s.frozenAt })
+  : step.startsWith('unfreeze') ? (s.unfrozen = (s.unfrozen || 0) + 1, save(), { ok: true, unfrozenAt: new Date().toISOString() })
+  : step.startsWith('logs') ? { ok: true, podUids: JSON.parse(envOf(job, 'LOG_PODS')).map(p => p.uid).slice(s.logsMissing ? 1 : 0) }
+  : ['database', 'identity', 'destination', 'clone', 'tplreset', 'discard'].includes(step)
   ? { ok: true, database: job.spec.template.spec.containers[0].env.find(e => e.name === 'POSTGRES_DB')?.value
     || Buffer.from(find('secret', 'radar-db-credentials').data.POSTGRES_DB, 'base64').toString(), migrations: 25 }
   : step === 'resolve' ? { ok: true, date: '2026-10-29', backupId: 'latest', ageHours: 1,
@@ -105,6 +109,34 @@ if (tool === 'curl') {
   if (route === '/') { type = 'text/html'; body = '<html></html>'; }
   if (route === '/build.json') body = { sha: s.release.uiServedSha };
   if (route === '/health') body = { sha: s.release.apiServedSha, db: { ok: true }, objectStore: { ok: true } };
+  // Builds are served by the Pods behind the route: public routes through the canonical Services,
+  // private ones through the forwarded resource (a UI proxies /health to its slot's API Service).
+  const podsOf = resource => {
+    const [kind, name] = resource.split('/');
+    const running = p => p.kind === 'Pod' && p.status?.phase === 'Running' && !s.unready?.includes(p.metadata.labels?.['sentropic.io/slot']);
+    if (kind === 'service') {
+      const selector = find('service', name)?.spec.selector;
+      if (!selector) return undefined;
+      return s.objects.filter(p => running(p) && Object.entries(selector).every(([k, v]) => p.metadata.labels?.[k] === v));
+    }
+    const d = find('deployment', name);
+    if (!d) return undefined;
+    const sets = s.objects.filter(r => r.kind === 'ReplicaSet' && r.metadata.ownerReferences?.some(o => o.uid === d.metadata.uid)).map(r => r.metadata.uid);
+    return s.objects.filter(p => running(p) && p.metadata.ownerReferences?.some(o => sets.includes(o.uid)));
+  };
+  const port = /^https?:\/\/127\.0\.0\.1:(\d+)/.exec(url)?.[1];
+  const forwarded = port && fs.existsSync(path.join(dir, `forward-${port}`)) ? fs.readFileSync(path.join(dir, `forward-${port}`), 'utf8') : null;
+  let resource = publicProbe ? (route === '/health' ? 'service/radar-api' : 'service/radar-ui') : forwarded;
+  if (resource && route === '/health' && /radar-ui/.test(resource)) resource = /prepared/.test(resource) ? 'service/radar-api-prepared' : 'service/radar-api';
+  if (resource && (route === '/health' || route === '/build.json')) {
+    const pods = podsOf(resource);
+    if (pods && !pods.length) code = 503;
+    const image = pods?.[0]?.status.containerStatuses?.[0]?.imageID;
+    if (s.preparedStale && publicProbe && route === '/build.json' && pods?.[0]?.metadata.labels?.['sentropic.io/slot'] === 'prepared') body.sha = 'stale';
+    if (image && s.previousSha && image !== s.release.apiImage && image !== s.release.uiImage) {
+      body.sha = route === '/health' ? s.previousSha : s.previousSha.slice(0, 7);
+    }
+  }
   if (route === '/api/v1/workspaces' || route === '/mcp') { code = 401; headers = 'WWW-Authenticate: Bearer realm="radar"\r\n'; }
   if (route.includes('well-known')) body = { resource: `${s.url}/mcp` };
   if (s.badSha && route === '/build.json') body.sha = 'stale';
@@ -120,7 +152,11 @@ if (tool === 'curl') {
 if (args[0] === 'exec') { out(s.pvcMeasure ?? '3000000000 20000000000 21474836480\n'); process.exit(); }
 if (args[0] === 'config') { out(s.server || 'https://hlhedx.c1.bhs5.k8s.ovh.net'); process.exit(); }
 if (args[0] === 'port-forward') {
-  out(`Forwarding from 127.0.0.1:${args.includes('service/radar-ui') ? 18080 : 18848} -> service\n`);
+  // One local port per forwarded resource; curl resolves it back to the serving Pods.
+  const resource = args.find(a => /^(service|pod|deployment)\//.test(a));
+  const port = 20000 + [...resource].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 20000, 7);
+  fs.writeFileSync(path.join(dir, `forward-${port}`), resource);
+  out(`Forwarding from 127.0.0.1:${port} -> ${resource}\n`);
   setInterval(() => {}, 1000); return;
 }
 if (args[0] === 'rollout') process.exit(s.missingMcp && args.includes('deployment/radar-immo-mcp') ? 1 : 0);
@@ -154,9 +190,11 @@ function rollout(d) {
   for (let i = 0; i < d.spec.replicas; i++) {
     s.objects.push({ kind: 'Pod', metadata: { name: `${d.metadata.name}-pod${generation}-${i}`, uid: `uid-pod-${generation}-${i}`,
       labels: { ...(d.spec.template.metadata?.labels || {}), 'pod-template-hash': `h${generation}` },
-      ownerReferences: [{ kind: 'ReplicaSet', controller: true, uid: rs.metadata.uid }] },
+      ownerReferences: [{ kind: 'ReplicaSet', controller: true, uid: rs.metadata.uid, name: rs.metadata.name }] },
     spec: { containers: d.spec.template.spec.containers },
-    status: { phase: 'Running', containerStatuses: d.spec.template.spec.containers.map(c => ({ name: c.name, ready: true, imageID: c.image })) } });
+    // The kubelet reports the resolved digest, also for a tag reference.
+    status: { phase: 'Running', containerStatuses: d.spec.template.spec.containers.map(c => ({ name: c.name, ready: true,
+      imageID: c.image.includes('@sha256:') ? c.image : `${c.image.replace(/:[^:@/]+$/, '')}@sha256:${'0'.repeat(64)}` })) } });
   }
 }
 // EndpointSlices are derived from the Service selector and the Running Pods.
@@ -205,7 +243,10 @@ if (args[0] === 'create' || args[0] === 'replace' || args[0] === 'apply') {
       availableReplicas: o.spec.replicas, observedGeneration: 1 };
   }
   persist(o);
-  if (o.kind === 'Deployment' && !current) rollout(o);
+  if (o.kind === 'Deployment' && !current) {
+    rollout(o);
+    (s.created ||= []).push({ name: o.metadata.name, db: o.spec.template.spec.containers[0].env?.find(e => e.name === 'POSTGRES_DB')?.value });
+  }
   save(); out(o);
   if (s.apiLostAfterRestore && o.kind === 'Job' && o.metadata.name.endsWith('-restore')) { s.apiLost = true; save(); }
   if (o.kind === 'Job') crash(o.metadata.name.split('-').at(-1), 'after-create');

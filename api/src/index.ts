@@ -1,6 +1,7 @@
 import { serve } from "@hono/node-server";
 import { readArtifactsEnv } from "@radar/artifacts-host";
 import { createApp } from "./app.js";
+import { createGraceful } from "./lifecycle/graceful.js";
 import { startArtifactControl } from "./artifacts/control-route-startup.js";
 import { contentHostAppOption, resolveContentHostConfig } from "./artifacts/content-config.js";
 import { createBasketReadOperation } from "./artifacts/reader-baskets.js";
@@ -139,7 +140,9 @@ const durableRetirement = await readDurableLegacyRetirement(dbHandle.db).catch((
   return "cutover-closed" as const;
 });
 
+const graceful = createGraceful();
 const app = createApp({
+  graceful,
   checkDb: makeDbProbe(dbHandle),
   checkObjectStore: makeObjectStoreProbe(objectStore),
   store: objectStore,
@@ -175,6 +178,16 @@ void scrapeObjectStore
     logger.warn({ err: String(e) }, "ensureBucket (scrape) failed"),
   );
 
-serve({ fetch: app.fetch, port: config.PORT }, (info) => {
+const server = serve({ fetch: app.fetch, port: config.PORT }, (info) => {
   logger.info({ port: info.port, env: config.NODE_ENV }, "radar-api listening");
+});
+
+// Blue/green cutover: SIGTERM stops accepting, closes SSE streams and waits for in-flight
+// requests (25 s, inside the 30 s termination grace period) before exiting.
+process.once("SIGTERM", () => {
+  logger.info({ inflight: graceful.inflight(), streams: graceful.streams() }, "SIGTERM: draining");
+  void graceful.shutdown(server, 25_000).then((outcome) => {
+    logger.info({ outcome }, "radar-api stopped");
+    process.exit(0);
+  });
 });

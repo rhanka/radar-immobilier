@@ -38,7 +38,6 @@ job_observe() {
       fail "Job failed: $name (sanitized; inspect in cluster)"
     fi
     if ((SECONDS>=deadline)); then
-      if [[ -n ${FAST_DEADLINE:-} ]] && ((SECONDS+5>=FAST_DEADLINE)); then budget_exhausted; fi
       delete_job_uid "$name" "$uid"
       local termination=$((SECONDS+120))
       until job_pods_ended "$name" "$uid"; do
@@ -47,17 +46,11 @@ job_observe() {
       done
       fail "Job deadline exceeded: $name; execution terminated"
     fi
-    sleep 2
+    sleep "${JOB_POLL:-2}"
   done
 }
 run_job() {
   local step=$1 deadline=$2 budget=$3 name uid existing
-  if [[ -n ${FAST_DEADLINE:-} ]]; then
-    local remaining=$((FAST_DEADLINE-SECONDS-5))
-    ((remaining>20)) || budget_exhausted
-    ((deadline<=remaining)) || deadline=$remaining
-    ((budget<=remaining)) || budget=$remaining
-  fi
   name="cutover-$RUN-$step"
   existing=$(jq -c --arg step "$step" '.jobs[$step]//null' "$WORK/record.json")
   if [[ ${RECOVERING:-0} == 1 && $step =~ ^(ddl|data|restore|backup)$ && $existing != null ]]; then
@@ -105,8 +98,9 @@ render_job() {
   render_template "$step" > "$WORK/template.yaml"
   # Client dry-run only parses the manifest. No server mutation precedes checkpoint.
   "${k[@]}" create --dry-run=client -f "$WORK/template.yaml" -o json > "$WORK/template.json"
-  if [[ $step =~ ^(destination|database|clone|discard|tplreset|tplseal)$ ]]; then
-    local operation=$step
+  if [[ $step =~ ^(destination|database|identity|clone|discard|tplreset|tplseal|freeze|unfreeze|unfreezeprev|probeverify)$ ]]; then
+    local operation=${step%prev}
+    [[ $step != identity ]] || operation=database
     [[ $step != destination || -n ${TARGET_DB:-} ]] || operation=database
     jq --rawfile database deploy/cutover/database.cjs --arg step "$operation" --arg target "${TARGET_DB:-}" '
       .spec.template.spec.containers[0].command=["node","-e",$database]|

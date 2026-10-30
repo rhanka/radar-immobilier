@@ -28,7 +28,7 @@ ACQUIRED=0
 cleanup() {
   local code=$?
   trap - EXIT INT TERM
-  unset FAST_DEADLINE REQUEST_DEADLINE
+  unset REQUEST_DEADLINE
   stop_forwards
   if [[ ${STAGING:-0} == 1 && $code != 0 ]]; then
     (set -e; template_write failed) || printf 'Template stamp state unknown\n' >&2
@@ -50,9 +50,18 @@ cleanup() {
       jq '.executor.state="stopped"' "$WORK/record.json" > "$WORK/next.json"
       mv "$WORK/next.json" "$WORK/record.json"
       record_save || printf 'Could not record executor stop; reconcile liveness through resume\n' >&2
+    elif jq -e '.mode=="run" and .checkpoints.promote!=null' "$WORK/record.json" >/dev/null; then
+      # A started promotion completes forward: routing and images are reconciled by resume.
+      (set -e; stop_operation_jobs) || printf 'Database Job termination unknown; lock retained\n' >&2
+      jq '.executor.state="stopped"' "$WORK/record.json" > "$WORK/next.json"
+      mv "$WORK/next.json" "$WORK/record.json"
+      record_save || printf 'Could not record executor stop; reconcile liveness through resume\n' >&2
+      printf 'Promotion interrupted; complete it with resume RUN=%s\n' "$RUN" >&2
     else
-      # Preclosure helper Jobs must end before ownership is released.
+      # Preclosure helper Jobs must end before ownership is released; a release cutover
+      # returns routing to slot=main and reopens live writes first.
       (set -e; stop_operation_jobs
+        if jq -e '.mode=="run"' "$WORK/record.json" >/dev/null; then back_to_main; fi
         if jq -e '.checkpoints.suspend!=null' "$WORK/record.json" >/dev/null; then restore_schedules; fi
         lock_delete) || printf 'Helper state unknown; lock retained\n' >&2
     fi
@@ -70,7 +79,7 @@ case ${1:-} in
   pvc-verify) rbac_preflight; pvc_verify;;
   slots-adopt) rbac_preflight; slots_adopt;;
   stage) rbac_preflight; stage_command;;
-  rollback) lock_resume; rollback_stages;;
+  rollback) rbac_preflight; rollback_command;;
   status)
     "${k[@]}" get configmap radar-change-lock --ignore-not-found -o json > "$WORK/lock.json"
     if [[ ! -s $WORK/lock.json ]]; then printf 'No active change operation\n'; exit; fi
@@ -110,7 +119,7 @@ case ${1:-} in
     else save_release "$RELEASE"; fi
     if [[ ${MODE:-} == list ]]; then run_job list 540 600; report_listing; lock_delete; exit; fi
     inventory
-    suspend_writers kill
+    if [[ ${MODE:-run} == run ]]; then suspend_writers drain; else suspend_writers kill; fi
     if [[ ${MODE:-run} == restore ]]; then
       run_job database 30 45
       jq --slurpfile db "$WORK/verdict.json" '.liveDb=$db[0].database' "$WORK/record.json" > "$WORK/next.json"

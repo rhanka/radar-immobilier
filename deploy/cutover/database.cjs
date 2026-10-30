@@ -67,6 +67,32 @@ const OPERATIONS = {
     return { migrations };
   },
   database: c => measure(c),
+  // Preprod switch: from frozenAt the live database accepts no write. New sessions start
+  // read-only (25006 on write); sessions opened before the change are terminated (57P01) and
+  // read back as gone. The API answers both with an explicit 503 maintenance_read_only.
+  async freeze(c) {
+    if (!valid(target)) throw Error();
+    await c.query(`ALTER DATABASE "${target}" SET default_transaction_read_only = on`);
+    const since = (await c.query('SELECT clock_timestamp() AS at')).rows[0].at;
+    const writable = `SELECT pid FROM pg_stat_activity WHERE datname=$1 AND pid<>pg_backend_pid()
+      AND backend_type='client backend' AND backend_start < $2`;
+    for (let attempt = 0; attempt < 10; attempt++) {
+      await c.query(`SELECT pg_terminate_backend(pid, 3000) FROM (${writable}) s`, [target, since]);
+      if ((await c.query(writable, [target, since])).rows.length === 0) {
+        return { frozenAt: (await c.query('SELECT clock_timestamp() AS at')).rows[0].at.toISOString() };
+      }
+    }
+    throw Error('writable_sessions_remain');
+  },
+  // Rollback before promotion: writes again, and pooled read-only sessions reconnect writable.
+  async unfreeze(c) {
+    if (!valid(target)) throw Error();
+    await c.query(`ALTER DATABASE "${target}" RESET default_transaction_read_only`);
+    const since = (await c.query('SELECT clock_timestamp() AS at')).rows[0].at;
+    await c.query(`SELECT pg_terminate_backend(pid, 3000) FROM pg_stat_activity WHERE datname=$1
+      AND pid<>pg_backend_pid() AND backend_type='client backend' AND backend_start < $2`, [target, since]);
+    return { unfrozenAt: since.toISOString() };
+  },
 };
 async function main() {
   if (env.POSTGRES_HOST !== 'radar-postgres' || !valid(env.POSTGRES_DB) || !OPERATIONS[operation]) throw Error();
