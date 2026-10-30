@@ -30,7 +30,7 @@
 - [x] Lot 0: read rules, confirm branch, identify isolated Make targets.
 - [ ] Lot 1: bulk version resolution and sweep exclusion, backup selftests (9,418 unpinned candidates, 268 pages).
 - [ ] Lot 2: database identity, explicit target env, parallel restore and Secret patch RBAC implemented; validation pending.
-- [ ] Lot 3: prepare lifecycle, stamp, isolated smoke and cleanup.
+- [ ] Lot 3: prepared stamp ownership and freshness implemented; lifecycle, smoke and cleanup follow.
 - [ ] Lot 4: prepared verification, switch, rollback and early writer suspension.
 - [ ] Lot 5: mandatory CI preparation gate and fake-cluster acceptance tests.
 - [ ] Lot 6: existing controller suite, empty-HOME checks, API suite, lint, typecheck, down -v.
