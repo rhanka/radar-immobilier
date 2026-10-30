@@ -4,6 +4,7 @@ import pg from "pg";
 import type { AppConfig } from "../config.js";
 import type { ProbeResult } from "../routes/health.js";
 import { schema } from "./schema.js";
+import { instrumentPool } from "../lifecycle/maintenance.js";
 
 export type Database = NodePgDatabase<typeof schema>;
 
@@ -26,11 +27,9 @@ export function createDb(config: AppConfig): DbHandle {
     connectionTimeoutMillis: 3000,
     max: 5,
   });
-  // An idle pooled session terminated by the server (cutover freeze/unfreeze, restart) must not
-  // crash the process: the pool drops it and the next checkout opens a fresh session.
-  pool.on("error", (error: Error & { code?: string }) => {
-    console.warn(JSON.stringify({ level: "warn", msg: "postgres idle session lost", code: error.code ?? null }));
-  });
+  // A session terminated by the server (cutover freeze/unfreeze, restart), idle or checked out,
+  // never crashes the process; freeze errors surface as 503 even when a route catches them.
+  instrumentPool(pool);
   const db = drizzle(pool, { schema });
   return { db, pool };
 }
