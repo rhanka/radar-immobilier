@@ -89,3 +89,26 @@ jobs:
       - name: Tear down
         if: always()
         run: make clean ENV=test-ci
+
+  e2e:
+    name: Real-stack e2e (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Real-stack Playwright suite (production images, synthetic data)
+        run: make test-e2e ENV=test-e2e-ci
+
+      - name: Upload Playwright traces and network log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-real
+          path: tmp/e2e-real/
+          retention-days: 7
+
+      - name: Tear down
+        if: always()
+        run: make test-e2e-down ENV=test-e2e-ci
