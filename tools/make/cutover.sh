@@ -97,12 +97,12 @@ case ${1:-} in
     else save_release "$RELEASE"; fi
     if [[ ${MODE:-} == list ]]; then run_job list 540 600; report_listing; lock_delete; exit; fi
     inventory
+    suspend_writers kill
     if [[ ${MODE:-run} == restore ]]; then
       run_job database 30 45
       jq --slurpfile db "$WORK/verdict.json" '.liveDb=$db[0].database' "$WORK/record.json" > "$WORK/next.json"
       mv "$WORK/next.json" "$WORK/record.json"; record_save
     fi
-    suspend_writers kill
     execute_stages;;
   resume)
     lock_resume

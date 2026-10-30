@@ -17,8 +17,10 @@ async function main() {
     const database = (await c.query('SELECT current_database() AS name')).rows[0].name;
     if (operation === 'reset' || operation === 'discard') {
       if (!valid(target) || target === database) throw Error();
-      const role = (await c.query('SELECT rolcreatedb OR rolsuper AS allowed FROM pg_roles WHERE rolname=current_user')).rows[0];
-      if (!role?.allowed) throw Error('createdb_required');
+      if (operation === 'reset') {
+        const role = (await c.query('SELECT rolcreatedb OR rolsuper AS allowed FROM pg_roles WHERE rolname=current_user')).rows[0];
+        if (!role?.allowed) throw Error('createdb_required');
+      }
       await c.query(`DROP DATABASE IF EXISTS "${target}" WITH (FORCE)`);
       if (operation === 'reset') await c.query(`CREATE DATABASE "${target}" TEMPLATE template0`);
     }

@@ -73,6 +73,11 @@ test('cutover refuses stale and mismatched prepared stamps before closure', () =
       assert.equal(object(f, 'radar-api').spec.replicas, 1);
       assert.equal(object(f, 'radar-refresh-pv').spec.suspend, false);
     }
+    for (const pinOverride of [{ ageHours: 27 }, { date: '2026-10-30' }]) {
+      const state = structuredClone(original); state.pinOverride = pinOverride; save(f, state);
+      assert.notEqual(f.run('run', ['MODE=run']).status, 0);
+      assert.equal(JSON.stringify(object(f, 'application').spec).includes('base-maintenance-'), false);
+    }
   } finally { f.cleanup(); }
 });
 test('rollback patches the previous database and previous images after failed cutover', () => {
@@ -102,5 +107,21 @@ test('production prepares a recovery backup and cutover changes images without r
     assert.equal(steps.filter(s => s === 'backup').length, 1);
     assert.ok(steps.every(s => !['restore', 'ddl', 'data', 'docs', 'recon'].includes(s)));
     assert.equal(f.calls().some(c => c.includes('patch') && c.includes('secret')), false);
+  } finally { f.cleanup(); }
+});
+test('prepare drains owned refresh for at most ten minutes without killing it', () => {
+  const f = fixture({ fastClock: true });
+  try {
+    const state = f.state();
+    state.objects.push({ kind: 'Job', metadata: { name: 'draining-refresh', uid: 'draining-refresh-uid',
+      ownerReferences: [{ kind: 'CronJob', controller: true, uid: 'uid-radar-refresh-pv' }] }, status: { active: 1 } });
+    save(f, state);
+    const result = f.run('prepare');
+    assert.notEqual(result.status, 0);
+    assert.ok(result.stderr.includes('drain exceeded ten minutes'), result.stderr);
+    assert.equal(object(f, 'radar-prepared-db').data.status, 'failed');
+    assert.equal(object(f, 'radar-refresh-pv').spec.suspend, false);
+    assert.equal(f.state().jobCreation.some(j => j.step === 'docs'), false);
+    assert.equal(f.calls().some(c => c.includes('delete') && c.some(a => a.endsWith('/jobs/draining-refresh'))), false);
   } finally { f.cleanup(); }
 });
