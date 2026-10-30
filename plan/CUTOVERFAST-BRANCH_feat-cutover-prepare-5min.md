@@ -18,7 +18,9 @@
 ## Feedback Loop
 - [x] CUTOVERFAST-EX1: owner requests mandatory prepare CI gate; impact is a blocking preparation job; rollback reverts this branch's workflow changes.
 - [x] Keep the existing daily `MODE=restore` path as explicitly required by the design.
-- [ ] Record any simple interpretation of an open implementation detail and remaining infrastructure prerequisites.
+- [x] Prepared API smoke checks health, release SHA and anonymous refusal; full UI/MCP smoke remains at cutover.
+- [x] Runner polls cluster Jobs for up to 50 minutes: the stated runner wall budget of five minutes contradicts waiting for 25–40 minute Jobs.
+- [x] Infrastructure prerequisites: CREATEDB (asserted by reset), PVC capacity for two databases (5 Gi today), updated namespace RBAC.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch, sequential implementation lots.
@@ -32,6 +34,6 @@
 - [ ] Lot 2: database identity, explicit target env, parallel restore and Secret patch RBAC implemented; validation pending.
 - [ ] Lot 3: prepare lifecycle, ownership, freshness, isolated API smoke and cleanup implemented; validation pending.
 - [ ] Lot 4: prepared verification, switch, rollback and early writer suspension wired; validation pending.
-- [ ] Lot 5: mandatory CI preparation gate and fake-cluster acceptance tests.
+- [ ] Lot 5: mandatory CI preparation gate implemented; fake-cluster acceptance tests follow.
 - [ ] Lot 6: empty-HOME controller execution and daily/bascule selftests wired; API suite, lint, typecheck, down -v pending.
 - [ ] Lot 7: selective atomic commits and push; no PR.

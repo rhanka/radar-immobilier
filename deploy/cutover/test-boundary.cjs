@@ -90,6 +90,7 @@ if (args[0] === 'create' || args[0] === 'replace' || args[0] === 'apply') {
     const step = o.metadata.name.split('-').at(-1);
     crash(step, 'before-create');
     (s.jobCreation ||= []).push({ step, closed: s.objects.some(x => x.kind === 'Ingress' && JSON.stringify(x.spec).includes('base-maintenance-')),
+      lockHeld: !!find('configmap', 'radar-change-lock'), preparedStatus: find('configmap', 'radar-prepared-db')?.data.status,
       watchdogSuspended: find('cronjob', 'radar-refresh-pending-watchdog')?.spec.suspend });
     o.status = s.hangJob === step ? { active: 1 } : { conditions: [{ type: s.failJob === step ? 'Failed' : 'Complete', status: 'True' }], succeeded: s.failJob === step ? 0 : 1 };
     persist(o);
