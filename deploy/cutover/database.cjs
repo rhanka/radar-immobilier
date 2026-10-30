@@ -2,6 +2,8 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const { Client } = require('pg');
 const process = require('node:process');
+const fs = require('node:fs');
+const crypto = require('node:crypto');
 const env = process.env;
 const operation = env.CUTOVER_DB_OPERATION;
 const target = env.TARGET_DB;
@@ -24,6 +26,11 @@ async function main() {
     if (operation === 'destination') {
       if (database !== target) throw Error();
       migrations = Number((await c.query('SELECT count(*) AS n FROM drizzle.__drizzle_migrations')).rows[0].n);
+      const journal = JSON.parse(fs.readFileSync('drizzle/meta/_journal.json', 'utf8'));
+      const applied = new Set((await c.query('SELECT hash FROM drizzle.__drizzle_migrations')).rows.map(r => r.hash));
+      for (const entry of journal.entries) {
+        if (!applied.has(crypto.createHash('sha256').update(fs.readFileSync(`drizzle/${entry.tag}.sql`)).digest('hex'))) throw Error('migration_missing');
+      }
     }
     process.stdout.write(JSON.stringify({ ok: true, database, migrations }));
   } finally { await c.end(); }
