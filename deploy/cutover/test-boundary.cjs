@@ -261,7 +261,7 @@ if (args[0] === 'create' || args[0] === 'replace' || args[0] === 'apply') {
 if (args[0] === 'patch') {
   const o = find(args[1], args[2]); if (!o) process.exit(1);
   const patch = JSON.parse(value('-p'));
-  if (o.kind === 'Service' && s.serviceConflict === o.metadata.name) process.exit(1);
+  if (o.kind === 'Service' && s.serviceConflict === o.metadata.name && (!s.conflictTo || patch.at(-1).value === s.conflictTo)) process.exit(1);
   if (o.kind === 'Ingress' && s.ingressConflict === o.metadata.name &&
     patch.some(p => p.op === 'replace' && p.path === '/spec' && !JSON.stringify(p.value).includes('base-maintenance-'))) process.exit(1);
   if (args.includes('--type=merge')) Object.assign(o.data, patch.data);

@@ -45,6 +45,8 @@ prepared_stack_delete() {
 }
 prepared_stack_up() {
   local db=$1 name row
+  # Defence in depth: never create prepared Pods that an unadopted Service could select.
+  require_slots
   render_prepared_stack "$db"
   ! prepared_stack_present || fail 'Prepared slot still present; retire it (logs exported) first'
   prepared_quota_preflight

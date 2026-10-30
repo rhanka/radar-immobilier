@@ -157,3 +157,33 @@ test('rollback after promotion rebuilds the previous release on the retained dat
     assert.equal(lock(f), undefined);
   } finally { f.cleanup(); }
 });
+test('before slot adoption, prepare, run and rollback refuse slots_not_adopted before creating anything', () => {
+  const f = fixture({ unadopted: true });
+  try {
+    for (const [action, extra] of [['prepare', []], ['run', ['MODE=run']], ['rollback', ['RUN=00000000-0000-4000-8000-000000000000', 'MODE=run']]]) {
+      const result = f.run(action, extra);
+      assert.notEqual(result.status, 0, action);
+      assert.match(result.stderr, /slots_not_adopted/, action);
+    }
+    assert.equal(f.calls().some(c => c[0] === 'kubectl' && (c.includes('create') || c.includes('patch') || c.includes('delete'))
+      && !c.includes('can-i') && !c.includes('--dry-run=client')), false, 'no creation, patch or deletion');
+    assert.equal(f.state().objects.some(o => o.metadata.name.endsWith('-prepared') || o.metadata.name === 'radar-change-lock'), false);
+  } finally { f.cleanup(); }
+});
+test('prepared Pods are never selected by the canonical Services; a partial switch is fully reverted', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    const state = f.state();
+    for (const name of SERVICES) {
+      const selector = state.objects.find(o => o.kind === 'Service' && o.metadata.name === name).spec.selector;
+      const selected = state.objects.filter(p => p.kind === 'Pod' && Object.entries(selector).every(([k, v]) => p.metadata.labels?.[k] === v));
+      assert.ok(selected.length > 0 && selected.every(p => p.metadata.labels['sentropic.io/slot'] === 'main'), name);
+    }
+    // The third Service refuses the switch: the two already switched return to main.
+    state.serviceConflict = 'radar-ui'; state.conflictTo = 'prepared'; save(f, state);
+    assert.notEqual(f.run('run', ['MODE=run']).status, 0);
+    for (const name of SERVICES) assert.equal(slotOf(f, name), 'main', name);
+    assert.equal(lock(f), undefined);
+  } finally { f.cleanup(); }
+});
