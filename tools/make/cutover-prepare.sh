@@ -26,6 +26,7 @@ prepare_database() {
     run_job restore 1800 1920
     run_job ddl 540 600
     if [[ $(jq -r .release.dataMigration "$WORK/record.json") == 6h ]]; then
+      prepared_data_evidence
       run_job data 540 600
       verify_data_migration
     fi
@@ -43,6 +44,19 @@ prepare_database() {
   PREPARING=0
   lock_delete
   printf 'Prepared database ready for release\n'
+}
+prepared_data_evidence() {
+  "${k[@]}" get pods -o json > "$WORK/prepared-writers.json"
+  jq -e --slurpfile r "$WORK/record.json" 'all(["restore","ddl"][]; . as $step|
+    any(.items[]; .status.phase=="Succeeded" and any(.metadata.ownerReferences[]?;
+      .kind=="Job" and .controller==true and .uid==$r[0].jobs[$step].uid)))' \
+    "$WORK/prepared-writers.json" >/dev/null || fail 'Missing terminated prepared-writer evidence'
+  jq --slurpfile pods "$WORK/prepared-writers.json" --arg at "$(date -u +%FT%TZ)" '
+    . as $r|.preparedDrainedAt=$at|.preparedConsumers=[$pods[0].items[]|
+      select(any(.metadata.ownerReferences[]?; .kind=="Job" and .controller==true and
+        (.uid==$r.jobs.restore.uid or .uid==$r.jobs.ddl.uid)))|.metadata.uid]' \
+    "$WORK/record.json" > "$WORK/next.json"
+  mv "$WORK/next.json" "$WORK/record.json"; record_save
 }
 prepare_failed() {
   stop_forwards
