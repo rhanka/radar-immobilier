@@ -4,11 +4,12 @@ if $step=="ddl" or $step=="data" or $step=="destination" then
       [{name:"POSTGRES_DB",value:($r[0].targetDb//$r[0].liveDb//"radar")},
        {name:"CUTOVER_EXPECTED_DATABASE",value:($r[0].targetDb//$r[0].liveDb//"radar")}])
 else . end
-| if $step=="restore" and $r[0].targetDb!=null then
+| ($r[0].restoreDb//$r[0].targetDb) as $db
+| if $step=="restore" and $db!=null then
     .spec.template.spec.containers[0].env |=
       (map(select(.name!="PGDATABASE" and .name!="TARGET_DB" and .name!="LIVE_DB")) +
-        [{name:"PGDATABASE",value:$r[0].targetDb},{name:"TARGET_DB",value:$r[0].targetDb},
-         {name:"POSTGRES_DB",value:$r[0].targetDb},{name:"LIVE_DB",value:($r[0].liveDb//"")}])
+        [{name:"PGDATABASE",value:$db},{name:"TARGET_DB",value:$db},
+         {name:"POSTGRES_DB",value:$db},{name:"LIVE_DB",value:($r[0].liveDb//"")}])
   else . end
 | (.spec.template.spec.containers[],.spec.template.spec.initContainers[]?) |= (
   .terminationMessagePolicy="File"|.terminationMessagePath="/dev/termination-log"|
@@ -21,7 +22,7 @@ else . end
       "--"]+(.command//["/s5cmd"])+(.args//[])|.command=["/bin/sh","-c"]
   end
 )
-| if (["ddl","data","destination","database","reset","discard"]|index($step)) then
+| if (["ddl","data","destination","database","clone","discard","tplreset","tplseal"]|index($step)) then
     .spec.template.spec.containers[0].image=$r[0].release.apiImage
   else . end
 | if $step=="data" then
