@@ -1,5 +1,8 @@
 if $step=="ddl" or $step=="data" or $step=="destination" then
-  .spec.template.spec.containers[0].env += [{name:"CUTOVER_EXPECTED_DATABASE",value:"radar"}]
+  .spec.template.spec.containers[0].env |=
+    (map(select(.name!="POSTGRES_DB")) +
+      [{name:"POSTGRES_DB",value:($r[0].targetDb//$r[0].liveDb//"radar")},
+       {name:"CUTOVER_EXPECTED_DATABASE",value:($r[0].targetDb//$r[0].liveDb//"radar")}])
 else . end
 | (.spec.template.spec.containers[],.spec.template.spec.initContainers[]?) |= (
   .terminationMessagePolicy="File"|.terminationMessagePath="/dev/termination-log"|
@@ -12,10 +15,12 @@ else . end
       "--"]+(.command//["/s5cmd"])+(.args//[])|.command=["/bin/sh","-c"]
   end
 )
-| if $step=="ddl" or $step=="data" or $step=="destination" then
+| if (["ddl","data","destination","database","reset","discard"]|index($step)) then
     .spec.template.spec.containers[0].image=$r[0].release.apiImage
   else . end
 | if $step=="data" then
     .spec.template.spec.containers[0].env += [{name:"CUTOVER_EVIDENCE",value:({
-      run:$r[0].run,release:$r[0].release.gitSha,instances:$r[0].consumers,completedAt:$r[0].closedAt}|tojson)}]
+      run:$r[0].run,release:$r[0].release.gitSha,
+      instances:(if $r[0].kind=="prepare" then ["prepared-disposable-database"] else $r[0].consumers end),
+      completedAt:($r[0].closedAt//$r[0].preparedStartedAt)}|tojson)}]
   else . end

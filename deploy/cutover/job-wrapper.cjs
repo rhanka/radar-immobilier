@@ -19,6 +19,7 @@ let raw = {};
 try { raw = JSON.parse(fs.readFileSync('/tmp/cutover-child.json', 'utf8')); }
 catch { try { raw = JSON.parse(result.stdout.toString().trim()); } catch { /* No readable verdict. */ } }
 const clean = { ok: result.status === 0 && !result.error };
+if (raw.database === 'radar' || raw.database === 'radar_next') clean.database = raw.database;
 for (const key of ['date', 'backupId', 'dumpStartedAt', 'startedAt']) {
   if (typeof raw[key] === 'string' && /^(latest|\d{4}-\d\d-\d\d(?:T[0-9:.]+Z)?)$/.test(raw[key])) clean[key] = raw[key];
 }
