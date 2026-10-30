@@ -83,6 +83,7 @@ case ${1:-} in
     report_refs; lock_delete;;
   run)
     case ${MODE:-run} in run|restore|list) ;; *) fail 'MODE must be restore or list when supplied';; esac
+    [[ ${MODE:-run} != restore || $ENV == preprod ]] || fail 'Daily restore is preprod-only'
     [[ ${BACKUP_ID:-latest} == latest || ${BACKUP_ID:-} =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || fail 'Invalid backup selection'
     if [[ ${RELEASE:-} != deployed ]]; then validate_release "${RELEASE:-}"; fi
     lock_acquire
@@ -107,6 +108,7 @@ case ${1:-} in
   resume)
     lock_resume
     MODE=$(jq -r '.mode//"run"' "$WORK/record.json")
+    [[ $MODE != restore || $ENV == preprod ]] || fail 'Daily restore recovery is preprod-only'
     [[ $MODE == restore ]] || FAST_DEADLINE=$((SECONDS+295))
     RECOVERING=1
     if [[ $(jq -r .kind "$WORK/record.json") == writer ]]; then

@@ -30,6 +30,7 @@
 - [x] Preserve recovery after a Secret patch with a lost checkpoint; retry compares either the old or already-selected target, without restoring again.
 - [x] The shared release budget starts before cluster preflight, including identity checks in the five-minute bound.
 - [x] Prepared 6H drain/shutdown evidence uses observed, terminated restore/DDL Pod UIDs and the observed drain timestamp.
+- [x] Daily restore and its recovery are preprod-only; production uses the prepared, image-only release path.
 - [ ] Local PostgreSQL integration: parallel custom-archive restore, CREATEDB refusal, live-database protection and release migration hash verification.
 
 ## Orchestration Mode (AI-selected)
