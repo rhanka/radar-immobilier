@@ -3,6 +3,16 @@ import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import YAML from 'yaml';
 const workflow = name => YAML.parse(readFileSync(`.github/workflows/${name}`, 'utf8'));
+test('main deployment requires successful prepare with no tolerated restore or migration failure', () => {
+  const w = workflow('build-push-images.yml');
+  const job = w.jobs['prepare-preprod-db'];
+  assert.deepEqual(job.needs, ['build-push', 'cutover-release']);
+  assert.equal(job['timeout-minutes'], 50);
+  assert.equal(job.if, "github.ref == 'refs/heads/main'");
+  assert.ok(w.jobs['deploy-preprod'].needs.includes('prepare-preprod-db'));
+  assert.ok(job.steps.some(s => s.run === 'make -f deploy/cutover/operator.mk prepare RELEASE=cutover-release/release.json ENV=preprod'));
+  assert.equal(JSON.stringify(job).includes('continue-on-error'), false);
+});
 test('daily and inter-tenant interfaces use the engine with protected arming unchanged', () => {
   const w = workflow('bascule-preprod.yml');
   assert.equal(w.on.schedule[0].cron, '0 4 * * *');
