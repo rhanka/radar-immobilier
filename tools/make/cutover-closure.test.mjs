@@ -40,7 +40,7 @@ test('unsupported workload controllers cause a named refusal before workload cha
   try {
     const result = f.run(); assert.notEqual(result.status, 0);
     assert.ok(result.stderr.includes('DaemonSet/unexpected-daemon'), result.stdout + result.stderr);
-    assert.equal(f.calls().some(c => c.includes('patch')), false);
+    assert.equal(f.calls().some(c => c.includes('patch') && !c.includes('can-i')), false);
   } finally { f.cleanup(); }
 });
 test('ACME solver routes are excluded and partial route restoration is reclosed on conflict', () => {
