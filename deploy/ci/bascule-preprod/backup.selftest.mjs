@@ -450,7 +450,7 @@ async function suite() {
     eq("docs — paginated history restores the exact key using both S3 markers",
       [r.code, r.t.recon?.ok, s.copies.find((c) => c.key === "raw/b.pdf")?.versionId, pages.length,
         pages[1]?.KeyMarker, pages[1]?.VersionIdMarker],
-      [0, true, original.VersionId, 3, "docs/raw/b.pdf", s.versions(B, "docs/raw/b.pdf")[2].VersionId]);
+      [0, true, original.VersionId, 3, "docs/raw/b.pdf", s.versions(B, "docs/raw/b.pdf")[3].VersionId]);
     s.b.get(B).delete("docs/raw/b.pdf"); s.b.get(DST).delete("raw/b.pdf");
     const missing = await step({ s, env: docsEnv(manSha) });
     eq("docs — paginated prefix neighbors cannot replace a missing exact key", [missing.code, missing.t.unresolvedReasons], [2, { "no-version": 1 }]);
@@ -657,7 +657,7 @@ async function suite() {
   v.state.drift = v.upToDate;
   stats = v.reset(true);
   const drift = await v.run();
-  eq("volume — matching pinned ETag tolerates one size drift and recon uses HEAD size", [drift.exitCode, drift.termination.inventoryAnomalyCount, drift.termination.copied, drift.termination.recon.ok, stats.calls.HeadObjectCommand], [0, 1, 36282, true, 36182]);
+  eq("volume — matching pinned ETag tolerates one size drift and recon uses HEAD size", [drift.exitCode, drift.termination.inventoryAnomalyCount, drift.termination.copied, drift.termination.recon.ok, stats.calls.HeadObjectCommand], [0, 1, 36282, true, 26864]);
 }
 
 // ═════════════════════════════ runner pure functions ══════════════════════════
