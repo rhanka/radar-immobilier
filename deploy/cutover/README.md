@@ -283,3 +283,21 @@ records `restorePath` and `restoreSeconds`; the CI rehearsal fails when
 The destination listing (`docs`, `recon`) uses 64 shards listed 64 at a time
 (`LIST_CONCURRENCY`, independent of the copy workers): the sequential depth per
 shard drops from about 27 pages to about 7 on the preprod bucket.
+
+### Prepared slot
+
+After `destination`, `prepare` starts the prepared slot: `radar-api-prepared`,
+`radar-immo-mcp-prepared` and `radar-ui-prepared` Deployments plus internal
+Services of the same names and `radar-ui-nginx-prepared` (the UI nginx
+ConfigMap with `proxy_pass http://radar-api-prepared:3000`). Pods keep the
+canonical component labels (NetworkPolicies apply), carry
+`sentropic.io/slot=prepared`, a literal `POSTGRES_DB=<targetDb>`, the release
+images and `terminationGracePeriodSeconds: 30`; the prepared MCP calls
+`RADAR_API_BASE_URL=http://radar-api-prepared:3000`. Replicas equal the
+current canonical count (an HPA-scaled count included). A quota preflight
+reads every ResourceQuota status and refuses `quota_insufficient` before
+creating anything. The full private smoke (UI, build SHA, API health, anonymous
+refusal, MCP bearer challenge and metadata) runs through the prepared Services;
+the canonical Services and Ingresses are untouched. The slot stays Ready for the
+switch; a new preparation deletes a previous slot first, a failed preparation
+deletes it, and the daily `MODE=restore` refuses `prepared_stack_present`.

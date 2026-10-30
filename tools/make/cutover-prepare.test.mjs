@@ -18,7 +18,7 @@ test('prepare stamps ready without closing live services and releases the lock d
     assert.equal(stamp.migrations, '25');
     assert.equal(object(f, 'radar-db-credentials').data.POSTGRES_DB, Buffer.from('radar').toString('base64'));
     assert.equal(object(f, 'radar-change-lock'), undefined);
-    assert.equal(object(f, 'radar-api-prepared'), undefined);
+    assert.equal(object(f, 'radar-api-prepared').spec.template.metadata.labels['sentropic.io/slot'], 'prepared');
     assert.equal(object(f, 'radar-refresh-pv').spec.suspend, false);
     const restore = f.state().jobCreation.find(j => j.step === 'restore');
     assert.deepEqual([restore.closed, restore.lockHeld, restore.preparedStatus, restore.watchdogSuspended], [false, false, 'preparing', true]);
@@ -362,5 +362,44 @@ test('daily staging builds the template under the lock and refuses while a prepa
     assert.notEqual(refused.status, 0);
     assert.match(refused.stderr, /volume_insufficient/);
     assert.equal(object(f, 'radar-template-db').data.status, 'ready', 'a refused staging never touches the ready template');
+  } finally { f.cleanup(); }
+});
+test('prepare starts a Ready prepared slot on the target database without touching canonical routing', () => {
+  const f = fixture();
+  try {
+    const state = f.state(); state.objects.find(o => o.kind === 'Deployment' && o.metadata.name === 'radar-api').spec.replicas = 2; save(f, state);
+    success(f.run('prepare'));
+    const api = object(f, 'radar-api-prepared'), mcp = object(f, 'radar-immo-mcp-prepared'), ui = object(f, 'radar-ui-prepared');
+    assert.equal(api.spec.replicas, 2, 'replicas equal the current canonical count');
+    for (const d of [api, mcp, ui]) {
+      assert.equal(d.spec.selector.matchLabels['sentropic.io/slot'], 'prepared');
+      assert.ok(d.spec.template.metadata.labels['app.kubernetes.io/component'], 'component label kept for NetworkPolicies');
+      assert.equal(d.spec.template.spec.terminationGracePeriodSeconds, 30);
+    }
+    const env = d => d.spec.template.spec.containers[0].env;
+    assert.deepEqual(env(api).filter(e => e.name === 'POSTGRES_DB'), [{ name: 'POSTGRES_DB', value: 'radar_next' }]);
+    assert.ok(env(mcp).some(e => e.name === 'RADAR_API_BASE_URL' && e.value === 'http://radar-api-prepared:3000'));
+    assert.equal(api.spec.template.spec.containers[0].image, f.release.apiImage);
+    assert.equal(ui.spec.template.spec.containers[0].image, f.release.uiImage);
+    const nginx = object(f, 'radar-ui-nginx-prepared').data['default.conf'];
+    assert.ok(nginx.includes('http://radar-api-prepared:3000/health') && !nginx.includes('http://radar-api:3000'));
+    for (const name of ['radar-api', 'radar-immo-mcp', 'radar-ui']) {
+      assert.equal(f.state().objects.find(o => o.kind === 'Service' && o.metadata.name === name).spec.selector['sentropic.io/slot'], 'main');
+      assert.equal(f.state().objects.find(o => o.kind === 'Service' && o.metadata.name === `${name}-prepared`).spec.selector['sentropic.io/slot'], 'prepared');
+    }
+    assert.equal(object(f, 'radar-prepared-db').data.status, 'ready');
+    // A new preparation removes the previous slot before replacing its database.
+    success(f.run('prepare'));
+    assert.ok(f.state().deletions.some(d => d.kind === 'Deployment' && d.name === 'radar-api-prepared'));
+  } finally { f.cleanup(); }
+});
+test('prepare refuses quota_insufficient before creating any prepared object', () => {
+  const f = fixture({ quota: { hard: { 'limits.cpu': '3', 'limits.memory': '6Gi' }, used: { 'limits.cpu': '2500m', 'limits.memory': '1920Mi' } } });
+  try {
+    const result = f.run('prepare');
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /quota_insufficient: preprod-cap\/limits.cpu/);
+    assert.equal(f.state().objects.some(o => o.metadata.name.endsWith('-prepared') && o.kind !== 'ConfigMap'), false);
+    assert.equal(object(f, 'radar-prepared-db').data.status, 'failed');
   } finally { f.cleanup(); }
 });

@@ -16,13 +16,17 @@ export function fixture(changes = {}) {
   const objects = [];
   objects.push({ ...object('Secret', 'radar-db-credentials', {}),
     data: { POSTGRES_DB: Buffer.from('radar').toString('base64'), POSTGRES_USER: 'synthetic-user', POSTGRES_PASSWORD: 'synthetic-only' } });
+  const RESOURCES = { api: { requests: { cpu: '30m', memory: '256Mi' }, limits: { cpu: '500m', memory: '768Mi' } },
+    ui: { requests: { cpu: '30m', memory: '64Mi' }, limits: { cpu: '100m', memory: '128Mi' } },
+    mcp: { requests: { cpu: '50m', memory: '128Mi' }, limits: { cpu: '150m', memory: '256Mi' } } };
   // Canonical slot: adopted (`sentropic.io/slot=main`) unless the test models the pre-adoption state.
   const slot = changes.unadopted ? {} : { 'sentropic.io/slot': 'main' };
   for (const [name, container, image] of [['radar-api', 'api', 'api'], ['radar-ui', 'ui', 'ui'], ['radar-immo-mcp', 'mcp', 'api']]) {
     const component = container === 'mcp' ? 'mcp' : image;
     const labels = { 'app.kubernetes.io/name': 'radar-immobilier', 'app.kubernetes.io/component': component };
     objects.push(object('Deployment', name, { replicas: 1, selector: { matchLabels: { ...labels, ...slot } },
-      template: { metadata: { labels: { ...labels, ...slot } }, spec: { containers: [{ name: container, image: `ghcr.io/rhanka/radar-${image}:old` }] } } }));
+      template: { metadata: { labels: { ...labels, ...slot } }, spec: { containers: [{ name: container, image: `ghcr.io/rhanka/radar-${image}:old`,
+        resources: RESOURCES[container] }] } } }));
     const service = object('Service', name, { selector: { ...labels, ...slot }, ports: [{ name: 'http', port: 80 }] });
     service.metadata.uid = `uid-svc-${name}`; objects.push(service);
     objects.push(object('Endpoints', name, {}));
@@ -43,6 +47,12 @@ export function fixture(changes = {}) {
     rules: [{ host: 'preprod.immo.sent-tech.ca', http: { paths: [{ path: '/', pathType: 'Prefix', backend: { service: { name: 'radar-ui', port: { number: 8080 } } } }] } }] }));
   objects.push({ ...object('PersistentVolumeClaim', 'postgres-data-radar-postgres-0', { resources: { requests: { storage: '5Gi' } } }),
     status: { capacity: { storage: '5Gi' } } });
+  objects.push({ ...object('ConfigMap', 'radar-ui-nginx', {}), data: { 'default.conf':
+    'location /api/ { proxy_pass http://radar-api:3000; }\nlocation = /health { proxy_pass http://radar-api:3000/health; }\n' } });
+  // Preprod quota as measured on 2026-10-30 (limits.cpu 3 / used 1350m, limits.memory 6Gi / used 1920Mi, pods 20 / 4).
+  objects.push({ ...object('ResourceQuota', 'preprod-cap', {}), status: changes.quota || {
+    hard: { 'limits.cpu': '3', 'limits.memory': '6Gi', 'requests.cpu': '400m', pods: '20' },
+    used: { 'limits.cpu': '1350m', 'limits.memory': '1920Mi', 'requests.cpu': '90m', pods: '4' } } });
   objects.push({ ...object('ConfigMap', 'radar-api', {}), data: { GEO_DOCUMENTS_REPOINT: 'old' } });
   objects.push({ ...object('ConfigMap', 'radar-cutover-6h', {}), data: { 'plan.json': JSON.stringify({ version: 1,
     actorSub: 'synthetic-production-subject', workspaceSlug: 'synthetic', accounts: [{ sub: 'synthetic-production-subject' }] }) } });

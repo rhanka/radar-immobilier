@@ -17,8 +17,16 @@ rules:
     verbs: [create]
   - apiGroups: [apps]
     resources: [deployments]
-    resourceNames: [radar-api, radar-ui, radar-immo-mcp, radar-api-prepared]
+    resourceNames: [radar-api, radar-ui, radar-immo-mcp, radar-api-prepared, radar-ui-prepared, radar-immo-mcp-prepared]
     verbs: [delete]
+  # Lot 4: prepared slot (UI nginx copy) and quota preflight.
+  - apiGroups: [""]
+    resources: [configmaps]
+    resourceNames: [radar-ui-nginx-prepared]
+    verbs: [delete]
+  - apiGroups: [""]
+    resources: [resourcequotas]
+    verbs: [get, list]
   # Lot 2: orphaned ReplicaSets have generated names (RBAC cannot name them in advance).
   - apiGroups: [apps]
     resources: [replicasets]
