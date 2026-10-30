@@ -219,3 +219,34 @@ export function workspaceUnavailableMessage(state: Pick<WorkspaceContextState, "
       return "Espace de travail indisponible — signaux indisponibles.";
   }
 }
+
+/**
+ * Resolve once the context is no longer loading (launch-time capture for
+ * screens that read once on mount). Never waits on an idle context.
+ */
+export function settledWorkspaceContext(
+  store: Readable<WorkspaceContextState> = workspaceContext,
+): Promise<WorkspaceContextState> {
+  return new Promise((resolve) => {
+    let settled = false;
+    let unsubscribe: (() => void) | null = null;
+    unsubscribe = store.subscribe((state) => {
+      if (settled || state.status === "loading") return;
+      settled = true;
+      resolve(state);
+      if (unsubscribe) unsubscribe();
+    });
+    if (settled) unsubscribe();
+  });
+}
+
+/** The explicit workspace of a settled context, or the unavailable copy as error. */
+export async function requireScopedWorkspace(
+  store: Readable<WorkspaceContextState> = workspaceContext,
+): Promise<string> {
+  const state = await settledWorkspaceContext(store);
+  if (state.context.workspaceId === null) {
+    throw new WorkspaceClientError(workspaceUnavailableMessage(state) ?? "workspace_missing");
+  }
+  return state.context.workspaceId;
+}
