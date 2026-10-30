@@ -22,13 +22,22 @@ lock_acquire() {
   EXECUTOR=$(executor_identity)
   jq -n --arg run "$RUN" --arg ns "$NS" --arg kind "${1:-cutover}" --argjson executor "$EXECUTOR" \
     '{apiVersion:"v1",kind:"ConfigMap",metadata:{name:"radar-change-lock",namespace:$ns},
-      data:{record:({run:$run,kind:$kind,executor:$executor,stage:"inventory",checkpoints:{},jobs:{},originalJobs:[]}|tojson)}}' > "$WORK/lock.json"
-  if ! "${k[@]}" create -f "$WORK/lock.json" >/dev/null 2>&1; then
-    lock_read || fail 'Lock acquisition failed; cluster state unknown'
-    record_read
-    jq -r '"Change lock owned by operation " + .run' "$WORK/record.json" >&2
-    fail 'A competing operation holds the lock'
-  fi
+      data:{record:({run:$run,kind:$kind,executor:$executor,stage:"inventory",checkpoints:{},jobs:{},originalJobs:[]}|tojson)}}' > "$WORK/lock-request.json"
+  # Bounded wait (LOCK_WAIT seconds, default 900) for a competing operation to release the lock:
+  # the daily restore, the staging and the release chain then queue instead of failing at once.
+  # Waiting never adopts a lock: a retained recovery lock still needs `resume RUN=`.
+  local deadline=$((SECONDS+${LOCK_WAIT:-900})) note=0 holder
+  until "${k[@]}" create -f "$WORK/lock-request.json" >/dev/null 2>&1; do
+    if "${k[@]}" get configmap radar-change-lock -o json > "$WORK/lock-held.json" 2>/dev/null; then
+      holder=$(jq -r '(.data.record|fromjson).run' "$WORK/lock-held.json" 2>/dev/null || echo unknown)
+      if ((SECONDS >= deadline)); then
+        printf 'Change lock owned by operation %s\n' "$holder" >&2
+        fail 'A competing operation holds the lock'
+      fi
+      ((SECONDS < note)) || { printf 'Waiting for operation %s to release radar-change-lock\n' "$holder" >&2; note=$((SECONDS+30)); }
+    elif ((SECONDS >= deadline)); then fail 'Lock acquisition failed; cluster state unknown'; fi
+    sleep 2
+  done
   OWNED=1
   ACQUIRED=1
   lock_read; record_read

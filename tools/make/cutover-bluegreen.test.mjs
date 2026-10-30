@@ -92,7 +92,8 @@ test('an unserved prepared slot switches back to main automatically and reopens 
     assert.equal(db(f), 'radar');
     assert.equal(lock(f), undefined);
     assert.equal(object(f, 'radar-refresh-pv').spec.suspend, false);
-    assert.ok(object(f, 'radar-api-prepared', 'Deployment'), 'the prepared slot stays for a retry');
+    assert.equal(object(f, 'radar-api-prepared', 'Deployment'), undefined, 'the abandoned prepared slot is removed (logs exported)');
+    assert.ok(f.state().jobCreation.some(j => j.step.startsWith('logsprepared')));
   } finally { f.cleanup(); }
 });
 test('the drill routes back to the previous release then re-switches', () => {
@@ -136,6 +137,7 @@ test('rollback of an interrupted run routes back to main and unfreezes the live 
     success(f.run('rollback', [`RUN=${record.run}`, 'MODE=run']));
     for (const name of SERVICES) assert.equal(slotOf(f, name), 'main');
     assert.equal(f.state().unfrozen, 1);
+    assert.equal(object(f, 'radar-api-prepared', 'Deployment'), undefined, 'the prepared slot is cleaned up');
     assert.equal(db(f), 'radar');
     assert.equal(lock(f), undefined);
     assert.equal(object(f, 'radar-refresh-pv').spec.suspend, false);
@@ -262,5 +264,23 @@ test('a return to main before promotion records the writes made through the prep
     assert.notEqual(f.run('run', ['MODE=run']).status, 0);
     const retained = object(f, 'radar-retained-db').data;
     assert.deepEqual([retained.status, retained.db, retained.abandonedTuples], ['pending', 'radar_next', '3']);
+  } finally { f.cleanup(); }
+});
+test('the change lock is awaited for a bounded time instead of failing at once', () => {
+  const held = () => ({ apiVersion: 'v1', kind: 'ConfigMap', metadata: { name: 'radar-change-lock', uid: 'uid-held', resourceVersion: '1' },
+    data: { record: JSON.stringify({ run: 'competing-operation', kind: 'stage', executor: { kind: 'github', run: '1' }, checkpoints: {}, jobs: {} }) } });
+  const f = fixture();
+  try {
+    const state = f.state(); state.objects.push(held()); state.lockReleaseAfter = 2; save(f, state);
+    f.env.LOCK_WAIT = '60';
+    const queued = f.run('prepare');
+    assert.equal(queued.status, 0, queued.stderr);
+    assert.match(queued.stderr, /Waiting for operation competing-operation to release radar-change-lock/);
+    const again = f.state(); again.objects.push(held()); again.lockReleaseAfter = 0; save(f, again);
+    f.env.LOCK_WAIT = '3';
+    const refused = f.run('prepare');
+    assert.notEqual(refused.status, 0);
+    assert.match(refused.stderr, /A competing operation holds the lock/);
+    assert.equal(lock(f).metadata.uid, 'uid-held', 'waiting never adopts a lock');
   } finally { f.cleanup(); }
 });

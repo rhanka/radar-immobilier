@@ -165,6 +165,12 @@ if (args[0] === 'rollout') process.exit(s.missingMcp && args.includes('deploymen
 if (args[0] === 'wait') process.exit();
 if (args[0] === 'get') {
   if (args[1].includes(',')) { out({ items: s.controllers || [] }); process.exit(); }
+  if (s.lockReleaseAfter && args[1] === 'configmap' && args[2] === 'radar-change-lock') {
+    // A competing operation releases the lock after a number of reads.
+    s.lockReleaseAfter -= 1;
+    if (s.lockReleaseAfter === 0) s.objects = s.objects.filter(o => o.metadata.name !== 'radar-change-lock');
+    save();
+  }
   if (args[1] === 'endpointslices') { out(slicesOf(find('service', value('-l').split('=')[1]))); process.exit(); }
   let objects = s.objects.filter(o => o.kind === key(args[1]));
   if (key(args[1]) === 'Pod' && !args.includes('-l') && args[2]?.startsWith('-')) {

@@ -126,6 +126,9 @@ make -f deploy/cutover/operator.mk rollback RUN=<ORIGINAL_UUID> ENV=preprod
 ```
 
 Use `ENV=prod` for production recovery. A repeated `run` never adopts a lock.
+Every operation waits up to `LOCK_WAIT` seconds (default 900) for a competing
+operation to release `radar-change-lock` (daily restore at 04:00, staging at
+05:00, release chain) instead of failing at once; waiting never adopts a lock.
 `radar-change-lock` contains the original route/consumer/schedule inventory,
 release, backup pins, Job UIDs and checkpoints. It has no automatic expiry.
 Takeover requires an ended local process or terminal GitHub run and an atomic
@@ -366,8 +369,9 @@ gone and whose manifest is incomplete is recorded in the receipt as `logGaps`
 (the rehearsal fails on any gap). Slot adoption follows the orphaned ReplicaSet
 Pods the same way before deleting them.
 
-Recovery: a failure before promotion returns routing to `main`, unfreezes and
-restores the schedules automatically. A failure after promotion started keeps
+Recovery: a failure before promotion returns routing to `main`, unfreezes,
+restores the schedules and removes the prepared slot (logs exported) automatically,
+so the daily restore is never blocked by a leftover slot. A failure after promotion started keeps
 the lock: `resume RUN=<uuid>` completes the promotion idempotently.
 `rollback RUN=<uuid>` with that run's lock still present (interrupted before
 promotion) switches back and unfreezes. After a promoted run, `rollback RUN=`
