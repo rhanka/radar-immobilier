@@ -28,7 +28,9 @@
   import { acquireChatTrigger } from "$lib/chat/chat-trigger";
   import { setChatContext } from "$lib/chat/chat-context";
   import type { SignalT } from "@radar/domain";
-  import { authStore } from "$lib/auth/auth-store.js";
+  import { authStore, type AuthState } from "$lib/auth/auth-store.js";
+  import { workspaceContext } from "$lib/signals/workspace-client.js";
+  import WorkspacePicker from "$lib/components/workspace/WorkspacePicker.svelte";
   import {
     activeGeoRoute,
     activeRouteView,
@@ -46,6 +48,23 @@
 
   // Auth state
   $: authState = $authStore;
+
+  // 6H workspace context: App owns it. Resolved once per login incarnation
+  // after /auth/me, for approved accounts with authentication enabled only;
+  // every other state resets it so no scoped request can be issued.
+  $: syncWorkspaceContext(authState);
+  function syncWorkspaceContext(state: AuthState): void {
+    if (state.loading) return;
+    const sub = state.user?.sub ?? null;
+    const eligible = state.authenticated && !state.authDisabled
+      && state.user?.status === "approved" && sub !== null;
+    const current = workspaceContext.current();
+    if (!eligible) {
+      if (current.status !== "idle") workspaceContext.reset();
+      return;
+    }
+    if (current.sub !== sub || current.status === "idle") void workspaceContext.load(sub);
+  }
 
   // Libellés lisibles par type de signal
   const TYPE_LABELS_SHORT: Record<string, string> = {
@@ -240,6 +259,7 @@
         {authState}
         onLogout={handleLogout}
       />
+      <WorkspacePicker />
 
       <!-- Zone de contenu -->
       <!-- 4 vues principales -->

@@ -212,8 +212,12 @@ test-immo-mcp: ## Run isolated MCP tests (SCOPE=<file>, excludes service E2E)
 	  npm run test --workspace=packages/immo-mcp -- --exclude '**/*.e2e.test.ts' $(SCOPE)"
 
 .PHONY: test-e2e
-test-e2e: ## Run Playwright e2e tests (E2E_SPEC=<file> for scoped runs)
-	@echo "[test-e2e] no e2e suite yet — placeholder for BR-07+"
+test-e2e: ## Real-stack Playwright suite on production images (ENV=test-* only, always down -v)
+	ENV=$(ENV) bash tools/make/e2e-real.sh
+
+.PHONY: test-e2e-down
+test-e2e-down: ## Tear down the real-stack e2e compose project of ENV (down -v)
+	ENV=$(ENV) bash tools/make/e2e-real.sh down
 
 .PHONY: test-smoke
 test-smoke: ## Smoke test against deployed env

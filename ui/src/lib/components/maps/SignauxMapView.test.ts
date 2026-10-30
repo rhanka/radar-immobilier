@@ -54,13 +54,16 @@ vi.mock("$lib/signals/graph-signal-detail-client.js", async (importOriginal) => 
     await importOriginal<typeof import("$lib/signals/graph-signal-detail-client.js")>();
   return {
     ...actual,
-    fetchGraphSignalDetail: vi.fn(async (citySlug: string) => ({
-      ok: true,
-      citySlug,
-      legacyProjection: null,
-      nodes: [],
+    fetchGraphSignalDetail: vi.fn(async (_scope: unknown, citySlug: string) => ({
+      citySlug, token: "token", legacyProjection: null, nodes: [], heads: [],
+      counts: { total: 0, hidden: 0, visible: 0, selected: 0 },
     })),
   };
+});
+
+vi.mock("$lib/signals/workspace-client.js", async (importOriginal) => {
+  const { readyWorkspaceModule } = await import("./test-stubs/workspace-context-ready.js");
+  return readyWorkspaceModule(await importOriginal());
 });
 
 vi.mock("$lib/maps/signaux-zones-loader.js", async (importOriginal) => {
@@ -112,6 +115,7 @@ import { fetchAllLots } from "$lib/maps/lots-client.js";
 import { loadSignauxZones } from "$lib/maps/signaux-zones-loader.js";
 import { fetchCptaqConstraints } from "$lib/maps/cptaq-client.js";
 import { fetchGraphSignalsByCity } from "$lib/signals/graph-signals-by-city-client.js";
+import { TEST_WORKSPACE_ID } from "./test-stubs/workspace-context-ready.js";
 
 /** Une zone réelle avec géométrie — le drill zones est alimenté. */
 function fixtureZones(citySlug: string): GeoZonesResponse {
@@ -268,7 +272,7 @@ describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
       `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
     const today = new Date();
     const weekAgo = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7);
-    expect(vi.mocked(fetchGraphSignalsByCity)).toHaveBeenLastCalledWith("", expect.objectContaining({
+    expect(vi.mocked(fetchGraphSignalsByCity)).toHaveBeenLastCalledWith({ workspaceId: TEST_WORKSPACE_ID }, expect.objectContaining({
       dateBasis: "document", dateFrom: civil(weekAgo), dateTo: civil(today),
     }));
   });

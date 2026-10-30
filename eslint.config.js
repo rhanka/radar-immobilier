@@ -20,7 +20,7 @@ export default tseslint.config(
   {
     // Node.js tooling scripts: declare the Node runtime globals they use
     // (process, console, setTimeout) instead of disabling no-undef.
-    files: ["tools/make/*.mjs"],
+    files: ["tools/make/*.mjs", "ui/e2e-real/*.mjs"],
     languageOptions: {
       globals: {
         console: "readonly",

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/svelte";
-import { CITY_SLUG, NODES, NODE_FINGERPRINT, cityRoute, openFirstSignalCard } from "./SignauxMapView.facets.fixtures.js";
+import { CITY_SLUG, detailOf, NODES, NODE_FINGERPRINT, cityRoute, openFirstSignalCard } from "./SignauxMapView.facets.fixtures.js";
 import SignauxMapView from "./SignauxMapView.svelte";
 import { fetchCityFacets, postFacetCommand, SignalFacetError } from "$lib/signals/signal-facets-client.js";
 import { fetchGraphSignalDetail } from "$lib/signals/graph-signal-detail-client.js";
@@ -12,8 +12,7 @@ describe("SignauxMapView — 6B displayed fingerprint", () => {
     await fireEvent.change(screen.getByLabelText("Code de motif (requis) — Écarter"), {
       target: { value: "N-ADMIN" },
     });
-    vi.mocked(fetchGraphSignalDetail).mockResolvedValue({ ok: true, citySlug: CITY_SLUG,
-      legacyProjection: null, nodes: NODES.filter((node) => node.id !== "sig-1") });
+    vi.mocked(fetchGraphSignalDetail).mockResolvedValue(detailOf(CITY_SLUG, NODES.filter((node) => node.id !== "sig-1")));
     await fireEvent.click(screen.getByTestId("facet-discard-submit"));
     await screen.findByTestId("discarded-notice");
     await waitFor(() => expect(screen.queryByTestId("signal-facet-controls")).toBeNull());
@@ -39,8 +38,7 @@ describe("SignauxMapView — 6B displayed fingerprint", () => {
     vi.mocked(postFacetCommand).mockRejectedValueOnce(
       new SignalFacetError(409, "target_version_conflict", undefined,
         { version: { fingerprint: "f".repeat(64) }, heads: [] }));
-    vi.mocked(fetchGraphSignalDetail).mockResolvedValue({ ok: true, citySlug: CITY_SLUG,
-      legacyProjection: null, nodes: NODES.filter((node) => node.id !== "sig-1") });
+    vi.mocked(fetchGraphSignalDetail).mockResolvedValue(detailOf(CITY_SLUG, NODES.filter((node) => node.id !== "sig-1")));
     await fireEvent.click(screen.getByTestId("facet-discard-submit"));
     const conflict = await screen.findByTestId("facet-conflict-notice");
     expect(conflict.textContent).toMatch(/Contenu modifié/);

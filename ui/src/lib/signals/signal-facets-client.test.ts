@@ -6,7 +6,7 @@
  * verdict and never on the prefix.
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { buildFacetTarget, codesForVerdict, createCommandKey, expectedHeadIdFor, facetErrorMessage, fetchCityFacets, fetchReasonCodes, indexFacetHeads, postFacetCommand, SignalFacetError, type FacetHead } from "./signal-facets-client.js";
+import { buildFacetTarget, codesForVerdict, createCommandKey, expectedHeadIdFor, facetErrorMessage, fetchCityFacets, fetchReasonCodes, bindFacetCommand, indexFacetHeads, postFacetCommand, refuseUnscopedFacetCommand, SignalFacetError, type FacetHead } from "./signal-facets-client.js";
 import type { GraphSignalNode } from "./graph-signal-detail-client.js";
 
 function signalNode(overrides: Partial<GraphSignalNode> = {}): GraphSignalNode {
@@ -32,6 +32,8 @@ const CODES = [
 ];
 
 const FINGERPRINT = "0123456789abcdef".repeat(4);
+const WS = "11111111-1111-4111-8111-111111111111";
+const SCOPE = { workspaceId: WS };
 
 function head(overrides: Partial<FacetHead>): FacetHead {
   return {
@@ -197,7 +199,7 @@ describe("facet reads", () => {
         changedSinceArchive: true,
       }),
     ] }));
-    const { heads } = await fetchCityFacets("", "ville-synth");
+    const { heads } = await fetchCityFacets(SCOPE, "ville-synth");
     const byTarget = indexFacetHeads(heads);
     expect([...byTarget.keys()]).toEqual(["Signal/sig-1", "DesignationEvent/sig-1"]);
     expect(byTarget.get("Signal/sig-1")).toMatchObject({
@@ -219,7 +221,7 @@ describe("facet reads", () => {
     "should reject an unreadable codebook returned with HTTP 200: %j",
     async (payload) => {
       stubFetch(() => jsonResponse(200, payload));
-      await expect(fetchReasonCodes("")).rejects.toThrow("Invalid reason codes response");
+      await expect(fetchReasonCodes(SCOPE)).rejects.toThrow("Invalid reason codes response");
     },
   );
 
@@ -227,9 +229,9 @@ describe("facet reads", () => {
     const { calls } = stubFetch(() =>
       jsonResponse(200, { ok: true, profileId: "immo-steve-2026-09", codes: CODES }),
     );
-    const res = await fetchReasonCodes("");
+    const res = await fetchReasonCodes(SCOPE);
     expect(calls).toHaveLength(1);
-    expect(calls[0]!.url).toBe("/api/v1/signal-facets/reason-codes");
+    expect(calls[0]!.url).toBe(`/api/v1/workspaces/${WS}/signal-facets/reason-codes`);
     expect(res.codes).toHaveLength(5);
   });
 
@@ -237,14 +239,14 @@ describe("facet reads", () => {
     const { calls } = stubFetch(() =>
       jsonResponse(200, { ok: true, heads: [head({})] }),
     );
-    await fetchCityFacets("", "ville-synth");
+    await fetchCityFacets(SCOPE, "ville-synth");
     expect(calls).toHaveLength(1);
-    expect(calls[0]!.url).toBe("/api/v1/signal-facets/cities/ville-synth");
+    expect(calls[0]!.url).toBe(`/api/v1/workspaces/${WS}/signal-facets/personal/cities/ville-synth`);
   });
 
   it("times out a stalled heads body instead of blocking the panel", async () => {
     stubStalledBody(200);
-    const failure = await fetchCityFacets("", "ville-synth", { timeoutMs: 10 }).catch(
+    const failure = await fetchCityFacets(SCOPE, "ville-synth", { timeoutMs: 10 }).catch(
       (err) => err,
     );
     expect(failure?.name).toBe("RequestTimeoutError");
@@ -252,7 +254,7 @@ describe("facet reads", () => {
 
   it("times out a stalled codebook body instead of blocking the controls", async () => {
     stubStalledBody(200);
-    const failure = await fetchReasonCodes("", { timeoutMs: 10 }).catch((err) => err);
+    const failure = await fetchReasonCodes(SCOPE, { timeoutMs: 10 }).catch((err) => err);
     expect(failure?.name).toBe("RequestTimeoutError");
   });
 });
@@ -264,7 +266,7 @@ describe("facet writes", () => {
     );
     const key = createCommandKey();
     const event = await postFacetCommand(
-      "",
+      SCOPE,
       "discard",
       { target: { citySlug: "ville-synth", type: "Signal", id: "sig-1" }, reasonCode: "N-ADMIN",
         expectedHeadId: null, displayedFingerprint: FINGERPRINT },
@@ -272,7 +274,7 @@ describe("facet writes", () => {
     );
     expect(event).toEqual({ id: "event-1" });
     const init = calls[0]!.init!;
-    expect(calls[0]!.url).toBe("/api/v1/signal-facets/discard");
+    expect(calls[0]!.url).toBe(`/api/v1/workspaces/${WS}/signal-facets/personal/discard`);
     expect(init.method).toBe("POST");
     expect((init.headers as Record<string, string>)["Idempotency-Key"]).toBe(key);
     expect(JSON.parse(init.body as string)).toEqual({
@@ -292,7 +294,7 @@ describe("facet writes", () => {
     });
     const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" },
       expectedHeadId: null, displayedFingerprint: FINGERPRINT };
-    await expect(postFacetCommand("", "select", body, "k1")).rejects.toMatchObject({
+    await expect(postFacetCommand(SCOPE, "select", body, "k1")).rejects.toMatchObject({
       status: 422,
       code: "reason_code_required",
     });
@@ -336,7 +338,7 @@ describe("facet writes", () => {
     stubFetch(() => jsonResponse(409, { error: "facet_head_conflict", current }));
     const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" },
       expectedHeadId: null, displayedFingerprint: FINGERPRINT };
-    const failure = await postFacetCommand("", "select", body, "k1").catch((err) => err);
+    const failure = await postFacetCommand(SCOPE, "select", body, "k1").catch((err) => err);
     expect(failure).toBeInstanceOf(SignalFacetError);
     if (!(failure instanceof SignalFacetError)) throw new Error("Expected a facet failure");
     expect(failure).toMatchObject({ status: 409, code: "facet_head_conflict", current });
@@ -348,7 +350,7 @@ describe("facet writes", () => {
     stubFetch(() => jsonResponse(409, { error: "target_version_conflict", current }));
     const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" },
       expectedHeadId: null, displayedFingerprint: FINGERPRINT };
-    const failure = await postFacetCommand("", "select", body, "k1").catch((err) => err);
+    const failure = await postFacetCommand(SCOPE, "select", body, "k1").catch((err) => err);
     expect(failure).toBeInstanceOf(SignalFacetError);
     if (!(failure instanceof SignalFacetError)) throw new Error("Expected a facet failure");
     expect(failure).toMatchObject({ status: 409, code: "target_version_conflict", current });
@@ -361,7 +363,7 @@ describe("facet writes", () => {
     });
     const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" },
       expectedHeadId: null, displayedFingerprint: FINGERPRINT };
-    const failure = await postFacetCommand("", "restore", body, "k1").catch((err) => err);
+    const failure = await postFacetCommand(SCOPE, "restore", body, "k1").catch((err) => err);
     expect(failure).toBeInstanceOf(SignalFacetError);
     if (!(failure instanceof SignalFacetError)) throw new Error("Expected a facet failure");
     expect(failure.status).toBeNull();
@@ -372,12 +374,39 @@ describe("facet writes", () => {
     stubStalledBody(200);
     const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" },
       expectedHeadId: null, displayedFingerprint: FINGERPRINT };
-    const failure = await postFacetCommand("", "select", body, "k1", { timeoutMs: 10 }).catch(
+    const failure = await postFacetCommand(SCOPE, "select", body, "k1", { timeoutMs: 10 }).catch(
       (err) => err,
     );
     expect(failure).toBeInstanceOf(SignalFacetError);
     if (!(failure instanceof SignalFacetError)) throw new Error("Expected a facet failure");
     expect(failure.status).toBeNull();
     expect(facetErrorMessage(failure)).toBe("Écriture non confirmée — Réessayer.");
+  });
+});
+
+describe("scoped facet routes (6H)", () => {
+  it.each(["select", "deselect", "discard", "restore"] as const)(
+    "POST %s targets the scoped personal route, never the legacy one",
+    async (action) => {
+      const { calls } = stubFetch(() => jsonResponse(200, { ok: true, event: null }));
+      const post = bindFacetCommand(SCOPE);
+      await post(action, { target: { citySlug: "ville-synth", type: "Signal", id: "sig-1" },
+        expectedHeadId: null, displayedFingerprint: FINGERPRINT }, "k-1");
+      expect(calls[0]!.url).toBe(`/api/v1/workspaces/${WS}/signal-facets/personal/${action}`);
+      expect(calls[0]!.url).not.toMatch(/^\/api\/v1\/signal-facets\//);
+    },
+  );
+
+  it("refuses a command without workspace before any request", async () => {
+    const { calls } = stubFetch(() => jsonResponse(200, { ok: true, event: null }));
+    const failure = await refuseUnscopedFacetCommand("select", { target: { citySlug: "c", type: "Signal", id: "s" },
+      expectedHeadId: null, displayedFingerprint: FINGERPRINT }, "k-1").catch((err: unknown) => err as SignalFacetError);
+    expect(calls).toHaveLength(0);
+    expect(failure).toBeInstanceOf(SignalFacetError);
+    expect(facetErrorMessage(failure as SignalFacetError)).toMatch(/Espace de travail non sélectionné/);
+  });
+
+  it("refuses an empty workspace id", async () => {
+    await expect(fetchReasonCodes({ workspaceId: "" })).rejects.toThrow("missing_scoped_context");
   });
 });
