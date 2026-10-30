@@ -661,8 +661,8 @@ jobs:
     # in `if:`; secrets are not — hence a variable, not the secret itself.
     # prepare-preprod-db is a rehearsal: its failure (e.g. a long refresh still
     # draining) is reported below but never blocks the preprod rollout. No prepare
-    # output is read. always() lets this job run when prepare failed or was skipped.
-    if: always() && needs.build-push.result == 'success' && github.ref == 'refs/heads/main' && vars.PREPROD_CD_ENABLED == 'true'
+    # output is read. !cancelled() runs it when prepare failed or was skipped, never on a cancelled run.
+    if: "!cancelled() && needs.build-push.result == 'success' && github.ref == 'refs/heads/main' && vars.PREPROD_CD_ENABLED == 'true'"
     permissions:
       contents: read
       deployments: write

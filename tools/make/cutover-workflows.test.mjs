@@ -11,7 +11,7 @@ test('main deployment rehearses preparation without gating the preprod rollout o
   assert.equal(job['timeout-minutes'], 50);
   assert.equal(job.if, "github.ref == 'refs/heads/main' && vars.PREPROD_CD_ENABLED == 'true'");
   assert.deepEqual(deploy.needs, ['build-push', 'prepare-preprod-db']);
-  assert.equal(deploy.if, `always() && needs.build-push.result == 'success' && ${job.if}`, 'deploy shares the preprod CD arming');
+  assert.equal(deploy.if, `!cancelled() && needs.build-push.result == 'success' && ${job.if}`, 'deploy shares the preprod CD arming');
   assert.equal(JSON.stringify(deploy).includes('needs.prepare-preprod-db.outputs'), false);
   const report = deploy.steps[0];
   assert.equal(report.if, "needs.prepare-preprod-db.result != 'success'");
