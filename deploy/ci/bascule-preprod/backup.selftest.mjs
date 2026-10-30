@@ -46,7 +46,7 @@ const denied = () => Object.assign(new Error("AccessDenied"), { name: "AccessDen
 const notFound = () => Object.assign(new Error("NoSuchKey"), { name: "NoSuchKey", $metadata: { httpStatusCode: 404 } });
 
 class Store {
-  constructor() { this.b = new Map(); this.seq = 0; this.copies = []; }
+  constructor() { this.b = new Map(); this.seq = 0; this.copies = []; this.calls = []; this.counts = {}; }
   put(bucket, key, body, lastModified) {
     if (!this.b.has(bucket)) this.b.set(bucket, new Map());
     const m = this.b.get(bucket);
@@ -67,6 +67,9 @@ function client(store, policy) {
   return {
     async send(cmd) {
       const i = cmd.input;
+      const name = cmd.constructor.name;
+      store.counts[name] = (store.counts[name] || 0) + 1;
+      store.calls.push({ name, ...i });
       if (cmd instanceof sdk.GetObjectCommand || cmd instanceof sdk.HeadObjectCommand) {
         if (!can("read", i.Bucket, i.Key)) throw denied();
         const v = i.VersionId ? store.versions(i.Bucket, i.Key).find((x) => x.VersionId === i.VersionId) : store.latest(i.Bucket, i.Key);
@@ -77,10 +80,13 @@ function client(store, policy) {
       }
       if (cmd instanceof sdk.ListObjectsV2Command) {
         if (!can("list", i.Bucket)) throw denied();
+        if (i.ContinuationToken && i.StartAfter !== undefined) throw new Error("StartAfter must be omitted after the first page");
+        if (policy.failShard && i.StartAfter) { policy.failShard = false; throw new Error("simulated shard failure"); }
         const m = store.b.get(i.Bucket) || new Map();
         const all = [...m.keys()].filter((k) => !i.Prefix || k.startsWith(i.Prefix)).sort()
           .map((k) => { const v = store.latest(i.Bucket, k); return { Key: k, Size: v.Size, ETag: v.ETag, LastModified: v.LastModified }; });
-        const start = i.ContinuationToken ? Number(i.ContinuationToken) : 0;
+        const start = i.ContinuationToken ? Number(i.ContinuationToken) : all.findIndex((o) => !i.StartAfter || o.Key > i.StartAfter);
+        if (start < 0) return { Contents: [], IsTruncated: false };
         const page = all.slice(start, start + 2);
         const more = start + 2 < all.length;
         return { Contents: page, IsTruncated: more, NextContinuationToken: more ? String(start + 2) : undefined };
@@ -91,22 +97,28 @@ function client(store, policy) {
         const all = [];
         for (const k of [...m.keys()].filter((x) => !i.Prefix || x.startsWith(i.Prefix)).sort()) {
           const vs = m.get(k);
-          vs.forEach((v, idx) => all.push({ Key: k, VersionId: v.VersionId, ETag: v.ETag, Size: v.Size, LastModified: v.LastModified, IsLatest: idx === vs.length - 1 }));
+          [...vs].reverse().forEach((v, idx) => all.push({ Key: k, VersionId: v.VersionId, ETag: v.ETag, Size: v.Size, LastModified: v.LastModified, IsLatest: idx === 0 }));
         }
-        const start = i.KeyMarker ? Number(i.KeyMarker) : 0;
-        const page = all.slice(start, start + 3);
-        const more = start + 3 < all.length;
-        return { Versions: page, DeleteMarkers: [], IsTruncated: more, NextKeyMarker: more ? String(start + 3) : undefined, NextVersionIdMarker: more ? "x" : undefined };
+        const start = i.KeyMarker ? (i.VersionIdMarker
+          ? all.findIndex((v) => v.Key === i.KeyMarker && v.VersionId === i.VersionIdMarker) + 1
+          : all.findIndex((v) => v.Key > i.KeyMarker)) : 0;
+        if (start < 0) return { Versions: [], IsTruncated: false };
+        const limit = i.MaxKeys || 3;
+        const page = all.slice(start, start + limit);
+        const more = start + limit < all.length;
+        const last = page.at(-1);
+        return { Versions: page, DeleteMarkers: [], IsTruncated: more, NextKeyMarker: more ? last.Key : undefined, NextVersionIdMarker: more ? last.VersionId : undefined };
       }
       if (cmd instanceof sdk.CopyObjectCommand) {
         const m = /^\/([^/]+)\/(.+?)(?:\?versionId=(.+))?$/.exec(i.CopySource);
         const srcBucket = m[1]; const srcKey = decodeURIComponent(m[2]); const vid = m[3] ? decodeURIComponent(m[3]) : null;
         if (!can("read", srcBucket, srcKey) || !can("write", i.Bucket)) throw denied();
+        if (policy.failCopyKey === i.Key) throw Object.assign(new Error("simulated copy failure"), { $metadata: { attempts: 3 } });
         const v = vid ? store.versions(srcBucket, srcKey).find((x) => x.VersionId === vid) : store.latest(srcBucket, srcKey);
         if (!v) throw notFound();
         store.copies.push({ key: i.Key, from: srcKey, versionId: vid, grant: i.GrantFullControl || null });
         store.put(i.Bucket, i.Key, v.body, "2026-09-27T05:00:00Z");
-        return { CopyObjectResult: { ETag: v.ETag } };
+        return { CopyObjectResult: { ETag: v.ETag }, $metadata: { attempts: policy.copyAttempts || 1 } };
       }
       throw new Error("unexpected command");
     },
@@ -122,7 +134,7 @@ const D1 = "2026-09-25";
 const NOW_FRESH = Date.parse("2026-09-26T12:00:00Z");
 const NOW_STALE = Date.parse("2026-09-27T08:00:00Z"); // dump 02:23 D → 29.6 h
 
-function fixture({ tamperDump = false, rewriteBAfterD = true, inventorySizeMismatch = false, extraAnomalies = 0 } = {}) {
+function fixture({ tamperDump = false, rewriteBAfterD = true, inventorySizeMismatch = false, extraAnomalies = 0, unpinA = false } = {}) {
   const s = new Store();
   const dump = Buffer.from("PGDMP-fake-custom-archive-bytes-0123456789");
   const dumpV = s.put(B, `pg/${D}/radar.dump`, tamperDump ? Buffer.concat([dump, Buffer.from("x")]) : dump);
@@ -136,7 +148,7 @@ function fixture({ tamperDump = false, rewriteBAfterD = true, inventorySizeMisma
     format: "radar-backup-docs-inventory/v1", date: D, createdAt: "2026-09-26T03:40:00.000Z",
     sourceBucket: PROD, backupBucket: B, backupPrefix: "docs/", counts: { objects: 3 },
     objects: [
-      { key: "raw/a b.pdf", size: inventorySizeMismatch ? 790337 : a.Size, etag: a.ETag, state: "backed-up", backupEtag: a.ETag, versionId: a.VersionId },
+      { key: "raw/a b.pdf", size: inventorySizeMismatch ? 790337 : a.Size, etag: a.ETag, state: "backed-up", backupEtag: a.ETag, versionId: unpinA ? null : a.VersionId },
       { key: "raw/b.pdf", size: bD.Size, etag: bD.ETag, state: "backed-up", backupEtag: bD.ETag, versionId: null },
       { key: "raw/c.pdf", size: c.Size, etag: c.ETag, state: "backed-up", backupEtag: c.ETag, versionId: null },
     ],
@@ -191,6 +203,82 @@ async function step({ s, env, now = NOW_FRESH, copier = copierPolicy }) {
   } catch (e) { err = e; }
   const t = existsSync(term) ? JSON.parse(readFileSync(term, "utf8")) : null;
   return { r, err, t, logs, code: err ? err.exitCode ?? 1 : r.exitCode };
+}
+
+// Full-size metadata-only fixture: synthesize destination pages, never document bodies.
+function volumeFixture() {
+  const total = 267683; const upToDate = 231401; const destination = 419903;
+  const keyFor = (n) => `raw/doc-${String(n).padStart(6, "0")}.pdf`;
+  const indexes = new Int32Array(destination).fill(-1);
+  const objects = Array.from({ length: total }, (_, n) => {
+    const position = 1 + Math.floor(n * (destination - 2) / total);
+    indexes[position] = n;
+    return { key: keyFor(position), size: 10, etag: `"source-${n}"`, backupEtag: `"backup-${n}"`,
+      state: "backed-up", versionId: n < total - 100 ? `v${n}` : null };
+  });
+  const inventory = JSON.stringify({ format: br.LAYOUT.inventoryFormat, date: D, createdAt: `${D}T03:40:00Z`, counts: { objects: total }, objects });
+  const manifest = JSON.stringify({ ...fixture().manifest, docs: { objects: total, inventoryKey: br.keysFor(D).inventory, inventorySha256: sha(inventory) } });
+  const copied = new Set();
+  let stats;
+  const state = { missing: -1, drift: -1 };
+  const reset = (clearCopies = false) => {
+    if (clearCopies) copied.clear();
+    stats = { calls: {}, starts: new Set(), active: {}, maxActive: {}, upToDateCalls: 0, globalVersions: 0, earlyCopies: 0, badCopies: 0 };
+    return stats;
+  };
+  reset();
+  const positionOf = (key) => Number(/doc-(\d{6})\.pdf$/.exec(key)?.[1] ?? -1);
+  const reader = { async send(cmd) {
+    const body = cmd.input.Key === br.keysFor(D).manifest ? manifest : cmd.input.Key === br.keysFor(D).inventory ? inventory : null;
+    if (!body || !(cmd instanceof sdk.GetObjectCommand)) throw new Error("unexpected volume read");
+    stats.calls.GetObjectCommand = (stats.calls.GetObjectCommand || 0) + 1;
+    return { Body: body };
+  } };
+  const copier = { async send(cmd) {
+    const i = cmd.input; const name = cmd.constructor.name;
+    stats.calls[name] = (stats.calls[name] || 0) + 1;
+    stats.active[name] = (stats.active[name] || 0) + 1;
+    stats.maxActive[name] = Math.max(stats.maxActive[name] || 0, stats.active[name]);
+    await Promise.resolve(); // Expose concurrent sends without real latency.
+    try {
+      if (cmd instanceof sdk.ListObjectsV2Command) {
+        if (i.ContinuationToken && i.StartAfter !== undefined) throw new Error("StartAfter must be omitted after the first page");
+        if (!i.ContinuationToken) stats.starts.add(i.StartAfter);
+        const start = i.ContinuationToken ? Number(i.ContinuationToken) : i.StartAfter ? positionOf(i.StartAfter) + 1 : 0;
+        const end = Math.min(start + 1000, destination);
+        const Contents = Array.from({ length: end - start }, (_, offset) => {
+          const position = start + offset; const n = indexes[position];
+          const matches = n >= 0 && (n < upToDate || copied.has(n));
+          return { Key: keyFor(position), Size: copied.has(n) && n === state.drift ? 11 : 10,
+            ETag: matches ? `"backup-${n}"` : '"different"' };
+        });
+        return { Contents, IsTruncated: end < destination, NextContinuationToken: end < destination ? String(end) : undefined };
+      }
+      if (cmd instanceof sdk.ListObjectVersionsCommand && i.Prefix === "docs/") stats.globalVersions += 1;
+      const n = indexes[positionOf(i.Key || i.Prefix)] ?? -1;
+      if (n >= 0 && n < upToDate) stats.upToDateCalls += 1;
+      if (cmd instanceof sdk.HeadObjectCommand) {
+        if (n === state.missing) throw notFound();
+        return { ContentLength: n === state.drift ? 11 : 10, ETag: `"backup-${n}"`, VersionId: `v${n}` };
+      }
+      if (cmd instanceof sdk.ListObjectVersionsCommand) {
+        return { Versions: [{ Key: i.Prefix, Size: 10, ETag: `"backup-${n}"`, VersionId: `v${n}`, LastModified: `${D}T03:00:00Z` }], IsTruncated: false };
+      }
+      if (cmd instanceof sdk.CopyObjectCommand) {
+        if ((stats.calls.HeadObjectCommand || 0) + (stats.calls.ListObjectVersionsCommand || 0) !== total - upToDate) stats.earlyCopies += 1;
+        if (i.CopySource !== br.copySourceFor(B, objects[n].key, `v${n}`) || i.MetadataDirective !== "COPY" || i.GrantFullControl !== "id=volume-grantee") stats.badCopies += 1;
+        copied.add(n);
+        return { $metadata: { attempts: 1 } };
+      }
+      throw new Error("unexpected volume command");
+    } finally { stats.active[name] -= 1; }
+  } };
+  const run = async (extra = {}) => br.runStep({
+    env: baseEnv({ BR_STEP: "docs", BACKUP_DATE: D, PIN_MANIFEST_SHA256: sha(manifest), COPIER_ACCESS_KEY: "c", COPIER_SECRET_KEY: "c",
+      DST_BUCKET: DST, FORBIDDEN_DST_BUCKETS: PROD, COPY_GRANTEE: "volume-grantee", TERMINATION_LOG: join(tmp, "volume.json"), ...extra }),
+    sdk, clients: { reader, copier }, log: () => {},
+  });
+  return { run, reset, state, upToDate, total };
 }
 
 // ═════════════════════════════ pure functions (in-pod) ════════════════════════
@@ -319,6 +407,65 @@ async function suite() {
   // docs
   const docsEnv = (manSha, extra = {}) => baseEnv({ BR_STEP: "docs", BACKUP_DATE: D, PIN_MANIFEST_SHA256: manSha, COPIER_ACCESS_KEY: "c", COPIER_SECRET_KEY: "c",
     DST_BUCKET: DST, FORBIDDEN_DST_BUCKETS: PROD, COPY_GRANTEE: "1901410700457444:user-x", COPY_CONCURRENCY: "2", ...extra });
+  for (const [value, expected] of [[undefined, 48], ["invalid", 48], ["0", 1], ["999", 64]]) {
+    eq("readConfig — bounded concurrency for " + value, br.readConfig(docsEnv("a".repeat(64), { COPY_CONCURRENCY: value }), "docs").concurrency, expected);
+  }
+  {
+    const { s, manSha } = fixture();
+    for (let n = 0; n < 8; n++) s.put(DST, `zz/extra-${n}`, "extra");
+    const r = await step({ s, env: docsEnv(manSha) });
+    const pages = s.calls.filter((c) => c.name === "ListObjectsV2Command");
+    const continued = pages.filter((c) => c.ContinuationToken);
+    eq("docs — multi-page shards omit StartAfter with continuation tokens and preserve every extra",
+      [r.code, r.t.recon?.extra, continued.length >= 4, continued.every((c) => !Object.hasOwn(c, "StartAfter"))], [0, 9, true, true]);
+  }
+  {
+    const { s, manSha } = fixture();
+    const policy = { ...copierPolicy, failShard: true, copyAttempts: 3 };
+    const r = await step({ s, env: docsEnv(manSha), copier: policy });
+    eq("docs — shard failure falls back to full sequential listing without losing extras", [policy.failShard, r.code, r.t.recon?.extra, r.t.destListCalls], [false, 0, 1, s.counts.ListObjectsV2Command]);
+    eq("docs — successful SDK copy retries counted from metadata", r.t.copyRetries, 4);
+  }
+  {
+    const { s, manSha } = fixture();
+    const r = await step({ s, env: docsEnv(manSha), copier: { ...copierPolicy, failCopyKey: "raw/a b.pdf", copyAttempts: 3 } });
+    eq("docs — copy failure keeps processing, counts SDK retries and fails recon", [r.code, r.t.copied, r.t.copyErrors, r.t.copyRetries, r.t.recon?.ok], [1, 1, 1, 4, false]);
+  }
+  {
+    const { s, manSha } = fixture();
+    const original = s.versions(B, "docs/raw/b.pdf")[0];
+    for (let n = 0; n < 1000; n++) s.put(B, "docs/raw/b.pdf", "later-" + n, "2026-09-28T01:00:00Z");
+    for (let n = 0; n < 1001; n++) s.put(B, "docs/raw/b.pdf-neighbor", "BBBB-at-D");
+    const r = await step({ s, env: docsEnv(manSha) });
+    const pages = s.calls.filter((c) => c.name === "ListObjectVersionsCommand");
+    eq("docs — paginated history restores the exact key using both S3 markers",
+      [r.code, r.t.recon?.ok, s.copies.find((c) => c.key === "raw/b.pdf")?.versionId, pages.length,
+        pages[1]?.KeyMarker, pages[1]?.VersionIdMarker],
+      [0, true, original.VersionId, 3, "docs/raw/b.pdf", s.versions(B, "docs/raw/b.pdf")[2].VersionId]);
+    s.b.get(B).delete("docs/raw/b.pdf"); s.b.get(DST).delete("raw/b.pdf");
+    const missing = await step({ s, env: docsEnv(manSha) });
+    eq("docs — paginated prefix neighbors cannot replace a missing exact key", [missing.code, missing.t.unresolvedReasons], [2, { "no-version": 1 }]);
+  }
+  {
+    const { s, manSha } = fixture();
+    s.put(B, "docs/raw/b.pdf-neighbor", "BBBB-at-D");
+    s.b.get(B).delete("docs/raw/b.pdf");
+    const r = await step({ s, env: docsEnv(manSha) });
+    eq("docs — prefix-neighbor versions never substitute for the exact candidate", [r.code, r.t.unresolvedReasons, s.copies.length], [2, { "no-version": 1 }, 0]);
+  }
+  {
+    const { s, inventory, manifest } = fixture({ rewriteBAfterD: false });
+    for (let n = 0; n < 8; n++) {
+      const key = `raw/unpinned-${n}.pdf`; const obj = s.put(B, "docs/" + key, "unpinned");
+      inventory.objects.push({ key, size: obj.Size, backupEtag: obj.ETag, state: "backed-up", versionId: null });
+    }
+    inventory.counts.objects = manifest.docs.objects = inventory.objects.length;
+    const inv = JSON.stringify(inventory); manifest.docs.inventorySha256 = sha(inv);
+    const man = JSON.stringify(manifest);
+    s.put(B, br.keysFor(D).inventory, inv); s.put(B, br.keysFor(D).manifest, man);
+    const r = await step({ s, env: docsEnv(sha(man), { COPY_CONCURRENCY: "64" }), copier: copierNoVersions });
+    eq("docs — one denied version probe switches every unpinned worker to HEAD", [r.code, s.counts.ListObjectVersionsCommand, r.t.headChecked, r.t.copied], [0, 1, 10, 10]);
+  }
   {
     const { s, manSha } = fixture({ inventorySizeMismatch: true, extraAnomalies: 600 });
     const r = await step({ s, env: docsEnv(manSha, { DOCS_DRY: "1" }) });
@@ -343,6 +490,23 @@ async function suite() {
     const corrupt = await step({ s, env: { ...docsEnv(manSha), BR_STEP: "recon" }, copier });
     eq("recon — wrong restored size still fails", corrupt.code, 1);
   }
+  {
+    const { s, inventory, manifest } = fixture({ inventorySizeMismatch: true });
+    inventory.objects[0].versionId = null;
+    const inv = JSON.stringify(inventory); manifest.docs.inventorySha256 = sha(inv);
+    const man = JSON.stringify(manifest);
+    s.put(B, br.keysFor(D).inventory, inv); s.put(B, br.keysFor(D).manifest, man);
+    const r = await step({ s, env: docsEnv(sha(man)) });
+    const anomaly = { keySha256: sha("raw/a b.pdf"), inventorySize: 790337, versionSize: 797540 };
+    eq("docs — matching unpinned ETag tolerates size drift with a hashed receipt and correct recon",
+      [r.code, r.t.inventoryAnomalyCount, r.t.inventoryAnomalies, r.t.recon?.ok, s.latest(DST, "raw/a b.pdf")?.Size],
+      [0, 1, [anomaly], true, 797540]);
+    ok("docs — unpinned anomaly never exposes its key", !(r.logs.join("\n") + JSON.stringify(r.t)).includes("raw/a b.pdf"));
+    s.b.get(DST).delete("raw/a b.pdf"); s.latest(B, "docs/raw/a b.pdf").ETag = '"wrong"';
+    s.copies.length = 0;
+    const bad = await step({ s, env: docsEnv(sha(man)) });
+    eq("docs — different unpinned ETag refuses before copying despite size drift", [bad.code, bad.t.unresolvedReasons, s.copies.length], [2, { "etag-not-found": 1 }, 0]);
+  }
   for (const copier of [copierPolicy, copierNoVersions]) {
     for (const defect of ["etag", "gone"]) {
       const { s, manSha } = fixture({ inventorySizeMismatch: true, rewriteBAfterD: false });
@@ -353,11 +517,53 @@ async function suite() {
     }
   }
   {
+    const { s, manSha } = fixture({ inventorySizeMismatch: true, rewriteBAfterD: false, unpinA: true });
+    const r = await step({ s, env: docsEnv(manSha), copier: copierNoVersions });
+    eq("docs — 403 HEAD fallback tolerates unpinned size drift and reconciles actual bytes",
+      [r.code, r.t.recon?.ok, r.t.bytesToCopy, r.t.inventoryAnomalies, s.counts.ListObjectVersionsCommand],
+      [0, true, 797549, [{ keySha256: sha("raw/a b.pdf"), inventorySize: 790337, versionSize: 797540 }], 1]);
+    ok("docs — 403 size anomaly receipt and logs hash the key", !(r.logs.join("\n") + JSON.stringify(r.t)).includes("raw/a b.pdf"));
+    for (const defect of ["etag", "gone"]) {
+      s.b.get(DST).delete("raw/a b.pdf"); s.copies.length = 0;
+      if (defect === "etag") s.latest(B, "docs/raw/a b.pdf").ETag = '"wrong"';
+      else s.b.get(B).delete("docs/raw/a b.pdf");
+      const bad = await step({ s, env: docsEnv(manSha), copier: copierNoVersions });
+      eq("docs — 403 unpinned " + defect + " refuses before copying", [bad.code, bad.t.unresolved, s.copies.length], [2, 1, 0]);
+    }
+  }
+  for (const copier of [copierPolicy, copierNoVersions]) {
+    const { s, manSha } = fixture({ inventorySizeMismatch: true, rewriteBAfterD: false, unpinA: true });
+    const restored = await step({ s, env: docsEnv(manSha), copier });
+    const anomaly = { keySha256: sha("raw/a b.pdf"), inventorySize: 790337, versionSize: 797540 };
+    const env = { ...docsEnv(manSha), BR_STEP: "recon" };
+    const rec = await step({ s, env, copier });
+    eq("docs then standalone recon — unpinned drift uses selected size with listing or 403 HEAD",
+      [restored.code, rec.code, rec.t.inventoryAnomalies], [0, 0, [anomaly]]);
+    eq("recon — unpinned drift checks the backup even when the destination ETag matches",
+      [rec.t.versionsResolved, rec.t.headChecked], copier === copierPolicy ? [1, 0] : [0, 1]);
+    s.latest(DST, "raw/a b.pdf").ETag = '"rechunked-multipart"';
+    const rechunked = await step({ s, env, copier });
+    eq("recon — unpinned drift permits a re-chunked destination ETag", [rechunked.code, rechunked.t.inventoryAnomalies], [0, [anomaly]]);
+    s.latest(DST, "raw/a b.pdf").Size += 1;
+    const corrupt = await step({ s, env, copier });
+    eq("recon — unpinned drift rejects a destination size different from the backup version", [corrupt.code, corrupt.t.sizeMismatch], [1, 1]);
+    s.latest(DST, "raw/a b.pdf").Size -= 1;
+    s.latest(DST, "raw/a b.pdf").ETag = s.latest(B, "docs/raw/a b.pdf").ETag;
+    for (const defect of ["etag", "gone"]) {
+      if (defect === "etag") s.latest(B, "docs/raw/a b.pdf").ETag = '"wrong"';
+      else s.b.get(B).delete("docs/raw/a b.pdf");
+      const bad = await step({ s, env, copier });
+      eq("recon — unpinned " + defect + " fails despite matching destination ETag", bad.code, 1);
+    }
+  }
+  {
     const { s, manSha } = fixture();
     const dry = await step({ s, env: docsEnv(manSha, { DOCS_DRY: "1" }) });
     eq("docs DRY — plan: 1 up to date, 2 to copy, 0 copy done", [dry.code, dry.t.upToDate, dry.t.toCopy, s.copies.length], [0, 1, 2, 0]);
     const r = await step({ s, env: docsEnv(manSha) });
     eq("docs — exit 0, 2 copies, recon ok", [r.code, r.t.copied, r.t.recon.ok], [0, 2, true]);
+    eq("docs — up-to-date c receives no per-object calls", s.calls.filter((c) => c.Key === "docs/raw/c.pdf" || c.Key === "raw/c.pdf" || c.Prefix === "docs/raw/c.pdf"), []);
+    eq("docs — only pinned a is HEAD-checked and unpinned b version-resolved", [r.t.headChecked, r.t.versionsResolved], [1, 1]);
     ok("docs — b.pdf restored to its content AT D (not the later rewrite)", s.latest(DST, "raw/b.pdf").body.toString() === "BBBB-at-D");
     ok("docs — a b.pdf copied by recorded versionId + grant", s.copies.some((c) => c.key === "raw/a b.pdf" && c.versionId && c.grant === "id=1901410700457444:user-x"));
     ok("docs — additive: preprod object newer than D kept", !!s.latest(DST, "runs/extra-newer-than-D.json"));
@@ -388,7 +594,7 @@ async function suite() {
     // others checked by HEAD — b rewritten after D ⇒ current differs ⇒ refusal.
     const { s, manSha } = fixture();
     const r = await step({ s, env: docsEnv(manSha), copier: copierNoVersions });
-    eq("docs — no version listing + object rewritten since D ⇒ refused before any copy", [r.code, s.copies.length, r.t.unresolvedReasons], [2, 0, { "current-differs": 1 }]);
+    eq("docs — no version listing + object rewritten since D ⇒ refused before any copy", [r.code, s.copies.length, r.t.unresolvedReasons], [2, 0, { "etag-not-found": 1 }]);
     ok("docs — fallback announced in the log", r.logs.some((l) => /version listing .* not permitted/.test(l)));
   }
   {
@@ -407,6 +613,42 @@ async function suite() {
     const rec = await step({ s, env: { ...docsEnv(manSha), BR_STEP: "recon" } });
     eq("recon — object deleted after the restore ⇒ fail", [rec.code, rec.t.missing], [1, 1]);
   }
+}
+
+// ═════════════════════════════ simulated production volume ═══════════════════
+{
+  const v = volumeFixture();
+  let stats = v.reset();
+  const r = await v.run();
+  eq("volume — restores 267,683 objects with 36,282 copies and additive recon", [r.exitCode, r.termination.upToDate, r.termination.copied, r.termination.recon.ok, r.termination.recon.extra], [0, 231401, 36282, true, 152220]);
+  eq("volume — two pinned input GETs, candidate HEADs, per-key version lists and copies", [stats.calls.GetObjectCommand, stats.calls.HeadObjectCommand, stats.calls.ListObjectVersionsCommand, stats.calls.CopyObjectCommand], [2, 36182, 100, 36282]);
+  eq("volume — zero global version listings or per-object calls on up-to-date objects", [stats.globalVersions, stats.upToDateCalls], [0, 0]);
+  ok("volume — both destination listings use at most 872 calls", stats.calls.ListObjectsV2Command <= 2 * (420 + 16));
+  eq("volume — 16 distinct shard starts and 16 concurrent shard requests", [stats.starts.size, stats.maxActive.ListObjectsV2Command], [16, 16]);
+  eq("volume — default worker concurrency 48 for HEAD and copy", [stats.maxActive.HeadObjectCommand, stats.maxActive.CopyObjectCommand], [48, 48]);
+  eq("volume — all candidates verified before copying, pinned sources and ACL preserved", [stats.earlyCopies, stats.badCopies], [0, 0]);
+  eq("volume — receipt counters match observed calls", [r.termination.destListCalls, r.termination.headChecked, r.termination.versionsResolved, r.termination.copyRetries], [stats.calls.ListObjectsV2Command, 36182, 100, 0]);
+  ok("volume — complete receipt stays under 3,900 bytes", Buffer.byteLength(JSON.stringify(r.termination)) < br.TERMINATION_MAX_BYTES);
+  console.log("  volume calls " + JSON.stringify(stats.calls));
+  stats = v.reset();
+  const again = await v.run();
+  eq("volume — resume issues zero per-object calls and zero copies", [again.exitCode, again.termination.copied, stats.calls.HeadObjectCommand || 0, stats.calls.ListObjectVersionsCommand || 0, stats.calls.CopyObjectCommand || 0], [0, 0, 0, 0, 0]);
+  for (const concurrency of [1, 2, 8, 64]) {
+    stats = v.reset();
+    const bounded = await v.run({ COPY_CONCURRENCY: String(concurrency) });
+    eq("volume — listing concurrency " + concurrency + " respects the worker bound without losing keys or extras",
+      [bounded.exitCode, stats.maxActive.ListObjectsV2Command, stats.starts.size, bounded.termination.recon.checked, bounded.termination.recon.extra],
+      [0, Math.min(16, concurrency), 16, v.total, 152220]);
+  }
+  v.state.missing = v.upToDate;
+  stats = v.reset(true);
+  const missing = await v.run();
+  eq("volume — one missing pinned candidate refuses before all copies", [missing.exitCode, missing.termination.unresolvedReasons, stats.calls.CopyObjectCommand || 0], [2, { "version-gone": 1 }, 0]);
+  v.state.missing = -1;
+  v.state.drift = v.upToDate;
+  stats = v.reset(true);
+  const drift = await v.run();
+  eq("volume — matching pinned ETag tolerates one size drift and recon uses HEAD size", [drift.exitCode, drift.termination.inventoryAnomalyCount, drift.termination.copied, drift.termination.recon.ok, stats.calls.HeadObjectCommand], [0, 1, 36282, true, 36182]);
 }
 
 // ═════════════════════════════ runner pure functions ══════════════════════════
@@ -470,7 +712,7 @@ const renders = {
   "db-restore-backup-job.tmpl.yaml": { ...common, DUMP_IMAGE: "postgis/postgis:16-3.4", BACKUP_DATE: D, PIN_MANIFEST_SHA256: "a".repeat(64), PIN_PG_SHA256: "b".repeat(64),
     DB_SECRET: "radar-db-credentials", PGHOST: "radar-postgres", EXPECTED_DATABASE: "radar", RESTORE_ASSERT_DB: "1" },
   "docs-restore-backup-job.tmpl.yaml": { ...common, JOB_NAME: JOBS.docs, BR_STEP: "docs", COPY_SECRET: "radar-backup-restore-docs", BACKUP_DATE: D, PIN_MANIFEST_SHA256: "a".repeat(64),
-    DST_BUCKET: DST, FORBIDDEN_DST_BUCKETS: PROD, COPY_GRANTEE: "g", COPY_CONCURRENCY: "8", DOCS_DRY: "0" },
+    DST_BUCKET: DST, FORBIDDEN_DST_BUCKETS: PROD, COPY_GRANTEE: "g", COPY_CONCURRENCY: "48", DOCS_DRY: "0" },
 };
 for (const [tmpl, vars] of Object.entries(renders)) {
   const { text, leftover } = render(tmpl, vars);
