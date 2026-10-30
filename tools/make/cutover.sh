@@ -24,6 +24,7 @@ ACQUIRED=0
 cleanup() {
   local code=$?
   trap - EXIT INT TERM
+  unset FAST_DEADLINE
   stop_forwards
   if [[ ${PREPARING:-0} == 1 && $code != 0 ]]; then
     (set -e; prepare_failed) || printf 'Prepared cleanup incomplete; slot remains blocked\n' >&2
@@ -82,6 +83,7 @@ case ${1:-} in
   run)
     case ${MODE:-run} in run|restore|list) ;; *) fail 'MODE must be restore or list when supplied';; esac
     [[ ${BACKUP_ID:-latest} == latest || ${BACKUP_ID:-} =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || fail 'Invalid backup selection'
+    [[ ${MODE:-run} == restore || ${MODE:-run} == list ]] || FAST_DEADLINE=$((SECONDS+295))
     if [[ ${RELEASE:-} != deployed ]]; then validate_release "${RELEASE:-}"; fi
     lock_acquire
     jq --arg mode "${MODE:-run}" '.mode=$mode' "$WORK/record.json" > "$WORK/next.json"
@@ -105,6 +107,7 @@ case ${1:-} in
   resume)
     lock_resume
     MODE=$(jq -r '.mode//"run"' "$WORK/record.json")
+    [[ $MODE == restore ]] || FAST_DEADLINE=$((SECONDS+295))
     RECOVERING=1
     if [[ $(jq -r .kind "$WORK/record.json") == writer ]]; then
       writer_release

@@ -10,10 +10,17 @@ cutover_config() {
 }
 cluster_request() {
   local remaining=15
+  if [[ -n ${FAST_DEADLINE:-} ]]; then
+    remaining=$((FAST_DEADLINE-SECONDS))
+    ((remaining>0)) || fail 'Five-minute cutover budget exhausted; remain closed'
+    ((remaining<=15)) || remaining=15
+  fi
   if [[ -n ${REQUEST_DEADLINE:-} ]]; then
     remaining=$((REQUEST_DEADLINE-SECONDS))
     ((remaining>0)) || fail 'Shared cluster-operation deadline exceeded'
     ((remaining<=15)) || remaining=15
+    if [[ -n ${FAST_DEADLINE:-} ]] && ((FAST_DEADLINE-SECONDS < remaining)); then remaining=$((FAST_DEADLINE-SECONDS)); fi
+    ((remaining>0)) || fail 'Five-minute cutover budget exhausted; remain closed'
   fi
   command kubectl --request-timeout="${remaining}s" "$@"
 }
