@@ -56,6 +56,7 @@ cleanup() {
 trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
+if [[ ${1:-} == run && ${MODE:-run} == run ]]; then FAST_DEADLINE=$((SECONDS+295)); fi
 cluster_preflight
 case ${1:-} in
   prepare) prepare_database;;
@@ -83,7 +84,6 @@ case ${1:-} in
   run)
     case ${MODE:-run} in run|restore|list) ;; *) fail 'MODE must be restore or list when supplied';; esac
     [[ ${BACKUP_ID:-latest} == latest || ${BACKUP_ID:-} =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || fail 'Invalid backup selection'
-    [[ ${MODE:-run} == restore || ${MODE:-run} == list ]] || FAST_DEADLINE=$((SECONDS+295))
     if [[ ${RELEASE:-} != deployed ]]; then validate_release "${RELEASE:-}"; fi
     lock_acquire
     jq --arg mode "${MODE:-run}" '.mode=$mode' "$WORK/record.json" > "$WORK/next.json"
