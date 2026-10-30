@@ -21,6 +21,7 @@
 - [x] Prepared API smoke checks health, release SHA and anonymous refusal; full UI/MCP smoke remains at cutover.
 - [x] Runner polls cluster Jobs for up to 50 minutes: the stated runner wall budget of five minutes contradicts waiting for 25–40 minute Jobs.
 - [x] Infrastructure prerequisites: CREATEDB (asserted by reset), PVC capacity for two databases (5 Gi today), updated namespace RBAC.
+- [x] Keep the short claim lock outside the ten-minute drain; suspend schedules immediately after inventory, then drain after slot claim/release.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch, sequential implementation lots.
