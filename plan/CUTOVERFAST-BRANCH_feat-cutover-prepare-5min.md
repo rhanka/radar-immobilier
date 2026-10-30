@@ -34,6 +34,6 @@
 - [ ] Lot 2: database identity, explicit target env, parallel restore and Secret patch RBAC implemented; validation pending.
 - [ ] Lot 3: prepare lifecycle, ownership, freshness, isolated API smoke and cleanup implemented; validation pending.
 - [ ] Lot 4: prepared verification, switch, rollback and early writer suspension wired; validation pending.
-- [ ] Lot 5: mandatory CI preparation gate implemented; fake-cluster acceptance tests follow.
+- [ ] Lot 5: CI gate and fake-cluster preparation, failures, freshness, switch, rollback and schedule tests implemented; validation pending.
 - [ ] Lot 6: empty-HOME controller execution and daily/bascule selftests wired; API suite, lint, typecheck, down -v pending.
 - [ ] Lot 7: selective atomic commits and push; no PR.
