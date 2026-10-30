@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/svelte";
 import { tick } from "svelte";
 import SignalFacetControls from "./SignalFacetControls.svelte";
-import { emptyTargetFacetState, SignalFacetError, type FacetAction, type postFacetCommand } from "$lib/signals/signal-facets-client.js";
+import { emptyTargetFacetState, SignalFacetError, type FacetAction, type FacetCommandPoster } from "$lib/signals/signal-facets-client.js";
 
 afterEach(cleanup);
 
@@ -15,7 +15,7 @@ describe("SignalFacetControls — late viewer commands", () => {
       let resolve!: () => void;
       let reject!: (error: unknown) => void;
       const pending = new Promise<void>((done, fail) => { resolve = done; reject = fail; });
-      const postCommand = vi.fn<typeof postFacetCommand>(async () => null);
+      const postCommand = vi.fn<FacetCommandPoster>(async () => null);
       postCommand.mockImplementationOnce(() => pending);
       const onSaved = vi.fn();
       const state = emptyTargetFacetState();
@@ -59,7 +59,7 @@ describe("SignalFacetControls — late viewer commands", () => {
       await fireEvent.click(trigger);
       await waitFor(() => expect(onSaved).toHaveBeenCalledWith(action, expect.objectContaining({ viewerKey })));
       const calls = postCommand.mock.calls;
-      expect(calls[1]![3]).not.toBe(calls[0]![3]);
+      expect(calls[1]![2]).not.toBe(calls[0]![2]);
     },
   );
 });
