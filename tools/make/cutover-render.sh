@@ -18,7 +18,7 @@ render_template() {
   PIN_MANIFEST_SHA256=$(jq -r '.pin.manifestSha256//""' "$WORK/record.json")
   PIN_PG_SHA256=$(jq -r '.pin.pgSha256//""' "$WORK/record.json")
   EXPECTED_DATABASE=$(jq -r --arg e "$ENV" '.[$e].database' "$CONFIG")
-  export DST_BUCKET FORBIDDEN_DST_BUCKETS COPY_GRANTEE COPY_CONCURRENCY=8 DOCS_DRY=0
+  export DST_BUCKET FORBIDDEN_DST_BUCKETS COPY_GRANTEE COPY_CONCURRENCY=${COPY_CONCURRENCY:-48} DOCS_DRY=0
   COPY_GRANTEE=$(jq -r .storage.copyGrantee "$CONFIG")
   DST_BUCKET=$(jq -r --arg e "$ENV" '.[$e].documents' "$CONFIG")
   FORBIDDEN_DST_BUCKETS="$(jq -r .prod.documents "$CONFIG"),$EXPECTED_BACKUP_BUCKET"
