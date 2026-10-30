@@ -6,9 +6,9 @@ if $step=="ddl" or $step=="data" or $step=="destination" then
 else . end
 | if $step=="restore" and $r[0].targetDb!=null then
     .spec.template.spec.containers[0].env |=
-      (map(select(.name!="PGDATABASE" and .name!="TARGET_DB")) +
+      (map(select(.name!="PGDATABASE" and .name!="TARGET_DB" and .name!="LIVE_DB")) +
         [{name:"PGDATABASE",value:$r[0].targetDb},{name:"TARGET_DB",value:$r[0].targetDb},
-         {name:"POSTGRES_DB",value:$r[0].targetDb}])
+         {name:"POSTGRES_DB",value:$r[0].targetDb},{name:"LIVE_DB",value:($r[0].liveDb//"")}])
   else . end
 | (.spec.template.spec.containers[],.spec.template.spec.initContainers[]?) |= (
   .terminationMessagePolicy="File"|.terminationMessagePath="/dev/termination-log"|

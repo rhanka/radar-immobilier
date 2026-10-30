@@ -57,7 +57,7 @@ run_job() {
   fi
   name="cutover-$RUN-$step"
   existing=$(jq -c --arg step "$step" '.jobs[$step]//null' "$WORK/record.json")
-  if [[ ${RECOVERING:-0} == 1 && $step =~ ^(ddl|data)$ && $existing != null ]]; then
+  if [[ ${RECOVERING:-0} == 1 && $step =~ ^(ddl|data|restore|backup)$ && $existing != null ]]; then
     local previous
     previous=$("${k[@]}" get job "$(jq -r .name <<< "$existing")" -o json) || fail 'Migration outcome unknown'
     if jq -e 'any(.status.conditions[]?;.type=="Failed" and .status=="True")' <<< "$previous" >/dev/null; then
