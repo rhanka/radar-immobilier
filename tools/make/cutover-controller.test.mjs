@@ -72,17 +72,16 @@ test('daily restoration pins deployed digests and skips the 6H hook', () => {
     assert.equal(JSON.parse(f.state().objects.find(o => o.metadata.name === 'radar-cutover-receipt').data.receipt).release.dataMigration, null);
   } finally { f.cleanup(); }
 });
-test('production uses the same engine and backs up before DDL while skipping source restoration', () => {
+test('production rejects daily restoration because prepared releases are image-only', () => {
   const f = fixture({ url: 'https://immo.sent-tech.ca' });
   try {
     const state = f.state();
     const ingress = state.objects.find(o => o.kind === 'Ingress');
     ingress.spec.rules[0].host = 'immo.sent-tech.ca'; ingress.spec.tls[0].hosts = ['immo.sent-tech.ca'];
     writeFileSync(join(f.dir, 'state.json'), JSON.stringify(state));
-    success(f.run('run', [], 'prod'));
-    const steps = f.state().jobCreation.map(j => j.step);
-    for (const step of ['resolve', 'docs', 'recon', 'restore']) assert.equal(steps.includes(step), false);
-    assert.ok(steps.indexOf('backup') < steps.indexOf('ddl')); assert.ok(steps.includes('data'));
+    assert.notEqual(f.run('run', [], 'prod').status, 0);
+    assert.equal(f.calls().some(c => c.includes('create')), false);
+    assert.deepEqual(f.state().jobCreation || [], []);
   } finally { f.cleanup(); }
 });
 test('explicit resume retries a terminated data migration through protected forward resume', () => {
@@ -112,4 +111,47 @@ for (const step of ['restore', 'backup', 'ddl', 'data']) {
       } finally { f.cleanup(); }
     });
   }
+}
+test('daily restoration probes and writes the recovery backup to the preprod bucket', () => {
+  const f = fixture();
+  try {
+    success(f.run('run', ['RELEASE=deployed', 'MODE=restore']));
+    const creation = f.state().jobCreation;
+    const probe = creation.findIndex(j => j.step === 'probe');
+    assert.ok(probe >= 0 && probe < creation.findIndex(j => j.closed));
+    const jobs = f.state().objects.filter(o => o.kind === 'Job');
+    for (const step of ['probe', 'backup']) {
+      const spec = JSON.stringify(jobs.find(o => o.metadata.name.endsWith(`-${step}`)).spec);
+      assert.ok(spec.includes('s3://sentropic-pgbackup-preprod/db-backups/cutover-preprod-'), step);
+      assert.ok(!spec.includes('radar-immobilier-backup/db-backups'), step);
+    }
+    const receipt = JSON.parse(f.state().objects.find(o => o.metadata.name === 'radar-cutover-receipt').data.receipt);
+    assert.match(receipt.recoveryReference, /^s3:\/\/sentropic-pgbackup-preprod\/db-backups\//);
+  } finally { f.cleanup(); }
+});
+test('unwritable recovery bucket fails before closure and reopens nothing', () => {
+  const f = fixture({ failJob: 'probe' });
+  try {
+    const original = f.state().objects.find(o => o.kind === 'Ingress').spec;
+    assert.notEqual(f.run().status, 0);
+    assert.equal(lock(f), undefined);
+    assert.equal(f.state().jobCreation.some(j => j.closed), false);
+    assert.equal(f.state().jobCreation.some(j => ['docs', 'restore', 'backup'].includes(j.step)), false);
+    assert.deepEqual(f.state().objects.find(o => o.kind === 'Ingress').spec, original);
+    assert.equal(f.state().objects.find(o => o.metadata.name === 'radar-refresh-pv').spec.suspend, false);
+  } finally { f.cleanup(); }
+});
+for (const step of ['restore', 'backup']) {
+  test(`explicit resume relaunches a failed ${step} Job under a new name`, () => {
+    const f = fixture({ failJob: step });
+    try {
+      assert.notEqual(f.run().status, 0);
+      const run = record(f).run;
+      const state = f.state(); state.failJob = null;
+      writeFileSync(join(f.dir, 'state.json'), JSON.stringify(state));
+      success(f.run('resume', [`RUN=${run}`]));
+      const names = f.state().objects.filter(o => o.kind === 'Job' && o.metadata.name.endsWith(`-${step}`)).map(o => o.metadata.name);
+      assert.deepEqual(names.sort(), [`cutover-${run}-1-${step}`, `cutover-${run}-${step}`].sort());
+    } finally { f.cleanup(); }
+  });
 }

@@ -9,20 +9,24 @@
 #                           the manifest, the .sha256 sidecar and the PIN; writes
 #                           /work/radar.dump + /work/backup.env.
 #   container     `restore` (postgis): pg_restore --list (TOC entry count == manifest,
-#                           header dbname == EXPECTED_DATABASE) then pg_restore
-#                           --clean --if-exists --single-transaction --exit-on-error.
+#                           header dbname == DUMP_DATABASE), then deploy/cutover/atomic-restore.sh:
+#                           DROP SCHEMA ... CASCADE + replay without --clean, one transaction
+#                           for the live database, pg_restore -j 4 for a prepared database.
 #                           DB creds = ${DB_SECRET} as libpq PG* (never a password URI).
 #
-# The shared cutover closure is verified BEFORE and DURING this Job.
-# The destination recovery backup runs before DDL. Fail-closed: backoffLimit 0,
-# restartPolicy Never, single transaction = all or nothing.
+# Prepared databases are disposable; failed preparation discards the target.
+# Daily MODE=restore is atomic and relaunchable (schema reset in the same transaction).
 # Runner = kubectl only (.status + termination message of `fetch`, never logs).
 #
 # Placeholders: ${NAMESPACE} ${IMAGE} ${DUMP_IMAGE} ${READER_SECRET} ${S3_ENDPOINT}
 # ${S3_REGION} ${S3_FORCE_PATH_STYLE} ${EXPECTED_BACKUP_BUCKET} ${BACKUP_DATE}
 # ${PIN_MANIFEST_SHA256} ${PIN_PG_SHA256} ${DB_SECRET} ${PGHOST} ${EXPECTED_DATABASE}
-# ${RESTORE_ASSERT_DB} ${TTL_SECONDS}, plus the BR_SCRIPT placeholder under the
-# `fetch` args (never written in a comment: it spans many lines). The $VAR of the
+# ${RESTORE_ASSERT_DB} ${TTL_SECONDS} ${RESTORE_REQUEST_CPU} ${RESTORE_REQUEST_MEMORY}
+# ${RESTORE_LIMIT_CPU} ${RESTORE_LIMIT_MEMORY} (per-environment `restoreResources` in
+# deploy/cutover/config.json, sized for the namespace ResourceQuota; pg_restore -j 4
+# keeps four workers within that CPU limit), plus the BR_SCRIPT placeholder under the
+# `fetch` args and the RESTORE_SCRIPT placeholder under the `restore` args (never
+# written as placeholders in a comment: they span many lines). The $VAR of the
 # restore shell are RUNTIME variables (no braces).
 # =============================================================================
 apiVersion: batch/v1
@@ -111,29 +115,14 @@ ${BR_SCRIPT}
               . /work/backup.env
               [ "$PGDATABASE" = "$EXPECTED_DATABASE" ] || exit 2
               echo "[restore] backup date=$BACKUP_DATE sha256=$PG_SHA256 (verified by fetch)"
-              pg_restore --list /work/radar.dump > /tmp/toc.txt
-              toc="$(grep -c '^[0-9]' /tmp/toc.txt || true)"
-              if [ -n "$EXPECTED_TOC_ENTRIES" ] && [ "$toc" != "$EXPECTED_TOC_ENTRIES" ]; then
-                echo "[restore] ERROR — TOC entries $toc != manifest $EXPECTED_TOC_ENTRIES (restore refused)"; exit 1
-              fi
-              src_db="$(awk -F': ' '/^;[[:space:]]+dbname:/ {print $2; exit}' /tmp/toc.txt | tr -d '[:space:]')"
-              echo "[restore] toc_entries=$toc archive dbname='${src_db:-<none>}' expected='$EXPECTED_DATABASE'"
-              if [ "$RESTORE_ASSERT_DB" = "1" ]; then
-                if [ -z "$src_db" ] || [ "$src_db" != "$EXPECTED_DATABASE" ]; then
-                  echo "[restore] ERROR — archive dbname != EXPECTED_DATABASE (restore refused)"; exit 1
-                fi
-              else
-                echo "[restore] dbname check DISABLED (RESTORE_ASSERT_DB=0)"
-              fi
-              echo "[restore] pg_restore --clean --if-exists --single-transaction -> db=$PGDATABASE host=$PGHOST"
-              pg_restore --clean --if-exists --no-owner --no-privileges \
-                --exit-on-error --single-transaction \
-                --dbname "$PGDATABASE" /work/radar.dump
-              echo "[restore] ok — backup $BACKUP_DATE loaded into preprod"
+${RESTORE_SCRIPT}
           env:
             - { name: PGHOST, value: "${PGHOST}" }
             - { name: EXPECTED_DATABASE, value: "${EXPECTED_DATABASE}" }
             - { name: RESTORE_ASSERT_DB, value: "${RESTORE_ASSERT_DB}" }
+            - { name: TARGET_DB, value: "" }
+            - { name: LIVE_DB, value: "" }
+            - { name: RESTORE_DUMP, value: "/work/radar.dump" }
             - { name: PGUSER, valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_USER } } }
             - { name: PGPASSWORD, valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_PASSWORD } } }
             - { name: PGDATABASE, valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_DB } } }
@@ -144,8 +133,8 @@ ${BR_SCRIPT}
               drop:
                 - ALL
           resources:
-            requests: { cpu: 100m, memory: 256Mi }
-            limits: { cpu: "1", memory: 1Gi }
+            requests: { cpu: "${RESTORE_REQUEST_CPU}", memory: "${RESTORE_REQUEST_MEMORY}" }
+            limits: { cpu: "${RESTORE_LIMIT_CPU}", memory: "${RESTORE_LIMIT_MEMORY}" }
           volumeMounts:
             - { name: work, mountPath: /work }
             - { name: tmp, mountPath: /tmp }

@@ -63,7 +63,7 @@ jobs:
         run: node deploy/ci/backup/backup-daily.selftest.mjs
 
       - name: Validate cutover controller and backup adapters (hermetic tests)
-        run: make -f deploy/cutover/operator.mk test TEST_PATTERN='one command restores|long owned radar-refresh-pending-watchdog|failure remains closed.*failJob|daily restoration|daily and inter-tenant interfaces' ENV=test-cutover
+        run: make -f deploy/cutover/operator.mk test TEST_PATTERN='one command restores|long owned radar-refresh-pending-watchdog|failure remains closed.*failJob|daily restoration|daily and inter-tenant interfaces|prepare|prepared|rollback patches|resume reconciles|main deployment' ENV=test-cutover
 
       - name: Install workspace deps
         run: make install ENV=ci

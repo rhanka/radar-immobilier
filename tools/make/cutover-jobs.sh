@@ -36,6 +36,7 @@ job_observe() {
       fail "Job failed: $name (sanitized; inspect in cluster)"
     fi
     if ((SECONDS>=deadline)); then
+      if [[ -n ${FAST_DEADLINE:-} ]] && ((SECONDS+5>=FAST_DEADLINE)); then budget_exhausted; fi
       delete_job_uid "$name" "$uid"
       local termination=$((SECONDS+120))
       until job_pods_ended "$name" "$uid"; do
@@ -49,9 +50,15 @@ job_observe() {
 }
 run_job() {
   local step=$1 deadline=$2 budget=$3 name uid existing
+  if [[ -n ${FAST_DEADLINE:-} ]]; then
+    local remaining=$((FAST_DEADLINE-SECONDS-5))
+    ((remaining>20)) || budget_exhausted
+    ((deadline<=remaining)) || deadline=$remaining
+    ((budget<=remaining)) || budget=$remaining
+  fi
   name="cutover-$RUN-$step"
   existing=$(jq -c --arg step "$step" '.jobs[$step]//null' "$WORK/record.json")
-  if [[ ${RECOVERING:-0} == 1 && $step =~ ^(ddl|data)$ && $existing != null ]]; then
+  if [[ ${RECOVERING:-0} == 1 && $step =~ ^(ddl|data|restore|backup)$ && $existing != null ]]; then
     local previous
     previous=$("${k[@]}" get job "$(jq -r .name <<< "$existing")" -o json) || fail 'Migration outcome unknown'
     if jq -e 'any(.status.conditions[]?;.type=="Failed" and .status=="True")' <<< "$previous" >/dev/null; then
@@ -96,9 +103,12 @@ render_job() {
   render_template "$step" > "$WORK/template.yaml"
   # Client dry-run only parses the manifest. No server mutation precedes checkpoint.
   "${k[@]}" create --dry-run=client -f "$WORK/template.yaml" -o json > "$WORK/template.json"
-  if [[ $step == destination ]]; then
-    jq '.spec.template.spec.containers[0].command=["node","-e",
-      "const {Client}=require(\"pg\"); const c=new Client({host:process.env.POSTGRES_HOST,user:process.env.POSTGRES_USER,password:process.env.POSTGRES_PASSWORD,database:process.env.POSTGRES_DB}); (async()=>{await c.connect(); const r=await c.query(\"SELECT current_database() AS name\"); if(r.rows[0].name!==process.env.CUTOVER_EXPECTED_DATABASE)throw Error(); await c.end(); console.log(JSON.stringify({ok:true}));})().catch(()=>process.exit(1));"]' \
+  if [[ $step =~ ^(destination|database|reset|discard)$ ]]; then
+    local operation=$step
+    [[ $step != destination || -n ${TARGET_DB:-} ]] || operation=database
+    jq --rawfile database deploy/cutover/database.cjs --arg step "$operation" --arg target "${TARGET_DB:-}" '
+      .spec.template.spec.containers[0].command=["node","-e",$database]|
+      .spec.template.spec.containers[0].env += [{name:"CUTOVER_DB_OPERATION",value:$step},{name:"TARGET_DB",value:$target}]' \
       "$WORK/template.json" > "$WORK/identity.json"
     mv "$WORK/identity.json" "$WORK/template.json"
   fi

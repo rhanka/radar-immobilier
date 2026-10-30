@@ -214,7 +214,7 @@ function volumeFixture() {
     const position = 1 + Math.floor(n * (destination - 2) / total);
     indexes[position] = n;
     return { key: keyFor(position), size: 10, etag: `"source-${n}"`, backupEtag: `"backup-${n}"`,
-      state: "backed-up", versionId: n < total - 100 ? `v${n}` : null };
+      state: "backed-up", versionId: n < total - 9418 ? `v${n}` : null };
   });
   const inventory = JSON.stringify({ format: br.LAYOUT.inventoryFormat, date: D, createdAt: `${D}T03:40:00Z`, counts: { objects: total }, objects });
   const manifest = JSON.stringify({ ...fixture().manifest, docs: { objects: total, inventoryKey: br.keysFor(D).inventory, inventorySha256: sha(inventory) } });
@@ -262,10 +262,14 @@ function volumeFixture() {
         return { ContentLength: n === state.drift ? 11 : 10, ETag: `"backup-${n}"`, VersionId: `v${n}` };
       }
       if (cmd instanceof sdk.ListObjectVersionsCommand) {
-        return { Versions: [{ Key: i.Prefix, Size: 10, ETag: `"backup-${n}"`, VersionId: `v${n}`, LastModified: `${D}T03:00:00Z` }], IsTruncated: false };
+        const start = i.KeyMarker ? objects.findIndex(o => "docs/" + o.key === i.KeyMarker) + 1 : 0;
+        const end = Math.min(start + 1000, total);
+        return { Versions: objects.slice(start, end).map((o, offset) => ({ Key: "docs/" + o.key,
+          Size: 10, ETag: `"backup-${start + offset}"`, VersionId: `v${start + offset}`, LastModified: `${D}T03:00:00Z` })),
+          IsTruncated: end < total, NextKeyMarker: "docs/" + objects[end - 1].key, NextVersionIdMarker: `v${end - 1}` };
       }
       if (cmd instanceof sdk.CopyObjectCommand) {
-        if ((stats.calls.HeadObjectCommand || 0) + (stats.calls.ListObjectVersionsCommand || 0) !== total - upToDate) stats.earlyCopies += 1;
+        if ((stats.calls.HeadObjectCommand || 0) !== total - upToDate - 9418 || stats.calls.ListObjectVersionsCommand !== Math.ceil(total / 1000)) stats.earlyCopies += 1;
         if (i.CopySource !== br.copySourceFor(B, objects[n].key, `v${n}`) || i.MetadataDirective !== "COPY" || i.GrantFullControl !== "id=volume-grantee") stats.badCopies += 1;
         copied.add(n);
         return { $metadata: { attempts: 1 } };
@@ -336,6 +340,11 @@ eq("chooseDate — latest → latestComplete (not the newest partial)",
   eq("planDocsRestore — excluded entry skipped (not a refusal), counted apart", [pEx.excluded, pEx.notInBackup, pEx.unresolved, pEx.upToDate, pEx.toCopy.length], [1, 0, 0, 1, 0]);
   const pPend = br.planDocsRestore({ inventory: { ...invEx, objects: [{ key: "p", size: 1, state: "pending" }] }, versionsIndex: new Map(), destIndex: new Map() });
   eq("planDocsRestore — pending entry still blocks (notInBackup)", [pPend.notInBackup, pPend.excluded], [1, 0]);
+  const sweep = { objects: [{ key: "refresh/018/sweep/cursor.json", size: 4, state: "pending" }] };
+  const sweepPlan = br.planDocsRestore({ inventory: sweep, destIndex: new Map() });
+  const sweepRecon = br.reconInventory(sweep, new Map());
+  eq("sweep cursor — mutable control state is excluded even without a backup", [sweepPlan.excluded,
+    sweepPlan.notInBackup, sweepPlan.needsHead.length, sweepRecon.ok, sweepRecon.excluded], [1, 0, 0, true, 1]);
   const big = br.buildListing({ bucket: B, latest: null, manifests: Array.from({ length: 80 }, (_, k) => ({ date: `2026-0${1 + (k % 9)}-${String(1 + (k % 28)).padStart(2, "0")}`, status: "complete", pg: { sizeBytes: 1, sha256: "a".repeat(64) } })), maxBytes: 1500 });
   ok("buildListing — truncated to fit the termination message", big.truncated && Buffer.byteLength(JSON.stringify(big)) <= 1500);
 }
@@ -441,7 +450,7 @@ async function suite() {
     eq("docs — paginated history restores the exact key using both S3 markers",
       [r.code, r.t.recon?.ok, s.copies.find((c) => c.key === "raw/b.pdf")?.versionId, pages.length,
         pages[1]?.KeyMarker, pages[1]?.VersionIdMarker],
-      [0, true, original.VersionId, 3, "docs/raw/b.pdf", s.versions(B, "docs/raw/b.pdf")[2].VersionId]);
+      [0, true, original.VersionId, 3, "docs/raw/b.pdf", s.versions(B, "docs/raw/b.pdf")[3].VersionId]);
     s.b.get(B).delete("docs/raw/b.pdf"); s.b.get(DST).delete("raw/b.pdf");
     const missing = await step({ s, env: docsEnv(manSha) });
     eq("docs — paginated prefix neighbors cannot replace a missing exact key", [missing.code, missing.t.unresolvedReasons], [2, { "no-version": 1 }]);
@@ -621,13 +630,13 @@ async function suite() {
   let stats = v.reset();
   const r = await v.run();
   eq("volume — restores 267,683 objects with 36,282 copies and additive recon", [r.exitCode, r.termination.upToDate, r.termination.copied, r.termination.recon.ok, r.termination.recon.extra], [0, 231401, 36282, true, 152220]);
-  eq("volume — two pinned input GETs, candidate HEADs, per-key version lists and copies", [stats.calls.GetObjectCommand, stats.calls.HeadObjectCommand, stats.calls.ListObjectVersionsCommand, stats.calls.CopyObjectCommand], [2, 36182, 100, 36282]);
-  eq("volume — zero global version listings or per-object calls on up-to-date objects", [stats.globalVersions, stats.upToDateCalls], [0, 0]);
+  eq("volume — 9,418 unpinned candidates resolved with page-count version calls", [stats.calls.GetObjectCommand, stats.calls.HeadObjectCommand, stats.calls.ListObjectVersionsCommand, stats.calls.CopyObjectCommand], [2, 26864, 268, 36282]);
+  eq("volume — bulk listings have no per-object calls on up-to-date objects", [stats.globalVersions, stats.upToDateCalls], [268, 0]);
   ok("volume — both destination listings use at most 872 calls", stats.calls.ListObjectsV2Command <= 2 * (420 + 16));
   eq("volume — 16 distinct shard starts and 16 concurrent shard requests", [stats.starts.size, stats.maxActive.ListObjectsV2Command], [16, 16]);
   eq("volume — default worker concurrency 48 for HEAD and copy", [stats.maxActive.HeadObjectCommand, stats.maxActive.CopyObjectCommand], [48, 48]);
   eq("volume — all candidates verified before copying, pinned sources and ACL preserved", [stats.earlyCopies, stats.badCopies], [0, 0]);
-  eq("volume — receipt counters match observed calls", [r.termination.destListCalls, r.termination.headChecked, r.termination.versionsResolved, r.termination.copyRetries], [stats.calls.ListObjectsV2Command, 36182, 100, 0]);
+  eq("volume — receipt counters match observed calls", [r.termination.destListCalls, r.termination.headChecked, r.termination.versionsResolved, r.termination.copyRetries], [stats.calls.ListObjectsV2Command, 26864, 9418, 0]);
   ok("volume — complete receipt stays under 3,900 bytes", Buffer.byteLength(JSON.stringify(r.termination)) < br.TERMINATION_MAX_BYTES);
   console.log("  volume calls " + JSON.stringify(stats.calls));
   stats = v.reset();
@@ -648,7 +657,7 @@ async function suite() {
   v.state.drift = v.upToDate;
   stats = v.reset(true);
   const drift = await v.run();
-  eq("volume — matching pinned ETag tolerates one size drift and recon uses HEAD size", [drift.exitCode, drift.termination.inventoryAnomalyCount, drift.termination.copied, drift.termination.recon.ok, stats.calls.HeadObjectCommand], [0, 1, 36282, true, 36182]);
+  eq("volume — matching pinned ETag tolerates one size drift and recon uses HEAD size", [drift.exitCode, drift.termination.inventoryAnomalyCount, drift.termination.copied, drift.termination.recon.ok, stats.calls.HeadObjectCommand], [0, 1, 36282, true, 26864]);
 }
 
 // ═════════════════════════════ runner pure functions ══════════════════════════
@@ -707,10 +716,14 @@ try { YAML = (await import("yaml")).default; } catch { YAML = null; }
 const common = { NAMESPACE: "radar-immobilier-preprod", IMAGE: "ghcr.io/rhanka/radar-api@sha256:" + "a".repeat(64), READER_SECRET: "radar-backup-reader-preprod",
   S3_ENDPOINT: "https://s3.bhs.io.cloud.ovh.net", S3_REGION: "bhs", S3_FORCE_PATH_STYLE: "true", EXPECTED_BACKUP_BUCKET: B, TTL_SECONDS: "3600",
   BR_SCRIPT: indentBlock(SCRIPT, 14) };
+const RESTORE_RES = JSON.parse(readFileSync(join(DIR, "../../cutover/config.json"), "utf8")).preprod.restoreResources;
 const renders = {
   "backup-read-job.tmpl.yaml": { ...common, JOB_NAME: JOBS.resolve, BR_STEP: "resolve", BACKUP_ID: "latest", ALLOW_STALE_BACKUP: "false", MAX_AGE_HOURS: "24" },
   "db-restore-backup-job.tmpl.yaml": { ...common, DUMP_IMAGE: "postgis/postgis:16-3.4", BACKUP_DATE: D, PIN_MANIFEST_SHA256: "a".repeat(64), PIN_PG_SHA256: "b".repeat(64),
-    DB_SECRET: "radar-db-credentials", PGHOST: "radar-postgres", EXPECTED_DATABASE: "radar", RESTORE_ASSERT_DB: "1" },
+    DB_SECRET: "radar-db-credentials", PGHOST: "radar-postgres", EXPECTED_DATABASE: "radar", RESTORE_ASSERT_DB: "1",
+    RESTORE_SCRIPT: indentBlock(readFileSync(join(DIR, "../../cutover/atomic-restore.sh"), "utf8"), 14),
+    RESTORE_REQUEST_CPU: RESTORE_RES.requests.cpu, RESTORE_REQUEST_MEMORY: RESTORE_RES.requests.memory,
+    RESTORE_LIMIT_CPU: RESTORE_RES.limits.cpu, RESTORE_LIMIT_MEMORY: RESTORE_RES.limits.memory },
   "docs-restore-backup-job.tmpl.yaml": { ...common, JOB_NAME: JOBS.docs, BR_STEP: "docs", COPY_SECRET: "radar-backup-restore-docs", BACKUP_DATE: D, PIN_MANIFEST_SHA256: "a".repeat(64),
     DST_BUCKET: DST, FORBIDDEN_DST_BUCKETS: PROD, COPY_GRANTEE: "g", COPY_CONCURRENCY: "48", DOCS_DRY: "0" },
 };
@@ -727,6 +740,10 @@ for (const [tmpl, vars] of Object.entries(renders)) {
     const node = [...(pod.initContainers || []), ...pod.containers].find((c) => c.command && c.command[0] === "node");
     ok(`${tmpl} — YAML parses, node -e arg == script`, node && node.args[0].trimEnd() === SCRIPT.trimEnd());
     ok(`${tmpl} — automountServiceAccountToken false`, pod.automountServiceAccountToken === false);
+    if (tmpl === "db-restore-backup-job.tmpl.yaml") {
+      eq("db-restore-backup-job — restore resources fit the preprod quota (config.json)",
+        pod.containers.find((c) => c.name === "restore").resources, { requests: { cpu: "250m", memory: "1Gi" }, limits: { cpu: "1500m", memory: "2Gi" } });
+    }
   }
 }
 if (!YAML) console.log("  info yaml package not resolvable — YAML parse checks skipped (structure checks done)");

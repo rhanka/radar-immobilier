@@ -6,8 +6,9 @@ stop_forwards() {
 }
 http_check() {
   local base=$1 path=$2 expected=$3 kind=$4 deadline=$5 result code type remaining
+  if [[ -n ${FAST_DEADLINE:-} ]] && ((FAST_DEADLINE<deadline)); then deadline=$FAST_DEADLINE; fi
   while :; do
-    remaining=$((deadline-SECONDS)); ((remaining>0)) || fail "Smoke deadline: $path"
+    remaining=$((deadline-SECONDS)); ((remaining>0)) || { budget_check; fail "Smoke deadline: $path"; }
     result=$(curl -q -sS --max-time "$remaining" --connect-timeout 3 -D "$WORK/headers" -o "$WORK/body" \
       -H "Host: ${URL#https://}" -w '%{http_code} %{content_type}' "$base$path" 2>/dev/null) || result='000 transport'
     code=${result%% *}; type=${result#* }
@@ -27,6 +28,11 @@ http_check() {
 }
 smoke_pass() {
   local ui=$1 mcp=$2 deadline=${3:-$((SECONDS+60))}
+  if [[ ${4:-} == prepared ]]; then
+    http_check "$ui" /health 200 health "$deadline"
+    http_check "$ui" /api/v1/workspaces 401 auth "$deadline"
+    return
+  fi
   http_check "$ui" / 200 html "$deadline"
   http_check "$ui" /build.json 200 build "$deadline"
   http_check "$ui" /health 200 health "$deadline"
@@ -55,10 +61,11 @@ private_smoke() {
   stop_forwards
 }
 start_forward() {
-  local parent=$$ start
+  local parent=$$ start resource=$1
+  [[ $resource == */* ]] || resource=service/$resource
   start=$(awk '{print $22}' "/proc/$parent/stat")
   (
-    command kubectl --request-timeout=0 -n "$NS" port-forward --address=127.0.0.1 "service/$1" "$2" > "$3" 2>&1 &
+    command kubectl --request-timeout=0 -n "$NS" port-forward --address=127.0.0.1 "$resource" "$2" > "$3" 2>&1 &
     child=$!
     trap 'kill "$child" 2>/dev/null || true; wait "$child" 2>/dev/null || true' EXIT
     trap 'exit 143' TERM INT
