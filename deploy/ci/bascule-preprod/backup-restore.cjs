@@ -279,7 +279,7 @@ function planDocsRestore({ inventory, destIndex, verifyCandidates = false }) {
   const entries = new Map();
   for (const e of inventory.objects) {
     plan.objects += 1;
-    if (e.state === 'excluded') { plan.excluded += 1; continue; }
+    if (e.state === 'excluded' || e.key.startsWith('refresh/018/sweep/')) { plan.excluded += 1; continue; }
     if (e.state !== 'backed-up') { plan.notInBackup += 1; continue; }
     entries.set(e.key, { ...e, size: Number(e.size), backupEtag: normEtag(e.backupEtag) });
   }
@@ -314,7 +314,7 @@ function reconInventory(inventory, destIndex, expectedSizes = new Map()) {
   const keys = new Set();
   for (const e of inventory.objects) {
     keys.add(e.key);
-    if (e.state === 'excluded') { r.excluded += 1; continue; }
+    if (e.state === 'excluded' || e.key.startsWith('refresh/018/sweep/')) { r.excluded += 1; continue; }
     if (e.state !== 'backed-up') { r.notInBackup += 1; continue; }
     r.checked += 1;
     const d = destIndex.get(e.key);
@@ -457,14 +457,21 @@ async function listAll(c, Bucket, Prefix, counters) {
   } while (ContinuationToken);
   return all;
 }
-async function listVersionsFor(c, Bucket, key) {
-  const Prefix = LAYOUT.docsPrefix + key;
-  const versions = [];
+async function listVersionsBulk(c, Bucket, entries) {
+  const wanted = new Set(entries.filter(e => !e.versionId).map(e => LAYOUT.docsPrefix + e.key));
+  const versions = new Map();
   let KeyMarker; let VersionIdMarker;
-  for (let page = 0; page < 1000; page++) {
-    const out = await c.s3.send(new c.sdk.ListObjectVersionsCommand({ Bucket, Prefix, MaxKeys: 1000,
+  for (let page = 0; page < 10000; page++) {
+    let out;
+    try { out = await c.s3.send(new c.sdk.ListObjectVersionsCommand({ Bucket, Prefix: LAYOUT.docsPrefix, MaxKeys: 1000,
       ...(KeyMarker ? { KeyMarker, ...(VersionIdMarker ? { VersionIdMarker } : {}) } : {}) }));
-    versions.push(...indexVersions((out.Versions || []).filter((v) => v.Key === Prefix)).get(key) || []);
+    } catch (err) {
+      if (page === 0 && (err.name === 'AccessDenied' || err.$metadata?.httpStatusCode === 403)) return null;
+      throw err;
+    }
+    for (const [key, list] of indexVersions((out.Versions || []).filter(v => wanted.has(v.Key)))) {
+      versions.set(key, [...(versions.get(key) || []), ...list]);
+    }
     if (!out.IsTruncated) return versions;
     if (!out.NextKeyMarker || (out.NextKeyMarker === KeyMarker && out.NextVersionIdMarker === VersionIdMarker)) {
       throw failed('backup version pagination did not advance');
@@ -472,7 +479,7 @@ async function listVersionsFor(c, Bucket, key) {
     KeyMarker = out.NextKeyMarker;
     VersionIdMarker = out.NextVersionIdMarker;
   }
-  throw failed('backup version pagination exceeded 1000 pages');
+  throw failed('backup version pagination exceeded 10000 pages');
 }
 async function downloadWithSha(c, Bucket, Key, VersionId, file) {
   const got = await c.s3.send(new c.sdk.GetObjectCommand(VersionId ? { Bucket, Key, VersionId } : { Bucket, Key }));
@@ -625,33 +632,21 @@ async function runFetchDump({ cfg, reader, log }) {
   return { exitCode: EXIT.OK, termination: { ok: true, step: 'fetch-dump', date: cfg.date, pgSha256: got.sha256, pgSizeBytes: got.size } };
 }
 
-// Resolve every candidate before copying. Probe version-list permission once;
-// concurrent unpinned workers await that verdict before issuing more listings.
+// Resolve candidates from one streamed version inventory before any copying.
 async function resolveCandidates(copier, cfg, plan, destIndex, { resolveVersions = false, createdAtMs, log, counters } = {}) {
   let next = 0;
-  let listingAllowed = resolveVersions;
-  let probe;
-  const list = async (e) => {
-    try { return await listVersionsFor(copier, cfg.backupBucket, e.key); } catch (err) {
-      if (!(err.name === 'AccessDenied' || err.$metadata?.httpStatusCode === 403)) throw err;
-      if (listingAllowed) log('WARN version listing of <backup>/docs/ not permitted to the copy identity: recorded versions and unpinned current objects checked by HEAD');
-      listingAllowed = false;
-      return null;
-    }
-  };
-  const versionsFor = async (e) => {
-    if (!probe) { probe = list(e); return probe; }
-    await probe;
-    return listingAllowed ? list(e) : null;
-  };
+  const bulk = resolveVersions && plan.needsHead.some(e => !e.versionId)
+    ? await listVersionsBulk(copier, cfg.backupBucket, plan.needsHead) : null;
+  if (resolveVersions && bulk === null && plan.needsHead.some(e => !e.versionId)) {
+    log('WARN version listing of <backup>/docs/ not permitted to the copy identity: recorded versions and unpinned current objects checked by HEAD');
+  }
   const worker = async () => {
     while (next < plan.needsHead.length) {
       let e = plan.needsHead[next++];
       let c;
       if (!e.versionId && resolveVersions) {
-        const versions = await versionsFor(e);
-        if (versions) {
-          c = chooseVersion(e, versions, createdAtMs);
+        if (bulk) {
+          c = chooseVersion(e, bulk.get(e.key) || [], createdAtMs);
           if (!c.error && counters) counters.versionsResolved += 1;
         }
       }
