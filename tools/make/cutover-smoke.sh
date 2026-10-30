@@ -6,6 +6,7 @@ stop_forwards() {
 }
 http_check() {
   local base=$1 path=$2 expected=$3 kind=$4 deadline=$5 result code type remaining
+  if [[ -n ${FAST_DEADLINE:-} ]] && ((FAST_DEADLINE<deadline)); then deadline=$FAST_DEADLINE; fi
   while :; do
     remaining=$((deadline-SECONDS)); ((remaining>0)) || fail "Smoke deadline: $path"
     result=$(curl -q -sS --max-time "$remaining" --connect-timeout 3 -D "$WORK/headers" -o "$WORK/body" \
