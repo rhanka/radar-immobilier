@@ -21,7 +21,8 @@ if (s.apiLost && tool === 'kubectl' && args[0] !== 'config') process.exit(1);
 const out = value => fs.writeFileSync(1, typeof value === 'string' ? value : JSON.stringify(value));
 const key = kind => ({ configmap: 'ConfigMap', configmaps: 'ConfigMap', deployment: 'Deployment', deployments: 'Deployment',
   job: 'Job', jobs: 'Job', pods: 'Pod', service: 'Service', services: 'Service', cronjob: 'CronJob', cronjobs: 'CronJob',
-  ingress: 'Ingress', ingresses: 'Ingress', endpoints: 'Endpoints', replicasets: 'ReplicaSet', networkpolicy: 'NetworkPolicy', secret: 'Secret' })[kind];
+  ingress: 'Ingress', ingresses: 'Ingress', endpoints: 'Endpoints', replicasets: 'ReplicaSet', networkpolicy: 'NetworkPolicy', secret: 'Secret',
+  pvc: 'PersistentVolumeClaim' })[kind];
 const find = (kind, name) => s.objects.find(o => o.kind === key(kind) && o.metadata.name === name);
 const value = flag => args[args.indexOf(flag) + 1];
 const jobVerdict = (step, job) => ['database', 'destination', 'reset', 'discard'].includes(step)
@@ -35,12 +36,12 @@ const jobVerdict = (step, job) => ['database', 'destination', 'reset', 'discard'
   { ok: true, status: 'open-success', epoch: 'scoped', sealedUnresolved: 0, maintenanceBarrier: false } : { ok: true };
 // RBAC access log: every API access the controller performs, as {verb, resource, group, name}.
 const RESOURCES = { configmap: ['configmaps', ''], configmaps: ['configmaps', ''], secret: ['secrets', ''], service: ['services', ''],
-  services: ['services', ''], pods: ['pods', ''], 'pods/portforward': ['pods/portforward', ''], endpoints: ['endpoints', ''], deployment: ['deployments', 'apps'],
+  services: ['services', ''], pods: ['pods', ''], 'pods/portforward': ['pods/portforward', ''], 'pods/exec': ['pods/exec', ''], endpoints: ['endpoints', ''], deployment: ['deployments', 'apps'],
   deployments: ['deployments', 'apps'], replicasets: ['replicasets', 'apps'], statefulsets: ['statefulsets', 'apps'],
   daemonsets: ['daemonsets', 'apps'], horizontalpodautoscalers: ['horizontalpodautoscalers', 'autoscaling'],
   job: ['jobs', 'batch'], jobs: ['jobs', 'batch'], cronjob: ['cronjobs', 'batch'], cronjobs: ['cronjobs', 'batch'],
   ingress: ['ingresses', 'networking.k8s.io'], ingresses: ['ingresses', 'networking.k8s.io'],
-  networkpolicy: ['networkpolicies', 'networking.k8s.io'] };
+  networkpolicy: ['networkpolicies', 'networking.k8s.io'], pvc: ['persistentvolumeclaims', ''] };
 const KIND_RESOURCE = { ConfigMap: 'configmaps', Secret: 'secrets', Service: 'services', Deployment: 'deployments', Job: 'jobs' };
 function resourceOf(token) {
   if (RESOURCES[token]) return RESOURCES[token];
@@ -71,6 +72,7 @@ if (tool === 'kubectl' && !args.includes('--dry-run=client')) {
     const [kind, name] = args.find(a => a.includes('/') && !a.startsWith('--')).split('/');
     for (const verb of ['get', 'list', 'watch']) access(verb, kind, verb === 'get' ? name : '');
   }
+  if (args[0] === 'exec') { access('get', 'pods', args[1]); access('create', 'pods/exec', args[1]); }
   if (args[0] === 'port-forward') {
     const [kind, name] = args.find(a => /^(service|pod|deployment)\//.test(a)).split('/');
     access('get', { service: 'services', deployment: 'deployments' }[kind] || 'pods', name);
@@ -113,6 +115,7 @@ if (tool === 'curl') {
   if (input.includes('-w')) out(`${code} ${type}`);
   process.exit();
 }
+if (args[0] === 'exec') { out(s.pvcMeasure ?? '3000000000 20000000000 21474836480\n'); process.exit(); }
 if (args[0] === 'config') { out(s.server || 'https://hlhedx.c1.bhs5.k8s.ovh.net'); process.exit(); }
 if (args[0] === 'port-forward') {
   out(`Forwarding from 127.0.0.1:${args.includes('service/radar-ui') ? 18080 : 18848} -> service\n`);
@@ -200,6 +203,9 @@ if (args[0] === 'patch') {
     const endpoint = find('endpoints', o.metadata.name);
     if (endpoint) endpoint.subsets = o.spec.replicas ? [{ addresses: [{ ip: '10.0.0.1' }] }] : [];
   }
+  if (o.kind === 'PersistentVolumeClaim') o.status = s.pvcResize === 'pending'
+    ? { capacity: o.status?.capacity, conditions: [{ type: 'FileSystemResizePending', status: 'True' }] }
+    : { capacity: { storage: o.spec.resources.requests.storage } };
   persist(o); save(); out(o);
   if (o.kind === 'Secret') crash('switch', 'after-patch');
   process.exit();
