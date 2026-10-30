@@ -79,6 +79,7 @@ case ${1:-} in
   pvc-verify) rbac_preflight; pvc_verify;;
   slots-adopt) rbac_preflight adopt; slots_adopt;;
   stage) rbac_preflight; stage_command;;
+  ack) [[ $ENV == preprod ]] || fail 'ack is preprod-only'; rbac_preflight; ack_retained;;
   slots-status)
     # CI guard: "adopted" delegates the release to the blue/green cutover; "legacy" keeps the old path.
     rbac_preflight

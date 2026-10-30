@@ -372,7 +372,18 @@ promotion) switches back and unfreezes. After a promoted run, `rollback RUN=`
 rebuilds a prepared slot from `.previousRelease` (production: the same database;
 preprod: the retained previous database, unfrozen first, while the current one
 is frozen; writes made on the promoted database are not carried), switches to
-it and promotes it, without outage. The maintenance page remains only for the
+it and promotes it, without outage. Abandoned writes (preprod): a return to the previous
+database, before promotion (switch back) or after it (`rollback RUN=`), leaves the
+writes acknowledged by the abandoned database behind. They are counted as written
+tuples (`pg_stat_database`, against the baseline taken before the switch; `-1`
+when unknown), recorded in the receipt (`abandoned`) and in `radar-retained-db`;
+the next `prepare` refuses `retained_db_unacknowledged` instead of replacing that
+database until the conductor reviews the receipt and runs
+`make -f deploy/cutover/operator.mk ack RUN=<uuid> ENV=preprod`. The rehearsal
+rollback scenarios therefore leave a pending receipt (at least their own probe
+writes) that the conductor acknowledges before the next preparation; the probe
+verdict is red when probe writes acknowledged by the abandoned database are not
+detected (`abandoned-undetected`). The maintenance page remains only for the
 daily `MODE=restore`. The API stops gracefully on SIGTERM
 (`api/src/lifecycle/graceful.ts`: stop accepting, close SSE streams, wait for
 in-flight requests up to 25 s; `terminationGracePeriodSeconds: 30`). MCP
