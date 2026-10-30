@@ -78,7 +78,7 @@ describe("resolveWorkspaceSelection", () => {
 
 describe("fetchWorkspaces", () => {
   it("calls GET /api/v1/workspaces with no query string", async () => {
-    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ ok: true, workspaces: [row(WS_A)] }),
+    const fetchMock = vi.fn(async (_url: string) => new Response(JSON.stringify({ ok: true, workspaces: [row(WS_A)] }),
       { status: 200, headers: { "content-type": "application/json" } }));
     vi.stubGlobal("fetch", fetchMock);
     const result = await fetchWorkspaces();
