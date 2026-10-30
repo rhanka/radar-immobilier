@@ -128,21 +128,67 @@ test('production prepares a recovery backup and cutover changes images without r
     assert.equal(f.calls().some(c => c.includes('patch') && c.includes('secret')), false);
   } finally { f.cleanup(); }
 });
+const refreshJob = (name, status) => ({ kind: 'Job', metadata: { name, uid: `${name}-uid`,
+  ownerReferences: [{ kind: 'CronJob', controller: true, uid: 'uid-radar-refresh-pv' }] }, status });
+const refreshPod = (job, phase, reason) => ({ kind: 'Pod', metadata: { name: `${job}-pod`, uid: `${job}-pod-uid`,
+  labels: { 'job-name': job }, ownerReferences: [{ kind: 'Job', controller: true, uid: `${job}-uid` }] },
+  status: { phase, containerStatuses: [{ name: 'refresh-pv', state: reason ? { terminated: { reason } } : { running: {} } }] } });
+const drainReads = f => (f.state().podReads || []).filter(r => r.watchdog === true && r.refresh === true);
 test('prepare drains owned refresh for at most ten minutes without killing it', () => {
   const f = fixture({ fastClock: true });
   try {
     const state = f.state();
-    state.objects.push({ kind: 'Job', metadata: { name: 'draining-refresh', uid: 'draining-refresh-uid',
-      ownerReferences: [{ kind: 'CronJob', controller: true, uid: 'uid-radar-refresh-pv' }] }, status: { active: 1 } });
+    state.objects.push(refreshJob('draining-refresh', { active: 1 }), refreshPod('draining-refresh', 'Running'));
     save(f, state);
     const result = f.run('prepare');
     assert.notEqual(result.status, 0);
     assert.ok(result.stderr.includes('drain exceeded ten minutes'), result.stderr);
+    assert.ok(result.stderr.includes('Pod/draining-refresh-pod(Running)'), result.stderr);
     assert.equal(object(f, 'radar-prepared-db').data.status, 'failed');
+    // Every drain poll ran with the watchdog and the refresh schedule suspended...
+    assert.ok(drainReads(f).length >= 10, JSON.stringify(f.state().podReads));
+    // ...and the failure restored each schedule to its original state.
     assert.equal(object(f, 'radar-refresh-pv').spec.suspend, false);
+    assert.equal(object(f, 'radar-refresh-pending-watchdog').spec.suspend, false);
+    assert.equal(object(f, 'originally-suspended').spec.suspend, true);
     assert.equal(f.state().jobCreation.some(j => j.step === 'docs'), false);
     assert.equal(f.calls().some(c => c.includes('delete') && c.some(a => a.endsWith('/jobs/draining-refresh'))), false);
   } finally { f.cleanup(); }
+});
+test('prepare drain ignores terminated writer Pods (Error/Completed) and waits for a writer Job without Pod', () => {
+  const f = fixture({ fastClock: true });
+  try {
+    const state = f.state();
+    // Preprod 2026-10-30: Failed refresh Job with its Error Pod, a refresh Job whose Pod ended in Error
+    // before the Job controller set a terminal condition, and a Completed watchdog run.
+    state.objects.push(
+      refreshJob('refresh-failed', { conditions: [{ type: 'Failed', status: 'True' }], failed: 1 }),
+      refreshPod('refresh-failed', 'Failed', 'Error'),
+      refreshJob('refresh-ended', { failed: 1 }), refreshPod('refresh-ended', 'Failed', 'Error'),
+      { ...refreshJob('watchdog-done', { conditions: [{ type: 'Complete', status: 'True' }], succeeded: 1 }),
+        metadata: { name: 'watchdog-done', uid: 'watchdog-done-uid',
+          ownerReferences: [{ kind: 'CronJob', controller: true, uid: 'uid-radar-refresh-pending-watchdog' }] } },
+      refreshPod('watchdog-done', 'Succeeded', 'Completed'));
+    save(f, state);
+    success(f.run('prepare'));
+    assert.equal(object(f, 'radar-prepared-db').data.status, 'ready');
+    assert.equal(f.state().jobCreation.find(j => j.step === 'docs').watchdogSuspended, true);
+    assert.ok(drainReads(f).length >= 1);
+    assert.equal(object(f, 'radar-refresh-pv').spec.suspend, false);
+    assert.equal(object(f, 'radar-refresh-pending-watchdog').spec.suspend, false);
+    assert.equal(object(f, 'originally-suspended').spec.suspend, true);
+    assert.equal(f.calls().some(c => c.includes('delete') && c.some(a => /\/jobs\/(refresh|watchdog)-/.test(a))), false);
+  } finally { f.cleanup(); }
+  const g = fixture({ fastClock: true });
+  try {
+    const state = g.state();
+    state.objects.push(refreshJob('refresh-starting', {}));
+    save(g, state);
+    const result = g.run('prepare');
+    assert.notEqual(result.status, 0);
+    assert.ok(result.stderr.includes('Job/refresh-starting(PodNotCreated)'), result.stderr);
+    assert.equal(object(g, 'radar-refresh-pending-watchdog').spec.suspend, false);
+  } finally { g.cleanup(); }
 });
 test('resume reconciles a database switch whose checkpoint response was lost', () => {
   const f = fixture();
