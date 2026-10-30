@@ -13,6 +13,8 @@ export function fixture(changes = {}) {
     uiImage: `ghcr.io/rhanka/radar-ui@sha256:${'c'.repeat(64)}`, apiServedSha: sha, uiServedSha: sha.slice(0, 7), dataMigration: '6h' };
   const object = (kind, name, spec) => ({ apiVersion: 'v1', kind, metadata: { name, uid: `uid-${name}`, resourceVersion: '1', generation: 1 }, spec });
   const objects = [];
+  objects.push({ ...object('Secret', 'radar-db-credentials', {}),
+    data: { POSTGRES_DB: Buffer.from('radar').toString('base64'), POSTGRES_USER: 'synthetic-user', POSTGRES_PASSWORD: 'synthetic-only' } });
   for (const [name, container, image] of [['radar-api', 'api', 'api'], ['radar-ui', 'ui', 'ui'], ['radar-immo-mcp', 'mcp', 'api']]) {
     objects.push(object('Deployment', name, { replicas: 1, template: { spec: { containers: [{ name: container, image: `ghcr.io/rhanka/radar-${image}:old` }] } } }));
     objects.push(object('Endpoints', name, {}));
@@ -46,7 +48,7 @@ export function fixture(changes = {}) {
   if (changes.fastClock) env['BASH_FUNC_sleep%%'] = '() { if [ "$1" = 2 ]; then SECONDS=$((SECONDS+31)); else command sleep "$@"; fi; }';
   const run = (action = 'run', extra = [], environment = 'preprod') => {
     const result = spawnSync('make', ['-s', '-f', 'deploy/cutover/operator.mk', action,
-      `RELEASE=${dir}/release.json`, ...extra, `ENV=${environment}`], { env, encoding: 'utf8', timeout: 240000 });
+      `RELEASE=${dir}/release.json`, 'MODE=restore', ...extra, `ENV=${environment}`], { env, encoding: 'utf8', timeout: 240000 });
     if (result.error) throw result.error;
     return result;
   };
