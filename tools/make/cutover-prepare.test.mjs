@@ -28,7 +28,8 @@ test('prepare stamps ready without closing live services and releases the lock d
       if (job.metadata.name.endsWith('-restore')) {
         assert.equal(env.find(e => e.name === 'PGDATABASE').value, 'radar_next');
         assert.equal(env.find(e => e.name === 'LIVE_DB').value, 'radar');
-        assert.equal(job.spec.template.spec.containers[0].resources.limits.cpu, '4');
+        assert.deepEqual(job.spec.template.spec.containers[0].resources,
+          { requests: { cpu: '250m', memory: '1Gi' }, limits: { cpu: '1500m', memory: '2Gi' } });
       }
       if (job.metadata.name.endsWith('-data')) {
         const evidence = JSON.parse(env.find(e => e.name === 'CUTOVER_EVIDENCE').value);
@@ -40,6 +41,8 @@ test('prepare stamps ready without closing live services and releases the lock d
     const before = f.state().jobCreation.length;
     success(f.run('run', ['MODE=run']));
     assert.ok(f.state().jobCreation.slice(before).every(j => !['restore', 'ddl', 'data', 'docs', 'backup'].includes(j.step)));
+    const receipt = JSON.parse(object(f, 'radar-cutover-receipt').data.receipt);
+    assert.equal(receipt.recoveryReference, 'postgres://radar-postgres/radar');
     const patches = f.calls().filter(c => c.includes('patch') && c.includes('secret'));
     assert.equal(patches.length, 1);
     assert.ok(JSON.parse(patches[0][patches[0].indexOf('-p') + 1]).every(p => p.path === '/data/POSTGRES_DB'));
@@ -74,7 +77,8 @@ test('cutover refuses stale and mismatched prepared stamps before closure', () =
     success(f.run('prepare'));
     const original = clone(f.state());
     for (const change of [{ preparedAt: '2020-01-01T00:00:00Z' }, { gitSha: 'f'.repeat(40) },
-      { manifestSha256: 'f'.repeat(64) }, { pgSha256: 'f'.repeat(64) }, { status: 'preparing' }, { targetDb: 'radar' }]) {
+      { manifestSha256: 'f'.repeat(64) }, { pgSha256: 'f'.repeat(64) }, { status: 'preparing' }, { targetDb: 'radar' },
+      { recoveryReference: '' }]) {
       const state = clone(original);
       Object.assign(state.objects.find(o => o.metadata.name === 'radar-prepared-db').data, change); save(f, state);
       assert.notEqual(f.run('run', ['MODE=run']).status, 0, JSON.stringify(change));
@@ -117,6 +121,9 @@ test('production prepares a recovery backup and cutover changes images without r
     assert.ok(steps.indexOf('probe') >= 0 && steps.indexOf('probe') < steps.indexOf('backup'));
     const backup = f.state().objects.find(o => o.kind === 'Job' && o.metadata.name.endsWith('-backup'));
     assert.ok(JSON.stringify(backup.spec).includes('s3://sentropic-pgbackup/db-backups/cutover-prod-'));
+    const prepareRun = JSON.parse(object(f, 'radar-prepared-db').data.record).run;
+    assert.equal(JSON.parse(object(f, 'radar-cutover-receipt').data.receipt).recoveryReference,
+      `s3://sentropic-pgbackup/db-backups/cutover-prod-${prepareRun}.sql.gz`);
     assert.ok(steps.every(s => !['restore', 'ddl', 'data', 'docs', 'recon'].includes(s)));
     assert.equal(f.calls().some(c => c.includes('patch') && c.includes('secret')), false);
   } finally { f.cleanup(); }
@@ -149,5 +156,26 @@ test('resume reconciles a database switch whose checkpoint response was lost', (
     assert.equal(object(f, 'radar-db-credentials').data.POSTGRES_DB, Buffer.from('radar_next').toString('base64'));
     assert.equal(f.state().jobCreation.filter(j => j.step === 'restore').length, 1);
     assert.equal(object(f, 'radar-change-lock'), undefined);
+  } finally { f.cleanup(); }
+});
+test('budget exhaustion after closure rolls back automatically and reopens', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    const state = f.state(); state.hangJob = 'recon'; save(f, state);
+    const ingress = clone(object(f, 'application').spec);
+    // Time jumps only once the closure-started budget exists.
+    f.env['BASH_FUNC_sleep%%'] = '() { if [ -n "${FAST_DEADLINE:-}" ]; then SECONDS=$((SECONDS+300)); else command sleep "$@"; fi; }';
+    const result = f.run('run', ['MODE=run']);
+    assert.notEqual(result.status, 0);
+    assert.ok(result.stderr.includes('automatic rollback'), result.stderr);
+    assert.ok(result.stdout.includes('Rollback recovery reference: postgres://radar-postgres/radar'), result.stdout);
+    assert.equal(object(f, 'radar-change-lock'), undefined);
+    assert.deepEqual(object(f, 'application').spec, ingress);
+    assert.equal(object(f, 'radar-db-credentials').data.POSTGRES_DB, Buffer.from('radar').toString('base64'));
+    assert.equal(object(f, 'radar-refresh-pv').spec.suspend, false);
+    const receipt = JSON.parse(object(f, 'radar-cutover-receipt').data.receipt);
+    assert.equal(receipt.checkpoints.switch, 'rolled-back');
+    assert.equal(receipt.jobHistory.at(-1).outcome, 'stopped');
   } finally { f.cleanup(); }
 });
