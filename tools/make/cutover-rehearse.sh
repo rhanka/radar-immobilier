@@ -56,8 +56,7 @@ scenario() {
     node deploy/cutover/probe-verify.mjs "$OUT/$name-reads.jsonl" "$OUT/$name-writes.jsonl" "$OUT/$name-receipt.json" \
       "$OUT/$name/probe-ranges.json" "$mode" > "$OUT/$name-verdict.json" || status=1
   fi
-  jq -e '[.jobs.database.verdict.sessionsByDb//{}|to_entries[].value]|add as $n|
-    ($n//0) <= 0.8*(.jobs.database.verdict.maxConnections//0)' "$OUT/$name-receipt.json" >/dev/null || status=1
+  jq -e -f tools/make/cutover-sessions.jq "$OUT/$name-receipt.json" >/dev/null || status=1
   jq -e '(.logGaps//[])|length==0' "$OUT/$name-receipt.json" >/dev/null || status=1
   if k get deployment radar-api-prepared --ignore-not-found -o name | grep -q .; then status=1; fi
   if ((status == 0)); then verdict "$name: OK $(jq -c .stats "$OUT/$name-verdict.json")"
