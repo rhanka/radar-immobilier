@@ -638,6 +638,10 @@ async function suite() {
   eq("volume — all candidates verified before copying, pinned sources and ACL preserved", [stats.earlyCopies, stats.badCopies], [0, 0]);
   eq("volume — receipt counters match observed calls", [r.termination.destListCalls, r.termination.headChecked, r.termination.versionsResolved, r.termination.copyRetries], [stats.calls.ListObjectsV2Command, 26864, 9418, 0]);
   ok("volume — complete receipt stays under 3,900 bytes", Buffer.byteLength(JSON.stringify(r.termination)) < br.TERMINATION_MAX_BYTES);
+  eq("volume — per-shard listing calls add up to the listing total",
+    r.termination.destListCallsPerShard.reduce((a, b) => a + b, 0), r.termination.destListCalls);
+  eq("volume — docs phase timings are recorded in the receipt",
+    ["listMs", "planMs", "copyMs", "reconListMs"].every((k) => Number.isFinite(r.termination.timings[k])), true);
   console.log("  volume calls " + JSON.stringify(stats.calls));
   stats = v.reset();
   const again = await v.run();

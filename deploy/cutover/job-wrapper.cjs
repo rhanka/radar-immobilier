@@ -29,6 +29,22 @@ for (const key of ['manifestSha256', 'pgSha256', 'codeSha']) {
 for (const key of ['pgSizeBytes', 'docsObjects', 'migrations', 'ageHours', 'copied', 'missing', 'sizeMismatch', 'sealedUnresolved', 'streamsBound', 'pendingReceipts', 'inventoryAnomalyCount']) {
   if (Number.isFinite(raw[key]) && raw[key] >= 0) clean[key] = raw[key];
 }
+// Measurement maps: bounded name → non-negative number (database sizes, sessions, phase timings).
+const numberMap = (value, pattern, limit) => value && typeof value === 'object' && !Array.isArray(value)
+  ? Object.fromEntries(Object.entries(value).filter(([k, v]) => pattern.test(k) && Number.isFinite(v) && v >= 0).slice(0, limit))
+  : undefined;
+for (const key of ['databaseSizes', 'sessionsByDb']) {
+  const map = numberMap(raw[key], /^[a-z_][a-z0-9_]{0,62}$/, 16);
+  if (map) clean[key] = map;
+}
+const timings = numberMap(raw.timings, /^[a-zA-Z]{1,32}$/, 16);
+if (timings) clean.timings = timings;
+for (const key of ['maxConnections', 'destListCalls', 'headChecked', 'versionsResolved', 'copyRetries']) {
+  if (Number.isFinite(raw[key]) && raw[key] >= 0) clean[key] = raw[key];
+}
+if (Array.isArray(raw.destListCallsPerShard)) {
+  clean.destListCallsPerShard = raw.destListCallsPerShard.slice(0, 64).filter(n => Number.isSafeInteger(n) && n >= 0);
+}
 for (const key of ['stale', 'staleOverridden', 'maintenanceBarrier', 'inventoryAnomaliesTruncated']) {
   if (typeof raw[key] === 'boolean') clean[key] = raw[key];
 }
