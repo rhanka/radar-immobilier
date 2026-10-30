@@ -7,9 +7,13 @@
  */
 import { Hono } from "hono";
 import { z } from "zod";
-import { and, eq, inArray } from "drizzle-orm";
 import type { Database } from "../db/client.js";
-import { graphNodes } from "../db/schema.js";
+import { getSignalNodesForCity } from "../services/graph/graph-store.js";
+import {
+  buildScopedSignalCards,
+  scopedLegacyProjection,
+  type ScopedSignalCardDeps,
+} from "../services/facets/scoped-signal-cards.js";
 import { FacetError, targetFingerprint } from "../services/facets/target.js";
 import { ScopeError } from "../services/facets/scope.js";
 import { WorkspaceError } from "../services/workspaces/types.js";
@@ -24,7 +28,7 @@ const workspaceId = z.string().guid();
 const city = z.string().min(1).max(128).regex(/^[a-z0-9-]+$/);
 const mode = z.enum(["signal"]);
 
-export interface ScopedProjectionRevisionsDeps {
+export interface ScopedProjectionRevisionsDeps extends ScopedSignalCardDeps {
   db: Database;
   auth?: { enabled: boolean };
 }
@@ -102,11 +106,7 @@ export function scopedProjectionRevisionsRoute(deps: ScopedProjectionRevisionsDe
             c.req.param("workspaceId"), params.data.citySlug),
           selection: await readScopedPersonalHeads(deps.db, session.sub,
             c.req.param("workspaceId"), params.data.citySlug),
-          signals: await deps.db.select({ id: graphNodes.id, type: graphNodes.type,
-            citySlug: graphNodes.citySlug, label: graphNodes.label,
-            props: graphNodes.props, sourceRef: graphNodes.sourceRef })
-            .from(graphNodes).where(and(eq(graphNodes.citySlug, params.data.citySlug),
-              inArray(graphNodes.type, ["Signal", "DesignationEvent"]))),
+          signals: await getSignalNodesForCity(deps.db, params.data.citySlug),
         }));
       const heads = coherent.payload.archive.map((row) => ({
         target: row.target,
@@ -119,9 +119,18 @@ export function scopedProjectionRevisionsRoute(deps: ScopedProjectionRevisionsDe
       const hiddenKeys = new Set(heads.filter((head) => head.effectiveDiscarded)
         .map((head) => key(head.target)));
       // Each served node carries the displayed fingerprint computed exactly
-      // like the 6B contract, so the snapshot supports a follow-up command.
-      const signals = coherent.payload.signals.filter((node) => !hiddenKeys.has(key(node)))
-        .map((node) => ({ ...node, facetFingerprint: targetFingerprint(node) }));
+      // like the 6B contract, so the snapshot supports a follow-up command,
+      // plus the server card fields derived from that same stored node
+      // (classification, evidence) so the UI never reclassifies.
+      const visibleNodes = coherent.payload.signals.filter((node) => !hiddenKeys.has(key(node)));
+      const cards = await buildScopedSignalCards(deps, visibleNodes, params.data.citySlug);
+      const signals = visibleNodes.map((node, index) => ({
+        ...cards[index]!,
+        id: node.id, type: node.type, citySlug: node.citySlug, label: node.label,
+        props: node.props, sourceRef: node.sourceRef,
+        facetFingerprint: targetFingerprint(node),
+      }));
+      const legacyProjection = scopedLegacyProjection(cards);
       const total = coherent.payload.signals.length;
       const hidden = total - signals.length;
       const selection = coherent.payload.selection.filter((head) => head.facet === "selection");
@@ -129,7 +138,7 @@ export function scopedProjectionRevisionsRoute(deps: ScopedProjectionRevisionsDe
       return c.json({ ok: true, workspaceId: c.req.param("workspaceId"),
         citySlug: params.data.citySlug, mode: params.data.mode,
         token: coherent.scope.token, revisions: revisionsOf(coherent.scope),
-        heads, selection, signals,
+        heads, selection, signals, legacyProjection,
         counts: { total, hidden, visible: signals.length, selected } });
     } catch (error) {
       if (error instanceof WorkspaceError || error instanceof ScopeError) {
