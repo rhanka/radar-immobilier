@@ -336,12 +336,23 @@ jobs:
           else
             printf '%s' "$KUBE_CONFIG_DATA_PREPROD" > "$HOME/.kube/config"
           fi
-      - name: Same-database scenario, then preprod scenario with drill, under read and writer probes
+      # A re-run of the same main workflow finds the release already served: the rehearsal is
+      # skipped (neutral, job summary), never red.
+      - name: Version change
+        id: change
+        run: echo "state=$(make -s -f deploy/cutover/operator.mk rehearse-check RELEASE=cutover-release/release.json ENV=preprod)" >> "$GITHUB_OUTPUT"
+      - name: Rehearsal skipped (same release already served)
+        if: steps.change.outputs.state == 'same'
+        run: |
+          echo "::notice title=Rehearsal skipped::release ${{ github.sha }} is already served in preprod (re-run): nothing to switch"
+          printf '### Zero-downtime rehearsal skipped\n\nRelease `%s` is already served in preprod (re-run of the same workflow): no version change to rehearse.\n' "${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
+      - name: Release with drill, rollback, re-promotion and same-database scenarios under read and writer probes
+        if: steps.change.outputs.state == 'changed'
         env:
           CUTOVER_PROBE_TOKEN: ${{ secrets.CUTOVER_PROBE_TOKEN }}
         run: make -f deploy/cutover/operator.mk rehearse RELEASE=cutover-release/release.json OUTPUT=rehearsal ENV=preprod
       - name: Rehearsal evidence (receipts, probes, verdicts)
-        if: always()
+        if: always() && steps.change.outputs.state == 'changed'
         uses: actions/upload-artifact@v4
         with:
           name: cutover-rehearsal-${{ github.sha }}
