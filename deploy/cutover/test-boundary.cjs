@@ -80,12 +80,18 @@ if (tool === 'kubectl' && !args.includes('--dry-run=client')) {
 if (tool === 'kubectl' && args.includes('--dry-run=client') && args[0] === 'create' && args[1] === 'job') {
   access('get', 'cronjobs', args.find(a => a.startsWith('--from=')).split('/')[1]);
 }
+// Served types: built-in kinds plus the CRDs a test installs (apiResources).
+const SERVED = ['pods', 'services', 'configmaps', 'secrets', 'endpoints', 'deployments.apps', 'replicasets.apps',
+  'statefulsets.apps', 'daemonsets.apps', 'horizontalpodautoscalers.autoscaling', 'jobs.batch', 'cronjobs.batch',
+  'ingresses.networking.k8s.io', 'networkpolicies.networking.k8s.io', ...(s.apiResources || [])];
 if (args[0] === 'auth' && args[1] === 'can-i') {
   const sub = args.find(a => a.startsWith('--subresource='))?.split('=')[1];
   const right = `${args[2]} ${args[3].split('/')[0]}${sub ? `/${sub}` : ''}`;
-  process.exit((s.deniedRights || []).includes(right) ? 1 : 0);
+  // Like the API server, can-i answers no for a type that is not served.
+  const served = SERVED.includes(args[3].split('/')[0]);
+  process.exit(served && !(s.deniedRights || []).includes(right) ? 0 : 1);
 }
-if (args[0] === 'api-resources') { out((s.apiResources || []).map(r => `${r}\n`).join('')); process.exit(); }
+if (args[0] === 'api-resources') { out(SERVED.map(r => `${r}\n`).join('')); process.exit(); }
 function crash(step, edge) {
   if (s.crash?.step === step && s.crash?.edge === edge) {
     s.crash = null; save(); process.kill(process.ppid, 'SIGKILL'); process.exit(99);
