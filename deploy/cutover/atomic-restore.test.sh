@@ -100,4 +100,9 @@ grep -Eq "^top1Ms=[0-9]+$" /tmp/cutover-metrics || fail "slowest restore items n
 assert_snapshot atomic_next
 run_restore atomic_next atomic_next atomic_live "$work/radar.dump" > "$work/next-rerun.out"
 assert_snapshot atomic_next
+# Template staging: two workers, tuned bulk load and planner statistics.
+RESTORE_TUNED=1 RESTORE_JOBS=2 run_restore atomic_next atomic_next atomic_live "$work/radar.dump" > "$work/tuned.out"
+assert_snapshot atomic_next
+grep -Eq "^analyzeMs=[0-9]+$" /tmp/cutover-metrics || fail "statistics pass not measured"
+[[ $(q atomic_next "SELECT count(*) FROM pg_stats WHERE tablename = 'bulk'") -gt 0 ]] || fail "planner statistics missing after tuned restore"
 printf 'Atomic restore replaced N+k with the N snapshot, reran, rolled back a truncated archive and restored a prepared target\n'

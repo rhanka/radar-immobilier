@@ -22,7 +22,7 @@
 # ${S3_REGION} ${S3_FORCE_PATH_STYLE} ${EXPECTED_BACKUP_BUCKET} ${BACKUP_DATE}
 # ${PIN_MANIFEST_SHA256} ${PIN_PG_SHA256} ${DB_SECRET} ${PGHOST} ${EXPECTED_DATABASE}
 # ${RESTORE_ASSERT_DB} ${TTL_SECONDS} ${RESTORE_REQUEST_CPU} ${RESTORE_REQUEST_MEMORY}
-# ${RESTORE_LIMIT_CPU} ${RESTORE_LIMIT_MEMORY} (per-environment `restoreResources` in
+# ${RESTORE_LIMIT_CPU} ${RESTORE_LIMIT_MEMORY} ${RESTORE_JOBS} ${RESTORE_TUNED} (per-environment `restoreResources` in
 # deploy/cutover/config.json, sized for the namespace ResourceQuota; pg_restore -j 4
 # keeps four workers within that CPU limit), plus the BR_SCRIPT placeholder under the
 # `fetch` args and the RESTORE_SCRIPT placeholder under the `restore` args (never
@@ -123,6 +123,8 @@ ${RESTORE_SCRIPT}
             - { name: TARGET_DB, value: "" }
             - { name: LIVE_DB, value: "" }
             - { name: RESTORE_DUMP, value: "/work/radar.dump" }
+            - { name: RESTORE_JOBS, value: "${RESTORE_JOBS}" }
+            - { name: RESTORE_TUNED, value: "${RESTORE_TUNED}" }
             - { name: PGUSER, valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_USER } } }
             - { name: PGPASSWORD, valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_PASSWORD } } }
             - { name: PGDATABASE, valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_DB } } }

@@ -105,7 +105,7 @@ render_job() {
   render_template "$step" > "$WORK/template.yaml"
   # Client dry-run only parses the manifest. No server mutation precedes checkpoint.
   "${k[@]}" create --dry-run=client -f "$WORK/template.yaml" -o json > "$WORK/template.json"
-  if [[ $step =~ ^(destination|database|reset|discard)$ ]]; then
+  if [[ $step =~ ^(destination|database|clone|discard|tplreset|tplseal)$ ]]; then
     local operation=$step
     [[ $step != destination || -n ${TARGET_DB:-} ]] || operation=database
     jq --rawfile database deploy/cutover/database.cjs --arg step "$operation" --arg target "${TARGET_DB:-}" '

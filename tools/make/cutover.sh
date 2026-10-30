@@ -19,6 +19,7 @@ source tools/make/cutover-switch.sh
 source tools/make/cutover-rbac.sh
 source tools/make/cutover-pvc.sh
 source tools/make/cutover-slots.sh
+source tools/make/cutover-stage.sh
 cutover_config
 [[ -z ${CYCLE_ID:-} || $CYCLE_ID =~ ^[A-Za-z0-9._-]{1,100}$ ]] || fail 'Invalid cycle identifier'
 WORK=$(mktemp -d)
@@ -29,6 +30,9 @@ cleanup() {
   trap - EXIT INT TERM
   unset FAST_DEADLINE REQUEST_DEADLINE
   stop_forwards
+  if [[ ${STAGING:-0} == 1 && $code != 0 ]]; then
+    (set -e; template_write failed) || printf 'Template stamp state unknown\n' >&2
+  fi
   if [[ ${PREPARING:-0} == 1 && $code != 0 ]]; then
     (set -e; prepare_failed) || printf 'Prepared cleanup incomplete; slot remains blocked\n' >&2
     rm -rf "$WORK"
@@ -65,6 +69,7 @@ case ${1:-} in
   pvc-expand) rbac_preflight; pvc_expand;;
   pvc-verify) rbac_preflight; pvc_verify;;
   slots-adopt) rbac_preflight; slots_adopt;;
+  stage) rbac_preflight; stage_command;;
   rollback) lock_resume; rollback_stages;;
   status)
     "${k[@]}" get configmap radar-change-lock --ignore-not-found -o json > "$WORK/lock.json"
