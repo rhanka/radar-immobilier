@@ -143,6 +143,10 @@ const durableRetirement = await readDurableLegacyRetirement(dbHandle.db).catch((
 const graceful = createGraceful();
 const app = createApp({
   graceful,
+  cutoverProbe: {
+    enabled: process.env["CUTOVER_PROBE_ENABLED"] === "true",
+    token: (process.env["CUTOVER_PROBE_TOKEN"] ?? "").trim(),
+  },
   checkDb: makeDbProbe(dbHandle),
   checkObjectStore: makeObjectStoreProbe(objectStore),
   store: objectStore,

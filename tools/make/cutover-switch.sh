@@ -113,7 +113,7 @@ freeze_stage() {
   samedb && return 0
   jq -e '.frozenAt!=null' "$WORK/record.json" >/dev/null && return 0
   JOB_POLL=0.5 run_job freeze 60 90
-  record_set '.frozenAt=$v[0].frozenAt' --slurpfile v "$WORK/verdict.json"
+  record_set '.frozenAt=$v[0].frozenAt|.freezeStartedAt=$v[0].freezeStartedAt' --slurpfile v "$WORK/verdict.json"
   printf 'Live database %s read-only from %s\n' "$(jq -r .liveDb "$WORK/record.json")" "$(jq -r .frozenAt "$WORK/record.json")"
 }
 switch_stage() {
@@ -121,8 +121,9 @@ switch_stage() {
   if ! wait_served "$(jq -r .release.apiServedSha "$WORK/record.json")" "$(jq -r .release.uiServedSha "$WORK/record.json")" "${SERVE_TIMEOUT:-30}"; then
     back_to_main; fail 'Prepared slot not served after the switch; routing returned to slot=main'
   fi
-  record_set '.firstGreenAt=$at|if .frozenAt then .freezeWindowMs=((($at|sub("\\.[0-9]+Z$";"Z")|fromdateiso8601)*1000+($at|capture("\\.(?<ms>[0-9]+)Z$").ms|tonumber))
-    -((.frozenAt|sub("\\.[0-9]+Z$";"Z")|fromdateiso8601)*1000+(.frozenAt|capture("\\.(?<ms>[0-9]+)Z$").ms|tonumber))) else . end' --arg at "$(iso_ms)"
+  # Freeze window (owner limit 10 s): first refused write possible (ALTER) -> first green response.
+  record_set 'def epochms: (sub("\\.[0-9]+Z$";"Z")|fromdateiso8601)*1000+(capture("\\.(?<ms>[0-9]+)Z$").ms|tonumber);
+    .firstGreenAt=$at|if .freezeStartedAt then .freezeWindowMs=(($at|epochms)-(.freezeStartedAt|epochms)) else . end' --arg at "$(iso_ms)"
   if ! (set -e; smoke_pass "$URL" "$URL"); then
     back_to_main; fail 'Public smoke failed on the prepared slot; routing returned to slot=main'
   fi
