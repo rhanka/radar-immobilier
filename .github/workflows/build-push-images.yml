@@ -290,6 +290,51 @@ jobs:
       - name: Prepare restore, migrations, 6H and isolated smoke
         run: make -f deploy/cutover/operator.mk prepare RELEASE=cutover-release/release.json ENV=preprod
 
+  rehearse-preprod-bluegreen:
+    name: Rehearse zero-downtime cutover in preprod
+    # Runs after deploy-preprod while that job still sets the canonical images itself (owner
+    # decision pending); both take radar-change-lock, so they never run concurrently.
+    needs: [prepare-preprod-db, deploy-preprod]
+    # Same arming as prepare/deploy-preprod (variable read only, never written).
+    if: github.ref == 'refs/heads/main' && vars.PREPROD_CD_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: cutover-release-${{ github.sha }}
+          path: cutover-release
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: v1.31.0
+      - name: Configure namespace-scoped preprod identity
+        env:
+          KUBE_CONFIG_DATA_PREPROD: ${{ secrets.KUBE_CONFIG_DATA_PREPROD }}
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p "$HOME/.kube"
+          if printf '%s' "$KUBE_CONFIG_DATA_PREPROD" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
+            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" | base64 -d > "$HOME/.kube/config"
+          else
+            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" > "$HOME/.kube/config"
+          fi
+      - name: Same-database scenario, then preprod scenario with drill, under read and writer probes
+        env:
+          CUTOVER_PROBE_TOKEN: ${{ secrets.CUTOVER_PROBE_TOKEN }}
+        run: make -f deploy/cutover/operator.mk rehearse RELEASE=cutover-release/release.json OUTPUT=rehearsal ENV=preprod
+      - name: Rehearsal evidence (receipts, probes, verdicts)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cutover-rehearsal-${{ github.sha }}
+          path: rehearsal
+          retention-days: 30
+
   deploy:
     name: Deploy to cluster
     needs: build-push

@@ -20,11 +20,13 @@ override PROBE := $(value PROBE)
 export ENV RELEASE RUN MODE BACKUP_ID CYCLE_ID OUTPUT BUILD_RUN SHA SIZE DRAIN OBSERVE DRILL SAMEDB PROBE TEST_PATTERN
 export COMPOSE_DISABLE_ENV_FILE := 1
 override COMPOSE := docker compose --env-file /dev/null -p radar-test-cutover -f $(CUTOVER_ROOT)/deploy/cutover/test.compose.yml
-.PHONY: help run prepare rollback status resume lock release-lock report-refs force-refresh pvc-expand pvc-verify slots-adopt stage probe-verify test lint typecheck test-api down ps commit syntax
+.PHONY: help rehearse run prepare rollback status resume lock release-lock report-refs force-refresh pvc-expand pvc-verify slots-adopt stage probe-verify test lint typecheck test-api down ps commit syntax
 help:
 	@echo 'run RELEASE=<release.json> [OBSERVE=600] [DRAIN=15] [SAMEDB=1] [DRILL=1] ENV=preprod|prod; status; resume RUN=<uuid>; rollback RUN=<uuid>'
 run prepare rollback status resume lock release-lock report-refs force-refresh pvc-expand pvc-verify slots-adopt stage probe-verify:
 	@cd "$(CUTOVER_ROOT)" && bash tools/make/cutover.sh $@
+rehearse:
+	@cd "$(CUTOVER_ROOT)" && bash tools/make/cutover-rehearse.sh
 download-release:
 	@cd "$(CUTOVER_ROOT)" && bash tools/make/cutover-download.sh
 test lint typecheck test-api:

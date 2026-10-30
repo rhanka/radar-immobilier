@@ -1,0 +1,40 @@
+# Daily template staging for the zero-downtime cutover (preprod): restores the latest complete
+# backup once into the sealed template database radar_tpl and copies the documents, so that a
+# release preparation clones it in seconds (deploy/cutover/README.md, "Staged template").
+# Arming is an owner act: the schedule runs only when vars.BASCULE_STAGE_ENABLED == 'true'
+# (read here, never written); a manual dispatch always runs.
+name: bascule-stage-preprod
+on:
+  schedule:
+    # After the 04:00 UTC daily restore (bascule-preprod.yml) and the nightly backup.
+    - cron: '0 5 * * *'
+  workflow_dispatch: {}
+concurrency:
+  group: bascule-stage-preprod
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  stage:
+    if: ${{ github.event_name != 'schedule' || vars.BASCULE_STAGE_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: v1.31.0
+      - name: Configure namespace-scoped preprod identity
+        env:
+          KUBE_CONFIG_DATA_PREPROD: ${{ secrets.KUBE_CONFIG_DATA_PREPROD }}
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p "$HOME/.kube"
+          if printf '%s' "$KUBE_CONFIG_DATA_PREPROD" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
+            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" | base64 -d > "$HOME/.kube/config"
+          else
+            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" > "$HOME/.kube/config"
+          fi
+      - name: Stage the template database (restore, documents, seal)
+        run: make -f deploy/cutover/operator.mk stage RELEASE=deployed ENV=preprod
