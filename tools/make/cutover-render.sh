@@ -21,10 +21,14 @@ render_template() {
   EXPECTED_DATABASE=$(jq -r '.targetDb//.liveDb//"radar"' "$WORK/record.json")
   export TARGET_DB
   TARGET_DB=$(jq -r '.targetDb//""' "$WORK/record.json")
+  # Recovery backups go to the per-environment bucket that the namespace backup Secret can write.
+  export RECOVERY_BUCKET
+  RECOVERY_BUCKET=$(jq -er --arg e "$ENV" '.[$e].recoveryBucket|select(test("^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$"))' "$CONFIG") || fail 'Missing recovery backup bucket'
   export DST_BUCKET FORBIDDEN_DST_BUCKETS COPY_GRANTEE COPY_CONCURRENCY=${COPY_CONCURRENCY:-48} DOCS_DRY=0
   COPY_GRANTEE=$(jq -r .storage.copyGrantee "$CONFIG")
   DST_BUCKET=$(jq -r --arg e "$ENV" '.[$e].documents' "$CONFIG")
   FORBIDDEN_DST_BUCKETS="$(jq -r .prod.documents "$CONFIG"),$EXPECTED_BACKUP_BUCKET"
+  [[ $RECOVERY_BUCKET != "$DST_BUCKET" && ,$FORBIDDEN_DST_BUCKETS, != *,$RECOVERY_BUCKET,* ]] || fail 'Recovery backup bucket overlaps a protected bucket'
   case $step in
     resolve|list) template=deploy/ci/bascule-preprod/backup-read-job.tmpl.yaml;;
     docs|recon) template=deploy/ci/bascule-preprod/docs-restore-backup-job.tmpl.yaml;;
@@ -32,7 +36,12 @@ render_template() {
     backup)
       template=deploy/ci/db-backup-job.tmpl.yaml
       export UPLOAD_IMAGE=peakcom/s5cmd:v2.2.2 BACKUP_S3_ENDPOINT=$S3_ENDPOINT BACKUP_S3_REGION=$S3_REGION
-      export BACKUP_S3_BUCKET=$EXPECTED_BACKUP_BUCKET S3_SECRET KEY="db-backups/cutover-$ENV-$RUN.sql.gz"
+      export BACKUP_S3_BUCKET=$RECOVERY_BUCKET S3_SECRET KEY="db-backups/cutover-$ENV-$RUN.sql.gz"
+      S3_SECRET=$(jq -r .storage.backupSecret "$CONFIG");;
+    probe)
+      template=deploy/cutover/backup-probe-job.tmpl.yaml
+      export UPLOAD_IMAGE=peakcom/s5cmd:v2.2.2 BACKUP_S3_ENDPOINT=$S3_ENDPOINT BACKUP_S3_REGION=$S3_REGION
+      export BACKUP_S3_BUCKET=$RECOVERY_BUCKET S3_SECRET KEY="db-backups/cutover-$ENV-$RUN.probe"
       S3_SECRET=$(jq -r .storage.backupSecret "$CONFIG");;
     ddl|destination|database|reset|discard) template=deploy/k8s/36-db-migrate-job.yaml;;
     data) template=deploy/cutover/data-migrate-job.tmpl.yaml;;
