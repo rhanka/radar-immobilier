@@ -22,7 +22,7 @@ else . end
       "--"]+(.command//["/s5cmd"])+(.args//[])|.command=["/bin/sh","-c"]
   end
 )
-| if (["ddl","data","destination","database","clone","discard","tplreset","tplseal"]|index($step)) then
+| if (["ddl","data","destination","database","identity","clone","discard","tplreset","tplseal","freeze","unfreeze","unfreezeprev","probeverify"]|index($step)) then
     .spec.template.spec.containers[0].image=$r[0].release.apiImage
   else . end
 | if $step=="data" then

@@ -20,7 +20,7 @@ try { raw = JSON.parse(fs.readFileSync('/tmp/cutover-child.json', 'utf8')); }
 catch { try { raw = JSON.parse(result.stdout.toString().trim()); } catch { /* No readable verdict. */ } }
 const clean = { ok: result.status === 0 && !result.error };
 if (raw.database === 'radar' || raw.database === 'radar_next') clean.database = raw.database;
-for (const key of ['date', 'backupId', 'dumpStartedAt', 'startedAt']) {
+for (const key of ['date', 'backupId', 'dumpStartedAt', 'startedAt', 'frozenAt', 'unfrozenAt']) {
   if (typeof raw[key] === 'string' && /^(latest|\d{4}-\d\d-\d\d(?:T[0-9:.]+Z)?)$/.test(raw[key])) clean[key] = raw[key];
 }
 for (const key of ['manifestSha256', 'pgSha256', 'codeSha']) {
@@ -39,9 +39,11 @@ for (const key of ['databaseSizes', 'sessionsByDb']) {
 }
 const timings = numberMap(raw.timings, /^[a-zA-Z]{1,32}$/, 16);
 if (timings) clean.timings = timings;
-for (const key of ['maxConnections', 'destListCalls', 'headChecked', 'versionsResolved', 'copyRetries']) {
+for (const key of ['maxConnections', 'logContainers', 'logBytes', 'destListCalls', 'headChecked', 'versionsResolved', 'copyRetries']) {
   if (Number.isFinite(raw[key]) && raw[key] >= 0) clean[key] = raw[key];
 }
+// Log export: the Pod UIDs whose every container log is in the verified manifest.
+if (Array.isArray(raw.podUids)) clean.podUids = raw.podUids.slice(0, 64).filter(u => typeof u === 'string' && /^[a-zA-Z0-9-]{1,64}$/.test(u));
 if (Array.isArray(raw.destListCallsPerShard)) {
   clean.destListCallsPerShard = raw.destListCallsPerShard.slice(0, 64).filter(n => Number.isSafeInteger(n) && n >= 0);
 }

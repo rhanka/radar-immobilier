@@ -71,3 +71,37 @@ test('staged template: clone copies data, two consecutive stages rerun, a sessio
     await c.end();
   }
 });
+test('freeze refuses every write from frozenAt; unfreeze makes pooled sessions writable again', async () => {
+  const { Pool } = require('pg');
+  const c = await connect('radar');
+  await c.query('DROP DATABASE IF EXISTS radar_next WITH (FORCE)');
+  await c.query('CREATE DATABASE radar_next TEMPLATE template0');
+  const pool = new Pool({ host: 'postgres', user: 'radar', password: 'synthetic-only', database: 'radar_next', max: 2 });
+  pool.on('error', () => {});
+  // A terminated pooled session fails once (57P01); the next checkout opens a fresh session.
+  const attempt = async sql => { try { await pool.query(sql); return 'ok'; } catch (e) { return e.code; } };
+  const settle = async sql => {
+    let code = await attempt(sql);
+    for (let i = 0; i < 3 && code !== 'ok' && code !== '25006'; i++) code = await attempt(sql);
+    return code;
+  };
+  try {
+    assert.equal(await attempt('CREATE TABLE writes (id int)'), 'ok');
+    const frozen = run('freeze', 'radar_next');
+    assert.equal(frozen.status, 0, frozen.stderr);
+    const frozenAt = JSON.parse(frozen.stdout).frozenAt;
+    assert.match(frozenAt, /^\d{4}-\d\d-\d\dT[0-9:.]+Z$/);
+    assert.equal(await settle('INSERT INTO writes VALUES (1)'), '25006', 'a write after the freeze is refused read-only');
+    assert.equal(await attempt('SELECT count(*) FROM writes'), 'ok', 'reads are still served');
+    const old = await c.query(`SELECT count(*)::int AS n FROM pg_stat_activity WHERE datname='radar_next' AND backend_start < $1`, [frozenAt]);
+    assert.equal(old.rows[0].n, 0, 'no session opened before the freeze remains');
+    const unfrozen = run('unfreeze', 'radar_next');
+    assert.equal(unfrozen.status, 0, unfrozen.stderr);
+    assert.equal(await settle('INSERT INTO writes VALUES (2)'), 'ok', 'pooled sessions reconnect writable');
+    assert.equal((await c.query('SELECT 1')).rowCount, 1, 'the operator session on another database is untouched');
+  } finally {
+    await pool.end();
+    await c.query('DROP DATABASE IF EXISTS radar_next WITH (FORCE)');
+    await c.end();
+  }
+});

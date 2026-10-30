@@ -114,6 +114,9 @@ spec:
         app.kubernetes.io/component: api
     spec:
       serviceAccountName: radar-app
+      # Graceful stop (api/src/lifecycle/graceful.ts): 25 s drain of in-flight requests and SSE
+      # closing inside a 30 s grace period, for the blue/green cutover and every re-roll.
+      terminationGracePeriodSeconds: 30
       securityContext:
         runAsNonRoot: true
         runAsUser: 1001

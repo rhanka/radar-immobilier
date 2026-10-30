@@ -14,7 +14,9 @@ const save = (f, state) => writeFileSync(join(f.dir, 'state.json'), JSON.stringi
 const success = r => assert.equal(r.status, 0, r.stdout + r.stderr);
 function covered(rules, { verb, resource, group, name }) {
   return rules.some(r => r.apiGroups.includes(group) && r.resources.includes(resource) && r.verbs.includes(verb)
-    && (!r.resourceNames || (name && !['list', 'create', 'watch'].includes(verb) && r.resourceNames.includes(name))));
+    // A named create is enforceable only on a subresource of a named object (pods/exec).
+    && (!r.resourceNames || (name && (!['list', 'create', 'watch'].includes(verb) || (verb === 'create' && resource.includes('/')))
+      && r.resourceNames.includes(name))));
 }
 function accesses(f) {
   const file = join(f.dir, 'access');
@@ -36,21 +38,22 @@ test('the preflight right list is exactly the Role of each rbac-<env>.yaml', () 
     }
   }
 });
-test('every Kubernetes access of prepare, cutover, rollback and daily restore is granted by rbac-preprod.yaml', () => {
-  const daily = fixture({ apiResources: AUTOSCALERS });
+test('every Kubernetes access of volume expansion, staging, prepare, blue/green cutover, rollback and daily restore is granted by rbac-preprod.yaml', () => {
+  const daily = fixture({ apiResources: AUTOSCALERS, unadopted: true });
   let dailyAccesses;
   try {
+    success(daily.run('slots-adopt'));
     success(daily.run('run', ['RELEASE=deployed', 'MODE=restore']));
     dailyAccesses = accesses(daily);
   } finally { daily.cleanup(); }
-  const f = fixture({ apiResources: AUTOSCALERS });
+  const f = fixture({ apiResources: AUTOSCALERS, previousSha: '9'.repeat(40) });
   try {
+    success(f.run('pvc-expand'));
+    success(f.run('stage', ['RELEASE=deployed']));
     success(f.run('prepare'));
-    const state = f.state(); state.missingMcp = true; save(f, state);
-    assert.notEqual(f.run('run', ['MODE=run']).status, 0);
-    const record = JSON.parse(f.state().objects.find(o => o.metadata.name === 'radar-change-lock').data.record);
-    const recovery = f.state(); recovery.missingMcp = false; save(f, recovery);
-    success(f.run('rollback', [`RUN=${record.run}`, 'MODE=run']));
+    success(f.run('run', ['MODE=run', 'DRILL=1']));
+    const run = JSON.parse(f.state().objects.find(o => o.metadata.name === 'radar-cutover-receipt').data.receipt).run;
+    success(f.run('rollback', [`RUN=${run}`, 'MODE=run']));
     const seen = [...dailyAccesses, ...accesses(f)];
     for (const resource of ['scaledobjects', 'httpscaledobjects', 'verticalpodautoscalers', 'rollouts']) {
       assert.ok(seen.some(a => a.verb === 'list' && a.resource === resource), resource);

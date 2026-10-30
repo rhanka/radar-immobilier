@@ -5,7 +5,7 @@ prepare_database() {
   prepared_available
   save_release "$RELEASE"
   # A previous prepared slot runs on the database this preparation replaces: remove it first.
-  if prepared_stack_present; then prepared_stack_delete; fi
+  prepared_stack_retire
   inventory
   # Production backs up before preparing: prove the recovery bucket is writable first.
   [[ $ENV == preprod ]] || run_job probe 170 180
@@ -73,7 +73,7 @@ prepared_data_evidence() {
 prepare_failed() {
   stop_forwards
   stop_operation_jobs || return 1
-  prepared_stack_delete || return 1
+  prepared_stack_retire || return 1
   if [[ $ENV == preprod ]] && jq -e '.checkpoints.clone!=null' "$WORK/record.json" >/dev/null; then
     run_job discard 60 90 || return 1
   fi

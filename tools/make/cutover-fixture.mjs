@@ -33,10 +33,11 @@ export function fixture(changes = {}) {
     const rs = object('ReplicaSet', `${name}-rs`, { selector: { matchLabels: { ...labels, ...slot } } });
     rs.metadata.ownerReferences = [{ kind: 'Deployment', controller: true, uid: `uid-${name}` }]; objects.push(rs);
     const pod = object('Pod', `${name}-consumer`, {});
-    pod.metadata.ownerReferences = [{ kind: 'ReplicaSet', controller: true, uid: rs.metadata.uid }];
+    pod.metadata.ownerReferences = [{ kind: 'ReplicaSet', controller: true, uid: rs.metadata.uid, name: rs.metadata.name }];
     pod.metadata.labels = { ...labels, ...slot };
     pod.status = { phase: 'Running', containerStatuses: [{ name: container, ready: true,
-      imageID: image === 'ui' ? release.uiImage : release.apiImage }] }; objects.push(pod);
+      // With a previousSha the running Pods serve an older build (previous release).
+      imageID: changes.previousSha ? `ghcr.io/rhanka/radar-${image}@sha256:${'9'.repeat(64)}` : image === 'ui' ? release.uiImage : release.apiImage }] }; objects.push(pod);
   }
   const cj = object('CronJob', 'radar-refresh-pv', { suspend: false, jobTemplate: { spec: { template: { spec: {
     containers: [{ name: 'refresh', image: 'ghcr.io/rhanka/radar-api:old' }], initContainers: [{ name: 'init', image: 'ghcr.io/rhanka/radar-api:old' }] } } } } });
@@ -65,6 +66,8 @@ export function fixture(changes = {}) {
   delete env.NAMESPACE; delete env.PREPROD_NAMESPACE; delete env.GITHUB_RUN_ID;
   delete env.GITHUB_ENV; delete env.GITHUB_OUTPUT;
   env.GITHUB_ACTIONS = 'false';
+  // Blue/green timings shortened for the fake cluster (retention, drain, first-serve wait).
+  Object.assign(env, { OBSERVE: '0', DRAIN: '0', SERVE_TIMEOUT: '3' });
   if (changes.fastClock) env['BASH_FUNC_sleep%%'] = '() { if [ "$1" = 2 ]; then SECONDS=$((SECONDS+31)); else command sleep "$@"; fi; }';
   const run = (action = 'run', extra = [], environment = 'preprod') => {
     const result = spawnSync('make', ['-s', '-f', 'deploy/cutover/operator.mk', action,

@@ -6,9 +6,9 @@ save_release() {
 deployed_release() {
   "${k[@]}" get pods -o json > "$WORK/deployed-pods.json"
   local api ui sha short
-  api=$(jq -er '[.items[]|select(.metadata.labels["app.kubernetes.io/component"]=="api")|
+  api=$(jq -er '[.items[]|select(.metadata.labels["app.kubernetes.io/component"]=="api" and .metadata.labels["sentropic.io/slot"]!="prepared")|
     .status.containerStatuses[]?|select(.name=="api" and .ready)|.imageID|sub("^docker-pullable://";"")]|unique|select(length==1)|first' "$WORK/deployed-pods.json")
-  ui=$(jq -er '[.items[]|select(.metadata.labels["app.kubernetes.io/component"]=="ui")|
+  ui=$(jq -er '[.items[]|select(.metadata.labels["app.kubernetes.io/component"]=="ui" and .metadata.labels["sentropic.io/slot"]!="prepared")|
     .status.containerStatuses[]?|select(.name=="ui" and .ready)|.imageID|sub("^docker-pullable://";"")]|unique|select(length==1)|first' "$WORK/deployed-pods.json")
   curl -q -fsS --max-time 15 "$URL/health" -o "$WORK/health.json" 2>/dev/null || fail 'Cannot identify deployed API'
   curl -q -fsS --max-time 15 "$URL/build.json" -o "$WORK/build.json" 2>/dev/null || fail 'Cannot identify deployed UI'
@@ -54,48 +54,14 @@ migrate_stage() {
   fi
 }
 execute_stages() {
-  if [[ ${MODE:-run} != restore ]]; then
-    execute_stage 1 'Verify prepared database' verify_prepared_release
-    execute_stage 2 Close close_once
-    fast_release_stages
-    printf '6/6 Reopen\n'; checkpoint stage-6 started; reopen
-    return
-  fi
+  # Release cutover: blue/green, never closed (cutover-switch.sh). Daily restore: closed.
+  if [[ ${MODE:-run} != restore ]]; then bluegreen_stages; return; fi
   execute_stage 1 Restore restore_stage
   execute_stage 2 Close close_once
   execute_stage 3 Migrate migrate_stage
   execute_stage 4 'Restart API, UI and MCP' restart_services
   execute_stage 5 'Quick private test' private_smoke
   printf '6/6 Reopen\n'; checkpoint stage-6 started; reopen
-}
-fast_release_stages() {
-  # The five-minute budget starts at the effective closure. Its exhaustion alone
-  # never keeps the site closed: the previous release is restored and reopened.
-  local code
-  rm -f "$WORK/budget-exhausted"
-  FAST_DEADLINE=$((SECONDS+295))
-  set +e
-  (
-    set -e
-    trap stop_forwards EXIT
-    execute_stage 3 'Switch database' switch_db
-    execute_stage 4 'Restart API, UI and MCP' restart_services
-    execute_stage 5 'Quick private test' private_smoke
-  )
-  code=$?
-  set -e
-  unset FAST_DEADLINE
-  ((code != 0)) || return 0
-  [[ -f $WORK/budget-exhausted ]] || exit "$code"
-  printf 'Five-minute budget exhausted after closure; automatic rollback and reopening\n' >&2
-  stop_operation_jobs || fail 'Database Job termination unknown; remain closed'
-  # Stopped (never completed) Jobs are kept as history, outside the final completion evidence.
-  jq '.jobHistory=((.jobHistory//[])+[.jobs[]|select(.outcome!="completed")|.outcome="stopped"])|
-    .jobs|=with_entries(select(.value.outcome=="completed"))' "$WORK/record.json" > "$WORK/next.json"
-  mv "$WORK/next.json" "$WORK/record.json"; record_save
-  rollback_stages
-  printf 'Rolled back and reopened on the previous release after budget exhaustion\n' >&2
-  exit 1
 }
 execute_stage() {
   printf '%s/6 %s\n' "$1" "$2"
