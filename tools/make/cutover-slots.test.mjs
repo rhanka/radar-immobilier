@@ -32,7 +32,7 @@ test('slot adoption orphans, recreates on slot=main, moves the Service selector,
     const before = f.calls().length;
     assert.equal(f.run('slots-adopt', ['DRAIN=0']).status, 0, 'rerun');
     assert.equal(f.calls().slice(before).filter(c => !c.includes('auth') && !c.join(' ').includes('radar-change-lock')).some(c => c.includes('delete') || (c.includes('create') && c.includes('-f')
-      && !c.join(' ').includes('lock.json'))), false, 'a rerun recreates and deletes nothing');
+      && !c.join(' ').includes('lock-request.json'))), false, 'a rerun recreates and deletes nothing');
   } finally { f.cleanup(); }
 });
 test('slot adoption refuses a concurrently changed Service selector and keeps the orphan serving', () => {

@@ -367,6 +367,7 @@ bluegreen_stages() {
 bluegreen_abandon() {
   # Before promotion: routing back to slot=main, writes reopened, schedules restored.
   back_to_main
+  prepared_stack_retire
   restore_schedules
   lock_delete
   fail 'Cutover abandoned before promotion; slot=main serves the previous release'
@@ -377,6 +378,7 @@ rollback_command() {
     lock_resume
     jq -e '.checkpoints.promote==null' "$WORK/record.json" >/dev/null || fail 'Promotion started: resume RUN= first, then rollback RUN='
     back_to_main
+    prepared_stack_retire
     restore_schedules
     lock_delete
     printf 'Rolled back: slot=main serves the previous release (%s)\n' "$RUN"
