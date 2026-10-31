@@ -63,7 +63,7 @@ Lot L0 of the Steve-aligned classification pilot (plan-pilote-v2 §B-L0, §H): s
   - [x] `tools/classif/run-seat.mjs` + `make classif-l0-probe ENV=preprod`: 12 probe calls, report.
   - [x] `make classif-sandbox-build DIR=<dir> ENV=preprod`: fingerprint scanner.
 
-- [ ] **Lot 4 — Gate**
+- [x] **Lot 4 — Gate**
   - [x] `make classif-check ENV=test-classif` + `make classif-test ENV=test-classif` (14/14).
   - [x] `harness verify --category static` and `--category unit`.
-  - [ ] Push branch (no PR).
+  - [x] Push branch (no PR).
