@@ -321,6 +321,8 @@ reroll_canonical() {
   # The release manifest spec (#611) with the live selector and replica count, the release images
   # and a per-run template annotation: a new ReplicaSet even on an identical SHA.
   local name current desired
+  # The generated ConfigMaps the release workloads mount exist before their specs land.
+  apply_release_generated
   for name in "${SLOT_SERVICES[@]}"; do
     if ! jq -e --arg n "$name" '.promotion.oldHashes[$n]!=null' "$WORK/record.json" >/dev/null; then
       record_set '.promotion.oldHashes[$n]=$h' --arg n "$name" --arg h "$("${k[@]}" get pods -o json | jq -r --arg l "$SLOT_LABEL" --arg n "$name" '

@@ -26,7 +26,8 @@ export function fixture(changes = {}) {
     const labels = { 'app.kubernetes.io/name': 'radar-immobilier', 'app.kubernetes.io/component': component };
     objects.push(object('Deployment', name, { replicas: 1, selector: { matchLabels: { ...labels, ...slot } },
       template: { metadata: { labels: { ...labels, ...slot } }, spec: { containers: [{ name: container, image: `ghcr.io/rhanka/radar-${image}:old`,
-        resources: RESOURCES[container] }] } } }));
+        resources: RESOURCES[container] }],
+        ...(container === 'ui' ? { volumes: [{ name: 'nginx-conf', configMap: { name: 'radar-ui-nginx' } }] } : {}) } } }));
     const service = object('Service', name, { selector: { ...labels, ...slot }, ports: [{ name: 'http', port: 80 }] });
     service.metadata.uid = `uid-svc-${name}`; objects.push(service);
     objects.push(object('Endpoints', name, {}));
@@ -40,18 +41,24 @@ export function fixture(changes = {}) {
       imageID: changes.previousSha ? `ghcr.io/rhanka/radar-${image}@sha256:${'9'.repeat(64)}` : image === 'ui' ? release.uiImage : release.apiImage }] }; objects.push(pod);
   }
   // Release manifests (#611): the delivered commit's workloads, distinguishable from the live ones.
+  const NGINX = 'radar-ui-nginx-7k2m9h5tgb';
   const manifestDeployments = [['radar-api', 'api', 'api'], ['radar-ui', 'ui', 'ui'], ['radar-immo-mcp', 'mcp', 'api']].map(([name, container, image]) => {
     const labels = { 'app.kubernetes.io/name': 'radar-immobilier', 'app.kubernetes.io/component': container === 'mcp' ? 'mcp' : image };
     return { apiVersion: 'apps/v1', kind: 'Deployment', metadata: { name, labels }, spec: { replicas: 1, selector: { matchLabels: labels },
       strategy: { type: container === 'mcp' ? 'Recreate' : 'RollingUpdate' },
       template: { metadata: { labels }, spec: { containers: [{ name: container, image: `ghcr.io/rhanka/radar-${image}:release`,
-        resources: RESOURCES[container], env: [{ name: 'FROM_RELEASE_MANIFEST', value: '1' }] }] } } } };
+        resources: RESOURCES[container], env: [{ name: 'FROM_RELEASE_MANIFEST', value: '1' }],
+        ...(container === 'ui' ? { volumeMounts: [{ name: 'nginx-conf', mountPath: '/etc/nginx/conf.d' }] } : {}) }],
+        ...(container === 'ui' ? { volumes: [{ name: 'nginx-conf', configMap: { name: NGINX } }] } : {}) } } } };
   });
+  // kustomize configMapGenerator: a content-hashed name, absent from the live namespace.
+  const nginxManifest = { apiVersion: 'v1', kind: 'ConfigMap', metadata: { name: NGINX }, data: { 'default.conf':
+    '# release nginx\nlocation /api/ { proxy_pass http://radar-api:3000; }\nlocation = /health { proxy_pass http://radar-api:3000/health; }\n' } };
   const manifestCronJob = { apiVersion: 'batch/v1', kind: 'CronJob', metadata: { name: 'radar-refresh-pv' }, spec: { suspend: false,
     jobTemplate: { spec: { template: { spec: { containers: [{ name: 'refresh', image: 'ghcr.io/rhanka/radar-api:release',
       env: [{ name: 'FROM_RELEASE_MANIFEST', value: '1' }] }] } } } } } };
-  const releaseManifests = { 'deploy/overlays/preprod': manifestDeployments, 'deploy/k8s/refresh-cronjobs': [manifestCronJob],
-    'deploy/k8s': manifestDeployments, 'deploy/k8s/immo-mcp': [] };
+  const releaseManifests = { 'deploy/overlays/preprod': [...manifestDeployments, nginxManifest], 'deploy/k8s/refresh-cronjobs': [manifestCronJob],
+    'deploy/k8s': [...manifestDeployments, nginxManifest], 'deploy/k8s/immo-mcp': [] };
   const cj = object('CronJob', 'radar-refresh-pv', { suspend: false, jobTemplate: { spec: { template: { spec: {
     containers: [{ name: 'refresh', image: 'ghcr.io/rhanka/radar-api:old' }], initContainers: [{ name: 'init', image: 'ghcr.io/rhanka/radar-api:old' }] } } } } });
   objects.push(cj, object('CronJob', 'radar-refresh-pending-watchdog', cj.spec),

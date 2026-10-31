@@ -50,6 +50,7 @@ prepared_stack_up() {
   render_prepared_stack "$db"
   ! prepared_stack_present || fail 'Prepared slot still present; retire it (logs exported) first'
   prepared_quota_preflight
+  apply_release_generated
   while read -r row; do
     printf '%s' "$row" > "$WORK/prepared-object.json"
     "${k[@]}" create -f "$WORK/prepared-object.json" >/dev/null || fail 'Prepared slot creation failed'
