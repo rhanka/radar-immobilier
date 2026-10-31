@@ -29,6 +29,8 @@ prepare_database() {
     pin_backup
     # Restore window (T_restore): resolve start -> destination verdict. A staged template that
     # matches the pin is cloned; otherwise the template is staged first (reported, slower).
+    # Volume preflight before any clone or staging (warning above 75 %, refusal above 90 %).
+    volume_preflight
     if template_matches_pin; then RESTORE_PATH=clone; else RESTORE_PATH=stage+clone; stage_template; fi
     run_job clone 300 330
     # Staging copied and reconciled the documents; a clone path re-checks them once.
