@@ -206,7 +206,8 @@ live_specs() {
   printf '%s\n' "$specs"
 }
 # Server-managed fields never enter a fingerprint: the same cluster state always hashes the same.
-DRIFT_NORMALIZE='del(.metadata.uid,.metadata.resourceVersion,.metadata.generation,.metadata.managedFields,.metadata.creationTimestamp,.status)'
+# spec.replicas (HPA) and spec.suspend (schedules) are operational state, not drift (live and release).
+DRIFT_NORMALIZE='del(.metadata.uid,.metadata.resourceVersion,.metadata.generation,.metadata.managedFields,.metadata.creationTimestamp,.status,.spec.replicas,.spec.suspend)'
 drift_report() {
   local applied key baseline
   "${k[@]}" get configmap radar-applied-specs --ignore-not-found -o json > "$WORK/applied.json"
@@ -345,16 +346,18 @@ back_to_main() {
   # Routing back first (reads and writes served by the previous release), then writes reopen.
   # The live selectors decide (a partially applied switch included), not the recorded slot.
   back_to_main_routing
+  # Writes reopen at once on the previous database; the (settled) measurement of the abandoned
+  # one comes after, never delaying the unfreeze.
+  if jq -e '.frozenAt!=null and .unfrozenAt==null' "$WORK/record.json" >/dev/null; then
+    JOB_POLL=0.5 run_job unfreeze 60 90
+    record_set '.unfrozenAt=$v[0].unfrozenAt' --slurpfile v "$WORK/verdict.json"
+  fi
   # Writes acknowledged by the prepared slot after the switch stay on the abandoned database.
   if ! samedb && jq -e 'any(.switches[]?; .to=="prepared") and .abandoned==null' "$WORK/record.json" >/dev/null; then
     local abandoned_db
     abandoned_db=$(jq -r .targetDb "$WORK/record.json")
     record_abandoned "$abandoned_db" "$(jq -c --arg db "$abandoned_db" '.writeBaseline[$db]' "$WORK/record.json")" \
       "$(jq -c --arg db "$abandoned_db" '.writeBaselineNonProbe[$db]' "$WORK/record.json")" "$(jq -c .writeBaselineAt "$WORK/record.json")"
-  fi
-  if jq -e '.frozenAt!=null and .unfrozenAt==null' "$WORK/record.json" >/dev/null; then
-    JOB_POLL=0.5 run_job unfreeze 60 90
-    record_set '.unfrozenAt=$v[0].unfrozenAt' --slurpfile v "$WORK/verdict.json"
   fi
 }
 verify_prepared_release() {

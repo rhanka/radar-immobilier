@@ -270,6 +270,8 @@ test('a return to main before promotion records the writes made through the prep
     assert.ok(Date.now() - started >= 11000, 'waited at least 11 s before measuring');
     const [entry] = entries(f);
     assert.deepEqual([entry.status, entry.db, entry.tuples, entry.settledSeconds], ['pending', 'radar_next', 3, 11]);
+    const steps = f.state().jobCreation.map(j => j.step);
+    assert.ok(steps.indexOf('unfreeze') >= 0 && steps.indexOf('unfreeze') < steps.lastIndexOf('writestats1'), 'writes reopen before the settled measurement');
   } finally { f.cleanup(); }
 });
 test('the change lock is awaited for a bounded time instead of failing at once', () => {
@@ -433,7 +435,14 @@ test('the drift fingerprint is stable across reports on an unchanged cluster des
     ingress.spec.rules[0].host = 'immo.sent-tech.ca'; ingress.spec.tls[0].hosts = ['immo.sent-tech.ca'];
     save(f, state);
     success(f.run('prepare', [], 'prod'));
-    const reports = [1, 2].map(() => {
+    const reports = [1, 2].map(run => {
+      if (run === 2) {
+        // Operational state only (HPA replicas, schedule suspension): never part of the fingerprint.
+        const live = f.state();
+        live.objects.find(o => o.kind === 'Deployment' && o.metadata.name === 'radar-api').spec.replicas = 2;
+        live.objects.find(o => o.kind === 'CronJob' && o.metadata.name === 'radar-refresh-pv').spec.suspend = true;
+        save(f, live);
+      }
       const result = f.run('run', ['MODE=run'], 'prod');
       assert.match(result.stderr, /drift_unreviewed/);
       return object(f, 'radar-release-drift').data;
