@@ -34,3 +34,17 @@ syntax:
 commit:
 	@test -n "$$MSG"
 	@git -C "$(CUTOVER_ROOT)" commit -m "$$MSG"
+# PostgreSQL major upgrade by logical replication (deploy/cutover/PG18-UPGRADE.md).
+# KUBECONFIG names the tenant kubeconfig file explicitly; ~/.kube/config is refused.
+override TARGET := $(value TARGET)
+override ABORT := $(value ABORT)
+override REVERSE := $(value REVERSE)
+override KUBECONFIG := $(value KUBECONFIG)
+override PG_STATE_DIR := $(value PG_STATE_DIR)
+export TARGET ABORT REVERSE KUBECONFIG PG_STATE_DIR
+.PHONY: pg-replicate pg-verify pg-switch pg-reverse test-pg
+pg-replicate pg-verify pg-switch pg-reverse:
+	@cd "$(CUTOVER_ROOT)" && bash tools/make/cutover-pg.sh $@
+test-pg:
+	@test "$(ENV)" = test-cutover
+	@cd "$(CUTOVER_ROOT)" && bash tools/make/cutover-verify.sh $@
