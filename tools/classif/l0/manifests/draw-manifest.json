@@ -1,0 +1,16 @@
+{
+ "lot": "L0",
+ "createdAt": "2026-10-31T09:22:13.285Z",
+ "devItems": 504,
+ "devItemsSha256": "13e60c918e249ccbdc931f1a6a33137242bafe3a9d164507b751d1e71864cb04",
+ "signals": {
+  "drawn": 384,
+  "itemsFileSha256": "3e6ce939d96b2fad0041a095fc848aec8cd80427bfc6b75baff88710bdccdd0c",
+  "manifest": "signal-draw-manifest.json"
+ },
+ "pvs": {
+  "drawn": 120,
+  "itemsFileSha256": "df923955042eedbb118cbc53a0130f95762287846d5fbe02426626ff550d07a9",
+  "manifest": "pv-draw-manifest.json"
+ }
+}
