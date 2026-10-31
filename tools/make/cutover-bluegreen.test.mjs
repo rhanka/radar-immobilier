@@ -421,3 +421,22 @@ test('the rehearsal check skips only a served SHA whose rehearsal receipt is gre
     assert.equal(check(changed), 'run', 'not served yet: the release is rehearsed');
   } finally { changed.cleanup(); }
 });
+test('the drift fingerprint is stable across reports on an unchanged cluster despite changing kubectl diff headers', () => {
+  const f = fixture({ url: 'https://immo.sent-tech.ca' });
+  try {
+    const state = f.state();
+    const ingress = state.objects.find(o => o.kind === 'Ingress');
+    ingress.spec.rules[0].host = 'immo.sent-tech.ca'; ingress.spec.tls[0].hosts = ['immo.sent-tech.ca'];
+    save(f, state);
+    success(f.run('prepare', [], 'prod'));
+    const reports = [1, 2].map(() => {
+      const result = f.run('run', ['MODE=run'], 'prod');
+      assert.match(result.stderr, /drift_unreviewed/);
+      return object(f, 'radar-release-drift').data;
+    });
+    assert.notEqual(reports[0].report, reports[1].report, 'the readable kubectl diff differs (temporary paths, times)');
+    assert.equal(reports[0].sha256, reports[1].sha256, 'the fingerprint of the normalized objects does not');
+    success(f.run('ack-drift', [`SHA256=${reports[1].sha256}`], 'prod'));
+    success(f.run('run', ['MODE=run'], 'prod'));
+  } finally { f.cleanup(); }
+});

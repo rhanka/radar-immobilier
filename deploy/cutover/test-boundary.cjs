@@ -165,7 +165,10 @@ if (args[0] === 'diff') {
   const lines = [];
   for (const o of yaml.parse(fs.readFileSync(value('-f'), 'utf8')).items) {
     const live = s.objects.find(x => x.kind === o.kind && x.metadata.name === o.metadata.name);
-    if (JSON.stringify(live?.spec) !== JSON.stringify(o.spec)) lines.push(`diff -u live/${o.kind}/${o.metadata.name} release/${o.kind}/${o.metadata.name}`);
+    // Like kubectl: temporary directories and file times in the headers change on every call.
+    const tmp = Math.random().toString(36).slice(2);
+    if (JSON.stringify(live?.spec) !== JSON.stringify(o.spec)) lines.push(`diff -u -N /tmp/LIVE-${tmp}/${o.kind}.${o.metadata.name} /tmp/MERGED-${tmp}/${o.kind}.${o.metadata.name}`,
+      `--- /tmp/LIVE-${tmp}/${o.kind}.${o.metadata.name}\t${new Date().toISOString()}`, `+++ /tmp/MERGED-${tmp}/${o.kind}.${o.metadata.name}\t${new Date().toISOString()}`);
   }
   out(lines.map(l => `${l}\n`).join(''));
   process.exit(lines.length ? 1 : 0);
