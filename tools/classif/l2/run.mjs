@@ -63,10 +63,9 @@ export async function runPass({ pass, mode = 'independent', guide = 'G0', annota
       tasks.push({ annotator, lot, out });
     }
   }
-  // Interleave annotators so the three seats work in parallel.
-  tasks.sort((a, b) => a.lot.lotId.localeCompare(b.lot.lotId) || a.annotator.localeCompare(b.annotator));
+  // One pool per annotator: at most `concurrency` simultaneous calls per seat (machine load).
   let done = 0;
-  await pool(tasks.map(({ annotator, lot, out }) => async () => {
+  const work1 = async ({ annotator, lot, out }) => {
     const prompt = buildPrompt({ profilePrompt, pack, items: lot.items, mode, context: context.get(annotator) ?? new Map() });
     let r = null;
     let pairs = [];
@@ -107,7 +106,8 @@ export async function runPass({ pass, mode = 'independent', guide = 'G0', annota
       exitCode: r.code, latencyMs: r.latencyMs, usage: r.usage ?? null, engramValid: validation.valid ?? false, engramIssues: (validation.issues ?? []).length, annotations }, null, 1), { mode: 0o600 });
     done++;
     if (done % 10 === 0 || done === tasks.length) log(`[pass ${pass}] ${done}/${tasks.length} calls done (${Math.round((Date.now() - started) / 60000)} min)`);
-  }), concurrency * annotators.length);
+  };
+  await Promise.all(annotators.map((a) => pool(tasks.filter((t) => t.annotator === a).map((t) => () => work1(t)), concurrency)));
   return { pass, calls: tasks.length, minutes: (Date.now() - started) / 60000 };
 }
 
