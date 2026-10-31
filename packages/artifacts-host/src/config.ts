@@ -72,8 +72,14 @@ function budgetValue(input: ArtifactsS3BudgetInput, key: keyof ArtifactS3Budget)
 export function resolveS3Budget(input: ArtifactsS3BudgetInput = {}): ArtifactS3Budget {
   const attemptTimeoutMs = budgetValue(input, "attemptTimeoutMs") ?? DEFAULT_S3_BUDGET.attemptTimeoutMs;
   const maxAttempts = budgetValue(input, "maxAttempts") ?? DEFAULT_S3_BUDGET.maxAttempts;
-  const operationTimeoutMs = budgetValue(input, "operationTimeoutMs") ??
-    attemptTimeoutMs * maxAttempts + S3_RETRY_HEADROOM_MS;
+  const explicit = budgetValue(input, "operationTimeoutMs");
+  const operationTimeoutMs = explicit ?? attemptTimeoutMs * maxAttempts + S3_RETRY_HEADROOM_MS;
+  const [, maxOperation] = S3_BUDGET_BOUNDS.operationTimeoutMs;
+  if (explicit === undefined && operationTimeoutMs > maxOperation) {
+    throw new Error(`invalid ${S3_BUDGET_VARS.operationTimeoutMs}: derived ${operationTimeoutMs} ms ` +
+      `(${S3_BUDGET_VARS.maxAttempts} x ${S3_BUDGET_VARS.attemptTimeoutMs} + ${S3_RETRY_HEADROOM_MS}) ` +
+      `exceeds ${maxOperation}`);
+  }
   if (operationTimeoutMs < attemptTimeoutMs * maxAttempts) {
     throw new Error(`invalid ${S3_BUDGET_VARS.operationTimeoutMs}: must cover ` +
       `${S3_BUDGET_VARS.maxAttempts} x ${S3_BUDGET_VARS.attemptTimeoutMs}`);
