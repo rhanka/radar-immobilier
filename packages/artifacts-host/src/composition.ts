@@ -11,11 +11,11 @@ import type { ActivationConfig } from "./activation.js";
 import { initializeArtifactScope } from "./storage.js";
 import { createHostPolicy, authorizeArtifactCommit } from "./commit-policy.js";
 import { guardArtifactPool } from "./idempotency.js";
-import { createCommitDomain } from "./commit-domain.js";
+import { createCommitDomain, PUBLISH_BLOB_DEADLINE_MS } from "./commit-domain.js";
 import { mapHostError, reportWriteFailure } from "./host-outcome.js";
 import { startPreparationCleanup } from "./preparation-cleanup.js";
 import { projectArtifactWriteFailure } from "@sentropic/artifacts/server/outcome-contract";
-import { createTimeoutBlobStore, createTimeoutS3Client, DEFAULT_S3_BUDGET } from "./s3-timeout.js";
+import { createTimeoutBlobStore, createTimeoutS3Client, DEFAULT_S3_BUDGET, withS3Deadline } from "./s3-timeout.js";
 
 export interface ArtifactHostOptions {
   readonly profile?: HttpAppDeps["profile"];
@@ -64,7 +64,11 @@ export async function composeArtifactHost(
     });
     const cleanup = startPreparationCleanup(pool, domain.store, blobs, options.onProviderFailure);
     const execute: typeof domain.execute = async (request, invocation) => {
-      const outcome = await domain.execute(request, invocation);
+      const dispatch = () => domain.execute(request, invocation);
+      // Every PUT and read-back of one publish shares a deadline that ends
+      // before the preparation window, so finalization is never refused for it.
+      const outcome = request.method === "POST" && request.path === "/publish"
+        ? await withS3Deadline(Date.now() + PUBLISH_BLOB_DEADLINE_MS, dispatch) : await dispatch();
       if (!outcome.ok) {
         const entry = projectArtifactWriteFailure(outcome.failure, {
           dispatched: true, write: request.method === "POST" && ["/ensure", "/publish"].includes(request.path),
