@@ -175,5 +175,11 @@ if [ "$RC" -eq 0 ] && clean && has "$CALLS" 'apply immo-mcp-config' && ! grep -q
   ok 'slots adopted: ConfigMaps applied, no roll, no Deployment or CronJob apply'
 else bad "config only (rc=$RC): $(calls)"; fi
 
+# Zero-downtime writer probe: enabled in the preprod radar-api ConfigMap only (real kustomize render).
+probe_pre="$("$REAL_KUBECTL" kustomize --load-restrictor LoadRestrictionsNone "$HERE/../overlays/preprod" | grep -c '^  CUTOVER_PROBE_ENABLED: "true"$' || true)"
+probe_base="$("$REAL_KUBECTL" kustomize --load-restrictor LoadRestrictionsNone "$HERE/../k8s" | grep -c 'CUTOVER_PROBE_ENABLED' || true)"
+if [ "$probe_pre" = 1 ] && [ "$probe_base" = 0 ]; then ok 'writer probe enabled in the preprod render only'
+else bad "writer probe render: preprod=$probe_pre base=$probe_base"; fi
+
 echo "PASS=$PASS FAIL=$FAIL"
 [ "$FAIL" -eq 0 ]
