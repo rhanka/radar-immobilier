@@ -14,6 +14,16 @@ import { latestVotes } from './converge.mjs';
 
 const MAX_PER_ANNOTATOR = 8;
 
+// Resume state: each answer is saved as soon as it returns and reused (keyed by prompt sha256).
+async function cachedCall(home, annotator, step, prompt, seatTmp) {
+  const file = path.join(home, 'l2', 'amend-raw', `${step}.${annotator}.${sha256(prompt).slice(0, 16)}.json`);
+  if (existsSync(file)) return { ...JSON.parse(readFileSync(file, 'utf8')), reused: true };
+  mkdirSync(path.dirname(file), { recursive: true, mode: 0o700 });
+  const r = await callSeat(annotator, prompt, { base: seatTmp, timeoutMs: 3600000 });
+  writeFileSync(file, JSON.stringify(r), { mode: 0o600 });
+  return r;
+}
+
 export function disagreementDigest(items, latest, residual) {
   const byId = new Map(items.map((i) => [i.itemId, i]));
   return residual.map((id) => {
@@ -56,8 +66,8 @@ ${digest}
 `;
   const calls = [];
   const proposals = await Promise.all(ANNOTATORS.map(async (a) => {
-    const r = await callSeat(a, proposePrompt, { base: seatTmp, timeoutMs: 3600000 });
-    calls.push({ annotator: a, step: 'propose', exitCode: r.code, latencyMs: r.latencyMs });
+    const r = await cachedCall(home, a, 'propose', proposePrompt, seatTmp);
+    calls.push({ annotator: a, step: 'propose', exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused) });
     const j = parseJsonObject(r.text);
     return (Array.isArray(j?.amendments) ? j.amendments : []).slice(0, MAX_PER_ANNOTATOR).filter((x) => typeof x?.rule === 'string' && x.rule.trim());
   }));
@@ -71,8 +81,8 @@ false. Return ONLY JSON: {"votes":{"X1":true,"X2":false, ...}}
 ${union.map((x) => `- ${x.id}: ${x.rule} (rationale: ${x.rationale})`).join('\n')}
 `;
   const ballots = await Promise.all(ANNOTATORS.map(async (a) => {
-    const r = await callSeat(a, votePrompt, { base: seatTmp, timeoutMs: 3600000 });
-    calls.push({ annotator: a, step: 'vote', exitCode: r.code, latencyMs: r.latencyMs });
+    const r = await cachedCall(home, a, 'vote', votePrompt, seatTmp);
+    calls.push({ annotator: a, step: 'vote', exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused) });
     return parseJsonObject(r.text)?.votes ?? {};
   }));
   const tally = union.map((x) => ({ ...x, yes: ballots.filter((b) => b[x.id] === true).length }));
