@@ -1,0 +1,197 @@
+# PG18 StatefulSet for the logical-replication upgrade from radar-postgres (PG16).
+#
+# - Applications keep connecting to the Service `radar-postgres`; its selector
+#   pins one pod (20-postgres-postgis.yaml) and `pg-switch` moves it.
+# - The two direct Services below never move: replication connects to
+#   `radar-pg16` / `radar-pg18` by name, whichever pod is serving.
+# - The volume is XFS (StorageClass block-standard-xfs, reflink) so that
+#   `CREATE DATABASE ... STRATEGY FILE_COPY` clones files (file_copy_method=clone).
+# - The image default PGDATA is /var/lib/postgresql/18/docker: the volume is
+#   mounted at /var/lib/postgresql. A mount at /var/lib/postgresql/data makes
+#   the 18 image refuse to start.
+# - The StatefulSet selector adds sentropic.io/pg-major so it never claims the
+#   PG16 pod. The PG16 StatefulSet selector (immutable) also matches this pod's
+#   labels; ownership is decided by controllerRef, so neither controller adopts
+#   the other's pod.
+apiVersion: v1
+kind: Service
+metadata:
+  name: radar-pg16
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/component: postgres
+spec:
+  selector:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/component: postgres
+    statefulset.kubernetes.io/pod-name: radar-postgres-0
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: radar-pg18
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/component: postgres
+spec:
+  selector:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/component: postgres
+    statefulset.kubernetes.io/pod-name: radar-pg18-0
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+---
+# Replication traffic between the two PostgreSQL pods (both directions:
+# PG18 subscribes to PG16, then PG16 subscribes to PG18 after the switch).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-postgres-to-postgres
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/component: postgres
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: radar-immobilier
+      app.kubernetes.io/component: postgres
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: radar-immobilier
+              app.kubernetes.io/component: postgres
+      ports:
+        - protocol: TCP
+          port: 5432
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: radar-pg18
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/component: postgres
+    sentropic.io/pg-major: "18"
+spec:
+  serviceName: radar-pg18
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: radar-immobilier
+      app.kubernetes.io/component: postgres
+      sentropic.io/pg-major: "18"
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/part-of: sentropic
+        app.kubernetes.io/component: postgres
+        sentropic.io/pg-major: "18"
+    spec:
+      serviceAccountName: radar-app
+      initContainers:
+        # Filesystem probe, logged before PostgreSQL starts: filesystem type,
+        # free bytes and a reflink copy. REQUIRE_REFLINK=1 fails the pod when
+        # the volume cannot share blocks (no XFS reflink): the upgrade then waits
+        # instead of landing on a volume it would have to migrate again.
+        - name: fs-probe
+          image: postgis/postgis:18-3.6@sha256:4a43e3c3e5d55b9208240fc71db543b79c638766280c625a425bd0a2390989c4
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: REQUIRE_REFLINK
+              value: "1"
+          command:
+            - bash
+            - -ec
+            - |
+              dir=/var/lib/postgresql/.fs-probe
+              rm -rf "$dir"; mkdir -p "$dir"; trap 'rm -rf "$dir"' EXIT
+              echo "fs-probe type=$(stat -f -c %T /var/lib/postgresql)"
+              df -B1 /var/lib/postgresql | awk 'NR==2 {print "fs-probe bytes total=" $2 " used=" $3 " free=" $4}'
+              head -c 67108864 /dev/zero > "$dir/source"
+              if cp --reflink=always "$dir/source" "$dir/clone" 2>"$dir/err"; then
+                echo "fs-probe reflink=yes"
+              else
+                echo "fs-probe reflink=no ($(cat "$dir/err"))"
+                [ "$REQUIRE_REFLINK" != 1 ] || exit 1
+              fi
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            limits: { cpu: 200m, memory: 128Mi }
+          volumeMounts:
+            - name: pgdata
+              mountPath: /var/lib/postgresql
+      containers:
+        - name: postgres
+          image: postgis/postgis:18-3.6@sha256:4a43e3c3e5d55b9208240fc71db543b79c638766280c625a425bd0a2390989c4
+          imagePullPolicy: IfNotPresent
+          # file_copy_method=clone: FILE_COPY database creation (radar_tpl clones)
+          # uses reflink copies. wal_level=logical: PG18 publishes to PG16 after
+          # the switch (reverse replication, the no-loss rollback path).
+          args:
+            - -c
+            - wal_level=logical
+            - -c
+            - max_slot_wal_keep_size=2GB
+            - -c
+            - file_copy_method=clone
+            - -c
+            - wal_receiver_status_interval=1s
+          ports:
+            - name: postgres
+              containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_USER } }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
+            # initdb creates no application database: pg-replicate creates the
+            # live database from template0 and copies its schema from PG16.
+            - name: POSTGRES_DB
+              value: postgres
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "pg_isready -U \"$POSTGRES_USER\" -d postgres"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            exec:
+              command: ["sh", "-c", "pg_isready -U \"$POSTGRES_USER\" -d postgres"]
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 3
+          volumeMounts:
+            - name: pgdata
+              mountPath: /var/lib/postgresql
+            # Empty: skips the image's 10_postgis.sh, which would create
+            # template_postgis plus the unused topology/tiger extensions.
+            - name: no-initdb-scripts
+              mountPath: /docker-entrypoint-initdb.d
+          resources:
+            requests: { cpu: 50m, memory: 256Mi }
+            limits: { cpu: 600m, memory: 768Mi }
+      volumes:
+        - name: no-initdb-scripts
+          emptyDir: {}
+  volumeClaimTemplates:
+    - metadata:
+        name: pgdata
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: block-standard-xfs
+        resources:
+          requests:
+            storage: 10Gi
