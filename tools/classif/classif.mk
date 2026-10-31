@@ -89,3 +89,7 @@ classif-l2-scrape: ## Classification pilot L2: traced complements for items flag
 classif-l2-amend: ## Classification pilot L2: guide amendment by majority of the 3 annotators (FROM=G0 TO=G1 PASS=n)
 	@test "$(ENV)" = "preprod" || { echo "[classif-l2-amend] ENV=preprod required"; exit 2; }
 	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/amend.mjs --from $(FROM) --to $(TO) --pass $(PASS)
+
+.PHONY: classif-l2-revalidate
+classif-l2-revalidate: ## Classification pilot L2: re-run Engram validation on saved extractions of PASS=n (no seat call)
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/revalidate.mjs --pass $(PASS) $(if $(ALL),--all,)
