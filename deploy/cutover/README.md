@@ -485,7 +485,12 @@ with `restoreSeconds <= 300`, when the previous and new releases are the same
 answers `skip` only when the release is already served AND
 `radar-rehearsal-receipt` records a green rehearsal of that SHA: preparation and
 rehearsal are then skipped, neutral, with a job summary; a red or missing
-rehearsal is replayed in full; every rehearsal writes that receipt),
+rehearsal is replayed in full; every rehearsal writes that receipt, with the previous
+release and specs its first scenario switched from. A re-run after a rehearsal that
+stayed red after its promotion finds the release already served: it first replays
+that recorded previous release (`run SAMEDB=1 REPLAY_SPECS=<recorded specs>`, the
+production path on the live database, its recorded specs), then rehearses previous ->
+new again, so the version change is real),
 and per scenario when the run fails, `probe-verify.mjs`
 reports a violation, a prepared Deployment is left, a `logGaps` entry exists, or
 the sessions exceed 80 % of `max_connections`. A run interrupted after its

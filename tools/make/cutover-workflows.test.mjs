@@ -116,3 +116,9 @@ test('a re-run of a SHA whose rehearsal was green skips preparation and rehearsa
   const rehearse = readFileSync('tools/make/cutover-rehearse.sh', 'utf8');
   assert.ok(rehearse.includes('radar-rehearsal-receipt') && rehearse.includes('rehearsal_receipt "$( ((red == 0))'));
 });
+test('the rehearsal records the previous release it switched from and replays from it on a re-run after red', () => {
+  const rehearse = readFileSync('tools/make/cutover-rehearse.sh', 'utf8');
+  assert.ok(rehearse.includes('previousRelease:(.previousRelease|tojson),previousSpecs:(.previousSpecs|tojson)'));
+  assert.ok(rehearse.includes('scenario restore-previous samedb run RELEASE="$OUT/previous-release.json" SAMEDB=1 OBSERVE=0 REPLAY_SPECS="$OUT/previous-specs.json"'));
+  assert.ok(rehearse.indexOf('scenario restore-previous') < rehearse.indexOf('scenario preprod preprod run'));
+});
