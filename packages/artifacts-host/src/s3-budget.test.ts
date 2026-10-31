@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { composeArtifactHost } from "./composition.js";
-import { blob, failureOf, startS3, stubConfig, stubPool, type S3Stub } from "./s3-stub.test-support.js";
+import { withS3Deadline } from "./s3-timeout.js";
+import { blob, failureOf, startS3, stubConfig, stubPool, thirdAttemptOnly, type S3Stub } from "./s3-stub.test-support.js";
 
 vi.mock("./storage.js", () => ({
   initializeArtifactScope: vi.fn().mockResolvedValue(undefined),
@@ -84,3 +85,45 @@ describe("artifact S3 budget against a stalling provider", () => {
   }, 30_000);
 });
 
+/** Same order as a publish: stage every file, then read every file back. */
+async function stageAndReadBack(blobs: { putBlob(key: string, bytes: Uint8Array): Promise<void>;
+  getBlob(key: string): Promise<Uint8Array | undefined> }, files: number) {
+  const staged = Array.from({ length: files }, (_, index) => blob(`<p>file ${index}</p>`));
+  for (const file of staged) await blobs.putBlob(file.key, file.bytes);
+  for (const file of staged) expect(await blobs.getBlob(file.key)).toEqual(file.bytes);
+}
+
+describe("one deadline shared by every blob operation of an invocation", () => {
+  beforeEach(() => { vi.spyOn(console, "error").mockImplementation(() => undefined); });
+  afterEach(() => { vi.restoreAllMocks(); });
+
+  // Every operation succeeds on its third attempt only: >= 600 ms each with 300 ms attempts.
+  it("finishes inside the deadline when the operations fit", async () => {
+    const s3 = await startS3({ stalled: thirdAttemptOnly, close: true });
+    await withHost(s3, { s3Budget: FAST_BUDGET }, async (host) => {
+      const started = Date.now();
+      await withS3Deadline(started + 4000, () => stageAndReadBack(host.blobs, 1));
+      expect(Date.now() - started).toBeLessThan(4000);
+      expect(s3.connections).toBe(6);
+    });
+  }, 30_000);
+
+  it("ends with a retriable 503 at the deadline and starts nothing after it", async () => {
+    const s3 = await startS3({ stalled: thirdAttemptOnly, close: true });
+    await withHost(s3, { s3Budget: FAST_BUDGET }, async (host) => {
+      const started = Date.now();
+      const deadline = started + 2000;
+      // 2 files = 4 operations of >= 600 ms each, every one within its own 1500 ms budget.
+      const cause = await settle(withS3Deadline(deadline, () => stageAndReadBack(host.blobs, 2)));
+      const ended = Date.now();
+      expect(cause).toMatchObject({ code: "artifact_s3_timeout" });
+      expect(failureOf(cause)).toMatchObject(RETRIABLE_503);
+      expect(ended).toBeGreaterThanOrEqual(deadline - 50);
+      expect(ended).toBeLessThan(deadline + 250);
+      const connections = s3.connections;
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      expect(s3.connections).toBe(connections);
+      expect(s3.requestTimes.every((at) => at <= deadline)).toBe(true);
+    });
+  }, 30_000);
+});
