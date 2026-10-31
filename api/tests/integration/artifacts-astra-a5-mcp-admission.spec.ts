@@ -5,7 +5,7 @@ import { createArtifactBinding } from "../../../packages/immo-mcp/src/artifact-b
 import { ALICE, WORKSPACE, SECOND, startAstra, type Astra } from "./artifacts-astra-a5.helpers.js";
 
 const request: VerifiedMcpRequest = {
-  principal: { issuer: "synthetic", sub: ALICE, scopes: ["immo:read"], claims: [], attributes: {} },
+  principal: { issuer: "synthetic", sub: ALICE, scopes: ["immo:read", "immo:artifacts:read", "immo:artifacts:write"], claims: [], attributes: {} },
   resource: "synthetic:mcp", correlationId: "astra", signal: new AbortController().signal,
 };
 const body = (result: CallToolResult) => JSON.parse((result.content[0] as { text: string }).text);

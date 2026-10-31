@@ -6,7 +6,6 @@
  */
 
 export const ARTIFACT_PROVIDER_ID = "sentropic.artifacts" as const;
-export const ARTIFACT_INVOCATION_SCOPE = "immo:read" as const;
 export const ARTIFACT_PROFILE_REVISION = "immo-artifacts.v1" as const;
 export const ARTIFACT_PROVIDER_VERSION = "0.2.2" as const;
 
@@ -18,6 +17,63 @@ export const ARTIFACT_TOOL_NAMES = [
 ] as const;
 
 export type ArtifactToolName = (typeof ARTIFACT_TOOL_NAMES)[number];
+
+/**
+ * Explicit artifact scopes, named after the repository convention
+ * `immo:<resource>:<action>` (compare `immo:documents:read`, `immo:notes:write`).
+ * Reading (list, get) and writing (ensure, publish) are consented separately:
+ * `immo:read` alone never grants a write.
+ */
+export const ARTIFACT_READ_SCOPE = "immo:artifacts:read" as const;
+export const ARTIFACT_WRITE_SCOPE = "immo:artifacts:write" as const;
+export const ARTIFACT_INVOCATION_SCOPES = Object.freeze({
+  read: ARTIFACT_READ_SCOPE,
+  write: ARTIFACT_WRITE_SCOPE,
+} as const);
+
+/** Required scope per selected tool; the only source for manifest, registry and binding checks. */
+export const ARTIFACT_TOOL_SCOPES: Readonly<Record<ArtifactToolName, string>> = Object.freeze({
+  artifacts_ensure: ARTIFACT_WRITE_SCOPE,
+  artifacts_publish: ARTIFACT_WRITE_SCOPE,
+  artifacts_list: ARTIFACT_READ_SCOPE,
+  artifacts_get: ARTIFACT_READ_SCOPE,
+});
+
+/**
+ * Transition (owner decision 2026-10-31): while clients connected before the
+ * explicit scopes existed still hold only `immo:read`, the flag
+ * `IMMO_MCP_ARTIFACTS_LEGACY_READ_SCOPE=true` lets `immo:read` satisfy the
+ * READ tools only. It never satisfies a write tool. Default: off (strict).
+ */
+export const ARTIFACT_LEGACY_READ_SCOPE = "immo:read" as const;
+export const ARTIFACT_LEGACY_READ_FLAG = "IMMO_MCP_ARTIFACTS_LEGACY_READ_SCOPE" as const;
+
+export interface ArtifactScopePolicy {
+  /** When true, `immo:read` also satisfies `immo:artifacts:read` (transition only). */
+  readonly legacyReadScope: boolean;
+}
+
+export const STRICT_ARTIFACT_SCOPE_POLICY: ArtifactScopePolicy = Object.freeze({ legacyReadScope: false });
+
+/** Parse the transition flag; anything other than unset, "true" or "false" is a configuration error. */
+export function readArtifactScopePolicy(env: NodeJS.ProcessEnv): ArtifactScopePolicy {
+  const raw = env[ARTIFACT_LEGACY_READ_FLAG]?.trim();
+  if (raw === undefined || raw === "" || raw === "false") return STRICT_ARTIFACT_SCOPE_POLICY;
+  if (raw === "true") return Object.freeze({ legacyReadScope: true });
+  throw new Error("artifact_legacy_read_scope_invalid");
+}
+
+/** Scopes, any one of which satisfies the tool under the given policy. */
+export function acceptedArtifactScopes(tool: ArtifactToolName, policy: ArtifactScopePolicy): readonly string[] {
+  const required = ARTIFACT_TOOL_SCOPES[tool];
+  return required === ARTIFACT_READ_SCOPE && policy.legacyReadScope
+    ? [required, ARTIFACT_LEGACY_READ_SCOPE] : [required];
+}
+
+export function hasArtifactScope(tool: ArtifactToolName, scopes: readonly string[],
+  policy: ArtifactScopePolicy): boolean {
+  return acceptedArtifactScopes(tool, policy).some((scope) => scopes.includes(scope));
+}
 
 export interface ArtifactSelectionEntry {
   readonly tool: ArtifactToolName;

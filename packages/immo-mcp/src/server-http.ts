@@ -464,7 +464,8 @@ async function main(): Promise<void> {
   process.stderr.write(
     `[immo-mcp-http] listening port=${config.port} resource=${config.resource} ` +
       `issuer=${config.issuer} dataMode=${config.dataMode} domainMode=${data.mode} ` +
-      `rawMode=${raw.mode} requiredScopes=${config.requiredScopes.join(",")}\n`,
+      `rawMode=${raw.mode} requiredScopes=${config.requiredScopes.join(",")} ` +
+      `artifacts=${artifacts ? (artifacts.binding.scopePolicy.legacyReadScope ? "legacy-read" : "strict") : "off"}\n`,
   );
 }
 
