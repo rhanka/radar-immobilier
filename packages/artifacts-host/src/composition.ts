@@ -12,7 +12,7 @@ import { initializeArtifactScope } from "./storage.js";
 import { createHostPolicy, authorizeArtifactCommit } from "./commit-policy.js";
 import { guardArtifactPool } from "./idempotency.js";
 import { createCommitDomain } from "./commit-domain.js";
-import { mapHostError } from "./host-outcome.js";
+import { mapHostError, reportWriteFailure } from "./host-outcome.js";
 import { startPreparationCleanup } from "./preparation-cleanup.js";
 import { projectArtifactWriteFailure } from "@sentropic/artifacts/server/outcome-contract";
 import { createTimeoutBlobStore, createTimeoutS3Client, S3_OPERATION_TIMEOUT_MS } from "./s3-timeout.js";
@@ -59,6 +59,7 @@ export async function composeArtifactHost(
         const entry = projectArtifactWriteFailure(outcome.failure, {
           dispatched: true, write: request.method === "POST" && ["/ensure", "/publish"].includes(request.path),
         });
+        if (entry) reportWriteFailure(entry, outcome.failure);
         if (entry) await pool.query(
           `INSERT INTO artifacts.host_failures (invocation_id, actor_id, operation, reason, status, at_ms)
            VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (invocation_id) DO NOTHING`,
