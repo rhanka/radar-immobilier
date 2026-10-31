@@ -14,29 +14,42 @@ set -euo pipefail
 [[ -n ${RELEASE:-} ]] || { echo 'RELEASE=<release.json> is required' >&2; exit 2; }
 CONFIG=deploy/cutover/config.json
 URL=$(jq -r .preprod.url "$CONFIG")
+NS=$(jq -r .preprod.namespace "$CONFIG")
+k() { kubectl --request-timeout=15s -n "$NS" "$@"; }
 if [[ ${1:-} == check ]]; then
-  # Version-change guard for the CI: "same" when the served build already is the release (a re-run
-  # of the same main workflow) -> the rehearsal is skipped (neutral); "changed" otherwise.
+  # CI guard, run in prepare-preprod-db before any clone: "skip" only when the release is already
+  # served (a re-run of the same main workflow) AND the rehearsal of that SHA was green
+  # (radar-rehearsal-receipt); "run" otherwise, so a red rehearsal is always replayed in full.
   served=$(mktemp)
   code=$(curl -q -sS --max-time 15 -o "$served" -w '%{http_code}' "$URL/health" 2>/dev/null || echo 000)
-  if [[ ${code%% *} == 200 ]] && jq -e --slurpfile r "$RELEASE" '.sha==$r[0].gitSha' "$served" >/dev/null 2>&1; then echo same; else echo changed; fi
+  state=run
+  receipt=$(k get configmap radar-rehearsal-receipt --ignore-not-found -o json 2>/dev/null || true)
+  if [[ ${code%% *} == 200 && -n $receipt ]] && jq -e --slurpfile r "$RELEASE" '.sha==$r[0].gitSha' "$served" >/dev/null 2>&1 &&
+    jq -e --slurpfile r "$RELEASE" '.data.gitSha==$r[0].gitSha and .data.status=="green"' <<< "$receipt" >/dev/null 2>&1; then state=skip; fi
   rm -f "$served"
+  echo "$state"
   exit 0
 fi
 [[ ${#CUTOVER_PROBE_TOKEN} -ge 32 ]] || { echo 'CUTOVER_PROBE_TOKEN (32+ characters) is required' >&2; exit 2; }
-NS=$(jq -r .preprod.namespace "$CONFIG")
 OUT=${OUTPUT:-.bascule-work/rehearsal}
 mkdir -p "$OUT"
 red=0
-k() { kubectl --request-timeout=15s -n "$NS" "$@"; }
 verdict() { printf '%s\n' "$*" | tee -a "$OUT/verdict.txt"; }
+rehearsal_receipt() {
+  # The verdict of this SHA: a later re-run is skipped only after a green one.
+  jq -n --arg ns "$NS" --arg status "$1" --slurpfile r "$RELEASE" --arg at "$(date -u +%FT%TZ)" --rawfile v "$OUT/verdict.txt" \
+    '{apiVersion:"v1",kind:"ConfigMap",metadata:{name:"radar-rehearsal-receipt",namespace:$ns},
+      data:{gitSha:$r[0].gitSha,status:$status,at:$at,verdict:$v}}' > "$OUT/rehearsal-receipt.json"
+  k apply -f "$OUT/rehearsal-receipt.json" >/dev/null || echo 'rehearsal receipt not recorded: the next re-run replays the rehearsal' >&2
+}
+: > "$OUT/verdict.txt"
 # Every probe run of this rehearsal shares one prefix (traceable in cutover_probe_writes).
 CHAIN="rh-$(date -u +%s)"
 # A pending retained-database entry is never overwritten: one that the conductor has not
 # acknowledged (operator rollback) stops the rehearsal cleanly before any change.
 pending=$(k get configmap radar-retained-db --ignore-not-found -o json | jq -c '[.data.entries//"[]"|fromjson|.[]|select(.status=="pending")]' 2>/dev/null || echo '[]')
 if [[ $(jq length <<< "${pending:-[]}") != 0 ]]; then
-  verdict "retained database: RED pending entries need the conductor ack first: $pending"; exit 1
+  verdict "retained database: RED pending entries need the conductor ack first: $pending"; rehearsal_receipt red; exit 1
 fi
 stamp=$(k get configmap radar-prepared-db -o json | jq -c .data)
 printf '%s\n' "$stamp" | jq '{status,restorePath,restoreSeconds,targetDb,gitSha}' > "$OUT/prepared-stamp.json"
@@ -111,4 +124,5 @@ if [[ -n $run_a ]]; then
   else verdict 'repromote: RED rollback not promoted'; red=1; fi
 else verdict 'rollback: RED previous scenario not promoted'; red=1; fi
 scenario samedb samedb run SAMEDB=1 OBSERVE=60
+rehearsal_receipt "$( ((red == 0)) && echo green || echo red)"
 exit "$red"

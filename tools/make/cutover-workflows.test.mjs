@@ -56,12 +56,12 @@ test('the preprod CI/CD rehearses the zero-downtime cutover after preparation, w
   const w = workflow('build-push-images.yml');
   const job = w.jobs['rehearse-preprod-bluegreen'];
   assert.deepEqual(job.needs, ['prepare-preprod-db', 'deploy-preprod'], 'never concurrent with the canonical deploy (shared lock)');
-  assert.equal(job.if, `${w.jobs['prepare-preprod-db'].if} && needs.prepare-preprod-db.outputs.slots == 'adopted'`,
+  assert.equal(job.if, `${w.jobs['prepare-preprod-db'].if} && needs.prepare-preprod-db.outputs.slots == 'adopted' && needs.prepare-preprod-db.outputs.rehearse == 'run'`,
     'same PREPROD_CD_ENABLED arming (read only), only once the slots are adopted');
   assert.equal(job['timeout-minutes'], 80);
   const steps = JSON.stringify(job.steps);
   assert.ok(job.steps.some(s => s.run === 'make -f deploy/cutover/operator.mk rehearse RELEASE=cutover-release/release.json OUTPUT=rehearsal ENV=preprod'));
-  assert.ok(job.steps.some(s => s.uses?.startsWith('actions/upload-artifact') && s.if === "always() && steps.change.outputs.state == 'changed'"));
+  assert.ok(job.steps.some(s => s.uses?.startsWith('actions/upload-artifact') && s.if === 'always()'));
   assert.equal(steps.includes('continue-on-error'), false);
   const rehearse = readFileSync('tools/make/cutover-rehearse.sh', 'utf8');
   assert.ok(rehearse.includes('SAMEDB=1 OBSERVE=60') && rehearse.includes('OBSERVE=120 DRILL=1'));
@@ -87,7 +87,7 @@ test('once the slots are adopted, deploy-preprod delegates the release to the bl
   assert.equal(prepare.outputs.slots, '${{ steps.slots.outputs.state }}');
   assert.ok(prepare.steps.some(s => s.id === 'slots' && s.run.includes('operator.mk slots-status ENV=preprod')));
   assert.equal(prepare.steps.find(s => s.run === 'make -f deploy/cutover/operator.mk prepare RELEASE=cutover-release/release.json ENV=preprod').if,
-    "steps.slots.outputs.state == 'adopted'");
+    "steps.slots.outputs.state == 'adopted' && steps.change.outputs.state == 'run'");
   const deploy = w.jobs['deploy-preprod'];
   assert.equal(deploy.env.SLOTS, '${{ needs.prepare-preprod-db.outputs.slots }}');
   for (const name of ['Roll preprod deployments to pushed sha', 'Wait for rollouts', 'Assert served sha (preprod)']) {
@@ -101,13 +101,18 @@ test('once the slots are adopted, deploy-preprod delegates the release to the bl
   assert.ok(reconcile.includes('RECONCILE_CONFIG_ONLY'));
   assert.ok(readFileSync('tools/make/cutover-rehearse.sh', 'utf8').includes('version change'), 'the rehearsal requires previous != release');
 });
-test('a re-run on the same SHA skips the rehearsal (neutral, job summary) instead of failing', () => {
-  const job = workflow('build-push-images.yml').jobs['rehearse-preprod-bluegreen'];
-  const change = job.steps.find(s => s.id === 'change');
-  assert.ok(change.run.includes('operator.mk rehearse-check RELEASE=cutover-release/release.json ENV=preprod'));
-  const rehearse = job.steps.find(s => s.run === 'make -f deploy/cutover/operator.mk rehearse RELEASE=cutover-release/release.json OUTPUT=rehearsal ENV=preprod');
-  assert.equal(rehearse.if, "steps.change.outputs.state == 'changed'");
-  const skipped = job.steps.find(s => s.if === "steps.change.outputs.state == 'same'");
-  assert.ok(skipped.run.includes('GITHUB_STEP_SUMMARY') && skipped.run.includes('::notice'));
-  assert.equal(JSON.stringify(skipped).includes('exit 1'), false, 'neutral, never red');
+test('a re-run of a SHA whose rehearsal was green skips preparation and rehearsal before any clone; otherwise both run', () => {
+  const w = workflow('build-push-images.yml');
+  const prepare = w.jobs['prepare-preprod-db'];
+  assert.equal(prepare.outputs.rehearse, '${{ steps.change.outputs.state }}');
+  const index = id => prepare.steps.findIndex(s => s.id === id);
+  const prep = prepare.steps.findIndex(s => s.run === 'make -f deploy/cutover/operator.mk prepare RELEASE=cutover-release/release.json ENV=preprod');
+  assert.ok(index('slots') < index('change') && index('change') < prep, 'checked before any clone');
+  assert.ok(prepare.steps[index('change')].run.includes('operator.mk rehearse-check RELEASE=cutover-release/release.json ENV=preprod'));
+  assert.equal(prepare.steps[prep].if, "steps.slots.outputs.state == 'adopted' && steps.change.outputs.state == 'run'");
+  const skipped = prepare.steps.find(s => s.if === "steps.change.outputs.state == 'skip'");
+  assert.ok(skipped.run.includes('GITHUB_STEP_SUMMARY') && skipped.run.includes('::notice') && !skipped.run.includes('exit 1'));
+  assert.match(w.jobs['rehearse-preprod-bluegreen'].if, /needs\.prepare-preprod-db\.outputs\.rehearse == 'run'$/);
+  const rehearse = readFileSync('tools/make/cutover-rehearse.sh', 'utf8');
+  assert.ok(rehearse.includes('radar-rehearsal-receipt') && rehearse.includes('rehearsal_receipt "$( ((red == 0))'));
 });

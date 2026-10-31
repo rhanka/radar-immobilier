@@ -322,16 +322,6 @@ test('a release without the manifest of a workload refuses before creating the p
     assert.equal(f.state().objects.some(o => o.kind === 'Deployment' && o.metadata.name.endsWith('-prepared')), false);
   } finally { f.cleanup(); }
 });
-test('the rehearsal version check answers same when the release is already served, changed otherwise', () => {
-  const same = fixture();
-  try {
-    const result = same.run('rehearse-check');
-    assert.equal(result.status, 0, result.stderr);
-    assert.equal(result.stdout.trim(), 'same');
-  } finally { same.cleanup(); }
-  const changed = fixture({ previousSha: '9'.repeat(40) });
-  try { assert.equal(changed.run('rehearse-check').stdout.trim(), 'changed'); } finally { changed.cleanup(); }
-});
 test('the kustomize-hashed nginx ConfigMap of the release is applied first and the prepared UI calls the prepared API', () => {
   const f = fixture();
   try {
@@ -410,4 +400,24 @@ test('the rehearsal acknowledges an abandon only with zero rows outside the prob
       ['acknowledged', 'rehearsal-probe', 0, 30]);
     assert.equal(entries(f).find(e => e.run === b.run).status, 'pending', 'the unexplained entry still needs the conductor');
   } finally { f.cleanup(); }
+});
+test('the rehearsal check skips only a served SHA whose rehearsal receipt is green', () => {
+  const receiptMap = (gitSha, status) => ({ apiVersion: 'v1', kind: 'ConfigMap',
+    metadata: { name: 'radar-rehearsal-receipt', uid: 'uid-rehearsal', resourceVersion: '1' }, data: { gitSha, status } });
+  const check = f => { const r = f.run('rehearse-check'); assert.equal(r.status, 0, r.stderr); return r.stdout.trim(); };
+  const same = fixture();
+  try {
+    assert.equal(check(same), 'run', 'served, but no rehearsal receipt');
+    let state = same.state(); state.objects.push(receiptMap(same.release.gitSha, 'red')); save(same, state);
+    assert.equal(check(same), 'run', 'a red rehearsal is replayed in full');
+    state = same.state(); state.objects.find(o => o.metadata.name === 'radar-rehearsal-receipt').data.status = 'green'; save(same, state);
+    assert.equal(check(same), 'skip');
+    state = same.state(); state.objects.find(o => o.metadata.name === 'radar-rehearsal-receipt').data.gitSha = 'b'.repeat(40); save(same, state);
+    assert.equal(check(same), 'run', 'the green receipt belongs to another SHA');
+  } finally { same.cleanup(); }
+  const changed = fixture({ previousSha: '9'.repeat(40) });
+  try {
+    const state = changed.state(); state.objects.push(receiptMap(changed.release.gitSha, 'green')); save(changed, state);
+    assert.equal(check(changed), 'run', 'not served yet: the release is rehearsed');
+  } finally { changed.cleanup(); }
 });
