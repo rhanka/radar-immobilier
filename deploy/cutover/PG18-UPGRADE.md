@@ -11,8 +11,19 @@ Images (pinned by digest, same publisher as before):
 
 | Use | Image |
 |---|---|
-| PG18 server, preprod dump/restore client | `postgis/postgis:18-3.6@sha256:4a43e3c3e5d55b9208240fc71db543b79c638766280c625a425bd0a2390989c4` |
-| PG16 server (the digest already running), prod dump client until L4 | `postgis/postgis:16-3.4@sha256:44126d872ac91993766c341e369c539e8196614321765d36a6f1bab0419a5fa5` |
+| PG18 server, dump/restore client while PG18 serves (`dumpImages.pg18`) | `postgis/postgis:18-3.6@sha256:4a43e3c3e5d55b9208240fc71db543b79c638766280c625a425bd0a2390989c4` |
+| PG16 server (the digest already running), dump/restore client while PG16 serves (`dumpImages.pg16`) | `postgis/postgis:16-3.4@sha256:44126d872ac91993766c341e369c539e8196614321765d36a6f1bab0419a5fa5` |
+
+Dump and restore clients follow the serving server, not the environment: the
+cutover Jobs (`cutover-render.sh`) and the CD backup (`deploy/ci/run-db-backup.sh`)
+read `data.active` of ConfigMap `radar-pg-upgrade` (written by `pg-switch`; absent
+means pg16) and take `dumpImages[active]` from `config.json`. Measured in `test-pg`:
+pg_restore 18 into a PG16 server fails on every archive, pg_dump 16 or 18, direct or
+streamed (`unrecognized configuration parameter "transaction_timeout"`), and
+pg_dump 16 refuses a PG18 server. So a fixed per-environment image would break the
+preprod daily restore before the switch or the backup after it. Consequence for
+rollback: once PG18 serves, a backup taken from it cannot be restored into PG16;
+the rollback path is reverse replication (`pg-switch TARGET=pg16`), not a backup.
 
 The 18 image stores data under `/var/lib/postgresql/18/docker` and refuses to start
 when anything is mounted at `/var/lib/postgresql/data`: every PG18 volume or tmpfs is
@@ -130,9 +141,10 @@ already selects the target, re-run `pg-switch` with that target.
 
 ## Later lots (not in this change)
 
-- L4: move every remaining `postgis/postgis:16-3.4` dump user (both prod backup
-  CronJobs, `db-ro-role-provision`, the prod `dumpImage`) to the 18 digest before the
-  prod switch: pg_dump 18 reads PG16; pg_dump 16 refuses a PG18 server.
+- L4: before the prod switch, move the remaining fixed `postgis/postgis:16-3.4` dump
+  users (both prod backup CronJobs, `db-ro-role-provision`, served-refs) to the
+  serving-major rule or to the 18 digest at the switch: pg_dump 16 refuses a PG18
+  server, and pg_restore 18 cannot restore into PG16.
 - L5: production, same verbs after a PR sets `prod.pgUpgrade: true`.
 - L6: `pg-replicate ABORT=1`, scale `radar-postgres` to 0, keep its PVC 7 days,
   make PG18 canonical in the manifests (Service selector, single StatefulSet).
@@ -149,5 +161,6 @@ reports "already exists" for them and loads the rest).
 
 Tests: `make -f deploy/cutover/operator.mk test-pg ENV=test-cutover` runs the
 verbs on a real PG16 and PG18 (real migrations, live writes, switch, reverse
-replication, rollback, second switch, abort cleanup, pg_dump 16 archive -> PG18 and
-pg_dump 18 archive -> PG16).
+replication, rollback, second switch, abort cleanup; pg_dump 16 archives restored by
+pg_restore 18 into PG18, direct and streamed; the PG16 restore failures above are
+printed as `observed`).

@@ -68,7 +68,7 @@ jobs:
         run: node deploy/ci/backup/backup-daily.selftest.mjs
 
       - name: Validate cutover controller and backup adapters (hermetic tests)
-        run: make -f deploy/cutover/operator.mk test TEST_PATTERN='one command restores|long owned radar-refresh-pending-watchdog|failure remains closed.*failJob|daily restoration|daily and inter-tenant interfaces|prepare|prepared|rollback patches|resume reconciles|main deployment|PostgreSQL|pg-switch renders|pg verbs refuse|dump images are pinned|closure ignores' ENV=test-cutover
+        run: make -f deploy/cutover/operator.mk test TEST_PATTERN='one command restores|long owned radar-refresh-pending-watchdog|failure remains closed.*failJob|daily restoration|daily and inter-tenant interfaces|prepare|prepared|rollback patches|resume reconciles|main deployment|PostgreSQL|pg-switch renders|pg verbs refuse|dump images are pinned per server major|closure ignores' ENV=test-cutover
 
       - name: PG16 to PG18 logical replication, switch and rollback (real servers)
         run: make -f deploy/cutover/operator.mk test-pg ENV=test-cutover
