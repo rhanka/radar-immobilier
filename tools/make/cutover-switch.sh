@@ -188,6 +188,16 @@ live_specs() {
     specs=$(jq -c --argjson c "$("${k[@]}" get cronjob "$name" -o json)" \
       '.["CronJob/"+$c.metadata.name]=($c.spec|del(.suspend))' <<< "$specs")
   done < <(jq -r --slurpfile cfg "$CONFIG" '.cronjobs[]|select(.name as $n|$cfg[0].cronjobs|index($n))|.name' "$WORK/record.json")
+  # The content of the nginx and generated ConfigMaps the canonical workloads mount is part of the
+  # drift: an in-place edit of a mounted ConfigMap is reported too.
+  local cm
+  while read -r name; do
+    cm=$("${k[@]}" get configmap "$name" --ignore-not-found -o json)
+    [[ -n $cm ]] || cm='{"data":{"__missing__":"ConfigMap absent"}}'
+    specs=$(jq -c --arg n "$name" --argjson c "$cm" '.["ConfigMap/"+$n]=($c.data//{})' <<< "$specs")
+  done < <(for name in "${SLOT_SERVICES[@]}"; do "${k[@]}" get deployment "$name" -o json; done | jq -r '.spec.template.spec|
+    [.volumes[]?.configMap.name,(.containers[],.initContainers[]?|.envFrom[]?.configMapRef.name)]|.[]|strings|
+    select(startswith("radar-ui-nginx") or test("-[a-z0-9]{10}$"))' | sort -u)
   printf '%s\n' "$specs"
 }
 # Server-managed fields never enter a fingerprint: the same cluster state always hashes the same.
@@ -222,11 +232,38 @@ drift_report() {
       kind=$(jq -r '.[0]' <<< "$row"); name=$(jq -r '.[1]' <<< "$row")
       "${k[@]}" get "$(tr '[:upper:]' '[:lower:]' <<< "$kind")" "$name" --ignore-not-found -o json | jq -c "$DRIFT_NORMALIZE"
     done | jq -s . > "$WORK/live-objects.json"
-    jq -S -c --slurpfile live "$WORK/live-objects.json" \
-      "{release:[.items[]|$DRIFT_NORMALIZE],live:\$live[0]}" "$WORK/release-objects.json" > "$WORK/drift-basis.json"
+    generated_configmaps_diff
+    jq -S -c --slurpfile live "$WORK/live-objects.json" --slurpfile cms "$WORK/generated-cms.json" \
+      "{release:[.items[]|$DRIFT_NORMALIZE],live:\$live[0],configMaps:\$cms[0]}" "$WORK/release-objects.json" > "$WORK/drift-basis.json"
   fi
   record_set '.drift={baseline:$b,lines:$n,sha256:$s}' --arg b "$baseline" --argjson n "$(wc -l < "$WORK/drift.txt")" \
     --arg s "$(sha256sum "$WORK/drift-basis.json" | cut -d' ' -f1)"
+}
+generated_configmaps_diff() {
+  # Content of every generated (hash-suffixed) ConfigMap the release workloads mount, against the
+  # ConfigMap the live workload mounts for the same role (same name before the hash suffix).
+  local name pairs='[]' release live base
+  : > "$WORK/generated-cms.jsonl"
+  for name in "${PREPARED_NAMES[@]}"; do
+    release_object Deployment "$name" > "$WORK/gen-release.json"
+    "${k[@]}" get deployment "$name" -o json > "$WORK/gen-live.json"
+    while read -r release; do
+      base=${release%-*}
+      live=$(jq -r --arg b "$base" '[.spec.template.spec|.volumes[]?.configMap.name,(.containers[]|.envFrom[]?.configMapRef.name)|strings|
+        select(.==$b or startswith($b+"-"))]|first//""' "$WORK/gen-live.json")
+      release_configmap "$release" | jq -c '.data//{}' > "$WORK/gen-release-data.json"
+      if [[ -n $live ]]; then "${k[@]}" get configmap "$live" --ignore-not-found -o json | jq -c '.data//{}' > "$WORK/gen-live-data.json"
+      else echo '{}' > "$WORK/gen-live-data.json"; fi
+      [[ -s $WORK/gen-live-data.json ]] || echo '{}' > "$WORK/gen-live-data.json"
+      diff -u --label "live ConfigMap/${live:-none} (mounted by $name)" --label "release ConfigMap/$release" \
+        <(jq -r -S 'to_entries[]|"## \(.key)\n\(.value)"' "$WORK/gen-live-data.json") \
+        <(jq -r -S 'to_entries[]|"## \(.key)\n\(.value)"' "$WORK/gen-release-data.json") >> "$WORK/drift.txt" || true
+      jq -c -n --arg r "$release" --arg l "$live" --slurpfile rd "$WORK/gen-release-data.json" --slurpfile ld "$WORK/gen-live-data.json" \
+        '{release:$r,live:$l,releaseData:$rd[0],liveData:$ld[0]}' >> "$WORK/generated-cms.jsonl"
+    done < <(jq -r '.spec.template.spec|[.volumes[]?.configMap.name,(.containers[],.initContainers[]?|.envFrom[]?.configMapRef.name)]|
+      .[]|strings|select(test("-[a-z0-9]{10}$"))' "$WORK/gen-release.json" | sort -u)
+  done
+  jq -s -S 'sort_by(.release)' "$WORK/generated-cms.jsonl" > "$WORK/generated-cms.json"
 }
 drift_gate() {
   drift_report
