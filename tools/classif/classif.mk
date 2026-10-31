@@ -93,3 +93,8 @@ classif-l2-amend: ## Classification pilot L2: guide amendment by majority of the
 .PHONY: classif-l2-revalidate
 classif-l2-revalidate: ## Classification pilot L2: re-run Engram validation on saved extractions of PASS=n (no seat call)
 	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/revalidate.mjs --pass $(PASS) $(if $(ALL),--all,)
+
+.PHONY: classif-l2-chain
+classif-l2-chain: ## Classification pilot L2: whole protocol, resumable (WAIT_UNIT=<systemd unit> CONCURRENCY=2)
+	@test "$(ENV)" = "preprod" || { echo "[classif-l2-chain] ENV=preprod required"; exit 2; }
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/chain.mjs --concurrency $(CONCURRENCY) $(if $(WAIT_UNIT),--wait-unit $(WAIT_UNIT),)
