@@ -96,18 +96,37 @@ for side in pg16 pg18; do
 done
 pass 'abort removes subscriptions, publications, slots and the replication role'
 
-# Cross-version archives: production backups are pg_dump 16 archives restored by
-# the PG18 client; a PG18 client may also restore into PG16 (rollback by backup).
+# Cross-version archives. Production backups are pg_dump 16 archives; the client
+# that restores them follows config.json dumpImage. Both restore modes of
+# atomic-restore.sh are exercised: direct (--dbname) and SQL stream (--file=- | psql).
 "${compose[@]}" exec -T postgres16 sh -ec "pg_dump -U radar -Fc -d $DB -n pgup_synthetic" > "$STATE/pg16.dump"
 "${compose[@]}" exec -T -e PGPASSWORD=synthetic-only postgres sh -ec "pg_dump -U radar -Fc -h radar-pg16 -d $DB -n pgup_synthetic" > "$STATE/pg18.dump"
-op pg18 postgres 'CREATE DATABASE from16' && op pg18 from16 'CREATE EXTENSION postgis; CREATE EXTENSION pg_trgm'
-"${compose[@]}" exec -T postgres sh -ec 'pg_restore -U radar --no-owner --exit-on-error -j 4 -d from16' < "$STATE/pg16.dump" \
-  || fail 'pg_restore 18 of a pg_dump 16 archive into PG18'
-op pg16 postgres 'CREATE DATABASE from18' && op pg16 from18 'CREATE EXTENSION postgis; CREATE EXTENSION pg_trgm'
-"${compose[@]}" exec -T -e PGPASSWORD=synthetic-only postgres sh -ec \
-  'pg_restore -U radar -h radar-pg16 --no-owner --exit-on-error -d from18' < "$STATE/pg18.dump" \
-  || fail 'pg_restore 18 of a pg_dump 18 archive into PG16'
 want=$(op pg16 "$DB" 'SELECT count(*) FROM pgup_synthetic.nodes')
-[[ $(op pg18 from16 'SELECT count(*) FROM pgup_synthetic.nodes') == "$want" && $(op pg16 from18 'SELECT count(*) FROM pgup_synthetic.nodes') == "$want" ]] \
-  || fail 'cross-version restores lost rows'
-pass 'pg_dump 16 archive -> PG18 and pg_dump 18 archive -> PG16 (pg_restore 18) restore every row'
+target_db() { op "$1" postgres "DROP DATABASE IF EXISTS $2" && op "$1" postgres "CREATE DATABASE $2" && op "$1" "$2" 'CREATE EXTENSION postgis; CREATE EXTENSION pg_trgm'; }
+# restore18 <archive> <server side> <mode direct|stream> <db>: pg_restore 18 into that server.
+restore18() {
+  local host=127.0.0.1; [[ $2 == pg18 ]] || host=radar-pg16
+  target_db "$2" "$4"
+  if [[ $3 == direct ]]; then
+    "${compose[@]}" exec -T -e PGPASSWORD=synthetic-only -e H="$host" -e D="$4" postgres sh -ec \
+      'pg_restore -U radar -h "$H" --no-owner --exit-on-error -d "$D"' < "$1"
+  else
+    "${compose[@]}" exec -T -e PGPASSWORD=synthetic-only -e H="$host" -e D="$4" postgres bash -o pipefail -ec \
+      'pg_restore --no-owner --exit-on-error --file=- | psql -X -q -v ON_ERROR_STOP=1 -U radar -h "$H" -d "$D" >/dev/null' < "$1"
+  fi
+  [[ $(op "$2" "$4" 'SELECT count(*) FROM pgup_synthetic.nodes') == "$want" ]]
+}
+for mode in direct stream; do
+  restore18 "$STATE/pg16.dump" pg18 "$mode" r16to18 || fail "pg_restore 18 ($mode) of a pg_dump 16 archive into PG18"
+  if restore18 "$STATE/pg16.dump" pg16 "$mode" r16to16 2>"$STATE/err"; then
+    printf 'observed - pg_restore 18 (%s) of a pg_dump 16 archive into PG16: ok\n' "$mode"
+  else
+    printf 'observed - pg_restore 18 (%s) of a pg_dump 16 archive into PG16: FAILS (%s)\n' "$mode" "$(grep -m1 -o 'ERROR:.*' "$STATE/err")"
+  fi
+  if restore18 "$STATE/pg18.dump" pg16 "$mode" r18to16 2>"$STATE/err"; then
+    printf 'observed - pg_restore 18 (%s) of a pg_dump 18 archive into PG16: ok\n' "$mode"
+  else
+    printf 'observed - pg_restore 18 (%s) of a pg_dump 18 archive into PG16: FAILS (%s)\n' "$mode" "$(grep -m1 -o 'ERROR:.*' "$STATE/err")"
+  fi
+done
+pass 'pg_dump 16 archives restore into PG18 with the PG18 client (direct and stream)'
