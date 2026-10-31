@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { writeFileSync } from 'node:fs';
+import { writeFileSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fixture } from './cutover-fixture.mjs';
 import { Buffer } from 'node:buffer';
@@ -301,5 +301,31 @@ test('prepare refuses quota_insufficient before creating any prepared object', (
     assert.match(result.stderr, /quota_insufficient: preprod-cap\/limits.cpu/);
     assert.equal(f.state().objects.some(o => o.metadata.name.endsWith('-prepared') && o.kind !== 'ConfigMap'), false);
     assert.equal(object(f, 'radar-prepared-db').data.status, 'failed');
+  } finally { f.cleanup(); }
+});
+test('the volume preflight of stage and prepare warns above a 75 % projected peak and refuses above 90 %', () => {
+  const f = fixture();
+  try {
+    const summary = join(f.dir, 'summary.md');
+    f.env.GITHUB_STEP_SUMMARY = summary;
+    // 20 Gi claim; peak = used 11e9 + 2 x live 3e9 = 17e9, about 79 %: warning, staging goes on.
+    let state = f.state(); state.volume = { volumeUsedBytes: 11000000000, liveDbBytes: 3000000000 }; save(f, state);
+    const warned = f.run('stage', ['RELEASE=deployed']);
+    assert.equal(warned.status, 0, warned.stderr);
+    assert.match(warned.stderr, /WARNING volume: projected peak 17000000000 bytes is 79% /);
+    assert.match(readFileSync(summary, 'utf8'), /PostgreSQL volume above 75 %/);
+    assert.equal(object(f, 'radar-template-db').data.status, 'ready');
+    // Peak 14e9 + 6e9 = 20e9, about 93 %: prepare refuses before any clone or staging.
+    state = f.state(); state.volume = { volumeUsedBytes: 14000000000, liveDbBytes: 3000000000 }; save(f, state);
+    const refused = f.run('prepare');
+    assert.notEqual(refused.status, 0);
+    assert.match(refused.stderr, /volume_insufficient: projected peak 20000000000 bytes is 93%/);
+    assert.equal(f.state().jobCreation.some(j => j.step === 'clone'), false);
+    // Below 75 % (the measured preprod state: 1.43 GB used, ~2.9 GB peak on 5 GB is about 58 %): silent.
+    state = f.state(); state.volume = { volumeUsedBytes: 1430000000, liveDbBytes: 735000000 };
+    state.objects.find(o => o.kind === 'PersistentVolumeClaim').status.capacity.storage = '5Gi'; save(f, state);
+    const quiet = f.run('prepare');
+    assert.equal(quiet.status, 0, quiet.stderr);
+    assert.equal(/WARNING volume/.test(quiet.stderr), false);
   } finally { f.cleanup(); }
 });
