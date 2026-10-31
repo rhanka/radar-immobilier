@@ -5,7 +5,10 @@ render_template() {
     "${k[@]}" create job cutover-refresh --from=cronjob/radar-refresh-pv --dry-run=client -o yaml
     return
   fi
-  export NAMESPACE=$NS IMAGE DUMP_IMAGE=postgis/postgis:16-3.4 TTL_SECONDS=86400
+  export NAMESPACE=$NS IMAGE DUMP_IMAGE TTL_SECONDS=86400
+  # pg_dump refuses a newer server and pg_restore an archive from a newer pg_dump:
+  # the client major follows the environment (deploy/cutover/PG18-UPGRADE.md).
+  DUMP_IMAGE=$(jq -er --arg e "$ENV" '.[$e].dumpImage|select(test("^postgis/postgis:[0-9]+-[0-9.]+@sha256:[0-9a-f]{64}$"))' "$CONFIG") || fail 'Missing pinned dump image'
   IMAGE=$(jq -r .release.apiImage "$WORK/record.json")
   export PGHOST=radar-postgres DB_SECRET S3_ENDPOINT S3_REGION EXPECTED_BACKUP_BUCKET READER_SECRET COPY_SECRET
   DB_SECRET=$(jq -r .storage.dbSecret "$CONFIG")
