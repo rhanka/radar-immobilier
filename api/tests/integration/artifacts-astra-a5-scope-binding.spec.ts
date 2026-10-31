@@ -29,7 +29,7 @@ describe("astra A5 scope-bound membership", () => {
       await h.memberships([SECOND]);
       const before = await h.durable();
       const denied = await bound.binding.invoke("artifacts_list", {}, {
-        principal: { issuer: "synthetic", sub: ALICE, scopes: ["immo:read"], claims: [], attributes: {} },
+        principal: { issuer: "synthetic", sub: ALICE, scopes: ["immo:read", "immo:artifacts:read", "immo:artifacts:write"], claims: [], attributes: {} },
         resource: "synthetic:mcp", correlationId: "scope", signal: new AbortController().signal,
       });
       expect(denied.isError).toBe(true);
