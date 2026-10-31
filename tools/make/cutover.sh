@@ -138,6 +138,8 @@ case ${1:-} in
     MODE=$(jq -r '.mode//"run"' "$WORK/record.json")
     [[ $MODE != restore || $ENV == preprod ]] || fail 'Daily restore recovery is preprod-only'
     RECOVERING=1
+    # Forward resume serves the restored pin again: a reopening marker is cleared.
+    jq 'del(.restoreAborted)' "$WORK/record.json" > "$WORK/next.json"; mv "$WORK/next.json" "$WORK/record.json"
     if [[ $(jq -r .kind "$WORK/record.json") == writer ]]; then
       writer_release
     else

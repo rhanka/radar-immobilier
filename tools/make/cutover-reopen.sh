@@ -128,12 +128,14 @@ restore_reopen() {
   # Stopped or failed Jobs become history; a previous verification is never reused.
   jq '.jobHistory=((.jobHistory//[])+[.jobs|to_entries[]|select(.value.outcome!="completed" or .key=="verify")|
       .value|if .outcome=="started" then .outcome="stopped" else . end])|
-    .jobs|=with_entries(select(.value.outcome=="completed" and .key!="verify"))|.restoreAborted=true' \
+    .jobs|=with_entries(select(.value.outcome=="completed" and .key!="verify"))' \
     "$WORK/record.json" > "$WORK/next.json"
   mv "$WORK/next.json" "$WORK/record.json"; record_save
   run_job verify 60 90
   jq -e --slurpfile r "$WORK/record.json" '.ok==true and .database==$r[0].liveDb' "$WORK/verdict.json" >/dev/null || fail 'Live database verification refused; remain closed'
   restart_services
   private_smoke
+  jq '.restoreAborted=true' "$WORK/record.json" > "$WORK/next.json"
+  mv "$WORK/next.json" "$WORK/record.json"; record_save
   reopen
 }
