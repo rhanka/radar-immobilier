@@ -474,8 +474,11 @@ retained database, which is unfrozen first, while the promoted one is frozen),
 then `samedb` (`run SAMEDB=1 OBSERVE=60`, the production path on the now
 migrated live database). Red when the prepared stamp is not `restorePath=clone`
 with `restoreSeconds <= 300`, when the previous and new releases are the same
-(no version change; a re-run of the same main workflow is detected first by
-`rehearse-check` and the rehearsal steps are skipped, neutral, with a job summary),
+(no version change; in `prepare-preprod-db`, before any clone, `rehearse-check`
+answers `skip` only when the release is already served AND
+`radar-rehearsal-receipt` records a green rehearsal of that SHA: preparation and
+rehearsal are then skipped, neutral, with a job summary; a red or missing
+rehearsal is replayed in full; every rehearsal writes that receipt),
 and per scenario when the run fails, `probe-verify.mjs`
 reports a violation, a prepared Deployment is left, a `logGaps` entry exists, or
 the sessions exceed 80 % of `max_connections`. A run interrupted after its
