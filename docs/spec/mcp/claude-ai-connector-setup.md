@@ -13,9 +13,10 @@ Guide utilisateur — 5 minutes. Prérequis : un compte claude.ai **Pro, Max, Te
 | Scopes accordés au login | `immo:read`, `immo:search`, `immo:documents:read` | identiques |
 
 Pour la préprod, suivre les mêmes étapes avec les valeurs de la colonne
-**Préprod** (nom suggéré : `Radar immobilier (préprod)`). Le détail des outils,
-des scénarios de test et des erreurs en préprod est dans l'annexe
-[Manuel MCP préprod](../../manuals/MCP_PREPROD_USER_MANUAL.md).
+**Préprod** (nom suggéré : `Radar immobilier (préprod)`). Le guide illustré
+[`docs/guides/connecteur-mcp/guide-connecteur-claude-ai.md`](../../guides/connecteur-mcp/guide-connecteur-claude-ai.md)
+(et son PDF) détaille les outils, l'exemple de génération d'artefact et, en
+annexe A, les erreurs typées en préprod.
 
 > **Connecteur préprod déjà en place ?** Rien ne change avec la nouvelle version
 > du MCP : le connecteur existant continue de fonctionner tel quel. Il faut
@@ -60,5 +61,5 @@ Poser des questions en langage naturel ; Claude appelle les outils du radar :
   remote MCP* (centre d'aide support.claude.com).
 - Runbook interne serveur : `docs/spec/mcp/immo-mcp-remote-deploy.md`
   (déploiement, OAuth RS, manifests k8s).
-- Annexe préprod (outils, scénarios de test, erreurs typées) :
-  `docs/manuals/MCP_PREPROD_USER_MANUAL.md`.
+- Guide illustré (outils, artefacts, annexe A préprod) :
+  `docs/guides/connecteur-mcp/guide-connecteur-claude-ai.md` et son PDF.
