@@ -104,17 +104,17 @@ render_job() {
   render_template "$step" > "$WORK/template.yaml"
   # Client dry-run only parses the manifest. No server mutation precedes checkpoint.
   "${k[@]}" create --dry-run=client -f "$WORK/template.yaml" -o json > "$WORK/template.json"
-  if [[ $step =~ ^(destination|database|identity|clone|discard|tplreset|tplseal|freeze|unfreeze|unfreezeprev|probeverify|probecount|volume[0-9]*|writestats[0-9]*)$ ]]; then
+  if [[ $step =~ ^(destination|database|identity|clone|discard|tplreset|tplseal|freeze|unfreeze|unfreezeprev|probeverify|volume[0-9]*|writestats[0-9]*)$ ]]; then
     local operation=${step%prev}
     [[ $step != identity ]] || operation=database
     [[ $step != volume* ]] || operation=volume
     [[ $step != writestats* ]] || operation=writestats
     [[ $step != destination || -n ${TARGET_DB:-} ]] || operation=database
     jq --rawfile database deploy/cutover/database.cjs --arg step "$operation" --arg target "${TARGET_DB:-}" \
-      --arg probe "$(jq -r '.probeRun//""' "$WORK/record.json")" --arg since "$(jq -r '.probeSince//""' "$WORK/record.json")" '
+      --arg probe "$(jq -r '.probeRun//""' "$WORK/record.json")" '
       .spec.template.spec.containers[0].command=["node","-e",$database]|
       .spec.template.spec.containers[0].env += [{name:"CUTOVER_DB_OPERATION",value:$step},{name:"TARGET_DB",value:$target},
-        {name:"PROBE_RUN",value:$probe},{name:"PROBE_SINCE",value:$since}]' \
+        {name:"PROBE_RUN",value:$probe}]' \
       "$WORK/template.json" > "$WORK/identity.json"
     mv "$WORK/identity.json" "$WORK/template.json"
   fi

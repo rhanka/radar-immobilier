@@ -95,7 +95,26 @@ record_write_baseline() {
   local at
   at=$(iso_ms)
   write_stats
-  record_set '.writeBaseline=$v[0].writeStats|.writeBaselineAt=$at' --slurpfile v "$WORK/verdict.json" --arg at "$at"
+  record_set '.writeBaseline=$v[0].writeStats|.writeBaselineNonProbe=$v[0].writeStatsNonProbe|.writeBaselineAt=$at' \
+    --slurpfile v "$WORK/verdict.json" --arg at "$at"
+}
+record_abandoned() {
+  # record_abandoned <abandoned database> <baseline rows, all tables> <baseline rows, non-probe tables> <baseline time>
+  # (each a JSON value, null when unknown)
+  local abandoned=$1 baseline=$2 nonprobe=$3 since=$4 tuples others
+  write_stats
+  local delta='.[$db] as $now|if ($base|type)!="number" or ($now|type)!="number" or $now<$base then -1 else $now-$base end'
+  tuples=$(jq -r --arg db "$abandoned" --argjson base "$baseline" ".writeStats|$delta" "$WORK/verdict.json")
+  others=$(jq -r --arg db "$abandoned" --argjson base "$nonprobe" ".writeStatsNonProbe|$delta" "$WORK/verdict.json")
+  record_set '.abandoned={db:$db,tuples:$t,nonProbeTuples:$o,since:$since,measuredAt:$at}' --arg db "$abandoned" \
+    --argjson t "$tuples" --argjson o "$others" --argjson since "$since" --arg at "$(iso_ms)"
+  ((tuples != 0)) || return 0
+  printf 'Abandoned writes on %s: %s rows, %s outside the probe table (-1 = unknown), pending acknowledgement (run %s)\n' \
+    "$abandoned" "$tuples" "$others" "$RUN" >&2
+  retained_load
+  jq --slurpfile r "$WORK/record.json" '.data.entries=((.data.entries//"[]"|fromjson)+[$r[0].abandoned+{run:$r[0].run,status:"pending"}]|tojson)' \
+    "$WORK/retained-now.json" > "$WORK/retained-next.json"
+  retained_save
 }
 retained_load() {
   "${k[@]}" get configmap radar-retained-db --ignore-not-found -o json > "$WORK/retained-now.json"
@@ -108,21 +127,6 @@ retained_load() {
 retained_save() {
   # Compare-and-swap on the resource version: a concurrent entry is never lost.
   "${k[@]}" "$RETAINED_VERB" -f "$WORK/retained-next.json" >/dev/null || fail 'Retained database receipt changed concurrently; retry'
-}
-record_abandoned() {
-  # record_abandoned <abandoned database> <baseline written tuples or null> <baseline time or null>
-  local abandoned=$1 baseline=$2 since=$3 tuples
-  write_stats
-  tuples=$(jq -r --arg db "$abandoned" --argjson base "$baseline" \
-    '.writeStats[$db] as $now|if ($base|type)!="number" or ($now|type)!="number" or $now<$base then -1 else $now-$base end' "$WORK/verdict.json")
-  record_set '.abandoned={db:$db,tuples:$t,since:$since,measuredAt:$at}' --arg db "$abandoned" --argjson t "$tuples" \
-    --argjson since "$since" --arg at "$(iso_ms)"
-  ((tuples != 0)) || return 0
-  printf 'Abandoned writes on %s: %s tuples (-1 = unknown), pending acknowledgement (run %s)\n' "$abandoned" "$tuples" "$RUN" >&2
-  retained_load
-  jq --slurpfile r "$WORK/record.json" '.data.entries=((.data.entries//"[]"|fromjson)+[$r[0].abandoned+{run:$r[0].run,status:"pending"}]|tojson)' \
-    "$WORK/retained-now.json" > "$WORK/retained-next.json"
-  retained_save
 }
 retained_gate() {
   # retained_gate <database about to be replaced>
@@ -154,28 +158,19 @@ ack_retained() {
   printf 'Acknowledged: the next prepare may replace it\n'
 }
 ack_probe() {
-  # Rehearsal: acknowledged only when the probe rows written since the baseline explain every tuple.
-  local entries entry db since tuples rows original=${RUN:-}
+  # Rehearsal: acknowledged only when not a single row outside the probe table was written in the
+  # abandoned database since the baseline (pg_stat_user_tables delta exactly 0).
+  local entries entry original=${RUN:-}
   valid_run
-  [[ ${PROBE:-} =~ ^[a-z0-9-]{1,63}$ ]] || fail 'PROBE must be the rehearsal probe prefix'
   retained_load
   entries=$(jq -c --arg run "$original" '[.data.entries//"[]"|fromjson|.[]|select(.run==$run and .status=="pending")]' "$WORK/retained-now.json")
   [[ $(jq length <<< "$entries") == 1 ]] || fail 'Expected exactly one pending retained entry for this RUN'
-  entry=$(jq -c '.[0]' <<< "$entries"); db=$(jq -r .db <<< "$entry"); since=$(jq -r '.since//""' <<< "$entry"); tuples=$(jq -r .tuples <<< "$entry")
-  [[ -n $since ]] || fail 'Retained entry without a baseline time: conductor ack required'
-  lock_acquire probe
-  deployed_release
-  record_set '.probeRun=$p|.probeDb=$db|.probeSince=$s' --arg p "$PROBE" --arg db "$db" --arg s "$since"
-  run_job probecount 60 90
-  rows=$(jq -r '.probeRows' "$WORK/verdict.json")
-  lock_delete
-  [[ $rows =~ ^[0-9]+$ ]] || fail 'Unreadable probe row count'
-  if ((tuples < 0 || tuples > rows)); then
-    fail "abandoned_writes_unexplained: $tuples tuples on $db, $rows probe rows ($PROBE*) since $since; conductor ack required"
-  fi
-  retained_mark "$original" "$(jq -n --arg at "$(iso_ms)" --arg p "$PROBE" --argjson rows "$rows" --argjson t "$tuples" \
-    '{by:"rehearsal-probe",at:$at,proof:{probePrefix:$p,probeRows:$rows,tuples:$t}}')"
-  printf 'Rehearsal entry acknowledged: %s tuples explained by %s probe rows\n' "$tuples" "$rows"
+  entry=$(jq -c '.[0]' <<< "$entries")
+  jq -e '.nonProbeTuples==0' <<< "$entry" >/dev/null ||
+    fail "abandoned_writes_unexplained: $(jq -r '"\(.nonProbeTuples) rows outside the probe table on \(.db) since \(.since)"' <<< "$entry"); conductor ack required"
+  retained_mark "$original" "$(jq -n --arg at "$(iso_ms)" --argjson e "$entry" \
+    '{by:"rehearsal-probe",at:$at,proof:{nonProbeTuples:$e.nonProbeTuples,probeTuples:$e.tuples,since:$e.since}}')"
+  printf 'Rehearsal entry acknowledged: %s rows, all in the probe table\n' "$(jq -r .tuples <<< "$entry")"
 }
 # Drift between the live canonical workloads and what the cutover last applied (radar-applied-specs).
 # Before the first promotion there is no applied record: the report is a `kubectl diff` of the
@@ -298,8 +293,10 @@ back_to_main() {
   back_to_main_routing
   # Writes acknowledged by the prepared slot after the switch stay on the abandoned database.
   if ! samedb && jq -e 'any(.switches[]?; .to=="prepared") and .abandoned==null' "$WORK/record.json" >/dev/null; then
-    record_abandoned "$(jq -r .targetDb "$WORK/record.json")" "$(jq -c --arg db "$(jq -r .targetDb "$WORK/record.json")" '.writeBaseline[$db]' "$WORK/record.json")" \
-      "$(jq -c .writeBaselineAt "$WORK/record.json")"
+    local abandoned_db
+    abandoned_db=$(jq -r .targetDb "$WORK/record.json")
+    record_abandoned "$abandoned_db" "$(jq -c --arg db "$abandoned_db" '.writeBaseline[$db]' "$WORK/record.json")" \
+      "$(jq -c --arg db "$abandoned_db" '.writeBaselineNonProbe[$db]' "$WORK/record.json")" "$(jq -c .writeBaselineAt "$WORK/record.json")"
   fi
   if jq -e '.frozenAt!=null and .unfrozenAt==null' "$WORK/record.json" >/dev/null; then
     JOB_POLL=0.5 run_job unfreeze 60 90
@@ -477,7 +474,7 @@ finalize_stage() {
   # A rollback after promotion abandons the writes made on the promoted database (resume included).
   if ! samedb && jq -e '.rollbackOf!=null and .abandoned==null' "$WORK/record.json" >/dev/null; then
     record_abandoned "$(jq -r .liveDb "$WORK/record.json")" "$(jq -c .abandonBaseline "$WORK/record.json")" \
-      "$(jq -c .abandonSince "$WORK/record.json")"
+      "$(jq -c .abandonBaselineNonProbe "$WORK/record.json")" "$(jq -c .abandonSince "$WORK/record.json")"
   fi
   while read -r row; do
     name=$(jq -r .name <<< "$row"); uid=$(jq -r .uid <<< "$row")
@@ -572,7 +569,8 @@ rollback_promoted() {
     JOB_POLL=0.5 run_job unfreezeprev 60 90
     record_set 'del(.freezeDb)'
     # Writes on the promoted database since the original switch are abandoned by this rollback.
-    record_set '.abandonBaseline=$b|.abandonSince=$s' --argjson b "$(jq -c --arg db "$(jq -r .liveDb "$WORK/record.json")" '.writeBaseline[$db]' "$WORK/receipt.json")" \
+    record_set '.abandonBaseline=$b|.abandonBaselineNonProbe=$o|.abandonSince=$s' --argjson b "$(jq -c --arg db "$(jq -r .liveDb "$WORK/record.json")" '.writeBaseline[$db]' "$WORK/receipt.json")" \
+      --argjson o "$(jq -c --arg db "$(jq -r .liveDb "$WORK/record.json")" '.writeBaselineNonProbe[$db]' "$WORK/receipt.json")" \
       --argjson s "$(jq -c .writeBaselineAt "$WORK/receipt.json")"
     record_write_baseline
   fi
