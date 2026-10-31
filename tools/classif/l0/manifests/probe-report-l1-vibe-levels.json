@@ -1,0 +1,73 @@
+{
+ "lot": "L0",
+ "kind": "route-probe",
+ "createdAt": "2026-10-31T09:48:10.327Z",
+ "calls": 2,
+ "ok": 2,
+ "results": [
+  {
+   "label": "glm-5.3-low",
+   "family": "GLM 5.3",
+   "model": "glm-5-3-classif",
+   "effort": "low",
+   "route": "vibe --prompt-file --output json --max-price --output-dir (VIBE_ACTIVE_MODEL=glm-5-3-classif, VIBE_HOME=<classif>/vibe/low), empty cwd",
+   "item": "signal",
+   "promptSha256": "d4fa756054d8b35a4a0b3e9431d1c90bcbda22f98aa8497134cc1615cc4e8a50",
+   "exitCode": 0,
+   "latencyMs": 8697,
+   "jsonValid": true,
+   "invalidReason": null,
+   "answer": {
+    "verdict": "pertinent",
+    "code": "P-USAGE-MULTI",
+    "ambiguous": false,
+    "citation": "permettre les habitations multifamiliales de 6 logements dans la zone H-999"
+   },
+   "usage": {
+    "input_tokens": 8462,
+    "output_tokens": 106,
+    "cached_input_tokens": 6784,
+    "total_tokens": 8568
+   },
+   "costUsd": 0,
+   "effectiveModel": "glm-5-3-classif",
+   "effectiveThinking": "low",
+   "toolEvents": null,
+   "outcome": "finished",
+   "textTail": null,
+   "stderrTail": null
+  },
+  {
+   "label": "mistral-large-4-medium",
+   "family": "Mistral Large 4",
+   "model": "mistral-large-4-classif",
+   "effort": "medium",
+   "route": "vibe --prompt-file --output json --max-price --output-dir (VIBE_ACTIVE_MODEL=mistral-large-4-classif, VIBE_HOME=<classif>/vibe/medium), empty cwd",
+   "item": "signal",
+   "promptSha256": "d4fa756054d8b35a4a0b3e9431d1c90bcbda22f98aa8497134cc1615cc4e8a50",
+   "exitCode": 0,
+   "latencyMs": 8685,
+   "jsonValid": true,
+   "invalidReason": null,
+   "answer": {
+    "verdict": "pertinent",
+    "code": "P-USAGE-MULTI",
+    "ambiguous": false,
+    "citation": "« Avis de motion est donné qu'à une séance subséquente sera adopté le règlement 9999-01 modifiant le règlement de zonage afin de permettre les habitations multifamiliales de 6 logements dans la zone H-999. »"
+   },
+   "usage": {
+    "input_tokens": 8491,
+    "output_tokens": 516,
+    "cached_input_tokens": 3072,
+    "total_tokens": 9007
+   },
+   "costUsd": 0,
+   "effectiveModel": "mistral-large-4-classif",
+   "effectiveThinking": "medium",
+   "toolEvents": null,
+   "outcome": "finished",
+   "textTail": null,
+   "stderrTail": null
+  }
+ ]
+}

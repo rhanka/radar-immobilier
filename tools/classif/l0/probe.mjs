@@ -74,7 +74,8 @@ async function pool(tasks, n) {
 
 export async function main(argv = process.argv.slice(2)) {
   const only = argv.includes('--only') ? argv[argv.indexOf('--only') + 1].split(',') : null;
-  const plan = only ? PLAN.filter(([r]) => only.includes(r)) : PLAN;
+  const routesArg = argv.includes('--routes') ? argv[argv.indexOf('--routes') + 1].split(',').map((p) => p.split(':')) : null;
+  const plan = routesArg ?? (only ? PLAN.filter(([r]) => only.includes(r)) : PLAN);
   const home = classifHome();
   const seatTmp = privateDir(path.join(home, 'l0', 'seat-tmp'));
   const results = await pool(plan.map(([label, kind]) => async () => {
@@ -84,12 +85,12 @@ export async function main(argv = process.argv.slice(2)) {
     const route = ROUTES[label];
     return { label, family: route.family, model: route.model, effort: route.effort, route: route.route, item: kind, promptSha256: sha256(prompt),
       exitCode: r.code, latencyMs: r.latencyMs, jsonValid: v.ok, invalidReason: v.ok ? null : v.why, answer: v.ok ? v.answer : null,
-      usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, effectiveModel: r.effectiveModel ?? null, outcome: r.outcome ?? null,
+      usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, effectiveModel: r.effectiveModel ?? null, effectiveThinking: r.effectiveThinking ?? null, toolEvents: r.toolEvents ?? null, outcome: r.outcome ?? null,
       textTail: v.ok ? null : String(r.text ?? '').slice(-300), stderrTail: r.code === 0 ? null : r.stderrTail };
   }), 6);
   const report = { lot: 'L0', kind: 'route-probe', createdAt: new Date().toISOString(), calls: results.length, ok: results.filter((r) => r.jsonValid).length, results };
   mkdirSync(MANIFEST_DIR, { recursive: true });
-  const name = only ? `probe-report-${only.join('+')}.json` : 'probe-report.json';
+  const name = routesArg ? `probe-report-${argv[argv.indexOf('--name') + 1] ?? 'routes'}.json` : only ? `probe-report-${only.join('+')}.json` : 'probe-report.json';
   writeFileSync(path.join(MANIFEST_DIR, name), `${JSON.stringify(report, null, 1)}\n`);
   for (const r of results) process.stdout.write(`${r.jsonValid ? 'OK  ' : 'FAIL'} ${r.label.padEnd(24)} ${r.item.padEnd(6)} exit=${r.exitCode} ${Math.round(r.latencyMs / 1000)}s ${r.invalidReason ?? ''}\n`);
   return report;

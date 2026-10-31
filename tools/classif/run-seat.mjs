@@ -8,6 +8,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
+import { ALIASES, LEVELS, vibeHome } from './lib/vibe-home.mjs';
+import { classifHome } from './lib/paths.mjs';
 
 const SCRUB = /(_API_KEY|_AUTH_TOKEN|_API_BASE|_BASE_URL|_SECRET_KEY|_ACCESS_KEY)$|^(ANTHROPIC_|OPENAI_|GEMINI_|CLAUDE_CODE_USE_|AWS_|GOOGLE_CLOUD_|GOOGLE_APPLICATION_CREDENTIALS|GOOGLE_GENAI_USE_VERTEXAI|VERTEX|SCRAPE_S3_|REFERENCE_C_KEY|CLASSIF_EVAL_KEY|MISTRAL_|VIBE_ACTIVE_MODEL)/;
 export function seatEnv(extra = {}) {
@@ -37,10 +39,12 @@ export const ROUTES = {
       '--disable-web-tools', '--disable-reminders', '--disable-request-user-input', '--no-foreign-personal-context', '--no-session-log', '--workspace', dir] }),
     parse: parseMuse,
   },
-  ...Object.fromEntries(['high', 'medium'].map((e) => [`gemini-4-argon-${e}`, {
-    family: 'Gemini 4 Argon', model: `gemini-4-argon-${e}`, effort: e, route: 'agy --print, json output, slash commands disabled, empty cwd',
-    build: (_dir, _file, prompt) => ({ cmd: 'agy', args: ['--model', `gemini-4-argon-${e}`, '--output-format', 'json', '--disable-slash-commands', `--print=${prompt}`] }),
-    parse: (stdout) => { const j = lastJson(stdout); return { text: j?.result ?? j?.response ?? j?.text ?? stdout, usage: j?.usage ?? j?.stats ?? null }; },
+  // agy: prompt on stdin as one stream-json "user" event (no 128 KB argument limit, L0 open point).
+  ...Object.fromEntries(['high', 'medium', 'low'].map((e) => [`gemini-4-argon-${e}`, {
+    family: 'Gemini 4 Argon', model: `gemini-4-argon-${e}`, effort: e, route: 'agy --print= with stream-json stdin input, slash commands disabled, empty cwd',
+    build: (_dir, _file, prompt) => ({ cmd: 'agy', args: ['--model', `gemini-4-argon-${e}`, '--input-format', 'stream-json', '--output-format', 'stream-json',
+      '--disable-slash-commands', '--print='], stdin: `${JSON.stringify({ event: 'user', message: { role: 'user', content: prompt } })}\n` }),
+    parse: parseAgyStream,
   }])),
   ...Object.fromEntries(['max', 'medium'].map((e) => [`opus-5.5-${e}`, {
     family: 'Opus 5.5', model: 'claude-opus-5-5', effort: e, route: 'isolated claude -p, tools disallowed, strict empty MCP config, empty cwd',
@@ -48,19 +52,43 @@ export const ROUTES = {
       '--disallowed-tools', '*', '--strict-mcp-config', '--mcp-config', '{"mcpServers":{}}'], stdin: prompt }),
     parse: (stdout) => { const j = lastJson(stdout); return { text: j?.result ?? '', usage: j?.usage ?? null, costUsdApiEquivalent: j?.total_cost_usd ?? null, isError: j?.is_error ?? false }; },
   }])),
-  ...Object.fromEntries([['glm-5.3', 'glm-5-3', 'GLM 5.3'], ['mistral-large-4', 'mistral-large-4', 'Mistral Large 4']].map(([label, alias, family]) => [label, {
-    family, model: alias, effort: 'config', route: `vibe --prompt-file --output json --max-price --output-dir (VIBE_ACTIVE_MODEL=${alias}), empty cwd`,
+  // vibe: per-effort VIBE_HOME (lib/vibe-home.mjs) + classification alias; L0 aliases kept for reference.
+  ...Object.fromEntries([
+    ['glm-5.3', 'glm-5-3', 'GLM 5.3', null, 'config (high)'],
+    ['mistral-large-4', 'mistral-large-4', 'Mistral Large 4', null, 'config (high)'],
+    ...LEVELS.flatMap((lv) => [[`glm-5.3-${lv}`, ALIASES.glm, 'GLM 5.3', lv, lv], [`mistral-large-4-${lv}`, ALIASES.mistral, 'Mistral Large 4', lv, lv]]),
+  ].map(([label, alias, family, level, effort]) => [label, {
+    family, model: alias, effort, route: `vibe --prompt-file --output json --max-price --output-dir (VIBE_ACTIVE_MODEL=${alias}${level ? `, VIBE_HOME=<classif>/vibe/${level}` : ''}), empty cwd`,
     build: (dir, file) => ({ cmd: 'vibe', args: ['--prompt-file', file, '--output', 'json', '--max-price', '0.50', '--max-turns', '1', '--output-dir', path.join(dir, 'export'), '--trust', '--workdir', dir],
-      env: { VIBE_ACTIVE_MODEL: alias } }),
-    parse: (stdout, dir) => {
-      const msgs = lastJson(stdout);
-      const text = Array.isArray(msgs) ? msgs.filter((m) => m.role === 'assistant' && m.type === 'message').flatMap((m) => (m.content ?? []).filter((c) => c.type === 'text').map((c) => c.text)).join('\n') : '';
-      let exp = null;
-      try { exp = JSON.parse(fs.readFileSync(path.join(dir, 'export', 'export.json'), 'utf8')); } catch { /* none */ }
-      return { text, usage: exp?.usage ?? null, costUsd: exp?.cost_usd ?? null, effectiveModel: exp?.config?.active_model ?? null, outcome: exp?.outcome ?? null };
-    },
+      env: { VIBE_ACTIVE_MODEL: alias, ...(level ? { VIBE_HOME: vibeHome(classifHome(), level) } : {}) } }),
+    parse: parseVibe,
   }])),
 };
+
+function parseVibe(stdout, dir) {
+  const msgs = lastJson(stdout);
+  const text = Array.isArray(msgs) ? msgs.filter((m) => m.role === 'assistant' && m.type === 'message').flatMap((m) => (m.content ?? []).filter((c) => c.type === 'text').map((c) => c.text)).join('\n') : '';
+  let exp = null;
+  try { exp = JSON.parse(fs.readFileSync(path.join(dir, 'export', 'export.json'), 'utf8')); } catch { /* none */ }
+  const models = Array.isArray(exp?.config?.models) ? exp.config.models : Object.values(exp?.config?.models ?? {});
+  const model = models.find((m) => m?.alias === exp?.config?.active_model);
+  return { text, usage: exp?.usage ?? null, costUsd: exp?.cost_usd ?? null, effectiveModel: exp?.config?.active_model ?? null,
+    effectiveThinking: model?.thinking ?? null, outcome: exp?.outcome ?? null };
+}
+
+// agy stream-json output: one JSON event per line; the final "result" event carries the answer
+// and usage. Tool-call events are counted (an answer that used a tool is flagged by the caller).
+function parseAgyStream(stdout) {
+  let result = null;
+  let toolEvents = 0;
+  for (const line of stdout.split('\n')) {
+    let e;
+    try { e = JSON.parse(line); } catch { continue; }
+    if (e.event === 'result') result = e.result;
+    else if (/tool/i.test(String(e.event ?? '')) || e.tool_call || e.toolCall) toolEvents++;
+  }
+  return { text: result?.response ?? '', usage: result?.usage ?? null, status: result?.status ?? null, error: result?.error ?? null, toolEvents };
+}
 
 // muse exec --json emits JSONL events; the final answer is the "text" of the completed
 // run_terminal payload (nested), usage objects may appear at any depth.
@@ -107,7 +135,7 @@ export function callSeat(label, prompt, { timeoutMs = 900000, base = process.env
       let parsed = { text: '', usage: null };
       try { parsed = r.parse(out, work); } catch { /* keep empty */ }
       fs.rmSync(dir, { recursive: true, force: true });
-      resolve({ code, latencyMs, ...parsed, stderrTail: err.slice(-600) });
+      resolve({ code, latencyMs, ...parsed, stderrTail: err.slice(-600), stdoutTail: parsed.text ? undefined : out.slice(-600) });
     });
     child.stdin.end(stdin ?? '');
   });
