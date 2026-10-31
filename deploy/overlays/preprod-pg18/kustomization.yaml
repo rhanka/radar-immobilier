@@ -1,0 +1,8 @@
+# Preprod render of the PG18 StatefulSet, its direct Services and the
+# replication NetworkPolicy (deploy/k8s/pg18). Operator-applied only; the CD
+# reconcile never applies StatefulSets, Services or NetworkPolicies.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: radar-immobilier-preprod
+resources:
+  - ../../k8s/pg18
