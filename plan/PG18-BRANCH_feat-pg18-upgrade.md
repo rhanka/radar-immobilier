@@ -63,7 +63,7 @@ selector in the manifest, the `pg-replicate` / `pg-verify` / `pg-switch` /
   - [x] `radar-pg18` StatefulSet (XFS, clone, fs-probe), direct Services, replication NetworkPolicy.
   - [x] Service selector pinned by pod in the manifest; PG16 `wal_level=logical`.
   - [x] Label-based PostgreSQL filters (controllers, consumers, snapshot, closure endpoints).
-  - [x] Per-environment `dumpImage` (cutover render, CD backup).
+  - [x] Dump/restore client pinned per serving major (`dumpImages`, ConfigMap `radar-pg-upgrade`): cutover render, CD backup.
   - [x] Verbs `pg-replicate`, `pg-verify`, `pg-switch`, `pg-reverse`.
   - [x] Procedure `deploy/cutover/PG18-UPGRADE.md`.
   - [ ] Lot gate:
