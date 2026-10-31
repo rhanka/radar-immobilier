@@ -28,9 +28,24 @@ template_matches_pin() {
     "$WORK/template.json" >/dev/null
 }
 volume_preflight() {
-  # The template and a clone sit next to the live database on one volume (Lot 1).
+  # Projected peak on the PostgreSQL volume: what is stored now (live, any retained database, an
+  # existing template, WAL) plus a fresh template and a clone of the live database. Above 75 % of
+  # the claim capacity: warning and job summary (plan pvc-expand); above 90 %: refusal.
+  [[ ${VOLUME_CHECKED:-0} == 1 ]] && return 0
   pvc_measure
-  ((FREE_BYTES >= 2*DB_BYTES + 2*GIB)) || fail 'volume_insufficient: expand the PostgreSQL volume (pvc-expand) before staging'
+  local peak=$((USED_BYTES + 2*DB_BYTES)) percent
+  percent=$((peak * 100 / SIZE_BYTES))
+  record_set '.volume={usedBytes:$u,liveDbBytes:$d,capacityBytes:$c,projectedPeakBytes:$p,projectedPercent:$pc}' \
+    --argjson u "$USED_BYTES" --argjson d "$DB_BYTES" --argjson c "$SIZE_BYTES" --argjson p "$peak" --argjson pc "$percent"
+  VOLUME_CHECKED=1
+  if ((percent > 90)); then
+    fail "volume_insufficient: projected peak $peak bytes is ${percent}% of the $SIZE_BYTES-byte volume (> 90 %); run pvc-expand first"
+  fi
+  if ((percent > 75)); then
+    printf 'WARNING volume: projected peak %s bytes is %s%% of the %s-byte volume (> 75 %%); plan pvc-expand\n' "$peak" "$percent" "$SIZE_BYTES" >&2
+    [[ -z ${GITHUB_STEP_SUMMARY:-} ]] || printf '### PostgreSQL volume above 75 %%\n\nProjected peak %s bytes = %s%% of %s bytes (live + template + clone + retained). Plan `pvc-expand` (refusal above 90 %%).\n' \
+      "$peak" "$percent" "$SIZE_BYTES" >> "$GITHUB_STEP_SUMMARY"
+  fi
 }
 stage_template() {
   # Rerun-safe: the template is dropped first. Documents are copied here (with their internal
