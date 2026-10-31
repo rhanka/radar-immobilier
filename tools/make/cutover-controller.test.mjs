@@ -148,11 +148,12 @@ test('unwritable recovery bucket fails before closure and reopens nothing', () =
 });
 for (const step of ['restore', 'backup']) {
   test(`explicit resume relaunches a failed ${step} Job under a new name`, () => {
-    const f = fixture({ failJob: step });
+    // A refused live database verification keeps the closed record for forward resume.
+    const f = fixture({ failJobs: [step, 'verify'] });
     try {
       assert.notEqual(f.run().status, 0);
       const run = record(f).run;
-      const state = f.state(); state.failJob = null;
+      const state = f.state(); state.failJobs = [];
       writeFileSync(join(f.dir, 'state.json'), JSON.stringify(state));
       success(f.run('resume', [`RUN=${run}`]));
       const names = f.state().objects.filter(o => o.kind === 'Job' && o.metadata.name.endsWith(`-${step}`)).map(o => o.metadata.name);
