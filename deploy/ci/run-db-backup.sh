@@ -16,9 +16,9 @@
 #
 # ENV (required): BACKUP_ENV, BACKUP_TAG, NAMESPACE, BACKUP_S3_BUCKET,
 #   BACKUP_S3_ENDPOINT, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY.
-# ENV (optional, defaults): DUMP_IMAGE=the dumpImage of the environment whose
-#   namespace is NAMESPACE in deploy/cutover/config.json (pg_dump must not be
-#   older than the server: PG18 environments need the 18 client),
+# ENV (optional, defaults): DUMP_IMAGE=dumpImages[<serving major>] of
+#   deploy/cutover/config.json (pg_dump must not be older than the server;
+#   the serving major comes from ConfigMap radar-pg-upgrade, default pg16),
 #   UPLOAD_IMAGE=peakcom/s5cmd:v2.2.2, PGHOST=radar-postgres,
 #   DB_SECRET=radar-db-credentials, S3_SECRET=radar-backup-s3-credentials,
 #   BACKUP_S3_REGION="", BACKUP_RETAIN_COUNT=14, BACKUP_PREFIX=db-backups,
@@ -39,8 +39,20 @@ warn() { echo "::warning title=db-backup::$*"; }
 : "${AWS_ACCESS_KEY_ID:?AWS_ACCESS_KEY_ID required (retention)}"
 : "${AWS_SECRET_ACCESS_KEY:?AWS_SECRET_ACCESS_KEY required (retention)}"
 
-DUMP_IMAGE="${DUMP_IMAGE:-$(jq -r --arg ns "$NAMESPACE" '[.[]|objects|select(.namespace?==$ns)|.dumpImage][0] // empty' "$(dirname "$0")/../cutover/config.json")}"
-[ -n "$DUMP_IMAGE" ] || die "no dumpImage for namespace ${NAMESPACE} in deploy/cutover/config.json"
+if [ -z "${DUMP_IMAGE:-}" ]; then
+  # The pg_dump major follows the serving server (pg_dump refuses a newer one):
+  # environments with the PG upgrade enabled read it from ConfigMap
+  # radar-pg-upgrade (written by pg-switch); others serve PG16.
+  CUTOVER_CONFIG="$(dirname "$0")/../cutover/config.json"
+  SERVING=pg16
+  if jq -e --arg ns "$NAMESPACE" 'any(.[]|objects; .namespace?==$ns and .pgUpgrade==true)' "$CUTOVER_CONFIG" >/dev/null; then
+    SERVING="$(kubectl -n "$NAMESPACE" get configmap radar-pg-upgrade --ignore-not-found -o json | jq -r '.data.active // empty')" \
+      || die "serving PostgreSQL major unknown in ${NAMESPACE}"
+    SERVING="${SERVING:-pg16}"
+  fi
+  DUMP_IMAGE="$(jq -r --arg s "$SERVING" '.dumpImages[$s] // empty' "$CUTOVER_CONFIG")"
+fi
+[ -n "$DUMP_IMAGE" ] || die "no dump image for ${NAMESPACE} in deploy/cutover/config.json"
 export DUMP_IMAGE
 export UPLOAD_IMAGE="${UPLOAD_IMAGE:-peakcom/s5cmd:v2.2.2}"
 export PGHOST="${PGHOST:-radar-postgres}"
