@@ -25,6 +25,8 @@ const lastJson = (stdout) => {
   return null;
 };
 
+export const NEUTRAL_SYSTEM = 'You are a careful annotator. Follow the user instructions exactly and answer only in the requested format.';
+
 /** Route table: label → { family, model, effort, build(dir, promptFile, prompt) → {cmd, args, env, stdin}, parse(stdout, dir) }. */
 export const ROUTES = {
   'muse-wonder-max': {
@@ -47,9 +49,10 @@ export const ROUTES = {
     parse: parseAgyStream,
   }])),
   ...Object.fromEntries(['max', 'medium'].map((e) => [`opus-5.5-${e}`, {
-    family: 'Opus 5.5', model: 'claude-opus-5-5', effort: e, route: 'isolated claude -p, tools disallowed, strict empty MCP config, empty cwd',
+    family: 'Opus 5.5', model: 'claude-opus-5-5', effort: e, route: 'isolated claude -p: no tools, no CLAUDE.md (CLAUDE_CODE_DISABLE_CLAUDE_MDS=1), project settings only, neutral system prompt, empty MCP config, no session persistence, empty cwd',
     build: (_dir, _file, prompt) => ({ cmd: 'claude', args: ['-p', '--model', 'claude-opus-5-5', '--effort', e, '--output-format', 'json',
-      '--disallowed-tools', '*', '--strict-mcp-config', '--mcp-config', '{"mcpServers":{}}'], stdin: prompt }),
+      '--tools', '', '--setting-sources', 'project', '--no-session-persistence', '--system-prompt', NEUTRAL_SYSTEM,
+      '--strict-mcp-config', '--mcp-config', '{"mcpServers":{}}'], stdin: prompt, env: { CLAUDE_CODE_DISABLE_CLAUDE_MDS: '1' } }),
     parse: (stdout) => { const j = lastJson(stdout); return { text: j?.result ?? '', usage: j?.usage ?? null, costUsdApiEquivalent: j?.total_cost_usd ?? null, isError: j?.is_error ?? false }; },
   }])),
   // vibe: per-effort VIBE_HOME (lib/vibe-home.mjs) + classification alias; L0 aliases kept for reference.
