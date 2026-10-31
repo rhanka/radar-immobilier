@@ -102,12 +102,17 @@ record_abandoned() {
   # record_abandoned <abandoned database> <baseline rows, all tables> <baseline rows, non-probe tables> <baseline time>
   # (each a JSON value, null when unknown)
   local abandoned=$1 baseline=$2 nonprobe=$3 since=$4 tuples others
+  # pg_stat_user_tables publishes counters late (about 1 s, up to 10 s for an idle session): the
+  # measurement waits STATS_SETTLE seconds (default 11) after routing left the abandoned database.
+  local settle=${STATS_SETTLE:-11}
+  [[ $settle =~ ^[0-9]{1,3}$ ]] || fail 'STATS_SETTLE must be a number of seconds'
+  ((settle == 0)) || sleep "$settle"
   write_stats
   local delta='.[$db] as $now|if ($base|type)!="number" or ($now|type)!="number" or $now<$base then -1 else $now-$base end'
   tuples=$(jq -r --arg db "$abandoned" --argjson base "$baseline" ".writeStats|$delta" "$WORK/verdict.json")
   others=$(jq -r --arg db "$abandoned" --argjson base "$nonprobe" ".writeStatsNonProbe|$delta" "$WORK/verdict.json")
-  record_set '.abandoned={db:$db,tuples:$t,nonProbeTuples:$o,since:$since,measuredAt:$at}' --arg db "$abandoned" \
-    --argjson t "$tuples" --argjson o "$others" --argjson since "$since" --arg at "$(iso_ms)"
+  record_set '.abandoned={db:$db,tuples:$t,nonProbeTuples:$o,since:$since,measuredAt:$at,settledSeconds:$w}' --arg db "$abandoned" \
+    --argjson t "$tuples" --argjson o "$others" --argjson since "$since" --arg at "$(iso_ms)" --argjson w "$settle"
   ((tuples != 0)) || return 0
   printf 'Abandoned writes on %s: %s rows, %s outside the probe table (-1 = unknown), pending acknowledgement (run %s)\n' \
     "$abandoned" "$tuples" "$others" "$RUN" >&2
