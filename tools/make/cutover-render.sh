@@ -149,8 +149,14 @@ render_prepared_stack() {
 release_manifests() {
   [[ -s $WORK/release-manifests.json ]] && return 0
   local sha dir
-  sha=$(git rev-parse HEAD 2>/dev/null || true)
-  [[ -z $sha || $sha == "$(jq -r .release.gitSha "$WORK/record.json")" ]] ||
+  if [[ -n ${CUTOVER_TEST_STATE:-} ]]; then
+    # Fake-cluster test harness only (deploy/cutover/test-boundary.cjs): the checkout identity is given.
+    sha=${CUTOVER_TEST_TREE_SHA:-}
+  else
+    sha=$(git rev-parse HEAD 2>/dev/null) || sha=
+  fi
+  [[ -n $sha ]] || fail 'release_manifests_unverifiable: the checkout commit cannot be read (git rev-parse); run from a git checkout of the release'
+  [[ $sha == "$(jq -r .release.gitSha "$WORK/record.json")" ]] ||
     fail "release_manifests_mismatch: checkout $sha is not the release commit; check out the release before the cutover"
   : > "$WORK/release-manifests.yaml"
   while read -r dir; do

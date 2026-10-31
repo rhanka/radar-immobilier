@@ -380,3 +380,38 @@ test('the kustomize-hashed nginx ConfigMap of the release is applied first and t
     assert.ok(object(f, 'radar-ui-nginx-7k2m9h5tgb', 'ConfigMap'), 'the promoted UI mounts an existing ConfigMap');
   } finally { f.cleanup(); }
 });
+test('drift: the first promotion reviews live vs release; later runs compare the live specs to the last applied ones', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    success(f.run('run', ['MODE=run']));
+    const first = receipt(f);
+    assert.equal(first.drift.baseline, 'first-promotion');
+    assert.ok(first.drift.lines > 0, 'the live specs differed from the release manifests');
+    assert.equal(object(f, 'radar-release-drift').data.status, 'pending', 'preprod: reported, not blocking');
+    const applied = JSON.parse(object(f, 'radar-applied-specs').data.specs);
+    assert.ok(applied['Deployment/radar-api'] && applied['CronJob/radar-refresh-pv']);
+    assert.equal(applied['Deployment/radar-api'].replicas, undefined, 'replicas (HPA) are not part of the drift');
+    // A manual change on the live workload after the promotion is drift against the applied specs.
+    const state = f.state();
+    state.objects.find(o => o.kind === 'Deployment' && o.metadata.name === 'radar-api').spec.template.spec.containers[0].env.push({ name: 'MANUAL', value: 'x' });
+    save(f, state);
+    success(f.run('run', ['MODE=run', 'SAMEDB=1']));
+    const second = receipt(f);
+    assert.deepEqual([second.drift.baseline, second.drift.lines > 0], ['applied', true]);
+    assert.match(object(f, 'radar-release-drift').data.report, /MANUAL/);
+  } finally { f.cleanup(); }
+});
+test('the release manifests are refused when the checkout commit is unreadable or another commit', () => {
+  const f = fixture();
+  try {
+    f.env.CUTOVER_TEST_TREE_SHA = '';
+    const unreadable = f.run('prepare');
+    assert.notEqual(unreadable.status, 0);
+    assert.match(unreadable.stderr, /release_manifests_unverifiable/);
+    f.env.CUTOVER_TEST_TREE_SHA = 'f'.repeat(40);
+    const other = f.run('prepare');
+    assert.notEqual(other.status, 0);
+    assert.match(other.stderr, /release_manifests_mismatch/);
+  } finally { f.cleanup(); }
+});

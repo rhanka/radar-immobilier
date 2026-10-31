@@ -107,6 +107,12 @@ test('production prepares a recovery backup and cutover changes images without r
     save(f, state);
     success(f.run('prepare', [], 'prod'));
     assert.equal(object(f, 'radar-prepared-db').data.targetDb, 'radar');
+    // First production promotion: the live-vs-release drift is reviewed and acknowledged first.
+    const unreviewed = f.run('run', ['MODE=run'], 'prod');
+    assert.notEqual(unreviewed.status, 0);
+    assert.match(unreviewed.stderr, /drift_unreviewed/);
+    const drift = f.state().objects.find(o => o.metadata.name === 'radar-release-drift').data;
+    success(f.run('ack-drift', [`SHA256=${drift.sha256}`], 'prod'));
     success(f.run('run', ['MODE=run'], 'prod'));
     const steps = f.state().jobCreation.map(j => j.step);
     assert.equal(steps.filter(s => s === 'backup').length, 1);
