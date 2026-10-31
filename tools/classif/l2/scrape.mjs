@@ -68,7 +68,7 @@ export async function main() {
   for (const a of ANNOTATORS) for (const an of pass1.get(a).values()) if (an.valid && an.ambiguous && an.cause === 'missing-information') flagged.add(an.itemId);
   const dir = privateDir(path.join(home, 'l2', 'external'));
   const manifest = path.join(home, 'l2', 'scrape-manifest.jsonl');
-  if (existsSync(manifest)) throw new Error(`${manifest} exists; delete it to re-run the complement step`);
+  if (existsSync(manifest)) { process.stdout.write(`[scrape] ${manifest} exists: complement step already done, skipped\n`); return { skipped: true }; }
   writeFileSync(manifest, '', { mode: 0o600 });
   const guard = loadFingerprints(home);
   const sigIds = [...flagged].filter((id) => items.get(id).kind === 'signal');
