@@ -12,9 +12,15 @@ metadata:
     app.kubernetes.io/part-of: sentropic
     app.kubernetes.io/component: postgres
 spec:
+  # The selector names ONE pod. Two PostgreSQL StatefulSets coexist during a
+  # major upgrade (radar-postgres = PG16, radar-pg18 = PG18, deploy/k8s/pg18/),
+  # and both carry component: postgres; a label-only selector would split the
+  # traffic between them. `make -f deploy/cutover/operator.mk pg-switch` is the
+  # only writer of this field in a live namespace (deploy/cutover/PG18-UPGRADE.md).
   selector:
     app.kubernetes.io/name: radar-immobilier
     app.kubernetes.io/component: postgres
+    statefulset.kubernetes.io/pod-name: radar-postgres-0
   ports:
     - name: postgres
       port: 5432
@@ -46,8 +52,12 @@ spec:
       serviceAccountName: radar-app
       containers:
         - name: postgres
-          # Same image as the dev/test stack (docker-compose.yml).
-          image: postgis/postgis:16-3.4
+          # PG16 until the PG18 switch (deploy/cutover/PG18-UPGRADE.md); the digest is
+          # the one already running, so pinning it changes no binary.
+          image: postgis/postgis:16-3.4@sha256:44126d872ac91993766c341e369c539e8196614321765d36a6f1bab0419a5fa5
+          # Logical decoding feeds the PG18 subscriber (pg-replicate). The slot cap
+          # keeps a stalled subscriber from filling the volume with retained WAL.
+          args: ["-c", "wal_level=logical", "-c", "max_slot_wal_keep_size=2GB"]
           imagePullPolicy: IfNotPresent
           ports:
             - name: postgres

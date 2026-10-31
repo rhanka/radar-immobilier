@@ -1,5 +1,5 @@
 def images: [.containers[]?,.initContainers[]?]|map({name,image});
-.deployments=[$d[0].items[]|select(.metadata.name!="radar-postgres")|
+.deployments=[$d[0].items[]|select(.metadata.labels["app.kubernetes.io/component"]!="postgres")|
   {name:.metadata.name,uid:.metadata.uid,replicas:(.spec.replicas//1),images:(.spec.template.spec|images)}]
 | .cronjobs=[$c[0].items[]|{name:.metadata.name,uid:.metadata.uid,suspend:.spec.suspend,
     images:(.spec.jobTemplate.spec.template.spec|images)}]

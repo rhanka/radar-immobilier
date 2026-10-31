@@ -25,7 +25,7 @@ services:
     command: ["postgres", "-c", "max_connections=$postgres_connections"]
     volumes: !reset []
     tmpfs:
-      - /var/lib/postgresql/data:size=$postgres_tmpfs
+      - /var/lib/postgresql:size=$postgres_tmpfs
     environment:
       POSTGRES_INITDB_ARGS: --no-sync
     healthcheck:
