@@ -26,8 +26,8 @@ const lastJson = (stdout) => {
 /** Route table: label → { family, model, effort, build(dir, promptFile, prompt) → {cmd, args, env, stdin}, parse(stdout, dir) }. */
 export const ROUTES = {
   'muse-wonder-max': {
-    family: 'Muse Wonder', model: 'muse-wonder', effort: 'max', route: 'muse exec --prompt-file, preset empty, no web tools, no session log',
-    build: (dir, file) => ({ cmd: 'muse', args: ['exec', '--model', 'muse-wonder', '--reasoning-effort', 'max', '--preset', 'empty', '--prompt-file', file, '--json',
+    family: 'Muse Wonder', model: 'muse-wonder-1.0', effort: 'max', route: 'muse exec --prompt-file, preset empty, no web tools, no session log',
+    build: (dir, file) => ({ cmd: 'muse', args: ['exec', '--model', 'muse-wonder-1.0', '--reasoning-effort', 'max', '--preset', 'empty', '--prompt-file', file, '--json',
       '--disable-web-tools', '--disable-reminders', '--disable-request-user-input', '--no-foreign-personal-context', '--no-session-log', '--workspace', dir] }),
     parse: parseMuse,
   },
@@ -62,16 +62,21 @@ export const ROUTES = {
   }])),
 };
 
+// muse exec --json emits JSONL events; the final answer is the "text" of the completed
+// run_terminal payload (nested), usage objects may appear at any depth.
 function parseMuse(stdout) {
   let text = '';
   let usage = null;
+  const walk = (o) => {
+    if (!o || typeof o !== 'object') return;
+    if (o.terminal === 'completed' && typeof o.text === 'string') text = o.text;
+    for (const [k, v] of Object.entries(o)) {
+      if ((k === 'usage' || k === 'token_usage') && v && typeof v === 'object') usage = v;
+      else walk(v);
+    }
+  };
   for (const line of stdout.split('\n')) {
-    let e;
-    try { e = JSON.parse(line); } catch { continue; }
-    const t = e.final_message ?? e.finalMessage ?? e.message?.text ?? e.text ?? (e.type === 'assistant_message' ? e.content : null);
-    if (typeof t === 'string' && t.trim()) text = t;
-    const u = e.usage ?? e.token_usage ?? e.stats?.usage;
-    if (u) usage = u;
+    try { walk(JSON.parse(line)); } catch { /* not json */ }
   }
   return { text: text || stdout.slice(-4000), usage };
 }
