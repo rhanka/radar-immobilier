@@ -24,7 +24,7 @@ const key = kind => ({ configmap: 'ConfigMap', configmaps: 'ConfigMap', deployme
   ingress: 'Ingress', ingresses: 'Ingress', endpoints: 'Endpoints', replicasets: 'ReplicaSet', networkpolicy: 'NetworkPolicy', secret: 'Secret' })[kind];
 const find = (kind, name) => s.objects.find(o => o.kind === key(kind) && o.metadata.name === name);
 const value = flag => args[args.indexOf(flag) + 1];
-const jobVerdict = (step, job) => ['database', 'destination', 'reset', 'discard'].includes(step)
+const jobVerdict = (step, job) => ['database', 'destination', 'reset', 'discard', 'verify'].includes(step)
   ? { ok: true, database: job.spec.template.spec.containers[0].env.find(e => e.name === 'POSTGRES_DB')?.value
     || Buffer.from(find('secret', 'radar-db-credentials').data.POSTGRES_DB, 'base64').toString(), migrations: 25 }
   : step === 'resolve' ? { ok: true, date: '2026-10-29', backupId: 'latest', ageHours: 1,
