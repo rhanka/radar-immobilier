@@ -1,0 +1,43 @@
+# Classification pilot tooling (plan-pilote-v2 §B-L0, §C). Included from the root Makefile.
+# Host Node on purpose (exception BRCLASSIF-EX1): the targets drive host-only CLIs
+# (kubectl, s5cmd, muse, agy, claude, vibe) and use node: built-ins only (no npm dependency).
+# Private outputs live in $(CLASSIF_HOME) (mode 700), never in the repository.
+# No DB, cluster or S3 write: DB = SELECT in a READ ONLY transaction, S3 = s5cmd cp/ls only.
+
+CLASSIF_NODE   ?= node
+CLASSIF_HOME   ?= $(HOME)/.local/share/radar-classif
+CLASSIF_SEED   ?=
+CLASSIF_DIR    := tools/classif
+export CLASSIF_HOME
+
+.PHONY: classif-test classif-check classif-guard-unseal classif-l0-pvs classif-l0-signals classif-l0-probe classif-sandbox-build
+
+classif-test: ## Classification pilot: unit tests (synthetic fixtures only)
+	@mkdir -p -m 700 "$(CLASSIF_HOME)/tmp-test"
+	TMPDIR="$(CLASSIF_HOME)/tmp-test" $(CLASSIF_NODE) --test $(CLASSIF_DIR)/test/*.test.mjs
+
+classif-check: ## Classification pilot: syntax check of every module
+	@set -e; for f in $$(find $(CLASSIF_DIR) -name '*.mjs' | sort); do $(CLASSIF_NODE) --check "$$f"; done; echo "[classif-check] OK"
+
+# Guardian act, run ONCE by the conductor: REFERENCE_C_KEY and CLASSIF_EVAL_KEY must be in the
+# process environment (injected at launch). Unseals reference-c in memory, seals the evaluation
+# set into docs/spec/reports/classif-eval/, writes label-free guard material, prints hashes only.
+classif-guard-unseal: ## Classification pilot: unseal reference-c in memory + seal the evaluation set (conductor-run)
+	@test "$(ENV)" = "preprod" || { echo "[classif-guard-unseal] ENV=preprod required"; exit 2; }
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/guard/unseal.mjs
+
+classif-l0-pvs: ## Classification pilot: draw 120 recent PVs without signal + fetch text read-only (CLASSIF_SEED=...)
+	@test "$(ENV)" = "preprod" || { echo "[classif-l0-pvs] ENV=preprod required"; exit 2; }
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l0/pvs.mjs --seed "$(CLASSIF_SEED)" $(CLASSIF_ARGS)
+
+classif-l0-signals: ## Classification pilot: signal pool + strata (DRY_RUN=1 prints strata; draw needs exclusions.json)
+	@test "$(ENV)" = "preprod" || { echo "[classif-l0-signals] ENV=preprod required"; exit 2; }
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l0/signals.mjs --seed "$(CLASSIF_SEED)" $(if $(DRY_RUN),--dry-run,) $(CLASSIF_ARGS)
+
+classif-l0-probe: ## Classification pilot: 12 route probes on one synthetic non-Steve item
+	@test "$(ENV)" = "preprod" || { echo "[classif-l0-probe] ENV=preprod required"; exit 2; }
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l0/probe.mjs $(CLASSIF_ARGS)
+
+classif-sandbox-build: ## Classification pilot: refuse any sandbox file hitting a fingerprint list (DIR=<sandbox>)
+	@test -n "$(DIR)" || { echo "Pass DIR=<sandbox dir>"; exit 2; }
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/guard/sandbox-build.mjs "$(DIR)"
