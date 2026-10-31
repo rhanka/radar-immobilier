@@ -122,3 +122,20 @@ test('the rehearsal records the previous release it switched from and replays fr
   assert.ok(rehearse.includes('scenario restore-previous samedb run RELEASE="$OUT/previous-release.json" SAMEDB=1 OBSERVE=0 REPLAY_SPECS="$OUT/previous-specs.json"'));
   assert.ok(rehearse.indexOf('scenario restore-previous') < rehearse.indexOf('scenario preprod preprod run'));
 });
+test('the writer probe is enabled in the preprod radar-api ConfigMap only (survives the preprod reconcile)', () => {
+  // Static render of the radar-api ConfigMap: base data, then the overlay's inline JSON patches.
+  const base = YAML.parseAllDocuments(readFileSync('deploy/k8s/30-api.yaml', 'utf8')).map(d => d.toJS())
+    .find(d => d?.kind === 'ConfigMap' && d.metadata.name === 'radar-api');
+  assert.equal(base.data.CUTOVER_PROBE_ENABLED, undefined, 'base and production render: no probe');
+  const overlay = YAML.parse(readFileSync('deploy/overlays/preprod/kustomization.yaml', 'utf8'));
+  const data = { ...base.data };
+  for (const p of overlay.patches.filter(p => p.target.kind === 'ConfigMap' && p.target.name === 'radar-api' && p.patch)) {
+    for (const op of YAML.parse(p.patch)) if (op.op === 'add' || op.op === 'replace') data[op.path.split('/').at(-1)] = op.value;
+  }
+  assert.equal(data.CUTOVER_PROBE_ENABLED, 'true', 'preprod render enables the probe');
+  for (const dir of ['deploy/k8s', 'deploy/k8s/immo-mcp']) {
+    const kustomization = YAML.parse(readFileSync(`${dir}/kustomization.yaml`, 'utf8'));
+    assert.equal(JSON.stringify(kustomization).includes('CUTOVER_PROBE_ENABLED'), false, `${dir}: production sources stay without the probe`);
+  }
+  assert.ok(readFileSync('deploy/ci/reconcile-preprod-mcp.test.sh', 'utf8').includes('CUTOVER_PROBE_ENABLED'), 'checked on the real kustomize render in CI');
+});
