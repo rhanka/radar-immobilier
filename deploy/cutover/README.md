@@ -414,10 +414,10 @@ as an entry of `radar-retained-db`; the next `prepare` refuses
 `retained_db_unacknowledged` instead of replacing a database with a pending entry.
 After an operator rollback the conductor reviews the receipt and runs
 `make -f deploy/cutover/operator.mk ack RUN=<uuid> ENV=preprod`. The rehearsal
-acknowledges its own rollback entries itself (`ack-probe RUN=<uuid> PROBE=<prefix>`)
-only when the rows of its probe runs written in that database since the baseline
-explain every abandoned tuple; the proof (prefix, probe rows, tuples) is stored in
-the entry and in the rehearsal artifacts. Otherwise, or when a pending entry not
+acknowledges its own rollback entries itself (`ack-probe RUN=<uuid>`) only when the
+`pg_stat_user_tables` delta of every table but `cutover_probe_writes` is exactly 0 in
+the abandoned database since the baseline (no catalog writes counted); the proof
+(non-probe rows 0, probe rows) is stored in the entry and in the rehearsal artifacts. Otherwise, or when a pending entry not
 from the probe exists, the rehearsal fails and the conductor acknowledges. The probe
 verdict is red when probe writes acknowledged by the abandoned database are not
 detected (`abandoned-undetected`). The maintenance page remains only for the

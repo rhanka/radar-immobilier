@@ -30,7 +30,7 @@ mkdir -p "$OUT"
 red=0
 k() { kubectl --request-timeout=15s -n "$NS" "$@"; }
 verdict() { printf '%s\n' "$*" | tee -a "$OUT/verdict.txt"; }
-# Every probe run of this rehearsal shares one prefix: its abandoned writes can be proven.
+# Every probe run of this rehearsal shares one prefix (traceable in cutover_probe_writes).
 CHAIN="rh-$(date -u +%s)"
 # A pending retained-database entry is never overwritten: one that the conductor has not
 # acknowledged (operator rollback) stops the rehearsal cleanly before any change.
@@ -90,12 +90,12 @@ else verdict 'version change: RED previous release == release (nothing switched 
 # re-promote the new release the same way (rollback of the rollback).
 promoted_run() { jq -r 'select(.checkpoints.promote=="completed")|.run' "$OUT/$1-receipt.json" 2>/dev/null || true; }
 probe_ack() {
-  # The rollback scenarios abandon (at least) their own probe writes: acknowledged only when the
-  # probe rows explain every abandoned tuple; the proof lands in radar-retained-db and here.
+  # The rollback scenarios abandon (at least) their own probe writes: acknowledged only when not a
+  # single row outside the probe table was abandoned; the proof lands in radar-retained-db and here.
   local run
   run=$(jq -r 'select((.abandoned.tuples//0) != 0)|.run' "$OUT/$1-receipt.json" 2>/dev/null || true)
   [[ -n $run ]] || return 0
-  if make -s -f deploy/cutover/operator.mk ack-probe RUN="$run" PROBE="$CHAIN" ENV=preprod 2>&1 | tee "$OUT/$1-ack.log"; then
+  if make -s -f deploy/cutover/operator.mk ack-probe RUN="$run" ENV=preprod 2>&1 | tee "$OUT/$1-ack.log"; then
     verdict "$1 abandoned writes: OK $(tail -1 "$OUT/$1-ack.log")"
   else verdict "$1 abandoned writes: RED not explained by the probe; conductor ack required"; red=1; fi
   k get configmap radar-retained-db -o json | jq '.data.entries|fromjson' > "$OUT/retained-db.json" || true
