@@ -440,3 +440,35 @@ test('the drift fingerprint is stable across reports on an unchanged cluster des
     success(f.run('run', ['MODE=run'], 'prod'));
   } finally { f.cleanup(); }
 });
+test('the drift report covers the content of the generated ConfigMaps (first promotion and in-place edits)', () => {
+  const prod = fixture({ url: 'https://immo.sent-tech.ca' });
+  const prodHost = f => {
+    const state = f.state(); const ingress = state.objects.find(o => o.kind === 'Ingress');
+    ingress.spec.rules[0].host = 'immo.sent-tech.ca'; ingress.spec.tls[0].hosts = ['immo.sent-tech.ca']; save(f, state);
+  };
+  try {
+    prodHost(prod);
+    success(prod.run('prepare', [], 'prod'));
+    assert.match(prod.run('run', ['MODE=run'], 'prod').stderr, /drift_unreviewed/);
+    const first = object(prod, 'radar-release-drift').data;
+    assert.match(first.report, /release ConfigMap\/radar-ui-nginx-7k2m9h5tgb/);
+    assert.match(first.report, /\+# release nginx/, 'the default.conf content of the release against the mounted one');
+    // Another release content under the same live state: another fingerprint.
+    const state = prod.state();
+    state.releaseManifests['deploy/k8s'].find(o => o.kind === 'ConfigMap').data['default.conf'] += '# changed\n';
+    save(prod, state);
+    assert.match(prod.run('run', ['MODE=run'], 'prod').stderr, /drift_unreviewed/);
+    assert.notEqual(object(prod, 'radar-release-drift').data.sha256, first.sha256);
+  } finally { prod.cleanup(); }
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    success(f.run('run', ['MODE=run']));
+    assert.ok(JSON.parse(object(f, 'radar-applied-specs').data.specs)['ConfigMap/radar-ui-nginx-7k2m9h5tgb'], 'mounted ConfigMap content recorded');
+    const state = f.state();
+    state.objects.find(o => o.kind === 'ConfigMap' && o.metadata.name === 'radar-ui-nginx-7k2m9h5tgb').data['default.conf'] += '# edited in place\n';
+    save(f, state);
+    success(f.run('run', ['MODE=run', 'SAMEDB=1']));
+    assert.match(object(f, 'radar-release-drift').data.report, /edited in place/);
+  } finally { f.cleanup(); }
+});

@@ -303,7 +303,10 @@ Drift review: before any switch, `run` compares the live canonical workloads
 (Deployments without replicas, CronJobs without `suspend`) with the specs the last
 promotion applied (`radar-applied-specs`); before the first promotion it reports a
 `kubectl diff` of the release Deployments, CronJobs and canonical Services against
-the live ones. A non-empty report goes to the receipt (`drift`) and to
+the live ones, plus the content diff of every generated (hash-suffixed) ConfigMap the
+release workloads mount against the ConfigMap the live workload mounts for the same
+role; the mounted ConfigMap contents are also part of the applied baseline, so an
+in-place edit is drift. A non-empty report goes to the receipt (`drift`) and to
 `radar-release-drift`; production refuses `drift_unreviewed` until the operator
 reviews it and runs `make -f deploy/cutover/operator.mk ack-drift SHA256=<sha> ENV=prod`
 (preprod reports without blocking). The fingerprint is the sha256 of the normalized
