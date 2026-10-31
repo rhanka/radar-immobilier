@@ -114,6 +114,15 @@ describe("S3 budget", () => {
       .toThrow("invalid ARTIFACTS_S3_OPERATION_TIMEOUT_MS: must cover");
   });
 
+  it("bounds a derived operation deadline like an explicit one", () => {
+    expect(() => resolveS3Budget({ attemptTimeoutMs: "30000", maxAttempts: "5" }))
+      .toThrow("invalid ARTIFACTS_S3_OPERATION_TIMEOUT_MS: derived 151000 ms");
+    expect(resolveS3Budget({ attemptTimeoutMs: "23800", maxAttempts: "5" }))
+      .toEqual({ attemptTimeoutMs: 23_800, maxAttempts: 5, operationTimeoutMs: 120_000 });
+    expect(resolveS3Budget({ attemptTimeoutMs: "30000", maxAttempts: "4", operationTimeoutMs: "120000" }))
+      .toEqual({ attemptTimeoutMs: 30_000, maxAttempts: 4, operationTimeoutMs: 120_000 });
+  });
+
   it("is tuning only: it never enables, completes or breaks a disabled config", () => {
     const s3Budget = { attemptTimeoutMs: "not-a-number" };
     expect(resolveArtifactsStorageConfig({ s3Budget })).toEqual({ enabled: false, reason: "artifacts_config_absent" });
