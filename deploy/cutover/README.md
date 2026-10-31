@@ -413,7 +413,8 @@ preprod: the retained previous database, unfrozen first, while the current one
 is frozen; writes made on the promoted database are not carried), switches to
 it and promotes it, without outage. Abandoned writes (preprod): a return to the previous
 database, before promotion (switch back) or after it (`rollback RUN=`), leaves the
-writes acknowledged by the abandoned database behind. They are counted as written
+writes acknowledged by the abandoned database behind. They are counted (after waiting `STATS_SETTLE` seconds, default 11, for the
+delayed `pg_stat_user_tables` counters) as written
 tuples (`pg_stat_database`, against the baseline taken before the switch; `-1`
 when unknown), recorded in the receipt (`abandoned`) and appended, never overwritten,
 as an entry of `radar-retained-db`; the next `prepare` refuses

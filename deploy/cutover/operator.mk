@@ -19,7 +19,8 @@ override SAMEDB := $(value SAMEDB)
 override PROBE := $(value PROBE)
 override LOCK_WAIT := $(value LOCK_WAIT)
 override SHA256 := $(value SHA256)
-export ENV RELEASE RUN MODE BACKUP_ID CYCLE_ID OUTPUT BUILD_RUN SHA SIZE DRAIN OBSERVE DRILL SAMEDB PROBE LOCK_WAIT SHA256 TEST_PATTERN
+override STATS_SETTLE := $(value STATS_SETTLE)
+export ENV RELEASE RUN MODE BACKUP_ID CYCLE_ID OUTPUT BUILD_RUN SHA SIZE DRAIN OBSERVE DRILL SAMEDB PROBE LOCK_WAIT SHA256 STATS_SETTLE TEST_PATTERN
 export COMPOSE_DISABLE_ENV_FILE := 1
 override COMPOSE := docker compose --env-file /dev/null -p radar-test-cutover -f $(CUTOVER_ROOT)/deploy/cutover/test.compose.yml
 .PHONY: help rehearse rehearse-check run prepare rollback status resume lock release-lock report-refs force-refresh pvc-expand pvc-verify slots-adopt slots-status stage probe-verify ack ack-probe ack-drift test lint typecheck test-api down ps commit syntax
