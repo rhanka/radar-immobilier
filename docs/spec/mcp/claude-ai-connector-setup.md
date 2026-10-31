@@ -5,12 +5,22 @@ Guide utilisateur — 5 minutes. Prérequis : un compte claude.ai **Pro, Max, Te
 
 ## Paramètres à avoir sous la main
 
-| Champ | Valeur |
-|---|---|
-| URL du serveur MCP | `https://immo.sent-tech.ca/mcp` |
-| OAuth Client ID | *(fourni par l'équipe — client public)* |
-| Client Secret | **aucun** (laisser vide — flux PKCE) |
-| Scopes accordés au login | `immo:read`, `immo:search`, `immo:documents:read` |
+| Champ | Production | Préprod |
+|---|---|---|
+| URL du serveur MCP | `https://immo.sent-tech.ca/mcp` | `https://preprod.immo.sent-tech.ca/mcp` |
+| OAuth Client ID | *(fourni par l'équipe — client public)* | `immo-mcp-preprod` (client public) |
+| Client Secret | **aucun** (laisser vide — flux PKCE) | **aucun** (laisser vide — flux PKCE) |
+| Scopes accordés au login | `immo:read`, `immo:search`, `immo:documents:read` | identiques |
+
+Pour la préprod, suivre les mêmes étapes avec les valeurs de la colonne
+**Préprod** (nom suggéré : `Radar immobilier (préprod)`). Le guide illustré
+[`docs/guides/connecteur-mcp/guide-connecteur-claude-ai.md`](../../guides/connecteur-mcp/guide-connecteur-claude-ai.md)
+(et son PDF) détaille les outils, l'exemple de génération d'artefact et, en
+annexe A, les erreurs typées en préprod.
+
+> **Connecteur préprod déjà en place ?** Rien ne change avec la nouvelle version
+> du MCP : le connecteur existant continue de fonctionner tel quel. Il faut
+> seulement le recréer si l'on change de compte Claude.
 
 ## Étapes
 
@@ -51,3 +61,5 @@ Poser des questions en langage naturel ; Claude appelle les outils du radar :
   remote MCP* (centre d'aide support.claude.com).
 - Runbook interne serveur : `docs/spec/mcp/immo-mcp-remote-deploy.md`
   (déploiement, OAuth RS, manifests k8s).
+- Guide illustré (outils, artefacts, annexe A préprod) :
+  `docs/guides/connecteur-mcp/guide-connecteur-claude-ai.md` et son PDF.
