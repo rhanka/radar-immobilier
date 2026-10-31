@@ -12,6 +12,7 @@
 //     salt, fingerprints.json, codes-definitions.md.
 //  6. Appends the access log; prints hashes and counts only. No plaintext file is ever written.
 import process from 'node:process';
+import { Buffer } from 'node:buffer';
 import os from 'node:os';
 import path from 'node:path';
 import { randomBytes } from 'node:crypto';
