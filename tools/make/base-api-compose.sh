@@ -4,12 +4,12 @@ write_compose() {
 name: $PROJECT
 services:
   postgres:
-    image: postgis/postgis:16-3.4
+    image: postgis/postgis:18-3.6@sha256:4a43e3c3e5d55b9208240fc71db543b79c638766280c625a425bd0a2390989c4
     # Synthetic databases exercise SQL commits, never PostgreSQL crash durability.
     command: postgres -c max_wal_size=64MB -c min_wal_size=32MB -c fsync=off -c synchronous_commit=off
     mem_limit: 2g
     labels: {org.radar.base.owner: "$OWNER"}
-    tmpfs: [/var/lib/postgresql/data:size=1536m]
+    tmpfs: [/var/lib/postgresql:size=1536m]
     # Retain RAM-backed dependencies between successive operator containers.
     volumes: [runtime:/base-api-runtime:ro]
     environment:
