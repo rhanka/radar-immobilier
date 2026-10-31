@@ -94,7 +94,10 @@ export async function runPass({ pass, mode = 'independent', guide = 'G0', annota
     const rel = path.join('runs', `pass${pass}`, annotator, `${lot.lotId}.json`);
     writeFileSync(path.join(work, rel), JSON.stringify(extraction), { mode: 0o600 });
     const validation = extraction.nodes.length ? validateExtraction(work, rel) : { valid: false, issues: [] };
-    const validity = itemValidity(extraction, validation, pairs, codes);
+    // Fail closed: if Engram itself could not run, every item is an execution failure until
+    // `make classif-l2-revalidate` re-checks the saved extraction (no seat call).
+    const engramDown = (validation.issues ?? []).some((i) => i.code === 'engram_failed');
+    const validity = engramDown ? pairs.map(({ item }) => ({ itemId: item.itemId, valid: false, issues: ['engram_failed'] })) : itemValidity(extraction, validation, pairs, codes);
     const annotations = pairs.map(({ item, answer }, i) => ({
       itemId: item.itemId, kind: item.kind, valid: validity[i].valid, issues: validity[i].issues,
       code: answer ? String(answer.code ?? '') : null, verdict: answer ? codes.get(String(answer.code ?? '')) ?? null : null,
@@ -103,7 +106,8 @@ export async function runPass({ pass, mode = 'independent', guide = 'G0', annota
       quoteFound: extraction.nodes.find((n) => n.id === `annotation:${annotator}:p${pass}:${item.itemId}`)?.quote_found ?? null,
     }));
     writeFileSync(out, JSON.stringify({ pass, mode, guide, annotator, lotId: lot.lotId, promptSha256: sha256(prompt), packSha256: pack.sha256, attempts,
-      exitCode: r.code, latencyMs: r.latencyMs, usage: r.usage ?? null, engramValid: validation.valid ?? false, engramIssues: (validation.issues ?? []).length, annotations }, null, 1), { mode: 0o600 });
+      exitCode: r.code, latencyMs: r.latencyMs, usage: r.usage ?? null, engramValid: validation.valid ?? false, engramIssues: (validation.issues ?? []).length,
+      engramIssueCodes: [...new Set((validation.issues ?? []).map((x) => x.code))], engramChecked: !engramDown, annotations }, null, 1), { mode: 0o600 });
     done++;
     if (done % 10 === 0 || done === tasks.length) log(`[pass ${pass}] ${done}/${tasks.length} calls done (${Math.round((Date.now() - started) / 60000)} min)`);
   };
