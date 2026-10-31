@@ -1,7 +1,41 @@
 import type { S3Client } from "@aws-sdk/client-s3";
 import type { Readable } from "node:stream";
 
-export const S3_OPERATION_TIMEOUT_MS = 5000;
+/**
+ * Time budget of one blob operation against the provider.
+ *
+ * A single HTTP attempt can stall before any byte comes back. Measured on
+ * 2026-10-31 from the preprod MCP pod and from outside the cluster, 5-10 % of
+ * fresh TLS connections to s3.bhs.io.cloud.ovh.net took 5-16 s to handshake or
+ * never completed, while DNS (< 10 ms) and TCP connect (~1 ms) stayed fast and
+ * other S3 endpoints handshook in < 100 ms; requests then take 0.3-2.6 s. The
+ * SDK retries a stalled attempt on a new connection, so the operation deadline
+ * must leave room for the retries; it is still the bound that maps to a
+ * retriable 503.
+ */
+export interface ArtifactS3Budget {
+  /** One HTTP attempt: handshake, request and response headers (SDK requestTimeout). */
+  readonly attemptTimeoutMs: number;
+  /** SDK attempts per S3 call; timeouts, network errors and 5xx are retried, 4xx are not. */
+  readonly maxAttempts: number;
+  /** Whole blob operation, every attempt and backoff included (host deadline). */
+  readonly operationTimeoutMs: number;
+}
+
+/** Room for the SDK backoff between attempts (standard mode: under 600 ms for 3 attempts). */
+export const S3_RETRY_HEADROOM_MS = 1000;
+
+/**
+ * 3 x 4 s keeps a blob PUT plus its read-back under the 30 s preparation cleanup
+ * window, even when both need every attempt.
+ */
+export const DEFAULT_S3_BUDGET: ArtifactS3Budget = Object.freeze({
+  attemptTimeoutMs: 4000,
+  maxAttempts: 3,
+  operationTimeoutMs: 3 * 4000 + S3_RETRY_HEADROOM_MS,
+});
+
+export const S3_OPERATION_TIMEOUT_MS = DEFAULT_S3_BUDGET.operationTimeoutMs;
 
 export class ArtifactS3TimeoutError extends Error {
   readonly code = "artifact_s3_timeout";
