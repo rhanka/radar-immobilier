@@ -107,6 +107,37 @@ jobs:
           path: .bascule-work/served-refs/
           include-hidden-files: true
           if-no-files-found: error
+  # The restore job can die without its trap (lost runner, cancellation): this job
+  # takes over only this run's daily restore lock once that job has ended and
+  # reopens on the verified live database (deploy/cutover/README.md, recovery).
+  recover:
+    needs: bascule
+    if: ${{ always() && (needs.bascule.result == 'failure' || needs.bascule.result == 'cancelled') }}
+    runs-on: ubuntu-latest
+    environment: radar-bascule
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-kubectl@v4
+      - name: Configure dedicated preprod credential
+        env:
+          KUBE_CONFIG_DATA_BASCULE_PREPROD: ${{ secrets.KUBE_CONFIG_DATA_BASCULE_PREPROD }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.kube"
+          if printf '%s' "$KUBE_CONFIG_DATA_BASCULE_PREPROD" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
+            printf '%s' "$KUBE_CONFIG_DATA_BASCULE_PREPROD" | base64 -d > "$HOME/.kube/config"
+          else
+            printf '%s' "$KUBE_CONFIG_DATA_BASCULE_PREPROD" > "$HOME/.kube/config"
+          fi
+          chmod 600 "$HOME/.kube/config"
+      - name: Reopen a daily restore left closed by this run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: make -f deploy/cutover/operator.mk recover ENV=preprod
   served-ids:
     needs: bascule
     if: ${{ inputs.CYCLE_ID != '' && !inputs.DRY_RUN && (inputs.MODE || 'restore') != 'list' && needs.bascule.result == 'success' }}

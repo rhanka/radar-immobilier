@@ -33,6 +33,18 @@ test('daily and inter-tenant interfaces use the engine with protected arming unc
   assert.ok(w.jobs.bascule.steps.find(s => s.id === 'engine').run.includes('RELEASE=deployed'));
   for (const name of ['served-ids', 'cycle-leg']) assert.equal(JSON.stringify(w.jobs[name]).includes('secrets.'), false);
 });
+test('a daily restore whose job died is recovered by the same workflow', () => {
+  const w = workflow('bascule-preprod.yml');
+  const job = w.jobs.recover;
+  assert.equal(job.needs, 'bascule');
+  assert.equal(job.if, "${{ always() && (needs.bascule.result == 'failure' || needs.bascule.result == 'cancelled') }}");
+  assert.equal(job.environment, 'radar-bascule');
+  assert.equal(job.permissions.actions, 'read');
+  const step = job.steps.at(-1);
+  assert.equal(step.run, 'make -f deploy/cutover/operator.mk recover ENV=preprod');
+  assert.equal(step.env.GH_TOKEN, '${{ github.token }}');
+  assert.equal(JSON.stringify(job).includes('BASCULE_SCHEDULE_ENABLED'), false);
+});
 test('all competing workflows acquire before mutations and release through always', () => {
   for (const [file, jobs] of [['build-push-images.yml', ['deploy', 'deploy-preprod']],
     ['rollback.yml', ['rollback-preprod', 'rollback-prod']], ['run-job.yaml', ['run']], ['k8s-apply-mcp.yaml', ['apply']],
