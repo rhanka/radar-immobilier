@@ -52,7 +52,7 @@ Lot L0 of the Steve-aligned classification pilot (plan-pilote-v2 §B-L0, §H): s
   - [x] `tools/classif/guard/unseal.mjs` + `make classif-guard-unseal ENV=preprod`.
   - [x] `tools/classif/guard/evalset.mjs`: executor role, hash check, one run per prompt/model/effort, access log.
   - [x] Unit tests on a synthetic sealed fixture (`make classif-test ENV=test-classif`).
-  - [ ] Conductor run done; sealed files and README committed.
+  - [x] Conductor run done; sealed files and README committed.
 
 - [ ] **Lot 2 — Draws**
   - [ ] `make classif-l0-pvs ENV=preprod`: 120 PVs, seed committed in track first, text read-only, sha256 checked.
