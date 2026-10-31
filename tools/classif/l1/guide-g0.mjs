@@ -48,8 +48,14 @@ export async function main() {
   let r;
   let calls = 0;
   for (let attempt = 1; attempt <= 2; attempt++) {
-    calls++;
-    r = await callSeat('opus-5.5-max', prompt, { base: privateDir(path.join(home, 'l1', 'seat-tmp')) });
+    // Resume state: the raw answer is saved as soon as it returns and reused after a restart.
+    const rawFile = path.join(home, 'l1', `guide-G0.raw.${sha256(prompt).slice(0, 16)}.a${attempt}.json`);
+    if (existsSync(rawFile)) r = JSON.parse(readFileSync(rawFile, 'utf8'));
+    else {
+      calls++;
+      r = await callSeat('opus-5.5-max', prompt, { base: privateDir(path.join(home, 'l1', 'seat-tmp')) });
+      writeFileSync(rawFile, JSON.stringify(r), { mode: 0o600 });
+    }
     if (r.code === 0 && String(r.text).trim().length > 800) break;
   }
   const guide = String(r.text ?? '').trim();

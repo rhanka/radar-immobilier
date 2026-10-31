@@ -77,7 +77,7 @@ CONCURRENCY ?= 4
 .PHONY: classif-l2-pass classif-l2-converge classif-l2-scrape classif-l2-amend
 classif-l2-pass: ## Classification pilot L2: one annotation pass (PASS=n MODE=independent|reconcile GUIDE=G0 CONCURRENCY=4)
 	@test "$(ENV)" = "preprod" || { echo "[classif-l2-pass] ENV=preprod required"; exit 2; }
-	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/run.mjs --pass $(PASS) --mode $(MODE) --guide $(GUIDE) --concurrency $(CONCURRENCY)
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/run.mjs --pass $(PASS) --mode $(MODE) --guide $(GUIDE) --concurrency $(CONCURRENCY) $(if $(LOTS),--lots $(LOTS),)
 
 classif-l2-converge: ## Classification pilot L2: majority, α, unanimity, stop rule, next-pass todo (PASS=n)
 	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/converge.mjs --pass $(PASS)
