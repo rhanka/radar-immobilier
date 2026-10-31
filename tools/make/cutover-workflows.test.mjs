@@ -139,3 +139,10 @@ test('the writer probe is enabled in the preprod radar-api ConfigMap only (survi
   }
   assert.ok(readFileSync('deploy/ci/reconcile-preprod-mcp.test.sh', 'utf8').includes('CUTOVER_PROBE_ENABLED'), 'checked on the real kustomize render in CI');
 });
+test('the live application order makes the volume expansion conditional on the 75 % projected peak', () => {
+  const readme = readFileSync('deploy/cutover/README.md', 'utf8');
+  const order = readme.slice(readme.indexOf('### Live application order'));
+  assert.match(order, /`pvc-expand` \/ `pvc-verify` only when the volume\s+preflight projects more than 75 % at the peak/);
+  assert.equal(/run `pvc-expand` \/ `pvc-verify` \(preprod/.test(order), false, 'no unconditional expansion step');
+  assert.match(readme, /above 75 % they warn \(stderr and job summary[^)]*\), above 90 % they refuse `volume_insufficient`/);
+});
