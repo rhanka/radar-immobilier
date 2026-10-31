@@ -106,7 +106,7 @@ sha256sum "$LOG_DIR/target.diff" > "$LOG_DIR/target.sha256"
 MONITOR=$!
 "${compose[@]}" up -d --wait postgres minio
 docker image inspect --format '{{.Id}} {{json .RepoDigests}}' \
-  node:24-bookworm-slim postgis/postgis:16-3.4 adobe/s3mock:3.12.0 > "$LOG_DIR/image-ids.txt"
+  node:24-bookworm-slim postgis/postgis:18-3.6@sha256:4a43e3c3e5d55b9208240fc71db543b79c638766280c625a425bd0a2390989c4 adobe/s3mock:3.12.0 > "$LOG_DIR/image-ids.txt"
 "${compose[@]}" run --rm --no-deps -T api bash -ec \
   'tar -xf /source.tar -C /workspace; exec bash tools/make/base-api-pwa-container.sh "$1" "$2" "$3"' -- "$SCOPE" "$PWA_MODE" "${PWA_CI:-1}" \
   > >(tee "$LOG_DIR/campaign.log") 2>&1 &
