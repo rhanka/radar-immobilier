@@ -41,6 +41,10 @@ export async function composeArtifactHost(
     endpoint: config.s3Endpoint, region: config.s3Region, forcePathStyle: true,
     credentials: { accessKeyId: config.s3AccessKey, secretAccessKey: config.s3SecretKey },
     requestHandler: { requestTimeout: 5000, connectionTimeout: 3000, throwOnRequestTimeout: true },
+    // Plain PUT/GET without the SDK's default CRC32 headers: the portable form for
+    // S3-compatible providers (same settings as deploy/ci/backup/backup-daily.cjs).
+    requestChecksumCalculation: "WHEN_REQUIRED",
+    responseChecksumValidation: "WHEN_REQUIRED",
   });
   const base = injectedBlobs ?? createS3BlobStore({ client: createTimeoutS3Client(client), bucket: config.s3Bucket });
   const blobs = createTimeoutBlobStore(base, S3_OPERATION_TIMEOUT_MS, options.onProviderFailure);
