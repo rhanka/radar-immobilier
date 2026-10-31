@@ -230,7 +230,13 @@ claim `status.capacity`; no Role grants `pods/exec`. The target size is
 max(10 GiB, used + 2 x live database + 2 GiB). When the claim reports
 `FileSystemResizePending`, restart `radar-postgres-0` once, outside any cutover
 window (owner-scheduled), then run `pvc-verify`: it requires free capacity of at
-least 2 x live database + 2 GiB. Staging refuses `volume_insufficient` otherwise.
+least 2 x live database + 2 GiB. The expansion is CONDITIONAL: `stage` and
+`prepare` compute the projected peak (everything stored now, live and any retained
+database or template, plus a fresh template and a clone of the live database)
+against the claim capacity; above 75 % they warn (stderr and job summary: plan the
+expansion), above 90 % they refuse `volume_insufficient`. Owner decision
+(2026-10-31): preprod is not expanded now (1.43 GB used of 5 GB, about 2.9 GB at
+the three-database peak, below 75 %).
 `pvc-expand` and `slots-adopt` need the one-time Role of `rbac-adopt-<env>.yaml`
 (claim patch, orphaning delete of the canonical Deployments, deletion of unnamed
 ReplicaSets): install it for these acts, then remove it.
@@ -507,14 +513,16 @@ written.
 1. Install `rbac-preprod.yaml`, `rbac-prod.yaml`, `rbac-logs-preprod.yaml`,
    `rbac-logs-prod.yaml` (permanent); preprod: create Secret `radar-cutover-probe`
    (`CUTOVER_PROBE_TOKEN`, 32+ characters, also as the GitHub secret
-   `CUTOVER_PROBE_TOKEN`) and set `CUTOVER_PROBE_ENABLED=true` in the preprod
-   `radar-api` ConfigMap.
+   `CUTOVER_PROBE_TOKEN`); `CUTOVER_PROBE_ENABLED=true` is carried by the preprod
+   overlay patch of the `radar-api` ConfigMap (base and production stay without it).
 2. From a checkout of this branch, BEFORE its merge: install
-   `rbac-adopt-<env>.yaml`, run `pvc-expand` / `pvc-verify` (preprod; restart
-   `radar-postgres-0` once if the resize is pending) and `slots-adopt DRAIN=15`
+   `rbac-adopt-<env>.yaml`, run `slots-adopt DRAIN=15`
    (preprod, then production), then remove `rbac-adopt-<env>.yaml`. Until then,
    `prepare`, `run` and `rollback` refuse `slots_not_adopted` and the preprod CI
-   keeps the legacy path.
+   keeps the legacy path. `pvc-expand` / `pvc-verify` only when the volume
+   preflight projects more than 75 % at the peak (live + template + clone +
+   retained database); then restart `radar-postgres-0` once if the resize is
+   pending.
 3. Merge and deploy (migration 0028, graceful stop, 503 mapping, probe route).
 4. `stage RELEASE=deployed` (or dispatch `bascule-stage-preprod.yml`), then arm
    `BASCULE_STAGE_ENABLED` when ready.
