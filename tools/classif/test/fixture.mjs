@@ -46,14 +46,32 @@ export const VERDICTS = ['Pertinent', 'À surveiller', 'Non pertinent'];
 export function fakeRows(n = 124) {
   return Array.from({ length: n }, (_, i) => {
     const line = i + 1;
-    const city = `Ville Fictive ${line % 40}`;
+    const anchor = { 14: "Saint-Jean-Baptiste", 55: "Mont-Saint-Hilaire", 58: "Sainte-Cécile-de-Milton" }[line];
+    const city = anchor ?? `Ville Fictive ${line % 40}`;
     return { line, city, slug: `ville-fictive-${line % 40}`, id: `signal-ville-fictive-${line % 40}-item${line}`, verdict: VERDICTS[line % 3], code: CODES[line % 28], bylaw: `90${line}-1` };
   });
 }
 
-export function fakeWorkbook(rows = fakeRows()) {
-  const triage = [[5, { A: '#', B: 'Passe', C: 'Municipalité', H: 'Règlement', L: 'Objet', Q: 'Classement', R: 'Code de motif' }],
-    ...rows.map((r, i) => [6 + i, { A: String(r.line), B: '1 — 5 filtres', C: r.city, H: r.bylaw, L: `Signal ${r.id} (page 2)`, Q: r.verdict, R: r.code }])];
+/**
+ * layout "hash-in-A": column A holds the Triage "#" (oracle-c assumption).
+ * layout "id-in-A": column A holds a non-numeric reference (e.g. "S-2026-09-15-007"), no "#"
+ *   column; the line number is the Excel order. The first parser read A and found none of the
+ *   expected lines (conductor run of 2026-10-31): this layout reproduces that failure.
+ * layout "hash-in-S": a "N°" column elsewhere, rows physically shuffled.
+ */
+export function fakeWorkbook(rows = fakeRows(), { layout = "id-in-A" } = {}) {
+  const head = { B: 'Passe', C: 'Municipalité', H: 'Règlement', L: 'Objet', Q: 'Classement', R: 'Code de motif' };
+  if (layout === "hash-in-A") head.A = '#';
+  if (layout === "id-in-A") head.A = 'Réf.';
+  if (layout === "hash-in-S") head.S = 'N°';
+  const ordered = layout === "hash-in-S" ? [...rows].sort((a, b) => ((a.line * 37) % 124) - ((b.line * 37) % 124)) : rows;
+  const triage = [[5, head], ...ordered.map((r, i) => {
+    const cells = { B: '1 — 5 filtres', C: r.city, H: r.bylaw, L: `Signal ${r.id} (page 2)`, Q: r.verdict, R: r.code };
+    if (layout === "hash-in-A") cells.A = String(r.line);
+    if (layout === "id-in-A") cells.A = `S-2026-09-${String(15 + (r.line % 7)).padStart(2, "0")}-${String((r.line * 7919) % 1000).padStart(3, "0")}`;
+    if (layout === "hash-in-S") cells.S = String(r.line);
+    return [6 + i, cells];
+  })];
   const codes = [[4, { A: 'Classement', B: 'Code', C: 'Signification' }],
     ...CODES.map((c, i) => [5 + i, { A: 'x', B: c, C: `Definition of ${c} (ex. ligne 12). Ex : cas 3.` }])];
   return zipStore([
@@ -65,9 +83,9 @@ export function fakeWorkbook(rows = fakeRows()) {
 }
 
 /** Writes a fake reference-c folder (sealed xlsx + csv + README with plaintext hashes). */
-export function fakeReferenceC(dir, refKey, rows = fakeRows()) {
+export function fakeReferenceC(dir, refKey, rows = fakeRows(), opts = {}) {
   mkdirSync(dir, { recursive: true });
-  const xlsx = fakeWorkbook(rows);
+  const xlsx = fakeWorkbook(rows, opts);
   const retained = rows.filter((r) => ![14, 55, 58].includes(r.line));
   const csv = Buffer.from(`﻿${toCsv([['#', 'Ville', 'Liens'], ...retained.map((r) => [r.line, r.city, `https://example.invalid/doc/${'a'.repeat(63)}${r.line % 10} ${r.id}`])])}`);
   writeFileSync(path.join(dir, 'reference-c.xlsx.sealed'), seal(refKey, xlsx));
