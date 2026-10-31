@@ -10,7 +10,11 @@
  * Ce test rend le VRAI `GeoCityMapBase` (maplibre-gl MOCKÉ — le composant est
  * sinon jamais monté en jsdom, cf. GeoCityMapBase.controls-responsive.test.ts)
  * et prouve, avec des timers factices :
- *   1. `'load'` ne fire pas → après 6 s l'overlay « Chargement… » disparaît ;
+ *   1. style chargé mais `'load'` ne fire pas → après 6 s l'overlay « Chargement… »
+ *      disparaît ;
+ *   1b. style JAMAIS chargé (onglet sans frame) → après 6 s message explicite
+ *      `map-stalled` (pas d'`addSource` qui lèverait « Style is not done loading »),
+ *      puis finalisation dès `style.load` ;
  *   2. `'load'` fire → finalisation UNE fois (pas de double `addSource`), et le
  *      repli est annulé (aucune seconde pose après avance des timers) ;
  *   3. `'load'` fire deux fois → garde d'idempotence (toujours un seul
@@ -124,15 +128,17 @@ afterEach(() => {
 });
 
 describe("GeoCityMapBase — résilience mapReady (repli si `load` ne fire pas)", () => {
-  it("REPLI : `load` jamais émis → après MAP_READY_FALLBACK_MS l'overlay « Chargement… » disparaît", async () => {
+  it("REPLI : style chargé, `load` jamais émis → après MAP_READY_FALLBACK_MS l'overlay « Chargement… » disparaît", async () => {
     const onReady = vi.fn();
     const { container } = render(GeoCityMapBase, {
       props: { fillColorExpression: FILL_COLOR, onReady },
     });
-    // La carte s'initialise (maplibre importé, timeout de repli armé) mais
-    // `'load'` n'est JAMAIS déclenché — overlay encore présent.
+    // La carte s'initialise (maplibre importé, timeout de repli armé), le style
+    // est chargé, mais `'load'` n'est JAMAIS déclenché — overlay encore présent.
     await flushMicrotasks();
     expect(mapMocks.instances).toHaveLength(1);
+    mapMocks.instances[0].fire("style.load");
+    await flushMicrotasks();
     expect(overlayText(container)).toBe(true);
     expect(onReady).not.toHaveBeenCalled();
 
@@ -143,6 +149,37 @@ describe("GeoCityMapBase — résilience mapReady (repli si `load` ne fire pas)"
     expect(overlayText(container)).toBe(false); // overlay levé
     expect(citiesSourceCalls(mapMocks.instances[0])).toBe(1); // couches posées
     expect(onReady).toHaveBeenCalledTimes(1);
+  });
+
+  it("STALLED : style jamais chargé → message explicite au lieu d'un chargement sans fin, puis reprise à `style.load`", async () => {
+    const onReady = vi.fn();
+    const { container } = render(GeoCityMapBase, {
+      props: { fillColorExpression: FILL_COLOR, onReady },
+    });
+    await flushMicrotasks();
+    const map = mapMocks.instances[0];
+
+    await vi.advanceTimersByTimeAsync(6000);
+    await flushMicrotasks();
+
+    // No finalization on an unloaded style: nothing would survive `addSource`.
+    expect(citiesSourceCalls(map)).toBe(0);
+    expect(onReady).not.toHaveBeenCalled();
+    expect(overlayText(container)).toBe(false);
+    const stalled = container.querySelector('[data-testid="map-stalled"]');
+    expect(stalled?.getAttribute("role")).toBe("alert");
+    expect(stalled?.textContent).toContain("La carte ne s'affiche pas");
+    expect(stalled?.querySelector("button")?.textContent).toContain("Réessayer");
+
+    // Frames resume: the style loads and the map finalizes on its own, once.
+    map.fire("style.load");
+    await flushMicrotasks();
+    expect(container.querySelector('[data-testid="map-stalled"]')).toBeNull();
+    expect(citiesSourceCalls(map)).toBe(1);
+    expect(onReady).toHaveBeenCalledTimes(1);
+    map.fire("load");
+    await flushMicrotasks();
+    expect(citiesSourceCalls(map)).toBe(1);
   });
 
   it("NOMINAL : `load` fire → finalisation UNE fois, repli annulé (pas de seconde pose)", async () => {
