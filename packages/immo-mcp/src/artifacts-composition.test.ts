@@ -10,7 +10,10 @@ const config: ImmoHttpConfig = {
   scopesSupported: ["immo:read"], dataMode: "simulation", port: 0,
   sessionIdleTimeoutMs: 1000, sessionMaxLifetimeMs: 2000,
 };
-async function setup(withAccountBinding = true) {
+const ALL_SCOPES = "immo:read immo:artifacts:read immo:artifacts:write";
+const PUBLISH = { artifactId: "123e4567-e89b-12d3-a456-426614174000", idempotencyKey: "k",
+  files: [{ path: "index.html", mimeType: "text/html", text: "<p>x</p>" }] };
+async function setup(withAccountBinding = true, scopePolicy?: { legacyReadScope: boolean }) {
   const keys = await generateKeyPair("RS256");
   const seen: ArtifactInvocationContext[] = [];
   const execute = vi.fn<ArtifactsApp["execute"]>(async (_request, invocation) => {
@@ -21,11 +24,11 @@ async function setup(withAccountBinding = true) {
   const createGuard = vi.fn(() => vi.fn(async () => ({ allowed: false as const,
     reason: "denied" as const, publicCode: "access_denied", status: 403, retriable: false })));
   const artifacts = bindArtifactProvider({ app: { execute, profileDigest: profile.profileDigest,
-    selectedCapabilities: profile.selectedCapabilities }, storageScopeId: "synthetic-scope", authorizeCommit: createGuard });
+    selectedCapabilities: profile.selectedCapabilities }, storageScopeId: "synthetic-scope", authorizeCommit: createGuard, scopePolicy });
   const authorize = vi.fn(async () => true);
   const app = createImmoHttpApp(config, { artifacts, ...(withAccountBinding ? { authorize } : {}),
     keySource: { resolveKey: async () => keys.publicKey } });
-  const token = (scope = "immo:read") => new SignJWT({ scope }).setIssuer(config.issuer).setAudience(config.resource)
+  const token = (scope = ALL_SCOPES) => new SignJWT({ scope }).setIssuer(config.issuer).setAudience(config.resource)
     .setSubject("alice").setIssuedAt().setExpirationTime("5m").setProtectedHeader({ alg: "RS256" }).sign(keys.privateKey);
   const post = async (message: object, session?: string, scope?: string) => app.request("/mcp", { method: "POST",
     headers: { authorization: `Bearer ${await token(scope)}`, "content-type": "application/json",
@@ -40,6 +43,58 @@ async function setup(withAccountBinding = true) {
     method: "tools/call", params: { name, arguments: args } }, session, scope);
   return { app, post, session, call, execute, createGuard, seen, authorize };
 }
+
+const payload = async (response: Response) => {
+  const json = await response.json() as { result: { isError?: boolean; content: { text: string }[] } };
+  return { isError: json.result.isError === true, body: JSON.parse(json.result.content[0]!.text) as Record<string, unknown> };
+};
+
+describe("explicit artifact scopes over the MCP transport", () => {
+  it.each([
+    ["artifacts_ensure", { bindingName: "summer", idempotencyKey: "k" }],
+    ["artifacts_publish", PUBLISH],
+  ] as const)("should refuse %s with a typed artifact_scope_denied without immo:artifacts:write", async (tool, args) => {
+    for (const policy of [undefined, { legacyReadScope: true }]) {
+      const h = await setup(true, policy);
+      for (const scope of ["immo:read", "immo:read immo:search immo:documents:read", "immo:read immo:artifacts:read"]) {
+        const refused = await payload(await h.call(tool, args, scope));
+        expect(refused.isError).toBe(true);
+        expect(refused.body).toMatchObject({ error: "artifact_scope_denied", retryable: false,
+          requiredScope: "immo:artifacts:write", tool });
+      }
+      expect(h.execute).not.toHaveBeenCalled();
+      expect(h.createGuard).not.toHaveBeenCalled();
+    }
+  });
+
+  it.each([
+    ["artifacts_ensure", { bindingName: "summer", idempotencyKey: "k" }],
+    ["artifacts_publish", PUBLISH],
+  ] as const)("should dispatch %s with immo:artifacts:write", async (tool, args) => {
+    const h = await setup();
+    const accepted = await payload(await h.call(tool, args, "immo:read immo:artifacts:write"));
+    expect(accepted.isError).toBe(false);
+    expect(h.execute).toHaveBeenCalledTimes(1);
+    expect(h.seen[0]!.actorId).toBe("alice");
+  });
+
+  it("should require immo:artifacts:read for reads unless the transition flag is on", async () => {
+    const strict = await setup();
+    const refused = await payload(await strict.call("artifacts_list", {}, "immo:read"));
+    expect(refused.body).toMatchObject({ error: "artifact_scope_denied", requiredScope: "immo:artifacts:read" });
+    expect(strict.execute).not.toHaveBeenCalled();
+    expect((await payload(await strict.call("artifacts_list", {}, "immo:read immo:artifacts:read"))).isError).toBe(false);
+    expect(strict.execute).toHaveBeenCalledTimes(1);
+
+    const legacy = await setup(true, { legacyReadScope: true });
+    expect((await payload(await legacy.call("artifacts_list", {}, "immo:read"))).isError).toBe(false);
+    expect((await payload(await legacy.call("artifacts_get", { artifactId: PUBLISH.artifactId }, "immo:read"))).isError)
+      .toBe(false);
+    expect((await payload(await legacy.call("artifacts_list", {}, "immo:search"))).body)
+      .toMatchObject({ error: "artifact_scope_denied" });
+    expect(legacy.execute).toHaveBeenCalledTimes(2);
+  });
+});
 
 describe("P7 composed transport (contract double; no storage qualification)", () => {
   it("should list exactly twelve plus four and dispatch each call once with fresh frozen authority", async () => {

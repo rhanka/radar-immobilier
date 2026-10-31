@@ -18,7 +18,7 @@ assert.equal(config.provider.selectionStatus, "guarded");
 assert.equal(config.provider.version, "0.2.2");
 assert.equal(IMMO_ARTIFACT_MANIFEST.audit.artifactsProfileDigest, IMMO_ARTIFACT_PROFILE.profileDigest);
 assert.equal(IMMO_ARTIFACT_MANIFEST.tools.length, 4);
-for (const tool of IMMO_ARTIFACT_MANIFEST.tools) assert.deepEqual(tool.requiredScopes, [config.invocationScope]);
+for (const tool of IMMO_ARTIFACT_MANIFEST.tools) assert.deepEqual(tool.requiredScopes, [config.toolScopes[tool.name]]);
 const receipt = {
   qualification: "profile-and-composition-only",
   candidate: readFileSync("/evidence/candidate-sha.txt", "utf8").trim(),

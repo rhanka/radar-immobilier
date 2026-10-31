@@ -168,7 +168,10 @@ Use two separate browser profiles and two current approved accounts, A and B.
 Record source/image/render hashes, account aliases, status codes and observations;
 never log bearers, grants, tickets, cookie values or secret data.
 
-- Connect each account to preprod MCP with `immo:read`. `tools/list` must expose
+- Connect each account to preprod MCP with `immo:read immo:artifacts:read
+  immo:artifacts:write` (writes require `immo:artifacts:write`; while
+  `IMMO_MCP_ARTIFACTS_LEGACY_READ_SCOPE=true`, `immo:read` alone still covers
+  `artifacts_list`/`artifacts_get` only). `tools/list` must expose
   `artifacts_ensure`, `artifacts_publish`, `artifacts_list`, `artifacts_get`.
   Both accounts publish real HTML/CSS/JS using the same binding name and distinct
   operation keys. Confirm distinct artifacts and no private cross-account access.

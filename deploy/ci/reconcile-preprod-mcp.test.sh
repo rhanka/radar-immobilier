@@ -124,7 +124,8 @@ else bad "missing annotation (rc=$RC): $(calls)"; fi
 
 # What was applied is the WHOLE guarded preprod document (byte-compared with the
 # immo-mcp-config document of an independent render; POSIX awk split on ---),
-# plus the env-specific values named explicitly.
+# plus the env-specific values named explicitly. The kustomize YAML emitter folds
+# the long scope list onto a continuation line; the value itself is unchanged.
 A="$STATE/applied-mcp"
 "$REAL_KUBECTL" kustomize --load-restrictor LoadRestrictionsNone "$HERE/../overlays/preprod" \
   | awk '/^---$/ { if (keep) printf "%s", doc; doc = ""; keep = 0; k = 0; next }
@@ -138,7 +139,9 @@ if [ -s "$T/expected-mcp" ] && [ -f "$A" ] && cmp -s "$T/expected-mcp" "$A" \
   && has "$A" '  IMMO_MCP_OAUTH_RESOURCE: https://preprod.immo.sent-tech.ca/mcp' \
   && has "$A" '  RADAR_PUBLIC_BASE_URL: https://preprod.immo.sent-tech.ca' \
   && has "$A" '  RADAR_API_BASE_URL: http://radar-api:3000' \
-  && has "$A" '  IMMO_MCP_OAUTH_SCOPES_SUPPORTED: immo:read immo:search immo:documents:read'; then
+  && has "$A" '  IMMO_MCP_OAUTH_SCOPES_SUPPORTED: immo:read immo:search immo:documents:read immo:artifacts:read' \
+  && has "$A" '    immo:artifacts:write' \
+  && has "$A" '  IMMO_MCP_ARTIFACTS_LEGACY_READ_SCOPE: "true"'; then
   ok 'applied immo-mcp-config = the full rendered preprod document'
 else bad "applied immo-mcp-config differs from the render: $(diff "$T/expected-mcp" "$A" 2>&1 | paste -sd'|' -)"; fi
 
