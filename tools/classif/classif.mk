@@ -63,3 +63,29 @@ classif-down: ## Classification pilot: remove the classifier deps volume
 classif-l1-profile: ## Classification pilot L1: codebook export + Engram profile validate/dataprep/profile-prompt
 	@test "$(ENV)" = "preprod" || { echo "[classif-l1-profile] ENV=preprod required"; exit 2; }
 	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l1/profile.mjs
+
+.PHONY: classif-l1-guide
+classif-l1-guide: ## Classification pilot L1: guide G0 by one isolated Opus 5.5 max session (allowed pack only)
+	@test "$(ENV)" = "preprod" || { echo "[classif-l1-guide] ENV=preprod required"; exit 2; }
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l1/guide-g0.mjs
+
+# L2 — convergence passes of the 3 max-effort annotators over the dev items (never the evaluation set).
+PASS ?= 1
+MODE ?= independent
+GUIDE ?= G0
+CONCURRENCY ?= 4
+.PHONY: classif-l2-pass classif-l2-converge classif-l2-scrape classif-l2-amend
+classif-l2-pass: ## Classification pilot L2: one annotation pass (PASS=n MODE=independent|reconcile GUIDE=G0 CONCURRENCY=4)
+	@test "$(ENV)" = "preprod" || { echo "[classif-l2-pass] ENV=preprod required"; exit 2; }
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/run.mjs --pass $(PASS) --mode $(MODE) --guide $(GUIDE) --concurrency $(CONCURRENCY)
+
+classif-l2-converge: ## Classification pilot L2: majority, α, unanimity, stop rule, next-pass todo (PASS=n)
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/converge.mjs --pass $(PASS)
+
+classif-l2-scrape: ## Classification pilot L2: traced complements for items flagged missing-information (scrape-manifest.jsonl)
+	@test "$(ENV)" = "preprod" || { echo "[classif-l2-scrape] ENV=preprod required"; exit 2; }
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/scrape.mjs
+
+classif-l2-amend: ## Classification pilot L2: guide amendment by majority of the 3 annotators (FROM=G0 TO=G1 PASS=n)
+	@test "$(ENV)" = "preprod" || { echo "[classif-l2-amend] ENV=preprod required"; exit 2; }
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/amend.mjs --from $(FROM) --to $(TO) --pass $(PASS)
