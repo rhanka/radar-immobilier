@@ -53,7 +53,7 @@ const RESOURCES = { configmap: ['configmaps', ''], configmaps: ['configmaps', ''
   ingress: ['ingresses', 'networking.k8s.io'], ingresses: ['ingresses', 'networking.k8s.io'],
   networkpolicy: ['networkpolicies', 'networking.k8s.io'], pvc: ['persistentvolumeclaims', ''],
   endpointslices: ['endpointslices', 'discovery.k8s.io'], resourcequotas: ['resourcequotas', ''] };
-const KIND_RESOURCE = { ConfigMap: 'configmaps', Secret: 'secrets', Service: 'services', Deployment: 'deployments', Job: 'jobs' };
+const KIND_RESOURCE = { ConfigMap: 'configmaps', Secret: 'secrets', Service: 'services', Deployment: 'deployments', Job: 'jobs', CronJob: 'cronjobs' };
 function resourceOf(token) {
   if (RESOURCES[token]) return RESOURCES[token];
   const dot = token.indexOf('.');
@@ -74,6 +74,12 @@ if (tool === 'kubectl' && !args.includes('--dry-run=client')) {
     if (args[0] === 'apply') { access('get', token, o.metadata.name); access('create', token); access('patch', token, o.metadata.name); }
   }
   if (args[0] === 'patch') access('patch', args[1], args[2]);
+  if (args[0] === 'diff') {
+    // Server-side dry-run apply: read and (dry-run) patch every object.
+    for (const o of yaml.parse(fs.readFileSync(args[args.indexOf('-f') + 1], 'utf8')).items) {
+      access('get', KIND_RESOURCE[o.kind], o.metadata.name); access('patch', KIND_RESOURCE[o.kind], o.metadata.name);
+    }
+  }
   if (args[0] === 'delete' && args.includes('--raw')) {
     const parts = args[args.indexOf('--raw') + 1].split('/');
     const group = parts[1] === 'apis' ? parts[2] : '';
@@ -152,6 +158,16 @@ if (tool === 'curl') {
   if (input.includes('-D')) fs.writeFileSync(input[input.indexOf('-D') + 1], headers);
   if (input.includes('-w')) out(`${code} ${type}`);
   process.exit();
+}
+// kubectl diff: exit 1 with a report when a live spec differs from the given object, 0 otherwise.
+if (args[0] === 'diff') {
+  const lines = [];
+  for (const o of yaml.parse(fs.readFileSync(value('-f'), 'utf8')).items) {
+    const live = s.objects.find(x => x.kind === o.kind && x.metadata.name === o.metadata.name);
+    if (JSON.stringify(live?.spec) !== JSON.stringify(o.spec)) lines.push(`diff -u live/${o.kind}/${o.metadata.name} release/${o.kind}/${o.metadata.name}`);
+  }
+  out(lines.map(l => `${l}\n`).join(''));
+  process.exit(lines.length ? 1 : 0);
 }
 // Rendered release manifests per kustomize directory (fixture: releaseManifests).
 if (args[0] === 'kustomize') { out({ apiVersion: 'v1', kind: 'List', items: s.releaseManifests?.[args.at(-1)] || [] }); process.exit(); }

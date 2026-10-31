@@ -73,6 +73,12 @@ test('every Kubernetes access of production prepare and cutover is granted by rb
     ingress.spec.rules[0].host = 'immo.sent-tech.ca'; ingress.spec.tls[0].hosts = ['immo.sent-tech.ca'];
     save(f, state);
     success(f.run('prepare', [], 'prod'));
+    // First production promotion: the live-vs-release drift is reviewed and acknowledged first.
+    const unreviewed = f.run('run', ['MODE=run'], 'prod');
+    assert.notEqual(unreviewed.status, 0);
+    assert.match(unreviewed.stderr, /drift_unreviewed/);
+    const drift = f.state().objects.find(o => o.metadata.name === 'radar-release-drift').data;
+    success(f.run('ack-drift', [`SHA256=${drift.sha256}`], 'prod'));
     success(f.run('run', ['MODE=run'], 'prod'));
     assert.deepEqual(uncovered('prod', accesses(f)), []);
   } finally { f.cleanup(); }

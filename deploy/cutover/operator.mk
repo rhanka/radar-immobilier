@@ -18,13 +18,14 @@ override DRILL := $(value DRILL)
 override SAMEDB := $(value SAMEDB)
 override PROBE := $(value PROBE)
 override LOCK_WAIT := $(value LOCK_WAIT)
-export ENV RELEASE RUN MODE BACKUP_ID CYCLE_ID OUTPUT BUILD_RUN SHA SIZE DRAIN OBSERVE DRILL SAMEDB PROBE LOCK_WAIT TEST_PATTERN
+override SHA256 := $(value SHA256)
+export ENV RELEASE RUN MODE BACKUP_ID CYCLE_ID OUTPUT BUILD_RUN SHA SIZE DRAIN OBSERVE DRILL SAMEDB PROBE LOCK_WAIT SHA256 TEST_PATTERN
 export COMPOSE_DISABLE_ENV_FILE := 1
 override COMPOSE := docker compose --env-file /dev/null -p radar-test-cutover -f $(CUTOVER_ROOT)/deploy/cutover/test.compose.yml
-.PHONY: help rehearse rehearse-check run prepare rollback status resume lock release-lock report-refs force-refresh pvc-expand pvc-verify slots-adopt slots-status stage probe-verify ack ack-probe test lint typecheck test-api down ps commit syntax
+.PHONY: help rehearse rehearse-check run prepare rollback status resume lock release-lock report-refs force-refresh pvc-expand pvc-verify slots-adopt slots-status stage probe-verify ack ack-probe ack-drift test lint typecheck test-api down ps commit syntax
 help:
 	@echo 'run RELEASE=<release.json> [OBSERVE=600] [DRAIN=15] [SAMEDB=1] [DRILL=1] ENV=preprod|prod; status; resume RUN=<uuid>; rollback RUN=<uuid>'
-run prepare rollback status resume lock release-lock report-refs force-refresh pvc-expand pvc-verify slots-adopt slots-status stage probe-verify ack ack-probe:
+run prepare rollback status resume lock release-lock report-refs force-refresh pvc-expand pvc-verify slots-adopt slots-status stage probe-verify ack ack-probe ack-drift:
 	@cd "$(CUTOVER_ROOT)" && bash tools/make/cutover.sh $@
 rehearse rehearse-check:
 	@cd "$(CUTOVER_ROOT)" && bash tools/make/cutover-rehearse.sh $(if $(filter rehearse-check,$@),check)

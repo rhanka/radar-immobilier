@@ -177,6 +177,87 @@ ack_probe() {
     '{by:"rehearsal-probe",at:$at,proof:{probePrefix:$p,probeRows:$rows,tuples:$t}}')"
   printf 'Rehearsal entry acknowledged: %s tuples explained by %s probe rows\n' "$tuples" "$rows"
 }
+# Drift between the live canonical workloads and what the cutover last applied (radar-applied-specs).
+# Before the first promotion there is no applied record: the report is a `kubectl diff` of the
+# release objects (Deployments, CronJobs, canonical Services) against the live ones. A non-empty
+# report is recorded in the receipt and in radar-release-drift; production refuses
+# `drift_unreviewed` until the operator acknowledges that exact report (`ack-drift`).
+live_specs() {
+  # Comparable specs: Deployments without replicas (HPA), CronJobs without suspend (schedules).
+  local name specs='{}'
+  for name in "${SLOT_SERVICES[@]}"; do
+    specs=$(jq -c --argjson d "$("${k[@]}" get deployment "$name" -o json)" \
+      '.["Deployment/"+$d.metadata.name]=($d.spec|del(.replicas))' <<< "$specs")
+  done
+  while read -r name; do
+    specs=$(jq -c --argjson c "$("${k[@]}" get cronjob "$name" -o json)" \
+      '.["CronJob/"+$c.metadata.name]=($c.spec|del(.suspend))' <<< "$specs")
+  done < <(jq -r --slurpfile cfg "$CONFIG" '.cronjobs[]|select(.name as $n|$cfg[0].cronjobs|index($n))|.name' "$WORK/record.json")
+  printf '%s\n' "$specs"
+}
+drift_report() {
+  local applied key baseline
+  "${k[@]}" get configmap radar-applied-specs --ignore-not-found -o json > "$WORK/applied.json"
+  : > "$WORK/drift.txt"
+  if [[ -s $WORK/applied.json ]]; then
+    baseline=applied
+    live_specs > "$WORK/live-specs.json"
+    jq -r '.data.specs|fromjson|keys[]' "$WORK/applied.json" | while read -r key; do
+      diff -u --label "applied $key" --label "live $key" \
+        <(jq -S --arg key "$key" '.data.specs|fromjson|.[$key]' "$WORK/applied.json") \
+        <(jq -S --arg key "$key" '.[$key]' "$WORK/live-specs.json") >> "$WORK/drift.txt" || true
+    done
+  else
+    baseline=first-promotion
+    release_manifests
+    jq --slurpfile r "$WORK/record.json" --arg ns "$NS" '{apiVersion:"v1",kind:"List",items:[.[]|
+      select(.metadata.name as $n|((.kind=="Deployment" or .kind=="Service") and (["radar-api","radar-ui","radar-immo-mcp"]|index($n)) != null)
+        or (.kind=="CronJob" and ($r[0].cronjobs|map(.name)|index($n)) != null))|.metadata.namespace=$ns]}' \
+      "$WORK/release-manifests.json" > "$WORK/release-objects.json"
+    local code=0
+    "${k[@]}" diff -f "$WORK/release-objects.json" > "$WORK/drift.txt" 2> "$WORK/drift.err" || code=$?
+    ((code <= 1)) || { cat "$WORK/drift.err" >&2; fail 'Drift report unavailable (kubectl diff)'; }
+  fi
+  record_set '.drift={baseline:$b,lines:$n,sha256:$s}' --arg b "$baseline" --argjson n "$(wc -l < "$WORK/drift.txt")" \
+    --arg s "$(sha256sum "$WORK/drift.txt" | cut -d' ' -f1)"
+}
+drift_gate() {
+  drift_report
+  jq -e '.drift.lines>0' "$WORK/record.json" >/dev/null || return 0
+  local sha
+  sha=$(jq -r .drift.sha256 "$WORK/record.json")
+  "${k[@]}" get configmap radar-release-drift --ignore-not-found -o json > "$WORK/drift-cm.json"
+  if [[ -s $WORK/drift-cm.json ]] && jq -e --arg s "$sha" '.data.sha256==$s and .data.status=="acknowledged"' "$WORK/drift-cm.json" >/dev/null; then
+    record_set '.drift.acknowledged=true'
+    return 0
+  fi
+  head -c 524288 "$WORK/drift.txt" > "$WORK/drift-report.txt"
+  jq -n --arg ns "$NS" --arg s "$sha" --rawfile report "$WORK/drift-report.txt" --slurpfile r "$WORK/record.json" \
+    '{apiVersion:"v1",kind:"ConfigMap",metadata:{name:"radar-release-drift",namespace:$ns},
+      data:{status:"pending",sha256:$s,run:$r[0].run,gitSha:$r[0].release.gitSha,baseline:$r[0].drift.baseline,report:$report}}' > "$WORK/drift-next.json"
+  "${k[@]}" apply -f "$WORK/drift-next.json" >/dev/null
+  printf 'Drift between live and %s: %s lines (radar-release-drift, sha256 %s)\n' \
+    "$(jq -r .drift.baseline "$WORK/record.json")" "$(jq -r .drift.lines "$WORK/record.json")" "$sha" >&2
+  [[ $ENV != prod ]] || fail "drift_unreviewed: review the report in ConfigMap radar-release-drift, then: make -f deploy/cutover/operator.mk ack-drift SHA256=$sha ENV=prod"
+}
+ack_drift() {
+  [[ ${SHA256:-} =~ ^[a-f0-9]{64}$ ]] || fail 'SHA256 must be the reviewed drift report fingerprint'
+  "${k[@]}" get configmap radar-release-drift -o json > "$WORK/drift-cm.json" || fail 'No drift report'
+  jq -e --arg s "$SHA256" '.data.sha256==$s and .data.status=="pending"' "$WORK/drift-cm.json" >/dev/null ||
+    fail 'No pending drift report with this SHA256 (the live state changed: run the cutover again for a new report)'
+  jq -r '.data.report' "$WORK/drift-cm.json" | head -200
+  "${k[@]}" patch configmap radar-release-drift --type=merge \
+    -p "$(jq -n --arg at "$(iso_ms)" '{data:{status:"acknowledged",acknowledgedAt:$at}}')" >/dev/null
+  printf 'Drift report %s acknowledged: the next cutover applies the release specs\n' "$SHA256"
+}
+record_applied_specs() {
+  # After a promotion: the live canonical specs become the drift baseline.
+  live_specs > "$WORK/live-specs.json"
+  jq -n --arg ns "$NS" --rawfile specs "$WORK/live-specs.json" --slurpfile r "$WORK/record.json" \
+    '{apiVersion:"v1",kind:"ConfigMap",metadata:{name:"radar-applied-specs",namespace:$ns},
+      data:{run:$r[0].run,gitSha:$r[0].release.gitSha,specs:$specs}}' > "$WORK/applied-next.json"
+  "${k[@]}" apply -f "$WORK/applied-next.json" >/dev/null
+}
 served_matches() {
   # The public routes serve the expected API and UI builds.
   local result
@@ -236,6 +317,8 @@ verify_prepared_release() {
   fi
   # The document re-check lists the whole preprod bucket: before anything is switched.
   [[ $ENV != preprod ]] || run_job recon 840 900
+  # Live-vs-applied drift (first promotion: live vs release); production stops on an unreviewed one.
+  drift_gate
   local db
   if samedb; then db=$(jq -r .liveDb "$WORK/record.json"); else db=$(jq -r .targetDb "$WORK/record.json"); fi
   record_set '.samedb=$same|.slotDb=$db' --argjson same "$(samedb && echo true || echo false)" --arg db "$db"
@@ -419,6 +502,7 @@ finalize_stage() {
   if ! samedb && [[ -z $(jq -r '.rollbackOf//""' "$WORK/record.json") ]]; then
     "${k[@]}" patch configmap radar-prepared-db --type=merge -p '{"data":{"status":"consumed"}}' >/dev/null
   fi
+  record_applied_specs
   jq -n --arg ns "$NS" --slurpfile r "$WORK/record.json" \
     '{apiVersion:"v1",kind:"ConfigMap",metadata:{name:"radar-cutover-receipt",namespace:$ns},data:{receipt:($r[0]|tojson)}}' > "$WORK/receipt.json"
   "${k[@]}" apply -f "$WORK/receipt.json" >/dev/null
