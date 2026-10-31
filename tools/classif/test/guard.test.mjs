@@ -145,3 +145,37 @@ test('Triage numbering: the conductor failure (column A read as "#") cannot recu
     return true;
   });
 });
+
+test('sandbox scanner refuses files hitting a fingerprint list, accepts clean ones', async () => {
+  const { buildFingerprints } = await import('../lib/fingerprint.mjs');
+  const { scanFile } = await import('../guard/sandbox-build.mjs');
+  const salt = 'test-salt';
+  const input = 'Avis de motion du règlement fictif numéro 9001-1 visant la zone fictive avec des habitations multifamiliales de six logements';
+  const fps = buildFingerprints(salt, { nodeIds: ['signal-ville-x-1'], docShas: ['d'.repeat(64)], citySlugs: ['saint-exemple'], bylaws: ['9001-1'], inputs: [input] });
+  const guard = { salt, fps };
+  const clean = scanFile(guard, 'Un texte neutre sans rapport, à propos de la ville de Nulle-Part et du règlement 1-2.');
+  assert.equal(Object.values(clean).reduce((a, b) => a + b, 0), 0);
+  const dirty = scanFile(guard, `Voir signal-ville-x-1, document ${'d'.repeat(64)}, Saint-Exemple, règlement 9001-1. ${input}`);
+  assert.deepEqual(Object.keys(dirty).filter((k) => dirty[k] > 0).sort(), ['bylaws', 'citySlugs', 'docShas', 'nodeIds', 'shingles']);
+});
+
+test('draw helpers: committed seed check, seeded order is stable, allocation sums to target', async () => {
+  const { seededOrder, regionBand } = await import('../lib/draw.mjs');
+  const { allocate } = await import('../l0/signals.mjs');
+  const items = Array.from({ length: 20 }, (_, i) => ({ id: `x${i}` }));
+  assert.deepEqual(seededOrder('s', items), seededOrder('s', [...items].reverse()));
+  assert.notDeepEqual(seededOrder('s', items), seededOrder('t', items));
+  const a = allocate(192, { a: 1000, b: 30, c: 170 });
+  assert.equal(Object.values(a).reduce((x, y) => x + y, 0), 192);
+  assert.equal(allocate(10, { a: 3, b: 2 }).a, 3);
+  assert.equal(regionBand(10), 'lt50km');
+  assert.equal(regionBand(null), 'unknown');
+});
+
+test('probe answer validation: code partition, boolean ambiguity, citation', async () => {
+  const { validate } = await import('../l0/probe.mjs');
+  assert.ok(validate('```json\n{"verdict":"pertinent","code":"P-DENSITE","ambiguous":false,"citation":"x"}\n```').ok);
+  assert.equal(validate('{"verdict":"non_pertinent","code":"P-DENSITE","ambiguous":false,"citation":"x"}').ok, false);
+  assert.equal(validate('{"verdict":"pertinent","code":"P-NOPE","ambiguous":false,"citation":"x"}').ok, false);
+  assert.equal(validate('no json').ok, false);
+});
