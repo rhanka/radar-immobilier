@@ -37,6 +37,15 @@ cleanup() {
     if jq -e '.kind=="writer"' "$WORK/record.json" >/dev/null; then
       printf 'Writer lock retained; resume after the workflow and its Jobs terminate\n' >&2
     elif jq -e '.checkpoints.close!=null' "$WORK/record.json" >/dev/null; then
+      # A daily restore reopens on the verified live database (the atomic restore
+      # either committed or left it intact); a refusal falls through and stays closed.
+      if [[ ${REOPEN_ATTEMPTED:-0} != 1 ]] && jq -e '.mode=="restore" and .kind=="cutover"' "$WORK/record.json" >/dev/null; then
+        # errexit stays effective inside the subshell only outside a tested context.
+        local reopened
+        set +e; (set -e; MODE=restore; restore_reopen); reopened=$?; set -e
+        if ((reopened == 0)); then rm -rf "$WORK"; exit "$code"; fi
+        printf 'Automatic reopening refused; daily restore remains closed for recovery\n' >&2
+      fi
       # Any failure after reopening began must reclose schedules and every route.
       (set -e; stop_schedules) || printf 'Schedule state unknown; recovery lock retained\n' >&2
       (set -e; reclose_best_effort) || printf 'Route state unknown; recovery lock retained\n' >&2
@@ -60,7 +69,25 @@ trap 'exit 143' TERM
 cluster_preflight
 case ${1:-} in
   prepare) validate_release "${RELEASE:-}"; rbac_preflight; prepare_database;;
-  rollback) lock_resume; rollback_stages;;
+  rollback)
+    lock_resume
+    if jq -e '.mode=="restore"' "$WORK/record.json" >/dev/null; then
+      MODE=restore; RECOVERING=1; REOPEN_ATTEMPTED=1; restore_reopen
+    else rollback_stages; fi;;
+  recover)
+    # Runs in the same workflow after the restore job ended (runner lost, cancelled
+    # or failed): only this run's daily restore lock is taken over and reopened.
+    [[ $ENV == preprod && ${GITHUB_ACTIONS:-} == true && ${GITHUB_RUN_ID:-} =~ ^[0-9]+$ ]] || fail 'Recovery runs from the daily restore workflow'
+    "${k[@]}" get configmap radar-change-lock --ignore-not-found -o json > "$WORK/lock.json"
+    if [[ ! -s $WORK/lock.json ]]; then printf 'No active change operation\n'; exit; fi
+    record_read
+    if ! jq -e --arg repo "${GITHUB_REPOSITORY:-}" --arg run "$GITHUB_RUN_ID" '.kind=="cutover" and .mode=="restore"
+      and .executor.kind=="github" and .executor.repo==$repo and .executor.run==$run' "$WORK/record.json" >/dev/null; then
+      printf 'Change lock belongs to another operation; nothing to recover\n'; exit
+    fi
+    RUN=$(jq -r .run "$WORK/record.json")
+    lock_resume
+    MODE=restore; RECOVERING=1; REOPEN_ATTEMPTED=1; restore_reopen;;
   status)
     "${k[@]}" get configmap radar-change-lock --ignore-not-found -o json > "$WORK/lock.json"
     if [[ ! -s $WORK/lock.json ]]; then printf 'No active change operation\n'; exit; fi
