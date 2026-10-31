@@ -11,6 +11,66 @@ export function mapHostError(cause: unknown): ArtifactOperationError | undefined
   return undefined;
 }
 
+/** One redacted link of a failure cause chain: identifiers only, never messages or values. */
+export interface FailureCauseSummary {
+  readonly name?: string;
+  readonly code?: string;
+  readonly httpStatus?: number;
+  readonly operation?: string;
+  readonly phase?: string;
+}
+
+const SAFE_TOKEN = /^[A-Za-z0-9_.:-]{1,64}$/;
+const MAX_CAUSE_DEPTH = 6;
+
+function safeToken(value: unknown): string | undefined {
+  return typeof value === "string" && SAFE_TOKEN.test(value) ? value : undefined;
+}
+
+/**
+ * Summarize a failure cause chain for operators. Messages are dropped on
+ * purpose (they may carry keys, URLs or SQL); only bounded identifier tokens
+ * and the provider HTTP status survive.
+ */
+export function describeFailureCause(cause: unknown): FailureCauseSummary[] {
+  const chain: FailureCauseSummary[] = [];
+  const seen = new Set<unknown>();
+  let current = cause;
+  while (current !== null && typeof current === "object" && !seen.has(current) && chain.length < MAX_CAUSE_DEPTH) {
+    seen.add(current);
+    const record = current as Record<string, unknown>;
+    const metadata = record.$metadata as { httpStatusCode?: unknown } | undefined;
+    const httpStatus = typeof metadata?.httpStatusCode === "number" && Number.isInteger(metadata.httpStatusCode)
+      ? metadata.httpStatusCode : undefined;
+    const name = safeToken(record.name);
+    const code = safeToken(record.code) ?? safeToken(record.Code);
+    const operation = safeToken(record.operation);
+    const phase = safeToken(record.phase);
+    chain.push({
+      ...(name !== undefined ? { name } : {}),
+      ...(code !== undefined ? { code } : {}),
+      ...(httpStatus !== undefined ? { httpStatus } : {}),
+      ...(operation !== undefined ? { operation } : {}),
+      ...(phase !== undefined ? { phase } : {}),
+    });
+    current = record.cause;
+  }
+  return chain;
+}
+
+/** Write-failure diagnostic line; the durable host_failures row keeps only the reason. */
+export function reportWriteFailure(
+  entry: { readonly invocationId: string; readonly operation: string; readonly reason: string; readonly status: number },
+  failure: { readonly phase?: unknown; readonly cause?: unknown },
+  log: (line: string) => void = (line) => console.error(line),
+): void {
+  try {
+    log(JSON.stringify({ kind: "artifacts.write_failure", invocationId: entry.invocationId,
+      operation: entry.operation, reason: entry.reason, status: entry.status,
+      phase: safeToken(failure.phase), causes: describeFailureCause(failure.cause) }));
+  } catch { /* diagnostics never break dispatch */ }
+}
+
 /** Retain host phase diagnostics without reclassifying a provider outcome. */
 export function normalizeHostOutcome(outcome: ArtifactOutcome<HttpResponse>): ArtifactOutcome<HttpResponse> {
   if (outcome.ok) return outcome;
