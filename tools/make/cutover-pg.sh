@@ -5,6 +5,7 @@
 # PostgreSQL containers (kubectl exec in a namespace, docker compose in tests).
 set -euo pipefail
 umask 077
+export LC_ALL=C
 fail() { printf 'PG upgrade refused: %s\n' "$*" >&2; exit 1; }
 log() { printf '[pg-upgrade] %s\n' "$*" >&2; }
 
@@ -70,13 +71,16 @@ remote() {
     sh "radar-$(other "$side")" "$*"
 }
 db_exists() { [[ $(q1 "$1" postgres "SELECT count(*) FROM pg_database WHERE datname='$LIVE_DB'") == 1 ]]; }
-excluded_sql() { printf "'%s'," "${EXCLUDED_EXTENSIONS[@]}" | sed 's/,$//'; }
 # Application tables: every permanent table that no extension owns.
 TABLES_SQL="SELECT format('%I.%I', n.nspname, c.relname) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
   WHERE c.relkind='r' AND c.relpersistence='p' AND n.nspname NOT IN ('pg_catalog','information_schema')
   AND n.nspname NOT LIKE 'pg\_%'
   AND NOT EXISTS (SELECT 1 FROM pg_depend d WHERE d.classid='pg_class'::regclass AND d.objid=c.oid AND d.deptype='e')
   ORDER BY 1"
+# Application sequences (extension-owned ones excluded) and their positions.
+SEQUENCES_SQL="SELECT format('%I.%I=%s', s.schemaname, s.sequencename, coalesce(s.last_value::text, '-')) FROM pg_sequences s
+  WHERE NOT EXISTS (SELECT 1 FROM pg_depend d WHERE d.classid='pg_class'::regclass
+    AND d.objid=format('%I.%I', s.schemaname, s.sequencename)::regclass AND d.deptype='e') ORDER BY 1"
 tables() { q1 "$1" "$LIVE_DB" "$TABLES_SQL"; }
 new_password() { od -An -N24 -tx1 /dev/urandom | tr -d ' \n'; }
 
@@ -197,9 +201,11 @@ flip_service() {   # $1 side that serves radar-postgres from now on
     sleep 1
   done
 }
-record() {   # receipt of the last operation (ConfigMap radar-pg-upgrade / state file)
+# Receipt of the last operation. ConfigMap radar-pg-upgrade data.active (pg16 or
+# pg18) also selects the dump/restore client major (cutover-render, run-db-backup).
+record() {
   if [[ $BACKEND == compose ]]; then printf '%s\n' "$1" > "$PG_STATE_DIR/receipt.json"; return; fi
-  jq -n --arg ns "$NS" --arg r "$1" '{apiVersion:"v1",kind:"ConfigMap",metadata:{name:"radar-pg-upgrade",namespace:$ns},data:{receipt:$r}}' \
+  jq -n --arg ns "$NS" --arg r "$1" '{apiVersion:"v1",kind:"ConfigMap",metadata:{name:"radar-pg-upgrade",namespace:$ns},data:{receipt:$r,active:($r|fromjson|.active)}}' \
     | kc apply --server-side --field-manager=pg-upgrade --force-conflicts -f - >/dev/null
 }
 
@@ -231,7 +237,7 @@ cmd_replicate() {
   # Roles first, with their SCRAM hashes: application Secrets stay valid on PG18.
   if [[ $(q1 pg18 postgres "SELECT count(*) FROM pg_roles WHERE rolname='$ROLE'") == 0 ]]; then
     log 'Copying roles from PG16'
-    remote pg18 "pg_dumpall --roles-only -d postgres | grep -vxF \"CREATE ROLE \$POSTGRES_USER;\" | psql -X -q -v ON_ERROR_STOP=1 -h /var/run/postgresql -d postgres" >/dev/null
+    remote pg18 "pg_dumpall --roles-only -l postgres | grep -vxF \"CREATE ROLE \$POSTGRES_USER;\" | psql -X -q -v ON_ERROR_STOP=1 -h /var/run/postgresql -d postgres" >/dev/null
   fi
   if ! db_exists pg18; then
     log "Creating $LIVE_DB on PG18 and copying its schema"
@@ -298,21 +304,22 @@ cmd_verify() {
   [[ $a == "$b" ]] || { diff <(echo "$a") <(echo "$b") >&2 || true; fail 'Privileges or roles differ'; }
   log "Privileges and roles: equal ($(wc -l <<< "$a") entries)"
   log "Sequences differing (expected on the standby until a switch copies them): $(diff \
-    <(q1 "$active" "$LIVE_DB" 'SELECT schemaname||$$.$$||sequencename||$$=$$||coalesce(last_value::text,$$-$$) FROM pg_sequences ORDER BY 1') \
-    <(q1 "$standby" "$LIVE_DB" 'SELECT schemaname||$$.$$||sequencename||$$=$$||coalesce(last_value::text,$$-$$) FROM pg_sequences ORDER BY 1') \
+    <(q1 "$active" "$LIVE_DB" "$SEQUENCES_SQL") \
+    <(q1 "$standby" "$LIVE_DB" "$SEQUENCES_SQL") \
     | grep -c '^<' || true)"
 }
 pg_verify_digest() {   # one line per table: name|rows|md5 of the sorted row md5s
   q1 "$1" "$LIVE_DB" "$(tables "$1" | sed "s/.*/SELECT '&|' || count(*) || '|' || coalesce(md5(string_agg(h, '' ORDER BY h)), '') FROM (SELECT md5(t::text) h FROM & t) s;/")"
 }
+# MAINTAIN (m, PG17+) has no PG16 equivalent: it is stripped before comparing.
 acl_matrix() {
-  q1 "$1" "$LIVE_DB" "SELECT format('%s %s %s', c.oid::regclass, c.relkind, coalesce(c.relacl::text,'-')) FROM pg_class c
+  q1 "$1" "$LIVE_DB" "SELECT format('%s %s %s', c.oid::regclass, c.relkind, coalesce(regexp_replace(c.relacl::text, '(=[a-zA-Z*]*)m[*]?', '\1', 'g'),'-')) FROM pg_class c
       JOIN pg_namespace n ON n.oid=c.relnamespace WHERE c.relkind IN ('r','S','v') AND n.nspname NOT LIKE 'pg\_%'
       AND n.nspname NOT IN ('information_schema') AND NOT EXISTS (SELECT 1 FROM pg_depend d
         WHERE d.classid='pg_class'::regclass AND d.objid=c.oid AND d.deptype='e')
     UNION ALL SELECT format('schema %s %s', nspname, coalesce(nspacl::text,'-')) FROM pg_namespace
       WHERE nspname NOT LIKE 'pg\_%' AND nspname NOT IN ('information_schema','tiger','tiger_data','topology')
-    UNION ALL SELECT format('default %s %s %s', pg_get_userbyid(defaclrole), defaclobjtype, defaclacl) FROM pg_default_acl
+    UNION ALL SELECT format('default %s %s %s', pg_get_userbyid(defaclrole), defaclobjtype, regexp_replace(defaclacl::text, '(=[a-zA-Z*]*)m[*]?', '\1', 'g')) FROM pg_default_acl
     UNION ALL SELECT format('role %s super=%s login=%s repl=%s bypassrls=%s', rolname, rolsuper, rolcanlogin, rolreplication, rolbypassrls)
       FROM pg_roles WHERE rolname NOT LIKE 'pg\_%' AND rolname<>'$ROLE'
     UNION ALL SELECT format('member %s %s', pg_get_userbyid(roleid), pg_get_userbyid(member)) FROM pg_auth_members
@@ -321,7 +328,8 @@ acl_matrix() {
 }
 
 cmd_switch() {
-  local target=${TARGET:-} active t0 stage=init
+  # Globals on purpose: the EXIT trap (switch_failed) reads them.
+  target=${TARGET:-}; active=""; t0=""; stage=init
   [[ $target == pg16 || $target == pg18 ]] || fail 'TARGET must be pg16 or pg18'
   if [[ $BACKEND == k8s ]] && ! kc get service radar-postgres -o json | jq -e '.spec.selector["statefulset.kubernetes.io/pod-name"]' >/dev/null; then
     # One-time pin: only while radar-postgres-0 is the sole endpoint (before radar-pg18 exists).

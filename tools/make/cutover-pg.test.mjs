@@ -75,9 +75,10 @@ test('pg verbs refuse the default kubeconfig, a missing one, and a disabled envi
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
-test('dump images are pinned per environment and follow the server major', () => {
+test('dump images are pinned per server major; the upgrade is enabled for preprod only', () => {
   const config = JSON.parse(spawnSync('cat', ['deploy/cutover/config.json'], { encoding: 'utf8' }).stdout);
-  assert.match(config.preprod.dumpImage, /^postgis\/postgis:18-3\.6@sha256:[0-9a-f]{64}$/);
-  assert.match(config.prod.dumpImage, /^postgis\/postgis:16-3\.4@sha256:[0-9a-f]{64}$/);
+  assert.match(config.dumpImages.pg16, /^postgis\/postgis:16-3\.4@sha256:[0-9a-f]{64}$/);
+  assert.match(config.dumpImages.pg18, /^postgis\/postgis:18-3\.6@sha256:[0-9a-f]{64}$/);
+  assert.equal(config.preprod.pgUpgrade, true);
   assert.equal(config.prod.pgUpgrade, undefined);
 });
