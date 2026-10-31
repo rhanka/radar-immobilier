@@ -7,12 +7,12 @@
 //     corpus/<itemId>.md in a private workspace) → profile-prompt. Prints hashes and counts.
 import path from 'node:path';
 import process from 'node:process';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { selectJson } from '../lib/db.mjs';
 import { toCsv } from '../lib/csv.mjs';
 import { codebookFromMigration } from '../lib/triage.mjs';
 import { sha256 } from '../lib/render.mjs';
-import { MIGRATION_CODES, classifHome } from '../lib/paths.mjs';
+import { CLASSIF_DIR, MIGRATION_CODES, classifHome } from '../lib/paths.mjs';
 import { PROFILE_DIR, buildProfileState, engramVersion, prepareWorkspace } from '../lib/engram.mjs';
 
 export const PROFILE_ID = 'immo-steve-2026-09';
@@ -52,11 +52,15 @@ export async function main() {
   const built = buildProfileState(work);
   const state = JSON.parse(readFileSync(built.state, 'utf8'));
   const summary = {
-    engram: engramVersion(work), profile: { id: state.profile?.id, version: state.profile?.version, hash: state.profile?.profile_hash },
+    lot: 'L1', kind: 'engram-profile', createdAt: new Date().toISOString(),
+    engram: engramVersion(work), profile: { id: state.profile_id, version: state.profile_version, hash: state.profile_hash },
     codebook: { rows: db.length, equalToMigration: cmp.equal, csvSha256: sha256(csv) },
-    registries: Object.fromEntries(Object.entries(state.registries ?? {}).map(([k, v]) => [k, v.length])),
-    corpus: items.length, profilePromptSha256: sha256(built.prompt), workspace: work,
+    registries: state.registry_counts ?? null, registryNodes: state.registry_node_count ?? null,
+    corpus: items.length, semanticFiles: state.semantic_file_count ?? null, profilePromptSha256: sha256(built.prompt),
   };
+  const manifestDir = path.join(CLASSIF_DIR, 'l1', 'manifests');
+  mkdirSync(manifestDir, { recursive: true });
+  writeFileSync(path.join(manifestDir, 'engram-profile.json'), `${JSON.stringify(summary, null, 1)}\n`);
   process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`);
   return summary;
 }
