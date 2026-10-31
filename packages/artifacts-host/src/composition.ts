@@ -15,7 +15,7 @@ import { createCommitDomain } from "./commit-domain.js";
 import { mapHostError, reportWriteFailure } from "./host-outcome.js";
 import { startPreparationCleanup } from "./preparation-cleanup.js";
 import { projectArtifactWriteFailure } from "@sentropic/artifacts/server/outcome-contract";
-import { createTimeoutBlobStore, createTimeoutS3Client, S3_OPERATION_TIMEOUT_MS } from "./s3-timeout.js";
+import { createTimeoutBlobStore, createTimeoutS3Client, DEFAULT_S3_BUDGET } from "./s3-timeout.js";
 
 export interface ArtifactHostOptions {
   readonly profile?: HttpAppDeps["profile"];
@@ -37,17 +37,23 @@ export async function composeArtifactHost(
   const coordinator = options.coordinator ?? createArtifactCommitCoordinator({
     executor: createPostgresCommitExecutor(pool), policy, mapHostError,
   });
+  const budget = config.s3Budget ?? DEFAULT_S3_BUDGET;
   const client = new S3Client({
     endpoint: config.s3Endpoint, region: config.s3Region, forcePathStyle: true,
     credentials: { accessKeyId: config.s3AccessKey, secretAccessKey: config.s3SecretKey },
-    requestHandler: { requestTimeout: 5000, connectionTimeout: 3000, throwOnRequestTimeout: true },
+    // Each attempt is bounded on its own so a stalled connection is dropped and
+    // retried on a new one, inside the operation deadline below. With the
+    // attempt timeout equal to the operation deadline, no retry could ever run.
+    requestHandler: { requestTimeout: budget.attemptTimeoutMs, connectionTimeout: 3000, throwOnRequestTimeout: true },
+    maxAttempts: budget.maxAttempts, retryMode: "standard",
     // Plain PUT/GET without the SDK's default CRC32 headers: the portable form for
     // S3-compatible providers (same settings as deploy/ci/backup/backup-daily.cjs).
     requestChecksumCalculation: "WHEN_REQUIRED",
     responseChecksumValidation: "WHEN_REQUIRED",
   });
-  const base = injectedBlobs ?? createS3BlobStore({ client: createTimeoutS3Client(client), bucket: config.s3Bucket });
-  const blobs = createTimeoutBlobStore(base, S3_OPERATION_TIMEOUT_MS, options.onProviderFailure);
+  const base = injectedBlobs ?? createS3BlobStore({
+    client: createTimeoutS3Client(client, budget.operationTimeoutMs), bucket: config.s3Bucket });
+  const blobs = createTimeoutBlobStore(base, budget.operationTimeoutMs, options.onProviderFailure);
   try {
     const domain = await createCommitDomain({ pool, scope: config.storageScope, blobs, coordinator,
       profile: options.profile ?? compileArtifactsProfile(RADAR_ARTIFACTS_PROFILE),
