@@ -263,9 +263,13 @@ test('a return to main before promotion records the writes made through the prep
   try {
     success(f.run('prepare'));
     const state = f.state(); state.preparedStale = true; save(f, state);
+    // Default settle time: counters of the last writes are published before the measurement.
+    delete f.env.STATS_SETTLE;
+    const started = Date.now();
     assert.notEqual(f.run('run', ['MODE=run']).status, 0);
+    assert.ok(Date.now() - started >= 11000, 'waited at least 11 s before measuring');
     const [entry] = entries(f);
-    assert.deepEqual([entry.status, entry.db, entry.tuples], ['pending', 'radar_next', 3]);
+    assert.deepEqual([entry.status, entry.db, entry.tuples, entry.settledSeconds], ['pending', 'radar_next', 3, 11]);
   } finally { f.cleanup(); }
 });
 test('the change lock is awaited for a bounded time instead of failing at once', () => {
