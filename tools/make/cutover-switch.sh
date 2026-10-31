@@ -190,6 +190,8 @@ live_specs() {
   done < <(jq -r --slurpfile cfg "$CONFIG" '.cronjobs[]|select(.name as $n|$cfg[0].cronjobs|index($n))|.name' "$WORK/record.json")
   printf '%s\n' "$specs"
 }
+# Server-managed fields never enter a fingerprint: the same cluster state always hashes the same.
+DRIFT_NORMALIZE='del(.metadata.uid,.metadata.resourceVersion,.metadata.generation,.metadata.managedFields,.metadata.creationTimestamp,.status)'
 drift_report() {
   local applied key baseline
   "${k[@]}" get configmap radar-applied-specs --ignore-not-found -o json > "$WORK/applied.json"
@@ -202,6 +204,7 @@ drift_report() {
         <(jq -S --arg key "$key" '.data.specs|fromjson|.[$key]' "$WORK/applied.json") \
         <(jq -S --arg key "$key" '.[$key]' "$WORK/live-specs.json") >> "$WORK/drift.txt" || true
     done
+    jq -S -c --slurpfile live "$WORK/live-specs.json" '{applied:(.data.specs|fromjson),live:$live[0]}' "$WORK/applied.json" > "$WORK/drift-basis.json"
   else
     baseline=first-promotion
     release_manifests
@@ -212,9 +215,18 @@ drift_report() {
     local code=0
     "${k[@]}" diff -f "$WORK/release-objects.json" > "$WORK/drift.txt" 2> "$WORK/drift.err" || code=$?
     ((code <= 1)) || { cat "$WORK/drift.err" >&2; fail 'Drift report unavailable (kubectl diff)'; }
+    # The readable kubectl diff is attached but never hashed (temporary paths and times in its
+    # headers): the fingerprint covers the normalized live and release objects.
+    local kind name
+    jq -c '.items[]|[.kind,.metadata.name]' "$WORK/release-objects.json" | while read -r row; do
+      kind=$(jq -r '.[0]' <<< "$row"); name=$(jq -r '.[1]' <<< "$row")
+      "${k[@]}" get "$(tr '[:upper:]' '[:lower:]' <<< "$kind")" "$name" --ignore-not-found -o json | jq -c "$DRIFT_NORMALIZE"
+    done | jq -s . > "$WORK/live-objects.json"
+    jq -S -c --slurpfile live "$WORK/live-objects.json" \
+      "{release:[.items[]|$DRIFT_NORMALIZE],live:\$live[0]}" "$WORK/release-objects.json" > "$WORK/drift-basis.json"
   fi
   record_set '.drift={baseline:$b,lines:$n,sha256:$s}' --arg b "$baseline" --argjson n "$(wc -l < "$WORK/drift.txt")" \
-    --arg s "$(sha256sum "$WORK/drift.txt" | cut -d' ' -f1)"
+    --arg s "$(sha256sum "$WORK/drift-basis.json" | cut -d' ' -f1)"
 }
 drift_gate() {
   drift_report
