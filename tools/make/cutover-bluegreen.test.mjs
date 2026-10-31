@@ -476,3 +476,27 @@ test('the drift report covers the content of the generated ConfigMaps (first pro
     assert.match(object(f, 'radar-release-drift').data.report, /edited in place/);
   } finally { f.cleanup(); }
 });
+test('a re-run after a red rehearsal replays from the recorded previous release, then switches previous -> new again', () => {
+  const f = fixture({ previousSha: '9'.repeat(40) });
+  try {
+    success(f.run('prepare'));
+    success(f.run('run', ['MODE=run']));
+    const a = receipt(f);
+    // What the rehearsal receipt keeps from its first scenario.
+    writeFileSync(join(f.dir, 'previous-release.json'), JSON.stringify(a.previousRelease));
+    writeFileSync(join(f.dir, 'previous-specs.json'), JSON.stringify(a.previousSpecs));
+    const replay = f.run('run', ['MODE=run', 'SAMEDB=1', `RELEASE=${join(f.dir, 'previous-release.json')}`,
+      `REPLAY_SPECS=${join(f.dir, 'previous-specs.json')}`]);
+    assert.equal(replay.status, 0, replay.stderr);
+    const api = object(f, 'radar-api', 'Deployment').spec.template.spec.containers[0];
+    assert.equal(api.image, a.previousRelease.apiImage, 'the previous release is served again');
+    assert.equal((api.env || []).some(e => e.name === 'FROM_RELEASE_MANIFEST'), false, 'with its recorded specs');
+    // The re-run then prepares and rehearses the release again: a real version change.
+    success(f.run('prepare'));
+    success(f.run('run', ['MODE=run']));
+    const again = receipt(f);
+    assert.notEqual(again.previousRelease.gitSha, again.release.gitSha);
+    assert.equal(object(f, 'radar-api', 'Deployment').spec.template.spec.containers[0].image, f.release.apiImage);
+    assert.notEqual(f.run('run', ['MODE=run', `REPLAY_SPECS=${join(f.dir, 'previous-specs.json')}`]).status, 0, 'replay only with SAMEDB=1');
+  } finally { f.cleanup(); }
+});

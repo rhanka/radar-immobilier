@@ -49,7 +49,7 @@ verify_prepared() {
   local same=false
   [[ $ENV != preprod || ${SAMEDB:-0} != 1 ]] || same=true
   jq -e --slurpfile r "$WORK/record.json" --argjson now "$(date +%s)" --argjson same "$same" '
-    .data as $d|($d.status=="ready" or ($same and $d.status=="consumed")) and $d.smoke=="pass" and $d.gitSha==$r[0].release.gitSha
+    .data as $d|($d.status=="ready" or ($same and $d.status=="consumed")) and $d.smoke=="pass" and ($d.gitSha==$r[0].release.gitSha or $r[0].replay==true)
     and ($d.preparedAt|fromdateiso8601) <= $now
     and $now-($d.preparedAt|fromdateiso8601)<=86400
     and ($d.migrations|tonumber)>0

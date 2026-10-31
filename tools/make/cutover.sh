@@ -137,6 +137,13 @@ case ${1:-} in
       [[ $ENV == preprod && ${MODE:-} =~ ^(restore|list)$ ]] || fail 'Deployed release is only for the daily/reporting adapter'
       deployed_release
     else save_release "$RELEASE"; fi
+    if [[ -n ${REPLAY_SPECS:-} ]]; then
+      # Replay of a previous release (rehearsal re-run): production path on the live database only,
+      # with the specs recorded when that release last ran (never a rendering of another commit).
+      [[ $ENV == preprod && ${SAMEDB:-0} == 1 && ${MODE:-run} == run && -f $REPLAY_SPECS ]] || fail 'REPLAY_SPECS needs ENV=preprod, SAMEDB=1 and a specs file'
+      jq -e 'type=="object" and (keys|length)>0' "$REPLAY_SPECS" >/dev/null || fail 'Unreadable replay specs'
+      record_set '.releaseSpecs=$s[0]|.replay=true' --slurpfile s "$REPLAY_SPECS"
+    fi
     if [[ ${MODE:-} == list ]]; then run_job list 540 600; report_listing; lock_delete; exit; fi
     inventory
     if [[ ${MODE:-run} == run ]]; then suspend_writers drain; else suspend_writers kill; fi

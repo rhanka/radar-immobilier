@@ -36,10 +36,16 @@ mkdir -p "$OUT"
 red=0
 verdict() { printf '%s\n' "$*" | tee -a "$OUT/verdict.txt"; }
 rehearsal_receipt() {
-  # The verdict of this SHA: a later re-run is skipped only after a green one.
+  # The verdict of this SHA: a later re-run is skipped only after a green one. The previous release
+  # (and its specs) that the first scenario switched from is kept, so that a re-run after a red
+  # rehearsal can replay from it.
+  local from='{}'
+  if [[ -s $OUT/preprod-receipt.json ]] && jq -e --slurpfile r "$RELEASE" '.previousRelease.gitSha != $r[0].gitSha' "$OUT/preprod-receipt.json" >/dev/null 2>&1; then
+    from=$(jq -c '{previousRelease:(.previousRelease|tojson),previousSpecs:(.previousSpecs|tojson)}' "$OUT/preprod-receipt.json")
+  elif [[ -n ${REPLAY_FROM:-} ]]; then from=$REPLAY_FROM; fi
   jq -n --arg ns "$NS" --arg status "$1" --slurpfile r "$RELEASE" --arg at "$(date -u +%FT%TZ)" --rawfile v "$OUT/verdict.txt" \
-    '{apiVersion:"v1",kind:"ConfigMap",metadata:{name:"radar-rehearsal-receipt",namespace:$ns},
-      data:{gitSha:$r[0].gitSha,status:$status,at:$at,verdict:$v}}' > "$OUT/rehearsal-receipt.json"
+    --argjson from "$from" '{apiVersion:"v1",kind:"ConfigMap",metadata:{name:"radar-rehearsal-receipt",namespace:$ns},
+      data:({gitSha:$r[0].gitSha,status:$status,at:$at,verdict:$v}+$from)}' > "$OUT/rehearsal-receipt.json"
   k apply -f "$OUT/rehearsal-receipt.json" >/dev/null || echo 'rehearsal receipt not recorded: the next re-run replays the rehearsal' >&2
 }
 : > "$OUT/verdict.txt"
@@ -93,6 +99,24 @@ scenario() {
   if ((status == 0)); then verdict "$name: OK $(jq -c .stats "$OUT/$name-verdict.json")"
   else verdict "$name: RED $(jq -c '.violations//{}|map_values(.count)' "$OUT/$name-verdict.json" 2>/dev/null)"; red=1; fi
 }
+# Re-run after a rehearsal that stayed red after its promotion: the release is already served, so
+# the scenarios would switch from the release to itself. The rehearsal first replays the previous
+# release recorded by that rehearsal (production path, SAMEDB, its recorded specs), then rehearses
+# previous -> new again.
+served_now=$(mktemp)
+curl -q -sS --max-time 15 -o "$served_now" "$URL/health" >/dev/null 2>&1 || true
+if jq -e --slurpfile r "$RELEASE" '.sha==$r[0].gitSha' "$served_now" >/dev/null 2>&1; then
+  recorded=$(k get configmap radar-rehearsal-receipt --ignore-not-found -o json 2>/dev/null || true)
+  if [[ -n $recorded ]] && jq -e --slurpfile r "$RELEASE" '.data.gitSha==$r[0].gitSha and
+      (.data.previousRelease//""|length>0) and (.data.previousSpecs//""|length>0)' <<< "$recorded" >/dev/null 2>&1; then
+    REPLAY_FROM=$(jq -c '.data|{previousRelease,previousSpecs}' <<< "$recorded")
+    jq -r '.data.previousRelease' <<< "$recorded" > "$OUT/previous-release.json"
+    jq -r '.data.previousSpecs' <<< "$recorded" > "$OUT/previous-specs.json"
+    verdict "replay: release already served after a red rehearsal; back to $(jq -r '.gitSha[0:7]' "$OUT/previous-release.json") first"
+    scenario restore-previous samedb run RELEASE="$OUT/previous-release.json" SAMEDB=1 OBSERVE=0 REPLAY_SPECS="$OUT/previous-specs.json"
+  else verdict 'replay: RED the release is already served and no previous release is recorded'; red=1; fi
+fi
+rm -f "$served_now"
 scenario preprod preprod run OBSERVE=120 DRILL=1
 # The rehearsal must exercise a version change: previous release != new release.
 if jq -e '.previousRelease.gitSha != .release.gitSha' "$OUT/preprod-receipt.json" >/dev/null 2>&1; then
