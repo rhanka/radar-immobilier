@@ -121,3 +121,27 @@ test('guard refuses when a key is missing, equal keys, or a README hash differs,
   assert.ok(!existsSync(path.join(home, 'guard')));
   rmSync(root, { recursive: true, force: true });
 });
+
+test('Triage numbering: real-layout variants (no "#" in column A, "N°" elsewhere, shuffled rows)', () => {
+  for (const layout of ['id-in-A', 'hash-in-A', 'hash-in-S']) {
+    const wb = parseWorkbook(fakeWorkbook(fakeRows(), { layout }));
+    const { retained, evaluation } = partition(wb.rows);
+    assert.equal(retained.length, 121, layout);
+    assert.equal(evaluation.length, 113, layout);
+    assert.equal(wb.rows.find((r) => r.lineNo === 55).citySlug, 'mont-saint-hilaire', layout);
+  }
+  assert.equal(parseWorkbook(fakeWorkbook(fakeRows(), { layout: 'id-in-A' })).numberingSource, 'excel order');
+  assert.match(parseWorkbook(fakeWorkbook(fakeRows(), { layout: 'hash-in-S' })).numberingSource, /column S/);
+});
+
+test('Triage numbering: the conductor failure (column A read as "#") cannot recur silently', () => {
+  // Reading column A digits on the "id-in-A" layout gives 124 distinct numbers and none of the
+  // expected lines: exactly the failing run. The anchor check now refuses any such numbering.
+  const rows = fakeRows().map((r) => ({ ...r, city: r.line === 14 ? 'Ville Fictive 99' : r.city }));
+  assert.throws(() => parseWorkbook(fakeWorkbook(rows, { layout: 'id-in-A' })), (e) => {
+    assert.match(e.message, /anchor cities/);
+    assert.match(e.message, /Row-5 headers/);
+    assert.ok(!/Pertinent|surveiller|P-VILLE|V2-PRECEDENT/.test(e.message));
+    return true;
+  });
+});

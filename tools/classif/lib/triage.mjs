@@ -40,6 +40,47 @@ export function bylawsIn(text) {
   return [...out];
 }
 
+// Anchors that pin the Triage line numbering (public facts, sources-bundle.md:478): line #14 is
+// in Saint-Jean-Baptiste, #55 in Mont-Saint-Hilaire, #58 in Sainte-Cécile-de-Milton.
+export const ANCHORS = { 14: 'saint-jean-baptiste', 55: 'mont-saint-hilaire', 58: 'sainte-cecile-de-milton' };
+
+const INT_RE = /^\s*(?:#|n°|no\.?)?\s*(\d{1,4})(?:\.0+)?\s*$/i;
+
+/** Column letter of the first header matching `re`, else `fallback`. */
+function headerColumn(header, re, fallback) {
+  for (const [col, text] of header) if (re.test(String(text).trim())) return col;
+  return fallback;
+}
+
+/**
+ * Line number (Triage "#") of each row. Candidates, in order: a header named "#"/"n°"/"No";
+ * any column whose values are exactly the integers 1..n; the Excel order (row − first row + 1).
+ * The first candidate whose numbering puts the 3 anchor cities at #14, #55, #58 is kept.
+ */
+export function detectNumbering(header, raw, cityCol) {
+  const n = raw.length;
+  const candidates = [];
+  const named = [...header].filter(([, t]) => /^\s*(#|n°|no\.?|num(é|e)ro|ligne)\s*$/i.test(String(t))).map(([c]) => c);
+  const cols = [...new Set([...named, ...[...header.keys()], ...new Set(raw.flatMap((r) => [...r.cells.keys()]))])];
+  for (const col of cols) {
+    const nums = raw.map((r) => { const m = String(r.cells.get(col) ?? '').match(INT_RE); return m ? Number(m[1]) : null; });
+    if (nums.some((v) => v === null)) continue;
+    const set = new Set(nums);
+    if (set.size !== n || Math.min(...nums) !== 1 || Math.max(...nums) !== n) continue;
+    candidates.push({ source: `column ${col} (${header.get(col) ?? 'no header'})`, nums });
+  }
+  candidates.push({ source: 'excel order', nums: raw.map((r) => r.excelRow - raw[0].excelRow + 1) });
+  const tried = [];
+  for (const c of candidates) {
+    const at = (line) => slugify(raw[c.nums.indexOf(Number(line))]?.cells.get(cityCol) ?? '');
+    const ok = Object.entries(ANCHORS).every(([line, slug]) => at(line).includes(slug));
+    tried.push(`${c.source}: ${Object.keys(ANCHORS).map((l) => `#${l}=${at(l) || '?'}`).join(', ')}`);
+    if (ok) return { source: c.source, nums: c.nums, tried };
+  }
+  const headers = [...header].map(([c, t]) => `${c}=${JSON.stringify(String(t).slice(0, 40))}`).join(' ');
+  throw new Error(`workbook: no Triage numbering places the anchor cities at #14/#55/#58. Tried: ${tried.join(' | ')}. Row-5 headers: ${headers}`);
+}
+
 /** Parses the workbook buffer. Returns rows (all 124) and the codes dictionary. */
 export function parseWorkbook(buf) {
   const { sheets } = readXlsx(buf);
@@ -50,34 +91,49 @@ export function parseWorkbook(buf) {
   if (!header || header.get('Q') !== 'Classement' || header.get('R') !== 'Code de motif') {
     throw new Error('workbook: unexpected Triage header (Q must be "Classement", R "Code de motif")');
   }
-  const rows = [];
-  for (const [r, cells] of [...triage.rows.entries()].sort((a, b) => a[0] - b[0])) {
-    if (r <= HEADER_ROW || !cells.get('Q')) continue;
-    const lineNo = Number(String(cells.get('A') ?? '').replace(/[^\d]/g, ''));
+  const col = {
+    city: headerColumn(header, /^(municipalit|ville)/i, 'C'),
+    pass: headerColumn(header, /^passe/i, 'B'),
+    bylaw: headerColumn(header, /r[èe]glement/i, 'H'),
+    objet: headerColumn(header, /^objet/i, 'L'),
+  };
+  const raw = [...triage.rows.entries()].sort((a, b) => a[0] - b[0])
+    .filter(([r, cells]) => r > HEADER_ROW && cells.get('Q'))
+    .map(([excelRow, cells]) => ({ excelRow, cells }));
+  const numbering = detectNumbering(header, raw, col.city);
+  const rows = raw.map(({ excelRow, cells }, i) => {
     const allText = [...cells.values()].join('\n');
-    const citySlug = slugify(cells.get('C'));
-    // Column L may abbreviate the city part of an id with "…" (oracle-c 01-extract-triage.mjs).
-    const abbreviated = (String(cells.get('L') ?? '').match(/(?:signal|event)-[A-Za-z0-9….-]+/g) ?? [])
+    const citySlug = slugify(cells.get(col.city));
+    // The object column may abbreviate the city part of an id with "…" (oracle-c 01-extract-triage.mjs).
+    const abbreviated = (String(cells.get(col.objet) ?? '').match(/(?:signal|event)-[A-Za-z0-9….-]+/g) ?? [])
       .filter((s) => s.includes('…'))
       .map((s) => s.replace(/[.…-]+$/, '').replace('…', citySlug));
-    rows.push({
-      excelRow: r,
-      lineNo,
-      pass: cells.get('B') ?? null,
-      city: cells.get('C') ?? '',
+    return {
+      excelRow,
+      lineNo: numbering.nums[i],
+      pass: cells.get(col.pass) ?? null,
+      city: cells.get(col.city) ?? '',
       citySlug,
-      bylaws: bylawsIn(cells.get('H')),
+      bylaws: bylawsIn(cells.get(col.bylaw)),
       nodeIds: [...new Set([...nodeIdsIn(allText), ...abbreviated])],
       docShas: shasIn(allText),
       verdict: cells.get('Q'),
       code: cells.get('R') ?? null,
-    });
-  }
+    };
+  }).sort((a, b) => a.lineNo - b.lineNo);
+  // Codes: any cell that is exactly a code; its meaning = the longest other text cell of the row.
+  // Layout-independent (the oracle-c reader assumed B = code, C = meaning, rows > 4).
   const codes = [];
-  for (const [r, cells] of codesSheet.rows) {
-    if (r <= 4) continue;
-    const code = cells.get('B');
-    if (code && /^(P|S|N|V2)-/.test(code)) codes.push({ verdict: cells.get('A') ?? null, code, meaning: cells.get('C') ?? '' });
+  const seenCodes = new Set();
+  for (const [, cells] of [...codesSheet.rows.entries()].sort((x, y) => x[0] - y[0])) {
+    for (const [c, v] of cells) {
+      const code = String(v).trim();
+      if (!/^(P|S|N|V2)-[A-Z0-9-]+$/.test(code) || seenCodes.has(code)) continue;
+      const others = [...cells].filter(([k]) => k !== c).map(([, t]) => String(t)).filter((t) => !/^(P|S|N|V2)-[A-Z0-9-]+$/.test(t.trim()));
+      const meaning = others.sort((x, y) => y.length - x.length)[0] ?? "";
+      seenCodes.add(code);
+      codes.push({ code, meaning });
+    }
   }
   // Every node id / sha256 / city anywhere in the workbook (all tabs): exposure is workbook-wide.
   const workbookNodeIds = new Set();
@@ -90,7 +146,7 @@ export function parseWorkbook(buf) {
       }
     }
   }
-  return { rows, codes, workbookNodeIds: [...workbookNodeIds], workbookShas: [...workbookShas] };
+  return { rows, codes, numberingSource: numbering.source, columns: col, workbookNodeIds: [...workbookNodeIds], workbookShas: [...workbookShas] };
 }
 
 /** Splits rows into retained and evaluation partitions and checks the documented counts. */
@@ -98,7 +154,7 @@ export function partition(rows, { strict = true } = {}) {
   const byLine = new Map(rows.map((r) => [r.lineNo, r]));
   const problems = [];
   if (rows.length !== EXPECTED.triage) problems.push(`Triage rows ${rows.length} != ${EXPECTED.triage}`);
-  if (byLine.size !== rows.length) problems.push('duplicate line numbers in column A');
+  if (byLine.size !== rows.length) problems.push('duplicate line numbers');
   for (const n of [...NOT_RETAINED, ...NOT_EVALUATED]) if (!byLine.has(n)) problems.push(`line #${n} missing`);
   const retained = rows.filter((r) => !NOT_RETAINED.includes(r.lineNo));
   const evaluation = retained.filter((r) => !NOT_EVALUATED.includes(r.lineNo));

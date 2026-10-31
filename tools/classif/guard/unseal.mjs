@@ -205,7 +205,7 @@ export async function run({
     const summary = {
       referenceC: { 'reference-c.xlsx': `${sha256(xlsx)} (README match)`, 'reference-c.csv': `${sha256(csv)} (README match)` },
       evalSet: {
-        rows: evaluation.length, withInput: counts.withInput, withoutInput: counts.withoutInput,
+        rows: evaluation.length, withInput: counts.withInput, withoutInput: counts.withoutInput, triageNumbering: wb.numberingSource,
         [`${EVAL_FILES.inputs}.sealed`]: { plainSha256: files.inputs.plainSha256, sealedSha256: files.inputs.sealedSha256, roundTrip: 'byte-for-byte OK' },
         [`${EVAL_FILES.expected}.sealed`]: { plainSha256: files.expected.plainSha256, sealedSha256: files.expected.sealedSha256, roundTrip: 'byte-for-byte OK' },
       },
