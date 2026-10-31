@@ -20,6 +20,12 @@ describe("write failure diagnostics", () => {
     expect(JSON.stringify(chain)).not.toContain("secret");
   });
 
+  it("reports how many SDK attempts ran before a timeout surfaced", () => {
+    const exhausted = Object.assign(new Error("request exceeded 4000 ms"), {
+      name: "TimeoutError", code: "ETIMEDOUT", $metadata: { attempts: 3, totalRetryDelay: 312 } });
+    expect(describeFailureCause(exhausted)).toEqual([{ name: "TimeoutError", code: "ETIMEDOUT", attempts: 3 }]);
+  });
+
   it("drops messages and unsafe tokens, and stops on cycles", () => {
     const loop: Record<string, unknown> = { name: "Error", code: "has spaces and = values" };
     loop.cause = loop;
