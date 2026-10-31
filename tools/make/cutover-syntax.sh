@@ -16,3 +16,4 @@ printf '%s\n' '{"items":[]}' | jq --argjson r '[{"cronjobs":[]}]' --argjson cfg 
 jq -n --arg step ddl --argjson timeout 520 --argjson r '[{"release":{"apiImage":"synthetic"}}]' \
   --rawfile wrapper deploy/cutover/job-wrapper.cjs --rawfile shellWrapper deploy/cutover/shell-wrapper.sh \
   -f tools/make/cutover-sanitize.jq >/dev/null
+printf '%s\n' '{"items":[]}' | jq -e -f tools/make/cutover-endpoints.jq >/dev/null
