@@ -16,7 +16,9 @@
 #
 # ENV (required): BACKUP_ENV, BACKUP_TAG, NAMESPACE, BACKUP_S3_BUCKET,
 #   BACKUP_S3_ENDPOINT, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY.
-# ENV (optional, defaults): DUMP_IMAGE=postgis/postgis:16-3.4,
+# ENV (optional, defaults): DUMP_IMAGE=the dumpImage of the environment whose
+#   namespace is NAMESPACE in deploy/cutover/config.json (pg_dump must not be
+#   older than the server: PG18 environments need the 18 client),
 #   UPLOAD_IMAGE=peakcom/s5cmd:v2.2.2, PGHOST=radar-postgres,
 #   DB_SECRET=radar-db-credentials, S3_SECRET=radar-backup-s3-credentials,
 #   BACKUP_S3_REGION="", BACKUP_RETAIN_COUNT=14, BACKUP_PREFIX=db-backups,
@@ -37,7 +39,9 @@ warn() { echo "::warning title=db-backup::$*"; }
 : "${AWS_ACCESS_KEY_ID:?AWS_ACCESS_KEY_ID required (retention)}"
 : "${AWS_SECRET_ACCESS_KEY:?AWS_SECRET_ACCESS_KEY required (retention)}"
 
-export DUMP_IMAGE="${DUMP_IMAGE:-postgis/postgis:16-3.4}"
+DUMP_IMAGE="${DUMP_IMAGE:-$(jq -r --arg ns "$NAMESPACE" '[.[]|objects|select(.namespace?==$ns)|.dumpImage][0] // empty' "$(dirname "$0")/../cutover/config.json")}"
+[ -n "$DUMP_IMAGE" ] || die "no dumpImage for namespace ${NAMESPACE} in deploy/cutover/config.json"
+export DUMP_IMAGE
 export UPLOAD_IMAGE="${UPLOAD_IMAGE:-peakcom/s5cmd:v2.2.2}"
 export PGHOST="${PGHOST:-radar-postgres}"
 export DB_SECRET="${DB_SECRET:-radar-db-credentials}"
