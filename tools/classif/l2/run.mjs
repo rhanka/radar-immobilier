@@ -40,10 +40,10 @@ async function pool(tasks, n) {
   await Promise.all(Array.from({ length: n }, async () => { while (i < tasks.length) { const k = i++; await tasks[k](); } }));
 }
 
-export async function runPass({ pass, mode = 'independent', guide = 'G0', annotators = ANNOTATORS, todo = null, context = new Map(), concurrency = 4, home = classifHome(), log = (s) => process.stdout.write(`${s}\n`) }) {
+export async function runPass({ pass, mode = 'independent', guide = 'G0', annotators = ANNOTATORS, todo = null, context = new Map(), concurrency = 4, onlyLots = null, home = classifHome(), log = (s) => process.stdout.write(`${s}\n`) }) {
   const all = loadDevItems(home);
   const items = todo ? all.filter((i) => todo.has(i.itemId)) : all;
-  const lots = makeLots(items);
+  const lots = makeLots(items).filter((l) => !onlyLots || onlyLots.includes(l.lotId));
   const codes = loadCodes();
   const pack = loadPack(path.join(home, 'l1', 'pack'), guide);
   const work = path.join(home, 'l1', 'engram-work');
@@ -71,12 +71,23 @@ export async function runPass({ pass, mode = 'independent', guide = 'G0', annota
     let r = null;
     let pairs = [];
     let attempts = 0;
+    // Resume state: every seat answer is saved (raw/) as soon as it returns, keyed by prompt sha256 and
+    // attempt; a restart reuses a saved answer instead of paying the call again.
+    const rawDir = path.join(passDir, 'raw', annotator);
+    mkdirSync(rawDir, { recursive: true, mode: 0o700 });
+    const promptSha = sha256(prompt);
     for (attempts = 1; attempts <= 3; attempts++) {
-      r = await callSeat(annotator, prompt, { base: seatTmp, timeoutMs: 1800000 });
+      const rawFile = path.join(rawDir, `${lot.lotId}.${promptSha.slice(0, 16)}.a${attempts}.json`);
+      let reused = false;
+      if (existsSync(rawFile)) { r = JSON.parse(readFileSync(rawFile, 'utf8')); reused = true; }
+      else {
+        r = await callSeat(annotator, prompt, { base: seatTmp, timeoutMs: 1800000 });
+        writeFileSync(rawFile, JSON.stringify(r), { mode: 0o600 });
+      }
       pairs = parseAnswers(r.text, lot.items);
       const answered = pairs.filter((p) => p.answer).length;
       appendFileSync(callsLog, `${JSON.stringify({ at: new Date().toISOString(), pass, mode, guide, annotator, lotId: lot.lotId, items: lot.items.length, attempt: attempts,
-        exitCode: r.code, latencyMs: r.latencyMs, answered, toolEvents: r.toolEvents ?? null, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null })}\n`);
+        exitCode: r.code, latencyMs: r.latencyMs, reused, answered, toolEvents: r.toolEvents ?? null, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null })}\n`);
       if (r.code === 0 && answered > 0 && !(r.toolEvents > 0)) break;
     }
     if (r.toolEvents > 0) pairs = pairs.map((p) => ({ ...p, answer: null }));
@@ -132,7 +143,7 @@ if (process.argv[1] && path.resolve(process.argv[1]).endsWith(path.join('l2', 'r
   const todo = pass > 1 && existsSync(todoFile) ? new Set(JSON.parse(readFileSync(todoFile, 'utf8')).items) : null;
   if (pass > 1 && !todo) { process.stderr.write(`classif-l2-pass: ${todoFile} missing (run make classif-l2-converge first)\n`); process.exit(2); }
   const context = existsSync(ctxFile) ? new Map(Object.entries(JSON.parse(readFileSync(ctxFile, 'utf8'))).map(([a, m]) => [a, new Map(Object.entries(m))])) : new Map();
-  runPass({ pass, mode, guide, todo, context, concurrency: Number(arg('--concurrency', '4')), home })
+  runPass({ pass, mode, guide, todo, context, concurrency: Number(arg('--concurrency', '4')), home, onlyLots: arg('--lots', '') ? arg('--lots', '').split(',') : null })
     .then((r) => process.stdout.write(`${JSON.stringify(r)}\n`))
     .catch((err) => { process.stderr.write(`classif-l2-pass: ${err.stack}\n`); process.exit(1); });
 }
