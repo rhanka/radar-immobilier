@@ -41,3 +41,20 @@ classif-l0-probe: ## Classification pilot: 12 route probes on one synthetic non-
 classif-sandbox-build: ## Classification pilot: refuse any sandbox file hitting a fingerprint list (DIR=<sandbox>)
 	@test -n "$(DIR)" || { echo "Pass DIR=<sandbox dir>"; exit 2; }
 	@$(CLASSIF_NODE) $(CLASSIF_DIR)/guard/sandbox-build.mjs "$(DIR)"
+
+# Dependencies of the B′ classifier (repository TypeScript run with tsx in a node:24 container).
+# Installed in a dedicated docker volume, never on the host; `classif-down` removes it (down -v).
+CLASSIF_NODE_IMAGE ?= node:24-bookworm-slim
+CLASSIF_DEPS_VOLUME ?= radar-classif-deps-$(ENV)
+export CLASSIF_NODE_IMAGE CLASSIF_DEPS_VOLUME
+
+.PHONY: classif-deps classif-down
+classif-deps: ## Classification pilot: install classifier deps in a docker volume (npm ci, workspaces api + packages)
+	docker volume create $(CLASSIF_DEPS_VOLUME) >/dev/null
+	docker run --rm -v $(CLASSIF_DEPS_VOLUME):/w -v "$(CURDIR)":/src:ro -w /w $(CLASSIF_NODE_IMAGE) sh -c '\
+	  cp /src/package.json /src/package-lock.json /w/ && \
+	  for d in api ui packages/artifacts-host packages/immo-mcp packages/radar-domain packages/radar-scoring packages/radar-sources; do mkdir -p /w/$$d && cp /src/$$d/package.json /w/$$d/; done && \
+	  npm ci --ignore-scripts --no-audit --no-fund -w api -w packages/radar-domain -w packages/radar-sources'
+
+classif-down: ## Classification pilot: remove the classifier deps volume
+	-docker volume rm $(CLASSIF_DEPS_VOLUME)

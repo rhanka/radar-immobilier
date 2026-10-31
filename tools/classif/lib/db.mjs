@@ -21,7 +21,12 @@ export function selectJson(sql) {
   const script = `\\set ON_ERROR_STOP 1\nBEGIN READ ONLY;\n${sql};\nROLLBACK;\n`;
   const args = ['--kubeconfig', DB.kubeconfig, '-n', DB.namespace, 'exec', '-i', DB.pod, '--',
     'psql', '-U', DB.user, '-d', DB.database, '-At', '-q', '-v', 'ON_ERROR_STOP=1'];
-  const run = spawnSync('kubectl', args, { input: script, encoding: 'utf8', maxBuffer: 512 * 1024 * 1024 });
+  // Read-only statement: retried on transient transport errors (kubectl exec stream timeouts).
+  let run;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    run = spawnSync('kubectl', args, { input: script, encoding: 'utf8', maxBuffer: 512 * 1024 * 1024 });
+    if (run.status === 0 || /ERROR:/.test(String(run.stderr))) break;
+  }
   if (run.status !== 0) throw new Error(`db: psql failed (${run.status}): ${String(run.stderr).slice(-400)}`);
   const out = run.stdout.trim();
   const start = out.search(/^[[{]/m);
