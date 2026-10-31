@@ -41,7 +41,9 @@ test('database preparation checks CREATEDB, protects live identity and verifies 
     assert.ok(v.volumeUsedBytes >= v.liveDbBytes + v.walBytes && v.liveDbBytes > 0 && v.walBytes > 0, volume.stdout);
     const stats = run('writestats', '');
     assert.equal(stats.status, 0, stats.stderr);
-    assert.ok(Number.isInteger(JSON.parse(stats.stdout).writeStats.radar));
+    const written = JSON.parse(stats.stdout);
+    assert.ok(Number.isInteger(written.writeStats.radar) && Number.isInteger(written.writeStatsNonProbe.radar));
+    assert.ok(written.writeStatsNonProbe.radar <= written.writeStats.radar, 'the probe table is excluded from the non-probe count');
     assert.equal(run('discard', 'radar_next').status, 0);
     assert.equal((await c.query('SELECT current_database() AS name')).rows[0].name, 'radar');
   } finally {

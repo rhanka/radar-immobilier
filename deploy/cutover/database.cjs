@@ -99,27 +99,24 @@ const OPERATIONS = {
     }
     throw Error('writable_sessions_remain');
   },
-  // Written tuples per application database (pg_stat_database): a rollback compares them to the
-  // baseline taken before the switch to detect acknowledged writes it abandons.
-  async writestats(c) {
-    const writeStats = {};
-    for (const row of (await c.query(`SELECT datname AS name, (tup_inserted + tup_updated + tup_deleted)::bigint AS n
-      FROM pg_stat_database WHERE datname IN ('radar', 'radar_next')`)).rows) writeStats[row.name] = Number(row.n);
-    return { writeStats };
-  },
-  // Rehearsal: probe rows written in one database since a baseline time (proof for ack-probe).
-  async probecount() {
-    const prefix = env.PROBE_RUN, since = env.PROBE_SINCE;
-    if (!valid(target) || !/^[a-z0-9-]{1,63}$/.test(prefix || '') || Number.isNaN(Date.parse(since || ''))) throw Error();
-    const d = new Client({ host: env.POSTGRES_HOST, user: env.POSTGRES_USER, password: env.POSTGRES_PASSWORD, database: target });
-    try {
-      await d.connect();
-      const n = (await d.query('SELECT count(*)::int AS n FROM cutover_probe_writes WHERE starts_with(run, $1) AND at >= $2', [prefix, since])).rows[0].n;
-      return { probeRows: n };
-    } catch (e) {
-      if (e.code === '42P01') return { probeRows: 0 };
-      throw e;
-    } finally { await d.end().catch(() => {}); }
+  // Rows written in the user tables of each application database (pg_stat_user_tables, no catalog
+  // writes): all tables, and all but the rehearsal probe table. A rollback compares them to the
+  // baseline taken before the switch; only a zero non-probe delta proves an abandon harmless.
+  async writestats() {
+    const writeStats = {}, writeStatsNonProbe = {};
+    for (const name of ['radar', 'radar_next']) {
+      const d = new Client({ host: env.POSTGRES_HOST, user: env.POSTGRES_USER, password: env.POSTGRES_PASSWORD, database: name });
+      try {
+        await d.connect();
+        const row = (await d.query(`SELECT coalesce(sum(n_tup_ins + n_tup_upd + n_tup_del), 0)::bigint AS total,
+          coalesce(sum(n_tup_ins + n_tup_upd + n_tup_del) FILTER (WHERE relname <> 'cutover_probe_writes'), 0)::bigint AS other
+          FROM pg_stat_user_tables`)).rows[0];
+        writeStats[name] = Number(row.total); writeStatsNonProbe[name] = Number(row.other);
+      } catch (e) {
+        if (e.code !== '3D000') throw e;
+      } finally { await d.end().catch(() => {}); }
+    }
+    return { writeStats, writeStatsNonProbe };
   },
   // Rehearsal: acknowledged probe writes present in each application database, as seq ranges.
   async probeverify() {

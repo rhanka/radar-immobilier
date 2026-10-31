@@ -286,39 +286,6 @@ test('the change lock is awaited for a bounded time instead of failing at once',
     assert.equal(lock(f).metadata.uid, 'uid-held', 'waiting never adopts a lock');
   } finally { f.cleanup(); }
 });
-test('the rehearsal acknowledges its own abandoned writes only when its probe rows explain them; entries are never overwritten', () => {
-  const f = fixture({ previousSha: '9'.repeat(40), writeStats: { radar: 100, radar_next: 0 } });
-  try {
-    success(f.run('prepare'));
-    success(f.run('run', ['MODE=run']));
-    const a = receipt(f);
-    let state = f.state(); state.writeStats.radar_next = 40; save(f, state);
-    success(f.run('rollback', [`RUN=${a.run}`, 'MODE=run']));
-    const b = receipt(f);
-    // Unexplained: fewer probe rows than abandoned tuples -> stays pending, conductor ack required.
-    state = f.state(); state.probeRows = 12; save(f, state);
-    const refused = f.run('ack-probe', [`RUN=${b.run}`, 'PROBE=rh-1700000000']);
-    assert.notEqual(refused.status, 0);
-    assert.match(refused.stderr, /abandoned_writes_unexplained/);
-    assert.equal(entries(f)[0].status, 'pending');
-    // A second abandonment (rollback of the rollback) appends: the pending entry survives.
-    state = f.state(); state.writeStats.radar = 130; save(f, state);
-    success(f.run('rollback', [`RUN=${b.run}`, 'MODE=run']));
-    const c = receipt(f);
-    assert.deepEqual(entries(f).map(e => [e.run, e.db, e.status]), [[b.run, 'radar_next', 'pending'], [c.run, 'radar', 'pending']]);
-    // Explained by the probe rows: acknowledged with the proof attached.
-    state = f.state(); state.probeRows = 40; save(f, state);
-    const ok = f.run('ack-probe', [`RUN=${b.run}`, 'PROBE=rh-1700000000']);
-    assert.equal(ok.status, 0, ok.stderr);
-    const acked = entries(f).find(e => e.run === b.run);
-    assert.deepEqual([acked.status, acked.acknowledgement.by, acked.acknowledgement.proof],
-      ['acknowledged', 'rehearsal-probe', { probePrefix: 'rh-1700000000', probeRows: 40, tuples: 40 }]);
-    const job = f.state().objects.filter(o => o.kind === 'Job' && o.metadata.name.endsWith('-probecount')).at(-1);
-    const env = Object.fromEntries(job.spec.template.spec.containers[0].env.map(e => [e.name, e.value]));
-    assert.deepEqual([env.TARGET_DB, env.PROBE_RUN, env.PROBE_SINCE], ['radar_next', 'rh-1700000000', acked.since]);
-    assert.equal(entries(f).find(e => e.run === c.run).status, 'pending', 'only the proven entry is acknowledged');
-  } finally { f.cleanup(); }
-});
 test('the prepared slot and the promotion use the release manifests (#611); a rollback restores the previous specs', () => {
   const f = fixture({ previousSha: '9'.repeat(40) });
   const marked = c => (c.env || []).some(e => e.name === 'FROM_RELEASE_MANIFEST');
@@ -413,5 +380,34 @@ test('the release manifests are refused when the checkout commit is unreadable o
     const other = f.run('prepare');
     assert.notEqual(other.status, 0);
     assert.match(other.stderr, /release_manifests_mismatch/);
+  } finally { f.cleanup(); }
+});
+test('the rehearsal acknowledges an abandon only with zero rows outside the probe table (exact); entries are never overwritten', () => {
+  const f = fixture({ previousSha: '9'.repeat(40), writeStats: { radar: 100, radar_next: 0 }, writeStatsNonProbe: { radar: 50, radar_next: 0 } });
+  try {
+    success(f.run('prepare'));
+    success(f.run('run', ['MODE=run']));
+    const a = receipt(f);
+    // 40 rows on the promoted database, 3 of them outside the probe table: not provably the probe's own.
+    let state = f.state(); state.writeStats.radar_next = 40; state.writeStatsNonProbe.radar_next = 3; save(f, state);
+    success(f.run('rollback', [`RUN=${a.run}`, 'MODE=run']));
+    const b = receipt(f);
+    assert.deepEqual([b.abandoned.tuples, b.abandoned.nonProbeTuples], [40, 3]);
+    const refused = f.run('ack-probe', [`RUN=${b.run}`]);
+    assert.notEqual(refused.status, 0);
+    assert.match(refused.stderr, /abandoned_writes_unexplained: 3 rows outside the probe table/);
+    assert.equal(entries(f)[0].status, 'pending');
+    // A second abandon (rollback of the rollback): 30 rows, all in the probe table. Appended, never overwritten.
+    state = f.state(); state.writeStats.radar = 130; save(f, state);
+    success(f.run('rollback', [`RUN=${b.run}`, 'MODE=run']));
+    const c = receipt(f);
+    assert.deepEqual([c.abandoned.tuples, c.abandoned.nonProbeTuples], [30, 0]);
+    assert.deepEqual(entries(f).map(e => [e.run, e.db, e.status]), [[b.run, 'radar_next', 'pending'], [c.run, 'radar', 'pending']]);
+    const ok = f.run('ack-probe', [`RUN=${c.run}`]);
+    assert.equal(ok.status, 0, ok.stderr);
+    const acked = entries(f).find(e => e.run === c.run);
+    assert.deepEqual([acked.status, acked.acknowledgement.by, acked.acknowledgement.proof.nonProbeTuples, acked.acknowledgement.proof.probeTuples],
+      ['acknowledged', 'rehearsal-probe', 0, 30]);
+    assert.equal(entries(f).find(e => e.run === b.run).status, 'pending', 'the unexplained entry still needs the conductor');
   } finally { f.cleanup(); }
 });

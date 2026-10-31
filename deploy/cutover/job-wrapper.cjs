@@ -33,13 +33,13 @@ for (const key of ['pgSizeBytes', 'sizeBytes', 'docsObjects', 'migrations', 'age
 const numberMap = (value, pattern, limit) => value && typeof value === 'object' && !Array.isArray(value)
   ? Object.fromEntries(Object.entries(value).filter(([k, v]) => pattern.test(k) && Number.isFinite(v) && v >= 0).slice(0, limit))
   : undefined;
-for (const key of ['databaseSizes', 'sessionsByDb', 'writeStats']) {
+for (const key of ['databaseSizes', 'sessionsByDb', 'writeStats', 'writeStatsNonProbe']) {
   const map = numberMap(raw[key], /^[a-z_][a-z0-9_]{0,62}$/, 16);
   if (map) clean[key] = map;
 }
 const timings = numberMap(raw.timings, /^[a-zA-Z]{1,32}$/, 16);
 if (timings) clean.timings = timings;
-for (const key of ['maxConnections', 'probeRows', 'volumeUsedBytes', 'liveDbBytes', 'walBytes', 'logContainers', 'logBytes', 'destListCalls', 'headChecked', 'versionsResolved', 'copyRetries']) {
+for (const key of ['maxConnections', 'volumeUsedBytes', 'liveDbBytes', 'walBytes', 'logContainers', 'logBytes', 'destListCalls', 'headChecked', 'versionsResolved', 'copyRetries']) {
   if (Number.isFinite(raw[key]) && raw[key] >= 0) clean[key] = raw[key];
 }
 // Probe verification: acknowledged writes per application database, as bounded seq ranges.
