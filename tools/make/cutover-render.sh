@@ -6,9 +6,14 @@ render_template() {
     return
   fi
   export NAMESPACE=$NS IMAGE DUMP_IMAGE TTL_SECONDS=86400
-  # pg_dump refuses a newer server and pg_restore an archive from a newer pg_dump:
-  # the client major follows the environment (deploy/cutover/PG18-UPGRADE.md).
-  DUMP_IMAGE=$(jq -er --arg e "$ENV" '.[$e].dumpImage|select(test("^postgis/postgis:[0-9]+-[0-9.]+@sha256:[0-9a-f]{64}$"))' "$CONFIG") || fail 'Missing pinned dump image'
+  # pg_dump refuses a newer server, and pg_restore 18 cannot restore into PG16
+  # (transaction_timeout): the client major follows the serving server, recorded
+  # by pg-switch in ConfigMap radar-pg-upgrade (absent: pg16). PG18-UPGRADE.md.
+  local serving
+  serving=$("${k[@]}" get configmap radar-pg-upgrade --ignore-not-found -o json | jq -r '.data.active // empty') \
+    || fail 'Serving PostgreSQL major unknown'
+  DUMP_IMAGE=$(jq -er --arg s "${serving:-pg16}" '.dumpImages[$s]|select(test("^postgis/postgis:[0-9]+-[0-9.]+@sha256:[0-9a-f]{64}$"))' "$CONFIG") \
+    || fail 'Missing pinned dump image'
   IMAGE=$(jq -r .release.apiImage "$WORK/record.json")
   export PGHOST=radar-postgres DB_SECRET S3_ENDPOINT S3_REGION EXPECTED_BACKUP_BUCKET READER_SECRET COPY_SECRET
   DB_SECRET=$(jq -r .storage.dbSecret "$CONFIG")
