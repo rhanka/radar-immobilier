@@ -16,6 +16,8 @@ export interface FailureCauseSummary {
   readonly name?: string;
   readonly code?: string;
   readonly httpStatus?: number;
+  /** SDK attempts behind this error (retries included), when the SDK reports them. */
+  readonly attempts?: number;
   readonly operation?: string;
   readonly phase?: string;
 }
@@ -39,9 +41,11 @@ export function describeFailureCause(cause: unknown): FailureCauseSummary[] {
   while (current !== null && typeof current === "object" && !seen.has(current) && chain.length < MAX_CAUSE_DEPTH) {
     seen.add(current);
     const record = current as Record<string, unknown>;
-    const metadata = record.$metadata as { httpStatusCode?: unknown } | undefined;
+    const metadata = record.$metadata as { httpStatusCode?: unknown; attempts?: unknown } | undefined;
     const httpStatus = typeof metadata?.httpStatusCode === "number" && Number.isInteger(metadata.httpStatusCode)
       ? metadata.httpStatusCode : undefined;
+    const attempts = typeof metadata?.attempts === "number" && Number.isInteger(metadata.attempts)
+      ? metadata.attempts : undefined;
     const name = safeToken(record.name);
     const code = safeToken(record.code) ?? safeToken(record.Code);
     const operation = safeToken(record.operation);
@@ -50,6 +54,7 @@ export function describeFailureCause(cause: unknown): FailureCauseSummary[] {
       ...(name !== undefined ? { name } : {}),
       ...(code !== undefined ? { code } : {}),
       ...(httpStatus !== undefined ? { httpStatus } : {}),
+      ...(attempts !== undefined ? { attempts } : {}),
       ...(operation !== undefined ? { operation } : {}),
       ...(phase !== undefined ? { phase } : {}),
     });
