@@ -88,7 +88,7 @@ export function fixture(changes = {}) {
   delete env.GITHUB_ENV; delete env.GITHUB_OUTPUT;
   env.GITHUB_ACTIONS = 'false';
   // Blue/green timings shortened for the fake cluster (retention, drain, first-serve wait).
-  Object.assign(env, { OBSERVE: '0', DRAIN: '0', SERVE_TIMEOUT: '3', LOCK_WAIT: '0' });
+  Object.assign(env, { OBSERVE: '0', DRAIN: '0', SERVE_TIMEOUT: '3', LOCK_WAIT: '0', CUTOVER_TEST_TREE_SHA: sha });
   if (changes.fastClock) env['BASH_FUNC_sleep%%'] = '() { if [ "$1" = 2 ]; then SECONDS=$((SECONDS+31)); else command sleep "$@"; fi; }';
   const run = (action = 'run', extra = [], environment = 'preprod') => {
     const result = spawnSync('make', ['-s', '-f', 'deploy/cutover/operator.mk', action,

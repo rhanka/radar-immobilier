@@ -82,6 +82,7 @@ case ${1:-} in
   slots-adopt) rbac_preflight adopt; slots_adopt;;
   stage) rbac_preflight; stage_command;;
   ack) [[ $ENV == preprod ]] || fail 'ack is preprod-only'; rbac_preflight; ack_retained;;
+  ack-drift) rbac_preflight; ack_drift;;
   ack-probe) [[ $ENV == preprod ]] || fail 'ack-probe is preprod-only'; rbac_preflight; ack_probe;;
   slots-status)
     # CI guard: "adopted" delegates the release to the blue/green cutover; "legacy" keeps the old path.
