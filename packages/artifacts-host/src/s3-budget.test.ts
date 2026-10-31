@@ -51,6 +51,28 @@ describe("artifact S3 budget against a stalling provider", () => {
     });
   }, 30_000);
 
+  it("stays a retriable 503 when the SDK spends its attempts on provider 503s", async () => {
+    const s3 = await startS3({ fail: () => ({ status: 503, code: "ServiceUnavailable", delayMs: 100 }) });
+    await withHost(s3, { s3Budget: FAST_BUDGET }, async (host) => {
+      const cause = await settle(host.blobs.putBlob(KEY, BYTES));
+      // The SDK error itself reaches the mapper, before the host deadline.
+      expect(cause).toMatchObject({ name: "ServiceUnavailable", $metadata: { httpStatusCode: 503, attempts: 3 } });
+      expect(s3.requests).toBe(3);
+      expect(failureOf(cause)).toMatchObject(RETRIABLE_503);
+    });
+  }, 30_000);
+
+  it("retries a 429, then stays a retriable 503", async () => {
+    const s3 = await startS3({ fail: () => ({ status: 429, code: "TooManyRequests" }) });
+    // Throttling backs off up to 3 s over 3 attempts: give the operation room to show it.
+    await withHost(s3, { s3Budget: { ...FAST_BUDGET, operationTimeoutMs: 5000 } }, async (host) => {
+      const cause = await settle(host.blobs.putBlob(KEY, BYTES));
+      expect(cause).toMatchObject({ $metadata: { httpStatusCode: 429, attempts: 3 } });
+      expect(s3.requests).toBe(3);
+      expect(failureOf(cause)).toMatchObject(RETRIABLE_503);
+    });
+  }, 30_000);
+
   it("does not retry or mask a permanent refusal", async () => {
     const s3 = await startS3({ fail: () => ({ status: 403, code: "AccessDenied" }) });
     await withHost(s3, { s3Budget: FAST_BUDGET }, async (host) => {

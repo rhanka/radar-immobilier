@@ -16,13 +16,21 @@ import type { Readable } from "node:stream";
 export interface ArtifactS3Budget {
   /** One HTTP attempt: handshake, request and response headers (SDK requestTimeout). */
   readonly attemptTimeoutMs: number;
-  /** SDK attempts per S3 call; timeouts, network errors and 5xx are retried, 4xx are not. */
+  /**
+   * SDK attempts per S3 call (standard mode). Retried: timeouts, network errors,
+   * 5xx, throttling (429, SlowDown) and S3 RequestTimeout (400). Not retried:
+   * the other 4xx answers (403, 404, ...).
+   */
   readonly maxAttempts: number;
   /** Whole blob operation, every attempt and backoff included (host deadline). */
   readonly operationTimeoutMs: number;
 }
 
-/** Room for the SDK backoff between attempts (standard mode: under 600 ms for 3 attempts). */
+/**
+ * Room for the SDK backoff between attempts: under 600 ms over 3 attempts for
+ * transient errors. Throttling backs off longer (up to 3 s); the operation
+ * deadline still bounds it and maps to a retriable 503.
+ */
 export const S3_RETRY_HEADROOM_MS = 1000;
 
 /**
