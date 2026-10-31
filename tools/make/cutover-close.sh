@@ -129,8 +129,7 @@ verify_closed() {
     "${k[@]}" get deployment "$(jq -r .name <<< "$row")" -o json |
       jq -e --arg uid "$(jq -r .uid <<< "$row")" '.metadata.uid==$uid and .spec.replicas==0 and (.status.replicas//0)==0' >/dev/null || return 1
   done < <(jq -c '.deployments[]' "$WORK/record.json")
-  "${k[@]}" get endpoints -o json | jq -e 'all(.items[]|select(.metadata.name!="radar-postgres");
-    all(.subsets[]?; ((.addresses//[])|length)==0 and ((.notReadyAddresses//[])|length)==0))' >/dev/null || return 1
+  "${k[@]}" get endpoints -o json | jq -e -f tools/make/cutover-endpoints.jq >/dev/null || return 1
   while read -r row; do
     desired=$(maintenance_spec <(jq .spec <<< "$row"))
     "${k[@]}" get ingress "$(jq -r .name <<< "$row")" -o json |

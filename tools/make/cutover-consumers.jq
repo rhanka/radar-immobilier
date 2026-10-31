@@ -1,5 +1,8 @@
 def controller($object;$kind):
   [$object.metadata.ownerReferences[]? | select(.controller==true and .kind==$kind)] | first;
+# Any PostgreSQL StatefulSet pod (PG16 or PG18), by controller kind and label, never by name.
+def postgresPod($pod):
+  controller($pod;"StatefulSet") != null and $pod.metadata.labels["app.kubernetes.io/component"]=="postgres";
 def terminal:
   any(.status.conditions[]?; (.type=="Complete" or .type=="Failed") and .status=="True");
 def operationJob($record;$job):
@@ -25,7 +28,7 @@ $r[0] as $record |
   select(operationJob($record;.)|not) | select(refreshJob($record;.)|not) |
   {name:.metadata.name,uid:.metadata.uid,known:false}] +
 [.items[] | select(.status.phase!="Succeeded" and .status.phase!="Failed") |
-  select(controller(.;"StatefulSet").name!="radar-postgres") |
+  select(postgresPod(.)|not) |
   select(operationPod($record;$jobs[0];.)|not) |
   {name:.metadata.name,uid:.metadata.uid,
     known:(deploymentPod($record;$rs[0];.) or refreshPod($record;$jobs[0];.))}]
