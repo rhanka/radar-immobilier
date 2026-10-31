@@ -26,6 +26,11 @@ case ${1:-} in
     "${compose[@]}" exec -T postgres bash -s < deploy/cutover/parallel-restore.test.sh
     "${compose[@]}" exec -T postgres bash /cutover/atomic-restore.test.sh
     command='npm ci --ignore-scripts --silent && npm run db:migrate --workspace=api && node --test deploy/cutover/database.test.cjs && npm run test --workspace=api -- tests/integration/database-cutover.spec.ts src/services/facets/activation src/services/facets/attachment src/services/facets/base-api-personal-activation src/services/facets/base-api-activation src/services/facets/lots/lot-cutover --maxWorkers=2';;
+  test-pg)
+    # PG16 -> PG18 logical replication, switch, reverse and rollback on two real servers.
+    "${compose[@]}" up -d --wait postgres16 postgres
+    bash deploy/cutover/pg-upgrade.test.sh
+    exit;;
   *) exit 2;;
 esac
 "${compose[@]}" run --rm --no-deps -T -e TEST_PATTERN api bash -ec "$command"
