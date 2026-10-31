@@ -1,3 +1,5 @@
+import type { ArtifactS3Budget } from "./s3-timeout.js";
+
 export interface ArtifactsConfigInput {
   readonly storageScope?: string | undefined;
   readonly orgId?: string | undefined;
@@ -20,6 +22,8 @@ export type ArtifactsStorageConfig =
       readonly s3Region: string;
       readonly s3AccessKey: string;
       readonly s3SecretKey: string;
+      /** Omitted: composition uses DEFAULT_S3_BUDGET. */
+      readonly s3Budget?: ArtifactS3Budget | undefined;
     }
   | { readonly enabled: false; readonly reason: ArtifactsDisabledReason; readonly missing?: string[] };
 
