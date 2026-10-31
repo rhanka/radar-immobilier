@@ -24,17 +24,25 @@ pour vous authentifier et accorder les autorisations en lecture.
 
 ## 3. Paramètres à préparer
 
-| Champ | Valeur |
-|---|---|
-| **Nom** | `Radar immobilier` |
-| **URL du serveur MCP distant** | `https://immo.sent-tech.ca/mcp` |
-| **ID client OAuth** (Paramètres avancés) | `immo-mcp` |
-| **Secret client OAuth** | *(laisser **vide** — client public + PKCE)* |
-| Fournisseur d'identité (OAuth) | `https://auth.sent-tech.ca` |
-| Scopes accordés à la connexion | `immo:read`, `immo:search`, `immo:documents:read` |
+| Champ | Production | Préprod |
+|---|---|---|
+| **Nom** | `Radar immobilier` | `Radar immobilier (préprod)` |
+| **URL du serveur MCP distant** | `https://immo.sent-tech.ca/mcp` | `https://preprod.immo.sent-tech.ca/mcp` |
+| **ID client OAuth** (Paramètres avancés) | `immo-mcp` | `immo-mcp-preprod` |
+| **Secret client OAuth** | *(laisser **vide** — client public + PKCE)* | *(laisser **vide** — client public + PKCE)* |
+| Fournisseur d'identité (OAuth) | `https://auth.sent-tech.ca` | `https://preprod.auth.sent-tech.ca` |
+| Scopes accordés à la connexion | `immo:read`, `immo:search`, `immo:documents:read` | identiques |
 
 > Le **secret client doit rester vide** : le serveur est un client OAuth **public**
 > qui utilise PKCE. Renseigner un secret ferait échouer la connexion.
+
+Pour la **préprod**, suivre les mêmes étapes avec les valeurs de la colonne
+**Préprod**. Le détail des outils, des scénarios de test et des erreurs en préprod
+est dans l'annexe [Manuel MCP préprod](../../manuals/MCP_PREPROD_USER_MANUAL.md).
+
+> **Connecteur préprod déjà en place ?** Rien ne change avec la nouvelle version du
+> MCP : le connecteur existant continue de fonctionner tel quel. Il faut seulement
+> le recréer si l'on change de compte Claude.
 
 ---
 
@@ -244,3 +252,5 @@ OAuth).
 - Runbook interne (déploiement, OAuth RS, manifests) :
   `docs/spec/mcp/immo-mcp-remote-deploy.md`.
 - Fiche paramètres condensée : `docs/spec/mcp/claude-ai-connector-setup.md`.
+- Annexe préprod (outils, scénarios de test, erreurs typées) :
+  `docs/manuals/MCP_PREPROD_USER_MANUAL.md`.
