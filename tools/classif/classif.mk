@@ -58,3 +58,8 @@ classif-deps: ## Classification pilot: install classifier deps in a docker volum
 
 classif-down: ## Classification pilot: remove the classifier deps volume
 	-docker volume rm $(CLASSIF_DEPS_VOLUME)
+
+.PHONY: classif-l1-profile
+classif-l1-profile: ## Classification pilot L1: codebook export + Engram profile validate/dataprep/profile-prompt
+	@test "$(ENV)" = "preprod" || { echo "[classif-l1-profile] ENV=preprod required"; exit 2; }
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l1/profile.mjs
