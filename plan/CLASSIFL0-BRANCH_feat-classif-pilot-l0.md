@@ -28,6 +28,7 @@ Lot L0 of the Steve-aligned classification pilot (plan-pilote-v2 §B-L0, §H): s
   - Declare exception ID `BRxx-EXn` in `## Feedback Loop` before touching any conditional/forbidden path.
 
 ## Feedback Loop
+- `attention` BRCLASSIF-EX3: B′ classifier runs the repository TypeScript with tsx in a throw-away `node:24` container (`docker run --rm --network none`, read-only source mounts); deps in docker volume `radar-classif-deps-<ENV>` (`make classif-deps`), removed by `make classif-down` after use.
 - `attention` BRCLASSIF-EX1: host Node for `tools/classif/**` targets. Reason: they drive host-only CLIs (kubectl, s5cmd, muse, agy, claude, vibe) with seat logins; node built-ins only, no npm dependency. Impact: no container image. Rollback: delete `tools/classif/`.
 - `attention` BRCLASSIF-EX2: one line `-include tools/classif/classif.mk` in `Makefile`. Impact: adds `classif-*` targets only. Rollback: remove the line.
 - `clarification` (conductor, 2026-10-31): the conductor runs `make classif-guard-unseal ENV=preprod` with `REFERENCE_C_KEY` and `CLASSIF_EVAL_KEY` injected; the evaluation set is sealed with the reference-c mechanism (REFC1, plaintext hashes in a README, byte-for-byte round trip); no plaintext stays on disk.
@@ -47,22 +48,22 @@ Lot L0 of the Steve-aligned classification pilot (plan-pilote-v2 §B-L0, §H): s
   - [x] Confirm command style: `make ... ENV=<env>` with `ENV` last.
   - [x] Declare BRCLASSIF-EX1 and BRCLASSIF-EX2.
 
-- [ ] **Lot 1 — Guard and evaluation-set seal**
+- [x] **Lot 1 — Guard and evaluation-set seal**
   - [x] `tools/classif/lib/refc1.mjs`: REFC1 library (mechanism of `scripts/reference-seal.mjs`), env-only keys.
   - [x] `tools/classif/guard/unseal.mjs` + `make classif-guard-unseal ENV=preprod`.
   - [x] `tools/classif/guard/evalset.mjs`: executor role, hash check, one run per prompt/model/effort, access log.
   - [x] Unit tests on a synthetic sealed fixture (`make classif-test ENV=test-classif`).
   - [x] Conductor run done; sealed files and README committed.
 
-- [ ] **Lot 2 — Draws**
-  - [ ] `make classif-l0-pvs ENV=preprod`: 120 PVs, seed committed in track first, text read-only, sha256 checked.
-  - [ ] `make classif-l0-signals ENV=preprod`: pool + strata; draw refused until `exclusions.json` exists.
+- [x] **Lot 2 — Draws**
+  - [x] `make classif-l0-pvs ENV=preprod`: 120 PVs, seed committed in git first (track event: conductor), text read-only, sha256 checked.
+  - [x] `make classif-l0-signals ENV=preprod`: pool + strata; draw refused until `exclusions.json` exists.
 
-- [ ] **Lot 3 — Probes and sandbox scanner**
-  - [ ] `tools/classif/run-seat.mjs` + `make classif-l0-probe ENV=preprod`: 12 probe calls, report.
-  - [ ] `make classif-sandbox-build DIR=<dir> ENV=preprod`: fingerprint scanner.
+- [x] **Lot 3 — Probes and sandbox scanner**
+  - [x] `tools/classif/run-seat.mjs` + `make classif-l0-probe ENV=preprod`: 12 probe calls, report.
+  - [x] `make classif-sandbox-build DIR=<dir> ENV=preprod`: fingerprint scanner.
 
 - [ ] **Lot 4 — Gate**
-  - [ ] `make classif-check ENV=test-classif` + `make classif-test ENV=test-classif`.
-  - [ ] `harness verify --category static` and `--category unit`.
+  - [x] `make classif-check ENV=test-classif` + `make classif-test ENV=test-classif` (14/14).
+  - [x] `harness verify --category static` and `--category unit`.
   - [ ] Push branch (no PR).
