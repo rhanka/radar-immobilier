@@ -95,7 +95,7 @@ prepared_config_sha() {
   # Fingerprint of the configuration the prepared Pods read at start: a later ConfigMap change
   # (deploy reconcile) makes the slot stale and it is restarted before any switch.
   local cm
-  for cm in radar-api immo-mcp-config radar-ui-nginx; do
+  for cm in radar-api immo-mcp-config; do
     "${k[@]}" get configmap "$cm" --ignore-not-found -o json | jq -cS '.data//{}'
   done | sha256sum | cut -c1-16
 }
@@ -103,8 +103,10 @@ render_prepared_stack() {
   local db=$1 name cfg
   cfg=$(prepared_config_sha)
   : > "$WORK/prepared-stack.jsonl"
-  "${k[@]}" get configmap radar-ui-nginx -o json | jq -c --arg ns "$NS" '{apiVersion:"v1",kind:"ConfigMap",
-    metadata:{name:"radar-ui-nginx-prepared",namespace:$ns,labels:(.metadata.labels//{}|.["sentropic.io/slot"]="prepared")},
+  # The UI nginx configuration of the RELEASE (kustomize-generated, hash-suffixed name), re-pointed
+  # at radar-api-prepared: the prepared UI never calls the canonical API.
+  release_nginx_configmap | jq -c --arg ns "$NS" '{apiVersion:"v1",kind:"ConfigMap",
+    metadata:{name:"radar-ui-nginx-prepared",namespace:$ns,labels:((.metadata.labels//{})|.["sentropic.io/slot"]="prepared")},
     data:(.data|map_values(gsub("http://radar-api:3000";"http://radar-api-prepared:3000")))}' >> "$WORK/prepared-stack.jsonl"
   for name in "${PREPARED_NAMES[@]}"; do
     # Workload spec from the release manifests (#611: env, secretKeyRef, probes, resources reach
@@ -131,7 +133,7 @@ render_prepared_stack() {
                  +[{name:"POSTGRES_DB",value:$db}]
                  +(if $name=="radar-immo-mcp" then [{name:"RADAR_API_BASE_URL",value:"http://radar-api-prepared:3000"}] else [] end))
              end)|
-           .spec.volumes=((.spec.volumes//[])|map(if .configMap.name=="radar-ui-nginx"
+           .spec.volumes=((.spec.volumes//[])|map(if (.configMap.name//""|startswith("radar-ui-nginx"))
              then .configMap.name="radar-ui-nginx-prepared" else . end)))}}' \
       "$WORK/release-deployment.json" >> "$WORK/prepared-stack.jsonl"
     jq -c --arg ns "$NS" --arg l "$SLOT_LABEL" '{apiVersion:"v1",kind:"Service",
@@ -175,4 +177,34 @@ release_object() {
   object=$(release_find "$1" "$2")
   [[ $object != null && -n $object ]] || fail "release_manifest_missing: $1/$2"
   printf '%s\n' "$object"
+}
+release_configmap() {
+  # release_configmap <name>: the ConfigMap rendered with the release, else the live one (a rollback
+  # restores specs whose generated ConfigMaps already exist in the namespace).
+  local cm
+  cm=$(release_find ConfigMap "$1")
+  if [[ $cm == null || -z $cm ]]; then cm=$("${k[@]}" get configmap "$1" -o json) || fail "release_configmap_missing: $1"; fi
+  printf '%s\n' "$cm"
+}
+release_nginx_configmap() {
+  # The nginx ConfigMap mounted by the release UI (kustomize names it radar-ui-nginx-<hash>).
+  local name
+  name=$(release_object Deployment radar-ui | jq -r '[.spec.template.spec.volumes[]?.configMap.name//empty|select(startswith("radar-ui-nginx"))]|first//""')
+  [[ -n $name ]] || fail 'release_manifest_missing: the release UI mounts no radar-ui-nginx ConfigMap'
+  release_configmap "$name"
+}
+apply_release_generated() {
+  # Generated (content-hashed) ConfigMaps of the release that its workloads reference are created
+  # before the prepared slot and before the promotion: immutable by name, never updated.
+  local name
+  while read -r name; do
+    [[ -n $name ]] || continue
+    "${k[@]}" get configmap "$name" --ignore-not-found -o name | grep -q . && continue
+    release_find ConfigMap "$name" | jq -c --arg ns "$NS" 'select(.!=null)|{apiVersion:"v1",kind:"ConfigMap",
+      metadata:{name:.metadata.name,namespace:$ns,labels:(.metadata.labels//{})},data:(.data//{})}' > "$WORK/generated.json"
+    [[ -s $WORK/generated.json ]] || continue
+    "${k[@]}" create -f "$WORK/generated.json" >/dev/null || fail "Release ConfigMap creation failed: $name"
+  done < <(for name in "${PREPARED_NAMES[@]}"; do release_object Deployment "$name"; done | jq -r '
+    .spec.template.spec|[.volumes[]?.configMap.name, (.containers[],.initContainers[]?|.envFrom[]?.configMapRef.name,
+      .env[]?.valueFrom.configMapKeyRef.name)]|.[]|strings|select(test("-[a-z0-9]{10}$"))' | sort -u)
 }

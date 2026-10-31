@@ -365,3 +365,18 @@ test('the rehearsal version check answers same when the release is already serve
   const changed = fixture({ previousSha: '9'.repeat(40) });
   try { assert.equal(changed.run('rehearse-check').stdout.trim(), 'changed'); } finally { changed.cleanup(); }
 });
+test('the kustomize-hashed nginx ConfigMap of the release is applied first and the prepared UI calls the prepared API', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    const ui = object(f, 'radar-ui-prepared', 'Deployment').spec.template.spec;
+    assert.deepEqual(ui.volumes.map(v => v.configMap?.name), ['radar-ui-nginx-prepared'], 'remapped by prefix, never the hashed canonical name');
+    const conf = object(f, 'radar-ui-nginx-prepared').data['default.conf'];
+    assert.ok(conf.startsWith('# release nginx') && conf.includes('http://radar-api-prepared:3000') && !conf.includes('http://radar-api:3000'));
+    assert.ok(object(f, 'radar-ui-nginx-7k2m9h5tgb', 'ConfigMap'), 'generated ConfigMap of the release created before the slot');
+    success(f.run('run', ['MODE=run']));
+    const canonical = object(f, 'radar-ui', 'Deployment').spec.template.spec;
+    assert.deepEqual(canonical.volumes.map(v => v.configMap?.name), ['radar-ui-nginx-7k2m9h5tgb']);
+    assert.ok(object(f, 'radar-ui-nginx-7k2m9h5tgb', 'ConfigMap'), 'the promoted UI mounts an existing ConfigMap');
+  } finally { f.cleanup(); }
+});
