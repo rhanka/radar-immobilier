@@ -1,15 +1,26 @@
-# Radar immobilier MCP server in preprod: user manual
+# Annex: Radar immobilier MCP server in preprod, user manual
+
+This document is an annex to the connector guide
+[`docs/spec/mcp/claude-ai-connector-setup.md`](../spec/mcp/claude-ai-connector-setup.md)
+(illustrated version with PDF:
+[`docs/guides/connecteur-mcp/guide-connecteur-claude-ai.md`](../guides/connecteur-mcp/guide-connecteur-claude-ai.md)).
+The guide gives the connection parameters for production and preprod; this
+annex covers preprod tools, test scenarios and errors.
+
+> **Preprod connector already in place?** Nothing changes with the new MCP
+> version. Recreate the connector only if you switch Claude accounts.
 
 | Item | Value |
 | --- | --- |
 | MCP endpoint | `https://preprod.immo.sent-tech.ca/mcp` |
+| OAuth client ID | `immo-mcp-preprod` (public client, empty secret) |
 | Identity provider | `https://preprod.auth.sent-tech.ca` |
 | Published artifact hosts | `<artifact-uuid>.preprod.immo-pages.sent-tech.ca` (stable), `<release-uuid>.pinned.preprod.immo-pages.sent-tech.ca` (pinned) |
 | Served API release | `6092169` (`GET /health` returned `sha: 609216947c48…` on 2026-10-30) |
 | Source read for this manual | `origin/main` at `d25eb5ac2`, which contains `6092169` |
 | Audience | Owner or tester with an approved preprod account |
 
-This manual describes what a tester sees from the outside. It does not
+This annex describes what a tester sees from the outside. It does not
 replace the operator runbooks listed in [Sources](#9-sources).
 
 ## 1. What the MCP server does
@@ -37,10 +48,8 @@ workspace or ownership from tool arguments.
   `search_signals` returns `scope_denied:immo:search`.
 - **OAuth client ID.** The preprod IdP metadata (checked 2026-10-30) advertises
   no `registration_endpoint`, so clients cannot register themselves. You need a
-  pre-registered public client ID. The preprod value is **not recorded in the
-  repository** (`missing source`); ask the IdP owner. Production uses the public
-  client `immo-mcp` with no secret (see
-  `docs/guides/connecteur-mcp/guide-connecteur-claude-ai.md`).
+  pre-registered public client ID: in preprod, `immo-mcp-preprod`, with an empty
+  secret and the same scopes as production (production uses `immo-mcp`).
 
 ## 3. Connect
 
@@ -96,8 +105,8 @@ organization admin may have to add the connector.
 3. Fill in:
    - **Name**: `Radar immobilier (preprod)`
    - **Remote MCP server URL**: `https://preprod.immo.sent-tech.ca/mcp`
-4. Open **Advanced settings**: **OAuth Client ID** = the preprod client ID from
-   section 2; **OAuth Client Secret** stays empty.
+4. Open **Advanced settings**: **OAuth Client ID** = `immo-mcp-preprod`;
+   **OAuth Client Secret** stays empty.
 5. Click **Add**, open the connector, click **Connect**.
 6. Sign in on the IdP screen (step 2 above) and accept the scopes.
 7. The connector shows as connected and lists its tools. In each new
@@ -113,7 +122,7 @@ Command line:
 
 ```sh
 claude mcp add --transport http \
-  --client-id <PREPROD_CLIENT_ID> \
+  --client-id immo-mcp-preprod \
   --callback-port <PORT> \
   -s project immo-preprod https://preprod.immo.sent-tech.ca/mcp
 ```
@@ -136,7 +145,7 @@ Claude Code 2.1.314):
       "type": "http",
       "url": "https://preprod.immo.sent-tech.ca/mcp",
       "oauth": {
-        "clientId": "<PREPROD_CLIENT_ID>",
+        "clientId": "immo-mcp-preprod",
         "callbackPort": 53682
       }
     }
@@ -537,8 +546,6 @@ operator when you report a problem.
   `unverified`. Test only with designated test accounts.
 - Five domain tools return `not_wired_yet`: `search_lots`, `get_lot_card`,
   `get_opportunity_dossier`, `list_documents`, `read_document_excerpt`.
-- The preprod OAuth client ID for connectors is not documented in the
-  repository.
 - No authenticated MCP call was made while writing this manual. Tool results
   shown are shapes from fixtures and code, not preprod data.
 - Mutations other than artifacts (notes, decisions) are not exposed.
