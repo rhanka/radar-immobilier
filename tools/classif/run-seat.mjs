@@ -3,6 +3,7 @@
 // scrubbed of provider keys / base URLs / cloud variables, tools and MCP disabled where the CLI
 // allows it, so the model sees only the prompt. No API key is ever passed.
 import { spawn } from 'node:child_process';
+import { clearTimeout, setTimeout } from 'node:timers';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';

@@ -3,6 +3,8 @@
 // computed by the repository code itself, exactly as aggregateGraphSignalProjectionRows():
 //   z = isZonageSignal · r = B′-eligible ∧ isResidentielPertinent · p = isPrecoceSignal ·
 //   hidden = isHiddenByVivierBExclusions(PIIA without residential project, minor variances).
+import { Buffer } from "node:buffer";
+import process from "node:process";
 import { classifyBPrime, isHiddenByVivierBExclusions } from "@radar/domain";
 import {
   classifyGraphNodeVivierV2,
