@@ -81,7 +81,7 @@ export async function runPass({ pass, mode = 'independent', guide = 'G0', annota
       let reused = false;
       if (existsSync(rawFile)) { r = JSON.parse(readFileSync(rawFile, 'utf8')); reused = true; }
       else {
-        r = await callSeat(annotator, prompt, { base: seatTmp, timeoutMs: 1800000 });
+        r = await callSeat(annotator, prompt, { base: seatTmp, timeoutMs: 3600000 });
         writeFileSync(rawFile, JSON.stringify(r), { mode: 0o600 });
       }
       pairs = parseAnswers(r.text, lot.items);

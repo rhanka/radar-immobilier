@@ -53,7 +53,7 @@ export async function main() {
     if (existsSync(rawFile)) r = JSON.parse(readFileSync(rawFile, 'utf8'));
     else {
       calls++;
-      r = await callSeat('opus-5.5-max', prompt, { base: privateDir(path.join(home, 'l1', 'seat-tmp')) });
+      r = await callSeat('opus-5.5-max', prompt, { base: privateDir(path.join(home, 'l1', 'seat-tmp')), timeoutMs: 3600000 });
       writeFileSync(rawFile, JSON.stringify(r), { mode: 0o600 });
     }
     if (r.code === 0 && String(r.text).trim().length > 800) break;

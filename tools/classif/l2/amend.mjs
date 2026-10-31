@@ -56,7 +56,7 @@ ${digest}
 `;
   const calls = [];
   const proposals = await Promise.all(ANNOTATORS.map(async (a) => {
-    const r = await callSeat(a, proposePrompt, { base: seatTmp, timeoutMs: 1800000 });
+    const r = await callSeat(a, proposePrompt, { base: seatTmp, timeoutMs: 3600000 });
     calls.push({ annotator: a, step: 'propose', exitCode: r.code, latencyMs: r.latencyMs });
     const j = parseJsonObject(r.text);
     return (Array.isArray(j?.amendments) ? j.amendments : []).slice(0, MAX_PER_ANNOTATOR).filter((x) => typeof x?.rule === 'string' && x.rule.trim());
@@ -71,7 +71,7 @@ false. Return ONLY JSON: {"votes":{"X1":true,"X2":false, ...}}
 ${union.map((x) => `- ${x.id}: ${x.rule} (rationale: ${x.rationale})`).join('\n')}
 `;
   const ballots = await Promise.all(ANNOTATORS.map(async (a) => {
-    const r = await callSeat(a, votePrompt, { base: seatTmp, timeoutMs: 1800000 });
+    const r = await callSeat(a, votePrompt, { base: seatTmp, timeoutMs: 3600000 });
     calls.push({ annotator: a, step: 'vote', exitCode: r.code, latencyMs: r.latencyMs });
     return parseJsonObject(r.text)?.votes ?? {};
   }));
