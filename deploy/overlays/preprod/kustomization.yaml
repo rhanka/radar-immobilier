@@ -87,6 +87,11 @@ patches:
       - op: replace
         path: /data/GRAPH_S3_BUCKET
         value: radar-immobilier-docs-preprod
+      # Zero-downtime rehearsal writer probe: preprod only (the base and production stay without it).
+      # Kept here because reconcile-preprod.sh re-applies this ConfigMap on every deploy.
+      - op: add
+        path: /data/CUTOVER_PROBE_ENABLED
+        value: "true"
 
 # Per-env OIDC auth. Same mechanism as the buckets above, same trap: once
 # reconcile-preprod.sh applies ConfigMap radar-api (#738), EVERY key the overlay
