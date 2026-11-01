@@ -11,6 +11,7 @@
    * (RadarChatPanel). `ChatWidget` reste le CONTENU (tabs/panneaux), pas un dock.
    */
   import { onMount } from "svelte";
+  import { chatDisplayMode } from "$lib/sync/preferences.js";
   import { MessageCircle, X, PanelRight, PanelBottom } from "@lucide/svelte";
   import ChatDock, {
     type ChatDockInstance,
@@ -58,18 +59,20 @@
 
   onMount(() => {
     displayMode = readDisplayMode();
+    const stopPreference = chatDisplayMode.subscribe((value) => { displayMode = value; });
     // Canal de commande #564 : chaque bump du nonce = une bascule demandée par un
     // déclencheur hôte. On IGNORE la valeur courante rejouée à l'abonnement, puis
     // on réutilise le toggle() existant du dock (aucune ouverture/fermeture
     // parallèle). L'unsub est rendu à onDestroy.
     let primed = false;
-    return chatToggleNonce.subscribe(() => {
+    const stopToggle = chatToggleNonce.subscribe(() => {
       if (!primed) {
         primed = true;
         return;
       }
       void dock?.toggle();
     });
+    return () => { stopPreference(); stopToggle(); };
   });
 
   const setDisplayMode = (next: ChatWidgetDisplayMode): void => {
