@@ -104,6 +104,7 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
   - [ ] Versioned bounded contexts, explicit adoption, session isolation.
   - [ ] Unknown schemas preserved; storage failures degrade without retries.
 - [ ] **Lot T — Verification**
+  - [x] Final scoped verification: 43 tests, workspace types, lint and nginx parity pass.
   - [x] Replay stub can execute on the temporary mount; temporary diagnostics removed.
   - [x] Qualification UI images receive the full committed source identity.
   - [x] Disposable DB data/socket tmpfs fixes measured startup fsync stalls.
