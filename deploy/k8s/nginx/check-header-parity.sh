@@ -51,4 +51,15 @@ if [ "$cluster_js" != "$preprod_js" ]; then
   echo "Keep the worker location block identical (JS MIME, never SPA HTML)." >&2
   exit 1
 fi
-echo "OK: nginx security headers identical between cluster, compose and preprod confs; worker location block identical between cluster and preprod."
+extract_sw_block() {
+  local block
+  block="$(awk 'index($0, "location = /immo-sw.js") { f = 1 } f { print } f && /^[[:space:]]*}$/ { exit }' "$1")"
+  [ -n "$block" ] || { echo "ERROR: missing SW block in $1" >&2; return 1; }
+  printf '%s\n' "$block"
+}
+cluster_sw="$(extract_sw_block "$CLUSTER")"
+for conf in "$COMPOSE" "$PREPROD"; do
+  variant_sw="$(extract_sw_block "$conf")"
+  diff <(printf '%s\n' "$cluster_sw") <(printf '%s\n' "$variant_sw")
+done
+echo "OK: nginx headers and worker entrypoints match across all three variants."

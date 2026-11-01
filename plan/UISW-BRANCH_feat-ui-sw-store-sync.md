@@ -59,7 +59,7 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
   - [x] Embedded wire/state contracts and preprod-only runtime gate.
   - [ ] Closed protocol, browser-client validation, handshake and reconnect.
   - [ ] Compatible update, targeted invalidation, kill switch and build identities.
-  - [ ] Three nginx variants: JS, no-cache, 404, security-header inheritance.
+  - [x] Three nginx variants: JS, no-cache, 404, security-header inheritance.
 - [ ] **Lot C — Local state sync**
   - [x] App/session wiring and explicit partial-context resume controls.
   - [x] Svelte preference integration keeps chat layout, basemap and route ownership.
