@@ -73,7 +73,7 @@ cleanup() {
       (set -e; stop_operation_jobs
         # An abandoned release returns routing and writes to slot=main, then removes the prepared
         # slot (logs exported) so that neither the next chain nor the daily restore is blocked.
-        if jq -e '.mode=="run"' "$WORK/record.json" >/dev/null; then back_to_main; prepared_stack_retire; fi
+        if jq -e '.mode=="run"' "$WORK/record.json" >/dev/null; then back_to_main; fi
         if jq -e '.checkpoints.suspend!=null' "$WORK/record.json" >/dev/null; then restore_schedules; fi
         lock_delete) || printf 'Helper state unknown; lock retained\n' >&2
     fi

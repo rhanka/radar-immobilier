@@ -583,3 +583,33 @@ test('an unreadable slot state is unknown, never legacy: slots-status and the bl
     assert.equal(legacy.stdout.trim(), 'legacy');
   } finally { f.cleanup(); g.cleanup(); }
 });
+test('a partial switch still retains the abandoned writes: the next prepare refuses the database', () => {
+  const f = fixture({ writeGrowth: { radar_next: 5 } });
+  try {
+    success(f.run('prepare'));
+    // The third Service refuses the switch after two already moved to prepared.
+    const state = f.state(); state.serviceConflict = 'radar-ui'; state.conflictTo = 'prepared'; save(f, state);
+    assert.notEqual(f.run('run', ['MODE=run']).status, 0);
+    for (const name of SERVICES) assert.equal(slotOf(f, name), 'main');
+    const [entry] = entries(f);
+    assert.deepEqual([entry.status, entry.db, entry.tuples], ['pending', 'radar_next', 5]);
+    const refused = f.run('prepare');
+    assert.notEqual(refused.status, 0);
+    assert.match(refused.stderr, /retained_db_unacknowledged/);
+  } finally { f.cleanup(); }
+});
+test('a return to main measures the abandoned writes only after the prepared writers stopped', () => {
+  const f = fixture({ commitOnPreparedStop: 3 });
+  try {
+    success(f.run('prepare'));
+    const state = f.state(); state.preparedStale = true; save(f, state);
+    assert.notEqual(f.run('run', ['MODE=run']).status, 0);
+    const steps = f.state().jobCreation.map(j => j.step);
+    const retired = steps.findIndex(s => s.startsWith('logsprepared'));
+    const measured = steps.reduce((last, s, i) => s.startsWith('writestats') ? i : last, -1);
+    assert.ok(retired >= 0 && retired < measured, `the prepared stack retires before the settled measurement: ${steps.join(' ')}`);
+    assert.equal(object(f, 'radar-api-prepared', 'Deployment'), undefined, 'the writers are gone before the measurement');
+    const [entry] = entries(f);
+    assert.deepEqual([entry.status, entry.db, entry.tuples], ['pending', 'radar_next', 3]);
+  } finally { f.cleanup(); }
+});
