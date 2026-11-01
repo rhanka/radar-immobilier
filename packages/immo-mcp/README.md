@@ -135,6 +135,7 @@ L'entrée `immo` suit exactement le même contrat stdio :
 | `IMMO_MCP_OAUTH_JWKS_URI` | `<issuer>/.well-known/jwks.json` | override du JWKS de vérif |
 | `IMMO_MCP_OAUTH_REQUIRED_SCOPE` | `immo:read` | gate de scope grossier sur la route `/mcp` |
 | `IMMO_MCP_OAUTH_SCOPES_SUPPORTED` | `immo:read immo:search immo:documents:read` | scopes annoncés dans le PRM |
+| `IMMO_MCP_ARTIFACTS_LEGACY_READ_SCOPE` | `false` | Transition flag for the artifact tools. Writes (`artifacts_ensure`, `artifacts_publish`) always require `immo:artifacts:write`; reads (`artifacts_list`, `artifacts_get`) require `immo:artifacts:read`, and `true` lets `immo:read` still satisfy the reads only. Any other value than unset/`true`/`false` fails startup. |
 | `IMMO_MCP_HTTP_PORT` | `8848` | port d'écoute |
 | `IMMO_MCP_SESSION_IDLE_TIMEOUT_MS` | `1800000` (30 min) | inactivité max d'une session MCP avant fermeture + libération mémoire |
 | `IMMO_MCP_SESSION_MAX_LIFETIME_MS` | `28800000` (8 h) | durée de vie maximale d'une session MCP, même active |

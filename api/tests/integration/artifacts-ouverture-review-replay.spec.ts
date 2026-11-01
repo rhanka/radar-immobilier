@@ -4,6 +4,9 @@ import { auth, cookie } from "./artifacts-h2.helpers.js";
 import { createArtifactBinding } from "../../../packages/immo-mcp/src/artifact-binding.js";
 import { ALICE, SCOPE, bindingRequest, body, general, startOuverture, type Ouverture } from "./artifacts-ouverture.helpers.js";
 
+/** Seconds a case needs inside one minute window; stays below the 20 s hook timeout. */
+const MINUTE_MARGIN_S = 10;
+
 describe("Astra review: committed replay before the minute bound", () => {
   let h: Ouverture;
   let bound: NonNullable<Awaited<ReturnType<typeof createArtifactBinding>>>;
@@ -21,6 +24,12 @@ describe("Astra review: committed replay before the minute bound", () => {
   beforeEach(async () => {
     await h.setStatus(ALICE, "approved");
     await h.pool.query("DELETE FROM artifacts.host_actor_rate");
+    // The shared bound is a calendar-minute window (date_trunc('minute', now())).
+    // All eleven admissions of a case must land in one window, otherwise the
+    // capped call is admitted by a fresh minute; start with enough of it left.
+    await h.pool.query(`SELECT pg_sleep(CASE WHEN left_s < $1 THEN left_s + 0.05 ELSE 0 END)
+      FROM (SELECT 60 - extract(epoch FROM clock_timestamp()
+        - date_trunc('minute', clock_timestamp()))::float8 AS left_s) AS bound`, [MINUTE_MARGIN_S]);
   });
   afterAll(async () => { await bound?.close(); await h?.close(); });
 

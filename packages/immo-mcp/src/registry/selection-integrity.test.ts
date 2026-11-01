@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { ARTIFACT_SELECTION } from "./artifact-profile.js";
+import { ARTIFACT_INVOCATION_SCOPES, ARTIFACT_TOOL_SCOPES, ARTIFACT_SELECTION } from "./artifact-profile.js";
 import { compileComposition } from "./composition.js";
 import type { ArtifactActivationRequest, ProviderDefinition } from "./mcp-registry.js";
 
@@ -8,13 +8,13 @@ const embedded = JSON.parse(readFileSync(new URL("../../config/immo-tools.v1.jso
 const immo: ProviderDefinition = { ...embedded.provider, tools: embedded.tools };
 const artifact: ArtifactActivationRequest = {
   providerId: "sentropic.artifacts", selection: ARTIFACT_SELECTION,
-  invocationScope: "immo:read", profileRevision: "immo-artifacts.v1",
+  invocationScopes: ARTIFACT_INVOCATION_SCOPES, profileRevision: "immo-artifacts.v1",
   finalizationContract: "test-finalization.v1", errorContract: "test-failure.v1",
 };
 const provider = (): ProviderDefinition => ({
   id: "sentropic.artifacts", version: "0.2.2",
   tools: ARTIFACT_SELECTION.map(({ tool }) => ({
-    name: tool, scope: "immo:read", binding: { context: "artifact-service", registeredBy: "registerTools" },
+    name: tool, scope: ARTIFACT_TOOL_SCOPES[tool], binding: { context: "artifact-service", registeredBy: "registerTools" },
   })),
 });
 

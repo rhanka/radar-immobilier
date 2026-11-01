@@ -8,12 +8,20 @@ import { ARTIFACT_NATIVE_ADAPTER, bindArtifactProvider, IMMO_ARTIFACT_PROFILE as
   IMMO_ARTIFACT_MANIFEST, type ArtifactMcpBinding } from "./artifact-provider.js";
 
 const authority: VerifiedMcpRequest = {
-  principal: { issuer: "synthetic", sub: "alice", scopes: ["immo:read"], claims: [], attributes: {} },
+  principal: { issuer: "synthetic", sub: "alice", scopes: ["immo:read", "immo:artifacts:read", "immo:artifacts:write"],
+    claims: [], attributes: {} },
   resource: "synthetic:mcp", correlationId: "test", signal: new AbortController().signal,
 };
 const guard = vi.fn(async () => ({ allowed: false as const, reason: "denied" as const,
   publicCode: "access_denied", status: 403, retriable: false }));
-function setup() {
+const withScopes = (scopes: string[]): VerifiedMcpRequest => ({
+  ...authority, principal: { ...authority.principal, scopes },
+});
+const denial = (result: { content: unknown[] }) => JSON.parse((result.content[0] as { text: string }).text);
+const ENSURE = { bindingName: "summer", idempotencyKey: "k" };
+const PUBLISH = { artifactId: "123e4567-e89b-12d3-a456-426614174000", idempotencyKey: "k",
+  files: [{ path: "index.html", mimeType: "text/html", text: "<p>x</p>" }] };
+function setup(scopePolicy?: { legacyReadScope: boolean }) {
   const execute = vi.fn<ArtifactsApp["execute"]>(async (_request, invocation) => ({
     ok: false, failure: { kind: "operational", category: "provider_unavailable", httpStatus: 503,
       publicCode: "capability_unavailable", retriable: true, invocationId: invocation.invocationId,
@@ -22,7 +30,7 @@ function setup() {
   const app = { execute, profileDigest: profile.profileDigest, selectedCapabilities: profile.selectedCapabilities };
   const createGuard = vi.fn(() => guard);
   return { execute, app, createGuard, binding: bindArtifactProvider({ app,
-    storageScopeId: "synthetic", authorizeCommit: createGuard }) };
+    storageScopeId: "synthetic", authorizeCommit: createGuard, scopePolicy }) };
 }
 
 describe("P7 trusted artifact binding", () => {
@@ -51,12 +59,54 @@ describe("P7 trusted artifact binding", () => {
     const unselected = await h.binding.invoke("artifacts_delete", {}, authority);
     expect(unselected.isError).toBe(true);
     expect(JSON.stringify(unselected)).toContain("capability_unavailable");
-    await expect(h.binding.invoke("artifacts_list", {}, {
-      ...authority, principal: { ...authority.principal, scopes: [] },
-    })).rejects.toThrow("artifact_scope_denied");
+    expect(denial(await h.binding.invoke("artifacts_list", {}, withScopes([]))))
+      .toEqual({ error: "artifact_scope_denied", retryable: false, requiredScope: "immo:artifacts:read" });
     await expect(ARTIFACT_NATIVE_ADAPTER.invokeTool()).rejects.toThrow("native_wire_dispatch_required");
     expect(h.execute).not.toHaveBeenCalled();
     expect(h.createGuard).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["artifacts_ensure", ENSURE],
+    ["artifacts_publish", PUBLISH],
+  ] as const)("should refuse %s with a typed artifact_scope_denied without the write scope", async (tool, args) => {
+    for (const policy of [undefined, { legacyReadScope: true }]) {
+      const h = setup(policy);
+      for (const scopes of [["immo:read"], ["immo:read", "immo:search", "immo:documents:read"], ["immo:artifacts:read"]]) {
+        const result = await h.binding.invoke(tool, args, withScopes(scopes));
+        expect(result.isError).toBe(true);
+        expect(denial(result)).toEqual({ error: "artifact_scope_denied", retryable: false,
+          requiredScope: "immo:artifacts:write" });
+      }
+      expect(h.execute).not.toHaveBeenCalled();
+      expect(h.createGuard).not.toHaveBeenCalled();
+    }
+  });
+
+  it.each([
+    ["artifacts_ensure", ENSURE],
+    ["artifacts_publish", PUBLISH],
+  ] as const)("should dispatch %s once the write scope is granted", async (tool, args) => {
+    const h = setup();
+    const result = await h.binding.invoke(tool, args, withScopes(["immo:artifacts:write"]));
+    // The contract double answers capability_unavailable: reaching it proves admission.
+    expect(denial(result).error).not.toBe("artifact_scope_denied");
+    expect(h.createGuard).toHaveBeenCalledTimes(1);
+    expect(h.execute).toHaveBeenCalledTimes(1);
+  });
+
+  it("should accept immo:read for reads only while the transition flag is on", async () => {
+    const strict = setup();
+    expect(denial(await strict.binding.invoke("artifacts_list", {}, withScopes(["immo:read"]))).error)
+      .toBe("artifact_scope_denied");
+    expect(strict.execute).not.toHaveBeenCalled();
+    await strict.binding.invoke("artifacts_list", {}, withScopes(["immo:artifacts:read"]));
+    expect(strict.execute).toHaveBeenCalledTimes(1);
+    const legacy = setup({ legacyReadScope: true });
+    expect(legacy.binding.scopePolicy.legacyReadScope).toBe(true);
+    await legacy.binding.invoke("artifacts_list", {}, withScopes(["immo:read"]));
+    await legacy.binding.invoke("artifacts_get", { artifactId: PUBLISH.artifactId }, withScopes(["immo:read"]));
+    expect(legacy.execute).toHaveBeenCalledTimes(2);
   });
 
   it("should preserve retry classification while hiding private causes", async () => {
