@@ -5,7 +5,7 @@
 // Writes $CLASSIF_HOME/l1/pack/guide-G0.md (private) and the L1 manifest (hashes only) in the repo.
 import path from 'node:path';
 import process from 'node:process';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { callSeat } from '../run-seat.mjs';
 import { OUTPUT_SCHEMA } from '../l2/annotation.mjs';
 import { sha256 } from '../lib/render.mjs';
@@ -54,12 +54,15 @@ export async function main() {
     else {
       calls++;
       r = await callSeat('opus-5.5-max', prompt, { base: privateDir(path.join(home, 'l1', 'seat-tmp')), timeoutMs: 3600000 });
-      writeFileSync(rawFile, JSON.stringify(r), { mode: 0o600 });
+      const tmpRaw = `${rawFile}.tmp-${process.pid}`;
+      writeFileSync(tmpRaw, JSON.stringify(r), { mode: 0o600 });
+      renameSync(tmpRaw, rawFile);
     }
     if (r.code === 0 && String(r.text).trim().length > 800) break;
   }
   const guide = String(r.text ?? '').trim();
-  if (guide.length <= 800) throw new Error(`guide G0 not produced (exit ${r.code}): ${String(r.stderrTail ?? '').slice(-300)}`);
+  // Fail closed: a non-zero seat exit never yields an admissible guide, even with long text.
+  if (r?.code !== 0 || guide.length <= 800) throw new Error(`guide G0 not produced (exit ${r?.code}): ${String(r?.stderrTail ?? '').slice(-300)}`);
   writeFileSync(out, `${guide}\n`, { mode: 0o600 });
   const manifestDir = path.join(CLASSIF_DIR, 'l1', 'manifests');
   mkdirSync(manifestDir, { recursive: true });

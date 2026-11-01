@@ -5,11 +5,11 @@
 // volume was missing after a machine crash, issue `engram_failed`).
 import path from 'node:path';
 import process from 'node:process';
-import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { classifHome } from '../lib/paths.mjs';
 import { validateExtraction } from '../lib/engram.mjs';
 import { itemValidity } from './annotation.mjs';
-import { ANNOTATORS, loadCodes, loadDevItems } from './run.mjs';
+import { atomicWrite, ANNOTATORS, loadCodes, loadDevItems } from './run.mjs';
 
 export const engramFailed = (validation) => (validation.issues ?? []).some((i) => i.code === 'engram_failed');
 
@@ -20,13 +20,23 @@ export async function main(argv = process.argv.slice(2)) {
   const work = path.join(home, 'l1', 'engram-work');
   const items = new Map(loadDevItems(home).map((i) => [i.itemId, i]));
   const codes = loadCodes();
-  const stats = { checked: 0, rewritten: 0, stillFailed: 0, invalidItems: 0 };
+  const stats = { checked: 0, rewritten: 0, stillFailed: 0, nonZeroExit: 0, invalidItems: 0 };
   for (const a of ANNOTATORS) {
     const dir = path.join(home, 'l2', `pass${n}`, a);
     if (!existsSync(dir)) continue;
     for (const f of readdirSync(dir).filter((x) => x.endsWith('.json'))) {
       const file = path.join(dir, f);
       const lot = JSON.parse(readFileSync(file, 'utf8'));
+      // Fail closed: a non-zero seat exit makes every vote of the lot inadmissible on
+      // every path. Revalidation must never resurrect such votes, even with --all.
+      if (lot.exitCode !== 0) {
+        lot.annotations = lot.annotations.map((an) => ({ ...an, valid: false, issues: [...new Set([...(an.issues ?? []), 'non-zero-exit'])] }));
+        stats.nonZeroExit++;
+        stats.invalidItems += lot.annotations.length;
+        atomicWrite(file, JSON.stringify(lot, null, 1), { mode: 0o600 });
+        stats.rewritten++;
+        continue;
+      }
       if (onlyFailed && lot.engramChecked === true) continue;
       stats.checked++;
       const rel = path.join('runs', `pass${n}`, a, f);
@@ -41,7 +51,7 @@ export async function main(argv = process.argv.slice(2)) {
       lot.engramIssueCodes = [...new Set((validation.issues ?? []).map((x) => x.code))];
       lot.engramChecked = true;
       stats.invalidItems += lot.annotations.filter((x) => !x.valid).length;
-      writeFileSync(file, JSON.stringify(lot, null, 1), { mode: 0o600 });
+      atomicWrite(file, JSON.stringify(lot, null, 1), { mode: 0o600 });
       stats.rewritten++;
     }
   }
