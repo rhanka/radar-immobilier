@@ -9,10 +9,31 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { callSeat, parseJsonObject } from '../run-seat.mjs';
 import { sha256 } from '../lib/render.mjs';
 import { CLASSIF_DIR, classifHome, privateDir } from '../lib/paths.mjs';
-import { ANNOTATORS, loadDevItems } from './run.mjs';
+import { atomicWrite, ANNOTATORS, loadDevItems } from './run.mjs';
 import { latestVotes } from './converge.mjs';
 
 const MAX_PER_ANNOTATOR = 8;
+
+/**
+ * Fail-closed seat policy for amendment: a non-zero seat exit contributes nothing —
+ * neither a proposal nor a vote — so a failed ballot can never adopt a rule.
+ */
+export function parseProposalList(r) {
+  if (!r || r.code !== 0) return [];
+  const j = parseJsonObject(r.text);
+  return (Array.isArray(j?.amendments) ? j.amendments : []).slice(0, MAX_PER_ANNOTATOR).filter((x) => typeof x?.rule === 'string' && x.rule.trim());
+}
+
+export function parseBallot(r) {
+  if (!r || r.code !== 0) return {};
+  return parseJsonObject(r.text)?.votes ?? {};
+}
+
+export function tallyAmendments(union, ballotResults) {
+  const ballots = ballotResults.map(parseBallot);
+  const tally = union.map((x) => ({ ...x, yes: ballots.filter((b) => b[x.id] === true).length }));
+  return { ballots, tally, adopted: tally.filter((x) => x.yes >= 2) };
+}
 
 // Resume state: each answer is saved as soon as it returns and reused (keyed by prompt sha256).
 async function cachedCall(home, annotator, step, prompt, seatTmp) {
@@ -20,7 +41,7 @@ async function cachedCall(home, annotator, step, prompt, seatTmp) {
   if (existsSync(file)) return { ...JSON.parse(readFileSync(file, 'utf8')), reused: true };
   mkdirSync(path.dirname(file), { recursive: true, mode: 0o700 });
   const r = await callSeat(annotator, prompt, { base: seatTmp, timeoutMs: 3600000 });
-  writeFileSync(file, JSON.stringify(r), { mode: 0o600 });
+  atomicWrite(file, JSON.stringify(r), { mode: 0o600 });
   return r;
 }
 
@@ -65,12 +86,12 @@ criteria and the code definitions (general rules, not item-specific decisions). 
 ${digest}
 `;
   const calls = [];
-  const proposals = await Promise.all(ANNOTATORS.map(async (a) => {
+  const proposals = (await Promise.all(ANNOTATORS.map(async (a) => {
     const r = await cachedCall(home, a, 'propose', proposePrompt, seatTmp);
     calls.push({ annotator: a, step: 'propose', exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused) });
-    const j = parseJsonObject(r.text);
-    return (Array.isArray(j?.amendments) ? j.amendments : []).slice(0, MAX_PER_ANNOTATOR).filter((x) => typeof x?.rule === 'string' && x.rule.trim());
-  }));
+    if (r.code !== 0) process.stderr.write(`[amend] ${a} propose seat exit code ${r.code}: proposals inadmissible (fail-closed exit policy)\n`);
+    return parseProposalList(r);
+  }))).flat();
   const union = proposals.flat().map((x) => ({ rule: x.rule.trim(), rationale: String(x.rationale ?? '').trim() }))
     .sort((x, y) => (sha256(x.rule) < sha256(y.rule) ? -1 : 1)).map((x, i) => ({ id: `X${i + 1}`, ...x }));
   const votePrompt = `${common}
@@ -80,13 +101,13 @@ false. Return ONLY JSON: {"votes":{"X1":true,"X2":false, ...}}
 
 ${union.map((x) => `- ${x.id}: ${x.rule} (rationale: ${x.rationale})`).join('\n')}
 `;
-  const ballots = await Promise.all(ANNOTATORS.map(async (a) => {
+  const ballotResults = await Promise.all(ANNOTATORS.map(async (a) => {
     const r = await cachedCall(home, a, 'vote', votePrompt, seatTmp);
     calls.push({ annotator: a, step: 'vote', exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused) });
-    return parseJsonObject(r.text)?.votes ?? {};
+    if (r.code !== 0) process.stderr.write(`[amend] ${a} vote seat exit code ${r.code}: ballot inadmissible (fail-closed exit policy)\n`);
+    return r;
   }));
-  const tally = union.map((x) => ({ ...x, yes: ballots.filter((b) => b[x.id] === true).length }));
-  const adopted = tally.filter((x) => x.yes >= 2);
+  const { tally, adopted } = tallyAmendments(union, ballotResults);
   const next = `${guide.trim()}\n\n## Amendments adopted in ${to} (majority of the three annotators, after pass ${n})\n\n${adopted.map((x, i) => `${i + 1}. ${x.rule}`).join('\n')}\n`;
   writeFileSync(out, next, { mode: 0o600 });
   writeFileSync(path.join(home, 'l2', `amend-${to}.json`), JSON.stringify({ tally, calls }, null, 1), { mode: 0o600 });

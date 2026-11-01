@@ -13,7 +13,7 @@ import { renderItem, nodeBylaws, nodeDocShas, sha256 } from '../lib/render.mjs';
 import { baseCity } from '../lib/fingerprint.mjs';
 import { bprimeStates, fetchProjectionRows } from '../lib/bprime.mjs';
 import { REPO, classifHome } from '../lib/paths.mjs';
-import { MANIFEST_DIR, fingerprintHits, loadExclusions, loadFingerprints, loadSeed, regionBand, seededOrder } from '../lib/draw.mjs';
+import { MANIFEST_DIR, fingerprintHits, loadExclusions, loadSeed, regionBand, requireFingerprints, seededOrder } from '../lib/draw.mjs';
 
 export const TARGETS = { pass1: 192, pass2: 96, pass3: 96 };
 const PER_CITY = 4;
@@ -47,7 +47,9 @@ export async function main(argv = process.argv.slice(2)) {
   const seed = loadSeed('signals', seedArg);
   const home = classifHome();
   const excl = loadExclusions(home, { require: !dry });
-  const fp = loadFingerprints(home);
+  // Fail closed: without the fingerprint guard no input can be scanned; the dry-run
+  // strata report emits no item and needs no guard.
+  const fp = dry ? null : requireFingerprints(home);
   const muni = new Map(JSON.parse(readFileSync(path.join(REPO, 'packages/radar-sources/src/geo/municipalities.qc.json'), 'utf8')).map((m) => [m.slug, m]));
 
   const rows = [...new Map(fetchProjectionRows().map((r) => [r.id, r])).values()];

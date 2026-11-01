@@ -17,7 +17,7 @@ import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } fr
 import { fetchNodes } from '../lib/db.mjs';
 import { sha256 } from '../lib/render.mjs';
 import { CLASSIF_DIR, classifHome, privateDir } from '../lib/paths.mjs';
-import { loadFingerprints } from '../lib/draw.mjs';
+import { requireFingerprints } from '../lib/draw.mjs';
 import { scanFile } from '../guard/sandbox-build.mjs';
 import { words } from '../lib/fingerprint.mjs';
 import { ANNOTATORS, loadDevItems, readPass } from './run.mjs';
@@ -94,8 +94,7 @@ export async function main() {
   const dir = privateDir(path.join(home, 'l2', 'external'));
   const manifest = path.join(home, 'l2', 'scrape-manifest.jsonl');
   // Fail closed: without the fingerprint guard no excerpt can be checked, so the step refuses.
-  const guard = loadFingerprints(home);
-  if (!guard) throw new Error(`refused: ${path.join(home, 'guard', 'fingerprints.json')} missing (fail closed; run make classif-guard-unseal ENV=preprod first)`);
+  const guard = requireFingerprints(home);
   // Per-item resume: only items without a manifest record are processed; an interruption or a
   // DB error after the manifest was created no longer abandons the remaining items.
   const done = readManifestDone(manifest);

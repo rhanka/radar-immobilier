@@ -39,6 +39,14 @@ export function loadFingerprints(home) {
   return { salt: readFileSync(path.join(dir, 'salt'), 'utf8').trim(), fps: JSON.parse(readFileSync(path.join(dir, 'fingerprints.json'), 'utf8')) };
 }
 
+/** Fail-closed fingerprint guard: throws when the guard material is absent, so no draw
+    or complement step can run un-scanned. */
+export function requireFingerprints(home) {
+  const fp = loadFingerprints(home);
+  if (!fp) throw new Error(`refused: ${path.join(home, 'guard', 'fingerprints.json')} missing (fail closed; run make classif-guard-unseal ENV=preprod first)`);
+  return fp;
+}
+
 export function fingerprintHits(fp, text, citySlugs = []) {
   if (!fp) return null;
   const h = scanText(fp.salt, fp.fps, text, { citySlugs });
