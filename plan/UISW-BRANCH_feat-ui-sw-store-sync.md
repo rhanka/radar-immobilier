@@ -1,0 +1,123 @@
+# Feature: UI service worker and local store continuity
+
+## Objective
+Deliver TODAY items (b) and (c) of POSITION IMMO (2026-11-01): coordination-only
+UI worker and targeted local store sync. The DS/H5 kit belongs to another branch.
+
+## Scope / Guardrails
+- Use the owner-provided `.worktrees/ui-sw`, branch `feat/ui-sw-store-sync`.
+- Make only; ENV last; no Python, environment-file reads or kubeconfig access.
+- No deployment. No trailer or AI attribution in commits (owner instruction).
+- Test stacks: `test-ui-sw` and `test-ui-continuity-e2e`; no published ports.
+- Browser fixture binds only to a random container-loopback port.
+- Every campaign tears down its own stack with `down -v`.
+
+## Branch Scope Boundaries (MANDATORY)
+- **Allowed Paths (implementation scope)**:
+  - `ui/public/immo-sw.js`, `ui/src/lib/sw/**`, `ui/src/lib/sync/**`
+  - `ui/src/{App.svelte,main.ts,vite-env.d.ts}`
+  - `ui/src/lib/{state/beta.ts,chat/chat-widget-layout.ts,router/router.ts}`
+  - `ui/src/lib/auth/auth-store.ts` (invalidation and stale-response guard only)
+  - `ui/src/lib/auth/auth-store.test.ts` (delayed-response regression)
+  - `ui/src/lib/components/{chat/ChatWidgetHost.svelte,maps/SignauxMapView.svelte,workspace/ContextResume.svelte}`
+  - `ui/e2e-real/ui-sync*`, this branch plan, `docs/operations/ui-continuity.md`
+- **Forbidden Paths (must not change in this branch)**:
+  - `Makefile`, `docker-compose*.yml`, `rules/**`, agent entrypoints
+  - Other branch plans; DS/H5 implementation; `deploy/cutover/**`, `tools/make/cutover*`
+- **Conditional Paths (allowed only with explicit exception)**:
+  - `ui/{Dockerfile,vite.config.ts}`, nginx variants and header parity check
+  - `tools/ui-continuity.*` (isolated verification entrypoint)
+  - `tools/make/e2e-real.sh` (optional isolated compose override only)
+  - `tools/make/e2e-real-runner.sh` (preinstalled browser OS dependencies only)
+- **Exception process**: declare rationale, impact and rollback below before edits.
+
+## Feedback Loop
+- UISW-EX1: Dockerfile/Vite build stamps distinct client and worker identities and
+  supports kill bytes at the stable URL. Build-only impact; rollback by old image.
+- UISW-EX2: consume `fix/preprod-nginx-worker-csp` via merge, preserving current
+  preprod proxy routes; add SW serving to all three nginx variants and parity.
+  Static-serving impact only; rollback by old configuration.
+- UISW-EX3: standalone Make/compose verification wrapper avoids `.env` reads,
+  keeps dependencies in named volumes, invokes the existing real-stack E2E runner.
+  Buildx activity metadata stays under repository `tmp/` (user config is read-only).
+  No host ports or production effects; remove the wrapper to roll back.
+- UISW-EX4: optional E2E compose override selects tmpfs for the synthetic DB.
+  Evidence: initdb completed bootstrap but host-disk sync exceeded the health
+  window twice. This removes durable I/O from disposable test data without
+  increasing a timeout. Defaults are unchanged; remove the override to roll back.
+- UISW-EX5: the test-only override uses the locally cached Playwright OS image
+  with preinstalled libraries, but installs the exact lockfile Chromium build.
+  Evidence: repeated dpkg fsync stalls on the host disk. Application images and
+  default runners remain unchanged; remove the override to roll back.
+- Synthetic S3/runner temporary bodies also use tmpfs after measured S3 deadlines
+  under host I/O pressure; the API suite is rerun with one worker, unchanged timeouts.
+- The API runner's temporary mount permits execution of synthetic test binaries:
+  inspection proved the default tmpfs was noexec, blocking the replay test's
+  pdftotext stub. This is confined to the disposable runner, never application images.
+- UISW-EX6: API verification extracts committed source into the runner's tmpfs,
+  retaining locked dependency volumes and remapping workspace links. Evidence:
+  repeated cold subprocess imports exceed the unchanged deadline on the host
+  bind mount, while a warmed replay finishes in 6.8 seconds. No assertion or
+  timeout changes; remove the snapshot runner to roll back.
+- Dependency volumes in the disposable wrapper also use executable tmpfs,
+  avoiding repeated disk-bound package creation/removal. The locked dependency
+  graph is unchanged; all mounts disappear with the test stack.
+- Navigation adoption needs router methods to update geographic/hash views
+  coherently; isolated `.set()` of activeRouteView is forbidden.
+- Review runs in this session: owner forbids workflow/background agents.
+
+## Orchestration Mode (AI-selected)
+- [x] Single branch; execute all work directly in this session.
+
+## UAT Management (in orchestration context)
+- Root UAT remains unchanged; qualification uses isolated synthetic test stacks.
+
+## Plan / Todo (lot-based)
+- [x] **Lot 0 — Baseline and constraints**
+  - [x] Read rules and inherited diff; retain correct build/bootstrap work.
+  - [x] Consume prepared preprod worker CSP correction with a merge commit.
+- [x] **Lot B — Coordination worker**
+  - [x] Lifecycle events never restart a retiring worker; kill replies neutralize even after a missed notice.
+  - [x] Invalidations can target an ephemeral tab identity without business state.
+  - [x] Chromium qualified N/N-1/N+1, interruption, refusal, rollback and kill.
+  - [x] Image stamping and disabled-build kill bytes at the stable worker URL.
+  - [x] Nonblocking client registration, stopped-worker reconnect and update API.
+  - [x] Worker validates browser clients and probes the complete live client set.
+  - [x] Embedded wire/state contracts and preprod-only runtime gate.
+  - [x] Closed protocol, browser-client validation, handshake and reconnect.
+  - [x] Compatible update, targeted invalidation, kill switch and build identities.
+  - [x] Three nginx variants: JS, no-cache, 404, security-header inheritance.
+- [x] **Lot C — Local state sync**
+  - [x] Logout during wake revalidation invalidates its owned epoch without overwriting a newer login.
+  - [x] A stale logout preserves contexts owned by a newer canonical epoch.
+  - [x] Epoch changes interrupt an already suspended wake revalidation.
+  - [x] Existing approved epochs are adopted without storage rewrite or echo.
+  - [x] Epoch-scoped invalidation hints preserve fresh logins and survive quota failures.
+  - [x] Wake preserves mounted UI; auth reads recheck changing epochs once.
+  - [x] App/session wiring and explicit partial-context resume controls.
+  - [x] Svelte preference integration keeps chat layout, basemap and route ownership.
+  - [x] Per-tab context engine, session epochs and explicit adoption guards.
+  - [x] Storage-failure boundary and same-origin invalidation channel.
+  - [x] Bounded context projection and fail-closed version validation.
+  - [x] Stable scalar codecs and receive-without-write preference adapter.
+  - [x] Four stable scalar preferences; codecs, Svelte adapters, no receive rewrite.
+  - [x] Versioned bounded contexts, explicit adoption, session isolation.
+  - [x] Unknown schemas preserved; storage failures degrade without retries.
+- [x] **Lot T — Verification**
+  - [x] Final scoped verification: 43 tests, workspace types, lint and nginx parity pass.
+  - [x] Replay stub can execute on the temporary mount; temporary diagnostics removed.
+  - [x] Qualification UI images receive the full committed source identity.
+  - [x] Disposable DB data/socket tmpfs fixes measured startup fsync stalls.
+  - [x] Full UI: 1,981 passed, 2 skipped, 10 todo; MCP: 491 passed.
+  - [x] Browser fixture and production-UI continuity scenarios authored.
+  - [x] Isolated Make entrypoint avoids environment files and removes test volumes.
+  - [x] Session/context isolation unit regressions; delayed auth response rejected.
+  - [x] UI unit tests, codec/adapter/isolation regressions and scoped legacy tests.
+  - [x] Typecheck, lint, API (3,881 passed, 974 conditional skips) and MCP (491 passed).
+  - [x] Playwright: 11 passed, including two tabs, N/N-1/N+1, refusal, reconnect, rollback, kill.
+- [x] **Lot N-1 — Docs consolidation**
+  - [x] Operating procedure authored; interim conductor report records real results.
+  - [x] Operating procedure and French report at the requested conductor path.
+- [x] **Lot N — Delivery**
+  - [x] Push branch and open English PR #976; full SHA and CI state in conductor receipt.
+  - [x] Leave merge to the owner and preserve the source branch.

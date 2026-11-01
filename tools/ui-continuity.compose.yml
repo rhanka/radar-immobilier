@@ -1,0 +1,42 @@
+x-continuity-modules: &continuity-modules
+  driver: local
+  driver_opts:
+    type: tmpfs
+    device: tmpfs
+    o: rw,exec,size=2g
+
+services:
+  minio:
+    volumes:
+      - type: tmpfs
+        target: /tmp
+  postgres:
+    # Synthetic DB discarded after each campaign; avoid host-disk fsync stalls.
+    volumes:
+      - type: tmpfs
+        target: /var/lib/postgresql/data
+      - type: tmpfs
+        target: /var/run/postgresql
+  api:
+    environment:
+      DOTENV_CONFIG_PATH: /dev/null
+      NODE_COMPILE_CACHE: /tmp/node-compile-cache
+    # Replay tests execute a synthetic pdftotext stub under the temporary tree.
+    tmpfs:
+      - /tmp:rw,exec,mode=1777
+    volumes:
+      - continuity-ui-modules:/workspace/ui/node_modules
+      - continuity-mcp-modules:/workspace/packages/immo-mcp/node_modules
+      - continuity-artifacts-modules:/workspace/packages/artifacts-host/node_modules
+      - continuity-domain-modules:/workspace/packages/radar-domain/node_modules
+      - continuity-scoring-modules:/workspace/packages/radar-scoring/node_modules
+      - continuity-sources-modules:/workspace/packages/radar-sources/node_modules
+volumes:
+  radar-test-root-node-modules: *continuity-modules
+  radar-test-api-node-modules: *continuity-modules
+  continuity-ui-modules: *continuity-modules
+  continuity-mcp-modules: *continuity-modules
+  continuity-artifacts-modules: *continuity-modules
+  continuity-domain-modules: *continuity-modules
+  continuity-scoring-modules: *continuity-modules
+  continuity-sources-modules: *continuity-modules

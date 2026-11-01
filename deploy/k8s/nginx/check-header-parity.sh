@@ -1,19 +1,31 @@
 #!/usr/bin/env bash
-# Guard for the intentional 2-file nginx split.
+# Guard for the intentional 3-file nginx split.
 #
 # The CLUSTER conf (deploy/k8s/nginx/default.conf, direct proxy_pass — in-cluster
-# the radar-api Service DNS always exists) and the COMPOSE/standalone conf
+# the radar-api Service DNS always exists), the COMPOSE/standalone conf
 # (ui/nginx/default.conf, lazy `resolver` + variable proxy_pass so nginx boots
-# even if the api is absent) legitimately differ ONLY on proxy resolution. Their
+# even if the api is absent) and the PREPROD copy
+# (deploy/overlays/preprod/nginx/default.conf, the preprod ConfigMap source —
+# identical to the cluster conf except the /api/geo/collections upstream)
+# legitimately differ ONLY on proxy resolution. Their
 # SECURITY HEADERS must stay identical — a silent divergence would re-introduce a
 # served-headers gap like #608. This compares the `add_header` + `server_tokens`
-# directives of both files and exits non-zero on any difference.
+# directives of all three files, plus the `location ~ \.(js|mjs)$` block of the
+# cluster and preprod confs (worker scripts: JS MIME, never SPA HTML), and exits
+# non-zero on any difference.
 set -euo pipefail
 DIR="$(cd "$(dirname "$0")" && pwd)"
 CLUSTER="$DIR/default.conf"
 COMPOSE="$DIR/../../../ui/nginx/default.conf"
+PREPROD="$DIR/../../../deploy/overlays/preprod/nginx/default.conf"
 
 extract() { grep -E '^[[:space:]]*(add_header|server_tokens)\b' "$1" | sed 's/^[[:space:]]*//' | sort; }
+extract_js_block() {
+  local block
+  block="$(awk 'index($0, "location ~ \\.(js|mjs)$") { f = 1 } f { print } f && /^[[:space:]]*}$/ { exit }' "$1")"
+  if [ -z "$block" ]; then echo "ERROR: worker location block not found in $1" >&2; exit 1; fi
+  printf "%s\n" "$block"
+}
 
 if ! diff <(extract "$CLUSTER") <(extract "$COMPOSE"); then
   echo "ERROR: nginx security-header divergence between" >&2
@@ -22,4 +34,32 @@ if ! diff <(extract "$CLUSTER") <(extract "$COMPOSE"); then
   echo "Keep the add_header/server_tokens directives identical (the resolver/proxy_pass may differ)." >&2
   exit 1
 fi
-echo "OK: nginx security headers identical between cluster and compose conf."
+if ! diff <(extract "$CLUSTER") <(extract "$PREPROD"); then
+  echo "ERROR: nginx security-header divergence between" >&2
+  echo "  $CLUSTER" >&2
+  echo "  $PREPROD" >&2
+  echo "Keep the add_header/server_tokens directives identical (only the /api/geo/collections upstream may differ)." >&2
+  exit 1
+fi
+cluster_js="$(extract_js_block "$CLUSTER")"
+preprod_js="$(extract_js_block "$PREPROD")"
+if [ "$cluster_js" != "$preprod_js" ]; then
+  diff <(printf "%s\n" "$cluster_js") <(printf "%s\n" "$preprod_js") || true
+  echo "ERROR: nginx worker location-block divergence between" >&2
+  echo "  $CLUSTER" >&2
+  echo "  $PREPROD" >&2
+  echo "Keep the worker location block identical (JS MIME, never SPA HTML)." >&2
+  exit 1
+fi
+extract_sw_block() {
+  local block
+  block="$(awk 'index($0, "location = /immo-sw.js") { f = 1 } f { print } f && /^[[:space:]]*}$/ { exit }' "$1")"
+  [ -n "$block" ] || { echo "ERROR: missing SW block in $1" >&2; return 1; }
+  printf '%s\n' "$block"
+}
+cluster_sw="$(extract_sw_block "$CLUSTER")"
+for conf in "$COMPOSE" "$PREPROD"; do
+  variant_sw="$(extract_sw_block "$conf")"
+  diff <(printf '%s\n' "$cluster_sw") <(printf '%s\n' "$variant_sw")
+done
+echo "OK: nginx headers and worker entrypoints match across all three variants."
