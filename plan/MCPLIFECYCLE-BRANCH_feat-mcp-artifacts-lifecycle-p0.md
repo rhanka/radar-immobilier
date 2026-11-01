@@ -17,6 +17,7 @@ with existing authorization and quotas, and annotate every active MCP tool.
 - **Allowed Paths (implementation scope)**:
   - `packages/immo-mcp/src/registry/**`
   - `packages/immo-mcp/src/artifacts-composition.test.ts`
+  - `packages/immo-mcp/src/deployed-baseline.test.ts`
   - `packages/immo-mcp/src/tool-definitions.ts`
   - `packages/immo-mcp/src/tools.ts`
   - `plan/MCPLIFECYCLE-BRANCH_feat-mcp-artifacts-lifecycle-p0.md`
@@ -45,16 +46,16 @@ with existing authorization and quotas, and annotate every active MCP tool.
   - [x] Read repository rules and investigation; confirm clean requested branch.
   - [x] Inspect published tarballs 0.2.2/0.2.3/0.2.4 and sentropic origin/main.
   - [x] Identify the transport guard, missing dispatch and bounded upstream handoff.
-- [ ] **Lot 1 — Active-tool annotations**
-  - [ ] Annotate twelve Immo reads and artifact list/get in both active projections.
-  - [ ] Mark ensure/publish as non-destructive idempotent writes.
-  - [ ] Keep SDK contract registrations consistent with the active projection.
-  - [ ] Verify tools/list is identical across sessions, scopes and ensure calls.
+- [x] **Lot 1 — Active-tool annotations**
+  - [x] Annotate twelve Immo reads and artifact list/get in both active projections.
+  - [x] Mark ensure/publish as non-destructive idempotent writes.
+  - [x] Keep SDK contract registrations consistent with the active projection.
+  - [x] Verify tools/list is identical across sessions, scopes and ensure calls.
 - [ ] **Lot 2 — Authoring guide**
   - [ ] Bump the guide revision and explain publication on the same artifactId.
   - [ ] Describe source/edit/delete/restore/sharing availability accurately.
 - [ ] **Lot 3 — Verification and delivery**
-  - [ ] Reproduce the seven blocked capabilities against published transports.
-  - [ ] Run registry and HTTP tests, MCP typecheck and scoped lint.
+  - [x] Reproduce the seven blocked capabilities against published transports: 63 constructor refusals across 0.2.2/0.2.3/0.2.4.
+  - [x] Run registry and HTTP tests (509 passed, 64 files), MCP typecheck and scoped lint.
   - [ ] Remove the isolated compose stack and volumes with down -v.
   - [ ] Push the branch, open an English PR and write the French conductor report.
