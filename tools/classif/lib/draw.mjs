@@ -47,9 +47,9 @@ export function requireFingerprints(home) {
   return fp;
 }
 
-export function fingerprintHits(fp, text, citySlugs = []) {
+export function fingerprintHits(fp, text, _citySlugs = []) {
   if (!fp) return null;
-  const h = scanText(fp.salt, fp.fps, text, { citySlugs });
+  const h = scanText(fp.salt, fp.fps, text);
   return Object.values(h).reduce((a, b) => a + b, 0) ? h : null;
 }
 
