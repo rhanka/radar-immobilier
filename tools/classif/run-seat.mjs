@@ -112,8 +112,21 @@ function parseMuse(stdout) {
   return { text: text || stdout.slice(-4000), usage };
 }
 
-/** One isolated call. Returns { code, latencyMs, text, usage, ... }. */
-export function callSeat(label, prompt, { timeoutMs = 900000, base = process.env.CLASSIF_SEAT_TMP ?? os.tmpdir() } = {}) {
+/**
+ * Kill a seat child AND its descendants. The child is spawned detached (its own
+ * process group), so signalling the negative pid reaches the whole tree — a CLI
+ * that forked a grandchild holding stdout open cannot survive the parent. Falls
+ * back to a direct kill when group signalling is unavailable (e.g. Windows).
+ */
+export function killSeatTree(child, sig = 'SIGTERM') {
+  try {
+    if (child.pid) { process.kill(-child.pid, sig); return 'group'; }
+  } catch { /* fallthrough to a direct kill */ }
+  try { child.kill(sig); return 'direct'; } catch { return 'none'; }
+}
+
+/** One isolated call. Returns { code, latencyMs, timedOut, text, usage, ... }. */
+export function callSeat(label, prompt, { timeoutMs = 900000, base = process.env.CLASSIF_SEAT_TMP ?? os.tmpdir(), killEscalationMs = 15000, closeGraceMs = 30000, spawnImpl = spawn } = {}) {
   const r = ROUTES[label];
   if (!r) throw new Error(`unknown route ${label}`);
   fs.mkdirSync(base, { recursive: true, mode: 0o700 });
@@ -125,22 +138,35 @@ export function callSeat(label, prompt, { timeoutMs = 900000, base = process.env
   const { cmd, args, env, stdin } = r.build(work, file, prompt);
   const started = Date.now();
   return new Promise((resolve) => {
-    const child = spawn(cmd, args, { cwd: work, env: seatEnv(env), stdio: ['pipe', 'pipe', 'pipe'] });
+    // detached: the child leads its own process group so the timeout kill reaches descendants.
+    const child = spawnImpl(cmd, args, { cwd: work, env: seatEnv(env), stdio: ['pipe', 'pipe', 'pipe'], detached: true });
     let out = '';
     let err = '';
-    // Timeout: SIGTERM, then SIGKILL after 15 s (a seat CLI that ignores SIGTERM must not hang the pass).
-    const timer = setTimeout(() => { child.kill('SIGTERM'); setTimeout(() => child.kill('SIGKILL'), 15000).unref(); }, timeoutMs);
-    child.stdout.on('data', (d) => { out += d; });
-    child.stderr.on('data', (d) => { err += d; });
-    child.on('error', (e) => { err += String(e.message); });
-    child.on('close', (code) => {
+    let settled = false;
+    const finish = (code, timedOut) => {
+      if (settled) return;
+      settled = true;
       clearTimeout(timer);
+      clearTimeout(escalate);
+      clearTimeout(force);
       const latencyMs = Date.now() - started;
       let parsed = { text: '', usage: null };
       try { parsed = r.parse(out, work); } catch { /* keep empty */ }
       fs.rmSync(dir, { recursive: true, force: true });
-      resolve({ code, latencyMs, ...parsed, stderrTail: err.slice(-600), stdoutTail: parsed.text ? undefined : out.slice(-600) });
-    });
+      resolve({ code, latencyMs, timedOut, ...parsed, stderrTail: err.slice(-600), stdoutTail: parsed.text ? undefined : out.slice(-600) });
+    };
+    // Timeout: SIGTERM to the group, then SIGKILL to the group after killEscalationMs.
+    const timer = setTimeout(() => {
+      killSeatTree(child, 'SIGTERM');
+      escalate = setTimeout(() => killSeatTree(child, 'SIGKILL'), killEscalationMs);
+    }, timeoutMs);
+    let escalate = null;
+    // Bound on the `close` wait: a surviving descendant holding stdout open must not hang the pass.
+    const force = setTimeout(() => { killSeatTree(child, 'SIGKILL'); finish(null, true); }, timeoutMs + closeGraceMs);
+    child.stdout.on('data', (d) => { out += d; });
+    child.stderr.on('data', (d) => { err += d; });
+    child.on('error', (e) => { err += String(e.message); });
+    child.on('close', (code) => finish(code, false));
     child.stdin.end(stdin ?? '');
   });
 }
