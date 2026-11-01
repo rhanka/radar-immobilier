@@ -75,12 +75,18 @@ export function refreshErrorDiagnostic(error: unknown): Record<string, string | 
   const token = (value: unknown) => typeof value === "string" && /^[A-Za-z0-9_.:-]{1,120}$/.test(value)
     ? value : undefined;
   const status = (value: unknown) => typeof value === "number" && Number.isInteger(value) ? value : undefined;
+  // RoutePlanError carries why no account was eligible (e.g. `reauth-required`).
+  // Only its code and transport id are logged — never its message.
+  const route = record["diagnostic"] && typeof record["diagnostic"] === "object"
+    ? record["diagnostic"] as Record<string, unknown> : {};
   const internalFrame = error instanceof Error ? error.stack?.split("\n").slice(1)
     .map((line) => line.trim()).find((line) => /^at [A-Za-z0-9_.<>]+ \(?node:internal\//.test(line)) : undefined;
   return { errorName: token(record["name"]), errorCode: token(record["code"]),
     statusCode: status(record["statusCode"] ?? record["status"]), requestId: token(record["requestId"]),
     causeName: token(cause["name"]), causeCode: token(cause["code"]),
-    causeStatusCode: status(cause["statusCode"] ?? cause["status"]), stackOrigin: internalFrame };
+    causeStatusCode: status(cause["statusCode"] ?? cause["status"]),
+    routeDiagnosticCode: token(route["code"]), routeTransportProviderId: token(route["transportProviderId"]),
+    stackOrigin: internalFrame };
 }
 
 export function bindRefreshAbortSignal(

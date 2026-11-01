@@ -8,7 +8,7 @@ import {
   type ImmoHttpConfig,
 } from "../../../packages/immo-mcp/src/server-http.js";
 import {
-  ALICE, BOB, STALE, UNKNOWN_ARTIFACT,
+  ALICE, ARTIFACT_SCOPES, BOB, STALE, UNKNOWN_ARTIFACT,
   bindingRequest, body, ouvertureKeys, signToken, startOuverture,
   ISSUER, RESOURCE, type Ouverture, type OuvertureKeys,
 } from "./artifacts-ouverture.helpers.js";
@@ -83,18 +83,59 @@ describe("ouverture L2 artifact tools on the MCP binding", () => {
 
   it("refuses a missing or foreign invocation scope without dispatch", async () => {
     const before = await h.durable();
-    await expect(bound.binding.invoke("artifacts_list", {},
-      bindingRequest(ALICE, []))).rejects.toThrow("artifact_scope_denied");
-    await expect(bound.binding.invoke("artifacts_list", {},
-      bindingRequest(ALICE, ["immo:search"]))).rejects.toThrow("artifact_scope_denied");
+    for (const scopes of [[], ["immo:search"], ["immo:read"]]) {
+      const denied = await bound.binding.invoke("artifacts_list", {}, bindingRequest(ALICE, scopes));
+      expect(denied.isError).toBe(true);
+      expect(body(denied)).toEqual({ error: "artifact_scope_denied", retryable: false,
+        requiredScope: "immo:artifacts:read" });
+    }
     expect(await h.durable()).toEqual(before);
+  });
+
+  it("refuses writes without immo:artifacts:write and leaves storage untouched", async () => {
+    const before = await h.durable();
+    for (const scopes of [["immo:read"], ["immo:read", "immo:search", "immo:documents:read"],
+      ["immo:read", "immo:artifacts:read"]]) {
+      const denied = await bound.binding.invoke("artifacts_ensure",
+        { bindingName: "no-write", idempotencyKey: "no-write" }, bindingRequest(ALICE, scopes));
+      expect(denied.isError).toBe(true);
+      expect(body(denied)).toEqual({ error: "artifact_scope_denied", retryable: false,
+        requiredScope: "immo:artifacts:write" });
+      const unpublished = await bound.binding.invoke("artifacts_publish", { artifactId: UNKNOWN_ARTIFACT,
+        idempotencyKey: "no-write", files: [{ path: "index.html", mimeType: "text/html", text: "<p>x</p>" }] },
+      bindingRequest(ALICE, scopes));
+      expect(body(unpublished)).toMatchObject({ error: "artifact_scope_denied", requiredScope: "immo:artifacts:write" });
+    }
+    expect(await h.durable()).toEqual(before);
+    const granted = await bound.binding.invoke("artifacts_ensure",
+      { bindingName: "write-granted", idempotencyKey: "write-granted" },
+      bindingRequest(ALICE, ["immo:read", "immo:artifacts:write"]));
+    expect(granted.isError, JSON.stringify(granted)).not.toBe(true);
+    expect(body(granted)).toMatchObject({ artifactId: expect.any(String) });
+  });
+
+  it("accepts immo:read for reads only behind IMMO_MCP_ARTIFACTS_LEGACY_READ_SCOPE", async () => {
+    const legacy = await createArtifactBinding({ ...h.bindingEnv, IMMO_MCP_ARTIFACTS_LEGACY_READ_SCOPE: "true" });
+    if (!legacy) throw new Error("artifact binding unavailable in general mode");
+    try {
+      const listed = await legacy.binding.invoke("artifacts_list", {}, bindingRequest(ALICE, ["immo:read"]));
+      expect(listed.isError, JSON.stringify(listed)).not.toBe(true);
+      const before = await h.durable();
+      const denied = await legacy.binding.invoke("artifacts_ensure",
+        { bindingName: "legacy-write", idempotencyKey: "legacy-write" }, bindingRequest(ALICE, ["immo:read"]));
+      expect(body(denied)).toEqual({ error: "artifact_scope_denied", retryable: false,
+        requiredScope: "immo:artifacts:write" });
+      expect(await h.durable()).toEqual(before);
+    } finally { await legacy.close(); }
+    await expect(createArtifactBinding({ ...h.bindingEnv, IMMO_MCP_ARTIFACTS_LEGACY_READ_SCOPE: "yes" }))
+      .rejects.toThrow("artifact_legacy_read_scope_invalid");
   });
 
   it("admits stale workspace claims on artifact tools over HTTP but keeps business controls", async () => {
     const app = createImmoHttpApp(HTTP_CONFIG, { keySource: keys.keySource, artifacts: bound.binding,
       authorize: accountAuthorizer(h.pool, h.bindingEnv) });
     const token = await signToken(keys.privateKey, {
-      sub: ALICE, scope: "immo:read immo:search", workspaces: [STALE],
+      sub: ALICE, scope: [...ARTIFACT_SCOPES, "immo:search"].join(" "), workspaces: [STALE],
     });
     const headers = (sessionId?: string | null): HeadersInit => ({
       "content-type": "application/json", accept: "application/json, text/event-stream",

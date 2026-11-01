@@ -3,10 +3,10 @@ import {
   hasForgedArtifactCallerFields,
   IMMO_ARTIFACT_MANIFEST,
 } from "./registry/artifact-provider.js";
-import { ARTIFACT_INVOCATION_SCOPE, ARTIFACT_TOOL_NAMES } from "./registry/artifact-profile.js";
+import { ARTIFACT_INVOCATION_SCOPES, ARTIFACT_TOOL_NAMES } from "./registry/artifact-profile.js";
 
 describe("artifact general tool selection", () => {
-  it("exposes exactly the four artifact tools over the invocation scope", () => {
+  it("exposes exactly the four artifact tools over the explicit artifact scopes", () => {
     expect([...ARTIFACT_TOOL_NAMES]).toEqual([
       "artifacts_ensure",
       "artifacts_publish",
@@ -16,7 +16,7 @@ describe("artifact general tool selection", () => {
     expect(IMMO_ARTIFACT_MANIFEST.tools.map((tool) => tool.name).sort()).toEqual(
       [...ARTIFACT_TOOL_NAMES].sort(),
     );
-    expect(ARTIFACT_INVOCATION_SCOPE).toBe("immo:read");
+    expect(ARTIFACT_INVOCATION_SCOPES).toEqual({ read: "immo:artifacts:read", write: "immo:artifacts:write" });
   });
 });
 
