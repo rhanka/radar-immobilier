@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { DESIGN_KIT_ASSETS, designKitAssetUrl } from "@radar/artifacts-host";
+import { releaseCspForHtml } from "../../../../api/src/artifacts/release-files.js";
 import type { ArtifactsApp } from "@sentropic/artifacts/mcp-core";
 import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-stateful";
 import {
@@ -96,6 +97,16 @@ describe("artifact authoring guide", () => {
     expect(Object.keys(files).sort()).toEqual(["app.css", "app.js", "index.html", "reader.js"]);
     const total = guide.starter.files.reduce((sum, file) => sum + Buffer.byteLength(file.text, "utf8"), 0);
     expect(total).toBeLessThan(256 * 1024);
+    const csp = releaseCspForHtml(files["index.html"]!);
+    expect(csp).toContain("script-src 'self'");
+    expect(csp).toContain("style-src 'self'");
+    expect(csp).toContain("connect-src 'self'");
+    expect(csp).not.toMatch(/unsafe-inline|unsafe-eval/);
+    for (const [, url] of files["index.html"]!.matchAll(/<(?:script|link)\b[^>]*?(?:src|href)="([^"]+)"/g)) {
+      expect(url!.startsWith("/")).toBe(true);
+      expect(url!.startsWith("//")).toBe(false);
+      expect(url!.startsWith("/__artifacts/design/") || files[url!.slice(1)] !== undefined).toBe(true);
+    }
     // No inline script/style: the release CSP needs no per-page hash.
     expect(files["index.html"]).not.toMatch(/<script(?![^>]*\bsrc=)[^>]*>/);
     expect(files["index.html"]).not.toContain("<style");
