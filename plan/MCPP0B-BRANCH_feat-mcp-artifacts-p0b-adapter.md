@@ -45,7 +45,7 @@ Prepare the three qualified 0.3.0 operations while preserving the current non-CA
 - [ ] **Lot 2 — Trusted host wiring**
   - [x] Implement the shared source ports and account predicate with transaction-time recipient checks.
   - [x] Source ports, approved IdP subjects, transactional deletion confirmation and migration.
-  - [ ] Trusted cookie-session confirmation page; mutation accounting and quota classification.
+  - [x] Trusted cookie-session confirmation page; mutation accounting and quota classification.
 - [ ] **Lot 3 — Guide and qualification**
   - [ ] Document edit, delete and named-share journeys and publication commands.
   - [ ] Verify 0.2.2 baseline and locally packed 0.3.0 candidate; typecheck and lint.

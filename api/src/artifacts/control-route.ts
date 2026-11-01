@@ -12,6 +12,8 @@ import {
   type ActivationConfig,
   type ArtifactControl,
   type MembershipQueryable,
+  type ArtifactDeleteConfirmation,
+  ARTIFACT_P0B, isArtifactMutation,
 } from "@radar/artifacts-host";
 import type { AuthConfig } from "../config.js";
 import { controlCacheHeaders } from "./control-cache.js";
@@ -22,7 +24,7 @@ import {
   type VerifiedSession,
 } from "../services/auth/session.js";
 
-export type ControlOp = "ensure" | "publish" | "meta" | "list";
+export type ControlOp = "ensure" | "publish" | "meta" | "list" | "get_source" | "set_access" | "delete";
 
 const unavailableBackend: ArtifactControl = {
   handle: () => Promise.resolve({ status: 503, body: { error: "capability_unavailable" } }),
@@ -41,6 +43,7 @@ export interface ControlRouteDeps {
   readonly readActivation?: (() => ActivationConfig) | undefined;
   readonly storageScope?: string | undefined;
   readonly readerStorage?: ReturnType<typeof createStoredReader>;
+  readonly confirmation?: ArtifactDeleteConfirmation;
 }
 
 export const CONTROL_MAX_BODY_BYTES = 2 * 1024 * 1024;
@@ -129,7 +132,7 @@ export function controlRoute(deps: ControlRouteDeps): Hono {
     onError: (c) => c.json({ error: "body_too_large" }, 413),
   }));
   async function dispatch(op: ControlOp, c: Context, session: VerifiedSession, body: unknown) {
-    if (deps.readActivation && (op === "ensure" || op === "publish")) {
+    if (deps.readActivation && isArtifactMutation(op)) {
       // Reread after the entry guard, immediately before storage dispatch.
       let commit;
       try {
@@ -165,6 +168,44 @@ export function controlRoute(deps: ControlRouteDeps): Hono {
     const guarded = await guardPost(c, deps);
     if (guarded instanceof Response) return guarded;
     return dispatch("publish", c, guarded.session, guarded.body);
+  });
+
+  for (const op of ["get_source", "set_access", "delete"] as const) {
+    app.post(`/${op}`, async (c) => {
+      const guarded = await guardPost(c, deps);
+      if (guarded instanceof Response) return guarded;
+      if (!ARTIFACT_P0B) return c.json({ error: "capability_unavailable" }, 503);
+      return dispatch(op, c, guarded.session, guarded.body);
+    });
+  }
+
+  // Only the normal application cookie can approve; MCP bearer tokens are refused by guard.
+  app.get("/delete-confirmations/:ref", async (c) => {
+    const guarded = await guard(c, deps);
+    if (guarded instanceof Response) return guarded;
+    if (!deps.confirmation) return c.json({ error: "capability_unavailable" }, 503);
+    const challenge = await deps.confirmation.read(c.req.param("ref"), guarded.session.sub);
+    if (!challenge) return c.json({ error: "not_found" }, 404);
+    c.header("Content-Security-Policy", "default-src 'none'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'");
+    c.header("Referrer-Policy", "no-referrer");
+    const escape = (s: string) => s.replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};`);
+    const expired = Date.parse(challenge.expiresAt) <= Date.now() || challenge.consumed;
+    return c.html(`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+      <title>Confirm page deletion</title><h1>Permanently delete this page?</h1>
+      <p>Artifact: ${escape(challenge.artifactId)}</p><p>Release: ${escape(challenge.expectedCurrentReleaseId ?? "unpublished")}</p>
+      <p>This stops access to all releases. Restoration is unavailable. Physical purge is pending.</p>
+      ${expired ? "<p>This confirmation expired or was consumed. Prepare a new deletion.</p>" :
+    `<form method="post"><button name="confirm" value="delete" type="submit">Confirm permanent deletion</button></form>`}</html>`);
+  });
+  app.post("/delete-confirmations/:ref", async (c) => {
+    const guarded = await guard(c, deps);
+    if (guarded instanceof Response) return guarded;
+    if (!deps.confirmation) return c.json({ error: "capability_unavailable" }, 503);
+    if (c.req.header("content-type")?.split(";")[0] !== "application/x-www-form-urlencoded" ||
+      await c.req.text() !== "confirm=delete") return c.json({ error: "invalid_request" }, 400);
+    const approved = await deps.confirmation.approve(c.req.param("ref"), guarded.session.sub);
+    return approved ? c.html("<!doctype html><html lang=en><title>Deletion approved</title><p>Approved. Return to your assistant and retry the same deletion with the confirmation reference.</p></html>")
+      : c.json({ error: "confirmation_invalid" }, 409);
   });
 
   app.get("/meta", async (c) => {
