@@ -24,7 +24,7 @@ const key = kind => ({ configmap: 'ConfigMap', configmaps: 'ConfigMap', deployme
   ingress: 'Ingress', ingresses: 'Ingress', endpoints: 'Endpoints', replicasets: 'ReplicaSet', networkpolicy: 'NetworkPolicy', secret: 'Secret' })[kind];
 const find = (kind, name) => s.objects.find(o => o.kind === key(kind) && o.metadata.name === name);
 const value = flag => args[args.indexOf(flag) + 1];
-const jobVerdict = (step, job) => ['database', 'destination', 'reset', 'discard'].includes(step)
+const jobVerdict = (step, job) => ['database', 'destination', 'reset', 'discard', 'verify'].includes(step)
   ? { ok: true, database: job.spec.template.spec.containers[0].env.find(e => e.name === 'POSTGRES_DB')?.value
     || Buffer.from(find('secret', 'radar-db-credentials').data.POSTGRES_DB, 'base64').toString(), migrations: 25 }
   : step === 'resolve' ? { ok: true, date: '2026-10-29', backupId: 'latest', ageHours: 1,
@@ -98,10 +98,13 @@ function crash(step, edge) {
   }
 }
 if (tool === 'curl') {
-  const url = input.find(a => /^https?:\/\//.test(a)); const route = new URL(url).pathname;
+  const url = input.find(a => /^https?:\/\//.test(a));
+  // Like curl: a literal wildcard hostname is rejected before any request (exit 3).
+  if (/^https?:\/\/[^/]*\*/.test(url)) { process.stderr.write('curl: (3) URL rejected: Bad hostname\n'); process.exit(3); }
+  const route = new URL(url).pathname;
   const isClosed = s.objects.some(o => o.kind === 'Ingress' && JSON.stringify(o.spec).includes('base-maintenance-'));
   const maintenance = input[input.indexOf('-o') + 1] === '/dev/null';
-  if (maintenance) { out(isClosed ? '503' : '200'); process.exit(); }
+  if (maintenance) { out(isClosed && !s.maintenanceUnproven ? '503' : '200'); process.exit(); }
   const publicProbe = url.startsWith('https:');
   let code = 200, type = 'application/json', body = {}, headers = '';
   if (route === '/') { type = 'text/html'; body = '<html></html>'; }
@@ -159,7 +162,7 @@ if (args[0] === 'create' || args[0] === 'replace' || args[0] === 'apply') {
       watchdogSuspended: find('cronjob', 'radar-refresh-pending-watchdog')?.spec.suspend });
     // jobSeconds models real duration: the wrapper timeout (or deadline) kills a slower child.
     const limit = Number(o.spec.template.spec.containers[0].env?.find(e => e.name === 'CUTOVER_TIMEOUT')?.value ?? o.spec.activeDeadlineSeconds);
-    const failed = s.failJob === step || s.jobSeconds?.[step] > limit;
+    const failed = s.failJob === step || (s.failJobs || []).includes(step) || s.jobSeconds?.[step] > limit;
     o.status = s.hangJob === step ? { active: 1 } : { conditions: [{ type: failed ? 'Failed' : 'Complete', status: 'True' }], succeeded: failed ? 0 : 1 };
     persist(o);
     persist({ kind: 'Pod', metadata: { name: `${o.metadata.name}-pod`, labels: { 'job-name': o.metadata.name },

@@ -271,6 +271,16 @@ describe("refresh mesh", () => {
     expect(JSON.stringify(diagnostic)).not.toContain(secret);
   });
 
+  it("should expose the route diagnostic code of a no-route error, never its message", () => {
+    const secret = "account user@example.test needs reauth";
+    const error = Object.assign(new Error(secret), { name: "RoutePlanError", code: "no-route",
+      diagnostic: { code: "reauth-required", transportProviderId: "cloud-code", message: secret } });
+    const diagnostic = refreshErrorDiagnostic(error);
+    expect(diagnostic).toMatchObject({ errorName: "RoutePlanError", errorCode: "no-route",
+      routeDiagnosticCode: "reauth-required", routeTransportProviderId: "cloud-code" });
+    expect(JSON.stringify(diagnostic)).not.toContain(secret);
+  });
+
   it("should forward schema and token cap through the mesh seam", async () => {
     let captured: GenerateRequest | undefined;
     const harness = runtimeHarness(async (request) => {

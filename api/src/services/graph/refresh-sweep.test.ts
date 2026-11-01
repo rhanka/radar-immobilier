@@ -261,6 +261,55 @@ describe("runRefreshSweep", () => {
       .toEqual({ exitCode: 1, reason: "fallback-quota-exhausted" });
   });
 
+  it("reports a systemic halt reached on the LAST extracting cities", async () => {
+    // #969 review: three no-route refusals on the tail of the list left no later
+    // poll, so the report had 3 attempts, no halt reason, and exit 0.
+    const store = new MemoryStore();
+    let refusals = 0;
+    const report = await runRefreshSweep(options(store, {
+      haltExtraction: () => refusals >= 3 ? "fallback-no-route" : null,
+      refreshCity: async (city) => {
+        if (city === "alpha") return { status: "up-to-date" };
+        refusals += 1;
+        throw Object.assign(new Error("No eligible route"), { code: "no-route" });
+      },
+    }));
+
+    expect(report.visited).toBe(4);
+    expect(report.counts.failed).toBe(3);
+    expect(report.extractionHaltedBy).toBe("fallback-no-route");
+    expect(assessRefreshSweepHealth(report, 0.9))
+      .toEqual({ exitCode: 1, reason: "fallback-no-route" });
+  });
+
+  it("reports a systemic halt reached right before the deadline stops the sweep", async () => {
+    const store = new MemoryStore();
+    let refusals = 0;
+    const visited: string[] = [];
+    const report = await runRefreshSweep(options(store, {
+      now: steppingClock(100),
+      deadlineMs: 450,
+      cityReserveMs: 100,
+      haltExtraction: () => refusals >= 1 ? "fallback-no-route" : null,
+      refreshCity: async (city) => {
+        visited.push(city);
+        refusals += 1;
+        throw Object.assign(new Error("No eligible route"), { code: "no-route" });
+      },
+    }));
+
+    expect(report.stoppedBy).toBe("deadline");
+    expect(visited).toHaveLength(1);
+    expect(report.extractionHaltedBy).toBe("fallback-no-route");
+    expect(assessRefreshSweepHealth(report, 0.9))
+      .toEqual({ exitCode: 1, reason: "fallback-no-route" });
+  });
+
+  it("does not invent a halt reason when nothing systemic happened", async () => {
+    const report = await runRefreshSweep(options(new MemoryStore(), { haltExtraction: () => null }));
+    expect(report.extractionHaltedBy).toBeUndefined();
+  });
+
   it("keeps sweeping when the cursor PUT fails, and says so", async () => {
     const store = new MemoryStore();
     let puts = 0;
