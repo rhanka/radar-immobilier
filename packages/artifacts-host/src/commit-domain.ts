@@ -14,6 +14,23 @@ import { mapHostError, normalizeHostOutcome } from "./host-outcome.js";
 import { rateLimitedOutcome, reserveArtifactAttempt } from "./attempt-admission.js";
 import { replayPublication } from "./publication-replay.js";
 
+/**
+ * A prepared publication must finalize within this window: past it, the
+ * preparation sweeper reclaims the staged blobs and finalization is refused
+ * ("preparation expired or abandoned").
+ */
+export const PREPARATION_WINDOW_MS = 30_000;
+
+/** Kept after the last blob operation of a publish for its finalization transaction. */
+export const PUBLISH_FINALIZE_MARGIN_MS = 10_000;
+
+/**
+ * Shared deadline of every blob operation of one publish, counted from dispatch
+ * (before the preparation starts), so a slow provider ends the publish with a
+ * retriable 503 instead of an expired preparation.
+ */
+export const PUBLISH_BLOB_DEADLINE_MS = PREPARATION_WINDOW_MS - PUBLISH_FINALIZE_MARGIN_MS;
+
 export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | "coordinator"> & {
   pool: pg.Pool; scope: string; blobs: HttpAppDeps["publication"]["blobs"];
   publicationUrls?: HttpAppDeps["publicationUrls"];
@@ -53,7 +70,7 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
     },
     acls: store, lifecycle: createLifecycleService(store, undefined, store),
     publication: { blobs, intents: store, refs: createPostgresClaimGuardedRefs(store, createPostgresCommitExecutor(pool)),
-      cleanupWindowMs: 30_000, createUnitWriter: createPostgresPublicationUnitWriter, getCurrent: publication.getCurrent,
+      cleanupWindowMs: PREPARATION_WINDOW_MS, createUnitWriter: createPostgresPublicationUnitWriter, getCurrent: publication.getCurrent,
       locks: { "artifact-lifecycle": [lock("artifacts", "id")], acl: [lock("artifact_access", "artifact_id")],
         "current-pointer": [lock("artifact_current", "artifact_id")] } },
     ...(options.publicationUrls ? { publicationUrls: options.publicationUrls } : {}),

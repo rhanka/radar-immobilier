@@ -1,7 +1,48 @@
 import type { S3Client } from "@aws-sdk/client-s3";
+import { AsyncLocalStorage } from "node:async_hooks";
 import type { Readable } from "node:stream";
 
-export const S3_OPERATION_TIMEOUT_MS = 5000;
+/**
+ * Time budget of one blob operation against the provider.
+ *
+ * A single HTTP attempt can stall before any byte comes back. Measured on
+ * 2026-10-31 from the preprod MCP pod and from outside the cluster, 5-10 % of
+ * fresh TLS connections to s3.bhs.io.cloud.ovh.net took 5-16 s to handshake or
+ * never completed, while DNS (< 10 ms) and TCP connect (~1 ms) stayed fast and
+ * other S3 endpoints handshook in < 100 ms; requests then take 0.3-2.6 s. The
+ * SDK retries a stalled attempt on a new connection, so the operation deadline
+ * must leave room for the retries; it is still the bound that maps to a
+ * retriable 503. A publish runs several operations in sequence: they also
+ * share one invocation deadline (withS3Deadline) below the preparation window.
+ */
+export interface ArtifactS3Budget {
+  /** One HTTP attempt: handshake, request and response headers (SDK requestTimeout). */
+  readonly attemptTimeoutMs: number;
+  /**
+   * SDK attempts per S3 call (standard mode). Retried: timeouts, network errors,
+   * 5xx, throttling (429, SlowDown) and S3 RequestTimeout (400). Not retried:
+   * the other 4xx answers (403, 404, ...).
+   */
+  readonly maxAttempts: number;
+  /** Whole blob operation, every attempt and backoff included (host deadline). */
+  readonly operationTimeoutMs: number;
+}
+
+/**
+ * Room for the SDK backoff between attempts: under 600 ms over 3 attempts for
+ * transient errors. Throttling backs off longer (up to 3 s); the operation
+ * deadline still bounds it and maps to a retriable 503.
+ */
+export const S3_RETRY_HEADROOM_MS = 1000;
+
+/** 3 attempts of 4 s: enough for a stalled handshake plus two fresh tries. */
+export const DEFAULT_S3_BUDGET: ArtifactS3Budget = Object.freeze({
+  attemptTimeoutMs: 4000,
+  maxAttempts: 3,
+  operationTimeoutMs: 3 * 4000 + S3_RETRY_HEADROOM_MS,
+});
+
+export const S3_OPERATION_TIMEOUT_MS = DEFAULT_S3_BUDGET.operationTimeoutMs;
 
 export class ArtifactS3TimeoutError extends Error {
   readonly code = "artifact_s3_timeout";
@@ -9,6 +50,24 @@ export class ArtifactS3TimeoutError extends Error {
     super(`artifact s3 operation timed out: ${operation} exceeded ${timeoutMs}ms`);
     this.name = "ArtifactS3TimeoutError";
   }
+}
+
+const invocationDeadline = new AsyncLocalStorage<number>();
+
+/**
+ * Run `work` with one absolute deadline (epoch ms) shared by every blob
+ * operation it starts, on top of each operation's own budget. Per-operation
+ * budgets alone do not bound a publish, which stages then reads back each file
+ * in sequence.
+ */
+export function withS3Deadline<T>(deadlineMs: number, work: () => Promise<T>): Promise<T> {
+  return invocationDeadline.run(deadlineMs, work);
+}
+
+/** Time left for one operation: its own budget, capped by the invocation deadline. */
+function remainingBudget(timeoutMs: number): number {
+  const deadline = invocationDeadline.getStore();
+  return deadline === undefined ? timeoutMs : Math.min(timeoutMs, deadline - Date.now());
 }
 
 /** Bound complete blob operations, including injected stores and pagination. */
@@ -36,13 +95,16 @@ export function createTimeoutBlobStore<T extends object>(
       const value = Reflect.get(target, property);
       if (typeof value !== "function") return value;
       return (...args: unknown[]) => {
-        const result = (value as (...args: unknown[]) => unknown).apply(target, args);
-        if (property !== "destroy" && property !== "close" && result instanceof Promise) {
-          const bounded = withS3Timeout(result, `blobs.${String(property)}`, timeoutMs);
-          if (onFailure === undefined) return bounded;
-          return bounded.catch((error: unknown) => { safeReport(onFailure, error); throw error; });
-        }
-        return result;
+        const apply = () => (value as (...args: unknown[]) => unknown).apply(target, args);
+        if (property === "destroy" || property === "close") return apply();
+        const operation = `blobs.${String(property)}`;
+        const budget = remainingBudget(timeoutMs);
+        // Past the invocation deadline nothing new is started.
+        const result = budget > 0 ? apply() : Promise.reject(new ArtifactS3TimeoutError(operation, 0));
+        if (!(result instanceof Promise)) return result;
+        const bounded = withS3Timeout(result, operation, Math.max(budget, 0));
+        if (onFailure === undefined) return bounded;
+        return bounded.catch((error: unknown) => { safeReport(onFailure, error); throw error; });
       };
     },
   });
@@ -65,6 +127,8 @@ export function createTimeoutS3Client(
       return async (command: unknown, options: SendOptions = {}) => {
         const userSignal = options.abortSignal;
         if (userSignal?.aborted) throw userSignal.reason;
+        const budget = remainingBudget(timeoutMs);
+        if (budget <= 0) throw new ArtifactS3TimeoutError("s3.send", 0);
         const controller = new AbortController();
         let body: Readable | undefined;
         const cleanup = () => {
@@ -78,7 +142,7 @@ export function createTimeoutS3Client(
           controller.abort(reason);
         };
         const onUserAbort = () => abort(userSignal?.reason as Error);
-        const timer = setTimeout(() => abort(new ArtifactS3TimeoutError("s3.send", timeoutMs)), timeoutMs);
+        const timer = setTimeout(() => abort(new ArtifactS3TimeoutError("s3.send", budget)), budget);
         userSignal?.addEventListener("abort", onUserAbort, { once: true });
         try {
           const output = await send(command, { ...options, abortSignal: controller.signal });
