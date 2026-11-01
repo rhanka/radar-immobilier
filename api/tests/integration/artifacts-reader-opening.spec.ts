@@ -5,6 +5,8 @@ import { createSharedReaderTickets } from "../../src/artifacts/reader-tickets.js
 import { startHarness, cookie, type Harness } from "./artifacts-h2.helpers.js";
 import { publishedBaskets } from "./artifacts-baskets.helpers.js";
 import { fingerprintReaderProfile } from "../../src/artifacts/reader-profile.js";
+import { APPROVAL_BASE_CSP, APPROVAL_STYLE_HASH } from "../../src/artifacts/reader-opening.js";
+import { DESIGN_KIT_ASSETS, designKitAssetUrl } from "@radar/artifacts-host";
 import { createStoredReader } from "../../src/artifacts/reader-storage.js";
 import { createReaderContentApp } from "../../src/artifacts/content-serve.js";
 import { GRANT_SECRET, SESSION_SECRET, ISSUER } from "../../src/artifacts/reader-test-fixture.js";
@@ -98,8 +100,15 @@ describeDb("stored reader approval and single-use exchange", () => {
     expect(summary.status).toBe(200);
     expect(summary.headers.get("referrer-policy")).toBe("same-origin");
     expect(summary.headers.get("content-security-policy"))
-      .toBe(`default-src 'none'; form-action 'self' https://${contentHost}; frame-ancestors 'none'; base-uri 'none'`);
-    expect(await summary.text()).toContain("Autoriser et ouvrir");
+      .toBe(`default-src 'none'; style-src 'self' '${APPROVAL_STYLE_HASH}'; ` +
+        `form-action 'self' https://${contentHost}; frame-ancestors 'none'; base-uri 'none'`);
+    const approvalHtml = await summary.text();
+    expect(approvalHtml).toContain("Autoriser et ouvrir");
+    expect(approvalHtml).toContain('data-st-theme="sent-tech"');
+    expect(approvalHtml).toContain("st-card");
+    expect(approvalHtml).toContain("st-button--primary");
+    expect(approvalHtml).toContain("/__artifacts/design/");
+    expect(approvalHtml).toContain("<style>");
     const pinnedSummary = await request(pinned.headers.get("location")!, { headers: { cookie: appCookie } });
     expect(pinnedSummary.status).toBe(200);
     expect(pinnedSummary.headers.get("content-security-policy"))
@@ -109,8 +118,7 @@ describeDb("stored reader approval and single-use exchange", () => {
       forged.searchParams.set("origin", origin);
       const rejected = await request(forged.href, { headers: { cookie: appCookie } });
       expect(rejected.status).toBe(401);
-      expect(rejected.headers.get("content-security-policy"))
-        .toBe("default-src 'none'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'");
+      expect(rejected.headers.get("content-security-policy")).toBe(APPROVAL_BASE_CSP);
     }
     expect((await h.pool.query("SELECT count(*) FROM artifacts.reader_tickets")).rows[0].count).toBe("0");
     const fields = new URL(approvalUrl).searchParams;
@@ -147,6 +155,23 @@ describeDb("stored reader approval and single-use exchange", () => {
     expect(page.status).toBe(200);
     expect(await page.text()).toContain('src="/main.js"');
     expect((await request(exchangeUrl, { headers: { cookie: initialCookie } })).status).toBe(401);
+  });
+  it("should serve the official kit stylesheets publicly on the approval origin", async () => {
+    const f = await publishedBaskets(h);
+    const app = f.runtime();
+    for (const asset of DESIGN_KIT_ASSETS) {
+      const res = await app.request(`https://app.example.test${designKitAssetUrl(asset)}`, {
+        headers: { host: "app.example.test" },
+      });
+      expect(res.status, asset.file).toBe(200);
+      expect(res.headers.get("content-type")).toContain("text/css");
+      expect(res.headers.get("cache-control")).toContain("immutable");
+      expect(await res.text()).toContain("--st-");
+    }
+    const unknown = await app.request("https://app.example.test/__artifacts/design/ds-0.00.00-r9/x/y.css", {
+      headers: { host: "app.example.test" },
+    });
+    expect(unknown.status).toBe(404);
   });
   it("should retain single-use semantics on separate PostgreSQL connections and expire by DB time", async () => {
     const f = await publishedBaskets(h);
