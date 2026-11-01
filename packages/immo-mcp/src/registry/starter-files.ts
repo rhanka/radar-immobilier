@@ -95,8 +95,8 @@ body { margin: 0; background: var(--st-semantic-surface-subtle); }
 }
 .radar-eyebrow {
   color: var(--st-semantic-text-muted);
-  font-size: 0.8125rem;
-  font-weight: 600;
+  font-size: var(--st-typography-label-size);
+  font-weight: var(--st-typography-label-weight);
   letter-spacing: 0.04em;
   margin: 0;
   text-transform: uppercase;
@@ -109,16 +109,16 @@ body { margin: 0; background: var(--st-semantic-surface-subtle); }
 }
 .radar-lede {
   color: var(--st-semantic-text-secondary);
-  font-size: 0.9375rem;
-  line-height: 1.5;
+  font-size: var(--st-typography-control-size);
+  line-height: var(--st-typography-field-lineHeight);
   margin: 0;
   max-width: 40rem;
 }
 .radar-filters {
   align-items: end;
   background: var(--st-semantic-surface-subtle);
-  border: 1px solid var(--st-semantic-border-subtle);
-  border-radius: 0.5rem;
+  border: var(--st-borderWidth-thin) var(--st-borderStyle-solid) var(--st-semantic-border-subtle);
+  border-radius: var(--st-radius-lg);
   display: flex;
   flex-wrap: wrap;
   gap: var(--st-spacing-4);
@@ -133,11 +133,11 @@ body { margin: 0; background: var(--st-semantic-surface-subtle); }
 }
 .radar-status {
   margin-top: var(--st-spacing-4);
-  min-height: 1.5rem;
+  min-height: var(--st-spacing-6);
 }
 .radar-summary {
   color: var(--st-semantic-text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--st-typography-label-size);
   margin: var(--st-spacing-4) 0 var(--st-spacing-2);
 }
 .radar-list {
@@ -148,8 +148,8 @@ body { margin: 0; background: var(--st-semantic-surface-subtle); }
   padding: 0;
 }
 .radar-item-title {
-  font-size: 0.9375rem;
-  font-weight: 600;
+  font-size: var(--st-typography-control-size);
+  font-weight: var(--st-typography-control-weight);
   margin: 0 0 var(--st-spacing-1);
 }
 .radar-item-meta {
@@ -157,16 +157,16 @@ body { margin: 0; background: var(--st-semantic-surface-subtle); }
   display: flex;
   flex-wrap: wrap;
   gap: var(--st-spacing-2);
-  font-size: 0.8125rem;
+  font-size: var(--st-typography-label-size);
   margin: 0;
 }
 .radar-more {
   margin-top: var(--st-spacing-4);
 }
 .radar-foot {
-  border-top: 1px solid var(--st-semantic-border-subtle);
+  border-top: var(--st-borderWidth-thin) var(--st-borderStyle-solid) var(--st-semantic-border-subtle);
   color: var(--st-semantic-text-muted);
-  font-size: 0.8125rem;
+  font-size: var(--st-typography-label-size);
   margin-top: var(--st-spacing-8);
   padding-top: var(--st-spacing-4);
 }
@@ -174,8 +174,8 @@ body { margin: 0; background: var(--st-semantic-surface-subtle); }
   font-family: var(--st-font-mono);
 }
 :focus-visible {
-  outline: 2px solid var(--st-semantic-border-interactive);
-  outline-offset: 2px;
+  outline: var(--st-focus-width) var(--st-borderStyle-solid) var(--st-focus-color);
+  outline-offset: var(--st-focus-offset);
 }
 `;
 
