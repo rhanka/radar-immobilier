@@ -1,5 +1,5 @@
 /**
- * Publishable starter files for Radar artifact pages (starter v1.0.0).
+ * Publishable starter files for Radar artifact pages (starter v1.1.0).
  *
  * Single HTML page + author stylesheet + presentation script + the
  * framework-agnostic H5 reader client. The four files are directly
@@ -28,13 +28,18 @@ ${DESIGN_KIT_ASSETS.map((asset) => `<link rel="stylesheet" href="${designKitAsse
 <header class="radar-head">
 <p class="radar-eyebrow">Radar immobilier</p>
 <h1>Signaux de votre panier</h1>
-<p class="radar-lede">Lecture seule, avec vos droits de lecteur. Renseignez l'espace de travail et la ville, puis lisez les signaux.</p>
+<p class="radar-lede">Lecture seule, avec vos droits de lecteur. Choisissez votre espace de travail et la ville, puis lisez les signaux.</p>
 </header>
 <form id="filters" class="radar-filters" novalidate>
-<div class="st-field radar-grow">
+<div id="workspace-field" class="st-field radar-grow">
 <span class="st-field__label"><label for="workspace">Espace de travail</label></span>
-<span class="st-field__control"><input id="workspace" name="workspace" class="st-control st-control--md" type="text" autocomplete="off" spellcheck="false" placeholder="UUID de l'espace" aria-describedby="workspace-help" required></span>
-<span id="workspace-help" class="st-field__help">Identifiant explicite de votre espace. Aucune valeur implicite.</span>
+<span class="st-field__control"><select id="workspace" name="workspace" class="st-select st-select--md" aria-describedby="workspace-help" disabled required><option value="">Chargement des espaces…</option></select></span>
+<span id="workspace-help" class="st-field__help">Vos espaces accessibles avec vos droits de lecteur.</span>
+</div>
+<div id="workspace-manual-field" class="st-field radar-grow" hidden>
+<span class="st-field__label"><label for="workspace-manual">Espace de travail</label></span>
+<span class="st-field__control"><input id="workspace-manual" name="workspace-manual" class="st-control st-control--md" type="text" autocomplete="off" spellcheck="false" placeholder="UUID de l'espace" aria-describedby="workspace-manual-help" required></span>
+<span id="workspace-manual-help" class="st-field__help">Aucun espace disponible. Renseignez un identifiant d'espace (UUID) si vous en avez un.</span>
 </div>
 <div class="st-field">
 <span class="st-field__label"><label for="city">Ville</label></span>
@@ -306,7 +311,8 @@ function read(operation, params) {
       if (value === undefined || value === null || value === "") return;
       query.set(key, String(value));
     });
-    return timedFetch("/__reader/api/" + operation + "?" + query.toString(), {
+    var search = query.toString();
+    return timedFetch("/__reader/api/" + operation + (search ? "?" + search : ""), {
       method: "GET",
       headers: { "x-preview-grant": grant }
     });
@@ -340,6 +346,7 @@ function search(args) {
 }
 window.ImmoReader = {
   ReadError: ReadError,
+  workspaces: function () { return read("workspaces.list.v1", {}); },
   context: context,
   search: search,
   ensureGrant: ensureGrant,
@@ -368,12 +375,14 @@ var items = el("items");
 var moreWrap = el("more-wrap");
 var moreButton = el("more");
 var reopenWrap = el("reopen-wrap");
-var state = { workspaceId: "", citySlug: "", basket: "all", limit: 20, cursor: null, loading: false };
+var state = { workspaceId: "", citySlug: "", basket: "all", limit: 20, cursor: null, loading: false, workspaceReady: false };
+var requestedWorkspace = "";
+var disposed = false;
 (function init() {
   var query = new URLSearchParams(location.search);
   var workspaceId = query.get("workspaceId") || "";
   var citySlug = query.get("citySlug") || "";
-  if (UUID_RE.test(workspaceId)) workspaceInput.value = workspaceId;
+  if (UUID_RE.test(workspaceId)) requestedWorkspace = workspaceId.toLowerCase();
   if (SLUG_RE.test(citySlug)) cityInput.value = citySlug;
 })();
 function setStatus(text) {
@@ -391,7 +400,7 @@ function readFilters() {
   };
 }
 function stateMessage(kind, code) {
-  if (kind === "no_workspace") return "Renseignez un identifiant d'espace de travail (UUID) pour lire vos paniers.";
+  if (kind === "no_workspace") return "Choisissez un espace de travail pour lire vos paniers.";
   if (kind === "denied") return "Cet espace ne vous est pas accessible avec vos droits actuels (" + code + ").";
   if (kind === "session") return "Votre accès a expiré. Réouvrez la page pour continuer.";
   if (kind === "changed") return "La vue de classement a changé (" + code + "). Relancez la lecture.";
@@ -454,7 +463,7 @@ function fail(error) {
   moreWrap.hidden = true;
 }
 function load(reset) {
-  if (state.loading) return;
+  if (state.loading || !state.workspaceReady) return;
   var filters = readFilters();
   if (!UUID_RE.test(filters.workspaceId) || !SLUG_RE.test(filters.citySlug)) {
     setStatus(stateMessage(!UUID_RE.test(filters.workspaceId) ? "no_workspace" : "invalid", "invalid_query"));
@@ -505,7 +514,39 @@ function more() {
 }
 form.addEventListener("submit", submit);
 moreButton.addEventListener("click", more);
+loadButton.disabled = true;
+setStatus("Chargement de vos espaces…");
+Reader.workspaces().then(function (body) {
+  if (disposed) return;
+  var workspaces = body.workspaces;
+  workspaceInput.textContent = "";
+  if (workspaces.length === 0) {
+    el("workspace-field").hidden = true;
+    el("workspace-manual-field").hidden = false;
+    workspaceInput = el("workspace-manual");
+    workspaceInput.value = requestedWorkspace;
+  } else {
+    var placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "Choisissez un espace";
+    workspaceInput.appendChild(placeholder);
+    workspaces.forEach(function (workspace) {
+      var option = document.createElement("option");
+      option.value = workspace.id;
+      var availability = workspace.signals.availability;
+      option.textContent = workspace.label + (availability.state === "open" ? "" : " — indisponible (" + availability.reason + ")");
+      workspaceInput.appendChild(option);
+    });
+    workspaceInput.disabled = false;
+    if (workspaces.length === 1) workspaceInput.value = workspaces[0].id;
+    else if (workspaces.some(function (workspace) { return workspace.id === requestedWorkspace; })) workspaceInput.value = requestedWorkspace;
+  }
+  state.workspaceReady = true;
+  loadButton.disabled = false;
+  setStatus(workspaces.length === 0 ? "Aucun espace disponible. Renseignez un identifiant d'espace (UUID)." : "");
+}).catch(function (error) { if (!disposed) fail(error); });
 return function () {
+  disposed = true;
   form.removeEventListener("submit", submit);
   moreButton.removeEventListener("click", more);
 };
