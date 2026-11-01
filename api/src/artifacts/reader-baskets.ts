@@ -7,8 +7,10 @@
  * - baskets.search.v1 -> searchSignalClassifications
  * - baskets.state.v1 -> readSignalClassification
  *
- * The caller (content-serve) supplies the verified H5 reader context. The
- * workspace id is always explicit in the operation params: no default is
+ * workspaces.list.v1 discovers active memberships using the verified reader
+ * and exposes only workspace labels and signal/basket availability.
+ * The caller (content-serve) supplies the verified H5 reader context. For
+ * basket reads, the workspace id is explicit in the operation params: no default is
  * ever inferred. Zero membership, foreign or revoked workspaces are refused
  * inside the services (workspace_not_authorized). Several memberships
  * require the caller to pick one workspace id explicitly.
@@ -21,8 +23,9 @@ import {
   type ClassificationOptions,
 } from "../services/facets/classification-search.js";
 import { readSignalClassification } from "../services/facets/classification-state.js";
+import { listWorkspacesForAccount } from "../services/workspaces/store.js";
 import type { ApiReaderContext } from "./reader-context.js";
-import { isBasketOperation, type ReaderOperationName } from "./reader-operations.js";
+import { isWorkspaceReadOperation, type ReaderOperationName } from "./reader-operations.js";
 
 export interface BasketReadDeps {
   readonly db: Database;
@@ -36,7 +39,18 @@ export function createBasketReadOperation(deps: BasketReadDeps): (
   context: ApiReaderContext,
 ) => Promise<unknown> {
   return async (op, params, context) => {
-    if (!isBasketOperation(op)) throw new Error("Capability unavailable");
+    if (!isWorkspaceReadOperation(op)) throw new Error("Capability unavailable");
+    if (op === "workspaces.list.v1") {
+      const memberships = await listWorkspacesForAccount(deps.db, context.readerSub);
+      const workspaces = [];
+      for (const { workspace } of memberships) {
+        const result = await readFacetContext(deps.db, context.readerSub, workspace.id);
+        if (result.workspaceId !== workspace.id) throw new Error("Workspace mismatch");
+        workspaces.push({ id: workspace.id, slug: workspace.slug, label: workspace.label,
+          signals: { availability: result.signals.availability } });
+      }
+      return { ok: true as const, workspaces };
+    }
     const input = params as Record<string, unknown>;
     const workspaceId = input.workspaceId as string;
     if (op === "baskets.context.v1") {

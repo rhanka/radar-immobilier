@@ -46,7 +46,7 @@ describe("artifact authoring guide", () => {
     expect(guide.theme).toBe("sent-tech");
     expect(guide.rule).toContain("Sentropic DS is mandatory");
     expect(guide.data.warning).toContain("Never call /api/*");
-    expect(guide.data.operations.map((op) => op.name)).toEqual(["baskets.context.v1", "baskets.search.v1",
+    expect(guide.data.operations.map((op) => op.name)).toEqual(["workspaces.list.v1", "baskets.context.v1", "baskets.search.v1",
       "baskets.state.v1", "geo.read.v1", "signals.protected-read.v1", "status.closed.v1"]);
     expect(guide.checklist.length).toBeGreaterThan(0);
     expect(guide.frameworks.map((entry) => entry.framework))
