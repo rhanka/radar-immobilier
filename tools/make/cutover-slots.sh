@@ -101,14 +101,32 @@ slots_adopt() {
 slots_adopted() {
   # Every canonical Deployment selects and labels slot=main and every canonical Service selects
   # by slot: the prepared Pods (slot=prepared) can then never be routed before a switch.
-  local name
+  # Returns 0 adopted, 1 not adopted (objects read, or absent), 2 unknown: an API error or timeout
+  # is never read as "not adopted" (that would allow a direct roll over adopted slots).
+  local name state=0
   for name in "${SLOT_SERVICES[@]}"; do
-    "${k[@]}" get deployment "$name" -o json | jq -e --arg l "$SLOT_LABEL" '
-      .spec.selector.matchLabels[$l]=="main" and .spec.template.metadata.labels[$l]=="main"' >/dev/null 2>&1 || return 1
-    "${k[@]}" get service "$name" -o json | jq -e --arg l "$SLOT_LABEL" '
-      .spec.selector[$l]=="main" or .spec.selector[$l]=="prepared"' >/dev/null 2>&1 || return 1
+    "${k[@]}" get deployment "$name" --ignore-not-found -o json > "$WORK/slot-deployment.json" 2>/dev/null || return 2
+    "${k[@]}" get service "$name" --ignore-not-found -o json > "$WORK/slot-service.json" 2>/dev/null || return 2
+    jq -e --arg l "$SLOT_LABEL" '.spec.selector.matchLabels[$l]=="main" and .spec.template.metadata.labels[$l]=="main"' \
+      "$WORK/slot-deployment.json" >/dev/null 2>&1 || state=1
+    jq -e --arg l "$SLOT_LABEL" '.spec.selector[$l]=="main" or .spec.selector[$l]=="prepared"' \
+      "$WORK/slot-service.json" >/dev/null 2>&1 || state=1
   done
+  return "$state"
+}
+slots_state() {
+  # adopted | legacy; an unreadable state refuses (the CI guard then refuses any direct roll).
+  local rc=0
+  slots_adopted || rc=$?
+  case $rc in
+    0) echo adopted;;
+    1) echo legacy;;
+    *) fail 'slots_state_unknown: canonical Deployments or Services unreadable';;
+  esac
 }
 require_slots() {
-  slots_adopted || fail 'slots_not_adopted: run slots-adopt (one-time, operator) before any blue/green preparation or cutover'
+  local rc=0
+  slots_adopted || rc=$?
+  ((rc != 2)) || fail 'slots_state_unknown: canonical Deployments or Services unreadable'
+  ((rc == 0)) || fail 'slots_not_adopted: run slots-adopt (one-time, operator) before any blue/green preparation or cutover'
 }
