@@ -130,21 +130,27 @@ IMPORT_SHRED_LOCAL = if [ -n "$(IMPORT_RENDER_OUT)" ]; then \
 # Creates the render's objects ONCE (`kubectl create`: no client-side apply, so
 # no last-applied annotation carrying the Secret), waits for the Job to succeed
 # or fail (it may first wait on .refresh.lock for a running pass), prints its
-# pseudonymized log, and ALWAYS runs cleanup-keyring-import — guard failure,
-# create refusal, Job failure, timeout or interruption included. kubectl's
-# stderr on the create path is never echoed (it may quote the object): only
-# the API reason token is. Exit status is the Job's.
+# pseudonymized log, and ALWAYS shreds the local render. Remote objects are
+# deleted ONLY after guard-preprod has succeeded and PREPROD_CONFIRM=1 has
+# passed (remote_ok=1): the EXIT trap stays local-only before that point, so
+# a refused identity or a missing confirmation never deletes anything remotely
+# on a foreign cluster. kubectl's stderr on the create path is never echoed
+# (it may quote the object): only the API reason token is. Exit status is the
+# Job's.
 .PHONY: run-keyring-import
 run-keyring-import:
-	@set -uo pipefail; status=1; \
-	  cleanup() { $(MAKE) -s -f "$(lastword $(MAKEFILE_LIST))" cleanup-keyring-import \
+	@set -uo pipefail; status=1; remote_ok=0; \
+	  shred_local() { $(IMPORT_SHRED_LOCAL); }; \
+	  cleanup() { if [ "$$remote_ok" -eq 1 ]; then $(MAKE) -s -f "$(lastword $(MAKEFILE_LIST))" cleanup-keyring-import \
 	    KUBECONFIG="$(KUBECONFIG)" IMPORT_RENDER_OUT="$(IMPORT_RENDER_OUT)" IMPORT_REQUEST_SECONDS=$(IMPORT_REQUEST_SECONDS) ENV=$(ENV) \
-	    || { echo "keyring import cleanup FAILED: rerun cleanup-keyring-import" >&2; exit 1; }; }; \
+	    || { echo "keyring import cleanup FAILED: rerun cleanup-keyring-import" >&2; exit 1; }; \
+	    else shred_local; fi; }; \
 	  trap cleanup EXIT; trap 'exit 130' INT TERM; \
 	  $(MAKE) -s -f "$(lastword $(MAKEFILE_LIST))" guard-preprod KUBECONFIG="$(KUBECONFIG)" IMPORT_REQUEST_SECONDS=$(IMPORT_REQUEST_SECONDS) ENV=$(ENV) || exit 1; \
 	  test "$(PREPROD_CONFIRM)" = "1" || { echo "PREPROD_CONFIRM=1 is required" >&2; exit 1; }; \
 	  { [ ! -L "$(IMPORT_RENDER_OUT)" ] && [ -f "$(IMPORT_RENDER_OUT)" ]; } \
 	    || { echo "IMPORT_RENDER_OUT must be the regular render file" >&2; exit 1; }; \
+	  remote_ok=1; \
 	  $(IMPORT_K) delete $(IMPORT_OBJECTS) --ignore-not-found --wait=true >/dev/null 2>&1 \
 	    || { echo "could not clear a previous import" >&2; exit 1; }; \
 	  err="$$($(IMPORT_K) create -f "$(IMPORT_RENDER_OUT)" 2>&1 >/dev/null)" || { \
@@ -163,20 +169,28 @@ run-keyring-import:
 	  exit $$status
 
 # Idempotent. The LOCAL render goes first and unconditionally (a guard or API
-# failure must never leave the key on disk), then the guard runs only as a
-# bounded, non-blocking identity check whose result is logged, and finally the
-# Job, its Secret (owner keyring) and its script ConfigMap are deleted even
-# when that guard failed or timed out. Safe to rerun after any failure; the
-# Job TTL alone would leave the Secret and ConfigMap behind.
+# failure must never leave the key on disk). Remote objects (the Job, its
+# Secret holding the owner keyring, its script ConfigMap) are deleted ONLY on
+# the validated preprod cluster: an explicit server-identity check runs first
+# (a wrong cluster is refused with no remote delete), then a bounded
+# ServiceAccount probe (an unavailable probe is logged with no remote delete).
+# Safe to rerun after any failure; the Job TTL alone would leave the Secret
+# and ConfigMap behind.
 .PHONY: cleanup-keyring-import
 cleanup-keyring-import:
 	@$(IMPORT_SHRED_LOCAL)
-	@set -u; guard_ok=1; \
-	  $(MAKE) -s -f "$(lastword $(MAKEFILE_LIST))" guard-preprod KUBECONFIG="$(KUBECONFIG)" IMPORT_REQUEST_SECONDS=$(IMPORT_REQUEST_SECONDS) ENV=$(ENV) \
-	    && echo "cleanup guard: preprod identity confirmed" \
-	    || { guard_ok=0; echo "cleanup guard failed or timed out: continuing with deletion" >&2; }; \
-	  $(IMPORT_K) delete $(IMPORT_OBJECTS) --ignore-not-found --wait=true; del=$$?; \
-	  [ "$$guard_ok" -eq 1 ] && [ "$$del" -eq 0 ]
+	@set -u; \
+	  test "$(ENV)" = "preprod" || { echo "cleanup guard refused: ENV=preprod is required, no remote delete" >&2; exit 1; }; \
+	  test -n "$(KUBECONFIG)" -a -f "$(KUBECONFIG)" || { echo "cleanup guard refused: KUBECONFIG file is required, no remote delete" >&2; exit 1; }; \
+	  server="$$(kubectl --kubeconfig "$(KUBECONFIG)" config view --minify -o jsonpath='{.clusters[0].cluster.server}')" \
+	    || { echo "cleanup guard refused: cannot read API server identity, no remote delete" >&2; exit 1; }; \
+	  case "$$server" in "$(EXPECTED_SERVER)"|"$(EXPECTED_SERVER)":*) ;; \
+	    *) echo "cleanup guard refused: unexpected API server, no remote delete" >&2; exit 1;; esac; \
+	  if ! timeout $$(( $(IMPORT_REQUEST_SECONDS) * 3 )) $(K) --request-timeout=$(IMPORT_REQUEST_SECONDS)s get serviceaccount radar-app -o name >/dev/null; then \
+	    echo "cleanup guard: ServiceAccount probe unavailable, no remote delete" >&2; exit 1; \
+	  fi; \
+	  echo "cleanup guard: preprod identity confirmed"; \
+	  $(IMPORT_K) delete $(IMPORT_OBJECTS) --ignore-not-found --wait=true
 
 .PHONY: test-keyring-import
 test-keyring-import: ## Hermetic tests of the keyring account import (no cluster)

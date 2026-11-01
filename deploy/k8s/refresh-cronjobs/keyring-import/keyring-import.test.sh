@@ -6,13 +6,18 @@
 #   - import-keyring-account refuses a render destination inside the repo,
 #     inside any git work tree, in a directory that is not 0700, an existing
 #     file or a symlink, and deletes the render when a post-render guard fails;
-#   - run-keyring-import ALWAYS cleans the Job, the Secret and the ConfigMap
-#     and the local render: Job success, Job failure, create refused (without
-#     echoing kubectl's stderr, which may quote the Secret), guard failure;
-#   - cleanup-keyring-import removes the local render FIRST, then still deletes
-#     the Job, the Secret and the ConfigMap even when the guard fails or hangs
-#     (a hanging guard is bounded by the timeout and logged), and never follows
-#     a symlink.
+#   - run-keyring-import deletes the Job, the Secret and the ConfigMap and the
+#     local render on the validated preprod cluster only: Job success, Job
+#     failure, create refused (without echoing kubectl's stderr, which may
+#     quote the Secret); a refused identity, a hanging initial guard or a
+#     missing confirmation removes the local render only and never touches
+#     remote objects;
+#   - cleanup-keyring-import removes the local render FIRST and unconditionally,
+#     then deletes the Job, the Secret and the ConfigMap ONLY when the preprod
+#     identity is confirmed (expected API server plus a bounded ServiceAccount
+#     probe): a wrong cluster is refused with no remote delete, an unavailable
+#     probe is bounded by the timeout, logged, and refused with no remote
+#     delete; a symlink is removed, never followed.
 set -uo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -120,7 +125,9 @@ run_case() { # $1 = label, $2 = expected exit (0|nonzero), env: MOCK_JOB_STATE, 
     bad "$label: exit $status, expected $expect ($(cat "$T/out"))"; return; fi
   if grep -q "U0VDUkVULUtFWS1MRUFL\|last-applied" "$T/out"; then bad "$label: kubectl stderr echoed (may quote the Secret)"; return; fi
   if [ -n "${EXPECT_NO_REMOTE:-}" ]; then
-    [ ! -e "$file" ] && ok "$label: render removed although the guard refused" || bad "$label: render left on disk"
+    if [ -e "$file" ]; then bad "$label: render left on disk"; return; fi
+    if grep -q " delete \| create \| apply " "$CALLS"; then bad "$label: remote objects touched ($(cat "$CALLS"))"; return; fi
+    ok "$label: render removed, no remote delete"
     return; fi
   if grep -q "delete job/radar-refresh-keyring-account-import secret/radar-refresh-keyring-account-import configmap/radar-refresh-keyring-import-script --ignore-not-found" "$CALLS" \
     && [ ! -e "$file" ]; then ok "$label: Job, Secret, ConfigMap and render cleaned"
@@ -130,8 +137,8 @@ MOCK_JOB_STATE="1/" run_case "Job succeeded" 0
 MOCK_JOB_STATE="/1" run_case "Job failed (e.g. master keys differ)" 1
 MOCK_JOB_STATE="/" MOCK_CREATE=fail run_case "create refused" 1
 grep -q "reason: Invalid" "$T/out" && ok "create refused: only the API reason is reported" || bad "create refusal reason missing ($(cat "$T/out"))"
-MOCK_JOB_STATE="/" MOCK_SERVER=https://elsewhere.example EXPECT_NO_REMOTE=1 run_case "guard refused" 1
-if grep -q " create \| apply " "$CALLS"; then bad "guard refused: objects were still created"; else ok "guard refused: nothing created"; fi
+MOCK_JOB_STATE="/" MOCK_SERVER=https://elsewhere.example EXPECT_NO_REMOTE=1 run_case "run: wrong cluster refused" 1
+if grep -q " delete \| create \| apply " "$CALLS"; then bad "run wrong cluster: remote objects touched"; else ok "run wrong cluster: nothing created, nothing deleted"; fi
 
 started=$(date +%s)
 MOCK_JOB_STATE="/" MOCK_GET=hang IMPORT_REQUEST_SECONDS=1 run_case "API read hanging" 1
@@ -140,29 +147,57 @@ elapsed=$(( $(date +%s) - started ))
   && ok "hanging API read is bounded (${elapsed}s) and still cleaned up" || bad "hanging read not bounded (${elapsed}s)"
 
 started=$(date +%s)
-MOCK_JOB_STATE="/" MOCK_GUARD=hang IMPORT_REQUEST_SECONDS=1 run_case "initial guard hanging" 1
+MOCK_JOB_STATE="/" MOCK_GUARD=hang IMPORT_REQUEST_SECONDS=1 EXPECT_NO_REMOTE=1 run_case "run: initial guard hanging" 1
 elapsed=$(( $(date +%s) - started ))
 [ "$elapsed" -lt 20 ] \
-  && ok "hanging initial guard is bounded (${elapsed}s) and still cleaned up" || bad "hanging initial guard not bounded (${elapsed}s)"
+  && ok "hanging initial guard is bounded (${elapsed}s), render removed, no remote delete" || bad "hanging initial guard not bounded (${elapsed}s)"
 
-cleanup_case() { # $1 = label, env: MOCK_DELETE, MOCK_SERVER
+# A missing confirmation must never touch remote objects, even on the right cluster.
+confirm_file="$(private_dir)/r.yaml"; echo "kind: Job" >"$confirm_file"; : >"$CALLS"
+if make -s -f "$MK" run-keyring-import PREPROD_CONFIRM=0 KUBECONFIG="$T/kubeconfig" \
+  IMPORT_RENDER_OUT="$confirm_file" IMPORT_POLL_SECONDS=0 IMPORT_WAIT_SECONDS=5 \
+  IMPORT_REQUEST_SECONDS=30 ENV=preprod >"$T/out" 2>&1; then
+  bad "run without PREPROD_CONFIRM=1 accepted"
+elif [ -e "$confirm_file" ]; then bad "run without confirmation left the render on disk"
+elif grep -q " delete \| create \| apply " "$CALLS"; then bad "run without confirmation touched remote objects"
+else ok "run without PREPROD_CONFIRM=1: render removed, no remote delete"; fi
+
+cleanup_case() { # $1 = label, env: MOCK_DELETE, MOCK_SERVER, MOCK_GUARD, EXPECT_NO_REMOTE
   local file; file="$(private_dir)/r.yaml"; echo "kind: Secret" >"$file"; : >"$CALLS"
   if make -s -f "$MK" cleanup-keyring-import KUBECONFIG="$T/kubeconfig" IMPORT_RENDER_OUT="$file" ENV=preprod >"$T/out" 2>&1; then
-    bad "$1: cleanup reported success"; elif [ -e "$file" ]; then bad "$1: render left on disk"; else ok "$1: render removed first, failure reported"; fi
+    bad "$1: cleanup reported success"; return; fi
+  if [ -e "$file" ]; then bad "$1: render left on disk"; return; fi
+  if [ -n "${EXPECT_NO_REMOTE:-}" ]; then
+    if grep -q " delete " "$CALLS"; then bad "$1: remote delete on a refused cluster"; else ok "$1: render removed first, no remote delete, failure reported"; fi
+    return; fi
+  if grep -q " delete job/radar-refresh-keyring-account-import" "$CALLS"; then
+    ok "$1: render removed first, remote delete attempted, failure reported"
+  else bad "$1: remote delete missing ($(cat "$CALLS"))"; fi
 }
 MOCK_DELETE=fail cleanup_case "cleanup with API delete failing"
-MOCK_SERVER=https://elsewhere.example cleanup_case "cleanup with guard failing"
+MOCK_SERVER=https://elsewhere.example EXPECT_NO_REMOTE=1 cleanup_case "cleanup: wrong cluster refused"
+if grep -q "unexpected API server, no remote delete" "$T/out" && ! grep -q " delete " "$CALLS"; then
+  ok "cleanup wrong cluster: refused identity, no remote delete"
+else bad "cleanup wrong cluster: wrong message or remote delete ($(cat "$T/out"); $(cat "$CALLS"))"; fi
 
-# --- cleanup with a hanging guard -------------------------------------------
+# --- cleanup with a hanging ServiceAccount probe -----------------------------
 hang_dir="$(private_dir)"; hang_file="$hang_dir/r.yaml"; echo "kind: Secret" >"$hang_file"; : >"$CALLS"
 started=$(date +%s)
 MOCK_GUARD=hang make -s -f "$MK" cleanup-keyring-import KUBECONFIG="$T/kubeconfig" IMPORT_RENDER_OUT="$hang_file" IMPORT_REQUEST_SECONDS=1 ENV=preprod >"$T/out" 2>&1
 hang_status=$?
 elapsed=$(( $(date +%s) - started ))
-if [ ! -e "$hang_file" ] && grep -q " delete job/radar-refresh-keyring-account-import" "$CALLS" \
-  && grep -q "cleanup guard failed or timed out" "$T/out" && [ "$elapsed" -lt 20 ]; then
-  ok "hanging guard: cleanup still deletes the render and the objects within the timeout (${elapsed}s)"
-else bad "hanging guard: cleanup blocked or silent (exit $hang_status, ${elapsed}s)"; fi
+if [ ! -e "$hang_file" ] && ! grep -q " delete " "$CALLS" \
+  && grep -q "ServiceAccount probe unavailable, no remote delete" "$T/out" && [ "$elapsed" -lt 20 ] && [ "$hang_status" -ne 0 ]; then
+  ok "hanging probe: render removed, no remote delete, bounded (${elapsed}s)"
+else bad "hanging probe: blocked, silent, or remote delete (exit $hang_status, ${elapsed}s, $(cat "$T/out"))"; fi
+
+# --- cleanup nominal: validated identity still deletes remotely ---------------
+nominal_file="$(private_dir)/r.yaml"; echo "kind: Secret" >"$nominal_file"; : >"$CALLS"
+if make -s -f "$MK" cleanup-keyring-import KUBECONFIG="$T/kubeconfig" IMPORT_RENDER_OUT="$nominal_file" ENV=preprod >"$T/out" 2>&1 \
+  && [ ! -e "$nominal_file" ] && grep -q " delete job/radar-refresh-keyring-account-import secret/radar-refresh-keyring-account-import configmap/radar-refresh-keyring-import-script --ignore-not-found" "$CALLS" \
+  && grep -q "preprod identity confirmed" "$T/out"; then
+  ok "cleanup nominal: identity confirmed, Job, Secret and ConfigMap deleted, render removed"
+else bad "cleanup nominal failed ($(cat "$T/out"); $(cat "$CALLS"))"; fi
 
 kept="$T/victim/kept.yaml"; echo kept >"$kept"; ln -s "$kept" "$(private_dir)/link.yaml"
 link="$(ls -d "$T"/render.*/link.yaml)"
