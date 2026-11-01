@@ -295,7 +295,11 @@ jobs:
           fi
       - name: Blue/green slot state
         id: slots
-        run: echo "state=$(make -s -f deploy/cutover/operator.mk slots-status ENV=preprod)" >> "$GITHUB_OUTPUT"
+        # An unreadable slots state fails this step (no state output): deploy-preprod then refuses.
+        run: |
+          set -euo pipefail
+          state=$(make -s -f deploy/cutover/operator.mk slots-status ENV=preprod)
+          echo "state=$state" >> "$GITHUB_OUTPUT"
       # Before any clone: a re-run of the same SHA after a green rehearsal skips the preparation and
       # the rehearsal (neutral, job summary); a red or missing rehearsal is replayed in full.
       - name: Rehearsal need
