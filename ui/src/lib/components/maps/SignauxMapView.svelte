@@ -21,6 +21,7 @@
    *  - NE déclenche PAS l'activation zonage-au-zoom (Phase 2)
    */
   import { onMount, tick } from "svelte";
+  import { lotLabels, zoneLabels } from "$lib/sync/preferences.js";
   import { Checkbox, IconButton } from "@sentropic/design-system-svelte";
   // §5 R2 point 2 — déclencheur chat = bulle DANS un carré (glyph lucide
   // `MessageSquare`, PAS `MessageCircle`). Le bouton vit dans la rangée de
@@ -448,34 +449,21 @@
   // séparément → on peut avoir zone SEUL, lot SEUL, les DEUX, ou AUCUN.
   // Défaut : n° de zone AFFICHÉ (coché), n° de lot MASQUÉ. PERSISTANT en
   // session (localStorage) : le choix tient au fil des villes et des reloads.
-  const LOT_LABELS_LS_KEY = "signaux-show-lot-labels";
-  const ZONE_LABELS_LS_KEY = "signaux-show-zone-labels";
   let showLotLabels = false;
   let showZoneLabels = true;
-
-  function readLabelPref(key: string, fallback: boolean): boolean {
-    if (typeof localStorage === "undefined") return fallback;
-    const stored = localStorage.getItem(key);
-    return stored === null ? fallback : stored === "1";
-  }
-  function persistLabelPref(key: string, value: boolean): void {
-    if (typeof localStorage !== "undefined") {
-      localStorage.setItem(key, value ? "1" : "0");
-    }
-  }
   function setShowLotLabels(value: boolean): void {
     showLotLabels = value;
-    persistLabelPref(LOT_LABELS_LS_KEY, value);
+    lotLabels.set(value);
   }
   function setShowZoneLabels(value: boolean): void {
     showZoneLabels = value;
-    persistLabelPref(ZONE_LABELS_LS_KEY, value);
+    zoneLabels.set(value);
   }
 
   // ── CPTAQ toggle and loading ────────────────────────────────────────────────
   function setCptaqEnabled(value: boolean): void {
     cptaqEnabled = value;
-    persistLabelPref(CPTAQ_LS_KEY, value);
+    try { localStorage.setItem(CPTAQ_LS_KEY, value ? "1" : "0"); } catch { /* memory only */ }
     syncFilterRoute();
     if (value) {
       if (selectedCity && cptaqAvailable) void loadCptaq(selectedCity.municipality.slug);
@@ -2944,11 +2932,12 @@
     // Restaurer le filtre depuis l'URL au premier chargement
     // m5 — restaurer les préférences d'affichage des libellés (persistance
     // session). Défaut si rien de persisté : n° de zone AFFICHÉ, n° de lot masqué.
-    showLotLabels = readLabelPref(LOT_LABELS_LS_KEY, false);
-    showZoneLabels = readLabelPref(ZONE_LABELS_LS_KEY, true);
+    const stopLotLabels = lotLabels.subscribe((value) => { showLotLabels = value; });
+    const stopZoneLabels = zoneLabels.subscribe((value) => { showZoneLabels = value; });
     // Overlay activation is authoritative in the shared URL.
     void load();
     // L'init MapLibre est portée par le socle GeoCityMapBase (cf. template).
+    return () => { stopLotLabels(); stopZoneLabels(); };
   });
 </script>
 
