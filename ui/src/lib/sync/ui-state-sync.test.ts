@@ -109,9 +109,10 @@ describe("per-tab contexts and session continuity", () => {
   it("should suspend a sleeping tab on epoch changes and revalidate independently", async () => {
     const { sync, storage, revalidate } = setup(); await sync.account("subject");
     const peer = publishPeer(storage); sync.refresh(); expect(get(sync.peers)).toHaveLength(1);
+    sync.wake(); revalidate.mockClear();
     const current = decodeSession(storage.getItem(SESSION_KEY)!)!;
     storage.setItem(SESSION_KEY, JSON.stringify({ ...current, invalidated: true, sessionEpoch: uuid() }));
-    sync.receive(SESSION_KEY); expect(get(sync.peers)).toEqual([]); expect(revalidate).toHaveBeenCalledOnce();
+    sync.receive(SESSION_KEY); expect(get(sync.peers)).toEqual([]); expect(revalidate).toHaveBeenCalledExactlyOnceWith(true);
     expect(await sync.adopt(peer)).toBe(false);
   });
   it("should preserve unknown schema bytes during reads, writes and bounded retention", async () => {
