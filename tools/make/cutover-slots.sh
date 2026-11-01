@@ -40,7 +40,7 @@ select_slot() {
 }
 adopt_deployment() {
   local name=$1 component current selector deadline
-  "${k[@]}" get deployment "$name" -o json > "$WORK/adopt.json"
+  "${k[@]}" get deployment "$name" -o json > "$WORK/adopt.json" || unknown_state "Deployment state unknown: $name"
   component=$(jq -er '.spec.template.metadata.labels["app.kubernetes.io/component"]' "$WORK/adopt.json") || fail "Unlabelled Deployment: $name"
   if ! jq -e --arg l "$SLOT_LABEL" '.spec.selector.matchLabels[$l]=="main"' "$WORK/adopt.json" >/dev/null; then
     jq -e --arg l "$SLOT_LABEL" '.spec.selector.matchLabels[$l]==null' "$WORK/adopt.json" >/dev/null || fail "Unexpected slot selector: $name"
@@ -54,14 +54,16 @@ adopt_deployment() {
     # Orphaning keeps the running ReplicaSet and its Pods serving through the unchanged Service.
     "${k[@]}" delete --raw "/apis/apps/v1/namespaces/$NS/deployments/$name" -f "$WORK/orphan.json" >/dev/null || fail "Orphaning refused: $name"
     deadline=$((SECONDS+60))
-    while "${k[@]}" get deployment "$name" --ignore-not-found -o name | grep -q .; do
+    while :; do
+      current=$("${k[@]}" get deployment "$name" --ignore-not-found -o name) || unknown_state "Deployment state unknown: $name"
+      [[ -n $current ]] || break
       ((SECONDS < deadline)) || fail "Orphaned Deployment still present: $name"
       sleep 1
     done
     "${k[@]}" create -f "$WORK/adopted.json" >/dev/null || fail "Slot Deployment creation failed: $name"
   fi
   "${k[@]}" rollout status "deployment/$name" --timeout=300s >/dev/null || fail "Slot Deployment not Ready: $name"
-  "${k[@]}" get service "$name" -o json > "$WORK/adopt-service.json"
+  "${k[@]}" get service "$name" -o json > "$WORK/adopt-service.json" || unknown_state "Service routing unknown: $name"
   if jq -e --arg l "$SLOT_LABEL" '.spec.selector[$l]==null' "$WORK/adopt-service.json" >/dev/null; then
     selector=$(jq -c .spec.selector "$WORK/adopt-service.json")
     "${k[@]}" patch service "$name" --type=json -p "$(jq -n --argjson s "$selector" --arg path "$SLOT_PATH" \
