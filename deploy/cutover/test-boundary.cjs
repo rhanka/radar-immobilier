@@ -208,7 +208,7 @@ if (args[0] === 'get') {
     save();
   }
   // getFail "<kind>/<name>": that read fails like an API timeout (not a NotFound).
-  if (s.getFail && `${args[1]}/${args[2]}` === s.getFail) { process.stderr.write('Unable to connect to the server: i/o timeout\n'); process.exit(1); }
+  if ([s.getFail, ...(s.getFails || [])].includes(`${args[1]}/${args[2]}`)) { process.stderr.write('Unable to connect to the server: i/o timeout\n'); process.exit(1); }
   if (args[1] === 'endpointslices') { out(slicesOf(find('service', value('-l').split('=')[1]))); process.exit(); }
   let objects = s.objects.filter(o => o.kind === key(args[1]));
   if (key(args[1]) === 'Pod' && !args.includes('-l') && args[2]?.startsWith('-')) {
@@ -312,7 +312,10 @@ if (args[0] === 'create' || args[0] === 'replace' || args[0] === 'apply') {
 if (args[0] === 'patch') {
   const o = find(args[1], args[2]); if (!o) process.exit(1);
   const patch = JSON.parse(value('-p'));
-  if (o.kind === 'Service' && s.serviceConflict === o.metadata.name && (!s.conflictTo || patch.at(-1).value === s.conflictTo)) process.exit(1);
+  if (o.kind === 'Service' && s.serviceConflict === o.metadata.name && (!s.conflictTo || patch.at(-1).value === s.conflictTo)) {
+    if (s.getFailOnConflict) { s.getFail = s.getFailOnConflict; save(); }
+    process.exit(1);
+  }
   if (o.kind === 'Ingress' && s.ingressConflict === o.metadata.name &&
     patch.some(p => p.op === 'replace' && p.path === '/spec' && !JSON.stringify(p.value).includes('base-maintenance-'))) process.exit(1);
   if (args.includes('--type=merge')) Object.assign(o.data, patch.data);
@@ -347,15 +350,16 @@ if (args[0] === 'delete') {
   const o = s.objects.find(x => x.kind === kind && x.metadata.name === name);
   if (o && raw && JSON.parse(fs.readFileSync(value('-f'))).preconditions.uid !== o.metadata.uid) process.exit(1);
   (s.deletions ||= []).push({ kind, name });
-  if (o && raw && JSON.parse(fs.readFileSync(value('-f'))).propagationPolicy === 'Orphan') {
-    for (const x of s.objects) if (x.metadata.ownerReferences) x.metadata.ownerReferences = x.metadata.ownerReferences.filter(r => r.uid !== o.metadata.uid);
-    s.objects = s.objects.filter(x => x !== o);
   // A final in-flight request commits only when the prepared API receives SIGTERM.
   if (kind === 'Deployment' && name === 'radar-api-prepared' && s.commitOnPreparedStop) {
     s.writeStats ||= {};
     s.writeStats.radar_next = (s.writeStats.radar_next || 0) + s.commitOnPreparedStop;
     s.commitOnPreparedStop = 0;
   }
+  if (o && raw && JSON.parse(fs.readFileSync(value('-f'))).propagationPolicy === 'Orphan') {
+    for (const x of s.objects) if (x.metadata.ownerReferences) x.metadata.ownerReferences = x.metadata.ownerReferences.filter(r => r.uid !== o.metadata.uid);
+    s.objects = s.objects.filter(x => x !== o);
+    if (s.getFailAfterOrphan) s.getFail = s.getFailAfterOrphan;
   } else if (o) {
     const gone = new Set([o.metadata.uid]);
     for (let grew = true; grew;) {

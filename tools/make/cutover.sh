@@ -2,6 +2,7 @@
 set -euo pipefail
 umask 077
 fail() { printf '%s\n' "Cutover refused: $*" >&2; exit 1; }
+unknown_state() { KEEP_LOCK=1; fail "$*"; }
 source tools/make/cutover-release.sh
 source tools/make/cutover-cluster.sh
 source tools/make/cutover-inventory.sh
@@ -30,6 +31,11 @@ cleanup() {
   trap - EXIT INT TERM
   unset REQUEST_DEADLINE
   stop_forwards
+  if [[ ${KEEP_LOCK:-0} == 1 ]]; then
+    printf 'State unknown; lock retained; deletion refused\n' >&2
+    rm -rf "$WORK"
+    exit "$code"
+  fi
   if [[ ${STAGING:-0} == 1 && $code != 0 ]]; then
     (set -e; template_write failed) || printf 'Template stamp state unknown\n' >&2
   fi
