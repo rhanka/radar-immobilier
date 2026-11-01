@@ -236,7 +236,11 @@ test('R2-P2b revalidate rewrites atomically and keeps failed exits inadmissible'
       { itemId: 'i2', kind: 'signal', anchor: { id: 'n2' }, input: 't2' },
     ];
     mkdirSync(path.join(home, 'l0'), { recursive: true });
-    writeFileSync(path.join(home, 'l0', 'dev-items.jsonl'), `${items.map((i) => JSON.stringify(i)).join('\n')}\n`);
+    const corpusBody = `${items.map((i) => JSON.stringify(i)).join('\n')}\n`;
+    writeFileSync(path.join(home, 'l0', 'dev-items.jsonl'), corpusBody);
+    // Synthetic fixture: declare its own corpus expectations (the frozen-corpus loader is strict).
+    const { sha256 } = await import('../lib/render.mjs');
+    writeFileSync(path.join(home, 'l0', 'dev-items.expect.json'), JSON.stringify({ count: items.length, sha256: sha256(corpusBody) }));
     for (const a of ANNOTATORS) {
       const exitCode = a === ANNOTATORS[0] ? 1 : 0;
       const d = path.join(home, 'l2', 'pass1', a);
@@ -305,7 +309,11 @@ test('exit audit lists non-zero accepted votes and recomputes without them (0 LL
     { itemId: 'i2', kind: 'signal', anchor: { id: 'n2' }, input: 't2' },
   ];
   mkdirSync(path.join(home, 'l0'), { recursive: true });
-  writeFileSync(path.join(home, 'l0', 'dev-items.jsonl'), `${items.map((i) => JSON.stringify(i)).join('\n')}\n`);
+  const corpusBody = `${items.map((i) => JSON.stringify(i)).join('\n')}\n`;
+  writeFileSync(path.join(home, 'l0', 'dev-items.jsonl'), corpusBody);
+  // Synthetic fixture: declare its own corpus expectations (the frozen-corpus loader is strict).
+  const { sha256 } = await import('../lib/render.mjs');
+  writeFileSync(path.join(home, 'l0', 'dev-items.expect.json'), JSON.stringify({ count: items.length, sha256: sha256(corpusBody) }));
   for (const a of ANNOTATORS) {
     const d = path.join(home, 'l2', 'pass1', a);
     mkdirSync(d, { recursive: true });
@@ -410,4 +418,85 @@ test('R3-P3 early seat exit (EPIPE on stdin) resolves as a call failure', async 
   const r2 = await callSeat('muse-wonder-max', 'prompt', { base, timeoutMs: 5000, closeGraceMs: 2000, spawnImpl: () => epipeChild() });
   assert.equal(r2.code, 1);
   rmSync(base, { recursive: true, force: true });
+});
+
+// R4-P2a — frozen corpus: count and manifest hash are checked, a truncated write fails loudly.
+test('R4-P2a loadDevItems refuses a truncated frozen corpus (count and hash)', async () => {
+  const { loadDevItems, devCorpusExpectations } = await import('../l2/run.mjs');
+  const { sha256 } = await import('../lib/render.mjs');
+  const home = tmp();
+  mkdirSync(path.join(home, 'l0'), { recursive: true });
+  const items = [
+    { itemId: 'i1', kind: 'signal', anchor: { id: 'n1' }, input: 't1' },
+    { itemId: 'i2', kind: 'signal', anchor: { id: 'n2' }, input: 't2' },
+    { itemId: 'i3', kind: 'pv', anchor: { id: 'n3' }, input: 't3' },
+  ];
+  const body = `${items.map((i) => JSON.stringify(i)).join('\n')}\n`;
+  writeFileSync(path.join(home, 'l0', 'dev-items.jsonl'), body);
+  try {
+    // No sidecar: the committed frozen-corpus manifest applies, so a 3-item file is refused.
+    assert.throws(() => loadDevItems(home), /hash mismatch/);
+    writeFileSync(path.join(home, 'l0', 'dev-items.expect.json'), JSON.stringify({ count: 3, sha256: sha256(body) }));
+    assert.equal(devCorpusExpectations(home).count, 3);
+    assert.equal(loadDevItems(home).length, 3);
+    // Killed write: the last line disappears without error at the JSONL level.
+    const truncated = `${items.slice(0, 2).map((i) => JSON.stringify(i)).join('\n')}\n`;
+    writeFileSync(path.join(home, 'l0', 'dev-items.jsonl'), truncated);
+    assert.throws(() => loadDevItems(home), /hash mismatch/);
+    // Hash updated but count stale: the count check catches it too.
+    writeFileSync(path.join(home, 'l0', 'dev-items.expect.json'), JSON.stringify({ count: 3, sha256: sha256(truncated) }));
+    assert.throws(() => loadDevItems(home), /count 2 != 3/);
+  } finally {
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
+// R4-P2b — a PV vote without a located quote is invalid and never contributes.
+test('R4-P2b itemValidity requires quote_found for PV votes', async () => {
+  const { itemValidity, toExtraction, parseAnswers } = await import('../l2/annotation.mjs');
+  const codes = new Map([['S-PLANIFIE', 'a_surveiller']]);
+  const items = [
+    { itemId: 'pv-ok', kind: 'pv', anchor: { type: 'Source', id: 's-ok', citySlug: 'v' }, input: 'page un : adoption du reglement 3-4 afin de permettre six logements.' },
+    { itemId: 'pv-bad', kind: 'pv', anchor: { type: 'Source', id: 's-bad', citySlug: 'v' }, input: 'page un : adoption du reglement 3-4 afin de permettre six logements.' },
+    { itemId: 'sig', kind: 'signal', anchor: { type: 'DesignationEvent', id: 'e-sig', citySlug: 'v' }, input: 'avis de motion du reglement 1-2 afin de permettre six logements.' },
+  ];
+  const pairs = parseAnswers(JSON.stringify({ annotations: [
+    { item_id: 'pv-ok', code: 'S-PLANIFIE', ambiguous: false, ambiguity_cause: null, quote: 'adoption du reglement 3-4 afin de permettre', reason: 'r' },
+    { item_id: 'pv-bad', code: 'S-PLANIFIE', ambiguous: false, ambiguity_cause: null, quote: 'texte absent du document source sans rapport', reason: 'r' },
+    { item_id: 'sig', code: 'S-PLANIFIE', ambiguous: false, ambiguity_cause: null, quote: 'texte absent du document source sans rapport', reason: 'r' },
+  ] }), items);
+  const ex = toExtraction({ annotator: 'x', pass: 1, guideVersion: 'G0', pairs, codes });
+  const byId = new Map(itemValidity(ex, { valid: true, issues: [] }, pairs, codes).map((x) => [x.itemId, x]));
+  assert.equal(byId.get('pv-ok').valid, true);
+  assert.equal(byId.get('pv-bad').valid, false);
+  assert.deepEqual(byId.get('pv-bad').issues, ['quote-not-found']);
+  // Signals keep the previous behavior: no quote requirement.
+  assert.equal(byId.get('sig').valid, true);
+});
+
+// R4-P2c — L3 rows: PV act agreement needs located quotes (the head-code 105 → 104 behavior).
+test('R4-P2c buildReferenceRows marks actMatched only for located shared passages', async () => {
+  const { buildReferenceRows } = await import('../l3/reference.mjs');
+  const codes = new Map([['S-PLANIFIE', 'a_surveiller']]);
+  const items = [
+    { itemId: 'pv1', kind: 'pv', anchor: {}, input: 'page un\fpage deux : adoption du reglement 3-4 afin de permettre six logements.' },
+    { itemId: 'pv2', kind: 'pv', anchor: {}, input: 'page un\fpage deux : adoption du reglement 3-4 afin de permettre six logements.' },
+  ];
+  // pv1: two annotators cite the same passage, located in the text (same page, overlap).
+  // pv2: two annotators cite overlapping passages that are absent from the text.
+  const absentA = 'texte absent du document source sans rapport avec le contenu present ici';
+  const absentB = 'texte absent du document source sans rapport avec le contenu present la';
+  const votes = {
+    pv1: ['adoption du reglement 3-4 afin de permettre', 'reglement 3-4 afin de permettre six logements', 'levee de la seance'],
+    pv2: [absentA, absentB, 'levee de la seance'],
+  };
+  const { ANNOTATORS } = await import('../l2/run.mjs');
+  const latest = new Map(ANNOTATORS.map((a, i) => [a, new Map(items.map((it) => [it.itemId,
+    { valid: true, verdict: 'a_surveiller', code: 'S-PLANIFIE', quote: votes[it.itemId][i], pass: 1 }]))]));
+  const rows = items.map((it) => ({ itemId: it.itemId, kind: 'pv',
+    codeMaj: { value: 'S-PLANIFIE', count: 2 }, verdictMaj: { value: 'a_surveiller', count: 3 }, ambiguous33: false }));
+  const ref = buildReferenceRows({ items, codes, rows, latest, complements: new Map(), signalStrata: new Map(), pass: 1 });
+  assert.equal(ref[0].actMatched, true);
+  assert.equal(ref[1].actMatched, false);
+  assert.ok(ref.every((r) => r.partition === 'dev-core' && r.code === 'S-PLANIFIE'));
 });

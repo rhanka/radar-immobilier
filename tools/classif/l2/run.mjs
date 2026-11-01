@@ -12,7 +12,7 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { callSeat } from '../run-seat.mjs';
 import { appendJsonlRecord, parseJsonlTolerant } from '../lib/jsonl.mjs';
 import { sha256 } from '../lib/render.mjs';
-import { classifHome, privateDir } from '../lib/paths.mjs';
+import { CLASSIF_DIR, classifHome, privateDir } from '../lib/paths.mjs';
 import { PROFILE_DIR, validateExtraction } from '../lib/engram.mjs';
 import { buildPrompt, itemValidity, loadPack, parseAnswers, toExtraction } from './annotation.mjs';
 
@@ -47,10 +47,30 @@ export function quotaWaitMs(r) {
   return Math.min(ms, 6 * 3600000) + 30000;
 }
 
+/**
+ * Expected identity of the frozen dev corpus: the committed draw manifest, unless the home
+ * carries its own expectations (synthetic test fixtures only — never in the real home).
+ * The frozen corpus is checked by count AND manifest hash: a truncated write (killed draw)
+ * must fail loudly instead of silently feeding an incomplete corpus to the next step.
+ */
+export function devCorpusExpectations(home) {
+  const sidecar = path.join(home, 'l0', 'dev-items.expect.json');
+  if (existsSync(sidecar)) {
+    const e = JSON.parse(readFileSync(sidecar, 'utf8'));
+    return { source: sidecar, count: e.count, sha256: e.sha256 };
+  }
+  const m = JSON.parse(readFileSync(path.join(CLASSIF_DIR, 'l0', 'manifests', 'draw-manifest.json'), 'utf8'));
+  return { source: 'tools/classif/l0/manifests/draw-manifest.json', count: m.devItems, sha256: m.devItemsSha256 };
+}
+
 export function loadDevItems(home) {
-  // Tolerant of a truncated last line (a killed draw must not break the next pass).
-  const records = parseJsonlTolerant(readFileSync(path.join(home, 'l0', 'dev-items.jsonl'), 'utf8'));
-  if (!records.length) throw new Error(`no dev items in ${path.join(home, 'l0', 'dev-items.jsonl')}`);
+  const file = path.join(home, 'l0', 'dev-items.jsonl');
+  const raw = readFileSync(file, 'utf8');
+  const exp = devCorpusExpectations(home);
+  if (sha256(raw) !== exp.sha256) throw new Error(`frozen corpus hash mismatch in ${file} (expected ${exp.sha256} from ${exp.source}): refusing a possibly truncated corpus`);
+  const records = parseJsonlTolerant(raw);
+  if (records.length !== exp.count) throw new Error(`frozen corpus count ${records.length} != ${exp.count} in ${file} (from ${exp.source}): refusing a possibly truncated corpus`);
+  if (!records.length) throw new Error(`no dev items in ${file}`);
   return records;
 }
 

@@ -7,14 +7,14 @@
 //     corpus/<itemId>.md in a private workspace) → profile-prompt. Prints hashes and counts.
 import path from 'node:path';
 import process from 'node:process';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { selectJson } from '../lib/db.mjs';
 import { toCsv } from '../lib/csv.mjs';
 import { codebookFromMigration } from '../lib/triage.mjs';
 import { sha256 } from '../lib/render.mjs';
 import { CLASSIF_DIR, MIGRATION_CODES, classifHome } from '../lib/paths.mjs';
-import { parseJsonlTolerant } from '../lib/jsonl.mjs';
 import { PROFILE_DIR, buildProfileState, engramVersion, prepareWorkspace } from '../lib/engram.mjs';
+import { loadDevItems } from '../l2/run.mjs';
 
 export const PROFILE_ID = 'immo-steve-2026-09';
 
@@ -45,9 +45,8 @@ export async function main() {
   writeFileSync(csvFile, csv);
 
   const home = classifHome();
-  const devFile = path.join(home, 'l0', 'dev-items.jsonl');
-  if (!existsSync(devFile)) throw new Error(`${devFile} missing (lot L0)`);
-  const items = parseJsonlTolerant(readFileSync(devFile, 'utf8'));
+  // Frozen corpus, checked by count and manifest hash (no tolerance for a truncated corpus).
+  const items = loadDevItems(home);
   const work = prepareWorkspace(path.join(home, 'l1', 'engram-work'));
   writeCorpus(work, items);
   const built = buildProfileState(work);

@@ -146,8 +146,20 @@ export function itemValidity(extraction, validation, pairs, codes) {
       }
     }
   }
+  // Quote evidence of the extraction, per item: the Annotation node records whether its
+  // quote was located verbatim in the item text (quote_found).
+  const quoteFound = new Map();
+  for (const n of extraction.nodes ?? []) {
+    if (n?.node_type !== 'Annotation' || typeof n.id !== 'string') continue;
+    for (const { item } of pairs) if (n.id.endsWith(`:${item.itemId}`)) quoteFound.set(item.itemId, n.quote_found === true);
+  }
   for (const { item, answer } of pairs) {
     if (answer && codes && !codes.has(String(answer.code ?? ''))) bad.set(item.itemId, [...(bad.get(item.itemId) ?? []), 'unknown_registry_record_ref']);
+    // Fail closed: a PV vote proves nothing when its quote cannot be found in the item text.
+    // A missing citation never contributes to majorities or alphas.
+    if (answer && item.kind === 'pv' && quoteFound.get(item.itemId) !== true) {
+      bad.set(item.itemId, [...(bad.get(item.itemId) ?? []), 'quote-not-found']);
+    }
   }
   return pairs.map(({ item, answer }) => ({ itemId: item.itemId, valid: Boolean(answer) && !bad.has(item.itemId), issues: answer ? bad.get(item.itemId) ?? [] : ['missing-answer'] }));
 }
