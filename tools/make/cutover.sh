@@ -61,7 +61,8 @@ cleanup() {
       record_save || printf 'Could not record executor stop; reconcile liveness through resume\n' >&2
     elif jq -e '.mode=="run" and .checkpoints.promote!=null' "$WORK/record.json" >/dev/null; then
       # A started promotion completes forward: routing and images are reconciled by resume.
-      (set -e; stop_operation_jobs) || printf 'Database Job termination unknown; lock retained\n' >&2
+      # The log export of the canonical Pods keeps running: resume verifies its manifest.
+      (set -e; stop_operation_jobs keep-logs) || printf 'Database Job termination unknown; lock retained\n' >&2
       jq '.executor.state="stopped"' "$WORK/record.json" > "$WORK/next.json"
       mv "$WORK/next.json" "$WORK/record.json"
       record_save || printf 'Could not record executor stop; reconcile liveness through resume\n' >&2
@@ -96,7 +97,7 @@ case ${1:-} in
   slots-status)
     # CI guard: "adopted" delegates the release to the blue/green cutover; "legacy" keeps the old path.
     rbac_preflight
-    if slots_adopted; then echo adopted; else echo legacy; fi;;
+    slots_state;;
   probe-verify)
     # Rehearsal: acknowledged probe writes per database, read back by a Job (writer probe run id PROBE).
     [[ $ENV == preprod && ${PROBE:-} =~ ^[a-z0-9-]{1,64}$ ]] || fail 'probe-verify needs ENV=preprod and PROBE=<run id>'
