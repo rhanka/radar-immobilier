@@ -32,6 +32,7 @@ export interface UiContext {
   expiresAt: number;
   payload: ContextPayload;
 }
+export interface SessionInvalidation { partition: string; epoch: string }
 export interface SyncDependencies {
   storage: Storage | null;
   origin: string;
@@ -39,7 +40,7 @@ export interface SyncDependencies {
   revalidate(invalidated?: boolean): void;
   validateWorkspace(workspaceId: string, sub: string): Promise<boolean>;
   apply(workspaceId: string, payload: ContextPayload): void;
-  notify?(key: string): void;
+  notify?(key: string, invalidated?: SessionInvalidation): void;
   now?: () => number;
   uuid?: () => string;
   partition?: typeof accountPartition;

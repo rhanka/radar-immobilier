@@ -1,10 +1,10 @@
 import { writable } from "svelte/store";
-import { createClientId } from "../sw/protocol.js";
+import { createClientId, isUuidLike } from "../sw/protocol.js";
 import { contextStorage } from "./context-storage.js";
 import { decodeContext, decodeSession } from "./ui-state-codecs.js";
 import { accountPartition, contextKey, CONTEXT_DEBOUNCE, CONTEXT_SCHEMA,
   CONTEXT_TTL, MAX_CONTEXT_BYTES, MAX_CONTEXTS, SCHEMA_VERSION, SESSION_KEY, SESSION_SCHEMA,
-  type SyncDependencies, type UiContext, type UiSession } from "./ui-state-contract.js";
+  type SessionInvalidation, type SyncDependencies, type UiContext, type UiSession } from "./ui-state-contract.js";
 
 export function createUiStateSync(d: SyncDependencies) {
   const now = d.now ?? Date.now;
@@ -19,26 +19,43 @@ export function createUiStateSync(d: SyncDependencies) {
   const { read, write, keys, purge } = local;
   let timer: ReturnType<typeof setTimeout> | undefined;
   let disposed = false;
+  const invalidatedEpochs = new Set<string>();
   function live() {
     if (!session || disposed) return false;
     // Memory-only operation stays usable when storage is blocked. It cannot
     // adopt or expose persisted peers without a matching canonical epoch.
     if (!local.available) return false;
     const canonical = decodeSession(read(SESSION_KEY) ?? "");
-    return canonical !== null && !canonical.invalidated && canonical.partition === session.partition
+    return canonical !== null && !canonical.invalidated && !invalidatedEpochs.has(canonical.sessionEpoch) && canonical.partition === session.partition
       && canonical.sessionEpoch === session.sessionEpoch;
   }
   function suspend() {
     generation++; clearTimeout(timer); peers.set([]);
     session = null;
   }
+  function purgeEpoch(partition: string, epoch: string) {
+    for (const key of keys()) {
+      const c = decodeContext(read(key) ?? "", now(), true);
+      if (c?.partition === partition && c.sessionEpoch === epoch && !local.remove(key)) return;
+    }
+  }
   function receive(key: string | null) {
     if (disposed) return;
     if ((key === SESSION_KEY || key === null) && session && !live()) {
-      purge(session.partition);
+      purgeEpoch(session.partition, session.sessionEpoch);
       suspend(); d.revalidate(true); return;
     }
     refresh();
+  }
+  function sessionInvalidated(hint: SessionInvalidation) {
+    if (!hint || !isUuidLike(hint.epoch) || !/^[a-f0-9]{64}$/.test(hint.partition)) return;
+    const current = decodeSession(read(SESSION_KEY) ?? "");
+    const affected = session?.partition === hint.partition && session.sessionEpoch === hint.epoch;
+    if (!affected && (current?.partition !== hint.partition
+      || (current.sessionEpoch !== hint.epoch && !current.invalidated))) return;
+    invalidatedEpochs.add(hint.epoch);
+    purgeEpoch(hint.partition, hint.epoch);
+    suspend(); d.revalidate(true);
   }
   function refresh() {
     if (!live()) { peers.set([]); return; }
@@ -68,6 +85,7 @@ export function createUiStateSync(d: SyncDependencies) {
     const current = raw === null ? null : decodeSession(raw);
     if (raw !== baseline && current?.partition !== partition) { suspend(); d.revalidate(true); return; }
     if (raw !== null && !current) return; // Unknown bytes are preserved.
+    if (current && invalidatedEpochs.has(current.sessionEpoch)) return;
     if (current?.partition === partition && current.invalidated) return;
     if (current && current.partition !== partition) {
       write(SESSION_KEY, JSON.stringify({ ...current, sessionEpoch: uuid(), invalidated: true }));
@@ -83,9 +101,13 @@ export function createUiStateSync(d: SyncDependencies) {
     const old = session;
     suspend();
     if (!old) return;
+    invalidatedEpochs.add(old.sessionEpoch);
     // Epoch first, then purge; no publication can race from this page.
-    write(SESSION_KEY, JSON.stringify({ ...old, sessionEpoch: uuid(), invalidated: true }));
+    const raw = read(SESSION_KEY);
+    if (raw === null || decodeSession(raw)) write(SESSION_KEY, JSON.stringify({ ...old, sessionEpoch: uuid(), invalidated: true }));
     purge(old.partition);
+    // A quota/storage failure must still interrupt peers over available transports.
+    d.notify?.(SESSION_KEY, { partition: old.partition, epoch: old.sessionEpoch });
   }
   function flush() {
     clearTimeout(timer);
@@ -126,12 +148,13 @@ export function createUiStateSync(d: SyncDependencies) {
     if (!allowed || operation !== generation || !live()) return false;
     d.apply(c.workspaceId, c.payload); schedule(); return true;
   }
-  return { peers: { subscribe: peers.subscribe }, tabId, account, invalidate, receive, refresh, schedule, flush, adopt,
+  return { peers: { subscribe: peers.subscribe }, tabId, account, invalidate, receive, sessionInvalidated, refresh, schedule, flush, adopt,
     prepareLogin() {
       const current = decodeSession(read(SESSION_KEY) ?? "");
-      if (current?.invalidated) {
+      if (current && (current.invalidated || invalidatedEpochs.has(current.sessionEpoch))) {
         if (local.remove(SESSION_KEY)) d.notify?.(SESSION_KEY);
       }
+      invalidatedEpochs.clear();
     },
     wake() { const changed = session !== null && !live(); suspend(); d.revalidate(changed); },
     dispose() { disposed = true; suspend(); } };

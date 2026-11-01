@@ -19,6 +19,31 @@ function publishPeer(storage: Storage, changes: Partial<UiContext> = {}) {
   storage.setItem(contextKey(value), JSON.stringify(value)); return value;
 }
 describe("per-tab contexts and session continuity", () => {
+  it("should preserve a fresh login when an old session invalidation arrives late", async () => {
+    const { sync, storage, revalidate } = setup(); await sync.account("subject");
+    const old = decodeSession(storage.getItem(SESSION_KEY)!)!;
+    const next = { ...old, sessionEpoch: uuid() };
+    storage.setItem(SESSION_KEY, JSON.stringify(next));
+    const fresh = publishPeer(storage);
+    sync.receive(SESSION_KEY); expect(storage.getItem(contextKey(fresh))).not.toBeNull();
+    await sync.account("subject"); revalidate.mockClear();
+    sync.sessionInvalidated({ partition: old.partition, epoch: old.sessionEpoch });
+    sync.refresh(); expect(get(sync.peers)).toEqual([fresh]); expect(revalidate).not.toHaveBeenCalled();
+  });
+  it("should interrupt peers after quota failure and preserve unknown session bytes on logout", async () => {
+    const notify = vi.fn(); const storage = memoryStorage();
+    const { sync } = setup(storage, { notify }); await sync.account("subject");
+    const { sync: peer } = setup(storage); await peer.account("subject");
+    vi.mocked(storage.setItem).mockImplementation(() => { throw new Error("quota"); });
+    const current = decodeSession(storage.getItem(SESSION_KEY)!)!;
+    const hint = { partition: current.partition, epoch: current.sessionEpoch };
+    sync.invalidate(); expect(notify).toHaveBeenCalledWith(SESSION_KEY, hint);
+    peer.sessionInvalidated(hint); await peer.account("subject"); peer.flush();
+    expect(get(peer.peers)).toEqual([]);
+    const other = setup(); await other.sync.account("subject");
+    other.storage.setItem(SESSION_KEY, '{"schemaVersion":"2.0.0"}'); other.sync.invalidate();
+    expect(other.storage.getItem(SESSION_KEY)).toBe('{"schemaVersion":"2.0.0"}');
+  });
   it("should pause publications on wake without invalidating an unchanged visible session", async () => {
     const { sync, revalidate } = setup(); await sync.account("subject");
     sync.wake(); expect(revalidate).toHaveBeenCalledWith(false);

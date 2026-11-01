@@ -4,7 +4,7 @@ import { workspaceContext } from "../signals/workspace-client.js";
 import { activeGeoRoute, activePageState, activeRouteView,
   navigateToGeoRoute, navigateToPageState } from "../router/router.js";
 import { geographicTarget, projectContext, decodeSession } from "./ui-state-codecs.js";
-import { SESSION_KEY } from "./ui-state-contract.js";
+import { SESSION_KEY, type SessionInvalidation } from "./ui-state-contract.js";
 import { createUiStateSync } from "./ui-state-sync.js";
 import { browserSyncChannel } from "./browser-channel.js";
 import { currentServiceWorkerClient } from "../sw/client.js";
@@ -12,15 +12,14 @@ import { currentServiceWorkerClient } from "../sw/client.js";
 export function mountUiStateSync() {
   let storage: Storage | null = null;
   try { storage = window.localStorage; } catch { /* operate in memory */ }
-  const bus = browserSyncChannel((key) => sync.receive(key));
+  const bus = browserSyncChannel((key, invalidated) => invalidated ? sync.sessionInvalidated(invalidated) : sync.receive(key));
   const sync = createUiStateSync({ storage, origin: window.location.origin,
-    notify(key) {
-      bus.notify(key);
+    notify(key, invalidated) {
+      bus.notify(key, invalidated);
       const relay = currentServiceWorkerClient();
       if (!relay) return;
       if (key === SESSION_KEY) {
-        const s = decodeSession(storage?.getItem(key) ?? "");
-        if (s?.invalidated) void relay.notifySessionInvalidated({ partition: s.partition, epoch: s.sessionEpoch }).catch(() => undefined);
+        if (invalidated) void relay.notifySessionInvalidated(invalidated).catch(() => undefined);
       } else void relay.notifyInvalidation({ scope: "context" }).catch(() => undefined);
     },
     snapshot() {
@@ -62,7 +61,7 @@ export function mountUiStateSync() {
   window.addEventListener("pageshow", wake);
   window.addEventListener("online", wake);
   const refresh = () => sync.refresh();
-  const sessionInvalidated = () => sync.receive(SESSION_KEY);
+  const sessionInvalidated = (event: Event) => sync.sessionInvalidated((event as CustomEvent<SessionInvalidation>).detail);
   window.addEventListener("immo:coordination-invalidated", refresh);
   window.addEventListener("immo:session-invalidated", sessionInvalidated);
   const pagehide = () => sync.flush();
