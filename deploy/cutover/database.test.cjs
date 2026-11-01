@@ -108,6 +108,12 @@ test('freeze refuses every write from frozenAt; unfreeze makes pooled sessions w
     assert.equal(unfrozen.status, 0, unfrozen.stderr);
     assert.equal(await settle('INSERT INTO writes VALUES (2)'), 'ok', 'pooled sessions reconnect writable');
     assert.equal((await c.query('SELECT 1')).rowCount, 1, 'the operator session on another database is untouched');
+    // As in the cluster, the Job connects to the frozen database itself (POSTGRES_DB = live database).
+    assert.equal(run('freeze', 'radar_next', { POSTGRES_DB: 'radar_next' }).status, 0);
+    assert.equal(await settle('INSERT INTO writes VALUES (3)'), '25006');
+    const inside = run('unfreeze', 'radar_next', { POSTGRES_DB: 'radar_next' });
+    assert.equal(inside.status, 0, inside.stderr);
+    assert.equal(await settle('INSERT INTO writes VALUES (4)'), 'ok', 'unfreeze from a session on the frozen database');
   } finally {
     await pool.end();
     await c.query('DROP DATABASE IF EXISTS radar_next WITH (FORCE)');
