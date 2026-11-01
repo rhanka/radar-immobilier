@@ -17,9 +17,9 @@ services:
     volumes:
       - ../..:/workspace
     tmpfs:
-      - /tmp:size=512m
-      - /workspace/node_modules:size=3g
-      - /workspace/api/node_modules:size=512m
+      - /tmp:exec,size=512m
+      - /workspace/node_modules:exec,size=3g
+      - /workspace/api/node_modules:exec,size=512m
     environment:
       NODE_ENV: test
       LOT_MIGRATION_DB_TEST: "1"
