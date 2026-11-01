@@ -102,8 +102,8 @@ record_abandoned() {
   # record_abandoned <abandoned database> <baseline rows, all tables> <baseline rows, non-probe tables> <baseline time>
   # (each a JSON value, null when unknown)
   local abandoned=$1 baseline=$2 nonprobe=$3 since=$4 tuples others
-  # pg_stat_user_tables publishes counters late (about 1 s, up to 10 s for an idle session): the
-  # measurement waits STATS_SETTLE seconds (default 11) after routing left the abandoned database.
+  # Callers first stop the abandoned database's writers. Only then wait for their delayed
+  # pg_stat_user_tables counters (about 1 s, up to 10 s for an idle session) to be published.
   local settle=${STATS_SETTLE:-11}
   [[ $settle =~ ^[0-9]{1,3}$ ]] || fail 'STATS_SETTLE must be a number of seconds'
   ((settle == 0)) || sleep "$settle"
@@ -340,9 +340,10 @@ switch_services() {
   started=$(now_ms)
   for svc in "${order[@]}"; do select_slot "$svc" "$from" "$to"; done
   for svc in "${order[@]}"; do wait_slices "$svc" "$to" 60; done
-  record_set '.slot=$to|.switches=((.switches//[])+[{to:$to,at:$at,mixedWindowMs:$ms}])' \
-    --arg to "$to" --arg at "$(iso_ms)" --argjson ms "$(( $(now_ms) - started ))"
+  record_set '.slot=$to|.switches[-1].mixedWindowMs=$ms' --arg to "$to" --argjson ms "$(( $(now_ms) - started ))"
   printf 'Routing on slot=%s (mixed window %s ms)\n' "$to" "$(jq -r '.switches[-1].mixedWindowMs' "$WORK/record.json")"
+  # Any first patch can expose a writer, even when a later patch or EndpointSlice wait fails.
+  record_set '.switches=((.switches//[])+[{to:$to,at:$at,mixedWindowMs:null}])' --arg to "$to" --arg at "$(iso_ms)"
 }
 back_to_main_routing() {
   local svc
@@ -372,6 +373,9 @@ back_to_main() {
       "$(jq -c --arg db "$abandoned_db" '.writeBaselineNonProbe[$db]' "$WORK/record.json")" "$(jq -c .writeBaselineAt "$WORK/record.json")"
   fi
 }
+  # Routing and a fixed pause do not end in-flight requests. Foreground deletion waits for the
+  # prepared containers to exit (including their HTTP drain) before measuring their final writes.
+  prepared_stack_retire
 verify_prepared_release() {
   verify_prepared
   if ! jq -e '.previousRelease!=null' "$WORK/record.json" >/dev/null; then
@@ -597,7 +601,6 @@ bluegreen_stages() {
 bluegreen_abandon() {
   # Before promotion: routing back to slot=main, writes reopened, schedules restored.
   back_to_main
-  prepared_stack_retire
   restore_schedules
   lock_delete
   fail 'Cutover abandoned before promotion; slot=main serves the previous release'
@@ -608,7 +611,6 @@ rollback_command() {
     lock_resume
     jq -e '.checkpoints.promote==null' "$WORK/record.json" >/dev/null || fail 'Promotion started: resume RUN= first, then rollback RUN='
     back_to_main
-    prepared_stack_retire
     restore_schedules
     lock_delete
     printf 'Rolled back: slot=main serves the previous release (%s)\n' "$RUN"
