@@ -74,7 +74,7 @@ describe("artifact activation", () => {
     const active = [immoProvider()];
     const before = JSON.stringify(active);
     const candidate = compileComposition([...active, artifactProvider()], { artifact: artifactRequest() });
-    expect(candidate.artifact?.selection).toHaveLength(4);
+    expect(candidate.artifact?.selection).toHaveLength(ARTIFACT_SELECTION.length);
     expect(JSON.stringify(active)).toBe(before);
     expect(candidate.digest).not.toBe(compileComposition(active).digest);
     expect(candidate.digest).toMatch(/^[0-9a-f]{64}$/);
@@ -107,7 +107,7 @@ describe("artifact activation", () => {
     const providers = [immoProvider(), artifactProvider()];
     const foreign = artifactRequest({
       selection: [...artifactRequest().selection.slice(0, 3),
-        { tool: "artifacts_delete", operation: "delete", method: "POST", path: "/delete", command: "delete" }],
+        { tool: "artifacts_restore", operation: "restore", method: "POST", path: "/restore", command: "restore" }],
     });
     expect(codeOf(() => compileComposition(providers, { artifact: foreign }))).toBe("unavailable_capability");
     const remappedSelection = artifactRequest().selection.map((entry) => (entry.tool === "artifacts_publish"
@@ -128,14 +128,14 @@ describe("artifact activation", () => {
     const withExtra: ProviderDefinition = {
       ...extended,
       tools: [...extended.tools, {
-        name: "artifacts_delete",
+        name: "artifacts_restore",
         scope: ARTIFACT_INVOCATION_SCOPES.write,
         binding: { context: "artifact-service", registeredBy: "registerTools" },
       }],
     };
     const candidate = compileComposition([immoProvider(), withExtra], { artifact: artifactRequest() });
-    expect(Object.keys(candidate.toolScopes)).toHaveLength(16);
-    expect(candidate.toolScopes).not.toHaveProperty("artifacts_delete");
+    expect(Object.keys(candidate.toolScopes)).toHaveLength(12 + ARTIFACT_SELECTION.length);
+    expect(candidate.toolScopes).not.toHaveProperty("artifacts_restore");
     expect(candidate.toolScopes).toEqual(baseline.toolScopes);
     expect(candidate.digest).toBe(baseline.digest);
   });
@@ -144,12 +144,7 @@ describe("artifact activation", () => {
     const candidate = compileComposition([immoProvider(), artifactProvider()], { artifact: artifactRequest() });
     expect(candidate.artifact?.effectiveRequired.artifacts_ensure).toContain("idempotencyKey");
     expect(candidate.artifact?.effectiveRequired.artifacts_publish).toContain("idempotencyKey");
-    expect(candidate.artifact?.effectiveRequired).toEqual({
-      artifacts_ensure: [...ARTIFACT_EFFECTIVE_REQUIRED.artifacts_ensure],
-      artifacts_publish: [...ARTIFACT_EFFECTIVE_REQUIRED.artifacts_publish],
-      artifacts_list: [...ARTIFACT_EFFECTIVE_REQUIRED.artifacts_list],
-      artifacts_get: [...ARTIFACT_EFFECTIVE_REQUIRED.artifacts_get],
-    });
+    expect(candidate.artifact?.effectiveRequired).toEqual(ARTIFACT_EFFECTIVE_REQUIRED);
     expect(candidate.artifact?.durableIdentity).toEqual({ ...ARTIFACT_DURABLE_IDENTITY });
     expect(candidate.artifact?.requiredContracts).toEqual({ ...REQUIRED_PROVIDER_CONTRACTS });
     expect(Object.isFrozen(candidate.artifact?.effectiveRequired.artifacts_ensure)).toBe(true);
