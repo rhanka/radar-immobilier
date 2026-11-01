@@ -144,6 +144,9 @@ const OPERATIONS = {
   // Rollback before promotion: writes again, and pooled read-only sessions reconnect writable.
   async unfreeze(c) {
     if (!valid(target)) throw Error();
+    // The Job connects to the frozen database itself: its session starts read-only and
+    // PostgreSQL refuses ALTER DATABASE in a read-only transaction (25006).
+    await c.query('SET SESSION CHARACTERISTICS AS TRANSACTION READ WRITE');
     await c.query(`ALTER DATABASE "${target}" RESET default_transaction_read_only`);
     const since = (await c.query('SELECT clock_timestamp() AS at')).rows[0].at;
     await c.query(`SELECT pg_terminate_backend(pid, 3000) FROM pg_stat_activity WHERE datname=$1
