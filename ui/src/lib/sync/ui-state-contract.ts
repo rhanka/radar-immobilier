@@ -32,6 +32,18 @@ export interface UiContext {
   expiresAt: number;
   payload: ContextPayload;
 }
+export interface SyncDependencies {
+  storage: Storage | null;
+  origin: string;
+  snapshot(): { workspaceId: string; payload: ContextPayload } | null;
+  revalidate(): void;
+  validateWorkspace(workspaceId: string, sub: string): Promise<boolean>;
+  apply(workspaceId: string, payload: ContextPayload): void;
+  notify?(key: string): void;
+  now?: () => number;
+  uuid?: () => string;
+  partition?: typeof accountPartition;
+}
 export const contextKey = (c: Pick<UiContext, "partition" | "workspaceId" | "tabId">) =>
   `${CONTEXT_PREFIX}${c.partition}.${c.workspaceId}.${c.tabId}`;
 /** Pseudonymous, not a security boundary against scripts on the UI origin. */
