@@ -19,7 +19,7 @@ export function contextStorage(storage: Storage | null, notify?: (key: string) =
     try { storage?.removeItem(key); return true; } catch { available = false; return false; }
   };
   const purge = (partition: string) => {
-    for (const key of keys()) if (key.startsWith(`${CONTEXT_PREFIX}${partition}.`)) remove(key);
+    for (const key of keys()) if (key.startsWith(`${CONTEXT_PREFIX}${partition}.`) && !remove(key)) return;
   };
   return { read, write, keys, remove, purge, get available() { return available; } };
 }

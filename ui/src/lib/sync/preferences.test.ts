@@ -5,6 +5,12 @@ import { betaCodec, displayModeCodec, labelCodec, createSyncedPreference,
 import { memoryStorage } from "./test-support.js";
 
 describe("stable preference adapters", () => {
+  it("should keep defaults and local commands when browser storage reads are refused", () => {
+    const storage = memoryStorage(); vi.mocked(storage.getItem).mockImplementation(() => { throw new Error("blocked"); });
+    const store = createSyncedPreference("beta", betaCodec, { storage, listen: () => () => {}, notify: vi.fn() });
+    expect(get(store)).toBe(false); store.set(true); expect(get(store)).toBe(true);
+    expect(storage.setItem).not.toHaveBeenCalled();
+  });
   it("should preserve the four legacy scalar encodings without a migration", () => {
     expect(betaCodec.encode(true)).toBe("true"); expect(betaCodec.encode(false)).toBeNull();
     expect(displayModeCodec.decode("floating")).toBe("floating");
