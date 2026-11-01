@@ -58,6 +58,10 @@ run_job() {
   fi
   name="cutover-$RUN-$step"
   existing=$(jq -c --arg step "$step" '.jobs[$step]//null' "$WORK/record.json")
+  # A Job name kept in history is never reused for a new Job.
+  if [[ $existing == null ]] && jq -e --arg name "$name" 'any(.jobHistory[]?;.name==$name)' "$WORK/record.json" >/dev/null; then
+    name="cutover-$RUN-$(jq '.jobHistory|length' "$WORK/record.json")-$step"
+  fi
   if [[ ${RECOVERING:-0} == 1 && $step =~ ^(ddl|data|restore|backup)$ && $existing != null ]]; then
     local previous
     previous=$("${k[@]}" get job "$(jq -r .name <<< "$existing")" -o json) || fail 'Migration outcome unknown'
@@ -103,10 +107,12 @@ render_job() {
   render_template "$step" > "$WORK/template.yaml"
   # Client dry-run only parses the manifest. No server mutation precedes checkpoint.
   "${k[@]}" create --dry-run=client -f "$WORK/template.yaml" -o json > "$WORK/template.json"
-  if [[ $step =~ ^(destination|database|reset|discard)$ ]]; then
-    local operation=$step
+  if [[ $step =~ ^(destination|database|reset|discard|verify)$ ]]; then
+    local operation=$step target=${TARGET_DB:-}
     [[ $step != destination || -n ${TARGET_DB:-} ]] || operation=database
-    jq --rawfile database deploy/cutover/database.cjs --arg step "$operation" --arg target "${TARGET_DB:-}" '
+    # verify: the live database must carry every migration of the release image.
+    if [[ $step == verify ]]; then operation=destination; target=$(jq -r .liveDb "$WORK/record.json"); fi
+    jq --rawfile database deploy/cutover/database.cjs --arg step "$operation" --arg target "$target" '
       .spec.template.spec.containers[0].command=["node","-e",$database]|
       .spec.template.spec.containers[0].env += [{name:"CUTOVER_DB_OPERATION",value:$step},{name:"TARGET_DB",value:$target}]' \
       "$WORK/template.json" > "$WORK/identity.json"
