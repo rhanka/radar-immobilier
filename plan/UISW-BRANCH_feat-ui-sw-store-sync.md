@@ -51,6 +51,9 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
   default runners remain unchanged; remove the override to roll back.
 - Synthetic S3/runner temporary bodies also use tmpfs after measured S3 deadlines
   under host I/O pressure; the API suite is rerun with one worker, unchanged timeouts.
+- The API runner's temporary mount permits execution of synthetic test binaries:
+  inspection proved the default tmpfs was noexec, blocking the replay test's
+  pdftotext stub. This is confined to the disposable runner, never application images.
 - Navigation adoption needs router methods to update geographic/hash views
   coherently; isolated `.set()` of activeRouteView is forbidden.
 - Review runs in this session: owner forbids workflow/background agents.
@@ -66,6 +69,7 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
   - [x] Read rules and inherited diff; retain correct build/bootstrap work.
   - [x] Consume prepared preprod worker CSP correction with a merge commit.
 - [ ] **Lot B — Coordination worker**
+  - [x] Lifecycle events never restart a retiring worker; kill replies neutralize even after a missed notice.
   - [x] Invalidations can target an ephemeral tab identity without business state.
   - [x] Chromium qualified N/N-1/N+1, interruption, refusal, rollback and kill.
   - [x] Image stamping and disabled-build kill bytes at the stable worker URL.

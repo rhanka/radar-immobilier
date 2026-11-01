@@ -9,6 +9,54 @@ const probes = { productionBuild: true, secureContext: true, workerApi: true,
 const opened: ServiceWorkerClient[] = [];
 afterEach(() => { opened.splice(0).forEach((client) => client.dispose()); vi.unstubAllGlobals(); });
 describe("worker rollout and degradation", () => {
+  it("should leave the retiring worker stopped and handshake only after its replacement activates", async () => {
+    class Channel {
+      port1 = { onmessage: null as ((event: { data: unknown }) => void) | null, close() {} };
+      port2 = { postMessage: (data: unknown) => this.port1.onmessage?.({ data }) };
+    }
+    vi.stubGlobal("MessageChannel", Channel);
+    const old = { state: "activated", postMessage: vi.fn() };
+    const replacement = Object.assign(new EventTarget(), { state: "installing",
+      postMessage(message: { id: string }, ports: MessagePort[]) {
+        ports[0]!.postMessage({ protocol: 1, type: "HELLO_ACK", id: "new", correlationId: message.id,
+          payload: { workerBuildId: "replacement", protocolVersion: 1 } });
+      } });
+    const registration = Object.assign(new EventTarget(), { active: old as unknown,
+      installing: replacement as unknown, waiting: null as unknown, update: vi.fn().mockResolvedValue(undefined) });
+    const container = Object.assign(new EventTarget(), { register: vi.fn().mockResolvedValue(registration) });
+    vi.stubGlobal("navigator", { serviceWorker: container });
+    const client = initServiceWorker({ probes }); opened.push(client);
+    await Promise.resolve(); await Promise.resolve();
+    replacement.state = "installed"; registration.installing = null; registration.waiting = replacement;
+    replacement.dispatchEvent(new Event("statechange"));
+    await client.checkForUpdate();
+    expect(get(client.status)).toBe("waiting"); expect(old.postMessage).not.toHaveBeenCalled();
+    registration.waiting = null; registration.active = replacement; replacement.state = "activating";
+    container.dispatchEvent(new Event("controllerchange"));
+    expect(old.postMessage).not.toHaveBeenCalled();
+    replacement.state = "activated"; replacement.dispatchEvent(new Event("statechange"));
+    await vi.waitFor(() => expect(get(client.status)).toBe("ready"));
+    expect(get(client.worker)?.workerBuildId).toBe("replacement");
+  });
+  it("should neutralize on a correlated kill reply even when the broadcast notice is missed", async () => {
+    class Channel {
+      port1: { onmessage: ((event: { data: unknown }) => void) | null; close(): void } = { onmessage: null, close() {} };
+      port2 = { postMessage: (data: unknown) => this.port1.onmessage?.({ data }) };
+    }
+    vi.stubGlobal("MessageChannel", Channel);
+    const active = Object.assign(new EventTarget(), { state: "activated",
+      postMessage(message: { id: string }, ports: MessagePort[]) {
+        ports[0]!.postMessage({ protocol: 1, type: "DISABLED", id: "kill", correlationId: message.id,
+          payload: { workerBuildId: "kill" } });
+      } });
+    const registration = Object.assign(new EventTarget(), { active, installing: null, waiting: null });
+    const container = Object.assign(new EventTarget(), { register: vi.fn().mockResolvedValue(registration) });
+    vi.stubGlobal("navigator", { serviceWorker: container });
+    const client = initServiceWorker({ probes }); opened.push(client);
+    await vi.waitFor(() => expect(get(client.status)).toBe("disabled"));
+    expect(get(client.worker)).toBeNull();
+    await expect(client.ping()).rejects.toThrow("worker-unavailable");
+  });
   it("should degrade without requiring secure crypto APIs on an unsupported origin", () => {
     vi.stubGlobal("crypto", undefined);
     const client = initServiceWorker({ probes: { ...probes, secureContext: false } });

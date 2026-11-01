@@ -12,7 +12,7 @@ export function exchange(target: ServiceWorker, type: string,
     const timer = setTimeout(() => finish(new Error("worker-unreachable")), SW_HANDSHAKE_TIMEOUT_MS);
     channel.port1.onmessage = ({ data }) => {
       if (!validateSwMessage(data, "worker") || data.correlationId !== id) return;
-      if (data.type === "ERROR" || data.type === "DISABLED") finish(new Error(data.type));
+      if (data.type === "ERROR") finish(new Error(data.type));
       else finish(null, data);
     };
     try { target.postMessage({ protocol: 1, type, id, ...(payload ? { payload } : {}) }, [channel.port2]); }

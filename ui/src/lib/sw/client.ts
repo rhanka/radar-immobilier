@@ -20,14 +20,25 @@ export function initServiceWorker(options: {
   let disabled = false;
   const enabled = options.enabled ?? (typeof __IMMO_SW_ENABLED__ === "undefined" || __IMMO_SW_ENABLED__);
   const setStatus = (value: SwStatus) => { if (!disposed && (!disabled || value === "disabled")) status.set(value); };
+  function neutralize() { disabled = true; worker.set(null); setStatus("disabled"); }
+  async function talk(target: ServiceWorker, type: string, payload?: Record<string, unknown>) {
+    const reply = await exchange(target, type, payload);
+    if (reply.type === "DISABLED") { neutralize(); throw new Error("worker-disabled"); }
+    return reply;
+  }
   async function connect(target: ServiceWorker) {
-    const ack = await exchange(target, "HELLO", hello);
+    const ack = await talk(target, "HELLO", hello);
     if (ack.type !== "HELLO_ACK" || ack.payload?.protocolVersion !== 1) throw new Error("incompatible-worker");
     if (!disposed) worker.set(ack.payload as unknown as SwWorkerInfo);
     return target;
   }
   async function refresh() {
-    if (disposed || disabled) return;
+    if (disposed || disabled || !enabled) return;
+    // Do not restart the retiring worker while an update is taking its place.
+    if (registration?.waiting) { setStatus("waiting"); return; }
+    if (registration?.installing || registration?.active?.state === "activating") {
+      setStatus("installing"); return;
+    }
     try {
       if (registration?.active) await connect(registration.active);
       setStatus(registration?.waiting ? "waiting" : registration?.active ? "ready" : "installing");
@@ -36,7 +47,7 @@ export function initServiceWorker(options: {
   async function request(type: string, payload?: Record<string, unknown>) {
     if (disposed || disabled || !enabled || !registration?.active) throw new Error("worker-unavailable");
     // Repeat HELLO on each operation: a stopped worker loses its registry.
-    return exchange(await connect(registration.active), type, payload);
+    return talk(await connect(registration.active), type, payload);
   }
   function onMessage(event: MessageEvent) {
     const source = event.source as ServiceWorker | null;
@@ -47,7 +58,7 @@ export function initServiceWorker(options: {
       event.ports[0]?.postMessage({ protocol: 1, type: "HELLO", id: crypto.randomUUID(),
         correlationId: m.id, payload: hello });
     } else if (m.type === "DISABLED") {
-      disabled = true; worker.set(null); setStatus("disabled");
+      neutralize();
     } else if (enabled && !disabled && m.type === "INVALIDATE") {
       options.onInvalidation?.(m.payload as unknown as SwInvalidatePayload);
     } else if (enabled && !disabled && m.type === "SESSION_INVALIDATED") {
@@ -61,7 +72,10 @@ export function initServiceWorker(options: {
   function watchInstall() {
     const installing = registration?.installing;
     if (!installing) return;
-    listen(installing, "statechange", () => { void refresh(); });
+    listen(installing, "statechange", () => {
+      if (installing.state === "activated" || installing.state === "redundant") void refresh();
+      else if (installing.state === "installed") setStatus("waiting");
+    });
   }
   async function boot() {
     if (!gateServiceWorkerRuntime(options.probes ?? runtimeProbes())) return;
@@ -107,7 +121,7 @@ export function initServiceWorker(options: {
       if (!enabled || !target || disabled) return { ok: false, reason: "no-waiting-worker" };
       try {
         await connect(target);
-        const result = await exchange(target, "ACTIVATE_COMPATIBLE");
+        const result = await talk(target, "ACTIVATE_COMPATIBLE");
         if (result.payload?.ok !== true) return { ok: false, reason: String(result.payload?.reason) };
         await activated(target); await refresh();
         return { ok: true };
