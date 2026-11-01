@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { ARTIFACT_P0B } from "./p0b-profile.js";
 import { p0bFixture } from "./p0b.test-support.js";
 
@@ -54,6 +54,24 @@ describe.skipIf(!ARTIFACT_P0B || !process.env.P0B_DATABASE_URL)("P0b host with r
     await h.pool.query("UPDATE account_users SET status='pending' WHERE sub='idp-bob'");
     expect((await h.call("set_access", { artifactId, action: "revoke", principalId: "idp-bob", idempotencyKey: randomUUID() })).status).toBe(200);
     expect((await h.call("meta", { artifactId }, "idp-bob")).status).toBeGreaterThanOrEqual(400);
+  });
+
+  it("should reread recipient approval on the transaction after the request snapshot", async () => {
+    const { artifactId } = await h.page();
+    const query = h.pool.query.bind(h.pool);
+    let armed = true;
+    const spy = vi.spyOn(h.pool, "query").mockImplementation(async (...args: Parameters<typeof h.pool.query>) => {
+      const result = await query(...args);
+      if (armed && String(args[0]).startsWith("SELECT sub, status FROM account_users")) {
+        armed = false;
+        await query("UPDATE account_users SET status='pending' WHERE sub='idp-bob'");
+      }
+      return result;
+    });
+    try {
+      expect((await h.call("set_access", { artifactId, action: "grant", principalId: "idp-bob", grant: "read", idempotencyKey: randomUUID() })).status).toBe(403);
+      expect((await query("SELECT 1 FROM artifacts.artifact_access WHERE artifact_id=$1", [artifactId])).rowCount).toBe(0);
+    } finally { spy.mockRestore(); }
   });
 
   it("should require human approval, roll proof consumption back on denial and replay a terminal deletion", async () => {

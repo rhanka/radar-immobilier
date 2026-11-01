@@ -13,7 +13,7 @@ import {
   type ArtifactControl,
   type MembershipQueryable,
   type ArtifactDeleteConfirmation,
-  ARTIFACT_P0B, isArtifactMutation,
+  ARTIFACT_P0B, ARTIFACT_PROFILE_DESCRIPTOR, ACTIVE_ARTIFACT_TOOLS, isArtifactMutation,
 } from "@radar/artifacts-host";
 import type { AuthConfig } from "../config.js";
 import { controlCacheHeaders } from "./control-cache.js";
@@ -55,6 +55,7 @@ function jsonError(c: Context, status: 400 | 401 | 403 | 413 | 415 | 503, body: 
 async function guard(
   c: Context,
   deps: ControlRouteDeps,
+  allowNavigation = false,
 ): Promise<{ session: VerifiedSession } | Response> {
   if (c.req.header("authorization") !== undefined) {
     return jsonError(c, 401, { error: "cookie_required" });
@@ -69,8 +70,10 @@ async function guard(
   const origin = c.req.header("origin");
   const read = c.req.method === "GET" || c.req.method === "HEAD";
   const fetchSite = c.req.header("sec-fetch-site");
+  const navigation = allowNavigation && c.req.method === "GET" && c.req.header("sec-fetch-mode") === "navigate" &&
+    c.req.header("sec-fetch-dest") === "document";
   if ((read ? origin !== undefined && origin !== deps.auth.appBaseUrl : origin !== deps.auth.appBaseUrl) ||
-    (read && fetchSite !== undefined && fetchSite !== "same-origin")) {
+    (read && fetchSite !== undefined && fetchSite !== "same-origin" && !navigation)) {
     return jsonError(c, 403, { error: "forbidden_origin" });
   }
   // A failed startup probe must not query the same unavailable database.
@@ -170,6 +173,12 @@ export function controlRoute(deps: ControlRouteDeps): Hono {
     return dispatch("publish", c, guarded.session, guarded.body);
   });
 
+  app.get("/profile", async (c) => {
+    const guarded = await guard(c, deps);
+    if (guarded instanceof Response) return guarded;
+    return c.json({ ...ARTIFACT_PROFILE_DESCRIPTOR, selectedCapabilities: ACTIVE_ARTIFACT_TOOLS });
+  });
+
   for (const op of ["get_source", "set_access", "delete"] as const) {
     app.post(`/${op}`, async (c) => {
       const guarded = await guardPost(c, deps);
@@ -181,8 +190,13 @@ export function controlRoute(deps: ControlRouteDeps): Hono {
 
   // Only the normal application cookie can approve; MCP bearer tokens are refused by guard.
   app.get("/delete-confirmations/:ref", async (c) => {
-    const guarded = await guard(c, deps);
-    if (guarded instanceof Response) return guarded;
+    const guarded = await guard(c, deps, true);
+    if (guarded instanceof Response) {
+      if (guarded.status === 401 && !c.req.header("authorization") && c.req.header("sec-fetch-mode") === "navigate") {
+        return c.html('<!doctype html><html lang="en"><title>Sign in to confirm deletion</title><p><a href="/api/v1/auth/login">Sign in</a>, then reopen this confirmation link.</p></html>', 401);
+      }
+      return guarded;
+    }
     if (!deps.confirmation) return c.json({ error: "capability_unavailable" }, 503);
     const challenge = await deps.confirmation.read(c.req.param("ref"), guarded.session.sub);
     if (!challenge) return c.json({ error: "not_found" }, 404);

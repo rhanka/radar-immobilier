@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { ArtifactDeleteConfirmation } from "@radar/artifacts-host";
+import { ARTIFACT_PROFILE_DESCRIPTOR, ACTIVE_ARTIFACT_TOOLS } from "@radar/artifacts-host";
 import { controlRoute } from "../../../api/src/artifacts/control-route.js";
 import { signSession, SESSION_COOKIE_NAME } from "../../../api/src/services/auth/session.js";
 import type { AuthConfig } from "../../../api/src/config.js";
@@ -29,7 +30,16 @@ describe("trusted deletion approval route", () => {
     expect(await page.text()).toContain("Confirm permanent deletion");
     expect(page.headers.get("cache-control")).toContain("no-store");
     expect(page.headers.get("content-security-policy")).toContain("frame-ancestors 'none'");
+    expect(page.headers.get("referrer-policy")).toBe("same-origin");
     expect(h.approve).not.toHaveBeenCalled();
+    const profile = await h.app.request("/profile", { headers: h.headers });
+    expect(await profile.json()).toEqual({ ...ARTIFACT_PROFILE_DESCRIPTOR, selectedCapabilities: ACTIVE_ARTIFACT_TOOLS });
+    const external = { cookie: h.headers.cookie, "sec-fetch-site": "cross-site", "sec-fetch-mode": "navigate", "sec-fetch-dest": "document" };
+    expect((await h.app.request(h.path, { headers: external })).status).toBe(200);
+    expect((await h.app.request(h.path, { headers: { ...external, "sec-fetch-mode": "cors", "sec-fetch-dest": "empty" } })).status).toBe(403);
+    const signIn = await h.app.request(h.path, { headers: { "sec-fetch-mode": "navigate", "sec-fetch-dest": "document" } });
+    expect(signIn.status).toBe(401);
+    expect(await signIn.text()).toContain('/api/v1/auth/login');
     const approved = await h.app.request(h.path, { method: "POST", headers: h.headers, body: "confirm=delete" });
     expect(approved.status).toBe(200);
     expect(h.approve).toHaveBeenCalledExactlyOnceWith(ID, "alice");

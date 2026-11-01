@@ -14,6 +14,7 @@ The `immo:read` transition covers only get/list, never source or mutations.
 Restore, fork, promote, renew and all part1 tools remain disabled.
 The model sees `immo-artifacts.p0b.v1`, `requireExpectedCurrentReleaseId:false`,
 `resultEnvelopeVersion:1` in discovery and the authoring guide. Results retain their business fields at the root.
+The cookie-authenticated `GET /api/v1/artifacts/control/profile` returns the same descriptor and selected tool names.
 
 ## Edit an existing page
 
