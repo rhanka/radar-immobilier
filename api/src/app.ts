@@ -11,7 +11,6 @@ import { writeIntentH5Route } from "./artifacts/write-intent-h5-route.js";
 import { writeIntentAppRoute } from "./artifacts/write-intent-app-route.js";
 import type { ContentHostConfig } from "./artifacts/content-config.js";
 import { controlRoute, type ControlRouteDeps } from "./artifacts/control-route.js";
-import { createDesignKitApp } from "./artifacts/design-kit.js";
 import { chatRoute } from "./routes/chat.js";
 import { automationRoute } from "./routes/automation.js";
 import { sourcesRoute, type SourcesDeps } from "./routes/sources.js";
@@ -139,10 +138,6 @@ export function createApp(deps: AppDeps): Hono {
   // Auth runs after the content gate, so protect still fronts every business
   // route. When `deps.auth` is absent or disabled both are inert no-ops.
   if (deps.auth?.enabled && deps.readerOpening) app.route("/api/v1/artifacts/reader", deps.readerOpening);
-  // Official design-kit stylesheets for the reader approval page: public,
-  // digest-pinned and immutable. Mounted before protect so the
-  // unauthenticated approval form can load them same-origin.
-  app.route("/__artifacts/design", createDesignKitApp());
   app.use("/api/v1/workspaces/*", privateSignalResponse);
   app.use("/api/v1/workspaces", privateSignalResponse);
   app.use("/api/v1/workspaces/*", classificationBoundary);

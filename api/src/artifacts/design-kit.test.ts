@@ -21,7 +21,7 @@ describe("design-kit serving bytes", () => {
     expect(APPROVAL_STYLE).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
     const links = approvalStylesheetLinks();
     for (const asset of DESIGN_KIT_ASSETS) {
-      expect(links).toContain(`/__artifacts/design/`);
+      expect(links).toContain(`/api/v1/artifacts/reader/design/`);
       expect(links).toContain(asset.sha256Hex);
       expect(links).toContain(asset.file);
     }
