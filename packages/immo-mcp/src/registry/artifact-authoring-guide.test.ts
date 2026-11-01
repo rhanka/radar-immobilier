@@ -43,6 +43,8 @@ describe("artifact authoring guide", () => {
     expect(guide.guideId).toBe(AUTHORING_GUIDE_ID);
     expect(guide.revision).toBe(AUTHORING_GUIDE_REVISION);
     expect(guide.starterVersion).toBe(STARTER_VERSION);
+    expect(guide.starterVersion).toBe("1.1.0");
+    expect(guide.starter.version).toBe(guide.starterVersion);
     expect(guide.theme).toBe("sent-tech");
     expect(guide.rule).toContain("Sentropic DS is mandatory");
     expect(guide.data.warning).toContain("Never call /api/*");
@@ -66,6 +68,22 @@ describe("artifact authoring guide", () => {
     expect(checklist).toContain("npx --yes -p @sentropic/design-system-skills@0.1.0 design audit ./index.html");
     expect(checklist).toContain("exit 1 (findings) and exit 2 (tool error) both block publication");
     expect(checklist).not.toMatch(/skills@0\.3\.2|design check|--fail-under/);
+  });
+
+  it("should preserve artifact identity when editing and disclose unavailable lifecycle actions", () => {
+    const guide = getAuthoringGuide();
+    expect(guide.revision).toBe("2026-11-01-r4");
+    const editing = guide.lifecycle.editing.join("\n");
+    expect(editing).toContain("artifacts_get_source → edit → artifacts_publish");
+    expect(editing).toContain("same artifactId");
+    expect(editing).toContain("stableUrl stays the same");
+    expect(editing).toContain("fresh idempotencyKey for changed content");
+    expect(editing).toContain("artifacts_get returns metadata");
+    expect(editing).toContain("source retrieval is blocked");
+    expect(guide.lifecycle.unavailableTools).toEqual(["artifacts_get_source", "artifacts_delete",
+      "artifacts_restore", "artifacts_set_access", "artifacts_fork", "artifacts_promote", "artifacts_renew"]);
+    expect(guide.lifecycle.deleteRestore).toContain("unavailable");
+    expect(guide.lifecycle.sharing).toContain("unavailable");
   });
 
   it("should distinguish published framework packages from the CSS snapshot", () => {
@@ -149,6 +167,7 @@ describe("artifact authoring guide", () => {
       expect(files[path]).not.toContain("localStorage");
       expect(files[path]).not.toContain("sessionStorage");
     }
+    expect(files["reader.js"]).toContain("workspaces.list.v1");
     expect(files["reader.js"]).toContain("baskets.context.v1");
     expect(files["reader.js"]).toContain("baskets.search.v1");
     expect(files["reader.js"]).toContain("/__reader/renew");
