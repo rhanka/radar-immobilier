@@ -39,15 +39,18 @@ Prepare the three qualified 0.3.0 operations while preserving the current non-CA
 - [x] **Lot 0 — Baseline and constraints**
   - [x] Read repository rules, harness guidance and converged-r2.
   - [x] Verify clean assigned branch and inspect the upstream 0.3.0 contracts.
-- [ ] **Lot 1 — Version boundary and profile**
+- [x] **Lot 1 — Version boundary and profile**
   - [x] Centralize the pin at 0.2.2; enable P0b automatically with 0.3.0.
   - [x] Extend discovery, scopes, annotations and profile metadata.
-- [ ] **Lot 2 — Trusted host wiring**
+- [x] **Lot 2 — Trusted host wiring**
   - [x] Implement the shared source ports and account predicate with transaction-time recipient checks.
   - [x] Source ports, approved IdP subjects, transactional deletion confirmation and migration.
   - [x] Trusted cookie-session confirmation page; mutation accounting and quota classification.
-- [ ] **Lot 3 — Guide and qualification**
+- [x] **Lot 3 — Guide and qualification**
   - [x] Document edit, delete and named-share journeys and publication commands.
-  - [ ] Verify 0.2.2 baseline and locally packed 0.3.0 candidate; typecheck and lint.
+  - [x] Verify 0.2.2 baseline and locally packed 0.3.0 candidate; typecheck and lint.
+  - [x] Baseline: 511 MCP + 223 host tests pass (8 + 5 profile-dependent skips); three workspace typechecks and scoped lint pass.
+  - [x] Candidate: 522 MCP + 228 host tests pass; three workspace typechecks and scoped lint pass, including real PostgreSQL confirmation/rollback and reader cutoff.
+  - [x] Upstream reference: `8b5b1f7793e433938de64f068dc2116e6f084ff6`; tarball SHA-256 `b6a13f19f218e5a433581cf395c9fcc4ed4ca1ee07485e67507b37069b75c4cf`.
 - [ ] **Lot 4 — Delivery**
   - [ ] Review diff, push, open English draft PR, write French report.
