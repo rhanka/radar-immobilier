@@ -162,7 +162,7 @@ export function getAuthoringGuide(): AuthoringGuide {
           "the browser snapshot stays pinned at 0.36.46 until a newer bundle is qualified under the release CSP.",
       },
       rule: "Sentropic DS is mandatory: set data-st-theme=\"sent-tech\" on <html>, load the two " +
-        "official kit stylesheets plus ThemeProvider when React is used, and style only with DS " +
+        "official kit stylesheets plus ThemeProvider when DS React components are used, and style only with DS " +
         "components and --st-* tokens. Never write your own palette and never redefine --st-* " +
         "tokens to recreate one. Claude default styling (orange or any author theme) is forbidden.",
       assets: {
@@ -245,7 +245,7 @@ export function getAuthoringGuide(): AuthoringGuide {
         componentIds: ["BarChart", "BpmnCanvas", "DecisionDossier"],
         status: "Framework-agnostic custom elements st-bar-chart, st-bpmn-canvas, st-decision-dossier; contractVersion 1.0, JSON envelope with root.component and hostConfig in script#st-host-config[type=application/json]. Package exports an envelope validator for server use. Not vendored/qualified in this CSS-only revision: do not import a CDN. Runtime assets, validator and prompt hashes must be pinned before use.",
       },
-      componentUsage: "DS ids are components[].catalogId + componentId + contractVersion; preserve package/version and promptRef/hash separately for future resources. Essential snapshot prompts: React uses window.SentropicDS.<componentId> inside ThemeProvider; load DS styles + ThemeProvider, never write your own palette. The native CSS fast path uses the listed st-* markup without React: Button is a native button (variant primary/secondary/ghost/danger, size sm/md/lg); Input/Select need a visible label and help/error association; Card is a noninteractive container unless a real link/button is provided; Tag is informational, not an action; Notification needs readable title/message and status/alert semantics; ContentSwitcher needs keyboard behavior and selection state; InlineLoading needs accessible status text and reduced motion. Do not imitate complex component behavior; use a qualified runtime. Prompt files are provenance, these inline instructions are available to the remote author.",
+      componentUsage: "DS ids are components[].catalogId + componentId + contractVersion; preserve package/version and promptRef/hash separately for future resources. Snapshot contractVersion 1.0 identifies this guide's native CSS mapping, not a published React wire contract. Essential snapshot prompts: the full React DS runtime uses window.SentropicDS.<componentId> inside ThemeProvider; load DS styles + ThemeProvider, never write your own palette. The native CSS fast path uses the listed st-* markup without the DS React runtime: Button is a native button (variant primary/secondary/ghost/danger, size sm/md/lg); Input/Select need a visible label and help/error association; Card is a noninteractive container unless a real link/button is provided; Tag is informational, not an action; Notification needs readable title/message and status/alert semantics; ContentSwitcher needs keyboard behavior and selection state; InlineLoading needs accessible status text and reduced motion. Do not imitate complex component behavior; use a qualified runtime. Prompt files are provenance, these inline instructions are available to the remote author.",
     });
   }
   return cached;
