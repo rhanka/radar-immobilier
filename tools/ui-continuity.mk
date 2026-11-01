@@ -23,7 +23,7 @@ test-immo-mcp: guard
 	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; $(RUN) sh -ec 'npm ci --no-audit --no-fund && npm run test --workspace=packages/immo-mcp -- --exclude "**/*.e2e.test.ts" $(SCOPE)'
 test-e2e: guard
 	@mkdir -p tmp/ui-continuity/buildx
-	@BUILDX_CONFIG=$(CURDIR)/tmp/ui-continuity/buildx E2E_COMPOSE_EXTRA_FILE=tools/ui-continuity.e2e.yml ENV=$(ENV) bash tools/make/e2e-real.sh
+	@BUILDX_CONFIG=$(CURDIR)/tmp/ui-continuity/buildx CONTINUITY_GIT_SHA="$$(git rev-parse HEAD)" E2E_COMPOSE_EXTRA_FILE=tools/ui-continuity.e2e.yml ENV=$(ENV) bash tools/make/e2e-real.sh
 test-worker: guard
 	@trap '$(BROWSER_COMPOSE) down -v --remove-orphans' EXIT; $(BROWSER_COMPOSE) run --rm --no-deps -T -e PLAYWRIGHT_SKIP_BROWSER_GC=1 --entrypoint '' api sh -ec 'npm ci --no-audit --no-fund && ./node_modules/.bin/playwright install --only-shell chromium && cd ui && ../node_modules/.bin/playwright test --config playwright.real.config.ts e2e-real/ui-sync-sw.spec.ts --grep "preserve two tabs"'
 down: guard

@@ -89,6 +89,7 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
   - [ ] Versioned bounded contexts, explicit adoption, session isolation.
   - [ ] Unknown schemas preserved; storage failures degrade without retries.
 - [ ] **Lot T — Verification**
+  - [x] Qualification UI images receive the full committed source identity.
   - [x] Disposable DB data/socket tmpfs fixes measured startup fsync stalls.
   - [x] Full UI: 1,981 passed, 2 skipped, 10 todo; MCP: 491 passed.
   - [x] Browser fixture and production-UI continuity scenarios authored.
