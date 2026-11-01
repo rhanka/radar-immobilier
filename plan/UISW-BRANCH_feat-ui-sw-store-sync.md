@@ -58,6 +58,7 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
   - [ ] Compatible update, targeted invalidation, kill switch and build identities.
   - [ ] Three nginx variants: JS, no-cache, 404, security-header inheritance.
 - [ ] **Lot C — Local state sync**
+  - [x] Stable scalar codecs and receive-without-write preference adapter.
   - [ ] Four stable scalar preferences; codecs, Svelte adapters, no receive rewrite.
   - [ ] Versioned bounded contexts, explicit adoption, session isolation.
   - [ ] Unknown schemas preserved; storage failures degrade without retries.
