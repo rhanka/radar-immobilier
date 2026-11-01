@@ -1,7 +1,9 @@
 export {
   readArtifactsEnv,
   resolveArtifactsStorageConfig,
+  resolveS3Budget,
   type ArtifactsConfigInput,
+  type ArtifactsS3BudgetInput,
   type ArtifactsDisabledReason,
   type ArtifactsStorageConfig,
 } from "./config.js";
@@ -39,7 +41,10 @@ export {
 } from "./idempotency.js";
 export {
   ArtifactS3TimeoutError,
+  DEFAULT_S3_BUDGET,
   S3_OPERATION_TIMEOUT_MS,
+  S3_RETRY_HEADROOM_MS,
+  type ArtifactS3Budget,
   createTimeoutBlobStore,
   createTimeoutS3Client,
   withS3Timeout,
