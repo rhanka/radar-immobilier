@@ -58,6 +58,16 @@ const harnessInput = qaHarness
 
 export default defineConfig({
   base,
+  define: {
+    // Client build identity (see ui-state position §b): the loaded bundle
+    // carries its own id so tabs on N/N-1 deployments can be told apart.
+    // Injected from IMMO_CLIENT_BUILD_ID (Dockerfile stamps the deployment
+    // sha); dev and unstamped builds read "unknown".
+    __IMMO_CLIENT_BUILD_ID__: JSON.stringify(
+      process.env.IMMO_CLIENT_BUILD_ID ?? "unknown",
+    ),
+    __IMMO_SW_ENABLED__: process.env.IMMO_SW_ENABLED !== "false",
+  },
   plugins: [svelte()],
   resolve: {
     conditions: ["browser", "svelte", "module", "import", "default"],
