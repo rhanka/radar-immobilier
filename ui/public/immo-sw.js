@@ -1,7 +1,7 @@
 /* IMMO coordination v1. No fetch interception or durable worker state. */
 /* global self, URL, MessageChannel, TextEncoder, setTimeout, clearTimeout */
 const WORKER_BUILD_ID = "__IMMO_WORKER_BUILD_ID__";
-const known = new Set();
+const known = new Map();
 const uuid = (v) => typeof v === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
 const text = (v) => typeof v === "string" && v.length > 0 && v.length <= 128;
 const record = (v) => v && typeof v === "object" && !Array.isArray(v);
@@ -16,9 +16,10 @@ function valid(m) {
   if (!record(p)) return false;
   if (m.type === "HELLO") return keys(p, ["clientBuildId", "tabId", "protocolVersion"])
     && text(p.clientBuildId) && uuid(p.tabId) && Number.isInteger(p.protocolVersion);
-  if (m.type === "INVALIDATE") return keys(p, ["scope", "workspaceId", "citySlug"])
+  if (m.type === "INVALIDATE") return keys(p, ["scope", "workspaceId", "citySlug", "targetTabId"])
     && ["signals", "workspace", "context"].includes(p.scope)
-    && (p.workspaceId === undefined || uuid(p.workspaceId)) && (p.citySlug === undefined || text(p.citySlug));
+    && (p.workspaceId === undefined || uuid(p.workspaceId)) && (p.citySlug === undefined || text(p.citySlug))
+    && (p.targetTabId === undefined || uuid(p.targetTabId));
   return m.type === "SESSION_INVALIDATED" && keys(p, ["partition", "epoch"])
     && text(p.partition) && uuid(p.epoch);
 }
@@ -54,7 +55,7 @@ async function handle(event) {
   const reply = (type, payload) => port.postMessage(message(type, m?.id, payload));
   if (!valid(m)) { reply("ERROR", { reason: "invalid-message" }); return; }
   if (m.type === "HELLO") {
-    if (m.payload.protocolVersion === 1) { known.add(source.id); reply("HELLO_ACK", info); }
+    if (m.payload.protocolVersion === 1) { known.set(source.id, m.payload.tabId); reply("HELLO_ACK", info); }
     else reply("ERROR", { reason: "incompatible-client" });
     return;
   }
@@ -71,9 +72,10 @@ async function handle(event) {
   }
   let relayedTo = 0;
   const present = await windows();
-  for (const id of known) if (!present.some((c) => c.id === id)) known.delete(id);
+  for (const id of known.keys()) if (!present.some((c) => c.id === id)) known.delete(id);
   for (const client of present) {
     if (client.id === source.id || !known.has(client.id)) continue;
+    if (m.type === "INVALIDATE" && m.payload.targetTabId && known.get(client.id) !== m.payload.targetTabId) continue;
     client.postMessage(message(m.type, undefined, m.payload)); relayedTo++;
   }
   reply(`${m.type}_RELAYED`, { relayedTo });

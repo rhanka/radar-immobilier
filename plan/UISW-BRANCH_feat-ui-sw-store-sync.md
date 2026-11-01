@@ -64,6 +64,7 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
   - [x] Read rules and inherited diff; retain correct build/bootstrap work.
   - [x] Consume prepared preprod worker CSP correction with a merge commit.
 - [ ] **Lot B — Coordination worker**
+  - [x] Invalidations can target an ephemeral tab identity without business state.
   - [x] Chromium qualified N/N-1/N+1, interruption, refusal, rollback and kill.
   - [x] Image stamping and disabled-build kill bytes at the stable worker URL.
   - [x] Nonblocking client registration, stopped-worker reconnect and update API.
