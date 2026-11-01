@@ -8,7 +8,8 @@
  */
 
 export const BASELINE_TOOL_COUNT = 12;
-export const H4_CHECKPOINT_TOOL_COUNT = 16;
+import { ARTIFACT_TOOL_NAMES } from "../registry/artifact-profile.js";
+export const H4_CHECKPOINT_TOOL_COUNT = BASELINE_TOOL_COUNT + ARTIFACT_TOOL_NAMES.length;
 export const SUCCESSOR_TOOL_COUNT = 22;
 
 export const SUCCESSOR_SEARCH_ENDPOINT = {
