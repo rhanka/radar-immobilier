@@ -3,9 +3,36 @@ import { ArtifactKeyLockConflict, ArtifactOperationError,
 import type { HttpResponse } from "@sentropic/artifacts/http";
 import { isPoolAcquisitionTimeout } from "./idempotency.js";
 
-/** Classify host-owned failures through the provider's HTTP/coordinator mapper. */
+/**
+ * Provider answers that the SDK retries (standard mode) and that stay transient
+ * once its attempts are spent: throttling, S3 RequestTimeout and server faults.
+ */
+const TRANSIENT_PROVIDER_NAMES = new Set([
+  "RequestTimeout", "RequestTimeoutException", "SlowDown", "Throttling", "ThrottlingException",
+  "ThrottledException", "RequestThrottled", "RequestThrottledException", "TooManyRequestsException",
+  "RequestLimitExceeded", "BandwidthLimitExceeded", "ProvisionedThroughputExceededException",
+  "ServiceUnavailable", "InternalError", "PriorRequestNotComplete",
+]);
+
+/** An S3 SDK service error whose retries ran out on a transient answer (5xx, 429, throttling). */
+function isTransientProviderAnswer(cause: unknown): boolean {
+  if (cause === null || typeof cause !== "object") return false;
+  const error = cause as { $metadata?: { httpStatusCode?: unknown }; $fault?: unknown; $retryable?: unknown; name?: unknown };
+  if (error.$metadata === undefined && error.$fault === undefined) return false;
+  const status = error.$metadata?.httpStatusCode;
+  if (typeof status === "number" && (status >= 500 || status === 429)) return true;
+  if (error.$retryable) return true;
+  return typeof error.name === "string" && TRANSIENT_PROVIDER_NAMES.has(error.name);
+}
+
+/**
+ * Classify host-owned failures through the provider's HTTP/coordinator mapper.
+ * Transient provider answers stay a retriable 503 after the SDK retries; other
+ * 4xx (403, 404, ...) keep the provider's own projection.
+ */
 export function mapHostError(cause: unknown): ArtifactOperationError | undefined {
-  if ((cause as { code?: unknown } | null)?.code === "artifact_s3_timeout" || isPoolAcquisitionTimeout(cause)) {
+  if ((cause as { code?: unknown } | null)?.code === "artifact_s3_timeout" || isPoolAcquisitionTimeout(cause) ||
+    isTransientProviderAnswer(cause)) {
     return new ArtifactOperationError("provider_unavailable", { cause });
   }
   return undefined;
@@ -16,6 +43,8 @@ export interface FailureCauseSummary {
   readonly name?: string;
   readonly code?: string;
   readonly httpStatus?: number;
+  /** SDK attempts behind this error (retries included), when the SDK reports them. */
+  readonly attempts?: number;
   readonly operation?: string;
   readonly phase?: string;
 }
@@ -39,9 +68,11 @@ export function describeFailureCause(cause: unknown): FailureCauseSummary[] {
   while (current !== null && typeof current === "object" && !seen.has(current) && chain.length < MAX_CAUSE_DEPTH) {
     seen.add(current);
     const record = current as Record<string, unknown>;
-    const metadata = record.$metadata as { httpStatusCode?: unknown } | undefined;
+    const metadata = record.$metadata as { httpStatusCode?: unknown; attempts?: unknown } | undefined;
     const httpStatus = typeof metadata?.httpStatusCode === "number" && Number.isInteger(metadata.httpStatusCode)
       ? metadata.httpStatusCode : undefined;
+    const attempts = typeof metadata?.attempts === "number" && Number.isInteger(metadata.attempts)
+      ? metadata.attempts : undefined;
     const name = safeToken(record.name);
     const code = safeToken(record.code) ?? safeToken(record.Code);
     const operation = safeToken(record.operation);
@@ -50,6 +81,7 @@ export function describeFailureCause(cause: unknown): FailureCauseSummary[] {
       ...(name !== undefined ? { name } : {}),
       ...(code !== undefined ? { code } : {}),
       ...(httpStatus !== undefined ? { httpStatus } : {}),
+      ...(attempts !== undefined ? { attempts } : {}),
       ...(operation !== undefined ? { operation } : {}),
       ...(phase !== undefined ? { phase } : {}),
     });
