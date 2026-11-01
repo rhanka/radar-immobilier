@@ -44,18 +44,20 @@ Let a published page discover the verified reader's active workspaces and select
   - [x] Test project `test-reader-ws`; no published ports for the test compose overlay.
   - [x] Reserve branch ports API 18861, UI 15361, Maildev 11161 if required.
   - [x] Use Make targets with ENV last; omit .env includes and Compose dotenv loading.
-- [ ] **Lot 1 — Reader contract and operation**
+- [x] **Lot 1 — Reader contract and operation**
   - [x] Add strict parameter and response contracts and H5 dispatch.
-  - [ ] Verify operation, authorization, availability and reader isolation.
+  - [x] Verify operation, authorization, availability and reader isolation against the real PostgreSQL services.
   - [x] Add unit proofs for the discovery contract, isolation, typed failures and H5 grant renewal.
   - [x] Add explicit H5 refusal and authorization-race coverage.
   - [x] Add PostgreSQL coverage for active memberships, availability and account/ACL revocation.
-- [ ] **Lot 2 — Authoring starter and guide**
+- [x] **Lot 2 — Authoring starter and guide**
   - [x] Populate a labelled workspace selector; preselect a sole workspace, use manual entry only for an empty list.
   - [x] Document the discovery operation and bump the guide revision to r3 (starter 1.1.0).
-  - [ ] Verify the reader client and browser flow when available.
+  - [x] Verify the reader client and real Chromium flow under the release CSP, including grant recovery and revoked access.
   - [x] Extend browser acceptance for one, several and zero workspaces without an initial UUID.
-- [ ] **Lot 3 — Delivery**
-  - [ ] Run scoped tests, typecheck and lint; review the diff.
-  - [ ] Tear down the isolated test stack with volumes.
-  - [ ] Push, open the English PR and write the French conductor report.
+- [x] **Lot 3 — Delivery**
+  - [x] Run gates: 39 API unit/integration tests, 115 MCP registry tests and 1 Chromium acceptance pass; workspace typechecks and ESLint pass.
+  - [x] Review the diff for scope, reader identity, strict contracts and absence of PII.
+  - [x] Diagnose disposable PostgreSQL initialization/IO contention; sequential integration passes without longer timeouts. Disable fsync/synchronous_commit only in this disposable test database project for remaining checks.
+  - [x] Tear down the isolated test stack with `down -v --remove-orphans`.
+  - [x] Push, open English PR #977 and write `.lanes/conductor/tmp/reviews/reader-ws-report.md` in French.
