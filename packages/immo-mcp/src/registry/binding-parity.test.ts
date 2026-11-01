@@ -1,4 +1,6 @@
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { describe, expect, it, vi } from "vitest";
 import { resolveAuthContext } from "../auth-context.js";
 import { registerTools, type ToolContext } from "../tools.js";
@@ -21,6 +23,27 @@ const calls = [
 type Handler = (args: unknown) => Promise<unknown>;
 
 describe("existing handler binding parity", () => {
+  it("should annotate all twelve SDK-registered reads", async () => {
+    const server = new McpServer({ name: "annotation-test", version: "1" });
+    const client = new Client({ name: "annotation-test", version: "1" });
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    registerTools(server, { auth: resolveAuthContext({}), data: {} as ToolContext["data"],
+      raw: {} as ToolContext["raw"] });
+    try {
+      await server.connect(serverTransport);
+      await client.connect(clientTransport);
+      const listed = await client.listTools();
+      expect(listed.tools).toHaveLength(12);
+      expect(new Set(listed.tools.map((tool) => tool.name))).toEqual(new Set(IMMO_TOOL_NAMES));
+      for (const tool of listed.tools) expect(tool.annotations).toEqual({
+        readOnlyHint: true, destructiveHint: false, openWorldHint: false, idempotentHint: true,
+      });
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  });
+
   it.each(calls)("should bind %s to %s with its existing scope", async (name, method, args) => {
     const invoked = vi.fn();
     const seam = (context: string) => new Proxy({}, {
