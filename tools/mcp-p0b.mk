@@ -36,5 +36,5 @@ integration: guard
 push: guard
 	git push -u origin HEAD
 clean-deps: guard-env
-	@rm -rf packages/*/node_modules ui/node_modules tmp/mcp-p0b/artifacts tmp/mcp-p0b/toolchain
+	@$(CHECK) 'rm -rf packages/*/node_modules ui/node_modules tmp/mcp-p0b/artifacts tmp/mcp-p0b/toolchain'
 	@rmdir node_modules api/node_modules 2>/dev/null || true
