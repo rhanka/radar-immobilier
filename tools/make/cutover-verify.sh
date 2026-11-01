@@ -4,14 +4,14 @@ set -euo pipefail
 export COMPOSE_DISABLE_ENV_FILE=1
 unset COMPOSE_FILE COMPOSE_ENV_FILES COMPOSE_PROFILES
 mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}"
-exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
+exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-cutover-test.lock"
 compose=(docker compose --env-file /dev/null -p radar-test-cutover -f deploy/cutover/test.compose.yml)
 cleanup() { "${compose[@]}" down -v --remove-orphans >/dev/null; }
-trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
-# Serialize test campaigns; unrelated idle stacks need not stop for this portless project.
-until flock -w 30 8; do echo 'Waiting for Docker campaign lock'; done
+# Serialize this project's campaigns; the portless stack can coexist with other projects.
+until flock -w 30 8; do echo 'Waiting for cutover test lock'; done
+trap cleanup EXIT
 case ${1:-} in
   test) command='apt-get update -qq && apt-get install -y -qq bash make jq curl gettext-base >/dev/null && npm ci --ignore-scripts --silent && HOME=$(mktemp -d) node --test --test-name-pattern="${TEST_PATTERN:-.}" tools/make/cutover*.test.mjs && node deploy/ci/bascule-preprod/backup.selftest.mjs && node deploy/ci/backup/backup-daily.selftest.mjs && node deploy/ci/bascule-2tenants/orchestrator.selftest.mjs';;
   lint) command='npm ci --ignore-scripts --silent && npx eslint .';;

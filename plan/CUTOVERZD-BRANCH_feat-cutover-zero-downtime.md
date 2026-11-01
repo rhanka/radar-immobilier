@@ -16,7 +16,7 @@
 
 ## Feedback Loop
 - [x] Owner authorizes finishing the interrupted builder's work, test-first fixes, commits and push.
-- [x] Test runner's blanket wait on unrelated Docker stacks blocks local verification; retain campaign locking and allow the isolated portless stack to coexist with idle dependencies.
+- [x] Test runner's blanket wait on unrelated Docker stacks blocks local verification; serialize the cutover project with its own lock and allow its portless stack to coexist with other projects.
 
 ## Orchestration Mode (AI-selected)
 - [x] Sequential work in this session, without delegated or background workflows.
