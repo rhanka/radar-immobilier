@@ -59,8 +59,11 @@ test("should preserve two tabs through registration, interruption, compatible up
       await expect(page.locator("#lots")).toHaveText("true", { timeout: 2000 });
       await expect(page.locator("#zones")).toHaveText("false", { timeout: 2000 });
     }
-    await a.evaluate(() => window.continuity.client.notifyInvalidation({ scope: "context", citySlug: "valleyfield" }));
+    const targetTabId = await b.evaluate(() => window.continuity.client.tabId);
+    await a.evaluate((targetTabId) => window.continuity.client.notifyInvalidation({ scope: "context", targetTabId }), targetTabId);
     await expect(b.locator("#invalidations")).toHaveText("1", { timeout: 2000 });
+    const dropped = await a.evaluate(() => window.continuity.client.notifyInvalidation({ scope: "context", targetTabId: crypto.randomUUID() }));
+    expect(dropped.payload?.relayedTo).toBe(0);
     const cdp = await context.newCDPSession(a);
     await cdp.send("ServiceWorker.enable"); await cdp.send("ServiceWorker.stopAllWorkers");
     expect((await a.evaluate(() => window.continuity.client.ping())).workerBuildId).toBe("N");

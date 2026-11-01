@@ -16,6 +16,7 @@ export interface SwInvalidatePayload {
   scope: "signals" | "workspace" | "context";
   workspaceId?: string;
   citySlug?: string;
+  targetTabId?: string;
 }
 export const isUuidLike = (v: unknown): v is string => typeof v === "string"
   && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
@@ -45,10 +46,11 @@ export function validateSwMessage(raw: unknown, direction: "client" | "worker"):
   const p = raw.payload;
   if (direction === "client" && ["PING", "ACTIVATE_COMPATIBLE"].includes(raw.type)) return p === undefined;
   if (!isRecord(p)) return false;
-  if (raw.type === "INVALIDATE") return onlyKeys(p, ["scope", "workspaceId", "citySlug"])
+  if (raw.type === "INVALIDATE") return onlyKeys(p, ["scope", "workspaceId", "citySlug", "targetTabId"])
     && ["signals", "workspace", "context"].includes(String(p.scope))
     && (p.workspaceId === undefined || isUuidLike(p.workspaceId))
-    && (p.citySlug === undefined || text(p.citySlug));
+    && (p.citySlug === undefined || text(p.citySlug))
+    && (p.targetTabId === undefined || isUuidLike(p.targetTabId));
   if (raw.type === "SESSION_INVALIDATED") return onlyKeys(p, ["partition", "epoch"])
     && text(p.partition) && isUuidLike(p.epoch);
   if (direction === "client") return raw.type === "HELLO"
