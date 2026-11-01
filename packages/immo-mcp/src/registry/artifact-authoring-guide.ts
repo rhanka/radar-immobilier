@@ -26,7 +26,7 @@ import {
 import { FRAMEWORK_STARTERS, FRAMEWORK_BUILD_RULE } from "./framework-starters.js";
 
 export const AUTHORING_GUIDE_ID = "immo-artifact-authoring" as const;
-export const AUTHORING_GUIDE_REVISION = "2026-11-01-r2" as const;
+export const AUTHORING_GUIDE_REVISION = "2026-11-01-r3" as const;
 export const STARTER_VERSION = "1.0.0" as const;
 
 /**
@@ -37,6 +37,8 @@ export const STARTER_VERSION = "1.0.0" as const;
 export const AUTHORING_GUIDE_SNIPPET =
   "Every Radar page uses the versioned Sentropic starter and its official assets. " +
   "Fetch `authoringGuide` from artifacts_ensure (or artifacts_get for an existing page). " +
+  "To update, publish the full edited bundle on the same artifactId with a fresh idempotencyKey; " +
+  "the stable URL is preserved. Source retrieval, deletion, restoration and sharing are currently unavailable. " +
   "Apply the sent-tech theme and its tokens; never write your own palette. " +
   "For baskets use only the documented H5 reader bridge: /__reader/renew, " +
   "baskets.context.v1, baskets.search.v1. Never invent /api/* endpoints.";
@@ -133,6 +135,12 @@ export interface AuthoringGuide {
   readonly uiState: Readonly<{ contractId: string; ownership: string; bootstrap: string; persistence: string; example: object }>;
   readonly elements: Readonly<{ package: string; packageVersion: string; catalogId: string; componentIds: readonly string[]; status: string }>;
   readonly componentUsage: string;
+  readonly lifecycle: Readonly<{
+    editing: readonly string[];
+    unavailableTools: readonly string[];
+    deleteRestore: string;
+    sharing: string;
+  }>;
 }
 
 let cached: AuthoringGuide | undefined;
@@ -143,6 +151,18 @@ export function getAuthoringGuide(): AuthoringGuide {
       guideId: AUTHORING_GUIDE_ID,
       revision: AUTHORING_GUIDE_REVISION,
       starterVersion: STARTER_VERSION,
+      lifecycle: {
+        editing: [
+          "The complete editing journey is artifacts_get_source → edit → artifacts_publish on the same artifactId. " +
+            "Currently source retrieval is blocked: artifacts_get_source is unavailable and artifacts_get returns metadata plus this guide, without editable files.",
+          "When the complete original source bundle is already available in the conversation, edit those files and publish the full bundle with artifacts_publish on the same artifactId. Do not call artifacts_ensure to replace an existing artifact.",
+          "Each publication creates a new release/version and pinnedUrl; stableUrl stays the same. Use a fresh idempotencyKey for changed content, and reuse a previous key only to retry the identical publication.",
+        ],
+        unavailableTools: ["artifacts_get_source", "artifacts_delete", "artifacts_restore", "artifacts_set_access",
+          "artifacts_fork", "artifacts_promote", "artifacts_renew"],
+        deleteRestore: "artifacts_delete and artifacts_restore are unavailable. Deletion and restoration cannot be performed through this MCP catalogue.",
+        sharing: "artifacts_set_access is unavailable. Granting or revoking read/source access and changing public visibility cannot be performed through this MCP catalogue; do not claim sharing was changed.",
+      },
       theme: DESIGN_KIT_THEME,
       designPackages: {
         react: `@sentropic/design-system-react@${DESIGN_KIT_REACT_SNAPSHOT}`,

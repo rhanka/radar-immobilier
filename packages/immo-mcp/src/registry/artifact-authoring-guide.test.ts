@@ -68,6 +68,22 @@ describe("artifact authoring guide", () => {
     expect(checklist).not.toMatch(/skills@0\.3\.2|design check|--fail-under/);
   });
 
+  it("should preserve artifact identity when editing and disclose unavailable lifecycle actions", () => {
+    const guide = getAuthoringGuide();
+    expect(guide.revision).toBe("2026-11-01-r3");
+    const editing = guide.lifecycle.editing.join("\n");
+    expect(editing).toContain("artifacts_get_source → edit → artifacts_publish");
+    expect(editing).toContain("same artifactId");
+    expect(editing).toContain("stableUrl stays the same");
+    expect(editing).toContain("fresh idempotencyKey for changed content");
+    expect(editing).toContain("artifacts_get returns metadata");
+    expect(editing).toContain("source retrieval is blocked");
+    expect(guide.lifecycle.unavailableTools).toEqual(["artifacts_get_source", "artifacts_delete",
+      "artifacts_restore", "artifacts_set_access", "artifacts_fork", "artifacts_promote", "artifacts_renew"]);
+    expect(guide.lifecycle.deleteRestore).toContain("unavailable");
+    expect(guide.lifecycle.sharing).toContain("unavailable");
+  });
+
   it("should distinguish published framework packages from the CSS snapshot", () => {
     expect(FRAMEWORK_STARTERS.filter((entry) => entry.framework !== "plain JS")
       .map((entry) => [entry.framework, entry.packageVersion])).toEqual([
