@@ -104,13 +104,15 @@ for (const step of ['restore', 'backup', 'ddl', 'data']) {
       try {
         assert.notEqual(f.run().status, 0);
         const run = record(f).run;
+        const deleted = (f.state().deletions || []).length;
         const result = f.run('resume', [`RUN=${run}`]);
         if (edge === 'before-create' || edge.endsWith('started')) {
-          // Indeterminate Job evidence: a daily restore reopens on the verified live
-          // database, except after a started protected data migration.
+          // An unobserved mutating Job cannot prove its outcome. Recovery keeps the lock
+          // and performs no deletion until that uncertainty has been reconciled.
           assert.notEqual(result.status, 0);
-          if (step === 'data') assert.ok(lock(f));
-          else { assert.equal(lock(f), undefined); assert.ok(result.stdout.includes('REOPENED WITHOUT RESTORE'), result.stdout + result.stderr); }
+          assert.ok(lock(f));
+          assert.match(result.stderr, /State unknown; lock retained/);
+          assert.equal((f.state().deletions || []).length, deleted);
         } else success(result);
         assert.ok(f.state().objects.filter(o => o.kind === 'Job' && o.metadata.name.endsWith('-restore')).length <= 1);
       } finally { f.cleanup(); }

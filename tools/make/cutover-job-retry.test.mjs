@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fixture } from './cutover-fixture.mjs';
 
-function retry(step, state, { unreadable = false, live = false, changedUid = false, unreadablePods = false } = {}) {
+function retry(step, state, { unreadable = false, live = false, changedUid = false, unreadablePods = false, orphaned = false } = {}) {
   const f = fixture();
   const run = '11111111-1111-4111-8111-111111111111', name = `cutover-${run}-${step}`;
   const record = { run, jobs: { [step]: { name, uid: 'original', hash: 'hash', outcome: 'started' } }, checkpoints: {} };
@@ -17,7 +17,7 @@ function retry(step, state, { unreadable = false, live = false, changedUid = fal
     labels: { 'sentropic.io/bascule': run }, annotations: { 'cutover-spec-sha256': 'hash' } },
     status: { conditions: [{ type: state, status: 'True' }] } });
   if (state !== 'missing' || live) s.objects.push({ kind: 'Pod', metadata: { name: `${name}-pod`, labels: { 'job-name': name },
-    ownerReferences: [{ kind: 'Job', controller: true, uid: 'original' }] }, status: { phase: live ? 'Running' : 'Succeeded',
+    ownerReferences: orphaned ? [] : [{ kind: 'Job', controller: true, uid: 'original' }] }, status: { phase: live ? 'Running' : 'Succeeded',
     containerStatuses: [{ state: { terminated: { message: '{"ok":true}' } } }] } });
   writeFileSync(join(f.dir, 'state.json'), JSON.stringify(s));
   const result = spawnSync('bash', ['-euc', `
@@ -53,11 +53,13 @@ for (const step of ['identity', 'database', 'destination', 'verify', 'recon', 'p
 for (const [step, state, options] of [
   ['identity', 'Failed', { unreadable: true }], ['identity', 'Failed', { changedUid: true }],
   ['identity', 'Failed', { live: true }], ['identity', 'missing', { live: true }], ['identity', 'Failed', { unreadablePods: true }], ['restore', 'missing', {}],
+  ['identity', 'missing', { live: true, orphaned: true }],
 ]) {
   test(`recovery refuses to retry ${step}/${state} with unknown or live execution: ${JSON.stringify(options)}`, () => {
     const { f, result } = retry(step, state, options);
     try {
       assert.notEqual(result.status, 0);
+      assert.match(result.stderr, /unknown|UID.*(?:changed|conflict)|consumers|indeterminate/);
       assert.deepEqual(f.state().jobCreation || [], []);
     } finally { f.cleanup(); }
   });
