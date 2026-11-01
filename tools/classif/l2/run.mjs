@@ -8,6 +8,7 @@
 import path from 'node:path';
 import process from 'node:process';
 import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { setTimeout as sleep } from 'node:timers/promises';
 import { callSeat } from '../run-seat.mjs';
 import { sha256 } from '../lib/render.mjs';
 import { classifHome, privateDir } from '../lib/paths.mjs';
@@ -16,6 +17,15 @@ import { buildPrompt, itemValidity, loadPack, parseAnswers, toExtraction } from 
 
 export const ANNOTATORS = ['muse-wonder-max', 'gemini-4-argon-high', 'opus-5.5-max'];
 export const LOT_SIZE = 10;
+
+/** Milliseconds to wait when the seat answered a quota denial ("Resets in 10m57s"), else null. */
+export function quotaWaitMs(r) {
+  const msg = `${r?.error ?? ''} ${r?.stderrTail ?? ''} ${r?.code !== 0 ? r?.text ?? '' : ''}`;
+  if (!/quota reached|quota exceeded|RESOURCE_EXHAUSTED|rate limit|usage limit/i.test(msg)) return null;
+  const m = /Resets in (?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?/i.exec(msg);
+  const ms = m ? ((Number(m[1] ?? 0) * 60 + Number(m[2] ?? 0)) * 60 + Number(m[3] ?? 0)) * 1000 : 15 * 60000;
+  return Math.min(ms, 6 * 3600000) + 30000;
+}
 
 export function loadDevItems(home) {
   return readFileSync(path.join(home, 'l0', 'dev-items.jsonl'), 'utf8').trim().split('\n').map((l) => JSON.parse(l));
@@ -80,7 +90,15 @@ export async function runPass({ pass, mode = 'independent', guide = 'G0', annota
       let reused = false;
       if (existsSync(rawFile)) { r = JSON.parse(readFileSync(rawFile, 'utf8')); reused = true; }
       else {
-        r = await callSeat(annotator, prompt, { base: seatTmp, timeoutMs: 3600000 });
+        // Seat quota denials cost nothing: wait for the announced reset and call again without
+        // consuming an attempt (and without saving the denial as an answer).
+        for (;;) {
+          r = await callSeat(annotator, prompt, { base: seatTmp, timeoutMs: 3600000 });
+          const wait = quotaWaitMs(r);
+          if (wait === null) break;
+          log(`[pass ${pass}] ${annotator} quota reached, waiting ${Math.round(wait / 60000)} min`);
+          await sleep(wait);
+        }
         writeFileSync(rawFile, JSON.stringify(r), { mode: 0o600 });
       }
       pairs = parseAnswers(r.text, lot.items);
