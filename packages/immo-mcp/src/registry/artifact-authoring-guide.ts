@@ -26,7 +26,7 @@ import {
 import { FRAMEWORK_STARTERS, FRAMEWORK_BUILD_RULE } from "./framework-starters.js";
 
 export const AUTHORING_GUIDE_ID = "immo-artifact-authoring" as const;
-export const AUTHORING_GUIDE_REVISION = "2026-11-01-r1" as const;
+export const AUTHORING_GUIDE_REVISION = "2026-11-01-r2" as const;
 export const STARTER_VERSION = "1.0.0" as const;
 
 /**
@@ -64,13 +64,10 @@ const STARTER_FILES: readonly AuthoringGuideStarterFile[] = freeze([
 ]);
 
 export interface AuthoringGuideComponentRef {
-  /** Future ui:// key: catalog + component + contract version. */
-  readonly catalogId: "@sentropic/design-system-react";
-  readonly componentId: string;
-  readonly contractVersion: "1.0";
-  /** Exact upstream package + version that documents the component. */
-  readonly package: "@sentropic/design-system-react";
-  readonly packageVersion: typeof DESIGN_KIT_REACT_SNAPSHOT;
+  /** Upstream CSS recipe provenance, independent of the Elements catalogue. */
+  readonly sourcePackage: "@sentropic/design-system-react";
+  readonly componentName: string;
+  readonly snapshotVersion: typeof DESIGN_KIT_REACT_SNAPSHOT;
   /** Prompt doc ref + sha256 of its bytes at guide revision time. */
   readonly promptRef: string;
   readonly promptHash: string;
@@ -79,43 +76,35 @@ export interface AuthoringGuideComponentRef {
 }
 
 const COMPONENTS: readonly AuthoringGuideComponentRef[] = freeze([
-  { catalogId: "@sentropic/design-system-react", componentId: "Button", contractVersion: "1.0",
-    package: "@sentropic/design-system-react", packageVersion: DESIGN_KIT_REACT_SNAPSHOT,
+  { sourcePackage: "@sentropic/design-system-react", componentName: "Button", snapshotVersion: DESIGN_KIT_REACT_SNAPSHOT,
     promptRef: "ds-bundle/components/general/Button/Button.prompt.md",
     promptHash: "e8ab6e3ba088a571d75ae6c6a6215541e864d519b07b9951c648fa61345921b7",
     classes: ["st-button", "st-button--primary", "st-button--secondary", "st-button--md"] },
-  { catalogId: "@sentropic/design-system-react", componentId: "Tag", contractVersion: "1.0",
-    package: "@sentropic/design-system-react", packageVersion: DESIGN_KIT_REACT_SNAPSHOT,
+  { sourcePackage: "@sentropic/design-system-react", componentName: "Tag", snapshotVersion: DESIGN_KIT_REACT_SNAPSHOT,
     promptRef: "ds-bundle/components/general/Tag/Tag.prompt.md",
     promptHash: "43e00e9ffff65a4ebf87c94780ae25aece5070f9d4d39e8ea583c763c17035f5",
     classes: ["st-tag", "st-tag--sm", "st-tag--info"] },
-  { catalogId: "@sentropic/design-system-react", componentId: "Card", contractVersion: "1.0",
-    package: "@sentropic/design-system-react", packageVersion: DESIGN_KIT_REACT_SNAPSHOT,
+  { sourcePackage: "@sentropic/design-system-react", componentName: "Card", snapshotVersion: DESIGN_KIT_REACT_SNAPSHOT,
     promptRef: "ds-bundle/components/general/Card/Card.prompt.md",
     promptHash: "900840598009a841fe73c345822d163922d69fc3c5b1f81fcb95f90611d2b127",
     classes: ["st-card"] },
-  { catalogId: "@sentropic/design-system-react", componentId: "Notification", contractVersion: "1.0",
-    package: "@sentropic/design-system-react", packageVersion: DESIGN_KIT_REACT_SNAPSHOT,
+  { sourcePackage: "@sentropic/design-system-react", componentName: "Notification", snapshotVersion: DESIGN_KIT_REACT_SNAPSHOT,
     promptRef: "ds-bundle/components/general/Notification/Notification.prompt.md",
     promptHash: "92cb7ffd7c60db14982e32915f905b532468f3326c9b5beb0dc27affb589a5d6",
     classes: ["st-notification", "st-notification--error"] },
-  { catalogId: "@sentropic/design-system-react", componentId: "Select", contractVersion: "1.0",
-    package: "@sentropic/design-system-react", packageVersion: DESIGN_KIT_REACT_SNAPSHOT,
+  { sourcePackage: "@sentropic/design-system-react", componentName: "Select", snapshotVersion: DESIGN_KIT_REACT_SNAPSHOT,
     promptRef: "ds-bundle/components/general/Select/Select.prompt.md",
     promptHash: "e37cc0c9b69a502c0d8cd09d8819189c9741d21fef1483061c8b9e61ac2272bf",
     classes: ["st-select", "st-select--md", "st-field", "st-field__label", "st-field__control", "st-field__help"] },
-  { catalogId: "@sentropic/design-system-react", componentId: "Input", contractVersion: "1.0",
-    package: "@sentropic/design-system-react", packageVersion: DESIGN_KIT_REACT_SNAPSHOT,
+  { sourcePackage: "@sentropic/design-system-react", componentName: "Input", snapshotVersion: DESIGN_KIT_REACT_SNAPSHOT,
     promptRef: "ds-bundle/components/general/Input/Input.prompt.md",
     promptHash: "173ff92dd7e8029788cf698c6cdca2f56ba173add854a3ffa4e91df356b7b33b",
     classes: ["st-control", "st-control--md"] },
-  { catalogId: "@sentropic/design-system-react", componentId: "ContentSwitcher", contractVersion: "1.0",
-    package: "@sentropic/design-system-react", packageVersion: DESIGN_KIT_REACT_SNAPSHOT,
+  { sourcePackage: "@sentropic/design-system-react", componentName: "ContentSwitcher", snapshotVersion: DESIGN_KIT_REACT_SNAPSHOT,
     promptRef: "ds-bundle/components/general/ContentSwitcher/ContentSwitcher.prompt.md",
     promptHash: "b8be750c7f4a799ac6882d58744224b64cdb85f8cdb9448571e75630f483ad86",
     classes: ["st-contentSwitcher", "st-contentSwitcher--md", "st-contentSwitcher__option"] },
-  { catalogId: "@sentropic/design-system-react", componentId: "InlineLoading", contractVersion: "1.0",
-    package: "@sentropic/design-system-react", packageVersion: DESIGN_KIT_REACT_SNAPSHOT,
+  { sourcePackage: "@sentropic/design-system-react", componentName: "InlineLoading", snapshotVersion: DESIGN_KIT_REACT_SNAPSHOT,
     promptRef: "ds-bundle/components/general/InlineLoading/InlineLoading.prompt.md",
     promptHash: "9045c154480f466f91a349890dedcfc005612c0bee3ad05f5ae0f9e049a11929",
     classes: ["st-inlineLoading"] },
@@ -228,7 +217,7 @@ export function getAuthoringGuide(): AuthoringGuide {
         "Empty, unavailable, denied and expired-session states are visually distinct; expired access offers reopening.",
         "No inline <script> or <style> blocks: the release CSP stays hash-free and browser-clean.",
         "Keyboard and mobile pass: labelled fields, visible focus, aria-live status, French copy.",
-        "Run @sentropic/design-system-skills@0.3.2: design check index.html --tech --fail-under 80 with the pinned kit styles resolved locally. Static checks do not replace browser acceptance. Server-side publication enforcement is a follow-up.",
+        "Run npx --yes -p @sentropic/design-system-skills@0.1.0 design audit ./index.html with the pinned kit styles resolved locally; exit 1 (findings) and exit 2 (tool error) both block publication. Static checks do not replace browser acceptance. Server-side publication enforcement is a follow-up.",
       ],
       frameworks: FRAMEWORK_STARTERS,
       frameworkBuild: FRAMEWORK_BUILD_RULE,
@@ -245,7 +234,7 @@ export function getAuthoringGuide(): AuthoringGuide {
         componentIds: ["BarChart", "BpmnCanvas", "DecisionDossier"],
         status: "Framework-agnostic custom elements st-bar-chart, st-bpmn-canvas, st-decision-dossier; contractVersion 1.0, JSON envelope with root.component and hostConfig in script#st-host-config[type=application/json]. Package exports an envelope validator for server use. Not vendored/qualified in this CSS-only revision: do not import a CDN. Runtime assets, validator and prompt hashes must be pinned before use.",
       },
-      componentUsage: "DS ids are components[].catalogId + componentId + contractVersion; preserve package/version and promptRef/hash separately for future resources. Snapshot contractVersion 1.0 identifies this guide's native CSS mapping, not a published React wire contract. Essential snapshot prompts: the full React DS runtime uses window.SentropicDS.<componentId> inside ThemeProvider; load DS styles + ThemeProvider, never write your own palette. The native CSS fast path uses the listed st-* markup without the DS React runtime: Button is a native button (variant primary/secondary/ghost/danger, size sm/md/lg); Input/Select need a visible label and help/error association; Card is a noninteractive container unless a real link/button is provided; Tag is informational, not an action; Notification needs readable title/message and status/alert semantics; ContentSwitcher needs keyboard behavior and selection state; InlineLoading needs accessible status text and reduced motion. Do not imitate complex component behavior; use a qualified runtime. Prompt files are provenance, these inline instructions are available to the remote author.",
+      componentUsage: "React CSS recipes use components[].sourcePackage + componentName + snapshotVersion with promptRef/hash for provenance. Elements catalogue contracts are described separately in elements. Essential snapshot prompts: the full React DS runtime uses window.SentropicDS.<componentName> inside ThemeProvider; load DS styles + ThemeProvider, never write your own palette. The native CSS fast path uses the listed st-* markup without the DS React runtime: Button is a native button (variant primary/secondary/ghost/danger, size sm/md/lg); Input/Select need a visible label and help/error association; Card is a noninteractive container unless a real link/button is provided; Tag is informational, not an action; Notification needs readable title/message and status/alert semantics; ContentSwitcher needs keyboard behavior and selection state; InlineLoading needs accessible status text and reduced motion. Do not imitate complex component behavior; use a qualified runtime. Prompt files are provenance, these inline instructions are available to the remote author.",
     });
   }
   return cached;
