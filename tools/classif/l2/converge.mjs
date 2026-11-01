@@ -6,9 +6,10 @@
 // context = own previous annotation + the two others anonymised + traced complements).
 import path from 'node:path';
 import process from 'node:process';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { CLASSIF_DIR, classifHome } from '../lib/paths.mjs';
 import { ANNOTATORS, loadDevItems, readPass } from './run.mjs';
+import { readJsonlRecords } from '../lib/jsonl.mjs';
 import { krippendorffAlpha, majority, stopDecision } from './agreement.mjs';
 
 /** Latest annotation per annotator and item over passes 1..n. */
@@ -74,10 +75,9 @@ function reconcileContext(rows, latest, complements) {
 export function loadComplements(home) {
   const f = path.join(home, 'l2', 'scrape-manifest.jsonl');
   const m = new Map();
-  if (!existsSync(f)) return m;
-  for (const l of readFileSync(f, 'utf8').trim().split('\n').filter(Boolean)) {
-    const r = JSON.parse(l);
-    if (r.status !== 'ok' || !r.excerptPath) continue;
+  // Tolerant: a truncated last line from a killed scrape never throws here.
+  for (const r of readJsonlRecords(f)) {
+    if (r?.status !== 'ok' || !r.excerptPath) continue;
     const excerpt = readFileSync(r.excerptPath, 'utf8');
     m.set(r.itemId, [...(m.get(r.itemId) ?? []), { url: r.url, fetchedAt: r.fetchedAt, sha256: r.sha256, excerpt }]);
   }

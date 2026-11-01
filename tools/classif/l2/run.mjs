@@ -7,9 +7,10 @@
 // already done for (pass, annotator) is skipped. Dev items only: the sealed evaluation set is never read.
 import path from 'node:path';
 import process from 'node:process';
-import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, writeFileSync } from 'node:fs';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { callSeat } from '../run-seat.mjs';
+import { appendJsonlRecord, parseJsonlTolerant } from '../lib/jsonl.mjs';
 import { sha256 } from '../lib/render.mjs';
 import { classifHome, privateDir } from '../lib/paths.mjs';
 import { PROFILE_DIR, validateExtraction } from '../lib/engram.mjs';
@@ -47,7 +48,10 @@ export function quotaWaitMs(r) {
 }
 
 export function loadDevItems(home) {
-  return readFileSync(path.join(home, 'l0', 'dev-items.jsonl'), 'utf8').trim().split('\n').map((l) => JSON.parse(l));
+  // Tolerant of a truncated last line (a killed draw must not break the next pass).
+  const records = parseJsonlTolerant(readFileSync(path.join(home, 'l0', 'dev-items.jsonl'), 'utf8'));
+  if (!records.length) throw new Error(`no dev items in ${path.join(home, 'l0', 'dev-items.jsonl')}`);
+  return records;
 }
 
 export function loadCodes() {
@@ -122,8 +126,8 @@ export async function runPass({ pass, mode = 'independent', guide = 'G0', annota
       }
       pairs = parseAnswers(r.text, lot.items);
       const answered = pairs.filter((p) => p.answer).length;
-      appendFileSync(callsLog, `${JSON.stringify({ at: new Date().toISOString(), pass, mode, guide, annotator, lotId: lot.lotId, items: lot.items.length, attempt: attempts,
-        exitCode: r.code, latencyMs: r.latencyMs, reused, answered, toolEvents: r.toolEvents ?? null, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null })}\n`);
+      appendJsonlRecord(callsLog, { at: new Date().toISOString(), pass, mode, guide, annotator, lotId: lot.lotId, items: lot.items.length, attempt: attempts,
+        exitCode: r.code, latencyMs: r.latencyMs, reused, answered, toolEvents: r.toolEvents ?? null, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null });
       if (r.code === 0 && answered > 0 && !(r.toolEvents > 0)) break;
     }
     // Explicit exit policy, logged: a non-zero seat exit makes every vote of the lot
