@@ -11,6 +11,22 @@ Guide utilisateur — 5 minutes. Prérequis : un compte claude.ai **Pro, Max, Te
 | OAuth Client ID | *(fourni par l'équipe — client public)* |
 | Client Secret | **aucun** (laisser vide — flux PKCE) |
 | Scopes accordés au login | `immo:read`, `immo:search`, `immo:documents:read` |
+| Scopes artefacts (préproduction `https://preprod.immo.sent-tech.ca/mcp`) | `immo:artifacts:read` (`artifacts_list`, `artifacts_get`), `immo:artifacts:write` (`artifacts_ensure`, `artifacts_publish`) |
+
+### Scopes artefacts et transition
+
+- Les outils d'artefacts exigent un scope **explicite** ; `immo:read` ne permet
+  jamais d'écrire. Sans `immo:artifacts:write`, `artifacts_ensure` et
+  `artifacts_publish` répondent
+  `{"error":"artifact_scope_denied","retryable":false,"requiredScope":"immo:artifacts:write"}`.
+- Transition : drapeau serveur `IMMO_MCP_ARTIFACTS_LEGACY_READ_SCOPE` (défaut
+  `false` ; `true` en préproduction pendant la transition). Actif, il laisse
+  `immo:read` satisfaire **la lecture seule** (`artifacts_list`, `artifacts_get`)
+  pour les connecteurs autorisés avant ces scopes. Il ne s'applique jamais à
+  l'écriture. Retrait prévu quand les connecteurs ont été ré-autorisés.
+- À la connexion préproduction, **accepter** `immo:artifacts:read` et
+  `immo:artifacts:write` en plus des trois scopes de données. Prérequis : le
+  catalogue de l'IdP préprod et le client `immo-mcp` déclarent ces deux scopes.
 
 ## Étapes
 
@@ -42,6 +58,9 @@ Poser des questions en langage naturel ; Claude appelle les outils du radar :
   (Advanced settings) — champ exact, pas d'espace, secret vide.
 - **401 après connexion** : les autorisations n'ont pas été accordées — refaire
   le flux et accepter les scopes.
+- **`artifact_scope_denied`** (préproduction) : le scope `requiredScope` n'a pas
+  été accordé — déconnecter puis reconnecter le connecteur et accepter les scopes
+  artefacts.
 - **Le connecteur n'apparaît pas dans une conversation** : l'activer dans
   **Search & tools** (il est désactivé par défaut par conversation).
 

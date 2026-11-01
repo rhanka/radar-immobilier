@@ -7,9 +7,11 @@ import {
 import {
   ARTIFACT_DURABLE_IDENTITY,
   ARTIFACT_EFFECTIVE_REQUIRED,
+  ARTIFACT_INVOCATION_SCOPES,
   ARTIFACT_PROFILE_REVISION,
   ARTIFACT_PROVIDER_VERSION,
   ARTIFACT_SELECTION,
+  ARTIFACT_TOOL_SCOPES,
   REQUIRED_PROVIDER_CONTRACTS,
 } from "./artifact-profile.js";
 import { compileComposition } from "./composition.js";
@@ -49,7 +51,7 @@ function artifactProvider(version: string = ARTIFACT_PROVIDER_VERSION): Provider
     version,
     tools: ARTIFACT_SELECTION.map((entry) => ({
       name: entry.tool,
-      scope: "immo:read",
+      scope: ARTIFACT_TOOL_SCOPES[entry.tool],
       binding: { context: "artifact-service", registeredBy: "registerTools" },
     })),
   };
@@ -59,7 +61,7 @@ function artifactRequest(overrides?: Partial<ArtifactActivationRequest>): Artifa
   return {
     providerId: ARTIFACT_PROVIDER_ID,
     selection: ARTIFACT_SELECTION.map((entry) => ({ ...entry })),
-    invocationScope: "immo:read",
+    invocationScopes: ARTIFACT_INVOCATION_SCOPES,
     profileRevision: ARTIFACT_PROFILE_REVISION,
     finalizationContract: "upstream-finalization.v1",
     errorContract: "upstream-typed-failure.v1",
@@ -87,7 +89,11 @@ describe("artifact activation", () => {
       artifact: artifactRequest({ errorContract: null }),
     }))).toBe("missing_error_binding");
     expect(codeOf(() => compileComposition(providers, {
-      artifact: artifactRequest({ invocationScope: "artifacts:*" }),
+      artifact: artifactRequest({ invocationScopes: { read: "artifacts:*", write: ARTIFACT_INVOCATION_SCOPES.write } }),
+    }))).toBe("generic_scope");
+    // The pre-decision single immo:read invocation scope is no longer accepted.
+    expect(codeOf(() => compileComposition(providers, {
+      artifact: artifactRequest({ invocationScopes: { read: "immo:read", write: "immo:read" } }),
     }))).toBe("generic_scope");
     expect(codeOf(() => compileComposition(providers, {
       artifact: artifactRequest({ profileRevision: "immo-artifacts.v9" }),
@@ -123,7 +129,7 @@ describe("artifact activation", () => {
       ...extended,
       tools: [...extended.tools, {
         name: "artifacts_delete",
-        scope: "immo:read",
+        scope: ARTIFACT_INVOCATION_SCOPES.write,
         binding: { context: "artifact-service", registeredBy: "registerTools" },
       }],
     };
@@ -175,8 +181,10 @@ describe("artifact activation", () => {
     }))).toBe("unavailable_capability");
   });
 
-  it.each(ARTIFACT_SELECTION)("should require immo:read on $tool", ({ tool: name }) => {
-    for (const scope of ["immo:search", "immo:documents:read", "artifacts:*"]) {
+  it.each(ARTIFACT_SELECTION)("should require its explicit artifact scope on $tool", ({ tool: name }) => {
+    const other = ARTIFACT_TOOL_SCOPES[name] === ARTIFACT_INVOCATION_SCOPES.write
+      ? ARTIFACT_INVOCATION_SCOPES.read : ARTIFACT_INVOCATION_SCOPES.write;
+    for (const scope of ["immo:read", "immo:search", "immo:documents:read", "artifacts:*", other]) {
       const scoped = artifactProvider();
       const providers: ProviderDefinition[] = [{
         ...scoped,

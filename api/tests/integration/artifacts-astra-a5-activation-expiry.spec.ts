@@ -36,7 +36,7 @@ describe("astra A5 activation expiry during membership wait", () => {
     const env = { ...h.bindingEnv };
     const bound = (await createArtifactBinding(env))!;
     const request = {
-      principal: { issuer: "synthetic", sub: ALICE, scopes: ["immo:read"], claims: [], attributes: {} },
+      principal: { issuer: "synthetic", sub: ALICE, scopes: ["immo:read", "immo:artifacts:read", "immo:artifacts:write"], claims: [], attributes: {} },
       resource: "synthetic:mcp", correlationId: "expiry", signal: new AbortController().signal,
     };
     const args = { bindingName: "expiry-replay", idempotencyKey: "expiry-replay" };
