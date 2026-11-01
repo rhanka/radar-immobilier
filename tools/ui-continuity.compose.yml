@@ -1,3 +1,10 @@
+x-continuity-modules: &continuity-modules
+  driver: local
+  driver_opts:
+    type: tmpfs
+    device: tmpfs
+    o: rw,exec,size=2g
+
 services:
   minio:
     volumes:
@@ -25,9 +32,11 @@ services:
       - continuity-scoring-modules:/workspace/packages/radar-scoring/node_modules
       - continuity-sources-modules:/workspace/packages/radar-sources/node_modules
 volumes:
-  continuity-ui-modules:
-  continuity-mcp-modules:
-  continuity-artifacts-modules:
-  continuity-domain-modules:
-  continuity-scoring-modules:
-  continuity-sources-modules:
+  radar-test-root-node-modules: *continuity-modules
+  radar-test-api-node-modules: *continuity-modules
+  continuity-ui-modules: *continuity-modules
+  continuity-mcp-modules: *continuity-modules
+  continuity-artifacts-modules: *continuity-modules
+  continuity-domain-modules: *continuity-modules
+  continuity-scoring-modules: *continuity-modules
+  continuity-sources-modules: *continuity-modules
