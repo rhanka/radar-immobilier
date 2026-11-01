@@ -30,12 +30,20 @@ async function exportLogs({ pods, prefix, k8s, s3, onOpen = () => {}, log = () =
     const entry = { name: expected.name, uid: expected.uid, containers: [] };
     manifest.pods.push(entry);
     for (const container of [...(pod.spec.initContainers || []), ...pod.spec.containers].map(c => c.name)) {
-      for (const previous of [false, true]) streams.push({ entry, container, previous, ...k8s.openLog(expected.name, container, { previous, follow: !previous }) });
+      for (const previous of [false, true]) {
+        const stream = k8s.openLog(expected.name, container, { previous, follow: !previous });
+        // A stream can reject while other Pods are still being read or opened.
+        stream.text.catch(() => {});
+        streams.push({ entry, container, previous, ...stream });
+      }
     }
   }
   // Every follow stream is open before any deletion is allowed.
-  await Promise.all(streams.map(s => s.opened));
-  onOpen();
+  const opened = await Promise.all(streams.map(s => s.opened));
+  for (const [i, s] of streams.entries()) {
+    if (!opened[i]) manifest.missing.push(`${s.entry.uid}/${s.container}${s.previous ? '/previous' : ''}`);
+  }
+  if (manifest.missing.length === 0) onOpen();
   for (const s of streams) {
     const text = await s.text;
     // No previous instance is a normal case; a missing current log is a failure.
@@ -71,18 +79,26 @@ function inClusterK8s() {
       request(`${base}/${name}`, res => {
         const chunks = [];
         res.on('data', c => chunks.push(c));
-        res.on('end', () => resolve(res.statusCode === 200 ? JSON.parse(Buffer.concat(chunks).toString()) : null));
+        res.on('error', reject);
+        res.on('end', () => {
+          if (res.statusCode === 404) return resolve(null);
+          if (res.statusCode !== 200) return reject(Error(`Pod read failed: ${res.statusCode}`));
+          try { resolve(JSON.parse(Buffer.concat(chunks).toString())); } catch (e) { reject(e); }
+        });
       }).on('error', reject);
     }),
     openLog(name, container, { previous, follow }) {
       let opened, text;
       const openedP = new Promise(r => { opened = r; });
       const textP = new Promise((resolve, reject) => { text = { resolve, reject }; });
+      textP.catch(() => {});
       const query = `container=${encodeURIComponent(container)}&timestamps=true${previous ? '&previous=true' : ''}${follow ? '&follow=true' : ''}`;
       request(`${base}/${name}/log?${query}`, res => {
-        opened(true);
+        opened(res.statusCode === 200 || (previous && [400, 404].includes(res.statusCode)));
         const chunks = [];
         res.on('data', c => chunks.push(c));
+        res.on('error', text.reject);
+        res.on('aborted', () => text.reject(Error('log stream aborted')));
         res.on('end', () => {
           if (res.statusCode === 200) text.resolve(Buffer.concat(chunks).toString());
           else if (res.statusCode === 400 || res.statusCode === 404) text.resolve(null);
