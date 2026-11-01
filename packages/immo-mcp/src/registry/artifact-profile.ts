@@ -5,16 +5,12 @@
  * contract revisions required before activation.
  */
 
+import { ACTIVE_ARTIFACT_TOOLS, ARTIFACT_PROFILE_DESCRIPTOR, ARTIFACT_P0B } from "@radar/artifacts-host";
+export { ARTIFACT_PROVIDER_VERSION } from "@radar/artifacts-host";
 export const ARTIFACT_PROVIDER_ID = "sentropic.artifacts" as const;
-export const ARTIFACT_PROFILE_REVISION = "immo-artifacts.v1" as const;
-export const ARTIFACT_PROVIDER_VERSION = "0.2.2" as const;
+export const ARTIFACT_PROFILE_REVISION = ARTIFACT_PROFILE_DESCRIPTOR.profileRevisionId;
 
-export const ARTIFACT_TOOL_NAMES = [
-  "artifacts_ensure",
-  "artifacts_publish",
-  "artifacts_list",
-  "artifacts_get",
-] as const;
+export const ARTIFACT_TOOL_NAMES = ACTIVE_ARTIFACT_TOOLS;
 
 export type ArtifactToolName = (typeof ARTIFACT_TOOL_NAMES)[number];
 
@@ -32,12 +28,17 @@ export const ARTIFACT_INVOCATION_SCOPES = Object.freeze({
 } as const);
 
 /** Required scope per selected tool; the only source for manifest, registry and binding checks. */
-export const ARTIFACT_TOOL_SCOPES: Readonly<Record<ArtifactToolName, string>> = Object.freeze({
+const ALL_TOOL_SCOPES: Record<ArtifactToolName, string> = {
   artifacts_ensure: ARTIFACT_WRITE_SCOPE,
   artifacts_publish: ARTIFACT_WRITE_SCOPE,
   artifacts_list: ARTIFACT_READ_SCOPE,
   artifacts_get: ARTIFACT_READ_SCOPE,
-});
+  artifacts_get_source: ARTIFACT_READ_SCOPE,
+  artifacts_set_access: ARTIFACT_WRITE_SCOPE,
+  artifacts_delete: ARTIFACT_WRITE_SCOPE,
+};
+export const ARTIFACT_TOOL_SCOPES = Object.freeze(Object.fromEntries(
+  ARTIFACT_TOOL_NAMES.map((name) => [name, ALL_TOOL_SCOPES[name]]))) as Readonly<Record<ArtifactToolName, string>>;
 
 /**
  * Transition (owner decision 2026-10-31): while clients connected before the
@@ -66,7 +67,7 @@ export function readArtifactScopePolicy(env: NodeJS.ProcessEnv): ArtifactScopePo
 /** Scopes, any one of which satisfies the tool under the given policy. */
 export function acceptedArtifactScopes(tool: ArtifactToolName, policy: ArtifactScopePolicy): readonly string[] {
   const required = ARTIFACT_TOOL_SCOPES[tool];
-  return required === ARTIFACT_READ_SCOPE && policy.legacyReadScope
+  return (tool === "artifacts_get" || tool === "artifacts_list") && policy.legacyReadScope
     ? [required, ARTIFACT_LEGACY_READ_SCOPE] : [required];
 }
 
@@ -77,10 +78,10 @@ export function hasArtifactScope(tool: ArtifactToolName, scopes: readonly string
 
 export interface ArtifactSelectionEntry {
   readonly tool: ArtifactToolName;
-  readonly operation: "ensure" | "publish" | "list" | "meta";
+  readonly operation: "ensure" | "publish" | "list" | "meta" | "get_source" | "set_access" | "delete";
   readonly method: "POST" | "GET";
   readonly path: string;
-  readonly command: "ensure" | "publish" | "list" | "meta";
+  readonly command: ArtifactSelectionEntry["operation"];
 }
 
 export const ARTIFACT_SELECTION: readonly ArtifactSelectionEntry[] = [
@@ -88,6 +89,11 @@ export const ARTIFACT_SELECTION: readonly ArtifactSelectionEntry[] = [
   { tool: "artifacts_publish", operation: "publish", method: "POST", path: "/publish", command: "publish" },
   { tool: "artifacts_list", operation: "list", method: "POST", path: "/list", command: "list" },
   { tool: "artifacts_get", operation: "meta", method: "GET", path: "/meta/{artifactId}", command: "meta" },
+  ...(ARTIFACT_P0B ? [
+    { tool: "artifacts_get_source", operation: "get_source", method: "POST", path: "/get_source", command: "get_source" },
+    { tool: "artifacts_set_access", operation: "set_access", method: "POST", path: "/set_access", command: "set_access" },
+    { tool: "artifacts_delete", operation: "delete", method: "POST", path: "/delete", command: "delete" },
+  ] as const : []),
 ];
 
 export const ARTIFACT_LIMITS = {
@@ -133,7 +139,10 @@ export const ARTIFACT_EFFECTIVE_REQUIRED: Record<ArtifactToolName, readonly stri
   artifacts_publish: ["artifactId", "files", "idempotencyKey"],
   artifacts_list: [],
   artifacts_get: ["artifactId"],
-};
+  ...(ARTIFACT_P0B ? { artifacts_get_source: ["artifactId"],
+    artifacts_set_access: ["artifactId", "action", "principalId", "idempotencyKey"],
+    artifacts_delete: ["artifactId", "idempotencyKey"] } : {}),
+} as Record<ArtifactToolName, readonly string[]>;
 
 export const ARTIFACT_DURABLE_IDENTITY = {
   internalKey: "SHA-256 UTF-8(storageScope | sub | operation | artifactIdOrEmpty | originalCallerKey)",
@@ -183,6 +192,12 @@ export function artifactEffectiveProfile() {
       required: [...ARTIFACT_EFFECTIVE_REQUIRED.artifacts_get],
       artifactId: "lowercase UUID validated by the library",
     },
+    ...(ARTIFACT_P0B ? {
+      descriptor: ARTIFACT_PROFILE_DESCRIPTOR,
+      artifacts_get_source: { required: ARTIFACT_EFFECTIVE_REQUIRED.artifacts_get_source, maxFiles: 32, maxTotalBytes: 262144 },
+      artifacts_set_access: { required: ARTIFACT_EFFECTIVE_REQUIRED.artifacts_set_access, grant: "read", principalId: "approved IMMO account IdP sub" },
+      artifacts_delete: { required: ARTIFACT_EFFECTIVE_REQUIRED.artifacts_delete, confirmation: "trusted app session; transactional consumption", terminal: true },
+    } : {}),
     closedArguments: [...ARTIFACT_FORBIDDEN_CALLER_FIELDS],
     callerKey: {
       type: "string",
@@ -191,7 +206,7 @@ export function artifactEffectiveProfile() {
   };
 }
 
-export type ProviderContractStatus = "immo-artifacts.v1" | "artifacts-profile/v1" |
+export type ProviderContractStatus = "immo-artifacts.v1" | "immo-artifacts.p0b.v1" | "artifacts-profile/v1" |
   "artifacts-commit/v1" | "artifacts-outcome/v1";
 
 export interface RequiredProviderContracts {
@@ -204,8 +219,8 @@ export interface RequiredProviderContracts {
 
 export const REQUIRED_PROVIDER_CONTRACTS: RequiredProviderContracts = {
   capabilitySelection: "artifacts-profile/v1",
-  effectiveProfile: "immo-artifacts.v1",
-  durableCommandIdentity: "immo-artifacts.v1",
+  effectiveProfile: ARTIFACT_PROFILE_REVISION,
+  durableCommandIdentity: ARTIFACT_PROFILE_REVISION,
   finalizationAuthorization: "artifacts-commit/v1",
   typedFailure: "artifacts-outcome/v1",
 };
