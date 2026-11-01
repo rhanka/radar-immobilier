@@ -87,3 +87,10 @@ test('per-effort vibe config drops MCP servers and sets the thinking level', () 
   assert.ok(c.includes('active_model = ""'));
   assert.equal((c.match(/thinking = "low"/g) ?? []).length, 2);
 });
+
+test('quota denials are detected with their reset delay', async () => {
+  const { quotaWaitMs } = await import('../l2/run.mjs');
+  assert.equal(quotaWaitMs({ code: 1, error: 'Individual quota reached. Please upgrade your subscription to increase your limits. Resets in 10m57s.' }), (10 * 60 + 57) * 1000 + 30000);
+  assert.equal(quotaWaitMs({ code: 0, text: '{"annotations":[]}' }), null);
+  assert.equal(quotaWaitMs({ code: 1, error: 'invalid model selection' }), null);
+});
