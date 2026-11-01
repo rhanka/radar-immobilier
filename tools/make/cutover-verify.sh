@@ -10,13 +10,8 @@ cleanup() { "${compose[@]}" down -v --remove-orphans >/dev/null; }
 trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
-while :; do
-  if ! flock -w 30 8; then echo 'Waiting for Docker campaign lock'; continue; fi
-  busy=$(docker ps --format '{{.Label "com.docker.compose.project"}}' | awk 'NF && $0!="radar-test-cutover"')
-  [[ -n $busy ]] || break
-  flock -u 8
-  echo 'Waiting for the active Docker test stack'; sleep 30
-done
+# Serialize test campaigns; unrelated idle stacks need not stop for this portless project.
+until flock -w 30 8; do echo 'Waiting for Docker campaign lock'; done
 case ${1:-} in
   test) command='apt-get update -qq && apt-get install -y -qq bash make jq curl gettext-base >/dev/null && npm ci --ignore-scripts --silent && HOME=$(mktemp -d) node --test --test-name-pattern="${TEST_PATTERN:-.}" tools/make/cutover*.test.mjs && node deploy/ci/bascule-preprod/backup.selftest.mjs && node deploy/ci/backup/backup-daily.selftest.mjs && node deploy/ci/bascule-2tenants/orchestrator.selftest.mjs';;
   lint) command='npm ci --ignore-scripts --silent && npx eslint .';;
