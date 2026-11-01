@@ -187,7 +187,7 @@ export function controlRoute(deps: ControlRouteDeps): Hono {
     const challenge = await deps.confirmation.read(c.req.param("ref"), guarded.session.sub);
     if (!challenge) return c.json({ error: "not_found" }, 404);
     c.header("Content-Security-Policy", "default-src 'none'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'");
-    c.header("Referrer-Policy", "no-referrer");
+    c.header("Referrer-Policy", "same-origin");
     const escape = (s: string) => s.replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};`);
     const expired = Date.parse(challenge.expiresAt) <= Date.now() || challenge.consumed;
     return c.html(`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
