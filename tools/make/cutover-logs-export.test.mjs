@@ -4,6 +4,10 @@ import { createRequire } from 'node:module';
 import { createHash } from 'node:crypto';
 import { gunzipSync } from 'node:zlib';
 import { Buffer } from 'node:buffer';
+import { readFileSync } from 'node:fs';
+import { runInNewContext } from 'node:vm';
+import { EventEmitter } from 'node:events';
+import { setImmediate } from 'node:timers';
 const require = createRequire(import.meta.url);
 const { exportLogs } = require('../../deploy/cutover/logs-export.cjs');
 const sha = b => createHash('sha256').update(b).digest('hex');
@@ -62,4 +66,47 @@ test('log export refuses a missing or replaced Pod and a sha256 mismatch on re-r
   const failing = exportLogs({ pods: [{ name: 'radar-ui-pod1', uid: 'uid-2' }], prefix: 'q', k8s: corrupt.k8s, s3: corrupt.s3 });
   await new Promise(resolve => setTimeout(resolve, 10)); corrupt.end();
   await assert.rejects(failing, /sha256 mismatch/);
+});
+for (const unavailable of ['missing Pod', 'replaced Pod', 'unopened current log', 'unopened previous log']) {
+  test(`log export never authorizes deletion with ${unavailable} while another stream follows a live Pod`, async () => {
+    const f = fakes();
+    const getPod = f.k8s.getPod, openLog = f.k8s.openLog;
+    f.k8s.getPod = name => name === 'radar-api-pod1' && unavailable.includes('Pod')
+      ? Promise.resolve(unavailable === 'missing Pod' ? null : { metadata: { uid: 'replacement' } }) : getPod(name);
+    f.k8s.openLog = (name, container, options) => name === 'radar-api-pod1' && unavailable.includes('log')
+      && options.previous === (unavailable === 'unopened previous log')
+      ? { opened: Promise.resolve(false), text: Promise.resolve(null) } : openLog(name, container, options);
+    let ready = false;
+    const exporting = exportLogs({ pods: [{ name: 'radar-api-pod1', uid: 'uid-1' }, { name: 'radar-ui-pod1', uid: 'uid-2' }],
+      prefix: 'p', k8s: f.k8s, s3: f.s3, onOpen: () => { ready = true; } });
+    // Observe rejection immediately: a refused stream must never become an unhandled rejection.
+    const outcome = exporting.catch(() => null);
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(ready, false, 'a live Pod without its export must keep deletion blocked');
+    f.end(); await outcome;
+  });
+}
+test('the Kubernetes log adapter reports HTTP errors before readiness and rejects unknown Pod reads', async () => {
+  const source = readFileSync(new URL('../../deploy/cutover/logs-export.cjs', import.meta.url), 'utf8');
+  for (const statusCode of [400, 404, 500]) {
+    const context = { module: { exports: {} }, require: name => name === 'node:fs' ? { readFileSync: () => 'synthetic' }
+      : name === 'node:https' ? { get: (_options, onResponse) => {
+        queueMicrotask(() => { const response = new EventEmitter(); response.statusCode = statusCode;
+          onResponse(response); response.emit('end'); });
+        return new EventEmitter();
+      } } : require(name) };
+    runInNewContext(`${source}\nmodule.exports.adapter = inClusterK8s;`, context);
+    const adapter = context.module.exports.adapter();
+    const stream = adapter.openLog('pod', 'api', { previous: false, follow: true });
+    const text = stream.text.catch(() => null);
+    assert.equal(await stream.opened, false, `HTTP ${statusCode} is not an open log stream`);
+    await text;
+    const previous = adapter.openLog('pod', 'api', { previous: true, follow: false });
+    const previousText = previous.text.catch(() => null);
+    assert.equal(await previous.opened, statusCode !== 500, 'only an absent previous instance is optional');
+    await previousText;
+    if (statusCode === 500) await assert.rejects(adapter.getPod('pod'), /500/);
+    else if (statusCode === 404) assert.equal(await adapter.getPod('pod'), null);
+    else await assert.rejects(adapter.getPod('pod'), /400/);
+  }
 });

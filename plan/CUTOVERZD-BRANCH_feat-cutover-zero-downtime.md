@@ -29,7 +29,7 @@
 - [ ] Lot 1: persist switch intent before exposing prepared writers.
 - [ ] Lot 2: retire prepared writers before measuring abandoned writes.
 - [ ] Lot 3: unknown Service or Deployment state retains the lock and forbids deletion.
-- [ ] Lot 4: incomplete log streams never authorize deletion.
+- [x] Lot 4: incomplete log streams never authorize deletion (five red reproductions, seven passing exporter tests).
 - [ ] Lot 5: retry safe failed or missing verification Jobs on recovery.
 - [ ] Lot 6: targeted and full operator tests pass; remove the test stack and volumes.
 - [ ] Lot 7: push atomic commits and write the French report with file lines and SHAs.
