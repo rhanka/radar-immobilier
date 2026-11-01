@@ -47,7 +47,8 @@ CREATE TABLE artifacts.delete_confirmations (
   confirmation_ref UUID PRIMARY KEY,
   storage_scope_id TEXT NOT NULL REFERENCES artifacts.storage_scopes(id),
   actor_id TEXT NOT NULL,
-  artifact_id UUID NOT NULL REFERENCES artifacts.artifacts(id),
+  -- Requested while the provider holds the artifact lock; no cross-transaction FK wait.
+  artifact_id UUID NOT NULL,
   expected_release_id UUID,
   command_hash TEXT NOT NULL,
   internal_key TEXT NOT NULL,
