@@ -52,5 +52,5 @@ Prepare the three qualified 0.3.0 operations while preserving the current non-CA
   - [x] Baseline: 511 MCP + 223 host tests pass (8 + 5 profile-dependent skips); three workspace typechecks and scoped lint pass.
   - [x] Candidate: 522 MCP + 228 host tests pass; three workspace typechecks and scoped lint pass, including real PostgreSQL confirmation/rollback and reader cutoff.
   - [x] Upstream reference: `8b5b1f7793e433938de64f068dc2116e6f084ff6`; tarball SHA-256 `b6a13f19f218e5a433581cf395c9fcc4ed4ca1ee07485e67507b37069b75c4cf`.
-- [ ] **Lot 4 — Delivery**
-  - [ ] Review diff, push, open English draft PR, write French report.
+- [x] **Lot 4 — Delivery**
+  - [x] Review diff, push, open English draft PR #979, write the French conductor report.
