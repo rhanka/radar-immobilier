@@ -12,7 +12,11 @@ test('main deployment rehearses preparation without gating the preprod rollout o
   assert.equal(job.if, "github.ref == 'refs/heads/main' && vars.PREPROD_CD_ENABLED == 'true'");
   assert.deepEqual(deploy.needs, ['build-push', 'prepare-preprod-db']);
   assert.equal(deploy.if, `!cancelled() && needs.build-push.result == 'success' && ${job.if}`, 'deploy shares the preprod CD arming');
-  assert.equal(JSON.stringify(deploy).includes('needs.prepare-preprod-db.outputs'), false);
+  // Only the blue/green slots selector is read from prepare; an unknown slots state refuses the job.
+  assert.equal(JSON.stringify(deploy).replaceAll('needs.prepare-preprod-db.outputs.slots', '').includes('needs.prepare-preprod-db.outputs'), false);
+  const guard = deploy.steps[1];
+  assert.equal(guard.if, "env.SLOTS != 'adopted' && env.SLOTS != 'legacy'");
+  assert.ok(guard.run.includes('exit 1'));
   const report = deploy.steps[0];
   assert.equal(report.if, "needs.prepare-preprod-db.result != 'success'");
   assert.ok(report.run.includes('::warning') && report.run.includes('GITHUB_STEP_SUMMARY'));
@@ -69,4 +73,98 @@ test('retired executable vehicles have no fallback entry', () => {
   for (const file of ['deploy/base-preprod/operator.mk', 'deploy/ci/bascule-preprod/bascule.mjs',
     'deploy/ci/bascule-preprod/restore-mode.mjs', 'tools/make/base-preprod-maintenance.sh']) assert.equal(existsSync(file), false);
   assert.equal(readFileSync('deploy/cutover/operator.mk', 'utf8').includes('include .env'), false);
+});
+test('the preprod CI/CD rehearses the zero-downtime cutover after preparation, with the same arming', () => {
+  const w = workflow('build-push-images.yml');
+  const job = w.jobs['rehearse-preprod-bluegreen'];
+  assert.deepEqual(job.needs, ['prepare-preprod-db', 'deploy-preprod'], 'never concurrent with the canonical deploy (shared lock)');
+  assert.equal(job.if, `${w.jobs['prepare-preprod-db'].if} && needs.prepare-preprod-db.outputs.slots == 'adopted' && needs.prepare-preprod-db.outputs.rehearse == 'run'`,
+    'same PREPROD_CD_ENABLED arming (read only), only once the slots are adopted');
+  assert.equal(job['timeout-minutes'], 80);
+  const steps = JSON.stringify(job.steps);
+  assert.ok(job.steps.some(s => s.run === 'make -f deploy/cutover/operator.mk rehearse RELEASE=cutover-release/release.json OUTPUT=rehearsal ENV=preprod'));
+  assert.ok(job.steps.some(s => s.uses?.startsWith('actions/upload-artifact') && s.if === 'always()'));
+  assert.equal(steps.includes('continue-on-error'), false);
+  const rehearse = readFileSync('tools/make/cutover-rehearse.sh', 'utf8');
+  assert.ok(rehearse.includes('SAMEDB=1 OBSERVE=60') && rehearse.includes('OBSERVE=120 DRILL=1'));
+  assert.ok(rehearse.includes('scenario rollback preprod rollback RUN=') && rehearse.includes('scenario repromote preprod rollback RUN='),
+    'rollback after promotion and re-promotion are rehearsed');
+});
+test('daily staging is a dispatchable workflow armed by its own variable, never by the protected ones', () => {
+  const w = workflow('bascule-stage-preprod.yml');
+  assert.ok(w.on.workflow_dispatch !== undefined);
+  assert.equal(w.on.schedule[0].cron, '0 5 * * *');
+  assert.equal(w.jobs.stage.if, "${{ github.event_name != 'schedule' || vars.BASCULE_STAGE_ENABLED == 'true' }}");
+  assert.ok(w.jobs.stage.steps.some(s => s.run === 'make -f deploy/cutover/operator.mk stage RELEASE=deployed ENV=preprod'));
+  for (const file of ['build-push-images.yml', 'bascule-stage-preprod.yml', 'bascule-preprod.yml']) {
+    const text = readFileSync(`.github/workflows/${file}`, 'utf8').split('\n').filter(l => !/^\s*#/.test(l)).join('\n');
+    for (const name of ['PREPROD_CD_ENABLED', 'BASCULE_SCHEDULE_ENABLED']) {
+      assert.equal(new RegExp(`(gh variable set ${name}|vars\\.${name}\\s*=[^=])`).test(text), false, `${file} never writes ${name}`);
+    }
+  }
+});
+test('once the slots are adopted, deploy-preprod delegates the release to the blue/green cutover; legacy path otherwise', () => {
+  const w = workflow('build-push-images.yml');
+  const prepare = w.jobs['prepare-preprod-db'];
+  assert.equal(prepare.outputs.slots, '${{ steps.slots.outputs.state }}');
+  assert.ok(prepare.steps.some(s => s.id === 'slots' && s.run.includes('operator.mk slots-status ENV=preprod')));
+  assert.equal(prepare.steps.find(s => s.run === 'make -f deploy/cutover/operator.mk prepare RELEASE=cutover-release/release.json ENV=preprod').if,
+    "steps.slots.outputs.state == 'adopted' && steps.change.outputs.state == 'run'");
+  const deploy = w.jobs['deploy-preprod'];
+  assert.equal(deploy.env.SLOTS, '${{ needs.prepare-preprod-db.outputs.slots }}');
+  for (const name of ['Roll preprod deployments to pushed sha', 'Wait for rollouts', 'Assert served sha (preprod)']) {
+    assert.match(deploy.steps.find(s => s.name === name).if, /env\.SLOTS != 'adopted'/, name);
+  }
+  assert.match(deploy.steps.find(s => s.name === 'Migrate DB before release (fail-closed)').if, /env\.SLOTS != 'adopted'/);
+  assert.match(deploy.steps.find(s => s.name === 'Deploy refresh CronJobs (preprod)').if, /env\.SLOTS != 'adopted'/);
+  assert.equal(deploy.steps.find(s => s.name.startsWith('Reconcile preprod manifests')).env.RECONCILE_CONFIG_ONLY,
+    "${{ env.SLOTS == 'adopted' && '1' || '0' }}");
+  const reconcile = readFileSync('deploy/ci/reconcile-preprod.sh', 'utf8');
+  assert.ok(reconcile.includes('RECONCILE_CONFIG_ONLY'));
+  assert.ok(readFileSync('tools/make/cutover-rehearse.sh', 'utf8').includes('version change'), 'the rehearsal requires previous != release');
+});
+test('a re-run of a SHA whose rehearsal was green skips preparation and rehearsal before any clone; otherwise both run', () => {
+  const w = workflow('build-push-images.yml');
+  const prepare = w.jobs['prepare-preprod-db'];
+  assert.equal(prepare.outputs.rehearse, '${{ steps.change.outputs.state }}');
+  const index = id => prepare.steps.findIndex(s => s.id === id);
+  const prep = prepare.steps.findIndex(s => s.run === 'make -f deploy/cutover/operator.mk prepare RELEASE=cutover-release/release.json ENV=preprod');
+  assert.ok(index('slots') < index('change') && index('change') < prep, 'checked before any clone');
+  assert.ok(prepare.steps[index('change')].run.includes('operator.mk rehearse-check RELEASE=cutover-release/release.json ENV=preprod'));
+  assert.equal(prepare.steps[prep].if, "steps.slots.outputs.state == 'adopted' && steps.change.outputs.state == 'run'");
+  const skipped = prepare.steps.find(s => s.if === "steps.change.outputs.state == 'skip'");
+  assert.ok(skipped.run.includes('GITHUB_STEP_SUMMARY') && skipped.run.includes('::notice') && !skipped.run.includes('exit 1'));
+  assert.match(w.jobs['rehearse-preprod-bluegreen'].if, /needs\.prepare-preprod-db\.outputs\.rehearse == 'run'$/);
+  const rehearse = readFileSync('tools/make/cutover-rehearse.sh', 'utf8');
+  assert.ok(rehearse.includes('radar-rehearsal-receipt') && rehearse.includes('rehearsal_receipt "$( ((red == 0))'));
+});
+test('the rehearsal records the previous release it switched from and replays from it on a re-run after red', () => {
+  const rehearse = readFileSync('tools/make/cutover-rehearse.sh', 'utf8');
+  assert.ok(rehearse.includes('previousRelease:(.previousRelease|tojson),previousSpecs:(.previousSpecs|tojson)'));
+  assert.ok(rehearse.includes('scenario restore-previous samedb run RELEASE="$OUT/previous-release.json" SAMEDB=1 OBSERVE=0 REPLAY_SPECS="$OUT/previous-specs.json"'));
+  assert.ok(rehearse.indexOf('scenario restore-previous') < rehearse.indexOf('scenario preprod preprod run'));
+});
+test('the writer probe is enabled in the preprod radar-api ConfigMap only (survives the preprod reconcile)', () => {
+  // Static render of the radar-api ConfigMap: base data, then the overlay's inline JSON patches.
+  const base = YAML.parseAllDocuments(readFileSync('deploy/k8s/30-api.yaml', 'utf8')).map(d => d.toJS())
+    .find(d => d?.kind === 'ConfigMap' && d.metadata.name === 'radar-api');
+  assert.equal(base.data.CUTOVER_PROBE_ENABLED, undefined, 'base and production render: no probe');
+  const overlay = YAML.parse(readFileSync('deploy/overlays/preprod/kustomization.yaml', 'utf8'));
+  const data = { ...base.data };
+  for (const p of overlay.patches.filter(p => p.target.kind === 'ConfigMap' && p.target.name === 'radar-api' && p.patch)) {
+    for (const op of YAML.parse(p.patch)) if (op.op === 'add' || op.op === 'replace') data[op.path.split('/').at(-1)] = op.value;
+  }
+  assert.equal(data.CUTOVER_PROBE_ENABLED, 'true', 'preprod render enables the probe');
+  for (const dir of ['deploy/k8s', 'deploy/k8s/immo-mcp']) {
+    const kustomization = YAML.parse(readFileSync(`${dir}/kustomization.yaml`, 'utf8'));
+    assert.equal(JSON.stringify(kustomization).includes('CUTOVER_PROBE_ENABLED'), false, `${dir}: production sources stay without the probe`);
+  }
+  assert.ok(readFileSync('deploy/ci/reconcile-preprod-mcp.test.sh', 'utf8').includes('CUTOVER_PROBE_ENABLED'), 'checked on the real kustomize render in CI');
+});
+test('the live application order makes the volume expansion conditional on the 75 % projected peak', () => {
+  const readme = readFileSync('deploy/cutover/README.md', 'utf8');
+  const order = readme.slice(readme.indexOf('### Live application order'));
+  assert.match(order, /`pvc-expand` \/ `pvc-verify` only when the volume\s+preflight projects more than 75 % at the peak/);
+  assert.equal(/run `pvc-expand` \/ `pvc-verify` \(preprod/.test(order), false, 'no unconditional expansion step');
+  assert.match(readme, /above 75 % they warn \(stderr and job summary[^)]*\), above 90 % they refuse `volume_insufficient`/);
 });

@@ -20,8 +20,9 @@ function accesses(f) {
   const file = join(f.dir, 'access');
   return existsSync(file) ? readFileSync(file, 'utf8').trim().split('\n').map(l => JSON.parse(l)) : [];
 }
-function uncovered(env, list) {
-  const rules = role(env).rules;
+function uncovered(env, list, oneTime = false) {
+  const rules = [...role(env).rules, ...(oneTime ? YAML.parseAllDocuments(readFileSync(`deploy/cutover/rbac-adopt-${env}.yaml`, 'utf8'))
+    .map(d => d.toJS()).find(d => d?.kind === 'Role').rules : [])];
   return [...new Set(list.filter(a => !covered(rules, a)).map(a => `${a.verb} ${a.resource}.${a.group} ${a.name}`))];
 }
 test('the preflight right list is exactly the Role of each rbac-<env>.yaml', () => {
@@ -36,21 +37,27 @@ test('the preflight right list is exactly the Role of each rbac-<env>.yaml', () 
     }
   }
 });
-test('every Kubernetes access of prepare, cutover, rollback and daily restore is granted by rbac-preprod.yaml', () => {
-  const daily = fixture({ apiResources: AUTOSCALERS });
-  let dailyAccesses;
+test('every Kubernetes access of volume expansion, staging, prepare, blue/green cutover, rollback and daily restore is granted by rbac-preprod.yaml', () => {
+  const daily = fixture({ apiResources: AUTOSCALERS, unadopted: true, pvcSize: '5Gi' });
+  let dailyAccesses, oneTime;
   try {
+    // One-time operator acts: the permanent Role plus rbac-adopt-preprod.yaml.
+    success(daily.run('slots-adopt'));
+    success(daily.run('pvc-expand'));
+    oneTime = accesses(daily);
+    assert.deepEqual(uncovered('preprod', oneTime, true), []);
+    assert.notDeepEqual(uncovered('preprod', oneTime), [], 'adoption needs the one-time Role');
     success(daily.run('run', ['RELEASE=deployed', 'MODE=restore']));
-    dailyAccesses = accesses(daily);
+    dailyAccesses = accesses(daily).slice(oneTime.length);
   } finally { daily.cleanup(); }
-  const f = fixture({ apiResources: AUTOSCALERS });
+  const f = fixture({ apiResources: AUTOSCALERS, previousSha: '9'.repeat(40) });
   try {
+    success(f.run('pvc-verify'));
+    success(f.run('stage', ['RELEASE=deployed']));
     success(f.run('prepare'));
-    const state = f.state(); state.missingMcp = true; save(f, state);
-    assert.notEqual(f.run('run', ['MODE=run']).status, 0);
-    const record = JSON.parse(f.state().objects.find(o => o.metadata.name === 'radar-change-lock').data.record);
-    const recovery = f.state(); recovery.missingMcp = false; save(f, recovery);
-    success(f.run('rollback', [`RUN=${record.run}`, 'MODE=run']));
+    success(f.run('run', ['MODE=run', 'DRILL=1']));
+    const run = JSON.parse(f.state().objects.find(o => o.metadata.name === 'radar-cutover-receipt').data.receipt).run;
+    success(f.run('rollback', [`RUN=${run}`, 'MODE=run']));
     const seen = [...dailyAccesses, ...accesses(f)];
     for (const resource of ['scaledobjects', 'httpscaledobjects', 'verticalpodautoscalers', 'rollouts']) {
       assert.ok(seen.some(a => a.verb === 'list' && a.resource === resource), resource);
@@ -66,6 +73,12 @@ test('every Kubernetes access of production prepare and cutover is granted by rb
     ingress.spec.rules[0].host = 'immo.sent-tech.ca'; ingress.spec.tls[0].hosts = ['immo.sent-tech.ca'];
     save(f, state);
     success(f.run('prepare', [], 'prod'));
+    // First production promotion: the live-vs-release drift is reviewed and acknowledged first.
+    const unreviewed = f.run('run', ['MODE=run'], 'prod');
+    assert.notEqual(unreviewed.status, 0);
+    assert.match(unreviewed.stderr, /drift_unreviewed/);
+    const drift = f.state().objects.find(o => o.metadata.name === 'radar-release-drift').data;
+    success(f.run('ack-drift', [`SHA256=${drift.sha256}`], 'prod'));
     success(f.run('run', ['MODE=run'], 'prod'));
     assert.deepEqual(uncovered('prod', accesses(f)), []);
   } finally { f.cleanup(); }

@@ -6,6 +6,8 @@
     "namespace": "radar-immobilier-preprod",
     "url": "https://preprod.immo.sent-tech.ca",
     "database": "radar",
+    "templateDb": "radar_tpl",
+    "manifests": ["deploy/overlays/preprod", "deploy/k8s/refresh-cronjobs"],
     "documents": "radar-immobilier-docs-preprod",
     "recoveryBucket": "sentropic-pgbackup-preprod",
     "restoreResources": {"requests": {"cpu": "250m", "memory": "1Gi"}, "limits": {"cpu": "1500m", "memory": "2Gi"}}
@@ -13,6 +15,7 @@
   "prod": {
     "namespace": "radar-immobilier",
     "url": "https://immo.sent-tech.ca",
+    "manifests": ["deploy/k8s", "deploy/k8s/immo-mcp"],
     "database": "radar",
     "documents": "radar-immobilier-docs",
     "recoveryBucket": "sentropic-pgbackup",

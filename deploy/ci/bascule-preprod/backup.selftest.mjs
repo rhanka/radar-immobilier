@@ -632,22 +632,27 @@ async function suite() {
   eq("volume — restores 267,683 objects with 36,282 copies and additive recon", [r.exitCode, r.termination.upToDate, r.termination.copied, r.termination.recon.ok, r.termination.recon.extra], [0, 231401, 36282, true, 152220]);
   eq("volume — 9,418 unpinned candidates resolved with page-count version calls", [stats.calls.GetObjectCommand, stats.calls.HeadObjectCommand, stats.calls.ListObjectVersionsCommand, stats.calls.CopyObjectCommand], [2, 26864, 268, 36282]);
   eq("volume — bulk listings have no per-object calls on up-to-date objects", [stats.globalVersions, stats.upToDateCalls], [268, 0]);
-  ok("volume — both destination listings use at most 872 calls", stats.calls.ListObjectsV2Command <= 2 * (420 + 16));
-  eq("volume — 16 distinct shard starts and 16 concurrent shard requests", [stats.starts.size, stats.maxActive.ListObjectsV2Command], [16, 16]);
+  ok("volume — listing call budget: both destination listings use at most 968 calls (one page overlap per shard)", stats.calls.ListObjectsV2Command <= 2 * (420 + 64));
+  eq("volume — 64 distinct shard starts and 64 concurrent shard requests", [stats.starts.size, stats.maxActive.ListObjectsV2Command], [64, 64]);
+  ok("volume — sequential listing depth bounded to 8 pages per shard", Math.max(...r.termination.destListCallsPerShard) <= 2 * 8);
   eq("volume — default worker concurrency 48 for HEAD and copy", [stats.maxActive.HeadObjectCommand, stats.maxActive.CopyObjectCommand], [48, 48]);
   eq("volume — all candidates verified before copying, pinned sources and ACL preserved", [stats.earlyCopies, stats.badCopies], [0, 0]);
   eq("volume — receipt counters match observed calls", [r.termination.destListCalls, r.termination.headChecked, r.termination.versionsResolved, r.termination.copyRetries], [stats.calls.ListObjectsV2Command, 26864, 9418, 0]);
   ok("volume — complete receipt stays under 3,900 bytes", Buffer.byteLength(JSON.stringify(r.termination)) < br.TERMINATION_MAX_BYTES);
+  eq("volume — per-shard listing calls add up to the listing total",
+    r.termination.destListCallsPerShard.reduce((a, b) => a + b, 0), r.termination.destListCalls);
+  eq("volume — docs phase timings are recorded in the receipt",
+    ["listMs", "planMs", "copyMs", "reconListMs"].every((k) => Number.isFinite(r.termination.timings[k])), true);
   console.log("  volume calls " + JSON.stringify(stats.calls));
   stats = v.reset();
   const again = await v.run();
   eq("volume — resume issues zero per-object calls and zero copies", [again.exitCode, again.termination.copied, stats.calls.HeadObjectCommand || 0, stats.calls.ListObjectVersionsCommand || 0, stats.calls.CopyObjectCommand || 0], [0, 0, 0, 0, 0]);
   for (const concurrency of [1, 2, 8, 64]) {
     stats = v.reset();
-    const bounded = await v.run({ COPY_CONCURRENCY: String(concurrency) });
+    const bounded = await v.run({ COPY_CONCURRENCY: String(concurrency), LIST_CONCURRENCY: String(concurrency) });
     eq("volume — listing concurrency " + concurrency + " respects the worker bound without losing keys or extras",
       [bounded.exitCode, stats.maxActive.ListObjectsV2Command, stats.starts.size, bounded.termination.recon.checked, bounded.termination.recon.extra],
-      [0, Math.min(16, concurrency), 16, v.total, 152220]);
+      [0, Math.min(64, concurrency), 64, v.total, 152220]);
   }
   v.state.missing = v.upToDate;
   stats = v.reset(true);
@@ -723,7 +728,7 @@ const renders = {
     DB_SECRET: "radar-db-credentials", PGHOST: "radar-postgres", EXPECTED_DATABASE: "radar", RESTORE_ASSERT_DB: "1",
     RESTORE_SCRIPT: indentBlock(readFileSync(join(DIR, "../../cutover/atomic-restore.sh"), "utf8"), 14),
     RESTORE_REQUEST_CPU: RESTORE_RES.requests.cpu, RESTORE_REQUEST_MEMORY: RESTORE_RES.requests.memory,
-    RESTORE_LIMIT_CPU: RESTORE_RES.limits.cpu, RESTORE_LIMIT_MEMORY: RESTORE_RES.limits.memory },
+    RESTORE_LIMIT_CPU: RESTORE_RES.limits.cpu, RESTORE_LIMIT_MEMORY: RESTORE_RES.limits.memory, RESTORE_JOBS: "2", RESTORE_TUNED: "1" },
   "docs-restore-backup-job.tmpl.yaml": { ...common, JOB_NAME: JOBS.docs, BR_STEP: "docs", COPY_SECRET: "radar-backup-restore-docs", BACKUP_DATE: D, PIN_MANIFEST_SHA256: "a".repeat(64),
     DST_BUCKET: DST, FORBIDDEN_DST_BUCKETS: PROD, COPY_GRANTEE: "g", COPY_CONCURRENCY: "48", DOCS_DRY: "0" },
 };

@@ -23,6 +23,7 @@ prepared_write() {
       migrations:(($r.jobs.destination.verdict.migrations//0)|tostring),
       liveDb:$r.liveDb,targetDb:($r.targetDb//$r.liveDb),preparedAt:$at,
       recoveryReference:($r.recoveryReference//""),
+      restorePath:($r.restore.path//""),restoreSeconds:(($r.restore.seconds//"")|tostring),
       smoke:(if $status=="ready" then "pass" else $status end)}' "$WORK/prepared.json" > "$WORK/prepared-next.json"
   "${k[@]}" "$verb" -f "$WORK/prepared-next.json" >/dev/null
 }
@@ -43,8 +44,12 @@ pin_backup() {
 verify_prepared() {
   prepared_read
   [[ -s $WORK/prepared.json ]] || fail 'Run prepare before cutover'
-  jq -e --slurpfile r "$WORK/record.json" --argjson now "$(date +%s)" '
-    .data as $d|$d.status=="ready" and $d.smoke=="pass" and $d.gitSha==$r[0].release.gitSha
+  # SAMEDB=1 (preprod, production path): the release runs on the live database, which must already
+  # carry the release migrations; a consumed stamp (its database promoted) still identifies the release.
+  local same=false
+  [[ $ENV != preprod || ${SAMEDB:-0} != 1 ]] || same=true
+  jq -e --slurpfile r "$WORK/record.json" --argjson now "$(date +%s)" --argjson same "$same" '
+    .data as $d|($d.status=="ready" or ($same and $d.status=="consumed")) and $d.smoke=="pass" and ($d.gitSha==$r[0].release.gitSha or $r[0].replay==true)
     and ($d.preparedAt|fromdateiso8601) <= $now
     and $now-($d.preparedAt|fromdateiso8601)<=86400
     and ($d.migrations|tonumber)>0
@@ -57,9 +62,13 @@ verify_prepared() {
     .recoveryReference=$p[0].data.recoveryReference' \
     "$WORK/record.json" > "$WORK/next.json"
   mv "$WORK/next.json" "$WORK/record.json"; record_save
-  jq -e --arg env "$ENV" '.prepared.liveDb==.liveDb and
-    (if $env=="preprod" then .liveDb!=.targetDb else .liveDb==.targetDb end)' "$WORK/record.json" >/dev/null || fail 'Prepared database identity changed'
-  if [[ $ENV == preprod ]]; then
+  if [[ $same == true ]]; then
+    record_set '.targetDb=.liveDb|.recoveryReference=("postgres://radar-postgres/"+.liveDb)'
+  else
+    jq -e --arg env "$ENV" '.prepared.liveDb==.liveDb and
+      (if $env=="preprod" then .liveDb!=.targetDb else .liveDb==.targetDb end)' "$WORK/record.json" >/dev/null || fail 'Prepared database identity changed'
+  fi
+  if [[ $ENV == preprod && $same == false ]]; then
     BACKUP_ID=latest pin_backup
     jq -e '.prepared.backupDate==.pin.date and .prepared.manifestSha256==.pin.manifestSha256
       and .prepared.pgSha256==.pin.pgSha256' "$WORK/record.json" >/dev/null || fail 'Prepared backup differs from latestComplete'

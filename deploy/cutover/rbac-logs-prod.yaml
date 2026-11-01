@@ -1,0 +1,34 @@
+# Install through the infrastructure owner. Identity of the cutover log-export Job
+# (deploy/cutover/logs-export-job.tmpl.yaml): reads Pods and their logs, nothing else.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: radar-cutover-logs
+  namespace: radar-immobilier
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: radar-cutover-logs
+  namespace: radar-immobilier
+rules:
+  - apiGroups: [""]
+    resources: [pods]
+    verbs: [get, list]
+  - apiGroups: [""]
+    resources: [pods/log]
+    verbs: [get]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: radar-cutover-logs
+  namespace: radar-immobilier
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: radar-cutover-logs
+subjects:
+  - kind: ServiceAccount
+    name: radar-cutover-logs
+    namespace: radar-immobilier

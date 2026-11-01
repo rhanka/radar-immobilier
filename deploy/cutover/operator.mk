@@ -11,14 +11,27 @@ override CYCLE_ID := $(value CYCLE_ID)
 override OUTPUT := $(value OUTPUT)
 override BUILD_RUN := $(value BUILD_RUN)
 override SHA := $(value SHA)
-export ENV RELEASE RUN MODE BACKUP_ID CYCLE_ID OUTPUT BUILD_RUN SHA TEST_PATTERN
+override SIZE := $(value SIZE)
+override DRAIN := $(value DRAIN)
+override OBSERVE := $(value OBSERVE)
+override DRILL := $(value DRILL)
+override SAMEDB := $(value SAMEDB)
+override PROBE := $(value PROBE)
+override LOCK_WAIT := $(value LOCK_WAIT)
+override SHA256 := $(value SHA256)
+override STATS_SETTLE := $(value STATS_SETTLE)
+override REPLAY_SPECS := $(value REPLAY_SPECS)
+export ENV RELEASE RUN MODE BACKUP_ID CYCLE_ID OUTPUT BUILD_RUN SHA SIZE DRAIN OBSERVE DRILL SAMEDB PROBE LOCK_WAIT SHA256 STATS_SETTLE REPLAY_SPECS TEST_PATTERN
 export COMPOSE_DISABLE_ENV_FILE := 1
+export CUTOVER_TEST_IMAGE
 override COMPOSE := docker compose --env-file /dev/null -p radar-test-cutover -f $(CUTOVER_ROOT)/deploy/cutover/test.compose.yml
-.PHONY: help run prepare rollback recover status resume lock release-lock report-refs force-refresh test lint typecheck test-api down ps commit syntax
+.PHONY: help rehearse rehearse-check run prepare rollback recover status resume lock release-lock report-refs force-refresh pvc-expand pvc-verify slots-adopt slots-status stage probe-verify ack ack-probe ack-drift test lint typecheck test-api down ps commit syntax
 help:
-	@echo 'run RELEASE=<release.json> ENV=preprod|prod; status; resume RUN=<uuid>'
-run prepare rollback recover status resume lock release-lock report-refs force-refresh:
+	@echo 'run RELEASE=<release.json> [OBSERVE=600] [DRAIN=15] [SAMEDB=1] [DRILL=1] ENV=preprod|prod; status; resume RUN=<uuid>; rollback RUN=<uuid>'
+run prepare rollback recover status resume lock release-lock report-refs force-refresh pvc-expand pvc-verify slots-adopt slots-status stage probe-verify ack ack-probe ack-drift:
 	@cd "$(CUTOVER_ROOT)" && bash tools/make/cutover.sh $@
+rehearse rehearse-check:
+	@cd "$(CUTOVER_ROOT)" && bash tools/make/cutover-rehearse.sh $(if $(filter rehearse-check,$@),check)
 download-release:
 	@cd "$(CUTOVER_ROOT)" && bash tools/make/cutover-download.sh
 test lint typecheck test-api:

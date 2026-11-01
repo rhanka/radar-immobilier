@@ -17,8 +17,23 @@ rules:
     verbs: [create]
   - apiGroups: [apps]
     resources: [deployments]
-    resourceNames: [radar-api-prepared]
+    resourceNames: [radar-api-prepared, radar-ui-prepared, radar-immo-mcp-prepared]
     verbs: [delete]
+  # Lot 4: prepared slot (UI nginx copy) and quota preflight.
+  - apiGroups: [""]
+    resources: [configmaps]
+    resourceNames: [radar-ui-nginx-prepared]
+    verbs: [delete]
+  - apiGroups: [""]
+    resources: [resourcequotas]
+    verbs: [get, list]
+  - apiGroups: [""]
+    resources: [services]
+    resourceNames: [radar-api, radar-ui, radar-immo-mcp]
+    verbs: [patch]
+  - apiGroups: [discovery.k8s.io]
+    resources: [endpointslices]
+    verbs: [get, list]
   - apiGroups: [""]
     resources: [secrets]
     resourceNames: [radar-db-credentials]
@@ -73,6 +88,11 @@ rules:
     resources: [configmaps]
     resourceNames: [radar-change-lock]
     verbs: [delete]
+  # Volume capacity read (the occupancy itself is measured in SQL by a Job; no pods/exec).
+  - apiGroups: [""]
+    resources: [persistentvolumeclaims]
+    resourceNames: [postgres-data-radar-postgres-0]
+    verbs: [get]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

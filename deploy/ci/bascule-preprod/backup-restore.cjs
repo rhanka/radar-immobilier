@@ -406,6 +406,9 @@ function readConfig(env, step) {
     cfg.dry = String(env.DOCS_DRY || '0').trim() === '1';
     const c = Math.floor(Number(env.COPY_CONCURRENCY || '48'));
     cfg.concurrency = Number.isFinite(c) ? Math.max(1, Math.min(64, c)) : 48;
+    // Listing parallelism is independent of the copy workers: each shard pages sequentially.
+    const l = Math.floor(Number(env.LIST_CONCURRENCY || String(LIST_SHARDS)));
+    cfg.listConcurrency = Number.isFinite(l) ? Math.max(1, Math.min(LIST_SHARDS, l)) : LIST_SHARDS;
     const forbidden = String(env.FORBIDDEN_DST_BUCKETS || '').split(',').map((s) => s.trim()).filter(Boolean);
     // The runner always names the production docs bucket: an empty list means a
     // mis-rendered Job, never "nothing forbidden".
@@ -523,11 +526,14 @@ async function destIndexOf(c, bucket, counters) {
   return idx;
 }
 
+// Lot 3 listing fix: 16 shards paged ~27 sequential pages each (~95 s on the preprod bucket);
+// 64 shards listed 64 at a time bound the sequential depth to ~7 pages.
+const LIST_SHARDS = 64;
 // Disjoint (start, end] ranges include every destination key, including extras.
 // Pagination stays sequential within each shard; failed shards trigger a full
 // sequential read only after all outstanding shard requests have settled.
 async function listDestSharded(c, bucket, sortedKeys, counters, concurrency) {
-  const pivots = Array.from({ length: 15 }, (_, i) => sortedKeys[Math.floor(sortedKeys.length * (i + 1) / 16)])
+  const pivots = Array.from({ length: LIST_SHARDS - 1 }, (_, i) => sortedKeys[Math.floor(sortedKeys.length * (i + 1) / LIST_SHARDS)])
     .filter((key) => key !== undefined);
   const bounds = [undefined, ...new Set(pivots), undefined];
   const idx = new Map();
@@ -535,7 +541,10 @@ async function listDestSharded(c, bucket, sortedKeys, counters, concurrency) {
     const end = bounds[shard + 1];
     let ContinuationToken;
     do {
-      if (counters) counters.destListCalls += 1;
+      if (counters) {
+        counters.destListCalls += 1;
+        counters.destListCallsPerShard[shard] = (counters.destListCallsPerShard[shard] || 0) + 1;
+      }
       const out = await c.s3.send(new c.sdk.ListObjectsV2Command({
         Bucket: bucket, MaxKeys: 1000,
         ...(ContinuationToken ? { ContinuationToken } : { StartAfter: bounds[shard] }),
@@ -551,7 +560,7 @@ async function listDestSharded(c, bucket, sortedKeys, counters, concurrency) {
   const worker = async () => {
     while (next < bounds.length - 1) await listShard(next++);
   };
-  const workers = await Promise.allSettled(Array.from({ length: Math.min(16, concurrency, bounds.length - 1) }, () => worker()));
+  const workers = await Promise.allSettled(Array.from({ length: Math.min(LIST_SHARDS, concurrency, bounds.length - 1) }, () => worker()));
   if (workers.some((s) => s.status === 'rejected')) return destIndexOf(c, bucket, counters);
   return idx;
 }
@@ -674,14 +683,23 @@ async function resolveCandidates(copier, cfg, plan, destIndex, { resolveVersions
   plan.toCopy.sort((a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0);
 }
 
+// Receipt counters, per-shard listing calls and phase timings (milliseconds).
+function newCounters() {
+  return { destListCalls: 0, destListCallsPerShard: [], headChecked: 0, versionsResolved: 0, copyRetries: 0, timings: {} };
+}
+async function timed(counters, phase, work) {
+  const started = Date.now();
+  try { return await work(); } finally { counters.timings[phase] = (counters.timings[phase] || 0) + Date.now() - started; }
+}
+
 async function runDocs({ cfg, reader, copier, log }) {
   const manifest = await loadPinnedManifest(reader, cfg);
   const inventory = await loadInventory(reader, cfg, manifest);
-  const counters = { destListCalls: 0, headChecked: 0, versionsResolved: 0, copyRetries: 0 };
+  const counters = newCounters();
   const sortedKeys = inventory.objects.filter((e) => e.state === 'backed-up').map((e) => e.key).sort();
-  const destIndex = await listDestSharded(copier, cfg.dstBucket, sortedKeys, counters, cfg.concurrency);
+  const destIndex = await timed(counters, 'listMs', () => listDestSharded(copier, cfg.dstBucket, sortedKeys, counters, cfg.listConcurrency));
   const plan = planDocsRestore({ inventory, destIndex });
-  if (plan.needsHead.length) await resolveCandidates(copier, cfg, plan, destIndex, { resolveVersions: true, createdAtMs: Date.parse(inventory.createdAt), log, counters });
+  if (plan.needsHead.length) await timed(counters, 'planMs', () => resolveCandidates(copier, cfg, plan, destIndex, { resolveVersions: true, createdAtMs: Date.parse(inventory.createdAt), log, counters }));
   log(`PLAN date=${cfg.date} inventory=${plan.objects} up_to_date=${plan.upToDate} to_copy=${plan.toCopy.length} ` +
     `bytes_to_copy=${plan.bytesToCopy} excluded=${plan.excluded} not_in_backup=${plan.notInBackup} unresolved=${plan.unresolved} ` +
     `reasons=${JSON.stringify(plan.unresolvedReasons)} how=${JSON.stringify(plan.how)} dest_objects=${destIndex.size} ` +
@@ -720,8 +738,9 @@ async function runDocs({ cfg, reader, copier, log }) {
       if (done % 5000 === 0) log(`progress ${done}/${plan.toCopy.length}`);
     }
   };
-  await Promise.all(Array.from({ length: Math.min(cfg.concurrency, plan.toCopy.length) }, () => worker()));
-  const recon = reconInventory(inventory, await listDestSharded(copier, cfg.dstBucket, sortedKeys, counters, cfg.concurrency), plan.expectedSizes);
+  await timed(counters, 'copyMs', () => Promise.all(Array.from({ length: Math.min(cfg.concurrency, plan.toCopy.length) }, () => worker())));
+  const recon = reconInventory(inventory, await timed(counters, 'reconListMs',
+    () => listDestSharded(copier, cfg.dstBucket, sortedKeys, counters, cfg.listConcurrency)), plan.expectedSizes);
   const ok = copyErrors === 0 && recon.ok;
   log(`${ok ? 'DOCS OK' : 'DOCS FAIL'} date=${cfg.date} copied=${copied} copy_errors=${copyErrors} recon.checked=${recon.checked} ` +
     `recon.missing=${recon.missing} recon.size_mismatch=${recon.sizeMismatch} dest_extra=${recon.extra} (additive: extra objects kept)`);
@@ -731,9 +750,9 @@ async function runDocs({ cfg, reader, copier, log }) {
 async function runRecon({ cfg, reader, copier, log }) {
   const manifest = await loadPinnedManifest(reader, cfg);
   const inventory = await loadInventory(reader, cfg, manifest);
-  const counters = { destListCalls: 0, headChecked: 0, versionsResolved: 0, copyRetries: 0 };
+  const counters = newCounters();
   const sortedKeys = inventory.objects.filter((e) => e.state === 'backed-up').map((e) => e.key).sort();
-  const destIndex = await listDestSharded(copier, cfg.dstBucket, sortedKeys, counters, cfg.concurrency);
+  const destIndex = await timed(counters, 'listMs', () => listDestSharded(copier, cfg.dstBucket, sortedKeys, counters, cfg.listConcurrency));
   // Only mismatching sizes require backup verification: resolve unpinned entries
   // by ETag, with the same HEAD fallback as docs when version listing is denied.
   const candidates = inventory.objects.filter(e => e.state === 'backed-up' &&

@@ -263,6 +263,12 @@ jobs:
     if: github.ref == 'refs/heads/main' && vars.PREPROD_CD_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 50
+    outputs:
+      # "adopted": blue/green slots in place, the release is delegated to the cutover rehearsal;
+      # "legacy": slots not adopted yet, deploy-preprod keeps the direct roll (old path).
+      slots: ${{ steps.slots.outputs.state }}
+      # "run": rehearse this release; "skip": a re-run of a SHA whose rehearsal was green (nothing to do).
+      rehearse: ${{ steps.change.outputs.state }}
     permissions:
       contents: read
       actions: read
@@ -287,8 +293,77 @@ jobs:
           else
             printf '%s' "$KUBE_CONFIG_DATA_PREPROD" > "$HOME/.kube/config"
           fi
-      - name: Prepare restore, migrations, 6H and isolated smoke
+      - name: Blue/green slot state
+        id: slots
+        # An unreadable slots state fails this step (no state output): deploy-preprod then refuses.
+        run: |
+          set -euo pipefail
+          state=$(make -s -f deploy/cutover/operator.mk slots-status ENV=preprod)
+          echo "state=$state" >> "$GITHUB_OUTPUT"
+      # Before any clone: a re-run of the same SHA after a green rehearsal skips the preparation and
+      # the rehearsal (neutral, job summary); a red or missing rehearsal is replayed in full.
+      - name: Rehearsal need
+        id: change
+        if: steps.slots.outputs.state == 'adopted'
+        run: echo "state=$(make -s -f deploy/cutover/operator.mk rehearse-check RELEASE=cutover-release/release.json ENV=preprod)" >> "$GITHUB_OUTPUT"
+      - name: Rehearsal skipped (green rehearsal of this SHA already served)
+        if: steps.change.outputs.state == 'skip'
+        run: |
+          echo "::notice title=Rehearsal skipped::release ${{ github.sha }} is served and its rehearsal was green (re-run)"
+          printf '### Zero-downtime preparation and rehearsal skipped\n\nRelease `%s` is already served in preprod and its rehearsal receipt is green (re-run of the same workflow).\n' "${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
+      - name: Prepare restore, migrations, 6H and the prepared slot
+        if: steps.slots.outputs.state == 'adopted' && steps.change.outputs.state == 'run'
         run: make -f deploy/cutover/operator.mk prepare RELEASE=cutover-release/release.json ENV=preprod
+      - name: Legacy path notice
+        if: steps.slots.outputs.state != 'adopted'
+        run: echo "::notice title=Blue/green slots not adopted::deploy-preprod keeps the direct roll until slots-adopt"
+
+  rehearse-preprod-bluegreen:
+    name: Rehearse zero-downtime cutover in preprod
+    # Conductor decision: once the slots are adopted, deploy-preprod no longer rolls the canonical
+    # slot; this job IS the preprod release (previous -> new release, under probes). Both take
+    # radar-change-lock, so they run in sequence. Legacy path (slots not adopted): skipped.
+    needs: [prepare-preprod-db, deploy-preprod]
+    # Same arming as prepare/deploy-preprod (variable read only, never written).
+    if: github.ref == 'refs/heads/main' && vars.PREPROD_CD_ENABLED == 'true' && needs.prepare-preprod-db.outputs.slots == 'adopted' && needs.prepare-preprod-db.outputs.rehearse == 'run'
+    runs-on: ubuntu-latest
+    # Four scenarios (release with drill, rollback, re-promotion, same database): ~35 min.
+    timeout-minutes: 80
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: cutover-release-${{ github.sha }}
+          path: cutover-release
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: v1.31.0
+      - name: Configure namespace-scoped preprod identity
+        env:
+          KUBE_CONFIG_DATA_PREPROD: ${{ secrets.KUBE_CONFIG_DATA_PREPROD }}
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p "$HOME/.kube"
+          if printf '%s' "$KUBE_CONFIG_DATA_PREPROD" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
+            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" | base64 -d > "$HOME/.kube/config"
+          else
+            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" > "$HOME/.kube/config"
+          fi
+      - name: Release with drill, rollback, re-promotion and same-database scenarios under read and writer probes
+        env:
+          CUTOVER_PROBE_TOKEN: ${{ secrets.CUTOVER_PROBE_TOKEN }}
+        run: make -f deploy/cutover/operator.mk rehearse RELEASE=cutover-release/release.json OUTPUT=rehearsal ENV=preprod
+      - name: Rehearsal evidence (receipts, probes, verdicts)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cutover-rehearsal-${{ github.sha }}
+          path: rehearsal
+          retention-days: 30
 
   deploy:
     name: Deploy to cluster
@@ -660,14 +735,18 @@ jobs:
     # (`gh variable set PREPROD_CD_ENABLED --body true`.) Variables are allowed
     # in `if:`; secrets are not — hence a variable, not the secret itself.
     # prepare-preprod-db is a rehearsal: its failure (e.g. a long refresh still
-    # draining) is reported below but never blocks the preprod rollout. No prepare
-    # output is read. !cancelled() runs it when prepare failed or was skipped, never on a cancelled run.
+    # draining) is reported below but never blocks the preprod rollout. Only the slots
+    # selector output is read (adopted -> delegate, legacy -> direct roll); an unknown slots
+    # state refuses the job. !cancelled() runs it when prepare failed or was skipped, never on a cancelled run.
     if: "!cancelled() && needs.build-push.result == 'success' && github.ref == 'refs/heads/main' && vars.PREPROD_CD_ENABLED == 'true'"
     permissions:
       contents: read
       deployments: write
     env:
       NAMESPACE: radar-immobilier-preprod
+      # Blue/green slots adopted: no direct roll, migration or CronJob image change here; the
+      # release is delegated to rehearse-preprod-bluegreen (old -> new). Legacy path otherwise.
+      SLOTS: ${{ needs.prepare-preprod-db.outputs.slots }}
     steps:
       - name: Report prepare rehearsal outcome
         if: needs.prepare-preprod-db.result != 'success'
@@ -679,6 +758,13 @@ jobs:
             echo '### Preprod preparation rehearsal'
             echo "prepare-preprod-db result: \`${PREPARE_RESULT}\`. The rollout continues; inspect that job before the next cutover."
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Refuse an unknown blue/green slots state
+        # A failed or skipped slots-status must never fall back to a direct roll on adopted slots.
+        if: env.SLOTS != 'adopted' && env.SLOTS != 'legacy'
+        run: |
+          echo "::error title=Blue/green slots state unknown::prepare-preprod-db reported slots='${SLOTS}'; no direct roll without a known slots state."
+          exit 1
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -830,7 +916,7 @@ jobs:
       # var as the backup so a migrate NEVER runs without a fresh pre-migration
       # rollback point (order: backup → migrate → set-image → assert).
       - name: Migrate DB before release (fail-closed)
-        if: vars.BACKUP_BEFORE_RELEASE_ENABLED == 'true'
+        if: vars.BACKUP_BEFORE_RELEASE_ENABLED == 'true' && env.SLOTS != 'adopted'
         env:
           SHA: ${{ steps.vars.outputs.sha }}
         run: |
@@ -902,6 +988,9 @@ jobs:
       # Fail-closed: a failed ConfigMap apply exits BEFORE set-image, so radar-ui
       # never rolls onto a Deployment referencing an absent ConfigMap.
       - name: Reconcile preprod manifests (server-side apply — targeted)
+        env:
+          # Slots adopted: ConfigMaps only; the workloads change through the blue/green cutover.
+          RECONCILE_CONFIG_ONLY: ${{ env.SLOTS == 'adopted' && '1' || '0' }}
         run: bash deploy/ci/reconcile-preprod.sh
 
       # NOTE: no separate "Apply immo-mcp declarative config" step here: the
@@ -910,6 +999,7 @@ jobs:
       # the ConfigMap resourceVersion) when that ConfigMap changed. The preprod
       # Ingress stays operator-applied (no Ingress grant).
       - name: Roll preprod deployments to pushed sha
+        if: env.SLOTS != 'adopted'
         id: roll
         env:
           SHA: ${{ steps.vars.outputs.sha }}
@@ -942,6 +1032,7 @@ jobs:
           fi
 
       - name: Wait for rollouts
+        if: env.SLOTS != 'adopted'
         id: wait
         run: |
           set -euo pipefail
@@ -1007,6 +1098,7 @@ jobs:
       # proves the preprod BUILD. Pure network, no kubeconfig. Cert serials are
       # public identifiers — printing them leaks nothing.
       - name: Post-deploy — prove preprod endpoint serves the deployed LB (TLS serial)
+        if: env.SLOTS != 'adopted'
         env:
           PUBLIC_HOST: ${{ vars.PREPROD_ENDPOINT_HOST }}
           EXPECTED_LB_IP: ${{ vars.EXPECTED_OVH_LB_IP }}
@@ -1042,6 +1134,7 @@ jobs:
       # the sha this run pushed, or the deploy REDs. Closes the silent-no-op gap
       # (wrong ns / scaled-to-0 makes set-image + rollout succeed instantly).
       - name: Assert served sha (preprod)
+        if: env.SLOTS != 'adopted'
         env:
           SHA: ${{ steps.vars.outputs.sha }}
           API_SHA: ${{ github.sha }}
@@ -1096,7 +1189,7 @@ jobs:
       # radar-refresh-pending-watchdog every 5 min requests the deletion of a refresh pod still Pending
       # 15 min after creation (its SA/Role are in the same 11-…rbac.yaml).
       - name: Deploy refresh CronJobs (preprod)
-        if: ${{ vars.REFRESH_CRONJOB_PREPROD_ENABLED == 'true' }}
+        if: ${{ vars.REFRESH_CRONJOB_PREPROD_ENABLED == 'true' && env.SLOTS != 'adopted' }}
         env:
           SHA: ${{ steps.vars.outputs.sha }}
         run: |

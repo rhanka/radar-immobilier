@@ -1,0 +1,683 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { Buffer } from 'node:buffer';
+import { fixture } from './cutover-fixture.mjs';
+const success = r => assert.equal(r.status, 0, r.stdout + r.stderr);
+const object = (f, name, kind) => f.state().objects.find(o => o.metadata.name === name && (!kind || o.kind === kind));
+const save = (f, state) => writeFileSync(join(f.dir, 'state.json'), JSON.stringify(state));
+const db = f => Buffer.from(object(f, 'radar-db-credentials').data.POSTGRES_DB, 'base64').toString();
+const slotOf = (f, name) => object(f, name, 'Service').spec.selector['sentropic.io/slot'];
+const receipt = f => JSON.parse(object(f, 'radar-cutover-receipt').data.receipt);
+const lock = f => object(f, 'radar-change-lock');
+const calls = f => f.calls().map(c => c.join(' '));
+const SERVICES = ['radar-api', 'radar-immo-mcp', 'radar-ui'];
+const entries = f => JSON.parse(object(f, 'radar-retained-db')?.data.entries ?? '[]');
+const servicePatches = f => f.calls().map((c, i) => ({ c, i })).filter(({ c }) => c.includes('patch') && c.includes('service'))
+  .map(({ c, i }) => ({ i, name: c[c.indexOf('service') + 1], to: JSON.parse(c[c.indexOf('-p') + 1]).at(-1).value }))
+  .filter(p => p.name.startsWith('radar-'));
+test('preprod blue/green: freeze, switch callers first, promotion re-rolls canonical, logs before deletion, routing back on main', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    const before = f.calls().length;
+    const result = f.run('run', ['MODE=run']);
+    success(result);
+    const steps = f.state().jobCreation.map(j => j.step);
+    const run = receipt(f);
+    // Order: freeze, then the three Service patches api -> mcp -> ui; back to main ui -> mcp -> api.
+    const patches = servicePatches(f).filter(p => p.i >= before);
+    assert.deepEqual(patches.map(p => `${p.name}:${p.to}`), ['radar-api:prepared', 'radar-immo-mcp:prepared', 'radar-ui:prepared',
+      'radar-ui:main', 'radar-immo-mcp:main', 'radar-api:main']);
+    assert.ok(steps.indexOf('freeze') < steps.indexOf('logsmain0') && steps.indexOf('logsmain0') < steps.indexOf('logsprepared1'));
+    // The canonical Secret switches once, after the canonical logs, before the canonical re-roll.
+    const all = calls(f);
+    const secret = all.findIndex(c => / patch secret radar-db-credentials/.test(c));
+    const reroll = all.findIndex((c, i) => i > secret && / patch deployment radar-api /.test(c));
+    const mainLogs = all.findIndex(c => c.includes('job-name=cutover-') && c.includes('-logsmain0'));
+    assert.ok(mainLogs > 0 && mainLogs < reroll, 'the canonical Pods are followed before the re-roll');
+    assert.ok(secret > 0 && reroll > secret);
+    assert.equal(db(f), 'radar_next');
+    // Same SHA: the per-run annotation still forces a new ReplicaSet on every canonical Deployment.
+    for (const name of SERVICES) {
+      const d = object(f, name, 'Deployment');
+      assert.equal(d.spec.template.metadata.annotations['sentropic.io/promoted-run'], run.run);
+      assert.ok(run.promotion.oldHashes[name] !== undefined);
+      assert.equal(slotOf(f, name), 'main');
+    }
+    // The prepared slot is deleted only after routing left it and its logs were exported.
+    const prepLogs = all.findIndex(c => c.includes('-logsprepared1'));
+    const deletion = all.findIndex(c => c.includes('/deployments/radar-api-prepared') && c.includes('delete'));
+    const lastBack = servicePatches(f).at(-1).i;
+    assert.ok(lastBack < prepLogs && prepLogs < deletion, `${lastBack} < ${prepLogs} < ${deletion}`);
+    assert.equal(object(f, 'radar-api-prepared', 'Deployment'), undefined);
+    assert.equal(object(f, 'radar-ui-nginx-prepared'), undefined);
+    // Receipt: measured windows, freeze, first green, consumed stamp, schedules, lock.
+    assert.equal(run.switches.length, 2);
+    assert.ok(run.switches.every(s => Number.isInteger(s.mixedWindowMs)));
+    assert.match(run.frozenAt, /Z$/); assert.match(run.firstGreenAt, /Z$/);
+    assert.ok(Number.isInteger(run.freezeWindowMs));
+    assert.equal(object(f, 'radar-prepared-db').data.status, 'consumed');
+    assert.equal(object(f, 'radar-refresh-pv').spec.suspend, false);
+    assert.equal(object(f, 'originally-suspended').spec.suspend, true);
+    assert.equal(lock(f), undefined);
+    assert.equal(JSON.stringify(object(f, 'application').spec).includes('base-maintenance-'), false, 'Ingresses never change');
+    assert.notEqual(f.run('run', ['MODE=run']).status, 0, 'a consumed prepared database is never reused');
+  } finally { f.cleanup(); }
+});
+test('SAMEDB=1 runs the production path in preprod: no freeze, no database switch, slot on the live database', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    success(f.run('run', ['MODE=run', 'SAMEDB=1']));
+    const steps = f.state().jobCreation.map(j => j.step);
+    assert.equal(steps.includes('freeze'), false);
+    assert.equal(f.calls().some(c => c.includes('secret')  && c.includes('patch')), false);
+    assert.equal(db(f), 'radar');
+    assert.deepEqual(f.state().created.filter(c => c.name === 'radar-api-prepared').map(c => c.db), ['radar_next', 'radar']);
+    assert.equal(object(f, 'radar-prepared-db').data.status, 'ready', 'the prepared database is not consumed');
+    assert.equal(receipt(f).samedb, true);
+  } finally { f.cleanup(); }
+});
+test('an unserved prepared slot switches back to main automatically and reopens writes', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    const state = f.state(); state.preparedStale = true; save(f, state);
+    const result = f.run('run', ['MODE=run']);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /routing returned to slot=main/);
+    for (const name of SERVICES) assert.equal(slotOf(f, name), 'main');
+    assert.equal(f.state().unfrozen, 1);
+    assert.equal(db(f), 'radar');
+    assert.equal(lock(f), undefined);
+    assert.equal(object(f, 'radar-refresh-pv').spec.suspend, false);
+    assert.equal(object(f, 'radar-api-prepared', 'Deployment'), undefined, 'the abandoned prepared slot is removed (logs exported)');
+    assert.ok(f.state().jobCreation.some(j => j.step.startsWith('logsprepared')));
+  } finally { f.cleanup(); }
+});
+test('the drill routes back to the previous release then re-switches', () => {
+  const f = fixture({ previousSha: '9'.repeat(40) });
+  try {
+    success(f.run('prepare'));
+    success(f.run('run', ['MODE=run', 'DRILL=1']));
+    const run = receipt(f);
+    assert.deepEqual(run.switches.map(s => s.to), ['prepared', 'main', 'prepared', 'main']);
+    assert.ok(Number.isInteger(run.drill.backMs));
+    assert.equal(run.previousRelease.apiServedSha, '9'.repeat(40));
+  } finally { f.cleanup(); }
+});
+test('a log manifest missing a Pod refuses every deletion; resume completes the promotion', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    const state = f.state(); state.logsMissing = true; save(f, state);
+    const failed = f.run('run', ['MODE=run']);
+    assert.notEqual(failed.status, 0);
+    assert.match(failed.stderr, /Log manifest misses a recorded Pod/);
+    assert.ok(lock(f), 'promotion started: the lock is retained');
+    assert.ok(object(f, 'radar-api-prepared', 'Deployment'), 'no further deletion after an incomplete manifest');
+    for (const name of SERVICES) assert.equal(slotOf(f, name), 'prepared', 'the release keeps being served');
+    const record = JSON.parse(lock(f).data.record);
+    const fixed = f.state(); fixed.logsMissing = false; save(f, fixed);
+    success(f.run('resume', [`RUN=${record.run}`]));
+    for (const name of SERVICES) assert.equal(slotOf(f, name), 'main');
+    assert.equal(lock(f), undefined);
+    assert.deepEqual(receipt(f).logGaps, ['logsmain0'], 'the unrecoverable gap is explicit in the receipt');
+  } finally { f.cleanup(); }
+});
+test('rollback of an interrupted run routes back to main and unfreezes the live database', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    const state = f.state(); state.crash = { step: 'stage-4', edge: 'after-started' }; save(f, state);
+    assert.notEqual(f.run('run', ['MODE=run']).status, 0);
+    for (const name of SERVICES) assert.equal(slotOf(f, name), 'prepared');
+    const record = JSON.parse(lock(f).data.record);
+    success(f.run('rollback', [`RUN=${record.run}`, 'MODE=run']));
+    for (const name of SERVICES) assert.equal(slotOf(f, name), 'main');
+    assert.equal(f.state().unfrozen, 1);
+    assert.equal(object(f, 'radar-api-prepared', 'Deployment'), undefined, 'the prepared slot is cleaned up');
+    assert.equal(db(f), 'radar');
+    assert.equal(lock(f), undefined);
+    assert.equal(object(f, 'radar-refresh-pv').spec.suspend, false);
+  } finally { f.cleanup(); }
+});
+test('rollback after promotion rebuilds the previous release on the retained database without outage', () => {
+  const f = fixture({ previousSha: '9'.repeat(40) });
+  try {
+    success(f.run('prepare'));
+    success(f.run('run', ['MODE=run']));
+    const promoted = receipt(f);
+    assert.equal(db(f), 'radar_next');
+    success(f.run('rollback', [`RUN=${promoted.run}`, 'MODE=run']));
+    const back = receipt(f);
+    assert.equal(back.rollbackOf, promoted.run);
+    assert.equal(db(f), 'radar');
+    assert.ok(f.state().jobCreation.some(j => j.step === 'unfreezeprev'), 'the retained database accepts writes again');
+    assert.equal(object(f, 'radar-api', 'Deployment').spec.template.spec.containers[0].image, promoted.previousRelease.apiImage);
+    for (const name of SERVICES) assert.equal(slotOf(f, name), 'main');
+    assert.equal(object(f, 'radar-api-prepared', 'Deployment'), undefined);
+    assert.equal(lock(f), undefined);
+  } finally { f.cleanup(); }
+});
+test('before slot adoption, prepare, run and rollback refuse slots_not_adopted before creating anything', () => {
+  const f = fixture({ unadopted: true });
+  try {
+    for (const [action, extra] of [['prepare', []], ['run', ['MODE=run']], ['rollback', ['RUN=00000000-0000-4000-8000-000000000000', 'MODE=run']]]) {
+      const result = f.run(action, extra);
+      assert.notEqual(result.status, 0, action);
+      assert.match(result.stderr, /slots_not_adopted/, action);
+    }
+    assert.equal(f.calls().some(c => c[0] === 'kubectl' && (c.includes('create') || c.includes('patch') || c.includes('delete'))
+      && !c.includes('can-i') && !c.includes('--dry-run=client')), false, 'no creation, patch or deletion');
+    assert.equal(f.state().objects.some(o => o.metadata.name.endsWith('-prepared') || o.metadata.name === 'radar-change-lock'), false);
+  } finally { f.cleanup(); }
+});
+test('prepared Pods are never selected by the canonical Services; a partial switch is fully reverted', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    const state = f.state();
+    for (const name of SERVICES) {
+      const selector = state.objects.find(o => o.kind === 'Service' && o.metadata.name === name).spec.selector;
+      const selected = state.objects.filter(p => p.kind === 'Pod' && Object.entries(selector).every(([k, v]) => p.metadata.labels?.[k] === v));
+      assert.ok(selected.length > 0 && selected.every(p => p.metadata.labels['sentropic.io/slot'] === 'main'), name);
+    }
+    // The third Service refuses the switch: the two already switched return to main.
+    state.serviceConflict = 'radar-ui'; state.conflictTo = 'prepared'; save(f, state);
+    assert.notEqual(f.run('run', ['MODE=run']).status, 0);
+    for (const name of SERVICES) assert.equal(slotOf(f, name), 'main', name);
+    assert.equal(lock(f), undefined);
+  } finally { f.cleanup(); }
+});
+test('after a promotion, SAMEDB=1 runs on the promoted (migrated) live database with the consumed stamp', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    success(f.run('run', ['MODE=run']));
+    assert.equal(object(f, 'radar-prepared-db').data.status, 'consumed');
+    success(f.run('run', ['MODE=run', 'SAMEDB=1']));
+    const run = receipt(f);
+    assert.deepEqual([run.samedb, run.liveDb, run.targetDb], [true, 'radar_next', 'radar_next']);
+    assert.equal(f.state().created.filter(c => c.name === 'radar-api-prepared').at(-1).db, 'radar_next');
+    assert.ok(f.state().objects.some(o => o.kind === 'Job' && o.metadata.name === `cutover-${run.run}-destination`), 'live migrations checked');
+  } finally { f.cleanup(); }
+});
+test('a ConfigMap changed after prepare restarts the prepared slot before any switch', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    const state = f.state();
+    state.objects.find(o => o.kind === 'ConfigMap' && o.metadata.name === 'radar-api').data.NEW_SETTING = 'changed';
+    save(f, state);
+    success(f.run('run', ['MODE=run']));
+    assert.equal(f.state().created.filter(c => c.name === 'radar-api-prepared').length, 2);
+  } finally { f.cleanup(); }
+});
+test('a rollback of the rollback re-promotes the new release on its retained database, unfreezing it first', () => {
+  const f = fixture({ previousSha: '9'.repeat(40) });
+  try {
+    success(f.run('prepare'));
+    success(f.run('run', ['MODE=run']));
+    const a = receipt(f);
+    success(f.run('rollback', [`RUN=${a.run}`, 'MODE=run']));
+    const b = receipt(f);
+    assert.equal(db(f), 'radar');
+    success(f.run('rollback', [`RUN=${b.run}`, 'MODE=run']));
+    const c = receipt(f);
+    assert.equal(c.rollbackOf, b.run);
+    assert.equal(db(f), 'radar_next', 'the new release is back on the database promoted first');
+    assert.equal(object(f, 'radar-api', 'Deployment').spec.template.spec.containers[0].image, f.release.apiImage);
+    assert.equal(f.state().jobCreation.filter(j => j.step === 'unfreezeprev').length, 2);
+    for (const name of SERVICES) assert.equal(slotOf(f, name), 'main');
+  } finally { f.cleanup(); }
+});
+test('a rollback after promotion records the abandoned writes; the next prepare keeps that database until ack', () => {
+  const f = fixture({ previousSha: '9'.repeat(40), writeStats: { radar: 100, radar_next: 0 } });
+  try {
+    success(f.run('prepare'));
+    success(f.run('run', ['MODE=run']));
+    const a = receipt(f);
+    const state = f.state(); state.writeStats.radar_next = 7; save(f, state);
+    success(f.run('rollback', [`RUN=${a.run}`, 'MODE=run']));
+    const b = receipt(f);
+    assert.deepEqual([b.abandoned.db, b.abandoned.tuples], ['radar_next', 7]);
+    const [entry] = entries(f);
+    assert.deepEqual([entry.status, entry.db, entry.run, entry.tuples], ['pending', 'radar_next', b.run, 7]);
+    assert.ok(entry.since, 'the baseline time of the original switch is kept');
+    const refused = f.run('prepare');
+    assert.notEqual(refused.status, 0);
+    assert.match(refused.stderr, /retained_db_unacknowledged/);
+    assert.equal(f.state().jobCreation.filter(j => j.step === 'clone').length, 1, 'the retained database is not replaced');
+    const ack = f.run('ack', [`RUN=${b.run}`]);
+    assert.equal(ack.status, 0, ack.stderr);
+    assert.match(ack.stdout, /radar_next: 7 abandoned written tuples/);
+    assert.deepEqual(entries(f).map(e => [e.status, e.acknowledgement.by]), [['acknowledged', 'operator']]);
+    success(f.run('prepare'));
+  } finally { f.cleanup(); }
+});
+test('a return to main before promotion records the writes made through the prepared slot', () => {
+  const f = fixture({ writeGrowth: { radar_next: 3 } });
+  try {
+    success(f.run('prepare'));
+    const state = f.state(); state.preparedStale = true; save(f, state);
+    // Default settle time: counters of the last writes are published before the measurement.
+    delete f.env.STATS_SETTLE;
+    const started = Date.now();
+    assert.notEqual(f.run('run', ['MODE=run']).status, 0);
+    assert.ok(Date.now() - started >= 11000, 'waited at least 11 s before measuring');
+    const [entry] = entries(f);
+    assert.deepEqual([entry.status, entry.db, entry.tuples, entry.settledSeconds], ['pending', 'radar_next', 3, 11]);
+    const steps = f.state().jobCreation.map(j => j.step);
+    assert.ok(steps.indexOf('unfreeze') >= 0 && steps.indexOf('unfreeze') < steps.lastIndexOf('writestats1'), 'writes reopen before the settled measurement');
+  } finally { f.cleanup(); }
+});
+test('the change lock is awaited for a bounded time instead of failing at once', () => {
+  const held = () => ({ apiVersion: 'v1', kind: 'ConfigMap', metadata: { name: 'radar-change-lock', uid: 'uid-held', resourceVersion: '1' },
+    data: { record: JSON.stringify({ run: 'competing-operation', kind: 'stage', executor: { kind: 'github', run: '1' }, checkpoints: {}, jobs: {} }) } });
+  const f = fixture();
+  try {
+    const state = f.state(); state.objects.push(held()); state.lockReleaseAfter = 2; save(f, state);
+    f.env.LOCK_WAIT = '60';
+    const queued = f.run('prepare');
+    assert.equal(queued.status, 0, queued.stderr);
+    assert.match(queued.stderr, /Waiting for operation competing-operation to release radar-change-lock/);
+    const again = f.state(); again.objects.push(held()); again.lockReleaseAfter = 0; save(f, again);
+    f.env.LOCK_WAIT = '3';
+    const refused = f.run('prepare');
+    assert.notEqual(refused.status, 0);
+    assert.match(refused.stderr, /A competing operation holds the lock/);
+    assert.equal(lock(f).metadata.uid, 'uid-held', 'waiting never adopts a lock');
+  } finally { f.cleanup(); }
+});
+test('the prepared slot and the promotion use the release manifests (#611); a rollback restores the previous specs', () => {
+  const f = fixture({ previousSha: '9'.repeat(40) });
+  const marked = c => (c.env || []).some(e => e.name === 'FROM_RELEASE_MANIFEST');
+  try {
+    const state = f.state(); state.objects.find(o => o.kind === 'Deployment' && o.metadata.name === 'radar-api').spec.replicas = 2; save(f, state);
+    success(f.run('prepare'));
+    for (const name of SERVICES) {
+      assert.ok(marked(object(f, `${name}-prepared`, 'Deployment').spec.template.spec.containers[0]), `${name}: prepared from the release manifest`);
+    }
+    success(f.run('run', ['MODE=run']));
+    const api = object(f, 'radar-api', 'Deployment');
+    assert.ok(marked(api.spec.template.spec.containers[0]), 'the canonical slot receives the release spec');
+    assert.equal(api.spec.template.spec.containers[0].image, f.release.apiImage);
+    assert.deepEqual([api.spec.replicas, api.spec.selector.matchLabels['sentropic.io/slot'], api.spec.template.metadata.labels['sentropic.io/slot']], [2, 'main', 'main']);
+    const cron = object(f, 'radar-refresh-pv', 'CronJob');
+    assert.ok(marked(cron.spec.jobTemplate.spec.template.spec.containers[0]), 'CronJob spec from the release');
+    assert.equal(cron.spec.suspend, false, 'original schedule state restored');
+    const promoted = receipt(f);
+    assert.ok(promoted.previousSpecs['Deployment/radar-api'] && promoted.previousSpecs['CronJob/radar-refresh-pv']);
+    success(f.run('rollback', [`RUN=${promoted.run}`, 'MODE=run']));
+    const back = object(f, 'radar-api', 'Deployment').spec.template.spec.containers[0];
+    assert.equal(marked(back), false, 'the rollback restores the spec that ran before');
+    assert.equal(back.image, promoted.previousRelease.apiImage);
+  } finally { f.cleanup(); }
+});
+test('a release without the manifest of a workload refuses before creating the prepared slot', () => {
+  const f = fixture();
+  try {
+    const state = f.state(); state.releaseManifests['deploy/overlays/preprod'] = state.releaseManifests['deploy/overlays/preprod']
+      .filter(d => d.metadata.name !== 'radar-ui'); save(f, state);
+    const result = f.run('prepare');
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /release_manifest_missing: Deployment\/radar-ui/);
+    assert.equal(f.state().objects.some(o => o.kind === 'Deployment' && o.metadata.name.endsWith('-prepared')), false);
+  } finally { f.cleanup(); }
+});
+test('the kustomize-hashed nginx ConfigMap of the release is applied first and the prepared UI calls the prepared API', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    const ui = object(f, 'radar-ui-prepared', 'Deployment').spec.template.spec;
+    assert.deepEqual(ui.volumes.map(v => v.configMap?.name), ['radar-ui-nginx-prepared'], 'remapped by prefix, never the hashed canonical name');
+    const conf = object(f, 'radar-ui-nginx-prepared').data['default.conf'];
+    assert.ok(conf.startsWith('# release nginx') && conf.includes('http://radar-api-prepared:3000') && !conf.includes('http://radar-api:3000'));
+    assert.ok(object(f, 'radar-ui-nginx-7k2m9h5tgb', 'ConfigMap'), 'generated ConfigMap of the release created before the slot');
+    success(f.run('run', ['MODE=run']));
+    const canonical = object(f, 'radar-ui', 'Deployment').spec.template.spec;
+    assert.deepEqual(canonical.volumes.map(v => v.configMap?.name), ['radar-ui-nginx-7k2m9h5tgb']);
+    assert.ok(object(f, 'radar-ui-nginx-7k2m9h5tgb', 'ConfigMap'), 'the promoted UI mounts an existing ConfigMap');
+  } finally { f.cleanup(); }
+});
+test('drift: the first promotion reviews live vs release; later runs compare the live specs to the last applied ones', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    success(f.run('run', ['MODE=run']));
+    const first = receipt(f);
+    assert.equal(first.drift.baseline, 'first-promotion');
+    assert.ok(first.drift.lines > 0, 'the live specs differed from the release manifests');
+    assert.equal(object(f, 'radar-release-drift').data.status, 'pending', 'preprod: reported, not blocking');
+    const applied = JSON.parse(object(f, 'radar-applied-specs').data.specs);
+    assert.ok(applied['Deployment/radar-api'] && applied['CronJob/radar-refresh-pv']);
+    assert.equal(applied['Deployment/radar-api'].replicas, undefined, 'replicas (HPA) are not part of the drift');
+    // A manual change on the live workload after the promotion is drift against the applied specs.
+    const state = f.state();
+    state.objects.find(o => o.kind === 'Deployment' && o.metadata.name === 'radar-api').spec.template.spec.containers[0].env.push({ name: 'MANUAL', value: 'x' });
+    save(f, state);
+    success(f.run('run', ['MODE=run', 'SAMEDB=1']));
+    const second = receipt(f);
+    assert.deepEqual([second.drift.baseline, second.drift.lines > 0], ['applied', true]);
+    assert.match(object(f, 'radar-release-drift').data.report, /MANUAL/);
+  } finally { f.cleanup(); }
+});
+test('the release manifests are refused when the checkout commit is unreadable or another commit', () => {
+  const f = fixture();
+  try {
+    f.env.CUTOVER_TEST_TREE_SHA = '';
+    const unreadable = f.run('prepare');
+    assert.notEqual(unreadable.status, 0);
+    assert.match(unreadable.stderr, /release_manifests_unverifiable/);
+    f.env.CUTOVER_TEST_TREE_SHA = 'f'.repeat(40);
+    const other = f.run('prepare');
+    assert.notEqual(other.status, 0);
+    assert.match(other.stderr, /release_manifests_mismatch/);
+  } finally { f.cleanup(); }
+});
+test('the rehearsal acknowledges an abandon only with zero rows outside the probe table (exact); entries are never overwritten', () => {
+  const f = fixture({ previousSha: '9'.repeat(40), writeStats: { radar: 100, radar_next: 0 }, writeStatsNonProbe: { radar: 50, radar_next: 0 } });
+  try {
+    success(f.run('prepare'));
+    success(f.run('run', ['MODE=run']));
+    const a = receipt(f);
+    // 40 rows on the promoted database, 3 of them outside the probe table: not provably the probe's own.
+    let state = f.state(); state.writeStats.radar_next = 40; state.writeStatsNonProbe.radar_next = 3; save(f, state);
+    success(f.run('rollback', [`RUN=${a.run}`, 'MODE=run']));
+    const b = receipt(f);
+    assert.deepEqual([b.abandoned.tuples, b.abandoned.nonProbeTuples], [40, 3]);
+    const refused = f.run('ack-probe', [`RUN=${b.run}`]);
+    assert.notEqual(refused.status, 0);
+    assert.match(refused.stderr, /abandoned_writes_unexplained: 3 rows outside the probe table/);
+    assert.equal(entries(f)[0].status, 'pending');
+    // A second abandon (rollback of the rollback): 30 rows, all in the probe table. Appended, never overwritten.
+    state = f.state(); state.writeStats.radar = 130; save(f, state);
+    success(f.run('rollback', [`RUN=${b.run}`, 'MODE=run']));
+    const c = receipt(f);
+    assert.deepEqual([c.abandoned.tuples, c.abandoned.nonProbeTuples], [30, 0]);
+    assert.deepEqual(entries(f).map(e => [e.run, e.db, e.status]), [[b.run, 'radar_next', 'pending'], [c.run, 'radar', 'pending']]);
+    const ok = f.run('ack-probe', [`RUN=${c.run}`]);
+    assert.equal(ok.status, 0, ok.stderr);
+    const acked = entries(f).find(e => e.run === c.run);
+    assert.deepEqual([acked.status, acked.acknowledgement.by, acked.acknowledgement.proof.nonProbeTuples, acked.acknowledgement.proof.probeTuples],
+      ['acknowledged', 'rehearsal-probe', 0, 30]);
+    assert.equal(entries(f).find(e => e.run === b.run).status, 'pending', 'the unexplained entry still needs the conductor');
+  } finally { f.cleanup(); }
+});
+test('the rehearsal check skips only a served SHA whose rehearsal receipt is green', () => {
+  const receiptMap = (gitSha, status) => ({ apiVersion: 'v1', kind: 'ConfigMap',
+    metadata: { name: 'radar-rehearsal-receipt', uid: 'uid-rehearsal', resourceVersion: '1' }, data: { gitSha, status } });
+  const check = f => { const r = f.run('rehearse-check'); assert.equal(r.status, 0, r.stderr); return r.stdout.trim(); };
+  const same = fixture();
+  try {
+    assert.equal(check(same), 'run', 'served, but no rehearsal receipt');
+    let state = same.state(); state.objects.push(receiptMap(same.release.gitSha, 'red')); save(same, state);
+    assert.equal(check(same), 'run', 'a red rehearsal is replayed in full');
+    state = same.state(); state.objects.find(o => o.metadata.name === 'radar-rehearsal-receipt').data.status = 'green'; save(same, state);
+    assert.equal(check(same), 'skip');
+    state = same.state(); state.objects.find(o => o.metadata.name === 'radar-rehearsal-receipt').data.gitSha = 'b'.repeat(40); save(same, state);
+    assert.equal(check(same), 'run', 'the green receipt belongs to another SHA');
+  } finally { same.cleanup(); }
+  const changed = fixture({ previousSha: '9'.repeat(40) });
+  try {
+    const state = changed.state(); state.objects.push(receiptMap(changed.release.gitSha, 'green')); save(changed, state);
+    assert.equal(check(changed), 'run', 'not served yet: the release is rehearsed');
+  } finally { changed.cleanup(); }
+});
+test('the drift fingerprint is stable across reports on an unchanged cluster despite changing kubectl diff headers', () => {
+  const f = fixture({ url: 'https://immo.sent-tech.ca' });
+  try {
+    const state = f.state();
+    const ingress = state.objects.find(o => o.kind === 'Ingress');
+    ingress.spec.rules[0].host = 'immo.sent-tech.ca'; ingress.spec.tls[0].hosts = ['immo.sent-tech.ca'];
+    save(f, state);
+    success(f.run('prepare', [], 'prod'));
+    const reports = [1, 2].map(run => {
+      if (run === 2) {
+        // Operational state only (HPA replicas, schedule suspension): never part of the fingerprint.
+        const live = f.state();
+        live.objects.find(o => o.kind === 'Deployment' && o.metadata.name === 'radar-api').spec.replicas = 2;
+        live.objects.find(o => o.kind === 'CronJob' && o.metadata.name === 'radar-refresh-pv').spec.suspend = true;
+        save(f, live);
+      }
+      const result = f.run('run', ['MODE=run'], 'prod');
+      assert.match(result.stderr, /drift_unreviewed/);
+      return object(f, 'radar-release-drift').data;
+    });
+    assert.notEqual(reports[0].report, reports[1].report, 'the readable kubectl diff differs (temporary paths, times)');
+    assert.equal(reports[0].sha256, reports[1].sha256, 'the fingerprint of the normalized objects does not');
+    success(f.run('ack-drift', [`SHA256=${reports[1].sha256}`], 'prod'));
+    success(f.run('run', ['MODE=run'], 'prod'));
+  } finally { f.cleanup(); }
+});
+test('the drift report covers the content of the generated ConfigMaps (first promotion and in-place edits)', () => {
+  const prod = fixture({ url: 'https://immo.sent-tech.ca' });
+  const prodHost = f => {
+    const state = f.state(); const ingress = state.objects.find(o => o.kind === 'Ingress');
+    ingress.spec.rules[0].host = 'immo.sent-tech.ca'; ingress.spec.tls[0].hosts = ['immo.sent-tech.ca']; save(f, state);
+  };
+  try {
+    prodHost(prod);
+    success(prod.run('prepare', [], 'prod'));
+    assert.match(prod.run('run', ['MODE=run'], 'prod').stderr, /drift_unreviewed/);
+    const first = object(prod, 'radar-release-drift').data;
+    assert.match(first.report, /release ConfigMap\/radar-ui-nginx-7k2m9h5tgb/);
+    assert.match(first.report, /\+# release nginx/, 'the default.conf content of the release against the mounted one');
+    // Another release content under the same live state: another fingerprint.
+    const state = prod.state();
+    state.releaseManifests['deploy/k8s'].find(o => o.kind === 'ConfigMap').data['default.conf'] += '# changed\n';
+    save(prod, state);
+    assert.match(prod.run('run', ['MODE=run'], 'prod').stderr, /drift_unreviewed/);
+    assert.notEqual(object(prod, 'radar-release-drift').data.sha256, first.sha256);
+  } finally { prod.cleanup(); }
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    success(f.run('run', ['MODE=run']));
+    assert.ok(JSON.parse(object(f, 'radar-applied-specs').data.specs)['ConfigMap/radar-ui-nginx-7k2m9h5tgb'], 'mounted ConfigMap content recorded');
+    const state = f.state();
+    state.objects.find(o => o.kind === 'ConfigMap' && o.metadata.name === 'radar-ui-nginx-7k2m9h5tgb').data['default.conf'] += '# edited in place\n';
+    save(f, state);
+    success(f.run('run', ['MODE=run', 'SAMEDB=1']));
+    assert.match(object(f, 'radar-release-drift').data.report, /edited in place/);
+  } finally { f.cleanup(); }
+});
+test('a re-run after a red rehearsal replays from the recorded previous release, then switches previous -> new again', () => {
+  const f = fixture({ previousSha: '9'.repeat(40) });
+  try {
+    success(f.run('prepare'));
+    success(f.run('run', ['MODE=run']));
+    const a = receipt(f);
+    // What the rehearsal receipt keeps from its first scenario.
+    writeFileSync(join(f.dir, 'previous-release.json'), JSON.stringify(a.previousRelease));
+    writeFileSync(join(f.dir, 'previous-specs.json'), JSON.stringify(a.previousSpecs));
+    const replay = f.run('run', ['MODE=run', 'SAMEDB=1', `RELEASE=${join(f.dir, 'previous-release.json')}`,
+      `REPLAY_SPECS=${join(f.dir, 'previous-specs.json')}`]);
+    assert.equal(replay.status, 0, replay.stderr);
+    const api = object(f, 'radar-api', 'Deployment').spec.template.spec.containers[0];
+    assert.equal(api.image, a.previousRelease.apiImage, 'the previous release is served again');
+    assert.equal((api.env || []).some(e => e.name === 'FROM_RELEASE_MANIFEST'), false, 'with its recorded specs');
+    // The re-run then prepares and rehearses the release again: a real version change.
+    success(f.run('prepare'));
+    success(f.run('run', ['MODE=run']));
+    const again = receipt(f);
+    assert.notEqual(again.previousRelease.gitSha, again.release.gitSha);
+    assert.equal(object(f, 'radar-api', 'Deployment').spec.template.spec.containers[0].image, f.release.apiImage);
+    assert.notEqual(f.run('run', ['MODE=run', `REPLAY_SPECS=${join(f.dir, 'previous-specs.json')}`]).status, 0, 'replay only with SAMEDB=1');
+  } finally { f.cleanup(); }
+});
+test('a freeze Job that fails after its ALTER is undone: the live database is unfrozen before the lock is released', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    const state = f.state(); state.failJob = 'freeze'; save(f, state);
+    assert.notEqual(f.run('run', ['MODE=run']).status, 0);
+    const steps = f.state().jobCreation.map(j => j.step);
+    assert.ok(steps.indexOf('freeze') >= 0 && steps.indexOf('unfreeze') > steps.indexOf('freeze'), steps.join(' '));
+    assert.equal(f.state().unfrozen, 1);
+    for (const name of SERVICES) assert.equal(slotOf(f, name), 'main');
+    assert.equal(lock(f), undefined);
+  } finally { f.cleanup(); }
+});
+test('an interruption before the retained entry is written never loses it: the rollback measures again and records it once', () => {
+  const f = fixture({ writeGrowth: { radar_next: 3 } });
+  try {
+    success(f.run('prepare'));
+    const state = f.state(); state.crash = { step: 'stage-4', edge: 'after-started' }; save(f, state);
+    assert.notEqual(f.run('run', ['MODE=run']).status, 0);
+    const record = JSON.parse(lock(f).data.record);
+    const killed = f.state(); killed.crash = { step: 'retained', edge: 'before-write' }; save(f, killed);
+    assert.notEqual(f.run('rollback', [`RUN=${record.run}`, 'MODE=run']).status, 0);
+    assert.deepEqual(entries(f), [], 'killed before the entry was written');
+    success(f.run('rollback', [`RUN=${record.run}`, 'MODE=run']));
+    assert.deepEqual(entries(f).map(e => [e.status, e.db, e.run, e.tuples]), [['pending', 'radar_next', record.run, 3]]);
+    const refused = f.run('prepare');
+    assert.notEqual(refused.status, 0);
+    assert.match(refused.stderr, /retained_db_unacknowledged/);
+  } finally { f.cleanup(); }
+});
+test('a failed canonical re-roll keeps the canonical log export running; resume verifies it and completes', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    const state = f.state(); state.rolloutFail = 'radar-api'; state.followJobs = ['logsmain0']; save(f, state);
+    const failed = f.run('run', ['MODE=run']);
+    assert.notEqual(failed.status, 0);
+    assert.match(failed.stderr, /Canonical re-roll failed/);
+    assert.ok(lock(f), 'promotion started: the lock is retained');
+    const s = f.state();
+    const job = s.objects.find(o => o.kind === 'Job' && o.metadata.name.endsWith('-logsmain0'));
+    assert.ok(job, 'the log export Job is kept');
+    assert.equal((s.deletions || []).some(d => d.kind === 'Job' && d.name === job.metadata.name), false);
+    // The followed Pods exit: the export completes with every recorded Pod.
+    const pods = JSON.parse(job.spec.template.spec.containers[0].env.find(e => e.name === 'LOG_PODS').value);
+    job.status = { conditions: [{ type: 'Complete', status: 'True' }], succeeded: 1 };
+    const pod = s.objects.find(o => o.kind === 'Pod' && o.metadata.name === `${job.metadata.name}-pod`);
+    pod.status = { phase: 'Succeeded', containerStatuses: [{ name: 'result',
+      state: { terminated: { message: JSON.stringify({ ok: true, podUids: pods.map(p => p.uid) }) } } }] };
+    s.followJobs = []; save(f, s);
+    const record = JSON.parse(lock(f).data.record);
+    success(f.run('resume', [`RUN=${record.run}`]));
+    assert.equal(lock(f), undefined);
+    for (const name of SERVICES) assert.equal(slotOf(f, name), 'main');
+    assert.ok(receipt(f).logsVerified.includes('logsmain0'));
+  } finally { f.cleanup(); }
+});
+test('an unreadable slot state is unknown, never legacy: slots-status and the blue/green entries refuse', () => {
+  const f = fixture();
+  const g = fixture({ unadopted: true });
+  try {
+    const state = f.state(); state.getFail = 'service/radar-api'; save(f, state);
+    const status = f.run('slots-status');
+    assert.notEqual(status.status, 0);
+    assert.match(status.stderr, /slots_state_unknown/);
+    assert.doesNotMatch(status.stdout, /legacy|adopted/);
+    const prepare = f.run('prepare');
+    assert.notEqual(prepare.status, 0);
+    assert.match(prepare.stderr, /slots_state_unknown/);
+    const legacy = g.run('slots-status');
+    assert.equal(legacy.status, 0, legacy.stderr);
+    assert.equal(legacy.stdout.trim(), 'legacy');
+  } finally { f.cleanup(); g.cleanup(); }
+});
+test('a partial switch still retains the abandoned writes: the next prepare refuses the database', () => {
+  const f = fixture({ writeGrowth: { radar_next: 5 } });
+  try {
+    success(f.run('prepare'));
+    // The third Service refuses the switch after two already moved to prepared.
+    const state = f.state(); state.serviceConflict = 'radar-ui'; state.conflictTo = 'prepared'; save(f, state);
+    assert.notEqual(f.run('run', ['MODE=run']).status, 0);
+    for (const name of SERVICES) assert.equal(slotOf(f, name), 'main');
+    const [entry] = entries(f);
+    assert.deepEqual([entry.status, entry.db, entry.tuples], ['pending', 'radar_next', 5]);
+    const refused = f.run('prepare');
+    assert.notEqual(refused.status, 0);
+    assert.match(refused.stderr, /retained_db_unacknowledged/);
+  } finally { f.cleanup(); }
+});
+test('a return to main measures the abandoned writes only after the prepared writers stopped', () => {
+  const f = fixture({ commitOnPreparedStop: 3 });
+  try {
+    success(f.run('prepare'));
+    const state = f.state(); state.preparedStale = true; save(f, state);
+    assert.notEqual(f.run('run', ['MODE=run']).status, 0);
+    const steps = f.state().jobCreation.map(j => j.step);
+    const retired = steps.findIndex(s => s.startsWith('logsprepared'));
+    const measured = steps.reduce((last, s, i) => s.startsWith('writestats') ? i : last, -1);
+    assert.ok(retired >= 0 && retired < measured, `the prepared stack retires before the settled measurement: ${steps.join(' ')}`);
+    assert.equal(object(f, 'radar-api-prepared', 'Deployment'), undefined, 'the writers are gone before the measurement');
+    const [entry] = entries(f);
+    assert.deepEqual([entry.status, entry.db, entry.tuples], ['pending', 'radar_next', 3]);
+  } finally { f.cleanup(); }
+});
+test('an unreadable Service routing keeps the lock and forbids any deletion', () => {
+  const f = fixture({ writeGrowth: { radar_next: 3 } });
+  try {
+    success(f.run('prepare'));
+    // The API already serves prepared when the third patch fails and API reads time out.
+    const state = f.state(); state.serviceConflict = 'radar-ui'; state.conflictTo = 'prepared';
+    state.getFailOnConflict = 'service/radar-api'; save(f, state);
+    const refused = f.run('run', ['MODE=run']);
+    assert.notEqual(refused.status, 0);
+    assert.match(refused.stderr, /routing unknown/);
+    assert.ok(lock(f), 'unknown routing keeps the lock');
+    assert.equal((f.state().deletions || []).filter(d => d.kind === 'Deployment' && /-prepared$/.test(d.name)).length, 0,
+      'no prepared Deployment is deleted while routing is unknown');
+    assert.equal(slotOf(f, 'radar-api'), 'prepared');
+    const run = JSON.parse(lock(f).data.record).run;
+    const recovered = f.state(); delete recovered.getFail; delete recovered.getFailOnConflict; save(f, recovered);
+    success(f.run('rollback', [`RUN=${run}`, 'MODE=run']));
+    assert.equal(lock(f), undefined);
+  } finally { f.cleanup(); }
+});
+for (const action of ['prepare', 'run']) {
+  test(`an unreadable prepared Deployment during ${action} keeps the lock without deleting any slot`, () => {
+    const f = fixture();
+    try {
+      success(f.run('prepare'));
+      const state = f.state(); state.getFails = SERVICES.map(name => `deployment/${name}-prepared`); save(f, state);
+      const result = f.run(action, ['MODE=run']);
+      assert.notEqual(result.status, 0);
+      assert.match(result.stderr, /Prepared slot state unknown/);
+      assert.ok(lock(f));
+      assert.equal((f.state().deletions || []).some(d => d.kind === 'Deployment'), false);
+    } finally { f.cleanup(); }
+  });
+}
+test('a failed identity Job is retried on resume instead of blocking it forever', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    const state = f.state(); state.failJobs = ['identity']; save(f, state);
+    const failed = f.run('run', ['MODE=run']);
+    assert.notEqual(failed.status, 0);
+    assert.match(failed.stderr, /Job failed: cutover-.*-identity/);
+    assert.ok(lock(f), 'promotion interrupted: the lock is retained');
+    const run = JSON.parse(lock(f).data.record).run;
+    const retrying = f.state(); retrying.failJobs = []; save(f, retrying);
+    success(f.run('resume', [`RUN=${run}`]));
+    for (const name of SERVICES) assert.equal(slotOf(f, name), 'main');
+    assert.equal(lock(f), undefined);
+    assert.equal(f.state().jobCreation.filter(j => j.step === 'identity').length, 2, 'the failed identity Job ran again');
+  } finally { f.cleanup(); }
+});
+test('a resume recreates a disappeared read-only Job instead of refusing its absence', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    const state = f.state(); state.failJobs = ['identity']; save(f, state);
+    assert.notEqual(f.run('run', ['MODE=run']).status, 0);
+    const run = JSON.parse(lock(f).data.record).run;
+    // The timed-out Job was deleted: the recorded name resolves to nothing.
+    const gone = f.state();
+    gone.failJobs = [];
+    gone.objects = gone.objects.filter(o => !(o.kind === 'Job' && /-identity$/.test(o.metadata.name)));
+    save(f, gone);
+    success(f.run('resume', [`RUN=${run}`]));
+    for (const name of SERVICES) assert.equal(slotOf(f, name), 'main');
+    assert.equal(lock(f), undefined);
+  } finally { f.cleanup(); }
+});
