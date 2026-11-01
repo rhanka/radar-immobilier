@@ -12,12 +12,14 @@ services:
       interval: 2s
       retries: 30
   api:
-    image: node:24-bookworm-slim
+    image: ${CUTOVER_TEST_IMAGE:-node:24-bookworm-slim}
     working_dir: /workspace
     volumes:
       - ../..:/workspace
-      - modules:/workspace/node_modules
-      - api-modules:/workspace/api/node_modules
+    tmpfs:
+      - /tmp:size=512m
+      - /workspace/node_modules:size=3g
+      - /workspace/api/node_modules:size=512m
     environment:
       NODE_ENV: test
       LOT_MIGRATION_DB_TEST: "1"
@@ -31,6 +33,3 @@ services:
       S3_SECRET_KEY: synthetic
       S3_ENDPOINT: http://minio:9000
     entrypoint: []
-volumes:
-  modules:
-  api-modules:

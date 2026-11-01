@@ -17,6 +17,7 @@
 ## Feedback Loop
 - [x] Owner authorizes finishing the interrupted builder's work, test-first fixes, commits and push.
 - [x] Test runner's blanket wait on unrelated Docker stacks blocks local verification; serialize the cutover project with its own lock and allow its portless stack to coexist with other projects.
+- [x] Shared Docker disk I/O blocks fixture writes and package installation; keep test state/dependencies in bounded tmpfs mounts and permit reuse of the identical local tools image.
 
 ## Orchestration Mode (AI-selected)
 - [x] Sequential work in this session, without delegated or background workflows.
