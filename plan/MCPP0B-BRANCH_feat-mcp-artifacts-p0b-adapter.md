@@ -40,7 +40,7 @@ Prepare the three qualified 0.3.0 operations while preserving the current non-CA
   - [x] Read repository rules, harness guidance and converged-r2.
   - [x] Verify clean assigned branch and inspect the upstream 0.3.0 contracts.
 - [ ] **Lot 1 — Version boundary and profile**
-  - [ ] Centralize the pin at 0.2.2; enable P0b automatically with 0.3.0.
+  - [x] Centralize the pin at 0.2.2; enable P0b automatically with 0.3.0.
   - [ ] Extend discovery, scopes, annotations and profile metadata.
 - [ ] **Lot 2 — Trusted host wiring**
   - [ ] Source ports, approved IdP subjects, transactional deletion confirmation and migration.
