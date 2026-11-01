@@ -1,6 +1,8 @@
-# The k8s lane applies this only after creating the uniquely named Secret
-# radar-refresh-keyring-account-import. It must contain the encrypted source
-# keyring files and .key from the owner enrollment; it is deleted after import.
+# Rendered with its Secret radar-refresh-keyring-account-import (encrypted
+# owner keyring + .key) by `refresh-018.mk import-keyring-account`, applied
+# once by `run-keyring-import`, which ALWAYS runs `cleanup-keyring-import`
+# afterwards (success or failure): Job, Secret and the script ConfigMap.
+# ttlSecondsAfterFinished below only removes the Job, never the Secret.
 # IMPORT_TRANSPORT is substituted at render time by refresh-018.mk
 # (import-keyring-account IMPORT_TRANSPORT=codex|cloud-code); the placeholder
 # is fail-loud: the script refuses any transport it does not know.
