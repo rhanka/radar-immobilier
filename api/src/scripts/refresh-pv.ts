@@ -287,7 +287,11 @@ async function main(): Promise<void> {
       // The primary's quota circuit already spares the following cities a call
       // known to be refused. Nothing covered the FALLBACK: once it too is out of
       // quota, every remaining city would pay a 429 and fail.
-      haltExtraction: () => documentModels.fallbackQuotaExhausted() ? "fallback-quota-exhausted" : null,
+      // Same for a fallback with no eligible route at all (account needing
+      // re-authorization): every remaining extraction would fail in milliseconds
+      // and the run would still take hours. Stop extracting and fail loudly.
+      haltExtraction: () => documentModels.fallbackQuotaExhausted() ? "fallback-quota-exhausted"
+        : documentModels.fallbackUnroutable() ? "fallback-no-route" : null,
       cityReserveMs: sweepOptions.cityReserveMs,
       onCity: (entry) => logger.info(entry, "refresh-pv: city"),
       onNote: (note, detail) => logger.warn({ ...detail }, `refresh-pv: ${note}`),
