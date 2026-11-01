@@ -8,7 +8,7 @@ cluster_preflight() {
 executor_identity() {
   if [[ -n ${GITHUB_RUN_ID:-} ]]; then
     jq -n --arg repo "$GITHUB_REPOSITORY" --arg run "$GITHUB_RUN_ID" --arg attempt "${GITHUB_RUN_ATTEMPT:-1}" \
-      '{kind:"github",repo:$repo,run:$run,attempt:$attempt,state:"running"}'
+      --arg job "${GITHUB_JOB:-}" '{kind:"github",repo:$repo,run:$run,attempt:$attempt,job:$job,state:"running"}'
   else
     jq -n --arg host "$(hostname)" --arg boot "$(cat /proc/sys/kernel/random/boot_id)" \
       --arg pid "$$" --arg start "$(awk '{print $22}' /proc/$$/stat)" \
@@ -72,10 +72,18 @@ executor_ended() {
   e=$(jq -c .executor "$WORK/record.json"); kind=$(jq -r .kind <<< "$e")
   [[ $(jq -r .state <<< "$e") != stopped ]] || return 0
   if [[ $kind == github ]]; then
-    local repo run state
+    local repo run state attempt job
     repo=$(jq -r .repo <<< "$e"); run=$(jq -r .run <<< "$e")
-    [[ $repo =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ && $run =~ ^[0-9]+$ ]] || return 1
-    state=$(gh api "repos/$repo/actions/runs/$run" --jq .status 2>/dev/null) || return 1
+    attempt=$(jq -r '.attempt//"1"' <<< "$e"); job=$(jq -r '.job//""' <<< "$e")
+    [[ $repo =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ && $run =~ ^[0-9]+$ && $attempt =~ ^[0-9]+$ ]] || return 1
+    if [[ $job =~ ^[A-Za-z0-9_-]+$ ]]; then
+      # The recorded job ended (lost runner, cancellation, failure) even while a
+      # later recovery job of the same run is still running.
+      state=$(gh api "repos/$repo/actions/runs/$run/attempts/$attempt/jobs" --paginate \
+        --jq ".jobs[]|select(.name==\"$job\")|.status" 2>/dev/null) || return 1
+    else
+      state=$(gh api "repos/$repo/actions/runs/$run" --jq .status 2>/dev/null) || return 1
+    fi
     [[ $state == completed ]]
   elif [[ $kind == local ]]; then
     [[ $(jq -r .host <<< "$e") == "$(hostname)" ]] || return 1

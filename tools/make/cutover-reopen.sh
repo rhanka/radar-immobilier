@@ -96,13 +96,45 @@ reopen() {
   checkpoint reopen completed
   checkpoint stage-6 completed
   # The receipt is sanitized recovery data; save it before releasing ownership.
-  jq -n --arg ns "$NS" --slurpfile r "$WORK/record.json" \
-    '{apiVersion:"v1",kind:"ConfigMap",metadata:{name:"radar-cutover-receipt",namespace:$ns},data:{receipt:($r[0]|tojson)}}' > "$WORK/receipt.json"
-  "${k[@]}" apply -f "$WORK/receipt.json" >/dev/null
+  # A reopening without restoration keeps the previous receipt (its pin was not served).
+  if ! jq -e '.restoreAborted==true' "$WORK/record.json" >/dev/null; then
+    jq -n --arg ns "$NS" --slurpfile r "$WORK/record.json" \
+      '{apiVersion:"v1",kind:"ConfigMap",metadata:{name:"radar-cutover-receipt",namespace:$ns},data:{receipt:($r[0]|tojson)}}' > "$WORK/receipt.json"
+    "${k[@]}" apply -f "$WORK/receipt.json" >/dev/null
+  fi
   if "${k[@]}" get ingresses -o json | jq -e --arg s "base-maintenance-$RUN" \
     '[.items[].spec|..|objects|.service?.name? // empty]|all(.!=$s)' >/dev/null; then
     "${k[@]}" delete service "base-maintenance-$RUN" --ignore-not-found >/dev/null
   fi
   lock_delete
+  if jq -e '.restoreAborted==true' "$WORK/record.json" >/dev/null; then
+    printf 'REOPENED WITHOUT RESTORE: previous database verified; API, UI, MCP, routes and schedules restored (%s)\n' "$RUN"
+    return
+  fi
   printf 'SUCCESS: API, UI, MCP, routes and schedules restored (%s)\n' "$RUN"
+}
+# Daily restore recovery. The live database is only replaced by the atomic restore
+# Job (one transaction): until it commits, the previous database is intact. After
+# any failure past closure, the site reopens on the deployed release once a fresh
+# `verify` Job proves that the live database carries every migration of that
+# release. The protected 6H data migration is never reopened automatically.
+restore_reopen() {
+  jq -e '.mode=="restore" and .kind=="cutover" and .checkpoints.close!=null' "$WORK/record.json" >/dev/null || fail 'No closed daily restore to reopen'
+  [[ $ENV == preprod ]] || fail 'Daily restore recovery is preprod-only'
+  jq -e '.jobs.data==null' "$WORK/record.json" >/dev/null || fail 'Protected data migration started; remain closed'
+  printf 'Daily restore failed after closure; reopening on the verified live database\n' >&2
+  stop_operation_jobs || fail 'Database Job termination unknown; remain closed'
+  # Stopped or failed Jobs become history; a previous verification is never reused.
+  jq '.jobHistory=((.jobHistory//[])+[.jobs|to_entries[]|select(.value.outcome!="completed" or .key=="verify")|
+      .value|if .outcome=="started" then .outcome="stopped" else . end])|
+    .jobs|=with_entries(select(.value.outcome=="completed" and .key!="verify"))' \
+    "$WORK/record.json" > "$WORK/next.json"
+  mv "$WORK/next.json" "$WORK/record.json"; record_save
+  run_job verify 60 90
+  jq -e --slurpfile r "$WORK/record.json" '.ok==true and .database==$r[0].liveDb' "$WORK/verdict.json" >/dev/null || fail 'Live database verification refused; remain closed'
+  restart_services
+  private_smoke
+  jq '.restoreAborted=true' "$WORK/record.json" > "$WORK/next.json"
+  mv "$WORK/next.json" "$WORK/record.json"; record_save
+  reopen
 }

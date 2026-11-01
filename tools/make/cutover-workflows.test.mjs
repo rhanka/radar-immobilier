@@ -3,14 +3,24 @@ import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import YAML from 'yaml';
 const workflow = name => YAML.parse(readFileSync(`.github/workflows/${name}`, 'utf8'));
-test('main deployment requires successful prepare with no tolerated restore or migration failure', () => {
+test('main deployment rehearses preparation without gating the preprod rollout on it', () => {
   const w = workflow('build-push-images.yml');
   const job = w.jobs['prepare-preprod-db'];
+  const deploy = w.jobs['deploy-preprod'];
   assert.deepEqual(job.needs, ['build-push', 'cutover-release']);
   assert.equal(job['timeout-minutes'], 50);
   assert.equal(job.if, "github.ref == 'refs/heads/main' && vars.PREPROD_CD_ENABLED == 'true'");
-  assert.equal(job.if, w.jobs['deploy-preprod'].if, 'prepare shares the preprod CD arming');
-  assert.ok(w.jobs['deploy-preprod'].needs.includes('prepare-preprod-db'));
+  assert.deepEqual(deploy.needs, ['build-push', 'prepare-preprod-db']);
+  assert.equal(deploy.if, `!cancelled() && needs.build-push.result == 'success' && ${job.if}`, 'deploy shares the preprod CD arming');
+  // Only the blue/green slots selector is read from prepare; an unknown slots state refuses the job.
+  assert.equal(JSON.stringify(deploy).replaceAll('needs.prepare-preprod-db.outputs.slots', '').includes('needs.prepare-preprod-db.outputs'), false);
+  const guard = deploy.steps[1];
+  assert.equal(guard.if, "env.SLOTS != 'adopted' && env.SLOTS != 'legacy'");
+  assert.ok(guard.run.includes('exit 1'));
+  const report = deploy.steps[0];
+  assert.equal(report.if, "needs.prepare-preprod-db.result != 'success'");
+  assert.ok(report.run.includes('::warning') && report.run.includes('GITHUB_STEP_SUMMARY'));
+  assert.equal(JSON.stringify(report).includes('exit 1'), false);
   assert.ok(job.steps.some(s => s.run === 'make -f deploy/cutover/operator.mk prepare RELEASE=cutover-release/release.json ENV=preprod'));
   assert.equal(JSON.stringify(job).includes('continue-on-error'), false);
 });
@@ -26,6 +36,18 @@ test('daily and inter-tenant interfaces use the engine with protected arming unc
   assert.equal(inputs.SKIP_FLIP, undefined); assert.equal(inputs.SKIP_QUIESCE, undefined);
   assert.ok(w.jobs.bascule.steps.find(s => s.id === 'engine').run.includes('RELEASE=deployed'));
   for (const name of ['served-ids', 'cycle-leg']) assert.equal(JSON.stringify(w.jobs[name]).includes('secrets.'), false);
+});
+test('a daily restore whose job died is recovered by the same workflow', () => {
+  const w = workflow('bascule-preprod.yml');
+  const job = w.jobs.recover;
+  assert.equal(job.needs, 'bascule');
+  assert.equal(job.if, "${{ always() && (needs.bascule.result == 'failure' || needs.bascule.result == 'cancelled') }}");
+  assert.equal(job.environment, 'radar-bascule');
+  assert.equal(job.permissions.actions, 'read');
+  const step = job.steps.at(-1);
+  assert.equal(step.run, 'make -f deploy/cutover/operator.mk recover ENV=preprod');
+  assert.equal(step.env.GH_TOKEN, '${{ github.token }}');
+  assert.equal(JSON.stringify(job).includes('BASCULE_SCHEDULE_ENABLED'), false);
 });
 test('all competing workflows acquire before mutations and release through always', () => {
   for (const [file, jobs] of [['build-push-images.yml', ['deploy', 'deploy-preprod']],
