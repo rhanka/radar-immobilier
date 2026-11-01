@@ -12,7 +12,10 @@ import { scanText } from '../lib/fingerprint.mjs';
 import { MIGRATION_CODES } from '../lib/paths.mjs';
 import { fakeReferenceC, fakeWorkbook, fakeRows, fakeFetchNodes, newKey } from './fixture.mjs';
 
-const tmp = () => mkdtempSync(path.join(os.tmpdir(), 'classif-test-'));
+const tmp = () => {
+  try { return mkdtempSync(path.join(os.tmpdir(), 'classif-test-')); }
+  catch (e) { if (e?.code !== 'EROFS' && e?.code !== 'EACCES') throw e; return mkdtempSync(path.join('/tmp', 'classif-test-')); }
+};
 
 test('REFC1 round trip, tamper and wrong key are refused', () => {
   const key = newKey();
