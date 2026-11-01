@@ -1,4 +1,8 @@
 services:
+  minio:
+    volumes:
+      - type: tmpfs
+        target: /tmp
   postgres:
     # Synthetic DB discarded after each campaign; avoid host-disk fsync stalls.
     volumes:
@@ -10,6 +14,8 @@ services:
     environment:
       DOTENV_CONFIG_PATH: /dev/null
     volumes:
+      - type: tmpfs
+        target: /tmp
       - continuity-ui-modules:/workspace/ui/node_modules
       - continuity-mcp-modules:/workspace/packages/immo-mcp/node_modules
       - continuity-artifacts-modules:/workspace/packages/artifacts-host/node_modules
