@@ -29,16 +29,26 @@ COPY ui ui
 # le rapport d'étude par `?raw` depuis docs/ — sans cette copie, `vite build`
 # échoue en image (« Could not resolve …/report.md?raw »).
 COPY docs/spec/reports/study-2026-07 docs/spec/reports/study-2026-07
-RUN npm run build --workspace=ui
+ARG GIT_SHA=unknown
+ARG IMMO_SW_ENABLED=true
+RUN IMMO_CLIENT_BUILD_ID="$GIT_SHA" IMMO_SW_ENABLED="$IMMO_SW_ENABLED" npm run build --workspace=ui
 # Stamp the served bundle with its build identity (short git sha), fed by the CI
 # build's `--build-arg GIT_SHA=<sha>`. nginx serves ui/dist as static files
 # (`location / { try_files $uri ... }`), so /build.json is publicly readable and
 # the CD deploy job can PROVE the SERVED ui bundle is the one this run built —
 # `kubectl rollout status` only proves the ReplicaSet rolled, not what nginx
-# serves. Placed AFTER `npm run build` so a new sha only re-runs this tiny echo
-# layer, never the cached vite build above. Defaults to "unknown" locally.
-ARG GIT_SHA=unknown
+# serves. The loaded bundle and worker also embed this identity. A new SHA
+# recompiles Vite so an old tab never identifies itself with the current build.json.
 RUN printf '{"sha":"%s"}\n' "$GIT_SHA" > ui/dist/build.json
+# Stamp the service worker bytes with the same deployment identity. Update
+# checks compare these bytes; republishing the previous bytes at the stable
+# URL is the normal rollback (no destructive migration exists).
+RUN sed -i "s/__IMMO_WORKER_BUILD_ID__/${GIT_SHA}/" ui/dist/immo-sw.js \
+  && ! grep -q "__IMMO_WORKER_BUILD_ID__" ui/dist/immo-sw.js
+RUN if [ "$IMMO_SW_ENABLED" = false ]; then \
+  IMMO_BUILD_ID="$GIT_SHA" node --import tsx --input-type=module -e \
+  'import {writeFileSync} from "node:fs"; import {buildDisabledWorkerSource} from "./ui/src/lib/sw/disabled-worker-source.ts"; writeFileSync("ui/dist/immo-sw.js", buildDisabledWorkerSource(process.env.IMMO_BUILD_ID || "disabled"));'; \
+  fi
 
 # Unprivileged nginx (listens on 8080, matches deploy/k8s/50-ui.yaml). The
 # baked conf is a sane default; the K8s Deployment mounts the radar-ui-nginx

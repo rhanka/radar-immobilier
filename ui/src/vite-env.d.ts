@@ -20,3 +20,12 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+/**
+ * Client build identity injected by vite `define` (see ui/vite.config.ts),
+ * from `IMMO_CLIENT_BUILD_ID` at build time. Never read back from the
+ * served `build.json`: that file describes the deployment, not the bundle
+ * already loaded in this tab.
+ */
+declare const __IMMO_CLIENT_BUILD_ID__: string | undefined;
+declare const __IMMO_SW_ENABLED__: boolean;
