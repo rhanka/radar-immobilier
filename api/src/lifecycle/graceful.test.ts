@@ -1,10 +1,11 @@
+import { EventEmitter } from "node:events";
 import { describe, expect, it } from "vitest";
 import { Hono } from "hono";
 import { createGraceful } from "./graceful.js";
 
 const server = () => {
   const state = { closed: false };
-  return { state, close: () => { state.closed = true; } };
+  return { state, close: (callback?: () => void) => { state.closed = true; callback?.(); } };
 };
 
 describe("graceful stop", () => {
@@ -56,5 +57,40 @@ describe("graceful stop", () => {
     void app.request("/stuck");
     await new Promise((resolve) => setTimeout(resolve, 10));
     expect(await graceful.shutdown(server(), 50)).toBe("timeout");
+  });
+
+  it("keeps a request in flight until its response is written, not when the handler returns", async () => {
+    const graceful = createGraceful();
+    const app = new Hono();
+    app.use("*", graceful.middleware);
+    app.post("/write", (c) => c.json({ ok: true }));
+    // The Node response of @hono/node-server: the body is written after the handler returned.
+    const outgoing = Object.assign(new EventEmitter(), { writableFinished: false });
+    const response = await app.request("/write", { method: "POST" }, { outgoing });
+    expect(response.status).toBe(200);
+    expect(graceful.inflight()).toBe(1);
+    let outcome: string | undefined;
+    const stopping = graceful.shutdown(server(), 2_000).then((o) => { outcome = o; });
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(outcome).toBeUndefined();
+    outgoing.writableFinished = true;
+    outgoing.emit("finish");
+    await stopping;
+    expect(outcome).toBe("drained");
+    expect(graceful.inflight()).toBe(0);
+  });
+
+  it("waits for the server close callback before reporting drained, within the bound", async () => {
+    const graceful = createGraceful();
+    let closed: () => void = () => {};
+    const pending = { close: (callback?: () => void) => { closed = callback ?? (() => {}); } };
+    let outcome: string | undefined;
+    const stopping = graceful.shutdown(pending, 2_000).then((o) => { outcome = o; });
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(outcome).toBeUndefined();
+    closed();
+    await stopping;
+    expect(outcome).toBe("drained");
+    expect(await graceful.shutdown({ close: () => {} }, 50)).toBe("timeout");
   });
 });
