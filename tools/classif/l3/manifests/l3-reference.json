@@ -1,14 +1,14 @@
 {
  "lot": "L3",
  "kind": "dev-reference",
- "createdAt": "2026-11-01T04:20:51.758Z",
+ "createdAt": "2026-11-01T13:53:34.582Z",
  "llmCalls": 0,
  "fromPass": 1,
  "provenance": "model_consensus (3 annotators: muse-wonder-1.0 max, gemini-4-argon-high, opus-5.5 max; guide G0)",
  "refUsesExternal": {
   "items": 0,
   "share": 0,
-  "note": "No reconciliation pass ran (stop rule met after pass 1): no traced complement decided any vote. The immo-only ceiling is therefore not reduced by external evidence."
+  "note": "No reconciliation pass ran (stop rule met after pass 1): 11 items have a traced complement but no vote was cast with it. The immo-only ceiling is therefore not reduced by external evidence."
  },
  "partitions": {
   "dev-core": {
@@ -28,7 +28,7 @@
  },
  "pvActs": {
   "items": 120,
-  "actMatched2of3": 105,
+  "actMatched2of3": 104,
   "note": "one annotation per PV item and annotator (no per-act annotation in this pilot): act agreement = at least 2 annotators cite the same passage (same page, ≥ 50 % word overlap)"
  },
  "agreement": {
@@ -232,7 +232,7 @@
  },
  "hashes": {
   "devItemsSha256": "13e60c918e249ccbdc931f1a6a33137242bafe3a9d164507b751d1e71864cb04",
-  "devReferenceSha256": "7af566a59566392f04c4db486bc9b7bd532bd4f50596590b4eee7b51415601f9",
+  "devReferenceSha256": "33344e5c14569a775c57d7f41dc32438f9ba5fbc5bdfefbc5e9e83c70f5e9357",
   "sealedTest": {
    "readme": "docs/spec/reports/classif-eval/README.md",
    "files": {
