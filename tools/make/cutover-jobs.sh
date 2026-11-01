@@ -134,7 +134,10 @@ render_job() {
   sanitize_job
 }
 stop_operation_jobs() {
-  local row name uid deadline=$((SECONDS+120))
+  # stop_operation_jobs [keep-logs]: keep-logs leaves the log export Jobs (logs*) running; they
+  # follow Pods still alive and end by themselves (bounded deadline), and resume verifies them.
+  local row name uid deadline=$((SECONDS+120)) keep=false
+  [[ ${1:-} != keep-logs ]] || keep=true
   while read -r row; do
     name=$(jq -r .name <<< "$row"); uid=$(jq -r .uid <<< "$row")
     [[ $uid != null ]] || {
@@ -151,5 +154,5 @@ stop_operation_jobs() {
         sleep 2
       done
     fi
-  done < <(jq -c '.jobs[]' "$WORK/record.json")
+  done < <(jq -c --argjson keep "$keep" '.jobs|to_entries[]|select(($keep and (.key|startswith("logs")))|not)|.value' "$WORK/record.json")
 }

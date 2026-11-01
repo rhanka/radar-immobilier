@@ -111,15 +111,25 @@ record_abandoned() {
   local delta='.[$db] as $now|if ($base|type)!="number" or ($now|type)!="number" or $now<$base then -1 else $now-$base end'
   tuples=$(jq -r --arg db "$abandoned" --argjson base "$baseline" ".writeStats|$delta" "$WORK/verdict.json")
   others=$(jq -r --arg db "$abandoned" --argjson base "$nonprobe" ".writeStatsNonProbe|$delta" "$WORK/verdict.json")
-  record_set '.abandoned={db:$db,tuples:$t,nonProbeTuples:$o,since:$since,measuredAt:$at,settledSeconds:$w}' --arg db "$abandoned" \
-    --argjson t "$tuples" --argjson o "$others" --argjson since "$since" --arg at "$(iso_ms)" --argjson w "$settle"
-  ((tuples != 0)) || return 0
-  printf 'Abandoned writes on %s: %s rows, %s outside the probe table (-1 = unknown), pending acknowledgement (run %s)\n' \
-    "$abandoned" "$tuples" "$others" "$RUN" >&2
-  retained_load
-  jq --slurpfile r "$WORK/record.json" '.data.entries=((.data.entries//"[]"|fromjson)+[$r[0].abandoned+{run:$r[0].run,status:"pending"}]|tojson)' \
-    "$WORK/retained-now.json" > "$WORK/retained-next.json"
-  retained_save
+  local entry run
+  entry=$(jq -nc '{db:$db,tuples:$t,nonProbeTuples:$o,since:$since,measuredAt:$at,settledSeconds:$w}' --arg db "$abandoned" \
+    --argjson t "$tuples" --argjson o "$others" --argjson since "$since" --arg at "$(iso_ms)" --argjson w "$settle")
+  run=$(jq -r .run "$WORK/record.json")
+  # The radar-retained-db entry is written before .abandoned: an interruption in between leaves
+  # .abandoned unset, so resume measures again and the entry (one per run and database) is never
+  # lost nor duplicated; the next prepare then keeps the database holding acknowledged writes.
+  if ((tuples != 0)); then
+    printf 'Abandoned writes on %s: %s rows, %s outside the probe table (-1 = unknown), pending acknowledgement (run %s)\n' \
+      "$abandoned" "$tuples" "$others" "$run" >&2
+    retained_load
+    if ! jq -e --arg run "$run" --arg db "$abandoned" 'any(.data.entries//"[]"|fromjson|.[]; .run==$run and .db==$db)' \
+        "$WORK/retained-now.json" >/dev/null; then
+      jq --argjson e "$entry" --arg run "$run" '.data.entries=((.data.entries//"[]"|fromjson)+[$e+{run:$run,status:"pending"}]|tojson)' \
+        "$WORK/retained-now.json" > "$WORK/retained-next.json"
+      retained_save
+    fi
+  fi
+  record_set '.abandoned=$e' --argjson e "$entry"
 }
 retained_load() {
   "${k[@]}" get configmap radar-retained-db --ignore-not-found -o json > "$WORK/retained-now.json"
@@ -348,7 +358,9 @@ back_to_main() {
   back_to_main_routing
   # Writes reopen at once on the previous database; the (settled) measurement of the abandoned
   # one comes after, never delaying the unfreeze.
-  if jq -e '.frozenAt!=null and .unfrozenAt==null' "$WORK/record.json" >/dev/null; then
+  # freezeIntent is recorded before the freeze Job: a Job that failed or was interrupted after its
+  # ALTER leaves the database read-only, so any started freeze is undone (unfreeze is idempotent).
+  if jq -e '(.frozenAt!=null or .freezeIntent!=null) and .unfrozenAt==null' "$WORK/record.json" >/dev/null; then
     JOB_POLL=0.5 run_job unfreeze 60 90
     record_set '.unfrozenAt=$v[0].unfrozenAt' --slurpfile v "$WORK/verdict.json"
   fi
@@ -395,6 +407,7 @@ verify_prepared_release() {
 freeze_stage() {
   samedb && return 0
   jq -e '.frozenAt!=null' "$WORK/record.json" >/dev/null && return 0
+  record_set '.freezeIntent=$at' --arg at "$(iso_ms)"
   JOB_POLL=0.5 run_job freeze 60 90
   record_set '.frozenAt=$v[0].frozenAt|.freezeStartedAt=$v[0].freezeStartedAt' --slurpfile v "$WORK/verdict.json"
   printf 'Live database %s read-only from %s\n' "$(jq -r .liveDb "$WORK/record.json")" "$(jq -r .frozenAt "$WORK/record.json")"
@@ -508,6 +521,8 @@ promote_stage() {
     start_pod_logs main "$(slot_pods main)"; main_logs=$LOG_STEP
     record_set '.promotion.mainLogsStep=$s' --arg s "$main_logs"
   fi
+  # Resume after an interrupted promotion: the kept export is finished and verified by
+  # reconcile_log_exports below (gap-tolerant, never restarted), so main_logs stays empty here.
   if ! samedb; then
     select_database "$(jq -r .liveDb "$WORK/record.json")" "$(jq -r .targetDb "$WORK/record.json")" || fail 'Database selection failed'
     "${k[@]}" patch configmap radar-api --type=merge -p '{"data":{"GEO_DOCUMENTS_REPOINT":null}}' >/dev/null
