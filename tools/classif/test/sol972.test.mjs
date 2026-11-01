@@ -325,3 +325,89 @@ test('exit audit lists non-zero accepted votes and recomputes without them (0 LL
   assert.ok(after.metrics.codeConverged <= before.metrics.codeConverged);
   rmSync(home, { recursive: true, force: true });
 });
+
+// R3-P1 — L0 firewall parity: an allowed-city document citing an excluded city and bylaw
+// is refused by both scanText (L0) and scanFile (sandbox) with identical hit counts.
+test('R3-P1 L0 scanText matches the sandbox scanner on city and bylaw mentions', async () => {
+  const { buildFingerprints, scanText } = await import('../lib/fingerprint.mjs');
+  const { scanFile } = await import('../guard/sandbox-build.mjs');
+  const { fingerprintHits } = await import('../lib/draw.mjs');
+  const salt = 'r3-p1-salt';
+  const fps = buildFingerprints(salt, {
+    nodeIds: ['signal-ville-x-1'], docShas: ['e'.repeat(64)], citySlugs: ['saint-exemple'],
+    bylaws: ['9001-1'], inputs: ['un jeu de mots completement different sans rapport avec le texte teste ici presentement'],
+  });
+  const guard = { salt, fps };
+  const text = 'Document de Ville-Autorisee : le proces-verbal cite la ville de Saint-Exemple et le reglement 9001-1 pour comparaison.';
+  const a = scanText(salt, fps, text, { citySlugs: ['ville-autorisee'] });
+  const b = scanFile(guard, text);
+  assert.deepEqual(a, b);
+  assert.ok(a.citySlugs > 0, `expected a city hit, got ${JSON.stringify(a)}`);
+  assert.ok(a.bylaws > 0, `expected a bylaw hit, got ${JSON.stringify(a)}`);
+  assert.equal(a.nodeIds, 0);
+  assert.equal(a.docShas, 0);
+  const hits = fingerprintHits(guard, text, ['ville-autorisee']);
+  assert.ok(hits && hits.citySlugs > 0 && hits.bylaws > 0);
+  const clean = 'Document de Ville-Autorisee : proces-verbal local sans mention exterieure ni numero, douze mots neutres pour completer ici presentement.';
+  assert.deepEqual(scanText(salt, fps, clean), scanFile(guard, clean));
+  assert.equal(fingerprintHits(guard, clean, ['ville-autorisee']), null);
+});
+
+// R3-P2 — JSONL resume: a truncated last line is dropped before append, readers stay tolerant.
+test('R3-P2 truncated manifest tail is repaired before append and never throws', async () => {
+  const { appendJsonlRecord, parseJsonlTolerant, repairTruncatedJsonl } = await import('../lib/jsonl.mjs');
+  const { readManifestDone } = await import('../l2/scrape.mjs');
+  const { loadComplements } = await import('../l2/converge.mjs');
+  const dir = tmp();
+  const home = path.join(dir, 'home');
+  mkdirSync(path.join(home, 'l2'), { recursive: true });
+  const excerptA = path.join(home, 'l2', 'a.excerpt.txt');
+  writeFileSync(excerptA, 'extrait A conserve');
+  const manifest = path.join(home, 'l2', 'scrape-manifest.jsonl');
+  const recA = { itemId: 'a', status: 'ok', url: 'https://x.invalid/a', fetchedAt: '2026-01-01T00:00:00.000Z', sha256: 'a'.repeat(64), excerptPath: excerptA };
+  writeFileSync(manifest, `${JSON.stringify(recA)}\n{"itemId":"b","status":"ok","url":`);
+  // Tolerant read: the complete record is kept, the truncated tail is skipped, no throw.
+  assert.deepEqual([...readManifestDone(manifest)], ['a']);
+  assert.doesNotThrow(() => loadComplements(home));
+  assert.ok(loadComplements(home).has('a'));
+  // Resume: repair drops the partial line, the next append stays a readable record.
+  repairTruncatedJsonl(manifest);
+  const excerptB = path.join(home, 'l2', 'b.excerpt.txt');
+  writeFileSync(excerptB, 'extrait B conserve');
+  appendJsonlRecord(manifest, { itemId: 'b', status: 'ok', url: 'https://x.invalid/b', fetchedAt: '2026-01-01T00:00:00.000Z', sha256: 'b'.repeat(64), excerptPath: excerptB });
+  const lines = readFileSync(manifest, 'utf8').split('\n').filter(Boolean);
+  assert.equal(lines.length, 2);
+  assert.deepEqual(lines.map((l) => JSON.parse(l).itemId).sort(), ['a', 'b']);
+  assert.deepEqual([...readManifestDone(manifest)].sort(), ['a', 'b']);
+  assert.doesNotThrow(() => loadComplements(home));
+  assert.deepEqual([...loadComplements(home).keys()].sort(), ['a', 'b']);
+  assert.deepEqual(parseJsonlTolerant('{"x":1}\n{"x":'), [{ x: 1 }]);
+  rmSync(dir, { recursive: true, force: true });
+});
+
+// R3-P3 — EPIPE on child.stdin fails that call only, never the runner.
+test('R3-P3 early seat exit (EPIPE on stdin) resolves as a call failure', async () => {
+  const { callSeat } = await import('../run-seat.mjs');
+  const epipeChild = () => {
+    const child = new EventEmitter();
+    child.pid = 99998;
+    child.stdout = new EventEmitter();
+    child.stderr = new EventEmitter();
+    const stdin = new EventEmitter();
+    // Sync emit: the call attaches the stdin error handler before end(), so the
+    // EPIPE is recorded; close follows so the call resolves as a failure.
+    stdin.end = () => { stdin.emit('error', Object.assign(new Error('write EPIPE'), { code: 'EPIPE' })); };
+    child.stdin = stdin;
+    child.kill = () => true;
+    setTimeout(() => { child.emit('close', 1); }, 20);
+    return child;
+  };
+  const base = tmp();
+  const r1 = await callSeat('muse-wonder-max', 'prompt', { base, timeoutMs: 5000, closeGraceMs: 2000, spawnImpl: () => epipeChild() });
+  assert.equal(r1.code, 1);
+  assert.match(String(r1.stderrTail ?? ''), /EPIPE/);
+  // The runner survives: a second call after the EPIPE still resolves.
+  const r2 = await callSeat('muse-wonder-max', 'prompt', { base, timeoutMs: 5000, closeGraceMs: 2000, spawnImpl: () => epipeChild() });
+  assert.equal(r2.code, 1);
+  rmSync(base, { recursive: true, force: true });
+});
