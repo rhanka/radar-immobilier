@@ -27,6 +27,8 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
 - **Conditional Paths (allowed only with explicit exception)**:
   - `ui/{Dockerfile,vite.config.ts}`, nginx variants and header parity check
   - `tools/ui-continuity.*` (isolated verification entrypoint)
+  - `tools/make/e2e-real.sh` (optional isolated compose override only)
+  - `tools/make/e2e-real-runner.sh` (preinstalled browser OS dependencies only)
 - **Exception process**: declare rationale, impact and rollback below before edits.
 
 ## Feedback Loop
@@ -37,7 +39,16 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
   Static-serving impact only; rollback by old configuration.
 - UISW-EX3: standalone Make/compose verification wrapper avoids `.env` reads,
   keeps dependencies in named volumes, invokes the existing real-stack E2E runner.
+  Buildx activity metadata stays under repository `tmp/` (user config is read-only).
   No host ports or production effects; remove the wrapper to roll back.
+- UISW-EX4: optional E2E compose override selects tmpfs for the synthetic DB.
+  Evidence: initdb completed bootstrap but host-disk sync exceeded the health
+  window twice. This removes durable I/O from disposable test data without
+  increasing a timeout. Defaults are unchanged; remove the override to roll back.
+- UISW-EX5: the test-only override uses the locally cached Playwright OS image
+  with preinstalled libraries, but installs the exact lockfile Chromium build.
+  Evidence: repeated dpkg fsync stalls on the host disk. Application images and
+  default runners remain unchanged; remove the override to roll back.
 - Navigation adoption needs router methods to update geographic/hash views
   coherently; isolated `.set()` of activeRouteView is forbidden.
 - Review runs in this session: owner forbids workflow/background agents.
@@ -71,6 +82,7 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
   - [ ] Versioned bounded contexts, explicit adoption, session isolation.
   - [ ] Unknown schemas preserved; storage failures degrade without retries.
 - [ ] **Lot T — Verification**
+  - [x] Full UI: 1,981 passed, 2 skipped, 10 todo; MCP: 491 passed.
   - [x] Browser fixture and production-UI continuity scenarios authored.
   - [x] Isolated Make entrypoint avoids environment files and removes test volumes.
   - [x] Session/context isolation unit regressions; delayed auth response rejected.
@@ -78,6 +90,7 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
   - [ ] Typecheck, lint, API and MCP tests.
   - [ ] Playwright: two tabs, N/N-1/N+1, refusal, reconnect, rollback, kill.
 - [ ] **Lot N-1 — Docs consolidation**
+  - [x] Operating procedure authored; interim conductor report records real results.
   - [ ] Operating procedure and French report at the requested conductor path.
 - [ ] **Lot N — Delivery**
   - [ ] Push branch, open English PR, record full head SHA and CI state.
