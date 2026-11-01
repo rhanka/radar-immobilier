@@ -13,9 +13,11 @@ services:
   api:
     environment:
       DOTENV_CONFIG_PATH: /dev/null
+      NODE_COMPILE_CACHE: /tmp/node-compile-cache
+    # Replay tests execute a synthetic pdftotext stub under the temporary tree.
+    tmpfs:
+      - /tmp:rw,exec,mode=1777
     volumes:
-      - type: tmpfs
-        target: /tmp
       - continuity-ui-modules:/workspace/ui/node_modules
       - continuity-mcp-modules:/workspace/packages/immo-mcp/node_modules
       - continuity-artifacts-modules:/workspace/packages/artifacts-host/node_modules
