@@ -1,6 +1,11 @@
-# The k8s lane applies this only after creating the uniquely named Secret
-# radar-refresh-keyring-account-import. It must contain the encrypted source
-# keyring files and .key from the owner enrollment; it is deleted after import.
+# Rendered with its Secret radar-refresh-keyring-account-import (encrypted
+# owner keyring + .key) by `refresh-018.mk import-keyring-account`, applied
+# once by `run-keyring-import`, which ALWAYS runs `cleanup-keyring-import`
+# afterwards (success or failure): Job, Secret and the script ConfigMap.
+# ttlSecondsAfterFinished below only removes the Job, never the Secret.
+# IMPORT_TRANSPORT is substituted at render time by refresh-018.mk
+# (import-keyring-account IMPORT_TRANSPORT=codex|cloud-code); the placeholder
+# is fail-loud: the script refuses any transport it does not know.
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -29,6 +34,10 @@ spec:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities: { drop: ["ALL"] }
+          env:
+            - { name: IMPORT_TRANSPORT, value: "IMPORT-TRANSPORT-SET-BY-RENDER" }
+            - name: REFRESH_OWNER_SCOPE_REF
+              valueFrom: { secretKeyRef: { name: radar-refresh-runtime, key: REFRESH_OWNER_SCOPE_REF } }
           command:
             - /bin/sh
             - -ceu
@@ -44,11 +53,11 @@ spec:
               mkdir -p /keyring/runtime/.import
               trap 'rm -rf /keyring/runtime/.import' EXIT
               cp -a /import/. /keyring/runtime/.import/
-              node /workspace/enroll-codex-import.mjs /keyring/runtime /keyring/runtime/.import
+              node /workspace/account-import.mjs "$IMPORT_TRANSPORT" /keyring/runtime /keyring/runtime/.import
           volumeMounts:
             - { name: keyring, mountPath: /keyring }
             - { name: account-import, mountPath: /import, readOnly: true }
-            - { name: import-script, mountPath: /workspace/enroll-codex-import.mjs, subPath: enroll-codex-import.mjs, readOnly: true }
+            - { name: import-script, mountPath: /workspace/account-import.mjs, subPath: account-import.mjs, readOnly: true }
       volumes:
         - name: keyring
           persistentVolumeClaim: { claimName: radar-refresh-keyring }
