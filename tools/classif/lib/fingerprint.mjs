@@ -2,6 +2,7 @@
 // numbers, and 12-word shingles of the evaluation-set inputs. Only salted sha256 values are kept;
 // the scanner re-hashes candidate tokens with the same salt.
 import { createHash } from 'node:crypto';
+import { bylawsIn, slugify } from './triage.mjs';
 
 export const SHINGLE = 12;
 
@@ -32,14 +33,37 @@ export function buildFingerprints(salt, { nodeIds, docShas, citySlugs, bylaws, i
   };
 }
 
-/** Scans a text against the fingerprint lists. Returns hit counts per list (no plaintext). */
-export function scanText(salt, fps, text, { citySlugs = [] } = {}) {
+/**
+ * Single shared scanner for every L0/L2 guard (plan §C.4): node ids, docShas, city slugs
+ * (1–6 word n-grams of the text), bylaw numbers, 12-word shingles. Both `scanText` and the
+ * sandbox `scanFile` delegate here so the lists cannot drift apart.
+ */
+export function scanShared(salt, fps, text) {
   const sets = Object.fromEntries(['nodeIds', 'docShas', 'citySlugs', 'bylaws', 'shingles'].map((k) => [k, new Set(fps[k])]));
+  const has = (k, v) => sets[k].has(fp(salt, v));
   const hits = { nodeIds: 0, docShas: 0, citySlugs: 0, bylaws: 0, shingles: 0 };
   const t = String(text ?? '');
-  for (const m of t.matchAll(/\b(?:signal|event|doc|source|bylaw|zone|lot)-[a-z0-9][a-z0-9._-]*[a-z0-9]/gi)) if (sets.nodeIds.has(fp(salt, m[0]))) hits.nodeIds++;
-  for (const m of t.matchAll(/\b[0-9a-f]{64}\b/g)) if (sets.docShas.has(fp(salt, m[0]))) hits.docShas++;
-  for (const c of citySlugs) if (sets.citySlugs.has(fp(salt, baseCity(c)))) hits.citySlugs++;
-  for (const s of shingles(t)) if (sets.shingles.has(fp(salt, s))) hits.shingles++;
+  for (const m of t.matchAll(/\b(?:signal|event|doc|source|bylaw|zone|lot)-[a-z0-9][a-z0-9._-]*[a-z0-9]/gi)) if (has('nodeIds', m[0])) hits.nodeIds++;
+  for (const m of t.matchAll(/\b[0-9a-f]{64}\b/g)) if (has('docShas', m[0])) hits.docShas++;
+  const w = words(t);
+  const seen = new Set();
+  for (let n = 1; n <= 6; n++) {
+    for (let i = 0; i + n <= w.length; i++) {
+      const s = slugify(w.slice(i, i + n).join(' '));
+      if (!seen.has(s)) { seen.add(s); if (has('citySlugs', s)) hits.citySlugs++; }
+    }
+  }
+  for (const b of bylawsIn(t)) if (has('bylaws', b)) hits.bylaws++;
+  for (const s of shingles(t)) if (has('shingles', s)) hits.shingles++;
   return hits;
+}
+
+/**
+ * Scans a text against the fingerprint lists. Returns hit counts per list (no plaintext).
+ * The `citySlugs` option is kept for caller compatibility but no longer affects the counts:
+ * city matching is text-based (same n-gram scan as the sandbox) so an allowed-city document
+ * citing an excluded city is refused.
+ */
+export function scanText(salt, fps, text, _opts = {}) {
+  return scanShared(salt, fps, text);
 }
