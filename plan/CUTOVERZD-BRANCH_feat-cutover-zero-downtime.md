@@ -1,0 +1,35 @@
+# Feature: Recoverable zero-downtime cutover
+
+## Objective
+- [x] Address PR #956's second blocking review without losing acknowledged writes or logs.
+
+## Scope / Guardrails
+- [x] Work in `tmp/cutover-zd`, branch `feat/cutover-zero-downtime`; preserve the inherited tests.
+- [x] Make only, ENV last, no Python, no environment files, no cluster operations or kubeconfig changes.
+- [x] Commit without trailers or attribution; push without force or rebase.
+- [x] Tests use the portless `test-cutover` stack; remove volumes after each campaign.
+
+## Branch Scope Boundaries (MANDATORY)
+- [x] Allowed Paths: `tools/make/cutover*`, `deploy/cutover/**`, this plan.
+- [x] Forbidden Paths: root `Makefile`, root compose files, `rules/**`, agent entry points, other plans.
+- [x] Conditional Paths: none required by this repair.
+
+## Feedback Loop
+- [x] Owner authorizes finishing the interrupted builder's work, test-first fixes, commits and push.
+- [x] Test runner's blanket wait on unrelated Docker stacks blocks local verification; retain campaign locking and allow the isolated portless stack to coexist with idle dependencies.
+
+## Orchestration Mode (AI-selected)
+- [x] Sequential work in this session, without delegated or background workflows.
+
+## UAT Management (in orchestration context)
+- [x] No deployment or UAT; local synthetic Kubernetes and container tests only.
+
+## Plan / Todo (lot-based)
+- [x] Lot 0: read rules, fast-forward branch, inspect inherited changes and reproduce failures.
+- [ ] Lot 1: persist switch intent before exposing prepared writers.
+- [ ] Lot 2: retire prepared writers before measuring abandoned writes.
+- [ ] Lot 3: unknown Service or Deployment state retains the lock and forbids deletion.
+- [ ] Lot 4: incomplete log streams never authorize deletion.
+- [ ] Lot 5: retry safe failed or missing verification Jobs on recovery.
+- [ ] Lot 6: targeted and full operator tests pass; remove the test stack and volumes.
+- [ ] Lot 7: push atomic commits and write the French report with file lines and SHAs.
