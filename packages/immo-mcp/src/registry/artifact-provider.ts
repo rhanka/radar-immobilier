@@ -8,6 +8,7 @@ import { computeManifestDigest, type RegistryDefinition } from "@sentropic/clust
 import { checkAdmission, type AdmissionAuthority } from "@radar/artifacts-host";
 import { ARTIFACT_INVOCATION_SCOPES, ARTIFACT_TOOL_NAMES, ARTIFACT_TOOL_SCOPES, acceptedArtifactScopes, hasArtifactScope,
   isArtifactToolName, STRICT_ARTIFACT_SCOPE_POLICY, type ArtifactScopePolicy } from "./artifact-profile.js";
+import { AUTHORING_GUIDE_SNIPPET, getAuthoringGuide } from "./artifact-authoring-guide.js";
 
 // Compile the complete versioned contract, including semantic rules, before registry admission.
 export const IMMO_ARTIFACT_PROFILE = compileArtifactsProfile({ ...RADAR_ARTIFACTS_PROFILE,
@@ -25,13 +26,24 @@ type ArtifactManifestTool = ArtifactManifest["tools"][number];
  * because the registry only expresses "all of"; the binding then enforces
  * "immo:artifacts:read or immo:read" itself. Writes are declared in every mode.
  */
+/**
+ * Tools whose description carries the imperative DS + H5 core: ensure and
+ * publish (page creation path) plus get (republication of an existing
+ * page must find the guide too). The full contract ships in the
+ * `authoringGuide` response field of ensure and get.
+ */
+const GUIDE_DESCRIPTION_TOOLS: ReadonlySet<string> = new Set(
+  ["artifacts_ensure", "artifacts_publish", "artifacts_get"]);
+
 export function createImmoArtifactManifest(policy: ArtifactScopePolicy = STRICT_ARTIFACT_SCOPE_POLICY): ArtifactManifest {
   const base = createArtifactsManifest({ profile: IMMO_ARTIFACT_PROFILE });
   const tools = base.tools.map((tool: ArtifactManifestTool) => {
     const name: string = tool.name;
     if (!isArtifactToolName(name)) throw new Error("artifact_tool_unselected");
     const accepted = acceptedArtifactScopes(name, policy);
-    return { ...tool, requiredScopes: accepted.length === 1 ? [ARTIFACT_TOOL_SCOPES[name]] : [] };
+    const description = GUIDE_DESCRIPTION_TOOLS.has(name)
+      ? `${tool.description} ${AUTHORING_GUIDE_SNIPPET}` : tool.description;
+    return { ...tool, description, requiredScopes: accepted.length === 1 ? [ARTIFACT_TOOL_SCOPES[name]] : [] };
   });
   const scopes = [ARTIFACT_INVOCATION_SCOPES.read, ARTIFACT_INVOCATION_SCOPES.write]
     .filter((scope) => tools.some((tool: ArtifactManifestTool) => tool.requiredScopes.includes(scope)));
@@ -154,11 +166,25 @@ export function bindArtifactProvider(options: {
       });
       const outcome = await executor.execute({ tool, args, invocation });
       if (!outcome.ok) return refusal(outcome.failure.publicCode, outcome.failure.retriable);
-      return { content: [{ type: "text", text: JSON.stringify(outcome.result.body) }] };
+      // The durable receipt is untouched: the guide rides the MCP response
+      // text only, so tool selection and republication both surface it.
+      return { content: [{ type: "text", text: JSON.stringify(withAuthoringGuide(tool, outcome.result.body)) }] };
     },
   });
   bindings.add(binding);
   return binding;
+}
+
+/**
+ * Ensure and get responses carry the full authoring guide alongside the
+ * durable receipt fields. Anything else passes through unchanged.
+ */
+export function withAuthoringGuide(tool: string, body: unknown): unknown {
+  if ((tool === "artifacts_ensure" || tool === "artifacts_get") &&
+    typeof body === "object" && body !== null && !Array.isArray(body)) {
+    return { ...body, authoringGuide: getAuthoringGuide() };
+  }
+  return body;
 }
 
 export function assertArtifactBinding(value: ArtifactMcpBinding): void {

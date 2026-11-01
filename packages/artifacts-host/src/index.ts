@@ -82,3 +82,13 @@ export {
   type AuthorizePurpose, type CommitOperation, type AuthorizeCommitContext,
   type AuthorizeCommitDecision, type AuthorizeCommit,
 } from "./transaction-authority.js";
+export {
+  DESIGN_KIT_ASSETS,
+  DESIGN_KIT_REACT_SNAPSHOT,
+  DESIGN_KIT_THEME,
+  DESIGN_KIT_THEMES_VERSION,
+  DESIGN_KIT_VERSION,
+  designKitAssetUrl,
+  findDesignKitAsset,
+  type DesignKitAsset,
+} from "./design-kit.js";
