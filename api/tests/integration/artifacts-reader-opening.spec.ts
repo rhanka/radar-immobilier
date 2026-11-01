@@ -5,8 +5,8 @@ import { createSharedReaderTickets } from "../../src/artifacts/reader-tickets.js
 import { startHarness, cookie, type Harness } from "./artifacts-h2.helpers.js";
 import { publishedBaskets } from "./artifacts-baskets.helpers.js";
 import { fingerprintReaderProfile } from "../../src/artifacts/reader-profile.js";
-import { APPROVAL_BASE_CSP, APPROVAL_STYLE_HASH } from "../../src/artifacts/reader-opening.js";
-import { DESIGN_KIT_ASSETS, designKitAssetUrl } from "@radar/artifacts-host";
+import { APPROVAL_BASE_CSP, APPROVAL_STYLE_HASH, approvalDesignAssetUrl } from "../../src/artifacts/reader-opening.js";
+import { DESIGN_KIT_ASSETS } from "@radar/artifacts-host";
 import { createStoredReader } from "../../src/artifacts/reader-storage.js";
 import { createReaderContentApp } from "../../src/artifacts/content-serve.js";
 import { GRANT_SECRET, SESSION_SECRET, ISSUER } from "../../src/artifacts/reader-test-fixture.js";
@@ -107,7 +107,7 @@ describeDb("stored reader approval and single-use exchange", () => {
     expect(approvalHtml).toContain('data-st-theme="sent-tech"');
     expect(approvalHtml).toContain("st-card");
     expect(approvalHtml).toContain("st-button--primary");
-    expect(approvalHtml).toContain("/__artifacts/design/");
+    expect(approvalHtml).toContain("/api/v1/artifacts/reader/design/");
     expect(approvalHtml).toContain("<style>");
     const pinnedSummary = await request(pinned.headers.get("location")!, { headers: { cookie: appCookie } });
     expect(pinnedSummary.status).toBe(200);
@@ -160,7 +160,7 @@ describeDb("stored reader approval and single-use exchange", () => {
     const f = await publishedBaskets(h);
     const app = f.runtime();
     for (const asset of DESIGN_KIT_ASSETS) {
-      const res = await app.request(`https://app.example.test${designKitAssetUrl(asset)}`, {
+      const res = await app.request(`https://app.example.test${approvalDesignAssetUrl(asset)}`, {
         headers: { host: "app.example.test" },
       });
       expect(res.status, asset.file).toBe(200);
@@ -168,7 +168,7 @@ describeDb("stored reader approval and single-use exchange", () => {
       expect(res.headers.get("cache-control")).toContain("immutable");
       expect(await res.text()).toContain("--st-");
     }
-    const unknown = await app.request("https://app.example.test/__artifacts/design/ds-0.00.00-r9/x/y.css", {
+    const unknown = await app.request("https://app.example.test/api/v1/artifacts/reader/design/ds-0.00.00-r9/x/y.css", {
       headers: { host: "app.example.test" },
     });
     expect(unknown.status).toBe(404);

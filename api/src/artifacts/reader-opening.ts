@@ -9,7 +9,8 @@ import { validateTicketForExchange } from "./preview-exchange.js";
 import { mintSessionCookie, parseCookieHeader, PREVIEW_INIT_COOKIE } from "./preview-session.js";
 import { parseContentHost } from "./content-host.js";
 import { applyReaderContentHeaders } from "./content-isolation.js";
-import { DESIGN_KIT_ASSETS, designKitAssetUrl } from "@radar/artifacts-host";
+import { DESIGN_KIT_ASSETS, designKitAssetUrl, type DesignKitAsset } from "@radar/artifacts-host";
+import { createDesignKitApp } from "./design-kit.js";
 import type { SharedReaderTickets } from "./reader-tickets.js";
 import type { PwIdentityDomain } from "./write-intent-principal.js";
 import { samePwIdentityDomain } from "./write-intent-principal.js";
@@ -41,7 +42,13 @@ export const APPROVAL_BASE_CSP =
 
 export function approvalStylesheetLinks(): string {
   return DESIGN_KIT_ASSETS.map((asset) =>
-    `<link rel="stylesheet" href="${designKitAssetUrl(asset)}">`).join("");
+    `<link rel="stylesheet" href="${approvalDesignAssetUrl(asset)}">`).join("");
+}
+
+export function approvalDesignAssetUrl(asset: DesignKitAsset): string {
+  // The application ingress sends / to the UI. Only /api/* reaches this
+  // server through the existing nginx proxy; no new ingress is necessary.
+  return designKitAssetUrl(asset).replace("/__artifacts/design", "/api/v1/artifacts/reader/design");
 }
 
 export function createReaderOpening(deps: {
@@ -62,6 +69,7 @@ export function createReaderOpening(deps: {
     c.header("Content-Security-Policy", APPROVAL_BASE_CSP);
     return next();
   });
+  application.route("/design", createDesignKitApp());
   async function readablePinnedOrigin(value: unknown): Promise<string | null> {
     if (typeof value !== "string") return null;
     try {

@@ -24,6 +24,7 @@ compiled files are upstream output, not an author palette.
 
 Published pages load this kit from their own content origin through the
 authorized reader path. The application origin exposes the same immutable
-public assets for approval. CSP remains `style-src 'self'`; approval adds only
+public assets for approval under `/api/v1/artifacts/reader/design/`, which
+the existing UI nginx proxy routes to the API. CSP remains `style-src 'self'`; approval adds only
 this source and the exact hash of its small layout block. React ThemeProvider
 injects runtime styles and needs separate CSP qualification before use.
