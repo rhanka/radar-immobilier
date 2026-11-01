@@ -94,7 +94,7 @@ export function createUiStateSync(d: SyncDependencies) {
     session = current?.partition === partition && !current.invalidated ? current
       : { schema: SESSION_SCHEMA, schemaVersion: SCHEMA_VERSION, partition,
         sessionEpoch: uuid(), invalidated: false };
-    write(SESSION_KEY, JSON.stringify(session));
+    if (session !== current) write(SESSION_KEY, JSON.stringify(session));
     refresh(); schedule();
   }
   function invalidate() {

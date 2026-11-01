@@ -47,6 +47,9 @@ publication resumes. Unknown versions are ignored without overwriting their
 bytes; explicit logout purge is a distinct operation. No destructive migration
 or down-migration is performed in v1. Storage refusal/quota failures disable
 writes for that page; the application remains usable in memory.
+Invalidation hints name the affected partition and epoch, so a late hint cannot
+cancel a fresh login. Available transports still notify peers if storage writes
+fail. Re-reading an existing approved epoch never rewrites its record.
 
 ## Worker update and rollback
 
