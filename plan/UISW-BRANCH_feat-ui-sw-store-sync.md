@@ -82,6 +82,7 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
 - [ ] **Lot C — Local state sync**
   - [x] Logout during wake revalidation invalidates its owned epoch without overwriting a newer login.
   - [x] A stale logout preserves contexts owned by a newer canonical epoch.
+  - [x] Epoch changes interrupt an already suspended wake revalidation.
   - [x] Existing approved epochs are adopted without storage rewrite or echo.
   - [x] Epoch-scoped invalidation hints preserve fresh logins and survive quota failures.
   - [x] Wake preserves mounted UI; auth reads recheck changing epochs once.
