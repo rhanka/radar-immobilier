@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { EventEmitter } from 'node:events';
 import { mkdtempSync, mkdirSync, readFileSync, readdirSync, writeFileSync, existsSync, rmSync } from 'node:fs';
 import os from 'node:os';
@@ -154,6 +155,144 @@ test('P2.8 classif-down has no dash prefix and tolerates an absent volume', asyn
   assert.ok(!/^[\t ]*-docker volume rm/m.test(mk), 'dash prefix must not hide removal failures');
   assert.ok(mk.includes('docker volume rm $(CLASSIF_DEPS_VOLUME)'));
   assert.ok(mk.includes('docker volume inspect'), 'absent volume must be an explicit success path');
+});
+
+// R2-P1a — L0 draws refuse without the fingerprint guard (fail closed, no un-scanned draw).
+test('R2-P1a L0 PV and signal draws refuse without fingerprints.json', async () => {
+  const { requireFingerprints } = await import('../lib/draw.mjs');
+  const empty = tmp();
+  assert.throws(() => requireFingerprints(empty), /fingerprints\.json.*fail closed/);
+  rmSync(empty, { recursive: true, force: true });
+  const home = tmp();
+  const prev = process.env.CLASSIF_HOME;
+  process.env.CLASSIF_HOME = home;
+  try {
+    const pvs = await import('../l0/pvs.mjs');
+    await assert.rejects(pvs.main([]), /fingerprints\.json.*fail closed/);
+    mkdirSync(path.join(home, 'guard'), { recursive: true });
+    writeFileSync(path.join(home, 'guard', 'exclusions.json'), JSON.stringify({ citySlugs: [], nodeIds: [], docShas: [], bylaws: [] }));
+    const signals = await import('../l0/signals.mjs');
+    await assert.rejects(signals.main([]), /fingerprints\.json.*fail closed/);
+  } finally {
+    if (prev === undefined) delete process.env.CLASSIF_HOME; else process.env.CLASSIF_HOME = prev;
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
+// R2-P1b — amendment: proposals and votes from non-zero exits contribute nothing.
+test('R2-P1b amendment ignores proposals and votes from non-zero exits', async () => {
+  const { parseProposalList, parseBallot, tallyAmendments } = await import('../l2/amend.mjs');
+  assert.deepEqual(parseProposalList({ code: 1, text: '{"amendments":[{"rule":"Do X.","rationale":"Y"}]}' }), []);
+  assert.deepEqual(parseProposalList({ code: 0, text: 'not json' }), []);
+  assert.deepEqual(parseBallot({ code: 1, text: '{"votes":{"X1":true}}' }), {});
+  assert.deepEqual(parseBallot({ code: 0, text: '{"votes":{"X1":true}}' }), { X1: true });
+  // Review scenario: one clean yes, one yes with exit 1, one clean no → not adopted.
+  const union = [{ id: 'X1', rule: 'Adopt rule one.', rationale: '' }];
+  const review = [
+    { code: 0, text: '{"votes":{"X1":true}}' },
+    { code: 1, text: '{"votes":{"X1":true}}' },
+    { code: 0, text: '{"votes":{"X1":false}}' },
+  ];
+  assert.deepEqual(tallyAmendments(union, review).adopted, []);
+  const clean = [
+    { code: 0, text: '{"votes":{"X1":true}}' },
+    { code: 0, text: '{"votes":{"X1":true}}' },
+    { code: 0, text: '{"votes":{"X1":false}}' },
+  ];
+  assert.equal(tallyAmendments(union, clean).adopted.length, 1);
+});
+
+// R2-P2a — locateQuote: a present prefix completed by an invented passage never matches.
+test('R2-P2a invented completions of a present prefix never match', async () => {
+  const { locateQuote } = await import('../l2/annotation.mjs');
+  const { actMatched } = await import('../l3/reference.mjs');
+  const prefix = 'avis de motion du reglement de zonage numero 1234-5 afin de permettre la construction de logements multiples dans la zone visee par';
+  const item = { input: `ouverture de la seance ${prefix} la suite du proces-verbal sans rapport avec la fin inventee` };
+  const tail = 'une tour de trente etages avec heliport et casino municipal flambant neuf';
+  const q1 = `${prefix} ${tail} variante alpha`;
+  const q2 = `${prefix} ${tail} variante beta`;
+  assert.equal(locateQuote(item.input, q1).found, false);
+  assert.equal(locateQuote(item.input, q2).found, false);
+  const v = (quote) => ({ valid: true, quote });
+  assert.equal(actMatched(item, [v(q1), v(q2), null]), false);
+  const verbatim = 'avis de motion du reglement de zonage numero 1234-5';
+  assert.deepEqual(locateQuote(`premiere page\f${item.input}`, verbatim), { found: true, page: 2 });
+});
+
+// R2-P2b — revalidate: atomic rewrite, non-zero-exit lots stay inadmissible.
+test('R2-P2b revalidate rewrites atomically and keeps failed exits inadmissible', async () => {
+  const src = readFileSync(new URL('../l2/revalidate.mjs', import.meta.url), 'utf8');
+  assert.ok(src.includes('atomicWrite'), 'revalidate must rewrite final lots atomically');
+  const { main: revalidate } = await import('../l2/revalidate.mjs');
+  const { ANNOTATORS, loadCodes } = await import('../l2/run.mjs');
+  const codes = loadCodes();
+  const code = [...codes.keys()][0];
+  const home = tmp();
+  const prev = process.env.CLASSIF_HOME;
+  process.env.CLASSIF_HOME = home;
+  try {
+    const items = [
+      { itemId: 'i1', kind: 'signal', anchor: { id: 'n1' }, input: 't1' },
+      { itemId: 'i2', kind: 'signal', anchor: { id: 'n2' }, input: 't2' },
+    ];
+    mkdirSync(path.join(home, 'l0'), { recursive: true });
+    writeFileSync(path.join(home, 'l0', 'dev-items.jsonl'), `${items.map((i) => JSON.stringify(i)).join('\n')}\n`);
+    for (const a of ANNOTATORS) {
+      const exitCode = a === ANNOTATORS[0] ? 1 : 0;
+      const d = path.join(home, 'l2', 'pass1', a);
+      mkdirSync(d, { recursive: true });
+      writeFileSync(path.join(d, 's001.json'), JSON.stringify({
+        pass: 1, annotator: a, lotId: 's001', exitCode, attempts: 3,
+        annotations: items.map((i) => ({ itemId: i.itemId, kind: i.kind, valid: true, issues: [], code, verdict: codes.get(code), ambiguous: false, cause: null, quote: null, reason: null, changed: null, quoteFound: null })),
+      }));
+      const w = path.join(home, 'l1', 'engram-work', 'runs', 'pass1', a);
+      mkdirSync(w, { recursive: true });
+      writeFileSync(path.join(w, 's001.json'), JSON.stringify({ nodes: [], edges: [] }));
+    }
+    const stats = await revalidate(['--pass', '1']);
+    assert.equal(stats.nonZeroExit, 1);
+    const bad = JSON.parse(readFileSync(path.join(home, 'l2', 'pass1', ANNOTATORS[0], 's001.json'), 'utf8'));
+    assert.ok(bad.annotations.every((an) => an.valid === false && an.issues.includes('non-zero-exit')));
+    const good = JSON.parse(readFileSync(path.join(home, 'l2', 'pass1', ANNOTATORS[2], 's001.json'), 'utf8'));
+    assert.ok(good.annotations.every((an) => an.valid === true));
+    for (const a of ANNOTATORS) assert.deepEqual(readdirSync(path.join(home, 'l2', 'pass1', a)).filter((f) => f.includes('.tmp-')), []);
+  } finally {
+    if (prev === undefined) delete process.env.CLASSIF_HOME; else process.env.CLASSIF_HOME = prev;
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
+// R2-P2c — classif-down with a stubbed docker: unreachable daemon fails, absent volume succeeds.
+test('R2-P2c classif-down fails when docker is unreachable, succeeds when absent', async () => {
+  const mk = readFileSync(new URL('../classif.mk', import.meta.url), 'utf8');
+  assert.match(mk, /no such volume/i);
+  assert.ok(mk.includes('exit 1'));
+  const lines = mk.split('\n');
+  const start = lines.findIndex((l) => l.startsWith('classif-down:'));
+  const body = [];
+  for (const l of lines.slice(start + 1)) {
+    if (!/^\t/.test(l)) break;
+    body.push(l.replace(/^\t/, '').replace(/^@/, ''));
+  }
+  const script = body.join('\n').split('$(CLASSIF_DEPS_VOLUME)').join('testvol-972').split('$$').join('$');
+  const bin = tmp();
+  writeFileSync(path.join(bin, 'docker'), `#!/bin/sh
+if [ "$1" = "volume" ] && [ "$2" = "inspect" ]; then
+  if [ "$DOCKER_STUB_MODE" = "absent" ]; then echo "Error: No such volume: $3" >&2; exit 1; fi
+  if [ "$DOCKER_STUB_MODE" = "down" ]; then echo "Cannot connect to the Docker daemon at unix:///var/run/docker.sock" >&2; exit 1; fi
+  echo '[{"Name":"'"$3"'"}]'; exit 0
+fi
+if [ "$1" = "volume" ] && [ "$2" = "rm" ]; then echo "$3"; exit 0; fi
+exit 0
+`, { mode: 0o755 });
+  try {
+    const run = (mode) => spawnSync('sh', ['-c', script], { encoding: 'utf8', env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, DOCKER_STUB_MODE: mode } });
+    const absent = run('absent');
+    assert.equal(absent.status, 0);
+    assert.match(absent.stdout, /absent/);
+    assert.notEqual(run('down').status, 0);
+    assert.equal(run('present').status, 0);
+  } finally { rmSync(bin, { recursive: true, force: true }); }
 });
 
 // P1.3b — exit audit: a non-zero final with valid votes is listed and excluded from recompute.
