@@ -39,7 +39,8 @@ bindings must remain present in addition to the two new MCP Secrets.
 | `IMMO_MCP_DATA_MODE` | CM `immo-mcp-config` | `http` | Simulation audit mode; source selection still depends on API base |
 | `IMMO_MCP_HTTP_PORT` | CM `immo-mcp-config` | `8848` | Defaults to 8848 |
 | `IMMO_MCP_OAUTH_REQUIRED_SCOPE` | Deliberately unset | Default `immo:read`; search also requires `immo:search` | Uses default |
-| `IMMO_MCP_OAUTH_SCOPES_SUPPORTED` | CM `immo-mcp-config` | `immo:read immo:search immo:documents:read` | Same advertised defaults |
+| `IMMO_MCP_OAUTH_SCOPES_SUPPORTED` | CM `immo-mcp-config` (preprod overlay) | `immo:read immo:search immo:documents:read immo:artifacts:read immo:artifacts:write` | Code default omits the artifact scopes; clients would not request them. Requires both scopes in the preprod IdP catalogue and the `immo-mcp` client first |
+| `IMMO_MCP_ARTIFACTS_LEGACY_READ_SCOPE` | CM `immo-mcp-config` (preprod overlay) | `true` during the transition | Default `false`: `artifacts_list`/`artifacts_get` require `immo:artifacts:read`; writes always require `immo:artifacts:write`; any other value aborts startup |
 | `IMMO_MCP_SESSION_IDLE_TIMEOUT_MS` / `IMMO_MCP_SESSION_MAX_LIFETIME_MS` | Deliberately unset | Defaults 1800000 / 28800000 | Uses defaults |
 | `MCP_SIGNAL_SEARCH_ENABLED` | API ref: CM `radar-mcp-receiver`, same key | Versioned `0`; operator sets `1` for qualification/serving | `0`, authenticated facade returns 503; values other than 0/1 abort API startup |
 | `STRICT_RECEIVER_ARMED` | API ref: same CM, same key | Versioned `0`; `1` only after matching A2 qualification receipt | Disarmed; see receiver semantics below |

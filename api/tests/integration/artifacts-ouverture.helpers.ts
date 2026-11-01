@@ -33,7 +33,10 @@ export const general = () => ({ enabled: true as const, subjects: [] as string[]
 
 export const body = (result: CallToolResult) => JSON.parse((result.content[0] as { text: string }).text);
 
-export function bindingRequest(sub: string, scopes: readonly string[] = ["immo:read"]): VerifiedMcpRequest {
+/** Explicit artifact consent (read + write) on top of the coarse Immo route scope. */
+export const ARTIFACT_SCOPES = ["immo:read", "immo:artifacts:read", "immo:artifacts:write"] as const;
+
+export function bindingRequest(sub: string, scopes: readonly string[] = ARTIFACT_SCOPES): VerifiedMcpRequest {
   return {
     principal: { issuer: "synthetic", sub, scopes: [...scopes], claims: [], attributes: {} },
     resource: "synthetic:mcp", correlationId: "ouverture", signal: new AbortController().signal,

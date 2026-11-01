@@ -3,7 +3,7 @@ import { composeArtifactHost, createArtifactAdmissionAuthority, guardArtifactPoo
   resolveArtifactsStorageConfig, readActivationEnv, resolveActivationConfig } from "@radar/artifacts-host";
 import { bindArtifactProvider, IMMO_ARTIFACT_PROFILE,
   type FrozenCallAuthority } from "./registry/artifact-provider.js";
-import { ARTIFACT_INVOCATION_SCOPE } from "./registry/artifact-profile.js";
+import { ARTIFACT_WRITE_SCOPE, readArtifactScopePolicy } from "./registry/artifact-profile.js";
 import { bindDatabaseName } from "./database-url.js";
 
 /** Trusted production composition; configuration supplies storage, never caller authority. */
@@ -11,6 +11,8 @@ export async function createArtifactBinding(env: NodeJS.ProcessEnv) {
   const config = resolveArtifactsStorageConfig(readArtifactsEnv(env));
   const readActivation = () => resolveActivationConfig(readActivationEnv(env));
   if (!config.enabled || !readActivation().enabled) return undefined;
+  // Read before any connection so an invalid transition flag fails startup closed.
+  const scopePolicy = readArtifactScopePolicy(env);
   const roleUrl = env.IMMO_MCP_ARTIFACT_DATABASE_URL;
   const contentBase = env.ARTIFACTS_CONTENT_BASE;
   if (!roleUrl || !contentBase) throw new Error("artifact_binding_incomplete");
@@ -25,12 +27,13 @@ export async function createArtifactBinding(env: NodeJS.ProcessEnv) {
       { profile: IMMO_ARTIFACT_PROFILE, readActivation, contentBase });
     const admission = createArtifactAdmissionAuthority(pool, readActivation, config.storageScope);
     const binding = bindArtifactProvider({ app: host.app, storageScopeId: config.storageScope,
-      admission,
+      admission, scopePolicy,
       authorizeCommit(request, frozen?: FrozenCallAuthority) {
         const actorId = request.principal.sub;
         return async (context, transaction) => {
           if (context.actorId !== actorId || context.storageScopeId !== config.storageScope ||
-            !request.principal.scopes.includes(ARTIFACT_INVOCATION_SCOPE)) {
+            // A commit is always a mutation: the legacy read transition never applies here.
+            !request.principal.scopes.includes(ARTIFACT_WRITE_SCOPE)) {
             return { allowed: false, reason: "denied", publicCode: "access_denied", status: 403, retriable: false };
           }
           const participant = (transaction as { participant?: {

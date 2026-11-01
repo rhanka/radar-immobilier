@@ -8,9 +8,10 @@
 import {
   ARTIFACT_DURABLE_IDENTITY,
   ARTIFACT_EFFECTIVE_REQUIRED,
-  ARTIFACT_INVOCATION_SCOPE,
+  ARTIFACT_INVOCATION_SCOPES,
   ARTIFACT_PROFILE_REVISION,
   ARTIFACT_SELECTION,
+  ARTIFACT_TOOL_SCOPES,
   REQUIRED_PROVIDER_CONTRACTS,
   isArtifactToolName,
   type ArtifactToolName,
@@ -21,6 +22,8 @@ export const ARTIFACT_PROVIDER_ID = "sentropic.artifacts" as const;
 
 const TOOL_NAME_RE = /^[a-z][a-z0-9_]*$/;
 export const DEFAULT_ALLOWED_SCOPES: readonly string[] = ["immo:read", "immo:search", "immo:documents:read"];
+/** Artifact tools never borrow an Immo data scope: each one requires its explicit artifact scope. */
+export const ARTIFACT_ALLOWED_SCOPES: readonly string[] = [ARTIFACT_INVOCATION_SCOPES.read, ARTIFACT_INVOCATION_SCOPES.write];
 
 export interface RegistryToolBinding {
   readonly context: string;
@@ -50,7 +53,7 @@ export interface ArtifactSelectionRequest {
 export interface ArtifactActivationRequest {
   readonly providerId: string;
   readonly selection: readonly ArtifactSelectionRequest[];
-  readonly invocationScope: string;
+  readonly invocationScopes: { readonly read: string; readonly write: string };
   readonly profileRevision: string;
   readonly finalizationContract: string | null;
   readonly errorContract: string | null;
@@ -118,9 +121,11 @@ export function checkTool(def: RegistryToolDefinition, allowedScopes: readonly s
     (isImmoToolName(def.name) && def.binding.context !== IMMO_TOOL_BINDINGS[def.name].context)) {
     throw new RegistryError("missing_binding", `tool ${def.name} has no handler binding`);
   }
-  if (!DEFAULT_ALLOWED_SCOPES.includes(def.scope) || !allowedScopes.includes(def.scope) ||
-    (isImmoToolName(def.name) && def.scope !== IMMO_TOOL_SCOPES[def.name]) ||
-    (isArtifactToolName(def.name) && def.scope !== ARTIFACT_INVOCATION_SCOPE)) {
+  const scopeAllowed = isArtifactToolName(def.name)
+    ? ARTIFACT_ALLOWED_SCOPES.includes(def.scope) && def.scope === ARTIFACT_TOOL_SCOPES[def.name]
+    : DEFAULT_ALLOWED_SCOPES.includes(def.scope) && allowedScopes.includes(def.scope) &&
+      !(isImmoToolName(def.name) && def.scope !== IMMO_TOOL_SCOPES[def.name]);
+  if (!scopeAllowed) {
     throw new RegistryError("generic_scope", `tool ${def.name} scope ${def.scope} is not an Immo scope`);
   }
 }
@@ -134,8 +139,10 @@ export function checkArtifact(request: ArtifactActivationRequest, providers: rea
   if (request.providerId !== ARTIFACT_PROVIDER_ID || !provider) {
     throw new RegistryError("unknown_provider", `artifact provider ${request.providerId} is not registered`);
   }
-  if (request.invocationScope !== ARTIFACT_INVOCATION_SCOPE) {
-    throw new RegistryError("generic_scope", "artifact invocation scope must be immo:read");
+  if (request.invocationScopes?.read !== ARTIFACT_INVOCATION_SCOPES.read ||
+    request.invocationScopes?.write !== ARTIFACT_INVOCATION_SCOPES.write) {
+    throw new RegistryError("generic_scope",
+      `artifact invocation scopes must be ${ARTIFACT_INVOCATION_SCOPES.read} and ${ARTIFACT_INVOCATION_SCOPES.write}`);
   }
   if (request.profileRevision !== ARTIFACT_PROFILE_REVISION) {
     throw new RegistryError("incompatible_version", `artifact profile ${request.profileRevision} is not supported`);
@@ -159,8 +166,9 @@ export function checkArtifact(request: ArtifactActivationRequest, providers: rea
     if (!expected || !declared) {
       throw new RegistryError("unavailable_capability", `artifact tool ${entry.tool} is not selectable`);
     }
-    if (declared.scope !== ARTIFACT_INVOCATION_SCOPE) {
-      throw new RegistryError("generic_scope", `artifact tool ${entry.tool} scope must be immo:read`);
+    if (declared.scope !== ARTIFACT_TOOL_SCOPES[entry.tool as ArtifactToolName]) {
+      throw new RegistryError("generic_scope",
+        `artifact tool ${entry.tool} scope must be ${ARTIFACT_TOOL_SCOPES[entry.tool as ArtifactToolName]}`);
     }
     if (expected.operation !== entry.operation || expected.method !== entry.method ||
       expected.path !== entry.path || expected.command !== entry.command) {
