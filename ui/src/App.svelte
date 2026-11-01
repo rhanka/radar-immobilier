@@ -31,6 +31,10 @@
   import { authStore, type AuthState } from "$lib/auth/auth-store.js";
   import { workspaceContext } from "$lib/signals/workspace-client.js";
   import WorkspacePicker from "$lib/components/workspace/WorkspacePicker.svelte";
+  import ContextResume from "$lib/components/workspace/ContextResume.svelte";
+  import UpdateNotice from "$lib/sw/UpdateNotice.svelte";
+  import { mountUiStateSync } from "$lib/sync/svelte-adapters.js";
+  let uiSync: ReturnType<typeof mountUiStateSync> | null = null;
   import {
     activeGeoRoute,
     activeRouteView,
@@ -109,6 +113,9 @@
   }
 
   async function handleLogout(): Promise<void> {
+    uiSync?.invalidate();
+    authStore.invalidateSession();
+    workspaceContext.reset();
     // Déconnexion serveur : efface le cookie de session (GET /logout ->
     // deleteCookie). On envoie `Accept: application/json` pour récupérer la
     // réponse JSON `{ok:true}` plutôt qu'un 302 (navigation), et on ignore les
@@ -188,6 +195,7 @@
   // explicite de l'utilisateur qui lance le flux OIDC (voir auth-store.ts pour
   // le disjoncteur `loginBlocked`).
   function handleLogin(): void {
+    uiSync?.prepareLogin();
     authStore.resetLoginAttempt();
     authStore.redirectToLogin();
   }
@@ -199,6 +207,7 @@
 
   onMount(async () => {
     cleanupRouter = initRouter();
+    uiSync = mountUiStateSync();
     // Raccourci beta GLOBAL (monté une fois, comme le routeur) : Ctrl+Shift+X
     // bascule le flag `radar.beta.evaluation` (persisté) qui révèle/masque
     // l'entrée « Évaluation » dans TopNav. Effets de navigation :
@@ -218,6 +227,7 @@
   });
 
   onDestroy(() => {
+    uiSync?.dispose();
     cleanupRouter?.();
     cleanupBetaShortcut?.();
     // §5 R2 — libère la suppression de bulle #564 si App est détruit sur Signaux.
@@ -260,6 +270,8 @@
         onLogout={handleLogout}
       />
       <WorkspacePicker />
+      <UpdateNotice save={() => uiSync?.flush()} />
+      {#if uiSync}<ContextResume sync={uiSync} />{/if}
 
       <!-- Zone de contenu -->
       <!-- 4 vues principales -->

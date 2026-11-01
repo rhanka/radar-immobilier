@@ -61,6 +61,7 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
   - [ ] Compatible update, targeted invalidation, kill switch and build identities.
   - [ ] Three nginx variants: JS, no-cache, 404, security-header inheritance.
 - [ ] **Lot C — Local state sync**
+  - [x] App/session wiring and explicit partial-context resume controls.
   - [x] Svelte preference integration keeps chat layout, basemap and route ownership.
   - [x] Per-tab context engine, session epochs and explicit adoption guards.
   - [x] Storage-failure boundary and same-origin invalidation channel.
