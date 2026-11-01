@@ -1,0 +1,18 @@
+services:
+  api:
+    environment:
+      DOTENV_CONFIG_PATH: /dev/null
+    volumes:
+      - continuity-ui-modules:/workspace/ui/node_modules
+      - continuity-mcp-modules:/workspace/packages/immo-mcp/node_modules
+      - continuity-artifacts-modules:/workspace/packages/artifacts-host/node_modules
+      - continuity-domain-modules:/workspace/packages/radar-domain/node_modules
+      - continuity-scoring-modules:/workspace/packages/radar-scoring/node_modules
+      - continuity-sources-modules:/workspace/packages/radar-sources/node_modules
+volumes:
+  continuity-ui-modules:
+  continuity-mcp-modules:
+  continuity-artifacts-modules:
+  continuity-domain-modules:
+  continuity-scoring-modules:
+  continuity-sources-modules:
