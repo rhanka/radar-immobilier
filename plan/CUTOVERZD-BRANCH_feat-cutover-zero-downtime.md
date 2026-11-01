@@ -32,6 +32,6 @@
 - [x] Lot 2: retire prepared writers before measuring abandoned writes; the regression commits a final request at SIGTERM.
 - [x] Lot 3: unknown routing, prepared/adopted Deployment reads and Pod phases block deletion; four focused state tests pass.
 - [x] Lot 4: incomplete log streams never authorize deletion; previous instances, restarts and stream failures are covered (ten passing exporter tests).
-- [x] Lot 5: retry safe failed or missing verification Jobs on recovery (24 red reproductions, 30 passing helper tests).
+- [x] Lot 5: retry safe failed or missing verification Jobs; unknown creates and identity conflicts keep ownership (35 passing helper tests).
 - [ ] Lot 6: targeted and full operator tests pass; remove the test stack and volumes.
 - [ ] Lot 7: push atomic commits and write the French report with file lines and SHAs.

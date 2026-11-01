@@ -1,20 +1,22 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fixture } from './cutover-fixture.mjs';
 
-function retry(step, state, { unreadable = false, live = false, changedUid = false, unreadablePods = false, orphaned = false } = {}) {
+function retry(step, state, { unreadable = false, live = false, changedUid = false, unreadablePods = false, orphaned = false,
+  changedHash = false, recovering = true, lostCreate = false } = {}) {
   const f = fixture();
   const run = '11111111-1111-4111-8111-111111111111', name = `cutover-${run}-${step}`;
   const record = { run, jobs: { [step]: { name, uid: 'original', hash: 'hash', outcome: 'started' } }, checkpoints: {} };
+  if (lostCreate) record.jobs = {};
   writeFileSync(join(f.dir, 'record.json'), JSON.stringify(record));
   const s = f.state();
   if (unreadable) s.getFail = `job/${name}`;
   if (unreadablePods) s.getFail = 'pods/-l';
   if (state !== 'missing') s.objects.push({ kind: 'Job', metadata: { name, uid: changedUid ? 'replacement' : 'original',
-    labels: { 'sentropic.io/bascule': run }, annotations: { 'cutover-spec-sha256': 'hash' } },
+    labels: { 'sentropic.io/bascule': run }, annotations: { 'cutover-spec-sha256': changedHash ? 'replacement' : 'hash' } },
     status: { conditions: [{ type: state, status: 'True' }] } });
   if (state !== 'missing' || live) s.objects.push({ kind: 'Pod', metadata: { name: `${name}-pod`, labels: { 'job-name': name },
     ownerReferences: orphaned ? [] : [{ kind: 'Job', controller: true, uid: 'original' }] }, status: { phase: live ? 'Running' : 'Succeeded',
@@ -23,10 +25,11 @@ function retry(step, state, { unreadable = false, live = false, changedUid = fal
   const result = spawnSync('bash', ['-euc', `
     set -o pipefail
     fail() { echo "$*" >&2; exit 1; }
-    unknown_state() { fail "$*"; }
+    unknown_state() { touch "$WORK/unknown"; fail "$*"; }
     record_save() { :; }; checkpoint() { :; }
     source tools/make/cutover-jobs.sh
-    k=(kubectl); WORK="$1"; RUN="$2"; NS=synthetic; RECOVERING=1
+    k=(kubectl); WORK="$1"; RUN="$2"; NS=synthetic; RECOVERING=${recovering ? 1 : 0}
+    ${lostCreate ? 'lost_create() { kubectl "$@"; [[ $1 != create ]]; }; k=(lost_create)' : ''}
     render_job() {
       jq -n --arg name "$2" --arg run "$RUN" '{kind:"Job",metadata:{name:$name,labels:{"sentropic.io/bascule":$run}},
         spec:{activeDeadlineSeconds:30,template:{spec:{containers:[{env:[]}]}}}}' > "$WORK/job.json"
@@ -59,6 +62,7 @@ for (const [step, state, options] of [
     const { f, result } = retry(step, state, options);
     try {
       assert.notEqual(result.status, 0);
+      assert.doesNotMatch(result.stderr, /Cannot find module|Permission denied/);
       assert.match(result.stderr, /unknown|UID.*(?:changed|conflict)|consumers|indeterminate/);
       assert.deepEqual(f.state().jobCreation || [], []);
     } finally { f.cleanup(); }
@@ -69,3 +73,14 @@ test('recovery observes a completed identity Job without starting another', () =
   try { assert.equal(result.status, 0, result.stdout + result.stderr); assert.deepEqual(f.state().jobCreation || [], []); }
   finally { f.cleanup(); }
 });
+for (const options of [{ changedUid: true }, { changedHash: true }, { lostCreate: true }]) {
+  test(`unknown Job ownership keeps the cleanup lock before recovery: ${JSON.stringify(options)}`, () => {
+    const { f, result } = retry('identity', options.lostCreate ? 'missing' : 'Failed', { ...options, recovering: false });
+    try {
+      assert.notEqual(result.status, 0);
+      assert.doesNotMatch(result.stderr, /Cannot find module|Permission denied/);
+      assert.equal(existsSync(join(f.dir, 'unknown')), true, result.stderr);
+      if (options.lostCreate) assert.equal(f.state().jobCreation.length, 1, 'the server created the Job before losing its response');
+    } finally { f.cleanup(); }
+  });
+}
