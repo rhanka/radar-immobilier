@@ -54,8 +54,11 @@ Prepare the three qualified P0b operations (0.2.5 or 0.3.0) while preserving the
   - [x] Upstream reference: `8b5b1f7793e433938de64f068dc2116e6f084ff6`; tarball SHA-256 `b6a13f19f218e5a433581cf395c9fcc4ed4ca1ee07485e67507b37069b75c4cf`.
 - [x] **Lot 4 — Delivery**
   - [x] Review diff, push, open English draft PR #979, write the French conductor report.
-- [ ] **Lot 5 — P0b publication version flexibility**
+- [x] **Lot 5 — P0b publication version flexibility**
   - [x] Qualify 0.2.5 and 0.3.0 through one exported version list, keeping 0.2.2 legacy.
   - [x] Parameterize registry/candidate and resolve IMMO's actual dependency graph.
   - [x] Local 0.2.5 candidate: 522 MCP + 234 host tests pass, no skips; three typechecks and lint pass. IMMO pins cluster-mesh 0.22.1; full npm resolution accepts the candidate without ERESOLVE.
-  - [ ] Update publication steps, verify baseline/fallback, tear down, push and report.
+  - [x] 0.2.2 baseline: 511 MCP + 229 host tests pass (8 + 5 profile skips); three typechecks and lint pass; explicit down -v completed.
+  - [x] Local 0.3.0 fallback: 522 MCP + 234 host tests pass, no skips; typechecks, lint and full graph resolution pass with the existing root override.
+  - [x] Update publication steps; registry default selects 0.2.5 (E404 at 18:42 Montreal on 2026-11-01).
+  - [x] Remove disposable dependencies; explicit down -v and inspection confirm no remaining project containers, volumes or networks.

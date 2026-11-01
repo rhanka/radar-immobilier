@@ -2,7 +2,8 @@
 
 The central dependency pin is `dependencies["@sentropic/artifacts"]` in the root `package.json`.
 Workspace dependencies resolve through the root override. With 0.2.2 the existing four tools stay active;
-with the qualified 0.3.0 package the host and MCP select exactly seven tools. No environment flag switches profiles.
+with either qualified P0b version (0.2.5 or 0.3.0) the host and MCP select exactly seven tools.
+`ARTIFACT_P0B_VERSIONS` is the shared version list. No environment flag switches profiles.
 
 | Added tool | Required scope | MCP annotations |
 | --- | --- | --- |
@@ -39,7 +40,7 @@ Sharing and deletion do not consume publication quotas; their attempts still use
 ## Delete permanently
 
 1. The owner calls `artifacts_delete({artifactId,idempotencyKey})`. The public release field is optional.
-   Upstream 0.3.0 needs a snapshot internally: IMMO resolves it on the server and retains it with the challenge.
+   Upstream P0b needs a snapshot internally: IMMO resolves it on the server and retains it with the challenge.
    An explicitly supplied snapshot is still checked. Omission does not become caller-visible CAS.
 2. `confirmation_required` preserves `details.confirmationRef`, `details.managementUrl`, `details.expiresAt` through MCP/HTTP.
    Open the management URL on the normal IMMO origin. A valid application cookie, approved account, current activation,
@@ -60,26 +61,40 @@ All commands below run in this worktree. The standalone runner never includes th
 `--env-file /dev/null`, publishes no ports and always tears down with `down -v --remove-orphans`.
 
 ```sh
-make -f tools/mcp-p0b.mk registry ENV=test-mcp-p0b
+make -f tools/mcp-p0b.mk registry P0B_VERSION=0.2.5 ENV=test-mcp-p0b
 make -f tools/mcp-p0b.mk verify ENV=test-mcp-p0b
-make -f tools/mcp-p0b.mk candidate SOURCE=/absolute/sentropic/p0b/packages/artifacts ENV=test-mcp-p0b
+make -f tools/mcp-p0b.mk candidate P0B_VERSION=0.2.5 SOURCE=/absolute/sentropic/p0b/packages/artifacts ENV=test-mcp-p0b
 make -f tools/mcp-p0b.mk down ENV=test-mcp-p0b
 ```
 
 `candidate` mounts the upstream package read-only, copies only package inputs, compiles and packs that copy,
-then extracts the tarball into disposable container dependencies. It leaves both repositories' dependency pins and
-lockfiles unchanged and runs the real PostgreSQL lifecycle tests in the isolated `p0b` database.
+stamping both package metadata and the provider version with `P0B_VERSION` (default `0.2.5`; fallback `0.3.0`).
+It resolves the complete IMMO workspace graph against that tarball in a disposable manifest/lock copy, without
+`--force` or `--legacy-peer-deps`, then extracts the tarball into disposable container dependencies.
+It leaves both repositories' dependency pins and lockfiles unchanged and runs the real PostgreSQL lifecycle
+tests in the isolated `p0b` database.
 External S3 is replaced by the existing in-memory publication port; SDK stall tests remain in the suite.
+
+IMMO pins `@sentropic/cluster-mesh@0.22.1`, not `0.26.0-dev.3`. Its declared artifacts peer range is
+`>=0.2.0 <0.3.0`, which accepts `0.2.5`. The root artifacts override is retained in the disposable graph;
+the candidate's npm resolution checks the actual IMMO configuration rather than inferring sentropic's result.
+Both local candidate graphs (0.2.5 and 0.3.0) resolve without ERESOLVE with that existing override.
 
 When npm publication is available:
 
-1. Verify `registry` reports `0.3.0` and that the published API matches the qualified upstream candidate.
-2. Change **one source line**: root `@sentropic/artifacts` from `0.2.2` to `0.3.0`.
+1. Prefer `0.2.5`. Run `make -f tools/mcp-p0b.mk registry P0B_VERSION=0.2.5 ENV=test-mcp-p0b`
+   and confirm the published API matches PR #878, commit `8b5b1f7793e433938de64f068dc2116e6f084ff6` or later.
+   If upstream publishes the fallback instead, use `P0B_VERSION=0.3.0` for registry/candidate;
+   the remaining commands are unchanged.
+2. Change **one source line**: root `dependencies["@sentropic/artifacts"]` from `0.2.2` to the selected version,
+   `0.2.5` or `0.3.0`.
 3. Regenerate the lockfile with `make -f tools/mcp-p0b.mk lock ENV=test-mcp-p0b`.
-4. Run `verify` and `integration` with the published package. Commit only the pin plus generated lockfile.
+4. Run `make -f tools/mcp-p0b.mk verify ENV=test-mcp-p0b`, then
+   `make -f tools/mcp-p0b.mk integration ENV=test-mcp-p0b` with the published package.
+5. Run `make -f tools/mcp-p0b.mk down ENV=test-mcp-p0b`, then commit only the pin plus generated lockfile.
    No source, guide, scope, annotation, profile JSON or operation-selection edit should be necessary.
 
-Deployment is a separate operator action and was not performed by this branch. Before starting a 0.3.0 host,
+Deployment is a separate operator action and was not performed by this branch. Before starting a P0b host,
 apply `0028_artifacts_p0b` through the normal migration journal. It includes the upstream terminal guards and the
 shared confirmation table, without fabricating historical modification timestamps. Check that the restricted MCP
 database role has SELECT/INSERT/UPDATE on `artifacts.delete_confirmations`, SELECT on `account_users` and the existing
