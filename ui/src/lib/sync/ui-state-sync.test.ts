@@ -19,6 +19,21 @@ function publishPeer(storage: Storage, changes: Partial<UiContext> = {}) {
   storage.setItem(contextKey(value), JSON.stringify(value)); return value;
 }
 describe("per-tab contexts and session continuity", () => {
+  it("should invalidate and purge on logout while wake authentication is pending", async () => {
+    const { sync, storage } = setup(); await sync.account("subject");
+    const peer = publishPeer(storage);
+    sync.wake(); sync.invalidate();
+    expect(decodeSession(storage.getItem(SESSION_KEY)!)?.invalidated).toBe(true);
+    expect(storage.getItem(contextKey(peer))).toBeNull();
+    await sync.account("subject"); sync.flush(); expect(get(sync.peers)).toEqual([]);
+  });
+  it("should preserve a newer canonical epoch when a suspended old tab logs out", async () => {
+    const { sync, storage } = setup(); await sync.account("subject");
+    sync.wake();
+    const next = JSON.stringify({ ...decodeSession(storage.getItem(SESSION_KEY)!)!, sessionEpoch: uuid() });
+    storage.setItem(SESSION_KEY, next); sync.invalidate();
+    expect(storage.getItem(SESSION_KEY)).toBe(next);
+  });
   it("should preserve a fresh login when an old session invalidation arrives late", async () => {
     const { sync, storage, revalidate } = setup(); await sync.account("subject");
     const old = decodeSession(storage.getItem(SESSION_KEY)!)!;
