@@ -6,7 +6,9 @@
 // scrape-manifest.jsonl (item, source, URL, fetch time, HTTP status, content type, sha256, paths).
 // Complements feed the dev-truth passes only (reconciliation), never the evaluated prompts; any
 // excerpt hitting a fingerprint list of the evaluation set is refused.
+/* global fetch, AbortSignal */
 import path from 'node:path';
+import { URL } from 'node:url';
 import process from 'node:process';
 import { spawnSync } from 'node:child_process';
 import { setTimeout as sleep } from 'node:timers/promises';

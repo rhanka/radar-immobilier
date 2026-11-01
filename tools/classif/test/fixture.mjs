@@ -87,7 +87,7 @@ export function fakeReferenceC(dir, refKey, rows = fakeRows(), opts = {}) {
   mkdirSync(dir, { recursive: true });
   const xlsx = fakeWorkbook(rows, opts);
   const retained = rows.filter((r) => ![14, 55, 58].includes(r.line));
-  const csv = Buffer.from(`﻿${toCsv([['#', 'Ville', 'Liens'], ...retained.map((r) => [r.line, r.city, `https://example.invalid/doc/${'a'.repeat(63)}${r.line % 10} ${r.id}`])])}`);
+  const csv = Buffer.from(`\uFEFF${toCsv([['#', 'Ville', 'Liens'], ...retained.map((r) => [r.line, r.city, `https://example.invalid/doc/${'a'.repeat(63)}${r.line % 10} ${r.id}`])])}`);
   writeFileSync(path.join(dir, 'reference-c.xlsx.sealed'), seal(refKey, xlsx));
   writeFileSync(path.join(dir, 'reference-c.csv.sealed'), seal(refKey, csv));
   writeFileSync(path.join(dir, 'README.md'), `| Sealed file | Content | SHA-256 of plaintext |\n|---|---|---|\n| \`reference-c.xlsx.sealed\` | x | \`${sha256(xlsx)}\` |\n| \`reference-c.csv.sealed\` | x | \`${sha256(csv)}\` |\n`);
