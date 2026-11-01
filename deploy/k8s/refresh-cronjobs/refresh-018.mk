@@ -84,21 +84,71 @@ import-keyring-account:
 	@test -d "$(IMPORT_SOURCE_DIR)" -a -f "$(IMPORT_SOURCE_DIR)/.key" \
 	  || { echo "IMPORT_SOURCE_DIR with .key is required" >&2; exit 1; }
 	@test -n "$(IMPORT_RENDER_OUT)" || { echo "IMPORT_RENDER_OUT is required" >&2; exit 1; }
-	@set -o pipefail; umask 077; { \
-	  kubectl create secret generic radar-refresh-keyring-account-import \
-	    --from-file="$(IMPORT_SOURCE_DIR)" --dry-run=client -o yaml; echo ---; \
-	  kubectl kustomize --load-restrictor LoadRestrictionsNone "$(OVERLAY)/keyring-import" \
-	    | sed -e "s#$(PLACEHOLDER)#$(IMPORT_IMAGE_REF)#g" -e "s#IMPORT-TRANSPORT-SET-BY-RENDER#$(IMPORT_TRANSPORT)#g"; \
-	} > "$(IMPORT_RENDER_OUT)"
-	@test "$$(grep -c '^kind: Job$$' "$(IMPORT_RENDER_OUT)")" -eq 1
-	@test "$$(grep -c '^kind: Secret$$' "$(IMPORT_RENDER_OUT)")" -eq 1
-	@! grep -q 'PINNED-BY-CI\|radar-api:latest\|IMPORT-TRANSPORT-SET-BY-RENDER' "$(IMPORT_RENDER_OUT)"
-	@grep -A1 -E 'name: IMPORT_TRANSPORT$$' "$(IMPORT_RENDER_OUT)" | grep -Eq 'value: "?$(IMPORT_TRANSPORT)"?$$' \
-	  || { echo "rendered Job does not carry IMPORT_TRANSPORT=$(IMPORT_TRANSPORT)" >&2; exit 1; }
+	@# The render holds the base64 master key and encrypted accounts. It may only
+	@# land in an existing 0700 directory of yours, outside this checkout and
+	@# outside any git work tree (e.g. `mktemp -d`); any failure deletes it.
+	@set -uo pipefail; umask 077; out="$(IMPORT_RENDER_OUT)"; \
+	  dir="$$(dirname -- "$$out")"; \
+	  test -d "$$dir" || { echo "IMPORT_RENDER_OUT directory must exist" >&2; exit 1; }; \
+	  dir="$$(cd -- "$$dir" && pwd -P)"; root="$$(cd -- "$(ROOT)" && pwd -P)"; \
+	  case "$$dir/" in "$$root/"*) echo "IMPORT_RENDER_OUT must be outside the repository" >&2; exit 1;; esac; \
+	  if git -C "$$dir" rev-parse --is-inside-work-tree >/dev/null 2>&1; then \
+	    echo "IMPORT_RENDER_OUT must be outside any git work tree" >&2; exit 1; fi; \
+	  { test -O "$$dir" && test "$$(stat -c %a -- "$$dir")" = 700; } \
+	    || { echo "IMPORT_RENDER_OUT directory must be yours with mode 0700" >&2; exit 1; }; \
+	  fail() { rm -f -- "$$out"; echo "$$1; render deleted" >&2; exit 1; }; \
+	  { kubectl create secret generic radar-refresh-keyring-account-import \
+	      --from-file="$(IMPORT_SOURCE_DIR)" --dry-run=client -o yaml && echo --- && \
+	    kubectl kustomize --load-restrictor LoadRestrictionsNone "$(OVERLAY)/keyring-import" \
+	      | sed -e "s#$(PLACEHOLDER)#$(IMPORT_IMAGE_REF)#g" -e "s#IMPORT-TRANSPORT-SET-BY-RENDER#$(IMPORT_TRANSPORT)#g"; \
+	  } > "$$out" || fail "render failed"; \
+	  test "$$(grep -c '^kind: Job$$' "$$out")" -eq 1 || fail "render must hold exactly one Job"; \
+	  test "$$(grep -c '^kind: Secret$$' "$$out")" -eq 1 || fail "render must hold exactly one Secret"; \
+	  ! grep -q 'PINNED-BY-CI\|radar-api:latest\|IMPORT-TRANSPORT-SET-BY-RENDER' "$$out" || fail "render is not pinned"; \
+	  grep -A1 -E 'name: IMPORT_TRANSPORT$$' "$$out" | grep -Eq 'value: "?$(IMPORT_TRANSPORT)"?$$' \
+	    || fail "rendered Job does not carry IMPORT_TRANSPORT=$(IMPORT_TRANSPORT)"
+
+IMPORT_WAIT_SECONDS ?= 21600
+IMPORT_POLL_SECONDS ?= 10
+
+# Applies the render ONCE, waits for the Job to succeed or fail (it may first
+# wait on .refresh.lock for a running pass), prints its pseudonymized log, and
+# ALWAYS runs cleanup-keyring-import — on success, Job failure, apply failure,
+# timeout or interruption. Exit status is the Job's.
+.PHONY: run-keyring-import
+run-keyring-import: guard-preprod
+	@test "$(PREPROD_CONFIRM)" = "1" || { echo "PREPROD_CONFIRM=1 is required" >&2; exit 1; }
+	@test -f "$(IMPORT_RENDER_OUT)" || { echo "IMPORT_RENDER_OUT render file is required" >&2; exit 1; }
+	@set -uo pipefail; status=1; \
+	  cleanup() { $(MAKE) -s -f "$(lastword $(MAKEFILE_LIST))" cleanup-keyring-import \
+	    KUBECONFIG="$(KUBECONFIG)" IMPORT_RENDER_OUT="$(IMPORT_RENDER_OUT)" ENV=preprod \
+	    || { echo "keyring import cleanup FAILED: rerun cleanup-keyring-import" >&2; exit 1; }; }; \
+	  trap cleanup EXIT; trap 'exit 130' INT TERM; \
+	  $(K) apply -f "$(IMPORT_RENDER_OUT)" || exit 1; \
+	  deadline=$$(( $$(date +%s) + $(IMPORT_WAIT_SECONDS) )); \
+	  while :; do \
+	    state="$$($(K) get job radar-refresh-keyring-account-import -o jsonpath='{.status.succeeded}/{.status.failed}')" || break; \
+	    case "$$state" in 1/*) status=0; break;; */[1-9]*) echo "keyring import Job failed" >&2; break;; esac; \
+	    [ "$$(date +%s)" -lt "$$deadline" ] || { echo "keyring import Job did not finish in time" >&2; break; }; \
+	    sleep $(IMPORT_POLL_SECONDS); \
+	  done; \
+	  $(K) logs job/radar-refresh-keyring-account-import || true; \
+	  exit $$status
+
+# Idempotent: removes the import Job, its Secret (owner keyring) and its
+# script ConfigMap, then the local render. Safe to rerun after any failure;
+# the Job TTL alone would leave the Secret and ConfigMap behind.
+.PHONY: cleanup-keyring-import
+cleanup-keyring-import: guard-preprod
+	@$(K) delete job/radar-refresh-keyring-account-import secret/radar-refresh-keyring-account-import \
+	  configmap/radar-refresh-keyring-import-script --ignore-not-found --wait=true
+	@if [ -n "$(IMPORT_RENDER_OUT)" ] && [ -f "$(IMPORT_RENDER_OUT)" ]; then \
+	  shred -u -- "$(IMPORT_RENDER_OUT)" 2>/dev/null || rm -f -- "$(IMPORT_RENDER_OUT)"; fi
 
 .PHONY: test-keyring-import
-test-keyring-import: ## Hermetic selftest of the keyring account import (no cluster)
+test-keyring-import: ## Hermetic tests of the keyring account import (no cluster)
 	@node --test "$(OVERLAY)/keyring-import/account-import.selftest.mjs"
+	@bash "$(OVERLAY)/keyring-import/keyring-import.test.sh"
 
 .PHONY: consent-cloud-code
 consent-cloud-code:
