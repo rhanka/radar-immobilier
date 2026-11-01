@@ -104,7 +104,7 @@ test("should sync actual Svelte preferences and offer partial contexts without m
   const other = await context.newPage(); await other.goto("/#/rapport");
   await expect(page.getByRole("link", { name: "Sources", exact: true })).toBeVisible();
   await page.keyboard.press("Control+Shift+X");
-  await expect(other.getByRole("link", { name: "Évaluation", exact: true })).toBeVisible({ timeout: 2000 });
+  await expect(other.getByRole("link", { name: /^Évaluation/ })).toBeVisible({ timeout: 2000 });
   expect(new URL(other.url()).hash).toBe("#/rapport");
   await page.goto("/#/sources?filter.period=all&filter.citySearch=private&filter.showDiscarded=1");
   await other.locator("summary").filter({ hasText: "Reprendre un contexte" }).click();

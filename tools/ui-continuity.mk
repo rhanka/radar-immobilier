@@ -6,7 +6,7 @@ export COMPOSE_DISABLE_ENV_FILE
 override COMPOSE := docker compose --env-file /dev/null -p radar-$(ENV) -f docker-compose.yml -f docker-compose.test.yml -f tools/ui-continuity.compose.yml
 RUN := $(COMPOSE) run --rm --no-deps -T --entrypoint '' api
 BROWSER_COMPOSE := $(COMPOSE) -f tools/ui-continuity.browser.yml
-.PHONY: guard test-ui typecheck lint test-api test-immo-mcp test-e2e down commit merge push inspect
+.PHONY: guard test-ui typecheck lint verify test-api test-immo-mcp test-e2e test-worker down commit push inspect
 guard:
 	@case "$(ENV)" in test-*) ;; *) echo 'Require ENV=test-*'; exit 2;; esac
 test-ui: guard
@@ -31,17 +31,7 @@ down: guard
 commit: guard
 	@test -n "$$MSG"
 	git commit -m "$$MSG"
-merge: guard
-	git merge --no-ff --no-commit fix/preprod-nginx-worker-csp
 push: guard
 	git push -u origin feat/ui-sw-store-sync
 inspect: guard
 	docker ps -a --filter label=com.docker.compose.project=radar-$(ENV) --format '{{.Names}} {{.Image}} {{.Status}}'
-inspect-all: guard
-	docker ps --format '{{.Names}} {{.Status}}'
-logs-db: guard
-	$(COMPOSE) logs --tail=80 postgres
-inspect-images: guard
-	docker image ls --format '{{.Repository}}:{{.Tag}}'
-stop-campaign: guard
-	@docker ps -q --filter label=com.docker.compose.project=radar-$(ENV) | xargs -r docker stop
