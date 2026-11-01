@@ -22,7 +22,7 @@ export const HOST_ARTIFACT_PROFILE = compileArtifactsProfile({ ...RADAR_ARTIFACT
     { operation: "delete", limits: { idempotencyKeyMaxUnits: 256 }, defaults: {} },
   ] : [])],
   contractRevisions: { ...RADAR_ARTIFACTS_PROFILE.contractRevisions,
-    immo: ARTIFACT_PROFILE_DESCRIPTOR.profileRevisionId },
+    ...(ARTIFACT_P0B ? { immo: ARTIFACT_PROFILE_DESCRIPTOR.profileRevisionId } : {}) },
 });
 
 export const isArtifactMutation = (op: string): boolean => ["ensure", "publish", "set_access", "delete"].includes(op);

@@ -16,7 +16,7 @@ Prepare the three qualified 0.3.0 operations while preserving the current non-CA
   - `api/src/artifacts/control-route*`, `api/tests/*p0b*`
   - `api/drizzle/0028_artifacts_p0b.sql`, `api/drizzle/meta/_journal.json`
   - `package.json`, `package-lock.json`, `api/package.json`
-  - `tools/mcp-p0b.mk`, `tools/mcp-p0b.services.yml`, `docs/runbooks/mcp-artifacts-p0b.md`
+  - `tools/mcp-p0b*`, `docs/runbooks/mcp-artifacts-p0b.md`
   - This branch plan.
 - **Forbidden Paths (must not change in this branch)**:
   - `Makefile`, `docker-compose*.yml`, `rules/**`, agent entry points, other branch plans.
