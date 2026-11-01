@@ -76,6 +76,7 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
   - [ ] Compatible update, targeted invalidation, kill switch and build identities.
   - [x] Three nginx variants: JS, no-cache, 404, security-header inheritance.
 - [ ] **Lot C — Local state sync**
+  - [x] Existing approved epochs are adopted without storage rewrite or echo.
   - [x] Epoch-scoped invalidation hints preserve fresh logins and survive quota failures.
   - [x] Wake preserves mounted UI; auth reads recheck changing epochs once.
   - [x] App/session wiring and explicit partial-context resume controls.

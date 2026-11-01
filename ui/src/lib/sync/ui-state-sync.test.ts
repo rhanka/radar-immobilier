@@ -64,6 +64,7 @@ describe("per-tab contexts and session continuity", () => {
     const { sync: a } = setup(storage); const { sync: b } = setup(storage);
     await a.account("subject"); const first = storage.getItem(SESSION_KEY);
     await b.account("subject"); expect(storage.getItem(SESSION_KEY)).toBe(first);
+    expect(storage.setItem).toHaveBeenCalledOnce();
     await vi.advanceTimersByTimeAsync(250);
     const keys = Array.from({ length: storage.length }, (_, i) => storage.key(i)!).filter((k) => k !== SESSION_KEY);
     expect(keys).toHaveLength(2); expect(keys[0]).not.toBe(keys[1]);
