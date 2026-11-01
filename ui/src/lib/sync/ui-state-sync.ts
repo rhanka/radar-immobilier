@@ -12,6 +12,8 @@ export function createUiStateSync(d: SyncDependencies) {
   const tabId = uuid(); // A page instance, never a copied sessionStorage tab id.
   const peers = writable<UiContext[]>([]);
   let session: UiSession | null = null;
+  // Retain ownership while publication is suspended for a fresh /auth/me.
+  let lastSession: UiSession | null = null;
   let sub: string | null = null;
   let generation = 0;
   let revision = 0;
@@ -70,10 +72,10 @@ export function createUiStateSync(d: SyncDependencies) {
     if (disposed || (next === sub && session && live())) return;
     const previous = sub;
     if (next === null) {
-      if (session) invalidate(); else suspend();
+      if (session || lastSession) invalidate(); else suspend();
       sub = null; return;
     }
-    if (session && previous !== next) invalidate();
+    if ((session || lastSession) && previous !== next) invalidate();
     suspend(); sub = next;
     const operation = generation;
     const baseline = read(SESSION_KEY);
@@ -95,16 +97,21 @@ export function createUiStateSync(d: SyncDependencies) {
       : { schema: SESSION_SCHEMA, schemaVersion: SCHEMA_VERSION, partition,
         sessionEpoch: uuid(), invalidated: false };
     if (session !== current) write(SESSION_KEY, JSON.stringify(session));
+    lastSession = session;
     refresh(); schedule();
   }
   function invalidate() {
-    const old = session;
+    const old = session ?? lastSession;
+    lastSession = null;
     suspend();
     if (!old) return;
     invalidatedEpochs.add(old.sessionEpoch);
     // Epoch first, then purge; no publication can race from this page.
     const raw = read(SESSION_KEY);
-    if (raw === null || decodeSession(raw)) write(SESSION_KEY, JSON.stringify({ ...old, sessionEpoch: uuid(), invalidated: true }));
+    const canonical = raw === null ? null : decodeSession(raw);
+    if (raw === null || (canonical?.partition === old.partition && canonical.sessionEpoch === old.sessionEpoch)) {
+      write(SESSION_KEY, JSON.stringify({ ...old, sessionEpoch: uuid(), invalidated: true }));
+    }
     purge(old.partition);
     // A quota/storage failure must still interrupt peers over available transports.
     d.notify?.(SESSION_KEY, { partition: old.partition, epoch: old.sessionEpoch });
