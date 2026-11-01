@@ -76,14 +76,24 @@ recover_promotion() {
 }
 # scenario <name> <samedb|preprod> <operator target> [make arguments...]
 scenario() {
-  local name=$1 mode=$2 target=$3 probe pids status=0; shift 3
+  local name=$1 mode=$2 target=$3 probe pids status=0 op deadline code; shift 3
   probe="$CHAIN-$name"
   : > "$OUT/$name-reads.jsonl"; : > "$OUT/$name-writes.jsonl"
+  # The read paths are served by the previous release too; the writer probe route ships with the
+  # new release, so writes start once it answers anything but 404: pre-switch writes against the
+  # previous release prove nothing and only pollute the verdict. The unauthenticated check never
+  # writes (401 on the new release, 404 on the previous one).
   node deploy/cutover/availability-probe.mjs "$URL" "$OUT/$name-reads.jsonl" & pids=$!
+  make -s -f deploy/cutover/operator.mk "$target" RELEASE="$RELEASE" MODE=run "$@" ENV=preprod 2>&1 | tee "$OUT/$name-run.log" & op=$!
+  deadline=$((SECONDS+900))
+  while kill -0 "$op" 2>/dev/null && ((SECONDS < deadline)); do
+    code=$(curl -q -sS --max-time 5 -o /dev/null -w '%{http_code}' -X POST "$URL/api/internal/cutover-probe" \
+      -H 'content-type: application/json' -d '{"run":"route-check","seq":0}' 2>/dev/null || echo 000)
+    [[ $code == 404 || $code == 000 ]] || break
+    sleep 2
+  done
   node deploy/cutover/writer-probe.mjs "$URL" "$probe" "$OUT/$name-writes.jsonl" & pids="$pids $!"
-  sleep 10
-  make -s -f deploy/cutover/operator.mk "$target" RELEASE="$RELEASE" MODE=run "$@" ENV=preprod 2>&1 | tee "$OUT/$name-run.log" ||
-    { status=1; recover_promotion; }
+  wait "$op" || { status=1; recover_promotion; }
   sleep 10
   # shellcheck disable=SC2086
   kill -TERM $pids; wait $pids || true
