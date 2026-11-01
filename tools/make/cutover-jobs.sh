@@ -97,9 +97,9 @@ run_job() {
     # Reconcile a create whose response/checkpoint was lost. No second restore.
     "${k[@]}" get job "$name" -o json > "$WORK/job.json" || unknown_state "Recorded Job disappeared; outcome indeterminate: $name"
     jq -e --arg run "$RUN" --arg hash "$(jq -r .hash <<< "$existing")" \
-      '.metadata.labels["sentropic.io/bascule"]==$run and .metadata.annotations["cutover-spec-sha256"]==$hash' "$WORK/job.json" >/dev/null || fail 'Recorded Job identity conflict'
+      '.metadata.labels["sentropic.io/bascule"]==$run and .metadata.annotations["cutover-spec-sha256"]==$hash' "$WORK/job.json" >/dev/null || unknown_state 'Recorded Job identity conflict'
     uid=$(jq -r .metadata.uid "$WORK/job.json")
-    [[ $(jq -r .uid <<< "$existing") == null || $(jq -r .uid <<< "$existing") == "$uid" ]] || fail 'Recorded Job UID conflict'
+    [[ $(jq -r .uid <<< "$existing") == null || $(jq -r .uid <<< "$existing") == "$uid" ]] || unknown_state 'Recorded Job UID conflict'
   else
     render_job "$step" "$name" "$deadline"
     local hash
@@ -108,7 +108,7 @@ run_job() {
     jq --arg step "$step" --arg name "$name" --arg hash "$hash" \
       '.jobs[$step]={name:$name,uid:null,hash:$hash,outcome:"started"}' "$WORK/record.json" > "$WORK/next.json"
     mv "$WORK/next.json" "$WORK/record.json"; record_save; checkpoint "$step" started
-    "${k[@]}" create -f "$WORK/rendered.json" -o json > "$WORK/job.json" || fail "Job create outcome unknown: $name"
+    "${k[@]}" create -f "$WORK/rendered.json" -o json > "$WORK/job.json" || unknown_state "Job create outcome unknown: $name"
     uid=$(jq -r .metadata.uid "$WORK/job.json")
   fi
   jq --arg step "$step" --arg uid "$uid" '.jobs[$step].uid=$uid' "$WORK/record.json" > "$WORK/next.json"
