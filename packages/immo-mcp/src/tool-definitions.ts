@@ -6,6 +6,10 @@ import {
   RAW_GEOJSON_MAX_LIMIT,
 } from "./raw-data.js";
 
+export const IMMO_READ_ANNOTATIONS = Object.freeze({
+  readOnlyHint: true, destructiveHint: false, openWorldHint: false, idempotentHint: true,
+});
+
 /**
  * Single source of the twelve tool contracts consumed by the SDK registrar
  * and, later, the cluster-mesh bridge. Schemas, titles, descriptions, bounds
