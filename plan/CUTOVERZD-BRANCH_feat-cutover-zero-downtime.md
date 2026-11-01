@@ -33,5 +33,6 @@
 - [x] Lot 3: unknown routing, prepared/adopted Deployment reads and Pod phases block deletion; rehearsal also requires readable absence (seven focused state tests).
 - [x] Lot 4: incomplete log streams never authorize deletion; previous instances, restarts and stream failures are covered (ten passing exporter tests).
 - [x] Lot 5: retry safe failed or missing verification Jobs; unknown creates and identity conflicts keep ownership (35 passing helper tests).
-- [ ] Lot 6: targeted and full operator tests pass; remove the test stack and volumes.
-- [ ] Lot 7: push atomic commits and write the French report with file lines and SHAs.
+- [x] Lot 6: targeted campaign 71/71; full operator suite 194/194 plus 219/265/92 backup/orchestration checks; scoped ESLint, Shell/JQ syntax and whitespace checks pass.
+- [x] Test containers, networks and volumes removed with `down -v`; project-scoped absence verified.
+- [x] Lot 7: atomic commits and French report with file lines and SHAs delivered through the authorized branch push.
