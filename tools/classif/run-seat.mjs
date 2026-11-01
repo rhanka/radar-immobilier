@@ -167,7 +167,10 @@ export function callSeat(label, prompt, { timeoutMs = 900000, base = process.env
     child.stderr.on('data', (d) => { err += d; });
     child.on('error', (e) => { err += String(e.message); });
     child.on('close', (code) => finish(code, false));
-    child.stdin.end(stdin ?? '');
+    // An early seat exit while the prompt is still piped raises EPIPE on stdin: a failure
+    // of this call only (recorded in err), never an unhandled exception killing the runner.
+    if (child.stdin && typeof child.stdin.on === 'function') child.stdin.on('error', (e) => { err += String(e?.message ?? e); });
+    try { child.stdin.end(stdin ?? ''); } catch (e) { err += String(e?.message ?? e); }
   });
 }
 
