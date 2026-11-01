@@ -49,6 +49,12 @@ Lots L1 and L2 of the Steve-aligned classification pilot (plan-pilote-v2 §B-L1,
 - [x] **Lot L2 — Convergence passes**
   - [x] Annotation circuit through Engram, passes, convergence, complements, amendment, resumable chain.
   - [x] Pass 1: 3 × 159 calls; stop rule met (α verdict 0.773, α code 0.754, verdict unanimity 84.7 %).
+- [x] **Lot L3 — Dev reference (0 LLM call)**
+  - [x] `make classif-l3-reference ENV=preprod`: model_consensus reference, dev-core 386 / dev-ambiguous 118, PV acts 105/120, ref-uses-external = 0, hashes of dev and sealed test.
+  - [x] Low-Pertinent analysis (5 P / 504) with two options for the L4 dev objective.
+  - [x] Fingerprint refusal audit (`make classif-l2-fingerprint-audit ENV=preprod`): bylaw-number list causes 29/30.
+  - [ ] Track event before L4 (conductor, single track writer).
+
 - [x] **Gate**
-  - [x] `make classif-check ENV=test-classif` + `make classif-test ENV=test-classif` (24/24).
+  - [x] `make classif-check ENV=test-classif` + `make classif-test ENV=test-classif` (25/25).
   - [x] Push branch (no PR).
