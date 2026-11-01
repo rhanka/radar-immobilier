@@ -30,7 +30,7 @@ samedb() { [[ $ENV == prod || ${SAMEDB:-0} == 1 ]]; }
 slot_pods() {
   "${k[@]}" get pods -o json | jq -c --arg l "$SLOT_LABEL" --arg slot "$1" '[.items[]|
     select(.metadata.labels[$l]==$slot and (.metadata.labels["app.kubernetes.io/component"]|IN("api","mcp","ui")))|
-    select(.status.phase=="Running" or .status.phase=="Pending")|{name:.metadata.name,uid:.metadata.uid}]'
+    select(.status.phase!="Succeeded" and .status.phase!="Failed")|{name:.metadata.name,uid:.metadata.uid}]'
 }
 # R5: the log export Job follows every container of the recorded Pods; its streams open BEFORE
 # the Pods are deleted or re-rolled and close only when each container has exited, so the
@@ -76,10 +76,15 @@ reconcile_log_exports() {
   done
 }
 prepared_stack_retire() {
-  prepared_stack_present || return 0
-  start_pod_logs prepared "$(slot_pods prepared)"
-  prepared_stack_delete
-  finish_pod_logs "$LOG_STEP"
+  local pods
+  if prepared_stack_present; then
+    pods=$(slot_pods prepared) || unknown_state 'Prepared Pods state unknown; deletion refused'
+    start_pod_logs prepared "$pods"
+    prepared_stack_delete
+    finish_pod_logs "$LOG_STEP"
+  fi
+  pods=$(slot_pods prepared) || unknown_state 'Prepared Pods termination unknown'
+  [[ $(jq length <<< "$pods") == 0 ]] || unknown_state 'Prepared writers still running; measurement refused'
 }
 # Abandoned writes (preprod, conductor decision): a return to the previous database leaves the
 # acknowledged writes of the abandoned one behind. They are counted (pg_stat_database written
@@ -338,20 +343,23 @@ switch_services() {
   local from=$1 to=$2 svc started order
   if [[ $to == prepared ]]; then order=("${SLOT_SERVICES[@]}"); else order=(radar-ui radar-immo-mcp radar-api); fi
   started=$(now_ms)
+  # Any first patch can expose a writer, even when a later patch or EndpointSlice wait fails.
+  record_set '.switches=((.switches//[])+[{to:$to,at:$at,mixedWindowMs:null}])' --arg to "$to" --arg at "$(iso_ms)"
   for svc in "${order[@]}"; do select_slot "$svc" "$from" "$to"; done
   for svc in "${order[@]}"; do wait_slices "$svc" "$to" 60; done
   record_set '.slot=$to|.switches[-1].mixedWindowMs=$ms' --arg to "$to" --argjson ms "$(( $(now_ms) - started ))"
   printf 'Routing on slot=%s (mixed window %s ms)\n' "$to" "$(jq -r '.switches[-1].mixedWindowMs' "$WORK/record.json")"
-  # Any first patch can expose a writer, even when a later patch or EndpointSlice wait fails.
-  record_set '.switches=((.switches//[])+[{to:$to,at:$at,mixedWindowMs:null}])' --arg to "$to" --arg at "$(iso_ms)"
 }
 back_to_main_routing() {
-  local svc
+  local svc routing moved=false
   for svc in "${SLOT_SERVICES[@]}"; do
-    if "${k[@]}" get service "$svc" -o json | jq -e --arg l "$SLOT_LABEL" '.spec.selector[$l]=="prepared"' >/dev/null; then
-      switch_services prepared main; return
-    fi
+    routing=$("${k[@]}" get service "$svc" -o json) || unknown_state "Service routing unknown: $svc; deletion refused"
+    routing=$(jq -er --arg l "$SLOT_LABEL" '.spec.selector[$l]|select(.=="main" or .=="prepared")' <<< "$routing") ||
+      unknown_state "Service routing unknown: $svc; deletion refused"
+    [[ $routing != prepared ]] || moved=true
   done
+  if [[ $moved == true ]]; then switch_services prepared main
+  else for svc in "${SLOT_SERVICES[@]}"; do wait_slices "$svc" main 60; done; fi
 }
 back_to_main() {
   # Routing back first (reads and writes served by the previous release), then writes reopen.
@@ -365,6 +373,9 @@ back_to_main() {
     JOB_POLL=0.5 run_job unfreeze 60 90
     record_set '.unfrozenAt=$v[0].unfrozenAt' --slurpfile v "$WORK/verdict.json"
   fi
+  # Routing and a fixed pause do not end in-flight requests. Foreground deletion waits for the
+  # prepared containers to exit (including their HTTP drain) before measuring their final writes.
+  prepared_stack_retire
   # Writes acknowledged by the prepared slot after the switch stay on the abandoned database.
   if ! samedb && jq -e 'any(.switches[]?; .to=="prepared") and .abandoned==null' "$WORK/record.json" >/dev/null; then
     local abandoned_db
@@ -373,9 +384,6 @@ back_to_main() {
       "$(jq -c --arg db "$abandoned_db" '.writeBaselineNonProbe[$db]' "$WORK/record.json")" "$(jq -c .writeBaselineAt "$WORK/record.json")"
   fi
 }
-  # Routing and a fixed pause do not end in-flight requests. Foreground deletion waits for the
-  # prepared containers to exit (including their HTTP drain) before measuring their final writes.
-  prepared_stack_retire
 verify_prepared_release() {
   verify_prepared
   if ! jq -e '.previousRelease!=null' "$WORK/record.json" >/dev/null; then
@@ -389,15 +397,20 @@ verify_prepared_release() {
   [[ $ENV != preprod ]] || run_job recon 840 900
   # Live-vs-applied drift (first promotion: live vs release); production stops on an unreviewed one.
   drift_gate
-  local db
+  local db matches=false
   if samedb; then db=$(jq -r .liveDb "$WORK/record.json"); else db=$(jq -r .targetDb "$WORK/record.json"); fi
   record_set '.samedb=$same|.slotDb=$db' --argjson same "$(samedb && echo true || echo false)" --arg db "$db"
   # The slot must run the release on the selected database; otherwise it is (re)started.
   # An absent slot gives no JSON at all (jq -e may then succeed): presence is checked first.
-  if ! prepared_stack_present || ! "${k[@]}" get deployment radar-api-prepared -o json | jq -e --slurpfile r "$WORK/record.json" \
+  if prepared_stack_present; then
+    "${k[@]}" get deployment radar-api-prepared --ignore-not-found -o json > "$WORK/prepared-check.json" ||
+      unknown_state 'Prepared slot state unknown: radar-api-prepared; deletion refused'
+    if [[ -s $WORK/prepared-check.json ]] && jq -e --slurpfile r "$WORK/record.json" \
       --arg cfg "$(prepared_config_sha)" '.metadata.annotations["sentropic.io/prepared-config"]==$cfg and
       .metadata.annotations["sentropic.io/prepared-db"]==$r[0].slotDb and
-      .spec.template.spec.containers[0].image==$r[0].release.apiImage' >/dev/null 2>&1; then
+      .spec.template.spec.containers[0].image==$r[0].release.apiImage' "$WORK/prepared-check.json" >/dev/null; then matches=true; fi
+  fi
+  if [[ $matches != true ]]; then
     prepared_stack_retire
     prepared_stack_up "$db"
   fi
@@ -609,6 +622,7 @@ rollback_command() {
   "${k[@]}" get configmap radar-change-lock --ignore-not-found -o json > "$WORK/lock.json"
   if [[ -s $WORK/lock.json ]] && jq -e --arg run "${RUN:-}" '(.data.record|fromjson).run==$run' "$WORK/lock.json" >/dev/null; then
     lock_resume
+    RECOVERING=1
     jq -e '.checkpoints.promote==null' "$WORK/record.json" >/dev/null || fail 'Promotion started: resume RUN= first, then rollback RUN='
     back_to_main
     restore_schedules

@@ -23,25 +23,35 @@ prepared_quota_preflight() {
   [[ ! -s $WORK/quota-short ]] || fail "quota_insufficient: $(paste -sd, "$WORK/quota-short")"
 }
 prepared_stack_present() {
-  local name
+  local name present=1
   for name in "${PREPARED_NAMES[@]}"; do
-    "${k[@]}" get deployment "$name-prepared" --ignore-not-found -o name | grep -q . && return 0
+    "${k[@]}" get deployment "$name-prepared" --ignore-not-found -o json > "$WORK/prepared-presence.json" ||
+      unknown_state "Prepared slot state unknown: $name-prepared; deletion refused"
+    if [[ -s $WORK/prepared-presence.json ]]; then
+      jq -e '.metadata.uid|type=="string"' "$WORK/prepared-presence.json" >/dev/null ||
+        unknown_state "Prepared slot state unknown: $name-prepared; deletion refused"
+      present=0
+    fi
   done
-  return 1
+  return "$present"
 }
 prepared_stack_delete() {
   local name uid
   for name in "${PREPARED_NAMES[@]}"; do
-    "${k[@]}" get deployment "$name-prepared" --ignore-not-found -o json > "$WORK/prepared-deployment.json"
+    "${k[@]}" get deployment "$name-prepared" --ignore-not-found -o json > "$WORK/prepared-deployment.json" ||
+      unknown_state "Prepared slot state unknown: $name-prepared; deletion refused"
     if [[ -s $WORK/prepared-deployment.json ]]; then
-      uid=$(jq -r .metadata.uid "$WORK/prepared-deployment.json")
+      uid=$(jq -er '.metadata.uid|select(type=="string" and length>0)' "$WORK/prepared-deployment.json") ||
+        unknown_state "Prepared slot identity unknown: $name-prepared; deletion refused"
       jq -n --arg uid "$uid" '{apiVersion:"v1",kind:"DeleteOptions",propagationPolicy:"Foreground",preconditions:{uid:$uid}}' > "$WORK/delete-prepared.json"
-      "${k[@]}" delete --raw "/apis/apps/v1/namespaces/$NS/deployments/$name-prepared" -f "$WORK/delete-prepared.json" >/dev/null
-      "${k[@]}" wait --for=delete "deployment/$name-prepared" --timeout=120s >/dev/null
+      "${k[@]}" delete --raw "/apis/apps/v1/namespaces/$NS/deployments/$name-prepared" -f "$WORK/delete-prepared.json" >/dev/null ||
+        unknown_state "Prepared slot deletion unknown: $name-prepared"
+      "${k[@]}" wait --for=delete "deployment/$name-prepared" --timeout=120s >/dev/null ||
+        unknown_state "Prepared slot termination unknown: $name-prepared"
     fi
-    "${k[@]}" delete service "$name-prepared" --ignore-not-found >/dev/null
+    "${k[@]}" delete service "$name-prepared" --ignore-not-found >/dev/null || unknown_state 'Prepared Service deletion unknown'
   done
-  "${k[@]}" delete configmap radar-ui-nginx-prepared --ignore-not-found >/dev/null
+  "${k[@]}" delete configmap radar-ui-nginx-prepared --ignore-not-found >/dev/null || unknown_state 'Prepared ConfigMap deletion unknown'
 }
 prepared_stack_up() {
   local db=$1 name row
