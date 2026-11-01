@@ -54,6 +54,11 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
 - The API runner's temporary mount permits execution of synthetic test binaries:
   inspection proved the default tmpfs was noexec, blocking the replay test's
   pdftotext stub. This is confined to the disposable runner, never application images.
+- UISW-EX6: API verification extracts committed source into the runner's tmpfs,
+  retaining locked dependency volumes and remapping workspace links. Evidence:
+  repeated cold subprocess imports exceed the unchanged deadline on the host
+  bind mount, while a warmed replay finishes in 6.8 seconds. No assertion or
+  timeout changes; remove the snapshot runner to roll back.
 - Navigation adoption needs router methods to update geographic/hash views
   coherently; isolated `.set()` of activeRouteView is forbidden.
 - Review runs in this session: owner forbids workflow/background agents.

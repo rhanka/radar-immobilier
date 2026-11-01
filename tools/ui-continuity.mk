@@ -18,7 +18,7 @@ lint: guard
 verify: guard
 	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; $(RUN) sh -ec 'npm ci --no-audit --no-fund && npm run typecheck --workspaces --if-present && npm run test --workspace=ui -- src/lib/sw src/lib/sync src/lib/auth/auth-store.test.ts && npx --no-install eslint . && bash deploy/k8s/nginx/check-header-parity.sh'
 test-api: guard
-	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; if ! $(COMPOSE) up -d --wait postgres minio; then $(COMPOSE) logs --tail=80 postgres; exit 1; fi; $(RUN) sh -ec 'npm ci --no-audit --no-fund && npm run db:migrate --workspace=api && npm run test --workspace=api -- $(SCOPE)'
+	@set -o pipefail; trap '$(COMPOSE) down -v --remove-orphans' EXIT; if ! $(COMPOSE) up -d --wait postgres minio; then $(COMPOSE) logs --tail=80 postgres; exit 1; fi; git archive HEAD | $(RUN) sh tools/ui-continuity.api.sh $(SCOPE)
 test-immo-mcp: guard
 	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; $(RUN) sh -ec 'npm ci --no-audit --no-fund && npm run test --workspace=packages/immo-mcp -- --exclude "**/*.e2e.test.ts" $(SCOPE)'
 test-e2e: guard
