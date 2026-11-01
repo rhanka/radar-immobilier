@@ -7,28 +7,13 @@
 import path from 'node:path';
 import process from 'node:process';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { bylawsIn, slugify } from '../lib/triage.mjs';
-import { fp, shingles, words } from '../lib/fingerprint.mjs';
+import { scanShared } from '../lib/fingerprint.mjs';
 import { classifHome } from '../lib/paths.mjs';
 import { loadFingerprints } from '../lib/draw.mjs';
 
+/** Sandbox refusal scan: delegates to the single shared guard scanner (no drift). */
 export function scanFile(guard, text) {
-  const sets = Object.fromEntries(['nodeIds', 'docShas', 'citySlugs', 'bylaws', 'shingles'].map((k) => [k, new Set(guard.fps[k])]));
-  const has = (k, v) => sets[k].has(fp(guard.salt, v));
-  const hits = { nodeIds: 0, docShas: 0, citySlugs: 0, bylaws: 0, shingles: 0 };
-  for (const m of text.matchAll(/\b(?:signal|event|doc|source|bylaw|zone|lot)-[a-z0-9][a-z0-9._-]*[a-z0-9]/gi)) if (has('nodeIds', m[0])) hits.nodeIds++;
-  for (const m of text.matchAll(/\b[0-9a-f]{64}\b/g)) if (has('docShas', m[0])) hits.docShas++;
-  const w = words(text);
-  const seen = new Set();
-  for (let n = 1; n <= 6; n++) {
-    for (let i = 0; i + n <= w.length; i++) {
-      const s = slugify(w.slice(i, i + n).join(' '));
-      if (!seen.has(s)) { seen.add(s); if (has('citySlugs', s)) hits.citySlugs++; }
-    }
-  }
-  for (const b of bylawsIn(text)) if (has('bylaws', b)) hits.bylaws++;
-  for (const s of shingles(text)) if (has('shingles', s)) hits.shingles++;
-  return hits;
+  return scanShared(guard.salt, guard.fps, text);
 }
 
 function walk(dir) {
