@@ -34,14 +34,15 @@ async function setup(withAccountBinding = true, scopePolicy?: { legacyReadScope:
     headers: { authorization: `Bearer ${await token(scope)}`, "content-type": "application/json",
       accept: "application/json, text/event-stream", ...(session ? { "mcp-session-id": session } : {}) },
     body: JSON.stringify(message) });
-  const init = await post({ jsonrpc: "2.0", id: 1, method: "initialize", params: {
+  const initialize = (scope?: string) => post({ jsonrpc: "2.0", id: 1, method: "initialize", params: {
     protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "test", version: "1" },
-  } });
+  } }, undefined, scope);
+  const init = await initialize();
   expect(init.status).toBe(200);
   const session = init.headers.get("mcp-session-id")!;
   const call = (name: string, args: object = {}, scope?: string) => post({ jsonrpc: "2.0", id: 3,
     method: "tools/call", params: { name, arguments: args } }, session, scope);
-  return { app, post, session, call, execute, createGuard, seen, authorize };
+  return { app, post, initialize, session, call, execute, createGuard, seen, authorize };
 }
 
 const payload = async (response: Response) => {
@@ -97,6 +98,36 @@ describe("explicit artifact scopes over the MCP transport", () => {
 });
 
 describe("P7 composed transport (contract double; no storage qualification)", () => {
+  it("should annotate every active tool and preserve tools/list across sessions, scopes and ensure", async () => {
+    const h = await setup();
+    const list = async (session: string, scope?: string) => {
+      const response = await h.post({ jsonrpc: "2.0", id: 2, method: "tools/list" }, session, scope);
+      expect(response.status).toBe(200);
+      return (await response.json()).result.tools;
+    };
+    const first = await list(h.session);
+    expect(first).toHaveLength(16);
+    expect(first.filter((tool: { name: string }) => tool.name.startsWith("artifacts_"))
+      .map((tool: { name: string }) => tool.name)).toEqual(profile.selectedCapabilities);
+    for (const tool of first) {
+      const write = ["artifacts_ensure", "artifacts_publish"].includes(tool.name);
+      expect(tool.annotations).toEqual({ readOnlyHint: !write, destructiveHint: false,
+        openWorldHint: false, idempotentHint: true });
+    }
+    const serialized = JSON.stringify(first);
+    const readScopes = "immo:read immo:artifacts:read";
+    const second = await h.initialize(readScopes);
+    expect(second.status).toBe(200);
+    const secondSession = second.headers.get("mcp-session-id")!;
+    expect(secondSession).not.toBe(h.session);
+    expect(JSON.stringify(await list(secondSession, readScopes))).toBe(serialized);
+    expect(JSON.stringify(await list(h.session, "immo:read"))).toBe(serialized);
+    expect((await payload(await h.call("artifacts_ensure", { bindingName: "summer", idempotencyKey: "k" })))
+      .isError).toBe(false);
+    expect(JSON.stringify(await list(h.session))).toBe(serialized);
+    expect(JSON.stringify(await list(secondSession, readScopes))).toBe(serialized);
+  });
+
   it("should list exactly twelve plus four and dispatch each call once with fresh frozen authority", async () => {
     const h = await setup();
     const list = await (await h.post({ jsonrpc: "2.0", id: 2, method: "tools/list" }, h.session)).json();

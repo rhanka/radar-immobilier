@@ -13,7 +13,7 @@ import {
   getInvocationContext,
   type InvocationContext,
 } from "./invocation-context.js";
-import { ALL_TOOL_DEFINITIONS } from "./tool-definitions.js";
+import { ALL_TOOL_DEFINITIONS, IMMO_READ_ANNOTATIONS } from "./tool-definitions.js";
 import { RadarSignalReadError } from "./signal-read-error.js";
 import { TOOL_HANDLERS, type ToolTextResult } from "./tool-handlers.js";
 import { installNormalizedListHandler } from "./zod4-list-handler.js";
@@ -37,7 +37,8 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
     if (!handler) throw new Error(`missing_handler:${def.name}`);
     const registered = server.registerTool(
       def.name,
-      { title: def.title, description: def.description, inputSchema: def.inputSchema },
+      { title: def.title, description: def.description, inputSchema: def.inputSchema,
+        annotations: IMMO_READ_ANNOTATIONS },
       async (args): Promise<ToolTextResult> => {
         const snapshot =
           getInvocationContext() ??

@@ -125,8 +125,10 @@ export function bindArtifactProvider(options: {
     adapter: nativeAdapter(manifest),
     scopePolicy,
     configuration: Object.freeze({ storageScopeId: scope }),
-    tools: Object.freeze(manifest.tools.map((tool: Tool) => freeze({
+    tools: Object.freeze(manifest.tools.map((tool: ArtifactManifestTool) => freeze({
       name: tool.name, description: tool.description, inputSchema: tool.inputSchema as Tool["inputSchema"],
+      annotations: { readOnlyHint: tool.mutability === "read-only", destructiveHint: false,
+        openWorldHint: false, idempotentHint: tool.mutability === "read-only" || tool.idempotency.required },
       execution: { taskSupport: "forbidden" as const },
     }))),
     async invoke(tool: string, args: unknown, request: VerifiedMcpRequest): Promise<CallToolResult> {
