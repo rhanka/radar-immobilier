@@ -68,8 +68,8 @@ Give every artifact author the official Sentropic starter and H5 reader contract
   - [x] API/MCP typechecks and repository ESLint passed; static DS audit 0.3.2 scored HTML 100/100 and author CSS 90/100.
   - [x] Push, open English PR #975 and write the French conductor report.
   - [x] Record follow-ups in the PR: server enforcement, guide tool/resource, framework runtimes, Elements, OpenAPI and ui://.
-- [ ] **Lot 5 — Pre-merge review corrections**
+- [x] **Lot 5 — Pre-merge review corrections**
   - [x] B1/B2/B3: published audit command and exit policy, npm pins and CSS recipe provenance; regression assertions reproduced the old defects.
   - [x] T1: replace reviewed CSS literals with official tokens and recompute the approval CSP hash; token existence and CSS-property regression tests pass.
-  - [ ] Sol P1/P2: verify approval styles through nginx, application-only authorization calls and explicit grant renewal/recovery.
-  - [ ] Run final targeted suites, typechecks and lint; push and write the French fix-round report.
+  - [x] Sol P1/P2: qualify approval through the deployed nginx locations, CSS MIME/digests, application-only authorization calls and explicit grant renewal/recovery in Chromium.
+  - [x] Final gates: 125 targeted tests (113 registry/H5/style, 8 API, 4 Chromium), API/MCP typechecks, ESLint and published DS audit 0.1.0 with zero findings; push and French fix-round report.
