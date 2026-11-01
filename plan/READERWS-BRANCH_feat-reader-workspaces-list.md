@@ -48,8 +48,8 @@ Let a published page discover the verified reader's active workspaces and select
   - [x] Add strict parameter and response contracts and H5 dispatch.
   - [ ] Verify operation, authorization, availability and reader isolation.
 - [ ] **Lot 2 — Authoring starter and guide**
-  - [ ] Populate a labelled workspace selector; preselect a sole workspace, use manual entry only for an empty list.
-  - [ ] Document the discovery operation and bump the guide revision.
+  - [x] Populate a labelled workspace selector; preselect a sole workspace, use manual entry only for an empty list.
+  - [x] Document the discovery operation and bump the guide revision to r3 (starter 1.1.0).
   - [ ] Verify the reader client and browser flow when available.
 - [ ] **Lot 3 — Delivery**
   - [ ] Run scoped tests, typecheck and lint; review the diff.
