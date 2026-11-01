@@ -350,6 +350,12 @@ if (args[0] === 'delete') {
   if (o && raw && JSON.parse(fs.readFileSync(value('-f'))).propagationPolicy === 'Orphan') {
     for (const x of s.objects) if (x.metadata.ownerReferences) x.metadata.ownerReferences = x.metadata.ownerReferences.filter(r => r.uid !== o.metadata.uid);
     s.objects = s.objects.filter(x => x !== o);
+  // A final in-flight request commits only when the prepared API receives SIGTERM.
+  if (kind === 'Deployment' && name === 'radar-api-prepared' && s.commitOnPreparedStop) {
+    s.writeStats ||= {};
+    s.writeStats.radar_next = (s.writeStats.radar_next || 0) + s.commitOnPreparedStop;
+    s.commitOnPreparedStop = 0;
+  }
   } else if (o) {
     const gone = new Set([o.metadata.uid]);
     for (let grew = true; grew;) {
