@@ -1,0 +1,5 @@
+services:
+  api:
+    # Existing local browser image supplies OS libraries; install the lockfile's
+    # Chromium build without reinstalling system packages on the slow host disk.
+    image: mcr.microsoft.com/playwright:v1.60.0-noble

@@ -43,7 +43,8 @@ test.beforeAll(async () => {
 test.afterAll(async () => { server?.closeAllConnections(); await new Promise<void>((resolve) => server?.close(() => resolve())); });
 
 test("should preserve two tabs through registration, interruption, compatible update, rollback and kill", async ({ browser }) => {
-  const context = await browser.newContext({ baseURL: origin, serviceWorkers: "allow" });
+  const context = await browser.newContext({ baseURL: origin, serviceWorkers: "allow",
+    storageState: { cookies: [], origins: [] } });
   try {
     const a = await context.newPage(); const b = await context.newPage();
     await a.goto("/?build=N-1"); await expect(a.locator("#status")).toHaveText("ready", { timeout: 2000 });
@@ -105,7 +106,8 @@ test("should sync actual Svelte preferences and offer partial contexts without m
   await page.goto("/#/sources?filter.period=all&filter.citySearch=private&filter.showDiscarded=1");
   await other.locator("summary").filter({ hasText: "Reprendre un contexte" }).click();
   await expect(other.getByText("Contexte partiel", { exact: false }).first()).toBeVisible({ timeout: 2000 });
-  await other.getByRole("button", { name: "Reprendre ce contexte", exact: true }).first().click();
+  await other.locator("details").getByText("sources", { exact: true }).first().locator("..")
+    .getByRole("button", { name: "Reprendre ce contexte", exact: true }).click();
   await expect(other).toHaveURL(/#\/sources\?mode=signal&filter.period=all/, { timeout: 2000 });
   expect(other.url()).not.toMatch(/showDiscarded|citySearch|private/);
   await other.goBack(); await expect(other).toHaveURL(/#\/rapport$/);
