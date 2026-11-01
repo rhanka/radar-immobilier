@@ -1,4 +1,5 @@
-import { readFileSync } from "node:fs";
+import { ARTIFACT_P0B } from "@radar/artifacts-host";
+import { readArtifactConfig } from "./artifact-config.test-support.js";
 import { describe, expect, it } from "vitest";
 import {
   ARTIFACT_DURABLE_IDENTITY,
@@ -24,10 +25,7 @@ import {
   validateListPagination,
 } from "./artifact-profile.js";
 
-const config = JSON.parse(readFileSync(
-  new URL("../../config/immo-artifacts.v1.json", import.meta.url),
-  "utf8",
-)) as {
+const config = readArtifactConfig() as {
   invocationScopes: { read: string; write: string };
   toolScopes: Record<string, string>;
   legacyReadTransition: { flag: string; default: boolean; legacyScope: string; appliesTo: string[] };
@@ -65,12 +63,14 @@ describe("artifact effective profile", () => {
       "artifacts_publish",
       "artifacts_list",
       "artifacts_get",
+      ...(ARTIFACT_P0B ? ["artifacts_get_source", "artifacts_set_access", "artifacts_delete"] : []),
     ]);
     expect(ARTIFACT_SELECTION).toEqual([
       { tool: "artifacts_ensure", operation: "ensure", method: "POST", path: "/ensure", command: "ensure" },
       { tool: "artifacts_publish", operation: "publish", method: "POST", path: "/publish", command: "publish" },
       { tool: "artifacts_list", operation: "list", method: "POST", path: "/list", command: "list" },
       { tool: "artifacts_get", operation: "meta", method: "GET", path: "/meta/{artifactId}", command: "meta" },
+      ...(ARTIFACT_P0B ? config.selection.slice(4) : []),
     ]);
     expect(ARTIFACT_INVOCATION_SCOPES).toEqual({ read: "immo:artifacts:read", write: "immo:artifacts:write" });
     expect(ARTIFACT_TOOL_SCOPES).toEqual({
@@ -78,6 +78,7 @@ describe("artifact effective profile", () => {
       artifacts_publish: "immo:artifacts:write",
       artifacts_list: "immo:artifacts:read",
       artifacts_get: "immo:artifacts:read",
+      ...(ARTIFACT_P0B ? { artifacts_get_source: "immo:artifacts:read", artifacts_set_access: "immo:artifacts:write", artifacts_delete: "immo:artifacts:write" } : {}),
     });
   });
 
@@ -184,6 +185,6 @@ describe("artifact effective profile", () => {
   });
 
   it("should expose the single qualified artifact provider version", () => {
-    expect(ARTIFACT_PROVIDER_VERSION).toBe("0.2.2");
+    expect(ARTIFACT_PROVIDER_VERSION).toBe(ARTIFACT_P0B ? "0.3.0" : "0.2.2");
   });
 });
