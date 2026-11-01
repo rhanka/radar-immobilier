@@ -1,4 +1,4 @@
--- @sentropic/artifacts 0.3.0 terminal controls plus IMMO's trusted confirmation port.
+-- @sentropic/artifacts P0b (0.2.5 or 0.3.0) terminal controls plus IMMO's trusted confirmation port.
 ALTER TABLE artifacts.artifacts ADD COLUMN IF NOT EXISTS terminal_deleted_at TIMESTAMPTZ;
 ALTER TABLE artifacts.artifacts ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ;
 ALTER TABLE artifacts.artifacts ALTER COLUMN updated_at SET DEFAULT now();
