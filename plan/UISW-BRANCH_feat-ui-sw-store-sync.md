@@ -64,6 +64,7 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
   - [x] Read rules and inherited diff; retain correct build/bootstrap work.
   - [x] Consume prepared preprod worker CSP correction with a merge commit.
 - [ ] **Lot B — Coordination worker**
+  - [x] Chromium qualified N/N-1/N+1, interruption, refusal, rollback and kill.
   - [x] Image stamping and disabled-build kill bytes at the stable worker URL.
   - [x] Nonblocking client registration, stopped-worker reconnect and update API.
   - [x] Worker validates browser clients and probes the complete live client set.
@@ -72,6 +73,7 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
   - [ ] Compatible update, targeted invalidation, kill switch and build identities.
   - [x] Three nginx variants: JS, no-cache, 404, security-header inheritance.
 - [ ] **Lot C — Local state sync**
+  - [x] Epoch-scoped invalidation hints preserve fresh logins and survive quota failures.
   - [x] Wake preserves mounted UI; auth reads recheck changing epochs once.
   - [x] App/session wiring and explicit partial-context resume controls.
   - [x] Svelte preference integration keeps chat layout, basemap and route ownership.

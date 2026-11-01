@@ -8,7 +8,7 @@ export type SwStatus = "unsupported" | "unavailable" | "installing" | "ready" | 
 export function initServiceWorker(options: {
   probes?: SwRuntimeProbes; enabled?: boolean; clientBuildId?: string;
   onInvalidation?: (payload: SwInvalidatePayload) => void;
-  onSessionInvalidated?: () => void;
+  onSessionInvalidated?: (payload: { partition: string; epoch: string }) => void;
 } = {}) {
   const status = writable<SwStatus>("unsupported");
   const worker = writable<SwWorkerInfo | null>(null);
@@ -50,7 +50,9 @@ export function initServiceWorker(options: {
       disabled = true; worker.set(null); setStatus("disabled");
     } else if (enabled && !disabled && m.type === "INVALIDATE") {
       options.onInvalidation?.(m.payload as unknown as SwInvalidatePayload);
-    } else if (enabled && !disabled && m.type === "SESSION_INVALIDATED") options.onSessionInvalidated?.();
+    } else if (enabled && !disabled && m.type === "SESSION_INVALIDATED") {
+      options.onSessionInvalidated?.(m.payload as { partition: string; epoch: string });
+    }
   }
   function listen(target: EventTarget, type: string, handler: EventListener) {
     target.addEventListener(type, handler);
@@ -88,6 +90,7 @@ export function initServiceWorker(options: {
   }
   void boot();
   return {
+    tabId: hello.tabId,
     status: { subscribe: status.subscribe }, worker: { subscribe: worker.subscribe },
     async ping(): Promise<SwWorkerInfo> {
       const reply = await request("PING"); return reply.payload as unknown as SwWorkerInfo;

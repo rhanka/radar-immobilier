@@ -28,7 +28,7 @@ async function bootstrap(root: HTMLElement) {
   // local sync stay fully usable when the worker is unsupported.
   publishServiceWorkerClient(initServiceWorker({
     onInvalidation: () => window.dispatchEvent(new Event("immo:coordination-invalidated")),
-    onSessionInvalidated: () => window.dispatchEvent(new Event("immo:session-invalidated")),
+    onSessionInvalidated: (payload) => window.dispatchEvent(new CustomEvent("immo:session-invalidated", { detail: payload })),
   }));
   return app;
 }
