@@ -70,6 +70,10 @@ const VALID_VIEWS = new Set<string>([
 /** Vue par défaut si l'URL ne contient pas de vue valide. */
 const DEFAULT_VIEW: DemoView = "signaux";
 
+export function isKnownRouteView(value: unknown): value is DemoView {
+  return typeof value === "string" && VALID_VIEWS.has(value);
+}
+
 /** Extrait la vue depuis le hash de l'URL courante. */
 function viewFromHash(hash: string): DemoView {
   // Hash attendu : `#/signaux`, `#/opportunity`, etc.
@@ -118,7 +122,9 @@ export const activePageState = writable(pageStateFromLocation());
 export function navigateToPageState(view: DemoView, state: GeoRouteStateInput): void {
   if (typeof window === "undefined") return;
   const hash = `#/${view}${buildGeoQuery(state)}`;
-  if (window.location.hash !== hash) window.history.pushState({ view }, "", hash);
+  const url = `${isGeoRoutePathname(window.location.pathname) ? "/" : ""}${hash}`;
+  if (window.location.hash !== hash || isGeoRoutePathname(window.location.pathname)) window.history.pushState({ view }, "", url);
+  activeGeoRoute.set(geoRouteFromLocation(window.location));
   activePageState.set(pageStateFromLocation());
   activeRouteView.set(view);
 }
@@ -163,6 +169,7 @@ export function navigateToGeoRoute(
   }
 
   activeGeoRoute.set(geoRouteFromLocation(window.location));
+  activeRouteView.set("signaux");
 }
 
 /**

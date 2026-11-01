@@ -18,6 +18,7 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
   - `ui/src/{App.svelte,main.ts,vite-env.d.ts}`
   - `ui/src/lib/{state/beta.ts,chat/chat-widget-layout.ts,router/router.ts}`
   - `ui/src/lib/auth/auth-store.ts` (invalidation and stale-response guard only)
+  - `ui/src/lib/auth/auth-store.test.ts` (delayed-response regression)
   - `ui/src/lib/components/{chat/ChatWidgetHost.svelte,maps/SignauxMapView.svelte,workspace/ContextResume.svelte}`
   - `ui/e2e-real/ui-sync*`, this branch plan, `docs/operations/ui-continuity.md`
 - **Forbidden Paths (must not change in this branch)**:
@@ -52,6 +53,7 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
   - [x] Read rules and inherited diff; retain correct build/bootstrap work.
   - [x] Consume prepared preprod worker CSP correction with a merge commit.
 - [ ] **Lot B — Coordination worker**
+  - [x] Embedded wire/state contracts and preprod-only runtime gate.
   - [ ] Closed protocol, browser-client validation, handshake and reconnect.
   - [ ] Compatible update, targeted invalidation, kill switch and build identities.
   - [ ] Three nginx variants: JS, no-cache, 404, security-header inheritance.
