@@ -19,6 +19,16 @@ describe("auth-store — sondage /me non-caché", () => {
     vi.restoreAllMocks();
   });
 
+  it("should discard an auth response arriving after session invalidation", async () => {
+    let finish!: (value: unknown) => void;
+    vi.stubGlobal("fetch", vi.fn(() => new Promise((resolve) => { finish = resolve; })));
+    const request = authStore.checkSession();
+    authStore.invalidateSession();
+    finish({ json: async () => ({ authenticated: true, user: { sub: "old-account", status: "approved" } }) });
+    await request;
+    expect(get(authStore)).toMatchObject({ authenticated: false, user: null });
+  });
+
   it("appelle /api/v1/auth/me avec cache:'no-store'", async () => {
     const fetchMock = vi
       .fn()

@@ -89,6 +89,7 @@ function clearLoginAttempt(): void {
 }
 
 function createAuthStore() {
+  let generation = 0;
   const { subscribe, set } = writable<AuthState>({
     loading: true,
     authenticated: false,
@@ -97,7 +98,13 @@ function createAuthStore() {
     user: null,
   });
 
-  async function checkSession(): Promise<void> {
+  function invalidateSession(loading = false): void {
+    generation++;
+    set({ loading, authenticated: false, authDisabled: false, loginBlocked: false, user: null });
+  }
+
+  async function checkSession(accept: () => boolean = () => true): Promise<void> {
+    const operation = ++generation;
     try {
       // `cache: "no-store"` est CRITIQUE : sans lui, le navigateur (cache HTTP
       // ou bfcache) peut resservir une ancienne réponse `/me` et ré-afficher le
@@ -105,6 +112,8 @@ function createAuthStore() {
       // « reconnect = compte précédent ». On force un aller-retour réseau frais.
       const res = await fetch("/api/v1/auth/me", { cache: "no-store" });
       const data = await res.json();
+      if (operation !== generation) return;
+      if (!accept()) { invalidateSession(); return; }
       const authenticated = data.authenticated === true;
       const authDisabled = data.authDisabled === true;
 
@@ -133,6 +142,7 @@ function createAuthStore() {
         } : null,
       });
     } catch {
+      if (operation !== generation) return;
       // /me injoignable : on ne boucle pas vers le login (le réseau, pas l'auth,
       // est en cause). On laisse l'App afficher l'état non-authentifié sans
       // redirection automatique en passant loginBlocked si on revient d'un essai.
@@ -184,6 +194,7 @@ function createAuthStore() {
   return {
     subscribe,
     checkSession,
+    invalidateSession,
     redirectToLogin,
     resetLoginAttempt,
     markForceReauth,
