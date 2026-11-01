@@ -9,6 +9,10 @@ import "./app.css";
 import { mount } from "svelte";
 import App from "./App.svelte";
 import { initializeMaplibreWorker } from "./lib/maps/maplibre-worker";
+import {
+  initServiceWorker,
+  publishServiceWorkerClient,
+} from "./lib/sw/client";
 
 const target = document.getElementById("app");
 
@@ -18,7 +22,15 @@ if (!target) {
 
 async function bootstrap(root: HTMLElement) {
   await initializeMaplibreWorker();
-  return mount(App, { target: root });
+  const app = mount(App, { target: root });
+  // Service worker: local-client coordination + its own update cycle only.
+  // Registered after the mount, never blocking startup; the app and the
+  // local sync stay fully usable when the worker is unsupported.
+  publishServiceWorkerClient(initServiceWorker({
+    onInvalidation: () => window.dispatchEvent(new Event("immo:coordination-invalidated")),
+    onSessionInvalidated: () => window.dispatchEvent(new Event("immo:session-invalidated")),
+  }));
+  return app;
 }
 
 export default bootstrap(target);

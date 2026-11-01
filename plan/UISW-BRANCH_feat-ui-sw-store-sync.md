@@ -53,6 +53,7 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
   - [x] Read rules and inherited diff; retain correct build/bootstrap work.
   - [x] Consume prepared preprod worker CSP correction with a merge commit.
 - [ ] **Lot B — Coordination worker**
+  - [x] Nonblocking client registration, stopped-worker reconnect and update API.
   - [x] Worker validates browser clients and probes the complete live client set.
   - [x] Embedded wire/state contracts and preprod-only runtime gate.
   - [ ] Closed protocol, browser-client validation, handshake and reconnect.
