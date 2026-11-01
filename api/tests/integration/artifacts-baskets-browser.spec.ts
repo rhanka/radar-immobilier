@@ -77,6 +77,12 @@ describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("published H
           expect((await page.goto(`https://${host}/`))?.status()).toBe(200);
           expect(new URL(page.url()).host).toBe("app.example.test");
           started = Date.now();
+          await expect(page.locator('html[data-st-theme="sent-tech"]')).toHaveCount(1);
+          const approvalButton = page.getByRole("button", { name: "Autoriser et ouvrir" });
+          expect(await approvalButton.evaluate((button) => getComputedStyle(button).backgroundColor)).not.toBe("rgba(0, 0, 0, 0)");
+          await page.keyboard.press("Tab");
+          await expect(approvalButton).toBeFocused();
+          expect(await approvalButton.evaluate((button) => getComputedStyle(button).outlineStyle)).not.toBe("none");
           await page.getByRole("button", { name: "Autoriser et ouvrir" }).click();
           await page.waitForFunction((matched) => document.body.dataset.matched === String(matched), count, { timeout: 1500 });
           const elapsedMs = Date.now() - started;
@@ -121,7 +127,9 @@ describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("published H
             .toEqual([expect.objectContaining({ host: "app.example.test", origin: "https://app.example.test" })]);
           for (const request of requests) {
             if (request.host.endsWith(".pages.example.test")) expect(request.cookie).not.toContain("radar_session");
-            expect(request.cacheControl).toBe("private, no-store");
+            if (request.host === "app.example.test" && request.path.startsWith("/__artifacts/design/")) {
+              expect(request.cacheControl).toContain("immutable");
+            } else expect(request.cacheControl).toBe("private, no-store");
           }
           expect(errors).toEqual([]);
         } catch (error) {
