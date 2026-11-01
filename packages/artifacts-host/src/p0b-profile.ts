@@ -2,8 +2,9 @@ import { ARTIFACTS_PROVIDER_VERSION, compileArtifactsProfile, RADAR_ARTIFACTS_PR
 
 /** The installed, centrally pinned package is the only activation switch. */
 export const ARTIFACT_PROVIDER_VERSION: string = ARTIFACTS_PROVIDER_VERSION;
-if (!["0.2.2", "0.3.0"].includes(ARTIFACT_PROVIDER_VERSION)) throw new Error("artifact_provider_version_unqualified");
-export const ARTIFACT_P0B = ARTIFACT_PROVIDER_VERSION === "0.3.0";
+export const ARTIFACT_P0B_VERSIONS: readonly string[] = Object.freeze(["0.2.5", "0.3.0"]);
+export const ARTIFACT_P0B = ARTIFACT_P0B_VERSIONS.includes(ARTIFACT_PROVIDER_VERSION);
+if (ARTIFACT_PROVIDER_VERSION !== "0.2.2" && !ARTIFACT_P0B) throw new Error("artifact_provider_version_unqualified");
 export const ARTIFACT_PROFILE_DESCRIPTOR = Object.freeze({
   profileRevisionId: ARTIFACT_P0B ? "immo-artifacts.p0b.v1" : "immo-artifacts.v1",
   requireExpectedCurrentReleaseId: false,

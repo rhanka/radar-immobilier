@@ -6,6 +6,7 @@ RUN_DATABASE_API := $(COMPOSE) run --rm --no-deps -T --entrypoint '' -e P0B_DATA
 .DEFAULT_GOAL := verify
 INSTALL := npm ci
 SOURCE ?= /home/antoinefa/src/sentropic/tmp/worktrees/artifacts-parity-p0b/packages/artifacts
+P0B_VERSION ?= 0.2.5
 
 .PHONY: prepare lock registry verify candidate integration database-check
 prepare: guard
@@ -19,14 +20,14 @@ database-logs: guard-env
 lock: guard
 	@$(CHECK) 'npm install --package-lock-only --ignore-scripts'
 registry: guard
-	@$(CHECK) 'npm view @sentropic/artifacts@0.3.0 version'
+	@$(CHECK) 'npm view @sentropic/artifacts@$(P0B_VERSION) version'
 verify: guard
 	@$(CHECK) "$(INSTALL) && npm run typecheck --workspace=packages/immo-mcp && npm run typecheck --workspace=packages/artifacts-host && npm run typecheck --workspace=api && npx --no-install eslint packages/immo-mcp/src packages/artifacts-host/src api/src/artifacts/control-route*.ts && npm run test --workspace=packages/immo-mcp -- --exclude '**/*.e2e.test.ts' && npm run test --workspace=packages/artifacts-host -- --maxWorkers=1"
 # A copy is built inside the container; the upstream checkout is mounted read-only.
 candidate: guard
 	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; \
 	$(COMPOSE) up -d --wait postgres && \
-	$(RUN_DATABASE_API) -v '$(SOURCE):/candidate:ro' api sh tools/mcp-p0b-candidate.sh
+	$(RUN_DATABASE_API) -e P0B_VERSION='$(P0B_VERSION)' -v '$(SOURCE):/candidate:ro' api sh tools/mcp-p0b-candidate.sh
 integration: guard
 	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; \
 	$(COMPOSE) up -d --wait postgres && \
@@ -36,5 +37,5 @@ integration: guard
 push: guard
 	git push -u origin HEAD
 clean-deps: guard-env
-	@$(CHECK) 'rm -rf packages/*/node_modules ui/node_modules tmp/mcp-p0b/artifacts tmp/mcp-p0b/toolchain'
+	@$(CHECK) 'rm -rf packages/*/node_modules ui/node_modules tmp/mcp-p0b/artifacts tmp/mcp-p0b/toolchain tmp/mcp-p0b/graph'
 	@rmdir node_modules api/node_modules 2>/dev/null || true

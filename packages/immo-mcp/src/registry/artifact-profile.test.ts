@@ -1,4 +1,4 @@
-import { ARTIFACT_P0B } from "@radar/artifacts-host";
+import { ARTIFACT_P0B, ARTIFACT_P0B_VERSIONS } from "@radar/artifacts-host";
 import { readArtifactConfig } from "./artifact-config.test-support.js";
 import { describe, expect, it } from "vitest";
 import {
@@ -26,6 +26,7 @@ import {
 } from "./artifact-profile.js";
 
 const config = readArtifactConfig() as {
+  provider: { version: string };
   invocationScopes: { read: string; write: string };
   toolScopes: Record<string, string>;
   legacyReadTransition: { flag: string; default: boolean; legacyScope: string; appliesTo: string[] };
@@ -57,7 +58,7 @@ const config = readArtifactConfig() as {
 };
 
 describe("artifact effective profile", () => {
-  it("should select exactly the four tools with their operation mapping", () => {
+  it("should select the active tools with their operation mapping", () => {
     expect([...ARTIFACT_TOOL_NAMES]).toEqual([
       "artifacts_ensure",
       "artifacts_publish",
@@ -184,7 +185,9 @@ describe("artifact effective profile", () => {
     expect(config.requiredContracts).toEqual(REQUIRED_PROVIDER_CONTRACTS);
   });
 
-  it("should expose the single qualified artifact provider version", () => {
-    expect(ARTIFACT_PROVIDER_VERSION).toBe(ARTIFACT_P0B ? "0.3.0" : "0.2.2");
+  it("should expose the installed qualified artifact provider version", () => {
+    expect(ARTIFACT_P0B_VERSIONS).toEqual(["0.2.5", "0.3.0"]);
+    expect(ARTIFACT_P0B ? ARTIFACT_P0B_VERSIONS : ["0.2.2"]).toContain(ARTIFACT_PROVIDER_VERSION);
+    expect(config.provider.version).toBe(ARTIFACT_PROVIDER_VERSION);
   });
 });
