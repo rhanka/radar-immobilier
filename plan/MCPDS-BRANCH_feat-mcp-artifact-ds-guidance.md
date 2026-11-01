@@ -36,7 +36,7 @@ Give every artifact author the official Sentropic starter and H5 reader contract
 ## Feedback Loop
 - [x] MCPDS-EX1: reuse the owner-specified existing worktree rather than `tmp/`; no other checkout changes.
 - [x] MCPDS-EX2: vendor upstream CSS verbatim in an indivisible commit, exceeding 150 lines; required to preserve upstream hashes. Rollback removes this kit and its manifest together.
-- [x] MCPDS-EX3: keep complete directly publishable starter/guide units together when they exceed the normal 150-line guideline; inherited uncommitted work was reviewed, not discarded.
+- [x] MCPDS-EX3: keep coupled asset-serving, directly publishable starter and guide units together when they exceed the normal 150-line guideline; inherited uncommitted work was reviewed, not discarded.
 - [x] MCPDS-EX4: user explicitly requires no commit trailers, overriding the default attribution recipe; use the standalone Make commit target.
 
 ## Orchestration Mode (AI-selected)
@@ -44,7 +44,7 @@ Give every artifact author the official Sentropic starter and H5 reader contract
 
 ## UAT Management
 - [x] Do not change the root checkout or fixed dev environment.
-- [ ] Qualify approval and starter in isolated Chromium over HTTPS with the real CSP.
+- [x] Qualify approval and starter in isolated Chromium over HTTPS with the real CSP.
 - [ ] Owner/conductor qualifies the actual refreshed Claude.ai connector after deployment; no cluster action authorized here.
 
 ## Plan / Todo (lot-based)
@@ -63,8 +63,8 @@ Give every artifact author the official Sentropic starter and H5 reader contract
 - [x] **Lot 3 — Approval**
   - [x] French native form, official DS CSS, mobile layout and exact style hash.
   - [x] Preserve fields, CSRF, conditional write copy and pinned redirects.
-- [ ] **Lot 4 — Verification and delivery**
-  - [ ] Targeted API/MCP/host tests and HTTPS Chromium acceptance.
-  - [ ] Scoped typecheck/lint and pinned static DS audit.
-  - [ ] Push, open an English PR and write the French conductor report.
-  - [ ] Record follow-ups in the PR: server enforcement, guide tool/resource, framework runtimes, Elements, OpenAPI and ui://.
+- [x] **Lot 4 — Verification and delivery**
+  - [x] Targeted API/MCP/host tests and HTTPS Chromium acceptance: 125 tests passed (108 registry/H5, 11 API, 2 manifest, 4 browser).
+  - [x] API/MCP typechecks and repository ESLint passed; static DS audit 0.3.2 scored HTML 100/100 and author CSS 90/100.
+  - [x] Push, open English PR #975 and write the French conductor report.
+  - [x] Record follow-ups in the PR: server enforcement, guide tool/resource, framework runtimes, Elements, OpenAPI and ui://.
