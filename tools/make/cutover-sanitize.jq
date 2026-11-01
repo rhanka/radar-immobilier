@@ -1,4 +1,4 @@
-if $step=="ddl" or $step=="data" or $step=="destination" then
+if $step=="ddl" or $step=="data" or $step=="destination" or $step=="verify" then
   .spec.template.spec.containers[0].env |=
     ((.//[]|map(select(.name!="POSTGRES_DB"))) +
       [{name:"POSTGRES_DB",value:($r[0].targetDb//$r[0].liveDb//"radar")},
@@ -21,7 +21,7 @@ else . end
       "--"]+(.command//["/s5cmd"])+(.args//[])|.command=["/bin/sh","-c"]
   end
 )
-| if (["ddl","data","destination","database","reset","discard"]|index($step)) then
+| if (["ddl","data","destination","database","reset","discard","verify"]|index($step)) then
     .spec.template.spec.containers[0].image=$r[0].release.apiImage
   else . end
 | if $step=="data" then
