@@ -59,6 +59,9 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
   repeated cold subprocess imports exceed the unchanged deadline on the host
   bind mount, while a warmed replay finishes in 6.8 seconds. No assertion or
   timeout changes; remove the snapshot runner to roll back.
+- Dependency volumes in the disposable wrapper also use executable tmpfs,
+  avoiding repeated disk-bound package creation/removal. The locked dependency
+  graph is unchanged; all mounts disappear with the test stack.
 - Navigation adoption needs router methods to update geographic/hash views
   coherently; isolated `.set()` of activeRouteView is forbidden.
 - Review runs in this session: owner forbids workflow/background agents.
