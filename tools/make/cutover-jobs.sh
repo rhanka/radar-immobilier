@@ -10,9 +10,11 @@ job_verdict() {
       .state.terminated.message? // empty|fromjson? | select(.ok==true)]|add' > "$WORK/verdict.json"
 }
 job_pods_ended() {
-  "${k[@]}" get pods -l "job-name=$1" -o json | jq -e --arg uid "$2" '
-    all(.items[]|select(any(.metadata.ownerReferences[]?;.kind=="Job" and .uid==$uid));
-      .status.phase=="Succeeded" or .status.phase=="Failed")' >/dev/null
+  "${k[@]}" get pods -l "job-name=$1" -o json > "$WORK/job-consumers.json" || unknown_state "Job consumers unknown: $1"
+  jq -e '.items|type=="array"' "$WORK/job-consumers.json" >/dev/null || unknown_state "Job consumers unknown: $1"
+  jq -e --arg uid "$2" '
+    all(.items[]|select(any(.metadata.ownerReferences[]?;.kind=="Job" and ($uid=="null" or .uid==$uid)));
+      .status.phase=="Succeeded" or .status.phase=="Failed")' "$WORK/job-consumers.json" >/dev/null
 }
 job_observe() {
   local step=$1 name=$2 uid=$3 budget=$4 deadline status
@@ -21,8 +23,8 @@ job_observe() {
     if jq -e '.checkpoints.close=="completed"' "$WORK/record.json" >/dev/null; then
       verify_closed || fail 'Consumer closure changed during database operation'
     fi
-    status=$("${k[@]}" get job "$name" -o json) || fail "Job outcome unknown: $name"
-    [[ $(jq -r .metadata.uid <<< "$status") == "$uid" ]] || fail "Job UID changed: $name"
+    status=$("${k[@]}" get job "$name" -o json) || unknown_state "Job outcome unknown: $name"
+    [[ $(jq -r .metadata.uid <<< "$status") == "$uid" ]] || unknown_state "Job UID changed: $name"
     if jq -e 'any(.status.conditions[]?;.type=="Complete" and .status=="True")' <<< "$status" >/dev/null; then
       job_pods_ended "$name" "$uid" || fail "Completed Job still has consumers: $name"
       job_verdict "$name" "$uid" || fail "Missing sanitized Job verdict: $name"
@@ -57,17 +59,33 @@ run_job() {
   if [[ $existing == null ]] && jq -e --arg name "$name" 'any(.jobHistory[]?;.name==$name)' "$WORK/record.json" >/dev/null; then
     name="cutover-$RUN-$(jq '.jobHistory|length' "$WORK/record.json")-$step"
   fi
-  if [[ ${RECOVERING:-0} == 1 && $step =~ ^(ddl|data|restore|backup)$ && $existing != null ]]; then
-    local previous
-    previous=$("${k[@]}" get job "$(jq -r .name <<< "$existing")" -o json) || fail 'Migration outcome unknown'
-    if jq -e 'any(.status.conditions[]?;.type=="Failed" and .status=="True")' <<< "$previous" >/dev/null; then
-      local observed_uid
+  # Only read-only checks and idempotent freeze/thaw helpers may be recreated after absence.
+  # Mutating migration/restore Jobs still require a positively observed, terminated failure.
+  local repeatable=false
+  [[ ! $step =~ ^(identity|database|destination|verify|recon|probe|probeverify|volume[0-9]*|writestats[0-9]*|freeze|unfreeze|unfreezeprev)$ ]] || repeatable=true
+  if [[ ${RECOVERING:-0} == 1 && $existing != null && ( $repeatable == true || $step =~ ^(ddl|data|restore|backup)$ ) ]]; then
+    local previous retry=false observed_uid
+    name=$(jq -r .name <<< "$existing")
+    previous=$("${k[@]}" get job "$name" --ignore-not-found -o json) || unknown_state "Job outcome unknown: $name"
+    observed_uid=$(jq -r .uid <<< "$existing")
+    if [[ -z $previous ]]; then
+      [[ $repeatable == true ]] || unknown_state "Recorded Job disappeared; outcome indeterminate: $name"
+      # The Job may have been deleted while its Pods are still terminating. Check every Pod
+      # under that name, including when a lost create response left the recorded UID null.
+      job_pods_ended "$name" null || unknown_state "Previous Job still has consumers: $name"
+      retry=true
+    else
+      [[ $observed_uid == null || $observed_uid == "$(jq -r .metadata.uid <<< "$previous")" ]] || unknown_state 'Failed Job UID changed'
       observed_uid=$(jq -r .metadata.uid <<< "$previous")
-      [[ $(jq -r .uid <<< "$existing") == null || $observed_uid == "$(jq -r .uid <<< "$existing")" ]] || fail 'Failed migration UID changed'
       jq -e --arg run "$RUN" --arg hash "$(jq -r .hash <<< "$existing")" \
-        '.metadata.labels["sentropic.io/bascule"]==$run and .metadata.annotations["cutover-spec-sha256"]==$hash' <<< "$previous" >/dev/null || fail 'Failed migration identity conflict'
-      job_pods_ended "$(jq -r .name <<< "$existing")" "$observed_uid" || fail 'Previous migration still has consumers'
-      jq --arg step "$step" --arg uid "$observed_uid" '.jobs[$step].uid=$uid|
+        '.metadata.labels["sentropic.io/bascule"]==$run and .metadata.annotations["cutover-spec-sha256"]==$hash' <<< "$previous" >/dev/null || unknown_state 'Recorded Job identity conflict'
+      if jq -e 'any(.status.conditions[]?;.type=="Failed" and .status=="True")' <<< "$previous" >/dev/null; then
+        job_pods_ended "$name" "$observed_uid" || unknown_state 'Previous Job still has consumers'
+        retry=true
+      fi
+    fi
+    if [[ $retry == true ]]; then
+      jq --arg step "$step" --arg uid "$observed_uid" '.jobs[$step].uid=(if $uid=="null" then null else $uid end)|
         .jobHistory=((.jobHistory//[])+[.jobs[$step]])|del(.jobs[$step])' "$WORK/record.json" > "$WORK/next.json"
       mv "$WORK/next.json" "$WORK/record.json"; record_save
       existing=null
@@ -77,7 +95,7 @@ run_job() {
   if [[ $existing != null ]]; then
     name=$(jq -r .name <<< "$existing")
     # Reconcile a create whose response/checkpoint was lost. No second restore.
-    "${k[@]}" get job "$name" -o json > "$WORK/job.json" || fail "Recorded Job disappeared; outcome indeterminate: $name"
+    "${k[@]}" get job "$name" -o json > "$WORK/job.json" || unknown_state "Recorded Job disappeared; outcome indeterminate: $name"
     jq -e --arg run "$RUN" --arg hash "$(jq -r .hash <<< "$existing")" \
       '.metadata.labels["sentropic.io/bascule"]==$run and .metadata.annotations["cutover-spec-sha256"]==$hash' "$WORK/job.json" >/dev/null || fail 'Recorded Job identity conflict'
     uid=$(jq -r .metadata.uid "$WORK/job.json")
