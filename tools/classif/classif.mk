@@ -99,14 +99,17 @@ classif-l2-chain: ## Classification pilot L2: whole protocol, resumable (WAIT_UN
 	@test "$(ENV)" = "preprod" || { echo "[classif-l2-chain] ENV=preprod required"; exit 2; }
 	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/chain.mjs --concurrency $(CONCURRENCY) $(if $(WAIT_UNIT),--wait-unit $(WAIT_UNIT),)
 
-.PHONY: classif-l2-fingerprint-audit classif-l3-reference
+.PHONY: classif-l2-fingerprint-audit classif-l2-dev-firewall-audit classif-l3-reference
 classif-l2-fingerprint-audit: ## Classification pilot: which fingerprint list caused the complement refusals (no change to the lists)
 	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/fingerprint-audit.mjs
+
+classif-l2-dev-firewall-audit: ## Classification pilot: scan the frozen dev corpus with the current guard scanner (0 LLM, measurement only, OUT=...)
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/dev-firewall-audit.mjs --out "$(OUT)"
 
 OUT ?= $(CLASSIF_HOME)/recompute-972
 classif-l2-exit-audit: ## Classification pilot L2: audit exit≠0 votes, recompute convergence + L3 rows without LLM (PASS=n OUT=...)
 	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/exit-audit.mjs --pass $(PASS) --out "$(OUT)"
 
-classif-l3-reference: ## Classification pilot L3: dev reference (model_consensus), partitions, manifest (0 LLM call)
+classif-l3-reference: ## Classification pilot L3: dev reference (model_consensus), partitions, manifest (0 LLM call, L3OUT=... redirects the private rows copy)
 	@test "$(ENV)" = "preprod" || { echo "[classif-l3-reference] ENV=preprod required"; exit 2; }
-	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l3/reference.mjs
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l3/reference.mjs $(if $(L3OUT),--out "$(L3OUT)",)

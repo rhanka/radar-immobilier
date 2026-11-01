@@ -85,6 +85,11 @@ export function refExternalSummary(ref, lastPass, complements) {
 
 export async function main() {
   const home = classifHome();
+  // Private copy of the dev reference rows: home/l3 by default; --out redirects it
+  // (read-only-home lanes keep every write under $CLASSIF_HOME/recompute-972).
+  // The published manifest (repo) always carries the sha256 of these exact bytes.
+  const outIdx = process.argv.indexOf('--out');
+  const outDir = outIdx === -1 ? path.join(home, 'l3') : path.resolve(process.argv[outIdx + 1]);
   const items = loadDevItems(home);
   const codes = loadCodes();
   const lastPass = lastConvergedPass(home);
@@ -94,7 +99,6 @@ export async function main() {
   const signalStrata = new Map(JSON.parse(readFileSync(path.join(CLASSIF_DIR, 'l0', 'manifests', 'signal-draw-manifest.json'), 'utf8')).items.map((i) => [i.itemId, i]));
   const ref = buildReferenceRows({ items, codes, rows: conv.rows, latest, complements, signalStrata, pass: lastPass });
   const body = `${ref.map((r) => JSON.stringify(r)).join('\n')}\n`;
-  const outDir = path.join(home, 'l3');
   mkdirSync(outDir, { recursive: true, mode: 0o700 });
   writeFileSync(path.join(outDir, 'dev-reference.jsonl'), body, { mode: 0o600 });
 
