@@ -13,8 +13,9 @@ const { exportLogs } = require('../../deploy/cutover/logs-export.cjs');
 const sha = b => createHash('sha256').update(b).digest('hex');
 function fakes({ corrupt = false } = {}) {
   const pods = {
-    'radar-api-pod1': { metadata: { uid: 'uid-1' }, spec: { initContainers: [{ name: 'migrate' }], containers: [{ name: 'api' }] } },
-    'radar-ui-pod1': { metadata: { uid: 'uid-2' }, spec: { containers: [{ name: 'ui' }] } },
+    'radar-api-pod1': { metadata: { uid: 'uid-1' }, spec: { initContainers: [{ name: 'migrate' }], containers: [{ name: 'api' }] },
+      status: { initContainerStatuses: [{ name: 'migrate', restartCount: 0 }], containerStatuses: [{ name: 'api', restartCount: 1 }] } },
+    'radar-ui-pod1': { metadata: { uid: 'uid-2' }, spec: { containers: [{ name: 'ui' }] }, status: { containerStatuses: [{ name: 'ui', restartCount: 0 }] } },
   };
   const logs = {
     'radar-api-pod1/api': '2026-10-30T12:00:00.000Z started\n2026-10-30T12:05:00.000Z request\n',
@@ -103,10 +104,52 @@ test('the Kubernetes log adapter reports HTTP errors before readiness and reject
     await text;
     const previous = adapter.openLog('pod', 'api', { previous: true, follow: false });
     const previousText = previous.text.catch(() => null);
-    assert.equal(await previous.opened, statusCode !== 500, 'only an absent previous instance is optional');
+    assert.equal(await previous.opened, false, 'a recorded previous instance must be readable');
     await previousText;
     if (statusCode === 500) await assert.rejects(adapter.getPod('pod'), /500/);
     else if (statusCode === 404) assert.equal(await adapter.getPod('pod'), null);
     else await assert.rejects(adapter.getPod('pod'), /400/);
   }
+});
+test('log export skips previous logs only when the Pod proves that the container never restarted', async () => {
+  const f = fakes(), openLog = f.k8s.openLog;
+  f.k8s.openLog = (name, container, options) => {
+    assert.equal(options.previous, false, 'the never-restarted UI has no previous instance');
+    return openLog(name, container, options);
+  };
+  const exporting = exportLogs({ pods: [{ name: 'radar-ui-pod1', uid: 'uid-2' }], prefix: 'p', k8s: f.k8s, s3: f.s3 });
+  const outcome = exporting.catch(error => ({ error }));
+  await new Promise(resolve => setImmediate(resolve)); f.end();
+  const verdict = await outcome;
+  assert.equal(verdict.ok, true, verdict.error?.message);
+});
+test('a restart while log streams open blocks readiness until the new container instance is exported', async () => {
+  const f = fakes(), getPod = f.k8s.getPod;
+  let reads = 0, ready = false;
+  f.k8s.getPod = async name => {
+    const pod = structuredClone(await getPod(name));
+    if (++reads > 1) pod.status.containerStatuses[0].restartCount++;
+    return pod;
+  };
+  const exporting = exportLogs({ pods: [{ name: 'radar-ui-pod1', uid: 'uid-2' }], prefix: 'p', k8s: f.k8s, s3: f.s3,
+    onOpen: () => { ready = true; } });
+  await new Promise(resolve => setImmediate(resolve)); f.end();
+  const verdict = await exporting;
+  assert.equal(ready, false, 'the pre-restart snapshot cannot authorize deletion of the new instance');
+  assert.equal(verdict.ok, false);
+});
+test('a failed stream withdraws readiness immediately while other live streams remain open', async () => {
+  const f = fakes(), openLog = f.k8s.openLog;
+  let rejectStream, ready = false;
+  f.k8s.openLog = (name, container, options) => container === 'api' && !options.previous
+    ? { opened: Promise.resolve(true), text: new Promise((_resolve, reject) => { rejectStream = reject; }) }
+    : openLog(name, container, options);
+  const exporting = exportLogs({ pods: [{ name: 'radar-api-pod1', uid: 'uid-1' }, { name: 'radar-ui-pod1', uid: 'uid-2' }],
+    prefix: 'p', k8s: f.k8s, s3: f.s3, onOpen: () => { ready = true; }, onClose: () => { ready = false; } });
+  const outcome = exporting.catch(error => error);
+  await new Promise(resolve => setImmediate(resolve)); assert.equal(ready, true);
+  rejectStream(Error('stream interrupted'));
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(ready, false, 'another active stream must not hide a failed exporter');
+  f.end(); assert.match((await outcome).message, /stream interrupted/);
 });

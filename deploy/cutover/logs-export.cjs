@@ -21,19 +21,26 @@ function stats(text) {
   return { lines: lines.length, firstAt: lines.length ? stamp(lines[0]) : null, lastAt: lines.length ? stamp(lines.at(-1)) : null };
 }
 // k8s.openLog(pod, container, { previous, follow }) -> { opened: Promise<boolean>, text: Promise<string|null> }
-async function exportLogs({ pods, prefix, k8s, s3, onOpen = () => {}, log = () => {} }) {
+async function exportLogs({ pods, prefix, k8s, s3, onOpen = () => {}, onClose = () => {}, log = () => {} }) {
   const manifest = { format: 'radar-cutover-logs/v1', prefix, pods: [], missing: [] };
-  const streams = [];
+  const streams = [], snapshots = [];
+  let broken = false;
+  const instances = pod => JSON.stringify([...(pod.status?.initContainerStatuses || []), ...(pod.status?.containerStatuses || [])]
+    .map(c => [c.name, c.restartCount, c.containerID]).sort((a, b) => a[0].localeCompare(b[0])));
   for (const expected of pods) {
     const pod = await k8s.getPod(expected.name);
     if (!pod || pod.metadata.uid !== expected.uid || !SAFE.test(expected.name)) { manifest.missing.push(expected.uid); continue; }
+    snapshots.push({ ...expected, instances: instances(pod) });
     const entry = { name: expected.name, uid: expected.uid, containers: [] };
     manifest.pods.push(entry);
     for (const container of [...(pod.spec.initContainers || []), ...pod.spec.containers].map(c => c.name)) {
+      const status = [...(pod.status?.initContainerStatuses || []), ...(pod.status?.containerStatuses || [])].find(c => c.name === container);
       for (const previous of [false, true]) {
+        // A previous log is optional only when the Pod positively reports no restart.
+        if (previous && status?.restartCount === 0) continue;
         const stream = k8s.openLog(expected.name, container, { previous, follow: !previous });
         // A stream can reject while other Pods are still being read or opened.
-        stream.text.catch(() => {});
+        stream.text.catch(() => { broken = true; onClose(); });
         streams.push({ entry, container, previous, ...stream });
       }
     }
@@ -43,7 +50,12 @@ async function exportLogs({ pods, prefix, k8s, s3, onOpen = () => {}, log = () =
   for (const [i, s] of streams.entries()) {
     if (!opened[i]) manifest.missing.push(`${s.entry.uid}/${s.container}${s.previous ? '/previous' : ''}`);
   }
-  if (manifest.missing.length === 0) onOpen();
+  // A restart between the Pod read and the HTTP opens invalidates the captured instances.
+  for (const snapshot of snapshots) {
+    const current = await k8s.getPod(snapshot.name);
+    if (!current || current.metadata.uid !== snapshot.uid || instances(current) !== snapshot.instances) manifest.missing.push(snapshot.uid);
+  }
+  if (manifest.missing.length === 0 && !broken) onOpen();
   for (const s of streams) {
     const text = await s.text;
     // No previous instance is a normal case; a missing current log is a failure.
@@ -94,7 +106,7 @@ function inClusterK8s() {
       textP.catch(() => {});
       const query = `container=${encodeURIComponent(container)}&timestamps=true${previous ? '&previous=true' : ''}${follow ? '&follow=true' : ''}`;
       request(`${base}/${name}/log?${query}`, res => {
-        opened(res.statusCode === 200 || (previous && [400, 404].includes(res.statusCode)));
+        opened(res.statusCode === 200);
         const chunks = [];
         res.on('data', c => chunks.push(c));
         res.on('error', text.reject);
@@ -126,12 +138,14 @@ if (require.main === module || module.id === '[eval]') {
   const env = process.env;
   const pods = JSON.parse(env.LOG_PODS || '[]');
   const ready = env.LOG_READY_FILE || '/tmp/streams-open';
+  const onClose = () => fs.rmSync(ready, { force: true });
   exportLogs({ pods, prefix: env.LOG_PREFIX, k8s: inClusterK8s(), s3: s3Client(env),
-    onOpen: () => fs.writeFileSync(ready, 'open\n'), log: m => process.stderr.write(`${m}\n`) })
+    onOpen: () => fs.writeFileSync(ready, 'open\n'), onClose, log: m => process.stderr.write(`${m}\n`) })
     .then(verdict => {
+      if (!verdict.ok) onClose();
       if (env.TERMINATION_LOG) fs.writeFileSync(env.TERMINATION_LOG, JSON.stringify(verdict));
       else process.stdout.write(JSON.stringify(verdict));
       process.exitCode = verdict.ok ? 0 : 1;
     })
-    .catch(e => { process.stderr.write(`logs_export_failed ${e.message}\n`); process.exitCode = 1; });
+    .catch(e => { onClose(); process.stderr.write(`logs_export_failed ${e.message}\n`); process.exitCode = 1; });
 }
