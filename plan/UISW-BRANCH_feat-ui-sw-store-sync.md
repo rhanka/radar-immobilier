@@ -76,7 +76,7 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
 - [x] **Lot 0 — Baseline and constraints**
   - [x] Read rules and inherited diff; retain correct build/bootstrap work.
   - [x] Consume prepared preprod worker CSP correction with a merge commit.
-- [ ] **Lot B — Coordination worker**
+- [x] **Lot B — Coordination worker**
   - [x] Lifecycle events never restart a retiring worker; kill replies neutralize even after a missed notice.
   - [x] Invalidations can target an ephemeral tab identity without business state.
   - [x] Chromium qualified N/N-1/N+1, interruption, refusal, rollback and kill.
@@ -84,10 +84,10 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
   - [x] Nonblocking client registration, stopped-worker reconnect and update API.
   - [x] Worker validates browser clients and probes the complete live client set.
   - [x] Embedded wire/state contracts and preprod-only runtime gate.
-  - [ ] Closed protocol, browser-client validation, handshake and reconnect.
-  - [ ] Compatible update, targeted invalidation, kill switch and build identities.
+  - [x] Closed protocol, browser-client validation, handshake and reconnect.
+  - [x] Compatible update, targeted invalidation, kill switch and build identities.
   - [x] Three nginx variants: JS, no-cache, 404, security-header inheritance.
-- [ ] **Lot C — Local state sync**
+- [x] **Lot C — Local state sync**
   - [x] Logout during wake revalidation invalidates its owned epoch without overwriting a newer login.
   - [x] A stale logout preserves contexts owned by a newer canonical epoch.
   - [x] Epoch changes interrupt an already suspended wake revalidation.
@@ -100,10 +100,10 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
   - [x] Storage-failure boundary and same-origin invalidation channel.
   - [x] Bounded context projection and fail-closed version validation.
   - [x] Stable scalar codecs and receive-without-write preference adapter.
-  - [ ] Four stable scalar preferences; codecs, Svelte adapters, no receive rewrite.
-  - [ ] Versioned bounded contexts, explicit adoption, session isolation.
-  - [ ] Unknown schemas preserved; storage failures degrade without retries.
-- [ ] **Lot T — Verification**
+  - [x] Four stable scalar preferences; codecs, Svelte adapters, no receive rewrite.
+  - [x] Versioned bounded contexts, explicit adoption, session isolation.
+  - [x] Unknown schemas preserved; storage failures degrade without retries.
+- [x] **Lot T — Verification**
   - [x] Final scoped verification: 43 tests, workspace types, lint and nginx parity pass.
   - [x] Replay stub can execute on the temporary mount; temporary diagnostics removed.
   - [x] Qualification UI images receive the full committed source identity.
@@ -112,12 +112,12 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
   - [x] Browser fixture and production-UI continuity scenarios authored.
   - [x] Isolated Make entrypoint avoids environment files and removes test volumes.
   - [x] Session/context isolation unit regressions; delayed auth response rejected.
-  - [ ] UI unit tests, codec/adapter/isolation regressions and scoped legacy tests.
-  - [ ] Typecheck, lint, API and MCP tests.
-  - [ ] Playwright: two tabs, N/N-1/N+1, refusal, reconnect, rollback, kill.
-- [ ] **Lot N-1 — Docs consolidation**
+  - [x] UI unit tests, codec/adapter/isolation regressions and scoped legacy tests.
+  - [x] Typecheck, lint, API (3,881 passed, 974 conditional skips) and MCP (491 passed).
+  - [x] Playwright: 11 passed, including two tabs, N/N-1/N+1, refusal, reconnect, rollback, kill.
+- [x] **Lot N-1 — Docs consolidation**
   - [x] Operating procedure authored; interim conductor report records real results.
-  - [ ] Operating procedure and French report at the requested conductor path.
-- [ ] **Lot N — Delivery**
-  - [ ] Push branch, open English PR, record full head SHA and CI state.
-  - [ ] Merge remains the owner's action; preserve branch.
+  - [x] Operating procedure and French report at the requested conductor path.
+- [x] **Lot N — Delivery**
+  - [x] Push branch and open English PR #976; full SHA and CI state in conductor receipt.
+  - [x] Leave merge to the owner and preserve the source branch.
