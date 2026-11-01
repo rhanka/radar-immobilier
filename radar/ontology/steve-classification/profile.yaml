@@ -1,0 +1,107 @@
+# radar-immobilier / geo — Steve-aligned signal classification profile (pilot, plan-pilote-v2 §B-L1).
+#
+# Owned by radar/geo, consumed by @sentropic/engram 0.21.2 unchanged (profile mode, external path).
+# Models Steve's classification plan already stored in the database (facet_reason_codes, profile
+# immo-steve-2026-09, api/drizzle/0014_facets_signal.sql):
+#   - main category  = verdict (3 values: pertinent, a_surveiller, non_pertinent);
+#   - annotation tag = reason code (28 codes), whose verdict is its registry partition.
+# An Annotation targets ONE immo anchor (Signal, DesignationEvent, Source PV) or a geo anchor (Zone,
+# Lot) referenced by id only — no cross-profile edge is created. Every Annotation cites at least one
+# Evidence (verbatim quote, source file + page). Code definitions are NOT in this public file: they
+# are Steve's text and reach annotators only through the private allowed pack.
+id: steve-classification
+version: 1
+ontology_version: "1.0"
+default_language: fr
+
+node_types:
+  ReasonCode:
+    id_prefix: code
+    definition: Steve's reason code (immo-steve-2026-09); its verdict is the registry partition.
+    registry: reason_codes
+  Verdict:
+    id_prefix: verdict
+    definition: Main category of an annotation (pertinent, a_surveiller, non_pertinent).
+    registry: verdicts
+  Annotation:
+    id_prefix: annotation
+    definition: One annotator's classification of one anchor (reason code, ambiguity flag and cause).
+    source_backed: true
+    status_policy: hardenable
+    properties:
+      annotator:       { type: string, description: Seat label (model + effort) }
+      pass:            { type: integer, description: Convergence pass number (1-4) }
+      ambiguous:       { type: boolean, description: True when the item is ambiguous for the annotator }
+      ambiguity_cause: { type: string, description: missing-information | conflicting-information | scope-unclear | other }
+      guide_version:   { type: string, description: Annotation guide version (G0, G1, ...) }
+  Evidence:
+    id_prefix: evidence
+    definition: Verbatim quote of the item text supporting the annotation.
+    source_backed: true
+  Signal:
+    id_prefix: signal
+    definition: immo anchor — graph node of type Signal, referenced by its id.
+  DesignationEvent:
+    id_prefix: event
+    definition: immo anchor — graph node of type DesignationEvent, referenced by its id.
+  Source:
+    id_prefix: source
+    definition: immo anchor — PV document (Source node), referenced by its id.
+  Zone:
+    id_prefix: zone
+    definition: geo anchor — zone referenced by id (ogc:zones:<city>:<code>), no cross-profile edge.
+  Lot:
+    id_prefix: lot
+    definition: geo anchor — cadastral lot referenced by id (ogc:lots:<city>:<no_lot>), no cross-profile edge.
+
+relation_types:
+  targets:
+    source: Annotation
+    target: [Signal, DesignationEvent, Source, Zone, Lot]
+    description: The annotation classifies this anchor.
+  justified_by:
+    source: Annotation
+    target: ReasonCode
+    description: The annotation's reason code (its verdict is the code's registry partition).
+  has_verdict:
+    source: Annotation
+    target: Verdict
+    derivation_methods: [registry_partition]
+    description: Main category, derived from the reason code partition (never chosen separately).
+  cites:
+    source: Annotation
+    target: Evidence
+    requires_evidence: true
+    description: The annotation rests on this verbatim evidence.
+
+registries:
+  reason_codes:
+    source: reason_codes
+    id_column: code
+    label_column: code
+    partition_column: verdict
+    node_type: ReasonCode
+  verdicts:
+    source: verdicts
+    id_column: verdict
+    label_column: label
+    node_type: Verdict
+
+citation_policy:
+  minimum_granularity: page
+  require_source_file: true
+  allow_bbox: never
+
+evidence_policy:
+  require_evidence_refs: false
+
+inference_policy:
+  allow_inferred_relations: false
+  require_evidence_refs: false
+
+hardening:
+  statuses: [candidate, converged, non_converged, rejected]
+  default_status: candidate
+  status_transitions:
+    - from: [candidate]
+      to: [converged, non_converged, rejected]
