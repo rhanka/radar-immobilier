@@ -16,6 +16,11 @@ CONFIG=deploy/cutover/config.json
 URL=$(jq -r .preprod.url "$CONFIG")
 NS=$(jq -r .preprod.namespace "$CONFIG")
 k() { kubectl --request-timeout=15s -n "$NS" "$@"; }
+prepared_slot_gone() {
+  local deployment
+  deployment=$(k get deployment radar-api-prepared --ignore-not-found -o name) || return 1
+  [[ -z $deployment ]]
+}
 if [[ ${1:-} == check ]]; then
   # CI guard, run in prepare-preprod-db before any clone: "skip" only when the release is already
   # served (a re-run of the same main workflow) AND the rehearsal of that SHA was green
@@ -105,7 +110,7 @@ scenario() {
   fi
   jq -e -f tools/make/cutover-sessions.jq "$OUT/$name-receipt.json" >/dev/null || status=1
   jq -e '(.logGaps//[])|length==0' "$OUT/$name-receipt.json" >/dev/null || status=1
-  if k get deployment radar-api-prepared --ignore-not-found -o name | grep -q .; then status=1; fi
+  prepared_slot_gone || status=1
   if ((status == 0)); then verdict "$name: OK $(jq -c .stats "$OUT/$name-verdict.json")"
   else verdict "$name: RED $(jq -c '.violations//{}|map_values(.count)' "$OUT/$name-verdict.json" 2>/dev/null)"; red=1; fi
 }

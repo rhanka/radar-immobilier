@@ -30,7 +30,7 @@
 - [x] Lot 0: read rules, fast-forward branch, inspect inherited changes and reproduce failures.
 - [x] Lot 1: persist switch intent before exposing prepared writers; partial-switch retention reproduced first.
 - [x] Lot 2: retire prepared writers before measuring abandoned writes; the regression commits a final request at SIGTERM.
-- [x] Lot 3: unknown routing, prepared/adopted Deployment reads and Pod phases block deletion; four focused state tests pass.
+- [x] Lot 3: unknown routing, prepared/adopted Deployment reads and Pod phases block deletion; rehearsal also requires readable absence (seven focused state tests).
 - [x] Lot 4: incomplete log streams never authorize deletion; previous instances, restarts and stream failures are covered (ten passing exporter tests).
 - [x] Lot 5: retry safe failed or missing verification Jobs; unknown creates and identity conflicts keep ownership (35 passing helper tests).
 - [ ] Lot 6: targeted and full operator tests pass; remove the test stack and volumes.
