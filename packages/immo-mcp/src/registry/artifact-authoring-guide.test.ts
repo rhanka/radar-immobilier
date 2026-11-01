@@ -16,6 +16,7 @@ import {
   IMMO_ARTIFACT_PROFILE as profile,
   withAuthoringGuide,
 } from "./artifact-provider.js";
+import { FRAMEWORK_STARTERS } from "./framework-starters.js";
 
 const authority: VerifiedMcpRequest = {
   principal: { issuer: "synthetic", sub: "alice", scopes: ["immo:artifacts:read", "immo:artifacts:write"],
@@ -54,10 +55,37 @@ describe("artifact authoring guide", () => {
     expect(guide.frameworkBuild).toContain("ImmoArtifact.mount/dispose");
     expect(guide.components.length).toBeGreaterThan(0);
     for (const component of guide.components) {
-      expect(component.catalogId).toBe("@sentropic/design-system-react");
+      expect(component.sourcePackage).toBe("@sentropic/design-system-react");
       expect(component.promptHash).toMatch(/^[0-9a-f]{64}$/);
     }
     expect(Object.isFrozen(guide)).toBe(true);
+  });
+
+  it("should require the published audit CLI and block findings and tool errors", () => {
+    const checklist = getAuthoringGuide().checklist.join("\n");
+    expect(checklist).toContain("npx --yes -p @sentropic/design-system-skills@0.1.0 design audit ./index.html");
+    expect(checklist).toContain("exit 1 (findings) and exit 2 (tool error) both block publication");
+    expect(checklist).not.toMatch(/skills@0\.3\.2|design check|--fail-under/);
+  });
+
+  it("should distinguish published framework packages from the CSS snapshot", () => {
+    expect(FRAMEWORK_STARTERS.filter((entry) => entry.framework !== "plain JS")
+      .map((entry) => [entry.framework, entry.packageVersion])).toEqual([
+      ["React", "0.38.0"], ["Svelte", "0.36.0"], ["Vue", "0.38.0"], ["Angular", "0.38.0"],
+    ]);
+    expect(FRAMEWORK_STARTERS.find((entry) => entry.framework === "React")?.cssSnapshotVersion).toBe("0.36.46");
+  });
+
+  it("should describe React CSS recipes without claiming Elements catalogue contracts", () => {
+    const guide = getAuthoringGuide();
+    const recipes = [...guide.components, ...FRAMEWORK_STARTERS.flatMap((entry) => entry.componentRefs)];
+    for (const recipe of recipes) {
+      expect(recipe).toMatchObject({ sourcePackage: "@sentropic/design-system-react", snapshotVersion: "0.36.46" });
+      expect(recipe.componentName).toBeTruthy();
+      for (const key of ["catalogId", "componentId", "contractVersion"]) expect(recipe).not.toHaveProperty(key);
+    }
+    expect(guide.componentUsage).not.toContain("components[].catalogId");
+    expect(guide.elements.componentIds).toEqual(["BarChart", "BpmnCanvas", "DecisionDossier"]);
   });
 
   it("should point the ensure/publish/get descriptions at the guide", () => {
