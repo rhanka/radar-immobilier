@@ -9,6 +9,7 @@ function client(respond: (path: string, init: RequestInit) => Response, withGran
   const history = { replaceState: vi.fn() };
   const window = {} as { ImmoReader: {
     context(id: string): Promise<unknown>; search(args: object): Promise<unknown>;
+    workspaces(): Promise<unknown>;
     ensureGrant(): Promise<void>;
   } };
   runInNewContext(STARTER_READER_JS, { window, history, fetch, URL, URLSearchParams, AbortController,
@@ -33,6 +34,21 @@ describe("publishable H5 client", () => {
     }
   });
 
+  it("should discover workspaces using the reader grant without workspace or identity parameters", async () => {
+    const body = { ok: true, workspaces: [{ id: "workspace", label: "Team", slug: "team",
+      signals: { availability: { state: "open" } } }] };
+    const c = client(() => Response.json(body));
+    expect(await c.reader.workspaces()).toEqual(body);
+    expect(c.fetch).toHaveBeenCalledWith("/__reader/api/workspaces.list.v1", expect.objectContaining({
+      method: "GET", credentials: "same-origin", headers: { "x-preview-grant": "initial" },
+    }));
+  });
+
+  it("should preserve discovery refusal instead of returning an empty workspace list", async () => {
+    const c = client(() => Response.json({ ok: false, requestId: "trace", error: { code: "account_not_approved" } }, { status: 403 }));
+    await expect(c.reader.workspaces()).rejects.toMatchObject({ kind: "denied", code: "account_not_approved", requestId: "trace" });
+  });
+
   it("should share concurrent renewal and recover once without an expired grant", async () => {
     const c = client((path, init) => {
       if (path === "/__reader/renew") return (init.headers as Record<string, string>)["x-preview-grant"]
@@ -40,7 +56,7 @@ describe("publishable H5 client", () => {
       return Response.json(path.includes("context") ? openContext : { ok: true, items: [] });
     });
     c.expire();
-    await Promise.all([c.reader.context("workspace"), c.reader.search({ workspaceId: "workspace", citySlug: "city" })]);
+    await Promise.all([c.reader.workspaces(), c.reader.context("workspace"), c.reader.search({ workspaceId: "workspace", citySlug: "city" })]);
     const renewals = c.fetch.mock.calls.filter(([path]) => path === "/__reader/renew");
     expect(renewals).toHaveLength(2);
     expect(renewals[0]![1].headers).toEqual({ "x-preview-grant": "initial" });
