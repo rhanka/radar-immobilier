@@ -6,6 +6,7 @@ import { SUCCESSOR_TOOL_NAMES, SuccessorManifestSchema,
   SuccessorSearchSignalsInputSchema } from "./successor-schemas.js";
 
 const digest = "a".repeat(64);
+import { H4_CHECKPOINT_TOOL_COUNT, SUCCESSOR_TOOL_COUNT } from "./successor-contract.js";
 describe("inert successor compatibility", () => {
   it("should retain exactly twelve live definitions and the baseline search schema", () => {
     const names = ALL_TOOL_DEFINITIONS.map((tool) => tool.name);
@@ -27,8 +28,8 @@ describe("inert successor compatibility", () => {
   });
 
   it("should bind all successor definitions and versions while preserving the H4 checkpoint", () => {
-    const manifest = { version: "status-v1", baseline: { toolCount: 12, digest }, h4: { toolCount: 16, digest },
-      successor: { toolCount: 22, digest, definitionsVersion: "v1", capabilitiesVersion: "v1",
+    const manifest = { version: "status-v1", baseline: { toolCount: 12, digest }, h4: { toolCount: H4_CHECKPOINT_TOOL_COUNT, digest },
+      successor: { toolCount: SUCCESSOR_TOOL_COUNT, digest, definitionsVersion: "v1", capabilitiesVersion: "v1",
         handlersVersion: "v1", schemasVersion: "v1", searchSignalsContract: "search_signals.status-v1",
         tools: SUCCESSOR_TOOL_NAMES.map((name) => ({ name, schemaDigest: digest,
           handlerDigest: digest, capabilities: ["synthetic"] })) } };
