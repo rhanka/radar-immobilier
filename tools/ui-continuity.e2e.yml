@@ -1,4 +1,8 @@
 services:
+  ui:
+    build:
+      args:
+        GIT_SHA: ${CONTINUITY_GIT_SHA:-unknown}
   minio:
     volumes:
       - type: tmpfs
