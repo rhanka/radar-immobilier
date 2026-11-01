@@ -1,4 +1,11 @@
 services:
+  postgres:
+    # Synthetic DB discarded after each campaign; avoid host-disk fsync stalls.
+    volumes:
+      - type: tmpfs
+        target: /var/lib/postgresql/data
+      - type: tmpfs
+        target: /var/run/postgresql
   api:
     environment:
       DOTENV_CONFIG_PATH: /dev/null

@@ -29,7 +29,11 @@ case "$phase" in
     node ui/e2e-real/local-proxy.mjs "${PLAYWRIGHT_UI_BASE_URL##*:}" "${E2E_UI_UPSTREAM}" &
     wait_for "${PLAYWRIGHT_UI_BASE_URL}/"
     node --import tsx ui/e2e-real/seed.mjs --verify
-    ./node_modules/.bin/playwright install --with-deps --only-shell chromium
+    if [ "${E2E_BROWSER_DEPS:-}" = preinstalled ]; then
+      ./node_modules/.bin/playwright install --only-shell chromium
+    else
+      ./node_modules/.bin/playwright install --with-deps --only-shell chromium
+    fi
     cd ui
     ../node_modules/.bin/playwright test --config playwright.real.config.ts
     ;;
