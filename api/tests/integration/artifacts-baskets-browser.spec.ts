@@ -1,10 +1,11 @@
-import { chromium, type Browser } from "@playwright/test";
+import { chromium, expect as expectBrowser, type Browser } from "@playwright/test";
 import { getRequestListener } from "@hono/node-server";
 import { afterAll, beforeAll, expect, it } from "vitest";
 import { describeDb } from "../../src/services/facets/scope-db-fixture.js";
 import { cookie, startHarness, type Harness } from "./artifacts-h2.helpers.js";
 import { publishedBaskets } from "./artifacts-baskets.helpers.js";
 import { startBrowserHttps } from "./artifacts-baskets-browser.helpers.js";
+const expectUi = expectBrowser.configure({ timeout: 1500 });
 
 // Explicit opt-in: the default CI API image has no browser installed.
 describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("published HTML/CSS/JS Chromium acceptance", () => {
@@ -77,6 +78,12 @@ describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("published H
           expect((await page.goto(`https://${host}/`))?.status()).toBe(200);
           expect(new URL(page.url()).host).toBe("app.example.test");
           started = Date.now();
+          await expectUi(page.locator('html[data-st-theme="sent-tech"]')).toHaveCount(1);
+          const approvalButton = page.getByRole("button", { name: "Autoriser et ouvrir" });
+          expect(await approvalButton.evaluate((button) => getComputedStyle(button).backgroundColor)).not.toBe("rgba(0, 0, 0, 0)");
+          await page.keyboard.press("Tab");
+          await expectUi(approvalButton).toBeFocused();
+          expect(await approvalButton.evaluate((button) => getComputedStyle(button).outlineStyle)).not.toBe("none");
           await page.getByRole("button", { name: "Autoriser et ouvrir" }).click();
           await page.waitForFunction((matched) => document.body.dataset.matched === String(matched), count, { timeout: 1500 });
           const elapsedMs = Date.now() - started;
@@ -121,7 +128,9 @@ describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("published H
             .toEqual([expect.objectContaining({ host: "app.example.test", origin: "https://app.example.test" })]);
           for (const request of requests) {
             if (request.host.endsWith(".pages.example.test")) expect(request.cookie).not.toContain("radar_session");
-            expect(request.cacheControl).toBe("private, no-store");
+            if (request.host === "app.example.test" && request.path.startsWith("/api/v1/artifacts/reader/design/")) {
+              expect(request.cacheControl).toContain("immutable");
+            } else expect(request.cacheControl).toBe("private, no-store");
           }
           expect(errors).toEqual([]);
         } catch (error) {
