@@ -14,6 +14,9 @@ project="radar-${env_name}"
 export COMPOSE_DISABLE_ENV_FILE=1
 unset COMPOSE_FILE COMPOSE_ENV_FILES COMPOSE_PROFILES
 compose=(docker compose --env-file /dev/null -p "$project" -f docker-compose.yml -f docker-compose.e2e.yml)
+if [ -n "${E2E_COMPOSE_EXTRA_FILE:-}" ]; then
+  compose+=(-f "$E2E_COMPOSE_EXTRA_FILE")
+fi
 down() { "${compose[@]}" --profile e2e down -v --remove-orphans > /dev/null 2>&1 || true; }
 if [ "${1:-run}" = "down" ]; then
   down
