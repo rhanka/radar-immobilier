@@ -509,3 +509,77 @@ test('a re-run after a red rehearsal replays from the recorded previous release,
     assert.notEqual(f.run('run', ['MODE=run', `REPLAY_SPECS=${join(f.dir, 'previous-specs.json')}`]).status, 0, 'replay only with SAMEDB=1');
   } finally { f.cleanup(); }
 });
+test('a freeze Job that fails after its ALTER is undone: the live database is unfrozen before the lock is released', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    const state = f.state(); state.failJob = 'freeze'; save(f, state);
+    assert.notEqual(f.run('run', ['MODE=run']).status, 0);
+    const steps = f.state().jobCreation.map(j => j.step);
+    assert.ok(steps.indexOf('freeze') >= 0 && steps.indexOf('unfreeze') > steps.indexOf('freeze'), steps.join(' '));
+    assert.equal(f.state().unfrozen, 1);
+    for (const name of SERVICES) assert.equal(slotOf(f, name), 'main');
+    assert.equal(lock(f), undefined);
+  } finally { f.cleanup(); }
+});
+test('an interruption before the retained entry is written never loses it: the rollback measures again and records it once', () => {
+  const f = fixture({ writeGrowth: { radar_next: 3 } });
+  try {
+    success(f.run('prepare'));
+    const state = f.state(); state.crash = { step: 'stage-4', edge: 'after-started' }; save(f, state);
+    assert.notEqual(f.run('run', ['MODE=run']).status, 0);
+    const record = JSON.parse(lock(f).data.record);
+    const killed = f.state(); killed.crash = { step: 'retained', edge: 'before-write' }; save(f, killed);
+    assert.notEqual(f.run('rollback', [`RUN=${record.run}`, 'MODE=run']).status, 0);
+    assert.deepEqual(entries(f), [], 'killed before the entry was written');
+    success(f.run('rollback', [`RUN=${record.run}`, 'MODE=run']));
+    assert.deepEqual(entries(f).map(e => [e.status, e.db, e.run, e.tuples]), [['pending', 'radar_next', record.run, 3]]);
+    const refused = f.run('prepare');
+    assert.notEqual(refused.status, 0);
+    assert.match(refused.stderr, /retained_db_unacknowledged/);
+  } finally { f.cleanup(); }
+});
+test('a failed canonical re-roll keeps the canonical log export running; resume verifies it and completes', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    const state = f.state(); state.rolloutFail = 'radar-api'; state.followJobs = ['logsmain0']; save(f, state);
+    const failed = f.run('run', ['MODE=run']);
+    assert.notEqual(failed.status, 0);
+    assert.match(failed.stderr, /Canonical re-roll failed/);
+    assert.ok(lock(f), 'promotion started: the lock is retained');
+    const s = f.state();
+    const job = s.objects.find(o => o.kind === 'Job' && o.metadata.name.endsWith('-logsmain0'));
+    assert.ok(job, 'the log export Job is kept');
+    assert.equal((s.deletions || []).some(d => d.kind === 'Job' && d.name === job.metadata.name), false);
+    // The followed Pods exit: the export completes with every recorded Pod.
+    const pods = JSON.parse(job.spec.template.spec.containers[0].env.find(e => e.name === 'LOG_PODS').value);
+    job.status = { conditions: [{ type: 'Complete', status: 'True' }], succeeded: 1 };
+    const pod = s.objects.find(o => o.kind === 'Pod' && o.metadata.name === `${job.metadata.name}-pod`);
+    pod.status = { phase: 'Succeeded', containerStatuses: [{ name: 'result',
+      state: { terminated: { message: JSON.stringify({ ok: true, podUids: pods.map(p => p.uid) }) } } }] };
+    s.followJobs = []; save(f, s);
+    const record = JSON.parse(lock(f).data.record);
+    success(f.run('resume', [`RUN=${record.run}`]));
+    assert.equal(lock(f), undefined);
+    for (const name of SERVICES) assert.equal(slotOf(f, name), 'main');
+    assert.ok(receipt(f).logsVerified.includes('logsmain0'));
+  } finally { f.cleanup(); }
+});
+test('an unreadable slot state is unknown, never legacy: slots-status and the blue/green entries refuse', () => {
+  const f = fixture();
+  const g = fixture({ unadopted: true });
+  try {
+    const state = f.state(); state.getFail = 'service/radar-api'; save(f, state);
+    const status = f.run('slots-status');
+    assert.notEqual(status.status, 0);
+    assert.match(status.stderr, /slots_state_unknown/);
+    assert.doesNotMatch(status.stdout, /legacy|adopted/);
+    const prepare = f.run('prepare');
+    assert.notEqual(prepare.status, 0);
+    assert.match(prepare.stderr, /slots_state_unknown/);
+    const legacy = g.run('slots-status');
+    assert.equal(legacy.status, 0, legacy.stderr);
+    assert.equal(legacy.stdout.trim(), 'legacy');
+  } finally { f.cleanup(); g.cleanup(); }
+});

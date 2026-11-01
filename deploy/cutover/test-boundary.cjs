@@ -193,7 +193,11 @@ if (args[0] === 'port-forward') {
   out(`Forwarding from 127.0.0.1:${port} -> ${resource}\n`);
   setInterval(() => {}, 1000); return;
 }
-if (args[0] === 'rollout') process.exit(s.missingMcp && args.includes('deployment/radar-immo-mcp') ? 1 : 0);
+if (args[0] === 'rollout') {
+  // rolloutFail: the next rollout status of that Deployment fails once (a failed re-roll).
+  if (s.rolloutFail && args.includes(`deployment/${s.rolloutFail}`)) { s.rolloutFail = null; save(); process.exit(1); }
+  process.exit(s.missingMcp && args.includes('deployment/radar-immo-mcp') ? 1 : 0);
+}
 if (args[0] === 'wait') process.exit();
 if (args[0] === 'get') {
   if (args[1].includes(',')) { out({ items: s.controllers || [] }); process.exit(); }
@@ -203,6 +207,8 @@ if (args[0] === 'get') {
     if (s.lockReleaseAfter === 0) s.objects = s.objects.filter(o => o.metadata.name !== 'radar-change-lock');
     save();
   }
+  // getFail "<kind>/<name>": that read fails like an API timeout (not a NotFound).
+  if (s.getFail && `${args[1]}/${args[2]}` === s.getFail) { process.stderr.write('Unable to connect to the server: i/o timeout\n'); process.exit(1); }
   if (args[1] === 'endpointslices') { out(slicesOf(find('service', value('-l').split('=')[1]))); process.exit(); }
   let objects = s.objects.filter(o => o.kind === key(args[1]));
   if (key(args[1]) === 'Pod' && !args.includes('-l') && args[2]?.startsWith('-')) {
@@ -258,6 +264,7 @@ if (args[0] === 'create' || args[0] === 'replace' || args[0] === 'apply') {
   const current = s.objects.find(x => x.kind === o.kind && x.metadata.name === o.metadata.name);
   if (args[0] === 'create' && current) process.exit(1);
   if (args[0] === 'replace' && current?.metadata.resourceVersion !== o.metadata.resourceVersion) process.exit(1);
+  if (o.kind === 'ConfigMap' && o.metadata.name === 'radar-retained-db') crash('retained', 'before-write');
   if (o.kind === 'Job') {
     const step = o.metadata.name.split('-').at(-1);
     crash(step, 'before-create');
@@ -267,10 +274,13 @@ if (args[0] === 'create' || args[0] === 'replace' || args[0] === 'apply') {
     // jobSeconds models real duration: the wrapper timeout (or deadline) kills a slower child.
     const limit = Number(o.spec.template.spec.containers[0].env?.find(e => e.name === 'CUTOVER_TIMEOUT')?.value ?? o.spec.activeDeadlineSeconds);
     const failed = s.failJob === step || (s.failJobs || []).includes(step) || s.jobSeconds?.[step] > limit;
-    o.status = s.hangJob === step ? { active: 1 } : { conditions: [{ type: failed ? 'Failed' : 'Complete', status: 'True' }], succeeded: failed ? 0 : 1 };
+    // followJobs: a log export still following its Pods (active, streams open).
+    const follow = (s.followJobs || []).includes(step);
+    o.status = s.hangJob === step || follow ? { active: 1 } : { conditions: [{ type: failed ? 'Failed' : 'Complete', status: 'True' }], succeeded: failed ? 0 : 1 };
     persist(o);
     persist({ kind: 'Pod', metadata: { name: `${o.metadata.name}-pod`, labels: { 'job-name': o.metadata.name },
-      ownerReferences: [{ kind: 'Job', controller: true, uid: o.metadata.uid }] }, status: { phase: s.hangJob === step ? 'Running' : failed ? 'Failed' : 'Succeeded',
+      ownerReferences: [{ kind: 'Job', controller: true, uid: o.metadata.uid }] }, status: { phase: s.hangJob === step || follow ? 'Running' : failed ? 'Failed' : 'Succeeded',
+      ...(follow ? { conditions: [{ type: 'Ready', status: 'True' }] } : {}),
       containerStatuses: [{ name: 'result', state: { terminated: { message: JSON.stringify(failed ? { ok: false } : jobVerdict(step, o)) } } }] } });
   }
   if (o.kind === 'ConfigMap' && o.metadata.name === 'radar-change-lock') {
