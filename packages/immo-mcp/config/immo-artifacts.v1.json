@@ -14,7 +14,20 @@
     "finalizationAuthorization": "artifacts-commit/v1",
     "typedFailure": "artifacts-outcome/v1"
   },
-  "invocationScope": "immo:read",
+  "invocationScopes": { "read": "immo:artifacts:read", "write": "immo:artifacts:write" },
+  "toolScopes": {
+    "artifacts_ensure": "immo:artifacts:write",
+    "artifacts_publish": "immo:artifacts:write",
+    "artifacts_list": "immo:artifacts:read",
+    "artifacts_get": "immo:artifacts:read"
+  },
+  "legacyReadTransition": {
+    "flag": "IMMO_MCP_ARTIFACTS_LEGACY_READ_SCOPE",
+    "default": false,
+    "legacyScope": "immo:read",
+    "appliesTo": ["artifacts_list", "artifacts_get"],
+    "note": "Transition only: immo:read also satisfies the read tools; it never satisfies a write tool."
+  },
   "selection": [
     { "tool": "artifacts_ensure", "operation": "ensure", "method": "POST", "path": "/ensure", "command": "ensure" },
     { "tool": "artifacts_publish", "operation": "publish", "method": "POST", "path": "/publish", "command": "publish" },

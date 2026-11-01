@@ -348,6 +348,18 @@ export async function runRefreshSweep(options: RefreshSweepOptions): Promise<Ref
     options.onCity?.(entry);
   }
 
+  // The halt is only polled BEFORE each city. When the systemic condition
+  // (dry or unroutable fallback) is reached on the last extracting cities, or
+  // right before the deadline or an abort, no later poll happens: the run would
+  // report too few attempts to fail on rate and exit green. Poll once more.
+  if (extracting) {
+    const halted = options.haltExtraction?.() ?? null;
+    if (halted) {
+      extractionHaltedBy = halted;
+      note("extraction-halted", { reason: halted, submissions: submissions(), atEnd: true });
+    }
+  }
+
   return { visited, counts, entries, nextCity: cities[index]!,
     completedFullSweep: visited === cities.length, stoppedBy, documentsExtracted,
     submissions: submissions(), cursorWriteFailures,
