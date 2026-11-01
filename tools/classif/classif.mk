@@ -56,8 +56,8 @@ classif-deps: ## Classification pilot: install classifier deps in a docker volum
 	  for d in api ui packages/artifacts-host packages/immo-mcp packages/radar-domain packages/radar-scoring packages/radar-sources; do mkdir -p /w/$$d && cp /src/$$d/package.json /w/$$d/; done && \
 	  npm ci --ignore-scripts --no-audit --no-fund -w api -w packages/radar-domain -w packages/radar-sources'
 
-classif-down: ## Classification pilot: remove the classifier deps volume
-	-docker volume rm $(CLASSIF_DEPS_VOLUME)
+classif-down: ## Classification pilot: remove the classifier deps volume (absent volume is success; a failed removal fails loudly)
+	if docker volume inspect $(CLASSIF_DEPS_VOLUME) >/dev/null 2>&1; then docker volume rm $(CLASSIF_DEPS_VOLUME); else echo "[classif-down] volume $(CLASSIF_DEPS_VOLUME) absent, nothing to remove"; fi
 
 .PHONY: classif-l1-profile
 classif-l1-profile: ## Classification pilot L1: codebook export + Engram profile validate/dataprep/profile-prompt
@@ -102,6 +102,10 @@ classif-l2-chain: ## Classification pilot L2: whole protocol, resumable (WAIT_UN
 .PHONY: classif-l2-fingerprint-audit classif-l3-reference
 classif-l2-fingerprint-audit: ## Classification pilot: which fingerprint list caused the complement refusals (no change to the lists)
 	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/fingerprint-audit.mjs
+
+OUT ?= $(CLASSIF_HOME)/recompute-972
+classif-l2-exit-audit: ## Classification pilot L2: audit exit≠0 votes, recompute convergence + L3 rows without LLM (PASS=n OUT=...)
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/exit-audit.mjs --pass $(PASS) --out "$(OUT)"
 
 classif-l3-reference: ## Classification pilot L3: dev reference (model_consensus), partitions, manifest (0 LLM call)
 	@test "$(ENV)" = "preprod" || { echo "[classif-l3-reference] ENV=preprod required"; exit 2; }
