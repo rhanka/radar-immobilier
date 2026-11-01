@@ -16,7 +16,7 @@ Prepare the three qualified 0.3.0 operations while preserving the current non-CA
   - `api/src/artifacts/control-route*`, `api/tests/*p0b*`
   - `api/drizzle/0028_artifacts_p0b.sql`, `api/drizzle/meta/_journal.json`
   - `package.json`, `package-lock.json`, `api/package.json`
-  - `tools/mcp-p0b.mk`, `docs/runbooks/mcp-artifacts-p0b.md`
+  - `tools/mcp-p0b.mk`, `tools/mcp-p0b.services.yml`, `docs/runbooks/mcp-artifacts-p0b.md`
   - This branch plan.
 - **Forbidden Paths (must not change in this branch)**:
   - `Makefile`, `docker-compose*.yml`, `rules/**`, agent entry points, other branch plans.
@@ -47,7 +47,7 @@ Prepare the three qualified 0.3.0 operations while preserving the current non-CA
   - [x] Source ports, approved IdP subjects, transactional deletion confirmation and migration.
   - [x] Trusted cookie-session confirmation page; mutation accounting and quota classification.
 - [ ] **Lot 3 — Guide and qualification**
-  - [ ] Document edit, delete and named-share journeys and publication commands.
+  - [x] Document edit, delete and named-share journeys and publication commands.
   - [ ] Verify 0.2.2 baseline and locally packed 0.3.0 candidate; typecheck and lint.
 - [ ] **Lot 4 — Delivery**
   - [ ] Review diff, push, open English draft PR, write French report.
