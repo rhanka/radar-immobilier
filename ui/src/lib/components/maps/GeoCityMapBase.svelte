@@ -296,6 +296,16 @@
   // Résilience `load` — handle du timeout de repli (annulé dès la finalisation ou
   // au démontage). `undefined` tant qu'aucune carte n'est en cours d'init.
   let readyFallbackTimer: ReturnType<typeof setTimeout> | undefined;
+  // Style readiness of the current map, from MapLibre's `style.load` event. An
+  // inline style is only parsed on an animation frame: a tab that renders no
+  // frame (window occluded, tab driven over CDP without focus) never loads it,
+  // and any `addSource` then throws "Style is not done loading". The fallback
+  // below only finalizes once the style is loaded.
+  let styleReady = false;
+  // Explicit stalled state: the fallback delay elapsed while the style was not
+  // loaded. The overlay then shows an actionable message instead of an endless
+  // "Chargement de la carte…"; finalization resumes on `style.load`.
+  let mapStalled = false;
   // Résilience style-load — FILET DE RÉCUPÉRATION (onglet caché / canvas taille-nulle
   // au montage → `'load'` jamais émis, ou canvas 0×0 devenu visible mais non repeint).
   // `triggerFinalize` expose le corps de finalisation (closure locale d'`initMap`) au
@@ -1944,6 +1954,7 @@
       const finalizeMapSetup = async (): Promise<void> => {
         if (mapSetupStarted) return;
         mapSetupStarted = true;
+        mapStalled = false;
         // Finalisation engagée → annule le repli s'il est encore en vol (chemin
         // nominal : le timeout ne fera jamais un second passage).
         if (readyFallbackTimer !== undefined) {
@@ -2006,12 +2017,22 @@
       m.on("error", (e: unknown) => handleMapError(e));
       // Chemin nominal (primaire) : l'event `'load'` de MapLibre.
       m.on("load", () => void finalizeMapSetup());
+      // Style parsed: the fallback may finalize from now on; a map already
+      // reported as stalled finalizes right away.
+      m.on("style.load", () => {
+        styleReady = true;
+        if (mapStalled) void finalizeMapSetup();
+      });
       // Repli : si `'load'` ne fire pas dans le délai imparti (flap réseau, tuile
       // stuck, requête que `map.loaded()` attend et qui est avortée), on force la
       // finalisation UNE SEULE fois — le garde d'idempotence côté finalizeMapSetup
-      // absorbe toute course avec un `'load'` tardif.
+      // absorbe toute course avec un `'load'` tardif. Style NOT loaded (tab that
+      // renders no frame): finalizing would throw on every `addSource` and freeze
+      // the view, so the overlay switches to the explicit stalled message instead.
       readyFallbackTimer = setTimeout(() => {
-        void finalizeMapSetup();
+        readyFallbackTimer = undefined;
+        if (styleReady || isMapStyleLoaded(m)) void finalizeMapSetup();
+        else mapStalled = true;
       }, MAP_READY_FALLBACK_MS);
 
       mapInstance = m;
@@ -2055,6 +2076,8 @@
     }
     mapReady = false;
     mapSetupStarted = false;
+    styleReady = false;
+    mapStalled = false;
     // Résilience style-load — la carte est détruite : ses handlers villes et son
     // déclencheur de finalisation deviennent caducs. On les remet à zéro pour que
     // la carte NEUVE relie ses propres handlers et expose sa propre finalisation.
@@ -2094,6 +2117,22 @@
    * `mapSetupStarted`, ré-écoute `'idle'` gardée par `recoverIdleArmed`, couches de
    * base gardées par getSource/getLayer (cf. ensureBaseCityLayers).
    */
+  /** `isStyleLoaded()` when the map exposes it (stricter: also waits on sources). */
+  function isMapStyleLoaded(map: unknown): boolean {
+    const m = map as { isStyleLoaded?: () => boolean | void } | null;
+    return typeof m?.isStyleLoaded === "function" && m.isStyleLoaded() === true;
+  }
+
+  /** "Réessayer" of the stalled overlay: request a frame, then run the recovery net. */
+  function retryMapRender(): void {
+    try {
+      (mapInstance as { triggerRepaint?: () => void } | null)?.triggerRepaint?.();
+    } catch {
+      /* map not far enough along to repaint: the recovery net below still runs */
+    }
+    recoverMapRender();
+  }
+
   function recoverMapRender(): void {
     if (reinitializing) return;
     const m = mapInstance as
@@ -2487,7 +2526,28 @@
     <div
       class="absolute inset-0 flex items-center justify-center bg-slate-100"
     >
-      <span class="text-xs text-slate-400">Chargement de la carte…</span>
+      {#if mapStalled}
+        <div
+          role="alert"
+          data-testid="map-stalled"
+          class="mx-4 max-w-sm rounded border border-amber-300 bg-amber-50 px-4 py-3 text-center text-xs text-amber-900"
+        >
+          <p class="m-0 font-semibold">La carte ne s'affiche pas : le fond de carte n'a pas fini de charger.</p>
+          <p class="mt-1 mb-2">
+            L'onglet n'affiche aucune image (fenêtre masquée ou en arrière-plan). Les signaux restent
+            consultables dans les panneaux ; ramenez l'onglet au premier plan ou réessayez.
+          </p>
+          <button
+            type="button"
+            class="rounded border border-amber-400 bg-white px-3 py-1 font-semibold text-amber-900"
+            onclick={retryMapRender}
+          >
+            Réessayer
+          </button>
+        </div>
+      {:else}
+        <span class="text-xs text-slate-400">Chargement de la carte…</span>
+      {/if}
     </div>
   {/if}
 

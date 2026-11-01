@@ -22,4 +22,15 @@ describe("artifact S3 composition", () => {
     }));
     host.close();
   });
+
+  it("only sends and validates checksums when the operation requires them", async () => {
+    const host = await composeArtifactHost({ query: vi.fn().mockResolvedValue({ rows: [] }) } as unknown as pg.Pool, {
+      enabled: true, storageScope: "scope", orgId: "org", s3Bucket: "test-bucket",
+      s3Endpoint: "https://s3.bhs.io.cloud.ovh.net", s3Region: "bhs", s3AccessKey: "test", s3SecretKey: "test",
+    });
+    expect(S3Client).toHaveBeenLastCalledWith(expect.objectContaining({
+      requestChecksumCalculation: "WHEN_REQUIRED", responseChecksumValidation: "WHEN_REQUIRED",
+    }));
+    host.close();
+  });
 });

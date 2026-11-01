@@ -80,6 +80,9 @@ maintenance_probe() {
   [[ $code == 404 || $code == 503 ]] || return 1
   while read -r row; do
     host=$(jq -r '.host' <<< "$row"); path=$(jq -r '.path' <<< "$row")
+    # A wildcard host (artifact pages) is probed through one concrete label: curl
+    # rejects a literal "*" hostname, which would keep the closure check failing.
+    [[ $host != '*.'* ]] || host=cutover-probe.${host#\*.}
     [[ -n $host && $host != null ]] || return 1
     code=$(curl -q -sS --max-time 3 -o /dev/null -w '%{http_code}' "https://$host$path" 2>/dev/null) || return 1
     [[ $code == 404 || $code == 503 ]] || return 1

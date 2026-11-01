@@ -29,6 +29,10 @@ only `POSTGRES_DB`. Old databases are retained. Production preparation takes a
 recovery backup and verifies the live release migration hashes; production
 cutover changes images only.
 
+Restores drop every GRANT (`--no-privileges`); the `ddl` step runs the API
+migrator, which re-asserts the restricted MCP role privileges on the prepared
+database. The MCP role URLs follow `POSTGRES_DB` after the switch restart.
+
 Both restore paths run `atomic-restore.sh`: every application schema is dropped
 with `CASCADE` and recreated, then the archive is replayed without `--clean`, so
 a snapshot with fewer migrations than the destination restores and a rerun is
@@ -108,7 +112,7 @@ prepared Services; the public smoke runs again after the switch.
 | Application role owns every application schema and may `CREATE EXTENSION postgis` | preprod PostgreSQL | the atomic restore drops and recreates them |
 | PostgreSQL PVC holds both `radar` and `radar_next` plus WAL/temporary space; today 5 Gi in `deploy/k8s/20-postgres-postgis.yaml` | preprod namespace | measure both database sizes; expand the PVC if they do not fit twice |
 | Restore Job within quota: requests 250m CPU / 1 Gi, limits 1500m CPU / 2 Gi (`restoreResources`; no 4-CPU node needed) | preprod `preprod-cap` ResourceQuota | Job admitted; keep 1500m CPU and 2 Gi of limits free |
-| `rbac-preprod.yaml`, `rbac-prod.yaml` and `../ci/bascule-preprod/rbac-ci-bascule-prod.yaml` installed (Secret patch on `radar-db-credentials`, `radar-api-prepared` lifecycle, Job create/delete, get/list of KEDA `scaledobjects`/`scaledjobs`/`httpscaledobjects`, `verticalpodautoscalers` and Argo `rollouts`) | both namespaces | `prepare` and `run` check every right of the Role with `kubectl auth can-i` before any lock and fail with the missing rights |
+| `rbac-preprod.yaml`, `rbac-prod.yaml` and `../ci/bascule-preprod/rbac-ci-bascule-prod.yaml` installed (Secret patch on `radar-db-credentials`, `radar-api-prepared` lifecycle, Job create/delete, get/list of KEDA `scaledobjects`/`scaledjobs`/`httpscaledobjects`, `verticalpodautoscalers` and Argo `rollouts`) | both namespaces | `prepare` and `run` check every right of the Role with `kubectl auth can-i` before any lock and fail with the missing rights; types absent from `kubectl api-resources` (CRD not installed) are skipped |
 | `radar-backup-s3-credentials` can write and list the environment's `recoveryBucket` (`config.json`: preprod `sentropic-pgbackup-preprod`, prod `sentropic-pgbackup`) | both namespaces | the `probe` Job runs before closure and fails early otherwise |
 
 The adapter rejects absent/unapproved accounts, conflicting workspaces or
@@ -146,6 +150,37 @@ unreachable Kubernetes means **unknown**, never success. A successful recorded
 restore is reconciled and never replayed because its checkpoint was interrupted.
 A `restore`, `backup`, `ddl` or `data` Job that ended **Failed** is relaunched by
 `resume` under a new Job name; the restore reset makes that relaunch idempotent.
+### Daily restore (preprod) after closure
+
+The daily restore replaces the live database only through the atomic restore
+Job (one transaction): until it commits, the previous database is intact. Any
+failure after closure starts (closure deadline, failed or stopped restore,
+migration, rollout or smoke failure) therefore reopens instead of staying
+closed: operation Jobs are stopped, a fresh `verify` Job proves that the live
+database carries every migration of the deployed release, the original
+Deployments, routes and schedules are restored, the private and public smokes
+run, the lock is released and `REOPENED WITHOUT RESTORE` is printed. The
+command still exits non-zero and the previous `radar-cutover-receipt` is kept.
+A refused verification (restored database not yet migrated) or a started 6H
+data migration keeps the site closed; `resume RUN` then continues forward.
+
+The same reopening is available explicitly:
+
+```sh
+make -f deploy/cutover/operator.mk rollback RUN=<ORIGINAL_UUID> ENV=preprod
+```
+
+Lost GitHub executor (runner killed, job cancelled or timed out, so no trap
+ran): the workflow `recover` job runs after a failed or cancelled `bascule`
+job, takes over only the lock recorded for its own run once the GitHub API
+reports the `bascule` job completed, and runs the same reopening. If that job
+cannot run, an operator with `gh` authenticated runs `status` then the
+`rollback` above; takeover is refused while the recorded job is not completed.
+
+The closure check probes every Ingress host; a wildcard host
+(`*.preprod.immo-pages…`) is probed through the concrete label
+`cutover-probe.`. A closure deadline names the last unmet condition.
+
 Routes return to maintenance after a reopening/public-smoke failure; schedules
 remain suspended. Maintenance Services remain on failure and are deleted only
 when no ingress references them after complete reopening.
@@ -339,7 +374,7 @@ current canonical count (an HPA-scaled count included). A quota preflight
 reads every ResourceQuota status and refuses `quota_insufficient` before
 creating anything. The full private smoke (UI, build SHA, API health, anonymous
 refusal, MCP bearer challenge and metadata) runs through the prepared Services;
-the canonical Services and Ingresses are untouched. `prepare`, `run` and `rollback` refuse
+the canonical Services and Ingresses are untouched. `prepare`, `run` and `rollback` (except the daily-restore reopening) refuse
 `slots_not_adopted` before creating anything (lock included) unless every canonical
 Deployment selects and labels `sentropic.io/slot=main` and every canonical
 Service selects by slot: an unadopted Service selects only the component labels

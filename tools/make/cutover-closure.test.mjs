@@ -58,14 +58,17 @@ test('ACME solver routes are excluded and partial route restoration is reclosed 
     }
   } finally { f.cleanup(); }
 });
-test('restore observation timeout stops only its recorded Job and retains the closed lock', () => {
+test('restore observation timeout stops only its recorded Job and reopens on the verified database', () => {
   const f = fixture({ hangJob: 'restore' });
   f.env['BASH_FUNC_sleep%%'] = '() { if [ "$1" = 2 ]; then SECONDS=$((SECONDS+1000)); else command sleep "$@"; fi; }';
   try {
     const result = f.run(); assert.notEqual(result.status, 0);
     assert.ok(result.stderr.includes('Job deadline exceeded'), result.stdout + result.stderr);
+    assert.ok(result.stdout.includes('REOPENED WITHOUT RESTORE'), result.stdout + result.stderr);
     const state = f.state();
-    assert.ok(state.objects.some(o => o.metadata.name === 'radar-change-lock'));
+    assert.equal(state.objects.some(o => o.metadata.name === 'radar-change-lock'), false);
+    assert.equal(JSON.stringify(state.objects.find(o => o.kind === 'Ingress').spec).includes('base-maintenance-'), false);
+    assert.ok(state.objects.some(o => o.kind === 'Job' && o.metadata.name.endsWith('-verify')));
     assert.equal(state.objects.some(o => o.kind === 'Job' && o.metadata.name.endsWith('-ddl')), false);
     assert.equal(state.objects.some(o => o.kind === 'Job' && o.metadata.name.endsWith('-restore')), false);
   } finally { f.cleanup(); }

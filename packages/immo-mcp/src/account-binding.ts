@@ -1,6 +1,7 @@
 import pg from "pg";
 import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-stateful";
 import { ARTIFACT_TOOL_NAMES } from "./registry/artifact-profile.js";
+import { bindDatabaseName } from "./database-url.js";
 
 /**
  * General opening (artefacts-ouverture L2): the four artifact tools publish
@@ -52,7 +53,7 @@ export function accountAuthorizer(db: AccountQuery, env: NodeJS.ProcessEnv = pro
 export function createAccountBinding(env: NodeJS.ProcessEnv) {
   const url = env.IMMO_MCP_ACCOUNT_DATABASE_URL;
   if (!url) return undefined;
-  const pool = new pg.Pool({ connectionString: url, max: 2, connectionTimeoutMillis: 2000,
+  const pool = new pg.Pool({ connectionString: bindDatabaseName(url, env.IMMO_MCP_DATABASE_NAME), max: 2, connectionTimeoutMillis: 2000,
     idleTimeoutMillis: 10_000, options: "-c default_transaction_read_only=on -c statement_timeout=2000" });
   // pg evicts the broken idle client before emitting; the next query opens a fresh connection.
   pool.on("error", logAccountDisconnect);

@@ -55,6 +55,12 @@ together through review before activation; do not substitute only live values.
    reads and the row-lock privileges used by `SELECT ... FOR SHARE` (for example,
    column UPDATE on account ID and membership workspace ID). Keep the existing
    account-reader role read-only. Verify the role with real publication before GO.
+   Privileges of `immo_mcp_artifact_writer` and `immo_mcp_account_reader` are
+   re-asserted by the migrator (`api/src/db/service-role-grants.ts`) after every
+   migration run, including the cutover `ddl` step on the prepared database:
+   restores use `--no-privileges` and drop every GRANT. Both role URLs follow
+   `radar-db-credentials.POSTGRES_DB` through `IMMO_MCP_DATABASE_NAME`; the
+   database name stored in the URL is ignored once that binding is present.
 4. Provision `artifacts.storage_scopes` with the scope/org above and a matching
    `artifacts.host_quotas` row. Set explicit nonzero `operation_limit` and
    `byte_limit` for this preprod campaign, record them and verify remaining budget.

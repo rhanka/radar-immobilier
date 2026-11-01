@@ -36,7 +36,8 @@ test('one command restores all services/routes/schedule states with fixed bounde
     assert.ok(jobs.length >= 8);
   } finally { f.cleanup(); }
 });
-for (const change of [{ badSha: true }, { anonymous200: true }, { publicFailure: true }, { missingMcp: true }, { failJob: 'data' }, { failJob: 'restore' }]) {
+// A failed atomic restore reopens on the intact database: cutover-restore-reopen.test.mjs.
+for (const change of [{ badSha: true }, { anonymous200: true }, { publicFailure: true }, { missingMcp: true }, { failJob: 'data' }]) {
   test(`failure remains closed with original recovery record: ${JSON.stringify(change)}`, () => {
     const f = fixture(change);
     try {
@@ -105,7 +106,11 @@ for (const step of ['restore', 'backup', 'ddl', 'data']) {
         const run = record(f).run;
         const result = f.run('resume', [`RUN=${run}`]);
         if (edge === 'before-create' || edge.endsWith('started')) {
-          assert.notEqual(result.status, 0); assert.ok(lock(f));
+          // Indeterminate Job evidence: a daily restore reopens on the verified live
+          // database, except after a started protected data migration.
+          assert.notEqual(result.status, 0);
+          if (step === 'data') assert.ok(lock(f));
+          else { assert.equal(lock(f), undefined); assert.ok(result.stdout.includes('REOPENED WITHOUT RESTORE'), result.stdout + result.stderr); }
         } else success(result);
         assert.ok(f.state().objects.filter(o => o.kind === 'Job' && o.metadata.name.endsWith('-restore')).length <= 1);
       } finally { f.cleanup(); }
@@ -143,11 +148,12 @@ test('unwritable recovery bucket fails before closure and reopens nothing', () =
 });
 for (const step of ['restore', 'backup']) {
   test(`explicit resume relaunches a failed ${step} Job under a new name`, () => {
-    const f = fixture({ failJob: step });
+    // A refused live database verification keeps the closed record for forward resume.
+    const f = fixture({ failJobs: [step, 'verify'] });
     try {
       assert.notEqual(f.run().status, 0);
       const run = record(f).run;
-      const state = f.state(); state.failJob = null;
+      const state = f.state(); state.failJobs = [];
       writeFileSync(join(f.dir, 'state.json'), JSON.stringify(state));
       success(f.run('resume', [`RUN=${run}`]));
       const names = f.state().objects.filter(o => o.kind === 'Job' && o.metadata.name.endsWith(`-${step}`)).map(o => o.metadata.name);

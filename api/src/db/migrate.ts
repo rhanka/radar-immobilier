@@ -2,6 +2,7 @@ import { writeFile } from "node:fs/promises";
 
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { createDb } from "./client.js";
+import { applyServiceRoleGrants } from "./service-role-grants.js";
 import { loadConfig } from "../config.js";
 import { createLogger } from "../logger.js";
 
@@ -30,8 +31,10 @@ async function writeSummary(summary: Record<string, unknown>): Promise<void> {
 }
 
 migrate(db, { migrationsFolder: "drizzle" })
+  // Restores strip every GRANT; re-assert restricted role privileges after each run.
+  .then(() => applyServiceRoleGrants(pool))
   .then(async () => {
-    logger.info("migrations applied");
+    logger.info("migrations and service role grants applied");
     await writeSummary({ status: "committed" });
     return pool.end();
   })
