@@ -13,6 +13,8 @@ import {
   chatWidgetLayout,
   type ChatWidgetDisplayMode,
 } from "@sentropic/chat-ui/stores/chatWidgetLayout";
+import { get } from "svelte/store";
+import { chatDisplayMode } from "../sync/preferences.js";
 
 export { chatWidgetLayout };
 export type { ChatWidgetDisplayMode };
@@ -24,13 +26,12 @@ const isBrowser = (): boolean => typeof window !== "undefined";
 /** Read the persisted display mode; docked by default. */
 export const readDisplayMode = (): ChatWidgetDisplayMode => {
   if (!isBrowser()) return "docked";
-  const saved = window.localStorage.getItem(DISPLAY_MODE_STORAGE_KEY);
-  return saved === "floating" ? "floating" : "docked";
+  return get(chatDisplayMode);
 };
 
 export const persistDisplayMode = (mode: ChatWidgetDisplayMode): void => {
   if (!isBrowser()) return;
-  window.localStorage.setItem(DISPLAY_MODE_STORAGE_KEY, mode);
+  chatDisplayMode.set(mode);
 };
 
 /** Dock width as a CSS length, scaled to the viewport (mirror of sentropic). */

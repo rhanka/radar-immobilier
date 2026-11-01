@@ -1,4 +1,4 @@
-import { writable } from "svelte/store";
+import { createSyncedPreference, betaCodec } from "../sync/preferences.js";
 
 /**
  * Flag « beta » — vue Évaluation cachée de la nav principale.
@@ -18,31 +18,8 @@ import { writable } from "svelte/store";
 /** Clé localStorage du flag (contrat stable — ne pas renommer). */
 export const EVALUATION_BETA_STORAGE_KEY = "radar.beta.evaluation";
 
-function readInitial(): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    return window.localStorage.getItem(EVALUATION_BETA_STORAGE_KEY) === "true";
-  } catch {
-    // Stockage indisponible (navigation privée, quota…) : flag mémoire only.
-    return false;
-  }
-}
-
 /** true = l'entrée « Évaluation » est révélée dans la nav principale. */
-export const evaluationBeta = writable<boolean>(readInitial());
-
-function persist(value: boolean): void {
-  if (typeof window === "undefined") return;
-  try {
-    if (value) {
-      window.localStorage.setItem(EVALUATION_BETA_STORAGE_KEY, "true");
-    } else {
-      window.localStorage.removeItem(EVALUATION_BETA_STORAGE_KEY);
-    }
-  } catch {
-    // Stockage indisponible : le flag reste effectif en mémoire pour la session.
-  }
-}
+export const evaluationBeta = createSyncedPreference(EVALUATION_BETA_STORAGE_KEY, betaCodec);
 
 /** Bascule le flag beta Évaluation (et le persiste). Retourne le nouvel état. */
 export function toggleEvaluationBeta(): boolean {
@@ -51,7 +28,6 @@ export function toggleEvaluationBeta(): boolean {
     next = !value;
     return next;
   });
-  persist(next);
   return next;
 }
 
