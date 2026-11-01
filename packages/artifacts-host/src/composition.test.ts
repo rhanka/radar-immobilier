@@ -12,13 +12,37 @@ vi.mock("@aws-sdk/client-s3", async (original) => {
 });
 
 describe("artifact S3 composition", () => {
-  it("uses the configured region and finite connection/request deadlines", async () => {
+  it("uses the configured region and bounded per-attempt deadlines with retries", async () => {
     const host = await composeArtifactHost({ query: vi.fn().mockResolvedValue({ rows: [] }) } as unknown as pg.Pool, {
       enabled: true, storageScope: "scope", orgId: "org", s3Bucket: "test-bucket",
       s3Endpoint: "http://minio:9000", s3Region: "ca-central-1", s3AccessKey: "test", s3SecretKey: "test",
     });
     expect(S3Client).toHaveBeenCalledWith(expect.objectContaining({
-      region: "ca-central-1", requestHandler: { requestTimeout: 5000, connectionTimeout: 3000, throwOnRequestTimeout: true },
+      region: "ca-central-1", requestHandler: { requestTimeout: 4000, connectionTimeout: 3000, throwOnRequestTimeout: true },
+      maxAttempts: 3, retryMode: "standard",
+    }));
+    host.close();
+  });
+
+  it("applies a resolved S3 budget to the client", async () => {
+    const host = await composeArtifactHost({ query: vi.fn().mockResolvedValue({ rows: [] }) } as unknown as pg.Pool, {
+      enabled: true, storageScope: "scope", orgId: "org", s3Bucket: "test-bucket",
+      s3Endpoint: "http://minio:9000", s3Region: "ca-central-1", s3AccessKey: "test", s3SecretKey: "test",
+      s3Budget: { attemptTimeoutMs: 2500, maxAttempts: 4, operationTimeoutMs: 11_000 },
+    });
+    expect(S3Client).toHaveBeenLastCalledWith(expect.objectContaining({
+      requestHandler: { requestTimeout: 2500, connectionTimeout: 3000, throwOnRequestTimeout: true }, maxAttempts: 4,
+    }));
+    host.close();
+  });
+
+  it("only sends and validates checksums when the operation requires them", async () => {
+    const host = await composeArtifactHost({ query: vi.fn().mockResolvedValue({ rows: [] }) } as unknown as pg.Pool, {
+      enabled: true, storageScope: "scope", orgId: "org", s3Bucket: "test-bucket",
+      s3Endpoint: "https://s3.bhs.io.cloud.ovh.net", s3Region: "bhs", s3AccessKey: "test", s3SecretKey: "test",
+    });
+    expect(S3Client).toHaveBeenLastCalledWith(expect.objectContaining({
+      requestChecksumCalculation: "WHEN_REQUIRED", responseChecksumValidation: "WHEN_REQUIRED",
     }));
     host.close();
   });

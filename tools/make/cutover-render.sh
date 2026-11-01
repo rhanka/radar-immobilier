@@ -47,14 +47,14 @@ render_template() {
       export UPLOAD_IMAGE=peakcom/s5cmd:v2.2.2 BACKUP_S3_ENDPOINT=$S3_ENDPOINT BACKUP_S3_REGION=$S3_REGION
       export BACKUP_S3_BUCKET=$RECOVERY_BUCKET S3_SECRET KEY="db-backups/cutover-$ENV-$RUN.probe"
       S3_SECRET=$(jq -r .storage.backupSecret "$CONFIG");;
-    ddl|destination|database|reset|discard) template=deploy/k8s/36-db-migrate-job.yaml;;
+    ddl|destination|database|reset|discard|verify) template=deploy/k8s/36-db-migrate-job.yaml;;
     data) template=deploy/cutover/data-migrate-job.tmpl.yaml;;
     refs)
       template=deploy/ci/bascule-preprod/served-refs-job.tmpl.yaml
       export REFS_CONFIGMAP_PREFIX=immo-served-refs REFS_CONFIGMAP_COUNT=4 REFS_WRITER_SA=radar-bascule-refs-writer;;
     *) fail 'Unknown fixed Job operation';;
   esac
-  if [[ $step =~ ^(ddl|destination|database|reset|discard)$ ]]; then
+  if [[ $step =~ ^(ddl|destination|database|reset|discard|verify)$ ]]; then
     sed 's/^  namespace: radar-immobilier$/  namespace: ${NAMESPACE}/' "$template" > "$WORK/ddl-template.yaml"
     template=$WORK/ddl-template.yaml
   fi
