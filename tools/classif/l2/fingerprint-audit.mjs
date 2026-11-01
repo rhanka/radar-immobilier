@@ -8,6 +8,7 @@ import process from 'node:process';
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { CLASSIF_DIR, classifHome } from '../lib/paths.mjs';
+import { readJsonlRecords } from '../lib/jsonl.mjs';
 import { bylawsIn } from '../lib/triage.mjs';
 
 const shape = (t) => t.replace(/[0-9]/g, '9').replace(/[A-Za-z]/g, 'A');
@@ -16,7 +17,7 @@ export async function main() {
   const home = classifHome();
   const excl = JSON.parse(readFileSync(path.join(home, 'guard', 'exclusions.json'), 'utf8'));
   const bylaws = new Set(excl.bylaws);
-  const records = readFileSync(path.join(home, 'l2', 'scrape-manifest.jsonl'), 'utf8').trim().split('\n').map((l) => JSON.parse(l));
+  const records = readJsonlRecords(path.join(home, 'l2', 'scrape-manifest.jsonl'));
   const refused = records.filter((r) => r.status === 'refused-fingerprint');
   const perList = {};
   const combos = {};

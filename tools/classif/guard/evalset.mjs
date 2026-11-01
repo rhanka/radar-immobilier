@@ -7,8 +7,9 @@ import os from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
 import { spawnSync } from 'node:child_process';
-import { appendFileSync, existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { keyFromEnv, sha256, unseal } from '../lib/refc1.mjs';
+import { appendJsonlRecord, parseJsonlTolerant } from '../lib/jsonl.mjs';
 import { EVAL_DIR_DEFAULT, REPO } from '../lib/paths.mjs';
 import { EVAL_FILES } from './unseal.mjs';
 
@@ -16,14 +17,14 @@ export const accessLog = (evalDir = EVAL_DIR_DEFAULT) => path.join(evalDir, 'acc
 
 export function audit(entry, { evalDir = EVAL_DIR_DEFAULT, env = process.env } = {}) {
   const rec = { at: new Date().toISOString(), actor: env.CLASSIF_ACTOR ?? os.userInfo().username, role: env.CLASSIF_ROLE ?? null, ...entry };
-  appendFileSync(accessLog(evalDir), `${JSON.stringify(rec)}\n`);
+  appendJsonlRecord(accessLog(evalDir), rec);
   return rec;
 }
 
 export function readAudit(evalDir = EVAL_DIR_DEFAULT) {
   const f = accessLog(evalDir);
   if (!existsSync(f)) return [];
-  return readFileSync(f, 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l));
+  return parseJsonlTolerant(readFileSync(f, 'utf8'));
 }
 
 export function expectedHashes(evalDir = EVAL_DIR_DEFAULT) {

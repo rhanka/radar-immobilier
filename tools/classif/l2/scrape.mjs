@@ -13,8 +13,9 @@ import process from 'node:process';
 import { spawnSync } from 'node:child_process';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { Buffer } from 'node:buffer';
-import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fetchNodes } from '../lib/db.mjs';
+import { appendJsonlRecord, readJsonlRecords, repairTruncatedJsonl } from '../lib/jsonl.mjs';
 import { sha256 } from '../lib/render.mjs';
 import { CLASSIF_DIR, classifHome, privateDir } from '../lib/paths.mjs';
 import { requireFingerprints } from '../lib/draw.mjs';
@@ -66,16 +67,18 @@ export function fingerprintVerdict(guard, excerpt) {
   return { refused: false };
 }
 
-/** Item ids already recorded in the manifest (per-item resume after interruption). */
+/**
+ * Item ids already recorded in the manifest (per-item resume after interruption).
+ * Tolerant: blank lines and a truncated last line are skipped, never thrown.
+ */
 export function readManifestDone(manifest) {
   const done = new Set();
-  if (!existsSync(manifest)) return done;
-  for (const line of readFileSync(manifest, 'utf8').split('\n')) {
-    if (!line.trim()) continue;
-    try { const r = JSON.parse(line); if (r?.itemId) done.add(r.itemId); } catch { /* keep prior records */ }
-  }
+  for (const r of readJsonlRecords(manifest)) if (r?.itemId) done.add(r.itemId);
   return done;
 }
+
+/** Repair helper re-exported for tests: drops a truncated last line before resume. */
+export { repairTruncatedJsonl };
 
 /** Pages of the fetched document that best match the item text (token overlap), capped. */
 export function bestExcerpt(text, itemInput) {
@@ -95,15 +98,17 @@ export async function main() {
   const manifest = path.join(home, 'l2', 'scrape-manifest.jsonl');
   // Fail closed: without the fingerprint guard no excerpt can be checked, so the step refuses.
   const guard = requireFingerprints(home);
-  // Per-item resume: only items without a manifest record are processed; an interruption or a
-  // DB error after the manifest was created no longer abandons the remaining items.
-  const done = readManifestDone(manifest);
+  // Per-item resume: a truncated last line from a killed run is dropped before reading,
+  // so the next record is never concatenated to a partial one; only items without a
+  // manifest record are processed.
   if (!existsSync(manifest)) writeFileSync(manifest, '', { mode: 0o600 });
-  else process.stdout.write(`[scrape] ${manifest} exists: resuming, ${done.size} items already recorded\n`);
+  else { repairTruncatedJsonl(manifest); }
+  const done = readManifestDone(manifest);
+  if (done.size) process.stdout.write(`[scrape] ${manifest} exists: resuming, ${done.size} items already recorded\n`);
   const sigIds = [...flagged].filter((id) => items.get(id).kind === 'signal');
   const nodes = new Map(fetchNodes(sigIds.map((id) => items.get(id).anchor.id)).map((n) => [n.id, n]));
   const stats = {};
-  const rec = (r) => { stats[r.status] = (stats[r.status] ?? 0) + 1; appendFileSync(manifest, `${JSON.stringify(r)}\n`); };
+  const rec = (r) => { stats[r.status] = (stats[r.status] ?? 0) + 1; appendJsonlRecord(manifest, r); };
   for (const id of [...flagged].sort()) {
     if (done.has(id)) continue;
     const it = items.get(id);
