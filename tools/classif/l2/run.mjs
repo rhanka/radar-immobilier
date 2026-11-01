@@ -7,7 +7,7 @@
 // already done for (pass, annotator) is skipped. Dev items only: the sealed evaluation set is never read.
 import path from 'node:path';
 import process from 'node:process';
-import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, writeFileSync } from 'node:fs';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { callSeat } from '../run-seat.mjs';
 import { sha256 } from '../lib/render.mjs';
@@ -17,6 +17,25 @@ import { buildPrompt, itemValidity, loadPack, parseAnswers, toExtraction } from 
 
 export const ANNOTATORS = ['muse-wonder-max', 'gemini-4-argon-high', 'opus-5.5-max'];
 export const LOT_SIZE = 10;
+
+/** Atomic file write: temp file in the same directory, then rename (a kill mid-write
+    never leaves a truncated final file for resume to trust). */
+export function atomicWrite(file, data, opts) {
+  const tmp = `${file}.tmp-${process.pid}`;
+  writeFileSync(tmp, data, opts);
+  renameSync(tmp, file);
+}
+
+/**
+ * Fail-closed seat exit policy (explicit, logged by the caller): only a clean seat
+ * exit (code 0) yields admissible votes. A non-zero exit — or a kill (code null) —
+ * nulls every answer, so the lot becomes an execution failure (a missing vote in
+ * convergence), never a fabricated majority.
+ */
+export function applyExitPolicy(pairs, r) {
+  const exitAdmissible = r.code === 0;
+  return { exitAdmissible, pairs: exitAdmissible ? pairs : pairs.map((p) => ({ ...p, answer: null })) };
+}
 
 /** Milliseconds to wait when the seat answered a quota denial ("Resets in 10m57s"), else null. */
 export function quotaWaitMs(r) {
@@ -99,7 +118,7 @@ export async function runPass({ pass, mode = 'independent', guide = 'G0', annota
           log(`[pass ${pass}] ${annotator} quota reached, waiting ${Math.round(wait / 60000)} min`);
           await sleep(wait);
         }
-        writeFileSync(rawFile, JSON.stringify(r), { mode: 0o600 });
+        atomicWrite(rawFile, JSON.stringify(r), { mode: 0o600 });
       }
       pairs = parseAnswers(r.text, lot.items);
       const answered = pairs.filter((p) => p.answer).length;
@@ -107,15 +126,21 @@ export async function runPass({ pass, mode = 'independent', guide = 'G0', annota
         exitCode: r.code, latencyMs: r.latencyMs, reused, answered, toolEvents: r.toolEvents ?? null, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null })}\n`);
       if (r.code === 0 && answered > 0 && !(r.toolEvents > 0)) break;
     }
+    // Explicit exit policy, logged: a non-zero seat exit makes every vote of the lot
+    // inadmissible (execution failure = missing vote, never a negative).
+    const { exitAdmissible, pairs: kept } = applyExitPolicy(pairs, r);
+    pairs = kept;
+    if (!exitAdmissible) log(`[pass ${pass}] ${annotator} ${lot.lotId} seat exit code ${r.code}: votes inadmissible (fail-closed exit policy)`);
     if (r.toolEvents > 0) pairs = pairs.map((p) => ({ ...p, answer: null }));
     const extraction = toExtraction({ annotator, pass, guideVersion: pack.guideVersion, pairs, codes });
     const rel = path.join('runs', `pass${pass}`, annotator, `${lot.lotId}.json`);
-    writeFileSync(path.join(work, rel), JSON.stringify(extraction), { mode: 0o600 });
+    atomicWrite(path.join(work, rel), JSON.stringify(extraction), { mode: 0o600 });
     const validation = extraction.nodes.length ? validateExtraction(work, rel) : { valid: false, issues: [] };
     // Fail closed: if Engram itself could not run, every item is an execution failure until
     // `make classif-l2-revalidate` re-checks the saved extraction (no seat call).
     const engramDown = (validation.issues ?? []).some((i) => i.code === 'engram_failed');
-    const validity = engramDown ? pairs.map(({ item }) => ({ itemId: item.itemId, valid: false, issues: ['engram_failed'] })) : itemValidity(extraction, validation, pairs, codes);
+    const validity = !exitAdmissible ? pairs.map(({ item }) => ({ itemId: item.itemId, valid: false, issues: ['non-zero-exit'] }))
+      : engramDown ? pairs.map(({ item }) => ({ itemId: item.itemId, valid: false, issues: ['engram_failed'] })) : itemValidity(extraction, validation, pairs, codes);
     const annotations = pairs.map(({ item, answer }, i) => ({
       itemId: item.itemId, kind: item.kind, valid: validity[i].valid, issues: validity[i].issues,
       code: answer ? String(answer.code ?? '') : null, verdict: answer ? codes.get(String(answer.code ?? '')) ?? null : null,
@@ -123,8 +148,8 @@ export async function runPass({ pass, mode = 'independent', guide = 'G0', annota
       reason: answer?.reason ?? null, changed: answer?.changed ?? null,
       quoteFound: extraction.nodes.find((n) => n.id === `annotation:${annotator}:p${pass}:${item.itemId}`)?.quote_found ?? null,
     }));
-    writeFileSync(out, JSON.stringify({ pass, mode, guide, annotator, lotId: lot.lotId, promptSha256: sha256(prompt), packSha256: pack.sha256, attempts,
-      exitCode: r.code, latencyMs: r.latencyMs, usage: r.usage ?? null, engramValid: validation.valid ?? false, engramIssues: (validation.issues ?? []).length,
+    atomicWrite(out, JSON.stringify({ pass, mode, guide, annotator, lotId: lot.lotId, promptSha256: sha256(prompt), packSha256: pack.sha256, attempts,
+      exitCode: r.code, exitAdmissible, latencyMs: r.latencyMs, usage: r.usage ?? null, engramValid: validation.valid ?? false, engramIssues: (validation.issues ?? []).length,
       engramIssueCodes: [...new Set((validation.issues ?? []).map((x) => x.code))], engramChecked: !engramDown, annotations }, null, 1), { mode: 0o600 });
     done++;
     if (done % 10 === 0 || done === tasks.length) log(`[pass ${pass}] ${done}/${tasks.length} calls done (${Math.round((Date.now() - started) / 60000)} min)`);
