@@ -154,6 +154,37 @@ unreachable Kubernetes means **unknown**, never success. A successful recorded
 restore is reconciled and never replayed because its checkpoint was interrupted.
 A `restore`, `backup`, `ddl` or `data` Job that ended **Failed** is relaunched by
 `resume` under a new Job name; the restore reset makes that relaunch idempotent.
+### Daily restore (preprod) after closure
+
+The daily restore replaces the live database only through the atomic restore
+Job (one transaction): until it commits, the previous database is intact. Any
+failure after closure starts (closure deadline, failed or stopped restore,
+migration, rollout or smoke failure) therefore reopens instead of staying
+closed: operation Jobs are stopped, a fresh `verify` Job proves that the live
+database carries every migration of the deployed release, the original
+Deployments, routes and schedules are restored, the private and public smokes
+run, the lock is released and `REOPENED WITHOUT RESTORE` is printed. The
+command still exits non-zero and the previous `radar-cutover-receipt` is kept.
+A refused verification (restored database not yet migrated) or a started 6H
+data migration keeps the site closed; `resume RUN` then continues forward.
+
+The same reopening is available explicitly:
+
+```sh
+make -f deploy/cutover/operator.mk rollback RUN=<ORIGINAL_UUID> ENV=preprod
+```
+
+Lost GitHub executor (runner killed, job cancelled or timed out, so no trap
+ran): the workflow `recover` job runs after a failed or cancelled `bascule`
+job, takes over only the lock recorded for its own run once the GitHub API
+reports the `bascule` job completed, and runs the same reopening. If that job
+cannot run, an operator with `gh` authenticated runs `status` then the
+`rollback` above; takeover is refused while the recorded job is not completed.
+
+The closure check probes every Ingress host; a wildcard host
+(`*.preprod.immo-pages…`) is probed through the concrete label
+`cutover-probe.`. A closure deadline names the last unmet condition.
+
 Routes return to maintenance after a reopening/public-smoke failure; schedules
 remain suspended. Maintenance Services remain on failure and are deleted only
 when no ingress references them after complete reopening.
