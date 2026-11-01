@@ -23,6 +23,9 @@ http_check() {
       esac
       fail "Smoke identity/content mismatch: $path"
     fi
+    # Public routes converge after the ingress patch: a transient SPA fallback (200 on /mcp)
+    # is retried until the existing deadline; a persistent 200 still fails.
+    if [[ $base == "${URL:-}" && $path == /mcp && $code == 200 ]]; then sleep 1; continue; fi
     case $code in 000|429|5??) sleep 1;; *) fail "Smoke authentication/status mismatch: $path ($code)";; esac
   done
 }
