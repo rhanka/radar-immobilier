@@ -54,6 +54,29 @@ async function allowedByRobots(url) {
   return !robotsCache.get(u.host).some((pref) => u.pathname.startsWith(pref));
 }
 
+/**
+ * Fail-closed fingerprint disposition: a missing guard refuses every excerpt (a complement
+ * that cannot be checked against the evaluation-set fingerprints must never reach
+ * reconciliation), as does any excerpt hitting the lists.
+ */
+export function fingerprintVerdict(guard, excerpt) {
+  if (!guard) return { refused: true, reason: 'missing-fingerprints' };
+  const hits = scanFile(guard, excerpt);
+  if (hits && Object.values(hits).some((h) => h > 0)) return { refused: true, reason: 'fingerprint-hit', hits };
+  return { refused: false };
+}
+
+/** Item ids already recorded in the manifest (per-item resume after interruption). */
+export function readManifestDone(manifest) {
+  const done = new Set();
+  if (!existsSync(manifest)) return done;
+  for (const line of readFileSync(manifest, 'utf8').split('\n')) {
+    if (!line.trim()) continue;
+    try { const r = JSON.parse(line); if (r?.itemId) done.add(r.itemId); } catch { /* keep prior records */ }
+  }
+  return done;
+}
+
 /** Pages of the fetched document that best match the item text (token overlap), capped. */
 export function bestExcerpt(text, itemInput) {
   const target = new Set(words(itemInput).filter((w) => w.length > 3 || /\d/.test(w)));
@@ -70,14 +93,20 @@ export async function main() {
   for (const a of ANNOTATORS) for (const an of pass1.get(a).values()) if (an.valid && an.ambiguous && an.cause === 'missing-information') flagged.add(an.itemId);
   const dir = privateDir(path.join(home, 'l2', 'external'));
   const manifest = path.join(home, 'l2', 'scrape-manifest.jsonl');
-  if (existsSync(manifest)) { process.stdout.write(`[scrape] ${manifest} exists: complement step already done, skipped\n`); return { skipped: true }; }
-  writeFileSync(manifest, '', { mode: 0o600 });
+  // Fail closed: without the fingerprint guard no excerpt can be checked, so the step refuses.
   const guard = loadFingerprints(home);
+  if (!guard) throw new Error(`refused: ${path.join(home, 'guard', 'fingerprints.json')} missing (fail closed; run make classif-guard-unseal ENV=preprod first)`);
+  // Per-item resume: only items without a manifest record are processed; an interruption or a
+  // DB error after the manifest was created no longer abandons the remaining items.
+  const done = readManifestDone(manifest);
+  if (!existsSync(manifest)) writeFileSync(manifest, '', { mode: 0o600 });
+  else process.stdout.write(`[scrape] ${manifest} exists: resuming, ${done.size} items already recorded\n`);
   const sigIds = [...flagged].filter((id) => items.get(id).kind === 'signal');
   const nodes = new Map(fetchNodes(sigIds.map((id) => items.get(id).anchor.id)).map((n) => [n.id, n]));
   const stats = {};
   const rec = (r) => { stats[r.status] = (stats[r.status] ?? 0) + 1; appendFileSync(manifest, `${JSON.stringify(r)}\n`); };
   for (const id of [...flagged].sort()) {
+    if (done.has(id)) continue;
     const it = items.get(id);
     const base = { itemId: id, anchorId: it.anchor.id, source: 'source-document' };
     if (it.kind === 'pv') { rec({ ...base, status: 'no-target', note: 'full PV text already in the item' }); continue; }
@@ -106,8 +135,8 @@ export async function main() {
     if (!res.ok || !text.trim()) { rec({ ...record, status: res.ok ? 'no-text' : 'http-error' }); await sleep(2000); continue; }
     const excerpt = bestExcerpt(text, it.input);
     if (!excerpt) { rec({ ...record, status: 'no-matching-page' }); await sleep(2000); continue; }
-    const hits = guard ? scanFile(guard, excerpt) : null;
-    if (hits && Object.values(hits).some((h) => h > 0)) { rec({ ...record, status: 'refused-fingerprint', hits }); await sleep(2000); continue; }
+    const verdict = fingerprintVerdict(guard, excerpt);
+    if (verdict.refused) { rec({ ...record, status: 'refused-fingerprint', ...(verdict.hits ? { hits: verdict.hits } : { note: verdict.reason }) }); await sleep(2000); continue; }
     const excerptPath = path.join(dir, `${digest}.${sha256(id).slice(0, 8)}.excerpt.txt`);
     writeFileSync(excerptPath, excerpt, { mode: 0o600 });
     rec({ ...record, status: 'ok', excerptPath, excerptSha256: sha256(excerpt), excerptChars: excerpt.length });
