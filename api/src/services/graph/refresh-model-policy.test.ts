@@ -1,7 +1,8 @@
 import type { TextJsonGenerationClient } from "@sentropic/engram";
 import { describe, expect, it, vi } from "vitest";
 
-import { createRefreshModelPolicy, type RefreshModel, type RefreshModelReceipt } from "./refresh-model-policy.js";
+import { createRefreshModelPolicy, isRefreshNoRoute, type RefreshModel,
+  type RefreshModelReceipt } from "./refresh-model-policy.js";
 
 const primary: RefreshModel = { provider: "gemini", model: "gemini-3.8-flash", effort: "low" };
 const fallback: RefreshModel = { provider: "openai", model: "gpt-6-astra", effort: "low" };
@@ -212,6 +213,61 @@ describe("refresh model policy", () => {
       await expect(run.document(id).generateJson(input)).rejects.toThrow("network");
     }
     expect(run.policy.fallbackQuotaExhausted()).toBe(false);
+  });
+
+  it("should declare the FALLBACK unroutable after three consecutive no-route refusals", async () => {
+    // Preprod 2026-10-30/31: the fallback account needed re-authorization, every
+    // fallback call failed in milliseconds with RoutePlanError no-route, and the
+    // sweep still took 2 to 4 hours to extract nothing.
+    const noRoute = Object.assign(new Error("No eligible route"), { name: "RoutePlanError", code: "no-route" });
+    const run = fixture(async (model) => {
+      if (model === primary) throw Object.assign(new Error("limited"), { status: 429 });
+      throw noRoute;
+    });
+    for (const id of ["a", "b"]) {
+      await expect(run.document(id).generateJson(input)).rejects.toBe(noRoute);
+    }
+    expect(run.policy.fallbackUnroutable()).toBe(false);
+    await expect(run.document("c").generateJson(input)).rejects.toBe(noRoute);
+    expect(run.policy.fallbackUnroutable()).toBe(true);
+    expect(run.policy.fallbackQuotaExhausted()).toBe(false);
+  });
+
+  it("should reset the no-route streak when an extraction succeeds in between", async () => {
+    const noRoute = Object.assign(new Error("No eligible route"), { code: "no-route" });
+    let primaryUp = false;
+    const run = fixture(async (model) => {
+      if (model === primary) { if (primaryUp) return "{}"; throw new Error("down"); }
+      throw noRoute;
+    });
+    for (const id of ["a", "b"]) {
+      await expect(run.document(id).generateJson(input)).rejects.toBe(noRoute);
+      run.policy.completeDocument(id);
+    }
+    primaryUp = true;
+    await run.document("c").generateJson(input);
+    run.policy.completeDocument("c");
+    primaryUp = false;
+    await expect(run.document("d").generateJson(input)).rejects.toBe(noRoute);
+    expect(run.policy.fallbackUnroutable()).toBe(false);
+  });
+
+  it("should not confuse a plain transport failure of the fallback with no route", async () => {
+    const run = fixture(async () => { throw new Error("network"); });
+    for (const id of ["a", "b", "c", "d"]) {
+      await expect(run.document(id).generateJson(input)).rejects.toThrow("network");
+    }
+    expect(run.policy.fallbackUnroutable()).toBe(false);
+  });
+
+  it.each([
+    [Object.assign(new Error("x"), { code: "no-route" }), true],
+    [Object.assign(new Error("x"), { cause: Object.assign(new Error("y"), { code: "no-route" }) }), true],
+    [Object.assign(new Error("x"), { code: "unknown-model" }), false],
+    [new TypeError("fetch failed"), false],
+    [undefined, false],
+  ])("should detect a no-route error on the error or its cause (%#)", (error, expected) => {
+    expect(isRefreshNoRoute(error)).toBe(expected);
   });
 
   it("should forget a finished document, since one policy now spans 528 cities", async () => {

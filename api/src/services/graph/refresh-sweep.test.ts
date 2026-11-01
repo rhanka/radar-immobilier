@@ -261,6 +261,98 @@ describe("runRefreshSweep", () => {
       .toEqual({ exitCode: 1, reason: "fallback-quota-exhausted" });
   });
 
+  it("reports a systemic halt reached on the LAST extracting cities", async () => {
+    // #969 review: three no-route refusals on the tail of the list left no later
+    // poll, so the report had 3 attempts, no halt reason, and exit 0.
+    const store = new MemoryStore();
+    let refusals = 0;
+    const report = await runRefreshSweep(options(store, {
+      haltExtraction: () => refusals >= 3 ? "fallback-no-route" : null,
+      refreshCity: async (city) => {
+        if (city === "alpha") return { status: "up-to-date" };
+        refusals += 1;
+        throw Object.assign(new Error("No eligible route"), { code: "no-route" });
+      },
+    }));
+
+    expect(report.visited).toBe(4);
+    expect(report.counts.failed).toBe(3);
+    expect(report.extractionHaltedBy).toBe("fallback-no-route");
+    expect(assessRefreshSweepHealth(report, 0.9))
+      .toEqual({ exitCode: 1, reason: "fallback-no-route" });
+  });
+
+  it("reports a systemic halt reached right before the deadline stops the sweep", async () => {
+    const store = new MemoryStore();
+    let refusals = 0;
+    const visited: string[] = [];
+    const report = await runRefreshSweep(options(store, {
+      now: steppingClock(100),
+      deadlineMs: 450,
+      cityReserveMs: 100,
+      haltExtraction: () => refusals >= 1 ? "fallback-no-route" : null,
+      refreshCity: async (city) => {
+        visited.push(city);
+        refusals += 1;
+        throw Object.assign(new Error("No eligible route"), { code: "no-route" });
+      },
+    }));
+
+    expect(report.stoppedBy).toBe("deadline");
+    expect(visited).toHaveLength(1);
+    expect(report.extractionHaltedBy).toBe("fallback-no-route");
+    expect(assessRefreshSweepHealth(report, 0.9))
+      .toEqual({ exitCode: 1, reason: "fallback-no-route" });
+  });
+
+  it("reports a systemic halt reached right before the sweep is aborted", async () => {
+    const store = new MemoryStore();
+    const controller = new AbortController();
+    let refusals = 0;
+    const report = await runRefreshSweep(options(store, {
+      signal: controller.signal,
+      haltExtraction: () => refusals >= 2 ? "fallback-no-route" : null,
+      refreshCity: async (city) => {
+        if (city === "alpha") return { status: "up-to-date" };
+        refusals += 1;
+        // Aborted mid-list (charlie), before the next poll of the halt.
+        if (refusals === 2) controller.abort();
+        throw Object.assign(new Error("No eligible route"), { code: "no-route" });
+      },
+    }));
+
+    expect(report.stoppedBy).toBe("aborted");
+    expect(report.visited).toBe(3);
+    expect(report.counts.failed).toBe(2);
+    expect(report.extractionHaltedBy).toBe("fallback-no-route");
+    expect(assessRefreshSweepHealth(report, 0.9))
+      .toEqual({ exitCode: 1, reason: "fallback-no-route" });
+  });
+
+  it("reports a fallback seat that runs dry on the very last city", async () => {
+    const store = new MemoryStore();
+    let exhausted = false;
+    const report = await runRefreshSweep(options(store, {
+      haltExtraction: () => exhausted ? "fallback-quota-exhausted" : null,
+      refreshCity: async (city) => {
+        if (city !== CITIES.at(-1)) return { status: "published" };
+        exhausted = true;
+        throw new Error("429");
+      },
+    }));
+
+    expect(report.visited).toBe(CITIES.length);
+    expect(report.counts.published).toBe(3);
+    expect(report.extractionHaltedBy).toBe("fallback-quota-exhausted");
+    expect(assessRefreshSweepHealth(report, 0.9))
+      .toEqual({ exitCode: 1, reason: "fallback-quota-exhausted" });
+  });
+
+  it("does not invent a halt reason when nothing systemic happened", async () => {
+    const report = await runRefreshSweep(options(new MemoryStore(), { haltExtraction: () => null }));
+    expect(report.extractionHaltedBy).toBeUndefined();
+  });
+
   it("keeps sweeping when the cursor PUT fails, and says so", async () => {
     const store = new MemoryStore();
     let puts = 0;
