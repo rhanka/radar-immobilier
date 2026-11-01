@@ -19,6 +19,8 @@ describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("MCP starter
   afterAll(async () => { await h?.close(); });
   it("should load official DS styles, read real baskets, recover a grant and show revoked access", async () => {
     const f = await publishedBaskets(h, { files: getAuthoringGuide().starter.files });
+    await f.data.pool.query("UPDATE workspace_memberships SET status='revoked',revoked_at=now() WHERE workspace_id=$1 AND account_id=$2",
+      [f.data.otherId, f.data.contributor.id]);
     const app = f.runtime();
     const requests: { url: URL; method: string }[] = [];
     const proxy = await startApprovalProxy(getRequestListener((request) => app.fetch(request)));
@@ -64,7 +66,9 @@ describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("MCP starter
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       await page.screenshot({ path: new URL("approval.png", screenshots).pathname, fullPage: true });
       await approve.click();
-      await page.getByLabel("Espace de travail", { exact: true }).fill(f.data.workspaceId);
+      const workspace = page.getByRole("combobox", { name: "Espace de travail", exact: true });
+      await expectUi(workspace).toHaveValue(f.data.workspaceId);
+      await expectUi(page.getByRole("textbox", { name: "Espace de travail", exact: true })).toBeHidden();
       await page.getByLabel("Ville", { exact: true }).fill("synthetic-city");
       await page.getByLabel("Panier", { exact: true }).selectOption("pertinent");
       const read = page.waitForResponse((response) => new URL(response.url()).pathname === "/__reader/api/baskets.search.v1");
@@ -79,6 +83,7 @@ describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("MCP starter
       for (const asset of DESIGN_KIT_ASSETS) expect(paths).toContain(designKitAssetUrl(asset));
       expect(requests.filter(({ url }) => url.host === "app.example.test" && url.pathname.endsWith("/approve"))
         .map(({ method }) => method)).toEqual(["GET", "POST"]);
+      expect(paths.indexOf("/__reader/api/workspaces.list.v1")).toBeLessThan(paths.indexOf("/__reader/api/baskets.context.v1"));
       expect(paths.indexOf("/__reader/api/baskets.context.v1")).toBeLessThan(paths.indexOf("/__reader/api/baskets.search.v1"));
       await page.screenshot({ path: new URL("starter.png", screenshots).pathname, fullPage: true });
 
@@ -97,14 +102,27 @@ describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("MCP starter
         history.replaceState(null, "", url.pathname + url.search + url.hash);
       });
       const pinned = new URL(page.url()).origin;
-      await page.goto(`${pinned}/index.html?workspaceId=${f.data.workspaceId}&citySlug=synthetic-city`);
       const renewed = page.waitForResponse((response) => new URL(response.url()).pathname === "/__reader/renew");
-      await page.getByRole("button", { name: "Lire les signaux" }).click();
+      await page.goto(`${pinned}/index.html?citySlug=synthetic-city`);
       expect((await renewed).status()).toBe(200);
+      await page.getByRole("button", { name: "Lire les signaux" }).click();
       await expectUi(page.locator("#items li")).toHaveCount(2);
       await page.getByLabel("Panier", { exact: true }).selectOption("a_surveiller");
       await page.getByRole("button", { name: "Lire les signaux" }).click();
       await expectUi(page.getByRole("status")).toContainText("Aucun signal");
+      await f.data.pool.query("UPDATE workspace_memberships SET status='active',revoked_at=null WHERE workspace_id=$1 AND account_id=$2",
+        [f.data.otherId, f.data.contributor.id]);
+      await page.reload();
+      await expectUi(workspace.locator("option")).toHaveCount(3);
+      await expectUi(workspace).toHaveValue("");
+      await workspace.selectOption(f.data.workspaceId);
+      await f.data.pool.query("UPDATE workspace_memberships SET status='revoked',revoked_at=now() WHERE account_id=$1", [f.data.contributor.id]);
+      await page.reload();
+      const manualWorkspace = page.getByRole("textbox", { name: "Espace de travail", exact: true });
+      await expectUi(manualWorkspace).toBeVisible();
+      await expectUi(workspace).toBeHidden();
+      await manualWorkspace.fill(f.data.workspaceId);
+      await page.getByLabel("Ville", { exact: true }).fill("synthetic-city");
       await h.pool.query("DELETE FROM artifacts.artifact_access WHERE artifact_id=$1 AND principal_id=$2", [f.artifactId, f.data.contributor.sub]);
       await page.getByRole("button", { name: "Lire les signaux" }).click();
       await expectUi(page.getByRole("status")).toContainText("Votre accès a expiré");

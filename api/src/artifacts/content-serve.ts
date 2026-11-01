@@ -33,7 +33,8 @@ import { adaptGrantToReader, canInvoke, type ApiReaderContext } from "./reader-c
 import type { AuthorityReader } from "./reader-profile.js";
 import { validateReaderResponse } from "./reader-responses.js";
 import {
-  isBasketOperation,
+  isWorkspaceReadOperation,
+  workspacesListParams,
   basketsContextParams,
   basketsSearchParams,
   basketsStateParams,
@@ -136,7 +137,7 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
   app.get("/health", (c) => c.json({ status: "ok" }));
 
   app.use("/__reader/api/*", async (c, next) => {
-    if (c.req.method !== "GET" || !isBasketOperation(c.req.path.slice("/__reader/api/".length))) return next();
+    if (c.req.method !== "GET" || !isWorkspaceReadOperation(c.req.path.slice("/__reader/api/".length))) return next();
     try {
       await next();
       if (c.res.status < 400) return;
@@ -251,7 +252,7 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     const capability = op === "geo.read.v1" ? "geo.read" : "signals.protected-read";
     if (!canInvoke(auth, capability, auth.releaseId)) return c.json({ error: "forbidden" }, 403);
     if (!deps.readOperation) return c.json({ error: "capability_unavailable" }, 503);
-    if (isBasketOperation(op)) {
+    if (isWorkspaceReadOperation(op)) {
       applyReaderContentHeaders(c);
       if (!await authorityCurrent(auth)) return c.json({ error: "unauthenticated" }, 401);
       try {
@@ -259,7 +260,7 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
         if (Buffer.byteLength(url.pathname + url.search) > 16384) throw new ClassificationError("request_uri_too_long");
         if (url.searchParams.getAll("grant").length > 1) throw new ClassificationError("invalid_query");
         url.searchParams.delete("grant");
-        const schema = op === "baskets.context.v1" ? basketsContextParams : op === "baskets.search.v1"
+        const schema = op === "workspaces.list.v1" ? workspacesListParams : op === "baskets.context.v1" ? basketsContextParams : op === "baskets.search.v1"
           ? basketsSearchParams : basketsStateParams;
         const params = decodeQuery(url.searchParams, schema);
         const body = validateReaderResponse(op, await deps.readOperation(op, params, auth), auth.readerSub);
