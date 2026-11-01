@@ -49,10 +49,12 @@ Let a published page discover the verified reader's active workspaces and select
   - [ ] Verify operation, authorization, availability and reader isolation.
   - [x] Add unit proofs for the discovery contract, isolation, typed failures and H5 grant renewal.
   - [x] Add explicit H5 refusal and authorization-race coverage.
+  - [x] Add PostgreSQL coverage for active memberships, availability and account/ACL revocation.
 - [ ] **Lot 2 — Authoring starter and guide**
   - [x] Populate a labelled workspace selector; preselect a sole workspace, use manual entry only for an empty list.
   - [x] Document the discovery operation and bump the guide revision to r3 (starter 1.1.0).
   - [ ] Verify the reader client and browser flow when available.
+  - [x] Extend browser acceptance for one, several and zero workspaces without an initial UUID.
 - [ ] **Lot 3 — Delivery**
   - [ ] Run scoped tests, typecheck and lint; review the diff.
   - [ ] Tear down the isolated test stack with volumes.
