@@ -66,6 +66,7 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
   - [ ] Versioned bounded contexts, explicit adoption, session isolation.
   - [ ] Unknown schemas preserved; storage failures degrade without retries.
 - [ ] **Lot T — Verification**
+  - [x] Session/context isolation unit regressions; delayed auth response rejected.
   - [ ] UI unit tests, codec/adapter/isolation regressions and scoped legacy tests.
   - [ ] Typecheck, lint, API and MCP tests.
   - [ ] Playwright: two tabs, N/N-1/N+1, refusal, reconnect, rollback, kill.
