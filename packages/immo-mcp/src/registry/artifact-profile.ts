@@ -1,6 +1,6 @@
 /**
  * Effective H4 artifact profile shared by the embedded configuration and the
- * compatibility tests. Records the four-tool selection, the caller-visible
+ * compatibility tests. Records the installed selection, the caller-visible
  * input bounds, the durable command-identity semantics and the provider
  * contract revisions required before activation.
  */

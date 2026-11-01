@@ -4,9 +4,9 @@ import { STATUS_TOOL_NAMES } from "./command-contracts.js";
 import { STATUS_TOOL_CONTRACTS } from "./tool-contracts.js";
 import { SUCCESSOR_TOOL_NAMES, SuccessorManifestSchema,
   SuccessorSearchSignalsInputSchema } from "./successor-schemas.js";
+import { H4_CHECKPOINT_TOOL_COUNT, SUCCESSOR_TOOL_COUNT } from "./successor-contract.js";
 
 const digest = "a".repeat(64);
-import { H4_CHECKPOINT_TOOL_COUNT, SUCCESSOR_TOOL_COUNT } from "./successor-contract.js";
 describe("inert successor compatibility", () => {
   it("should retain exactly twelve live definitions and the baseline search schema", () => {
     const names = ALL_TOOL_DEFINITIONS.map((tool) => tool.name);

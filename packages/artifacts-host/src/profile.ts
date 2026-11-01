@@ -5,7 +5,7 @@
  * Compilation and attestation require the actual upstream construction API.
  */
 
-/** Frozen r2 operation selection for the Radar profile, ordered. */
+/** Installed operation selection for the Radar profile, ordered. */
 import { ACTIVE_ARTIFACT_TOOLS } from "./p0b-profile.js";
 export const FROZEN_CAPABILITIES = Object.freeze([...ACTIVE_ARTIFACT_TOOLS].sort());
 

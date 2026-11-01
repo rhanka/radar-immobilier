@@ -21,7 +21,7 @@ lock: guard
 registry: guard
 	@$(CHECK) 'npm view @sentropic/artifacts@0.3.0 version'
 verify: guard
-	@$(CHECK) "$(INSTALL) && npm run typecheck --workspace=packages/immo-mcp && npm run typecheck --workspace=packages/artifacts-host && npm run typecheck --workspace=api && npx --no-install eslint packages/immo-mcp/src packages/artifacts-host/src api/src/artifacts/control-route*.ts && npm run test --workspace=packages/immo-mcp -- --exclude '**/*.e2e.test.ts' && npm run test --workspace=packages/artifacts-host"
+	@$(CHECK) "$(INSTALL) && npm run typecheck --workspace=packages/immo-mcp && npm run typecheck --workspace=packages/artifacts-host && npm run typecheck --workspace=api && npx --no-install eslint packages/immo-mcp/src packages/artifacts-host/src api/src/artifacts/control-route*.ts && npm run test --workspace=packages/immo-mcp -- --exclude '**/*.e2e.test.ts' && npm run test --workspace=packages/artifacts-host -- --maxWorkers=1"
 # A copy is built inside the container; the upstream checkout is mounted read-only.
 candidate: guard
 	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; \
@@ -31,3 +31,10 @@ integration: guard
 	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; \
 	$(COMPOSE) up -d --wait postgres && \
 	$(RUN_DATABASE_API) api sh -ec '$(INSTALL) && npm run test --workspace=packages/artifacts-host -- src/p0b.integration.test.ts'
+
+.PHONY: push clean-deps
+push: guard
+	git push -u origin HEAD
+clean-deps: guard-env
+	@rm -rf packages/*/node_modules ui/node_modules tmp/mcp-p0b/artifacts tmp/mcp-p0b/toolchain
+	@rmdir node_modules api/node_modules 2>/dev/null || true

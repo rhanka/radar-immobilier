@@ -69,8 +69,17 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
         await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))",
           [JSON.stringify([binding.storageScopeId, binding.ownerId, binding.bindingName])]);
       },
-      resolveBinding(client, binding) {
-        return createPostgresArtifactStore(client as unknown as pg.Pool).ensureArtifact({ ...binding, profile: {} });
+      async resolveBinding(client, binding) {
+        try {
+          return await createPostgresArtifactStore(client as unknown as pg.Pool).ensureArtifact({ ...binding, profile: {} });
+        } catch (cause) {
+          // The coordinator accepts operational refusals; preserve terminal identity as 410.
+          if (ARTIFACT_P0B && cause instanceof ArtifactOperationError && String(cause.kind) === "gone") {
+            throw new ArtifactOperationError("unauthorized_at_commit", { cause, refusal: {
+              allowed: false, reason: "denied", publicCode: "gone", status: 410, retriable: false } });
+          }
+          throw cause;
+        }
       },
       async abandonAttempt() { /* Ensure stages no external objects. */ },
     },

@@ -2,12 +2,14 @@ import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { ARTIFACT_P0B } from "./p0b-profile.js";
 import { p0bFixture } from "./p0b.test-support.js";
+import { createStoredReader } from "../../../api/src/artifacts/reader-storage.js";
 
 describe.skipIf(!ARTIFACT_P0B || !process.env.P0B_DATABASE_URL)("P0b host with real PostgreSQL", () => {
   let h: Awaited<ReturnType<typeof p0bFixture>>;
   beforeAll(async () => { h = await p0bFixture(); });
   afterAll(async () => { await h?.close(); });
   beforeEach(async () => {
+    await h.pool.query("DELETE FROM artifacts.host_actor_rate");
     await h.pool.query("UPDATE artifacts.host_quotas SET operation_limit=1000,byte_limit=10000000");
     await h.pool.query("UPDATE artifacts.host_actor_quotas SET operation_limit=1000,byte_limit=10000000");
     await h.pool.query("UPDATE account_users SET status='approved' WHERE sub='idp-bob'");
@@ -77,6 +79,8 @@ describe.skipIf(!ARTIFACT_P0B || !process.env.P0B_DATABASE_URL)("P0b host with r
   it("should require human approval, roll proof consumption back on denial and replay a terminal deletion", async () => {
     const p = await h.page();
     const { args, ref } = await challenge(p.artifactId);
+    const reader = createStoredReader(h.pool, "p0b", "pages.test", h.host.blobs);
+    expect(await reader.authority.getContentOrigin(p.artifactId)).not.toBeNull();
     expect(await h.confirmation.approve(ref, "idp-bob")).toBe(false);
     expect((await h.call("delete", { ...args, confirmationRef: ref })).body).toMatchObject({ error: "confirmation_invalid" });
     expect(await h.confirmation.approve(ref, "alice")).toBe(true);
@@ -92,6 +96,10 @@ describe.skipIf(!ARTIFACT_P0B || !process.env.P0B_DATABASE_URL)("P0b host with r
     expect((await h.confirmation.read(ref, "alice"))?.consumed).toBe(true);
     expect((await h.call("delete", { ...args, confirmationRef: ref })).body).toEqual(deleted.body);
     expect((await h.call("get_source", { artifactId: p.artifactId, releaseId: p.releaseId })).status).toBe(410);
+    expect(await reader.authority.getContentOrigin(p.artifactId)).toBeNull();
+    expect(await reader.authority.getRelease(p.artifactId, p.releaseId)).toBeNull();
+    expect(await reader.getArtifactIdForRelease(p.releaseId)).toBeNull();
+    expect(await reader.releaseFiles.getFile(p.artifactId, p.releaseId, "index.html")).toBeNull();
     expect((await h.call("ensure", { bindingName: p.bindingName, idempotencyKey: randomUUID() })).status).toBe(410);
     await expect(h.pool.query("UPDATE artifacts.artifacts SET lifecycle_state='active' WHERE id=$1", [p.artifactId])).rejects.toMatchObject({ code: "23514" });
     for (const op of ["restore", "fork", "promote", "renew"]) expect((await h.call(op, { artifactId: p.artifactId })).status).toBe(503);
