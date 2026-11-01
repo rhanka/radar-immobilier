@@ -1,7 +1,7 @@
 # Feature: Prepare the IMMO artifacts P0b adapter
 
 ## Objective
-Prepare the three qualified 0.3.0 operations while preserving the current non-CAS, root-result contract. Publication must require only the central version pin and regenerated lockfile.
+Prepare the three qualified P0b operations (0.2.5 or 0.3.0) while preserving the current non-CAS, root-result contract. Publication must require only the central version pin and regenerated lockfile.
 
 ## Scope / Guardrails
 - Work only in the owner-assigned `.worktrees/mcp-p0b` checkout.
@@ -54,3 +54,8 @@ Prepare the three qualified 0.3.0 operations while preserving the current non-CA
   - [x] Upstream reference: `8b5b1f7793e433938de64f068dc2116e6f084ff6`; tarball SHA-256 `b6a13f19f218e5a433581cf395c9fcc4ed4ca1ee07485e67507b37069b75c4cf`.
 - [x] **Lot 4 — Delivery**
   - [x] Review diff, push, open English draft PR #979, write the French conductor report.
+- [ ] **Lot 5 — P0b publication version flexibility**
+  - [x] Qualify 0.2.5 and 0.3.0 through one exported version list, keeping 0.2.2 legacy.
+  - [x] Parameterize registry/candidate and resolve IMMO's actual dependency graph.
+  - [x] Local 0.2.5 candidate: 522 MCP + 234 host tests pass, no skips; three typechecks and lint pass. IMMO pins cluster-mesh 0.22.1; full npm resolution accepts the candidate without ERESOLVE.
+  - [ ] Update publication steps, verify baseline/fallback, tear down, push and report.

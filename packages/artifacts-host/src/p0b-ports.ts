@@ -23,7 +23,7 @@ export async function assertP0bStorage(pool: pg.Pool, confirmation?: ArtifactDel
   return columns;
 }
 
-/** 0.3.0 still accepts a synchronous account predicate: isolate it per async request. */
+/** P0b (0.2.5 or 0.3.0) accepts a synchronous account predicate: isolate it per async request. */
 export function p0bPorts(store: ReturnType<typeof createPostgresArtifactStore>,
   confirmation: ArtifactDeleteConfirmation | undefined, isApprovedAccount: (sub: string) => boolean) {
   return ARTIFACT_P0B ? { sources: store, management: { confirmation: confirmation!.port }, isApprovedAccount } : {};

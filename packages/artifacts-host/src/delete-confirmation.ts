@@ -3,7 +3,7 @@ import type pg from "pg";
 import type { FinalizeTxClient } from "@sentropic/artifacts/server/commit-contract";
 import { deriveIdempotencyKey } from "./idempotency.js";
 
-/** Structural 0.3.0 port: no import of an entry point absent from 0.2.2. */
+/** Structural P0b port (0.2.5 or 0.3.0): no import of an entry point absent from 0.2.2. */
 export interface DeleteConfirmationContext {
   actorId: string; storageScopeId: string; artifactId: string;
   expectedCurrentReleaseId: string | null; commandHash: string; internalKey: string;
