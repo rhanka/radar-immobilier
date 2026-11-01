@@ -613,3 +613,71 @@ test('a return to main measures the abandoned writes only after the prepared wri
     assert.deepEqual([entry.status, entry.db, entry.tuples], ['pending', 'radar_next', 3]);
   } finally { f.cleanup(); }
 });
+test('an unreadable Service routing keeps the lock and forbids any deletion', () => {
+  const f = fixture({ writeGrowth: { radar_next: 3 } });
+  try {
+    success(f.run('prepare'));
+    // The API already serves prepared when the third patch fails and API reads time out.
+    const state = f.state(); state.serviceConflict = 'radar-ui'; state.conflictTo = 'prepared';
+    state.getFailOnConflict = 'service/radar-api'; save(f, state);
+    const refused = f.run('run', ['MODE=run']);
+    assert.notEqual(refused.status, 0);
+    assert.match(refused.stderr, /routing unknown/);
+    assert.ok(lock(f), 'unknown routing keeps the lock');
+    assert.equal((f.state().deletions || []).filter(d => d.kind === 'Deployment' && /-prepared$/.test(d.name)).length, 0,
+      'no prepared Deployment is deleted while routing is unknown');
+    assert.equal(slotOf(f, 'radar-api'), 'prepared');
+    const run = JSON.parse(lock(f).data.record).run;
+    const recovered = f.state(); delete recovered.getFail; delete recovered.getFailOnConflict; save(f, recovered);
+    success(f.run('rollback', [`RUN=${run}`, 'MODE=run']));
+    assert.equal(lock(f), undefined);
+  } finally { f.cleanup(); }
+});
+for (const action of ['prepare', 'run']) {
+  test(`an unreadable prepared Deployment during ${action} keeps the lock without deleting any slot`, () => {
+    const f = fixture();
+    try {
+      success(f.run('prepare'));
+      const state = f.state(); state.getFails = SERVICES.map(name => `deployment/${name}-prepared`); save(f, state);
+      const result = f.run(action, ['MODE=run']);
+      assert.notEqual(result.status, 0);
+      assert.match(result.stderr, /Prepared slot state unknown/);
+      assert.ok(lock(f));
+      assert.equal((f.state().deletions || []).some(d => d.kind === 'Deployment'), false);
+    } finally { f.cleanup(); }
+  });
+}
+test('a failed identity Job is retried on resume instead of blocking it forever', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    const state = f.state(); state.failJobs = ['identity']; save(f, state);
+    const failed = f.run('run', ['MODE=run']);
+    assert.notEqual(failed.status, 0);
+    assert.match(failed.stderr, /Job failed: cutover-.*-identity/);
+    assert.ok(lock(f), 'promotion interrupted: the lock is retained');
+    const run = JSON.parse(lock(f).data.record).run;
+    const retrying = f.state(); retrying.failJobs = []; save(f, retrying);
+    success(f.run('resume', [`RUN=${run}`]));
+    for (const name of SERVICES) assert.equal(slotOf(f, name), 'main');
+    assert.equal(lock(f), undefined);
+    assert.equal(f.state().jobCreation.filter(j => j.step === 'identity').length, 2, 'the failed identity Job ran again');
+  } finally { f.cleanup(); }
+});
+test('a resume recreates a disappeared read-only Job instead of refusing its absence', () => {
+  const f = fixture();
+  try {
+    success(f.run('prepare'));
+    const state = f.state(); state.failJobs = ['identity']; save(f, state);
+    assert.notEqual(f.run('run', ['MODE=run']).status, 0);
+    const run = JSON.parse(lock(f).data.record).run;
+    // The timed-out Job was deleted: the recorded name resolves to nothing.
+    const gone = f.state();
+    gone.failJobs = [];
+    gone.objects = gone.objects.filter(o => !(o.kind === 'Job' && /-identity$/.test(o.metadata.name)));
+    save(f, gone);
+    success(f.run('resume', [`RUN=${run}`]));
+    for (const name of SERVICES) assert.equal(slotOf(f, name), 'main');
+    assert.equal(lock(f), undefined);
+  } finally { f.cleanup(); }
+});
