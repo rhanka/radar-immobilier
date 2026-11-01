@@ -70,6 +70,6 @@ Give every artifact author the official Sentropic starter and H5 reader contract
   - [x] Record follow-ups in the PR: server enforcement, guide tool/resource, framework runtimes, Elements, OpenAPI and ui://.
 - [ ] **Lot 5 — Pre-merge review corrections**
   - [x] B1/B2/B3: published audit command and exit policy, npm pins and CSS recipe provenance; regression assertions reproduced the old defects.
-  - [ ] T1: replace reviewed CSS literals with official tokens and recompute the approval CSP hash.
+  - [x] T1: replace reviewed CSS literals with official tokens and recompute the approval CSP hash; token existence and CSS-property regression tests pass.
   - [ ] Sol P1/P2: verify approval styles through nginx, application-only authorization calls and explicit grant renewal/recovery.
   - [ ] Run final targeted suites, typechecks and lint; push and write the French fix-round report.
