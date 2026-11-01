@@ -15,7 +15,8 @@ import { GRANT_SECRET, ISSUER, SESSION_SECRET } from "../../src/artifacts/reader
 import type { ObjectStore } from "../../src/storage/object-store.js";
 import { auth, type Harness } from "./artifacts-h2.helpers.js";
 
-export async function publishedBaskets(h: Harness, options: { native?: boolean; eol?: string } = {}) {
+export async function publishedBaskets(h: Harness, options: { native?: boolean; eol?: string;
+  files?: readonly { path: string; mimeType: string; text: string }[] } = {}) {
   const data = await workspaceFixture();
   const first = await workspaceSignal(data, "First basket signal");
   const second = await workspaceSignal(data, "Second basket signal");
@@ -60,6 +61,7 @@ export async function publishedBaskets(h: Harness, options: { native?: boolean; 
       { path: "theme.css", mimeType: "text/css", text: "body{color:rgb(17,34,51)}" },
       { path: "dynamic.js", mimeType: "text/javascript", text: 'document.body.dataset.dynamicReady="1";' });
   }
+  if (options.files) files.splice(0, files.length, ...options.files.map((file) => ({ ...file })));
   const published = await h.control.handle("publish", "author-alice", { artifactId, files, idempotencyKey: randomUUID() });
   expect(published.status).toBe(201);
   const releaseId = (published.body as { releaseId: string }).releaseId;
