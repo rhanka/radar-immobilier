@@ -62,6 +62,13 @@ export interface RefreshDocumentModels {
    * must stop extracting and say so.
    */
   fallbackQuotaExhausted(): boolean;
+  /**
+   * The FALLBACK has had no eligible route (`RoutePlanError` `no-route`: its
+   * account needs re-authorization or re-enrollment) for N documents in a row
+   * with no extraction succeeding in between. Unlike a dry seat this does not
+   * heal within a run, so a caller that sees it must stop extracting.
+   */
+  fallbackUnroutable(): boolean;
 }
 
 /** Consecutive documents refused on quota before a seat is declared exhausted. */
@@ -79,10 +86,18 @@ export function refreshFallbackReason(error: unknown): RefreshFallbackReason {
   return "transport";
 }
 
+/** True when the mesh found no eligible account at all, on the error or its cause chain. */
+export function isRefreshNoRoute(error: unknown): boolean {
+  const record = error && typeof error === "object" ? error as Record<string, unknown> : {};
+  if (record["code"] === "no-route") return true;
+  return record["cause"] ? isRefreshNoRoute(record["cause"]) : false;
+}
+
 /** One instance per cycle. A fallback sticks to its document after any model switch. */
 export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): RefreshDocumentModels {
   let consecutiveQuotaDocuments = 0;
   let consecutiveFallbackQuota = 0;
+  let consecutiveFallbackNoRoute = 0;
   if (!Number.isInteger(options.primaryQualityAttempts) || options.primaryQualityAttempts < 1) {
     throw new Error("Refresh primary quality attempts must be positive");
   }
@@ -154,6 +169,9 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
     },
     fallbackQuotaExhausted() {
       return consecutiveFallbackQuota >= REFRESH_QUOTA_THRESHOLD;
+    },
+    fallbackUnroutable() {
+      return consecutiveFallbackNoRoute >= REFRESH_QUOTA_THRESHOLD;
     },
     completeDocument(docSha) {
       const document = documents.get(docSha);
@@ -269,7 +287,7 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
             do {
               primary = await attempt(options.primary,
                 selected.primaryQualityCalls === 0 ? "primary" : "same-model-retry");
-              if (!primary.failed) return finish(primary);
+              if (!primary.failed) { consecutiveFallbackNoRoute = 0; return finish(primary); }
               if (!primary.qualityRefused || primary.terminalFailure) break;
               selected.primaryQualityCalls += 1;
             } while (selected.primaryQualityCalls < options.primaryQualityAttempts);
@@ -284,9 +302,11 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
           const fallback = await attempt(options.fallback, "fallback", selected.reason);
           if (fallback.failed) {
             consecutiveFallbackQuota = fallback.reason === "quota" ? consecutiveFallbackQuota + 1 : 0;
+            consecutiveFallbackNoRoute = isRefreshNoRoute(fallback.failure) ? consecutiveFallbackNoRoute + 1 : 0;
             throw fallback.failure;
           }
           consecutiveFallbackQuota = 0;
+          consecutiveFallbackNoRoute = 0;
           return finish(fallback);
         },
       };
