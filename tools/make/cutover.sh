@@ -43,6 +43,15 @@ cleanup() {
     if jq -e '.kind=="writer"' "$WORK/record.json" >/dev/null; then
       printf 'Writer lock retained; resume after the workflow and its Jobs terminate\n' >&2
     elif jq -e '.checkpoints.close!=null' "$WORK/record.json" >/dev/null; then
+      # A daily restore reopens on the verified live database (the atomic restore
+      # either committed or left it intact); a refusal falls through and stays closed.
+      if [[ ${REOPEN_ATTEMPTED:-0} != 1 ]] && jq -e '.mode=="restore" and .kind=="cutover"' "$WORK/record.json" >/dev/null; then
+        # errexit stays effective inside the subshell only outside a tested context.
+        local reopened
+        set +e; (set -e; MODE=restore; restore_reopen); reopened=$?; set -e
+        if ((reopened == 0)); then rm -rf "$WORK"; exit "$code"; fi
+        printf 'Automatic reopening refused; daily restore remains closed for recovery\n' >&2
+      fi
       # Any failure after reopening began must reclose schedules and every route.
       (set -e; stop_schedules) || printf 'Schedule state unknown; recovery lock retained\n' >&2
       (set -e; reclose_best_effort) || printf 'Route state unknown; recovery lock retained\n' >&2
@@ -98,7 +107,29 @@ case ${1:-} in
     jq -e '.probe and (.probeTruncated|not)' "$WORK/verdict.json" > /dev/null || fail 'Probe ranges unreadable or truncated'
     jq .probe "$WORK/verdict.json" > "${OUTPUT:-.bascule-work}/probe-ranges.json"
     lock_delete;;
-  rollback) rbac_preflight; require_slots; rollback_command;;
+  rollback)
+    rbac_preflight
+    # A closed daily restore is reopened on the verified live database; any other
+    # rollback is the blue/green one (slot=main before promotion, rebuilt after).
+    "${k[@]}" get configmap radar-change-lock --ignore-not-found -o json > "$WORK/lock.json"
+    if [[ -s $WORK/lock.json ]] && jq -e '(.data.record|fromjson).mode=="restore"' "$WORK/lock.json" >/dev/null; then
+      lock_resume
+      MODE=restore; RECOVERING=1; REOPEN_ATTEMPTED=1; restore_reopen
+    else require_slots; rollback_command; fi;;
+  recover)
+    # Runs in the same workflow after the restore job ended (runner lost, cancelled
+    # or failed): only this run's daily restore lock is taken over and reopened.
+    [[ $ENV == preprod && ${GITHUB_ACTIONS:-} == true && ${GITHUB_RUN_ID:-} =~ ^[0-9]+$ ]] || fail 'Recovery runs from the daily restore workflow'
+    "${k[@]}" get configmap radar-change-lock --ignore-not-found -o json > "$WORK/lock.json"
+    if [[ ! -s $WORK/lock.json ]]; then printf 'No active change operation\n'; exit; fi
+    record_read
+    if ! jq -e --arg repo "${GITHUB_REPOSITORY:-}" --arg run "$GITHUB_RUN_ID" '.kind=="cutover" and .mode=="restore"
+      and .executor.kind=="github" and .executor.repo==$repo and .executor.run==$run' "$WORK/record.json" >/dev/null; then
+      printf 'Change lock belongs to another operation; nothing to recover\n'; exit
+    fi
+    RUN=$(jq -r .run "$WORK/record.json")
+    lock_resume
+    MODE=restore; RECOVERING=1; REOPEN_ATTEMPTED=1; restore_reopen;;
   status)
     "${k[@]}" get configmap radar-change-lock --ignore-not-found -o json > "$WORK/lock.json"
     if [[ ! -s $WORK/lock.json ]]; then printf 'No active change operation\n'; exit; fi
@@ -158,6 +189,8 @@ case ${1:-} in
     MODE=$(jq -r '.mode//"run"' "$WORK/record.json")
     [[ $MODE != restore || $ENV == preprod ]] || fail 'Daily restore recovery is preprod-only'
     RECOVERING=1
+    # Forward resume serves the restored pin again: a reopening marker is cleared.
+    jq 'del(.restoreAborted)' "$WORK/record.json" > "$WORK/next.json"; mv "$WORK/next.json" "$WORK/record.json"
     if [[ $(jq -r .kind "$WORK/record.json") == writer ]]; then
       writer_release
     else

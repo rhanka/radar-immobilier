@@ -48,8 +48,11 @@ rules:
     resources: [horizontalpodautoscalers]
     verbs: [get, list]
   # Inventory refuses unsupported autoscalers/rollouts: it must be able to list them.
-  - apiGroups: [keda.sh, http.keda.sh]
-    resources: [scaledobjects, scaledjobs, httpscaledobjects]
+  - apiGroups: [keda.sh]
+    resources: [scaledobjects, scaledjobs]
+    verbs: [get, list]
+  - apiGroups: [http.keda.sh]
+    resources: [httpscaledobjects]
     verbs: [get, list]
   - apiGroups: [autoscaling.k8s.io]
     resources: [verticalpodautoscalers]

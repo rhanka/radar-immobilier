@@ -122,21 +122,29 @@ remember_consumers() {
 }
 verify_closed() {
   local row desired
+  # CLOSE_REASON names the last unmet closure condition for the deadline message.
+  CLOSE_REASON=consumers
   remember_consumers
   jq -e 'length==0' "$WORK/consumers.json" >/dev/null || return 1
+  CLOSE_REASON='refresh Jobs'
   [[ $(owned_refresh_jobs | jq length) == 0 ]] || return 1
+  CLOSE_REASON='Deployments not at zero'
   while read -r row; do
     "${k[@]}" get deployment "$(jq -r .name <<< "$row")" -o json |
       jq -e --arg uid "$(jq -r .uid <<< "$row")" '.metadata.uid==$uid and .spec.replicas==0 and (.status.replicas//0)==0' >/dev/null || return 1
   done < <(jq -c '.deployments[]' "$WORK/record.json")
+  CLOSE_REASON='Service endpoints'
   "${k[@]}" get endpoints -o json | jq -e 'all(.items[]|select(.metadata.name!="radar-postgres");
     all(.subsets[]?; ((.addresses//[])|length)==0 and ((.notReadyAddresses//[])|length)==0))' >/dev/null || return 1
+  CLOSE_REASON='Ingress maintenance spec'
   while read -r row; do
     desired=$(maintenance_spec <(jq .spec <<< "$row"))
     "${k[@]}" get ingress "$(jq -r .name <<< "$row")" -o json |
       jq -e --argjson spec "$desired" '.spec==$spec' >/dev/null || return 1
   done < <(jq -c '.ingresses[]' "$WORK/record.json")
+  CLOSE_REASON='public maintenance probe'
   maintenance_probe || return 1
+  CLOSE_REASON=
 }
 close_once() {
   local deadline row REQUEST_DEADLINE
@@ -155,7 +163,7 @@ close_once() {
   while :; do
     while read -r row; do delete_job_uid "$(jq -r .name <<< "$row")" "$(jq -r .uid <<< "$row")"; done < <(owned_refresh_jobs | jq -c '.[]')
     if verify_closed; then break; fi
-    (( SECONDS < deadline )) || fail 'Closure deadline exceeded; remain closed'
+    (( SECONDS < deadline )) || fail "Closure deadline exceeded (${CLOSE_REASON:-unknown}); remain closed"
     sleep 2
   done
   jq --arg at "$(date -u +%FT%TZ)" '.closedAt=$at' "$WORK/record.json" > "$WORK/next.json"

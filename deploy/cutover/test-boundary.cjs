@@ -36,7 +36,7 @@ const jobVerdict = (step, job) => step === 'tplseal' ? { ok: true, sizeBytes: 28
     writeStatsNonProbe: Object.fromEntries(['radar', 'radar_next'].map(db => [db, s.writeStatsNonProbe?.[db] ?? 0])) })
   : step === 'probeverify' ? { ok: true, probe: s.probeRanges || { radar: [], radar_next: [] } }
   : step.startsWith('logs') ? { ok: true, podUids: JSON.parse(envOf(job, 'LOG_PODS')).map(p => p.uid).slice(s.logsMissing ? 1 : 0) }
-  : ['database', 'identity', 'destination', 'clone', 'tplreset', 'discard'].includes(step)
+  : ['database', 'identity', 'destination', 'clone', 'tplreset', 'discard', 'verify'].includes(step)
   ? { ok: true, database: job.spec.template.spec.containers[0].env.find(e => e.name === 'POSTGRES_DB')?.value
     || Buffer.from(find('secret', 'radar-db-credentials').data.POSTGRES_DB, 'base64').toString(), migrations: 25 }
   : step === 'resolve' ? { ok: true, date: '2026-10-29', backupId: 'latest', ageHours: 1,
@@ -99,22 +99,31 @@ if (tool === 'kubectl' && !args.includes('--dry-run=client')) {
 if (tool === 'kubectl' && args.includes('--dry-run=client') && args[0] === 'create' && args[1] === 'job') {
   access('get', 'cronjobs', args.find(a => a.startsWith('--from=')).split('/')[1]);
 }
+// Served types: built-in kinds plus the CRDs a test installs (apiResources).
+const SERVED = ['pods', 'services', 'configmaps', 'secrets', 'endpoints', 'deployments.apps', 'replicasets.apps',
+  'statefulsets.apps', 'daemonsets.apps', 'horizontalpodautoscalers.autoscaling', 'jobs.batch', 'cronjobs.batch',
+  'ingresses.networking.k8s.io', 'networkpolicies.networking.k8s.io', 'persistentvolumeclaims', 'resourcequotas', ...(s.apiResources || [])];
 if (args[0] === 'auth' && args[1] === 'can-i') {
   const sub = args.find(a => a.startsWith('--subresource='))?.split('=')[1];
   const right = `${args[2]} ${args[3].split('/')[0]}${sub ? `/${sub}` : ''}`;
-  process.exit((s.deniedRights || []).includes(right) ? 1 : 0);
+  // Like the API server, can-i answers no for a type that is not served.
+  const served = SERVED.includes(args[3].split('/')[0]);
+  process.exit(served && !(s.deniedRights || []).includes(right) ? 0 : 1);
 }
-if (args[0] === 'api-resources') { out((s.apiResources || []).map(r => `${r}\n`).join('')); process.exit(); }
+if (args[0] === 'api-resources') { out(SERVED.map(r => `${r}\n`).join('')); process.exit(); }
 function crash(step, edge) {
   if (s.crash?.step === step && s.crash?.edge === edge) {
     s.crash = null; save(); process.kill(process.ppid, 'SIGKILL'); process.exit(99);
   }
 }
 if (tool === 'curl') {
-  const url = input.find(a => /^https?:\/\//.test(a)); const route = new URL(url).pathname;
+  const url = input.find(a => /^https?:\/\//.test(a));
+  // Like curl: a literal wildcard hostname is rejected before any request (exit 3).
+  if (/^https?:\/\/[^/]*\*/.test(url)) { process.stderr.write('curl: (3) URL rejected: Bad hostname\n'); process.exit(3); }
+  const route = new URL(url).pathname;
   const isClosed = s.objects.some(o => o.kind === 'Ingress' && JSON.stringify(o.spec).includes('base-maintenance-'));
   const maintenance = input[input.indexOf('-o') + 1] === '/dev/null';
-  if (maintenance) { out(isClosed ? '503' : '200'); process.exit(); }
+  if (maintenance) { out(isClosed && !s.maintenanceUnproven ? '503' : '200'); process.exit(); }
   const publicProbe = url.startsWith('https:');
   let code = 200, type = 'application/json', body = {}, headers = '';
   if (route === '/') { type = 'text/html'; body = '<html></html>'; }
@@ -257,7 +266,7 @@ if (args[0] === 'create' || args[0] === 'replace' || args[0] === 'apply') {
       watchdogSuspended: find('cronjob', 'radar-refresh-pending-watchdog')?.spec.suspend });
     // jobSeconds models real duration: the wrapper timeout (or deadline) kills a slower child.
     const limit = Number(o.spec.template.spec.containers[0].env?.find(e => e.name === 'CUTOVER_TIMEOUT')?.value ?? o.spec.activeDeadlineSeconds);
-    const failed = s.failJob === step || s.jobSeconds?.[step] > limit;
+    const failed = s.failJob === step || (s.failJobs || []).includes(step) || s.jobSeconds?.[step] > limit;
     o.status = s.hangJob === step ? { active: 1 } : { conditions: [{ type: failed ? 'Failed' : 'Complete', status: 'True' }], succeeded: failed ? 0 : 1 };
     persist(o);
     persist({ kind: 'Pod', metadata: { name: `${o.metadata.name}-pod`, labels: { 'job-name': o.metadata.name },
