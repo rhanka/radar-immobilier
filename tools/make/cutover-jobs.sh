@@ -13,7 +13,7 @@ job_pods_ended() {
   "${k[@]}" get pods -l "job-name=$1" -o json > "$WORK/job-consumers.json" || unknown_state "Job consumers unknown: $1"
   jq -e '.items|type=="array"' "$WORK/job-consumers.json" >/dev/null || unknown_state "Job consumers unknown: $1"
   jq -e --arg uid "$2" '
-    all(.items[]|select(any(.metadata.ownerReferences[]?;.kind=="Job" and ($uid=="null" or .uid==$uid)));
+    all(.items[]|select($uid=="null" or any(.metadata.ownerReferences[]?;.kind=="Job" and .uid==$uid));
       .status.phase=="Succeeded" or .status.phase=="Failed")' "$WORK/job-consumers.json" >/dev/null
 }
 job_observe() {
