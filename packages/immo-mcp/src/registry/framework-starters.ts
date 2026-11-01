@@ -1,4 +1,5 @@
 import { STARTER_INDEX_HTML } from "./starter-files.js";
+import { DESIGN_KIT_REACT_SNAPSHOT } from "@radar/artifacts-host";
 
 // The four framework shells reuse exactly the qualified DS markup and H5
 // client. Compile framework source ahead of publication; no runtime compiler,
@@ -13,7 +14,7 @@ export const FRAMEWORK_STARTERS = [
   },
   {
     framework: "React", templateId: "immo.baskets.react.v1",
-    package: "@sentropic/design-system-react", packageVersion: "0.36.46",
+    package: "@sentropic/design-system-react", packageVersion: "0.38.0", cssSnapshotVersion: DESIGN_KIT_REACT_SNAPSHOT,
     fastPath: "Compile this React 18 component with your existing build. Import shell.html as a string. " +
       "Use the native DS CSS fast path today. Full SentropicDS components require DS styles + ThemeProvider; " +
       "that runtime is deferred because its injected style violates the current CSP. Never write your own palette.",
@@ -28,7 +29,7 @@ export default function App() {
   },
   {
     framework: "Svelte", templateId: "immo.baskets.svelte.v1",
-    package: "@sentropic/design-system-svelte", packageVersion: "0.35.0",
+    package: "@sentropic/design-system-svelte", packageVersion: "0.36.0",
     fastPath: "Compile App.svelte with Vite/Svelte, extracting CSS. The native DS markup is the qualified fast path; " +
       "the inventoried Svelte DS binding exists but its complete runtime is a separate CSP qualification.",
     files: [file("shell.html", shell), file("App.svelte", `<script>
@@ -42,7 +43,7 @@ onMount(() => window.ImmoArtifact.mount(root));
   },
   {
     framework: "Vue", templateId: "immo.baskets.vue.v1",
-    package: "@sentropic/design-system-vue", packageVersion: "0.37.0",
+    package: "@sentropic/design-system-vue", packageVersion: "0.38.0",
     fastPath: "Compile this Vue 3 single-file component ahead of publication (no runtime template compiler). " +
       "Use the native DS CSS fast path; the inventoried Vue DS binding needs separate runtime CSP qualification.",
     files: [file("shell.html", shell), file("App.vue", `<script setup>
@@ -58,7 +59,7 @@ onBeforeUnmount(() => dispose?.());
   },
   {
     framework: "Angular", templateId: "immo.baskets.angular.v1",
-    package: "@sentropic/design-system-angular", packageVersion: "0.37.0",
+    package: "@sentropic/design-system-angular", packageVersion: "0.38.0",
     fastPath: "Compile the standalone component with Angular AOT (no JIT/eval). Its template embeds the same " +
       "shell.html markup. Use the native DS CSS fast path; the inventoried Angular binding " +
       "needs separate runtime CSP qualification. Check the compiled files fit the publication budget.",
@@ -75,8 +76,8 @@ export class AppComponent implements AfterViewInit, OnDestroy {
   },
 ].map((starter) => ({ ...starter,
   identity: { catalogId: "immo.artifact-templates", componentId: starter.templateId, contractVersion: "1.0" },
-  componentRefs: ["Button", "Input", "Select", "Card", "Tag"].map((componentId) => ({
-    catalogId: "@sentropic/design-system-react", componentId, contractVersion: "1.0",
+  componentRefs: ["Button", "Input", "Select", "Card", "Tag"].map((componentName) => ({
+    sourcePackage: "@sentropic/design-system-react", componentName, snapshotVersion: DESIGN_KIT_REACT_SNAPSHOT,
   })),
 }));
 
