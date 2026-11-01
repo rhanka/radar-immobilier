@@ -26,8 +26,8 @@ import {
 import { FRAMEWORK_STARTERS, FRAMEWORK_BUILD_RULE } from "./framework-starters.js";
 
 export const AUTHORING_GUIDE_ID = "immo-artifact-authoring" as const;
-export const AUTHORING_GUIDE_REVISION = "2026-11-01-r3" as const;
-export const STARTER_VERSION = "1.0.0" as const;
+export const AUTHORING_GUIDE_REVISION = "2026-11-01-r4" as const;
+export const STARTER_VERSION = "1.1.0" as const;
 
 /**
  * Imperative core embedded in the artifacts_ensure, artifacts_publish and
@@ -41,7 +41,7 @@ export const AUTHORING_GUIDE_SNIPPET =
   "the stable URL is preserved. Source retrieval, deletion, restoration and sharing are currently unavailable. " +
   "Apply the sent-tech theme and its tokens; never write your own palette. " +
   "For baskets use only the documented H5 reader bridge: /__reader/renew, " +
-  "baskets.context.v1, baskets.search.v1. Never invent /api/* endpoints.";
+  "workspaces.list.v1, baskets.context.v1, baskets.search.v1. Never invent /api/* endpoints.";
 
 function freeze<T extends object>(value: T): T {
   if (Array.isArray(value)) {
@@ -199,10 +199,13 @@ export function getAuthoringGuide(): AuthoringGuide {
           "When the session or rights are gone, stop and offer “Réouvrir la page” to /__reader/start. No retry loop and never render an error as an empty list.",
         ],
         operations: [
+          { name: "workspaces.list.v1", method: "GET", path: "/__reader/api/workspaces.list.v1",
+            params: "None. Unknown and duplicate parameters are rejected. Requires signals.protected-read, the same H5 grant and session as baskets.context.v1.",
+            response: "{ ok: true, workspaces: [{ id, slug, label, signals: { availability: { state: 'open' } | { state: 'closed' | 'unavailable', reason } } }] }. Only the approved reader's active memberships; no publisher authority or account details. Availability reuses baskets.context.v1 (not_activated, maintenance, not_configured, transport_closed, unresolved_history, dependency_unavailable, catalog_unavailable). Call first, fill a labelled select, preselect a sole workspace, otherwise require a choice. Manual UUID entry only when the list is empty; errors never mean an empty list." },
           { name: "baskets.context.v1", method: "GET",
             path: "/__reader/api/baskets.context.v1?workspaceId=<UUID>",
             params: "workspaceId (UUID, required).",
-            response: "{ ok: true, context: { workspaceId, signals, lots, reasonCatalog, … } }. Call first with an explicit workspaceId; a missing workspace is a configuration prompt, never an invented workspaces.list call." },
+            response: "{ ok: true, context: { workspaceId, signals, lots, reasonCatalog, … } }. Call after workspaces.list.v1 with the selected explicit workspaceId; recheck availability before searching." },
           { name: "baskets.search.v1", method: "GET",
             path: "/__reader/api/baskets.search.v1?workspaceId=<UUID>&citySlug=<slug>&basket=all&limit=20",
             params: "workspaceId (required UUID), citySlug (required lowercase slug), basket=all|none|pertinent|a_surveiller (default all), limit=1-100 (default 20), cursor (opaque), archive=exclude|include|only (default exclude), personalHistory=any|untouched|has_history (default any), dateBasis=document, sort=freshness_desc. Unknown or duplicate parameters are rejected.",
@@ -232,7 +235,7 @@ export function getAuthoringGuide(): AuthoringGuide {
       checklist: [
         "Page root carries data-st-theme=\"sent-tech\" and links the two pinned kit stylesheets (exact digest URLs).",
         "No author color: author CSS/JS reference only --st-* tokens and the documented st-* classes.",
-        "Zero calls to /api/*; baskets load through reader.js (context then search) with real data.",
+        "Zero calls to /api/*; reader.js discovers reader workspaces, then reads context and searches with the selected workspaceId.",
         "Grant is read from the URL once, removed from the URL, renewed, never stored or logged.",
         "Empty, unavailable, denied and expired-session states are visually distinct; expired access offers reopening.",
         "No inline <script> or <style> blocks: the release CSP stays hash-free and browser-clean.",

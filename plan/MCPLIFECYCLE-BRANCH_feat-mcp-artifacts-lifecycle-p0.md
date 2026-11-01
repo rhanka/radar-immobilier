@@ -59,3 +59,8 @@ with existing authorization and quotas, and annotate every active MCP tool.
   - [x] Run registry and HTTP tests (509 passed, 64 files), MCP typecheck and scoped lint.
   - [x] Remove the isolated compose stack and four volumes with down -v; absence verified.
   - [x] Push the branch, open English PR #978 and write the French conductor report at the owner-requested path.
+- [x] **Lot 4 — Merge main for PR #978**
+  - [x] Merge origin/main (PR #977) without rebasing; retain starter 1.1.0 and workspaces.list.v1.
+  - [x] Preserve annotations and editing guidance; use guide revision 2026-11-01-r4 and update contract assertions.
+  - [x] Run targeted MCP registry, composition, baseline and HTTP suites: 158 tests passed in 18 files; MCP lint passed.
+  - [x] Run isolated down -v, remove dependency directories and verify no containers, volumes or networks remain.

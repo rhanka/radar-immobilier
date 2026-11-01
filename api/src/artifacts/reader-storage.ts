@@ -47,7 +47,10 @@ export function createStoredReader(pool: pg.Pool, scope: string, contentBase: st
       const state = await pool.query(`SELECT
         (SELECT jsonb_agg(jsonb_build_array(principal_id, permission, xmin::text) ORDER BY principal_id)
          FROM artifacts.artifact_access WHERE artifact_id=$1 AND principal_id=$2) AS acl,
-        (SELECT jsonb_build_array(sub, status, xmin::text) FROM account_users WHERE sub=$2) AS account`,
+        (SELECT jsonb_build_array(sub, status, xmin::text) FROM account_users WHERE sub=$2) AS account,
+        (SELECT jsonb_agg(jsonb_build_array(m.workspace_id, m.status, m.xmin::text) ORDER BY m.workspace_id)
+         FROM workspace_memberships m JOIN account_users a ON a.id=m.account_id
+         WHERE a.sub=$2) AS memberships`,
       [id, readerSub ?? null]);
       return createHash("sha256").update(JSON.stringify([row, state.rows[0], BASKET_READER_PROFILE])).digest("hex");
     },
