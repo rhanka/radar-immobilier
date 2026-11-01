@@ -23,6 +23,7 @@ override STATS_SETTLE := $(value STATS_SETTLE)
 override REPLAY_SPECS := $(value REPLAY_SPECS)
 export ENV RELEASE RUN MODE BACKUP_ID CYCLE_ID OUTPUT BUILD_RUN SHA SIZE DRAIN OBSERVE DRILL SAMEDB PROBE LOCK_WAIT SHA256 STATS_SETTLE REPLAY_SPECS TEST_PATTERN
 export COMPOSE_DISABLE_ENV_FILE := 1
+export CUTOVER_TEST_IMAGE
 override COMPOSE := docker compose --env-file /dev/null -p radar-test-cutover -f $(CUTOVER_ROOT)/deploy/cutover/test.compose.yml
 .PHONY: help rehearse rehearse-check run prepare rollback recover status resume lock release-lock report-refs force-refresh pvc-expand pvc-verify slots-adopt slots-status stage probe-verify ack ack-probe ack-drift test lint typecheck test-api down ps commit syntax
 help:
