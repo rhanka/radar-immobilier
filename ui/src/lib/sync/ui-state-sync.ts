@@ -22,15 +22,16 @@ export function createUiStateSync(d: SyncDependencies) {
   let timer: ReturnType<typeof setTimeout> | undefined;
   let disposed = false;
   const invalidatedEpochs = new Set<string>();
-  function live() {
-    if (!session || disposed) return false;
+  function currentEpoch(owned: UiSession | null) {
+    if (!owned || disposed) return false;
     // Memory-only operation stays usable when storage is blocked. It cannot
     // adopt or expose persisted peers without a matching canonical epoch.
     if (!local.available) return false;
     const canonical = decodeSession(read(SESSION_KEY) ?? "");
-    return canonical !== null && !canonical.invalidated && !invalidatedEpochs.has(canonical.sessionEpoch) && canonical.partition === session.partition
-      && canonical.sessionEpoch === session.sessionEpoch;
+    return canonical !== null && !canonical.invalidated && !invalidatedEpochs.has(canonical.sessionEpoch) && canonical.partition === owned.partition
+      && canonical.sessionEpoch === owned.sessionEpoch;
   }
+  function live() { return currentEpoch(session); }
   function suspend() {
     generation++; clearTimeout(timer); peers.set([]);
     session = null;
@@ -43,8 +44,9 @@ export function createUiStateSync(d: SyncDependencies) {
   }
   function receive(key: string | null) {
     if (disposed) return;
-    if ((key === SESSION_KEY || key === null) && session && !live()) {
-      purgeEpoch(session.partition, session.sessionEpoch);
+    const owned = session ?? lastSession;
+    if ((key === SESSION_KEY || key === null) && owned && !currentEpoch(owned)) {
+      purgeEpoch(owned.partition, owned.sessionEpoch);
       suspend(); d.revalidate(true); return;
     }
     refresh();
@@ -165,6 +167,7 @@ export function createUiStateSync(d: SyncDependencies) {
       }
       invalidatedEpochs.clear();
     },
-    wake() { const changed = session !== null && !live(); suspend(); d.revalidate(changed); },
+    wake() { const owned = session ?? lastSession; const changed = owned !== null && !currentEpoch(owned);
+      suspend(); d.revalidate(changed); },
     dispose() { disposed = true; suspend(); } };
 }
