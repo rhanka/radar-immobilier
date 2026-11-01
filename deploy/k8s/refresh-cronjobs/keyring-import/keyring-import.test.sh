@@ -9,8 +9,10 @@
 #   - run-keyring-import ALWAYS cleans the Job, the Secret and the ConfigMap
 #     and the local render: Job success, Job failure, create refused (without
 #     echoing kubectl's stderr, which may quote the Secret), guard failure;
-#   - cleanup-keyring-import removes the local render FIRST, even when the
-#     guard or the API delete fails, and never follows a symlink.
+#   - cleanup-keyring-import removes the local render FIRST, then still deletes
+#     the Job, the Secret and the ConfigMap even when the guard fails or hangs
+#     (a hanging guard is bounded by the timeout and logged), and never follows
+#     a symlink.
 set -uo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -36,7 +38,9 @@ case " $* " in
     exec "$REAL_KUBECTL" "$@" ;;
   *" create secret generic "*"--dry-run=client"*) exec "$REAL_KUBECTL" "$@" ;;
   *" config view "*) echo "${MOCK_SERVER:-https://hlhedx.c1.bhs5.k8s.ovh.net}" ;;
-  *" get serviceaccount radar-app -o name "*) echo serviceaccount/radar-app ;;
+  *" get serviceaccount radar-app -o name "*)
+    if [ "${MOCK_GUARD:-}" = hang ]; then sleep 30; fi
+    echo serviceaccount/radar-app ;;
   *" apply "*) echo "client-side apply must not be used" >&2; exit 96 ;;
   *" create -f "*)
     [ "${MOCK_CREATE:-ok}" = ok ] || {
@@ -135,6 +139,12 @@ elapsed=$(( $(date +%s) - started ))
 [ "$elapsed" -lt 20 ] && grep -q "could not read the import Job" "$T/out" \
   && ok "hanging API read is bounded (${elapsed}s) and still cleaned up" || bad "hanging read not bounded (${elapsed}s)"
 
+started=$(date +%s)
+MOCK_JOB_STATE="/" MOCK_GUARD=hang IMPORT_REQUEST_SECONDS=1 run_case "initial guard hanging" 1
+elapsed=$(( $(date +%s) - started ))
+[ "$elapsed" -lt 20 ] \
+  && ok "hanging initial guard is bounded (${elapsed}s) and still cleaned up" || bad "hanging initial guard not bounded (${elapsed}s)"
+
 cleanup_case() { # $1 = label, env: MOCK_DELETE, MOCK_SERVER
   local file; file="$(private_dir)/r.yaml"; echo "kind: Secret" >"$file"; : >"$CALLS"
   if make -s -f "$MK" cleanup-keyring-import KUBECONFIG="$T/kubeconfig" IMPORT_RENDER_OUT="$file" ENV=preprod >"$T/out" 2>&1; then
@@ -142,6 +152,17 @@ cleanup_case() { # $1 = label, env: MOCK_DELETE, MOCK_SERVER
 }
 MOCK_DELETE=fail cleanup_case "cleanup with API delete failing"
 MOCK_SERVER=https://elsewhere.example cleanup_case "cleanup with guard failing"
+
+# --- cleanup with a hanging guard -------------------------------------------
+hang_dir="$(private_dir)"; hang_file="$hang_dir/r.yaml"; echo "kind: Secret" >"$hang_file"; : >"$CALLS"
+started=$(date +%s)
+MOCK_GUARD=hang make -s -f "$MK" cleanup-keyring-import KUBECONFIG="$T/kubeconfig" IMPORT_RENDER_OUT="$hang_file" IMPORT_REQUEST_SECONDS=1 ENV=preprod >"$T/out" 2>&1
+hang_status=$?
+elapsed=$(( $(date +%s) - started ))
+if [ ! -e "$hang_file" ] && grep -q " delete job/radar-refresh-keyring-account-import" "$CALLS" \
+  && grep -q "cleanup guard failed or timed out" "$T/out" && [ "$elapsed" -lt 20 ]; then
+  ok "hanging guard: cleanup still deletes the render and the objects within the timeout (${elapsed}s)"
+else bad "hanging guard: cleanup blocked or silent (exit $hang_status, ${elapsed}s)"; fi
 
 kept="$T/victim/kept.yaml"; echo kept >"$kept"; ln -s "$kept" "$(private_dir)/link.yaml"
 link="$(ls -d "$T"/render.*/link.yaml)"

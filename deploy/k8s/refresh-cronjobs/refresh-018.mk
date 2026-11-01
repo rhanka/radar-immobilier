@@ -23,7 +23,7 @@ guard-preprod:
 	@test -n "$(KUBECONFIG)" -a -f "$(KUBECONFIG)" || { echo "KUBECONFIG file is required" >&2; exit 1; }
 	@server="$$(kubectl --kubeconfig "$(KUBECONFIG)" config view --minify -o jsonpath='{.clusters[0].cluster.server}')"; \
 	  case "$$server" in "$(EXPECTED_SERVER)"|"$(EXPECTED_SERVER)":*) ;; *) echo "refusing unexpected API server" >&2; exit 1;; esac
-	@$(K) get serviceaccount radar-app -o name >/dev/null
+	@timeout $$(( $(IMPORT_REQUEST_SECONDS) * 3 )) $(K) --request-timeout=$(IMPORT_REQUEST_SECONDS)s get serviceaccount radar-app -o name >/dev/null
 
 .PHONY: inspect-preprod
 inspect-preprod: guard-preprod
@@ -138,10 +138,10 @@ IMPORT_SHRED_LOCAL = if [ -n "$(IMPORT_RENDER_OUT)" ]; then \
 run-keyring-import:
 	@set -uo pipefail; status=1; \
 	  cleanup() { $(MAKE) -s -f "$(lastword $(MAKEFILE_LIST))" cleanup-keyring-import \
-	    KUBECONFIG="$(KUBECONFIG)" IMPORT_RENDER_OUT="$(IMPORT_RENDER_OUT)" ENV=$(ENV) \
+	    KUBECONFIG="$(KUBECONFIG)" IMPORT_RENDER_OUT="$(IMPORT_RENDER_OUT)" IMPORT_REQUEST_SECONDS=$(IMPORT_REQUEST_SECONDS) ENV=$(ENV) \
 	    || { echo "keyring import cleanup FAILED: rerun cleanup-keyring-import" >&2; exit 1; }; }; \
 	  trap cleanup EXIT; trap 'exit 130' INT TERM; \
-	  $(MAKE) -s -f "$(lastword $(MAKEFILE_LIST))" guard-preprod KUBECONFIG="$(KUBECONFIG)" ENV=$(ENV) || exit 1; \
+	  $(MAKE) -s -f "$(lastword $(MAKEFILE_LIST))" guard-preprod KUBECONFIG="$(KUBECONFIG)" IMPORT_REQUEST_SECONDS=$(IMPORT_REQUEST_SECONDS) ENV=$(ENV) || exit 1; \
 	  test "$(PREPROD_CONFIRM)" = "1" || { echo "PREPROD_CONFIRM=1 is required" >&2; exit 1; }; \
 	  { [ ! -L "$(IMPORT_RENDER_OUT)" ] && [ -f "$(IMPORT_RENDER_OUT)" ]; } \
 	    || { echo "IMPORT_RENDER_OUT must be the regular render file" >&2; exit 1; }; \
@@ -163,14 +163,20 @@ run-keyring-import:
 	  exit $$status
 
 # Idempotent. The LOCAL render goes first and unconditionally (a guard or API
-# failure must never leave the key on disk), then the Job, its Secret (owner
-# keyring) and its script ConfigMap. Safe to rerun after any failure; the Job
-# TTL alone would leave the Secret and ConfigMap behind.
+# failure must never leave the key on disk), then the guard runs only as a
+# bounded, non-blocking identity check whose result is logged, and finally the
+# Job, its Secret (owner keyring) and its script ConfigMap are deleted even
+# when that guard failed or timed out. Safe to rerun after any failure; the
+# Job TTL alone would leave the Secret and ConfigMap behind.
 .PHONY: cleanup-keyring-import
 cleanup-keyring-import:
 	@$(IMPORT_SHRED_LOCAL)
-	@$(MAKE) -s -f "$(lastword $(MAKEFILE_LIST))" guard-preprod KUBECONFIG="$(KUBECONFIG)" ENV=$(ENV)
-	@$(IMPORT_K) delete $(IMPORT_OBJECTS) --ignore-not-found --wait=true
+	@set -u; guard_ok=1; \
+	  $(MAKE) -s -f "$(lastword $(MAKEFILE_LIST))" guard-preprod KUBECONFIG="$(KUBECONFIG)" IMPORT_REQUEST_SECONDS=$(IMPORT_REQUEST_SECONDS) ENV=$(ENV) \
+	    && echo "cleanup guard: preprod identity confirmed" \
+	    || { guard_ok=0; echo "cleanup guard failed or timed out: continuing with deletion" >&2; }; \
+	  $(IMPORT_K) delete $(IMPORT_OBJECTS) --ignore-not-found --wait=true; del=$$?; \
+	  [ "$$guard_ok" -eq 1 ] && [ "$$del" -eq 0 ]
 
 .PHONY: test-keyring-import
 test-keyring-import: ## Hermetic tests of the keyring account import (no cluster)
