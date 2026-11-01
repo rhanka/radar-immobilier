@@ -50,6 +50,8 @@ Let a published page discover the verified reader's active workspaces and select
   - [x] Add unit proofs for the discovery contract, isolation, typed failures and H5 grant renewal.
   - [x] Add explicit H5 refusal and authorization-race coverage.
   - [x] Add PostgreSQL coverage for active memberships, availability and account/ACL revocation.
+  - [x] Reproduce cross-workspace membership revocation during discovery and include all reader memberships in the final H5 freshness check.
+  - [x] Validate the P1 fix with 76 reader unit/integration tests, API typecheck and scoped ESLint; PostgreSQL regression fails before the fix and passes after it.
 - [x] **Lot 2 — Authoring starter and guide**
   - [x] Populate a labelled workspace selector; preselect a sole workspace, use manual entry only for an empty list.
   - [x] Document the discovery operation and bump the guide revision to r3 (starter 1.1.0).
