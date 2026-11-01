@@ -2,8 +2,9 @@
 # the radar-immo-mcp Deployment through envFrom; base:
 # deploy/k8s/40-immo-mcp-http-deploy.yaml, which carries the PROD values).
 # Strategic-merge patch: only the keys that name an environment are changed;
-# every other key (scopes, data mode, port, api wiring) is inherited from the
-# base so preprod and prod stay aligned by construction (GH #835).
+# every other key (data mode, port, api wiring) is inherited from the base so
+# preprod and prod stay aligned by construction (GH #835). Exception: the
+# artifact scopes below, because the artifact tools are active in preprod only.
 #
 # - IMMO_MCP_OAUTH_RESOURCE: the canonical resource = token audience, advertised
 #   in the RFC 9728 PRM at <resource>/.well-known/oauth-protected-resource and in
@@ -15,6 +16,16 @@
 #   search_signals exchanges the human bearer for a delegated API token.
 #   Both hops use the preprod issuer, with distinct MCP and API audiences.
 # - RADAR_PUBLIC_BASE_URL: base of the URLs the MCP hands back (get_pv_pdf).
+# - IMMO_MCP_OAUTH_SCOPES_SUPPORTED: the base list plus the explicit artifact
+#   scopes immo:artifacts:read (artifacts_list, artifacts_get) and
+#   immo:artifacts:write (artifacts_ensure, artifacts_publish). Advertised in the
+#   PRM, so clients request them at consent. PRECONDITION: the preprod IdP
+#   catalogue and the immo-mcp client must know both scopes before this value
+#   rolls out, otherwise an authorization request carrying them can be refused.
+# - IMMO_MCP_ARTIFACTS_LEGACY_READ_SCOPE: transition flag. "true" lets immo:read
+#   still satisfy the READ artifact tools for clients consented before the
+#   explicit scopes existed; writes always require immo:artifacts:write. Remove
+#   (or set "false") once connected clients have re-consented.
 #
 # Guarded by deploy/ci/check-preprod-auth-isolation.sh (CI + reconcile), which
 # also requires the MCP issuer to equal the radar-api issuer.
@@ -30,6 +41,8 @@ data:
   IMMO_MCP_EXCHANGE_TOKEN_ENDPOINT: "https://preprod.auth.sent-tech.ca/api/v1/auth/oauth/token"
   IMMO_MCP_EXCHANGE_ENV: "preprod"
   # Must match radar-api: one physical namespace shared by all approved users.
+  IMMO_MCP_OAUTH_SCOPES_SUPPORTED: "immo:read immo:search immo:documents:read immo:artifacts:read immo:artifacts:write"
+  IMMO_MCP_ARTIFACTS_LEGACY_READ_SCOPE: "true"
   ARTIFACTS_CONTROL_MODE: "general"
   ARTIFACTS_STORAGE_SCOPE: "radar-immobilier-preprod"
   ARTIFACTS_ORG_ID: "radar-immobilier-preprod"

@@ -32,6 +32,7 @@ pour vous authentifier et accorder les autorisations en lecture.
 | **Secret client OAuth** | *(laisser **vide** — client public + PKCE)* |
 | Fournisseur d'identité (OAuth) | `https://auth.sent-tech.ca` |
 | Scopes accordés à la connexion | `immo:read`, `immo:search`, `immo:documents:read` |
+| Scopes artefacts (**préproduction** uniquement) | `immo:artifacts:read`, `immo:artifacts:write` — voir [section 9.4](#94-artefacts-préproduction-uniquement) |
 
 > Le **secret client doit rester vide** : le serveur est un client OAuth **public**
 > qui utilise PKCE. Renseigner un secret ferait échouer la connexion.
@@ -80,6 +81,10 @@ d'autorisation OAuth sur **`auth.sent-tech.ca`** :
   automatiquement (SSO) et la fenêtre se referme ;
 - sinon, connectez-vous avec votre compte sentropic, puis **acceptez** les
   autorisations demandées (scopes `immo:read`, `immo:search`, `immo:documents:read`).
+  Sur la **préproduction** (`https://preprod.immo.sent-tech.ca/mcp`), l'écran de
+  consentement demande aussi `immo:artifacts:read` et `immo:artifacts:write` :
+  **acceptez-les** pour pouvoir lister, lire, créer et publier des artefacts
+  (section 9.4).
 
 À la fin, claude.ai revient sur la page des connecteurs avec l'état **succès**.
 
@@ -157,6 +162,30 @@ ne jamais inonder la conversation :
 | **Get zones GeoJSON** | `get_zones_geojson` | Zones de zonage d'une ville (code de zone, `kind`, grille PDF et propriétés sources). | `city` *(requis)*, `bbox`, `limit`. | `immo:read` |
 | **Get lots GeoJSON** | `get_lots_geojson` | Lots cadastraux d'une ville, **enrichis côté serveur** : zone jointe (`zone.code/kind/densiteLogHa/usages/grillePdfUrl`), `zoneCode`, `multifamilial4plus` (+ `multifamilial4plusSource: grille｜heuristique`), `superficieM2`, `tod`/`priorite` quand la source les porte. | `city` *(requis)*, `bbox`, `limit`, **`only4Plus`** (ne garder que les lots `multifamilial4plus === true`), **`superficieMinM2`** (superficie minimale en m²). Les filtres s'appliquent sur la page récupérée. | `immo:read` |
 
+### 9.4 Artefacts (préproduction uniquement)
+
+Sur la préproduction, le connecteur expose aussi quatre outils d'**artefacts**
+(pages HTML/CSS/JS publiées). Ce sont les seuls outils qui **écrivent** : chacun
+exige un scope **explicite**, distinct des scopes de données.
+
+| Identifiant | Rôle | Scope requis |
+|---|---|---|
+| `artifacts_list` | Liste vos artefacts. | `immo:artifacts:read` |
+| `artifacts_get` | Métadonnées d'un artefact. | `immo:artifacts:read` |
+| `artifacts_ensure` | Crée (ou retrouve) un artefact par nom. | `immo:artifacts:write` |
+| `artifacts_publish` | Publie une nouvelle version d'un artefact. | `immo:artifacts:write` |
+
+- `immo:read` **ne suffit jamais** pour créer ou publier : sans
+  `immo:artifacts:write`, l'appel est refusé avec l'erreur typée
+  `artifact_scope_denied` (le champ `requiredScope` indique le scope manquant),
+  sans aucun effet côté serveur.
+- **Transition** : les connecteurs autorisés avant l'arrivée de ces scopes ne
+  détiennent que `immo:read`. Tant que le drapeau serveur
+  `IMMO_MCP_ARTIFACTS_LEGACY_READ_SCOPE=true` est actif (préproduction), `immo:read`
+  suffit encore pour `artifacts_list` et `artifacts_get`, jamais pour l'écriture.
+  Le drapeau sera retiré une fois les connecteurs ré-autorisés : **reconnectez-vous**
+  pour accepter les deux scopes artefacts.
+
 ---
 
 ## 10. Cas d'usage illustré
@@ -213,6 +242,12 @@ Quelques autres questions typiques :
   défaut** dans chaque conversation, cf. section 8).
 - **Un popup a été bloqué à l'ajout** — cliquez ensuite sur **Connecter** dans le
   détail du connecteur pour relancer l'autorisation.
+- **`artifact_scope_denied` sur un outil d'artefact** (préproduction) — le jeton
+  ne porte pas le scope indiqué par `requiredScope` (`immo:artifacts:write` pour
+  créer/publier, `immo:artifacts:read` pour lister/lire). Cliquer **Déconnecter**
+  puis **Connecter** dans le détail du connecteur et **accepter** les scopes
+  artefacts. Si l'écran de consentement ne les propose pas, prévenir l'équipe :
+  le fournisseur d'identité doit d'abord les connaître.
 - **Réponse GeoJSON tronquée** (`truncated=true`) ou « réponse trop grande » —
   demandez à Claude de **resserrer le bbox** ou de **réduire `limit`** (voir les
   bornes en section 9.3).

@@ -7,7 +7,7 @@ import { ALL_TOOL_DEFINITIONS } from "../tool-definitions.js";
 import { getInvocationContext } from "../invocation-context.js";
 import { invokeTool } from "../tools.js";
 import { AccountBindingUnavailable } from "../account-binding.js";
-import { assertArtifactBinding, ARTIFACT_NATIVE_ADAPTER, type ArtifactMcpBinding } from "./artifact-provider.js";
+import { artifactScopeDenied, assertArtifactBinding, type ArtifactMcpBinding } from "./artifact-provider.js";
 
 // GeoJSON may contain 2,000 features; budgets must not impose a smaller semantic limit.
 export const IMMO_WIRE_LIMITS = Object.freeze({
@@ -63,7 +63,7 @@ export async function composeStatefulImmo(
   if (artifacts) {
     const artifactManifest = artifacts.manifest;
     registry.register({
-      manifest: artifactManifest, requiredPorts: [], adapter: ARTIFACT_NATIVE_ADAPTER,
+      manifest: artifactManifest, requiredPorts: [], adapter: artifacts.adapter,
       parameterSchema: { properties: { storageScopeId: { type: "string" } }, required: ["storageScopeId"] },
       provenance: { approvalRef: "H4-P7-v3", revision: "1",
         manifestDigest: computeManifestDigest(artifactManifest), reviewedBy: ["owner"] },
@@ -98,6 +98,13 @@ export async function composeStatefulImmo(
       return invokeTool(tool, args, snapshot);
     },
     formatRefusal(tool, refusal, context) {
+      // Artifact tools share one typed scope refusal with the binding check.
+      if (refusal.kind === "scope" && artifacts?.tools.some((entry) => entry.name === tool)) {
+        const denied = artifactScopeDenied(tool);
+        const text = JSON.parse((denied.content[0] as { text: string }).text) as Record<string, unknown>;
+        return { ...denied, content: [{ type: "text", text: JSON.stringify({ ...text, tool,
+          correlationId: context.correlationId }, null, 2) }] };
+      }
       const retriable = refusal.kind === "account" && unavailableAccounts.delete(context);
       const error = retriable ? "account_binding_unavailable"
         : refusal.kind === "scope" ? `scope_denied:${refusal.missingScopes.join(",")}` : `composition_${refusal.kind}`;
