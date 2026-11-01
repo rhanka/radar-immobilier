@@ -49,6 +49,9 @@ jobs:
       - name: Validate refresh render guards (mutation tests — stagger, pending watchdog)
         run: bash deploy/k8s/refresh-cronjobs/verify-renders.test.sh
 
+      - name: Validate keyring account import (hermetic selftest, codex and cloud-code)
+        run: make -f deploy/k8s/refresh-cronjobs/refresh-018.mk test-keyring-import ENV=ci
+
       - name: Validate object-storage contracts (offline)
         run: bash deploy/ci/check-object-storage-bindings.test.sh
 
