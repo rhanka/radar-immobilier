@@ -13,7 +13,6 @@ export function createUiStateSync(d: SyncDependencies) {
   const peers = writable<UiContext[]>([]);
   let session: UiSession | null = null;
   let sub: string | null = null;
-  let blockedSub: string | null = null;
   let generation = 0;
   let revision = 0;
   const local = contextStorage(d.storage, d.notify);
@@ -29,16 +28,15 @@ export function createUiStateSync(d: SyncDependencies) {
     return canonical !== null && !canonical.invalidated && canonical.partition === session.partition
       && canonical.sessionEpoch === session.sessionEpoch;
   }
-  function suspend(block = false) {
+  function suspend() {
     generation++; clearTimeout(timer); peers.set([]);
-    if (block) blockedSub = sub;
     session = null;
   }
   function receive(key: string | null) {
     if (disposed) return;
     if ((key === SESSION_KEY || key === null) && session && !live()) {
       purge(session.partition);
-      suspend(true); d.revalidate(); return;
+      suspend(); d.revalidate(true); return;
     }
     refresh();
   }
@@ -58,7 +56,6 @@ export function createUiStateSync(d: SyncDependencies) {
       if (session) invalidate(); else suspend();
       sub = null; return;
     }
-    if (next === blockedSub) return;
     if (session && previous !== next) invalidate();
     suspend(); sub = next;
     const operation = generation;
@@ -69,7 +66,7 @@ export function createUiStateSync(d: SyncDependencies) {
     if (operation !== generation || disposed) return;
     const raw = read(SESSION_KEY);
     const current = raw === null ? null : decodeSession(raw);
-    if (raw !== baseline && current?.partition !== partition) { suspend(true); d.revalidate(); return; }
+    if (raw !== baseline && current?.partition !== partition) { suspend(); d.revalidate(true); return; }
     if (raw !== null && !current) return; // Unknown bytes are preserved.
     if (current?.partition === partition && current.invalidated) return;
     if (current && current.partition !== partition) {
@@ -84,7 +81,7 @@ export function createUiStateSync(d: SyncDependencies) {
   }
   function invalidate() {
     const old = session;
-    suspend(true);
+    suspend();
     if (!old) return;
     // Epoch first, then purge; no publication can race from this page.
     write(SESSION_KEY, JSON.stringify({ ...old, sessionEpoch: uuid(), invalidated: true }));
@@ -135,8 +132,7 @@ export function createUiStateSync(d: SyncDependencies) {
       if (current?.invalidated) {
         if (local.remove(SESSION_KEY)) d.notify?.(SESSION_KEY);
       }
-      blockedSub = null;
     },
-    wake() { suspend(); d.revalidate(); },
+    wake() { const changed = session !== null && !live(); suspend(); d.revalidate(changed); },
     dispose() { disposed = true; suspend(); } };
 }

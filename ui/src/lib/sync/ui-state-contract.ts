@@ -36,7 +36,7 @@ export interface SyncDependencies {
   storage: Storage | null;
   origin: string;
   snapshot(): { workspaceId: string; payload: ContextPayload } | null;
-  revalidate(): void;
+  revalidate(invalidated?: boolean): void;
   validateWorkspace(workspaceId: string, sub: string): Promise<boolean>;
   apply(workspaceId: string, payload: ContextPayload): void;
   notify?(key: string): void;

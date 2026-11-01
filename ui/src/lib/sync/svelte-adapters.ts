@@ -30,8 +30,8 @@ export function mountUiStateSync() {
       const target = route ? geographicTarget(route) : { kind: "page" as const, view: get(activeRouteView) };
       return target ? { workspaceId, payload: projectContext(target, route?.state ?? get(activePageState)) } : null;
     },
-    revalidate() {
-      authStore.invalidateSession(true); workspaceContext.reset();
+    revalidate(invalidated) {
+      if (invalidated) { authStore.invalidateSession(true); workspaceContext.reset(); }
       void authStore.checkSession(() => {
         try { return !decodeSession(storage?.getItem(SESSION_KEY) ?? "")?.invalidated; }
         catch { return true; }
@@ -54,7 +54,8 @@ export function mountUiStateSync() {
     activeRouteView.subscribe(() => sync.schedule()), workspaceContext.subscribe(() => sync.schedule()),
     authStore.subscribe((auth) => {
       if (!auth.loading) void sync.account(auth.authenticated && !auth.authDisabled
-        && auth.user?.status === "approved" ? auth.user.sub : null);
+        && auth.user?.status === "approved" && typeof auth.user.sub === "string"
+        && auth.user.sub.length > 0 ? auth.user.sub : null);
     })];
   const wake = () => { if (document.visibilityState !== "hidden") sync.wake(); };
   document.addEventListener("visibilitychange", wake);

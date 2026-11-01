@@ -29,6 +29,20 @@ describe("auth-store — sondage /me non-caché", () => {
     expect(get(authStore)).toMatchObject({ authenticated: false, user: null });
   });
 
+  it("should revalidate once when another account changes the epoch during an auth read", async () => {
+    let finish!: (value: unknown) => void;
+    const fetchMock = vi.fn().mockImplementationOnce(() => new Promise((resolve) => { finish = resolve; }))
+      .mockResolvedValue({ json: async () => ({ authenticated: true, user: { sub: "new-account" } }) });
+    vi.stubGlobal("fetch", fetchMock);
+    const request = authStore.checkSession();
+    localStorage.setItem("immo.ui.session.v1", JSON.stringify({ schema: "immo.ui.session", schemaVersion: "1.0.0",
+      partition: "a".repeat(64), sessionEpoch: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", invalidated: false }));
+    finish({ json: async () => ({ authenticated: true, user: { sub: "old-account" } }) });
+    await request;
+    expect(fetchMock).toHaveBeenCalledTimes(2); expect(get(authStore).user?.sub).toBe("new-account");
+    localStorage.removeItem("immo.ui.session.v1");
+  });
+
   it("appelle /api/v1/auth/me avec cache:'no-store'", async () => {
     const fetchMock = vi
       .fn()

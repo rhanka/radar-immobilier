@@ -19,6 +19,21 @@ function publishPeer(storage: Storage, changes: Partial<UiContext> = {}) {
   storage.setItem(contextKey(value), JSON.stringify(value)); return value;
 }
 describe("per-tab contexts and session continuity", () => {
+  it("should pause publications on wake without invalidating an unchanged visible session", async () => {
+    const { sync, revalidate } = setup(); await sync.account("subject");
+    sync.wake(); expect(revalidate).toHaveBeenCalledWith(false);
+  });
+  it("should refuse a pending partition calculation when another account changes the epoch", async () => {
+    let finish!: (value: string) => void;
+    const { sync, storage, revalidate } = setup(memoryStorage(), {
+      partition: () => new Promise((resolve) => { finish = resolve; }),
+    });
+    const pending = sync.account("old-account");
+    const raw = JSON.stringify({ schema: "immo.ui.session", schemaVersion: "1.0.0",
+      partition: "b".repeat(64), sessionEpoch: uuid(), invalidated: false });
+    storage.setItem(SESSION_KEY, raw); finish(partition); await pending;
+    sync.flush(); expect(storage.getItem(SESSION_KEY)).toBe(raw); expect(revalidate).toHaveBeenCalledOnce();
+  });
   it("should keep an epoch across page mounts and publish coherent own records after debounce", async () => {
     vi.useFakeTimers(); const storage = memoryStorage();
     const { sync: a } = setup(storage); const { sync: b } = setup(storage);

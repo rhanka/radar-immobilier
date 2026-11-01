@@ -1,4 +1,10 @@
 import { writable } from "svelte/store";
+import { SESSION_KEY } from "../sync/ui-state-contract.js";
+import { decodeSession } from "../sync/ui-state-codecs.js";
+
+function sessionMarker(): string | null {
+  try { return globalThis.localStorage?.getItem(SESSION_KEY) ?? null; } catch { return null; }
+}
 
 export type AccountStatus = "pending" | "approved" | "rejected";
 
@@ -103,8 +109,9 @@ function createAuthStore() {
     set({ loading, authenticated: false, authDisabled: false, loginBlocked: false, user: null });
   }
 
-  async function checkSession(accept: () => boolean = () => true): Promise<void> {
+  async function checkSession(accept: () => boolean = () => true, retried = false): Promise<void> {
     const operation = ++generation;
+    const marker = sessionMarker();
     try {
       // `cache: "no-store"` est CRITIQUE : sans lui, le navigateur (cache HTTP
       // ou bfcache) peut resservir une ancienne réponse `/me` et ré-afficher le
@@ -113,7 +120,11 @@ function createAuthStore() {
       const res = await fetch("/api/v1/auth/me", { cache: "no-store" });
       const data = await res.json();
       if (operation !== generation) return;
-      if (!accept()) { invalidateSession(); return; }
+      if (sessionMarker() !== marker) {
+        if (!retried) return checkSession(accept, true);
+        invalidateSession(); return;
+      }
+      if (!accept() || decodeSession(marker ?? "")?.invalidated) { invalidateSession(); return; }
       const authenticated = data.authenticated === true;
       const authDisabled = data.authDisabled === true;
 
