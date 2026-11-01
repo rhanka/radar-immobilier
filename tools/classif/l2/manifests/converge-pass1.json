@@ -1,0 +1,28 @@
+{
+ "pass": 1,
+ "createdAt": "2026-11-01T04:12:59.822Z",
+ "metrics": {
+  "items": 504,
+  "alphaVerdict": 0.7730908225694153,
+  "alphaCode": 0.7543742031449214,
+  "verdictUnanimity": 0.8472222222222222,
+  "verdictConverged": 1,
+  "codeUnanimity": 0.7142857142857143,
+  "codeConverged": 0.9642857142857143,
+  "nonConvergedCode": 18,
+  "nonConvergedVerdict": 0,
+  "executionFailures": 0,
+  "ambiguous33": 101,
+  "missingInfoFlagged": 48,
+  "changedShare": null
+ },
+ "stop": {
+  "stop": true,
+  "why": "α verdict 0.773 and α code 0.754 ≥ 0.67, verdict unanimity 84.7 % ≥ 75 %"
+ },
+ "reannotatedThisPass": {
+  "muse-wonder-max": 504,
+  "gemini-4-argon-high": 504,
+  "opus-5.5-max": 504
+ }
+}
