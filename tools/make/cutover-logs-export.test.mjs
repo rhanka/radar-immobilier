@@ -8,6 +8,7 @@ import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import { EventEmitter } from 'node:events';
 import { setImmediate } from 'node:timers';
+import { URL } from 'node:url';
 const require = createRequire(import.meta.url);
 const { exportLogs } = require('../../deploy/cutover/logs-export.cjs');
 const sha = b => createHash('sha256').update(b).digest('hex');
@@ -92,7 +93,7 @@ test('the Kubernetes log adapter reports HTTP errors before readiness and reject
   for (const statusCode of [400, 404, 500]) {
     const context = { module: { exports: {} }, require: name => name === 'node:fs' ? { readFileSync: () => 'synthetic' }
       : name === 'node:https' ? { get: (_options, onResponse) => {
-        queueMicrotask(() => { const response = new EventEmitter(); response.statusCode = statusCode;
+        Promise.resolve().then(() => { const response = new EventEmitter(); response.statusCode = statusCode;
           onResponse(response); response.emit('end'); });
         return new EventEmitter();
       } } : require(name) };
@@ -127,7 +128,7 @@ test('a restart while log streams open blocks readiness until the new container 
   const f = fakes(), getPod = f.k8s.getPod;
   let reads = 0, ready = false;
   f.k8s.getPod = async name => {
-    const pod = structuredClone(await getPod(name));
+    const pod = JSON.parse(JSON.stringify(await getPod(name)));
     if (++reads > 1) pod.status.containerStatuses[0].restartCount++;
     return pod;
   };
