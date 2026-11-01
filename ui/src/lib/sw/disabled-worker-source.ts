@@ -27,8 +27,8 @@ export function buildDisabledWorkerSource(workerBuildId: string): string {
 const WORKER_BUILD_ID = ${buildId};
 const PROTOCOL_VERSION = ${DISABLED_WORKER_PROTOCOL_VERSION};
 
-self.addEventListener("install", () => {
-  self.skipWaiting();
+self.addEventListener("install", (event) => {
+  event.waitUntil(self.skipWaiting());
 });
 
 self.addEventListener("activate", (event) => {
