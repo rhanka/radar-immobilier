@@ -94,3 +94,13 @@ test('quota denials are detected with their reset delay', async () => {
   assert.equal(quotaWaitMs({ code: 0, text: '{"annotations":[]}' }), null);
   assert.equal(quotaWaitMs({ code: 1, error: 'invalid model selection' }), null);
 });
+
+test('L3: PV act agreement needs two annotators citing the same passage', async () => {
+  const { quotesOverlap, actMatched } = await import('../l3/reference.mjs');
+  assert.ok(quotesOverlap('adoption du règlement 3-4 afin d’augmenter la densité', 'règlement 3-4 afin d’augmenter la densité résidentielle'));
+  assert.ok(!quotesOverlap('levée de la séance', 'adoption du règlement de zonage'));
+  const item = { input: 'page un\fpage deux : adoption du règlement 3-4 afin d’augmenter la densité.' };
+  const v = (quote) => ({ valid: true, quote });
+  assert.ok(actMatched(item, [v('adoption du règlement 3-4 afin d’augmenter'), v('règlement 3-4 afin d’augmenter la densité'), null]));
+  assert.ok(!actMatched(item, [v('adoption du règlement 3-4 afin d’augmenter'), v('page un'), null]));
+});
