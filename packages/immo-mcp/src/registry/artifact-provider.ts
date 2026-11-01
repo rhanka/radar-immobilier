@@ -1,18 +1,18 @@
 import { randomUUID } from "node:crypto";
 import type { CallToolResult, Tool } from "@modelcontextprotocol/sdk/types.js";
-import { compileArtifactsProfile, RADAR_ARTIFACTS_PROFILE, createArtifactsManifest,
+import { createArtifactsManifest,
   createArtifactsToolExecutor, ArtifactProfileInputError, type ArtifactsApp } from "@sentropic/artifacts/mcp-core";
 import type { ArtifactInvocationContext, AuthorizeCommit } from "@sentropic/artifacts/server/commit-contract";
 import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-stateful";
 import { computeManifestDigest, type RegistryDefinition } from "@sentropic/cluster-mesh/mcp/registry";
-import { checkAdmission, type AdmissionAuthority } from "@radar/artifacts-host";
-import { ARTIFACT_INVOCATION_SCOPES, ARTIFACT_TOOL_NAMES, ARTIFACT_TOOL_SCOPES, acceptedArtifactScopes, hasArtifactScope,
+import { checkAdmission, HOST_ARTIFACT_PROFILE, ARTIFACT_PROFILE_DESCRIPTOR, ARTIFACT_P0B,
+  artifactPublicSchema, validateArtifactInput, type AdmissionAuthority } from "@radar/artifacts-host";
+import { ARTIFACT_INVOCATION_SCOPES, ARTIFACT_TOOL_SCOPES, acceptedArtifactScopes, hasArtifactScope,
   isArtifactToolName, STRICT_ARTIFACT_SCOPE_POLICY, type ArtifactScopePolicy } from "./artifact-profile.js";
 import { AUTHORING_GUIDE_SNIPPET, getAuthoringGuide } from "./artifact-authoring-guide.js";
 
 // Compile the complete versioned contract, including semantic rules, before registry admission.
-export const IMMO_ARTIFACT_PROFILE = compileArtifactsProfile({ ...RADAR_ARTIFACTS_PROFILE,
-  selectedCapabilities: [...ARTIFACT_TOOL_NAMES] });
+export const IMMO_ARTIFACT_PROFILE = HOST_ARTIFACT_PROFILE;
 function freeze<T extends object>(value: T): T {
   for (const entry of Object.values(value)) if (entry && typeof entry === "object") freeze(entry);
   return Object.freeze(value);
@@ -33,7 +33,7 @@ type ArtifactManifestTool = ArtifactManifest["tools"][number];
  * `authoringGuide` response field of ensure and get.
  */
 const GUIDE_DESCRIPTION_TOOLS: ReadonlySet<string> = new Set(
-  ["artifacts_ensure", "artifacts_publish", "artifacts_get"]);
+  ["artifacts_ensure", "artifacts_publish", "artifacts_get", "artifacts_get_source"]);
 
 export function createImmoArtifactManifest(policy: ArtifactScopePolicy = STRICT_ARTIFACT_SCOPE_POLICY): ArtifactManifest {
   const base = createArtifactsManifest({ profile: IMMO_ARTIFACT_PROFILE });
@@ -41,9 +41,11 @@ export function createImmoArtifactManifest(policy: ArtifactScopePolicy = STRICT_
     const name: string = tool.name;
     if (!isArtifactToolName(name)) throw new Error("artifact_tool_unselected");
     const accepted = acceptedArtifactScopes(name, policy);
-    const description = GUIDE_DESCRIPTION_TOOLS.has(name)
+    const guideDescription = GUIDE_DESCRIPTION_TOOLS.has(name)
       ? `${tool.description} ${AUTHORING_GUIDE_SNIPPET}` : tool.description;
-    return { ...tool, description, requiredScopes: accepted.length === 1 ? [ARTIFACT_TOOL_SCOPES[name]] : [] };
+    const description = ARTIFACT_P0B ? `${guideDescription} Contract: ${JSON.stringify(ARTIFACT_PROFILE_DESCRIPTOR)}.` : guideDescription;
+    return { ...tool, description, inputSchema: artifactPublicSchema(name, tool.inputSchema),
+      requiredScopes: accepted.length === 1 ? [ARTIFACT_TOOL_SCOPES[name]] : [] };
   });
   const scopes = [ARTIFACT_INVOCATION_SCOPES.read, ARTIFACT_INVOCATION_SCOPES.write]
     .filter((scope) => tools.some((tool: ArtifactManifestTool) => tool.requiredScopes.includes(scope)));
@@ -110,6 +112,7 @@ export function bindArtifactProvider(options: {
   readonly admission?: AdmissionAuthority | undefined;
   /** Transition policy; defaults to strict (explicit artifact scopes only). */
   readonly scopePolicy?: ArtifactScopePolicy | undefined;
+  readonly prepareDelete?: (actorId: string, args: Record<string, unknown>) => Promise<Record<string, unknown>>;
 }): ArtifactMcpBinding {
   if (!options.storageScopeId.trim() || typeof options.authorizeCommit !== "function") {
     throw new Error("artifact_binding_incomplete");
@@ -125,14 +128,16 @@ export function bindArtifactProvider(options: {
     adapter: nativeAdapter(manifest),
     scopePolicy,
     configuration: Object.freeze({ storageScopeId: scope }),
-    tools: Object.freeze(manifest.tools.map((tool: Tool) => freeze({
+    tools: Object.freeze(manifest.tools.map((tool: ArtifactManifestTool) => freeze({
       name: tool.name, description: tool.description, inputSchema: tool.inputSchema as Tool["inputSchema"],
+      annotations: { readOnlyHint: tool.mutability === "read-only", destructiveHint: tool.name === "artifacts_delete" },
+      ...(ARTIFACT_P0B ? { _meta: { "immo/artifactsProfile": ARTIFACT_PROFILE_DESCRIPTOR } } : {}),
       execution: { taskSupport: "forbidden" as const },
     }))),
     async invoke(tool: string, args: unknown, request: VerifiedMcpRequest): Promise<CallToolResult> {
       // Selection/input refusal happens before minting any host authority.
       if (hasForgedArtifactCallerFields(args)) return refusal("invalid_request", false);
-      try { IMMO_ARTIFACT_PROFILE.validate(tool, args); }
+      try { validateArtifactInput(tool, args); }
       catch (error) {
         if (error instanceof ArtifactProfileInputError) return refusal(error.publicCode, error.retriable);
         throw error;
@@ -164,8 +169,17 @@ export function bindArtifactProvider(options: {
         invocationId: randomUUID(), actorId: request.principal.sub, storageScopeId: scope,
         authorizeCommit: authority,
       });
+      if (tool === "artifacts_delete" && args && typeof args === "object" && !Array.isArray(args) &&
+        !Object.hasOwn(args, "expectedCurrentReleaseId")) {
+        if (!options.prepareDelete) return refusal("capability_unavailable", true);
+        try { args = await options.prepareDelete(request.principal.sub, args as Record<string, unknown>); }
+        catch { return refusal("capability_unavailable", true); }
+      }
       const outcome = await executor.execute({ tool, args, invocation });
-      if (!outcome.ok) return refusal(outcome.failure.publicCode, outcome.failure.retriable);
+      if (!outcome.ok) {
+        const details = (outcome.failure as { details?: Readonly<Record<string, unknown>> }).details;
+        return refusal(outcome.failure.publicCode, outcome.failure.retriable, details ? { details } : {});
+      }
       // The durable receipt is untouched: the guide rides the MCP response
       // text only, so tool selection and republication both surface it.
       return { content: [{ type: "text", text: JSON.stringify(withAuthoringGuide(tool, outcome.result.body)) }] };
@@ -180,7 +194,7 @@ export function bindArtifactProvider(options: {
  * durable receipt fields. Anything else passes through unchanged.
  */
 export function withAuthoringGuide(tool: string, body: unknown): unknown {
-  if ((tool === "artifacts_ensure" || tool === "artifacts_get") &&
+  if ((tool === "artifacts_ensure" || tool === "artifacts_get" || tool === "artifacts_get_source") &&
     typeof body === "object" && body !== null && !Array.isArray(body)) {
     return { ...body, authoringGuide: getAuthoringGuide() };
   }

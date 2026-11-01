@@ -148,7 +148,7 @@ export function checkArtifact(request: ArtifactActivationRequest, providers: rea
     throw new RegistryError("incompatible_version", `artifact profile ${request.profileRevision} is not supported`);
   }
   if (request.selection.length !== ARTIFACT_SELECTION.length) {
-    throw new RegistryError("unavailable_capability", "artifact selection must list exactly four tools");
+    throw new RegistryError("unavailable_capability", `artifact selection must list exactly ${ARTIFACT_SELECTION.length} tools`);
   }
   checkEffectiveProfile();
   const selected = new Set<string>();
