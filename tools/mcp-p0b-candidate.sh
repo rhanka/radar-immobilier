@@ -21,5 +21,6 @@ npm run typecheck --workspace=api
 npx --no-install eslint packages/immo-mcp/src packages/artifacts-host/src api/src/artifacts/control-route*.ts
 p0b_status=0
 npm run test --workspace=packages/immo-mcp -- --exclude '**/*.e2e.test.ts' || p0b_status=1
-npm run test --workspace=packages/artifacts-host || p0b_status=1
+# Keep the existing S3 deadline assertions isolated from other test files.
+npm run test --workspace=packages/artifacts-host -- --maxWorkers=1 || p0b_status=1
 exit "$p0b_status"

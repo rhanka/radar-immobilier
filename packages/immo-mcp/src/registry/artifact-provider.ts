@@ -190,7 +190,7 @@ export function bindArtifactProvider(options: {
 }
 
 /**
- * Ensure and get responses carry the full authoring guide alongside the
+ * Ensure, get and source responses carry the full authoring guide alongside the
  * durable receipt fields. Anything else passes through unchanged.
  */
 export function withAuthoringGuide(tool: string, body: unknown): unknown {
