@@ -9,7 +9,7 @@ resources:
 configMapGenerator:
   - name: radar-refresh-keyring-import-script
     files:
-      - enroll-codex-import.mjs
+      - account-import.mjs
 
 generatorOptions:
   disableNameSuffixHash: true
