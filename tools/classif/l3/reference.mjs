@@ -7,13 +7,13 @@
 // passage). The sealed evaluation set is NOT opened: only its committed hashes are copied.
 import path from 'node:path';
 import process from 'node:process';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { sha256 } from '../lib/render.mjs';
 import { CLASSIF_DIR, EVAL_DIR_DEFAULT, classifHome } from '../lib/paths.mjs';
 import { readmeHashes } from '../lib/refc1.mjs';
 import { words } from '../lib/fingerprint.mjs';
 import { ANNOTATORS, loadCodes, loadDevItems } from '../l2/run.mjs';
-import { latestVotes } from '../l2/converge.mjs';
+import { latestVotes, loadComplements } from '../l2/converge.mjs';
 import { locateQuote } from '../l2/annotation.mjs';
 
 export function quotesOverlap(a, b) {
@@ -25,25 +25,36 @@ export function quotesOverlap(a, b) {
   return inter / Math.min(wa.size, wb.size) >= 0.5;
 }
 
-/** PV act agreement: true when at least 2 annotators cite the same passage (same page + ≥ 50 % overlap). */
+/** PV act agreement: true when at least 2 annotators cite the same passage (quote located
+    in the item text, same page + ≥ 50 % overlap). An unlocated quote never matches, even
+    when two absent quotes resemble each other. */
 export function actMatched(item, votes) {
-  const q = votes.filter((v) => v?.valid && v.quote).map((v) => ({ quote: v.quote, page: locateQuote(item.input, v.quote).page }));
-  for (let i = 0; i < q.length; i++) for (let j = i + 1; j < q.length; j++) if (q[i].page === q[j].page && quotesOverlap(q[i].quote, q[j].quote)) return true;
+  const q = votes.filter((v) => v?.valid && v.quote).map((v) => { const loc = locateQuote(item.input, v.quote); return { quote: v.quote, page: loc.page, found: loc.found }; });
+  for (let i = 0; i < q.length; i++) for (let j = i + 1; j < q.length; j++) if (q[i].found && q[j].found && q[i].page === q[j].page && quotesOverlap(q[i].quote, q[j].quote)) return true;
   return false;
 }
 
-const count = (rows, key) => rows.reduce((m, r) => { const k = key(r); m[k] = (m[k] ?? 0) + 1; return m; }, {});
+/** Highest converged pass (converge-passN.json) in the home: L3 reads the last one, not pass 1. */
+export function lastConvergedPass(home) {
+  const ns = readdirSync(path.join(home, 'l2')).filter((f) => /^converge-pass(\d+)\.json$/.test(f)).map((f) => Number(/^converge-pass(\d+)\.json$/.exec(f)[1]));
+  if (!ns.length) throw new Error(`no converge-passN.json in ${path.join(home, 'l2')} (run make classif-l2-converge first)`);
+  return Math.max(...ns);
+}
 
-export async function main() {
-  const home = classifHome();
-  const items = loadDevItems(home);
-  const codes = loadCodes();
-  const conv = JSON.parse(readFileSync(path.join(home, 'l2', 'converge-pass1.json'), 'utf8'));
-  const lastPass = conv.pass;
-  const { latest } = latestVotes(home, lastPass);
+/**
+ * Whether an item's reference uses external evidence: a traced complement existed for it
+ * AND its latest vote was cast in a reconcile pass (≥ 2), where complements are injected
+ * as context. Pass-1-only references never use external evidence.
+ */
+export function refUsesExternalForItem(itemId, latest, complements) {
+  if (!(complements.get(itemId)?.length)) return false;
+  return ANNOTATORS.some((a) => (latest.get(a).get(itemId)?.pass ?? 1) > 1);
+}
+
+/** Reference rows from converged rows + latest votes (shared by the L3 step and the exit audit). */
+export function buildReferenceRows({ items, codes, rows, latest, complements, signalStrata, pass }) {
   const byId = new Map(items.map((i) => [i.itemId, i]));
-  const signalStrata = new Map(JSON.parse(readFileSync(path.join(CLASSIF_DIR, 'l0', 'manifests', 'signal-draw-manifest.json'), 'utf8')).items.map((i) => [i.itemId, i]));
-  const ref = conv.rows.map((r) => {
+  return rows.map((r) => {
     const it = byId.get(r.itemId);
     const votes = ANNOTATORS.map((a) => latest.get(a).get(r.itemId) ?? null);
     const code = r.codeMaj?.value ?? null;
@@ -52,12 +63,36 @@ export async function main() {
       itemId: r.itemId, kind: r.kind, code, verdict: code ? codes.get(code) : (r.verdictMaj?.value ?? null),
       codeVotes: r.codeMaj?.count ?? 0, verdictVotes: r.verdictMaj?.count ?? 0, partition,
       reasons: [...(!r.codeMaj ? ['no-code-majority'] : []), ...(r.ambiguous33 ? ['ambiguous-3of3'] : [])],
-      provenance: 'model_consensus', refUsesExternal: false, pass: lastPass,
+      provenance: 'model_consensus', refUsesExternal: refUsesExternalForItem(r.itemId, latest, complements), pass,
       pVotes: votes.filter((v) => v?.valid && v.verdict === 'pertinent').length,
       ...(r.kind === 'pv' ? { actMatched: actMatched(it, votes) } : {}),
       bprimePass: r.kind === 'signal' ? signalStrata.get(r.itemId)?.pass ?? null : null,
     };
   });
+}
+
+const count = (rows, key) => rows.reduce((m, r) => { const k = key(r); m[k] = (m[k] ?? 0) + 1; return m; }, {});
+
+/** Manifest-level external-evidence summary, computed from the reference rows. */
+export function refExternalSummary(ref, lastPass, complements) {
+  const items = ref.filter((r) => r.refUsesExternal).length;
+  const share = ref.length ? items / ref.length : 0;
+  const note = lastPass <= 1
+    ? `No reconciliation pass ran (stop rule met after pass ${lastPass}): ${complements.size} items have a traced complement but no vote was cast with it. The immo-only ceiling is therefore not reduced by external evidence.`
+    : `${items} of ${ref.length} reference rows decided in a reconcile pass with a traced complement available (${complements.size} items with a complement).`;
+  return { items, share, note };
+}
+
+export async function main() {
+  const home = classifHome();
+  const items = loadDevItems(home);
+  const codes = loadCodes();
+  const lastPass = lastConvergedPass(home);
+  const conv = JSON.parse(readFileSync(path.join(home, 'l2', `converge-pass${lastPass}.json`), 'utf8'));
+  const { latest } = latestVotes(home, lastPass);
+  const complements = loadComplements(home);
+  const signalStrata = new Map(JSON.parse(readFileSync(path.join(CLASSIF_DIR, 'l0', 'manifests', 'signal-draw-manifest.json'), 'utf8')).items.map((i) => [i.itemId, i]));
+  const ref = buildReferenceRows({ items, codes, rows: conv.rows, latest, complements, signalStrata, pass: lastPass });
   const body = `${ref.map((r) => JSON.stringify(r)).join('\n')}\n`;
   const outDir = path.join(home, 'l3');
   mkdirSync(outDir, { recursive: true, mode: 0o700 });
@@ -75,7 +110,7 @@ export async function main() {
   const manifest = {
     lot: 'L3', kind: 'dev-reference', createdAt: new Date().toISOString(), llmCalls: 0, fromPass: lastPass,
     provenance: 'model_consensus (3 annotators: muse-wonder-1.0 max, gemini-4-argon-high, opus-5.5 max; guide G0)',
-    refUsesExternal: { items: 0, share: 0, note: 'No reconciliation pass ran (stop rule met after pass 1): no traced complement decided any vote. The immo-only ceiling is therefore not reduced by external evidence.' },
+    refUsesExternal: refExternalSummary(ref, lastPass, complements),
     partitions: {
       'dev-core': { items: core.length, signal: core.filter((r) => r.kind === 'signal').length, pv: core.filter((r) => r.kind === 'pv').length, codeVotes3: core.filter((r) => r.codeVotes === 3).length, codeVotes2: core.filter((r) => r.codeVotes === 2).length },
       'dev-ambiguous': { items: amb.length, noCodeMajority: amb.filter((r) => r.reasons.includes('no-code-majority')).length, ambiguous3of3: amb.filter((r) => r.reasons.includes('ambiguous-3of3')).length,
