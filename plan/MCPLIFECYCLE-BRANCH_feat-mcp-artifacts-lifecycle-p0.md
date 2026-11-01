@@ -54,8 +54,8 @@ with existing authorization and quotas, and annotate every active MCP tool.
 - [x] **Lot 2 — Authoring guide**
   - [x] Bump the guide revision and explain publication on the same artifactId.
   - [x] Describe source/edit/delete/restore/sharing availability accurately.
-- [ ] **Lot 3 — Verification and delivery**
+- [x] **Lot 3 — Verification and delivery**
   - [x] Reproduce the seven blocked capabilities against published transports: 63 constructor refusals across 0.2.2/0.2.3/0.2.4.
   - [x] Run registry and HTTP tests (509 passed, 64 files), MCP typecheck and scoped lint.
-  - [ ] Remove the isolated compose stack and volumes with down -v.
-  - [ ] Push the branch, open an English PR and write the French conductor report.
+  - [x] Remove the isolated compose stack and four volumes with down -v; absence verified.
+  - [x] Push the branch, open English PR #978 and write the French conductor report at the owner-requested path.
