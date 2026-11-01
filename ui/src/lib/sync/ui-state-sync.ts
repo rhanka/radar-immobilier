@@ -109,10 +109,12 @@ export function createUiStateSync(d: SyncDependencies) {
     // Epoch first, then purge; no publication can race from this page.
     const raw = read(SESSION_KEY);
     const canonical = raw === null ? null : decodeSession(raw);
-    if (raw === null || (canonical?.partition === old.partition && canonical.sessionEpoch === old.sessionEpoch)) {
+    const sameEpoch = canonical?.partition === old.partition && canonical.sessionEpoch === old.sessionEpoch;
+    if (raw === null || sameEpoch) {
       write(SESSION_KEY, JSON.stringify({ ...old, sessionEpoch: uuid(), invalidated: true }));
     }
-    purge(old.partition);
+    if (canonical && !canonical.invalidated && !sameEpoch) purgeEpoch(old.partition, old.sessionEpoch);
+    else purge(old.partition);
     // A quota/storage failure must still interrupt peers over available transports.
     d.notify?.(SESSION_KEY, { partition: old.partition, epoch: old.sessionEpoch });
   }

@@ -31,8 +31,9 @@ describe("per-tab contexts and session continuity", () => {
     const { sync, storage } = setup(); await sync.account("subject");
     sync.wake();
     const next = JSON.stringify({ ...decodeSession(storage.getItem(SESSION_KEY)!)!, sessionEpoch: uuid() });
-    storage.setItem(SESSION_KEY, next); sync.invalidate();
+    storage.setItem(SESSION_KEY, next); const fresh = publishPeer(storage); sync.invalidate();
     expect(storage.getItem(SESSION_KEY)).toBe(next);
+    expect(storage.getItem(contextKey(fresh))).not.toBeNull();
   });
   it("should preserve a fresh login when an old session invalidation arrives late", async () => {
     const { sync, storage, revalidate } = setup(); await sync.account("subject");
