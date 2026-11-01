@@ -13,7 +13,7 @@ import { selectJson } from '../lib/db.mjs';
 import { sha256 } from '../lib/render.mjs';
 import { baseCity } from '../lib/fingerprint.mjs';
 import { classifHome, privateDir } from '../lib/paths.mjs';
-import { MANIFEST_DIR, fingerprintHits, loadExclusions, loadFingerprints, loadSeed, seededOrder } from '../lib/draw.mjs';
+import { MANIFEST_DIR, fingerprintHits, loadExclusions, loadSeed, requireFingerprints, seededOrder } from '../lib/draw.mjs';
 
 const TARGET = 120;
 const PER_CITY = 2;
@@ -61,7 +61,7 @@ export async function main(argv = process.argv.slice(2)) {
   const seed = loadSeed('pvs', argv.includes('--seed') ? seedArg : undefined);
   const home = classifHome();
   const excl = loadExclusions(home);
-  const fp = loadFingerprints(home);
+  const fp = requireFingerprints(home);
   const s3 = s3Env();
   const rawDir = privateDir(path.join(home, 'l0', 'pv-raw'));
   const outFile = path.join(home, 'l0', 'pv-items.jsonl');

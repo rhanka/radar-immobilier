@@ -69,14 +69,16 @@ ${itemsBlock(items, extra)}
 
 const norm = (s) => String(s ?? '').normalize('NFC').replace(/[’‘`]/g, "'").replace(/[«»“”]/g, '"').replace(/\s+/g, ' ').trim().toLowerCase();
 
-/** Locates the quote in the item text: { found, page } (page = 1 + form feeds before it). */
+/**
+ * Locates the quote in the item text: { found, page } (page = 1 + form feeds before it).
+ * Fail closed: only a verbatim occurrence counts. A present prefix completed by an
+ * invented passage must never match, so there is no prefix fallback.
+ */
 export function locateQuote(input, quote) {
   const q = norm(quote).replace(/^"|"$/g, '');
   if (q.length < 8) return { found: false, page: 1 };
   const pages = String(input).split('\f');
   for (let i = 0; i < pages.length; i++) if (norm(pages[i]).includes(q)) return { found: true, page: i + 1 };
-  const probe = q.slice(0, 60);
-  for (let i = 0; i < pages.length; i++) if (norm(pages[i]).includes(probe)) return { found: true, page: i + 1, partial: true };
   return { found: false, page: 1 };
 }
 

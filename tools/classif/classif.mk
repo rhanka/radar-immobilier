@@ -57,7 +57,7 @@ classif-deps: ## Classification pilot: install classifier deps in a docker volum
 	  npm ci --ignore-scripts --no-audit --no-fund -w api -w packages/radar-domain -w packages/radar-sources'
 
 classif-down: ## Classification pilot: remove the classifier deps volume (absent volume is success; a failed removal fails loudly)
-	if docker volume inspect $(CLASSIF_DEPS_VOLUME) >/dev/null 2>&1; then docker volume rm $(CLASSIF_DEPS_VOLUME); else echo "[classif-down] volume $(CLASSIF_DEPS_VOLUME) absent, nothing to remove"; fi
+	@if out=$$(docker volume inspect $(CLASSIF_DEPS_VOLUME) 2>&1); then docker volume rm $(CLASSIF_DEPS_VOLUME); elif echo "$$out" | grep -qi 'no such volume'; then echo "[classif-down] volume $(CLASSIF_DEPS_VOLUME) absent, nothing to remove"; else echo "$$out" >&2; exit 1; fi
 
 .PHONY: classif-l1-profile
 classif-l1-profile: ## Classification pilot L1: codebook export + Engram profile validate/dataprep/profile-prompt
