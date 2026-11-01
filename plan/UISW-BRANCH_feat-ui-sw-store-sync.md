@@ -49,6 +49,8 @@ UI worker and targeted local store sync. The DS/H5 kit belongs to another branch
   with preinstalled libraries, but installs the exact lockfile Chromium build.
   Evidence: repeated dpkg fsync stalls on the host disk. Application images and
   default runners remain unchanged; remove the override to roll back.
+- Synthetic S3/runner temporary bodies also use tmpfs after measured S3 deadlines
+  under host I/O pressure; the API suite is rerun with one worker, unchanged timeouts.
 - Navigation adoption needs router methods to update geographic/hash views
   coherently; isolated `.set()` of activeRouteView is forbidden.
 - Review runs in this session: owner forbids workflow/background agents.
