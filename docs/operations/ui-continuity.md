@@ -50,6 +50,9 @@ writes for that page; the application remains usable in memory.
 Invalidation hints name the affected partition and epoch, so a late hint cannot
 cancel a fresh login. Available transports still notify peers if storage writes
 fail. Re-reading an existing approved epoch never rewrites its record.
+Suspending publication for wake authentication retains the previous epoch's
+ownership: logout still invalidates it, and a concurrent newer login and its
+contexts remain intact.
 
 ## Worker update and rollback
 
@@ -70,6 +73,8 @@ credential, grant, H5 value, operation queue or MCP transport.
 3. Only the requesting tab reloads, once. Other tabs retain their JavaScript and
    drafts. A controller change re-handshakes without reloading. Focus/online and
    every operation re-handshake, so stopping the worker loses no essential state.
+   Installing/waiting transitions do not contact the retiring worker; the client
+   handshakes with its replacement only after activation has completed.
 4. Normal rollback republishes the previous image/worker bytes at the same stable
    URL. Preserve that image digest and `GIT_SHA`. Recheck the served worker,
    waiting/active lifecycle and client/worker versions, including an older tab.
@@ -96,6 +101,10 @@ loading `.env`, isolates dependency volumes and invokes the existing real-stack
 Playwright target/runner. Every campaign uses `down -v` on exit. No test publishes
 host ports. The synthetic Playwright fixture serves changing bytes at the stable
 URL; tests exercise the production client and worker, not a mocked SW API.
+The disposable wrapper puts dependencies, temporary files and synthetic database
+data in memory. API tests use a `git archive HEAD` snapshot with workspace links
+remapped to that source; untracked files are excluded. This avoids measured host
+disk stalls without changing test deadlines or assertions.
 
 An isolated candidate is not a deployed-preprod receipt. Promotion must verify
 the actual preprod responses for `/immo-sw.js` and a missing JS asset, the served
