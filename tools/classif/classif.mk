@@ -98,3 +98,11 @@ classif-l2-revalidate: ## Classification pilot L2: re-run Engram validation on s
 classif-l2-chain: ## Classification pilot L2: whole protocol, resumable (WAIT_UNIT=<systemd unit> CONCURRENCY=2)
 	@test "$(ENV)" = "preprod" || { echo "[classif-l2-chain] ENV=preprod required"; exit 2; }
 	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/chain.mjs --concurrency $(CONCURRENCY) $(if $(WAIT_UNIT),--wait-unit $(WAIT_UNIT),)
+
+.PHONY: classif-l2-fingerprint-audit classif-l3-reference
+classif-l2-fingerprint-audit: ## Classification pilot: which fingerprint list caused the complement refusals (no change to the lists)
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/fingerprint-audit.mjs
+
+classif-l3-reference: ## Classification pilot L3: dev reference (model_consensus), partitions, manifest (0 LLM call)
+	@test "$(ENV)" = "preprod" || { echo "[classif-l3-reference] ENV=preprod required"; exit 2; }
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l3/reference.mjs
