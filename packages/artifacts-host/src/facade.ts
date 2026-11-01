@@ -6,6 +6,7 @@ import { projectArtifactWriteFailure } from "@sentropic/artifacts/server/outcome
 import { authorizeArtifactCommit } from "./commit-policy.js";
 import { checkAdmission, type AdmissionAuthority } from "./admission.js";
 import type { composeArtifactHost } from "./composition.js";
+import { ACTIVE_ARTIFACT_TOOLS, isArtifactMutation } from "./p0b-profile.js";
 
 export interface ArtifactControl {
   handle(op: string, actorId: string, body: unknown): Promise<HttpResponse>;
@@ -59,7 +60,7 @@ export function createArtifactControl(
 ): ArtifactControl {
   const control: ArtifactControl = {
     async handle(op, actorId, raw) {
-      if (!["ensure", "publish", "meta", "list"].includes(op)) {
+      if (!ACTIVE_ARTIFACT_TOOLS.some((name) => name === `artifacts_${op === "meta" ? "get" : op}`)) {
         return { status: 503, body: { error: "capability_unavailable" } };
       }
       let frozenWorkspace: string | undefined;
@@ -81,7 +82,7 @@ export function createArtifactControl(
       const body = raw as Record<string, unknown>;
       if (body.storageScopeId !== undefined && body.storageScopeId !== scope) return invalid();
       const artifactId = body.artifactId;
-      if ((op === "publish" || op === "meta") && !isArtifactId(artifactId)) return invalid();
+      if (!["ensure", "list"].includes(op) && !isArtifactId(artifactId)) return invalid();
       let stableUrl: string | undefined;
       if (op === "publish") {
         try {
@@ -90,7 +91,7 @@ export function createArtifactControl(
           if (stable?.kind !== "stable" || stable.artifactId !== artifactId) return invalid();
         } catch { return invalid(); }
       }
-      const write = op === "ensure" || op === "publish";
+      const write = isArtifactMutation(op);
       if (write && (typeof body.idempotencyKey !== "string" || !body.idempotencyKey.trim() ||
         body.idempotencyKey.length > 256)) return invalid();
       if (write && admission) {
