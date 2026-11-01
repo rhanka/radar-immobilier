@@ -128,7 +128,8 @@ export function callSeat(label, prompt, { timeoutMs = 900000, base = process.env
     const child = spawn(cmd, args, { cwd: work, env: seatEnv(env), stdio: ['pipe', 'pipe', 'pipe'] });
     let out = '';
     let err = '';
-    const timer = setTimeout(() => child.kill('SIGTERM'), timeoutMs);
+    // Timeout: SIGTERM, then SIGKILL after 15 s (a seat CLI that ignores SIGTERM must not hang the pass).
+    const timer = setTimeout(() => { child.kill('SIGTERM'); setTimeout(() => child.kill('SIGKILL'), 15000).unref(); }, timeoutMs);
     child.stdout.on('data', (d) => { out += d; });
     child.stderr.on('data', (d) => { err += d; });
     child.on('error', (e) => { err += String(e.message); });
