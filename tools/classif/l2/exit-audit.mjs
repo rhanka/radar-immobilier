@@ -8,6 +8,7 @@ import path from 'node:path';
 import process from 'node:process';
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { CLASSIF_DIR, classifHome } from '../lib/paths.mjs';
+import { readJsonlRecords } from '../lib/jsonl.mjs';
 import { ANNOTATORS, loadCodes, loadDevItems, readPass } from './run.mjs';
 import { latestVotes, loadComplements, summarise } from './converge.mjs';
 import { buildReferenceRows } from '../l3/reference.mjs';
@@ -37,9 +38,8 @@ export function auditPass(home, pass) {
   const calls = path.join(home, 'l2', 'calls.jsonl');
   const callsByExit = {};
   const nonZeroAnsweredAttempts = [];
-  if (existsSync(calls)) for (const l of readFileSync(calls, 'utf8').split('\n').filter(Boolean)) {
-    const c = JSON.parse(l);
-    if (c.pass !== pass) continue;
+  for (const c of readJsonlRecords(calls)) {
+    if (c?.pass !== pass) continue;
     callsByExit[String(c.exitCode)] = (callsByExit[String(c.exitCode)] ?? 0) + 1;
     if (c.exitCode !== 0 && (c.answered ?? 0) > 0) nonZeroAnsweredAttempts.push({ annotator: c.annotator, lotId: c.lotId, attempt: c.attempt, exitCode: c.exitCode, answered: c.answered });
   }

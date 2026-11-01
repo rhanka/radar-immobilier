@@ -17,7 +17,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { randomBytes } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
-import { appendFileSync, existsSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, readFileSync, rmSync } from 'node:fs';
+import { appendJsonlRecord } from '../lib/jsonl.mjs';
 import { keyFromEnv, readmeHashes, sealToFile, sha256, unseal } from '../lib/refc1.mjs';
 import { codebookFromMigration, codesMarkdown, nodeIdsIn, parseWorkbook, partition, shasIn, slugify } from '../lib/triage.mjs';
 import { parseCsv } from '../lib/csv.mjs';
@@ -202,7 +203,7 @@ export async function run({
       evalSet: { inputs: files.inputs.plainSha256, expected: files.expected.plainSha256, rows: evaluation.length },
       exclusionsSha256: sha256(exclusionsBuf), fingerprintsSha256: sha256(fingerprintsBuf),
     };
-    appendFileSync(path.join(evalDir, 'access-log.jsonl'), `${JSON.stringify(entry)}\n`);
+    appendJsonlRecord(path.join(evalDir, 'access-log.jsonl'), entry);
     const summary = {
       referenceC: { 'reference-c.xlsx': `${sha256(xlsx)} (README match)`, 'reference-c.csv': `${sha256(csv)} (README match)` },
       evalSet: {
