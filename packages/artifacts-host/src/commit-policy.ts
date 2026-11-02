@@ -6,9 +6,9 @@ import { sharePrincipalApproved } from "./p0b-ports.js";
 
 /** Every policy read and provisional reservation uses the coordinator's client. */
 export async function createHostPolicy(pool: pg.Pool, scope: string,
-  readActivation?: () => ActivationConfig): Promise<CommitPolicyParticipantFactory> {
+  readActivation?: () => ActivationConfig, expectedRevision = POLICY_REVISION): Promise<CommitPolicyParticipantFactory> {
   await pool.query("INSERT INTO artifacts.host_policy (storage_scope_id, revision) VALUES ($1, $2) ON CONFLICT DO NOTHING",
-    [scope, POLICY_REVISION]);
+    [scope, expectedRevision]);
   return { createParticipant(client, transactionToken) {
     return {
       async readRevision() {
@@ -30,7 +30,7 @@ export async function createHostPolicy(pool: pg.Pool, scope: string,
         const activationOpen = !activation || general || (activation.enabled &&
           activation.expiresAtMs > Date.now() && activation.subjects.includes(actorId));
         const approvedAccount = account.rows[0]?.status === "approved";
-        const revisionOk = revision.rows[0]?.revision === POLICY_REVISION;
+        const revisionOk = revision.rows[0]?.revision === expectedRevision;
         if (!revisionOk || !approvedAccount || !activationOpen) {
           let publicCode = "access_denied";
           const status = 403;
