@@ -17,6 +17,7 @@ import {
   type ArtifactToolName,
 } from "./artifact-profile.js";
 import { IMMO_TOOL_BINDINGS, IMMO_TOOL_SCOPES, isImmoToolName } from "./immo-provider.js";
+import { ARTIFACT_PART1 } from "@radar/artifacts-host";
 export const REGISTRY_NETWORK_POLICY = "no-central-registry-request" as const;
 export const ARTIFACT_PROVIDER_ID = "sentropic.artifacts" as const;
 
@@ -97,7 +98,7 @@ export function checkEffectiveProfile(
     throw new RegistryError("unavailable_capability", "artifact tool artifacts_ensure must require bindingName");
   }
   if (!required["artifacts_publish"]?.includes("artifactId") ||
-    !required["artifacts_publish"]?.includes("files")) {
+    (!ARTIFACT_PART1 && !required["artifacts_publish"]?.includes("files"))) {
     throw new RegistryError("unavailable_capability", "artifact tool artifacts_publish must require artifactId and files");
   }
   if (!required["artifacts_get"]?.includes("artifactId")) {
