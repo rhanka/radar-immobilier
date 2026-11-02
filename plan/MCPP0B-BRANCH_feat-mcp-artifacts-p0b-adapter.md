@@ -6,7 +6,7 @@ Prepare the three qualified P0b operations (0.2.5 or 0.3.0) while preserving the
 ## Scope / Guardrails
 - Work only in the owner-assigned `.worktrees/mcp-p0b` checkout.
 - Make-only execution; no Python, environment-file reads, cluster actions, workflow tools or delegated agents.
-- Dedicated `ENV=test-mcp-p0b`; standalone compose has no published ports; teardown uses `down -v`.
+- Dedicated `ENV=test-mcp-p0b` and `test-mcp-listget-*` qualification projects; standalone compose has no published ports; teardown uses `down -v`.
 - English implementation, commits and draft PR; French conductor report outside the checkout.
 - No commit trailers; no merge or deployment.
 
@@ -29,6 +29,7 @@ Prepare the three qualified P0b operations (0.2.5 or 0.3.0) while preserving the
 - [x] Owner instruction supersedes peer/workflow requirements: perform design, implementation and review directly in this session; do not claim peer consensus.
 - [x] Upstream delete requires a release snapshot: make the public field optional and resolve it on the host; proof retries reuse their recorded snapshot.
 - [x] Keep an existing P0b digest on the same current-release snapshot as links and timestamps; unit coverage rejects mixed snapshots and PostgreSQL checks the stored digest.
+- [x] Docker stalls removing the stopped baseline database (state `removing`, no error): continue qualification under isolated `test-mcp-listget-v025` / `test-mcp-listget-v030` only after the previous API container has exited; retain teardown and final inspection for every project.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single builder, single branch, no background agent.
@@ -63,10 +64,12 @@ Prepare the three qualified P0b operations (0.2.5 or 0.3.0) while preserving the
   - [x] Local 0.3.0 fallback: 522 MCP + 234 host tests pass, no skips; typechecks, lint and full graph resolution pass with the existing root override.
   - [x] Update publication steps; registry default selects 0.2.5 (E404 at 18:42 Montreal on 2026-11-01).
   - [x] Remove disposable dependencies; explicit down -v and inspection confirm no remaining project containers, volumes or networks.
-- [ ] **Lot 6 — Discoverable artifact metadata**
+- [x] **Lot 6 — Discoverable artifact metadata**
   - [x] Add shared IMMO get/list metadata and publication ordering without changing the upstream contract.
   - [x] Publish additive output schemas and preserve read annotations.
   - [x] Bump the authoring guide revision and document discovery metadata.
   - [x] Cover current-release timestamps, drafts, ordering and pagination with unit and real PostgreSQL tests.
   - [x] 0.2.2 baseline: 515 MCP + 234 host tests pass (8 + 5 profile skips), including the shared PostgreSQL scenario; three typechecks and lint pass.
-  - [ ] Verify 0.2.2 and both P0b candidates, tear down volumes, push and write the French report.
+  - [x] Local 0.2.5 and 0.3.0 candidates each pass 526 MCP + 239 host tests, no skips, including six PostgreSQL scenarios; three typechecks and lint pass.
+  - [x] Verify 0.2.2 and both P0b candidates, tear down volumes, push and write the French report.
+  - [x] Remove disposable dependencies; explicit down -v and inspection confirm zero resources for all three qualification projects. PR #979 remains draft; French report: `mcp-listget-report.md` in the conductor reviews directory.
