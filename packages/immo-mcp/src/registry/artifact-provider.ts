@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { isDeepStrictEqual } from "node:util";
 import type { CallToolResult, Tool } from "@modelcontextprotocol/sdk/types.js";
 import { createArtifactsManifest,
   createArtifactsToolExecutor, ArtifactProfileInputError, type ArtifactsApp } from "@sentropic/artifacts/mcp-core";
@@ -40,7 +41,7 @@ const GUIDE_DESCRIPTION_TOOLS: ReadonlySet<string> = new Set(
 
 export function createImmoArtifactManifest(policy: ArtifactScopePolicy = STRICT_ARTIFACT_SCOPE_POLICY): ArtifactManifest {
   assertArtifactAssembly();
-  if (getAuthoringGuide().descriptor.profileRevisionId !== ARTIFACT_PROFILE_DESCRIPTOR.profileRevisionId) {
+  if (!isDeepStrictEqual(getAuthoringGuide().descriptor, ARTIFACT_PROFILE_DESCRIPTOR)) {
     throw new Error("artifact_guide_assembly_incoherent");
   }
   const base = createArtifactsManifest({ profile: IMMO_ARTIFACT_PROFILE });
@@ -193,9 +194,9 @@ export function bindArtifactProvider(options: {
         catch { return refusal("capability_unavailable", true); }
       }
       let body: unknown;
-      if (tool === "artifacts_get_source") {
+      if (tool === "artifacts_get_source" || tool === "artifacts_list_versions") {
         // The shared facade rereads IMMO admission after every source blob has been read.
-        const response = await sourceControl.handle("get_source", request.principal.sub, args);
+        const response = await sourceControl.handle(tool.slice("artifacts_".length), request.principal.sub, args);
         if (response.status < 200 || response.status >= 300) {
           if (ARTIFACT_PART1) return { isError: true, content: [{ type: "text", text: JSON.stringify(response.body) }] };
           const error = response.body as { error: string; details?: unknown };

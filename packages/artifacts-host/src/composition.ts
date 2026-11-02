@@ -72,7 +72,7 @@ export async function composeArtifactHost(
       const dispatch = () => domain.execute(request, invocation);
       // Every PUT and read-back of one publish shares a deadline that ends
       // before the preparation window, so finalization is never refused for it.
-      const outcome = request.method === "POST" && request.path === "/publish"
+      const outcome = request.method === "POST" && ["/publish", "/revert"].includes(request.path)
         ? await withS3Deadline(Date.now() + PUBLISH_BLOB_DEADLINE_MS, dispatch) : await dispatch();
       if (!outcome.ok) {
         const entry = projectArtifactWriteFailure(outcome.failure, {

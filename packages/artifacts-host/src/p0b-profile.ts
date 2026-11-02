@@ -12,6 +12,7 @@ export function artifactProfileDescriptor(env: NodeJS.ProcessEnv = process.env) 
     throw new Error("artifact_profile_revision_unqualified");
   }
   const strict = revision === "immo-artifacts.cas.v2" || revision === "immo-artifacts.v2";
+  if ((revision === "immo-artifacts.v1") !== !ARTIFACT_P0B) throw new Error("artifact_profile_provider_mismatch");
   if (strict && ARTIFACT_PROVIDER_VERSION !== "0.2.6") throw new Error("artifact_strict_provider_unqualified");
   if (revision === "immo-artifacts.v2" &&
     (env.ARTIFACTS_INPUTS_QUALIFIED !== "true" || env.ARTIFACTS_RESULTS_QUALIFIED !== "true")) {
@@ -32,16 +33,16 @@ export const ACTIVE_ARTIFACT_TOOLS = Object.freeze([
 ]);
 export function compileHostArtifactProfile(descriptor = ARTIFACT_PROFILE_DESCRIPTOR) {
   return compileArtifactsProfile({ ...RADAR_ARTIFACTS_PROFILE,
-  ...descriptor,
-  selectedCapabilities: [...BASE_ARTIFACT_TOOLS,
-    ...(descriptor.profileRevisionId !== "immo-artifacts.v1" ? P0B_ARTIFACT_TOOLS : []),
-    ...(descriptor.resultEnvelopeVersion === 2 ? PART1_ARTIFACT_TOOLS : [])],
-  operations: [...RADAR_ARTIFACTS_PROFILE.operations, ...(ARTIFACT_P0B ? [
-    { operation: "set_access", limits: { idempotencyKeyMaxUnits: 256 }, defaults: {} },
-    { operation: "delete", limits: { idempotencyKeyMaxUnits: 256 }, defaults: {} },
-  ] : [])],
-  contractRevisions: { ...RADAR_ARTIFACTS_PROFILE.contractRevisions,
-    ...(ARTIFACT_P0B ? { immo: descriptor.profileRevisionId } : {}) },
+    ...descriptor,
+    selectedCapabilities: [...BASE_ARTIFACT_TOOLS,
+      ...(descriptor.profileRevisionId !== "immo-artifacts.v1" ? P0B_ARTIFACT_TOOLS : []),
+      ...(descriptor.resultEnvelopeVersion === 2 ? PART1_ARTIFACT_TOOLS : [])],
+    operations: [...RADAR_ARTIFACTS_PROFILE.operations, ...(ARTIFACT_P0B ? [
+      { operation: "set_access", limits: { idempotencyKeyMaxUnits: 256 }, defaults: {} },
+      { operation: "delete", limits: { idempotencyKeyMaxUnits: 256 }, defaults: {} },
+    ] : [])],
+    contractRevisions: { ...RADAR_ARTIFACTS_PROFILE.contractRevisions,
+      ...(ARTIFACT_P0B ? { immo: descriptor.profileRevisionId } : {}) },
   });
 }
 export const HOST_ARTIFACT_PROFILE = compileHostArtifactProfile();

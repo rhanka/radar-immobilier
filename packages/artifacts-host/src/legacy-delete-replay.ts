@@ -36,7 +36,7 @@ export async function replayLegacyDelete(options: {
   const revision = (await pool.query<{ revision: string }>(
     "SELECT revision FROM artifacts.host_policy WHERE storage_scope_id=$1", [invocation.storageScopeId])).rows[0]?.revision;
   if (!revision) throw new Error("artifact_policy_unavailable");
-  const outcome = await coordinator.replayPrepared({ scopeId: invocation.storageScopeId, internalKey,
+  const outcome = await coordinator.replayPrepared({ scopeId: invocation.storageScopeId, internalKey: command.identity.internalKey,
     commandHash: command.identity.commandHash, codecVersion: command.identity.codecVersion,
     actorId: invocation.actorId, invocationId: invocation.invocationId, operation: "delete", artifactId,
     bindingName: null, policyRevision: revision, receiptData: undefined,
