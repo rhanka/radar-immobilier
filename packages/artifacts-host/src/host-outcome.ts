@@ -106,6 +106,14 @@ export function reportWriteFailure(
 /** Retain host phase diagnostics without reclassifying a provider outcome. */
 export function normalizeHostOutcome(outcome: ArtifactOutcome<HttpResponse>): ArtifactOutcome<HttpResponse> {
   if (outcome.ok) return outcome;
+  // A historic receipt can attest a commit without retaining enough output to prove its result.
+  // Preserve that uncertainty; never turn a failed receipt decode into a definite failed write.
+  if (outcome.failure.kind === "operational" && outcome.failure.commitState === "committed" && outcome.failure.publicCode === "internal_error") {
+    const failure = { ...outcome.failure, commitState: "unknown" as const,
+      httpStatus: 503, publicCode: "capability_unavailable", retriable: true };
+    Object.defineProperty(failure, "cause", { value: outcome.failure.cause, enumerable: false });
+    return { ok: false, failure };
+  }
   const original = outcome.failure;
   let cause = original.cause;
   let phase = original.phase;

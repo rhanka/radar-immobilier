@@ -62,6 +62,10 @@ export function createArtifactControl(
   // Captured at binding construction: deployment changes never reshape an in-flight response.
   const profile = host.profile ?? HOST_ARTIFACT_PROFILE;
   const refused = (status: number, code: string) => artifactRefusalResponse(status, code, status === 503, {}, profile.resultEnvelopeVersion);
+  const denied = (status: number, body: { error: string }) => {
+    const { error, ...details } = body;
+    return artifactRefusalResponse(status, error, false, details, profile.resultEnvelopeVersion);
+  };
   const invalid = () => refused(400, "invalid_request");
   const control: ArtifactControl = {
     async handle(op, actorId, raw) {
@@ -78,7 +82,7 @@ export function createArtifactControl(
           Object.defineProperty(unavailable, "retryable", { value: true });
           return unavailable;
         }
-        if (!entry.allowed) return refused(entry.status, entry.body.error);
+        if (!entry.allowed) return denied(entry.status, entry.body);
         // General opening reports no workspace: nothing is frozen and the
         // commit reread below cannot diverge from it.
         frozenWorkspace = entry.workspaceId === "" ? undefined : entry.workspaceId;
@@ -109,7 +113,7 @@ export function createArtifactControl(
           Object.defineProperty(unavailable, "retryable", { value: true });
           return unavailable;
         }
-        if (!commit.allowed) return refused(commit.status, commit.body.error);
+        if (!commit.allowed) return denied(commit.status, commit.body);
         if (frozenWorkspace !== undefined && commit.workspaceId !== frozenWorkspace) {
           return refused(403, "workspace_membership_required");
         }
@@ -178,7 +182,7 @@ export function createArtifactControl(
           Object.defineProperty(unavailable, "retryable", { value: true });
           return unavailable;
         }
-        if (!current.allowed) return refused(current.status, current.body.error);
+        if (!current.allowed) return denied(current.status, current.body);
       }
       const response = { ...projectArtifactHttpOutcome(outcome, profile.resultEnvelopeVersion === 2) };
       if (!outcome.ok && outcome.failure.publicCode === "rate_limited" && profile.resultEnvelopeVersion !== 2) {
