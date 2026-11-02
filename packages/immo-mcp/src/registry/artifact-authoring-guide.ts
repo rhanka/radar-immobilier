@@ -4,9 +4,11 @@
  * Feeds the artifacts_ensure / artifacts_publish / artifacts_get MCP
  * surface: the tool descriptions carry the imperative core, while the
  * full guide object is returned as `authoringGuide` in the MCP response
- * of artifacts_ensure and artifacts_get. The durable publication receipt
- * is unchanged. A future dedicated guide tool or MCP resource would
- * return exactly this definition.
+ * of artifacts_ensure and artifacts_get. artifacts_get_source carries
+ * only a small guide reference (guideId/revision plus the lifecycle
+ * hint) so the source payload stays within the model tool-result budget.
+ * The durable publication receipt is unchanged. A future dedicated guide
+ * tool or MCP resource would return exactly this definition.
  */
 
 import {
@@ -176,7 +178,7 @@ export function getAuthoringGuide(): AuthoringGuide {
         editing: [
           "The complete editing journey is artifacts_get_source → edit → artifacts_publish on the same artifactId. " +
             (ARTIFACT_P0B
-              ? "artifacts_get returns metadata and permissions; artifacts_get_source returns the retained manifest and file bytes. Follow artifactLifecycle.edit."
+              ? "artifacts_get returns metadata and permissions; artifacts_get_source returns the retained manifest and file text (UTF-8; bytes only for non-text or undecodable files). Follow artifactLifecycle.edit."
               : "Currently source retrieval is blocked: artifacts_get_source is unavailable and artifacts_get returns metadata plus this guide, without editable files."),
           ARTIFACT_STRICT ? STRICT_ARTIFACT_GUIDE : "When the complete original source bundle is already available in the conversation, edit those files and publish the full bundle with artifacts_publish on the same artifactId. Do not call artifacts_ensure to replace an existing artifact.",
           "Each publication creates a new release/version and pinnedUrl; stableUrl stays the same. Use a fresh idempotencyKey for changed content, and reuse a previous key only to retry the identical publication.",
@@ -288,8 +290,8 @@ export function getAuthoringGuide(): AuthoringGuide {
       componentUsage: "React CSS recipes use components[].sourcePackage + componentName + snapshotVersion with promptRef/hash for provenance. Elements catalogue contracts are described separately in elements. Essential snapshot prompts: the full React DS runtime uses window.SentropicDS.<componentName> inside ThemeProvider; load DS styles + ThemeProvider, never write your own palette. The native CSS fast path uses the listed st-* markup without the DS React runtime: Button is a native button (variant primary/secondary/ghost/danger, size sm/md/lg); Input/Select need a visible label and help/error association; Card is a noninteractive container unless a real link/button is provided; Tag is informational, not an action; Notification needs readable title/message and status/alert semantics; ContentSwitcher needs keyboard behavior and selection state; InlineLoading needs accessible status text and reduced motion. Do not imitate complex component behavior; use a qualified runtime. Prompt files are provenance, these inline instructions are available to the remote author.",
       ...(ARTIFACT_P0B ? { artifactLifecycle: {
         descriptor: ARTIFACT_PROFILE_DESCRIPTOR,
-        edit: ["Read artifacts_get for permissions and currentReleaseId, then artifacts_get_source({artifactId}) for the retained manifest and file bytes. Source requires immo:artifacts:read; immo:read alone is insufficient.",
-          ARTIFACT_STRICT ? STRICT_ARTIFACT_GUIDE : "Decode returned UTF-8 bytes, edit locally with the supplied DS starter rules, preserve every required file, then artifacts_publish({artifactId, files, idempotencyKey}) with a fresh key. Publish the complete snapshot, not a patch. expectedCurrentReleaseId is not required by this profile.",
+        edit: ["Read artifacts_get for permissions and currentReleaseId, then artifacts_get_source({artifactId}) for the retained manifest and file text. Source requires immo:artifacts:read; immo:read alone is insufficient.",
+          ARTIFACT_STRICT ? STRICT_ARTIFACT_GUIDE : "Edit the returned text locally with the supplied DS starter rules, preserve every required file, then artifacts_publish({artifactId, files, idempotencyKey}) with a fresh key. Publish the complete snapshot, not a patch. expectedCurrentReleaseId is not required by this profile.",
           `Keep the same key and identical content on retries. resultEnvelopeVersion: ${ARTIFACT_PROFILE_DESCRIPTOR.resultEnvelopeVersion}. ` +
             (ARTIFACT_PART1 ? "Results are in output; use either full files or edits:[{path,oldStr,newStr}], never both. Supply title/description/icon on ensure or publish. list_versions returns retained releases; revert({artifactId,targetReleaseId,expectedCurrentReleaseId,idempotencyKey}) creates a new release with current metadata and ACL. " : "Results remain at the root. ") +
             "release_unavailable requires another retained release or the original author files; never invent missing source."],
