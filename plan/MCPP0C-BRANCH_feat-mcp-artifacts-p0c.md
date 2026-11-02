@@ -37,6 +37,7 @@
   - [x] Pin artifacts 0.2.6 and mcp-platform 0.4.1 centrally; regenerate lock through make.
   - [ ] Add trusted profile selection, strict guide/catalogue and startup coherence checks.
   - [ ] Add replayable locked policy activation and complete writer inventory.
+  - [x] Keep schema migration and exclusive policy migration independent from startup/default P0b.
   - [ ] Preserve old receipts and refuse new omissions after authorization without quota.
   - [ ] Verify unit/integration, old and waiting writers, crossing-switch retry, HTTP/MCP omission and first null publication.
 - [ ] **Lot B — Results and qualified part1**
