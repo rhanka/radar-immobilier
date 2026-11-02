@@ -207,6 +207,12 @@ export function artifactEffectiveProfile() {
       artifacts_set_access: { required: ARTIFACT_EFFECTIVE_REQUIRED.artifacts_set_access, grant: "read", principalId: "approved IMMO account IdP sub" },
       artifacts_delete: { required: ARTIFACT_EFFECTIVE_REQUIRED.artifacts_delete, confirmation: "trusted app session; transactional consumption", terminal: true },
     } : {}),
+    ...(ARTIFACT_PART1 ? {
+      artifacts_list_versions: { required: ARTIFACT_EFFECTIVE_REQUIRED.artifacts_list_versions },
+      artifacts_revert: { required: ARTIFACT_EFFECTIVE_REQUIRED.artifacts_revert },
+      metadata: ["title", "description", "icon"],
+      contentSource: "exactly one of files or edits",
+    } : {}),
     closedArguments: [...ARTIFACT_FORBIDDEN_CALLER_FIELDS],
     callerKey: {
       type: "string",
