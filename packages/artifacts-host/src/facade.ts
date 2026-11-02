@@ -6,7 +6,8 @@ import { projectArtifactWriteFailure } from "@sentropic/artifacts/server/outcome
 import { authorizeArtifactCommit } from "./commit-policy.js";
 import { checkAdmission, type AdmissionAuthority } from "./admission.js";
 import type { composeArtifactHost } from "./composition.js";
-import { ACTIVE_ARTIFACT_TOOLS, isArtifactMutation } from "./p0b-profile.js";
+import { HOST_ARTIFACT_PROFILE, isArtifactMutation } from "./p0b-profile.js";
+import { artifactRefusalResponse } from "./result-projection.js";
 
 export interface ArtifactControl {
   handle(op: string, actorId: string, body: unknown): Promise<HttpResponse>;
@@ -49,8 +50,7 @@ export interface ArtifactControlOptions {
 }
 
 type ComposedHost = NonNullable<Awaited<ReturnType<typeof composeArtifactHost>>>;
-type Host = { readonly app: Pick<ComposedHost["app"], "execute"> } & Partial<Pick<ComposedHost, "execute">>;
-const invalid = (): HttpResponse => ({ status: 400, body: { error: "invalid_request" } });
+type Host = { readonly app: Pick<ComposedHost["app"], "execute"> } & Partial<Pick<ComposedHost, "execute" | "profile">>;
 
 export function createArtifactControl(
   host: Host,
@@ -59,10 +59,14 @@ export function createArtifactControl(
   admission?: AdmissionAuthority | undefined,
   options?: ArtifactControlOptions | undefined,
 ): ArtifactControl {
+  // Captured at binding construction: deployment changes never reshape an in-flight response.
+  const profile = host.profile ?? HOST_ARTIFACT_PROFILE;
+  const refused = (status: number, code: string) => artifactRefusalResponse(status, code, status === 503, {}, profile.resultEnvelopeVersion);
+  const invalid = () => refused(400, "invalid_request");
   const control: ArtifactControl = {
     async handle(op, actorId, raw) {
-      if (!ACTIVE_ARTIFACT_TOOLS.some((name) => name === `artifacts_${op === "meta" ? "get" : op}`)) {
-        return { status: 503, body: { error: "capability_unavailable" } };
+      if (!profile.selectedCapabilities.some((name) => name === `artifacts_${op === "meta" ? "get" : op}`)) {
+        return refused(503, "capability_unavailable");
       }
       let frozenWorkspace: string | undefined;
       if (admission) {
@@ -70,11 +74,11 @@ export function createArtifactControl(
         try {
           entry = await checkAdmission(admission, actorId, scope);
         } catch {
-          const unavailable = { status: 503 as const, body: { error: "capability_unavailable" } };
+          const unavailable = refused(503, "capability_unavailable");
           Object.defineProperty(unavailable, "retryable", { value: true });
           return unavailable;
         }
-        if (!entry.allowed) return { status: entry.status, body: entry.body };
+        if (!entry.allowed) return refused(entry.status, entry.body.error);
         // General opening reports no workspace: nothing is frozen and the
         // commit reread below cannot diverge from it.
         frozenWorkspace = entry.workspaceId === "" ? undefined : entry.workspaceId;
@@ -101,13 +105,13 @@ export function createArtifactControl(
         try {
           commit = await checkAdmission(admission, actorId, scope);
         } catch {
-          const unavailable = { status: 503 as const, body: { error: "capability_unavailable" } };
+          const unavailable = refused(503, "capability_unavailable");
           Object.defineProperty(unavailable, "retryable", { value: true });
           return unavailable;
         }
-        if (!commit.allowed) return { status: commit.status, body: commit.body };
+        if (!commit.allowed) return refused(commit.status, commit.body.error);
         if (frozenWorkspace !== undefined && commit.workspaceId !== frozenWorkspace) {
-          return { status: 403, body: { error: "workspace_membership_required" } };
+          return refused(403, "workspace_membership_required");
         }
         if (commit.workspaceId !== "") frozenWorkspace = commit.workspaceId;
       }
@@ -170,17 +174,18 @@ export function createArtifactControl(
         let current;
         try { current = await checkAdmission(admission, actorId, scope); }
         catch {
-          const unavailable = { status: 503 as const, body: { error: "capability_unavailable" } };
+          const unavailable = refused(503, "capability_unavailable");
           Object.defineProperty(unavailable, "retryable", { value: true });
           return unavailable;
         }
-        if (!current.allowed) return { status: current.status, body: current.body };
+        if (!current.allowed) return refused(current.status, current.body.error);
       }
-      const response = { ...projectArtifactHttpOutcome(outcome) };
-      if (!outcome.ok && outcome.failure.publicCode === "rate_limited") {
+      const response = { ...projectArtifactHttpOutcome(outcome, profile.resultEnvelopeVersion === 2) };
+      if (!outcome.ok && outcome.failure.publicCode === "rate_limited" && profile.resultEnvelopeVersion !== 2) {
         response.body = { error: "rate_limited", retryable: outcome.failure.retriable };
       }
       Object.defineProperty(response, "retryable", { value: !outcome.ok && outcome.failure.retriable });
+      if (profile.resultEnvelopeVersion === 2) return response;
       if (op !== "publish" || response.status !== 201) return response;
       const result = response.body as { releaseId: string; manifest: string };
       const manifest = JSON.parse(result.manifest) as { digest: string };

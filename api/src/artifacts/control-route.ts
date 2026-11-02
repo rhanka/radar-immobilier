@@ -14,6 +14,7 @@ import {
   type MembershipQueryable,
   type ArtifactDeleteConfirmation,
   ARTIFACT_P0B, ARTIFACT_PROFILE_DESCRIPTOR, ACTIVE_ARTIFACT_TOOLS, isArtifactMutation,
+  artifactRefusalResponse,
 } from "@radar/artifacts-host";
 import type { AuthConfig } from "../config.js";
 import { controlCacheHeaders } from "./control-cache.js";
@@ -24,7 +25,7 @@ import {
   type VerifiedSession,
 } from "../services/auth/session.js";
 
-export type ControlOp = "ensure" | "publish" | "meta" | "list" | "get_source" | "set_access" | "delete";
+export type ControlOp = "ensure" | "publish" | "meta" | "list" | "get_source" | "set_access" | "delete" | "list_versions" | "revert";
 
 const unavailableBackend: ArtifactControl = {
   handle: () => Promise.resolve({ status: 503, body: { error: "capability_unavailable" } }),
@@ -48,8 +49,9 @@ export interface ControlRouteDeps {
 
 export const CONTROL_MAX_BODY_BYTES = 2 * 1024 * 1024;
 
-function jsonError(c: Context, status: 400 | 401 | 403 | 413 | 415 | 503, body: Record<string, string>): Response {
-  return c.json(body, status);
+function jsonError(c: Context, status: ContentfulStatusCode, body: Record<string, string>): Response {
+  const { error = "invalid_request", ...details } = body;
+  return c.json(artifactRefusalResponse(status, error, status === 503, details).body as object, status);
 }
 
 async function guard(
@@ -90,13 +92,13 @@ async function guard(
       return jsonError(c, 503, { error: "capability_unavailable" });
     }
     if (!admission.allowed) {
-      return c.json(admission.body, admission.status);
+      return jsonError(c, admission.status, admission.body);
     }
     return { session };
   }
   const status = await readAccountStatus(deps.accounts, session.sub);
   if (!isApprovedAccountStatus(status)) {
-    return c.json({ error: "account_not_approved", status: status ?? "unknown" }, 403);
+    return jsonError(c, 403, { error: "account_not_approved", status: status ?? "unknown" });
   }
   return { session };
 }
@@ -132,7 +134,7 @@ export function controlRoute(deps: ControlRouteDeps): Hono {
   app.use("*", controlCacheHeaders);
   app.use("*", bodyLimit({
     maxSize: CONTROL_MAX_BODY_BYTES,
-    onError: (c) => c.json({ error: "body_too_large" }, 413),
+    onError: (c) => jsonError(c, 413, { error: "body_too_large" }),
   }));
   async function dispatch(op: ControlOp, c: Context, session: VerifiedSession, body: unknown) {
     if (deps.readActivation && isArtifactMutation(op)) {
@@ -148,7 +150,7 @@ export function controlRoute(deps: ControlRouteDeps): Hono {
         return jsonError(c, 503, { error: "capability_unavailable" });
       }
       if (!commit.allowed) {
-        return c.json(commit.body, commit.status);
+        return jsonError(c, commit.status, commit.body);
       }
     }
     let result;
@@ -179,11 +181,13 @@ export function controlRoute(deps: ControlRouteDeps): Hono {
     return c.json({ ...ARTIFACT_PROFILE_DESCRIPTOR, selectedCapabilities: ACTIVE_ARTIFACT_TOOLS });
   });
 
-  for (const op of ["get_source", "set_access", "delete"] as const) {
+  for (const op of ["get_source", "set_access", "delete", "list_versions", "revert"] as const) {
     app.post(`/${op}`, async (c) => {
       const guarded = await guardPost(c, deps);
       if (guarded instanceof Response) return guarded;
-      if (!ARTIFACT_P0B) return c.json({ error: "capability_unavailable" }, 503);
+      if (!ARTIFACT_P0B || !ACTIVE_ARTIFACT_TOOLS.some((tool) => tool === `artifacts_${op}`)) {
+        return jsonError(c, 503, { error: "capability_unavailable" });
+      }
       return dispatch(op, c, guarded.session, guarded.body);
     });
   }
@@ -237,7 +241,7 @@ export function controlRoute(deps: ControlRouteDeps): Hono {
   app.all("*", async (c) => {
     const guarded = await guard(c, deps);
     if (guarded instanceof Response) return guarded;
-    return c.json({ error: "capability_unavailable" }, 503);
+    return jsonError(c, 503, { error: "capability_unavailable" });
   });
 
   return app;

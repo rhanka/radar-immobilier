@@ -94,7 +94,7 @@ export async function composeArtifactHost(
     let accountingFailure: unknown;
     const handle: typeof domain.app.handle = async (request, invocation) =>
       projectArtifactHttpOutcome(await execute(request, invocation));
-    return { ...domain, app: { ...domain.app, execute, handle }, execute, coordinator, blobs,
+    return { ...domain, profile, app: { ...domain.app, execute, handle }, execute, coordinator, blobs,
       get accountingFailure() { return accountingFailure; },
       cleanup, intents: domain.store, refs: domain.store,
       selectedCapabilities: domain.app.selectedCapabilities, profileDigest: domain.app.profileDigest,
