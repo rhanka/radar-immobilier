@@ -90,7 +90,7 @@ describe("artifact authoring guide", () => {
     expect(editing).toContain("artifacts_get returns metadata");
     if (ARTIFACT_P0B) {
       expect(editing).not.toContain("source retrieval is blocked");
-      expect(editing).toContain("artifacts_get_source returns the retained manifest and file bytes");
+      expect(editing).toContain("artifacts_get_source returns the retained manifest and file text");
       expect(guide.lifecycle.unavailableTools).toEqual(["artifacts_restore", "artifacts_fork", "artifacts_promote", "artifacts_renew"]);
       expect(guide.lifecycle.deleteRestore).toContain("explicit human confirmation");
       expect(guide.lifecycle.sharing).toContain("named read access");
@@ -134,7 +134,7 @@ describe("artifact authoring guide", () => {
     expect(byName["artifacts_list"]).not.toContain("authoringGuide");
   });
 
-  it("should return authoringGuide on ensure/get responses only, receipt fields intact", async () => {
+  it("should return the full authoringGuide on ensure/get and a small reference on get_source, receipt fields intact", async () => {
     const receipt = { artifactId: "123e4567-e89b-12d3-a456-426614174000" };
     const ensured = read(await setup(receipt).binding
       .invoke("artifacts_ensure", { bindingName: "x", idempotencyKey: "k" }, authority));
@@ -143,6 +143,14 @@ describe("artifact authoring guide", () => {
     const got = read(await setup(receipt).binding
       .invoke("artifacts_get", { artifactId: receipt.artifactId }, authority));
     expect(got.authoringGuide.revision).toBe(AUTHORING_GUIDE_REVISION);
+    expect(got.authoringGuide.starter.files.length).toBeGreaterThan(0);
+    const source = read(await setup({ artifactId: receipt.artifactId, files: [] }).binding
+      .invoke("artifacts_get_source", { artifactId: receipt.artifactId }, authority));
+    expect(source.authoringGuide.guideId).toBe(AUTHORING_GUIDE_ID);
+    expect(source.authoringGuide.revision).toBe(AUTHORING_GUIDE_REVISION);
+    expect(source.authoringGuide.lifecycle.editing.length).toBeGreaterThan(0);
+    expect(source.authoringGuide).not.toHaveProperty("starter");
+    expect(source.authoringGuide).not.toHaveProperty("components");
     const published = read(await setup({ releaseId: "r" }).binding.invoke("artifacts_publish",
       { artifactId: receipt.artifactId, files: [{ path: "index.html", mimeType: "text/html", text: "<p>x</p>" }],
         idempotencyKey: "k" }, authority));
