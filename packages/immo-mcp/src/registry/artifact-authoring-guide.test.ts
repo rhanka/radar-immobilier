@@ -38,6 +38,15 @@ function setup(body: unknown) {
 const read = (result: { content: unknown[] }) => JSON.parse((result.content[0] as { text: string }).text);
 
 describe("artifact authoring guide", () => {
+  it("should document the display label, publication timestamps and newest-first discovery", () => {
+    const discovery = getAuthoringGuide().artifactDiscovery;
+    expect(discovery.displayLabel).toBe("Use bindingName as the display label until part1 title/description metadata is available.");
+    expect(discovery.listOrder).toContain("updatedAt descending, nulls last, then createdAt descending");
+    expect(discovery.timestamps).toContain("current release publication time, or null if never published");
+    expect(discovery.links).toContain("pinnedUrl");
+    expect(discovery.state).toContain("published");
+  });
+
   it("should expose one versioned definition with starter, H5 bridge and checklist", () => {
     const guide = getAuthoringGuide();
     expect(guide.guideId).toBe(AUTHORING_GUIDE_ID);
