@@ -5,7 +5,7 @@ import { createArtifactsManifest,
 import type { ArtifactInvocationContext, AuthorizeCommit } from "@sentropic/artifacts/server/commit-contract";
 import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-stateful";
 import { computeManifestDigest, type RegistryDefinition } from "@sentropic/cluster-mesh/mcp/registry";
-import { checkAdmission, HOST_ARTIFACT_PROFILE, ARTIFACT_PROFILE_DESCRIPTOR, ARTIFACT_P0B,
+import { checkAdmission, createArtifactControl, HOST_ARTIFACT_PROFILE, ARTIFACT_PROFILE_DESCRIPTOR, ARTIFACT_P0B,
   artifactPublicSchema, validateArtifactInput, type AdmissionAuthority } from "@radar/artifacts-host";
 import { ARTIFACT_INVOCATION_SCOPES, ARTIFACT_TOOL_SCOPES, acceptedArtifactScopes, hasArtifactScope,
   isArtifactToolName, STRICT_ARTIFACT_SCOPE_POLICY, type ArtifactScopePolicy } from "./artifact-profile.js";
@@ -126,6 +126,7 @@ export function bindArtifactProvider(options: {
   const scope = options.storageScopeId;
   const authorizeCommit = options.authorizeCommit;
   const admission = options.admission;
+  const sourceControl = createArtifactControl({ app: options.app }, scope, undefined, admission);
   const scopePolicy: ArtifactScopePolicy = Object.freeze({ legacyReadScope: options.scopePolicy?.legacyReadScope === true });
   const manifest = scopePolicy.legacyReadScope ? createImmoArtifactManifest(scopePolicy) : IMMO_ARTIFACT_MANIFEST;
   const binding: ArtifactMcpBinding = Object.freeze({
@@ -182,14 +183,27 @@ export function bindArtifactProvider(options: {
         try { args = await options.prepareDelete(request.principal.sub, args as Record<string, unknown>); }
         catch { return refusal("capability_unavailable", true); }
       }
-      const outcome = await executor.execute({ tool, args, invocation });
-      if (!outcome.ok) {
-        const details = (outcome.failure as { details?: Readonly<Record<string, unknown>> }).details;
-        return refusal(outcome.failure.publicCode, outcome.failure.retriable, details ? { details } : {});
+      let body: unknown;
+      if (tool === "artifacts_get_source") {
+        // The shared facade rereads IMMO admission after every source blob has been read.
+        const response = await sourceControl.handle("get_source", request.principal.sub, args);
+        if (response.status < 200 || response.status >= 300) {
+          const error = response.body as { error: string; details?: unknown };
+          return refusal(error.error, (response as { retryable?: boolean }).retryable === true,
+            error.details ? { details: error.details } : {});
+        }
+        body = response.body;
+      } else {
+        const outcome = await executor.execute({ tool, args, invocation });
+        if (!outcome.ok) {
+          const details = (outcome.failure as { details?: Readonly<Record<string, unknown>> }).details;
+          return refusal(outcome.failure.publicCode, outcome.failure.retriable, details ? { details } : {});
+        }
+        body = outcome.result.body;
       }
       // The durable receipt is untouched: the guide rides the MCP response
       // only, so tool selection and republication both surface it.
-      const result = withAuthoringGuide(tool, outcome.result.body);
+      const result = withAuthoringGuide(tool, body);
       return { content: [{ type: "text", text: JSON.stringify(result) }],
         ...(artifactReadOutputSchema(tool) ? { structuredContent: result as Record<string, unknown> } : {}) };
     },
