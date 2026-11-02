@@ -20,9 +20,9 @@ describeDb("stored reader approval and single-use exchange", () => {
       [h.config.storageScope, "author-alice"]);
   });
   afterAll(async () => { await h?.close(); });
-  it("should retain already issued pinned credentials independently of the current publication pointer", async () => {
+  it("should retain already issued exact credentials independently of the current publication pointer", async () => {
     const f = await publishedBaskets(h);
-    const host = `${f.releaseId}.pinned.pages.example.test`;
+    const host = `${f.releaseId}.pages.example.test`;
     const credential = await f.credentials(f.data.contributor.sub, f.releaseId, host);
     const publication = await h.control.handle("publish", "author-alice", { artifactId: f.artifactId,
       files: f.files.map((file) => ({ ...file, text: file.text + "\n" })), idempotencyKey: `${f.releaseId}-next` });
@@ -40,7 +40,7 @@ describeDb("stored reader approval and single-use exchange", () => {
 
   it("should restart disconnected opening through existing login with a fresh binding", async () => {
     const f = await publishedBaskets(h), app = f.runtime();
-    const origin = `https://${f.releaseId}.pinned.pages.example.test`;
+    const origin = `https://${f.releaseId}.pages.example.test`;
     const request = (url: string, cookieHeader = "") => app.request(url, { headers: { host: new URL(url).host, cookie: cookieHeader } });
     const first = await request(origin + "/__reader/start");
     const login = await request(first.headers.get("location")!);
@@ -56,6 +56,52 @@ describeDb("stored reader approval and single-use exchange", () => {
     expect((await request(fresh.headers.get("location")!, await cookie(f.data.contributor.sub))).status).toBe(200);
     resume.searchParams.set("origin", "https://foreign.test");
     expect((await request(resume.href)).status).toBe(404);
+  });
+
+  it("should answer the same 404 for unknown, colliding and retired labels without leaking the kind", async () => {
+    const f = await publishedBaskets(h), app = f.runtime();
+    const unknownId = "123e4567-e89b-12d3-a456-426614174099";
+    const unknown = await app.request(`https://${unknownId}.pages.example.test/__reader/start`, {
+      headers: { host: `${unknownId}.pages.example.test` } });
+    expect(unknown.status).toBe(404);
+    expect(await unknown.json()).toEqual({ error: "not_found" });
+    // Manufacture an id collision: a release row reusing another artifact's id.
+    const second = await h.control.handle("ensure", "author-alice",
+      { bindingName: `collision-${f.releaseId}`, idempotencyKey: `collision-${f.releaseId}` });
+    expect(second.status).toBe(201);
+    const otherId = (second.body as { artifactId: string }).artifactId;
+    await h.pool.query(
+      "INSERT INTO artifacts.releases (id, artifact_id, manifest_digest, manifest, state) VALUES ($1, $2, 'deadbeef', '{}', 'ready')",
+      [f.artifactId, otherId]);
+    try {
+      const collided = await app.request(`https://${f.artifactId}.pages.example.test/__reader/start`, {
+        headers: { host: `${f.artifactId}.pages.example.test` } });
+      expect(collided.status).toBe(404);
+      expect(await collided.json()).toEqual({ error: "not_found" });
+    } finally {
+      await h.pool.query("DELETE FROM artifacts.releases WHERE id=$1 AND artifact_id=$2", [f.artifactId, otherId]);
+    }
+    // The retired pinned form is never a content host.
+    const retired = await app.request(`https://${f.releaseId}.pinned.pages.example.test/__reader/start`, {
+      headers: { host: `${f.releaseId}.pinned.pages.example.test` } });
+    expect(retired.status).toBe(404);
+  });
+
+  it("should 301 both retired immo-pages hosts to the same label on the new base", async () => {
+    const f = await publishedBaskets(h), app = f.runtime();
+    const stable = await app.request(`http://${f.artifactId}.preprod.immo-pages.sent-tech.ca/__reader/start?x=1`, {
+      headers: { host: `${f.artifactId}.preprod.immo-pages.sent-tech.ca` } });
+    expect(stable.status).toBe(301);
+    expect(stable.headers.get("location"))
+      .toBe(`https://${f.artifactId}.pages.example.test/__reader/start?x=1`);
+    const exact = await app.request(`http://${f.releaseId}.pinned.preprod.immo-pages.sent-tech.ca/main.js?grant=abc`, {
+      headers: { host: `${f.releaseId}.pinned.preprod.immo-pages.sent-tech.ca` } });
+    expect(exact.status).toBe(301);
+    expect(exact.headers.get("location"))
+      .toBe(`https://${f.releaseId}.pages.example.test/main.js?grant=abc`);
+    const malformed = await app.request("http://not-a-uuid.preprod.immo-pages.sent-tech.ca/", {
+      headers: { host: "not-a-uuid.preprod.immo-pages.sent-tech.ca" } });
+    expect(malformed.status).toBe(404);
   });
 
   it("should keep a delayed read open across unrelated account and ACL changes", async () => {
@@ -76,7 +122,7 @@ describeDb("stored reader approval and single-use exchange", () => {
   });
   it("should require app confirmation and exchange once across independently composed readers", async () => {
     const f = await publishedBaskets(h);
-    const contentHost = `${f.releaseId}.pinned.pages.example.test`;
+    const contentHost = `${f.releaseId}.pages.example.test`;
     const app = f.runtime();
     const request = (url: string, init?: RequestInit) => app.request(url, {
       ...init, headers: { host: new URL(url).host, ...init?.headers },
@@ -87,11 +133,11 @@ describeDb("stored reader approval and single-use exchange", () => {
     const start = await request(`https://${f.host}/__reader/start`);
     expect(start.status).toBe(303);
     expect(start.headers.get("location")).toBe(`https://${contentHost}/__reader/start`);
-    const pinned = await request(`https://${f.releaseId}.pinned.pages.example.test/__reader/start`);
+    const pinned = await request(`https://${f.releaseId}.pages.example.test/__reader/start`);
     expect(pinned.status).toBe(303);
     expect(new URL(pinned.headers.get("location")!).searchParams.get("artifactId")).toBe(f.artifactId);
     expect(new URL(pinned.headers.get("location")!).searchParams.get("origin"))
-      .toBe(`https://${f.releaseId}.pinned.pages.example.test`);
+      .toBe(`https://${f.releaseId}.pages.example.test`);
     const initialCookie = pinned.headers.get("set-cookie")!.split(";")[0]!;
     expect(pinned.headers.get("set-cookie")).toContain("Secure; HttpOnly; SameSite=Lax");
     const approvalUrl = pinned.headers.get("location")!;
@@ -112,12 +158,15 @@ describeDb("stored reader approval and single-use exchange", () => {
     const pinnedSummary = await request(pinned.headers.get("location")!, { headers: { cookie: appCookie } });
     expect(pinnedSummary.status).toBe(200);
     expect(pinnedSummary.headers.get("content-security-policy"))
-      .toContain(`form-action 'self' https://${f.releaseId}.pinned.pages.example.test;`);
-    for (const origin of ["https://foreign.test", `https://${f.host}.foreign.test`]) {
+      .toContain(`form-action 'self' https://${f.releaseId}.pages.example.test;`);
+    for (const origin of ["https://foreign.test", `https://${f.host}.foreign.test`,
+      `https://${f.releaseId}.pinned.pages.example.test`,
+      `https://${f.artifactId}.preprod.immo-pages.sent-tech.ca`,
+      "https://preprod.immo.sent-tech.ca", "https://preprod.auth.sent-tech.ca"]) {
       const forged = new URL(approvalUrl);
       forged.searchParams.set("origin", origin);
       const rejected = await request(forged.href, { headers: { cookie: appCookie } });
-      expect(rejected.status).toBe(401);
+      expect(rejected.status, origin).toBe(401);
       expect(rejected.headers.get("content-security-policy")).toBe(APPROVAL_BASE_CSP);
     }
     expect((await h.pool.query("SELECT count(*) FROM artifacts.reader_tickets")).rows[0].count).toBe("0");

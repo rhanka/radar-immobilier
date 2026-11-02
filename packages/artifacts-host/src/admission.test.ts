@@ -130,7 +130,7 @@ describe("admission refusals without storage mutation [T02 T05 T17 T24]", () => 
     expect(response).toEqual({ status: 201,
       body: { artifactId: ARTIFACT, releaseId: RELEASE, manifest: JSON.stringify({ digest: DIGEST }), digest: DIGEST,
         stableUrl: `https://${ARTIFACT}.pages.example.test/`,
-        pinnedUrl: `https://${RELEASE}.pinned.pages.example.test/` } });
+        pinnedUrl: `https://${RELEASE}.pages.example.test/` } });
     expect(handle).toHaveBeenCalledTimes(1);
   });
 

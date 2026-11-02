@@ -730,7 +730,7 @@ describe.skipIf(!ENABLED)("provider failures Q2 (set ARTIFACTS_PROVIDER_ACCEPTAN
         artifactId, releaseId: durableReceipt.releaseId, manifest: durableReceipt.manifest,
         digest: (JSON.parse(durableReceipt.manifest) as { digest: string }).digest,
         stableUrl: `https://${artifactId}.pages.example.test/`,
-        pinnedUrl: `https://${durableReceipt.releaseId}.pinned.pages.example.test/`,
+        pinnedUrl: `https://${durableReceipt.releaseId}.pages.example.test/`,
       } });
       // Successful manifests retain their bound provenance; deployment credentials stay private.
       expect(JSON.parse(durableReceipt.manifest)).toMatchObject({
