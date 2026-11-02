@@ -1,13 +1,13 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { ARTIFACT_INVOCATION_SCOPES, ARTIFACT_TOOL_SCOPES, ARTIFACT_PROFILE_REVISION, ARTIFACT_SELECTION } from "./artifact-profile.js";
+import { ARTIFACT_INVOCATION_SCOPES, ARTIFACT_TOOL_SCOPES, ARTIFACT_PROFILE_REVISION, ARTIFACT_SELECTION, ARTIFACT_PROVIDER_VERSION } from "./artifact-profile.js";
 import { compileComposition } from "./composition.js";
 import { type ArtifactActivationRequest, type ProviderDefinition } from "./mcp-registry.js";
 
 const embedded = JSON.parse(readFileSync(new URL("../../config/immo-tools.v1.json", import.meta.url), "utf8"));
 const immo = (): ProviderDefinition => structuredClone({ ...embedded.provider, tools: embedded.tools });
 const artifacts = (): ProviderDefinition => ({
-  id: "sentropic.artifacts", version: "0.2.2",
+  id: "sentropic.artifacts", version: ARTIFACT_PROVIDER_VERSION,
   tools: ARTIFACT_SELECTION.map(({ tool }) => ({
     name: tool, scope: ARTIFACT_TOOL_SCOPES[tool], binding: { context: "artifact-service", registeredBy: "registerTools" },
   })),

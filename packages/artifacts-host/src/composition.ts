@@ -2,7 +2,6 @@ import type pg from "pg";
 import { S3Client } from "@aws-sdk/client-s3";
 import { createS3BlobStore } from "@sentropic/artifacts/adapters/s3";
 import { createPostgresCommitExecutor } from "@sentropic/artifacts/adapters/postgres-commit";
-import { compileArtifactsProfile, RADAR_ARTIFACTS_PROFILE } from "@sentropic/artifacts/mcp-core";
 import { createArtifactCommitCoordinator } from "@sentropic/artifacts/server/commit-contract";
 import { projectArtifactHttpOutcome, type HttpAppDeps } from "@sentropic/artifacts/http";
 import type { PublicationBlobStore } from "@sentropic/artifacts/server/publication";
@@ -16,6 +15,8 @@ import { mapHostError, reportWriteFailure } from "./host-outcome.js";
 import { startPreparationCleanup } from "./preparation-cleanup.js";
 import { projectArtifactWriteFailure } from "@sentropic/artifacts/server/outcome-contract";
 import { createTimeoutBlobStore, createTimeoutS3Client, DEFAULT_S3_BUDGET, withS3Deadline } from "./s3-timeout.js";
+import { HOST_ARTIFACT_PROFILE, isArtifactMutation } from "./p0b-profile.js";
+import type { ArtifactDeleteConfirmation } from "./delete-confirmation.js";
 
 export interface ArtifactHostOptions {
   readonly profile?: HttpAppDeps["profile"];
@@ -23,6 +24,7 @@ export interface ArtifactHostOptions {
   readonly readActivation?: () => ActivationConfig;
   readonly contentBase?: string;
   readonly onProviderFailure?: (error: unknown) => void;
+  readonly confirmation?: ArtifactDeleteConfirmation;
 }
 
 export async function composeArtifactHost(
@@ -56,7 +58,8 @@ export async function composeArtifactHost(
   const blobs = createTimeoutBlobStore(base, budget.operationTimeoutMs, options.onProviderFailure);
   try {
     const domain = await createCommitDomain({ pool, scope: config.storageScope, blobs, coordinator,
-      profile: options.profile ?? compileArtifactsProfile(RADAR_ARTIFACTS_PROFILE),
+      profile: options.profile ?? HOST_ARTIFACT_PROFILE,
+      ...(options.confirmation ? { confirmation: options.confirmation } : {}),
       ...(options.contentBase ? { publicationUrls: (artifactId, releaseId) => ({
         stableUrl: `https://${artifactId}.${options.contentBase}/`,
         pinnedUrl: `https://${releaseId}.pinned.${options.contentBase}/`,
@@ -71,7 +74,7 @@ export async function composeArtifactHost(
         ? await withS3Deadline(Date.now() + PUBLISH_BLOB_DEADLINE_MS, dispatch) : await dispatch();
       if (!outcome.ok) {
         const entry = projectArtifactWriteFailure(outcome.failure, {
-          dispatched: true, write: request.method === "POST" && ["/ensure", "/publish"].includes(request.path),
+          dispatched: true, write: request.method === "POST" && isArtifactMutation(request.path.slice(1)),
         });
         if (entry) reportWriteFailure(entry, outcome.failure);
         if (entry) await pool.query(

@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { expect } from "vitest";
 import { S3Client } from "@aws-sdk/client-s3";
-import { composeArtifactHost, createArtifactControl } from "@radar/artifacts-host";
+import { composeArtifactHost, createArtifactControl, createDeleteConfirmation } from "@radar/artifacts-host";
 import { workspaceFixture, workspaceSignal } from "../../src/services/facets/workspace-archive-fixture.js";
 import { loadConfig } from "../../src/config.js";
 import { createTestS3BlobStore } from "../artifacts-blob-store.helpers.js";
@@ -37,7 +37,8 @@ export async function l5Publication(write = true) {
   const blobs = createTestS3BlobStore({ client: s3, bucket: config.s3Bucket });
   await f.pool.query("INSERT INTO artifacts.storage_scopes(id,org_id) VALUES($1,$2)", [scope, config.orgId]);
   await f.pool.query("INSERT INTO artifacts.host_quotas(storage_scope_id,operation_limit,byte_limit) VALUES($1,1000,1000000)", [scope]);
-  const host = (await composeArtifactHost(f.pool, config, blobs))!;
+  const host = (await composeArtifactHost(f.pool, config, blobs, {
+    confirmation: createDeleteConfirmation(f.pool, scope, L5_DOMAIN.appOrigin) }))!;
   const control = createArtifactControl(host, scope, "pages.example.test");
   const ensured = await control.handle("ensure", author, { bindingName: randomUUID(), idempotencyKey: randomUUID() });
   expect(ensured.status).toBe(201);

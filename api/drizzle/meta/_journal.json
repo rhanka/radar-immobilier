@@ -190,6 +190,13 @@
       "when": 1792100000001,
       "tag": "0027_pw_write_persistence",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1792100000002,
+      "tag": "0028_artifacts_p0b",
+      "breakpoints": true
     }
   ]
 }

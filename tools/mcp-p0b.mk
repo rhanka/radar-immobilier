@@ -1,0 +1,57 @@
+# Standalone runner: never include the root Makefile or read environment files.
+include tools/immo-mcp-test.mk
+override COMPOSE := docker compose --env-file /dev/null -p radar-$(ENV) -f docker-compose.test.yml -f tools/mcp-p0b.services.yml
+override CI_COMPOSE := docker compose --env-file /dev/null -p radar-$(ENV) -f docker-compose.yml -f docker-compose.test.yml -f tools/mcp-p0b.ci.services.yml
+RUN_API := $(COMPOSE) run --rm --no-deps -T --entrypoint '' api
+RUN_DATABASE_API := $(COMPOSE) run --rm --no-deps -T --entrypoint '' -e P0B_DATABASE_URL=postgres://p0b:p0b-test-only@postgres:5432/p0b
+.DEFAULT_GOAL := verify
+INSTALL := npm ci
+SOURCE ?= /home/antoinefa/src/sentropic/tmp/worktrees/artifacts-parity-p0b/packages/artifacts
+P0B_VERSION ?= 0.2.5
+
+.PHONY: prepare lock registry verify candidate integration database-check test-api down-api
+prepare: guard
+	@mkdir -p tmp/mcp-p0b
+database-check: guard
+	@trap '$(COMPOSE) logs --no-color postgres; $(COMPOSE) down -v --remove-orphans' EXIT; $(COMPOSE) up -d --wait postgres
+database-logs: guard-env
+	@$(COMPOSE) ps -a
+	@$(COMPOSE) logs --no-color postgres
+	@df -h .
+lock: guard
+	@$(CHECK) 'npm install --package-lock-only --ignore-scripts'
+registry: guard
+	@$(CHECK) 'npm view @sentropic/artifacts@$(P0B_VERSION) version'
+verify: guard
+ifeq ($(CANDIDATE),1)
+	@$(MAKE) --no-print-directory -f tools/mcp-p0b.mk candidate P0B_VERSION='$(P0B_VERSION)' SOURCE='$(SOURCE)' ENV=$(ENV)
+else
+	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; \
+	$(COMPOSE) up -d --wait postgres && \
+	$(RUN_DATABASE_API) api sh -ec "$(INSTALL) && npm run typecheck --workspace=packages/immo-mcp && npm run typecheck --workspace=packages/artifacts-host && npm run typecheck --workspace=api && npx --no-install eslint packages/immo-mcp/src packages/artifacts-host/src api/src/artifacts/control-route*.ts && npm run test --workspace=packages/immo-mcp -- --exclude '**/*.e2e.test.ts' && npm run test --workspace=packages/artifacts-host -- --maxWorkers=1"
+endif
+# A copy is built inside the container; the upstream checkout is mounted read-only.
+candidate: guard
+	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; \
+	$(COMPOSE) up -d --wait postgres && \
+	$(RUN_DATABASE_API) -e P0B_VERSION='$(P0B_VERSION)' -v '$(SOURCE):/candidate:ro' api sh tools/mcp-p0b-candidate.sh
+integration: guard
+	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; \
+	$(COMPOSE) up -d --wait postgres && \
+	$(RUN_DATABASE_API) api sh -ec '$(INSTALL) && npm run test --workspace=packages/artifacts-host -- src/p0b.integration.test.ts'
+
+# Same API gate as the root test-api / CI test target, without including .env.
+test-api: guard
+	@trap 'status=$$?; if [ "$$status" -ne 0 ]; then $(CI_COMPOSE) logs --no-color --tail=100 postgres minio; fi; $(CI_COMPOSE) down -v --remove-orphans; exit "$$status"' EXIT; \
+	$(CI_COMPOSE) up -d --wait postgres minio && \
+	$(CI_COMPOSE) run --rm -T api sh -ec '$(INSTALL) && npm run db:migrate --workspace=api && npm run test --workspace=api $(if $(SCOPE),-- $(SCOPE),)'
+
+down-api: guard-env
+	$(CI_COMPOSE) down -v --remove-orphans
+
+.PHONY: push clean-deps
+push: guard
+	git push -u origin HEAD
+clean-deps: guard-env
+	@$(CHECK) 'rm -rf packages/*/node_modules ui/node_modules tmp/mcp-p0b/artifacts tmp/mcp-p0b/toolchain tmp/mcp-p0b/graph'
+	@rmdir node_modules api/node_modules 2>/dev/null || true

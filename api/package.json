@@ -21,7 +21,7 @@
     "@radar/artifacts-host": "*",
     "@radar/domain": "*",
     "@radar/sources": "*",
-    "@sentropic/artifacts": "0.2.2",
+    "@sentropic/artifacts": "*",
     "@sentropic/chat-core": "^0.1.2",
     "@sentropic/geo": "^0.1.1",
     "@sentropic/geo-sources-americas": "^0.1.1",

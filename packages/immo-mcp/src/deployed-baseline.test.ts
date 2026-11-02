@@ -22,9 +22,13 @@ const fixtureBytes = readFileSync(new URL("./fixtures/immo-tools.v1.json", impor
 const fixture = JSON.parse(fixtureBytes.toString("utf8")) as {
   serverVersion: { name: string; version: string };
   serverCapabilities: unknown;
-  tools: unknown[];
+  tools: Record<string, unknown>[];
   captures: { http: Capture; simulation: Capture };
 };
+// Explicit discovery evolution; retain the captured fixture and its receipt hash.
+const expectedTools = fixture.tools.map((tool) => ({ ...tool, annotations: {
+  readOnlyHint: true, destructiveHint: false, openWorldHint: false, idempotentHint: true,
+} }));
 const receipt = JSON.parse(readFileSync(
   new URL("./fixtures/immo-deployed-baseline.v1.json", import.meta.url), "utf8",
 )) as {
@@ -143,7 +147,7 @@ describe("deployed twelve-tool baseline", () => {
         expect(client.getServerCapabilities()).toEqual(fixture.serverCapabilities);
         const { tools } = await client.listTools();
         expect(tools).toHaveLength(receipt.toolCount);
-        expect(tools).toEqual(fixture.tools);
+        expect(tools).toEqual(expectedTools);
         for (const [name, call] of Object.entries(fixture.captures[mode].calls)) {
           const result = await client.callTool({ name, arguments: call.args }) as ToolResult;
           expect(normalize(result), name).toEqual(normalize(call.result));
@@ -191,7 +195,7 @@ describe("deployed twelve-tool baseline", () => {
     const client = new Client({ name: "factory-baseline-test", version: "0.0.0" });
     try {
       await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
-      expect((await client.listTools()).tools).toEqual(fixture.tools);
+      expect((await client.listTools()).tools).toEqual(expectedTools);
     } finally {
       await client.close();
       await server.close();

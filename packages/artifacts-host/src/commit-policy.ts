@@ -2,6 +2,7 @@ import type pg from "pg";
 import type { AuthorizeCommit, CommitPolicyParticipantFactory } from "@sentropic/artifacts/server/commit-contract";
 import { isGeneralActivation, type ActivationConfig } from "./activation.js";
 import { POLICY_REVISION } from "./transaction-authority.js";
+import { sharePrincipalApproved } from "./p0b-ports.js";
 
 /** Every policy read and provisional reservation uses the coordinator's client. */
 export async function createHostPolicy(pool: pg.Pool, scope: string,
@@ -16,7 +17,10 @@ export async function createHostPolicy(pool: pg.Pool, scope: string,
         if (!result.rows[0]) throw new Error("artifact policy unavailable");
         return result.rows[0].revision;
       },
-      async checkApproval({ actorId }: { actorId: string }) {
+      async checkApproval({ actorId, operation }: { actorId: string; operation: string }) {
+        if (!await sharePrincipalApproved(client, operation)) {
+          return { approved: false as const, reason: "denied" as const, publicCode: "access_denied", status: 403 };
+        }
         const revision = await client.query<{ revision: string }>(
           "SELECT revision FROM artifacts.host_policy WHERE storage_scope_id = $1 FOR SHARE", [scope]);
         const account = await client.query<{ id: string; status: string }>(

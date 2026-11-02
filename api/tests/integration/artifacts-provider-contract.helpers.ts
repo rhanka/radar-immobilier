@@ -223,12 +223,13 @@ export async function requireCommitBarrier(points?: readonly CoordinatorBarrierP
 }
 
 /**
- * Assert the frozen selection value plus the compiled profile digest.
+ * Assert the expected selection plus the compiled profile digest (historical r2 by default).
  * The digest must equal the digest of the profile returned by
  * `compileArtifactsProfile`; any well-formed but unrelated hex digest is
  * rejected. A malformed Radar host is a contract violation.
  */
-export function requireSelectedProfile(host: unknown, expectedDigest: string): string {
+export function requireSelectedProfile(host: unknown, expectedDigest: string,
+  expectedCapabilities: readonly string[] = FROZEN_CAPABILITIES): string {
   const record = host as Record<string, unknown> | null;
   const selected = record !== null ? record["selectedCapabilities"] : undefined;
   if (!Array.isArray(selected)) {
@@ -241,7 +242,7 @@ export function requireSelectedProfile(host: unknown, expectedDigest: string): s
   if (!Object.isFrozen(selected)) {
     throw new Error("[contract-violation] host.selectedCapabilities must be frozen");
   }
-  const frozen = [...FROZEN_CAPABILITIES].sort();
+  const frozen = [...expectedCapabilities].sort();
   if (names.length !== frozen.length || names.some((name, index) => name !== frozen[index])) {
     throw new Error(
       `[contract-violation] provider.selectCapabilities: expected exactly ${frozen.join(", ")}`,

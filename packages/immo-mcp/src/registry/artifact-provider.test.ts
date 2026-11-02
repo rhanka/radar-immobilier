@@ -3,11 +3,12 @@ import { compileArtifactsProfile, RADAR_ARTIFACTS_PROFILE } from "@sentropic/art
 import { IMMO_ARTIFACT_PROFILE as profile, IMMO_ARTIFACT_MANIFEST as manifest,
   createImmoArtifactManifest } from "./artifact-provider.js";
 import { ARTIFACT_TOOL_SCOPES, type ArtifactToolName } from "./artifact-profile.js";
+import { ARTIFACT_P0B, ACTIVE_ARTIFACT_TOOLS } from "@radar/artifacts-host";
 
 describe("P7 published effective profile", () => {
   it("should compile four closed schemas with caller keys and the invocation scope", () => {
     expect(manifest.tools.map((tool) => tool.name)).toEqual(profile.selectedCapabilities);
-    expect(manifest.tools).toHaveLength(4);
+    expect(manifest.tools).toHaveLength(ACTIVE_ARTIFACT_TOOLS.length);
     expect(Object.isFrozen(profile)).toBe(true);
     expect(manifest.audit.artifactsProfileDigest).toBe(profile.profileDigest);
     for (const tool of manifest.tools) {
@@ -27,14 +28,16 @@ describe("P7 published effective profile", () => {
     expect(Object.fromEntries(manifest.tools.map((tool) => [tool.name, tool.requiredScopes]))).toEqual({
       artifacts_ensure: ["immo:artifacts:write"], artifacts_publish: ["immo:artifacts:write"],
       artifacts_list: ["immo:artifacts:read"], artifacts_get: ["immo:artifacts:read"],
+      ...(ARTIFACT_P0B ? { artifacts_get_source: ["immo:artifacts:read"], artifacts_set_access: ["immo:artifacts:write"], artifacts_delete: ["immo:artifacts:write"] } : {}),
     });
     expect(manifest.authz.scopes).toEqual(["immo:artifacts:read", "immo:artifacts:write"]);
     const transition = createImmoArtifactManifest({ legacyReadScope: true });
     expect(Object.fromEntries(transition.tools.map((tool) => [tool.name, tool.requiredScopes]))).toEqual({
       artifacts_ensure: ["immo:artifacts:write"], artifacts_publish: ["immo:artifacts:write"],
       artifacts_list: [], artifacts_get: [],
+      ...(ARTIFACT_P0B ? { artifacts_get_source: ["immo:artifacts:read"], artifacts_set_access: ["immo:artifacts:write"], artifacts_delete: ["immo:artifacts:write"] } : {}),
     });
-    expect(transition.authz.scopes).toEqual(["immo:artifacts:write"]);
+    expect(transition.authz.scopes).toEqual(ARTIFACT_P0B ? ["immo:artifacts:read", "immo:artifacts:write"] : ["immo:artifacts:write"]);
     expect(manifest.tools.some((tool) => tool.requiredScopes.includes("immo:read"))).toBe(false);
   });
 

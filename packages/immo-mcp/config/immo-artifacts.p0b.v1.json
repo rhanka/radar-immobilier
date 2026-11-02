@@ -1,0 +1,25 @@
+{
+  "extends": "immo-artifacts.v1.json",
+  "descriptor": {
+    "profileRevisionId": "immo-artifacts.p0b.v1",
+    "requireExpectedCurrentReleaseId": false,
+    "resultEnvelopeVersion": 1
+  },
+  "providerVersion": "0.2.5 || 0.3.0",
+  "additionalToolScopes": {
+    "artifacts_get_source": "immo:artifacts:read",
+    "artifacts_set_access": "immo:artifacts:write",
+    "artifacts_delete": "immo:artifacts:write"
+  },
+  "additionalSelection": [
+    { "tool": "artifacts_get_source", "operation": "get_source", "method": "POST", "path": "/get_source", "command": "get_source" },
+    { "tool": "artifacts_set_access", "operation": "set_access", "method": "POST", "path": "/set_access", "command": "set_access" },
+    { "tool": "artifacts_delete", "operation": "delete", "method": "POST", "path": "/delete", "command": "delete" }
+  ],
+  "additionalEffectiveProfile": {
+    "artifacts_get_source": { "required": ["artifactId"], "maxFiles": 32, "maxTotalBytes": 262144 },
+    "artifacts_set_access": { "required": ["artifactId", "action", "principalId", "idempotencyKey"], "grant": "read", "principalId": "approved IMMO account IdP sub" },
+    "artifacts_delete": { "required": ["artifactId", "idempotencyKey"], "confirmation": "trusted app session; transactional consumption", "terminal": true }
+  },
+  "disabled": ["artifacts_restore", "artifacts_fork", "artifacts_promote", "artifacts_renew"]
+}

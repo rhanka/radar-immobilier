@@ -6,7 +6,26 @@ vi.mock("@sentropic/artifacts/http", async (original) => {
 });
 
 it("denies a publication revoked during a key wait without a durable success", async () => {
-  const host = await composeArtifactHost(pool, storageConfig(), rawBlobs());
+  const keyWait = Promise.withResolvers<void>();
+  let observeKeyWait = false;
+  const observed = new Proxy(pool, { get(target, key) {
+    if (key === "connect") return async () => {
+      const client = await target.connect();
+      return new Proxy(client, { get(connection, property) {
+        if (property === "query") return (text: unknown, ...args: unknown[]) => {
+          const pending = Reflect.apply(connection.query, connection, [text, ...args]);
+          if (observeKeyWait && typeof text === "string" && text.includes("artifacts.operation_keys") &&
+            text.includes("FOR UPDATE")) keyWait.resolve();
+          return pending;
+        };
+        const value = Reflect.get(connection, property);
+        return typeof value === "function" ? value.bind(connection) : value;
+      } });
+    };
+    const value = Reflect.get(target, key);
+    return typeof value === "function" ? value.bind(target) : value;
+  } });
+  const host = await composeArtifactHost(observed, storageConfig(), rawBlobs(), hostOptions(observed));
   const control = createArtifactControl(host, SCOPE, BASE);
   const holder = await pool.connect();
   let pending: ReturnType<typeof control.handle> | undefined;
@@ -22,7 +41,12 @@ it("denies a publication revoked during a key wait without a durable success", a
     await holder.query("SELECT 1 FROM artifacts.operation_keys WHERE storage_scope_id=$1 AND internal_key=$2 FOR UPDATE", [SCOPE, internalKey]);
     const releases = await tableCount("releases");
     const receipts = await tableCount("operation_receipts");
+    observeKeyWait = true;
     pending = control.handle("publish", "alice", body);
+    // S3 preparation precedes the key lock; start observing only once SQL is dispatched.
+    await Promise.race([keyWait.promise, pending.then((response) => {
+      throw new Error(`publication completed before the key wait: ${JSON.stringify(response)}`);
+    })]);
     await expect.poll(async () => Number((await pool.query(
       "SELECT count(*) FROM pg_stat_activity WHERE datname=current_database() AND wait_event_type='Lock'",
     )).rows[0].count)).toBeGreaterThan(0);
@@ -40,7 +64,7 @@ it("denies a publication revoked during a key wait without a durable success", a
     expect(await tableCount("releases")).toBe(releases + 1);
     expect(await tableCount("operation_receipts")).toBe(receipts + 1);
     host.close();
-    const restarted = await composeArtifactHost(pool, storageConfig(), rawBlobs());
+    const restarted = await composeArtifactHost(pool, storageConfig(), rawBlobs(), hostOptions());
     try {
       const now = Date.now();
       await pool.query(`UPDATE artifacts.object_intents SET payload = payload ||
@@ -72,6 +96,7 @@ import {
   composeArtifactHost,
   createArtifactControl,
   createArtifactsPool,
+  createDeleteConfirmation,
   createMemoryCommitLedger,
   deriveIdempotencyKey,
 } from "@radar/artifacts-host";
@@ -93,6 +118,9 @@ let accessKey = "";
 let secretKey = "";
 
 const rawBlobs = () => createTestS3BlobStore({ client: s3, bucket: BUCKET });
+const hostOptions = (connection = pool) => ({
+  confirmation: createDeleteConfirmation(connection, SCOPE, "https://app.example.test"),
+});
 const storageConfig = () => ({ enabled: true as const, storageScope: SCOPE, orgId: ORG,
   s3Bucket: BUCKET, s3Endpoint: endpoint, s3Region: "us-east-1",
   s3AccessKey: accessKey, s3SecretKey: secretKey });
@@ -141,7 +169,7 @@ describe("commit probe against the real provider stack [T05 T13]", () => {
   it("maps a below-layer S3 timeout converted to 500 back to 503", async () => {
     const { ledger, entries } = createMemoryCommitLedger();
     const broken = (await composeArtifactHost(pool, storageConfig(), { ...rawBlobs(),
-      async putBlob() { throw new ArtifactS3TimeoutError("blobs.putBlob"); } }))!;
+      async putBlob() { throw new ArtifactS3TimeoutError("blobs.putBlob"); } }, hostOptions()))!;
     const control = createArtifactControl(broken, SCOPE, BASE, undefined, { ledger });
     try {
       const id = await ensureArtifact(control, "probe-s3-ensure");
@@ -170,7 +198,7 @@ describe("commit probe against the real provider stack [T05 T13]", () => {
       return typeof value === "function" ? value.bind(target) : value;
     } });
     const { ledger, entries } = createMemoryCommitLedger();
-    const host = (await composeArtifactHost(flaky, storageConfig(), rawBlobs()))!;
+    const host = (await composeArtifactHost(flaky, storageConfig(), rawBlobs(), hostOptions(flaky)))!;
     const control = createArtifactControl(host, SCOPE, BASE, undefined, { ledger });
     armed.current = true;
     try {
@@ -187,7 +215,7 @@ describe("commit probe against the real provider stack [T05 T13]", () => {
 
   it("keeps a below-layer lock conflict as 409 conflict", async () => {
     const { ledger, entries } = createMemoryCommitLedger();
-    const host = (await composeArtifactHost(pool, storageConfig(), rawBlobs()))!;
+    const host = (await composeArtifactHost(pool, storageConfig(), rawBlobs(), hostOptions()))!;
     const control = createArtifactControl(host, SCOPE, BASE, undefined, { ledger });
     try {
       const id = await ensureArtifact(control, "probe-lock-ensure");

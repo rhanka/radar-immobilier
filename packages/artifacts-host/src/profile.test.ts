@@ -12,7 +12,7 @@ describe("provider-neutral Radar profile preparation", () => {
   });
 
   it("requires exactly the approved four operations regardless of ordering", () => {
-    const selected = ["artifacts_ensure", "artifacts_get", "artifacts_list", "artifacts_publish"];
+    const selected = [...FROZEN_CAPABILITIES];
     expect(() => assertFrozenSelection(selected)).not.toThrow();
     expect(() => assertFrozenSelection([...selected].reverse())).not.toThrow();
     expect(() => assertFrozenSelection(selected.slice(1))).toThrow("[contract-violation]");

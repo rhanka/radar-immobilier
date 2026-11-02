@@ -8,7 +8,7 @@ describe("provider selection structural guard", () => {
 
   it("accepts a frozen primitive selection with its expected digest", () => {
     expect(requireSelectedProfile({ selectedCapabilities: Object.freeze([...FROZEN_CAPABILITIES]),
-      profileDigest: digest }, digest)).toBe(digest);
+      profileDigest: digest }, digest, FROZEN_CAPABILITIES)).toBe(digest);
   });
 
   it.each([
@@ -16,6 +16,15 @@ describe("provider selection structural guard", () => {
     { kind: "objects", names: FROZEN_CAPABILITIES.map((name) => ({ toString: () => name })) },
   ])("rejects non-string selection values: $kind", ({ names }) => {
     expect(() => requireSelectedProfile({ selectedCapabilities: Object.freeze(names),
-      profileDigest: digest }, digest)).toThrow("[contract-violation]");
+      profileDigest: digest }, digest, FROZEN_CAPABILITIES)).toThrow("[contract-violation]");
+  });
+
+  it.each([
+    { kind: "missing", names: FROZEN_CAPABILITIES.slice(1) },
+    { kind: "extra", names: [...FROZEN_CAPABILITIES, "artifacts_restore"] },
+    { kind: "duplicate", names: [...FROZEN_CAPABILITIES, FROZEN_CAPABILITIES[0]] },
+  ])("rejects an incorrect active selection: $kind", ({ names }) => {
+    expect(() => requireSelectedProfile({ selectedCapabilities: Object.freeze(names),
+      profileDigest: digest }, digest, FROZEN_CAPABILITIES)).toThrow("[contract-violation]");
   });
 });

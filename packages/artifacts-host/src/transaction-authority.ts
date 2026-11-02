@@ -1,7 +1,7 @@
 /** Provider-neutral authority seam. Runtime binding awaits the candidate API. */
 export type AuthorizePurpose = "finalize" | "replay";
 
-export type CommitOperation = "ensure" | "publish";
+export type CommitOperation = "ensure" | "publish" | "set_access" | "delete";
 
 export interface AuthorizeCommitContext {
   readonly invocationId: string;

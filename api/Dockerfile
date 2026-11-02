@@ -162,6 +162,10 @@ COPY --from=build /workspace/packages/immo-mcp/node_modules ./packages/immo-mcp/
 COPY --from=build /workspace/api/drizzle ./api/drizzle
 # Fixtures simulation CS-L6 (JSON lus depuis le disque à la première requête)
 COPY --from=build /workspace/api/src/services/geo/fixtures ./api/fixtures
+# Official Sentropic design-kit stylesheets (verbatim upstream CSS, sha256-pinned
+# in @radar/artifacts-host). Read at runtime by api/dist/artifacts/design-kit.js
+# next to the bundle; served on the reserved content/approval design path.
+COPY --from=build /workspace/api/src/artifacts/design-assets ./api/dist/artifacts/design-assets
 # Shared ontology profile — the exploitation reconciler (reconcile.ts
 # loadRadarProfile) reads it at RUNTIME. The esbuild bundle flattens the module
 # depth (api/dist/index.js + api/dist/scripts/*.js sit shallower than
