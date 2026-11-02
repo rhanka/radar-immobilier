@@ -8,6 +8,8 @@ import { getInvocationContext } from "../invocation-context.js";
 import { invokeTool } from "../tools.js";
 import { AccountBindingUnavailable } from "../account-binding.js";
 import { artifactRefusal, artifactScopeDenied, assertArtifactBinding, type ArtifactMcpBinding } from "./artifact-provider.js";
+import { ARTIFACT_STRICT, ARTIFACT_PART1 } from "@radar/artifacts-host";
+import { deferArtifactPrecondition } from "./artifact-transport-modules.js";
 
 // GeoJSON may contain 2,000 features; budgets must not impose a smaller semantic limit.
 export const IMMO_WIRE_LIMITS = Object.freeze({
@@ -46,7 +48,8 @@ export async function composeStatefulImmo(
 ) {
   const unavailableAccounts = new WeakSet<VerifiedMcpRequest>();
   if (artifacts) assertArtifactBinding(artifacts);
-  const modules = createClusterMeshModules();
+  const nativeModules = createClusterMeshModules();
+  const modules = artifacts && ARTIFACT_STRICT ? deferArtifactPrecondition(nativeModules, artifacts.tools) : nativeModules;
   const registry = createMcpRegistry({ modules });
   registry.register({
     manifest, parameterSchema: { properties: {} }, requiredPorts: [],
@@ -109,7 +112,9 @@ export async function composeStatefulImmo(
       const retriable = refusal.kind === "account" && unavailableAccounts.delete(context);
       const error = retriable ? "account_binding_unavailable"
         : refusal.kind === "scope" ? `scope_denied:${refusal.missingScopes.join(",")}` : `composition_${refusal.kind}`;
-      if (artifacts?.tools.some((entry) => entry.name === tool)) return artifactRefusal(error, retriable);
+      if (artifacts?.tools.some((entry) => entry.name === tool)) {
+        return artifactRefusal(ARTIFACT_PART1 && refusal.kind === "invalid-arguments" ? "invalid_request" : error, retriable);
+      }
       return { isError: true, content: [{ type: "text", text: JSON.stringify({
         error, tool, correlationId: context.correlationId, ...(retriable ? { retriable: true } : {}),
       }, null, 2) }] };

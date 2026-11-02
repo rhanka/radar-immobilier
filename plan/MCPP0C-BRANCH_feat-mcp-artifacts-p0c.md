@@ -21,6 +21,7 @@
 - [x] MCPP0C-EX2: owner requires no commit trailers, overriding the repository co-author convention; standalone commit target already supports this.
 - [x] MCPP0C-EX3: historic receipt codecs and both projections are contract requirements, overriding the generic no-legacy-fallback rule for these codecs.
 - [x] Source pointers corrected: control route is `api/src/artifacts/control-route.ts`; successor contract is `packages/immo-mcp/src/status/successor-contract.ts`.
+- [x] MCPP0C-EX4: owner prohibits workflow/background tools and delegation; review is performed in-session, with no independent consensus claim.
 
 ## Orchestration Mode (AI-selected)
 - [x] One branch, two deployment lots, all execution in this session; no delegation or background workflow.
