@@ -1,5 +1,5 @@
 import { ARTIFACT_P0B, ARTIFACT_P0B_VERSIONS } from "@radar/artifacts-host";
-import { readArtifactConfig } from "./artifact-config.test-support.js";
+import { readArtifactConfig } from "./artifact-config.js";
 import { describe, expect, it } from "vitest";
 import {
   ARTIFACT_DURABLE_IDENTITY,
@@ -186,7 +186,7 @@ describe("artifact effective profile", () => {
   });
 
   it("should expose the installed qualified artifact provider version", () => {
-    expect(ARTIFACT_P0B_VERSIONS).toEqual(["0.2.5", "0.3.0"]);
+    expect(ARTIFACT_P0B_VERSIONS).toEqual(["0.2.5", "0.2.6", "0.3.0"]);
     expect(ARTIFACT_P0B ? ARTIFACT_P0B_VERSIONS : ["0.2.2"]).toContain(ARTIFACT_PROVIDER_VERSION);
     expect(config.provider.version).toBe(ARTIFACT_PROVIDER_VERSION);
   });
