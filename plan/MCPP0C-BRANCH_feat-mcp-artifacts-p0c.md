@@ -36,17 +36,17 @@
   - [x] Verify published 0.2.6 integrity before consuming it (exact owner-provided SHA-512 matches npm).
 - [ ] **Lot A — Strict inputs and authority, envelope 1**
   - [x] Pin artifacts 0.2.6 and mcp-platform 0.4.1 centrally; regenerate lock through make.
-  - [ ] Add trusted profile selection, strict guide/catalogue and startup coherence checks.
-  - [ ] Add replayable locked policy activation and complete writer inventory.
+  - [x] Add trusted profile selection, strict guide/catalogue and startup coherence checks.
+  - [x] Add replayable locked policy activation and complete writer inventory.
   - [x] Keep schema migration and exclusive policy migration independent from startup/default P0b.
-  - [ ] Preserve old receipts and refuse new omissions after authorization without quota.
+  - [x] Preserve old receipts and refuse new omissions after authorization without quota.
   - [ ] Verify unit/integration, old and waiting writers, crossing-switch retry, HTTP/MCP omission and first null publication.
 - [ ] **Lot B — Results and qualified part1**
-  - [ ] Freeze projection per binding/request; migrate consumers, errors and guide placement.
-  - [ ] Expose versions/revert only for the v2 profile, with operation-specific annotations.
+  - [x] Freeze projection per binding/request; migrate consumers, errors and guide placement.
+  - [x] Expose versions/revert only for the v2 profile, with operation-specific annotations.
   - [ ] Run strict P0-A lifecycle, conflict, edits, metadata, revert and retry proofs.
 - [ ] **Delivery and qualification**
-  - [ ] Add one operator command per switchover and explicit Claude qualification gates.
+  - [x] Add one operator command per switchover and explicit Claude qualification gates.
   - [ ] Run verify, integration, full API Quality gates integration suite; always down -v.
   - [ ] Review final changes in this session, push and open one PR in English.
   - [ ] Write the conductor report with exact activation sequence and remaining gaps.
