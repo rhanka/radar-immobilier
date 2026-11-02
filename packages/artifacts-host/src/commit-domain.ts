@@ -16,6 +16,7 @@ import { replayPublication } from "./publication-replay.js";
 import { ARTIFACT_P0B, isArtifactMutation, isArtifactPublication } from "./p0b-profile.js";
 import { assertP0bStorage, p0bPorts, sharePrincipal } from "./p0b-ports.js";
 import type { ArtifactDeleteConfirmation } from "./delete-confirmation.js";
+import { createArtifactReadMetadata } from "./read-metadata.js";
 
 /**
  * A prepared publication must finalize within this window: past it, the
@@ -42,6 +43,7 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
   const { pool, scope, blobs, profile, coordinator } = options;
   await assertP0bStorage(pool, options.confirmation);
   const store = createPostgresArtifactStore(pool);
+  const reads = createArtifactReadMetadata(pool, scope, options.publicationUrls);
   const publication = createPublicationService({ state: store, blobs, intents: store });
   const keyDomain = new AsyncLocalStorage<ReturnType<typeof createRadarKeyDerivation>>();
   const artifact = new AsyncLocalStorage<string>();
@@ -83,7 +85,7 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
       },
       async abandonAttempt() { /* Ensure stages no external objects. */ },
     },
-    acls: store, lifecycle: createLifecycleService(store, undefined, store),
+    acls: { ...store, listArtifactIds: reads.listArtifactIds }, lifecycle: createLifecycleService(store, undefined, store),
     ...p0bPorts(store, options.confirmation, (sub) => approved.getStore()?.has(sub) === true),
     publication: { blobs, intents: store, refs: createPostgresClaimGuardedRefs(store, createPostgresCommitExecutor(pool)),
       cleanupWindowMs: PREPARATION_WINDOW_MS, createUnitWriter: createPostgresPublicationUnitWriter, getCurrent: publication.getCurrent,
@@ -132,7 +134,7 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
               return rateLimitedOutcome(invocation.invocationId, command.operation);
             }
           }
-          return app.execute(request, invocation);
+          return reads.project(request, () => app.execute(request, invocation));
         })))));
     } catch (cause) {
       const failure = classifyArtifactFailure(cause, { invocationId: invocation.invocationId,
