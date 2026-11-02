@@ -256,7 +256,7 @@ function isSourceTextMime(mimeType: unknown): boolean {
 
 function decodeStrictUtf8(bytes: readonly number[]): string | undefined {
   try {
-    return new TextDecoder("utf-8", { fatal: true }).decode(Uint8Array.from(bytes));
+    return new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(Uint8Array.from(bytes));
   } catch {
     return undefined;
   }
