@@ -32,7 +32,7 @@ ifeq ($(CANDIDATE),1)
 else
 	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; \
 	$(COMPOSE) up -d --wait postgres && \
-	$(RUN_DATABASE_API) api sh -ec "$(INSTALL) && npm run typecheck --workspace=packages/immo-mcp && npm run typecheck --workspace=packages/artifacts-host && npm run typecheck --workspace=api && npx --no-install eslint packages/immo-mcp/src packages/artifacts-host/src api/src/artifacts/control-route*.ts && npm run test --workspace=packages/immo-mcp -- --exclude '**/*.e2e.test.ts' && npm run test --workspace=packages/artifacts-host -- --maxWorkers=1"
+	$(RUN_DATABASE_API) api sh tools/mcp-p0c-verify.sh
 endif
 # A copy is built inside the container; the upstream checkout is mounted read-only.
 candidate: guard
@@ -42,7 +42,11 @@ candidate: guard
 integration: guard
 	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; \
 	$(COMPOSE) up -d --wait postgres && \
-	$(RUN_DATABASE_API) api sh -ec '$(INSTALL) && npm run test --workspace=packages/artifacts-host -- src/p0b.integration.test.ts'
+	$(RUN_DATABASE_API) api sh -ec '$(INSTALL) && npm run test --workspace=packages/artifacts-host -- src/p0b.integration.test.ts src/p0c.integration.test.ts src/p0c-lifecycle.integration.test.ts --maxWorkers=1'
+strict: guard
+	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; \
+	$(COMPOSE) up -d --wait postgres && \
+	$(RUN_DATABASE_API) api sh -ec '$(INSTALL) && ARTIFACTS_PROFILE_REVISION=immo-artifacts.cas.v2 npm run test --workspace=packages/immo-mcp -- src/registry/p0c-transport.test.ts src/registry/p0c-http.test.ts --maxWorkers=1 && ARTIFACTS_PROFILE_REVISION=immo-artifacts.v2 ARTIFACTS_INPUTS_QUALIFIED=true ARTIFACTS_RESULTS_QUALIFIED=true npm run test --workspace=packages/immo-mcp -- src/registry/p0c-transport.test.ts src/registry/p0c-http.test.ts --maxWorkers=1'
 
 # Same API gate as the root test-api / CI test target, without including .env.
 test-api: guard

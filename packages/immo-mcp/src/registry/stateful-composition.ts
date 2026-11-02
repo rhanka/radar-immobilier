@@ -105,6 +105,7 @@ export async function composeStatefulImmo(
       // Artifact tools share one typed scope refusal with the binding check.
       if (refusal.kind === "scope" && artifacts?.tools.some((entry) => entry.name === tool)) {
         const denied = artifactScopeDenied(tool);
+        if (ARTIFACT_PART1) return denied;
         const text = JSON.parse((denied.content[0] as { text: string }).text) as Record<string, unknown>;
         return { ...denied, content: [{ type: "text", text: JSON.stringify({ ...text, tool,
           correlationId: context.correlationId }, null, 2) }] };
