@@ -88,3 +88,10 @@ Prepare the three qualified P0b operations (0.2.5 or 0.3.0) while preserving the
   - [x] 0.2.2 baseline: 518 MCP + 234 host tests pass (8 + 10 profile skips); three workspace typechecks and scoped lint pass.
   - [x] Local 0.2.5 candidate: 529 MCP + 244 host tests pass, no skips, including eleven PostgreSQL cases; three typechecks, lint and dependency resolution pass.
   - [x] Remove disposable dependencies; explicit `down -v` and inspection confirm zero remaining project containers, volumes or networks.
+- [x] **Lot 9 — Requalify sentropic PR #878 after its rebase**
+  - [x] Archive the immutable upstream package at `708f15d1a6ee40224b2a572be5581bfc6e092130` into this checkout's scratch directory; keep sentropic read-only.
+  - [x] Compare with `8b5b1f77`: package/provider version 0.2.5, an authorization fixture, the APP-P1 manifest pin and rebased CI tooling change; API, exports, dispatched tool names and transport-profile validation stay unchanged. No adapter change is needed.
+  - [x] Local 0.2.5 candidate: 529 MCP + 244 host tests pass, no skips, including eleven PostgreSQL cases; three typechecks, lint and full dependency resolution pass.
+  - [x] Tarball SHA-256: `5dc60bd499d5ba0b0974fca8ecc1ef8a4468bc8712f446a87a8d2c5e5bb0525f`; update the runbook's upstream reference.
+  - [x] 0.2.2 baseline: 518 MCP + 234 host tests pass (8 + 10 profile skips); three workspace typechecks and scoped lint pass; dependency pin and lockfile stay unchanged.
+  - [x] Remove disposable dependencies; explicit `down -v` and inspection confirm zero remaining project containers, volumes or networks.
