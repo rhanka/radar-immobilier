@@ -98,7 +98,7 @@ Both local candidate graphs (0.2.5 and 0.3.0) resolve without ERESOLVE with that
 When npm publication is available:
 
 1. Prefer `0.2.5`. Run `make -f tools/mcp-p0b.mk registry P0B_VERSION=0.2.5 ENV=test-mcp-p0b`
-   and confirm the published API matches PR #878, commit `8b5b1f7793e433938de64f068dc2116e6f084ff6` or later.
+   and confirm the published API matches PR #878, commit `708f15d1a6ee40224b2a572be5581bfc6e092130` or later.
    If upstream publishes the fallback instead, use `P0B_VERSION=0.3.0` for registry/candidate;
    the remaining commands are unchanged.
 2. Change **one source line**: root `dependencies["@sentropic/artifacts"]` from `0.2.2` to the selected version,
