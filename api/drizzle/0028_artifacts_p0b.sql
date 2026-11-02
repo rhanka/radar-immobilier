@@ -17,9 +17,9 @@ BEGIN
   RETURN NEW;
 END $$;
 --> statement-breakpoint
-CREATE TRIGGER terminal_restore_guard BEFORE UPDATE ON artifacts.artifacts
+CREATE OR REPLACE TRIGGER terminal_restore_guard BEFORE UPDATE ON artifacts.artifacts
 FOR EACH ROW EXECUTE FUNCTION artifacts.reject_terminal_restore();
-CREATE TRIGGER terminal_identity_guard BEFORE DELETE ON artifacts.artifacts
+CREATE OR REPLACE TRIGGER terminal_identity_guard BEFORE DELETE ON artifacts.artifacts
 FOR EACH ROW EXECUTE FUNCTION artifacts.reject_terminal_restore();
 --> statement-breakpoint
 CREATE OR REPLACE FUNCTION artifacts.reject_terminal_publication() RETURNS trigger LANGUAGE plpgsql AS $$
@@ -29,9 +29,9 @@ BEGIN
   RETURN NEW;
 END $$;
 --> statement-breakpoint
-CREATE TRIGGER terminal_release_guard BEFORE INSERT ON artifacts.releases
+CREATE OR REPLACE TRIGGER terminal_release_guard BEFORE INSERT ON artifacts.releases
 FOR EACH ROW EXECUTE FUNCTION artifacts.reject_terminal_publication();
-CREATE TRIGGER terminal_pointer_guard BEFORE INSERT OR UPDATE ON artifacts.artifact_current
+CREATE OR REPLACE TRIGGER terminal_pointer_guard BEFORE INSERT OR UPDATE ON artifacts.artifact_current
 FOR EACH ROW EXECUTE FUNCTION artifacts.reject_terminal_publication();
 --> statement-breakpoint
 CREATE OR REPLACE FUNCTION artifacts.record_publication_update() RETURNS trigger LANGUAGE plpgsql AS $$
@@ -40,10 +40,10 @@ BEGIN
   RETURN NEW;
 END $$;
 --> statement-breakpoint
-CREATE TRIGGER publication_updated_at AFTER INSERT ON artifacts.releases
+CREATE OR REPLACE TRIGGER publication_updated_at AFTER INSERT ON artifacts.releases
 FOR EACH ROW EXECUTE FUNCTION artifacts.record_publication_update();
 --> statement-breakpoint
-CREATE TABLE artifacts.delete_confirmations (
+CREATE TABLE IF NOT EXISTS artifacts.delete_confirmations (
   confirmation_ref UUID PRIMARY KEY,
   storage_scope_id TEXT NOT NULL REFERENCES artifacts.storage_scopes(id),
   actor_id TEXT NOT NULL,
