@@ -35,7 +35,9 @@ export async function composeArtifactHost(
 ) {
   pool = guardArtifactPool(pool);
   await initializeArtifactScope(pool, config.storageScope, config.orgId);
-  const policy = await createHostPolicy(pool, config.storageScope, options.readActivation);
+  const profile = options.profile ?? HOST_ARTIFACT_PROFILE;
+  const policy = await createHostPolicy(pool, config.storageScope, options.readActivation,
+    profile.requireExpectedCurrentReleaseId ? "radar-c4-r3-artifacts-cas" : "radar-c4-r2");
   const coordinator = options.coordinator ?? createArtifactCommitCoordinator({
     executor: createPostgresCommitExecutor(pool), policy, mapHostError,
   });
@@ -58,7 +60,7 @@ export async function composeArtifactHost(
   const blobs = createTimeoutBlobStore(base, budget.operationTimeoutMs, options.onProviderFailure);
   try {
     const domain = await createCommitDomain({ pool, scope: config.storageScope, blobs, coordinator,
-      profile: options.profile ?? HOST_ARTIFACT_PROFILE,
+      profile,
       ...(options.confirmation ? { confirmation: options.confirmation } : {}),
       ...(options.contentBase ? { publicationUrls: (artifactId, releaseId) => ({
         stableUrl: `https://${artifactId}.${options.contentBase}/`,
