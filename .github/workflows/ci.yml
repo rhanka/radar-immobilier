@@ -61,6 +61,9 @@ jobs:
       - name: Validate preprod reconcile immo-mcp branch (hermetic, fake kubectl)
         run: bash deploy/ci/reconcile-preprod-mcp.test.sh
 
+      - name: Validate P0-C preprod switchover hook (hermetic, fake kubectl)
+        run: bash deploy/ci/p0c-apply-hook.test.sh
+
       - name: Validate manifest filter equivalence (fixtures and preprod render)
         run: bash deploy/ci/kfilter.test.sh
 
