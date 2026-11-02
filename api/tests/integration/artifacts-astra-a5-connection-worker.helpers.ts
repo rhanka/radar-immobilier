@@ -1,7 +1,7 @@
 import { fork } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
-import { composeArtifactHost, guardArtifactPool } from "@radar/artifacts-host";
+import { composeArtifactHost, createDeleteConfirmation, guardArtifactPool } from "@radar/artifacts-host";
 import { ALICE, live, type Astra } from "./artifacts-astra-a5.helpers.js";
 
 export async function openConnectionPeer(h: Astra) {
@@ -49,7 +49,8 @@ if (process.argv[2] === "--connection-peer") {
         pool = guardArtifactPool(new pg.Pool(message.args.params));
         scope = message.args.config.storageScope;
         host = await composeArtifactHost(pool, message.args.config, undefined,
-          { readActivation: live, contentBase: "pages.example.test" });
+          { readActivation: live, contentBase: "pages.example.test",
+            confirmation: createDeleteConfirmation(pool, scope, "https://app.example.test") });
       } else if (message.method === "reserve") {
         reserved = await pool.connect();
         value = (await reserved.query("SELECT pg_backend_pid() AS pid")).rows[0];

@@ -4,7 +4,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { fileURLToPath } from "node:url";
 import { createTestS3BlobStore } from "../artifacts-blob-store.helpers.js";
-import { composeArtifactHost, createArtifactControl, createArtifactsPool } from "@radar/artifacts-host";
+import { composeArtifactHost, createArtifactControl, createArtifactsPool, createDeleteConfirmation } from "@radar/artifacts-host";
 import { loadConfig, type AuthConfig } from "../../src/config.js";
 import { signSession } from "../../src/services/auth/session.js";
 import { seedArtifactMemberships } from "./artifacts-membership.helpers.js";
@@ -44,9 +44,10 @@ export async function startHarness(name: string, subjects: readonly string[] = [
     [config.storageScope, config.orgId]);
   await pool.query(`INSERT INTO artifacts.host_quotas (storage_scope_id, operation_limit, byte_limit)
     VALUES ($1, 1000000, 1000000000)`, [config.storageScope]);
-  const host = (await composeArtifactHost(pool, config, blobs))!;
+  const hostOptions = { confirmation: createDeleteConfirmation(pool, config.storageScope, auth.appBaseUrl) };
+  const host = (await composeArtifactHost(pool, config, blobs, hostOptions))!;
   const control = createArtifactControl(host, config.storageScope, "pages.example.test");
-  return { pool, config, host, control, blobs,
+  return { pool, config, host, hostOptions, control, blobs,
     async close() {
       for (const key of await blobs.listKeys(`artifacts/${config.storageScope}/`)) await blobs.deleteBlob(key);
       await s3.send(new DeleteBucketCommand({ Bucket: config.s3Bucket }));
