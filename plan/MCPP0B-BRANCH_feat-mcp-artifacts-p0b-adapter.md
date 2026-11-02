@@ -112,10 +112,13 @@ Prepare the three qualified P0b operations (0.2.5 or 0.3.0) while preserving the
   - [x] Full API gate: 3,899 tests pass, 978 existing skips; all eleven tests in the three failing files pass.
   - [x] 0.2.2 verification: 518 MCP + 234 host tests pass (12 + 10 profile skips); three workspace typechecks and scoped lint pass.
   - [x] Remove disposable dependencies; explicit `down -v` and inspection confirm zero remaining containers, volumes or networks for both test projects.
-- [ ] **Lot 12 — Published P0b API qualification**
+- [x] **Lot 12 — Published P0b API qualification**
   - [x] Supply real deletion confirmation and OAuth resource configuration in API fixtures.
   - [x] Scoped API artifacts gate: 731 tests pass, 94 existing skips across 126 files; no product guard changes.
-  - [ ] Assert the active tool selection and preserve source admission coverage.
-  - [ ] Diagnose worker replay timing against 0.2.2 without increasing timeouts.
-  - [ ] Pass the full API gate and P0b verification; remove disposable dependencies and tear down volumes.
-  - [ ] Commit without trailers, push and write the French conductor report.
+  - [x] Assert the active seven-tool selection, reject missing/extra/duplicate tools and preserve source admission coverage.
+  - [x] Worker diagnosis: unchanged 20 s limit; 0.2.5 passes in 14.7 s scoped and 13.6 s in the full API gate, while the same local test times out with a runtime-confirmed 0.2.2 package. No worker change.
+  - [x] First full API rerun: 3,901 pass, one key-wait poll fails; its deadline starts before S3 preparation. Synchronize on actual SQL dispatch, retaining the PostgreSQL lock observation and all durable-state assertions. Four scoped tests pass; no timeout or product changes.
+  - [x] Final full API gate: 3,902 tests pass, 978 existing skips; all 366 active files pass. Unchanged worker replay passes in 7.2 s. Lint passes on all fifteen changed test/helper files, including the synchronized probe.
+  - [x] Published 0.2.5 verification: 533 MCP + 244 host tests pass, no skips; three workspace typechecks and scoped lint pass.
+  - [x] Remove disposable dependencies; explicit `down-api` and `down` with `-v` and inspection confirm zero containers, volumes or networks for both test projects.
+  - [x] Commit without trailers, push and write the French conductor report.
