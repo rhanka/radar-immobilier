@@ -49,7 +49,7 @@ export async function l5Publication(write = true) {
   ] });
   expect(published.status).toBe(201);
   const releaseId = (published.body as { releaseId: string }).releaseId;
-  const pageHost = `${releaseId}.pinned.pages.example.test`, origin = `https://${pageHost}`;
+  const pageHost = `${releaseId}.pages.example.test`, origin = `https://${pageHost}`;
   for (const person of [f.contributor, f.moderator, f.outsider]) await f.pool.query(
     "INSERT INTO artifacts.artifact_access(artifact_id,principal_id,permission) VALUES($1,$2,'read')", [artifactId, person.sub]);
   return { f, signal, author, scope, artifactId, releaseId, pageHost, origin, control, blobs,
