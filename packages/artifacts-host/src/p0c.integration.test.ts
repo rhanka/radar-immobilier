@@ -98,6 +98,9 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("P0-C switchovers on real Postgre
     expect(replay).toMatchObject({ status: 200, body: { ok: true, commitState: "committed", replayed: true, output: deleted.body } });
     expect(command).not.toHaveProperty("expectedCurrentReleaseId");
     expect(await usage()).toEqual(before);
+    await h.pool.query("UPDATE artifacts.operation_receipts SET receipt='{}' WHERE receipt->>'artifactId'=$1", [page.artifactId]);
+    expect((await v2.control.handle("delete", "alice", command)).body).toMatchObject({ ok: false, commitState: "unknown" });
+    expect(await usage()).toEqual(before);
     expect(await v2.control.handle("delete", "alice", { artifactId: untouched.artifactId, idempotencyKey: randomUUID() }))
       .toMatchObject({ status: 428, body: { error: { code: "precondition_required" } } });
   });
