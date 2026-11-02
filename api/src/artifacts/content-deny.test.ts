@@ -5,7 +5,7 @@ const ARTIFACT = "123e4567-e89b-12d3-a456-426614174000";
 const RELEASE = "123e4567-e89b-12d3-a456-426614174001";
 const BASE = "pages.example.net";
 const STABLE = `${ARTIFACT}.${BASE}`;
-const PINNED = `${RELEASE}.pinned.${BASE}`;
+const PINNED = `${RELEASE}.${BASE}`;
 
 /** Every host form the closed boundary must deny, malformed ones included. */
 const HOSTS = [

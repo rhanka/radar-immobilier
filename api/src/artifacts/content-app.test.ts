@@ -27,7 +27,8 @@ const DISCOVERY: OidcDiscovery = {
 
 const BASE = "pages.example.net";
 const STABLE = `123e4567-e89b-12d3-a456-426614174000.${BASE}`;
-const PINNED = `123e4567-e89b-12d3-a456-426614174001.pinned.${BASE}`;
+const EXACT = `123e4567-e89b-12d3-a456-426614174001.${BASE}`;
+const PINNED = EXACT;
 const APP_HOST = "app.example.test";
 
 function makeApp(contentBase: string | null = BASE) {
@@ -250,5 +251,34 @@ describe("contentGate reader dispatch (A6/H5 seam)", () => {
     const res = await app.request(`http://${STABLE}/index.html`);
     expect(res.status).toBe(404);
     expect(await res.json()).toEqual({ error: "not_found" });
+  });
+});
+
+describe("contentGate legacy immo-pages redirect (transition only)", () => {
+  const ARTIFACT = "123e4567-e89b-12d3-a456-426614174000";
+  const RELEASE = "123e4567-e89b-12d3-a456-426614174001";
+  it("301s both retired host forms to the same UUID label on the new base, path and query preserved", async () => {
+    const stable = await app.request(
+      `http://${ARTIFACT}.preprod.immo-pages.sent-tech.ca/__reader/start?x=1`);
+    expect(stable.status).toBe(301);
+    expect(stable.headers.get("location"))
+      .toBe(`https://${ARTIFACT}.${BASE}/__reader/start?x=1`);
+    expect(stable.headers.get("set-cookie")).toBeNull();
+    const exact = await app.request(
+      `http://${RELEASE}.pinned.preprod.immo-pages.sent-tech.ca/main.js?grant=abc&citySlug=v`);
+    expect(exact.status).toBe(301);
+    expect(exact.headers.get("location"))
+      .toBe(`https://${RELEASE}.${BASE}/main.js?grant=abc&citySlug=v`);
+    expect(exact.headers.get("set-cookie")).toBeNull();
+  });
+
+  it("answers 404 (never a redirect) for malformed legacy labels", async () => {
+    for (const host of ["not-a-uuid.preprod.immo-pages.sent-tech.ca",
+      "nope.pinned.preprod.immo-pages.sent-tech.ca",
+      "preprod.immo-pages.sent-tech.ca"]) {
+      const res = await app.request(`http://${host}/`);
+      expect(res.status, host).toBe(404);
+      expect(res.headers.get("location"), host).toBeNull();
+    }
   });
 });
