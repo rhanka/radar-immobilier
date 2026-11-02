@@ -10,6 +10,9 @@
     "ui",
     "packages/*"
   ],
+  "dependencies": {
+    "@sentropic/artifacts": "0.2.5"
+  },
   "devDependencies": {
     "@eslint/js": "^9.7.0",
     "eslint": "^9.7.0",
@@ -20,6 +23,7 @@
     "node": ">=24"
   },
   "overrides": {
+    "@sentropic/artifacts": "$@sentropic/artifacts",
     "svelte": "^5.0.0",
     "vite": "^6.4.4",
     "dompurify": "3.4.17",

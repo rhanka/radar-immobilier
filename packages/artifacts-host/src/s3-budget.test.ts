@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { composeArtifactHost } from "./composition.js";
+import { createDeleteConfirmation } from "./delete-confirmation.js";
 import { withS3Deadline } from "./s3-timeout.js";
 import { blob, failureOf, startS3, stubConfig, stubPool, thirdAttemptOnly, type S3Stub } from "./s3-stub.test-support.js";
 
@@ -13,7 +14,9 @@ const RETRIABLE_503 = { category: "provider_unavailable", httpStatus: 503, publi
 
 async function withHost<T>(s3: S3Stub, extra: Record<string, unknown>,
   run: (host: Awaited<ReturnType<typeof composeArtifactHost>>) => Promise<T>): Promise<T> {
-  const host = await composeArtifactHost(stubPool(), stubConfig(s3.url, extra));
+  const pool = stubPool();
+  const host = await composeArtifactHost(pool, stubConfig(s3.url, extra), undefined,
+    { confirmation: createDeleteConfirmation(pool, "scope", "https://app.test") });
   try { return await run(host); } finally { host.close(); await s3.close(); }
 }
 
