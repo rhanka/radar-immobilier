@@ -73,3 +73,11 @@ Prepare the three qualified P0b operations (0.2.5 or 0.3.0) while preserving the
   - [x] Local 0.2.5 and 0.3.0 candidates each pass 526 MCP + 239 host tests, no skips, including six PostgreSQL scenarios; three typechecks and lint pass.
   - [x] Verify 0.2.2 and both P0b candidates, tear down volumes, push and write the French report.
   - [x] Remove disposable dependencies; explicit down -v and inspection confirm zero resources for all three qualification projects. PR #979 remains draft; French report: `mcp-listget-report.md` in the conductor reviews directory.
+- [x] **Lot 7 — Merge main after PR #978**
+  - [x] Merge `origin/main` at `4a6c15b2091641c10d89a70fc2a33aeca130bef2`; retain the twelve-tool annotations, P0b operations and list/get discovery fields and ordering.
+  - [x] Resolve the guide/provider conflicts and reconcile both profiles' transport and guide assertions; deletion remains destructive, source retrieval read-only and access changes non-destructive.
+  - [x] Advance the baseline guide to `2026-11-01-r5` and P0b to `2026-11-01-p0b-r3`, with profile-specific lifecycle availability.
+  - [x] 0.2.2 baseline: 518 MCP + 234 host tests pass (8 + 5 profile skips); three workspace typechecks and scoped lint pass.
+  - [x] Local 0.2.5 candidate: 529 MCP + 239 host tests pass, no skips, including six PostgreSQL scenarios; three typechecks, lint and npm dependency resolution pass.
+  - [x] Qualify an immutable upstream package snapshot at `3be782f4a64ed1def72b0e2cacb803a828f23e05` after the live checkout moved during preparation; its package tree matches the initial `a922c8bb4f07718f36b0e587a7811600a4840ddc` snapshot.
+  - [x] Remove disposable dependencies; explicit `down -v` and inspection confirm zero remaining project containers, volumes or networks.

@@ -3,7 +3,7 @@ import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { createClusterMeshModules } from "@sentropic/cluster-mesh";
 import { createMcpRegistry, computeManifestDigest, type RegistryDefinition } from "@sentropic/cluster-mesh/mcp/registry";
 import { createStatefulMcpNamespace, type StatefulMcpHost, type VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-stateful";
-import { ALL_TOOL_DEFINITIONS } from "../tool-definitions.js";
+import { ALL_TOOL_DEFINITIONS, IMMO_READ_ANNOTATIONS } from "../tool-definitions.js";
 import { getInvocationContext } from "../invocation-context.js";
 import { invokeTool } from "../tools.js";
 import { AccountBindingUnavailable } from "../account-binding.js";
@@ -20,6 +20,7 @@ export const ARTIFACT_WIRE_LIMITS = Object.freeze({ ...IMMO_WIRE_LIMITS,
 export const IMMO_WIRE_TOOLS: readonly Tool[] = ALL_TOOL_DEFINITIONS.map((def) => {
   const schema = normalizeToolJsonSchema(def.name, convertInputShape(def.inputSchema));
   return { name: def.name, title: def.title, description: def.description,
+    annotations: IMMO_READ_ANNOTATIONS,
     inputSchema: schema as Tool["inputSchema"], execution: { taskSupport: "forbidden" } };
 });
 const manifest: RegistryDefinition["manifest"] = {

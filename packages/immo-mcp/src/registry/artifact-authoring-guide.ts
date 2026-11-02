@@ -28,7 +28,7 @@ import { FRAMEWORK_STARTERS, FRAMEWORK_BUILD_RULE } from "./framework-starters.j
 import { ARTIFACT_LIST_ORDER } from "./artifact-read-schema.js";
 
 export const AUTHORING_GUIDE_ID = "immo-artifact-authoring" as const;
-export const AUTHORING_GUIDE_REVISION = ARTIFACT_P0B ? "2026-11-01-p0b-r2" : "2026-11-01-r4";
+export const AUTHORING_GUIDE_REVISION = ARTIFACT_P0B ? "2026-11-01-p0b-r3" : "2026-11-01-r5";
 export const STARTER_VERSION = "1.1.0" as const;
 
 /**
@@ -39,6 +39,11 @@ export const STARTER_VERSION = "1.1.0" as const;
 export const AUTHORING_GUIDE_SNIPPET =
   "Every Radar page uses the versioned Sentropic starter and its official assets. " +
   "Fetch `authoringGuide` from artifacts_ensure (or artifacts_get for an existing page). " +
+  "To update, publish the full edited bundle on the same artifactId with a fresh idempotencyKey; " +
+  "the stable URL is preserved. " +
+  (ARTIFACT_P0B
+    ? "For source retrieval, owner-confirmed deletion and named read sharing, follow artifactLifecycle in authoringGuide; restoration remains unavailable. "
+    : "Source retrieval, deletion, restoration and sharing are currently unavailable. ") +
   "Apply the sent-tech theme and its tokens; never write your own palette. " +
   "For baskets use only the documented H5 reader bridge: /__reader/renew, " +
   "workspaces.list.v1, baskets.context.v1, baskets.search.v1. Never invent /api/* endpoints.";
@@ -138,6 +143,12 @@ export interface AuthoringGuide {
   readonly artifactDiscovery: Readonly<{ displayLabel: string; listOrder: string; timestamps: string; links: string; state: string }>;
   readonly artifactLifecycle?: Readonly<{ descriptor: typeof ARTIFACT_PROFILE_DESCRIPTOR;
     edit: readonly string[]; share: readonly string[]; delete: readonly string[] }>;
+  readonly lifecycle: Readonly<{
+    editing: readonly string[];
+    unavailableTools: readonly string[];
+    deleteRestore: string;
+    sharing: string;
+  }>;
 }
 
 let cached: AuthoringGuide | undefined;
@@ -154,6 +165,25 @@ export function getAuthoringGuide(): AuthoringGuide {
         timestamps: "createdAt is artifact creation; updatedAt is the current release publication time, or null if never published.",
         links: "artifacts_list and artifacts_get return stableUrl and currentReleaseId; pinnedUrl is the current release URL, or null if unpublished.",
         state: "state is the lifecycle state; published indicates that a current release exists.",
+      },
+      lifecycle: {
+        editing: [
+          "The complete editing journey is artifacts_get_source → edit → artifacts_publish on the same artifactId. " +
+            (ARTIFACT_P0B
+              ? "artifacts_get returns metadata and permissions; artifacts_get_source returns the retained manifest and file bytes. Follow artifactLifecycle.edit."
+              : "Currently source retrieval is blocked: artifacts_get_source is unavailable and artifacts_get returns metadata plus this guide, without editable files."),
+          "When the complete original source bundle is already available in the conversation, edit those files and publish the full bundle with artifacts_publish on the same artifactId. Do not call artifacts_ensure to replace an existing artifact.",
+          "Each publication creates a new release/version and pinnedUrl; stableUrl stays the same. Use a fresh idempotencyKey for changed content, and reuse a previous key only to retry the identical publication.",
+        ],
+        unavailableTools: ARTIFACT_P0B ? ["artifacts_restore", "artifacts_fork", "artifacts_promote", "artifacts_renew"]
+          : ["artifacts_get_source", "artifacts_delete", "artifacts_restore", "artifacts_set_access",
+          "artifacts_fork", "artifacts_promote", "artifacts_renew"],
+        deleteRestore: ARTIFACT_P0B
+          ? "Owner-only artifacts_delete requires explicit human confirmation through the normal IMMO application; follow artifactLifecycle.delete. Deletion is terminal and artifacts_restore remains unavailable."
+          : "artifacts_delete and artifacts_restore are unavailable. Deletion and restoration cannot be performed through this MCP catalogue.",
+        sharing: ARTIFACT_P0B
+          ? "Owner-only artifacts_set_access grants or revokes named read access to an approved IMMO account IdP sub; follow artifactLifecycle.share. Source grants and public visibility changes remain unavailable."
+          : "artifacts_set_access is unavailable. Granting or revoking read/source access and changing public visibility cannot be performed through this MCP catalogue; do not claim sharing was changed.",
       },
       theme: DESIGN_KIT_THEME,
       designPackages: {
