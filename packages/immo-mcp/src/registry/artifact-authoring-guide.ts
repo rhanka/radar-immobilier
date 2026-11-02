@@ -16,6 +16,7 @@ import {
   DESIGN_KIT_THEMES_VERSION,
   DESIGN_KIT_VERSION,
   designKitAssetUrl,
+  ARTIFACT_P0B, ARTIFACT_PROFILE_DESCRIPTOR,
 } from "@radar/artifacts-host";
 import {
   STARTER_APP_CSS,
@@ -24,9 +25,10 @@ import {
   STARTER_READER_JS,
 } from "./starter-files.js";
 import { FRAMEWORK_STARTERS, FRAMEWORK_BUILD_RULE } from "./framework-starters.js";
+import { ARTIFACT_LIST_ORDER } from "./artifact-read-schema.js";
 
 export const AUTHORING_GUIDE_ID = "immo-artifact-authoring" as const;
-export const AUTHORING_GUIDE_REVISION = "2026-11-01-r4" as const;
+export const AUTHORING_GUIDE_REVISION = ARTIFACT_P0B ? "2026-11-01-p0b-r3" : "2026-11-01-r5";
 export const STARTER_VERSION = "1.1.0" as const;
 
 /**
@@ -38,7 +40,10 @@ export const AUTHORING_GUIDE_SNIPPET =
   "Every Radar page uses the versioned Sentropic starter and its official assets. " +
   "Fetch `authoringGuide` from artifacts_ensure (or artifacts_get for an existing page). " +
   "To update, publish the full edited bundle on the same artifactId with a fresh idempotencyKey; " +
-  "the stable URL is preserved. Source retrieval, deletion, restoration and sharing are currently unavailable. " +
+  "the stable URL is preserved. " +
+  (ARTIFACT_P0B
+    ? "For source retrieval, owner-confirmed deletion and named read sharing, follow artifactLifecycle in authoringGuide; restoration remains unavailable. "
+    : "Source retrieval, deletion, restoration and sharing are currently unavailable. ") +
   "Apply the sent-tech theme and its tokens; never write your own palette. " +
   "For baskets use only the documented H5 reader bridge: /__reader/renew, " +
   "workspaces.list.v1, baskets.context.v1, baskets.search.v1. Never invent /api/* endpoints.";
@@ -135,6 +140,9 @@ export interface AuthoringGuide {
   readonly uiState: Readonly<{ contractId: string; ownership: string; bootstrap: string; persistence: string; example: object }>;
   readonly elements: Readonly<{ package: string; packageVersion: string; catalogId: string; componentIds: readonly string[]; status: string }>;
   readonly componentUsage: string;
+  readonly artifactDiscovery: Readonly<{ displayLabel: string; listOrder: string; timestamps: string; links: string; state: string }>;
+  readonly artifactLifecycle?: Readonly<{ descriptor: typeof ARTIFACT_PROFILE_DESCRIPTOR;
+    edit: readonly string[]; share: readonly string[]; delete: readonly string[] }>;
   readonly lifecycle: Readonly<{
     editing: readonly string[];
     unavailableTools: readonly string[];
@@ -147,21 +155,35 @@ let cached: AuthoringGuide | undefined;
 
 export function getAuthoringGuide(): AuthoringGuide {
   if (!cached) {
-    cached = freeze({
+    cached = freeze<AuthoringGuide>({
       guideId: AUTHORING_GUIDE_ID,
       revision: AUTHORING_GUIDE_REVISION,
       starterVersion: STARTER_VERSION,
+      artifactDiscovery: {
+        displayLabel: "Use bindingName as the display label until part1 title/description metadata is available.",
+        listOrder: `artifacts_list orders by ${ARTIFACT_LIST_ORDER}, before offset/limit pagination.`,
+        timestamps: "createdAt is artifact creation; updatedAt is the current release publication time, or null if never published.",
+        links: "artifacts_list and artifacts_get return stableUrl and currentReleaseId; pinnedUrl is the current release URL, or null if unpublished.",
+        state: "state is the lifecycle state; published indicates that a current release exists.",
+      },
       lifecycle: {
         editing: [
           "The complete editing journey is artifacts_get_source → edit → artifacts_publish on the same artifactId. " +
-            "Currently source retrieval is blocked: artifacts_get_source is unavailable and artifacts_get returns metadata plus this guide, without editable files.",
+            (ARTIFACT_P0B
+              ? "artifacts_get returns metadata and permissions; artifacts_get_source returns the retained manifest and file bytes. Follow artifactLifecycle.edit."
+              : "Currently source retrieval is blocked: artifacts_get_source is unavailable and artifacts_get returns metadata plus this guide, without editable files."),
           "When the complete original source bundle is already available in the conversation, edit those files and publish the full bundle with artifacts_publish on the same artifactId. Do not call artifacts_ensure to replace an existing artifact.",
           "Each publication creates a new release/version and pinnedUrl; stableUrl stays the same. Use a fresh idempotencyKey for changed content, and reuse a previous key only to retry the identical publication.",
         ],
-        unavailableTools: ["artifacts_get_source", "artifacts_delete", "artifacts_restore", "artifacts_set_access",
+        unavailableTools: ARTIFACT_P0B ? ["artifacts_restore", "artifacts_fork", "artifacts_promote", "artifacts_renew"]
+          : ["artifacts_get_source", "artifacts_delete", "artifacts_restore", "artifacts_set_access",
           "artifacts_fork", "artifacts_promote", "artifacts_renew"],
-        deleteRestore: "artifacts_delete and artifacts_restore are unavailable. Deletion and restoration cannot be performed through this MCP catalogue.",
-        sharing: "artifacts_set_access is unavailable. Granting or revoking read/source access and changing public visibility cannot be performed through this MCP catalogue; do not claim sharing was changed.",
+        deleteRestore: ARTIFACT_P0B
+          ? "Owner-only artifacts_delete requires explicit human confirmation through the normal IMMO application; follow artifactLifecycle.delete. Deletion is terminal and artifacts_restore remains unavailable."
+          : "artifacts_delete and artifacts_restore are unavailable. Deletion and restoration cannot be performed through this MCP catalogue.",
+        sharing: ARTIFACT_P0B
+          ? "Owner-only artifacts_set_access grants or revokes named read access to an approved IMMO account IdP sub; follow artifactLifecycle.share. Source grants and public visibility changes remain unavailable."
+          : "artifacts_set_access is unavailable. Granting or revoking read/source access and changing public visibility cannot be performed through this MCP catalogue; do not claim sharing was changed.",
       },
       theme: DESIGN_KIT_THEME,
       designPackages: {
@@ -258,6 +280,18 @@ export function getAuthoringGuide(): AuthoringGuide {
         status: "Framework-agnostic custom elements st-bar-chart, st-bpmn-canvas, st-decision-dossier; contractVersion 1.0, JSON envelope with root.component and hostConfig in script#st-host-config[type=application/json]. Package exports an envelope validator for server use. Not vendored/qualified in this CSS-only revision: do not import a CDN. Runtime assets, validator and prompt hashes must be pinned before use.",
       },
       componentUsage: "React CSS recipes use components[].sourcePackage + componentName + snapshotVersion with promptRef/hash for provenance. Elements catalogue contracts are described separately in elements. Essential snapshot prompts: the full React DS runtime uses window.SentropicDS.<componentName> inside ThemeProvider; load DS styles + ThemeProvider, never write your own palette. The native CSS fast path uses the listed st-* markup without the DS React runtime: Button is a native button (variant primary/secondary/ghost/danger, size sm/md/lg); Input/Select need a visible label and help/error association; Card is a noninteractive container unless a real link/button is provided; Tag is informational, not an action; Notification needs readable title/message and status/alert semantics; ContentSwitcher needs keyboard behavior and selection state; InlineLoading needs accessible status text and reduced motion. Do not imitate complex component behavior; use a qualified runtime. Prompt files are provenance, these inline instructions are available to the remote author.",
+      ...(ARTIFACT_P0B ? { artifactLifecycle: {
+        descriptor: ARTIFACT_PROFILE_DESCRIPTOR,
+        edit: ["Read artifacts_get for permissions and currentReleaseId, then artifacts_get_source({artifactId}) for the retained manifest and file bytes. Source requires immo:artifacts:read; immo:read alone is insufficient.",
+          "Decode returned UTF-8 bytes, edit locally with the supplied DS starter rules, preserve every required file, then artifacts_publish({artifactId, files, idempotencyKey}) with a fresh key. Publish the complete snapshot, not a patch. expectedCurrentReleaseId is not required by this profile.",
+          "Keep the same key and identical content on retries. Results remain at the root. release_unavailable requires another retained release or the original author files; never invent missing source."],
+        share: ["Only the owner calls artifacts_set_access({artifactId, action:'grant', principalId:<approved IMMO account IdP sub>, grant:'read', idempotencyKey}). A principalId is the exact IdP sub, never an email or account UUID. Named read sharing keeps isPublic:false and grants neither source nor editing.",
+          "Revoke with action:'revoke', the same principalId and a fresh idempotencyKey; omit grant. Publication quota exhaustion does not prevent sharing or revocation."],
+        delete: ["Owner: artifacts_delete({artifactId, idempotencyKey}). expectedCurrentReleaseId is optional; the server binds the observed release to the confirmation. Never send actor, owner, scope or a fabricated confirmation.",
+          "On confirmation_required, show details.managementUrl and expiresAt to the human. They sign into the normal IMMO application and explicitly approve permanent deletion. MCP bearer tokens cannot approve.",
+          "Retry identical arguments with the same key plus details.confirmationRef. The proof is consumed in the deletion transaction. Invalid, expired or stale confirmation requires reading the page and starting a new deletion with a fresh key.",
+          "Deletion is terminal for stable and pinned readers. Physical purge remains pending; restore, fork, promote and renew remain unavailable."],
+      } } : {}),
     });
   }
   return cached;

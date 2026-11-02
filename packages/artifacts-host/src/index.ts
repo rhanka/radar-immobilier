@@ -64,6 +64,10 @@ export {
   type AccountStatusQueryable,
 } from "./account-status.js";
 export { composeArtifactHost } from "./composition.js";
+export { createDeleteConfirmation, type ArtifactDeleteConfirmation, type DeleteChallenge } from "./delete-confirmation.js";
+export { ARTIFACT_P0B, ARTIFACT_P0B_VERSIONS, ARTIFACT_PROVIDER_VERSION, ARTIFACT_PROFILE_DESCRIPTOR,
+  ACTIVE_ARTIFACT_TOOLS, HOST_ARTIFACT_PROFILE, validateArtifactInput, artifactPublicSchema,
+  isArtifactMutation, isArtifactPublication } from "./p0b-profile.js";
 export {
   createArtifactControl,
   createMemoryCommitLedger,

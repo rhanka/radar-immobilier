@@ -4,6 +4,7 @@ import { createImmoHttpApp, type ImmoHttpConfig } from "./server-http.js";
 import { bindArtifactProvider, IMMO_ARTIFACT_PROFILE as profile } from "./registry/artifact-provider.js";
 import type { ArtifactsApp } from "@sentropic/artifacts/mcp-core";
 import type { ArtifactInvocationContext } from "@sentropic/artifacts/server/commit-contract";
+import { ARTIFACT_P0B } from "@radar/artifacts-host";
 
 const config: ImmoHttpConfig = {
   issuer: "https://synthetic.test", resource: "https://synthetic.test/mcp", requiredScopes: [],
@@ -13,18 +14,22 @@ const config: ImmoHttpConfig = {
 const ALL_SCOPES = "immo:read immo:artifacts:read immo:artifacts:write";
 const PUBLISH = { artifactId: "123e4567-e89b-12d3-a456-426614174000", idempotencyKey: "k",
   files: [{ path: "index.html", mimeType: "text/html", text: "<p>x</p>" }] };
+const SUMMARY = { artifactId: PUBLISH.artifactId, bindingName: "summer", state: "active", published: false,
+  stableUrl: `https://${PUBLISH.artifactId}.pages.test/`, pinnedUrl: null, currentReleaseId: null,
+  createdAt: "2026-11-01T00:00:00.000Z", updatedAt: null };
 async function setup(withAccountBinding = true, scopePolicy?: { legacyReadScope: boolean }) {
   const keys = await generateKeyPair("RS256");
   const seen: ArtifactInvocationContext[] = [];
-  const execute = vi.fn<ArtifactsApp["execute"]>(async (_request, invocation) => {
+  const execute = vi.fn<ArtifactsApp["execute"]>(async (input, invocation) => {
     seen.push(invocation);
-    return { ok: true, result: { status: 200, body: { artifacts: [] } },
+    return { ok: true, result: { status: 200, body: input.path.startsWith("/meta/") ? SUMMARY : { total: 1, artifacts: [SUMMARY] } },
       invocationId: invocation.invocationId, commitState: "committed", replayed: false };
   });
   const createGuard = vi.fn(() => vi.fn(async () => ({ allowed: false as const,
     reason: "denied" as const, publicCode: "access_denied", status: 403, retriable: false })));
   const artifacts = bindArtifactProvider({ app: { execute, profileDigest: profile.profileDigest,
-    selectedCapabilities: profile.selectedCapabilities }, storageScopeId: "synthetic-scope", authorizeCommit: createGuard, scopePolicy });
+    selectedCapabilities: profile.selectedCapabilities }, storageScopeId: "synthetic-scope", authorizeCommit: createGuard, scopePolicy,
+    prepareDelete: async (_actor, args) => ({ ...args, expectedCurrentReleaseId: null }) });
   const authorize = vi.fn(async () => true);
   const app = createImmoHttpApp(config, { artifacts, ...(withAccountBinding ? { authorize } : {}),
     keySource: { resolveKey: async () => keys.publicKey } });
@@ -51,6 +56,17 @@ const payload = async (response: Response) => {
 };
 
 describe("explicit artifact scopes over the MCP transport", () => {
+  it.skipIf(!ARTIFACT_P0B).each([
+    ["artifacts_get_source", { artifactId: PUBLISH.artifactId }, "immo:artifacts:read"],
+    ["artifacts_set_access", { artifactId: PUBLISH.artifactId, action: "grant", principalId: "idp-bob", grant: "read", idempotencyKey: "share" }, "immo:artifacts:write"],
+    ["artifacts_delete", { artifactId: PUBLISH.artifactId, idempotencyKey: "delete" }, "immo:artifacts:write"],
+  ])("should enforce scopes and dispatch %s through the real MCP transport", async (tool, args, scope) => {
+    const h = await setup();
+    expect((await payload(await h.call(tool, args, "immo:read"))).body).toMatchObject({ error: "artifact_scope_denied" });
+    expect(h.execute).not.toHaveBeenCalled();
+    expect((await payload(await h.call(tool, args, `immo:read ${scope}`))).isError).toBe(false);
+    expect(h.execute).toHaveBeenCalledTimes(1);
+  });
   it.each([
     ["artifacts_ensure", { bindingName: "summer", idempotencyKey: "k" }],
     ["artifacts_publish", PUBLISH],
@@ -106,12 +122,12 @@ describe("P7 composed transport (contract double; no storage qualification)", ()
       return (await response.json()).result.tools;
     };
     const first = await list(h.session);
-    expect(first).toHaveLength(16);
+    expect(first).toHaveLength(12 + profile.selectedCapabilities.length);
     expect(first.filter((tool: { name: string }) => tool.name.startsWith("artifacts_"))
       .map((tool: { name: string }) => tool.name)).toEqual(profile.selectedCapabilities);
     for (const tool of first) {
-      const write = ["artifacts_ensure", "artifacts_publish"].includes(tool.name);
-      expect(tool.annotations).toEqual({ readOnlyHint: !write, destructiveHint: false,
+      const write = ["artifacts_ensure", "artifacts_publish", "artifacts_set_access", "artifacts_delete"].includes(tool.name);
+      expect(tool.annotations).toEqual({ readOnlyHint: !write, destructiveHint: tool.name === "artifacts_delete",
         openWorldHint: false, idempotentHint: true });
     }
     const serialized = JSON.stringify(first);
@@ -131,12 +147,26 @@ describe("P7 composed transport (contract double; no storage qualification)", ()
   it("should list exactly twelve plus four and dispatch each call once with fresh frozen authority", async () => {
     const h = await setup();
     const list = await (await h.post({ jsonrpc: "2.0", id: 2, method: "tools/list" }, h.session)).json();
-    expect(list.result.tools).toHaveLength(16);
+    expect(list.result.tools).toHaveLength(12 + profile.selectedCapabilities.length);
     expect(list.result.tools.filter((t: { name: string }) => t.name.startsWith("artifacts_")).map((t: { name: string }) => t.name))
       .toEqual(profile.selectedCapabilities);
+    for (const name of ["artifacts_list", "artifacts_get"]) {
+      const tool = list.result.tools.find((t: { name: string }) => t.name === name);
+      expect(tool.annotations).toMatchObject({ readOnlyHint: true });
+      expect(JSON.stringify(tool.outputSchema)).toContain("currentReleaseId");
+      expect(JSON.stringify(tool.outputSchema)).toContain("updatedAt");
+    }
+    if (ARTIFACT_P0B) {
+      const tool = (name: string) => list.result.tools.find((t: { name: string }) => t.name === `artifacts_${name}`);
+      expect(tool("get_source").annotations).toMatchObject({ readOnlyHint: true });
+      expect(tool("set_access").annotations).toMatchObject({ readOnlyHint: false, destructiveHint: false });
+      expect(tool("delete").annotations).toMatchObject({ destructiveHint: true });
+    }
     for (let i = 0; i < 2; i++) {
       const result = await (await h.call("artifacts_list")).json();
       expect(result.result.isError).not.toBe(true);
+      expect(JSON.parse(result.result.content[0].text).artifacts).toEqual([SUMMARY]);
+      expect(result.result.structuredContent).toEqual({ total: 1, artifacts: [SUMMARY] });
     }
     expect(h.execute).toHaveBeenCalledTimes(2);
     expect(h.seen.every((invocation) => Object.isFrozen(invocation) && invocation.actorId === "alice"

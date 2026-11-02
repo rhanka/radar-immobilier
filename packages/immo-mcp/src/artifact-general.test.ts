@@ -4,6 +4,7 @@ import {
   IMMO_ARTIFACT_MANIFEST,
 } from "./registry/artifact-provider.js";
 import { ARTIFACT_INVOCATION_SCOPES, ARTIFACT_TOOL_NAMES } from "./registry/artifact-profile.js";
+import { ARTIFACT_P0B } from "@radar/artifacts-host";
 
 describe("artifact general tool selection", () => {
   it("exposes exactly the four artifact tools over the explicit artifact scopes", () => {
@@ -12,6 +13,7 @@ describe("artifact general tool selection", () => {
       "artifacts_publish",
       "artifacts_list",
       "artifacts_get",
+      ...(ARTIFACT_P0B ? ["artifacts_get_source", "artifacts_set_access", "artifacts_delete"] : []),
     ]);
     expect(IMMO_ARTIFACT_MANIFEST.tools.map((tool) => tool.name).sort()).toEqual(
       [...ARTIFACT_TOOL_NAMES].sort(),

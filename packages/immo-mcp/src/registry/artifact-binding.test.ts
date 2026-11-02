@@ -56,7 +56,7 @@ describe("P7 trusted artifact binding", () => {
 
   it("should refuse direct unselected dispatch and removed scope before creating authority", async () => {
     const h = setup();
-    const unselected = await h.binding.invoke("artifacts_delete", {}, authority);
+    const unselected = await h.binding.invoke("artifacts_restore", {}, authority);
     expect(unselected.isError).toBe(true);
     expect(JSON.stringify(unselected)).toContain("capability_unavailable");
     expect(denial(await h.binding.invoke("artifacts_list", {}, withScopes([]))))

@@ -1,6 +1,7 @@
 import pg from "pg";
 import { composeArtifactHost, createArtifactAdmissionAuthority, guardArtifactPool, readArtifactsEnv,
   resolveArtifactsStorageConfig, readActivationEnv, resolveActivationConfig } from "@radar/artifacts-host";
+import { ARTIFACT_P0B, createDeleteConfirmation } from "@radar/artifacts-host";
 import { bindArtifactProvider, IMMO_ARTIFACT_PROFILE,
   type FrozenCallAuthority } from "./registry/artifact-provider.js";
 import { ARTIFACT_WRITE_SCOPE, readArtifactScopePolicy } from "./registry/artifact-profile.js";
@@ -23,11 +24,14 @@ export async function createArtifactBinding(env: NodeJS.ProcessEnv) {
   const pool = guardArtifactPool(new pg.Pool({ connectionString: url, max: 5, connectionTimeoutMillis: 2000,
     options: "-c statement_timeout=5000 -c lock_timeout=1000" }));
   try {
+    const confirmation = ARTIFACT_P0B ? createDeleteConfirmation(pool, config.storageScope,
+      new URL(env.IMMO_MCP_OAUTH_RESOURCE ?? "").origin) : undefined;
     const host = await composeArtifactHost(pool, config, undefined,
-      { profile: IMMO_ARTIFACT_PROFILE, readActivation, contentBase });
+      { profile: IMMO_ARTIFACT_PROFILE, readActivation, contentBase, ...(confirmation ? { confirmation } : {}) });
     const admission = createArtifactAdmissionAuthority(pool, readActivation, config.storageScope);
     const binding = bindArtifactProvider({ app: host.app, storageScopeId: config.storageScope,
       admission, scopePolicy,
+      ...(confirmation ? { prepareDelete: confirmation.prepareDelete } : {}),
       authorizeCommit(request, frozen?: FrozenCallAuthority) {
         const actorId = request.principal.sub;
         return async (context, transaction) => {

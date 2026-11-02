@@ -30,7 +30,7 @@ describe("artifact Postgres and S3 publication", () => {
       h.control.handle("ensure", "alice", ensure("same-key"))));
     expect(replays.map((r) => (r.body as { artifactId: string }).artifactId)).toEqual(Array(10).fill(ids[0]));
     expect((await h.pool.query("SELECT count(*) FROM artifacts.artifacts")).rows[0].count).toBe("1");
-    const restarted = (await composeArtifactHost(h.pool, h.config))!;
+    const restarted = (await composeArtifactHost(h.pool, h.config, undefined, h.hostOptions))!;
     const again = await createArtifactControl(restarted, h.config.storageScope, "pages.example.test")
       .handle("ensure", "alice", ensure("same-key"));
     expect(again.status).toBe(201);
@@ -74,7 +74,7 @@ describe("artifact Postgres and S3 publication", () => {
     expect(ensured.status).toBe(201);
     const id = (ensured.body as { artifactId: string }).artifactId;
     const broken = (await composeArtifactHost(h.pool, h.config, { ...h.blobs,
-      async putBlob() { throw new Error("injected S3 failure"); } }))!;
+      async putBlob() { throw new Error("injected S3 failure"); } }, h.hostOptions))!;
     const response = await createArtifactControl(broken, h.config.storageScope, "pages.example.test")
       .handle("publish", "alice", { artifactId: id, files: [file], idempotencyKey: "failure" });
     expect(response.status).toBe(500);

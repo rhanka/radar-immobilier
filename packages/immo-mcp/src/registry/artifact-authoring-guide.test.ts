@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { DESIGN_KIT_ASSETS, designKitAssetUrl } from "@radar/artifacts-host";
+import { ARTIFACT_P0B, DESIGN_KIT_ASSETS, designKitAssetUrl } from "@radar/artifacts-host";
 import { releaseCspForHtml } from "../../../../api/src/artifacts/release-files.js";
 import type { ArtifactsApp } from "@sentropic/artifacts/mcp-core";
 import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-stateful";
@@ -38,6 +38,15 @@ function setup(body: unknown) {
 const read = (result: { content: unknown[] }) => JSON.parse((result.content[0] as { text: string }).text);
 
 describe("artifact authoring guide", () => {
+  it("should document the display label, publication timestamps and newest-first discovery", () => {
+    const discovery = getAuthoringGuide().artifactDiscovery;
+    expect(discovery.displayLabel).toBe("Use bindingName as the display label until part1 title/description metadata is available.");
+    expect(discovery.listOrder).toContain("updatedAt descending, nulls last, then createdAt descending");
+    expect(discovery.timestamps).toContain("current release publication time, or null if never published");
+    expect(discovery.links).toContain("pinnedUrl");
+    expect(discovery.state).toContain("published");
+  });
+
   it("should expose one versioned definition with starter, H5 bridge and checklist", () => {
     const guide = getAuthoringGuide();
     expect(guide.guideId).toBe(AUTHORING_GUIDE_ID);
@@ -72,16 +81,26 @@ describe("artifact authoring guide", () => {
 
   it("should preserve artifact identity when editing and disclose unavailable lifecycle actions", () => {
     const guide = getAuthoringGuide();
-    expect(guide.revision).toBe("2026-11-01-r4");
+    expect(guide.revision).toBe(ARTIFACT_P0B ? "2026-11-01-p0b-r3" : "2026-11-01-r5");
     const editing = guide.lifecycle.editing.join("\n");
     expect(editing).toContain("artifacts_get_source → edit → artifacts_publish");
     expect(editing).toContain("same artifactId");
     expect(editing).toContain("stableUrl stays the same");
     expect(editing).toContain("fresh idempotencyKey for changed content");
     expect(editing).toContain("artifacts_get returns metadata");
-    expect(editing).toContain("source retrieval is blocked");
-    expect(guide.lifecycle.unavailableTools).toEqual(["artifacts_get_source", "artifacts_delete",
-      "artifacts_restore", "artifacts_set_access", "artifacts_fork", "artifacts_promote", "artifacts_renew"]);
+    if (ARTIFACT_P0B) {
+      expect(editing).not.toContain("source retrieval is blocked");
+      expect(editing).toContain("artifacts_get_source returns the retained manifest and file bytes");
+      expect(guide.lifecycle.unavailableTools).toEqual(["artifacts_restore", "artifacts_fork", "artifacts_promote", "artifacts_renew"]);
+      expect(guide.lifecycle.deleteRestore).toContain("explicit human confirmation");
+      expect(guide.lifecycle.sharing).toContain("named read access");
+      expect(AUTHORING_GUIDE_SNIPPET).toContain("follow artifactLifecycle");
+    } else {
+      expect(editing).toContain("source retrieval is blocked");
+      expect(guide.lifecycle.unavailableTools).toEqual(["artifacts_get_source", "artifacts_delete",
+        "artifacts_restore", "artifacts_set_access", "artifacts_fork", "artifacts_promote", "artifacts_renew"]);
+      expect(AUTHORING_GUIDE_SNIPPET).toContain("Source retrieval, deletion, restoration and sharing are currently unavailable");
+    }
     expect(guide.lifecycle.deleteRestore).toContain("unavailable");
     expect(guide.lifecycle.sharing).toContain("unavailable");
   });
