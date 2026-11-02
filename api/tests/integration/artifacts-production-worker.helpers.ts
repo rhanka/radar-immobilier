@@ -1,7 +1,7 @@
 import { fork } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
-import { composeArtifactHost, createArtifactControl } from "@radar/artifacts-host";
+import { composeArtifactHost, createArtifactControl, createDeleteConfirmation } from "@radar/artifacts-host";
 import type { Harness } from "./artifacts-h2.helpers.js";
 import { loadConfig } from "../../src/config.js";
 
@@ -49,7 +49,9 @@ if (process.argv[2] === "--production-peer") {
       let value: unknown;
       if (message.method === "init") {
         pool = new pg.Pool(message.args.database as pg.PoolConfig);
-        host = await composeArtifactHost(pool, message.args.config as Harness["config"]);
+        const config = message.args.config as Harness["config"];
+        host = await composeArtifactHost(pool, config, undefined, {
+          confirmation: createDeleteConfirmation(pool, config.storageScope, "https://app.example.test") });
         value = { pid: process.pid };
       } else if (message.method === "ensure") {
         value = await createArtifactControl(host, "h2_scope", "pages.example.test")

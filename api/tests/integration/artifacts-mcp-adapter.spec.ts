@@ -4,7 +4,7 @@ vi.mock("@sentropic/artifacts/http", async (original) => {
   return withCandidateProfile(await original<typeof import("@sentropic/artifacts/http")>());
 });
 import { composeArtifactHost, createArtifactControl, createMemoryCommitLedger, createArtifactAdmissionAuthority,
-  type AdmissionAuthority } from "@radar/artifacts-host";
+  createDeleteConfirmation, type AdmissionAuthority } from "@radar/artifacts-host";
 import { createMcpArtifactAdapter } from "../../../packages/artifacts-host/src/mcp-app-adapter.js";
 import { controlRoute } from "../../src/artifacts/control-route.js";
 import { auth, cookie, startHarness, type Harness } from "./artifacts-h2.helpers.js";
@@ -62,12 +62,14 @@ describe("unexposed MCP adapter with the composed provider", () => {
 
   it("counts a finalization admission outage once without a durable success", async () => {
     // Fail the authority query on the reserved coordinator client, after entry succeeds.
+    let authorityFailures = 0;
     const unavailable = new Proxy(h.pool, { get(target, key) {
       if (key === "connect") return async () => {
         const client = await target.connect();
         return new Proxy(client, { get(connection, property) {
           if (property === "query") return (text: unknown, ...args: unknown[]) => {
             if (typeof text === "string" && text.startsWith("SELECT id, status FROM account_users")) {
+              authorityFailures += 1;
               throw new Error("private admission database cause");
             }
             return Reflect.apply(connection.query, connection, [text, ...args]);
@@ -79,22 +81,32 @@ describe("unexposed MCP adapter with the composed provider", () => {
       const value = Reflect.get(target, key);
       return typeof value === "function" ? value.bind(target) : value;
     } });
-    const host = await composeArtifactHost(unavailable, h.config, h.blobs);
+    // Cohort admission requires the storage scope to match Alice's real workspace.
+    const scope = (await h.pool.query<{ id: string }>(
+      "SELECT id FROM workspaces WHERE slug = 'artifacts-test'")).rows[0]!.id;
+    const host = await composeArtifactHost(unavailable, { ...h.config, storageScope: scope }, h.blobs, {
+      confirmation: createDeleteConfirmation(unavailable, scope, auth.appBaseUrl) });
     try {
+      await h.pool.query(`INSERT INTO artifacts.host_quotas (storage_scope_id, operation_limit, byte_limit)
+        SELECT $1, operation_limit, byte_limit FROM artifacts.host_quotas WHERE storage_scope_id = $2`,
+      [scope, h.config.storageScope]);
       const authority = createArtifactAdmissionAuthority(h.pool, () => ({
         enabled: true, subjects: ["alice"], expiresAtMs: Date.now() + 60_000,
       }));
       const { ledger, entries } = createMemoryCommitLedger();
       const adapter = createMcpArtifactAdapter(createArtifactControl(
-        host, h.config.storageScope, "pages.example.test", authority, { ledger, nowMs: () => 0 }));
+        host, scope, "pages.example.test", authority, { ledger, nowMs: () => 0 }));
       const before = await count();
       expect(await adapter.execute({ method: "POST", path: "/ensure",
         args: { bindingName: "outage", idempotencyKey: "outage" } }, { actorId: "alice" }))
         .toEqual({ ok: false, status: 503, code: "capability_unavailable", retryable: true,
           error: { error: "capability_unavailable" } });
+      expect(authorityFailures).toBe(1);
       expect(entries).toEqual([{ invocationId: expect.any(String), op: "ensure", actorId: "alice", reason: "unauthorized_at_commit",
         status: 503, atMs: 0 }]);
       expect(await count()).toEqual(before);
+      expect((await h.pool.query("SELECT count(*)::int AS n FROM artifacts.artifacts WHERE storage_scope_id = $1",
+        [scope])).rows[0].n).toBe(0);
     } finally {
       host.close();
     }
@@ -104,7 +116,7 @@ describe("unexposed MCP adapter with the composed provider", () => {
     const ensured = await http("ensure", { bindingName: direction, idempotencyKey: direction });
     expect(ensured.status).toBe(201);
     const artifactId = ensured.body.artifactId as string;
-    const second = (await composeArtifactHost(h.pool, h.config, h.blobs))!;
+    const second = (await composeArtifactHost(h.pool, h.config, h.blobs, h.hostOptions))!;
     try {
       const adapter = createMcpArtifactAdapter(
         createArtifactControl(second, h.config.storageScope, "pages.example.test"));

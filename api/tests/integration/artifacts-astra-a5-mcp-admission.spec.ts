@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { ARTIFACT_P0B } from "@radar/artifacts-host";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-stateful";
 import { createArtifactBinding } from "../../../packages/immo-mcp/src/artifact-binding.js";
@@ -41,7 +42,8 @@ describe("astra A5 production MCP admission", () => {
     for (const [tool, args] of [["artifacts_list", {}], ["artifacts_get", { artifactId }],
       ["artifacts_ensure", { bindingName: "denied", idempotencyKey: "denied" }],
       ["artifacts_publish", { artifactId, idempotencyKey: "denied", files: [
-        { path: "index.html", mimeType: "text/html", text: "denied" }] }]] as const) {
+        { path: "index.html", mimeType: "text/html", text: "denied" }] }],
+      ...(ARTIFACT_P0B ? [["artifacts_get_source", { artifactId }]] as const : [])] as const) {
       const result = await bound.binding.invoke(tool, args, request);
       expect(result.isError, tool).toBe(true);
       expect(body(result), tool).toEqual({ error, retryable: false });

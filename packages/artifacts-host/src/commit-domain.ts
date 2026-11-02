@@ -13,6 +13,10 @@ import { assertArtifactReplayMigration } from "@sentropic/artifacts/server/idemp
 import { mapHostError, normalizeHostOutcome } from "./host-outcome.js";
 import { rateLimitedOutcome, reserveArtifactAttempt } from "./attempt-admission.js";
 import { replayPublication } from "./publication-replay.js";
+import { ARTIFACT_P0B, isArtifactMutation, isArtifactPublication } from "./p0b-profile.js";
+import { assertP0bStorage, p0bPorts, sharePrincipal } from "./p0b-ports.js";
+import type { ArtifactDeleteConfirmation } from "./delete-confirmation.js";
+import { createArtifactReadMetadata } from "./read-metadata.js";
 
 /**
  * A prepared publication must finalize within this window: past it, the
@@ -34,13 +38,17 @@ export const PUBLISH_BLOB_DEADLINE_MS = PREPARATION_WINDOW_MS - PUBLISH_FINALIZE
 export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | "coordinator"> & {
   pool: pg.Pool; scope: string; blobs: HttpAppDeps["publication"]["blobs"];
   publicationUrls?: HttpAppDeps["publicationUrls"];
+  confirmation?: ArtifactDeleteConfirmation;
 }) {
   const { pool, scope, blobs, profile, coordinator } = options;
+  await assertP0bStorage(pool, options.confirmation);
   const store = createPostgresArtifactStore(pool);
+  const reads = createArtifactReadMetadata(pool, scope, options.publicationUrls);
   const publication = createPublicationService({ state: store, blobs, intents: store });
   const keyDomain = new AsyncLocalStorage<ReturnType<typeof createRadarKeyDerivation>>();
   const artifact = new AsyncLocalStorage<string>();
   const legacyRecords = createPostgresLegacyArtifactRecords(pool);
+  const approved = new AsyncLocalStorage<ReadonlySet<string>>();
   const lock = (table: string, column: string) => async (client: FinalizeTxClient) => {
     await client.query(`SELECT ${column} FROM artifacts.${table} WHERE ${column} = $1 FOR UPDATE`,
       [artifact.getStore()]);
@@ -63,26 +71,42 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
         await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))",
           [JSON.stringify([binding.storageScopeId, binding.ownerId, binding.bindingName])]);
       },
-      resolveBinding(client, binding) {
-        return createPostgresArtifactStore(client as unknown as pg.Pool).ensureArtifact({ ...binding, profile: {} });
+      async resolveBinding(client, binding) {
+        try {
+          return await createPostgresArtifactStore(client as unknown as pg.Pool).ensureArtifact({ ...binding, profile: {} });
+        } catch (cause) {
+          // The coordinator accepts operational refusals; preserve terminal identity as 410.
+          if (ARTIFACT_P0B && cause instanceof ArtifactOperationError && String(cause.kind) === "gone") {
+            throw new ArtifactOperationError("unauthorized_at_commit", { cause, refusal: {
+              allowed: false, reason: "denied", publicCode: "gone", status: 410, retriable: false } });
+          }
+          throw cause;
+        }
       },
       async abandonAttempt() { /* Ensure stages no external objects. */ },
     },
-    acls: store, lifecycle: createLifecycleService(store, undefined, store),
+    acls: { ...store, listArtifactIds: reads.listArtifactIds }, lifecycle: createLifecycleService(store, undefined, store),
+    ...p0bPorts(store, options.confirmation, (sub) => approved.getStore()?.has(sub) === true),
     publication: { blobs, intents: store, refs: createPostgresClaimGuardedRefs(store, createPostgresCommitExecutor(pool)),
       cleanupWindowMs: PREPARATION_WINDOW_MS, createUnitWriter: createPostgresPublicationUnitWriter, getCurrent: publication.getCurrent,
+      ...(ARTIFACT_P0B ? { getRelease: publication.getRelease } : {}),
       locks: { "artifact-lifecycle": [lock("artifacts", "id")], acl: [lock("artifact_access", "artifact_id")],
         "current-pointer": [lock("artifact_current", "artifact_id")] } },
     ...(options.publicationUrls ? { publicationUrls: options.publicationUrls } : {}),
   });
   const execute: typeof app.execute = async (request, invocation: ArtifactInvocationContext) => {
     try {
-      const actors = await pool.query<{ sub: string }>("SELECT sub FROM account_users ORDER BY sub");
+      const actors = await pool.query<{ sub: string; status?: string }>("SELECT sub, status FROM account_users ORDER BY sub");
       const binding = createRadarKeyDerivation({ storageScopeId: scope, actorIds: actors.rows.map((row) => row.sub) });
+      if (ARTIFACT_P0B && request.path === "/delete" && request.body && typeof request.body === "object" &&
+        !Array.isArray(request.body) && !Object.hasOwn(request.body, "expectedCurrentReleaseId")) {
+        request = { ...request, body: await options.confirmation!.prepareDelete(invocation.actorId, request.body as Record<string, unknown>) };
+      }
       const body = request.body as { artifactId?: string } | undefined;
-      return normalizeHostOutcome(await keyDomain.run(binding,
+      return normalizeHostOutcome(await sharePrincipal.run(request.body as { action?: unknown; principalId?: unknown } ?? {}, () =>
+        approved.run(new Set(actors.rows.filter((r) => r.status === "approved").map((r) => r.sub)), () => keyDomain.run(binding,
         () => artifact.run(body?.artifactId ?? "", async () => {
-          const write = request.method === "POST" && ["/ensure", "/publish"].includes(request.path);
+          const write = request.method === "POST" && isArtifactMutation(request.path.slice(1));
           if (write && invocation.actorId && invocation.storageScopeId === scope &&
             request.actorId === invocation.actorId &&
             (request.storageScopeId === undefined || request.storageScopeId === scope)) {
@@ -95,7 +119,7 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
               authority: { actorId: invocation.actorId, storageScopeId: scope }, derivation: binding,
               ...(request.idempotencyKey === undefined ? {} : { envelopeKey: request.idempotencyKey }),
             });
-            await assertArtifactReplayMigration(legacyRecords, command, invocation, String(normalized.idempotencyKey));
+            if (isArtifactPublication(command.operation)) await assertArtifactReplayMigration(legacyRecords, command, invocation, String(normalized.idempotencyKey));
             const existing = await pool.query(
               "SELECT 1 FROM artifacts.operation_receipts WHERE storage_scope_id=$1 AND internal_key=$2",
               [scope, command.identity.internalKey]);
@@ -110,8 +134,8 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
               return rateLimitedOutcome(invocation.invocationId, command.operation);
             }
           }
-          return app.execute(request, invocation);
-        })));
+          return reads.project(request, () => app.execute(request, invocation));
+        })))));
     } catch (cause) {
       const failure = classifyArtifactFailure(cause, { invocationId: invocation.invocationId,
         operation: request.path.slice(1), phase: "dispatch", commitState: "not_committed" },
