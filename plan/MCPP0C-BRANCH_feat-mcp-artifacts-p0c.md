@@ -34,7 +34,7 @@
   - [x] Confirm clean branch and test-only runner without ports or environment files.
   - [x] Verify published 0.2.6 integrity before consuming it (exact owner-provided SHA-512 matches npm).
 - [ ] **Lot A — Strict inputs and authority, envelope 1**
-  - [ ] Pin artifacts 0.2.6 and mcp-platform 0.4.1 centrally; regenerate lock through make.
+  - [x] Pin artifacts 0.2.6 and mcp-platform 0.4.1 centrally; regenerate lock through make.
   - [ ] Add trusted profile selection, strict guide/catalogue and startup coherence checks.
   - [ ] Add replayable locked policy activation and complete writer inventory.
   - [ ] Preserve old receipts and refuse new omissions after authorization without quota.

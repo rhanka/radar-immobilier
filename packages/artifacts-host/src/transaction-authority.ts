@@ -1,7 +1,8 @@
 /** Provider-neutral authority seam. Runtime binding awaits the candidate API. */
 export type AuthorizePurpose = "finalize" | "replay";
 
-export type CommitOperation = "ensure" | "publish" | "set_access" | "delete";
+import { ARTIFACT_STRICT } from "./p0b-profile.js";
+export type CommitOperation = "ensure" | "publish" | "revert" | "set_access" | "delete";
 
 export interface AuthorizeCommitContext {
   readonly invocationId: string;
@@ -24,4 +25,4 @@ export type AuthorizeCommit = (
 ) => Promise<AuthorizeCommitDecision>;
 
 /** Policy revision proposed for the Radar profile. */
-export const POLICY_REVISION = "radar-c4-r2";
+export const POLICY_REVISION = ARTIFACT_STRICT ? "radar-c4-r3-artifacts-cas" : "radar-c4-r2";
