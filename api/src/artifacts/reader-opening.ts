@@ -70,17 +70,23 @@ export function createReaderOpening(deps: {
     return next();
   });
   application.route("/design", createDesignKitApp());
-  async function readablePinnedOrigin(value: unknown): Promise<string | null> {
+  async function readableReleaseOrigin(value: unknown): Promise<string | null> {
     if (typeof value !== "string") return null;
     try {
       const url = new URL(value);
       const host = parseContentHost(url.host, deps.contentBase);
-      return url.protocol === "https:" && url.origin === value && host.kind === "pinned" &&
-        await deps.getArtifactIdForRelease?.(host.releaseId) ? url.origin : null;
+      if (url.protocol !== "https:" || url.origin !== value || host.kind !== "content") return null;
+      // Single-level label: accept only a known release. A label that is both
+      // an artifact and a release (id collision) fails closed as unknown.
+      const [releaseArtifact, artifactRelease] = await Promise.all([
+        deps.getArtifactIdForRelease?.(host.id) ?? null,
+        deps.authority.getRelease(host.id),
+      ]);
+      return releaseArtifact && !artifactRelease ? url.origin : null;
     } catch { return null; }
   }
   application.get("/resume", async (c) => {
-    const origin = await readablePinnedOrigin(c.req.query("origin"));
+    const origin = await readableReleaseOrigin(c.req.query("origin"));
     // Restart at the content host so even a long login gets a fresh binding.
     return origin ? c.redirect(`${origin}/__reader/start`, 303) : c.json({ error: "not_found" }, 404);
   });
@@ -94,7 +100,13 @@ export function createReaderOpening(deps: {
     if (typeof input.origin === "string") {
       try {
         const host = parseContentHost(new URL(input.origin).host, deps.contentBase);
-        if (host.kind === "pinned") requestedRelease = host.releaseId;
+        if (host.kind === "content") {
+          // Single-level: a release label selects that release; a stable
+          // (artifact) label keeps the current release. A colliding label
+          // fails closed below in the origin check.
+          const releaseArtifact = await deps.getArtifactIdForRelease?.(host.id) ?? null;
+          if (releaseArtifact) requestedRelease = host.id;
+        }
       } catch { return null; }
     }
     const release = await deps.authority.getRelease(input.artifactId, requestedRelease);
@@ -109,8 +121,17 @@ export function createReaderOpening(deps: {
         const url = new URL(input.origin);
         if (url.protocol !== "https:" || url.origin !== input.origin) return null;
         const host = parseContentHost(url.host, deps.contentBase);
-        if (!(host.kind === "stable" && host.artifactId === release.artifactId) &&
-          !(host.kind === "pinned" && host.releaseId === release.releaseId)) return null;
+        // Exactly the new hosts: single UUID label matching this release's
+        // artifact (stable) or release (exact). Anything else is refused.
+        if (host.kind !== "content" ||
+          (host.id !== release.artifactId && host.id !== release.releaseId)) return null;
+        // Id-collision guard: a label that is both an artifact and a release
+        // fails closed instead of serving either.
+        const [collisionArtifact, collisionRelease] = await Promise.all([
+          deps.authority.getRelease(host.id),
+          deps.getArtifactIdForRelease?.(host.id) ?? null,
+        ]);
+        if (collisionArtifact && collisionRelease) return null;
         contentOrigin = input.origin;
       } catch { return null; }
     }
@@ -126,7 +147,7 @@ export function createReaderOpening(deps: {
   application.get("/approve", async (c) => {
     const token = parseCookieHeader(c.req.header("cookie"), SESSION_COOKIE_NAME);
     if (!token || !await verifySession(token, { sessionSecret: deps.auth.sessionSecret })) {
-      const origin = await readablePinnedOrigin(c.req.query("origin"));
+      const origin = await readableReleaseOrigin(c.req.query("origin"));
       if (!origin || !deps.auth.enabled || c.req.header("authorization")) return c.json({ error: "unauthenticated" }, 401);
       const returnTo = "/api/v1/artifacts/reader/resume?" + new URLSearchParams({ origin });
       return c.redirect("/api/v1/auth/login?" + new URLSearchParams({ returnTo }), 303);
@@ -172,14 +193,22 @@ export function createReaderOpening(deps: {
   });
   content.get("/__reader/start", async (c) => {
     const host = parseContentHost(c.req.header("host"), deps.contentBase);
-    const artifactId = host.kind === "stable" ? host.artifactId : host.kind === "pinned"
-      ? await deps.getArtifactIdForRelease?.(host.releaseId) : null;
-    if (!artifactId || !deps.auth.enabled) return c.json({ error: "not_found" }, 404);
-    if (host.kind === "stable") {
-      const release = await deps.authority.getRelease(artifactId);
-      if (!release) return c.json({ error: "not_found" }, 404);
-      return c.redirect(`https://${release.releaseId}.pinned.${deps.contentBase}/__reader/start`, 303);
+    // Unknown labels answer the same 404 whether the kind is missing as an
+    // artifact or as a release; collisions fail closed the same way.
+    if (host.kind !== "content" || !deps.auth.enabled) return c.json({ error: "not_found" }, 404);
+    const [artifactRelease, releaseArtifactId] = await Promise.all([
+      deps.authority.getRelease(host.id),
+      deps.getArtifactIdForRelease?.(host.id) ?? null,
+    ]);
+    if ((artifactRelease && releaseArtifactId) || (!artifactRelease && !releaseArtifactId)) {
+      return c.json({ error: "not_found" }, 404);
     }
+    if (artifactRelease) {
+      const release = artifactRelease;
+      if (!release) return c.json({ error: "not_found" }, 404);
+      return c.redirect(`https://${release.releaseId}.${deps.contentBase}/__reader/start`, 303);
+    }
+    const artifactId = releaseArtifactId!;
     const binding = randomBytes(32).toString("hex");
     c.header("Set-Cookie", `${PREVIEW_INIT_COOKIE}=${binding}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=60`);
     return c.redirect(`${deps.auth.appBaseUrl}/api/v1/artifacts/reader/approve?` +
