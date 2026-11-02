@@ -4,7 +4,7 @@ import type { ArtifactApp, HttpAppDeps, HttpRequest } from "@sentropic/artifacts
 
 interface MetadataRow {
   id: string; binding_name: string; created_at: Date; lifecycle_state: string;
-  release_id: string | null; published_at: Date | null;
+  release_id: string | null; published_at: Date | null; current_digest: string | null;
 }
 
 /** Local projection shared by MCP and HTTP; upstream still authorizes every read. */
@@ -14,7 +14,7 @@ export function createArtifactReadMetadata(pool: Pick<pg.Pool, "query">, scope: 
   async function read(ids: string[] | null) {
     const result = await pool.query<MetadataRow>(
       `SELECT a.id, a.binding_name, a.created_at, a.lifecycle_state,
-         r.id AS release_id, r.created_at AS published_at
+         r.id AS release_id, r.created_at AS published_at, r.manifest_digest AS current_digest
        FROM artifacts.artifacts a
        LEFT JOIN artifacts.artifact_current c ON c.artifact_id=a.id
        LEFT JOIN artifacts.releases r ON r.id=c.release_id AND r.artifact_id=a.id
@@ -47,7 +47,8 @@ export function createArtifactReadMetadata(pool: Pick<pg.Pool, "query">, scope: 
         const enriched = items.map((item) => {
           const row = snapshots.getStore()!.get(String(item.artifactId));
           if (!row) throw new Error("artifact read metadata unavailable");
-          return { ...item, ...summary(row) };
+          return { ...item, ...summary(row),
+            ...(Object.hasOwn(item, "digest") ? { digest: row.current_digest } : {}) };
         });
         return { ...outcome, result: { ...outcome.result,
           body: list ? { ...body, artifacts: enriched } : enriched[0] } };

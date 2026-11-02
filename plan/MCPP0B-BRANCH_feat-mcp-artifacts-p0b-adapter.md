@@ -28,6 +28,7 @@ Prepare the three qualified P0b operations (0.2.5 or 0.3.0) while preserving the
 - [x] MCPP0B-EX2: generated dependency lock may exceed the per-commit line limit; centralize existing pins without changing their version; rollback the dependency-only commit.
 - [x] Owner instruction supersedes peer/workflow requirements: perform design, implementation and review directly in this session; do not claim peer consensus.
 - [x] Upstream delete requires a release snapshot: make the public field optional and resolve it on the host; proof retries reuse their recorded snapshot.
+- [x] Keep an existing P0b digest on the same current-release snapshot as links and timestamps; unit coverage rejects mixed snapshots and PostgreSQL checks the stored digest.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single builder, single branch, no background agent.

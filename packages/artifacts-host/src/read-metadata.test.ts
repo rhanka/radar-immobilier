@@ -5,11 +5,12 @@ import { createArtifactReadMetadata } from "./read-metadata.js";
 
 const row = { id: "123e4567-e89b-12d3-a456-426614174000", binding_name: "summer",
   created_at: new Date("2026-10-01T00:00:00Z"), lifecycle_state: "active",
-  release_id: "123e4567-e89b-12d3-a456-426614174001", published_at: new Date("2026-10-02T00:00:00Z") };
+  release_id: "123e4567-e89b-12d3-a456-426614174001", published_at: new Date("2026-10-02T00:00:00Z"), current_digest: "ab".repeat(32) };
 const ok = (body: unknown) => ({ ok: true as const, result: { status: 200, body },
   invocationId: "test", commitState: "not_committed" as const, replayed: false });
 const request = (path: string) => ({ method: path === "/list" ? "POST" : "GET", path, actorId: "alice", body: undefined });
-type FixtureRow = Omit<typeof row, "release_id" | "published_at"> & { release_id: string | null; published_at: Date | null };
+type FixtureRow = Omit<typeof row, "release_id" | "published_at" | "current_digest"> & {
+  release_id: string | null; published_at: Date | null; current_digest: string | null };
 function setup(rows: FixtureRow[] = [row]) {
   const query = vi.fn().mockResolvedValue({ rows });
   const reads = createArtifactReadMetadata({ query } as unknown as Pick<pg.Pool, "query">, "scope",
@@ -18,14 +19,14 @@ function setup(rows: FixtureRow[] = [row]) {
 }
 
 describe("IMMO artifact read metadata", () => {
-  it("should enrich only the authorized page and retain the upstream result fields", async () => {
+  it("should enrich only the authorized page and keep current release fields consistent", async () => {
     const { reads, query } = setup();
     const result = await reads.project(request("/list"), async () => {
       const ids = await reads.listArtifactIds();
-      return ok({ total: 1, artifacts: ids.map((artifactId) => ({ artifactId, ownerId: "alice" })) });
+      return ok({ total: 1, artifacts: ids.map((artifactId) => ({ artifactId, ownerId: "alice", digest: "previous snapshot" })) });
     });
     expect(result).toMatchObject({ ok: true, result: { body: { total: 1, artifacts: [{ artifactId: row.id,
-      bindingName: "summer", ownerId: "alice", currentReleaseId: row.release_id, state: "active", published: true,
+      bindingName: "summer", ownerId: "alice", currentReleaseId: row.release_id, digest: row.current_digest, state: "active", published: true,
       stableUrl: `https://${row.id}.pages.test/`, pinnedUrl: `https://${row.release_id}.pinned.pages.test/`,
       createdAt: "2026-10-01T00:00:00.000Z", updatedAt: "2026-10-02T00:00:00.000Z" }] } } });
     expect(query).toHaveBeenCalledTimes(1);
@@ -33,7 +34,7 @@ describe("IMMO artifact read metadata", () => {
   });
 
   it("should return explicit null publication fields for an unpublished artifact", async () => {
-    const { reads, query } = setup([{ ...row, release_id: null, published_at: null }]);
+    const { reads, query } = setup([{ ...row, release_id: null, published_at: null, current_digest: null }]);
     expect(await reads.project(request(`/meta/${row.id}`), async () => ok({ artifactId: row.id })))
       .toMatchObject({ result: { body: { bindingName: "summer", currentReleaseId: null,
         pinnedUrl: null, updatedAt: null, published: false, state: "active", stableUrl: `https://${row.id}.pages.test/` } } });
