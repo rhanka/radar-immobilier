@@ -34,7 +34,9 @@ type ArtifactManifestTool = ArtifactManifest["tools"][number];
  * Tools whose description carries the imperative DS + H5 core: ensure and
  * publish (page creation path) plus get (republication of an existing
  * page must find the guide too). The full contract ships in the
- * `authoringGuide` response field of ensure and get.
+ * `authoringGuide` response field of ensure and get; get_source carries
+ * only a small guide reference (guideId/revision plus the lifecycle
+ * hint) because the source payload itself must stay readable.
  */
 const GUIDE_DESCRIPTION_TOOLS: ReadonlySet<string> = new Set(
   ["artifacts_ensure", "artifacts_publish", "artifacts_get", "artifacts_get_source"]);
@@ -225,8 +227,10 @@ export function bindArtifactProvider(options: {
         body = projectArtifactHttpOutcome(outcome, ARTIFACT_PART1).body;
       }
       // The durable receipt is untouched: the guide rides the MCP response
-      // only, so tool selection and republication both surface it.
-      const result = withAuthoringGuide(tool, body);
+      // only, so tool selection and republication both surface it. Source
+      // files are projected to text first so a page read stays editable.
+      const result = withAuthoringGuide(tool,
+        tool === "artifacts_get_source" ? projectSourceBody(body) : body);
       return { content: [{ type: "text", text: JSON.stringify(result) }],
         ...(!ARTIFACT_PART1 && artifactReadOutputSchema(tool) ? { structuredContent: result as Record<string, unknown> } : {}) };
     },
@@ -236,18 +240,97 @@ export function bindArtifactProvider(options: {
 }
 
 /**
- * Ensure, get and source responses carry the full authoring guide alongside the
- * durable receipt fields. Anything else passes through unchanged.
+ * MIME types the MCP source projection decodes to `text`. The publish
+ * contract accepts exactly one of `text` or `bytes` per file; `text/*`
+ * plus `application/json` covers every MIME type the profile admits, and
+ * any future non-text type (or undecodable payload) keeps `bytes`.
+ */
+const SOURCE_TEXT_MIME_TYPES: ReadonlySet<string> = new Set(
+  ["text/html", "text/css", "text/javascript", "application/json"]);
+
+function isSourceTextMime(mimeType: unknown): boolean {
+  if (typeof mimeType !== "string") return false;
+  const base = mimeType.split(";")[0]?.trim().toLowerCase() ?? "";
+  return base.startsWith("text/") || SOURCE_TEXT_MIME_TYPES.has(base);
+}
+
+function decodeStrictUtf8(bytes: readonly number[]): string | undefined {
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(Uint8Array.from(bytes));
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Project one retained source file from the upstream `bytes` form to the
+ * publish-compatible `text` form. Non-text MIME types, missing MIME types,
+ * non-byte arrays and invalid UTF-8 keep `bytes` untouched; every other
+ * field (path, mimeType, digest/size when present) is preserved so
+ * integrity can still be checked and the file republishes as-is.
+ */
+export function projectSourceFile(file: unknown): unknown {
+  if (typeof file !== "object" || file === null || Array.isArray(file)) return file;
+  const entry = file as Record<string, unknown>;
+  if (!Array.isArray(entry.bytes) || entry.text !== undefined) return file;
+  const bytes = entry.bytes as unknown[];
+  if (!bytes.every((byte) => Number.isInteger(byte) && (byte as number) >= 0 && (byte as number) <= 255)) return file;
+  if (!isSourceTextMime(entry.mimeType)) return file;
+  const text = decodeStrictUtf8(bytes as number[]);
+  if (text === undefined) return file;
+  const { bytes: _dropped, ...rest } = entry;
+  return { ...rest, text };
+}
+
+/**
+ * Project a get_source response body (v1 root `files` or v2
+ * `output.files`) from `bytes` to `text` per {@link projectSourceFile}.
+ * Unknown shapes pass through unchanged.
+ */
+export function projectSourceBody(body: unknown): unknown {
+  if (typeof body !== "object" || body === null || Array.isArray(body)) return body;
+  const root = body as Record<string, unknown>;
+  const output = root.output;
+  if (output !== null && typeof output === "object" && !Array.isArray(output)) {
+    const out = output as Record<string, unknown>;
+    if (Array.isArray(out.files)) return { ...root, output: { ...out, files: out.files.map(projectSourceFile) } };
+    return body;
+  }
+  if (Array.isArray(root.files)) return { ...root, files: root.files.map(projectSourceFile) };
+  return body;
+}
+
+/**
+ * Small guide reference attached to get_source responses instead of the
+ * full authoring guide: identity (guideId/revision) plus the lifecycle
+ * hint the edit journey needs. Anything else (starter files, components,
+ * checklist) stays on ensure/get, where the model reads it once.
+ */
+export function getSourceGuideReference(): {
+  readonly guideId: string; readonly revision: string;
+  readonly lifecycle: unknown; readonly artifactLifecycle: unknown;
+} {
+  const guide = getAuthoringGuide();
+  return { guideId: guide.guideId, revision: guide.revision,
+    lifecycle: guide.lifecycle, artifactLifecycle: guide.artifactLifecycle };
+}
+
+/**
+ * Ensure and get responses carry the full authoring guide alongside the
+ * durable receipt fields. Source responses carry only the small guide
+ * reference so the file payload stays within the model tool-result
+ * budget. Anything else passes through unchanged.
  */
 export function withAuthoringGuide(tool: string, body: unknown): unknown {
   if ((tool === "artifacts_ensure" || tool === "artifacts_get" || tool === "artifacts_get_source") &&
     typeof body === "object" && body !== null && !Array.isArray(body)) {
+    const guide = tool === "artifacts_get_source" ? getSourceGuideReference() : getAuthoringGuide();
     if (ARTIFACT_PART1) {
       const envelope = body as { ok: boolean; output?: object };
       if (!envelope.ok || !envelope.output) return body;
-      return { ...envelope, output: { ...envelope.output, authoringGuide: getAuthoringGuide() } };
+      return { ...envelope, output: { ...envelope.output, authoringGuide: guide } };
     }
-    return { ...body, authoringGuide: getAuthoringGuide() };
+    return { ...body, authoringGuide: guide };
   }
   return body;
 }
