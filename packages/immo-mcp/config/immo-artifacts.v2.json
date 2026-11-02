@@ -1,0 +1,18 @@
+{
+  "extends": "immo-artifacts.cas.v2.json",
+  "descriptor": { "profileRevisionId": "immo-artifacts.v2", "requireExpectedCurrentReleaseId": true, "resultEnvelopeVersion": 2 },
+  "providerVersion": "0.2.6",
+  "policyRevision": "radar-c4-r3-artifacts-cas",
+  "additionalToolScopes": { "artifacts_list_versions": "immo:artifacts:read", "artifacts_revert": "immo:artifacts:write" },
+  "additionalSelection": [
+    { "tool": "artifacts_list_versions", "operation": "list_versions", "method": "POST", "path": "/list_versions", "command": "list_versions" },
+    { "tool": "artifacts_revert", "operation": "revert", "method": "POST", "path": "/revert", "command": "revert" }
+  ],
+  "effectiveRequired": { "artifacts_publish": ["artifactId", "idempotencyKey", "expectedCurrentReleaseId"] },
+  "additionalEffectiveProfile": {
+    "artifacts_list_versions": { "required": ["artifactId"] },
+    "artifacts_revert": { "required": ["artifactId", "targetReleaseId", "expectedCurrentReleaseId", "idempotencyKey"] },
+    "metadata": ["title", "description", "icon"],
+    "contentSource": "exactly one of files or edits"
+  }
+}
