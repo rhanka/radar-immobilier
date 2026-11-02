@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { isDeepStrictEqual } from "node:util";
-import { ARTIFACT_P0B, ARTIFACT_PROVIDER_VERSION, ARTIFACT_PROFILE_DESCRIPTOR, HOST_ARTIFACT_PROFILE } from "@radar/artifacts-host";
-import { artifactEffectiveProfile, ARTIFACT_SELECTION, ARTIFACT_TOOL_SCOPES } from "./artifact-profile.js";
+import { ARTIFACT_P0B, ARTIFACT_PROVIDER_VERSION, ARTIFACT_PROFILE_DESCRIPTOR, HOST_ARTIFACT_PROFILE, POLICY_REVISION } from "@radar/artifacts-host";
+import { artifactEffectiveProfile, ARTIFACT_SELECTION, ARTIFACT_TOOL_SCOPES, ARTIFACT_INVOCATION_SCOPES, REQUIRED_PROVIDER_CONTRACTS } from "./artifact-profile.js";
 
 /** Independent deployment manifest; no defaults are inferred from caller arguments. */
 export function readArtifactConfig(revision = ARTIFACT_PROFILE_DESCRIPTOR.profileRevisionId): ReturnType<typeof JSON.parse> {
@@ -17,6 +17,7 @@ export function readArtifactConfig(revision = ARTIFACT_PROFILE_DESCRIPTOR.profil
     effectiveProfile[tool] = { ...effectiveProfile[tool], required };
   }
   return { ...base, configVersion: extension.descriptor.profileRevisionId,
+    policyRevision: extension.policyRevision ?? base.policyRevision,
     provider: { ...base.provider, version: ARTIFACT_PROVIDER_VERSION },
     toolScopes: { ...base.toolScopes, ...extension.additionalToolScopes },
     selection: [...base.selection, ...(extension.additionalSelection ?? [])],
@@ -27,7 +28,10 @@ export function readArtifactConfig(revision = ARTIFACT_PROFILE_DESCRIPTOR.profil
 
 export function assertArtifactAssembly(config = readArtifactConfig()) {
   if (!ARTIFACT_P0B) return;
-  if (!isDeepStrictEqual(config.effectiveProfile, artifactEffectiveProfile()) ||
+  if (config.configVersion !== ARTIFACT_PROFILE_DESCRIPTOR.profileRevisionId || config.policyRevision !== POLICY_REVISION ||
+    !isDeepStrictEqual(config.invocationScopes, ARTIFACT_INVOCATION_SCOPES) ||
+    !isDeepStrictEqual(config.requiredContracts, REQUIRED_PROVIDER_CONTRACTS) ||
+    !isDeepStrictEqual(config.effectiveProfile, artifactEffectiveProfile()) ||
     !isDeepStrictEqual(config.selection, ARTIFACT_SELECTION) ||
     !isDeepStrictEqual(config.toolScopes, ARTIFACT_TOOL_SCOPES) ||
     !isDeepStrictEqual(config.effectiveProfile.descriptor, ARTIFACT_PROFILE_DESCRIPTOR) ||
