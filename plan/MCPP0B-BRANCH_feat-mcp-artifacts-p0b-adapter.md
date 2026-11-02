@@ -64,6 +64,7 @@ Prepare the three qualified P0b operations (0.2.5 or 0.3.0) while preserving the
   - [x] Remove disposable dependencies; explicit down -v and inspection confirm no remaining project containers, volumes or networks.
 - [ ] **Lot 6 — Discoverable artifact metadata**
   - [x] Add shared IMMO get/list metadata and publication ordering without changing the upstream contract.
-  - [ ] Publish additive output schemas, preserve read annotations and bump the authoring guide revision.
+  - [x] Publish additive output schemas and preserve read annotations.
+  - [ ] Bump the authoring guide revision and document discovery metadata.
   - [ ] Cover current-release timestamps, drafts, ordering and pagination with unit and real PostgreSQL tests.
   - [ ] Verify 0.2.2 and both P0b candidates, tear down volumes, push and write the French report.
