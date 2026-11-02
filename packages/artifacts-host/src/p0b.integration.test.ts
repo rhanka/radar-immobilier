@@ -4,7 +4,7 @@ import { ARTIFACT_P0B } from "./p0b-profile.js";
 import { p0bFixture } from "./p0b.test-support.js";
 import { createStoredReader } from "../../../api/src/artifacts/reader-storage.js";
 
-describe.skipIf(!ARTIFACT_P0B || !process.env.P0B_DATABASE_URL)("P0b host with real PostgreSQL", () => {
+describe.skipIf(!process.env.P0B_DATABASE_URL)("IMMO artifact host with real PostgreSQL", () => {
   let h: Awaited<ReturnType<typeof p0bFixture>>;
   beforeAll(async () => { h = await p0bFixture(); });
   afterAll(async () => { await h?.close(); });
@@ -22,7 +22,53 @@ describe.skipIf(!ARTIFACT_P0B || !process.env.P0B_DATABASE_URL)("P0b host with r
     return { args, ref: (refused.body as { details: { confirmationRef: string } }).details.confirmationRef };
   };
 
-  it("should return full get/list summaries and retained source for editing and republication", async () => {
+  it("should expose current publication metadata and order visible artifacts before pagination", async () => {
+    const first = await h.page();
+    const second = await h.page();
+    const drafts: string[] = [];
+    for (const day of [3, 4]) {
+      const ensured = await h.call("ensure", { bindingName: `draft-${randomUUID()}`, idempotencyKey: randomUUID() });
+      expect(ensured.status).toBe(201);
+      const { artifactId } = ensured.body as { artifactId: string };
+      drafts.push(artifactId);
+      await h.pool.query("UPDATE artifacts.artifacts SET created_at=$2 WHERE id=$1", [artifactId, `2026-10-0${day}T00:00:00Z`]);
+    }
+    for (const [page, day] of [[first, 1], [second, 2]] as const) {
+      await h.pool.query("UPDATE artifacts.artifacts SET created_at=$2 WHERE id=$1", [page.artifactId, `2026-10-0${day}T00:00:00Z`]);
+      await h.pool.query("UPDATE artifacts.releases SET created_at='2026-10-05T00:00:00Z' WHERE id=$1", [page.releaseId]);
+    }
+    type Summary = { artifactId: string; bindingName: string; currentReleaseId: string | null;
+      stableUrl: string; pinnedUrl: string | null; createdAt: string; updatedAt: string | null; state: string; published: boolean };
+    const list = async (args = {}) => {
+      const response = await h.call("list", args);
+      expect(response.status).toBe(200);
+      return response.body as { total: number; artifacts: Summary[] };
+    };
+    const before = await list();
+    expect(before.artifacts.map((item) => item.artifactId)).toEqual([second.artifactId, first.artifactId, drafts[1], drafts[0]]);
+    expect(before.artifacts[0]).toMatchObject({ bindingName: second.bindingName, currentReleaseId: second.releaseId,
+      stableUrl: `https://${second.artifactId}.pages.test/`, pinnedUrl: `https://${second.releaseId}.pinned.pages.test/`,
+      createdAt: "2026-10-02T00:00:00.000Z", updatedAt: "2026-10-05T00:00:00.000Z", state: "active", published: true });
+    expect(before.artifacts[2]).toMatchObject({ currentReleaseId: null, pinnedUrl: null, updatedAt: null, state: "active", published: false });
+    expect((await h.call("meta", { artifactId: drafts[1] })).body).toMatchObject(before.artifacts[2]!);
+    const republished = await h.call("publish", { artifactId: first.artifactId, files: first.files, idempotencyKey: randomUUID() });
+    expect(republished.status).toBe(201);
+    const releaseId = (republished.body as { releaseId: string }).releaseId;
+    const publication = await h.pool.query("SELECT created_at FROM artifacts.releases WHERE id=$1", [releaseId]);
+    // A newer unpromoted release must not replace the current publication's timestamp.
+    await h.pool.query(`INSERT INTO artifacts.releases (id,artifact_id,manifest_digest,manifest,state,created_at)
+      SELECT $1,artifact_id,manifest_digest,manifest,state,'2099-01-01' FROM artifacts.releases WHERE id=$2`, [randomUUID(), releaseId]);
+    const after = await list();
+    expect(after.artifacts.map((item) => item.artifactId)).toEqual([first.artifactId, second.artifactId, drafts[1], drafts[0]]);
+    expect(after.artifacts[0]).toMatchObject({ currentReleaseId: releaseId, pinnedUrl: `https://${releaseId}.pinned.pages.test/`,
+      updatedAt: (publication.rows[0].created_at as Date).toISOString(), bindingName: first.bindingName });
+    expect((await h.call("meta", { artifactId: first.artifactId })).body).toMatchObject(after.artifacts[0]!);
+    expect(await list({ limit: 1, offset: 1 })).toEqual({ total: 4, artifacts: [after.artifacts[1]] });
+    expect((await h.call("list", {}, "idp-bob")).body).toMatchObject({ total: 0, artifacts: [] });
+    expect((await h.call("meta", { artifactId: first.artifactId }, "idp-bob")).status).toBe(404);
+  });
+
+  it.skipIf(!ARTIFACT_P0B)("should return full get/list summaries and retained source for editing and republication", async () => {
     const p = await h.page();
     const meta = await h.call("meta", { artifactId: p.artifactId });
     expect(meta.body).toMatchObject({ artifactId: p.artifactId, currentReleaseId: p.releaseId, bindingName: expect.any(String),
@@ -40,7 +86,7 @@ describe.skipIf(!ARTIFACT_P0B || !process.env.P0B_DATABASE_URL)("P0b host with r
     expect((await h.call("get_source", { artifactId: p.artifactId, releaseId: p.releaseId })).status).toBe(200);
   });
 
-  it("should allow only named approved IdP subjects, preserve read-only grants and revoke at exhausted quota", async () => {
+  it.skipIf(!ARTIFACT_P0B)("should allow only named approved IdP subjects, preserve read-only grants and revoke at exhausted quota", async () => {
     const { artifactId } = await h.page();
     await h.pool.query("UPDATE artifacts.host_quotas SET operation_limit=operations_used,byte_limit=bytes_used");
     const share = { artifactId, action: "grant", principalId: "idp-bob", grant: "read", idempotencyKey: randomUUID() };
@@ -58,7 +104,7 @@ describe.skipIf(!ARTIFACT_P0B || !process.env.P0B_DATABASE_URL)("P0b host with r
     expect((await h.call("meta", { artifactId }, "idp-bob")).status).toBeGreaterThanOrEqual(400);
   });
 
-  it("should reread recipient approval on the transaction after the request snapshot", async () => {
+  it.skipIf(!ARTIFACT_P0B)("should reread recipient approval on the transaction after the request snapshot", async () => {
     const { artifactId } = await h.page();
     const query = h.pool.query.bind(h.pool);
     let armed = true;
@@ -76,7 +122,7 @@ describe.skipIf(!ARTIFACT_P0B || !process.env.P0B_DATABASE_URL)("P0b host with r
     } finally { spy.mockRestore(); }
   });
 
-  it("should require human approval, roll proof consumption back on denial and replay a terminal deletion", async () => {
+  it.skipIf(!ARTIFACT_P0B)("should require human approval, roll proof consumption back on denial and replay a terminal deletion", async () => {
     const p = await h.page();
     const { args, ref } = await challenge(p.artifactId);
     const reader = createStoredReader(h.pool, "p0b", "pages.test", h.host.blobs);
@@ -105,7 +151,7 @@ describe.skipIf(!ARTIFACT_P0B || !process.env.P0B_DATABASE_URL)("P0b host with r
     for (const op of ["restore", "fork", "promote", "renew"]) expect((await h.call(op, { artifactId: p.artifactId })).status).toBe(503);
   });
 
-  it("should reject expired, forged, mismatched and stale confirmations", async () => {
+  it.skipIf(!ARTIFACT_P0B)("should reject expired, forged, mismatched and stale confirmations", async () => {
     const p = await h.page();
     const { args, ref } = await challenge(p.artifactId);
     expect(await h.confirmation.approve(ref, "alice")).toBe(true);

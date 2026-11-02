@@ -65,6 +65,7 @@ Prepare the three qualified P0b operations (0.2.5 or 0.3.0) while preserving the
 - [ ] **Lot 6 — Discoverable artifact metadata**
   - [x] Add shared IMMO get/list metadata and publication ordering without changing the upstream contract.
   - [x] Publish additive output schemas and preserve read annotations.
-  - [ ] Bump the authoring guide revision and document discovery metadata.
-  - [ ] Cover current-release timestamps, drafts, ordering and pagination with unit and real PostgreSQL tests.
+  - [x] Bump the authoring guide revision and document discovery metadata.
+  - [x] Cover current-release timestamps, drafts, ordering and pagination with unit and real PostgreSQL tests.
+  - [x] 0.2.2 baseline: 515 MCP + 234 host tests pass (8 + 5 profile skips), including the shared PostgreSQL scenario; three typechecks and lint pass.
   - [ ] Verify 0.2.2 and both P0b candidates, tear down volumes, push and write the French report.
