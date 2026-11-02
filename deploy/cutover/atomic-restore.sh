@@ -5,6 +5,13 @@
 # database), LIVE_DB, RESTORE_DUMP, EXPECTED_TOC_ENTRIES, RESTORE_ASSERT_DB,
 # DUMP_DATABASE.
 #
+# Preprod catalogue preservation (D2 = C, opt-in): when CATALOGUE_DIR is set,
+# the preprod-only artifact catalogue (artifacts.* rows, blobs stay in S3) is
+# exported before the schema reset and re-imported after the replay, before
+# any reopening. CATALOGUE_SCRIPT points at deploy/cutover/artifacts-catalogue.sh
+# and CATALOGUE_MAP optionally at an explicit subject correspondence file.
+# Unset CATALOGUE_DIR keeps the historical behavior byte-for-byte.
+#
 # A snapshot older than the destination schema (fewer migrations) cannot be
 # restored with `pg_restore --clean`: dropping a primary key that newer foreign
 # keys depend on aborts the whole transaction. Every application schema is
@@ -37,6 +44,35 @@ else
   echo "[restore] dbname check DISABLED (RESTORE_ASSERT_DB=0)"
 fi
 echo "[restore] toc_entries=$toc archive verified"
+catalogue_export_dir=${CATALOGUE_DIR:-}
+catalogue_script=${CATALOGUE_SCRIPT:-}
+catalogue_map=${CATALOGUE_MAP:-}
+if [ -n "$catalogue_export_dir" ]; then
+  [ -n "$catalogue_script" ] || { echo "[restore] ERROR — CATALOGUE_DIR without CATALOGUE_SCRIPT"; exit 1; }
+  [ -f "$catalogue_script" ] || { echo "[restore] ERROR — catalogue script missing"; exit 1; }
+  mkdir -p "$catalogue_export_dir/export"
+  if [ -f "$catalogue_export_dir/export/manifest.json" ] \
+    && bash "$catalogue_script" manifest-check --in-dir "$catalogue_export_dir/export" >/dev/null 2>&1; then
+    echo "[restore] catalogue export already sealed, reusing $catalogue_export_dir/export"
+  elif [ -n "$TARGET_DB" ]; then
+    echo "[restore] ERROR — prepared-database restore requires a pre-sealed catalogue export (export from live first, never from the candidate)" >&2
+    exit 1
+  else
+    rm -rf "$catalogue_export_dir/export"
+    bash "$catalogue_script" export --out-dir "$catalogue_export_dir/export" || exit 1
+  fi
+fi
+catalogue_import() {
+  [ -n "$catalogue_export_dir" ] || return 0
+  set -- --in-dir "$catalogue_export_dir/export"
+  # Live path: the database was reset and replayed after the export, so the
+  # export source name matches by construction; re-import is restoration, not
+  # a double load (a surviving duplicate key aborts the single transaction).
+  # Prepared path keeps the strict guard: the export must come from live.
+  [ -z "${TARGET_DB:-}" ] && set -- "$@" --allow-same-db
+  [ -n "$catalogue_map" ] && set -- "$@" --map "$catalogue_map"
+  bash "$catalogue_script" import "$@" || exit 1
+}
 reset_schemas() {
   printf '%s\n' \
     'DO $reset$ DECLARE s name; BEGIN' \
@@ -50,6 +86,7 @@ reset_schemas() {
 if [ -n "$TARGET_DB" ]; then
   reset_schemas | psql -X --no-psqlrc -v ON_ERROR_STOP=1 --single-transaction --quiet --file=-
   pg_restore --no-owner --no-privileges --exit-on-error -j 4 --dbname="$PGDATABASE" "$dump"
+  catalogue_import
   echo "[restore] ok — archive loaded into prepared database $PGDATABASE"
   exit 0
 fi
@@ -63,4 +100,5 @@ fi
     exit 1
   fi
 } | psql -X --no-psqlrc -v ON_ERROR_STOP=1 --quiet --file=- > /dev/null
+catalogue_import
 echo "[restore] ok — archive loaded atomically into $PGDATABASE"
