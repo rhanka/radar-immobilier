@@ -136,7 +136,8 @@ export function bindArtifactProvider(options: {
     tools: Object.freeze(manifest.tools.map((tool: ArtifactManifestTool) => freeze({
       name: tool.name, description: tool.description, inputSchema: tool.inputSchema as Tool["inputSchema"],
       ...(artifactReadOutputSchema(tool.name) ? { outputSchema: artifactReadOutputSchema(tool.name)! } : {}),
-      annotations: { readOnlyHint: tool.mutability === "read-only", destructiveHint: tool.name === "artifacts_delete" },
+      annotations: { readOnlyHint: tool.mutability === "read-only", destructiveHint: tool.name === "artifacts_delete",
+        openWorldHint: false, idempotentHint: tool.mutability === "read-only" || tool.idempotency.required },
       ...(ARTIFACT_P0B ? { _meta: { "immo/artifactsProfile": ARTIFACT_PROFILE_DESCRIPTOR } } : {}),
       execution: { taskSupport: "forbidden" as const },
     }))),
