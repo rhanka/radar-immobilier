@@ -1,16 +1,19 @@
 import { randomUUID } from "node:crypto";
+import { isDeepStrictEqual } from "node:util";
 import type { CallToolResult, Tool } from "@modelcontextprotocol/sdk/types.js";
 import { createArtifactsManifest,
   createArtifactsToolExecutor, ArtifactProfileInputError, type ArtifactsApp } from "@sentropic/artifacts/mcp-core";
 import type { ArtifactInvocationContext, AuthorizeCommit } from "@sentropic/artifacts/server/commit-contract";
 import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-stateful";
 import { computeManifestDigest, type RegistryDefinition } from "@sentropic/cluster-mesh/mcp/registry";
-import { checkAdmission, createArtifactControl, HOST_ARTIFACT_PROFILE, ARTIFACT_PROFILE_DESCRIPTOR, ARTIFACT_P0B,
-  artifactPublicSchema, validateArtifactInput, type AdmissionAuthority } from "@radar/artifacts-host";
+import { projectArtifactHttpOutcome } from "@sentropic/artifacts/http";
+import { checkAdmission, createArtifactControl, HOST_ARTIFACT_PROFILE, ARTIFACT_PROFILE_DESCRIPTOR, ARTIFACT_P0B, ARTIFACT_STRICT, ARTIFACT_PART1,
+  artifactRefusalResponse, artifactPublicSchema, validateArtifactInput, type AdmissionAuthority } from "@radar/artifacts-host";
 import { ARTIFACT_INVOCATION_SCOPES, ARTIFACT_TOOL_SCOPES, acceptedArtifactScopes, hasArtifactScope,
   isArtifactToolName, STRICT_ARTIFACT_SCOPE_POLICY, type ArtifactScopePolicy } from "./artifact-profile.js";
 import { AUTHORING_GUIDE_SNIPPET, getAuthoringGuide } from "./artifact-authoring-guide.js";
 import { ARTIFACT_LIST_ORDER, artifactReadOutputSchema } from "./artifact-read-schema.js";
+import { assertArtifactAssembly } from "./artifact-config.js";
 
 // Compile the complete versioned contract, including semantic rules, before registry admission.
 export const IMMO_ARTIFACT_PROFILE = HOST_ARTIFACT_PROFILE;
@@ -37,6 +40,10 @@ const GUIDE_DESCRIPTION_TOOLS: ReadonlySet<string> = new Set(
   ["artifacts_ensure", "artifacts_publish", "artifacts_get", "artifacts_get_source"]);
 
 export function createImmoArtifactManifest(policy: ArtifactScopePolicy = STRICT_ARTIFACT_SCOPE_POLICY): ArtifactManifest {
+  assertArtifactAssembly();
+  if (!isDeepStrictEqual(getAuthoringGuide().descriptor, ARTIFACT_PROFILE_DESCRIPTOR)) {
+    throw new Error("artifact_guide_assembly_incoherent");
+  }
   const base = createArtifactsManifest({ profile: IMMO_ARTIFACT_PROFILE });
   const tools = base.tools.map((tool: ArtifactManifestTool) => {
     const name: string = tool.name;
@@ -48,8 +55,8 @@ export function createImmoArtifactManifest(policy: ArtifactScopePolicy = STRICT_
     const guideDescription = GUIDE_DESCRIPTION_TOOLS.has(name)
       ? `${readDescription} ${AUTHORING_GUIDE_SNIPPET}` : readDescription;
     const description = ARTIFACT_P0B ? `${guideDescription} Contract: ${JSON.stringify(ARTIFACT_PROFILE_DESCRIPTOR)}.` : guideDescription;
-    return { ...tool, description, inputSchema: artifactPublicSchema(name, tool.inputSchema),
-      outputSchema: artifactReadOutputSchema(name) ?? tool.outputSchema,
+    return { ...tool, description, inputSchema: artifactPublicSchema(name, tool.inputSchema as Readonly<Record<string, unknown>>),
+      outputSchema: ARTIFACT_PART1 ? tool.outputSchema : artifactReadOutputSchema(name) ?? tool.outputSchema,
       requiredScopes: accepted.length === 1 ? [ARTIFACT_TOOL_SCOPES[name]] : [] };
   });
   const scopes = [ARTIFACT_INVOCATION_SCOPES.read, ARTIFACT_INVOCATION_SCOPES.write]
@@ -60,8 +67,10 @@ export const IMMO_ARTIFACT_MANIFEST = createImmoArtifactManifest(STRICT_ARTIFACT
 export const IMMO_ARTIFACT_MANIFEST_DIGEST = computeManifestDigest(IMMO_ARTIFACT_MANIFEST);
 const bindings = new WeakSet<object>();
 const unavailable = async (): Promise<never> => { throw new Error("native_wire_dispatch_required"); };
-const refusal = (error: string, retryable: boolean, extra: Record<string, unknown> = {}): CallToolResult => ({
-  isError: true, content: [{ type: "text", text: JSON.stringify({ error, retryable, ...extra }) }] });
+export const artifactRefusal = (error: string, retryable: boolean, extra: Record<string, unknown> = {}): CallToolResult => ({
+  isError: true, content: [{ type: "text", text: JSON.stringify(ARTIFACT_PART1
+    ? artifactRefusalResponse(400, error, retryable, extra).body : { error, retryable, ...extra }) }] });
+const refusal = artifactRefusal;
 
 /** Typed refusal shared by the binding and the composed namespace: the scope the call lacks. */
 export const ARTIFACT_SCOPE_DENIED = "artifact_scope_denied" as const;
@@ -136,7 +145,8 @@ export function bindArtifactProvider(options: {
     configuration: Object.freeze({ storageScopeId: scope }),
     tools: Object.freeze(manifest.tools.map((tool: ArtifactManifestTool) => freeze({
       name: tool.name, description: tool.description, inputSchema: tool.inputSchema as Tool["inputSchema"],
-      ...(artifactReadOutputSchema(tool.name) ? { outputSchema: artifactReadOutputSchema(tool.name)! } : {}),
+      ...(ARTIFACT_PART1 ? { outputSchema: tool.outputSchema as Tool["outputSchema"] }
+        : artifactReadOutputSchema(tool.name) ? { outputSchema: artifactReadOutputSchema(tool.name)! } : {}),
       annotations: { readOnlyHint: tool.mutability === "read-only", destructiveHint: tool.name === "artifacts_delete",
         openWorldHint: false, idempotentHint: tool.mutability === "read-only" || tool.idempotency.required },
       ...(ARTIFACT_P0B ? { _meta: { "immo/artifactsProfile": ARTIFACT_PROFILE_DESCRIPTOR } } : {}),
@@ -177,17 +187,18 @@ export function bindArtifactProvider(options: {
         invocationId: randomUUID(), actorId: request.principal.sub, storageScopeId: scope,
         authorizeCommit: authority,
       });
-      if (tool === "artifacts_delete" && args && typeof args === "object" && !Array.isArray(args) &&
+      if (!ARTIFACT_STRICT && tool === "artifacts_delete" && args && typeof args === "object" && !Array.isArray(args) &&
         !Object.hasOwn(args, "expectedCurrentReleaseId")) {
         if (!options.prepareDelete) return refusal("capability_unavailable", true);
         try { args = await options.prepareDelete(request.principal.sub, args as Record<string, unknown>); }
         catch { return refusal("capability_unavailable", true); }
       }
       let body: unknown;
-      if (tool === "artifacts_get_source") {
+      if (tool === "artifacts_get_source" || tool === "artifacts_list_versions") {
         // The shared facade rereads IMMO admission after every source blob has been read.
-        const response = await sourceControl.handle("get_source", request.principal.sub, args);
+        const response = await sourceControl.handle(tool.slice("artifacts_".length), request.principal.sub, args);
         if (response.status < 200 || response.status >= 300) {
+          if (ARTIFACT_PART1) return { isError: true, content: [{ type: "text", text: JSON.stringify(response.body) }] };
           const error = response.body as { error: string; details?: unknown };
           return refusal(error.error, (response as { retryable?: boolean }).retryable === true,
             error.details ? { details: error.details } : {});
@@ -196,16 +207,28 @@ export function bindArtifactProvider(options: {
       } else {
         const outcome = await executor.execute({ tool, args, invocation });
         if (!outcome.ok) {
-          const details = (outcome.failure as { details?: Readonly<Record<string, unknown>> }).details;
-          return refusal(outcome.failure.publicCode, outcome.failure.retriable, details ? { details } : {});
+          if (admission && outcome.failure.conflict?.currentSource !== undefined) {
+            try {
+              const current = await checkAdmission(admission, request.principal.sub, scope);
+              if (!current.allowed) return refusal(current.body.error, false);
+            } catch { return refusal("capability_unavailable", true); }
+          }
+          const projected = projectArtifactHttpOutcome(outcome, true).body as { error: { message: string; details?: unknown } };
+          if (ARTIFACT_PART1) return { isError: true, content: [{ type: "text", text: JSON.stringify(projectArtifactHttpOutcome(outcome, true).body) }] };
+          const details = ARTIFACT_STRICT || outcome.failure.details || outcome.failure.conflict || outcome.failure.edit || outcome.failure.release
+            ? projected.error.details : undefined;
+          return refusal(outcome.failure.publicCode, outcome.failure.retriable, {
+            ...(outcome.failure.publicCode === "precondition_required" ? { message: projected.error.message } : {}),
+            ...(details ? { details } : {}),
+          });
         }
-        body = outcome.result.body;
+        body = projectArtifactHttpOutcome(outcome, ARTIFACT_PART1).body;
       }
       // The durable receipt is untouched: the guide rides the MCP response
       // only, so tool selection and republication both surface it.
       const result = withAuthoringGuide(tool, body);
       return { content: [{ type: "text", text: JSON.stringify(result) }],
-        ...(artifactReadOutputSchema(tool) ? { structuredContent: result as Record<string, unknown> } : {}) };
+        ...(!ARTIFACT_PART1 && artifactReadOutputSchema(tool) ? { structuredContent: result as Record<string, unknown> } : {}) };
     },
   });
   bindings.add(binding);
@@ -219,6 +242,11 @@ export function bindArtifactProvider(options: {
 export function withAuthoringGuide(tool: string, body: unknown): unknown {
   if ((tool === "artifacts_ensure" || tool === "artifacts_get" || tool === "artifacts_get_source") &&
     typeof body === "object" && body !== null && !Array.isArray(body)) {
+    if (ARTIFACT_PART1) {
+      const envelope = body as { ok: boolean; output?: object };
+      if (!envelope.ok || !envelope.output) return body;
+      return { ...envelope, output: { ...envelope.output, authoringGuide: getAuthoringGuide() } };
+    }
     return { ...body, authoringGuide: getAuthoringGuide() };
   }
   return body;

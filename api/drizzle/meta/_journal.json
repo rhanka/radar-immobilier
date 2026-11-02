@@ -197,6 +197,13 @@
       "when": 1792100000002,
       "tag": "0028_artifacts_p0b",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1792100000003,
+      "tag": "0029_artifacts_parity",
+      "breakpoints": true
     }
   ]
 }

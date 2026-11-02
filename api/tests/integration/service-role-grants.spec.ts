@@ -25,6 +25,23 @@ async function asRole<T>(role: string, body: (client: pg.PoolClient) => Promise<
   }
 }
 
+/**
+ * pg-pool's end() resolves as soon as its idle clients are detached, before their sockets
+ * close. A following `DROP DATABASE ... WITH (FORCE)` then terminates a still-closing
+ * backend; its FATAL 57P01 reaches the client's pool idle listener, re-emitted as a pool
+ * 'error' with no listener: an uncaught exception. Wait until every client has really ended.
+ */
+async function endPoolAndClients(target: pg.Pool): Promise<void> {
+  const closing = target.totalCount;
+  const ended = new Promise<void>((resolve) => {
+    let removed = 0;
+    if (closing === 0) resolve();
+    target.on("remove", () => { if (++removed >= closing) resolve(); });
+  });
+  await target.end();
+  await ended;
+}
+
 /** Mirrors `pg_restore --no-privileges` on a database created from template0. */
 async function stripPrivileges(): Promise<void> {
   for (const role of roles) {
@@ -51,7 +68,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await pool?.end();
+  if (pool) await endPoolAndClients(pool);
   await admin?.query(`DROP DATABASE IF EXISTS ${database} WITH (FORCE)`);
   for (const role of roles) await admin?.query(`DROP ROLE IF EXISTS ${role}`).catch(() => undefined);
   await admin?.end();

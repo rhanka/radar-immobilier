@@ -66,8 +66,11 @@ export {
 export { composeArtifactHost } from "./composition.js";
 export { createDeleteConfirmation, type ArtifactDeleteConfirmation, type DeleteChallenge } from "./delete-confirmation.js";
 export { ARTIFACT_P0B, ARTIFACT_P0B_VERSIONS, ARTIFACT_PROVIDER_VERSION, ARTIFACT_PROFILE_DESCRIPTOR,
+  ARTIFACT_STRICT, ARTIFACT_PART1, artifactProfileDescriptor,
+  compileHostArtifactProfile,
   ACTIVE_ARTIFACT_TOOLS, HOST_ARTIFACT_PROFILE, validateArtifactInput, artifactPublicSchema,
   isArtifactMutation, isArtifactPublication } from "./p0b-profile.js";
+export { artifactRefusalResponse } from "./result-projection.js";
 export {
   createArtifactControl,
   createMemoryCommitLedger,

@@ -7,7 +7,9 @@ import { ALL_TOOL_DEFINITIONS, IMMO_READ_ANNOTATIONS } from "../tool-definitions
 import { getInvocationContext } from "../invocation-context.js";
 import { invokeTool } from "../tools.js";
 import { AccountBindingUnavailable } from "../account-binding.js";
-import { artifactScopeDenied, assertArtifactBinding, type ArtifactMcpBinding } from "./artifact-provider.js";
+import { artifactRefusal, artifactScopeDenied, assertArtifactBinding, type ArtifactMcpBinding } from "./artifact-provider.js";
+import { ARTIFACT_STRICT, ARTIFACT_PART1 } from "@radar/artifacts-host";
+import { deferArtifactPrecondition } from "./artifact-transport-modules.js";
 
 // GeoJSON may contain 2,000 features; budgets must not impose a smaller semantic limit.
 export const IMMO_WIRE_LIMITS = Object.freeze({
@@ -46,7 +48,8 @@ export async function composeStatefulImmo(
 ) {
   const unavailableAccounts = new WeakSet<VerifiedMcpRequest>();
   if (artifacts) assertArtifactBinding(artifacts);
-  const modules = createClusterMeshModules();
+  const nativeModules = createClusterMeshModules();
+  const modules = artifacts && ARTIFACT_STRICT ? deferArtifactPrecondition(nativeModules, artifacts.tools) : nativeModules;
   const registry = createMcpRegistry({ modules });
   registry.register({
     manifest, parameterSchema: { properties: {} }, requiredPorts: [],
@@ -102,6 +105,7 @@ export async function composeStatefulImmo(
       // Artifact tools share one typed scope refusal with the binding check.
       if (refusal.kind === "scope" && artifacts?.tools.some((entry) => entry.name === tool)) {
         const denied = artifactScopeDenied(tool);
+        if (ARTIFACT_PART1) return denied;
         const text = JSON.parse((denied.content[0] as { text: string }).text) as Record<string, unknown>;
         return { ...denied, content: [{ type: "text", text: JSON.stringify({ ...text, tool,
           correlationId: context.correlationId }, null, 2) }] };
@@ -109,6 +113,9 @@ export async function composeStatefulImmo(
       const retriable = refusal.kind === "account" && unavailableAccounts.delete(context);
       const error = retriable ? "account_binding_unavailable"
         : refusal.kind === "scope" ? `scope_denied:${refusal.missingScopes.join(",")}` : `composition_${refusal.kind}`;
+      if (artifacts?.tools.some((entry) => entry.name === tool)) {
+        return artifactRefusal(ARTIFACT_PART1 && refusal.kind === "invalid-arguments" ? "invalid_request" : error, retriable);
+      }
       return { isError: true, content: [{ type: "text", text: JSON.stringify({
         error, tool, correlationId: context.correlationId, ...(retriable ? { retriable: true } : {}),
       }, null, 2) }] };
