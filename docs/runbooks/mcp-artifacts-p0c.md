@@ -56,7 +56,10 @@ Provide these variables from the operator's existing authenticated environment, 
 - `P0C_OLD_HTTP_BASE`: authenticated private endpoint of an actual old P0b instance, retained only for the input-switch proof.
 - `P0C_V1_HTTP_BASE`, `P0C_V2_HTTP_BASE`: full control bases, normally under `https://preprod.immo.sent-tech.ca/api/v1/artifacts/control`, routed to the independently configured bindings.
 - `P0C_MCP_URL`: the MCP URL of the binding under qualification; refresh/reconnect Claude's catalogue to that binding.
-- `P0C_APPLY_HOOK`: absolute executable deployment adapter supplied/reviewed by the conductor, mounted read-only.
+- `P0C_APPLY_HOOK`: absolute path of the reviewed adapter (`tools/make/p0c-apply-hook.sh`), mounted read-only at `/p0c-apply` in the container.
+- `P0C_KUBECONFIG`: absolute path of an explicit preprod kubeconfig file (readable, never `~/.kube/config`), mounted read-only at `/kubeconfig` in the container. The hook refuses `~/.kube/config` (including via symlink or non-canonical path) and any namespace other than `radar-immobilier-preprod`.
+- `KUBECTL_BIN` (optional, defaults to `command -v kubectl`): host kubectl binary, mounted read-only at `/usr/local/bin/kubectl` in the container. The container image carries node but no kubectl.
+- `ARTIFACTS_INPUTS_QUALIFIED`, `ARTIFACTS_RESULTS_QUALIFIED`: set both to `true` in the operator environment only for the results switchover; leave them unset otherwise (the hook forwards them to the candidates only when set, unsets them explicitly when absent, and never defaults them to `true`).
 
 The hook receives `<inputs|results> <prepare|open|close>`. `prepare` closes old public admission and selects/waits for
 the staged configuration from the table. `open` opens the selected strict binding (the input target migrates the
@@ -94,14 +97,16 @@ Results keep the v1 binding alive on the live Deployments/Services while `-v2` c
 (`radar-immo-mcp-v2`, `radar-api-v2` Deployments + Services) serve the qualification traffic. `results
 prepare` labels the live pod templates `p0c-candidate=live`, waits for that rollout, narrows the live
 Service selectors to labeled pods, applies the candidate Services (selecting `p0c-candidate=v2`), clones
-the live Deployments into the candidates (renamed, labeled in selector and template, server-assigned
-fields stripped), sets `ARTIFACTS_PROFILE_REVISION=immo-artifacts.v2` plus the caller-passed attestations
+the live Deployments into the candidates as JSON (renamed, labeled in selector and template,
+server-assigned fields and `last-applied-configuration` stripped, component labels asserted),
+sets `ARTIFACTS_PROFILE_REVISION=immo-artifacts.v2` plus the caller-passed attestations
 on the candidates (and `RADAR_API_BASE_URL=http://radar-api-v2:3000` on the MCP candidate so the v2 stack
 is isolated), then waits for the candidate rollouts. `results open` verifies `P0C_V2_HTTP_BASE/profile`
 serves `immo-artifacts.v2` strict envelope 2 **and** `P0C_V1_HTTP_BASE/profile` still serves `cas.v2`
-envelope 1. `results close` deletes the four candidate objects, restores the live Service selectors,
-re-asserts `cas.v2` on live only if it drifted, waits for the live rollout, and re-verifies the v1
-profile. Close never unsets the live revision, never touches `host_policy`, never deletes receipts or
+envelope 1. `results close` deletes the four candidate objects, removes `p0c-candidate` from the live
+Service selectors (explicit null merge patch), re-asserts `cas.v2` on live only if either live
+Deployment drifted, waits for the live rollout, and re-verifies the v1
+profile. `results prepare` is idempotent and safe to re-run after any CD run. Close never unsets the live revision, never touches `host_policy`, never deletes receipts or
 data, and never touches `PREPROD_CD_ENABLED` / `BASCULE_SCHEDULE_ENABLED` or the bascule workflows.
 
 The conductor must route `P0C_V2_HTTP_BASE` to the `radar-api-v2:3000` Service and the qualification
@@ -122,17 +127,33 @@ reconciles `radar-api` server-side (field-manager `cd-preprod`): entries the man
 manager (`kubectl set env`) owns — such as `ARTIFACTS_PROFILE_REVISION` — are preserved, not deleted.
 `radar-immo-mcp`'s spec is not reconciled at all (only its ConfigMap plus an annotation roll), and the
 `set image` steps (`build-push-images.yml`, deploy-preprod job) patch only the image. The candidates are
-invisible to the CD entirely. Exact step after any CD run that touches preprod: re-check with
-`kubectl --kubeconfig "$P0C_KUBECONFIG" -n radar-immobilier-preprod get deploy/radar-api
-deploy/radar-immo-mcp -o jsonpath` that `ARTIFACTS_PROFILE_REVISION` still holds the active revision
-(`cas.v2` after inputs, `v2` on the candidates after results), and re-run the hook's `prepare` for the
-active phase if it does not. If a future CD change starts reconciling the `radar-immo-mcp` spec, move
-the revision into the preprod overlay at that point (today the overlay carries no `ARTIFACTS_*` keys, so
-nothing declarative would override them either way).
+invisible to the CD entirely.
+A CD rollback (`kubectl rollout undo`, armed only on deployment-health failure) restores the N-1 pod
+template verbatim, which drops a hook-set `ARTIFACTS_PROFILE_REVISION` that the N-1 revision never
+carried; likewise a CD run inside the results window updates the live images without updating the
+`-v2` candidates. Exact conductor check after any CD run that touches preprod — rollback included —
+before collecting qualification evidence:
 
 ```sh
+kubectl --kubeconfig "$P0C_KUBECONFIG" -n radar-immobilier-preprod get deploy/radar-api deploy/radar-immo-mcp \
+  -o 'jsonpath={range .items[*]}{.metadata.name}={.spec.template.spec.containers[*].env[?(@.name=="ARTIFACTS_PROFILE_REVISION")].value}{"\n"}{end}'
+```
+
+`ARTIFACTS_PROFILE_REVISION` must still hold the active revision (`cas.v2` on live after inputs,
+`v2` on the candidates after results). If it does not, re-run the hook's `prepare` for the active
+phase (`results prepare` re-clones the candidates from the current live manifests, so it also
+reconverges candidate images after a CD image bump, and is safe to re-run at any time). If a future
+CD change starts reconciling the `radar-immo-mcp` spec, move the revision into the preprod overlay
+at that point (today the overlay carries no `ARTIFACTS_*` keys, so nothing declarative would
+override them either way).
+
+```sh
+export P0C_APPLY_HOOK="$PWD/tools/make/p0c-apply-hook.sh"
+export P0C_KUBECONFIG=/path/to/preprod.kubeconfig  # explicit file, never ~/.kube/config
+# Optional: export KUBECTL_BIN=/path/to/kubectl  (defaults to `command -v kubectl`)
 make -f tools/mcp-p0c-activate.mk preprod-switch-inputs ENV=preprod
 # Accept scripted + real Claude input evidence; then qualify the restricted v2 candidate.
+export ARTIFACTS_INPUTS_QUALIFIED=true ARTIFACTS_RESULTS_QUALIFIED=true
 make -f tools/mcp-p0c-activate.mk preprod-switch-results ENV=preprod
 ```
 
