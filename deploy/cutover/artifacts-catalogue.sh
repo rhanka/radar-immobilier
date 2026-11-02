@@ -16,6 +16,7 @@
 #   artifacts-catalogue.sh export --out-dir DIR [--scope SCOPE]
 #   artifacts-catalogue.sh import --in-dir DIR [--map FILE] [--report FILE] [--allow-same-db]
 #   artifacts-catalogue.sh verify --in-dir DIR
+#   artifacts-catalogue.sh archive --in-dir DIR --bucket NAME --prefix PATH --endpoint-url URL [--s5cmd BIN]
 #   artifacts-catalogue.sh manifest-check --in-dir DIR
 #   artifacts-catalogue.sh map-check --map FILE --subjects FILE
 #
@@ -384,6 +385,43 @@ cmd_map_check() {
   catalogue_log "map-check ok ($n explicit correspondence(s))"
 }
 
+# Durable copy (Lot 3): upload a sealed export to the preprod recovery bucket
+# and prove it reads back. s5cmd only (the engine's existing UPLOAD_IMAGE, no
+# new image); --s5cmd injects the binary (tests stub it). Read-back compares
+# the object count and the generation id. The engine supplies the preprod
+# recovery bucket from deploy/cutover/config.json; obvious prod names refuse.
+cmd_archive() {
+  local in_dir="" bucket="" prefix="" endpoint="" s5cmd_bin="s5cmd"
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --in-dir) in_dir="$2"; shift 2 ;;
+      --bucket) bucket="$2"; shift 2 ;;
+      --prefix) prefix="$2"; shift 2 ;;
+      --endpoint-url) endpoint="$2"; shift 2 ;;
+      --s5cmd) s5cmd_bin="$2"; shift 2 ;;
+      *) catalogue_fail "archive: unknown argument '$1'" ;;
+    esac
+  done
+  [[ -n "$in_dir" && -n "$bucket" && -n "$prefix" && -n "$endpoint" ]] \
+    || catalogue_fail 'archive: --in-dir, --bucket, --prefix and --endpoint-url are required'
+  catalogue_refuse_prod "$bucket"
+  catalogue_refuse_prod "$prefix"
+  cmd_manifest_check --in-dir "$in_dir" >/dev/null
+  local generation dest local_count remote_count remote_generation
+  generation=$(catalogue_manifest_value "$in_dir" generation)
+  [[ -n "$generation" ]] || catalogue_fail 'archive: sealed export lacks a generation'
+  prefix=${prefix%/}
+  dest="s3://$bucket/$prefix/$generation/"
+  "$s5cmd_bin" --endpoint-url "$endpoint" sync "$in_dir/" "$dest" \
+    || catalogue_fail 'archive: upload refused'
+  local_count=$(find "$in_dir" -type f | wc -l | tr -d ' ')
+  remote_count=$("$s5cmd_bin" --endpoint-url "$endpoint" ls "$dest" | wc -l | tr -d ' ')
+  [[ "$remote_count" == "$local_count" ]] || catalogue_fail "archive: read-back count $remote_count differs from sealed $local_count"
+  remote_generation=$("$s5cmd_bin" --endpoint-url "$endpoint" cat "$dest/manifest.json" | grep -o '"generation":"[^"]*"' | sed 's/"generation":"//;s/"$//' || true)
+  [[ "$remote_generation" == "$generation" ]] || catalogue_fail 'archive: read-back generation differs'
+  catalogue_log "archived generation $generation to $dest ($remote_count objects, read back)"
+}
+
 # Byte-level proof that the live catalogue matches the manifest.
 cmd_verify() {
   local in_dir=""
@@ -595,13 +633,14 @@ catalogue_import_identities() {
 
 cmd_main() {
   local cmd="${1:-}"
-  [[ -n "$cmd" ]] || catalogue_fail 'usage: artifacts-catalogue.sh {gate|export|import|verify|manifest-check|map-check} ...'
+  [[ -n "$cmd" ]] || catalogue_fail 'usage: artifacts-catalogue.sh {gate|export|import|verify|archive|manifest-check|map-check} ...'
   shift
   case "$cmd" in
     gate) cmd_gate "$@" ;;
     export) cmd_export "$@" ;;
     import) cmd_import "$@" ;;
     verify) cmd_verify "$@" ;;
+    archive) cmd_archive "$@" ;;
     manifest-check) cmd_manifest_check "$@" ;;
     map-check) cmd_map_check "$@" ;;
     *) catalogue_fail "unknown command '$cmd'" ;;

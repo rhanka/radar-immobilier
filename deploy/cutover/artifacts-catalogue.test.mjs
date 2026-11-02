@@ -16,8 +16,9 @@ const script = path.join(here, 'artifacts-catalogue.sh');
 
 // Hermetic by construction: the script gets an explicit minimal PATH, never the
 // host environment (keeps eslint clean without config changes outside scope).
+const BASE_PATH = '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin';
 const run = (args, env = {}) =>
-  spawnSync('bash', [script, ...args], { encoding: 'utf8', env: { PATH: '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', ...env } });
+  spawnSync('bash', [script, ...args], { encoding: 'utf8', env: { PATH: BASE_PATH, ...env } });
 
 function makeExportDir(tamper) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'catalogue-hermetic-'));
@@ -110,6 +111,105 @@ test('map-check enforces explicit validated correspondence', () => {
   const refused = run(['map-check', '--map', badStatus]);
   assert.notEqual(refused.status, 0, 'unknown forced status must be refused');
   assert.match(refused.stderr, /bad status/);
+});
+
+function makeS5cmdStub() {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'catalogue-s5cmd-'));
+  const bin = path.join(dir, 's5cmd');
+  fs.writeFileSync(bin, `#!/bin/bash
+echo "s5cmd $*" >> "$STUB_LOG"
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --endpoint-url) shift 2 ;;
+    sync|cp) echo "op=upload dest=\${@: -1}" >> "$STUB_LOG"; exit "\${STUB_EXIT:-0}" ;;
+    ls) command cat "$STUB_LS"; exit 0 ;;
+    cat) command cat "$STUB_CAT"; exit 0 ;;
+    *) echo "unexpected: $1" >> "$STUB_LOG"; exit 9 ;;
+  esac
+done
+`);
+  fs.chmodSync(bin, 0o755);
+  return dir;
+}
+
+function countFiles(dir) {
+  let n = 0;
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    n += e.isDirectory() ? countFiles(path.join(dir, e.name)) : 1;
+  }
+  return n;
+}
+
+function makeArchiveFixture() {
+  const dir = makeExportDir(false);
+  const stubDir = makeS5cmdStub();
+  const log = path.join(stubDir, 'calls.log');
+  fs.writeFileSync(log, '');
+  const ls = path.join(stubDir, 'ls.txt');
+  fs.writeFileSync(ls, Array.from({ length: countFiles(dir) }, (_, i) => `file-${i}`).join('\n') + '\n');
+  const baseEnv = {
+    PATH: `${stubDir}:${BASE_PATH}`,
+    STUB_LOG: log,
+    STUB_EXIT: '0',
+    STUB_LS: ls,
+    STUB_CAT: path.join(dir, 'manifest.json'),
+  };
+  return { dir, stubDir, log, baseEnv };
+}
+
+const archiveArgs = (dir, stubDir, extra = {}) => ([
+  'archive', '--in-dir', dir,
+  '--bucket', 'sentropic-pgbackup-preprod', '--prefix', 'catalogue',
+  '--endpoint-url', 'https://s3.bhs.io.cloud.ovh.net', '--s5cmd', path.join(stubDir, 's5cmd'),
+  ...Object.entries(extra).flatMap(([k, v]) => [`--${k}`, v]),
+]);
+
+test('archive uploads a sealed export and proves the read-back', () => {
+  const { dir, stubDir, log, baseEnv } = makeArchiveFixture();
+  const ok = run(archiveArgs(dir, stubDir), baseEnv);
+  assert.equal(ok.status, 0, ok.stderr);
+  assert.match(ok.stderr, /archived generation g to s3:\/\/sentropic-pgbackup-preprod\/catalogue\/g\//);
+  const calls = fs.readFileSync(log, 'utf8');
+  assert.match(calls, /--endpoint-url https:\/\/s3\.bhs\.io\.cloud\.ovh\.net.*sync/);
+  assert.match(calls, /op=upload dest=s3:\/\/sentropic-pgbackup-preprod\/catalogue\/g\//);
+});
+
+test('archive refuses an unsealed export before touching s5cmd', () => {
+  const { stubDir, log, baseEnv } = makeArchiveFixture();
+  const tampered = makeExportDir('byte');
+  const refused = run(archiveArgs(tampered, stubDir), baseEnv);
+  assert.notEqual(refused.status, 0, 'unsealed export must be refused');
+  assert.match(refused.stderr, /checksum mismatch/);
+  assert.doesNotMatch(fs.readFileSync(log, 'utf8'), /op=upload/);
+});
+
+test('archive refuses upload failures, count drift and generation drift', () => {
+  const up = makeArchiveFixture();
+  const failed = run(archiveArgs(up.dir, up.stubDir), { ...up.baseEnv, STUB_EXIT: '1' });
+  assert.notEqual(failed.status, 0, 's5cmd failure must be refused');
+  assert.match(failed.stderr, /upload refused/);
+
+  const short = makeArchiveFixture();
+  fs.writeFileSync(path.join(short.stubDir, 'ls.txt'), 'only-one\n');
+  const drifted = run(archiveArgs(short.dir, short.stubDir), short.baseEnv);
+  assert.notEqual(drifted.status, 0, 'object count drift must be refused');
+  assert.match(drifted.stderr, /read-back count/);
+
+  const gen = makeArchiveFixture();
+  const other = path.join(gen.stubDir, 'other.json');
+  fs.writeFileSync(other, '{"generation":"other"}');
+  const diverged = run(archiveArgs(gen.dir, gen.stubDir), { ...gen.baseEnv, STUB_CAT: other });
+  assert.notEqual(diverged.status, 0, 'generation drift must be refused');
+  assert.match(diverged.stderr, /read-back generation/);
+});
+
+test('archive refuses prod buckets and missing arguments', () => {
+  const { dir, stubDir, log, baseEnv } = makeArchiveFixture();
+  const prod = run(archiveArgs(dir, stubDir, { bucket: 'x-prod-x' }), baseEnv);
+  assert.notEqual(prod.status, 0, 'prod bucket must be refused');
+  assert.doesNotMatch(fs.readFileSync(log, 'utf8'), /op=upload/);
+  const missing = run(['archive', '--in-dir', dir, '--bucket', 'b'], { PATH: `${stubDir}:${BASE_PATH}` });
+  assert.notEqual(missing.status, 0, 'missing arguments must be refused');
 });
 
 test('stable and pinned URL derivation still keys on artifact and release ids', () => {
