@@ -1,11 +1,30 @@
-import { readFileSync } from "node:fs";
 import { isDeepStrictEqual } from "node:util";
 import { ARTIFACT_P0B, ARTIFACT_PROVIDER_VERSION, ARTIFACT_PROFILE_DESCRIPTOR, HOST_ARTIFACT_PROFILE, POLICY_REVISION } from "@radar/artifacts-host";
 import { artifactEffectiveProfile, ARTIFACT_SELECTION, ARTIFACT_TOOL_SCOPES, ARTIFACT_INVOCATION_SCOPES, REQUIRED_PROVIDER_CONTRACTS } from "./artifact-profile.js";
+import immoArtifactsV1 from "../../config/immo-artifacts.v1.json" with { type: "json" };
+import immoArtifactsP0bV1 from "../../config/immo-artifacts.p0b.v1.json" with { type: "json" };
+import immoArtifactsCasV2 from "../../config/immo-artifacts.cas.v2.json" with { type: "json" };
+import immoArtifactsV2 from "../../config/immo-artifacts.v2.json" with { type: "json" };
+
+/**
+ * Static JSON imports (inlined by the esbuild image bundle, resolved by tsx/vitest
+ * and tsc alike) keyed by revision id: no runtime path depends on the module's
+ * on-disk depth, which differs between src/, dist/registry/ and the bundled dist/.
+ */
+const ARTIFACT_CONFIG_REVISIONS: Readonly<Record<string, unknown>> = Object.freeze({
+  "immo-artifacts.v1": immoArtifactsV1,
+  "immo-artifacts.p0b.v1": immoArtifactsP0bV1,
+  "immo-artifacts.cas.v2": immoArtifactsCasV2,
+  "immo-artifacts.v2": immoArtifactsV2,
+});
 
 /** Independent deployment manifest; no defaults are inferred from caller arguments. */
 export function readArtifactConfig(revision = ARTIFACT_PROFILE_DESCRIPTOR.profileRevisionId): ReturnType<typeof JSON.parse> {
-  const read = (name: string) => JSON.parse(readFileSync(new URL(`../../config/${name}.json`, import.meta.url), "utf8"));
+  const read = (name: string) => {
+    if (!Object.hasOwn(ARTIFACT_CONFIG_REVISIONS, name)) throw new Error(`artifact_config_revision_unknown: ${name}`);
+    // Fresh copy per read, as JSON.parse(readFileSync(...)) gave: callers never share mutable state.
+    return structuredClone(ARTIFACT_CONFIG_REVISIONS[name]) as ReturnType<typeof JSON.parse>;
+  };
   if (revision === "immo-artifacts.v1") return read("immo-artifacts.v1");
   const extension = read(revision);
   const base = readArtifactConfig(extension.extends.replace(/\.json$/, ""));
