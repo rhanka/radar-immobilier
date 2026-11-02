@@ -50,7 +50,7 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("IMMO artifact host with real Pos
     const before = await list();
     expect(before.artifacts.map((item) => item.artifactId)).toEqual([second.artifactId, first.artifactId, drafts[1], drafts[0]]);
     expect(before.artifacts[0]).toMatchObject({ bindingName: second.bindingName, currentReleaseId: second.releaseId,
-      stableUrl: `https://${second.artifactId}.pages.test/`, pinnedUrl: `https://${second.releaseId}.pinned.pages.test/`,
+      stableUrl: `https://${second.artifactId}.pages.test/`, pinnedUrl: `https://${second.releaseId}.pages.test/`,
       createdAt: "2026-10-02T00:00:00.000Z", updatedAt: "2026-10-05T00:00:00.000Z", state: "active", published: true });
     expect(before.artifacts[2]).toMatchObject({ currentReleaseId: null, pinnedUrl: null, updatedAt: null, state: "active", published: false });
     expect((await h.call("meta", { artifactId: drafts[1] })).body).toMatchObject(before.artifacts[2]!);
@@ -63,7 +63,7 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("IMMO artifact host with real Pos
       SELECT $1,artifact_id,manifest_digest,manifest,state,'2099-01-01' FROM artifacts.releases WHERE id=$2`, [randomUUID(), releaseId]);
     const after = await list();
     expect(after.artifacts.map((item) => item.artifactId)).toEqual([first.artifactId, second.artifactId, drafts[1], drafts[0]]);
-    expect(after.artifacts[0]).toMatchObject({ currentReleaseId: releaseId, pinnedUrl: `https://${releaseId}.pinned.pages.test/`,
+    expect(after.artifacts[0]).toMatchObject({ currentReleaseId: releaseId, pinnedUrl: `https://${releaseId}.pages.test/`,
       updatedAt: (publication.rows[0].created_at as Date).toISOString(), bindingName: first.bindingName });
     if (ARTIFACT_P0B) expect(after.artifacts[0]).toHaveProperty("digest", publication.rows[0].manifest_digest);
     expect((await h.call("meta", { artifactId: first.artifactId })).body).toMatchObject(after.artifacts[0]!);
