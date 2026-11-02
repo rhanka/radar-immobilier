@@ -67,7 +67,9 @@ Survive prod-to-preprod restores without losing the preprod-only artifact catalo
   - [x] Real PostgreSQL persist test with witness artifact through the restore path.
   - [x] Lot gate: `make -f deploy/cutover/operator.mk test-api ENV=test-cutover` (green 2026-11-02: witness byte-identical on daily, mapped and prepared paths)
 - [ ] **Lot 3 — Durable BHS copy (s5cmd, Loi 25)**
-  - [ ] Upload sealed export to preprod bucket before any reset; read-back verification.
+  - [x] `archive` subcommand: sealed-only upload + read-back proof (count, generation), prod refusal.
+  - [x] Hermetic stub-`s5cmd` contract tests (upload, refusal, drift, prod).
+  - [ ] Engine Job wiring before any reset (new template; needs scope exception).
   - [ ] Retention pins vs GC; seven-day retention proposal.
   - [ ] Lot gate (same checklist as Lot 2)
 - [ ] **Lot 4 — Blue/green (#956) and PG18 reuse + authenticated preview**

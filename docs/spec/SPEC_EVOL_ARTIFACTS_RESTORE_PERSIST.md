@@ -110,9 +110,13 @@ silent drift impossible.
 
 ## 5. Remaining lots
 
-- Lot 3 — Durable BHS copy: upload the sealed export to the preprod
-  recovery bucket (existing `s5cmd` `UPLOAD_IMAGE`, no new image) before
-  any reset, with read-back verification; retention pins vs GC.
+- Lot 3 — Durable BHS copy: `archive` subcommand uploads the sealed export
+  to the preprod recovery bucket (existing `s5cmd`, no new image) and
+  proves the read-back (object count + generation id); only sealed exports
+  upload, prod-looking buckets refuse. Engine Job wiring (archive step
+  before any reset, seven-day retention, GC pins) follows with a scope
+  exception for the new Job template; the live-bucket campaign in Lot 5
+  qualifies the real round-trip.
 - Lot 4 — Blue/green (#956) and PG18 reuse: prepared-database import path
   qualification, candidate reader-only preview composition,
   generation-bound grants.
