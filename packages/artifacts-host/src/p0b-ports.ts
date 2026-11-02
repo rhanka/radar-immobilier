@@ -20,6 +20,8 @@ export async function assertP0bStorage(pool: pg.Pool, confirmation?: ArtifactDel
   if (!confirmation) throw new Error("artifact_delete_confirmation_required");
   const columns = await pool.query(`SELECT terminal_deleted_at, updated_at FROM artifacts.artifacts LIMIT 0`);
   await pool.query("SELECT confirmation_ref FROM artifacts.delete_confirmations LIMIT 0");
+  await pool.query("SELECT metadata FROM artifacts.artifacts LIMIT 0");
+  await pool.query("SELECT author_principal_id, parent_release_id, reverted_from_release_id FROM artifacts.releases LIMIT 0");
   return columns;
 }
 
