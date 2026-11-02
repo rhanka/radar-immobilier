@@ -17,6 +17,19 @@ The model sees `immo-artifacts.p0b.v1`, `requireExpectedCurrentReleaseId:false`,
 `resultEnvelopeVersion:1` in discovery and the authoring guide. Results retain their business fields at the root.
 The cookie-authenticated `GET /api/v1/artifacts/control/profile` returns the same descriptor and selected tool names.
 
+## Find the latest artifact
+
+Both `artifacts_list` items and `artifacts_get` expose `bindingName`, `stableUrl`, `pinnedUrl`,
+`currentReleaseId`, `createdAt`, `updatedAt`, `state` and `published`, with either 0.2.2 or P0b.
+Use `bindingName` as the display label until part1 title/description metadata is available.
+`createdAt` is artifact creation; `updatedAt` is the current release publication time, not an ACL change
+or an unpromoted release's timestamp. An unpublished artifact has null `updatedAt`, `currentReleaseId`
+and `pinnedUrl`, but still has its stable URL. `state` is the lifecycle state; `published` means a current release exists.
+List ordering is `updatedAt DESC NULLS LAST, createdAt DESC, artifactId ASC`, applied before pagination;
+the final ID ordering resolves exact ties. This order is also documented in the tool description and output schema.
+MCP read results carry the same root fields in text and `structuredContent`; list/get retain `readOnlyHint:true`.
+The authoring guide revisions are `2026-11-01-r4` (legacy) and `2026-11-01-p0b-r2` (P0b).
+
 ## Edit an existing page
 
 1. Call `artifacts_get({artifactId})` for the full summary, permissions and current release.
@@ -63,7 +76,7 @@ All commands below run in this worktree. The standalone runner never includes th
 ```sh
 make -f tools/mcp-p0b.mk registry P0B_VERSION=0.2.5 ENV=test-mcp-p0b
 make -f tools/mcp-p0b.mk verify ENV=test-mcp-p0b
-make -f tools/mcp-p0b.mk candidate P0B_VERSION=0.2.5 SOURCE=/absolute/sentropic/p0b/packages/artifacts ENV=test-mcp-p0b
+make -f tools/mcp-p0b.mk verify CANDIDATE=1 P0B_VERSION=0.2.5 SOURCE=/absolute/sentropic/p0b/packages/artifacts ENV=test-mcp-p0b
 make -f tools/mcp-p0b.mk down ENV=test-mcp-p0b
 ```
 
@@ -73,6 +86,8 @@ It resolves the complete IMMO workspace graph against that tarball in a disposab
 `--force` or `--legacy-peer-deps`, then extracts the tarball into disposable container dependencies.
 It leaves both repositories' dependency pins and lockfiles unchanged and runs the real PostgreSQL lifecycle
 tests in the isolated `p0b` database.
+`verify CANDIDATE=1` invokes that candidate qualification; plain `verify` checks the central 0.2.2 pin.
+Both run the shared real PostgreSQL metadata/order/pagination scenario; the five P0b-only scenarios are skipped on 0.2.2.
 External S3 is replaced by the existing in-memory publication port; SDK stall tests remain in the suite.
 
 IMMO pins `@sentropic/cluster-mesh@0.22.1`, not `0.26.0-dev.3`. Its declared artifacts peer range is
