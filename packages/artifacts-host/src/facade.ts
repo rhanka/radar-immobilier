@@ -174,7 +174,8 @@ export function createArtifactControl(
         if (entry) await options?.ledger?.record({ invocationId: entry.invocationId, op, actorId,
           reason: entry.reason, status: entry.status, atMs: (options?.nowMs ?? Date.now)() });
       }
-      if (outcome.ok && ["get_source", "list_versions"].includes(op) && admission) {
+      const hasConflictSource = !outcome.ok && outcome.failure.conflict?.currentSource !== undefined;
+      if (admission && ((outcome.ok && ["get_source", "list_versions"].includes(op)) || hasConflictSource)) {
         let current;
         try { current = await checkAdmission(admission, actorId, scope); }
         catch {

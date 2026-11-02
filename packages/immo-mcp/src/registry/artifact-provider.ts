@@ -207,11 +207,19 @@ export function bindArtifactProvider(options: {
       } else {
         const outcome = await executor.execute({ tool, args, invocation });
         if (!outcome.ok) {
+          if (admission && outcome.failure.conflict?.currentSource !== undefined) {
+            try {
+              const current = await checkAdmission(admission, request.principal.sub, scope);
+              if (!current.allowed) return refusal(current.body.error, false);
+            } catch { return refusal("capability_unavailable", true); }
+          }
           const projected = projectArtifactHttpOutcome(outcome, true).body as { error: { message: string; details?: unknown } };
           if (ARTIFACT_PART1) return { isError: true, content: [{ type: "text", text: JSON.stringify(projectArtifactHttpOutcome(outcome, true).body) }] };
+          const details = ARTIFACT_STRICT || outcome.failure.details || outcome.failure.conflict || outcome.failure.edit || outcome.failure.release
+            ? projected.error.details : undefined;
           return refusal(outcome.failure.publicCode, outcome.failure.retriable, {
             ...(outcome.failure.publicCode === "precondition_required" ? { message: projected.error.message } : {}),
-            ...(projected.error.details ? { details: projected.error.details } : {}),
+            ...(details ? { details } : {}),
           });
         }
         body = projectArtifactHttpOutcome(outcome, ARTIFACT_PART1).body;

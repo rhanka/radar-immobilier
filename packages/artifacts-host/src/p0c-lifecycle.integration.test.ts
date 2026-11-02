@@ -1,11 +1,12 @@
 import { randomUUID } from "node:crypto";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { p0bFixture } from "./p0b.test-support.js";
 import { compileHostArtifactProfile } from "./p0b-profile.js";
 import { createPostgresCommitExecutor } from "@sentropic/artifacts/adapters/postgres-commit";
 import { createArtifactCommitCoordinator } from "@sentropic/artifacts/server/commit-contract";
 import { createHostPolicy } from "./commit-policy.js";
 import { createArtifactControl } from "./facade.js";
+import { createAdmissionAuthority } from "./admission.js";
 
 const profile = compileHostArtifactProfile({ profileRevisionId: "immo-artifacts.v2", requireExpectedCurrentReleaseId: true, resultEnvelopeVersion: 2 });
 const files = [{ path: "index.html", mimeType: "text/html", text: "<h1>Before</h1>" }];
@@ -15,7 +16,7 @@ const output = (response: { body: unknown }) => (response.body as { output: Outp
 describe.skipIf(!process.env.P0B_DATABASE_URL)("strict P0-A artifact lifecycle", () => {
   let h: Awaited<ReturnType<typeof p0bFixture>>;
   beforeEach(async () => { h = await p0bFixture(profile); });
-  afterEach(async () => { await h?.close(); });
+  afterEach(async () => { vi.restoreAllMocks(); await h?.close(); });
   async function draft() {
     const result = await h.call("ensure", { bindingName: randomUUID(), idempotencyKey: randomUUID(), title: "First", description: "Initial page", icon: "house" });
     expect(result.status).toBe(201);
@@ -42,6 +43,10 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("strict P0-A artifact lifecycle",
       edits: [{ path: "index.html", oldStr: "Before", newStr: "After" }], title: "Current", description: "Edited page", icon: "building" });
     expect(b.status).toBe(201);
     const B = output(b).releaseId;
+    const stale = await h.call("publish", { artifactId, expectedCurrentReleaseId: A, idempotencyKey: randomUUID(),
+      edits: [{ path: "index.html", oldStr: "Before", newStr: "Other" }] });
+    expect(stale).toMatchObject({ status: 409, body: { error: { code: "conflict", details: {
+      variant: "pointer_conflict", currentReleaseId: B, currentSource: { releaseId: B, files: [{ path: "index.html", text: "<h1>After</h1>" }] } } } } });
     const versions = await h.call("list_versions", { artifactId });
     expect(versions.status).toBe(200);
     expect(JSON.stringify(versions.body)).toContain(A);
@@ -119,5 +124,25 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("strict P0-A artifact lifecycle",
     expect((await h.pool.query("SELECT operations_used,bytes_used FROM artifacts.host_quotas")).rows).toEqual(before);
     expect((await h.pool.query("SELECT id FROM artifacts.releases WHERE artifact_id=$1", [artifactId])).rows)
       .toEqual([{ id: output(replay).releaseId }]);
+  });
+
+  it("should discard conflict source when IMMO admission is revoked during the source read", async () => {
+    const artifactId = await draft();
+    const A = output(await publish(artifactId, null)).releaseId;
+    await publish(artifactId, A, { files: [{ ...files[0], text: "<h1>After</h1>" }] });
+    const admission = createAdmissionAuthority(h.pool, () => ({ enabled: true, mode: "general", subjects: [], expiresAtMs: Infinity }));
+    const control = createArtifactControl(h.host, "p0b", "pages.test", admission);
+    const getBlob = h.blobs.getBlob.bind(h.blobs);
+    vi.spyOn(h.blobs, "getBlob").mockImplementation(async (key) => {
+      const bytes = await getBlob(key);
+      if (bytes && new TextDecoder().decode(bytes).includes("After")) {
+        await h.pool.query("UPDATE account_users SET status='pending' WHERE sub='alice'");
+      }
+      return bytes;
+    });
+    const refused = await control.handle("publish", "alice", { artifactId, expectedCurrentReleaseId: A, idempotencyKey: randomUUID(),
+      edits: [{ path: "index.html", oldStr: "Before", newStr: "Other" }] });
+    expect(refused).toMatchObject({ status: 403, body: { ok: false, commitState: "not_committed", error: { code: "account_not_approved" } } });
+    expect(JSON.stringify(refused.body)).not.toMatch(/currentSource|After/);
   });
 });
