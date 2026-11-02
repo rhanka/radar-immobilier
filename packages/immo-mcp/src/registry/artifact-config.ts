@@ -4,7 +4,7 @@ import { ARTIFACT_P0B, ARTIFACT_PROVIDER_VERSION, ARTIFACT_PROFILE_DESCRIPTOR, H
 import { artifactEffectiveProfile, ARTIFACT_SELECTION, ARTIFACT_TOOL_SCOPES } from "./artifact-profile.js";
 
 /** Independent deployment manifest; no defaults are inferred from caller arguments. */
-export function readArtifactConfig(revision = ARTIFACT_PROFILE_DESCRIPTOR.profileRevisionId) {
+export function readArtifactConfig(revision = ARTIFACT_PROFILE_DESCRIPTOR.profileRevisionId): ReturnType<typeof JSON.parse> {
   const read = (name: string) => JSON.parse(readFileSync(new URL(`../../config/${name}.json`, import.meta.url), "utf8"));
   if (revision === "immo-artifacts.v1") return read("immo-artifacts.v1");
   const extension = read(revision);

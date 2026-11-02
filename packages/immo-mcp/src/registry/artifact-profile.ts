@@ -140,18 +140,20 @@ export const ARTIFACT_FORBIDDEN_CALLER_FIELDS: readonly string[] = [
   "paramsHash",
 ];
 
-export const ARTIFACT_EFFECTIVE_REQUIRED: Record<ArtifactToolName, readonly string[]> = {
+const ALL_EFFECTIVE_REQUIRED: Record<ArtifactToolName, readonly string[]> = {
   artifacts_ensure: ["bindingName", "idempotencyKey"],
   artifacts_publish: ["artifactId", ...(!ARTIFACT_PART1 ? ["files"] : []), "idempotencyKey",
     ...(ARTIFACT_STRICT ? ["expectedCurrentReleaseId"] : [])],
   artifacts_list: [],
   artifacts_get: ["artifactId"],
-  ...(ARTIFACT_P0B ? { artifacts_get_source: ["artifactId"],
-    artifacts_set_access: ["artifactId", "action", "principalId", "idempotencyKey"],
-    artifacts_delete: ["artifactId", "idempotencyKey", ...(ARTIFACT_STRICT ? ["expectedCurrentReleaseId"] : [])] } : {}),
+  artifacts_get_source: ["artifactId"],
+  artifacts_set_access: ["artifactId", "action", "principalId", "idempotencyKey"],
+  artifacts_delete: ["artifactId", "idempotencyKey", ...(ARTIFACT_STRICT ? ["expectedCurrentReleaseId"] : [])],
   artifacts_list_versions: ["artifactId"],
   artifacts_revert: ["artifactId", "targetReleaseId", "expectedCurrentReleaseId", "idempotencyKey"],
-} as Record<ArtifactToolName, readonly string[]>;
+};
+export const ARTIFACT_EFFECTIVE_REQUIRED = Object.fromEntries(ARTIFACT_TOOL_NAMES.map((name) =>
+  [name, ALL_EFFECTIVE_REQUIRED[name]])) as Record<ArtifactToolName, readonly string[]>;
 
 export const ARTIFACT_DURABLE_IDENTITY = {
   internalKey: "SHA-256 UTF-8(storageScope | sub | operation | artifactIdOrEmpty | originalCallerKey)",
