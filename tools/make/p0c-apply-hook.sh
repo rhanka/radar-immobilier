@@ -64,42 +64,64 @@ fail() { echo "p0c-apply-hook: $*" >&2; exit 1; }
 [ -n "${P0C_KUBECONFIG:-}" ] || fail "P0C_KUBECONFIG is required (explicit preprod kubeconfig)"
 KC="$P0C_KUBECONFIG"
 case "$KC" in "~/"*) KC="$HOME/${KC#~/}";; esac
-[ "$KC" != "$HOME/.kube/config" ] || fail "refusing default kubeconfig ~/.kube/config (pass an explicit P0C_KUBECONFIG)"
-[ -r "$P0C_KUBECONFIG" ] || fail "P0C_KUBECONFIG is not readable: $P0C_KUBECONFIG"
+KC_REAL="$(realpath -m "$KC")"
+HOME_KC_REAL="$(realpath -m "$HOME/.kube/config")"
+[ "$KC_REAL" != "$HOME_KC_REAL" ] || fail "refusing default kubeconfig ~/.kube/config (pass an explicit P0C_KUBECONFIG)"
+[ -r "$KC" ] || fail "P0C_KUBECONFIG is not readable: $P0C_KUBECONFIG"
 
-KUBECTL="kubectl --kubeconfig \"$P0C_KUBECONFIG\" -n $NS"
+KUBECTL="kubectl --kubeconfig \"$KC\" -n $NS"
 k() {
   if [ "$DRY" = "1" ]; then
     # shellcheck disable=SC2086
     printf '+ %s\n' "$KUBECTL $*" >&2
     return 0
   fi
-  kubectl --kubeconfig "$P0C_KUBECONFIG" -n "$NS" "$@"
+  kubectl --kubeconfig "$KC" -n "$NS" "$@"
 }
 
 # Clone a live Deployment manifest into a -v2 candidate: rename the object,
-# add the candidate label to the selector and the pod template (the component
+# set the candidate label on the selector and the pod template (the component
 # labels are preserved so NetworkPolicies keep matching), and strip
-# server-assigned fields that kubectl apply/create reject. Reads live state;
-# prints the apply command only in dry-run mode.
+# server-assigned fields plus last-applied-configuration that kubectl
+# apply/create reject. Reads live state as JSON and transforms it with node
+# (setting the label key overwrites any inherited p0c-candidate value, so a
+# re-run after label_live_templates never duplicates the key); prints the
+# apply command only in dry-run mode.
 apply_candidate() {
   local base="$1" candidate="$2" comp="$3"
   if [ "$DRY" = "1" ]; then
-    printf '+ %s\n' "$KUBECTL get deploy/$base -o yaml \\"
-    printf '+   | clone to %s (label %s=%s) | %s apply -f -\n' "$candidate" "$LABEL_KEY" "$CANDIDATE_LABEL" "$KUBECTL"
+    printf '+ %s get deploy/%s -o json \\\n' "$KUBECTL" "$base" >&2
+    printf '+   | clone to %s (label %s=%s) | %s apply -f -\n' "$candidate" "$LABEL_KEY" "$CANDIDATE_LABEL" "$KUBECTL" >&2
     return 0
   fi
-  k get "deploy/$base" -o yaml | awk -v base="$base" -v candidate="$candidate" -v comp="$comp" -v key="$LABEL_KEY" -v label="$CANDIDATE_LABEL" '
-    /^status:/ { exit }
-    /^  managedFields:$/ { skip = 1; next }
-    skip && /^  [A-Za-z]/ { skip = 0 }
-    skip { next }
-    /^[[:space:]]*(resourceVersion|uid|selfLink|creationTimestamp|generation):/ { next }
-    $0 == "  name: " base { $0 = "  name: " candidate }
-    { print }
-    $0 == "      app.kubernetes.io/component: " comp { print "      " key ": " label }
-    $0 == "        app.kubernetes.io/component: " comp { print "        " key ": " label }
-  ' | kubectl --kubeconfig "$P0C_KUBECONFIG" -n "$NS" apply -f -
+  k get "deploy/$base" -o json | node -e '
+    const [candidate, key, label, comp] = process.argv.slice(1);
+    let data = "";
+    process.stdin.on("data", (chunk) => { data += chunk; }).on("end", () => {
+      const obj = JSON.parse(data);
+      const component = obj?.spec?.template?.metadata?.labels?.["app.kubernetes.io/component"];
+      if (component !== comp) {
+        console.error("p0c-apply-hook: refusing to clone deploy/" + obj?.metadata?.name + ": component label is " + component);
+        process.exit(1);
+      }
+      delete obj.status;
+      const meta = obj.metadata || {};
+      delete meta.resourceVersion; delete meta.uid; delete meta.selfLink;
+      delete meta.creationTimestamp; delete meta.generation; delete meta.managedFields;
+      if (meta.annotations) {
+        delete meta.annotations["kubectl.kubernetes.io/last-applied-configuration"];
+        if (Object.keys(meta.annotations).length === 0) delete meta.annotations;
+      }
+      if (meta.labels) delete meta.labels[key];
+      meta.name = candidate;
+      obj.metadata = meta;
+      obj.spec.selector.matchLabels = obj.spec.selector.matchLabels || {};
+      obj.spec.selector.matchLabels[key] = label;
+      obj.spec.template.metadata.labels = obj.spec.template.metadata.labels || {};
+      obj.spec.template.metadata.labels[key] = label;
+      process.stdout.write(JSON.stringify(obj));
+    });
+  ' "$candidate" "$LABEL_KEY" "$CANDIDATE_LABEL" "$comp" | kubectl --kubeconfig "$KC" -n "$NS" apply -f -
 }
 
 # Static candidate Service: selects the candidate pods only. Applied (not
@@ -107,7 +129,7 @@ apply_candidate() {
 apply_candidate_service() {
   local name="$1" comp="$2" port="$3"
   if [ "$DRY" = "1" ]; then
-    printf '+ %s apply -f - <<Service/%s\n' "$KUBECTL" "$name"
+    printf '+ %s apply -f - <<Service/%s\n' "$KUBECTL" "$name" >&2
     return 0
   fi
   k apply -f - <<EOF
@@ -136,9 +158,11 @@ EOF
 # dependency: the disposable container always has node). Exits nonzero on any
 # mismatch so open/close fail closed.
 verify_profile() {
-  local base="$1" revision="$2" envelope="$3"
+  local var_name="$1" revision="$2" envelope="$3"
+  [ -n "${!var_name:-}" ] || fail "$var_name is required for $PHASE $STEP"
+  local base="${!var_name}"
   if [ "$DRY" = "1" ]; then
-    printf '+ verify %s/profile serves %s envelope %s\n' "$base" "$revision" "$envelope"
+    printf '+ verify %s/profile serves %s envelope %s\n' "$base" "$revision" "$envelope" >&2
     return 0
   fi
   node -e '
@@ -154,12 +178,6 @@ verify_profile() {
   ' "$base" "$revision" "$envelope"
 }
 
-require_http_base() {
-  local name="$1"
-  [ -n "${!name:-}" ] || fail "$name is required for $PHASE $STEP"
-  printf '%s' "${!name}"
-}
-
 inputs_prepare() {
   k set env "deploy/$MCP_DEPLOY" "deploy/$API_DEPLOY" "ARTIFACTS_PROFILE_REVISION=$INPUTS_REV"
   k set env "deploy/$MCP_DEPLOY" "deploy/$API_DEPLOY" ARTIFACTS_INPUTS_QUALIFIED- ARTIFACTS_RESULTS_QUALIFIED-
@@ -167,8 +185,9 @@ inputs_prepare() {
 }
 
 inputs_open() {
+  [ -n "${P0C_V1_HTTP_BASE:-}" ] || fail "P0C_V1_HTTP_BASE is required for $PHASE $STEP"
   k rollout status "deploy/$MCP_DEPLOY" "deploy/$API_DEPLOY" --timeout="$ROLLOUT_TIMEOUT"
-  verify_profile "$(require_http_base P0C_V1_HTTP_BASE)" "$INPUTS_REV" 1
+  verify_profile P0C_V1_HTTP_BASE "$INPUTS_REV" 1
 }
 
 inputs_close() {
@@ -196,8 +215,8 @@ isolate_live_services() {
 }
 
 restore_live_services() {
-  k patch "svc/$MCP_DEPLOY" --type merge -p '{"spec":{"selector":{"app.kubernetes.io/name":"radar-immobilier","app.kubernetes.io/component":"mcp"}}}'
-  k patch "svc/$API_DEPLOY" --type merge -p '{"spec":{"selector":{"app.kubernetes.io/name":"radar-immobilier","app.kubernetes.io/component":"api"}}}'
+  k patch "svc/$MCP_DEPLOY" --type merge -p '{"spec":{"selector":{"app.kubernetes.io/name":"radar-immobilier","app.kubernetes.io/component":"mcp","p0c-candidate":null}}}'
+  k patch "svc/$API_DEPLOY" --type merge -p '{"spec":{"selector":{"app.kubernetes.io/name":"radar-immobilier","app.kubernetes.io/component":"api","p0c-candidate":null}}}'
 }
 
 set_candidate_env() {
@@ -215,19 +234,23 @@ results_prepare() {
   apply_candidate "$API_DEPLOY" "$API_CANDIDATE" api
   # Qualification attestations are forwarded ONLY when the caller passes them
   # in (never defaulted to true: an unset attestation makes the candidate
-  # refuse startup via artifact_switchovers_not_qualified, fail-closed).
+  # refuse startup via artifact_switchovers_not_qualified, fail-closed). An
+  # absent variable is unset explicitly so a re-run without attestations
+  # cannot inherit them from a previous staging.
   local args=(ARTIFACTS_PROFILE_REVISION="$RESULTS_REV")
-  [ -z "${ARTIFACTS_INPUTS_QUALIFIED:-}" ] || args+=(ARTIFACTS_INPUTS_QUALIFIED="$ARTIFACTS_INPUTS_QUALIFIED")
-  [ -z "${ARTIFACTS_RESULTS_QUALIFIED:-}" ] || args+=(ARTIFACTS_RESULTS_QUALIFIED="$ARTIFACTS_RESULTS_QUALIFIED")
+  if [ -n "${ARTIFACTS_INPUTS_QUALIFIED:-}" ]; then args+=(ARTIFACTS_INPUTS_QUALIFIED="$ARTIFACTS_INPUTS_QUALIFIED"); else args+=(ARTIFACTS_INPUTS_QUALIFIED-); fi
+  if [ -n "${ARTIFACTS_RESULTS_QUALIFIED:-}" ]; then args+=(ARTIFACTS_RESULTS_QUALIFIED="$ARTIFACTS_RESULTS_QUALIFIED"); else args+=(ARTIFACTS_RESULTS_QUALIFIED-); fi
   set_candidate_env "$API_CANDIDATE" "${args[@]}"
   set_candidate_env "$MCP_CANDIDATE" "${args[@]}" RADAR_API_BASE_URL=http://radar-api-v2:3000
   k rollout status "deploy/$MCP_CANDIDATE" "deploy/$API_CANDIDATE" --timeout="$ROLLOUT_TIMEOUT"
 }
 
 results_open() {
+  [ -n "${P0C_V2_HTTP_BASE:-}" ] || fail "P0C_V2_HTTP_BASE is required for $PHASE $STEP"
+  [ -n "${P0C_V1_HTTP_BASE:-}" ] || fail "P0C_V1_HTTP_BASE is required for $PHASE $STEP"
   k rollout status "deploy/$MCP_CANDIDATE" "deploy/$API_CANDIDATE" --timeout="$ROLLOUT_TIMEOUT"
-  verify_profile "$(require_http_base P0C_V2_HTTP_BASE)" "$RESULTS_REV" 2
-  verify_profile "$(require_http_base P0C_V1_HTTP_BASE)" "$INPUTS_REV" 1
+  verify_profile P0C_V2_HTTP_BASE "$RESULTS_REV" 2
+  verify_profile P0C_V1_HTTP_BASE "$INPUTS_REV" 1
 }
 
 # Restore routing to the live bindings, remove the candidates, and ensure the
@@ -239,13 +262,14 @@ results_close() {
   local failures=0
   k delete deploy/"$MCP_CANDIDATE" deploy/"$API_CANDIDATE" svc/"$MCP_CANDIDATE" svc/"$API_CANDIDATE" --ignore-not-found || failures=$((failures + 1))
   restore_live_services || failures=$((failures + 1))
-  local current
-  current="$(k get "deploy/$API_DEPLOY" -o "jsonpath={.spec.template.spec.containers[*].env[?(@.name==\"ARTIFACTS_PROFILE_REVISION\")].value}")" || failures=$((failures + 1))
-  if [ "${current:-}" != "$INPUTS_REV" ]; then
+  local api_rev mcp_rev
+  api_rev="$(k get "deploy/$API_DEPLOY" -o "jsonpath={.spec.template.spec.containers[*].env[?(@.name==\"ARTIFACTS_PROFILE_REVISION\")].value}")" || failures=$((failures + 1))
+  mcp_rev="$(k get "deploy/$MCP_DEPLOY" -o "jsonpath={.spec.template.spec.containers[*].env[?(@.name==\"ARTIFACTS_PROFILE_REVISION\")].value}")" || failures=$((failures + 1))
+  if [ "${api_rev:-}" != "$INPUTS_REV" ] || [ "${mcp_rev:-}" != "$INPUTS_REV" ]; then
     k set env "deploy/$MCP_DEPLOY" "deploy/$API_DEPLOY" "ARTIFACTS_PROFILE_REVISION=$INPUTS_REV" || failures=$((failures + 1))
   fi
   k rollout status "deploy/$MCP_DEPLOY" "deploy/$API_DEPLOY" --timeout="$ROLLOUT_TIMEOUT" || failures=$((failures + 1))
-  verify_profile "$(require_http_base P0C_V1_HTTP_BASE)" "$INPUTS_REV" 1 || failures=$((failures + 1))
+  verify_profile P0C_V1_HTTP_BASE "$INPUTS_REV" 1 || failures=$((failures + 1))
   [ "$failures" = 0 ] || fail "results close incomplete ($failures step(s) failed, operator action required)"
 }
 
