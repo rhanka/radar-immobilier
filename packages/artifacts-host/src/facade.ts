@@ -1,7 +1,25 @@
 import { randomUUID } from "node:crypto";
 import { isArtifactId } from "@sentropic/artifacts/contracts";
-import { parseContentHost } from "@sentropic/artifacts/content/routing";
 import { projectArtifactHttpOutcome, type HttpResponse } from "@sentropic/artifacts/http";
+
+// Immo-side content projection (owner decision 2026-11-02): single-level UUID
+// hosts on `pages.<app>`. Both stable (`<artifactId>.<base>/`) and exact
+// (`<releaseId>.<base>/`, exposed as `pinnedUrl`) share one wildcard; the
+// label resolves server-side as artifact or release. Upstream
+// `@sentropic/artifacts/content/routing` still builds `<release>.pinned.<base>`;
+// see the branch report for the exact upstream change it must make.
+const UUID_RE = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
+
+function contentUrl(label: string, base: string): string | null {
+  if (!UUID_RE.test(label) || !base || base.length > 253) return null;
+  try {
+    const url = new URL(`https://${label}.${base}/`);
+    if (url.host !== `${label}.${base}`.toLowerCase() || url.pathname !== "/") return null;
+    return `https://${label.toLowerCase()}.${base.toLowerCase()}/`;
+  } catch {
+    return null;
+  }
+}
 import { projectArtifactWriteFailure } from "@sentropic/artifacts/server/outcome-contract";
 import { authorizeArtifactCommit } from "./commit-policy.js";
 import { checkAdmission, type AdmissionAuthority } from "./admission.js";
@@ -95,11 +113,8 @@ export function createArtifactControl(
       let stableUrl: string | undefined;
       if (op === "publish") {
         if (!contentBase) return invalid();
-        try {
-          stableUrl = `https://${String(artifactId)}.${contentBase}/`;
-          const stable = parseContentHost(new URL(stableUrl).host, contentBase);
-          if (stable?.kind !== "stable" || stable.artifactId !== artifactId) return invalid();
-        } catch { return invalid(); }
+        stableUrl = contentUrl(String(artifactId), contentBase);
+        if (!stableUrl) return invalid();
       }
       const write = isArtifactMutation(op);
       if (write && (typeof body.idempotencyKey !== "string" || !body.idempotencyKey.trim() ||
@@ -194,9 +209,13 @@ export function createArtifactControl(
       if (op !== "publish" || response.status !== 201) return response;
       const result = response.body as { releaseId: string; manifest: string };
       const manifest = JSON.parse(result.manifest) as { digest: string };
-      const pinnedUrl = `https://${result.releaseId}.pinned.${contentBase}/`;
-      const pinned = parseContentHost(new URL(pinnedUrl).host, contentBase);
-      if (pinned?.kind !== "pinned" || pinned.releaseId !== result.releaseId) throw new Error("invalid content links");
+      // Exact-version URL shares the single wildcard (no `pinned` label). The
+      // `pinnedUrl` field name stays as the opaque MCP/API contract.
+      const pinnedUrl = contentUrl(result.releaseId, contentBase);
+      // Id-collision guard: a release must never reuse its artifact id.
+      if (!pinnedUrl || result.releaseId.toLowerCase() === String(artifactId).toLowerCase()) {
+        throw new Error("invalid content links");
+      }
       return { status: 201, body: { ...result, artifactId, releaseId: result.releaseId, digest: manifest.digest,
         stableUrl, pinnedUrl } };
     },
