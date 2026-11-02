@@ -62,3 +62,8 @@ Prepare the three qualified P0b operations (0.2.5 or 0.3.0) while preserving the
   - [x] Local 0.3.0 fallback: 522 MCP + 234 host tests pass, no skips; typechecks, lint and full graph resolution pass with the existing root override.
   - [x] Update publication steps; registry default selects 0.2.5 (E404 at 18:42 Montreal on 2026-11-01).
   - [x] Remove disposable dependencies; explicit down -v and inspection confirm no remaining project containers, volumes or networks.
+- [ ] **Lot 6 — Discoverable artifact metadata**
+  - [x] Add shared IMMO get/list metadata and publication ordering without changing the upstream contract.
+  - [ ] Publish additive output schemas, preserve read annotations and bump the authoring guide revision.
+  - [ ] Cover current-release timestamps, drafts, ordering and pagination with unit and real PostgreSQL tests.
+  - [ ] Verify 0.2.2 and both P0b candidates, tear down volumes, push and write the French report.
