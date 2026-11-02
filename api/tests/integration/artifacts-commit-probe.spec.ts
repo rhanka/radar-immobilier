@@ -6,7 +6,7 @@ vi.mock("@sentropic/artifacts/http", async (original) => {
 });
 
 it("denies a publication revoked during a key wait without a durable success", async () => {
-  const host = await composeArtifactHost(pool, storageConfig(), rawBlobs());
+  const host = await composeArtifactHost(pool, storageConfig(), rawBlobs(), hostOptions());
   const control = createArtifactControl(host, SCOPE, BASE);
   const holder = await pool.connect();
   let pending: ReturnType<typeof control.handle> | undefined;
@@ -40,7 +40,7 @@ it("denies a publication revoked during a key wait without a durable success", a
     expect(await tableCount("releases")).toBe(releases + 1);
     expect(await tableCount("operation_receipts")).toBe(receipts + 1);
     host.close();
-    const restarted = await composeArtifactHost(pool, storageConfig(), rawBlobs());
+    const restarted = await composeArtifactHost(pool, storageConfig(), rawBlobs(), hostOptions());
     try {
       const now = Date.now();
       await pool.query(`UPDATE artifacts.object_intents SET payload = payload ||
@@ -72,6 +72,7 @@ import {
   composeArtifactHost,
   createArtifactControl,
   createArtifactsPool,
+  createDeleteConfirmation,
   createMemoryCommitLedger,
   deriveIdempotencyKey,
 } from "@radar/artifacts-host";
@@ -93,6 +94,9 @@ let accessKey = "";
 let secretKey = "";
 
 const rawBlobs = () => createTestS3BlobStore({ client: s3, bucket: BUCKET });
+const hostOptions = (connection = pool) => ({
+  confirmation: createDeleteConfirmation(connection, SCOPE, "https://app.example.test"),
+});
 const storageConfig = () => ({ enabled: true as const, storageScope: SCOPE, orgId: ORG,
   s3Bucket: BUCKET, s3Endpoint: endpoint, s3Region: "us-east-1",
   s3AccessKey: accessKey, s3SecretKey: secretKey });
@@ -141,7 +145,7 @@ describe("commit probe against the real provider stack [T05 T13]", () => {
   it("maps a below-layer S3 timeout converted to 500 back to 503", async () => {
     const { ledger, entries } = createMemoryCommitLedger();
     const broken = (await composeArtifactHost(pool, storageConfig(), { ...rawBlobs(),
-      async putBlob() { throw new ArtifactS3TimeoutError("blobs.putBlob"); } }))!;
+      async putBlob() { throw new ArtifactS3TimeoutError("blobs.putBlob"); } }, hostOptions()))!;
     const control = createArtifactControl(broken, SCOPE, BASE, undefined, { ledger });
     try {
       const id = await ensureArtifact(control, "probe-s3-ensure");
@@ -170,7 +174,7 @@ describe("commit probe against the real provider stack [T05 T13]", () => {
       return typeof value === "function" ? value.bind(target) : value;
     } });
     const { ledger, entries } = createMemoryCommitLedger();
-    const host = (await composeArtifactHost(flaky, storageConfig(), rawBlobs()))!;
+    const host = (await composeArtifactHost(flaky, storageConfig(), rawBlobs(), hostOptions(flaky)))!;
     const control = createArtifactControl(host, SCOPE, BASE, undefined, { ledger });
     armed.current = true;
     try {
@@ -187,7 +191,7 @@ describe("commit probe against the real provider stack [T05 T13]", () => {
 
   it("keeps a below-layer lock conflict as 409 conflict", async () => {
     const { ledger, entries } = createMemoryCommitLedger();
-    const host = (await composeArtifactHost(pool, storageConfig(), rawBlobs()))!;
+    const host = (await composeArtifactHost(pool, storageConfig(), rawBlobs(), hostOptions()))!;
     const control = createArtifactControl(host, SCOPE, BASE, undefined, { ledger });
     try {
       const id = await ensureArtifact(control, "probe-lock-ensure");

@@ -4,7 +4,7 @@ vi.mock("@sentropic/artifacts/http", async (original) => {
   return withCandidateProfile(await original<typeof import("@sentropic/artifacts/http")>());
 });
 import { composeArtifactHost, createArtifactControl, createMemoryCommitLedger, createArtifactAdmissionAuthority,
-  type AdmissionAuthority } from "@radar/artifacts-host";
+  createDeleteConfirmation, type AdmissionAuthority } from "@radar/artifacts-host";
 import { createMcpArtifactAdapter } from "../../../packages/artifacts-host/src/mcp-app-adapter.js";
 import { controlRoute } from "../../src/artifacts/control-route.js";
 import { auth, cookie, startHarness, type Harness } from "./artifacts-h2.helpers.js";
@@ -84,7 +84,8 @@ describe("unexposed MCP adapter with the composed provider", () => {
     // Cohort admission requires the storage scope to match Alice's real workspace.
     const scope = (await h.pool.query<{ id: string }>(
       "SELECT id FROM workspaces WHERE slug = 'artifacts-test'")).rows[0]!.id;
-    const host = await composeArtifactHost(unavailable, { ...h.config, storageScope: scope }, h.blobs);
+    const host = await composeArtifactHost(unavailable, { ...h.config, storageScope: scope }, h.blobs, {
+      confirmation: createDeleteConfirmation(unavailable, scope, auth.appBaseUrl) });
     try {
       await h.pool.query(`INSERT INTO artifacts.host_quotas (storage_scope_id, operation_limit, byte_limit)
         SELECT $1, operation_limit, byte_limit FROM artifacts.host_quotas WHERE storage_scope_id = $2`,
@@ -115,7 +116,7 @@ describe("unexposed MCP adapter with the composed provider", () => {
     const ensured = await http("ensure", { bindingName: direction, idempotencyKey: direction });
     expect(ensured.status).toBe(201);
     const artifactId = ensured.body.artifactId as string;
-    const second = (await composeArtifactHost(h.pool, h.config, h.blobs))!;
+    const second = (await composeArtifactHost(h.pool, h.config, h.blobs, h.hostOptions))!;
     try {
       const adapter = createMcpArtifactAdapter(
         createArtifactControl(second, h.config.storageScope, "pages.example.test"));

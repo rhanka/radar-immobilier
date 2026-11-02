@@ -14,6 +14,7 @@ Prepare the three qualified P0b operations (0.2.5 or 0.3.0) while preserving the
 - **Allowed Paths (implementation scope)**:
   - `packages/immo-mcp/**`, `packages/artifacts-host/**`
   - `api/src/artifacts/control-route*`, `api/tests/*p0b*`
+  - `api/tests/**`, `api/src/scripts/worker-live-reexploit.test.ts` (owner-authorized P0b API gate repair)
   - `api/drizzle/0028_artifacts_p0b.sql`, `api/drizzle/meta/_journal.json`
   - `api/tests/integration/artifacts-mcp-adapter.spec.ts` (owner-requested CI fixture repair)
   - `package.json`, `package-lock.json`, `api/package.json`
@@ -27,6 +28,7 @@ Prepare the three qualified P0b operations (0.2.5 or 0.3.0) while preserving the
 ## Feedback Loop
 - [x] MCPP0B-EX1: use the assigned worktree instead of `tmp/`; owner instruction; no root checkout mutation; rollback by removing this branch only.
 - [x] MCPP0B-EX2: generated dependency lock may exceed the per-commit line limit; centralize existing pins without changing their version; rollback the dependency-only commit.
+- [x] MCPP0B-EX3: owner authorizes API fixture/helper repairs for the published P0b profile and evidence-based worker test diagnosis; preserve product guards; rollback the test-only commits.
 - [x] Owner instruction supersedes peer/workflow requirements: perform design, implementation and review directly in this session; do not claim peer consensus.
 - [x] Upstream delete requires a release snapshot: make the public field optional and resolve it on the host; proof retries reuse their recorded snapshot.
 - [x] Keep an existing P0b digest on the same current-release snapshot as links and timestamps; unit coverage rejects mixed snapshots and PostgreSQL checks the stored digest.
@@ -110,3 +112,10 @@ Prepare the three qualified P0b operations (0.2.5 or 0.3.0) while preserving the
   - [x] Full API gate: 3,899 tests pass, 978 existing skips; all eleven tests in the three failing files pass.
   - [x] 0.2.2 verification: 518 MCP + 234 host tests pass (12 + 10 profile skips); three workspace typechecks and scoped lint pass.
   - [x] Remove disposable dependencies; explicit `down -v` and inspection confirm zero remaining containers, volumes or networks for both test projects.
+- [ ] **Lot 12 — Published P0b API qualification**
+  - [x] Supply real deletion confirmation and OAuth resource configuration in API fixtures.
+  - [x] Scoped API artifacts gate: 731 tests pass, 94 existing skips across 126 files; no product guard changes.
+  - [ ] Assert the active tool selection and preserve source admission coverage.
+  - [ ] Diagnose worker replay timing against 0.2.2 without increasing timeouts.
+  - [ ] Pass the full API gate and P0b verification; remove disposable dependencies and tear down volumes.
+  - [ ] Commit without trailers, push and write the French conductor report.
