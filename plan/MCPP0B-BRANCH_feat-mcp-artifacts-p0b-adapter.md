@@ -95,3 +95,9 @@ Prepare the three qualified P0b operations (0.2.5 or 0.3.0) while preserving the
   - [x] Tarball SHA-256: `5dc60bd499d5ba0b0974fca8ecc1ef8a4468bc8712f446a87a8d2c5e5bb0525f`; update the runbook's upstream reference.
   - [x] 0.2.2 baseline: 518 MCP + 234 host tests pass (8 + 10 profile skips); three workspace typechecks and scoped lint pass; dependency pin and lockfile stay unchanged.
   - [x] Remove disposable dependencies; explicit `down -v` and inspection confirm zero remaining project containers, volumes or networks.
+- [x] **Lot 10 — Recheck source authority on the MCP transport**
+  - [x] Route MCP source retrieval through the shared HTTP facade and use the storage scope in every admission check.
+  - [x] Reproduce source leakage over authenticated MCP, then pass four scoped PostgreSQL/blob regressions covering account, activation, membership and authority outage after the final blob read.
+  - [x] 0.2.2 baseline: 518 MCP + 234 host tests pass (12 + 10 profile skips); three workspace typechecks and scoped lint pass.
+  - [x] 0.2.5 candidate at `708f15d1a6ee40224b2a572be5581bfc6e092130`: 533 MCP + 244 host tests pass, no skips; three typechecks, lint and full dependency resolution pass; tarball SHA-256 unchanged at `5dc60bd499d5ba0b0974fca8ecc1ef8a4468bc8712f446a87a8d2c5e5bb0525f`.
+  - [x] Remove disposable dependencies; explicit `down -v` and inspection confirm zero remaining project containers, volumes or networks.

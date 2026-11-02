@@ -48,13 +48,14 @@ export interface ArtifactControlOptions {
   readonly nowMs?: () => number;
 }
 
-type Host = NonNullable<Awaited<ReturnType<typeof composeArtifactHost>>>;
+type ComposedHost = NonNullable<Awaited<ReturnType<typeof composeArtifactHost>>>;
+type Host = { readonly app: Pick<ComposedHost["app"], "execute"> } & Partial<Pick<ComposedHost, "execute">>;
 const invalid = (): HttpResponse => ({ status: 400, body: { error: "invalid_request" } });
 
 export function createArtifactControl(
   host: Host,
   scope: string,
-  contentBase: string,
+  contentBase = "",
   admission?: AdmissionAuthority | undefined,
   options?: ArtifactControlOptions | undefined,
 ): ArtifactControl {
@@ -67,7 +68,7 @@ export function createArtifactControl(
       if (admission) {
         let entry;
         try {
-          entry = await checkAdmission(admission, actorId);
+          entry = await checkAdmission(admission, actorId, scope);
         } catch {
           const unavailable = { status: 503 as const, body: { error: "capability_unavailable" } };
           Object.defineProperty(unavailable, "retryable", { value: true });
@@ -85,6 +86,7 @@ export function createArtifactControl(
       if (!["ensure", "list"].includes(op) && !isArtifactId(artifactId)) return invalid();
       let stableUrl: string | undefined;
       if (op === "publish") {
+        if (!contentBase) return invalid();
         try {
           stableUrl = `https://${String(artifactId)}.${contentBase}/`;
           const stable = parseContentHost(new URL(stableUrl).host, contentBase);
@@ -97,7 +99,7 @@ export function createArtifactControl(
       if (write && admission) {
         let commit;
         try {
-          commit = await checkAdmission(admission, actorId);
+          commit = await checkAdmission(admission, actorId, scope);
         } catch {
           const unavailable = { status: 503 as const, body: { error: "capability_unavailable" } };
           Object.defineProperty(unavailable, "retryable", { value: true });
@@ -139,7 +141,7 @@ export function createArtifactControl(
               }
             } else {
               let decision;
-              try { decision = await checkAdmission(admission, actorId); }
+              try { decision = await checkAdmission(admission, actorId, scope); }
               catch { return { allowed: false as const, reason: "unavailable" as const,
                 publicCode: "capability_unavailable", status: 503, retriable: true }; }
               if (!decision.allowed) return { allowed: false as const, reason: "denied" as const,
@@ -166,7 +168,7 @@ export function createArtifactControl(
       }
       if (outcome.ok && op === "get_source" && admission) {
         let current;
-        try { current = await checkAdmission(admission, actorId); }
+        try { current = await checkAdmission(admission, actorId, scope); }
         catch {
           const unavailable = { status: 503 as const, body: { error: "capability_unavailable" } };
           Object.defineProperty(unavailable, "retryable", { value: true });
