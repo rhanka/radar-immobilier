@@ -25,9 +25,10 @@ import {
   STARTER_READER_JS,
 } from "./starter-files.js";
 import { FRAMEWORK_STARTERS, FRAMEWORK_BUILD_RULE } from "./framework-starters.js";
+import { ARTIFACT_LIST_ORDER } from "./artifact-read-schema.js";
 
 export const AUTHORING_GUIDE_ID = "immo-artifact-authoring" as const;
-export const AUTHORING_GUIDE_REVISION = ARTIFACT_P0B ? "2026-11-01-p0b-r1" : "2026-11-01-r3";
+export const AUTHORING_GUIDE_REVISION = ARTIFACT_P0B ? "2026-11-01-p0b-r2" : "2026-11-01-r4";
 export const STARTER_VERSION = "1.1.0" as const;
 
 /**
@@ -134,6 +135,7 @@ export interface AuthoringGuide {
   readonly uiState: Readonly<{ contractId: string; ownership: string; bootstrap: string; persistence: string; example: object }>;
   readonly elements: Readonly<{ package: string; packageVersion: string; catalogId: string; componentIds: readonly string[]; status: string }>;
   readonly componentUsage: string;
+  readonly artifactDiscovery: Readonly<{ displayLabel: string; listOrder: string; timestamps: string; links: string; state: string }>;
   readonly artifactLifecycle?: Readonly<{ descriptor: typeof ARTIFACT_PROFILE_DESCRIPTOR;
     edit: readonly string[]; share: readonly string[]; delete: readonly string[] }>;
 }
@@ -146,6 +148,13 @@ export function getAuthoringGuide(): AuthoringGuide {
       guideId: AUTHORING_GUIDE_ID,
       revision: AUTHORING_GUIDE_REVISION,
       starterVersion: STARTER_VERSION,
+      artifactDiscovery: {
+        displayLabel: "Use bindingName as the display label until part1 title/description metadata is available.",
+        listOrder: `artifacts_list orders by ${ARTIFACT_LIST_ORDER}, before offset/limit pagination.`,
+        timestamps: "createdAt is artifact creation; updatedAt is the current release publication time, or null if never published.",
+        links: "artifacts_list and artifacts_get return stableUrl and currentReleaseId; pinnedUrl is the current release URL, or null if unpublished.",
+        state: "state is the lifecycle state; published indicates that a current release exists.",
+      },
       theme: DESIGN_KIT_THEME,
       designPackages: {
         react: `@sentropic/design-system-react@${DESIGN_KIT_REACT_SNAPSHOT}`,
