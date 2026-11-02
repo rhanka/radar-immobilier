@@ -131,6 +131,9 @@ restore_reopen() {
     .jobs|=with_entries(select(.value.outcome=="completed" and .key!="verify"))' \
     "$WORK/record.json" > "$WORK/next.json"
   mv "$WORK/next.json" "$WORK/record.json"; record_save
+  # The normal path may have restarted consumers before failing: close them again so the
+  # verification Job runs under the same closure guard (cutover-jobs.sh verify_closed).
+  if jq -e '.checkpoints.close=="completed"' "$WORK/record.json" >/dev/null; then close_once; fi
   run_job verify 60 90
   jq -e --slurpfile r "$WORK/record.json" '.ok==true and .database==$r[0].liveDb' "$WORK/verdict.json" >/dev/null || fail 'Live database verification refused; remain closed'
   restart_services
