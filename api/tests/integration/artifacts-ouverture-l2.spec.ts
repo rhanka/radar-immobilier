@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { ARTIFACT_P0B, FROZEN_CAPABILITIES } from "@radar/artifacts-host";
 import { createArtifactBinding } from "../../../packages/immo-mcp/src/artifact-binding.js";
 import { accountAuthorizer } from "../../../packages/immo-mcp/src/account-binding.js";
 import {
@@ -38,9 +39,9 @@ describe("ouverture L2 artifact tools on the MCP binding", () => {
   });
   afterAll(async () => { await bound?.close(); await h?.close(); });
 
-  it("exposes the four artifact tools and publishes two real accounts", async () => {
+  it("exposes the active artifact profile and publishes two real accounts", async () => {
     expect(bound.binding.tools.map((tool) => tool.name).sort()).toEqual(
-      ["artifacts_ensure", "artifacts_get", "artifacts_list", "artifacts_publish"]);
+      [...FROZEN_CAPABILITIES].sort());
     const alice = await bound.binding.invoke("artifacts_ensure",
       { bindingName: "mcp-shared", idempotencyKey: "mcp-shared" }, bindingRequest(ALICE));
     expect(alice.isError).not.toBe(true);
@@ -67,6 +68,20 @@ describe("ouverture L2 artifact tools on the MCP binding", () => {
       bindingRequest(BOB));
     expect(foreign.isError).toBe(true);
     expect(body(foreign)).toEqual(body(unknown));
+    if (ARTIFACT_P0B) {
+      const source = await bound.binding.invoke("artifacts_get_source", { artifactId: body(alice).artifactId },
+        bindingRequest(ALICE));
+      expect(source.isError, JSON.stringify(source)).not.toBe(true);
+      expect(body(source)).toMatchObject({ artifactId: body(alice).artifactId,
+        files: [{ path: "index.html", mimeType: "text/html",
+          bytes: Array.from(new TextEncoder().encode("<h1>ouverture</h1>")) }] });
+      const foreignSource = await bound.binding.invoke("artifacts_get_source", { artifactId: body(alice).artifactId },
+        bindingRequest(BOB));
+      const unknownSource = await bound.binding.invoke("artifacts_get_source", { artifactId: UNKNOWN_ARTIFACT },
+        bindingRequest(BOB));
+      expect(foreignSource.isError).toBe(true);
+      expect(body(foreignSource)).toEqual(body(unknownSource));
+    }
   });
 
   it("refuses forged actor, owner and storage fields without dispatch", async () => {
@@ -152,7 +167,7 @@ describe("ouverture L2 artifact tools on the MCP binding", () => {
     const list = await (await post({ jsonrpc: "2.0", id: 2, method: "tools/list" }, sessionId)).json() as {
       result?: { tools?: { name: string }[] } };
     const names = (list.result?.tools ?? []).map((tool) => tool.name);
-    for (const tool of ["artifacts_ensure", "artifacts_publish", "artifacts_list", "artifacts_get"]) {
+    for (const tool of FROZEN_CAPABILITIES) {
       expect(names).toContain(tool);
     }
     const ensured = await (await post({ jsonrpc: "2.0", id: 3, method: "tools/call",

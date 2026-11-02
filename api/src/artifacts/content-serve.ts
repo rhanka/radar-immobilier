@@ -33,7 +33,8 @@ import { adaptGrantToReader, canInvoke, type ApiReaderContext } from "./reader-c
 import type { AuthorityReader } from "./reader-profile.js";
 import { validateReaderResponse } from "./reader-responses.js";
 import {
-  isBasketOperation,
+  isWorkspaceReadOperation,
+  workspacesListParams,
   basketsContextParams,
   basketsSearchParams,
   basketsStateParams,
@@ -49,6 +50,7 @@ import {
   releaseCspForHtml,
   type ReleaseFileProvider,
 } from "./release-files.js";
+import { DESIGN_KIT_CSS_MIME, getDesignKitCss, resolveDesignKitAsset } from "./design-kit.js";
 import { ClassificationError, classificationFailure } from "../services/facets/classification-errors.js";
 import { decodeQuery } from "../services/facets/classification-query.js";
 import type { WritePageSurface } from "./write-intent-page-surface.js";
@@ -135,7 +137,7 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
   app.get("/health", (c) => c.json({ status: "ok" }));
 
   app.use("/__reader/api/*", async (c, next) => {
-    if (c.req.method !== "GET" || !isBasketOperation(c.req.path.slice("/__reader/api/".length))) return next();
+    if (c.req.method !== "GET" || !isWorkspaceReadOperation(c.req.path.slice("/__reader/api/".length))) return next();
     try {
       await next();
       if (c.res.status < 400) return;
@@ -250,7 +252,7 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     const capability = op === "geo.read.v1" ? "geo.read" : "signals.protected-read";
     if (!canInvoke(auth, capability, auth.releaseId)) return c.json({ error: "forbidden" }, 403);
     if (!deps.readOperation) return c.json({ error: "capability_unavailable" }, 503);
-    if (isBasketOperation(op)) {
+    if (isWorkspaceReadOperation(op)) {
       applyReaderContentHeaders(c);
       if (!await authorityCurrent(auth)) return c.json({ error: "unauthenticated" }, 401);
       try {
@@ -258,7 +260,7 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
         if (Buffer.byteLength(url.pathname + url.search) > 16384) throw new ClassificationError("request_uri_too_long");
         if (url.searchParams.getAll("grant").length > 1) throw new ClassificationError("invalid_query");
         url.searchParams.delete("grant");
-        const schema = op === "baskets.context.v1" ? basketsContextParams : op === "baskets.search.v1"
+        const schema = op === "workspaces.list.v1" ? workspacesListParams : op === "baskets.context.v1" ? basketsContextParams : op === "baskets.search.v1"
           ? basketsSearchParams : basketsStateParams;
         const params = decodeQuery(url.searchParams, schema);
         const body = validateReaderResponse(op, await deps.readOperation(op, params, auth), auth.readerSub);
@@ -304,6 +306,28 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
       return c.json(body);
     }
     catch { return c.json({ error: "capability_unavailable" }, 503); }
+  });
+
+  // Official design-kit stylesheets on a reserved path of every content
+  // origin: same-origin ('self') for published pages, sha256-pinned,
+  // outside the publication budget. Resolved inside the authorized reader
+  // path, before any user file lookup; unknown versions and traversal
+  // are refused. Author files can never shadow this prefix because
+  // "__artifacts" is a reserved first segment of the publish policy.
+  app.get("/__artifacts/design/:kit/:digest/:file", async (c) => {
+    const asset = resolveDesignKitAsset(c.req.param("kit"), c.req.param("digest"), c.req.param("file"));
+    if (!asset) {
+      applyReaderContentHeaders(c);
+      return c.json({ error: "not_found" }, 404);
+    }
+    const auth = await authorized(c, true);
+    if (!auth || !stillOpen(auth) || !await authorityCurrent(auth)) {
+      applyReaderContentHeaders(c);
+      return c.json({ error: "unauthenticated" }, 401);
+    }
+    applyReaderContentHeaders(c);
+    c.header("Content-Type", DESIGN_KIT_CSS_MIME);
+    return c.body(getDesignKitCss(asset));
   });
 
   app.get("*", async (c) => {

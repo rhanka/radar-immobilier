@@ -4,7 +4,7 @@ import pg from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { composeArtifactHost, createArtifactControl, createArtifactsPool } from "@radar/artifacts-host";
+import { composeArtifactHost, createArtifactControl, createArtifactsPool, createDeleteConfirmation } from "@radar/artifacts-host";
 import { loadConfig } from "../../src/config.js";
 import { migrationsFolder } from "./artifacts-h2.helpers.js";
 import { seedArtifactMemberships } from "./artifacts-membership.helpers.js";
@@ -98,7 +98,8 @@ describe("publish against a provider whose every operation needs three attempts"
   ])("%i file(s): publishes or fails retriably inside the preparation window", async (files, expected) => {
     const s3 = await startThirdAttemptS3();
     const host = await composeArtifactHost(pool, { enabled: true, storageScope: SCOPE, orgId: "deadline_org",
-      s3Bucket: "deadline", s3Endpoint: s3.url, s3Region: "bhs", s3AccessKey: "test", s3SecretKey: "test" });
+      s3Bucket: "deadline", s3Endpoint: s3.url, s3Region: "bhs", s3AccessKey: "test", s3SecretKey: "test" },
+    undefined, { confirmation: createDeleteConfirmation(pool, SCOPE, "https://app.example.test") });
     const control = createArtifactControl(host, SCOPE, "pages.example.test");
     const errors = vi.spyOn(console, "error").mockImplementation(() => undefined);
     try {
