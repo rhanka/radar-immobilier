@@ -158,5 +158,5 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
     }
   };
   return { app: { ...app, execute, handle: async (request, invocation) =>
-    projectArtifactHttpOutcome(await execute(request, invocation)) } as typeof app, execute, store, publication };
+    projectArtifactHttpOutcome(await execute(request, invocation), profile.resultEnvelopeVersion === 2) } as typeof app, execute, store, publication };
 }
