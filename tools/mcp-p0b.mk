@@ -1,6 +1,7 @@
 # Standalone runner: never include the root Makefile or read environment files.
 include tools/immo-mcp-test.mk
 override COMPOSE := docker compose --env-file /dev/null -p radar-$(ENV) -f docker-compose.test.yml -f tools/mcp-p0b.services.yml
+override CI_COMPOSE := docker compose --env-file /dev/null -p radar-$(ENV) -f docker-compose.yml -f docker-compose.test.yml -f tools/mcp-p0b.ci.services.yml
 RUN_API := $(COMPOSE) run --rm --no-deps -T --entrypoint '' api
 RUN_DATABASE_API := $(COMPOSE) run --rm --no-deps -T --entrypoint '' -e P0B_DATABASE_URL=postgres://p0b:p0b-test-only@postgres:5432/p0b
 .DEFAULT_GOAL := verify
@@ -8,7 +9,7 @@ INSTALL := npm ci
 SOURCE ?= /home/antoinefa/src/sentropic/tmp/worktrees/artifacts-parity-p0b/packages/artifacts
 P0B_VERSION ?= 0.2.5
 
-.PHONY: prepare lock registry verify candidate integration database-check
+.PHONY: prepare lock registry verify candidate integration database-check test-api down-api
 prepare: guard
 	@mkdir -p tmp/mcp-p0b
 database-check: guard
@@ -38,6 +39,15 @@ integration: guard
 	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; \
 	$(COMPOSE) up -d --wait postgres && \
 	$(RUN_DATABASE_API) api sh -ec '$(INSTALL) && npm run test --workspace=packages/artifacts-host -- src/p0b.integration.test.ts'
+
+# Same API gate as the root test-api / CI test target, without including .env.
+test-api: guard
+	@trap 'status=$$?; if [ "$$status" -ne 0 ]; then $(CI_COMPOSE) logs --no-color --tail=100 postgres minio; fi; $(CI_COMPOSE) down -v --remove-orphans; exit "$$status"' EXIT; \
+	$(CI_COMPOSE) up -d --wait postgres minio && \
+	$(CI_COMPOSE) run --rm -T api sh -ec '$(INSTALL) && npm run db:migrate --workspace=api && npm run test --workspace=api $(if $(SCOPE),-- $(SCOPE),)'
+
+down-api: guard-env
+	$(CI_COMPOSE) down -v --remove-orphans
 
 .PHONY: push clean-deps
 push: guard
