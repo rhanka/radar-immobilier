@@ -14,12 +14,15 @@ const config: ImmoHttpConfig = {
 const ALL_SCOPES = "immo:read immo:artifacts:read immo:artifacts:write";
 const PUBLISH = { artifactId: "123e4567-e89b-12d3-a456-426614174000", idempotencyKey: "k",
   files: [{ path: "index.html", mimeType: "text/html", text: "<p>x</p>" }] };
+const SUMMARY = { artifactId: PUBLISH.artifactId, bindingName: "summer", state: "active", published: false,
+  stableUrl: `https://${PUBLISH.artifactId}.pages.test/`, pinnedUrl: null, currentReleaseId: null,
+  createdAt: "2026-11-01T00:00:00.000Z", updatedAt: null };
 async function setup(withAccountBinding = true, scopePolicy?: { legacyReadScope: boolean }) {
   const keys = await generateKeyPair("RS256");
   const seen: ArtifactInvocationContext[] = [];
-  const execute = vi.fn<ArtifactsApp["execute"]>(async (_request, invocation) => {
+  const execute = vi.fn<ArtifactsApp["execute"]>(async (input, invocation) => {
     seen.push(invocation);
-    return { ok: true, result: { status: 200, body: { artifacts: [] } },
+    return { ok: true, result: { status: 200, body: input.path.startsWith("/meta/") ? SUMMARY : { total: 1, artifacts: [SUMMARY] } },
       invocationId: invocation.invocationId, commitState: "committed", replayed: false };
   });
   const createGuard = vi.fn(() => vi.fn(async () => ({ allowed: false as const,
@@ -116,6 +119,12 @@ describe("P7 composed transport (contract double; no storage qualification)", ()
     expect(list.result.tools).toHaveLength(12 + profile.selectedCapabilities.length);
     expect(list.result.tools.filter((t: { name: string }) => t.name.startsWith("artifacts_")).map((t: { name: string }) => t.name))
       .toEqual(profile.selectedCapabilities);
+    for (const name of ["artifacts_list", "artifacts_get"]) {
+      const tool = list.result.tools.find((t: { name: string }) => t.name === name);
+      expect(tool.annotations).toMatchObject({ readOnlyHint: true });
+      expect(JSON.stringify(tool.outputSchema)).toContain("currentReleaseId");
+      expect(JSON.stringify(tool.outputSchema)).toContain("updatedAt");
+    }
     if (ARTIFACT_P0B) {
       const tool = (name: string) => list.result.tools.find((t: { name: string }) => t.name === `artifacts_${name}`);
       expect(tool("get_source").annotations).toMatchObject({ readOnlyHint: true });
@@ -125,6 +134,8 @@ describe("P7 composed transport (contract double; no storage qualification)", ()
     for (let i = 0; i < 2; i++) {
       const result = await (await h.call("artifacts_list")).json();
       expect(result.result.isError).not.toBe(true);
+      expect(JSON.parse(result.result.content[0].text).artifacts).toEqual([SUMMARY]);
+      expect(result.result.structuredContent).toEqual({ total: 1, artifacts: [SUMMARY] });
     }
     expect(h.execute).toHaveBeenCalledTimes(2);
     expect(h.seen.every((invocation) => Object.isFrozen(invocation) && invocation.actorId === "alice"

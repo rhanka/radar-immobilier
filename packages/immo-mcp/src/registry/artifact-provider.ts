@@ -10,6 +10,7 @@ import { checkAdmission, HOST_ARTIFACT_PROFILE, ARTIFACT_PROFILE_DESCRIPTOR, ART
 import { ARTIFACT_INVOCATION_SCOPES, ARTIFACT_TOOL_SCOPES, acceptedArtifactScopes, hasArtifactScope,
   isArtifactToolName, STRICT_ARTIFACT_SCOPE_POLICY, type ArtifactScopePolicy } from "./artifact-profile.js";
 import { AUTHORING_GUIDE_SNIPPET, getAuthoringGuide } from "./artifact-authoring-guide.js";
+import { ARTIFACT_LIST_ORDER, artifactReadOutputSchema } from "./artifact-read-schema.js";
 
 // Compile the complete versioned contract, including semantic rules, before registry admission.
 export const IMMO_ARTIFACT_PROFILE = HOST_ARTIFACT_PROFILE;
@@ -41,10 +42,14 @@ export function createImmoArtifactManifest(policy: ArtifactScopePolicy = STRICT_
     const name: string = tool.name;
     if (!isArtifactToolName(name)) throw new Error("artifact_tool_unselected");
     const accepted = acceptedArtifactScopes(name, policy);
+    const readDescription = name === "artifacts_list"
+      ? `${tool.description} Returns bindingName, content URLs, lifecycle and publication timestamps. Ordered by ${ARTIFACT_LIST_ORDER}, before offset/limit pagination.`
+      : tool.description;
     const guideDescription = GUIDE_DESCRIPTION_TOOLS.has(name)
-      ? `${tool.description} ${AUTHORING_GUIDE_SNIPPET}` : tool.description;
+      ? `${readDescription} ${AUTHORING_GUIDE_SNIPPET}` : readDescription;
     const description = ARTIFACT_P0B ? `${guideDescription} Contract: ${JSON.stringify(ARTIFACT_PROFILE_DESCRIPTOR)}.` : guideDescription;
     return { ...tool, description, inputSchema: artifactPublicSchema(name, tool.inputSchema),
+      outputSchema: artifactReadOutputSchema(name) ?? tool.outputSchema,
       requiredScopes: accepted.length === 1 ? [ARTIFACT_TOOL_SCOPES[name]] : [] };
   });
   const scopes = [ARTIFACT_INVOCATION_SCOPES.read, ARTIFACT_INVOCATION_SCOPES.write]
@@ -130,6 +135,7 @@ export function bindArtifactProvider(options: {
     configuration: Object.freeze({ storageScopeId: scope }),
     tools: Object.freeze(manifest.tools.map((tool: ArtifactManifestTool) => freeze({
       name: tool.name, description: tool.description, inputSchema: tool.inputSchema as Tool["inputSchema"],
+      ...(artifactReadOutputSchema(tool.name) ? { outputSchema: artifactReadOutputSchema(tool.name)! } : {}),
       annotations: { readOnlyHint: tool.mutability === "read-only", destructiveHint: tool.name === "artifacts_delete" },
       ...(ARTIFACT_P0B ? { _meta: { "immo/artifactsProfile": ARTIFACT_PROFILE_DESCRIPTOR } } : {}),
       execution: { taskSupport: "forbidden" as const },
@@ -181,8 +187,10 @@ export function bindArtifactProvider(options: {
         return refusal(outcome.failure.publicCode, outcome.failure.retriable, details ? { details } : {});
       }
       // The durable receipt is untouched: the guide rides the MCP response
-      // text only, so tool selection and republication both surface it.
-      return { content: [{ type: "text", text: JSON.stringify(withAuthoringGuide(tool, outcome.result.body)) }] };
+      // only, so tool selection and republication both surface it.
+      const result = withAuthoringGuide(tool, outcome.result.body);
+      return { content: [{ type: "text", text: JSON.stringify(result) }],
+        ...(artifactReadOutputSchema(tool) ? { structuredContent: result as Record<string, unknown> } : {}) };
     },
   });
   bindings.add(binding);
