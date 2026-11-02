@@ -16,6 +16,7 @@ import { ARTIFACT_P0B, isArtifactMutation, isArtifactPublication } from "./p0b-p
 import { assertP0bStorage, p0bPorts, sharePrincipal } from "./p0b-ports.js";
 import type { ArtifactDeleteConfirmation } from "./delete-confirmation.js";
 import { createArtifactReadMetadata } from "./read-metadata.js";
+import { replayLegacyDelete } from "./legacy-delete-replay.js";
 
 /**
  * A prepared publication must finalize within this window: past it, the
@@ -116,7 +117,13 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
             const normalized = profile.validate(capability, args, request.idempotencyKey, { deferPrecondition: true });
             // The provider owns historical decoding, authorization and the required-field error.
             if (profile.requireExpectedCurrentReleaseId && ["/publish", "/revert", "/delete"].includes(request.path) &&
-              !Object.hasOwn(args, "expectedCurrentReleaseId")) return app.execute(request, invocation);
+              !Object.hasOwn(args, "expectedCurrentReleaseId")) {
+              if (request.path === "/delete") {
+                const replay = await replayLegacyDelete({ pool, profile, coordinator, invocation, args, derivation: binding });
+                if (replay !== undefined) return replay;
+              }
+              return app.execute(request, invocation);
+            }
             const command = profile.validators.normalizeCommand({ capability, args,
               authority: { actorId: invocation.actorId, storageScopeId: scope }, derivation: binding,
               ...(request.idempotencyKey === undefined ? {} : { envelopeKey: request.idempotencyKey }),
