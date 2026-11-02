@@ -7,7 +7,7 @@ import { GRANT_SECRET, SESSION_SECRET, ISSUER } from "./reader-test-fixture.js";
 
 const artifactId = "123e4567-e89b-12d3-a456-426614174000";
 const releaseId = "123e4567-e89b-12d3-a456-426614174001";
-const host = `${releaseId}.pinned.pages.example.test`;
+const host = `${releaseId}.pages.example.test`;
 const resource = { ...ISSUER, host, artifactId, releaseId, readerSub: "reader-alice", sessionId: "sealed",
   profileName: "demo", policyRevision: "pol-001", profileFingerprint: fingerprintReaderProfile({
     name: "demo", policyRevision: "pol-001", capabilities: ["geo.read", "signals.protected-read"] }) };
@@ -26,7 +26,7 @@ function fixture() {
   return { app, request, cookie, setNow: (value: number) => { now = value; }, withdraw: () => { withdrawn = true; } };
 }
 
-it("should renew a live grant and recover an expired grant using only a current sealed P on its pinned host", async () => {
+it("should renew a live grant and recover an expired grant using only a current sealed P on its exact host", async () => {
   const f = fixture(), grant = await mintGrant(resource, GRANT_SECRET, 1000);
   f.setNow(41000);
   expect((await f.request({ "x-preview-grant": grant })).status).toBe(200);
@@ -53,7 +53,7 @@ it("should refuse cookie recovery from foreign origins, altered bindings and exp
     expect((await f.request({}, f.cookie(changed))).status).toBe(401);
   }
   expect((await f.request({}, f.cookie(), `${artifactId}.pages.example.test`)).status).toBe(401);
-  expect((await f.request({}, f.cookie(), `${artifactId}.pinned.pages.example.test`)).status).toBe(401);
+  expect((await f.request({}, f.cookie(), `${artifactId}.pages.example.test`)).status).toBe(401);
   expect((await f.request({ "x-preview-grant": "forged" })).status).toBe(401);
   expect((await f.request({ authorization: "Bearer publisher" })).status).toBe(400);
 });

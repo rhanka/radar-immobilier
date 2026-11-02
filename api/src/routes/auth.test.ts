@@ -126,6 +126,24 @@ describe("GET /api/v1/auth/login", () => {
     expect(url.searchParams.get("prompt")).toBeNull();
   });
 
+  it("sets host-only cookies (no Domain=) so they never leak to content hosts", async () => {
+    const app = authRoute(AUTH_ON, { discovery: DISCOVERY });
+    const login = await app.request("/api/v1/auth/login");
+    expect(login.headers.get("set-cookie")).toBeTruthy();
+    expect(login.headers.get("set-cookie")).not.toMatch(/Domain=/i);
+    const { idToken, getKey } = await makeIdToken({ nonce: "N", sub: "user-x" });
+    const fetchImpl: FetchLike = async () => ({
+      ok: true, status: 200,
+      json: async () => ({ id_token: idToken }), text: async () => "",
+    });
+    const callback = authRoute(AUTH_ON, { discovery: DISCOVERY, fetchImpl, getKey });
+    const result = await callback.request("/api/v1/auth/oauth/callback?code=C&state=S", {
+      headers: { cookie: flowCookie({ state: "S", nonce: "N", codeVerifier: "V" }) },
+    });
+    expect(result.headers.get("set-cookie")).toBeTruthy();
+    expect(result.headers.get("set-cookie")).not.toMatch(/Domain=/i);
+  });
+
   it("forwards prompt=login to the IdP so it RE-AUTHENTICATES (kills SSO reuse)", async () => {
     // The reported symptom "logout → reconnect = previous user" and "invite
     // link → residual admin" both stem from the IdP silently re-authorizing its
@@ -165,7 +183,7 @@ describe("GET /api/v1/auth/login", () => {
 
 describe("GET /api/v1/auth/oauth/callback", () => {
   it.each([
-    "/api/v1/artifacts/reader/resume?origin=https%3A%2F%2Frelease.pinned.pages.example.test",
+    "/api/v1/artifacts/reader/resume?origin=https%3A%2F%2Frelease.pages.example.test",
     "https://foreign.test/", "//foreign.test/", "/api/v1/admin/users",
     "/api/v1/artifacts/reader/resume?origin=x&origin=y",
   ])("should resume only a validated local reader flow: %s", async (returnTo) => {
