@@ -1,7 +1,7 @@
 import type pg from "pg";
 import type { HttpAppDeps, HttpResponse } from "@sentropic/artifacts/http";
 import type { ArtifactInvocationContext, FinalizeTxClient } from "@sentropic/artifacts/server/commit-contract";
-import type { ArtifactOutcome } from "@sentropic/artifacts/server/outcome-contract";
+import { ArtifactOperationError, classifyArtifactFailure, type ArtifactOutcome } from "@sentropic/artifacts/server/outcome-contract";
 import type { createRadarKeyDerivation } from "@sentropic/artifacts/mcp-core";
 import { deriveIdempotencyKey } from "./idempotency.js";
 
@@ -51,5 +51,11 @@ export async function replayLegacyDelete(options: {
       return invocation.authorizeCommit(context, transaction);
     },
   });
-  return outcome.ok ? { ...outcome, result: { status: 200, body: outcome.result.receipt } } : outcome;
+  if (!outcome.ok) return outcome;
+  const receipt = outcome.result.receipt as { artifactId?: unknown; terminal?: unknown } | null;
+  if (!receipt || receipt.artifactId !== artifactId || receipt.terminal !== true) {
+    return { ok: false, failure: classifyArtifactFailure(new ArtifactOperationError("provider_unavailable"), {
+      invocationId: invocation.invocationId, operation: "delete", phase: "replay", commitState: "unknown" }) };
+  }
+  return { ...outcome, result: { status: 200, body: receipt } };
 }
