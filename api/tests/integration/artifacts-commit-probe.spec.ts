@@ -6,7 +6,26 @@ vi.mock("@sentropic/artifacts/http", async (original) => {
 });
 
 it("denies a publication revoked during a key wait without a durable success", async () => {
-  const host = await composeArtifactHost(pool, storageConfig(), rawBlobs(), hostOptions());
+  const keyWait = Promise.withResolvers<void>();
+  let observeKeyWait = false;
+  const observed = new Proxy(pool, { get(target, key) {
+    if (key === "connect") return async () => {
+      const client = await target.connect();
+      return new Proxy(client, { get(connection, property) {
+        if (property === "query") return (text: unknown, ...args: unknown[]) => {
+          const pending = Reflect.apply(connection.query, connection, [text, ...args]);
+          if (observeKeyWait && typeof text === "string" && text.includes("artifacts.operation_keys") &&
+            text.includes("FOR UPDATE")) keyWait.resolve();
+          return pending;
+        };
+        const value = Reflect.get(connection, property);
+        return typeof value === "function" ? value.bind(connection) : value;
+      } });
+    };
+    const value = Reflect.get(target, key);
+    return typeof value === "function" ? value.bind(target) : value;
+  } });
+  const host = await composeArtifactHost(observed, storageConfig(), rawBlobs(), hostOptions(observed));
   const control = createArtifactControl(host, SCOPE, BASE);
   const holder = await pool.connect();
   let pending: ReturnType<typeof control.handle> | undefined;
@@ -22,7 +41,12 @@ it("denies a publication revoked during a key wait without a durable success", a
     await holder.query("SELECT 1 FROM artifacts.operation_keys WHERE storage_scope_id=$1 AND internal_key=$2 FOR UPDATE", [SCOPE, internalKey]);
     const releases = await tableCount("releases");
     const receipts = await tableCount("operation_receipts");
+    observeKeyWait = true;
     pending = control.handle("publish", "alice", body);
+    // S3 preparation precedes the key lock; start observing only once SQL is dispatched.
+    await Promise.race([keyWait.promise, pending.then((response) => {
+      throw new Error(`publication completed before the key wait: ${JSON.stringify(response)}`);
+    })]);
     await expect.poll(async () => Number((await pool.query(
       "SELECT count(*) FROM pg_stat_activity WHERE datname=current_database() AND wait_event_type='Lock'",
     )).rows[0].count)).toBeGreaterThan(0);
