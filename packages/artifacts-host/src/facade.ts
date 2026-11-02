@@ -6,6 +6,7 @@ import { projectArtifactWriteFailure } from "@sentropic/artifacts/server/outcome
 import { authorizeArtifactCommit } from "./commit-policy.js";
 import { checkAdmission, type AdmissionAuthority } from "./admission.js";
 import type { composeArtifactHost } from "./composition.js";
+import { ACTIVE_ARTIFACT_TOOLS, isArtifactMutation } from "./p0b-profile.js";
 
 export interface ArtifactControl {
   handle(op: string, actorId: string, body: unknown): Promise<HttpResponse>;
@@ -47,26 +48,27 @@ export interface ArtifactControlOptions {
   readonly nowMs?: () => number;
 }
 
-type Host = NonNullable<Awaited<ReturnType<typeof composeArtifactHost>>>;
+type ComposedHost = NonNullable<Awaited<ReturnType<typeof composeArtifactHost>>>;
+type Host = { readonly app: Pick<ComposedHost["app"], "execute"> } & Partial<Pick<ComposedHost, "execute">>;
 const invalid = (): HttpResponse => ({ status: 400, body: { error: "invalid_request" } });
 
 export function createArtifactControl(
   host: Host,
   scope: string,
-  contentBase: string,
+  contentBase = "",
   admission?: AdmissionAuthority | undefined,
   options?: ArtifactControlOptions | undefined,
 ): ArtifactControl {
   const control: ArtifactControl = {
     async handle(op, actorId, raw) {
-      if (!["ensure", "publish", "meta", "list"].includes(op)) {
+      if (!ACTIVE_ARTIFACT_TOOLS.some((name) => name === `artifacts_${op === "meta" ? "get" : op}`)) {
         return { status: 503, body: { error: "capability_unavailable" } };
       }
       let frozenWorkspace: string | undefined;
       if (admission) {
         let entry;
         try {
-          entry = await checkAdmission(admission, actorId);
+          entry = await checkAdmission(admission, actorId, scope);
         } catch {
           const unavailable = { status: 503 as const, body: { error: "capability_unavailable" } };
           Object.defineProperty(unavailable, "retryable", { value: true });
@@ -81,22 +83,23 @@ export function createArtifactControl(
       const body = raw as Record<string, unknown>;
       if (body.storageScopeId !== undefined && body.storageScopeId !== scope) return invalid();
       const artifactId = body.artifactId;
-      if ((op === "publish" || op === "meta") && !isArtifactId(artifactId)) return invalid();
+      if (!["ensure", "list"].includes(op) && !isArtifactId(artifactId)) return invalid();
       let stableUrl: string | undefined;
       if (op === "publish") {
+        if (!contentBase) return invalid();
         try {
           stableUrl = `https://${String(artifactId)}.${contentBase}/`;
           const stable = parseContentHost(new URL(stableUrl).host, contentBase);
           if (stable?.kind !== "stable" || stable.artifactId !== artifactId) return invalid();
         } catch { return invalid(); }
       }
-      const write = op === "ensure" || op === "publish";
+      const write = isArtifactMutation(op);
       if (write && (typeof body.idempotencyKey !== "string" || !body.idempotencyKey.trim() ||
         body.idempotencyKey.length > 256)) return invalid();
       if (write && admission) {
         let commit;
         try {
-          commit = await checkAdmission(admission, actorId);
+          commit = await checkAdmission(admission, actorId, scope);
         } catch {
           const unavailable = { status: 503 as const, body: { error: "capability_unavailable" } };
           Object.defineProperty(unavailable, "retryable", { value: true });
@@ -138,7 +141,7 @@ export function createArtifactControl(
               }
             } else {
               let decision;
-              try { decision = await checkAdmission(admission, actorId); }
+              try { decision = await checkAdmission(admission, actorId, scope); }
               catch { return { allowed: false as const, reason: "unavailable" as const,
                 publicCode: "capability_unavailable", status: 503, retriable: true }; }
               if (!decision.allowed) return { allowed: false as const, reason: "denied" as const,
@@ -162,6 +165,16 @@ export function createArtifactControl(
         const entry = projectArtifactWriteFailure(outcome.failure, { dispatched: true, write });
         if (entry) await options?.ledger?.record({ invocationId: entry.invocationId, op, actorId,
           reason: entry.reason, status: entry.status, atMs: (options?.nowMs ?? Date.now)() });
+      }
+      if (outcome.ok && op === "get_source" && admission) {
+        let current;
+        try { current = await checkAdmission(admission, actorId, scope); }
+        catch {
+          const unavailable = { status: 503 as const, body: { error: "capability_unavailable" } };
+          Object.defineProperty(unavailable, "retryable", { value: true });
+          return unavailable;
+        }
+        if (!current.allowed) return { status: current.status, body: current.body };
       }
       const response = { ...projectArtifactHttpOutcome(outcome) };
       if (!outcome.ok && outcome.failure.publicCode === "rate_limited") {

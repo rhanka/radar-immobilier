@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   CURRENT_SEARCH_SIGNALS_HAS_WORKSPACE,
+  H4_CHECKPOINT_TOOL_COUNT,
+  SUCCESSOR_TOOL_COUNT,
   SUCCESSOR_SEARCH_ENDPOINT,
   isAuthorizedEmptyResult,
   resolveSuccessorSearchWorkspace,
@@ -12,7 +14,7 @@ const W2 = "22222222-3333-4444-8555-666666666666";
 
 describe("successor and search_signals contract", () => {
   it("freezes the 12 / 16 / 22 milestone counts", () => {
-    expect(validateSuccessorManifest(12, 16, 22)).toBe(true);
+    expect(validateSuccessorManifest(12, H4_CHECKPOINT_TOOL_COUNT, SUCCESSOR_TOOL_COUNT)).toBe(true);
     expect(validateSuccessorManifest(12, 16, 21)).toBe(false);
     expect(CURRENT_SEARCH_SIGNALS_HAS_WORKSPACE).toBe(false);
     expect(SUCCESSOR_SEARCH_ENDPOINT).toEqual({
