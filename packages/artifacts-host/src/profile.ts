@@ -5,13 +5,9 @@
  * Compilation and attestation require the actual upstream construction API.
  */
 
-/** Frozen r2 operation selection for the Radar profile, ordered. */
-export const FROZEN_CAPABILITIES = Object.freeze([
-  "artifacts_ensure",
-  "artifacts_get",
-  "artifacts_list",
-  "artifacts_publish",
-] as const);
+/** Installed operation selection for the Radar profile, ordered. */
+import { ACTIVE_ARTIFACT_TOOLS } from "./p0b-profile.js";
+export const FROZEN_CAPABILITIES = Object.freeze([...ACTIVE_ARTIFACT_TOOLS].sort());
 
 export type ArtifactCapability = (typeof FROZEN_CAPABILITIES)[number];
 
@@ -55,7 +51,7 @@ export interface CompiledArtifactsProfile {
   readonly selectedCapabilities: readonly string[];
   readonly [key: string]: unknown;
 }
-/** Assert the exact frozen four-operation selection, deterministically ordered. */
+/** Assert the installed profile selection, deterministically ordered. */
 export function assertFrozenSelection(names: readonly unknown[]): asserts names is readonly string[] {
   const frozen = [...FROZEN_CAPABILITIES].sort();
   if (names.some((name) => typeof name !== "string")) {
