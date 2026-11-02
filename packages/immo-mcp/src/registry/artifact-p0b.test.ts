@@ -72,4 +72,14 @@ describe.skipIf(!ARTIFACT_P0B)("P0b MCP binding", () => {
     expect(body(response)).toEqual({ error: "confirmation_required", retryable: false, details });
     expect(JSON.stringify(response)).not.toContain("private SQL");
   });
+
+  it("should preserve the compatible P0b policy refusal without adding a generic variant", async () => {
+    const h = setup();
+    h.execute.mockImplementation(async (_input, invocation) => ({ ok: false, failure: {
+      kind: "operational", category: "unauthorized_at_commit", variant: "policy_denial", publicCode: "activation_closed",
+      httpStatus: 403, retriable: false, invocationId: invocation.invocationId, operation: "publish", phase: "guard", commitState: "not_committed" } }));
+    const result = await h.binding.invoke("artifacts_publish", { artifactId: ID, idempotencyKey: "retry",
+      files: [{ path: "index.html", mimeType: "text/html", text: "x" }] }, request(["immo:artifacts:write"]));
+    expect(body(result)).toEqual({ error: "activation_closed", retryable: false });
+  });
 });
