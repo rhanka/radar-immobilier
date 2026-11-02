@@ -7,7 +7,7 @@ import { ALL_TOOL_DEFINITIONS, IMMO_READ_ANNOTATIONS } from "../tool-definitions
 import { getInvocationContext } from "../invocation-context.js";
 import { invokeTool } from "../tools.js";
 import { AccountBindingUnavailable } from "../account-binding.js";
-import { artifactScopeDenied, assertArtifactBinding, type ArtifactMcpBinding } from "./artifact-provider.js";
+import { artifactRefusal, artifactScopeDenied, assertArtifactBinding, type ArtifactMcpBinding } from "./artifact-provider.js";
 
 // GeoJSON may contain 2,000 features; budgets must not impose a smaller semantic limit.
 export const IMMO_WIRE_LIMITS = Object.freeze({
@@ -109,6 +109,7 @@ export async function composeStatefulImmo(
       const retriable = refusal.kind === "account" && unavailableAccounts.delete(context);
       const error = retriable ? "account_binding_unavailable"
         : refusal.kind === "scope" ? `scope_denied:${refusal.missingScopes.join(",")}` : `composition_${refusal.kind}`;
+      if (artifacts?.tools.some((entry) => entry.name === tool)) return artifactRefusal(error, retriable);
       return { isError: true, content: [{ type: "text", text: JSON.stringify({
         error, tool, correlationId: context.correlationId, ...(retriable ? { retriable: true } : {}),
       }, null, 2) }] };
