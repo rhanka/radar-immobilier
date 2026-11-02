@@ -3,6 +3,9 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 import { ARTIFACT_P0B } from "./p0b-profile.js";
 import { p0bFixture } from "./p0b.test-support.js";
 import { createStoredReader } from "../../../api/src/artifacts/reader-storage.js";
+import type { FinalizeTxClient } from "@sentropic/artifacts/server/commit-contract";
+import { createAdmissionAuthority } from "./admission.js";
+import { createArtifactControl } from "./facade.js";
 
 describe.skipIf(!process.env.P0B_DATABASE_URL)("IMMO artifact host with real PostgreSQL", () => {
   let h: Awaited<ReturnType<typeof p0bFixture>>;
@@ -87,6 +90,40 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("IMMO artifact host with real Pos
     expect((await h.call("get_source", { artifactId: p.artifactId, releaseId: p.releaseId })).status).toBe(200);
   });
 
+  it.skipIf(!ARTIFACT_P0B).each([
+    ["account", { error: "account_not_approved", status: "pending" }],
+    ["activation", { error: "activation_closed" }],
+    ["membership", { error: "workspace_membership_required" }],
+    ["unavailable", { error: "capability_unavailable" }],
+  ] as const)("should refuse source bytes after %s authority changes during the blob read", async (revocation, error) => {
+    const { artifactId } = await h.page();
+    let enabled = true;
+    let memberships = ["p0b"];
+    const authority = { ...createAdmissionAuthority(h.pool, () => enabled
+      ? { enabled: true, subjects: ["alice"], expiresAtMs: Number.POSITIVE_INFINITY }
+      : { enabled: false, reason: "activation_off" }, undefined, "p0b"),
+      readMemberships: async () => memberships };
+    const control = createArtifactControl(h.host, "p0b", "pages.test", authority);
+    const getBlob = h.host.blobs.getBlob.bind(h.host.blobs);
+    const spy = vi.spyOn(h.host.blobs, "getBlob").mockImplementationOnce(async (key) => {
+      const bytes = await getBlob(key);
+      if (revocation === "account") await h.pool.query("UPDATE account_users SET status='pending' WHERE sub='alice'");
+      if (revocation === "activation") enabled = false;
+      if (revocation === "membership") memberships = [];
+      if (revocation === "unavailable") vi.spyOn(authority, "readStatus").mockRejectedValue(new Error("database unavailable"));
+      return bytes;
+    });
+    try {
+      const response = await control.handle("get_source", "alice", { artifactId });
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(response).toEqual({ status: revocation === "unavailable" ? 503 : 403, body: error });
+      if (revocation === "unavailable") expect(response).toHaveProperty("retryable", true);
+    } finally {
+      spy.mockRestore();
+      await h.pool.query("UPDATE account_users SET status='approved' WHERE sub='alice'");
+    }
+  });
+
   it.skipIf(!ARTIFACT_P0B)("should allow only named approved IdP subjects, preserve read-only grants and revoke at exhausted quota", async () => {
     const { artifactId } = await h.page();
     await h.pool.query("UPDATE artifacts.host_quotas SET operation_limit=operations_used,byte_limit=bytes_used");
@@ -150,6 +187,39 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("IMMO artifact host with real Pos
     expect((await h.call("ensure", { bindingName: p.bindingName, idempotencyKey: randomUUID() })).status).toBe(410);
     await expect(h.pool.query("UPDATE artifacts.artifacts SET lifecycle_state='active' WHERE id=$1", [p.artifactId])).rejects.toMatchObject({ code: "23514" });
     for (const op of ["restore", "fork", "promote", "renew"]) expect((await h.call(op, { artifactId: p.artifactId })).status).toBe(503);
+  });
+
+  it.skipIf(!ARTIFACT_P0B)("should refuse a confirmation that expires while consumption waits for its row lock", async () => {
+    const { artifactId } = await h.page();
+    const { ref } = await challenge(artifactId);
+    expect(await h.confirmation.approve(ref, "alice")).toBe(true);
+    const context = (await h.confirmation.read(ref, "alice"))!;
+    const locking = await h.pool.connect();
+    const consuming = await h.pool.connect();
+    let pending: ReturnType<typeof h.confirmation.port.consume> | undefined;
+    try {
+      await locking.query("BEGIN");
+      await locking.query("SELECT 1 FROM artifacts.delete_confirmations WHERE confirmation_ref=$1 FOR UPDATE", [ref]);
+      await consuming.query("BEGIN");
+      const pid = (await consuming.query<{ pid: number }>("SELECT pg_backend_pid() AS pid")).rows[0]!.pid;
+      pending = h.confirmation.port.consume(consuming as unknown as FinalizeTxClient, context, ref);
+      await vi.waitFor(async () => {
+        const waiting = await h.pool.query("SELECT wait_event_type FROM pg_stat_activity WHERE pid=$1", [pid]);
+        expect(waiting.rows[0]?.wait_event_type).toBe("Lock");
+      });
+      // Expire after BEGIN and while the consumer is blocked, using only the DB clock.
+      await locking.query("UPDATE artifacts.delete_confirmations SET expires_at=clock_timestamp() WHERE confirmation_ref=$1", [ref]);
+      await locking.query("COMMIT");
+      expect(await pending).toBe("expired");
+      await consuming.query("COMMIT");
+      expect((await h.confirmation.read(ref, "alice"))?.consumed).toBe(false);
+    } finally {
+      await locking.query("ROLLBACK");
+      await pending?.catch(() => undefined);
+      await consuming.query("ROLLBACK");
+      locking.release();
+      consuming.release();
+    }
   });
 
   it.skipIf(!ARTIFACT_P0B)("should reject expired, forged, mismatched and stale confirmations", async () => {
