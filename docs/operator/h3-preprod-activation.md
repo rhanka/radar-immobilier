@@ -73,7 +73,8 @@ rtk make -f tools/artifact-host.mk check-h3-rollback-render H3_RENDER=path/to/h2
 
 Prepare and validate the rollback file before GO. The rollback gate still
 requires reviewed digests on API, denial, UI and jobs, unchanged denial
-isolation/network/auth checks, and both real wildcard routes. It permits API
+isolation/network/auth checks, and all real wildcard routes (content plus
+legacy redirects during transition). It permits API
 and denial images to differ; the retained denial image must contain the H3
 entrypoint. Offline validation cannot prove that an image digest contains H2
 or H3: retain the separate image qualification receipts. An abort before GO
@@ -86,8 +87,9 @@ can use the preparation render, with control kept `off`.
 2. Run any required migration once, using the reviewed image.
 3. Deploy and verify the isolated denial boundary
    (`radar-artifact-content-deny` Deployment/Service + NetworkPolicies).
-4. Apply and verify both wildcard routes and TLS coverage (operator apply of
-   the reviewed Ingress; check both `*.BASE` and `*.pinned.BASE` deny).
+4. Apply and verify the wildcard routes and TLS coverage (operator apply of
+   the reviewed Ingress; check `*.BASE` denies, plus the two legacy
+   immo-pages redirect hosts during transition).
 5. Deploy the API/nginx changes with control mode `off`.
 6. Verify baseline API/UI/MCP behavior.
 7. After operational GO, enable the exact cohort and bounded window

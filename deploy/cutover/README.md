@@ -182,7 +182,7 @@ cannot run, an operator with `gh` authenticated runs `status` then the
 `rollback` above; takeover is refused while the recorded job is not completed.
 
 The closure check probes every Ingress host; a wildcard host
-(`*.preprod.immo-pages…`) is probed through the concrete label
+(`*.pages.preprod.immo…`) is probed through the concrete label
 `cutover-probe.`. A closure deadline names the last unmet condition.
 
 Routes return to maintenance after a reopening/public-smoke failure; schedules
