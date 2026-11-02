@@ -63,7 +63,72 @@ the staged configuration from the table. `open` opens the selected strict bindin
 policy row immediately before this call). `close` closes write admission after **any** failed apply/proof. It must
 never restore r2, delete receipts or reopen a permissive route. For input qualification, preserve private probe
 access to the real old instance. For results, preserve the CAS/envelope-1 binding and migrate only qualified
-connections to the v2 binding. The repository intentionally supplies no default deployment adapter.
+connections to the v2 binding.
+
+## Deployment adapter `tools/make/p0c-apply-hook.sh`
+
+The repository supplies one reviewed adapter (bash, no Python): pass its absolute path as `P0C_APPLY_HOOK`.
+It uses exactly `kubectl --kubeconfig "$P0C_KUBECONFIG" -n radar-immobilier-preprod` for every call.
+`P0C_KUBECONFIG` is required, `~/.kube/config` is refused, and any namespace other than
+`radar-immobilier-preprod` is refused (prod is never touched). The env names set are exactly those the
+code reads (`packages/artifacts-host/src/p0b-profile.ts:8-22`, shared by `radar-api` and `radar-immo-mcp`
+via `packages/immo-mcp/src/registry/artifact-profile.ts:8`): `ARTIFACTS_PROFILE_REVISION`, and for the
+results phase only `ARTIFACTS_INPUTS_QUALIFIED` / `ARTIFACTS_RESULTS_QUALIFIED`, forwarded solely from the
+caller's own environment, never defaulted to `true`. Profiles are captured at process/binding construction,
+so every env change is followed by `rollout status --timeout=300s`, and `open` verifies the served
+`/profile` descriptor over HTTP with node (the disposable container always has node, no curl dependency).
+
+Dry run first (prints every kubectl command and profile check, executes nothing):
+
+```sh
+P0C_DRY_RUN=1 P0C_KUBECONFIG=/path/to/preprod.kubeconfig \
+  tools/make/p0c-apply-hook.sh results prepare
+```
+
+`inputs prepare` sets `ARTIFACTS_PROFILE_REVISION=immo-artifacts.cas.v2` on `radar-immo-mcp` and `radar-api`
+and unsets both qualification vars, then waits for the rollout. `inputs open` re-checks the rollout and
+verifies `P0C_V1_HTTP_BASE/profile` serves `cas.v2` strict envelope 1. `inputs close` unsets the revision
+(back to the `p0b` default) and the qualification vars, then waits for the rollout.
+
+Results keep the v1 binding alive on the live Deployments/Services while `-v2` candidates
+(`radar-immo-mcp-v2`, `radar-api-v2` Deployments + Services) serve the qualification traffic. `results
+prepare` labels the live pod templates `p0c-candidate=live`, waits for that rollout, narrows the live
+Service selectors to labeled pods, applies the candidate Services (selecting `p0c-candidate=v2`), clones
+the live Deployments into the candidates (renamed, labeled in selector and template, server-assigned
+fields stripped), sets `ARTIFACTS_PROFILE_REVISION=immo-artifacts.v2` plus the caller-passed attestations
+on the candidates (and `RADAR_API_BASE_URL=http://radar-api-v2:3000` on the MCP candidate so the v2 stack
+is isolated), then waits for the candidate rollouts. `results open` verifies `P0C_V2_HTTP_BASE/profile`
+serves `immo-artifacts.v2` strict envelope 2 **and** `P0C_V1_HTTP_BASE/profile` still serves `cas.v2`
+envelope 1. `results close` deletes the four candidate objects, restores the live Service selectors,
+re-asserts `cas.v2` on live only if it drifted, waits for the live rollout, and re-verifies the v1
+profile. Close never unsets the live revision, never touches `host_policy`, never deletes receipts or
+data, and never touches `PREPROD_CD_ENABLED` / `BASCULE_SCHEDULE_ENABLED` or the bascule workflows.
+
+The conductor must route `P0C_V2_HTTP_BASE` to the `radar-api-v2:3000` Service and the qualification
+`P0C_MCP_URL` to the `radar-immo-mcp-v2:8848` Service (operator-owned ingress, outside this adapter),
+and must delete the `-v2` candidates after the results qualification migrates traffic to the v2 binding.
+
+Decision record (v1 binding preserved during results): an in-place results switch cannot satisfy
+converged-r2 §2.6 — `packages/immo-mcp/scripts/p0c-switch.ts:77-80` requires the v1 HTTP base to still
+serve `cas.v2` while the v2 base serves `immo-artifacts.v2`, and §2.6 requires existing connections to
+keep their v1 projection until migrated. The candidate mechanism above is the smallest one that passes
+that proof: same scope/policy row and data, separate Deployments/Services, component labels preserved
+so the postgres/traefik NetworkPolicies (`deploy/k8s/70-networkpolicy.yaml`,
+`deploy/k8s/71-mcp-account-networkpolicy.yaml`) keep matching, with only the additive `p0c-candidate`
+label distinguishing the bindings.
+
+CD persistence: a later preprod CD rollout does not silently drop the hook's env. `deploy/ci/reconcile-preprod.sh`
+reconciles `radar-api` server-side (field-manager `cd-preprod`): entries the manifest omits but another
+manager (`kubectl set env`) owns — such as `ARTIFACTS_PROFILE_REVISION` — are preserved, not deleted.
+`radar-immo-mcp`'s spec is not reconciled at all (only its ConfigMap plus an annotation roll), and the
+`set image` steps (`build-push-images.yml`, deploy-preprod job) patch only the image. The candidates are
+invisible to the CD entirely. Exact step after any CD run that touches preprod: re-check with
+`kubectl --kubeconfig "$P0C_KUBECONFIG" -n radar-immobilier-preprod get deploy/radar-api
+deploy/radar-immo-mcp -o jsonpath` that `ARTIFACTS_PROFILE_REVISION` still holds the active revision
+(`cas.v2` after inputs, `v2` on the candidates after results), and re-run the hook's `prepare` for the
+active phase if it does not. If a future CD change starts reconciling the `radar-immo-mcp` spec, move
+the revision into the preprod overlay at that point (today the overlay carries no `ARTIFACTS_*` keys, so
+nothing declarative would override them either way).
 
 ```sh
 make -f tools/mcp-p0c-activate.mk preprod-switch-inputs ENV=preprod
