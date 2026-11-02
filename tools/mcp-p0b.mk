@@ -5,7 +5,7 @@ override CI_COMPOSE := docker compose --env-file /dev/null -p radar-$(ENV) -f do
 RUN_API := $(COMPOSE) run --rm --no-deps -T --entrypoint '' api
 RUN_DATABASE_API := $(COMPOSE) run --rm --no-deps -T --entrypoint '' -e P0B_DATABASE_URL=postgres://p0b:p0b-test-only@postgres:5432/p0b
 .DEFAULT_GOAL := verify
-INSTALL := npm ci
+INSTALL := npm ci --cache /tmp/immo-p0c-npm
 SOURCE ?= /home/antoinefa/src/sentropic/tmp/worktrees/artifacts-parity-p0b/packages/artifacts
 P0B_VERSION ?= 0.2.5
 
@@ -19,9 +19,13 @@ database-logs: guard-env
 	@$(COMPOSE) logs --no-color postgres
 	@df -h .
 lock: guard
-	@$(CHECK) 'npm install --package-lock-only --ignore-scripts'
+	@$(CHECK) 'npm install --cache /tmp/immo-p0c-npm --package-lock-only --ignore-scripts'
 registry: guard
-	@$(CHECK) 'npm view @sentropic/artifacts@$(P0B_VERSION) version'
+	@$(CHECK) 'npm --cache /tmp/immo-p0c-npm view @sentropic/artifacts@$(P0B_VERSION) version'
+integrity: guard
+	@$(CHECK) 'actual=$$(npm --cache /tmp/immo-p0c-npm view @sentropic/artifacts@0.2.6 dist.integrity); test "$$actual" = "sha512-d8WUnRSCz623gTbeImMCPRuudAQFY6tOdNqlMMV7CeK5sEvUWB0FUixvaK0I9dFADdM0AxazTz1K80R2I6r/cQ==" && printf "%s\n" "$$actual"'
+upstream: guard
+	@$(CHECK) 'mkdir -p tmp/mcp-p0c/upstream && npm --cache /tmp/immo-p0c-npm pack @sentropic/artifacts@0.2.6 --pack-destination /tmp && tar -xzf /tmp/sentropic-artifacts-0.2.6.tgz -C tmp/mcp-p0c/upstream'
 verify: guard
 ifeq ($(CANDIDATE),1)
 	@$(MAKE) --no-print-directory -f tools/mcp-p0b.mk candidate P0B_VERSION='$(P0B_VERSION)' SOURCE='$(SOURCE)' ENV=$(ENV)
