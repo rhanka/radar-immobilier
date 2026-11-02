@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { ARTIFACT_INVOCATION_SCOPES, ARTIFACT_TOOL_SCOPES, ARTIFACT_EFFECTIVE_REQUIRED, ARTIFACT_LIMITS, ARTIFACT_SELECTION,
   ARTIFACT_PROFILE_REVISION, ARTIFACT_PROVIDER_VERSION } from "./artifact-profile.js";
-import { readArtifactConfig } from "./artifact-config.test-support.js";
+import { readArtifactConfig } from "./artifact-config.js";
 import { compileComposition } from "./composition.js";
 import type { ArtifactActivationRequest, ProviderDefinition } from "./mcp-registry.js";
 

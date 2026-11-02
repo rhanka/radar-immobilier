@@ -35,7 +35,9 @@ export async function composeArtifactHost(
 ) {
   pool = guardArtifactPool(pool);
   await initializeArtifactScope(pool, config.storageScope, config.orgId);
-  const policy = await createHostPolicy(pool, config.storageScope, options.readActivation);
+  const profile = options.profile ?? HOST_ARTIFACT_PROFILE;
+  const policy = await createHostPolicy(pool, config.storageScope, options.readActivation,
+    profile.requireExpectedCurrentReleaseId ? "radar-c4-r3-artifacts-cas" : "radar-c4-r2");
   const coordinator = options.coordinator ?? createArtifactCommitCoordinator({
     executor: createPostgresCommitExecutor(pool), policy, mapHostError,
   });
@@ -58,7 +60,7 @@ export async function composeArtifactHost(
   const blobs = createTimeoutBlobStore(base, budget.operationTimeoutMs, options.onProviderFailure);
   try {
     const domain = await createCommitDomain({ pool, scope: config.storageScope, blobs, coordinator,
-      profile: options.profile ?? HOST_ARTIFACT_PROFILE,
+      profile,
       ...(options.confirmation ? { confirmation: options.confirmation } : {}),
       ...(options.contentBase ? { publicationUrls: (artifactId, releaseId) => ({
         stableUrl: `https://${artifactId}.${options.contentBase}/`,
@@ -70,7 +72,7 @@ export async function composeArtifactHost(
       const dispatch = () => domain.execute(request, invocation);
       // Every PUT and read-back of one publish shares a deadline that ends
       // before the preparation window, so finalization is never refused for it.
-      const outcome = request.method === "POST" && request.path === "/publish"
+      const outcome = request.method === "POST" && ["/publish", "/revert"].includes(request.path)
         ? await withS3Deadline(Date.now() + PUBLISH_BLOB_DEADLINE_MS, dispatch) : await dispatch();
       if (!outcome.ok) {
         const entry = projectArtifactWriteFailure(outcome.failure, {
@@ -91,8 +93,8 @@ export async function composeArtifactHost(
     };
     let accountingFailure: unknown;
     const handle: typeof domain.app.handle = async (request, invocation) =>
-      projectArtifactHttpOutcome(await execute(request, invocation));
-    return { ...domain, app: { ...domain.app, execute, handle }, execute, coordinator, blobs,
+      projectArtifactHttpOutcome(await execute(request, invocation), profile.resultEnvelopeVersion === 2);
+    return { ...domain, profile, app: { ...domain.app, execute, handle }, execute, coordinator, blobs,
       get accountingFailure() { return accountingFailure; },
       cleanup, intents: domain.store, refs: domain.store,
       selectedCapabilities: domain.app.selectedCapabilities, profileDigest: domain.app.profileDigest,

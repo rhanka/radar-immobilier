@@ -5,7 +5,7 @@ override CI_COMPOSE := docker compose --env-file /dev/null -p radar-$(ENV) -f do
 RUN_API := $(COMPOSE) run --rm --no-deps -T --entrypoint '' api
 RUN_DATABASE_API := $(COMPOSE) run --rm --no-deps -T --entrypoint '' -e P0B_DATABASE_URL=postgres://p0b:p0b-test-only@postgres:5432/p0b
 .DEFAULT_GOAL := verify
-INSTALL := npm ci
+INSTALL := npm ci --cache /tmp/immo-p0c-npm
 SOURCE ?= /home/antoinefa/src/sentropic/tmp/worktrees/artifacts-parity-p0b/packages/artifacts
 P0B_VERSION ?= 0.2.5
 
@@ -19,16 +19,20 @@ database-logs: guard-env
 	@$(COMPOSE) logs --no-color postgres
 	@df -h .
 lock: guard
-	@$(CHECK) 'npm install --package-lock-only --ignore-scripts'
+	@$(CHECK) 'npm install --cache /tmp/immo-p0c-npm --package-lock-only --ignore-scripts'
 registry: guard
-	@$(CHECK) 'npm view @sentropic/artifacts@$(P0B_VERSION) version'
+	@$(CHECK) 'npm --cache /tmp/immo-p0c-npm view @sentropic/artifacts@$(P0B_VERSION) version'
+integrity: guard
+	@$(CHECK) 'actual=$$(npm --cache /tmp/immo-p0c-npm view @sentropic/artifacts@0.2.6 dist.integrity); test "$$actual" = "sha512-d8WUnRSCz623gTbeImMCPRuudAQFY6tOdNqlMMV7CeK5sEvUWB0FUixvaK0I9dFADdM0AxazTz1K80R2I6r/cQ==" && printf "%s\n" "$$actual"'
+upstream: guard
+	@$(CHECK) 'mkdir -p tmp/mcp-p0c/upstream && npm --cache /tmp/immo-p0c-npm pack @sentropic/artifacts@0.2.6 --pack-destination /tmp && tar -xzf /tmp/sentropic-artifacts-0.2.6.tgz -C tmp/mcp-p0c/upstream'
 verify: guard
 ifeq ($(CANDIDATE),1)
 	@$(MAKE) --no-print-directory -f tools/mcp-p0b.mk candidate P0B_VERSION='$(P0B_VERSION)' SOURCE='$(SOURCE)' ENV=$(ENV)
 else
 	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; \
 	$(COMPOSE) up -d --wait postgres && \
-	$(RUN_DATABASE_API) api sh -ec "$(INSTALL) && npm run typecheck --workspace=packages/immo-mcp && npm run typecheck --workspace=packages/artifacts-host && npm run typecheck --workspace=api && npx --no-install eslint packages/immo-mcp/src packages/artifacts-host/src api/src/artifacts/control-route*.ts && npm run test --workspace=packages/immo-mcp -- --exclude '**/*.e2e.test.ts' && npm run test --workspace=packages/artifacts-host -- --maxWorkers=1"
+	$(RUN_DATABASE_API) api sh tools/mcp-p0c-verify.sh
 endif
 # A copy is built inside the container; the upstream checkout is mounted read-only.
 candidate: guard
@@ -38,7 +42,11 @@ candidate: guard
 integration: guard
 	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; \
 	$(COMPOSE) up -d --wait postgres && \
-	$(RUN_DATABASE_API) api sh -ec '$(INSTALL) && npm run test --workspace=packages/artifacts-host -- src/p0b.integration.test.ts'
+	$(RUN_DATABASE_API) api sh -ec '$(INSTALL) && npm run test --workspace=packages/artifacts-host -- src/p0b.integration.test.ts src/p0c.integration.test.ts src/p0c-lifecycle.integration.test.ts --maxWorkers=1'
+strict: guard
+	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; \
+	$(COMPOSE) up -d --wait postgres && \
+	$(RUN_DATABASE_API) api sh -ec '$(INSTALL) && ARTIFACTS_PROFILE_REVISION=immo-artifacts.cas.v2 npm run test --workspace=packages/immo-mcp -- src/registry/p0c-transport.test.ts src/registry/p0c-http.test.ts --maxWorkers=1 && ARTIFACTS_PROFILE_REVISION=immo-artifacts.v2 ARTIFACTS_INPUTS_QUALIFIED=true ARTIFACTS_RESULTS_QUALIFIED=true npm run test --workspace=packages/immo-mcp -- src/registry/p0c-transport.test.ts src/registry/p0c-http.test.ts --maxWorkers=1'
 
 # Same API gate as the root test-api / CI test target, without including .env.
 test-api: guard

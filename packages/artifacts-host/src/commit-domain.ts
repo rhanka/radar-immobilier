@@ -12,11 +12,11 @@ import { ArtifactOperationError, classifyArtifactFailure } from "@sentropic/arti
 import { assertArtifactReplayMigration } from "@sentropic/artifacts/server/idempotency";
 import { mapHostError, normalizeHostOutcome } from "./host-outcome.js";
 import { rateLimitedOutcome, reserveArtifactAttempt } from "./attempt-admission.js";
-import { replayPublication } from "./publication-replay.js";
 import { ARTIFACT_P0B, isArtifactMutation, isArtifactPublication } from "./p0b-profile.js";
 import { assertP0bStorage, p0bPorts, sharePrincipal } from "./p0b-ports.js";
 import type { ArtifactDeleteConfirmation } from "./delete-confirmation.js";
 import { createArtifactReadMetadata } from "./read-metadata.js";
+import { replayLegacyDelete } from "./legacy-delete-replay.js";
 
 /**
  * A prepared publication must finalize within this window: past it, the
@@ -89,7 +89,7 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
     ...p0bPorts(store, options.confirmation, (sub) => approved.getStore()?.has(sub) === true),
     publication: { blobs, intents: store, refs: createPostgresClaimGuardedRefs(store, createPostgresCommitExecutor(pool)),
       cleanupWindowMs: PREPARATION_WINDOW_MS, createUnitWriter: createPostgresPublicationUnitWriter, getCurrent: publication.getCurrent,
-      ...(ARTIFACT_P0B ? { getRelease: publication.getRelease } : {}),
+      getRelease: publication.getRelease, listReleases: publication.listReleases,
       locks: { "artifact-lifecycle": [lock("artifacts", "id")], acl: [lock("artifact_access", "artifact_id")],
         "current-pointer": [lock("artifact_current", "artifact_id")] } },
     ...(options.publicationUrls ? { publicationUrls: options.publicationUrls } : {}),
@@ -98,7 +98,7 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
     try {
       const actors = await pool.query<{ sub: string; status?: string }>("SELECT sub, status FROM account_users ORDER BY sub");
       const binding = createRadarKeyDerivation({ storageScopeId: scope, actorIds: actors.rows.map((row) => row.sub) });
-      if (ARTIFACT_P0B && request.path === "/delete" && request.body && typeof request.body === "object" &&
+      if (ARTIFACT_P0B && !profile.requireExpectedCurrentReleaseId && request.path === "/delete" && request.body && typeof request.body === "object" &&
         !Array.isArray(request.body) && !Object.hasOwn(request.body, "expectedCurrentReleaseId")) {
         request = { ...request, body: await options.confirmation!.prepareDelete(invocation.actorId, request.body as Record<string, unknown>) };
       }
@@ -114,7 +114,16 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
             if (args.storageScopeId !== undefined && args.storageScopeId !== scope) return app.execute(request, invocation);
             delete args.storageScopeId;
             const capability = `artifacts_${request.path.slice(1)}`;
-            const normalized = profile.validate(capability, args, request.idempotencyKey);
+            const normalized = profile.validate(capability, args, request.idempotencyKey, { deferPrecondition: true });
+            // The provider owns historical decoding, authorization and the required-field error.
+            if (profile.requireExpectedCurrentReleaseId && ["/publish", "/revert", "/delete"].includes(request.path) &&
+              !Object.hasOwn(args, "expectedCurrentReleaseId")) {
+              if (request.path === "/delete") {
+                const replay = await replayLegacyDelete({ pool, profile, coordinator, invocation, args, derivation: binding });
+                if (replay !== undefined) return replay;
+              }
+              return app.execute(request, invocation);
+            }
             const command = profile.validators.normalizeCommand({ capability, args,
               authority: { actorId: invocation.actorId, storageScopeId: scope }, derivation: binding,
               ...(request.idempotencyKey === undefined ? {} : { envelopeKey: request.idempotencyKey }),
@@ -126,8 +135,6 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
             if (existing.rows.length > 0) {
               // This is a presence probe only. The coordinator rereads the receipt
               // under locks and revalidates current rights, without reserving again.
-              if (command.operation === "publish") return replayPublication({ pool, coordinator, command, invocation,
-                ...(options.publicationUrls ? { publicationUrls: options.publicationUrls } : {}) });
               return app.execute(request, invocation);
             }
             if (!await reserveArtifactAttempt(pool, scope, invocation.actorId)) {
@@ -139,7 +146,8 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
     } catch (cause) {
       const failure = classifyArtifactFailure(cause, { invocationId: invocation.invocationId,
         operation: request.path.slice(1), phase: "dispatch", commitState: "not_committed" },
-      (error) => error instanceof ArtifactProfileInputError ? new ArtifactOperationError(error.category) : mapHostError(error));
+      (error) => error instanceof ArtifactProfileInputError ? new ArtifactOperationError(error.category,
+        error.details ? { publicDetails: error.details } : {}) : mapHostError(error));
       if (cause instanceof CommitQuarantineError) {
         const quarantine = { ...failure, kind: "operational" as const, category: "provider_unavailable" as const,
           variant: "legacy_quarantine", httpStatus: 503, publicCode: "capability_unavailable", retriable: false };
@@ -150,5 +158,5 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
     }
   };
   return { app: { ...app, execute, handle: async (request, invocation) =>
-    projectArtifactHttpOutcome(await execute(request, invocation)) } as typeof app, execute, store, publication };
+    projectArtifactHttpOutcome(await execute(request, invocation), profile.resultEnvelopeVersion === 2) } as typeof app, execute, store, publication };
 }

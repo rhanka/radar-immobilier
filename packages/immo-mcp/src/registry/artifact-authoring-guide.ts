@@ -16,7 +16,7 @@ import {
   DESIGN_KIT_THEMES_VERSION,
   DESIGN_KIT_VERSION,
   designKitAssetUrl,
-  ARTIFACT_P0B, ARTIFACT_PROFILE_DESCRIPTOR,
+  ARTIFACT_P0B, ARTIFACT_PROFILE_DESCRIPTOR, ARTIFACT_STRICT, ARTIFACT_PART1,
 } from "@radar/artifacts-host";
 import {
   STARTER_APP_CSS,
@@ -28,8 +28,10 @@ import { FRAMEWORK_STARTERS, FRAMEWORK_BUILD_RULE } from "./framework-starters.j
 import { ARTIFACT_LIST_ORDER } from "./artifact-read-schema.js";
 
 export const AUTHORING_GUIDE_ID = "immo-artifact-authoring" as const;
-export const AUTHORING_GUIDE_REVISION = ARTIFACT_P0B ? "2026-11-01-p0b-r3" : "2026-11-01-r5";
+export const AUTHORING_GUIDE_REVISION = ARTIFACT_STRICT ? `2026-11-02-${ARTIFACT_PROFILE_DESCRIPTOR.profileRevisionId}`
+  : ARTIFACT_P0B ? "2026-11-01-p0b-r3" : "2026-11-01-r5";
 export const STARTER_VERSION = "1.1.0" as const;
+export const STRICT_ARTIFACT_GUIDE = "This profile requires expectedCurrentReleaseId for artifacts_publish, artifacts_revert and artifacts_delete. First read the artifact with artifacts_get or artifacts_list. For a first publication, send expectedCurrentReleaseId: null only after that read returns currentReleaseId: null. For an update, read the observed release with artifacts_get_source, edit those files, and send its releaseId as expectedCurrentReleaseId. Conversation files alone do not establish the current release. For a revert or deletion, send the currentReleaseId observed by your read. On conflict, re-read and reconcile before submitting a changed command with a new idempotencyKey. For a lost response or commitState: unknown, reconcile with the same idempotencyKey and unchanged command before attempting a new write. Read resultEnvelopeVersion in this guide: version 1 keeps business fields at the root; version 2 places them in output and the guide in output.authoringGuide.";
 
 /**
  * Imperative core embedded in the artifacts_ensure, artifacts_publish and
@@ -41,6 +43,7 @@ export const AUTHORING_GUIDE_SNIPPET =
   "Fetch `authoringGuide` from artifacts_ensure (or artifacts_get for an existing page). " +
   "To update, publish the full edited bundle on the same artifactId with a fresh idempotencyKey; " +
   "the stable URL is preserved. " +
+  (ARTIFACT_STRICT ? `${STRICT_ARTIFACT_GUIDE} ` : "") +
   (ARTIFACT_P0B
     ? "For source retrieval, owner-confirmed deletion and named read sharing, follow artifactLifecycle in authoringGuide; restoration remains unavailable. "
     : "Source retrieval, deletion, restoration and sharing are currently unavailable. ") +
@@ -118,6 +121,7 @@ const COMPONENTS: readonly AuthoringGuideComponentRef[] = freeze([
 ]);
 
 export interface AuthoringGuide {
+  readonly descriptor: typeof ARTIFACT_PROFILE_DESCRIPTOR;
   readonly guideId: typeof AUTHORING_GUIDE_ID;
   readonly revision: typeof AUTHORING_GUIDE_REVISION;
   readonly starterVersion: typeof STARTER_VERSION;
@@ -157,10 +161,12 @@ export function getAuthoringGuide(): AuthoringGuide {
   if (!cached) {
     cached = freeze<AuthoringGuide>({
       guideId: AUTHORING_GUIDE_ID,
+      descriptor: ARTIFACT_PROFILE_DESCRIPTOR,
       revision: AUTHORING_GUIDE_REVISION,
       starterVersion: STARTER_VERSION,
       artifactDiscovery: {
-        displayLabel: "Use bindingName as the display label until part1 title/description metadata is available.",
+        displayLabel: ARTIFACT_PART1 ? "Use title, description and icon when supplied; bindingName remains the binding identity."
+          : "Use bindingName as the display label until part1 title/description metadata is available.",
         listOrder: `artifacts_list orders by ${ARTIFACT_LIST_ORDER}, before offset/limit pagination.`,
         timestamps: "createdAt is artifact creation; updatedAt is the current release publication time, or null if never published.",
         links: "artifacts_list and artifacts_get return stableUrl and currentReleaseId; pinnedUrl is the current release URL, or null if unpublished.",
@@ -172,7 +178,7 @@ export function getAuthoringGuide(): AuthoringGuide {
             (ARTIFACT_P0B
               ? "artifacts_get returns metadata and permissions; artifacts_get_source returns the retained manifest and file bytes. Follow artifactLifecycle.edit."
               : "Currently source retrieval is blocked: artifacts_get_source is unavailable and artifacts_get returns metadata plus this guide, without editable files."),
-          "When the complete original source bundle is already available in the conversation, edit those files and publish the full bundle with artifacts_publish on the same artifactId. Do not call artifacts_ensure to replace an existing artifact.",
+          ARTIFACT_STRICT ? STRICT_ARTIFACT_GUIDE : "When the complete original source bundle is already available in the conversation, edit those files and publish the full bundle with artifacts_publish on the same artifactId. Do not call artifacts_ensure to replace an existing artifact.",
           "Each publication creates a new release/version and pinnedUrl; stableUrl stays the same. Use a fresh idempotencyKey for changed content, and reuse a previous key only to retry the identical publication.",
         ],
         unavailableTools: ARTIFACT_P0B ? ["artifacts_restore", "artifacts_fork", "artifacts_promote", "artifacts_renew"]
@@ -283,11 +289,14 @@ export function getAuthoringGuide(): AuthoringGuide {
       ...(ARTIFACT_P0B ? { artifactLifecycle: {
         descriptor: ARTIFACT_PROFILE_DESCRIPTOR,
         edit: ["Read artifacts_get for permissions and currentReleaseId, then artifacts_get_source({artifactId}) for the retained manifest and file bytes. Source requires immo:artifacts:read; immo:read alone is insufficient.",
-          "Decode returned UTF-8 bytes, edit locally with the supplied DS starter rules, preserve every required file, then artifacts_publish({artifactId, files, idempotencyKey}) with a fresh key. Publish the complete snapshot, not a patch. expectedCurrentReleaseId is not required by this profile.",
-          "Keep the same key and identical content on retries. Results remain at the root. release_unavailable requires another retained release or the original author files; never invent missing source."],
+          ARTIFACT_STRICT ? STRICT_ARTIFACT_GUIDE : "Decode returned UTF-8 bytes, edit locally with the supplied DS starter rules, preserve every required file, then artifacts_publish({artifactId, files, idempotencyKey}) with a fresh key. Publish the complete snapshot, not a patch. expectedCurrentReleaseId is not required by this profile.",
+          `Keep the same key and identical content on retries. resultEnvelopeVersion: ${ARTIFACT_PROFILE_DESCRIPTOR.resultEnvelopeVersion}. ` +
+            (ARTIFACT_PART1 ? "Results are in output; use either full files or edits:[{path,oldStr,newStr}], never both. Supply title/description/icon on ensure or publish. list_versions returns retained releases; revert({artifactId,targetReleaseId,expectedCurrentReleaseId,idempotencyKey}) creates a new release with current metadata and ACL. " : "Results remain at the root. ") +
+            "release_unavailable requires another retained release or the original author files; never invent missing source."],
         share: ["Only the owner calls artifacts_set_access({artifactId, action:'grant', principalId:<approved IMMO account IdP sub>, grant:'read', idempotencyKey}). A principalId is the exact IdP sub, never an email or account UUID. Named read sharing keeps isPublic:false and grants neither source nor editing.",
           "Revoke with action:'revoke', the same principalId and a fresh idempotencyKey; omit grant. Publication quota exhaustion does not prevent sharing or revocation."],
-        delete: ["Owner: artifacts_delete({artifactId, idempotencyKey}). expectedCurrentReleaseId is optional; the server binds the observed release to the confirmation. Never send actor, owner, scope or a fabricated confirmation.",
+        delete: [ARTIFACT_STRICT ? "Owner: read artifacts_get, then artifacts_delete({artifactId,expectedCurrentReleaseId:<observed currentReleaseId>,idempotencyKey}). Never send actor, owner, scope or a fabricated confirmation."
+          : "Owner: artifacts_delete({artifactId, idempotencyKey}). expectedCurrentReleaseId is optional; the server binds the observed release to the confirmation. Never send actor, owner, scope or a fabricated confirmation.",
           "On confirmation_required, show details.managementUrl and expiresAt to the human. They sign into the normal IMMO application and explicitly approve permanent deletion. MCP bearer tokens cannot approve.",
           "Retry identical arguments with the same key plus details.confirmationRef. The proof is consumed in the deletion transaction. Invalid, expired or stale confirmation requires reading the page and starting a new deletion with a fresh key.",
           "Deletion is terminal for stable and pinned readers. Physical purge remains pending; restore, fork, promote and renew remain unavailable."],
