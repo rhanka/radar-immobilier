@@ -73,8 +73,8 @@ describe("ouverture L2 artifact tools on the MCP binding", () => {
         bindingRequest(ALICE));
       expect(source.isError, JSON.stringify(source)).not.toBe(true);
       expect(body(source)).toMatchObject({ artifactId: body(alice).artifactId,
-        files: [{ path: "index.html", mimeType: "text/html",
-          bytes: Array.from(new TextEncoder().encode("<h1>ouverture</h1>")) }] });
+        files: [{ path: "index.html", mimeType: "text/html", text: "<h1>ouverture</h1>" }] });
+      expect(body(source).files[0]).not.toHaveProperty("bytes");
       const foreignSource = await bound.binding.invoke("artifacts_get_source", { artifactId: body(alice).artifactId },
         bindingRequest(BOB));
       const unknownSource = await bound.binding.invoke("artifacts_get_source", { artifactId: UNKNOWN_ARTIFACT },
