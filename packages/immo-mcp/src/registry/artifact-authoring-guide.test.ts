@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { ARTIFACT_P0B, DESIGN_KIT_ASSETS, designKitAssetUrl } from "@radar/artifacts-host";
+import { ARTIFACT_P0B, ARTIFACT_STRICT, DESIGN_KIT_ASSETS, designKitAssetUrl } from "@radar/artifacts-host";
 import { releaseCspForHtml } from "../../../../api/src/artifacts/release-files.js";
 import type { ArtifactsApp } from "@sentropic/artifacts/mcp-core";
 import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-stateful";
@@ -146,14 +146,16 @@ describe("artifact authoring guide", () => {
     expect(got.authoringGuide.starter.files.length).toBeGreaterThan(0);
     const source = read(await setup({ artifactId: receipt.artifactId, files: [] }).binding
       .invoke("artifacts_get_source", { artifactId: receipt.artifactId }, authority));
-    expect(source.authoringGuide.guideId).toBe(AUTHORING_GUIDE_ID);
-    expect(source.authoringGuide.revision).toBe(AUTHORING_GUIDE_REVISION);
-    expect(source.authoringGuide.lifecycle.editing.length).toBeGreaterThan(0);
-    expect(source.authoringGuide).not.toHaveProperty("starter");
-    expect(source.authoringGuide).not.toHaveProperty("components");
+    const sourceData = (source.output ?? source) as Record<string, Record<string, unknown>>;
+    const sourceGuide = (sourceData.authoringGuide ?? source.authoringGuide) as Record<string, unknown>;
+    expect(sourceGuide.guideId).toBe(AUTHORING_GUIDE_ID);
+    expect(sourceGuide.revision).toBe(AUTHORING_GUIDE_REVISION);
+    expect((sourceGuide.lifecycle as { editing: unknown[] }).editing.length).toBeGreaterThan(0);
+    expect(sourceGuide).not.toHaveProperty("starter");
+    expect(sourceGuide).not.toHaveProperty("components");
     const published = read(await setup({ releaseId: "r" }).binding.invoke("artifacts_publish",
       { artifactId: receipt.artifactId, files: [{ path: "index.html", mimeType: "text/html", text: "<p>x</p>" }],
-        idempotencyKey: "k" }, authority));
+        idempotencyKey: "k", ...(ARTIFACT_STRICT ? { expectedCurrentReleaseId: null } : {}) }, authority));
     expect(published.releaseId).toBe("r");
     expect(published.authoringGuide).toBeUndefined();
   });
