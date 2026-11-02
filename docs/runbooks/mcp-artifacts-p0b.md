@@ -1,6 +1,9 @@
 # IMMO artifacts P0b preparation
 
 The central dependency pin is `dependencies["@sentropic/artifacts"]` in the root `package.json`.
+P0-C pins 0.2.6 and keeps P0b/envelope 1 by default. The two explicit deployment switches,
+operator commands and qualification requirements are documented in [the P0-C runbook](mcp-artifacts-p0c.md).
+The version-only activation and handoff instructions below describe the preceding P0b rollout.
 Workspace dependencies resolve through the root override. With 0.2.2 the existing four tools stay active;
 with either qualified P0b version (0.2.5 or 0.3.0) the host and MCP select exactly seven tools.
 `ARTIFACT_P0B_VERSIONS` is the shared version list. No environment flag switches profiles.
