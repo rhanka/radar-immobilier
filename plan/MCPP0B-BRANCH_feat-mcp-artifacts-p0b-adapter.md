@@ -15,6 +15,7 @@ Prepare the three qualified P0b operations (0.2.5 or 0.3.0) while preserving the
   - `packages/immo-mcp/**`, `packages/artifacts-host/**`
   - `api/src/artifacts/control-route*`, `api/tests/*p0b*`
   - `api/drizzle/0028_artifacts_p0b.sql`, `api/drizzle/meta/_journal.json`
+  - `api/tests/integration/artifacts-mcp-adapter.spec.ts` (owner-requested CI fixture repair)
   - `package.json`, `package-lock.json`, `api/package.json`
   - `tools/mcp-p0b*`, `docs/runbooks/mcp-artifacts-p0b.md`
   - This branch plan.
@@ -101,3 +102,11 @@ Prepare the three qualified P0b operations (0.2.5 or 0.3.0) while preserving the
   - [x] 0.2.2 baseline: 518 MCP + 234 host tests pass (12 + 10 profile skips); three workspace typechecks and scoped lint pass.
   - [x] 0.2.5 candidate at `708f15d1a6ee40224b2a572be5581bfc6e092130`: 533 MCP + 244 host tests pass, no skips; three typechecks, lint and full dependency resolution pass; tarball SHA-256 unchanged at `5dc60bd499d5ba0b0974fca8ecc1ef8a4468bc8712f446a87a8d2c5e5bb0525f`.
   - [x] Remove disposable dependencies; explicit `down -v` and inspection confirm zero remaining project containers, volumes or networks.
+- [x] **Lot 11 — Repair PR #979 CI failures**
+  - [x] Reproduce the six failing tests in the three API files using CI's PostGIS/S3 stack without environment-file reads.
+  - [x] Use disposable PGDATA on tmpfs after disk sync stalls caused local startup/cleanup failures; keep the CI images and test timeouts unchanged.
+  - [x] Make all five 0028 triggers and its confirmation table replayable; hashes are derived from SQL bytes, so no journal or pinned package hash update is needed.
+  - [x] Correct the outage fixture's scope and quotas; prove one authority failure, a retryable 503, one ledger entry and no durable success. The existing facade mapping is correct.
+  - [x] Full API gate: 3,899 tests pass, 978 existing skips; all eleven tests in the three failing files pass.
+  - [x] 0.2.2 verification: 518 MCP + 234 host tests pass (12 + 10 profile skips); three workspace typechecks and scoped lint pass.
+  - [x] Remove disposable dependencies; explicit `down -v` and inspection confirm zero remaining containers, volumes or networks for both test projects.
