@@ -22,6 +22,9 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("strict P0-A artifact lifecycle",
     const artifactId = output(result).artifactId;
     const read = await h.call("meta", { artifactId });
     expect(output(read).currentReleaseId).toBeNull();
+    const native = await h.host.app.handle({ actorId: "alice", method: "GET", path: `/meta/${artifactId}`, body: undefined }, {
+      invocationId: randomUUID(), actorId: "alice", storageScopeId: "p0b", authorizeCommit: h.host.authorizeCommit });
+    expect(native.body).toMatchObject({ ok: true, commitState: "not_committed", output: { artifactId, currentReleaseId: null } });
     return artifactId;
   }
   const publish = (artifactId: string, expectedCurrentReleaseId: string | null, args = {}) =>
