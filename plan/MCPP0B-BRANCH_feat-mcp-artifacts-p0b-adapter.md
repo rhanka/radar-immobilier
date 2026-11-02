@@ -81,3 +81,10 @@ Prepare the three qualified P0b operations (0.2.5 or 0.3.0) while preserving the
   - [x] Local 0.2.5 candidate: 529 MCP + 239 host tests pass, no skips, including six PostgreSQL scenarios; three typechecks, lint and npm dependency resolution pass.
   - [x] Qualify an immutable upstream package snapshot at `3be782f4a64ed1def72b0e2cacb803a828f23e05` after the live checkout moved during preparation; its package tree matches the initial `a922c8bb4f07718f36b0e587a7811600a4840ddc` snapshot.
   - [x] Remove disposable dependencies; explicit `down -v` and inspection confirm zero remaining project containers, volumes or networks.
+- [x] **Lot 8 — Review #979 authority and expiry races**
+  - [x] Reproduce both defects with five failing PostgreSQL regression cases before applying the fixes.
+  - [x] Reread source admission after all blob reads and preserve existing typed refusals.
+  - [x] Check confirmation expiry with the DB wall clock after the consuming transaction locks its row.
+  - [x] 0.2.2 baseline: 518 MCP + 234 host tests pass (8 + 10 profile skips); three workspace typechecks and scoped lint pass.
+  - [x] Local 0.2.5 candidate: 529 MCP + 244 host tests pass, no skips, including eleven PostgreSQL cases; three typechecks, lint and dependency resolution pass.
+  - [x] Remove disposable dependencies; explicit `down -v` and inspection confirm zero remaining project containers, volumes or networks.

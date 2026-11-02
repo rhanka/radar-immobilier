@@ -164,6 +164,16 @@ export function createArtifactControl(
         if (entry) await options?.ledger?.record({ invocationId: entry.invocationId, op, actorId,
           reason: entry.reason, status: entry.status, atMs: (options?.nowMs ?? Date.now)() });
       }
+      if (outcome.ok && op === "get_source" && admission) {
+        let current;
+        try { current = await checkAdmission(admission, actorId); }
+        catch {
+          const unavailable = { status: 503 as const, body: { error: "capability_unavailable" } };
+          Object.defineProperty(unavailable, "retryable", { value: true });
+          return unavailable;
+        }
+        if (!current.allowed) return { status: current.status, body: current.body };
+      }
       const response = { ...projectArtifactHttpOutcome(outcome) };
       if (!outcome.ok && outcome.failure.publicCode === "rate_limited") {
         response.body = { error: "rate_limited", retryable: outcome.failure.retriable };
