@@ -83,10 +83,13 @@ export function createDeleteConfirmation(pool: pg.Pool, scope: string, appOrigin
         if (!row || row.storage_scope_id !== scope || row.actor_id !== context.actorId || row.artifact_id !== context.artifactId ||
           row.internal_key !== context.internalKey || row.command_hash !== context.commandHash || row.consumed_at) return "invalid";
         if (row.expected_release_id !== context.expectedCurrentReleaseId) return "stale";
-        const consumed = await client.query(`UPDATE artifacts.delete_confirmations SET consumed_at=now()
-          WHERE confirmation_ref=$1 AND expires_at > now() AND approved_at IS NOT NULL AND consumed_at IS NULL RETURNING confirmation_ref`, [ref]);
+        // now() is fixed at BEGIN; expiry must use the DB clock after the row-lock wait.
+        const consumed = await client.query(`UPDATE artifacts.delete_confirmations SET consumed_at=clock_timestamp()
+          WHERE confirmation_ref=$1 AND expires_at > clock_timestamp() AND approved_at IS NOT NULL AND consumed_at IS NULL RETURNING confirmation_ref`, [ref]);
         if (consumed.rowCount === 1) return "valid";
-        return row.expires_at.getTime() <= Date.now() ? "expired" : "invalid";
+        const current = await client.query<{ expired: boolean }>(
+          "SELECT expires_at <= clock_timestamp() AS expired FROM artifacts.delete_confirmations WHERE confirmation_ref=$1", [ref]);
+        return current.rows[0]?.expired ? "expired" : "invalid";
       },
     },
   };
