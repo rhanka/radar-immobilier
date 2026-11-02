@@ -1,13 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 import type { ArtifactsApp } from "@sentropic/artifacts/mcp-core";
 import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-stateful";
-import { ARTIFACT_P0B } from "@radar/artifacts-host";
+import { ARTIFACT_P0B, ARTIFACT_PART1, ARTIFACT_STRICT } from "@radar/artifacts-host";
 import {
   bindArtifactProvider,
   getSourceGuideReference,
   IMMO_ARTIFACT_PROFILE as profile,
   projectSourceBody,
   projectSourceFile,
+  withAuthoringGuide,
 } from "./artifact-provider.js";
 import {
   AUTHORING_GUIDE_ID,
@@ -81,6 +82,43 @@ describe.skipIf(!ARTIFACT_P0B)("artifact source text projection", () => {
     expect(projected[6]).not.toHaveProperty("text");
   });
 
+  it("should keep a leading UTF-8 BOM so re-encoding is byte-identical", () => {
+    const bytes = [0xef, 0xbb, 0xbf, ...toBytes("<p>bom</p>")];
+    const projected = projectSourceFile({
+      path: "bom.html", mimeType: "text/html", bytes, digest: "bom-digest", sizeBytes: bytes.length,
+    }) as Record<string, unknown>;
+    expect(typeof projected.text).toBe("string");
+    expect((projected.text as string).charCodeAt(0)).toBe(0xfeff);
+    expect(toBytes(projected.text as string)).toEqual(bytes);
+    expect(Buffer.byteLength(projected.text as string, "utf8")).toBe(projected.sizeBytes);
+    expect(projected).toMatchObject({ digest: "bom-digest" });
+    expect(projected).not.toHaveProperty("bytes");
+  });
+
+  it("should keep CESU-8 surrogates and truncated multibyte sequences as bytes", () => {
+    for (const bytes of [[0xed, 0xa0, 0x80], [0xe2, 0x82]]) {
+      const projected = projectSourceFile({
+        path: "broken.html", mimeType: "text/html", bytes,
+      }) as Record<string, unknown>;
+      expect(projected).toMatchObject({ path: "broken.html", bytes });
+      expect(projected).not.toHaveProperty("text");
+    }
+  });
+
+  it("should decode text MIME types carrying a charset parameter", () => {
+    const projected = projectSourceFile({
+      path: "index.html", mimeType: "text/html; charset=utf-8", bytes: toBytes(INDEX_HTML),
+    }) as Record<string, unknown>;
+    expect(projected).toEqual({ path: "index.html", mimeType: "text/html; charset=utf-8", text: INDEX_HTML });
+  });
+
+  it("should keep byte arrays with out-of-range or non-integer values opaque", () => {
+    for (const bytes of [[-1], [256], [1.5]]) {
+      const file = { path: "odd.html", mimeType: "text/html", bytes };
+      expect(projectSourceFile(file)).toBe(file);
+    }
+  });
+
   it("should preserve digest and size fields so integrity can still be checked", () => {
     const projected = projectSourceFile({
       path: "app.css", mimeType: "text/css", bytes: toBytes(APP_CSS), digest: "css-digest", sizeBytes: 41,
@@ -100,31 +138,59 @@ describe.skipIf(!ARTIFACT_P0B)("artifact source text projection", () => {
   });
 
   it("should round-trip get_source text back through publish within a small size budget", async () => {
-    const rawBytes = sourceBody().files.reduce((sum, file) => sum + (file.bytes as number[]).length, 0);
-    const { binding } = setup(sourceBody());
+    const original = sourceBody();
+    const rawBytes = original.files.reduce((sum, file) => sum + (file.bytes as number[]).length, 0);
+    const originalBytes = new Map(original.files.map((file) => [file.path, file.bytes as number[]]));
+    const { binding } = setup(original);
     const result = await binding.invoke("artifacts_get_source", { artifactId: ARTIFACT_ID }, authority);
     expect(result.isError).not.toBe(true);
     const payload = read(result);
-    for (const file of payload.files as Record<string, unknown>[]) {
+    const data = (payload.output ?? payload) as Record<string, unknown>;
+    for (const file of data.files as Record<string, unknown>[]) {
       if (["index.html", "app.css", "app.js", "data.json"].includes(String(file.path))) {
         expect(file).toHaveProperty("text");
         expect(file).not.toHaveProperty("bytes");
+        expect(toBytes(file.text as string)).toEqual(originalBytes.get(String(file.path)));
       }
     }
-    expect(payload.authoringGuide.guideId).toBe(AUTHORING_GUIDE_ID);
-    expect(payload.authoringGuide.revision).toBe(AUTHORING_GUIDE_REVISION);
-    expect(payload.authoringGuide).not.toHaveProperty("starter");
+    const guide = (data.authoringGuide ?? payload.authoringGuide) as Record<string, unknown>;
+    expect(guide.guideId).toBe(AUTHORING_GUIDE_ID);
+    expect(guide.revision).toBe(AUTHORING_GUIDE_REVISION);
+    expect(guide).not.toHaveProperty("starter");
     const size = JSON.stringify(payload).length;
     expect(size).toBeLessThan(4 * rawBytes + 8192);
-    const editable = (payload.files as Record<string, unknown>[])
+    const editable = (data.files as Record<string, unknown>[])
       .filter((file) => typeof file.text === "string")
       .map((file) => ({ path: file.path, mimeType: file.mimeType, text: file.text }));
     const publisher = setup({ releaseId: RELEASE_ID });
     const published = await publisher.binding.invoke("artifacts_publish",
-      { artifactId: ARTIFACT_ID, files: editable, idempotencyKey: "round-trip" }, authority);
+      { artifactId: ARTIFACT_ID, files: editable, idempotencyKey: "round-trip",
+        ...(ARTIFACT_STRICT ? { expectedCurrentReleaseId: null } : {}) }, authority);
     expect(published.isError).not.toBe(true);
     expect(read(published)).toMatchObject({ releaseId: RELEASE_ID });
     expect(publisher.execute).toHaveBeenCalledTimes(1);
+    const forwarded = publisher.execute.mock.calls[0]?.[0] as {
+      body?: { files?: { path: string; bytes: number[] }[] };
+    };
+    const forwardedBytes = new Map(
+      (forwarded?.body?.files ?? []).map((file) => [file.path, file.bytes]));
+    for (const file of editable) {
+      expect(forwardedBytes.get(file.path as string)).toEqual(toBytes(file.text as string));
+      expect(forwardedBytes.get(file.path as string)).toEqual(originalBytes.get(file.path as string));
+    }
+  });
+
+  it("should project source files and attach the guide reference under the v2 envelope", () => {
+    const file = { path: "bom.html", mimeType: "text/html", bytes: [0xef, 0xbb, 0xbf, ...toBytes("<p>bom</p>")] };
+    const projected = projectSourceBody({ ok: true, output: { artifactId: ARTIFACT_ID, files: [file] } });
+    expect(projected).toMatchObject({ output: { files: [{ path: "bom.html", text: "\uFEFF<p>bom</p>" }] } });
+    const out = (projected as { output: { files: Record<string, unknown>[] } }).output;
+    expect(toBytes(out.files[0]!.text as string)).toEqual(file.bytes);
+    const guided = withAuthoringGuide("artifacts_get_source", projected) as Record<string, { authoringGuide?: unknown }>;
+    const holder = (ARTIFACT_PART1 ? guided.output : guided) as Record<string, Record<string, unknown>>;
+    expect(holder.authoringGuide?.guideId).toBe(AUTHORING_GUIDE_ID);
+    expect(holder.authoringGuide?.revision).toBe(AUTHORING_GUIDE_REVISION);
+    expect(holder.authoringGuide).not.toHaveProperty("starter");
   });
 
   it("should keep the get_source guide reference small next to the full guide", () => {
