@@ -52,7 +52,7 @@ describe("artifact journal and startup guard", () => {
     const replaySince = artifactEntries[1]!.when;
     const deleted = await h.pool.query("DELETE FROM drizzle.__drizzle_migrations WHERE created_at >= $1", [replaySince]);
     expect(deleted.rowCount).toBe(journal.entries.filter((entry) => entry.when >= replaySince).length);
-    await expect(composeArtifactHost(h.pool, h.config)).rejects.toThrow("0016 absent or hash mismatch");
+    await expect(composeArtifactHost(h.pool, h.config, undefined, h.hostOptions)).rejects.toThrow("0016 absent or hash mismatch");
     const app = createApp({ checkDb: async () => ({ ok: true }),
       checkObjectStore: async () => ({ ok: true }), store: {} as ObjectStore, auth,
       artifactsControl: { auth, accounts: h.pool } });
@@ -64,11 +64,11 @@ describe("artifact journal and startup guard", () => {
     await migrate(drizzle(h.pool), { migrationsFolder });
     const repaired = (await h.pool.query("SELECT hash, created_at FROM drizzle.__drizzle_migrations ORDER BY id")).rows;
     expect(repaired).toEqual(before);
-    const restarted = await composeArtifactHost(h.pool, h.config);
+    const restarted = await composeArtifactHost(h.pool, h.config, undefined, h.hostOptions);
     expect(restarted).toBeDefined(); restarted?.close();
   });
   it("refuses a scope bound to a different organization without overwriting it", async () => {
-    await expect(composeArtifactHost(h.pool, { ...h.config, orgId: "another-org" })).rejects.toThrow("organization mismatch");
+    await expect(composeArtifactHost(h.pool, { ...h.config, orgId: "another-org" }, undefined, h.hostOptions)).rejects.toThrow("organization mismatch");
     expect((await h.pool.query("SELECT org_id FROM artifacts.storage_scopes WHERE id = $1", [h.config.storageScope])).rows[0].org_id).toBe(h.config.orgId);
   });
   it("refuses a 0016 journal row with a different hash without writing a scope", async () => {
@@ -76,7 +76,7 @@ describe("artifact journal and startup guard", () => {
     const original = (await h.pool.query("SELECT hash FROM drizzle.__drizzle_migrations WHERE created_at = $1", [when])).rows[0].hash;
     try {
       await h.pool.query("UPDATE drizzle.__drizzle_migrations SET hash = $1 WHERE created_at = $2", ["0".repeat(64), when]);
-      await expect(composeArtifactHost(h.pool, { ...h.config, storageScope: "hash_mismatch" }))
+      await expect(composeArtifactHost(h.pool, { ...h.config, storageScope: "hash_mismatch" }, undefined, h.hostOptions))
         .rejects.toThrow("0016 absent or hash mismatch");
       expect((await h.pool.query("SELECT count(*) FROM artifacts.storage_scopes WHERE id = 'hash_mismatch'")).rows[0].count).toBe("0");
     } finally {

@@ -1,0 +1,7 @@
+# Keep CI's PostGIS image; disposable database files avoid host disk sync stalls.
+services:
+  postgres:
+    environment:
+      PGDATA: /var/lib/postgresql/ci
+    tmpfs:
+      - /var/lib/postgresql/ci

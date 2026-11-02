@@ -88,7 +88,7 @@ export function checkEffectiveProfile(
     readonly durableCommandIdentity: string;
   } = REQUIRED_PROVIDER_CONTRACTS,
 ): void {
-  for (const tool of ["artifacts_ensure", "artifacts_publish"] as const) {
+  for (const { tool } of ARTIFACT_SELECTION.filter(({ tool }) => ARTIFACT_TOOL_SCOPES[tool] === ARTIFACT_INVOCATION_SCOPES.write)) {
     if (!required[tool]?.includes("idempotencyKey")) {
       throw new RegistryError("unavailable_capability", `artifact tool ${tool} must require idempotencyKey`);
     }
@@ -102,6 +102,9 @@ export function checkEffectiveProfile(
   }
   if (!required["artifacts_get"]?.includes("artifactId")) {
     throw new RegistryError("unavailable_capability", "artifact tool artifacts_get must require artifactId");
+  }
+  for (const { tool } of ARTIFACT_SELECTION.filter(({ tool }) => tool !== "artifacts_ensure" && tool !== "artifacts_list")) {
+    if (!required[tool]?.includes("artifactId")) throw new RegistryError("unavailable_capability", `artifact tool ${tool} must require artifactId`);
   }
   if (durableIdentity.payloadHashInKey !== false) {
     throw new RegistryError("unavailable_capability", "durable identity must not embed a payload hash in the key");
@@ -148,7 +151,7 @@ export function checkArtifact(request: ArtifactActivationRequest, providers: rea
     throw new RegistryError("incompatible_version", `artifact profile ${request.profileRevision} is not supported`);
   }
   if (request.selection.length !== ARTIFACT_SELECTION.length) {
-    throw new RegistryError("unavailable_capability", "artifact selection must list exactly four tools");
+    throw new RegistryError("unavailable_capability", `artifact selection must list exactly ${ARTIFACT_SELECTION.length} tools`);
   }
   checkEffectiveProfile();
   const selected = new Set<string>();

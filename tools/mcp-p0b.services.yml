@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    tmpfs:
+      - /var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: p0b
+      POSTGRES_PASSWORD: p0b-test-only
+      POSTGRES_DB: p0b
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U p0b -d p0b"]
+      interval: 1s
+      timeout: 1s
+      retries: 30
