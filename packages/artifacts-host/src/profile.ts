@@ -6,7 +6,8 @@
  */
 
 /** Installed operation selection for the Radar profile, ordered. */
-import { ACTIVE_ARTIFACT_TOOLS } from "./p0b-profile.js";
+import { ACTIVE_ARTIFACT_TOOLS, ARTIFACT_PROVIDER_VERSION } from "./p0b-profile.js";
+import { POLICY_REVISION } from "./transaction-authority.js";
 export const FROZEN_CAPABILITIES = Object.freeze([...ACTIVE_ARTIFACT_TOOLS].sort());
 
 export type ArtifactCapability = (typeof FROZEN_CAPABILITIES)[number];
@@ -40,7 +41,7 @@ export const RADAR_EFFECTIVE_PROFILE = Object.freeze({
   emptyParametersOnly: true,
   defaults: Object.freeze({ parameters: Object.freeze({}), profile: Object.freeze({}) }),
   provenance: Object.freeze({ kind: "inline-original", callerSourceAbsent: true }),
-  revisions: Object.freeze({ profile: "radar-c4-r2", providerContract: "0.2.0", commandCodec: "v1" }),
+  revisions: Object.freeze({ profile: POLICY_REVISION, providerContract: ARTIFACT_PROVIDER_VERSION, commandCodec: "v1" }),
 });
 
 export type RadarEffectiveProfile = typeof RADAR_EFFECTIVE_PROFILE;
