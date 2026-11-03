@@ -78,8 +78,30 @@ describe("registry title uniqueness (ambiguity ⇒ unknown)", () => {
   });
 
   it("a duplicated title resolves to unknown, never to the first id", () => {
-    // Guard documents the route-level rule: ambiguity is detected by the
-    // uniqueness test above; resolution itself stays exact-match-only.
+    // A duplicated title across ids with different conditions is AMBIGUOUS:
+    // resolution refuses it (unknown) instead of serving the first match.
+    const duplicated = [
+      { id: "a", title: "Same Title" },
+      { id: "b", title: "Same Title" },
+    ];
+    expect(() => assertRegistryTitlesUnique(duplicated)).toThrow(/ambiguous licence title/);
+    expect(resolveLicenceId("Same Title", duplicated)).toEqual({
+      status: "unknown",
+      reason: "ambiguous-title",
+    });
+    // The shipped registry itself stays unambiguous and exact-match-only.
     expect(GOVERNED_LICENCE_REGISTRY.filter((e) => e.title === "Same Title")).toHaveLength(0);
+  });
+
+  it("an injected registry is honoured (no hidden global read)", () => {
+    const custom = [{ id: "custom-id", title: "Custom Title" }];
+    expect(resolveLicenceId("Custom Title", custom)).toEqual({
+      status: "known",
+      licenseId: "custom-id",
+    });
+    expect(resolveLicenceId("Custom Title")).toEqual({
+      status: "unknown",
+      reason: "unmatched-title",
+    });
   });
 });

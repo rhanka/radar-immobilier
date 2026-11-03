@@ -18,7 +18,9 @@
  */
 
 import {
+  GOVERNED_LICENCE_REGISTRY,
   resolveLicenceId,
+  type GovernedLicence,
   type LicenceResolution,
 } from "./governed-licences.js";
 
@@ -138,9 +140,10 @@ const DEFERRED_FAMILIES: ReadonlySet<string> = new Set([
 export function catalogueCollection(
   collection: LiveCollectionDescriptor,
   records: readonly ServedCollectionRecord[] = GOVERNED_SERVED_RECORDS,
+  registry: readonly GovernedLicence[] = GOVERNED_LICENCE_REGISTRY,
 ): CataloguedCollection {
   const family = parseGovernedFamily(collection.id);
-  const licence = resolveLicenceId(collection.licenseTitle);
+  const licence = resolveLicenceId(collection.licenseTitle, registry);
 
   if (DEFERRED_FAMILIES.has(family)) {
     return {
@@ -189,6 +192,7 @@ export function catalogueCollection(
 export function catalogueCollections(
   collections: readonly LiveCollectionDescriptor[],
   records: readonly ServedCollectionRecord[] = GOVERNED_SERVED_RECORDS,
+  registry: readonly GovernedLicence[] = GOVERNED_LICENCE_REGISTRY,
 ): CataloguedCollection[] {
-  return collections.map((collection) => catalogueCollection(collection, records));
+  return collections.map((collection) => catalogueCollection(collection, records, registry));
 }
