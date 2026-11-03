@@ -341,6 +341,18 @@ function exchangedScopes(payload: JWTPayload): string[] {
  * `maxLifetimeS` (and never outlive the call clock), proof-bound keys (`cnf`)
  * and service-user subjects fail. Error codes use the `strict_*` namespace.
  */
+/**
+ * Verified exchanged-search identity. `email`/`emailVerified` are surfaced
+ * only when the (already signature-, issuer- and audience-verified) token
+ * carries them, so the strict path can JIT-reconcile a first-time MCP user;
+ * absent email claims keep the historical closed behaviour.
+ */
+export interface VerifiedExchangedSearch {
+  sub: string;
+  email?: string;
+  emailVerified: boolean;
+}
+
 export async function verifyExchangedSearchToken(
   presented: string,
   opts: {
@@ -353,7 +365,7 @@ export async function verifyExchangedSearchToken(
     getKey: JWTVerifyGetKey;
     now?: number | undefined;
   },
-): Promise<{ sub: string }> {
+): Promise<VerifiedExchangedSearch> {
   const requiredScope = opts.requiredScope ?? "immo:search";
   const maxLifetimeS = opts.maxLifetimeS ?? 300;
   const nowS = Math.floor((opts.now ?? Date.now()) / 1000);
@@ -426,5 +438,10 @@ export async function verifyExchangedSearchToken(
   if (Math.floor(iat) > nowS || Math.floor(exp) <= nowS) {
     throw new Error("strict_invalid_lifetime");
   }
-  return { sub: claims.sub };
+  const exchangedEmail = typeof claims["email"] === "string" ? claims["email"] : undefined;
+  return {
+    sub: claims.sub,
+    ...(exchangedEmail !== undefined ? { email: exchangedEmail } : {}),
+    emailVerified: claims["email_verified"] === true,
+  };
 }

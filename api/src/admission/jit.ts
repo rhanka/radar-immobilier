@@ -15,7 +15,7 @@
 // lower(email) for prod_sync rows (plus the global sub uniqueness); a unique
 // violation re-reads instead of failing.
 
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, ne, sql } from "drizzle-orm";
 import type { Database } from "../db/client.js";
 import { accountUsers, admissionSyncProfiles } from "../db/schema.js";
 import { normalizeAdmissionEmail } from "./snapshot.js";
@@ -55,7 +55,37 @@ export type JitRejectReason =
 type AccountRow = typeof accountUsers.$inferSelect;
 
 function emailMatches(row: AccountRow, norm: string): boolean {
-  return typeof row.email === "string" && row.email.toLowerCase() === norm;
+  return typeof row.email === "string" && normalizeAdmissionEmail(row.email) === norm;
+}
+
+/** Another `sub` already linked to this email via `prod_sync`: never relink. */
+async function findProdSyncLink(db: Database, norm: string, excludeSub?: string): Promise<boolean> {
+  const filters = [
+    eq(accountUsers.admissionSource, "prod_sync"),
+    sql`lower(${accountUsers.email}) = ${norm}`,
+    ...(excludeSub !== undefined ? [ne(accountUsers.sub, excludeSub)] : []),
+  ];
+  const linked = await db
+    .select({ sub: accountUsers.sub })
+    .from(accountUsers)
+    .where(and(...filters))
+    .limit(1);
+  return linked.length > 0;
+}
+
+/** Another `sub` holding this email as a `local` account: never hijack. */
+async function findLocalSameEmail(db: Database, norm: string, excludeSub?: string): Promise<boolean> {
+  const filters = [
+    eq(accountUsers.admissionSource, "local"),
+    sql`lower(${accountUsers.email}) = ${norm}`,
+    ...(excludeSub !== undefined ? [ne(accountUsers.sub, excludeSub)] : []),
+  ];
+  const local = await db
+    .select({ sub: accountUsers.sub })
+    .from(accountUsers)
+    .where(and(...filters))
+    .limit(1);
+  return local.length > 0;
 }
 
 export async function reconcilePreprodSub(
@@ -112,62 +142,57 @@ export async function reconcilePreprodSub(
     }
     // Pending local auto-row (first login before the sync ran, never
     // admin-touched): adopt it into the prod admission. Any other shape —
-    // including a divergent email — is left alone.
+    // including a missing or divergent email — is left alone: a `null` email
+    // row must never be stamped with the incoming address.
     if (row.status !== "pending" || row.approvedAt !== null) {
       return { linked: false, reason: "local_conflict" };
     }
-    if (row.email !== null && !emailMatches(row, norm)) {
+    if (row.email === null || !emailMatches(row, norm)) {
       return { linked: false, reason: "local_conflict" };
     }
-    const updated = await db
-      .update(accountUsers)
-      .set({
-        email: input.email.trim(),
-        ...(admission.name !== null ? { name: admission.name } : {}),
-        status: "approved",
-        isAdmin: admission.role === "admin",
-        approvedAt: now,
-        approvedBy: "prod-sync",
-        admissionSource: "prod_sync",
-      })
-      .where(
-        and(
-          eq(accountUsers.sub, input.sub),
-          eq(accountUsers.status, "pending"),
-          eq(accountUsers.admissionSource, "local"),
-        ),
-      )
-      .returning({ id: accountUsers.id });
-    return updated.length > 0
-      ? { linked: true, mode: "upgraded" }
-      : { linked: false, reason: "local_conflict" };
+    // Same guards as the create path: never adopt past an existing link or
+    // a local same-email account held by another sub.
+    if (await findProdSyncLink(db, norm, input.sub)) {
+      return { linked: false, reason: "already_linked_elsewhere" };
+    }
+    if (await findLocalSameEmail(db, norm, input.sub)) {
+      return { linked: false, reason: "local_conflict" };
+    }
+    try {
+      const updated = await db
+        .update(accountUsers)
+        .set({
+          email: input.email.trim(),
+          ...(admission.name !== null ? { name: admission.name } : {}),
+          status: "approved",
+          isAdmin: admission.role === "admin",
+          approvedAt: now,
+          approvedBy: "prod-sync",
+          admissionSource: "prod_sync",
+        })
+        .where(
+          and(
+            eq(accountUsers.sub, input.sub),
+            eq(accountUsers.status, "pending"),
+            eq(accountUsers.admissionSource, "local"),
+          ),
+        )
+        .returning({ id: accountUsers.id });
+      return updated.length > 0
+        ? { linked: true, mode: "upgraded" }
+        : { linked: false, reason: "local_conflict" };
+    } catch (error) {
+      // Lost a race against a concurrent link: report the conflict, never 500.
+      if (!isUniqueViolation(error)) throw error;
+      return { linked: false, reason: "already_linked_elsewhere" };
+    }
   }
 
   // No row for this sub: refuse to hijack an existing link or local account.
-  const linkedElsewhere = await db
-    .select({ sub: accountUsers.sub })
-    .from(accountUsers)
-    .where(
-      and(
-        eq(accountUsers.admissionSource, "prod_sync"),
-        sql`lower(${accountUsers.email}) = ${norm}`,
-      ),
-    )
-    .limit(1);
-  if (linkedElsewhere.length > 0) {
+  if (await findProdSyncLink(db, norm)) {
     return { linked: false, reason: "already_linked_elsewhere" };
   }
-  const localSameEmail = await db
-    .select({ sub: accountUsers.sub })
-    .from(accountUsers)
-    .where(
-      and(
-        eq(accountUsers.admissionSource, "local"),
-        sql`lower(${accountUsers.email}) = ${norm}`,
-      ),
-    )
-    .limit(1);
-  if (localSameEmail.length > 0) {
+  if (await findLocalSameEmail(db, norm)) {
     return { linked: false, reason: "local_conflict" };
   }
 

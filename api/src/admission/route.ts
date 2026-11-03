@@ -111,7 +111,23 @@ export async function pushAdmissionMutation(
     return { pushed: false, reason: "push_failed" };
   }
   if (!response.ok) return { pushed: false, reason: "push_refused" };
-  return { pushed: true };
+  // The webhook answers 200 with the applied/stale outcome: only an actual
+  // apply counts as emitted, so `admissionEmitted` stays honest when the
+  // mutation loses a same-millisecond race (`applied: false, stale: true`).
+  let body: unknown;
+  try {
+    body = await response.json();
+  } catch {
+    return { pushed: false, reason: "push_unreadable" };
+  }
+  const outcome = body as { applied?: unknown; stale?: unknown } | null;
+  if (outcome !== null && typeof outcome === "object" && outcome.applied === true) {
+    return { pushed: true };
+  }
+  if (outcome !== null && typeof outcome === "object" && outcome.stale === true) {
+    return { pushed: false, reason: "push_stale" };
+  }
+  return { pushed: false, reason: "push_not_applied" };
 }
 
 export async function readAllAdmissionSourceRows(db: Database) {

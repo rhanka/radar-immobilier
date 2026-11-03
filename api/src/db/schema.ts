@@ -381,10 +381,12 @@ export const admissionSyncProfiles = pgTable("admission_sync_profiles", {
 });
 
 /**
- * Lot I1 — per-signing-key replay guard. Snapshots carry a wall-clock
+ * Lot I1 — global monotonic replay guard. Snapshots carry a wall-clock
  * `issuedAt` from the single prod emitter; a snapshot is applied only when its
- * `issuedAt` is strictly newer than the last applied one for its `kid`, so a
- * delayed full snapshot can never resurrect a newer revocation.
+ * `issuedAt` is strictly newer than the MAX applied one across ALL kids, so a
+ * delayed snapshot signed with a rotated-out key can never resurrect a newer
+ * revocation. Per-kid rows are kept for observability; only the global MAX
+ * decides.
  */
 export const admissionSyncState = pgTable("admission_sync_state", {
   kid: text("kid").primaryKey(),
