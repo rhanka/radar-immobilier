@@ -194,11 +194,15 @@ export async function exchangeCode(
   return json as TokenResponse;
 }
 
-/** Verified id_token claims we care about (Phase A0: sub/name/email). */
+/** Verified id_token claims we care about (Phase A0: sub/name/email + I1 JIT). */
 export interface VerifiedIdToken {
   sub: string;
   name?: string;
   email?: string;
+  /** IdP `email_verified` claim; absent means unverified for JIT purposes. */
+  emailVerified?: boolean;
+  /** Verified token issuer (matches the configured IdP issuer). */
+  iss: string;
 }
 
 /**
@@ -230,6 +234,7 @@ export async function verifyIdToken(
   const claims = payload as JWTPayload & {
     name?: unknown;
     email?: unknown;
+    email_verified?: unknown;
     nonce?: unknown;
   };
   if (claims.nonce !== opts.expectedNonce) {
@@ -238,9 +243,13 @@ export async function verifyIdToken(
   if (typeof claims.sub !== "string" || claims.sub === "") {
     throw new Error("id_token missing sub");
   }
-  const out: VerifiedIdToken = { sub: claims.sub };
+  const out: VerifiedIdToken = {
+    sub: claims.sub,
+    iss: typeof payload.iss === "string" ? payload.iss : opts.auth.issuer,
+  };
   if (typeof claims.name === "string") out.name = claims.name;
   if (typeof claims.email === "string") out.email = claims.email;
+  if (claims.email_verified === true) out.emailVerified = true;
   return out;
 }
 
@@ -253,6 +262,15 @@ export interface VerifiedAccessToken {
    * receiver refuses it there — delegation is search-route-only.
    */
   delegated: boolean;
+  /**
+   * Lot I1: email carried by the access token when the IdP includes it.
+   * Enables opportunistic JIT reconciliation on the MCP path; absent means
+   * the token alone cannot link (a first MCP login then needs a prior app
+   * login, which runs the full JIT).
+   */
+  email?: string;
+  /** Lot I1: access-token `email_verified` claim (true only when asserted). */
+  emailVerified: boolean;
 }
 
 /**
@@ -286,10 +304,14 @@ export async function verifyAccessToken(
     throw new Error("access_token missing sub");
   }
   const act = (payload as JWTPayload & Record<string, unknown>)["act"];
-  return {
+  const claims = payload as JWTPayload & Record<string, unknown>;
+  const out: VerifiedAccessToken = {
     sub: payload.sub,
     delegated: act !== undefined,
+    emailVerified: claims["email_verified"] === true,
   };
+  if (typeof claims["email"] === "string") out.email = claims["email"];
+  return out;
 }
 
 /** Scope values carried by an exchanged search token (`scope` or `scp`). */
@@ -319,6 +341,18 @@ function exchangedScopes(payload: JWTPayload): string[] {
  * `maxLifetimeS` (and never outlive the call clock), proof-bound keys (`cnf`)
  * and service-user subjects fail. Error codes use the `strict_*` namespace.
  */
+/**
+ * Verified exchanged-search identity. `email`/`emailVerified` are surfaced
+ * only when the (already signature-, issuer- and audience-verified) token
+ * carries them, so the strict path can JIT-reconcile a first-time MCP user;
+ * absent email claims keep the historical closed behaviour.
+ */
+export interface VerifiedExchangedSearch {
+  sub: string;
+  email?: string;
+  emailVerified: boolean;
+}
+
 export async function verifyExchangedSearchToken(
   presented: string,
   opts: {
@@ -331,7 +365,7 @@ export async function verifyExchangedSearchToken(
     getKey: JWTVerifyGetKey;
     now?: number | undefined;
   },
-): Promise<{ sub: string }> {
+): Promise<VerifiedExchangedSearch> {
   const requiredScope = opts.requiredScope ?? "immo:search";
   const maxLifetimeS = opts.maxLifetimeS ?? 300;
   const nowS = Math.floor((opts.now ?? Date.now()) / 1000);
@@ -404,5 +438,10 @@ export async function verifyExchangedSearchToken(
   if (Math.floor(iat) > nowS || Math.floor(exp) <= nowS) {
     throw new Error("strict_invalid_lifetime");
   }
-  return { sub: claims.sub };
+  const exchangedEmail = typeof claims["email"] === "string" ? claims["email"] : undefined;
+  return {
+    sub: claims.sub,
+    ...(exchangedEmail !== undefined ? { email: exchangedEmail } : {}),
+    emailVerified: claims["email_verified"] === true,
+  };
 }
