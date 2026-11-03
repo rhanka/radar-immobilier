@@ -6,7 +6,7 @@ import { SESSION_COOKIE_NAME, verifySession } from "../services/auth/session.js"
 import { fingerprintReaderProfile, type AuthorityReader } from "./reader-profile.js";
 import { mintGrant, type GrantIssuer } from "./preview-grant.js";
 import { validateTicketForExchange } from "./preview-exchange.js";
-import { mintSessionCookie, parseCookieHeader, PREVIEW_INIT_COOKIE } from "./preview-session.js";
+import { mintInitCookie, mintRetryCookie, mintSessionCookie, parseCookieHeader, PREVIEW_INIT_COOKIE, PREVIEW_RETRY_COOKIE } from "./preview-session.js";
 import { parseContentHost } from "./content-host.js";
 import { applyReaderContentHeaders } from "./content-isolation.js";
 import { DESIGN_KIT_ASSETS, designKitAssetUrl, type DesignKitAsset } from "@radar/artifacts-host";
@@ -49,6 +49,48 @@ export function approvalDesignAssetUrl(asset: DesignKitAsset): string {
   // The application ingress sends / to the UI. Only /api/* reaches this
   // server through the existing nginx proxy; no new ingress is necessary.
   return designKitAssetUrl(asset).replace("/__artifacts/design", "/api/v1/artifacts/reader/design");
+}
+
+/**
+ * Stylesheets for the neutral expired page. Unlike the approval page (served
+ * on the application origin), the expired page is served on the content host
+ * where every /api/* path answers 401: it must use the public content-origin
+ * design-kit path /__artifacts/design/… (same-origin, covered by the
+ * style-src 'self' CSP below).
+ */
+export function contentStylesheetLinks(): string {
+  return DESIGN_KIT_ASSETS.map((asset) =>
+    `<link rel="stylesheet" href="${designKitAssetUrl(asset)}">`).join("");
+}
+
+/**
+ * Neutral expired-opening page (French, no identifiers).
+ *
+ * Shown to browsers only, after the single auto-restart below has already
+ * failed: every refusal (unknown, reused or expired ticket, origin mismatch,
+ * withdrawn approval) renders these exact bytes with the same status, so the
+ * page never reveals whether the artifact exists or why it was refused.
+ */
+export function expiredReaderOpeningHtml(): string {
+  return `<!doctype html><html lang="fr" data-st-theme="sent-tech"><head><meta charset="utf-8">` +
+    `<meta name="viewport" content="width=device-width, initial-scale=1">` +
+    `<title>Lien expiré — Radar immobilier</title>` +
+    contentStylesheetLinks() +
+    `<style>${APPROVAL_STYLE}</style></head><body><main class="reader-approve">` +
+    `<div class="st-card reader-approve__card">` +
+    `<p class="reader-approve__eyebrow">Radar immobilier</p>` +
+    `<h1>Ce lien d'ouverture a expiré</h1>` +
+    `<p>Ce lien d'ouverture a expiré. Rouvrir la page depuis ce lien pour obtenir une nouvelle ouverture.</p>` +
+    `<a class="st-button st-button--primary st-button--md" href="/__reader/start">Rouvrir la page</a>` +
+    `</div></main></body></html>`;
+}
+
+function wantsBrowserExchange(c: Context): boolean {
+  return (c.req.header("accept") ?? "").includes("text/html");
+}
+
+function hasExchangeRetry(c: Context): boolean {
+  return parseCookieHeader(c.req.header("cookie"), PREVIEW_RETRY_COOKIE) === "1";
 }
 
 export function createReaderOpening(deps: {
@@ -223,7 +265,10 @@ export function createReaderOpening(deps: {
     }
     const artifactId = releaseArtifactId!;
     const binding = randomBytes(32).toString("hex");
-    c.header("Set-Cookie", `${PREVIEW_INIT_COOKIE}=${binding}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=60`);
+    // 10-minute binding window aligned with the ticket TTL (DB default) and
+    // the approval page lifetime: a tab opened from a Claude link is often
+    // approved minutes later, and the previous 60 s cookie expired first.
+    c.header("Set-Cookie", mintInitCookie(binding));
     return c.redirect(`${deps.auth.appBaseUrl}/api/v1/artifacts/reader/approve?` +
       new URLSearchParams({ artifactId, binding, origin: `https://${c.req.header("host")}` }), 303);
   });
@@ -232,7 +277,22 @@ export function createReaderOpening(deps: {
     const binding = parseCookieHeader(c.req.header("cookie"), PREVIEW_INIT_COOKIE) ?? "";
     const ticket = await deps.tickets.consume(c.req.query("ticket") ?? "", binding);
     if (!ticket || `https://${c.req.header("host")}` !== ticket.origin ||
-      !await validateTicketForExchange(ticket, deps.authority)) return c.json({ error: "unauthenticated" }, 401);
+      !await validateTicketForExchange(ticket, deps.authority)) {
+      // Non-browser clients (fetch, existing contracts) keep the 401 JSON.
+      if (!wantsBrowserExchange(c)) return c.json({ error: "unauthenticated" }, 401);
+      // Browsers never see raw JSON: the first failure restarts the opening
+      // on the same content host with a fresh binding and a fresh approval.
+      // The short retry cookie bounds this to a single auto-restart; a
+      // second failure renders the neutral expired page instead of looping.
+      // Every cause renders the same response, so refusals stay
+      // indistinguishable (no artifact/release existence or reason leaks).
+      if (hasExchangeRetry(c)) {
+        c.header("Content-Security-Policy", APPROVAL_BASE_CSP);
+        return c.html(expiredReaderOpeningHtml(), 401);
+      }
+      c.header("Set-Cookie", mintRetryCookie());
+      return c.redirect("/__reader/start", 303);
+    }
     const now = (deps.now ?? Date.now)();
     const sid = randomUUID();
     const resource = { ...deps.issuer, host: new URL(ticket.origin).host,
@@ -247,6 +307,7 @@ export function createReaderOpening(deps: {
       createdAt: now, expiresAt: now + 900_000, resource,
       ...(writeIdentity ? { writeIdentity } : {}) }, deps.sessionSecret));
     c.header("Set-Cookie", `${PREVIEW_INIT_COOKIE}=; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=0`, { append: true });
+    c.header("Set-Cookie", `${PREVIEW_RETRY_COOKIE}=; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=0`, { append: true });
     return c.redirect(`/?grant=${encodeURIComponent(grant)}`, 303);
   });
   return { application, content };
