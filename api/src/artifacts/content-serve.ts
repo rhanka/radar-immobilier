@@ -5,7 +5,9 @@
  * valid session cookie plus a matching signed grant. The ticket is exchanged
  * before custom code runs and never appears in the final URL, Referer or
  * logs. Old tabs keep their pinned release; a newer release never leaks
- * through an old grant.
+ * through an old grant. The only exception is the official design-kit
+ * stylesheets: public upstream bytes (sha256-pinned, no tenant data),
+ * served without reader authorization so every page view is styled.
  *
  * Native files use the session scoped to a pinned release host, including
  * module/CSS imports and dynamic scripts. Published JavaScript calls H5 with
@@ -310,20 +312,23 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
 
   // Official design-kit stylesheets on a reserved path of every content
   // origin: same-origin ('self') for published pages, sha256-pinned,
-  // outside the publication budget. Resolved inside the authorized reader
-  // path, before any user file lookup; unknown versions and traversal
-  // are refused. Author files can never shadow this prefix because
-  // "__artifacts" is a reserved first segment of the publish policy.
+  // outside the publication budget. The bytes are public upstream content
+  // (identical for every page, no tenant data; the approval page serves
+  // the same bytes unauthenticated), so no reader authorization is
+  // required: page <link> tags carry no grant and styles must load with
+  // or without reader.js. Unknown versions and traversal stay refused,
+  // and non-content hosts stay 404. Author files can never shadow this
+  // prefix because "__artifacts" is a reserved first segment of the
+  // publish policy.
   app.get("/__artifacts/design/:kit/:digest/:file", async (c) => {
     const asset = resolveDesignKitAsset(c.req.param("kit"), c.req.param("digest"), c.req.param("file"));
     if (!asset) {
       applyReaderContentHeaders(c);
       return c.json({ error: "not_found" }, 404);
     }
-    const auth = await authorized(c, true);
-    if (!auth || !stillOpen(auth) || !await authorityCurrent(auth)) {
+    if (parseContentHost(c.req.header("host"), deps.contentBase).kind === "other") {
       applyReaderContentHeaders(c);
-      return c.json({ error: "unauthenticated" }, 401);
+      return c.json({ error: "not_found" }, 404);
     }
     applyReaderContentHeaders(c);
     c.header("Content-Type", DESIGN_KIT_CSS_MIME);
@@ -340,7 +345,12 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     const auth = await authorized(c, true);
     if (!auth) {
       applyReaderContentHeaders(c);
-      if (deps.openingContent && !presentedGrant(c) && (c.req.path === "/" || c.req.path === "/index.html")) {
+      // A document reload after the grant expired (or a forged-grant probe)
+      // restarts at the styled reader opening instead of returning raw
+      // unstyled JSON: the redirect drops the stale grant and approval
+      // re-runs before any page bytes are served. Sub-resources and reader
+      // APIs stay closed with 401.
+      if (deps.openingContent && (c.req.path === "/" || c.req.path === "/index.html")) {
         return c.redirect("/__reader/start", 303);
       }
       return c.json({ error: "unauthenticated" }, 401);
