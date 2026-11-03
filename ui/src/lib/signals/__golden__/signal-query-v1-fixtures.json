@@ -1,88 +1,764 @@
 {
+  "archived": [
+    "sig-sm-01",
+    "sig-vf-03"
+  ],
   "matrix": [
     {
+      "archive": "exclude",
+      "axes": {
+        "p": true,
+        "r": true,
+        "z": true
+      },
       "citySlug": "valleyfield",
-      "name": "city-01"
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "city-01",
+      "range": {
+        "from": 1790942400000,
+        "mode": "relative",
+        "relative": "7d",
+        "to": 1791547200000
+      },
+      "sort": "vivier_rank",
+      "zoneMatch": "attached"
     },
     {
+      "archive": "exclude",
+      "axes": {
+        "p": true,
+        "r": true,
+        "z": false
+      },
       "citySlug": "valleyfield",
-      "name": "city-02"
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "city-02",
+      "range": {
+        "from": 1790942400000,
+        "mode": "relative",
+        "relative": "7d",
+        "to": 1791547200000
+      },
+      "sort": "vivier_rank",
+      "zoneMatch": "attached"
     },
     {
+      "archive": "exclude",
+      "axes": {
+        "p": true,
+        "r": false,
+        "z": true
+      },
       "citySlug": "valleyfield",
-      "name": "city-03"
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "city-03",
+      "range": {
+        "from": 1790942400000,
+        "mode": "relative",
+        "relative": "7d",
+        "to": 1791547200000
+      },
+      "sort": "vivier_rank",
+      "zoneMatch": "attached"
     },
     {
+      "archive": "exclude",
+      "axes": {
+        "p": false,
+        "r": true,
+        "z": true
+      },
       "citySlug": "valleyfield",
-      "name": "city-04"
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "city-04",
+      "range": {
+        "from": 1790942400000,
+        "mode": "relative",
+        "relative": "7d",
+        "to": 1791547200000
+      },
+      "sort": "vivier_rank",
+      "zoneMatch": "attached"
     },
     {
+      "archive": "exclude",
+      "axes": {
+        "p": false,
+        "r": false,
+        "z": false
+      },
       "citySlug": "valleyfield",
-      "name": "city-05"
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": false,
+      "exclusions": {
+        "derogationsMineures": false,
+        "piiaSansProjetResidentiel": false
+      },
+      "name": "city-05",
+      "range": {
+        "from": 0,
+        "mode": "relative",
+        "relative": "all",
+        "to": 0
+      },
+      "sort": "vivier_rank",
+      "zoneMatch": "attached"
     },
     {
+      "archive": "exclude",
+      "axes": {
+        "p": false,
+        "r": false,
+        "z": false
+      },
       "citySlug": "valleyfield",
-      "name": "city-06"
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": false,
+        "piiaSansProjetResidentiel": false
+      },
+      "name": "city-06",
+      "range": {
+        "from": 0,
+        "mode": "relative",
+        "relative": "all",
+        "to": 0
+      },
+      "sort": "vivier_rank",
+      "zoneMatch": "attached"
     },
     {
+      "archive": "exclude",
+      "axes": {
+        "p": true,
+        "r": true,
+        "z": true
+      },
       "citySlug": "valleyfield",
-      "name": "city-07"
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "city-07",
+      "range": {
+        "from": 1790942400000,
+        "mode": "relative",
+        "relative": "7d",
+        "to": 1791547200000
+      },
+      "sort": "freshness_desc",
+      "zoneMatch": "attached"
     },
     {
+      "archive": "exclude",
+      "axes": {
+        "p": true,
+        "r": true,
+        "z": true
+      },
       "citySlug": "valleyfield",
-      "name": "city-08"
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "city-08",
+      "range": {
+        "from": 1769817600000,
+        "mode": "absolute",
+        "to": 1785456000000
+      },
+      "sort": "vivier_rank",
+      "zoneMatch": "attached"
     },
     {
+      "archive": "exclude",
+      "axes": {
+        "p": true,
+        "r": true,
+        "z": true
+      },
       "citySlug": "valleyfield",
-      "name": "city-09"
+      "dateBasis": "scrap",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "city-09",
+      "range": {
+        "from": 1769817600000,
+        "mode": "absolute",
+        "to": 1785456000000
+      },
+      "sort": "vivier_rank",
+      "zoneMatch": "attached"
     },
     {
+      "archive": "exclude",
+      "axes": {
+        "p": true,
+        "r": true,
+        "z": true
+      },
       "citySlug": "valleyfield",
-      "name": "city-10"
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "city-10",
+      "range": {
+        "from": 1790942400000,
+        "mode": "relative",
+        "relative": "7d",
+        "to": 1791547200000
+      },
+      "sort": "vivier_rank",
+      "zoneCode": "H-101",
+      "zoneMatch": "attached"
     },
     {
+      "archive": "exclude",
+      "axes": {
+        "p": true,
+        "r": true,
+        "z": true
+      },
       "citySlug": "valleyfield",
-      "name": "city-11"
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "city-11",
+      "range": {
+        "from": 1790942400000,
+        "mode": "relative",
+        "relative": "7d",
+        "to": 1791547200000
+      },
+      "sort": "vivier_rank",
+      "zoneCode": "H-101",
+      "zoneMatch": "attached-or-unattached"
     },
     {
+      "archive": "exclude",
+      "axes": {
+        "p": true,
+        "r": true,
+        "z": true
+      },
       "citySlug": "valleyfield",
-      "name": "city-12"
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "city-12",
+      "q": "ecole",
+      "range": {
+        "from": 1790942400000,
+        "mode": "relative",
+        "relative": "7d",
+        "to": 1791547200000
+      },
+      "sort": "vivier_rank",
+      "zoneMatch": "attached"
     },
     {
-      "name": "all-01"
+      "archive": "include",
+      "axes": {
+        "p": true,
+        "r": true,
+        "z": true
+      },
+      "citySlug": "valleyfield",
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "city-13",
+      "range": {
+        "from": 1790942400000,
+        "mode": "relative",
+        "relative": "7d",
+        "to": 1791547200000
+      },
+      "sort": "vivier_rank",
+      "zoneMatch": "attached"
     },
     {
-      "name": "all-02"
+      "archive": "only",
+      "axes": {
+        "p": true,
+        "r": true,
+        "z": true
+      },
+      "citySlug": "valleyfield",
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "city-14",
+      "range": {
+        "from": 1790942400000,
+        "mode": "relative",
+        "relative": "7d",
+        "to": 1791547200000
+      },
+      "sort": "vivier_rank",
+      "zoneMatch": "attached"
     },
     {
-      "name": "all-03"
+      "archive": "exclude",
+      "axes": {
+        "p": true,
+        "r": true,
+        "z": true
+      },
+      "citySlug": "valleyfield",
+      "dateBasis": "scrap",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "city-15",
+      "range": {
+        "from": 1790942400000,
+        "mode": "relative",
+        "relative": "7d",
+        "to": 1791547200000
+      },
+      "sort": "freshness_desc",
+      "zoneMatch": "attached"
     },
     {
-      "name": "all-04"
+      "archive": "exclude",
+      "axes": {
+        "p": true,
+        "r": true,
+        "z": true
+      },
+      "citySlug": "valleyfield",
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "city-16",
+      "population": "with-unclassified",
+      "range": {
+        "from": 1790942400000,
+        "mode": "relative",
+        "relative": "7d",
+        "to": 1791547200000
+      },
+      "sort": "vivier_rank",
+      "zoneMatch": "attached"
     },
     {
-      "name": "all-05"
+      "archive": "exclude",
+      "axes": {
+        "p": true,
+        "r": true,
+        "z": true
+      },
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "all-01",
+      "range": {
+        "from": 1790942400000,
+        "mode": "relative",
+        "relative": "7d",
+        "to": 1791547200000
+      },
+      "sort": "vivier_rank",
+      "zoneMatch": "attached"
     },
     {
-      "name": "all-06"
+      "archive": "exclude",
+      "axes": {
+        "p": true,
+        "r": true,
+        "z": false
+      },
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "all-02",
+      "range": {
+        "from": 1790942400000,
+        "mode": "relative",
+        "relative": "7d",
+        "to": 1791547200000
+      },
+      "sort": "vivier_rank",
+      "zoneMatch": "attached"
     },
     {
-      "name": "all-07"
+      "archive": "exclude",
+      "axes": {
+        "p": true,
+        "r": false,
+        "z": true
+      },
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "all-03",
+      "range": {
+        "from": 1790942400000,
+        "mode": "relative",
+        "relative": "7d",
+        "to": 1791547200000
+      },
+      "sort": "vivier_rank",
+      "zoneMatch": "attached"
     },
     {
-      "name": "all-08"
+      "archive": "exclude",
+      "axes": {
+        "p": false,
+        "r": true,
+        "z": true
+      },
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "all-04",
+      "range": {
+        "from": 1790942400000,
+        "mode": "relative",
+        "relative": "7d",
+        "to": 1791547200000
+      },
+      "sort": "vivier_rank",
+      "zoneMatch": "attached"
     },
     {
-      "name": "all-09"
+      "archive": "exclude",
+      "axes": {
+        "p": false,
+        "r": false,
+        "z": false
+      },
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": false,
+      "exclusions": {
+        "derogationsMineures": false,
+        "piiaSansProjetResidentiel": false
+      },
+      "name": "all-05",
+      "range": {
+        "from": 0,
+        "mode": "relative",
+        "relative": "all",
+        "to": 0
+      },
+      "sort": "vivier_rank",
+      "zoneMatch": "attached"
     },
     {
-      "name": "all-10"
+      "archive": "exclude",
+      "axes": {
+        "p": false,
+        "r": false,
+        "z": false
+      },
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": false,
+        "piiaSansProjetResidentiel": false
+      },
+      "name": "all-06",
+      "range": {
+        "from": 0,
+        "mode": "relative",
+        "relative": "all",
+        "to": 0
+      },
+      "sort": "vivier_rank",
+      "zoneMatch": "attached"
     },
     {
-      "name": "all-11"
+      "archive": "exclude",
+      "axes": {
+        "p": true,
+        "r": true,
+        "z": true
+      },
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "all-07",
+      "range": {
+        "from": 1790942400000,
+        "mode": "relative",
+        "relative": "7d",
+        "to": 1791547200000
+      },
+      "sort": "freshness_desc",
+      "zoneMatch": "attached"
     },
     {
-      "name": "all-12"
+      "archive": "exclude",
+      "axes": {
+        "p": true,
+        "r": true,
+        "z": true
+      },
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "all-08",
+      "range": {
+        "from": 1769817600000,
+        "mode": "absolute",
+        "to": 1785456000000
+      },
+      "sort": "vivier_rank",
+      "zoneMatch": "attached"
+    },
+    {
+      "archive": "exclude",
+      "axes": {
+        "p": true,
+        "r": true,
+        "z": true
+      },
+      "dateBasis": "scrap",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "all-09",
+      "range": {
+        "from": 1769817600000,
+        "mode": "absolute",
+        "to": 1785456000000
+      },
+      "sort": "vivier_rank",
+      "zoneMatch": "attached"
+    },
+    {
+      "archive": "exclude",
+      "axes": {
+        "p": true,
+        "r": true,
+        "z": true
+      },
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "all-10",
+      "range": {
+        "from": 1790942400000,
+        "mode": "relative",
+        "relative": "7d",
+        "to": 1791547200000
+      },
+      "sort": "vivier_rank",
+      "zoneCode": "H-101",
+      "zoneMatch": "attached"
+    },
+    {
+      "archive": "exclude",
+      "axes": {
+        "p": true,
+        "r": true,
+        "z": true
+      },
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "all-11",
+      "range": {
+        "from": 1790942400000,
+        "mode": "relative",
+        "relative": "7d",
+        "to": 1791547200000
+      },
+      "sort": "vivier_rank",
+      "zoneCode": "H-101",
+      "zoneMatch": "attached-or-unattached"
+    },
+    {
+      "archive": "exclude",
+      "axes": {
+        "p": true,
+        "r": true,
+        "z": true
+      },
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "all-12",
+      "q": "ecole",
+      "range": {
+        "from": 1790942400000,
+        "mode": "relative",
+        "relative": "7d",
+        "to": 1791547200000
+      },
+      "sort": "vivier_rank",
+      "zoneMatch": "attached"
+    },
+    {
+      "archive": "include",
+      "axes": {
+        "p": true,
+        "r": true,
+        "z": true
+      },
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "all-13",
+      "range": {
+        "from": 1790942400000,
+        "mode": "relative",
+        "relative": "7d",
+        "to": 1791547200000
+      },
+      "sort": "vivier_rank",
+      "zoneMatch": "attached"
+    },
+    {
+      "archive": "only",
+      "axes": {
+        "p": true,
+        "r": true,
+        "z": true
+      },
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "all-14",
+      "range": {
+        "from": 1790942400000,
+        "mode": "relative",
+        "relative": "7d",
+        "to": 1791547200000
+      },
+      "sort": "vivier_rank",
+      "zoneMatch": "attached"
+    },
+    {
+      "archive": "exclude",
+      "axes": {
+        "p": true,
+        "r": true,
+        "z": true
+      },
+      "dateBasis": "scrap",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "all-15",
+      "range": {
+        "from": 1790942400000,
+        "mode": "relative",
+        "relative": "7d",
+        "to": 1791547200000
+      },
+      "sort": "freshness_desc",
+      "zoneMatch": "attached"
+    },
+    {
+      "archive": "exclude",
+      "axes": {
+        "p": true,
+        "r": true,
+        "z": true
+      },
+      "dateBasis": "document",
+      "excludeAutomaticallyExcluded": true,
+      "exclusions": {
+        "derogationsMineures": true,
+        "piiaSansProjetResidentiel": true
+      },
+      "name": "all-16",
+      "population": "with-unclassified",
+      "range": {
+        "from": 1790942400000,
+        "mode": "relative",
+        "relative": "7d",
+        "to": 1791547200000
+      },
+      "sort": "vivier_rank",
+      "zoneMatch": "attached"
     }
   ],
   "nodes": [
@@ -248,11 +924,11 @@
             "documentDate": {
               "precision": "day",
               "status": "known",
-              "value": "2026-10-01"
+              "value": "2026-10-05"
             },
             "excerpt": "extrait",
-            "fetchedAt": "2026-10-02T10:00:00Z",
-            "publishedAt": "2026-10-01"
+            "fetchedAt": "2026-10-06T10:00:00Z",
+            "publishedAt": "2026-10-05"
           }
         ]
       },
@@ -397,7 +1073,7 @@
       },
       "createdAt": "2026-09-01T00:00:00Z",
       "id": "sig-vf-06",
-      "label": "Ecole primaire — usage mixte et habitation",
+      "label": "École primaire — usage mixte et habitation",
       "legacySubset": {
         "flags": {
           "m": true,
@@ -410,9 +1086,248 @@
       "props": {
         "category": null,
         "description": "Ecole et usage mixte",
-        "refs": []
+        "refs": [
+          {
+            "documentDate": {
+              "precision": "day",
+              "status": "known",
+              "value": "2026-10-03"
+            },
+            "excerpt": "extrait",
+            "fetchedAt": "2026-10-04T10:00:00Z",
+            "publishedAt": "2026-10-03"
+          }
+        ]
       },
       "publishedAt": "2026-05-01T00:00:00Z",
+      "sourceRef": null,
+      "type": "Signal"
+    },
+    {
+      "citySlug": "valleyfield",
+      "classification": {
+        "confiance": 0.9,
+        "effet_densifiant": "densifie",
+        "etape": "projet_reglement",
+        "etapes_historique": [],
+        "exclusion_reason": null,
+        "instrument": "rezonage",
+        "provenance": {
+          "extrait": "projet de 12 logements"
+        },
+        "residentiel": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        },
+        "zonage": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        }
+      },
+      "createdAt": "2026-09-01T00:00:00Z",
+      "id": "sig-vf-07",
+      "label": "Rezonage rang Saint-Joseph — 6 logements",
+      "legacySubset": {
+        "flags": {
+          "m": true,
+          "p": true,
+          "z": true
+        },
+        "signalId": "sig-vf-07",
+        "version": "legacy-zmp-v1"
+      },
+      "props": {
+        "category": null,
+        "description": "Projet de 6 logements",
+        "etape": "projet_reglement",
+        "instrument": "rezonage",
+        "refs": [
+          {
+            "documentDate": {
+              "precision": "day",
+              "status": "known",
+              "value": "2026-03-15"
+            },
+            "excerpt": "extrait",
+            "fetchedAt": "2026-10-04T10:00:00Z",
+            "publishedAt": "2026-03-15"
+          }
+        ]
+      },
+      "publishedAt": "2026-09-28T00:00:00Z",
+      "sourceRef": null,
+      "type": "Signal"
+    },
+    {
+      "citySlug": "valleyfield",
+      "classification": {
+        "confiance": 0.9,
+        "effet_densifiant": "densifie",
+        "etape": "avis_motion",
+        "etapes_historique": [],
+        "exclusion_reason": null,
+        "instrument": "ppcmoi",
+        "provenance": {
+          "extrait": "projet de 12 logements"
+        },
+        "residentiel": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        },
+        "zonage": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        }
+      },
+      "createdAt": "2026-09-01T00:00:00Z",
+      "id": "sig-vf-08",
+      "label": "PPCMOI rue Saint-Laurent — 8 logements",
+      "legacySubset": {
+        "flags": {
+          "m": true,
+          "p": true,
+          "z": true
+        },
+        "signalId": "sig-vf-08",
+        "version": "legacy-zmp-v1"
+      },
+      "props": {
+        "category": null,
+        "description": "Projet de 8 logements",
+        "etape": "avis_motion",
+        "instrument": "ppcmoi",
+        "refs": [
+          {
+            "documentDate": {
+              "precision": "day",
+              "status": "known",
+              "value": "2026-10-01"
+            },
+            "excerpt": "extrait",
+            "fetchedAt": "2026-04-10T10:00:00Z",
+            "publishedAt": "2026-10-01"
+          }
+        ]
+      },
+      "publishedAt": "2026-09-28T00:00:00Z",
+      "sourceRef": null,
+      "type": "Signal"
+    },
+    {
+      "citySlug": "valleyfield",
+      "classification": {
+        "confiance": 0.9,
+        "effet_densifiant": "densifie",
+        "etape": "avis_motion",
+        "etapes_historique": [],
+        "exclusion_reason": null,
+        "instrument": "rezonage",
+        "provenance": {
+          "extrait": "projet de 12 logements"
+        },
+        "residentiel": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        },
+        "zonage": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        }
+      },
+      "createdAt": "2026-09-01T00:00:00Z",
+      "id": "sig-vf-09",
+      "label": "Rezonage boulevard Monseigneur-Langlois — 10 logements",
+      "legacySubset": {
+        "flags": {
+          "m": true,
+          "p": true,
+          "z": true
+        },
+        "signalId": "sig-vf-09",
+        "version": "legacy-zmp-v1"
+      },
+      "props": {
+        "category": null,
+        "description": "Projet de 10 logements",
+        "etape": "avis_motion",
+        "instrument": "rezonage",
+        "refs": [
+          {
+            "documentDate": {
+              "precision": "day",
+              "status": "known",
+              "value": "2026-10-06"
+            },
+            "excerpt": "extrait",
+            "fetchedAt": "2026-10-03T10:00:00Z",
+            "publishedAt": "2026-10-06"
+          }
+        ]
+      },
+      "publishedAt": "2026-10-05T00:00:00Z",
+      "sourceRef": null,
+      "type": "Signal"
+    },
+    {
+      "citySlug": "valleyfield",
+      "classification": {
+        "confiance": 0.9,
+        "effet_densifiant": "densifie",
+        "etape": "avis_motion",
+        "etapes_historique": [],
+        "exclusion_reason": null,
+        "instrument": "rezonage",
+        "provenance": {
+          "extrait": "projet de 12 logements"
+        },
+        "residentiel": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        },
+        "zonage": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        }
+      },
+      "createdAt": "2026-09-01T00:00:00Z",
+      "id": "sig-vf-10",
+      "label": "Rezonage chemin Larocque — 10 logements",
+      "legacySubset": {
+        "flags": {
+          "m": true,
+          "p": true,
+          "z": true
+        },
+        "signalId": "sig-vf-10",
+        "version": "legacy-zmp-v1"
+      },
+      "props": {
+        "category": null,
+        "description": "Projet de 10 logements",
+        "etape": "avis_motion",
+        "instrument": "rezonage",
+        "refs": [
+          {
+            "documentDate": {
+              "precision": "day",
+              "status": "known",
+              "value": "2026-10-04"
+            },
+            "excerpt": "extrait",
+            "fetchedAt": "2026-10-05T10:00:00Z",
+            "publishedAt": "2026-10-04"
+          }
+        ]
+      },
+      "publishedAt": "2026-10-05T00:00:00Z",
       "sourceRef": null,
       "type": "Signal"
     },
@@ -753,5 +1668,39 @@
       "sourceRef": null,
       "type": "Signal"
     }
-  ]
+  ],
+  "unclassified": {
+    "citySlug": "valleyfield",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "id": "sig-vf-99",
+    "label": "Avis public sans classification",
+    "legacySubset": {
+      "flags": {
+        "m": true,
+        "p": true,
+        "z": true
+      },
+      "signalId": "sig-vf-99",
+      "version": "legacy-zmp-v1"
+    },
+    "props": {
+      "category": null,
+      "description": "Avis public sans classification",
+      "refs": [
+        {
+          "documentDate": {
+            "precision": "day",
+            "status": "known",
+            "value": "2026-10-05"
+          },
+          "excerpt": "extrait",
+          "fetchedAt": "2026-10-06T10:00:00Z",
+          "publishedAt": "2026-10-05"
+        }
+      ]
+    },
+    "publishedAt": "2026-09-28T00:00:00Z",
+    "sourceRef": null,
+    "type": "Signal"
+  }
 }
