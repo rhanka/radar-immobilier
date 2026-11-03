@@ -10,6 +10,10 @@ import {
   GOVERNED_BASE_PATH,
   geoGovernedRoute,
 } from "./geo-governed.js";
+import { createApp } from "../app.js";
+import type { AuthConfig } from "../config.js";
+import type { Database } from "../db/client.js";
+import type { ObjectStore } from "../storage/object-store.js";
 
 const CC_BY_4 = "Creative Commons Attribution 4.0 International";
 const PILOT = "qc-zonage-gatineau-affectations-territoire";
@@ -137,8 +141,11 @@ describe("GET items refusals (zero upstream calls)", () => {
   it.each([
     ["qc-lots-delson", "not served"],
     ["qc-zoning-events-candiac", "not served"],
-    ["qc-zonage-salaberry-de-valleyfield", "unknown"],
-    ["qc-zonage-unknown-city", "unknown"],
+    // No dated per-collection record: the catalogue status (`not covered`)
+    // is served BEFORE any upstream call — the live licence is unverifiable
+    // without one, and the record is missing in every case.
+    ["qc-zonage-salaberry-de-valleyfield", "not covered"],
+    ["qc-zonage-unknown-city", "not covered"],
   ])("refuses %s (%s) without any upstream call", async (id, status) => {
     const { fn, calls } = makeFetch();
     const app = geoGovernedRoute({ fetchImpl: fn, baseUrl: "https://geo.example" });
@@ -148,10 +155,27 @@ describe("GET items refusals (zero upstream calls)", () => {
       ok: boolean;
       error: string;
       status: string;
+      reason?: string;
     };
     expect(body.ok).toBe(false);
     expect(body.error).toBe("geo_governed_not_served");
     expect(body.status).toBe(status);
+    expect(calls).toHaveLength(0); // refused BEFORE any upstream call
+  });
+
+  it("refuses an unregistered licence-known zonage as not covered (same as catalog)", async () => {
+    const { fn, calls } = makeFetch();
+    const app = geoGovernedRoute({ fetchImpl: fn, baseUrl: "https://geo.example" });
+    const res = await app.request(
+      `${GOVERNED_BASE_PATH}/collections/qc-zonage-laval-sad-centre-ville/items`,
+    );
+    expect(res.status).toBe(403);
+    expect(await res.json()).toMatchObject({
+      ok: false,
+      error: "geo_governed_not_served",
+      status: "not covered",
+      reason: "no-dated-per-collection-record",
+    });
     expect(calls).toHaveLength(0); // refused BEFORE any upstream call
   });
 
@@ -221,6 +245,76 @@ describe("GET items served (bounded proxy, allowlist, provenance)", () => {
     expect(JSON.stringify(body)).not.toContain("rue Principale");
   });
 
+  it("preserves a contract-valid proof envelope on the live path (composition order)", async () => {
+    // Regression: the allowlist drops PROVENANCE_KEYS, so nesting the
+    // provenance sanitiser INSIDE applyZonageAllowlist silently deleted
+    // `proof`. The route allowlists first, then re-attaches validated
+    // envelopes — a valid proof survives, an invalid one does not.
+    const validProof = {
+      schema_version: "2.0",
+      geometry_source: {
+        url: "https://example.com/geo/gatineau.json",
+        type: "geonet",
+        method: "natif",
+        reliability: "directe",
+        retrieved_at: null,
+        sha256: null,
+      },
+    };
+    const calls: string[] = [];
+    const fn = (async (input: string | URL | Request) => {
+      const url = String(input);
+      calls.push(url);
+      if (url.includes("/collections?")) {
+        return new Response(JSON.stringify(LISTING), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        });
+      }
+      return new Response(
+        JSON.stringify({
+          type: "FeatureCollection",
+          numberMatched: 2,
+          numberReturned: 2,
+          features: [
+            {
+              type: "Feature",
+              geometry: { type: "Point", coordinates: [-75.7, 45.45] },
+              properties: {
+                DESCRIPTION: "kept",
+                adresse: "123 rue Principale",
+                proof: validProof,
+              },
+            },
+            {
+              type: "Feature",
+              geometry: { type: "Point", coordinates: [-75.71, 45.46] },
+              properties: {
+                DESCRIPTION: "kept-too",
+                proof: { schema_version: "2.0", geometry_source: { url: "not-a-url" } },
+              },
+            },
+          ],
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
+    }) as unknown as typeof fetch;
+    const app = geoGovernedRoute({ fetchImpl: fn, baseUrl: "https://geo.example" });
+    const res = await app.request(`${GOVERNED_BASE_PATH}/collections/${PILOT}/items?limit=10`);
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      features: Array<{ properties: Record<string, unknown> }>;
+    };
+    const kept = body.features[0]!.properties;
+    expect(kept["DESCRIPTION"]).toBe("kept");
+    expect(kept["proof"]).toEqual(validProof);
+    expect(kept).not.toHaveProperty("adresse");
+    // An invalid envelope is dropped as a whole, never partly rewritten.
+    const dropped = body.features[1]!.properties;
+    expect(dropped["DESCRIPTION"]).toBe("kept-too");
+    expect(dropped).not.toHaveProperty("proof");
+  });
+
   it("bounds the limit (max 1000) on the upstream query", async () => {
     const { fn, calls } = makeFetch();
     const app = geoGovernedRoute({ fetchImpl: fn, baseUrl: "https://geo.example" });
@@ -238,7 +332,15 @@ describe("GET items served (bounded proxy, allowlist, provenance)", () => {
         {
           type: "Feature",
           geometry: { type: "Point", coordinates: [-75.7, 45.45] },
-          properties: { zoneCode: "R-1", citySlug: "gatineau" },
+          properties: {
+            DESCRIPTION: "Affectation résidentielle",
+            name: "Zone R-1",
+            zoneCode: "R-1",
+            citySlug: "gatineau",
+            adresse: "123 rue Principale",
+            code_postal: "J8X 1A1",
+            extrait_brut: "M. Tremblay demande une dérogation…",
+          },
         },
       ],
     });
@@ -250,6 +352,18 @@ describe("GET items served (bounded proxy, allowlist, provenance)", () => {
     const res = await app.request(`${GOVERNED_BASE_PATH}/collections/${PILOT}/items`);
     expect(res.status).toBe(200);
     expect(res.headers.get(GOVERNANCE_PROVENANCE_HEADER)).toBe(GOVERNANCE_PROVENANCE_FALLBACK);
+    const body = (await res.json()) as {
+      features: Array<{ properties: Record<string, unknown> }>;
+    };
+    const props = body.features[0]!.properties;
+    // pg-fallback serves through the SAME allowlist as the live path.
+    expect(props["DESCRIPTION"]).toBe("Affectation résidentielle");
+    expect(props["name"]).toBe("Zone R-1");
+    for (const banned of ["adresse", "code_postal", "extrait_brut", "zoneCode", "citySlug"]) {
+      expect(props).not.toHaveProperty(banned);
+    }
+    expect(JSON.stringify(body)).not.toContain("rue Principale");
+    expect(JSON.stringify(body)).not.toContain("Tremblay");
   });
 
   it("answers 502 honest when live fails and no local store is stocked", async () => {
@@ -261,5 +375,86 @@ describe("GET items served (bounded proxy, allowlist, provenance)", () => {
     });
     const res = await app.request(`${GOVERNED_BASE_PATH}/collections/${PILOT}/items`);
     expect(res.status).toBe(502);
+  });
+});
+
+describe("createApp wiring (auth gating + AppDeps seams)", () => {
+  const AUTH_ON: AuthConfig = {
+    enabled: true,
+    issuer: "https://auth.example.test",
+    clientId: "radar-immobilier",
+    clientSecret: "super-secret",
+    redirectUri: "https://immo.example.test/api/v1/auth/oauth/callback",
+    scopes: "openid profile email",
+    appBaseUrl: "https://immo.example.test",
+    sessionSecret: "session-secret-32-bytes-long-padding!!",
+    sessionTtlSeconds: 3600,
+    sessionAbsoluteTtlSeconds: 7200,
+    jwksUri: "https://auth.example.test/.well-known/jwks.json",
+    bearerAudiences: ["https://immo.example.test", "https://immo.example.test/mcp"],
+  };
+
+  it("serves the governed catalog through the createApp seams when auth is off", async () => {
+    // Proves AppDeps propagation: without fetchImpl/geoBaseUrl reaching
+    // geoGovernedRoute, this would hit the real OGC base URL and fail.
+    const { fn } = makeFetch();
+    const app = createApp({
+      checkDb: async () => ({ ok: true }),
+      checkObjectStore: async () => ({ ok: true }),
+      fetchImpl: fn,
+      geoBaseUrl: "https://geo.example",
+      db: undefined as unknown as Database,
+      store: {} as unknown as ObjectStore,
+    });
+    const res = await app.request(`${GOVERNED_BASE_PATH}/catalog`);
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      served: Array<{ collectionId: string }>;
+    };
+    expect(body.served.map((e) => e.collectionId)).toEqual([PILOT]);
+  });
+
+  it("session-gates the governed catalog (401) with zero upstream calls", async () => {
+    const { fn, calls } = makeFetch();
+    const app = createApp({
+      checkDb: async () => ({ ok: true }),
+      checkObjectStore: async () => ({ ok: true }),
+      auth: AUTH_ON,
+      fetchImpl: fn,
+      geoBaseUrl: "https://geo.example",
+      db: undefined as unknown as Database,
+      store: {} as unknown as ObjectStore,
+    });
+    const res = await app.request(`${GOVERNED_BASE_PATH}/catalog`);
+    expect(res.status).toBe(401);
+    expect(calls).toHaveLength(0); // gated by protect, before any fetch
+  });
+
+  it("leaves /api/geo/collections/* public while the governed root needs a session", async () => {
+    // The public prefix must stay reachable without a session; point the
+    // server-side OGC fallback at an unroutable test address so the public
+    // request fails fast offline (502) instead of touching the network.
+    const previous = process.env["GEO_OGC_BASE_URL"];
+    process.env["GEO_OGC_BASE_URL"] = "http://127.0.0.1:9";
+    try {
+      const { fn } = makeFetch();
+      const app = createApp({
+        checkDb: async () => ({ ok: true }),
+        checkObjectStore: async () => ({ ok: true }),
+        auth: AUTH_ON,
+        fetchImpl: fn,
+        geoBaseUrl: "https://geo.example",
+        db: undefined as unknown as Database,
+        store: {} as unknown as ObjectStore,
+      });
+      const pub = await app.request("/api/geo/collections/qc-lots-delson/items?limit=1");
+      // Never session-gated: any non-401 proves protect let it through.
+      expect(pub.status).not.toBe(401);
+      const gov = await app.request(`${GOVERNED_BASE_PATH}/catalog`);
+      expect(gov.status).toBe(401);
+    } finally {
+      if (previous === undefined) delete process.env["GEO_OGC_BASE_URL"];
+      else process.env["GEO_OGC_BASE_URL"] = previous;
+    }
   });
 });
