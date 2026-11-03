@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import { createFixtureAuthority, fingerprintReaderProfile } from "../../src/artifacts/reader-profile.js";
 import { validatePreviewInit } from "../../src/artifacts/preview-init.js";
 import { validateTicketForExchange } from "../../src/artifacts/preview-exchange.js";
-import { createTicketStore } from "../../src/artifacts/preview-tickets.js";
+import { createTicketStore, PREVIEW_TICKET_TTL_MS } from "../../src/artifacts/preview-tickets.js";
 
 const INIT = {
   browserBinding: "browser-secret-at-least-32-characters",
@@ -34,7 +34,7 @@ describe("artifacts reader init and ticket flow", () => {
         capabilities: summary!.capabilities as ("geo.read" | "signals.protected-read")[] }),
     });
     expect(ticket.ticket.length).toBeGreaterThanOrEqual(32);
-    expect(ticket.expiresAt).toBe(1_000 + 60_000);
+    expect(ticket.expiresAt).toBe(1_000 + PREVIEW_TICKET_TTL_MS);
     expect(ticket.policyRevision).toBe(summary!.policyRevision);
     const consumed = store.consume(ticket.ticket, INIT.browserBinding);
     expect(consumed?.readerSub).toBe("reader-alice");
