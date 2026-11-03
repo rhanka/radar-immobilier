@@ -93,31 +93,56 @@ No `filter.*` key carries `citySlug` (route level), `zoneCode`
 or `include`. Those travel as explicit query arguments in I-2, never as
 invented URL spellings here.
 
+Executable translator (pure, tested): `geoFiltersToSignalFilter` in
+`ui/src/lib/router/signal-query-v1-mapping.ts` applies the UI opening
+rule (`excludeAutomaticallyExcluded: true`, `sort: "vivier_rank"`,
+absolute-only `scrap` clock, `archive: "include"` iff the snapshot
+reveals discarded signals, relative presets resolved to civil dates at
+open).
+
 ## 5. Golden capture
 
-- Fixtures: `ui/src/lib/signals/__golden__/signal-query-v1-fixtures.json`
-- Expected outputs: `ui/src/lib/signals/__golden__/signal-query-v1-golden.json`
+- Fixtures (full case params, nodes, unclassified boundary node, archived
+  ids): `ui/src/lib/signals/__golden__/signal-query-v1-fixtures.json`
+- Expected outputs (32 cases: 16 city + 16 all-cities, incl. 2 typed
+  refusals): `ui/src/lib/signals/__golden__/signal-query-v1-golden.json`
 - Divergences (projection vs panel refilter): `ui/src/lib/signals/__golden__/signal-query-v1-divergences.json`
 - Runner: `ui/src/lib/signals/signal-query-v1-golden.test.ts` (real client
-  code paths: `projectComposedVivierB`, `filterNodesByDocumentDate`,
+  code paths: `projectComposedVivierB`, `keyForVivierB`,
+  `filterNodesByDocumentDate` / `signalDocumentDateWindow`,
   `applyVivierBExclusions`, `rankVivierBNodes`, `nodeMatchesSubset`,
-  `matchesDocumentDateWindow`, `extractSignalZoneRefs/LotRefs`).
+  `resultCivilDates`, `extractSignalZoneRefs/LotRefs`). Every case is first
+  validated through `SignalFilterV1.safeParse` (`zoneCode` without `citySlug`
+  is a typed refusal, recorded as such); `byCity` is counted on the same
+  filter minus `citySlug`. Server-only dimensions (`excludeAutomaticallyExcluded:
+  false` recomposition, `archive`, instruments/stages/regulatoryStatus,
+  basket/personalHistory, `q`, `zoneCode` resolution) apply the documented v1
+  predicate in the runner; the UI pipeline has no equivalent (gap), I-2
+  implements them exactly. Owner decision D-A: the server classification is
+  the reference; divergences are listed as visible gaps.
 
 ## 6. Volume thresholds (measured in I-0, enforced in I-2)
 
-Measured on the test DB with documented seeds (`i0-vol-a/b/c`, 6+3+3 = 12
-signal rows; see `api/tests/fixtures/signals-query-v1/volumes.json`):
-per-city reads return the full visible population with raw `props`
-(`i0-vol-a`: 6 rows / 6,514 JSON bytes / 2 ms; `i0-vol-b/c`: 3 rows /
-5,248 bytes / 0-1 ms; city aggregate over the seeded slugs: 9 ms).
-These seeds are small by design (method proof, not a production census —
-the commented corpus is ~3,294 signals with a ~914-signal wall for a large
-city in B view): I-2 re-measures on the real corpus before enforcing.
+Measured in an isolated synthetic database on a deterministic production-like
+corpus (seed `20261103`, 128 cities from the committed 127-slug vivier-B
+denominator plus the pilot city as the heavy city; realistic JSON props,
+relational lots, 60 basket heads on the heavy city; see
+`api/tests/fixtures/signals-query-v1/volumes.json` and
+`api/src/services/graph/signal-query-v1-volumes.test.ts`):
+
+- 3,374 signals total, 914 max per city (pilot-city wall);
+- 2,310 lots total, 639 max lots per city;
+- heavy-city detail read: 914 rows / 711,059 JSON bytes;
+- membership unions on the corpus: 716 distinct zone codes,
+  1,354 distinct signal lot refs;
+- basket search (`searchSignalClassifications`, limit 100) on the heavy
+  city: 914 matched.
 
 - `membership` ceiling: 10,000 ordered ids + unions, per request, both
   modes. Over-ceiling = typed error, never silent truncation. Covers the
-  measured 12 plus the commented ~3.3k corpus with headroom.
-- Response stays under the existing 2,097,152-byte payload cap.
+  measured 3,374 (2.9× headroom), 716 zone codes, and 1,354 lot refs.
+- Response stays under the existing 2,097,152-byte payload cap (heavy-city
+  detail payload today: 711 kB).
 - Phase-2 trigger (measured in I-2, single pass first): heaviest-city
   detail payload today > 1 MB, or all-cities fan-out p95 > 2 s, or
   `membership` demand beyond the 10,000 ceiling. Then the materialisation
