@@ -26,6 +26,7 @@ import { geoLotsRoute } from "./routes/geo-lots.js";
 import { geoZonesRoute } from "./routes/geo-zones.js";
 import { geoFeaturesRoute, type GeoFeaturesDeps } from "./routes/geo-features.js";
 import { geoCollectionsRoute } from "./routes/geo-collections.js";
+import { geoGovernedRoute } from "./routes/geo-governed.js";
 import { signalsDetailRoute } from "./routes/signals-detail.js";
 import { opportunitesRoute } from "./routes/opportunites.js";
 import { adminRoute } from "./routes/admin.js";
@@ -231,6 +232,13 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", geoZonesRoute({ db: deps.db }));
   app.route("/", geoFeaturesRoute({ db: deps.db }));
   app.route("/", geoCollectionsRoute({ db: deps.db }));
+  // I-1A governed geo facade (converged r3 §2): frozen path
+  // /api/v1/geo-governed, session-gated by protect (NOT a public prefix —
+  // never add it to PUBLIC_PREFIXES). The public /api/geo/* prefix above is
+  // unchanged and ungated. No P1 credential exists yet, so the contract
+  // pointer resolves to `missing source` until the geo tenant operator grants
+  // the GEO_SERVED_CONTRACT_S3_* read credential (see runbook).
+  app.route("/", geoGovernedRoute({ db: deps.db }));
   app.route("/", signalsDetailRoute(deps));
   app.route("/", opportunitesRoute(deps));
   app.route("/", prospectMarksRoute(deps.auth?.enabled && deps.auth.sessionSecret ? { db: deps.db, sessionSecret: deps.auth.sessionSecret } : { db: deps.db }));
