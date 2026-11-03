@@ -26,7 +26,7 @@ export function createArtifactReadMetadata(pool: Pick<pg.Pool, "query">, scope: 
   function summary(row: MetadataRow) {
     const links = urls?.(row.id, row.release_id ?? "");
     return { artifactId: row.id, bindingName: row.binding_name,
-      stableUrl: links?.stableUrl ?? null, pinnedUrl: row.release_id ? links?.pinnedUrl ?? null : null,
+      stableUrl: links?.stableUrl ?? null, pinnedUrl: row.release_id ? links?.versionUrl ?? null : null,
       currentReleaseId: row.release_id, createdAt: row.created_at.toISOString(),
       updatedAt: row.published_at?.toISOString() ?? null, state: row.lifecycle_state,
       published: row.release_id !== null };

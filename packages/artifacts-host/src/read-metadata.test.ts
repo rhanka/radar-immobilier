@@ -14,7 +14,7 @@ type FixtureRow = Omit<typeof row, "release_id" | "published_at" | "current_dige
 function setup(rows: FixtureRow[] = [row]) {
   const query = vi.fn().mockResolvedValue({ rows });
   const reads = createArtifactReadMetadata({ query } as unknown as Pick<pg.Pool, "query">, "scope",
-    (artifactId, releaseId) => ({ stableUrl: `https://${artifactId}.pages.test/`, pinnedUrl: `https://${releaseId}.pages.test/` }));
+    (artifactId, releaseId) => ({ stableUrl: `https://${artifactId}.pages.test/`, versionUrl: `https://${releaseId}.pages.test/` }));
   return { reads, query };
 }
 
