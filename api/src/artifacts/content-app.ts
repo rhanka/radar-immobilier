@@ -25,7 +25,7 @@ function pathAndQuery(c: Context): string {
  * only: remove with the legacy Ingress rules per
  * docs/runbooks/ARTIFACTS_PREPROD_ACTIVATION.md ("Legacy redirect removal").
  */
-function legacyRedirect(c: Context, contentBase: string): Response | null {
+function legacyRedirect(c: Context, contentBase: string): Response {
   const target = legacyContentRedirectTarget(c.req.header("host"), contentBase, pathAndQuery(c));
   if (!target) {
     applyContentDenyHeaders(c);

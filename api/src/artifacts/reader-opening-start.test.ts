@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { Hono } from "hono";
 import { createReaderOpening } from "./reader-opening.js";
 import type { AuthConfig } from "../config.js";
 import type { AuthorityReader } from "./reader-profile.js";
@@ -45,7 +46,7 @@ function opening(options: {
     getArtifactIdForRelease: async () => options.artifactForRelease ?? null });
 }
 
-const start = (app: { request: (url: string, init?: RequestInit) => Promise<Response> }, host: string) =>
+const start = (app: Hono, host: string) =>
   app.request(`https://${host}/__reader/start`, { headers: { host } });
 
 describe("single-level /__reader/start resolution", () => {
