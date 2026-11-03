@@ -126,6 +126,8 @@ export interface AuthoringGuide {
   readonly rule: string;
   readonly assets: Readonly<{ loadOrder: readonly string[]; note: string;
     manifest: readonly Readonly<{ file: string; sha256Hex: string; sizeBytes: number; mediaType: string; url: string }>[] }>;
+  readonly mapBase: Readonly<{ tiles: string; labels: string; note: string;
+    attribution: readonly Readonly<{ text: string; licenseUrl: string }>[] }>;
   readonly starter: Readonly<{ version: string; files: readonly AuthoringGuideStarterFile[]; adapt: string }>;
   readonly data: Readonly<{
     warning: string;
@@ -204,6 +206,20 @@ export function getAuthoringGuide(): AuthoringGuide {
         note: "Official kit stylesheets served same-origin from the reserved design path " +
           `(${DESIGN_KIT_VERSION}, sha256-pinned, text/css, outside the 256 KiB publication budget). ` +
           "Load sent-tech.css, then components.css, then the page stylesheet; load reader.js before app.js.",
+      },
+      mapBase: {
+        tiles: "/__artifacts/tiles/v1/{z}/{x}/{y}",
+        labels: "/__artifacts/tiles/v1/labels/{z}/{x}/{y}",
+        note: "Same-origin raster basemap for artifact pages (lot I-10): served by the content origin " +
+          "under img-src 'self', no worker required. Render the tile layer from the tiles template; paint " +
+          "the labels template over it only when the fallback upstream is active. Always keep the " +
+          "attribution below visible. Templates mirror api/src/artifacts/tile-proxy.ts (source of truth).",
+        attribution: [
+          { text: "© Gouvernement du Québec — Cartes topographiques 1/20 000 (CC-BY 4.0)",
+            licenseUrl: "https://www.donneesquebec.ca/licence/" },
+          { text: "© Sa Majesté le Roi du chef du Canada, représenté par le ministre de Ressources naturelles Canada",
+            licenseUrl: "https://ouvert.canada.ca/fr/licence-du-gouvernement-ouvert-canada" },
+        ],
       },
       starter: {
         version: STARTER_VERSION,

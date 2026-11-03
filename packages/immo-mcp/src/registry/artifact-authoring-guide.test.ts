@@ -72,6 +72,20 @@ describe("artifact authoring guide", () => {
     expect(Object.isFrozen(guide)).toBe(true);
   });
 
+  it("should publish the same-origin tile template and both basemap attributions", () => {
+    const mapBase = getAuthoringGuide().mapBase;
+    expect(mapBase.tiles).toBe("/__artifacts/tiles/v1/{z}/{x}/{y}");
+    expect(mapBase.labels).toBe("/__artifacts/tiles/v1/labels/{z}/{x}/{y}");
+    expect(mapBase.note).toContain("img-src 'self'");
+    expect(mapBase.attribution.map((entry) => entry.text)).toEqual([
+      "© Gouvernement du Québec — Cartes topographiques 1/20 000 (CC-BY 4.0)",
+      "© Sa Majesté le Roi du chef du Canada, représenté par le ministre de Ressources naturelles Canada",
+    ]);
+    for (const entry of mapBase.attribution) {
+      expect(entry.licenseUrl).toMatch(/^https:\/\//);
+    }
+  });
+
   it("should require the published audit CLI and block findings and tool errors", () => {
     const checklist = getAuthoringGuide().checklist.join("\n");
     expect(checklist).toContain("npx --yes -p @sentropic/design-system-skills@0.1.0 design audit ./index.html");
