@@ -1,0 +1,40 @@
+{
+  "divergences": [
+    {
+      "divergence": [
+        "sig-vf-06"
+      ],
+      "name": "city-05"
+    },
+    {
+      "divergence": [
+        "sig-vf-06"
+      ],
+      "name": "city-06"
+    },
+    {
+      "divergence": [
+        "sig-sm-03"
+      ],
+      "name": "all-04"
+    },
+    {
+      "divergence": [
+        "sig-ri-03",
+        "sig-sm-02",
+        "sig-sm-03",
+        "sig-vf-06"
+      ],
+      "name": "all-05"
+    },
+    {
+      "divergence": [
+        "sig-ri-03",
+        "sig-sm-02",
+        "sig-sm-03",
+        "sig-vf-06"
+      ],
+      "name": "all-06"
+    }
+  ]
+}
