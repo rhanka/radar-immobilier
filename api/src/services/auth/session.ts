@@ -18,6 +18,14 @@ export interface SessionClaims {
   /** Email, when present. */
   email?: string;
   /**
+   * Lot I1: IdP `email_verified` at login time. Carried so the reader opening
+   * flow can JIT-reconcile the preprod sub by verified email without
+   * re-contacting the IdP. Absent on legacy sessions (treated as unverified).
+   */
+  emailVerified?: boolean;
+  /** Lot I1: issuer that verified the claims (id_token iss at login). */
+  idpIssuer?: string;
+  /**
    * Original issued-at (epoch seconds) — the ANCHOR of the absolute sliding
    * ceiling. Set once on the first mint (defaults to the current `iat`) and
    * carried verbatim through every sliding re-mint, so the rolling 15-day
@@ -53,6 +61,8 @@ export async function signSession(
   const payload: Record<string, unknown> = { sub: claims.sub };
   if (claims.name !== undefined) payload.name = claims.name;
   if (claims.email !== undefined) payload.email = claims.email;
+  if (claims.emailVerified !== undefined) payload.email_verified = claims.emailVerified;
+  if (claims.idpIssuer !== undefined) payload.idp_issuer = claims.idpIssuer;
   // On the first mint, `iat0` defaults to the current issuance; on a sliding
   // re-mint the caller passes the ORIGINAL iat0 so the absolute ceiling holds.
   payload.iat0 = claims.iat0 ?? issuedAt;
@@ -88,6 +98,8 @@ export async function verifySession(
     const out: VerifiedSession = { sub: payload.sub, exp, iat };
     if (typeof payload.name === "string") out.name = payload.name;
     if (typeof payload.email === "string") out.email = payload.email;
+    if (typeof payload.email_verified === "boolean") out.emailVerified = payload.email_verified;
+    if (typeof payload.idp_issuer === "string") out.idpIssuer = payload.idp_issuer;
     if (typeof payload.iat0 === "number") out.iat0 = payload.iat0;
     return out;
   } catch {

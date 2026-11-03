@@ -72,8 +72,10 @@ export { ARTIFACT_P0B, ARTIFACT_P0B_VERSIONS, ARTIFACT_PROVIDER_VERSION, ARTIFAC
   isArtifactMutation, isArtifactPublication } from "./p0b-profile.js";
 export { artifactRefusalResponse } from "./result-projection.js";
 export {
+  assertContentIdsDisjoint,
   createArtifactControl,
   createMemoryCommitLedger,
+  projectContentUrls,
   type ArtifactControl,
   type ArtifactControlOptions,
   type CommitFailureLedger,

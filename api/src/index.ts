@@ -10,6 +10,9 @@ import { createReaderOpening } from "./artifacts/reader-opening.js";
 import { createPublishedWriteRuntime } from "./artifacts/published-write-runtime.js";
 import { pageWriteListenerRoute } from "./artifacts/write-intent-page-listener.js";
 import { loadConfig, resolveAuthConfig, resolveTemConfig } from "./config.js";
+import { resolveAdmissionConfig } from "./admission/admission-config.js";
+import { reconcilePreprodSub } from "./admission/jit.js";
+import { pushAdmissionMutation } from "./admission/route.js";
 import { createLogger } from "./logger.js";
 import { createDb, makeDbProbe } from "./db/client.js";
 import { readDurableLegacyRetirement } from "./services/facets/legacy-retirement.js";
@@ -56,6 +59,24 @@ logger.info(
   auth.enabled
     ? "OIDC relying-party enabled (login required)"
     : "OIDC relying-party disabled (open mode — no login)",
+);
+
+// Lot I1 (R1): admission sync prod -> preprod. Fail-closed on both sides:
+// the preprod webhook answers only when enabled with prod public keys; the
+// prod private key exists ONLY in prod (k8s Secret `radar-admission-signing`).
+const admission = resolveAdmissionConfig(config);
+logger.info(
+  {
+    syncEnabled: admission.syncEnabled,
+    trustedIssuers: admission.trustedIssuers.length,
+    signing: admission.signingKey !== undefined,
+    push: admission.pushUrl !== "",
+  },
+  admission.syncEnabled
+    ? "admission sync ingest enabled (signature-verified preprod webhook)"
+    : admission.signingKey
+      ? "admission sync emitter armed (prod snapshot signing + push)"
+      : "admission sync disabled (closed by default)",
 );
 
 // Resolve optional Scaleway TEM config for invitation emails. SMTP egress is
@@ -105,7 +126,12 @@ const readerOpening = contentHost.enabled && artifactsControl?.readerStorage && 
   readerGrantSecret.length >= 32 && readerSessionSecret.length >= 32
   ? createReaderOpening({ ...artifactsControl.readerStorage, auth, contentBase: contentHost.contentBase,
     issuer: readerIssuer, grantSecret: readerGrantSecret, sessionSecret: readerSessionSecret,
-    ...(publishedWrite ? { writeDomain: publishedWrite.domain, permitsWrite: publishedWrite.permitsWrite } : {}) }) : undefined;
+    ...(publishedWrite ? { writeDomain: publishedWrite.domain, permitsWrite: publishedWrite.permitsWrite } : {}),
+    // Lot I1 (R1/a): JIT before getRights; disabled without trusted issuers.
+    ...(admission.trustedIssuers.length > 0
+      ? { reconcile: (input: { sub: string; email?: string; emailVerified: boolean; issuer: string }) =>
+        reconcilePreprodSub(dbHandle.db, input, { trustedIssuers: admission.trustedIssuers }) }
+      : {}) }) : undefined;
 logger.info(
   {
     readerWired: !!readerOpening,
@@ -139,9 +165,29 @@ const durableRetirement = await readDurableLegacyRetirement(dbHandle.db).catch((
   return "cutover-closed" as const;
 });
 
+// Lot I1: prod mutation emission (signing key + push URL present = prod).
+const signingKey = admission.signingKey;
+const admissionEmit = signingKey && admission.pushUrl !== ""
+  ? {
+    emit: (targetSub: string) => pushAdmissionMutation({
+      db: dbHandle.db,
+      kid: signingKey.kid,
+      key: signingKey.key,
+      pushUrl: admission.pushUrl,
+    }, targetSub),
+  }
+  : undefined;
+
 const app = createApp({
   checkDb: makeDbProbe(dbHandle),
   checkObjectStore: makeObjectStoreProbe(objectStore),
+  admission: {
+    db: dbHandle.db,
+    enabled: admission.syncEnabled,
+    publicKeys: admission.publicKeys,
+    trustedIssuers: admission.trustedIssuers,
+    ...(admissionEmit ? { emit: admissionEmit } : {}),
+  },
   store: objectStore,
   scrapeStore: scrapeObjectStore,
   geoDocumentsRepoint: config.GEO_DOCUMENTS_REPOINT,

@@ -81,9 +81,9 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("IMMO artifact host with real Pos
       artifactId: p.artifactId, currentReleaseId: p.releaseId, stableUrl: `https://${p.artifactId}.pages.test/` })]) });
     const source = await h.call("get_source", { artifactId: p.artifactId });
     expect(source.status).toBe(200);
-    const snapshot = source.body as { manifest: string; files: { path: string; mimeType: string; bytes: number[] }[] };
+    const snapshot = source.body as { manifest: string; files: { path: string; mimeType: string; text: string; encoding: string }[] };
     expect(JSON.parse(snapshot.manifest)).toMatchObject({ artifactId: p.artifactId });
-    expect(new TextDecoder().decode(Uint8Array.from(snapshot.files[0]!.bytes))).toBe("<h1>Before</h1>");
+    expect(snapshot.files[0]).toMatchObject({ path: "index.html", text: "<h1>Before</h1>", encoding: "utf8" });
     const published = await h.call("publish", { artifactId: p.artifactId, idempotencyKey: randomUUID(),
       files: snapshot.files.map((file) => ({ path: file.path, mimeType: file.mimeType, text: "<h1>After</h1>" })) });
     expect(published.status).toBe(201);

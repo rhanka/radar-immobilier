@@ -39,6 +39,12 @@ export interface AdminDeps {
   mailer?: MailerConfig;
   /** URL de base de l'app (pour construire le lien d'invitation). */
   appBaseUrl?: string;
+  /**
+   * Lot I1: prod-side mutation emission. Called best-effort after every
+   * account status change; resolves `{ pushed }` (periodic full snapshots
+   * converge regardless). Absent disables emission.
+   */
+  admission?: { emit: (targetSub: string) => Promise<{ pushed: boolean }> };
 }
 
 /** Génère un token d'invitation opaque (base64url, 32 bytes). */
@@ -116,6 +122,7 @@ async function updateAccountStatus(
       actorSub: string;
       at: Date;
       reason: string;
+      admissionEmitted: boolean;
     }
   | null
 > {
@@ -154,6 +161,18 @@ async function updateAccountStatus(
     createdAt: at,
   });
 
+  // Lot I1: emit a signed incremental snapshot on mutation (best-effort —
+  // the periodic full snapshot converges regardless, so a push failure never
+  // breaks the admin action; the outcome is reported honestly to the admin).
+  let admissionEmitted = false;
+  if (deps.admission) {
+    try {
+      admissionEmitted = (await deps.admission.emit(params.targetSub)).pushed;
+    } catch {
+      admissionEmitted = false;
+    }
+  }
+
   return {
     sub: params.targetSub,
     fromStatus: rows[0]!.status,
@@ -161,6 +180,7 @@ async function updateAccountStatus(
     actorSub: params.actorSub,
     at,
     reason,
+    admissionEmitted,
   };
 }
 
@@ -181,6 +201,7 @@ function statusResponse(c: Context, change: NonNullable<Awaited<ReturnType<typeo
     sub: change.sub,
     fromStatus: change.fromStatus,
     status: change.status,
+    admissionEmitted: change.admissionEmitted,
     audit: {
       actorSub: change.actorSub,
       at: change.at.toISOString(),

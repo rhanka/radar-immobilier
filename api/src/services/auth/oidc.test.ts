@@ -388,10 +388,27 @@ describe("verifyExchangedSearchToken (H4 P5 strict receiver)", () => {
 
   it("accepts one API audience and refuses multiple or repeated audiences", async () => {
     const { presented, getKey } = await makeExchanged({ aud: [EXCHANGE.apiAudience] });
-    expect(await verifyExchangedSearchToken(presented, { ...EXCHANGE, getKey })).toEqual({ sub: "human-7" });
+    expect(await verifyExchangedSearchToken(presented, { ...EXCHANGE, getKey })).toEqual({
+      sub: "human-7",
+      emailVerified: false,
+    });
     for (const aud of [[EXCHANGE.apiAudience, EXCHANGE.apiAudience], [EXCHANGE.apiAudience, `${EXCHANGE.apiAudience}/mcp`]]) {
       expect(await rejected({ aud })).toBe("strict_invalid_audience");
     }
+  });
+
+  it("surfaces the verified email for JIT when the minter includes it", async () => {
+    const { presented, getKey } = await makeExchanged({ email: "mcp@example.ca", email_verified: true });
+    expect(await verifyExchangedSearchToken(presented, { ...EXCHANGE, getKey })).toEqual({
+      sub: "human-7",
+      email: "mcp@example.ca",
+      emailVerified: true,
+    });
+    const without = await makeExchanged();
+    expect(await verifyExchangedSearchToken(without.presented, { ...EXCHANGE, getKey: without.getKey })).toEqual({
+      sub: "human-7",
+      emailVerified: false,
+    });
   });
 
   it("rejects overlong lifetime, expiry, proof binding and token type", async () => {
