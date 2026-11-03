@@ -23,12 +23,15 @@ describe("IMMO artifact read metadata", () => {
     const { reads, query } = setup();
     const result = await reads.project(request("/list"), async () => {
       const ids = await reads.listArtifactIds();
-      return ok({ total: 1, artifacts: ids.map((artifactId) => ({ artifactId, ownerId: "alice", digest: "previous snapshot" })) });
+      return ok({ total: 1, artifacts: ids.map((artifactId) => ({ artifactId, ownerId: "alice", digest: "previous snapshot",
+        stableUrl: `https://${artifactId}.pages.test/`, versionUrl: `https://${row.release_id}.pages.test/` })) });
     });
     expect(result).toMatchObject({ ok: true, result: { body: { total: 1, artifacts: [{ artifactId: row.id,
       bindingName: "summer", ownerId: "alice", currentReleaseId: row.release_id, digest: row.current_digest, state: "active", published: true,
       stableUrl: `https://${row.id}.pages.test/`, pinnedUrl: `https://${row.release_id}.pages.test/`,
       createdAt: "2026-10-01T00:00:00.000Z", updatedAt: "2026-10-02T00:00:00.000Z" }] } } });
+    const artifacts = (result as { result: { body: { artifacts: Record<string, unknown>[] } } }).result.body.artifacts;
+    expect(artifacts[0]).not.toHaveProperty("versionUrl");
     expect(query).toHaveBeenCalledTimes(1);
     expect(query.mock.calls[0]![1]).toEqual(["scope", null]);
   });

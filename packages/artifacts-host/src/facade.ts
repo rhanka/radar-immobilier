@@ -6,10 +6,47 @@ import { projectArtifactHttpOutcome, type HttpResponse } from "@sentropic/artifa
 // hosts on `pages.<app>`. Both stable (`<artifactId>.<base>/`) and exact
 // (`<releaseId>.<base>/`, exposed as `pinnedUrl`) share one wildcard; the
 // label resolves server-side as artifact or release. Upstream
-// `@sentropic/artifacts@0.2.8` implements the same single-level scheme
+// `@sentropic/artifacts@0.2.9` implements the same single-level scheme
 // (`versionUrl` for the exact release); immo keeps `pinnedUrl` as its own
 // opaque MCP/API contract and never imports the upstream routing subpath.
 const UUID_RE = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
+
+/**
+ * Project the upstream 0.2.9 `versionUrl` wire field to the immo opaque
+ * `pinnedUrl` contract on any response body (v1 root fields or v2
+ * `output.*`, single objects or arrays such as `artifacts`/`versions`).
+ * `versionUrl` never leaks: it is dropped wherever `pinnedUrl` is present
+ * or derived, so `get`, `list`, `publish`/`revert` (v1/v2 HTTP and MCP),
+ * `get_source` and `list_versions` all expose `pinnedUrl` only.
+ */
+export function projectContentUrls<T>(value: T): T {
+  if (Array.isArray(value)) return value.map(projectContentUrls) as T;
+  if (typeof value === "object" && value !== null) {
+    const record = value as Record<string, unknown>;
+    const projected: Record<string, unknown> = {};
+    for (const [key, entry] of Object.entries(record)) {
+      if (key === "versionUrl") continue;
+      projected[key] = projectContentUrls(entry);
+    }
+    if (typeof record.versionUrl === "string" && typeof projected.pinnedUrl !== "string") {
+      projected.pinnedUrl = record.versionUrl;
+    }
+    return projected as T;
+  }
+  return value;
+}
+
+/**
+ * Id-collision guard: a release must never reuse its artifact id. A label
+ * that is both an artifact and a release fails closed (404 on reads, throw
+ * on publish) instead of serving the stable artifact silently like upstream.
+ */
+export function assertContentIdsDisjoint(artifactId: unknown, releaseId: unknown): void {
+  if (typeof artifactId === "string" && typeof releaseId === "string" &&
+    artifactId.toLowerCase() === releaseId.toLowerCase()) {
+    throw new Error("invalid content links");
+  }
+}
 
 function contentUrl(label: string, base: string): string | null {
   if (!UUID_RE.test(label) || !base || base.length > 253) return null;
@@ -201,24 +238,29 @@ export function createArtifactControl(
         }
         if (!current.allowed) return denied(current.status, current.body);
       }
-      const response = { ...projectArtifactHttpOutcome(outcome, profile.resultEnvelopeVersion === 2) };
+      const projectedOutcome = projectArtifactHttpOutcome(outcome, profile.resultEnvelopeVersion === 2);
+      const response = { ...projectedOutcome, body: projectContentUrls(projectedOutcome.body) };
       if (!outcome.ok && outcome.failure.publicCode === "rate_limited" && profile.resultEnvelopeVersion !== 2) {
         response.body = { error: "rate_limited", retryable: outcome.failure.retriable };
       }
       Object.defineProperty(response, "retryable", { value: !outcome.ok && outcome.failure.retriable });
-      if (profile.resultEnvelopeVersion === 2) return response;
-      if (op !== "publish" || response.status !== 201) return response;
-      const result = response.body as { releaseId: string; manifest: string };
-      const manifest = JSON.parse(result.manifest) as { digest: string };
-      // Exact-version URL shares the single wildcard (no `pinned` label). The
-      // `pinnedUrl` field name stays as the opaque MCP/API contract.
-      const pinnedUrl = contentUrl(result.releaseId, contentBase);
-      // Id-collision guard: a release must never reuse its artifact id.
-      if (!pinnedUrl || result.releaseId.toLowerCase() === String(artifactId).toLowerCase()) {
-        throw new Error("invalid content links");
+      if ((op === "publish" || op === "revert") && response.status === 201) {
+        const payload = (response.body as { output?: unknown }).output ?? response.body;
+        const record = payload as { releaseId?: unknown; manifest?: unknown };
+        assertContentIdsDisjoint(artifactId, record.releaseId);
+        if (profile.resultEnvelopeVersion !== 2) {
+          const result = response.body as { releaseId: string; manifest: string };
+          const manifest = JSON.parse(result.manifest) as { digest: string };
+          // Exact-version URL shares the single wildcard (no `pinned` label). The
+          // `pinnedUrl` field name stays as the opaque MCP/API contract.
+          const pinnedUrl = contentUrl(result.releaseId, contentBase);
+          if (!pinnedUrl) throw new Error("invalid content links");
+          return { status: 201, body: projectContentUrls({ ...result, artifactId, releaseId: result.releaseId, digest: manifest.digest,
+            stableUrl, pinnedUrl }) };
+        }
+        return response;
       }
-      return { status: 201, body: { ...result, artifactId, releaseId: result.releaseId, digest: manifest.digest,
-        stableUrl, pinnedUrl } };
+      return response;
     },
   };
   return control;
