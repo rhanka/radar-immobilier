@@ -1,0 +1,649 @@
+{
+  "cases": [
+    {
+      "available": true,
+      "byCity": [
+        {
+          "citySlug": "valleyfield",
+          "matched": 1
+        }
+      ],
+      "citySlug": "valleyfield",
+      "coPv": {
+        "sig-vf-01": 0
+      },
+      "lotNos": [],
+      "matched": 1,
+      "name": "city-01",
+      "orderedIds": [
+        "sig-vf-01"
+      ],
+      "panelDivergence": [],
+      "zoneCodes": [
+        "H-101"
+      ]
+    },
+    {
+      "available": true,
+      "byCity": [
+        {
+          "citySlug": "valleyfield",
+          "matched": 1
+        }
+      ],
+      "citySlug": "valleyfield",
+      "coPv": {
+        "sig-vf-01": 0
+      },
+      "lotNos": [],
+      "matched": 1,
+      "name": "city-02",
+      "orderedIds": [
+        "sig-vf-01"
+      ],
+      "panelDivergence": [],
+      "zoneCodes": [
+        "H-101"
+      ]
+    },
+    {
+      "available": true,
+      "byCity": [
+        {
+          "citySlug": "valleyfield",
+          "matched": 1
+        }
+      ],
+      "citySlug": "valleyfield",
+      "coPv": {
+        "sig-vf-01": 0
+      },
+      "lotNos": [],
+      "matched": 1,
+      "name": "city-03",
+      "orderedIds": [
+        "sig-vf-01"
+      ],
+      "panelDivergence": [],
+      "zoneCodes": [
+        "H-101"
+      ]
+    },
+    {
+      "available": true,
+      "byCity": [
+        {
+          "citySlug": "valleyfield",
+          "matched": 1
+        }
+      ],
+      "citySlug": "valleyfield",
+      "coPv": {
+        "sig-vf-01": 0
+      },
+      "lotNos": [],
+      "matched": 1,
+      "name": "city-04",
+      "orderedIds": [
+        "sig-vf-01"
+      ],
+      "panelDivergence": [],
+      "zoneCodes": [
+        "H-101"
+      ]
+    },
+    {
+      "available": true,
+      "byCity": [
+        {
+          "citySlug": "valleyfield",
+          "matched": 5
+        }
+      ],
+      "citySlug": "valleyfield",
+      "coPv": {
+        "sig-vf-01": 0,
+        "sig-vf-02": 0,
+        "sig-vf-03": 0,
+        "sig-vf-04": 0,
+        "sig-vf-06": 0
+      },
+      "lotNos": [],
+      "matched": 5,
+      "name": "city-05",
+      "orderedIds": [
+        "sig-vf-01",
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-06"
+      ],
+      "panelDivergence": [
+        "sig-vf-06"
+      ],
+      "zoneCodes": [
+        "H-101"
+      ]
+    },
+    {
+      "available": true,
+      "byCity": [
+        {
+          "citySlug": "valleyfield",
+          "matched": 5
+        }
+      ],
+      "citySlug": "valleyfield",
+      "coPv": {
+        "sig-vf-01": 0,
+        "sig-vf-02": 0,
+        "sig-vf-03": 0,
+        "sig-vf-04": 0,
+        "sig-vf-06": 0
+      },
+      "lotNos": [],
+      "matched": 5,
+      "name": "city-06",
+      "orderedIds": [
+        "sig-vf-01",
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-06"
+      ],
+      "panelDivergence": [
+        "sig-vf-06"
+      ],
+      "zoneCodes": [
+        "H-101"
+      ]
+    },
+    {
+      "available": true,
+      "byCity": [
+        {
+          "citySlug": "valleyfield",
+          "matched": 1
+        }
+      ],
+      "citySlug": "valleyfield",
+      "coPv": {
+        "sig-vf-01": 0
+      },
+      "lotNos": [],
+      "matched": 1,
+      "name": "city-07",
+      "orderedIds": [
+        "sig-vf-01"
+      ],
+      "panelDivergence": [],
+      "zoneCodes": [
+        "H-101"
+      ]
+    },
+    {
+      "available": true,
+      "byCity": [],
+      "citySlug": "valleyfield",
+      "coPv": {},
+      "lotNos": [],
+      "matched": 0,
+      "name": "city-08",
+      "orderedIds": [],
+      "panelDivergence": [],
+      "zoneCodes": []
+    },
+    {
+      "available": true,
+      "byCity": [],
+      "citySlug": "valleyfield",
+      "coPv": {},
+      "lotNos": [],
+      "matched": 0,
+      "name": "city-09",
+      "orderedIds": [],
+      "panelDivergence": [],
+      "zoneCodes": []
+    },
+    {
+      "available": true,
+      "byCity": [
+        {
+          "citySlug": "valleyfield",
+          "matched": 1
+        }
+      ],
+      "citySlug": "valleyfield",
+      "coPv": {
+        "sig-vf-01": 0
+      },
+      "lotNos": [],
+      "matched": 1,
+      "name": "city-10",
+      "orderedIds": [
+        "sig-vf-01"
+      ],
+      "panelDivergence": [],
+      "zoneCodes": [
+        "H-101"
+      ]
+    },
+    {
+      "available": true,
+      "byCity": [
+        {
+          "citySlug": "valleyfield",
+          "matched": 1
+        }
+      ],
+      "citySlug": "valleyfield",
+      "coPv": {
+        "sig-vf-01": 0
+      },
+      "lotNos": [],
+      "matched": 1,
+      "name": "city-11",
+      "orderedIds": [
+        "sig-vf-01"
+      ],
+      "panelDivergence": [],
+      "zoneCodes": [
+        "H-101"
+      ]
+    },
+    {
+      "available": true,
+      "byCity": [],
+      "citySlug": "valleyfield",
+      "coPv": {},
+      "lotNos": [],
+      "matched": 0,
+      "name": "city-12",
+      "orderedIds": [],
+      "panelDivergence": [],
+      "zoneCodes": []
+    },
+    {
+      "available": true,
+      "byCity": [
+        {
+          "citySlug": "richelieu",
+          "matched": 1
+        },
+        {
+          "citySlug": "sainte-martine",
+          "matched": 1
+        },
+        {
+          "citySlug": "valleyfield",
+          "matched": 1
+        }
+      ],
+      "citySlug": null,
+      "coPv": {
+        "sig-ri-02": 0,
+        "sig-sm-01": 0,
+        "sig-vf-01": 0
+      },
+      "lotNos": [],
+      "matched": 3,
+      "name": "all-01",
+      "orderedIds": [
+        "sig-vf-01",
+        "sig-ri-02",
+        "sig-sm-01"
+      ],
+      "panelDivergence": [],
+      "zoneCodes": [
+        "H-101",
+        "R-201"
+      ]
+    },
+    {
+      "available": true,
+      "byCity": [
+        {
+          "citySlug": "richelieu",
+          "matched": 1
+        },
+        {
+          "citySlug": "sainte-martine",
+          "matched": 1
+        },
+        {
+          "citySlug": "valleyfield",
+          "matched": 1
+        }
+      ],
+      "citySlug": null,
+      "coPv": {
+        "sig-ri-02": 0,
+        "sig-sm-01": 0,
+        "sig-vf-01": 0
+      },
+      "lotNos": [],
+      "matched": 3,
+      "name": "all-02",
+      "orderedIds": [
+        "sig-vf-01",
+        "sig-ri-02",
+        "sig-sm-01"
+      ],
+      "panelDivergence": [],
+      "zoneCodes": [
+        "H-101",
+        "R-201"
+      ]
+    },
+    {
+      "available": true,
+      "byCity": [
+        {
+          "citySlug": "richelieu",
+          "matched": 1
+        },
+        {
+          "citySlug": "sainte-martine",
+          "matched": 1
+        },
+        {
+          "citySlug": "valleyfield",
+          "matched": 1
+        }
+      ],
+      "citySlug": null,
+      "coPv": {
+        "sig-ri-02": 0,
+        "sig-sm-01": 0,
+        "sig-vf-01": 0
+      },
+      "lotNos": [],
+      "matched": 3,
+      "name": "all-03",
+      "orderedIds": [
+        "sig-vf-01",
+        "sig-ri-02",
+        "sig-sm-01"
+      ],
+      "panelDivergence": [],
+      "zoneCodes": [
+        "H-101",
+        "R-201"
+      ]
+    },
+    {
+      "available": true,
+      "byCity": [
+        {
+          "citySlug": "richelieu",
+          "matched": 1
+        },
+        {
+          "citySlug": "sainte-martine",
+          "matched": 2
+        },
+        {
+          "citySlug": "valleyfield",
+          "matched": 1
+        }
+      ],
+      "citySlug": null,
+      "coPv": {
+        "sig-ri-02": 1,
+        "sig-sm-01": 0,
+        "sig-sm-03": 1,
+        "sig-vf-01": 0
+      },
+      "lotNos": [],
+      "matched": 4,
+      "name": "all-04",
+      "orderedIds": [
+        "sig-vf-01",
+        "sig-ri-02",
+        "sig-sm-01",
+        "sig-sm-03"
+      ],
+      "panelDivergence": [
+        "sig-sm-03"
+      ],
+      "zoneCodes": [
+        "H-101",
+        "R-201"
+      ]
+    },
+    {
+      "available": true,
+      "byCity": [
+        {
+          "citySlug": "richelieu",
+          "matched": 2
+        },
+        {
+          "citySlug": "sainte-martine",
+          "matched": 3
+        },
+        {
+          "citySlug": "valleyfield",
+          "matched": 5
+        }
+      ],
+      "citySlug": null,
+      "coPv": {
+        "sig-ri-02": 1,
+        "sig-ri-03": 0,
+        "sig-sm-01": 0,
+        "sig-sm-02": 0,
+        "sig-sm-03": 1,
+        "sig-vf-01": 0,
+        "sig-vf-02": 0,
+        "sig-vf-03": 0,
+        "sig-vf-04": 0,
+        "sig-vf-06": 0
+      },
+      "lotNos": [],
+      "matched": 10,
+      "name": "all-05",
+      "orderedIds": [
+        "sig-vf-01",
+        "sig-ri-02",
+        "sig-sm-01",
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-06",
+        "sig-sm-02",
+        "sig-sm-03",
+        "sig-ri-03"
+      ],
+      "panelDivergence": [
+        "sig-ri-03",
+        "sig-sm-02",
+        "sig-sm-03",
+        "sig-vf-06"
+      ],
+      "zoneCodes": [
+        "H-101",
+        "R-201"
+      ]
+    },
+    {
+      "available": true,
+      "byCity": [
+        {
+          "citySlug": "richelieu",
+          "matched": 2
+        },
+        {
+          "citySlug": "sainte-martine",
+          "matched": 3
+        },
+        {
+          "citySlug": "valleyfield",
+          "matched": 5
+        }
+      ],
+      "citySlug": null,
+      "coPv": {
+        "sig-ri-02": 1,
+        "sig-ri-03": 0,
+        "sig-sm-01": 0,
+        "sig-sm-02": 0,
+        "sig-sm-03": 1,
+        "sig-vf-01": 0,
+        "sig-vf-02": 0,
+        "sig-vf-03": 0,
+        "sig-vf-04": 0,
+        "sig-vf-06": 0
+      },
+      "lotNos": [],
+      "matched": 10,
+      "name": "all-06",
+      "orderedIds": [
+        "sig-vf-01",
+        "sig-ri-02",
+        "sig-sm-01",
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-06",
+        "sig-sm-02",
+        "sig-sm-03",
+        "sig-ri-03"
+      ],
+      "panelDivergence": [
+        "sig-ri-03",
+        "sig-sm-02",
+        "sig-sm-03",
+        "sig-vf-06"
+      ],
+      "zoneCodes": [
+        "H-101",
+        "R-201"
+      ]
+    },
+    {
+      "available": true,
+      "byCity": [
+        {
+          "citySlug": "richelieu",
+          "matched": 1
+        },
+        {
+          "citySlug": "sainte-martine",
+          "matched": 1
+        },
+        {
+          "citySlug": "valleyfield",
+          "matched": 1
+        }
+      ],
+      "citySlug": null,
+      "coPv": {
+        "sig-ri-02": 0,
+        "sig-sm-01": 0,
+        "sig-vf-01": 0
+      },
+      "lotNos": [],
+      "matched": 3,
+      "name": "all-07",
+      "orderedIds": [
+        "sig-ri-02",
+        "sig-sm-01",
+        "sig-vf-01"
+      ],
+      "panelDivergence": [],
+      "zoneCodes": [
+        "H-101",
+        "R-201"
+      ]
+    },
+    {
+      "available": true,
+      "byCity": [],
+      "citySlug": null,
+      "coPv": {},
+      "lotNos": [],
+      "matched": 0,
+      "name": "all-08",
+      "orderedIds": [],
+      "panelDivergence": [],
+      "zoneCodes": []
+    },
+    {
+      "available": true,
+      "byCity": [],
+      "citySlug": null,
+      "coPv": {},
+      "lotNos": [],
+      "matched": 0,
+      "name": "all-09",
+      "orderedIds": [],
+      "panelDivergence": [],
+      "zoneCodes": []
+    },
+    {
+      "available": true,
+      "byCity": [
+        {
+          "citySlug": "valleyfield",
+          "matched": 1
+        }
+      ],
+      "citySlug": null,
+      "coPv": {
+        "sig-vf-01": 0
+      },
+      "lotNos": [],
+      "matched": 1,
+      "name": "all-10",
+      "orderedIds": [
+        "sig-vf-01"
+      ],
+      "panelDivergence": [],
+      "zoneCodes": [
+        "H-101"
+      ]
+    },
+    {
+      "available": true,
+      "byCity": [
+        {
+          "citySlug": "richelieu",
+          "matched": 1
+        },
+        {
+          "citySlug": "valleyfield",
+          "matched": 1
+        }
+      ],
+      "citySlug": null,
+      "coPv": {
+        "sig-ri-02": 0,
+        "sig-vf-01": 0
+      },
+      "lotNos": [],
+      "matched": 2,
+      "name": "all-11",
+      "orderedIds": [
+        "sig-vf-01",
+        "sig-ri-02"
+      ],
+      "panelDivergence": [],
+      "zoneCodes": [
+        "H-101"
+      ]
+    },
+    {
+      "available": true,
+      "byCity": [],
+      "citySlug": null,
+      "coPv": {},
+      "lotNos": [],
+      "matched": 0,
+      "name": "all-12",
+      "orderedIds": [],
+      "panelDivergence": [],
+      "zoneCodes": []
+    }
+  ]
+}
