@@ -1,0 +1,278 @@
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+import { describe, expect, it } from "vitest";
+import { MAP_KIT_ASSETS } from "@radar/artifacts-host";
+import {
+  bboxOf,
+  evaluatePaint,
+  expandTemplate,
+  findFeatureAt,
+  pointInRing,
+  tilesForBounds,
+  tileToLonLat,
+  tileXY,
+  validateBasemapTemplate,
+} from "../../src/artifacts/design-assets/map-base.mjs";
+
+const here = dirname(fileURLToPath(import.meta.url));
+const fixtures = join(here, "..", "fixtures", "map-i4");
+const designAssets = join(here, "..", "..", "src", "artifacts", "design-assets");
+
+type Properties = Record<string, unknown>;
+interface TestFeature {
+  readonly type: "Feature";
+  readonly properties: Properties;
+  readonly geometry: { readonly type: string; readonly coordinates: unknown } | null;
+}
+
+function load(name: string) {
+  return JSON.parse(readFileSync(join(fixtures, name), "utf8")) as {
+    readonly type: string;
+    readonly numberMatched: number;
+    readonly numberReturned: number;
+    readonly features: TestFeature[];
+  };
+}
+
+/** Independent point-in-ring oracle (duplicated on purpose, not shared code). */
+function oracleInside(lon: number, lat: number, ring: readonly (readonly number[])[]): boolean {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i]![0]!;
+    const yi = ring[i]![1]!;
+    const xj = ring[j]![0]!;
+    const yj = ring[j]![1]!;
+    if (yi > lat !== yj > lat && lon < ((xj - xi) * (lat - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+function oracleContains(geometry: TestFeature["geometry"], lon: number, lat: number): boolean {
+  if (!geometry) return false;
+  if (geometry.type === "Polygon" && Array.isArray(geometry.coordinates)) {
+    const rings = geometry.coordinates as readonly (readonly number[])[];
+    if (rings.length === 0 || !oracleInside(lon, lat, rings[0]!)) return false;
+    return rings.slice(1).every((hole) => !oracleInside(lon, lat, hole));
+  }
+  if (geometry.type === "MultiPolygon" && Array.isArray(geometry.coordinates)) {
+    return (geometry.coordinates as unknown[]).some((polygon) =>
+      oracleContains({ type: "Polygon", coordinates: polygon }, lon, lat));
+  }
+  return false;
+}
+
+function collectProperties(value: unknown, into: Properties[]): void {
+  if (Array.isArray(value)) {
+    for (const entry of value) collectProperties(entry, into);
+    return;
+  }
+  if (value !== null && typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    if (typeof record["type"] === "string" && "properties" in record &&
+      record["properties"] !== null && typeof record["properties"] === "object") {
+      into.push(record["properties"] as Properties);
+    }
+    for (const entry of Object.values(record)) collectProperties(entry, into);
+  }
+}
+
+describe("map-i4 real fixtures", () => {
+  it("should load the captured Longueuil zonage and lots subsets with their match counts", () => {
+    const zones = load("zones-longueuil.geojson");
+    const lots = load("lots-longueuil.geojson");
+    expect(zones.type).toBe("FeatureCollection");
+    expect(zones.features).toHaveLength(40);
+    expect(zones.numberMatched).toBe(81);
+    expect(zones.numberReturned).toBe(40);
+    expect(lots.type).toBe("FeatureCollection");
+    expect(lots.features).toHaveLength(80);
+    expect(lots.numberMatched).toBe(1076);
+    expect(lots.numberReturned).toBe(80);
+  });
+
+  it("should expose no address or code_postal field anywhere in the fixtures", () => {
+    for (const name of ["zones-longueuil.geojson", "lots-longueuil.geojson"]) {
+      const collection = load(name);
+      const seen: Properties[] = [];
+      collectProperties(collection, seen);
+      expect(seen.length).toBeGreaterThan(0);
+      for (const properties of seen) {
+        for (const key of Object.keys(properties)) {
+          expect(key.toLowerCase(), `${name}:${key}`).not.toMatch(/adress|postal|address/);
+        }
+      }
+      const raw = readFileSync(join(fixtures, name), "utf8").toLowerCase();
+      expect(raw).not.toContain("adresse");
+      expect(raw).not.toContain("code_postal");
+    }
+  });
+
+  it("should keep cadastral identifiers on every feature", () => {
+    const zones = load("zones-longueuil.geojson");
+    const lots = load("lots-longueuil.geojson");
+    for (const feature of zones.features) {
+      expect(typeof feature.properties["zone_code"]).toBe("string");
+    }
+    for (const feature of lots.features) {
+      const identifier = feature.properties["NO_LOT"] ?? feature.properties["noLot"];
+      expect(typeof identifier).not.toBe("undefined");
+      expect(typeof feature.properties["zone_code"]).toBe("string");
+    }
+  });
+});
+
+describe("map-base geometry", () => {
+  it("should bound the real collections around Longueuil", () => {
+    const zones = load("zones-longueuil.geojson");
+    const lots = load("lots-longueuil.geojson");
+    for (const collection of [zones, lots]) {
+      const box = bboxOf(collection);
+      expect(box).not.toBeNull();
+      const [minLon, minLat, maxLon, maxLat] = box!;
+      expect(minLon).toBeGreaterThan(-74);
+      expect(maxLon).toBeLessThan(-73);
+      expect(minLat).toBeGreaterThan(45);
+      expect(maxLat).toBeLessThan(46);
+      expect(maxLon).toBeGreaterThan(minLon);
+      expect(maxLat).toBeGreaterThan(minLat);
+    }
+    expect(bboxOf({ type: "FeatureCollection", features: [] })).toBeNull();
+  });
+
+  it("should agree with an independent oracle on a grid over the real data", () => {
+    const zones = load("zones-longueuil.geojson");
+    const lots = load("lots-longueuil.geojson");
+    const sources = { outlines: [], zones: zones.features, lots: lots.features };
+    const box = bboxOf({ type: "FeatureCollection", features: [...zones.features, ...lots.features] })!;
+    const [minLon, minLat, maxLon, maxLat] = box;
+    // One assertion at the end: per-cell expects would format whole
+    // GeoJSON features on mismatch, which buries the signal.
+    const mismatches: string[] = [];
+    let hits = 0;
+    for (let gx = 0; gx < 12; gx += 1) {
+      for (let gy = 0; gy < 12; gy += 1) {
+        const lon = minLon + ((gx + 0.5) / 12) * (maxLon - minLon);
+        const lat = minLat + ((gy + 0.5) / 12) * (maxLat - minLat);
+        const found = findFeatureAt(sources, lon, lat);
+        const contained = [...lots.features, ...zones.features]
+          .filter((feature) => oracleContains(feature.geometry, lon, lat));
+        if (found === null) {
+          if (contained.length !== 0) mismatches.push(`cell ${gx},${gy}: bundle finds nothing, oracle contains ${contained.length}`);
+        } else {
+          hits += 1;
+          if (!oracleContains(found.feature.geometry, lon, lat)) {
+            mismatches.push(`cell ${gx},${gy}: bundle hit is not inside its own geometry`);
+          }
+          // Lots draw over zones: a lot hit wins over any zone hit.
+          if (found.layer === "zones" &&
+            lots.features.some((feature) => oracleContains(feature.geometry, lon, lat))) {
+            mismatches.push(`cell ${gx},${gy}: zone hit while a lot contains the point`);
+          }
+        }
+      }
+    }
+    expect(mismatches).toEqual([]);
+    expect(hits).toBeGreaterThan(10);
+  });
+
+  it("should hit-test layers topmost-first on synthetic polygons", () => {
+    const square = (x0: number, y0: number, x1: number, y1: number): TestFeature => ({
+      type: "Feature",
+      properties: {},
+      geometry: { type: "Polygon", coordinates: [[[x0, y0], [x1, y0], [x1, y1], [x0, y1], [x0, y0]]] },
+    });
+    expect(pointInRing(0.5, 0.5, [[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]])).toBe(true);
+    expect(pointInRing(2, 2, [[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]])).toBe(false);
+    const sources = { outlines: [square(0, 0, 10, 10)], zones: [square(0, 0, 5, 5)], lots: [square(1, 1, 2, 2)] };
+    expect(findFeatureAt(sources, 1.5, 1.5)?.layer).toBe("lots");
+    expect(findFeatureAt(sources, 3, 3)?.layer).toBe("zones");
+    expect(findFeatureAt(sources, 8, 8)?.layer).toBe("outlines");
+    expect(findFeatureAt(sources, 20, 20)).toBeNull();
+  });
+});
+
+describe("map-base paint expressions", () => {
+  it("should resolve literal, function and stop-table colors with fallbacks", () => {
+    const properties = { zone_code: "H34-045 (VLO)", surface_m2: 512 };
+    expect(evaluatePaint({ fill: "#ff0000" }, properties).fill).toBe("#ff0000");
+    expect(evaluatePaint({ fill: (props: Properties) => (props["surface_m2"] as number) > 500 ? "#00ff00" : "#0000ff" }, properties).fill)
+      .toBe("#00ff00");
+    expect(evaluatePaint({
+      fill: { property: "zone_code", stops: [["H34-045 (VLO)", "#123456"]], fallback: "#abcdef" },
+    }, properties).fill).toBe("#123456");
+    expect(evaluatePaint({
+      fill: { property: "zone_code", stops: [["OTHER", "#123456"]], fallback: "#abcdef" },
+    }, properties).fill).toBe("#abcdef");
+    expect(evaluatePaint({}, properties)).toEqual({ fill: "rgba(0,0,0,0)", stroke: "#3a3a3a", lineWidth: 1 });
+    expect(evaluatePaint({ lineWidth: -2 }, properties).lineWidth).toBe(1);
+  });
+
+  it("should paint real zones by code and lots by surface through page expressions", () => {
+    const zones = load("zones-longueuil.geojson");
+    const lots = load("lots-longueuil.geojson");
+    const firstCode = zones.features[0]!.properties["zone_code"];
+    const paint = {
+      zones: { fill: { property: "zone_code", stops: [[firstCode, "#ff0000"]], fallback: "#00ff00" }, stroke: "#111111" },
+      lots: { fill: (props: Properties) => (Number(props["surface_m2"]) > 1000 ? "#0000ff" : "#ffff00") },
+    };
+    expect(evaluatePaint(paint.zones, zones.features[0]!.properties).fill).toBe("#ff0000");
+    const other = zones.features.find((feature) => feature.properties["zone_code"] !== firstCode)!;
+    expect(evaluatePaint(paint.zones, other.properties).fill).toBe("#00ff00");
+    const fills = new Set(lots.features.map((feature) => evaluatePaint(paint.lots, feature.properties).fill));
+    expect(fills.size).toBeGreaterThanOrEqual(1);
+  });
+});
+
+describe("map-base basemap hook", () => {
+  it("should accept only same-origin templates carrying z, x and y", () => {
+    expect(validateBasemapTemplate(null)).toBeNull();
+    expect(validateBasemapTemplate(undefined)).toBeNull();
+    expect(validateBasemapTemplate("/tiles/{z}/{x}/{y}.png")).toBe("/tiles/{z}/{x}/{y}.png");
+    expect(() => validateBasemapTemplate("https://tiles.example.com/{z}/{x}/{y}.png")).toThrow();
+    expect(() => validateBasemapTemplate("/tiles/{z}/{x}.png")).toThrow();
+    expect(() => validateBasemapTemplate(42)).toThrow();
+  });
+
+  it("should expand templates and index standard XYZ tiles", () => {
+    expect(expandTemplate("/t/{z}/{x}/{y}.png", 14, 4846, 6132)).toBe("/t/14/4846/6132.png");
+    const [x, y] = tileXY(-73.512, 45.53, 14);
+    expect(x).toBeGreaterThanOrEqual(0);
+    expect(y).toBeGreaterThanOrEqual(0);
+    expect(x).toBeLessThan(2 ** 14);
+    expect(y).toBeLessThan(2 ** 14);
+    const [west, north] = tileToLonLat(x, y, 14);
+    const [east, south] = tileToLonLat(x + 1, y + 1, 14);
+    expect(west).toBeLessThanOrEqual(-73.512);
+    expect(east).toBeGreaterThanOrEqual(-73.512);
+    expect(south).toBeLessThanOrEqual(45.53);
+    expect(north).toBeGreaterThanOrEqual(45.53);
+    const tiles = tilesForBounds([[-73.52, 45.535], [-73.505, 45.525]], 14);
+    expect(tiles.length).toBeGreaterThan(0);
+    expect(tiles.length).toBeLessThan(64);
+    expect(new Set(tiles.map(([tx, ty]) => `${tx}/${ty}`)).size).toBe(tiles.length);
+  });
+});
+
+describe("map-base served bytes", () => {
+  it("should match the pinned manifest digests and sizes exactly", () => {
+    for (const asset of MAP_KIT_ASSETS) {
+      const bytes = readFileSync(join(designAssets, asset.file), "utf8");
+      expect(createHash("sha256").update(bytes).digest("hex")).toBe(asset.sha256Hex);
+      expect(Buffer.byteLength(bytes)).toBe(asset.sizeBytes);
+    }
+  });
+
+  it("should carry no worker, network, style-injection or personal-data surface", () => {
+    const bundle = readFileSync(join(designAssets, "map-base.mjs"), "utf8");
+    for (const forbidden of ["new Worker", "fetch(", "setAttribute(\"style\"", "<style",
+      "adresse", "code_postal", "http://", "https://", ".style.", "eval(", "innerHTML"]) {
+      expect(bundle, forbidden).not.toContain(forbidden);
+    }
+    const css = readFileSync(join(designAssets, "map-base.css"), "utf8");
+    for (const forbidden of ["http://", "https://", "adresse"]) {
+      expect(css, forbidden).not.toContain(forbidden);
+    }
+  });
+});
