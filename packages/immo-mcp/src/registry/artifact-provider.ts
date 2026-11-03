@@ -82,8 +82,15 @@ const CAS_GUARDED_TOOLS: ReadonlySet<string> = new Set(
  * The server still enforces it per profile (precondition_required with
  * the descriptor in the error details); the transport keeps its own
  * deferral for the same omission.
+ *
+ * `artifacts_get_source` additionally pins the `paths` property to its
+ * qualified description-less shape: upstream 0.2.8 documents the text /
+ * base64 encoding there, and claude.ai resets the owner's per-tool
+ * "Always allow" grant whenever a served definition changes, so the
+ * catalogue keeps the exact qualified surface instead.
  */
 function stabilizeArtifactInputSchema(name: string, schema: Readonly<Record<string, unknown>>): Record<string, unknown> {
+  if (name === "artifacts_get_source") return stabilizeGetSourceInputSchema(schema);
   if (!CAS_GUARDED_TOOLS.has(name)) return schema as Record<string, unknown>;
   const properties = { ...schema.properties as Record<string, unknown> };
   const guard = properties.expectedCurrentReleaseId;
@@ -92,6 +99,22 @@ function stabilizeArtifactInputSchema(name: string, schema: Readonly<Record<stri
     : { type: ["string", "null"], format: "uuid", description: EXPECTED_RELEASE_DESCRIPTION };
   return { ...schema, properties,
     required: (schema.required as string[]).filter((key) => key !== "expectedCurrentReleaseId") };
+}
+
+/**
+ * Pin `artifacts_get_source` inputs to the qualified surface: the `paths`
+ * property keeps its qualified shape without the encoding description
+ * upstream added in 0.2.8. Validation still runs against the upstream
+ * profile; only the served catalogue stays bit-identical.
+ */
+function stabilizeGetSourceInputSchema(schema: Readonly<Record<string, unknown>>): Record<string, unknown> {
+  const properties = schema.properties as Record<string, unknown> | undefined;
+  const paths = properties?.paths as Record<string, unknown> | undefined;
+  if (!paths || typeof paths !== "object" || Array.isArray(paths) || !("description" in paths)) {
+    return schema as Record<string, unknown>;
+  }
+  const { description: _dropped, ...rest } = paths;
+  return { ...schema, properties: { ...properties, paths: rest } };
 }
 
 export function createImmoArtifactManifest(policy: ArtifactScopePolicy = STRICT_ARTIFACT_SCOPE_POLICY): ArtifactManifest {
