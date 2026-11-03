@@ -17,14 +17,12 @@
  * metadata are never consulted, so a forged forwarded host can divert a
  * request neither onto nor off a content origin.
  *
- * This module is the immo-side projection. Upstream `@sentropic/artifacts`
- * still owns the `stable`/`pinned` scheme (`<uuid>.pinned.<base>`); the exact
- * upstream change it must make is recorded in the branch report (content-host
- * report, section "upstream"): teach `parseContentHost` the single-level form,
- * build `pinnedUrl` as `https://<releaseId>.<base>/`, and enforce artifact /
- * release id disjointness at creation. Immo never imports that subpath here so
- * the new scheme cannot regress when the upstream package still ships the old
- * one.
+ * This module is the immo-side projection. Upstream `@sentropic/artifacts@0.2.8`
+ * implements the same single-level scheme (`parseContentHost` returns
+ * `{ kind: 'id', id }` for exactly one UUID label; the exact release is
+ * exposed as `versionUrl`). Immo never imports that subpath here: its own
+ * parser (`{ kind: 'content' }`) and its `pinnedUrl` contract stay the
+ * converged single-label behavior without tracking upstream renames.
  *
  * Legacy transition (remove per docs/runbooks/ARTIFACTS_PREPROD_ACTIVATION.md
  * section "Legacy redirect removal"): hosts under
