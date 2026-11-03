@@ -91,11 +91,14 @@ async function main() {
     await client.connect(new StreamableHTTPClientTransport(new URL(required("P0C_MCP_URL")), {
       requestInit: { headers: { authorization: `Bearer ${required("P0C_MCP_TOKEN")}` } } }));
     const catalogue = await client.listTools();
-    for (const tool of catalogue.tools.filter((tool) => tool.name.startsWith("artifacts_"))) {
-      assert.deepEqual(tool._meta?.["immo/artifactsProfile"], descriptor.body.profileRevisionId ? {
-        profileRevisionId: revision, requireExpectedCurrentReleaseId: true, resultEnvelopeVersion: version } : undefined);
+    const artifactTools = catalogue.tools.filter((tool) => tool.name.startsWith("artifacts_"));
+    // The catalogue carries no per-tool descriptor: tool definitions stay
+    // byte-stable across profile switches so the owner's "Always allow" grant
+    // survives. The descriptor is read from results and the guide instead.
+    for (const tool of artifactTools) {
+      assert.equal(tool._meta?.["immo/artifactsProfile"], undefined, "p0c_tool_meta_stable");
     }
-    assert.equal(catalogue.tools.filter((tool) => tool.name.startsWith("artifacts_")).length, version === 2 ? 9 : 7);
+    assert.equal(artifactTools.length, version === 2 ? 9 : 7, "p0c_tool_count");
     const mcpDenied = await client.callTool({ name: "artifacts_publish", arguments: missing });
     assert.equal(mcpDenied.isError, true, "p0c_mcp_isError");
     precondition(JSON.parse((mcpDenied.content as { text: string }[])[0]!.text), version, revision);
@@ -106,7 +109,10 @@ async function main() {
       profileRevisionId: revision, requireExpectedCurrentReleaseId: true, resultEnvelopeVersion: version });
     const fresh = String(data.artifactId);
     const get = await client.callTool({ name: "artifacts_get", arguments: { artifactId: fresh } });
-    assert.equal(output(JSON.parse((get.content as { text: string }[])[0]!.text)).currentReleaseId, null);
+    const got = output(JSON.parse((get.content as { text: string }[])[0]!.text));
+    assert.equal(got.currentReleaseId, null);
+    assert.deepEqual((got.authoringGuide as { descriptor: unknown }).descriptor, {
+      profileRevisionId: revision, requireExpectedCurrentReleaseId: true, resultEnvelopeVersion: version });
     const published = await client.callTool({ name: "artifacts_publish", arguments: { artifactId: fresh, files, expectedCurrentReleaseId: null, idempotencyKey: randomUUID() } });
     assert.notEqual(published.isError, true, "p0c_first_null_publish");
   } finally { await client.close(); }
