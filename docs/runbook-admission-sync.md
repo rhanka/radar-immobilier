@@ -73,16 +73,37 @@ make admission-keygen ENV=test-i1
 
 ## 4. Enabling the sync in preprod
 
-Preprod deployment (owner/ops change, no code deploy needed beyond this lot):
+Preprod env (persisted in git at
+`deploy/overlays/preprod/patch-artifacts-api-env.yaml`, applied to the
+`radar-api` Deployment by the CD reconcile):
 
 ```yaml
 ADMISSION_SYNC_ENABLED: "1"
-ADMISSION_PROD_PUBLIC_KEYS: "<kid1>.<b64>,<kid2>.<b64>"   # current (+ prev during rotation)
+# PUBLIC KEYS ARE NOT A LITERAL HERE. The public entry (kid HHrnyG0BNHfS7DGw)
+# lives in the operator-held ConfigMap `radar-admission-preprod`, key
+# `ADMISSION_PROD_PUBLIC_KEYS` (current entry, plus the previous one during
+# rotation: `<kid1>.<b64>,<kid2>.<b64>`), referenced with
+# `configMapKeyRef ... optional: true` so a missing ConfigMap keeps the
+# capability closed instead of crashing the pod. Never commit the key
+# material to the overlay: reference it, do not paste it.
+ADMISSION_PROD_PUBLIC_KEYS: { configMapKeyRef: { name: radar-admission-preprod, key: ADMISSION_PROD_PUBLIC_KEYS, optional: true } }
 ADMISSION_TRUSTED_ISSUERS: "https://preprod.auth.sent-tech.ca,https://auth.sent-tech.ca"
 ```
 
+`ADMISSION_TRUSTED_ISSUERS` intentionally lists the prod issuer second: the
+JIT links prod-issuer sessions on verified email. The preprod auth-isolation
+gate (`deploy/ci/check-preprod-auth-isolation.sh`) carries a narrow,
+exact-name exemption for that one env literal; any other PROD host in the
+render still fails the gate.
+
 Owner GO #3 (preprod activation) required before setting
 `ADMISSION_SYNC_ENABLED=1`: it opens the ingest webhook and JIT linking.
+
+Key generation MUST run via `make admission-keygen`: the generator is the
+repo's `tsx`-run source (`api/src/admission/snapshot.ts`, invoked through
+the `admission:keygen` npm script), and the prod image ships with neither
+`tsx` nor `src`, so the keypair cannot be produced inside prod. Run the make
+target from the repo instead and store its printed JSON out of band.
 
 ## 5. Enabling the emitter in prod
 
