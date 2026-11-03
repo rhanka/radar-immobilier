@@ -204,6 +204,13 @@
       "when": 1792100000003,
       "tag": "0029_artifacts_parity",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1793000000000,
+      "tag": "0030_admission_sync",
+      "breakpoints": true
     }
   ]
 }
