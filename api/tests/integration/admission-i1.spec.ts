@@ -8,6 +8,7 @@
 
 import pg from "pg";
 import { describe, expect, it, beforeAll, afterAll } from "vitest";
+import { Hono } from "hono";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { eq } from "drizzle-orm";
@@ -26,8 +27,9 @@ import {
 } from "../../src/admission/snapshot.js";
 import { applyAdmissionSnapshot } from "../../src/admission/ingest.js";
 import { reconcilePreprodSub } from "../../src/admission/jit.js";
-import { admissionRoute } from "../../src/admission/route.js";
-import { authRoute, type AuthRouteOptions } from "../../src/routes/auth.js";
+import { admissionRoute, pushAdmissionMutation } from "../../src/admission/route.js";
+import { authRoute, protect, type AuthRouteOptions } from "../../src/routes/auth.js";
+import { adminRoute } from "../../src/routes/admin.js";
 import type { FetchLike, OidcDiscovery } from "../../src/services/auth/oidc.js";
 import { signSession } from "../../src/services/auth/session.js";
 import { createReaderOpening } from "../../src/artifacts/reader-opening.js";
@@ -428,4 +430,537 @@ describe("I1 placement — JIT before getRights, login linking", () => {
     expect(row?.status).toBe("approved");
     expect(row?.admissionSource).toBe("prod_sync");
   });
+});
+
+// ── Findings F1–F8 follow-up coverage (real Postgres, no mocks) ──────────
+// All timestamps below stay strictly above the acceptance flow above
+// (2026-11-03), because the F1 guard is a GLOBAL monotonic sequence.
+
+function envelopeForAs(
+  entries: { email: string; name?: string; status?: "pending" | "approved" | "rejected" | "suspended"; admin?: boolean }[],
+  issuedAt: string,
+  full: boolean,
+  key: { kid: string; key: ReturnType<typeof parsePrivateKeyEntry>["key"] },
+) {
+  const payload = buildAdmissionSnapshot(
+    entries.map((entry) => ({
+      email: entry.email,
+      name: entry.name ?? null,
+      status: entry.status ?? "approved",
+      isAdmin: entry.admin ?? false,
+      createdAt: "2026-01-01T00:00:00.000Z",
+      approvedAt: "2026-02-01T00:00:00.000Z",
+    })),
+    { kid: key.kid, issuedAt: new Date(issuedAt), full },
+  );
+  return signSnapshot(payload, key.key);
+}
+
+describe("I1 F1 — no rollback across a key rotation", () => {
+  it("should reject a delayed snapshot signed with a rotated-out key", async () => {
+    const oldPair = generateAdmissionKeypair();
+    const oldKey = parsePrivateKeyEntry(oldPair.privateEntry);
+    // Rotation overlap: the current key plus the rotated-out one both verify.
+    const bothKeys = new Map([...publicKeys, [oldPair.kid, oldKey.key]]);
+    const email = "rotate@example.ca";
+
+    await applyAdmissionSnapshot(db, envelopeFor([{ email }], "2026-11-04T10:00:00.000Z", false), {
+      publicKeys,
+    });
+    await reconcilePreprodSub(
+      db,
+      { sub: "preprod-sub-rotate", email, emailVerified: true, issuer: ISSUER },
+      { trustedIssuers: [ISSUER, PROD_ISSUER] },
+    );
+    expect((await accountBySub("preprod-sub-rotate"))?.status).toBe("approved");
+
+    const revoked = await applyAdmissionSnapshot(
+      db,
+      envelopeFor([{ email, status: "rejected" }], "2026-11-04T13:00:00.000Z", false),
+      { publicKeys },
+    );
+    expect(revoked.applied).toBe(true);
+    expect((await accountBySub("preprod-sub-rotate"))?.status).toBe("rejected");
+
+    // Delayed approval signed with the OLD key (never seen under it): the
+    // per-kid guard would let it through and resurrect the account.
+    const delayed = await applyAdmissionSnapshot(
+      db,
+      envelopeForAs([{ email }], "2026-11-04T12:30:00.000Z", false, {
+        kid: oldPair.kid,
+        key: oldKey.key,
+      }),
+      { publicKeys: bothKeys },
+    );
+    expect(delayed.applied).toBe(false);
+    expect(delayed.stale).toBe(true);
+    expect((await accountBySub("preprod-sub-rotate"))?.status).toBe("rejected");
+  });
+});
+
+describe("I1 F3 — upgraded branch guards", () => {
+  it("should adopt a matching pending local row and refuse every conflicting shape", async () => {
+    await applyAdmissionSnapshot(
+      db,
+      envelopeFor(
+        [{ email: "up-ok@example.ca" }, { email: "up-linked@example.ca" }, { email: "up-local@example.ca" }, { email: "up-null@example.ca" }],
+        "2026-11-04T15:00:00.000Z",
+        false,
+      ),
+      { publicKeys },
+    );
+    const ctx = { trustedIssuers: [ISSUER, PROD_ISSUER] } as const;
+    const jit = (sub: string, email: string) =>
+      reconcilePreprodSub(db, { sub, email, emailVerified: true, issuer: ISSUER }, { ...ctx });
+
+    // Success: matching pending local auto-row is adopted.
+    await pool.query(
+      "INSERT INTO account_users (sub, email, name, status, is_admin, admission_source) VALUES ('preprod-sub-upok','up-ok@example.ca','Up Ok','pending',false,'local')",
+    );
+    await expect(jit("preprod-sub-upok", "up-ok@example.ca")).resolves.toEqual({
+      linked: true,
+      mode: "upgraded",
+    });
+    const adopted = await accountBySub("preprod-sub-upok");
+    expect(adopted?.status).toBe("approved");
+    expect(adopted?.admissionSource).toBe("prod_sync");
+
+    // Another sub already linked to the email: conflict, never a 500.
+    await pool.query(
+      "INSERT INTO account_users (sub, email, name, status, is_admin, admission_source) VALUES ('preprod-sub-uplinked','up-linked@example.ca','Linked','approved',false,'prod_sync')",
+    );
+    await pool.query(
+      "INSERT INTO account_users (sub, email, name, status, is_admin, admission_source) VALUES ('preprod-sub-uplink','up-linked@example.ca','Up Link','pending',false,'local')",
+    );
+    await expect(jit("preprod-sub-uplink", "up-linked@example.ca")).resolves.toEqual({
+      linked: false,
+      reason: "already_linked_elsewhere",
+    });
+    expect((await accountBySub("preprod-sub-uplink"))?.admissionSource).toBe("local");
+
+    // Another local account holding the email: no prod_sync duplicate.
+    await pool.query(
+      "INSERT INTO account_users (sub, email, name, status, is_admin, admission_source) VALUES ('preprod-sub-uplocal-other','up-local@example.ca','Local Other','approved',false,'local')",
+    );
+    await pool.query(
+      "INSERT INTO account_users (sub, email, name, status, is_admin, admission_source) VALUES ('preprod-sub-uplocal','up-local@example.ca','Up Local','pending',false,'local')",
+    );
+    await expect(jit("preprod-sub-uplocal", "up-local@example.ca")).resolves.toEqual({
+      linked: false,
+      reason: "local_conflict",
+    });
+
+    // A pending local row with no email is never stamped with the address.
+    await pool.query(
+      "INSERT INTO account_users (sub, email, name, status, is_admin, admission_source) VALUES ('preprod-sub-upnull',NULL,'Up Null','pending',false,'local')",
+    );
+    await expect(jit("preprod-sub-upnull", "up-null@example.ca")).resolves.toEqual({
+      linked: false,
+      reason: "local_conflict",
+    });
+    expect(await accountBySub("preprod-sub-upnull")).toMatchObject({ email: null, status: "pending" });
+  });
+});
+
+describe("I1 F8 — email matching trims like the normaliser", () => {
+  it("should adopt a pending local row whose email only differs by case/whitespace", async () => {
+    await applyAdmissionSnapshot(db, envelopeFor([{ email: "spaced@example.ca" }], "2026-11-04T15:30:00.000Z", false), {
+      publicKeys,
+    });
+    await pool.query(
+      "INSERT INTO account_users (sub, email, name, status, is_admin, admission_source) VALUES ('preprod-sub-spaced','  Spaced@Example.CA ','Spaced','pending',false,'local')",
+    );
+    await expect(
+      reconcilePreprodSub(
+        db,
+        { sub: "preprod-sub-spaced", email: "spaced@example.ca", emailVerified: true, issuer: ISSUER },
+        { trustedIssuers: [ISSUER, PROD_ISSUER] },
+      ),
+    ).resolves.toEqual({ linked: true, mode: "upgraded" });
+  });
+});
+
+describe("I1 F4 — JIT on existing sessions and the MCP path", () => {
+  const STRICT_ISSUER = "https://exchange.admission.test";
+  const STRICT_AUTH: AuthConfig = {
+    ...AUTH,
+    strict: {
+      enabled: true,
+      armingRequested: true,
+      issuer: STRICT_ISSUER,
+      apiAudience: "https://preprod.immo.sent-tech.ca",
+      mcpAudience: "https://preprod.immo.sent-tech.ca/mcp",
+      workloadSub: "immo-mcp-workload",
+      workloadClientId: "immo-mcp-workload",
+      requiredScope: "immo:search",
+      maxLifetimeS: 300,
+      environment: "test",
+    },
+  };
+
+  async function signExchanged(opts: {
+    sub: string;
+    email?: string;
+    emailVerified?: boolean;
+  }): Promise<{ presented: string; getKey: ReturnType<typeof createLocalJWKSet> }> {
+    const { publicKey, privateKey } = await generateKeyPair("EdDSA", { crv: "Ed25519" });
+    const pubJwk: JWK = await exportJWK(publicKey);
+    pubJwk.kid = "ex-f4";
+    pubJwk.alg = "EdDSA";
+    const presented = await new SignJWT({
+      scope: "immo:search",
+      client_id: "immo-mcp-workload",
+      act: { sub: "immo-mcp-workload" },
+      ...(opts.email !== undefined ? { email: opts.email } : {}),
+      ...(opts.emailVerified !== undefined ? { email_verified: opts.emailVerified } : {}),
+    })
+      .setProtectedHeader({ alg: "EdDSA", kid: "ex-f4", typ: "at+jwt" })
+      .setIssuer(STRICT_ISSUER)
+      .setAudience("https://preprod.immo.sent-tech.ca")
+      .setSubject(opts.sub)
+      .setIssuedAt()
+      .setExpirationTime("60s")
+      .sign(privateKey);
+    return { presented, getKey: createLocalJWKSet({ keys: [pubJwk] }) };
+  }
+
+  async function signAccessToken(opts: { sub: string; email?: string; emailVerified?: boolean }) {
+    const { publicKey, privateKey } = await generateKeyPair("EdDSA", { crv: "Ed25519" });
+    const pubJwk: JWK = await exportJWK(publicKey);
+    pubJwk.kid = "at-f4";
+    pubJwk.alg = "EdDSA";
+    const accessToken = await new SignJWT({
+      ...(opts.email !== undefined ? { email: opts.email } : {}),
+      ...(opts.emailVerified !== undefined ? { email_verified: opts.emailVerified } : {}),
+    })
+      .setProtectedHeader({ alg: "EdDSA", kid: "at-f4" })
+      .setIssuer(ISSUER)
+      .setAudience(AUTH.bearerAudiences[0])
+      .setSubject(opts.sub)
+      .setIssuedAt()
+      .setExpirationTime("5m")
+      .sign(privateKey);
+    return { accessToken, getKey: createLocalJWKSet({ keys: [pubJwk] }) };
+  }
+
+  it("should repair a pre-sync session on /me after the snapshot lands", async () => {
+    await applyAdmissionSnapshot(
+      db,
+      envelopeFor([{ email: "f4session@example.ca" }], "2026-11-04T16:00:00.000Z", false),
+      { publicKeys },
+    );
+    const session = await signSession(
+      { sub: "preprod-sub-f4me", email: "f4session@example.ca", emailVerified: true, idpIssuer: ISSUER },
+      { sessionSecret: AUTH.sessionSecret, ttlSeconds: 3600 },
+    );
+    const app = authRoute(AUTH, { db, admissionTrustedIssuers: [ISSUER, PROD_ISSUER] });
+    const res = await app.request("/api/v1/auth/me", { headers: { cookie: `radar_session=${session}` } });
+    expect(res.status).toBe(200);
+    expect((await res.json()).user.status).toBe("approved");
+    expect((await accountBySub("preprod-sub-f4me"))?.admissionSource).toBe("prod_sync");
+  });
+
+  it("should let the same repaired session through cookie protect", async () => {
+    await applyAdmissionSnapshot(
+      db,
+      envelopeFor([{ email: "f4cookie@example.ca" }], "2026-11-04T16:01:00.000Z", false),
+      { publicKeys },
+    );
+    const session = await signSession(
+      { sub: "preprod-sub-f4cookie", email: "f4cookie@example.ca", emailVerified: true, idpIssuer: ISSUER },
+      { sessionSecret: AUTH.sessionSecret, ttlSeconds: 3600 },
+    );
+    const app = new Hono();
+    app.use("*", protect(AUTH, { db, admissionTrustedIssuers: [ISSUER, PROD_ISSUER] }));
+    app.get("/api/protected", (c) => c.json({ ok: true }));
+    const res = await app.request("/api/protected", { headers: { cookie: `radar_session=${session}` } });
+    expect(res.status).toBe(200);
+    expect((await accountBySub("preprod-sub-f4cookie"))?.status).toBe("approved");
+  });
+
+  it("should JIT-link a first-time MCP user on the strict exchanged path", async () => {
+    await applyAdmissionSnapshot(
+      db,
+      envelopeFor([{ email: "f4strict@example.ca" }], "2026-11-04T16:02:00.000Z", false),
+      { publicKeys },
+    );
+    const { presented, getKey } = await signExchanged({
+      sub: "preprod-sub-f4strict",
+      email: "f4strict@example.ca",
+      emailVerified: true,
+    });
+    const app = new Hono();
+    app.use(
+      "*",
+      protect(STRICT_AUTH, { db, bearerGetKey: getKey, admissionTrustedIssuers: [STRICT_ISSUER, ISSUER] }),
+    );
+    app.get("/api/v1/mcp/facets/signals/search", (c) => c.json({ ok: true }));
+    const res = await app.request("/api/v1/mcp/facets/signals/search?city=valleyfield", {
+      headers: { authorization: `Bearer ${presented}` },
+    });
+    expect(res.status).toBe(200);
+    expect((await accountBySub("preprod-sub-f4strict"))?.admissionSource).toBe("prod_sync");
+  });
+
+  it("should keep refusing the strict path when the exchanged token carries no email", async () => {
+    const { presented, getKey } = await signExchanged({ sub: "preprod-sub-f4strict-noemail" });
+    const app = new Hono();
+    app.use(
+      "*",
+      protect(STRICT_AUTH, { db, bearerGetKey: getKey, admissionTrustedIssuers: [STRICT_ISSUER, ISSUER] }),
+    );
+    app.get("/api/v1/mcp/facets/signals/search", (c) => c.json({ ok: true }));
+    const res = await app.request("/api/v1/mcp/facets/signals/search?city=valleyfield", {
+      headers: { authorization: `Bearer ${presented}` },
+    });
+    expect(res.status).toBe(403);
+    expect(await accountBySub("preprod-sub-f4strict-noemail")).toBeUndefined();
+  });
+
+  it("should JIT-link a first-time user on the plain Bearer [REDACTED]", async () => {
+    await applyAdmissionSnapshot(
+      db,
+      envelopeFor([{ email: "f4bearer@example.ca" }], "2026-11-04T16:03:00.000Z", false),
+      { publicKeys },
+    );
+    const { accessToken, getKey } = await signAccessToken({
+      sub: "preprod-sub-f4bearer",
+      email: "f4bearer@example.ca",
+      emailVerified: true,
+    });
+    const app = new Hono();
+    app.use("*", protect(AUTH, { db, bearerGetKey: getKey, admissionTrustedIssuers: [ISSUER, PROD_ISSUER] }));
+    app.get("/api/protected", (c) => c.json({ ok: true }));
+    const res = await app.request("/api/protected", {
+      headers: { authorization: `Bearer ${accessToken}` },
+    });
+    expect(res.status).toBe(200);
+    expect((await accountBySub("preprod-sub-f4bearer"))?.admissionSource).toBe("prod_sync");
+  });
+});
+
+describe("I1 F7 — no replay, admin reset, honest push", () => {
+  it("should not replay markedAbsent on a repeated full cycle", async () => {
+    const first = await applyAdmissionSnapshot(
+      db,
+      envelopeFor([{ email: "keep-a@example.ca" }, { email: "gone-a@example.ca" }], "2026-11-04T17:00:00.000Z", true),
+      { publicKeys },
+    );
+    expect(first.applied).toBe(true);
+    const second = await applyAdmissionSnapshot(
+      db,
+      envelopeFor([{ email: "keep-a@example.ca" }], "2026-11-04T17:01:00.000Z", true),
+      { publicKeys },
+    );
+    expect(second.applied).toBe(true);
+    expect(second.markedAbsent).toBe(1);
+    const staged = await pool.query("SELECT status FROM admission_sync_profiles WHERE email=$1", ["gone-a@example.ca"]);
+    expect(staged.rows[0]?.status).toBe("rejected");
+    const third = await applyAdmissionSnapshot(
+      db,
+      envelopeFor([{ email: "keep-a@example.ca" }], "2026-11-04T17:02:00.000Z", true),
+      { publicKeys },
+    );
+    expect(third.applied).toBe(true);
+    expect(third.markedAbsent).toBe(0);
+  });
+
+  it("should reset isAdmin when a revocation propagates to the mirror row", async () => {
+    await applyAdmissionSnapshot(
+      db,
+      envelopeFor([{ email: "adminreset@example.ca", admin: true }], "2026-11-04T17:10:00.000Z", false),
+      { publicKeys },
+    );
+    await reconcilePreprodSub(
+      db,
+      { sub: "preprod-sub-adminreset", email: "adminreset@example.ca", emailVerified: true, issuer: ISSUER },
+      { trustedIssuers: [ISSUER, PROD_ISSUER] },
+    );
+    expect((await accountBySub("preprod-sub-adminreset"))?.isAdmin).toBe(true);
+    const full = await applyAdmissionSnapshot(
+      db,
+      envelopeFor([{ email: "keep-a@example.ca" }], "2026-11-04T17:11:00.000Z", true),
+      { publicKeys },
+    );
+    expect(full.applied).toBe(true);
+    const mirror = await accountBySub("preprod-sub-adminreset");
+    expect(mirror?.status).toBe("rejected");
+    expect(mirror?.isAdmin).toBe(false);
+  });
+
+  it("should report a stale mutation push as not emitted", async () => {
+    await pool.query(
+      "INSERT INTO account_users (sub, email, name, status, is_admin, admission_source) VALUES ('prod-sub-push','pushprod@example.ca','Push Prod','approved',false,'local')",
+    );
+    const staleFetch = (async () => ({
+      ok: true,
+      json: async () => ({ ok: true, applied: false, stale: true, kid: "k", issuedAt: "", full: false }),
+    })) as unknown as typeof fetch;
+    const stale = await pushAdmissionMutation(
+      { db, kid: "k", key: signKey.key, pushUrl: "https://preprod.test/ingest", fetchImpl: staleFetch },
+      "prod-sub-push",
+    );
+    expect(stale).toEqual({ pushed: false, reason: "push_stale" });
+
+    const appliedFetch = (async () => ({
+      ok: true,
+      json: async () => ({ ok: true, applied: true, stale: false, kid: "k", issuedAt: "", full: false }),
+    })) as unknown as typeof fetch;
+    const applied = await pushAdmissionMutation(
+      { db, kid: "k", key: signKey.key, pushUrl: "https://preprod.test/ingest", fetchImpl: appliedFetch },
+      "prod-sub-push",
+    );
+    expect(applied).toEqual({ pushed: true });
+  });
+});
+
+describe("I1 F6 — real reader opening and branch coverage", () => {
+  it("should open for a first-time user through real reconcile and real getRights", async () => {
+    await applyAdmissionSnapshot(
+      db,
+      envelopeFor([{ email: "opener-real@example.ca", name: "Real Opener" }], "2026-11-04T18:00:00.000Z", false),
+      { publicKeys },
+    );
+    await pool.query(
+      "INSERT INTO artifacts.artifact_access (artifact_id, principal_id, permission) VALUES ($1,$2,'read') ON CONFLICT DO NOTHING",
+      [ARTIFACT_ID, "preprod-sub-realopen"],
+    );
+    const stored = createStoredReader(pool, SCOPE, "pages.example.test", { getBlob: async () => null });
+    const opening = createReaderOpening({
+      auth: AUTH,
+      contentBase: "pages.example.test",
+      authority: stored.authority,
+      tickets: createSharedReaderTickets(pool),
+      issuer: { issuer: "https://preprod.immo.sent-tech.ca", audience: "x", tier: "test" },
+      grantSecret: "grant-secret-32-bytes-long-padding!",
+      sessionSecret: AUTH.sessionSecret,
+      reconcile: (input) =>
+        reconcilePreprodSub(
+          db,
+          { sub: input.sub, ...(input.email !== undefined ? { email: input.email } : {}), emailVerified: input.emailVerified, issuer: input.issuer },
+          { trustedIssuers: [ISSUER, PROD_ISSUER] },
+        ),
+    });
+    // Local pending auto-row from a pre-sync login: adopted, then approved.
+    await pool.query(
+      "INSERT INTO account_users (sub, email, name, status, is_admin, admission_source) VALUES ('preprod-sub-realopen','opener-real@example.ca','Real Opener','pending',false,'local')",
+    );
+    const session = await signSession(
+      { sub: "preprod-sub-realopen", email: "opener-real@example.ca", emailVerified: true, idpIssuer: ISSUER },
+      { sessionSecret: AUTH.sessionSecret, ttlSeconds: 3600 },
+    );
+    const binding = "ab".repeat(32);
+    const res = await opening.application.request(
+      `/approve?${new URLSearchParams({ artifactId: ARTIFACT_ID, binding })}`,
+      { headers: { cookie: `radar_session=${session}` } },
+    );
+    expect(res.status).toBe(200);
+    const row = await accountBySub("preprod-sub-realopen");
+    expect(row?.status).toBe("approved");
+    expect(row?.admissionSource).toBe("prod_sync");
+  });
+
+  it("should re-admit a locally revoked link (reapproved) without relinking", async () => {
+    await applyAdmissionSnapshot(
+      db,
+      envelopeFor([{ email: "reapprove@example.ca" }], "2026-11-04T18:01:00.000Z", false),
+      { publicKeys },
+    );
+    await reconcilePreprodSub(
+      db,
+      { sub: "preprod-sub-reapprove", email: "reapprove@example.ca", emailVerified: true, issuer: ISSUER },
+      { trustedIssuers: [ISSUER, PROD_ISSUER] },
+    );
+    // Local change after the link: the mirror row is rejected while prod
+    // still approves it.
+    await pool.query("UPDATE account_users SET status='rejected' WHERE sub='preprod-sub-reapprove'");
+    const outcome = await reconcilePreprodSub(
+      db,
+      { sub: "preprod-sub-reapprove", email: "reapprove@example.ca", emailVerified: true, issuer: ISSUER },
+      { trustedIssuers: [ISSUER, PROD_ISSUER] },
+    );
+    expect(outcome).toEqual({ linked: true, mode: "reapproved" });
+    expect((await accountBySub("preprod-sub-reapprove"))?.status).toBe("approved");
+  });
+
+  it("should report the admin mutation emission honestly", async () => {
+    await pool.query(
+      "INSERT INTO account_users (sub, email, name, status, is_admin, admission_source) VALUES ('admin-sub-f6','admin-f6@example.ca','Admin F6','approved',true,'local')",
+    );
+    await pool.query(
+      "INSERT INTO account_users (sub, email, name, status, is_admin, admission_source) VALUES ('target-sub-f6','target-f6@example.ca','Target F6','pending',false,'local')",
+    );
+    const adminSession = await signSession({ sub: "admin-sub-f6" }, { sessionSecret: AUTH.sessionSecret, ttlSeconds: 3600 });
+    const withEmit = (pushed: boolean) =>
+      adminRoute({
+        db,
+        sessionSecret: AUTH.sessionSecret,
+        admission: { emit: async () => ({ pushed }) },
+      });
+    const okRes = await withEmit(true).request(
+      `/api/v1/admin/users/${encodeURIComponent("target-sub-f6")}/status`,
+      {
+        method: "POST",
+        headers: { cookie: `radar_session=${adminSession}`, "content-type": "application/json" },
+        body: JSON.stringify({ status: "approved" }),
+      },
+    );
+    expect(okRes.status).toBe(200);
+    expect((await okRes.json()).admissionEmitted).toBe(true);
+    const staleRes = await withEmit(false).request(
+      `/api/v1/admin/users/${encodeURIComponent("target-sub-f6")}/status`,
+      {
+        method: "POST",
+        headers: { cookie: `radar_session=${adminSession}`, "content-type": "application/json" },
+        body: JSON.stringify({ status: "suspended" }),
+      },
+    );
+    expect(staleRes.status).toBe(200);
+    expect((await staleRes.json()).admissionEmitted).toBe(false);
+  });
+});
+
+describe("I1 F2 — concurrent snapshot and revocation serialise", () => {
+  it("should always converge on the newer revocation, never resurrect", async () => {
+    const email = "aaa-race-leaver@example.ca";
+    await applyAdmissionSnapshot(db, envelopeFor([{ email }], "2026-11-04T19:00:00.000Z", false), {
+      publicKeys,
+    });
+    await reconcilePreprodSub(
+      db,
+      { sub: "preprod-sub-race", email, emailVerified: true, issuer: ISSUER },
+      { trustedIssuers: [ISSUER, PROD_ISSUER] },
+    );
+    expect((await accountBySub("preprod-sub-race"))?.status).toBe("approved");
+
+    // Slow FULL snapshot (older, keeps the approval) racing a fast
+    // incremental revocation (newer). The filler mass keeps the full ingest
+    // in flight long after the revocation commits.
+    const fillers = Array.from({ length: 1200 }, (_, index) => ({
+      email: `f2fill${String(index).padStart(4, "0")}@example.ca`,
+    }));
+    const slowFull = envelopeFor([{ email }, ...fillers], "2026-11-04T19:01:00.000Z", true);
+    const fastRevocation = envelopeFor([{ email, status: "rejected" }], "2026-11-04T19:02:00.000Z", false);
+
+    const slow = applyAdmissionSnapshot(db, slowFull, { publicKeys });
+    // Only start the revocation once the full ingest visibly holds the lock
+    // and is mid-loop: the outcome must not depend on commit order.
+    const deadline = Date.now() + 10_000;
+    for (;;) {
+      const counted = await pool.query(
+        "SELECT count(*)::int AS n FROM admission_sync_profiles WHERE email LIKE 'f2fill%'",
+      );
+      if ((counted.rows[0]?.n as number) >= 3) break;
+      if (Date.now() > deadline) throw new Error("f2 slow ingest never started");
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+    const revocation = await applyAdmissionSnapshot(db, fastRevocation, { publicKeys });
+    const fullResult = await slow;
+
+    expect(revocation.applied).toBe(true);
+    expect(fullResult.stale === true || fullResult.applied === true).toBe(true);
+    const state = await pool.query("SELECT max(issued_at) AS m FROM admission_sync_state");
+    expect(new Date(state.rows[0].m as string).toISOString()).toBe("2026-11-04T19:02:00.000Z");
+    expect((await accountBySub("preprod-sub-race"))?.status).toBe("rejected");
+  }, 120_000);
 });
