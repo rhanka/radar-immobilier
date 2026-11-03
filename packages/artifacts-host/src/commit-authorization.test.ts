@@ -126,7 +126,7 @@ describe("commit-time authorization while the provider is blocked [T05 T13]", ()
     expect(await pending).toEqual({ status: 201,
       body: { artifactId: ARTIFACT, releaseId: RELEASE, manifest: JSON.stringify({ digest: DIGEST }), digest: DIGEST,
         stableUrl: `https://${ARTIFACT}.pages.example.test/`,
-        pinnedUrl: `https://${RELEASE}.pinned.pages.example.test/` } });
+        pinnedUrl: `https://${RELEASE}.pages.example.test/` } });
     expect(entries).toEqual([]);
   });
 });

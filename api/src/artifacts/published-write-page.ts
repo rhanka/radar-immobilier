@@ -45,9 +45,9 @@ export function createPublishedWritePage(options: PublishedWritePageOptions) {
     const resource = session?.resource;
     const host = request.headers.get("host") ?? new URL(request.url).host;
     const parsed = parseContentHost(host, options.contentBase);
-    if (!session || !resource || !session.writeIdentity || parsed.kind !== "pinned" ||
+    if (!session || !resource || !session.writeIdentity || parsed.kind !== "content" ||
       !samePwIdentityDomain(session.writeIdentity, options.domain) ||
-      resource.host !== host || resource.releaseId !== parsed.releaseId ||
+      resource.host !== host || resource.releaseId !== parsed.id ||
       resource.sessionId !== session.sid || resource.readerSub !== session.readerSub ||
       resource.artifactId !== session.artifactId || resource.issuer !== options.readIssuer.issuer ||
       resource.audience !== options.readIssuer.audience || resource.tier !== options.readIssuer.tier ||

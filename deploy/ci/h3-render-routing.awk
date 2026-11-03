@@ -41,9 +41,12 @@ function judge( i, v, labels, selector, podLabels) {
     content++
     if (field("^  ingressClassName:") != "traefik") fail("Traefik ingress class required")
     v = (phase == "general" ? "radar-api" : "radar-artifact-content-deny")
-    if (count("^            name: " v "$") != 2 || count("^            name:") != 2) fail("content routes only to the " (phase == "general" ? "reader API" : "denial Service"))
-    if (phase == "general" && count("^              name: http$") != 2) fail("content reader port must be http")
-    if (count("^  - host:") != 2 || count("^    - [\047\"]?\\*\\.") != 2) fail("both wildcard levels must be present")
+    # Transition: one content wildcard plus two retired immo-pages redirect
+    # hosts. Removal ("Legacy redirect removal" in the runbook) returns every
+    # count below to 1 and drops the legacy host assertions.
+    if (count("^            name: " v "$") != 3 || count("^            name:") != 3) fail("content routes only to the " (phase == "general" ? "reader API" : "denial Service"))
+    if (phase == "general" && count("^              name: http$") != 3) fail("content reader port must be http")
+    if (count("^  - host:") != 3 || count("^    - [\047\"]?\\*\\.") != 3) fail("content wildcard plus both legacy redirect wildcards must be present")
     for (i = 1; i <= n; i++) {
       if (buf[i] ~ /^  - host:/) hosts[++hostCount] = val(buf[i])
       if (buf[i] ~ /^    - /) { v = buf[i]; sub(/^    - /, "", v); tlsHosts[++tlsCount] = unquote(v) }
@@ -58,11 +61,22 @@ END {
   if (phase == "disabled") {
     base = "artifacts-content-unverified.invalid"
     if (tlsSecret != "radar-artifact-content-unverified-tls") fail("unexpected disabled TLS placeholder")
+    if (hosts[1] != "*." base || hosts[2] != "*.legacy." base || hosts[3] != "*.pinned.legacy." base) fail("disabled content/TLS placeholder mismatch")
+    if (tlsHosts[1] != hosts[1] || tlsHosts[2] != hosts[2] || tlsHosts[3] != hosts[3]) fail("disabled content/TLS placeholder mismatch")
+    exit(fails > 0)
   } else {
     if (base == "" || base ~ /(^|\.)(invalid)$/ || base ~ /unverified|replace-me/) fail("unfilled content-domain placeholder in operator render")
     if (tlsSecret == "" || tlsSecret ~ /unverified|replace-me/) fail("unfilled content TLS Secret in operator render")
   }
   if (phase == "general" && tlsSecret != "radar-artifact-content-preprod-tls") fail("preprod content TLS Secret required")
-  if (hosts[1] != "*." base || hosts[2] != "*.pinned." base || tlsHosts[1] != hosts[1] || tlsHosts[2] != hosts[2]) fail("content domain/TLS wildcard mismatch or empty domain")
+  if (hosts[1] != "*." base) fail("content domain/TLS wildcard mismatch or empty domain")
+  # Transition legacy redirect hosts: the real retired immo-pages wildcards in
+  # general, the fixture `legacy.<base>` placeholders in every synthetic phase.
+  # Removal ("Legacy redirect removal" in the runbook) drops hosts[2]/hosts[3]
+  # and keeps exactly the one content wildcard.
+  if (phase == "general") {
+    if (hosts[2] != "*.preprod.immo-pages.sent-tech.ca" || hosts[3] != "*.pinned.preprod.immo-pages.sent-tech.ca") fail("content domain/TLS wildcard mismatch or empty domain")
+  } else if (hosts[2] != ("*.legacy." base) || hosts[3] != ("*.pinned.legacy." base)) fail("content domain/TLS wildcard mismatch or empty domain")
+  if (tlsHosts[1] != hosts[1] || tlsHosts[2] != hosts[2] || tlsHosts[3] != hosts[3]) fail("content domain/TLS wildcard mismatch or empty domain")
   exit(fails > 0)
 }
