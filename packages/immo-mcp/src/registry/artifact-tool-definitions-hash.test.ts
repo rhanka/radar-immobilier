@@ -2,15 +2,20 @@ import { createHash } from "node:crypto";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
 /**
- * Bit-identical artifact tool definitions across provider bumps.
+ * Bit-identical artifact tool definitions across deploys.
  *
  * claude.ai resets the owner's per-tool "Always allow" grant whenever a tool
  * definition changes, so the nine served `artifacts_*` definitions (name,
- * description, inputSchema, annotations) must be byte-identical before and
- * after a `@sentropic/artifacts` bump. The upstream 0.2.6 -> 0.2.8 bump only
- * changed a `paths` property description on `artifacts_get_source`; the
- * provider here pins that description back to the qualified surface (see
- * `stabilizeArtifactInputSchema`), and this test locks the result.
+ * description, inputSchema, annotations) must be byte-identical across
+ * deploys, package versions and profile switches. Upstream 0.2.9 makes every
+ * definition a compile-time constant (`ARTIFACTS_TOOL_DEFINITIONS`); the
+ * active profile only selects the exposed tool set and stays visible in
+ * manifest audit metadata and typed result details, never in a definition.
+ * The 0.2.8 -> 0.2.9 bump changes the definitions one final time by design
+ * (static schemas replace profile-dependent bounds); this test locks the
+ * 0.2.9 result. The provider here keeps the qualified catalogue surface
+ * (CAS guard optional, `paths` description-less, stable summaries) via
+ * `stabilizeArtifactInputSchema`.
  *
  * outputSchema is deliberately outside this contract (it tracks the result
  * envelope version, as in `artifact-tool-catalogue-stability.test.ts`).
@@ -29,7 +34,7 @@ const EXPECTED_ARTIFACT_TOOL_DEFINITIONS: readonly string[] = [
 ];
 
 /** Golden sha256 over the canonical catalogue. Re-baseline only with owner sign-off. */
-const EXPECTED_TOOL_DEFINITIONS_HASH = "ab57457b6582734b3a772175c24a5db885308e31e88c61bc805c713d0f4a9621";
+const EXPECTED_TOOL_DEFINITIONS_HASH = "a7586debdc2f029fb0c1389486b687f7fab1c13736f60bf5317d33de99a1b9d1";
 
 const ENV_KEYS = ["ARTIFACTS_PROFILE_REVISION", "ARTIFACTS_INPUTS_QUALIFIED", "ARTIFACTS_RESULTS_QUALIFIED"] as const;
 
@@ -92,6 +97,18 @@ describe("artifact tool definitions hash", () => {
   it("should keep the served definitions bit-identical (golden hash)", () => {
     const ordered = [...tools].sort((a, b) => String(a.name).localeCompare(String(b.name)));
     const digest = createHash("sha256").update(JSON.stringify(canonicalize(ordered))).digest("hex");
+    expect(digest).toBe(EXPECTED_TOOL_DEFINITIONS_HASH);
+  });
+
+  it("should produce identical bytes across two builds", async () => {
+    const first = await loadV2Tools();
+    const second = await loadV2Tools();
+    const bytesOf = (entries: Record<string, unknown>[]) => JSON.stringify(canonicalize(
+      [...entries].sort((a, b) => String(a.name).localeCompare(String(b.name)))));
+    const firstBytes = bytesOf(first);
+    const secondBytes = bytesOf(second);
+    expect(secondBytes).toBe(firstBytes);
+    const digest = createHash("sha256").update(firstBytes).digest("hex");
     expect(digest).toBe(EXPECTED_TOOL_DEFINITIONS_HASH);
   });
 });
