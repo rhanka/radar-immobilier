@@ -21,7 +21,7 @@ const FINGERPRINT = fingerprintReaderProfile({ name: "demo", policyRevision: "po
   capabilities: ["geo.read", "signals.protected-read"] });
 const ARTIFACT_ID = "123e4567-e89b-12d3-a456-426614174000";
 const RELEASE_ID = "123e4567-e89b-12d3-a456-426614174001";
-const PINNED_HOST = `${RELEASE_ID}.pinned.pages.example.test`;
+const EXACT_HOST = `${RELEASE_ID}.pages.example.test`;
 
 async function authorized() {
   const app = makeApp();
@@ -117,32 +117,32 @@ function makeReloadApp(nowMs: number) {
 }
 
 function sessionWithResource(): string {
-  const resource = { ...ISSUER, host: PINNED_HOST, artifactId: ARTIFACT_ID, releaseId: RELEASE_ID,
+  const resource = { ...ISSUER, host: EXACT_HOST, artifactId: ARTIFACT_ID, releaseId: RELEASE_ID,
     readerSub: "reader-alice", sessionId: "session-1", profileName: "demo",
     policyRevision: "pol-001", profileFingerprint: FINGERPRINT };
   return mintSessionCookie({ sid: "session-1", readerSub: "reader-alice", artifactId: ARTIFACT_ID,
     createdAt: 1_000, expiresAt: 1_000 + 900_000, resource }, SESSION_SECRET).split(";")[0]!;
 }
 
-async function pinnedRequest(app: ReturnType<typeof makeApp>, path: string, cookie?: string, grant?: string): Promise<Response> {
-  const url = `http://${PINNED_HOST}${path}${grant ? `${path.includes("?") ? "&" : "?"}grant=${grant}` : ""}`;
-  return app.request(url, { headers: { host: PINNED_HOST, ...(cookie ? { cookie } : {}) } });
+async function exactRequest(app: ReturnType<typeof makeApp>, path: string, cookie?: string, grant?: string): Promise<Response> {
+  const url = `http://${EXACT_HOST}${path}${grant ? `${path.includes("?") ? "&" : "?"}grant=${grant}` : ""}`;
+  return app.request(url, { headers: { host: EXACT_HOST, ...(cookie ? { cookie } : {}) } });
 }
 
 describe("reload after the grant expired", () => {
   it("should redirect a document reload with a stale grant to the styled reader opening", async () => {
     const app = makeReloadApp(300_000);
     const stale = await mintGrant(
-      { ...ISSUER, host: PINNED_HOST, artifactId: ARTIFACT_ID, releaseId: RELEASE_ID,
+      { ...ISSUER, host: EXACT_HOST, artifactId: ARTIFACT_ID, releaseId: RELEASE_ID,
         readerSub: "reader-alice", sessionId: "session-1", profileName: "demo",
         policyRevision: "pol-001", profileFingerprint: FINGERPRINT },
       GRANT_SECRET,
       1_000,
     );
-    const reload = await pinnedRequest(app, "/", sessionWithResource(), stale);
+    const reload = await exactRequest(app, "/", sessionWithResource(), stale);
     expect(reload.status).toBe(303);
     expect(reload.headers.get("location")).toBe("/__reader/start");
-    const opening = await pinnedRequest(app, "/__reader/start");
+    const opening = await exactRequest(app, "/__reader/start");
     expect(opening.status).toBe(200);
     expect(opening.headers.get("content-type")).toContain("text/html");
     expect(await opening.text()).toContain("__artifacts/design/");
@@ -151,7 +151,7 @@ describe("reload after the grant expired", () => {
   it("should redirect a document reload with a forged grant to the styled reader opening", async () => {
     const app = makeReloadApp(300_000);
     for (const path of ["/", "/index.html"]) {
-      const reload = await pinnedRequest(app, path, undefined, "forged-grant");
+      const reload = await exactRequest(app, path, undefined, "forged-grant");
       expect(reload.status, path).toBe(303);
       expect(reload.headers.get("location"), path).toBe("/__reader/start");
     }
@@ -159,16 +159,16 @@ describe("reload after the grant expired", () => {
 
   it("should keep non-document paths closed when authorization fails", async () => {
     const app = makeReloadApp(300_000);
-    expect((await pinnedRequest(app, "/app.js")).status).toBe(401);
-    expect((await pinnedRequest(app, "/app.js", undefined, "forged-grant")).status).toBe(401);
+    expect((await exactRequest(app, "/app.js")).status).toBe(401);
+    expect((await exactRequest(app, "/app.js", undefined, "forged-grant")).status).toBe(401);
   });
 
   it("should recover a grant-less reload on the pinned host into a fresh grant redirect", async () => {
     const app = makeReloadApp(300_000);
-    const reload = await pinnedRequest(app, "/", sessionWithResource());
+    const reload = await exactRequest(app, "/", sessionWithResource());
     expect(reload.status).toBe(303);
     const location = reload.headers.get("location")!;
     expect(location.startsWith("/?grant=")).toBe(true);
-    expect(new URL(location, `http://${PINNED_HOST}`).searchParams.get("grant")).not.toBe("");
+    expect(new URL(location, `http://${EXACT_HOST}`).searchParams.get("grant")).not.toBe("");
   });
 });
