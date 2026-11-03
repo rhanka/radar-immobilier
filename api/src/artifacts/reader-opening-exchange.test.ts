@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { createReaderOpening, expiredReaderOpeningHtml } from "./reader-opening.js";
+import { APPROVAL_BASE_CSP, contentStylesheetLinks, createReaderOpening, expiredReaderOpeningHtml } from "./reader-opening.js";
+import { DESIGN_KIT_ASSETS, designKitAssetUrl } from "@radar/artifacts-host";
 import type { AuthConfig } from "../config.js";
 import { createFixtureAuthority, fingerprintReaderProfile } from "./reader-profile.js";
 import type { PreviewTicket } from "./preview-tickets.js";
@@ -103,6 +104,28 @@ describe("reader exchange browser recovery", () => {
     expect(expired.status).toBe(401);
     expect(expired.headers.get("content-type")).toContain("text/html");
     expect(expired.headers.get("location")).toBeNull();
+    expect(expired.headers.get("content-security-policy")).toBe(APPROVAL_BASE_CSP);
+  });
+
+  it("serves the expired page stylesheets from the public content-origin path", () => {
+    const links = contentStylesheetLinks();
+    for (const asset of DESIGN_KIT_ASSETS) {
+      expect(links).toContain(designKitAssetUrl(asset));
+      expect(links).toContain(asset.sha256Hex);
+      expect(links).toContain(asset.file);
+    }
+    const body = expiredReaderOpeningHtml();
+    expect(body).not.toContain("/api/v1/artifacts/reader/design/");
+    for (const asset of DESIGN_KIT_ASSETS) {
+      expect(body).toContain(designKitAssetUrl(asset));
+    }
+  });
+
+  it("ignores the legacy ?retry=1 query without a retry cookie", async () => {
+    const { content } = opening(async () => null);
+    const res = await exchange(content, `?ticket=${TICKET}&retry=1`, { cookie: BINDING_COOKIE, ...BROWSER });
+    expect(res.status).toBe(303);
+    expect(res.headers.get("location")).toBe("/__reader/start");
   });
 
   it("renders the same neutral page for every cause without leaking state", async () => {
@@ -111,6 +134,7 @@ describe("reader exchange browser recovery", () => {
     const mismatch = await exchange(opening(async () => record("https://other.pages.example.test")).content,
       `?ticket=${TICKET}`, { cookie: `${BINDING_COOKIE}; ${RETRY_COOKIE}`, ...BROWSER });
     expect(unknown.status).toBe(401);
+    expect(unknown.headers.get("content-security-policy")).toBe(APPROVAL_BASE_CSP);
     expect(await unknown.text()).toBe(await mismatch.text());
     const body = await exchange(opening(async () => null).content, "?ticket=not-a-ticket",
       { cookie: RETRY_COOKIE, ...BROWSER }).then((r) => r.text());
