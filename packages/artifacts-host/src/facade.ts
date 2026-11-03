@@ -6,8 +6,9 @@ import { projectArtifactHttpOutcome, type HttpResponse } from "@sentropic/artifa
 // hosts on `pages.<app>`. Both stable (`<artifactId>.<base>/`) and exact
 // (`<releaseId>.<base>/`, exposed as `pinnedUrl`) share one wildcard; the
 // label resolves server-side as artifact or release. Upstream
-// `@sentropic/artifacts/content/routing` still builds `<release>.pinned.<base>`;
-// see the branch report for the exact upstream change it must make.
+// `@sentropic/artifacts@0.2.8` implements the same single-level scheme
+// (`versionUrl` for the exact release); immo keeps `pinnedUrl` as its own
+// opaque MCP/API contract and never imports the upstream routing subpath.
 const UUID_RE = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
 
 function contentUrl(label: string, base: string): string | null {
