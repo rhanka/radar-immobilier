@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
-import { DESIGN_KIT_ASSETS } from "@radar/artifacts-host";
-import { APPROVAL_STYLE, APPROVAL_STYLE_HASH, approvalStylesheetLinks } from "./reader-opening.js";
+import { DESIGN_KIT_ASSETS, designKitAssetUrl } from "@radar/artifacts-host";
+import { APPROVAL_STYLE, APPROVAL_STYLE_HASH, approvalStylesheetLinks, contentStylesheetLinks } from "./reader-opening.js";
 import { DESIGN_KIT_CSS_MIME, getDesignKitCss } from "./design-kit.js";
 
 describe("design-kit serving bytes", () => {
@@ -24,6 +24,14 @@ describe("design-kit serving bytes", () => {
       expect(links).toContain(`/api/v1/artifacts/reader/design/`);
       expect(links).toContain(asset.sha256Hex);
       expect(links).toContain(asset.file);
+    }
+  });
+
+  it("should point the expired page at the public content-origin kit path", () => {
+    const links = contentStylesheetLinks();
+    expect(links).not.toContain("/api/v1/artifacts/reader/design/");
+    for (const asset of DESIGN_KIT_ASSETS) {
+      expect(links).toContain(designKitAssetUrl(asset));
     }
   });
 });

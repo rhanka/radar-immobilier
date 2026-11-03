@@ -14,6 +14,20 @@ import type { PwIdentityDomain } from "./write-intent-principal.js";
 export const PREVIEW_INIT_COOKIE = "__Host-preview-init";
 export const PREVIEW_SESSION_COOKIE = "__Host-preview-session";
 export const PREVIEW_SESSION_TTL_MS = 15 * 60_000;
+/**
+ * Browser-binding lifetime (seconds). Aligned with the 10-minute ticket and
+ * approval window: a tab opened from a Claude link is often approved more
+ * than 60 s later, and the previous 60 s cookie expired before the click,
+ * making every late approval fail at exchange time.
+ */
+export const PREVIEW_INIT_MAX_AGE_S = 600;
+/**
+ * Single exchange-retry marker (seconds). Bounds the browser auto-restart to
+ * one redirect per approval window so a reloaded or restored exchange URL
+ * restarts once instead of looping.
+ */
+export const PREVIEW_RETRY_COOKIE = "__Host-preview-retry";
+export const PREVIEW_RETRY_MAX_AGE_S = 600;
 
 export interface PreviewSessionClaims {
   /** Attributed at verified application approval, never inferred from a read grant. */
@@ -44,7 +58,11 @@ export function parseCookieHeader(header: string | null | undefined, name: strin
 }
 
 export function mintInitCookie(ticket: string): string {
-  return hostCookie(PREVIEW_INIT_COOKIE, ticket, 60);
+  return hostCookie(PREVIEW_INIT_COOKIE, ticket, PREVIEW_INIT_MAX_AGE_S);
+}
+
+export function mintRetryCookie(): string {
+  return hostCookie(PREVIEW_RETRY_COOKIE, "1", PREVIEW_RETRY_MAX_AGE_S);
 }
 
 export function mintSessionCookie(claims: PreviewSessionClaims, secret: string): string {

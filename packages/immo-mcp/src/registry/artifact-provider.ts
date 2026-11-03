@@ -7,8 +7,8 @@ import type { ArtifactInvocationContext, AuthorizeCommit } from "@sentropic/arti
 import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-stateful";
 import { computeManifestDigest, type RegistryDefinition } from "@sentropic/cluster-mesh/mcp/registry";
 import { projectArtifactHttpOutcome } from "@sentropic/artifacts/http";
-import { checkAdmission, createArtifactControl, HOST_ARTIFACT_PROFILE, ARTIFACT_PROFILE_DESCRIPTOR, ARTIFACT_STRICT, ARTIFACT_PART1,
-  artifactRefusalResponse, validateArtifactInput, type AdmissionAuthority } from "@radar/artifacts-host";
+import { assertContentIdsDisjoint, checkAdmission, createArtifactControl, HOST_ARTIFACT_PROFILE, ARTIFACT_PROFILE_DESCRIPTOR, ARTIFACT_STRICT, ARTIFACT_PART1,
+  artifactRefusalResponse, projectContentUrls, validateArtifactInput, type AdmissionAuthority } from "@radar/artifacts-host";
 import { ARTIFACT_INVOCATION_SCOPES, ARTIFACT_TOOL_SCOPES, acceptedArtifactScopes, hasArtifactScope,
   isArtifactToolName, STRICT_ARTIFACT_SCOPE_POLICY, type ArtifactScopePolicy } from "./artifact-profile.js";
 import { AUTHORING_GUIDE_SNIPPET, getAuthoringGuide } from "./artifact-authoring-guide.js";
@@ -82,8 +82,15 @@ const CAS_GUARDED_TOOLS: ReadonlySet<string> = new Set(
  * The server still enforces it per profile (precondition_required with
  * the descriptor in the error details); the transport keeps its own
  * deferral for the same omission.
+ *
+ * `artifacts_get_source` additionally pins the `paths` property to its
+ * qualified description-less shape: upstream 0.2.8 documents the text /
+ * base64 encoding there, and claude.ai resets the owner's per-tool
+ * "Always allow" grant whenever a served definition changes, so the
+ * catalogue keeps the exact qualified surface instead.
  */
 function stabilizeArtifactInputSchema(name: string, schema: Readonly<Record<string, unknown>>): Record<string, unknown> {
+  if (name === "artifacts_get_source") return stabilizeGetSourceInputSchema(schema);
   if (!CAS_GUARDED_TOOLS.has(name)) return schema as Record<string, unknown>;
   const properties = { ...schema.properties as Record<string, unknown> };
   const guard = properties.expectedCurrentReleaseId;
@@ -92,6 +99,22 @@ function stabilizeArtifactInputSchema(name: string, schema: Readonly<Record<stri
     : { type: ["string", "null"], format: "uuid", description: EXPECTED_RELEASE_DESCRIPTION };
   return { ...schema, properties,
     required: (schema.required as string[]).filter((key) => key !== "expectedCurrentReleaseId") };
+}
+
+/**
+ * Pin `artifacts_get_source` inputs to the qualified surface: the `paths`
+ * property keeps its qualified shape without the encoding description
+ * upstream added in 0.2.8. Validation still runs against the upstream
+ * profile; only the served catalogue stays bit-identical.
+ */
+function stabilizeGetSourceInputSchema(schema: Readonly<Record<string, unknown>>): Record<string, unknown> {
+  const properties = schema.properties as Record<string, unknown> | undefined;
+  const paths = properties?.paths as Record<string, unknown> | undefined;
+  if (!paths || typeof paths !== "object" || Array.isArray(paths) || !("description" in paths)) {
+    return schema as Record<string, unknown>;
+  }
+  const { description: _dropped, ...rest } = paths;
+  return { ...schema, properties: { ...properties, paths: rest } };
 }
 
 export function createImmoArtifactManifest(policy: ArtifactScopePolicy = STRICT_ARTIFACT_SCOPE_POLICY): ArtifactManifest {
@@ -255,12 +278,12 @@ export function bindArtifactProvider(options: {
         // The shared facade rereads IMMO admission after every source blob has been read.
         const response = await sourceControl.handle(tool.slice("artifacts_".length), request.principal.sub, args);
         if (response.status < 200 || response.status >= 300) {
-          if (ARTIFACT_PART1) return { isError: true, content: [{ type: "text", text: JSON.stringify(response.body) }] };
+          if (ARTIFACT_PART1) return { isError: true, content: [{ type: "text", text: JSON.stringify(projectContentUrls(response.body)) }] };
           const error = response.body as { error: string; details?: unknown };
           return refusal(error.error, (response as { retryable?: boolean }).retryable === true,
             error.details ? { details: error.details } : {});
         }
-        body = response.body;
+        body = projectContentUrls(response.body);
       } else {
         const outcome = await executor.execute({ tool, args, invocation });
         if (!outcome.ok) {
@@ -271,7 +294,7 @@ export function bindArtifactProvider(options: {
             } catch { return refusal("capability_unavailable", true); }
           }
           const projected = projectArtifactHttpOutcome(outcome, true).body as { error: { message: string; details?: unknown } };
-          if (ARTIFACT_PART1) return { isError: true, content: [{ type: "text", text: JSON.stringify(projectArtifactHttpOutcome(outcome, true).body) }] };
+          if (ARTIFACT_PART1) return { isError: true, content: [{ type: "text", text: JSON.stringify(projectContentUrls(projectArtifactHttpOutcome(outcome, true).body)) }] };
           const details = ARTIFACT_STRICT || outcome.failure.details || outcome.failure.conflict || outcome.failure.edit || outcome.failure.release
             ? projected.error.details : undefined;
           return refusal(outcome.failure.publicCode, outcome.failure.retriable, {
@@ -279,7 +302,17 @@ export function bindArtifactProvider(options: {
             ...(details ? { details } : {}),
           });
         }
-        body = projectArtifactHttpOutcome(outcome, ARTIFACT_PART1).body;
+        body = projectContentUrls(projectArtifactHttpOutcome(outcome, ARTIFACT_PART1).body);
+        if (tool === "artifacts_publish" || tool === "artifacts_revert") {
+          const payload = (body as { output?: unknown }).output ?? body;
+          const record = payload as { artifactId?: unknown; releaseId?: unknown };
+          const requestArgs = args as { artifactId?: unknown };
+          try {
+            assertContentIdsDisjoint(requestArgs.artifactId ?? record.artifactId, record.releaseId);
+          } catch {
+            return refusal("provider_error", false);
+          }
+        }
       }
       // The durable receipt is untouched: the guide rides the MCP response
       // only, so tool selection and republication both surface it. Source
@@ -318,15 +351,47 @@ function decodeStrictUtf8(bytes: readonly number[]): string | undefined {
 }
 
 /**
- * Project one retained source file from the upstream `bytes` form to the
- * publish-compatible `text` form. Non-text MIME types, missing MIME types,
- * non-byte arrays and invalid UTF-8 keep `bytes` untouched; every other
- * field (path, mimeType, digest/size when present) is preserved so
- * integrity can still be checked and the file republishes as-is.
+ * Project one retained source file from the upstream 0.2.9 wire form to the
+ * publish-compatible #982 form. Upstream 0.2.7+ encodes verified bytes as
+ * `{ text, encoding: "utf8" }` for valid UTF-8 text or `{ base64,
+ * encoding: "base64" }` otherwise (never an integer array, which blows the
+ * tool-result budget). The publish contract accepts exactly one of `text`
+ * or `bytes` per file and rejects `encoding`/`base64`, so the projection
+ * drops `encoding`, keeps `text` as-is and decodes `base64` back to `bytes`.
+ * Every other field (path, mimeType, digest/size when present) is preserved
+ * so integrity can still be checked and the file republishes as-is.
+ *
+ * BOM handling is explicit: upstream decodes without `ignoreBOM` and strips
+ * `U+FEFF`, so a retained BOM arrives already stripped in `text`. The
+ * projection preserves the stripped text (no FEFF); re-encoding is therefore
+ * not byte-identical for BOM files, unlike the legacy `bytes` path below
+ * which keeps FEFF via `ignoreBOM: true`.
+ *
+ * The legacy 0.2.6 `bytes` form is still accepted for fixtures: non-text
+ * MIME types, missing MIME types, non-byte arrays and invalid UTF-8 keep
+ * `bytes` untouched.
  */
 export function projectSourceFile(file: unknown): unknown {
   if (typeof file !== "object" || file === null || Array.isArray(file)) return file;
   const entry = file as Record<string, unknown>;
+  if (typeof entry.encoding === "string") {
+    const { encoding: _encoding, ...withoutEncoding } = entry;
+    if (entry.encoding === "utf8" && typeof entry.text === "string") {
+      const { base64: _base64, bytes: _bytes, ...rest } = withoutEncoding;
+      return { ...rest, text: entry.text };
+    }
+    if (entry.encoding === "base64" && typeof entry.base64 === "string") {
+      try {
+        const bytes = Array.from(Buffer.from(entry.base64, "base64"));
+        const { base64: _base64, text: _text, bytes: _oldBytes, ...rest } = withoutEncoding;
+        return { ...rest, bytes };
+      } catch {
+        return file;
+      }
+    }
+    const { base64: _droppedBase64, ...rest } = withoutEncoding;
+    return rest;
+  }
   if (!Array.isArray(entry.bytes) || entry.text !== undefined) return file;
   const bytes = entry.bytes as unknown[];
   if (!bytes.every((byte) => Number.isInteger(byte) && (byte as number) >= 0 && (byte as number) <= 255)) return file;
@@ -339,8 +404,8 @@ export function projectSourceFile(file: unknown): unknown {
 
 /**
  * Project a get_source response body (v1 root `files` or v2
- * `output.files`) from `bytes` to `text` per {@link projectSourceFile}.
- * Unknown shapes pass through unchanged.
+ * `output.files`) from the 0.2.9 wire form to the publish-compatible form
+ * per {@link projectSourceFile}. Unknown shapes pass through unchanged.
  */
 export function projectSourceBody(body: unknown): unknown {
   if (typeof body !== "object" || body === null || Array.isArray(body)) return body;
