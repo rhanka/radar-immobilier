@@ -8,7 +8,7 @@
  *
  * No MapLibre, no API: pure click → focus → detail reactivity loop.
  */
-import { describe, it, expect, afterEach, vi } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import { render, fireEvent, cleanup } from "@testing-library/svelte";
 import type { MunicipalityT } from "@radar/domain";
 import type { CityMapEntry } from "$lib/maps/maps-data.js";
@@ -20,22 +20,6 @@ import {
   type SelectionBucketState,
 } from "$lib/maps/selection-bucket.js";
 import Harness from "./SignauxSelPanelHarness.svelte";
-
-// §2 — les fiches signal dépliées montent SignalAnnotations, qui appelle le
-// client annotations au mount. On le mocke pour garder ces tests hermétiques
-// (aucun fetch réel ; les fiches restent testées à l'identique).
-vi.mock("$lib/collab/annotations-client.js", () => ({
-  listAnnotations: vi.fn(async () => []),
-  createAnnotation: vi.fn(async () => {}),
-  editAnnotation: vi.fn(async () => {}),
-  deleteAnnotation: vi.fn(async () => {}),
-}));
-// §2 PR2 — SignalAnnotations s'abonne au flux SSE au mount ; on le neutralise
-// (aucun EventSource réel en jsdom).
-vi.mock("$lib/collab/prospect-notes-stream.js", () => ({
-  subscribeNoteFrames: () => () => {},
-  noteMatchesTarget: () => false,
-}));
 
 /**
  * État de sélection avec une ZONE active (focusée), utilisé par les tests du
@@ -1434,5 +1418,48 @@ describe("SignauxSelPanel — P01 garde preuve signal (non-régression)", () => 
       "https://exemple.gouv.qc.ca/pv/2026-05.pdf",
     );
     expect(getByTestId("signal-stage-badge")).toBeTruthy();
+  });
+});
+
+describe("SignauxSelPanel — carte signal sans triage ni notes (retrait owner)", () => {
+  it("la fiche ouverte ne rend aucun contrôle de triage ni de notes", async () => {
+    const { getByText, queryByText, queryByTestId, container } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: NODES },
+    });
+
+    await fireEvent.click(getByText("Avis de motion règlement zonage H-431"));
+
+    // La fiche est bien ouverte (contenu lecture seule conservé).
+    expect(queryByText("Premier signal de zonage.")).not.toBeNull();
+    expect(queryByText("Preuve")).not.toBeNull();
+    expect(queryByText("Voir la preuve")).not.toBeNull();
+
+    // Aucun contrôle de triage/classement (panneau SignalFacetControls retiré).
+    expect(queryByTestId("signal-facet-controls")).toBeNull();
+    expect(queryByTestId("show-discarded-row")).toBeNull();
+    expect(queryByTestId("facet-badge-pertinent")).toBeNull();
+    expect(queryByTestId("facet-badge-watching")).toBeNull();
+    expect(queryByTestId("facet-badge-archived")).toBeNull();
+    expect(queryByTestId("facet-badge-changed")).toBeNull();
+    expect(queryByTestId("facet-card-note")).toBeNull();
+    expect(queryByTestId("facet-heads-loading")).toBeNull();
+    expect(queryByTestId("facet-heads-error")).toBeNull();
+    expect(queryByTestId("facet-all-archived")).toBeNull();
+    expect(queryByTestId("discarded-notice")).toBeNull();
+    expect(queryByTestId("facet-conflict-notice")).toBeNull();
+    expect(queryByTestId("facet-reload-error")).toBeNull();
+    expect(queryByTestId("facets-unavailable-note")).toBeNull();
+    expect(container.textContent).not.toContain("Montrer les écartés");
+    expect(container.textContent).not.toContain("Ajouter au panier");
+    expect(container.textContent).not.toContain("Code de motif");
+    expect(container.textContent).not.toContain("Choisir un code");
+    expect(container.textContent).not.toContain("Tous les signaux sont écartés");
+    expect(container.textContent).not.toContain("Chargement du classement");
+
+    // Aucun contrôle de notes (SignalAnnotations retiré de la fiche signal).
+    expect(queryByTestId("entity-annotations")).toBeNull();
+    expect(queryByTestId("annotation-add")).toBeNull();
+    expect(queryByTestId("annotation-new")).toBeNull();
+    expect(container.textContent).not.toContain("Ajouter une note");
   });
 });
