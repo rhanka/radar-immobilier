@@ -191,10 +191,7 @@ export function authRoute(
    * report `authenticated:true` + the real `status`, so the SPA renders the
    * static Pending/Rejected screen instead of looping.
    */
-  async function mintSessionCookie(
-    c: Context,
-    claims: { sub: string; name?: string; email?: string },
-  ): Promise<void> {
+  async function mintSessionCookie(c: Context, claims: SessionClaims): Promise<void> {
     // First mint: no `iat0` passed → signSession anchors it to the current iat.
     await signAndSetSessionCookie(c, auth, claims, nowFn());
   }
@@ -504,11 +501,35 @@ export function authRoute(
     let status: string | undefined;
     let isAdmin: boolean | undefined;
     if (options.db) {
-      const rows = await options.db
+      let rows = await options.db
         .select()
         .from(accountUsers)
         .where(eq(accountUsers.sub, session.sub))
         .limit(1);
+      // Lot I1 (R1/b): a session minted before the prod snapshot was
+      // ingested carries no usable account yet. Reconcile by verified email
+      // before refusing, so an already-logged-in user lands approved after
+      // the next sync instead of staying stuck on `/pending`.
+      if (
+        (rows.length === 0 || rows[0]!.status !== "approved") &&
+        session.emailVerified === true &&
+        typeof session.email === "string" &&
+        session.email.trim() !== "" &&
+        typeof session.idpIssuer === "string" &&
+        options.admissionTrustedIssuers &&
+        options.admissionTrustedIssuers.length > 0
+      ) {
+        await reconcilePreprodSub(
+          options.db,
+          { sub: session.sub, email: session.email, emailVerified: true, issuer: session.idpIssuer },
+          { trustedIssuers: options.admissionTrustedIssuers, now: nowFn },
+        );
+        rows = await options.db
+          .select()
+          .from(accountUsers)
+          .where(eq(accountUsers.sub, session.sub))
+          .limit(1);
+      }
       if (rows.length === 0) {
         return c.json(
           { error: "account_not_approved", status: "unknown" },
@@ -690,7 +711,25 @@ export function protect(
 
     if (session) {
       if (options.db) {
-        const status = await fetchAccountStatus(options.db, session.sub);
+        let status = await fetchAccountStatus(options.db, session.sub);
+        // Lot I1 (R1/b): same pre-sync session repair as `/me` — a cookie
+        // minted before ingestion must not stay 403 after the sync lands.
+        if (
+          status !== "approved" &&
+          session.emailVerified === true &&
+          typeof session.email === "string" &&
+          session.email.trim() !== "" &&
+          typeof session.idpIssuer === "string" &&
+          options.admissionTrustedIssuers &&
+          options.admissionTrustedIssuers.length > 0
+        ) {
+          await reconcilePreprodSub(
+            options.db,
+            { sub: session.sub, email: session.email, emailVerified: true, issuer: session.idpIssuer },
+            { trustedIssuers: options.admissionTrustedIssuers, now: nowFn },
+          );
+          status = await fetchAccountStatus(options.db, session.sub);
+        }
         if (status !== "approved") {
           return c.json(
             { error: "account_not_approved", status: status ?? "unknown" },
@@ -735,6 +774,32 @@ export function protect(
           if (!options.db) return c.json({ error: "unauthenticated" }, 401);
           const exchangedStatus = await fetchAccountStatus(options.db, exchanged.sub);
           if (exchangedStatus !== "approved") {
+            // Lot I1 (R1/b): first-time MCP users arrive with no preprod row.
+            // When the (verified) exchanged token carries a verified email AND
+            // the exchange issuer is trusted for JIT, reconcile before
+            // refusing — otherwise the MCP path can never link on its own.
+            if (
+              exchanged.email !== undefined &&
+              exchanged.emailVerified &&
+              options.admissionTrustedIssuers &&
+              options.admissionTrustedIssuers.length > 0 &&
+              options.admissionTrustedIssuers.includes(auth.strict.issuer)
+            ) {
+              await reconcilePreprodSub(
+                options.db,
+                { sub: exchanged.sub, email: exchanged.email, emailVerified: true, issuer: auth.strict.issuer },
+                { trustedIssuers: options.admissionTrustedIssuers, now: nowFn },
+              );
+              const retryStatus = await fetchAccountStatus(options.db, exchanged.sub);
+              if (retryStatus === "approved") {
+                c.set("session" as never, { sub: exchanged.sub, via: "exchanged" } as never);
+                return next();
+              }
+              return c.json(
+                { error: "account_not_approved", status: retryStatus ?? "unknown" },
+                403,
+              );
+            }
             return c.json(
               { error: "account_not_approved", status: exchangedStatus ?? "unknown" },
               403,

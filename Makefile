@@ -274,23 +274,23 @@ db-status: ## Check DB readiness
 
 .PHONY: admission-keygen
 admission-keygen: ## Print a fresh Ed25519 admission keypair JSON (owner stores it; nothing is created)
-	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm --no-deps -T api sh -c "npm ci --silent && npm run admission:keygen --workspace=api"
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm --no-deps -T api sh -c "npm ci --silent && npm run --silent admission:keygen --workspace=api"
 
 .PHONY: admission-snapshot
 admission-snapshot: ## Emit a signed FULL admission snapshot from the DB (prod emitter, prints envelope JSON)
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) up -d postgres
-	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm -T -e ADMISSION_SIGNING_KEY api sh -c "npm ci --silent && npm run admission:snapshot --workspace=api"
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm -T -e ADMISSION_SIGNING_KEY api sh -c "npm ci --silent && npm run --silent admission:snapshot --workspace=api"
 
 .PHONY: admission-ingest
 admission-ingest: ## Apply a signed admission envelope file (preprod ingest, FILE=<envelope.json>)
 	@test -n "$(FILE)" || (echo "Pass FILE=<envelope.json> (repo-relative, visible in the container)"; exit 1)
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) up -d postgres
-	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm -T -e ADMISSION_SYNC_ENABLED -e ADMISSION_PROD_PUBLIC_KEYS api sh -c "npm ci --silent && npm run db:migrate --workspace=api && npm run admission:ingest --workspace=api -- --file /workspace/$(FILE)"
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm -T -e ADMISSION_SYNC_ENABLED -e ADMISSION_PROD_PUBLIC_KEYS api sh -c "npm ci --silent && npm run --silent db:migrate --workspace=api && npm run --silent admission:ingest --workspace=api -- --file /workspace/$(FILE)"
 
 .PHONY: admission-verify
 admission-verify: ## Offline signature check of an envelope file (FILE=<envelope.json>, no DB writes)
 	@test -n "$(FILE)" || (echo "Pass FILE=<envelope.json>"; exit 1)
-	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm --no-deps -T -e ADMISSION_PROD_PUBLIC_KEYS api sh -c "npm ci --silent && npm run admission:verify --workspace=api -- --file /workspace/$(FILE)"
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm --no-deps -T -e ADMISSION_PROD_PUBLIC_KEYS api sh -c "npm ci --silent && npm run --silent admission:verify --workspace=api -- --file /workspace/$(FILE)"
 
 # ─────────────────────────────────────────────────────────────────────
 # Object storage (adobe/s3mock local, OVH S3 in deployed environments)

@@ -163,3 +163,50 @@ describe("signSnapshot / verifySnapshot", () => {
     expect(canonicalSnapshotBytes(a).equals(canonicalSnapshotBytes(b))).toBe(true);
   });
 });
+
+describe("buildAdmissionSnapshot — email dedup (F5)", () => {
+  const DUPS = [
+    { email: "DUP@example.ca", name: "Old", status: "rejected", isAdmin: false,
+      createdAt: "2026-01-01T00:00:00.000Z", approvedAt: null },
+    { email: "dup@example.ca", name: "New", status: "approved", isAdmin: false,
+      createdAt: "2026-02-01T00:00:00.000Z", approvedAt: "2026-03-01T00:00:00.000Z" },
+    { email: "  dup@Example.CA  ", name: "Messy", status: "suspended", isAdmin: false,
+      createdAt: "2026-04-01T00:00:00.000Z", approvedAt: null },
+  ];
+
+  it("should collapse case/whitespace duplicates to the single approved entry", () => {
+    const { pair } = keypair();
+    const payload = buildAdmissionSnapshot(DUPS, {
+      kid: pair.kid, issuedAt: new Date("2026-11-03T12:00:00.000Z"), full: true,
+    });
+    expect(payload.entries).toHaveLength(1);
+    expect(payload.entries[0]).toMatchObject({ status: "approved", name: "New" });
+  });
+
+  it("should pick the same winner regardless of input order", () => {
+    const { pair } = keypair();
+    const opts = { kid: pair.kid, issuedAt: new Date("2026-11-03T12:00:00.000Z"), full: true as const };
+    const first = buildAdmissionSnapshot(DUPS, opts);
+    const shuffled = buildAdmissionSnapshot([DUPS[2]!, DUPS[0]!, DUPS[1]!], opts);
+    expect(shuffled.entries).toEqual(first.entries);
+    expect(canonicalSnapshotBytes(shuffled).equals(canonicalSnapshotBytes(first))).toBe(true);
+  });
+
+  it("should keep distinct emails sorted by normalised email", () => {
+    const { pair } = keypair();
+    const payload = buildAdmissionSnapshot(
+      [
+        { email: "Zoe@Example.ca", name: null, status: "approved", isAdmin: false, createdAt: null, approvedAt: null },
+        { email: "adam@example.ca", name: null, status: "approved", isAdmin: false, createdAt: null, approvedAt: null },
+        { email: "DUP@example.ca", name: "Old", status: "rejected", isAdmin: false, createdAt: null, approvedAt: null },
+        { email: "dup@example.ca", name: "New", status: "approved", isAdmin: false, createdAt: null, approvedAt: null },
+      ],
+      { kid: pair.kid, issuedAt: new Date("2026-11-03T12:00:00.000Z"), full: true },
+    );
+    expect(payload.entries.map((entry) => entry.email)).toEqual([
+      "adam@example.ca",
+      "dup@example.ca",
+      "Zoe@Example.ca",
+    ]);
+  });
+});
