@@ -1,41 +1,25 @@
 {
-  "seeds": [
-    {
-      "city": "i0-vol-a",
-      "count": 6
-    },
-    {
-      "city": "i0-vol-b",
-      "count": 3
-    },
-    {
-      "city": "i0-vol-c",
-      "count": 3
-    }
-  ],
+  "seed": 20261103,
+  "cohort": "scripts/cohorte-vivier-b/cohorte-vivier-b-6mo.slugs.tsv (127 slugs, dump 2026-08-06 vintage)",
   "note": "UI today loads the full visible population of one city with raw props, no limit or cursor; all-cities opens one such read per city with signals.",
-  "perCity": [
-    {
-      "citySlug": "i0-vol-a",
-      "rows": 6,
-      "jsonBytes": 6514,
-      "readMs": 2
-    },
-    {
-      "citySlug": "i0-vol-b",
-      "rows": 3,
-      "jsonBytes": 5248,
-      "readMs": 0
-    },
-    {
-      "citySlug": "i0-vol-c",
-      "rows": 3,
-      "jsonBytes": 5248,
-      "readMs": 1
-    }
-  ],
-  "maxPerCity": 6,
-  "totalAllCities": 12,
-  "maxJsonBytes": 6514,
-  "citiesMs": 9
+  "cities": 128,
+  "heavyCity": "valleyfield",
+  "totalSignals": 3374,
+  "maxPerCity": 914,
+  "totalLots": 2310,
+  "maxLotsPerCity": 639,
+  "distinctZoneCodes": 716,
+  "distinctSignalLotRefs": 1354,
+  "heavyDetail": {
+    "rows": 914,
+    "jsonBytes": 711059
+  },
+  "timings": {
+    "aggregateMs": 0,
+    "fanoutMs": 0,
+    "lotsMs": 0,
+    "headsMs": 0,
+    "basketMs": 0
+  },
+  "basketMatched": 914
 }
