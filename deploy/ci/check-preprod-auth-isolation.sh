@@ -23,6 +23,12 @@
 #   1. no PROD app/IdP host: `immo.sent-tech.ca` or `auth.sent-tech.ca` unless
 #      it is the `preprod.` subdomain. In kind Ingress it is reported as a PROD
 #      routing host.
+#      EXCEPTION: the `value:` line of the `ADMISSION_TRUSTED_ISSUERS` workload
+#      env literal intentionally lists the prod issuer second
+#      (`https://preprod.auth.sent-tech.ca,https://auth.sent-tech.ca`): the
+#      admission JIT links prod-issuer sessions on verified email (lot I1,
+#      docs/runbook-admission-sync.md §4). Exact-name match only; any other
+#      env literal or ConfigMap key with a PROD host is still rejected.
 #   2. no `*CLIENT_ID` set to the PROD client id `radar-immobilier` (exact),
 #      in ConfigMap data or in a container env literal.
 #   3. ConfigMaps radar-api and immo-mcp-config are present (no vacuous pass)
@@ -88,9 +94,16 @@ awk -v expected="$(IFS='|'; echo "${EXPECTED[*]}")" '
       line = buf[i]
       low = tolower(line)
       # Rule 1: PROD host = not preceded by a host char (so `preprod.` is exempt).
+      # EXCEPTION: the value of the ADMISSION_TRUSTED_ISSUERS env literal
+      # intentionally carries the prod issuer (lot I1 JIT). Exact-name match
+      # on the preceding `- name:` line only.
       if (low ~ /(^|[^a-z0-9.-])(immo|auth)\.sent-tech\.ca/) {
-        if (kind == "Ingress") report(id ": PROD routing host -> " unquote(line))
-        else report(id ": PROD auth host -> " unquote(line))
+        prev = (i > 1 ? buf[i - 1] : "")
+        exempt = (line ~ /^[ \t]*value:/ && prev ~ /-[ \t]+name:[ \t]*ADMISSION_TRUSTED_ISSUERS[ \t]*$/)
+        if (!exempt) {
+          if (kind == "Ingress") report(id ": PROD routing host -> " unquote(line))
+          else report(id ": PROD auth host -> " unquote(line))
+        }
       }
       # Rule 4: the PROD TLS Secret on a preprod Ingress.
       if (kind == "Ingress" && line ~ /^[ \t]*secretName:/) {
