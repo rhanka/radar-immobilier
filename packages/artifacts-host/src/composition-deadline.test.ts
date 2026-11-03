@@ -74,4 +74,25 @@ describe("composed dispatch deadline", () => {
       await s3.close();
     }
   }, 30_000);
+
+  it("/publish honors a configured blob deadline instead of the default", async () => {
+    const s3 = await startS3({ stalled: thirdAttemptOnly, close: true });
+    const host = await composeArtifactHost(stubPool(),
+      stubConfig(s3.url, { s3Budget: FAST_BUDGET, publishBlobDeadlineMs: 800 }));
+    try {
+      const started = Date.now();
+      // 1 file = 2 blob operations of >= 600 ms each: over 800 ms, under the
+      // mocked 2000 ms default, so only the configured bound can fire here.
+      const outcome = await (host.execute as unknown as Dispatch)({ method: "POST", path: "/publish", body: { files: 1 } },
+        { invocationId: randomUUID(), actorId: "alice", storageScopeId: "scope" });
+      const elapsed = Date.now() - started;
+      expect(outcome.ok).toBe(false);
+      expect(outcome.failure).toMatchObject({ category: "provider_unavailable", httpStatus: 503, retriable: true });
+      expect(elapsed).toBeGreaterThanOrEqual(700);
+      expect(elapsed).toBeLessThan(1300);
+    } finally {
+      host.close();
+      await s3.close();
+    }
+  }, 30_000);
 });
