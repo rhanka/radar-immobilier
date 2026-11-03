@@ -40,7 +40,7 @@ describe.skipIf(!ARTIFACT_P0B)("P0b MCP binding", () => {
     expect(tool("set_access").annotations).toMatchObject({ readOnlyHint: false, destructiveHint: false });
     expect(tool("delete").annotations).toMatchObject({ readOnlyHint: false, destructiveHint: true });
     expect(tool("delete").inputSchema.required).not.toContain("expectedCurrentReleaseId");
-    expect(tool("get")._meta).toEqual({ "immo/artifactsProfile": ARTIFACT_PROFILE_DESCRIPTOR });
+    expect(tool("get")).not.toHaveProperty("_meta");
     expect(getAuthoringGuide().artifactLifecycle?.descriptor).toEqual(ARTIFACT_PROFILE_DESCRIPTOR);
   });
 
