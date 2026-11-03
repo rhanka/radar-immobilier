@@ -58,6 +58,11 @@ export function createReaderOpening(deps: {
   writeDomain?: PwIdentityDomain;
   permitsWrite?: (artifactId: string, releaseId: string) => Promise<boolean>;
   getArtifactIdForRelease?: (releaseId: string) => Promise<string | null>;
+  /**
+   * Lot I1 (R1/a): JIT reconciliation of the preprod sub by verified email,
+   * run BEFORE getRights. Absent keeps the historical behaviour (disabled).
+   */
+  reconcile?: (input: { sub: string; email?: string; emailVerified: boolean; issuer: string }) => Promise<unknown>;
 }) {
   const application = new Hono();
   const content = new Hono();
@@ -112,6 +117,14 @@ export function createReaderOpening(deps: {
     const release = await deps.authority.getRelease(input.artifactId, requestedRelease);
     const profile = await deps.authority.getProfile(input.artifactId);
     const origin = await deps.authority.getContentOrigin(input.artifactId);
+    // Lot I1 (R1/a, normative): reconcile the preprod sub by verified email
+    // BEFORE getRights, so the first click on a shared link links, then the
+    // same flow opens the artifact — no prior step, no DB restore.
+    await deps.reconcile?.({ sub: session.sub,
+      ...(session.email !== undefined ? { email: session.email } : {}),
+      emailVerified: session.emailVerified === true,
+      issuer: session.idpIssuer ?? "",
+    });
     const rights = await deps.authority.getRights(session.sub, input.artifactId);
     if (!release || !profile || !origin || !rights?.approved) return null;
     let contentOrigin = origin;

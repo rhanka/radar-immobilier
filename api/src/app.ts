@@ -29,6 +29,7 @@ import { geoCollectionsRoute } from "./routes/geo-collections.js";
 import { signalsDetailRoute } from "./routes/signals-detail.js";
 import { opportunitesRoute } from "./routes/opportunites.js";
 import { adminRoute } from "./routes/admin.js";
+import { admissionRoute, type AdmissionRouteDeps } from "./admission/route.js";
 import { dataQualityRoute, type DataQualityDeps } from "./routes/data-quality.js";
 import { sourceCoverageRoute } from "./routes/source-coverage.js";
 import { sourceConsistencyRoute } from "./routes/source-consistency.js";
@@ -69,6 +70,17 @@ export type AppDeps = HealthDeps &
     auth?: AuthConfig;
     /** Test seams for the OIDC routes (mock fetch / JWKS / discovery). */
     authOptions?: AuthRouteOptions;
+    /**
+     * Lot I1: admission sync wiring. `route` deps mount the signature-
+     * authenticated ingest webhook as a public path (see PUBLIC_PREFIXES);
+     * absent keeps it closed (503). `trustedIssuers` enables JIT
+     * reconciliation at login; `emit` hooks prod-side mutation emission into
+     * the admin routes.
+     */
+    admission?: AdmissionRouteDeps & {
+      trustedIssuers: string[];
+      emit?: { emit: (targetSub: string) => Promise<{ pushed: boolean }> };
+    };
     /** Config Scaleway TEM optionnelle pour les emails d'invitation. */
     tem?: TemConfig;
     /**
@@ -141,12 +153,22 @@ export function createApp(deps: AppDeps): Hono {
   app.use("/api/v1/workspaces/*", privateSignalResponse);
   app.use("/api/v1/workspaces", privateSignalResponse);
   app.use("/api/v1/workspaces/*", classificationBoundary);
+  // Lot I1: the ingest webhook is signature-authenticated (prod holds no
+  // preprod session); protect() lets its public path through (PUBLIC_PREFIXES).
+  if (deps.admission) {
+    app.route("/", admissionRoute(deps.admission));
+  }
   if (deps.auth) {
-    app.use("*", protect(deps.auth, { db: deps.db }));
+    const admissionIssuers = deps.admission?.trustedIssuers ?? [];
+    app.use("*", protect(deps.auth, {
+      db: deps.db,
+      ...(admissionIssuers.length > 0 ? { admissionTrustedIssuers: admissionIssuers } : {}),
+    }));
     // Pass db into authOptions so enrollment runs in production.
     const authOptions: AuthRouteOptions = {
       ...deps.authOptions,
       ...(deps.db ? { db: deps.db } : {}),
+      ...(admissionIssuers.length > 0 ? { admissionTrustedIssuers: admissionIssuers } : {}),
     };
     app.route("/", authRoute(deps.auth, authOptions));
     // Admin routes require a live DB.
@@ -156,6 +178,7 @@ export function createApp(deps: AppDeps): Hono {
         adminRoute({
           db: deps.db,
           sessionSecret: deps.auth.sessionSecret,
+          ...(deps.admission?.emit ? { admission: deps.admission.emit } : {}),
           ...(deps.tem?.enabled
             ? {
                 mailer: {
