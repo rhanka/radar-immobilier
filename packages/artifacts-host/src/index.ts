@@ -1,6 +1,8 @@
 export {
+  PUBLISH_BLOB_DEADLINE_BOUNDS,
   readArtifactsEnv,
   resolveArtifactsStorageConfig,
+  resolvePublishBlobDeadlineMs,
   resolveS3Budget,
   type ArtifactsConfigInput,
   type ArtifactsS3BudgetInput,

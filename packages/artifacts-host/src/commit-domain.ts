@@ -35,12 +35,31 @@ export const PUBLISH_FINALIZE_MARGIN_MS = 10_000;
  */
 export const PUBLISH_BLOB_DEADLINE_MS = PREPARATION_WINDOW_MS - PUBLISH_FINALIZE_MARGIN_MS;
 
+/**
+ * Derive the preparation window from the publish blob deadline, preserving the
+ * invariant `blobDeadlineMs + PUBLISH_FINALIZE_MARGIN_MS === preparationWindowMs`:
+ * every blob operation must finish strictly inside the window so the
+ * finalization transaction still fits before the preparation sweeper may
+ * reclaim the staged blobs (and `completeIntent` refuses an expired
+ * preparation). A longer window holds no contended resource: no key lock or
+ * leased connection spans S3 I/O, and longer only delays the reclaim of
+ * crashed publishes.
+ */
+export function resolvePublishDeadlines(blobDeadlineMs: number = PUBLISH_BLOB_DEADLINE_MS): {
+  readonly blobDeadlineMs: number; readonly preparationWindowMs: number;
+} {
+  return { blobDeadlineMs, preparationWindowMs: blobDeadlineMs + PUBLISH_FINALIZE_MARGIN_MS };
+}
+
 export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | "coordinator"> & {
   pool: pg.Pool; scope: string; blobs: HttpAppDeps["publication"]["blobs"];
   publicationUrls?: HttpAppDeps["publicationUrls"];
   confirmation?: ArtifactDeleteConfirmation;
+  /** Preparation window; defaults to PREPARATION_WINDOW_MS. Derive it with resolvePublishDeadlines. */
+  preparationWindowMs?: number;
 }) {
   const { pool, scope, blobs, profile, coordinator } = options;
+  const preparationWindowMs = options.preparationWindowMs ?? PREPARATION_WINDOW_MS;
   await assertP0bStorage(pool, options.confirmation);
   const store = createPostgresArtifactStore(pool);
   const reads = createArtifactReadMetadata(pool, scope, options.publicationUrls);
@@ -88,7 +107,7 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
     acls: { ...store, listArtifactIds: reads.listArtifactIds }, lifecycle: createLifecycleService(store, undefined, store),
     ...p0bPorts(store, options.confirmation, (sub) => approved.getStore()?.has(sub) === true),
     publication: { blobs, intents: store, refs: createPostgresClaimGuardedRefs(store, createPostgresCommitExecutor(pool)),
-      cleanupWindowMs: PREPARATION_WINDOW_MS, createUnitWriter: createPostgresPublicationUnitWriter, getCurrent: publication.getCurrent,
+      cleanupWindowMs: preparationWindowMs, createUnitWriter: createPostgresPublicationUnitWriter, getCurrent: publication.getCurrent,
       getRelease: publication.getRelease, listReleases: publication.listReleases,
       locks: { "artifact-lifecycle": [lock("artifacts", "id")], acl: [lock("artifact_access", "artifact_id")],
         "current-pointer": [lock("artifact_current", "artifact_id")] } },
