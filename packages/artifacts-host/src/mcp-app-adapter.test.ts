@@ -85,7 +85,7 @@ describe("mcp adapter minimal profile", () => {
     expect(result).toEqual({ ok: true, status: 201,
       data: { artifactId: ARTIFACT, releaseId: RELEASE, manifest: JSON.stringify({ digest: DIGEST }), digest: DIGEST,
         stableUrl: `https://${ARTIFACT}.pages.example.test/`,
-        pinnedUrl: `https://${RELEASE}.pinned.pages.example.test/` } });
+        pinnedUrl: `https://${RELEASE}.pages.example.test/` } });
     expect(handle).toHaveBeenCalledTimes(1);
   });
 });

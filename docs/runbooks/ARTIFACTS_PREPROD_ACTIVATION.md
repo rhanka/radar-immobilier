@@ -26,8 +26,8 @@ unchanged manifests; the production base render remains byte-identical.
 | Storage namespace | API/MCP `ARTIFACTS_STORAGE_SCOPE=radar-immobilier-preprod`, `ARTIFACTS_ORG_ID=radar-immobilier-preprod`; not a workspace ID |
 | Private bucket | `radar-immobilier-artifacts-preprod`, endpoint `https://s3.bhs.io.cloud.ovh.net`, region `bhs` |
 | Object prefix | `artifacts/radar-immobilier-preprod/`; blob suffix `blobs/sha256/<digest>`; fixed by code, no prefix environment variable |
-| Content base | Bare hostname `preprod.immo-pages.sent-tech.ca`, identical on API and MCP |
-| Stable / pinned origins | `<artifact-uuid>.preprod.immo-pages.sent-tech.ca` / `<release-uuid>.pinned.preprod.immo-pages.sent-tech.ca` |
+| Content base | Bare hostname `pages.preprod.immo.sent-tech.ca`, identical on API and MCP |
+| Stable / exact origins | `<artifact-uuid>.pages.preprod.immo.sent-tech.ca` (stable, serves the current release) / `<release-uuid>.pages.preprod.immo.sent-tech.ca` (exact version). Both UUID labels share the one wildcard; the server resolves the label as artifact or release, unknown answers 404 without leaking the kind, and a colliding label fails closed as 404. No `pinned` label. |
 | Reader approval | Existing app login, review and POST confirmation at `https://preprod.immo.sent-tech.ca`; issuer that origin, audience that origin plus `/reader`, tier `preprod` |
 | Reader DB/S3 | Existing API DB credentials, artifact authority/ACL/releases/tickets in PostgreSQL, artifact S3 bindings, existing application object store for basket reads |
 | MCP DB | Secret `immo-mcp-artifact-writer`, key `IMMO_MCP_ARTIFACT_DATABASE_URL`; retain separate `immo-mcp-account-reader` binding |
@@ -98,15 +98,51 @@ supports one key, so outstanding continuations will be invalidated by rotation.
 
 ## DNS, TLS and ingress request
 
-Ask the DNS/cluster operator for records routing both
-`*.preprod.immo-pages.sent-tech.ca` and
-`*.pinned.preprod.immo-pages.sent-tech.ca` to the preprod Traefik ingress.
+Ask the DNS/cluster operator for a record routing
+`*.pages.preprod.immo.sent-tech.ca` to the preprod Traefik ingress.
 Provision TLS Secret `radar-artifact-content-preprod-tls` in the preprod namespace
-with **both wildcard SANs**. One wildcard does not cover the deeper pinned hosts.
+with exactly that one wildcard SAN. One wildcard covers both the stable page and
+every exact version because both are single UUID labels on the same base.
 Use DNS-01 issuance or import a certificate; this overlay requests no automatic
 wildcard issuance. Confirm certificate chain/SANs and DNS from outside the cluster.
 Do not route these hosts to `radar-ui` or rewrite Host to the application host.
-Verify no parent-domain application cookie is sent to either content hostname.
+Verify no parent-domain application cookie is sent to any content hostname:
+every app cookie stays host-only (no `Domain=`).
+
+Transition: keep the retired records `*.preprod.immo-pages.sent-tech.ca` and
+`*.pinned.preprod.immo-pages.sent-tech.ca` routed to the same ingress only for
+the 301 below, with their SANs retained in the same Secret until removal. They
+are never content hosts; the API answers 301 to the same UUID label on the new
+base (path and query preserved, never logged because the URL may carry
+`?grant=`; keep grant params out of access logs as well).
+
+## Legacy redirect removal
+
+When the transition ends (no traffic on the retired hosts for at least one
+release cycle, confirmed from ingress access counts without grant values):
+
+1. Delete the two `immo-pages` rules and their two TLS SANs from
+   `deploy/overlays/preprod/artifact-content-ingress.yaml`, leaving exactly
+   `*.pages.preprod.immo.sent-tech.ca` on Secret
+   `radar-artifact-content-preprod-tls`.
+2. Shrink `deploy/ci/h3-render-routing.awk` back to a single wildcard (counts
+   3→1, drop the legacy host assertions) and update
+   `deploy/ci/h3-disabled-fixture.sh` plus
+   `deploy/ci/check-h3-general-render.test.sh` to match.
+3. Ask the DNS/cluster operator to remove the two `immo-pages` records.
+4. Optionally delete the legacy helpers (`parseLegacyContentHost`,
+   `legacyContentRedirectTarget`, `belongsToLegacyContentDomain`) and their
+   tests once the Ingress no longer routes those hosts.
+
+## Rollout order (nothing breaks)
+
+1. Deploy the code first: it already serves the new hosts and 301s the old
+   ones, so both families work before any DNS/TLS change.
+2. Operator provisions DNS (`*.pages…`) + TLS (new SAN, legacy SANs retained)
+   and applies Ingress `radar-artifact-content`.
+3. Verify new stable → exact 303, exact open/approve/exchange, legacy 301s,
+   isolation probes, and host-only cookies before announcing the move.
+4. Retire the legacy redirect per the section above.
 
 ## Ordered activation
 
@@ -178,24 +214,38 @@ never log bearers, grants, tickets, cookie values or secret data.
   operation keys. Confirm distinct artifacts and no private cross-account access.
 - Give the readers authorized access to a shared test artifact using existing
   artifact ACLs. Open its stable URL as each reader, complete app review/approval,
-  then follow the pinned release. Confirm actual HTML/CSS/JS execution and H5
+  then follow the exact release. Confirm actual HTML/CSS/JS execution and H5
   context/search/state responses showing each reader's own authorized baskets.
+  Each release keeps its own origin (per-release isolation); the reader session
+  cookie stays `__Host-` scoped per host.
   An approved account without workspace membership may publish; basket reads
   require an explicit authorized workspace, with no implicit `default`.
 - Use enough fixture results to obtain a search continuation. Read page one,
   restart the API with the **same Secret and key ID**, then successfully read
   the continuation; repeat across API instances if multiple replicas are used.
   Confirm workspace revocation, foreign workspace and unapproved account fail.
-- On both stable and pinned hosts, GET/POST `/admin`, `/login`, `/auth/login`
+- On both stable and exact hosts, GET/POST `/admin`, `/login`, `/auth/login`
   and `/api/v1/workspaces` must never reach the app, admin or login UI;
   `/api/*` must return 401 and app/admin paths a reader refusal, without an app
   cookie or app redirect. Test without a grant and with a valid reader session.
   `/health` and `/livez` are deliberately probe exceptions.
 - Repeat the isolation checks with nonexistent UUIDs and malformed labels,
-  including `not-a-uuid.preprod.immo-pages.sent-tech.ca` and
-  `nope.pinned.preprod.immo-pages.sent-tech.ca`. Check `/api/v1/auth/enroll`,
-  `/api/v1/auth/login`, `/api/geo/collections` and `/admin`: no app handler,
-  app cookie or redirect; isolation headers must remain present.
+  including `not-a-uuid.pages.preprod.immo.sent-tech.ca` and
+  `nope.pages.preprod.immo.sent-tech.ca`, plus the bare apex
+  `pages.preprod.immo.sent-tech.ca` and the app host
+  `preprod.immo.sent-tech.ca` (never content hosts). Check
+  `/api/v1/auth/enroll`, `/api/v1/auth/login`, `/api/geo/collections` and
+  `/admin`: no app handler, app cookie or redirect; isolation headers must
+  remain present.
+- Confirm the legacy redirect: `GET
+  https://<artifact-uuid>.preprod.immo-pages.sent-tech.ca/<path>?<query>`
+  answers 301 to
+  `https://<artifact-uuid>.pages.preprod.immo.sent-tech.ca/<path>?<query>`,
+  and `GET
+  https://<release-uuid>.pinned.preprod.immo-pages.sent-tech.ca/<path>?<query>`
+  answers 301 to
+  `https://<release-uuid>.pages.preprod.immo.sent-tech.ca/<path>?<query>`.
+  Malformed legacy labels answer 404, never a redirect.
 - Inspect HTML, subresources, H5 and denial responses: private/no-store cache,
   `nosniff`, no-referrer, COOP/CORP `same-origin`, `X-Frame-Options: DENY`,
   restrictive CSP, including denied workers/frames/objects/forms.
@@ -222,9 +272,10 @@ ConfigMaps at `off`, and `ARTIFACTS_CONTROL_MODE=off` verified in every selected
 API/MCP pod, including old replicas. Any failure returns nonzero; a ConfigMap
 write alone never counts as a successful rollback. Resolve the reported failure
 and rerun rollback before declaring closure.
-Retest publication denial and refusal of existing content URLs on both host
-families. Route cutoff matters: mode `off` alone does not revoke existing reader
-grants. Already loaded files or committed publications cannot be recalled.
+Retest publication denial and refusal of existing content URLs on the new hosts
+(plus the legacy 301s while they exist). Route cutoff matters: mode `off`
+alone does not revoke existing reader grants. Already loaded files or committed
+publications cannot be recalled.
 Keep the bucket, DB rows, receipts, quota counters and persistent keys.
 
 Before resuming CD, change `ARTIFACTS_CONTROL_MODE` to `off` in **both**

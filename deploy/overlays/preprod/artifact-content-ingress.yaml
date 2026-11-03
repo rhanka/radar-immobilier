@@ -1,6 +1,11 @@
 # L4 content hosts go directly to the API-mounted reader, preserving Host.
 # The API host gate rejects application/API routes before auth/SPA dispatch.
-# DNS and both wildcard SANs require operator provisioning (DNS-01 or imported
+# Single content wildcard (owner decision 2026-11-02): every artifact page and
+# every exact release share `*.pages.preprod.immo.sent-tech.ca`. The two
+# `immo-pages` rules below are the 301 transition only (same UUID label on the
+# new base, path and query preserved, never logged); remove them per
+# docs/runbooks/ARTIFACTS_PREPROD_ACTIVATION.md ("Legacy redirect removal").
+# DNS and the wildcard SAN require operator provisioning (DNS-01 or imported
 # certificate); this manifest does not claim that they already exist.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -18,10 +23,26 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
+        - "*.pages.preprod.immo.sent-tech.ca"
+        # Transition only: keep the retired SANs until the 301 below is
+        # removed. Final state keeps exactly the one SAN above.
         - "*.preprod.immo-pages.sent-tech.ca"
         - "*.pinned.preprod.immo-pages.sent-tech.ca"
       secretName: radar-artifact-content-preprod-tls
   rules:
+    - host: "*.pages.preprod.immo.sent-tech.ca"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: radar-api
+                port:
+                  name: http
+    # Transition only: retired hosts answer 301 to the new base (same
+    # artifact/release, path and query preserved). Delete both rules with the
+    # legacy TLS SANs above when the redirect is retired.
     - host: "*.preprod.immo-pages.sent-tech.ca"
       http:
         paths:

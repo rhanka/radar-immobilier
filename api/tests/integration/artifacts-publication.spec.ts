@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { composeArtifactHost, createArtifactControl } from "@radar/artifacts-host";
-import { parseContentHost } from "@sentropic/artifacts/content/routing";
+import { parseContentHost } from "../../src/artifacts/content-host.js";
 import { startHarness, type Harness } from "./artifacts-h2.helpers.js";
 
 let h: Harness;
@@ -54,8 +54,12 @@ describe("artifact Postgres and S3 publication", () => {
     expect(new TextDecoder().decode(bytes)).toBe(file.text);
     expect((await h.pool.query("SELECT kind FROM artifacts.artifact_sources")).rows[0].kind).toBe("inline-original");
     const receipt = results[0]!.body as { stableUrl: string; pinnedUrl: string; digest: string };
-    expect(parseContentHost(new URL(receipt.stableUrl).host, "pages.example.test")).toEqual({ kind: "stable", artifactId: id });
-    expect(parseContentHost(new URL(receipt.pinnedUrl).host, "pages.example.test")?.kind).toBe("pinned");
+    expect(parseContentHost(new URL(receipt.stableUrl).host, "pages.example.test"))
+      .toEqual({ kind: "content", id });
+    const releaseId = (results[0]!.body as { releaseId: string }).releaseId;
+    expect(parseContentHost(new URL(receipt.pinnedUrl).host, "pages.example.test"))
+      .toEqual({ kind: "content", id: releaseId });
+    expect(new URL(receipt.pinnedUrl).host).not.toContain("pinned");
     expect(receipt.digest).toMatch(/^[a-f0-9]{64}$/);
     expect((await h.control.handle("publish", "alice", { ...body, files: [{ ...file, text: "changed" }] })).status).toBe(409);
     expect((await h.control.handle("publish", "alice", { ...body,
