@@ -44,9 +44,11 @@ function opening(consume: SharedReaderTickets["consume"]) {
     sessionSecret: "session-secret-32-bytes-long-pad!!" });
 }
 
-const exchange = (app: { request: Function }, query: string, headers: Record<string, string>) =>
-  (app as unknown as { request: (url: string, init?: RequestInit) => Promise<Response> })
-    .request(`https://${HOST}/__reader/exchange${query}`, { headers: { host: HOST, ...headers } });
+const exchange = (
+  app: { request: (url: string, init?: RequestInit) => Promise<Response> },
+  query: string,
+  headers: Record<string, string>,
+) => app.request(`https://${HOST}/__reader/exchange${query}`, { headers: { host: HOST, ...headers } });
 
 const BROWSER = { accept: "text/html,application/xhtml+xml" };
 const BINDING_COOKIE = `__Host-preview-init=${BINDING}`;
