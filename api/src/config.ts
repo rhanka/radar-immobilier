@@ -243,6 +243,23 @@ const envSchema = z.object({
   SCW_TEM_FROM_NAME: z.string().default("Radar"),
   SCW_TEM_SECRET_KEY: optStr(z.string().min(1)),
 
+  /**
+   * I-1A governed geo facade — served-contract pointer (converged r3 P1).
+   *
+   * These name the READ credential for `exports/immo/geo-served-contract/v1/`
+   * in the geo bucket `sentropic-geo`. The credential does NOT exist yet and
+   * all five are OPTIONAL: when any is absent the facade reports
+   * `missing source` and never fabricates a snapshot. No fallback to another
+   * bucket or credential is ever attempted. See
+   * `docs/runbooks/geo-governed-facade.md` for the grant procedure (geo
+   * tenant operator), rotation, and the negative test.
+   */
+  GEO_SERVED_CONTRACT_S3_ENDPOINT: optStr(z.string().url()),
+  GEO_SERVED_CONTRACT_S3_REGION: optStr(z.string().min(1)),
+  GEO_SERVED_CONTRACT_S3_BUCKET: optStr(z.string().min(1)),
+  GEO_SERVED_CONTRACT_S3_ACCESS_KEY: optStr(z.string().min(1)),
+  GEO_SERVED_CONTRACT_S3_SECRET_KEY: optStr(z.string().min(1)),
+
   // ── Lot I1 — admission sync prod -> preprod (converged R2 §2.6) ──────
   // Preprod ingestion is fail-closed: the webhook stays 503 unless
   // ADMISSION_SYNC_ENABLED=1 AND at least one prod public key is configured.
