@@ -238,7 +238,15 @@ export function createApp(deps: AppDeps): Hono {
   // unchanged and ungated. No P1 credential exists yet, so the contract
   // pointer resolves to `missing source` until the geo tenant operator grants
   // the GEO_SERVED_CONTRACT_S3_* read credential (see runbook).
-  app.route("/", geoGovernedRoute({ db: deps.db }));
+  app.route(
+    "/",
+    geoGovernedRoute({
+      db: deps.db,
+      ...(deps.fetchImpl ? { fetchImpl: deps.fetchImpl } : {}),
+      ...(deps.geoBaseUrl ? { baseUrl: deps.geoBaseUrl } : {}),
+      ...(deps.geoListingTtlMs !== undefined ? { listingTtlMs: deps.geoListingTtlMs } : {}),
+    }),
+  );
   app.route("/", signalsDetailRoute(deps));
   app.route("/", opportunitesRoute(deps));
   app.route("/", prospectMarksRoute(deps.auth?.enabled && deps.auth.sessionSecret ? { db: deps.db, sessionSecret: deps.auth.sessionSecret } : { db: deps.db }));
