@@ -28,6 +28,7 @@ import { ImmoStatefulHost } from "./stateful-host.js";
 import { composeStatefulImmo } from "./registry/stateful-composition.js";
 import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-stateful";
 import { createAccountBinding } from "./account-binding.js";
+import { admissionJitInputFromClaims } from "./admission-jit.js";
 import { createArtifactBinding } from "./artifact-binding.js";
 
 /**
@@ -301,9 +302,18 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
 
   const dispatchWithExchange = <T>(mcpAuth: McpAuthContext, auth: ImmoMcpAuthContext, subjectToken: string | undefined, snapshot: InvocationContext, fn: () => Promise<T>, signal: AbortSignal): Promise<T> => {
     const clientId = ownerClientId(mcpAuth);
+    // Lot I1 (R1/b): carry the JIT identity on the principal when the
+    // already-verified upstream token carries a usable email. The account
+    // gate links first-time MCP users from it; no email means no JIT.
+    const jitIdentity = admissionJitInputFromClaims(
+      mcpAuth.claims as unknown as Record<string, unknown> | null | undefined,
+    );
     const authority: VerifiedMcpRequest = {
       principal: { issuer: config.issuer, sub: snapshot.auth.sub, scopes: snapshot.auth.scopes,
-        claims: [], attributes: { workspaces: snapshot.auth.workspaces }, ...(clientId === undefined ? {} : { clientId }) },
+        claims: [], attributes: { workspaces: snapshot.auth.workspaces,
+          ...(jitIdentity ? { email: jitIdentity.email, emailVerified: jitIdentity.emailVerified,
+            idpIssuer: jitIdentity.issuer } : {}) },
+        ...(clientId === undefined ? {} : { clientId }) },
       resource: config.resource, correlationId: randomUUID(), signal,
     };
     const dispatch = () => runWithInvocationContext(snapshot, () => host.run(authority, fn));
