@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { readGeoFilters, writeGeoFilters, unrestrictedGeoFilters } from "./geo-filter-state.js";
+import { defaultGeoFilters, readGeoFilters, writeGeoFilters, unrestrictedGeoFilters } from "./geo-filter-state.js";
 import {
   FILTER_TO_CONTRACT,
   GEO_FILTER_STATE_KEYS,
+  geoFiltersToSignalFilter,
 } from "./signal-query-v1-mapping.js";
 
 describe("filter.* mapping exhaustiveness", () => {
@@ -47,5 +48,79 @@ describe("filter.* mapping exhaustiveness", () => {
     for (const key of GEO_FILTER_STATE_KEYS) {
       expect(spec, `spec missing filter.${key}`).toContain(`filter.${key}`);
     }
+  });
+});
+
+describe("geoFiltersToSignalFilter translator", () => {
+  const NOW = Date.UTC(2026, 9, 9, 12, 0, 0);
+
+  it("should translate the product-default snapshot to the opening contract", () => {
+    const filter = geoFiltersToSignalFilter(defaultGeoFilters(NOW), NOW);
+    expect(filter.requireZonage).toBe(true);
+    expect(filter.requireResidentielEligible).toBe(true);
+    expect(filter.requirePrecoce).toBe(true);
+    expect(filter.excludeAutomaticallyExcluded).toBe(true);
+    expect(filter.excludePiia).toBe(true);
+    expect(filter.excludeDerogations).toBe(true);
+    expect(filter.dateBasis).toBe("document");
+    expect(filter.dateFrom).toBe("2026-10-02");
+    expect(filter.dateTo).toBe("2026-10-09");
+    expect(filter.archive).toBe("exclude");
+    expect(filter.basket).toBe("all");
+    expect(filter.personalHistory).toBe("any");
+    expect(filter.sort).toBe("vivier_rank");
+    expect(filter.citySlug).toBeUndefined();
+    expect(filter.zoneCode).toBeUndefined();
+    expect(filter.q).toBeUndefined();
+  });
+
+  it("should leave an unrestricted snapshot unrestricted with no dates", () => {
+    const filter = geoFiltersToSignalFilter(unrestrictedGeoFilters(), NOW);
+    expect(filter.requireZonage).toBe(false);
+    expect(filter.dateFrom).toBeUndefined();
+    expect(filter.dateTo).toBeUndefined();
+    expect(filter.dateBasis).toBe("document");
+  });
+
+  it("should select the scrap clock for acquisition only on an absolute period", () => {
+    const absolute = {
+      ...defaultGeoFilters(NOW),
+      timeRange: { mode: "absolute" as const, from: Date.UTC(2026, 0, 15), to: Date.UTC(2026, 1, 15) },
+      dateBasis: "scrap" as const,
+    };
+    const scrap = geoFiltersToSignalFilter(absolute, NOW);
+    expect(scrap.dateBasis).toBe("scrap");
+    expect(scrap.dateFrom).toBe("2026-01-15");
+    expect(scrap.dateTo).toBe("2026-02-15");
+    const relative = { ...defaultGeoFilters(NOW), dateBasis: "scrap" as const };
+    expect(geoFiltersToSignalFilter(relative, NOW).dateBasis).toBe("document");
+  });
+
+  it("should open the archive only when the snapshot reveals discarded signals", () => {
+    const shown = geoFiltersToSignalFilter(
+      { ...unrestrictedGeoFilters(), showDiscarded: true }, NOW,
+    );
+    expect(shown.archive).toBe("include");
+    const hidden = geoFiltersToSignalFilter(unrestrictedGeoFilters(), NOW);
+    expect(hidden.archive).toBe("exclude");
+  });
+
+  it("should round-trip through the URL grammar without inventing spellings", () => {
+    const state = {
+      ...defaultGeoFilters(NOW),
+      timeRange: { mode: "absolute" as const, from: Date.UTC(2026, 0, 15), to: Date.UTC(2026, 1, 15) },
+      dateBasis: "scrap" as const,
+      showDiscarded: true,
+    };
+    const written = writeGeoFilters(state);
+    const reread = readGeoFilters(
+      Object.fromEntries(Object.entries(written).map(([key, value]) => [key, [value].flat()])) as Record<string, readonly string[]>,
+      NOW,
+    );
+    const filter = geoFiltersToSignalFilter(reread, NOW);
+    expect(filter.dateBasis).toBe("scrap");
+    expect(filter.dateFrom).toBe("2026-01-15");
+    expect(filter.dateTo).toBe("2026-02-15");
+    expect(filter.archive).toBe("include");
   });
 });
