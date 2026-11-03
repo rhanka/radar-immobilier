@@ -113,7 +113,7 @@ export function createArtifactControl(
       let stableUrl: string | undefined;
       if (op === "publish") {
         if (!contentBase) return invalid();
-        stableUrl = contentUrl(String(artifactId), contentBase);
+        stableUrl = contentUrl(String(artifactId), contentBase) ?? undefined;
         if (!stableUrl) return invalid();
       }
       const write = isArtifactMutation(op);
