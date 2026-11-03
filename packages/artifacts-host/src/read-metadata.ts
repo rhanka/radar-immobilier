@@ -1,6 +1,7 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import type pg from "pg";
 import type { ArtifactApp, HttpAppDeps, HttpRequest } from "@sentropic/artifacts/http";
+import { projectContentUrls } from "./facade.js";
 
 interface MetadataRow {
   id: string; binding_name: string; created_at: Date; lifecycle_state: string;
@@ -26,7 +27,7 @@ export function createArtifactReadMetadata(pool: Pick<pg.Pool, "query">, scope: 
   function summary(row: MetadataRow) {
     const links = urls?.(row.id, row.release_id ?? "");
     return { artifactId: row.id, bindingName: row.binding_name,
-      stableUrl: links?.stableUrl ?? null, pinnedUrl: row.release_id ? links?.pinnedUrl ?? null : null,
+      stableUrl: links?.stableUrl ?? null, pinnedUrl: row.release_id ? links?.versionUrl ?? null : null,
       currentReleaseId: row.release_id, createdAt: row.created_at.toISOString(),
       updatedAt: row.published_at?.toISOString() ?? null, state: row.lifecycle_state,
       published: row.release_id !== null };
@@ -47,8 +48,9 @@ export function createArtifactReadMetadata(pool: Pick<pg.Pool, "query">, scope: 
         const enriched = items.map((item) => {
           const row = snapshots.getStore()!.get(String(item.artifactId));
           if (!row) throw new Error("artifact read metadata unavailable");
-          return { ...item, ...summary(row),
-            ...(Object.hasOwn(item, "digest") ? { digest: row.current_digest } : {}) };
+          const { versionUrl: _versionUrl, stableUrl: _stableUrl, ...cleanItem } = item;
+          return projectContentUrls({ ...cleanItem, ...summary(row),
+            ...(Object.hasOwn(item, "digest") ? { digest: row.current_digest } : {}) });
         });
         return { ...outcome, result: { ...outcome.result,
           body: list ? { ...body, artifacts: enriched } : enriched[0] } };
