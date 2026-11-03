@@ -8,12 +8,12 @@ import { GRANT_SECRET, SESSION_SECRET, ISSUER, HOST } from "./reader-test-fixtur
 
 const artifactId = "123e4567-e89b-12d3-a456-426614174000";
 const releaseId = "123e4567-e89b-12d3-a456-426614174001";
-const host = `${releaseId}.pinned.pages.example.test`;
+const host = `${releaseId}.pages.example.test`;
 const resource = { ...ISSUER, artifactId, releaseId, host, readerSub: "reader-alice", sessionId: "native",
   profileName: "demo", policyRevision: "pol-001", profileFingerprint: fingerprintReaderProfile({
     name: "demo", policyRevision: "pol-001", capabilities: ["geo.read", "signals.protected-read"] }) };
 
-describe("native pinned release resources", () => {
+describe("native exact release resources", () => {
   it.each(["", "&grant=&grant="])("should retain all navigation parameters when issuing only the grant (%s)", async (extra) => {
     const app = createReaderContentApp({ contentBase: "pages.example.test", issuer: ISSUER,
       grantSecret: GRANT_SECRET, sessionSecret: SESSION_SECRET, now: () => 60_000,
@@ -32,7 +32,7 @@ describe("native pinned release resources", () => {
     expect(await verifyGrant(target.searchParams.get("grant")!, { ...ISSUER, host }, GRANT_SECRET, 60_000)).not.toBeNull();
     expect((await app.request(target.href, { headers: { host, cookie } })).status).toBe(200);
   });
-  it("should authorize only sealed session files on the exact pinned release host", async () => {
+  it("should authorize only sealed session files on the exact release host", async () => {
     const authority = createFixtureAuthority();
     let revoked = false;
     const app = createReaderContentApp({ contentBase: "pages.example.test", issuer: ISSUER,
@@ -50,7 +50,7 @@ describe("native pinned release resources", () => {
     expect((await request("/missing.js")).status).toBe(404);
     expect((await request("/main.js", host, "")).status).toBe(401);
     expect((await request("/main.js", HOST)).status).toBe(401);
-    expect((await request("/main.js", `${artifactId}.pinned.pages.example.test`)).status).toBe(401);
+    expect((await request("/main.js", `${artifactId}.pages.example.test`)).status).toBe(401);
     expect((await request("/main.js?grant=forged")).status).toBe(401);
     expect((await request(`/main.js?grant=${await mintGrant(resource, GRANT_SECRET, 1_000)}`)).status).toBe(401);
     expect((await request("/__reader/api/geo.read.v1")).status).toBe(401);
