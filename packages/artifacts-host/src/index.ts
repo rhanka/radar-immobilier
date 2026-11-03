@@ -107,3 +107,10 @@ export {
   isLegacyReaderBridge,
   upgradeLegacyReaderBridge,
 } from "./reader-bridge-compat.js";
+export {
+  MAP_KIT_ASSETS,
+  MAP_KIT_VERSION,
+  findMapKitAsset,
+  mapKitAssetUrl,
+  type MapKitAsset,
+} from "./map-kit.js";
