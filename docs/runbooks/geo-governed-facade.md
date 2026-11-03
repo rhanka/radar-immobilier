@@ -53,7 +53,9 @@ rights), and `Unknown license` (the rest). Registry titles are unique
 
 The pointer `exports/immo/geo-served-contract/v1/latest.json` (constant
 `SERVED_CONTRACT_POINTER_KEY` in `served-contract-pointer.ts`) lives in the
-geo bucket `sentropic-geo`. The
+geo bucket `sentropic-geo` — or, once the geo copy exists, in the dedicated
+export bucket (for example `sentropic-geo-export-immo`); the bucket name
+itself is configuration (`GEO_SERVED_CONTRACT_S3_BUCKET`). The
 facade reads it ONLY through configuration:
 
 - `GEO_SERVED_CONTRACT_S3_ENDPOINT`
@@ -69,32 +71,71 @@ fallback to another bucket or credential is attempted.
 
 ### Who grants the read (geo-review-r3 G2)
 
-- The grant is an act of infrastructure by the **geo tenant operator, owner
-  of the bucket `sentropic-geo`**, via a prefix-scoped S3/IAM read policy on
-  `exports/immo/geo-served-contract/v1/` (+ snapshots it points to), with an
-  explicit rotation cycle, `.env` storage, and documented procedure verifiable
-  without a per-unit owner act. Immo cannot self-grant this access.
-- The named holder of the OVH rights for `sentropic-geo` is **unknown** on
-  both sides: naming that actor is a precondition line to fill before I-1A can
-  leave `missing source`.
-- The grant MUST be verified prefix-scoped: a read of the granted credential
-  outside `exports/immo/` must be refused (OVH prefix-scoped reads are
-  unverified — if OVH cannot scope the read, the fallback is a geo-side copy
-  of the pointer + snapshots into a dedicated export bucket, outside I-1 code).
-- Rotation: rotate the read credential on the operator's cycle; immo only
-  consumes the new values via `.env` (never committed). After rotation,
-  `GET /api/v1/geo-governed/catalog` must show `contract.status: ok` with the
-  pointer's `snapshot_sha256`; otherwise it stays `missing source` and items
-  keep serving live with the explicit marker (no silent change).
+- The grant is an act of infrastructure by the **k8s lane (ex-poc-k8s)**,
+  which provisions the OVH S3 users for geo via the OVH API: a dedicated
+  user per (bucket × env) with role `objectstore_operator`, plus a per-user
+  policy via `POST /cloud/project/{projectId}/user/{userId}/policy`
+  (cross-denial verified — the same recipe as the `immo-graph-<env>-RW`
+  users). Immo cannot self-grant this access.
+- The bucket policy on `sentropic-geo` is owner-held but is NOT needed for
+  P1: the read is granted per-user, not per-bucket.
+- Prefix-restricted RO on OVH is **untested**, so the recommended path is a
+  **dedicated export bucket** (for example `sentropic-geo-export-immo`)
+  with a user `immo-geo-export-<env>-RO` holding read on the whole bucket.
+  Copying the pointer and the snapshots it points to into that bucket is a
+  geo action (ADR-0035 or F3-PUB) — start date **unknown**.
+- A prefix-scoped RO on `sentropic-geo` itself is accepted ONLY with a
+  verified negative test: with the granted credential, `GetObject` on
+  `raw/…` and on `capture/…` MUST return 403 (see below). Without that
+  proof, the export-bucket path above applies.
+- Rotation follows the governed k8s↔immo credential cycle
+  (`deploy/ci/bascule-preprod/CRED_CYCLE.md`): **every 90 days** (and at
+  once on suspected exposure), one identity at a time — mint the new
+  `s3Credentials` for the OVH user (the old credential stays valid),
+  store the new values in the GitHub Environment + the `.env` recovery
+  copies, verify with the NEW credential
+  (`GET /api/v1/geo-governed/catalog` shows `contract.status: ok` with the
+  pointer's `snapshot_sha256`), and ONLY then delete the old credential
+  (revocation). Record the rotation date (next due = +90 days). After
+  rotation, `contract.status: ok`; otherwise the facade stays
+  `missing source` and items keep serving live with the explicit marker
+  (no silent change).
 
 ### Negative test (G2)
 
-`served-contract-pointer.test.ts` — "REFUSES a read outside `exports/immo/`
-with ZERO upstream calls (G2 negative)": requesting
-`raw/pv-index/cas/deadbeef.pdf` returns `refused /
-read-outside-exports-immo-refused` and the injected client is never invoked.
-The in-code prefix guard is the second layer; the first is the prefix-scoped
-credential above.
+In code, `served-contract-pointer.test.ts` covers the second layer:
+
+- "REFUSES a read outside `exports/immo/geo-served-contract/v1/` with ZERO
+  upstream calls": requesting `raw/pv-index/cas/deadbeef.pdf` returns
+  `refused / read-outside-exports-immo-refused` and the injected client is
+  never invoked.
+- "REFUSES `raw/` and `capture/` reads with ZERO upstream calls": both
+  `raw/pv-index/cas/deadbeef.pdf` and `capture/pv/2024/doc.pdf` — including
+  via `..` traversal through the served-contract tree — are refused before
+  any client call.
+- Traversal guard: keys containing `..`, `//` or control characters are
+  refused even under the allowed prefix.
+
+Against the REAL granted credential (first layer, by the k8s lane at grant
+time and after every rotation), the negative proof is:
+
+```bash
+# With ONLY the immo-geo-export-<env>-RO (or prefix-scoped RO) values in the
+# environment: reads inside the served-contract tree succeed…
+aws --endpoint-url "$GEO_SERVED_CONTRACT_S3_ENDPOINT" s3api get-object \
+  --bucket "$GEO_SERVED_CONTRACT_S3_BUCKET" \
+  --key exports/immo/geo-served-contract/v1/latest.json /tmp/pointer.json
+# …while raw/ and capture/ MUST be denied (HTTP 403).
+aws --endpoint-url "$GEO_SERVED_CONTRACT_S3_ENDPOINT" s3api get-object \
+  --bucket "$GEO_SERVED_CONTRACT_S3_BUCKET" \
+  --key raw/pv-index/cas/deadbeef.pdf /tmp/must-fail-1.bin
+aws --endpoint-url "$GEO_SERVED_CONTRACT_S3_ENDPOINT" s3api get-object \
+  --bucket "$GEO_SERVED_CONTRACT_S3_BUCKET" \
+  --key capture/pv/2024/doc.pdf /tmp/must-fail-2.bin
+```
+
+Both `must-fail` calls return 403. Any success outside the served-contract
+tree invalidates the grant: fall back to the dedicated export bucket.
 
 ## 4. Field discipline (O3 default)
 
