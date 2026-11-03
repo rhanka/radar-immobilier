@@ -1,0 +1,44 @@
+/**
+ * Qualification page stylesheet (I-4 test fixture).
+ *
+ * Layout only: every color and type comes from the official kit
+ * stylesheets through --st-* tokens. No author palette, no remote
+ * reference, no page-specific theme.
+ */
+.map-qualif {
+  display: grid;
+  gap: var(--st-spacing-4);
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: var(--st-spacing-4);
+  color: var(--st-semantic-text-primary);
+  background: var(--st-semantic-surface-subtle);
+  font-family: var(--st-font-sans);
+}
+
+.map-qualif__frame {
+  border: 1px solid var(--st-semantic-border-default);
+  background: var(--st-semantic-surface-default);
+}
+
+.map-qualif__frame .map-base {
+  height: 60vh;
+  min-height: 24rem;
+}
+
+.map-qualif__facts {
+  display: grid;
+  gap: var(--st-spacing-2);
+  margin: 0;
+}
+
+.map-qualif__facts div {
+  display: grid;
+  grid-template-columns: 8rem 1fr;
+  gap: var(--st-spacing-2);
+}
+
+.map-qualif__facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
