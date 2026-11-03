@@ -6,7 +6,7 @@ import { SESSION_COOKIE_NAME, verifySession } from "../services/auth/session.js"
 import { fingerprintReaderProfile, type AuthorityReader } from "./reader-profile.js";
 import { mintGrant, type GrantIssuer } from "./preview-grant.js";
 import { validateTicketForExchange } from "./preview-exchange.js";
-import { mintRetryCookie, mintSessionCookie, parseCookieHeader, PREVIEW_INIT_COOKIE, PREVIEW_INIT_MAX_AGE_S, PREVIEW_RETRY_COOKIE } from "./preview-session.js";
+import { mintInitCookie, mintRetryCookie, mintSessionCookie, parseCookieHeader, PREVIEW_INIT_COOKIE, PREVIEW_RETRY_COOKIE } from "./preview-session.js";
 import { parseContentHost } from "./content-host.js";
 import { applyReaderContentHeaders } from "./content-isolation.js";
 import { DESIGN_KIT_ASSETS, designKitAssetUrl, type DesignKitAsset } from "@radar/artifacts-host";
@@ -52,6 +52,18 @@ export function approvalDesignAssetUrl(asset: DesignKitAsset): string {
 }
 
 /**
+ * Stylesheets for the neutral expired page. Unlike the approval page (served
+ * on the application origin), the expired page is served on the content host
+ * where every /api/* path answers 401: it must use the public content-origin
+ * design-kit path /__artifacts/design/… (same-origin, covered by the
+ * style-src 'self' CSP below).
+ */
+export function contentStylesheetLinks(): string {
+  return DESIGN_KIT_ASSETS.map((asset) =>
+    `<link rel="stylesheet" href="${designKitAssetUrl(asset)}">`).join("");
+}
+
+/**
  * Neutral expired-opening page (French, no identifiers).
  *
  * Shown to browsers only, after the single auto-restart below has already
@@ -63,7 +75,7 @@ export function expiredReaderOpeningHtml(): string {
   return `<!doctype html><html lang="fr" data-st-theme="sent-tech"><head><meta charset="utf-8">` +
     `<meta name="viewport" content="width=device-width, initial-scale=1">` +
     `<title>Lien expiré — Radar immobilier</title>` +
-    approvalStylesheetLinks() +
+    contentStylesheetLinks() +
     `<style>${APPROVAL_STYLE}</style></head><body><main class="reader-approve">` +
     `<div class="st-card reader-approve__card">` +
     `<p class="reader-approve__eyebrow">Radar immobilier</p>` +
@@ -78,8 +90,7 @@ function wantsBrowserExchange(c: Context): boolean {
 }
 
 function hasExchangeRetry(c: Context): boolean {
-  return parseCookieHeader(c.req.header("cookie"), PREVIEW_RETRY_COOKIE) === "1" ||
-    c.req.query("retry") === "1";
+  return parseCookieHeader(c.req.header("cookie"), PREVIEW_RETRY_COOKIE) === "1";
 }
 
 export function createReaderOpening(deps: {
@@ -257,7 +268,7 @@ export function createReaderOpening(deps: {
     // 10-minute binding window aligned with the ticket TTL (DB default) and
     // the approval page lifetime: a tab opened from a Claude link is often
     // approved minutes later, and the previous 60 s cookie expired first.
-    c.header("Set-Cookie", `${PREVIEW_INIT_COOKIE}=${binding}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=${PREVIEW_INIT_MAX_AGE_S}`);
+    c.header("Set-Cookie", mintInitCookie(binding));
     return c.redirect(`${deps.auth.appBaseUrl}/api/v1/artifacts/reader/approve?` +
       new URLSearchParams({ artifactId, binding, origin: `https://${c.req.header("host")}` }), 303);
   });

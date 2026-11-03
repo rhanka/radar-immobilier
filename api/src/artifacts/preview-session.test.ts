@@ -18,13 +18,14 @@ describe("preview page cookies", () => {
     expect(PREVIEW_INIT_MAX_AGE_S).toBe(600);
     expect(init).toContain("Max-Age=600");
     expect(mintRetryCookie().startsWith(`${PREVIEW_RETRY_COOKIE}=1`)).toBe(true);
-    for (const cookie of [init, mintSessionCookie(
+    for (const cookie of [init, mintRetryCookie(), mintSessionCookie(
       { sid: "s1", readerSub: "reader-alice", artifactId: "123e4567-e89b-12d3-a456-426614174000", createdAt: 1_000, expiresAt: 901_000 },
       "session-secret-32-bytes-long-pad!!",
     )]) {
       expect(cookie).toContain("Path=/");
       expect(cookie).toContain("Secure");
       expect(cookie).toContain("HttpOnly");
+      expect(cookie).toContain("SameSite=Lax");
       expect(cookie).not.toContain("Domain=");
     }
   });

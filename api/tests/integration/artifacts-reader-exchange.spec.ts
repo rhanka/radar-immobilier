@@ -2,6 +2,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { startHarness, cookie, type Harness } from "./artifacts-h2.helpers.js";
 import { publishedBaskets } from "./artifacts-baskets.helpers.js";
 import { fingerprintReaderProfile } from "../../src/artifacts/reader-profile.js";
+import { APPROVAL_BASE_CSP } from "../../src/artifacts/reader-opening.js";
+import { DESIGN_KIT_ASSETS, designKitAssetUrl } from "@radar/artifacts-host";
 
 let h: Harness;
 beforeAll(async () => { h = await startHarness("readerexchange", ["author-alice"]); });
@@ -42,6 +44,19 @@ describe("reader exchange browser recovery", () => {
     expect(start.headers.get("set-cookie")).toContain("Max-Age=600");
   });
 
+  it("should default artifacts.reader_tickets expires_at to the 10-minute window", async () => {
+    const def = await h.pool.query(
+      "SELECT column_default FROM information_schema.columns WHERE table_schema='artifacts' AND table_name='reader_tickets' AND column_name='expires_at'");
+    expect(def.rows[0].column_default).toContain("00:10:00");
+    await h.pool.query("DELETE FROM artifacts.reader_tickets");
+    const f = await publishedBaskets(h);
+    await approvedExchangeUrl(f.runtime(), f);
+    const ttl = await h.pool.query("SELECT extract(epoch FROM (expires_at - now())) AS ttl FROM artifacts.reader_tickets");
+    expect(ttl.rows).toHaveLength(1);
+    expect(Number(ttl.rows[0].ttl)).toBeGreaterThan(300);
+    expect(Number(ttl.rows[0].ttl)).toBeLessThanOrEqual(600);
+  });
+
   it("should keep the 401 JSON for non-browser exchange failures", async () => {
     const f = await publishedBaskets(h);
     const { request, binding, exchangeUrl } = await approvedExchangeUrl(f.runtime(), f);
@@ -69,10 +84,24 @@ describe("reader exchange browser recovery", () => {
     expect(expired.status).toBe(401);
     expect(expired.headers.get("content-type")).toContain("text/html");
     expect(expired.headers.get("location")).toBeNull();
+    expect(expired.headers.get("content-security-policy")).toBe(APPROVAL_BASE_CSP);
     const expiredBody = await expired.text();
     expect(expiredBody).toContain("Ce lien d'ouverture a expiré");
     expect(expiredBody).toContain("Rouvrir la page");
     expect(expiredBody).toContain('href="/__reader/start"');
+    expect(expiredBody).not.toContain("/api/v1/artifacts/reader/design/");
+    for (const asset of DESIGN_KIT_ASSETS) {
+      expect(expiredBody).toContain(designKitAssetUrl(asset));
+    }
+    const contentHost = new URL(exchangeUrl).host;
+    const styles = [...expiredBody.matchAll(/<link rel="stylesheet" href="([^"]+)">/g)].map((m) => m[1]!);
+    expect(styles).toHaveLength(DESIGN_KIT_ASSETS.length);
+    for (const href of styles) {
+      const css = await request(`https://${contentHost}${href}`);
+      expect(css.status, href).toBe(200);
+      expect(css.headers.get("content-type")).toContain("text/css");
+      expect(await css.text()).toContain("--st-");
+    }
     for (const secret of [f.artifactId, f.releaseId, "unauthenticated"]) {
       expect(expiredBody.includes(secret), secret).toBe(false);
     }
