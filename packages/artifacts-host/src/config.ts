@@ -1,3 +1,4 @@
+import { PUBLISH_BLOB_DEADLINE_MS, PUBLISH_FINALIZE_MARGIN_MS } from "./commit-domain.js";
 import { DEFAULT_S3_BUDGET, S3_RETRY_HEADROOM_MS, type ArtifactS3Budget } from "./s3-timeout.js";
 
 /** Optional S3 time budget overrides; absent values keep DEFAULT_S3_BUDGET. */
@@ -17,9 +18,11 @@ export interface ArtifactsConfigInput {
   readonly s3SecretKey?: string | undefined;
   /** Tuning only: never counted as present or missing configuration. */
   readonly s3Budget?: ArtifactsS3BudgetInput | undefined;
+  /** Shared blob deadline of one publish, in ms. Tuning only: never counted as present or missing. */
+  readonly publishBlobDeadlineMs?: string | undefined;
 }
 
-type RequiredConfigKey = Exclude<keyof ArtifactsConfigInput, "s3Budget">;
+type RequiredConfigKey = Exclude<keyof ArtifactsConfigInput, "s3Budget" | "publishBlobDeadlineMs">;
 
 export type ArtifactsDisabledReason = "artifacts_config_absent" | "artifacts_config_incomplete";
 
@@ -35,6 +38,8 @@ export type ArtifactsStorageConfig =
       readonly s3SecretKey: string;
       /** Resolved by resolveArtifactsStorageConfig; composition defaults it when omitted. */
       readonly s3Budget?: ArtifactS3Budget | undefined;
+      /** Shared blob deadline of one publish; composition derives the preparation window from it. */
+      readonly publishBlobDeadlineMs?: number | undefined;
     }
   | { readonly enabled: false; readonly reason: ArtifactsDisabledReason; readonly missing?: string[] };
 
@@ -87,6 +92,30 @@ export function resolveS3Budget(input: ArtifactsS3BudgetInput = {}): ArtifactS3B
   return Object.freeze({ attemptTimeoutMs, maxAttempts, operationTimeoutMs });
 }
 
+/**
+ * Hard cap of the preparation window: 5 minutes. Still far below the upstream
+ * 15-minute default, and long enough for a 30-file publish at 2.5 s per
+ * request. A longer window holds no contended resource (no lock spans S3 I/O);
+ * it only delays the reclaim of crashed publishes.
+ */
+const MAX_PREPARATION_WINDOW_MS = 300_000;
+
+/** Bounds of the shared publish blob deadline: the window minus the finalization margin. */
+export const PUBLISH_BLOB_DEADLINE_BOUNDS: readonly [number, number] =
+  [1_000, MAX_PREPARATION_WINDOW_MS - PUBLISH_FINALIZE_MARGIN_MS];
+
+/** Shared blob deadline of one publish: configured value or PUBLISH_BLOB_DEADLINE_MS. */
+export function resolvePublishBlobDeadlineMs(input: string | undefined = undefined): number {
+  if (input === undefined || input.trim() === "") return PUBLISH_BLOB_DEADLINE_MS;
+  const [min, max] = PUBLISH_BLOB_DEADLINE_BOUNDS;
+  const text = input.trim();
+  const value = Number(text);
+  if (!/^[0-9]+$/.test(text) || value < min || value > max) {
+    throw new Error(`invalid ARTIFACTS_PUBLISH_BLOB_DEADLINE_MS: expected an integer in [${min}, ${max}]`);
+  }
+  return value;
+}
+
 export function readArtifactsEnv(
   env: NodeJS.ProcessEnv = process.env,
 ): ArtifactsConfigInput {
@@ -98,6 +127,7 @@ export function readArtifactsEnv(
     s3Region: env["ARTIFACTS_S3_REGION"],
     s3AccessKey: env["ARTIFACTS_S3_ACCESS_KEY"],
     s3SecretKey: env["ARTIFACTS_S3_SECRET_KEY"],
+    publishBlobDeadlineMs: env["ARTIFACTS_PUBLISH_BLOB_DEADLINE_MS"],
     s3Budget: {
       attemptTimeoutMs: env[S3_BUDGET_VARS.attemptTimeoutMs],
       maxAttempts: env[S3_BUDGET_VARS.maxAttempts],
@@ -174,5 +204,6 @@ export function resolveArtifactsStorageConfig(
     s3AccessKey: values.s3AccessKey!,
     s3SecretKey: values.s3SecretKey!,
     s3Budget,
+    publishBlobDeadlineMs: resolvePublishBlobDeadlineMs(input.publishBlobDeadlineMs),
   };
 }
