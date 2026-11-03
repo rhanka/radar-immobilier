@@ -23,6 +23,13 @@ let h: Harness;
 beforeAll(async () => { h = await startHarness("migrations"); });
 afterAll(async () => { await h?.close(); });
 describe("artifact journal and startup guard", () => {
+  it("should keep 0030 after 0029 with a strictly greater when", () => {
+    const ttl = journal.entries.find((entry) => entry.tag === "0030_artifacts_reader_tickets_ttl")!;
+    expect(ttl.idx).toBe(29);
+    const previous = journal.entries.find((entry) => entry.idx === ttl.idx - 1)!;
+    expect(previous.tag).toBe("0029_artifacts_parity");
+    expect(ttl.when).toBeGreaterThan(previous.when);
+  });
   it("should apply actor quotas 0025 before reader tickets 0026", async () => {
     const quota = journal.entries.find((entry) => entry.tag === "0025_artifacts_actor_quotas")!;
     const reader = journal.entries.find((entry) => entry.tag === "0026_artifacts_reader_tickets")!;
