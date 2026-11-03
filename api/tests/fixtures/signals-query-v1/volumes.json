@@ -1,0 +1,41 @@
+{
+  "seeds": [
+    {
+      "city": "i0-vol-a",
+      "count": 6
+    },
+    {
+      "city": "i0-vol-b",
+      "count": 3
+    },
+    {
+      "city": "i0-vol-c",
+      "count": 3
+    }
+  ],
+  "note": "UI today loads the full visible population of one city with raw props, no limit or cursor; all-cities opens one such read per city with signals.",
+  "perCity": [
+    {
+      "citySlug": "i0-vol-a",
+      "rows": 6,
+      "jsonBytes": 6514,
+      "readMs": 2
+    },
+    {
+      "citySlug": "i0-vol-b",
+      "rows": 3,
+      "jsonBytes": 5248,
+      "readMs": 0
+    },
+    {
+      "citySlug": "i0-vol-c",
+      "rows": 3,
+      "jsonBytes": 5248,
+      "readMs": 1
+    }
+  ],
+  "maxPerCity": 6,
+  "totalAllCities": 12,
+  "maxJsonBytes": 6514,
+  "citiesMs": 9
+}
