@@ -1,10 +1,10 @@
 import { render, waitFor } from "@testing-library/svelte";
 import { describe, expect, it, vi } from "vitest";
 
-// Fiche lot sans notes : la couche collab a été supprimée de l'UI. On mocke
-// uniquement le client prospect-marks (pipeline/marché, conservé).
+// Lot file without notes: the collab layer was removed from the UI. Only the
+// prospect-marks client (pipeline/market, kept) is mocked.
 vi.mock("$lib/prospect/prospect-marks-client.js", () => ({
-  fetchProspectLotState: vi.fn(async () => ({ marks: [], notes: [] })),
+  fetchProspectLotState: vi.fn(async () => ({ marks: [] })),
   activePipelineMark: () => null,
   activeMarketMark: () => null,
   createProspectMark: vi.fn(async () => {}),

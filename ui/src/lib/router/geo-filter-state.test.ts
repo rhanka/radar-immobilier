@@ -139,8 +139,8 @@ describe("shareable geographic restrictions", () => {
 
   it("should never emit the retired triage reveal key, and should drop it on read", () => {
     // The triage reveal was removed from the UI: writeGeoFilters never emits
-    // the key, and a legacy link carrying it reads as an authoritative
-    // snapshot with no business restriction (unknown keys are dropped).
+    // the key, and a stale link carrying it alone opens the product defaults
+    // (the retired key is ignored, not treated as a restriction).
     expect(writeGeoFilters(unrestrictedGeoFilters())).toEqual({ period: ["all"] });
     expect("showDiscarded" in writeGeoFilters(unrestrictedGeoFilters())).toBe(false);
     const combined = readGeoFilters(parseGeoQuery("?filter.zonage=1&filter.showDiscarded=1").filters);
@@ -149,8 +149,11 @@ describe("shareable geographic restrictions", () => {
     expect(buildGeoQuery({ filters: writeGeoFilters(combined) })).toBe(
       "?mode=signal&filter.zonage=1",
     );
+    const staleAlone = readGeoFilters(parseGeoQuery("?filter.showDiscarded=1").filters);
+    expect(staleAlone.axes).toEqual({ z: true, r: true, p: true });
+    expect(staleAlone.timeRange).toMatchObject({ mode: "relative", relative: "7d" });
     expect(subsetFromGeoFilters({ showDiscarded: ["1"] })).toBe(
-      subsetFromGeoFilters({ zonage: ["0"] }),
+      subsetFromGeoFilters({}),
     );
   });
 

@@ -125,11 +125,14 @@ function readDateBasis(value: (key: string) => string | undefined): DocumentDate
   return ACQUISITION_DATE_BASIS_URL_VALUES.has(value("dateBasis") ?? "") ? "scrap" : "document";
 }
 
+/** Retired triage reveal key: stale shared links may still carry it; it never restricts. */
+const RETIRED_TRIAGE_KEYS = new Set(["showDiscarded"]);
+
 /** Omitted restrictions are unrestricted, independent of browser preferences. */
 export function readGeoFilters(filters: Record<string, readonly string[]>, now = Date.now()): GeoFilterState {
   const value = (key: string) => filters[key]?.[0];
   const legacy = filters.subset?.flatMap((item) => item.split("|"));
-  const restrictionKeys = Object.keys(filters);
+  const restrictionKeys = Object.keys(filters).filter((key) => !RETIRED_TRIAGE_KEYS.has(key));
   if (legacy || filters.legacyLayers || restrictionKeys.length === 0) {
     const defaults = defaultGeoFilters(now);
     if (legacy) defaults.axes = bAxesFromVivierKey(legacy.includes("vivier-v2") ? legacy.join("|") : "vivier-v2");
