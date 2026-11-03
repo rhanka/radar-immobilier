@@ -23,8 +23,8 @@ describeDb.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")("published H
       expect(publication.status).toBe(201);
       const second = (publication.body as { releaseId: string }).releaseId;
       expect(second).not.toBe(f.releaseId);
-      releases = [{ host: `${f.releaseId}.pinned.pages.example.test`, version: "one" },
-        { host: `${second}.pinned.pages.example.test`, version: "two" }];
+      releases = [{ host: `${f.releaseId}.pages.example.test`, version: "one" },
+        { host: `${second}.pages.example.test`, version: "two" }];
     }
     const app = f.runtime();
     let statuses: Record<string, number> = {};
