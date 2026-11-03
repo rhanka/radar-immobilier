@@ -2,16 +2,23 @@
  * Opaque single-use preview tickets (ARTEFACTS A6/H5).
  *
  * A ticket binds one validated init to one browser exchange. It is consumed
- * atomically (a second concurrent consume fails), lives at most 60 seconds,
+ * atomically (a second concurrent consume fails), lives at most 10 minutes,
  * and carries no authority by itself: the exchange rereads approval, ACL and
  * policy before minting a session. Cross-process races need the A1 technical
  * store binding; this in-memory store is the unit seam.
+ *
+ * The 10-minute window matches the browser-binding cookie and the approval
+ * page lifetime (DB default in 0030_artifacts_reader_tickets_ttl): a tab
+ * opened from a Claude link is often approved more than 60 s later, and a
+ * shorter ticket TTL would expire before the user clicks "Autoriser et
+ * ouvrir" even though the binding cookie is still present.
  */
 import { randomBytes } from "node:crypto";
 import { fingerprintReaderProfile, type ReaderProfile } from "./reader-profile.js";
 import type { PwIdentityDomain } from "./write-intent-principal.js";
 
-export const PREVIEW_TICKET_TTL_MS = 60_000;
+/** Approval window shared by the ticket, the binding cookie and the retry marker. */
+export const PREVIEW_TICKET_TTL_MS = 600_000;
 
 export interface PreviewTicket {
   readonly writeIdentity?: PwIdentityDomain;

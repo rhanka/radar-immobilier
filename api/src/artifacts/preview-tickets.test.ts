@@ -39,12 +39,16 @@ describe("preview ticket store", () => {
     expect(results.filter(Boolean)).toHaveLength(1);
   });
 
-  it("should expire tickets after the 60 s bound", () => {
+  it("should expire tickets after the 10-minute approval bound", () => {
     let now = 1_000;
     const store = createTicketStore({ now: () => now });
     const minted = store.mint(INPUT);
+    expect(PREVIEW_TICKET_TTL_MS).toBe(600_000);
+    now += 61_000;
+    expect(store.consume(minted.ticket, INPUT.browserBinding)).not.toBeNull();
+    const late = store.mint(INPUT);
     now += PREVIEW_TICKET_TTL_MS + 1;
-    expect(store.consume(minted.ticket, INPUT.browserBinding)).toBeNull();
+    expect(store.consume(late.ticket, INPUT.browserBinding)).toBeNull();
   });
 
   it("should reject unknown ticket strings", () => {

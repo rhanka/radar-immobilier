@@ -46,3 +46,55 @@
         name: radar-classification-cursor-preprod
         key: CLASSIFICATION_CURSOR_SECRET
         optional: true
+# Published write (artifact pages may prepare write intents). Secrets live in
+# the operator-held Secret radar-published-write-preprod (never in git);
+# missing optional references keep the app alive but close the capability.
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: PW_IDENTITY_TIER
+    value: preprod
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: PW_WRITE_GRANT_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: radar-published-write-preprod
+        key: PW_WRITE_GRANT_SECRET
+        optional: true
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: PW_CHALLENGE_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: radar-published-write-preprod
+        key: PW_CHALLENGE_SECRET
+        optional: true
+# Admission sync, preprod side (lot I1). ADMISSION_PROD_PUBLIC_KEYS is a PUBLIC
+# key entry (kid.base64(jwk-json), kid HHrnyG0BNHfS7DGw); its value lives in
+# the operator-held ConfigMap radar-admission-preprod (key of the same name),
+# referenced here with optional: true so a missing ConfigMap keeps the
+# capability closed (syncEnabled requires keys). ADMISSION_TRUSTED_ISSUERS
+# lists the preprod issuer only: in preprod, sessions come only from
+# https://preprod.auth.sent-tech.ca, so the prod issuer is not needed for JIT.
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: ADMISSION_SYNC_ENABLED
+    value: "1"
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: ADMISSION_TRUSTED_ISSUERS
+    value: https://preprod.auth.sent-tech.ca
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: ADMISSION_PROD_PUBLIC_KEYS
+    valueFrom:
+      configMapKeyRef:
+        name: radar-admission-preprod
+        key: ADMISSION_PROD_PUBLIC_KEYS
+        optional: true
