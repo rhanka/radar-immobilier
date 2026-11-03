@@ -175,6 +175,24 @@ describe("artifact authoring guide", () => {
     expect(guide.elements.componentIds).toEqual(["BarChart", "BpmnCanvas", "DecisionDossier"]);
   });
 
+  it("should document the worker-free map base with pinned kit URLs", () => {
+    const guide = getAuthoringGuide();
+    expect(guide.mapBase.kit).toBe("map");
+    expect(guide.mapBase.version).toBe("map-v1");
+    expect(guide.mapBase.manifest.map((asset) => asset.file).sort())
+      .toEqual(["map-base.css", "map-base.mjs"]);
+    for (const asset of guide.mapBase.manifest) {
+      expect(asset.url).toContain(asset.sha256Hex);
+      expect(asset.url).toContain("/__artifacts/design/map-v1/");
+    }
+    const all = [...guide.mapBase.load, ...guide.mapBase.feed, ...guide.mapBase.paint,
+      ...guide.mapBase.events, ...guide.mapBase.limits].join("\n");
+    for (const fragment of ["createMap", "setZones", "setLots", "setPaint", "fitToBounds",
+      "worker-src 'none'", "basemapTemplate: null", "256 KiB"]) {
+      expect(all, fragment).toContain(fragment);
+    }
+  });
+
   it("should point the ensure/publish/get descriptions at the guide", () => {
     const byName = Object.fromEntries(IMMO_ARTIFACT_MANIFEST.tools.map((tool) => [tool.name, tool.description]));
     for (const name of ["artifacts_ensure", "artifacts_publish", "artifacts_get"]) {
