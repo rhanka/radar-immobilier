@@ -80,5 +80,5 @@ Every user approved in prod opens preprod artifacts with no prior step, no DB re
   - [x] Full `make test-api ENV=test-i1`: 3934 pass, 0 fail, 978 skipped (pre-existing skips)
   - [x] `make build ENV=test-i1` green; e2e skipped (no UI/browser surface in this lot)
   - [x] Smoke Make targets on `ENV=test-i1` (keygen/snapshot/verify/ingest chain green), then `down -v` + volume cleanup
-  - [ ] Commit (no trailer), push, `gh pr create` (English, no AI line)
-  - [ ] French report `/.lanes/conductor/tmp/reviews/i1-admission-report.md`
+  - [x] Commit (no trailer), push, `gh pr create` (English, no AI line) — PR #987
+  - [x] French report `/.lanes/conductor/tmp/reviews/i1-admission-report.md`
