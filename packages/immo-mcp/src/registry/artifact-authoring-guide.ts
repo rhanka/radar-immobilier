@@ -2,9 +2,9 @@
  * Versioned artifact authoring guide (single definition).
  *
  * Feeds the artifacts_ensure / artifacts_publish / artifacts_get MCP
- * surface: the tool descriptions carry the imperative core, while the
- * full guide object is returned as `authoringGuide` in the MCP response
- * of artifacts_ensure and artifacts_get. artifacts_get_source carries
+ * surface: the tool descriptions carry only a stable pointer at the guide,
+ * while the full guide object is returned as `authoringGuide` in the MCP
+ * response of artifacts_ensure and artifacts_get. artifacts_get_source carries
  * only a small guide reference (guideId/revision plus the lifecycle
  * hint) so the source payload stays within the model tool-result budget.
  * The durable publication receipt is unchanged. A future dedicated guide
@@ -36,22 +36,16 @@ export const STARTER_VERSION = "1.1.0" as const;
 export const STRICT_ARTIFACT_GUIDE = "This profile requires expectedCurrentReleaseId for artifacts_publish, artifacts_revert and artifacts_delete. First read the artifact with artifacts_get or artifacts_list. For a first publication, send expectedCurrentReleaseId: null only after that read returns currentReleaseId: null. For an update, read the observed release with artifacts_get_source, edit those files, and send its releaseId as expectedCurrentReleaseId. Conversation files alone do not establish the current release. For a revert or deletion, send the currentReleaseId observed by your read. On conflict, re-read and reconcile before submitting a changed command with a new idempotencyKey. For a lost response or commitState: unknown, reconcile with the same idempotencyKey and unchanged command before attempting a new write. Read resultEnvelopeVersion in this guide: version 1 keeps business fields at the root; version 2 places them in output and the guide in output.authoringGuide.";
 
 /**
- * Imperative core embedded in the artifacts_ensure, artifacts_publish and
- * artifacts_get tool descriptions. Short by necessity; the full contract
- * comes from the `authoringGuide` response field.
+ * Stable pointer embedded in the artifacts_ensure, artifacts_publish,
+ * artifacts_get and artifacts_get_source tool descriptions. Identical in
+ * every profile on purpose: claude.ai resets the owner's per-tool "Always
+ * allow" grant whenever a tool description changes, so no profile, contract
+ * or guide-revision text may appear here. The full versioned contract
+ * (starter, H5 bridge, lifecycle, availability) comes from the
+ * `authoringGuide` response field, which already carries its descriptor.
  */
 export const AUTHORING_GUIDE_SNIPPET =
-  "Every Radar page uses the versioned Sentropic starter and its official assets. " +
-  "Fetch `authoringGuide` from artifacts_ensure (or artifacts_get for an existing page). " +
-  "To update, publish the full edited bundle on the same artifactId with a fresh idempotencyKey; " +
-  "the stable URL is preserved. " +
-  (ARTIFACT_STRICT ? `${STRICT_ARTIFACT_GUIDE} ` : "") +
-  (ARTIFACT_P0B
-    ? "For source retrieval, owner-confirmed deletion and named read sharing, follow artifactLifecycle in authoringGuide; restoration remains unavailable. "
-    : "Source retrieval, deletion, restoration and sharing are currently unavailable. ") +
-  "Apply the sent-tech theme and its tokens; never write your own palette. " +
-  "For baskets use only the documented H5 reader bridge: /__reader/renew, " +
-  "workspaces.list.v1, baskets.context.v1, baskets.search.v1. Never invent /api/* endpoints.";
+  "Fetch `authoringGuide` from artifacts_ensure (or artifacts_get for an existing page) and follow it.";
 
 function freeze<T extends object>(value: T): T {
   if (Array.isArray(value)) {
