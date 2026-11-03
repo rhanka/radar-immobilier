@@ -35,14 +35,13 @@ const PROFILES: readonly ProfileCase[] = [
 const PART1_ONLY_TOOLS = ["artifacts_list_versions", "artifacts_revert"];
 
 /**
- * Optional input properties the v2 profile adds to otherwise shared tools:
- * page metadata on ensure/publish plus the files|edits content source on
- * publish. Everything else about those schemas is identical across profiles.
+ * Upstream 0.2.9 makes every tool definition a compile-time constant: the
+ * active profile only selects the exposed tool set, never what a definition
+ * says. Shared tools are therefore byte-identical across p0b, cas.v2 and v2;
+ * only the two part1 tools exist in v2. No per-profile schema additions
+ * remain (page metadata and files|edits are static in every profile).
  */
-const PART1_SCHEMA_ADDITIONS: Record<string, readonly string[]> = {
-  artifacts_ensure: ["title", "description", "icon"],
-  artifacts_publish: ["title", "description", "icon", "edits"],
-};
+const PART1_SCHEMA_ADDITIONS: Record<string, readonly string[]> = {};
 
 /** Fragments that prove a description embeds deployment/profile state. */
 const DYNAMIC_DESCRIPTION_MARKERS = [
@@ -157,9 +156,9 @@ describe("artifact tool catalogue stability", () => {
     for (const v2Tool of v2Shared) {
       const base = shared(p0b).find((tool) => tool.name === v2Tool.name)!;
       expect(restOf(v2Tool)).toEqual(restOf(base));
-      // The v2 input schemas add only optional part1 inputs (page metadata,
-      // the files|edits content source); every pre-existing property and all
-      // other schema keywords are unchanged, so additions stay optional.
+      // Upstream 0.2.9 is static: shared input schemas are byte-identical
+      // across profiles, including requiredness (files|edits via oneOf, CAS
+      // guard optional). No per-profile additions remain.
       const additions = new Set(PART1_SCHEMA_ADDITIONS[v2Tool.name as string] ?? []);
       const v2Schema = v2Tool.inputSchema as { properties: Record<string, unknown>; required: string[] };
       const baseSchema = base.inputSchema as unknown as { properties: Record<string, unknown>; required: string[] };
@@ -168,14 +167,7 @@ describe("artifact tool catalogue stability", () => {
       for (const key of Object.keys(baseSchema.properties)) {
         expect(v2Schema.properties[key]).toEqual(baseSchema.properties[key]);
       }
-      const baseRequired = [...baseSchema.required].sort();
-      const v2Required = [...v2Schema.required].sort();
-      expect(v2Tool.name === "artifacts_publish"
-        ? v2Required.filter((key) => key !== "files")
-        : v2Required).toEqual(baseRequired.filter((key) => key !== "files"));
-      // "files" stays required outside v2, where the edits alternative
-      // does not exist yet.
-      if (v2Tool.name === "artifacts_publish") expect(baseRequired).toContain("files");
+      expect([...v2Schema.required].sort()).toEqual([...baseSchema.required].sort());
     }
     expect(v2.tools.filter((tool) => PART1_ONLY_TOOLS.includes(tool.name as string))
       .map((tool) => tool.name).sort()).toEqual([...PART1_ONLY_TOOLS].sort());
