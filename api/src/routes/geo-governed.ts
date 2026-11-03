@@ -37,6 +37,7 @@ import {
   type ServedCollectionRecord,
 } from "../services/geo/governed-policy.js";
 import { applyZonageAllowlist } from "../services/geo/governed-allowlist.js";
+import { assertRegistryTitlesUnique } from "../services/geo/governed-licences.js";
 import {
   readServedContractPointer,
   type ServedContractClient,
@@ -119,6 +120,10 @@ export function geoGovernedRoute(deps: GeoGovernedDeps = {}): Hono {
   const listingTtlMs = deps.listingTtlMs ?? GOVERNED_LISTING_TTL_MS_DEFAULT;
   const records: readonly ServedCollectionRecord[] = GOVERNED_SERVED_RECORDS;
 
+  // Fail fast on an ambiguous shipped registry: a duplicated title across ids
+  // would otherwise resolve to the first match instead of unknown.
+  assertRegistryTitlesUnique();
+
   const resolveBase = (): string =>
     (
       deps.baseUrl ??
@@ -126,12 +131,42 @@ export function geoGovernedRoute(deps: GeoGovernedDeps = {}): Hono {
       DEFAULT_OGC_BASE_URL
     ).replace(/\/$/, "");
 
+  /**
+   * Serve one item's properties through the allowlist FIRST, then re-attach
+   * the contract-validated provenance envelopes. Composition order matters:
+   * `applyZonageAllowlist` drops `proof` / `immo_zone_lot_provenance`
+   * (they are not allowlisted fields), so the sanitiser output must be
+   * merged back AFTER the allowlist — never nested inside it.
+   */
+  function serveZonageProperties(
+    collectionId: string,
+    rawProperties: Record<string, unknown>,
+  ): Record<string, unknown> {
+    const allowed = applyZonageAllowlist(collectionId, rawProperties, records);
+    const sanitized = sanitizeFeatureProvenance({ ...rawProperties });
+    const out: Record<string, unknown> = { ...allowed };
+    if ("proof" in sanitized) out["proof"] = sanitized["proof"];
+    if ("immo_zone_lot_provenance" in sanitized) {
+      out["immo_zone_lot_provenance"] = sanitized["immo_zone_lot_provenance"];
+    }
+    return out;
+  }
+
   const defaultLocalResolver: GovernedLocalZoneResolver = async (collectionId) => {
     if (!deps.db) return null;
-    const citySlug = collectionId.slice("qc-zonage-".length);
-    if (!citySlug) return null;
-    const fc = await getZoneFeatures(deps.db, citySlug);
-    return fc.features.length > 0 ? fc : null;
+    const suffix = collectionId.slice("qc-zonage-".length);
+    if (!suffix) return null;
+    // The collection suffix is NOT the DB city slug (e.g. the pilot
+    // "qc-zonage-gatineau-affectations-territoire" lives under "gatineau"):
+    // try the full suffix first, then progressively shorter prefixes, and
+    // serve the first stocked city. Fail-closed (null) when none is stocked.
+    const parts = suffix.split("-");
+    for (let len = parts.length; len >= 1; len -= 1) {
+      const citySlug = parts.slice(0, len).join("-");
+      const fc = await getZoneFeatures(deps.db, citySlug);
+      if (fc.features.length > 0) return fc;
+    }
+    return null;
   };
   const localZoneResolver = deps.localZoneResolver ?? defaultLocalResolver;
 
@@ -244,12 +279,21 @@ export function geoGovernedRoute(deps: GeoGovernedDeps = {}): Hono {
     }
     const record = records.find((r) => r.collectionId === id);
     if (!record) {
-      // No dated per-collection record: refuse BEFORE any upstream call.
-      const entry = catalogueCollection(
-        { id, licenseTitle: undefined, rightsPresent: false },
-        records,
+      // No dated per-collection record: refuse BEFORE any upstream call with
+      // the same status the catalogue reports for record-less zonage
+      // (`not covered`), never the licence-unknown status — the live licence
+      // is unverifiable without an upstream call, and the record is missing
+      // in every case.
+      return c.json(
+        refusalBody({
+          collectionId: id,
+          status: "not covered",
+          licence: { status: "unknown", reason: "missing-title" },
+          rightsPresent: false,
+          reason: "no-dated-per-collection-record",
+        }),
+        403,
       );
-      return c.json(refusalBody(entry), 403);
     }
 
     // Served candidate: verify the live licence still matches (cached listing).
@@ -304,13 +348,9 @@ export function geoGovernedRoute(deps: GeoGovernedDeps = {}): Hono {
       const features = Array.isArray(body.features) ? body.features : [];
       const served = features.map((feature) => ({
         ...feature,
-        properties: applyZonageAllowlist(
-          id,
-          sanitizeFeatureProvenance({
-            ...(feature.properties ?? {}),
-          }) as Record<string, unknown>,
-          records,
-        ),
+        properties: serveZonageProperties(id, {
+          ...(feature.properties ?? {}),
+        } as Record<string, unknown>),
       }));
       c.header(GOVERNANCE_PROVENANCE_HEADER, GOVERNANCE_PROVENANCE_LIVE);
       return c.json({
@@ -325,10 +365,19 @@ export function geoGovernedRoute(deps: GeoGovernedDeps = {}): Hono {
     }
 
     // Live failed: pg-fallback from the local store (when wired and stocked).
+    // The fallback serves through the SAME allowlist + provenance sanitiser
+    // as the live path: banned keys (`adresse`, `code_postal*`,
+    // `extrait_brut`) never leave the facade on any path.
     try {
       const local = await localZoneResolver(id);
       if (local && local.features.length > 0) {
-        const sliced = local.features.slice(0, limit);
+        const fallen = local.features.map((feature) => ({
+          ...feature,
+          properties: serveZonageProperties(id, {
+            ...((feature.properties ?? {}) as Record<string, unknown>),
+          }),
+        }));
+        const sliced = fallen.slice(0, limit);
         c.header(GOVERNANCE_PROVENANCE_HEADER, GOVERNANCE_PROVENANCE_FALLBACK);
         return c.json({
           type: "FeatureCollection",
