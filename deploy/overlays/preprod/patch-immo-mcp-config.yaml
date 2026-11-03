@@ -50,3 +50,8 @@ data:
   ARTIFACTS_S3_ENDPOINT: "https://s3.bhs.io.cloud.ovh.net"
   ARTIFACTS_S3_REGION: "bhs"
   ARTIFACTS_CONTENT_BASE: "pages.preprod.immo.sent-tech.ca"
+  # Shared blob deadline of one publish, in ms. Same value as ConfigMap
+  # radar-api: both workloads compose an artifacts host that runs publish
+  # dispatch. Kept in the ConfigMap (not the Deployment patch) so the
+  # workload render guard keeps its exact ARTIFACTS_ env count.
+  ARTIFACTS_PUBLISH_BLOB_DEADLINE_MS: "120000"
