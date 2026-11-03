@@ -7,8 +7,8 @@ import type { ArtifactInvocationContext, AuthorizeCommit } from "@sentropic/arti
 import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-stateful";
 import { computeManifestDigest, type RegistryDefinition } from "@sentropic/cluster-mesh/mcp/registry";
 import { projectArtifactHttpOutcome } from "@sentropic/artifacts/http";
-import { checkAdmission, createArtifactControl, HOST_ARTIFACT_PROFILE, ARTIFACT_PROFILE_DESCRIPTOR, ARTIFACT_P0B, ARTIFACT_STRICT, ARTIFACT_PART1,
-  artifactRefusalResponse, artifactPublicSchema, validateArtifactInput, type AdmissionAuthority } from "@radar/artifacts-host";
+import { checkAdmission, createArtifactControl, HOST_ARTIFACT_PROFILE, ARTIFACT_PROFILE_DESCRIPTOR, ARTIFACT_STRICT, ARTIFACT_PART1,
+  artifactRefusalResponse, validateArtifactInput, type AdmissionAuthority } from "@radar/artifacts-host";
 import { ARTIFACT_INVOCATION_SCOPES, ARTIFACT_TOOL_SCOPES, acceptedArtifactScopes, hasArtifactScope,
   isArtifactToolName, STRICT_ARTIFACT_SCOPE_POLICY, type ArtifactScopePolicy } from "./artifact-profile.js";
 import { AUTHORING_GUIDE_SNIPPET, getAuthoringGuide } from "./artifact-authoring-guide.js";
@@ -31,15 +31,68 @@ type ArtifactManifestTool = ArtifactManifest["tools"][number];
  * "immo:artifacts:read or immo:read" itself. Writes are declared in every mode.
  */
 /**
- * Tools whose description carries the imperative DS + H5 core: ensure and
- * publish (page creation path) plus get (republication of an existing
- * page must find the guide too). The full contract ships in the
- * `authoringGuide` response field of ensure and get; get_source carries
- * only a small guide reference (guideId/revision plus the lifecycle
- * hint) because the source payload itself must stay readable.
+ * Tools whose description points at the versioned guide: ensure and
+ * publish (page creation path) plus get and get_source (republication of
+ * an existing page must find the guide too). The full contract ships in
+ * the `authoringGuide` response field of ensure and get; get_source
+ * carries only a small guide reference (guideId/revision plus the
+ * lifecycle hint) because the source payload itself must stay readable.
  */
 const GUIDE_DESCRIPTION_TOOLS: ReadonlySet<string> = new Set(
   ["artifacts_ensure", "artifacts_publish", "artifacts_get", "artifacts_get_source"]);
+
+/**
+ * Short generic tool summaries, authored here and identical in every
+ * profile. The upstream base descriptions embed the active profile and
+ * envelope version, and claude.ai resets the owner's per-tool "Always
+ * allow" grant whenever a description changes, so they cannot be reused.
+ * Profile, contract and guide-revision detail lives in the guide and in
+ * result fields (authoringGuide.descriptor, error details) instead.
+ */
+const STABLE_TOOL_SUMMARIES: Readonly<Record<string, string>> = {
+  artifacts_ensure: "Create a Radar page and return its binding.",
+  artifacts_publish: "Publish a full page bundle on an existing binding.",
+  artifacts_list: `List visible Radar pages. Returns bindingName, content URLs, lifecycle and publication timestamps. Ordered by ${ARTIFACT_LIST_ORDER}, before offset/limit pagination.`,
+  artifacts_get: "Read a Radar page's metadata and permissions.",
+  artifacts_get_source: "Read a Radar page's retained source files for editing.",
+  artifacts_set_access: "Grant or revoke named read access on a Radar page.",
+  artifacts_delete: "Delete a Radar page after owner confirmation in the IMMO application.",
+  artifacts_list_versions: "List the retained releases of a Radar page.",
+  artifacts_revert: "Republish a retained release as the current release.",
+};
+
+/**
+ * Optimistic-concurrency guard description, identical in every profile.
+ * The property is always present and always optional in the catalogue;
+ * requiredness is enforced server-side with precondition_required, so a
+ * profile switch never changes the schema.
+ */
+const EXPECTED_RELEASE_DESCRIPTION =
+  "Concurrency guard: the currentReleaseId last observed with artifacts_get or artifacts_list " +
+  "(null only for a first publication after a read that returned currentReleaseId null). " +
+  "A missing or stale value is refused with precondition_required.";
+
+/** Writes guarded by optimistic concurrency (see EXPECTED_RELEASE_DESCRIPTION). */
+const CAS_GUARDED_TOOLS: ReadonlySet<string> = new Set(
+  ["artifacts_publish", "artifacts_delete", "artifacts_revert"]);
+
+/**
+ * Catalogue input schema for one tool: upstream shape, except the
+ * concurrency guard is always an optional property and never required.
+ * The server still enforces it per profile (precondition_required with
+ * the descriptor in the error details); the transport keeps its own
+ * deferral for the same omission.
+ */
+function stabilizeArtifactInputSchema(name: string, schema: Readonly<Record<string, unknown>>): Record<string, unknown> {
+  if (!CAS_GUARDED_TOOLS.has(name)) return schema as Record<string, unknown>;
+  const properties = { ...schema.properties as Record<string, unknown> };
+  const guard = properties.expectedCurrentReleaseId;
+  properties.expectedCurrentReleaseId = guard !== null && typeof guard === "object" && !Array.isArray(guard)
+    ? { ...guard as Record<string, unknown>, description: EXPECTED_RELEASE_DESCRIPTION }
+    : { type: ["string", "null"], format: "uuid", description: EXPECTED_RELEASE_DESCRIPTION };
+  return { ...schema, properties,
+    required: (schema.required as string[]).filter((key) => key !== "expectedCurrentReleaseId") };
+}
 
 export function createImmoArtifactManifest(policy: ArtifactScopePolicy = STRICT_ARTIFACT_SCOPE_POLICY): ArtifactManifest {
   assertArtifactAssembly();
@@ -51,13 +104,11 @@ export function createImmoArtifactManifest(policy: ArtifactScopePolicy = STRICT_
     const name: string = tool.name;
     if (!isArtifactToolName(name)) throw new Error("artifact_tool_unselected");
     const accepted = acceptedArtifactScopes(name, policy);
-    const readDescription = name === "artifacts_list"
-      ? `${tool.description} Returns bindingName, content URLs, lifecycle and publication timestamps. Ordered by ${ARTIFACT_LIST_ORDER}, before offset/limit pagination.`
-      : tool.description;
-    const guideDescription = GUIDE_DESCRIPTION_TOOLS.has(name)
-      ? `${readDescription} ${AUTHORING_GUIDE_SNIPPET}` : readDescription;
-    const description = ARTIFACT_P0B ? `${guideDescription} Contract: ${JSON.stringify(ARTIFACT_PROFILE_DESCRIPTOR)}.` : guideDescription;
-    return { ...tool, description, inputSchema: artifactPublicSchema(name, tool.inputSchema as Readonly<Record<string, unknown>>),
+    const summary = STABLE_TOOL_SUMMARIES[name];
+    if (!summary) throw new Error("artifact_tool_summary_missing");
+    const description = GUIDE_DESCRIPTION_TOOLS.has(name) ? `${summary} ${AUTHORING_GUIDE_SNIPPET}` : summary;
+    return { ...tool, description,
+      inputSchema: stabilizeArtifactInputSchema(name, tool.inputSchema as Readonly<Record<string, unknown>>),
       outputSchema: ARTIFACT_PART1 ? tool.outputSchema : artifactReadOutputSchema(name) ?? tool.outputSchema,
       requiredScopes: accepted.length === 1 ? [ARTIFACT_TOOL_SCOPES[name]] : [] };
   });
@@ -145,13 +196,17 @@ export function bindArtifactProvider(options: {
     adapter: nativeAdapter(manifest),
     scopePolicy,
     configuration: Object.freeze({ storageScopeId: scope }),
+    // No per-tool _meta on purpose: claude.ai resets the owner's per-tool
+    // "Always allow" grant whenever a tool definition changes, and the
+    // profile descriptor used to ride here. It was not proven that claude.ai
+    // ignores _meta, so the descriptor now travels only in results
+    // (authoringGuide.descriptor, error details) and the guide.
     tools: Object.freeze(manifest.tools.map((tool: ArtifactManifestTool) => freeze({
       name: tool.name, description: tool.description, inputSchema: tool.inputSchema as Tool["inputSchema"],
       ...(ARTIFACT_PART1 ? { outputSchema: tool.outputSchema as Tool["outputSchema"] }
         : artifactReadOutputSchema(tool.name) ? { outputSchema: artifactReadOutputSchema(tool.name)! } : {}),
       annotations: { readOnlyHint: tool.mutability === "read-only", destructiveHint: tool.name === "artifacts_delete",
         openWorldHint: false, idempotentHint: tool.mutability === "read-only" || tool.idempotency.required },
-      ...(ARTIFACT_P0B ? { _meta: { "immo/artifactsProfile": ARTIFACT_PROFILE_DESCRIPTOR } } : {}),
       execution: { taskSupport: "forbidden" as const },
     }))),
     async invoke(tool: string, args: unknown, request: VerifiedMcpRequest): Promise<CallToolResult> {

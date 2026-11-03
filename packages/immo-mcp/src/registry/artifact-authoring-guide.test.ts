@@ -94,13 +94,15 @@ describe("artifact authoring guide", () => {
       expect(guide.lifecycle.unavailableTools).toEqual(["artifacts_restore", "artifacts_fork", "artifacts_promote", "artifacts_renew"]);
       expect(guide.lifecycle.deleteRestore).toContain("explicit human confirmation");
       expect(guide.lifecycle.sharing).toContain("named read access");
-      expect(AUTHORING_GUIDE_SNIPPET).toContain("follow artifactLifecycle");
     } else {
       expect(editing).toContain("source retrieval is blocked");
       expect(guide.lifecycle.unavailableTools).toEqual(["artifacts_get_source", "artifacts_delete",
         "artifacts_restore", "artifacts_set_access", "artifacts_fork", "artifacts_promote", "artifacts_renew"]);
-      expect(AUTHORING_GUIDE_SNIPPET).toContain("Source retrieval, deletion, restoration and sharing are currently unavailable");
     }
+    // The description pointer is identical in every profile: availability
+    // detail lives in the guide, never in tool definitions.
+    expect(AUTHORING_GUIDE_SNIPPET).toContain("authoringGuide");
+    expect(AUTHORING_GUIDE_SNIPPET).toContain("follow it");
     expect(guide.lifecycle.deleteRestore).toContain("unavailable");
     expect(guide.lifecycle.sharing).toContain("unavailable");
   });

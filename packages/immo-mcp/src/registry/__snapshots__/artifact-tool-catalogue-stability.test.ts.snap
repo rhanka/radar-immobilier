@@ -1,0 +1,1392 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`artifact tool catalogue stability > should snapshot the immo-artifacts.cas.v2 catalogue 1`] = `
+[
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+    },
+    "description": "Create a Radar page and return its binding. Fetch \`authoringGuide\` from artifacts_ensure (or artifacts_get for an existing page) and follow it.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "bindingName": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string",
+        },
+        "idempotencyKey": {
+          "description": "Nonblank by JavaScript trim(); length is UTF-16 units; original bytes retained.",
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string",
+        },
+        "parameters": {
+          "additionalProperties": false,
+          "default": {},
+          "properties": {},
+          "required": [],
+          "type": "object",
+        },
+      },
+      "required": [
+        "bindingName",
+        "idempotencyKey",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_ensure",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+    },
+    "description": "Publish a full page bundle on an existing binding. Fetch \`authoringGuide\` from artifacts_ensure (or artifacts_get for an existing page) and follow it.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "not": {
+            "required": [
+              "edits",
+            ],
+          },
+          "required": [
+            "files",
+          ],
+        },
+        {
+          "not": {
+            "required": [
+              "files",
+            ],
+          },
+          "required": [
+            "edits",
+          ],
+        },
+      ],
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "expectedCurrentReleaseId": {
+          "description": "Concurrency guard: the currentReleaseId last observed with artifacts_get or artifacts_list (null only for a first publication after a read that returned currentReleaseId null). A missing or stale value is refused with precondition_required.",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": [
+            "string",
+            "null",
+          ],
+        },
+        "files": {
+          "description": "Full file set; required unless edits is supplied.",
+          "items": {
+            "additionalProperties": false,
+            "oneOf": [
+              {
+                "not": {
+                  "required": [
+                    "bytes",
+                  ],
+                },
+                "required": [
+                  "text",
+                ],
+              },
+              {
+                "not": {
+                  "required": [
+                    "text",
+                  ],
+                },
+                "required": [
+                  "bytes",
+                ],
+              },
+            ],
+            "properties": {
+              "bytes": {
+                "items": {
+                  "maximum": 255,
+                  "minimum": 0,
+                  "type": "integer",
+                },
+                "maxItems": 262144,
+                "type": "array",
+              },
+              "mimeType": {
+                "enum": [
+                  "text/html",
+                  "text/css",
+                  "text/javascript",
+                  "application/json",
+                ],
+                "type": "string",
+              },
+              "path": {
+                "allOf": [
+                  {
+                    "not": {
+                      "pattern": "[\\\\%?#:\\u0000-\\u001f\\u007f]",
+                    },
+                  },
+                  {
+                    "not": {
+                      "pattern": "(^|/)(\\.\\.?|)(/|$)",
+                    },
+                  },
+                  {
+                    "not": {
+                      "pattern": "^(?:api|__artifacts|livez|health)(?:/|$)",
+                    },
+                  },
+                ],
+                "description": "At most 1024 UTF-8 bytes; no empty/dot segments, colon or DEL.",
+                "maxLength": 1024,
+                "minLength": 1,
+                "type": "string",
+              },
+              "text": {
+                "description": "UTF-8 decoded-byte budget applies.",
+                "maxLength": 262144,
+                "type": "string",
+              },
+            },
+            "required": [
+              "path",
+              "mimeType",
+            ],
+            "type": "object",
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "type": "array",
+        },
+        "idempotencyKey": {
+          "description": "Nonblank by JavaScript trim(); length is UTF-16 units; original bytes retained.",
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string",
+        },
+        "profile": {
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number",
+              "boolean",
+              "null",
+            ],
+          },
+          "default": {},
+          "type": "object",
+        },
+      },
+      "required": [
+        "artifactId",
+        "idempotencyKey",
+        "files",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_publish",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+    },
+    "description": "List visible Radar pages. Returns bindingName, content URLs, lifecycle and publication timestamps. Ordered by updatedAt descending, nulls last, then createdAt descending; artifactId ascending breaks ties, before offset/limit pagination.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "default": 20,
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer",
+        },
+        "offset": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer",
+        },
+      },
+      "required": [],
+      "type": "object",
+    },
+    "name": "artifacts_list",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+    },
+    "description": "Read a Radar page's metadata and permissions. Fetch \`authoringGuide\` from artifacts_ensure (or artifacts_get for an existing page) and follow it.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_get",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+    },
+    "description": "Read a Radar page's retained source files for editing. Fetch \`authoringGuide\` from artifacts_ensure (or artifacts_get for an existing page) and follow it.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "paths": {
+          "items": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string",
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "type": "array",
+        },
+        "releaseId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_get_source",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+    },
+    "description": "Grant or revoke named read access on a Radar page.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "properties": {
+            "action": {
+              "enum": [
+                "grant",
+              ],
+            },
+          },
+          "required": [
+            "grant",
+          ],
+        },
+        {
+          "not": {
+            "required": [
+              "grant",
+            ],
+          },
+          "properties": {
+            "action": {
+              "enum": [
+                "revoke",
+              ],
+            },
+          },
+        },
+      ],
+      "properties": {
+        "action": {
+          "enum": [
+            "grant",
+            "revoke",
+          ],
+          "type": "string",
+        },
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "grant": {
+          "enum": [
+            "read",
+          ],
+          "type": "string",
+        },
+        "idempotencyKey": {
+          "description": "Nonblank by JavaScript trim(); length is UTF-16 units; original bytes retained.",
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string",
+        },
+        "principalId": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+        "action",
+        "principalId",
+        "idempotencyKey",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_set_access",
+  },
+  {
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+    },
+    "description": "Delete a Radar page after owner confirmation in the IMMO application.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "confirmationRef": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "type": "string",
+        },
+        "expectedCurrentReleaseId": {
+          "description": "Concurrency guard: the currentReleaseId last observed with artifacts_get or artifacts_list (null only for a first publication after a read that returned currentReleaseId null). A missing or stale value is refused with precondition_required.",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": [
+            "string",
+            "null",
+          ],
+        },
+        "idempotencyKey": {
+          "description": "Nonblank by JavaScript trim(); length is UTF-16 units; original bytes retained.",
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+        "idempotencyKey",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_delete",
+  },
+]
+`;
+
+exports[`artifact tool catalogue stability > should snapshot the immo-artifacts.p0b.v1 catalogue 1`] = `
+[
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+    },
+    "description": "Create a Radar page and return its binding. Fetch \`authoringGuide\` from artifacts_ensure (or artifacts_get for an existing page) and follow it.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "bindingName": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string",
+        },
+        "idempotencyKey": {
+          "description": "Nonblank by JavaScript trim(); length is UTF-16 units; original bytes retained.",
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string",
+        },
+        "parameters": {
+          "additionalProperties": false,
+          "default": {},
+          "properties": {},
+          "required": [],
+          "type": "object",
+        },
+      },
+      "required": [
+        "bindingName",
+        "idempotencyKey",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_ensure",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+    },
+    "description": "Publish a full page bundle on an existing binding. Fetch \`authoringGuide\` from artifacts_ensure (or artifacts_get for an existing page) and follow it.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "not": {
+            "required": [
+              "edits",
+            ],
+          },
+          "required": [
+            "files",
+          ],
+        },
+        {
+          "not": {
+            "required": [
+              "files",
+            ],
+          },
+          "required": [
+            "edits",
+          ],
+        },
+      ],
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "expectedCurrentReleaseId": {
+          "description": "Concurrency guard: the currentReleaseId last observed with artifacts_get or artifacts_list (null only for a first publication after a read that returned currentReleaseId null). A missing or stale value is refused with precondition_required.",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": [
+            "string",
+            "null",
+          ],
+        },
+        "files": {
+          "description": "Full file set; required unless edits is supplied.",
+          "items": {
+            "additionalProperties": false,
+            "oneOf": [
+              {
+                "not": {
+                  "required": [
+                    "bytes",
+                  ],
+                },
+                "required": [
+                  "text",
+                ],
+              },
+              {
+                "not": {
+                  "required": [
+                    "text",
+                  ],
+                },
+                "required": [
+                  "bytes",
+                ],
+              },
+            ],
+            "properties": {
+              "bytes": {
+                "items": {
+                  "maximum": 255,
+                  "minimum": 0,
+                  "type": "integer",
+                },
+                "maxItems": 262144,
+                "type": "array",
+              },
+              "mimeType": {
+                "enum": [
+                  "text/html",
+                  "text/css",
+                  "text/javascript",
+                  "application/json",
+                ],
+                "type": "string",
+              },
+              "path": {
+                "allOf": [
+                  {
+                    "not": {
+                      "pattern": "[\\\\%?#:\\u0000-\\u001f\\u007f]",
+                    },
+                  },
+                  {
+                    "not": {
+                      "pattern": "(^|/)(\\.\\.?|)(/|$)",
+                    },
+                  },
+                  {
+                    "not": {
+                      "pattern": "^(?:api|__artifacts|livez|health)(?:/|$)",
+                    },
+                  },
+                ],
+                "description": "At most 1024 UTF-8 bytes; no empty/dot segments, colon or DEL.",
+                "maxLength": 1024,
+                "minLength": 1,
+                "type": "string",
+              },
+              "text": {
+                "description": "UTF-8 decoded-byte budget applies.",
+                "maxLength": 262144,
+                "type": "string",
+              },
+            },
+            "required": [
+              "path",
+              "mimeType",
+            ],
+            "type": "object",
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "type": "array",
+        },
+        "idempotencyKey": {
+          "description": "Nonblank by JavaScript trim(); length is UTF-16 units; original bytes retained.",
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string",
+        },
+        "profile": {
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number",
+              "boolean",
+              "null",
+            ],
+          },
+          "default": {},
+          "type": "object",
+        },
+      },
+      "required": [
+        "artifactId",
+        "idempotencyKey",
+        "files",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_publish",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+    },
+    "description": "List visible Radar pages. Returns bindingName, content URLs, lifecycle and publication timestamps. Ordered by updatedAt descending, nulls last, then createdAt descending; artifactId ascending breaks ties, before offset/limit pagination.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "default": 20,
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer",
+        },
+        "offset": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer",
+        },
+      },
+      "required": [],
+      "type": "object",
+    },
+    "name": "artifacts_list",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+    },
+    "description": "Read a Radar page's metadata and permissions. Fetch \`authoringGuide\` from artifacts_ensure (or artifacts_get for an existing page) and follow it.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_get",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+    },
+    "description": "Read a Radar page's retained source files for editing. Fetch \`authoringGuide\` from artifacts_ensure (or artifacts_get for an existing page) and follow it.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "paths": {
+          "items": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string",
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "type": "array",
+        },
+        "releaseId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_get_source",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+    },
+    "description": "Grant or revoke named read access on a Radar page.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "properties": {
+            "action": {
+              "enum": [
+                "grant",
+              ],
+            },
+          },
+          "required": [
+            "grant",
+          ],
+        },
+        {
+          "not": {
+            "required": [
+              "grant",
+            ],
+          },
+          "properties": {
+            "action": {
+              "enum": [
+                "revoke",
+              ],
+            },
+          },
+        },
+      ],
+      "properties": {
+        "action": {
+          "enum": [
+            "grant",
+            "revoke",
+          ],
+          "type": "string",
+        },
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "grant": {
+          "enum": [
+            "read",
+          ],
+          "type": "string",
+        },
+        "idempotencyKey": {
+          "description": "Nonblank by JavaScript trim(); length is UTF-16 units; original bytes retained.",
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string",
+        },
+        "principalId": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+        "action",
+        "principalId",
+        "idempotencyKey",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_set_access",
+  },
+  {
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+    },
+    "description": "Delete a Radar page after owner confirmation in the IMMO application.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "confirmationRef": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "type": "string",
+        },
+        "expectedCurrentReleaseId": {
+          "description": "Concurrency guard: the currentReleaseId last observed with artifacts_get or artifacts_list (null only for a first publication after a read that returned currentReleaseId null). A missing or stale value is refused with precondition_required.",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": [
+            "string",
+            "null",
+          ],
+        },
+        "idempotencyKey": {
+          "description": "Nonblank by JavaScript trim(); length is UTF-16 units; original bytes retained.",
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+        "idempotencyKey",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_delete",
+  },
+]
+`;
+
+exports[`artifact tool catalogue stability > should snapshot the immo-artifacts.v2 catalogue 1`] = `
+[
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+    },
+    "description": "Create a Radar page and return its binding. Fetch \`authoringGuide\` from artifacts_ensure (or artifacts_get for an existing page) and follow it.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "bindingName": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string",
+        },
+        "description": {
+          "description": "Short artifact description.",
+          "maxLength": 2000,
+          "type": "string",
+        },
+        "icon": {
+          "description": "One short lowercase word.",
+          "pattern": "^[a-z][a-z0-9-]{0,31}$",
+          "type": [
+            "string",
+            "null",
+          ],
+        },
+        "idempotencyKey": {
+          "description": "Nonblank by JavaScript trim(); length is UTF-16 units; original bytes retained.",
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string",
+        },
+        "parameters": {
+          "additionalProperties": false,
+          "default": {},
+          "properties": {},
+          "required": [],
+          "type": "object",
+        },
+        "title": {
+          "description": "Artifact display title.",
+          "maxLength": 160,
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "bindingName",
+        "idempotencyKey",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_ensure",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+    },
+    "description": "Publish a full page bundle on an existing binding. Fetch \`authoringGuide\` from artifacts_ensure (or artifacts_get for an existing page) and follow it.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "not": {
+            "required": [
+              "edits",
+            ],
+          },
+          "required": [
+            "files",
+          ],
+        },
+        {
+          "not": {
+            "required": [
+              "files",
+            ],
+          },
+          "required": [
+            "edits",
+          ],
+        },
+      ],
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "description": {
+          "description": "Short artifact description.",
+          "maxLength": 2000,
+          "type": "string",
+        },
+        "edits": {
+          "description": "Small old/new edits applied to the current release text files; required unless files is supplied.",
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "newStr": {
+                "maxLength": 262144,
+                "type": "string",
+              },
+              "oldStr": {
+                "description": "Must occur exactly once in the current file text.",
+                "maxLength": 262144,
+                "minLength": 1,
+                "type": "string",
+              },
+              "path": {
+                "allOf": [
+                  {
+                    "not": {
+                      "pattern": "[\\\\%?#:\\u0000-\\u001f\\u007f]",
+                    },
+                  },
+                  {
+                    "not": {
+                      "pattern": "(^|/)(\\.\\.?|)(/|$)",
+                    },
+                  },
+                  {
+                    "not": {
+                      "pattern": "^(?:api|__artifacts|livez|health)(?:/|$)",
+                    },
+                  },
+                ],
+                "description": "At most 1024 UTF-8 bytes; no empty/dot segments, colon or DEL.",
+                "maxLength": 1024,
+                "minLength": 1,
+                "type": "string",
+              },
+            },
+            "required": [
+              "path",
+              "oldStr",
+              "newStr",
+            ],
+            "type": "object",
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "type": "array",
+        },
+        "expectedCurrentReleaseId": {
+          "description": "Concurrency guard: the currentReleaseId last observed with artifacts_get or artifacts_list (null only for a first publication after a read that returned currentReleaseId null). A missing or stale value is refused with precondition_required.",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": [
+            "string",
+            "null",
+          ],
+        },
+        "files": {
+          "description": "Full file set; required unless edits is supplied.",
+          "items": {
+            "additionalProperties": false,
+            "oneOf": [
+              {
+                "not": {
+                  "required": [
+                    "bytes",
+                  ],
+                },
+                "required": [
+                  "text",
+                ],
+              },
+              {
+                "not": {
+                  "required": [
+                    "text",
+                  ],
+                },
+                "required": [
+                  "bytes",
+                ],
+              },
+            ],
+            "properties": {
+              "bytes": {
+                "items": {
+                  "maximum": 255,
+                  "minimum": 0,
+                  "type": "integer",
+                },
+                "maxItems": 262144,
+                "type": "array",
+              },
+              "mimeType": {
+                "enum": [
+                  "text/html",
+                  "text/css",
+                  "text/javascript",
+                  "application/json",
+                ],
+                "type": "string",
+              },
+              "path": {
+                "allOf": [
+                  {
+                    "not": {
+                      "pattern": "[\\\\%?#:\\u0000-\\u001f\\u007f]",
+                    },
+                  },
+                  {
+                    "not": {
+                      "pattern": "(^|/)(\\.\\.?|)(/|$)",
+                    },
+                  },
+                  {
+                    "not": {
+                      "pattern": "^(?:api|__artifacts|livez|health)(?:/|$)",
+                    },
+                  },
+                ],
+                "description": "At most 1024 UTF-8 bytes; no empty/dot segments, colon or DEL.",
+                "maxLength": 1024,
+                "minLength": 1,
+                "type": "string",
+              },
+              "text": {
+                "description": "UTF-8 decoded-byte budget applies.",
+                "maxLength": 262144,
+                "type": "string",
+              },
+            },
+            "required": [
+              "path",
+              "mimeType",
+            ],
+            "type": "object",
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "type": "array",
+        },
+        "icon": {
+          "description": "One short lowercase word.",
+          "pattern": "^[a-z][a-z0-9-]{0,31}$",
+          "type": [
+            "string",
+            "null",
+          ],
+        },
+        "idempotencyKey": {
+          "description": "Nonblank by JavaScript trim(); length is UTF-16 units; original bytes retained.",
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string",
+        },
+        "profile": {
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number",
+              "boolean",
+              "null",
+            ],
+          },
+          "default": {},
+          "type": "object",
+        },
+        "title": {
+          "description": "Artifact display title.",
+          "maxLength": 160,
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+        "idempotencyKey",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_publish",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+    },
+    "description": "List visible Radar pages. Returns bindingName, content URLs, lifecycle and publication timestamps. Ordered by updatedAt descending, nulls last, then createdAt descending; artifactId ascending breaks ties, before offset/limit pagination.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "default": 20,
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer",
+        },
+        "offset": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer",
+        },
+      },
+      "required": [],
+      "type": "object",
+    },
+    "name": "artifacts_list",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+    },
+    "description": "Read a Radar page's metadata and permissions. Fetch \`authoringGuide\` from artifacts_ensure (or artifacts_get for an existing page) and follow it.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_get",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+    },
+    "description": "Read a Radar page's retained source files for editing. Fetch \`authoringGuide\` from artifacts_ensure (or artifacts_get for an existing page) and follow it.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "paths": {
+          "items": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string",
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "type": "array",
+        },
+        "releaseId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_get_source",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+    },
+    "description": "Grant or revoke named read access on a Radar page.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "properties": {
+            "action": {
+              "enum": [
+                "grant",
+              ],
+            },
+          },
+          "required": [
+            "grant",
+          ],
+        },
+        {
+          "not": {
+            "required": [
+              "grant",
+            ],
+          },
+          "properties": {
+            "action": {
+              "enum": [
+                "revoke",
+              ],
+            },
+          },
+        },
+      ],
+      "properties": {
+        "action": {
+          "enum": [
+            "grant",
+            "revoke",
+          ],
+          "type": "string",
+        },
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "grant": {
+          "enum": [
+            "read",
+          ],
+          "type": "string",
+        },
+        "idempotencyKey": {
+          "description": "Nonblank by JavaScript trim(); length is UTF-16 units; original bytes retained.",
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string",
+        },
+        "principalId": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+        "action",
+        "principalId",
+        "idempotencyKey",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_set_access",
+  },
+  {
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+    },
+    "description": "Delete a Radar page after owner confirmation in the IMMO application.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "confirmationRef": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "type": "string",
+        },
+        "expectedCurrentReleaseId": {
+          "description": "Concurrency guard: the currentReleaseId last observed with artifacts_get or artifacts_list (null only for a first publication after a read that returned currentReleaseId null). A missing or stale value is refused with precondition_required.",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": [
+            "string",
+            "null",
+          ],
+        },
+        "idempotencyKey": {
+          "description": "Nonblank by JavaScript trim(); length is UTF-16 units; original bytes retained.",
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+        "idempotencyKey",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_delete",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+    },
+    "description": "List the retained releases of a Radar page.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "cursor": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "type": "string",
+        },
+        "limit": {
+          "default": 20,
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer",
+        },
+      },
+      "required": [
+        "artifactId",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_list_versions",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+    },
+    "description": "Republish a retained release as the current release.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "expectedCurrentReleaseId": {
+          "description": "Concurrency guard: the currentReleaseId last observed with artifacts_get or artifacts_list (null only for a first publication after a read that returned currentReleaseId null). A missing or stale value is refused with precondition_required.",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": [
+            "string",
+            "null",
+          ],
+        },
+        "idempotencyKey": {
+          "description": "Nonblank by JavaScript trim(); length is UTF-16 units; original bytes retained.",
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string",
+        },
+        "targetReleaseId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+        "targetReleaseId",
+        "idempotencyKey",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_revert",
+  },
+]
+`;
