@@ -103,6 +103,21 @@ describe("catalogueCollection (fail-closed per collection)", () => {
     }
   });
 
+  it("refuses an ambiguous title as unknown with an injectable registry (no upstream)", () => {
+    const duplicated = [
+      { id: "licence-a", title: "Same Title" },
+      { id: "licence-b", title: "Same Title" },
+    ];
+    const entry = catalogueCollection(
+      { id: PILOT, licenseTitle: "Same Title", rightsPresent: true },
+      GOVERNED_SERVED_RECORDS,
+      duplicated,
+    );
+    expect(entry.status).toBe("unknown");
+    expect(entry.reason).toBe("licence-ambiguous-title");
+    expect(entry.record).toBeUndefined();
+  });
+
   it("refuses a record whose licence id no longer matches the live title", () => {
     const entry = catalogueCollection(
       { id: PILOT, licenseTitle: "Unknown license", rightsPresent: true },
