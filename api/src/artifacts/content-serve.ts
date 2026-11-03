@@ -66,7 +66,7 @@ import {
   releaseCspForHtml,
   type ReleaseFileProvider,
 } from "./release-files.js";
-import { DESIGN_KIT_CSS_MIME, getDesignKitCss, resolveDesignKitAsset } from "./design-kit.js";
+import { designKitMimeFor, getDesignKitBytes, resolveDesignKitAsset } from "./design-kit.js";
 import { ClassificationError, classificationFailure } from "../services/facets/classification-errors.js";
 import { decodeQuery } from "../services/facets/classification-query.js";
 import type { WritePageSurface } from "./write-intent-page-surface.js";
@@ -453,8 +453,8 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
       return c.json({ error: "not_found" }, 404);
     }
     applyReaderContentHeaders(c);
-    c.header("Content-Type", DESIGN_KIT_CSS_MIME);
-    return c.body(getDesignKitCss(asset));
+    c.header("Content-Type", designKitMimeFor(asset));
+    return c.body(getDesignKitBytes(asset));
   });
 
   app.get("*", async (c) => {
