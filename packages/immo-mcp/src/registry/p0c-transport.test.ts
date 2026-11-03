@@ -96,7 +96,8 @@ describe.skipIf(!ARTIFACT_STRICT || !process.env.P0B_DATABASE_URL)("strict MCP b
     const session = initialized.headers.get("mcp-session-id")!;
     const listed = await (await post({ jsonrpc: "2.0", id: 2, method: "tools/list" }, session)).json();
     const publish = listed.result.tools.find((tool: { name: string }) => tool.name === "artifacts_publish");
-    expect(publish.inputSchema.required).toContain("expectedCurrentReleaseId");
+    expect(Object.keys(publish.inputSchema.properties)).toContain("expectedCurrentReleaseId");
+    expect(publish.inputSchema.required).not.toContain("expectedCurrentReleaseId");
     const ensured = await binding.invoke("artifacts_ensure", { bindingName: randomUUID(), idempotencyKey: randomUUID() }, request());
     const response = await post({ jsonrpc: "2.0", id: 3, method: "tools/call", params: { name: "artifacts_publish", arguments: {
       artifactId: output(ensured).artifactId, files: [{ path: "index.html", mimeType: "text/html", text: "x" }], idempotencyKey: randomUUID() } } }, session);

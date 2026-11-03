@@ -10,7 +10,7 @@ import { createAdmissionAuthority } from "./admission.js";
 
 const profile = compileHostArtifactProfile({ profileRevisionId: "immo-artifacts.v2", requireExpectedCurrentReleaseId: true, resultEnvelopeVersion: 2 });
 const files = [{ path: "index.html", mimeType: "text/html", text: "<h1>Before</h1>" }];
-type Output = { artifactId: string; releaseId: string; stableUrl: string; currentReleaseId: string | null; files: { bytes: number[] }[] };
+type Output = { artifactId: string; releaseId: string; stableUrl: string; currentReleaseId: string | null; files: { text?: string; base64?: string; encoding: string }[] };
 const output = (response: { body: unknown }) => (response.body as { output: Output }).output;
 
 describe.skipIf(!process.env.P0B_DATABASE_URL)("strict P0-A artifact lifecycle", () => {
@@ -38,7 +38,7 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("strict P0-A artifact lifecycle",
     const A = output(a).releaseId;
     const source = await h.call("get_source", { artifactId, releaseId: A });
     expect(output(source).releaseId).toBe(A);
-    expect(new TextDecoder().decode(Uint8Array.from(output(source).files[0]!.bytes))).toBe(files[0]!.text);
+    expect(output(source).files[0]).toMatchObject({ text: files[0]!.text, encoding: "utf8" });
     const b = await h.call("publish", { artifactId, expectedCurrentReleaseId: A, idempotencyKey: randomUUID(),
       edits: [{ path: "index.html", oldStr: "Before", newStr: "After" }], title: "Current", description: "Edited page", icon: "building" });
     expect(b.status).toBe(201);
