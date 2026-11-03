@@ -1,0 +1,757 @@
+{
+  "matrix": [
+    {
+      "citySlug": "valleyfield",
+      "name": "city-01"
+    },
+    {
+      "citySlug": "valleyfield",
+      "name": "city-02"
+    },
+    {
+      "citySlug": "valleyfield",
+      "name": "city-03"
+    },
+    {
+      "citySlug": "valleyfield",
+      "name": "city-04"
+    },
+    {
+      "citySlug": "valleyfield",
+      "name": "city-05"
+    },
+    {
+      "citySlug": "valleyfield",
+      "name": "city-06"
+    },
+    {
+      "citySlug": "valleyfield",
+      "name": "city-07"
+    },
+    {
+      "citySlug": "valleyfield",
+      "name": "city-08"
+    },
+    {
+      "citySlug": "valleyfield",
+      "name": "city-09"
+    },
+    {
+      "citySlug": "valleyfield",
+      "name": "city-10"
+    },
+    {
+      "citySlug": "valleyfield",
+      "name": "city-11"
+    },
+    {
+      "citySlug": "valleyfield",
+      "name": "city-12"
+    },
+    {
+      "name": "all-01"
+    },
+    {
+      "name": "all-02"
+    },
+    {
+      "name": "all-03"
+    },
+    {
+      "name": "all-04"
+    },
+    {
+      "name": "all-05"
+    },
+    {
+      "name": "all-06"
+    },
+    {
+      "name": "all-07"
+    },
+    {
+      "name": "all-08"
+    },
+    {
+      "name": "all-09"
+    },
+    {
+      "name": "all-10"
+    },
+    {
+      "name": "all-11"
+    },
+    {
+      "name": "all-12"
+    }
+  ],
+  "nodes": [
+    {
+      "citySlug": "valleyfield",
+      "classification": {
+        "confiance": 0.9,
+        "effet_densifiant": "densifie",
+        "etape": "avis_motion",
+        "etapes_historique": [],
+        "exclusion_reason": null,
+        "instrument": "rezonage",
+        "provenance": {
+          "extrait": "projet de 12 logements"
+        },
+        "residentiel": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        },
+        "zonage": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        }
+      },
+      "createdAt": "2026-09-01T00:00:00Z",
+      "description": "Rezonage pour 12 logements",
+      "id": "sig-vf-01",
+      "label": "Rezonage residentiel — 12 logements zone H-101",
+      "legacySubset": {
+        "flags": {
+          "m": true,
+          "p": true,
+          "z": true
+        },
+        "signalId": "sig-vf-01",
+        "version": "legacy-zmp-v1"
+      },
+      "props": {
+        "category": null,
+        "description": "Rezonage pour 12 logements",
+        "etape": "avis_motion",
+        "instrument": "rezonage",
+        "refs": [
+          {
+            "documentDate": {
+              "precision": "day",
+              "status": "known",
+              "value": "2026-10-02"
+            },
+            "excerpt": "extrait",
+            "fetchedAt": "2026-10-03T10:00:00Z",
+            "publishedAt": "2026-10-02"
+          }
+        ],
+        "zone_ref": "H-101"
+      },
+      "publishedAt": "2026-10-05T00:00:00Z",
+      "sourceRef": null,
+      "type": "Signal"
+    },
+    {
+      "citySlug": "valleyfield",
+      "classification": {
+        "confiance": 0.9,
+        "effet_densifiant": "densifie",
+        "etape": "projet_reglement",
+        "etapes_historique": [],
+        "exclusion_reason": null,
+        "instrument": "piia",
+        "provenance": {
+          "extrait": "projet de 12 logements"
+        },
+        "residentiel": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        },
+        "zonage": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        }
+      },
+      "createdAt": "2026-09-01T00:00:00Z",
+      "id": "sig-vf-02",
+      "label": "PIIA secteur centre",
+      "legacySubset": {
+        "flags": {
+          "m": true,
+          "p": true,
+          "z": true
+        },
+        "signalId": "sig-vf-02",
+        "version": "legacy-zmp-v1"
+      },
+      "props": {
+        "category": null,
+        "description": "PIIA sans projet",
+        "etape": "projet_reglement",
+        "instrument": "piia",
+        "refs": [
+          {
+            "documentDate": {
+              "precision": "day",
+              "status": "known",
+              "value": "2026-10-01"
+            },
+            "excerpt": "extrait",
+            "fetchedAt": "2026-10-02T10:00:00Z",
+            "publishedAt": "2026-10-01"
+          }
+        ]
+      },
+      "publishedAt": "2026-09-28T00:00:00Z",
+      "sourceRef": null,
+      "type": "Signal"
+    },
+    {
+      "citySlug": "valleyfield",
+      "classification": {
+        "confiance": 0.9,
+        "effet_densifiant": "densifie",
+        "etape": "projet_reglement",
+        "etapes_historique": [],
+        "exclusion_reason": null,
+        "instrument": "piia",
+        "provenance": {
+          "extrait": "projet de 12 logements"
+        },
+        "residentiel": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        },
+        "zonage": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        }
+      },
+      "createdAt": "2026-09-01T00:00:00Z",
+      "id": "sig-vf-03",
+      "label": "PIIA 4 plex — quatre logements",
+      "legacySubset": {
+        "flags": {
+          "m": true,
+          "p": true,
+          "z": true
+        },
+        "signalId": "sig-vf-03",
+        "version": "legacy-zmp-v1"
+      },
+      "props": {
+        "category": null,
+        "description": "PIIA quatre logements",
+        "etape": "projet_reglement",
+        "instrument": "piia",
+        "nb_unites_max": 4,
+        "refs": [
+          {
+            "documentDate": {
+              "precision": "day",
+              "status": "known",
+              "value": "2026-10-01"
+            },
+            "excerpt": "extrait",
+            "fetchedAt": "2026-10-02T10:00:00Z",
+            "publishedAt": "2026-10-01"
+          }
+        ]
+      },
+      "publishedAt": "2026-09-28T00:00:00Z",
+      "sourceRef": null,
+      "type": "Signal"
+    },
+    {
+      "citySlug": "valleyfield",
+      "classification": {
+        "confiance": 0.9,
+        "effet_densifiant": "densifie",
+        "etape": "projet_reglement",
+        "etapes_historique": [],
+        "exclusion_reason": null,
+        "instrument": "derogation",
+        "provenance": {
+          "extrait": "projet de 12 logements"
+        },
+        "residentiel": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        },
+        "zonage": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        }
+      },
+      "createdAt": "2026-09-01T00:00:00Z",
+      "id": "sig-vf-04",
+      "label": "Derogation mineure marge laterale",
+      "legacySubset": {
+        "flags": {
+          "m": true,
+          "p": true,
+          "z": true
+        },
+        "signalId": "sig-vf-04",
+        "version": "legacy-zmp-v1"
+      },
+      "props": {
+        "category": null,
+        "description": "Derogation mineure",
+        "etape": "projet_reglement",
+        "instrument": "derogation",
+        "refs": [
+          {
+            "documentDate": {
+              "precision": "day",
+              "status": "known",
+              "value": "2026-09-29"
+            },
+            "excerpt": "extrait",
+            "fetchedAt": "2026-09-30T10:00:00Z",
+            "publishedAt": "2026-09-29"
+          }
+        ]
+      },
+      "publishedAt": "2026-09-28T00:00:00Z",
+      "sourceRef": null,
+      "type": "Signal"
+    },
+    {
+      "citySlug": "valleyfield",
+      "classification": {
+        "confiance": 0.9,
+        "effet_densifiant": "inconnu",
+        "etape": "adoption",
+        "etapes_historique": [],
+        "exclusion_reason": "non_residentiel_franc",
+        "instrument": "derogation",
+        "provenance": {
+          "extrait": ""
+        },
+        "residentiel": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "non"
+        },
+        "zonage": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        }
+      },
+      "createdAt": "2026-09-01T00:00:00Z",
+      "id": "sig-vf-05",
+      "label": "Entrepot industriel zone I-93",
+      "legacySubset": {
+        "flags": {
+          "m": true,
+          "p": true,
+          "z": true
+        },
+        "signalId": "sig-vf-05",
+        "version": "legacy-zmp-v1"
+      },
+      "props": {
+        "category": "industriel",
+        "description": "Entrepot industriel",
+        "refs": [
+          {
+            "documentDate": {
+              "precision": "day",
+              "status": "known",
+              "value": "2026-09-20"
+            },
+            "excerpt": "extrait",
+            "fetchedAt": "2026-09-21T10:00:00Z",
+            "publishedAt": "2026-09-20"
+          }
+        ]
+      },
+      "publishedAt": "2026-09-28T00:00:00Z",
+      "sourceRef": null,
+      "type": "Signal"
+    },
+    {
+      "citySlug": "valleyfield",
+      "classification": {
+        "confiance": 0.9,
+        "effet_densifiant": "densifie",
+        "etape": "projet_reglement",
+        "etapes_historique": [],
+        "exclusion_reason": null,
+        "instrument": "refonte",
+        "provenance": {
+          "extrait": "projet de 12 logements"
+        },
+        "residentiel": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        },
+        "zonage": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        }
+      },
+      "createdAt": "2026-09-01T00:00:00Z",
+      "id": "sig-vf-06",
+      "label": "Ecole primaire — usage mixte et habitation",
+      "legacySubset": {
+        "flags": {
+          "m": true,
+          "p": true,
+          "z": true
+        },
+        "signalId": "sig-vf-06",
+        "version": "legacy-zmp-v1"
+      },
+      "props": {
+        "category": null,
+        "description": "Ecole et usage mixte",
+        "refs": []
+      },
+      "publishedAt": "2026-05-01T00:00:00Z",
+      "sourceRef": null,
+      "type": "Signal"
+    },
+    {
+      "citySlug": "sainte-martine",
+      "classification": {
+        "confiance": 0.9,
+        "effet_densifiant": "densifie",
+        "etape": "projet_reglement",
+        "etapes_historique": [],
+        "exclusion_reason": null,
+        "instrument": "rezonage",
+        "provenance": {
+          "extrait": "projet de 12 logements"
+        },
+        "residentiel": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        },
+        "zonage": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        }
+      },
+      "createdAt": "2026-09-01T00:00:00Z",
+      "id": "sig-sm-01",
+      "label": "Rezonage rue Principale",
+      "legacySubset": {
+        "flags": {
+          "m": true,
+          "p": true,
+          "z": true
+        },
+        "signalId": "sig-sm-01",
+        "version": "legacy-zmp-v1"
+      },
+      "props": {
+        "category": null,
+        "etape": "projet_reglement",
+        "instrument": "rezonage",
+        "refs": [
+          {
+            "documentDate": {
+              "precision": "day",
+              "status": "known",
+              "value": "2026-10-03"
+            },
+            "excerpt": "extrait",
+            "fetchedAt": "2026-10-04T10:00:00Z",
+            "publishedAt": "2026-10-03"
+          }
+        ],
+        "zone_ref": "R-201"
+      },
+      "publishedAt": "2026-05-02T00:00:00Z",
+      "sourceRef": null,
+      "type": "Signal"
+    },
+    {
+      "citySlug": "sainte-martine",
+      "classification": {
+        "confiance": 0.9,
+        "effet_densifiant": "densifie",
+        "etape": "consultation_publique",
+        "etapes_historique": [],
+        "exclusion_reason": null,
+        "instrument": "plan_urbanisme",
+        "provenance": {
+          "extrait": "projet de 12 logements"
+        },
+        "residentiel": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        },
+        "zonage": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        }
+      },
+      "createdAt": "2026-09-01T00:00:00Z",
+      "id": "sig-sm-02",
+      "label": "Consultation publique plan urbanisme",
+      "legacySubset": {
+        "flags": {
+          "m": true,
+          "p": true,
+          "z": true
+        },
+        "signalId": "sig-sm-02",
+        "version": "legacy-zmp-v1"
+      },
+      "props": {
+        "category": null,
+        "etape": "consultation_publique",
+        "instrument": "plan_urbanisme",
+        "refs": [
+          {
+            "documentDate": {
+              "precision": "day",
+              "status": "known",
+              "value": "2026-08-15"
+            },
+            "excerpt": "extrait",
+            "fetchedAt": "2026-08-16T10:00:00Z",
+            "publishedAt": "2026-08-15"
+          }
+        ]
+      },
+      "publishedAt": "2026-09-28T00:00:00Z",
+      "sourceRef": null,
+      "type": "Signal"
+    },
+    {
+      "citySlug": "sainte-martine",
+      "classification": {
+        "confiance": 0.9,
+        "effet_densifiant": "densifie",
+        "etape": "second_projet",
+        "etapes_historique": [],
+        "exclusion_reason": null,
+        "instrument": "rezonage",
+        "provenance": {
+          "extrait": "projet de 12 logements"
+        },
+        "residentiel": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        },
+        "zonage": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        }
+      },
+      "createdAt": "2026-09-01T00:00:00Z",
+      "id": "sig-sm-03",
+      "label": "Second projet partageant le PV pv-shared-1",
+      "legacySubset": {
+        "flags": {
+          "m": true,
+          "p": true,
+          "z": true
+        },
+        "signalId": "sig-sm-03",
+        "version": "legacy-zmp-v1"
+      },
+      "props": {
+        "category": null,
+        "etape": "second_projet",
+        "instrument": "rezonage",
+        "rawRef": "raw/shared/pv-1.pdf",
+        "refs": [
+          {
+            "documentDate": {
+              "precision": "day",
+              "status": "known",
+              "value": "2026-10-02"
+            },
+            "excerpt": "extrait",
+            "fetchedAt": "2026-10-03T10:00:00Z",
+            "publishedAt": "2026-10-02"
+          }
+        ]
+      },
+      "publishedAt": "2026-09-28T00:00:00Z",
+      "sourceRef": null,
+      "type": "Signal"
+    },
+    {
+      "citySlug": "richelieu",
+      "classification": {
+        "confiance": 0.9,
+        "effet_densifiant": "inconnu",
+        "etape": "adoption",
+        "etapes_historique": [],
+        "exclusion_reason": "non_residentiel_franc",
+        "instrument": "autre",
+        "provenance": {
+          "extrait": ""
+        },
+        "residentiel": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "non"
+        },
+        "zonage": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        }
+      },
+      "createdAt": "2026-09-01T00:00:00Z",
+      "id": "sig-ri-01",
+      "label": "Adoption zonage commercial C-8",
+      "legacySubset": {
+        "flags": {
+          "m": true,
+          "p": true,
+          "z": true
+        },
+        "signalId": "sig-ri-01",
+        "version": "legacy-zmp-v1"
+      },
+      "props": {
+        "category": "commercial",
+        "description": "Usages commerciaux zone C-8",
+        "refs": [
+          {
+            "documentDate": {
+              "precision": "day",
+              "status": "known",
+              "value": "2026-07-01"
+            },
+            "excerpt": "extrait",
+            "fetchedAt": "2026-07-02T10:00:00Z",
+            "publishedAt": "2026-07-01"
+          }
+        ]
+      },
+      "publishedAt": "2026-09-28T00:00:00Z",
+      "sourceRef": null,
+      "type": "Signal"
+    },
+    {
+      "citySlug": "richelieu",
+      "classification": {
+        "confiance": 0.9,
+        "effet_densifiant": "densifie",
+        "etape": "avis_motion",
+        "etapes_historique": [],
+        "exclusion_reason": null,
+        "instrument": "ppcmoi",
+        "provenance": {
+          "extrait": "projet de 12 logements"
+        },
+        "residentiel": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        },
+        "zonage": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        }
+      },
+      "createdAt": "2026-09-01T00:00:00Z",
+      "id": "sig-ri-02",
+      "label": "Projet residentiel partagé PV pv-shared-1",
+      "legacySubset": {
+        "flags": {
+          "m": true,
+          "p": true,
+          "z": true
+        },
+        "signalId": "sig-ri-02",
+        "version": "legacy-zmp-v1"
+      },
+      "props": {
+        "category": null,
+        "etape": "avis_motion",
+        "instrument": "ppcmoi",
+        "rawRef": "raw/shared/pv-1.pdf",
+        "refs": [
+          {
+            "documentDate": {
+              "precision": "day",
+              "status": "known",
+              "value": "2026-10-04"
+            },
+            "excerpt": "extrait",
+            "fetchedAt": "2026-10-05T10:00:00Z",
+            "publishedAt": "2026-10-04"
+          }
+        ]
+      },
+      "publishedAt": "2026-10-06T00:00:00Z",
+      "sourceRef": null,
+      "type": "Signal"
+    },
+    {
+      "citySlug": "richelieu",
+      "classification": {
+        "confiance": 0.9,
+        "effet_densifiant": "densifie",
+        "etape": "projet_reglement",
+        "etapes_historique": [],
+        "exclusion_reason": null,
+        "instrument": "refonte",
+        "provenance": {
+          "extrait": "projet de 12 logements"
+        },
+        "residentiel": {
+          "confiance": 0.5,
+          "source": "s",
+          "valeur": "indetermine"
+        },
+        "zonage": {
+          "confiance": 0.9,
+          "source": "s",
+          "valeur": "oui"
+        }
+      },
+      "createdAt": "2026-09-01T00:00:00Z",
+      "id": "sig-ri-03",
+      "label": "Refonte complete du reglement",
+      "legacySubset": {
+        "flags": {
+          "m": true,
+          "p": true,
+          "z": true
+        },
+        "signalId": "sig-ri-03",
+        "version": "legacy-zmp-v1"
+      },
+      "props": {
+        "category": "refonte",
+        "description": "Refonte complete",
+        "refs": [
+          {
+            "documentDate": {
+              "precision": "day",
+              "status": "known",
+              "value": "2026-09-10"
+            },
+            "excerpt": "extrait",
+            "fetchedAt": "2026-09-11T10:00:00Z",
+            "publishedAt": "2026-09-10"
+          }
+        ]
+      },
+      "publishedAt": "2026-09-28T00:00:00Z",
+      "sourceRef": null,
+      "type": "Signal"
+    }
+  ]
+}
