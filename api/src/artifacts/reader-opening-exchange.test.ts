@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { Hono } from "hono";
 import { APPROVAL_BASE_CSP, contentStylesheetLinks, createReaderOpening, expiredReaderOpeningHtml } from "./reader-opening.js";
 import { DESIGN_KIT_ASSETS, designKitAssetUrl } from "@radar/artifacts-host";
 import type { AuthConfig } from "../config.js";
@@ -44,8 +45,8 @@ function opening(consume: SharedReaderTickets["consume"]) {
     sessionSecret: "session-secret-32-bytes-long-pad!!" });
 }
 
-const exchange = (
-  app: { request: (url: string, init?: RequestInit) => Promise<Response> },
+const exchange = async (
+  app: Hono,
   query: string,
   headers: Record<string, string>,
 ) => app.request(`https://${HOST}/__reader/exchange${query}`, { headers: { host: HOST, ...headers } });
