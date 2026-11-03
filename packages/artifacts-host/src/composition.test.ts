@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { S3Client } from "@aws-sdk/client-s3";
 import type pg from "pg";
-import { composeArtifactHost } from "./composition.js";
+import { PUBLISH_S3_MAX_SOCKETS, composeArtifactHost } from "./composition.js";
 import { createDeleteConfirmation } from "./delete-confirmation.js";
 const options = { confirmation: createDeleteConfirmation({} as pg.Pool, "scope", "https://app.test") };
 
@@ -20,7 +20,8 @@ describe("artifact S3 composition", () => {
       s3Endpoint: "http://minio:9000", s3Region: "ca-central-1", s3AccessKey: "test", s3SecretKey: "test",
     }, undefined, options);
     expect(S3Client).toHaveBeenCalledWith(expect.objectContaining({
-      region: "ca-central-1", requestHandler: { requestTimeout: 4000, connectionTimeout: 3000, throwOnRequestTimeout: true },
+      region: "ca-central-1", requestHandler: expect.objectContaining(
+        { requestTimeout: 4000, connectionTimeout: 3000, throwOnRequestTimeout: true }),
       maxAttempts: 3, retryMode: "standard",
     }));
     host.close();
@@ -33,8 +34,23 @@ describe("artifact S3 composition", () => {
       s3Budget: { attemptTimeoutMs: 2500, maxAttempts: 4, operationTimeoutMs: 11_000 },
     }, undefined, options);
     expect(S3Client).toHaveBeenLastCalledWith(expect.objectContaining({
-      requestHandler: { requestTimeout: 2500, connectionTimeout: 3000, throwOnRequestTimeout: true }, maxAttempts: 4,
+      requestHandler: expect.objectContaining(
+        { requestTimeout: 2500, connectionTimeout: 3000, throwOnRequestTimeout: true }), maxAttempts: 4,
     }));
+    host.close();
+  });
+
+  it("reuses one warm socket pool for the whole publish sequence", async () => {
+    const host = await composeArtifactHost({ query: vi.fn().mockResolvedValue({ rows: [] }) } as unknown as pg.Pool, {
+      enabled: true, storageScope: "scope", orgId: "org", s3Bucket: "test-bucket",
+      s3Endpoint: "https://s3.bhs.io.cloud.ovh.net", s3Region: "bhs", s3AccessKey: "test", s3SecretKey: "test",
+    }, undefined, options);
+    const requestHandler = (S3Client as unknown as { mock: { calls: [{
+      requestHandler: { httpsAgent: { keepAlive: boolean; maxSockets: number } } }][] } })
+      .mock.calls.at(-1)![0].requestHandler;
+    expect(requestHandler.httpsAgent.keepAlive).toBe(true);
+    expect(requestHandler.httpsAgent.maxSockets).toBe(PUBLISH_S3_MAX_SOCKETS);
+    expect(PUBLISH_S3_MAX_SOCKETS).toBeGreaterThanOrEqual(8);
     host.close();
   });
 
