@@ -80,6 +80,42 @@ export function normalizeAdmissionEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
+/**
+ * Valid total order on normalised emails (`0` on equality — the previous
+ * `-1 : 1` comparator violated the `Array.prototype.sort` contract and could
+ * invert same-email entries between `build` and `canonical` serialisation).
+ */
+function compareAdmissionEmails(a: string, b: string): number {
+  const ka = normalizeAdmissionEmail(a);
+  const kb = normalizeAdmissionEmail(b);
+  return ka < kb ? -1 : ka > kb ? 1 : 0;
+}
+
+function timeOrZero(value: string | null): number {
+  if (value === null) return 0;
+  const time = new Date(value).getTime();
+  return Number.isFinite(time) ? time : 0;
+}
+
+/**
+ * Deterministic winner among same-email rows (prod `email` is not UNIQUE for
+ * `local` rows, so an old `rejected` row and a new `approved` row may share
+ * an address). Preference: `approved` first, then most recent `approvedAt`,
+ * then most recent `createdAt`, then raw email/name (total, input-order
+ * independent).
+ */
+function isPreferredAdmissionEntry(candidate: AdmissionEntry, current: AdmissionEntry): boolean {
+  const rank = (entry: AdmissionEntry) => (entry.status === "approved" ? 0 : 1);
+  const rankDiff = rank(candidate) - rank(current);
+  if (rankDiff !== 0) return rankDiff < 0;
+  const approvedDiff = timeOrZero(candidate.approvedAt) - timeOrZero(current.approvedAt);
+  if (approvedDiff !== 0) return approvedDiff > 0;
+  const createdDiff = timeOrZero(candidate.createdAt) - timeOrZero(current.createdAt);
+  if (createdDiff !== 0) return createdDiff > 0;
+  if (candidate.email !== current.email) return candidate.email < current.email;
+  return (candidate.name ?? "") < (current.name ?? "");
+}
+
 function isEmailLike(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
@@ -95,22 +131,23 @@ export function buildAdmissionSnapshot(
   opts: { kid: string; issuedAt: Date | string; full: boolean },
 ): AdmissionPayload {
   const issuedAt = opts.issuedAt instanceof Date ? opts.issuedAt.toISOString() : new Date(opts.issuedAt).toISOString();
-  const entries: AdmissionEntry[] = [];
+  const byEmail = new Map<string, AdmissionEntry>();
   for (const row of rows) {
     if (typeof row.email !== "string" || !isEmailLike(row.email.trim())) continue;
     if (!(ADMISSION_STATUSES as readonly string[]).includes(row.status)) continue;
-    entries.push({
+    const candidate: AdmissionEntry = {
       email: row.email.trim(),
       name: typeof row.name === "string" && row.name.length > 0 ? row.name : null,
       status: row.status as AdmissionStatus,
       role: row.isAdmin ? "admin" : "member",
       createdAt: toIso(row.createdAt),
       approvedAt: toIso(row.approvedAt),
-    });
+    };
+    const norm = normalizeAdmissionEmail(candidate.email);
+    const current = byEmail.get(norm);
+    if (!current || isPreferredAdmissionEntry(candidate, current)) byEmail.set(norm, candidate);
   }
-  entries.sort((a, b) =>
-    normalizeAdmissionEmail(a.email) < normalizeAdmissionEmail(b.email) ? -1 : 1,
-  );
+  const entries = [...byEmail.values()].sort((a, b) => compareAdmissionEmails(a.email, b.email));
   return { version: ADMISSION_SNAPSHOT_VERSION, kid: opts.kid, issuedAt, full: opts.full, entries };
 }
 
@@ -126,9 +163,7 @@ export function canonicalSnapshotBytes(payload: AdmissionPayload): Buffer {
     kid: payload.kid,
     issuedAt: payload.issuedAt,
     full: payload.full,
-    entries: [...payload.entries].sort((a, b) =>
-      normalizeAdmissionEmail(a.email) < normalizeAdmissionEmail(b.email) ? -1 : 1,
-    ).map((entry) => ({
+    entries: [...payload.entries].sort((a, b) => compareAdmissionEmails(a.email, b.email)).map((entry) => ({
       email: entry.email,
       name: entry.name,
       status: entry.status,

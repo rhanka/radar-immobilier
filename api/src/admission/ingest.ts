@@ -6,9 +6,12 @@
 // never touched. A prod revocation (status leaving 'approved') is propagated
 // to the mirrored prod_sync row on the next applied cycle.
 
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, ne, sql } from "drizzle-orm";
 import type { KeyObject } from "node:crypto";
 import type { Database } from "../db/client.js";
+
+/** Transaction handle for ingestion (same session API as `Database`). */
+type AdmissionTx = Parameters<Parameters<Database["transaction"]>[0]>[0];
 import { accountUsers, admissionSyncProfiles, admissionSyncState } from "../db/schema.js";
 import {
   normalizeAdmissionEmail,
@@ -66,6 +69,7 @@ export async function applyAdmissionSnapshot(
   envelope: unknown,
   opts: IngestOptions,
 ): Promise<IngestResult> {
+  // Signature first, before any DB access (fail-closed on forgery).
   const payload: AdmissionPayload = verifySnapshot(envelope, opts.publicKeys);
   const issuedAt = new Date(payload.issuedAt);
   const base = {
@@ -74,77 +78,93 @@ export async function applyAdmissionSnapshot(
     full: payload.full,
   };
 
-  const prior = await db
-    .select()
-    .from(admissionSyncState)
-    .where(eq(admissionSyncState.kid, payload.kid))
-    .limit(1);
-  if (prior.length > 0 && issuedAt.getTime() <= prior[0]!.issuedAt.getTime()) {
-    return { ...base, applied: false, stale: true, upserted: 0, propagated: 0, markedAbsent: 0 };
-  }
+  // The whole ingestion runs in ONE SQL transaction under an advisory lock:
+  // concurrent snapshots/mutations serialise here, the staleness guard is
+  // re-checked under the lock (no TOCTOU), and a mid-loop failure rolls
+  // everything back instead of leaving a half-applied snapshot.
+  return db.transaction(async (tx) => {
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended('admission_sync_ingest', 0))`);
 
-  let upserted = 0;
-  let propagated = 0;
-  let markedAbsent = 0;
-  const seen = new Set<string>();
+    // Global monotonic guard across ALL keys: during a rotation (`old_kid`
+    // + `new_kid` both accepted), a delayed snapshot signed with the old key
+    // must never overwrite a newer revocation signed with the new key.
+    // Per-kid rows are kept for observability; only the global MAX decides.
+    const prior = await tx
+      .select({ maxIssuedAt: sql<Date | null>`max(${admissionSyncState.issuedAt})` })
+      .from(admissionSyncState);
+    const lastIssuedAt = prior[0]?.maxIssuedAt ? new Date(prior[0].maxIssuedAt) : null;
+    if (lastIssuedAt && issuedAt.getTime() <= lastIssuedAt.getTime()) {
+      return { ...base, applied: false, stale: true, upserted: 0, propagated: 0, markedAbsent: 0 };
+    }
 
-  for (const entry of payload.entries) {
-    const norm = normalizeAdmissionEmail(entry.email);
-    if (seen.has(norm)) continue;
-    seen.add(norm);
-    const dates = entryDates(entry);
-    await db
-      .insert(admissionSyncProfiles)
-      .values({
-        email: norm,
-        emailDisplay: entry.email.trim(),
-        name: entry.name,
-        status: entry.status,
-        role: entry.role,
-        approvedAt: dates.approvedAt,
-        createdAt: dates.createdAt,
-      })
-      .onConflictDoUpdate({
-        target: admissionSyncProfiles.email,
-        set: {
+    let upserted = 0;
+    let propagated = 0;
+    let markedAbsent = 0;
+    const seen = new Set<string>();
+
+    for (const entry of payload.entries) {
+      const norm = normalizeAdmissionEmail(entry.email);
+      if (seen.has(norm)) continue;
+      seen.add(norm);
+      const dates = entryDates(entry);
+      await tx
+        .insert(admissionSyncProfiles)
+        .values({
+          email: norm,
           emailDisplay: entry.email.trim(),
           name: entry.name,
           status: entry.status,
           role: entry.role,
           approvedAt: dates.approvedAt,
           createdAt: dates.createdAt,
-          syncedAt: new Date(opts.now?.() ?? Date.now()),
-        },
-      });
-    upserted += 1;
-    propagated += await propagateToMirrorRow(db, norm, entry);
-  }
-
-  if (payload.full) {
-    // Entries absent from a FULL snapshot left prod (deleted or email
-    // changed): stage them as rejected so a stale approval cannot linger.
-    // Local accounts are never in staging, so they cannot be marked here.
-    const staged = await db.select({ email: admissionSyncProfiles.email }).from(admissionSyncProfiles);
-    for (const row of staged) {
-      if (seen.has(row.email)) continue;
-      await db
-        .update(admissionSyncProfiles)
-        .set({ status: "rejected", syncedAt: new Date(opts.now?.() ?? Date.now()) })
-        .where(eq(admissionSyncProfiles.email, row.email));
-      markedAbsent += 1;
-      propagated += await propagateRevocationToMirrorRow(db, row.email);
+        })
+        .onConflictDoUpdate({
+          target: admissionSyncProfiles.email,
+          set: {
+            emailDisplay: entry.email.trim(),
+            name: entry.name,
+            status: entry.status,
+            role: entry.role,
+            approvedAt: dates.approvedAt,
+            createdAt: dates.createdAt,
+            syncedAt: new Date(opts.now?.() ?? Date.now()),
+          },
+        });
+      upserted += 1;
+      propagated += await propagateToMirrorRow(tx, norm, entry);
     }
-  }
 
-  await db
-    .insert(admissionSyncState)
-    .values({ kid: payload.kid, issuedAt, entries: payload.entries.length })
-    .onConflictDoUpdate({
-      target: admissionSyncState.kid,
-      set: { issuedAt, entries: payload.entries.length, appliedAt: new Date(opts.now?.() ?? Date.now()) },
-    });
+    if (payload.full) {
+      // Entries absent from a FULL snapshot left prod (deleted or email
+      // changed): stage them as rejected so a stale approval cannot linger.
+      // Local accounts are never in staging, so they cannot be marked here.
+      // Already-rejected rows are skipped so a repeated cycle is a no-op
+      // (no infinite `markedAbsent` replay).
+      const staged = await tx
+        .select({ email: admissionSyncProfiles.email })
+        .from(admissionSyncProfiles)
+        .where(ne(admissionSyncProfiles.status, "rejected"));
+      for (const row of staged) {
+        if (seen.has(row.email)) continue;
+        await tx
+          .update(admissionSyncProfiles)
+          .set({ status: "rejected", syncedAt: new Date(opts.now?.() ?? Date.now()) })
+          .where(eq(admissionSyncProfiles.email, row.email));
+        markedAbsent += 1;
+        propagated += await propagateRevocationToMirrorRow(tx, row.email);
+      }
+    }
 
-  return { ...base, applied: true, stale: false, upserted, propagated, markedAbsent };
+    await tx
+      .insert(admissionSyncState)
+      .values({ kid: payload.kid, issuedAt, entries: payload.entries.length })
+      .onConflictDoUpdate({
+        target: admissionSyncState.kid,
+        set: { issuedAt, entries: payload.entries.length, appliedAt: new Date(opts.now?.() ?? Date.now()) },
+      });
+
+    return { ...base, applied: true, stale: false, upserted, propagated, markedAbsent };
+  });
 }
 
 /**
@@ -153,7 +173,7 @@ export async function applyAdmissionSnapshot(
  * with the same email — are never matched. The `sub` is never written here:
  * sub linkage belongs to the JIT reconciliation alone.
  */
-async function propagateToMirrorRow(db: Database, normEmail: string, entry: AdmissionEntry): Promise<number> {
+async function propagateToMirrorRow(db: AdmissionTx, normEmail: string, entry: AdmissionEntry): Promise<number> {
   const set: { status: string; isAdmin: boolean; name?: string | null } = {
     status: entry.status,
     isAdmin: entry.role === "admin",
@@ -172,10 +192,10 @@ async function propagateToMirrorRow(db: Database, normEmail: string, entry: Admi
   return updated.length;
 }
 
-async function propagateRevocationToMirrorRow(db: Database, normEmail: string): Promise<number> {
+async function propagateRevocationToMirrorRow(db: AdmissionTx, normEmail: string): Promise<number> {
   const updated = await db
     .update(accountUsers)
-    .set({ status: "rejected" })
+    .set({ status: "rejected", isAdmin: false })
     .where(
       and(
         eq(accountUsers.admissionSource, "prod_sync"),

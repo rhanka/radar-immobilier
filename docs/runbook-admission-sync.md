@@ -18,9 +18,10 @@ Mechanism (converged R2 §2.6):
   FULL snapshot (CronJob, every 15 min recommended).
 - Preprod ingests read-only through `POST /api/v1/admission/ingest`
   (signature-verified webhook) or the `admission-ingest` cron job. Invalid
-  signatures are rejected (401). A per-key replay guard
-  (`admission_sync_state`) ignores delayed snapshots so an old FULL snapshot
-  can never resurrect a newer revocation.
+  signatures are rejected (401). A global monotonic replay guard
+  (`admission_sync_state`, MAX over all keys) inside a serialised SQL
+  transaction ignores delayed snapshots so an old FULL snapshot — including
+  one signed with a rotated-out key — can never resurrect a newer revocation.
 - `account_users.admission_source IN ('local','prod_sync')`: local preprod
   accounts are never overwritten by the sync; only `prod_sync` rows are
   status-propagated. A prod revocation takes effect at the next applied cycle.
@@ -96,7 +97,7 @@ ADMISSION_TRUSTED_ISSUERS: "https://auth.sent-tech.ca"    # prod JIT for prod-lo
 Plus a prod CronJob (every 15 min recommended) running the emitter image:
 
 ```bash
-npm run admission:snapshot --workspace=api \
+npm run --silent admission:snapshot --workspace=api \
   | curl -fsS -X POST "$ADMISSION_SYNC_PUSH_URL" \
       -H 'content-type: application/json' --data-binary @-
 ```
