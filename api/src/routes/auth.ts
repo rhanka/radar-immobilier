@@ -44,6 +44,7 @@ import {
 import type { Database } from "../db/client.js";
 import { accountUsers, accountInvitations } from "../db/schema.js";
 import { readerLoginReturn } from "../artifacts/reader-login-return.js";
+import { reconcilePreprodSub } from "../admission/jit.js";
 
 /** Transient cookie holding the per-login flow state until the callback. */
 const FLOW_COOKIE_NAME = "radar_oauth_flow";
@@ -64,6 +65,13 @@ export interface AuthRouteOptions {
    * backward compatibility for tests without DB).
    */
   db?: Database;
+  /**
+   * Lot I1 (R1): trusted OIDC issuers for JIT reconciliation of the preprod
+   * sub by verified email at login. When set (and non-empty) with `db`, the
+   * callback links a prod-approved user before enrollment. Absent/empty keeps
+   * the historical behaviour (JIT disabled).
+   */
+  admissionTrustedIssuers?: string[];
 }
 
 /** Is the request a browser navigation (vs. an XHR/fetch from the SPA)? */
@@ -146,6 +154,8 @@ async function maybeSlideSession(
     sub: session.sub,
     ...(session.name !== undefined ? { name: session.name } : {}),
     ...(session.email !== undefined ? { email: session.email } : {}),
+    ...(session.emailVerified !== undefined ? { emailVerified: session.emailVerified } : {}),
+    ...(session.idpIssuer !== undefined ? { idpIssuer: session.idpIssuer } : {}),
     ...(session.iat0 !== undefined ? { iat0: session.iat0 } : {}),
   };
   await signAndSetSessionCookie(c, auth, claims, nowMs);
@@ -181,10 +191,7 @@ export function authRoute(
    * report `authenticated:true` + the real `status`, so the SPA renders the
    * static Pending/Rejected screen instead of looping.
    */
-  async function mintSessionCookie(
-    c: Context,
-    claims: { sub: string; name?: string; email?: string },
-  ): Promise<void> {
+  async function mintSessionCookie(c: Context, claims: SessionClaims): Promise<void> {
     // First mint: no `iat0` passed → signSession anchors it to the current iat.
     await signAndSetSessionCookie(c, auth, claims, nowFn());
   }
@@ -318,11 +325,31 @@ export function authRoute(
       sub: user.sub,
       ...(user.name !== undefined ? { name: user.name } : {}),
       ...(user.email !== undefined ? { email: user.email } : {}),
+      // Lot I1: carry the login-time verification so the reader opening flow
+      // can JIT-reconcile before getRights without re-contacting the IdP.
+      ...(user.emailVerified === true ? { emailVerified: true as const } : {}),
+      ...(typeof user.iss === "string" ? { idpIssuer: user.iss } : {}),
     };
 
     // Enrollment: create or look up the account when DB is available.
     // When db is absent (tests without DB), skip enrollment (fail-open).
     if (options.db) {
+      // Lot I1 (R1/b): JIT reconciliation BEFORE enrollment, so a user
+      // approved in prod — unknown in preprod, different sub — links (or is
+      // created approved) instead of landing pending. JIT never blocks: it
+      // only links, and enrollment below decides the landing.
+      if (options.admissionTrustedIssuers && options.admissionTrustedIssuers.length > 0) {
+        await reconcilePreprodSub(
+          options.db,
+          {
+            sub: user.sub,
+            ...(user.email !== undefined ? { email: user.email } : {}),
+            emailVerified: user.emailVerified === true,
+            issuer: user.iss,
+          },
+          { trustedIssuers: options.admissionTrustedIssuers, now: nowFn },
+        );
+      }
       const existing = await options.db
         .select()
         .from(accountUsers)
@@ -474,11 +501,35 @@ export function authRoute(
     let status: string | undefined;
     let isAdmin: boolean | undefined;
     if (options.db) {
-      const rows = await options.db
+      let rows = await options.db
         .select()
         .from(accountUsers)
         .where(eq(accountUsers.sub, session.sub))
         .limit(1);
+      // Lot I1 (R1/b): a session minted before the prod snapshot was
+      // ingested carries no usable account yet. Reconcile by verified email
+      // before refusing, so an already-logged-in user lands approved after
+      // the next sync instead of staying stuck on `/pending`.
+      if (
+        (rows.length === 0 || rows[0]!.status !== "approved") &&
+        session.emailVerified === true &&
+        typeof session.email === "string" &&
+        session.email.trim() !== "" &&
+        typeof session.idpIssuer === "string" &&
+        options.admissionTrustedIssuers &&
+        options.admissionTrustedIssuers.length > 0
+      ) {
+        await reconcilePreprodSub(
+          options.db,
+          { sub: session.sub, email: session.email, emailVerified: true, issuer: session.idpIssuer },
+          { trustedIssuers: options.admissionTrustedIssuers, now: nowFn },
+        );
+        rows = await options.db
+          .select()
+          .from(accountUsers)
+          .where(eq(accountUsers.sub, session.sub))
+          .limit(1);
+      }
       if (rows.length === 0) {
         return c.json(
           { error: "account_not_approved", status: "unknown" },
@@ -549,6 +600,9 @@ const PUBLIC_PREFIXES = [
   "/api/v1/auth/me",
   "/api/geo/collections",
   "/api/documents/raw",
+  // Lot I1: the prod -> preprod ingest webhook authenticates by Ed25519
+  // signature, not by preprod session (prod holds none).
+  "/api/v1/admission/ingest",
 ];
 
 function isPublicPath(path: string): boolean {
@@ -618,6 +672,11 @@ export function protect(
     now?: () => number;
     db?: Database;
     /**
+     * Lot I1 (R1): trusted OIDC issuers for opportunistic JIT reconciliation
+     * on the per-user path. Absent/empty keeps the historical behaviour.
+     */
+    admissionTrustedIssuers?: string[];
+    /**
      * JWKS key getter used to verify a USER bearer token. Defaults to a cached
      * remote JWKS off `auth.jwksUri`. Injectable so tests verify a test-signed
      * JWT against a local key without hitting the network.
@@ -652,7 +711,25 @@ export function protect(
 
     if (session) {
       if (options.db) {
-        const status = await fetchAccountStatus(options.db, session.sub);
+        let status = await fetchAccountStatus(options.db, session.sub);
+        // Lot I1 (R1/b): same pre-sync session repair as `/me` — a cookie
+        // minted before ingestion must not stay 403 after the sync lands.
+        if (
+          status !== "approved" &&
+          session.emailVerified === true &&
+          typeof session.email === "string" &&
+          session.email.trim() !== "" &&
+          typeof session.idpIssuer === "string" &&
+          options.admissionTrustedIssuers &&
+          options.admissionTrustedIssuers.length > 0
+        ) {
+          await reconcilePreprodSub(
+            options.db,
+            { sub: session.sub, email: session.email, emailVerified: true, issuer: session.idpIssuer },
+            { trustedIssuers: options.admissionTrustedIssuers, now: nowFn },
+          );
+          status = await fetchAccountStatus(options.db, session.sub);
+        }
         if (status !== "approved") {
           return c.json(
             { error: "account_not_approved", status: status ?? "unknown" },
@@ -697,6 +774,32 @@ export function protect(
           if (!options.db) return c.json({ error: "unauthenticated" }, 401);
           const exchangedStatus = await fetchAccountStatus(options.db, exchanged.sub);
           if (exchangedStatus !== "approved") {
+            // Lot I1 (R1/b): first-time MCP users arrive with no preprod row.
+            // When the (verified) exchanged token carries a verified email AND
+            // the exchange issuer is trusted for JIT, reconcile before
+            // refusing — otherwise the MCP path can never link on its own.
+            if (
+              exchanged.email !== undefined &&
+              exchanged.emailVerified &&
+              options.admissionTrustedIssuers &&
+              options.admissionTrustedIssuers.length > 0 &&
+              options.admissionTrustedIssuers.includes(auth.strict.issuer)
+            ) {
+              await reconcilePreprodSub(
+                options.db,
+                { sub: exchanged.sub, email: exchanged.email, emailVerified: true, issuer: auth.strict.issuer },
+                { trustedIssuers: options.admissionTrustedIssuers, now: nowFn },
+              );
+              const retryStatus = await fetchAccountStatus(options.db, exchanged.sub);
+              if (retryStatus === "approved") {
+                c.set("session" as never, { sub: exchanged.sub, via: "exchanged" } as never);
+                return next();
+              }
+              return c.json(
+                { error: "account_not_approved", status: retryStatus ?? "unknown" },
+                403,
+              );
+            }
             return c.json(
               { error: "account_not_approved", status: exchangedStatus ?? "unknown" },
               403,
@@ -716,6 +819,8 @@ export function protect(
         }
       }
       let sub: string | null = null;
+      let jitEmail: string | undefined;
+      let jitEmailVerified = false;
       try {
         // Signature (JWKS) + iss + exp + aud-allowlist + sub are all enforced.
         const claims = await verifyAccessToken(bearer, {
@@ -736,10 +841,29 @@ export function protect(
           return c.json({ error: "delegated_scope_refused" }, 403);
         }
         sub = claims.sub;
+        jitEmail = claims.email;
+        jitEmailVerified = claims.emailVerified;
       } catch {
         sub = null; // invalid / expired / wrong iss / wrong aud → treat as no id
       }
       if (!sub) return c.json({ error: "unauthenticated" }, 401);
+
+      // Lot I1 (R1/b): opportunistic JIT on the per-user path when the token
+      // carries a verified email. Without email claims the token alone cannot
+      // link (a first login then needs a prior app login); the approved check
+      // below decides as before.
+      if (
+        options.db &&
+        jitEmail !== undefined &&
+        options.admissionTrustedIssuers &&
+        options.admissionTrustedIssuers.length > 0
+      ) {
+        await reconcilePreprodSub(
+          options.db,
+          { sub, email: jitEmail, emailVerified: jitEmailVerified, issuer: auth.issuer },
+          { trustedIssuers: options.admissionTrustedIssuers, now: nowFn },
+        );
+      }
 
       // Per-user authorisation: a bearer may carry ANY IdP user, so require an
       // APPROVED radar account (stricter than the cookie path, where an unknown
