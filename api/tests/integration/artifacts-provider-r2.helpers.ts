@@ -128,7 +128,7 @@ export async function composeCandidateHost(params: {
         "current-pointer": [lock("artifact_current", "artifact_id")] } },
     publicationUrls: (artifactId: string, releaseId: string) => ({
       stableUrl: `https://${artifactId}.pages.example.test/`,
-      pinnedUrl: `https://${releaseId}.pinned.pages.example.test/`,
+      pinnedUrl: `https://${releaseId}.pages.example.test/`,
     }),
   });
   return { app, store, publication, profile, coordinator, blobs, claims, intents: store, refs: store,

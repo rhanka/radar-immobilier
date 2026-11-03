@@ -14,7 +14,7 @@ type FixtureRow = Omit<typeof row, "release_id" | "published_at" | "current_dige
 function setup(rows: FixtureRow[] = [row]) {
   const query = vi.fn().mockResolvedValue({ rows });
   const reads = createArtifactReadMetadata({ query } as unknown as Pick<pg.Pool, "query">, "scope",
-    (artifactId, releaseId) => ({ stableUrl: `https://${artifactId}.pages.test/`, pinnedUrl: `https://${releaseId}.pinned.pages.test/` }));
+    (artifactId, releaseId) => ({ stableUrl: `https://${artifactId}.pages.test/`, pinnedUrl: `https://${releaseId}.pages.test/` }));
   return { reads, query };
 }
 
@@ -27,7 +27,7 @@ describe("IMMO artifact read metadata", () => {
     });
     expect(result).toMatchObject({ ok: true, result: { body: { total: 1, artifacts: [{ artifactId: row.id,
       bindingName: "summer", ownerId: "alice", currentReleaseId: row.release_id, digest: row.current_digest, state: "active", published: true,
-      stableUrl: `https://${row.id}.pages.test/`, pinnedUrl: `https://${row.release_id}.pinned.pages.test/`,
+      stableUrl: `https://${row.id}.pages.test/`, pinnedUrl: `https://${row.release_id}.pages.test/`,
       createdAt: "2026-10-01T00:00:00.000Z", updatedAt: "2026-10-02T00:00:00.000Z" }] } } });
     expect(query).toHaveBeenCalledTimes(1);
     expect(query.mock.calls[0]![1]).toEqual(["scope", null]);

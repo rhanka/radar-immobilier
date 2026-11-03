@@ -295,7 +295,7 @@ export function getAuthoringGuide(): AuthoringGuide {
           : "Owner: artifacts_delete({artifactId, idempotencyKey}). expectedCurrentReleaseId is optional; the server binds the observed release to the confirmation. Never send actor, owner, scope or a fabricated confirmation.",
           "On confirmation_required, show details.managementUrl and expiresAt to the human. They sign into the normal IMMO application and explicitly approve permanent deletion. MCP bearer tokens cannot approve.",
           "Retry identical arguments with the same key plus details.confirmationRef. The proof is consumed in the deletion transaction. Invalid, expired or stale confirmation requires reading the page and starting a new deletion with a fresh key.",
-          "Deletion is terminal for stable and pinned readers. Physical purge remains pending; restore, fork, promote and renew remain unavailable."],
+          "Deletion is terminal for stable and exact-version readers. Physical purge remains pending; restore, fork, promote and renew remain unavailable."],
       } } : {}),
     });
   }

@@ -23,7 +23,8 @@ awk '
 ' "$OVERLAY/patch-artifacts-api-env.yaml" >"$DEST/api-env.yaml"
 mv "$DEST/api-env.yaml" "$OVERLAY/patch-artifacts-api-env.yaml"
 sed -i '/^  ARTIFACTS_/d' "$OVERLAY/patch-immo-mcp-config.yaml"
-sed -i -e 's/preprod.immo-pages.sent-tech.ca/artifacts-content-unverified.invalid/g' \
+sed -i -e 's/pages.preprod.immo.sent-tech.ca/artifacts-content-unverified.invalid/g' \
+  -e 's/preprod.immo-pages.sent-tech.ca/legacy.artifacts-content-unverified.invalid/g' \
   -e 's/radar-artifact-content-preprod-tls/radar-artifact-content-unverified-tls/g' \
   -e 's/name: radar-api$/name: radar-artifact-content-deny/' \
   "$OVERLAY/artifact-content-ingress.yaml"

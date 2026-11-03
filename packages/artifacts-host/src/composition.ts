@@ -64,7 +64,7 @@ export async function composeArtifactHost(
       ...(options.confirmation ? { confirmation: options.confirmation } : {}),
       ...(options.contentBase ? { publicationUrls: (artifactId, releaseId) => ({
         stableUrl: `https://${artifactId}.${options.contentBase}/`,
-        pinnedUrl: `https://${releaseId}.pinned.${options.contentBase}/`,
+        pinnedUrl: `https://${releaseId}.${options.contentBase}/`,
       }) } : {}),
     });
     const cleanup = startPreparationCleanup(pool, domain.store, blobs, options.onProviderFailure);

@@ -9,7 +9,7 @@
  * stylesheets: public upstream bytes (sha256-pinned, no tenant data),
  * served without reader authorization so every page view is styled.
  *
- * Native files use the session scoped to a pinned release host, including
+ * Native files use the session scoped to an exact release host, including
  * module/CSS imports and dynamic scripts. Published JavaScript calls H5 with
  * fetch and the x-preview-grant header:
  *   const grant = new URLSearchParams(location.search).get("grant");
@@ -18,7 +18,7 @@
  *   });
  * Grant renewal is available at POST /__reader/renew (presented grant in
  * header, session cookie required) before the 55 s expiry. After expiry, a
- * same-origin POST without a grant can recover from a current sealed pinned P.
+ * same-origin POST without a grant can recover from a current sealed exact P.
  */
 import { Hono, type Context } from "hono";
 import {
@@ -27,7 +27,11 @@ import {
   isServiceWorkerPath,
   servedBodyLeaksCredentials,
 } from "./content-isolation.js";
-import { parseContentHost } from "./content-host.js";
+import {
+  belongsToLegacyContentDomain,
+  legacyContentRedirectTarget,
+  parseContentHost,
+} from "./content-host.js";
 import { mintGrant, verifyGrant, type GrantIssuer } from "./preview-grant.js";
 import { renewGrant } from "./preview-renewal.js";
 import { readSessionClaims } from "./preview-session.js";
@@ -111,17 +115,17 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     const session = readSessionClaims(c.req.header("cookie"), deps.sessionSecret, now());
     const parsed = parseContentHost(c.req.header("host"), deps.contentBase);
     const sealed = session?.resource;
-    // Cookie-only authority is restricted to native files on one pinned host.
+    // Cookie-only authority is restricted to native files on one exact host.
     // An explicitly presented invalid grant never falls back to the cookie.
     const claims = grant ? await verifyGrant(grant, { ...deps.issuer, host }, deps.grantSecret, now())
-      : resource && parsed.kind === "pinned" && sealed?.host === host && sealed.releaseId === parsed.releaseId &&
+      : resource && parsed.kind === "content" && sealed?.host === host && sealed.releaseId === parsed.id &&
         sealed.issuer === deps.issuer.issuer && sealed.audience === deps.issuer.audience && sealed.tier === deps.issuer.tier
         ? { ...sealed, expiresAtMs: session!.expiresAt } : null;
     if (!claims) return null;
     if (!session || session.sid !== claims.sessionId || session.readerSub !== claims.readerSub || session.artifactId !== claims.artifactId) return null;
     const content = parseContentHost(c.req.header("host"), deps.contentBase);
-    if (content.kind === "stable" && content.artifactId !== claims.artifactId) return null;
-    if (content.kind === "pinned" && content.releaseId !== claims.releaseId) return null;
+    if (content.kind === "other") return null;
+    if (content.id !== claims.artifactId && content.id !== claims.releaseId) return null;
     if (deps.isRevoked?.(session.sid)) return null;
     if (!deps.authority) return null;
     try {
@@ -137,6 +141,24 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
 
   app.get("/livez", (c) => c.json({ status: "ok" }));
   app.get("/health", (c) => c.json({ status: "ok" }));
+
+  // Retired immo-pages hosts: 301 to the same UUID label on the new base,
+  // path and query preserved. Never logged (may carry `?grant=`). Transition
+  // only; remove with the legacy Ingress rules (runbook "Legacy redirect
+  // removal").
+  app.use("*", async (c, next) => {
+    if (!belongsToLegacyContentDomain(c.req.header("host"))) return next();
+    const url = new URL(c.req.url);
+    const target = legacyContentRedirectTarget(
+      c.req.header("host"), deps.contentBase, `${url.pathname}${url.search}`);
+    if (!target) {
+      applyReaderContentHeaders(c);
+      return c.json({ error: "not_found" }, 404);
+    }
+    applyReaderContentHeaders(c);
+    c.header("Cache-Control", "private, no-store");
+    return c.redirect(target, 301);
+  });
 
   app.use("/__reader/api/*", async (c, next) => {
     if (c.req.method !== "GET" || !isWorkspaceReadOperation(c.req.path.slice("/__reader/api/".length))) return next();

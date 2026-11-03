@@ -63,6 +63,6 @@ export async function imagePublication(contentBase: string) {
   ] });
   expect(published.status).toBe(201);
   const releaseId = (published.body as { releaseId: string }).releaseId;
-  return { ...h, releaseId, pageHost: `${releaseId}.pinned.${contentBase}`,
-    origin: `https://${releaseId}.pinned.${contentBase}` };
+  return { ...h, releaseId, pageHost: `${releaseId}.${contentBase}`,
+    origin: `https://${releaseId}.${contentBase}` };
 }

@@ -30,7 +30,7 @@ function deny(c: Context, status: 401 | 404, error: string): Response {
 
 /**
  * Standalone content denial application (861c lot H3 unit 8). Denies EVERY
- * request unconditionally — valid stable/pinned hosts, malformed names,
+ * request unconditionally — valid stable/exact hosts, malformed names,
  * foreign hosts and missing bases alike — without parsing the Host header
  * and without any application dependency. Only minimal GET/HEAD liveness
  * and readiness probes are served; everything else receives the shared

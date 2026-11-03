@@ -1,9 +1,9 @@
 /**
  * Published release files seam (ARTEFACTS L3, relecture 1).
  *
- * Serves the real HTML/CSS/JS set of the pinned release — never the static
+ * Serves the real HTML/CSS/JS set of the exact release — never the static
  * example — under the same isolation headers. Native resources, including
- * transitive imports, use a sealed session on the pinned release host.
+ * transitive imports, use a sealed session on the exact release host.
  * HTML attributes and inline source are never rewritten. JavaScript calls H5 with fetch and
  * the x-preview-grant header (same pattern as the technical example):
  * - const grant = new URLSearchParams(location.search).get("grant")

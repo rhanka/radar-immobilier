@@ -276,3 +276,21 @@ describe("page write listener mount", () => {
     expect(status.status).toBe(404);
   });
 });
+
+describe("legacy immo-pages redirect (transition only)", () => {
+  const app = makeApp();
+  it("301s both retired host forms to the same UUID label, path and query preserved", async () => {
+    const stable = await app.request(
+      "https://123e4567-e89b-12d3-a456-426614174000.preprod.immo-pages.sent-tech.ca/__reader/start?x=1",
+      { headers: { host: "123e4567-e89b-12d3-a456-426614174000.preprod.immo-pages.sent-tech.ca" } });
+    expect(stable.status).toBe(301);
+    expect(stable.headers.get("location"))
+      .toBe("https://123e4567-e89b-12d3-a456-426614174000.pages.example.test/__reader/start?x=1");
+    const exact = await app.request(
+      "https://123e4567-e89b-12d3-a456-426614174001.pinned.preprod.immo-pages.sent-tech.ca/main.js?grant=abc",
+      { headers: { host: "123e4567-e89b-12d3-a456-426614174001.pinned.preprod.immo-pages.sent-tech.ca" } });
+    expect(exact.status).toBe(301);
+    expect(exact.headers.get("location"))
+      .toBe("https://123e4567-e89b-12d3-a456-426614174001.pages.example.test/main.js?grant=abc");
+  });
+});
