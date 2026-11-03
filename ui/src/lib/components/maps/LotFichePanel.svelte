@@ -670,18 +670,18 @@
           </div>
         {:else}
           <div class="space-y-3" data-testid="fiche-prospect-state">
-              <div class="flex flex-wrap gap-1.5">
-                {#if pipelineMark}
-                  <Badge tone={pipelineMark.statut === "ecarte" ? "neutral" : "success"} class="text-xs">
-                    Pipeline : {prospectStatusLabel(pipelineMark.statut)}
-                  </Badge>
-                {:else}
-                  <Badge tone="neutral" class="text-xs">Pipeline : non marqué</Badge>
-                {/if}
-                {#if marketMark}
-                  <Badge tone="warning" class="text-xs">Marché : {prospectStatusLabel(marketMark.statut)}</Badge>
-                {/if}
-              </div>
+            <div class="flex flex-wrap gap-1.5">
+              {#if pipelineMark}
+                <Badge tone={pipelineMark.statut === "ecarte" ? "neutral" : "success"} class="text-xs">
+                  Pipeline : {prospectStatusLabel(pipelineMark.statut)}
+                </Badge>
+              {:else}
+                <Badge tone="neutral" class="text-xs">Pipeline : non marqué</Badge>
+              {/if}
+              {#if marketMark}
+                <Badge tone="warning" class="text-xs">Marché : {prospectStatusLabel(marketMark.statut)}</Badge>
+              {/if}
+            </div>
 
             {#if allowMarquage}
               <div class="space-y-2 border-t border-slate-100 pt-2" data-testid="fiche-prospect-edit">
