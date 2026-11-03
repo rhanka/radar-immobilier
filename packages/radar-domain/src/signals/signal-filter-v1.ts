@@ -1,9 +1,13 @@
 import { z } from "zod";
 import { contractInteger } from "../contracts/validation-number.js";
+import { contractDateTime } from "../contracts/validation-datetime.js";
 import {
   vivierEtapeSchema,
+  vivierExclusionReasonSchema,
   vivierInstrumentSchema,
+  vivierV2Schema,
 } from "../vivier/vivier-v2.js";
+import { vivierExcludedByReasonSchema } from "../vivier/counts.js";
 
 /**
  * Frozen query contract for lot I-0 (viewdev R2 section 3, as amended by owner).
@@ -123,21 +127,195 @@ export const SIGNAL_QUERY_PRODUCT_DEFAULT: SignalFilterV1 = {
 
 const count = contractInteger().nonnegative();
 
+/**
+ * Coherence snapshot: the I-2 service stamps the population token and the
+ * digest of the normalized filter so a cursor replayed after any filter
+ * change (including adding/removing `citySlug`) is refused, never mixed.
+ */
+export const SignalQuerySnapshotV1 = z
+  .object({
+    kind: z.literal("signal-query-v1"),
+    baseToken: z.string().min(1).max(256),
+    queryDigest: z.string().min(1).max(256),
+  })
+  .strict();
+
+/**
+ * Declared-basis counts. Same invariant skeleton as `SignalCounts`
+ * (`eligible = visible + discarded`, navigation identities, `matched` within
+ * the navigation population) but the navigation basis is the single-pass
+ * query service — not the basket search pipeline — so the basis literal is
+ * new and frozen here.
+ */
+export const SignalQueryCountsV1 = z
+  .object({
+    unit: z.literal("distinct_targets"),
+    eligible: count,
+    visible: count,
+    discarded: count,
+    discardedByScope: z
+      .object({ personalOnly: count, workspaceOnly: count, both: count })
+      .strict(),
+    navigation: z
+      .object({
+        basis: z.literal("single_pass_signal_query_v1"),
+        population: count,
+        pertinent: count,
+        a_surveiller: count,
+        selectedDistinct: count,
+        selectionMemberships: count,
+        unselected: count,
+      })
+      .strict(),
+    matched: count,
+  })
+  .strict()
+  .superRefine((value, context) => {
+    const navigation = value.navigation;
+    const discarded = value.discardedByScope;
+    if (
+      value.eligible !== value.visible + value.discarded ||
+      value.discarded !==
+        discarded.personalOnly + discarded.workspaceOnly + discarded.both ||
+      navigation.selectionMemberships !==
+        navigation.pertinent + navigation.a_surveiller ||
+      navigation.population !==
+        navigation.selectedDistinct + navigation.unselected ||
+      navigation.selectedDistinct > navigation.selectionMemberships ||
+      navigation.selectedDistinct > navigation.population ||
+      navigation.selectedDistinct <
+        Math.max(navigation.pertinent, navigation.a_surveiller) ||
+      value.matched > navigation.population
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invalid distinct counts",
+      });
+    }
+  });
+
 /** Per-city facet entry: matched count for the same filter minus citySlug. */
 export const SignalByCityFacet = z
   .object({ citySlug: SIGNAL_QUERY_CITY_SLUG, matched: count })
   .strict();
 
+/**
+ * Facets with declared bases. `byCity` is always present (same filter minus
+ * `citySlug`); `byStage`/`byInstrument`/`byRegulatoryStatus` use closed
+ * enum keys so no unknown dimension can slip through; `vivier` carries the
+ * server classification block (`qualified`, `residentialUnknown`,
+ * `excludedByReason`).
+ */
 export const SignalQueryFacetsV1 = z
   .object({
     basis: z.string().min(1),
     byCity: z.array(SignalByCityFacet).max(1000),
-    byStage: z.record(z.string(), count).optional(),
-    byInstrument: z.record(z.string(), count).optional(),
-    byRegulatoryStatus: z.record(z.string(), count).optional(),
+    byStage: z.record(vivierEtapeSchema, count),
+    byInstrument: z.record(vivierInstrumentSchema, count),
+    byRegulatoryStatus: z.record(z.enum(["firm", "anticipation"]), count),
+    vivier: z
+      .object({
+        qualified: count,
+        residentialUnknown: count,
+        excludedByReason: vivierExcludedByReasonSchema,
+      })
+      .strict(),
   })
   .strict();
 
+/** Strict document reference carried on a query card (civil dates only). */
+export const SignalQueryDocRefV1 = z
+  .object({
+    docSha: z.string().min(1),
+    title: z.string().max(1024).nullable(),
+    publishedAt: civilDay.nullable(),
+    fetchedAt: contractDateTime({ offset: true }).nullable(),
+    excerpt: z.string().max(2000).nullable(),
+  })
+  .strict();
+
+/**
+ * Strict query card: the displayable signal, frozen field by field. Never
+ * raw `props` — the server resolves attachments to `zoneCodes`/`lotNos` on
+ * the item instead.
+ */
+export const SignalQueryCardV1 = z
+  .object({
+    label: z.string().max(1024),
+    description: z.string().max(8000).nullable(),
+    stage: vivierEtapeSchema,
+    sourceStage: z.string().max(256).nullable(),
+    regulatoryStatus: z.enum(["firm", "anticipation"]),
+    freshness: z
+      .object({
+        day: civilDay.nullable(),
+        basis: z.enum(["document", "scrap"]),
+      })
+      .strict(),
+    automaticExclusionReason: vivierExclusionReasonSchema.nullable(),
+    docRefs: z.array(SignalQueryDocRefV1).max(64),
+    missingEvidence: z.array(
+      z.enum([
+        "description",
+        "citation",
+        "pdfLink",
+        "documentDate",
+        "page",
+        "bbox",
+      ]),
+    ),
+    truncatedFields: z.array(
+      z.enum([
+        "label",
+        "description",
+        "sourceStage",
+        "docRefs",
+        "docRefs.title",
+        "docRefs.excerpt",
+      ]),
+    ),
+  })
+  .strict();
+
+/** Strict per-item basket facets (server-projected, never inferred client-side). */
+export const SignalQueryItemFacetsV1 = z
+  .object({
+    selection: z
+      .object({
+        pertinent: z.string().guid().nullable(),
+        a_surveiller: z.string().guid().nullable(),
+      })
+      .strict(),
+    archive: z
+      .object({
+        personal: z.boolean(),
+        workspace: z.boolean(),
+      })
+      .strict(),
+    personalHistoryState: z.enum(["untouched", "has_history"]),
+    personalHidden: z.boolean(),
+    workspaceHidden: z.boolean(),
+    effectiveHidden: z.boolean(),
+  })
+  .strict()
+  .superRefine((value, context) => {
+    if (
+      value.personalHidden !== value.archive.personal ||
+      value.workspaceHidden !== value.archive.workspace ||
+      value.effectiveHidden !==
+        (value.personalHidden || value.workspaceHidden)
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invalid signal facet projection",
+      });
+    }
+  });
+
+/**
+ * Strict query item: city, native target, frozen card, server
+ * classification, per-item facets, and server-resolved attachments.
+ */
 export const SignalQueryItemV1 = z
   .object({
     citySlug: SIGNAL_QUERY_CITY_SLUG,
@@ -148,12 +326,20 @@ export const SignalQueryItemV1 = z
         id: z.string().min(1).max(512),
       })
       .strict(),
+    card: SignalQueryCardV1,
+    classification: vivierV2Schema,
+    facets: SignalQueryItemFacetsV1,
     zoneCodes: z.array(z.string().min(1).max(64)).max(64),
     lotNos: z.array(z.string().min(1).max(64)).max(256),
   })
-  .strict()
-  .and(z.record(z.string(), z.unknown()));
+  .strict();
 
+/**
+ * Optional bounded membership block (owner decision D-C): ordered ids plus
+ * zone/lot unions. Over-ceiling is a typed error, never silent truncation.
+ * Ceilings are set from the I-0 volume measurements (see
+ * `docs/spec/SPEC_SIGNAL_QUERY_V1.md` §6).
+ */
 export const SignalQueryMembershipV1 = z
   .object({
     orderedIds: z.array(z.string().min(1)).max(10000),
@@ -165,8 +351,8 @@ export const SignalQueryMembershipV1 = z
 export const SignalQueryResponseV1 = z
   .object({
     contractVersion: z.literal(SIGNAL_QUERY_CONTRACT_VERSION),
-    snapshot: z.object({ kind: z.string().min(1) }).strict().and(z.record(z.string(), z.unknown())),
-    counts: z.object({ matched: count }).strict().and(z.record(z.string(), z.unknown())),
+    snapshot: SignalQuerySnapshotV1,
+    counts: SignalQueryCountsV1,
     facets: SignalQueryFacetsV1,
     items: z.array(SignalQueryItemV1).max(100),
     membership: SignalQueryMembershipV1.optional(),
