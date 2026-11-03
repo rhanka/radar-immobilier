@@ -42,7 +42,7 @@ candidate: guard
 integration: guard
 	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; \
 	$(COMPOSE) up -d --wait postgres && \
-	$(RUN_DATABASE_API) api sh -ec '$(INSTALL) && npm run test --workspace=packages/artifacts-host -- src/p0b.integration.test.ts src/p0c.integration.test.ts src/p0c-lifecycle.integration.test.ts --maxWorkers=1'
+	$(RUN_DATABASE_API) api sh -ec '$(INSTALL) && npm run test --workspace=packages/artifacts-host -- src/p0b.integration.test.ts src/p0c.integration.test.ts src/p0c-lifecycle.integration.test.ts src/publish-s3-deadline.integration.test.ts --maxWorkers=1'
 strict: guard
 	@trap '$(COMPOSE) down -v --remove-orphans' EXIT; \
 	$(COMPOSE) up -d --wait postgres && \
