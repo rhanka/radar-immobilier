@@ -12,6 +12,11 @@ data:
   ARTIFACTS_S3_ENDPOINT: "https://s3.bhs.io.cloud.ovh.net"
   ARTIFACTS_S3_REGION: "bhs"
   ARTIFACTS_CONTENT_BASE: "pages.preprod.immo.sent-tech.ca"
+  # Shared blob deadline of one publish, in ms. Tuning only: covers a 32-file
+  # publish at 1.3-1.5 s per S3 request on OVH BHS, plus margin. Kept in the
+  # ConfigMap (not the Deployment patch) so the workload render guards keep
+  # their exact ARTIFACTS_ env counts.
+  ARTIFACTS_PUBLISH_BLOB_DEADLINE_MS: "120000"
   ARTIFACTS_READER_ISSUER: "https://preprod.immo.sent-tech.ca"
   ARTIFACTS_READER_AUDIENCE: "https://preprod.immo.sent-tech.ca/reader"
   ARTIFACTS_READER_TIER: "preprod"
