@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   readArtifactsEnv,
   resolveArtifactsStorageConfig,
+  resolvePublishBlobDeadlineMs,
   resolveS3Budget,
   type ArtifactsConfigInput,
 } from "./config.js";
@@ -42,7 +43,15 @@ describe("resolveArtifactsStorageConfig", () => {
       ...FULL,
       s3Endpoint: "https://s3.example.net",
       s3Budget: DEFAULT_S3_BUDGET,
+      publishBlobDeadlineMs: 20_000,
     });
+  });
+
+  it("resolves a configured publish blob deadline", () => {
+    expect(resolveArtifactsStorageConfig({ ...FULL, publishBlobDeadlineMs: "120000" })).toMatchObject({
+      enabled: true, publishBlobDeadlineMs: 120_000,
+    });
+    expect(resolveArtifactsStorageConfig(FULL)).toMatchObject({ enabled: true, publishBlobDeadlineMs: 20_000 });
   });
 
   it("closes on a partial config and names only the missing variables", () => {
@@ -134,6 +143,32 @@ describe("S3 budget", () => {
   });
 });
 
+describe("publish blob deadline", () => {
+  it("defaults to the preparation window minus the finalization margin", () => {
+    expect(resolvePublishBlobDeadlineMs()).toBe(20_000);
+    expect(resolvePublishBlobDeadlineMs("")).toBe(20_000);
+    expect(resolvePublishBlobDeadlineMs("  ")).toBe(20_000);
+    expect(resolvePublishBlobDeadlineMs("120000")).toBe(120_000);
+    expect(resolvePublishBlobDeadlineMs("1000")).toBe(1_000);
+    expect(resolvePublishBlobDeadlineMs("290000")).toBe(290_000);
+  });
+
+  it("stops on a malformed deadline or one outside the safe bound", () => {
+    for (const raw of ["nope", "-5", "0", "999", "290001", "12.5", "120s"]) {
+      expect(() => resolvePublishBlobDeadlineMs(raw), raw).toThrow("invalid ARTIFACTS_PUBLISH_BLOB_DEADLINE_MS");
+    }
+    expect(() => resolveArtifactsStorageConfig({ ...FULL, publishBlobDeadlineMs: "nope" }))
+      .toThrow("invalid ARTIFACTS_PUBLISH_BLOB_DEADLINE_MS");
+  });
+
+  it("is tuning only: it never enables, completes or breaks a disabled config", () => {
+    expect(resolveArtifactsStorageConfig({ publishBlobDeadlineMs: "120000" }))
+      .toEqual({ enabled: false, reason: "artifacts_config_absent" });
+    expect(resolveArtifactsStorageConfig({ ...FULL, s3Region: undefined, publishBlobDeadlineMs: "120000" }))
+      .toEqual({ enabled: false, reason: "artifacts_config_incomplete", missing: ["ARTIFACTS_S3_REGION"] });
+  });
+});
+
 describe("readArtifactsEnv", () => {
   it("maps the ARTIFACTS_* variables and ignores the rest", () => {
     expect(
@@ -148,6 +183,7 @@ describe("readArtifactsEnv", () => {
         ARTIFACTS_S3_ATTEMPT_TIMEOUT_MS: "3000",
         ARTIFACTS_S3_MAX_ATTEMPTS: "4",
         ARTIFACTS_S3_OPERATION_TIMEOUT_MS: "14000",
+        ARTIFACTS_PUBLISH_BLOB_DEADLINE_MS: "45000",
         UNRELATED: "x",
       }),
     ).toEqual({
@@ -159,6 +195,7 @@ describe("readArtifactsEnv", () => {
       s3AccessKey: "AK",
       s3SecretKey: "SK",
       s3Budget: { attemptTimeoutMs: "3000", maxAttempts: "4", operationTimeoutMs: "14000" },
+      publishBlobDeadlineMs: "45000",
     });
   });
 });
