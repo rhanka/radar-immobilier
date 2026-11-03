@@ -38,19 +38,21 @@ const APP_CSS = ":root{color-scheme:light}\nbody{margin:0}\n";
 const APP_JS = "document.querySelector('button')?.addEventListener('click',()=>history.replaceState({},'',location.pathname));\n";
 const DATA_JSON = '{"zone":"H3","units":6}';
 
+const toBase64 = (bytes: readonly number[]): string => Buffer.from(bytes).toString("base64");
+
 function sourceBody() {
   return {
     artifactId: ARTIFACT_ID,
     releaseId: RELEASE_ID,
     manifest: JSON.stringify({ artifactId: ARTIFACT_ID, digest: "manifest-digest" }),
     files: [
-      { path: "index.html", mimeType: "text/html", bytes: toBytes(INDEX_HTML) },
-      { path: "app.css", mimeType: "text/css", bytes: toBytes(APP_CSS), digest: "css-digest", sizeBytes: toBytes(APP_CSS).length },
-      { path: "app.js", mimeType: "text/javascript", bytes: toBytes(APP_JS) },
-      { path: "data.json", mimeType: "application/json", bytes: toBytes(DATA_JSON) },
-      { path: "blob.bin", mimeType: "application/octet-stream", bytes: [0, 159, 255] },
-      { path: "broken.html", mimeType: "text/html", bytes: [255, 254, 0] },
-      { path: "unknown", bytes: toBytes("no mime, stays opaque") },
+      { path: "index.html", mimeType: "text/html", text: INDEX_HTML, encoding: "utf8", digest: "index-digest", size: toBytes(INDEX_HTML).length },
+      { path: "app.css", mimeType: "text/css", text: APP_CSS, encoding: "utf8", digest: "css-digest", size: toBytes(APP_CSS).length },
+      { path: "app.js", mimeType: "text/javascript", text: APP_JS, encoding: "utf8", digest: "js-digest", size: toBytes(APP_JS).length },
+      { path: "data.json", mimeType: "application/json", text: DATA_JSON, encoding: "utf8", digest: "json-digest", size: toBytes(DATA_JSON).length },
+      { path: "blob.bin", mimeType: "application/octet-stream", base64: toBase64([0, 159, 255]), encoding: "base64", digest: "bin-digest", size: 3 },
+      { path: "broken.html", mimeType: "text/html", base64: toBase64([255, 254, 0]), encoding: "base64", digest: "broken-digest", size: 3 },
+      { path: "unknown", mimeType: "application/octet-stream", base64: toBase64(toBytes("no mime, stays opaque")), encoding: "base64", digest: "unknown-digest", size: toBytes("no mime, stays opaque").length },
     ],
   };
 }
@@ -68,21 +70,31 @@ function setup(body: unknown) {
 const read = (result: { content: unknown[] }) => JSON.parse((result.content[0] as { text: string }).text);
 
 describe.skipIf(!ARTIFACT_P0B)("artifact source text projection", () => {
-  it("should decode text MIME files to text and keep binary or undecodable payloads as bytes", () => {
+  it("should project 0.2.9 text/base64 files to publish-compatible text/bytes without encoding", () => {
     const projected = sourceBody().files.map(projectSourceFile) as Record<string, unknown>[];
-    expect(projected[0]).toEqual({ path: "index.html", mimeType: "text/html", text: INDEX_HTML });
-    expect(projected[1]).toMatchObject({ path: "app.css", mimeType: "text/css", text: APP_CSS });
+    expect(projected[0]).toEqual({ path: "index.html", mimeType: "text/html", text: INDEX_HTML, digest: "index-digest", size: toBytes(INDEX_HTML).length });
+    expect(projected[0]).not.toHaveProperty("encoding");
+    expect(projected[0]).not.toHaveProperty("base64");
+    expect(projected[1]).toMatchObject({ path: "app.css", mimeType: "text/css", text: APP_CSS, digest: "css-digest" });
+    expect(projected[1]).not.toHaveProperty("encoding");
     expect(projected[2]).toMatchObject({ path: "app.js", text: APP_JS });
+    expect(projected[2]).not.toHaveProperty("encoding");
     expect(projected[3]).toMatchObject({ path: "data.json", text: DATA_JSON });
-    expect(projected[4]).toMatchObject({ path: "blob.bin", bytes: [0, 159, 255] });
+    expect(projected[3]).not.toHaveProperty("encoding");
+    expect(projected[4]).toMatchObject({ path: "blob.bin", bytes: [0, 159, 255], digest: "bin-digest", size: 3 });
     expect(projected[4]).not.toHaveProperty("text");
-    expect(projected[5]).toMatchObject({ path: "broken.html", bytes: [255, 254, 0] });
+    expect(projected[4]).not.toHaveProperty("encoding");
+    expect(projected[4]).not.toHaveProperty("base64");
+    expect(projected[5]).toMatchObject({ path: "broken.html", bytes: [255, 254, 0], digest: "broken-digest" });
     expect(projected[5]).not.toHaveProperty("text");
-    expect(projected[6]).toMatchObject({ path: "unknown" });
+    expect(projected[5]).not.toHaveProperty("encoding");
+    expect(projected[6]).toMatchObject({ path: "unknown", digest: "unknown-digest" });
+    expect(projected[6]).toHaveProperty("bytes");
     expect(projected[6]).not.toHaveProperty("text");
+    expect(projected[6]).not.toHaveProperty("encoding");
   });
 
-  it("should keep a leading UTF-8 BOM so re-encoding is byte-identical", () => {
+  it("should keep a leading UTF-8 BOM on the legacy bytes path so re-encoding is byte-identical", () => {
     const bytes = [0xef, 0xbb, 0xbf, ...toBytes("<p>bom</p>")];
     const projected = projectSourceFile({
       path: "bom.html", mimeType: "text/html", bytes, digest: "bom-digest", sizeBytes: bytes.length,
@@ -93,6 +105,20 @@ describe.skipIf(!ARTIFACT_P0B)("artifact source text projection", () => {
     expect(Buffer.byteLength(projected.text as string, "utf8")).toBe(projected.sizeBytes);
     expect(projected).toMatchObject({ digest: "bom-digest" });
     expect(projected).not.toHaveProperty("bytes");
+  });
+
+  it("should preserve upstream-stripped BOM text without encoding (0.2.9 explicit BOM handling)", () => {
+    const originalBytes = [0xef, 0xbb, 0xbf, ...toBytes("<p>bom</p>")];
+    const stripped = "<p>bom</p>";
+    const projected = projectSourceFile({
+      path: "bom.html", mimeType: "text/html", text: stripped, encoding: "utf8",
+      digest: "bom-digest", size: originalBytes.length,
+    }) as Record<string, unknown>;
+    expect(projected).toMatchObject({ path: "bom.html", text: stripped, digest: "bom-digest", size: originalBytes.length });
+    expect(projected).not.toHaveProperty("encoding");
+    expect(projected).not.toHaveProperty("bytes");
+    expect(projected).not.toHaveProperty("base64");
+    expect((projected.text as string).charCodeAt(0)).not.toBe(0xfeff);
   });
 
   it("should keep CESU-8 surrogates and truncated multibyte sequences as bytes", () => {
@@ -128,19 +154,25 @@ describe.skipIf(!ARTIFACT_P0B)("artifact source text projection", () => {
   });
 
   it("should project v1 root files and the v2 output envelope alike", () => {
-    const file = { path: "index.html", mimeType: "text/html", bytes: toBytes(INDEX_HTML) };
+    const file = { path: "index.html", mimeType: "text/html", text: INDEX_HTML, encoding: "utf8", digest: "d", size: 1 };
     expect(projectSourceBody({ artifactId: ARTIFACT_ID, files: [file] })).toMatchObject({
       files: [{ path: "index.html", text: INDEX_HTML }] });
     expect(projectSourceBody({ ok: true, output: { artifactId: ARTIFACT_ID, files: [file] } })).toMatchObject({
       output: { files: [{ path: "index.html", text: INDEX_HTML }] } });
+    const projected = projectSourceBody({ artifactId: ARTIFACT_ID, files: [file] }) as { files: Record<string, unknown>[] };
+    expect(projected.files[0]).not.toHaveProperty("encoding");
     expect(projectSourceBody(null)).toBeNull();
     expect(projectSourceBody({ artifactId: ARTIFACT_ID })).toEqual({ artifactId: ARTIFACT_ID });
   });
 
   it("should round-trip get_source text back through publish within a small size budget", async () => {
     const original = sourceBody();
-    const rawBytes = original.files.reduce((sum, file) => sum + (file.bytes as number[]).length, 0);
-    const originalBytes = new Map(original.files.map((file) => [file.path, file.bytes as number[]]));
+    const decodedBytes = (file: Record<string, unknown>): number[] =>
+      typeof file.text === "string" ? Array.from(new TextEncoder().encode(file.text as string))
+      : typeof file.base64 === "string" ? Array.from(Buffer.from(file.base64 as string, "base64"))
+      : [];
+    const rawBytes = original.files.reduce((sum, file) => sum + decodedBytes(file as Record<string, unknown>).length, 0);
+    const originalBytes = new Map(original.files.map((file) => [file.path, decodedBytes(file as Record<string, unknown>)]));
     const { binding } = setup(original);
     const result = await binding.invoke("artifacts_get_source", { artifactId: ARTIFACT_ID }, authority);
     expect(result.isError).not.toBe(true);
@@ -150,7 +182,15 @@ describe.skipIf(!ARTIFACT_P0B)("artifact source text projection", () => {
       if (["index.html", "app.css", "app.js", "data.json"].includes(String(file.path))) {
         expect(file).toHaveProperty("text");
         expect(file).not.toHaveProperty("bytes");
+        expect(file).not.toHaveProperty("encoding");
+        expect(file).not.toHaveProperty("base64");
         expect(toBytes(file.text as string)).toEqual(originalBytes.get(String(file.path)));
+      }
+      if (["blob.bin", "broken.html"].includes(String(file.path))) {
+        expect(file).toHaveProperty("bytes");
+        expect(file).not.toHaveProperty("text");
+        expect(file).not.toHaveProperty("encoding");
+        expect(file).not.toHaveProperty("base64");
       }
     }
     const guide = (data.authoringGuide ?? payload.authoringGuide) as Record<string, unknown>;
@@ -181,11 +221,12 @@ describe.skipIf(!ARTIFACT_P0B)("artifact source text projection", () => {
   });
 
   it("should project source files and attach the guide reference under the v2 envelope", () => {
-    const file = { path: "bom.html", mimeType: "text/html", bytes: [0xef, 0xbb, 0xbf, ...toBytes("<p>bom</p>")] };
+    const file = { path: "bom.html", mimeType: "text/html", text: "<p>bom</p>", encoding: "utf8", digest: "bom-digest", size: 12 };
     const projected = projectSourceBody({ ok: true, output: { artifactId: ARTIFACT_ID, files: [file] } });
-    expect(projected).toMatchObject({ output: { files: [{ path: "bom.html", text: "\uFEFF<p>bom</p>" }] } });
+    expect(projected).toMatchObject({ output: { files: [{ path: "bom.html", text: "<p>bom</p>" }] } });
     const out = (projected as { output: { files: Record<string, unknown>[] } }).output;
-    expect(toBytes(out.files[0]!.text as string)).toEqual(file.bytes);
+    expect(out.files[0]).not.toHaveProperty("encoding");
+    expect((out.files[0]!.text as string).charCodeAt(0)).not.toBe(0xfeff);
     const guided = withAuthoringGuide("artifacts_get_source", projected) as Record<string, { authoringGuide?: unknown }>;
     const holder = (ARTIFACT_PART1 ? guided.output : guided) as Record<string, Record<string, unknown>>;
     expect(holder.authoringGuide?.guideId).toBe(AUTHORING_GUIDE_ID);

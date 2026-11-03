@@ -1,0 +1,358 @@
+{
+  "divergences": [
+    {
+      "divergence": [
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-06",
+        "sig-vf-07",
+        "sig-vf-08"
+      ],
+      "name": "city-01"
+    },
+    {
+      "divergence": [
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-06",
+        "sig-vf-07",
+        "sig-vf-08"
+      ],
+      "name": "city-02"
+    },
+    {
+      "divergence": [
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-06",
+        "sig-vf-07",
+        "sig-vf-08"
+      ],
+      "name": "city-03"
+    },
+    {
+      "divergence": [
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-05",
+        "sig-vf-07",
+        "sig-vf-08"
+      ],
+      "name": "city-04"
+    },
+    {
+      "divergence": [
+        "sig-vf-03"
+      ],
+      "name": "city-05"
+    },
+    {
+      "divergence": [
+        "sig-vf-03",
+        "sig-vf-05"
+      ],
+      "name": "city-06"
+    },
+    {
+      "divergence": [
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-06",
+        "sig-vf-07",
+        "sig-vf-08"
+      ],
+      "name": "city-07"
+    },
+    {
+      "divergence": [
+        "sig-vf-01",
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-08",
+        "sig-vf-09",
+        "sig-vf-10"
+      ],
+      "name": "city-08"
+    },
+    {
+      "divergence": [
+        "sig-vf-01",
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-07",
+        "sig-vf-09",
+        "sig-vf-10"
+      ],
+      "name": "city-09"
+    },
+    {
+      "divergence": [
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-07",
+        "sig-vf-08",
+        "sig-vf-09",
+        "sig-vf-10"
+      ],
+      "name": "city-10"
+    },
+    {
+      "divergence": [
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-06",
+        "sig-vf-07",
+        "sig-vf-08"
+      ],
+      "name": "city-11"
+    },
+    {
+      "divergence": [
+        "sig-vf-01",
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-06",
+        "sig-vf-07",
+        "sig-vf-08",
+        "sig-vf-09",
+        "sig-vf-10"
+      ],
+      "name": "city-12"
+    },
+    {
+      "divergence": [
+        "sig-vf-02",
+        "sig-vf-04",
+        "sig-vf-06",
+        "sig-vf-07",
+        "sig-vf-08"
+      ],
+      "name": "city-13"
+    },
+    {
+      "divergence": [
+        "sig-vf-01",
+        "sig-vf-02",
+        "sig-vf-04",
+        "sig-vf-07",
+        "sig-vf-08",
+        "sig-vf-09",
+        "sig-vf-10"
+      ],
+      "name": "city-14"
+    },
+    {
+      "divergence": [
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-06",
+        "sig-vf-08"
+      ],
+      "name": "city-15"
+    },
+    {
+      "divergence": [
+        "sig-vf-01",
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-07",
+        "sig-vf-08",
+        "sig-vf-09",
+        "sig-vf-10"
+      ],
+      "name": "city-16"
+    },
+    {
+      "divergence": [
+        "sig-sm-01",
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-06",
+        "sig-vf-07",
+        "sig-vf-08"
+      ],
+      "name": "all-01"
+    },
+    {
+      "divergence": [
+        "sig-sm-01",
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-06",
+        "sig-vf-07",
+        "sig-vf-08"
+      ],
+      "name": "all-02"
+    },
+    {
+      "divergence": [
+        "sig-sm-01",
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-06",
+        "sig-vf-07",
+        "sig-vf-08"
+      ],
+      "name": "all-03"
+    },
+    {
+      "divergence": [
+        "sig-ri-01",
+        "sig-ri-03",
+        "sig-sm-01",
+        "sig-sm-02",
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-05",
+        "sig-vf-07",
+        "sig-vf-08"
+      ],
+      "name": "all-04"
+    },
+    {
+      "divergence": [
+        "sig-sm-01",
+        "sig-vf-03"
+      ],
+      "name": "all-05"
+    },
+    {
+      "divergence": [
+        "sig-ri-01",
+        "sig-sm-01",
+        "sig-vf-03",
+        "sig-vf-05"
+      ],
+      "name": "all-06"
+    },
+    {
+      "divergence": [
+        "sig-sm-01",
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-06",
+        "sig-vf-07",
+        "sig-vf-08"
+      ],
+      "name": "all-07"
+    },
+    {
+      "divergence": [
+        "sig-ri-02",
+        "sig-sm-01",
+        "sig-vf-01",
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-08",
+        "sig-vf-09",
+        "sig-vf-10"
+      ],
+      "name": "all-08"
+    },
+    {
+      "divergence": [
+        "sig-ri-02",
+        "sig-sm-01",
+        "sig-vf-01",
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-07",
+        "sig-vf-09",
+        "sig-vf-10"
+      ],
+      "name": "all-09"
+    },
+    {
+      "name": "all-10",
+      "refused": true
+    },
+    {
+      "name": "all-11",
+      "refused": true
+    },
+    {
+      "divergence": [
+        "sig-ri-02",
+        "sig-sm-01",
+        "sig-vf-01",
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-06",
+        "sig-vf-07",
+        "sig-vf-08",
+        "sig-vf-09",
+        "sig-vf-10"
+      ],
+      "name": "all-12"
+    },
+    {
+      "divergence": [
+        "sig-vf-02",
+        "sig-vf-04",
+        "sig-vf-06",
+        "sig-vf-07",
+        "sig-vf-08"
+      ],
+      "name": "all-13"
+    },
+    {
+      "divergence": [
+        "sig-ri-02",
+        "sig-vf-01",
+        "sig-vf-02",
+        "sig-vf-04",
+        "sig-vf-07",
+        "sig-vf-08",
+        "sig-vf-09",
+        "sig-vf-10"
+      ],
+      "name": "all-14"
+    },
+    {
+      "divergence": [
+        "sig-sm-01",
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-06",
+        "sig-vf-08"
+      ],
+      "name": "all-15"
+    },
+    {
+      "divergence": [
+        "sig-ri-02",
+        "sig-sm-01",
+        "sig-vf-01",
+        "sig-vf-02",
+        "sig-vf-03",
+        "sig-vf-04",
+        "sig-vf-07",
+        "sig-vf-08",
+        "sig-vf-09",
+        "sig-vf-10"
+      ],
+      "name": "all-16"
+    }
+  ]
+}
