@@ -45,7 +45,7 @@ END {
   if (settings["radar-api", "ARTIFACTS_S3_ENDPOINT"] != "https://s3.bhs.io.cloud.ovh.net" ||
       settings["radar-api", "ARTIFACTS_S3_BUCKET"] != "radar-immobilier-artifacts-preprod" ||
       settings["radar-api", "ARTIFACTS_S3_REGION"] != "bhs") fail("preprod artifact storage coordinates required")
-  if (settings["radar-api", "ARTIFACTS_CONTENT_BASE"] != "preprod.immo-pages.sent-tech.ca") fail("preprod content base required")
+  if (settings["radar-api", "ARTIFACTS_CONTENT_BASE"] != "pages.preprod.immo.sent-tech.ca") fail("preprod content base required")
   if (settings["radar-api", "ARTIFACTS_READER_ISSUER"] != "https://preprod.immo.sent-tech.ca" ||
       settings["radar-api", "ARTIFACTS_READER_AUDIENCE"] != "https://preprod.immo.sent-tech.ca/reader" ||
       settings["radar-api", "ARTIFACTS_READER_TIER"] != "preprod") fail("preprod reader approval identity required")

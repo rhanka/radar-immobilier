@@ -117,7 +117,7 @@ describe("commit-time authority reread [T05 T13]", () => {
     expect(response).toEqual({ status: 201,
       body: { artifactId: ARTIFACT, releaseId: RELEASE, manifest: JSON.stringify({ digest: DIGEST }), digest: DIGEST,
         stableUrl: `https://${ARTIFACT}.pages.example.test/`,
-        pinnedUrl: `https://${RELEASE}.pinned.pages.example.test/` } });
+        pinnedUrl: `https://${RELEASE}.pages.example.test/` } });
     expect(handle).toHaveBeenCalledTimes(1);
   });
 });

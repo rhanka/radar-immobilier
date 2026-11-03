@@ -49,7 +49,8 @@ reject '/CLASSIFICATION_CURSOR_KEY_ID:/a\  CLASSIFICATION_CURSOR_SECRET: fixture
 reject '/^  name: radar-artifact-content$/,/^---$/{s/name: radar-api$/name: radar-ui/;}' 'content routes only to the reader API'
 reject '/^  name: radar-artifact-content$/,/^---$/{s/name: http$/name: other/;}' 'content reader port must be http'
 reject 's/radar-artifact-content-preprod-tls/other-tls/' 'preprod content TLS Secret required'
-reject 's/\*.pinned.preprod.immo-pages.sent-tech.ca/\*.wrong.preprod.immo-pages.sent-tech.ca/g' 'content domain/TLS wildcard mismatch'
+reject 's/\*.pages.preprod.immo.sent-tech.ca/\*.wrong.preprod.immo.sent-tech.ca/g' 'content domain/TLS wildcard mismatch'
+reject 's/\*.preprod.immo-pages.sent-tech.ca/\*.wrong.preprod.immo-pages.sent-tech.ca/g' 'content domain/TLS wildcard mismatch'
 sed 's/ARTIFACTS_CONTROL_MODE: general/ARTIFACTS_CONTROL_MODE: "off"/g' "$GOOD" >"$CASE"
 bash "$CHECK" "$CASE" >/dev/null
 echo 'ok: mode-off rollback is accepted for both API and MCP'
