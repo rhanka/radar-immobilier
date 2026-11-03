@@ -4,7 +4,8 @@ import {
   activePipelineMark,
   computeProspectCounters,
   createProspectMark,
-  createProspectNote,
+  fetchProspectLotState,
+  fetchProspectMarksForLot,
   prospectStatusLabel,
   type ProspectMark,
 } from "./prospect-marks-client.js";
@@ -109,12 +110,26 @@ describe("prospect marks client — écriture (POST)", () => {
     expect(body.lienAnnonce).toBe("https://x");
   });
 
-  it("createProspectNote POST la note et retourne la note", async () => {
-    const note = { id: "n1", noLot: "42", citySlug: "delson", body: "à rappeler", mode: "real" as const, createdAt: "2026-06-29T00:00:00Z" };
-    const f = mockFetchOnce(201, { ok: true, note });
-    const res = await createProspectNote({ noLot: "42", citySlug: "delson", body: "à rappeler" });
-    expect(res).toEqual(note);
-    expect(String(f.mock.calls[0][0])).toContain("/api/v1/prospects/notes");
+  it("fetchProspectLotState reads only marks (no notes traffic)", async () => {
+    const marks: ProspectMark[] = [
+      mark({ noLot: "42", citySlug: "delson", dimension: "pipeline", statut: "favori", createdAt: "2026-06-29T00:00:00Z" }),
+    ];
+    const f = mockFetchOnce(200, { ok: true, marks });
+    const state = await fetchProspectLotState("42", "delson");
+    expect(state).toEqual({ marks });
+    expect(f).toHaveBeenCalledTimes(1);
+    expect(String(f.mock.calls[0][0])).toContain("/api/v1/prospects/lots/42/delson/marks");
+    expect(String(f.mock.calls[0][0])).not.toContain("notes");
+  });
+
+  it("fetchProspectMarksForLot reads only the marks endpoint", async () => {
+    const marks: ProspectMark[] = [
+      mark({ noLot: "7", citySlug: "candiac", dimension: "marche", statut: "en_vente", createdAt: "2026-06-29T00:00:00Z" }),
+    ];
+    const f = mockFetchOnce(200, { ok: true, marks });
+    const res = await fetchProspectMarksForLot("7", "candiac");
+    expect(res).toEqual(marks);
+    expect(String(f.mock.calls[0][0])).toContain("/api/v1/prospects/lots/7/candiac/marks");
   });
 
   it("lève quand l'API renvoie une erreur HTTP", async () => {

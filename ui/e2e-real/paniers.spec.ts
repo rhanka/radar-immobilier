@@ -31,6 +31,7 @@ test("signal card: no triage control and no notes control (read-only card)", asy
   await expect(page.getByTestId("entity-annotations")).toHaveCount(0);
   await expect(page.getByTestId("annotation-add")).toHaveCount(0);
   await expect(page.getByPlaceholder("Ajouter une note…")).toHaveCount(0);
+  await expect(page.getByTestId("fiche-annotations")).toHaveCount(0);
 
   // The read-only card content is still there.
   await expect(page.getByText("Preuve").first()).toBeVisible();
@@ -43,4 +44,10 @@ test("signal card: no triage control and no notes control (read-only card)", asy
     ),
   );
   expect(facetWrites, "triage API traffic observed").toEqual([]);
+
+  // No prospect notes traffic: the lot notes machinery is removed, marks stay.
+  const notesReads = network.filter((entry) =>
+    /\/prospects\/.*notes/.test(new URL(entry.url).pathname),
+  );
+  expect(notesReads, "prospect notes API traffic observed").toEqual([]);
 });

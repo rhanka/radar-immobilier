@@ -1,5 +1,5 @@
 /**
- * 6H scoped UI context: every facet intention carries the viewer incarnation
+ * 6H scoped UI context: every scoped read carries the viewer incarnation
  * and the selected workspace. Late responses from another context (account
  * switch, logout, workspace switch) are discarded by the owner. No screen,
  * selection, or account value is ever inferred as a destination.
