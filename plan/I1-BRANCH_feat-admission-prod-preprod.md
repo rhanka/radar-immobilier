@@ -39,9 +39,11 @@ Every user approved in prod opens preprod artifacts with no prior step, no DB re
 - **Conditional Paths (allowed only with explicit exception)**:
   - `Makefile` — see I1-EX1
   - `api/drizzle/*.sql` + `api/drizzle/meta/_journal.json` — see I1-EX2 (1 file)
+  - `packages/immo-mcp/src/**` — see I1-EX3
 - **Exception process**:
-  - `I1-EX1` (Makefile, additive only): three targets `admission-snapshot`, `admission-ingest`, `admission-verify`. Reason: the lot contract requires Make targets for emission/ingestion/manual check. Impact: new `.PHONY` block, no existing target touched. Rollback: delete the block.
+  - `I1-EX1` (Makefile, additive only): the admission block targets `admission-keygen`, `admission-snapshot`, `admission-ingest`, `admission-verify`. Reason: the lot contract requires Make targets for emission/ingestion/manual check. Impact: new `.PHONY` block, no existing target touched; follow-up adds `--silent` to its `npm run` invocations so machine-consumed stdout stays pure JSON. Rollback: delete the block.
   - `I1-EX2` (migration): `0030_admission_sync.sql` + journal entry (additive, `IF NOT EXISTS`). Reason: `admission_source` column + staging + replay guard. Rollback: fresh DBs re-migrate; deployed DBs keep dormant tables (no code reads them when disabled).
+  - `I1-EX3` (immo-mcp JIT, review finding F4): new `packages/immo-mcp/src/admission-jit.ts` (raw-SQL JIT mirror, no drizzle import), `account-binding.ts` (opt-in JIT gate + writable reconcile pool), `server-http.ts` (carry verified email claims on the principal), `admission-jit.test.ts`. Reason: the independent review requires JIT on the MCP path; the MCP account gate rejects unknown subjects before any radar-api call. Impact: additive only, dormant without `ADMISSION_TRUSTED_ISSUERS`. Rollback: delete `admission-jit.ts` + revert the two wiring hunks.
 
 ## Feedback Loop
 - No subagent delegation in this lot (direct execution only).
