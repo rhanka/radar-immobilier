@@ -20,6 +20,16 @@ export interface S3StubOptions {
   readonly fail?: (request: number) => { readonly status: number; readonly code: string; readonly delayMs?: number } | undefined;
   /** Close each connection after its answer, so every operation needs new connections. */
   readonly close?: boolean;
+  /** Server-side delay before answering each request: models provider latency (OVH BHS ~1.3 s). */
+  readonly latencyMs?: number;
+}
+
+/** One served request: method, path and server-side start/end timestamps. */
+export interface S3RequestRecord {
+  readonly method: string;
+  readonly path: string;
+  readonly start: number;
+  readonly end: number;
 }
 
 /**
@@ -31,38 +41,51 @@ export async function startS3(options: S3StubOptions = {}) {
   const objects = new Map<string, Buffer>();
   const sockets = new Set<Socket>();
   const requestTimes: number[] = [];
+  const timeline: S3RequestRecord[] = [];
   let connections = 0;
   const app = createHttpServer((req, res) => {
     const chunks: Buffer[] = [];
+    const started = Date.now();
     req.on("data", (chunk: Buffer) => chunks.push(chunk));
     req.on("end", () => {
-      requestTimes.push(Date.now());
-      if (options.close) res.setHeader("connection", "close");
-      const path = decodeURIComponent(new URL(req.url ?? "/", "http://s3.local").pathname);
-      const xmlError = (status: number, code: string): void => {
-        res.writeHead(status, { "content-type": "application/xml" })
-          .end(`<?xml version="1.0" encoding="UTF-8"?><Error><Code>${code}</Code><Message>${code}</Message></Error>`);
-      };
-      const failure = options.fail?.(requestTimes.length);
-      if (failure) {
-        setTimeout(() => xmlError(failure.status, failure.code), failure.delayMs ?? 0);
-        return;
-      }
-      if (req.method === "PUT") {
-        objects.set(path, Buffer.concat(chunks));
-        res.writeHead(200, { etag: "\"probe\"" }).end();
-        return;
-      }
-      if (req.method === "GET") {
-        const body = objects.get(path);
-        if (!body) {
-          xmlError(404, "NoSuchKey");
+      const serve = () => {
+        requestTimes.push(Date.now());
+        if (options.close) res.setHeader("connection", "close");
+        const path = decodeURIComponent(new URL(req.url ?? "/", "http://s3.local").pathname);
+        const record = (method: string): void => {
+          timeline.push({ method, path, start: started, end: Date.now() });
+        };
+        const xmlError = (status: number, code: string): void => {
+          record(req.method ?? "?");
+          res.writeHead(status, { "content-type": "application/xml" })
+            .end(`<?xml version="1.0" encoding="UTF-8"?><Error><Code>${code}</Code><Message>${code}</Message></Error>`);
+        };
+        const failure = options.fail?.(requestTimes.length);
+        if (failure) {
+          setTimeout(() => xmlError(failure.status, failure.code), failure.delayMs ?? 0);
           return;
         }
-        res.writeHead(200, { "content-length": String(body.length) }).end(body);
-        return;
-      }
-      xmlError(405, "MethodNotAllowed");
+        if (req.method === "PUT") {
+          objects.set(path, Buffer.concat(chunks));
+          record("PUT");
+          res.writeHead(200, { etag: "\"probe\"" }).end();
+          return;
+        }
+        if (req.method === "GET") {
+          const body = objects.get(path);
+          if (!body) {
+            xmlError(404, "NoSuchKey");
+            return;
+          }
+          record("GET");
+          res.writeHead(200, { "content-length": String(body.length) }).end(body);
+          return;
+        }
+        xmlError(405, "MethodNotAllowed");
+      };
+      const latency = options.latencyMs ?? 0;
+      if (latency > 0) setTimeout(serve, latency);
+      else serve();
     });
   });
   const front = createTcpServer((socket) => {
@@ -81,6 +104,7 @@ export async function startS3(options: S3StubOptions = {}) {
     get connections() { return connections; },
     get requests() { return requestTimes.length; },
     requestTimes,
+    timeline,
     async close() {
       for (const socket of sockets) socket.destroy();
       await new Promise<void>((resolve) => front.close(() => resolve()));
