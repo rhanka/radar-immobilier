@@ -242,6 +242,25 @@ const envSchema = z.object({
   SCW_TEM_FROM_EMAIL: z.string().default("no-reply@sent-tech.ca"),
   SCW_TEM_FROM_NAME: z.string().default("Radar"),
   SCW_TEM_SECRET_KEY: optStr(z.string().min(1)),
+
+  // ── Lot I1 — admission sync prod -> preprod (converged R2 §2.6) ──────
+  // Preprod ingestion is fail-closed: the webhook stays 503 unless
+  // ADMISSION_SYNC_ENABLED=1 AND at least one prod public key is configured.
+  // The prod signing key lives ONLY in prod (k8s Secret, never committed).
+  ADMISSION_SYNC_ENABLED: z
+    .enum(["0", "1"])
+    .default("0")
+    .transform((v) => v === "1"),
+  // Comma-separated prod Ed25519 public keys, each `kid.base64(jwk-json)`.
+  // Two entries during rotation (current + previous); envelope kid selects.
+  ADMISSION_PROD_PUBLIC_KEYS: optStr(z.string().min(1)),
+  // Comma-separated trusted OIDC issuers for JIT email linking
+  // (preprod issuer + prod issuer). Empty = JIT linking disabled.
+  ADMISSION_TRUSTED_ISSUERS: optStr(z.string().min(1)),
+  // Prod-only Ed25519 private key, `kid.base64(jwk-json)`. Secret.
+  ADMISSION_SIGNING_KEY: optStr(z.string().min(1)),
+  // Prod-only push target: the preprod ingest webhook URL (https).
+  ADMISSION_SYNC_PUSH_URL: optStr(z.string().url()),
 });
 
 export type AppConfig = z.infer<typeof envSchema>;
