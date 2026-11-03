@@ -56,6 +56,8 @@ Provide these variables from the operator's existing authenticated environment, 
 - `P0C_OLD_HTTP_BASE`: authenticated private endpoint of an actual old P0b instance, retained only for the input-switch proof.
 - `P0C_V1_HTTP_BASE`, `P0C_V2_HTTP_BASE`: full control bases, normally under `https://preprod.immo.sent-tech.ca/api/v1/artifacts/control`, routed to the independently configured bindings.
 - `P0C_MCP_URL`: the MCP URL of the binding under qualification; refresh/reconnect Claude's catalogue to that binding.
+  A new binding URL needs one "Always allow" per tool; switching the profile behind the same URL never does
+  (see "Stable tool catalogue" below).
 - `P0C_APPLY_HOOK`: absolute path of the reviewed adapter (`tools/make/p0c-apply-hook.sh`), mounted read-only at `/p0c-apply` in the container.
 - `P0C_KUBECONFIG`: absolute path of an explicit preprod kubeconfig file (readable, never `~/.kube/config`), mounted read-only at `/kubeconfig` in the container. The hook refuses `~/.kube/config` (including via symlink or non-canonical path) and any namespace other than `radar-immobilier-preprod`.
 - `KUBECTL_BIN` (optional, defaults to `command -v kubectl`): host kubectl binary, mounted read-only at `/usr/local/bin/kubectl` in the container. The container image carries node but no kubectl.
@@ -164,6 +166,22 @@ Both check the active descriptor/catalogue, exact HTTP 428 and MCP precondition 
 guide descriptor/placement and first publication with explicit null after a current-release read.
 Qualification pages stay in the scope as evidence; normal human-confirmed deletion can remove them later.
 Failure exits nonzero and calls the adapter's close action. Never roll policy back; correct the strict configuration.
+
+## Stable tool catalogue
+
+claude.ai resets the owner's per-tool "Always allow" grant whenever a tool definition (name, description,
+input schema, annotations, `_meta`) changes, so the served catalogue is byte-stable across deployments and
+profile switches: short generic descriptions with no profile/contract/guide-revision text, no per-tool `_meta`,
+and `expectedCurrentReleaseId` always present as an optional property (requiredness is enforced server-side
+with `precondition_required`). Only adding or removing a tool changes the catalogue — the two part1 tools
+(`artifacts_list_versions`, `artifacts_revert`) exist in v2 only. `packages/immo-mcp/scripts/p0c-switch.ts`
+asserts the absence of per-tool `_meta` plus the tool count, and reads the active descriptor from the
+`authoringGuide` result of `artifacts_ensure`/`artifacts_get` (and from the omission refusal details), never
+from the catalogue. `artifact-tool-catalogue-stability.test.ts` snapshots the catalogue for the p0b, cas.v2
+and v2 profiles and fails on any unreviewed change. Remaining deliberate differences: the v2-only tools, the
+optional v2 `title`/`description`/`icon` metadata inputs on ensure/publish, the v2 `artifacts_publish` schema
+without required `files` (content source is exactly one of `files` or `edits`), and output schemas, which
+track the result envelope version.
 
 ## Acceptance evidence and remaining human qualification
 
