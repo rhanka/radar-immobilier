@@ -53,13 +53,19 @@ export type LicenceResolution =
 /**
  * Resolve an OGC `license.title` to a registry id by EXACT match.
  *
- * Pure: no normalisation, no network, no fallback value.
+ * Pure: no normalisation, no network, no fallback value. The registry is
+ * injectable (default: the shipped `GOVERNED_LICENCE_REGISTRY`) so tests can
+ * prove the ambiguous-title refusal against a duplicated title without
+ * touching the shipped registry.
  */
-export function resolveLicenceId(title: unknown): LicenceResolution {
+export function resolveLicenceId(
+  title: unknown,
+  registry: readonly GovernedLicence[] = GOVERNED_LICENCE_REGISTRY,
+): LicenceResolution {
   if (typeof title !== "string" || title.length === 0) {
     return { status: "unknown", reason: "missing-title" };
   }
-  const matches = GOVERNED_LICENCE_REGISTRY.filter((entry) => entry.title === title);
+  const matches = registry.filter((entry) => entry.title === title);
   if (matches.length === 0) {
     return { status: "unknown", reason: "unmatched-title" };
   }
