@@ -351,10 +351,47 @@ export const accountUsers = pgTable("account_users", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   approvedAt: timestamp("approved_at", { withTimezone: true }),
   approvedBy: text("approved_by"),
+  // Lot I1 (converged R2 §2.6): marks rows mirroring a prod admission.
+  // 'local' rows are never overwritten by the prod -> preprod sync; only
+  // 'prod_sync' rows are status-propagated on each verified snapshot.
+  admissionSource: text("admission_source").notNull().default("local"),
 }, (t) => ({
   bySub: index("account_users_sub_idx").on(t.sub),
   byStatus: index("account_users_status_idx").on(t.status),
 }));
+
+/**
+ * Lot I1 — staging of the last VERIFIED prod admission snapshot, keyed by
+ * lowercased email (the preprod `sub` may differ from the prod `sub`: the two
+ * environments use distinct IdP domains, so the join key is the email, never
+ * the sub). Written only by the signature-verified ingestion; read by the JIT
+ * reconciliation at login and reader opening.
+ */
+export const admissionSyncProfiles = pgTable("admission_sync_profiles", {
+  // Lowercased, trimmed email — the join key.
+  email: text("email").primaryKey(),
+  // Email as received from prod (display form, case preserved).
+  emailDisplay: text("email_display"),
+  name: text("name"),
+  status: text("status").notNull(),
+  role: text("role").notNull().default("member"),
+  approvedAt: timestamp("approved_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }),
+  syncedAt: timestamp("synced_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/**
+ * Lot I1 — per-signing-key replay guard. Snapshots carry a wall-clock
+ * `issuedAt` from the single prod emitter; a snapshot is applied only when its
+ * `issuedAt` is strictly newer than the last applied one for its `kid`, so a
+ * delayed full snapshot can never resurrect a newer revocation.
+ */
+export const admissionSyncState = pgTable("admission_sync_state", {
+  kid: text("kid").primaryKey(),
+  issuedAt: timestamp("issued_at", { withTimezone: true }).notNull(),
+  appliedAt: timestamp("applied_at", { withTimezone: true }).notNull().defaultNow(),
+  entries: integer("entries").notNull().default(0),
+});
 
 export const accountUserStatusEvents = pgTable(
   "account_user_status_events",
@@ -1145,6 +1182,8 @@ export const schema = {
   accountUsers,
   accountUserStatusEvents,
   accountInvitations,
+  admissionSyncProfiles,
+  admissionSyncState,
   // Inc 1 — marquage Steve
   prospectMarks,
   prospectNotes,
