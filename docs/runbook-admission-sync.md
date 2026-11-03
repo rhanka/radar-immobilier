@@ -87,14 +87,14 @@ ADMISSION_SYNC_ENABLED: "1"
 # capability closed instead of crashing the pod. Never commit the key
 # material to the overlay: reference it, do not paste it.
 ADMISSION_PROD_PUBLIC_KEYS: { configMapKeyRef: { name: radar-admission-preprod, key: ADMISSION_PROD_PUBLIC_KEYS, optional: true } }
-ADMISSION_TRUSTED_ISSUERS: "https://preprod.auth.sent-tech.ca,https://auth.sent-tech.ca"
+ADMISSION_TRUSTED_ISSUERS: "https://preprod.auth.sent-tech.ca"
 ```
 
-`ADMISSION_TRUSTED_ISSUERS` intentionally lists the prod issuer second: the
-JIT links prod-issuer sessions on verified email. The preprod auth-isolation
-gate (`deploy/ci/check-preprod-auth-isolation.sh`) carries a narrow,
-exact-name exemption for that one env literal; any other PROD host in the
-render still fails the gate.
+`ADMISSION_TRUSTED_ISSUERS` lists the preprod issuer only: in preprod,
+sessions come only from `https://preprod.auth.sent-tech.ca`, so the prod
+issuer is not needed for JIT. Keeping the prod issuer out preserves the
+preprod auth-isolation guard (`deploy/ci/check-preprod-auth-isolation.sh`),
+which rejects any PROD host in the render with no exemption.
 
 Owner GO #3 (preprod activation) required before setting
 `ADMISSION_SYNC_ENABLED=1`: it opens the ingest webhook and JIT linking.

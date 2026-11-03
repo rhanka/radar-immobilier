@@ -70,22 +70,6 @@ run_bad "$CASE_ROOT" 'rejects a new base auth key left at its PROD value' 'PROD 
 fixture; sed -i '0,/^          env:$/{s#^          env:$#          env:\n            - name: APP_BASE_URL\n              value: "https://immo.sent-tech.ca"#}' "$CASE_ROOT/$BASE_API"
 run_bad "$CASE_ROOT" 'rejects a PROD app host as a workload env literal' 'Deployment/radar-api: PROD auth host'; rm -rf "$CASE_ROOT"
 
-# Lot I1 exemption narrowness: the released overlay (with ADMISSION_TRUSTED_ISSUERS
-# carrying the prod issuer) is accepted by the first test above; a lookalike
-# env name with a PROD host must still be rejected (exact-name match only).
-fixture; cat >>"$CASE_ROOT/$OVERLAY" <<'EOF'
-  - target:
-      kind: Deployment
-      name: radar-api
-    patch: |
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: ADMISSION_TRUSTED_ISSUERS_EXTRA
-          value: https://auth.sent-tech.ca
-EOF
-run_bad "$CASE_ROOT" 'rejects a PROD host under a lookalike trusted-issuers name' 'Deployment/radar-api: PROD auth host'; rm -rf "$CASE_ROOT"
-
 fixture; sed -i '0,/^          env:$/{s#^          env:$#          env:\n            - name: SENTROPIC_OAUTH_CLIENT_ID\n              value: radar-immobilier#}' "$CASE_ROOT/$BASE_API"
 run_bad "$CASE_ROOT" 'rejects the PROD client id as a workload env literal' 'Deployment/radar-api: PROD client id (env)'; rm -rf "$CASE_ROOT"
 

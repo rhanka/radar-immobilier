@@ -77,8 +77,8 @@
 # the operator-held ConfigMap radar-admission-preprod (key of the same name),
 # referenced here with optional: true so a missing ConfigMap keeps the
 # capability closed (syncEnabled requires keys). ADMISSION_TRUSTED_ISSUERS
-# intentionally lists both the preprod and the prod IdP issuers: the JIT link
-# accepts sessions from either issuer on verified email.
+# lists the preprod issuer only: in preprod, sessions come only from
+# https://preprod.auth.sent-tech.ca, so the prod issuer is not needed for JIT.
 - op: add
   path: /spec/template/spec/containers/0/env/-
   value:
@@ -88,7 +88,7 @@
   path: /spec/template/spec/containers/0/env/-
   value:
     name: ADMISSION_TRUSTED_ISSUERS
-    value: https://preprod.auth.sent-tech.ca,https://auth.sent-tech.ca
+    value: https://preprod.auth.sent-tech.ca
 - op: add
   path: /spec/template/spec/containers/0/env/-
   value:
