@@ -267,6 +267,32 @@ db-status: ## Check DB readiness
 	  pg_isready -U $(POSTGRES_USER) -d $(POSTGRES_DB)
 
 # ─────────────────────────────────────────────────────────────────────
+# Admission sync prod -> preprod (lot I1, converged R2 §2.6)
+# Needs BRANCH exception I1-EX1 (additive targets only, see plan file).
+# FILE paths must be repo-relative (visible inside the container mount).
+# ─────────────────────────────────────────────────────────────────────
+
+.PHONY: admission-keygen
+admission-keygen: ## Print a fresh Ed25519 admission keypair JSON (owner stores it; nothing is created)
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm --no-deps -T api sh -c "npm ci --silent && npm run admission:keygen --workspace=api"
+
+.PHONY: admission-snapshot
+admission-snapshot: ## Emit a signed FULL admission snapshot from the DB (prod emitter, prints envelope JSON)
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) up -d postgres
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm -T -e ADMISSION_SIGNING_KEY api sh -c "npm ci --silent && npm run admission:snapshot --workspace=api"
+
+.PHONY: admission-ingest
+admission-ingest: ## Apply a signed admission envelope file (preprod ingest, FILE=<envelope.json>)
+	@test -n "$(FILE)" || (echo "Pass FILE=<envelope.json> (repo-relative, visible in the container)"; exit 1)
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) up -d postgres
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm -T -e ADMISSION_SYNC_ENABLED -e ADMISSION_PROD_PUBLIC_KEYS api sh -c "npm ci --silent && npm run db:migrate --workspace=api && npm run admission:ingest --workspace=api -- --file /workspace/$(FILE)"
+
+.PHONY: admission-verify
+admission-verify: ## Offline signature check of an envelope file (FILE=<envelope.json>, no DB writes)
+	@test -n "$(FILE)" || (echo "Pass FILE=<envelope.json>"; exit 1)
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm --no-deps -T -e ADMISSION_PROD_PUBLIC_KEYS api sh -c "npm ci --silent && npm run admission:verify --workspace=api -- --file /workspace/$(FILE)"
+
+# ─────────────────────────────────────────────────────────────────────
 # Object storage (adobe/s3mock local, OVH S3 in deployed environments)
 # ─────────────────────────────────────────────────────────────────────
 # NOTE: the `minio`-named service now runs adobe/s3mock (MinIO closed all its
