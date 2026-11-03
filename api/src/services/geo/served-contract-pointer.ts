@@ -9,18 +9,26 @@
  * fabricates a value (no snapshot_sha256 invented).
  *
  * Prefix scoping (geo-review-r3 G2): the reader refuses any key outside
- * `exports/immo/` BEFORE any upstream call. The granted credential itself
- * must be prefix-scoped by the geo tenant operator (see the runbook); this
- * in-code guard is the second, fail-closed layer, and it is covered by a
- * negative test that asserts zero upstream calls on refusal.
+ * `exports/immo/geo-served-contract/v1/` BEFORE any upstream call. The
+ * granted credential itself must be scoped by the geo side (dedicated export
+ * bucket, or a prefix-scoped read verified by a negative test — see the
+ * runbook); this in-code guard is the second, fail-closed layer, and it is
+ * covered by negative tests that assert zero upstream calls on refusal.
  */
 
 /** Exact pointer key the facade is allowed to read. */
 export const SERVED_CONTRACT_POINTER_KEY =
   "exports/immo/geo-served-contract/v1/latest.json";
 
-/** Prefix outside of which every read is refused (G2 negative test target). */
-export const SERVED_CONTRACT_ALLOWED_PREFIX = "exports/immo/";
+/**
+ * Prefix outside of which every read is refused (G2 negative test target).
+ *
+ * Scoped to the served-contract tree only: a credential granted the wider
+ * `exports/immo/` prefix could also read unrelated immo exports, so keys
+ * outside `exports/immo/geo-served-contract/v1/` are refused in code even
+ * when they sit under `exports/immo/`.
+ */
+export const SERVED_CONTRACT_ALLOWED_PREFIX = "exports/immo/geo-served-contract/v1/";
 
 /** Env vars naming the read credential (all optional — absent ⇒ missing source). */
 export const SERVED_CONTRACT_ENV_VARS = [
@@ -76,10 +84,24 @@ export type ServedContractPointer =
   | { readonly status: "refused"; readonly reason: string };
 
 /**
- * Guard: refuse any read outside `exports/immo/`. Pure — no upstream call.
+ * Guard: refuse any read outside `exports/immo/geo-served-contract/v1/`.
+ * Pure — no upstream call.
+ *
+ * Beyond the prefix, traversal (`..`), empty segments (`//`) and control
+ * characters are refused outright: S3 keys are opaque strings, so
+ * `exports/immo/geo-served-contract/v1/../../raw/...` must never satisfy
+ * the guard by prefix alone.
  */
 export function assertContractKeyAllowed(key: string): boolean {
-  return key === SERVED_CONTRACT_POINTER_KEY || key.startsWith(SERVED_CONTRACT_ALLOWED_PREFIX);
+  if (typeof key !== "string" || key.length === 0) return false;
+  if (key !== SERVED_CONTRACT_POINTER_KEY && !key.startsWith(SERVED_CONTRACT_ALLOWED_PREFIX)) {
+    return false;
+  }
+  if (key.includes("..")) return false;
+  if (key.includes("//")) return false;
+  // eslint-disable-next-line no-control-regex
+  if (/[\u0000-\u001f\u007f]/.test(key)) return false;
+  return true;
 }
 
 /** True when the parsed pointer body carries a usable snapshot marker. */

@@ -41,22 +41,48 @@ describe("resolveServedContractStoreConfig (configuration only)", () => {
 });
 
 describe("assertContractKeyAllowed (G2 prefix scoping)", () => {
-  it("allows the exact pointer key and the exports/immo/ prefix", () => {
+  it("allows the exact pointer key and the served-contract v1 tree", () => {
     expect(assertContractKeyAllowed(SERVED_CONTRACT_POINTER_KEY)).toBe(true);
     expect(
       assertContractKeyAllowed("exports/immo/geo-served-contract/v1/snapshots/abc.json"),
     ).toBe(true);
   });
 
-  it("refuses keys outside exports/immo/", () => {
+  it("refuses keys outside exports/immo/geo-served-contract/v1/", () => {
     expect(assertContractKeyAllowed("raw/pv-index/cas/deadbeef.pdf")).toBe(false);
     expect(assertContractKeyAllowed("capture/pv/2024/doc.pdf")).toBe(false);
     expect(assertContractKeyAllowed("exports/other/file.json")).toBe(false);
+    expect(assertContractKeyAllowed("exports/immo/other-export/file.json")).toBe(false);
+    expect(assertContractKeyAllowed("exports/immo/geo-served-contract/v0/latest.json")).toBe(false);
     expect(assertContractKeyAllowed("pmtiles/qc-zones.pmtiles")).toBe(false);
+    expect(assertContractKeyAllowed("")).toBe(false);
   });
 
-  it("the allowed prefix is exactly exports/immo/", () => {
-    expect(SERVED_CONTRACT_ALLOWED_PREFIX).toBe("exports/immo/");
+  it("refuses path traversal, empty segments and control characters", () => {
+    expect(
+      assertContractKeyAllowed("exports/immo/geo-served-contract/v1/../../raw/pv-index/cas/deadbeef.pdf"),
+    ).toBe(false);
+    expect(assertContractKeyAllowed("exports/immo/../raw/pv-index/cas/deadbeef.pdf")).toBe(false);
+    expect(
+      assertContractKeyAllowed("exports/immo/geo-served-contract/v1//snapshots/abc.json"),
+    ).toBe(false);
+    expect(
+      assertContractKeyAllowed("exports/immo/geo-served-contract/v1/snapshots/ab\nc.json"),
+    ).toBe(false);
+    expect(
+      assertContractKeyAllowed("exports/immo/geo-served-contract/v1/snapshots/ab\rc.json"),
+    ).toBe(false);
+    expect(
+      assertContractKeyAllowed("exports/immo/geo-served-contract/v1/snapshots/ab\tc.json"),
+    ).toBe(false);
+    expect(
+      assertContractKeyAllowed("exports/immo/geo-served-contract/v1/snapshots/ab\u007fc.json"),
+    ).toBe(false);
+  });
+
+  it("the allowed prefix is exactly exports/immo/geo-served-contract/v1/", () => {
+    expect(SERVED_CONTRACT_ALLOWED_PREFIX).toBe("exports/immo/geo-served-contract/v1/");
+    expect(SERVED_CONTRACT_POINTER_KEY.startsWith(SERVED_CONTRACT_ALLOWED_PREFIX)).toBe(true);
   });
 });
 
@@ -73,7 +99,7 @@ describe("readServedContractPointer (missing source, never fabricated)", () => {
     expect(pointer).toEqual({ status: "missing source", reason: "reader-not-wired" });
   });
 
-  it("REFUSES a read outside exports/immo/ with ZERO upstream calls (G2 negative)", async () => {
+  it("REFUSES a read outside exports/immo/geo-served-contract/v1/ with ZERO upstream calls (G2 negative)", async () => {
     const client = { getObjectText: vi.fn(async () => "never") };
     const pointer = await readServedContractPointer({
       env: FULL_ENV,
@@ -85,6 +111,26 @@ describe("readServedContractPointer (missing source, never fabricated)", () => {
       reason: "read-outside-exports-immo-refused",
     });
     expect(client.getObjectText).not.toHaveBeenCalled();
+  });
+
+  it("REFUSES raw/ and capture/ reads with ZERO upstream calls (prefix-RO negative)", async () => {
+    // P1 grantor procedure: a prefix-scoped RO credential is accepted only
+    // when reads outside the served-contract tree are refused. raw/ (captured
+    // source documents incl. PV PDFs) and capture/ must never be readable.
+    for (const key of [
+      "raw/pv-index/cas/deadbeef.pdf",
+      "capture/pv/2024/doc.pdf",
+      "exports/immo/geo-served-contract/v1/../../raw/pv-index/cas/deadbeef.pdf",
+      "exports/immo/geo-served-contract/v1/../../capture/pv/2024/doc.pdf",
+    ]) {
+      const client = { getObjectText: vi.fn(async () => "never") };
+      const pointer = await readServedContractPointer({ env: FULL_ENV, client, key });
+      expect(pointer).toEqual({
+        status: "refused",
+        reason: "read-outside-exports-immo-refused",
+      });
+      expect(client.getObjectText).not.toHaveBeenCalled();
+    }
   });
 
   it("reports missing source when the pointer object is absent", async () => {
