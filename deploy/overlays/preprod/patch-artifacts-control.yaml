@@ -11,7 +11,7 @@ data:
   ARTIFACTS_S3_BUCKET: "radar-immobilier-artifacts-preprod"
   ARTIFACTS_S3_ENDPOINT: "https://s3.bhs.io.cloud.ovh.net"
   ARTIFACTS_S3_REGION: "bhs"
-  ARTIFACTS_CONTENT_BASE: "preprod.immo-pages.sent-tech.ca"
+  ARTIFACTS_CONTENT_BASE: "pages.preprod.immo.sent-tech.ca"
   ARTIFACTS_READER_ISSUER: "https://preprod.immo.sent-tech.ca"
   ARTIFACTS_READER_AUDIENCE: "https://preprod.immo.sent-tech.ca/reader"
   ARTIFACTS_READER_TIER: "preprod"
