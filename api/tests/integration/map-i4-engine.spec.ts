@@ -255,6 +255,23 @@ describe("map-base basemap hook", () => {
     }
   });
 
+  it("should refuse tab, newline, CR, backslash and encoded-slash bypasses", () => {
+    for (const hostile of [
+      "/\t/tiles.example.net/{z}/{x}/{y}",
+      "/\n/tiles.example.net/{z}/{x}/{y}",
+      "/\r/tiles.example.net/{z}/{x}/{y}",
+      "/ /tiles.example.net/{z}/{x}/{y}",
+      "/tiles/{z}/{x}/{y}.png\n",
+      "\\tiles.example.net/{z}/{x}/{y}",
+      "/%2Ftiles.example.net/{z}/{x}/{y}",
+      "/%2ftiles.example.net/{z}/{x}/{y}",
+      "/%5Ctiles.example.net/{z}/{x}/{y}",
+      "/tiles%2f{z}%2f{x}%2f{y}",
+    ]) {
+      expect(() => validateBasemapTemplate(hostile), JSON.stringify(hostile)).toThrow("same-origin path");
+    }
+  });
+
   it("should accept the real I-10A tile and labels templates", () => {
     expect(validateBasemapTemplate("/__artifacts/tiles/v1/{z}/{x}/{y}"))
       .toBe("/__artifacts/tiles/v1/{z}/{x}/{y}");

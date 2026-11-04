@@ -230,18 +230,30 @@ export function tileZoomForScale(scale, fitScale) {
 
 /**
  * Validate a same-origin tile template for the I-10 hook.
- * Only single-slash relative paths carrying `{z}`, `{x}` and `{y}` are
- * accepted, so a configured basemap can never point at an off-origin
- * host: protocol-relative (`//host/...`), backslash (`/\host/...`, any
- * `\`) and absolute-URL forms are all refused.
+ * Only paths starting with a single `/` followed by a non-slash
+ * character and carrying `{z}`, `{x}` and `{y}` are accepted, so a
+ * configured basemap can never point at an off-origin host:
+ * protocol-relative (`//host/...`), backslash (`/\host/...`, any `\`)
+ * and absolute-URL forms are all refused. Every whitespace and control
+ * character is refused as well — WHATWG URL parsing strips tab/newline
+ * before analysis, turning e.g. `/\t/host/...` into `//host/...` — as
+ * are percent-encoded slashes and backslashes (`%2F`, `%5C`).
  */
 export function validateBasemapTemplate(template) {
   if (template === null || template === undefined) return null;
   if (typeof template !== "string") throw new Error("map-base: basemap template must be a string or null");
-  if (!template.startsWith("/") || template.startsWith("//")) {
+  if (template.length < 2 || template[0] !== "/" || template[1] === "/") {
     throw new Error("map-base: basemap template must be a same-origin path");
   }
-  if (template.includes("\\")) throw new Error("map-base: basemap template must be a same-origin path");
+  for (const character of template) {
+    const code = character.codePointAt(0);
+    if (code <= 0x20 || (code >= 0x7f && code <= 0x9f) || character === "\\" || /\s/.test(character)) {
+      throw new Error("map-base: basemap template must be a same-origin path");
+    }
+  }
+  if (/%(?:2f|5c)/i.test(template)) {
+    throw new Error("map-base: basemap template must be a same-origin path");
+  }
   if (!template.includes("{z}") || !template.includes("{x}") || !template.includes("{y}")) {
     throw new Error("map-base: basemap template must carry {z}, {x} and {y}");
   }
