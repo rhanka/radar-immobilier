@@ -126,9 +126,13 @@ describe("P7 composed transport (contract double; no storage qualification)", ()
     expect(first.filter((tool: { name: string }) => tool.name.startsWith("artifacts_"))
       .map((tool: { name: string }) => tool.name)).toEqual(profile.selectedCapabilities);
     for (const tool of first) {
-      const write = ["artifacts_ensure", "artifacts_publish", "artifacts_set_access", "artifacts_delete"].includes(tool.name);
+      // Files parity LOT 1: the upload channel publishes, so it is not
+      // read-only; create_upload mints a fresh session per call and is the
+      // only active tool without an idempotency key.
+      const write = ["artifacts_ensure", "artifacts_publish", "artifacts_set_access", "artifacts_delete",
+        "artifacts_create_upload", "artifacts_commit_upload", "artifacts_publish_bundle"].includes(tool.name);
       expect(tool.annotations).toEqual({ readOnlyHint: !write, destructiveHint: tool.name === "artifacts_delete",
-        openWorldHint: false, idempotentHint: true });
+        openWorldHint: false, idempotentHint: tool.name !== "artifacts_create_upload" });
     }
     const serialized = JSON.stringify(first);
     const readScopes = "immo:read immo:artifacts:read";
