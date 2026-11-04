@@ -39,7 +39,7 @@ export interface PreviewSessionClaims {
   readonly expiresAt: number;
   /** Lot I2: present only after the control-origin basket consent. */
   readonly basketScope?: true;
-  /** Native resources only: host/release-bound authority sealed by the host. */
+  /** Native resources only: host-bound authority (stable artifact or exact release) sealed by the host. */
   readonly resource?: GrantClaims;
 }
 
