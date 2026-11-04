@@ -51,6 +51,12 @@ import {
   type ReaderOperationName,
 } from "./reader-operations.js";
 import { GeoItemsRefusal } from "./reader-geo.js";
+import {
+  TILE_CLIENT_MAX_AGE_SECONDS,
+  TILE_PATH_PREFIX,
+  TileProxy,
+  createTileProxyApp,
+} from "./tile-proxy.js";
 import { READER_EXAMPLE_HTML } from "./reader-example.js";
 import {
   normalizeReleaseHtml,
@@ -78,6 +84,12 @@ export interface ContentServeDeps {
   /** PW-C page write listener (prepare/status); absent keeps writes closed. */
   readonly pageWrite?: Hono;
   readonly writePageSurface?: WritePageSurface;
+  /**
+   * I-10B tile proxy override (tests inject a stub fetch here). Absent, the
+   * mount creates a default live proxy — production serves real tiles with
+   * zero extra wiring. Isolated optional field for the I2-partage rebase.
+   */
+  readonly tileProxy?: TileProxy;
 }
 type AuthorizedReader = ApiReaderContext & { readonly validUntil: number; readonly authorityVersion: string };
 
@@ -368,6 +380,36 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     }
     catch { return c.json({ error: "capability_unavailable" }, 503); }
   });
+
+  // ── I-10B same-origin tile proxy mount (pass-wonder §4) ──
+  // The merged I-10A byte relay (`tile-proxy.ts`, #993) on the frozen
+  // reserved path GET /__artifacts/tiles/v1/{z}/{x}/{y} (+ labels overlay),
+  // next to the design-kit route, before the final app.get("*"). Gates run
+  // before any upstream call: non-GET 405, off-content-host 404, no sealed
+  // reader session 401 (an <img> carries no grant header; ?grant= in the URL
+  // is honored by presentedGrant, then ignored downstream — never relayed).
+  // Forged paths (bad z/x/y, outside the Quebec emprise, suffixes,
+  // traversal, queries) are refused locally with zero upstream calls.
+  // img-src stays 'self': tiles are same-origin bytes, the release CSP is
+  // untouched. Attribution is served to the I-4 map base via the guide
+  // (mapBase.attribution). The 200 Cache-Control is rewritten to private
+  // caching after the global no-store middleware. Isolated block for the
+  // I2-partage rebase — no line above or below is touched.
+  {
+    const tiles = deps.tileProxy ?? new TileProxy();
+    const tileApp = createTileProxyApp({
+      proxy: tiles,
+      isContentHost: (c) => parseContentHost(c.req.header("host"), deps.contentBase).kind !== "other",
+      authorize: async (c) => (await authorized(c, true)) !== null,
+    });
+    app.use(`${TILE_PATH_PREFIX}/*`, async (c, next) => {
+      await next();
+      if (c.res.status === 200) {
+        c.header("Cache-Control", `private, max-age=${TILE_CLIENT_MAX_AGE_SECONDS}`);
+      }
+    });
+    app.route("/", tileApp);
+  }
 
   // Official design-kit stylesheets on a reserved path of every content
   // origin: same-origin ('self') for published pages, sha256-pinned,
