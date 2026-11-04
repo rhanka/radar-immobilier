@@ -13,7 +13,7 @@ import { beforeAll, describe, expect, it, vi } from "vitest";
  * manifest audit metadata and typed result details, never in a definition.
  * The 0.2.8 -> 0.2.9 bump changes the definitions one final time by design
  * (static schemas replace profile-dependent bounds); this test locks the
- * 0.2.9 result, re-verified byte-identical under the 0.2.10 pin. The provider here keeps the qualified catalogue surface
+ * 0.2.9 result, re-verified byte-identical under the 0.2.10 then 0.2.12 pins. The provider here keeps the qualified catalogue surface
  * (CAS guard optional, `paths` description-less, stable summaries) via
  * `stabilizeArtifactInputSchema`.
  *
