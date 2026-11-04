@@ -14,14 +14,17 @@ import type { DirectoryPerson, PrincipalDirectoryPort } from "@sentropic/artifac
  * erased people. Mode sentinels (`sentropic:*`) name no person and stay
  * unprojected.
  *
- * Input path (N3): `resolvePrincipal` resolves approved accounts only
- * (status = 'approved'); anything else resolves to nothing and the provider
- * merges every resolution/approval failure into the single
- * `person_not_shareable`. The legacy IdP-sub form still resolves for
- * pre-G2 callers (pinned by the p0b contract suite: a sub grant stays 200);
- * the model never learns subs because outputs only ever carry userRef, so
- * the guide instructs userRef exclusively. Refusing the sub form outright
- * needs a contract bump with owner sign-off.
+ * Input path (N3): `resolvePrincipal` accepts the opaque directory userRef
+ * (account UUID) of an approved account only (status = 'approved').
+ * Anything else — raw IdP sub, email, unknown marker — resolves to nothing,
+ * so no sub ever yields an account at the input boundary either. UUID misses
+ * merge into the single `person_not_shareable` (a directory throw would
+ * escape as a 500 instead, hence the miss); a known sub misused as input is
+ * refused provider-side with 403 access_denied, told apart from an unknown
+ * target precisely because `describePrincipal` always answers (R1). The
+ * set_access transaction guard agrees userRef-only as a second line. The
+ * guide instructs userRef exclusively, and outputs only ever carry userRef
+ * (R1).
  * The single-storage-scope host treats every account as in scope.
  * Display name falls back from the IdP name to the email local part, then to
  * the opaque reference; the package masks emails at the model boundary.
@@ -84,18 +87,17 @@ export function createAccountDirectory(pool: pg.Pool): PrincipalDirectoryPort {
       assertResolvableForm(userRef);
       // Mode sentinels are provider-owned: they name no person.
       if (typeof userRef === "string" && userRef.startsWith("sentropic:")) return undefined;
-      // N3: approved accounts only. Anything else (pending, suspended,
-      // unknown) resolves to nothing; the provider merges the failure into
-      // `person_not_shareable`, and the host transaction guard agrees.
-      // Canonical form: the opaque account id. The legacy IdP sub still
-      // resolves so pre-G2 callers keep working through the same approval.
-      if (UUID_RE.test(userRef)) {
-        const { rows } = await pool.query<{ sub: string }>(
-          "SELECT sub FROM account_users WHERE id = $1 AND status = 'approved'", [userRef]);
-        return rows[0]?.sub;
-      }
+      // N3: the canonical input form is the opaque directory userRef
+      // (account UUID) of an approved account. Anything else — raw IdP sub,
+      // email, unknown marker — resolves to nothing: subs never cross the
+      // model boundary in either direction (R1 covers outputs, this covers
+      // inputs). A miss (not a throw: the provider merges a miss into
+      // `person_not_shareable` but lets a directory exception escape as a
+      // 500) keeps the single merged refusal code, and the host transaction
+      // guard agrees.
+      if (!UUID_RE.test(userRef)) return undefined;
       const { rows } = await pool.query<{ sub: string }>(
-        "SELECT sub FROM account_users WHERE sub = $1 AND status = 'approved'", [userRef]);
+        "SELECT sub FROM account_users WHERE id = $1 AND status = 'approved'", [userRef]);
       return rows[0]?.sub;
     },
     async describePrincipal(_scope, principalId) {
