@@ -66,7 +66,7 @@ describe("artifact effective profile", () => {
       "artifacts_get",
       ...(ARTIFACT_P0B ? ["artifacts_get_source", "artifacts_set_access", "artifacts_delete",
         "artifacts_create_upload", "artifacts_commit_upload", "artifacts_publish_bundle",
-        "artifacts_lookup_people", "artifacts_list_access"] : []),
+        "artifacts_lookup_people", "artifacts_list_access", "artifacts_revoke_reader_consent"] : []),
     ]);
     expect(ARTIFACT_SELECTION).toEqual([
       { tool: "artifacts_ensure", operation: "ensure", method: "POST", path: "/ensure", command: "ensure" },
@@ -84,7 +84,8 @@ describe("artifact effective profile", () => {
       ...(ARTIFACT_P0B ? { artifacts_get_source: "immo:artifacts:read", artifacts_set_access: "immo:artifacts:write",
         artifacts_delete: "immo:artifacts:write", artifacts_create_upload: "immo:artifacts:write",
         artifacts_commit_upload: "immo:artifacts:write", artifacts_publish_bundle: "immo:artifacts:write",
-        artifacts_lookup_people: "immo:artifacts:read", artifacts_list_access: "immo:artifacts:read" } : {}),
+        artifacts_lookup_people: "immo:artifacts:read", artifacts_list_access: "immo:artifacts:read",
+        artifacts_revoke_reader_consent: "immo:artifacts:write" } : {}),
     });
   });
 

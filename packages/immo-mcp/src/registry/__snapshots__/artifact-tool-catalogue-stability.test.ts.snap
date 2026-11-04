@@ -776,6 +776,40 @@ exports[`artifact tool catalogue stability > should snapshot the immo-artifacts.
     },
     "name": "artifacts_publish_bundle",
   },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+    },
+    "description": "Withdraw the caller's own persistent opening consent for a Radar page.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "idempotencyKey": {
+          "description": "Nonblank by JavaScript trim(); the active profile bounds its length in UTF-16 units; original bytes retained.",
+          "minLength": 1,
+          "type": "string",
+        },
+        "scope": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+        "idempotencyKey",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_revoke_reader_consent",
+  },
 ]
 `;
 
@@ -1554,6 +1588,40 @@ exports[`artifact tool catalogue stability > should snapshot the immo-artifacts.
       "type": "object",
     },
     "name": "artifacts_publish_bundle",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+    },
+    "description": "Withdraw the caller's own persistent opening consent for a Radar page.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "idempotencyKey": {
+          "description": "Nonblank by JavaScript trim(); the active profile bounds its length in UTF-16 units; original bytes retained.",
+          "minLength": 1,
+          "type": "string",
+        },
+        "scope": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+        "idempotencyKey",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_revoke_reader_consent",
   },
 ]
 `;
@@ -2411,6 +2479,40 @@ exports[`artifact tool catalogue stability > should snapshot the immo-artifacts.
       "type": "object",
     },
     "name": "artifacts_publish_bundle",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+    },
+    "description": "Withdraw the caller's own persistent opening consent for a Radar page.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "idempotencyKey": {
+          "description": "Nonblank by JavaScript trim(); the active profile bounds its length in UTF-16 units; original bytes retained.",
+          "minLength": 1,
+          "type": "string",
+        },
+        "scope": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+        "idempotencyKey",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_revoke_reader_consent",
   },
 ]
 `;

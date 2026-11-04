@@ -7,6 +7,7 @@ import {
 import type { AuthConfig } from "../config.js";
 import type { Logger } from "../logger.js";
 import type { ControlRouteDeps } from "./control-route.js";
+import { createReaderConsentService } from "./reader-consent.js";
 import { createStoredReader } from "./reader-storage.js";
 
 export async function startArtifactControl(options: {
@@ -42,7 +43,9 @@ export async function startArtifactControl(options: {
     logger.info({ storageScope: parsed.storageScope, s3Bucket: parsed.s3Bucket }, "artifact control enabled");
     return { auth, accounts: pool, backend, readActivation, storageScope: parsed.storageScope,
       ...(confirmation ? { confirmation } : {}),
-      readerStorage: createStoredReader(pool, parsed.storageScope, contentBase, host.blobs) };
+      readerStorage: createStoredReader(pool, parsed.storageScope, contentBase, host.blobs),
+      // Reader consent LOT 1 — persistent opening consent for the bypass.
+      readerConsent: createReaderConsentService(pool, parsed.storageScope) };
   } catch (err) {
     logger.error({ err }, "artifact control unavailable; API remains available");
     return { auth, accounts: pool };

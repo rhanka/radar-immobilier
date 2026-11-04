@@ -128,6 +128,7 @@ const readerOpening = contentHost.enabled && artifactsControl?.readerStorage && 
   readerGrantSecret.length >= 32 && readerSessionSecret.length >= 32
   ? createReaderOpening({ ...artifactsControl.readerStorage, auth, contentBase: contentHost.contentBase,
     issuer: readerIssuer, grantSecret: readerGrantSecret, sessionSecret: readerSessionSecret,
+    ...(artifactsControl.readerConsent ? { consent: artifactsControl.readerConsent } : {}),
     ...(publishedWrite ? { writeDomain: publishedWrite.domain, permitsWrite: publishedWrite.permitsWrite } : {}),
     // Lot I1 (R1/a): JIT before getRights; disabled without trusted issuers.
     ...(admission.trustedIssuers.length > 0
