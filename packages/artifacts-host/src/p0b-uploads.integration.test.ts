@@ -109,6 +109,55 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("files parity upload channel", ()
     expect(typeof svgPinned.uploadId).toBe("string");
   });
 
+  it("should complete the guide's literal upload sequence with the exact byte size (R4)", async () => {
+    // Follows artifactLifecycle.edit word for word: create_upload with
+    // maxSize set to the exact file byte size, PUT of exactly those bytes
+    // with the checksum header, commit pinning, then one atomic bundle.
+    const ensured = await call("ensure", { bindingName: randomUUID(), idempotencyKey: randomUUID() });
+    expect(ensured.status).toBe(201);
+    const artifactId = (ensured.body as { artifactId: string }).artifactId;
+    const bytes = pngBytes(3000);
+    // "artifacts_create_upload({artifactId, mimeType, maxSize:<exact file byte size>})"
+    const created = await call("create_upload", { artifactId, mimeType: "image/png", maxSize: bytes.length });
+    expect(created.status).toBe(201);
+    const createdBody = created.body as { uploadId: string; uploadUrl: string; requiredHeaders: Record<string, string> };
+    // "PUT the exact bytes with the checksum header"
+    const key = stagingKey("p0b", createdBody.uploadId);
+    signerDouble.put({ key, contentType: "image/png", contentLength: bytes.length }, bytes,
+      { ...createdBody.requiredHeaders, "x-amz-checksum-sha256": checksumOf(bytes) });
+    await staging.put(key, bytes);
+    // "artifacts_commit_upload({artifactId, uploadId, path, mimeType, digest, size, idempotencyKey}) to pin"
+    const committed = await call("commit_upload", { artifactId, uploadId: createdBody.uploadId,
+      path: "assets/guide-photo.png", mimeType: "image/png", digest: digestOf(bytes),
+      size: bytes.length, idempotencyKey: randomUUID() });
+    expect(committed.status).toBe(201);
+    // "artifacts_publish_bundle({artifactId, files, assets, expectedCurrentReleaseId, idempotencyKey})"
+    const published = await call("publish_bundle", { artifactId, idempotencyKey: randomUUID(),
+      expectedCurrentReleaseId: null,
+      files: [{ path: "index.html", mimeType: "text/html", text: "<!doctype html><h1>Guide</h1>" }],
+      assets: [{ path: "assets/guide-photo.png", uploadId: createdBody.uploadId }] });
+    expect(published.status).toBe(201);
+  });
+
+  it("should bind the ceiling Content-Length when maxSize is omitted (why the guide requires it)", async () => {
+    const ensured = await call("ensure", { bindingName: randomUUID(), idempotencyKey: randomUUID() });
+    expect(ensured.status).toBe(201);
+    const artifactId = (ensured.body as { artifactId: string }).artifactId;
+    // Same host shape, durable session ledger: the bound size is readable.
+    const { createArtifactControl: controlFor } = await import("./facade.js");
+    const durable = await fixture.connect(undefined,
+      { uploads: { sessions: createPostgresUploadSessionStore(fixture.pool), staging, signer: signerDouble.signer } });
+    const durableCall = (op: string, args: unknown, actor = "alice") =>
+      controlFor(durable, "p0b", "pages.test").handle(op, actor, args);
+    const created = await durableCall("create_upload", { artifactId, mimeType: "image/png" });
+    expect(created.status).toBe(201);
+    // Without maxSize the signature binds the 16 MiB ceiling, so a PUT of
+    // the real (smaller) file is refused by S3: the guide must pass maxSize.
+    const session = await createPostgresUploadSessionStore(fixture.pool)
+      .get((created.body as { uploadId: string }).uploadId);
+    expect(session?.maxSize).toBe(16 * 1024 * 1024);
+  });
+
   it("should refuse a scripted SVG at commit", async () => {
     const ensured = await call("ensure", { bindingName: randomUUID(), idempotencyKey: randomUUID() });
     const artifactId = (ensured.body as { artifactId: string }).artifactId;
