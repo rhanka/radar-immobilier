@@ -27,7 +27,7 @@
    * expose seulement les côtés gauche/droite; le bottom sheet reste dépendant
    * d'une vague DS ultérieure. Sur desktop (md+), Card DS.
    */
-  import { X, MapPin, Star, Info, ExternalLink, MessageSquare } from "@lucide/svelte";
+  import { X, MapPin, Star, Info, ExternalLink } from "@lucide/svelte";
   import { Badge, Card, Drawer } from "@sentropic/design-system-svelte";
   import type { LotFeature } from "$lib/maps/lots-client.js";
   import {
@@ -52,13 +52,6 @@
     type ProspectMode,
     type PipelineStatus,
   } from "$lib/prospect/prospect-marks-client.js";
-  import type { LotFacetState } from "$lib/maps/lot-facet-counters.js";
-  // §2 (PR2) : notes d'équipe unifiées (endpoint `/api/v1/prospects/notes`,
-  // cible "lot") + temps réel SSE — réutilise les composants collab. Ouvert à
-  // tous les approuvés (serveur = autorité author-only), indépendant du gate
-  // `allowMarquage` qui ne garde plus que le marquage pipeline/marché.
-  import SignalAnnotations from "$lib/components/collab/SignalAnnotations.svelte";
-  import AnnotationBadge from "$lib/components/collab/AnnotationBadge.svelte";
   import {
     assignmentStateLabel,
     auditCodeLabel,
@@ -91,16 +84,6 @@
 
   /** Mode d'origine des marquages posés depuis ce panneau (réel vs simulation). */
   export let mode: ProspectMode = "real";
-
-  /**
-   * 6K cutover seam. `null` (default) preserves the established legacy
-   * mark behavior exactly. When the operator activates the destination,
-   * the parent supplies the independent facet states and the panel shows
-   * them instead of the legacy marks; notes stay untouched.
-   */
-  export let facetState: Omit<LotFacetState, "key"> | null = null;
-  export let lotFacetsActive = false;
-  $: usingFacets = lotFacetsActive;
 
   // ── Dérivés réactifs ─────────────────────────────────────────────────────────
 
@@ -161,8 +144,6 @@
   let prospectError: string | null = null;
   let prospectMarks: ProspectMark[] = [];
   let prospectRequestKey = "";
-  /** Nombre d'annotations §2 (cible lot) — pilote le badge ambiant. */
-  let annotationCount = 0;
 
   $: citySlug = lot?.properties.citySlug ?? "";
   $: mapsUrl = lotCentroid
@@ -177,17 +158,12 @@
 
   $: {
     const key = noLot && citySlug ? `${citySlug}::${noLot}` : "";
-    if (usingFacets) {
-      prospectMarks = [];
-      prospectError = null;
-      prospectLoading = false;
-    } else if (key && key !== prospectRequestKey) {
+    if (key && key !== prospectRequestKey) {
       prospectRequestKey = key;
       void loadProspectState(noLot, citySlug);
     } else if (!key && prospectRequestKey) {
       prospectRequestKey = "";
       prospectMarks = [];
-      annotationCount = 0;
       prospectError = null;
       prospectLoading = false;
     }
@@ -213,7 +189,7 @@
     prospectError = null;
     try {
       const state = await fetchProspectLotState(noLotValue, citySlugValue);
-      if (usingFacets || prospectRequestKey !== `${citySlugValue}::${noLotValue}`) return;
+      if (prospectRequestKey !== `${citySlugValue}::${noLotValue}`) return;
       prospectMarks = state.marks;
     } catch (e) {
       if (prospectRequestKey !== `${citySlugValue}::${noLotValue}`) return;
@@ -227,7 +203,6 @@
   }
 
   // ── Écriture marquage pipeline/marché (append-only, gatée allowMarquage) ────
-  // Les NOTES d'équipe sont désormais gérées par SignalAnnotations (§2 unifié).
   let prospectSaving = false;
 
   const PIPELINE_ACTIONS: Array<{ statut: PipelineStatus; label: string }> = [
@@ -238,7 +213,6 @@
   ];
 
   async function setPipeline(statut: PipelineStatus): Promise<void> {
-    if (usingFacets) return;
     if (!allowMarquage || !lotVersionId || !noLot || !citySlug || prospectSaving) return;
     prospectSaving = true;
     prospectError = null;
@@ -253,7 +227,6 @@
   }
 
   async function toggleEnVente(): Promise<void> {
-    if (usingFacets) return;
     if (!allowMarquage || !lotVersionId || !noLot || !citySlug || prospectSaving) return;
     prospectSaving = true;
     prospectError = null;
@@ -665,14 +638,13 @@
         {/if}
       </section>
 
-      <!-- Section Marquage équipe + notes (CS-L3) ─────────────────────────── -->
-      <section aria-labelledby="section-notes">
+      <!-- Section Marquage équipe (CS-L3) ─────────────────────────────────── -->
+      <section aria-labelledby="section-marquage">
         <h3
-          id="section-notes"
-          class="mb-2 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-500"
+          id="section-marquage"
+          class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500"
         >
-          <MessageSquare class="h-3.5 w-3.5 text-teal-600 shrink-0" aria-hidden="true" />
-          Marquage équipe & notes
+          Marquage équipe
         </h3>
 
         {#if !citySlug}
@@ -687,59 +659,31 @@
             class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-400"
             data-testid="fiche-prospect-loading"
           >
-            Chargement des marques et notes…
+            Chargement des marques…
           </div>
         {:else if prospectError}
           <div
             class="rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-xs text-amber-800"
             data-testid="fiche-prospect-error"
           >
-            Marquage/notes indisponibles — {prospectError}.
+            Marquage indisponible — {prospectError}.
           </div>
         {:else}
           <div class="space-y-3" data-testid="fiche-prospect-state">
-            {#if usingFacets}
-              {#if !facetState}
-                <p class="text-xs text-slate-500" role="status">Facettes indisponibles.</p>
+            <div class="flex flex-wrap gap-1.5">
+              {#if pipelineMark}
+                <Badge tone={pipelineMark.statut === "ecarte" ? "neutral" : "success"} class="text-xs">
+                  Pipeline : {prospectStatusLabel(pipelineMark.statut)}
+                </Badge>
               {:else}
-              <div class="flex flex-wrap gap-1.5" data-testid="fiche-facet-state">
-                <Badge tone={facetState?.selectionActive ? "success" : "neutral"} class="text-xs">
-                  Sélection : {facetState?.selectionActive ? "active" : "inactive"}
-                </Badge>
-                <Badge
-                  tone={facetState?.pipelineStatus ? "success" : "neutral"}
-                  class="text-xs"
-                >
-                  Pipeline : {facetState?.pipelineStatus === "sollicite"
-                    ? "Sollicité"
-                    : facetState?.pipelineStatus === "lettre_envoyee"
-                      ? "Lettre envoyée"
-                      : "inactif"}
-                </Badge>
-                <Badge tone={facetState?.marketActive ? "warning" : "neutral"} class="text-xs">
-                  Marché : {facetState?.marketActive ? "En vente" : "inactif"}
-                </Badge>
-                <Badge tone={facetState?.archivedActive ? "neutral" : "success"} class="text-xs">
-                  Archive : {facetState?.archivedActive ? "écarté" : "visible"}
-                </Badge>
-              </div>
+                <Badge tone="neutral" class="text-xs">Pipeline : non marqué</Badge>
               {/if}
-            {:else}
-              <div class="flex flex-wrap gap-1.5">
-                {#if pipelineMark}
-                  <Badge tone={pipelineMark.statut === "ecarte" ? "neutral" : "success"} class="text-xs">
-                    Pipeline : {prospectStatusLabel(pipelineMark.statut)}
-                  </Badge>
-                {:else}
-                  <Badge tone="neutral" class="text-xs">Pipeline : non marqué</Badge>
-                {/if}
-                {#if marketMark}
-                  <Badge tone="warning" class="text-xs">Marché : {prospectStatusLabel(marketMark.statut)}</Badge>
-                {/if}
-              </div>
-            {/if}
+              {#if marketMark}
+                <Badge tone="warning" class="text-xs">Marché : {prospectStatusLabel(marketMark.statut)}</Badge>
+              {/if}
+            </div>
 
-            {#if allowMarquage && !usingFacets}
+            {#if allowMarquage}
               <div class="space-y-2 border-t border-slate-100 pt-2" data-testid="fiche-prospect-edit">
                 <div class="flex flex-wrap gap-1.5">
                   {#each PIPELINE_ACTIONS as action (action.statut)}
@@ -763,7 +707,7 @@
                 </div>
                 {#if !lotVersionId}
                   <p class="text-[11px] text-slate-400 italic" data-testid="fiche-prospect-no-version">
-                    Statuts pipeline/marché désactivés : ce lot n'expose pas encore son identifiant de version (lotVersionId) côté collection geo. Les notes d'équipe restent possibles ci-dessous.
+                    Statuts pipeline/marché désactivés : ce lot n'expose pas encore son identifiant de version (lotVersionId) côté collection geo.
                   </p>
                 {/if}
               </div>
@@ -775,23 +719,6 @@
           </div>
         {/if}
 
-        <!-- Notes d'équipe §2 (endpoint unifié + temps réel SSE) — ouvert à tous
-             les approuvés (serveur = autorité author-only ; édition/suppression
-             seulement sur ses propres notes). Indépendant du gate allowMarquage. -->
-        {#if citySlug && noLot}
-          <div class="mt-3 border-t border-slate-100 pt-3" data-testid="fiche-annotations">
-            <div class="mb-1.5 flex items-center gap-2">
-              <span class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-                Notes d'équipe
-              </span>
-              <AnnotationBadge count={annotationCount} />
-            </div>
-            <SignalAnnotations
-              target={{ type: "lot", id: noLot, citySlug }}
-              onCount={(n) => (annotationCount = n)}
-            />
-          </div>
-        {/if}
       </section>
 
       <!-- Section Lien Google Maps ─────────────────────────────────────────── -->
