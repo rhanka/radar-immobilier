@@ -6,11 +6,12 @@ import { mintGrant } from "./preview-grant.js";
 import { fingerprintReaderProfile, createFixtureAuthority } from "./reader-profile.js";
 import { releaseCspForHtml } from "./release-files.js";
 
-async function token() {
+async function token(basketScope = false) {
   return mintGrant({ ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000",
     releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "s1",
     profileName: "demo", policyRevision: "pol-001", profileFingerprint: fingerprintReaderProfile({
-      name: "demo", policyRevision: "pol-001", capabilities: ["geo.read", "signals.protected-read"] }) }, GRANT_SECRET, 1000);
+      name: "demo", policyRevision: "pol-001", capabilities: ["geo.read", "signals.protected-read"] }),
+    ...(basketScope ? { basketScope: true as const } : {}) }, GRANT_SECRET, 1000);
 }
 describe("published release isolation", () => {
   it.each(["script", "style"])("should hash interpreted %s text after quoted HTML attributes", (tag) => {
@@ -73,8 +74,10 @@ describe("published release isolation", () => {
       .toContain(`'sha256-${createHash("sha256").update(script).digest("base64")}'`);
   });
   it("should reject duplicate operation parameters", async () => {
-    const response = await makeApp().request(`https://${HOST}/__reader/api/baskets.context.v1?workspaceId=x&workspaceId=y&grant=${await token()}`, {
-      headers: { host: HOST, cookie: await credentials("reader-alice", "s1", 1000) } });
+    // Lot I2: H5 business calls require the consented session; the duplicate
+    // check runs after the consent gate, so this fixture is consented.
+    const response = await makeApp().request(`https://${HOST}/__reader/api/baskets.context.v1?workspaceId=x&workspaceId=y&grant=${await token(true)}`, {
+      headers: { host: HOST, cookie: await credentials("reader-alice", "s1", 1000, { basketScope: true }) } });
     expect(response.status).toBe(400);
   });
 });

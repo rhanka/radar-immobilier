@@ -28,9 +28,11 @@ export function makeApp(now: () => number = () => 1_000) {
     grantSecret: GRANT_SECRET, sessionSecret: SESSION_SECRET, issuer: ISSUER, now });
 }
 
-export async function credentials(readerSub: string, sessionId: string, nowMs: number): Promise<string> {
+export async function credentials(readerSub: string, sessionId: string, nowMs: number,
+  options: { basketScope?: boolean } = {}): Promise<string> {
   return mintSessionCookie({ sid: sessionId, readerSub,
-    artifactId: "123e4567-e89b-12d3-a456-426614174000", createdAt: nowMs, expiresAt: nowMs + 900_000 },
+    artifactId: "123e4567-e89b-12d3-a456-426614174000", createdAt: nowMs, expiresAt: nowMs + 900_000,
+    ...(options.basketScope === true ? { basketScope: true as const } : {}) },
   SESSION_SECRET).split(";")[0]!;
 }
 

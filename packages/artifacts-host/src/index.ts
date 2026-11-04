@@ -103,3 +103,7 @@ export {
   findDesignKitAsset,
   type DesignKitAsset,
 } from "./design-kit.js";
+export {
+  isLegacyReaderBridge,
+  upgradeLegacyReaderBridge,
+} from "./reader-bridge-compat.js";
