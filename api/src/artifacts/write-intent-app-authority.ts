@@ -19,6 +19,13 @@ import { lockPublishedWriteAuthority } from "./published-write-authority.js";
 
 export interface WriteAppDeps extends AppGuardDeps {
   db: Database;
+  /**
+   * Gate B at write confirmation time (reader-consent design §3.3): a
+   * preparation awaiting the user's in-app confirmation re-checks the live
+   * `baskets.write.prepare` row before executing. Absent keeps the
+   * historical flow; a store failure fails closed.
+   */
+  basketConsent?: import("./reader-consent.js").BasketConsentGate | undefined;
   challengeKeys: ReadonlyMap<string, Uint8Array>;
   /** PW-C supplies rendering and command dispatch after its own qualification. */
   renderSummary?: (c: Context, row: PwIntentRow, bootstrap: { csrf: string; challengeToken: string }) => Response;

@@ -18,6 +18,8 @@ import { renderWriteIntentLogin, renderWriteIntentManagement, renderWriteIntentS
 export interface AppSurfaceConfig extends AppGuardDeps {
   db: Database;
   challengeKeys: ReadonlyMap<string, Uint8Array>;
+  /** Gate B at confirmation time; absent keeps the historical flow. */
+  basketConsent?: WriteAppDeps["basketConsent"];
 }
 
 /** Build the live WriteAppDeps: PW stays closed when the caller passes none. */
@@ -29,6 +31,7 @@ export function createWriteAppSurface(config: AppSurfaceConfig): WriteAppDeps {
     nowMs: config.nowMs,
     sessionSecret: config.sessionSecret,
     db: config.db,
+    ...(config.basketConsent ? { basketConsent: config.basketConsent } : {}),
     challengeKeys: config.challengeKeys,
     renderSummary: (c, row, bootstrap) => renderWriteIntentSummary(c, row, bootstrap),
     renderManagement: (c, row, bootstrap) => renderWriteIntentManagement(c, row, bootstrap),

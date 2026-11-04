@@ -140,4 +140,24 @@ describe("page write listener", () => {
     expect(await response.json()).toMatchObject({ error: { code: "write_grant_required" } });
     expect(forward).not.toHaveBeenCalled();
   });
+
+  it("should refuse prepare without a live write-prepare consent and forward with one (Gate B)", async () => {
+    const forward = vi.fn(async () => new Response(JSON.stringify(prepared(UUID).body), { status: 201,
+      headers: { "content-type": "application/json" } }));
+    const refused = await pageWriteListenerRoute({ ...depsFor(forward),
+      basketConsent: { hasLiveConsent: async () => false } }).request(prepareRequest());
+    expect(refused.status).toBe(403);
+    expect(await refused.json()).toMatchObject({ ok: false,
+      error: { code: "basket_consent_required", action: "consent_baskets" } });
+    expect(forward).not.toHaveBeenCalled();
+    const allowed = await pageWriteListenerRoute({ ...depsFor(forward),
+      basketConsent: { hasLiveConsent: async (readerSub, artifactId, scopeId) => {
+        expect(readerSub).toBe("reader");
+        expect(artifactId).toBe("artifact-1");
+        expect(scopeId).toBe("baskets.write.prepare");
+        return true;
+      } } }).request(prepareRequest());
+    expect(allowed.status).toBe(201);
+    expect(forward).toHaveBeenCalledTimes(1);
+  });
 });

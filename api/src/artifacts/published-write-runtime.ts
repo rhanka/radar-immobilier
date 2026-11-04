@@ -11,12 +11,15 @@ import { writeIntentH5Route } from "./write-intent-h5-route.js";
 import { createWriteAppSurface } from "./write-intent-app-surface.js";
 import { PUBLISHED_WRITE_SCRIPT, publishedWriteBootstrap } from "./published-write-bootstrap.js";
 import { writeIntentError } from "./write-intent-errors.js";
+import type { BasketConsentGate } from "./reader-consent.js";
 
 export function createPublishedWriteRuntime(options: {
   db: Database; auth: AuthConfig; accounts: AccountStatusQueryable;
   storage: ReturnType<typeof createStoredReader>; scope: string; contentBase: string;
   readIssuer: GrantIssuer; readGrantSecret: string; sessionSecret: string;
   env: Record<string, string | undefined>;
+  /** Gate B for write preparation and confirmation; absent keeps the historical flow. */
+  consent?: BasketConsentGate | undefined;
 }) {
   const domain = resolvePwIdentityDomain(options.auth, options.env["PW_IDENTITY_TIER"]);
   const grantSecret = options.env["PW_WRITE_GRANT_SECRET"] ?? "";
@@ -34,9 +37,11 @@ export function createPublishedWriteRuntime(options: {
   const h5 = { ...page, db: options.db, challengeKeyId: "published-write-v1",
     confirmationBaseUrl: `${domain.appOrigin}/artifact-write/intents`,
     managementBaseUrl: `${domain.appOrigin}/artifact-write/intents`,
+    ...(options.consent ? { basketConsent: options.consent } : {}),
     statusBaseUrl: `${domain.appOrigin}/api/v1/artifacts/reader/facets/write-intents` };
   const receiver = writeIntentH5Route(h5);
   const pageWrite = pageWriteListenerRoute({ ...page, contentBase: options.contentBase, applicationOrigin: domain.appOrigin,
+    ...(options.consent ? { basketConsent: options.consent } : {}),
     forward: (request) => Promise.resolve(receiver.fetch(request)) });
   for (const path of [PW_BOOTSTRAP_PATH, PW_SCRIPT_PATH]) pageWrite.get(path, async (c) => {
     c.header("Cache-Control", "private, no-store");
@@ -55,5 +60,6 @@ export function createPublishedWriteRuntime(options: {
   return { domain, permitsWrite, pageWrite, h5,
     application: createWriteAppSurface({ db: options.db, auth: options.auth, domain,
       accounts: options.accounts, sessionSecret: options.auth.sessionSecret,
+      ...(options.consent ? { basketConsent: options.consent } : {}),
       challengeKeys: new Map([["published-write-v1", new TextEncoder().encode(challengeSecret)]]) }) };
 }

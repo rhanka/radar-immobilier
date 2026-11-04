@@ -12,7 +12,8 @@
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { applyReaderContentHeaders } from "./content-isolation.js";
-import { timingSafeEqual } from "node:crypto";
+import { randomUUID, timingSafeEqual } from "node:crypto";
+import { BASKET_WRITE_PREPARE_SCOPE_ID, type BasketConsentGate } from "./reader-consent.js";
 import { projectPageWriteResponse } from "./write-intent-page-response.js";
 import { parseContentHost } from "./content-host.js";
 import { hasDuplicateJsonKeys } from "./write-intent-binding.js";
@@ -30,6 +31,27 @@ export interface PageListenerDeps extends PageWriteAuthorityDeps {
   /** Fixed H receiver; same-process sub-app or server-to-server fetch. */
   forward: (req: Request) => Promise<Response>;
   nowMs?: (() => number) | undefined;
+  /**
+   * Gate B for write preparation: the live `baskets.write.prepare` row is
+   * re-read before any write grant is minted. Absent keeps the historical
+   * flow; a store failure fails closed.
+   */
+  basketConsent?: BasketConsentGate | undefined;
+}
+
+/** Uniform H5 consent refusal: the bridge navigates to /__reader/consent, then replays once. */
+export function writePrepareConsentRefusal(c: { json: (body: unknown, status: number) => Response }): Response {
+  return c.json({ ok: false, error: { code: "basket_consent_required",
+    message: "Write preparation needs the baskets consent.",
+    retryable: false, action: "consent_baskets" }, requestId: randomUUID() }, 403);
+}
+
+async function hasLiveWritePrepareConsent(deps: Pick<PageListenerDeps, "basketConsent">,
+  readerSub: string, artifactId: string): Promise<boolean> {
+  if (!deps.basketConsent) return true;
+  try {
+    return await deps.basketConsent.hasLiveConsent(readerSub, artifactId, BASKET_WRITE_PREPARE_SCOPE_ID);
+  } catch { return false; }
 }
 
 const INTERNAL_HEADERS = ["x-preview-write-grant", "x-preview-session"];
@@ -113,6 +135,10 @@ export function pageWriteListenerRoute(deps: PageListenerDeps | null): Hono {
         c.req.header("x-reader-instance") !== page.pageInstanceId ||
         expected.length < 32 || csrf.length !== expected.length || !timingSafeEqual(csrf, expected)) {
         throw new FacetError(403, "csrf_refused");
+      }
+      // Gate B: no write grant without a live write-prepare consent row.
+      if (!await hasLiveWritePrepareConsent(deps, page.grant.readerSub, page.grant.artifactId)) {
+        return writePrepareConsentRefusal(c);
       }
       const grant = await mintPageWriteGrant(page, deps, (deps.nowMs ?? Date.now)());
       const headers = forwardHeaders(c, grant);
