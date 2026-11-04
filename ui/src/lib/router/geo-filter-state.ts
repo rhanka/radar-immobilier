@@ -1,4 +1,3 @@
-import { SHOW_DISCARDED_FILTER_KEY } from "./geo-route.js";
 import { EVAL_CATEGORIES, USAGE_GROUPS, type EvalLotFilter } from "$lib/maps/eval-lot-filters.js";
 import { ZONE_KIND_GROUPS, type ZoneKindFilter } from "$lib/maps/zone-kind-filter.js";
 import { bAxesFromVivierKey, DEFAULT_B_AXES, keyForVivierB, type BAxes } from "$lib/signals/vivier-view-mode.js";
@@ -41,12 +40,6 @@ export interface GeoFilterState {
   lots: EvalLotFilter;
   zoneKinds: ZoneKindFilter;
   zoneMillesime: string | null;
-  /**
-   * Discarded-signals reveal. Optional so older constructed states keep
-   * compiling; readGeoFilters always sets it. Written to the URL only when
-   * true, never to localStorage, and never counted as a business restriction.
-   */
-  showDiscarded?: boolean;
   lotsEnabled?: boolean;
   cptaqEnabled?: boolean;
   citySearch?: string;
@@ -70,7 +63,6 @@ export function unrestrictedGeoFilters(): GeoFilterState {
     lots: { category: "all", usages: new Set(), superficieMin: 0 },
     zoneKinds: new Set(),
     zoneMillesime: null,
-    showDiscarded: false,
     lotsEnabled: true,
     cptaqEnabled: false,
     citySearch: "",
@@ -133,14 +125,14 @@ function readDateBasis(value: (key: string) => string | undefined): DocumentDate
   return ACQUISITION_DATE_BASIS_URL_VALUES.has(value("dateBasis") ?? "") ? "scrap" : "document";
 }
 
+/** Retired triage reveal key: stale shared links may still carry it; it never restricts. */
+const RETIRED_TRIAGE_KEYS = new Set(["showDiscarded"]);
+
 /** Omitted restrictions are unrestricted, independent of browser preferences. */
 export function readGeoFilters(filters: Record<string, readonly string[]>, now = Date.now()): GeoFilterState {
   const value = (key: string) => filters[key]?.[0];
   const legacy = filters.subset?.flatMap((item) => item.split("|"));
-  // The reveal is not a restriction: a link carrying only showDiscarded still
-  // opens on the product defaults (plus the reveal).
-  const restrictionKeys = Object.keys(filters).filter((key) => key !== SHOW_DISCARDED_FILTER_KEY);
-  const showDiscarded = value(SHOW_DISCARDED_FILTER_KEY) === "1";
+  const restrictionKeys = Object.keys(filters).filter((key) => !RETIRED_TRIAGE_KEYS.has(key));
   if (legacy || filters.legacyLayers || restrictionKeys.length === 0) {
     const defaults = defaultGeoFilters(now);
     if (legacy) defaults.axes = bAxesFromVivierKey(legacy.includes("vivier-v2") ? legacy.join("|") : "vivier-v2");
@@ -151,7 +143,6 @@ export function readGeoFilters(filters: Record<string, readonly string[]>, now =
       defaults.timeRange = readTimeRange(value, now);
       defaults.dateBasis = dateBasisForTimeRange(defaults.timeRange, readDateBasis(value));
     }
-    defaults.showDiscarded = showDiscarded;
     return defaults;
   }
   const category = EVAL_CATEGORIES.find(({ id }) => id === value("lotCategory"))?.id ?? "all";
@@ -169,7 +160,6 @@ export function readGeoFilters(filters: Record<string, readonly string[]>, now =
     lots: { category, usages, superficieMin: Number.isFinite(minimum) && minimum > 0 ? minimum : 0 },
     zoneKinds: new Set(ZONE_KIND_GROUPS.filter(({ id }) => filters.zoneKind?.includes(id)).map(({ id }) => id)),
     zoneMillesime: value("zoneMillesime") ?? null,
-    showDiscarded,
     lotsEnabled: value("lots") !== "0",
     cptaqEnabled: value("cptaq") === "1",
     citySearch: value("citySearch") ?? "",
@@ -191,8 +181,6 @@ export function writeLotFilters(lots: EvalLotFilter): Record<string, string[]> {
 export function writeGeoFilters(state: GeoFilterState): Record<string, string[]> {
   const filters: Record<string, string[]> = {};
   const flag = (key: string, enabled: boolean) => { if (enabled) filters[key] = ["1"]; };
-  // URL-only reveal: written when true, never persisted to localStorage.
-  flag(SHOW_DISCARDED_FILTER_KEY, state.showDiscarded === true);
   flag("zonage", state.axes.z);
   flag("residentiel", state.axes.r);
   flag("precoce", state.axes.p);
@@ -216,7 +204,7 @@ export function writeGeoFilters(state: GeoFilterState): Record<string, string[]>
     if (query) filters[key] = [query];
   }
   // Keep "everything unchecked, no period" distinct from the product defaults.
-  if (Object.keys(filters).every((key) => key === SHOW_DISCARDED_FILTER_KEY)) filters.period = ["all"];
+  if (Object.keys(filters).length === 0) filters.period = ["all"];
   return filters;
 }
 

@@ -1,7 +1,8 @@
 /**
  * Scoped signal reads for one city (6H):
  * GET /api/v1/workspaces/:ws/signal-facets/coherent-city (visible nodes plus
- * archive heads, one coherent snapshot) and .../reveal for archived targets.
+ * archive heads, one coherent snapshot). The UI renders the visible nodes
+ * read-only; it never re-reads archived targets.
  *
  * Anti-invention: an authorized city without signal nodes is an explicit
  * empty state; a refusal or an unavailable scope is an error, never a list.
@@ -580,7 +581,7 @@ export interface GraphSignalDetailResponse {
   legacyProjection: LegacyZmpProjection | null;
   /** Visible nodes: effectively discarded targets are never served here. */
   nodes: GraphSignalNode[];
-  /** Archive heads of the city; archived targets open through `reveal`. */
+  /** Archive heads of the city as served (the read-only UI ignores them). */
   heads: CoherentArchiveHead[];
   counts: { total: number; hidden: number; visible: number; selected: number };
 }
@@ -687,67 +688,6 @@ export async function fetchGraphSignalDetail(
     nodes: body.signals.map(parseServedSignalNode),
     heads: body.heads as CoherentArchiveHead[],
     counts: body.counts as GraphSignalDetailResponse["counts"],
-  };
-}
-
-export interface RevealedSignal {
-  /** Re-read archived node; `facetFingerprint` is the reveal fingerprint. */
-  node: GraphSignalNode;
-  displayedFingerprint: string;
-  heads: { personal: CoherentArchiveHead["personal"]; workspace: CoherentArchiveHead["workspace"] };
-  effectiveDiscarded: boolean;
-}
-
-/**
- * `GET .../signal-facets/reveal?citySlug&type&id`: authorized re-read of one
- * archived target. A restore must carry the fingerprint returned here.
- */
-export async function fetchRevealedSignal(
-  scope: SignalScope,
-  target: { citySlug: string; type: string; id: string },
-  opts: FetchGraphSignalDetailOptions = {},
-): Promise<RevealedSignal> {
-  const query = new URLSearchParams({ citySlug: target.citySlug, type: target.type, id: target.id });
-  const label = `reveal/${target.citySlug}/${target.id}`;
-  const body = await readScoped<Record<string, unknown>>(
-    scopedSignalFacetsPath(scope, `reveal?${query.toString()}`), label, opts);
-  if (!isRecord(body) || typeof body.displayedFingerprint !== "string" || !isRecord(body.heads)) {
-    throw new Error(`${label}: invalid response`);
-  }
-  const node = parseServedSignalNode({ ...(isRecord(body.signal) ? body.signal : {}),
-    facetFingerprint: body.displayedFingerprint });
-  return {
-    node,
-    displayedFingerprint: body.displayedFingerprint,
-    heads: body.heads as RevealedSignal["heads"],
-    effectiveDiscarded: body.effectiveDiscarded === true,
-  };
-}
-
-/**
- * Show-discarded view: append re-read archived nodes after the visible ones.
- * The legacy A authority is extended from the server Z/M/P flags those
- * revealed nodes carry, in the same order, so the A projection stays the
- * server's exact id list; a revealed node without flags leaves it as-is
- * (the projection then reports itself unavailable, never partial).
- */
-export function appendRevealedNodes(
-  detail: GraphSignalDetailResponse, revealed: readonly RevealedSignal[],
-): GraphSignalDetailResponse {
-  if (revealed.length === 0) return detail;
-  const extra = revealed.map((item) => item.node);
-  const authority = detail.legacyProjection;
-  const extraIds = extra.filter((node) => {
-    const flags = node.legacySubset?.flags;
-    return flags !== undefined && flags.z && flags.m && flags.p;
-  }).map((node) => node.id);
-  return {
-    ...detail,
-    nodes: [...detail.nodes, ...extra],
-    legacyProjection: authority === null ? null : {
-      version: authority.version,
-      a: { count: authority.a.count + extraIds.length, signalIds: [...authority.a.signalIds, ...extraIds] },
-    },
   };
 }
 
