@@ -44,7 +44,7 @@ export async function startArtifactControl(options: {
     return { auth, accounts: pool, backend, readActivation, storageScope: parsed.storageScope,
       ...(confirmation ? { confirmation } : {}),
       readerStorage: createStoredReader(pool, parsed.storageScope, contentBase, host.blobs),
-      // Reader consent LOT 1 — persistent opening consent for the bypass.
+      // Reader consent — durable BASKETS consent (Gate B), never the opening.
       readerConsent: createReaderConsentService(pool, parsed.storageScope) };
   } catch (err) {
     logger.error({ err }, "artifact control unavailable; API remains available");

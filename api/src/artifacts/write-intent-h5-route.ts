@@ -13,9 +13,17 @@ import { FacetError } from "../services/facets/target.js";
 import { writeIntentError } from "./write-intent-errors.js";
 import { projectWriteIntentStatus } from "./write-intent-status.js";
 import { readPageBoundWriteIntent } from "./write-intent-h5-authority.js";
+import { BASKET_WRITE_PREPARE_SCOPE_ID, type BasketConsentGate } from "./reader-consent.js";
+import { writePrepareConsentRefusal } from "./write-intent-page-listener.js";
 
 export interface H5WriteDeps extends PrepareDeps, PageWriteAuthorityDeps {
   db: Database;
+  /**
+   * Gate B for write preparation: the live `baskets.write.prepare` row is
+   * re-read after grant verification, before any intent is prepared.
+   * Absent keeps the historical flow; a store failure fails closed.
+   */
+  basketConsent?: BasketConsentGate | undefined;
 }
 
 export function writeIntentH5Route(deps: H5WriteDeps | null): Hono {
@@ -46,6 +54,15 @@ export function writeIntentH5Route(deps: H5WriteDeps | null): Hono {
       const grant = await verifyWriteGrant(c.req.header("x-preview-write-grant") ?? "",
         page.grant, deps.grantSecret, (deps.nowMs ?? Date.now)());
       if (!grant) throw new FacetError(403, "write_grant_required");
+      // Gate B: no prepared intent without a live write-prepare consent row.
+      if (deps.basketConsent) {
+        let allowed = false;
+        try {
+          allowed = await deps.basketConsent.hasLiveConsent(
+            grant.readerSub, grant.artifactId, BASKET_WRITE_PREPARE_SCOPE_ID);
+        } catch { allowed = false; }
+        if (!allowed) return writePrepareConsentRefusal(c);
+      }
       const prepared = await prepareWriteIntent(deps.db, grant, body, key, page.pageInstanceId,
         { ...deps, authorityReferences: page.authorityReferences,
           authorityExpiresAtMs: Math.min(page.pageExpiresAtMs, page.delegationExpiresAtMs) });
