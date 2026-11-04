@@ -9,7 +9,7 @@ import { p0bFixture } from "./p0b.test-support.js";
  * Q1). The G1 mirror (named belt, audit, mode guards) stays covered by
  * p0b.integration; this file covers the G2 directory binding only.
  */
-describe("I2 sharing on G2", () => {
+describe.skipIf(!process.env.P0B_DATABASE_URL)("I2 sharing on G2", () => {
   let fixture: Awaited<ReturnType<typeof p0bFixture>>;
   // The host rate-limits commit attempts per actor and minute; the file
   // shares two pages (one for the grant cycle, one for the collab guard).
