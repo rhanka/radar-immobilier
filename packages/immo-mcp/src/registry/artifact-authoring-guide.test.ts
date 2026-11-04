@@ -58,7 +58,7 @@ describe("artifact authoring guide", () => {
     expect(guide.rule).toContain("Sentropic DS is mandatory");
     expect(guide.data.warning).toContain("Never call /api/*");
     expect(guide.data.operations.map((op) => op.name)).toEqual(["workspaces.list.v1", "baskets.context.v1", "baskets.search.v1",
-      "baskets.state.v1", "geo.read.v1", "signals.protected-read.v1", "status.closed.v1"]);
+      "baskets.state.v1", "geo.read.v1", "geo.cities.v1", "geo.collection-items.v1", "signals.protected-read.v1", "status.closed.v1"]);
     expect(guide.checklist.length).toBeGreaterThan(0);
     expect(guide.frameworks.map((entry) => entry.framework))
       .toEqual(["plain JS", "React", "Svelte", "Vue", "Angular"]);
@@ -86,6 +86,22 @@ describe("artifact authoring guide", () => {
     }
   });
 
+  it("should tell pages how to load the I-4 map base with tiles plus geo ops", () => {
+    const mapBase = getAuthoringGuide().mapBase;
+    const howTo = mapBase.howTo.join("\n");
+    for (const fragment of ["createMap", "basemapTemplate", "/__artifacts/tiles/v1/{z}/{x}/{y}",
+      "geo.cities.v1", "geo.collection-items.v1", "setZones", "setLots", "fitToBounds",
+      "setPaint", "worker-src 'none'", "img-src"]) {
+      expect(howTo, fragment).toContain(fragment);
+    }
+    expect(howTo).toContain("PR #996");
+    const ops = Object.fromEntries(getAuthoringGuide().data.operations.map((op) => [op.name, op]));
+    expect(ops["geo.read.v1"]!.response).toContain("geo.collection-items.v1");
+    expect(ops["geo.collection-items.v1"]!.response).toContain("truncated");
+    expect(ops["geo.collection-items.v1"]!.response).toContain("geo_governed_not_served");
+    expect(ops["geo.cities.v1"]!.path).toBe("/__reader/api/geo.cities.v1");
+  });
+
   it("should require the published audit CLI and block findings and tool errors", () => {
     const checklist = getAuthoringGuide().checklist.join("\n");
     expect(checklist).toContain("npx --yes -p @sentropic/design-system-skills@0.1.0 design audit ./index.html");
@@ -95,7 +111,7 @@ describe("artifact authoring guide", () => {
 
   it("should preserve artifact identity when editing and disclose unavailable lifecycle actions", () => {
     const guide = getAuthoringGuide();
-    expect(guide.revision).toBe(ARTIFACT_P0B ? "2026-11-01-p0b-r3" : "2026-11-01-r5");
+    expect(guide.revision).toBe(ARTIFACT_P0B ? "2026-11-01-p0b-r4" : "2026-11-01-r6");
     const editing = guide.lifecycle.editing.join("\n");
     expect(editing).toContain("artifacts_get_source → edit → artifacts_publish");
     expect(editing).toContain("same artifactId");

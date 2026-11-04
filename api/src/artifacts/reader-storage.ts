@@ -7,8 +7,12 @@ import { normalizeReleasePath, type ReleaseFileProvider } from "./release-files.
 import { createSharedReaderTickets, type SharedReaderTickets } from "./reader-tickets.js";
 
 // The host grants only read capabilities; publisher profile fields cannot widen them.
+// I-1B (converged-geo-mesh r3 §2): `geo.read` gates the governed catalogue
+// operations `geo.cities.v1` / `geo.collection-items.v1` (municipal,
+// non-personal data — no basket consent). Isolated two-line change for the
+// I2-partage rebase; the revision bump re-approves existing readers.
 export const BASKET_READER_PROFILE: ReaderProfile = {
-  name: "radar-baskets", policyRevision: "basket-read-v1", capabilities: ["signals.protected-read"],
+  name: "radar-baskets", policyRevision: "basket-read-v2", capabilities: ["signals.protected-read", "geo.read"],
 };
 
 export function createStoredReader(pool: pg.Pool, scope: string, contentBase: string,
