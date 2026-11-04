@@ -63,6 +63,29 @@ export const GOVERNED_LISTING_TTL_MS_DEFAULT = 10 * 60_000;
 /** TTL of the served-contract pointer cache (P1 status is near-static). */
 const POINTER_TTL_MS = 5 * 60_000;
 
+/**
+ * Serve one item's properties through the allowlist FIRST, then re-attach
+ * the contract-validated provenance envelopes. Composition order matters:
+ * `applyZonageAllowlist` drops `proof` / `immo_zone_lot_provenance`
+ * (they are not allowlisted fields), so the sanitiser output must be
+ * merged back AFTER the allowlist — never nested inside it.
+ * Shared with the reader geo service (I-1B): same fields on every path.
+ */
+export function serveZonageProperties(
+  collectionId: string,
+  rawProperties: Record<string, unknown>,
+  records: readonly ServedCollectionRecord[] = GOVERNED_SERVED_RECORDS,
+): Record<string, unknown> {
+  const allowed = applyZonageAllowlist(collectionId, rawProperties, records);
+  const sanitized = sanitizeFeatureProvenance({ ...rawProperties });
+  const out: Record<string, unknown> = { ...allowed };
+  if ("proof" in sanitized) out["proof"] = sanitized["proof"];
+  if ("immo_zone_lot_provenance" in sanitized) {
+    out["immo_zone_lot_provenance"] = sanitized["immo_zone_lot_provenance"];
+  }
+  return out;
+}
+
 export interface GovernedLocalZoneResolver {
   (collectionId: string): Promise<{
     type: string;
@@ -130,27 +153,6 @@ export function geoGovernedRoute(deps: GeoGovernedDeps = {}): Hono {
       process.env["GEO_OGC_BASE_URL"] ??
       DEFAULT_OGC_BASE_URL
     ).replace(/\/$/, "");
-
-  /**
-   * Serve one item's properties through the allowlist FIRST, then re-attach
-   * the contract-validated provenance envelopes. Composition order matters:
-   * `applyZonageAllowlist` drops `proof` / `immo_zone_lot_provenance`
-   * (they are not allowlisted fields), so the sanitiser output must be
-   * merged back AFTER the allowlist — never nested inside it.
-   */
-  function serveZonageProperties(
-    collectionId: string,
-    rawProperties: Record<string, unknown>,
-  ): Record<string, unknown> {
-    const allowed = applyZonageAllowlist(collectionId, rawProperties, records);
-    const sanitized = sanitizeFeatureProvenance({ ...rawProperties });
-    const out: Record<string, unknown> = { ...allowed };
-    if ("proof" in sanitized) out["proof"] = sanitized["proof"];
-    if ("immo_zone_lot_provenance" in sanitized) {
-      out["immo_zone_lot_provenance"] = sanitized["immo_zone_lot_provenance"];
-    }
-    return out;
-  }
 
   const defaultLocalResolver: GovernedLocalZoneResolver = async (collectionId) => {
     if (!deps.db) return null;
@@ -350,7 +352,7 @@ export function geoGovernedRoute(deps: GeoGovernedDeps = {}): Hono {
         ...feature,
         properties: serveZonageProperties(id, {
           ...(feature.properties ?? {}),
-        } as Record<string, unknown>),
+        } as Record<string, unknown>, records),
       }));
       c.header(GOVERNANCE_PROVENANCE_HEADER, GOVERNANCE_PROVENANCE_LIVE);
       return c.json({
@@ -375,7 +377,7 @@ export function geoGovernedRoute(deps: GeoGovernedDeps = {}): Hono {
           ...feature,
           properties: serveZonageProperties(id, {
             ...((feature.properties ?? {}) as Record<string, unknown>),
-          }),
+          }, records),
         }));
         const sliced = fallen.slice(0, limit);
         c.header(GOVERNANCE_PROVENANCE_HEADER, GOVERNANCE_PROVENANCE_FALLBACK);

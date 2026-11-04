@@ -39,6 +39,7 @@ import { adaptGrantToReader, canInvoke, type ApiReaderContext } from "./reader-c
 import type { AuthorityReader } from "./reader-profile.js";
 import { validateReaderResponse } from "./reader-responses.js";
 import {
+  isGeoReadOperation,
   isWorkspaceReadOperation,
   workspacesListParams,
   basketsContextParams,
@@ -49,6 +50,7 @@ import {
   validateOperationParams,
   type ReaderOperationName,
 } from "./reader-operations.js";
+import { GeoItemsRefusal } from "./reader-geo.js";
 import { READER_EXAMPLE_HTML } from "./reader-example.js";
 import {
   normalizeReleaseHtml,
@@ -273,7 +275,9 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
       applyReaderContentHeaders(c);
       return c.json({ error: "capability_unavailable" }, 503);
     }
-    const capability = op === "geo.read.v1" ? "geo.read" : "signals.protected-read";
+    // I-1B: the governed catalogue operations share the `geo.read` gate
+    // with the synthetic legacy `geo.read.v1` (isolated predicate).
+    const capability = isGeoReadOperation(op) ? "geo.read" : "signals.protected-read";
     if (!canInvoke(auth, capability, auth.releaseId)) return c.json({ error: "forbidden" }, 403);
     if (!deps.readOperation) return c.json({ error: "capability_unavailable" }, 503);
     if (isWorkspaceReadOperation(op)) {
@@ -315,6 +319,39 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
         return c.json(body);
       }
       catch { return c.json({ error: "capability_unavailable" }, 503); }
+    }
+    // ── I-1B governed catalogue operations (converged-geo-mesh r3 §2) ──
+    // Municipal, non-personal reads for an authorized reader: they MUST NOT
+    // trigger the deferred basket consent (triggers stay baskets.*,
+    // signals.query.v1 and workspace discovery). Bounded responses with
+    // numberMatched/numberReturned/truncated; served catalogue is
+    // known-licence qc-zonage only. Typed refusals (GeoItemsRefusal) answer
+    // before any upstream call; anything else stays 503. Isolated block for
+    // the I2-partage rebase — no line above or below is touched.
+    if (op === "geo.cities.v1" || op === "geo.collection-items.v1") {
+      const query = c.req.query();
+      const params = validateOperationParams(op, op === "geo.cities.v1" ? {} : {
+        collectionId: query["collectionId"] ?? "",
+        ...(query["limit"] !== undefined ? { limit: Number(query["limit"]) } : {}),
+        ...(query["bbox"] !== undefined ? { bbox: query["bbox"] } : {}),
+        ...(query["offset"] !== undefined ? { offset: Number(query["offset"]) } : {}),
+      });
+      if (!params.ok) {
+        applyReaderContentHeaders(c);
+        return c.json({ error: "invalid_params" }, 400);
+      }
+      applyReaderContentHeaders(c);
+      if (!await authorityCurrent(auth)) return c.json({ error: "unauthenticated" }, 401);
+      try {
+        const body = validateReaderResponse(op, await deps.readOperation(op, params.params, auth), auth.readerSub);
+        if (!stillOpen(auth)) return c.json({ error: "unauthenticated" }, 401);
+        if (!await authorityCurrent(auth)) return c.json({ error: "unauthenticated" }, 401);
+        return c.json(body);
+      }
+      catch (error) {
+        if (error instanceof GeoItemsRefusal) return c.json(error.body, error.status);
+        return c.json({ error: "capability_unavailable" }, 503);
+      }
     }
     const checked = validateOperationParams(op as ReaderOperationName, { ...Object.fromEntries(Object.entries(c.req.query()).filter(([key]) => key !== "grant")), city: c.req.query("city") ?? "valleyfield" });
     if (!checked.ok) {

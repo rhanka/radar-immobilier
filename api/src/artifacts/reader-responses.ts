@@ -12,6 +12,40 @@ const geoResponse = z.object({
 const signal = z.object({ id: z.string(), city: z.string(), kind: z.string(), detail: z.string().nullable() }).strict();
 const signalsResponse = z.object({ city: z.string(), reader: z.string(), signals: z.array(signal) }).strict();
 
+// ── I-1B governed geo responses (converged-geo-mesh r3 §2) ──
+// Bounded catalogue reads: cities of the served catalogue, and bounded
+// FeatureCollections with numberMatched/numberReturned/truncated. Field
+// content itself is enforced by the reader-geo allowlist, not here.
+const geoCitiesResponse = z.object({
+  ok: z.literal(true),
+  cities: z.array(z.object({
+    citySlug: z.string(),
+    zoneCount: z.number(),
+    lotCount: z.number(),
+    signalCount: z.number(),
+    collections: z.array(z.string()),
+  }).strict()),
+}).strict();
+
+const geoCollectionItemsResponse = z.object({
+  type: z.literal("FeatureCollection"),
+  features: z.array(z.object({
+    type: z.literal("Feature"),
+    geometry: z.unknown(),
+    properties: z.record(z.string(), z.unknown()),
+  }).strict()).max(1000),
+  numberMatched: z.number().int().nonnegative(),
+  numberReturned: z.number().int().nonnegative(),
+  truncated: z.boolean(),
+  collectionId: z.string(),
+  licenseId: z.string(),
+  contract: z.object({
+    status: z.string(),
+    snapshot_sha256: z.string().optional(),
+    reason: z.string().optional(),
+  }).strict(),
+}).strict();
+
 /** Discovery exposes labels and signal/basket availability, never account or membership details. */
 export const ReaderWorkspacesResponse = z.object({
   ok: z.literal(true),
@@ -32,6 +66,8 @@ export const ReaderWorkspacesResponse = z.object({
 export function validateReaderResponse(op: ReaderOperationName, value: unknown, readerSub: string): Record<string, unknown> {
   if (op === "workspaces.list.v1") return ReaderWorkspacesResponse.parse(value);
   if (op === "geo.read.v1") return geoResponse.parse(value);
+  if (op === "geo.cities.v1") return geoCitiesResponse.parse(value);
+  if (op === "geo.collection-items.v1") return geoCollectionItemsResponse.parse(value);
   if (op === "baskets.context.v1") return FacetContextResponse.parse(value);
   if (op === "baskets.search.v1") return SignalSearchResponse.parse(value);
   if (op === "baskets.state.v1") return SignalStateResponse.parse(value);
