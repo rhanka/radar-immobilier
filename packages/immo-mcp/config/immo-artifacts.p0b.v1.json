@@ -5,7 +5,7 @@
     "requireExpectedCurrentReleaseId": false,
     "resultEnvelopeVersion": 1
   },
-  "providerVersion": "0.2.5 || 0.2.6 || 0.3.0 || 0.2.8 || 0.2.9 || 0.2.10 || 0.2.12",
+  "providerVersion": "0.2.5 || 0.2.6 || 0.3.0 || 0.2.8 || 0.2.9 || 0.2.10 || 0.2.12 || 0.2.13",
   "policyRevision": "radar-c4-r2",
   "additionalToolScopes": {
     "artifacts_get_source": "immo:artifacts:read",
