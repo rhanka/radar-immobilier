@@ -56,12 +56,11 @@ describe("fetchGraphSignalsByCity — #4 fenêtre date (dateFrom/dateTo)", () =>
       dateBasis: "scrap", excludePiia: "1", excludeDerogations: "1" });
   });
 
-  it("forwards the reveal verbatim (showDiscarded=1), default stays hidden", async () => {
+  it("never sends the retired triage reveal key", async () => {
     const { calls } = stubFetch();
-    await fetchGraphSignalsByCity(SCOPE, { showDiscarded: true });
-    expect(calls[0]).toBe(`${BY_CITY}?showDiscarded=1`);
     await fetchGraphSignalsByCity(SCOPE);
-    expect(calls[1]).toBe(BY_CITY);
+    expect(calls[0]).toBe(BY_CITY);
+    expect(calls[0]).not.toContain("showDiscarded");
   });
 
   it("throws a typed error carrying the HTTP status", async () => {
@@ -131,8 +130,8 @@ describe("fetchGraphSignalsByCity — #4 fenêtre date (dateFrom/dateTo)", () =>
 describe("fetchGraphSignalsByCity — scoped aggregate (6H)", () => {
   it("reads the scoped by-city route, never the retired legacy aggregate", async () => {
     const { calls } = stubFetch();
-    await fetchGraphSignalsByCity(SCOPE, { dateFrom: "2026-01-01", showDiscarded: true });
-    expect(calls[0]).toBe(`${BY_CITY}?dateFrom=2026-01-01&showDiscarded=1`);
+    await fetchGraphSignalsByCity(SCOPE, { dateFrom: "2026-01-01" });
+    expect(calls[0]).toBe(`${BY_CITY}?dateFrom=2026-01-01`);
     expect(calls[0]).not.toContain("/api/graph-signals/");
   });
 

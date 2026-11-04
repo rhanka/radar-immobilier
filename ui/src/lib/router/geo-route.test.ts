@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  SHOW_DISCARDED_FILTER_KEY,
   buildFallbackZoneKey,
   buildGeoQuery,
   buildGeoRoute,
@@ -153,9 +152,9 @@ describe("geo route query state", () => {
     });
   });
 
-  it("carries the discarded reveal verbatim (filter.showDiscarded=1)", () => {
-    const query = buildGeoQuery({ filters: { [SHOW_DISCARDED_FILTER_KEY]: ["1"] } });
-    expect(query).toBe("?mode=signal&filter.showDiscarded=1");
-    expect(parseGeoQuery(query).filters).toEqual({ [SHOW_DISCARDED_FILTER_KEY]: ["1"] });
+  it("carries business filter keys verbatim (filter.zonage=1)", () => {
+    const query = buildGeoQuery({ filters: { zonage: ["1"] } });
+    expect(query).toBe("?mode=signal&filter.zonage=1");
+    expect(parseGeoQuery(query).filters).toEqual({ zonage: ["1"] });
   });
 });

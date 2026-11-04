@@ -1,21 +1,10 @@
 import { render, waitFor } from "@testing-library/svelte";
 import { describe, expect, it, vi } from "vitest";
 
-// §2 (PR2) : la fiche lot délègue les notes à SignalAnnotations (endpoint unifié
-// `/api/v1/prospects/notes` + temps réel SSE). On mocke la couche collab (aucun
-// fetch/EventSource réel) et le client legacy prospect-marks (pipeline/marché).
-vi.mock("$lib/collab/annotations-client.js", () => ({
-  listAnnotations: vi.fn(async () => []),
-  createAnnotation: vi.fn(async () => {}),
-  editAnnotation: vi.fn(async () => {}),
-  deleteAnnotation: vi.fn(async () => {}),
-}));
-vi.mock("$lib/collab/prospect-notes-stream.js", () => ({
-  subscribeNoteFrames: () => () => {},
-  noteMatchesTarget: () => false,
-}));
+// Lot file without notes: the collab layer was removed from the UI. Only the
+// prospect-marks client (pipeline/market, kept) is mocked.
 vi.mock("$lib/prospect/prospect-marks-client.js", () => ({
-  fetchProspectLotState: vi.fn(async () => ({ marks: [], notes: [] })),
+  fetchProspectLotState: vi.fn(async () => ({ marks: [] })),
   activePipelineMark: () => null,
   activeMarketMark: () => null,
   createProspectMark: vi.fn(async () => {}),
@@ -100,28 +89,51 @@ describe("LotFichePanel — audit des sources", () => {
   });
 });
 
-describe("LotFichePanel — notes d'équipe §2 (endpoint unifié + temps réel)", () => {
+describe("LotFichePanel — aucun bloc notes, aucun badge de facette lot", () => {
   const lotWithCity: LotFeature = {
     type: "Feature",
     geometry: null,
     properties: { noLot: "1 234 567", citySlug: "delson", lotVersionId: "v1" },
   };
 
-  it("délègue les notes au panneau d'annotations unifié (cible lot) et retire la saisie legacy", async () => {
+  it("ne rend aucun bloc notes (ni conteneur, ni saisie, ni badge)", async () => {
     const view = render(LotFichePanel, { props: { lot: lotWithCity, allowMarquage: true } });
-    // Le bloc annotations §2 est monté, avec le panneau présentiel (EntityAnnotations).
-    expect(view.getByTestId("fiche-annotations")).toBeTruthy();
-    await waitFor(() => expect(view.getByTestId("entity-annotations")).toBeTruthy());
-    // L'ancienne saisie de note legacy a disparu (désormais dans EntityAnnotations).
-    expect(view.queryByLabelText("Note d'équipe")).toBeNull();
-    expect(view.queryByText("Ajouter la note")).toBeNull();
+    await waitFor(() => expect(view.getByTestId("fiche-prospect-edit")).toBeTruthy());
+    expect(view.queryByTestId("fiche-annotations")).toBeNull();
+    expect(view.queryByTestId("entity-annotations")).toBeNull();
+    expect(view.queryByTestId("annotation-add")).toBeNull();
+    expect(view.queryByTestId("annotation-new")).toBeNull();
+    expect(view.queryByTestId("annotation-badge")).toBeNull();
+    expect(view.queryByPlaceholderText("Ajouter une note…")).toBeNull();
+    expect(view.container.textContent).not.toContain("Notes d'équipe");
+    expect(view.container.textContent).not.toContain("Chargement des notes");
+    expect(view.container.textContent).not.toContain("Aucune note.");
   });
 
-  it("garde le marquage pipeline/marché (legacy) indépendant des annotations", async () => {
+  it("ne rend aucun badge de facette lot (Sélection/Archive) et ignore les props retirées", async () => {
+    const legacyProps = {
+      lot: lotWithCity,
+      allowMarquage: true,
+      // Props supprimées : doivent rester ignorées sans casser le rendu.
+      lotFacetsActive: true,
+      facetState: { selectionActive: true, pipelineStatus: "sollicite", marketActive: true, archivedActive: true },
+    };
+    const view = render(LotFichePanel, {
+      props: legacyProps as unknown as { lot: LotFeature; allowMarquage: boolean },
+    });
+    await waitFor(() => expect(view.getByTestId("fiche-prospect-edit")).toBeTruthy());
+    expect(view.queryByTestId("fiche-facet-state")).toBeNull();
+    expect(view.container.textContent).not.toContain("Sélection :");
+    expect(view.container.textContent).not.toContain("Archive :");
+    expect(view.container.textContent).not.toContain("Facettes indisponibles.");
+  });
+
+  it("garde le marquage pipeline/marché prospect (conservé)", async () => {
     const view = render(LotFichePanel, { props: { lot: lotWithCity, allowMarquage: true } });
-    // Les boutons de marquage restent présents (gate allowMarquage), séparés des notes.
+    // Les boutons de marquage restent présents (gate allowMarquage).
     await waitFor(() => expect(view.getByTestId("fiche-prospect-edit")).toBeTruthy());
     expect(view.getByText("Favori")).not.toBeNull();
     expect(view.getByText("En vente")).not.toBeNull();
+    expect(view.getByText("Marquage équipe")).not.toBeNull();
   });
 });
