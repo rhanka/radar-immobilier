@@ -26,8 +26,8 @@ export interface MapKitAsset {
 export const MAP_KIT_ASSETS: readonly MapKitAsset[] = Object.freeze([
   {
     file: "map-base.mjs",
-    sha256Hex: "7f1ccf80fbd774969011465298f397cde9bdb362e84ce59c5e6fd736b5fb14d4",
-    sizeBytes: 27067,
+    sha256Hex: "c057ce8a5f703193daa505422d3a8a4ad1ee7d286b71c2997eae5c6d7c098719",
+    sizeBytes: 27653,
     mediaType: "text/javascript",
   },
   {
