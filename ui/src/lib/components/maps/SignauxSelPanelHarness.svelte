@@ -32,17 +32,6 @@
     DEFAULT_ZONE_MILLESIME_FILTER,
     type ZoneMillesimeFilter,
   } from "$lib/maps/zone-millesime-filter.js";
-  import {
-    refuseUnscopedFacetCommand,
-    type FacetCommandPoster,
-    type FacetAction,
-    type FacetCommandLaunch,
-    type FacetConflictNotice,
-    type FacetHeadsStatus,
-    type FacetTarget,
-    type ReasonCode,
-    type TargetFacetState,
-  } from "$lib/signals/signal-facets-client.js";
 
   export let selectedCity: CityMapEntry | null = null;
   export let detailNodes: GraphSignalNode[] = [];
@@ -65,45 +54,6 @@
     rawRef?: string | null;
     page?: number | null;
   }) => void = () => {};
-
-  // Lot 4 — mirror the personal basket props owned by SignauxMapView,
-  // with neutral defaults for the harness.
-  export let facetHeads: Map<string, TargetFacetState> = new Map();
-  export let facetHeadsState: FacetHeadsStatus = "ready";
-  export let facetReloading = false;
-  export let reasonCodes: ReasonCode[] | null = null;
-  export let facetCodesError: string | null = null;
-  export let facetCodesLoading = false;
-  export let facetsAllowed = false;
-  export let facetsNote: string | null = null;
-  export let showDiscarded = false;
-  export let onToggleShowDiscarded: (show: boolean) => void = () => {};
-  export let facetPostCommand: FacetCommandPoster = refuseUnscopedFacetCommand;
-  export let facetViewerKey: FacetCommandLaunch["viewerKey"] = null;
-  export let onFacetSaved: (
-    action: FacetAction,
-    target: FacetTarget,
-    launch?: FacetCommandLaunch,
-  ) => void | Promise<void> = () => {};
-  export let facetReloadError: string | null = null;
-  export let facetReloadAfterWrite = false;
-  export let onRetryFacetReads: () => void = () => {};
-  export let onFacetHeadsStale: (
-    target: FacetTarget,
-    launch: FacetCommandLaunch,
-    message: string,
-  ) => void = () => {};
-  export let facetConflictNotice: FacetConflictNotice | null = null;
-  export let onDismissFacetConflict: () => void = () => {};
-  export let discardedNotice: { target: FacetTarget; label: string } | null = null;
-  export let discardedActionError: string | null = null;
-  export let onUndoDiscard: (target: FacetTarget) => void = () => {};
-  export let onDismissDiscardedNotice: () => void = () => {};
-
-  function handleToggleShowDiscarded(show: boolean): void {
-    showDiscarded = show;
-    onToggleShowDiscarded(show);
-  }
 
   function handleLotFilterChange(next: EvalLotFilter): void {
     lotFilter = next;
@@ -150,27 +100,4 @@
   onZoneMillesimeFilterChange={handleZoneMillesimeFilterChange}
   onToggleKey={toggleBucketKey}
   {onOpenSource}
-  {facetHeads}
-  {facetHeadsState}
-  {facetReloading}
-  {reasonCodes}
-  {facetCodesError}
-  {facetCodesLoading}
-  {facetsAllowed}
-  {facetsNote}
-  {showDiscarded}
-  onToggleShowDiscarded={handleToggleShowDiscarded}
-  {facetPostCommand}
-  {facetViewerKey}
-  {onFacetSaved}
-  {facetReloadError}
-  {facetReloadAfterWrite}
-  {onRetryFacetReads}
-  {onFacetHeadsStale}
-  {facetConflictNotice}
-  {onDismissFacetConflict}
-  {discardedNotice}
-  {discardedActionError}
-  {onUndoDiscard}
-  {onDismissDiscardedNotice}
 />

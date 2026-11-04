@@ -1,8 +1,7 @@
 /**
  * Client for GET /api/v1/workspaces/:ws/signal-facets/by-city (6H scoped
  * aggregate): Signal + DesignationEvent counts per city from graph_nodes,
- * counted under the explicit workspace visibility (an effectively discarded
- * target is not counted unless `showDiscarded=1`).
+ * counted under the explicit workspace visibility.
  */
 
 import type { DocumentDateBasis, VivierV2Counts } from "@radar/domain";
@@ -58,11 +57,6 @@ export interface GraphSignalsByCityOptions {
   dateBasis?: DocumentDateBasis;
   excludePiia?: boolean;
   excludeDerogations?: boolean;
-  /**
-   * Reveal discarded signals: `showDiscarded=1` recalculates counters on
-   * the complete B(F) population. Hidden by default; forward unchanged.
-   */
-  showDiscarded?: boolean;
   /** External abort (latest-wins guard). Distinct from the inner timeout. */
   signal?: AbortSignal;
   /** Max wait before the read fails instead of hanging. */
@@ -79,7 +73,6 @@ export async function fetchGraphSignalsByCity(
   if (opts.dateBasis === "scrap") params.set("dateBasis", "scrap");
   if (opts.excludePiia) params.set("excludePiia", "1");
   if (opts.excludeDerogations) params.set("excludeDerogations", "1");
-  if (opts.showDiscarded === true) params.set("showDiscarded", "1");
   const qs = params.toString();
   // Bounded headers AND body: a stalled body still fails with
   // `RequestTimeoutError` instead of blocking the caller forever.
