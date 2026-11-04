@@ -2,6 +2,7 @@ import { ARTIFACT_P0B, ARTIFACT_P0B_VERSIONS } from "@radar/artifacts-host";
 import { readArtifactConfig } from "./artifact-config.js";
 import { describe, expect, it } from "vitest";
 import {
+  artifactEffectiveProfile,
   ARTIFACT_DURABLE_IDENTITY,
   ARTIFACT_EFFECTIVE_REQUIRED,
   ARTIFACT_FORBIDDEN_CALLER_FIELDS,
@@ -189,6 +190,17 @@ describe("artifact effective profile", () => {
     expect(config.activation.requiresFinalizationBinding).toBe(true);
     expect(config.activation.requiresErrorBinding).toBe(true);
     expect(config.requiredContracts).toEqual(REQUIRED_PROVIDER_CONTRACTS);
+  });
+
+  it("should document userRef plus the platform sentinel as the only principalId forms (R3)", () => {
+    const effective = artifactEffectiveProfile() as unknown as Record<string, Record<string, unknown>>;
+    const setAccess = effective.artifacts_set_access as unknown as { principalId: string };
+    expect(setAccess.principalId).toContain("userRef");
+    expect(setAccess.principalId).toContain("sentropic:platform");
+    expect(setAccess.principalId).not.toContain("IdP sub");
+    const embedded = (config.effectiveProfile as unknown as Record<string, Record<string, unknown>>)
+      .artifacts_set_access as unknown as { principalId: string };
+    expect(embedded.principalId).toBe(setAccess.principalId);
   });
 
   it("should expose the installed qualified artifact provider version", () => {
