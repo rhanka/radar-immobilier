@@ -11,7 +11,7 @@ import process from 'node:process';
 import { ALIASES, LEVELS, vibeHome } from './lib/vibe-home.mjs';
 import { classifHome } from './lib/paths.mjs';
 
-const SCRUB = /(_API_KEY|_AUTH_TOKEN|_API_BASE|_BASE_URL|_SECRET_KEY|_ACCESS_KEY)$|^(ANTHROPIC_|OPENAI_|GEMINI_|CLAUDE_CODE_USE_|AWS_|GOOGLE_CLOUD_|GOOGLE_APPLICATION_CREDENTIALS|GOOGLE_GENAI_USE_VERTEXAI|VERTEX|SCRAPE_S3_|REFERENCE_C_KEY|CLASSIF_EVAL_KEY|MISTRAL_|VIBE_ACTIVE_MODEL)/;
+const SCRUB = /(_API_KEY|_AUTH_TOKEN|_API_BASE|_BASE_URL|_SECRET_KEY|_ACCESS_KEY)$|^(ANTHROPIC_|OPENAI_|GEMINI_|CLAUDE_CODE_USE_|AWS_|GOOGLE_CLOUD_|GOOGLE_APPLICATION_CREDENTIALS|GOOGLE_GENAI_USE_VERTEXAI|VERTEX|SCRAPE_S3_|REFERENCE_C_KEY|CLASSIF_EVAL_KEY|CLASSIF_BLIND_KEY|MISTRAL_|VIBE_ACTIVE_MODEL)/;
 export function seatEnv(extra = {}) {
   const env = {};
   for (const [k, v] of Object.entries(process.env)) if (!SCRUB.test(k)) env[k] = v;
@@ -55,6 +55,19 @@ export const ROUTES = {
       '--strict-mcp-config', '--mcp-config', '{"mcpServers":{}}'], stdin: prompt, env: { CLAUDE_CODE_DISABLE_CLAUDE_MDS: '1' } }),
     parse: (stdout) => { const j = lastJson(stdout); return { text: j?.result ?? '', usage: j?.usage ?? null, costUsdApiEquivalent: j?.total_cost_usd ?? null, isError: j?.is_error ?? false }; },
   }])),
+  // Astra (ChatGPT seat, plan v3 owner decision 04/11): conductor-verified route
+  // `codex exec -m gpt-6-astra -c model_reasoning_effort=max -s read-only`, empty cwd, scrubbed
+  // env. Machine flags added for parsing only: `--json` (JSONL events on stdout) and
+  // `-o last-message.md` (the model's final message on disk); the prompt goes through stdin
+  // (`-`, no 128 KB argument limit). `--skip-git-repo-check` allows the empty non-repo cwd;
+  // `--ephemeral` keeps session files out of the seat. MCP exposure is bounded by the empty cwd
+  // (no project .codex config) and the read-only sandbox.
+  'astra-max': {
+    family: 'Astra', model: 'gpt-6-astra', effort: 'max', route: 'codex exec -m gpt-6-astra -c model_reasoning_effort=max -s read-only, empty cwd, scrubbed env (--json + -o last-message.md for parsing, prompt on stdin)',
+    build: (dir, _file, prompt) => ({ cmd: 'codex', args: ['exec', '-m', 'gpt-6-astra', '-c', 'model_reasoning_effort=max', '-s', 'read-only',
+      '--skip-git-repo-check', '--ephemeral', '--json', '-o', path.join(dir, 'last-message.md'), '-'], stdin: prompt }),
+    parse: parseCodex,
+  },
   // vibe: per-effort VIBE_HOME (lib/vibe-home.mjs) + classification alias; L0 aliases kept for reference.
   ...Object.fromEntries([
     ['glm-5.3', 'glm-5-3', 'GLM 5.3', null, 'config (high)'],
@@ -67,6 +80,34 @@ export const ROUTES = {
     parse: parseVibe,
   }])),
 };
+
+// codex exec --json: one JSON event per line; the model's final message is also written to
+// last-message.md (-o). Usage rides on turn/thread completion events. Unknown shapes are
+// tolerated: walk every decoded object for usage and candidate text, preferring the file.
+function parseCodex(stdout, dir) {
+  let usage = null;
+  let text = '';
+  try {
+    const last = fs.readFileSync(path.join(dir, 'last-message.md'), 'utf8').trim();
+    if (last) text = last;
+  } catch { /* file absent: fall back to the events */ }
+  const walk = (o) => {
+    if (!o || typeof o !== 'object') return;
+    if (Array.isArray(o)) { for (const v of o) walk(v); return; }
+    for (const [k, v] of Object.entries(o)) {
+      if ((k === 'usage' || k === 'token_usage' || k === 'tokens') && v && typeof v === 'object') usage = v;
+      else if (k === 'content' && Array.isArray(v)) {
+        for (const c of v) if (c && typeof c === 'object' && typeof c.text === 'string' && c.text.trim()) text = text || c.text;
+      } else if ((k === 'text' || k === 'response' || k === 'output_text' || k === 'last_message') && typeof v === 'string' && v.trim()) {
+        if (!text) text = v;
+      } else walk(v);
+    }
+  };
+  for (const line of String(stdout ?? '').split('\n')) {
+    try { walk(JSON.parse(line)); } catch { /* not json */ }
+  }
+  return { text, usage };
+}
 
 function parseVibe(stdout, dir) {
   const msgs = lastJson(stdout);
