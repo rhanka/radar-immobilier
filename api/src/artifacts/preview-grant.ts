@@ -27,6 +27,12 @@ export interface GrantSubject {
   readonly profileName: string;
   readonly policyRevision: string;
   readonly profileFingerprint: string;
+  /**
+   * Lot I2: basket consent granted through the control-origin consent page.
+   * Absent (or anything but true) means document-only: H5 basket operations
+   * answer `basket_consent_required` until the first consented call.
+   */
+  readonly basketScope?: boolean;
 }
 
 export type GrantClaims = GrantIssuer & GrantSubject;
@@ -82,6 +88,7 @@ export async function verifyGrant(
     for (const field of fields) {
       if (typeof claims[field] !== "string") return null;
     }
+    if (claims.basketScope !== undefined && claims.basketScope !== true) return null;
     return {
       expiresAtMs: payload.exp * 1000,
       issuer: expected.issuer ?? "",
@@ -95,6 +102,7 @@ export async function verifyGrant(
       profileName: claims.profileName as string,
       policyRevision: claims.policyRevision as string,
       profileFingerprint: claims.profileFingerprint as string,
+      ...(claims.basketScope === true ? { basketScope: true as const } : {}),
     };
   } catch {
     return null;
