@@ -20,6 +20,7 @@
  * header, session cookie required) before the 55 s expiry. After expiry, a
  * same-origin POST without a grant can recover from a current sealed exact P.
  */
+import { randomUUID } from "node:crypto";
 import { Hono, type Context } from "hono";
 import {
   applyReaderContentHeaders,
@@ -97,6 +98,21 @@ function presentedGrant(c: Context): string {
 export function createReaderContentApp(deps: ContentServeDeps): Hono {
   const app = new Hono();
   const now = deps.now ?? (() => Date.now());
+
+  /**
+   * Lot I2: deferred basket consent. H5 business calls (workspace/basket
+   * reads) without a consented session answer a typed 403 the bridge turns
+   * into a single top-level navigation to `/__reader/consent`. The envelope
+   * already carries a requestId so the classification middleware above lets
+   * the typed code through instead of remapping it to `capability_required`.
+   * The document, files and design-kit never require this scope.
+   */
+  function basketConsentRefusal(c: Context) {
+    applyReaderContentHeaders(c);
+    return c.json({ ok: false, error: { code: "basket_consent_required",
+      message: "Basket reading needs a one-time consent.",
+      retryable: false, action: "consent_baskets" }, requestId: randomUUID() }, 403);
+  }
 
   function stillOpen(reader: AuthorizedReader): boolean {
     return reader.validUntil > now() && !deps.isRevoked?.(reader.sessionId);
@@ -243,6 +259,7 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     if (!deps.writePageSurface) return c.json({ error: "capability_unavailable" }, 503);
     const reader = await authorized(c);
     if (!reader || !canInvoke(reader, "signals.protected-read", reader.releaseId)) return c.json({ error: "unauthenticated" }, 401);
+    if (!reader.basketScope) return basketConsentRefusal(c);
     try {
       const params = new URL(c.req.url).searchParams;
       params.delete("grant");
@@ -269,6 +286,9 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
       applyReaderContentHeaders(c);
       return c.json({ error: "unauthenticated" }, 401);
     }
+    // Lot I2: the document opens without this scope; the first business
+    // call carries the one-time consent instead.
+    if (isWorkspaceReadOperation(op) && !auth.basketScope) return basketConsentRefusal(c);
     if (op === "status.closed.v1") {
       applyReaderContentHeaders(c);
       return c.json({ error: "capability_unavailable" }, 503);
