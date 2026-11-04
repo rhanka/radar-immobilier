@@ -47,13 +47,28 @@ export function createPublishedWritePage(options: PublishedWritePageOptions) {
     const parsed = parseContentHost(host, options.contentBase);
     if (!session || !resource || !session.writeIdentity || parsed.kind !== "content" ||
       !samePwIdentityDomain(session.writeIdentity, options.domain) ||
-      resource.host !== host || resource.releaseId !== parsed.id ||
+      resource.host !== host ||
+      (resource.releaseId !== parsed.id && resource.artifactId !== parsed.id) ||
       resource.sessionId !== session.sid || resource.readerSub !== session.readerSub ||
       resource.artifactId !== session.artifactId || resource.issuer !== options.readIssuer.issuer ||
       resource.audience !== options.readIssuer.audience || resource.tier !== options.readIssuer.tier ||
       resource.profileName !== BASKET_READER_PROFILE.name || resource.policyRevision !== BASKET_READER_PROFILE.policyRevision ||
       resource.profileFingerprint !== fingerprintReaderProfile(BASKET_READER_PROFILE) ||
       (!tx && !await options.permitsWrite(session.artifactId, resource.releaseId))) return null;
+    // Stable artifact host writes bind the CURRENT release: a session pinned
+    // before a republish fails closed until a clean re-exchange. The exact
+    // release host keeps its pinned release. A colliding artifact/release id
+    // fails closed.
+    if (resource.artifactId === resource.releaseId) return null;
+    if (parsed.id === resource.artifactId) {
+      let current: { artifactId: string; releaseId: string } | null = null;
+      try {
+        current = await options.authority.getRelease(resource.artifactId);
+      } catch { return null; }
+      if (!current || current.artifactId !== resource.artifactId || current.releaseId !== resource.releaseId) return null;
+    } else if (parsed.id !== resource.releaseId) {
+      return null;
+    }
     const read = (connection: WriteTx) => readPublishedWriteAuthority(connection, {
       scope: options.scope, artifactId: session.artifactId, releaseId: resource.releaseId, readerSub: session.readerSub,
     });
