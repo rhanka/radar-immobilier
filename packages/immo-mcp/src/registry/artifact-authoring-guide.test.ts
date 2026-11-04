@@ -111,7 +111,7 @@ describe("artifact authoring guide", () => {
 
   it("should preserve artifact identity when editing and disclose unavailable lifecycle actions", () => {
     const guide = getAuthoringGuide();
-    expect(guide.revision).toBe(ARTIFACT_P0B ? "2026-11-01-p0b-r4" : "2026-11-01-r6");
+    expect(guide.revision).toBe(ARTIFACT_P0B ? "2026-11-04-p0b-r5" : "2026-11-01-r6");
     const editing = guide.lifecycle.editing.join("\n");
     expect(editing).toContain("artifacts_get_source → edit → artifacts_publish");
     expect(editing).toContain("same artifactId");
@@ -121,6 +121,7 @@ describe("artifact authoring guide", () => {
     if (ARTIFACT_P0B) {
       expect(editing).not.toContain("source retrieval is blocked");
       expect(editing).toContain("artifacts_get_source returns the retained manifest and file text");
+      expect(editing).toContain("artifacts_publish_bundle");
       expect(guide.lifecycle.unavailableTools).toEqual(["artifacts_restore", "artifacts_fork", "artifacts_promote", "artifacts_renew"]);
       expect(guide.lifecycle.deleteRestore).toContain("explicit human confirmation");
       expect(guide.lifecycle.sharing).toContain("named read access");
@@ -150,8 +151,14 @@ describe("artifact authoring guide", () => {
       expect(share).toContain("artifacts_lookup_people");
       expect(share).toContain("userRef");
       expect(share).toContain("all retained versions");
+      expect(share).toContain("artifacts_list_access");
+      expect(share).toContain("artifacts_revoke_reader_consent");
+      expect(share).toContain("Product Owner");
+      expect(share).toContain("Chaperon Immobilier");
+      expect(guide.lifecycle.sharing).toContain("persistent opening consent");
     }
     expect(guide.data.grantCycle.join("\n")).toContain("basket_consent_required");
+    expect(guide.data.grantCycle.join("\n")).toContain("persistent opening consent");
     expect(guide.data.errorKinds.map((entry) => entry.kind)).toContain("consent");
   });
 
