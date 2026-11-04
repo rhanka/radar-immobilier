@@ -31,7 +31,7 @@ import { ARTIFACT_LIST_ORDER } from "./artifact-read-schema.js";
 
 export const AUTHORING_GUIDE_ID = "immo-artifact-authoring" as const;
 export const AUTHORING_GUIDE_REVISION = ARTIFACT_STRICT ? `2026-11-02-${ARTIFACT_PROFILE_DESCRIPTOR.profileRevisionId}`
-  : ARTIFACT_P0B ? "2026-11-01-p0b-r3" : "2026-11-01-r5";
+  : ARTIFACT_P0B ? "2026-11-01-p0b-r4" : "2026-11-01-r6";
 export const STARTER_VERSION = "1.1.0" as const;
 export const STRICT_ARTIFACT_GUIDE = "This profile requires expectedCurrentReleaseId for artifacts_publish, artifacts_revert and artifacts_delete. First read the artifact with artifacts_get or artifacts_list. For a first publication, send expectedCurrentReleaseId: null only after that read returns currentReleaseId: null. For an update, read the observed release with artifacts_get_source, edit those files, and send its releaseId as expectedCurrentReleaseId. Conversation files alone do not establish the current release. For a revert or deletion, send the currentReleaseId observed by your read. On conflict, re-read and reconcile before submitting a changed command with a new idempotencyKey. For a lost response or commitState: unknown, reconcile with the same idempotencyKey and unchanged command before attempting a new write. Read resultEnvelopeVersion in this guide: version 1 keeps business fields at the root; version 2 places them in output and the guide in output.authoringGuide.";
 
@@ -186,8 +186,8 @@ export function getAuthoringGuide(): AuthoringGuide {
           ? "Owner-only artifacts_delete requires explicit human confirmation through the normal IMMO application; follow artifactLifecycle.delete. Deletion is terminal and artifacts_restore remains unavailable."
           : "artifacts_delete and artifacts_restore are unavailable. Deletion and restoration cannot be performed through this MCP catalogue.",
         sharing: ARTIFACT_P0B
-          ? "Owner-only artifacts_set_access grants or revokes named read access to an approved IMMO account IdP sub; follow artifactLifecycle.share. Source grants and public visibility changes remain unavailable."
-          : "artifacts_set_access is unavailable. Granting or revoking read/source access and changing public visibility cannot be performed through this MCP catalogue; do not claim sharing was changed.",
+          ? "Default share is VIEW ONLY (read). Owner-only artifacts_set_access grants or revokes named read access to one approved colleague at a time (\"share with Farid\"); follow artifactLifecycle.share. \"Everyone\" means every approved platform user (platform mode, read-only, set by the owner). Public sharing (no login) is permanently disabled and unavailable: never offer it, and a public request is refused with a typed refusal. A share covers all retained versions; a paused share (suspended account) resumes automatically once the account is approved again."
+          : "artifacts_set_access is unavailable. Granting or revoking read/source access and changing public visibility cannot be performed through this MCP catalogue; do not claim sharing was changed. Public sharing stays disabled regardless.",
       },
       theme: DESIGN_KIT_THEME,
       designPackages: {
@@ -234,6 +234,7 @@ export function getAuthoringGuide(): AuthoringGuide {
         grantCycle: [
           "Read grant once from the URL (?grant=), keep it in memory, then remove that parameter only with history.replaceState (keep the other query parameters).",
           "Send same-origin requests with cookies plus the x-preview-grant header. Never store the grant (no localStorage, no logs) and never embed it in published files.",
+          "The opening grant is document-only: the first baskets.context/search/state or workspaces.list call answers 403 basket_consent_required. Navigate top-level to /__reader/consent once, approve reading YOUR OWN baskets on the control page, then replay the call with the renewed grant.",
           "Renew with POST /__reader/renew before the 55 s expiry; concurrent reads share one renewal.",
           "After a 401 renewal with a grant, retry once without a grant to recover the sealed session, then stop.",
           "When the session or rights are gone, stop and offer “Réouvrir la page” to /__reader/start. No retry loop and never render an error as an empty list.",
@@ -264,6 +265,7 @@ export function getAuthoringGuide(): AuthoringGuide {
         ],
         errorKinds: [
           { kind: "no_workspace", codes: "workspace_required, workspace_ambiguous, workspace_missing", ui: "Prompt for an explicit workspace." },
+          { kind: "consent", codes: "basket_consent_required", ui: "One-time top-level consent at /__reader/consent, then replay the call once." },
           { kind: "denied", codes: "workspace_not_authorized, account_not_approved, capability_required, delegated_scope_refused, forbidden", ui: "Readable refusal plus reopen link." },
           { kind: "session", codes: "unauthenticated, session_expired", ui: "Access-expired state plus reopen link." },
           { kind: "changed", codes: "snapshot_changed, cursor_expired, projection_revision_unstable", ui: "Restart-the-query state." },
@@ -275,9 +277,10 @@ export function getAuthoringGuide(): AuthoringGuide {
       checklist: [
         "Page root carries data-st-theme=\"sent-tech\" and links the two pinned kit stylesheets (exact digest URLs).",
         "No author color: author CSS/JS reference only --st-* tokens and the documented st-* classes.",
-        "Zero calls to /api/*; reader.js discovers reader workspaces, then reads context and searches with the selected workspaceId.",
+        "Zero calls to /api/*; reader.js discovers the READER's workspaces first (workspaces.list.v1), then reads context and searches with the selected workspaceId. Never hardcode an author basket or workspace id.",
         "Grant is read from the URL once, removed from the URL, renewed, never stored or logged.",
-        "Empty, unavailable, denied and expired-session states are visually distinct; expired access offers reopening.",
+        "Empty, unavailable, denied, consent and expired-session states are visually distinct; expired access offers reopening.",
+        "Empty results stay empty (no workspace list shown is not an empty result); a 403 basket_consent_required triggers the one-time consent navigation, never an empty list.",
         "No inline <script> or <style> blocks: the release CSP stays hash-free and browser-clean.",
         "Keyboard and mobile pass: labelled fields, visible focus, aria-live status, French copy.",
         "Run npx --yes -p @sentropic/design-system-skills@0.1.0 design audit ./index.html with the pinned kit styles resolved locally; exit 1 (findings) and exit 2 (tool error) both block publication. Static checks do not replace browser acceptance. Server-side publication enforcement is a follow-up.",
@@ -305,8 +308,12 @@ export function getAuthoringGuide(): AuthoringGuide {
           `Keep the same key and identical content on retries. resultEnvelopeVersion: ${ARTIFACT_PROFILE_DESCRIPTOR.resultEnvelopeVersion}. ` +
             (ARTIFACT_PART1 ? "Results are in output; use either full files or edits:[{path,oldStr,newStr}], never both. Supply title/description/icon on ensure or publish. list_versions returns retained releases; revert({artifactId,targetReleaseId,expectedCurrentReleaseId,idempotencyKey}) creates a new release with current metadata and ACL. " : "Results remain at the root. ") +
             "release_unavailable requires another retained release or the original author files; never invent missing source."],
-        share: ["Only the owner calls artifacts_set_access({artifactId, action:'grant', principalId:<approved IMMO account IdP sub>, grant:'read', idempotencyKey}). A principalId is the exact IdP sub, never an email or account UUID. Named read sharing keeps isPublic:false and grants neither source nor editing.",
-          "Revoke with action:'revoke', the same principalId and a fresh idempotencyKey; omit grant. Publication quota exhaustion does not prevent sharing or revocation."],
+        share: ["Only the owner calls artifacts_set_access({artifactId, action:'grant', principalId:<colleague account reference>, grant:'read', idempotencyKey}). The principalId is the colleague's exact account reference (today the approved IMMO account IdP sub as shown in artifacts_get grants; from the G2 directory tools, the userRef returned by artifacts_lookup_people — never an email). \"Share with Farid\" means one nominative read grant for Farid, view only. Named read sharing never widens the artifact mode and grants neither source nor editing.",
+          "Revoke with action:'revoke', the same principalId and a fresh idempotencyKey; omit grant. Publication quota exhaustion does not prevent sharing or revocation.",
+          "Collab (source/editing) is an additional right for ONE named colleague only, in restricted mode, case by case — never platform-wide, never public.",
+          "\"Everyone\" (platform mode: every approved platform user reads) is set by the owner outside this catalogue; do not claim to set it here. Public mode (no login) is permanently disabled: never offer it.",
+          "Every share covers all retained versions, current and past: warn the human before sharing. A paused share (suspended colleague account) stays listed and resumes automatically once the account is approved again.",
+          "Source grants beyond one named collab and any public visibility change remain unavailable through this catalogue."],
         delete: [ARTIFACT_STRICT ? "Owner: read artifacts_get, then artifacts_delete({artifactId,expectedCurrentReleaseId:<observed currentReleaseId>,idempotencyKey}). Never send actor, owner, scope or a fabricated confirmation."
           : "Owner: artifacts_delete({artifactId, idempotencyKey}). expectedCurrentReleaseId is optional; the server binds the observed release to the confirmation. Never send actor, owner, scope or a fabricated confirmation.",
           "On confirmation_required, show details.managementUrl and expiresAt to the human. They sign into the normal IMMO application and explicitly approve permanent deletion. MCP bearer tokens cannot approve.",
