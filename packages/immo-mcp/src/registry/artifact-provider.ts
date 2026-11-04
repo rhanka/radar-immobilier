@@ -61,6 +61,9 @@ const STABLE_TOOL_SUMMARIES: Readonly<Record<string, string>> = {
   artifacts_create_upload: "Open an upload session and return the signed PUT URL for one file.",
   artifacts_commit_upload: "Verify staged bytes and pin one uploaded file to its manifest path.",
   artifacts_publish_bundle: "Publish one atomic release from inline files plus staged uploads.",
+  // I2 on G2 — share tooling through the I2 seams.
+  artifacts_lookup_people: "Find approved IMMO accounts by name or email; answers carry opaque userRef values.",
+  artifacts_list_access: "List the access mode and per-principal grants of a Radar page.",
   artifacts_list_versions: "List the retained releases of a Radar page.",
   artifacts_revert: "Republish a retained release as the current release.",
 };

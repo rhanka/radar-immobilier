@@ -109,6 +109,9 @@ export function checkEffectiveProfile(
     throw new RegistryError("unavailable_capability", "artifact tool artifacts_get must require artifactId");
   }
   for (const { tool } of ARTIFACT_SELECTION.filter(({ tool }) => tool !== "artifacts_ensure" && tool !== "artifacts_list")) {
+    // I2 on G2 — lookup_people is artifact-free by provider design (the
+    // account directory is global); every other tool still names its page.
+    if (tool === "artifacts_lookup_people") continue;
     if (!required[tool]?.includes("artifactId")) throw new RegistryError("unavailable_capability", `artifact tool ${tool} must require artifactId`);
   }
   if (durableIdentity.payloadHashInKey !== false) {

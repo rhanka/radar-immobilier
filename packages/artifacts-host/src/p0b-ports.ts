@@ -10,7 +10,12 @@ export async function sharePrincipalApproved(client: FinalizeTxClient, operation
   const target = sharePrincipal.getStore();
   if (operation !== "set_access" || target?.action !== "grant") return true;
   if (typeof target.principalId !== "string") return false;
-  const result = await client.query<{ status: string }>("SELECT status FROM account_users WHERE sub=$1 FOR SHARE", [target.principalId]);
+  // G2 — the grant target is an opaque directory userRef (account_users.id)
+  // or, for pre-G2 callers, the legacy IdP sub. Mode sentinels never name a
+  // person. Approval stays approved-only on both forms.
+  if (target.principalId.startsWith("sentropic:")) return true;
+  const result = await client.query<{ status: string }>(
+    "SELECT status FROM account_users WHERE (sub=$1 OR id::text=$1) FOR SHARE", [target.principalId]);
   return result.rows[0]?.status === "approved";
 }
 
