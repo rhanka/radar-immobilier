@@ -186,7 +186,7 @@ describe("artifact effective profile", () => {
   });
 
   it("should expose the installed qualified artifact provider version", () => {
-    expect(ARTIFACT_P0B_VERSIONS).toEqual(["0.2.5", "0.2.6", "0.3.0", "0.2.8", "0.2.9", "0.2.10", "0.2.12"]);
+    expect(ARTIFACT_P0B_VERSIONS).toEqual(["0.2.5", "0.2.6", "0.3.0", "0.2.8", "0.2.9", "0.2.10", "0.2.12", "0.2.13"]);
     expect(ARTIFACT_P0B ? ARTIFACT_P0B_VERSIONS : ["0.2.2"]).toContain(ARTIFACT_PROVIDER_VERSION);
     expect(config.provider.version).toBe(ARTIFACT_PROVIDER_VERSION);
   });
