@@ -8,7 +8,7 @@ import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-sta
 import { computeManifestDigest, type RegistryDefinition } from "@sentropic/cluster-mesh/mcp/registry";
 import { projectArtifactHttpOutcome } from "@sentropic/artifacts/http";
 import { assertContentIdsDisjoint, checkAdmission, createArtifactControl, HOST_ARTIFACT_PROFILE, ARTIFACT_PROFILE_DESCRIPTOR, ARTIFACT_STRICT, ARTIFACT_PART1,
-  artifactRefusalResponse, projectContentUrls, validateArtifactInput, type AdmissionAuthority } from "@radar/artifacts-host";
+  artifactRefusalResponse, projectContentUrls, projectListVersionsAuthors, validateArtifactInput, type AdmissionAuthority, type ListVersionsDirectory } from "@radar/artifacts-host";
 import { ARTIFACT_INVOCATION_SCOPES, ARTIFACT_TOOL_SCOPES, acceptedArtifactScopes, hasArtifactScope,
   isArtifactToolName, STRICT_ARTIFACT_SCOPE_POLICY, type ArtifactScopePolicy } from "./artifact-profile.js";
 import { AUTHORING_GUIDE_SNIPPET, getAuthoringGuide } from "./artifact-authoring-guide.js";
@@ -215,6 +215,7 @@ export function bindArtifactProvider(options: {
   /** Transition policy; defaults to strict (explicit artifact scopes only). */
   readonly scopePolicy?: ArtifactScopePolicy | undefined;
   readonly prepareDelete?: (actorId: string, args: Record<string, unknown>) => Promise<Record<string, unknown>>;
+  readonly directory?: ListVersionsDirectory | undefined;
 }): ArtifactMcpBinding {
   if (!options.storageScopeId.trim() || typeof options.authorizeCommit !== "function") {
     throw new Error("artifact_binding_incomplete");
@@ -223,7 +224,8 @@ export function bindArtifactProvider(options: {
   const scope = options.storageScopeId;
   const authorizeCommit = options.authorizeCommit;
   const admission = options.admission;
-  const sourceControl = createArtifactControl({ app: options.app }, scope, undefined, admission);
+  const sourceControl = createArtifactControl({ app: options.app }, scope, undefined, admission,
+    options.directory ? { directory: options.directory } : undefined);
   const scopePolicy: ArtifactScopePolicy = Object.freeze({ legacyReadScope: options.scopePolicy?.legacyReadScope === true });
   const manifest = scopePolicy.legacyReadScope ? createImmoArtifactManifest(scopePolicy) : IMMO_ARTIFACT_MANIFEST;
   const binding: ArtifactMcpBinding = Object.freeze({
@@ -296,6 +298,9 @@ export function bindArtifactProvider(options: {
             error.details ? { details: error.details } : {});
         }
         body = projectContentUrls(response.body);
+        if (tool === "artifacts_list_versions" && options.directory) {
+          await projectListVersionsAuthors(body, scope, options.directory);
+        }
       } else {
         const outcome = await executor.execute({ tool, args, invocation });
         if (!outcome.ok) {
