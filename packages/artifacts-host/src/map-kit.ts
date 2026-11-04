@@ -26,14 +26,14 @@ export interface MapKitAsset {
 export const MAP_KIT_ASSETS: readonly MapKitAsset[] = Object.freeze([
   {
     file: "map-base.mjs",
-    sha256Hex: "2b7a947bf314d110693dc0fb5a10a9482907602a9fd843243880185d810f7d79",
-    sizeBytes: 24825,
+    sha256Hex: "7f1ccf80fbd774969011465298f397cde9bdb362e84ce59c5e6fd736b5fb14d4",
+    sizeBytes: 27067,
     mediaType: "text/javascript",
   },
   {
     file: "map-base.css",
-    sha256Hex: "2d2818f785ce2cacbbbdde515136019090a06bb404ef2be7ca50e7646466cbe1",
-    sizeBytes: 615,
+    sha256Hex: "f1f83ec35652f897b4cee2b06248df17326e2b8e1515c6a9c12bb0dff7316c7f",
+    sizeBytes: 1031,
     mediaType: "text/css",
   },
 ]);
