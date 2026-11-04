@@ -11,10 +11,12 @@
  *   layout comes only from the external kit stylesheet (`map-base.css`),
  *   SVG presentation attributes and canvas bitmap attributes. This module
  *   never assigns element inline styles;
- * - no external tile, glyph or font fetch by default: the basemap template
- *   hook stays unset (`null`) until I-10 fills it with a same-origin tile
- *   path. The only network the module can ever emit is a same-origin tile
- *   image once a template was explicitly configured.
+ * - no external tile, glyph or font fetch by default: the basemap and labels
+ *   template hooks stay unset (`null`) until I-10 fills them with the
+ *   same-origin tile paths. The only network the module can ever emit is
+ *   same-origin tile images once a template was explicitly configured.
+ *   Tile attribution stays page-owned: the page renders it (kit class
+ *   `map-base-attribution`) from `getAttribution()` / the guide entries.
  *
  * Coordinate model: equirectangular projection around the fitted bounds
  * (adequate for single-city extents). Zoom is a continuous scale factor
@@ -212,14 +214,34 @@ export function tilesForBounds(corners, z) {
 }
 
 /**
+ * Integer tile zoom served by the I-10A proxy (mirror of
+ * api/src/artifacts/tile-proxy.ts TILE_MIN_ZOOM..TILE_MAX_ZOOM).
+ * The skeleton clamps there so extreme zooms reuse the nearest served
+ * level instead of emitting doomed 404s.
+ */
+export const MIN_TILE_ZOOM = 5;
+export const MAX_TILE_ZOOM = 18;
+
+/** Integer tile zoom for a view scale (pure, testable). */
+export function tileZoomForScale(scale, fitScale) {
+  if (!(scale > 0) || !(fitScale > 0)) return FIT_Z;
+  return Math.min(MAX_TILE_ZOOM, Math.max(MIN_TILE_ZOOM, Math.round(FIT_Z + Math.log2(scale / fitScale))));
+}
+
+/**
  * Validate a same-origin tile template for the I-10 hook.
- * Only relative paths carrying `{z}`, `{x}` and `{y}` are accepted, so a
- * configured basemap can never point at an off-origin host.
+ * Only single-slash relative paths carrying `{z}`, `{x}` and `{y}` are
+ * accepted, so a configured basemap can never point at an off-origin
+ * host: protocol-relative (`//host/...`), backslash (`/\host/...`, any
+ * `\`) and absolute-URL forms are all refused.
  */
 export function validateBasemapTemplate(template) {
   if (template === null || template === undefined) return null;
   if (typeof template !== "string") throw new Error("map-base: basemap template must be a string or null");
-  if (!template.startsWith("/")) throw new Error("map-base: basemap template must be a same-origin path");
+  if (!template.startsWith("/") || template.startsWith("//")) {
+    throw new Error("map-base: basemap template must be a same-origin path");
+  }
+  if (template.includes("\\")) throw new Error("map-base: basemap template must be a same-origin path");
   if (!template.includes("{z}") || !template.includes("{x}") || !template.includes("{y}")) {
     throw new Error("map-base: basemap template must carry {z}, {x} and {y}");
   }
@@ -249,6 +271,8 @@ export function createMap(container, options) {
   const state = {
     background: typeof settings.background === "string" ? settings.background : NEUTRAL_BACKGROUND,
     basemapTemplate: validateBasemapTemplate(settings.basemapTemplate ?? null),
+    labelsTemplate: validateBasemapTemplate(settings.labelsTemplate ?? null),
+    attribution: [],
     paint: { zones: {}, lots: {}, outlines: {} },
     sources: { outlines: [], zones: [], lots: [] },
     view: null,
@@ -328,18 +352,9 @@ export function createMap(container, options) {
     context.closePath();
   };
 
-  const drawTiles = (view, setup, width, height) => {
-    if (!state.basemapTemplate) return;
-    if (typeof Image !== "function") return;
-    const fitScale = state.fitScale && state.fitScale > 0 ? state.fitScale : view.scale;
-    const z = Math.min(19, Math.max(0, Math.round(FIT_Z + Math.log2(view.scale / fitScale))));
-    const corners = [
-      toLonLat(0, 0, view, setup, width, height),
-      toLonLat(width, height, view, setup, width, height),
-    ];
-    const tiles = tilesForBounds(corners, z);
+  const drawTileLayer = (template, prefix, view, setup, width, height, z, tiles) => {
     for (const [tx, ty] of tiles) {
-      const key = `${z}/${tx}/${ty}`;
+      const key = `${prefix}${z}/${tx}/${ty}`;
       let entry = state.tiles.get(key);
       if (!entry) {
         const image = new Image();
@@ -349,7 +364,7 @@ export function createMap(container, options) {
           entry.loaded = true;
           redraw();
         };
-        image.src = expandTemplate(state.basemapTemplate, z, tx, ty);
+        image.src = expandTemplate(template, z, tx, ty);
         if (state.tiles.size > 256) {
           const oldest = state.tiles.keys().next();
           if (!oldest.done) state.tiles.delete(oldest.value);
@@ -362,6 +377,21 @@ export function createMap(container, options) {
       const [bx, by] = toScreen(east, south, view, setup, width, height);
       context.drawImage(entry.image, ax, ay, bx - ax, by - ay);
     }
+  };
+
+  const drawTiles = (view, setup, width, height) => {
+    if (!state.basemapTemplate && !state.labelsTemplate) return;
+    if (typeof Image !== "function") return;
+    const fitScale = state.fitScale && state.fitScale > 0 ? state.fitScale : view.scale;
+    const z = tileZoomForScale(view.scale, fitScale);
+    const corners = [
+      toLonLat(0, 0, view, setup, width, height),
+      toLonLat(width, height, view, setup, width, height),
+    ];
+    const tiles = tilesForBounds(corners, z);
+    // Base first, labels over it (fallback-upstream legibility), vectors last.
+    if (state.basemapTemplate) drawTileLayer(state.basemapTemplate, "", view, setup, width, height, z, tiles);
+    if (state.labelsTemplate) drawTileLayer(state.labelsTemplate, "labels/", view, setup, width, height, z, tiles);
   };
 
   const redraw = () => {
@@ -478,14 +508,13 @@ export function createMap(container, options) {
     const view = ensureView();
     if (!view) return;
     const { cssWidth, cssHeight } = metrics();
-    const width = centerX === undefined ? cssWidth / 2 : centerX;
-    const height = centerY === undefined ? cssHeight / 2 : centerY;
+    const anchorX = (centerX === undefined ? cssWidth / 2 : centerX) - cssWidth / 2;
+    const anchorY = (centerY === undefined ? cssHeight / 2 : centerY) - cssHeight / 2;
     const next = clampScale(view.scale * factor);
-    const ratioChange = next / view.scale;
-    view.cx = (view.cx + (width - cssWidth / 2) / view.scale) * ratioChange -
-      (width - cssWidth / 2) / next;
-    view.cy = (view.cy + (height - cssHeight / 2) / view.scale) * ratioChange -
-      (height - cssHeight / 2) / next;
+    // Keep the projected point under the anchor fixed: the anchor offset
+    // equals (point - center) * scale, so center' = center + dx/scale - dx/next.
+    view.cx = view.cx + anchorX / view.scale - anchorX / next;
+    view.cy = view.cy + anchorY / view.scale - anchorY / next;
     view.scale = next;
     state.touched = true;
     redraw();
@@ -620,6 +649,28 @@ export function createMap(container, options) {
       state.basemapTemplate = validateBasemapTemplate(template);
       state.tiles.clear();
       redraw();
+    },
+    setLabelsTemplate(template) {
+      state.labelsTemplate = validateBasemapTemplate(template);
+      state.tiles.clear();
+      redraw();
+    },
+    setAttribution(value) {
+      if (value === null || value === undefined) {
+        state.attribution = [];
+        return [];
+      }
+      const entries = Array.isArray(value) ? value : [value];
+      for (const entry of entries) {
+        if (typeof entry !== "string" || entry.length === 0) {
+          throw new Error("map-base: attribution entries must be non-empty strings");
+        }
+      }
+      state.attribution = [...entries];
+      return [...state.attribution];
+    },
+    getAttribution() {
+      return [...state.attribution];
     },
     on(kind, callback) {
       if ((kind !== "click" && kind !== "hover") || typeof callback !== "function") {
