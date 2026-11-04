@@ -523,8 +523,13 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
       const file = await deps.releaseFiles?.getFile(auth.artifactId, auth.releaseId, `/${normalized}`) ?? null;
       if (file) {
         if (!stillOpen(auth) || !await authorityCurrent(auth)) return c.json({ error: "unauthenticated" }, 401);
-        const text = typeof file.body === "string" ? file.body : Buffer.from(file.body).toString("utf8");
-        if (servedBodyLeaksCredentials(text)) {
+        // Files parity LOT 1 — binary sub-resources (PNG, PDF, …) are never
+        // decoded: the credential-leak scan and the legacy-bridge upgrade
+        // run on text files only; binary bytes go out byte-identical.
+        const textual = file.contentType.startsWith("text/") || file.contentType === "application/json";
+        const text = !textual ? null
+          : typeof file.body === "string" ? file.body : Buffer.from(file.body).toString("utf8");
+        if (text !== null && servedBodyLeaksCredentials(text)) {
           applyReaderContentHeaders(c);
           return c.json({ error: "not_found" }, 404);
         }
@@ -537,19 +542,25 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
             target.searchParams.set("grant", grant);
             return c.redirect(`${target.pathname}${target.search}`, 303);
           }
-          const html = normalizeReleaseHtml(text);
+          const html = normalizeReleaseHtml(text!);
           c.header("Content-Security-Policy", releaseCspForHtml(html));
           return c.html(html);
         }
         c.header("Content-Type", file.contentType);
+        // Files parity LOT 1 — SVG and PDF are active-content types: even
+        // though commit verification rejects scripts, handlers and external
+        // references, direct navigation gets a sandboxed document on top of
+        // nosniff, so no slipped construct can script (provider headers.ts).
+        if (file.contentType === "image/svg+xml" || file.contentType === "application/pdf") {
+          c.header("Content-Security-Policy", "sandbox");
+        }
         // Lot I2 B2: a page published with the pre-I2 bridge maps the typed
         // consent refusal to `denied` and loops on « Réouvrir » until
         // republication. Upgrade exact legacy bridges at serve time so the
         // first H5 call navigates to /__reader/consent instead; every other
         // file goes out byte-identical.
-        if (file.contentType.startsWith("text/javascript")) {
+        if (text !== null && file.contentType.startsWith("text/javascript")) {
           const raw = typeof file.body === "string" ? null : Buffer.from(file.body);
-          const text = typeof file.body === "string" ? file.body : raw!.toString("utf8");
           const upgraded = upgradeLegacyReaderBridge(text);
           if (upgraded !== null && (raw === null || Buffer.from(text, "utf8").equals(raw))) {
             return c.body(upgraded);

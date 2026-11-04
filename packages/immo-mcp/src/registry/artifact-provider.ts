@@ -57,6 +57,10 @@ const STABLE_TOOL_SUMMARIES: Readonly<Record<string, string>> = {
   artifacts_get_source: "Read a Radar page's retained source files for editing.",
   artifacts_set_access: "Grant or revoke named read access on a Radar page.",
   artifacts_delete: "Delete a Radar page after owner confirmation in the IMMO application.",
+  // Files parity LOT 1 — outside-the-model bytes, then one atomic release.
+  artifacts_create_upload: "Open an upload session and return the signed PUT URL for one file.",
+  artifacts_commit_upload: "Verify staged bytes and pin one uploaded file to its manifest path.",
+  artifacts_publish_bundle: "Publish one atomic release from inline files plus staged uploads.",
   artifacts_list_versions: "List the retained releases of a Radar page.",
   artifacts_revert: "Republish a retained release as the current release.",
 };
@@ -303,7 +307,7 @@ export function bindArtifactProvider(options: {
           });
         }
         body = projectContentUrls(projectArtifactHttpOutcome(outcome, ARTIFACT_PART1).body);
-        if (tool === "artifacts_publish" || tool === "artifacts_revert") {
+        if (tool === "artifacts_publish" || tool === "artifacts_revert" || tool === "artifacts_publish_bundle") {
           const payload = (body as { output?: unknown }).output ?? body;
           const record = payload as { artifactId?: unknown; releaseId?: unknown };
           const requestArgs = args as { artifactId?: unknown };

@@ -56,9 +56,16 @@ const CONTENT_TYPES: Record<string, string> = {
   ".js": "text/javascript; charset=utf-8",
   ".mjs": "text/javascript; charset=utf-8",
   ".css": "text/css; charset=utf-8",
-  ".json": "application/json; charset=utf-8",
+  ".json": "application/json",
+  // Files parity LOT 1 — binary release assets, served byte-identical under
+  // nosniff; SVG/PDF additionally get a sandboxed document CSP at serve time.
   ".svg": "image/svg+xml",
   ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".gif": "image/gif",
+  ".webp": "image/webp",
+  ".pdf": "application/pdf",
 };
 
 export function contentTypeForPath(path: string): string {

@@ -24,11 +24,13 @@ interface ProfileCase {
 }
 
 const PROFILES: readonly ProfileCase[] = [
-  { revision: "immo-artifacts.p0b.v1", env: {}, toolCount: 7 },
-  { revision: "immo-artifacts.cas.v2", env: {}, toolCount: 7 },
+  // Files parity LOT 1: the upload channel (create/commit/publish_bundle)
+  // joins every P0b profile.
+  { revision: "immo-artifacts.p0b.v1", env: {}, toolCount: 10 },
+  { revision: "immo-artifacts.cas.v2", env: {}, toolCount: 10 },
   { revision: "immo-artifacts.v2",
     env: { ARTIFACTS_INPUTS_QUALIFIED: "true", ARTIFACTS_RESULTS_QUALIFIED: "true" },
-    toolCount: 9 },
+    toolCount: 12 },
 ];
 
 /** Tools only selected by the v2 (part1) profile. */

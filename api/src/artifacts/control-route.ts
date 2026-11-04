@@ -25,7 +25,10 @@ import {
   type VerifiedSession,
 } from "../services/auth/session.js";
 
-export type ControlOp = "ensure" | "publish" | "meta" | "list" | "get_source" | "set_access" | "delete" | "list_versions" | "revert";
+export type ControlOp = "ensure" | "publish" | "meta" | "list" | "get_source" | "set_access" | "delete" |
+  // Files parity LOT 1 — outside-the-model upload channel.
+  "create_upload" | "commit_upload" | "publish_bundle" |
+  "list_versions" | "revert";
 
 const unavailableBackend: ArtifactControl = {
   handle: () => Promise.resolve({ status: 503, body: { error: "capability_unavailable" } }),
@@ -181,7 +184,10 @@ export function controlRoute(deps: ControlRouteDeps): Hono {
     return c.json({ ...ARTIFACT_PROFILE_DESCRIPTOR, selectedCapabilities: ACTIVE_ARTIFACT_TOOLS });
   });
 
-  for (const op of ["get_source", "set_access", "delete", "list_versions", "revert"] as const) {
+  for (const op of ["get_source", "set_access", "delete",
+    // Files parity LOT 1 — outside-the-model upload channel.
+    "create_upload", "commit_upload", "publish_bundle",
+    "list_versions", "revert"] as const) {
     app.post(`/${op}`, async (c) => {
       const guarded = await guardPost(c, deps);
       if (guarded instanceof Response) return guarded;
