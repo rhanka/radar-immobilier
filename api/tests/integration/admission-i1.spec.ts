@@ -380,7 +380,7 @@ describe("I1 placement — JIT before getRights, login linking", () => {
     );
     const binding = "ab".repeat(32);
     const res = await opening.application.request(
-      `/approve?${new URLSearchParams({ artifactId: ARTIFACT_ID, binding })}`,
+      `/approve?${new URLSearchParams({ binding, origin: `https://${ARTIFACT_ID}.pages.example.test` })}`,
       { headers: { cookie: `radar_session=${session}` } },
     );
     expect(res.status).toBe(200);
@@ -830,6 +830,7 @@ describe("I1 F6 — real reader opening and branch coverage", () => {
       auth: AUTH,
       contentBase: "pages.example.test",
       authority: stored.authority,
+      getArtifactIdForRelease: stored.getArtifactIdForRelease,
       tickets: createSharedReaderTickets(pool),
       issuer: { issuer: "https://preprod.immo.sent-tech.ca", audience: "x", tier: "test" },
       grantSecret: "grant-secret-32-bytes-long-padding!",
@@ -851,7 +852,7 @@ describe("I1 F6 — real reader opening and branch coverage", () => {
     );
     const binding = "ab".repeat(32);
     const res = await opening.application.request(
-      `/approve?${new URLSearchParams({ artifactId: ARTIFACT_ID, binding })}`,
+      `/approve?${new URLSearchParams({ binding, origin: `https://${ARTIFACT_ID}.pages.example.test` })}`,
       { headers: { cookie: `radar_session=${session}` } },
     );
     expect(res.status).toBe(200);
