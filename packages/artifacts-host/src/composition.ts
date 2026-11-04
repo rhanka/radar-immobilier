@@ -2,14 +2,18 @@ import { Agent as HttpsAgent } from "node:https";
 import type pg from "pg";
 import { S3Client } from "@aws-sdk/client-s3";
 import { createS3BlobStore } from "@sentropic/artifacts/adapters/s3";
+import { createS3StagingStore, createS3UploadSigner } from "@sentropic/artifacts/adapters/s3-uploads";
+import { createUploadSweeper } from "@sentropic/artifacts/server/gc";
 import { createPostgresCommitExecutor } from "@sentropic/artifacts/adapters/postgres-commit";
 import { createArtifactCommitCoordinator } from "@sentropic/artifacts/server/commit-contract";
 import { projectArtifactHttpOutcome, type HttpAppDeps } from "@sentropic/artifacts/http";
 import type { PublicationBlobStore } from "@sentropic/artifacts/server/publication";
+import type { StagingStore, UploadSessionStore, UploadSignerPort } from "@sentropic/artifacts/server/uploads";
 import type { ArtifactsStorageConfig } from "./config.js";
 import type { ActivationConfig } from "./activation.js";
 import { initializeArtifactScope } from "./storage.js";
 import { createHostPolicy, authorizeArtifactCommit } from "./commit-policy.js";
+import { createPostgresUploadSessionStore } from "./upload-store.js";
 import { guardArtifactPool } from "./idempotency.js";
 import { createCommitDomain, PUBLISH_BLOB_DEADLINE_MS, resolvePublishDeadlines } from "./commit-domain.js";
 import { mapHostError, reportWriteFailure } from "./host-outcome.js";
@@ -34,6 +38,13 @@ export interface ArtifactHostOptions {
   readonly contentBase?: string;
   readonly onProviderFailure?: (error: unknown) => void;
   readonly confirmation?: ArtifactDeleteConfirmation;
+  /**
+   * Files parity LOT 1 — injectable upload ports. Production leaves them
+   * absent (Postgres ledger + S3 staging + presigned signer on the
+   * publication bucket); tests inject memory doubles with the same semantics.
+   */
+  readonly uploads?: { readonly sessions?: UploadSessionStore; readonly staging?: StagingStore;
+    readonly signer?: UploadSignerPort };
 }
 
 export async function composeArtifactHost(
@@ -80,9 +91,23 @@ export async function composeArtifactHost(
   // resolvePublishDeadlines): blob work always ends before the window.
   const { blobDeadlineMs, preparationWindowMs } =
     resolvePublishDeadlines(config.publishBlobDeadlineMs ?? PUBLISH_BLOB_DEADLINE_MS);
+  let uploadSweepTimer: NodeJS.Timeout | undefined;
   try {
+    // Files parity LOT 1 — upload staging + presigned PUT signer on the same
+    // bucket/client as publication blobs (disjoint `staging/` key prefix),
+    // with the enforced session sweeper beside the preparation cleanup.
+    const uploadSessions = options.uploads?.sessions ?? createPostgresUploadSessionStore(pool);
+    const staging = options.uploads?.staging ?? createS3StagingStore({ client, bucket: config.s3Bucket });
+    const signer = options.uploads?.signer ?? createS3UploadSigner({ client, bucket: config.s3Bucket });
+    const sweeper = createUploadSweeper({ sessions: uploadSessions, staging });
+    uploadSweepTimer = setInterval(() => { void sweeper.sweep().catch((error: unknown) => {
+      console.error(JSON.stringify({ kind: "artifacts.upload_sweep_unavailable" }));
+      options.onProviderFailure?.(error);
+    }); }, 60_000);
+    uploadSweepTimer.unref();
     const domain = await createCommitDomain({ pool, scope: config.storageScope, blobs, coordinator,
       profile, preparationWindowMs,
+      uploads: { sessions: uploadSessions, staging, signer },
       ...(options.confirmation ? { confirmation: options.confirmation } : {}),
       ...(options.contentBase ? { publicationUrls: (artifactId, releaseId) => ({
         stableUrl: `https://${artifactId}.${options.contentBase}/`,
@@ -120,6 +145,7 @@ export async function composeArtifactHost(
       get accountingFailure() { return accountingFailure; },
       cleanup, intents: domain.store, refs: domain.store,
       selectedCapabilities: domain.app.selectedCapabilities, profileDigest: domain.app.profileDigest,
-      authorizeCommit: authorizeArtifactCommit, close: () => { cleanup.stop(); destroyTransport(); } };
-  } catch (error) { destroyTransport(); throw error; }
+      authorizeCommit: authorizeArtifactCommit,
+      close: () => { clearInterval(uploadSweepTimer); cleanup.stop(); destroyTransport(); } };
+  } catch (error) { clearInterval(uploadSweepTimer); destroyTransport(); throw error; }
 }

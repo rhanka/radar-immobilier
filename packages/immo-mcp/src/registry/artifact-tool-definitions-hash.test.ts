@@ -13,7 +13,20 @@ import { beforeAll, describe, expect, it, vi } from "vitest";
  * manifest audit metadata and typed result details, never in a definition.
  * The 0.2.8 -> 0.2.9 bump changes the definitions one final time by design
  * (static schemas replace profile-dependent bounds); this test locks the
- * 0.2.9 result, re-verified byte-identical under the 0.2.10 then 0.2.12 pins. The provider here keeps the qualified catalogue surface
+ * 0.2.9 result, re-verified byte-identical under the 0.2.10 and 0.2.12 pins. The 0.2.13 pin
+ * (sentropic train #911) changes NONE of the nine served definitions — the
+ * provider diff touches only the version constant, a code comment on
+ * get_source and the six appended tools. This train adds them in three
+ * waves: files parity (artifacts_create_upload, artifacts_commit_upload,
+ * artifacts_publish_bundle) then I2 on G2 (artifacts_lookup_people,
+ * artifacts_list_access) then reader consent LOT 1
+ * (artifacts_revoke_reader_consent). Proven by per-tool JSON comparison of
+ * the committed catalogue snapshots across p0b.v1, cas.v2 and v2: additions
+ * only, zero removals, zero byte changes on the pre-existing definitions.
+ * The fifteenth definition is provider-published (staticTool in mcp-core at
+ * 0.2.13: self-revocation, required artifactId plus idempotencyKey, optional
+ * scope); the catalogue serves it with the stable immo summary only.
+ * The provider here keeps the qualified catalogue surface
  * (CAS guard optional, `paths` description-less, stable summaries) via
  * `stabilizeArtifactInputSchema`.
  *
@@ -22,19 +35,25 @@ import { beforeAll, describe, expect, it, vi } from "vitest";
  */
 
 const EXPECTED_ARTIFACT_TOOL_DEFINITIONS: readonly string[] = [
+  "artifacts_commit_upload",
+  "artifacts_create_upload",
   "artifacts_delete",
   "artifacts_ensure",
   "artifacts_get",
   "artifacts_get_source",
   "artifacts_list",
+  "artifacts_list_access",
   "artifacts_list_versions",
+  "artifacts_lookup_people",
   "artifacts_publish",
+  "artifacts_publish_bundle",
   "artifacts_revert",
+  "artifacts_revoke_reader_consent",
   "artifacts_set_access",
 ];
 
 /** Golden sha256 over the canonical catalogue. Re-baseline only with owner sign-off. */
-const EXPECTED_TOOL_DEFINITIONS_HASH = "a7586debdc2f029fb0c1389486b687f7fab1c13736f60bf5317d33de99a1b9d1";
+const EXPECTED_TOOL_DEFINITIONS_HASH = "a96e0cb50fbd56e8ea333ede526207db5ae798998f7ffd654625b2b3bd9de14c";
 
 const ENV_KEYS = ["ARTIFACTS_PROFILE_REVISION", "ARTIFACTS_INPUTS_QUALIFIED", "ARTIFACTS_RESULTS_QUALIFIED"] as const;
 
@@ -90,7 +109,7 @@ describe("artifact tool definitions hash", () => {
     tools = await loadV2Tools();
   }, 120000);
 
-  it("should serve exactly the nine qualified artifact tools", () => {
+  it("should serve exactly the fifteen qualified artifact tools", () => {
     expect(tools.map((tool) => tool.name).sort()).toEqual([...EXPECTED_ARTIFACT_TOOL_DEFINITIONS]);
   });
 

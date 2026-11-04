@@ -28,14 +28,22 @@ describe("P7 published effective profile", () => {
     expect(Object.fromEntries(manifest.tools.map((tool) => [tool.name, tool.requiredScopes]))).toEqual({
       artifacts_ensure: ["immo:artifacts:write"], artifacts_publish: ["immo:artifacts:write"],
       artifacts_list: ["immo:artifacts:read"], artifacts_get: ["immo:artifacts:read"],
-      ...(ARTIFACT_P0B ? { artifacts_get_source: ["immo:artifacts:read"], artifacts_set_access: ["immo:artifacts:write"], artifacts_delete: ["immo:artifacts:write"] } : {}),
+      ...(ARTIFACT_P0B ? { artifacts_get_source: ["immo:artifacts:read"], artifacts_set_access: ["immo:artifacts:write"],
+        artifacts_delete: ["immo:artifacts:write"], artifacts_create_upload: ["immo:artifacts:write"],
+        artifacts_commit_upload: ["immo:artifacts:write"], artifacts_publish_bundle: ["immo:artifacts:write"],
+        artifacts_lookup_people: ["immo:artifacts:read"], artifacts_list_access: ["immo:artifacts:read"],
+        artifacts_revoke_reader_consent: ["immo:artifacts:write"] } : {}),
     });
     expect(manifest.authz.scopes).toEqual(["immo:artifacts:read", "immo:artifacts:write"]);
     const transition = createImmoArtifactManifest({ legacyReadScope: true });
     expect(Object.fromEntries(transition.tools.map((tool) => [tool.name, tool.requiredScopes]))).toEqual({
       artifacts_ensure: ["immo:artifacts:write"], artifacts_publish: ["immo:artifacts:write"],
       artifacts_list: [], artifacts_get: [],
-      ...(ARTIFACT_P0B ? { artifacts_get_source: ["immo:artifacts:read"], artifacts_set_access: ["immo:artifacts:write"], artifacts_delete: ["immo:artifacts:write"] } : {}),
+      ...(ARTIFACT_P0B ? { artifacts_get_source: ["immo:artifacts:read"], artifacts_set_access: ["immo:artifacts:write"],
+        artifacts_delete: ["immo:artifacts:write"], artifacts_create_upload: ["immo:artifacts:write"],
+        artifacts_commit_upload: ["immo:artifacts:write"], artifacts_publish_bundle: ["immo:artifacts:write"],
+        artifacts_lookup_people: ["immo:artifacts:read"], artifacts_list_access: ["immo:artifacts:read"],
+        artifacts_revoke_reader_consent: ["immo:artifacts:write"] } : {}),
     });
     expect(transition.authz.scopes).toEqual(ARTIFACT_P0B ? ["immo:artifacts:read", "immo:artifacts:write"] : ["immo:artifacts:write"]);
     expect(manifest.tools.some((tool) => tool.requiredScopes.includes("immo:read"))).toBe(false);

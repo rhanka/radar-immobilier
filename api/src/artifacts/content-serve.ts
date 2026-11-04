@@ -55,6 +55,7 @@ import {
   type ReaderOperationName,
 } from "./reader-operations.js";
 import { GeoItemsRefusal } from "./reader-geo.js";
+import { BASKET_READ_SCOPE_ID, type BasketConsentGate } from "./reader-consent.js";
 import {
   TILE_CLIENT_MAX_AGE_SECONDS,
   TILE_PATH_PREFIX,
@@ -85,6 +86,13 @@ export interface ContentServeDeps {
   readonly now?: () => number;
   /** Optional revocation predicate; revoked sessions fail closed. */
   readonly isRevoked?: (sessionId: string) => boolean;
+  /**
+   * Gate B (reader-consent design §2–§3.3): durable baskets consent,
+   * re-read from the store on every business call. Absent keeps the
+   * sealed-session flow only; present, a revoked or missing row refuses
+   * the call even under a live cookie. A store failure fails closed.
+   */
+  readonly basketConsent?: BasketConsentGate;
   /** PW-C page write listener (prepare/status); absent keeps writes closed. */
   readonly pageWrite?: Hono;
   readonly writePageSurface?: WritePageSurface;
@@ -129,6 +137,20 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     return c.json({ ok: false, error: { code: "basket_consent_required",
       message: "Basket reading needs a one-time consent.",
       retryable: false, action: "consent_baskets" }, requestId: randomUUID() }, 403);
+  }
+
+  /**
+   * Gate B per business call: the sealed `basketScope` claim is a routing
+   * hint only — the live store row at the current scope version is
+   * authority, re-read here on every call (design §3.3).
+   */
+  async function hasLiveBasketConsent(reader: AuthorizedReader): Promise<boolean> {
+    if (!reader.basketScope) return false;
+    if (!deps.basketConsent) return true;
+    try {
+      return await deps.basketConsent.hasLiveConsent(
+        reader.readerSub, reader.artifactId, BASKET_READ_SCOPE_ID);
+    } catch { return false; }
   }
 
   function stillOpen(reader: AuthorizedReader): boolean {
@@ -311,7 +333,7 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     if (!deps.writePageSurface) return c.json({ error: "capability_unavailable" }, 503);
     const reader = await authorized(c);
     if (!reader || !canInvoke(reader, "signals.protected-read", reader.releaseId)) return c.json({ error: "unauthenticated" }, 401);
-    if (!reader.basketScope) return basketConsentRefusal(c);
+    if (!await hasLiveBasketConsent(reader)) return basketConsentRefusal(c);
     try {
       const params = new URL(c.req.url).searchParams;
       params.delete("grant");
@@ -339,8 +361,10 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
       return c.json({ error: "unauthenticated" }, 401);
     }
     // Lot I2: the document opens without this scope; the first business
-    // call carries the one-time consent instead.
-    if (isWorkspaceReadOperation(op) && !auth.basketScope) return basketConsentRefusal(c);
+    // call carries the one-time consent instead. Gate B re-reads the live
+    // store row on every call: revocation refuses here at once, even under
+    // a live cookie.
+    if (isWorkspaceReadOperation(op) && !await hasLiveBasketConsent(auth)) return basketConsentRefusal(c);
     if (op === "status.closed.v1") {
       applyReaderContentHeaders(c);
       return c.json({ error: "capability_unavailable" }, 503);
@@ -523,8 +547,13 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
       const file = await deps.releaseFiles?.getFile(auth.artifactId, auth.releaseId, `/${normalized}`) ?? null;
       if (file) {
         if (!stillOpen(auth) || !await authorityCurrent(auth)) return c.json({ error: "unauthenticated" }, 401);
-        const text = typeof file.body === "string" ? file.body : Buffer.from(file.body).toString("utf8");
-        if (servedBodyLeaksCredentials(text)) {
+        // Files parity LOT 1 — binary sub-resources (PNG, PDF, …) are never
+        // decoded: the credential-leak scan and the legacy-bridge upgrade
+        // run on text files only; binary bytes go out byte-identical.
+        const textual = file.contentType.startsWith("text/") || file.contentType === "application/json";
+        const text = !textual ? null
+          : typeof file.body === "string" ? file.body : Buffer.from(file.body).toString("utf8");
+        if (text !== null && servedBodyLeaksCredentials(text)) {
           applyReaderContentHeaders(c);
           return c.json({ error: "not_found" }, 404);
         }
@@ -537,19 +566,25 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
             target.searchParams.set("grant", grant);
             return c.redirect(`${target.pathname}${target.search}`, 303);
           }
-          const html = normalizeReleaseHtml(text);
+          const html = normalizeReleaseHtml(text!);
           c.header("Content-Security-Policy", releaseCspForHtml(html));
           return c.html(html);
         }
         c.header("Content-Type", file.contentType);
+        // Files parity LOT 1 — SVG and PDF are active-content types: even
+        // though commit verification rejects scripts, handlers and external
+        // references, direct navigation gets a sandboxed document on top of
+        // nosniff, so no slipped construct can script (provider headers.ts).
+        if (file.contentType === "image/svg+xml" || file.contentType === "application/pdf") {
+          c.header("Content-Security-Policy", "sandbox");
+        }
         // Lot I2 B2: a page published with the pre-I2 bridge maps the typed
         // consent refusal to `denied` and loops on « Réouvrir » until
         // republication. Upgrade exact legacy bridges at serve time so the
         // first H5 call navigates to /__reader/consent instead; every other
         // file goes out byte-identical.
-        if (file.contentType.startsWith("text/javascript")) {
+        if (text !== null && file.contentType.startsWith("text/javascript")) {
           const raw = typeof file.body === "string" ? null : Buffer.from(file.body);
-          const text = typeof file.body === "string" ? file.body : raw!.toString("utf8");
           const upgraded = upgradeLegacyReaderBridge(text);
           if (upgraded !== null && (raw === null || Buffer.from(text, "utf8").equals(raw))) {
             return c.body(upgraded);
