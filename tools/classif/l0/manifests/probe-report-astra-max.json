@@ -1,0 +1,42 @@
+{
+ "lot": "L0",
+ "kind": "route-probe",
+ "createdAt": "2026-11-04T23:52:20.773Z",
+ "calls": 1,
+ "ok": 1,
+ "results": [
+  {
+   "label": "astra-max",
+   "family": "Astra",
+   "model": "gpt-6-astra",
+   "effort": "max",
+   "route": "codex exec -m gpt-6-astra -c model_reasoning_effort=max -s read-only, empty cwd, scrubbed env (--json + -o last-message.md for parsing, prompt on stdin)",
+   "item": "signal",
+   "promptSha256": "d4fa756054d8b35a4a0b3e9431d1c90bcbda22f98aa8497134cc1615cc4e8a50",
+   "exitCode": 0,
+   "latencyMs": 13263,
+   "jsonValid": true,
+   "invalidReason": null,
+   "answer": {
+    "verdict": "pertinent",
+    "code": "P-USAGE-MULTI",
+    "ambiguous": false,
+    "citation": "Avis de motion est donné qu'à une séance subséquente sera adopté le règlement 9999-01 modifiant le règlement de zonage afin de permettre les habitations multifamiliales de 6 logements dans la zone H-999."
+   },
+   "usage": {
+    "input_tokens": 15750,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 354,
+    "reasoning_output_tokens": 276
+   },
+   "costUsd": null,
+   "effectiveModel": null,
+   "effectiveThinking": null,
+   "toolEvents": null,
+   "outcome": null,
+   "textTail": null,
+   "stderrTail": null
+  }
+ ]
+}
