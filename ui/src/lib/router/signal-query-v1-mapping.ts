@@ -35,7 +35,6 @@ export const FILTER_TO_CONTRACT: Record<string, FilterMappingTarget> = {
   dateFrom: { kind: "contract", field: "dateFrom" },
   dateTo: { kind: "contract", field: "dateTo" },
   dateBasis: { kind: "contract", field: "dateBasis" },
-  showDiscarded: { kind: "contract", field: "archive (1 = include, absent = exclude; only has no URL spelling)" },
   lotCategory: { kind: "out-of-scope", reason: "LotFilterV1 (I-9b), never a SignalFilterV1 field" },
   lotUsage: { kind: "out-of-scope", reason: "LotFilterV1 (I-9b), never a SignalFilterV1 field" },
   lotMinArea: { kind: "out-of-scope", reason: "LotFilterV1 (I-9b), never a SignalFilterV1 field" },
@@ -62,8 +61,8 @@ export const FILTER_TO_CONTRACT: Record<string, FilterMappingTarget> = {
  * - `filter.dateBasis=acquisition` selects the `scrap` clock on an absolute
  *   custom period only — with a relative period the key is ignored on read
  *   and never written, hence `document`;
- * - `filter.showDiscarded=1` opens the archive (`archive: "include"`),
- *   absent means `archive: "exclude"` (`only` has no URL spelling);
+ * - the archive is always excluded (`archive: "exclude"`): the UI exposes
+ *   no triage reveal, so the translator never opens it;
  * - no `filter.*` key carries `citySlug` (route level), `zoneCode` (zone
  *   focus level), `q`, `basket`, `personalHistory`, instruments/stages/
  *   regulatoryStatus, `legacyZmp`, `limit`, `cursor`, or `include`: those
@@ -89,7 +88,7 @@ export function geoFiltersToSignalFilter(
     ...(window.dateFrom ? { dateFrom: window.dateFrom } : {}),
     ...(window.dateTo ? { dateTo: window.dateTo } : {}),
     basket: "all",
-    archive: state.showDiscarded === true ? "include" : "exclude",
+    archive: "exclude",
     personalHistory: "any",
     sort: "vivier_rank",
   });
@@ -111,7 +110,6 @@ export const GEO_FILTER_STATE_KEYS: readonly string[] = [
   "lotMinArea",
   "zoneKind",
   "zoneMillesime",
-  "showDiscarded",
   "lots",
   "cptaq",
   "citySearch",

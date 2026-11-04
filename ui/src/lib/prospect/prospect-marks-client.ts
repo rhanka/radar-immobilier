@@ -1,9 +1,9 @@
 /**
- * Client UI pour les marquages/notes prospect (CS-L3).
+ * UI client for prospect marks (CS-L3).
  *
- * API backend existante : /api/v1/prospects/*.
- * Anti-PII : ces endpoints exposent uniquement noLot/citySlug/statuts/notes,
- * jamais propriétaire/adresse personnelle.
+ * Existing backend API: /api/v1/prospects/*.
+ * Anti-PII: these endpoints expose only noLot/citySlug/statuses,
+ * never owner/personal address.
  */
 
 import { fetchWithTimeout } from "$lib/net/fetch-with-timeout.js";
@@ -27,19 +27,8 @@ export interface ProspectMark {
   createdAt: string;
 }
 
-export interface ProspectNote {
-  id: string;
-  noLot: string;
-  citySlug: string;
-  authorId?: string | null;
-  body: string;
-  mode: ProspectMode;
-  createdAt: string;
-}
-
 export interface ProspectLotState {
   marks: ProspectMark[];
-  notes: ProspectNote[];
 }
 
 export interface ProspectCounters {
@@ -157,33 +146,18 @@ export async function fetchProspectMarksForZone(
   return body.marks ?? [];
 }
 
-export async function fetchProspectNotesForLot(
-  noLot: string,
-  citySlug: string,
-  baseUrl?: string,
-): Promise<ProspectNote[]> {
-  const res = await fetch(apiUrl(`/api/v1/prospects/lots/${encodeURIComponent(noLot)}/${encodeURIComponent(citySlug)}/notes`, baseUrl));
-  if (!res.ok) throw new Error(`prospect notes HTTP ${res.status}`);
-  const body = (await res.json()) as { ok?: boolean; notes?: ProspectNote[] };
-  if (!body.ok) throw new Error("prospect notes: api returned ok=false");
-  return body.notes ?? [];
-}
-
 export async function fetchProspectLotState(
   noLot: string,
   citySlug: string,
   baseUrl?: string,
 ): Promise<ProspectLotState> {
-  const [marks, notes] = await Promise.all([
-    fetchProspectMarksForLot(noLot, citySlug, baseUrl),
-    fetchProspectNotesForLot(noLot, citySlug, baseUrl),
-  ]);
-  return { marks, notes };
+  const marks = await fetchProspectMarksForLot(noLot, citySlug, baseUrl);
+  return { marks };
 }
 
-// ── Écriture (append-only) ──────────────────────────────────────────────────
-// Liste blanche stricte (Loi 25) : seuls statut/note/prix-public sont transmis,
-// jamais d'identité propriétaire ni d'adresse personnelle.
+// ── Write (append-only) ─────────────────────────────────────────────────────
+// Strict allowlist (Law 25): only status/public-price are sent,
+// never owner identity nor personal address.
 
 export interface CreateProspectMarkInput {
   lotVersionId?: string | null;
@@ -192,13 +166,13 @@ export interface CreateProspectMarkInput {
   dimension: ProspectDimension;
   statut: ProspectStatus;
   mode?: ProspectMode;
-  /** Marché uniquement : prix demandé (annonce publique, non-PII). */
+  /** Market only: asking price (public listing, non-PII). */
   prixDemande?: number | null;
-  /** Marché uniquement : lien d'annonce publique. */
+  /** Market only: public listing link. */
   lienAnnonce?: string | null;
 }
 
-/** POST /api/v1/prospects/marks → 201 { ok, mark }. Pose un statut (supersede LWW côté API). */
+/** POST /api/v1/prospects/marks → 201 { ok, mark }. Sets a status (LWW supersede on the API side). */
 export async function createProspectMark(
   input: CreateProspectMarkInput,
   baseUrl?: string,
@@ -223,38 +197,6 @@ export async function createProspectMark(
   });
   if (!res.ok) throw new Error(`prospect mark create HTTP ${res.status}`);
   const body = (await res.json()) as { ok?: boolean; mark?: ProspectMark };
-  if (!body.ok || !body.mark) throw new Error("prospect mark create: réponse invalide");
+  if (!body.ok || !body.mark) throw new Error("prospect mark create: invalid response");
   return body.mark;
-}
-
-export interface CreateProspectNoteInput {
-  noLot: string;
-  citySlug: string;
-  body: string;
-  mode?: ProspectMode;
-  lotVersionId?: string | null;
-}
-
-/** POST /api/v1/prospects/notes → 201 { ok, note }. Ajoute une note libre append-only. */
-export async function createProspectNote(
-  input: CreateProspectNoteInput,
-  baseUrl?: string,
-): Promise<ProspectNote> {
-  const payload: Record<string, unknown> = {
-    ...(input.lotVersionId != null ? { lotVersionId: input.lotVersionId } : {}),
-    noLot: input.noLot,
-    citySlug: input.citySlug,
-    body: input.body,
-    mode: input.mode ?? "real",
-  };
-  const res = await fetch(apiUrl(`/api/v1/prospects/notes`, baseUrl), {
-    method: "POST",
-    credentials: "same-origin",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error(`prospect note create HTTP ${res.status}`);
-  const body = (await res.json()) as { ok?: boolean; note?: ProspectNote };
-  if (!body.ok || !body.note) throw new Error("prospect note create: réponse invalide");
-  return body.note;
 }

@@ -1,16 +1,14 @@
 /**
- * Tests for the scoped city reads (coherent-city, reveal) and for
+ * Tests for the scoped city read (coherent-city) and for
  * extractDocRefs — the type-guard that parses props.refs from graph_nodes
  * into typed SignalDocRef[].
  */
 import { afterEach, describe, it, expect, vi } from "vitest";
 import {
-  appendRevealedNodes,
   extractDocRefs,
   extractSignalEvidence,
   extractZoneReglements,
   fetchGraphSignalDetail,
-  fetchRevealedSignal,
   GraphSignalsHttpError,
   scopedReadErrorMessage,
   type GraphSignalNode,
@@ -110,36 +108,6 @@ describe("fetchGraphSignalDetail — scoped coherent read", () => {
     );
     const failure = await fetchGraphSignalDetail(SCOPE, "ville-synth", { timeoutMs: 10 }).catch((err) => err);
     expect(String(failure?.message)).toContain("timeout after 10ms");
-  });
-});
-
-describe("fetchRevealedSignal — archived target", () => {
-  it("reads the scoped reveal route and carries the reveal fingerprint", async () => {
-    const calls: string[] = [];
-    vi.stubGlobal("fetch", async (url: string) => {
-      calls.push(url);
-      return new Response(JSON.stringify({ ok: true, target: {}, signal: servedNode("sig-9", { facetFingerprint: undefined }),
-        displayedFingerprint: "b".repeat(64), heads: { personal: { id: "h-1", state: "active", reasonCode: "N-ADMIN" },
-          workspace: null }, effectiveDiscarded: true }), { status: 200 });
-    });
-    const revealed = await fetchRevealedSignal(SCOPE, { citySlug: "ville-synth", type: "Signal", id: "sig-9" });
-    expect(calls).toEqual([
-      `/api/v1/workspaces/${WS}/signal-facets/reveal?citySlug=ville-synth&type=Signal&id=sig-9`,
-    ]);
-    expect(revealed.node.facetFingerprint).toBe("b".repeat(64));
-    expect(revealed.heads.personal?.id).toBe("h-1");
-  });
-
-  it("extends the A authority with revealed Z/M/P members in order", () => {
-    const detail = { citySlug: "c", token: "t", heads: [], counts: { total: 1, hidden: 1, visible: 1, selected: 0 },
-      nodes: [servedNode("a") as GraphSignalNode],
-      legacyProjection: { version: "legacy-zmp-v1" as const, a: { count: 1, signalIds: ["a"] } } };
-    const revealedNode = servedNode("b", { legacySubset: { version: "legacy-zmp-v1", signalId: "b",
-      flags: { z: true, m: true, p: true } } }) as GraphSignalNode;
-    const merged = appendRevealedNodes(detail, [{ node: revealedNode, displayedFingerprint: FP,
-      heads: { personal: null, workspace: null }, effectiveDiscarded: true }]);
-    expect(merged.nodes.map((node) => node.id)).toEqual(["a", "b"]);
-    expect(merged.legacyProjection).toEqual({ version: "legacy-zmp-v1", a: { count: 2, signalIds: ["a", "b"] } });
   });
 });
 
