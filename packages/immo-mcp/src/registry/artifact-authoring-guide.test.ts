@@ -111,7 +111,7 @@ describe("artifact authoring guide", () => {
 
   it("should preserve artifact identity when editing and disclose unavailable lifecycle actions", () => {
     const guide = getAuthoringGuide();
-    expect(guide.revision).toBe(ARTIFACT_P0B ? "2026-11-01-p0b-r3" : "2026-11-01-r5");
+    expect(guide.revision).toBe(ARTIFACT_P0B ? "2026-11-01-p0b-r4" : "2026-11-01-r6");
     const editing = guide.lifecycle.editing.join("\n");
     expect(editing).toContain("artifacts_get_source → edit → artifacts_publish");
     expect(editing).toContain("same artifactId");
