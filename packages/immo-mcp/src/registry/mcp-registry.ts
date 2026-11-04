@@ -90,6 +90,10 @@ export function checkEffectiveProfile(
   } = REQUIRED_PROVIDER_CONTRACTS,
 ): void {
   for (const { tool } of ARTIFACT_SELECTION.filter(({ tool }) => ARTIFACT_TOOL_SCOPES[tool] === ARTIFACT_INVOCATION_SCOPES.write)) {
+    // Files parity LOT 1 — create_upload mints a fresh quota-bounded session
+    // per call by provider design (no idempotencyKey on purpose); every other
+    // write stays safe to retry.
+    if (tool === "artifacts_create_upload") continue;
     if (!required[tool]?.includes("idempotencyKey")) {
       throw new RegistryError("unavailable_capability", `artifact tool ${tool} must require idempotencyKey`);
     }
@@ -105,6 +109,9 @@ export function checkEffectiveProfile(
     throw new RegistryError("unavailable_capability", "artifact tool artifacts_get must require artifactId");
   }
   for (const { tool } of ARTIFACT_SELECTION.filter(({ tool }) => tool !== "artifacts_ensure" && tool !== "artifacts_list")) {
+    // I2 on G2 — lookup_people is artifact-free by provider design (the
+    // account directory is global); every other tool still names its page.
+    if (tool === "artifacts_lookup_people") continue;
     if (!required[tool]?.includes("artifactId")) throw new RegistryError("unavailable_capability", `artifact tool ${tool} must require artifactId`);
   }
   if (durableIdentity.payloadHashInKey !== false) {

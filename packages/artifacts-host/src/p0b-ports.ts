@@ -6,11 +6,22 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import type { FinalizeTxClient } from "@sentropic/artifacts/server/commit-contract";
 
 export const sharePrincipal = new AsyncLocalStorage<{ action?: unknown; principalId?: unknown }>();
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export async function sharePrincipalApproved(client: FinalizeTxClient, operation: string): Promise<boolean> {
   const target = sharePrincipal.getStore();
   if (operation !== "set_access" || target?.action !== "grant") return true;
   if (typeof target.principalId !== "string") return false;
-  const result = await client.query<{ status: string }>("SELECT status FROM account_users WHERE sub=$1 FOR SHARE", [target.principalId]);
+  // G2 — the grant target is an opaque directory userRef (account_users.id).
+  // Mode sentinels never name a person. A raw IdP sub never approves here:
+  // the provider routes sub-form principals straight to this transaction
+  // guard without consulting the directory, so this is the immo-side
+  // enforcement point for the userRef-only input rule (N3, R1) — the false
+  // merges into the single person_not_shareable like every other refusal.
+  // Approval stays approved-only.
+  if (target.principalId.startsWith("sentropic:")) return true;
+  if (!UUID_RE.test(target.principalId)) return false;
+  const result = await client.query<{ status: string }>(
+    "SELECT status FROM account_users WHERE id=$1 FOR SHARE", [target.principalId]);
   return result.rows[0]?.status === "approved";
 }
 

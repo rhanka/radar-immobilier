@@ -1,5 +1,5 @@
 import {
-  composeArtifactHost, createArtifactControl, createArtifactsPool,
+  composeArtifactHost, createAccountDirectory, createArtifactControl, createArtifactsPool,
   resolveArtifactsStorageConfig, type ArtifactsConfigInput, type ArtifactsPoolParams,
   createArtifactAdmissionAuthority, readActivationEnv, resolveActivationConfig,
   ARTIFACT_P0B, createDeleteConfirmation,
@@ -7,6 +7,7 @@ import {
 import type { AuthConfig } from "../config.js";
 import type { Logger } from "../logger.js";
 import type { ControlRouteDeps } from "./control-route.js";
+import { createReaderConsentService } from "./reader-consent.js";
 import { createStoredReader } from "./reader-storage.js";
 
 export async function startArtifactControl(options: {
@@ -38,11 +39,14 @@ export async function startArtifactControl(options: {
     const host = await composeArtifactHost(pool, parsed, undefined, { readActivation, contentBase,
       ...(confirmation ? { confirmation } : {}) });
     const backend = createArtifactControl(host, parsed.storageScope, contentBase,
-      createArtifactAdmissionAuthority(pool, readActivation, parsed.storageScope));
+      createArtifactAdmissionAuthority(pool, readActivation, parsed.storageScope),
+      { directory: createAccountDirectory(pool) });
     logger.info({ storageScope: parsed.storageScope, s3Bucket: parsed.s3Bucket }, "artifact control enabled");
     return { auth, accounts: pool, backend, readActivation, storageScope: parsed.storageScope,
       ...(confirmation ? { confirmation } : {}),
-      readerStorage: createStoredReader(pool, parsed.storageScope, contentBase, host.blobs) };
+      readerStorage: createStoredReader(pool, parsed.storageScope, contentBase, host.blobs),
+      // Reader consent — durable BASKETS consent (Gate B), never the opening.
+      readerConsent: createReaderConsentService(pool, parsed.storageScope) };
   } catch (err) {
     logger.error({ err }, "artifact control unavailable; API remains available");
     return { auth, accounts: pool };

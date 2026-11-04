@@ -51,10 +51,13 @@
         "maxCount": 32,
         "maxDecodedBytesPerFile": 262144,
         "maxDecodedBytesTotal": 262144,
+        "releaseMaxFiles": 255,
+        "releaseMaxFileBytes": 16777216,
+        "releaseMaxTotalBytes": 67108864,
         "entry": "path plus mimeType plus exactly one of text or bytes",
         "textEncoding": "UTF-8 bytes",
         "byteRange": "integers 0 through 255",
-        "mimeTypes": ["text/html", "text/css", "text/javascript", "application/json"],
+        "mimeTypes": ["text/html", "text/css", "text/javascript", "application/json", "image/png", "image/jpeg", "image/gif", "image/webp", "image/svg+xml", "application/pdf"],
         "paths": "unique canonical paths; no empty or traversal segments, backslashes, percent-encoding, query or fragment markers",
         "reservedFirstSegments": ["api", "__artifacts", "livez", "health"]
       }

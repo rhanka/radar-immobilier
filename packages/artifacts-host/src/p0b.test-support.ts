@@ -5,6 +5,7 @@ import { createMemoryBlobStore } from "@sentropic/artifacts/server/publication";
 import { composeArtifactHost, type ArtifactHostOptions } from "./composition.js";
 import { HOST_ARTIFACT_PROFILE } from "./p0b-profile.js";
 import { createDeleteConfirmation } from "./delete-confirmation.js";
+import { createAccountDirectory } from "./directory.js";
 import { createArtifactControl } from "./facade.js";
 import { ARTIFACTS_COORDINATOR_HASH, ARTIFACTS_COORDINATOR_WHEN, ARTIFACTS_LIFECYCLE_HASH, ARTIFACTS_LIFECYCLE_WHEN } from "./storage.js";
 
@@ -14,11 +15,11 @@ export async function p0bFixture(profile = HOST_ARTIFACT_PROFILE) {
   if (url.hostname !== "postgres" || url.pathname !== "/p0b") throw new Error("p0b_test_database_required");
   const pool = new pg.Pool({ connectionString, max: 8, options: "-c statement_timeout=5000 -c lock_timeout=1000" });
   await pool.query("DROP SCHEMA IF EXISTS artifacts CASCADE; DROP SCHEMA IF EXISTS drizzle CASCADE; DROP TABLE IF EXISTS account_users");
-  for (const name of ["0015_artifacts_core", "0016_artifacts_lifecycle", "0024_artifacts_coordinator", "0025_artifacts_actor_quotas", "0028_artifacts_p0b", "0029_artifacts_parity", "0032_artifacts_sharing_access_mode"]) {
+  for (const name of ["0015_artifacts_core", "0016_artifacts_lifecycle", "0024_artifacts_coordinator", "0025_artifacts_actor_quotas", "0028_artifacts_p0b", "0029_artifacts_parity", "0032_artifacts_sharing_access_mode", "0033_artifacts_upload_sessions", "0034_artifacts_reader_consent"]) {
     await pool.query(readFileSync(new URL(`../../../api/drizzle/${name}.sql`, import.meta.url), "utf8"));
   }
   await pool.query(`CREATE SCHEMA drizzle; CREATE TABLE drizzle.__drizzle_migrations (created_at bigint, hash text);
-    CREATE TABLE account_users (id UUID DEFAULT gen_random_uuid(), sub TEXT PRIMARY KEY, status TEXT);
+    CREATE TABLE account_users (id UUID DEFAULT gen_random_uuid(), sub TEXT PRIMARY KEY, status TEXT, email TEXT, name TEXT);
     INSERT INTO account_users (sub,status) VALUES ('alice','approved'), ('idp-bob','approved'), ('pending','pending');`);
   for (const [when, hash] of [[ARTIFACTS_LIFECYCLE_WHEN, ARTIFACTS_LIFECYCLE_HASH], [ARTIFACTS_COORDINATOR_WHEN, ARTIFACTS_COORDINATOR_HASH]]) {
     await pool.query("INSERT INTO drizzle.__drizzle_migrations VALUES ($1,$2)", [when, hash]);
@@ -36,7 +37,8 @@ export async function p0bFixture(profile = HOST_ARTIFACT_PROFILE) {
   }
   const host = await connect();
   await pool.query("INSERT INTO artifacts.host_quotas (storage_scope_id,operation_limit,byte_limit) VALUES ('p0b',1000,10000000)");
-  const control = createArtifactControl(host, "p0b", "pages.test");
+  const control = createArtifactControl(host, "p0b", "pages.test", undefined,
+    { directory: createAccountDirectory(pool) });
   const call = (op: string, args: unknown, actor = "alice") => control.handle(op, actor, args);
   const page = async () => {
     const bindingName = randomUUID();

@@ -225,6 +225,20 @@
       "when": 1793000000002,
       "tag": "0032_artifacts_sharing_access_mode",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1793000000003,
+      "tag": "0033_artifacts_upload_sessions",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1793000000004,
+      "tag": "0034_artifacts_reader_consent",
+      "breakpoints": true
     }
   ]
 }
