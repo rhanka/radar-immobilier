@@ -4,7 +4,7 @@ import type { WriteTx } from "../services/facets/signal-write-scope.js";
 import { PwWriteError } from "../services/facets/pw-write-errors.js";
 import { WRITE_PROFILE_NAME } from "./write-profile.js";
 import { POLICY_REVISION } from "@radar/artifacts-host";
-import { evaluateAccess } from "@sentropic/artifacts/server/access";
+import { evaluateAccess, type AccessMode, type ArtifactAcl } from "@sentropic/artifacts/server/access";
 
 /** Immutable publication opt-in; it requests host features, never publisher rights. */
 export const PUBLISHED_WRITE_FILE = "radar-write.json";
@@ -40,7 +40,7 @@ export async function readPublishedWriteAuthority(tx: WriteTx,
   const policy = await tx.execute(sql`SELECT revision, xmin::text AS version
     FROM artifacts.host_policy WHERE storage_scope_id=${binding.scope} FOR SHARE`);
   if (policy.rows.length !== 1 || policy.rows[0]?.["revision"] !== POLICY_REVISION) return deny();
-  const result = await tx.execute(sql`SELECT a.owner_id, a.is_public, a.lifecycle_state,
+  const result = await tx.execute(sql`SELECT a.owner_id, a.is_public, a.access_mode, a.lifecycle_state,
     a.xmin::text AS artifact_version, r.xmin::text AS release_version, r.state, r.manifest
     FROM artifacts.artifacts a JOIN artifacts.releases r ON r.artifact_id=a.id
     WHERE a.id=${binding.artifactId}::uuid AND r.id=${binding.releaseId}::uuid
@@ -53,9 +53,14 @@ export async function readPublishedWriteAuthority(tx: WriteTx,
   if (account.rows[0]?.["status"] !== "approved") return deny();
   const acl = await tx.execute(sql`SELECT permission, xmin::text AS version FROM artifacts.artifact_access
     WHERE artifact_id=${binding.artifactId}::uuid AND principal_id=${binding.readerSub} FOR SHARE`);
-  const allowed = evaluateAccess({ ownerId: String(row["owner_id"]), isPublic: row["is_public"] === true,
-    withdrawn: false, grants: acl.rows.map((grant) => ({ principalId: binding.readerSub,
-      grant: grant["permission"] as "read" })) }, binding.readerSub, "read", () => true);
+  const mode: AccessMode | undefined = row["access_mode"] === "restricted" ||
+    row["access_mode"] === "platform" || row["access_mode"] === "public"
+    ? row["access_mode"] as AccessMode : undefined;
+  const stored: ArtifactAcl = { ownerId: String(row["owner_id"]), isPublic: row["is_public"] === true,
+    withdrawn: false, ...(mode === undefined ? {} : { accessMode: mode }),
+    grants: acl.rows.map((grant) => ({ principalId: binding.readerSub,
+      grant: grant["permission"] as "read" })) };
+  const allowed = evaluateAccess(stored, binding.readerSub, "read", () => true, {});
   if (!allowed) return deny();
   return { ...binding, version: createHash("sha256")
     .update(JSON.stringify([row, policy.rows, account.rows, acl.rows, PUBLISHED_WRITE_POLICY])).digest("hex") };
