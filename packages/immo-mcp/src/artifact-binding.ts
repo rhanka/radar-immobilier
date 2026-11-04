@@ -1,7 +1,7 @@
 import pg from "pg";
 import { composeArtifactHost, createArtifactAdmissionAuthority, guardArtifactPool, readArtifactsEnv,
   resolveArtifactsStorageConfig, readActivationEnv, resolveActivationConfig } from "@radar/artifacts-host";
-import { ARTIFACT_P0B, createDeleteConfirmation } from "@radar/artifacts-host";
+import { ARTIFACT_P0B, createAccountDirectory, createDeleteConfirmation } from "@radar/artifacts-host";
 import { bindArtifactProvider, IMMO_ARTIFACT_PROFILE,
   type FrozenCallAuthority } from "./registry/artifact-provider.js";
 import { ARTIFACT_WRITE_SCOPE, readArtifactScopePolicy } from "./registry/artifact-profile.js";
@@ -30,7 +30,7 @@ export async function createArtifactBinding(env: NodeJS.ProcessEnv) {
       { profile: IMMO_ARTIFACT_PROFILE, readActivation, contentBase, ...(confirmation ? { confirmation } : {}) });
     const admission = createArtifactAdmissionAuthority(pool, readActivation, config.storageScope);
     const binding = bindArtifactProvider({ app: host.app, storageScopeId: config.storageScope,
-      admission, scopePolicy,
+      admission, scopePolicy, directory: createAccountDirectory(pool),
       ...(confirmation ? { prepareDelete: confirmation.prepareDelete } : {}),
       authorizeCommit(request, frozen?: FrozenCallAuthority) {
         const actorId = request.principal.sub;

@@ -8,7 +8,7 @@ import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-sta
 import { computeManifestDigest, type RegistryDefinition } from "@sentropic/cluster-mesh/mcp/registry";
 import { projectArtifactHttpOutcome } from "@sentropic/artifacts/http";
 import { assertContentIdsDisjoint, checkAdmission, createArtifactControl, HOST_ARTIFACT_PROFILE, ARTIFACT_PROFILE_DESCRIPTOR, ARTIFACT_STRICT, ARTIFACT_PART1,
-  artifactRefusalResponse, projectContentUrls, validateArtifactInput, type AdmissionAuthority } from "@radar/artifacts-host";
+  artifactRefusalResponse, projectContentUrls, projectListVersionsAuthors, validateArtifactInput, type AdmissionAuthority, type ListVersionsDirectory } from "@radar/artifacts-host";
 import { ARTIFACT_INVOCATION_SCOPES, ARTIFACT_TOOL_SCOPES, acceptedArtifactScopes, hasArtifactScope,
   isArtifactToolName, STRICT_ARTIFACT_SCOPE_POLICY, type ArtifactScopePolicy } from "./artifact-profile.js";
 import { AUTHORING_GUIDE_SNIPPET, getAuthoringGuide } from "./artifact-authoring-guide.js";
@@ -57,6 +57,18 @@ const STABLE_TOOL_SUMMARIES: Readonly<Record<string, string>> = {
   artifacts_get_source: "Read a Radar page's retained source files for editing.",
   artifacts_set_access: "Grant or revoke named read access on a Radar page.",
   artifacts_delete: "Delete a Radar page after owner confirmation in the IMMO application.",
+  // Files parity LOT 1 — outside-the-model bytes, then one atomic release.
+  artifacts_create_upload: "Open an upload session and return the signed PUT URL for one file.",
+  artifacts_commit_upload: "Verify staged bytes and pin one uploaded file to its manifest path.",
+  artifacts_publish_bundle: "Publish one atomic release from inline files plus staged uploads.",
+  // I2 on G2 — share tooling through the I2 seams.
+  artifacts_lookup_people: "Find approved IMMO accounts by name or email; answers carry opaque userRef values.",
+  artifacts_list_access: "List the access mode and per-principal grants of a Radar page.",
+  // Reader consent — self-revocation of the caller's own persistent consent
+  // (baskets scopes since R2). The served summary stays frozen: the
+  // tool-definitions hash locks every served definition bit-identical, and
+  // any wording change resets the owner's per-tool "Always allow" grants.
+  artifacts_revoke_reader_consent: "Withdraw the caller's own persistent opening consent for a Radar page.",
   artifacts_list_versions: "List the retained releases of a Radar page.",
   artifacts_revert: "Republish a retained release as the current release.",
 };
@@ -203,6 +215,7 @@ export function bindArtifactProvider(options: {
   /** Transition policy; defaults to strict (explicit artifact scopes only). */
   readonly scopePolicy?: ArtifactScopePolicy | undefined;
   readonly prepareDelete?: (actorId: string, args: Record<string, unknown>) => Promise<Record<string, unknown>>;
+  readonly directory?: ListVersionsDirectory | undefined;
 }): ArtifactMcpBinding {
   if (!options.storageScopeId.trim() || typeof options.authorizeCommit !== "function") {
     throw new Error("artifact_binding_incomplete");
@@ -211,7 +224,8 @@ export function bindArtifactProvider(options: {
   const scope = options.storageScopeId;
   const authorizeCommit = options.authorizeCommit;
   const admission = options.admission;
-  const sourceControl = createArtifactControl({ app: options.app }, scope, undefined, admission);
+  const sourceControl = createArtifactControl({ app: options.app }, scope, undefined, admission,
+    options.directory ? { directory: options.directory } : undefined);
   const scopePolicy: ArtifactScopePolicy = Object.freeze({ legacyReadScope: options.scopePolicy?.legacyReadScope === true });
   const manifest = scopePolicy.legacyReadScope ? createImmoArtifactManifest(scopePolicy) : IMMO_ARTIFACT_MANIFEST;
   const binding: ArtifactMcpBinding = Object.freeze({
@@ -284,6 +298,9 @@ export function bindArtifactProvider(options: {
             error.details ? { details: error.details } : {});
         }
         body = projectContentUrls(response.body);
+        if (tool === "artifacts_list_versions" && options.directory) {
+          await projectListVersionsAuthors(body, scope, options.directory);
+        }
       } else {
         const outcome = await executor.execute({ tool, args, invocation });
         if (!outcome.ok) {
@@ -303,7 +320,7 @@ export function bindArtifactProvider(options: {
           });
         }
         body = projectContentUrls(projectArtifactHttpOutcome(outcome, ARTIFACT_PART1).body);
-        if (tool === "artifacts_publish" || tool === "artifacts_revert") {
+        if (tool === "artifacts_publish" || tool === "artifacts_revert" || tool === "artifacts_publish_bundle") {
           const payload = (body as { output?: unknown }).output ?? body;
           const record = payload as { artifactId?: unknown; releaseId?: unknown };
           const requestArgs = args as { artifactId?: unknown };

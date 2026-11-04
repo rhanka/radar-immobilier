@@ -23,7 +23,10 @@ function setup() {
 
 describe("installed artifact boundary", () => {
   it("should select only qualified tools for the installed provider", () => {
-    expect(profile.selectedCapabilities).toEqual(ACTIVE_ARTIFACT_TOOLS);
+    // Set equality: the host declares activation groups (base, P0b, upload
+    // channel, part1) while the provider serves its canonical capability
+    // order. Manifest order is locked by the catalogue snapshot and hash.
+    expect([...profile.selectedCapabilities].sort()).toEqual([...ACTIVE_ARTIFACT_TOOLS].sort());
     for (const disabled of ["restore", "fork", "promote", "renew"]) {
       expect(() => profile.validate(`artifacts_${disabled}`, { artifactId: ID })).toThrow("capability_unavailable");
     }
