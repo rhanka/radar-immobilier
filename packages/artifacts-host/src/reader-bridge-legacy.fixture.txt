@@ -1,0 +1,163 @@
+(function () {
+"use strict";
+var KIND_BY_CODE = {
+  workspace_required: "no_workspace",
+  workspace_ambiguous: "no_workspace",
+  workspace_missing: "no_workspace",
+  workspace_not_authorized: "denied",
+  account_not_approved: "denied",
+  capability_required: "denied",
+  delegated_scope_refused: "denied",
+  forbidden: "denied",
+  unauthenticated: "session",
+  session_expired: "session",
+  snapshot_changed: "changed",
+  cursor_expired: "changed",
+  projection_revision_unstable: "changed",
+  invalid_query: "invalid",
+  invalid_cursor: "invalid",
+  incompatible_continuation: "invalid",
+  request_uri_too_long: "invalid",
+  invalid_params: "invalid",
+  target_not_found: "invalid",
+  unknown_operation: "invalid"
+};
+function ReadError(kind, code, status, requestId) {
+  var err = new Error(code);
+  err.name = "ReadError";
+  err.kind = kind;
+  err.code = code;
+  err.status = status;
+  err.requestId = requestId || "";
+  return err;
+}
+function kindOf(code, status) {
+  if (Object.prototype.hasOwnProperty.call(KIND_BY_CODE, code)) return KIND_BY_CODE[code];
+  if (status === 401) return "session";
+  if (status === 403) return "denied";
+  if (status >= 500) return "unavailable";
+  return "unknown";
+}
+var TIMEOUT_MS = 20000;
+var REFRESH_BEFORE_MS = 30000;
+var here = new URL(location.href);
+var grant = here.searchParams.get("grant") || "";
+var grantAt = grant ? Date.now() : 0;
+var renewing = null;
+if (here.searchParams.has("grant")) {
+  here.searchParams.delete("grant");
+  var rest = here.searchParams.toString();
+  history.replaceState(null, "", here.pathname + (rest ? "?" + rest : "") + here.hash);
+}
+function timedFetch(path, init) {
+  var controller = new AbortController();
+  var timer = setTimeout(function () { controller.abort(); }, TIMEOUT_MS);
+  var options = { method: init.method, cache: "no-store", credentials: "same-origin", signal: controller.signal };
+  if (init.headers) options.headers = init.headers;
+  return fetch(path, options).then(
+    function (response) { clearTimeout(timer); return response; },
+    function (error) {
+      clearTimeout(timer);
+      throw ReadError("network", error && error.name === "AbortError" ? "timeout" : "network_error", 0, "");
+    }
+  );
+}
+function readGrantBody(body) {
+  if (body && typeof body.grant === "string" && body.grant && body.grant.length <= 4096) return body.grant;
+  return "";
+}
+function failureCode(body, status) {
+  if (!body) return status === 401 ? "unauthenticated" : "internal_error";
+  if (body.error && typeof body.error.code === "string") return body.error.code;
+  if (typeof body.error === "string") return body.error;
+  return status === 401 ? "unauthenticated" : "internal_error";
+}
+function requestIdOf(body) {
+  if (body && typeof body.requestId === "string") return body.requestId;
+  if (body && body.error && typeof body.error.requestId === "string") return body.error.requestId;
+  return "";
+}
+function renewOnce(withGrant) {
+  var headers = withGrant && grant ? { "x-preview-grant": grant } : {};
+  return timedFetch("/__reader/renew", { method: "POST", headers: headers }).then(function (response) {
+    return response.json().catch(function () { return null; }).then(function (body) {
+      if (!response.ok) {
+        var code = body && typeof body.error === "string" ? body.error : "unauthenticated";
+        throw ReadError(kindOf(code, response.status || 401), code, response.status, "");
+      }
+      var next = readGrantBody(body);
+      if (!next) throw ReadError("session", "unauthenticated", response.status, "");
+      return next;
+    });
+  });
+}
+function renewGrant() {
+  return renewOnce(true).catch(function (error) {
+    if (error && error.status === 401 && grant) return renewOnce(false);
+    throw error;
+  }).then(function (next) {
+    grant = next;
+    grantAt = Date.now();
+  });
+}
+function ensureGrant() {
+  if (grant && Date.now() - grantAt < REFRESH_BEFORE_MS) return Promise.resolve();
+  if (!renewing) {
+    renewing = renewGrant().then(
+      function () { renewing = null; },
+      function (error) { renewing = null; throw error; }
+    );
+  }
+  return renewing;
+}
+function read(operation, params) {
+  return ensureGrant().then(function () {
+    var query = new URLSearchParams();
+    Object.keys(params).forEach(function (key) {
+      if (key === "grant") return;
+      var value = params[key];
+      if (value === undefined || value === null || value === "") return;
+      query.set(key, String(value));
+    });
+    var search = query.toString();
+    return timedFetch("/__reader/api/" + operation + (search ? "?" + search : ""), {
+      method: "GET",
+      headers: { "x-preview-grant": grant }
+    });
+  }).then(function (response) {
+    return response.json().catch(function () { return null; }).then(function (body) {
+      if (response.ok && body && body.ok === true) return body;
+      var code = failureCode(body, response.status);
+      throw ReadError(kindOf(code, response.status), code, response.status, requestIdOf(body));
+    });
+  });
+}
+function context(workspaceId) {
+  return read("baskets.context.v1", { workspaceId: workspaceId }).then(function (body) {
+    var availability = body.context && body.context.signals && body.context.signals.availability;
+    if (!availability || availability.state !== "open") {
+      throw ReadError("unavailable", availability && availability.reason || "signal_capability_unavailable", 503, "");
+    }
+    return body;
+  });
+}
+function search(args) {
+  return read("baskets.search.v1", {
+    workspaceId: args.workspaceId,
+    citySlug: args.citySlug,
+    basket: args.basket,
+    limit: args.limit,
+    cursor: args.cursor,
+    archive: args.archive,
+    personalHistory: args.personalHistory
+  });
+}
+window.ImmoReader = {
+  ReadError: ReadError,
+  workspaces: function () { return read("workspaces.list.v1", {}); },
+  context: context,
+  search: search,
+  ensureGrant: ensureGrant,
+  reopenUrl: function () { return "/__reader/start"; }
+};
+})();
