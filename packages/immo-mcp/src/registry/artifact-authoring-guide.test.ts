@@ -177,6 +177,9 @@ describe("artifact authoring guide", () => {
 
   it("should document the worker-free map base with pinned kit URLs", () => {
     const guide = getAuthoringGuide();
+    expect(guide.mapBase.tiles).toBe("/__artifacts/tiles/v1/{z}/{x}/{y}");
+    expect(guide.mapBase.labels).toBe("/__artifacts/tiles/v1/labels/{z}/{x}/{y}");
+    expect(guide.mapBase.attribution).toHaveLength(2);
     expect(guide.mapBase.kit).toBe("map");
     expect(guide.mapBase.version).toBe("map-v1");
     expect(guide.mapBase.manifest.map((asset) => asset.file).sort())
