@@ -3,14 +3,15 @@ import type pg from "pg";
 import { createAccountDirectory, unknownUserRef } from "./directory.js";
 
 /**
- * R1 + N3 — the directory never leaks a raw IdP sub at the model boundary
- * and resolves approved accounts only:
+ * R1 + N3 — the directory never leaks a raw IdP sub at the model boundary,
+ * in either direction:
  * - `describePrincipal` always answers: opaque `userRef` for a known
  *   account (by sub or by id), explicit `unknown-<hash>` marker for a
  *   missing one, undefined only for `sentropic:*` mode sentinels;
- * - `resolvePrincipal` answers the sub for approved accounts and nothing
- *   for pending/suspended/unknown ones (the provider merges the miss into
- *   `person_not_shareable`); the unknown marker never resolves.
+ * - `resolvePrincipal` answers the sub for an approved account UUID and
+ *   nothing for anything else — raw sub, email, marker, pending, suspended
+ *   or unknown UUID (the provider merges the miss into
+ *   `person_not_shareable`; a throw would escape as a 500).
  */
 
 const ALICE = { id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", sub: "idp-alice",
@@ -73,14 +74,18 @@ describe("account directory model boundary", () => {
     expect(await directory.resolvePrincipal("scope", "sentropic:platform")).toBeUndefined();
   });
 
-  it("should resolve approved accounts only (N3)", async () => {
+  it("should resolve approved account UUIDs only and yield no account for raw subs (N3)", async () => {
     const directory = createAccountDirectory(stubPool());
     expect(await directory.resolvePrincipal("scope", ALICE.id)).toBe(ALICE.sub);
-    expect(await directory.resolvePrincipal("scope", ALICE.sub)).toBe(ALICE.sub);
     expect(await directory.resolvePrincipal("scope", PENDING.id)).toBeUndefined();
-    expect(await directory.resolvePrincipal("scope", PENDING.sub)).toBeUndefined();
     expect(await directory.resolvePrincipal("scope", "cccccccc-cccc-4ccc-8ccc-cccccccccccc"))
       .toBeUndefined();
+    // Raw IdP subs never yield an account at the input boundary, whatever
+    // the status — the miss (not a throw) is what the provider merges into
+    // person_not_shareable.
+    for (const sub of [ALICE.sub, PENDING.sub, "bob@example.test"]) {
+      expect(await directory.resolvePrincipal("scope", sub)).toBeUndefined();
+    }
     await expect(directory.resolvePrincipal("scope", ""))
       .rejects.toMatchObject({ code: "unresolvable_share_target" });
   });

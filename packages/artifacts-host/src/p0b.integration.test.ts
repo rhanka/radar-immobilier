@@ -127,34 +127,40 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("IMMO artifact host with real Pos
     }
   });
 
-  it.skipIf(!ARTIFACT_P0B)("should allow only named approved IdP subjects, preserve read-only grants and revoke at exhausted quota", async () => {
+  it.skipIf(!ARTIFACT_P0B)("should allow only named approved colleagues through opaque userRef, preserve read-only grants and revoke at exhausted quota", async () => {
     const { artifactId } = await h.page();
     await h.pool.query("UPDATE artifacts.host_quotas SET operation_limit=operations_used,byte_limit=bytes_used");
-    const share = { artifactId, action: "grant", principalId: "idp-bob", grant: "read", idempotencyKey: randomUUID() };
-    const granted = await h.call("set_access", share);
-    // I2 on G2: the legacy sub still grants, but the receipt projects the
-    // opaque userRef (isPublic stays a DB-side legacy projection only, never
-    // in the mutation receipt).
     const bobRef = (await h.pool.query<{ id: string }>(
       "SELECT id FROM account_users WHERE sub = 'idp-bob'")).rows[0]!.id;
+    const share = { artifactId, action: "grant", principalId: bobRef, grant: "read", idempotencyKey: randomUUID() };
+    const granted = await h.call("set_access", share);
+    // I2 on G2: the grant takes the opaque userRef; the receipt projects it
+    // back (isPublic stays a DB-side legacy projection only, never in the
+    // mutation receipt). The raw IdP sub is refused outright (N3, R1).
     expect(granted).toMatchObject({ status: 200, body: { accessMode: "restricted", grants: [{ principalId: bobRef, grant: "read" }] } });
     expect((await h.call("set_access", share)).body).toEqual(granted.body);
     expect((await h.call("meta", { artifactId }, "idp-bob")).status).toBe(200);
     expect((await h.call("get_source", { artifactId }, "idp-bob")).status).toBe(403);
     expect((await h.call("set_access", { ...share, idempotencyKey: randomUUID() }, "idp-bob")).status).toBe(403);
-    // Unknown, suspended and non-sub targets merge into person_not_shareable.
-    for (const principalId of ["pending", "unknown", "bob@example.test"]) {
+    // A raw sub is refused outright (403 access_denied: internal ids never
+    // cross the input boundary — R1 lets the provider tell a known internal
+    // id misused as input apart from an unknown target). Unknown, suspended
+    // and non-sub targets merge into person_not_shareable.
+    // Probe map (one assertion): a mismatch prints every form's actual outcome.
+    const probes: Record<string, string> = {};
+    for (const principalId of ["idp-bob", "pending", "unknown", "bob@example.test"]) {
       const refused = await h.call("set_access", { ...share, principalId, idempotencyKey: randomUUID() });
-      expect(refused.status).toBe(422);
-      expect((refused.body as { error: string }).error).toBe("person_not_shareable");
+      probes[principalId] = `${refused.status}:${(refused.body as { error?: string }).error ?? "?"}`;
     }
+    expect(probes).toEqual({ "idp-bob": "403:access_denied", pending: "422:person_not_shareable",
+      unknown: "422:person_not_shareable", "bob@example.test": "422:person_not_shareable" });
     // Revoke while approved, then suspend: post-suspend the grant is already
     // ineffective (reads reread approval), and the G2 seam refuses even the
     // cleanup grant/revoke on an unapproved target — merged person_not_shareable.
-    expect((await h.call("set_access", { artifactId, action: "revoke", principalId: "idp-bob", idempotencyKey: randomUUID() })).status).toBe(200);
+    expect((await h.call("set_access", { artifactId, action: "revoke", principalId: bobRef, idempotencyKey: randomUUID() })).status).toBe(200);
     expect((await h.call("meta", { artifactId }, "idp-bob")).status).toBeGreaterThanOrEqual(400);
     await h.pool.query("UPDATE account_users SET status='pending' WHERE sub='idp-bob'");
-    const revoked = await h.call("set_access", { artifactId, action: "revoke", principalId: "idp-bob", idempotencyKey: randomUUID() });
+    const revoked = await h.call("set_access", { artifactId, action: "revoke", principalId: bobRef, idempotencyKey: randomUUID() });
     expect(revoked.status).toBe(422);
     expect((revoked.body as { error: string }).error).toBe("person_not_shareable");
     // Lot I2 B1: every mutation lands in the append-only audit in the same
@@ -193,8 +199,10 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("IMMO artifact host with real Pos
     await h.pool.query("DELETE FROM artifacts.artifact_access WHERE artifact_id = $1", [artifactId]);
     await h.pool.query("UPDATE artifacts.artifacts SET access_mode = 'platform' WHERE id = $1", [artifactId]);
     // Audit rows are immutable once written through set_access.
+    const bobRef = (await h.pool.query<{ id: string }>(
+      "SELECT id FROM account_users WHERE sub = 'idp-bob'")).rows[0]!.id;
     const granted = await h.call("set_access",
-      { artifactId, action: "grant", principalId: "idp-bob", grant: "read", idempotencyKey: randomUUID() });
+      { artifactId, action: "grant", principalId: bobRef, grant: "read", idempotencyKey: randomUUID() });
     expect(granted.status).toBe(200);
     await expect(h.pool.query("UPDATE artifacts.artifact_access_events SET action = 'revoke' WHERE artifact_id = $1",
       [artifactId])).rejects.toThrow(/immutable/);
@@ -217,7 +225,17 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("IMMO artifact host with real Pos
       return result;
     });
     try {
-      expect((await h.call("set_access", { artifactId, action: "grant", principalId: "idp-bob", grant: "read", idempotencyKey: randomUUID() })).status).toBe(403);
+      const bobRef = (await query<{ id: string }>(
+        "SELECT id FROM account_users WHERE sub = 'idp-bob'")).rows[0]!.id;
+      // The flip lands after the request snapshot but before resolution, so
+      // the approved-only directory (N3) denies first with the merged
+      // person_not_shareable — earlier than the historical transaction
+      // re-read, same property: nothing commits on a stale approval. The
+      // FOR SHARE transaction re-read stays as defense-in-depth for flips
+      // that land after resolution.
+      const raced = await h.call("set_access", { artifactId, action: "grant", principalId: bobRef, grant: "read", idempotencyKey: randomUUID() });
+      expect(raced.status).toBe(422);
+      expect((raced.body as { error: string }).error).toBe("person_not_shareable");
       expect((await query("SELECT 1 FROM artifacts.artifact_access WHERE artifact_id=$1", [artifactId])).rowCount).toBe(0);
     } finally { spy.mockRestore(); }
   });

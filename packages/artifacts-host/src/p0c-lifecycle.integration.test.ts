@@ -51,7 +51,9 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("strict P0-A artifact lifecycle",
     expect(versions.status).toBe(200);
     expect(JSON.stringify(versions.body)).toContain(A);
     expect(JSON.stringify(versions.body)).toContain(B);
-    await h.call("set_access", { artifactId, action: "grant", principalId: "idp-bob", grant: "read", idempotencyKey: randomUUID() });
+    const bobRef = (await h.pool.query<{ id: string }>(
+      "SELECT id FROM account_users WHERE sub = 'idp-bob'")).rows[0]!.id;
+    await h.call("set_access", { artifactId, action: "grant", principalId: bobRef, grant: "read", idempotencyKey: randomUUID() });
     const c = await h.call("revert", { artifactId, targetReleaseId: A, expectedCurrentReleaseId: B, idempotencyKey: randomUUID() });
     expect(c.status).toBe(201);
     const C = output(c).releaseId;
@@ -60,8 +62,6 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("strict P0-A artifact lifecycle",
     const restored = await h.call("get_source", { artifactId, releaseId: C });
     expect(output(restored).files).toEqual(output(source).files);
     // I2 on G2: served summaries project the opaque userRef, never the sub.
-    const bobRef = (await h.pool.query<{ id: string }>(
-      "SELECT id FROM account_users WHERE sub = 'idp-bob'")).rows[0]!.id;
     expect((await h.call("meta", { artifactId })).body).toMatchObject({ output: { title: "Current", description: "Edited page", icon: "building", grants: [{ principalId: bobRef, grant: "read" }] } });
     const lineage = await h.pool.query("SELECT author_principal_id, parent_release_id, reverted_from_release_id FROM artifacts.releases WHERE id=$1", [C]);
     expect(lineage.rows[0]).toEqual({ author_principal_id: "alice", parent_release_id: B, reverted_from_release_id: A });
