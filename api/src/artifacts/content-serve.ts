@@ -22,6 +22,7 @@
  */
 import { randomUUID } from "node:crypto";
 import { Hono, type Context } from "hono";
+import { upgradeLegacyReaderBridge } from "@radar/artifacts-host";
 import {
   applyReaderContentHeaders,
   isEmbedPath,
@@ -421,6 +422,19 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
           return c.html(html);
         }
         c.header("Content-Type", file.contentType);
+        // Lot I2 B2: a page published with the pre-I2 bridge maps the typed
+        // consent refusal to `denied` and loops on « Réouvrir » until
+        // republication. Upgrade exact legacy bridges at serve time so the
+        // first H5 call navigates to /__reader/consent instead; every other
+        // file goes out byte-identical.
+        if (file.contentType.startsWith("text/javascript")) {
+          const raw = typeof file.body === "string" ? null : Buffer.from(file.body);
+          const text = typeof file.body === "string" ? file.body : raw!.toString("utf8");
+          const upgraded = upgradeLegacyReaderBridge(text);
+          if (upgraded !== null && (raw === null || Buffer.from(text, "utf8").equals(raw))) {
+            return c.body(upgraded);
+          }
+        }
         return c.body(typeof file.body === "string" ? file.body : new Uint8Array(file.body));
       }
     }
