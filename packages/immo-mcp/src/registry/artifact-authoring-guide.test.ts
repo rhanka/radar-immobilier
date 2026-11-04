@@ -111,7 +111,7 @@ describe("artifact authoring guide", () => {
 
   it("should preserve artifact identity when editing and disclose unavailable lifecycle actions", () => {
     const guide = getAuthoringGuide();
-    expect(guide.revision).toBe(ARTIFACT_P0B ? "2026-11-04-p0b-r5" : "2026-11-01-r6");
+    expect(guide.revision).toBe(ARTIFACT_P0B ? "2026-11-04-p0b-r6" : "2026-11-01-r6");
     const editing = guide.lifecycle.editing.join("\n");
     expect(editing).toContain("artifacts_get_source → edit → artifacts_publish");
     expect(editing).toContain("same artifactId");
@@ -155,11 +155,44 @@ describe("artifact authoring guide", () => {
       expect(share).toContain("artifacts_revoke_reader_consent");
       expect(share).toContain("Product Owner");
       expect(share).toContain("Chaperon Immobilier");
-      expect(guide.lifecycle.sharing).toContain("persistent opening consent");
+      expect(guide.lifecycle.sharing).toContain("memorized until revoked");
+      expect(guide.lifecycle.sharing).not.toContain("persistent opening consent");
     }
     expect(guide.data.grantCycle.join("\n")).toContain("basket_consent_required");
-    expect(guide.data.grantCycle.join("\n")).toContain("persistent opening consent");
+    expect(guide.data.grantCycle.join("\n")).toContain("persistent baskets consent");
+    expect(guide.data.grantCycle.join("\n")).not.toContain("persistent opening consent");
+    expect(guide.data.grantCycle.join("\n")).toContain("records nothing");
     expect(guide.data.errorKinds.map((entry) => entry.kind)).toContain("consent");
+  });
+
+  it("should document platform mode as settable and userRef as the only principalId form (R3)", () => {
+    const guide = getAuthoringGuide();
+    const sharing = guide.lifecycle.sharing;
+    expect(sharing).toContain("sentropic:platform");
+    expect(sharing).not.toContain("not available through this catalogue");
+    const share = (guide.artifactLifecycle?.share ?? []).join("\n");
+    expect(share).toContain("principalId:'sentropic:platform'");
+    expect(share).toContain("opaque userRef returned by artifacts_lookup_people");
+    expect(share).toContain("never an IdP sub");
+    expect(share).not.toContain("approved IMMO account IdP sub");
+    expect(share).toContain("sentropic:public is refused");
+  });
+
+  it("should require the exact byte size in both upload sequences (R4)", () => {
+    const guide = getAuthoringGuide();
+    const editing = guide.lifecycle.editing.join("\n");
+    expect(editing).toContain("artifacts_create_upload({artifactId, mimeType, maxSize:<exact file byte size>})");
+    expect(editing).toContain("binds that exact Content-Length");
+    const edit = (guide.artifactLifecycle?.edit ?? []).join("\n");
+    expect(edit).toContain("artifacts_create_upload({artifactId, mimeType, maxSize:<exact file byte size>})");
+    expect(edit).toContain("a PUT of any other size is refused");
+  });
+
+  it("should state the get_source bound for large releases (N5)", () => {
+    const guide = getAuthoringGuide();
+    const edit = (guide.artifactLifecycle?.edit ?? []).join("\n");
+    expect(edit).toContain("32 files / 256 KiB");
+    expect(edit).toContain("never invent missing source");
   });
 
   it("should distinguish published framework packages from the CSS snapshot", () => {
