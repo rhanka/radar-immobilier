@@ -130,7 +130,11 @@ export interface AuthoringGuide {
   readonly assets: Readonly<{ loadOrder: readonly string[]; note: string;
     manifest: readonly Readonly<{ file: string; sha256Hex: string; sizeBytes: number; mediaType: string; url: string }>[] }>;
   readonly mapBase: Readonly<{ tiles: string; labels: string; note: string;
-    attribution: readonly Readonly<{ text: string; licenseUrl: string }>[]; howTo: readonly string[] }>;
+    attribution: readonly Readonly<{ text: string; licenseUrl: string }>[]; howTo: readonly string[];
+    kit: string; version: string;
+    manifest: readonly Readonly<{ file: string; sha256Hex: string; sizeBytes: number; mediaType: string; url: string }>[];
+    load: readonly string[]; feed: readonly string[]; paint: readonly string[];
+    events: readonly string[]; limits: readonly string[] }>;
   readonly starter: Readonly<{ version: string; files: readonly AuthoringGuideStarterFile[]; adapt: string }>;
   readonly data: Readonly<{
     warning: string;
@@ -145,15 +149,6 @@ export interface AuthoringGuide {
   readonly uiState: Readonly<{ contractId: string; ownership: string; bootstrap: string; persistence: string; example: object }>;
   readonly elements: Readonly<{ package: string; packageVersion: string; catalogId: string; componentIds: readonly string[]; status: string }>;
   readonly componentUsage: string;
-  readonly mapBase: Readonly<{
-    kit: string; version: string; note: string;
-    manifest: readonly Readonly<{ file: string; sha256Hex: string; sizeBytes: number; mediaType: string; url: string }>[];
-    load: readonly string[];
-    feed: readonly string[];
-    paint: readonly string[];
-    events: readonly string[];
-    limits: readonly string[];
-  }>;
   readonly artifactDiscovery: Readonly<{ displayLabel: string; listOrder: string; timestamps: string; links: string; state: string }>;
   readonly artifactLifecycle?: Readonly<{ descriptor: typeof ARTIFACT_PROFILE_DESCRIPTOR;
     edit: readonly string[]; share: readonly string[]; delete: readonly string[] }>;
@@ -225,7 +220,10 @@ export function getAuthoringGuide(): AuthoringGuide {
         note: "Same-origin raster basemap for artifact pages (lot I-10): served by the content origin " +
           "under img-src 'self', no worker required. Render the tile layer from the tiles template; paint " +
           "the labels template over it only when the fallback upstream is active. Always keep the " +
-          "attribution below visible. Templates mirror api/src/artifacts/tile-proxy.ts (source of truth).",
+          "attribution below visible. Templates mirror api/src/artifacts/tile-proxy.ts (source of truth). " +
+          "The worker-free Canvas 2D map base (I-4 skeleton, read-only first) is served pinned " +
+          `(${MAP_KIT_VERSION}, sha256, outside the 256 KiB publication budget) on the same reserved ` +
+          "design path as the kit stylesheets; a wrong digest answers 404. Full application map parity is I-12.",
         attribution: [
           { text: "© Gouvernement du Québec — Cartes topographiques 1/20 000 (CC-BY 4.0)",
             licenseUrl: "https://www.donneesquebec.ca/licence/" },
@@ -233,7 +231,7 @@ export function getAuthoringGuide(): AuthoringGuide {
             licenseUrl: "https://ouvert.canada.ca/fr/licence-du-gouvernement-ouvert-canada" },
         ],
         howTo: [
-          "Load the I-4 worker-free map base (PR #996, not yet merged: map-v1 pinned at " +
+          "Load the I-4 worker-free map base (PR #996: map-v1 pinned at " +
             "/__artifacts/design/map-v1/<sha256>/map-base.mjs plus map-base.css on the same reserved design path). " +
             "Import { createMap } from the pinned map-base.mjs URL, render <div class=\"map-base\">, then call " +
             "createMap(container, { basemapTemplate: '/__artifacts/tiles/v1/{z}/{x}/{y}' }). A configured template " +
@@ -248,6 +246,44 @@ export function getAuthoringGuide(): AuthoringGuide {
           "Keep both attribution strings above visible in a bottom-right overlay that is never hidden and never " +
             "behind a toggle; never paint tiles when the attribution for the active upstream is absent. img-src " +
             "stays 'self' with zero external origin and zero CSP violation; worker-src 'none' is invariant.",
+        ],
+        kit: "map",
+        version: MAP_KIT_VERSION,
+        manifest: MAP_KIT_ASSETS.map((asset) => ({ ...asset, url: mapKitAssetUrl(asset) })),
+        load: [
+          "Link the two pinned kit stylesheets (assets.manifest), then the pinned map-base.css, then the page stylesheet; " +
+            "import { createMap } from the pinned map-base.mjs URL (mapBase.manifest).",
+          "Render <div class=\"map-base\" id=\"map\"> and call createMap(container, { basemapTemplate: null }). " +
+            "The module appends its own <canvas>; never set inline styles, never inject <style>.",
+          "Set the basemap template to the tiles path above (and the labels template when the fallback upstream is active). " +
+            "A configured template must be a same-origin /z/x/y path; anything else throws.",
+        ],
+        feed: [
+          "Read GeoJSON only through GET /__reader/api/<operation> with the x-preview-grant header, exactly like " +
+            "basket reads; never call /api/* from a published page and never bundle dataset bytes into page files.",
+          "Pass the returned FeatureCollections to map.setZones(collection) and map.setLots(collection); " +
+            "municipal outlines, when required, travel the same way through map.setOutlines(collection).",
+          "Call map.fitToBounds() after the sources are set; the view (center/scale) stays in the page.",
+        ],
+        paint: [
+          "Paint only through map.setPaint({ zones, lots, outlines }) with page-supplied expressions: " +
+            "a literal color string, a (properties) => color function, or " +
+            "{ property, stops: [[value, color], ...], fallback }.",
+          "Keep the neutral background for unstyled layers; style only with DS tokens in page CSS.",
+        ],
+        events: [
+          "Subscribe with map.on('click', cb) and map.on('hover', cb); the click payload carries " +
+            "{ layer, feature, index, lon, lat } with the topmost feature (lots over zones over outlines).",
+          "Zoom with map.zoomIn()/zoomOut()/setView(view); the wheel and drag gestures are built in.",
+          "Keep the mapBase.attribution entries visible below the map whenever a tile layer is on.",
+        ],
+        limits: [
+          "worker-src 'none' is invariant: no Worker, no service worker, no blob: URL — the base needs none.",
+          "No inline style attribute, no injected <style>, no external tile, glyph or font fetch by default; " +
+            "tile images, once enabled, stay same-origin under img-src 'self'. " +
+            "A page violating this fails the CSP gate and stays unpublished.",
+          "The page (HTML/CSS/JS/JSON it publishes) must stay under the 256 KiB publication cap; " +
+            "the map base is proven outside the budget because no publication can claim the __artifacts path.",
         ],
       },
       starter: {
@@ -335,47 +371,6 @@ export function getAuthoringGuide(): AuthoringGuide {
         catalogId: "https://design-system.sent-tech.ca/catalogs/elements/v1/catalog.json",
         componentIds: ["BarChart", "BpmnCanvas", "DecisionDossier"],
         status: "Framework-agnostic custom elements st-bar-chart, st-bpmn-canvas, st-decision-dossier; contractVersion 1.0, JSON envelope with root.component and hostConfig in script#st-host-config[type=application/json]. Package exports an envelope validator for server use. Not vendored/qualified in this CSS-only revision: do not import a CDN. Runtime assets, validator and prompt hashes must be pinned before use.",
-      },
-      mapBase: {
-        kit: "map",
-        version: MAP_KIT_VERSION,
-        note: "Worker-free Canvas 2D map base (I-4 skeleton, read-only first). The bundle is served " +
-          `pinned (${MAP_KIT_VERSION}, sha256, outside the 256 KiB publication budget) on the same reserved ` +
-          "design path as the kit stylesheets; a wrong digest answers 404. Full application map parity is I-12.",
-        manifest: MAP_KIT_ASSETS.map((asset) => ({ ...asset, url: mapKitAssetUrl(asset) })),
-        load: [
-          "Link the two pinned kit stylesheets, then the pinned map-base.css, then the page stylesheet; " +
-            "import { createMap } from the pinned map-base.mjs URL. All four URLs come from mapBase.manifest.",
-          "Render <div class=\"map-base\" id=\"map\"> and call createMap(container, { basemapTemplate: null }). " +
-            "The module appends its own <canvas>; never set inline styles, never inject <style>.",
-          "The basemap template hook stays null: the background is the neutral fill until I-10 serves " +
-            "a same-origin tile path. A configured template must be a same-origin /z/x/y path; anything else throws.",
-        ],
-        feed: [
-          "Read GeoJSON only through GET /__reader/api/<operation> with the x-preview-grant header, exactly like " +
-            "basket reads; never call /api/* from a published page and never bundle dataset bytes into page files.",
-          "Pass the returned FeatureCollections to map.setZones(collection) and map.setLots(collection); " +
-            "municipal outlines, when required, travel the same way through map.setOutlines(collection).",
-          "Call map.fitToBounds() after the sources are set; the view (center/scale) stays in the page.",
-        ],
-        paint: [
-          "Paint only through map.setPaint({ zones, lots, outlines }) with page-supplied expressions: " +
-            "a literal color string, a (properties) => color function, or " +
-            "{ property, stops: [[value, color], ...], fallback }.",
-          "Keep the neutral background for unstyled layers; style only with DS tokens in page CSS.",
-        ],
-        events: [
-          "Subscribe with map.on('click', cb) and map.on('hover', cb); the click payload carries " +
-            "{ layer, feature, index, lon, lat } with the topmost feature (lots over zones over outlines).",
-          "Zoom with map.zoomIn()/zoomOut()/setView(view); the wheel and drag gestures are built in.",
-        ],
-        limits: [
-          "worker-src 'none' is invariant: no Worker, no service worker, no blob: URL — the base needs none.",
-          "No inline style attribute, no injected <style>, no external tile, glyph or font fetch by default; " +
-            "a page violating this fails the CSP gate and stays unpublished.",
-          "The page (HTML/CSS/JS/JSON it publishes) must stay under the 256 KiB publication cap; " +
-            "the map base is proven outside the budget because no publication can claim the __artifacts path.",
-        ],
       },
       componentUsage: "React CSS recipes use components[].sourcePackage + componentName + snapshotVersion with promptRef/hash for provenance. Elements catalogue contracts are described separately in elements. Essential snapshot prompts: the full React DS runtime uses window.SentropicDS.<componentName> inside ThemeProvider; load DS styles + ThemeProvider, never write your own palette. The native CSS fast path uses the listed st-* markup without the DS React runtime: Button is a native button (variant primary/secondary/ghost/danger, size sm/md/lg); Input/Select need a visible label and help/error association; Card is a noninteractive container unless a real link/button is provided; Tag is informational, not an action; Notification needs readable title/message and status/alert semantics; ContentSwitcher needs keyboard behavior and selection state; InlineLoading needs accessible status text and reduced motion. Do not imitate complex component behavior; use a qualified runtime. Prompt files are provenance, these inline instructions are available to the remote author.",
       ...(ARTIFACT_P0B ? { artifactLifecycle: {
