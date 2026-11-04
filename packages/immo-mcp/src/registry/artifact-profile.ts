@@ -44,6 +44,9 @@ const ALL_TOOL_SCOPES: Record<ArtifactToolName, string> = {
   // I2 on G2 — opaque directory lookup and access listing: read-only.
   artifacts_lookup_people: ARTIFACT_READ_SCOPE,
   artifacts_list_access: ARTIFACT_READ_SCOPE,
+  // Reader consent LOT 1 — self-revocation withdraws the caller's own
+  // consent: a state transition, write-scoped and idempotency-guarded.
+  artifacts_revoke_reader_consent: ARTIFACT_WRITE_SCOPE,
   artifacts_list_versions: ARTIFACT_READ_SCOPE,
   artifacts_revert: ARTIFACT_WRITE_SCOPE,
 };
@@ -88,7 +91,7 @@ export function hasArtifactScope(tool: ArtifactToolName, scopes: readonly string
 
 export interface ArtifactSelectionEntry {
   readonly tool: ArtifactToolName;
-  readonly operation: "ensure" | "publish" | "list" | "meta" | "get_source" | "set_access" | "delete" | "create_upload" | "commit_upload" | "publish_bundle" | "lookup_people" | "list_access" | "list_versions" | "revert";
+  readonly operation: "ensure" | "publish" | "list" | "meta" | "get_source" | "set_access" | "delete" | "create_upload" | "commit_upload" | "publish_bundle" | "lookup_people" | "list_access" | "revoke_reader_consent" | "list_versions" | "revert";
   readonly method: "POST" | "GET";
   readonly path: string;
   readonly command: ArtifactSelectionEntry["operation"];
@@ -110,6 +113,8 @@ export const ARTIFACT_SELECTION: readonly ArtifactSelectionEntry[] = [
     // I2 on G2 — opaque directory lookup and access listing.
     { tool: "artifacts_lookup_people", operation: "lookup_people", method: "POST", path: "/lookup_people", command: "lookup_people" },
     { tool: "artifacts_list_access", operation: "list_access", method: "POST", path: "/list_access", command: "list_access" },
+    // Reader consent LOT 1 — self-revocation on the provider consent route.
+    { tool: "artifacts_revoke_reader_consent", operation: "revoke_reader_consent", method: "POST", path: "/revoke_reader_consent", command: "revoke_reader_consent" },
   ] as const : []),
   ...(ARTIFACT_PART1 ? [
     { tool: "artifacts_list_versions", operation: "list_versions", method: "POST", path: "/list_versions", command: "list_versions" },
@@ -171,6 +176,9 @@ const ALL_EFFECTIVE_REQUIRED: Record<ArtifactToolName, readonly string[]> = {
   // I2 on G2 — query/limit (lookup) and artifactId (listing).
   artifacts_lookup_people: ["query"],
   artifacts_list_access: ["artifactId"],
+  // Reader consent LOT 1 — revocation is an idempotent writer (required
+  // idempotencyKey); scope names one consent scope, omitted revokes them all.
+  artifacts_revoke_reader_consent: ["artifactId", "idempotencyKey"],
   artifacts_list_versions: ["artifactId"],
   artifacts_revert: ["artifactId", "targetReleaseId", "expectedCurrentReleaseId", "idempotencyKey"],
 };
@@ -250,6 +258,9 @@ export function artifactEffectiveProfile() {
         directory: "approved IMMO accounts by name/email; results carry userRef plus masked email hint" },
       artifacts_list_access: { required: ARTIFACT_EFFECTIVE_REQUIRED.artifacts_list_access,
         projection: "access mode plus per-principal grants (userRef, masked email hint, grant, reason)" },
+      // Reader consent LOT 1 — self-revocation only; the next opening asks again.
+      artifacts_revoke_reader_consent: { required: ARTIFACT_EFFECTIVE_REQUIRED.artifacts_revoke_reader_consent,
+        self: "withdraws the caller's own consent for one scope, or for every scope when scope is omitted" },
     } : {}),
     ...(ARTIFACT_PART1 ? {
       artifacts_list_versions: { required: ARTIFACT_EFFECTIVE_REQUIRED.artifacts_list_versions },

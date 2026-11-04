@@ -64,6 +64,8 @@ const STABLE_TOOL_SUMMARIES: Readonly<Record<string, string>> = {
   // I2 on G2 — share tooling through the I2 seams.
   artifacts_lookup_people: "Find approved IMMO accounts by name or email; answers carry opaque userRef values.",
   artifacts_list_access: "List the access mode and per-principal grants of a Radar page.",
+  // Reader consent LOT 1 — self-revocation of the persistent opening consent.
+  artifacts_revoke_reader_consent: "Withdraw the caller's own persistent opening consent for a Radar page.",
   artifacts_list_versions: "List the retained releases of a Radar page.",
   artifacts_revert: "Republish a retained release as the current release.",
 };

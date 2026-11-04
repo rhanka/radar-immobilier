@@ -4,6 +4,7 @@ import { createPostgresArtifactStore, createPostgresLegacyArtifactRecords } from
 import { createPostgresCommitExecutor } from "@sentropic/artifacts/adapters/postgres-commit";
 import { createHttpArtifactApp, projectArtifactHttpOutcome, type HttpAppDeps } from "@sentropic/artifacts/http";
 import type { StagingStore, UploadSignerPort, UploadSessionStore } from "@sentropic/artifacts/server/uploads";
+import { createPostgresReaderConsentStore } from "@sentropic/artifacts/adapters/postgres-reader-consent";
 import { createAccountDirectory } from "./directory.js";
 import { ArtifactProfileInputError, createRadarKeyDerivation } from "@sentropic/artifacts/mcp-core";
 import { createLifecycleService } from "@sentropic/artifacts/server/lifecycle";
@@ -112,6 +113,10 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
     ...p0bPorts(store, options.confirmation, (sub) => approved.getStore()?.has(sub) === true),
     // I2 on G2 — opaque userRef directory over approved immo accounts.
     directory: createAccountDirectory(pool),
+    // Reader consent LOT 1 — persistent consent through the generic host
+    // port; absent the port the provider fails the revoke route closed with
+    // capability_unavailable.
+    readerConsent: createPostgresReaderConsentStore(pool),
     ...(options.uploads ? { uploads: { ...options.uploads, idempotency: store } } : {}),
     publication: { blobs, intents: store, refs: createPostgresClaimGuardedRefs(store, createPostgresCommitExecutor(pool)),
       cleanupWindowMs: preparationWindowMs, createUnitWriter: createPostgresPublicationUnitWriter, getCurrent: publication.getCurrent,
@@ -150,21 +155,33 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
               }
               return app.execute(request, invocation);
             }
-            const command = profile.validators.normalizeCommand({ capability, args,
-              authority: { actorId: invocation.actorId, storageScopeId: scope }, derivation: binding,
-              ...(request.idempotencyKey === undefined ? {} : { envelopeKey: request.idempotencyKey }),
-            });
-            if (isArtifactPublication(command.operation)) await assertArtifactReplayMigration(legacyRecords, command, invocation, String(normalized.idempotencyKey));
-            const existing = await pool.query(
-              "SELECT 1 FROM artifacts.operation_receipts WHERE storage_scope_id=$1 AND internal_key=$2",
-              [scope, command.identity.internalKey]);
-            if (existing.rows.length > 0) {
-              // This is a presence probe only. The coordinator rereads the receipt
-              // under locks and revalidates current rights, without reserving again.
-              return app.execute(request, invocation);
-            }
-            if (!await reserveArtifactAttempt(pool, scope, invocation.actorId)) {
-              return rateLimitedOutcome(invocation.invocationId, command.operation);
+            // The provider command layer only knows the durable-command writers
+            // (ensure/publish/set_access/delete/revert/commit_upload/
+            // publish_bundle): it throws capability_unavailable for anything
+            // else. Capabilities without provider command identity
+            // (revoke_reader_consent) keep the required idempotencyKey at the
+            // schema layer but skip the receipt probe and the attempt quota,
+            // like the quota-bounded
+            // create_upload session mint; the provider executes them outside
+            // the coordinator and they are naturally idempotent.
+            const command = (profile.idempotency as Partial<Record<string, unknown>>)[capability] === undefined
+              ? undefined : profile.validators.normalizeCommand({ capability, args,
+                authority: { actorId: invocation.actorId, storageScopeId: scope }, derivation: binding,
+                ...(request.idempotencyKey === undefined ? {} : { envelopeKey: request.idempotencyKey }),
+              });
+            if (command !== undefined) {
+              if (isArtifactPublication(command.operation)) await assertArtifactReplayMigration(legacyRecords, command, invocation, String(normalized.idempotencyKey));
+              const existing = await pool.query(
+                "SELECT 1 FROM artifacts.operation_receipts WHERE storage_scope_id=$1 AND internal_key=$2",
+                [scope, command.identity.internalKey]);
+              if (existing.rows.length > 0) {
+                // This is a presence probe only. The coordinator rereads the receipt
+                // under locks and revalidates current rights, without reserving again.
+                return app.execute(request, invocation);
+              }
+              if (!await reserveArtifactAttempt(pool, scope, invocation.actorId)) {
+                return rateLimitedOutcome(invocation.invocationId, command.operation);
+              }
             }
           }
           return reads.project(request, () => app.execute(request, invocation));

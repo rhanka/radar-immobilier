@@ -19,6 +19,7 @@ import {
 import type { AuthConfig } from "../config.js";
 import { controlCacheHeaders } from "./control-cache.js";
 import type { createStoredReader } from "./reader-storage.js";
+import type { ReaderConsentService } from "./reader-consent.js";
 import {
   SESSION_COOKIE_NAME,
   verifySession,
@@ -30,6 +31,8 @@ export type ControlOp = "ensure" | "publish" | "meta" | "list" | "get_source" | 
   "create_upload" | "commit_upload" | "publish_bundle" |
   // I2 on G2 — opaque directory lookup and access listing.
   "lookup_people" | "list_access" |
+  // Reader consent LOT 1 — self-revocation of the persistent consent.
+  "revoke_reader_consent" |
   "list_versions" | "revert";
 
 const unavailableBackend: ArtifactControl = {
@@ -49,6 +52,7 @@ export interface ControlRouteDeps {
   readonly readActivation?: (() => ActivationConfig) | undefined;
   readonly storageScope?: string | undefined;
   readonly readerStorage?: ReturnType<typeof createStoredReader>;
+  readonly readerConsent?: ReaderConsentService;
   readonly confirmation?: ArtifactDeleteConfirmation;
 }
 
@@ -191,6 +195,8 @@ export function controlRoute(deps: ControlRouteDeps): Hono {
     "create_upload", "commit_upload", "publish_bundle",
     // I2 on G2 — opaque directory lookup and access listing.
     "lookup_people", "list_access",
+    // Reader consent LOT 1 — self-revocation of the persistent consent.
+    "revoke_reader_consent",
     "list_versions", "revert"] as const) {
     app.post(`/${op}`, async (c) => {
       const guarded = await guardPost(c, deps);
