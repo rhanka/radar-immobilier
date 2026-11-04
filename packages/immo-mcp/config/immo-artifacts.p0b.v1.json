@@ -31,7 +31,7 @@
   ],
   "additionalEffectiveProfile": {
     "artifacts_get_source": { "required": ["artifactId"], "maxFiles": 32, "maxTotalBytes": 262144 },
-    "artifacts_set_access": { "required": ["artifactId", "action", "principalId", "idempotencyKey"], "grant": "read", "principalId": "approved IMMO account IdP sub" },
+    "artifacts_set_access": { "required": ["artifactId", "action", "principalId", "idempotencyKey"], "grant": "read", "principalId": "opaque userRef from artifacts_lookup_people; sentropic:platform sentinel grants platform read-only; never a sub or email" },
     "artifacts_delete": { "required": ["artifactId", "idempotencyKey"], "confirmation": "trusted app session; transactional consumption", "terminal": true },
     "artifacts_create_upload": { "required": ["artifactId", "mimeType"], "session": "signed PUT, exact content-length, sha256 checksum header, 10-minute URL, 24-hour session, 8 open sessions per principal" },
     "artifacts_commit_upload": { "required": ["artifactId", "uploadId", "path", "mimeType", "digest", "size", "idempotencyKey"], "verification": "server re-reads staging and re-verifies size, digest and MIME before pinning" },
