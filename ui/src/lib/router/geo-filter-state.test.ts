@@ -137,40 +137,28 @@ describe("shareable geographic restrictions", () => {
     expect(state.timeRange.relative).toBe("all");
   });
 
-  it("should carry the discarded reveal in the URL only, never as a restriction", () => {
-    // Written only when true; preserve an explicitly unrestricted snapshot.
-    expect(writeGeoFilters({ ...unrestrictedGeoFilters(), showDiscarded: true })).toEqual({
-      showDiscarded: ["1"],
-      period: ["all"],
-    });
+  it("should never emit the retired triage reveal key, and should drop it on read", () => {
+    // The triage reveal was removed from the UI: writeGeoFilters never emits
+    // the key, and a stale link carrying it alone opens the product defaults
+    // (the retired key is ignored, not treated as a restriction).
     expect(writeGeoFilters(unrestrictedGeoFilters())).toEqual({ period: ["all"] });
-    // Read back identically through the URL grammar.
-    const revealed = readGeoFilters(
-      parseGeoQuery(buildGeoQuery({ filters: writeGeoFilters({ ...unrestrictedGeoFilters(), showDiscarded: true }) })).filters,
-    );
-    expect(revealed.showDiscarded).toBe(true);
-    // A reveal-only link still opens on the product defaults (plus reveal).
-    const defaults = readGeoFilters(parseGeoQuery("?filter.showDiscarded=1").filters);
-    expect(defaults.showDiscarded).toBe(true);
-    expect(defaults.axes).toEqual({ z: true, r: true, p: true });
-    expect(defaults.timeRange).toMatchObject({ mode: "relative", relative: "7d" });
-    // Combined with restrictions, the reveal survives the round-trip.
+    expect("showDiscarded" in writeGeoFilters(unrestrictedGeoFilters())).toBe(false);
     const combined = readGeoFilters(parseGeoQuery("?filter.zonage=1&filter.showDiscarded=1").filters);
-    expect(combined.showDiscarded).toBe(true);
+    expect("showDiscarded" in combined).toBe(false);
     expect(combined.axes).toEqual({ z: true, r: false, p: false });
     expect(buildGeoQuery({ filters: writeGeoFilters(combined) })).toBe(
-      "?mode=signal&filter.showDiscarded=1&filter.zonage=1",
+      "?mode=signal&filter.zonage=1",
     );
-    // Absent or invalid values mean hidden; the reveal never leaks elsewhere.
-    expect(readGeoFilters({}).showDiscarded).toBe(false);
-    expect(readGeoFilters({ showDiscarded: ["0"] }).showDiscarded).toBe(false);
+    const staleAlone = readGeoFilters(parseGeoQuery("?filter.showDiscarded=1").filters);
+    expect(staleAlone.axes).toEqual({ z: true, r: true, p: true });
+    expect(staleAlone.timeRange).toMatchObject({ mode: "relative", relative: "7d" });
     expect(subsetFromGeoFilters({ showDiscarded: ["1"] })).toBe(
       subsetFromGeoFilters({}),
     );
   });
 
-  it("should preserve unrestricted filters when reveal is the only enabled option", () => {
-    const state = { ...unrestrictedGeoFilters(), showDiscarded: true };
+  it("should preserve unrestricted filters through a write/read round-trip", () => {
+    const state = { ...unrestrictedGeoFilters() };
     const filters = writeGeoFilters(state);
     expect(filters.period).toEqual(["all"]);
     expect(readGeoFilters(filters)).toEqual(state);
