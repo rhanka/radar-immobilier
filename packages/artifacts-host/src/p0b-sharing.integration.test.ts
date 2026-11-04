@@ -108,6 +108,66 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("I2 sharing on G2", () => {
     expect((refused.body as { error: string }).error).toBe("public_sharing_disabled");
   });
 
+  it("should never expose a raw sub for a deleted account (R1 opaque projection)", async () => {
+    // Zero provider commits here (the file shares two pages for the
+    // per-actor per-minute attempt budget): the dangling grant is seeded
+    // the way the collab test seeds its source grant, then the account row
+    // is erased like a Loi 25 deletion. Reuses the grant-cycle page after
+    // its exact-grants assertions ran.
+    await fixture.pool.query(`INSERT INTO account_users (sub, status, email, name) VALUES
+      ('idp-gone', 'approved', 'gone@example.test', 'Gone')`);
+    await fixture.pool.query(`INSERT INTO artifacts.artifact_access (artifact_id, principal_id, permission)
+      VALUES ($1, 'idp-gone', 'read')`, [named.artifactId]);
+    await fixture.pool.query("DELETE FROM account_users WHERE sub = 'idp-gone'");
+    const listed = await fixture.call("list_access", { artifactId: named.artifactId }, "alice");
+    expect(listed.status).toBe(200);
+    const body = JSON.stringify(listed.body);
+    expect(body).not.toContain("idp-gone");
+    expect(body).toContain("unknown-");
+    const got = await fixture.call("meta", { artifactId: named.artifactId }, "alice");
+    expect(got.status).toBe(200);
+    expect(JSON.stringify(got.body)).not.toContain("idp-gone");
+  });
+
+  it("should refuse an unapproved userRef (N3 approved-only resolution)", async () => {
+    const mallory = (await fixture.pool.query<{ id: string }>(
+      "SELECT id FROM account_users WHERE sub = 'idp-mallory'")).rows[0]!.id;
+    // N3: the directory resolves approved accounts only; the miss merges
+    // into person_not_shareable like every other resolution failure. The
+    // legacy sub form still grants for an approved account (pinned by the
+    // p0b contract suite); the model never learns subs because outputs only
+    // ever carry userRef, so no extra grant cycle is spent here.
+    const refused = await fixture.call("set_access", { artifactId: named.artifactId, action: "grant",
+      principalId: mallory, grant: "read", idempotencyKey: randomUUID() });
+    expect(refused.status).toBe(422);
+    expect((refused.body as { error: string }).error).toBe("person_not_shareable");
+  });
+
+  // R5 — provider bug (fix requested from sentropic, skipped until then):
+  // revoking the dormant grant of a suspended or deleted colleague answers
+  // 422 person_not_shareable, because provider assertShareable requires an
+  // approved target even for revoke (server/management.ts:122-128, :187-189).
+  // Desired: revoke converges (grant gone, still refused after re-approval).
+  // Workaround without bypassing any guard: re-approve the account, revoke
+  // through set_access, then restore the prior status.
+  describe.skip("dormant grant revocation (provider R5)", () => {
+    it("should revoke a suspended beneficiary grant and keep it revoked after re-approval", async () => {
+      const dormant = await fixture.page();
+      const userRef = await colleagueRef("chloe");
+      expect((await fixture.call("set_access", { artifactId: dormant.artifactId, action: "grant",
+        principalId: userRef, grant: "read", idempotencyKey: randomUUID() })).status).toBe(200);
+      await fixture.pool.query("UPDATE account_users SET status = 'suspended' WHERE sub = 'idp-chloe'");
+      const revoked = await fixture.call("set_access", { artifactId: dormant.artifactId, action: "revoke",
+        principalId: userRef, idempotencyKey: randomUUID() });
+      expect(revoked.status).toBe(200);
+      const listed = await fixture.call("list_access", { artifactId: dormant.artifactId }, "alice");
+      expect(JSON.stringify((listed.body as { grants: unknown }).grants)).not.toContain(userRef);
+      await fixture.pool.query("UPDATE account_users SET status = 'approved' WHERE sub = 'idp-chloe'");
+      expect((await fixture.call("meta", { artifactId: dormant.artifactId }, "idp-chloe")).status)
+        .toBeGreaterThanOrEqual(400);
+    });
+  });
+
   it("should keep the collab source right to a single named colleague", async () => {
     const { artifactId } = collab;
     // No catalogue tool grants source: the schema only knows read.
