@@ -42,10 +42,10 @@ export const UPLOAD_ARTIFACT_TOOLS = ["artifacts_create_upload", "artifacts_comm
 export const SHARING_ARTIFACT_TOOLS = ["artifacts_lookup_people", "artifacts_list_access"] as const;
 export const PART1_ARTIFACT_TOOLS = ["artifacts_list_versions", "artifacts_revert"] as const;
 /**
- * Reader consent lot 1 — self-revocation of the persistent opening consent
- * through the generic host port (`readerConsent` on the provider app). The
- * screen itself (grant) and the bypass check (live row plus fresh rights)
- * live in the API opening flow; this tool only withdraws.
+ * Reader consent — self-revocation of the durable baskets consent through
+ * the generic host port (`readerConsent` on the provider app). The baskets
+ * screen (grant) and the Gate B check (live row plus fresh rights) live in
+ * the API reader flow; this tool only withdraws.
  */
 export const CONSENT_ARTIFACT_TOOLS = ["artifacts_revoke_reader_consent"] as const;
 export const ACTIVE_ARTIFACT_TOOLS = Object.freeze([
