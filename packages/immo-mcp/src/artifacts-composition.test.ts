@@ -128,7 +128,8 @@ describe("P7 composed transport (contract double; no storage qualification)", ()
     for (const tool of first) {
       // Files parity LOT 1: the upload channel publishes, so it is not
       // read-only; create_upload mints a fresh session per call and is the
-      // only active tool without an idempotency key.
+      // only active tool without an idempotency key. I2 on G2: the directory
+      // pair stays read-only (provider mutability), like list/get.
       const write = ["artifacts_ensure", "artifacts_publish", "artifacts_set_access", "artifacts_delete",
         "artifacts_create_upload", "artifacts_commit_upload", "artifacts_publish_bundle"].includes(tool.name);
       expect(tool.annotations).toEqual({ readOnlyHint: !write, destructiveHint: tool.name === "artifacts_delete",

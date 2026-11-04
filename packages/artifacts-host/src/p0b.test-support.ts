@@ -18,7 +18,7 @@ export async function p0bFixture(profile = HOST_ARTIFACT_PROFILE) {
     await pool.query(readFileSync(new URL(`../../../api/drizzle/${name}.sql`, import.meta.url), "utf8"));
   }
   await pool.query(`CREATE SCHEMA drizzle; CREATE TABLE drizzle.__drizzle_migrations (created_at bigint, hash text);
-    CREATE TABLE account_users (id UUID DEFAULT gen_random_uuid(), sub TEXT PRIMARY KEY, status TEXT);
+    CREATE TABLE account_users (id UUID DEFAULT gen_random_uuid(), sub TEXT PRIMARY KEY, status TEXT, email TEXT, name TEXT);
     INSERT INTO account_users (sub,status) VALUES ('alice','approved'), ('idp-bob','approved'), ('pending','pending');`);
   for (const [when, hash] of [[ARTIFACTS_LIFECYCLE_WHEN, ARTIFACTS_LIFECYCLE_HASH], [ARTIFACTS_COORDINATOR_WHEN, ARTIFACTS_COORDINATOR_HASH]]) {
     await pool.query("INSERT INTO drizzle.__drizzle_migrations VALUES ($1,$2)", [when, hash]);

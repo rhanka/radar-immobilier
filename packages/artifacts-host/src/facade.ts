@@ -147,7 +147,9 @@ export function createArtifactControl(
       const body = raw as Record<string, unknown>;
       if (body.storageScopeId !== undefined && body.storageScopeId !== scope) return invalid();
       const artifactId = body.artifactId;
-      if (!["ensure", "list"].includes(op) && !isArtifactId(artifactId)) return invalid();
+      // I2 on G2 — lookup_people is artifact-free by provider design (the
+      // account directory is global); every other op still names its page.
+      if (!["ensure", "list", "lookup_people"].includes(op) && !isArtifactId(artifactId)) return invalid();
       let stableUrl: string | undefined;
       if (op === "publish") {
         if (!contentBase) return invalid();

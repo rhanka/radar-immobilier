@@ -71,8 +71,9 @@ describe.skipIf(!ARTIFACT_STRICT || !process.env.P0B_DATABASE_URL)("strict MCP b
         ? { commitState: "not_committed", error: { code: "artifact_scope_denied", details: { requiredScope: "immo:artifacts:read" } } }
         : { error: "artifact_scope_denied", requiredScope: "immo:artifacts:read" });
     }
-    // Files parity LOT 1 — the upload channel joins every strict profile.
-    expect(binding.tools).toHaveLength(ARTIFACT_PART1 ? 12 : 10);
+    // Files parity LOT 1 — the upload channel joins every strict profile;
+    // I2 on G2 adds the share tooling.
+    expect(binding.tools).toHaveLength(ARTIFACT_PART1 ? 14 : 12);
     if (ARTIFACT_PART1) {
       expect(binding.tools.find((tool) => tool.name === "artifacts_list_versions")?.annotations).toMatchObject({ readOnlyHint: true });
       expect(binding.tools.find((tool) => tool.name === "artifacts_revert")?.annotations).toMatchObject({ readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false });
@@ -83,6 +84,11 @@ describe.skipIf(!ARTIFACT_STRICT || !process.env.P0B_DATABASE_URL)("strict MCP b
       { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false });
     expect(binding.tools.find((tool) => tool.name === "artifacts_publish_bundle")?.annotations).toMatchObject(
       { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false });
+    // I2 on G2: directory reads stay read-only (provider mutability).
+    expect(binding.tools.find((tool) => tool.name === "artifacts_lookup_people")?.annotations).toMatchObject(
+      { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false });
+    expect(binding.tools.find((tool) => tool.name === "artifacts_list_access")?.annotations).toMatchObject(
+      { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false });
     expect(binding.tools.find((tool) => tool.name === "artifacts_delete")?.annotations?.destructiveHint).toBe(true);
   });
 

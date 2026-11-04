@@ -537,6 +537,56 @@ exports[`artifact tool catalogue stability > should snapshot the immo-artifacts.
       "destructiveHint": false,
       "idempotentHint": true,
       "openWorldHint": false,
+      "readOnlyHint": true,
+    },
+    "description": "Find approved IMMO accounts by name or email; answers carry opaque userRef values.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "minimum": 1,
+          "type": "integer",
+        },
+        "query": {
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "query",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_lookup_people",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+    },
+    "description": "List the access mode and per-principal grants of a Radar page.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_list_access",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
       "readOnlyHint": false,
     },
     "description": "Publish one atomic release from inline files plus staged uploads.",
@@ -1260,6 +1310,56 @@ exports[`artifact tool catalogue stability > should snapshot the immo-artifacts.
       "type": "object",
     },
     "name": "artifacts_delete",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+    },
+    "description": "Find approved IMMO accounts by name or email; answers carry opaque userRef values.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "minimum": 1,
+          "type": "integer",
+        },
+        "query": {
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "query",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_lookup_people",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+    },
+    "description": "List the access mode and per-principal grants of a Radar page.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_list_access",
   },
   {
     "annotations": {
@@ -2067,6 +2167,56 @@ exports[`artifact tool catalogue stability > should snapshot the immo-artifacts.
       "type": "object",
     },
     "name": "artifacts_revert",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+    },
+    "description": "Find approved IMMO accounts by name or email; answers carry opaque userRef values.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "minimum": 1,
+          "type": "integer",
+        },
+        "query": {
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "query",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_lookup_people",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+    },
+    "description": "List the access mode and per-principal grants of a Radar page.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_list_access",
   },
   {
     "annotations": {

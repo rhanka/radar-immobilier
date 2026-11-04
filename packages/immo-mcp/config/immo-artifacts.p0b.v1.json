@@ -13,7 +13,9 @@
     "artifacts_delete": "immo:artifacts:write",
     "artifacts_create_upload": "immo:artifacts:write",
     "artifacts_commit_upload": "immo:artifacts:write",
-    "artifacts_publish_bundle": "immo:artifacts:write"
+    "artifacts_publish_bundle": "immo:artifacts:write",
+    "artifacts_lookup_people": "immo:artifacts:read",
+    "artifacts_list_access": "immo:artifacts:read"
   },
   "additionalSelection": [
     { "tool": "artifacts_get_source", "operation": "get_source", "method": "POST", "path": "/get_source", "command": "get_source" },
@@ -21,7 +23,9 @@
     { "tool": "artifacts_delete", "operation": "delete", "method": "POST", "path": "/delete", "command": "delete" },
     { "tool": "artifacts_create_upload", "operation": "create_upload", "method": "POST", "path": "/uploads/create", "command": "create_upload" },
     { "tool": "artifacts_commit_upload", "operation": "commit_upload", "method": "POST", "path": "/uploads/commit", "command": "commit_upload" },
-    { "tool": "artifacts_publish_bundle", "operation": "publish_bundle", "method": "POST", "path": "/publish_bundle", "command": "publish_bundle" }
+    { "tool": "artifacts_publish_bundle", "operation": "publish_bundle", "method": "POST", "path": "/publish_bundle", "command": "publish_bundle" },
+    { "tool": "artifacts_lookup_people", "operation": "lookup_people", "method": "POST", "path": "/lookup_people", "command": "lookup_people" },
+    { "tool": "artifacts_list_access", "operation": "list_access", "method": "POST", "path": "/list_access", "command": "list_access" }
   ],
   "additionalEffectiveProfile": {
     "artifacts_get_source": { "required": ["artifactId"], "maxFiles": 32, "maxTotalBytes": 262144 },
@@ -29,7 +33,9 @@
     "artifacts_delete": { "required": ["artifactId", "idempotencyKey"], "confirmation": "trusted app session; transactional consumption", "terminal": true },
     "artifacts_create_upload": { "required": ["artifactId", "mimeType"], "session": "signed PUT, exact content-length, sha256 checksum header, 10-minute URL, 24-hour session, 8 open sessions per principal" },
     "artifacts_commit_upload": { "required": ["artifactId", "uploadId", "path", "mimeType", "digest", "size", "idempotencyKey"], "verification": "server re-reads staging and re-verifies size, digest and MIME before pinning" },
-    "artifacts_publish_bundle": { "required": ["artifactId", "idempotencyKey", "expectedCurrentReleaseId"], "release": "atomic release from inline files plus staged assets; union under the release ceilings" }
+    "artifacts_publish_bundle": { "required": ["artifactId", "idempotencyKey", "expectedCurrentReleaseId"], "release": "atomic release from inline files plus staged assets; union under the release ceilings" },
+    "artifacts_lookup_people": { "required": ["query"], "directory": "approved IMMO accounts by name/email; results carry userRef plus masked email hint" },
+    "artifacts_list_access": { "required": ["artifactId"], "projection": "access mode plus per-principal grants (userRef, masked email hint, grant, reason)" }
   },
   "disabled": ["artifacts_restore", "artifacts_fork", "artifacts_promote", "artifacts_renew"]
 }

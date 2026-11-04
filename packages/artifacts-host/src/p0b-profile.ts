@@ -33,10 +33,18 @@ export const P0B_ARTIFACT_TOOLS = ["artifacts_get_source", "artifacts_set_access
  * PUT session, one verified commit, one atomic bundle publication.
  */
 export const UPLOAD_ARTIFACT_TOOLS = ["artifacts_create_upload", "artifacts_commit_upload", "artifacts_publish_bundle"] as const;
+/**
+ * I2 on G2 — share tooling through the I2 seams: opaque directory lookup
+ * and access listing (set_access semantics already ride the G1 mirror).
+ * The directory port is mandatory for these tools; without it they answer
+ * capability_unavailable instead of leaking resolution.
+ */
+export const SHARING_ARTIFACT_TOOLS = ["artifacts_lookup_people", "artifacts_list_access"] as const;
 export const PART1_ARTIFACT_TOOLS = ["artifacts_list_versions", "artifacts_revert"] as const;
 export const ACTIVE_ARTIFACT_TOOLS = Object.freeze([
   ...BASE_ARTIFACT_TOOLS, ...(ARTIFACT_P0B ? P0B_ARTIFACT_TOOLS : []),
   ...(ARTIFACT_P0B ? UPLOAD_ARTIFACT_TOOLS : []),
+  ...(ARTIFACT_P0B ? SHARING_ARTIFACT_TOOLS : []),
   ...(ARTIFACT_PART1 ? PART1_ARTIFACT_TOOLS : []),
 ]);
 /**
@@ -75,6 +83,7 @@ export function compileHostArtifactProfile(descriptor = ARTIFACT_PROFILE_DESCRIP
     selectedCapabilities: [...BASE_ARTIFACT_TOOLS,
       ...(p0b ? P0B_ARTIFACT_TOOLS : []),
       ...(p0b ? UPLOAD_ARTIFACT_TOOLS : []),
+      ...(p0b ? SHARING_ARTIFACT_TOOLS : []),
       ...(descriptor.resultEnvelopeVersion === 2 ? PART1_ARTIFACT_TOOLS : [])],
     operations: [...RADAR_ARTIFACTS_PROFILE.operations.map((entry) => entry.operation === "publish"
       ? { ...entry, limits: { ...entry.limits, releaseFilesMax: RELEASE_FILES_MAX,
