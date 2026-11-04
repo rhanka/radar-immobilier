@@ -252,7 +252,13 @@ export function createReaderOpening(deps: {
     if (typeof params.origin !== "string") return null;
     const resolved = await resolveOpeningOrigin(params.origin);
     if (!resolved) return null;
-    return approval(c, { ...params, ...resolved });
+    // The artifact/release pair is resolved server-side from the origin
+    // label only: drop any client-supplied requestedRelease so the query or
+    // body can never select the release (Q3 bounds every version anyway, but
+    // the comment below must stay true).
+    const clientParams = { ...params };
+    delete clientParams.requestedRelease;
+    return approval(c, { ...clientParams, ...resolved });
   }
   application.get("/approve", async (c) => {
     const token = parseCookieHeader(c.req.header("cookie"), SESSION_COOKIE_NAME);
