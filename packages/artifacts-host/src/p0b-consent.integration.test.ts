@@ -10,7 +10,7 @@ import { p0bFixture } from "./p0b.test-support.js";
  * reader's live row. The provider answers the write through the same error
  * order as every capability (syntax → visibility → store gate).
  */
-describe("reader consent self-revocation", () => {
+describe.skipIf(!process.env.P0B_DATABASE_URL)("reader consent self-revocation", () => {
   let fixture: Awaited<ReturnType<typeof p0bFixture>>;
   let named: { artifactId: string };
   beforeAll(async () => {
