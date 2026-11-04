@@ -6,13 +6,17 @@ import { describe, expect, it } from "vitest";
 import { MAP_KIT_ASSETS } from "@radar/artifacts-host";
 import {
   bboxOf,
+  createMap,
   evaluatePaint,
   expandTemplate,
   findFeatureAt,
+  MAX_TILE_ZOOM,
+  MIN_TILE_ZOOM,
   pointInRing,
   tilesForBounds,
   tileToLonLat,
   tileXY,
+  tileZoomForScale,
   validateBasemapTemplate,
 } from "../../src/artifacts/design-assets/map-base.mjs";
 
@@ -235,6 +239,63 @@ describe("map-base basemap hook", () => {
     expect(() => validateBasemapTemplate(42)).toThrow();
   });
 
+  it("should refuse protocol-relative, backslash and absolute template forms", () => {
+    for (const hostile of [
+      "//tiles.example.net/{z}/{x}/{y}.png",
+      "//tiles.example.net/{z}/{x}/{y}",
+      "/\\tiles.example.net/{z}/{x}/{y}",
+      "/tiles\\{z}\\{x}\\{y}.png",
+      "/tiles/{z}/{x}/{y}.png\\",
+      "https://tiles.example.com/{z}/{x}/{y}.png",
+      "http://tiles.example.com/{z}/{x}/{y}.png",
+      "tiles/{z}/{x}/{y}.png",
+      "",
+    ]) {
+      expect(() => validateBasemapTemplate(hostile), hostile).toThrow("same-origin path");
+    }
+  });
+
+  it("should accept the real I-10A tile and labels templates", () => {
+    expect(validateBasemapTemplate("/__artifacts/tiles/v1/{z}/{x}/{y}"))
+      .toBe("/__artifacts/tiles/v1/{z}/{x}/{y}");
+    expect(validateBasemapTemplate("/__artifacts/tiles/v1/labels/{z}/{x}/{y}"))
+      .toBe("/__artifacts/tiles/v1/labels/{z}/{x}/{y}");
+  });
+
+  it("should map view scales onto the proxy-served zoom range", () => {
+    expect(MIN_TILE_ZOOM).toBe(5);
+    expect(MAX_TILE_ZOOM).toBe(18);
+    expect(tileZoomForScale(100, 100)).toBe(14);
+    expect(tileZoomForScale(200, 100)).toBe(15);
+    expect(tileZoomForScale(50, 100)).toBe(13);
+    expect(tileZoomForScale(1e12, 1)).toBe(18);
+    expect(tileZoomForScale(1e-9, 1)).toBe(5);
+    expect(tileZoomForScale(0, 100)).toBe(14);
+    expect(tileZoomForScale(100, 0)).toBe(14);
+  });
+
+  it("should expose labels and attribution hooks with the same validation", () => {
+    const map = stubMap();
+    expect(map.getAttribution()).toEqual([]);
+    expect(map.setAttribution("© Gouvernement du Québec")).toEqual(["© Gouvernement du Québec"]);
+    expect(map.getAttribution()).toEqual(["© Gouvernement du Québec"]);
+    expect(map.setAttribution(["a", "b"])).toEqual(["a", "b"]);
+    expect(map.setAttribution(null)).toEqual([]);
+    expect(map.getAttribution()).toEqual([]);
+    expect(() => map.setAttribution(42)).toThrow();
+    expect(() => map.setAttribution("")).toThrow();
+    expect(() => map.setAttribution(["ok", ""])).toThrow();
+    expect(() => map.setLabelsTemplate("//tiles.example.net/{z}/{x}/{y}")).toThrow();
+    expect(() => map.setBasemapTemplate("//tiles.example.net/{z}/{x}/{y}")).toThrow();
+    expect(() => createMap(stubContainer(), { labelsTemplate: "//tiles.example.net/{z}/{x}/{y}" })).toThrow();
+    map.destroy();
+    const withTemplates = createMap(stubContainer(), {
+      basemapTemplate: "/__artifacts/tiles/v1/{z}/{x}/{y}",
+      labelsTemplate: "/__artifacts/tiles/v1/labels/{z}/{x}/{y}",
+    });
+    withTemplates.destroy();
+  });
+
   it("should expand templates and index standard XYZ tiles", () => {
     expect(expandTemplate("/t/{z}/{x}/{y}.png", 14, 4846, 6132)).toBe("/t/14/4846/6132.png");
     const [x, y] = tileXY(-73.512, 45.53, 14);
@@ -252,6 +313,113 @@ describe("map-base basemap hook", () => {
     expect(tiles.length).toBeGreaterThan(0);
     expect(tiles.length).toBeLessThan(64);
     expect(new Set(tiles.map(([tx, ty]) => `${tx}/${ty}`)).size).toBe(tiles.length);
+  });
+});
+
+interface StubDomCanvas {
+  width: number;
+  height: number;
+  parentNode: null;
+  listeners: Record<string, Array<(event: Record<string, unknown>) => void>>;
+  setAttribute: () => void;
+  getBoundingClientRect: () => { left: number; top: number; width: number; height: number };
+  getContext: () => Record<string, unknown>;
+  addEventListener: (kind: string, callback: (event: Record<string, unknown>) => void) => void;
+  removeEventListener: (kind: string, callback: (event: Record<string, unknown>) => void) => void;
+}
+
+function stubDomCanvas(): StubDomCanvas {
+  const listeners: Record<string, Array<(event: Record<string, unknown>) => void>> = {};
+  const context: Record<string, unknown> = {
+    setTransform() {}, fillRect() {}, beginPath() {}, moveTo() {},
+    lineTo() {}, closePath() {}, fill() {}, stroke() {}, drawImage() {},
+  };
+  return {
+    width: 0,
+    height: 0,
+    parentNode: null,
+    listeners,
+    setAttribute() {},
+    getBoundingClientRect: () => ({ left: 0, top: 0, width: 800, height: 600 }),
+    getContext: () => context,
+    addEventListener(kind, callback) {
+      (listeners[kind] ??= []).push(callback);
+    },
+    removeEventListener(kind, callback) {
+      listeners[kind] = (listeners[kind] ?? []).filter((entry) => entry !== callback);
+    },
+  };
+}
+
+function stubContainer() {
+  const canvas = stubDomCanvas();
+  return {
+    canvas,
+    appendChild() {},
+    getBoundingClientRect: () => ({ width: 800, height: 600 }),
+    ownerDocument: { createElement: () => canvas },
+  };
+}
+
+function stubMap() {
+  const map = createMap(stubContainer(), { basemapTemplate: null });
+  map.setZones({
+    type: "FeatureCollection",
+    features: [{
+      type: "Feature",
+      properties: {},
+      geometry: { type: "Polygon", coordinates: [[[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]]] },
+    }],
+  });
+  map.fitToBounds();
+  return map;
+}
+
+describe("map-base zoom anchoring", () => {
+  it("should keep the centre fixed across zoomIn and zoomOut", () => {
+    const map = stubMap();
+    const before = map.getView();
+    map.zoomIn();
+    const zoomed = map.getView();
+    expect(zoomed.scale).toBeCloseTo(before.scale * 1.5, 9);
+    expect(zoomed.cx).toBe(before.cx);
+    expect(zoomed.cy).toBe(before.cy);
+    map.zoomOut();
+    const restored = map.getView();
+    expect(restored.scale).toBeCloseTo(before.scale, 9);
+    expect(restored.cx).toBe(before.cx);
+    expect(restored.cy).toBe(before.cy);
+    map.destroy();
+  });
+
+  it("should keep the geography under an off-centre wheel zoom fixed", () => {
+    const container = stubContainer();
+    const map = createMap(container, { basemapTemplate: null });
+    map.setZones({
+      type: "FeatureCollection",
+      features: [{
+        type: "Feature",
+        properties: {},
+        geometry: { type: "Polygon", coordinates: [[[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]]] },
+      }],
+    });
+    map.fitToBounds();
+    const probe = { clientX: 600, clientY: 200, preventDefault() {} };
+    const clicks: Array<{ lon: number; lat: number }> = [];
+    map.on("click", (payload: { lon: number; lat: number }) => {
+      clicks.push({ lon: payload.lon, lat: payload.lat });
+    });
+    const wheel = container.canvas.listeners["wheel"];
+    const click = container.canvas.listeners["click"];
+    expect(wheel?.length).toBe(1);
+    expect(click?.length).toBe(1);
+    click![0]!(probe);
+    wheel![0]!({ ...probe, deltaY: -100 });
+    click![0]!(probe);
+    expect(clicks).toHaveLength(2);
+    expect(clicks[1]!.lon).toBeCloseTo(clicks[0]!.lon, 9);
+    expect(clicks[1]!.lat).toBeCloseTo(clicks[0]!.lat, 9);
+    map.destroy();
   });
 });
 
@@ -274,5 +442,6 @@ describe("map-base served bytes", () => {
     for (const forbidden of ["http://", "https://", "adresse"]) {
       expect(css, forbidden).not.toContain(forbidden);
     }
+    expect(css).toContain(".map-base-attribution");
   });
 });
