@@ -9,8 +9,10 @@
  * stylesheets: public upstream bytes (sha256-pinned, no tenant data),
  * served without reader authorization so every page view is styled.
  *
- * Native files use the session scoped to an exact release host, including
- * module/CSS imports and dynamic scripts. Published JavaScript calls H5 with
+ * Native files use the session scoped to one bound host — the stable
+ * artifact host (serving the CURRENT release, revalidated fresh) or the
+ * exact release host (serving its pinned release) — including module/CSS
+ * imports and dynamic scripts. Published JavaScript calls H5 with
  * fetch and the x-preview-grant header:
  *   const grant = new URLSearchParams(location.search).get("grant");
  *   fetch("/__reader/api/baskets.search.v1?workspaceId=...&citySlug=...", {
@@ -18,7 +20,7 @@
  *   });
  * Grant renewal is available at POST /__reader/renew (presented grant in
  * header, session cookie required) before the 55 s expiry. After expiry, a
- * same-origin POST without a grant can recover from a current sealed exact P.
+ * same-origin POST without a grant can recover from a current sealed P.
  */
 import { randomUUID } from "node:crypto";
 import { Hono, type Context } from "hono";
@@ -146,10 +148,14 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     const session = readSessionClaims(c.req.header("cookie"), deps.sessionSecret, now());
     const parsed = parseContentHost(c.req.header("host"), deps.contentBase);
     const sealed = session?.resource;
-    // Cookie-only authority is restricted to native files on one exact host.
-    // An explicitly presented invalid grant never falls back to the cookie.
+    // Cookie-only authority is restricted to native files on the one bound
+    // host: the exact release host (sealed.releaseId) or the stable artifact
+    // host (sealed.artifactId). An explicitly presented invalid grant never
+    // falls back to the cookie. Release freshness on the stable host is
+    // enforced below against the live authority, not here.
     const claims = grant ? await verifyGrant(grant, { ...deps.issuer, host }, deps.grantSecret, now())
-      : resource && parsed.kind === "content" && sealed?.host === host && sealed.releaseId === parsed.id &&
+      : resource && parsed.kind === "content" && sealed?.host === host &&
+        (sealed.artifactId === parsed.id || sealed.releaseId === parsed.id) &&
         sealed.issuer === deps.issuer.issuer && sealed.audience === deps.issuer.audience && sealed.tier === deps.issuer.tier
         ? { ...sealed, expiresAtMs: session!.expiresAt } : null;
     if (!claims) return null;
@@ -159,6 +165,21 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     if (content.id !== claims.artifactId && content.id !== claims.releaseId) return null;
     if (deps.isRevoked?.(session.sid)) return null;
     if (!deps.authority) return null;
+    // Stable artifact host serves only the CURRENT release: a session pinned
+    // at exchange time fails closed after a republish and the browser re-runs
+    // the exchange cleanly. The exact release host keeps its pinned release
+    // so old tabs never leak the new one. An id that is both an artifact and
+    // a release fails closed.
+    if (claims.artifactId === claims.releaseId) return null;
+    if (content.id === claims.artifactId) {
+      let current: { artifactId: string; releaseId: string } | null;
+      try {
+        current = await deps.authority.getRelease(claims.artifactId);
+      } catch { return null; }
+      if (!current || current.artifactId !== claims.artifactId || current.releaseId !== claims.releaseId) return null;
+    } else if (content.id !== claims.releaseId) {
+      return null;
+    }
     try {
       const version = await deps.authority.getAuthorizationVersion(claims.artifactId, claims.readerSub, claims.releaseId);
       if (!version) return null;
@@ -257,6 +278,22 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     if (!session || session.sid !== claims.sessionId || session.readerSub !== claims.readerSub || session.artifactId !== claims.artifactId) {
       applyReaderContentHeaders(c);
       return c.json({ error: "unauthenticated" }, 401);
+    }
+    // Stable artifact host renews only the CURRENT release: a stale grant
+    // fails closed here and the browser re-runs the exchange instead of
+    // extending the old release. The exact release host renews its pinned
+    // release. The cookie-recovery path above already enforces the same rule
+    // through authorized().
+    if (deps.authority && parsed.kind === "content" && parsed.id === claims.artifactId &&
+      claims.artifactId !== claims.releaseId) {
+      let current: { artifactId: string; releaseId: string } | null = null;
+      try {
+        current = await deps.authority.getRelease(claims.artifactId);
+      } catch { current = null; }
+      if (!current || current.artifactId !== claims.artifactId || current.releaseId !== claims.releaseId) {
+        applyReaderContentHeaders(c);
+        return c.json({ error: "unauthenticated" }, 401);
+      }
     }
     applyReaderContentHeaders(c);
     const renewed = await renewGrant(
