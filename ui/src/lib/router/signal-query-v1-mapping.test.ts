@@ -16,12 +16,12 @@ describe("filter.* mapping exhaustiveness", () => {
       dateFrom: ["2026-01-01"], dateTo: ["2026-01-31"], dateBasis: ["acquisition"],
       lotCategory: ["quatrePlus"], lotUsage: ["residentiel"], lotMinArea: ["1200"],
       zoneKind: ["H"], zoneMillesime: ["2008"],
-      showDiscarded: ["1"], lots: ["0"], cptaq: ["1"],
+      lots: ["0"], cptaq: ["1"],
       citySearch: ["Val"], zoneSearch: ["H-"], lotSearch: ["123"],
       subset: ["vivier-v2"], legacyLayers: ["zones"],
     };
     const state = readGeoFilters(full);
-    const written = writeGeoFilters({ ...state, showDiscarded: true });
+    const written = writeGeoFilters({ ...state });
     const touched = new Set([...Object.keys(full), ...Object.keys(written)]);
     for (const key of touched) {
       expect(
@@ -96,13 +96,9 @@ describe("geoFiltersToSignalFilter translator", () => {
     expect(geoFiltersToSignalFilter(relative, NOW).dateBasis).toBe("document");
   });
 
-  it("should open the archive only when the snapshot reveals discarded signals", () => {
-    const shown = geoFiltersToSignalFilter(
-      { ...unrestrictedGeoFilters(), showDiscarded: true }, NOW,
-    );
-    expect(shown.archive).toBe("include");
-    const hidden = geoFiltersToSignalFilter(unrestrictedGeoFilters(), NOW);
-    expect(hidden.archive).toBe("exclude");
+  it("should always exclude the archive (no triage reveal in the UI)", () => {
+    const filter = geoFiltersToSignalFilter(unrestrictedGeoFilters(), NOW);
+    expect(filter.archive).toBe("exclude");
   });
 
   it("should round-trip through the URL grammar without inventing spellings", () => {
@@ -110,7 +106,6 @@ describe("geoFiltersToSignalFilter translator", () => {
       ...defaultGeoFilters(NOW),
       timeRange: { mode: "absolute" as const, from: Date.UTC(2026, 0, 15), to: Date.UTC(2026, 1, 15) },
       dateBasis: "scrap" as const,
-      showDiscarded: true,
     };
     const written = writeGeoFilters(state);
     const reread = readGeoFilters(
@@ -121,6 +116,6 @@ describe("geoFiltersToSignalFilter translator", () => {
     expect(filter.dateBasis).toBe("scrap");
     expect(filter.dateFrom).toBe("2026-01-15");
     expect(filter.dateTo).toBe("2026-02-15");
-    expect(filter.archive).toBe("include");
+    expect(filter.archive).toBe("exclude");
   });
 });

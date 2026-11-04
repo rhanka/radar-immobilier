@@ -127,7 +127,7 @@ export interface AuthoringGuide {
   readonly assets: Readonly<{ loadOrder: readonly string[]; note: string;
     manifest: readonly Readonly<{ file: string; sha256Hex: string; sizeBytes: number; mediaType: string; url: string }>[] }>;
   readonly mapBase: Readonly<{ tiles: string; labels: string; note: string;
-    attribution: readonly Readonly<{ text: string; licenseUrl: string }>[] }>;
+    attribution: readonly Readonly<{ text: string; licenseUrl: string }>[]; howTo: readonly string[] }>;
   readonly starter: Readonly<{ version: string; files: readonly AuthoringGuideStarterFile[]; adapt: string }>;
   readonly data: Readonly<{
     warning: string;
@@ -220,6 +220,23 @@ export function getAuthoringGuide(): AuthoringGuide {
           { text: "© Sa Majesté le Roi du chef du Canada, représenté par le ministre de Ressources naturelles Canada",
             licenseUrl: "https://ouvert.canada.ca/fr/licence-du-gouvernement-ouvert-canada" },
         ],
+        howTo: [
+          "Load the I-4 worker-free map base (PR #996, not yet merged: map-v1 pinned at " +
+            "/__artifacts/design/map-v1/<sha256>/map-base.mjs plus map-base.css on the same reserved design path). " +
+            "Import { createMap } from the pinned map-base.mjs URL, render <div class=\"map-base\">, then call " +
+            "createMap(container, { basemapTemplate: '/__artifacts/tiles/v1/{z}/{x}/{y}' }). A configured template " +
+            "must be a same-origin /z/x/y path; anything else throws. The background stays the neutral fill until " +
+            "the first tile arrives, and on any tile error the neutral fill plus the overlays still paint.",
+          "Feed the base only through GET /__reader/api/<operation> with the x-preview-grant header, exactly like " +
+            "basket reads; never call /api/* from a published page. First GET geo.cities.v1 for the served cities, " +
+            "then GET geo.collection-items.v1?collectionId=<served-qc-zonage> for the chosen city; pass the returned " +
+            "FeatureCollections to map.setZones(collection) and map.setLots(collection), then map.fitToBounds().",
+          "Paint only through map.setPaint({ zones, lots, outlines }) with page-supplied expressions; subscribe " +
+            "with map.on('click', cb) and map.on('hover', cb); zoom with map.zoomIn()/zoomOut()/setView(view).",
+          "Keep both attribution strings above visible in a bottom-right overlay that is never hidden and never " +
+            "behind a toggle; never paint tiles when the attribution for the active upstream is absent. img-src " +
+            "stays 'self' with zero external origin and zero CSP violation; worker-src 'none' is invariant.",
+        ],
       },
       starter: {
         version: STARTER_VERSION,
@@ -256,7 +273,14 @@ export function getAuthoringGuide(): AuthoringGuide {
             response: "{ ok: true, contractVersion: 'signal-state-v1', workspaceId, snapshot, item: { target, readiness, displayedFingerprint, card, facets } }. Read one authorized target; reveal_required is an explicit action, not an empty result." },
           { name: "geo.read.v1", method: "GET", path: "/__reader/api/geo.read.v1",
             params: "collectionId=qc-(zonage|lots)-<slug>, limit=1-100 (default 10). Requires geo.read.",
-            response: "Synthetic legacy operation, not live baskets: { type: 'FeatureCollection', features: [{ zoneCode, citySlug }] }. Do not present synthetic data as current." },
+            response: "Legacy synthetic operation on fixtures only: { type: 'FeatureCollection', features: [{ zoneCode, citySlug }] }. Never a map source; for real zones use geo.collection-items.v1. Do not present synthetic data as current." },
+          { name: "geo.cities.v1", method: "GET", path: "/__reader/api/geo.cities.v1",
+            params: "None (extra query parameters are ignored). Requires geo.read, the same H5 grant and session as baskets.context.v1.",
+            response: "{ ok: true, cities: [{ citySlug, zoneCount, lotCount, signalCount, collections }] }. Served-catalogue cities only (known-licence qc-zonage); municipal, non-personal data that never triggers the basket consent. Call before geo.collection-items.v1; never invent a city slug." },
+          { name: "geo.collection-items.v1", method: "GET",
+            path: "/__reader/api/geo.collection-items.v1?collectionId=<served-qc-zonage>&limit=200",
+            params: "collectionId (served qc-zonage only, required), limit=1-1000 (default 200; above 200 requires bbox), bbox=minLon,minLat,maxLon,maxLat, offset>=0. Requires geo.read. Extra query parameters are ignored.",
+            response: "{ type: 'FeatureCollection', features, numberMatched, numberReturned, truncated, collectionId, licenseId, contract }. Bounded in features and bytes; a refused collection answers typed geo_governed_not_served without upstream call. Never serves adresse, code_postal* or extrait_brut. Feed the returned collection to the I-4 map base (see mapBase.howTo)." },
           { name: "signals.protected-read.v1", method: "GET", path: "/__reader/api/signals.protected-read.v1",
             params: "city (1-64 characters). Requires signals.protected-read.",
             response: "Synthetic legacy operation: { city, reader, signals: [{ id, city, kind, detail }] }. For real signals use baskets.search.v1." },
