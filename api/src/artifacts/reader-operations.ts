@@ -18,6 +18,8 @@ import { SignalQuery, StateQuery, WorkspaceId } from "../services/facets/classif
 
 export const READER_OPERATIONS = [
   "geo.read.v1",
+  "geo.cities.v1",
+  "geo.collection-items.v1",
   "signals.protected-read.v1",
   "status.closed.v1",
   "workspaces.list.v1",
@@ -36,6 +38,24 @@ const geoParams = z.object({
 
 const signalsParams = z.object({
   city: z.string().min(1).max(64),
+}).strict();
+
+// ── I-1B governed geo operations (converged-geo-mesh r3 §2) ──
+// Municipal, non-personal catalogue reads. `geo.cities.v1` takes no
+// parameter; `geo.collection-items.v1` is bounded (limit default 200 / max
+// 1000, bbox mandatory above 200 — enforced by the reader-geo service) and
+// serves the known-licence qc-zonage catalogue only.
+export const geoCitiesParams = z.object({}).strict();
+
+const geoBbox = z.string().regex(
+  /^-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?$/,
+);
+
+export const geoCollectionItemsParams = z.object({
+  collectionId: z.string().min(1).max(128),
+  limit: contractInteger().min(1).max(1000).default(200),
+  bbox: geoBbox.optional(),
+  offset: contractInteger().min(0).optional(),
 }).strict();
 
 export const basketsContextParams = z.object({
@@ -58,6 +78,15 @@ export function isBasketOperation(name: string): name is BasketOperationName {
   return name === "baskets.context.v1" || name === "baskets.search.v1" || name === "baskets.state.v1";
 }
 
+// ── I-1B: operations gated by the `geo.read` capability (synthetic legacy
+// `geo.read.v1` plus the governed catalogue operations). Isolated predicate
+// so the I2-partage rebase keeps one obvious hunk.
+export type GeoReadOperationName = "geo.read.v1" | "geo.cities.v1" | "geo.collection-items.v1";
+
+export function isGeoReadOperation(name: string): name is GeoReadOperationName {
+  return name === "geo.read.v1" || name === "geo.cities.v1" || name === "geo.collection-items.v1";
+}
+
 export function isWorkspaceReadOperation(name: string): name is BasketOperationName | "workspaces.list.v1" {
   return name === "workspaces.list.v1" || isBasketOperation(name);
 }
@@ -74,6 +103,8 @@ export function validateOperationParams(
   try {
     if (name === "workspaces.list.v1") return { ok: true, params: workspacesListParams.parse(params) };
     if (name === "geo.read.v1") return { ok: true, params: geoParams.parse(params) };
+    if (name === "geo.cities.v1") return { ok: true, params: geoCitiesParams.parse(params) };
+    if (name === "geo.collection-items.v1") return { ok: true, params: geoCollectionItemsParams.parse(params) };
     if (name === "signals.protected-read.v1") return { ok: true, params: signalsParams.parse(params) };
     if (name === "baskets.context.v1") return { ok: true, params: basketsContextParams.parse(params) };
     if (name === "baskets.search.v1") return { ok: true, params: basketsSearchParams.parse(params) };

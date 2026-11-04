@@ -4,6 +4,8 @@ import { createApp } from "./app.js";
 import { startArtifactControl } from "./artifacts/control-route-startup.js";
 import { contentHostAppOption, resolveContentHostConfig } from "./artifacts/content-config.js";
 import { createBasketReadOperation } from "./artifacts/reader-baskets.js";
+import { createGeoReadOperation } from "./artifacts/reader-geo.js";
+import { listGeoCities } from "./services/geo/geo-features.js";
 import { createReaderContentApp } from "./artifacts/content-serve.js";
 import { resolveReaderCursorKeyring } from "./artifacts/reader-cursor-keyring.js";
 import { createReaderOpening } from "./artifacts/reader-opening.js";
@@ -143,6 +145,18 @@ logger.info(
       : "artifact reader mounted in API without cursor keyring (search closed with transport_unavailable)"
     : "artifact reader not mounted (closed by default)",
 );
+// I-1B (converged-geo-mesh r3 §2): the governed catalogue operations ride
+// the same reader dispatch on the `geo.read` capability. The basket bridge
+// keeps workspace-scoped reads; the geo service answers catalogue reads.
+// Municipal, non-personal data — no basket consent (see reader-geo.ts).
+const basketReadOperation = createBasketReadOperation({
+  db: dbHandle.db,
+  store: objectStore,
+  ...(readerCursorKeyring ? { classification: { cursorKeyring: readerCursorKeyring } } : {}),
+});
+const geoReadOperation = createGeoReadOperation({
+  listCitiesImpl: () => listGeoCities(dbHandle.db),
+});
 const readerContent = contentHost.enabled && artifactsControl?.readerStorage && readerGrantSecret.length >= 32 && readerSessionSecret.length >= 32
   ? createReaderContentApp({
     contentBase: contentHost.contentBase,
@@ -152,11 +166,10 @@ const readerContent = contentHost.enabled && artifactsControl?.readerStorage && 
     pageWrite: publishedWrite?.pageWrite ?? pageWriteListenerRoute(null),
     ...(readerOpening ? { openingContent: readerOpening.content } : {}),
     ...artifactsControl.readerStorage,
-    readOperation: createBasketReadOperation({
-      db: dbHandle.db,
-      store: objectStore,
-      ...(readerCursorKeyring ? { classification: { cursorKeyring: readerCursorKeyring } } : {}),
-    }),
+    readOperation: async (op, params, context) => {
+      if (op === "geo.cities.v1" || op === "geo.collection-items.v1") return geoReadOperation(op, params);
+      return basketReadOperation(op, params, context);
+    },
   })
   : undefined;
 
