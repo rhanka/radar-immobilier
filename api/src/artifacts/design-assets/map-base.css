@@ -1,0 +1,35 @@
+/**
+ * Artifact map base kit stylesheet (I-4).
+ *
+ * Layout only: the renderer draws every polygon on the canvas bitmap, so
+ * this file only gives the container a box and the canvas its block
+ * geometry. Colors, type and components stay in the official kit
+ * stylesheets (`sent-tech.css`, `components.css`); no author palette here.
+ * This file never styles page content and contains no remote reference.
+ */
+.map-base {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 16rem;
+  overflow: hidden;
+}
+
+.map-base canvas[data-map-base="canvas"] {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/**
+ * Page-owned tile attribution slot (I-10A): the page renders one element
+ * with this class inside `.map-base` and fills it from
+ * `getAttribution()` (guide `mapBase.attribution`) whenever a tile layer
+ * is on. Kit-owned box only; type and color come from the DS tokens.
+ */
+.map-base .map-base-attribution {
+  position: absolute;
+  inset-inline-end: 0.25rem;
+  inset-block-end: 0.25rem;
+  max-width: 75%;
+}
