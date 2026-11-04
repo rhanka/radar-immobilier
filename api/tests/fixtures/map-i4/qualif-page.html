@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="fr" data-st-theme="sent-tech">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Carte — qualification du socle (I-4)</title>
+<link rel="stylesheet" href="{{SENT_TECH_CSS}}">
+<link rel="stylesheet" href="{{COMPONENTS_CSS}}">
+<link rel="stylesheet" href="{{MAP_BASE_CSS}}">
+<link rel="stylesheet" href="/qualif-page.css">
+</head>
+<body>
+<main class="map-qualif">
+<h1>Carte — qualification du socle</h1>
+<p id="map-status" role="status">Chargement des données…</p>
+<div class="map-qualif__frame">
+<div class="map-base" id="map" data-map-module="{{MAP_BASE_MJS}}" data-zones="{{ZONES_URL}}" data-lots="{{LOTS_URL}}"></div>
+</div>
+<dl class="map-qualif__facts">
+<div><dt>Zones</dt><dd id="fact-zones">—</dd></div>
+<div><dt>Lots</dt><dd id="fact-lots">—</dd></div>
+<div><dt>Sélection</dt><dd id="fact-selection">aucune</dd></div>
+</dl>
+</main>
+<script type="module" src="/qualif-app.js"></script>
+</body>
+</html>

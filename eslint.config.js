@@ -18,6 +18,22 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    // Published artifact map kit bytes and their browser test fixtures run
+    // in the browser under the release CSP (no worker, no inline styles):
+    // declare the browser globals they use instead of disabling no-undef.
+    files: ["api/src/artifacts/design-assets/*.mjs", "api/tests/fixtures/map-i4/*.js"],
+    languageOptions: {
+      globals: {
+        window: "readonly",
+        document: "readonly",
+        ResizeObserver: "readonly",
+        requestAnimationFrame: "readonly",
+        Image: "readonly",
+        fetch: "readonly",
+      },
+    },
+  },
+  {
     // Node.js tooling scripts: declare the Node runtime globals they use
     // (process, console, setTimeout) instead of disabling no-undef.
     files: ["tools/make/*.mjs", "ui/e2e-real/*.mjs"],
