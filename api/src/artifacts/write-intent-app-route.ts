@@ -8,6 +8,8 @@ import { hasDuplicateJsonKeys } from "./write-intent-binding.js";
 import { writeIntentError } from "./write-intent-errors.js";
 import { FacetError } from "../services/facets/target.js";
 import { readAppWriteIntentResult } from "./write-intent-app-result.js";
+import { BASKET_WRITE_PREPARE_SCOPE_ID } from "./reader-consent.js";
+import { writePrepareConsentRefusal } from "./write-intent-page-listener.js";
 export type { WriteAppDeps } from "./write-intent-app-authority.js";
 
 /** Exact route mounts only: a disabled PW capability never intercepts the app. */
@@ -83,6 +85,17 @@ export function writeIntentAppRoute(deps: WriteAppDeps | null): Hono {
       if (approved) return approved;
       const proof = verifyAppChallenge((body as { challengeToken: unknown }).challengeToken, row, deps, pass);
       if (!deps.confirm) return writeRefusal(c, "write_transport_closed", 503);
+      // Gate B at confirmation time: revoking the write-prepare consent
+      // while a preparation awaits confirmation blocks the execution.
+      if (deps.basketConsent) {
+        const artifactId = (row.artifactRef as Record<string, unknown> | undefined)?.artifactId;
+        let allowed = false;
+        try {
+          allowed = typeof artifactId === "string" && await deps.basketConsent.hasLiveConsent(
+            pass.session.sub, artifactId, BASKET_WRITE_PREPARE_SCOPE_ID);
+        } catch { allowed = false; }
+        if (!allowed) return writePrepareConsentRefusal(c);
+      }
       await deps.confirm(row, proof);
       // Admission locks ended at COMMIT. Consult the durable result under
       // current disclosure rights; never reuse the writer's returned event.

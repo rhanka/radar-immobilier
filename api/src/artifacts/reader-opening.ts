@@ -12,6 +12,7 @@ import { applyReaderContentHeaders } from "./content-isolation.js";
 import { DESIGN_KIT_ASSETS, designKitAssetUrl, type DesignKitAsset } from "@radar/artifacts-host";
 import { createDesignKitApp } from "./design-kit.js";
 import type { SharedReaderTickets } from "./reader-tickets.js";
+import { BASKET_READ_SCOPE_ID, basketsScopesForPage, type ReaderConsentService } from "./reader-consent.js";
 import type { PwIdentityDomain } from "./write-intent-principal.js";
 import { samePwIdentityDomain } from "./write-intent-principal.js";
 
@@ -126,6 +127,14 @@ export function createReaderOpening(deps: {
    * run BEFORE getRights. Absent keeps the historical behaviour (disabled).
    */
   reconcile?: (input: { sub: string; email?: string; emailVerified: boolean; issuer: string }) => Promise<unknown>;
+  /**
+   * Reader consent: durable BASKETS consent. The opening (Gate A) persists
+   * nothing and always renders its neutral screen; the baskets screen below
+   * records the first-party gesture, and GET /consent skips its screen when
+   * a live baskets row plus the fresh approval above already cover the
+   * reader. Absent keeps the sealed-session flow only (fail-open reads).
+   */
+  consent?: ReaderConsentService;
 }) {
   const application = new Hono();
   const content = new Hono();
@@ -270,6 +279,8 @@ export function createReaderOpening(deps: {
     }
     const input = await openingInput(c, c.req.query());
     if (!input) return refusal(c);
+    // Gate A persists nothing: the neutral opening screen renders on every
+    // opening. The baskets consent below never skips this screen.
     // no-referrer makes Chromium send Origin: null on the confirmation POST.
     // Keep the same-origin CSRF check usable without sending referrers off-site.
     c.header("Referrer-Policy", "same-origin");
@@ -303,6 +314,8 @@ export function createReaderOpening(deps: {
     if (!deps.auth.enabled || c.req.header("origin") !== deps.auth.appBaseUrl) return c.json({ error: "forbidden_origin" }, 403);
     const input = await openingInput(c, await c.req.parseBody());
     if (!input) return refusal(c);
+    // Gate A persists nothing: confirming the opening mints the
+    // document-only ticket and records no consent row.
     const ticket = await deps.tickets.mint(input);
     return c.redirect(`${input.origin}/__reader/exchange?ticket=${ticket.ticket}`, 303);
   });
@@ -325,7 +338,12 @@ export function createReaderOpening(deps: {
       `<p class="reader-approve__eyebrow">Radar immobilier</p>` +
       `<h1>Autoriser la lecture de vos paniers</h1>` +
       `<p>Cette page lit vos propres paniers avec vos droits actuels, jamais ceux de l'auteur.</p>` +
-      (input.writeIdentity ? `<p>Cette page peut préparer des actions. Chaque écriture exige votre confirmation dans l’application.</p>` : "") +
+      (input.writeIdentity
+        ? `<p>Cette page peut aussi préparer des modifications dans vos paniers. Chaque écriture exige votre confirmation dans l’application.</p>`
+        : "") +
+      `<p>Cet accord est mémorisé pour cette page jusqu’à sa révocation. ` +
+      `Vous pouvez le retirer à tout moment dans les réglages de votre compte, ` +
+      `ou demander à votre assistant de retirer votre consentement de lecture.</p>` +
       `<form method="post"><input type="hidden" name="artifactId" value="${escape(input.artifactId)}">` +
       `<input type="hidden" name="binding" value="${escape(input.browserBinding)}">` +
       `<input type="hidden" name="origin" value="${escape(input.origin)}">` +
@@ -344,6 +362,15 @@ export function createReaderOpening(deps: {
     }
     const input = await openingInput(c, c.req.query());
     if (!input) return refusal(c);
+    // Gate B: a live baskets row plus the fresh approval above (getRights
+    // re-read on this call) skips the screen — cross-device and next-day
+    // included. A suspended account never reaches this line (approval
+    // refuses first); a revoked consent renders the screen again.
+    if (deps.consent && await deps.consent.hasLiveConsent(
+      input.readerSub, input.artifactId, BASKET_READ_SCOPE_ID).catch(() => false)) {
+      const ticket = await deps.tickets.mint({ ...input, basketScope: true });
+      return c.redirect(`${input.origin}/__reader/exchange?ticket=${ticket.ticket}`, 303);
+    }
     c.header("Referrer-Policy", "same-origin");
     c.header("Content-Security-Policy", `default-src 'none'; style-src 'self' '${APPROVAL_STYLE_HASH}'; ` +
       `form-action 'self' ${input.origin}; frame-ancestors 'none'; base-uri 'none'`);
@@ -353,6 +380,15 @@ export function createReaderOpening(deps: {
     if (!deps.auth.enabled || c.req.header("origin") !== deps.auth.appBaseUrl) return c.json({ error: "forbidden_origin" }, 403);
     const input = await openingInput(c, await c.req.parseBody());
     if (!input) return refusal(c);
+    // The click is the first-party gesture: persist the BASKETS consent
+    // (read, plus write-prepare when the page may prepare actions — a
+    // read-only page never triggers a write-prepare ask). The opening
+    // itself is never persisted. A ledger failure never blocks the
+    // consented call; the screen simply shows again next time.
+    if (deps.consent) {
+      await deps.consent.grantScopes(input.readerSub, input.artifactId,
+        basketsScopesForPage(input.writeIdentity !== undefined)).catch(() => undefined);
+    }
     const ticket = await deps.tickets.mint({ ...input, basketScope: true });
     return c.redirect(`${input.origin}/__reader/exchange?ticket=${ticket.ticket}`, 303);
   });

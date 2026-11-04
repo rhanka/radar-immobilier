@@ -2,6 +2,7 @@ import { ARTIFACT_P0B, ARTIFACT_P0B_VERSIONS } from "@radar/artifacts-host";
 import { readArtifactConfig } from "./artifact-config.js";
 import { describe, expect, it } from "vitest";
 import {
+  artifactEffectiveProfile,
   ARTIFACT_DURABLE_IDENTITY,
   ARTIFACT_EFFECTIVE_REQUIRED,
   ARTIFACT_FORBIDDEN_CALLER_FIELDS,
@@ -64,7 +65,9 @@ describe("artifact effective profile", () => {
       "artifacts_publish",
       "artifacts_list",
       "artifacts_get",
-      ...(ARTIFACT_P0B ? ["artifacts_get_source", "artifacts_set_access", "artifacts_delete"] : []),
+      ...(ARTIFACT_P0B ? ["artifacts_get_source", "artifacts_set_access", "artifacts_delete",
+        "artifacts_create_upload", "artifacts_commit_upload", "artifacts_publish_bundle",
+        "artifacts_lookup_people", "artifacts_list_access", "artifacts_revoke_reader_consent"] : []),
     ]);
     expect(ARTIFACT_SELECTION).toEqual([
       { tool: "artifacts_ensure", operation: "ensure", method: "POST", path: "/ensure", command: "ensure" },
@@ -79,7 +82,11 @@ describe("artifact effective profile", () => {
       artifacts_publish: "immo:artifacts:write",
       artifacts_list: "immo:artifacts:read",
       artifacts_get: "immo:artifacts:read",
-      ...(ARTIFACT_P0B ? { artifacts_get_source: "immo:artifacts:read", artifacts_set_access: "immo:artifacts:write", artifacts_delete: "immo:artifacts:write" } : {}),
+      ...(ARTIFACT_P0B ? { artifacts_get_source: "immo:artifacts:read", artifacts_set_access: "immo:artifacts:write",
+        artifacts_delete: "immo:artifacts:write", artifacts_create_upload: "immo:artifacts:write",
+        artifacts_commit_upload: "immo:artifacts:write", artifacts_publish_bundle: "immo:artifacts:write",
+        artifacts_lookup_people: "immo:artifacts:read", artifacts_list_access: "immo:artifacts:read",
+        artifacts_revoke_reader_consent: "immo:artifacts:write" } : {}),
     });
   });
 
@@ -185,8 +192,19 @@ describe("artifact effective profile", () => {
     expect(config.requiredContracts).toEqual(REQUIRED_PROVIDER_CONTRACTS);
   });
 
+  it("should document userRef plus the platform sentinel as the only principalId forms (R3)", () => {
+    const effective = artifactEffectiveProfile() as unknown as Record<string, Record<string, unknown>>;
+    const setAccess = effective.artifacts_set_access as unknown as { principalId: string };
+    expect(setAccess.principalId).toContain("userRef");
+    expect(setAccess.principalId).toContain("sentropic:platform");
+    expect(setAccess.principalId).not.toContain("IdP sub");
+    const embedded = (config.effectiveProfile as unknown as Record<string, Record<string, unknown>>)
+      .artifacts_set_access as unknown as { principalId: string };
+    expect(embedded.principalId).toBe(setAccess.principalId);
+  });
+
   it("should expose the installed qualified artifact provider version", () => {
-    expect(ARTIFACT_P0B_VERSIONS).toEqual(["0.2.5", "0.2.6", "0.3.0", "0.2.8", "0.2.9", "0.2.10", "0.2.12"]);
+    expect(ARTIFACT_P0B_VERSIONS).toEqual(["0.2.5", "0.2.6", "0.3.0", "0.2.8", "0.2.9", "0.2.10", "0.2.12", "0.2.13"]);
     expect(ARTIFACT_P0B ? ARTIFACT_P0B_VERSIONS : ["0.2.2"]).toContain(ARTIFACT_PROVIDER_VERSION);
     expect(config.provider.version).toBe(ARTIFACT_PROVIDER_VERSION);
   });

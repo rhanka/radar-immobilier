@@ -49,7 +49,12 @@ export async function startHarness(name: string, subjects: readonly string[] = [
   const control = createArtifactControl(host, config.storageScope, "pages.example.test");
   return { pool, config, host, hostOptions, control, blobs,
     async close() {
-      for (const key of await blobs.listKeys(`artifacts/${config.storageScope}/`)) await blobs.deleteBlob(key);
+      // Files parity LOT 1 — the bucket also holds upload staging keys
+      // (artifacts/<scope>/staging/…), e.g. after a refused commit; only blob
+      // keys go through the blob store, the bucket itself is deleted below.
+      for (const key of await blobs.listKeys(`artifacts/${config.storageScope}/blobs/`)) {
+        await blobs.deleteBlob(key);
+      }
       await s3.send(new DeleteBucketCommand({ Bucket: config.s3Bucket }));
       host.close(); s3.destroy();
       await pool.end();

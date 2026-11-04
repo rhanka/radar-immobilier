@@ -71,11 +71,29 @@ describe.skipIf(!ARTIFACT_STRICT || !process.env.P0B_DATABASE_URL)("strict MCP b
         ? { commitState: "not_committed", error: { code: "artifact_scope_denied", details: { requiredScope: "immo:artifacts:read" } } }
         : { error: "artifact_scope_denied", requiredScope: "immo:artifacts:read" });
     }
-    expect(binding.tools).toHaveLength(ARTIFACT_PART1 ? 9 : 7);
+    // Files parity LOT 1 — the upload channel joins every strict profile;
+    // I2 on G2 adds the share tooling; reader consent LOT 1 adds the
+    // self-revocation tool.
+    expect(binding.tools).toHaveLength(ARTIFACT_PART1 ? 15 : 13);
     if (ARTIFACT_PART1) {
       expect(binding.tools.find((tool) => tool.name === "artifacts_list_versions")?.annotations).toMatchObject({ readOnlyHint: true });
       expect(binding.tools.find((tool) => tool.name === "artifacts_revert")?.annotations).toMatchObject({ readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false });
     }
+    expect(binding.tools.find((tool) => tool.name === "artifacts_create_upload")?.annotations).toMatchObject(
+      { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false });
+    expect(binding.tools.find((tool) => tool.name === "artifacts_commit_upload")?.annotations).toMatchObject(
+      { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false });
+    expect(binding.tools.find((tool) => tool.name === "artifacts_publish_bundle")?.annotations).toMatchObject(
+      { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false });
+    // I2 on G2: directory reads stay read-only (provider mutability).
+    expect(binding.tools.find((tool) => tool.name === "artifacts_lookup_people")?.annotations).toMatchObject(
+      { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false });
+    expect(binding.tools.find((tool) => tool.name === "artifacts_list_access")?.annotations).toMatchObject(
+      { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false });
+    // Reader consent LOT 1: self-revocation is a state-transition writer
+    // (provider mutability), idempotency-required like every writer.
+    expect(binding.tools.find((tool) => tool.name === "artifacts_revoke_reader_consent")?.annotations).toMatchObject(
+      { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false });
     expect(binding.tools.find((tool) => tool.name === "artifacts_delete")?.annotations?.destructiveHint).toBe(true);
   });
 

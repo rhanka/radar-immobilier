@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import type pg from "pg";
 import type { PublicationBlobStore } from "@sentropic/artifacts/server/publication";
 import { evaluateAccess, type AccessMode, type ArtifactAcl } from "@sentropic/artifacts/server/access";
+import { HOST_MIME_TYPES } from "@radar/artifacts-host";
 import type { AuthorityReader, ReaderProfile } from "./reader-profile.js";
 import { normalizeReleasePath, type ReleaseFileProvider } from "./release-files.js";
 import { createSharedReaderTickets, type SharedReaderTickets } from "./reader-tickets.js";
@@ -89,8 +90,14 @@ export function createStoredReader(pool: pg.Pool, scope: string, contentBase: st
       const body = await blobs.getBlob(`artifacts/${scope}/blobs/sha256/${file.digest.slice(7)}`);
       if (!body || body.byteLength !== file.size ||
         createHash("sha256").update(body).digest("hex") !== file.digest.slice(7)) return null;
-      if (!["text/html", "text/css", "text/javascript", "application/json"].includes(file.mimeType)) return null;
-      return { body, contentType: `${file.mimeType}; charset=utf-8` };
+      // Files parity LOT 1 — serve exactly the profile MIME allowlist with
+      // the declared type (verified at commit: magic bytes for binary,
+      // strict UTF-8 for text, script-free SVG). Text keeps its charset;
+      // binary types are served bare, still under nosniff + sandbox (SVG/PDF).
+      if (!(HOST_MIME_TYPES as readonly string[]).includes(file.mimeType)) return null;
+      const contentType = file.mimeType.startsWith("text/")
+        ? `${file.mimeType}; charset=utf-8` : file.mimeType;
+      return { body, contentType };
     },
   } };
 }

@@ -123,11 +123,13 @@ const readerIssuer = {
 const publishedWrite = contentHost.enabled && artifactsControl?.readerStorage && artifactsControl.storageScope
   ? createPublishedWriteRuntime({ db: dbHandle.db, auth, accounts: artifactsControl.accounts,
     storage: artifactsControl.readerStorage, scope: artifactsControl.storageScope, contentBase: contentHost.contentBase,
-    readIssuer: readerIssuer, readGrantSecret: readerGrantSecret, sessionSecret: readerSessionSecret, env: process.env }) : null;
+    readIssuer: readerIssuer, readGrantSecret: readerGrantSecret, sessionSecret: readerSessionSecret, env: process.env,
+    ...(artifactsControl.readerConsent ? { consent: artifactsControl.readerConsent } : {}) }) : null;
 const readerOpening = contentHost.enabled && artifactsControl?.readerStorage && auth.enabled &&
   readerGrantSecret.length >= 32 && readerSessionSecret.length >= 32
   ? createReaderOpening({ ...artifactsControl.readerStorage, auth, contentBase: contentHost.contentBase,
     issuer: readerIssuer, grantSecret: readerGrantSecret, sessionSecret: readerSessionSecret,
+    ...(artifactsControl.readerConsent ? { consent: artifactsControl.readerConsent } : {}),
     ...(publishedWrite ? { writeDomain: publishedWrite.domain, permitsWrite: publishedWrite.permitsWrite } : {}),
     // Lot I1 (R1/a): JIT before getRights; disabled without trusted issuers.
     ...(admission.trustedIssuers.length > 0
@@ -164,6 +166,9 @@ const readerContent = contentHost.enabled && artifactsControl?.readerStorage && 
     sessionSecret: readerSessionSecret,
     issuer: readerIssuer,
     pageWrite: publishedWrite?.pageWrite ?? pageWriteListenerRoute(null),
+    // Gate B: the H5 dispatch re-reads the durable baskets consent on
+    // every business call (revocation effective at the next call).
+    ...(artifactsControl.readerConsent ? { basketConsent: artifactsControl.readerConsent } : {}),
     ...(readerOpening ? { openingContent: readerOpening.content } : {}),
     ...artifactsControl.readerStorage,
     readOperation: async (op, params, context) => {

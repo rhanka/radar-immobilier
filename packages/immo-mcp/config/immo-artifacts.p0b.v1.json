@@ -5,22 +5,40 @@
     "requireExpectedCurrentReleaseId": false,
     "resultEnvelopeVersion": 1
   },
-  "providerVersion": "0.2.5 || 0.2.6 || 0.3.0 || 0.2.8 || 0.2.9 || 0.2.10 || 0.2.12",
+  "providerVersion": "0.2.5 || 0.2.6 || 0.3.0 || 0.2.8 || 0.2.9 || 0.2.10 || 0.2.12 || 0.2.13",
   "policyRevision": "radar-c4-r2",
   "additionalToolScopes": {
     "artifacts_get_source": "immo:artifacts:read",
     "artifacts_set_access": "immo:artifacts:write",
-    "artifacts_delete": "immo:artifacts:write"
+    "artifacts_delete": "immo:artifacts:write",
+    "artifacts_create_upload": "immo:artifacts:write",
+    "artifacts_commit_upload": "immo:artifacts:write",
+    "artifacts_publish_bundle": "immo:artifacts:write",
+    "artifacts_lookup_people": "immo:artifacts:read",
+    "artifacts_list_access": "immo:artifacts:read",
+    "artifacts_revoke_reader_consent": "immo:artifacts:write"
   },
   "additionalSelection": [
     { "tool": "artifacts_get_source", "operation": "get_source", "method": "POST", "path": "/get_source", "command": "get_source" },
     { "tool": "artifacts_set_access", "operation": "set_access", "method": "POST", "path": "/set_access", "command": "set_access" },
-    { "tool": "artifacts_delete", "operation": "delete", "method": "POST", "path": "/delete", "command": "delete" }
+    { "tool": "artifacts_delete", "operation": "delete", "method": "POST", "path": "/delete", "command": "delete" },
+    { "tool": "artifacts_create_upload", "operation": "create_upload", "method": "POST", "path": "/uploads/create", "command": "create_upload" },
+    { "tool": "artifacts_commit_upload", "operation": "commit_upload", "method": "POST", "path": "/uploads/commit", "command": "commit_upload" },
+    { "tool": "artifacts_publish_bundle", "operation": "publish_bundle", "method": "POST", "path": "/publish_bundle", "command": "publish_bundle" },
+    { "tool": "artifacts_lookup_people", "operation": "lookup_people", "method": "POST", "path": "/lookup_people", "command": "lookup_people" },
+    { "tool": "artifacts_list_access", "operation": "list_access", "method": "POST", "path": "/list_access", "command": "list_access" },
+    { "tool": "artifacts_revoke_reader_consent", "operation": "revoke_reader_consent", "method": "POST", "path": "/revoke_reader_consent", "command": "revoke_reader_consent" }
   ],
   "additionalEffectiveProfile": {
     "artifacts_get_source": { "required": ["artifactId"], "maxFiles": 32, "maxTotalBytes": 262144 },
-    "artifacts_set_access": { "required": ["artifactId", "action", "principalId", "idempotencyKey"], "grant": "read", "principalId": "approved IMMO account IdP sub" },
-    "artifacts_delete": { "required": ["artifactId", "idempotencyKey"], "confirmation": "trusted app session; transactional consumption", "terminal": true }
+    "artifacts_set_access": { "required": ["artifactId", "action", "principalId", "idempotencyKey"], "grant": "read", "principalId": "opaque userRef from artifacts_lookup_people; sentropic:platform sentinel grants platform read-only; never a sub or email" },
+    "artifacts_delete": { "required": ["artifactId", "idempotencyKey"], "confirmation": "trusted app session; transactional consumption", "terminal": true },
+    "artifacts_create_upload": { "required": ["artifactId", "mimeType"], "session": "signed PUT, exact content-length, sha256 checksum header, 10-minute URL, 24-hour session, 8 open sessions per principal" },
+    "artifacts_commit_upload": { "required": ["artifactId", "uploadId", "path", "mimeType", "digest", "size", "idempotencyKey"], "verification": "server re-reads staging and re-verifies size, digest and MIME before pinning" },
+    "artifacts_publish_bundle": { "required": ["artifactId", "idempotencyKey", "expectedCurrentReleaseId"], "release": "atomic release from inline files plus staged assets; union under the release ceilings" },
+    "artifacts_lookup_people": { "required": ["query"], "directory": "approved IMMO accounts by name/email; results carry userRef plus masked email hint" },
+    "artifacts_list_access": { "required": ["artifactId"], "projection": "access mode plus per-principal grants (userRef, masked email hint, grant, reason)" },
+    "artifacts_revoke_reader_consent": { "required": ["artifactId", "idempotencyKey"], "self": "withdraws the caller's own consent for one scope, or for every scope when scope is omitted" }
   },
   "disabled": ["artifacts_restore", "artifacts_fork", "artifacts_promote", "artifacts_renew"]
 }
