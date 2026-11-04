@@ -31,7 +31,7 @@ import { ARTIFACT_LIST_ORDER } from "./artifact-read-schema.js";
 
 export const AUTHORING_GUIDE_ID = "immo-artifact-authoring" as const;
 export const AUTHORING_GUIDE_REVISION = ARTIFACT_STRICT ? `2026-11-02-${ARTIFACT_PROFILE_DESCRIPTOR.profileRevisionId}`
-  : ARTIFACT_P0B ? "2026-11-01-p0b-r3" : "2026-11-01-r5";
+  : ARTIFACT_P0B ? "2026-11-01-p0b-r4" : "2026-11-01-r6";
 export const STARTER_VERSION = "1.1.0" as const;
 export const STRICT_ARTIFACT_GUIDE = "This profile requires expectedCurrentReleaseId for artifacts_publish, artifacts_revert and artifacts_delete. First read the artifact with artifacts_get or artifacts_list. For a first publication, send expectedCurrentReleaseId: null only after that read returns currentReleaseId: null. For an update, read the observed release with artifacts_get_source, edit those files, and send its releaseId as expectedCurrentReleaseId. Conversation files alone do not establish the current release. For a revert or deletion, send the currentReleaseId observed by your read. On conflict, re-read and reconcile before submitting a changed command with a new idempotencyKey. For a lost response or commitState: unknown, reconcile with the same idempotencyKey and unchanged command before attempting a new write. Read resultEnvelopeVersion in this guide: version 1 keeps business fields at the root; version 2 places them in output and the guide in output.authoringGuide.";
 
