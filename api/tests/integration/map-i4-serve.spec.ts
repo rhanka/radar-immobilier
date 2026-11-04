@@ -61,10 +61,13 @@ describe("map-i4 design-kit serving", () => {
       expect(anonymous.headers.get("content-type")).toContain(
         asset.mediaType === "text/javascript" ? "text/javascript" : "text/css",
       );
+      expect(anonymous.headers.get("cache-control"), asset.file)
+        .toBe("public, max-age=31536000, immutable");
       expect(createHash("sha256").update(await anonymous.text()).digest("hex")).toBe(asset.sha256Hex);
       const forged = await request(app,
         `/__artifacts/design/${MAP_KIT_VERSION}/${"0".repeat(64)}/${asset.file}`);
       expect(forged.status, asset.file).toBe(404);
+      expect(forged.headers.get("cache-control"), asset.file).toBe("private, no-store");
     }
   });
 
