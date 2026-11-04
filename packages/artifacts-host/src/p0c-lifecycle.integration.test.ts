@@ -59,7 +59,10 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("strict P0-A artifact lifecycle",
     expect(output(c).stableUrl).toBe(output(a).stableUrl);
     const restored = await h.call("get_source", { artifactId, releaseId: C });
     expect(output(restored).files).toEqual(output(source).files);
-    expect((await h.call("meta", { artifactId })).body).toMatchObject({ output: { title: "Current", description: "Edited page", icon: "building", grants: [{ principalId: "idp-bob", grant: "read" }] } });
+    // I2 on G2: served summaries project the opaque userRef, never the sub.
+    const bobRef = (await h.pool.query<{ id: string }>(
+      "SELECT id FROM account_users WHERE sub = 'idp-bob'")).rows[0]!.id;
+    expect((await h.call("meta", { artifactId })).body).toMatchObject({ output: { title: "Current", description: "Edited page", icon: "building", grants: [{ principalId: bobRef, grant: "read" }] } });
     const lineage = await h.pool.query("SELECT author_principal_id, parent_release_id, reverted_from_release_id FROM artifacts.releases WHERE id=$1", [C]);
     expect(lineage.rows[0]).toEqual({ author_principal_id: "alice", parent_release_id: B, reverted_from_release_id: A });
     await h.pool.query("UPDATE artifacts.releases SET state='purged' WHERE id=$1", [A]);
