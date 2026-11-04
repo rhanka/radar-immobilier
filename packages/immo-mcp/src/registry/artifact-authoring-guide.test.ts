@@ -58,7 +58,7 @@ describe("artifact authoring guide", () => {
     expect(guide.rule).toContain("Sentropic DS is mandatory");
     expect(guide.data.warning).toContain("Never call /api/*");
     expect(guide.data.operations.map((op) => op.name)).toEqual(["workspaces.list.v1", "baskets.context.v1", "baskets.search.v1",
-      "baskets.state.v1", "geo.read.v1", "signals.protected-read.v1", "status.closed.v1"]);
+      "baskets.state.v1", "geo.read.v1", "geo.cities.v1", "geo.collection-items.v1", "signals.protected-read.v1", "status.closed.v1"]);
     expect(guide.checklist.length).toBeGreaterThan(0);
     expect(guide.frameworks.map((entry) => entry.framework))
       .toEqual(["plain JS", "React", "Svelte", "Vue", "Angular"]);
@@ -85,6 +85,15 @@ describe("artifact authoring guide", () => {
       expect(entry.licenseUrl).toMatch(/^https:\/\//);
     }
   });
+
+  it("should point geo pages at the governed catalogue operations, not the legacy read", () => {
+    const ops = Object.fromEntries(getAuthoringGuide().data.operations.map((op) => [op.name, op]));
+    expect(ops["geo.read.v1"]!.response).toContain("geo.collection-items.v1");
+    expect(ops["geo.collection-items.v1"]!.response).toContain("truncated");
+    expect(ops["geo.collection-items.v1"]!.response).toContain("geo_governed_not_served");
+    expect(ops["geo.cities.v1"]!.path).toBe("/__reader/api/geo.cities.v1");
+  });
+
 
   it("should require the published audit CLI and block findings and tool errors", () => {
     const checklist = getAuthoringGuide().checklist.join("\n");
