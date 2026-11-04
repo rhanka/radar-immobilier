@@ -15,7 +15,9 @@ describe("artifact general tool selection", () => {
       "artifacts_get",
       ...(ARTIFACT_P0B ? ["artifacts_get_source", "artifacts_set_access", "artifacts_delete",
         // Files parity LOT 1 — upload channel.
-        "artifacts_create_upload", "artifacts_commit_upload", "artifacts_publish_bundle"] : []),
+        "artifacts_create_upload", "artifacts_commit_upload", "artifacts_publish_bundle",
+        // I2 on G2 — share tooling.
+        "artifacts_lookup_people", "artifacts_list_access"] : []),
     ]);
     expect(IMMO_ARTIFACT_MANIFEST.tools.map((tool) => tool.name).sort()).toEqual(
       [...ARTIFACT_TOOL_NAMES].sort(),

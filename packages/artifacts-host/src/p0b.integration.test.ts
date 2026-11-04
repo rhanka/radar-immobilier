@@ -75,8 +75,11 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("IMMO artifact host with real Pos
   it.skipIf(!ARTIFACT_P0B)("should return full get/list summaries and retained source for editing and republication", async () => {
     const p = await h.page();
     const meta = await h.call("meta", { artifactId: p.artifactId });
+    // I2 on G2: served summaries project the opaque userRef, never the sub.
+    const aliceRef = (await h.pool.query<{ id: string }>(
+      "SELECT id FROM account_users WHERE sub = 'alice'")).rows[0]!.id;
     expect(meta.body).toMatchObject({ artifactId: p.artifactId, currentReleaseId: p.releaseId, bindingName: expect.any(String),
-      ownerId: "alice", storageScopeId: "p0b", state: "active", permissions: { read: true, source: true, write: true } });
+      ownerId: aliceRef, storageScopeId: "p0b", state: "active", permissions: { read: true, source: true, write: true } });
     expect((await h.call("list", {})).body).toMatchObject({ artifacts: expect.arrayContaining([expect.objectContaining({
       artifactId: p.artifactId, currentReleaseId: p.releaseId, stableUrl: `https://${p.artifactId}.pages.test/` })]) });
     const source = await h.call("get_source", { artifactId: p.artifactId });
@@ -129,19 +132,31 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("IMMO artifact host with real Pos
     await h.pool.query("UPDATE artifacts.host_quotas SET operation_limit=operations_used,byte_limit=bytes_used");
     const share = { artifactId, action: "grant", principalId: "idp-bob", grant: "read", idempotencyKey: randomUUID() };
     const granted = await h.call("set_access", share);
-    // 0.2.12 receipt reports the authoritative accessMode (isPublic stays a
-    // DB-side legacy projection only, never in the mutation receipt).
-    expect(granted).toMatchObject({ status: 200, body: { accessMode: "restricted", grants: [{ principalId: "idp-bob", grant: "read" }] } });
+    // I2 on G2: the legacy sub still grants, but the receipt projects the
+    // opaque userRef (isPublic stays a DB-side legacy projection only, never
+    // in the mutation receipt).
+    const bobRef = (await h.pool.query<{ id: string }>(
+      "SELECT id FROM account_users WHERE sub = 'idp-bob'")).rows[0]!.id;
+    expect(granted).toMatchObject({ status: 200, body: { accessMode: "restricted", grants: [{ principalId: bobRef, grant: "read" }] } });
     expect((await h.call("set_access", share)).body).toEqual(granted.body);
     expect((await h.call("meta", { artifactId }, "idp-bob")).status).toBe(200);
     expect((await h.call("get_source", { artifactId }, "idp-bob")).status).toBe(403);
     expect((await h.call("set_access", { ...share, idempotencyKey: randomUUID() }, "idp-bob")).status).toBe(403);
+    // Unknown, suspended and non-sub targets merge into person_not_shareable.
     for (const principalId of ["pending", "unknown", "bob@example.test"]) {
-      expect((await h.call("set_access", { ...share, principalId, idempotencyKey: randomUUID() })).status).toBe(403);
+      const refused = await h.call("set_access", { ...share, principalId, idempotencyKey: randomUUID() });
+      expect(refused.status).toBe(422);
+      expect((refused.body as { error: string }).error).toBe("person_not_shareable");
     }
-    await h.pool.query("UPDATE account_users SET status='pending' WHERE sub='idp-bob'");
+    // Revoke while approved, then suspend: post-suspend the grant is already
+    // ineffective (reads reread approval), and the G2 seam refuses even the
+    // cleanup grant/revoke on an unapproved target — merged person_not_shareable.
     expect((await h.call("set_access", { artifactId, action: "revoke", principalId: "idp-bob", idempotencyKey: randomUUID() })).status).toBe(200);
     expect((await h.call("meta", { artifactId }, "idp-bob")).status).toBeGreaterThanOrEqual(400);
+    await h.pool.query("UPDATE account_users SET status='pending' WHERE sub='idp-bob'");
+    const revoked = await h.call("set_access", { artifactId, action: "revoke", principalId: "idp-bob", idempotencyKey: randomUUID() });
+    expect(revoked.status).toBe(422);
+    expect((revoked.body as { error: string }).error).toBe("person_not_shareable");
     // Lot I2 B1: every mutation lands in the append-only audit in the same
     // transaction (missing 0032 objects fail the set_access above, not here).
     const audit = await h.pool.query(
@@ -193,6 +208,8 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("IMMO artifact host with real Pos
     let armed = true;
     const spy = vi.spyOn(h.pool, "query").mockImplementation(async (...args: Parameters<typeof h.pool.query>) => {
       const result = await query(...args);
+      // The race flips the approval after the request snapshot (ALS build)
+      // but before the transactional re-read denies the commit.
       if (armed && String(args[0]).startsWith("SELECT sub, status FROM account_users")) {
         armed = false;
         await query("UPDATE account_users SET status='pending' WHERE sub='idp-bob'");

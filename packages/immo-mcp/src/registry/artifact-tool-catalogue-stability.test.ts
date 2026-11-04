@@ -25,12 +25,12 @@ interface ProfileCase {
 
 const PROFILES: readonly ProfileCase[] = [
   // Files parity LOT 1: the upload channel (create/commit/publish_bundle)
-  // joins every P0b profile.
-  { revision: "immo-artifacts.p0b.v1", env: {}, toolCount: 10 },
-  { revision: "immo-artifacts.cas.v2", env: {}, toolCount: 10 },
+  // joins every P0b profile; I2 on G2 adds the share tooling.
+  { revision: "immo-artifacts.p0b.v1", env: {}, toolCount: 12 },
+  { revision: "immo-artifacts.cas.v2", env: {}, toolCount: 12 },
   { revision: "immo-artifacts.v2",
     env: { ARTIFACTS_INPUTS_QUALIFIED: "true", ARTIFACTS_RESULTS_QUALIFIED: "true" },
-    toolCount: 12 },
+    toolCount: 14 },
 ];
 
 /** Tools only selected by the v2 (part1) profile. */
