@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import type pg from "pg";
 import type { PublicationBlobStore } from "@sentropic/artifacts/server/publication";
-import { evaluateAccess } from "@sentropic/artifacts/server/access";
+import { evaluateAccess, type AccessMode, type ArtifactAcl } from "@sentropic/artifacts/server/access";
 import type { AuthorityReader, ReaderProfile } from "./reader-profile.js";
 import { normalizeReleasePath, type ReleaseFileProvider } from "./release-files.js";
 import { createSharedReaderTickets, type SharedReaderTickets } from "./reader-tickets.js";
@@ -39,8 +39,17 @@ export function createStoredReader(pool: pg.Pool, scope: string, contentBase: st
       if (!row) return null;
       const account = await pool.query("SELECT 1 FROM account_users WHERE sub=$1 AND status='approved'", [readerSub]);
       const acl = await pool.query("SELECT principal_id,permission FROM artifacts.artifact_access WHERE artifact_id=$1 AND principal_id=$2", [id, readerSub]);
-      const allowed = evaluateAccess({ ownerId: row.owner_id, isPublic: row.is_public, withdrawn: false,
-        grants: acl.rows.map((grant) => ({ principalId: grant.principal_id, grant: grant.permission })) }, readerSub, "read", () => account.rowCount === 1);
+      // Lot I2 (G1): access_mode is authoritative; is_public is its legacy
+      // projection, never anonymous. The sharing policy stays closed: no
+      // SharingPolicyPort is provided and no allowPublicSharing capability
+      // exists, so `public` can never grant access here (and the 0032 CHECK
+      // forbids the value in this database altogether).
+      const mode: AccessMode | undefined = row.access_mode === "restricted" ||
+        row.access_mode === "platform" || row.access_mode === "public" ? row.access_mode : undefined;
+      const stored: ArtifactAcl = { ownerId: row.owner_id, isPublic: row.is_public === true,
+        withdrawn: false, ...(mode === undefined ? {} : { accessMode: mode }),
+        grants: acl.rows.map((grant) => ({ principalId: grant.principal_id, grant: grant.permission })) };
+      const allowed = evaluateAccess(stored, readerSub, "read", () => account.rowCount === 1, {});
       const approved = account.rowCount === 1 && allowed;
       return { readerSub, artifactId: id, approved, capabilities: approved ? BASKET_READER_PROFILE.capabilities : [] };
     },

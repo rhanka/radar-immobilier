@@ -129,7 +129,9 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("IMMO artifact host with real Pos
     await h.pool.query("UPDATE artifacts.host_quotas SET operation_limit=operations_used,byte_limit=bytes_used");
     const share = { artifactId, action: "grant", principalId: "idp-bob", grant: "read", idempotencyKey: randomUUID() };
     const granted = await h.call("set_access", share);
-    expect(granted).toMatchObject({ status: 200, body: { isPublic: false, grants: [{ principalId: "idp-bob", grant: "read" }] } });
+    // 0.2.12 receipt reports the authoritative accessMode (isPublic stays a
+    // DB-side legacy projection only, never in the mutation receipt).
+    expect(granted).toMatchObject({ status: 200, body: { accessMode: "restricted", grants: [{ principalId: "idp-bob", grant: "read" }] } });
     expect((await h.call("set_access", share)).body).toEqual(granted.body);
     expect((await h.call("meta", { artifactId }, "idp-bob")).status).toBe(200);
     expect((await h.call("get_source", { artifactId }, "idp-bob")).status).toBe(403);
@@ -140,6 +142,49 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("IMMO artifact host with real Pos
     await h.pool.query("UPDATE account_users SET status='pending' WHERE sub='idp-bob'");
     expect((await h.call("set_access", { artifactId, action: "revoke", principalId: "idp-bob", idempotencyKey: randomUUID() })).status).toBe(200);
     expect((await h.call("meta", { artifactId }, "idp-bob")).status).toBeGreaterThanOrEqual(400);
+    // Lot I2 B1: every mutation lands in the append-only audit in the same
+    // transaction (missing 0032 objects fail the set_access above, not here).
+    const audit = await h.pool.query(
+      "SELECT actor_id, action, audience, principal_id, policy_revision FROM artifacts.artifact_access_events" +
+      " WHERE artifact_id = $1 ORDER BY id", [artifactId]);
+    expect(audit.rows).toMatchObject([
+      { actor_id: "alice", action: "grant", audience: "user", principal_id: "idp-bob" },
+      { actor_id: "alice", action: "revoke", audience: "user", principal_id: "idp-bob" },
+    ]);
+    for (const row of audit.rows) expect(typeof row.policy_revision).toBe("string");
+  });
+
+  it.skipIf(!ARTIFACT_P0B)("should enforce the G1 mirror: named belt, one source, mode guards, append-only audit", async () => {
+    const { artifactId } = await h.page();
+    // Named local belt closes 'public' even though the provider knows it.
+    await expect(h.pool.query("UPDATE artifacts.artifacts SET access_mode = 'public' WHERE id = $1",
+      [artifactId])).rejects.toThrow();
+    // Source grants live only in restricted mode.
+    await h.pool.query("UPDATE artifacts.artifacts SET access_mode = 'platform' WHERE id = $1", [artifactId]);
+    await expect(h.pool.query(
+      "INSERT INTO artifacts.artifact_access (artifact_id, principal_id, permission) VALUES ($1, 'idp-bob', 'source')",
+      [artifactId])).rejects.toThrow(/restricted/);
+    await h.pool.query("UPDATE artifacts.artifacts SET access_mode = 'restricted' WHERE id = $1", [artifactId]);
+    await h.pool.query(
+      "INSERT INTO artifacts.artifact_access (artifact_id, principal_id, permission) VALUES ($1, 'idp-bob', 'source')",
+      [artifactId]);
+    // At most one collab source grant per artifact.
+    await expect(h.pool.query(
+      "INSERT INTO artifacts.artifact_access (artifact_id, principal_id, permission) VALUES ($1, 'alice', 'source')",
+      [artifactId])).rejects.toThrow();
+    // No mode widening while the source grant lives; widening works once gone.
+    await expect(h.pool.query("UPDATE artifacts.artifacts SET access_mode = 'platform' WHERE id = $1",
+      [artifactId])).rejects.toThrow(/source grant/);
+    await h.pool.query("DELETE FROM artifacts.artifact_access WHERE artifact_id = $1", [artifactId]);
+    await h.pool.query("UPDATE artifacts.artifacts SET access_mode = 'platform' WHERE id = $1", [artifactId]);
+    // Audit rows are immutable once written through set_access.
+    const granted = await h.call("set_access",
+      { artifactId, action: "grant", principalId: "idp-bob", grant: "read", idempotencyKey: randomUUID() });
+    expect(granted.status).toBe(200);
+    await expect(h.pool.query("UPDATE artifacts.artifact_access_events SET action = 'revoke' WHERE artifact_id = $1",
+      [artifactId])).rejects.toThrow(/immutable/);
+    await expect(h.pool.query("DELETE FROM artifacts.artifact_access_events WHERE artifact_id = $1",
+      [artifactId])).rejects.toThrow(/immutable/);
   });
 
   it.skipIf(!ARTIFACT_P0B)("should reread recipient approval on the transaction after the request snapshot", async () => {

@@ -61,9 +61,10 @@ function buildApp(readOperation: ReturnType<typeof vi.fn>) {
     issuer: ISSUER, releaseFiles: provider, now: () => 1_000 });
 }
 
-async function grantFor(readerSub: string, sessionId: string): Promise<string> {
+async function grantFor(readerSub: string, sessionId: string, basketScope = true): Promise<string> {
   return mintGrant({ ...ISSUER, host: HOST, artifactId: ARTIFACT, releaseId: RELEASE,
-    readerSub, sessionId, profileName: "demo", policyRevision: "pol-001", profileFingerprint: FINGERPRINT },
+    readerSub, sessionId, profileName: "demo", policyRevision: "pol-001", profileFingerprint: FINGERPRINT,
+    ...(basketScope ? { basketScope: true as const } : {}) },
   GRANT_SECRET, 1_000);
 }
 
@@ -78,7 +79,7 @@ function stubSearch() {
 describe("published basket page", () => {
   it("should serve a real HTML/CSS/JS set whose JS can call a basket read", async () => {
     const app = buildApp(stubSearch());
-    const cookie = await credentials("reader-alice", "session-1", 1_000);
+    const cookie = await credentials("reader-alice", "session-1", 1_000, { basketScope: true });
     const grant = await grantFor("reader-alice", "session-1");
     const page = await app.request(`http://${HOST}/index.html?grant=${grant}`, {
       headers: { host: HOST, cookie },
@@ -104,7 +105,7 @@ describe("published basket page", () => {
   it("should isolate two readers and refuse foreign workspaces", async () => {
     const app = buildApp(stubSearch());
     for (const [reader, session, matched] of [["reader-alice", "s-a", 2], ["reader-bob", "s-b", 1]] as const) {
-      const cookie = await credentials(reader, session, 1_000);
+      const cookie = await credentials(reader, session, 1_000, { basketScope: true });
       const grant = await grantFor(reader, session);
       const res = await app.request(
         `http://${HOST}/__reader/api/baskets.search.v1?workspaceId=${WORKSPACE}&citySlug=valleyfield`, {
@@ -113,12 +114,31 @@ describe("published basket page", () => {
       expect(res.status).toBe(200);
       expect((await res.json() as { counts: { matched: number } }).counts.matched).toBe(matched);
     }
-    const cookie = await credentials("reader-alice", "session-1", 1_000);
+    const cookie = await credentials("reader-alice", "session-1", 1_000, { basketScope: true });
     const grant = await grantFor("reader-alice", "session-1");
     const foreign = await app.request(
       `http://${HOST}/__reader/api/baskets.search.v1?workspaceId=${FOREIGN}&citySlug=valleyfield`, {
         headers: { host: HOST, cookie, "x-preview-grant": grant },
       });
     expect(foreign.status).toBe(403);
+  });
+
+  it("should open the static page without basket scope but refuse the first H5 call once", async () => {
+    const app = buildApp(stubSearch());
+    const cookie = await credentials("reader-alice", "session-1", 1_000);
+    const grant = await grantFor("reader-alice", "session-1", false);
+    const page = await app.request(`http://${HOST}/index.html?grant=${grant}`, {
+      headers: { host: HOST, cookie },
+    });
+    expect(page.status).toBe(200);
+    const api = await app.request(
+      `http://${HOST}/__reader/api/baskets.search.v1?workspaceId=${WORKSPACE}&citySlug=valleyfield`, {
+        headers: { host: HOST, cookie, "x-preview-grant": grant },
+      });
+    expect(api.status).toBe(403);
+    const body = await api.json() as { ok: boolean; error: { code: string }; requestId: string };
+    expect(body.ok).toBe(false);
+    expect(body.error.code).toBe("basket_consent_required");
+    expect(typeof body.requestId).toBe("string");
   });
 });
