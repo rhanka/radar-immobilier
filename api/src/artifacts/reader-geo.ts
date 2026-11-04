@@ -226,7 +226,8 @@ export async function readReaderCollectionItems(
   }
 
   // 4. Live licence re-check: a licence turned `unknown` since the record
-  // date refuses at the next read (one cached-by-caller listing call).
+  // date refuses at the next read (one listing call per items request; the
+  // I-1A 10-minute listing cache is not reused here).
   let listing: Array<{ id: string; licenseTitle?: unknown; rightsPresent: boolean }>;
   try {
     const res = await fetchImpl(`${baseUrl}/collections?f=json&limit=10000`);
@@ -291,13 +292,17 @@ export async function readReaderCollectionItems(
       properties: serveZonageProperties(collectionId, { ...(feature.properties ?? {}) }, records),
     }));
     const numberMatched = typeof body.numberMatched === "number" ? body.numberMatched : served.length;
-    const bounded = boundReaderFeatures(served);
+    // Facade cap: an upstream returning more than asked is sliced to
+    // `limit` before the byte cap, so the response stays bounded in
+    // features AND in bytes with `truncated` set.
+    const capped = served.slice(0, Math.min(limit, GEO_READER_ITEMS_LIMIT_MAX));
+    const bounded = boundReaderFeatures(capped);
     return {
       type: "FeatureCollection",
       features: bounded.features,
       numberMatched,
       numberReturned: bounded.features.length,
-      truncated: bounded.features.length < served.length || numberMatched > bounded.features.length,
+      truncated: bounded.features.length < capped.length || numberMatched > bounded.features.length,
       collectionId,
       licenseId: entry.record.licenseId,
       contract,
@@ -314,14 +319,15 @@ export async function readReaderCollectionItems(
         geometry: feature.geometry ?? null,
         properties: serveZonageProperties(collectionId, { ...(feature.properties ?? {}) }, records),
       }));
-      const bounded = boundReaderFeatures(fallen.slice(0, Math.min(limit, GEO_READER_ITEMS_LIMIT_MAX)));
+      const capped = fallen.slice(0, Math.min(limit, GEO_READER_ITEMS_LIMIT_MAX));
+      const bounded = boundReaderFeatures(capped);
       return {
         type: "FeatureCollection",
         features: bounded.features,
         numberMatched: local.features.length,
         numberReturned: bounded.features.length,
         truncated:
-          bounded.features.length < Math.min(local.features.length, Math.min(limit, GEO_READER_ITEMS_LIMIT_MAX)),
+          bounded.features.length < capped.length || local.features.length > bounded.features.length,
         collectionId,
         licenseId: entry.record.licenseId,
         contract,
@@ -339,7 +345,11 @@ export async function readReaderCollectionItems(
   );
 }
 
-/** Cap the served features in bytes (features already capped in count). */
+/**
+ * Byte-cap only: callers slice the feature COUNT to
+ * `min(limit, GEO_READER_ITEMS_LIMIT_MAX)` first, then this caps the
+ * serialized bytes. Never call it on an uncapped upstream page.
+ */
 function boundReaderFeatures(
   features: Array<{ type: "Feature"; geometry: unknown; properties: Record<string, unknown> }>,
 ): { features: Array<{ type: "Feature"; geometry: unknown; properties: Record<string, unknown> }> } {

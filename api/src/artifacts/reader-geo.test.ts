@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import {
   GEO_OPERATIONS_TRIGGER_BASKET_CONSENT,
   GEO_READER_BBOX_REQUIRED_ABOVE,
+  GEO_READER_MAX_BYTES,
   GeoItemsRefusal,
   createGeoReadOperation,
   filterServedCities,
@@ -188,6 +189,62 @@ describe("geo.collection-items.v1 served (real Gatineau zones)", () => {
     const body = await readReaderCollectionItems(BASE_DEPS(fn), PILOT, { limit: 10 });
     expect(body.numberMatched).toBe(1000);
     expect(body.numberReturned).toBe(2);
+    expect(body.truncated).toBe(true);
+  });
+
+  it("caps an upstream page that returns more features than limit", async () => {
+    const extra = Array.from({ length: 5 }, (_, index) => ({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [-75.7, 45.45] },
+      properties: { DESCRIPTION: `zone-${index}`, MUNID: "81017" },
+    }));
+    const { fn } = makeFetch({
+      items: { type: "FeatureCollection", numberMatched: 5, numberReturned: 5, features: extra },
+    });
+    const body = await readReaderCollectionItems(BASE_DEPS(fn), PILOT, { limit: 2 });
+    expect(body.numberMatched).toBe(5);
+    expect(body.numberReturned).toBe(2);
+    expect(body.features).toHaveLength(2);
+    expect(body.truncated).toBe(true);
+  });
+
+  it("applies the 1 MiB byte cap on the live path", async () => {
+    const big = Array.from({ length: 8 }, (_, index) => ({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [-75.7, 45.45] },
+      properties: { DESCRIPTION: `zone-${index}-${"x".repeat(300 * 1024)}`, MUNID: "81017" },
+    }));
+    const { fn } = makeFetch({
+      items: { type: "FeatureCollection", numberMatched: big.length, numberReturned: big.length, features: big },
+    });
+    const body = await readReaderCollectionItems(BASE_DEPS(fn), PILOT, {
+      limit: 1000,
+      bbox: "-75.8,45.4,-75.6,45.5",
+    });
+    expect(body.numberMatched).toBe(big.length);
+    expect(body.numberReturned).toBeLessThan(big.length);
+    expect(body.truncated).toBe(true);
+    expect(Buffer.byteLength(JSON.stringify(body.features), "utf8")).toBeLessThanOrEqual(GEO_READER_MAX_BYTES);
+  });
+
+  it("signals truncation when the local fallback holds more than limit", async () => {
+    const local = Array.from({ length: 5 }, (_, index) => ({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [-75.7, 45.45] },
+      properties: { DESCRIPTION: `zone-${index}`, MUNID: "81017" },
+    }));
+    const { fn } = makeFetch({ itemsStatus: 503 });
+    const body = await readReaderCollectionItems(
+      {
+        ...BASE_DEPS(fn),
+        localZoneResolver: async () => ({ type: "FeatureCollection", features: local }),
+      },
+      PILOT,
+      { limit: 2 },
+    );
+    expect(body.numberMatched).toBe(5);
+    expect(body.numberReturned).toBe(2);
+    expect(body.features).toHaveLength(2);
     expect(body.truncated).toBe(true);
   });
 
