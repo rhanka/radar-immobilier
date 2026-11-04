@@ -24,14 +24,16 @@ describe("basket transport error parity", () => {
     const reader = createReaderContentApp({ contentBase: "pages.example.test", grantSecret: GRANT_SECRET,
       sessionSecret: SESSION_SECRET, issuer: ISSUER, authority: createFixtureAuthority(), now: () => 1_000,
       readOperation: async () => { throw new Error("synthetic backend failure"); } });
+    // Lot I2: parity is measured past the consent gate, so the fixture is consented.
     const grant = await mintGrant({ ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000",
       releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: "reader-alice", sessionId: "parity",
       profileName: "demo", policyRevision: "pol-001", profileFingerprint: fingerprintReaderProfile({
-        name: "demo", policyRevision: "pol-001", capabilities: ["geo.read", "signals.protected-read"] }) }, GRANT_SECRET, 1_000);
+        name: "demo", policyRevision: "pol-001", capabilities: ["geo.read", "signals.protected-read"] }),
+      basketScope: true }, GRANT_SECRET, 1_000);
     for (const [query, code] of [[invalid, "invalid_query"], [valid, "internal_error"]]) {
       const expected = await official.request(`https://app.example.test/api/v1/workspaces/${workspaceId}/${path}?${query}`);
       const actual = await reader.request(`https://${HOST}/__reader/api/${op}?workspaceId=${workspaceId}&${query}`, {
-        headers: { host: HOST, cookie: await credentials("reader-alice", "parity", 1_000), "x-preview-grant": grant } });
+        headers: { host: HOST, cookie: await credentials("reader-alice", "parity", 1_000, { basketScope: true }), "x-preview-grant": grant } });
       const expectedBody = await expected.json(), actualBody = await actual.json();
       expect(actual.status).toBe(expected.status);
       expect(actualBody.error.code).toBe(code);

@@ -8,10 +8,13 @@ import { credentials, GRANT_SECRET, SESSION_SECRET, ISSUER, HOST } from "./reade
 const path = "/__reader/api/workspaces.list.v1";
 const profile = { name: "demo", policyRevision: "pol-001", capabilities: ["geo.read", "signals.protected-read"] as const };
 async function headers(sub = "reader-alice", issuedAt = 1_000, sid = "session") {
-  return { host: HOST, cookie: await credentials(sub, sid, issuedAt), "x-preview-grant": await mintGrant({
+  // Lot I2: these tests exercise post-consent H5 behavior, so the fixture
+  // carries the basket scope consented on the control page.
+  return { host: HOST, cookie: await credentials(sub, sid, issuedAt, { basketScope: true }), "x-preview-grant": await mintGrant({
     ...ISSUER, host: HOST, artifactId: "123e4567-e89b-12d3-a456-426614174000",
     releaseId: "123e4567-e89b-12d3-a456-426614174001", readerSub: sub, sessionId: sid,
     profileName: profile.name, policyRevision: profile.policyRevision, profileFingerprint: fingerprintReaderProfile(profile),
+    basketScope: true,
   }, GRANT_SECRET, issuedAt) };
 }
 function setup(overrides: Partial<ContentServeDeps> = {}) {

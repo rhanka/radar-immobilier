@@ -17,7 +17,7 @@ function context(sub: string): ApiReaderContext {
   return {
     readerSub: sub, sessionId: "session-1", artifactId: "artifact-1", releaseId: "release-1",
     profileName: "demo", policyRevision: "pol-001",
-    capabilities: ["signals.protected-read"], source: "h5-grant",
+    capabilities: ["signals.protected-read"], basketScope: true, source: "h5-grant",
   };
 }
 
