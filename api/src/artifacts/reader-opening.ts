@@ -12,6 +12,7 @@ import { applyReaderContentHeaders } from "./content-isolation.js";
 import { DESIGN_KIT_ASSETS, designKitAssetUrl, type DesignKitAsset } from "@radar/artifacts-host";
 import { createDesignKitApp } from "./design-kit.js";
 import type { SharedReaderTickets } from "./reader-tickets.js";
+import { consentAllowsOpening, type ReaderConsentService } from "./reader-consent.js";
 import type { PwIdentityDomain } from "./write-intent-principal.js";
 import { samePwIdentityDomain } from "./write-intent-principal.js";
 
@@ -126,6 +127,13 @@ export function createReaderOpening(deps: {
    * run BEFORE getRights. Absent keeps the historical behaviour (disabled).
    */
   reconcile?: (input: { sub: string; email?: string; emailVerified: boolean; issuer: string }) => Promise<unknown>;
+  /**
+   * Reader consent LOT 1: persistent opening consent. A live row plus the
+   * fresh approval above skips the neutral screen; the confirmation POSTs
+   * below record the first-party gesture. Absent keeps the screen on every
+   * opening (fail-open reads, the ledger only ever skips a screen).
+   */
+  consent?: ReaderConsentService;
 }) {
   const application = new Hono();
   const content = new Hono();
@@ -270,6 +278,16 @@ export function createReaderOpening(deps: {
     }
     const input = await openingInput(c, c.req.query());
     if (!input) return refusal(c);
+    // Reader consent LOT 1 — a live consent row plus the fresh approval
+    // above (getRights re-read on this call) skips the screen: mint the
+    // exchange ticket directly, exactly like the confirmation POST below.
+    // A suspended account never reaches this line (approval refuses first);
+    // a revoked consent renders the screen again.
+    if (deps.consent &&
+      consentAllowsOpening(await deps.consent.findLiveConsent(input.readerSub, input.artifactId))) {
+      const ticket = await deps.tickets.mint(input);
+      return c.redirect(`${input.origin}/__reader/exchange?ticket=${ticket.ticket}`, 303);
+    }
     // no-referrer makes Chromium send Origin: null on the confirmation POST.
     // Keep the same-origin CSRF check usable without sending referrers off-site.
     c.header("Referrer-Policy", "same-origin");
@@ -303,6 +321,12 @@ export function createReaderOpening(deps: {
     if (!deps.auth.enabled || c.req.header("origin") !== deps.auth.appBaseUrl) return c.json({ error: "forbidden_origin" }, 403);
     const input = await openingInput(c, await c.req.parseBody());
     if (!input) return refusal(c);
+    // Reader consent LOT 1 — the click is the first-party gesture: record
+    // the opening consent before minting the ticket. A ledger failure never
+    // blocks an approved opening; the screen simply shows again next time.
+    if (deps.consent) {
+      await deps.consent.grantOnScreen(input.readerSub, input.artifactId).catch(() => undefined);
+    }
     const ticket = await deps.tickets.mint(input);
     return c.redirect(`${input.origin}/__reader/exchange?ticket=${ticket.ticket}`, 303);
   });
@@ -353,6 +377,12 @@ export function createReaderOpening(deps: {
     if (!deps.auth.enabled || c.req.header("origin") !== deps.auth.appBaseUrl) return c.json({ error: "forbidden_origin" }, 403);
     const input = await openingInput(c, await c.req.parseBody());
     if (!input) return refusal(c);
+    // Reader consent LOT 1 — consenting to the basket screen implies
+    // accepting the opening itself: record the opening consent as well, so
+    // the next document opening skips its own screen.
+    if (deps.consent) {
+      await deps.consent.grantOnScreen(input.readerSub, input.artifactId).catch(() => undefined);
+    }
     const ticket = await deps.tickets.mint({ ...input, basketScope: true });
     return c.redirect(`${input.origin}/__reader/exchange?ticket=${ticket.ticket}`, 303);
   });

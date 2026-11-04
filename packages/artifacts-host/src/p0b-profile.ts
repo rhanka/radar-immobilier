@@ -41,10 +41,18 @@ export const UPLOAD_ARTIFACT_TOOLS = ["artifacts_create_upload", "artifacts_comm
  */
 export const SHARING_ARTIFACT_TOOLS = ["artifacts_lookup_people", "artifacts_list_access"] as const;
 export const PART1_ARTIFACT_TOOLS = ["artifacts_list_versions", "artifacts_revert"] as const;
+/**
+ * Reader consent lot 1 — self-revocation of the persistent opening consent
+ * through the generic host port (`readerConsent` on the provider app). The
+ * screen itself (grant) and the bypass check (live row plus fresh rights)
+ * live in the API opening flow; this tool only withdraws.
+ */
+export const CONSENT_ARTIFACT_TOOLS = ["artifacts_revoke_reader_consent"] as const;
 export const ACTIVE_ARTIFACT_TOOLS = Object.freeze([
   ...BASE_ARTIFACT_TOOLS, ...(ARTIFACT_P0B ? P0B_ARTIFACT_TOOLS : []),
   ...(ARTIFACT_P0B ? UPLOAD_ARTIFACT_TOOLS : []),
   ...(ARTIFACT_P0B ? SHARING_ARTIFACT_TOOLS : []),
+  ...(ARTIFACT_P0B ? CONSENT_ARTIFACT_TOOLS : []),
   ...(ARTIFACT_PART1 ? PART1_ARTIFACT_TOOLS : []),
 ]);
 /**
@@ -84,6 +92,7 @@ export function compileHostArtifactProfile(descriptor = ARTIFACT_PROFILE_DESCRIP
       ...(p0b ? P0B_ARTIFACT_TOOLS : []),
       ...(p0b ? UPLOAD_ARTIFACT_TOOLS : []),
       ...(p0b ? SHARING_ARTIFACT_TOOLS : []),
+      ...(p0b ? CONSENT_ARTIFACT_TOOLS : []),
       ...(descriptor.resultEnvelopeVersion === 2 ? PART1_ARTIFACT_TOOLS : [])],
     operations: [...RADAR_ARTIFACTS_PROFILE.operations.map((entry) => entry.operation === "publish"
       ? { ...entry, limits: { ...entry.limits, releaseFilesMax: RELEASE_FILES_MAX,
@@ -96,6 +105,10 @@ export function compileHostArtifactProfile(descriptor = ARTIFACT_PROFILE_DESCRIP
       { operation: "create_upload", limits: { idempotencyKeyMaxUnits: 256 }, defaults: {} },
       { operation: "commit_upload", limits: { idempotencyKeyMaxUnits: 256 }, defaults: { profile: {} } },
       { operation: "publish_bundle", limits: { idempotencyKeyMaxUnits: 256 }, defaults: { profile: {} } },
+      // Reader consent LOT 1 — self-revocation only; the provider operation
+      // profile already declares the schema (artifactId, optional scope,
+      // required idempotencyKey), the host only selects it.
+      { operation: "revoke_reader_consent", limits: { idempotencyKeyMaxUnits: 256 }, defaults: {} },
     ] : [])],
     contractRevisions: { ...RADAR_ARTIFACTS_PROFILE.contractRevisions,
       ...(ARTIFACT_P0B ? { immo: descriptor.profileRevisionId } : {}) },
@@ -107,7 +120,10 @@ export const isArtifactMutation = (op: string): boolean => ["ensure", "publish",
   // Files parity LOT 1: commit_upload stages bytes durably and publish_bundle
   // cuts a release; both carry an idempotencyKey. create_upload mints a
   // quota-bounded session only and stays read-like at this layer.
-  "commit_upload", "publish_bundle"].includes(op);
+  "commit_upload", "publish_bundle",
+  // Reader consent LOT 1: revocation is an idempotent writer (required
+  // idempotencyKey, provider IDEMPOTENT_WRITERS).
+  "revoke_reader_consent"].includes(op);
 export const isArtifactPublication = (op: string): boolean => ["ensure", "publish", "revert",
   "publish_bundle"].includes(op);
 

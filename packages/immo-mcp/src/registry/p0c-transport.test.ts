@@ -72,8 +72,9 @@ describe.skipIf(!ARTIFACT_STRICT || !process.env.P0B_DATABASE_URL)("strict MCP b
         : { error: "artifact_scope_denied", requiredScope: "immo:artifacts:read" });
     }
     // Files parity LOT 1 — the upload channel joins every strict profile;
-    // I2 on G2 adds the share tooling.
-    expect(binding.tools).toHaveLength(ARTIFACT_PART1 ? 14 : 12);
+    // I2 on G2 adds the share tooling; reader consent LOT 1 adds the
+    // self-revocation tool.
+    expect(binding.tools).toHaveLength(ARTIFACT_PART1 ? 15 : 13);
     if (ARTIFACT_PART1) {
       expect(binding.tools.find((tool) => tool.name === "artifacts_list_versions")?.annotations).toMatchObject({ readOnlyHint: true });
       expect(binding.tools.find((tool) => tool.name === "artifacts_revert")?.annotations).toMatchObject({ readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false });
@@ -89,6 +90,10 @@ describe.skipIf(!ARTIFACT_STRICT || !process.env.P0B_DATABASE_URL)("strict MCP b
       { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false });
     expect(binding.tools.find((tool) => tool.name === "artifacts_list_access")?.annotations).toMatchObject(
       { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false });
+    // Reader consent LOT 1: self-revocation is a state-transition writer
+    // (provider mutability), idempotency-required like every writer.
+    expect(binding.tools.find((tool) => tool.name === "artifacts_revoke_reader_consent")?.annotations).toMatchObject(
+      { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false });
     expect(binding.tools.find((tool) => tool.name === "artifacts_delete")?.annotations?.destructiveHint).toBe(true);
   });
 
