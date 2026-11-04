@@ -1,7 +1,9 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import type pg from "pg";
 import type { ArtifactApp, HttpAppDeps, HttpRequest } from "@sentropic/artifacts/http";
+import { createAccountDirectory } from "./directory.js";
 import { projectContentUrls } from "./facade.js";
+import { projectListVersionsAuthors } from "./list-versions-projection.js";
 
 interface MetadataRow {
   id: string; binding_name: string; created_at: Date; lifecycle_state: string;
@@ -38,6 +40,13 @@ export function createArtifactReadMetadata(pool: Pick<pg.Pool, "query">, scope: 
     async project(request: HttpRequest, dispatch: () => ReturnType<ArtifactApp["execute"]>): ReturnType<ArtifactApp["execute"]> {
       const list = request.method === "POST" && request.path === "/list";
       const get = request.method === "GET" && /^\/meta\/[^/]+$/.test(request.path);
+      const versions = request.method === "POST" && request.path === "/list_versions";
+      if (versions) {
+        const outcome = await dispatch();
+        if (!outcome.ok) return outcome;
+        await projectListVersionsAuthors(outcome.result.body, scope, createAccountDirectory(pool as unknown as pg.Pool));
+        return outcome;
+      }
       if (!list && !get) return dispatch();
       return snapshots.run(new Map(), async () => {
         const outcome = await dispatch();

@@ -5,6 +5,7 @@ import { createMemoryBlobStore } from "@sentropic/artifacts/server/publication";
 import { composeArtifactHost, type ArtifactHostOptions } from "./composition.js";
 import { HOST_ARTIFACT_PROFILE } from "./p0b-profile.js";
 import { createDeleteConfirmation } from "./delete-confirmation.js";
+import { createAccountDirectory } from "./directory.js";
 import { createArtifactControl } from "./facade.js";
 import { ARTIFACTS_COORDINATOR_HASH, ARTIFACTS_COORDINATOR_WHEN, ARTIFACTS_LIFECYCLE_HASH, ARTIFACTS_LIFECYCLE_WHEN } from "./storage.js";
 
@@ -36,7 +37,8 @@ export async function p0bFixture(profile = HOST_ARTIFACT_PROFILE) {
   }
   const host = await connect();
   await pool.query("INSERT INTO artifacts.host_quotas (storage_scope_id,operation_limit,byte_limit) VALUES ('p0b',1000,10000000)");
-  const control = createArtifactControl(host, "p0b", "pages.test");
+  const control = createArtifactControl(host, "p0b", "pages.test", undefined,
+    { directory: createAccountDirectory(pool) });
   const call = (op: string, args: unknown, actor = "alice") => control.handle(op, actor, args);
   const page = async () => {
     const bindingName = randomUUID();

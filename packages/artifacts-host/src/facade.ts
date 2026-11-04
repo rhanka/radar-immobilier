@@ -59,7 +59,9 @@ function contentUrl(label: string, base: string): string | null {
   }
 }
 import { projectArtifactWriteFailure } from "@sentropic/artifacts/server/outcome-contract";
+import type { PrincipalDirectoryPort } from "@sentropic/artifacts";
 import { authorizeArtifactCommit } from "./commit-policy.js";
+import { projectListVersionsAuthors } from "./list-versions-projection.js";
 import { checkAdmission, type AdmissionAuthority } from "./admission.js";
 import type { composeArtifactHost } from "./composition.js";
 import { HOST_ARTIFACT_PROFILE, isArtifactMutation } from "./p0b-profile.js";
@@ -103,6 +105,7 @@ export function createMemoryCommitLedger(): {
 export interface ArtifactControlOptions {
   readonly ledger?: CommitFailureLedger;
   readonly nowMs?: () => number;
+  readonly directory?: Pick<PrincipalDirectoryPort, "describePrincipal">;
 }
 
 type ComposedHost = NonNullable<Awaited<ReturnType<typeof composeArtifactHost>>>;
@@ -246,6 +249,9 @@ export function createArtifactControl(
       }
       const projectedOutcome = projectArtifactHttpOutcome(outcome, profile.resultEnvelopeVersion === 2);
       const response = { ...projectedOutcome, body: projectContentUrls(projectedOutcome.body) };
+      if (op === "list_versions" && response.status === 200 && options?.directory) {
+        await projectListVersionsAuthors(response.body, scope, options.directory);
+      }
       if (!outcome.ok && outcome.failure.publicCode === "rate_limited" && profile.resultEnvelopeVersion !== 2) {
         response.body = { error: "rate_limited", retryable: outcome.failure.retriable };
       }

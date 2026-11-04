@@ -73,6 +73,7 @@ export { ARTIFACT_P0B, ARTIFACT_P0B_VERSIONS, ARTIFACT_PROVIDER_VERSION, ARTIFAC
   RELEASE_FILES_MAX, RELEASE_FILE_BYTES_MAX, RELEASE_TOTAL_BYTES_MAX, HOST_MIME_TYPES,
   ACTIVE_ARTIFACT_TOOLS, HOST_ARTIFACT_PROFILE, validateArtifactInput, artifactPublicSchema,
   isArtifactMutation, isArtifactPublication } from "./p0b-profile.js";
+export { projectListVersionsAuthors, type ListVersionsDirectory } from "./list-versions-projection.js";
 export { createPostgresUploadSessionStore } from "./upload-store.js";
 export { createAccountDirectory } from "./directory.js";
 export { artifactRefusalResponse } from "./result-projection.js";

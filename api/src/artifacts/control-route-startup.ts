@@ -1,5 +1,5 @@
 import {
-  composeArtifactHost, createArtifactControl, createArtifactsPool,
+  composeArtifactHost, createAccountDirectory, createArtifactControl, createArtifactsPool,
   resolveArtifactsStorageConfig, type ArtifactsConfigInput, type ArtifactsPoolParams,
   createArtifactAdmissionAuthority, readActivationEnv, resolveActivationConfig,
   ARTIFACT_P0B, createDeleteConfirmation,
@@ -39,7 +39,8 @@ export async function startArtifactControl(options: {
     const host = await composeArtifactHost(pool, parsed, undefined, { readActivation, contentBase,
       ...(confirmation ? { confirmation } : {}) });
     const backend = createArtifactControl(host, parsed.storageScope, contentBase,
-      createArtifactAdmissionAuthority(pool, readActivation, parsed.storageScope));
+      createArtifactAdmissionAuthority(pool, readActivation, parsed.storageScope),
+      { directory: createAccountDirectory(pool) });
     logger.info({ storageScope: parsed.storageScope, s3Bucket: parsed.s3Bucket }, "artifact control enabled");
     return { auth, accounts: pool, backend, readActivation, storageScope: parsed.storageScope,
       ...(confirmation ? { confirmation } : {}),
