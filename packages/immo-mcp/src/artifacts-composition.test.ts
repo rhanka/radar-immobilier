@@ -129,9 +129,11 @@ describe("P7 composed transport (contract double; no storage qualification)", ()
       // Files parity LOT 1: the upload channel publishes, so it is not
       // read-only; create_upload mints a fresh session per call and is the
       // only active tool without an idempotency key. I2 on G2: the directory
-      // pair stays read-only (provider mutability), like list/get.
+      // pair stays read-only (provider mutability), like list/get. Reader
+      // consent LOT 1: self-revocation is a state-transition writer.
       const write = ["artifacts_ensure", "artifacts_publish", "artifacts_set_access", "artifacts_delete",
-        "artifacts_create_upload", "artifacts_commit_upload", "artifacts_publish_bundle"].includes(tool.name);
+        "artifacts_create_upload", "artifacts_commit_upload", "artifacts_publish_bundle",
+        "artifacts_revoke_reader_consent"].includes(tool.name);
       expect(tool.annotations).toEqual({ readOnlyHint: !write, destructiveHint: tool.name === "artifacts_delete",
         openWorldHint: false, idempotentHint: tool.name !== "artifacts_create_upload" });
     }
