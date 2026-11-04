@@ -14,7 +14,7 @@ export async function p0bFixture(profile = HOST_ARTIFACT_PROFILE) {
   if (url.hostname !== "postgres" || url.pathname !== "/p0b") throw new Error("p0b_test_database_required");
   const pool = new pg.Pool({ connectionString, max: 8, options: "-c statement_timeout=5000 -c lock_timeout=1000" });
   await pool.query("DROP SCHEMA IF EXISTS artifacts CASCADE; DROP SCHEMA IF EXISTS drizzle CASCADE; DROP TABLE IF EXISTS account_users");
-  for (const name of ["0015_artifacts_core", "0016_artifacts_lifecycle", "0024_artifacts_coordinator", "0025_artifacts_actor_quotas", "0028_artifacts_p0b", "0029_artifacts_parity"]) {
+  for (const name of ["0015_artifacts_core", "0016_artifacts_lifecycle", "0024_artifacts_coordinator", "0025_artifacts_actor_quotas", "0028_artifacts_p0b", "0029_artifacts_parity", "0032_artifacts_sharing_access_mode"]) {
     await pool.query(readFileSync(new URL(`../../../api/drizzle/${name}.sql`, import.meta.url), "utf8"));
   }
   await pool.query(`CREATE SCHEMA drizzle; CREATE TABLE drizzle.__drizzle_migrations (created_at bigint, hash text);

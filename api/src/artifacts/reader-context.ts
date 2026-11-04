@@ -22,6 +22,11 @@ export interface ApiReaderContext {
   readonly profileName: string;
   readonly policyRevision: string;
   readonly capabilities: readonly ReaderCapability[];
+  /**
+   * Lot I2: true only when the grant was minted from a consented session.
+   * H5 basket operations require it; the document itself never does.
+   */
+  readonly basketScope: boolean;
   readonly source: "h5-grant";
 }
 
@@ -50,6 +55,7 @@ export async function adaptGrantToReader(
     profileName: profile.name,
     policyRevision: profile.policyRevision,
     capabilities: intersectCapabilities(profile, rights),
+    basketScope: grant.basketScope === true,
     source: "h5-grant",
   };
   } catch { return null; }

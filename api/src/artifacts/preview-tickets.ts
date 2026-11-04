@@ -32,6 +32,8 @@ export interface PreviewTicket {
   readonly profileFingerprint: string;
   readonly readerSub: string;
   readonly returnTarget: string;
+  /** Lot I2: consent tickets carry the basket scope into the minted session. */
+  readonly basketScope?: true;
   readonly expiresAt: number;
 }
 
@@ -46,6 +48,8 @@ export interface TicketMint {
   readonly profileFingerprint: string;
   readonly readerSub: string;
   readonly returnTarget: string;
+  /** Lot I2: consent tickets carry the basket scope into the minted session. */
+  readonly basketScope?: true;
 }
 
 export interface TicketStoreOptions {
