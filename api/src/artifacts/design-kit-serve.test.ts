@@ -47,7 +47,9 @@ describe("reserved design-kit path", () => {
       const res = await request(app, designUrl(asset), cookie, grant);
       expect(res.status, asset.file).toBe(200);
       expect(res.headers.get("content-type")).toContain("text/css");
-      expect(res.headers.get("cache-control")).toBe("private, no-store");
+      // Pinned public bytes (no tenant data): same immutable regime as the
+      // application-origin kit mount, applied after the reader headers.
+      expect(res.headers.get("cache-control")).toBe("public, max-age=31536000, immutable");
       expect(await res.text()).toContain("--st-");
     }
   });
@@ -61,6 +63,7 @@ describe("reserved design-kit path", () => {
       const anonymous = await request(app, designUrl(asset));
       expect(anonymous.status, asset.file).toBe(200);
       expect(anonymous.headers.get("content-type")).toContain("text/css");
+      expect(anonymous.headers.get("cache-control")).toBe("public, max-age=31536000, immutable");
       expect(await anonymous.text()).toContain("--st-");
       const forged = await request(app, designUrl(asset), undefined, "forged-grant");
       expect(forged.status, asset.file).toBe(200);
