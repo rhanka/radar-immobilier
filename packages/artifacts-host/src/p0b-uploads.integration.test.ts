@@ -34,7 +34,7 @@ function checksumOf(bytes: Uint8Array): string {
   return createHash("sha256").update(bytes).digest("base64");
 }
 
-describe("files parity upload channel", () => {
+describe.skipIf(!process.env.P0B_DATABASE_URL)("files parity upload channel", () => {
   let fixture: Awaited<ReturnType<typeof p0bFixture>>;
   let call: (op: string, args: unknown, actor?: string) => Promise<{ status: number; body: unknown }>;
   const staging = createMemoryStaging();
