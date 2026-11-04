@@ -232,6 +232,13 @@
       "when": 1793000000003,
       "tag": "0033_artifacts_upload_sessions",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1793000000004,
+      "tag": "0034_artifacts_reader_consent",
+      "breakpoints": true
     }
   ]
 }
