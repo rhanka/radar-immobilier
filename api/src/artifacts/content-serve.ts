@@ -454,6 +454,10 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     }
     applyReaderContentHeaders(c);
     c.header("Content-Type", designKitMimeFor(asset));
+    // Pinned public bytes (no tenant data): same immutable regime as the
+    // application-origin kit mount, applied after the reader headers and
+    // only on success. Unknown digests stay 404 with private, no-store.
+    c.header("Cache-Control", "public, max-age=31536000, immutable");
     return c.body(getDesignKitBytes(asset));
   });
 
