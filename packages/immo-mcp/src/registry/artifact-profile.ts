@@ -240,7 +240,7 @@ export function artifactEffectiveProfile() {
     ...(ARTIFACT_P0B ? {
       descriptor: ARTIFACT_PROFILE_DESCRIPTOR,
       artifacts_get_source: { required: ARTIFACT_EFFECTIVE_REQUIRED.artifacts_get_source, maxFiles: 32, maxTotalBytes: 262144 },
-      artifacts_set_access: { required: ARTIFACT_EFFECTIVE_REQUIRED.artifacts_set_access, grant: "read", principalId: "approved IMMO account IdP sub" },
+      artifacts_set_access: { required: ARTIFACT_EFFECTIVE_REQUIRED.artifacts_set_access, grant: "read", principalId: "opaque userRef from artifacts_lookup_people; sentropic:platform sentinel grants platform read-only; never a sub or email" },
       artifacts_delete: { required: ARTIFACT_EFFECTIVE_REQUIRED.artifacts_delete, confirmation: "trusted app session; transactional consumption", terminal: true },
       // Files parity LOT 1 — outside-the-model bytes: signed PUT session,
       // verified commit, atomic bundle release (union of inline files and
@@ -258,7 +258,7 @@ export function artifactEffectiveProfile() {
         directory: "approved IMMO accounts by name/email; results carry userRef plus masked email hint" },
       artifacts_list_access: { required: ARTIFACT_EFFECTIVE_REQUIRED.artifacts_list_access,
         projection: "access mode plus per-principal grants (userRef, masked email hint, grant, reason)" },
-      // Reader consent LOT 1 — self-revocation only; the next opening asks again.
+      // Reader consent — self-revocation of the baskets consent only; the next baskets call asks again.
       artifacts_revoke_reader_consent: { required: ARTIFACT_EFFECTIVE_REQUIRED.artifacts_revoke_reader_consent,
         self: "withdraws the caller's own consent for one scope, or for every scope when scope is omitted" },
     } : {}),
