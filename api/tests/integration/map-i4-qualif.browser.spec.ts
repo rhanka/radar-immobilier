@@ -11,7 +11,37 @@ import { describe, expect, it } from "vitest";
 import { DESIGN_KIT_ASSETS, MAP_KIT_ASSETS, designKitAssetUrl, mapKitAssetUrl } from "@radar/artifacts-host";
 import { createDesignKitApp } from "../../src/artifacts/design-kit.js";
 import { releaseCspForHtml } from "../../src/artifacts/release-files.js";
-import { findFeatureAt } from "../../src/artifacts/design-assets/map-base.mjs";
+
+/** Independent point-in-ring oracle (duplicated on purpose, never the bundle). */
+function oracleInside(lon: number, lat: number, ring: readonly (readonly number[])[]): boolean {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i]![0]!;
+    const yi = ring[i]![1]!;
+    const xj = ring[j]![0]!;
+    const yj = ring[j]![1]!;
+    if (yi > lat !== yj > lat && lon < ((xj - xi) * (lat - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+/** Independent topmost-feature oracle over raw GeoJSON (lots over zones). */
+function oracleContains(
+  geometry: { readonly type: string; readonly coordinates: unknown },
+  lon: number,
+  lat: number,
+): boolean {
+  if (geometry.type === "Polygon" && Array.isArray(geometry.coordinates)) {
+    const rings = geometry.coordinates as readonly (readonly number[])[];
+    if (rings.length === 0 || !oracleInside(lon, lat, rings[0]!)) return false;
+    return rings.slice(1).every((hole) => !oracleInside(lon, lat, hole));
+  }
+  if (geometry.type === "MultiPolygon" && Array.isArray(geometry.coordinates)) {
+    return (geometry.coordinates as unknown[]).some((polygon) =>
+      oracleContains({ type: "Polygon", coordinates: polygon }, lon, lat));
+  }
+  return false;
+}
 
 const here = dirname(fileURLToPath(import.meta.url));
 const fixtures = join(here, "..", "fixtures", "map-i4");
@@ -24,8 +54,14 @@ describe.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")(
     it("should render polygons, return clicks, zoom, fit and stay same-origin with zero CSP violations", async () => {
       const zonesRaw = readFileSync(join(fixtures, "zones-longueuil.geojson"), "utf8");
       const lotsRaw = readFileSync(join(fixtures, "lots-longueuil.geojson"), "utf8");
-      const zones = JSON.parse(zonesRaw) as { features: { properties: Record<string, unknown> }[] };
-      const lots = JSON.parse(lotsRaw) as { features: { properties: Record<string, unknown> }[] };
+      const zones = JSON.parse(zonesRaw) as { features: {
+        properties: Record<string, unknown>;
+        geometry: { type: string; coordinates: unknown };
+      }[] };
+      const lots = JSON.parse(lotsRaw) as { features: {
+        properties: Record<string, unknown>;
+        geometry: { type: string; coordinates: unknown };
+      }[] };
 
       const template = readFileSync(join(fixtures, "qualif-page.html"), "utf8");
       // A real artifact page links the two pinned kit stylesheets plus the
@@ -75,6 +111,12 @@ describe.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")(
         const page = await browser.newPage({ viewport: { width: 1024, height: 768 } });
         const errors: string[] = [];
         const violations: string[] = [];
+        // Browser-side request journal: every attempted request must stay
+        // same-origin, including tile images once a template is configured.
+        const browserRequests: string[] = [];
+        page.on("request", (request) => {
+          browserRequests.push(request.url());
+        });
         page.on("pageerror", (error) => errors.push(error.message));
         page.on("console", (message) => {
           if (message.text().startsWith("CSP:")) violations.push(message.text());
@@ -130,14 +172,20 @@ describe.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")(
           layer: string | null; index: number; lon: number; lat: number;
           zoneCode: string | null; lotId: string | number | null;
         } | null = null;
+        let clickX = 0;
+        let clickY = 0;
         for (const fx of [0.3, 0.4, 0.5, 0.6, 0.7]) {
           for (const fy of [0.3, 0.4, 0.5, 0.6, 0.7]) {
-            await page.mouse.click(box!.x + box!.width * fx, box!.y + box!.height * fy);
+            const x = box!.x + box!.width * fx;
+            const y = box!.y + box!.height * fy;
+            await page.mouse.click(x, y);
             await page.waitForTimeout(150);
             const last = await page.evaluate(() =>
               window.__mapQualif.lastClick === null ? null : { ...window.__mapQualif.lastClick });
             if (last !== null && last.layer !== null) {
               click = last;
+              clickX = x;
+              clickY = y;
               break;
             }
           }
@@ -147,13 +195,26 @@ describe.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")(
         expect(["zones", "lots"]).toContain(click!.layer);
         expect(click!.lon).toBeGreaterThan(-74);
         expect(click!.lon).toBeLessThan(-73);
-        const expected = findFeatureAt(
-          { outlines: [], zones: zones.features, lots: lots.features },
-          click!.lon,
-          click!.lat,
-        );
+        // Independent oracle: raw GeoJSON ray-casting, never the bundle.
+        const topmostAt = (
+          lon: number,
+          lat: number,
+        ): { layer: string; index: number; feature: { properties: Record<string, unknown> } } | null => {
+          for (const { layer, features } of [
+            { layer: "lots", features: lots.features },
+            { layer: "zones", features: zones.features },
+          ] as const) {
+            for (let index = features.length - 1; index >= 0; index -= 1) {
+              const feature = features[index]!;
+              if (oracleContains(feature.geometry, lon, lat)) return { layer, index, feature };
+            }
+          }
+          return null;
+        };
+        const expected = topmostAt(click!.lon, click!.lat);
         expect(expected).not.toBeNull();
         expect(expected!.layer).toBe(click!.layer);
+        expect(expected!.index).toBe(click!.index);
         if (click!.layer === "lots") {
           const identity = (feature: { properties: Record<string, unknown> }) =>
             feature.properties["NO_LOT"] ?? feature.properties["noLot"];
@@ -162,10 +223,30 @@ describe.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")(
           expect(expected!.feature.properties["zone_code"]).toBe(click!.zoneCode);
         }
 
-        await page.mouse.move(centerX + 40, centerY + 40);
-        await page.waitForFunction(() => window.__mapQualif?.lastHover !== null, null, { timeout: 5000 });
+        // Hover must identify the same feature as the click: clear the
+        // journal, leave the canvas so the hover state resets, then hover
+        // the exact clicked point and compare the fresh payload.
+        await page.evaluate(() => {
+          window.__mapQualif.lastHover = null;
+        });
+        await page.mouse.move(8, 8);
+        await page.mouse.move(clickX, clickY, { steps: 12 });
+        await page.waitForFunction(
+          (identity: { layer: string | null; index: number }) => {
+            const hovered = window.__mapQualif?.lastHover;
+            return hovered !== null && hovered.layer === identity.layer && hovered.index === identity.index;
+          },
+          { layer: click!.layer, index: click!.index },
+          { timeout: 5000 },
+        );
         const hover = await page.evaluate(() => ({ ...window.__mapQualif.lastHover }));
-        expect(["zones", "lots", null]).toContain(hover.layer);
+        expect(hover.layer).toBe(click!.layer);
+        expect(hover.index).toBe(click!.index);
+        if (click!.layer === "lots") {
+          expect(hover.lotId).toBe(click!.lotId);
+        } else {
+          expect(hover.zoneCode).toBe(click!.zoneCode);
+        }
 
         const scaleBeforeWheel = (await page.evaluate(() => ({ ...window.__mapQualif.map.getView() }))).scale;
         await page.mouse.move(centerX, centerY);
@@ -178,6 +259,12 @@ describe.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")(
 
         for (const entry of seen) {
           expect(entry.host, entry.path).toBe(expectedHost);
+        }
+        // Browser-side journal: the page itself must never attempt an
+        // off-origin request (tile images included once enabled).
+        expect(browserRequests.length).toBeGreaterThan(0);
+        for (const url of browserRequests) {
+          expect(url.startsWith(origin), url).toBe(true);
         }
         const paths = seen.map((entry) => entry.path);
         expect(paths).toContain("/");
