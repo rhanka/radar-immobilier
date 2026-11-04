@@ -86,14 +86,21 @@ describe("artifact authoring guide", () => {
     }
   });
 
-  it("should point geo pages at the governed catalogue operations, not the legacy read", () => {
+  it("should tell pages how to load the I-4 map base with tiles plus geo ops", () => {
+    const mapBase = getAuthoringGuide().mapBase;
+    const howTo = mapBase.howTo.join("\n");
+    for (const fragment of ["createMap", "basemapTemplate", "/__artifacts/tiles/v1/{z}/{x}/{y}",
+      "geo.cities.v1", "geo.collection-items.v1", "setZones", "setLots", "fitToBounds",
+      "setPaint", "worker-src 'none'", "img-src"]) {
+      expect(howTo, fragment).toContain(fragment);
+    }
+    expect(howTo).toContain("PR #996");
     const ops = Object.fromEntries(getAuthoringGuide().data.operations.map((op) => [op.name, op]));
     expect(ops["geo.read.v1"]!.response).toContain("geo.collection-items.v1");
     expect(ops["geo.collection-items.v1"]!.response).toContain("truncated");
     expect(ops["geo.collection-items.v1"]!.response).toContain("geo_governed_not_served");
     expect(ops["geo.cities.v1"]!.path).toBe("/__reader/api/geo.cities.v1");
   });
-
 
   it("should require the published audit CLI and block findings and tool errors", () => {
     const checklist = getAuthoringGuide().checklist.join("\n");

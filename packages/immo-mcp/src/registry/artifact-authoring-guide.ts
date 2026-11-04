@@ -127,7 +127,7 @@ export interface AuthoringGuide {
   readonly assets: Readonly<{ loadOrder: readonly string[]; note: string;
     manifest: readonly Readonly<{ file: string; sha256Hex: string; sizeBytes: number; mediaType: string; url: string }>[] }>;
   readonly mapBase: Readonly<{ tiles: string; labels: string; note: string;
-    attribution: readonly Readonly<{ text: string; licenseUrl: string }>[] }>;
+    attribution: readonly Readonly<{ text: string; licenseUrl: string }>[]; howTo: readonly string[] }>;
   readonly starter: Readonly<{ version: string; files: readonly AuthoringGuideStarterFile[]; adapt: string }>;
   readonly data: Readonly<{
     warning: string;
@@ -219,6 +219,23 @@ export function getAuthoringGuide(): AuthoringGuide {
             licenseUrl: "https://www.donneesquebec.ca/licence/" },
           { text: "© Sa Majesté le Roi du chef du Canada, représenté par le ministre de Ressources naturelles Canada",
             licenseUrl: "https://ouvert.canada.ca/fr/licence-du-gouvernement-ouvert-canada" },
+        ],
+        howTo: [
+          "Load the I-4 worker-free map base (PR #996, not yet merged: map-v1 pinned at " +
+            "/__artifacts/design/map-v1/<sha256>/map-base.mjs plus map-base.css on the same reserved design path). " +
+            "Import { createMap } from the pinned map-base.mjs URL, render <div class=\"map-base\">, then call " +
+            "createMap(container, { basemapTemplate: '/__artifacts/tiles/v1/{z}/{x}/{y}' }). A configured template " +
+            "must be a same-origin /z/x/y path; anything else throws. The background stays the neutral fill until " +
+            "the first tile arrives, and on any tile error the neutral fill plus the overlays still paint.",
+          "Feed the base only through GET /__reader/api/<operation> with the x-preview-grant header, exactly like " +
+            "basket reads; never call /api/* from a published page. First GET geo.cities.v1 for the served cities, " +
+            "then GET geo.collection-items.v1?collectionId=<served-qc-zonage> for the chosen city; pass the returned " +
+            "FeatureCollections to map.setZones(collection) and map.setLots(collection), then map.fitToBounds().",
+          "Paint only through map.setPaint({ zones, lots, outlines }) with page-supplied expressions; subscribe " +
+            "with map.on('click', cb) and map.on('hover', cb); zoom with map.zoomIn()/zoomOut()/setView(view).",
+          "Keep both attribution strings above visible in a bottom-right overlay that is never hidden and never " +
+            "behind a toggle; never paint tiles when the attribution for the active upstream is absent. img-src " +
+            "stays 'self' with zero external origin and zero CSP violation; worker-src 'none' is invariant.",
         ],
       },
       starter: {
