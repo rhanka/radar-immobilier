@@ -64,7 +64,8 @@ describe("artifact effective profile", () => {
       "artifacts_publish",
       "artifacts_list",
       "artifacts_get",
-      ...(ARTIFACT_P0B ? ["artifacts_get_source", "artifacts_set_access", "artifacts_delete"] : []),
+      ...(ARTIFACT_P0B ? ["artifacts_get_source", "artifacts_set_access", "artifacts_delete",
+        "artifacts_create_upload", "artifacts_commit_upload", "artifacts_publish_bundle"] : []),
     ]);
     expect(ARTIFACT_SELECTION).toEqual([
       { tool: "artifacts_ensure", operation: "ensure", method: "POST", path: "/ensure", command: "ensure" },
@@ -79,7 +80,9 @@ describe("artifact effective profile", () => {
       artifacts_publish: "immo:artifacts:write",
       artifacts_list: "immo:artifacts:read",
       artifacts_get: "immo:artifacts:read",
-      ...(ARTIFACT_P0B ? { artifacts_get_source: "immo:artifacts:read", artifacts_set_access: "immo:artifacts:write", artifacts_delete: "immo:artifacts:write" } : {}),
+      ...(ARTIFACT_P0B ? { artifacts_get_source: "immo:artifacts:read", artifacts_set_access: "immo:artifacts:write",
+        artifacts_delete: "immo:artifacts:write", artifacts_create_upload: "immo:artifacts:write",
+        artifacts_commit_upload: "immo:artifacts:write", artifacts_publish_bundle: "immo:artifacts:write" } : {}),
     });
   });
 

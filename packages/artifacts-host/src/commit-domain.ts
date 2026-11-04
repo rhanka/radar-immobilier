@@ -3,6 +3,7 @@ import type pg from "pg";
 import { createPostgresArtifactStore, createPostgresLegacyArtifactRecords } from "@sentropic/artifacts/adapters/postgres";
 import { createPostgresCommitExecutor } from "@sentropic/artifacts/adapters/postgres-commit";
 import { createHttpArtifactApp, projectArtifactHttpOutcome, type HttpAppDeps } from "@sentropic/artifacts/http";
+import type { StagingStore, UploadSignerPort, UploadSessionStore } from "@sentropic/artifacts/server/uploads";
 import { ArtifactProfileInputError, createRadarKeyDerivation } from "@sentropic/artifacts/mcp-core";
 import { createLifecycleService } from "@sentropic/artifacts/server/lifecycle";
 import { createPostgresClaimGuardedRefs } from "@sentropic/artifacts/server/gc";
@@ -55,6 +56,8 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
   pool: pg.Pool; scope: string; blobs: HttpAppDeps["publication"]["blobs"];
   publicationUrls?: HttpAppDeps["publicationUrls"];
   confirmation?: ArtifactDeleteConfirmation;
+  /** Files parity LOT 1 — upload session ledger, staging bytes and presigned PUT signer. */
+  uploads?: { sessions: UploadSessionStore; staging: StagingStore; signer: UploadSignerPort };
   /** Preparation window; defaults to PREPARATION_WINDOW_MS. Derive it with resolvePublishDeadlines. */
   preparationWindowMs?: number;
 }) {
@@ -106,6 +109,7 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
     },
     acls: { ...store, listArtifactIds: reads.listArtifactIds }, lifecycle: createLifecycleService(store, undefined, store),
     ...p0bPorts(store, options.confirmation, (sub) => approved.getStore()?.has(sub) === true),
+    ...(options.uploads ? { uploads: { ...options.uploads, idempotency: store } } : {}),
     publication: { blobs, intents: store, refs: createPostgresClaimGuardedRefs(store, createPostgresCommitExecutor(pool)),
       cleanupWindowMs: preparationWindowMs, createUnitWriter: createPostgresPublicationUnitWriter, getCurrent: publication.getCurrent,
       getRelease: publication.getRelease, listReleases: publication.listReleases,

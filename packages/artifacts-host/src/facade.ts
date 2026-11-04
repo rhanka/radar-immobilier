@@ -219,9 +219,13 @@ export function createArtifactControl(
         limit: body.limit === undefined ? 20 : Number(body.limit),
         offset: body.offset === undefined ? 0 : Number(body.offset),
       } : body;
+      // Files parity LOT 1 — the provider serves the upload channel on
+      // dedicated routes, not `/${op}`.
+      const uploadPath = op === "create_upload" ? "/uploads/create"
+        : op === "commit_upload" ? "/uploads/commit" : undefined;
       const outcome = await (host.execute ?? host.app.execute)({ actorId, body: effective,
         method: op === "meta" ? "GET" : "POST",
-        path: op === "meta" ? `/meta/${String(artifactId)}` : `/${op}` }, invocation);
+        path: op === "meta" ? `/meta/${String(artifactId)}` : (uploadPath ?? `/${op}`) }, invocation);
       if (!outcome.ok) {
         const entry = projectArtifactWriteFailure(outcome.failure, { dispatched: true, write });
         if (entry) await options?.ledger?.record({ invocationId: entry.invocationId, op, actorId,

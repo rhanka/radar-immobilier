@@ -90,6 +90,10 @@ export function checkEffectiveProfile(
   } = REQUIRED_PROVIDER_CONTRACTS,
 ): void {
   for (const { tool } of ARTIFACT_SELECTION.filter(({ tool }) => ARTIFACT_TOOL_SCOPES[tool] === ARTIFACT_INVOCATION_SCOPES.write)) {
+    // Files parity LOT 1 — create_upload mints a fresh quota-bounded session
+    // per call by provider design (no idempotencyKey on purpose); every other
+    // write stays safe to retry.
+    if (tool === "artifacts_create_upload") continue;
     if (!required[tool]?.includes("idempotencyKey")) {
       throw new RegistryError("unavailable_capability", `artifact tool ${tool} must require idempotencyKey`);
     }
