@@ -152,6 +152,11 @@ Canonical hostnames — never guess or derive them, copy them from here:
 - All Markdown / spec / rules files: **English**.
 - Discuss with the user in **French** (or English if requested).
 
+## Naming of People and Roles (MANDATORY — owner decision 2026-11-03)
+- Refer to the client as **Chaperon Immobilier**, never by a person's first name ("Steve").
+- Refer to the product role as **Product Owner**, never by a person's first name ("Farid"), except in a specific case that requires the named person (for example an account, an access grant or a direct invitation).
+- Applies to every new artifact, report, decision dossier, spec, brief, PR, issue, UI copy and message to the owner. Existing historical documents are not rewritten unless the owner asks.
+
 ## Multi-agent Policy
 - This file is the single source of truth. Agent-specific pointers (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`) reference it and only add per-tool glue.
 - Never introduce agent-specific terminology in `rules/`; refer to "the agent".
