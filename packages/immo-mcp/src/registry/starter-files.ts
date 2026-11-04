@@ -188,7 +188,10 @@ body { margin: 0; background: var(--st-semantic-surface-subtle); }
  * Framework-agnostic H5 reader client. Loads before app.js and exposes
  * window.ImmoReader. Grant cycle: read once from the URL, keep in memory,
  * drop that parameter only, renew through POST /__reader/renew, recover a
- * sealed session once without a grant, then stop and offer reopening.
+ * sealed session once without a grant, then stop and offer reopening. The
+ * document opens with a document-only session; the first business call
+ * without basket scope answers basket_consent_required and the bridge
+ * navigates top-level to /__reader/consent exactly once per page load.
  */
 export const STARTER_READER_JS = `(function () {
 "use strict";
@@ -199,6 +202,7 @@ var KIND_BY_CODE = {
   workspace_not_authorized: "denied",
   account_not_approved: "denied",
   capability_required: "denied",
+  basket_consent_required: "consent",
   delegated_scope_refused: "denied",
   forbidden: "denied",
   unauthenticated: "session",
@@ -232,6 +236,12 @@ function kindOf(code, status) {
 }
 var TIMEOUT_MS = 20000;
 var REFRESH_BEFORE_MS = 30000;
+// Lot I2: deferred basket consent. The document opens with a document-only
+// session; the first H5 business call answers basket_consent_required, and
+// the bridge navigates top-level to /__reader/consent exactly once per page
+// load. After the consent the page reloads with a basket-scoped grant and
+// the call is replayed by the page code.
+var consentRedirected = false;
 var here = new URL(location.href);
 var grant = here.searchParams.get("grant") || "";
 var grantAt = grant ? Date.now() : 0;
@@ -320,7 +330,12 @@ function read(operation, params) {
     return response.json().catch(function () { return null; }).then(function (body) {
       if (response.ok && body && body.ok === true) return body;
       var code = failureCode(body, response.status);
-      throw ReadError(kindOf(code, response.status), code, response.status, requestIdOf(body));
+      var kind = kindOf(code, response.status);
+      if (kind === "consent" && !consentRedirected) {
+        consentRedirected = true;
+        location.assign("/__reader/consent");
+      }
+      throw ReadError(kind, code, response.status, requestIdOf(body));
     });
   });
 }
@@ -401,6 +416,7 @@ function readFilters() {
 }
 function stateMessage(kind, code) {
   if (kind === "no_workspace") return "Choisissez un espace de travail pour lire vos paniers.";
+  if (kind === "consent") return "Cette page a besoin de votre accord pour lire vos paniers. Redirection vers la page de consentement…";
   if (kind === "denied") return "Cet espace ne vous est pas accessible avec vos droits actuels (" + code + ").";
   if (kind === "session") return "Votre accès a expiré. Réouvrez la page pour continuer.";
   if (kind === "changed") return "La vue de classement a changé (" + code + "). Relancez la lecture.";

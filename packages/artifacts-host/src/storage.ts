@@ -35,6 +35,17 @@ export async function initializeArtifactScope(
   if (!actorQuota.rows[0]?.journal) throw new Error("artifact schema unavailable: 0025 absent");
   const actorRate = await pool.query("SELECT to_regclass('artifacts.host_actor_rate') AS journal");
   if (!actorRate.rows[0]?.journal) throw new Error("artifact schema unavailable: 0025 absent");
+  // Lot I2 (G1): the installed provider selects access_mode explicitly and
+  // records every set_access in artifact_access_events in the same
+  // transaction. Without 0032, get/list/set_access fail at the SQL level, so
+  // the scope stays closed until the migration has run. Apply 0032 BEFORE
+  // rolling immo-mcp/api onto the G1 provider pin.
+  const accessMode = await pool.query(
+    "SELECT 1 FROM information_schema.columns WHERE table_schema = 'artifacts'" +
+    " AND table_name = 'artifacts' AND column_name = 'access_mode'");
+  if (!accessMode.rowCount) throw new Error("artifact schema unavailable: 0032 access_mode absent");
+  const accessEvents = await pool.query("SELECT to_regclass('artifacts.artifact_access_events') AS journal");
+  if (!accessEvents.rows[0]?.journal) throw new Error("artifact schema unavailable: 0032 access events absent");
   await pool.query(
     "INSERT INTO artifacts.storage_scopes (id, org_id) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING",
     [scope, orgId],

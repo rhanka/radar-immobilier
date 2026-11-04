@@ -20,7 +20,9 @@
  * header, session cookie required) before the 55 s expiry. After expiry, a
  * same-origin POST without a grant can recover from a current sealed exact P.
  */
+import { randomUUID } from "node:crypto";
 import { Hono, type Context } from "hono";
+import { upgradeLegacyReaderBridge } from "@radar/artifacts-host";
 import {
   applyReaderContentHeaders,
   isEmbedPath,
@@ -111,6 +113,21 @@ function presentedGrant(c: Context): string {
 export function createReaderContentApp(deps: ContentServeDeps): Hono {
   const app = new Hono();
   const now = deps.now ?? (() => Date.now());
+
+  /**
+   * Lot I2: deferred basket consent. H5 business calls (workspace/basket
+   * reads) without a consented session answer a typed 403 the bridge turns
+   * into a single top-level navigation to `/__reader/consent`. The envelope
+   * already carries a requestId so the classification middleware above lets
+   * the typed code through instead of remapping it to `capability_required`.
+   * The document, files and design-kit never require this scope.
+   */
+  function basketConsentRefusal(c: Context) {
+    applyReaderContentHeaders(c);
+    return c.json({ ok: false, error: { code: "basket_consent_required",
+      message: "Basket reading needs a one-time consent.",
+      retryable: false, action: "consent_baskets" }, requestId: randomUUID() }, 403);
+  }
 
   function stillOpen(reader: AuthorizedReader): boolean {
     return reader.validUntil > now() && !deps.isRevoked?.(reader.sessionId);
@@ -257,6 +274,7 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     if (!deps.writePageSurface) return c.json({ error: "capability_unavailable" }, 503);
     const reader = await authorized(c);
     if (!reader || !canInvoke(reader, "signals.protected-read", reader.releaseId)) return c.json({ error: "unauthenticated" }, 401);
+    if (!reader.basketScope) return basketConsentRefusal(c);
     try {
       const params = new URL(c.req.url).searchParams;
       params.delete("grant");
@@ -283,6 +301,9 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
       applyReaderContentHeaders(c);
       return c.json({ error: "unauthenticated" }, 401);
     }
+    // Lot I2: the document opens without this scope; the first business
+    // call carries the one-time consent instead.
+    if (isWorkspaceReadOperation(op) && !auth.basketScope) return basketConsentRefusal(c);
     if (op === "status.closed.v1") {
       applyReaderContentHeaders(c);
       return c.json({ error: "capability_unavailable" }, 503);
@@ -480,6 +501,19 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
           return c.html(html);
         }
         c.header("Content-Type", file.contentType);
+        // Lot I2 B2: a page published with the pre-I2 bridge maps the typed
+        // consent refusal to `denied` and loops on « Réouvrir » until
+        // republication. Upgrade exact legacy bridges at serve time so the
+        // first H5 call navigates to /__reader/consent instead; every other
+        // file goes out byte-identical.
+        if (file.contentType.startsWith("text/javascript")) {
+          const raw = typeof file.body === "string" ? null : Buffer.from(file.body);
+          const text = typeof file.body === "string" ? file.body : raw!.toString("utf8");
+          const upgraded = upgradeLegacyReaderBridge(text);
+          if (upgraded !== null && (raw === null || Buffer.from(text, "utf8").equals(raw))) {
+            return c.body(upgraded);
+          }
+        }
         return c.body(typeof file.body === "string" ? file.body : new Uint8Array(file.body));
       }
     }

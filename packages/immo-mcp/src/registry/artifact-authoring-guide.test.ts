@@ -135,6 +135,24 @@ describe("artifact authoring guide", () => {
     expect(AUTHORING_GUIDE_SNIPPET).toContain("follow it");
     expect(guide.lifecycle.deleteRestore).toContain("unavailable");
     expect(guide.lifecycle.sharing).toContain("unavailable");
+    const sharing = guide.lifecycle.sharing;
+    expect(sharing).toContain("VIEW ONLY");
+    expect(sharing).toContain("Farid");
+    expect(sharing).toContain("Public sharing");
+    expect(sharing).toContain("all retained versions");
+    expect(sharing).toContain("resumes automatically");
+    if (ARTIFACT_P0B) {
+      const share = (guide.artifactLifecycle?.share ?? []).join("\n");
+      expect(share).toContain("Share with Farid");
+      expect(share).toContain("ONE named colleague");
+      expect(share).toContain("never platform-wide, never public");
+      expect(share).toContain("permanently disabled");
+      expect(share).toContain("artifacts_lookup_people");
+      expect(share).toContain("userRef");
+      expect(share).toContain("all retained versions");
+    }
+    expect(guide.data.grantCycle.join("\n")).toContain("basket_consent_required");
+    expect(guide.data.errorKinds.map((entry) => entry.kind)).toContain("consent");
   });
 
   it("should distinguish published framework packages from the CSS snapshot", () => {
