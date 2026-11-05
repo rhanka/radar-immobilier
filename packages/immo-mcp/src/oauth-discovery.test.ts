@@ -62,6 +62,22 @@ describe("OAuth protected resource discovery", () => {
     expect(res.headers.get("www-authenticate")).toContain('error="invalid_token"');
   });
 
+  it("advertises offline_access only when the environment configures it (preprod on, default off)", async () => {
+    // Default: the three data scopes, no offline_access (prod stays unchanged).
+    const res = await createApp().request(CANONICAL_PATH);
+    expect(((await res.json()) as { scopes_supported: string[] }).scopes_supported).toEqual(SCOPES);
+    expect(SCOPES).not.toContain("offline_access");
+
+    // Preprod overlay adds offline_access next to the immo:* scopes so the
+    // connector requests it and the IdP issues a refresh token.
+    const preprod = createImmoHttpApp(
+      { ...config, scopesSupported: [...SCOPES, "immo:artifacts:read", "immo:artifacts:write", "offline_access"] },
+      { keySource: { resolveKey: async () => { throw new Error("unexpected JWKS lookup"); } } },
+    );
+    const preprodRes = await preprod.request(CANONICAL_PATH);
+    expect(((await preprodRes.json()) as { scopes_supported: string[] }).scopes_supported).toContain("offline_access");
+  });
+
   it("keeps the transport prefix and routes only the canonical metadata path exactly to MCP", () => {
     const ingress = readFileSync(new URL("../../../deploy/k8s/41-immo-mcp-ingress.yaml", import.meta.url), "utf8");
     const routes = [...ingress.matchAll(

@@ -68,9 +68,13 @@ data:
   # Space-separated, advertised verbatim in the RFC 9728 PRM `scopes_supported`.
   # PROD keeps the three data scopes: the artifact tools are not active in prod
   # and the prod IdP does not list the artifact scopes yet. The preprod overlay
-  # (patch-immo-mcp-config.yaml) adds immo:artifacts:read and
-  # immo:artifacts:write; add them here together with the prod IdP catalogue
-  # when artifacts are activated in prod.
+  # (patch-immo-mcp-config.yaml) adds immo:artifacts:read,
+  # immo:artifacts:write and offline_access. Never add offline_access here:
+  # the prod immo-mcp client row is not refresh-eligible, so advertising it
+  # would only produce invalid_scope errors at authorize time. Enabling
+  # refresh in prod is an owner decision (upsert the client row first:
+  # grant_types with refresh_token, allowed_scopes with offline_access);
+  # only then extend this base value and the prod IdP catalogue together.
   IMMO_MCP_OAUTH_SCOPES_SUPPORTED: "immo:read immo:search immo:documents:read"
   # Left UNSET on purpose: @sentropic/mcp-auth defaults to
   # `${issuer}/.well-known/jwks.json` when absent (see core.js `getKeySource`).
