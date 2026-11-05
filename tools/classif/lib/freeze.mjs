@@ -8,7 +8,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { requireFingerprints } from './draw.mjs';
 import { scanText } from './fingerprint.mjs';
 import { sha256 } from './render.mjs';
-import { CLASSIF_DIR } from './paths.mjs';
+import { classifDir } from './paths.mjs';
 
 /** Throws when `text` shares a 12-word shingle with the sealed set. Returns the hit counts. */
 export function assertNoVerbatim(text, home, { what = 'candidate' } = {}) {
@@ -26,22 +26,23 @@ export function assertNoVerbatim(text, home, { what = 'candidate' } = {}) {
  * deleting or corrupting guide-freeze.json must never disable the check.
  * Consumed by reference-d, p0, chain --stage blind and the pass CLI.
  */
-export function assertFinalGuide(home, { manifestFile = path.join(CLASSIF_DIR, 'l2', 'manifests', 'guide-freeze.json') } = {}) {
+export function assertFinalGuide(home, { manifestFile = null } = {}) {
+  const freezeFile = manifestFile ?? path.join(classifDir(process.env), 'l2', 'manifests', 'guide-freeze.json');
   const guideFile = path.join(home, 'l1', 'pack', 'guide-FINAL.md');
   if (!existsSync(guideFile)) throw new Error(`FINAL guide refused: ${guideFile} absent (freeze FINAL first)`);
-  if (!existsSync(manifestFile)) throw new Error(`FINAL guide refused: freeze manifest ${manifestFile} absent (fail closed)`);
+  if (!existsSync(freezeFile)) throw new Error(`FINAL guide refused: freeze manifest ${freezeFile} absent (fail closed)`);
   let freeze;
   try {
-    freeze = JSON.parse(readFileSync(manifestFile, 'utf8'));
+    freeze = JSON.parse(readFileSync(freezeFile, 'utf8'));
   } catch (e) {
-    throw new Error(`FINAL guide refused: freeze manifest ${manifestFile} unparsable (fail closed): ${e.message}`);
+    throw new Error(`FINAL guide refused: freeze manifest ${freezeFile} unparsable (fail closed): ${e.message}`);
   }
   if (!freeze?.guideSha256 || typeof freeze.guideSha256 !== 'string') {
-    throw new Error(`FINAL guide refused: freeze manifest ${manifestFile} carries no guideSha256 (fail closed)`);
+    throw new Error(`FINAL guide refused: freeze manifest ${freezeFile} carries no guideSha256 (fail closed)`);
   }
   const actual = sha256(readFileSync(guideFile, 'utf8'));
   if (actual !== freeze.guideSha256) {
     throw new Error('FINAL guide refused: guide-FINAL.md sha differs from the freeze manifest (re-freeze before sealing)');
   }
-  return { guideSha256: actual, manifestFile };
+  return { guideSha256: actual, manifestFile: freezeFile };
 }

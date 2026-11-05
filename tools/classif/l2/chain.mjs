@@ -18,7 +18,7 @@ import process from 'node:process';
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync, copyFileSync } from 'node:fs';
 import { setTimeout as sleep } from 'node:timers/promises';
-import { classifHome, CLASSIF_DIR, REPO } from '../lib/paths.mjs';
+import { classifHome, classifDir, repoRoot } from '../lib/paths.mjs';
 import { check as budgetCheck, spent as budgetSpent, BUDGET_CAP } from '../lib/budget.mjs';
 import { assertNoVerbatim } from '../lib/freeze.mjs';
 import { sealedFile } from '../lib/blind.mjs';
@@ -37,13 +37,14 @@ const MODES = { 1: 'independent', 2: 'crossreview', 3: 'crossreview', 4: 'crossr
 /** Committed split halves (D2): refuses any A2 cross-review pass before the split exists.
     Review §3b: existence alone is not enough — the split must be tracked and clean. */
 function requireSplit() {
-  const f = path.join(CLASSIF_DIR, 'l3', 'manifests', 'split.json');
+  const f = path.join(classifDir(process.env), 'l3', 'manifests', 'split.json');
+  const repo = repoRoot(process.env);
   if (!existsSync(f)) {
     process.stderr.write(`classif-l2-chain: refusing pass ≥ 2 without the committed 50/50 split (D2: run make classif-l3b-split ENV=preprod first)\n`);
     process.exit(2);
   }
-  const rel = path.relative(REPO, f);
-  const git = (...a) => spawnSync('git', a, { cwd: REPO, encoding: 'utf8' });
+  const rel = path.relative(repo, f);
+  const git = (...a) => spawnSync('git', a, { cwd: repo, encoding: 'utf8' });
   if (git('ls-files', '--error-unmatch', rel).status !== 0) {
     process.stderr.write(`classif-l2-chain: refusing pass ≥ 2, split ${rel} is not committed\n`);
     process.exit(2);
@@ -141,7 +142,7 @@ function freeze(home, guide, status) {
   if (existsSync(dst)) throw new Error(`freeze refused: ${dst} already frozen`);
   copyFileSync(src, dst);
   const manifest = { kind: 'guide-freeze', frozen: 'FINAL', from: guide, createdAt: new Date().toISOString(), llmCalls: 0, guideSha256: sha256(text), shingleCheck: 'pass (0 verbatim shingles from the sealed set)' };
-  writeFileSync(path.join(CLASSIF_DIR, 'l2', 'manifests', 'guide-freeze.json'), `${JSON.stringify(manifest, null, 1)}\n`);
+  writeFileSync(path.join(classifDir(process.env), 'l2', 'manifests', 'guide-freeze.json'), `${JSON.stringify(manifest, null, 1)}\n`);
   status('frozen', { guide: 'FINAL', from: guide });
   return { frozen: 'FINAL', from: guide };
 }

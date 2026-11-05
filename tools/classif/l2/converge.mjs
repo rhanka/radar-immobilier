@@ -7,7 +7,7 @@
 import path from 'node:path';
 import process from 'node:process';
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
-import { CLASSIF_DIR, classifHome } from '../lib/paths.mjs';
+import { classifDir, classifHome } from '../lib/paths.mjs';
 import { ANNOTATORS, loadDevItems, readPass } from './run.mjs';
 import { readJsonlRecords } from '../lib/jsonl.mjs';
 import { krippendorffAlpha, majority, stopDecision } from './agreement.mjs';
@@ -132,13 +132,15 @@ export function residualsClassified(home, n, todo) {
 
 /** At least one traced amendment round (repo manifest amend-*.json with gel !== true).
     Review §7a: a freeze-only round (0 adopted, guide copied, gel:true) is not a round —
-    the stop rule forbids stopping before a real amendment. */
-export function hasTracedAmend(dir = path.join(CLASSIF_DIR, 'l2', 'manifests')) {
-  if (!existsSync(dir)) return false;
-  for (const f of readdirSync(dir)) {
+    the stop rule forbids stopping before a real amendment.
+    Review D2: in test mode the temp repo dir applies (never the real checkout). */
+export function hasTracedAmend(dir = null) {
+  const d = dir ?? path.join(classifDir(process.env), 'l2', 'manifests');
+  if (!existsSync(d)) return false;
+  for (const f of readdirSync(d)) {
     if (!/^amend-.+\.json$/.test(f)) continue;
     try {
-      const m = JSON.parse(readFileSync(path.join(dir, f), 'utf8'));
+      const m = JSON.parse(readFileSync(path.join(d, f), 'utf8'));
       if (m?.gel !== true) return true;
     } catch { /* unparsable manifest is not a traced round */ }
   }
@@ -179,7 +181,7 @@ export async function main(argv = process.argv.slice(2)) {
   const report = { pass: n, createdAt: new Date().toISOString(), deferred, gaps,
     metrics: { ...metrics, changedShare, reannotatedVotes: reannotated }, residuals, stop, budget: { spent, cap: BUDGET_CAP },
     reannotatedThisPass: Object.fromEntries(ANNOTATORS.map((a) => [a, perPass[n - 1].get(a).size])) };
-  const repoDir = path.join(CLASSIF_DIR, 'l2', 'manifests');
+  const repoDir = path.join(classifDir(process.env), 'l2', 'manifests');
   mkdirSync(repoDir, { recursive: true });
   writeFileSync(path.join(repoDir, `converge-pass${n}.json`), `${JSON.stringify(report, null, 1)}\n`);
   writeFileSync(path.join(home, 'l2', `converge-pass${n}.json`), JSON.stringify({ ...report, rows }, null, 1), { mode: 0o600 });

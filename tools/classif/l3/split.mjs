@@ -17,7 +17,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { sha256 } from '../lib/render.mjs';
 import { chiSquareHalves } from '../l4/metrics.mjs';
-import { CLASSIF_DIR, REPO, classifHome } from '../lib/paths.mjs';
+import { classifDir, repoRoot, classifHome } from '../lib/paths.mjs';
 import { ANNOTATORS, loadDevItems } from '../l2/run.mjs';
 
 export const bpassOf = (item, signalPass) => (item.kind === 'pv' ? 'pv' : signalPass.get(item.itemId) ?? 'unknown');
@@ -82,7 +82,7 @@ export function splitGrouped(cities, targets, rng = null) {
 /** The seed must be committed in the repo BEFORE the draw: the seed file must be tracked
     and clean (git ls-files + git diff --quiet HEAD). Returns the committed seed. */
 export function requireCommittedSeed(seedFile, cliSeed) {
-  const git = (...a) => spawnSync('git', a, { cwd: REPO, encoding: 'utf8' });
+  const git = (...a) => spawnSync('git', a, { cwd: repoRoot(process.env), encoding: 'utf8' });
   if (!existsSync(seedFile)) throw new Error(`split refused: seed file ${seedFile} absent (commit it before the draw)`);
   const rel = path.relative(REPO, seedFile);
   if (git('ls-files', '--error-unmatch', rel).status !== 0) throw new Error(`split refused: seed file ${rel} is not committed`);
@@ -94,14 +94,18 @@ export function requireCommittedSeed(seedFile, cliSeed) {
 }
 
 /** The consumed split must be committed BEFORE any pass ≥ 2: tracked and clean
-    (git ls-files + git diff --quiet HEAD), same guard as the seed. Returns the split. */
-export function requireCommittedSplit(splitFile = path.join(CLASSIF_DIR, 'l3', 'manifests', 'split.json'), repo = REPO) {
-  const git = (...a) => spawnSync('git', a, { cwd: repo, encoding: 'utf8' });
-  if (!existsSync(splitFile)) throw new Error(`split refused: ${splitFile} absent (run make classif-l3b-split first)`);
-  const rel = path.relative(repo, splitFile);
+    (git ls-files + git diff --quiet HEAD), same guard as the seed. Returns the split.
+    Review D1/D2: hermetic tests redirect via CLASSIF_REPO in test mode only. */
+export function requireCommittedSplit(splitFile = null, repo = null) {
+  const env = process.env;
+  const file = splitFile ?? path.join(classifDir(env), 'l3', 'manifests', 'split.json');
+  const root = repo ?? repoRoot(env);
+  const git = (...a) => spawnSync('git', a, { cwd: root, encoding: 'utf8' });
+  if (!existsSync(file)) throw new Error(`split refused: ${file} absent (run make classif-l3b-split first)`);
+  const rel = path.relative(root, file);
   if (git('ls-files', '--error-unmatch', rel).status !== 0) throw new Error(`split refused: ${rel} is not committed (commit the draw before any pass ≥ 2)`);
   if (git('diff', '--quiet', 'HEAD', '--', rel).status !== 0) throw new Error(`split refused: ${rel} differs from the committed version (commit before any pass ≥ 2)`);
-  return JSON.parse(readFileSync(splitFile, 'utf8'));
+  return JSON.parse(readFileSync(file, 'utf8'));
 }
 
 export function stratumOf(kind, verdict, bpass) {
@@ -111,8 +115,8 @@ export function stratumOf(kind, verdict, bpass) {
 export async function main(argv = process.argv.slice(2)) {
   const cliSeed = argv.includes('--seed') ? argv[argv.indexOf('--seed') + 1] : process.env.CLASSIF_SEED;
   const home = classifHome();
-  const manifestFile = path.join(CLASSIF_DIR, 'l3', 'manifests', 'split.json');
-  const seedFile = path.join(CLASSIF_DIR, 'l3', 'manifests', 'split-seed.json');
+  const manifestFile = path.join(classifDir(process.env), 'l3', 'manifests', 'split.json');
+  const seedFile = path.join(classifDir(process.env), 'l3', 'manifests', 'split-seed.json');
   mkdirSync(path.dirname(manifestFile), { recursive: true });
   // Review §3: refuse to re-draw over an existing split; the seed must be committed clean.
   if (existsSync(manifestFile)) {
@@ -143,7 +147,7 @@ export async function main(argv = process.argv.slice(2)) {
   const { rows: convRows } = summarise(items, latest);
   const convergeSha256 = sha256(JSON.stringify(convRows));
   const verdictOf = new Map(convRows.map((r) => [r.itemId, r.verdictMaj?.value ?? 'no-majority']));
-  const sigManifest = JSON.parse(readFileSync(path.join(CLASSIF_DIR, 'l0', 'manifests', 'signal-draw-manifest.json'), 'utf8'));
+  const sigManifest = JSON.parse(readFileSync(path.join(classifDir(process.env), 'l0', 'manifests', 'signal-draw-manifest.json'), 'utf8'));
   const signalPass = new Map(sigManifest.items.map((i) => [i.itemId, i.pass]));
   const byCity = new Map();
   for (const it of items) {

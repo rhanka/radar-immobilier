@@ -11,7 +11,7 @@ import { spawnSync } from 'node:child_process';
 import { chmodSync, existsSync, readFileSync } from 'node:fs';
 import { keyFromEnv, sha256, sealToFile, unseal } from './refc1.mjs';
 import { appendJsonlRecord, parseJsonlTolerant } from './jsonl.mjs';
-import { REPO, classifHome, privateDir } from './paths.mjs';
+import { repoRoot, classifHome, privateDir } from './paths.mjs';
 
 export const blindDir = (home = classifHome()) => path.join(home, 'blind');
 export const sealedFile = (home = classifHome()) => path.join(blindDir(home), 'blind.sealed');
@@ -53,12 +53,14 @@ export function openBlindSet({ purpose, promptSha256 = null, model = null, effor
   return rows;
 }
 
-/** Guard before a run on the blind half (mirrors assertEvalRunAllowed). */
-export function assertBlindRunAllowed({ promptFile, promptSha256, model, effort, home = classifHome(), repo = REPO }) {
-  const git = (...a) => spawnSync('git', a, { cwd: repo, encoding: 'utf8' });
-  const rel = path.relative(repo, path.resolve(repo, promptFile));
-  if (!existsSync(path.join(repo, rel))) throw new Error(`blind run refused: frozen prompt ${rel} not found`);
-  if (sha256(readFileSync(path.join(repo, rel))) !== promptSha256) throw new Error('blind run refused: prompt sha256 differs from the frozen prompt');
+/** Guard before a run on the blind half (mirrors assertEvalRunAllowed).
+    Review D2: in test mode the temp repo applies (never the real checkout). */
+export function assertBlindRunAllowed({ promptFile, promptSha256, model, effort, home = classifHome(), repo = null }) {
+  const root = repo ?? repoRoot(process.env);
+  const git = (...a) => spawnSync('git', a, { cwd: root, encoding: 'utf8' });
+  const rel = path.relative(root, path.resolve(root, promptFile));
+  if (!existsSync(path.join(root, rel))) throw new Error(`blind run refused: frozen prompt ${rel} not found`);
+  if (sha256(readFileSync(path.join(root, rel))) !== promptSha256) throw new Error('blind run refused: prompt sha256 differs from the frozen prompt');
   if (git('ls-files', '--error-unmatch', rel).status !== 0) throw new Error(`blind run refused: ${rel} is not committed`);
   if (git('diff', '--quiet', 'HEAD', '--', rel).status !== 0) throw new Error(`blind run refused: ${rel} differs from the committed version`);
   const previous = readAudit(home).filter((e) => e.action === 'blind-run' && e.promptSha256 === promptSha256 && e.model === model && e.effort === effort);
