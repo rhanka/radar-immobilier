@@ -45,12 +45,36 @@ interface AccountRow {
   email: string | null;
 }
 
+/**
+ * Least-privilege principal resolution runs on the restricted writer role
+ * (`immo_mcp_artifact_writer`: column SELECT on `id, sub, status` only).
+ * The opaque `userRef` / `unknown` projection needs no personal data, so it
+ * reads `id, sub, status` only and synthesizes the display fields locally.
+ */
+interface MinimalAccountRow {
+  id: string;
+  sub: string;
+  status: string;
+}
+
 function toPerson(row: AccountRow): DirectoryPerson {
   return {
     userRef: row.id,
     displayName: row.name ?? (row.email !== null ? row.email.split("@")[0] ?? row.id : row.id),
     email: row.email ?? "",
   };
+}
+
+function toOpaquePerson(row: MinimalAccountRow): DirectoryPerson {
+  return { userRef: row.id, displayName: row.id, email: "" };
+}
+
+/** Postgres privilege denial (table or column), e.g. missing name/email grant. */
+function isPrivilegeDenied(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) return false;
+  const record = error as { code?: unknown; message?: unknown };
+  if (record.code === "42501") return true;
+  return typeof record.message === "string" && record.message.includes("permission denied");
 }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -78,9 +102,25 @@ function toUnknownPerson(principalId: string): DirectoryPerson {
 export function createAccountDirectory(pool: pg.Pool): PrincipalDirectoryPort {
   return {
     async searchPeople(_scope, query, limit) {
+      // People lookup is the ONLY path that needs name/email (sharing by
+      // colleague). The writer role is deliberately NOT granted those
+      // personal-data columns (owner decision pending), so a missing grant
+      // fails here with a documented code instead of a raw pg error — and
+      // never affects the resolution paths below, which stay available.
+      // Proposal (NOT applied): GRANT SELECT (name, email) ON
+      // public.account_users TO immo_mcp_artifact_writer;
       const folded = fold(query);
-      const { rows } = await pool.query<AccountRow>(
-        "SELECT id, sub, name, email FROM account_users WHERE status = 'approved'");
+      let rows: AccountRow[];
+      try {
+        ({ rows } = await pool.query<AccountRow>(
+          "SELECT id, sub, name, email FROM account_users WHERE status = 'approved'"));
+      } catch (error) {
+        if (isPrivilegeDenied(error)) {
+          throw { code: "directory_lookup_unavailable",
+            reason: "people lookup needs SELECT(name, email) on public.account_users, withheld from immo_mcp_artifact_writer" };
+        }
+        throw error;
+      }
       return rows
         .filter((row) => fold(row.name ?? "").includes(folded) || fold(row.email ?? "").includes(folded))
         .sort((a, b) => (a.name ?? a.email ?? a.sub).localeCompare(b.name ?? b.email ?? b.sub))
@@ -112,15 +152,16 @@ export function createAccountDirectory(pool: pg.Pool): PrincipalDirectoryPort {
     async describePrincipal(_scope, principalId) {
       // Mode sentinels name no person; the provider renders the mode itself.
       if (typeof principalId === "string" && principalId.startsWith("sentropic:")) return undefined;
-      const { rows } = await pool.query<AccountRow>(
-        "SELECT id, sub, name, email FROM account_users WHERE sub = $1", [principalId]);
-      if (rows[0] !== undefined) return toPerson(rows[0]);
+      // Least privilege: id/sub/status only (granted to the writer role).
+      const { rows } = await pool.query<MinimalAccountRow>(
+        "SELECT id, sub, status FROM account_users WHERE sub = $1", [principalId]);
+      if (rows[0] !== undefined) return toOpaquePerson(rows[0]);
       // The opaque form resolves too: an existing account always projects
       // to its userRef, whatever form the stored principal arrived in.
       if (typeof principalId === "string" && UUID_RE.test(principalId)) {
-        const byId = await pool.query<AccountRow>(
-          "SELECT id, sub, name, email FROM account_users WHERE id = $1", [principalId]);
-        if (byId.rows[0] !== undefined) return toPerson(byId.rows[0]);
+        const byId = await pool.query<MinimalAccountRow>(
+          "SELECT id, sub, status FROM account_users WHERE id = $1", [principalId]);
+        if (byId.rows[0] !== undefined) return toOpaquePerson(byId.rows[0]);
       }
       // R1: never undefined for an internal id — a missing account projects
       // to the explicit unknown marker, never the raw sub.
