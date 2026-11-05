@@ -1,0 +1,8 @@
+{
+ "kind": "l4-p0",
+ "createdAt": "2026-11-05T19:16:35.250Z",
+ "llmCalls": 0,
+ "author": "builder template (deterministic, from guide FINAL + 28 definitions + criteria)",
+ "promptSha256": "a60713366128ae4348a45a7323d0b0984cef87ca6cb33eda15073c045235b016",
+ "shingleCheck": "pass (0 verbatim shingles from the sealed set)"
+}
