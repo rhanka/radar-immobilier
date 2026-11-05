@@ -34,6 +34,12 @@ export const P0B_ARTIFACT_TOOLS = ["artifacts_get_source", "artifacts_set_access
  */
 export const UPLOAD_ARTIFACT_TOOLS = ["artifacts_create_upload", "artifacts_commit_upload", "artifacts_publish_bundle"] as const;
 /**
+ * Files parity LOT 2 — browser upload pages and asset-first publication:
+ * owner-only page mint, staged-vs-released asset listing, and the v2 bundle
+ * (copy/carry/keep asset forms) beside the v1 union.
+ */
+export const UPLOAD_PAGE_ARTIFACT_TOOLS = ["artifacts_create_upload_page", "artifacts_list_assets", "artifacts_publish_bundle_v2"] as const;
+/**
  * I2 on G2 — share tooling through the I2 seams: opaque directory lookup
  * and access listing (set_access semantics already ride the G1 mirror).
  * The directory port is mandatory for these tools; without it they answer
@@ -51,6 +57,7 @@ export const CONSENT_ARTIFACT_TOOLS = ["artifacts_revoke_reader_consent"] as con
 export const ACTIVE_ARTIFACT_TOOLS = Object.freeze([
   ...BASE_ARTIFACT_TOOLS, ...(ARTIFACT_P0B ? P0B_ARTIFACT_TOOLS : []),
   ...(ARTIFACT_P0B ? UPLOAD_ARTIFACT_TOOLS : []),
+  ...(ARTIFACT_P0B ? UPLOAD_PAGE_ARTIFACT_TOOLS : []),
   ...(ARTIFACT_P0B ? SHARING_ARTIFACT_TOOLS : []),
   ...(ARTIFACT_P0B ? CONSENT_ARTIFACT_TOOLS : []),
   ...(ARTIFACT_PART1 ? PART1_ARTIFACT_TOOLS : []),
@@ -82,6 +89,11 @@ export const HOST_MIME_TYPES: readonly string[] = Object.freeze([
   "image/webp",
   "image/svg+xml",
   "application/pdf",
+  // Files parity LOT 2 — variable fonts and funnel videos ride the same
+  // upload channel; both are magic-byte verified at commit and served with
+  // the declared MIME type under nosniff.
+  "font/woff2",
+  "video/mp4",
 ]);
 export function compileHostArtifactProfile(descriptor = ARTIFACT_PROFILE_DESCRIPTOR) {
   const p0b = descriptor.profileRevisionId !== "immo-artifacts.v1";
@@ -91,6 +103,7 @@ export function compileHostArtifactProfile(descriptor = ARTIFACT_PROFILE_DESCRIP
     selectedCapabilities: [...BASE_ARTIFACT_TOOLS,
       ...(p0b ? P0B_ARTIFACT_TOOLS : []),
       ...(p0b ? UPLOAD_ARTIFACT_TOOLS : []),
+      ...(p0b ? UPLOAD_PAGE_ARTIFACT_TOOLS : []),
       ...(p0b ? SHARING_ARTIFACT_TOOLS : []),
       ...(p0b ? CONSENT_ARTIFACT_TOOLS : []),
       ...(descriptor.resultEnvelopeVersion === 2 ? PART1_ARTIFACT_TOOLS : [])],
@@ -105,6 +118,13 @@ export function compileHostArtifactProfile(descriptor = ARTIFACT_PROFILE_DESCRIP
       { operation: "create_upload", limits: { idempotencyKeyMaxUnits: 256 }, defaults: {} },
       { operation: "commit_upload", limits: { idempotencyKeyMaxUnits: 256 }, defaults: { profile: {} } },
       { operation: "publish_bundle", limits: { idempotencyKeyMaxUnits: 256 }, defaults: { profile: {} } },
+      // Files parity LOT 2 — page mint carries no idempotencyKey
+      // (quota-bounded mint); the asset listing is a paginated read (same
+      // page bounds as list); the v2 bundle is an idempotent writer like the
+      // v1 union.
+      { operation: "create_upload_page", limits: {}, defaults: {} },
+      { operation: "list_assets", limits: { listAssetsLimitMin: 1, listAssetsLimitMax: 100 }, defaults: { limit: 20 } },
+      { operation: "publish_bundle_v2", limits: { idempotencyKeyMaxUnits: 256 }, defaults: { profile: {} } },
       // Reader consent LOT 1 — self-revocation only; the provider operation
       // profile already declares the schema (artifactId, optional scope,
       // required idempotencyKey), the host only selects it.
@@ -121,11 +141,14 @@ export const isArtifactMutation = (op: string): boolean => ["ensure", "publish",
   // cuts a release; both carry an idempotencyKey. create_upload mints a
   // quota-bounded session only and stays read-like at this layer.
   "commit_upload", "publish_bundle",
+  // Files parity LOT 2: the v2 bundle is an idempotent writer; the page mint
+  // stays read-like (quota-bounded session) and the asset listing is a read.
+  "publish_bundle_v2",
   // Reader consent LOT 1: revocation is an idempotent writer (required
   // idempotencyKey, provider IDEMPOTENT_WRITERS).
   "revoke_reader_consent"].includes(op);
 export const isArtifactPublication = (op: string): boolean => ["ensure", "publish", "revert",
-  "publish_bundle"].includes(op);
+  "publish_bundle", "publish_bundle_v2"].includes(op);
 
 /** Defer CAS presence until after authorization and historical receipt lookup. Never fill it. */
 export function validateArtifactInput(tool: string, args: unknown) {

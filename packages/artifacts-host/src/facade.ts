@@ -225,9 +225,10 @@ export function createArtifactControl(
         offset: body.offset === undefined ? 0 : Number(body.offset),
       } : body;
       // Files parity LOT 1 — the provider serves the upload channel on
-      // dedicated routes, not `/${op}`.
+      // dedicated routes, not `/${op}` (LOT 2 adds the page mint route).
       const uploadPath = op === "create_upload" ? "/uploads/create"
-        : op === "commit_upload" ? "/uploads/commit" : undefined;
+        : op === "commit_upload" ? "/uploads/commit"
+        : op === "create_upload_page" ? "/uploads/page" : undefined;
       const outcome = await (host.execute ?? host.app.execute)({ actorId, body: effective,
         method: op === "meta" ? "GET" : "POST",
         path: op === "meta" ? `/meta/${String(artifactId)}` : (uploadPath ?? `/${op}`) }, invocation);
