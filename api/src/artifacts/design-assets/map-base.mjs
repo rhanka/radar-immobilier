@@ -158,9 +158,11 @@ function featuresOf(value) {
 }
 
 /**
- * Reference zoom rendered when the view sits at its fitted scale.
+ * Reference zoom for the scale-relative mapping (tileZoomForScale).
  * I-10 keeps this value: it only maps the continuous skeleton zoom onto
- * integer tile levels, it never changes a served byte.
+ * integer tile levels, it never changes a served byte. Frames instead
+ * derive their zoom from the visible ground resolution
+ * (tileZoomForExtent), so a fitted province no longer renders z14.
  */
 export const FIT_Z = 14;
 
@@ -200,7 +202,14 @@ export function tileToLonLat(x, y, z) {
   return [lon, lat];
 }
 
-/** Every XYZ tile intersecting two lon/lat corners (pure, testable). */
+/**
+ * Every XYZ tile intersecting two lon/lat corners (pure, testable).
+ *
+ * Anti-meridian limitation (pre-existing, kept: the Québec domain never
+ * spans ±180): corners are reduced to a min/max span, so a wrapped extent
+ * counts as the whole world, and tileXY clamps longitudes — nothing
+ * paints past ±180. These helpers are not for antimeridian-spanning maps.
+ */
 export function tilesForBounds(corners, z) {
   const lons = corners.map((corner) => corner[0]);
   const lats = corners.map((corner) => corner[1]);
@@ -226,6 +235,98 @@ export const MAX_TILE_ZOOM = 18;
 export function tileZoomForScale(scale, fitScale) {
   if (!(scale > 0) || !(fitScale > 0)) return FIT_Z;
   return Math.min(MAX_TILE_ZOOM, Math.max(MIN_TILE_ZOOM, Math.round(FIT_Z + Math.log2(scale / fitScale))));
+}
+
+/**
+ * Per-frame tile budget across ALL active tile layers: a fitted province
+ * extent at z14 would enumerate on the order of 1e5 tiles, one request
+ * each, blocking the main thread. The frame zoom derives from the visible
+ * ground resolution instead, and stepping down keeps the whole frame —
+ * every layer combined — within this many tile requests.
+ */
+export const MAX_TILES_PER_FRAME = 96;
+
+/**
+ * Bounded cache of settled tile images across frames (pure LRU size).
+ * In-flight loads the current frame no longer needs are aborted; settled
+ * tiles stay cached so returning to a previous view rarely refetches.
+ */
+export const MAX_CACHED_TILES = 256;
+
+/** Bounded retries for a failed tile image, with exponential backoff. */
+export const MAX_TILE_RETRIES = 3;
+export const TILE_RETRY_BASE_MS = 250;
+
+/**
+ * Per-layer share of the frame budget (pure, testable). A dual-layer
+ * configuration (basemap + labels) halves the enumeration per layer so
+ * the frame total stays within MAX_TILES_PER_FRAME.
+ */
+export function perLayerTileBudget(activeLayers, maxTiles = MAX_TILES_PER_FRAME) {
+  const layers = Math.max(1, Math.floor(activeLayers));
+  const total = maxTiles > 0 ? maxTiles : MAX_TILES_PER_FRAME;
+  return Math.max(1, Math.floor(total / layers));
+}
+
+/**
+ * Oldest-first eviction plan for the tile cache (pure, testable): returns
+ * the keys to drop so the cache returns to `cap` entries. Frame tiles are
+ * never evicted — only unneeded entries go, oldest insertion first.
+ */
+export function planTileEviction(keysInOrder, needed, cap = MAX_CACHED_TILES) {
+  const limit = cap > 0 ? cap : MAX_CACHED_TILES;
+  const victims = [];
+  let size = keysInOrder.length;
+  for (const key of keysInOrder) {
+    if (size <= limit) break;
+    if (!needed.has(key)) {
+      victims.push(key);
+      size -= 1;
+    }
+  }
+  return victims;
+}
+
+/**
+ * Integer tile zoom from the real ground resolution of the visible
+ * longitude span (pure, testable). A 256 px tile covers
+ * `lonSpanVisible * 256 / viewportCssWidth` degrees while zoom z shows
+ * `360 / 2 ** z` degrees per tile edge, hence
+ * z = round(log2(360 * viewportCssWidth / (256 * lonSpanVisible))).
+ * A province extent at desktop widths lands around z6-7, a city around
+ * z13-15. Clamped to the proxy-served range.
+ */
+export function tileZoomForExtent(lonSpanVisible, viewportCssWidth) {
+  if (!(lonSpanVisible > 0) || !(viewportCssWidth > 0)) return MIN_TILE_ZOOM;
+  const z = Math.round(Math.log2((360 * viewportCssWidth) / (256 * lonSpanVisible)));
+  return Math.min(MAX_TILE_ZOOM, Math.max(MIN_TILE_ZOOM, z));
+}
+
+/** Tile count intersecting two lon/lat corners, without allocating (pure, testable). */
+export function countTilesForBounds(corners, z) {
+  const lons = corners.map((corner) => corner[0]);
+  const lats = corners.map((corner) => corner[1]);
+  const [x0, y0] = tileXY(Math.min(...lons), Math.max(...lats), z);
+  const [x1, y1] = tileXY(Math.max(...lons), Math.min(...lats), z);
+  return (Math.abs(x1 - x0) + 1) * (Math.abs(y1 - y0) + 1);
+}
+
+/**
+ * Zoom and tile list for two visible lon/lat corners at a viewport width
+ * (pure, testable). The zoom derives from the visible ground resolution,
+ * then steps down while the frame exceeds the budget; the count is
+ * recomputed arithmetically at each step, so more than the budget is
+ * never enumerated. When even the minimum zoom exceeds the budget, the
+ * frame carries no tiles and the vector layers still paint.
+ */
+export function tilesForView(corners, viewportCssWidth, maxTiles = MAX_TILES_PER_FRAME) {
+  const lons = corners.map((corner) => corner[0]);
+  const lonSpan = Math.max(...lons) - Math.min(...lons);
+  let z = tileZoomForExtent(Math.max(1e-9, lonSpan), viewportCssWidth);
+  const budget = maxTiles > 0 ? maxTiles : MAX_TILES_PER_FRAME;
+  while (z > MIN_TILE_ZOOM && countTilesForBounds(corners, z) > budget) z -= 1;
+  if (countTilesForBounds(corners, z) > budget) return { z, tiles: [] };
+  return { z, tiles: tilesForBounds(corners, z) };
 }
 
 /**
@@ -364,23 +465,71 @@ export function createMap(container, options) {
     context.closePath();
   };
 
-  const drawTileLayer = (template, prefix, view, setup, width, height, z, tiles) => {
+  // A real abort: nulling the handlers only ignores the arrival, the
+  // fetch stays queued ahead of the current frame. Clearing src drops it.
+  const abortTileEntry = (entry) => {
+    entry.cancelled = true;
+    entry.image.onload = null;
+    entry.image.onerror = null;
+    entry.image.src = "";
+  };
+
+  const clearTiles = () => {
+    for (const entry of state.tiles.values()) abortTileEntry(entry);
+    state.tiles.clear();
+  };
+
+  // Bounded retry with exponential backoff for a failed tile image: the
+  // entry stays current so the next frame (or the timer) refetches it,
+  // and gives up after MAX_TILE_RETRIES attempts.
+  const scheduleTileRetry = (key, entry, template, z, tx, ty) => {
+    const attempt = (entry.retries ?? 0) + 1;
+    if (attempt > MAX_TILE_RETRIES) return;
+    entry.retries = attempt;
+    const delay = TILE_RETRY_BASE_MS * (2 ** (attempt - 1));
+    setTimeout(() => {
+      if (state.destroyed || entry.cancelled || entry.loaded) return;
+      if (state.tiles.get(key) !== entry) return;
+      entry.image.src = expandTemplate(template, z, tx, ty);
+    }, delay);
+  };
+
+  const trimTileCache = (needed) => {
+    // Eviction never drops a frame tile: the frame holds at most
+    // MAX_TILES_PER_FRAME entries against a larger cache, so a victim
+    // outside `needed` always exists while the cache is over capacity.
+    for (const key of planTileEviction([...state.tiles.keys()], needed)) {
+      const entry = state.tiles.get(key);
+      if (entry && !entry.loaded) abortTileEntry(entry);
+      state.tiles.delete(key);
+    }
+  };
+
+  const drawTileLayer = (template, prefix, view, setup, width, height, z, tiles, needed) => {
     for (const [tx, ty] of tiles) {
       const key = `${prefix}${z}/${tx}/${ty}`;
+      needed.add(key);
       let entry = state.tiles.get(key);
-      if (!entry) {
+      if (entry) {
+        // Refresh LRU recency on hits; identity is preserved so in-flight
+        // onload guards keep working.
+        state.tiles.delete(key);
+        state.tiles.set(key, entry);
+      } else {
         const image = new Image();
-        entry = { image, loaded: false };
+        entry = { image, loaded: false, cancelled: false, retries: 0 };
         state.tiles.set(key, entry);
         image.onload = () => {
+          if (entry.cancelled || state.tiles.get(key) !== entry) return;
           entry.loaded = true;
+          entry.retries = 0;
           redraw();
         };
+        image.onerror = () => {
+          if (entry.cancelled || state.tiles.get(key) !== entry) return;
+          scheduleTileRetry(key, entry, template, z, tx, ty);
+        };
         image.src = expandTemplate(template, z, tx, ty);
-        if (state.tiles.size > 256) {
-          const oldest = state.tiles.keys().next();
-          if (!oldest.done) state.tiles.delete(oldest.value);
-        }
       }
       if (!entry.loaded) continue;
       const [west, north] = tileToLonLat(tx, ty, z);
@@ -391,19 +540,41 @@ export function createMap(container, options) {
     }
   };
 
-  const drawTiles = (view, setup, width, height) => {
+  const drawTiles = (view, setup, width, height, bitmapWidth = width) => {
     if (!state.basemapTemplate && !state.labelsTemplate) return;
     if (typeof Image !== "function") return;
-    const fitScale = state.fitScale && state.fitScale > 0 ? state.fitScale : view.scale;
-    const z = tileZoomForScale(view.scale, fitScale);
+    // The budget is per frame across ALL active layers: a dual-layer
+    // configuration halves the per-layer enumeration.
+    const activeLayers = (state.basemapTemplate ? 1 : 0) + (state.labelsTemplate ? 1 : 0);
+    const perLayer = perLayerTileBudget(activeLayers);
     const corners = [
       toLonLat(0, 0, view, setup, width, height),
       toLonLat(width, height, view, setup, width, height),
     ];
-    const tiles = tilesForBounds(corners, z);
+    // Extent-derived zoom from the bitmap width (css x devicePixelRatio):
+    // a fitted province no longer enumerates z14, and hidpi bitmaps pick
+    // the sharper level while the step-down absorbs any surplus.
+    const { z, tiles } = tilesForView(corners, bitmapWidth > 0 ? bitmapWidth : width, perLayer);
+    const needed = new Set();
+    if (state.basemapTemplate) {
+      for (const [tx, ty] of tiles) needed.add(`${z}/${tx}/${ty}`);
+    }
+    if (state.labelsTemplate) {
+      for (const [tx, ty] of tiles) needed.add(`labels/${z}/${tx}/${ty}`);
+    }
+    // Abort in-flight loads the new frame no longer needs BEFORE issuing
+    // replacements, so the transient peak (stale + new) stays bounded.
+    // Settled tiles stay cached (LRU) instead of being purged with the frame.
+    for (const [key, entry] of state.tiles) {
+      if (!needed.has(key) && !entry.loaded) {
+        abortTileEntry(entry);
+        state.tiles.delete(key);
+      }
+    }
     // Base first, labels over it (fallback-upstream legibility), vectors last.
-    if (state.basemapTemplate) drawTileLayer(state.basemapTemplate, "", view, setup, width, height, z, tiles);
-    if (state.labelsTemplate) drawTileLayer(state.labelsTemplate, "labels/", view, setup, width, height, z, tiles);
+    if (state.basemapTemplate) drawTileLayer(state.basemapTemplate, "", view, setup, width, height, z, tiles, needed);
+    if (state.labelsTemplate) drawTileLayer(state.labelsTemplate, "labels/", view, setup, width, height, z, tiles, needed);
+    trimTileCache(needed);
   };
 
   const redraw = () => {
@@ -420,7 +591,7 @@ export function createMap(container, options) {
     if (!setup) return;
     const view = ensureView();
     if (!view) return;
-    drawTiles(view, setup, cssWidth, cssHeight);
+    drawTiles(view, setup, cssWidth, cssHeight, cssWidth * ratio);
     for (const layer of LAYER_ORDER) {
       for (const feature of state.sources[layer]) {
         const geometry = feature !== null && typeof feature === "object" ? feature.geometry : null;
@@ -598,7 +769,6 @@ export function createMap(container, options) {
     const setup = projectSetup();
     if (!setup) {
       state.view = null;
-      state.fitScale = null;
       redraw();
       return null;
     }
@@ -607,7 +777,6 @@ export function createMap(container, options) {
     const spanY = Math.max(1e-9, setup.maxLat - setup.minLat);
     const padding = 0.9;
     const scale = Math.min(cssWidth / spanX, cssHeight / spanY) * padding;
-    state.fitScale = clampScale(scale);
     state.fitSize = { w: cssWidth, h: cssHeight };
     state.touched = false;
     state.view = {
@@ -659,12 +828,12 @@ export function createMap(container, options) {
     },
     setBasemapTemplate(template) {
       state.basemapTemplate = validateBasemapTemplate(template);
-      state.tiles.clear();
+      clearTiles();
       redraw();
     },
     setLabelsTemplate(template) {
       state.labelsTemplate = validateBasemapTemplate(template);
-      state.tiles.clear();
+      clearTiles();
       redraw();
     },
     setAttribution(value) {
@@ -734,7 +903,7 @@ export function createMap(container, options) {
       canvas.removeEventListener("pointerup", onPointerUp);
       canvas.removeEventListener("pointerleave", onLeave);
       if (observer) observer.disconnect();
-      state.tiles.clear();
+      clearTiles();
       if (canvas.parentNode === container) container.removeChild(canvas);
     },
   };
