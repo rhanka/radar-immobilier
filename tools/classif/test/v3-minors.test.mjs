@@ -195,6 +195,9 @@ test('minors D3: stable stringify canonicalises key order', async () => {
   assert.equal(stableStringify(a), stableStringify(b));
   assert.equal(sha256(stableStringify(a)), sha256(stableStringify(b)));
   assert.equal(stableStringify([3, 2, 1]), '[3,2,1]', 'array order is preserved');
+  assert.equal(stableStringify({ b: 1, a: undefined, c: 2 }), stableStringify({ c: 2, b: 1 }), 'undefined object keys are omitted like JSON.stringify');
+  assert.equal(stableStringify({ a: undefined }), '{}', 'an only-undefined object stringifies to {}');
+  assert.equal(stableStringify([1, undefined, 3]), JSON.stringify([1, undefined, 3]), 'undefined array items become null like JSON.stringify');
 });
 
 // D3: the S113 plan and skip share one predicate (verified file + eval-run audit).
@@ -256,6 +259,26 @@ test('minors §7b: classifyResidual derives the cause from evidence', async () =
   assert.equal(counts['missing-information'], 1);
   assert.equal(fallbackToDefinitionGap, 1, 'the map reports how many fell back');
 });
+
+// §7b consumption: fallback residuals are reported and block the stop below the cap.
+test('minors §7b: residualsClassified reports fallbacks that block the stop', withTempHome(async (home) => {
+  const { residualsClassified } = await import('../l2/converge.mjs');
+  const { stopDecision } = await import('../l2/agreement.mjs');
+  mkdirSync(path.join(home, 'l2'), { recursive: true });
+  writeFileSync(path.join(home, 'l2', 'ambiguity-pass2.json'), JSON.stringify({ residuals: [
+    { itemId: 'r1', cause: 'definition-gap', fallback: true },
+    { itemId: 'r2', cause: 'missing-information', fallback: false },
+  ] }));
+  const r = residualsClassified(home, 2, ['r1', 'r2']);
+  assert.equal(r.classified, true, 'both residuals carry a cause class');
+  assert.equal(r.fallbackToDefinitionGap, 1, 'one fallback residual reported');
+  assert.deepEqual(r.fallbackIds, ['r1']);
+  assert.equal(stopDecision({ changedShare: 0.01, pass: 3, residualsClassified: r.classified, hasAmend: true, fallbackToDefinitionGap: r.fallbackToDefinitionGap }).stop,
+    false, 'fallback residuals block the stop below the cap');
+  const capped = stopDecision({ changedShare: 0.01, pass: 5, residualsClassified: r.classified, hasAmend: true, fallbackToDefinitionGap: r.fallbackToDefinitionGap });
+  assert.equal(capped.stop, true, 'the 4-pass cap stops and reports fallbacks as such');
+  assert.match(capped.why, /fallback/);
+}));
 
 // §11a: the FINAL guard fails closed on a missing, corrupt, sha-less or drifted manifest.
 test('minors §11a: assertFinalGuide fails closed without a valid freeze', async () => {

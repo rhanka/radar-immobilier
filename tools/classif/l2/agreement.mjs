@@ -52,11 +52,17 @@ export const STOP = { alphaReport: 0.67, unanimityReport: 0.75, changed: 0.02, r
 // (passes 2–5 resolve; the chain loops 1–5). Denominator of the 2 %: valid votes
 // re-annotated this pass (carried deferred votes excluded, invalid votes excluded).
 // Residuals without a majority after the cap keep status `unresolved` with their cause class.
-export function stopDecision({ changedShare, pass, residualsClassified, hasAmend = false }) {
+// Review §7b: a definition-gap fallback (fallback:true) is NOT a classification —
+// fallback residuals block the stop, unless the 4-pass cap is reached; at the cap
+// they are reported as such.
+export function stopDecision({ changedShare, pass, residualsClassified, hasAmend = false, fallbackToDefinitionGap = 0 }) {
+  const fallback = Number(fallbackToDefinitionGap ?? 0);
   if (pass >= STOP.capPass) {
+    if (fallback > 0) return { stop: true, why: `cap reached (pass ${pass} ≥ ${STOP.capPass}) with ${fallback} fallback definition-gap residual(s) reported as such` };
     return { stop: true, why: `cap reached (pass ${pass} ≥ ${STOP.capPass})` };
   }
   if (changedShare !== null && changedShare < STOP.changed && residualsClassified === true) {
+    if (fallback > 0) return { stop: false, why: `${(changedShare * 100).toFixed(2)} % changed but ${fallback} fallback definition-gap residual(s) block the stop (undecided, not classified)` };
     if (!hasAmend) return { stop: false, why: `${(changedShare * 100).toFixed(2)} % changed and residuals classified, but no amendment round traced yet (stop forbidden before an amendment)` };
     return { stop: true, why: `${(changedShare * 100).toFixed(2)} % of valid re-annotated votes changed (< 2 %) and every residual item is cause-classified` };
   }

@@ -82,9 +82,10 @@ export function splitGrouped(cities, targets, rng = null) {
 /** The seed must be committed in the repo BEFORE the draw: the seed file must be tracked
     and clean (git ls-files + git diff --quiet HEAD). Returns the committed seed. */
 export function requireCommittedSeed(seedFile, cliSeed) {
-  const git = (...a) => spawnSync('git', a, { cwd: repoRoot(process.env), encoding: 'utf8' });
+  const root = repoRoot(process.env);
+  const git = (...a) => spawnSync('git', a, { cwd: root, encoding: 'utf8' });
   if (!existsSync(seedFile)) throw new Error(`split refused: seed file ${seedFile} absent (commit it before the draw)`);
-  const rel = path.relative(REPO, seedFile);
+  const rel = path.relative(root, seedFile);
   if (git('ls-files', '--error-unmatch', rel).status !== 0) throw new Error(`split refused: seed file ${rel} is not committed`);
   if (git('diff', '--quiet', 'HEAD', '--', rel).status !== 0) throw new Error(`split refused: seed file ${rel} differs from the committed version (commit before the draw)`);
   const committed = JSON.parse(readFileSync(seedFile, 'utf8'));
@@ -115,6 +116,7 @@ export function stratumOf(kind, verdict, bpass) {
 export async function main(argv = process.argv.slice(2)) {
   const cliSeed = argv.includes('--seed') ? argv[argv.indexOf('--seed') + 1] : process.env.CLASSIF_SEED;
   const home = classifHome();
+  const root = repoRoot(process.env);
   const manifestFile = path.join(classifDir(process.env), 'l3', 'manifests', 'split.json');
   const seedFile = path.join(classifDir(process.env), 'l3', 'manifests', 'split-seed.json');
   mkdirSync(path.dirname(manifestFile), { recursive: true });
@@ -174,7 +176,7 @@ export async function main(argv = process.argv.slice(2)) {
     return { stratum: s, tuning: a, blind: b, ...chiSquareHalves(a, b) };
   });
   const body = (ids) => `${[...ids].sort().join('\n')}\n`;
-  const manifest = { kind: 'split', seed: committed.seed, seedFile: path.relative(REPO, seedFile), committedAt: committed.committedAt, drawnAt: new Date().toISOString(), llmCalls: 0,
+  const manifest = { kind: 'split', seed: committed.seed, seedFile: path.relative(root, seedFile), committedAt: committed.committedAt, drawnAt: new Date().toISOString(), llmCalls: 0,
     trio: [...ANNOTATORS], corpusSha256, convergeSha256,
     cities: byCity.size, halves,
     counts: { tuning: halves.tuning.length, blind: halves.blind.length,

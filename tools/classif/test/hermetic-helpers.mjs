@@ -54,6 +54,11 @@ export function withTempHome(fn) {
     delete process.env.CLASSIF_SPLIT_FILE;
     delete process.env.CLASSIF_REPO;
     delete process.env.CLASSIF_EVAL_DIR;
+    delete process.env.CLASSIF_TEST_QUOTA_WAIT_MS;
+    delete process.env.CLASSIF_ROLE;
+    delete process.env.CLASSIF_BLIND_KEY;
+    delete process.env.CLASSIF_ACTOR;
+    delete process.env.CLASSIF_EVAL_KEY;
     const fakeAuth = path.join(home, 'fake-auth.json');
     writeFileSync(fakeAuth, '{"fake":"auth-for-hermetic-tests"}');
     process.env.CLASSIF_ASTRA_AUTH_SRC = fakeAuth;
