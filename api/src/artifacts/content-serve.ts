@@ -22,7 +22,7 @@
  * header, session cookie required) before the 55 s expiry. After expiry, a
  * same-origin POST without a grant can recover from a current sealed P.
  */
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { Hono, type Context } from "hono";
 import { upgradeLegacyReaderBridge } from "@radar/artifacts-host";
 import {
@@ -162,10 +162,19 @@ export interface ContentServeDeps {
   readonly basketConsent?: BasketConsentGate;
   /**
    * J1.2d/e §13 reader budgets (process-local fixed windows). Absent, the
-   * dispatch creates one store per content app: replicas each enforce their
-   * own windows, which only tightens the effective budget.
+   * dispatch creates one store per content app. Each replica enforces its
+   * own windows: with N replicas the effective budget (and the concurrency
+   * and anti-enumeration caps) is up to N times LOOSER — `partial` until a
+   * shared store exists.
    */
   readonly budgets?: ReaderBudgetStore;
+  /**
+   * J1.2d/e §0.4/§13 typed access journal: one line per reader op call,
+   * 429 included — op, reader digest, artifact, release, status, bytes,
+   * duration. Never a city, a signal, a workspace or a query. Absent, a JSON
+   * line on `console.info`.
+   */
+  readonly accessLog?: (line: ReaderAccessLine) => void;
   /**
    * J1.2d/e §11.3 `documents.pv.v1`: PV PDF resolved from a signal the
    * reader can see. Absent keeps the op closed (503, no store read).
@@ -188,6 +197,23 @@ export interface ContentServeDeps {
   readonly geoBudget?: GeoReaderBudget;
 }
 type AuthorizedReader = ApiReaderContext & { readonly validUntil: number; readonly authorityVersion: string };
+
+/** Typed reader-op access line (§0.4): no business data by construction. */
+export interface ReaderAccessLine {
+  readonly event: "reader_op";
+  readonly op: string;
+  readonly reader: string | null;
+  readonly artifact: string | null;
+  readonly release: string | null;
+  readonly status: number;
+  readonly bytes: number | null;
+  readonly durationMs: number;
+}
+
+/** Non-reversible short reader digest for the access journal. */
+export function readerDigest(readerSub: string): string {
+  return createHash("sha256").update(`reader-access-v1:${readerSub}`, "utf8").digest("hex").slice(0, 16);
+}
 
 function bareHost(header: string | undefined): string {
   const raw = (header ?? "").trim().toLowerCase();
@@ -320,7 +346,10 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
       if (!context) return null;
       if (await deps.authority.getAuthorizationVersion(claims.artifactId, claims.readerSub, claims.releaseId) !== version) return null;
       const reader = { ...context, validUntil: Math.min(claims.expiresAtMs, session.expiresAt), authorityVersion: version };
-      return stillOpen(reader) ? reader : null;
+      if (!stillOpen(reader)) return null;
+      c.set("readerAudit" as never, { reader: readerDigest(reader.readerSub),
+        artifact: reader.artifactId, release: reader.releaseId } as never);
+      return reader;
     } catch { return null; }
   }
 
@@ -345,11 +374,32 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     return c.redirect(target, 301);
   });
 
+  // J1.2d/e §0.4/§13 typed access journal, outermost on the op surface so it
+  // records the final status (429 and classification remaps included).
+  const accessLog = deps.accessLog ?? ((line: ReaderAccessLine) => console.info(JSON.stringify(line)));
+  app.use("/__reader/api/*", async (c, next) => {
+    const started = performance.now();
+    await next();
+    const name = c.req.path.slice("/__reader/api/".length);
+    const audit = c.get("readerAudit" as never) as { reader: string; artifact: string; release: string } | undefined;
+    let bytes: number | null = Number(c.res.headers.get("content-length") ?? Number.NaN);
+    if (!Number.isFinite(bytes)) {
+      bytes = (c.res.headers.get("content-type") ?? "").includes("json")
+        ? (await c.res.clone().arrayBuffer().catch(() => null))?.byteLength ?? null : null;
+    }
+    try {
+      accessLog({ event: "reader_op", op: isReaderOperation(name) ? name : "unknown",
+        reader: audit?.reader ?? null, artifact: audit?.artifact ?? null, release: audit?.release ?? null,
+        status: c.res.status, bytes, durationMs: Math.round(performance.now() - started) });
+    } catch { /* journaling never fails a read */ }
+  });
+
   app.use("/__reader/api/*", async (c, next) => {
     if (c.req.method !== "GET" || !isWorkspaceReadOperation(c.req.path.slice("/__reader/api/".length))) return next();
     try {
       await next();
-      if (c.res.status < 400) return;
+      // §13: an exhausted budget stays a typed 429 + Retry-After (rate_limited).
+      if (c.res.status < 400 || c.res.status === 429) return;
       const body = await c.res.clone().json().catch(() => null);
       if (body?.ok === false && typeof body.requestId === "string") return;
       const code = c.res.status === 401 ? "unauthenticated" : c.res.status === 403 ? "capability_required"
@@ -503,8 +553,13 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
       if (result.kind === "not_found") return c.json({ error: "document_not_found" }, 404);
       if (result.kind === "unsupported_media") return c.json({ error: "unsupported_media_type" }, 415);
       if (result.kind === "too_large") return c.json({ error: "payload_too_large" }, 413);
-      if (result.kind === "refused") return c.json({ error: result.code }, result.status);
+      if (result.kind === "refused") {
+        // Closed classification table: never a raw service message.
+        const failure = classificationFailure(result.cause);
+        return c.json({ error: failure.body.error.code }, failure.status);
+      }
       c.header("Content-Type", "application/pdf");
+      c.header("Content-Length", String(result.bytes.byteLength));
       c.header("Content-Disposition", "inline; filename=\"document.pdf\"");
       c.header("X-Content-Type-Options", "nosniff");
       c.header("Content-Security-Policy", "sandbox; default-src 'none'");
@@ -595,13 +650,18 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
         // per reader, and a serialized-response ceiling — never a silent
         // truncation of cities or signals.
         if (isScopedSignalOperation(op) && params.workspaceId !== undefined) {
-          const admitted = budgets.consume(`ws\u0000${params.workspaceId}\u0000${op}`,
-            READER_WORKSPACE_BUDGET, now());
+          // The page chooses the workspace id: admission is only CHECKED here
+          // and spent after the scoped service re-verified the membership, so
+          // a non-member cannot drain a workspace it merely knows the id of.
+          const admissionKey = `ws\u0000${params.workspaceId}\u0000${op}`;
+          const admitted = budgets.check(admissionKey, READER_WORKSPACE_BUDGET, now());
           if (!admitted.ok) return rateLimited(c, admitted.retryAfterSec);
           const slot = budgetKey(auth.readerSub, auth.artifactId, op);
           if (!budgets.tryEnter(slot, READER_CONCURRENCY[op] ?? 1)) return rateLimited(c, 1);
           try {
-            const body = validateReaderResponse(op, await deps.readOperation(op, params, auth), auth.readerSub);
+            const raw = await deps.readOperation(op, params, auth);
+            budgets.consume(admissionKey, READER_WORKSPACE_BUDGET, now());
+            const body = validateReaderResponse(op, raw, auth.readerSub);
             const ceiling = op === "signals.by-city.v1" ? 1048576 : 2097152;
             if (Buffer.byteLength(JSON.stringify(body)) > ceiling) {
               throw new ClassificationError(op === "signals.by-city.v1"

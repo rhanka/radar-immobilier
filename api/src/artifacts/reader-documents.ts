@@ -43,7 +43,8 @@ export type ReaderDocumentResult =
   | { kind: "not_found" }
   | { kind: "unsupported_media" }
   | { kind: "too_large" }
-  | { kind: "refused"; status: 400 | 401 | 403 | 404 | 409 | 503; code: string };
+  /** Scoped-service refusal; the dispatch maps it through the closed classification table. */
+  | { kind: "refused"; cause: WorkspaceError | ScopeError | FacetError };
 
 export type ReaderDocumentRead = (
   params: DocumentsPvParams, context: ApiReaderContext,
@@ -84,7 +85,8 @@ export function createReaderDocumentRead(deps: ReaderDocumentDeps): ReaderDocume
         eq(graphNodes.id, params.id)));
       if (!node) return { kind: "not_found" };
       const [card] = await buildScopedSignalCards({ store: deps.store, docEnrichmentBudgetMs: 2000,
-        onDegraded: () => console.error("[reader-op] documents.pv.v1 card degraded") },
+        onDegraded: () => console.error("[reader-op] documents.pv.v1 card degraded"),
+        onRefFailed: () => console.error("[reader-op] documents.pv.v1 doc-ref enrichment failed") },
       [node], params.citySlug);
       const matches = new Map<string, string | null>();
       for (const ref of card?.docRefs ?? []) {
@@ -108,8 +110,7 @@ export function createReaderDocumentRead(deps: ReaderDocumentDeps): ReaderDocume
     } catch (error) {
       if (error instanceof WorkspaceError || error instanceof ScopeError || error instanceof FacetError) {
         if (error.status === 404) return { kind: "not_found" };
-        const status = error.status === 422 ? 400 : error.status;
-        return { kind: "refused", status, code: error.message };
+        return { kind: "refused", cause: error };
       }
       throw error;
     }
