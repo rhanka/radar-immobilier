@@ -12,7 +12,7 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { callSeat } from '../run-seat.mjs';
 import { appendJsonlRecord, parseJsonlTolerant } from '../lib/jsonl.mjs';
 import { sha256 } from '../lib/render.mjs';
-import { CLASSIF_DIR, REPO, classifHome, privateDir } from '../lib/paths.mjs';
+import { classifDir, repoRoot, testOnlyEnv, classifHome, privateDir } from '../lib/paths.mjs';
 import { check as checkBudget } from '../lib/budget.mjs';
 import { PROFILE_DIR, validateExtraction } from '../lib/engram.mjs';
 import { spawnSync } from 'node:child_process';
@@ -50,14 +50,24 @@ export function applyExitPolicy(pairs, r) {
 }
 
 /** Sync committed-split guard for the CLI (same rule as l3/split requireCommittedSplit,
-    inlined to avoid the run→split→run cycle at top-level await). */
-function requireCommittedSplitSync(splitFile = path.join(CLASSIF_DIR, 'l3', 'manifests', 'split.json'), repo = REPO) {
-  if (!existsSync(splitFile)) throw new Error(`split refused: ${splitFile} absent (run make classif-l3b-split first)`);
-  const rel = path.relative(repo, splitFile);
-  const git = (...a) => spawnSync('git', a, { cwd: repo, encoding: 'utf8' });
+    inlined to avoid the run→split→run cycle at top-level await).
+    Review D1/D2: hermetic tests redirect via CLASSIF_REPO in test mode only. */
+function requireCommittedSplitSync(splitFile = null, repo = null) {
+  const env = process.env;
+  const file = splitFile ?? path.join(classifDir(env), 'l3', 'manifests', 'split.json');
+  const root = repo ?? repoRoot(env);
+  if (!existsSync(file)) throw new Error(`split refused: ${file} absent (run make classif-l3b-split first)`);
+  const rel = path.relative(root, file);
+  const git = (...a) => spawnSync('git', a, { cwd: root, encoding: 'utf8' });
   if (git('ls-files', '--error-unmatch', rel).status !== 0) throw new Error(`split refused: ${rel} is not committed (commit the draw before any pass ≥ 2)`);
   if (git('diff', '--quiet', 'HEAD', '--', rel).status !== 0) throw new Error(`split refused: ${rel} differs from the committed version (commit before any pass ≥ 2)`);
-  return JSON.parse(readFileSync(splitFile, 'utf8'));
+  return JSON.parse(readFileSync(file, 'utf8'));
+}
+
+/** Test-only quota-wait override, in milliseconds (review D1: production refuses it). */
+export function testQuotaWaitMs(env = process.env) {
+  const v = testOnlyEnv(env, 'CLASSIF_TEST_QUOTA_WAIT_MS');
+  return v === undefined ? undefined : Number(v);
 }
 
 /** Milliseconds to wait when the seat answered a quota denial ("Resets in 10m57s"), else null. */
@@ -81,7 +91,7 @@ export function devCorpusExpectations(home) {
     const e = JSON.parse(readFileSync(sidecar, 'utf8'));
     return { source: sidecar, count: e.count, sha256: e.sha256 };
   }
-  const m = JSON.parse(readFileSync(path.join(CLASSIF_DIR, 'l0', 'manifests', 'draw-manifest.json'), 'utf8'));
+  const m = JSON.parse(readFileSync(path.join(classifDir(process.env), 'l0', 'manifests', 'draw-manifest.json'), 'utf8'));
   return { source: 'tools/classif/l0/manifests/draw-manifest.json', count: m.devItems, sha256: m.devItemsSha256 };
 }
 
@@ -172,7 +182,9 @@ export async function runPass({ pass, mode = 'independent', guide = 'G0', annota
           log(`[pass ${pass}] ${annotator} quota reached, waiting ${Math.round(wait / 60000)} min`);
           appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: phase ?? `pass${pass}`, pass, mode, guide, annotator, lotId: lot.lotId, items: lot.items.length, attempt: attempts,
             quota: true, quotaWaitMs: wait, exitCode: r.code });
-          const effectiveWait = process.env.CLASSIF_TEST_QUOTA_WAIT_MS !== undefined ? Number(process.env.CLASSIF_TEST_QUOTA_WAIT_MS) : wait;
+          // Review D1: the quota-wait override is test-only (production refuses it).
+          const quotaOverride = testQuotaWaitMs(process.env);
+          const effectiveWait = quotaOverride !== undefined ? quotaOverride : wait;
           await sleep(effectiveWait);
           // Free retry after a quota denial: no new counted intent, no extra budget burn.
           r = await callSeat(annotator, prompt, { base: seatTmp, timeoutMs: 3600000 });
@@ -278,7 +290,7 @@ if (process.argv[1] && path.resolve(process.argv[1]).endsWith(path.join('l2', 'r
   let todo = pass > 1 && existsSync(todoFile) ? new Set(JSON.parse(readFileSync(todoFile, 'utf8')).items) : null;
   // D2: a manual pass on one half is filtered by the committed split (the chain does it too).
   if (todo && arg('--half', '')) {
-    const split = JSON.parse(readFileSync(path.join(CLASSIF_DIR, 'l3', 'manifests', 'split.json'), 'utf8'));
+    const split = JSON.parse(readFileSync(path.join(classifDir(process.env), 'l3', 'manifests', 'split.json'), 'utf8'));
     const keep = new Set(split.halves[arg('--half', '')] ?? []);
     todo = new Set([...todo].filter((id) => keep.has(id)));
   }

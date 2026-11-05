@@ -9,7 +9,7 @@ import os from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
 import { ALIASES, LEVELS, vibeHome } from './lib/vibe-home.mjs';
-import { classifHome } from './lib/paths.mjs';
+import { classifHome, testOnlyEnv } from './lib/paths.mjs';
 import { privateDir } from './lib/paths.mjs';
 
 const SCRUB = /(_API_KEY|_AUTH_TOKEN|_API_BASE|_BASE_URL|_SECRET_KEY|_ACCESS_KEY)$|^(ANTHROPIC_|OPENAI_|GEMINI_|CLAUDE_CODE_USE_|AWS_|GOOGLE_CLOUD_|GOOGLE_APPLICATION_CREDENTIALS|GOOGLE_GENAI_USE_VERTEXAI|VERTEX|SCRAPE_S3_|REFERENCE_C_KEY|CLASSIF_EVAL_KEY|CLASSIF_BLIND_KEY|MISTRAL_|VIBE_ACTIVE_MODEL)/;
@@ -111,12 +111,13 @@ approval_policy = "never"
 sandbox_mode = "read-only"
 `;
 
-export function ensureAstraHome(home = classifHome(), { authSrc = process.env.CLASSIF_ASTRA_AUTH_SRC ?? null } = {}) {
+export function ensureAstraHome(home = classifHome(), { authSrc = testOnlyEnv(process.env, 'CLASSIF_ASTRA_AUTH_SRC') ?? null } = {}) {
   const dir = astraCodexHomeDir(home);
   privateDir(dir);
   fs.writeFileSync(path.join(dir, 'config.toml'), ASTRA_ISOLATED_CONFIG, { mode: 0o600 });
-  // Review §12: hermetic tests set CLASSIF_ASTRA_AUTH_SRC to a fake auth file (or
-  // CLASSIF_HOME to a temp home) — the real ~/.codex/auth.json is never read in tests.
+  // Review D1/D2: hermetic tests set CLASSIF_ASTRA_AUTH_SRC to a fake auth file in
+  // test mode (CLASSIF_TEST_MODE=1) — production refuses the hook, the real
+  // ~/.codex/auth.json is never read in tests.
   const src = authSrc ?? path.join(os.homedir(), '.codex', 'auth.json');
   const dst = path.join(dir, 'auth.json');
   if (src && fs.existsSync(src)) {
