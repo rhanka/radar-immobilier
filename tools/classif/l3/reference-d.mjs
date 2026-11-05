@@ -35,11 +35,18 @@ export function provenanceOf({ codeMaj, votes, adjudicated }) {
 }
 
 export function buildReferenceD({ rows, latest, complements, halves, adjudications, ambiguityCauses, pass, codes }) {
+  // Review §6b: every adjudication key must name a known item with a valid code — a bare
+  // key ({itemId:{}} or true) or an unknown itemId throws instead of faking provenance.
+  const rowIds = new Set(rows.map((r) => r.itemId));
+  for (const [id, adj] of adjudications) {
+    if (!rowIds.has(id)) throw new Error(`adjudication refused: unknown itemId ${id}`);
+    const c = typeof adj === 'string' ? adj : adj?.code ?? null;
+    if (typeof c !== 'string' || !c || !codes.has(c)) throw new Error(`adjudication refused: missing or unknown code for ${id} (got ${JSON.stringify(adj)?.slice(0, 60)})`);
+  }
   return rows.map((r) => {
     const votes = ANNOTATORS.map((a) => latest.get(a).get(r.itemId) ?? null);
     // Review §6: Chaperon adjudications {itemId:{code}} override the majority — validated
-    // against the registry, status resolved (a bare key keeps the majority code but still
-    // marks human_adjudicated provenance).
+    // against the registry, status resolved.
     const adj = adjudications.get(r.itemId) ?? null;
     const adjCode = typeof adj === 'string' ? adj : adj?.code ?? null;
     if (adjCode && !codes.has(adjCode)) throw new Error(`adjudication refused: unknown code ${adjCode} for ${r.itemId}`);
@@ -71,18 +78,22 @@ export function loadAdjudications(home) {
 
 export async function main(argv = process.argv.slice(2)) {
   const home = classifHome();
-  const splitFile = path.join(CLASSIF_DIR, 'l3', 'manifests', 'split.json');
-  if (!existsSync(splitFile)) { process.stderr.write('classif-l3b-reference: refusing without the committed split (run make classif-l3b-split ENV=preprod first)\n'); process.exit(2); }
-  const finalGuideFile = path.join(home, 'l1', 'pack', 'guide-FINAL.md');
-  if (!existsSync(finalGuideFile)) { process.stderr.write('classif-l3b-reference: refusing without the frozen guide (the blind half is sealed only after its cross-review under guide FINAL)\n'); process.exit(2); }
-  // Review §6 + §11: the frozen FINAL guide sha must match the freeze manifest.
+  const { requireCommittedSplit } = await import('./split.mjs');
   try {
-    const freeze = JSON.parse(readFileSync(path.join(CLASSIF_DIR, 'l2', 'manifests', 'guide-freeze.json'), 'utf8'));
-    if (freeze.guideSha256 && sha256(readFileSync(finalGuideFile, 'utf8')) !== freeze.guideSha256) {
-      throw new Error('classif-l3b-reference: guide-FINAL.md sha differs from the freeze manifest (re-freeze before sealing)');
-    }
-  } catch (e) { if (/sha differs/.test(e.message)) throw e; }
-  const split = JSON.parse(readFileSync(splitFile, 'utf8'));
+    requireCommittedSplit();
+  } catch (e) {
+    process.stderr.write(`classif-l3b-reference: ${e.message}\n`);
+    process.exit(2);
+  }
+  // Review §6 + §11a: shared fail-closed FINAL guard (missing/corrupt manifest refuses).
+  const { assertFinalGuide } = await import('../lib/freeze.mjs');
+  try {
+    assertFinalGuide(home);
+  } catch (e) {
+    process.stderr.write(`classif-l3b-reference: ${e.message}\n`);
+    process.exit(2);
+  }
+  const split = requireCommittedSplit();
   const halves = { tuning: new Set(split.halves.tuning), blind: new Set(split.halves.blind) };
   const items = loadDevItems(home);
   const codes = loadCodes();
@@ -99,12 +110,19 @@ export async function main(argv = process.argv.slice(2)) {
   }
   if (!existsSync(blindDoneFile)) { process.stderr.write(`classif-l3b-reference: refusing without the blind-stage done marker (pass${lastPass}.done)\n`); process.exit(2); }
   const conv = JSON.parse(readFileSync(path.join(home, 'l2', `converge-pass${lastPass}.json`), 'utf8'));
-  const { latest, gaps, deferred } = latestVotes(home, lastPass);
-  // Review §6: every blind todo item needs a FINAL vote (or explicit portage); unanimous
-  // blind items outside the todo are ported explicitly (their earlier vote stands).
+  const convDeferred = Array.isArray(conv.deferred) ? conv.deferred : [];
+  const { latest, gaps, deferred } = latestVotes(home, lastPass, { deferred: convDeferred });
+  // Review §6a: every blind todo item needs a FINAL vote from EVERY non-deferred annotator
+  // (a deferred annotator keeps its last vote with a traced gap) — one FINAL vote is not a seal.
   const blindTodoIds = new Set(blindTodo.items ?? []);
-  const missingFinal = [...blindTodoIds].filter((id) => !ANNOTATORS.some((a) => latest.get(a).get(id)?.guide === 'FINAL'));
-  if (missingFinal.length) throw new Error(`reference-D refused: ${missingFinal.length} blind todo items without a FINAL vote (${missingFinal.slice(0, 5).join(',')}…)`);
+  const activeFinal = ANNOTATORS.filter((a) => !convDeferred.includes(a));
+  const missingFinal = [];
+  for (const id of blindTodoIds) {
+    for (const a of activeFinal) {
+      if (latest.get(a).get(id)?.guide !== 'FINAL') { missingFinal.push(`${id}:${a}`); break; }
+    }
+  }
+  if (missingFinal.length) throw new Error(`reference-D refused: ${missingFinal.length} blind todo items without a FINAL vote from every active annotator (${missingFinal.slice(0, 5).join(',')}…)`);
   const complements = loadComplements(home);
   const adjudications = loadAdjudications(home);
   let causes = new Map();
