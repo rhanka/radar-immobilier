@@ -24,7 +24,9 @@ test('astra-max route: conductor-verified codex argv, model and effort', () => {
   writeFileSync(fakeAuth, '{"fake":"auth"}');
   const prevHome = process.env.CLASSIF_HOME;
   const prevSrc = process.env.CLASSIF_ASTRA_AUTH_SRC;
+  const prevMode = process.env.CLASSIF_TEST_MODE;
   process.env.CLASSIF_HOME = home;
+  process.env.CLASSIF_TEST_MODE = '1';
   process.env.CLASSIF_ASTRA_AUTH_SRC = fakeAuth;
   try {
     const prompt = 'classify this synthetic item';
@@ -43,6 +45,7 @@ test('astra-max route: conductor-verified codex argv, model and effort', () => {
   } finally {
     if (prevHome === undefined) delete process.env.CLASSIF_HOME; else process.env.CLASSIF_HOME = prevHome;
     if (prevSrc === undefined) delete process.env.CLASSIF_ASTRA_AUTH_SRC; else process.env.CLASSIF_ASTRA_AUTH_SRC = prevSrc;
+    if (prevMode === undefined) delete process.env.CLASSIF_TEST_MODE; else process.env.CLASSIF_TEST_MODE = prevMode;
     rmSync(dir, { recursive: true, force: true });
     rmSync(home, { recursive: true, force: true });
   }
@@ -85,7 +88,9 @@ test('astra isolation: dedicated CODEX_HOME, config with NO mcp_servers, auth co
   writeFileSync(fakeAuth, '{"fake":"auth-for-tests"}');
   const prevHome = process.env.CLASSIF_HOME;
   const prevSrc = process.env.CLASSIF_ASTRA_AUTH_SRC;
+  const prevMode = process.env.CLASSIF_TEST_MODE;
   process.env.CLASSIF_HOME = home;
+  process.env.CLASSIF_TEST_MODE = '1';
   process.env.CLASSIF_ASTRA_AUTH_SRC = fakeAuth;
   try {
     const dir = ensureAstraHome(home);
@@ -114,6 +119,7 @@ test('astra isolation: dedicated CODEX_HOME, config with NO mcp_servers, auth co
   } finally {
     if (prevHome === undefined) delete process.env.CLASSIF_HOME; else process.env.CLASSIF_HOME = prevHome;
     if (prevSrc === undefined) delete process.env.CLASSIF_ASTRA_AUTH_SRC; else process.env.CLASSIF_ASTRA_AUTH_SRC = prevSrc;
+    if (prevMode === undefined) delete process.env.CLASSIF_TEST_MODE; else process.env.CLASSIF_TEST_MODE = prevMode;
     rmSync(home, { recursive: true, force: true });
   }
 });
