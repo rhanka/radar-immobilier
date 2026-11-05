@@ -18,10 +18,18 @@
 # - RADAR_PUBLIC_BASE_URL: base of the URLs the MCP hands back (get_pv_pdf).
 # - IMMO_MCP_OAUTH_SCOPES_SUPPORTED: the base list plus the explicit artifact
 #   scopes immo:artifacts:read (artifacts_list, artifacts_get) and
-#   immo:artifacts:write (artifacts_ensure, artifacts_publish). Advertised in the
-#   PRM, so clients request them at consent. PRECONDITION: the preprod IdP
-#   catalogue and the immo-mcp client must know both scopes before this value
-#   rolls out, otherwise an authorization request carrying them can be refused.
+#   immo:artifacts:write (artifacts_ensure, artifacts_publish), plus
+#   offline_access. Advertised in the PRM, so clients request them at consent.
+#   offline_access is what lets claude.ai obtain a refresh token from the
+#   preprod IdP (whose immo-mcp client row is refresh-eligible): without it
+#   the 1 h access TTL forces a manual OAuth round-trip after every expiry
+#   or pod restart. PRECONDITION: the preprod IdP catalogue and the
+#   immo-mcp client must know these scopes before this value rolls out,
+#   otherwise an authorization request carrying them can be refused.
+#   PROD deliberately keeps the base three scopes (no offline_access): the
+#   prod immo-mcp client row is not refresh-eligible, so advertising it
+#   there would only produce invalid_scope errors. Enabling it in prod is
+#   an owner decision (client row upsert first, advertisement second).
 # - IMMO_MCP_ARTIFACTS_LEGACY_READ_SCOPE: transition flag. "true" lets immo:read
 #   still satisfy the READ artifact tools for clients consented before the
 #   explicit scopes existed; writes always require immo:artifacts:write. Remove
@@ -41,7 +49,7 @@ data:
   IMMO_MCP_EXCHANGE_TOKEN_ENDPOINT: "https://preprod.auth.sent-tech.ca/api/v1/auth/oauth/token"
   IMMO_MCP_EXCHANGE_ENV: "preprod"
   # Must match radar-api: one physical namespace shared by all approved users.
-  IMMO_MCP_OAUTH_SCOPES_SUPPORTED: "immo:read immo:search immo:documents:read immo:artifacts:read immo:artifacts:write"
+  IMMO_MCP_OAUTH_SCOPES_SUPPORTED: "immo:read immo:search immo:documents:read immo:artifacts:read immo:artifacts:write offline_access"
   IMMO_MCP_ARTIFACTS_LEGACY_READ_SCOPE: "true"
   ARTIFACTS_CONTROL_MODE: "general"
   ARTIFACTS_STORAGE_SCOPE: "radar-immobilier-preprod"
