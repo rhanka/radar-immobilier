@@ -3,7 +3,11 @@ import { S3Client } from "@aws-sdk/client-s3";
 import type pg from "pg";
 import { PUBLISH_S3_MAX_SOCKETS, composeArtifactHost } from "./composition.js";
 import { createDeleteConfirmation } from "./delete-confirmation.js";
-const options = { confirmation: createDeleteConfirmation({} as pg.Pool, "scope", "https://app.test") };
+const options = { confirmation: createDeleteConfirmation({} as pg.Pool, "scope", "https://app.test"),
+  // Files parity LOT 2 — the provider requires the page wiring as soon as
+  // the mint capability is selected (always under P0B).
+  uploadPage: { cookieSecret: "test-upload-page-secret-32-bytes-padding",
+    controlOrigin: "https://app.test", pageBaseUrl: "https://app.test/api/v1", s3Origins: [] } };
 
 vi.mock("./storage.js", () => ({
   initializeArtifactScope: vi.fn().mockResolvedValue(undefined),
