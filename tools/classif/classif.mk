@@ -134,9 +134,9 @@ classif-l3-reference: ## Classification pilot L3: dev reference (model_consensus
 
 # L3b — reference set D, 50/50 city-grouped split, blind seal (plan v3 D2/D3).
 .PHONY: classif-l3b-split classif-l3b-reference
-classif-l3b-split: ## Classification pilot L3b: 50/50 split grouped by city, seed committed before the draw (CLASSIF_SEED=... required)
+classif-l3b-split: ## Classification pilot L3b: 50/50 city-grouped seeded split (commit l3/manifests/split-seed.json first; refuses redraw)
 	@test "$(ENV)" = "preprod" || { echo "[classif-l3b-split] ENV=preprod required"; exit 2; }
-	@test -n "$(CLASSIF_SEED)" || { echo "[classif-l3b-split] CLASSIF_SEED=<seed> required"; exit 2; }
+	@test -n "$(CLASSIF_SEED)" || { echo "[classif-l3b-split] CLASSIF_SEED=<seed> required (must equal the committed split-seed.json seed)"; exit 2; }
 	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l3/split.mjs --seed "$(CLASSIF_SEED)"
 
 classif-l3b-reference: ## Classification pilot L3b: reference set D (provenances, core/unresolved) + blind-half seal (CLASSIF_ROLE=test-executor, after guide FINAL)
