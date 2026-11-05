@@ -18,6 +18,7 @@ import { SignalQuery, StateQuery, WorkspaceId } from "../services/facets/classif
 import { appMeParams } from "./reader-me.js";
 import { byCityParams } from "./reader-by-city.js";
 import { coherentCityParams } from "./reader-coherent-city.js";
+import { documentsPvParams } from "./reader-documents.js";
 
 export const READER_OPERATIONS = [
   "geo.read.v1",
@@ -29,6 +30,7 @@ export const READER_OPERATIONS = [
   "workspaces.list.v1",
   "signals.by-city.v1",
   "signals.coherent-city.v1",
+  "documents.pv.v1",
   "baskets.context.v1",
   "baskets.search.v1",
   "baskets.state.v1",
@@ -110,9 +112,17 @@ export function isScopedSignalOperation(name: string): name is ScopedSignalOpera
   return name === "signals.by-city.v1" || name === "signals.coherent-city.v1";
 }
 
+/**
+ * J1.2d/e §11.3 binary resource op: the PV PDF, authorized by the sealed
+ * session cookie alone (pdf.js sets no grant header; no `?grant=` URL).
+ */
+export function isDocumentOperation(name: string): name is "documents.pv.v1" {
+  return name === "documents.pv.v1";
+}
+
 /** Every op served under Gate B (`baskets.read` consent re-read per call). */
 export function isGateBOperation(name: string): boolean {
-  return isWorkspaceReadOperation(name) || isScopedSignalOperation(name);
+  return isWorkspaceReadOperation(name) || isScopedSignalOperation(name) || isDocumentOperation(name);
 }
 
 export function operationMethod(name: ReaderOperationName): "GET" {
@@ -129,6 +139,7 @@ export function validateOperationParams(
     if (name === "workspaces.list.v1") return { ok: true, params: workspacesListParams.parse(params) };
     if (name === "signals.by-city.v1") return { ok: true, params: byCityParams.parse(params) };
     if (name === "signals.coherent-city.v1") return { ok: true, params: coherentCityParams.parse(params) };
+    if (name === "documents.pv.v1") return { ok: true, params: documentsPvParams.parse(params) };
     if (name === "geo.read.v1") return { ok: true, params: geoParams.parse(params) };
     if (name === "geo.cities.v1") return { ok: true, params: geoCitiesParams.parse(params) };
     if (name === "geo.collection-items.v1") return { ok: true, params: geoCollectionItemsParams.parse(params) };

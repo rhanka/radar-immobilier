@@ -40,9 +40,23 @@ export interface DocumentsDeps {
   geoKeyIndex?: GeoKeyIndex;
 }
 
-export function documentsRoute(deps: DocumentsDeps): Hono {
-  const app = new Hono();
+/** 50 MiB ceiling shared by the public route and the reader op (DoS / memory). */
+export const MAX_DOCUMENT_SIZE_BYTES = 50 * 1024 * 1024;
 
+export type RawDocumentRead =
+  | { kind: "ok"; bytes: Uint8Array; contentType: string }
+  | { kind: "not_found" }
+  | { kind: "too_large" };
+
+/**
+ * Shared raw-document resolution (legacy immo stores, or the geo repoint for
+ * PV CAS keys), used by the public `/api/documents/raw` route and by the
+ * J1.2d/e reader op `documents.pv.v1`. The caller supplies an already
+ * normalized rawRef; nothing here decides authorization.
+ */
+export function createRawDocumentReader(deps: DocumentsDeps): (
+  normalizedRawRef: string, sourceUrl: string | null,
+) => Promise<RawDocumentRead> {
   // Fail fast on an inconsistent wiring rather than silently degrading to immo
   // when the operator intended the geo cutover.
   if (deps.geoDocumentsRepoint && !deps.geoDocumentsReader) {
@@ -58,14 +72,7 @@ export function documentsRoute(deps: DocumentsDeps): Hono {
     ? [deps.scrapeStore, deps.store]
     : [deps.store];
 
-  app.get("/api/documents/raw", async (c) => {
-    const rawRef = c.req.query("rawRef");
-    const sourceUrl = c.req.query("sourceUrl") ?? null;
-    const normalizedRawRef = rawRef ? normalizeRawRef(rawRef) : null;
-    if (!normalizedRawRef) {
-      return c.json({ ok: false, error: "invalid_raw_ref" }, 400);
-    }
-
+  return async (normalizedRawRef, sourceUrl) => {
     // When the repoint is on AND the rawRef yields PV CAS candidates, probe them
     // in priority order against geo ONLY (zero-copy read-only, no immo fallback).
     // A non-PV key yields no candidate and keeps the untouched legacy path.
@@ -93,17 +100,9 @@ export function documentsRoute(deps: DocumentsDeps): Hono {
         break;
       }
     }
-    if (!resolved) {
-      return c.json({ ok: false, error: "document_not_found" }, 404);
-    }
-
-    // DoS / Memory protection: limit maximum document size to 50 MiB.
-    const MAX_DOCUMENT_SIZE_BYTES = 50 * 1024 * 1024;
+    if (!resolved) return { kind: "not_found" };
     if (resolvedSize !== undefined && resolvedSize > MAX_DOCUMENT_SIZE_BYTES) {
-      return c.json(
-        { ok: false, error: "payload_too_large", message: "Document exceeds maximum size limit (50 MB)" },
-        413,
-      );
+      return { kind: "too_large" };
     }
 
     // The PAYLOAD object existed at HEAD; if it vanishes before GET (a rare
@@ -115,18 +114,38 @@ export function documentsRoute(deps: DocumentsDeps): Hono {
     try {
       bytes = await resolved.reader.get(resolved.key);
     } catch (error) {
-      if (isMissingObjectError(error)) {
-        return c.json({ ok: false, error: "document_not_found" }, 404);
-      }
+      if (isMissingObjectError(error)) return { kind: "not_found" };
       throw error;
     }
-    if (bytes.byteLength > MAX_DOCUMENT_SIZE_BYTES) {
+    if (bytes.byteLength > MAX_DOCUMENT_SIZE_BYTES) return { kind: "too_large" };
+    const contentType = await resolveRawContentType(resolved.reader, resolved.key);
+    return { kind: "ok", bytes, contentType };
+  };
+}
+
+export function documentsRoute(deps: DocumentsDeps): Hono {
+  const app = new Hono();
+  const readRaw = createRawDocumentReader(deps);
+
+  app.get("/api/documents/raw", async (c) => {
+    const rawRef = c.req.query("rawRef");
+    const sourceUrl = c.req.query("sourceUrl") ?? null;
+    const normalizedRawRef = rawRef ? normalizeRawRef(rawRef) : null;
+    if (!normalizedRawRef) {
+      return c.json({ ok: false, error: "invalid_raw_ref" }, 400);
+    }
+
+    const read = await readRaw(normalizedRawRef, sourceUrl);
+    if (read.kind === "not_found") {
+      return c.json({ ok: false, error: "document_not_found" }, 404);
+    }
+    if (read.kind === "too_large") {
       return c.json(
         { ok: false, error: "payload_too_large", message: "Document exceeds maximum size limit (50 MB)" },
         413,
       );
     }
-    const contentType = await resolveRawContentType(resolved.reader, resolved.key);
+    const { bytes, contentType } = read;
 
     const isPdf = contentType.toLowerCase().startsWith("application/pdf");
     const headers: Record<string, string> = {
