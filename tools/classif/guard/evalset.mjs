@@ -10,7 +10,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { keyFromEnv, sha256, unseal } from '../lib/refc1.mjs';
 import { appendJsonlRecord, parseJsonlTolerant } from '../lib/jsonl.mjs';
-import { EVAL_DIR_DEFAULT, REPO } from '../lib/paths.mjs';
+import { EVAL_DIR_DEFAULT, repoRoot, testOnlyEnv } from '../lib/paths.mjs';
 import { EVAL_FILES } from './unseal.mjs';
 
 export const accessLog = (evalDir = EVAL_DIR_DEFAULT) => path.join(evalDir, 'access-log.jsonl');
@@ -53,15 +53,19 @@ export function openEvalSet({ purpose, promptSha256 = null, model = null, effort
   return out;
 }
 
-/** Guard before a run on the evaluation set. */
-export function assertEvalRunAllowed({ promptFile, promptSha256, model, effort, evalDir = EVAL_DIR_DEFAULT, repo = REPO }) {
-  const git = (...a) => spawnSync('git', a, { cwd: repo, encoding: 'utf8' });
-  const rel = path.relative(repo, path.resolve(repo, promptFile));
-  if (!existsSync(path.join(repo, rel))) throw new Error(`evaluation run refused: frozen prompt ${rel} not found`);
-  if (sha256(readFileSync(path.join(repo, rel))) !== promptSha256) throw new Error('evaluation run refused: prompt sha256 differs from the frozen prompt');
+/** Guard before a run on the evaluation set.
+    Review D1/D2: CLASSIF_EVAL_DIR and CLASSIF_REPO overrides are test-only
+    (production refuses them); hermetic tests run against a temp repo and dir. */
+export function assertEvalRunAllowed({ promptFile, promptSha256, model, effort, evalDir = null, repo = null }) {
+  const dir = evalDir ?? testOnlyEnv(process.env, 'CLASSIF_EVAL_DIR') ?? EVAL_DIR_DEFAULT;
+  const root = repo ?? repoRoot(process.env);
+  const git = (...a) => spawnSync('git', a, { cwd: root, encoding: 'utf8' });
+  const rel = path.relative(root, path.resolve(root, promptFile));
+  if (!existsSync(path.join(root, rel))) throw new Error(`evaluation run refused: frozen prompt ${rel} not found`);
+  if (sha256(readFileSync(path.join(root, rel))) !== promptSha256) throw new Error('evaluation run refused: prompt sha256 differs from the frozen prompt');
   if (git('ls-files', '--error-unmatch', rel).status !== 0) throw new Error(`evaluation run refused: ${rel} is not committed`);
   if (git('diff', '--quiet', 'HEAD', '--', rel).status !== 0) throw new Error(`evaluation run refused: ${rel} differs from the committed version`);
-  const previous = readAudit(evalDir).filter((e) => e.action === 'eval-run' && e.promptSha256 === promptSha256 && e.model === model && e.effort === effort);
+  const previous = readAudit(dir).filter((e) => e.action === 'eval-run' && e.promptSha256 === promptSha256 && e.model === model && e.effort === effort);
   if (previous.length) throw new Error(`evaluation run refused: prompt ${promptSha256.slice(0, 12)} already run with ${model}/${effort} (${previous[0].at})`);
   return { frozenIn: git('log', '-1', '--format=%H %cI', '--', rel).stdout.trim() };
 }
