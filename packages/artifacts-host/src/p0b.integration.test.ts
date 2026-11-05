@@ -155,21 +155,27 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("IMMO artifact host with real Pos
     expect(probes).toEqual({ "idp-bob": "403:access_denied", pending: "422:person_not_shareable",
       unknown: "422:person_not_shareable", "bob@example.test": "422:person_not_shareable" });
     // Revoke while approved, then suspend: post-suspend the grant is already
-    // ineffective (reads reread approval), and the G2 seam refuses even the
-    // cleanup grant/revoke on an unapproved target — merged person_not_shareable.
+    // ineffective (reads reread approval). Provider R5 keeps revoke allowed
+    // for a dormant principal: revoking the already-removed grant is a
+    // no-op success, and a grant (not a revoke) to a pending account stays
+    // refused with merged person_not_shareable (see the probes above).
     expect((await h.call("set_access", { artifactId, action: "revoke", principalId: bobRef, idempotencyKey: randomUUID() })).status).toBe(200);
     expect((await h.call("meta", { artifactId }, "idp-bob")).status).toBeGreaterThanOrEqual(400);
     await h.pool.query("UPDATE account_users SET status='pending' WHERE sub='idp-bob'");
     const revoked = await h.call("set_access", { artifactId, action: "revoke", principalId: bobRef, idempotencyKey: randomUUID() });
-    expect(revoked.status).toBe(422);
-    expect((revoked.body as { error: string }).error).toBe("person_not_shareable");
+    expect(revoked.status).toBe(200);
+    expect((revoked.body as { grants?: unknown[] }).grants ?? []).toEqual([]);
     // Lot I2 B1: every mutation lands in the append-only audit in the same
     // transaction (missing 0032 objects fail the set_access above, not here).
+    // The R5 no-op revoke on the dormant principal is recorded too: the
+    // cleanup attempt itself is auditable even though the grant was already
+    // gone.
     const audit = await h.pool.query(
       "SELECT actor_id, action, audience, principal_id, policy_revision FROM artifacts.artifact_access_events" +
       " WHERE artifact_id = $1 ORDER BY id", [artifactId]);
     expect(audit.rows).toMatchObject([
       { actor_id: "alice", action: "grant", audience: "user", principal_id: "idp-bob" },
+      { actor_id: "alice", action: "revoke", audience: "user", principal_id: "idp-bob" },
       { actor_id: "alice", action: "revoke", audience: "user", principal_id: "idp-bob" },
     ]);
     for (const row of audit.rows) expect(typeof row.policy_revision).toBe("string");
@@ -227,15 +233,14 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("IMMO artifact host with real Pos
     try {
       const bobRef = (await query<{ id: string }>(
         "SELECT id FROM account_users WHERE sub = 'idp-bob'")).rows[0]!.id;
-      // The flip lands after the request snapshot but before resolution, so
-      // the approved-only directory (N3) denies first with the merged
-      // person_not_shareable — earlier than the historical transaction
-      // re-read, same property: nothing commits on a stale approval. The
-      // FOR SHARE transaction re-read stays as defense-in-depth for flips
-      // that land after resolution.
+      // The flip lands after the request snapshot but before the commit, so
+      // the status-blind directory (R5) still resolves — and the FOR SHARE
+      // transaction re-read denies the stale approval instead, surfaced as
+      // 403 access_denied at the commit boundary. Same property: nothing
+      // commits on a stale approval.
       const raced = await h.call("set_access", { artifactId, action: "grant", principalId: bobRef, grant: "read", idempotencyKey: randomUUID() });
-      expect(raced.status).toBe(422);
-      expect((raced.body as { error: string }).error).toBe("person_not_shareable");
+      expect(raced.status).toBe(403);
+      expect((raced.body as { error: string }).error).toBe("access_denied");
       expect((await query("SELECT 1 FROM artifacts.artifact_access WHERE artifact_id=$1", [artifactId])).rowCount).toBe(0);
     } finally { spy.mockRestore(); }
   });

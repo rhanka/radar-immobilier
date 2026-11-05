@@ -44,7 +44,11 @@ export async function startHarness(name: string, subjects: readonly string[] = [
     [config.storageScope, config.orgId]);
   await pool.query(`INSERT INTO artifacts.host_quotas (storage_scope_id, operation_limit, byte_limit)
     VALUES ($1, 1000000, 1000000000)`, [config.storageScope]);
-  const hostOptions = { confirmation: createDeleteConfirmation(pool, config.storageScope, auth.appBaseUrl) };
+  const hostOptions = { confirmation: createDeleteConfirmation(pool, config.storageScope, auth.appBaseUrl),
+    // Files parity LOT 2 — the provider requires the page wiring as soon as
+    // the mint capability is selected (always under P0B).
+    uploadPage: { cookieSecret: "test-upload-page-secret-32-bytes-padding",
+      controlOrigin: "https://app.example.test", pageBaseUrl: "https://app.example.test/api/v1", s3Origins: [] } };
   const host = (await composeArtifactHost(pool, config, blobs, hostOptions))!;
   const control = createArtifactControl(host, config.storageScope, "pages.example.test");
   return { pool, config, host, hostOptions, control, blobs,

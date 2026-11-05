@@ -74,6 +74,40 @@ import { ClassificationError, classificationFailure } from "../services/facets/c
 import { decodeQuery } from "../services/facets/classification-query.js";
 import type { WritePageSurface } from "./write-intent-page-surface.js";
 
+/**
+ * Files parity LOT 2 §B.4 — RFC 9110 §14 single-range subset, mirrored from
+ * the provider content handler: only the `bytes=` unit with one satisfiable
+ * range is honored; malformed or multi-range headers fall back to the whole
+ * file (never an error).
+ */
+export type ParsedContentRange =
+  | { readonly start: number; readonly end: number }
+  | "full"
+  | "ignore"
+  | "unsatisfiable";
+
+export function parseContentRange(header: string | undefined, size: number): ParsedContentRange {
+  if (header === undefined) return "full";
+  const match = /^bytes=(\d*)-(\d*)$/.exec(header.trim());
+  if (match === null) return "ignore";
+  const first = match[1]!;
+  const last = match[2]!;
+  if (first === "" && last === "") return "ignore";
+  if (first === "") {
+    // Suffix range: the last N bytes; longer than the file ⇒ the file.
+    const suffix = Number(last);
+    if (!Number.isSafeInteger(suffix) || suffix <= 0) return "unsatisfiable";
+    if (suffix >= size) return size === 0 ? "unsatisfiable" : { start: 0, end: size - 1 };
+    return { start: size - suffix, end: size - 1 };
+  }
+  const start = Number(first);
+  if (!Number.isSafeInteger(start) || start >= size) return "unsatisfiable";
+  if (last === "") return { start, end: size - 1 };
+  const end = Number(last);
+  if (!Number.isSafeInteger(end) || end < start) return "ignore";
+  return { start, end: Math.min(end, size - 1) };
+}
+
 export interface ContentServeDeps {
   readonly contentBase: string;
   readonly grantSecret: string;
@@ -522,7 +556,7 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     return c.body(getDesignKitBytes(asset));
   });
 
-  app.get("*", async (c) => {
+  const serveRelease = async (c: Context) => {
     const parsed = parseContentHost(c.req.header("host"), deps.contentBase);
     if (parsed.kind === "other") return c.json({ error: "not_found" }, 404);
     if (isServiceWorkerPath(c.req.path) || isEmbedPath(c.req.path)) {
@@ -583,14 +617,33 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
         // republication. Upgrade exact legacy bridges at serve time so the
         // first H5 call navigates to /__reader/consent instead; every other
         // file goes out byte-identical.
+        let out = typeof file.body === "string" ? Buffer.from(file.body, "utf8") : Buffer.from(file.body);
         if (text !== null && file.contentType.startsWith("text/javascript")) {
           const raw = typeof file.body === "string" ? null : Buffer.from(file.body);
           const upgraded = upgradeLegacyReaderBridge(text);
           if (upgraded !== null && (raw === null || Buffer.from(text, "utf8").equals(raw))) {
-            return c.body(upgraded);
+            out = Buffer.from(upgraded, "utf8");
           }
         }
-        return c.body(typeof file.body === "string" ? file.body : new Uint8Array(file.body));
+        // Files parity LOT 2 §B.4 — single-range 206/416 with HEAD parity:
+        // byte ranges serve media (fonts, video) progressively; malformed
+        // ranges fall back to the whole file, unsatisfiable ones answer 416
+        // with the `bytes * /size` hint. Every file response advertises
+        // `accept-ranges: bytes`.
+        c.header("Accept-Ranges", "bytes");
+        const range = parseContentRange(c.req.header("range") ?? undefined, out.length);
+        if (range === "unsatisfiable") {
+          c.header("Content-Range", `bytes */${out.length}`);
+          return c.json({ error: "range_not_satisfiable" }, 416);
+        }
+        if (range !== "full" && range !== "ignore") {
+          const slice = out.subarray(range.start, range.end + 1);
+          c.header("Content-Range", `bytes ${range.start}-${range.end}/${out.length}`);
+          c.header("Content-Length", String(slice.length));
+          return c.body(new Uint8Array(slice), 206);
+        }
+        c.header("Content-Length", String(out.length));
+        return c.body(new Uint8Array(out));
       }
     }
     if (!deps.releaseFiles && deps.writePageSurface && (c.req.path === "/" || c.req.path === "/index.html")) {
@@ -606,6 +659,17 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     }
     applyReaderContentHeaders(c);
     return c.json({ error: "not_found" }, 404);
+  };
+
+  // Files parity LOT 2 — HEAD parity on both content hosts (stable artifact
+  // and exact release share this handler): same status and content headers
+  // as GET (including 206 content-range and 416), never a body. The GET
+  // handler runs unchanged so header computation cannot drift; the wrapper
+  // only drops the bytes.
+  app.get("*", serveRelease);
+  app.on("HEAD", "*", async (c) => {
+    const res = await serveRelease(c);
+    return new Response(null, { status: res.status, headers: res.headers });
   });
 
   return app;
