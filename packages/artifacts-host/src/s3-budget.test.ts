@@ -16,7 +16,9 @@ async function withHost<T>(s3: S3Stub, extra: Record<string, unknown>,
   run: (host: Awaited<ReturnType<typeof composeArtifactHost>>) => Promise<T>): Promise<T> {
   const pool = stubPool();
   const host = await composeArtifactHost(pool, stubConfig(s3.url, extra), undefined,
-    { confirmation: createDeleteConfirmation(pool, "scope", "https://app.test") });
+    { confirmation: createDeleteConfirmation(pool, "scope", "https://app.test"),
+      uploadPage: { cookieSecret: "test-upload-page-secret-32-bytes-padding",
+        controlOrigin: "https://app.test", pageBaseUrl: "https://app.test/api/v1", s3Origins: [] } });
   try { return await run(host); } finally { host.close(); await s3.close(); }
 }
 

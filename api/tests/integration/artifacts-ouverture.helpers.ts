@@ -126,7 +126,10 @@ export async function startOuverture(name: "host" | "mcp" | "commit" | "review_r
     const host = await composeArtifactHost(pool, config, { ...blobs, async putBlob(...args) {
       await uploadHook(); return blobs.putBlob(...args);
     } }, { readActivation: general, contentBase: BASE,
-      confirmation: createDeleteConfirmation(pool, config.storageScope, new URL(RESOURCE).origin) });
+      confirmation: createDeleteConfirmation(pool, config.storageScope, new URL(RESOURCE).origin),
+      uploadPage: { cookieSecret: "test-upload-page-secret-32-bytes-padding",
+        controlOrigin: "https://app.example.test", pageBaseUrl: "https://app.example.test/api/v1",
+        s3Origins: [] } });
     hosts.push(host);
     await pool.query(`INSERT INTO artifacts.host_quotas (storage_scope_id, operation_limit, byte_limit)
       VALUES ($1,1000000,1000000000) ON CONFLICT DO NOTHING`, [config.storageScope]);
@@ -148,7 +151,9 @@ export async function startOuverture(name: "host" | "mcp" | "commit" | "review_r
       ARTIFACTS_S3_BUCKET: config.s3Bucket, ARTIFACTS_S3_ENDPOINT: config.s3Endpoint,
       ARTIFACTS_S3_REGION: config.s3Region, ARTIFACTS_S3_ACCESS_KEY: config.s3AccessKey,
       ARTIFACTS_S3_SECRET_KEY: config.s3SecretKey, ARTIFACTS_CONTENT_BASE: BASE,
-      IMMO_MCP_OAUTH_RESOURCE: RESOURCE, ARTIFACTS_CONTROL_MODE: "general" };
+      IMMO_MCP_OAUTH_RESOURCE: RESOURCE, ARTIFACTS_CONTROL_MODE: "general",
+      RADAR_PUBLIC_BASE_URL: "https://app.example.test",
+      ARTIFACTS_UPLOAD_PAGE_SECRET: "test-upload-page-secret-32-bytes-padding" };
     return { pool, host, beforeUpload: (hook) => { uploadHook = hook; }, control,
       durable, memberships, setStatus, bindingEnv, close };
   } catch (error) { await close(); throw error; }

@@ -38,7 +38,10 @@ export async function l5Publication(write = true) {
   await f.pool.query("INSERT INTO artifacts.storage_scopes(id,org_id) VALUES($1,$2)", [scope, config.orgId]);
   await f.pool.query("INSERT INTO artifacts.host_quotas(storage_scope_id,operation_limit,byte_limit) VALUES($1,1000,1000000)", [scope]);
   const host = (await composeArtifactHost(f.pool, config, blobs, {
-    confirmation: createDeleteConfirmation(f.pool, scope, L5_DOMAIN.appOrigin) }))!;
+    confirmation: createDeleteConfirmation(f.pool, scope, L5_DOMAIN.appOrigin),
+    uploadPage: { cookieSecret: "test-upload-page-secret-32-bytes-padding",
+      controlOrigin: "https://app.example.test", pageBaseUrl: "https://app.example.test/api/v1",
+      s3Origins: [] } }))!;
   const control = createArtifactControl(host, scope, "pages.example.test");
   const ensured = await control.handle("ensure", author, { bindingName: randomUUID(), idempotencyKey: randomUUID() });
   expect(ensured.status).toBe(201);

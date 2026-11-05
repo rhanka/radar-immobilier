@@ -2,7 +2,7 @@ import {
   composeArtifactHost, createAccountDirectory, createArtifactControl, createArtifactsPool,
   resolveArtifactsStorageConfig, type ArtifactsConfigInput, type ArtifactsPoolParams,
   createArtifactAdmissionAuthority, readActivationEnv, resolveActivationConfig,
-  ARTIFACT_P0B, createDeleteConfirmation, type UploadPageRouteConfig,
+  ARTIFACT_P0B, createDeleteConfirmation, readUploadPageWiring,
 } from "@radar/artifacts-host";
 import type { AuthConfig } from "../config.js";
 import type { Logger } from "../logger.js";
@@ -12,24 +12,12 @@ import { createReaderConsentService } from "./reader-consent.js";
 import { createStoredReader } from "./reader-storage.js";
 
 /**
- * Files parity LOT 2 — browser upload page wiring. The page cookie secret is
- * a dedicated secret (never the session secret): it signs the
- * single-exchange `__Host-` page cookie only. Absent or short under P0B, the
- * control plane stays closed with an explicit log — the provider requires
- * this wiring as soon as the page mint capability is selected.
+ * Files parity LOT 2 — browser upload page wiring, shared with the immo-mcp
+ * binding (`readUploadPageWiring` in artifacts-host). The page cookie secret
+ * is a dedicated secret (never the session secret). Absent or short under
+ * P0B, the control plane stays closed with an explicit log — the provider
+ * requires this wiring as soon as the page mint capability is selected.
  */
-function readUploadPageWiring(auth: AuthConfig, s3Endpoint: string): UploadPageRouteConfig | null {
-  if (!ARTIFACT_P0B) return null;
-  const secret = (process.env["ARTIFACTS_UPLOAD_PAGE_SECRET"] ?? "").trim();
-  if (secret.length < 32) return null;
-  let s3Origins: readonly string[] = [];
-  try {
-    const origin = new URL(s3Endpoint).origin;
-    if (origin.startsWith("https://")) s3Origins = [origin];
-  } catch { s3Origins = []; }
-  return { cookieSecret: secret, controlOrigin: auth.appBaseUrl,
-    pageBaseUrl: `${auth.appBaseUrl.replace(/\/$/, "")}/api/v1`, s3Origins };
-}
 
 export async function startArtifactControl(options: {
   input: ArtifactsConfigInput;
@@ -57,7 +45,8 @@ export async function startArtifactControl(options: {
     if (!contentBase) throw new Error("artifact content base disabled");
     const readActivation = () => resolveActivationConfig(readActivationEnv());
     const confirmation = ARTIFACT_P0B ? createDeleteConfirmation(pool, parsed.storageScope, auth.appBaseUrl) : undefined;
-    const uploadPage = readUploadPageWiring(auth, parsed.s3Endpoint);
+    const uploadPage = ARTIFACT_P0B ? readUploadPageWiring({ secret: process.env["ARTIFACTS_UPLOAD_PAGE_SECRET"],
+      controlOrigin: auth.appBaseUrl, s3Endpoint: parsed.s3Endpoint }) : null;
     if (ARTIFACT_P0B && !uploadPage) throw new Error("artifact upload page secret missing (ARTIFACTS_UPLOAD_PAGE_SECRET)");
     const host = await composeArtifactHost(pool, parsed, undefined, { readActivation, contentBase,
       ...(confirmation ? { confirmation } : {}),

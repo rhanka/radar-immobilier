@@ -45,6 +45,7 @@ reject 's/key: ARTIFACTS_READER_SESSION_SECRET/key: WRONG/' 'exact Secret refere
 reject 's/immo-mcp-artifact-writer/immo-mcp-account-reader/g' 'exact Secret reference required for IMMO_MCP_ARTIFACT_DATABASE_URL'
 reject 's/key: IMMO_MCP_ACCOUNT_DATABASE_URL/key: WRONG/' 'exact Secret reference required for IMMO_MCP_ACCOUNT_DATABASE_URL'
 reject 's/key: ARTIFACTS_S3_ACCESS_KEY/key: WRONG/g' 'exact Secret reference required for ARTIFACTS_S3_ACCESS_KEY'
+reject 's/name: radar-artifacts-upload-page-preprod/other-secret/g' 'exact Secret reference required for ARTIFACTS_UPLOAD_PAGE_SECRET'
 reject '/CLASSIFICATION_CURSOR_KEY_ID:/a\  CLASSIFICATION_CURSOR_SECRET: fixture-only' 'credential literal forbidden'
 reject '/^  name: radar-artifact-content$/,/^---$/{s/name: radar-api$/name: radar-ui/;}' 'content routes only to the reader API'
 reject '/^  name: radar-artifact-content$/,/^---$/{s/name: http$/name: other/;}' 'content reader port must be http'

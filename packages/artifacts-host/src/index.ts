@@ -66,6 +66,8 @@ export {
   type AccountStatusQueryable,
 } from "./account-status.js";
 export { composeArtifactHost, type ArtifactHostOptions, type UploadPageRouteConfig } from "./composition.js";
+export { UPLOAD_PAGE_SECRET_MIN_LENGTH, readUploadPageWiring,
+  type UploadPageWiringInput } from "./upload-page-wiring.js";
 export { createDeleteConfirmation, type ArtifactDeleteConfirmation, type DeleteChallenge } from "./delete-confirmation.js";
 export { ARTIFACT_P0B, ARTIFACT_P0B_VERSIONS, ARTIFACT_PROVIDER_VERSION, ARTIFACT_PROFILE_DESCRIPTOR,
   ARTIFACT_STRICT, ARTIFACT_PART1, artifactProfileDescriptor,
