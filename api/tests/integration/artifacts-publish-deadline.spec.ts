@@ -99,7 +99,10 @@ describe("publish against a provider whose every operation needs three attempts"
     const s3 = await startThirdAttemptS3();
     const host = await composeArtifactHost(pool, { enabled: true, storageScope: SCOPE, orgId: "deadline_org",
       s3Bucket: "deadline", s3Endpoint: s3.url, s3Region: "bhs", s3AccessKey: "test", s3SecretKey: "test" },
-    undefined, { confirmation: createDeleteConfirmation(pool, SCOPE, "https://app.example.test") });
+    undefined, { confirmation: createDeleteConfirmation(pool, SCOPE, "https://app.example.test"),
+      uploadPage: { cookieSecret: "test-upload-page-secret-32-bytes-padding",
+        controlOrigin: "https://app.example.test", pageBaseUrl: "https://app.example.test/api/v1",
+        s3Origins: [] } });
     const control = createArtifactControl(host, SCOPE, "pages.example.test");
     const errors = vi.spyOn(console, "error").mockImplementation(() => undefined);
     try {

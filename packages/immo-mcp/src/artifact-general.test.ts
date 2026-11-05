@@ -16,6 +16,8 @@ describe("artifact general tool selection", () => {
       ...(ARTIFACT_P0B ? ["artifacts_get_source", "artifacts_set_access", "artifacts_delete",
         // Files parity LOT 1 — upload channel.
         "artifacts_create_upload", "artifacts_commit_upload", "artifacts_publish_bundle",
+        // Files parity LOT 2 — page mint, asset listing, v2 bundle.
+        "artifacts_create_upload_page", "artifacts_list_assets", "artifacts_publish_bundle_v2",
         // I2 on G2 — share tooling.
         "artifacts_lookup_people", "artifacts_list_access",
         // Reader consent LOT 1 — self-revocation.

@@ -85,7 +85,10 @@ describe("unexposed MCP adapter with the composed provider", () => {
     const scope = (await h.pool.query<{ id: string }>(
       "SELECT id FROM workspaces WHERE slug = 'artifacts-test'")).rows[0]!.id;
     const host = await composeArtifactHost(unavailable, { ...h.config, storageScope: scope }, h.blobs, {
-      confirmation: createDeleteConfirmation(unavailable, scope, auth.appBaseUrl) });
+      confirmation: createDeleteConfirmation(unavailable, scope, auth.appBaseUrl),
+      uploadPage: { cookieSecret: "test-upload-page-secret-32-bytes-padding",
+        controlOrigin: "https://app.example.test", pageBaseUrl: "https://app.example.test/api/v1",
+        s3Origins: [] } });
     try {
       await h.pool.query(`INSERT INTO artifacts.host_quotas (storage_scope_id, operation_limit, byte_limit)
         SELECT $1, operation_limit, byte_limit FROM artifacts.host_quotas WHERE storage_scope_id = $2`,
