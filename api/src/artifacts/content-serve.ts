@@ -58,6 +58,7 @@ import { GeoItemsRefusal } from "./reader-geo.js";
 import { BASKET_READ_SCOPE_ID, type BasketConsentGate } from "./reader-consent.js";
 import {
   TILE_CLIENT_MAX_AGE_SECONDS,
+  TILE_OSM_RATE_LIMIT_DEFAULT,
   TILE_PATH_PREFIX,
   TileProxy,
   createTileProxyApp,
@@ -517,6 +518,12 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
       proxy: tiles,
       isContentHost: (c) => parseContentHost(c.req.header("host"), deps.contentBase).kind !== "other",
       authorize: async (c) => (await authorized(c, true)) !== null,
+      // J1.1 OSM relay (B1): per-reader abuse guard on the OSM path only.
+      // The key is the sealed session reader; anonymous requests already
+      // fail closed on authorize, so a null key only skips the guard.
+      osmRateLimit: TILE_OSM_RATE_LIMIT_DEFAULT,
+      rateLimitKey: (c) =>
+        readSessionClaims(c.req.header("cookie"), deps.sessionSecret, now())?.readerSub ?? null,
     });
     app.use(`${TILE_PATH_PREFIX}/*`, async (c, next) => {
       await next();
@@ -556,6 +563,23 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     return c.body(getDesignKitBytes(asset));
   });
 
+  /**
+   * J1.1 SPA history fallback (application mode): on both content hosts, a
+   * request for an extension-less path that is not a reserved prefix serves
+   * the release index.html when the client navigates (Accept: text/html).
+   * Real files — including missing ones, which keep their 404 — and the
+   * reserved `/__reader`, `/__artifacts`, `/__app` subtrees never fall back.
+   */
+  function isSpaFallbackRequest(c: Context): boolean {
+    const path = c.req.path;
+    if (path === "/" || path === "/index.html") return false;
+    const first = path.split("/")[1] ?? "";
+    if (first === "__reader" || first === "__artifacts" || first === "__app") return false;
+    const last = path.split("/").pop() ?? "";
+    if (last === "" || last.includes(".")) return false;
+    return (c.req.header("accept") ?? "").includes("text/html");
+  }
+
   const serveRelease = async (c: Context) => {
     const parsed = parseContentHost(c.req.header("host"), deps.contentBase);
     if (parsed.kind === "other") return c.json({ error: "not_found" }, 404);
@@ -578,7 +602,12 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     }
     const normalized = normalizeReleasePath(c.req.path);
     if (normalized) {
-      const file = await deps.releaseFiles?.getFile(auth.artifactId, auth.releaseId, `/${normalized}`) ?? null;
+      const direct = await deps.releaseFiles?.getFile(auth.artifactId, auth.releaseId, `/${normalized}`) ?? null;
+      // SPA history fallback: an extension-less navigation that matches no
+      // release file serves the release entry point with its CSP.
+      const file = direct ?? (isSpaFallbackRequest(c)
+        ? await deps.releaseFiles?.getFile(auth.artifactId, auth.releaseId, "/index.html") ?? null
+        : null);
       if (file) {
         if (!stillOpen(auth) || !await authorityCurrent(auth)) return c.json({ error: "unauthenticated" }, 401);
         // Files parity LOT 1 — binary sub-resources (PNG, PDF, …) are never
@@ -655,6 +684,9 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     if (!deps.releaseFiles && (c.req.path === "/" || c.req.path === "/index.html")) {
       applyReaderContentHeaders(c);
       c.header("Content-Type", "text/html; charset=utf-8");
+      // The base RELEASE_CSP no longer carries the example script hash: the
+      // technical example gets its own inline-script hash like any release.
+      c.header("Content-Security-Policy", releaseCspForHtml(READER_EXAMPLE_HTML));
       return c.html(READER_EXAMPLE_HTML);
     }
     applyReaderContentHeaders(c);
