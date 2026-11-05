@@ -18,7 +18,7 @@ function providerVersion(version: string) {
 }
 
 describe("artifact provider qualification", () => {
-  it.each(["0.2.5", "0.2.6", "0.3.0", "0.2.8", "0.2.9", "0.2.10", "0.2.12", "0.2.13"])("should activate all thirteen P0b tools for %s", async (version) => {
+  it.each(["0.2.5", "0.2.6", "0.3.0", "0.2.8", "0.2.9", "0.2.10", "0.2.12", "0.2.13", "0.2.15"])("should activate all thirteen P0b tools for %s", async (version) => {
     const profile = await providerVersion(version);
     expect(profile.ARTIFACT_P0B).toBe(true);
     // Files parity LOT 1: the upload channel (create/commit/publish_bundle)
@@ -42,7 +42,7 @@ describe("artifact provider qualification", () => {
     await expect(providerVersion(version)).rejects.toThrow("artifact_provider_version_unqualified");
   });
 
-  it.each(["0.2.10", "0.2.12", "0.2.13"])("should require explicit deployment qualification before exposing part1 on %s", async (version) => {
+  it.each(["0.2.10", "0.2.12", "0.2.13", "0.2.15"])("should require explicit deployment qualification before exposing part1 on %s", async (version) => {
     vi.stubEnv("ARTIFACTS_PROFILE_REVISION", "immo-artifacts.v2");
     await expect(providerVersion(version)).rejects.toThrow("artifact_switchovers_not_qualified");
     vi.stubEnv("ARTIFACTS_INPUTS_QUALIFIED", "true");
@@ -52,7 +52,7 @@ describe("artifact provider qualification", () => {
     expect(profile.ARTIFACT_PROFILE_DESCRIPTOR).toMatchObject({ requireExpectedCurrentReleaseId: true, resultEnvelopeVersion: 2 });
   });
 
-  it.each(["0.2.10", "0.2.12", "0.2.13"])("should keep part1 closed during the input-only switchover on %s", async (version) => {
+  it.each(["0.2.10", "0.2.12", "0.2.13", "0.2.15"])("should keep part1 closed during the input-only switchover on %s", async (version) => {
     vi.stubEnv("ARTIFACTS_PROFILE_REVISION", "immo-artifacts.cas.v2");
     const profile = await providerVersion(version);
     expect(profile.ACTIVE_ARTIFACT_TOOLS).toHaveLength(13);
