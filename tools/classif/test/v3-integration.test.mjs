@@ -54,8 +54,16 @@ const toolAstraStream = [
 
 // Fake seat (§10 mechanics used by every integration below): benign astra stream yields a
 // vote with toolEvents 0 and the raw --json stream kept; a tool stream fails closed.
+// Review §12: hermetic — temp CLASSIF_HOME + fake auth (never the real seat home).
 test('integration §5/§10: fake astra seat keeps the event stream and counts tools', async () => {
   const base = tmp();
+  const home = tmp();
+  const fakeAuth = path.join(home, 'fake-auth.json');
+  writeFileSync(fakeAuth, '{"fake":"auth"}');
+  const prevHome = process.env.CLASSIF_HOME;
+  const prevSrc = process.env.CLASSIF_ASTRA_AUTH_SRC;
+  process.env.CLASSIF_HOME = home;
+  process.env.CLASSIF_ASTRA_AUTH_SRC = fakeAuth;
   try {
     const ok = await callSeat('astra-max', 'prompt', { base, timeoutMs: 30000,
       spawnImpl: fakeSpawnImpl({ stdout: benignAstraStream, lastMessage: '{"code":"S-A"}\n' }) });
@@ -67,7 +75,10 @@ test('integration §5/§10: fake astra seat keeps the event stream and counts to
       spawnImpl: fakeSpawnImpl({ stdout: toolAstraStream }) });
     assert.ok(bad.toolEvents > 0, 'tool event must count');
   } finally {
+    if (prevHome === undefined) delete process.env.CLASSIF_HOME; else process.env.CLASSIF_HOME = prevHome;
+    if (prevSrc === undefined) delete process.env.CLASSIF_ASTRA_AUTH_SRC; else process.env.CLASSIF_ASTRA_AUTH_SRC = prevSrc;
     rmSync(base, { recursive: true, force: true });
+    rmSync(home, { recursive: true, force: true });
   }
 });
 

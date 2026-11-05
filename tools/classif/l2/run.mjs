@@ -12,11 +12,13 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { callSeat } from '../run-seat.mjs';
 import { appendJsonlRecord, parseJsonlTolerant } from '../lib/jsonl.mjs';
 import { sha256 } from '../lib/render.mjs';
-import { CLASSIF_DIR, classifHome, privateDir } from '../lib/paths.mjs';
+import { CLASSIF_DIR, REPO, classifHome, privateDir } from '../lib/paths.mjs';
 import { check as checkBudget } from '../lib/budget.mjs';
 import { PROFILE_DIR, validateExtraction } from '../lib/engram.mjs';
+import { spawnSync } from 'node:child_process';
 import { buildPrompt, itemValidity, loadPack, parseAnswers, toExtraction } from './annotation.mjs';
 import { loadGoldenPack } from './golden-pack.mjs';
+import { assertFinalGuide } from '../lib/freeze.mjs';
 import { sealedFile } from '../lib/blind.mjs';
 
 // Plan v3 (owner decision 04/11): triple blind annotation = pass-1 votes of muse-wonder-max and
@@ -45,6 +47,17 @@ export function atomicWrite(file, data, opts) {
 export function applyExitPolicy(pairs, r) {
   const exitAdmissible = r.code === 0;
   return { exitAdmissible, pairs: exitAdmissible ? pairs : pairs.map((p) => ({ ...p, answer: null })) };
+}
+
+/** Sync committed-split guard for the CLI (same rule as l3/split requireCommittedSplit,
+    inlined to avoid the run→split→run cycle at top-level await). */
+function requireCommittedSplitSync(splitFile = path.join(CLASSIF_DIR, 'l3', 'manifests', 'split.json'), repo = REPO) {
+  if (!existsSync(splitFile)) throw new Error(`split refused: ${splitFile} absent (run make classif-l3b-split first)`);
+  const rel = path.relative(repo, splitFile);
+  const git = (...a) => spawnSync('git', a, { cwd: repo, encoding: 'utf8' });
+  if (git('ls-files', '--error-unmatch', rel).status !== 0) throw new Error(`split refused: ${rel} is not committed (commit the draw before any pass ≥ 2)`);
+  if (git('diff', '--quiet', 'HEAD', '--', rel).status !== 0) throw new Error(`split refused: ${rel} differs from the committed version (commit before any pass ≥ 2)`);
+  return JSON.parse(readFileSync(splitFile, 'utf8'));
 }
 
 /** Milliseconds to wait when the seat answered a quota denial ("Resets in 10m57s"), else null. */
@@ -237,23 +250,22 @@ if (process.argv[1] && path.resolve(process.argv[1]).endsWith(path.join('l2', 'r
   const home = classifHome();
   const todoFile = path.join(home, 'l2', `pass${pass}`, 'todo.json');
   const ctxFile = path.join(home, 'l2', `pass${pass}`, 'context.json');
-  // Review §4 + §3b: manual passes ≥ 2 require the COMMITTED split and HALF∈{tuning,blind}.
-  // Blind runs only under the frozen FINAL guide (sha-checked, fail closed) and before the
-  // blind seal — and only in crossreview mode (an independent blind run would bypass review).
+  // Review §4 + §3b: manual passes ≥ 2 require HALF∈{tuning,blind} and the COMMITTED split.
+  // Blind runs only in crossreview mode (checked before the split, so an independent blind
+  // review is refused even without a split), under the frozen FINAL guide (sha-checked,
+  // fail closed) and before the blind seal. Sync guards (no top-level await cycle).
   if (pass >= 2) {
-    const { requireCommittedSplit } = await import('../l3/split.mjs');
+    const half = arg('--half', '');
+    if (half !== 'tuning' && half !== 'blind') { process.stderr.write('classif-l2-pass: refusing pass ≥ 2 without --half tuning|blind (D2 firewall)\n'); process.exit(2); }
+    if (half === 'blind' && mode !== 'crossreview') { process.stderr.write('classif-l2-pass: blind half requires --mode crossreview (independent blind review bypasses cross-review)\n'); process.exit(2); }
+    if (half === 'blind' && guide !== 'FINAL') { process.stderr.write('classif-l2-pass: blind half requires --guide FINAL (frozen guide only)\n'); process.exit(2); }
     try {
-      requireCommittedSplit();
+      requireCommittedSplitSync();
     } catch (e) {
       process.stderr.write(`classif-l2-pass: ${e.message}\n`);
       process.exit(2);
     }
-    const half = arg('--half', '');
-    if (half !== 'tuning' && half !== 'blind') { process.stderr.write('classif-l2-pass: refusing pass ≥ 2 without --half tuning|blind (D2 firewall)\n'); process.exit(2); }
     if (half === 'blind') {
-      if (mode !== 'crossreview') { process.stderr.write('classif-l2-pass: blind half requires --mode crossreview (independent blind review bypasses cross-review)\n'); process.exit(2); }
-      if (guide !== 'FINAL') { process.stderr.write('classif-l2-pass: blind half requires --guide FINAL (frozen guide only)\n'); process.exit(2); }
-      const { assertFinalGuide } = await import('../lib/freeze.mjs');
       try {
         assertFinalGuide(home);
       } catch (e) {

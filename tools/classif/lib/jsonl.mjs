@@ -1,7 +1,8 @@
 // Tolerant JSONL helpers: a kill mid-append must never poison resume (plan §B-L2).
 // Writers repair a truncated tail before appending; readers skip blank and unparsable
 // lines (including a truncated last line) instead of throwing.
-import { appendFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
+import path from 'node:path';
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 
 /** Parsed records of a JSONL text: blank and unparsable lines are skipped. */
 export function parseJsonlTolerant(text) {
@@ -43,8 +44,10 @@ export function repairTruncatedJsonl(file) {
   catch { writeFileSync(file, idx === -1 ? '' : `${raw.slice(0, idx + 1)}`); }
 }
 
-/** Append one JSONL record, repairing a truncated tail first so resume stays readable. */
+/** Append one JSONL record, repairing a truncated tail first so resume stays readable.
+    Review N1: parent dirs are created (a fresh temp home has no l2/ yet). */
 export function appendJsonlRecord(file, record, { mode } = {}) {
+  mkdirSync(path.dirname(file), { recursive: true });
   repairTruncatedJsonl(file);
   if (!existsSync(file) && mode !== undefined) writeFileSync(file, '', { mode });
   appendFileSync(file, `${JSON.stringify(record)}\n`);

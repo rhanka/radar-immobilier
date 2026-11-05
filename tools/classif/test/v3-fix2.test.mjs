@@ -18,7 +18,7 @@ const tmp = (prefix = 'fix2-') => {
   try { return mkdtempSync(path.join(os.tmpdir(), prefix)); }
   catch (e) { if (e?.code !== 'EROFS' && e?.code !== 'EACCES') throw e; return mkdtempSync(path.join('/tmp', prefix)); }
 };
-const REPO_ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', '..');
+const REPO_ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', '..', '..');
 const CLASSIF_DIR = path.join(REPO_ROOT, 'tools', 'classif');
 
 function saveEnv(keys) {
@@ -276,18 +276,43 @@ test('fix2 N5: real amendMain nulls tool-using contributions', withTempHome(asyn
     const savedRepo = process.env.CLASSIF_REPO;
     process.env.CLASSIF_SPLIT_FILE = tmpSplit;
     process.env.CLASSIF_REPO = tmpRepo;
-    const toolProposal = JSON.stringify({ amendments: [{ rule: 'Tool rule from a read-only seat execution.', rationale: 'tool' }] });
-    fbMuse = fakeBin('muse', `printf '%s' '{"amendments":[]}'\nexit 0`);
-    fbClaude = fakeBin('claude', `printf '%s' '{"votes":{}}'\nexit 0`);
-    // codex --json stream on stdout: tool event + agent_message carrying the proposal.
-    // parseCodex counts the mcp_tool_call (toolEvents>0) while text still parses.
-    const toolStream2 = [
+    // Decisive tool vote: propose is clean everywhere (one rule X1); the vote is
+    // muse=yes, claude=no, codex=yes-WITH-tool-event. Fixed code nulls the codex vote
+    // (1 yes → not adopted); bcb704ca5 counts it (2 yes → adopted).
+    const rule = JSON.stringify({ amendments: [{ rule: 'Fix2 quorum rule for tool decisive vote.', rationale: 'R' }] });
+    const yesVote = JSON.stringify({ votes: { X1: true } });
+    const noVote = JSON.stringify({ votes: { X1: false } });
+    const mc = path.join(home, 'muse-n5-count');
+    const cc = path.join(home, 'claude-n5-count');
+    const xc = path.join(home, 'codex-n5-count');
+    writeFileSync(mc, '0'); writeFileSync(cc, '0'); writeFileSync(xc, '0');
+    fbMuse = fakeBin('muse', [
+      `c=$(cat "${mc}"); echo $((c+1)) > "${mc}"`,
+      `if [ "$c" = "0" ]; then printf '%s' '${rule.replace(/'/g, "'\\''")}'; else printf '%s' '${yesVote.replace(/'/g, "'\\''")}'; fi`,
+      'exit 0',
+    ].join('\n'));
+    fbClaude = fakeBin('claude', [
+      `c=$(cat "${cc}"); echo $((c+1)) > "${cc}"`,
+      `if [ "$c" = "0" ]; then printf '%s' '{"amendments":[]}'; else printf '%s' '${noVote.replace(/'/g, "'\\''")}'; fi`,
+      'exit 0',
+    ].join('\n'));
+    // codex propose: benign stream with empty amendments; codex vote: tool stream + yes vote.
+    const codexClean = [
       JSON.stringify({ type: 'thread.started', thread_id: 't' }),
-      JSON.stringify({ type: 'item.completed', item: { type: 'mcp_tool_call', server: 'x', tool: 'search' } }),
-      JSON.stringify({ type: 'item.completed', item: { type: 'agent_message', text: toolProposal } }),
+      JSON.stringify({ type: 'item.completed', item: { type: 'agent_message', text: '{"amendments":[]}' } }),
       JSON.stringify({ type: 'turn.completed', usage: {} }),
     ].join('\n');
-    fbCodex = fakeBin('codex', `printf '%s' '${toolStream2.replace(/'/g, "'\\''")}'\nexit 0`);
+    const codexToolVote = [
+      JSON.stringify({ type: 'thread.started', thread_id: 't' }),
+      JSON.stringify({ type: 'item.completed', item: { type: 'mcp_tool_call', server: 'x', tool: 'search' } }),
+      JSON.stringify({ type: 'item.completed', item: { type: 'agent_message', text: yesVote } }),
+      JSON.stringify({ type: 'turn.completed', usage: {} }),
+    ].join('\n');
+    fbCodex = fakeBin('codex', [
+      `c=$(cat "${xc}"); echo $((c+1)) > "${xc}"`,
+      `if [ "$c" = "0" ]; then printf '%s' '${codexClean.replace(/'/g, "'\\''")}'; else printf '%s' '${codexToolVote.replace(/'/g, "'\\''")}'; fi`,
+      'exit 0',
+    ].join('\n'));
     const { main: amendMain } = await import('../l2/amend.mjs');
     const rep = await amendMain(['--from', 'G0', '--to', 'G9FIX2', '--pass', '1', '--half', 'tuning']);
     const adoptedCount = Array.isArray(rep.adopted) ? rep.adopted.length : (rep.adopted ?? 0);
@@ -303,6 +328,10 @@ test('fix2 N5: real amendMain nulls tool-using contributions', withTempHome(asyn
     rmSync(tmpRepo, { recursive: true, force: true });
     const out = path.join(home, 'l1', 'pack', 'guide-G9FIX2.md');
     if (existsSync(out)) rmSync(out);
+    // Repo amend manifest written by amendMain (real CLASSIF_DIR): remove to keep the
+    // worktree clean and later §7a/plan checks hermetic.
+    const repoManifest = path.join(CLASSIF_DIR, 'l2', 'manifests', 'amend-G9FIX2.json');
+    if (existsSync(repoManifest)) rmSync(repoManifest);
   }
 }));
 
@@ -330,13 +359,14 @@ async function setupDev98(home, n = 40) {
 }
 
 // N4 via the real devMain (series 98): failed rows are retried, not cached forever.
-// Fake `vibe` fails once (exit 1) then answers P-DENSITE. On bcb704ca5 the failure is
-// cached and the resume never retries (failures stay).
+// Fake `vibe` fails once (exit 1) then answers P-DENSITE (vibe message-array format,
+// which parseVibe extracts). On bcb704ca5 the failure is cached and never retried.
 test('fix2 N4: real devMain retries failed rows on resume', withTempHome(async (home) => {
   await setupDev98(home, 3);
   const counter = path.join(home, 'vibe-count');
   writeFileSync(counter, '0');
-  const good = JSON.stringify({ verdict: 'pertinent', code: 'P-DENSITE' });
+  const inner = JSON.stringify({ verdict: 'pertinent', code: 'P-DENSITE' });
+  const good = JSON.stringify([{ role: 'assistant', type: 'message', content: [{ type: 'text', text: inner }] }]);
   const fb = fakeBin('vibe', [
     `c=$(cat "${counter}"); echo $((c+1)) > "${counter}"`,
     `if [ "$c" -lt 3 ]; then echo "boom" >&2; exit 1; fi`,
@@ -371,7 +401,8 @@ test('fix2 N4: real devMain retries failed rows on resume', withTempHome(async (
 // On bcb704ca5 supports default to 30/30, so the verdict is pass, not indeterminate.
 test('fix2 §9a: real devMain drives indeterminate from series supports', withTempHome(async (home) => {
   await setupDev98(home, 40);
-  const good = JSON.stringify({ verdict: 'pertinent', code: 'P-DENSITE' });
+  const inner = JSON.stringify({ verdict: 'pertinent', code: 'P-DENSITE' });
+  const good = JSON.stringify([{ role: 'assistant', type: 'message', content: [{ type: 'text', text: inner }] }]);
   const fb = fakeBin('vibe', `printf '%s' '${good}'\nexit 0`);
   const devManifestFile = path.join(CLASSIF_DIR, 'l4', 'manifests', 'series-98-dev.json');
   const devExisted = existsSync(devManifestFile);

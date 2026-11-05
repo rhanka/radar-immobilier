@@ -11,6 +11,7 @@ const tmp = () => {
 };
 
 // Step 0 (plan v3, owner decision 04/11): the astra-max seat route.
+// Review §12: hermetic — temp CLASSIF_HOME + fake auth (never the real seat home).
 test('astra-max route: conductor-verified codex argv, model and effort', () => {
   const r = ROUTES['astra-max'];
   assert.ok(r, 'astra-max route is registered');
@@ -18,6 +19,13 @@ test('astra-max route: conductor-verified codex argv, model and effort', () => {
   assert.equal(r.model, 'gpt-6-astra');
   assert.equal(r.effort, 'max');
   const dir = tmp();
+  const home = tmp();
+  const fakeAuth = path.join(home, 'fake-auth.json');
+  writeFileSync(fakeAuth, '{"fake":"auth"}');
+  const prevHome = process.env.CLASSIF_HOME;
+  const prevSrc = process.env.CLASSIF_ASTRA_AUTH_SRC;
+  process.env.CLASSIF_HOME = home;
+  process.env.CLASSIF_ASTRA_AUTH_SRC = fakeAuth;
   try {
     const prompt = 'classify this synthetic item';
     const built = r.build(dir, path.join(dir, 'prompt.md'), prompt);
@@ -33,7 +41,10 @@ test('astra-max route: conductor-verified codex argv, model and effort', () => {
     assert.equal(argv[argv.length - 1], '-', 'prompt delivered on stdin');
     assert.equal(built.stdin, prompt);
   } finally {
+    if (prevHome === undefined) delete process.env.CLASSIF_HOME; else process.env.CLASSIF_HOME = prevHome;
+    if (prevSrc === undefined) delete process.env.CLASSIF_ASTRA_AUTH_SRC; else process.env.CLASSIF_ASTRA_AUTH_SRC = prevSrc;
     rmSync(dir, { recursive: true, force: true });
+    rmSync(home, { recursive: true, force: true });
   }
 });
 
