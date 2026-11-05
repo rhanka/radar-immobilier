@@ -2,9 +2,9 @@ import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createMemoryStaging, createMemoryUploadSessionStore, createMemoryUploadSigner,
   stagingKey } from "@sentropic/artifacts/server/uploads";
+import { createPostgresUploadSessionStore } from "@sentropic/artifacts/adapters/postgres-uploads";
 import { createUploadSweeper } from "@sentropic/artifacts/server/gc";
 import { p0bFixture } from "./p0b.test-support.js";
-import { createPostgresUploadSessionStore } from "./upload-store.js";
 
 /**
  * Files parity LOT 1 — outside-the-model upload channel on the immo host:

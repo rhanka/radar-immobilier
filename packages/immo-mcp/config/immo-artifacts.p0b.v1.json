@@ -14,6 +14,9 @@
     "artifacts_create_upload": "immo:artifacts:write",
     "artifacts_commit_upload": "immo:artifacts:write",
     "artifacts_publish_bundle": "immo:artifacts:write",
+    "artifacts_create_upload_page": "immo:artifacts:write",
+    "artifacts_list_assets": "immo:artifacts:read",
+    "artifacts_publish_bundle_v2": "immo:artifacts:write",
     "artifacts_lookup_people": "immo:artifacts:read",
     "artifacts_list_access": "immo:artifacts:read",
     "artifacts_revoke_reader_consent": "immo:artifacts:write"
@@ -25,6 +28,9 @@
     { "tool": "artifacts_create_upload", "operation": "create_upload", "method": "POST", "path": "/uploads/create", "command": "create_upload" },
     { "tool": "artifacts_commit_upload", "operation": "commit_upload", "method": "POST", "path": "/uploads/commit", "command": "commit_upload" },
     { "tool": "artifacts_publish_bundle", "operation": "publish_bundle", "method": "POST", "path": "/publish_bundle", "command": "publish_bundle" },
+    { "tool": "artifacts_create_upload_page", "operation": "create_upload_page", "method": "POST", "path": "/uploads/page", "command": "create_upload_page" },
+    { "tool": "artifacts_list_assets", "operation": "list_assets", "method": "POST", "path": "/list_assets", "command": "list_assets" },
+    { "tool": "artifacts_publish_bundle_v2", "operation": "publish_bundle_v2", "method": "POST", "path": "/publish_bundle_v2", "command": "publish_bundle_v2" },
     { "tool": "artifacts_lookup_people", "operation": "lookup_people", "method": "POST", "path": "/lookup_people", "command": "lookup_people" },
     { "tool": "artifacts_list_access", "operation": "list_access", "method": "POST", "path": "/list_access", "command": "list_access" },
     { "tool": "artifacts_revoke_reader_consent", "operation": "revoke_reader_consent", "method": "POST", "path": "/revoke_reader_consent", "command": "revoke_reader_consent" }
@@ -36,6 +42,9 @@
     "artifacts_create_upload": { "required": ["artifactId", "mimeType"], "session": "signed PUT, exact content-length, sha256 checksum header, 10-minute URL, 24-hour session, 8 open sessions per principal" },
     "artifacts_commit_upload": { "required": ["artifactId", "uploadId", "path", "mimeType", "digest", "size", "idempotencyKey"], "verification": "server re-reads staging and re-verifies size, digest and MIME before pinning" },
     "artifacts_publish_bundle": { "required": ["artifactId", "idempotencyKey", "expectedCurrentReleaseId"], "release": "atomic release from inline files plus staged assets; union under the release ceilings" },
+    "artifacts_create_upload_page": { "required": ["artifactId"], "page": "owner-only browser mint; bytes travel browser to storage, never through the model" },
+    "artifacts_list_assets": { "required": ["artifactId"], "listing": "staged rows are owner-only; released rows need the source right" },
+    "artifacts_publish_bundle_v2": { "required": ["artifactId", "idempotencyKey", "expectedCurrentReleaseId"], "release": "atomic release from inline files plus copy/carry/keep assets; union under the release ceilings" },
     "artifacts_lookup_people": { "required": ["query"], "directory": "approved IMMO accounts by name/email; results carry userRef plus masked email hint" },
     "artifacts_list_access": { "required": ["artifactId"], "projection": "access mode plus per-principal grants (userRef, masked email hint, grant, reason)" },
     "artifacts_revoke_reader_consent": { "required": ["artifactId", "idempotencyKey"], "self": "withdraws the caller's own consent for one scope, or for every scope when scope is omitted" }

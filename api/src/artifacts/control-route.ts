@@ -2,6 +2,8 @@ import { Hono, type Context } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { getCookie } from "hono/cookie";
 import { bodyLimit } from "hono/body-limit";
+import type { UploadPageService } from "@sentropic/artifacts/server/upload-page";
+import type { UploadPageRouteCfg } from "./upload-page-route.js";
 import {
   checkAdmission,
   createArtifactAdmissionAuthority,
@@ -29,6 +31,8 @@ import {
 export type ControlOp = "ensure" | "publish" | "meta" | "list" | "get_source" | "set_access" | "delete" |
   // Files parity LOT 1 — outside-the-model upload channel.
   "create_upload" | "commit_upload" | "publish_bundle" |
+  // Files parity LOT 2 — browser page mint, asset listing, v2 bundle.
+  "create_upload_page" | "list_assets" | "publish_bundle_v2" |
   // I2 on G2 — opaque directory lookup and access listing.
   "lookup_people" | "list_access" |
   // Reader consent LOT 1 — self-revocation of the persistent consent.
@@ -39,10 +43,17 @@ const unavailableBackend: ArtifactControl = {
   handle: () => Promise.resolve({ status: 503, body: { error: "capability_unavailable" } }),
 };
 
+export interface UploadPageRouteDeps {
+  /** Browser page service over the same ledger as the provider (absent keeps the page closed). */
+  readonly service?: UploadPageService | undefined;
+  readonly config?: UploadPageRouteCfg | undefined;
+}
+
 export interface ControlRouteDeps {
   readonly auth: AuthConfig;
   readonly accounts: AccountStatusQueryable;
   readonly backend?: ArtifactControl | undefined;
+  readonly uploadPage?: UploadPageRouteDeps | undefined;
   /**
    * H3 rehearsal activation reader (861C units 2-3). Absent preserves the H2
    * behavior (approval check only). Present enforces closed-by-default cohort
@@ -193,6 +204,8 @@ export function controlRoute(deps: ControlRouteDeps): Hono {
   for (const op of ["get_source", "set_access", "delete",
     // Files parity LOT 1 — outside-the-model upload channel.
     "create_upload", "commit_upload", "publish_bundle",
+    // Files parity LOT 2 — browser page mint, asset listing, v2 bundle.
+    "create_upload_page", "list_assets", "publish_bundle_v2",
     // I2 on G2 — opaque directory lookup and access listing.
     "lookup_people", "list_access",
     // Reader consent LOT 1 — self-revocation of the persistent consent.

@@ -37,7 +37,11 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("publish against a slow provider"
       s3AccessKey: "test", s3SecretKey: "test", ...extra },
     undefined, { confirmation: h.confirmation, contentBase: "pages.test",
       readActivation: () => ({ enabled: true, subjects: [],
-        expiresAtMs: Number.POSITIVE_INFINITY, mode: "general" }) });
+        expiresAtMs: Number.POSITIVE_INFINITY, mode: "general" }),
+      // Files parity LOT 2 — the provider requires the page wiring as soon
+      // as the mint capability is selected (always under P0B).
+      uploadPage: { cookieSecret: "test-upload-page-secret-32-bytes-padding",
+        controlOrigin: "https://app.test", pageBaseUrl: "https://app.test/api/v1", s3Origins: [] } });
     extraHosts.push(host);
     return createArtifactControl(host, "p0b", "pages.test");
   }

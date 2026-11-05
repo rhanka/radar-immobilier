@@ -32,28 +32,42 @@ import { beforeAll, describe, expect, it, vi } from "vitest";
  *
  * outputSchema is deliberately outside this contract (it tracks the result
  * envelope version, as in `artifact-tool-catalogue-stability.test.ts`).
+ *
+ * Files parity LOT 2 adds exactly three definitions and changes none of the
+ * fifteen pre-existing ones: artifacts_create_upload_page (owner-only page
+ * mint, write), artifacts_list_assets (staged/released listing, read) and
+ * artifacts_publish_bundle_v2 (copy/carry/keep bundle, write). The provider
+ * 0.2.15 ships all three with static, frozen-at-birth definitions; the new
+ * golden below re-baselines the catalogue for that reason only. Proven by
+ * per-tool JSON comparison of the committed catalogue snapshots across
+ * p0b.v1, cas.v2 and v2: three additions, zero removals, zero byte changes
+ * on the pre-existing definitions (see also the stability suite, which
+ * asserts shared tools byte-identical across profiles).
  */
 
 const EXPECTED_ARTIFACT_TOOL_DEFINITIONS: readonly string[] = [
   "artifacts_commit_upload",
   "artifacts_create_upload",
+  "artifacts_create_upload_page",
   "artifacts_delete",
   "artifacts_ensure",
   "artifacts_get",
   "artifacts_get_source",
   "artifacts_list",
   "artifacts_list_access",
+  "artifacts_list_assets",
   "artifacts_list_versions",
   "artifacts_lookup_people",
   "artifacts_publish",
   "artifacts_publish_bundle",
+  "artifacts_publish_bundle_v2",
   "artifacts_revert",
   "artifacts_revoke_reader_consent",
   "artifacts_set_access",
 ];
 
 /** Golden sha256 over the canonical catalogue. Re-baseline only with owner sign-off. */
-const EXPECTED_TOOL_DEFINITIONS_HASH = "a96e0cb50fbd56e8ea333ede526207db5ae798998f7ffd654625b2b3bd9de14c";
+const EXPECTED_TOOL_DEFINITIONS_HASH = "e92d58ff875deb987c3f9f717c5e8ad9616b345d26d40b56448879c6d5d0f23e";
 
 const ENV_KEYS = ["ARTIFACTS_PROFILE_REVISION", "ARTIFACTS_INPUTS_QUALIFIED", "ARTIFACTS_RESULTS_QUALIFIED"] as const;
 
@@ -109,7 +123,7 @@ describe("artifact tool definitions hash", () => {
     tools = await loadV2Tools();
   }, 120000);
 
-  it("should serve exactly the fifteen qualified artifact tools", () => {
+  it("should serve exactly the eighteen qualified artifact tools", () => {
     expect(tools.map((tool) => tool.name).sort()).toEqual([...EXPECTED_ARTIFACT_TOOL_DEFINITIONS]);
   });
 

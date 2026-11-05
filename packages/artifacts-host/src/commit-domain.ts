@@ -58,8 +58,10 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
   pool: pg.Pool; scope: string; blobs: HttpAppDeps["publication"]["blobs"];
   publicationUrls?: HttpAppDeps["publicationUrls"];
   confirmation?: ArtifactDeleteConfirmation;
-  /** Files parity LOT 1 — upload session ledger, staging bytes and presigned PUT signer. */
+  /** Files parity — upload session ledger, staging bytes and presigned PUT signer. */
   uploads?: { sessions: UploadSessionStore; staging: StagingStore; signer: UploadSignerPort };
+  /** Files parity LOT 2 — browser upload page host wiring (required under P0B). */
+  uploadPage?: HttpAppDeps["uploadPage"];
   /** Preparation window; defaults to PREPARATION_WINDOW_MS. Derive it with resolvePublishDeadlines. */
   preparationWindowMs?: number;
 }) {
@@ -77,7 +79,9 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
     await client.query(`SELECT ${column} FROM artifacts.${table} WHERE ${column} = $1 FOR UPDATE`,
       [artifact.getStore()]);
   };
+  const publicationRefs = createPostgresClaimGuardedRefs(store, createPostgresCommitExecutor(pool));
   const app = createHttpArtifactApp({ profile, coordinator, mapHostError,
+    ...(options.uploadPage ? { uploadPage: options.uploadPage } : {}),
     derivation: { algorithm: "radar-derive-idempotency-v1", derive(input) {
       const binding = keyDomain.getStore();
       if (!binding) throw new Error("artifact key domain unavailable");
@@ -118,7 +122,7 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
     // capability_unavailable.
     readerConsent: createPostgresReaderConsentStore(pool),
     ...(options.uploads ? { uploads: { ...options.uploads, idempotency: store } } : {}),
-    publication: { blobs, intents: store, refs: createPostgresClaimGuardedRefs(store, createPostgresCommitExecutor(pool)),
+    publication: { blobs, intents: store, refs: publicationRefs,
       cleanupWindowMs: preparationWindowMs, createUnitWriter: createPostgresPublicationUnitWriter, getCurrent: publication.getCurrent,
       getRelease: publication.getRelease, listReleases: publication.listReleases,
       locks: { "artifact-lifecycle": [lock("artifacts", "id")], acl: [lock("artifact_access", "artifact_id")],
@@ -157,11 +161,11 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
             }
             // The provider command layer only knows the durable-command writers
             // (ensure/publish/set_access/delete/revert/commit_upload/
-            // publish_bundle): it throws capability_unavailable for anything
-            // else. Capabilities without provider command identity
-            // (revoke_reader_consent) keep the required idempotencyKey at the
-            // schema layer but skip the receipt probe and the attempt quota,
-            // like the quota-bounded
+            // publish_bundle/publish_bundle_v2): it throws
+            // capability_unavailable for anything else. Capabilities without
+            // provider command identity (revoke_reader_consent) keep the
+            // required idempotencyKey at the schema layer but skip the
+            // receipt probe and the attempt quota, like the quota-bounded
             // create_upload session mint; the provider executes them outside
             // the coordinator and they are naturally idempotent.
             const command = (profile.idempotency as Partial<Record<string, unknown>>)[capability] === undefined
@@ -201,5 +205,5 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
     }
   };
   return { app: { ...app, execute, handle: async (request, invocation) =>
-    projectArtifactHttpOutcome(await execute(request, invocation), profile.resultEnvelopeVersion === 2) } as typeof app, execute, store, publication };
+    projectArtifactHttpOutcome(await execute(request, invocation), profile.resultEnvelopeVersion === 2) } as typeof app, execute, store, publication, publicationRefs };
 }
