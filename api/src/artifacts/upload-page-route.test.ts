@@ -113,6 +113,16 @@ describe("uploadPageRoute browser journey", () => {
     expect(html).toContain("x-artifact-upload");
   });
 
+  it("should refuse the page document to a foreign owner", async () => {
+    const minted = await mint(service);
+    const sid = minted.pageSessionId;
+    const bob = await cookieFor("bob");
+    const foreign = await app.request(`http://${APP_HOST}/api/v1/artifacts/upload/${sid}`, {
+      headers: { host: APP_HOST, cookie: bob, "sec-fetch-mode": "navigate", "sec-fetch-dest": "document" },
+    });
+    expect(foreign.status).toBe(403);
+  });
+
   it("should exchange the minted token once, then stage and commit a file without model bytes", async () => {
     const minted = await mint(service);
     const sid = minted.pageSessionId;

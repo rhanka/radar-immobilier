@@ -5,7 +5,7 @@
     "requireExpectedCurrentReleaseId": false,
     "resultEnvelopeVersion": 1
   },
-  "providerVersion": "0.2.5 || 0.2.6 || 0.3.0 || 0.2.8 || 0.2.9 || 0.2.10 || 0.2.12 || 0.2.13 || 0.2.15",
+  "providerVersion": "0.2.5 || 0.2.6 || 0.3.0 || 0.2.8 || 0.2.9 || 0.2.10 || 0.2.12 || 0.2.13 || 0.2.15 || 0.2.16",
   "policyRevision": "radar-c4-r2",
   "additionalToolScopes": {
     "artifacts_get_source": "immo:artifacts:read",
@@ -39,7 +39,7 @@
     "artifacts_get_source": { "required": ["artifactId"], "maxFiles": 32, "maxTotalBytes": 262144 },
     "artifacts_set_access": { "required": ["artifactId", "action", "principalId", "idempotencyKey"], "grant": "read", "principalId": "opaque userRef from artifacts_lookup_people; sentropic:platform sentinel grants platform read-only; never a sub or email" },
     "artifacts_delete": { "required": ["artifactId", "idempotencyKey"], "confirmation": "trusted app session; transactional consumption", "terminal": true },
-    "artifacts_create_upload": { "required": ["artifactId", "mimeType"], "session": "signed PUT, exact content-length, sha256 checksum header, 10-minute URL, 24-hour session, 8 open sessions per principal" },
+    "artifacts_create_upload": { "required": ["artifactId", "mimeType"], "session": "signed PUT, exact content-length, exactly the announced requiredHeaders and nothing else, 10-minute URL, 24-hour session, 8 open sessions per principal" },
     "artifacts_commit_upload": { "required": ["artifactId", "uploadId", "path", "mimeType", "digest", "size", "idempotencyKey"], "verification": "server re-reads staging and re-verifies size, digest and MIME before pinning" },
     "artifacts_publish_bundle": { "required": ["artifactId", "idempotencyKey", "expectedCurrentReleaseId"], "release": "atomic release from inline files plus staged assets; union under the release ceilings" },
     "artifacts_create_upload_page": { "required": ["artifactId"], "page": "owner-only browser mint; bytes travel browser to storage, never through the model" },

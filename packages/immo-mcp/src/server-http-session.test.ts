@@ -326,6 +326,77 @@ describe("mcp http session expiry", () => {
   });
 });
 
+describe("mcp http restart contract (T1+)", () => {
+  it("answers an unknown session id with a valid token as 404, then re-initializes and succeeds", async () => {
+    const app = createImmoHttpApp(BASE_CONFIG, { keySource });
+    const token = await signToken({ sub: "user-1" });
+    const sessionId = await initialize(app, token);
+
+    // The session id is unknown to this instance (restart wiped it): 404.
+    const stale = await app.request("/mcp", {
+      method: "POST",
+      headers: mcpHeaders({ token, sessionId: "stale-after-restart" }),
+      body: JSON.stringify(searchLotsCall(2)),
+    });
+    expect(stale.status).toBe(404);
+    expect(await stale.json()).toEqual({
+      jsonrpc: "2.0",
+      error: { code: -32000, message: "Unknown or expired MCP session" },
+      id: null,
+    });
+
+    // The client re-initializes with NO session header and resumes silently.
+    const freshSessionId = await initialize(app, token);
+    expect(freshSessionId).not.toBe(sessionId);
+    const call = await app.request("/mcp", {
+      method: "POST",
+      headers: mcpHeaders({ token, sessionId: freshSessionId }),
+      body: JSON.stringify(searchLotsCall(3)),
+    });
+    expect(call.status).toBe(200);
+  });
+
+  it("checks auth before the session lookup: unknown session without a token is 401, not 404", async () => {
+    const app = createImmoHttpApp(BASE_CONFIG, { keySource });
+    const unauthenticated = await app.request("/mcp", {
+      method: "POST",
+      headers: mcpHeaders({ sessionId: "no-such-session" }),
+      body: JSON.stringify(searchLotsCall(2)),
+    });
+    expect(unauthenticated.status).toBe(401);
+    expect(unauthenticated.headers.get("www-authenticate") ?? "").toContain('error="invalid_token"');
+  });
+
+  it("restarts between calls, then resumes with a refreshed token and no manual step", async () => {
+    const tokenA = await signToken({ sub: "user-1" });
+    const before = createImmoHttpApp(BASE_CONFIG, { keySource });
+    const sessionId = await initialize(before, tokenA);
+
+    // Restart: a second instance shares keySource/config but holds no session.
+    const after = createImmoHttpApp(BASE_CONFIG, { keySource });
+    expect(getMcpSessionCount(after)).toBe(0);
+
+    // The refreshed token (same owner, new jti) still 404s on the dead id.
+    const refreshed = await signToken({ sub: "user-1", jti: "refreshed-after-restart" });
+    expect(refreshed).not.toBe(tokenA);
+    const stale = await after.request("/mcp", {
+      method: "POST",
+      headers: mcpHeaders({ token: refreshed, sessionId }),
+      body: JSON.stringify(searchLotsCall(2)),
+    });
+    expect(stale.status).toBe(404);
+
+    // Silent recovery: initialize with the refreshed token, no session header.
+    const freshSessionId = await initialize(after, refreshed);
+    const call = await after.request("/mcp", {
+      method: "POST",
+      headers: mcpHeaders({ token: refreshed, sessionId: freshSessionId }),
+      body: JSON.stringify(searchLotsCall(3)),
+    });
+    expect(call.status).toBe(200);
+  });
+});
+
 describe("loadHttpConfig session timeouts", () => {
   const baseEnv = {
     IMMO_MCP_OAUTH_ISSUER: ISSUER,
