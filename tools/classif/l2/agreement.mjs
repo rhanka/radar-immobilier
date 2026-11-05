@@ -44,13 +44,22 @@ export function majority(votes) {
   return best && best.count >= 2 ? best : null;
 }
 
-export const STOP = { alpha: 0.67, unanimity: 0.75, changed: 0.02, maxPasses: 4 };
+export const STOP = { alphaReport: 0.67, unanimityReport: 0.75, changed: 0.02, resolutionCap: 4, firstResolutionPass: 2 };
 
-export function stopDecision({ alphaVerdict, alphaCode, verdictUnanimity, changedShare, pass }) {
-  if (alphaVerdict !== null && alphaCode !== null && alphaVerdict >= STOP.alpha && alphaCode >= STOP.alpha && verdictUnanimity >= STOP.unanimity) {
-    return { stop: true, why: `α verdict ${alphaVerdict.toFixed(3)} and α code ${alphaCode.toFixed(3)} ≥ ${STOP.alpha}, verdict unanimity ${(verdictUnanimity * 100).toFixed(1)} % ≥ 75 %` };
+// Plan v3 stop rule (review §E-5): the α thresholds NEVER stop the phase alone (they are
+// reported only). Stop when a pass changes < 2 % of the re-annotated votes AND every residual
+// item has a cause class; cap at 4 resolution passes (pass 1 is blind, passes 2–5 resolve).
+// Denominator of the 2 %: votes re-annotated this pass (valid votes cast on the todo items).
+// Residuals without a majority after the cap keep status `unresolved` with their cause class.
+export function stopDecision({ changedShare, pass, residualsClassified }) {
+  if (pass >= STOP.firstResolutionPass + STOP.resolutionCap) {
+    return { stop: true, why: `cap of ${STOP.resolutionCap} resolution passes reached (pass ${pass})` };
   }
-  if (changedShare !== null && changedShare < STOP.changed) return { stop: true, why: `${(changedShare * 100).toFixed(2)} % labels changed by the pass (< 2 %)` };
-  if (pass >= STOP.maxPasses) return { stop: true, why: 'cap of 4 passes reached' };
-  return { stop: false, why: 'thresholds not met' };
+  if (changedShare !== null && changedShare < STOP.changed && residualsClassified === true) {
+    return { stop: true, why: `${(changedShare * 100).toFixed(2)} % of re-annotated votes changed (< 2 %) and every residual item is cause-classified` };
+  }
+  if (changedShare !== null && changedShare < STOP.changed && residualsClassified !== true) {
+    return { stop: false, why: `${(changedShare * 100).toFixed(2)} % changed but residual items lack a cause class` };
+  }
+  return { stop: false, why: 'resolution continues' };
 }
