@@ -192,6 +192,17 @@ describe("artifact authoring guide", () => {
     expect(edit).toContain("a PUT of any other size is refused");
   });
 
+  it("should send exactly the announced headers with no checksum header (provider 0.2.16)", () => {
+    const guide = getAuthoringGuide();
+    const editing = guide.lifecycle.editing.join("\n");
+    expect(editing).toContain("exactly the announced requiredHeaders and nothing else");
+    expect(editing.toLowerCase()).not.toContain("checksum header");
+    const edit = (guide.artifactLifecycle?.edit ?? []).join("\n");
+    expect(edit).toContain("exactly the announced requiredHeaders and nothing else");
+    expect(edit.toLowerCase()).not.toContain("checksum header");
+    expect(edit).toContain("verification_failed");
+  });
+
   it("should state the get_source bound for large releases (N5)", () => {
     const guide = getAuthoringGuide();
     const edit = (guide.artifactLifecycle?.edit ?? []).join("\n");

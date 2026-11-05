@@ -98,10 +98,10 @@ describe("files parity bundle publish and serve", () => {
         { artifactId, mimeType: file.mimeType, maxSize: bytes.length });
       expect(created.status, `create ${file.path}`).toBe(201);
       const session = created.body as { uploadId: string; uploadUrl: string;
-        requiredHeaders: Record<string, string>; checksumHeader: string };
-      const checksum = createHash("sha256").update(bytes).digest("base64");
+        requiredHeaders: Record<string, string> };
+      expect(session).not.toHaveProperty("checksumHeader");
       const put = await fetch(session.uploadUrl, { method: "PUT",
-        headers: { ...session.requiredHeaders, [session.checksumHeader]: checksum },
+        headers: { ...session.requiredHeaders },
         body: Buffer.from(bytes) });
       expect(put.status, `PUT ${file.path}`).toBeLessThan(300);
       const committed = await h.control.handle("commit_upload", "author-alice", { artifactId,
@@ -181,11 +181,10 @@ describe("files parity bundle publish and serve", () => {
       { artifactId, mimeType: "image/svg+xml", maxSize: evil.length });
     expect(created.status).toBe(201);
     const session = created.body as { uploadId: string; uploadUrl: string;
-      requiredHeaders: Record<string, string>; checksumHeader: string };
+      requiredHeaders: Record<string, string> };
     stagingLeftovers.push(session.uploadId);
     const put = await fetch(session.uploadUrl, { method: "PUT",
-      headers: { ...session.requiredHeaders,
-        [session.checksumHeader]: createHash("sha256").update(evil).digest("base64") },
+      headers: { ...session.requiredHeaders },
       body: evil });
     expect(put.status).toBeLessThan(300);
     const committed = await h.control.handle("commit_upload", "author-alice", { artifactId,
@@ -212,10 +211,9 @@ describe("files parity bundle publish and serve", () => {
         { artifactId, mimeType, maxSize: bytes.length });
       expect(created.status, `create ${path}`).toBe(201);
       const session = created.body as { uploadId: string; uploadUrl: string;
-        requiredHeaders: Record<string, string>; checksumHeader: string };
+        requiredHeaders: Record<string, string> };
       const put = await fetch(session.uploadUrl, { method: "PUT",
-        headers: { ...session.requiredHeaders,
-          [session.checksumHeader]: createHash("sha256").update(bytes).digest("base64") },
+        headers: { ...session.requiredHeaders },
         body: Buffer.from(bytes) });
       expect(put.status, `PUT ${path}`).toBeLessThan(300);
       const committed = await h.control.handle("commit_upload", "author-alice", { artifactId,
@@ -250,10 +248,9 @@ describe("files parity bundle publish and serve", () => {
     const created = await h.control.handle("create_upload", "author-alice",
       { artifactId, mimeType: "video/mp4", maxSize: videoBytes.length });
     const session = created.body as { uploadId: string; uploadUrl: string;
-      requiredHeaders: Record<string, string>; checksumHeader: string };
+      requiredHeaders: Record<string, string> };
     await fetch(session.uploadUrl, { method: "PUT",
-      headers: { ...session.requiredHeaders,
-        [session.checksumHeader]: createHash("sha256").update(videoBytes).digest("base64") },
+      headers: { ...session.requiredHeaders },
       body: videoBytes });
     await h.control.handle("commit_upload", "author-alice", { artifactId,
       uploadId: session.uploadId, path: "assets/clip.mp4", mimeType: "video/mp4",
@@ -375,8 +372,7 @@ describe("files parity bundle publish and serve", () => {
         customHeader: true, artifactId, path, mimeType, size: bytes.length });
       // The browser PUTs bytes straight to object storage (MinIO here).
       const put = await fetch(created.uploadUrl, { method: "PUT",
-        headers: { ...created.requiredHeaders,
-          [created.checksumHeader!]: createHash("sha256").update(bytes).digest("base64") },
+        headers: { ...created.requiredHeaders },
         body: Buffer.from(bytes) });
       expect(put.status, `PUT ${path}`).toBeLessThan(300);
       const record = await service!.commitFile({ cookie: exchanged.cookie, origin,

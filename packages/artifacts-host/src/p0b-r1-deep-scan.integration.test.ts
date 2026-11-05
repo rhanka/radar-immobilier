@@ -206,8 +206,7 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("R1 deep scan across every artifa
           const body = out<{ uploadId: string; requiredHeaders: Record<string, string> }>(created.body);
           const key = stagingKey("p0b", body.uploadId);
           signerDouble.put({ key, contentType: "image/png", contentLength: bytes.length }, bytes,
-            { ...body.requiredHeaders,
-              "x-amz-checksum-sha256": createHash("sha256").update(bytes).digest("base64") });
+            { ...body.requiredHeaders });
           await staging.put(key, bytes);
           const digest = `sha256:${createHash("sha256").update(bytes).digest("hex")}`;
           const committed = await memCall("commit_upload", { artifactId: scanArtifactId,
