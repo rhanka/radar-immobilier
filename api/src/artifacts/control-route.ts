@@ -2,7 +2,7 @@ import { Hono, type Context } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { getCookie } from "hono/cookie";
 import { bodyLimit } from "hono/body-limit";
-import type { UploadPageService } from "@sentropic/artifacts/server/upload-page";
+import type { UploadPageService, UploadPageStore } from "@sentropic/artifacts/server/upload-page";
 import type { UploadPageRouteCfg } from "./upload-page-route.js";
 import {
   checkAdmission,
@@ -47,6 +47,8 @@ export interface UploadPageRouteDeps {
   /** Browser page service over the same ledger as the provider (absent keeps the page closed). */
   readonly service?: UploadPageService | undefined;
   readonly config?: UploadPageRouteCfg | undefined;
+  /** Page ledger for the session↔owner binding (absent keeps the page closed). */
+  readonly pages?: UploadPageStore | undefined;
 }
 
 export interface ControlRouteDeps {

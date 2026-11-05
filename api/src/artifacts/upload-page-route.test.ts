@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { Hono } from "hono";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createHmacUploadPageCookieSigner, createMemoryUploadPageStore, createUploadPageService, type UploadPageService } from "@sentropic/artifacts/server/upload-page";
+import { createHmacUploadPageCookieSigner, createMemoryUploadPageStore, createUploadPageService, type UploadPageService, type UploadPageStore } from "@sentropic/artifacts/server/upload-page";
 import { createMemoryStaging, createMemoryUploadSessionStore } from "@sentropic/artifacts/server/uploads";
 import { createMemoryBlobStore } from "@sentropic/artifacts/server/publication";
 import type { AccountStatusQueryable, ActivationConfig } from "@radar/artifacts-host";
@@ -23,7 +23,10 @@ const ARTIFACT_ID = "123e4567-e89b-12d3-a456-426614174000";
 
 function accounts(): AccountStatusQueryable {
   return {
-    async query(_text: string) {
+    async query(text: string) {
+      // The admission authority reads the single membership workspace from
+      // this port: the test scope owns it, like one workspace per scope.
+      if (text.includes("workspace_memberships")) return { rows: [{ workspace_id: "test" }] };
       return { rows: [{ status: "approved", workspace_id: "test-workspace" }] };
     },
   };
@@ -37,10 +40,11 @@ async function cookieFor(sub: string): Promise<string> {
   return `radar_session=${token}`;
 }
 
-function pageService(): { service: UploadPageService; put: (key: string, bytes: Uint8Array) => Promise<void> } {
+function pageService(): { service: UploadPageService; pages: UploadPageStore; put: (key: string, bytes: Uint8Array) => Promise<void> } {
   const sessions = createMemoryUploadSessionStore();
   const staging = createMemoryStaging();
   const blobs = createMemoryBlobStore();
+  const pages = createMemoryUploadPageStore();
   const signer = {
     async signPut(input: { key: string; contentType: string; contentLength: number; expiresInSeconds: number }) {
       return { url: `https://s3.test/staging/${input.key}`, method: "PUT" as const,
@@ -50,7 +54,7 @@ function pageService(): { service: UploadPageService; put: (key: string, bytes: 
   };
   const refs = { async pin() { }, async unpin() { } };
   const service = createUploadPageService({
-    pages: createMemoryUploadPageStore(),
+    pages,
     sessions, staging, signer: signer as never, blobs: blobs as never, refs: refs as never,
     cookieSigner: createHmacUploadPageCookieSigner({ secret: "test-upload-page-secret-32-bytes-padding" }),
     controlOrigin: AUTH.appBaseUrl, pageBaseUrl: `${AUTH.appBaseUrl}/api/v1`, s3Origins: ["https://s3.test"],
@@ -58,20 +62,21 @@ function pageService(): { service: UploadPageService; put: (key: string, bytes: 
       mimeTypes: ["text/html", "image/png", "application/pdf"] },
     budget: { filesMax: 32, totalBytesMax: 262144 },
   });
-  return { service, put: (key, bytes) => staging.put(key, bytes) };
+  return { service, pages, put: (key, bytes) => staging.put(key, bytes) };
 }
 
-function makeApp(service: UploadPageService): Hono {
+function makeApp(service: UploadPageService, pages: UploadPageStore): Hono {
   return new Hono().route("/api/v1/artifacts", uploadPageRoute({
     auth: AUTH, accounts: accounts(),
-    readActivation: (): ActivationConfig => ({ enabled: true, subjects: ["alice"],
+    readActivation: (): ActivationConfig => ({ enabled: true, subjects: ["alice", "bob"],
       expiresAtMs: Date.now() + 3600_000 }),
     service, config: { controlOrigin: AUTH.appBaseUrl, s3Origins: ["https://s3.test"] },
+    pages, storageScope: "test",
   }));
 }
 
 async function mint(service: UploadPageService) {
-  return service.mint({ artifactId: ARTIFACT_ID, storageScopeId: "test", ownerId: "alice-id" });
+  return service.mint({ artifactId: ARTIFACT_ID, storageScopeId: "test", ownerId: "alice" });
 }
 
 const jsonHeaders = (cookie: string, extra: Record<string, string> = {}) => ({
@@ -86,8 +91,9 @@ describe("uploadPageRoute browser journey", () => {
   let cookie: string;
   beforeEach(async () => {
     vi.restoreAllMocks();
-    ({ service, put } = pageService());
-    app = makeApp(service);
+    const built = pageService();
+    ({ service, put } = built);
+    app = makeApp(service, built.pages);
     cookie = await cookieFor("alice");
   });
 
@@ -151,6 +157,40 @@ describe("uploadPageRoute browser journey", () => {
       mimeType: "image/png", size: pngBytes.length, digest,
       uploadId: created.uploadId, pageSessionId: sid }],
     });
+  });
+
+  it("should refuse a second user without consuming the single-exchange token", async () => {
+    const minted = await mint(service);
+    const sid = minted.pageSessionId;
+    const base = `http://${APP_HOST}/api/v1/artifacts/upload/${sid}`;
+    const bob = await cookieFor("bob");
+    // Bob is admitted but owns nothing here: his exchange is refused and the
+    // token stays live, then his file call is refused too.
+    const foreign = await app.request(`${base}/exchange`, { method: "POST",
+      headers: jsonHeaders(bob), body: JSON.stringify({ token: minted.token }) });
+    expect(foreign.status).toBe(403);
+    const foreignFile = await app.request(`${base}/files`, { method: "POST",
+      headers: { ...jsonHeaders(bob) },
+      body: JSON.stringify({ artifactId: ARTIFACT_ID, path: "b.png", mimeType: "image/png", size: 4 }) });
+    expect(foreignFile.status).toBe(403);
+    // The owner still exchanges the same token afterwards.
+    const exchange = await app.request(`${base}/exchange`, { method: "POST",
+      headers: jsonHeaders(cookie), body: JSON.stringify({ token: minted.token }) });
+    expect(exchange.status).toBe(200);
+    expect(exchange.headers.get("set-cookie") ?? "").toContain("__Host-artifacts_upload=");
+  });
+
+  it("should require the custom header on the exchange without consuming the token", async () => {
+    const minted = await mint(service);
+    const sid = minted.pageSessionId;
+    const base = `http://${APP_HOST}/api/v1/artifacts/upload/${sid}`;
+    const bare = await app.request(`${base}/exchange`, { method: "POST",
+      headers: { host: APP_HOST, origin: AUTH.appBaseUrl, "content-type": "application/json", cookie },
+      body: JSON.stringify({ token: minted.token }) });
+    expect(bare.status).toBe(403);
+    const exchange = await app.request(`${base}/exchange`, { method: "POST",
+      headers: jsonHeaders(cookie), body: JSON.stringify({ token: minted.token }) });
+    expect(exchange.status).toBe(200);
   });
 
   it("should refuse page calls without the custom header or bound to another artifact", async () => {

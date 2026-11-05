@@ -12,7 +12,7 @@ import {
   artifactRefusalResponse,
 } from "@radar/artifacts-host";
 import { renderUploadPage } from "@sentropic/artifacts/server/upload-page";
-import type { UploadPageService } from "@sentropic/artifacts/server/upload-page";
+import type { UploadPageService, UploadPageStore } from "@sentropic/artifacts/server/upload-page";
 import type { AuthConfig } from "../config.js";
 import {
   SESSION_COOKIE_NAME,
@@ -57,6 +57,8 @@ export interface UploadPageRouteDeps {
   readonly storageScope?: string | undefined;
   readonly service?: UploadPageService | undefined;
   readonly config?: UploadPageRouteCfg | undefined;
+  /** Page ledger for the session↔owner binding (absent keeps the page closed). */
+  readonly pages?: UploadPageStore | undefined;
 }
 
 function jsonError(c: Context, status: ContentfulStatusCode, body: Record<string, string>): Response {
@@ -137,6 +139,32 @@ async function guardPageCommit(
   return null;
 }
 
+/**
+ * Session↔owner binding: the page row binds the mint to one owner in one
+ * storage scope, so only that session (and that scope) may exchange the
+ * token or stage files. Runs before the service call, so a refused session
+ * never consumes the single-exchange token.
+ */
+async function guardPageOwner(
+  c: Context,
+  deps: UploadPageRouteDeps,
+  session: VerifiedSession,
+): Promise<{ ownerId: string; storageScopeId: string } | Response> {
+  if (!deps.pages) return jsonError(c, 503, { error: "capability_unavailable" });
+  let row;
+  try {
+    row = await deps.pages.get(c.req.param("pageSessionId"));
+  } catch {
+    return jsonError(c, 503, { error: "capability_unavailable" });
+  }
+  if (!row) return jsonError(c, 404, { error: "not_found" });
+  if (row.ownerId !== session.sub) return jsonError(c, 403, { error: "forbidden_page" });
+  if (deps.storageScope !== undefined && row.storageScopeId !== deps.storageScope) {
+    return jsonError(c, 403, { error: "forbidden_page" });
+  }
+  return row;
+}
+
 function pageError(c: Context, cause: unknown): Response {
   const message = cause instanceof Error ? cause.message : String(cause);
   if (/unknown upload page/.test(message)) return jsonError(c, 404, { error: "not_found" });
@@ -204,6 +232,14 @@ export function uploadPageRoute(deps: UploadPageRouteDeps): Hono {
     if (guarded instanceof Response) return guarded;
     const commit = await guardPageCommit(c, deps, guarded.session.sub);
     if (commit) return commit;
+    const owner = await guardPageOwner(c, deps, guarded.session);
+    if (owner instanceof Response) return owner;
+    // The exchange is a write: it requires the custom header like every
+    // file call, and it carries the request origin (not the configured
+    // one) so the service check cannot pass tautologically.
+    if (c.req.header("x-artifact-upload") !== "1") {
+      return jsonError(c, 403, { error: "forbidden_page" });
+    }
     const parsed = await readJsonBody(c);
     if (parsed instanceof Response) return parsed;
     if (typeof parsed.body.token !== "string" || parsed.body.token === "") {
@@ -211,7 +247,7 @@ export function uploadPageRoute(deps: UploadPageRouteDeps): Hono {
     }
     try {
       const result = await deps.service!.exchange({ pageSessionId: c.req.param("pageSessionId"),
-        token: parsed.body.token, origin: deps.config!.controlOrigin });
+        token: parsed.body.token, origin: c.req.header("origin") ?? "" });
       c.header("Set-Cookie", result.cookie);
       return c.json({ ok: true, maxAgeSeconds: result.maxAgeSeconds });
     } catch (cause) {
@@ -225,6 +261,8 @@ export function uploadPageRoute(deps: UploadPageRouteDeps): Hono {
     if (guarded instanceof Response) return guarded;
     const commit = await guardPageCommit(c, deps, guarded.session.sub);
     if (commit) return commit;
+    const owner = await guardPageOwner(c, deps, guarded.session);
+    if (owner instanceof Response) return owner;
     const parsed = await readJsonBody(c);
     if (parsed instanceof Response) return parsed;
     const { path, mimeType, size, artifactId } = parsed.body;
@@ -245,6 +283,8 @@ export function uploadPageRoute(deps: UploadPageRouteDeps): Hono {
     if (guarded instanceof Response) return guarded;
     const commit = await guardPageCommit(c, deps, guarded.session.sub);
     if (commit) return commit;
+    const owner = await guardPageOwner(c, deps, guarded.session);
+    if (owner instanceof Response) return owner;
     const parsed = await readJsonBody(c);
     if (parsed instanceof Response) return parsed;
     const { path, mimeType, digest, size, idempotencyKey, artifactId } = parsed.body;
@@ -265,6 +305,8 @@ export function uploadPageRoute(deps: UploadPageRouteDeps): Hono {
   app.get("/upload/:pageSessionId/files", async (c) => {
     const guarded = await guardPage(c, deps);
     if (guarded instanceof Response) return guarded;
+    const owner = await guardPageOwner(c, deps, guarded.session);
+    if (owner instanceof Response) return owner;
     const artifactId = c.req.query("artifactId");
     if (!artifactId) return jsonError(c, 400, { error: "invalid_request" });
     try {

@@ -8,6 +8,7 @@ import type { AuthConfig } from "../config.js";
 import type { Logger } from "../logger.js";
 import type { ControlRouteDeps } from "./control-route.js";
 import type { UploadPageService } from "@sentropic/artifacts/server/upload-page";
+import { createPostgresUploadPageStore } from "@sentropic/artifacts/adapters/postgres-uploads";
 import { createReaderConsentService } from "./reader-consent.js";
 import { createStoredReader } from "./reader-storage.js";
 
@@ -60,11 +61,14 @@ export async function startArtifactControl(options: {
     return { auth, accounts: pool, backend, readActivation, storageScope: parsed.storageScope,
       ...(confirmation ? { confirmation } : {}),
       // Browser upload page (LOT 2): same ledger as the provider, mounted on
-      // the control origin with the control session rules.
+      // the control origin with the control session rules. The page store
+      // backs the session↔owner binding enforced by the route before every
+      // exchange and file call.
       ...(composed.uploadPageService && composed.uploadPageConfig ? { uploadPage: {
         service: composed.uploadPageService,
         config: { controlOrigin: composed.uploadPageConfig.controlOrigin,
-          s3Origins: composed.uploadPageConfig.s3Origins } } } : {}),
+          s3Origins: composed.uploadPageConfig.s3Origins },
+        pages: createPostgresUploadPageStore(pool) } } : {}),
       readerStorage: createStoredReader(pool, parsed.storageScope, contentBase, host.blobs),
       // Reader consent — durable BASKETS consent (Gate B), never the opening.
       readerConsent: createReaderConsentService(pool, parsed.storageScope) };
