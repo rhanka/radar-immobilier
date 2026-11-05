@@ -8,9 +8,17 @@ import process from 'node:process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { callSeat, parseJsonObject } from '../run-seat.mjs';
 import { sha256 } from '../lib/render.mjs';
+import { appendJsonlRecord } from '../lib/jsonl.mjs';
 import { CLASSIF_DIR, classifHome, privateDir } from '../lib/paths.mjs';
+import { assertNoVerbatim } from '../lib/freeze.mjs';
 import { atomicWrite, ANNOTATORS, loadDevItems } from './run.mjs';
 import { latestVotes } from './converge.mjs';
+
+/** Tuning-half item ids from the committed split (plan v3 D2: amendments from tuning only). */
+export function tuningHalf() {
+  const m = JSON.parse(readFileSync(path.join(CLASSIF_DIR, 'l3', 'manifests', 'split.json'), 'utf8'));
+  return new Set(m.halves.tuning);
+}
 
 const MAX_PER_ANNOTATOR = 8;
 
@@ -62,6 +70,9 @@ export async function main(argv = process.argv.slice(2)) {
   const from = arg('--from');
   const to = arg('--to');
   const n = Number(arg('--pass'));
+  const half = argv.includes('--half') ? argv[argv.indexOf('--half') + 1] : 'tuning';
+  const deferred = argv.includes('--deferred') ? argv[argv.indexOf('--deferred') + 1].split(',').filter(Boolean) : [];
+  const active = ANNOTATORS.filter((a) => !deferred.includes(a));
   const home = classifHome();
   const packDir = path.join(home, 'l1', 'pack');
   const out = path.join(packDir, `guide-${to}.md`);
@@ -70,8 +81,14 @@ export async function main(argv = process.argv.slice(2)) {
   const criteria = readFileSync(path.join(packDir, 'criteria.md'), 'utf8');
   const definitions = readFileSync(path.join(packDir, 'codes-definitions.md'), 'utf8');
   const items = loadDevItems(home);
-  const { latest } = latestVotes(home, n);
-  const residual = JSON.parse(readFileSync(path.join(home, 'l2', `pass${n + 1}`, 'todo.json'), 'utf8')).items;
+  const { latest, gaps } = latestVotes(home, n, { deferred });
+  let residual = JSON.parse(readFileSync(path.join(home, 'l2', `pass${n + 1}`, 'todo.json'), 'utf8')).items;
+  // D2: guide amendments are drawn from tuning-half disagreements only (committed split).
+  if (half === 'tuning') {
+    const tuning = tuningHalf();
+    residual = residual.filter((id) => tuning.has(id));
+  }
+  if (!residual.length) throw new Error(`amend ${from}→${to} refused: no ${half}-half residual disagreements after pass ${n}`);
   const digest = disagreementDigest(items, latest, residual);
   const seatTmp = privateDir(path.join(home, 'l2', 'seat-tmp'));
   const common = `You maintain the annotation guide used by three annotators to classify municipal regulatory items for
@@ -86,8 +103,12 @@ criteria and the code definitions (general rules, not item-specific decisions). 
 ${digest}
 `;
   const calls = [];
-  const proposals = (await Promise.all(ANNOTATORS.map(async (a) => {
+  const callsLog = path.join(home, 'l2', 'calls.jsonl');
+  // A deferred annotator neither proposes nor votes; its last votes stand (recorded in the manifest).
+  const proposals = (await Promise.all(active.map(async (a) => {
     const r = await cachedCall(home, a, 'propose', proposePrompt, seatTmp);
+    appendJsonlRecord(callsLog, { at: new Date().toISOString(), phase: `amend-${to}`, pass: n, step: 'propose', annotator: a,
+      exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused), usage: r.usage ?? null });
     calls.push({ annotator: a, step: 'propose', exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused) });
     if (r.code !== 0) process.stderr.write(`[amend] ${a} propose seat exit code ${r.code}: proposals inadmissible (fail-closed exit policy)\n`);
     return parseProposalList(r);
@@ -101,18 +122,22 @@ false. Return ONLY JSON: {"votes":{"X1":true,"X2":false, ...}}
 
 ${union.map((x) => `- ${x.id}: ${x.rule} (rationale: ${x.rationale})`).join('\n')}
 `;
-  const ballotResults = await Promise.all(ANNOTATORS.map(async (a) => {
+  const ballotResults = await Promise.all(active.map(async (a) => {
     const r = await cachedCall(home, a, 'vote', votePrompt, seatTmp);
+    appendJsonlRecord(callsLog, { at: new Date().toISOString(), phase: `amend-${to}`, pass: n, step: 'vote', annotator: a,
+      exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused), usage: r.usage ?? null });
     calls.push({ annotator: a, step: 'vote', exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused) });
     if (r.code !== 0) process.stderr.write(`[amend] ${a} vote seat exit code ${r.code}: ballot inadmissible (fail-closed exit policy)\n`);
     return r;
   }));
   const { tally, adopted } = tallyAmendments(union, ballotResults);
   const next = `${guide.trim()}\n\n## Amendments adopted in ${to} (majority of the three annotators, after pass ${n})\n\n${adopted.map((x, i) => `${i + 1}. ${x.rule}`).join('\n')}\n`;
+  // Review §C: no verbatim golden excerpt in any guide — shingle check before the freeze.
+  assertNoVerbatim(next, home, { what: `guide ${to}` });
   writeFileSync(out, next, { mode: 0o600 });
   writeFileSync(path.join(home, 'l2', `amend-${to}.json`), JSON.stringify({ tally, calls }, null, 1), { mode: 0o600 });
-  const manifest = { kind: 'guide-amendment', from, to, afterPass: n, createdAt: new Date().toISOString(), residualItems: residual.length,
-    proposed: union.length, adopted: adopted.length, votes: tally.map((x) => x.yes), calls, guideSha256: sha256(next) };
+  const manifest = { kind: 'guide-amendment', from, to, afterPass: n, createdAt: new Date().toISOString(), half, deferred, gaps,
+    residualItems: residual.length, proposed: union.length, adopted: adopted.length, votes: tally.map((x) => x.yes), calls, guideSha256: sha256(next) };
   const repoDir = path.join(CLASSIF_DIR, 'l2', 'manifests');
   mkdirSync(repoDir, { recursive: true });
   writeFileSync(path.join(repoDir, `amend-${to}.json`), `${JSON.stringify(manifest, null, 1)}\n`);

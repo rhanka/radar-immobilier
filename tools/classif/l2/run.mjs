@@ -16,7 +16,13 @@ import { CLASSIF_DIR, classifHome, privateDir } from '../lib/paths.mjs';
 import { PROFILE_DIR, validateExtraction } from '../lib/engram.mjs';
 import { buildPrompt, itemValidity, loadPack, parseAnswers, toExtraction } from './annotation.mjs';
 
-export const ANNOTATORS = ['muse-wonder-max', 'gemini-4-argon-high', 'opus-5.5-max'];
+// Plan v3 (owner decision 04/11): triple blind annotation = pass-1 votes of muse-wonder-max and
+// opus-5.5-max (reused) + a NEW independent blind pass 1 of astra-max on the 504 items (same
+// prompt, guide G0, same lots). Gemini 4 Argon leaves the annotator trio: its pass-1 votes stay
+// archived on disk (pass1/gemini-4-argon-high/) and are excluded from convergence. Argon remains
+// an evaluated route in L4 once its seat quota is back.
+export const ANNOTATORS = ['muse-wonder-max', 'astra-max', 'opus-5.5-max'];
+export const ARCHIVED_ANNOTATORS = ['gemini-4-argon-high'];
 export const LOT_SIZE = 10;
 
 /** Atomic file write: temp file in the same directory, then rename (a kill mid-write
@@ -93,7 +99,7 @@ async function pool(tasks, n) {
   await Promise.all(Array.from({ length: n }, async () => { while (i < tasks.length) { const k = i++; await tasks[k](); } }));
 }
 
-export async function runPass({ pass, mode = 'independent', guide = 'G0', annotators = ANNOTATORS, todo = null, context = new Map(), concurrency = 4, onlyLots = null, home = classifHome(), log = (s) => process.stdout.write(`${s}\n`) }) {
+export async function runPass({ pass, mode = 'independent', guide = 'G0', annotators = ANNOTATORS, todo = null, context = new Map(), concurrency = 4, onlyLots = null, phase = null, goldenPack = null, goldenRows = null, home = classifHome(), log = (s) => process.stdout.write(`${s}\n`) }) {
   const all = loadDevItems(home);
   const items = todo ? all.filter((i) => todo.has(i.itemId)) : all;
   const lots = makeLots(items).filter((l) => !onlyLots || onlyLots.includes(l.lotId));
@@ -118,8 +124,9 @@ export async function runPass({ pass, mode = 'independent', guide = 'G0', annota
   }
   // One pool per annotator: at most `concurrency` simultaneous calls per seat (machine load).
   let done = 0;
+  if (mode === 'crossreview' && !goldenPack) throw new Error(`pass ${pass}: crossreview mode requires the golden pack (run make classif-l2-golden-pack ENV=preprod first)`);
   const work1 = async ({ annotator, lot, out }) => {
-    const prompt = buildPrompt({ profilePrompt, pack, items: lot.items, mode, context: context.get(annotator) ?? new Map() });
+    const prompt = buildPrompt({ profilePrompt, pack, items: lot.items, mode, goldenPack, context: context.get(annotator) ?? new Map() });
     let r = null;
     let pairs = [];
     let attempts = 0;
@@ -146,7 +153,7 @@ export async function runPass({ pass, mode = 'independent', guide = 'G0', annota
       }
       pairs = parseAnswers(r.text, lot.items);
       const answered = pairs.filter((p) => p.answer).length;
-      appendJsonlRecord(callsLog, { at: new Date().toISOString(), pass, mode, guide, annotator, lotId: lot.lotId, items: lot.items.length, attempt: attempts,
+      appendJsonlRecord(callsLog, { at: new Date().toISOString(), phase: phase ?? `pass${pass}`, pass, mode, guide, annotator, lotId: lot.lotId, items: lot.items.length, attempt: attempts,
         exitCode: r.code, latencyMs: r.latencyMs, reused, answered, toolEvents: r.toolEvents ?? null, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null });
       if (r.code === 0 && answered > 0 && !(r.toolEvents > 0)) break;
     }
@@ -156,7 +163,7 @@ export async function runPass({ pass, mode = 'independent', guide = 'G0', annota
     pairs = kept;
     if (!exitAdmissible) log(`[pass ${pass}] ${annotator} ${lot.lotId} seat exit code ${r.code}: votes inadmissible (fail-closed exit policy)`);
     if (r.toolEvents > 0) pairs = pairs.map((p) => ({ ...p, answer: null }));
-    const extraction = toExtraction({ annotator, pass, guideVersion: pack.guideVersion, pairs, codes });
+    const extraction = toExtraction({ annotator, pass, guideVersion: pack.guideVersion, pairs, codes, goldenRows });
     const rel = path.join('runs', `pass${pass}`, annotator, `${lot.lotId}.json`);
     atomicWrite(path.join(work, rel), JSON.stringify(extraction), { mode: 0o600 });
     const validation = extraction.nodes.length ? validateExtraction(work, rel) : { valid: false, issues: [] };
@@ -164,12 +171,14 @@ export async function runPass({ pass, mode = 'independent', guide = 'G0', annota
     // `make classif-l2-revalidate` re-checks the saved extraction (no seat call).
     const engramDown = (validation.issues ?? []).some((i) => i.code === 'engram_failed');
     const validity = !exitAdmissible ? pairs.map(({ item }) => ({ itemId: item.itemId, valid: false, issues: ['non-zero-exit'] }))
-      : engramDown ? pairs.map(({ item }) => ({ itemId: item.itemId, valid: false, issues: ['engram_failed'] })) : itemValidity(extraction, validation, pairs, codes);
+      : engramDown ? pairs.map(({ item }) => ({ itemId: item.itemId, valid: false, issues: ['engram_failed'] })) : itemValidity(extraction, validation, pairs, codes, { goldenRows });
     const annotations = pairs.map(({ item, answer }, i) => ({
       itemId: item.itemId, kind: item.kind, valid: validity[i].valid, issues: validity[i].issues,
       code: answer ? String(answer.code ?? '') : null, verdict: answer ? codes.get(String(answer.code ?? '')) ?? null : null,
       ambiguous: answer ? answer.ambiguous === true : null, cause: answer?.ambiguity_cause ?? null, quote: answer?.quote ?? null,
       reason: answer?.reason ?? null, changed: answer?.changed ?? null,
+      goldenPrecedent: Array.isArray(answer?.golden_precedent) ? answer.golden_precedent.filter((x) => Number.isInteger(x)) : [],
+      labelProvenance: typeof answer?.label_provenance === 'string' ? answer.label_provenance : null,
       quoteFound: extraction.nodes.find((n) => n.id === `annotation:${annotator}:p${pass}:${item.itemId}`)?.quote_found ?? null,
     }));
     atomicWrite(out, JSON.stringify({ pass, mode, guide, annotator, lotId: lot.lotId, promptSha256: sha256(prompt), packSha256: pack.sha256, attempts,
@@ -208,13 +217,24 @@ if (process.argv[1] && path.resolve(process.argv[1]).endsWith(path.join('l2', 'r
   const pass = Number(arg('--pass', '1'));
   const mode = arg('--mode', 'independent');
   const guide = arg('--guide', 'G0');
+  const deferred = arg('--deferred', '') ? arg('--deferred', '').split(',').filter(Boolean) : [];
+  const annotators = ANNOTATORS.filter((a) => !deferred.includes(a));
   const home = classifHome();
   const todoFile = path.join(home, 'l2', `pass${pass}`, 'todo.json');
   const ctxFile = path.join(home, 'l2', `pass${pass}`, 'context.json');
-  const todo = pass > 1 && existsSync(todoFile) ? new Set(JSON.parse(readFileSync(todoFile, 'utf8')).items) : null;
+  let todo = pass > 1 && existsSync(todoFile) ? new Set(JSON.parse(readFileSync(todoFile, 'utf8')).items) : null;
+  // D2: a manual pass on one half is filtered by the committed split (the chain does it too).
+  if (todo && arg('--half', '')) {
+    const split = JSON.parse(readFileSync(path.join(CLASSIF_DIR, 'l3', 'manifests', 'split.json'), 'utf8'));
+    const keep = new Set(split.halves[arg('--half', '')] ?? []);
+    todo = new Set([...todo].filter((id) => keep.has(id)));
+  }
   if (pass > 1 && !todo) { process.stderr.write(`classif-l2-pass: ${todoFile} missing (run make classif-l2-converge first)\n`); process.exit(2); }
   const context = existsSync(ctxFile) ? new Map(Object.entries(JSON.parse(readFileSync(ctxFile, 'utf8'))).map(([a, m]) => [a, new Map(Object.entries(m))])) : new Map();
-  runPass({ pass, mode, guide, todo, context, concurrency: Number(arg('--concurrency', '4')), home, onlyLots: arg('--lots', '') ? arg('--lots', '').split(',') : null })
+  // Cross-review consults the golden pack (plan v3 A2): loaded here, fail closed when absent.
+  const goldenPack = mode === 'crossreview' ? readFileSync(path.join(home, 'pack-golden', 'golden.md'), 'utf8') : null;
+  const goldenRows = mode === 'crossreview' ? new Set(JSON.parse(readFileSync(path.join(home, 'pack-golden', 'rows.json'), 'utf8'))) : null;
+  runPass({ pass, mode, guide, annotators, todo, context, goldenPack, goldenRows, concurrency: Number(arg('--concurrency', '4')), home, onlyLots: arg('--lots', '') ? arg('--lots', '').split(',') : null })
     .then((r) => process.stdout.write(`${JSON.stringify(r)}\n`))
     .catch((err) => { process.stderr.write(`classif-l2-pass: ${err.stack}\n`); process.exit(1); });
 }
