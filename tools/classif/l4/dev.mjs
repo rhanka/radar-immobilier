@@ -5,6 +5,8 @@
 // one isolated seat call per item. Writes per-route tuning outputs + the optimiser error file
 // (private, $CLASSIF_HOME/l4/series-k/) and a metrics-only repo manifest (Annex M: shown
 // recall/precision, indeterminate supports, failures, cost). 0 blind access.
+// Seat families (l4/families.mjs) run in parallel, routes of one family sequentially;
+// --sequential keeps the former one-route-at-a-time order (same outputs).
 import path from 'node:path';
 import process from 'node:process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -14,6 +16,7 @@ import { sha256 } from '../lib/render.mjs';
 import { classifDir, classifHome, privateDir } from '../lib/paths.mjs';
 import { compareRoutes, routeFailed, seriesVerdict, shownStats } from './metrics.mjs';
 import { assertSeriesHalves, assertSeriesRoutes, loadSeriesManifest } from './series.mjs';
+import { groupRoutesByFamily, runFamiliesParallel } from './families.mjs';
 import { check as budgetCheck } from '../lib/budget.mjs';
 import { assertNoVerbatim } from '../lib/freeze.mjs';
 import { loadCodes } from '../l2/run.mjs';
@@ -128,8 +131,11 @@ export async function main(argv = process.argv.slice(2)) {
   budgetCheck(home, uncachedDev);
   const callsLog = path.join(home, 'l2', 'calls.jsonl');
   const seatTmp = privateDir(path.join(home, 'l4', 'seat-tmp'));
-  const perRoute = {};
-  for (const route of routes) {
+  // Seat-family parallelism: families run in parallel, routes inside one family run
+  // sequentially with the existing per-route concurrency (per-seat limit unchanged).
+  // Per-item caches and per-route files are written inside the route task, so a
+  // family failure keeps the cached items of the other families on disk.
+  const runDevRoute = async (route) => {
     const outFile = path.join(dir, `dev-${route}.jsonl`);
     // Review §8: per-item persistence with key (series,promptSha,route,itemId) verified on
     // resume — a crash never repays finished items, a changed prompt never reuses stale rows.
@@ -155,7 +161,14 @@ export async function main(argv = process.argv.slice(2)) {
       return row;
     }), concurrency);
     writeFileSync(outFile, `${rows.map((r) => JSON.stringify(r)).join('\n')}\n`, { mode: 0o600 });
-    perRoute[route] = rows;
+    return rows;
+  };
+  const perRoute = {};
+  if (argv.includes('--sequential')) {
+    for (const route of routes) perRoute[route] = await runDevRoute(route);
+  } else {
+    const byRoute = await runFamiliesParallel(groupRoutesByFamily(routes), runDevRoute);
+    for (const route of routes) perRoute[route] = byRoute.get(route);
   }
   // Aggregates (Annex M) + the optimiser error file (tuning mismatches for the optimiser input).
   // Review §9: metrics published WITH and WITHOUT unresolved rows; verdict from the series spec.
