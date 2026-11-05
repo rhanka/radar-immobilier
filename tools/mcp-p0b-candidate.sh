@@ -1,7 +1,7 @@
 #!/bin/sh
 # Invoked only inside the standalone Make-managed test container.
 set -eu
-: "${P0B_VERSION:=0.2.15}"
+: "${P0B_VERSION:=0.2.16}"
 npm ci
 p0b_stage=tmp/mcp-p0b
 mkdir -p "$p0b_stage"

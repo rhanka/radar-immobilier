@@ -12,6 +12,7 @@ Guide utilisateur — 5 minutes. Prérequis : un compte claude.ai **Pro, Max, Te
 | Client Secret | **aucun** (laisser vide — flux PKCE) |
 | Scopes accordés au login | `immo:read`, `immo:search`, `immo:documents:read` |
 | Scopes artefacts (préproduction `https://preprod.immo.sent-tech.ca/mcp`) | `immo:artifacts:read` (`artifacts_list`, `artifacts_get`), `immo:artifacts:write` (`artifacts_ensure`, `artifacts_publish`) |
+| Rester connecté (préproduction) | `offline_access` — à accepter avec les autres scopes : sans lui, claude.ai ne reçoit pas de refresh token et chaque expiration (1 h) ou redémarrage du pod exige une reconnexion manuelle |
 
 ### Scopes artefacts et transition
 
@@ -24,9 +25,16 @@ Guide utilisateur — 5 minutes. Prérequis : un compte claude.ai **Pro, Max, Te
   `immo:read` satisfaire **la lecture seule** (`artifacts_list`, `artifacts_get`)
   pour les connecteurs autorisés avant ces scopes. Il ne s'applique jamais à
   l'écriture. Retrait prévu quand les connecteurs ont été ré-autorisés.
-- À la connexion préproduction, **accepter** `immo:artifacts:read` et
-  `immo:artifacts:write` en plus des trois scopes de données. Prérequis : le
-  catalogue de l'IdP préprod et le client `immo-mcp` déclarent ces deux scopes.
+- À la connexion préproduction, **accepter** `immo:artifacts:read`,
+  `immo:artifacts:write` **et `offline_access`** en plus des trois scopes de
+  données. Prérequis : le catalogue de l'IdP préprod et le client `immo-mcp`
+  déclarent ces scopes (la ligne `immo-mcp` préprod est éligible au
+  rafraîchissement ; la ligne prod ne l'est pas — ne pas cocher
+  `offline_access` en production, la demande serait refusée).
+- En production, ne demander que les trois scopes de données. Activer le
+  maintien de connexion en prod exige d'abord une décision du Product Owner
+  (rendre la ligne client `immo-mcp` éligible côté IdP), puis une mise à jour
+  de ce guide.
 
 ## Étapes
 

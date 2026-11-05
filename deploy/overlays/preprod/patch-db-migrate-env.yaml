@@ -1,0 +1,21 @@
+# People lookup, PREPROD ONLY (owner decision 05/11 « Oui, préprod »).
+#
+# Applied by the deploy-preprod CD migrate step (not by the overlay
+# kustomization, which renders durables only): strategic-merge patch over the
+# copied deploy/k8s/36-db-migrate-job.yaml, merged by env name, so the
+# preprod migrate Job runs with IMMO_MCP_PEOPLE_LOOKUP_ENABLED=1 while the
+# base manifest (prod, CI) stays at the explicit "0" default. The migrator
+# then grants SELECT (name, email) ON public.account_users to
+# immo_mcp_artifact_writer; an OFF replay revokes those columns back.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-db-migrate
+spec:
+  template:
+    spec:
+      containers:
+        - name: db-migrate
+          env:
+            - name: IMMO_MCP_PEOPLE_LOOKUP_ENABLED
+              value: "1"

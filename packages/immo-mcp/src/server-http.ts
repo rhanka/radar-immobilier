@@ -275,6 +275,14 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
     return await next();
   });
 
+  // In-memory session routing: a restart wipes every session, so clients get
+  // 404 `Unknown or expired MCP session` and re-initialize (the spec-correct
+  // path). The Deployment stays at 1 replica with `strategy: Recreate` for
+  // the same reason — never add replicas without stickiness.
+  // FOLLOW-UP (not implemented here): persist the session routing (external
+  // store for `sessionId -> pod`, or SDK stateless mode) so rolling restarts
+  // no longer force re-initialize. Until then, silent recovery relies on
+  // refresh tokens (preprod `offline_access`) + 404-triggered re-initialize.
   const sessions = new Map<string, SessionEntry>();
   sessionStores.set(app, sessions);
   const clock = deps.clock ?? (() => Date.now());

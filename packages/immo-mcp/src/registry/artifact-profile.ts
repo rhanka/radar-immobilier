@@ -261,7 +261,7 @@ export function artifactEffectiveProfile() {
       // verified commit, atomic bundle release (union of inline files and
       // staged/uploaded assets under the release ceilings above).
       artifacts_create_upload: { required: ARTIFACT_EFFECTIVE_REQUIRED.artifacts_create_upload,
-        session: "signed PUT, exact content-length, sha256 checksum header, 10-minute URL, 24-hour session, 8 open sessions per principal" },
+        session: "signed PUT, exact content-length, exactly the announced requiredHeaders and nothing else, 10-minute URL, 24-hour session, 8 open sessions per principal" },
       artifacts_commit_upload: { required: ARTIFACT_EFFECTIVE_REQUIRED.artifacts_commit_upload,
         verification: "server re-reads staging and re-verifies size, digest and MIME before pinning" },
       artifacts_publish_bundle: { required: ARTIFACT_EFFECTIVE_REQUIRED.artifacts_publish_bundle,
