@@ -132,6 +132,7 @@
     MenuTriggerButton,
   } from "@sentropic/design-system-svelte";
   import { isDegenerateBounds } from "$lib/maps/geometry-bounds.js";
+  import { basemapTileTemplate } from "$lib/maps/basemap-tiles.js";
   import { createViewportMemory } from "$lib/maps/viewport-memory.js";
   import { isSatelliteBasemapEnabled, resolveMintUrl } from "$lib/maps/geo-sat-basemap.js";
   import {
@@ -1897,7 +1898,9 @@
       const sources: Record<string, unknown> = {
         "osm-tiles": {
           type: "raster",
-          tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+          // Artifact builds override this at build time with
+          // VITE_BASEMAP_TILE_URL (same-origin tile relay).
+          tiles: [basemapTileTemplate(import.meta.env)],
           tileSize: 256,
           attribution: "© OpenStreetMap contributors",
         },

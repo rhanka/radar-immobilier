@@ -22,16 +22,25 @@
  * - Fallback upstream: Natural Resources Canada CBMT/CBCT EPSG:3857
  *   (Open Government Licence - Canada): geometry JPEG plus a text-only
  *   PNG overlay composed client-side by the I-4 base.
- * - OSM tile proxying and geo PMTiles as a basemap are rejected and have
- *   no entry in the upstream table.
+ * - OSM raster tiles (J1.1, B1) on the sibling path
+ *   GET /__artifacts/tiles/v1/osm/{z}/{x}/{y}, z 0..19, with a per-reader
+ *   rate limit, an identifying User-Agent, no client IP forwarded and the
+ *   OSM attribution kept visible in the page. Geo PMTiles as a basemap
+ *   stays rejected and has no entry in the upstream table.
  */
 import { Hono, type Context } from "hono";
 
 export const TILE_PATH_PREFIX = "/__artifacts/tiles/v1" as const;
 export const TILE_LABELS_SEGMENT = "labels" as const;
+/**
+ * J1.1 OSM relay path (B1): same-origin replacement for the OSM template
+ * baked into the UI bundle. The default path above keeps serving the
+ * BDTQ/RNCan upstreams; this sibling path serves OpenStreetMap tiles only.
+ */
+export const TILE_OSM_PATH_PREFIX = `${TILE_PATH_PREFIX}/osm` as const;
 
 /** Closed upstream identifiers. No other host can ever be fetched. */
-export type TileUpstreamId = "quebec-bdtq20k" | "rncan-cbmt";
+export type TileUpstreamId = "quebec-bdtq20k" | "rncan-cbmt" | "osm";
 
 export interface TileUpstream {
   readonly id: TileUpstreamId;
@@ -64,6 +73,14 @@ export const TILE_UPSTREAMS: Record<TileUpstreamId, TileUpstream> = {
       `https://${RNCAN_HOST}/server2_serveur2/rest/services/BaseMaps/` +
       `CBMT_TXT_3857/MapServer/tile/${z}/${y}/${x}`,
   },
+  // J1.1 OSM upstream (B1): standard raster tiles in public {z}/{x}/{y}
+  // order. Served only on the OSM relay path with a per-reader rate limit;
+  // the default path never touches this host.
+  "osm": {
+    id: "osm",
+    host: "tile.openstreetmap.org",
+    tile: (z, x, y) => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`,
+  },
 };
 
 export const TILE_UPSTREAM_ORDER: readonly TileUpstreamId[] =
@@ -72,6 +89,9 @@ export const TILE_UPSTREAM_ORDER: readonly TileUpstreamId[] =
 /** Zoom range served by the proxy (pass-wonder section 4.3). */
 export const TILE_MIN_ZOOM = 5;
 export const TILE_MAX_ZOOM = 18;
+/** Zoom range served on the OSM relay path (OSM tile usage policy: z <= 19). */
+export const TILE_OSM_MIN_ZOOM = 0;
+export const TILE_OSM_MAX_ZOOM = 19;
 
 /**
  * Quebec product footprint per zoom, copied from the BDTQ-20K
@@ -142,6 +162,13 @@ export const TILE_ATTRIBUTION_FALLBACK: TileAttribution = {
   text: "© Sa Majesté le Roi du chef du Canada, représenté par le ministre de Ressources naturelles Canada",
   licenseUrl: "https://ouvert.canada.ca/fr/licence-du-gouvernement-ouvert-canada",
   upstream: "rncan-cbmt",
+};
+
+/** Attribution the page must keep visible while the OSM relay is active. */
+export const TILE_ATTRIBUTION_OSM: TileAttribution = {
+  text: "© OpenStreetMap contributors",
+  licenseUrl: "https://www.openstreetmap.org/copyright",
+  upstream: "osm",
 };
 
 export interface TileProxyMetrics {
@@ -333,16 +360,25 @@ export class TileProxy {
     return outcome;
   }
 
-  async serve(layer: "tile" | "labels", z: number, x: number, y: number): Promise<TileResponse> {
+  /**
+   * Serve one tile. With `onlyUpstream` the proxy tries that single
+   * upstream (OSM relay path) instead of the default ordered pair; the
+   * negative entry is then namespaced so a fixed-upstream 404 never
+   * poisons the default path, and conversely.
+   */
+  async serve(layer: "tile" | "labels", z: number, x: number, y: number,
+    onlyUpstream?: TileUpstreamId): Promise<TileResponse> {
     const started = this.now();
-    const key = `${layer}:${z}/${x}/${y}`;
+    const order = onlyUpstream
+      ? [onlyUpstream]
+      : layer === "labels" ? (["rncan-cbmt"] as const) : TILE_UPSTREAM_ORDER;
+    const key = onlyUpstream ? `${onlyUpstream}:${layer}:${z}/${x}/${y}` : `${layer}:${z}/${x}/${y}`;
     const negativeUntil = this.negative.get(key);
     if (negativeUntil !== undefined && negativeUntil > started) {
       this.negativeHits += 1;
       return tileJson(404, { error: "not_found" });
     }
     if (negativeUntil !== undefined) this.negative.delete(key);
-    const order = layer === "labels" ? (["rncan-cbmt"] as const) : TILE_UPSTREAM_ORDER;
     let sawNotFound = false;
     for (const upstreamId of order) {
       const upstream = TILE_UPSTREAMS[upstreamId];
@@ -497,6 +533,43 @@ export function rawTargetWithoutQuery(requestUrl: string): string {
   return queryStart === -1 ? target : target.slice(0, queryStart);
 }
 
+/**
+ * Strict validation of the OSM relay target (query already stripped):
+ * decimal digits only, zoom bounded by the OSM tile usage policy
+ * (TILE_OSM_MIN_ZOOM..TILE_OSM_MAX_ZOOM), one tile per z worldwide.
+ */
+export function parseOsmTilePath(rawTarget: string): TilePathParse {
+  if (!rawTarget.startsWith(TILE_OSM_PATH_PREFIX + "/")) return { kind: "malformed" };
+  const coords = rawTarget.slice(TILE_OSM_PATH_PREFIX.length + 1).split("/");
+  if (coords.length !== 3 || coords.some((segment) => typeof segment !== "string" || !/^[0-9]+$/.test(segment))) {
+    return { kind: "malformed" };
+  }
+  const z = Number(coords[0] as string);
+  const x = Number(coords[1] as string);
+  const y = Number(coords[2] as string);
+  if (!Number.isSafeInteger(z) || !Number.isSafeInteger(x) || !Number.isSafeInteger(y)) {
+    return { kind: "malformed" };
+  }
+  if (z < TILE_OSM_MIN_ZOOM || z > TILE_OSM_MAX_ZOOM || x < 0 || y < 0 || x >= 2 ** z || y >= 2 ** z) {
+    return { kind: "out-of-range" };
+  }
+  return { kind: "ok", layer: "tile", z, x, y };
+}
+
+/** Per-reader abuse guard on the OSM relay path (OSM tile usage policy). */
+export interface TileRateLimit {
+  /** Sliding window in milliseconds. */
+  readonly windowMs: number;
+  /** Max relayed requests per reader key per window. */
+  readonly maxRequests: number;
+}
+
+/** Sustains interactive panning while bounding bulk scraping per reader. */
+export const TILE_OSM_RATE_LIMIT_DEFAULT: TileRateLimit = {
+  windowMs: 60_000,
+  maxRequests: 300,
+};
+
 export interface TileProxyMount {
   /** Sealed reader session check (authorized(c, true) at the I-10B mount). */
   readonly authorize: (c: Context) => Promise<boolean>;
@@ -504,6 +577,12 @@ export interface TileProxyMount {
   readonly isContentHost: (c: Context) => boolean;
   readonly proxy?: TileProxy;
   readonly proxyOptions?: TileProxyOptions;
+  /** OSM relay abuse guard; absent leaves the OSM path unthrottled (tests). */
+  readonly osmRateLimit?: TileRateLimit;
+  /** Reader key for the OSM guard (readerSub at the content mount). */
+  readonly rateLimitKey?: (c: Context) => string | null;
+  /** Clock for the OSM guard; defaults to Date.now. */
+  readonly now?: () => number;
 }
 
 /**
@@ -516,6 +595,52 @@ export interface TileProxyMount {
 export function createTileProxyApp(mount: TileProxyMount): Hono {
   const app = new Hono();
   const proxy = mount.proxy ?? new TileProxy(mount.proxyOptions ?? {});
+  const clock = mount.now ?? Date.now;
+  // Sliding-window timestamps per reader key for the OSM relay guard.
+  const osmHits = new Map<string, number[]>();
+
+  function answer(c: Context, proxyResponse: TileResponse): Response | Promise<Response> {
+    if (proxyResponse.json !== null) {
+      return c.json(proxyResponse.json, proxyResponse.status as 404 | 429 | 502);
+    }
+    const headers = new Headers();
+    for (const [name, value] of Object.entries(proxyResponse.headers)) headers.set(name, value);
+    return new Response(proxyResponse.body, { status: proxyResponse.status, headers });
+  }
+
+  /** Per-reader OSM guard; refuses 429 with Retry-After before any upstream call. */
+  function osmAllowed(c: Context): Response | null {
+    const limit = mount.osmRateLimit;
+    if (!limit) return null;
+    const key = mount.rateLimitKey?.(c) ?? null;
+    if (key === null) return null;
+    const now = clock();
+    const windowStart = now - limit.windowMs;
+    const hits = (osmHits.get(key) ?? []).filter((at) => at > windowStart);
+    if (hits.length >= limit.maxRequests) {
+      const retryAfter = Math.max(1, Math.ceil((hits[0]! + limit.windowMs - now) / 1000));
+      c.header("Retry-After", String(retryAfter));
+      return c.json({ error: "rate_limited" }, 429);
+    }
+    hits.push(now);
+    osmHits.set(key, hits);
+    return null;
+  }
+
+  // OSM relay (J1.1): registered before the generic route so the sibling
+  // prefix is not swallowed by the frozen default path.
+  app.all(`${TILE_OSM_PATH_PREFIX}/*`, async (c) => {
+    if (c.req.method !== "GET") return c.json({ error: "method_not_allowed" }, 405);
+    if (!mount.isContentHost(c)) return c.json({ error: "not_found" }, 404);
+    if (!(await mount.authorize(c))) return c.json({ error: "unauthenticated" }, 401);
+    const parsed = parseOsmTilePath(rawTargetWithoutQuery(c.req.url));
+    if (parsed.kind === "malformed") return c.json({ error: "invalid_tile" }, 400);
+    if (parsed.kind === "out-of-range") return c.json({ error: "not_found" }, 404);
+    const limited = osmAllowed(c);
+    if (limited) return limited;
+    return answer(c, await proxy.serve("tile", parsed.z, parsed.x, parsed.y, "osm"));
+  });
+
   app.all(`${TILE_PATH_PREFIX}/*`, async (c) => {
     if (c.req.method !== "GET") return c.json({ error: "method_not_allowed" }, 405);
     if (!mount.isContentHost(c)) return c.json({ error: "not_found" }, 404);
@@ -523,11 +648,7 @@ export function createTileProxyApp(mount: TileProxyMount): Hono {
     const parsed = parseTilePath(rawTargetWithoutQuery(c.req.url));
     if (parsed.kind === "malformed") return c.json({ error: "invalid_tile" }, 400);
     if (parsed.kind === "out-of-range") return c.json({ error: "not_found" }, 404);
-    const served = await proxy.serve(parsed.layer, parsed.z, parsed.x, parsed.y);
-    if (served.json !== null) return c.json(served.json, served.status as 404 | 502);
-    const headers = new Headers();
-    for (const [name, value] of Object.entries(served.headers)) headers.set(name, value);
-    return new Response(served.body, { status: served.status, headers });
+    return answer(c, await proxy.serve(parsed.layer, parsed.z, parsed.x, parsed.y));
   });
   return app;
 }
