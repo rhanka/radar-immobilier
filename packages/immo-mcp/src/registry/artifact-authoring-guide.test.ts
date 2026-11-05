@@ -50,7 +50,9 @@ describe("artifact authoring guide", () => {
   it("should expose one versioned definition with starter, H5 bridge and checklist", () => {
     const guide = getAuthoringGuide();
     expect(guide.guideId).toBe(AUTHORING_GUIDE_ID);
-    expect(guide.revision).toBe(AUTHORING_GUIDE_REVISION);
+    // Pinned literal (not the constant itself): a content change without a
+    // revision bump must fail here.
+    expect(guide.revision).toBe("2026-11-05-p0b-r7");
     expect(guide.starterVersion).toBe(STARTER_VERSION);
     expect(guide.starterVersion).toBe("1.1.0");
     expect(guide.starter.version).toBe(guide.starterVersion);
@@ -111,7 +113,9 @@ describe("artifact authoring guide", () => {
 
   it("should preserve artifact identity when editing and disclose unavailable lifecycle actions", () => {
     const guide = getAuthoringGuide();
-    expect(guide.revision).toBe(AUTHORING_GUIDE_REVISION);
+    // Pinned literal (not the constant itself): a content change without a
+    // revision bump must fail here.
+    expect(guide.revision).toBe("2026-11-05-p0b-r7");
     const editing = guide.lifecycle.editing.join("\n");
     expect(editing).toContain("artifacts_get_source → edit → artifacts_publish");
     expect(editing).toContain("same artifactId");
