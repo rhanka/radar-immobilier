@@ -4,10 +4,9 @@ import { compileHostArtifactProfile } from "./p0b-profile.js";
 import { p0bFixture } from "./p0b.test-support.js";
 
 /**
- * R1 — `list_versions` must never emit a raw IdP sub (provider 0.2.13
- * emits `author` / `authorPrincipalId` unprojected). The immo host
- * projects both through the directory: known account -> opaque userRef,
- * missing account -> `unknown-<hash>`.
+ * R1 — `list_versions` must never emit a raw IdP sub (the provider
+ * projects since 0.2.15; the immo host keeps its defence-in-depth pass:
+ * known account -> opaque userRef, missing account -> `unknown-<hash>`).
  */
 const v1 = compileHostArtifactProfile({ profileRevisionId: "immo-artifacts.p0b.v1",
   requireExpectedCurrentReleaseId: false, resultEnvelopeVersion: 1 });
