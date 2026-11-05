@@ -839,6 +839,10 @@ jobs:
           JOB="radar-db-migrate-${SHA}"
           tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
           cp deploy/k8s/36-db-migrate-job.yaml "$tmp/job.yaml"
+          # People lookup, PREPROD ONLY (owner decision 05/11): the preprod
+          # overlay patch flips IMMO_MCP_PEOPLE_LOOKUP_ENABLED ON for this Job
+          # only; the base manifest stays at the explicit "0" default (prod, CI).
+          cp deploy/overlays/preprod/patch-db-migrate-env.yaml "$tmp/"
           # Overlay: pin the migrate image to the EXACT image this path deploys,
           # scope it to this path's namespace, and give the immutable Job a per-sha
           # name (avoids an apply collision on a re-deploy within ttlSecondsAfterFinished).
@@ -852,6 +856,8 @@ jobs:
             echo "  - name: ghcr.io/rhanka/radar-api"
             echo "    newName: ${IMAGE_PREFIX}/radar-api"
             echo "    newTag: \"${SHA}\""
+            echo "patches:"
+            echo "  - path: patch-db-migrate-env.yaml"
           } > "$tmp/kustomization.yaml"
           kubectl -n "$NAMESPACE" delete job "$JOB" --ignore-not-found
           kubectl kustomize "$tmp" | kubectl -n "$NAMESPACE" apply -f -

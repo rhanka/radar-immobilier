@@ -50,7 +50,9 @@ describe("artifact authoring guide", () => {
   it("should expose one versioned definition with starter, H5 bridge and checklist", () => {
     const guide = getAuthoringGuide();
     expect(guide.guideId).toBe(AUTHORING_GUIDE_ID);
-    expect(guide.revision).toBe(AUTHORING_GUIDE_REVISION);
+    // Pinned literal (not the constant itself): a content change without a
+    // revision bump must fail here.
+    expect(guide.revision).toBe("2026-11-05-p0b-r7");
     expect(guide.starterVersion).toBe(STARTER_VERSION);
     expect(guide.starterVersion).toBe("1.1.0");
     expect(guide.starter.version).toBe(guide.starterVersion);
@@ -111,7 +113,9 @@ describe("artifact authoring guide", () => {
 
   it("should preserve artifact identity when editing and disclose unavailable lifecycle actions", () => {
     const guide = getAuthoringGuide();
-    expect(guide.revision).toBe(AUTHORING_GUIDE_REVISION);
+    // Pinned literal (not the constant itself): a content change without a
+    // revision bump must fail here.
+    expect(guide.revision).toBe("2026-11-05-p0b-r7");
     const editing = guide.lifecycle.editing.join("\n");
     expect(editing).toContain("artifacts_get_source → edit → artifacts_publish");
     expect(editing).toContain("same artifactId");
@@ -186,6 +190,17 @@ describe("artifact authoring guide", () => {
     const edit = (guide.artifactLifecycle?.edit ?? []).join("\n");
     expect(edit).toContain("artifacts_create_upload({artifactId, mimeType, maxSize:<exact file byte size>})");
     expect(edit).toContain("a PUT of any other size is refused");
+  });
+
+  it("should send exactly the announced headers with no checksum header (provider 0.2.16)", () => {
+    const guide = getAuthoringGuide();
+    const editing = guide.lifecycle.editing.join("\n");
+    expect(editing).toContain("exactly the announced requiredHeaders and nothing else");
+    expect(editing.toLowerCase()).not.toContain("checksum header");
+    const edit = (guide.artifactLifecycle?.edit ?? []).join("\n");
+    expect(edit).toContain("exactly the announced requiredHeaders and nothing else");
+    expect(edit.toLowerCase()).not.toContain("checksum header");
+    expect(edit).toContain("verification_failed");
   });
 
   it("should state the get_source bound for large releases (N5)", () => {
