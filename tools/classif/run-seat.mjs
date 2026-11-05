@@ -111,13 +111,15 @@ approval_policy = "never"
 sandbox_mode = "read-only"
 `;
 
-export function ensureAstraHome(home = classifHome()) {
+export function ensureAstraHome(home = classifHome(), { authSrc = process.env.CLASSIF_ASTRA_AUTH_SRC ?? null } = {}) {
   const dir = astraCodexHomeDir(home);
   privateDir(dir);
   fs.writeFileSync(path.join(dir, 'config.toml'), ASTRA_ISOLATED_CONFIG, { mode: 0o600 });
-  const src = path.join(os.homedir(), '.codex', 'auth.json');
+  // Review §12: hermetic tests set CLASSIF_ASTRA_AUTH_SRC to a fake auth file (or
+  // CLASSIF_HOME to a temp home) — the real ~/.codex/auth.json is never read in tests.
+  const src = authSrc ?? path.join(os.homedir(), '.codex', 'auth.json');
   const dst = path.join(dir, 'auth.json');
-  if (fs.existsSync(src)) {
+  if (src && fs.existsSync(src)) {
     fs.copyFileSync(src, dst);
     fs.chmodSync(dst, 0o600);
   } else if (!fs.existsSync(dst)) {
@@ -132,7 +134,7 @@ export function ensureAstraHome(home = classifHome()) {
 // or item type counts too — the caller nulls the vote when toolEvents > 0.
 export const CODEX_KNOWN_EVENT_TYPES = new Set([
   'thread.started', 'turn.started', 'turn.completed', 'turn.failed',
-  'item.started', 'item.updated', 'item.completed', 'error',
+  'item.started', 'item.updated', 'item.completed',
 ]);
 
 // Only these item types are benign model output. Everything else (command_execution,
@@ -148,7 +150,8 @@ export function countCodexToolEvents(stdout) {
   for (const line of String(stdout ?? '').split('\n')) {
     if (!line.trim()) continue;
     let e;
-    try { e = JSON.parse(line); } catch { continue; }
+    // Review §10: fail closed on form — a non-JSON line is not a benign event.
+    try { e = JSON.parse(line); } catch { toolEvents++; unknownTypes.push('<non-json>'); continue; }
     const type = e?.type ?? e?.event ?? null;
     if (!type || typeof type !== 'string') { toolEvents++; unknownTypes.push('<missing-type>'); continue; }
     if (!CODEX_KNOWN_EVENT_TYPES.has(type)) { toolEvents++; unknownTypes.push(type); continue; }

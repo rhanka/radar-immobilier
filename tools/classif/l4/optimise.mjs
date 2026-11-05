@@ -115,6 +115,11 @@ export async function main(argv = process.argv.slice(2)) {
     tuningOutputs[route] = parseJsonlTolerant(readFileSync(path.join(dir, `dev-${route}.jsonl`), 'utf8'));
   }
   const errors = JSON.parse(readFileSync(path.join(dir, 'errors.json'), 'utf8'));
+  // Review N7: refuse the overwrite BEFORE any paid call or budget check — a frozen
+  // P(k+1) must fail before burning optimiser calls (the cache softened the old order).
+  const next = Number(k) + 1;
+  const outPrompt = path.join(CLASSIF_DIR, 'l4', 'prompts', `P${next}.md`);
+  if (existsSync(outPrompt)) throw new Error(`classif-l4-optimise: refusing to overwrite frozen prompt ${outPrompt}`);
   // D5: 2 proposals + 1 reconciliation = 3 calls.
   budgetCheck(home, optimisers.length + 1);
   const callsLog = path.join(home, 'l2', 'calls.jsonl');
@@ -131,10 +136,6 @@ export async function main(argv = process.argv.slice(2)) {
   if (!fusedText) throw new Error('reconciliation returned no usable prompt');
   // Review §C: no verbatim golden excerpt in any prompt — shingle check before the freeze.
   assertNoVerbatim(fusedText, home, { what: `prompt P${Number(k) + 1}` });
-  const next = Number(k) + 1;
-  const outPrompt = path.join(CLASSIF_DIR, 'l4', 'prompts', `P${next}.md`);
-  // Review §11: never overwrite a frozen prompt.
-  if (existsSync(outPrompt)) throw new Error(`classif-l4-optimise: refusing to overwrite frozen prompt ${outPrompt}`);
   writeFileSync(outPrompt, `${fusedText.trim()}\n`);
   const manifest = { kind: 'l4-optimise', series: k, next: `P${next}`, createdAt: new Date().toISOString(),
     optimisers, proposalSha256: proposals.map((p) => sha256(p)), promptSha256: sha256(`${fusedText.trim()}\n`),
