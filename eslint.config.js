@@ -30,6 +30,7 @@ export default tseslint.config(
         requestAnimationFrame: "readonly",
         Image: "readonly",
         fetch: "readonly",
+        setTimeout: "readonly",
       },
     },
   },
