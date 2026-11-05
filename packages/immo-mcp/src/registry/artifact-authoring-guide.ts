@@ -246,7 +246,8 @@ export function getAuthoringGuide(): AuthoringGuide {
             "with map.on('click', cb) and map.on('hover', cb); zoom with map.zoomIn()/zoomOut()/setView(view).",
           "Keep both attribution strings above visible in a bottom-right overlay that is never hidden and never " +
             "behind a toggle; never paint tiles when the attribution for the active upstream is absent. img-src " +
-            "stays 'self' with zero external origin and zero CSP violation; worker-src 'none' is invariant.",
+            "stays 'self' data: blob: with zero external origin and zero CSP violation; workers run same-origin " +
+            "under worker-src 'self' while service workers stay refused.",
         ],
         kit: "map",
         version: MAP_KIT_VERSION,
@@ -279,7 +280,8 @@ export function getAuthoringGuide(): AuthoringGuide {
           "Keep the mapBase.attribution entries visible below the map whenever a tile layer is on.",
         ],
         limits: [
-          "worker-src 'none' is invariant: no Worker, no service worker, no blob: URL — the base needs none.",
+          "worker-src 'self': workers run as same-origin assets when the page needs them; service workers stay " +
+            "refused and no worker runs from blob: — the base needs none.",
           "No inline style attribute, no injected <style>, no external tile, glyph or font fetch by default; " +
             "tile images, once enabled, stay same-origin under img-src 'self'. " +
             "A page violating this fails the CSP gate and stays unpublished.",

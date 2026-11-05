@@ -13,7 +13,6 @@
  * reader-storage binds this port to committed PostgreSQL manifests and
  * digest-verified S3 blobs. The in-memory provider below is for module tests.
  */
-import { READER_EXAMPLE_SCRIPT_HASH } from "./reader-example.js";
 import { createHash } from "node:crypto";
 import { parse, type DefaultTreeAdapterMap } from "parse5";
 
@@ -30,25 +29,36 @@ export interface ReleaseFileProvider {
   ) => Promise<ReleaseFile | null>;
 }
 
+/**
+ * Generic application CSP (J1.0 report §6, owner decision 05/11: every immo
+ * artifact runs in application mode, no profile opt-in). Served as the base
+ * header on every content path; per-release inline script hashes are added
+ * by releaseCspForHtml when an HTML file carries inline script.
+ */
 export const RELEASE_CSP =
-  `default-src 'self'; script-src 'self' 'sha256-${READER_EXAMPLE_SCRIPT_HASH}'; ` +
-  `style-src 'self'; img-src 'self' data:; connect-src 'self'; worker-src 'none'; ` +
-  `frame-ancestors 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'`;
+  `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; ` +
+  `img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob:; connect-src 'self'; ` +
+  `worker-src 'self'; child-src 'self'; frame-src 'none'; frame-ancestors 'none'; ` +
+  `object-src 'none'; base-uri 'none'; form-action 'none'`;
 
-/** Authorize only the inline bytes of this immutable release, never unsafe-inline. */
+/**
+ * Authorize only the inline script bytes of this immutable release: script-src
+ * never carries unsafe-inline. Inline <style> is NOT hashed: style-src already
+ * carries 'unsafe-inline' (Svelte style attributes, pdf.js runtime <style>),
+ * and any style hash would make CSP2/3 browsers ignore that 'unsafe-inline'.
+ */
 export function releaseCspForHtml(html: string): string {
-  const hashes = { script: [] as string[], style: [] as string[] };
+  const scriptHashes: string[] = [];
   const visit = (node: DefaultTreeAdapterMap["node"]): void => {
-    if ("tagName" in node && (node.tagName === "script" || node.tagName === "style")) {
+    if ("tagName" in node && node.tagName === "script") {
       const text = node.childNodes.map((child) => "value" in child ? child.value : "").join("");
-      hashes[node.tagName].push(`'sha256-${createHash("sha256").update(text).digest("base64")}'`);
+      scriptHashes.push(`'sha256-${createHash("sha256").update(text).digest("base64")}'`);
     }
     if ("childNodes" in node) node.childNodes.forEach(visit);
     if ("content" in node) visit(node.content);
   };
   visit(parse(normalizeReleaseHtml(html)));
-  return RELEASE_CSP.replace("script-src 'self'", `script-src 'self' ${hashes.script.join(" ")}`)
-    .replace("style-src 'self'", `style-src 'self' ${hashes.style.join(" ")}`);
+  return RELEASE_CSP.replace("script-src 'self'", `script-src 'self' ${scriptHashes.join(" ")}`);
 }
 
 const CONTENT_TYPES: Record<string, string> = {
@@ -57,6 +67,12 @@ const CONTENT_TYPES: Record<string, string> = {
   ".mjs": "text/javascript; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".json": "application/json",
+  // J1.1 — the real UI ships these: .geojson (municipal outlines),
+  // .mjs (pdf.js module worker), .woff2 (bundled fonts), .pbf (vector
+  // tiles, proxy octets only) and .wasm (reserved, none shipped today).
+  ".geojson": "application/json",
+  ".pbf": "application/x-protobuf",
+  ".wasm": "application/wasm",
   // Files parity LOT 1 — binary release assets, served byte-identical under
   // nosniff; SVG/PDF additionally get a sandboxed document CSP at serve time.
   // Files parity LOT 2 — variable fonts and funnel videos ride the same

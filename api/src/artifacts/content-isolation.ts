@@ -8,8 +8,9 @@
  *
  * L3 release CSP: published HTML/CSS/JS sets load as same-origin
  * sub-resources (script-src/style-src 'self') and call H5 over the same
- * origin (connect-src 'self'). The technical example inline script stays
- * allowed by hash. Workers, frames and objects stay refused.
+ * origin (connect-src 'self'). The technical example inline script is
+ * allowed by its hash through releaseCspForHtml at serve time. Workers,
+ * frames and objects stay refused.
  */
 import type { Context, MiddlewareHandler } from "hono";
 import { RELEASE_CSP } from "./release-files.js";
