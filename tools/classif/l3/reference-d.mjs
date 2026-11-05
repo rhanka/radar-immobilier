@@ -20,7 +20,7 @@ import path from 'node:path';
 import process from 'node:process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { sha256 } from '../lib/render.mjs';
-import { CLASSIF_DIR, classifHome, privateDir } from '../lib/paths.mjs';
+import { classifDir, classifHome, privateDir } from '../lib/paths.mjs';
 import { sealBlindSet } from '../lib/blind.mjs';
 import { ANNOTATORS, loadCodes, loadDevItems } from '../l2/run.mjs';
 import { latestVotes, loadComplements } from '../l2/converge.mjs';
@@ -149,8 +149,8 @@ export async function main(argv = process.argv.slice(2)) {
     hashes: { referenceD: sha256(body), blindPlain: seal.plainSha256, blindSealed: seal.sealedSha256 },
     externalEvidence: ref.filter((r) => r.evidence.external_evidence).length,
     trackEvent: 'to be recorded by the conductor (single track writer) before P0: referenceDSha256 + blind seal hashes above' };
-  mkdirSync(path.join(CLASSIF_DIR, 'l3', 'manifests'), { recursive: true });
-  writeFileSync(path.join(CLASSIF_DIR, 'l3', 'manifests', 'reference-d.json'), `${JSON.stringify(manifest, null, 1)}\n`);
+  mkdirSync(path.join(classifDir(process.env), 'l3', 'manifests'), { recursive: true });
+  writeFileSync(path.join(classifDir(process.env), 'l3', 'manifests', 'reference-d.json'), `${JSON.stringify(manifest, null, 1)}\n`);
   process.stdout.write(`${JSON.stringify(manifest, null, 2)}\n`);
   return manifest;
 }
