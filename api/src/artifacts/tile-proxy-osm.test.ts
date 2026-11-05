@@ -9,6 +9,8 @@ import { fingerprintReaderProfile } from "./reader-profile.js";
 import { mintGrant } from "./preview-grant.js";
 import {
   TILE_ATTRIBUTION_OSM,
+  TILE_BREAKER_DEFAULT_MS,
+  TILE_BREAKER_MAX_MS,
   TILE_CLIENT_MAX_AGE_SECONDS,
   TILE_OSM_MAX_ZOOM,
   TILE_OSM_PATH_PREFIX,
@@ -16,6 +18,8 @@ import {
   createTileProxy,
   createTileProxyApp,
   parseOsmTilePath,
+  parseRetryAfterMs,
+  SlidingWindowLimiter,
   TileProxy,
   type TileProxyMount,
   type TileProxyOptions,
@@ -216,6 +220,111 @@ describe("OSM per-reader rate limit", () => {
 
   it("should default to the documented per-minute budget", () => {
     expect(TILE_OSM_RATE_LIMIT_DEFAULT).toEqual({ windowMs: 60_000, maxRequests: 300 });
+  });
+});
+
+describe("OSM throttle breaker (review m2)", () => {
+  it("should map an upstream 429 to 503 with Retry-After and stop every reader until it elapses", async () => {
+    let now = 1_000_000;
+    let upstreamStatus = 429;
+    const control = stubFetch(() => upstreamStatus === 200
+      ? response(200, { "content-type": "image/png" }, PNG)
+      : response(upstreamStatus, { "content-type": "text/plain", "retry-after": "120" }));
+    let reader = "reader-alice";
+    const { app, proxy } = osmApp(control, { proxyOptions: { now: () => now },
+      osmRateLimit: { windowMs: 60_000, maxRequests: 100 }, rateLimitKey: () => reader });
+    const first = await app.request(OSM_TILE);
+    expect(first.status).toBe(503);
+    expect(first.headers.get("retry-after")).toBe("120");
+    expect(await first.json()).toEqual({ error: "upstream_throttled" });
+    expect(proxy.breakerOpenUntil("osm", now)).toBe(now + 120_000);
+    // Another reader, another tile: the breaker is global, no upstream call.
+    reader = "reader-bob";
+    now += 30_000;
+    const blocked = await app.request(`${TILE_OSM_PATH_PREFIX}/10/541/367`);
+    expect(blocked.status).toBe(503);
+    expect(blocked.headers.get("retry-after")).toBe("90");
+    expect(control.calls()).toBe(1);
+    // Past Retry-After the breaker closes and the upstream is tried again.
+    now += 91_000;
+    upstreamStatus = 200;
+    expect((await app.request(OSM_TILE)).status).toBe(200);
+    expect(control.calls()).toBe(2);
+    expect(proxy.breakerOpenUntil("osm", now)).toBeNull();
+  });
+
+  it.each([403, 418])("should open the breaker on %i with the default short pause", async (status) => {
+    let now = 5_000_000;
+    const control = stubFetch(() => response(status, { "content-type": "text/plain" }));
+    const { app, proxy } = osmApp(control, { proxyOptions: { now: () => now } });
+    const res = await app.request(OSM_TILE);
+    expect(res.status).toBe(503);
+    expect(res.headers.get("retry-after")).toBe(String(TILE_BREAKER_DEFAULT_MS / 1000));
+    expect(proxy.breakerOpenUntil("osm", now)).toBe(now + TILE_BREAKER_DEFAULT_MS);
+    expect((await app.request(OSM_TILE)).status).toBe(503);
+    expect(control.calls()).toBe(1);
+    now += TILE_BREAKER_DEFAULT_MS;
+    await app.request(OSM_TILE);
+    expect(control.calls()).toBe(2);
+  });
+
+  it("should keep serving a stale cached tile while the breaker is open", async () => {
+    let now = 1_000_000;
+    let throttled = false;
+    const control = stubFetch(() => throttled
+      ? response(429, { "retry-after": "60" })
+      : response(200, { "content-type": "image/png", "cache-control": "max-age=60" }, PNG));
+    const { app } = osmApp(control, { proxyOptions: { now: () => now } });
+    expect((await app.request(OSM_TILE)).status).toBe(200);
+    now += 61_000;
+    throttled = true;
+    const stale = await app.request(OSM_TILE);
+    expect(stale.status).toBe(200);
+    expect(new Uint8Array(await stale.arrayBuffer())).toEqual(PNG);
+    expect((await app.request(OSM_TILE)).status).toBe(200);
+    expect(control.calls()).toBe(2);
+  });
+
+  it("should leave the default BDTQ/RNCan path without a breaker", async () => {
+    const control = stubFetch(() => response(429, { "retry-after": "120" }));
+    const proxy = createTileProxy({ fetchImpl: control.fetch });
+    const res = await proxy.serve("tile", 12, 1200, 1400);
+    expect(res.status).toBe(502);
+    expect(proxy.breakerOpenUntil("quebec-bdtq20k")).toBeNull();
+    expect(proxy.breakerOpenUntil("rncan-cbmt")).toBeNull();
+  });
+
+  it("should parse Retry-After seconds and HTTP-dates within the short bounds", () => {
+    const now = Date.parse("2026-11-05T12:00:00Z");
+    expect(parseRetryAfterMs("30", now)).toBe(30_000);
+    expect(parseRetryAfterMs(null, now)).toBe(TILE_BREAKER_DEFAULT_MS);
+    expect(parseRetryAfterMs("soon", now)).toBe(TILE_BREAKER_DEFAULT_MS);
+    expect(parseRetryAfterMs("0", now)).toBe(1_000);
+    expect(parseRetryAfterMs("Thu, 05 Nov 2026 12:02:00 GMT", now)).toBe(120_000);
+    expect(parseRetryAfterMs("999999", now)).toBe(TILE_BREAKER_MAX_MS);
+  });
+});
+
+describe("OSM limiter memory (review m3)", () => {
+  it("should purge readers whose window is empty", () => {
+    const limiter = new SlidingWindowLimiter({ windowMs: 60_000, maxRequests: 5 });
+    for (let i = 0; i < 50; i += 1) expect(limiter.check(`reader-${i}`, 1_000)).toBeNull();
+    expect(limiter.size).toBe(50);
+    expect(limiter.check("reader-late", 1_000 + 60_001)).toBeNull();
+    expect(limiter.size).toBe(1);
+  });
+
+  it("should cap tracked readers by evicting the least recently seen", () => {
+    const limiter = new SlidingWindowLimiter({ windowMs: 60_000, maxRequests: 1 }, 3);
+    expect(limiter.check("a", 1)).toBeNull();
+    expect(limiter.check("b", 2)).toBeNull();
+    expect(limiter.check("c", 3)).toBeNull();
+    expect(limiter.check("a", 4)).toBe(60);
+    expect(limiter.check("d", 5)).toBeNull();
+    expect(limiter.size).toBe(3);
+    // b was the least recently seen: evicted, so its budget starts fresh.
+    expect(limiter.check("b", 6)).toBeNull();
+    expect(limiter.check("a", 7)).toBe(60);
   });
 });
 
