@@ -30,10 +30,6 @@ function digestOf(bytes: Uint8Array): string {
   return `sha256:${createHash("sha256").update(bytes).digest("hex")}`;
 }
 
-function checksumOf(bytes: Uint8Array): string {
-  return createHash("sha256").update(bytes).digest("base64");
-}
-
 describe.skipIf(!process.env.P0B_DATABASE_URL)("files parity upload channel", () => {
   let fixture: Awaited<ReturnType<typeof p0bFixture>>;
   let call: (op: string, args: unknown, actor?: string) => Promise<{ status: number; body: unknown }>;
@@ -55,9 +51,11 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("files parity upload channel", ()
     const created = await call("create_upload", { artifactId, mimeType, maxSize: bytes.length }, actor);
     expect(created.status, `create ${path}`).toBe(201);
     const body = created.body as { uploadId: string; requiredHeaders: Record<string, string> };
+    expect(Object.keys(body.requiredHeaders).sort()).toEqual(["content-length", "content-type"]);
+    expect(JSON.stringify(body.requiredHeaders).toLowerCase()).not.toContain("x-amz-");
     const key = stagingKey("p0b", body.uploadId);
     signerDouble.put({ key, contentType: mimeType, contentLength: bytes.length }, bytes,
-      { ...body.requiredHeaders, "x-amz-checksum-sha256": checksumOf(bytes) });
+      { ...body.requiredHeaders });
     await staging.put(key, bytes);
     const committed = await call("commit_upload", { artifactId, uploadId: body.uploadId,
       path, mimeType, digest: digestOf(bytes), size: bytes.length, idempotencyKey }, actor);
@@ -112,7 +110,8 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("files parity upload channel", ()
   it("should complete the guide's literal upload sequence with the exact byte size (R4)", async () => {
     // Follows artifactLifecycle.edit word for word: create_upload with
     // maxSize set to the exact file byte size, PUT of exactly those bytes
-    // with the checksum header, commit pinning, then one atomic bundle.
+    // with exactly the announced requiredHeaders, commit pinning, then one
+    // atomic bundle.
     const ensured = await call("ensure", { bindingName: randomUUID(), idempotencyKey: randomUUID() });
     expect(ensured.status).toBe(201);
     const artifactId = (ensured.body as { artifactId: string }).artifactId;
@@ -121,10 +120,12 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("files parity upload channel", ()
     const created = await call("create_upload", { artifactId, mimeType: "image/png", maxSize: bytes.length });
     expect(created.status).toBe(201);
     const createdBody = created.body as { uploadId: string; uploadUrl: string; requiredHeaders: Record<string, string> };
-    // "PUT the exact bytes with the checksum header"
+    expect(createdBody).not.toHaveProperty("checksumHeader");
+    expect(Object.keys(createdBody.requiredHeaders).sort()).toEqual(["content-length", "content-type"]);
+    // "PUT the exact bytes with exactly the announced requiredHeaders"
     const key = stagingKey("p0b", createdBody.uploadId);
     signerDouble.put({ key, contentType: "image/png", contentLength: bytes.length }, bytes,
-      { ...createdBody.requiredHeaders, "x-amz-checksum-sha256": checksumOf(bytes) });
+      { ...createdBody.requiredHeaders });
     await staging.put(key, bytes);
     // "artifacts_commit_upload({artifactId, uploadId, path, mimeType, digest, size, idempotencyKey}) to pin"
     const committed = await call("commit_upload", { artifactId, uploadId: createdBody.uploadId,
@@ -167,12 +168,72 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("files parity upload channel", ()
     const body = created.body as { uploadId: string; requiredHeaders: Record<string, string> };
     const key = stagingKey("p0b", body.uploadId);
     signerDouble.put({ key, contentType: "image/svg+xml", contentLength: evil.length }, evil,
-      { ...body.requiredHeaders, "x-amz-checksum-sha256": checksumOf(evil) });
+      { ...body.requiredHeaders });
     await staging.put(key, evil);
     const committed = await call("commit_upload", { artifactId, uploadId: body.uploadId, path: "evil.svg",
       mimeType: "image/svg+xml", digest: digestOf(evil), size: evil.length, idempotencyKey: randomUUID() });
     expect(committed.status).toBe(422);
     expect((committed.body as { error: string }).error).toBe("verification_failed");
+  });
+
+  it("should commit with exactly the announced headers and refuse a corrupted upload fail-closed with no release", async () => {
+    // Provider 0.2.16: create_upload announces exactly the signed headers
+    // (content-type + exact content-length, no x-amz-* and no checksumHeader);
+    // commit_upload re-verifies the staged bytes and refuses a mismatch with
+    // verification_failed, deleting the staging and closing the session.
+    // A fresh approved actor keeps its own per-minute attempt budget, far
+    // from the shared alice budget the other tests in this file consume.
+    const actor = "idp-upload-failclosed";
+    await fixture.pool.query(
+      "INSERT INTO account_users (sub, status) VALUES ($1, 'approved') ON CONFLICT (sub) DO NOTHING", [actor]);
+    const ensured = await call("ensure", { bindingName: randomUUID(), idempotencyKey: randomUUID() }, actor);
+    expect(ensured.status).toBe(201);
+    const artifactId = (ensured.body as { artifactId: string }).artifactId;
+    const bytes = pngBytes(2048);
+    const created = await call("create_upload", { artifactId, mimeType: "image/png", maxSize: bytes.length }, actor);
+    expect(created.status).toBe(201);
+    const session = created.body as { uploadId: string; requiredHeaders: Record<string, string> };
+    expect(session).not.toHaveProperty("checksumHeader");
+    expect(Object.keys(session.requiredHeaders).sort()).toEqual(["content-length", "content-type"]);
+    const key = stagingKey("p0b", session.uploadId);
+    signerDouble.put({ key, contentType: "image/png", contentLength: bytes.length }, bytes,
+      { ...session.requiredHeaders });
+    await staging.put(key, bytes);
+    const committed = await call("commit_upload", { artifactId, uploadId: session.uploadId,
+      path: "assets/exact.png", mimeType: "image/png", digest: digestOf(bytes),
+      size: bytes.length, idempotencyKey: randomUUID() }, actor);
+    expect(committed.status).toBe(201);
+    // Corrupted upload: the stored bytes differ from the declared digest.
+    const good = pngBytes(2048);
+    let bad = pngBytes(2048);
+    if (Buffer.from(bad).equals(Buffer.from(good))) bad = pngBytes(2049).subarray(0, 2048);
+    const createdBad = await call("create_upload", { artifactId, mimeType: "image/png", maxSize: good.length }, actor);
+    expect(createdBad.status).toBe(201);
+    const badSession = createdBad.body as { uploadId: string; requiredHeaders: Record<string, string> };
+    const badKey = stagingKey("p0b", badSession.uploadId);
+    signerDouble.put({ key: badKey, contentType: "image/png", contentLength: good.length }, good,
+      { ...badSession.requiredHeaders });
+    await staging.put(badKey, good);
+    await staging.put(badKey, bad);
+    const refused = await call("commit_upload", { artifactId, uploadId: badSession.uploadId,
+      path: "assets/corrupt.png", mimeType: "image/png", digest: digestOf(good),
+      size: good.length, idempotencyKey: randomUUID() }, actor);
+    expect(refused.status).toBe(422);
+    expect((refused.body as { error: string }).error).toBe("verification_failed");
+    expect(await staging.get(badKey)).toBeUndefined();
+    expect((await sessions.get(badSession.uploadId))?.state).not.toBe("open");
+    const retry = await call("commit_upload", { artifactId, uploadId: badSession.uploadId,
+      path: "assets/corrupt.png", mimeType: "image/png", digest: digestOf(good),
+      size: good.length, idempotencyKey: randomUUID() }, actor);
+    expect(retry.status).toBe(422);
+    const published = await call("publish_bundle", { artifactId, idempotencyKey: randomUUID(),
+      expectedCurrentReleaseId: null,
+      files: [{ path: "index.html", mimeType: "text/html", text: "<!doctype html><h1>Corrupt</h1>" }],
+      assets: [{ path: "assets/corrupt.png", uploadId: badSession.uploadId }] }, actor);
+    expect(published.status).not.toBe(201);
+    const { rows } = await fixture.pool.query<{ n: number }>(
+      "SELECT COUNT(*)::int AS n FROM artifacts.releases WHERE artifact_id = $1", [artifactId]);
+    expect(rows[0]?.n).toBe(0);
   });
 
   it("should persist sessions in Postgres and sweep expired ones", async () => {

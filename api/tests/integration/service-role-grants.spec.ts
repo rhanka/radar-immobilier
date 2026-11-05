@@ -3,7 +3,8 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { loadConfig } from "../../src/config.js";
-import { applyServiceRoleGrants, IMMO_MCP_ACCOUNT_READER_ROLE, IMMO_MCP_ARTIFACT_WRITER_ROLE }
+import { applyServiceRoleGrants, IMMO_MCP_ACCOUNT_READER_ROLE, IMMO_MCP_ARTIFACT_WRITER_ROLE,
+  IMMO_MCP_PEOPLE_LOOKUP_ENV, isPeopleLookupEnabled }
   from "../../src/db/service-role-grants.js";
 import { migrationsFolder } from "./artifacts-h2.helpers.js";
 
@@ -115,6 +116,48 @@ describe("restricted MCP role grants", () => {
         c.query(`UPDATE public.${table} SET ${column} = ${column}`)), `${table}.${column}`)
         .rejects.toThrow(/permission denied for table/);
     }
+  });
+
+  it("parses the people-lookup migrator flag as strictly opt-in", () => {
+    expect(isPeopleLookupEnabled({})).toBe(false);
+    expect(isPeopleLookupEnabled({ [IMMO_MCP_PEOPLE_LOOKUP_ENV]: undefined })).toBe(false);
+    expect(isPeopleLookupEnabled({ [IMMO_MCP_PEOPLE_LOOKUP_ENV]: "0" })).toBe(false);
+    expect(isPeopleLookupEnabled({ [IMMO_MCP_PEOPLE_LOOKUP_ENV]: "true" })).toBe(false);
+    expect(isPeopleLookupEnabled({ [IMMO_MCP_PEOPLE_LOOKUP_ENV]: "1" })).toBe(true);
+  });
+
+  it("grants name/email reads to the writer only with the flag ON, and revokes them when OFF", async () => {
+    await pool.query(`INSERT INTO account_users (sub, status, name, email)
+      VALUES ('lookup-subject', 'approved', 'Lookup Subject', 'lookup@example.test')
+      ON CONFLICT (sub) DO UPDATE SET name = 'Lookup Subject', email = 'lookup@example.test'`);
+    const flagOn = { ...process.env, [IMMO_MCP_PEOPLE_LOOKUP_ENV]: "1" };
+    const flagOff = { ...process.env, [IMMO_MCP_PEOPLE_LOOKUP_ENV]: "0" };
+    await stripPrivileges();
+    await applyServiceRoleGrants(pool, flagOn);
+    await applyServiceRoleGrants(pool, flagOn); // idempotent replay
+    await asRole(IMMO_MCP_ARTIFACT_WRITER_ROLE, async (c) => {
+      const person = await c.query(
+        "SELECT name, email FROM account_users WHERE sub = 'lookup-subject'");
+      expect(person.rows[0]).toMatchObject({ name: "Lookup Subject", email: "lookup@example.test" });
+    });
+    // An OFF replay converges back: the two personal-data columns are
+    // revoked while the least-privilege (id, sub, status) reads stay.
+    await applyServiceRoleGrants(pool, flagOff);
+    await expect(asRole(IMMO_MCP_ARTIFACT_WRITER_ROLE, (c) =>
+      c.query("SELECT name, email FROM account_users WHERE sub = 'lookup-subject'")))
+      .rejects.toThrow(/permission denied/);
+    await asRole(IMMO_MCP_ARTIFACT_WRITER_ROLE, async (c) => {
+      const account = await c.query("SELECT id, status FROM account_users WHERE sub = 'lookup-subject'");
+      expect(account.rows[0].status).toBe("approved");
+    });
+    // The default (flag unset, as in prod and CI) is OFF as well.
+    await applyServiceRoleGrants(pool, flagOn);
+    const withoutFlag = { ...process.env };
+    delete withoutFlag[IMMO_MCP_PEOPLE_LOOKUP_ENV];
+    await applyServiceRoleGrants(pool, withoutFlag);
+    await expect(asRole(IMMO_MCP_ARTIFACT_WRITER_ROLE, (c) =>
+      c.query("SELECT name FROM account_users WHERE sub = 'lookup-subject'")))
+      .rejects.toThrow(/permission denied/);
   });
 
   it("keeps account tables non-writable and restores the account reader column reads", async () => {
