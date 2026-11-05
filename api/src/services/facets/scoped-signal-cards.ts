@@ -20,6 +20,11 @@ export type StoredSignalNode = Parameters<typeof toDegradedSignalCard>[0];
 export interface ScopedSignalCardDeps {
   store?: ObjectStore;
   docEnrichmentBudgetMs?: number;
+  /**
+   * Degraded-card journal. Defaults to the app log line (city + node id);
+   * reader ops pass a typed line without business data (J1.2d/e §0.4).
+   */
+  onDegraded?: (error: unknown) => void;
 }
 
 export async function buildScopedSignalCards(
@@ -31,6 +36,10 @@ export async function buildScopedSignalCards(
   const enrichment = createDocEnrichmentContext(deps.docEnrichmentBudgetMs);
   return Promise.all(nodes.map((node) =>
     toGraphSignalCard(store, node, enrichment, citySlug).catch((error) => {
+      if (deps.onDegraded) {
+        deps.onDegraded(error);
+        return toDegradedSignalCard(node);
+      }
       console.error(`[scoped-signal-cards] card degraded (city=${citySlug} node=${node.id}):`, error);
       return toDegradedSignalCard(node);
     })));

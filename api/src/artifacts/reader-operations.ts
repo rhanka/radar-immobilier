@@ -17,6 +17,7 @@ import { z } from "zod";
 import { SignalQuery, StateQuery, WorkspaceId } from "../services/facets/classification-query.js";
 import { appMeParams } from "./reader-me.js";
 import { byCityParams } from "./reader-by-city.js";
+import { coherentCityParams } from "./reader-coherent-city.js";
 
 export const READER_OPERATIONS = [
   "geo.read.v1",
@@ -27,6 +28,7 @@ export const READER_OPERATIONS = [
   "app.me.v1",
   "workspaces.list.v1",
   "signals.by-city.v1",
+  "signals.coherent-city.v1",
   "baskets.context.v1",
   "baskets.search.v1",
   "baskets.state.v1",
@@ -102,10 +104,10 @@ export function isWorkspaceReadOperation(name: string): name is BasketOperationN
 }
 
 /** J1.2d/e scoped signal ops: same workspace visibility as the basket reads. */
-export type ScopedSignalOperationName = "signals.by-city.v1";
+export type ScopedSignalOperationName = "signals.by-city.v1" | "signals.coherent-city.v1";
 
 export function isScopedSignalOperation(name: string): name is ScopedSignalOperationName {
-  return name === "signals.by-city.v1";
+  return name === "signals.by-city.v1" || name === "signals.coherent-city.v1";
 }
 
 /** Every op served under Gate B (`baskets.read` consent re-read per call). */
@@ -126,6 +128,7 @@ export function validateOperationParams(
     if (name === "app.me.v1") return { ok: true, params: appMeParams.parse(params) };
     if (name === "workspaces.list.v1") return { ok: true, params: workspacesListParams.parse(params) };
     if (name === "signals.by-city.v1") return { ok: true, params: byCityParams.parse(params) };
+    if (name === "signals.coherent-city.v1") return { ok: true, params: coherentCityParams.parse(params) };
     if (name === "geo.read.v1") return { ok: true, params: geoParams.parse(params) };
     if (name === "geo.cities.v1") return { ok: true, params: geoCitiesParams.parse(params) };
     if (name === "geo.collection-items.v1") return { ok: true, params: geoCollectionItemsParams.parse(params) };
