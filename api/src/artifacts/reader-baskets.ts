@@ -24,8 +24,10 @@ import {
 } from "../services/facets/classification-search.js";
 import { readSignalClassification } from "../services/facets/classification-state.js";
 import { listWorkspacesForAccount } from "../services/workspaces/store.js";
+import { readScopedByCity } from "../services/facets/scoped-by-city.js";
 import type { ApiReaderContext } from "./reader-context.js";
-import { isWorkspaceReadOperation, type ReaderOperationName } from "./reader-operations.js";
+import { toByCityServiceQuery, type ByCityParams } from "./reader-by-city.js";
+import { isScopedSignalOperation, isWorkspaceReadOperation, type ReaderOperationName } from "./reader-operations.js";
 
 export interface BasketReadDeps {
   readonly db: Database;
@@ -39,6 +41,17 @@ export function createBasketReadOperation(deps: BasketReadDeps): (
   context: ApiReaderContext,
 ) => Promise<unknown> {
   return async (op, params, context) => {
+    // J1.2d/e §4.3: same service as the app route — the dispatch already
+    // refused `showDiscarded` and unknown keys, so the viewer population
+    // matches the app exactly. Response projection is enforced by
+    // `validateReaderResponse` (strict allowlist → typed 502).
+    if (isScopedSignalOperation(op)) {
+      const scoped = params as ByCityParams;
+      const result = await readScopedByCity(deps.db, context.readerSub, scoped.workspaceId,
+        toByCityServiceQuery(scoped));
+      // Same envelope as the app route body (`{ ok, totalCount, cities }`).
+      return { ok: true as const, totalCount: result.totalCount, cities: result.cities };
+    }
     if (!isWorkspaceReadOperation(op)) throw new Error("Capability unavailable");
     if (op === "workspaces.list.v1") {
       const memberships = await listWorkspacesForAccount(deps.db, context.readerSub);

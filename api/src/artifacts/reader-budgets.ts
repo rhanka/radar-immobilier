@@ -58,6 +58,7 @@ export const READER_WORKSPACE_BUDGET: readonly BudgetWindow[] = [minute(200)];
 
 /** §13 concurrency caps per (reader, artifact, op). */
 export const READER_CONCURRENCY: Record<string, number> = {
+  "signals.by-city.v1": 1,
   "signals.coherent-city.v1": 2,
   "documents.pv.v1": 2,
 };
