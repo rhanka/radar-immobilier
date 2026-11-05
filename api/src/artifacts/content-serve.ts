@@ -401,6 +401,18 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     } catch (error) { const failure = classificationFailure(error); return c.json(failure.body, failure.status); }
   });
 
+  // J1.2d/e wagon 1 (§14.1): the /__app/ relay prefix is reserved and
+  // closed on content origins — explicit local 404 with no upstream call and
+  // no release-file lookup, registered before every serving route.
+  app.all("/__app", (c) => {
+    applyReaderContentHeaders(c);
+    return c.json({ error: "not_found" }, 404);
+  });
+  app.all("/__app/*", (c) => {
+    applyReaderContentHeaders(c);
+    return c.json({ error: "not_found" }, 404);
+  });
+
   app.all("/__reader/api/:op", async (c) => {
     const parsed = parseContentHost(c.req.header("host"), deps.contentBase);
     if (parsed.kind === "other") return c.json({ error: "not_found" }, 404);

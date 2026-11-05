@@ -128,6 +128,13 @@ export function createApp(deps: AppDeps): Hono {
     app.use("*", contentGate(deps.contentHost.contentBase, deps.readerContent));
   }
 
+  // J1.2d/e wagon 1 (§14.1): the generic /__app/ relay is NO-GO — the
+  // prefix stays reserved and answers an explicit local typed 404 with no
+  // upstream call. Registered before protect so the refusal never depends
+  // on session state.
+  app.all("/__app", (c) => c.json({ error: "not_found" }, 404));
+  app.all("/__app/*", (c) => c.json({ error: "not_found" }, 404));
+
   // Control requests use the official cookie guard before general bearer auth.
   if (deps.auth?.enabled) {
     if (deps.artifactsControl) {
