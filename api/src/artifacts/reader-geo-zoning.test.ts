@@ -5,8 +5,10 @@
  * Fixtures `api/tests/fixtures/zonage-parity/<city>.raw.json` are verbatim
  * public OGC items + the verbatim listing entry observed 2026-11-05. The
  * listing entry carries NO `rights` (true of every city zoning collection on
- * that date): tests that need a served collection inject `rights` explicitly
- * — the unblocked state — and one test proves the verbatim entry is refused.
+ * that date). Since the PR #1010 follow-up (conductor decision), a CC-BY 4.0
+ * record carries rights derived from the licence: the parity runs on the
+ * VERBATIM listing entries, with no injected `rights`. Other tests inject a
+ * geo `rights` only to prove it takes precedence.
  *
  * The paged reader output is pinned as a file snapshot
  * (`<city>.reader-pages.json`) that the UI parity test
@@ -107,13 +109,26 @@ describe("J1 zonage records", () => {
     expect(GOVERNED_ZONING_RECORDS.map((r) => r.collectionId)).not.toContain("qc-zonage-salaberry-de-valleyfield");
     expect(GOVERNED_SERVED_RECORDS.filter((r) => r.zoning).length).toBe(68);
   });
+
+  it("states derived rights on the 65 CC-BY records only, with the listing attribution", () => {
+    const derived = GOVERNED_ZONING_RECORDS.filter((r) => r.rights);
+    expect(derived).toHaveLength(65);
+    for (const record of derived) {
+      expect(record.licenseId).toBe("cc-by-4.0");
+      expect(record.rights).toMatchObject({ source: "derived-from-licence", licenceId: "cc-by-4.0" });
+      expect(record.rights?.attribution).toMatch(/^© /);
+    }
+    const withoutDerived = GOVERNED_ZONING_RECORDS.filter((r) => !r.rights).map((r) => r.collectionId).sort();
+    expect(withoutDerived).toEqual(["qc-zonage-neuville", "qc-zonage-rosemere", "qc-zonage-saint-gilbert"]);
+  });
 });
 
 describe("J1 zonage — parity fixtures through the reader op", () => {
   for (const city of PARITY_CITIES) {
-    it(`pins the paged zoning-v1 output for ${city} (limit 5, every feature, same order)`, async () => {
+    it(`pins the paged zoning-v1 output for ${city} on the verbatim listing (derived rights)`, async () => {
       const raw = loadRaw(city);
-      const { fetchImpl } = ogcStub([{ ...raw.listingEntry, rights: RIGHTS }], { [raw.collectionId]: raw.items });
+      expect(raw.listingEntry).not.toHaveProperty("rights");
+      const { fetchImpl } = ogcStub([raw.listingEntry], { [raw.collectionId]: raw.items });
       const pages = await readAllPages(deps(fetchImpl), raw.collectionId, 5);
       const features = pages.flatMap((page) => page.features);
       expect(features).toHaveLength(raw.items.features.length);
@@ -125,6 +140,13 @@ describe("J1 zonage — parity fixtures through the reader op", () => {
         href: "https://creativecommons.org/licenses/by/4.0/",
         attribution: raw.listingEntry["attribution"],
       });
+      for (const page of pages) {
+        expect(page.rights).toEqual({
+          source: "derived-from-licence",
+          licenceId: "cc-by-4.0",
+          attribution: raw.listingEntry["attribution"],
+        });
+      }
       // Same codes, same order as a straight projection of the raw items.
       const record = GOVERNED_ZONING_RECORDS.find((r) => r.collectionId === raw.collectionId)!;
       expect(features.map((f) => f.properties["code"])).toEqual(
@@ -136,15 +158,38 @@ describe("J1 zonage — parity fixtures through the reader op", () => {
     });
   }
 
-  it("refuses the verbatim 2026-11-05 listing entry (no rights) as not covered, before any items call", async () => {
+  it("lets a geo-rendered rights object take precedence over derived rights", async () => {
     const raw = loadRaw("honfleur");
-    const { fetchImpl, calls } = ogcStub([raw.listingEntry], { [raw.collectionId]: raw.items });
-    const error = await readReaderCollectionItems(deps(fetchImpl), raw.collectionId, { limit: 5 }).catch((e: unknown) => e);
-    expect(error).toBeInstanceOf(GeoItemsRefusal);
-    expect((error as GeoItemsRefusal).status).toBe(403);
-    expect((error as GeoItemsRefusal).body).toMatchObject({ status: "not covered", reason: "rights-missing" });
-    expect(calls.some((url) => url.includes("/items"))).toBe(false);
+    const { fetchImpl } = ogcStub([{ ...raw.listingEntry, rights: RIGHTS }], { [raw.collectionId]: raw.items });
+    const page = await readReaderCollectionItems(deps(fetchImpl), raw.collectionId, { limit: 5 });
+    expect(page.rights).toEqual({ source: "geo" });
+    expect(page.license.attribution).toBe(raw.listingEntry["attribution"]);
   });
+
+  it("serves the record attribution when the live listing carries none", async () => {
+    const raw = loadRaw("honfleur");
+    const { attribution: _drop, ...bare } = raw.listingEntry;
+    const { fetchImpl } = ogcStub([bare], { [raw.collectionId]: raw.items });
+    const page = await readReaderCollectionItems(deps(fetchImpl), raw.collectionId, { limit: 5 });
+    const record = GOVERNED_ZONING_RECORDS.find((r) => r.collectionId === raw.collectionId)!;
+    expect(page.license.attribution).toBe(record.rights?.attribution);
+    expect(page.rights).toMatchObject({ source: "derived-from-licence", attribution: record.rights?.attribution });
+  });
+
+  for (const [id, title] of [
+    ["qc-zonage-neuville", "Donnée publique municipale (zonage) — MRC de Portneuf"],
+    ["qc-zonage-saint-gilbert", "Donnée publique municipale (zonage) — MRC de Portneuf"],
+    ["qc-zonage-rosemere", "Plan de zonage municipal Ville de Rosemère"],
+  ] as const) {
+    it(`refuses ${id} without geo rights (redistributability unverified), before any items call`, async () => {
+      const { fetchImpl, calls } = ogcStub([{ id, attribution: "x", license: { title } }], {});
+      const error = await readReaderCollectionItems(deps(fetchImpl), id, { limit: 5 }).catch((e: unknown) => e) as GeoItemsRefusal;
+      expect(error).toBeInstanceOf(GeoItemsRefusal);
+      expect(error.status).toBe(403);
+      expect(error.body).toMatchObject({ status: "not covered", reason: "rights-missing" });
+      expect(calls.some((url) => url.includes("/items"))).toBe(false);
+    });
+  }
 });
 
 describe("J1 zonage — licence gate", () => {
@@ -158,6 +203,19 @@ describe("J1 zonage — licence gate", () => {
     expect(error.status).toBe(403);
     expect(error.body).toMatchObject({ status: "not covered", reason: "no-dated-per-collection-record" });
     expect(calls).toHaveLength(0);
+  });
+
+  it("refuses a recorded CC-BY collection whose live title is unregistered, even without geo rights", async () => {
+    const raw = loadRaw("honfleur");
+    const { fetchImpl, calls } = ogcStub(
+      [{ ...raw.listingEntry, license: { title: "Creative Commons Attribution 4.0" } }],
+      { [raw.collectionId]: raw.items },
+    );
+    const error = await readReaderCollectionItems(deps(fetchImpl), raw.collectionId, { limit: 5 })
+      .catch((e: unknown) => e) as GeoItemsRefusal;
+    expect(error.status).toBe(403);
+    expect(error.body).toMatchObject({ status: "unknown", reason: "licence-unmatched-title" });
+    expect(calls.some((url) => url.includes("/items"))).toBe(false);
   });
 
   it("refuses a recorded collection whose live licence turned unknown, before any items call", async () => {
@@ -267,6 +325,7 @@ describe("J1 zonage — closed field projection", () => {
       numberMatched: 1, numberReturned: 1, truncated: false, nextOffset: null, projection: "zoning-v1",
       collectionId: "qc-zonage-honfleur", licenseId: "cc-by-4.0",
       license: { id: "cc-by-4.0", title: "t", href: null, attribution: null },
+      rights: { source: "geo" },
       contract: { status: "missing source", reason: "x" },
     }, "reader-alice")).toThrow();
   });

@@ -2235,6 +2235,11 @@
    "href": "https://creativecommons.org/licenses/by/4.0/",
    "attribution": "© Ville de Mrcdecoaticook — Creative Commons Attribution 4.0 International"
   },
+  "rights": {
+   "source": "derived-from-licence",
+   "licenceId": "cc-by-4.0",
+   "attribution": "© Ville de Mrcdecoaticook — Creative Commons Attribution 4.0 International"
+  },
   "contract": {
    "status": "missing source",
    "reason": "credential-not-configured"
@@ -3270,6 +3275,11 @@
    "id": "cc-by-4.0",
    "title": "Creative Commons Attribution 4.0 International",
    "href": "https://creativecommons.org/licenses/by/4.0/",
+   "attribution": "© Ville de Mrcdecoaticook — Creative Commons Attribution 4.0 International"
+  },
+  "rights": {
+   "source": "derived-from-licence",
+   "licenceId": "cc-by-4.0",
    "attribution": "© Ville de Mrcdecoaticook — Creative Commons Attribution 4.0 International"
   },
   "contract": {
@@ -5293,6 +5303,11 @@
    "href": "https://creativecommons.org/licenses/by/4.0/",
    "attribution": "© Ville de Mrcdecoaticook — Creative Commons Attribution 4.0 International"
   },
+  "rights": {
+   "source": "derived-from-licence",
+   "licenceId": "cc-by-4.0",
+   "attribution": "© Ville de Mrcdecoaticook — Creative Commons Attribution 4.0 International"
+  },
   "contract": {
    "status": "missing source",
    "reason": "credential-not-configured"
@@ -6992,6 +7007,11 @@
    "id": "cc-by-4.0",
    "title": "Creative Commons Attribution 4.0 International",
    "href": "https://creativecommons.org/licenses/by/4.0/",
+   "attribution": "© Ville de Mrcdecoaticook — Creative Commons Attribution 4.0 International"
+  },
+  "rights": {
+   "source": "derived-from-licence",
+   "licenceId": "cc-by-4.0",
    "attribution": "© Ville de Mrcdecoaticook — Creative Commons Attribution 4.0 International"
   },
   "contract": {

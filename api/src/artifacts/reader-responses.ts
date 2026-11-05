@@ -55,6 +55,10 @@ const geoCollectionItemsResponse = z.object({
     href: z.string().nullable(),
     attribution: z.string().nullable(),
   }).strict(),
+  rights: z.union([
+    z.object({ source: z.literal("geo") }).strict(),
+    z.object({ source: z.literal("derived-from-licence"), licenceId: z.string(), attribution: z.string() }).strict(),
+  ]),
   contract: z.object({
     status: z.string(),
     snapshot_sha256: z.string().optional(),

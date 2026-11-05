@@ -144,6 +144,61 @@ describe("catalogueCollection (fail-closed per collection)", () => {
   });
 });
 
+describe("derived rights (PR #1010 follow-up, conductor decision)", () => {
+  const HONFLEUR = "qc-zonage-honfleur";
+
+  it("serves a CC-BY record without geo rights on rights derived from the licence", () => {
+    const entry = catalogueCollection({ id: HONFLEUR, licenseTitle: CC_BY_4, rightsPresent: false });
+    expect(entry.status).toBe("served");
+    expect(entry.rightsSource).toBe("derived-from-licence");
+    expect(entry.rightsPresent).toBe(false);
+    expect(entry.record?.rights).toMatchObject({ source: "derived-from-licence", licenceId: "cc-by-4.0" });
+  });
+
+  it("lets a geo-rendered rights object take precedence", () => {
+    const entry = catalogueCollection({ id: HONFLEUR, licenseTitle: CC_BY_4, rightsPresent: true });
+    expect(entry.status).toBe("served");
+    expect(entry.rightsSource).toBe("geo");
+  });
+
+  it("refuses an unknown or unregistered live licence even with a derived-rights record", () => {
+    for (const title of ["Unknown license", "Creative Commons Attribution 4.0", undefined]) {
+      const entry = catalogueCollection({ id: HONFLEUR, licenseTitle: title, rightsPresent: false });
+      expect(entry.status).toBe("unknown");
+      expect(entry.record).toBeUndefined();
+    }
+  });
+
+  it("keeps Portneuf and Rosemère not covered without geo rights (unverified redistributability)", () => {
+    for (const [id, title] of [
+      ["qc-zonage-neuville", "Donnée publique municipale (zonage) — MRC de Portneuf"],
+      ["qc-zonage-saint-gilbert", "Donnée publique municipale (zonage) — MRC de Portneuf"],
+      ["qc-zonage-rosemere", "Plan de zonage municipal Ville de Rosemère"],
+    ] as const) {
+      const entry = catalogueCollection({ id, licenseTitle: title, rightsPresent: false });
+      expect(entry.status, id).toBe("not covered");
+      expect(entry.reason, id).toBe("rights-missing");
+    }
+  });
+
+  it("never derives rights for a licence the registry does not mark redistributable", () => {
+    const record = GOVERNED_SERVED_RECORDS.find((r) => r.collectionId === HONFLEUR)!;
+    const registry = [{ id: "cc-by-4.0", title: CC_BY_4, redistribution: "unverified" as const }];
+    expect(catalogueCollection({ id: HONFLEUR, licenseTitle: CC_BY_4, rightsPresent: false }, [record], registry))
+      .toMatchObject({ status: "not covered", reason: "rights-missing" });
+    const noFlag = [{ id: "cc-by-4.0", title: CC_BY_4 }];
+    expect(catalogueCollection({ id: HONFLEUR, licenseTitle: CC_BY_4, rightsPresent: false }, [record], noFlag).status)
+      .toBe("not covered");
+  });
+
+  it("never derives rights when the record's derived licence differs from the live one", () => {
+    const record = GOVERNED_SERVED_RECORDS.find((r) => r.collectionId === HONFLEUR)!;
+    const forged = { ...record, rights: { ...record.rights!, licenceId: "portneuf-zonage-municipal" } };
+    expect(catalogueCollection({ id: HONFLEUR, licenseTitle: CC_BY_4, rightsPresent: false }, [forged]).status)
+      .toBe("not covered");
+  });
+});
+
 describe("catalogueCollections (live-shaped fixture)", () => {
   it("derives served + refused from a live-shaped listing", () => {
     const entries = catalogueCollections([
