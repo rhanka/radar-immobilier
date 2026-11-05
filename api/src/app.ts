@@ -141,7 +141,8 @@ export function createApp(deps: AppDeps): Hono {
         ...(storageScope ? { storageScope } : {}),
         ...(uploadPage?.service && uploadPage?.config ? { service: uploadPage.service,
           config: { controlOrigin: uploadPage.config.controlOrigin,
-            s3Origins: uploadPage.config.s3Origins } } : {}) }));
+            s3Origins: uploadPage.config.s3Origins },
+          ...(uploadPage.pages ? { pages: uploadPage.pages } : {}) } : {}) }));
     } else {
       // Closed capability: same identity guards and cache headers as the
       // mounted route, without storage. The guard returns 503 after the
