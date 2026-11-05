@@ -193,6 +193,23 @@ describe("uploadPageRoute browser journey", () => {
     expect(exchange.status).toBe(200);
   });
 
+  it("should refuse a headerless oversized stream without buffering it", async () => {
+    const minted = await mint(service);
+    const sid = minted.pageSessionId;
+    // An endless chunk stream with no Content-Length: the bounded reader
+    // aborts past 64 KiB instead of buffering the request without end.
+    const endless = new ReadableStream<Uint8Array>({ pull(controller) {
+      controller.enqueue(new Uint8Array(16 * 1024));
+    } });
+    const streamed = await app.request(`http://${APP_HOST}/api/v1/artifacts/upload/${sid}/exchange`, {
+      method: "POST",
+      headers: { host: APP_HOST, origin: AUTH.appBaseUrl, "content-type": "application/json",
+        "x-artifact-upload": "1", cookie },
+      body: endless, duplex: "half",
+    } as RequestInit);
+    expect(streamed.status).toBe(413);
+  });
+
   it("should refuse page calls without the custom header or bound to another artifact", async () => {
     const minted = await mint(service);
     const sid = minted.pageSessionId;
