@@ -44,6 +44,7 @@ import type { AuthorityReader } from "./reader-profile.js";
 import { validateReaderResponse } from "./reader-responses.js";
 import {
   GEO_COLLECTION_ITEMS_QUERY_KEYS,
+  isDocumentOperation,
   isGateBOperation,
   isGeoReadOperation,
   isScopedSignalOperation,
@@ -62,6 +63,7 @@ import { createGeoReaderBudget, type GeoReaderBudget } from "./reader-geo-budget
 import { appMeParams, buildAppMeResponse } from "./reader-me.js";
 import { byCityParams } from "./reader-by-city.js";
 import { coherentCityParams } from "./reader-coherent-city.js";
+import { documentsPvParams, type ReaderDocumentRead } from "./reader-documents.js";
 import {
   READER_CONCURRENCY,
   READER_GLOBAL_BUDGET,
@@ -164,6 +166,11 @@ export interface ContentServeDeps {
    * own windows, which only tightens the effective budget.
    */
   readonly budgets?: ReaderBudgetStore;
+  /**
+   * J1.2d/e §11.3 `documents.pv.v1`: PV PDF resolved from a signal the
+   * reader can see. Absent keeps the op closed (503, no store read).
+   */
+  readonly readDocument?: ReaderDocumentRead;
   /** PW-C page write listener (prepare/status); absent keeps writes closed. */
   readonly pageWrite?: Hono;
   readonly writePageSurface?: WritePageSurface;
@@ -459,6 +466,57 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     return c.json({ error: "not_found" }, 404);
   });
 
+  /**
+   * J1.2d/e wagon 5 (§11.3): binary resource op. Same gates as the JSON ops
+   * (content host, GET, Gate B, capability, authority before and after,
+   * budget, strict params) but authorized by the sealed session cookie of
+   * the bound host — pdf.js sets no grant header, and a `?grant=` URL is
+   * refused before any authorization. Every failure is closed and typed;
+   * a missing, archived or unattached document answers the same 404.
+   */
+  async function serveDocument(c: Context): Promise<Response> {
+    applyReaderContentHeaders(c);
+    const url = new URL(c.req.url);
+    if (url.searchParams.has("grant")) return c.json({ error: "invalid_query" }, 400);
+    const auth = await authorized(c, true);
+    if (!auth) return c.json({ error: "unauthenticated" }, 401);
+    if (!await hasLiveBasketConsent(auth)) return basketConsentRefusal(c);
+    if (!canInvoke(auth, "signals.protected-read", auth.releaseId)) return c.json({ error: "forbidden" }, 403);
+    if (!deps.readDocument) return c.json({ error: "capability_unavailable" }, 503);
+    if (!await authorityCurrent(auth)) return c.json({ error: "unauthenticated" }, 401);
+    // Spent before validation and resolution: refusals count (anti-enumeration).
+    const spent = spendBudget(auth, "documents.pv.v1");
+    if (!spent.ok) return rateLimited(c, spent.retryAfterSec);
+    let params;
+    try {
+      if (Buffer.byteLength(url.pathname + url.search) > 16384) throw new ClassificationError("request_uri_too_long");
+      params = decodeQuery(url.searchParams, documentsPvParams);
+    } catch (error) {
+      const failure = classificationFailure(error);
+      return c.json(failure.body, failure.status);
+    }
+    const slot = budgetKey(auth.readerSub, auth.artifactId, "documents.pv.v1");
+    if (!budgets.tryEnter(slot, READER_CONCURRENCY["documents.pv.v1"] ?? 2)) return rateLimited(c, 1);
+    try {
+      const result = await deps.readDocument(params, auth);
+      if (!stillOpen(auth) || !await authorityCurrent(auth)) return c.json({ error: "unauthenticated" }, 401);
+      if (result.kind === "not_found") return c.json({ error: "document_not_found" }, 404);
+      if (result.kind === "unsupported_media") return c.json({ error: "unsupported_media_type" }, 415);
+      if (result.kind === "too_large") return c.json({ error: "payload_too_large" }, 413);
+      if (result.kind === "refused") return c.json({ error: result.code }, result.status);
+      c.header("Content-Type", "application/pdf");
+      c.header("Content-Disposition", "inline; filename=\"document.pdf\"");
+      c.header("X-Content-Type-Options", "nosniff");
+      c.header("Content-Security-Policy", "sandbox; default-src 'none'");
+      c.header("Cache-Control", "private, no-store");
+      return c.body(new Uint8Array(result.bytes), 200);
+    } catch {
+      return c.json({ error: "capability_unavailable" }, 503);
+    } finally {
+      budgets.leave(slot);
+    }
+  }
+
   app.all("/__reader/api/:op", async (c) => {
     const parsed = parseContentHost(c.req.header("host"), deps.contentBase);
     if (parsed.kind === "other") return c.json({ error: "not_found" }, 404);
@@ -471,6 +529,7 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
       applyReaderContentHeaders(c);
       return c.json({ error: "method_not_allowed" }, 405);
     }
+    if (isDocumentOperation(op)) return serveDocument(c);
     const auth = await authorized(c);
     if (!auth) {
       applyReaderContentHeaders(c);
