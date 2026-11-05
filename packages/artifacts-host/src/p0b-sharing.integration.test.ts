@@ -66,10 +66,13 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("I2 sharing on G2", () => {
     expect((await fixture.call("meta", { artifactId }, "idp-chloe")).status).toBe(200);
     const listed = await fixture.call("list_access", { artifactId }, "alice");
     expect(listed.status).toBe(200);
+    // Least-privilege directory (hotfix): describePrincipal projects the
+    // opaque userRef only (no name/email columns), so the access listing
+    // carries the opaque reference. Colleague names still resolve through
+    // artifacts_lookup_people (pinned above).
     expect(listed.body).toMatchObject({ artifactId, accessMode: "restricted", canManage: true,
       owner: { displayName: expect.any(String) },
-      grants: [{ userRef, displayName: "Chloé Tremblay", emailHint: "c***@example.test",
-        grant: "read", effective: true }] });
+      grants: [{ userRef, displayName: userRef, grant: "read", effective: true }] });
     // A simple reader only sees its own entry.
     const readerView = await fixture.call("list_access", { artifactId }, "idp-chloe");
     expect(readerView.status).toBe(200);
