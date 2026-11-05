@@ -10,6 +10,7 @@ import { p0bFixture } from "./p0b.test-support.js";
 import {
   applyServiceRoleGrants,
   IMMO_MCP_ARTIFACT_WRITER_ROLE,
+  IMMO_MCP_PEOPLE_LOOKUP_ENV,
 } from "../../../api/src/db/service-role-grants.js";
 
 /**
@@ -118,5 +119,45 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("artifact directory under product
     expect(JSON.stringify(lookup.body)).not.toContain("permission denied");
     const listed = await call("list", { limit: 20, offset: 0 });
     expect(listed.status, JSON.stringify(listed.body).slice(0, 300)).toBe(200);
+  });
+
+  it("should look people up through the MCP binding as the writer role with the flag ON", async () => {
+    // PREPROD ONLY (owner decision 05/11): the migrator flag grants
+    // SELECT (name, email) to the writer role, so searchPeople serves
+    // approved accounts only, with opaque userRef plus masked email hint.
+    await fixture.pool.query(
+      "INSERT INTO account_users (sub, status, email, name) VALUES " +
+      "('idp-p0b-colleague', 'approved', 'colleague.p0b@example.test', 'P0b Colleague'), " +
+      "('idp-p0b-suspended', 'suspended', 'suspended.p0b@example.test', 'P0b Suspended')");
+    const colleagueId = (await fixture.pool.query<{ id: string }>(
+      "SELECT id FROM account_users WHERE sub = 'idp-p0b-colleague'")).rows[0]!.id;
+    await applyServiceRoleGrants(fixture.pool,
+      { ...process.env, [IMMO_MCP_PEOPLE_LOOKUP_ENV]: "1" });
+    try {
+      const directory = createAccountDirectory(writerPool);
+      const people = await directory.searchPeople("p0b", "p0b colleague", 10);
+      expect(people).toEqual([{
+        userRef: colleagueId,
+        displayName: "P0b Colleague",
+        email: "colleague.p0b@example.test",
+      }]);
+      const lookup = await call("lookup_people", { query: "p0b colleague" });
+      expect(lookup.status, JSON.stringify(lookup.body).slice(0, 300)).toBe(200);
+      const matches = (lookup.body as { output?: { matches: unknown[] }; matches?: unknown[] }).output?.matches
+        ?? (lookup.body as { matches: unknown[] }).matches;
+      expect(matches).toEqual([{
+        userRef: colleagueId,
+        displayName: "P0b Colleague",
+        emailHint: expect.stringMatching(/^c\*+@example\.test$/),
+      }]);
+      const raw = JSON.stringify(lookup.body);
+      expect(raw).not.toContain("idp-p0b-colleague");
+      expect(raw).not.toContain("colleague.p0b@example.test");
+      expect(raw).not.toContain("P0b Suspended");
+      expect(raw).not.toContain("suspended.p0b@example.test");
+    } finally {
+      // Restore the least-privilege set: an OFF replay revokes the grant.
+      await applyServiceRoleGrants(fixture.pool);
+    }
   });
 });
