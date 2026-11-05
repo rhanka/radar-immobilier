@@ -11,7 +11,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { RESIDUAL_CAUSES } from './annotation.mjs';
 import { residualTodo } from './converge.mjs';
 import { readJsonlRecords } from '../lib/jsonl.mjs';
-import { CLASSIF_DIR, classifHome } from '../lib/paths.mjs';
+import { classifDir, classifHome } from '../lib/paths.mjs';
 
 // Complement unavailable: the item needs data outside the immo-served text.
 const REFUSED = new Set(['refused-fingerprint', 'robots-disallowed', 'fetch-error', 'http-error', 'no-text', 'no-matching-page']);
@@ -27,19 +27,23 @@ export function loadScrapeStatus(home) {
 }
 
 /**
- * Cause of one residual item. Rule order is binding (first match wins):
+ * Cause of one residual item, derived from evidence (review §7b). Rule order is
+ * binding (first match wins):
  *  1. a vote flags missing-information AND the complement is refused/unavailable → data-outside-immo;
  *  2. a vote flags missing-information (complement available) → missing-information;
  *  3. citing votes support different codes, or a cited golden row decides another code → golden-set-conflict;
  *  4. the item's top-2 codes are a frequent confused pair of this pass → code-pair-confusion;
- *  5. every valid vote is ambiguous, or a vote cause is conflicting-information/scope-unclear → definition-gap.
+ *  5. definition-gap, ONLY when no other cause applies: with positive evidence (every
+ *     valid vote ambiguous, or a vote cause of conflicting-information/scope-unclear)
+ *     it is a classified gap; without such evidence it is a fallback (fallback:true)
+ *     counted in the map's fallbackToDefinitionGap.
  */
 export function classifyResidual(votes, { kind, scrapeStatus, confusedPairs, goldenCodes }) {
   const valid = votes.filter((v) => v?.code);
   const codes = [...new Set(valid.map((v) => v.code))].sort();
   if (valid.some((v) => v.ambiguous === true && v.cause === 'missing-information')) {
-    if (refusedStatus(scrapeStatus, kind)) return { cause: 'data-outside-immo', detail: `missing-information flagged, complement ${scrapeStatus ?? 'absent'}` };
-    return { cause: 'missing-information', detail: 'missing-information flagged, complement available or pending' };
+    if (refusedStatus(scrapeStatus, kind)) return { cause: 'data-outside-immo', detail: `missing-information flagged, complement ${scrapeStatus ?? 'absent'}`, fallback: false };
+    return { cause: 'missing-information', detail: 'missing-information flagged, complement available or pending', fallback: false };
   }
   const citing = valid.filter((v) => (v.goldenPrecedent ?? []).length > 0);
   const citingCodes = new Set(citing.map((v) => v.code));
@@ -51,11 +55,20 @@ export function classifyResidual(votes, { kind, scrapeStatus, confusedPairs, gol
     }
   }
   if (citing.length > 0 && (citingCodes.size > 1 || (citedCodes.size > 0 && ![...citedCodes].every((c) => citingCodes.has(c))))) {
-    return { cause: 'golden-set-conflict', detail: `cited rows support ${[...citedCodes].join('/') || 'nothing cited'} while citing votes say ${[...citingCodes].join('/')}` };
+    return { cause: 'golden-set-conflict', detail: `cited rows support ${[...citedCodes].join('/') || 'nothing cited'} while citing votes say ${[...citingCodes].join('/')}`, fallback: false };
   }
   const pair = codes.slice(0, 2).join(' × ');
-  if (codes.length >= 2 && confusedPairs.has(pair)) return { cause: 'code-pair-confusion', detail: `frequent pair of this pass: ${pair}` };
-  return { cause: 'definition-gap', detail: codes.length > 1 ? `codes ${codes.join('/')} with no guide rule deciding` : 'ambiguous without a deciding rule' };
+  if (codes.length >= 2 && confusedPairs.has(pair)) return { cause: 'code-pair-confusion', detail: `frequent pair of this pass: ${pair}`, fallback: false };
+  const gapEvidence = valid.length > 0 && (valid.every((v) => v.ambiguous === true)
+    || valid.some((v) => v.cause === 'conflicting-information' || v.cause === 'scope-unclear'));
+  if (codes.length > 1) return { cause: 'definition-gap', detail: `codes ${codes.join('/')} with no guide rule deciding`, fallback: !gapEvidence };
+  return { cause: 'definition-gap', detail: 'ambiguous without a deciding rule', fallback: !gapEvidence };
+}
+
+/** Counts per cause plus the definition-gap fallback count (review §7b). */
+export function summariseCauses(mapped) {
+  const counts = Object.fromEntries(RESIDUAL_CAUSES.map((c) => [c, mapped.filter((r) => r.cause === c).length]));
+  return { counts, fallbackToDefinitionGap: mapped.filter((r) => r.cause === 'definition-gap' && r.fallback === true).length };
 }
 
 /** Pairs (top-2 codes) seen on ≥ 2 residuals of the pass: the confused pairs. */
@@ -116,20 +129,20 @@ export async function main(argv = process.argv.slice(2)) {
   const { pairs } = confusedPairsOf(residuals.map((r) => ({ votes: r.ambiguousVotes ?? [] })));
   const mapped = residuals.map((r) => {
     const votes = (r.ambiguousVotes ?? []).map((v) => ({ code: v.code, ambiguous: v.ambiguous, cause: v.cause, goldenPrecedent: v.goldenPrecedent ?? [] }));
-    const { cause, detail } = classifyResidual(votes, { kind: r.kind, scrapeStatus: scrape.get(r.itemId), confusedPairs: pairs, goldenCodes });
-    return { itemId: r.itemId, kind: r.kind, cause, detail, codes: [...new Set(votes.map((v) => v.code))].sort(), codeMaj: r.codeMaj?.value ?? null };
+    const { cause, detail, fallback } = classifyResidual(votes, { kind: r.kind, scrapeStatus: scrape.get(r.itemId), confusedPairs: pairs, goldenCodes });
+    return { itemId: r.itemId, kind: r.kind, cause, detail, fallback, codes: [...new Set(votes.map((v) => v.code))].sort(), codeMaj: r.codeMaj?.value ?? null };
   });
-  const counts = Object.fromEntries(RESIDUAL_CAUSES.map((c) => [c, mapped.filter((r) => r.cause === c).length]));
+  const { counts, fallbackToDefinitionGap } = summariseCauses(mapped);
   const map = { kind: 'ambiguity-map', pass: n, createdAt: new Date().toISOString(), llmCalls: 0,
-    residuals: mapped, counts, codePairs: confusedPairsOf(residuals.map((r) => ({ votes: r.ambiguousVotes ?? [] }))).counts };
+    residuals: mapped, counts, fallbackToDefinitionGap, codePairs: confusedPairsOf(residuals.map((r) => ({ votes: r.ambiguousVotes ?? [] }))).counts };
   const table = renderTable(map);
   const questions = renderQuestions(map);
   writeFileSync(path.join(home, 'l2', `ambiguity-pass${n}.json`), `${JSON.stringify(map, null, 1)}\n`, { mode: 0o600 });
   writeFileSync(path.join(home, 'l2', `ambiguity-pass${n}.md`), table, { mode: 0o600 });
   writeFileSync(path.join(home, 'l2', `questions-pass${n}.md`), questions, { mode: 0o600 });
-  const repoManifest = { kind: 'ambiguity-map', pass: n, createdAt: map.createdAt, counts: map.counts, residuals: mapped.length, codePairs: map.codePairs };
-  mkdirSync(path.join(CLASSIF_DIR, 'l2', 'manifests'), { recursive: true });
-  writeFileSync(path.join(CLASSIF_DIR, 'l2', 'manifests', `ambiguity-pass${n}.json`), `${JSON.stringify(repoManifest, null, 1)}\n`);
+  const repoManifest = { kind: 'ambiguity-map', pass: n, createdAt: map.createdAt, counts: map.counts, fallbackToDefinitionGap, residuals: mapped.length, codePairs: map.codePairs };
+  mkdirSync(path.join(classifDir(process.env), 'l2', 'manifests'), { recursive: true });
+  writeFileSync(path.join(classifDir(process.env), 'l2', 'manifests', `ambiguity-pass${n}.json`), `${JSON.stringify(repoManifest, null, 1)}\n`);
   process.stdout.write(table);
   return map;
 }

@@ -12,15 +12,15 @@ import process from 'node:process';
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { ROUTES, callSeat } from '../run-seat.mjs';
 import { appendJsonlRecord, parseJsonlTolerant } from '../lib/jsonl.mjs';
-import { sha256 } from '../lib/render.mjs';
-import { CLASSIF_DIR, REPO, classifHome, privateDir } from '../lib/paths.mjs';
+import { sha256, stableStringify } from '../lib/render.mjs';
+import { EVAL_DIR_DEFAULT, classifDir, repoRoot, testOnlyEnv, classifHome, privateDir } from '../lib/paths.mjs';
 import { EVAL_ROUTES, devPrompt, parseDevAnswer } from './dev.mjs';
 import { pertinentMasked, seriesVerdict, shownStats } from './metrics.mjs';
 import { check as budgetCheck } from '../lib/budget.mjs';
 import { assertNoVerbatim } from '../lib/freeze.mjs';
 import { loadCodes } from '../l2/run.mjs';
 import { assertBlindRunAllowed, audit, blindDir, openBlindSet, readAudit } from '../lib/blind.mjs';
-import { assertEvalRunAllowed, audit as auditEval, openEvalSet } from '../guard/evalset.mjs';
+import { assertEvalRunAllowed, audit as auditEval, openEvalSet, readAudit as readEvalAudit } from '../guard/evalset.mjs';
 import { assertSeriesHalves, assertSeriesRoutes, loadSeriesManifest } from './series.mjs';
 
 async function pool(tasks, n) {
@@ -35,6 +35,26 @@ async function pool(tasks, n) {
  * {series, promptSha256, routes, blindItems, aggregatesSha256} plus kind/createdAt/note —
  * NEVER perRoute, s113, stats or recall. Exported for the firewall test.
  */
+/**
+ * An S113 route is done only when its file verifies at the prompt sha AND the
+ * eval-run audit exists (review N2/D3): the same predicate drives the budget
+ * plan and the skip, so a stale or audit-less file is re-run instead of being
+ * under-counted then fail-closed by the guard. Exported for the resume test.
+ */
+export function isS113Done({ outDir, k, promptSha, route, evalDir = EVAL_DIR_DEFAULT }) {
+  const { model, effort } = ROUTES[route];
+  const s113File = path.join(outDir, `s113-series-${k}-${route}.json`);
+  if (!existsSync(s113File)) return false;
+  try {
+    const prev = JSON.parse(readFileSync(s113File, 'utf8'));
+    if (prev.promptSha256 !== promptSha || String(prev.series) !== String(k) || prev.route !== route) return false;
+  } catch { return false; }
+  try {
+    return readEvalAudit(evalDir).some((e) => e.action === 'eval-run' && e.promptSha256 === promptSha && e.model === model && e.effort === effort
+      && String(e.purpose ?? '').includes(`l4-s113-s${k}`));
+  } catch { return false; }
+}
+
 export function buildBlindManifest({ k, promptSha, routes, blindItems, aggregatesSha256 }) {
   return { kind: 'l4-blind', series: k, createdAt: new Date().toISOString(), promptSha256: promptSha,
     routes, blindItems, aggregatesSha256,
@@ -50,10 +70,10 @@ export async function main(argv = process.argv.slice(2)) {
   const home = classifHome();
   // The blind run refuses a series whose tuning manifest or frozen prompt is missing,
   // uncommitted, or locally modified (Annex M M.5).
-  const devManifestFile = path.join(CLASSIF_DIR, 'l4', 'manifests', `series-${k}-dev.json`);
+  const devManifestFile = path.join(classifDir(process.env), 'l4', 'manifests', `series-${k}-dev.json`);
   const promptRel = path.join('tools', 'classif', 'l4', 'prompts', `P${k}.md`);
   const devManifest = JSON.parse(readFileSync(devManifestFile, 'utf8'));
-  const frozen = readFileSync(path.join(REPO, promptRel), 'utf8');
+  const frozen = readFileSync(path.join(repoRoot(process.env), promptRel), 'utf8');
   const promptSha = sha256(frozen);
   if (devManifest.promptSha256 !== promptSha) throw new Error('blind run refused: series dev manifest prompt sha differs from the frozen prompt');
   // Review §11b: re-scan the frozen prompt on every run.
@@ -66,7 +86,7 @@ export async function main(argv = process.argv.slice(2)) {
   // (plain split read — L2 already enforced committed).
   assertSeriesRoutes(seriesSpec, routes, k);
   try {
-    const splitFile = path.join(CLASSIF_DIR, 'l3', 'manifests', 'split.json');
+    const splitFile = path.join(classifDir(process.env), 'l3', 'manifests', 'split.json');
     if (existsSync(splitFile)) {
       const split = JSON.parse(readFileSync(splitFile, 'utf8'));
       if (split.sha256) assertSeriesHalves(seriesSpec, k, split.sha256);
@@ -75,7 +95,7 @@ export async function main(argv = process.argv.slice(2)) {
     if (/halves|refused/.test(e.message)) throw e;
     throw e;
   }
-  const refManifest = JSON.parse(readFileSync(path.join(CLASSIF_DIR, 'l3', 'manifests', 'reference-d.json'), 'utf8'));
+  const refManifest = JSON.parse(readFileSync(path.join(classifDir(process.env), 'l3', 'manifests', 'reference-d.json'), 'utf8'));
   // Executor opens the blind half (role + key enforced inside; access logged).
   const blindExpected = openBlindSet({ purpose: `l4-blind-s${k}`, expectPlainSha256: refManifest.hashes.blindPlain, home, env: process.env });
   const corpus = new Map(parseJsonlTolerant(readFileSync(path.join(home, 'l0', 'dev-items.jsonl'), 'utf8')).map((i) => [i.itemId, i]));
@@ -106,11 +126,13 @@ export async function main(argv = process.argv.slice(2)) {
       if (!blindCachedCount(route, item.itemId)) uncachedBlind++;
     }
   }
-  // S113: 113 inputs per remaining route minus matching per-item caches.
+  // S113: inputs per remaining route minus matching per-item caches. Review D3: the
+  // plan uses the same isS113Done predicate as the skip (verified file + audit).
+  // Review D1: the eval-dir hook is test-only (production refuses it).
+  const evalDir = testOnlyEnv(process.env, 'CLASSIF_EVAL_DIR') ?? EVAL_DIR_DEFAULT;
   let uncachedS113 = 0;
   for (const route of routes) {
-    const s113File = path.join(outDir, `s113-series-${k}-${route}.json`);
-    if (existsSync(s113File)) continue;
+    if (isS113Done({ outDir, k, promptSha, route, evalDir })) continue;
     let cached = 0;
     for (const f of readdirSyncSafe(outDir)) {
       if (!f.startsWith(`s113-s${k}-${route}.`)) continue;
@@ -188,29 +210,14 @@ function readdirSyncSafe(dir) {
     perRoute[route] = { ...stats, withUnresolved: statsWithUnresolved, failures, verdict };
   }
   // S113 secondary: Steve's labels, flagged golden-exposed, diagnostic, outside selection.
-  // Review N2 + §11c: evalDone symmetric to blindDone (verified s113 file + eval-run audit
-  // skips before the guard), and the per-route guard runs BEFORE opening the eval set.
-  // The eval dir honours CLASSIF_EVAL_DIR (tests) else the default sealed set.
-  const { EVAL_DIR_DEFAULT } = await import('../lib/paths.mjs');
-  const { readAudit: readEvalAudit } = await import('../guard/evalset.mjs');
-  const evalDir = process.env.CLASSIF_EVAL_DIR ?? EVAL_DIR_DEFAULT;
-  const isS113Done = (route) => {
-    const { model, effort } = ROUTES[route];
-    const s113File = path.join(outDir, `s113-series-${k}-${route}.json`);
-    if (!existsSync(s113File)) return false;
-    try {
-      const prev = JSON.parse(readFileSync(s113File, 'utf8'));
-      if (prev.promptSha256 !== promptSha || String(prev.series) !== String(k) || prev.route !== route) return false;
-    } catch { return false; }
-    try {
-      return readEvalAudit(evalDir).some((e) => e.action === 'eval-run' && e.promptSha256 === promptSha && e.model === model && e.effort === effort
-        && String(e.purpose ?? '').includes(`l4-s113-s${k}`));
-    } catch { return false; }
-  };
+  // Review N2/D3 + §11c: the shared isS113Done predicate (verified s113 file +
+  // eval-run audit) skips before the guard, and the per-route guard runs BEFORE
+  // opening the eval set. The eval dir honours CLASSIF_EVAL_DIR in test mode only.
+  const s113Done = (route) => isS113Done({ outDir, k, promptSha, route, evalDir });
   // Pre-compute remaining S113 routes, guard them BEFORE opening (fail fast, no dangling open).
   const s113Remaining = [];
   for (const route of routes) {
-    if (isS113Done(route)) continue;
+    if (s113Done(route)) continue;
     const { model, effort } = ROUTES[route];
     assertEvalRunAllowed({ promptFile: promptRel, promptSha256: promptSha, model, effort, evalDir });
     s113Remaining.push(route);
@@ -269,13 +276,14 @@ function readdirSyncSafe(dir) {
   }
   // Review §1 (D3 adaptation ban): blind aggregates stay in $CLASSIF_HOME/blind/ (owner
   // only). The repo manifest and stdout carry NO scores — only the aggregates sha256.
+  // Review D3: canonical key order, so a resumed restore at equal data hashes identically.
   const aggregates = { perRoute, s113 };
-  const aggregatesSha256 = sha256(JSON.stringify(aggregates));
+  const aggregatesSha256 = sha256(stableStringify(aggregates));
   writeFileSync(path.join(outDir, `series-${k}-aggregates.json`), JSON.stringify({ series: k, promptSha256: promptSha, aggregatesSha256, ...aggregates }, null, 1), { mode: 0o600 });
   // Review §1: repo manifest + stdout carry NO scores (aggregates sha only).
   const manifest = buildBlindManifest({ k, promptSha, routes, blindItems: blind.length, aggregatesSha256 });
-  mkdirSync(path.join(CLASSIF_DIR, 'l4', 'manifests'), { recursive: true });
-  writeFileSync(path.join(CLASSIF_DIR, 'l4', 'manifests', `series-${k}-blind.json`), `${JSON.stringify(manifest, null, 1)}\n`);
+  mkdirSync(path.join(classifDir(process.env), 'l4', 'manifests'), { recursive: true });
+  writeFileSync(path.join(classifDir(process.env), 'l4', 'manifests', `series-${k}-blind.json`), `${JSON.stringify(manifest, null, 1)}\n`);
   process.stdout.write(`${JSON.stringify(manifest, null, 2)}\n`);
   return manifest;
 }
