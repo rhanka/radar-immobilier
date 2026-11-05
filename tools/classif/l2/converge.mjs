@@ -130,12 +130,19 @@ export function residualsClassified(home, n, todo) {
   return { classified: missing.length === 0, causes, missing, mapSha256: sha256(raw) };
 }
 
-/** At least one traced amendment round (repo manifest amend-*.json) — the stop rule (§7)
-    forbids stopping before it. */
-export function hasTracedAmend() {
-  const dir = path.join(CLASSIF_DIR, 'l2', 'manifests');
+/** At least one traced amendment round (repo manifest amend-*.json with gel !== true).
+    Review §7a: a freeze-only round (0 adopted, guide copied, gel:true) is not a round —
+    the stop rule forbids stopping before a real amendment. */
+export function hasTracedAmend(dir = path.join(CLASSIF_DIR, 'l2', 'manifests')) {
   if (!existsSync(dir)) return false;
-  return readdirSync(dir).some((f) => /^amend-.+\.json$/.test(f));
+  for (const f of readdirSync(dir)) {
+    if (!/^amend-.+\.json$/.test(f)) continue;
+    try {
+      const m = JSON.parse(readFileSync(path.join(dir, f), 'utf8'));
+      if (m?.gel !== true) return true;
+    } catch { /* unparsable manifest is not a traced round */ }
+  }
+  return false;
 }
 
 export async function main(argv = process.argv.slice(2)) {
