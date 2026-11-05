@@ -23,7 +23,7 @@ describe("published release isolation", () => {
     const html = '<div title="<script>attribute</script>"></div><!-- <script>comment</script> -->' +
       '<textarea><script>textarea</script></textarea><script>window.ready=true;</script>';
     const csp = releaseCspForHtml(html);
-    expect(csp.match(/sha256-/g)).toHaveLength(2);
+    expect(csp.match(/sha256-/g)).toHaveLength(1);
     expect(csp).toContain(`'sha256-${createHash("sha256").update("window.ready=true;").digest("base64")}'`);
   });
   it("should hash LF, CRLF and CR inline scripts as the browser interprets them", () => {
@@ -35,9 +35,13 @@ describe("published release isolation", () => {
   });
   it("should hash only release inline code and preserve external isolation", () => {
     const csp = releaseCspForHtml("<script>document.body.textContent='ok'</script><style>body{color:red}</style>");
-    expect(csp.match(/sha256-/g)).toHaveLength(3);
-    for (const directive of ["base-uri 'none'", "form-action 'none'", "worker-src 'none'", "frame-src 'none'"]) expect(csp).toContain(directive);
-    expect(csp).not.toContain("unsafe-inline");
+    expect(csp.match(/sha256-/g)).toHaveLength(2);
+    for (const directive of ["base-uri 'none'", "form-action 'none'", "worker-src 'self'", "frame-src 'none'"]) expect(csp).toContain(directive);
+    // Application mode: style 'unsafe-inline' is generic (Svelte/pdf.js),
+    // script stays hash-only and eval stays refused everywhere.
+    expect(csp).toContain("style-src 'self'");
+    expect(csp).toContain("'unsafe-inline'");
+    expect(csp).not.toContain("script-src 'self' 'unsafe-inline'");
     expect(csp).not.toContain("unsafe-eval");
   });
   it("should revalidate authorization after a delayed release read", async () => {

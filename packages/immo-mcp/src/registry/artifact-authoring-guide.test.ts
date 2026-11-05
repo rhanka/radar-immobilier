@@ -93,7 +93,7 @@ describe("artifact authoring guide", () => {
     const howTo = mapBase.howTo.join("\n");
     for (const fragment of ["createMap", "basemapTemplate", "/__artifacts/tiles/v1/{z}/{x}/{y}",
       "geo.cities.v1", "geo.collection-items.v1", "setZones", "setLots", "fitToBounds",
-      "setPaint", "worker-src 'none'", "img-src"]) {
+      "setPaint", "worker-src 'self'", "img-src"]) {
       expect(howTo, fragment).toContain(fragment);
     }
     expect(howTo).toContain("PR #996");
@@ -246,7 +246,7 @@ describe("artifact authoring guide", () => {
     const all = [...guide.mapBase.load, ...guide.mapBase.feed, ...guide.mapBase.paint,
       ...guide.mapBase.events, ...guide.mapBase.limits].join("\n");
     for (const fragment of ["createMap", "setZones", "setLots", "setPaint", "fitToBounds",
-      "worker-src 'none'", "basemapTemplate: null", "256 KiB"]) {
+      "worker-src 'self'", "basemapTemplate: null", "256 KiB"]) {
       expect(all, fragment).toContain(fragment);
     }
   });
@@ -307,7 +307,10 @@ describe("artifact authoring guide", () => {
     expect(csp).toContain("script-src 'self'");
     expect(csp).toContain("style-src 'self'");
     expect(csp).toContain("connect-src 'self'");
-    expect(csp).not.toMatch(/unsafe-inline|unsafe-eval/);
+    expect(csp).toContain("style-src 'self'");
+    expect(csp).toContain("'unsafe-inline'");
+    expect(csp).not.toContain("script-src 'self' 'unsafe-inline'");
+    expect(csp).not.toMatch(/unsafe-eval/);
     for (const [, url] of files["index.html"]!.matchAll(/<(?:script|link)\b[^>]*?(?:src|href)="([^"]+)"/g)) {
       expect(url!.startsWith("/")).toBe(true);
       expect(url!.startsWith("//")).toBe(false);

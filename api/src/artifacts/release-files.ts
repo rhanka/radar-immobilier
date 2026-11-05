@@ -13,7 +13,6 @@
  * reader-storage binds this port to committed PostgreSQL manifests and
  * digest-verified S3 blobs. The in-memory provider below is for module tests.
  */
-import { READER_EXAMPLE_SCRIPT_HASH } from "./reader-example.js";
 import { createHash } from "node:crypto";
 import { parse, type DefaultTreeAdapterMap } from "parse5";
 
@@ -30,10 +29,17 @@ export interface ReleaseFileProvider {
   ) => Promise<ReleaseFile | null>;
 }
 
+/**
+ * Generic application CSP (J1.0 report §6, owner decision 05/11: every immo
+ * artifact runs in application mode, no profile opt-in). Served as the base
+ * header on every content path; per-release inline hashes are added by
+ * releaseCspForHtml when an HTML file carries inline script/style.
+ */
 export const RELEASE_CSP =
-  `default-src 'self'; script-src 'self' 'sha256-${READER_EXAMPLE_SCRIPT_HASH}'; ` +
-  `style-src 'self'; img-src 'self' data:; connect-src 'self'; worker-src 'none'; ` +
-  `frame-ancestors 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'`;
+  `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; ` +
+  `img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob:; connect-src 'self'; ` +
+  `worker-src 'self'; child-src 'self'; frame-src 'none'; frame-ancestors 'none'; ` +
+  `object-src 'none'; base-uri 'none'; form-action 'none'`;
 
 /** Authorize only the inline bytes of this immutable release, never unsafe-inline. */
 export function releaseCspForHtml(html: string): string {
@@ -57,6 +63,12 @@ const CONTENT_TYPES: Record<string, string> = {
   ".mjs": "text/javascript; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".json": "application/json",
+  // J1.1 — the real UI ships these: .geojson (municipal outlines),
+  // .mjs (pdf.js module worker), .woff2 (bundled fonts), .pbf (vector
+  // tiles, proxy octets only) and .wasm (reserved, none shipped today).
+  ".geojson": "application/json",
+  ".pbf": "application/x-protobuf",
+  ".wasm": "application/wasm",
   // Files parity LOT 1 — binary release assets, served byte-identical under
   // nosniff; SVG/PDF additionally get a sandboxed document CSP at serve time.
   // Files parity LOT 2 — variable fonts and funnel videos ride the same
