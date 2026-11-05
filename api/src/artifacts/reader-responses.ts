@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { ReaderOperationName } from "./reader-operations.js";
 import { appMeResponseSchema } from "./reader-me.js";
+import { parseByCityResponse } from "./reader-by-city.js";
 import { Availability, FacetContextResponse } from "../services/facets/classification-context-contract.js";
 import { WorkspaceId } from "../services/facets/classification-query.js";
 import { SignalSearchResponse } from "../services/facets/classification-search-contract.js";
@@ -109,6 +110,7 @@ export const ReaderWorkspacesResponse = z.object({
 export function validateReaderResponse(op: ReaderOperationName, value: unknown, readerSub: string): Record<string, unknown> {
   if (op === "app.me.v1") return appMeResponseSchema.parse(value);
   if (op === "workspaces.list.v1") return ReaderWorkspacesResponse.parse(value);
+  if (op === "signals.by-city.v1") return parseByCityResponse(value);
   if (op === "geo.read.v1") return geoResponse.parse(value);
   if (op === "geo.cities.v1") return geoCitiesResponse.parse(value);
   if (op === "geo.collection-items.v1") return geoCollectionItemsResponse.parse(value);
