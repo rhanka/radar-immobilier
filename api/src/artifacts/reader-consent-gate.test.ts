@@ -20,7 +20,8 @@ import {
 /**
  * R2 — the persisted consent is the BASKETS consent (reader-consent design,
  * central decision, §2 Gate B and §3.3), never the opening screen:
- * - the opening always renders and records nothing;
+ * - J1.3a: the opening is the single gesture, records the baskets consent
+ *   and is skipped while the rows live;
  * - the baskets screen persists `baskets.read` (+ `baskets.write.prepare`
  *   when the page may prepare actions) and states what is memorized, until
  *   when, and where it is revoked;
@@ -118,32 +119,51 @@ describe("baskets consent scopes", () => {
   });
 });
 
-describe("opening persists nothing", () => {
-  it("should always render the neutral screen and record no consent row", async () => {
+describe("opening is the single consent gesture (J1.3a)", () => {
+  it("should record the baskets consent on the opening click, then skip the opening while live", async () => {
     const consent = memoryConsent();
     const opening = buildOpening(consent);
     const session = await appSession("reader-alice");
 
-    // Even with a live baskets row, the opening screen renders: Gate A
-    // persists nothing and the baskets consent never skips it.
-    consent.live.add(`reader-alice ${ARTIFACT} ${BASKET_READ_SCOPE_ID}`);
-    const fields = await openApprove(opening.application, session);
+    // No live row: the opening screen renders and states memorization.
     const screen = await opening.application.request(
       `/approve?binding=${"b".repeat(64)}&origin=${encodeURIComponent(`https://${ARTIFACT}.${BASE}`)}`,
       { headers: { cookie: session, ...BROWSER } });
     expect(screen.status).toBe(200);
     const body = await screen.text();
     expect(body).toContain("Ouvrir la page");
-    expect(body).not.toContain("mémoris");
+    expect(body).toContain("mémorisé pour cette page jusqu’à sa révocation");
 
-    // Confirming the opening mints the ticket without recording anything.
+    // Confirming records the baskets consent, then mints the ticket.
+    const fields = hiddenFields(body);
     const posted = form({ artifactId: ARTIFACT, binding: fields.binding!,
       origin: `https://${ARTIFACT}.${BASE}`, releaseId: fields.releaseId!,
       profileFingerprint: fields.profileFingerprint! });
     const confirmed = await opening.application.request("/approve",
       { method: "POST", headers: { cookie: session, ...posted.headers }, body: posted.body });
     expect(confirmed.status).toBe(303);
-    expect(consent.grantScopes).not.toHaveBeenCalled();
+    expect(consent.grantScopes).toHaveBeenCalledWith("reader-alice", ARTIFACT, [BASKET_READ_SCOPE_ID]);
+
+    // Live row: the next opening skips its screen.
+    const skipped = await opening.application.request(
+      `/approve?binding=${"b".repeat(64)}&origin=${encodeURIComponent(`https://${ARTIFACT}.${BASE}`)}`,
+      { headers: { cookie: session, ...BROWSER } });
+    expect(skipped.status).toBe(303);
+    expect(skipped.headers.get("location")).toContain("/__reader/exchange?ticket=");
+  });
+
+  it("should keep the screen on a write page until write-prepare is live too", async () => {
+    const consent = memoryConsent();
+    const opening = buildOpening(consent, true);
+    const session = await appSession("reader-alice");
+    consent.live.add(`reader-alice ${ARTIFACT} ${BASKET_READ_SCOPE_ID}`);
+    const fields = await openApprove(opening.application, session);
+    expect(fields.releaseId).toBe(RELEASE);
+    consent.live.add(`reader-alice ${ARTIFACT} ${BASKET_WRITE_PREPARE_SCOPE_ID}`);
+    const skipped = await opening.application.request(
+      `/approve?binding=${"b".repeat(64)}&origin=${encodeURIComponent(`https://${ARTIFACT}.${BASE}`)}`,
+      { headers: { cookie: session, ...BROWSER } });
+    expect(skipped.status).toBe(303);
   });
 });
 
@@ -263,12 +283,13 @@ describe("Gate B on every business H5 call", () => {
       .toBe("basket_consent_required");
   });
 
-  it("should fail closed when the store is unreadable", async () => {
+  it("should fail closed with an explicit typed error when the store is unreadable", async () => {
     const app = buildContent({ hasLiveConsent: async () => { throw new Error("store down"); } });
     const { cookie, grant } = await credentials();
     const refused = await h5(app, cookie, grant);
-    expect(refused.status).toBe(403);
+    // J1.3a: a ledger outage is never a consent prompt the reader cannot satisfy.
+    expect(refused.status).toBe(503);
     expect(((await refused.json()) as { error: { code: string } }).error.code)
-      .toBe("basket_consent_required");
+      .toBe("consent_ledger_unavailable");
   });
 });
