@@ -7,6 +7,8 @@
 // manifest and stdout carry only the aggregates sha256 (D3 adaptation ban, review §1).
 // Nothing from the blind half ever enters an optimiser input. S113 runs as a SECONDARY
 // measure (flagged golden-exposed, diagnostic, outside selection).
+// Seat families (l4/families.mjs) run in parallel, routes of one family sequentially;
+// --sequential keeps the former one-route-at-a-time order (same outputs).
 import path from 'node:path';
 import process from 'node:process';
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
@@ -22,6 +24,7 @@ import { loadCodes } from '../l2/run.mjs';
 import { assertBlindRunAllowed, audit, blindDir, openBlindSet, readAudit } from '../lib/blind.mjs';
 import { assertEvalRunAllowed, audit as auditEval, openEvalSet, readAudit as readEvalAudit } from '../guard/evalset.mjs';
 import { assertSeriesHalves, assertSeriesRoutes, loadSeriesManifest } from './series.mjs';
+import { groupRoutesByFamily, runFamiliesParallel } from './families.mjs';
 
 async function pool(tasks, n) {
   const out = new Array(tasks.length);
@@ -152,8 +155,11 @@ function readdirSyncSafe(dir) {
   // re-run blocked on route 1 no longer strands routes 2+.
   const blindDone = (model, effort) => readAudit(home).some((e) => e.action === 'blind-run' && e.promptSha256 === promptSha && e.model === model && e.effort === effort
     && String(e.purpose ?? '').includes(`l4-blind-s${k}`));
-  const perRoute = {};
-  for (const route of routes) {
+  // Seat-family parallelism: families run in parallel, routes inside one family run
+  // sequentially with the existing per-route concurrency (per-seat limit unchanged).
+  // Per-item caches and per-route files are written inside the route task, so a
+  // family failure keeps the cached items of the other families on disk.
+  const runBlindRoute = async (route) => {
     const { model, effort } = ROUTES[route];
     const routeFile = path.join(outDir, `series-${k}-${route}.json`);
     // Review N6: resumed aggregates must equal an uninterrupted run — withUnresolved and
@@ -161,8 +167,7 @@ function readdirSyncSafe(dir) {
     if (blindDone(model, effort) && existsSync(routeFile)) {
       const prev = JSON.parse(readFileSync(routeFile, 'utf8'));
       if (prev.promptSha256 !== promptSha) throw new Error(`blind resume refused: ${routeFile} prompt sha differs (re-run with the frozen prompt)`);
-      perRoute[route] = { ...prev.stats, withUnresolved: prev.withUnresolved, failures: prev.failures, verdict: prev.verdict };
-      continue;
+      return { ...prev.stats, withUnresolved: prev.withUnresolved, failures: prev.failures, verdict: prev.verdict };
     }
     // Review N7: guard before the start audit — a refused run leaves no started trace.
     assertBlindRunAllowed({ promptFile: promptRel, promptSha256: promptSha, model, effort, home });
@@ -207,7 +212,15 @@ function readdirSyncSafe(dir) {
       { recallFloor: seriesSpec.floors?.recall ?? 0, precisionFloor: seriesSpec.floors?.precision ?? 0, failureCeiling: seriesSpec.failureCeiling ?? 0.1 });
     writeFileSync(routeFile, JSON.stringify({ series: k, route, model, effort, promptSha256: promptSha, stats, withUnresolved: statsWithUnresolved, failures, verdict }, null, 1), { mode: 0o600 });
     audit({ action: 'blind-run', purpose: `l4-blind-s${k}`, promptSha256: promptSha, model, effort, items: rows.length, failures }, { home, env: process.env });
-    perRoute[route] = { ...stats, withUnresolved: statsWithUnresolved, failures, verdict };
+    return { ...stats, withUnresolved: statsWithUnresolved, failures, verdict };
+  };
+  const sequential = argv.includes('--sequential');
+  const perRoute = {};
+  if (sequential) {
+    for (const route of routes) perRoute[route] = await runBlindRoute(route);
+  } else {
+    const blindByRoute = await runFamiliesParallel(groupRoutesByFamily(routes), runBlindRoute);
+    for (const route of routes) perRoute[route] = blindByRoute.get(route);
   }
   // S113 secondary: Steve's labels, flagged golden-exposed, diagnostic, outside selection.
   // Review N2/D3 + §11c: the shared isS113Done predicate (verified s113 file +
@@ -236,7 +249,7 @@ function readdirSyncSafe(dir) {
       } catch { /* fall through to re-run below (should not happen: done implies file) */ }
     }
   }
-  for (const route of s113Remaining) {
+  const runS113Route = async (route) => {
     const { model, effort } = ROUTES[route];
     const s113File = path.join(outDir, `s113-series-${k}-${route}.json`);
     const loadS113Cached = (evalId) => {
@@ -270,9 +283,16 @@ function readdirSyncSafe(dir) {
       { recallSupport: s113supports.recall ?? 30, precisionSupport: s113supports.precision ?? 30 });
     const pRows = exp.map((e, i) => ({ e, r: rows[i] })).filter(({ e }) => e.verdict === 'pertinent');
     const masked = pRows.filter(({ r }) => r.failed || r.pred?.verdict === 'non_pertinent').length;
-    s113[route] = { ...s113stats, pertinentMasked: pertinentMasked(masked, pRows.length), flag: 'golden-exposed', selection: 'excluded (secondary diagnostic)' };
-    writeFileSync(s113File, JSON.stringify({ series: k, route, promptSha256: promptSha, stats: s113stats, s113: s113[route] }, null, 1), { mode: 0o600 });
+    const value = { ...s113stats, pertinentMasked: pertinentMasked(masked, pRows.length), flag: 'golden-exposed', selection: 'excluded (secondary diagnostic)' };
+    writeFileSync(s113File, JSON.stringify({ series: k, route, promptSha256: promptSha, stats: s113stats, s113: value }, null, 1), { mode: 0o600 });
     auditEval({ action: 'eval-run', purpose: `l4-s113-s${k}`, promptSha256: promptSha, model, effort, items: rows.length }, { evalDir, env: process.env });
+    return value;
+  };
+  if (sequential) {
+    for (const route of s113Remaining) s113[route] = await runS113Route(route);
+  } else {
+    const s113ByRoute = await runFamiliesParallel(groupRoutesByFamily(s113Remaining), runS113Route);
+    for (const route of s113Remaining) s113[route] = s113ByRoute.get(route);
   }
   // Review §1 (D3 adaptation ban): blind aggregates stay in $CLASSIF_HOME/blind/ (owner
   // only). The repo manifest and stdout carry NO scores — only the aggregates sha256.
