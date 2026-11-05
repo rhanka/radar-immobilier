@@ -2,20 +2,30 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { MAP_KIT_ASSETS } from "@radar/artifacts-host";
 import {
   bboxOf,
+  countTilesForBounds,
   createMap,
   evaluatePaint,
   expandTemplate,
   findFeatureAt,
+  FIT_Z,
+  MAX_CACHED_TILES,
+  MAX_TILES_PER_FRAME,
+  MAX_TILE_RETRIES,
   MAX_TILE_ZOOM,
   MIN_TILE_ZOOM,
+  TILE_RETRY_BASE_MS,
+  perLayerTileBudget,
+  planTileEviction,
   pointInRing,
   tilesForBounds,
+  tilesForView,
   tileToLonLat,
   tileXY,
+  tileZoomForExtent,
   tileZoomForScale,
   validateBasemapTemplate,
 } from "../../src/artifacts/design-assets/map-base.mjs";
@@ -333,6 +343,96 @@ describe("map-base basemap hook", () => {
   });
 });
 
+describe("map-base province tile budget", () => {
+  const PROVINCE: Array<[number, number]> = [[-79.5, 45.0], [-57.0, 62.5]];
+  const CITY: Array<[number, number]> = [[-73.55, 45.5], [-73.45, 45.6]];
+  const WORLD: Array<[number, number]> = [[-180, -85], [180, 85]];
+
+  it("should derive the zoom from ground resolution, not from the fit scale", () => {
+    expect(MAX_TILES_PER_FRAME).toBe(96);
+    expect(tileZoomForExtent(22.5, 1400)).toBe(6);
+    expect(tileZoomForExtent(0.1, 800)).toBe(13);
+    expect(tileZoomForExtent(360, 1400)).toBe(MIN_TILE_ZOOM);
+    expect(tileZoomForExtent(1e-9, 1400)).toBe(MAX_TILE_ZOOM);
+    expect(tileZoomForExtent(0, 1400)).toBe(MIN_TILE_ZOOM);
+    expect(tileZoomForExtent(Number.NaN, 1400)).toBe(MIN_TILE_ZOOM);
+    expect(tileZoomForExtent(22.5, 0)).toBe(MIN_TILE_ZOOM);
+  });
+
+  it("should serve a province extent at 1400px with at most 96 tiles at z<=8", () => {
+    // The old fit-scale mapping would have enumerated this at z14.
+    expect(countTilesForBounds(PROVINCE, FIT_Z)).toBeGreaterThan(MAX_TILES_PER_FRAME);
+    const view = tilesForView(PROVINCE, 1400);
+    expect(view.z).toBeLessThanOrEqual(8);
+    expect(view.tiles.length).toBeGreaterThan(0);
+    expect(view.tiles.length).toBeLessThanOrEqual(96);
+    expect(view.tiles.length).toBeLessThanOrEqual(MAX_TILES_PER_FRAME);
+    expect(view.tiles.length).toBe(countTilesForBounds(PROVINCE, view.z));
+  });
+
+  it("should serve a city extent with z>=12", () => {
+    const view = tilesForView(CITY, 800);
+    expect(view.z).toBeGreaterThanOrEqual(12);
+    expect(view.tiles.length).toBeGreaterThan(0);
+    expect(view.tiles.length).toBeLessThanOrEqual(MAX_TILES_PER_FRAME);
+  });
+
+  it("should hold the per-frame cap for any extent", () => {
+    const world = tilesForView(WORLD, 1400);
+    expect(world.z).toBe(MIN_TILE_ZOOM);
+    expect(countTilesForBounds(WORLD, world.z)).toBeGreaterThan(MAX_TILES_PER_FRAME);
+    expect(world.tiles).toEqual([]);
+    for (const [corners, width] of [
+      [PROVINCE, 1400],
+      [CITY, 800],
+      [WORLD, 1400],
+      [CITY, 320],
+    ] as const) {
+      const view = tilesForView(corners as Array<[number, number]>, width);
+      expect(view.tiles.length).toBeLessThanOrEqual(MAX_TILES_PER_FRAME);
+    }
+  });
+
+  it("should split the frame budget across layers in a dual-layer configuration", () => {
+    expect(perLayerTileBudget(0)).toBe(MAX_TILES_PER_FRAME);
+    expect(perLayerTileBudget(1)).toBe(MAX_TILES_PER_FRAME);
+    expect(perLayerTileBudget(2)).toBe(MAX_TILES_PER_FRAME / 2);
+    expect(perLayerTileBudget(2)).toBe(48);
+    // Province at desktop width with base + labels: each layer enumerates
+    // within its half, so the frame total stays within the budget.
+    const perLayer = perLayerTileBudget(2);
+    const view = tilesForView(PROVINCE, 1400, perLayer);
+    expect(view.z).toBeLessThanOrEqual(8);
+    expect(view.tiles.length).toBeGreaterThan(0);
+    expect(view.tiles.length).toBeLessThanOrEqual(perLayer);
+    expect(view.tiles.length * 2).toBeLessThanOrEqual(MAX_TILES_PER_FRAME);
+  });
+
+  it("should derive the zoom from the bitmap width (css x devicePixelRatio)", () => {
+    const css = tilesForView(CITY, 800);
+    const hidpi = tilesForView(CITY, 1600);
+    expect(hidpi.z).toBe(css.z + 1);
+    expect(hidpi.tiles.length).toBeLessThanOrEqual(MAX_TILES_PER_FRAME);
+    // The step-down absorbs any hidpi surplus at larger extents.
+    const provinceHidpi = tilesForView(PROVINCE, 1400 * 2, perLayerTileBudget(1));
+    expect(provinceHidpi.tiles.length).toBeLessThanOrEqual(MAX_TILES_PER_FRAME);
+  });
+});
+
+describe("map-base tile cache eviction", () => {
+  it("should never evict a frame tile and drop oldest unneeded first", () => {
+    expect(MAX_CACHED_TILES).toBe(256);
+    const keys = ["a", "b", "c", "d"];
+    const needed = new Set(["b", "d"]);
+    expect(planTileEviction(keys, needed, 2)).toEqual(["a", "c"]);
+    expect(planTileEviction(keys, needed, 10)).toEqual([]);
+    // Every entry needed: nothing may go, even over capacity — the frame
+    // holds at most MAX_TILES_PER_FRAME entries against the larger cache.
+    expect(planTileEviction(keys, new Set(keys), 1)).toEqual([]);
+    expect(planTileEviction(keys, new Set(), 2)).toEqual(["a", "b"]);
+  });
+});
+
 interface StubDomCanvas {
   width: number;
   height: number;
@@ -437,6 +537,219 @@ describe("map-base zoom anchoring", () => {
     expect(clicks[1]!.lon).toBeCloseTo(clicks[0]!.lon, 9);
     expect(clicks[1]!.lat).toBeCloseTo(clicks[0]!.lat, 9);
     map.destroy();
+  });
+});
+
+describe("map-base tile loading", () => {
+  class FakeImage {
+    static instances: FakeImage[] = [];
+    static srcEvents: string[] = [];
+    onload: (() => void) | null = null;
+    onerror: (() => void) | null = null;
+    srcValue = "";
+    constructor() {
+      FakeImage.instances.push(this);
+    }
+    get src(): string {
+      return this.srcValue;
+    }
+    set src(value: string) {
+      this.srcValue = value;
+      FakeImage.srcEvents.push(value);
+    }
+    static reset(): void {
+      FakeImage.instances = [];
+      FakeImage.srcEvents = [];
+    }
+  }
+
+  const globals = globalThis as unknown as Record<string, unknown>;
+  const installImages = (): void => {
+    FakeImage.reset();
+    globals["Image"] = FakeImage;
+  };
+  const uninstallImages = (): void => {
+    delete globals["Image"];
+    delete globals["window"];
+  };
+  const setDevicePixelRatio = (ratio: number): void => {
+    globals["window"] = { devicePixelRatio: ratio };
+  };
+  const requestedZooms = (): number[] =>
+    FakeImage.srcEvents.filter((src) => src !== "").map((src) => Number(src.split("/")[2]));
+  const cityCollection = () => ({
+    type: "FeatureCollection",
+    features: [{
+      type: "Feature",
+      properties: { NO_LOT: "CITY-1" },
+      geometry: {
+        type: "Polygon",
+        coordinates: [[[-73.55, 45.5], [-73.45, 45.5], [-73.45, 45.6], [-73.55, 45.6], [-73.55, 45.5]]],
+      },
+    }],
+  });
+  const farCollection = () => ({
+    type: "FeatureCollection",
+    features: [{
+      type: "Feature",
+      properties: { NO_LOT: "FAR-1" },
+      geometry: {
+        type: "Polygon",
+        coordinates: [[[10, 10], [11, 10], [11, 11], [10, 11], [10, 10]]],
+      },
+    }],
+  });
+
+  it("should really abort stale in-flight loads before issuing replacements", () => {
+    installImages();
+    try {
+      const map = createMap(stubContainer(), { basemapTemplate: "/tiles/{z}/{x}/{y}" });
+      map.setZones(cityCollection());
+      map.fitToBounds();
+      const firstFrame = [...FakeImage.instances];
+      expect(firstFrame.length).toBeGreaterThan(0);
+      map.setZones(farCollection());
+      for (const image of firstFrame) {
+        expect(image.onload).toBeNull();
+        expect(image.onerror).toBeNull();
+        expect(image.src).toBe("");
+      }
+      // Cancel-before-create: every abort lands before any replacement fetch.
+      const lastAbort = FakeImage.srcEvents.lastIndexOf("");
+      expect(lastAbort).toBeGreaterThanOrEqual(0);
+      const after = FakeImage.srcEvents.slice(lastAbort + 1);
+      expect(after.length).toBeGreaterThan(0);
+      expect(after.every((src) => src !== "")).toBe(true);
+      map.destroy();
+    } finally {
+      uninstallImages();
+    }
+  });
+
+  it("should abort in-flight loads on template change and destroy", () => {
+    installImages();
+    try {
+      const map = createMap(stubContainer(), {
+        basemapTemplate: "/tiles/{z}/{x}/{y}",
+        labelsTemplate: "/labels/{z}/{x}/{y}",
+      });
+      map.setZones(cityCollection());
+      map.fitToBounds();
+      const firstFrame = [...FakeImage.instances];
+      expect(firstFrame.length).toBeGreaterThan(0);
+      map.setBasemapTemplate("/tiles-v2/{z}/{x}/{y}");
+      for (const image of firstFrame) {
+        expect(image.onload).toBeNull();
+        expect(image.src).toBe("");
+      }
+      const secondFrame = FakeImage.instances.slice(firstFrame.length);
+      expect(secondFrame.length).toBeGreaterThan(0);
+      map.setLabelsTemplate("/labels-v2/{z}/{x}/{y}");
+      for (const image of secondFrame) {
+        expect(image.onload).toBeNull();
+        expect(image.src).toBe("");
+      }
+      const thirdFrame = FakeImage.instances.slice(firstFrame.length + secondFrame.length);
+      expect(thirdFrame.length).toBeGreaterThan(0);
+      map.destroy();
+      for (const image of thirdFrame) {
+        expect(image.onload).toBeNull();
+        expect(image.onerror).toBeNull();
+        expect(image.src).toBe("");
+      }
+    } finally {
+      uninstallImages();
+    }
+  });
+
+  it("should keep settled tiles across frames instead of refetching", () => {
+    installImages();
+    try {
+      const map = createMap(stubContainer(), { basemapTemplate: "/tiles/{z}/{x}/{y}" });
+      map.setZones(cityCollection());
+      map.fitToBounds();
+      const settled = [...FakeImage.instances];
+      expect(settled.length).toBeGreaterThan(0);
+      for (const image of settled) image.onload?.();
+      const count = FakeImage.instances.length;
+      // Same-view frames (paint change, refit) reuse the settled entries.
+      map.setPaint({ lots: { fill: "#ff0000" } });
+      map.fitToBounds();
+      expect(FakeImage.instances.length).toBe(count);
+      for (const image of settled) expect(image.src).not.toBe("");
+      map.destroy();
+    } finally {
+      uninstallImages();
+    }
+  });
+
+  it("should retry failed tiles with bounded backoff then give up", () => {
+    vi.useFakeTimers();
+    try {
+      installImages();
+      try {
+        expect(MAX_TILE_RETRIES).toBe(3);
+        const map = createMap(stubContainer(), { basemapTemplate: "/tiles/{z}/{x}/{y}" });
+        map.setZones(cityCollection());
+        map.fitToBounds();
+        const image = FakeImage.instances[0]!;
+        const url = image.src;
+        expect(url).not.toBe("");
+        const attempts = (): number => FakeImage.srcEvents.filter((src) => src === url).length;
+        // Each refetch fails again (like a browser refetch would), which
+        // schedules the next attempt — until the bound is reached.
+        image.onerror?.();
+        expect(attempts()).toBe(1);
+        vi.advanceTimersByTime(TILE_RETRY_BASE_MS + 50);
+        expect(attempts()).toBe(2);
+        image.onerror?.();
+        vi.advanceTimersByTime(TILE_RETRY_BASE_MS * 2 + 100);
+        expect(attempts()).toBe(3);
+        image.onerror?.();
+        vi.advanceTimersByTime(TILE_RETRY_BASE_MS * 4 + 200);
+        expect(attempts()).toBe(4);
+        image.onerror?.();
+        vi.advanceTimersByTime(60000);
+        expect(attempts()).toBe(4);
+        // A detached entry is never retried.
+        const doomed = FakeImage.instances[1]!;
+        const doomedUrl = doomed.src;
+        expect(doomedUrl).not.toBe("");
+        doomed.onerror?.();
+        map.setZones(farCollection());
+        expect(doomed.src).toBe("");
+        vi.advanceTimersByTime(60000);
+        expect(FakeImage.srcEvents.filter((src) => src === doomedUrl).length).toBe(1);
+        map.destroy();
+      } finally {
+        uninstallImages();
+      }
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("should request one zoom level higher at devicePixelRatio 2", () => {
+    installImages();
+    try {
+      setDevicePixelRatio(1);
+      const first = createMap(stubContainer(), { basemapTemplate: "/tiles/{z}/{x}/{y}" });
+      first.setZones(cityCollection());
+      first.fitToBounds();
+      const z1 = Math.max(...requestedZooms());
+      expect(Number.isInteger(z1)).toBe(true);
+      first.destroy();
+      FakeImage.reset();
+      setDevicePixelRatio(2);
+      const second = createMap(stubContainer(), { basemapTemplate: "/tiles/{z}/{x}/{y}" });
+      second.setZones(cityCollection());
+      second.fitToBounds();
+      const z2 = Math.max(...requestedZooms());
+      expect(z2).toBe(z1 + 1);
+      second.destroy();
+    } finally {
+      uninstallImages();
+    }
   });
 });
 
