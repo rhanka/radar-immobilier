@@ -8,10 +8,13 @@ import { createAccountDirectory, unknownUserRef } from "./directory.js";
  * - `describePrincipal` always answers: opaque `userRef` for a known
  *   account (by sub or by id), explicit `unknown-<hash>` marker for a
  *   missing one, undefined only for `sentropic:*` mode sentinels;
- * - `resolvePrincipal` answers the sub for an approved account UUID and
- *   nothing for anything else — raw sub, email, marker, pending, suspended
- *   or unknown UUID (the provider merges the miss into
- *   `person_not_shareable`; a throw would escape as a 500).
+ * - `resolvePrincipal` answers the sub for any existing account UUID,
+ *   regardless of status (R5: revoke stays a real cleanup for dormant
+ *   principals), and nothing for anything else — raw sub, email, marker or
+ *   unknown UUID (the provider merges the miss into `person_not_shareable`;
+ *   a throw would escape as a 500). The approved-only rule lives on the
+ *   grant path and is pinned by the sharing integration suite (N3 grant
+ *   refusal, R5 suspended revoke).
  */
 
 const ALICE = { id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", sub: "idp-alice",
@@ -27,13 +30,8 @@ function stubPool() {
       const bySub = (sub: string) => [ALICE, PENDING].filter((row) => row.sub === sub);
       // searchPeople: approved-only ledger scan.
       if (text.includes("account_users WHERE status")) return { rows: approved };
-      // resolvePrincipal: approved-only lookups, by id or by sub.
-      if (text.includes("status = 'approved'")) {
-        const hit = text.includes("WHERE id = $1")
-          ? byId(params[0] as string).filter((row) => approved.includes(row))
-          : bySub(params[0] as string).filter((row) => approved.includes(row));
-        return { rows: hit.map((row) => ({ sub: row.sub })) };
-      }
+      // resolvePrincipal: status-blind lookup by id (R5); the grant path
+      // enforces approved-only, not the resolver.
       if (text.includes("WHERE id = $1")) return { rows: byId(params[0] as string) };
       if (text.includes("WHERE sub = $1")) return { rows: bySub(params[0] as string) };
       throw new Error(`unexpected query: ${text}`);
@@ -74,10 +72,13 @@ describe("account directory model boundary", () => {
     expect(await directory.resolvePrincipal("scope", "sentropic:platform")).toBeUndefined();
   });
 
-  it("should resolve approved account UUIDs only and yield no account for raw subs (N3)", async () => {
+  it("should resolve any existing account UUID regardless of status and yield no account for raw subs (N3/R5)", async () => {
     const directory = createAccountDirectory(stubPool());
     expect(await directory.resolvePrincipal("scope", ALICE.id)).toBe(ALICE.sub);
-    expect(await directory.resolvePrincipal("scope", PENDING.id)).toBeUndefined();
+    // Status-blind on purpose: revoke is the cleanup step for dormant
+    // principals, so a non-approved account still resolves to its sub. The
+    // grant path (not the resolver) refuses non-approved accounts.
+    expect(await directory.resolvePrincipal("scope", PENDING.id)).toBe(PENDING.sub);
     expect(await directory.resolvePrincipal("scope", "cccccccc-cccc-4ccc-8ccc-cccccccccccc"))
       .toBeUndefined();
     // Raw IdP subs never yield an account at the input boundary, whatever

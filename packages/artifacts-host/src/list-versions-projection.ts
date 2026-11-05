@@ -1,9 +1,13 @@
 import type { PrincipalDirectoryPort } from "@sentropic/artifacts";
 
 /**
- * R1 — immo-side author projection for `list_versions` (provider 0.2.13
- * emits the raw IdP sub: v1 `author: manifest.ownerId`, v2
- * `authorPrincipalId: release.authorPrincipalId`).
+ * R1 — immo-side author projection for `list_versions`, kept as defence in
+ * depth under provider 0.2.15 (the provider now projects through the same
+ * directory, so this pass is idempotent for known accounts and re-marks an
+ * already-projected unknown value with the stable immo `unknown-<hash>`
+ * form; it additionally covers the `ownerId`/`principalId`/`actorId` keys a
+ * version entry may carry, on both the provider-outcome and the projected
+ * HTTP/MCP bodies).
  *
  * Every author field is resolved through the immo directory
  * `describePrincipal`: known account -> opaque `userRef`
