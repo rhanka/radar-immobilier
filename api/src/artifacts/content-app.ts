@@ -68,6 +68,13 @@ export function contentGate(contentBase: string, reader?: ContentReaderMount): M
       applyReaderContentHeaders(c);
       return c.json({ error: "unauthenticated" }, 401);
     }
+    // J1.2d/e wagon 1 (§14.1): the /__app/ relay prefix stays reserved and
+    // closed — explicit local 404, never delegated to the reader release and
+    // never proxied upstream. A published file can never shadow it because
+    // the publish policy reserves "__"-prefixed first segments.
+    if (path === "/__app" || path.startsWith("/__app/")) {
+      return deny(c, 404, "not_found");
+    }
     if (parseContentHost(host, contentBase).kind === "other" || /^\/(app|admin|auth|login)(\/|$)/.test(path)) {
       if (!reader) return deny(c, 404, "not_found");
       applyReaderContentHeaders(c);
