@@ -12,9 +12,10 @@ import { ROUTES, callSeat, parseJsonObject } from '../run-seat.mjs';
 import { appendJsonlRecord, parseJsonlTolerant } from '../lib/jsonl.mjs';
 import { sha256 } from '../lib/render.mjs';
 import { CLASSIF_DIR, classifHome, privateDir } from '../lib/paths.mjs';
-import { seriesVerdict, shownStats } from './metrics.mjs';
-import { loadSeriesManifest } from './series.mjs';
+import { compareRoutes, seriesVerdict, shownStats } from './metrics.mjs';
+import { assertSeriesHalves, assertSeriesRoutes, loadSeriesManifest } from './series.mjs';
 import { check as budgetCheck } from '../lib/budget.mjs';
+import { assertNoVerbatim } from '../lib/freeze.mjs';
 import { loadCodes } from '../l2/run.mjs';
 
 // Evaluated routes (plan v3 C–D): low and medium models. Argon runs once its seat quota is
@@ -81,15 +82,39 @@ export async function main(argv = process.argv.slice(2)) {
   if (!existsSync(promptFile)) { process.stderr.write(`classif-l4-dev: frozen prompt P${k} missing (run make classif-l4-p0 / optimise first)\n`); process.exit(2); }
   const frozen = readFileSync(promptFile, 'utf8');
   const promptSha = sha256(frozen);
+  // Review §11b: re-scan the frozen prompt on every run — an edited then recommitted
+  // prompt with an updated series manifest must not bypass the verbatim guard.
+  assertNoVerbatim(frozen, home, { what: `prompt P${k}` });
   // Review §9 (M.5): the pre-registered series manifest is required before dev.
   const seriesSpec = loadSeriesManifest(k);
   if (seriesSpec.promptSha256 !== promptSha) throw new Error(`classif-l4-dev: frozen prompt P${k} sha differs from the pre-registered series manifest`);
+  // Review §9b: the executed routes must match the pre-registered series (a --deferred
+  // that changes the series makes it exploratory, not the registered one), and the
+  // frozen halves must match the split draw (plain read — L2 already enforced committed).
+  assertSeriesRoutes(seriesSpec, routes, k);
+  try {
+    const splitFile = path.join(CLASSIF_DIR, 'l3', 'manifests', 'split.json');
+    if (existsSync(splitFile)) {
+      const split = JSON.parse(readFileSync(splitFile, 'utf8'));
+      if (split.sha256) assertSeriesHalves(seriesSpec, k, split.sha256);
+    }
+  } catch (e) {
+    if (/halves|refused/.test(e.message)) throw e;
+    throw e;
+  }
   const codes = loadCodes();
   const tuning = readTuning(home);
   if (tuning.some((r) => !r.input)) throw new Error('classif-l4-dev: tuning row without frozen input');
-  // D5: the whole series batch is refused when it would exceed the pilot cap.
-  budgetCheck(home, tuning.length * routes.length);
   const dir = privateDir(path.join(home, 'l4', `series-${k}`));
+  // Review §5 (D5): planned counts only non-cached items — a resume with 1 item left
+  // is not refused near the cap.
+  let uncachedDev = 0;
+  for (const route of routes) {
+    for (const item of tuning) {
+      if (!readDevItemCache(dir, route, item.itemId, k, promptSha)) uncachedDev++;
+    }
+  }
+  budgetCheck(home, uncachedDev);
   const callsLog = path.join(home, 'l2', 'calls.jsonl');
   const seatTmp = privateDir(path.join(home, 'l4', 'seat-tmp'));
   const perRoute = {};
@@ -111,8 +136,11 @@ export async function main(argv = process.argv.slice(2)) {
       const row = { itemId: item.itemId, ref: item.code, refVerdict: item.verdict, unresolved: item.status === 'unresolved',
         pred: parsed.failed ? null : { verdict: parsed.verdict, code: parsed.code }, failed: parsed.failed, why: parsed.why,
         usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null };
-      writeFileSync(path.join(dir, `dev-${route}.${item.itemId}.json`),
-        JSON.stringify({ series: String(k), promptSha256: promptSha, route, itemId: item.itemId, row }), { mode: 0o600 });
+      // Review N4: failures are never cached — retried on resume with a new counted intent.
+      if (!row.failed) {
+        writeFileSync(path.join(dir, `dev-${route}.${item.itemId}.json`),
+          JSON.stringify({ series: String(k), promptSha256: promptSha, route, itemId: item.itemId, row }), { mode: 0o600 });
+      }
       return row;
     }), concurrency);
     writeFileSync(outFile, `${rows.map((r) => JSON.stringify(r)).join('\n')}\n`, { mode: 0o600 });
@@ -120,10 +148,14 @@ export async function main(argv = process.argv.slice(2)) {
   }
   // Aggregates (Annex M) + the optimiser error file (tuning mismatches for the optimiser input).
   // Review §9: metrics published WITH and WITHOUT unresolved rows; verdict from the series spec.
+  // Review §9a: indeterminate supports come from the pre-registered series manifest.
+  const devSupports = seriesSpec.supports ?? {};
   const aggregates = {};
   for (const [route, rows] of Object.entries(perRoute)) {
-    const stats = shownStats(rows.map((r) => ({ ref: r.refVerdict, pred: r.failed ? { failed: true } : r.pred, unresolved: r.unresolved })));
-    const statsWithUnresolved = shownStats(rows.map((r) => ({ ref: r.refVerdict, pred: r.failed ? { failed: true } : r.pred, unresolved: false })));
+    const stats = shownStats(rows.map((r) => ({ ref: r.refVerdict, pred: r.failed ? { failed: true } : r.pred, unresolved: r.unresolved })),
+      { recallSupport: devSupports.recall ?? 30, precisionSupport: devSupports.precision ?? 30 });
+    const statsWithUnresolved = shownStats(rows.map((r) => ({ ref: r.refVerdict, pred: r.failed ? { failed: true } : r.pred, unresolved: false })),
+      { recallSupport: devSupports.recall ?? 30, precisionSupport: devSupports.precision ?? 30 });
     const failures = rows.filter((r) => r.failed).length;
     const spec = { recallFloor: seriesSpec.floors?.recall ?? 0, precisionFloor: seriesSpec.floors?.precision ?? 0,
       failureCeiling: seriesSpec.failureCeiling ?? 0.1 };
@@ -140,8 +172,14 @@ export async function main(argv = process.argv.slice(2)) {
       .map((r) => ({ itemId: r.itemId, ref: r.ref, refVerdict: r.refVerdict, pred: r.pred?.verdict ?? null, predCode: r.pred?.code ?? null, failed: r.failed, why: r.why ?? null }));
   }
   writeFileSync(path.join(dir, `errors.json`), `${JSON.stringify(errors, null, 1)}\n`, { mode: 0o600 });
+  // Review §9d (M.3): lexicographic selection wired on the tuning half (compareRoutes is
+  // no longer test-only) — recall LB, recall, precision LB, precision, prompt version, cost.
+  const ranked = Object.entries(aggregates)
+    .map(([route, a]) => ({ route, stats: { recallLB: a.recallLB, recall: a.recall, precisionLB: a.precisionLB, precision: a.precision, indeterminate: a.indeterminate }, promptVersion: `P${k}`, costUsd: a.costUsd ?? 0 }))
+    .sort(compareRoutes);
   const manifest = { kind: 'l4-dev', series: k, createdAt: new Date().toISOString(), promptSha256: promptSha,
     routes, deferred, tuningItems: tuning.length, aggregates,
+    selection: { order: ranked.map((r) => r.route), best: ranked[0]?.route ?? null, criterion: 'M.3 lexicographic (tuning half only)' },
     trackNote: 'per-item tuning outputs stay private (optimiser input); this manifest carries metrics only' };
   mkdirSync(path.join(CLASSIF_DIR, 'l4', 'manifests'), { recursive: true });
   writeFileSync(path.join(CLASSIF_DIR, 'l4', 'manifests', `series-${k}-dev.json`), `${JSON.stringify(manifest, null, 1)}\n`);
