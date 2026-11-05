@@ -44,19 +44,21 @@ export function majority(votes) {
   return best && best.count >= 2 ? best : null;
 }
 
-export const STOP = { alphaReport: 0.67, unanimityReport: 0.75, changed: 0.02, resolutionCap: 4, firstResolutionPass: 2 };
+export const STOP = { alphaReport: 0.67, unanimityReport: 0.75, changed: 0.02, resolutionCap: 4, firstResolutionPass: 2, capPass: 5 };
 
-// Plan v3 stop rule (review §E-5): the α thresholds NEVER stop the phase alone (they are
-// reported only). Stop when a pass changes < 2 % of the re-annotated votes AND every residual
-// item has a cause class; cap at 4 resolution passes (pass 1 is blind, passes 2–5 resolve).
-// Denominator of the 2 %: votes re-annotated this pass (valid votes cast on the todo items).
+// Plan v3 stop rule (review §E-5, §7): the α thresholds NEVER stop the phase alone (they are
+// reported only). Stop when a pass changes < 2 % of the VALID re-annotated votes AND every
+// residual item has a cause class AND at least one amendment round is traced. Cap at pass 5
+// (passes 2–5 resolve; the chain loops 1–5). Denominator of the 2 %: valid votes
+// re-annotated this pass (carried deferred votes excluded, invalid votes excluded).
 // Residuals without a majority after the cap keep status `unresolved` with their cause class.
-export function stopDecision({ changedShare, pass, residualsClassified }) {
-  if (pass >= STOP.firstResolutionPass + STOP.resolutionCap) {
-    return { stop: true, why: `cap of ${STOP.resolutionCap} resolution passes reached (pass ${pass})` };
+export function stopDecision({ changedShare, pass, residualsClassified, hasAmend = false }) {
+  if (pass >= STOP.capPass) {
+    return { stop: true, why: `cap reached (pass ${pass} ≥ ${STOP.capPass})` };
   }
   if (changedShare !== null && changedShare < STOP.changed && residualsClassified === true) {
-    return { stop: true, why: `${(changedShare * 100).toFixed(2)} % of re-annotated votes changed (< 2 %) and every residual item is cause-classified` };
+    if (!hasAmend) return { stop: false, why: `${(changedShare * 100).toFixed(2)} % changed and residuals classified, but no amendment round traced yet (stop forbidden before an amendment)` };
+    return { stop: true, why: `${(changedShare * 100).toFixed(2)} % of valid re-annotated votes changed (< 2 %) and every residual item is cause-classified` };
   }
   if (changedShare !== null && changedShare < STOP.changed && residualsClassified !== true) {
     return { stop: false, why: `${(changedShare * 100).toFixed(2)} % changed but residual items lack a cause class` };
