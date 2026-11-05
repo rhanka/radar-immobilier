@@ -1,0 +1,1 @@
+{"budget":{"cap":22000,"spent":0},"failureCeiling":0.1,"floors":{"precision":0.5,"recall":0.5},"kind":"l4-series","promptSha256":"571513ac7cf283b9d980d6a1e9743a94e6acaad6220dce6c3ded795afc619505","routes":["glm-5.3-low"],"supports":{"precision":1000,"recall":1000}}

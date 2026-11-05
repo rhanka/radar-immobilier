@@ -120,14 +120,15 @@ test('v3 deferred annotator keeps its last vote with a recorded gap', async () =
   }
 });
 
-// Pilot budget D5: strict spend (corrupt lines fail closed), intent-counted, check refuses over-cap.
+// Pilot budget D5: strict spend (non-final corrupt lines fail closed; N1 truncated tail
+// tolerated), intent-counted, check refuses over-cap.
 test('v3 pilot budget: counter in the manifest, chain refuses over cap', async () => {
   const { BUDGET_CAP, check, spent, spentByPhase } = await import('../lib/budget.mjs');
   assert.equal(BUDGET_CAP, 22000);
   const home = tmp();
   try {
     mkdirSync(path.join(home, 'l2'), { recursive: true });
-    writeFileSync(path.join(home, 'l2', 'calls.jsonl'), '{"phase":"pass1"}\n{"phase":"pass2"}\nnot-json\n');
+    writeFileSync(path.join(home, 'l2', 'calls.jsonl'), '{"phase":"pass1"}\nnot-json\n{"phase":"pass2"}\n');
     assert.throws(() => spent(home), /corrupt calls log/);
     writeFileSync(path.join(home, 'l2', 'calls.jsonl'), '{"phase":"pass1"}\n{"phase":"pass2"}\n');
     assert.equal(spent(home), 2);
@@ -282,7 +283,8 @@ test('v3 reference D: provenance, status, halves', () => {
     { itemId: 'b1', kind: 'pv', codeMaj: null, verdictMaj: null, ambiguousByOne: true },
   ];
   const halves = { tuning: new Set(['t1']), blind: new Set(['b1']) };
-  const ref = buildReferenceD({ rows, latest: noCite, complements: new Map(), halves, adjudications: new Map([['t1', true]]), ambiguityCauses: new Map([['b1', 'missing-information']]), pass: 3, codes });
+  // Review §6b: bare adjudications ({itemId:{}} or true) throw — use a valid {code} here.
+  const ref = buildReferenceD({ rows, latest: noCite, complements: new Map(), halves, adjudications: new Map([['t1', { code: 'S-A' }]]), ambiguityCauses: new Map([['b1', 'missing-information']]), pass: 3, codes });
   const t1 = ref.find((r) => r.itemId === 't1');
   assert.equal(t1.partition, 'core');
   assert.equal(t1.status, 'resolved');
