@@ -42,14 +42,12 @@ The verdict must be the partition of the code.
 
 export async function main(argv = process.argv.slice(2)) {
   const home = classifHome();
+  // Review §11a: shared fail-closed FINAL guard (missing/corrupt manifest refuses).
+  const { assertFinalGuide } = await import('../lib/freeze.mjs');
+  assertFinalGuide(home);
   const packDir = path.join(home, 'l1', 'pack');
   const guideFile = path.join(packDir, 'guide-FINAL.md');
   const guide = readFileSync(guideFile, 'utf8');
-  // Review §11: the consumed FINAL guide sha must match the freeze manifest.
-  try {
-    const freeze = JSON.parse(readFileSync(path.join(CLASSIF_DIR, 'l2', 'manifests', 'guide-freeze.json'), 'utf8'));
-    if (freeze.guideSha256 && sha256(guide) !== freeze.guideSha256) throw new Error('classif-l4-p0: guide-FINAL.md sha differs from the freeze manifest');
-  } catch (e) { if (/sha differs/.test(e.message)) throw e; }
   const criteria = readFileSync(path.join(packDir, 'criteria.md'), 'utf8');
   const definitions = readFileSync(path.join(packDir, 'codes-definitions.md'), 'utf8');
   const p0 = renderP0({ criteria, definitions, guide });

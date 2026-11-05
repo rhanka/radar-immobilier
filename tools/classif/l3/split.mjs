@@ -60,7 +60,11 @@ export function splitGrouped(cities, targets, rng = null) {
     return s;
   };
   const base = rng ? shuffleSeeded(cities, rng) : [...cities];
-  const ordered = base.sort((a, b) => b.items.length - a.items.length || (a.city < b.city ? -1 : 1));
+  // Review §3a: with a seed the shuffled order decides equal sizes (stable sort on size
+  // alone); without rng the legacy deterministic alphabetical tie-break applies (tests).
+  const ordered = rng
+    ? base.sort((a, b) => b.items.length - a.items.length)
+    : base.sort((a, b) => b.items.length - a.items.length || (a.city < b.city ? -1 : 1));
   for (const city of ordered) {
     const adds = new Map();
     for (const it of city.items) adds.set(it.stratum, (adds.get(it.stratum) ?? 0) + 1);
@@ -87,6 +91,17 @@ export function requireCommittedSeed(seedFile, cliSeed) {
   if (!committed.seed) throw new Error(`split refused: seed file ${rel} carries no seed`);
   if (cliSeed && cliSeed !== committed.seed) throw new Error('split refused: --seed differs from the committed seed file');
   return committed;
+}
+
+/** The consumed split must be committed BEFORE any pass ≥ 2: tracked and clean
+    (git ls-files + git diff --quiet HEAD), same guard as the seed. Returns the split. */
+export function requireCommittedSplit(splitFile = path.join(CLASSIF_DIR, 'l3', 'manifests', 'split.json'), repo = REPO) {
+  const git = (...a) => spawnSync('git', a, { cwd: repo, encoding: 'utf8' });
+  if (!existsSync(splitFile)) throw new Error(`split refused: ${splitFile} absent (run make classif-l3b-split first)`);
+  const rel = path.relative(repo, splitFile);
+  if (git('ls-files', '--error-unmatch', rel).status !== 0) throw new Error(`split refused: ${rel} is not committed (commit the draw before any pass ≥ 2)`);
+  if (git('diff', '--quiet', 'HEAD', '--', rel).status !== 0) throw new Error(`split refused: ${rel} differs from the committed version (commit before any pass ≥ 2)`);
+  return JSON.parse(readFileSync(splitFile, 'utf8'));
 }
 
 export function stratumOf(kind, verdict, bpass) {
@@ -116,8 +131,14 @@ export async function main(argv = process.argv.slice(2)) {
   // (muse-wonder-max, astra-max, opus-5.5-max) after Astra's pass 1 — never a stale file.
   const { latestVotes, summarise } = await import('../l2/converge.mjs');
   const { latest } = latestVotes(home, 1);
+  // Review §3c: pass-1 coverage must be COMPLETE per annotator — a partial Astra pass
+  // must not silently produce false strata.
   for (const a of ANNOTATORS) {
-    if (!latest.get(a) || latest.get(a).size === 0) throw new Error(`split refused: no pass-1 votes for ${a} (run Astra pass 1 first)`);
+    const votes = latest.get(a);
+    if (!votes || votes.size === 0) throw new Error(`split refused: no pass-1 votes for ${a} (run Astra pass 1 first)`);
+    if (votes.size !== items.length) throw new Error(`split refused: incomplete pass-1 coverage for ${a} (${votes.size}/${items.length} items — finish Astra pass 1 first)`);
+    const missing = items.some((it) => !votes.has(it.itemId));
+    if (missing) throw new Error(`split refused: incomplete pass-1 coverage for ${a} (some items without a vote — finish Astra pass 1 first)`);
   }
   const { rows: convRows } = summarise(items, latest);
   const convergeSha256 = sha256(JSON.stringify(convRows));

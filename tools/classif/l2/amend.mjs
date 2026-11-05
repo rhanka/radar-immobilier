@@ -5,36 +5,45 @@
 // votes are adopted into the next guide. Dev items only; the sealed evaluation set is never read.
 import path from 'node:path';
 import process from 'node:process';
+import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { callSeat, parseJsonObject } from '../run-seat.mjs';
 import { sha256 } from '../lib/render.mjs';
 import { appendJsonlRecord } from '../lib/jsonl.mjs';
-import { CLASSIF_DIR, classifHome, privateDir } from '../lib/paths.mjs';
+import { CLASSIF_DIR, REPO, classifHome, privateDir } from '../lib/paths.mjs';
 import { check as checkBudget } from '../lib/budget.mjs';
 import { assertNoVerbatim } from '../lib/freeze.mjs';
 import { atomicWrite, ANNOTATORS, loadDevItems } from './run.mjs';
 import { latestVotes } from './converge.mjs';
 
-/** Tuning-half item ids from the committed split (plan v3 D2: amendments from tuning only). */
-export function tuningHalf() {
-  const m = JSON.parse(readFileSync(path.join(CLASSIF_DIR, 'l3', 'manifests', 'split.json'), 'utf8'));
+/** Tuning-half item ids from the committed split (plan v3 D2: amendments from tuning only).
+    Review §3b: the split must be committed clean — an edited uncommitted split is refused.
+    Hermetic tests override via CLASSIF_SPLIT_FILE / CLASSIF_REPO (temp committed split). */
+export function tuningHalf(splitFile = process.env.CLASSIF_SPLIT_FILE ?? path.join(CLASSIF_DIR, 'l3', 'manifests', 'split.json'), repo = process.env.CLASSIF_REPO ?? REPO) {
+  if (!existsSync(splitFile)) throw new Error(`split refused: ${splitFile} absent (run make classif-l3b-split first)`);
+  const rel = path.relative(repo, splitFile);
+  const git = (...a) => spawnSync('git', a, { cwd: repo, encoding: 'utf8' });
+  if (git('ls-files', '--error-unmatch', rel).status !== 0) throw new Error(`split refused: ${rel} is not committed (commit the draw before amending)`);
+  if (git('diff', '--quiet', 'HEAD', '--', rel).status !== 0) throw new Error(`split refused: ${rel} differs from the committed version (commit before amending)`);
+  const m = JSON.parse(readFileSync(splitFile, 'utf8'));
   return new Set(m.halves.tuning);
 }
 
 const MAX_PER_ANNOTATOR = 8;
 
 /**
- * Fail-closed seat policy for amendment: a non-zero seat exit contributes nothing —
- * neither a proposal nor a vote — so a failed ballot can never adopt a rule.
+ * Fail-closed seat policy for amendment: a non-zero seat exit OR any tool event
+ * contributes nothing — neither a proposal nor a vote — so a failed ballot can never
+ * adopt a rule (review N5: Astra in read-only still counts as a tool user).
  */
 export function parseProposalList(r) {
-  if (!r || r.code !== 0) return [];
+  if (!r || r.code !== 0 || (r.toolEvents ?? 0) > 0) return [];
   const j = parseJsonObject(r.text);
   return (Array.isArray(j?.amendments) ? j.amendments : []).slice(0, MAX_PER_ANNOTATOR).filter((x) => typeof x?.rule === 'string' && x.rule.trim());
 }
 
 export function parseBallot(r) {
-  if (!r || r.code !== 0) return {};
+  if (!r || r.code !== 0 || (r.toolEvents ?? 0) > 0) return {};
   return parseJsonObject(r.text)?.votes ?? {};
 }
 
@@ -129,9 +138,10 @@ ${digest}
     const r = await cachedCall(home, a, 'propose', proposePrompt, seatTmp,
       { log: callsLog, rec: { phase: `amend-${to}`, pass: n, step: 'propose', annotator: a } });
     appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: `amend-${to}`, pass: n, step: 'propose', annotator: a,
-      exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused), usage: r.usage ?? null });
-    calls.push({ annotator: a, step: 'propose', exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused) });
+      exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused), toolEvents: r.toolEvents ?? null, usage: r.usage ?? null });
+    calls.push({ annotator: a, step: 'propose', exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused), toolEvents: r.toolEvents ?? null });
     if (r.code !== 0) process.stderr.write(`[amend] ${a} propose seat exit code ${r.code}: proposals inadmissible (fail-closed exit policy)\n`);
+    if ((r.toolEvents ?? 0) > 0) process.stderr.write(`[amend] ${a} propose tool events ${r.toolEvents}: proposals inadmissible (fail-closed tool policy)\n`);
     return parseProposalList(r);
   }))).flat();
   const union = proposals.flat().map((x) => ({ rule: x.rule.trim(), rationale: String(x.rationale ?? '').trim() }))
@@ -147,9 +157,10 @@ ${union.map((x) => `- ${x.id}: ${x.rule} (rationale: ${x.rationale})`).join('\n'
     const r = await cachedCall(home, a, 'vote', votePrompt, seatTmp,
       { log: callsLog, rec: { phase: `amend-${to}`, pass: n, step: 'vote', annotator: a } });
     appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: `amend-${to}`, pass: n, step: 'vote', annotator: a,
-      exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused), usage: r.usage ?? null });
-    calls.push({ annotator: a, step: 'vote', exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused) });
+      exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused), toolEvents: r.toolEvents ?? null, usage: r.usage ?? null });
+    calls.push({ annotator: a, step: 'vote', exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused), toolEvents: r.toolEvents ?? null });
     if (r.code !== 0) process.stderr.write(`[amend] ${a} vote seat exit code ${r.code}: ballot inadmissible (fail-closed exit policy)\n`);
+    if ((r.toolEvents ?? 0) > 0) process.stderr.write(`[amend] ${a} vote tool events ${r.toolEvents}: ballot inadmissible (fail-closed tool policy)\n`);
     return r;
   }));
   const { tally, adopted } = tallyAmendments(union, ballotResults);
