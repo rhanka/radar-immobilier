@@ -70,34 +70,52 @@ classif-l1-guide: ## Classification pilot L1: guide G0 by one isolated Opus 5.5 
 	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l1/guide-g0.mjs
 
 # L2 — convergence passes of the 3 max-effort annotators over the dev items (never the evaluation set).
+# Plan v3: trio = muse-wonder-max, astra-max, opus-5.5-max (ANNOTATORS in l2/run.mjs); a deferred
+# annotator keeps its last vote (DEFERRED=a,b). Modes: independent (pass 1) or crossreview (A2+,
+# needs the golden pack). A manual pass can be restricted to one split half (HALF=tuning|blind).
 PASS ?= 1
 MODE ?= independent
 GUIDE ?= G0
 CONCURRENCY ?= 4
+DEFERRED ?=
+HALF ?=
 .PHONY: classif-l2-pass classif-l2-converge classif-l2-scrape classif-l2-amend
-classif-l2-pass: ## Classification pilot L2: one annotation pass (PASS=n MODE=independent|reconcile GUIDE=G0 CONCURRENCY=4)
+classif-l2-pass: ## Classification pilot L2: one annotation pass (PASS=n MODE=independent|crossreview GUIDE=G0 CONCURRENCY=4 DEFERRED= HALF=)
 	@test "$(ENV)" = "preprod" || { echo "[classif-l2-pass] ENV=preprod required"; exit 2; }
-	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/run.mjs --pass $(PASS) --mode $(MODE) --guide $(GUIDE) --concurrency $(CONCURRENCY) $(if $(LOTS),--lots $(LOTS),)
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/run.mjs --pass $(PASS) --mode $(MODE) --guide $(GUIDE) --concurrency $(CONCURRENCY) $(if $(LOTS),--lots $(LOTS),) $(if $(DEFERRED),--deferred $(DEFERRED),) $(if $(HALF),--half $(HALF),)
 
-classif-l2-converge: ## Classification pilot L2: majority, α, unanimity, stop rule, next-pass todo (PASS=n)
-	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/converge.mjs --pass $(PASS)
+classif-l2-converge: ## Classification pilot L2: majority, v3 stop rule, next-pass todo (PASS=n DEFERRED=)
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/converge.mjs --pass $(PASS) $(if $(DEFERRED),--deferred $(DEFERRED),)
 
 classif-l2-scrape: ## Classification pilot L2: traced complements for items flagged missing-information (scrape-manifest.jsonl)
 	@test "$(ENV)" = "preprod" || { echo "[classif-l2-scrape] ENV=preprod required"; exit 2; }
 	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/scrape.mjs
 
-classif-l2-amend: ## Classification pilot L2: guide amendment by majority of the 3 annotators (FROM=G0 TO=G1 PASS=n)
+classif-l2-amend: ## Classification pilot L2: guide amendment from tuning-half disagreements (FROM=G0 TO=G1 PASS=n HALF=tuning DEFERRED=)
 	@test "$(ENV)" = "preprod" || { echo "[classif-l2-amend] ENV=preprod required"; exit 2; }
-	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/amend.mjs --from $(FROM) --to $(TO) --pass $(PASS)
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/amend.mjs --from $(FROM) --to $(TO) --pass $(PASS) --half $(if $(HALF),$(HALF),tuning) $(if $(DEFERRED),--deferred $(DEFERRED),)
 
 .PHONY: classif-l2-revalidate
 classif-l2-revalidate: ## Classification pilot L2: re-run Engram validation on saved extractions of PASS=n (no seat call)
 	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/revalidate.mjs --pass $(PASS) $(if $(ALL),--all,)
 
-.PHONY: classif-l2-chain
-classif-l2-chain: ## Classification pilot L2: whole protocol, resumable (WAIT_UNIT=<systemd unit> CONCURRENCY=2)
+.PHONY: classif-l2-chain classif-l2-golden-pack classif-l2-golden-delete classif-l2-ambiguity-map
+classif-l2-chain: ## Classification pilot L2: whole v3 phase-A protocol, resumable (WAIT_UNIT=<unit> CONCURRENCY=2 DEFERRED= STAGE=main|blind)
 	@test "$(ENV)" = "preprod" || { echo "[classif-l2-chain] ENV=preprod required"; exit 2; }
-	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/chain.mjs --concurrency $(CONCURRENCY) $(if $(WAIT_UNIT),--wait-unit $(WAIT_UNIT),)
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/chain.mjs --concurrency $(if $(CONCURRENCY),$(CONCURRENCY),2) $(if $(WAIT_UNIT),--wait-unit $(WAIT_UNIT),) $(if $(DEFERRED),--deferred $(DEFERRED),) $(if $(STAGE),--stage $(STAGE),)
+
+classif-l2-golden-pack: ## Classification pilot L2b: conductor-run, unseals reference-c + eval set in memory, writes the private 113-row golden pack (never committed)
+	@test "$(ENV)" = "preprod" || { echo "[classif-l2-golden-pack] ENV=preprod required"; exit 2; }
+	@test "$(CLASSIF_ROLE)" = "test-executor" || { echo "[classif-l2-golden-pack] CLASSIF_ROLE=test-executor required"; exit 2; }
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/golden-pack.mjs
+
+classif-l2-golden-delete: ## Classification pilot L2b: deletes the private golden pack at the end of phase A
+	@test "$(ENV)" = "preprod" || { echo "[classif-l2-golden-delete] ENV=preprod required"; exit 2; }
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/golden-pack.mjs --delete
+
+classif-l2-ambiguity-map: ## Classification pilot L2b: residual cause map + question draft (PASS=n)
+	@test "$(ENV)" = "preprod" || { echo "[classif-l2-ambiguity-map] ENV=preprod required"; exit 2; }
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l2/ambiguity.mjs --pass $(PASS)
 
 .PHONY: classif-l2-fingerprint-audit classif-l2-dev-firewall-audit classif-l3-reference
 classif-l2-fingerprint-audit: ## Classification pilot: which fingerprint list caused the complement refusals (no change to the lists)
@@ -113,3 +131,36 @@ classif-l2-exit-audit: ## Classification pilot L2: audit exit≠0 votes, recompu
 classif-l3-reference: ## Classification pilot L3: dev reference (model_consensus), partitions, manifest (0 LLM call, L3OUT=... redirects the private rows copy)
 	@test "$(ENV)" = "preprod" || { echo "[classif-l3-reference] ENV=preprod required"; exit 2; }
 	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l3/reference.mjs $(if $(L3OUT),--out "$(L3OUT)",)
+
+# L3b — reference set D, 50/50 city-grouped split, blind seal (plan v3 D2/D3).
+.PHONY: classif-l3b-split classif-l3b-reference
+classif-l3b-split: ## Classification pilot L3b: 50/50 split grouped by city, seed committed before the draw (CLASSIF_SEED=... required)
+	@test "$(ENV)" = "preprod" || { echo "[classif-l3b-split] ENV=preprod required"; exit 2; }
+	@test -n "$(CLASSIF_SEED)" || { echo "[classif-l3b-split] CLASSIF_SEED=<seed> required"; exit 2; }
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l3/split.mjs --seed "$(CLASSIF_SEED)"
+
+classif-l3b-reference: ## Classification pilot L3b: reference set D (provenances, core/unresolved) + blind-half seal (CLASSIF_ROLE=test-executor, after guide FINAL)
+	@test "$(ENV)" = "preprod" || { echo "[classif-l3b-reference] ENV=preprod required"; exit 2; }
+	@test "$(CLASSIF_ROLE)" = "test-executor" || { echo "[classif-l3b-reference] CLASSIF_ROLE=test-executor required"; exit 2; }
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l3/reference-d.mjs
+
+# L4 — P0 + prompt-tuning series with blind evaluation (plan v3 C/D, Annex M in l4/ANNEX-M.md).
+# SERIES=k last; P0 is builder-authored (0 LLM); dev runs tuning only; blind is executor-only.
+SERIES ?= 0
+.PHONY: classif-l4-p0 classif-l4-dev classif-l4-optimise classif-l4-blind
+classif-l4-p0: ## Classification pilot L4: author baseline P0 from guide FINAL (0 LLM call)
+	@test "$(ENV)" = "preprod" || { echo "[classif-l4-p0] ENV=preprod required"; exit 2; }
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l4/p0.mjs
+
+classif-l4-dev: ## Classification pilot L4: tuning-half evaluation of every route (SERIES=k DEFERRED= CONCURRENCY=2)
+	@test "$(ENV)" = "preprod" || { echo "[classif-l4-dev] ENV=preprod required"; exit 2; }
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l4/dev.mjs --series $(SERIES) $(if $(DEFERRED),--deferred $(DEFERRED),) --concurrency $(if $(CONCURRENCY),$(CONCURRENCY),2)
+
+classif-l4-optimise: ## Classification pilot L4: 2 max optimisers + reconciliation to one common P(k+1) (SERIES=k DEFERRED=)
+	@test "$(ENV)" = "preprod" || { echo "[classif-l4-optimise] ENV=preprod required"; exit 2; }
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l4/optimise.mjs --series $(SERIES) $(if $(DEFERRED),--deferred $(DEFERRED),)
+
+classif-l4-blind: ## Classification pilot L4: executor-only blind-half scoring + S113 secondary (SERIES=k CLASSIF_ROLE=test-executor)
+	@test "$(ENV)" = "preprod" || { echo "[classif-l4-blind] ENV=preprod required"; exit 2; }
+	@test "$(CLASSIF_ROLE)" = "test-executor" || { echo "[classif-l4-blind] CLASSIF_ROLE=test-executor required"; exit 2; }
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l4/blind.mjs --series $(SERIES) $(if $(DEFERRED),--deferred $(DEFERRED),) --concurrency $(if $(CONCURRENCY),$(CONCURRENCY),2)
