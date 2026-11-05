@@ -107,6 +107,23 @@ export function chiSquareHalves(a, b) {
 }
 
 /**
+ * Series verdict (Annex M M.2, review §9): `pass` if shown-recall AND shown-precision pass
+ * (lower bounds ≥ floors); `fail` if either fails or the failure share exceeds the
+ * pre-registered ceiling; `indeterminate` otherwise (supports unmet). Failures stay in
+ * every denominator.
+ */
+export function seriesVerdict({ stats, failures, items }, spec) {
+  const ceiling = spec?.failureCeiling ?? 0.1;
+  if (items && failures / items > ceiling) return 'fail';
+  if (stats?.indeterminate?.recall || stats?.indeterminate?.precision) return 'indeterminate';
+  const rf = spec?.recallFloor ?? 0;
+  const pf = spec?.precisionFloor ?? 0;
+  if ((stats?.recallLB ?? -1) >= rf && (stats?.precisionLB ?? -1) >= pf) return 'pass';
+  if ((stats?.recallLB ?? 1) < rf || (stats?.precisionLB ?? 1) < pf) return 'fail';
+  return 'indeterminate';
+}
+
+/**
  * Lexicographic selection (Annex M M.3, tuning half only): shown recall (LB, then point),
  * shown precision (LB, then point), most recent prompt version, lowest cost. Returns <0 when
  * `a` ranks first. Routes failing the failure ceiling or indeterminate on the compared
