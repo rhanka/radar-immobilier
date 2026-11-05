@@ -249,12 +249,15 @@ export function uploadPageRoute(deps: UploadPageRouteDeps): Hono {
   }));
 
   // Page document: navigation from the chat link (token rides the URL
-  // fragment, never the wire). Empty S3 origins (plain-http storage) keep
-  // this document closed with 503; the mint/exchange/file endpoints below
-  // keep working without it.
+  // fragment, never the wire). Same owner guard as the API calls below: a
+  // foreign session gets 403/404 and never the document. Empty S3 origins
+  // (plain-http storage) keep this document closed with 503; the
+  // mint/exchange/file endpoints below keep working without it.
   app.get("/upload/:pageSessionId", async (c) => {
     const guarded = await guardPage(c, deps, true);
     if (guarded instanceof Response) return guarded;
+    const owner = await guardPageOwner(c, deps, guarded.session);
+    if (owner instanceof Response) return owner;
     try {
       const html = renderUploadPage({ s3Origins: [...deps.config!.s3Origins] });
       c.header("Content-Type", "text/html; charset=utf-8");
