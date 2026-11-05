@@ -37,8 +37,15 @@ export function provenanceOf({ codeMaj, votes, adjudicated }) {
 export function buildReferenceD({ rows, latest, complements, halves, adjudications, ambiguityCauses, pass, codes }) {
   return rows.map((r) => {
     const votes = ANNOTATORS.map((a) => latest.get(a).get(r.itemId) ?? null);
-    const code = r.codeMaj?.value ?? null;
-    const status = code ? 'resolved' : 'unresolved';
+    // Review §6: Chaperon adjudications {itemId:{code}} override the majority — validated
+    // against the registry, status resolved (a bare key keeps the majority code but still
+    // marks human_adjudicated provenance).
+    const adj = adjudications.get(r.itemId) ?? null;
+    const adjCode = typeof adj === 'string' ? adj : adj?.code ?? null;
+    if (adjCode && !codes.has(adjCode)) throw new Error(`adjudication refused: unknown code ${adjCode} for ${r.itemId}`);
+    const code = adjCode ?? r.codeMaj?.value ?? null;
+    // Unresolved only without a majority AND without adjudication.
+    const finalStatus = code ? 'resolved' : 'unresolved';
     const cited = [...new Set(votes.filter((v) => v?.valid && (!code || v.code === code)).flatMap((v) => v.goldenPrecedent ?? []))].sort((a, b) => a - b);
     return {
       itemId: r.itemId, kind: r.kind, code, verdict: code ? codes.get(code) ?? null : (r.verdictMaj?.value ?? null),
@@ -47,29 +54,59 @@ export function buildReferenceD({ rows, latest, complements, halves, adjudicatio
         labelProvenance: v.labelProvenance ?? null, pass: v.pass ?? null, guide: v.guide ?? null } : { annotator: ANNOTATORS[i], valid: false }),
       label_provenance: provenanceOf({ codeMaj: code, votes, adjudicated: adjudications.has(r.itemId) }),
       evidence: { golden_precedent: cited, external_evidence: refUsesExternalForItem(r.itemId, latest, complements) },
-      status, cause: status === 'unresolved' ? ambiguityCauses.get(r.itemId) ?? 'unclassified' : null,
-      partition: status === 'unresolved' ? 'unresolved' : 'core',
+      status: finalStatus, cause: finalStatus === 'unresolved' ? ambiguityCauses.get(r.itemId) ?? 'unclassified' : null,
+      partition: finalStatus === 'unresolved' ? 'unresolved' : 'core',
       half: halves.tuning.has(r.itemId) ? 'tuning' : halves.blind.has(r.itemId) ? 'blind' : 'unknown',
-      pass,
+      pass, adjudicated: adjudications.has(r.itemId),
     };
   });
+}
+
+export function loadAdjudications(home) {
+  const adjFile = path.join(home, 'l3b', 'adjudications.json');
+  if (!existsSync(adjFile)) return new Map();
+  const raw = JSON.parse(readFileSync(adjFile, 'utf8'));
+  return new Map(Object.entries(raw));
 }
 
 export async function main(argv = process.argv.slice(2)) {
   const home = classifHome();
   const splitFile = path.join(CLASSIF_DIR, 'l3', 'manifests', 'split.json');
   if (!existsSync(splitFile)) { process.stderr.write('classif-l3b-reference: refusing without the committed split (run make classif-l3b-split ENV=preprod first)\n'); process.exit(2); }
-  if (!existsSync(path.join(home, 'l1', 'pack', 'guide-FINAL.md'))) { process.stderr.write('classif-l3b-reference: refusing without the frozen guide (the blind half is sealed only after its cross-review under guide FINAL)\n'); process.exit(2); }
+  const finalGuideFile = path.join(home, 'l1', 'pack', 'guide-FINAL.md');
+  if (!existsSync(finalGuideFile)) { process.stderr.write('classif-l3b-reference: refusing without the frozen guide (the blind half is sealed only after its cross-review under guide FINAL)\n'); process.exit(2); }
+  // Review §6 + §11: the frozen FINAL guide sha must match the freeze manifest.
+  try {
+    const freeze = JSON.parse(readFileSync(path.join(CLASSIF_DIR, 'l2', 'manifests', 'guide-freeze.json'), 'utf8'));
+    if (freeze.guideSha256 && sha256(readFileSync(finalGuideFile, 'utf8')) !== freeze.guideSha256) {
+      throw new Error('classif-l3b-reference: guide-FINAL.md sha differs from the freeze manifest (re-freeze before sealing)');
+    }
+  } catch (e) { if (/sha differs/.test(e.message)) throw e; }
   const split = JSON.parse(readFileSync(splitFile, 'utf8'));
   const halves = { tuning: new Set(split.halves.tuning), blind: new Set(split.halves.blind) };
   const items = loadDevItems(home);
   const codes = loadCodes();
   const lastPass = lastConvergedPass(home);
+  // Review §6: sealing requires the blind-stage marker — the last pass must be the blind
+  // half cross-review under FINAL (todo.json half blind), not a main-stage pass.
+  const blindTodoFile = path.join(home, 'l2', `pass${lastPass}`, 'todo.json');
+  const blindDoneFile = path.join(home, 'l2', `pass${lastPass}.done`);
+  let blindTodo = null;
+  try { blindTodo = JSON.parse(readFileSync(blindTodoFile, 'utf8')); } catch { /* absent */ }
+  if (!blindTodo || blindTodo.half !== 'blind') {
+    process.stderr.write(`classif-l3b-reference: refusing without the blind stage (pass${lastPass}/todo.json half must be 'blind' — run make classif-l2-chain STAGE=blind first)\n`);
+    process.exit(2);
+  }
+  if (!existsSync(blindDoneFile)) { process.stderr.write(`classif-l3b-reference: refusing without the blind-stage done marker (pass${lastPass}.done)\n`); process.exit(2); }
   const conv = JSON.parse(readFileSync(path.join(home, 'l2', `converge-pass${lastPass}.json`), 'utf8'));
   const { latest, gaps, deferred } = latestVotes(home, lastPass);
+  // Review §6: every blind todo item needs a FINAL vote (or explicit portage); unanimous
+  // blind items outside the todo are ported explicitly (their earlier vote stands).
+  const blindTodoIds = new Set(blindTodo.items ?? []);
+  const missingFinal = [...blindTodoIds].filter((id) => !ANNOTATORS.some((a) => latest.get(a).get(id)?.guide === 'FINAL'));
+  if (missingFinal.length) throw new Error(`reference-D refused: ${missingFinal.length} blind todo items without a FINAL vote (${missingFinal.slice(0, 5).join(',')}…)`);
   const complements = loadComplements(home);
-  const adjFile = path.join(home, 'l3b', 'adjudications.json');
-  const adjudications = new Set(existsSync(adjFile) ? Object.keys(JSON.parse(readFileSync(adjFile, 'utf8'))) : []);
+  const adjudications = loadAdjudications(home);
   let causes = new Map();
   try {
     const amb = JSON.parse(readFileSync(path.join(home, 'l2', `ambiguity-pass${lastPass}.json`), 'utf8'));

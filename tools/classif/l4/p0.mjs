@@ -8,7 +8,7 @@
 // it (freeze + commit before the tuning run).
 import path from 'node:path';
 import process from 'node:process';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { sha256 } from '../lib/render.mjs';
 import { CLASSIF_DIR, classifHome } from '../lib/paths.mjs';
 import { assertNoVerbatim } from '../lib/freeze.mjs';
@@ -43,13 +43,21 @@ The verdict must be the partition of the code.
 export async function main(argv = process.argv.slice(2)) {
   const home = classifHome();
   const packDir = path.join(home, 'l1', 'pack');
-  const guide = readFileSync(path.join(packDir, 'guide-FINAL.md'), 'utf8');
+  const guideFile = path.join(packDir, 'guide-FINAL.md');
+  const guide = readFileSync(guideFile, 'utf8');
+  // Review §11: the consumed FINAL guide sha must match the freeze manifest.
+  try {
+    const freeze = JSON.parse(readFileSync(path.join(CLASSIF_DIR, 'l2', 'manifests', 'guide-freeze.json'), 'utf8'));
+    if (freeze.guideSha256 && sha256(guide) !== freeze.guideSha256) throw new Error('classif-l4-p0: guide-FINAL.md sha differs from the freeze manifest');
+  } catch (e) { if (/sha differs/.test(e.message)) throw e; }
   const criteria = readFileSync(path.join(packDir, 'criteria.md'), 'utf8');
   const definitions = readFileSync(path.join(packDir, 'codes-definitions.md'), 'utf8');
   const p0 = renderP0({ criteria, definitions, guide });
   // Review §C: no verbatim golden excerpt in any prompt — shingle check before the freeze.
   assertNoVerbatim(p0, home, { what: 'prompt P0' });
   const out = path.join(CLASSIF_DIR, 'l4', 'prompts', 'P0.md');
+  // Review §11: never overwrite a frozen artefact.
+  if (existsSync(out)) throw new Error(`classif-l4-p0: refusing to overwrite frozen prompt ${out}`);
   mkdirSync(path.dirname(out), { recursive: true });
   writeFileSync(out, `${p0.trim()}\n`);
   const manifest = { kind: 'l4-p0', createdAt: new Date().toISOString(), llmCalls: 0,

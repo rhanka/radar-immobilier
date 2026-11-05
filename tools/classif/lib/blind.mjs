@@ -13,7 +13,7 @@ import { keyFromEnv, sha256, sealToFile, unseal } from './refc1.mjs';
 import { appendJsonlRecord, parseJsonlTolerant } from './jsonl.mjs';
 import { REPO, classifHome, privateDir } from './paths.mjs';
 
-export const blindDir = (home = classifHome()) => path.join(home, 'l3b');
+export const blindDir = (home = classifHome()) => path.join(home, 'blind');
 export const sealedFile = (home = classifHome()) => path.join(blindDir(home), 'blind.sealed');
 export const accessLog = (home = classifHome()) => path.join(blindDir(home), 'access-log.jsonl');
 

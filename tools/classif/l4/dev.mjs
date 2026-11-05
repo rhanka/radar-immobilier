@@ -12,7 +12,8 @@ import { ROUTES, callSeat, parseJsonObject } from '../run-seat.mjs';
 import { appendJsonlRecord, parseJsonlTolerant } from '../lib/jsonl.mjs';
 import { sha256 } from '../lib/render.mjs';
 import { CLASSIF_DIR, classifHome, privateDir } from '../lib/paths.mjs';
-import { shownStats } from './metrics.mjs';
+import { seriesVerdict, shownStats } from './metrics.mjs';
+import { loadSeriesManifest } from './series.mjs';
 import { check as budgetCheck } from '../lib/budget.mjs';
 import { loadCodes } from '../l2/run.mjs';
 
@@ -48,6 +49,21 @@ async function pool(tasks, n) {
   return out;
 }
 
+/**
+ * Per-item dev cache read (review §8): returns the cached row only when the stored key
+ * (series,promptSha256,route,itemId) matches exactly; corrupt or stale entries read as null
+ * (re-run). Exported for the resume test.
+ */
+export function readDevItemCache(dir, route, itemId, k, promptSha) {
+  const f = path.join(dir, `dev-${route}.${itemId}.json`);
+  if (!existsSync(f)) return null;
+  try {
+    const c = JSON.parse(readFileSync(f, 'utf8'));
+    if (c.series === String(k) && c.promptSha256 === promptSha && c.route === route && c.itemId === itemId) return c.row;
+  } catch { /* corrupt cache: re-run */ }
+  return null;
+}
+
 export function readTuning(home) {
   const ref = parseJsonlTolerant(readFileSync(path.join(home, 'l3b', 'reference-d.jsonl'), 'utf8'));
   const corpus = new Map(parseJsonlTolerant(readFileSync(path.join(home, 'l0', 'dev-items.jsonl'), 'utf8')).map((i) => [i.itemId, i]));
@@ -65,6 +81,9 @@ export async function main(argv = process.argv.slice(2)) {
   if (!existsSync(promptFile)) { process.stderr.write(`classif-l4-dev: frozen prompt P${k} missing (run make classif-l4-p0 / optimise first)\n`); process.exit(2); }
   const frozen = readFileSync(promptFile, 'utf8');
   const promptSha = sha256(frozen);
+  // Review §9 (M.5): the pre-registered series manifest is required before dev.
+  const seriesSpec = loadSeriesManifest(k);
+  if (seriesSpec.promptSha256 !== promptSha) throw new Error(`classif-l4-dev: frozen prompt P${k} sha differs from the pre-registered series manifest`);
   const codes = loadCodes();
   const tuning = readTuning(home);
   if (tuning.some((r) => !r.input)) throw new Error('classif-l4-dev: tuning row without frozen input');
@@ -76,36 +95,49 @@ export async function main(argv = process.argv.slice(2)) {
   const perRoute = {};
   for (const route of routes) {
     const outFile = path.join(dir, `dev-${route}.jsonl`);
-    if (existsSync(outFile)) {
-      perRoute[route] = parseJsonlTolerant(readFileSync(outFile, 'utf8'));
-      continue;
-    }
+    // Review §8: per-item persistence with key (series,promptSha,route,itemId) verified on
+    // resume — a crash never repays finished items, a changed prompt never reuses stale rows.
+    // Review §9: the predicted code is kept (pred.verdict + pred.code).
+    const loadCached = (itemId) => readDevItemCache(dir, route, itemId, k, promptSha);
     const rows = await pool(tuning.map((item) => async () => {
+      const hit = loadCached(item.itemId);
+      if (hit) return hit;
       const prompt = devPrompt(frozen, item);
+      appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: true, phase: `l4-dev-s${k}`, route, itemId: item.itemId });
       const r = await callSeat(route, prompt, { base: seatTmp, timeoutMs: 1800000 });
-      appendJsonlRecord(callsLog, { at: new Date().toISOString(), phase: `l4-dev-s${k}`, route, itemId: item.itemId,
+      appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: `l4-dev-s${k}`, route, itemId: item.itemId,
         exitCode: r.code, latencyMs: r.latencyMs, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null });
       const parsed = r.code === 0 ? parseDevAnswer(r.text, codes) : { verdict: null, code: null, failed: true, why: `exit-${r.code}` };
-      return { itemId: item.itemId, ref: item.code, refVerdict: item.verdict, unresolved: item.status === 'unresolved',
-        pred: parsed.failed ? null : { verdict: parsed.verdict }, failed: parsed.failed, why: parsed.why,
+      const row = { itemId: item.itemId, ref: item.code, refVerdict: item.verdict, unresolved: item.status === 'unresolved',
+        pred: parsed.failed ? null : { verdict: parsed.verdict, code: parsed.code }, failed: parsed.failed, why: parsed.why,
         usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null };
+      writeFileSync(path.join(dir, `dev-${route}.${item.itemId}.json`),
+        JSON.stringify({ series: String(k), promptSha256: promptSha, route, itemId: item.itemId, row }), { mode: 0o600 });
+      return row;
     }), concurrency);
     writeFileSync(outFile, `${rows.map((r) => JSON.stringify(r)).join('\n')}\n`, { mode: 0o600 });
     perRoute[route] = rows;
   }
   // Aggregates (Annex M) + the optimiser error file (tuning mismatches for the optimiser input).
+  // Review §9: metrics published WITH and WITHOUT unresolved rows; verdict from the series spec.
   const aggregates = {};
   for (const [route, rows] of Object.entries(perRoute)) {
     const stats = shownStats(rows.map((r) => ({ ref: r.refVerdict, pred: r.failed ? { failed: true } : r.pred, unresolved: r.unresolved })));
+    const statsWithUnresolved = shownStats(rows.map((r) => ({ ref: r.refVerdict, pred: r.failed ? { failed: true } : r.pred, unresolved: false })));
     const failures = rows.filter((r) => r.failed).length;
+    const spec = { recallFloor: seriesSpec.floors?.recall ?? 0, precisionFloor: seriesSpec.floors?.precision ?? 0,
+      failureCeiling: seriesSpec.failureCeiling ?? 0.1 };
     aggregates[route] = { ...stats, failures,
+      withUnresolved: statsWithUnresolved,
+      verdict: seriesVerdict ? seriesVerdict({ stats, failures, items: rows.length }, spec) : null,
       costUsd: rows.reduce((s, r) => s + (r.costUsd ?? 0), 0),
       items: rows.length };
   }
+  // Review §9: errors carry failures and code errors (not verdict mismatches only).
   const errors = {};
   for (const [route, rows] of Object.entries(perRoute)) {
-    errors[route] = rows.filter((r) => !r.unresolved && !r.failed && r.pred?.verdict !== r.refVerdict)
-      .map((r) => ({ itemId: r.itemId, ref: r.ref, refVerdict: r.refVerdict, pred: r.pred?.verdict }));
+    errors[route] = rows.filter((r) => !r.unresolved && (r.failed || r.pred?.verdict !== r.refVerdict || r.pred?.code !== r.ref))
+      .map((r) => ({ itemId: r.itemId, ref: r.ref, refVerdict: r.refVerdict, pred: r.pred?.verdict ?? null, predCode: r.pred?.code ?? null, failed: r.failed, why: r.why ?? null }));
   }
   writeFileSync(path.join(dir, `errors.json`), `${JSON.stringify(errors, null, 1)}\n`, { mode: 0o600 });
   const manifest = { kind: 'l4-dev', series: k, createdAt: new Date().toISOString(), promptSha256: promptSha,

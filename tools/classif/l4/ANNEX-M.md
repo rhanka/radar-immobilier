@@ -24,11 +24,13 @@ half makes the series exploratory.
 - **Unresolved**: reference-D rows with status `unresolved` are neither scored nor in any
   denominator. Every reported metric is published with AND without the unresolved rows.
 - **Precision P∪S**: share of shown predictions whose reference is P or S.
-- **Agreement**: 3-class agreement, per-code Cohen κ (raw agreement, prevalence and supports
-  alongside; no weighted κ), city-cluster bootstrap (≥ 10,000 draws) for intervals.
+- **Agreement**: 3-class agreement with raw agreement, prevalence and supports alongside
+  (no weighted κ). Per-code Cohen κ, McNemar pairwise tests and the city-cluster bootstrap
+  (≥ 10,000 draws) are pure utilities (`l4/metrics.mjs`, unit-tested) run in the L5 report,
+  never in series selection.
 - **Comparator**: B′ passes 1–3 recomputed on the frozen corpus, compared in shown/masked
-  only. The 21/09 observed P∪S share (49/73 = 67.1 %, other population) is reported, never
-  used as a comparator.
+  only, in the L5 report (not in series manifests). The 21/09 observed P∪S share (49/73 =
+  67.1 %, other population) is reported, never used as a comparator.
 
 ## M.2 Primary analysis (per series, tuning half then blind half)
 
