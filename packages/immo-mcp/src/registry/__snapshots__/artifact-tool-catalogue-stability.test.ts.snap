@@ -810,6 +810,332 @@ exports[`artifact tool catalogue stability > should snapshot the immo-artifacts.
     },
     "name": "artifacts_revoke_reader_consent",
   },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+    },
+    "description": "Mint a browser upload page so a human uploads large files without model bytes.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "maxFiles": {
+          "maximum": 255,
+          "minimum": 1,
+          "type": "integer",
+        },
+      },
+      "required": [
+        "artifactId",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_create_upload_page",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+    },
+    "description": "List staged and released asset files of a Radar page.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "cursor": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "type": "string",
+        },
+        "limit": {
+          "maximum": 255,
+          "minimum": 1,
+          "type": "integer",
+        },
+        "pageSessionId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "releaseId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "state": {
+          "enum": [
+            "staged",
+            "released",
+            "all",
+          ],
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_list_assets",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+    },
+    "description": "Publish one atomic release from inline files plus copy, carry or keep assets. Fetch \`authoringGuide\` from artifacts_ensure (or artifacts_get for an existing page) and follow it.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": [
+            "files",
+          ],
+        },
+        {
+          "required": [
+            "assets",
+          ],
+        },
+      ],
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "assets": {
+          "description": "Assets whose bytes already left the model: a staged uploadId, a CAS digest, a copy from the same scope, or a carry from a release of this artifact. Set keepUnmodifiedPaths to carry every other path of the expected release.",
+          "items": {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "path": {
+                    "description": "Manifest path; the active profile bounds its byte length and forbids reserved or dot segments, enforced server-side with typed errors.",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "uploadId": {
+                    "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "path",
+                  "uploadId",
+                ],
+                "type": "object",
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "digest": {
+                    "pattern": "^sha256:[0-9a-f]{64}$",
+                    "type": "string",
+                  },
+                  "mimeType": {
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "path": {
+                    "description": "Manifest path; the active profile bounds its byte length and forbids reserved or dot segments, enforced server-side with typed errors.",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "size": {
+                    "minimum": 1,
+                    "type": "integer",
+                  },
+                },
+                "required": [
+                  "path",
+                  "digest",
+                  "size",
+                  "mimeType",
+                ],
+                "type": "object",
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "path": {
+                    "description": "Manifest path; the active profile bounds its byte length and forbids reserved or dot segments, enforced server-side with typed errors.",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "sourceArtifactId": {
+                    "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                    "type": "string",
+                  },
+                  "sourcePath": {
+                    "description": "Manifest path; the active profile bounds its byte length and forbids reserved or dot segments, enforced server-side with typed errors.",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "sourceReleaseId": {
+                    "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "path",
+                  "sourceArtifactId",
+                ],
+                "type": "object",
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "carryFromReleaseId": {
+                    "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                    "type": "string",
+                  },
+                  "path": {
+                    "description": "Manifest path; the active profile bounds its byte length and forbids reserved or dot segments, enforced server-side with typed errors.",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "sourcePath": {
+                    "description": "Manifest path; the active profile bounds its byte length and forbids reserved or dot segments, enforced server-side with typed errors.",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "path",
+                  "carryFromReleaseId",
+                ],
+                "type": "object",
+              },
+            ],
+          },
+          "minItems": 1,
+          "type": "array",
+        },
+        "description": {
+          "description": "Short artifact description.",
+          "maxLength": 2000,
+          "type": "string",
+        },
+        "expectedCurrentReleaseId": {
+          "description": "Compare the current release atomically; null requires an unpublished artifact.",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": [
+            "string",
+            "null",
+          ],
+        },
+        "files": {
+          "description": "Inline files (bytes travel through the model, inline budget); at least one of files/assets is required.",
+          "items": {
+            "additionalProperties": false,
+            "oneOf": [
+              {
+                "not": {
+                  "required": [
+                    "bytes",
+                  ],
+                },
+                "required": [
+                  "text",
+                ],
+              },
+              {
+                "not": {
+                  "required": [
+                    "text",
+                  ],
+                },
+                "required": [
+                  "bytes",
+                ],
+              },
+            ],
+            "properties": {
+              "bytes": {
+                "items": {
+                  "maximum": 255,
+                  "minimum": 0,
+                  "type": "integer",
+                },
+                "type": "array",
+              },
+              "mimeType": {
+                "minLength": 1,
+                "type": "string",
+              },
+              "path": {
+                "description": "Manifest path; the active profile bounds its byte length and forbids reserved or dot segments, enforced server-side with typed errors.",
+                "minLength": 1,
+                "type": "string",
+              },
+              "text": {
+                "type": "string",
+              },
+            },
+            "required": [
+              "path",
+              "mimeType",
+            ],
+            "type": "object",
+          },
+          "minItems": 1,
+          "type": "array",
+        },
+        "icon": {
+          "description": "One short lowercase word.",
+          "pattern": "^[a-z][a-z0-9-]{0,31}$",
+          "type": [
+            "string",
+            "null",
+          ],
+        },
+        "idempotencyKey": {
+          "description": "Nonblank by JavaScript trim(); the active profile bounds its length in UTF-16 units; original bytes retained.",
+          "minLength": 1,
+          "type": "string",
+        },
+        "keepUnmodifiedPaths": {
+          "type": "boolean",
+        },
+        "profile": {
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number",
+              "boolean",
+              "null",
+            ],
+          },
+          "type": "object",
+        },
+        "title": {
+          "description": "Artifact display title.",
+          "maxLength": 160,
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+        "idempotencyKey",
+        "expectedCurrentReleaseId",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_publish_bundle_v2",
+  },
 ]
 `;
 
@@ -1622,6 +1948,332 @@ exports[`artifact tool catalogue stability > should snapshot the immo-artifacts.
       "type": "object",
     },
     "name": "artifacts_revoke_reader_consent",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+    },
+    "description": "Mint a browser upload page so a human uploads large files without model bytes.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "maxFiles": {
+          "maximum": 255,
+          "minimum": 1,
+          "type": "integer",
+        },
+      },
+      "required": [
+        "artifactId",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_create_upload_page",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+    },
+    "description": "List staged and released asset files of a Radar page.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "cursor": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "type": "string",
+        },
+        "limit": {
+          "maximum": 255,
+          "minimum": 1,
+          "type": "integer",
+        },
+        "pageSessionId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "releaseId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "state": {
+          "enum": [
+            "staged",
+            "released",
+            "all",
+          ],
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_list_assets",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+    },
+    "description": "Publish one atomic release from inline files plus copy, carry or keep assets. Fetch \`authoringGuide\` from artifacts_ensure (or artifacts_get for an existing page) and follow it.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": [
+            "files",
+          ],
+        },
+        {
+          "required": [
+            "assets",
+          ],
+        },
+      ],
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "assets": {
+          "description": "Assets whose bytes already left the model: a staged uploadId, a CAS digest, a copy from the same scope, or a carry from a release of this artifact. Set keepUnmodifiedPaths to carry every other path of the expected release.",
+          "items": {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "path": {
+                    "description": "Manifest path; the active profile bounds its byte length and forbids reserved or dot segments, enforced server-side with typed errors.",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "uploadId": {
+                    "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "path",
+                  "uploadId",
+                ],
+                "type": "object",
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "digest": {
+                    "pattern": "^sha256:[0-9a-f]{64}$",
+                    "type": "string",
+                  },
+                  "mimeType": {
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "path": {
+                    "description": "Manifest path; the active profile bounds its byte length and forbids reserved or dot segments, enforced server-side with typed errors.",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "size": {
+                    "minimum": 1,
+                    "type": "integer",
+                  },
+                },
+                "required": [
+                  "path",
+                  "digest",
+                  "size",
+                  "mimeType",
+                ],
+                "type": "object",
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "path": {
+                    "description": "Manifest path; the active profile bounds its byte length and forbids reserved or dot segments, enforced server-side with typed errors.",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "sourceArtifactId": {
+                    "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                    "type": "string",
+                  },
+                  "sourcePath": {
+                    "description": "Manifest path; the active profile bounds its byte length and forbids reserved or dot segments, enforced server-side with typed errors.",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "sourceReleaseId": {
+                    "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "path",
+                  "sourceArtifactId",
+                ],
+                "type": "object",
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "carryFromReleaseId": {
+                    "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                    "type": "string",
+                  },
+                  "path": {
+                    "description": "Manifest path; the active profile bounds its byte length and forbids reserved or dot segments, enforced server-side with typed errors.",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "sourcePath": {
+                    "description": "Manifest path; the active profile bounds its byte length and forbids reserved or dot segments, enforced server-side with typed errors.",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "path",
+                  "carryFromReleaseId",
+                ],
+                "type": "object",
+              },
+            ],
+          },
+          "minItems": 1,
+          "type": "array",
+        },
+        "description": {
+          "description": "Short artifact description.",
+          "maxLength": 2000,
+          "type": "string",
+        },
+        "expectedCurrentReleaseId": {
+          "description": "Compare the current release atomically; null requires an unpublished artifact.",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": [
+            "string",
+            "null",
+          ],
+        },
+        "files": {
+          "description": "Inline files (bytes travel through the model, inline budget); at least one of files/assets is required.",
+          "items": {
+            "additionalProperties": false,
+            "oneOf": [
+              {
+                "not": {
+                  "required": [
+                    "bytes",
+                  ],
+                },
+                "required": [
+                  "text",
+                ],
+              },
+              {
+                "not": {
+                  "required": [
+                    "text",
+                  ],
+                },
+                "required": [
+                  "bytes",
+                ],
+              },
+            ],
+            "properties": {
+              "bytes": {
+                "items": {
+                  "maximum": 255,
+                  "minimum": 0,
+                  "type": "integer",
+                },
+                "type": "array",
+              },
+              "mimeType": {
+                "minLength": 1,
+                "type": "string",
+              },
+              "path": {
+                "description": "Manifest path; the active profile bounds its byte length and forbids reserved or dot segments, enforced server-side with typed errors.",
+                "minLength": 1,
+                "type": "string",
+              },
+              "text": {
+                "type": "string",
+              },
+            },
+            "required": [
+              "path",
+              "mimeType",
+            ],
+            "type": "object",
+          },
+          "minItems": 1,
+          "type": "array",
+        },
+        "icon": {
+          "description": "One short lowercase word.",
+          "pattern": "^[a-z][a-z0-9-]{0,31}$",
+          "type": [
+            "string",
+            "null",
+          ],
+        },
+        "idempotencyKey": {
+          "description": "Nonblank by JavaScript trim(); the active profile bounds its length in UTF-16 units; original bytes retained.",
+          "minLength": 1,
+          "type": "string",
+        },
+        "keepUnmodifiedPaths": {
+          "type": "boolean",
+        },
+        "profile": {
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number",
+              "boolean",
+              "null",
+            ],
+          },
+          "type": "object",
+        },
+        "title": {
+          "description": "Artifact display title.",
+          "maxLength": 160,
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+        "idempotencyKey",
+        "expectedCurrentReleaseId",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_publish_bundle_v2",
   },
 ]
 `;
@@ -2513,6 +3165,332 @@ exports[`artifact tool catalogue stability > should snapshot the immo-artifacts.
       "type": "object",
     },
     "name": "artifacts_revoke_reader_consent",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+    },
+    "description": "Mint a browser upload page so a human uploads large files without model bytes.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "maxFiles": {
+          "maximum": 255,
+          "minimum": 1,
+          "type": "integer",
+        },
+      },
+      "required": [
+        "artifactId",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_create_upload_page",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+    },
+    "description": "List staged and released asset files of a Radar page.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "cursor": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "type": "string",
+        },
+        "limit": {
+          "maximum": 255,
+          "minimum": 1,
+          "type": "integer",
+        },
+        "pageSessionId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "releaseId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "state": {
+          "enum": [
+            "staged",
+            "released",
+            "all",
+          ],
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_list_assets",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+    },
+    "description": "Publish one atomic release from inline files plus copy, carry or keep assets. Fetch \`authoringGuide\` from artifacts_ensure (or artifacts_get for an existing page) and follow it.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": [
+            "files",
+          ],
+        },
+        {
+          "required": [
+            "assets",
+          ],
+        },
+      ],
+      "properties": {
+        "artifactId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string",
+        },
+        "assets": {
+          "description": "Assets whose bytes already left the model: a staged uploadId, a CAS digest, a copy from the same scope, or a carry from a release of this artifact. Set keepUnmodifiedPaths to carry every other path of the expected release.",
+          "items": {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "path": {
+                    "description": "Manifest path; the active profile bounds its byte length and forbids reserved or dot segments, enforced server-side with typed errors.",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "uploadId": {
+                    "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "path",
+                  "uploadId",
+                ],
+                "type": "object",
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "digest": {
+                    "pattern": "^sha256:[0-9a-f]{64}$",
+                    "type": "string",
+                  },
+                  "mimeType": {
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "path": {
+                    "description": "Manifest path; the active profile bounds its byte length and forbids reserved or dot segments, enforced server-side with typed errors.",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "size": {
+                    "minimum": 1,
+                    "type": "integer",
+                  },
+                },
+                "required": [
+                  "path",
+                  "digest",
+                  "size",
+                  "mimeType",
+                ],
+                "type": "object",
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "path": {
+                    "description": "Manifest path; the active profile bounds its byte length and forbids reserved or dot segments, enforced server-side with typed errors.",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "sourceArtifactId": {
+                    "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                    "type": "string",
+                  },
+                  "sourcePath": {
+                    "description": "Manifest path; the active profile bounds its byte length and forbids reserved or dot segments, enforced server-side with typed errors.",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "sourceReleaseId": {
+                    "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "path",
+                  "sourceArtifactId",
+                ],
+                "type": "object",
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "carryFromReleaseId": {
+                    "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                    "type": "string",
+                  },
+                  "path": {
+                    "description": "Manifest path; the active profile bounds its byte length and forbids reserved or dot segments, enforced server-side with typed errors.",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "sourcePath": {
+                    "description": "Manifest path; the active profile bounds its byte length and forbids reserved or dot segments, enforced server-side with typed errors.",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "path",
+                  "carryFromReleaseId",
+                ],
+                "type": "object",
+              },
+            ],
+          },
+          "minItems": 1,
+          "type": "array",
+        },
+        "description": {
+          "description": "Short artifact description.",
+          "maxLength": 2000,
+          "type": "string",
+        },
+        "expectedCurrentReleaseId": {
+          "description": "Compare the current release atomically; null requires an unpublished artifact.",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": [
+            "string",
+            "null",
+          ],
+        },
+        "files": {
+          "description": "Inline files (bytes travel through the model, inline budget); at least one of files/assets is required.",
+          "items": {
+            "additionalProperties": false,
+            "oneOf": [
+              {
+                "not": {
+                  "required": [
+                    "bytes",
+                  ],
+                },
+                "required": [
+                  "text",
+                ],
+              },
+              {
+                "not": {
+                  "required": [
+                    "text",
+                  ],
+                },
+                "required": [
+                  "bytes",
+                ],
+              },
+            ],
+            "properties": {
+              "bytes": {
+                "items": {
+                  "maximum": 255,
+                  "minimum": 0,
+                  "type": "integer",
+                },
+                "type": "array",
+              },
+              "mimeType": {
+                "minLength": 1,
+                "type": "string",
+              },
+              "path": {
+                "description": "Manifest path; the active profile bounds its byte length and forbids reserved or dot segments, enforced server-side with typed errors.",
+                "minLength": 1,
+                "type": "string",
+              },
+              "text": {
+                "type": "string",
+              },
+            },
+            "required": [
+              "path",
+              "mimeType",
+            ],
+            "type": "object",
+          },
+          "minItems": 1,
+          "type": "array",
+        },
+        "icon": {
+          "description": "One short lowercase word.",
+          "pattern": "^[a-z][a-z0-9-]{0,31}$",
+          "type": [
+            "string",
+            "null",
+          ],
+        },
+        "idempotencyKey": {
+          "description": "Nonblank by JavaScript trim(); the active profile bounds its length in UTF-16 units; original bytes retained.",
+          "minLength": 1,
+          "type": "string",
+        },
+        "keepUnmodifiedPaths": {
+          "type": "boolean",
+        },
+        "profile": {
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number",
+              "boolean",
+              "null",
+            ],
+          },
+          "type": "object",
+        },
+        "title": {
+          "description": "Artifact display title.",
+          "maxLength": 160,
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "artifactId",
+        "idempotencyKey",
+        "expectedCurrentReleaseId",
+      ],
+      "type": "object",
+    },
+    "name": "artifacts_publish_bundle_v2",
   },
 ]
 `;

@@ -120,6 +120,8 @@ let secretKey = "";
 const rawBlobs = () => createTestS3BlobStore({ client: s3, bucket: BUCKET });
 const hostOptions = (connection = pool) => ({
   confirmation: createDeleteConfirmation(connection, SCOPE, "https://app.example.test"),
+  uploadPage: { cookieSecret: "test-upload-page-secret-32-bytes-padding",
+    controlOrigin: "https://app.example.test", pageBaseUrl: "https://app.example.test/api/v1", s3Origins: [] },
 });
 const storageConfig = () => ({ enabled: true as const, storageScope: SCOPE, orgId: ORG,
   s3Bucket: BUCKET, s3Endpoint: endpoint, s3Region: "us-east-1",

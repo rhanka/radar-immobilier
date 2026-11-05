@@ -31,15 +31,15 @@ type ArtifactManifestTool = ArtifactManifest["tools"][number];
  * "immo:artifacts:read or immo:read" itself. Writes are declared in every mode.
  */
 /**
- * Tools whose description points at the versioned guide: ensure and
- * publish (page creation path) plus get and get_source (republication of
- * an existing page must find the guide too). The full contract ships in
- * the `authoringGuide` response field of ensure and get; get_source
- * carries only a small guide reference (guideId/revision plus the
- * lifecycle hint) because the source payload itself must stay readable.
+ * Tools whose description points at the versioned guide: ensure, publish
+ * and publish_bundle_v2 (page creation path) plus get and get_source
+ * (republication of an existing page must find the guide too). The full
+ * contract ships in the `authoringGuide` response field of ensure and get;
+ * get_source carries only a small guide reference (guideId/revision plus
+ * the lifecycle hint) because the source payload itself must stay readable.
  */
 const GUIDE_DESCRIPTION_TOOLS: ReadonlySet<string> = new Set(
-  ["artifacts_ensure", "artifacts_publish", "artifacts_get", "artifacts_get_source"]);
+  ["artifacts_ensure", "artifacts_publish", "artifacts_publish_bundle_v2", "artifacts_get", "artifacts_get_source"]);
 
 /**
  * Short generic tool summaries, authored here and identical in every
@@ -61,6 +61,10 @@ const STABLE_TOOL_SUMMARIES: Readonly<Record<string, string>> = {
   artifacts_create_upload: "Open an upload session and return the signed PUT URL for one file.",
   artifacts_commit_upload: "Verify staged bytes and pin one uploaded file to its manifest path.",
   artifacts_publish_bundle: "Publish one atomic release from inline files plus staged uploads.",
+  // Files parity LOT 2 — browser page mint, asset listing, v2 bundle.
+  artifacts_create_upload_page: "Mint a browser upload page so a human uploads large files without model bytes.",
+  artifacts_list_assets: "List staged and released asset files of a Radar page.",
+  artifacts_publish_bundle_v2: "Publish one atomic release from inline files plus copy, carry or keep assets.",
   // I2 on G2 — share tooling through the I2 seams.
   artifacts_lookup_people: "Find approved IMMO accounts by name or email; answers carry opaque userRef values.",
   artifacts_list_access: "List the access mode and per-principal grants of a Radar page.",
@@ -320,7 +324,8 @@ export function bindArtifactProvider(options: {
           });
         }
         body = projectContentUrls(projectArtifactHttpOutcome(outcome, ARTIFACT_PART1).body);
-        if (tool === "artifacts_publish" || tool === "artifacts_revert" || tool === "artifacts_publish_bundle") {
+        if (tool === "artifacts_publish" || tool === "artifacts_revert" || tool === "artifacts_publish_bundle" ||
+          tool === "artifacts_publish_bundle_v2") {
           const payload = (body as { output?: unknown }).output ?? body;
           const record = payload as { artifactId?: unknown; releaseId?: unknown };
           const requestArgs = args as { artifactId?: unknown };
@@ -440,16 +445,20 @@ export function projectSourceBody(body: unknown): unknown {
 /**
  * Small guide reference attached to get_source responses instead of the
  * full authoring guide: identity (guideId/revision) plus the lifecycle
- * hint the edit journey needs. Anything else (starter files, components,
- * checklist) stays on ensure/get, where the model reads it once.
+ * hint the edit journey needs (`artifactLifecycle`: edit/share/delete).
+ * The broader `lifecycle` overview (editing journey, sharing, restore,
+ * theme) already ships on ensure/get, which the journey reads first, so
+ * the reference stays within its byte budget without repeating it here.
+ * Anything else (starter files, components, checklist) stays on
+ * ensure/get, where the model reads it once.
  */
 export function getSourceGuideReference(): {
   readonly guideId: string; readonly revision: string;
-  readonly lifecycle: unknown; readonly artifactLifecycle: unknown;
+  readonly artifactLifecycle: unknown;
 } {
   const guide = getAuthoringGuide();
   return { guideId: guide.guideId, revision: guide.revision,
-    lifecycle: guide.lifecycle, artifactLifecycle: guide.artifactLifecycle };
+    artifactLifecycle: guide.artifactLifecycle };
 }
 
 /**
