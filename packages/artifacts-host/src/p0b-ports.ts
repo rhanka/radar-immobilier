@@ -33,6 +33,9 @@ export async function assertP0bStorage(pool: pg.Pool, confirmation?: ArtifactDel
   await pool.query("SELECT confirmation_ref FROM artifacts.delete_confirmations LIMIT 0");
   await pool.query("SELECT metadata FROM artifacts.artifacts LIMIT 0");
   await pool.query("SELECT author_principal_id, parent_release_id, reverted_from_release_id FROM artifacts.releases LIMIT 0");
+  // Files parity LOT 2 — the browser page ledger must exist before the page
+  // mint capability is served (same startup gate as the release ledger).
+  await pool.query("SELECT id, artifact_id, storage_scope_id, owner_id, token_hash, state, max_files, expires_at FROM artifacts.upload_pages LIMIT 0");
   return columns;
 }
 
