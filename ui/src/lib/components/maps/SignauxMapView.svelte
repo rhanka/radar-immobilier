@@ -221,6 +221,7 @@
   } from "$lib/maps/zone-millesime-filter.js";
   import ZoneMillesimeSelect from "$lib/components/maps/ZoneMillesimeSelect.svelte";
   import { lotZoneCode } from "$lib/components/maps/lot-fiche-utils.js";
+  import { basemapTileTemplate } from "$lib/maps/basemap-tiles.js";
   import {
     geometryBounds,
     boundsCenter,
@@ -244,7 +245,9 @@
   };
   const GEO_ENGINE_BASEMAP: BasemapSpec = {
     kind: "raster",
-    tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+    // Artifact builds override this at build time with VITE_BASEMAP_TILE_URL
+    // (same-origin tile relay); the app build keeps the OSM template.
+    tiles: [basemapTileTemplate({ VITE_BASEMAP_TILE_URL: import.meta.env.VITE_BASEMAP_TILE_URL })],
     attribution: "© OpenStreetMap contributors",
     saturation: -1,
   };
