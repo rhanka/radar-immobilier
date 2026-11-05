@@ -46,8 +46,11 @@ ${tuningRef.map((r) => `- ${r.itemId}: ${r.code} (${r.verdict})`).join('\n')}
 Tuning aggregates per route (Annex M shown recall/precision, failures, cost):
 ${JSON.stringify(aggregates, null, 1)}
 
-Tuning errors per route (item_id, expected → predicted, first 60 per route):
-${Object.entries(errors).map(([route, list]) => `## ${route}\n${list.slice(0, 60).map((e) => `- ${e.itemId}: ${e.ref} (${e.refVerdict}) → ${e.pred}`).join('\n')}`).join('\n\n')}
+Tuning outputs per route (item_id, expected code/verdict → predicted code/verdict, first 40 per route):
+${Object.entries(tuningOutputs).map(([route, list]) => `## ${route}\n${list.slice(0, 40).map((o) => `- ${o.itemId}: ${o.ref} (${o.refVerdict}) → ${o.pred?.code ?? 'FAILED'} (${o.pred?.verdict ?? o.why ?? 'failed'})`).join('\n')}`).join('\n\n')}
+
+Tuning errors per route (item_id, expected → predicted, failures and code errors included, first 60 per route):
+${Object.entries(errors).map(([route, list]) => `## ${route}\n${list.slice(0, 60).map((e) => `- ${e.itemId}: ${e.ref} (${e.refVerdict}) → ${e.predCode ?? e.pred ?? 'FAILED'} (${e.pred ?? e.why ?? ''})${e.failed ? ' [failure]' : ''}`).join('\n')}`).join('\n\n')}
 
 Propose the FULL next prompt P(k+1): same task, same answer schema (one JSON object per item: verdict, code, ambiguous, citation; verdict = registry partition of the code), improved ONLY from the tuning evidence above. General rules, never item-specific tricks, never a copied tuning example. Return ONLY the prompt text, no prose, no fences.`;
 }
@@ -76,11 +79,22 @@ export function parseProposal(text) {
   return t;
 }
 
+// Review §8: optimiser calls cached like amend cachedCall — a crash never repays a
+// returned proposal (keyed by prompt sha256).
 async function seatCall(home, callsLog, phase, annotator, prompt) {
+  const key = sha256(prompt).slice(0, 16);
+  const file = path.join(home, 'l4', 'opt-raw', `${phase}.${annotator}.${key}.json`);
+  if (existsSync(file)) {
+    const c = JSON.parse(readFileSync(file, 'utf8'));
+    if (c.promptSha256 === sha256(prompt) && typeof c.text === 'string') return c.text;
+  }
+  mkdirSync(path.dirname(file), { recursive: true, mode: 0o700 });
+  appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: true, phase, annotator });
   const r = await callSeat(annotator, prompt, { base: privateDir(path.join(home, 'l4', 'seat-tmp')), timeoutMs: 3600000 });
-  appendJsonlRecord(callsLog, { at: new Date().toISOString(), phase, annotator, exitCode: r.code,
+  appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase, annotator, exitCode: r.code,
     latencyMs: r.latencyMs, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null });
   if (r.code !== 0) throw new Error(`optimiser ${annotator} failed with seat exit ${r.code}`);
+  writeFileSync(file, JSON.stringify({ promptSha256: sha256(prompt), text: r.text }), { mode: 0o600 });
   return r.text;
 }
 
@@ -118,7 +132,10 @@ export async function main(argv = process.argv.slice(2)) {
   // Review §C: no verbatim golden excerpt in any prompt — shingle check before the freeze.
   assertNoVerbatim(fusedText, home, { what: `prompt P${Number(k) + 1}` });
   const next = Number(k) + 1;
-  writeFileSync(path.join(CLASSIF_DIR, 'l4', 'prompts', `P${next}.md`), `${fusedText.trim()}\n`);
+  const outPrompt = path.join(CLASSIF_DIR, 'l4', 'prompts', `P${next}.md`);
+  // Review §11: never overwrite a frozen prompt.
+  if (existsSync(outPrompt)) throw new Error(`classif-l4-optimise: refusing to overwrite frozen prompt ${outPrompt}`);
+  writeFileSync(outPrompt, `${fusedText.trim()}\n`);
   const manifest = { kind: 'l4-optimise', series: k, next: `P${next}`, createdAt: new Date().toISOString(),
     optimisers, proposalSha256: proposals.map((p) => sha256(p)), promptSha256: sha256(`${fusedText.trim()}\n`),
     tuningItems: tuningRef.length, shingleCheck: 'pass (0 verbatim shingles from the sealed set)' };
