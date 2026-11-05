@@ -15,6 +15,7 @@ import { contractInteger } from "@radar/domain";
  */
 import { z } from "zod";
 import { SignalQuery, StateQuery, WorkspaceId } from "../services/facets/classification-query.js";
+import { appMeParams } from "./reader-me.js";
 
 export const READER_OPERATIONS = [
   "geo.read.v1",
@@ -22,6 +23,7 @@ export const READER_OPERATIONS = [
   "geo.collection-items.v1",
   "signals.protected-read.v1",
   "status.closed.v1",
+  "app.me.v1",
   "workspaces.list.v1",
   "baskets.context.v1",
   "baskets.search.v1",
@@ -107,6 +109,7 @@ export function validateOperationParams(
   params: unknown,
 ): { ok: true; params: unknown } | { ok: false; error: string } {
   try {
+    if (name === "app.me.v1") return { ok: true, params: appMeParams.parse(params) };
     if (name === "workspaces.list.v1") return { ok: true, params: workspacesListParams.parse(params) };
     if (name === "geo.read.v1") return { ok: true, params: geoParams.parse(params) };
     if (name === "geo.cities.v1") return { ok: true, params: geoCitiesParams.parse(params) };
