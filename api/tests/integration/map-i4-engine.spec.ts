@@ -6,16 +6,21 @@ import { describe, expect, it } from "vitest";
 import { MAP_KIT_ASSETS } from "@radar/artifacts-host";
 import {
   bboxOf,
+  countTilesForBounds,
   createMap,
   evaluatePaint,
   expandTemplate,
   findFeatureAt,
+  FIT_Z,
+  MAX_TILES_PER_FRAME,
   MAX_TILE_ZOOM,
   MIN_TILE_ZOOM,
   pointInRing,
   tilesForBounds,
+  tilesForView,
   tileToLonLat,
   tileXY,
+  tileZoomForExtent,
   tileZoomForScale,
   validateBasemapTemplate,
 } from "../../src/artifacts/design-assets/map-base.mjs";
@@ -330,6 +335,56 @@ describe("map-base basemap hook", () => {
     expect(tiles.length).toBeGreaterThan(0);
     expect(tiles.length).toBeLessThan(64);
     expect(new Set(tiles.map(([tx, ty]) => `${tx}/${ty}`)).size).toBe(tiles.length);
+  });
+});
+
+describe("map-base province tile budget", () => {
+  const PROVINCE: Array<[number, number]> = [[-79.5, 45.0], [-57.0, 62.5]];
+  const CITY: Array<[number, number]> = [[-73.55, 45.5], [-73.45, 45.6]];
+  const WORLD: Array<[number, number]> = [[-180, -85], [180, 85]];
+
+  it("should derive the zoom from ground resolution, not from the fit scale", () => {
+    expect(MAX_TILES_PER_FRAME).toBe(96);
+    expect(tileZoomForExtent(22.5, 1400)).toBe(6);
+    expect(tileZoomForExtent(0.1, 800)).toBe(13);
+    expect(tileZoomForExtent(360, 1400)).toBe(MIN_TILE_ZOOM);
+    expect(tileZoomForExtent(1e-9, 1400)).toBe(MAX_TILE_ZOOM);
+    expect(tileZoomForExtent(0, 1400)).toBe(FIT_Z);
+    expect(tileZoomForExtent(22.5, 0)).toBe(FIT_Z);
+  });
+
+  it("should serve a province extent at 1400px with at most 96 tiles at z<=8", () => {
+    // The old fit-scale mapping would have enumerated this at z14.
+    expect(countTilesForBounds(PROVINCE, FIT_Z)).toBeGreaterThan(MAX_TILES_PER_FRAME);
+    const view = tilesForView(PROVINCE, 1400);
+    expect(view.z).toBeLessThanOrEqual(8);
+    expect(view.tiles.length).toBeGreaterThan(0);
+    expect(view.tiles.length).toBeLessThanOrEqual(96);
+    expect(view.tiles.length).toBeLessThanOrEqual(MAX_TILES_PER_FRAME);
+    expect(view.tiles.length).toBe(countTilesForBounds(PROVINCE, view.z));
+  });
+
+  it("should serve a city extent with z>=12", () => {
+    const view = tilesForView(CITY, 800);
+    expect(view.z).toBeGreaterThanOrEqual(12);
+    expect(view.tiles.length).toBeGreaterThan(0);
+    expect(view.tiles.length).toBeLessThanOrEqual(MAX_TILES_PER_FRAME);
+  });
+
+  it("should hold the per-frame cap for any extent", () => {
+    const world = tilesForView(WORLD, 1400);
+    expect(world.z).toBe(MIN_TILE_ZOOM);
+    expect(countTilesForBounds(WORLD, world.z)).toBeGreaterThan(MAX_TILES_PER_FRAME);
+    expect(world.tiles).toEqual([]);
+    for (const [corners, width] of [
+      [PROVINCE, 1400],
+      [CITY, 800],
+      [WORLD, 1400],
+      [CITY, 320],
+    ] as const) {
+      const view = tilesForView(corners as Array<[number, number]>, width);
+      expect(view.tiles.length).toBeLessThanOrEqual(MAX_TILES_PER_FRAME);
+    }
   });
 });
 
