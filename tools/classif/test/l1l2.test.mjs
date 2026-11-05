@@ -32,6 +32,13 @@ test('stop rule v3: α never stops alone, <2 % of valid re-annotated votes + cla
   // Cap at pass 5 (chain loops 1–5).
   assert.equal(stopDecision({ changedShare: 0.5, pass: 4, residualsClassified: false, hasAmend: true }).stop, false);
   assert.equal(stopDecision({ changedShare: 0.5, pass: 5, residualsClassified: false, hasAmend: true }).stop, true);
+  // §7b: fallback definition-gap residuals are not classified — they block the stop.
+  assert.equal(stopDecision({ changedShare: 0.01, pass: 3, residualsClassified: true, hasAmend: true, fallbackToDefinitionGap: 2 }).stop, false);
+  assert.match(stopDecision({ changedShare: 0.01, pass: 3, residualsClassified: true, hasAmend: true, fallbackToDefinitionGap: 2 }).why, /fallback/);
+  // At the 4-pass cap they are reported as such instead of blocking.
+  const capped = stopDecision({ changedShare: 0.01, pass: 5, residualsClassified: true, hasAmend: true, fallbackToDefinitionGap: 2 });
+  assert.equal(capped.stop, true);
+  assert.match(capped.why, /fallback/);
 });
 
 test('codebook comparison detects missing, unexpected and duplicates', () => {
