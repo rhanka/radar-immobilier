@@ -46,12 +46,19 @@ export async function startArtifactControl(options: {
     if (!contentBase) throw new Error("artifact content base disabled");
     const readActivation = () => resolveActivationConfig(readActivationEnv());
     const confirmation = ARTIFACT_P0B ? createDeleteConfirmation(pool, parsed.storageScope, auth.appBaseUrl) : undefined;
+    // Dependency diagnostics first (DB reachability, schema/journal, scope):
+    // the upload-page wiring is read here so it can be passed to the host,
+    // but a missing secret is only reported AFTER composeArtifactHost has
+    // validated the dependencies, so the control log keeps the real cause.
     const uploadPage = ARTIFACT_P0B ? readUploadPageWiring({ secret: process.env["ARTIFACTS_UPLOAD_PAGE_SECRET"],
       controlOrigin: auth.appBaseUrl, s3Endpoint: parsed.s3Endpoint }) : null;
-    if (ARTIFACT_P0B && !uploadPage) throw new Error("artifact upload page secret missing (ARTIFACTS_UPLOAD_PAGE_SECRET)");
     const host = await composeArtifactHost(pool, parsed, undefined, { readActivation, contentBase,
       ...(confirmation ? { confirmation } : {}),
       ...(uploadPage ? { uploadPage } : {}) });
+    if (ARTIFACT_P0B && !uploadPage) {
+      try { host.close(); } catch { /* host already torn down by compose */ }
+      throw new Error("artifact upload page secret missing (ARTIFACTS_UPLOAD_PAGE_SECRET)");
+    }
     const backend = createArtifactControl(host, parsed.storageScope, contentBase,
       createArtifactAdmissionAuthority(pool, readActivation, parsed.storageScope),
       { directory: createAccountDirectory(pool) });

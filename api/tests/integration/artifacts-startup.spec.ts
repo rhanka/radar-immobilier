@@ -1,5 +1,5 @@
 import pg from "pg";
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { startArtifactControl } from "../../src/artifacts/control-route-startup.js";
 import { createApp } from "../../src/app.js";
 import { loadConfig } from "../../src/config.js";
@@ -15,6 +15,16 @@ beforeAll(async () => { await admin.query(`CREATE DATABASE ${params.database}`);
 afterAll(async () => {
   await admin.query(`DROP DATABASE ${params.database} WITH (FORCE)`);
   await admin.end();
+});
+
+// Dependency-failure tests provide a valid page secret so the asserted
+// diagnostics come from the dependency checks, not the B1 wiring gate.
+const VALID_UPLOAD_PAGE_SECRET = "test-upload-page-secret-32-bytes-padding";
+const previousUploadPageSecret = process.env["ARTIFACTS_UPLOAD_PAGE_SECRET"];
+beforeEach(() => { process.env["ARTIFACTS_UPLOAD_PAGE_SECRET"] = VALID_UPLOAD_PAGE_SECRET; });
+afterEach(() => {
+  if (previousUploadPageSecret === undefined) delete process.env["ARTIFACTS_UPLOAD_PAGE_SECRET"];
+  else process.env["ARTIFACTS_UPLOAD_PAGE_SECRET"] = previousUploadPageSecret;
 });
 
 describe("artifact startup dependency failures", () => {
