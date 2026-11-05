@@ -158,9 +158,11 @@ function featuresOf(value) {
 }
 
 /**
- * Reference zoom rendered when the view sits at its fitted scale.
+ * Reference zoom for the scale-relative mapping (tileZoomForScale).
  * I-10 keeps this value: it only maps the continuous skeleton zoom onto
- * integer tile levels, it never changes a served byte.
+ * integer tile levels, it never changes a served byte. Frames instead
+ * derive their zoom from the visible ground resolution
+ * (tileZoomForExtent), so a fitted province no longer renders z14.
  */
 export const FIT_Z = 14;
 
@@ -226,6 +228,56 @@ export const MAX_TILE_ZOOM = 18;
 export function tileZoomForScale(scale, fitScale) {
   if (!(scale > 0) || !(fitScale > 0)) return FIT_Z;
   return Math.min(MAX_TILE_ZOOM, Math.max(MIN_TILE_ZOOM, Math.round(FIT_Z + Math.log2(scale / fitScale))));
+}
+
+/**
+ * Per-frame tile budget: a fitted province extent at z14 would enumerate
+ * on the order of 1e5 tiles, one request each, blocking the main thread.
+ * The frame zoom derives from the visible ground resolution instead, and
+ * stepping down keeps every frame within this many tile requests.
+ */
+export const MAX_TILES_PER_FRAME = 96;
+
+/**
+ * Integer tile zoom from the real ground resolution of the visible
+ * longitude span (pure, testable). A 256 px tile covers
+ * `lonSpanVisible * 256 / viewportCssWidth` degrees while zoom z shows
+ * `360 / 2 ** z` degrees per tile edge, hence
+ * z = round(log2(360 * viewportCssWidth / (256 * lonSpanVisible))).
+ * A province extent at desktop widths lands around z6-7, a city around
+ * z13-15. Clamped to the proxy-served range.
+ */
+export function tileZoomForExtent(lonSpanVisible, viewportCssWidth) {
+  if (!(lonSpanVisible > 0) || !(viewportCssWidth > 0)) return FIT_Z;
+  const z = Math.round(Math.log2((360 * viewportCssWidth) / (256 * lonSpanVisible)));
+  return Math.min(MAX_TILE_ZOOM, Math.max(MIN_TILE_ZOOM, z));
+}
+
+/** Tile count intersecting two lon/lat corners, without allocating (pure, testable). */
+export function countTilesForBounds(corners, z) {
+  const lons = corners.map((corner) => corner[0]);
+  const lats = corners.map((corner) => corner[1]);
+  const [x0, y0] = tileXY(Math.min(...lons), Math.max(...lats), z);
+  const [x1, y1] = tileXY(Math.max(...lons), Math.min(...lats), z);
+  return (Math.abs(x1 - x0) + 1) * (Math.abs(y1 - y0) + 1);
+}
+
+/**
+ * Zoom and tile list for two visible lon/lat corners at a viewport width
+ * (pure, testable). The zoom derives from the visible ground resolution,
+ * then steps down while the frame exceeds the budget; the count is
+ * recomputed arithmetically at each step, so more than the budget is
+ * never enumerated. When even the minimum zoom exceeds the budget, the
+ * frame carries no tiles and the vector layers still paint.
+ */
+export function tilesForView(corners, viewportCssWidth, maxTiles = MAX_TILES_PER_FRAME) {
+  const lons = corners.map((corner) => corner[0]);
+  const lonSpan = Math.max(...lons) - Math.min(...lons);
+  let z = tileZoomForExtent(Math.max(1e-9, lonSpan), viewportCssWidth);
+  const budget = maxTiles > 0 ? maxTiles : MAX_TILES_PER_FRAME;
+  while (z > MIN_TILE_ZOOM && countTilesForBounds(corners, z) > budget) z -= 1;
+  if (countTilesForBounds(corners, z) > budget) return { z, tiles: [] };
+  return { z, tiles: tilesForBounds(corners, z) };
 }
 
 /**
@@ -364,17 +416,23 @@ export function createMap(container, options) {
     context.closePath();
   };
 
-  const drawTileLayer = (template, prefix, view, setup, width, height, z, tiles) => {
+  const drawTileLayer = (template, prefix, view, setup, width, height, z, tiles, needed) => {
     for (const [tx, ty] of tiles) {
       const key = `${prefix}${z}/${tx}/${ty}`;
+      needed.add(key);
       let entry = state.tiles.get(key);
       if (!entry) {
         const image = new Image();
-        entry = { image, loaded: false };
+        entry = { image, loaded: false, cancelled: false };
         state.tiles.set(key, entry);
         image.onload = () => {
+          if (entry.cancelled || state.tiles.get(key) !== entry) return;
           entry.loaded = true;
           redraw();
+        };
+        image.onerror = () => {
+          if (entry.cancelled || state.tiles.get(key) !== entry) return;
+          entry.loaded = false;
         };
         image.src = expandTemplate(template, z, tx, ty);
         if (state.tiles.size > 256) {
@@ -394,16 +452,26 @@ export function createMap(container, options) {
   const drawTiles = (view, setup, width, height) => {
     if (!state.basemapTemplate && !state.labelsTemplate) return;
     if (typeof Image !== "function") return;
-    const fitScale = state.fitScale && state.fitScale > 0 ? state.fitScale : view.scale;
-    const z = tileZoomForScale(view.scale, fitScale);
     const corners = [
       toLonLat(0, 0, view, setup, width, height),
       toLonLat(width, height, view, setup, width, height),
     ];
-    const tiles = tilesForBounds(corners, z);
+    // Extent-derived zoom: a fitted province no longer enumerates z14.
+    const { z, tiles } = tilesForView(corners, width);
+    const needed = new Set();
     // Base first, labels over it (fallback-upstream legibility), vectors last.
-    if (state.basemapTemplate) drawTileLayer(state.basemapTemplate, "", view, setup, width, height, z, tiles);
-    if (state.labelsTemplate) drawTileLayer(state.labelsTemplate, "labels/", view, setup, width, height, z, tiles);
+    if (state.basemapTemplate) drawTileLayer(state.basemapTemplate, "", view, setup, width, height, z, tiles, needed);
+    if (state.labelsTemplate) drawTileLayer(state.labelsTemplate, "labels/", view, setup, width, height, z, tiles, needed);
+    // Drop loads from a previous view: detached entries may still settle,
+    // but their handlers are cleared so they never redraw or requeue.
+    for (const [key, entry] of state.tiles) {
+      if (!needed.has(key)) {
+        entry.cancelled = true;
+        entry.image.onload = null;
+        entry.image.onerror = null;
+        state.tiles.delete(key);
+      }
+    }
   };
 
   const redraw = () => {
