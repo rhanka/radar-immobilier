@@ -194,6 +194,8 @@ async function blindStage({ home, active, deferred, concurrency, status, argv })
   await runPass({ pass, mode: 'crossreview', guide: 'FINAL', annotators: active, todo, context, concurrency, home, phase: 'blind-crossreview',
     goldenPack: golden.goldenPack, goldenRows: golden.goldenRows });
   await revalidate(['--pass', String(pass)]);
+  // Same order as the main passes (lines ~120-127): ambiguity reads converge-pass<N>.json.
+  await converge(['--pass', String(pass), ...(deferred.length ? ['--deferred', deferred.join(',')] : [])]);
   await ambiguity(['--pass', String(pass)]);
   const report = await converge(['--pass', String(pass), ...(deferred.length ? ['--deferred', deferred.join(',')] : [])]);
   writeFileSync(path.join(home, 'l2', `pass${pass}.done`), JSON.stringify({ at: new Date().toISOString(), stop: { stop: true, why: 'blind half cross-reviewed once under the frozen guide; reference D next' }, metrics: report.metrics }), { mode: 0o600 });
