@@ -445,16 +445,20 @@ export function projectSourceBody(body: unknown): unknown {
 /**
  * Small guide reference attached to get_source responses instead of the
  * full authoring guide: identity (guideId/revision) plus the lifecycle
- * hint the edit journey needs. Anything else (starter files, components,
- * checklist) stays on ensure/get, where the model reads it once.
+ * hint the edit journey needs (`artifactLifecycle`: edit/share/delete).
+ * The broader `lifecycle` overview (editing journey, sharing, restore,
+ * theme) already ships on ensure/get, which the journey reads first, so
+ * the reference stays within its byte budget without repeating it here.
+ * Anything else (starter files, components, checklist) stays on
+ * ensure/get, where the model reads it once.
  */
 export function getSourceGuideReference(): {
   readonly guideId: string; readonly revision: string;
-  readonly lifecycle: unknown; readonly artifactLifecycle: unknown;
+  readonly artifactLifecycle: unknown;
 } {
   const guide = getAuthoringGuide();
   return { guideId: guide.guideId, revision: guide.revision,
-    lifecycle: guide.lifecycle, artifactLifecycle: guide.artifactLifecycle };
+    artifactLifecycle: guide.artifactLifecycle };
 }
 
 /**
