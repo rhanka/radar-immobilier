@@ -13,8 +13,11 @@ import { callSeat } from '../run-seat.mjs';
 import { appendJsonlRecord, parseJsonlTolerant } from '../lib/jsonl.mjs';
 import { sha256 } from '../lib/render.mjs';
 import { CLASSIF_DIR, classifHome, privateDir } from '../lib/paths.mjs';
+import { check as checkBudget } from '../lib/budget.mjs';
 import { PROFILE_DIR, validateExtraction } from '../lib/engram.mjs';
 import { buildPrompt, itemValidity, loadPack, parseAnswers, toExtraction } from './annotation.mjs';
+import { loadGoldenPack } from './golden-pack.mjs';
+import { sealedFile } from '../lib/blind.mjs';
 
 // Plan v3 (owner decision 04/11): triple blind annotation = pass-1 votes of muse-wonder-max and
 // opus-5.5-max (reused) + a NEW independent blind pass 1 of astra-max on the 504 items (same
@@ -125,6 +128,9 @@ export async function runPass({ pass, mode = 'independent', guide = 'G0', annota
   // One pool per annotator: at most `concurrency` simultaneous calls per seat (machine load).
   let done = 0;
   if (mode === 'crossreview' && !goldenPack) throw new Error(`pass ${pass}: crossreview mode requires the golden pack (run make classif-l2-golden-pack ENV=preprod first)`);
+  // Review §5 (D5): central pre-call control — up to 3 paid attempts per remaining lot per
+  // active annotator (cache deducted: tasks already exclude finished lots).
+  checkBudget(home, tasks.length * 3);
   const work1 = async ({ annotator, lot, out }) => {
     const prompt = buildPrompt({ profilePrompt, pack, items: lot.items, mode, goldenPack, context: context.get(annotator) ?? new Map() });
     let r = null;
@@ -143,6 +149,9 @@ export async function runPass({ pass, mode = 'independent', guide = 'G0', annota
         // Seat quota denials cost nothing: wait for the announced reset and call again without
         // consuming an attempt (and without saving the denial as an answer).
         for (;;) {
+          // Review §5: intent counted BEFORE the paid call, so a kill after the call cannot
+          // lose the spend (intents count, result records carry intent:false).
+          appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: true, phase: phase ?? `pass${pass}`, pass, mode, guide, annotator, lotId: lot.lotId, items: lot.items.length, attempt: attempts, promptSha256: promptSha });
           r = await callSeat(annotator, prompt, { base: seatTmp, timeoutMs: 3600000 });
           const wait = quotaWaitMs(r);
           if (wait === null) break;
@@ -153,7 +162,7 @@ export async function runPass({ pass, mode = 'independent', guide = 'G0', annota
       }
       pairs = parseAnswers(r.text, lot.items);
       const answered = pairs.filter((p) => p.answer).length;
-      appendJsonlRecord(callsLog, { at: new Date().toISOString(), phase: phase ?? `pass${pass}`, pass, mode, guide, annotator, lotId: lot.lotId, items: lot.items.length, attempt: attempts,
+      appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: phase ?? `pass${pass}`, pass, mode, guide, annotator, lotId: lot.lotId, items: lot.items.length, attempt: attempts,
         exitCode: r.code, latencyMs: r.latencyMs, reused, answered, toolEvents: r.toolEvents ?? null, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null });
       if (r.code === 0 && answered > 0 && !(r.toolEvents > 0)) break;
     }
@@ -222,6 +231,19 @@ if (process.argv[1] && path.resolve(process.argv[1]).endsWith(path.join('l2', 'r
   const home = classifHome();
   const todoFile = path.join(home, 'l2', `pass${pass}`, 'todo.json');
   const ctxFile = path.join(home, 'l2', `pass${pass}`, 'context.json');
+  // Review §4: manual passes ≥ 2 require the COMMITTED split and HALF∈{tuning,blind}.
+  // Blind runs only under the frozen FINAL guide and before the blind seal.
+  if (pass >= 2) {
+    const splitFile = path.join(CLASSIF_DIR, 'l3', 'manifests', 'split.json');
+    if (!existsSync(splitFile)) { process.stderr.write('classif-l2-pass: refusing pass ≥ 2 without the committed split (run make classif-l3b-split ENV=preprod first)\n'); process.exit(2); }
+    const half = arg('--half', '');
+    if (half !== 'tuning' && half !== 'blind') { process.stderr.write('classif-l2-pass: refusing pass ≥ 2 without --half tuning|blind (D2 firewall)\n'); process.exit(2); }
+    if (half === 'blind') {
+      if (guide !== 'FINAL') { process.stderr.write('classif-l2-pass: blind half requires --guide FINAL (frozen guide only)\n'); process.exit(2); }
+      if (!existsSync(path.join(home, 'l1', 'pack', 'guide-FINAL.md'))) { process.stderr.write('classif-l2-pass: blind half refused without the frozen guide-FINAL.md\n'); process.exit(2); }
+      if (existsSync(sealedFile(home))) { process.stderr.write('classif-l2-pass: blind half refused, the blind half is already sealed\n'); process.exit(2); }
+    }
+  }
   let todo = pass > 1 && existsSync(todoFile) ? new Set(JSON.parse(readFileSync(todoFile, 'utf8')).items) : null;
   // D2: a manual pass on one half is filtered by the committed split (the chain does it too).
   if (todo && arg('--half', '')) {
@@ -231,9 +253,10 @@ if (process.argv[1] && path.resolve(process.argv[1]).endsWith(path.join('l2', 'r
   }
   if (pass > 1 && !todo) { process.stderr.write(`classif-l2-pass: ${todoFile} missing (run make classif-l2-converge first)\n`); process.exit(2); }
   const context = existsSync(ctxFile) ? new Map(Object.entries(JSON.parse(readFileSync(ctxFile, 'utf8'))).map(([a, m]) => [a, new Map(Object.entries(m))])) : new Map();
-  // Cross-review consults the golden pack (plan v3 A2): loaded here, fail closed when absent.
-  const goldenPack = mode === 'crossreview' ? readFileSync(path.join(home, 'pack-golden', 'golden.md'), 'utf8') : null;
-  const goldenRows = mode === 'crossreview' ? new Set(JSON.parse(readFileSync(path.join(home, 'pack-golden', 'rows.json'), 'utf8'))) : null;
+  // Cross-review consults the golden pack (plan v3 A2): shared loader, fail closed when absent.
+  const golden = mode === 'crossreview' ? loadGoldenPack(home) : { goldenPack: null, goldenRows: null };
+  const goldenPack = golden.goldenPack;
+  const goldenRows = golden.goldenRows;
   runPass({ pass, mode, guide, annotators, todo, context, goldenPack, goldenRows, concurrency: Number(arg('--concurrency', '4')), home, onlyLots: arg('--lots', '') ? arg('--lots', '').split(',') : null })
     .then((r) => process.stdout.write(`${JSON.stringify(r)}\n`))
     .catch((err) => { process.stderr.write(`classif-l2-pass: ${err.stack}\n`); process.exit(1); });

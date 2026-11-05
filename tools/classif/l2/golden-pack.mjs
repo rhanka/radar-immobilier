@@ -22,6 +22,20 @@ import { CLASSIF_DIR, REFC_DIR, classifHome, privateDir } from '../lib/paths.mjs
 
 export const PACK_FILES = { doc: 'golden.md', rows: 'rows.json', codes: 'codes.json' };
 
+/**
+ * Shared golden-pack loader (review §2): reads the conductor-built private pack, fail
+ * closed when absent (run make classif-l2-golden-pack ENV=preprod first). Returns
+ * { goldenPack (markdown), goldenRows (Set of row numbers) } for runPass crossreview.
+ */
+export function loadGoldenPack(home) {
+  const doc = path.join(home, 'pack-golden', PACK_FILES.doc);
+  const rows = path.join(home, 'pack-golden', PACK_FILES.rows);
+  if (!existsSync(doc) || !existsSync(rows)) {
+    throw new Error(`crossreview refused: golden pack absent (${doc}); run make classif-l2-golden-pack ENV=preprod first`);
+  }
+  return { goldenPack: readFileSync(doc, 'utf8'), goldenRows: new Set(JSON.parse(readFileSync(rows, 'utf8'))) };
+}
+
 /** Renders the private pack body from the sealed rows (verdict, code, pass, frozen input). */
 export function renderPack(inputs, expected) {
   const byId = new Map(expected.map((e) => [e.evalId, e]));

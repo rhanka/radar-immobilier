@@ -10,6 +10,7 @@ import { callSeat, parseJsonObject } from '../run-seat.mjs';
 import { sha256 } from '../lib/render.mjs';
 import { appendJsonlRecord } from '../lib/jsonl.mjs';
 import { CLASSIF_DIR, classifHome, privateDir } from '../lib/paths.mjs';
+import { check as checkBudget } from '../lib/budget.mjs';
 import { assertNoVerbatim } from '../lib/freeze.mjs';
 import { atomicWrite, ANNOTATORS, loadDevItems } from './run.mjs';
 import { latestVotes } from './converge.mjs';
@@ -44,10 +45,12 @@ export function tallyAmendments(union, ballotResults) {
 }
 
 // Resume state: each answer is saved as soon as it returns and reused (keyed by prompt sha256).
-async function cachedCall(home, annotator, step, prompt, seatTmp) {
+async function cachedCall(home, annotator, step, prompt, seatTmp, intent = null) {
   const file = path.join(home, 'l2', 'amend-raw', `${step}.${annotator}.${sha256(prompt).slice(0, 16)}.json`);
   if (existsSync(file)) return { ...JSON.parse(readFileSync(file, 'utf8')), reused: true };
   mkdirSync(path.dirname(file), { recursive: true, mode: 0o700 });
+  // Review §5: intent counted BEFORE the paid call.
+  if (intent) appendJsonlRecord(intent.log, { at: new Date().toISOString(), intent: true, ...intent.rec });
   const r = await callSeat(annotator, prompt, { base: seatTmp, timeoutMs: 3600000 });
   atomicWrite(file, JSON.stringify(r), { mode: 0o600 });
   return r;
@@ -71,6 +74,9 @@ export async function main(argv = process.argv.slice(2)) {
   const to = arg('--to');
   const n = Number(arg('--pass'));
   const half = argv.includes('--half') ? argv[argv.indexOf('--half') + 1] : 'tuning';
+  // Review §4: amendments come from the tuning half ONLY — any other half fails closed
+  // (HALF=blind would smuggle blind items into the guide digest).
+  if (half !== 'tuning') throw new Error(`amend refused: half must be 'tuning' (got '${half}')`);
   const deferred = argv.includes('--deferred') ? argv[argv.indexOf('--deferred') + 1].split(',').filter(Boolean) : [];
   const active = ANNOTATORS.filter((a) => !deferred.includes(a));
   const home = classifHome();
@@ -88,7 +94,18 @@ export async function main(argv = process.argv.slice(2)) {
     const tuning = tuningHalf();
     residual = residual.filter((id) => tuning.has(id));
   }
-  if (!residual.length) throw new Error(`amend ${from}→${to} refused: no ${half}-half residual disagreements after pass ${n}`);
+  // Review §7: an empty tuning todo is a GEL (nothing left to amend), not an error.
+  if (!residual.length) {
+    writeFileSync(out, guide, { mode: 0o600 });
+    const gel = { kind: 'guide-amendment', from, to, afterPass: n, createdAt: new Date().toISOString(), half, deferred, gaps,
+      residualItems: 0, proposed: 0, adopted: 0, votes: [], calls: [], gel: true, guideSha256: sha256(guide),
+      why: `gel: no ${half}-half residual disagreements after pass ${n} (guide ${from} stands, copied to ${to})` };
+    writeFileSync(path.join(home, 'l2', `amend-${to}.json`), JSON.stringify({ gel: true, why: gel.why }, null, 1), { mode: 0o600 });
+    mkdirSync(path.join(CLASSIF_DIR, 'l2', 'manifests'), { recursive: true });
+    writeFileSync(path.join(CLASSIF_DIR, 'l2', 'manifests', `amend-${to}.json`), `${JSON.stringify(gel, null, 1)}\n`);
+    process.stdout.write(`${JSON.stringify(gel, null, 2)}\n`);
+    return gel;
+  }
   const digest = disagreementDigest(items, latest, residual);
   const seatTmp = privateDir(path.join(home, 'l2', 'seat-tmp'));
   const common = `You maintain the annotation guide used by three annotators to classify municipal regulatory items for
@@ -104,10 +121,14 @@ ${digest}
 `;
   const calls = [];
   const callsLog = path.join(home, 'l2', 'calls.jsonl');
+  // Review §5 (D5): pre-call control (propose + vote per active annotator, cache deducted
+  // inside cachedCall — intents counted before each paid call).
+  checkBudget(home, active.length * 2);
   // A deferred annotator neither proposes nor votes; its last votes stand (recorded in the manifest).
   const proposals = (await Promise.all(active.map(async (a) => {
-    const r = await cachedCall(home, a, 'propose', proposePrompt, seatTmp);
-    appendJsonlRecord(callsLog, { at: new Date().toISOString(), phase: `amend-${to}`, pass: n, step: 'propose', annotator: a,
+    const r = await cachedCall(home, a, 'propose', proposePrompt, seatTmp,
+      { log: callsLog, rec: { phase: `amend-${to}`, pass: n, step: 'propose', annotator: a } });
+    appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: `amend-${to}`, pass: n, step: 'propose', annotator: a,
       exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused), usage: r.usage ?? null });
     calls.push({ annotator: a, step: 'propose', exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused) });
     if (r.code !== 0) process.stderr.write(`[amend] ${a} propose seat exit code ${r.code}: proposals inadmissible (fail-closed exit policy)\n`);
@@ -123,8 +144,9 @@ false. Return ONLY JSON: {"votes":{"X1":true,"X2":false, ...}}
 ${union.map((x) => `- ${x.id}: ${x.rule} (rationale: ${x.rationale})`).join('\n')}
 `;
   const ballotResults = await Promise.all(active.map(async (a) => {
-    const r = await cachedCall(home, a, 'vote', votePrompt, seatTmp);
-    appendJsonlRecord(callsLog, { at: new Date().toISOString(), phase: `amend-${to}`, pass: n, step: 'vote', annotator: a,
+    const r = await cachedCall(home, a, 'vote', votePrompt, seatTmp,
+      { log: callsLog, rec: { phase: `amend-${to}`, pass: n, step: 'vote', annotator: a } });
+    appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: `amend-${to}`, pass: n, step: 'vote', annotator: a,
       exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused), usage: r.usage ?? null });
     calls.push({ annotator: a, step: 'vote', exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused) });
     if (r.code !== 0) process.stderr.write(`[amend] ${a} vote seat exit code ${r.code}: ballot inadmissible (fail-closed exit policy)\n`);
