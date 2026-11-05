@@ -11,6 +11,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: radar-db-migrate
+  namespace: radar-immobilier
 spec:
   template:
     spec:
