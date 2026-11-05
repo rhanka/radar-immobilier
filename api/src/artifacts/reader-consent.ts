@@ -42,6 +42,7 @@ export const BASKET_CONSENT_SCOPES: readonly string[] = Object.freeze(
 export function consentScopeForReadOperation(op: string): string | null {
   switch (op) {
     case "workspaces.list.v1":
+    case "signals.by-city.v1":
     case "baskets.context.v1":
     case "baskets.search.v1":
     case "baskets.state.v1":
