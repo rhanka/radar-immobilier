@@ -6,11 +6,13 @@
 // context = own previous annotation + the two others anonymised + traced complements).
 import path from 'node:path';
 import process from 'node:process';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { CLASSIF_DIR, classifHome } from '../lib/paths.mjs';
 import { ANNOTATORS, loadDevItems, readPass } from './run.mjs';
 import { readJsonlRecords } from '../lib/jsonl.mjs';
 import { krippendorffAlpha, majority, stopDecision } from './agreement.mjs';
+import { RESIDUAL_CAUSES } from './annotation.mjs';
+import { sha256 } from '../lib/render.mjs';
 
 /**
  * Latest annotation per annotator and item over passes 1..n. A deferred annotator (Argon quota,
@@ -115,13 +117,25 @@ export function loadComplements(home) {
  */
 export function residualsClassified(home, n, todo) {
   const f = path.join(home, 'l2', `ambiguity-pass${n}.json`);
-  if (!existsSync(f)) return { classified: false, causes: {}, missing: todo };
-  const map = JSON.parse(readFileSync(f, 'utf8'));
+  if (!existsSync(f)) return { classified: false, causes: {}, missing: todo, mapSha256: null };
+  const raw = readFileSync(f, 'utf8');
+  const map = JSON.parse(raw);
   const byId = new Map((map.residuals ?? []).map((r) => [r.itemId, r.cause]));
+  // Review §7: every cause must be a RESIDUAL_CAUSES value (no free-form chain).
+  const bad = [...byId.entries()].filter(([, c]) => !RESIDUAL_CAUSES.includes(c));
+  if (bad.length) throw new Error(`converge refused: ${bad.length} residual causes outside RESIDUAL_CAUSES (${bad.slice(0, 3).map(([id, c]) => `${id}=${c}`).join(',')}…)`);
   const missing = todo.filter((id) => !byId.has(id));
   const causes = {};
   for (const id of todo) if (byId.has(id)) causes[byId.get(id)] = (causes[byId.get(id)] ?? 0) + 1;
-  return { classified: missing.length === 0, causes, missing };
+  return { classified: missing.length === 0, causes, missing, mapSha256: sha256(raw) };
+}
+
+/** At least one traced amendment round (repo manifest amend-*.json) — the stop rule (§7)
+    forbids stopping before it. */
+export function hasTracedAmend() {
+  const dir = path.join(CLASSIF_DIR, 'l2', 'manifests');
+  if (!existsSync(dir)) return false;
+  return readdirSync(dir).some((f) => /^amend-.+\.json$/.test(f));
 }
 
 export async function main(argv = process.argv.slice(2)) {
@@ -132,8 +146,8 @@ export async function main(argv = process.argv.slice(2)) {
   const { latest, perPass, gaps } = latestVotes(home, n, { deferred });
   const { rows, metrics } = summarise(items, latest);
   const todo = residualTodo(rows);
-  // Changed share over the votes re-annotated this pass (valid or not, carried votes excluded:
-  // a deferred annotator repeats its last vote, which must not count as resolved work).
+  // Review §7: changed share over VALID votes re-annotated this pass (carried deferred
+  // votes excluded, invalid votes excluded from the denominator).
   let changedShare = null;
   let reannotated = 0;
   if (n > 1) {
@@ -142,17 +156,18 @@ export async function main(argv = process.argv.slice(2)) {
     for (const a of ANNOTATORS) {
       for (const [id, an] of perPass[n - 1].get(a)) {
         if (an.carriedFrom) continue;
+        if (!an.valid) continue;
         reannotated++;
         if (prev.get(a).get(id)?.code !== an.code) changed++;
       }
     }
     changedShare = reannotated ? changed / reannotated : null;
   }
-  const { classified: allClassified, causes, missing } = residualsClassified(home, n, todo);
-  const residuals = { count: todo.length, causes, unclassified: missing, unclassifiedCount: missing.length };
+  const { classified: allClassified, causes, missing, mapSha256 } = residualsClassified(home, n, todo);
+  const residuals = { count: todo.length, causes, unclassified: missing, unclassifiedCount: missing.length, mapSha256 };
   const stop = n === 1
     ? { stop: false, why: 'pass 1 is blind: convergence is descriptive, the split must be committed before any A2 cross-review pass' }
-    : stopDecision({ changedShare, pass: n, residualsClassified: allClassified });
+    : stopDecision({ changedShare, pass: n, residualsClassified: allClassified, hasAmend: hasTracedAmend() });
   const { spent, BUDGET_CAP } = await import('../lib/budget.mjs').then((m) => ({ spent: m.spent(home), BUDGET_CAP: m.BUDGET_CAP }));
   const report = { pass: n, createdAt: new Date().toISOString(), deferred, gaps,
     metrics: { ...metrics, changedShare, reannotatedVotes: reannotated }, residuals, stop, budget: { spent, cap: BUDGET_CAP },

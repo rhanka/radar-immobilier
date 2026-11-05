@@ -5,24 +5,36 @@
 import path from 'node:path';
 import { existsSync, readFileSync } from 'node:fs';
 import { classifHome } from './paths.mjs';
-import { parseJsonlTolerant } from './jsonl.mjs';
 
 export const BUDGET_CAP = 22000;
 export const CALLS_LOG = 'l2/calls.jsonl';
 
-/** Number of model calls spent so far (records in the calls log). */
+/**
+ * Number of model calls spent so far. STRICT (review §5): any blank-excluded line that
+ * is not valid JSON throws — a corrupt log must fail closed, never under-count. Intent
+ * records (written BEFORE the paid call) count; result records (intent:false, written
+ * after) do not double-count. Legacy records without an intent flag count (one line = one call).
+ */
 export function spent(home = classifHome()) {
-  const f = path.join(home, CALLS_LOG);
-  if (!existsSync(f)) return 0;
-  return parseJsonlTolerant(readFileSync(f, 'utf8')).length;
+  return readCallsStrict(home).filter((r) => r?.intent !== false).length;
 }
 
-/** Per-phase breakdown, for the manifest. */
-export function spentByPhase(home = classifHome()) {
+function readCallsStrict(home) {
   const f = path.join(home, CALLS_LOG);
-  if (!existsSync(f)) return {};
+  if (!existsSync(f)) return [];
+  const raw = readFileSync(f, 'utf8');
+  const out = [];
+  for (const line of raw.split('\n')) {
+    if (!line.trim()) continue;
+    try { out.push(JSON.parse(line)); } catch { throw new Error(`pilot budget refused: corrupt calls log line (${line.slice(0, 80)}…): refusing to under-count`); }
+  }
+  return out;
+}
+
+/** Per-phase breakdown, for the manifest (strict: see spent). */
+export function spentByPhase(home = classifHome()) {
   const out = {};
-  for (const r of parseJsonlTolerant(readFileSync(f, 'utf8'))) {
+  for (const r of readCallsStrict(home).filter((r) => r?.intent !== false)) {
     const key = r?.phase ?? (r?.pass !== undefined ? `pass${r.pass}` : 'unknown');
     out[key] = (out[key] ?? 0) + 1;
   }
