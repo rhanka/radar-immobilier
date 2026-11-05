@@ -65,7 +65,9 @@ describeDb("reader workspace discovery against PostgreSQL", () => {
       const response = await read(sub);
       expect(response.status).toBe(200);
       const body = await response.json();
-      expect(body.workspaces).toEqual([{ id, slug: expect.any(String), label: "Synthetic 6I", signals: { availability } }]);
+      expect(body.workspaces).toEqual([{ id, slug: expect.any(String), label: "Synthetic 6I", signals: { availability },
+        workspace: { id, slug: expect.any(String), label: "Synthetic 6I" },
+        moderateArchive: false, manageMembers: false }]);
       expect(response.headers.get("cache-control")).toBe("private, no-store");
     }
     const manager = await read(f.data.moderator.sub);

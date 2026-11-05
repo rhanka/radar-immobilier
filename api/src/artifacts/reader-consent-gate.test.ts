@@ -218,7 +218,9 @@ describe("Gate B on every business H5 call", () => {
   function buildContent(gate: { hasLiveConsent: (r: string, a: string, s: string) => Promise<boolean> }) {
     const readOperation = (async () => ({ ok: true as const,
       workspaces: [{ id: WORKSPACE, slug: "team", label: "Team",
-        signals: { availability: { state: "open" as const } } }] })) as never;
+        signals: { availability: { state: "open" as const } },
+        workspace: { id: WORKSPACE, slug: "team", label: "Team" },
+        moderateArchive: false, manageMembers: false }] })) as never;
     return createReaderContentApp({ authority: createFixtureAuthority(), readOperation,
       contentBase: BASE, grantSecret: GRANT_SECRET, sessionSecret: SESSION_SECRET,
       issuer: ISSUER, basketConsent: gate, now: () => 1_000,

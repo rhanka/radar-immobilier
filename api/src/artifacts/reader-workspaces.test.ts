@@ -16,6 +16,10 @@ const bridge = () => createBasketReadOperation({ db: {} as never, store: {} as n
 const membership = (id: string) => ({ workspace: { id, slug: "team", label: "Team", scope: "all-municipalities" as const },
   accountId: "private-account", moderateArchive: true, manageMembers: true });
 beforeEach(() => { vi.resetAllMocks(); });
+/** Published v1 row (starter pages) + the app parser row (§3.3), never account details. */
+const row = (id: string, availability: unknown = { state: "open" }) => ({
+  id, slug: "team", label: "Team", signals: { availability },
+  workspace: { id, slug: "team", label: "Team" }, moderateArchive: false, manageMembers: false });
 
 describe("reader workspace discovery", () => {
   it("should expose a strict read-only operation without caller-supplied identity", () => {
@@ -34,8 +38,7 @@ describe("reader workspace discovery", () => {
     const read = bridge();
     for (const [index, sub] of ["alice", "bob"].entries()) {
       const result = await read("workspaces.list.v1", {}, context(sub));
-      expect(result).toEqual({ ok: true, workspaces: [{ id: ids[index], slug: "team", label: "Team",
-        signals: { availability: { state: "open" } } }] });
+      expect(result).toEqual({ ok: true, workspaces: [row(ids[index]!)] });
       expect(readFacetContext).toHaveBeenCalledWith(expect.anything(), sub, ids[index]);
       expect(validateReaderResponse("workspaces.list.v1", result, sub)).toEqual(result);
     }
@@ -45,12 +48,22 @@ describe("reader workspace discovery", () => {
   it.each([
     { state: "closed", reason: "maintenance" }, { state: "closed", reason: "not_activated" },
     { state: "unavailable", reason: "unresolved_history" },
-  ])("should preserve signal/basket availability $reason", async (availability) => {
+  ])("should keep the published signal/basket availability $reason", async (availability) => {
     vi.mocked(listWorkspacesForAccount).mockResolvedValue([membership(ids[0]!)]);
     vi.mocked(readFacetContext).mockResolvedValue({ workspaceId: ids[0], signals: { availability } } as never);
     const result = await bridge()("workspaces.list.v1", {}, context("alice"));
-    expect(result).toMatchObject({ workspaces: [{ signals: { availability } }] });
+    expect(result).toEqual({ ok: true, workspaces: [row(ids[0]!, availability)] });
     expect(() => validateReaderResponse("workspaces.list.v1", result, "alice")).not.toThrow();
+  });
+
+  it("should serve constant read-only capabilities even for a real moderator", async () => {
+    vi.mocked(listWorkspacesForAccount).mockResolvedValue([membership(ids[0]!)]);
+    vi.mocked(readFacetContext).mockResolvedValue({ workspaceId: ids[0],
+      signals: { availability: { state: "open" } } } as never);
+    const result = await bridge()("workspaces.list.v1", {}, context("alice")) as {
+      workspaces: Array<{ moderateArchive: boolean; manageMembers: boolean }>;
+    };
+    expect(result.workspaces[0]).toMatchObject({ moderateArchive: false, manageMembers: false });
   });
 
   it("should return an empty list without selecting a default workspace", async () => {
@@ -69,8 +82,14 @@ describe("reader workspace discovery", () => {
     vi.mocked(listWorkspacesForAccount).mockResolvedValue([membership(ids[0]!)]);
     vi.mocked(readFacetContext).mockResolvedValue({ workspaceId: ids[1] } as never);
     await expect(bridge()("workspaces.list.v1", {}, context("alice"))).rejects.toThrow("Workspace mismatch");
+    for (const leaked of [{ accountId: "private" }, { scope: "all-municipalities" },
+      { moderateArchive: true }, { manageMembers: true },
+      { workspace: { id: ids[1], slug: "team", label: "Team" } }]) {
+      expect(() => validateReaderResponse("workspaces.list.v1", { ok: true,
+        workspaces: [{ ...row(ids[0]!), ...leaked }] }, "alice")).toThrow();
+    }
     expect(() => validateReaderResponse("workspaces.list.v1", { ok: true, workspaces: [{
-      ...membership(ids[0]!).workspace, accountId: "private", signals: { availability: { state: "open" } },
+      ...row(ids[0]!), workspace: { id: ids[0], slug: "team", label: "Team", scope: "all-municipalities" },
     }] }, "alice")).toThrow();
   });
 });

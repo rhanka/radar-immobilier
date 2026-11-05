@@ -44,10 +44,20 @@ export function createBasketReadOperation(deps: BasketReadDeps): (
       const memberships = await listWorkspacesForAccount(deps.db, context.readerSub);
       const workspaces = [];
       for (const { workspace } of memberships) {
+        // The context read stays the authorization check (revoked or foreign
+        // workspaces refuse here).
         const result = await readFacetContext(deps.db, context.readerSub, workspace.id);
         if (result.workspaceId !== workspace.id) throw new Error("Workspace mismatch");
+        // J1.2d/e §3.3 server-side shape adapter: the app parser shape
+        // (nested `workspace`, constant read-only capabilities) ADDED next to
+        // the published v1 row (`id`, `slug`, `label`, availability) that
+        // starter pages already read — the op contract only widens, so no
+        // published artifact breaks. Never `accountId`, never `scope`, never
+        // the real capabilities.
         workspaces.push({ id: workspace.id, slug: workspace.slug, label: workspace.label,
-          signals: { availability: result.signals.availability } });
+          signals: { availability: result.signals.availability },
+          workspace: { id: workspace.id, slug: workspace.slug, label: workspace.label },
+          moderateArchive: false, manageMembers: false });
       }
       return { ok: true as const, workspaces };
     }

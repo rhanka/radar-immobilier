@@ -57,6 +57,14 @@ import {
 } from "./reader-operations.js";
 import { GeoItemsRefusal } from "./reader-geo.js";
 import { createGeoReaderBudget, type GeoReaderBudget } from "./reader-geo-budget.js";
+import { appMeParams, buildAppMeResponse } from "./reader-me.js";
+import {
+  READER_GLOBAL_BUDGET,
+  READER_OP_BUDGETS,
+  budgetKey,
+  createBudgetStore,
+  type ReaderBudgetStore,
+} from "./reader-budgets.js";
 import { BASKET_READ_SCOPE_ID, type BasketConsentGate } from "./reader-consent.js";
 import {
   TILE_CLIENT_MAX_AGE_SECONDS,
@@ -144,6 +152,12 @@ export interface ContentServeDeps {
    * the call even under a live cookie. A store failure fails closed.
    */
   readonly basketConsent?: BasketConsentGate;
+  /**
+   * J1.2d/e §13 reader budgets (process-local fixed windows). Absent, the
+   * dispatch creates one store per content app: replicas each enforce their
+   * own windows, which only tightens the effective budget.
+   */
+  readonly budgets?: ReaderBudgetStore;
   /** PW-C page write listener (prepare/status); absent keeps writes closed. */
   readonly pageWrite?: Hono;
   readonly writePageSurface?: WritePageSurface;
@@ -213,6 +227,32 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
 
   function stillOpen(reader: AuthorizedReader): boolean {
     return reader.validUntil > now() && !deps.isRevoked?.(reader.sessionId);
+  }
+
+  /**
+   * J1.2d/e §13 budgets: fixed windows per (reader, artifact, op) plus the
+   * global per-(reader, artifact) envelope. Consumed BEFORE param validation
+   * and resolution, so validation failures and resolution misses count
+   * against the budget (anti-enumeration). Nothing is recorded on refusal.
+   */
+  const budgets = deps.budgets ?? createBudgetStore();
+  function spendBudget(
+    reader: AuthorizedReader, op: string,
+  ): { ok: true } | { ok: false; retryAfterSec: number } {
+    // The global envelope is shared across ops (one key); the op budget has
+    // its own key. Global first, so a global refusal does not burn the op
+    // window — and a later op refusal keeps the global spend (no unspend).
+    const global = budgets.consume(
+      budgetKey(reader.readerSub, reader.artifactId, "*"), READER_GLOBAL_BUDGET, now());
+    if (!global.ok) return global;
+    const windows = READER_OP_BUDGETS[op] ?? [];
+    if (windows.length === 0) return { ok: true };
+    return budgets.consume(budgetKey(reader.readerSub, reader.artifactId, op), windows, now());
+  }
+  function rateLimited(c: Context, retryAfterSec: number): Response {
+    applyReaderContentHeaders(c);
+    c.header("Retry-After", String(retryAfterSec));
+    return c.json({ error: "rate_limited" }, 429);
   }
 
   async function authorityCurrent(reader: AuthorizedReader): Promise<boolean> {
@@ -444,9 +484,37 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     const capability = isGeoReadOperation(op) ? "geo.read" : "signals.protected-read";
     if (!canInvoke(auth, capability, auth.releaseId)) return c.json({ error: "forbidden" }, 403);
     if (!deps.readOperation) return c.json({ error: "capability_unavailable" }, 503);
+    // J1.2d/e wagon 2 (§2.3): identity bootstrap synthesized server-side
+    // from the verified reader context — no Gate B (the consent screen
+    // boots from this call), no business call, no write. Strict empty
+    // params: any unknown or duplicated key refuses before any build.
+    if (op === "app.me.v1") {
+      applyReaderContentHeaders(c);
+      const spent = spendBudget(auth, op);
+      if (!spent.ok) return rateLimited(c, spent.retryAfterSec);
+      try {
+        const url = new URL(c.req.url);
+        if (Buffer.byteLength(url.pathname + url.search) > 16384) throw new ClassificationError("request_uri_too_long");
+        if (url.searchParams.getAll("grant").length > 1) throw new ClassificationError("invalid_query");
+        url.searchParams.delete("grant");
+        decodeQuery(url.searchParams, appMeParams);
+        const body = validateReaderResponse(op,
+          buildAppMeResponse(deps.sessionSecret, auth.artifactId, auth.readerSub), auth.readerSub);
+        if (!stillOpen(auth)) return c.json({ error: "unauthenticated" }, 401);
+        if (!await authorityCurrent(auth)) return c.json({ error: "unauthenticated" }, 401);
+        return c.json(body);
+      } catch (error) {
+        const failure = classificationFailure(error);
+        return c.json(failure.body, failure.status);
+      }
+    }
     if (isWorkspaceReadOperation(op)) {
       applyReaderContentHeaders(c);
       if (!await authorityCurrent(auth)) return c.json({ error: "unauthenticated" }, 401);
+      if (op === "workspaces.list.v1") {
+        const spent = spendBudget(auth, op);
+        if (!spent.ok) return rateLimited(c, spent.retryAfterSec);
+      }
       try {
         const url = new URL(c.req.url);
         if (Buffer.byteLength(url.pathname + url.search) > 16384) throw new ClassificationError("request_uri_too_long");
