@@ -100,6 +100,10 @@ export interface ReaderCollectionItemsResponse {
     readonly href: string | null;
     readonly attribution: string | null;
   };
+  /** Where condition (iii) came from: geo-rendered or derived from the licence. */
+  readonly rights:
+    | { readonly source: "geo" }
+    | { readonly source: "derived-from-licence"; readonly licenceId: string; readonly attribution: string };
   readonly contract:
     | { readonly status: "ok"; readonly snapshot_sha256: string }
     | { readonly status: "missing source"; readonly reason: string };
@@ -328,8 +332,16 @@ export async function readReaderCollectionItems(
     id: entry.record.licenseId,
     title: entry.record.matchedTitle,
     href: isPublicCanonicalUrl(licenseHref) ? licenseHref : null,
-    attribution: displayText(live?.attribution),
+    // Live attribution first; the dated record's attribution otherwise.
+    attribution: displayText(live?.attribution) ?? displayText(entry.record.rights?.attribution),
   };
+  const rights = entry.rightsSource === "derived-from-licence" && entry.record.rights
+    ? {
+      source: "derived-from-licence" as const,
+      licenceId: entry.record.rights.licenceId,
+      attribution: license.attribution ?? entry.record.rights.attribution,
+    }
+    : { source: "geo" as const };
   const fields = options.fields;
   const serve = (feature: { geometry?: unknown; properties?: Record<string, unknown> | null }, origin: "live" | "pg-fallback") => {
     const all = serveZonageProperties(collectionId, { ...(feature.properties ?? {}) }, records, origin);
@@ -390,6 +402,7 @@ export async function readReaderCollectionItems(
       collectionId,
       licenseId: entry.record.licenseId,
       license,
+      rights,
       contract,
     };
   }
@@ -415,6 +428,7 @@ export async function readReaderCollectionItems(
         collectionId,
         licenseId: entry.record.licenseId,
         license,
+        rights,
         contract,
       };
     }
