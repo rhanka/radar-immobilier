@@ -1,28 +1,48 @@
 {
  "pass": 1,
- "createdAt": "2026-11-01T04:12:59.822Z",
+ "createdAt": "2026-11-05T10:01:06.854Z",
+ "deferred": [],
+ "gaps": [],
  "metrics": {
   "items": 504,
-  "alphaVerdict": 0.7730908225694153,
-  "alphaCode": 0.7543742031449214,
-  "verdictUnanimity": 0.8472222222222222,
+  "alphaVerdict": 0.7873065692736421,
+  "alphaCode": 0.7652628149388409,
+  "verdictUnanimity": 0.8531746031746031,
   "verdictConverged": 1,
-  "codeUnanimity": 0.7142857142857143,
-  "codeConverged": 0.9642857142857143,
-  "nonConvergedCode": 18,
+  "codeUnanimity": 0.7281746031746031,
+  "codeConverged": 0.9722222222222222,
+  "nonConvergedCode": 14,
   "nonConvergedVerdict": 0,
   "executionFailures": 0,
-  "ambiguous33": 101,
-  "missingInfoFlagged": 48,
-  "changedShare": null
+  "ambiguous33": 117,
+  "missingInfoFlagged": 38,
+  "changedShare": null,
+  "reannotatedVotes": 0
+ },
+ "residuals": {
+  "count": 229,
+  "causes": {
+   "definition-gap": 95,
+   "data-outside-immo": 29,
+   "code-pair-confusion": 96,
+   "missing-information": 9
+  },
+  "unclassified": [],
+  "unclassifiedCount": 0,
+  "mapSha256": "96de9edcc81a6e28a660972cb2d64b802ef4d1fdaac15bccc277070abd7a4fa5",
+  "fallbackToDefinitionGap": 3
  },
  "stop": {
-  "stop": true,
-  "why": "α verdict 0.773 and α code 0.754 ≥ 0.67, verdict unanimity 84.7 % ≥ 75 %"
+  "stop": false,
+  "why": "pass 1 is blind: convergence is descriptive, the split must be committed before any A2 cross-review pass"
+ },
+ "budget": {
+  "spent": 922,
+  "cap": 22000
  },
  "reannotatedThisPass": {
   "muse-wonder-max": 504,
-  "gemini-4-argon-high": 504,
+  "astra-max": 504,
   "opus-5.5-max": 504
  }
 }
