@@ -11,7 +11,7 @@ const FARID = { id: "aaaaaaaa-1111-4111-8111-111111111111", sub: "idp-farid",
   name: "Farid D.", email: "farid.d@example.com" };
 
 function poolWith(rows: unknown[]) {
-  const query = vi.fn(async () => ({ rows, rowCount: rows.length }));
+  const query = vi.fn(async (_sql: string, _args: unknown[]) => ({ rows, rowCount: rows.length }));
   return { pool: { query } as never, query };
 }
 
@@ -26,21 +26,33 @@ describe("reader directory", () => {
   });
 
   it("resolves a userRef to the internal sub, approved accounts only", async () => {
-    const { pool, query } = poolWith([FARID]);
+    const { pool, query } = poolWith([{ id: FARID.id, sub: FARID.sub, status: "approved" }]);
     const hit = await resolveUserRef(pool, FARID.id);
     expect(hit).toMatchObject({ userRef: FARID.id, sub: FARID.sub,
-      displayName: "Farid D.", emailHint: "f***@example.com" });
+      displayName: "Membre", emailHint: "" });
     expect(query).toHaveBeenCalledWith(expect.stringContaining("status = 'approved'"), [FARID.id]);
+    expect(query.mock.calls[0]![0]).not.toContain("name");
+    expect(query.mock.calls[0]![0]).not.toContain("email");
     expect(await resolveUserRef(pool, "not-a-uuid")).toBeNull();
     const { pool: empty } = poolWith([]);
     expect(await resolveUserRef(empty, FARID.id)).toBeNull();
   });
 
   it("resolves a sub to its userRef, approved accounts only", async () => {
-    const { pool, query } = poolWith([FARID]);
+    const { pool, query } = poolWith([{ id: FARID.id, sub: FARID.sub, status: "approved" }]);
     const hit = await resolveSubToUserRef(pool, FARID.sub);
-    expect(hit).toMatchObject({ userRef: FARID.id, sub: FARID.sub });
+    expect(hit).toMatchObject({ userRef: FARID.id, sub: FARID.sub,
+      displayName: "Membre", emailHint: "" });
     expect(query).toHaveBeenCalledWith(expect.stringContaining("status = 'approved'"), [FARID.sub]);
+    expect(query.mock.calls[0]![0]).not.toContain("name");
+    expect(query.mock.calls[0]![0]).not.toContain("email");
+  });
+
+  it("fails people lookup cleanly when name/email columns are not granted", async () => {
+    const denied = Object.assign(new Error('permission denied for table account_users'), { code: "42501" });
+    const failing = { query: async () => { throw denied; } } as never;
+    await expect(searchDirectory(failing, "farid"))
+      .rejects.toMatchObject({ code: "directory_lookup_unavailable" });
   });
 
   it("searches approved accounts case- and accent-insensitively, capped at 10", async () => {

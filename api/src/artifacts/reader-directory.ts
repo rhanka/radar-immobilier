@@ -63,6 +63,24 @@ function toPerson(row: { id: string; name: string | null; email: string | null }
   return { userRef: row.id, displayName, emailHint: maskEmail(row.email) };
 }
 
+/**
+ * Least-privilege principal resolution: the opaque `userRef` projection
+ * needs no personal data, so it reads `id, sub, status` only (the columns
+ * the restricted writer role may read). Only the people-lookup path below
+ * reads `name`/`email`.
+ */
+function toOpaquePerson(row: { id: string; sub: string }): ResolvedDirectoryPerson {
+  return { userRef: row.id, displayName: "Membre", emailHint: "", sub: row.sub };
+}
+
+/** Postgres privilege denial (table or column), e.g. missing name/email grant. */
+function isPrivilegeDenied(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) return false;
+  const record = error as { code?: unknown; message?: unknown };
+  if (record.code === "42501") return true;
+  return typeof record.message === "string" && record.message.includes("permission denied");
+}
+
 /** Resolve a model-facing `userRef` to its internal principal. Approved accounts only. */
 export async function resolveUserRef(
   pool: Pick<pg.Pool, "query">,
@@ -70,12 +88,12 @@ export async function resolveUserRef(
 ): Promise<ResolvedDirectoryPerson | null> {
   if (!UUID_RE.test(userRef)) return null;
   const result = await pool.query(
-    `SELECT id, sub, name, email FROM account_users WHERE id = $1 AND status = 'approved'`,
+    `SELECT id, sub, status FROM account_users WHERE id = $1 AND status = 'approved'`,
     [userRef],
   );
-  const row = result.rows[0] as { id: string; sub: string; name: string | null; email: string | null } | undefined;
+  const row = result.rows[0] as { id: string; sub: string } | undefined;
   if (!row || typeof row.sub !== "string") return null;
-  return { ...toPerson(row), sub: row.sub };
+  return toOpaquePerson(row);
 }
 
 /** Resolve the internal `sub` to its model-facing `userRef`. Approved accounts only. */
@@ -85,12 +103,12 @@ export async function resolveSubToUserRef(
 ): Promise<ResolvedDirectoryPerson | null> {
   if (typeof sub !== "string" || sub.length === 0 || sub.length > 256) return null;
   const result = await pool.query(
-    `SELECT id, sub, name, email FROM account_users WHERE sub = $1 AND status = 'approved'`,
+    `SELECT id, sub, status FROM account_users WHERE sub = $1 AND status = 'approved'`,
     [sub],
   );
-  const row = result.rows[0] as { id: string; sub: string; name: string | null; email: string | null } | undefined;
+  const row = result.rows[0] as { id: string; sub: string } | undefined;
   if (!row) return null;
-  return { ...toPerson(row), sub: row.sub };
+  return toOpaquePerson(row);
 }
 
 /**
@@ -99,6 +117,12 @@ export async function resolveSubToUserRef(
  * folding runs over the bounded candidate set so behaviour stays identical
  * with or without the `unaccent` extension (server-side unaccent is a G2
  * follow-up, not a behaviour change).
+ *
+ * People lookup is the ONLY path that needs name/email. A restricted role
+ * without those columns fails here with the documented
+ * `directory_lookup_unavailable` error (proposal, NOT applied:
+ * `GRANT SELECT (name, email) ON public.account_users TO
+ * immo_mcp_artifact_writer;`); resolution above stays available.
  */
 export async function searchDirectory(
   pool: Pick<pg.Pool, "query">,
@@ -110,12 +134,21 @@ export async function searchDirectory(
   if (trimmed.length < DIRECTORY_QUERY_MIN_LENGTH || trimmed.length > DIRECTORY_QUERY_MAX_LENGTH) return [];
   const capped = Math.max(1, Math.min(Math.floor(limit) || DIRECTORY_RESULT_LIMIT_MAX, DIRECTORY_RESULT_LIMIT_MAX));
   const pattern = `%${trimmed.replace(/[%_\\]/g, (ch) => `\\${ch}`)}%`;
-  const result = await pool.query(
-    `SELECT id, name, email FROM account_users
+  let result;
+  try {
+    result = await pool.query(
+      `SELECT id, name, email FROM account_users
      WHERE status = 'approved' AND (name ILIKE $1 ESCAPE '\\' OR email ILIKE $1 ESCAPE '\\')
      ORDER BY name ASC LIMIT ${DIRECTORY_CANDIDATE_CAP}`,
-    [pattern],
-  );
+      [pattern],
+    );
+  } catch (error) {
+    if (isPrivilegeDenied(error)) {
+      throw { code: "directory_lookup_unavailable",
+        reason: "people lookup needs SELECT(name, email) on public.account_users, withheld from immo_mcp_artifact_writer" };
+    }
+    throw error;
+  }
   const folded = foldAccents(trimmed);
   const matches: DirectoryPerson[] = [];
   for (const row of result.rows as Array<{ id: string; name: string | null; email: string | null }>) {
