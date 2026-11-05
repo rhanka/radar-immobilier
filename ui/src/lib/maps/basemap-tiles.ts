@@ -11,7 +11,7 @@
 export const DEFAULT_BASEMAP_TILE_URL =
   "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 
-export function basemapTileTemplate(env: { VITE_BASEMAP_TILE_URL?: string }): string {
+export function basemapTileTemplate(env: { VITE_BASEMAP_TILE_URL?: string | undefined }): string {
   const override = env.VITE_BASEMAP_TILE_URL?.trim();
   return override ? override : DEFAULT_BASEMAP_TILE_URL;
 }
