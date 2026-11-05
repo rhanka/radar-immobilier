@@ -1,0 +1,41 @@
+{
+ "kind": "ambiguity-map",
+ "pass": 2,
+ "createdAt": "2026-11-05T10:01:06.975Z",
+ "counts": {
+  "code-pair-confusion": 70,
+  "definition-gap": 105,
+  "missing-information": 5,
+  "data-outside-immo": 21,
+  "golden-set-conflict": 13
+ },
+ "fallbackToDefinitionGap": 3,
+ "residuals": 214,
+ "codePairs": {
+  "S-INFO-MANQUANTE × S-PORTEE-FLOUE": 14,
+  "N-FAUX-POSITIF × S-PORTEE-FLOUE": 8,
+  "S-PLANIFIE × S-PORTEE-FLOUE": 8,
+  "N-ODJ-SEUL × S-PORTEE-FLOUE": 5,
+  "N-FORME × N-NON-RES": 2,
+  "N-FORME × S-PORTEE-FLOUE": 16,
+  "N-FAUX-POSITIF × N-NON-RES": 4,
+  "S-PORTEE-FLOUE × V2-PRECEDENT": 7,
+  "N-DOUBLON × N-FAUX-POSITIF": 2,
+  "N-RESTRICTIF × S-PORTEE-FLOUE": 2,
+  "N-FORME × S-INFO-MANQUANTE": 4,
+  "N-NON-RES × S-PLANIFIE": 1,
+  "N-NON-RES × S-PORTEE-FLOUE": 5,
+  "P-NOUV-ZONE × S-PORTEE-FLOUE": 2,
+  "N-ODJ-SEUL × V2-PRECEDENT": 5,
+  "N-FORME × S-MANDAT-AMONT": 1,
+  "P-USAGE-MULTI × S-PORTEE-FLOUE": 1,
+  "S-PLANIFIE × V2-PRECEDENT": 1,
+  "S-CONTRAINTE × S-PORTEE-FLOUE": 1,
+  "N-FORME × V2-PRECEDENT": 2,
+  "N-FAUX-POSITIF × N-FORME": 2,
+  "N-FAUX-POSITIF × S-PLANIFIE": 1,
+  "N-FAUX-POSITIF × S-PREEMPTION": 1,
+  "S-INFO-MANQUANTE × S-PLANIFIE": 1,
+  "N-FAUX-POSITIF × N-ODJ-SEUL": 8
+ }
+}

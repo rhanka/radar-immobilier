@@ -1,0 +1,23 @@
+{
+ "kind": "ambiguity-map",
+ "pass": 6,
+ "createdAt": "2026-11-05T19:14:44.320Z",
+ "counts": {
+  "code-pair-confusion": 5,
+  "definition-gap": 165,
+  "missing-information": 1,
+  "data-outside-immo": 5,
+  "golden-set-conflict": 0
+ },
+ "fallbackToDefinitionGap": 1,
+ "residuals": 176,
+ "codePairs": {
+  "S-PLANIFIE × S-PORTEE-FLOUE": 1,
+  "N-FORME × S-PORTEE-FLOUE": 2,
+  "S-INFO-MANQUANTE × S-PORTEE-FLOUE": 2,
+  "N-DOUBLON × S-PORTEE-FLOUE": 1,
+  "P-USAGE-MULTI × S-PORTEE-FLOUE": 1,
+  "N-FAUX-POSITIF × N-ODJ-SEUL": 3,
+  "N-FAUX-POSITIF × N-FORME": 1
+ }
+}
