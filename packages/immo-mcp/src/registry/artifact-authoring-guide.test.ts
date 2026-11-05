@@ -261,7 +261,12 @@ describe("artifact authoring guide", () => {
     const sourceGuide = (sourceData.authoringGuide ?? source.authoringGuide) as Record<string, unknown>;
     expect(sourceGuide.guideId).toBe(AUTHORING_GUIDE_ID);
     expect(sourceGuide.revision).toBe(AUTHORING_GUIDE_REVISION);
-    expect((sourceGuide.lifecycle as { editing: unknown[] }).editing.length).toBeGreaterThan(0);
+    // The small reference keeps identity plus the edit hint only: the
+    // broader lifecycle overview already ships on ensure/get.
+    expect(sourceGuide).not.toHaveProperty("lifecycle");
+    const edit = ((sourceGuide.artifactLifecycle as { edit: string[] }).edit ?? []).join("\n");
+    expect(edit).toContain("artifacts_create_upload_page");
+    expect(edit).toContain("artifacts_publish_bundle_v2");
     expect(sourceGuide).not.toHaveProperty("starter");
     expect(sourceGuide).not.toHaveProperty("components");
     const published = read(await setup({ releaseId: "r" }).binding.invoke("artifacts_publish",
