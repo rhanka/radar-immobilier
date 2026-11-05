@@ -79,6 +79,12 @@ export interface ReaderConsentService extends BasketConsentGate {
    */
   grantScopes(readerAccountId: string, artifactId: string,
     scopeIds: readonly string[]): Promise<ReaderConsentRecord[]>;
+  /**
+   * J1.3a: true when the ledger holds a revoked row for this scope at the
+   * current scope version (drives the revocation wording only, never
+   * authority). Absent, the wording never shows.
+   */
+  hasRevokedConsent?(readerAccountId: string, artifactId: string, scopeId: string): Promise<boolean>;
 }
 
 export function readerConsentKey(storageScopeId: string, readerAccountId: string,
@@ -106,6 +112,10 @@ export function createReaderConsentService(pool: pg.Pool, storageScopeId: string
     findLiveConsent,
     hasLiveConsent: async (readerAccountId, artifactId, scopeId) =>
       consentAllowsBaskets(await findLiveConsent(readerAccountId, artifactId, scopeId)),
+    hasRevokedConsent: async (readerAccountId, artifactId, scopeId) => (await pool.query(
+      `SELECT 1 FROM artifacts.reader_consents WHERE storage_scope_id=$1 AND reader_account_id=$2
+        AND artifact_id=$3 AND scope_id=$4 AND scope_version=$5 AND revoked_at IS NOT NULL LIMIT 1`,
+      [storageScopeId, readerAccountId, artifactId, scopeId, BASKET_SCOPE_VERSION])).rowCount === 1,
     grantScopes: async (readerAccountId, artifactId, scopeIds) => {
       const granted: ReaderConsentRecord[] = [];
       for (const scopeId of scopeIds) {

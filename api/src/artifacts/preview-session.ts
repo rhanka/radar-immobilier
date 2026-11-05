@@ -72,16 +72,22 @@ export function mintRetryCookie(): string {
  * call answers the typed `basket_consent_required`, so a « Réouvrir la
  * page » that restarts at `/__reader/start` (old bridges included) ends on
  * the consent screen instead of looping through a document-only opening.
- * It carries only the reason (`required` or `revoked`), is a routing hint
+ * `declined` is set by the exchange of a document-only ticket minted on
+ * « Ne pas autoriser »: H5 basket calls then answer the typed
+ * `basket_consent_declined` (no automatic navigation) and « Réouvrir »
+ * still reaches the consent screen. The value is a routing hint only
  * (never authority: the control origin re-checks session, rights and the
- * ledger) and is cleared on the consent entry.
+ * ledger; the revocation wording is driven by the ledger alone) and is
+ * cleared on the consent entry.
  */
 export const READER_CONSENT_PENDING_COOKIE = "__Host-reader-consent";
 export const READER_CONSENT_PENDING_MAX_AGE_S = 600;
-export type ConsentPendingReason = "required" | "revoked";
+export type ConsentPendingReason = "required" | "declined";
 
 export function mintConsentPendingCookie(reason: ConsentPendingReason): string {
-  return hostCookie(READER_CONSENT_PENDING_COOKIE, reason, READER_CONSENT_PENDING_MAX_AGE_S);
+  // A declined marker lives as long as the document-only page session.
+  return hostCookie(READER_CONSENT_PENDING_COOKIE, reason,
+    reason === "declined" ? PREVIEW_SESSION_TTL_MS / 1000 : READER_CONSENT_PENDING_MAX_AGE_S);
 }
 
 export function clearConsentPendingCookie(): string {
@@ -90,7 +96,7 @@ export function clearConsentPendingCookie(): string {
 
 export function readConsentPending(header: string | null | undefined): ConsentPendingReason | null {
   const value = parseCookieHeader(header, READER_CONSENT_PENDING_COOKIE);
-  return value === "required" || value === "revoked" ? value : null;
+  return value === "required" || value === "declined" ? value : null;
 }
 
 export function mintSessionCookie(claims: PreviewSessionClaims, secret: string): string {

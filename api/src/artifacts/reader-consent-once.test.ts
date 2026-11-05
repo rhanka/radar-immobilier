@@ -6,10 +6,10 @@ import { signSession, SESSION_COOKIE_NAME } from "../services/auth/session.js";
 import { mintGrant } from "./preview-grant.js";
 import { mintSessionCookie } from "./preview-session.js";
 import { fingerprintReaderProfile, type AuthorityReader, type ReaderProfile } from "./reader-profile.js";
-import { consentErrorHtml, consentRefusedHtml, createReaderOpening } from "./reader-opening.js";
+import { consentDecisionInvalidHtml, consentErrorHtml, createReaderOpening } from "./reader-opening.js";
 import { createTicketStore } from "./preview-tickets.js";
 import { BASKET_READ_SCOPE_ID, type ReaderConsentService } from "./reader-consent.js";
-import type { ReaderEvent } from "./reader-event-log.js";
+import { readerFailureCode, sanitizeReaderEvent, type ReaderEvent } from "./reader-event-log.js";
 import type { AuthConfig } from "../config.js";
 
 /**
@@ -20,7 +20,10 @@ import type { AuthConfig } from "../config.js";
  * - a ledger failure is an explicit error, never a grant;
  * - an old-bridge page whose « Réouvrir » restarts at /__reader/start ends
  *   on the consent screen, not on a document-only approve loop;
- * - refusal is a terminal state; the journal carries typed codes only.
+ * - « Ne pas autoriser » opens the document only and records nothing; the
+ *   reader can still consent later through « Réouvrir »;
+ * - a POST without an explicit decision records nothing;
+ * - the journal carries closed typed codes only.
  */
 
 const BASE = "pages.example.test";
@@ -74,6 +77,7 @@ function mutableAuthority() {
 /** In-memory ledger with failure switches; records the call order against ticket mints. */
 function memoryLedger(order: string[]) {
   const live = new Set<string>();
+  const revoked = new Set<string>();
   const key = (reader: string, artifact: string, scope: string) => `${reader} ${artifact} ${scope}`;
   const failures = { read: false, write: false };
   const service = {
@@ -83,6 +87,10 @@ function memoryLedger(order: string[]) {
       if (failures.read) throw new Error("ledger down");
       return live.has(key(reader, artifact, scope));
     }),
+    hasRevokedConsent: vi.fn(async (reader: string, artifact: string, scope: string) => {
+      if (failures.read) throw new Error("ledger down");
+      return revoked.has(key(reader, artifact, scope));
+    }),
     grantScopes: vi.fn(async (reader: string, artifact: string, scopes: readonly string[]) => {
       if (failures.write) throw new Error("ledger down");
       for (const scope of scopes) live.add(key(reader, artifact, scope));
@@ -91,7 +99,10 @@ function memoryLedger(order: string[]) {
     }),
   };
   return { service: service as unknown as ReaderConsentService, live, failures,
-    revoke: (reader: string) => live.delete(key(reader, ARTIFACT, BASKET_READ_SCOPE_ID)),
+    revoke: (reader: string) => {
+      live.delete(key(reader, ARTIFACT, BASKET_READ_SCOPE_ID));
+      revoked.add(key(reader, ARTIFACT, BASKET_READ_SCOPE_ID));
+    },
     grantScopes: service.grantScopes };
 }
 
@@ -143,9 +154,10 @@ function hiddenFields(html: string): Record<string, string> {
   return fields;
 }
 
-function decisionForm(fields: Record<string, string>, decision: "grant" | "refuse") {
+function decisionForm(fields: Record<string, string>, decision: "grant" | "refuse" | null | string) {
   return { body: new URLSearchParams({ artifactId: ARTIFACT, binding: fields.binding!, origin: ORIGIN,
-    releaseId: fields.releaseId!, profileFingerprint: fields.profileFingerprint!, decision }),
+    releaseId: fields.releaseId!, profileFingerprint: fields.profileFingerprint!,
+    ...(decision === null ? {} : { decision }) }),
   headers: { origin: AUTH.appBaseUrl, "content-type": "application/x-www-form-urlencoded", ...BROWSER } };
 }
 
@@ -274,14 +286,15 @@ describe("J1.3a consent once, no loop", () => {
     expect(refused.status).toBe(403);
     expect(((await refused.json()) as { error: { code: string } }).error.code).toBe("basket_consent_required");
     const pending = cookieValue(refused.headers.getSetCookie(), "__Host-reader-consent");
-    expect(pending).toBe("__Host-reader-consent=revoked");
+    expect(pending).toBe("__Host-reader-consent=required");
 
-    // The bridge navigates top-level to /__reader/consent: the screen states the revocation.
+    // The bridge navigates top-level to /__reader/consent: the screen states
+    // the revocation, read from the ledger (no client hint is forwarded).
     const entry = await world.app.request(`${ORIGIN}/__reader/consent`,
       { headers: { host: HOST, cookie: `${credentials.cookie}; ${pending}`, ...BROWSER } });
     expect(entry.status).toBe(303);
     const consentUrl = new URL(entry.headers.get("location")!);
-    expect(consentUrl.searchParams.get("reason")).toBe("revoked");
+    expect(consentUrl.searchParams.has("reason")).toBe(false);
     expect(entry.headers.getSetCookie().some((h) => h.startsWith("__Host-reader-consent=;"))).toBe(true);
     const screen = await world.application.request(`/consent${consentUrl.search}`,
       { headers: { cookie: session, ...BROWSER } });
@@ -291,7 +304,21 @@ describe("J1.3a consent once, no loop", () => {
     // A fresh opening prompts again too.
     const { res } = await reopen(world, session);
     expect(res.status).toBe(200);
-    expect(await res.text()).toContain("<h1>Ouvrir la page</h1>");
+    const reopenHtml = await res.text();
+    expect(reopenHtml).toContain("<h1>Ouvrir la page</h1>");
+    expect(reopenHtml).toContain("Votre accord précédent pour cette page a été retiré");
+  });
+
+  it("should never show the revocation wording from a client hint without a revoked ledger row", async () => {
+    const world = buildWorld();
+    const session = await appSession("reader-alice");
+    const forged = await world.application.request(
+      `/consent?binding=${"c".repeat(64)}&origin=${encodeURIComponent(ORIGIN)}&reason=revoked`,
+      { headers: { cookie: `${session}; __Host-reader-consent=revoked`, ...BROWSER } });
+    expect(forged.status).toBe(200);
+    const html = await forged.text();
+    expect(html).toContain("Autoriser la lecture de vos paniers");
+    expect(html).not.toContain("a été retiré");
   });
 
   it("should answer a ledger write failure with an explicit error and no ticket", async () => {
@@ -368,21 +395,75 @@ describe("J1.3a consent once, no loop", () => {
     expect(new URL(plain.headers.get("location")!).pathname).toBe("/api/v1/artifacts/reader/approve");
   });
 
-  it("should end a refusal on a terminal page that records nothing and mints nothing", async () => {
+  it("should open the DOCUMENT ONLY on « Ne pas autoriser », record nothing, and let the reader consent later", async () => {
     const world = buildWorld();
     const session = await appSession("reader-alice");
     const started = await start(world);
+    const initCookie = cookieValue(started.headers.getSetCookie(), "__Host-preview-init");
     const approveUrl = new URL(started.headers.get("location")!);
     const screen = await world.application.request(`/approve${approveUrl.search}`,
       { headers: { cookie: session, ...BROWSER } });
-    const posted = decisionForm(hiddenFields(await screen.text()), "refuse");
+    const html = await screen.text();
+    expect(html).toContain("Sans votre accord, la page s’ouvre sans lire vos paniers.");
+    const posted = decisionForm(hiddenFields(html), "refuse");
     const refused = await world.application.request("/approve",
       { method: "POST", headers: { cookie: session, ...posted.headers }, body: posted.body });
-    expect(refused.status).toBe(200);
-    expect(await refused.text()).toBe(consentRefusedHtml());
+    expect(refused.status).toBe(303);
     expect(world.ledger.grantScopes).not.toHaveBeenCalled();
-    expect(world.order).toEqual([]);
-    expect(world.events).toContainEqual({ surface: "opening", code: "consent_refused", status: 200 });
+    expect(world.order).toEqual(["ticket"]);
+    expect(world.events).toContainEqual({ surface: "opening", code: "consent_refused", status: 303 });
+
+    // Exchange: a document-only session, the host marked as declined.
+    const url = new URL(refused.headers.get("location")!);
+    const exchanged = await world.app.request(`${url.pathname}${url.search}`,
+      { headers: { host: HOST, cookie: initCookie, ...BROWSER } });
+    expect(exchanged.status).toBe(303);
+    const grant = new URL(exchanged.headers.get("location")!, "https://x.test").searchParams.get("grant")!;
+    const docCookie = cookieValue(exchanged.headers.getSetCookie(), "__Host-preview-session");
+    const declined = cookieValue(exchanged.headers.getSetCookie(), "__Host-reader-consent");
+    expect(declined).toBe("__Host-reader-consent=declined");
+    const page = await world.app.request(`${ORIGIN}/index.html?grant=${grant}`,
+      { headers: { host: HOST, cookie: docCookie } });
+    expect(page.status).toBe(200);
+    expect(await page.text()).toContain(`shared ${RELEASE_1}`);
+
+    // Basket calls stay refused with a typed code that no bridge turns into
+    // an automatic navigation (no screen on every load).
+    const api = await h5(world, { grant, cookie: `${docCookie}; ${declined}` });
+    expect(api.status).toBe(403);
+    expect(((await api.json()) as { error: { code: string } }).error.code).toBe("basket_consent_declined");
+    expect(world.ledger.live.size).toBe(0);
+
+    // « Réouvrir la page » reaches the consent screen: the reader can consent later.
+    const reopened = await start(world, `${docCookie}; ${declined}`);
+    expect(reopened.headers.get("location")).toBe("/__reader/consent");
+    const entry = await world.app.request(`${ORIGIN}/__reader/consent`,
+      { headers: { host: HOST, cookie: `${docCookie}; ${declined}`, ...BROWSER } });
+    const consentUrl = new URL(entry.headers.get("location")!);
+    expect(consentUrl.pathname).toBe("/api/v1/artifacts/reader/consent");
+    const consentScreen = await world.application.request(`/consent${consentUrl.search}`,
+      { headers: { cookie: session, ...BROWSER } });
+    expect(consentScreen.status).toBe(200);
+    expect(await consentScreen.text()).toContain("Autoriser la lecture de vos paniers");
+  });
+
+  it("should record nothing and mint nothing when the decision is missing or unknown", async () => {
+    for (const decision of [null, "", "yes", "GRANT"]) {
+      const world = buildWorld();
+      const session = await appSession("reader-alice");
+      const started = await start(world);
+      const approveUrl = new URL(started.headers.get("location")!);
+      const screen = await world.application.request(`/approve${approveUrl.search}`,
+        { headers: { cookie: session, ...BROWSER } });
+      const posted = decisionForm(hiddenFields(await screen.text()), decision);
+      const res = await world.application.request("/approve",
+        { method: "POST", headers: { cookie: session, ...posted.headers }, body: posted.body });
+      expect(res.status).toBe(400);
+      expect(await res.text()).toBe(consentDecisionInvalidHtml());
+      expect(res.headers.get("location")).toBeNull();
+      expect(world.ledger.grantScopes).not.toHaveBeenCalled();
+      expect(world.order).toEqual([]);
+    }
   });
 
   it("should journal typed codes without city, signal or query values", async () => {
@@ -402,5 +483,16 @@ describe("J1.3a consent once, no loop", () => {
     for (const leaked of [CITY, "secret-query", WORKSPACE, "reader-alice", ARTIFACT, RELEASE_1]) {
       expect(journal).not.toContain(leaked);
     }
+  });
+
+  it("should keep the journal to a closed list of codes", () => {
+    // A well-formed but unlisted string echoed from a body never reaches the journal.
+    expect(readerFailureCode({ error: { code: CITY.replace(/-/g, "_") } }, 403)).toBe("unclassified");
+    expect(readerFailureCode({ error: "salaberry" }, 404)).toBe("unclassified");
+    expect(readerFailureCode({ error: { code: "basket_consent_declined" } }, 403)).toBe("basket_consent_declined");
+    expect(readerFailureCode(null, 503)).toBe("http_503");
+    expect(readerFailureCode(null, 418)).toBe("unclassified");
+    expect(sanitizeReaderEvent({ surface: "h5", code: "some_city_slug", status: 200, op: "secret.op" }))
+      .toEqual({ surface: "h5", code: "unclassified", status: 200, op: "unknown_operation" });
   });
 });

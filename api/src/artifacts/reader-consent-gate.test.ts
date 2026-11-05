@@ -93,7 +93,7 @@ function hiddenFields(html: string): Record<string, string> {
 }
 
 function form(body: Record<string, string>): { body: URLSearchParams; headers: Record<string, string> } {
-  return { body: new URLSearchParams(body),
+  return { body: new URLSearchParams({ decision: "grant", ...body }),
     headers: { origin: "https://app.example.test", "content-type": "application/x-www-form-urlencoded" } };
 }
 

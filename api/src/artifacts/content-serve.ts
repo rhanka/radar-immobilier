@@ -38,7 +38,7 @@ import {
 } from "./content-host.js";
 import { mintGrant, verifyGrant, type GrantIssuer } from "./preview-grant.js";
 import { renewGrant } from "./preview-renewal.js";
-import { mintConsentPendingCookie, readSessionClaims, type ConsentPendingReason } from "./preview-session.js";
+import { mintConsentPendingCookie, readConsentPending, readSessionClaims } from "./preview-session.js";
 import { readerEventEmitter, readerFailureCode, type ReaderEventSink } from "./reader-event-log.js";
 import { adaptGrantToReader, canInvoke, type ApiReaderContext } from "./reader-context.js";
 import type { AuthorityReader } from "./reader-profile.js";
@@ -249,12 +249,22 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
    * the typed code through instead of remapping it to `capability_required`.
    * The document, files and design-kit never require this scope.
    */
-  function basketConsentRefusal(c: Context, reason: ConsentPendingReason) {
+  function basketConsentRefusal(c: Context) {
     applyReaderContentHeaders(c);
+    // J1.3a: the reader chose « Ne pas autoriser » for this page session.
+    // Answer a distinct typed code: every bridge (current and legacy) maps
+    // it to a plain refusal with « Réouvrir », never to an automatic
+    // navigation that would put the consent screen back on every load.
+    // « Réouvrir » still reaches the consent screen (marker kept).
+    if (readConsentPending(c.req.header("cookie")) === "declined") {
+      return c.json({ ok: false, error: { code: "basket_consent_declined",
+        message: "Basket reading was not authorized for this page. Reopen the page to authorize it.",
+        retryable: false, action: "reopen_to_consent" }, requestId: randomUUID() }, 403);
+    }
     // J1.3a: remember the typed refusal on this host so a « Réouvrir la
     // page » (old bridges included) lands on the consent screen instead of
     // a document-only opening that would answer this 403 again.
-    c.header("Set-Cookie", mintConsentPendingCookie(reason), { append: true });
+    c.header("Set-Cookie", mintConsentPendingCookie("required"), { append: true });
     return c.json({ ok: false, error: { code: "basket_consent_required",
       message: "Basket reading needs a one-time consent.",
       retryable: false, action: "consent_baskets" }, requestId: randomUUID() }, 403);
@@ -265,7 +275,7 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
    * hint only — the live store row at the current scope version is
    * authority, re-read here on every call (design §3.3).
    */
-  async function basketConsentState(reader: AuthorizedReader): Promise<"live" | ConsentPendingReason | "unavailable"> {
+  async function basketConsentState(reader: AuthorizedReader): Promise<"live" | "required" | "revoked" | "unavailable"> {
     if (!reader.basketScope) return "required";
     if (!deps.basketConsent) return "live";
     try {
@@ -292,7 +302,7 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     const state = await basketConsentState(reader);
     if (state === "live") return null;
     if (state === "unavailable") return consentLedgerUnavailable(c);
-    return basketConsentRefusal(c, state);
+    return basketConsentRefusal(c);
   }
 
   function stillOpen(reader: AuthorizedReader): boolean {
@@ -434,10 +444,12 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     await next();
     const op = c.req.path.slice("/__reader/api/".length);
     const status = c.res.status;
-    const body = await c.res.clone().json().catch(() => null) as Record<string, unknown> | null;
+    const body = status >= 400 || isWorkspaceReadOperation(op)
+      ? await c.res.clone().json().catch(() => null) as Record<string, unknown> | null : null;
     const requestId = body && typeof body.requestId === "string" ? body.requestId : undefined;
     if (status < 400) {
-      const rows = body && Array.isArray(body.items) ? body.items.length
+      // Row count only on the bounded workspace reads (no geo payload parse).
+      const rows = !isWorkspaceReadOperation(op) ? undefined : body && Array.isArray(body.items) ? body.items.length
         : body && Array.isArray(body.workspaces) ? body.workspaces.length : undefined;
       emit({ surface: "h5", code: "ok", status, op, ...(requestId ? { requestId } : {}),
         ...(rows !== undefined ? { count: rows } : {}) });
