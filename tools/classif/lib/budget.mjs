@@ -10,10 +10,14 @@ export const BUDGET_CAP = 22000;
 export const CALLS_LOG = 'l2/calls.jsonl';
 
 /**
- * Number of model calls spent so far. STRICT (review §5): any blank-excluded line that
- * is not valid JSON throws — a corrupt log must fail closed, never under-count. Intent
- * records (written BEFORE the paid call) count; result records (intent:false, written
- * after) do not double-count. Legacy records without an intent flag count (one line = one call).
+ * Number of model calls spent so far. STRICT (review §5) with a kill-tolerant tail
+ * (review N1): every line but the last non-empty one must parse — any earlier corrupt
+ * line throws (fail closed, never under-count). A corrupt LAST line is a kill-truncated
+ * append: it counts as 1 when it begins an intent record, 0 when it is a result
+ * (intent:false), so resume never dies on a torn write. Intent records (written BEFORE
+ * the paid call) count; result records (intent:false) do not double-count. Legacy
+ * records without an intent flag count (one line = one call). Existing intent/result
+ * lines still parse unchanged (backward-compatible with a running pass).
  */
 export function spent(home = classifHome()) {
   return readCallsStrict(home).filter((r) => r?.intent !== false).length;
@@ -23,10 +27,19 @@ function readCallsStrict(home) {
   const f = path.join(home, CALLS_LOG);
   if (!existsSync(f)) return [];
   const raw = readFileSync(f, 'utf8');
+  const lines = raw.split('\n').filter((l) => l.trim());
   const out = [];
-  for (const line of raw.split('\n')) {
-    if (!line.trim()) continue;
-    try { out.push(JSON.parse(line)); } catch { throw new Error(`pilot budget refused: corrupt calls log line (${line.slice(0, 80)}…): refusing to under-count`); }
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const last = i === lines.length - 1;
+    try {
+      out.push(JSON.parse(line));
+    } catch {
+      if (!last) throw new Error(`pilot budget refused: corrupt calls log line ${i + 1} (${line.slice(0, 80)}…): refusing to under-count`);
+      // N1: truncated last line from a kill mid-append — tolerated, counted fail-closed.
+      if (/"intent"\s*:\s*false/.test(line)) continue;
+      out.push({ intent: true, phase: 'truncated', truncated: true });
+    }
   }
   return out;
 }
