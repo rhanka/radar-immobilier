@@ -1,9 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { ROUTES, seatEnv } from '../run-seat.mjs';
+import { ASTRA_ISOLATED_CONFIG, CODEX_BENIGN_ITEM_TYPES, CODEX_KNOWN_EVENT_TYPES, ROUTES, astraCodexHomeDir, countCodexToolEvents, ensureAstraHome, seatEnv } from '../run-seat.mjs';
 
 const tmp = () => {
   try { return mkdtempSync(path.join(os.tmpdir(), 'astra-')); }
@@ -48,14 +48,89 @@ test('astra-max parse: last-message file wins, usage from JSONL events', () => {
       JSON.stringify({ type: 'turn.completed', usage: { input_tokens: 12, output_tokens: 34 } }),
     ].join('\n');
     // No file: text falls back to the events (no text field here → empty, usage kept).
-    assert.deepEqual(r.parse(events, dir), { text: '', usage: { input_tokens: 12, output_tokens: 34 } });
+    const p0 = r.parse(events, dir);
+    assert.equal(p0.text, '');
+    assert.deepEqual(p0.usage, { input_tokens: 12, output_tokens: 34 });
+    assert.equal(p0.toolEvents, 0);
     writeFileSync(path.join(dir, 'last-message.md'), '{"code":"S-PLANIFIE"}\n');
     const parsed = r.parse(events, dir);
     assert.equal(parsed.text, '{"code":"S-PLANIFIE"}');
     assert.deepEqual(parsed.usage, { input_tokens: 12, output_tokens: 34 });
+    assert.equal(parsed.toolEvents, 0);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test('astra isolation: dedicated CODEX_HOME, config with NO mcp_servers, auth copied', () => {
+  const home = tmp();
+  try {
+    const dir = ensureAstraHome(home);
+    assert.equal(dir, astraCodexHomeDir(home));
+    assert.ok(dir.startsWith(home));
+    assert.equal(statSync(dir).mode & 0o777 & 0o077, 0, 'seat home mode 700');
+    const cfg = readFileSync(`${dir}/config.toml`, 'utf8');
+    assert.ok(!/^\s*\[mcp_servers/m.test(cfg), 'isolated config holds NO mcp_servers section');
+    assert.ok(!/^\s*\[mcp_servers/m.test(ASTRA_ISOLATED_CONFIG));
+    // The seat route points codex at the isolated home.
+    const work = tmp();
+    try {
+      const built = ROUTES['astra-max'].build(work, `${work}/prompt.md`, 'p');
+      assert.equal(built.env?.CODEX_HOME, astraCodexHomeDir());
+      assert.ok(String(built.env.CODEX_HOME).includes('seat-homes/astra'));
+    } finally {
+      rmSync(work, { recursive: true, force: true });
+    }
+    // Auth: copied from ~/.codex/auth.json when present (mode 600), never committed.
+    const src = path.join(os.homedir(), '.codex', 'auth.json');
+    const dst = path.join(dir, 'auth.json');
+    if (existsSync(src)) {
+      assert.ok(existsSync(dst), 'auth copied to the isolated home');
+      assert.equal(statSync(dst).mode & 0o777 & 0o077, 0, 'auth mode 600');
+      assert.equal(readFileSync(dst, 'utf8'), readFileSync(src, 'utf8'));
+    }
+  } finally {
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
+test('astra tool accounting: every tool/command/MCP/web/file event counts, unknown fails closed', () => {
+  const benign = [
+    JSON.stringify({ type: 'thread.started', thread_id: 't' }),
+    JSON.stringify({ type: 'turn.started' }),
+    JSON.stringify({ type: 'item.completed', item: { type: 'agent_message', text: 'hello with the word tool inside prose' } }),
+    JSON.stringify({ type: 'item.completed', item: { type: 'reasoning', text: 'think' } }),
+    JSON.stringify({ type: 'turn.completed', usage: { input_tokens: 1, output_tokens: 2 } }),
+  ].join('\n');
+  assert.equal(countCodexToolEvents(benign).toolEvents, 0, 'benign stream counts 0');
+  for (const itype of ['command_execution', 'file_change', 'mcp_tool_call', 'collab_tool_call', 'web_search', 'todo_list', 'plan_update', 'error', 'mystery-future-type']) {
+    const s = [JSON.stringify({ type: 'thread.started' }),
+      JSON.stringify({ type: 'item.completed', item: { type: itype, text: 'x' } }),
+      JSON.stringify({ type: 'turn.completed', usage: {} })].join('\n');
+    assert.ok(countCodexToolEvents(s).toolEvents > 0, `${itype} must count`);
+  }
+  // Unknown top-level event type fails closed.
+  const unknownTop = [JSON.stringify({ type: 'thread.started' }),
+    JSON.stringify({ type: 'wormhole.opened', item: { type: 'agent_message', text: 'x' } })].join('\n');
+  const u = countCodexToolEvents(unknownTop);
+  assert.ok(u.toolEvents > 0 && u.unknownTypes.includes('wormhole.opened'));
+  // Missing type fails closed.
+  assert.ok(countCodexToolEvents(`${JSON.stringify({ no: 'type' })}\n`).toolEvents > 0);
+  // Missing item type fails closed.
+  assert.ok(countCodexToolEvents(`${JSON.stringify({ type: 'item.completed', item: {} })}\n`).toolEvents > 0);
+  // parseCodex surfaces the count (the run.mjs fail-closed gate reads it).
+  const dir = tmp();
+  try {
+    mkdirSync(dir, { recursive: true });
+    const toolStream = [JSON.stringify({ type: 'thread.started' }),
+      JSON.stringify({ type: 'item.completed', item: { type: 'mcp_tool_call', server: 'datagouv', tool: 'search' } }),
+      JSON.stringify({ type: 'turn.completed', usage: {} })].join('\n');
+    assert.ok(ROUTES['astra-max'].parse(toolStream, dir).toolEvents > 0, 'parse must report toolEvents>0');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+  assert.ok(CODEX_KNOWN_EVENT_TYPES.has('turn.completed'));
+  assert.ok(CODEX_BENIGN_ITEM_TYPES.has('agent_message') && !CODEX_BENIGN_ITEM_TYPES.has('mcp_tool_call'));
 });
 
 test('seat env stays scrubbed for the astra seat (provider keys, eval keys)', () => {
