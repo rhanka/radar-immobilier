@@ -1,6 +1,7 @@
 import { Hono, type Context } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { getCookie } from "hono/cookie";
+import { bodyLimit } from "hono/body-limit";
 import {
   checkAdmission,
   createArtifactAdmissionAuthority,
@@ -176,12 +177,43 @@ function pageError(c: Context, cause: unknown): Response {
   return jsonError(c, 400, { error: "invalid_request" });
 }
 
+/**
+ * Bounded body reader: streams at most PAGE_BODY_MAX_BYTES + 1 without ever
+ * buffering an unbounded request (the middleware above rejects an announced
+ * oversize, but a headerless stream would otherwise be fully buffered before
+ * the length test). Returns null past the bound.
+ */
+async function readBoundedBytes(c: Context): Promise<Uint8Array | null> {
+  const body = c.req.raw.body;
+  if (!body) return new Uint8Array(0);
+  const reader = body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > PAGE_BODY_MAX_BYTES) {
+      await reader.cancel().catch(() => undefined);
+      return null;
+    }
+    chunks.push(value);
+  }
+  const out = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    out.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return out;
+}
+
 async function readJsonBody(c: Context): Promise<{ body: Record<string, unknown> } | Response> {
   if (c.req.header("content-type")?.split(";")[0]?.trim().toLowerCase() !== "application/json") {
     return jsonError(c, 415, { error: "unsupported_media_type" });
   }
-  const bytes = new Uint8Array(await c.req.arrayBuffer());
-  if (bytes.byteLength > PAGE_BODY_MAX_BYTES) {
+  const bytes = await readBoundedBytes(c);
+  if (bytes === null) {
     return jsonError(c, 413, { error: "body_too_large" });
   }
   try {
@@ -207,6 +239,13 @@ function pageCall(c: Context, artifactId: unknown) {
 export function uploadPageRoute(deps: UploadPageRouteDeps): Hono {
   const app = new Hono();
   app.use("*", controlCacheHeaders);
+  // M2 — the page JSON bodies stay tiny (64 KiB): the middleware rejects an
+  // announced oversize before any byte is buffered, and the bounded reader
+  // below aborts a headerless stream past the same bound.
+  app.use("*", bodyLimit({
+    maxSize: PAGE_BODY_MAX_BYTES,
+    onError: (c) => jsonError(c, 413, { error: "body_too_large" }),
+  }));
 
   // Page document: navigation from the chat link (token rides the URL
   // fragment, never the wire). Empty S3 origins (plain-http storage) keep
