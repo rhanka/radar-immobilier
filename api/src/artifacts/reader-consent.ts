@@ -44,6 +44,7 @@ export function consentScopeForReadOperation(op: string): string | null {
     case "workspaces.list.v1":
     case "signals.by-city.v1":
     case "signals.coherent-city.v1":
+    case "documents.pv.v1":
     case "baskets.context.v1":
     case "baskets.search.v1":
     case "baskets.state.v1":
