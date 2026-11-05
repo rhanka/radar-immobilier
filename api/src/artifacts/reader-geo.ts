@@ -35,6 +35,8 @@ import {
   type ServedCollectionRecord,
 } from "../services/geo/governed-policy.js";
 import { serveZonageProperties } from "../routes/geo-governed.js";
+import { isPublicCanonicalUrl } from "../services/geo/provenance.js";
+import { ZONING_PROJECTION, projectZoningGeometry } from "../services/geo/zoning-projection.js";
 import {
   readServedContractPointer,
   type ServedContractClient,
@@ -55,6 +57,12 @@ export const GEO_READER_ITEMS_LIMIT_MAX = 1000;
 export const GEO_READER_BBOX_REQUIRED_ABOVE = 200;
 /** Serialized-features cap: responses are bounded in bytes as well. */
 export const GEO_READER_MAX_BYTES = 1024 * 1024;
+/** Upper bound of `offset` (largest known city ≈ 2 100 zones; generous). */
+export const GEO_READER_OFFSET_MAX = 100_000;
+/** Pseudo-field selecting the validated provenance envelopes. */
+export const GEO_READER_PROVENANCE_FIELD = "provenance";
+/** Bound on the served attribution string (display text from the listing). */
+const ATTRIBUTION_MAX = 256;
 
 export interface ReaderGeoCity {
   readonly citySlug: string;
@@ -79,8 +87,19 @@ export interface ReaderCollectionItemsResponse {
   readonly numberMatched: number;
   readonly numberReturned: number;
   readonly truncated: boolean;
+  /** J1 zonage: next page offset, or null when this page is the last one. */
+  readonly nextOffset: number | null;
+  /** J1 zonage: `zoning-v1` (closed projection) or `allowlist` (raw keys). */
+  readonly projection: "zoning-v1" | "allowlist";
   readonly collectionId: string;
   readonly licenseId: string;
+  /** J1 zonage: licence record served with every page (attribution duty). */
+  readonly license: {
+    readonly id: string;
+    readonly title: string;
+    readonly href: string | null;
+    readonly attribution: string | null;
+  };
   readonly contract:
     | { readonly status: "ok"; readonly snapshot_sha256: string }
     | { readonly status: "missing source"; readonly reason: string };
@@ -149,7 +168,10 @@ export function filterServedCities(
       .filter(
         (record) =>
           record.collectionId === `qc-zonage-${city.citySlug}` ||
-          record.collectionId.startsWith(`qc-zonage-${city.citySlug}-`),
+          // J1 zonage: a city zoning record names its city exactly, so it
+          // never covers a prefix city (`saint-louis` vs
+          // `saint-louis-de-gonzague-du-cap-tourmente`).
+          (!record.zoning && record.collectionId.startsWith(`qc-zonage-${city.citySlug}-`)),
       )
       .map((record) => record.collectionId);
     if (covered.length > 0) out.push({ ...city, collections: covered });
@@ -183,6 +205,21 @@ export interface ReaderCollectionItemsOptions {
   readonly limit?: number;
   readonly bbox?: string;
   readonly offset?: number;
+  /** Field projection: subset of the record's served fields (+ `provenance`). */
+  readonly fields?: readonly string[];
+}
+
+function displayText(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  // eslint-disable-next-line no-control-regex
+  if (trimmed.length === 0 || trimmed.length > ATTRIBUTION_MAX || /[\u0000-\u001f\u007f]/.test(trimmed)) return null;
+  return trimmed;
+}
+
+function nextOffsetOf(offset: number, returned: number, matched: number): number | null {
+  const next = offset + returned;
+  return returned > 0 && next < matched ? next : null;
 }
 
 export async function readReaderCollectionItems(
@@ -224,21 +261,46 @@ export async function readReaderCollectionItems(
       },
     );
   }
+  // 3b. Field projection gate: only served fields (plus the provenance
+  // pseudo-field) may be requested — refused with no call.
+  const requestable = new Set<string>([...record.servedFields, GEO_READER_PROVENANCE_FIELD]);
+  const unknownField = options.fields?.find((field) => !requestable.has(field));
+  if (unknownField !== undefined) {
+    throw new GeoItemsRefusal(400, { ok: false, error: "geo_field_not_served", collectionId });
+  }
+  const offset = options.offset ?? 0;
 
   // 4. Live licence re-check: a licence turned `unknown` since the record
   // date refuses at the next read (one listing call per items request; the
   // I-1A 10-minute listing cache is not reused here).
-  let listing: Array<{ id: string; licenseTitle?: unknown; rightsPresent: boolean }>;
+  let listing: Array<{
+    id: string;
+    licenseTitle?: unknown;
+    licenseHref?: unknown;
+    attribution?: unknown;
+    rightsPresent: boolean;
+  }>;
   try {
     const res = await fetchImpl(`${baseUrl}/collections?f=json&limit=10000`);
     if (!res.ok) throw new Error(`listing HTTP ${res.status}`);
     const body = (await res.json()) as {
-      collections?: Array<{ id?: unknown; license?: { title?: unknown } | null; rights?: unknown }>;
+      collections?: Array<{
+        id?: unknown;
+        license?: { title?: unknown; href?: unknown } | null;
+        attribution?: unknown;
+        rights?: unknown;
+      }>;
     };
     const collections = Array.isArray(body.collections) ? body.collections : [];
     listing = collections.flatMap((raw) =>
       typeof raw.id === "string" && raw.id.length > 0
-        ? [{ id: raw.id, licenseTitle: raw.license?.title, rightsPresent: raw.rights !== null && raw.rights !== undefined }]
+        ? [{
+          id: raw.id,
+          licenseTitle: raw.license?.title,
+          licenseHref: raw.license?.href,
+          attribution: raw.attribution,
+          rightsPresent: raw.rights !== null && raw.rights !== undefined,
+        }]
         : [],
     );
   } catch {
@@ -258,6 +320,30 @@ export async function readReaderCollectionItems(
       refusalBody(collectionId, entry.status, entry.reason ?? "catalogue-refused"),
     );
   }
+
+  const zoning = entry.record.zoning !== undefined;
+  const projection = zoning ? ZONING_PROJECTION : "allowlist" as const;
+  const licenseHref = live?.licenseHref;
+  const license = {
+    id: entry.record.licenseId,
+    title: entry.record.matchedTitle,
+    href: isPublicCanonicalUrl(licenseHref) ? licenseHref : null,
+    attribution: displayText(live?.attribution),
+  };
+  const fields = options.fields;
+  const serve = (feature: { geometry?: unknown; properties?: Record<string, unknown> | null }, origin: "live" | "pg-fallback") => {
+    const all = serveZonageProperties(collectionId, { ...(feature.properties ?? {}) }, records, origin);
+    const properties = fields
+      ? Object.fromEntries(Object.entries(all).filter(([key]) =>
+        fields.includes(key) || (fields.includes(GEO_READER_PROVENANCE_FIELD) && (key === "proof" || key === "immo_zone_lot_provenance"))))
+      : all;
+    return {
+      type: "Feature" as const,
+      // Zoning records: §6.4 geometry projection (known type, finite numbers).
+      geometry: zoning ? projectZoningGeometry(feature.geometry) : feature.geometry ?? null,
+      properties,
+    };
+  };
 
   const params = new URLSearchParams();
   params.set("limit", String(Math.min(limit, GEO_READER_ITEMS_LIMIT_MAX)));
@@ -286,11 +372,7 @@ export async function readReaderCollectionItems(
       numberMatched?: number;
     };
     const features = Array.isArray(body.features) ? body.features : [];
-    const served = features.map((feature) => ({
-      type: "Feature" as const,
-      geometry: feature.geometry ?? null,
-      properties: serveZonageProperties(collectionId, { ...(feature.properties ?? {}) }, records),
-    }));
+    const served = features.map((feature) => serve(feature, "live"));
     const numberMatched = typeof body.numberMatched === "number" ? body.numberMatched : served.length;
     // Facade cap: an upstream returning more than asked is sliced to
     // `limit` before the byte cap, so the response stays bounded in
@@ -303,8 +385,11 @@ export async function readReaderCollectionItems(
       numberMatched,
       numberReturned: bounded.features.length,
       truncated: bounded.features.length < capped.length || numberMatched > bounded.features.length,
+      nextOffset: nextOffsetOf(offset, bounded.features.length, numberMatched),
+      projection,
       collectionId,
       licenseId: entry.record.licenseId,
+      license,
       contract,
     };
   }
@@ -314,11 +399,8 @@ export async function readReaderCollectionItems(
   try {
     const local = await deps.localZoneResolver?.(collectionId);
     if (local && local.features.length > 0) {
-      const fallen = local.features.map((feature) => ({
-        type: "Feature" as const,
-        geometry: feature.geometry ?? null,
-        properties: serveZonageProperties(collectionId, { ...(feature.properties ?? {}) }, records),
-      }));
+      // The local store has no paging: `offset` slices it like the upstream.
+      const fallen = local.features.slice(offset).map((feature) => serve(feature, "pg-fallback"));
       const capped = fallen.slice(0, Math.min(limit, GEO_READER_ITEMS_LIMIT_MAX));
       const bounded = boundReaderFeatures(capped);
       return {
@@ -328,8 +410,11 @@ export async function readReaderCollectionItems(
         numberReturned: bounded.features.length,
         truncated:
           bounded.features.length < capped.length || local.features.length > bounded.features.length,
+        nextOffset: nextOffsetOf(offset, bounded.features.length, local.features.length),
+        projection,
         collectionId,
         licenseId: entry.record.licenseId,
+        license,
         contract,
       };
     }
@@ -368,11 +453,12 @@ export function createGeoReadOperation(deps: ReaderGeoDeps): (
   return async (op, params) => {
     if (op === "geo.cities.v1") return listReaderCities(deps);
     if (op === "geo.collection-items.v1") {
-      const input = params as ReaderCollectionItemsOptions & { collectionId: string };
+      const input = params as Omit<ReaderCollectionItemsOptions, "fields"> & { collectionId: string; fields?: string };
       return readReaderCollectionItems(deps, input.collectionId, {
         ...(input.limit !== undefined ? { limit: input.limit } : {}),
         ...(input.bbox !== undefined ? { bbox: input.bbox } : {}),
         ...(input.offset !== undefined ? { offset: input.offset } : {}),
+        ...(input.fields !== undefined ? { fields: input.fields.split(",") } : {}),
       });
     }
     throw new Error("Capability unavailable");

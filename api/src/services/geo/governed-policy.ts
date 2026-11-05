@@ -23,6 +23,7 @@ import {
   type GovernedLicence,
   type LicenceResolution,
 } from "./governed-licences.js";
+import { GOVERNED_ZONING_RECORDS } from "./governed-zoning-records.js";
 
 /** Per-collection served record (instance policy, versioned in code). */
 export interface ServedCollectionRecord {
@@ -39,6 +40,16 @@ export interface ServedCollectionRecord {
   readonly observedAt: string;
   /** Where the record comes from (live recount, field review, …). */
   readonly source: string;
+  /**
+   * J1 zonage: when present, items are served through the CLOSED zoning
+   * projection (zoning-projection.ts) instead of the raw-key allowlist:
+   * `sourceKeys` is the explicit per-collection mapping (the only raw keys
+   * ever read) and `servedFields` lists the projection output keys.
+   */
+  readonly zoning?: {
+    readonly projection: "zoning-v1";
+    readonly sourceKeys: readonly string[];
+  };
 }
 
 /**
@@ -47,8 +58,12 @@ export interface ServedCollectionRecord {
  * features, property keys recorded verbatim, no personal data among them).
  * Every other collection — including the 41 other licence-known qc-zonage-*
  * collections — has NO complete dated line and stays listed, not served.
+ *
+ * J1 zonage (policy j1z-2026-11-05) appends the dated city zoning records of
+ * governed-zoning-records.ts. The three conditions are unchanged: a city
+ * record whose live listing renders no `rights` stays `not covered`.
  */
-export const GOVERNED_POLICY_VERSION = "i1a-2026-11-03";
+export const GOVERNED_POLICY_VERSION = "j1z-2026-11-05";
 
 export const GOVERNED_SERVED_RECORDS: readonly ServedCollectionRecord[] = [
   {
@@ -72,6 +87,9 @@ export const GOVERNED_SERVED_RECORDS: readonly ServedCollectionRecord[] = [
     observedAt: "2026-11-03",
     source: "live-recount-public-ogc-api-collections-items-limit-1",
   },
+  // J1 zonage (2026-11-05): 68 city zoning collections through the closed
+  // zoning projection. Each still needs live licence + rights at every read.
+  ...GOVERNED_ZONING_RECORDS,
 ];
 
 /** Technical pilot city named at I-1A opening (P2). */

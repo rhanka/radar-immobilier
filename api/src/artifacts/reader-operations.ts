@@ -51,11 +51,17 @@ const geoBbox = z.string().regex(
   /^-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?$/,
 );
 
+// J1 zonage: `offset` is bounded and `fields` selects a subset of the
+// record's served fields (closed set checked by the reader-geo service,
+// unknown field = typed 400 before any upstream call).
+export const GEO_COLLECTION_ITEMS_QUERY_KEYS = ["collectionId", "limit", "bbox", "offset", "fields"] as const;
+
 export const geoCollectionItemsParams = z.object({
   collectionId: z.string().min(1).max(128),
   limit: contractInteger().min(1).max(1000).default(200),
   bbox: geoBbox.optional(),
-  offset: contractInteger().min(0).optional(),
+  offset: contractInteger().min(0).max(100_000).optional(),
+  fields: z.string().max(256).regex(/^[A-Za-z]+(,[A-Za-z]+){0,15}$/).optional(),
 }).strict();
 
 export const basketsContextParams = z.object({

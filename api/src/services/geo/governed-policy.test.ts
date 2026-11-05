@@ -68,12 +68,29 @@ describe("catalogueCollection (fail-closed per collection)", () => {
 
   it("marks licence-known zonage without a dated record as not covered (record first)", () => {
     const entry = catalogueCollection({
+      id: "qc-zonage-laval-sad-centre-ville",
+      licenseTitle: CC_BY_4,
+      rightsPresent: true,
+    });
+    expect(entry.status).toBe("not covered");
+    expect(entry.reason).toBe("no-dated-per-collection-record");
+  });
+
+  it("keeps a J1 city zoning record not covered while the live listing renders no rights", () => {
+    const entry = catalogueCollection({
       id: "qc-zonage-rosemere",
       licenseTitle: "Plan de zonage municipal Ville de Rosemère",
       rightsPresent: false,
     });
     expect(entry.status).toBe("not covered");
-    expect(entry.reason).toBe("no-dated-per-collection-record");
+    expect(entry.reason).toBe("rights-missing");
+    const served = catalogueCollection({
+      id: "qc-zonage-rosemere",
+      licenseTitle: "Plan de zonage municipal Ville de Rosemère",
+      rightsPresent: true,
+    });
+    expect(served.status).toBe("served");
+    expect(served.record?.zoning?.projection).toBe("zoning-v1");
   });
 
   it("lists lots and zoning events as not served, whatever the licence", () => {
