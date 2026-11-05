@@ -35,11 +35,17 @@ export const ROUTES = {
       '--disable-web-tools', '--disable-reminders', '--disable-request-user-input', '--no-foreign-personal-context', '--no-session-log', '--workspace', dir] }),
     parse: parseMuse,
   },
-  'muse-spark-1.3-medium': {
-    family: 'Muse 1.3', model: 'muse-spark-1.3', effort: 'medium', route: 'muse exec --prompt-file, preset empty, no web tools, no session log',
-    build: (dir, file) => ({ cmd: 'muse', args: ['exec', '--model', 'muse-spark-1.3', '--reasoning-effort', 'medium', '--preset', 'empty', '--prompt-file', file, '--json',
+  ...Object.fromEntries(['low', 'medium'].map((e) => [`muse-spark-1.3-${e}`, {
+    family: 'Muse 1.3', model: 'muse-spark-1.3', effort: e, route: 'muse exec --prompt-file, preset empty, no web tools, no session log',
+    build: (dir, file) => ({ cmd: 'muse', args: ['exec', '--model', 'muse-spark-1.3', '--reasoning-effort', e, '--preset', 'empty', '--prompt-file', file, '--json',
       '--disable-web-tools', '--disable-reminders', '--disable-request-user-input', '--no-foreign-personal-context', '--no-session-log', '--workspace', dir] }),
     parse: parseMuse,
+  }])),
+  'gemini-4-argon-low': {
+    family: 'Gemini 4 Argon', model: 'gemini-4-argon-low', effort: 'low', route: 'agy --print= with stream-json stdin input, slash commands disabled, empty cwd',
+    build: (_dir, _file, prompt) => ({ cmd: 'agy', args: ['--model', 'gemini-4-argon-low', '--input-format', 'stream-json', '--output-format', 'stream-json',
+      '--disable-slash-commands', '--print='], stdin: `${JSON.stringify({ event: 'user', message: { role: 'user', content: prompt } })}\n` }),
+    parse: parseAgyStream,
   },
   // agy: prompt on stdin as one stream-json "user" event (no 128 KB argument limit, L0 open point).
   ...Object.fromEntries(['high', 'medium', 'low'].map((e) => [`gemini-4-argon-${e}`, {
@@ -48,7 +54,7 @@ export const ROUTES = {
       '--disable-slash-commands', '--print='], stdin: `${JSON.stringify({ event: 'user', message: { role: 'user', content: prompt } })}\n` }),
     parse: parseAgyStream,
   }])),
-  ...Object.fromEntries(['max', 'medium'].map((e) => [`opus-5.5-${e}`, {
+  ...Object.fromEntries(['max', 'medium', 'low'].map((e) => [`opus-5.5-${e}`, {
     family: 'Opus 5.5', model: 'claude-opus-5-5', effort: e, route: 'isolated claude -p: no tools, no CLAUDE.md (CLAUDE_CODE_DISABLE_CLAUDE_MDS=1), project settings only, neutral system prompt, empty MCP config, no session persistence, empty cwd',
     build: (_dir, _file, prompt) => ({ cmd: 'claude', args: ['-p', '--model', 'claude-opus-5-5', '--effort', e, '--output-format', 'json',
       '--tools', '', '--setting-sources', 'project', '--no-session-persistence', '--system-prompt', NEUTRAL_SYSTEM,

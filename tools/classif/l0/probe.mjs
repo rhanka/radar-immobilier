@@ -7,6 +7,7 @@ import process from 'node:process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { ROUTES, callSeat, parseJsonObject } from '../run-seat.mjs';
 import { codebookFromMigration } from '../lib/triage.mjs';
+import { appendJsonlRecord } from '../lib/jsonl.mjs';
 import { MIGRATION_CODES, classifHome, privateDir } from '../lib/paths.mjs';
 import { MANIFEST_DIR } from '../lib/draw.mjs';
 import { sha256 } from '../lib/render.mjs';
@@ -78,9 +79,12 @@ export async function main(argv = process.argv.slice(2)) {
   const plan = routesArg ?? (only ? PLAN.filter(([r]) => only.includes(r)) : PLAN);
   const home = classifHome();
   const seatTmp = privateDir(path.join(home, 'l0', 'seat-tmp'));
+  const callsLog = path.join(home, 'l2', 'calls.jsonl');
   const results = await pool(plan.map(([label, kind]) => async () => {
     const prompt = probePrompt(SYNTHETIC[kind]);
     const r = await callSeat(label, prompt, { base: seatTmp });
+    appendJsonlRecord(callsLog, { at: new Date().toISOString(), phase: 'l0-probe', label, kind,
+      exitCode: r.code, latencyMs: r.latencyMs });
     const v = validate(r.text);
     const route = ROUTES[label];
     return { label, family: route.family, model: route.model, effort: route.effort, route: route.route, item: kind, promptSha256: sha256(prompt),
