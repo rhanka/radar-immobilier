@@ -26,7 +26,7 @@ function accounts(): AccountStatusQueryable {
     async query(text: string) {
       // The admission authority reads the single membership workspace from
       // this port: the test scope owns it, like one workspace per scope.
-      if (text.includes("workspace_memberships")) return { rows: [{ workspace_id: "test" }] };
+      if (text.includes("workspace_memberships")) return { rows: [{ status: "approved", workspace_id: "test" }] };
       return { rows: [{ status: "approved", workspace_id: "test-workspace" }] };
     },
   };
