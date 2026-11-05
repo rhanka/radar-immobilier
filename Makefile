@@ -143,6 +143,16 @@ build: ## Build all workspaces
 	$(COMPOSE_RUN_API_NODEPS) npm run build --workspace=api
 	$(COMPOSE_RUN_API_NODEPS) npm run build --workspace=ui
 
+.PHONY: build-ui-artifact
+build-ui-artifact: ## Build the UI for artifact publication (base /, relay basemap, /__app API base)
+	# NOTE: the build runs in the `api` one-off container, which forwards no
+	# VITE_* variable (only the `ui` service does), so the artifact variables
+	# are passed explicitly with -e. `make build` is untouched.
+	GITHUB_PAGES= $(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm --no-deps -T \
+	  -e VITE_API_BASE_URL=/__app \
+	  -e VITE_BASEMAP_TILE_URL="/__artifacts/tiles/v1/osm/{z}/{x}/{y}" \
+	  api npm run build --workspace=ui
+
 .PHONY: smoke-ui-bundle
 smoke-ui-bundle: ## Fail if the production UI bundle embeds Svelte's server runtime
 	@test -d ui/dist/assets || { echo "[smoke-ui-bundle] ui/dist/assets missing; run make build first"; exit 1; }
