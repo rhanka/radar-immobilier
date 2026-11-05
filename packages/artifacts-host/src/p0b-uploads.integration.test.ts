@@ -209,8 +209,8 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("files parity upload channel", ()
     // Same Postgres page ledger the host mints into; the orphan-key bound
     // stays visible at the sweep call like in production composition.
     const sweeper = createUploadSweeper({ sessions: createPostgresUploadSessionStore(fixture.pool),
-      staging, pages: createPostgresUploadPageStore(fixture.pool),
-      orphanKeyLimit: ORPHAN_SWEEP_MAX_KEYS });
+      staging, pages: createPostgresUploadPageStore(fixture.pool) },
+      { orphanKeyLimit: ORPHAN_SWEEP_MAX_KEYS });
     const report = await sweeper.sweep(undefined, { scopes: ["p0b"] });
     expect(report.failures).toEqual([]);
     expect(report.pagesExpired).toContain(pageSessionId);

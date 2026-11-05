@@ -146,7 +146,7 @@ export async function composeArtifactHost(
     // orphan-key bound stays visible here (provider default): a slow S3
     // listing never turns one tick into an unbounded scan.
     const sweeper = createUploadSweeper({ sessions: uploadSessions, staging,
-      refs: domain.publicationRefs, pages: uploadPages, orphanKeyLimit: ORPHAN_SWEEP_MAX_KEYS });
+      refs: domain.publicationRefs, pages: uploadPages }, { orphanKeyLimit: ORPHAN_SWEEP_MAX_KEYS });
     // Files parity LOT 2 — the browser page service over the same ledger,
     // staging, signer, blobs and claim-guarded refs as the provider's
     // internal page service (same stores, same ceilings, same quota

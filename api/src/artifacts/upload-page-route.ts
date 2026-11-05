@@ -152,9 +152,10 @@ async function guardPageOwner(
   session: VerifiedSession,
 ): Promise<{ ownerId: string; storageScopeId: string } | Response> {
   if (!deps.pages) return jsonError(c, 503, { error: "capability_unavailable" });
+  const pageSessionId = c.req.param("pageSessionId") ?? "";
   let row;
   try {
-    row = await deps.pages.get(c.req.param("pageSessionId"));
+    row = await deps.pages.get(pageSessionId);
   } catch {
     return jsonError(c, 503, { error: "capability_unavailable" });
   }
