@@ -124,12 +124,32 @@ export function seriesVerdict({ stats, failures, items }, spec) {
 }
 
 /**
- * Lexicographic selection (Annex M M.3, tuning half only): shown recall (LB, then point),
- * shown precision (LB, then point), most recent prompt version, lowest cost. Returns <0 when
- * `a` ranks first. Routes failing the failure ceiling or indeterminate on the compared
- * criterion never outrank a passing one.
+ * A route is failed when its verdict is `fail` or its failure share exceeds the
+ * pre-registered ceiling (review D4). Routes without shaped failure evidence
+ * (legacy unit-test objects) count as eligible: the rule only ever demotes.
+ */
+export function routeFailed(r) {
+  if (!r || typeof r !== 'object') return false;
+  if (r.verdict === 'fail') return true;
+  const ceiling = r.failureCeiling ?? null;
+  const items = r.items ?? null;
+  const failures = r.failures ?? 0;
+  if (ceiling !== null && ceiling !== undefined && items) return failures / items > ceiling;
+  return false;
+}
+
+/**
+ * Lexicographic selection (Annex M M.3, tuning half only): eligible routes first
+ * (a route failing the failure ceiling or with verdict `fail` never outranks an
+ * eligible one), then shown recall (LB, then point), shown precision (LB, then
+ * point), most recent prompt version, lowest cost. Returns <0 when `a` ranks
+ * first. Routes indeterminate on the compared criterion never outrank a passing one.
  */
 export function compareRoutes(a, b) {
+  const af = routeFailed(a);
+  const bf = routeFailed(b);
+  if (af && !bf) return 1;
+  if (bf && !af) return -1;
   for (const k of ['recallLB', 'recall', 'precisionLB', 'precision']) {
     const x = a.stats?.[k];
     const y = b.stats?.[k];
