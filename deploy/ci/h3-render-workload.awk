@@ -27,7 +27,7 @@ function judge( i, key, v, expected, keys, image, ef) {
       expected = "        - name: " key "\n          valueFrom:\n            secretKeyRef:\n              key: " key "\n              name: radar-artifacts-preprod\n              optional: true\n"
       if (!index(doc, expected)) fail("exact optional Secret reference missing for " key)
     }
-    if (count("^[ \t]*- name: ARTIFACTS_") != (phase == "rollback" ? 0 : (phase == "general" ? 4 : 2))) fail("unexpected ARTIFACTS env override")
+    if (count("^[ \t]*- name: ARTIFACTS_") != (phase == "rollback" ? 0 : (phase == "general" ? 5 : 2))) fail("unexpected ARTIFACTS env override")
     if (phase == "rollback" && index(doc, "radar-artifacts-preprod")) fail("artifact Secret reference forbidden for H2 rollback")
     if (count("^[ \t]*envFrom:") != 1) fail("exact api envFrom required (single configMapRef radar-api)")
     if (count("configMapRef:") != 1) fail("exact api envFrom source required (single configMapRef radar-api)")
