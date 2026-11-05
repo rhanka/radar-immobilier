@@ -1900,7 +1900,7 @@
           type: "raster",
           // Artifact builds override this at build time with
           // VITE_BASEMAP_TILE_URL (same-origin tile relay).
-          tiles: [basemapTileTemplate(import.meta.env)],
+          tiles: [basemapTileTemplate({ VITE_BASEMAP_TILE_URL: import.meta.env.VITE_BASEMAP_TILE_URL })],
           tileSize: 256,
           attribution: "© OpenStreetMap contributors",
         },

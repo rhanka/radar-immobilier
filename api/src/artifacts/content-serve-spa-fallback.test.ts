@@ -8,6 +8,7 @@ import { describe, expect, it } from "vitest";
 import { createReaderContentApp } from "./content-serve.js";
 import { fingerprintReaderProfile } from "./reader-profile.js";
 import { createMemoryReleaseFiles } from "./release-files.js";
+import { READER_EXAMPLE_SCRIPT_HASH } from "./reader-example.js";
 import { mintGrant } from "./preview-grant.js";
 import {
   GRANT_SECRET,
@@ -47,9 +48,9 @@ async function token(host: string = HOST): Promise<string> {
 }
 
 async function nav(app: ReturnType<typeof spaApp>, path: string, cookie: string | undefined,
-  grant: string | undefined, accept: string | undefined, host = HOST): Promise<Response> {
+  grant: string | undefined, accept: string | undefined, host = HOST, method = "GET"): Promise<Response> {
   const url = `http://${host}${path}${grant ? `?grant=${grant}` : ""}`;
-  return app.request(url, { headers: {
+  return app.request(url, { method, headers: {
     host, ...(cookie ? { cookie } : {}), ...(accept ? { accept } : {}) } });
 }
 
@@ -106,6 +107,55 @@ describe("SPA history fallback on the content hosts", () => {
       expect(res.status, path).not.toBe(200);
       expect(await res.text(), path).not.toContain("<title>Signals</title>");
     }
+  });
+
+  it("should answer HEAD on the fallback with the GET headers and no body", async () => {
+    const app = spaApp();
+    const grant = await token();
+    const cookie = await credentials("reader-alice", "s1", 1000);
+    const get = await nav(app, "/geo/valleyfield", cookie, grant, "text/html");
+    const head = await nav(app, "/geo/valleyfield", cookie, grant, "text/html", HOST, "HEAD");
+    expect(head.status).toBe(200);
+    expect(await head.text()).toBe("");
+    expect(head.headers.get("content-type")).toBe(get.headers.get("content-type"));
+    expect(head.headers.get("content-type")).toContain("text/html");
+    expect(head.headers.get("content-security-policy")).toBe(get.headers.get("content-security-policy"));
+  });
+
+  it("should serve the fallback for a single-segment path without extension", async () => {
+    const app = spaApp();
+    const grant = await token();
+    const cookie = await credentials("reader-alice", "s1", 1000);
+    const res = await nav(app, "/signaux", cookie, grant, "text/html");
+    expect(res.status).toBe(200);
+    expect(await res.text()).toBe(INDEX);
+  });
+
+  it("should answer 404, never index.html, to traversal-shaped navigations with Accept text/html", async () => {
+    const app = spaApp();
+    const grant = await token();
+    const cookie = await credentials("reader-alice", "s1", 1000);
+    // Literal `..` and `%2e%2e` segments are resolved by the WHATWG URL
+    // parser before routing; these encoded forms reach the handler with
+    // their dots and separators and must fail closed.
+    for (const path of ["/geo/..%2fsecret", "/..%2f..%2fetc%2fpasswd", "/%2e%2e%2fsecret",
+      "/geo/%2e%2e%5csecret", "/%2e%2e%5c%2e%2e%5cindex"]) {
+      const res = await nav(app, path, cookie, grant, "text/html");
+      expect(res.status, path).toBe(404);
+      expect(await res.text(), path).not.toContain("<title>Signals</title>");
+    }
+  });
+
+  it("should serve the reader example with its own inline-script hash in the CSP", async () => {
+    const app = createReaderContentApp({ ...fixtureReaderDeps(), contentBase: "pages.example.test",
+      grantSecret: GRANT_SECRET, sessionSecret: SESSION_SECRET, issuer: ISSUER, now: () => 1_000 });
+    const grant = await token();
+    const cookie = await credentials("reader-alice", "s1", 1000);
+    const res = await app.request(`http://${HOST}/?grant=${grant}`, { headers: { host: HOST, cookie } });
+    expect(res.status).toBe(200);
+    const csp = res.headers.get("content-security-policy") ?? "";
+    expect(csp).toContain(`script-src 'self' 'sha256-${READER_EXAMPLE_SCRIPT_HASH}'`);
+    expect(csp.match(/(?:^|; )style-src ([^;]*)/)?.[1]).toBe("'self' 'unsafe-inline'");
   });
 
   it("should still refuse anonymous navigations before any fallback", async () => {
