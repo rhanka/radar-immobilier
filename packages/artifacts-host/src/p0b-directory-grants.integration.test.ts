@@ -110,7 +110,12 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("artifact directory under product
     await expect(directory.searchPeople("p0b", "alice", 10))
       .rejects.toMatchObject({ code: "directory_lookup_unavailable" });
     const lookup = await call("lookup_people", { query: "alice" });
-    expect(lookup.status, JSON.stringify(lookup.body).slice(0, 300)).not.toBe(200);
+    // Pinned public contract (review 1005 §3): under the writer role the
+    // directory throw surfaces as internal_error, never a pg message, and
+    // the next tool still answers 200.
+    expect(lookup.status, JSON.stringify(lookup.body).slice(0, 300)).toBe(500);
+    expect(lookup.body).toMatchObject({ error: { code: "internal_error" } });
+    expect(JSON.stringify(lookup.body)).not.toContain("permission denied");
     const listed = await call("list", { limit: 20, offset: 0 });
     expect(listed.status, JSON.stringify(listed.body).slice(0, 300)).toBe(200);
   });

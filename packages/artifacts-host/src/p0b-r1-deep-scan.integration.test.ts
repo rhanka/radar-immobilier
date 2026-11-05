@@ -2,7 +2,9 @@ import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createMemoryStaging, createMemoryUploadSessionStore, createMemoryUploadSigner,
   stagingKey } from "@sentropic/artifacts/server/uploads";
-import { compileHostArtifactProfile } from "./p0b-profile.js";
+import { BASE_ARTIFACT_TOOLS, CONSENT_ARTIFACT_TOOLS, P0B_ARTIFACT_TOOLS,
+  PART1_ARTIFACT_TOOLS, SHARING_ARTIFACT_TOOLS, UPLOAD_ARTIFACT_TOOLS,
+  UPLOAD_PAGE_ARTIFACT_TOOLS, compileHostArtifactProfile } from "./p0b-profile.js";
 import { p0bFixture } from "./p0b.test-support.js";
 import { createArtifactControl } from "./facade.js";
 
@@ -25,6 +27,19 @@ const v1 = compileHostArtifactProfile({ profileRevisionId: "immo-artifacts.p0b.v
   requireExpectedCurrentReleaseId: false, resultEnvelopeVersion: 1 });
 const v2 = compileHostArtifactProfile({ profileRevisionId: "immo-artifacts.v2",
   requireExpectedCurrentReleaseId: true, resultEnvelopeVersion: 2 });
+
+/**
+ * Mechanical enumeration: every catalogue tool must have its output scanned
+ * below. Derived from the profile tool lists (not hardcoded), so a 19th tool
+ * cannot escape the scan. `artifacts_get` reads through the `meta` op.
+ */
+const opOfTool = (tool: string): string =>
+  tool === "artifacts_get" ? "meta" : tool.replace(/^artifacts_/, "");
+const EXPECTED_OPS = [...new Set([
+  ...BASE_ARTIFACT_TOOLS, ...P0B_ARTIFACT_TOOLS, ...UPLOAD_ARTIFACT_TOOLS,
+  ...UPLOAD_PAGE_ARTIFACT_TOOLS, ...SHARING_ARTIFACT_TOOLS,
+  ...CONSENT_ARTIFACT_TOOLS, ...PART1_ARTIFACT_TOOLS,
+].map(opOfTool))].sort();
 
 /** Fail on any raw internal id or email in a model-visible payload. */
 function expectNoRawIdentity(body: unknown, label: string): void {
@@ -60,6 +75,12 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("R1 deep scan across every artifa
       let goneArtifactId: string;
       let aliceId: string;
       let bobId: string;
+      // Every op whose output passed the no-raw-identity scan in this profile.
+      const covered = new Set<string>();
+      const scanOp = (op: string, body: unknown, label: string) => {
+        expectNoRawIdentity(body, label);
+        covered.add(op);
+      };
       beforeAll(async () => {
         fixture = await p0bFixture(profile);
         aliceId = (await fixture.pool.query<{ id: string }>(
@@ -69,7 +90,7 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("R1 deep scan across every artifa
         const ensured = await fixture.call("ensure",
           { bindingName: randomUUID(), idempotencyKey: randomUUID() });
         expect(ensured.status).toBe(201);
-        expectNoRawIdentity(ensured.body, "ensure receipt");
+        scanOp("ensure", ensured.body, "ensure receipt");
         // v1 receipts stay minimal (no owner field); v2 carries the summary.
         if (revertSelected) expect(JSON.stringify(ensured.body)).toContain(aliceId);
         artifactId = (ensured.body as { artifactId: string }).artifactId ??
@@ -78,7 +99,7 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("R1 deep scan across every artifa
           files: [{ path: "index.html", mimeType: "text/html", text: "<h1>Before</h1>" }],
           idempotencyKey: randomUUID(), ...(needsCas ? { expectedCurrentReleaseId: null } : {}) });
         expect(published.status).toBe(201);
-        expectNoRawIdentity(published.body, "publish receipt");
+        scanOp("publish", published.body, "publish receipt");
         expect(manifestOf(published.body).ownerId).toBe(aliceId);
         releaseId = (published.body as { releaseId: string }).releaseId ??
           ((published.body as { output: { releaseId: string } }).output.releaseId);
@@ -111,7 +132,7 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("R1 deep scan across every artifa
           const refused = await fixture.call("revert", { artifactId, targetReleaseId: releaseId,
             expectedCurrentReleaseId: releaseId, idempotencyKey: randomUUID() });
           expect(refused.status).toBe(503);
-          expectNoRawIdentity(refused.body, "revert refusal");
+          scanOp("revert", refused.body, "revert refusal");
           return;
         }
         const second = await fixture.call("publish", { artifactId,
@@ -122,18 +143,18 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("R1 deep scan across every artifa
         const reverted = await fixture.call("revert", { artifactId, targetReleaseId: releaseId,
           expectedCurrentReleaseId: secondId, idempotencyKey: randomUUID() });
         expect(reverted.status).toBe(201);
-        expectNoRawIdentity(reverted.body, "revert receipt");
+        scanOp("revert", reverted.body, "revert receipt");
         expect(manifestOf(reverted.body).ownerId).toBe(aliceId);
       });
 
       it("should list a deleted owner as unknown with no raw identity", async () => {
         const listed = await fixture.call("list_access", { artifactId: goneArtifactId }, "idp-bob");
         expect(listed.status).toBe(200);
-        expectNoRawIdentity(listed.body, "list_access");
+        scanOp("list_access", listed.body, "list_access");
         expect(JSON.stringify(listed.body)).toContain("unknown-");
         const got = await fixture.call("meta", { artifactId: goneArtifactId }, "idp-bob");
         expect(got.status).toBe(200);
-        expectNoRawIdentity(got.body, "get after owner deletion");
+        scanOp("meta", got.body, "get after owner deletion");
         expect(JSON.stringify(got.body)).toContain("unknown-");
       });
 
@@ -141,12 +162,12 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("R1 deep scan across every artifa
         const granted = await fixture.call("set_access", { artifactId, action: "grant",
           principalId: bobId, grant: "read", idempotencyKey: randomUUID() });
         expect(granted.status).toBe(200);
-        expectNoRawIdentity(granted.body, "set_access grant receipt");
+        scanOp("set_access", granted.body, "set_access grant receipt");
         expect(JSON.stringify(granted.body)).toContain(bobId);
         const revoked = await fixture.call("set_access", { artifactId, action: "revoke",
           principalId: bobId, idempotencyKey: randomUUID() });
         expect(revoked.status).toBe(200);
-        expectNoRawIdentity(revoked.body, "set_access revoke receipt");
+        scanOp("set_access", revoked.body, "set_access revoke receipt");
         // The revoke really removed the row: the receipt carries no grant
         // entry at all (and therefore no identity either).
         expect((revoked.body as { grants?: unknown[] }).grants ??
@@ -154,18 +175,20 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("R1 deep scan across every artifa
       });
 
       it("should carry no raw identity across every remaining tool output", async () => {
-        // Mechanical enumeration of every output the set_access-focused
-        // tests above do not scan. A fresh approved actor keeps its own
-        // per-minute attempt budget, far from the shared alice budget.
+        // The catalogue-derived ops not yet covered by the tests above are
+        // scanned here one by one; the final test asserts the union equals
+        // EXPECTED_OPS, so no tool output escapes the scan. A fresh approved
+        // actor keeps its own per-minute attempt budget, far from the shared
+        // alice budget.
         await fixture.pool.query(
           "INSERT INTO account_users (sub, status, email, name) VALUES " +
           "('idp-scan', 'approved', NULL, NULL), " +
           "('idp-scan-reader', 'approved', 'scan-reader@example.test', 'Scan Reader')");
-        const scan = (body: unknown, label: string) => expectNoRawIdentity(body, label);
+        const scan = (op: string, body: unknown, label: string) => scanOp(op, body, label);
         const ensured = await fixture.call("ensure",
           { bindingName: randomUUID(), idempotencyKey: randomUUID() }, "idp-scan");
         expect(ensured.status).toBe(201);
-        scan(ensured.body, "ensure receipt");
+        scan("ensure", ensured.body, "ensure receipt");
         const scanArtifactId = out<{ artifactId: string }>(ensured.body).artifactId;
         // Agent-channel uploads ride memory doubles (same semantics as the
         // S3 staging); the provider receipts are what the scan asserts on.
@@ -179,7 +202,7 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("R1 deep scan across every artifa
           const created = await memCall("create_upload",
             { artifactId: scanArtifactId, mimeType: "image/png", maxSize: bytes.length });
           expect(created.status, `create ${path}`).toBe(201);
-          scan(created.body, "create_upload receipt");
+          scan("create_upload", created.body, "create_upload receipt");
           const body = out<{ uploadId: string; requiredHeaders: Record<string, string> }>(created.body);
           const key = stagingKey("p0b", body.uploadId);
           signerDouble.put({ key, contentType: "image/png", contentLength: bytes.length }, bytes,
@@ -191,7 +214,7 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("R1 deep scan across every artifa
             uploadId: body.uploadId, path, mimeType: "image/png", digest,
             size: bytes.length, idempotencyKey: randomUUID() });
           expect(committed.status, `commit ${path}`).toBe(201);
-          scan(committed.body, "commit_upload receipt");
+          scan("commit_upload", committed.body, "commit_upload receipt");
           return body.uploadId;
         }
         const png = (seed: number): Uint8Array => {
@@ -201,25 +224,26 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("R1 deep scan across every artifa
         };
         const minted = await fixture.call("create_upload_page", { artifactId: scanArtifactId }, "idp-scan");
         expect(minted.status).toBe(201);
-        scan(minted.body, "create_upload_page receipt");
+        scan("create_upload_page", minted.body, "create_upload_page receipt");
         const uploadIdA = await stage(png(1), "assets/first.png");
         const bundled = await memCall("publish_bundle", { artifactId: scanArtifactId,
           idempotencyKey: randomUUID(), expectedCurrentReleaseId: null,
           files: [{ path: "index.html", mimeType: "text/html", text: "<h1>Scan</h1>" }],
           assets: [{ path: "assets/first.png", uploadId: uploadIdA }] });
         expect(bundled.status).toBe(201);
-        scan(bundled.body, "publish_bundle receipt");
+        scan("publish_bundle", bundled.body, "publish_bundle receipt");
         const bundleReleaseId = out<{ releaseId: string }>(bundled.body).releaseId;
         const assets = await fixture.call("list_assets", { artifactId: scanArtifactId }, "idp-scan");
         expect(assets.status).toBe(200);
-        scan(assets.body, "list_assets");
+        scan("list_assets", assets.body, "list_assets");
         const uploadIdB = await stage(png(2), "assets/second.png");
         const bundledV2 = await memCall("publish_bundle_v2", { artifactId: scanArtifactId,
           idempotencyKey: randomUUID(), expectedCurrentReleaseId: bundleReleaseId,
           files: [{ path: "index.html", mimeType: "text/html", text: "<h1>Scan v2</h1>" }],
           assets: [{ path: "assets/second.png", uploadId: uploadIdB }] });
         expect(bundledV2.status).toBe(201);
-        scan(bundledV2.body, "publish_bundle_v2 receipt");
+        scan("publish_bundle_v2", bundledV2.body, "publish_bundle_v2 receipt");
+        const committedReleaseId = out<{ releaseId: string }>(bundledV2.body).releaseId;
         for (const [op, args] of [
           ["list", {}],
           ["meta", { artifactId: scanArtifactId }],
@@ -227,7 +251,7 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("R1 deep scan across every artifa
         ] as const) {
           const response = await fixture.call(op, args, "idp-scan");
           expect(response.status, op).toBe(200);
-          scan(response.body, `${op} output`);
+          scan(op, response.body, `${op} output`);
         }
         const versions = await fixture.call("list_versions", { artifactId: scanArtifactId }, "idp-scan");
         if (!revertSelected) {
@@ -235,7 +259,7 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("R1 deep scan across every artifa
         } else {
           expect(versions.status).toBe(200);
         }
-        scan(versions.body, "list_versions output");
+        scan("list_versions", versions.body, "list_versions output");
         // Directory outputs carry the masked email hint by design (never the
         // raw sub, never the full address): assert that contract exactly.
         const readerRef = (await fixture.pool.query<{ id: string }>(
@@ -250,18 +274,42 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("R1 deep scan across every artifa
         const foundRaw = JSON.stringify(found.body);
         expect(foundRaw).not.toContain("idp-");
         expect(foundRaw).not.toContain("scan-reader@example.test");
+        // The masked emailHint carries "@example.test" by design, so this
+        // output skips the raw scan; the exact contract above (opaque userRef,
+        // masked hint, no sub, no full address) is the assertion, and coverage
+        // is recorded here.
+        covered.add("lookup_people");
         const access = await fixture.call("list_access", { artifactId: scanArtifactId }, "idp-scan");
         expect(access.status).toBe(200);
-        scan(access.body, "list_access");
-        // First delete call only mints the human confirmation (v1) or
-        // refuses the missing precondition (strict v2): no deletion happens.
-        const deleted = await fixture.call("delete",
-          { artifactId: scanArtifactId, idempotencyKey: randomUUID() }, "idp-scan");
+        scan("list_access", access.body, "list_access");
+        // First delete call mints the human confirmation (the current release
+        // rides along so the strict profile mints one too): no deletion yet.
+        const deleteArgs = { artifactId: scanArtifactId, idempotencyKey: randomUUID(),
+          expectedCurrentReleaseId: committedReleaseId };
+        const deleted = await fixture.call("delete", deleteArgs, "idp-scan");
         expect(deleted.status).toBeGreaterThanOrEqual(400);
-        scan(deleted.body, "delete first-call output");
+        scan("delete", deleted.body, "delete first-call output");
         const revokedConsent = await fixture.call("revoke_reader_consent",
           { artifactId: scanArtifactId, idempotencyKey: randomUUID() }, "idp-scan");
-        scan(revokedConsent.body, "revoke_reader_consent output");
+        scan("revoke_reader_consent", revokedConsent.body, "revoke_reader_consent output");
+        // Confirmed delete: approve the minted challenge, replay with the same
+        // identity key plus confirmationRef, and scan the success receipt too.
+        // Shape varies by envelope: v1 projects details at the root (or under
+        // output), the strict profile keeps the raw outcome error envelope.
+        const challengeBody = deleted.body as {
+          details?: { confirmationRef?: unknown };
+          output?: { details?: { confirmationRef?: unknown } };
+          error?: { details?: { confirmationRef?: unknown } };
+        };
+        const confirmationRef = challengeBody.details?.confirmationRef
+          ?? challengeBody.output?.details?.confirmationRef
+          ?? challengeBody.error?.details?.confirmationRef;
+        expect(typeof confirmationRef, "delete mints a confirmationRef").toBe("string");
+        expect(await fixture.confirmation.approve(confirmationRef as string, "idp-scan")).toBe(true);
+        const confirmed = await fixture.call("delete",
+          { ...deleteArgs, confirmationRef }, "idp-scan");
+        expect(confirmed.status).toBe(200);
+        scan("delete", confirmed.body, "delete success receipt");
       });
 
       it("should allow revoke after erasure without oracle while row convergence stays suspended-only (R5 erasure)", async () => {
@@ -302,6 +350,12 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("R1 deep scan across every artifa
         expect(raw).not.toContain("idp-erased");
         expect(raw).not.toContain("erased@example.test");
         expect(raw).toContain("unknown-");
+      });
+
+      it("should have scanned every catalogued tool output (mechanical coverage)", async () => {
+        // Derived from the profile tool lists, not hardcoded: adding a tool
+        // to the catalogue fails here until its output is scanned above.
+        expect([...covered].sort()).toEqual(EXPECTED_OPS);
       });
     });
   }
