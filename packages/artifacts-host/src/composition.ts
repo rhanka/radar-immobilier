@@ -11,6 +11,7 @@ import { createPostgresCommitExecutor } from "@sentropic/artifacts/adapters/post
 import { createArtifactCommitCoordinator } from "@sentropic/artifacts/server/commit-contract";
 import { projectArtifactHttpOutcome, type HttpAppDeps } from "@sentropic/artifacts/http";
 import type { PublicationBlobStore } from "@sentropic/artifacts/server/publication";
+import { ORPHAN_SWEEP_MAX_KEYS } from "@sentropic/artifacts/server/uploads";
 import type { StagingStore, UploadSessionStore, UploadSignerPort } from "@sentropic/artifacts/server/uploads";
 import type { ArtifactsStorageConfig } from "./config.js";
 import type { ActivationConfig } from "./activation.js";
@@ -141,9 +142,11 @@ export async function composeArtifactHost(
       }) } : {}),
     });
     // The sweeper shares the publication refs so consumed-pin releases and
-    // the orphan/expiry passes see the same ledger as publication.
+    // the orphan/expiry passes see the same ledger as publication. The
+    // orphan-key bound stays visible here (provider default): a slow S3
+    // listing never turns one tick into an unbounded scan.
     const sweeper = createUploadSweeper({ sessions: uploadSessions, staging,
-      refs: domain.publicationRefs, pages: uploadPages });
+      refs: domain.publicationRefs, pages: uploadPages, orphanKeyLimit: ORPHAN_SWEEP_MAX_KEYS });
     // Files parity LOT 2 — the browser page service over the same ledger,
     // staging, signer, blobs and claim-guarded refs as the provider's
     // internal page service (same stores, same ceilings, same quota
@@ -162,11 +165,20 @@ export async function composeArtifactHost(
         maxTotalBytes: RELEASE_TOTAL_BYTES_MAX, mimeTypes: [...HOST_MIME_TYPES] },
       budget: { filesMax: RELEASE_FILES_MAX, totalBytesMax: RELEASE_TOTAL_BYTES_MAX },
     }) : undefined;
-    uploadSweepTimer = setInterval(() => { void sweeper.sweep(undefined, { scopes: [config.storageScope] })
-      .catch((error: unknown) => {
-        console.error(JSON.stringify({ kind: "artifacts.upload_sweep_unavailable" }));
-        options.onProviderFailure?.(error);
-      }); }, 60_000);
+    // One sweep at a time: a slow tick never overlaps the next one (the
+    // 60s period keeps overlapping sweeps from piling up on a stalled
+    // store).
+    let sweepInFlight = false;
+    uploadSweepTimer = setInterval(() => {
+      if (sweepInFlight) return;
+      sweepInFlight = true;
+      void sweeper.sweep(undefined, { scopes: [config.storageScope] })
+        .catch((error: unknown) => {
+          console.error(JSON.stringify({ kind: "artifacts.upload_sweep_unavailable" }));
+          options.onProviderFailure?.(error);
+        })
+        .finally(() => { sweepInFlight = false; });
+    }, 60_000);
     uploadSweepTimer.unref();
     const cleanup = startPreparationCleanup(pool, domain.store, blobs, options.onProviderFailure);
     const execute: typeof domain.execute = async (request, invocation) => {
