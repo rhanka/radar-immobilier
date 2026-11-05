@@ -340,6 +340,12 @@ export function geoGovernedRoute(deps: GeoGovernedDeps = {}): Hono {
       return c.json(refusalBody(entry), 403);
     }
 
+    // PR #1010 follow-up: a collection served on derived rights carries its
+    // provenance and the recorded attribution (CC-BY attribution duty).
+    const rightsFields = entry.rightsSource === "derived-from-licence" && entry.record.rights
+      ? { rights: { ...entry.record.rights } }
+      : {};
+
     // Bounded passthrough query: limit/bbox/offset only, f=json forced.
     const limit = clampLimit(c.req.query("limit"));
     const params = new URLSearchParams();
@@ -384,6 +390,7 @@ export function geoGovernedRoute(deps: GeoGovernedDeps = {}): Hono {
         numberReturned: served.length,
         collectionId: id,
         licenseId: entry.record.licenseId,
+        ...rightsFields,
         contract,
       });
     }
@@ -410,6 +417,7 @@ export function geoGovernedRoute(deps: GeoGovernedDeps = {}): Hono {
           numberReturned: sliced.length,
           collectionId: id,
           licenseId: entry.record.licenseId,
+          ...rightsFields,
           contract,
         });
       }
