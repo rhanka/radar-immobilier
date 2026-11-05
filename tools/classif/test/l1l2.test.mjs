@@ -18,11 +18,18 @@ test('Krippendorff alpha (nominal, missing values) and majority', () => {
   assert.equal(majority(['x', null, null]), null);
 });
 
-test('stop rule: thresholds, changed share, cap', () => {
-  assert.ok(stopDecision({ alphaVerdict: 0.7, alphaCode: 0.68, verdictUnanimity: 0.8, changedShare: null, pass: 1 }).stop);
-  assert.ok(!stopDecision({ alphaVerdict: 0.7, alphaCode: 0.6, verdictUnanimity: 0.8, changedShare: null, pass: 1 }).stop);
-  assert.ok(stopDecision({ alphaVerdict: 0.5, alphaCode: 0.5, verdictUnanimity: 0.5, changedShare: 0.01, pass: 2 }).stop);
-  assert.ok(stopDecision({ alphaVerdict: 0.5, alphaCode: 0.5, verdictUnanimity: 0.5, changedShare: 0.2, pass: 4 }).stop);
+test('stop rule v3: α never stops alone, <2 % of re-annotated votes + all residuals classified, cap at 4 resolution passes', () => {
+  // α thresholds alone never stop the phase (they are reported only).
+  assert.equal(stopDecision({ changedShare: 0.5, pass: 2, residualsClassified: true }).stop, false);
+  // < 2 % changed but residuals lack a cause class: continue (map first).
+  assert.equal(stopDecision({ changedShare: 0.01, pass: 2, residualsClassified: false }).stop, false);
+  // < 2 % changed and every residual classified: stop.
+  assert.equal(stopDecision({ changedShare: 0.01, pass: 3, residualsClassified: true }).stop, true);
+  // Null share (no re-annotation): continue.
+  assert.equal(stopDecision({ changedShare: null, pass: 3, residualsClassified: true }).stop, false);
+  // Cap: passes 2–5 resolve; pass 6 stops no matter what.
+  assert.equal(stopDecision({ changedShare: 0.5, pass: 5, residualsClassified: false }).stop, false);
+  assert.equal(stopDecision({ changedShare: 0.5, pass: 6, residualsClassified: false }).stop, true);
 });
 
 test('codebook comparison detects missing, unexpected and duplicates', () => {
