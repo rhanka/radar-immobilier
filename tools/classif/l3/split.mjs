@@ -42,22 +42,32 @@ export function shuffleSeeded(arr, rng) {
   return a;
 }
 
-/** City-grouped greedy 50/50: sort cities by size desc, assign each to the half that best
-    balances every stratum (sum of squared deviations to half-targets). With an rng the
-    input order is shuffled (stable sort keeps the shuffled order within equal sizes) and
-    score ties break randomly — the draw is reproducible from the seed. Without rng the
-    legacy deterministic order applies (tests). */
+/** City-grouped greedy 50/50: sort cities by size desc, assign each city to the half
+    that minimises the TOTAL imbalance increase. With an rng the input order is
+    shuffled (stable sort keeps the shuffled order within equal sizes) and delta ties
+    break randomly — the draw is reproducible from the seed. Without rng the legacy
+    deterministic order applies (tests). */
 export function splitGrouped(cities, targets, rng = null) {
   const tuning = new Set();
   const blind = new Set();
   const counts = { tuning: new Map(), blind: new Map() };
-  const score = (half, adds) => {
-    let s = 0;
-    for (const [k, target] of targets) {
-      const c = (counts[half].get(k) ?? 0) + (adds.get(k) ?? 0);
-      s += (c - target) ** 2;
+  // Global size term: the halves stay near N/2 via a synthetic `__all__` stratum
+  // (target N/2) fed with each city's size alongside its per-stratum counts.
+  const withAll = new Map(targets);
+  withAll.set('__all__', cities.reduce((s, c) => s + c.items.length, 0) / 2);
+  // Total imbalance increase of assigning `adds` to `half`:
+  // Δ = Σₖ[(cₖ + aₖ − Tₖ)² − (cₖ − Tₖ)²], over the touched strata plus `__all__`.
+  // Strata the city does not touch contribute 0 (aₖ = 0), so unlike the former
+  // per-half absolute-score comparison the leading half cannot win by default.
+  const delta = (half, adds) => {
+    let d = 0;
+    const cur = counts[half];
+    for (const [k, a] of adds) {
+      const target = withAll.get(k) ?? 0;
+      const c = cur.get(k) ?? 0;
+      d += (c + a - target) ** 2 - (c - target) ** 2;
     }
-    return s;
+    return d;
   };
   const base = rng ? shuffleSeeded(cities, rng) : [...cities];
   // Review §3a: with a seed the shuffled order decides equal sizes (stable sort on size
@@ -68,13 +78,15 @@ export function splitGrouped(cities, targets, rng = null) {
   for (const city of ordered) {
     const adds = new Map();
     for (const it of city.items) adds.set(it.stratum, (adds.get(it.stratum) ?? 0) + 1);
-    const st = score('tuning', adds);
-    const sb = score('blind', adds);
-    const pick = st < sb ? 'tuning' : sb < st ? 'blind' : rng ? (rng() < 0.5 ? 'tuning' : 'blind') : tuning.size <= blind.size ? 'tuning' : 'blind';
+    adds.set('__all__', city.items.length);
+    const dt = delta('tuning', adds);
+    const db = delta('blind', adds);
+    const pick = dt < db ? 'tuning' : db < dt ? 'blind' : rng ? (rng() < 0.5 ? 'tuning' : 'blind') : tuning.size <= blind.size ? 'tuning' : 'blind';
     for (const it of city.items) {
       (pick === 'tuning' ? tuning : blind).add(it.id);
       counts[pick].set(it.stratum, (counts[pick].get(it.stratum) ?? 0) + 1);
     }
+    counts[pick].set('__all__', (counts[pick].get('__all__') ?? 0) + city.items.length);
   }
   return { tuning: [...tuning].sort(), blind: [...blind].sort() };
 }
