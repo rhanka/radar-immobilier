@@ -111,7 +111,7 @@ describe("artifact authoring guide", () => {
 
   it("should preserve artifact identity when editing and disclose unavailable lifecycle actions", () => {
     const guide = getAuthoringGuide();
-    expect(guide.revision).toBe(ARTIFACT_P0B ? "2026-11-04-p0b-r6" : "2026-11-01-r6");
+    expect(guide.revision).toBe(AUTHORING_GUIDE_REVISION);
     const editing = guide.lifecycle.editing.join("\n");
     expect(editing).toContain("artifacts_get_source → edit → artifacts_publish");
     expect(editing).toContain("same artifactId");
@@ -138,7 +138,7 @@ describe("artifact authoring guide", () => {
     expect(guide.lifecycle.sharing).toContain("unavailable");
     const sharing = guide.lifecycle.sharing;
     expect(sharing).toContain("VIEW ONLY");
-    expect(sharing).toContain("Farid");
+    expect(sharing).toContain("Product Owner");
     expect(sharing).toContain("Public sharing");
     expect(sharing).toContain("all retained versions");
     expect(sharing).toContain("resumes automatically");
@@ -261,7 +261,12 @@ describe("artifact authoring guide", () => {
     const sourceGuide = (sourceData.authoringGuide ?? source.authoringGuide) as Record<string, unknown>;
     expect(sourceGuide.guideId).toBe(AUTHORING_GUIDE_ID);
     expect(sourceGuide.revision).toBe(AUTHORING_GUIDE_REVISION);
-    expect((sourceGuide.lifecycle as { editing: unknown[] }).editing.length).toBeGreaterThan(0);
+    // The small reference keeps identity plus the edit hint only: the
+    // broader lifecycle overview already ships on ensure/get.
+    expect(sourceGuide).not.toHaveProperty("lifecycle");
+    const edit = ((sourceGuide.artifactLifecycle as { edit: string[] }).edit ?? []).join("\n");
+    expect(edit).toContain("artifacts_create_upload_page");
+    expect(edit).toContain("artifacts_publish_bundle_v2");
     expect(sourceGuide).not.toHaveProperty("starter");
     expect(sourceGuide).not.toHaveProperty("components");
     const published = read(await setup({ releaseId: "r" }).binding.invoke("artifacts_publish",

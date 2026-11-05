@@ -1,6 +1,7 @@
 import pg from "pg";
 import { composeArtifactHost, createArtifactAdmissionAuthority, guardArtifactPool, readArtifactsEnv,
-  resolveArtifactsStorageConfig, readActivationEnv, resolveActivationConfig } from "@radar/artifacts-host";
+  resolveArtifactsStorageConfig, readActivationEnv, resolveActivationConfig,
+  readUploadPageWiring } from "@radar/artifacts-host";
 import { ARTIFACT_P0B, createAccountDirectory, createDeleteConfirmation } from "@radar/artifacts-host";
 import { bindArtifactProvider, IMMO_ARTIFACT_PROFILE,
   type FrozenCallAuthority } from "./registry/artifact-provider.js";
@@ -26,8 +27,16 @@ export async function createArtifactBinding(env: NodeJS.ProcessEnv) {
   try {
     const confirmation = ARTIFACT_P0B ? createDeleteConfirmation(pool, config.storageScope,
       new URL(env.IMMO_MCP_OAUTH_RESOURCE ?? "").origin) : undefined;
+    // Files parity LOT 2 — browser upload page wiring, shared with the API
+    // control plane (`readUploadPageWiring` in artifacts-host): the same
+    // secret, application origin (`RADAR_PUBLIC_BASE_URL`), pageBaseUrl and
+    // https S3. Absent under P0B the provider refuses to compose, so MCP
+    // startup stays closed instead of serving a mint that 503s in the chat.
+    const uploadPage = ARTIFACT_P0B ? readUploadPageWiring({ secret: env.ARTIFACTS_UPLOAD_PAGE_SECRET,
+      controlOrigin: env.RADAR_PUBLIC_BASE_URL ?? "", s3Endpoint: config.s3Endpoint }) : null;
     const host = await composeArtifactHost(pool, config, undefined,
-      { profile: IMMO_ARTIFACT_PROFILE, readActivation, contentBase, ...(confirmation ? { confirmation } : {}) });
+      { profile: IMMO_ARTIFACT_PROFILE, readActivation, contentBase, ...(confirmation ? { confirmation } : {}),
+        ...(uploadPage ? { uploadPage } : {}) });
     const admission = createArtifactAdmissionAuthority(pool, readActivation, config.storageScope);
     const binding = bindArtifactProvider({ app: host.app, storageScopeId: config.storageScope,
       admission, scopePolicy, directory: createAccountDirectory(pool),

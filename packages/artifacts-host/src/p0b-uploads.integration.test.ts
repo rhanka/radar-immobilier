@@ -1,10 +1,10 @@
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { createMemoryStaging, createMemoryUploadSessionStore, createMemoryUploadSigner,
-  stagingKey } from "@sentropic/artifacts/server/uploads";
+import { casBlobKey, createMemoryStaging, createMemoryUploadSessionStore, createMemoryUploadSigner,
+  ORPHAN_SWEEP_MAX_KEYS, stagingKey } from "@sentropic/artifacts/server/uploads";
+import { createPostgresUploadPageStore, createPostgresUploadSessionStore } from "@sentropic/artifacts/adapters/postgres-uploads";
 import { createUploadSweeper } from "@sentropic/artifacts/server/gc";
 import { p0bFixture } from "./p0b.test-support.js";
-import { createPostgresUploadSessionStore } from "./upload-store.js";
 
 /**
  * Files parity LOT 1 — outside-the-model upload channel on the immo host:
@@ -189,5 +189,36 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("files parity upload channel", ()
     expect(report.expired).not.toHaveLength(0);
     expect(report.failures).toHaveLength(0);
     expect(await store.listExpiredOpen(new Date())).toHaveLength(0);
+  });
+
+  it("should flip an expired page without touching the live release blob", async () => {
+    const ensured = await call("ensure", { bindingName: randomUUID(), idempotencyKey: randomUUID() });
+    expect(ensured.status).toBe(201);
+    const artifactId = (ensured.body as { artifactId: string }).artifactId;
+    const text = "<h1>Sweep</h1>";
+    const published = await call("publish", { artifactId,
+      files: [{ path: "index.html", mimeType: "text/html", text }],
+      idempotencyKey: randomUUID() });
+    expect(published.status).toBe(201);
+    const minted = await call("create_upload_page", { artifactId });
+    expect(minted.status).toBe(201);
+    const pageSessionId = (minted.body as { pageSessionId: string }).pageSessionId;
+    await fixture.pool.query(
+      "UPDATE artifacts.upload_pages SET expires_at = now() - interval '1 second' WHERE id = $1",
+      [pageSessionId]);
+    // Same Postgres page ledger the host mints into; the orphan-key bound
+    // stays visible at the sweep call like in production composition.
+    const sweeper = createUploadSweeper({ sessions: createPostgresUploadSessionStore(fixture.pool),
+      staging, pages: createPostgresUploadPageStore(fixture.pool) },
+      { orphanKeyLimit: ORPHAN_SWEEP_MAX_KEYS });
+    const report = await sweeper.sweep(undefined, { scopes: ["p0b"] });
+    expect(report.failures).toEqual([]);
+    expect(report.pagesExpired).toContain(pageSessionId);
+    const row = await fixture.pool.query<{ state: string }>(
+      "SELECT state FROM artifacts.upload_pages WHERE id = $1", [pageSessionId]);
+    expect(row.rows).toEqual([{ state: "expired" }]);
+    const hex = createHash("sha256").update(text, "utf8").digest("hex");
+    expect(await fixture.blobs.getBlob(casBlobKey("p0b", `sha256:${hex}`)))
+      .toEqual(new Uint8Array(Buffer.from(text, "utf8")));
   });
 });

@@ -59,6 +59,8 @@ const CONTENT_TYPES: Record<string, string> = {
   ".json": "application/json",
   // Files parity LOT 1 — binary release assets, served byte-identical under
   // nosniff; SVG/PDF additionally get a sandboxed document CSP at serve time.
+  // Files parity LOT 2 — variable fonts and funnel videos ride the same
+  // channel (magic-byte verified at commit, declared type served).
   ".svg": "image/svg+xml",
   ".png": "image/png",
   ".jpg": "image/jpeg",
@@ -66,6 +68,8 @@ const CONTENT_TYPES: Record<string, string> = {
   ".gif": "image/gif",
   ".webp": "image/webp",
   ".pdf": "application/pdf",
+  ".woff2": "font/woff2",
+  ".mp4": "video/mp4",
 };
 
 export function contentTypeForPath(path: string): string {

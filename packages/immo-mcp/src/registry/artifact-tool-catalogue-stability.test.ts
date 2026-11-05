@@ -25,13 +25,14 @@ interface ProfileCase {
 
 const PROFILES: readonly ProfileCase[] = [
   // Files parity LOT 1: the upload channel (create/commit/publish_bundle)
-  // joins every P0b profile; I2 on G2 adds the share tooling; reader consent
-  // LOT 1 adds the self-revocation tool.
-  { revision: "immo-artifacts.p0b.v1", env: {}, toolCount: 13 },
-  { revision: "immo-artifacts.cas.v2", env: {}, toolCount: 13 },
+  // joins every P0b profile; files parity LOT 2 adds the page mint, the
+  // asset listing and the v2 bundle; I2 on G2 adds the share tooling;
+  // reader consent LOT 1 adds the self-revocation tool.
+  { revision: "immo-artifacts.p0b.v1", env: {}, toolCount: 16 },
+  { revision: "immo-artifacts.cas.v2", env: {}, toolCount: 16 },
   { revision: "immo-artifacts.v2",
     env: { ARTIFACTS_INPUTS_QUALIFIED: "true", ARTIFACTS_RESULTS_QUALIFIED: "true" },
-    toolCount: 15 },
+    toolCount: 18 },
 ];
 
 /** Tools only selected by the v2 (part1) profile. */
@@ -58,7 +59,7 @@ const DYNAMIC_DESCRIPTION_MARKERS = [
 ];
 
 /** Tools whose description must point the model at the versioned guide. */
-const GUIDE_DESCRIPTION_TOOLS = ["artifacts_ensure", "artifacts_publish", "artifacts_get", "artifacts_get_source"];
+const GUIDE_DESCRIPTION_TOOLS = ["artifacts_ensure", "artifacts_publish", "artifacts_publish_bundle_v2", "artifacts_get", "artifacts_get_source"];
 
 /** Writes guarded by optimistic concurrency: the property stays, requiredness does not. */
 const CAS_GUARDED_TOOLS = ["artifacts_publish", "artifacts_delete", "artifacts_revert"];

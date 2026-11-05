@@ -11,6 +11,7 @@ import { writeIntentH5Route } from "./artifacts/write-intent-h5-route.js";
 import { writeIntentAppRoute } from "./artifacts/write-intent-app-route.js";
 import type { ContentHostConfig } from "./artifacts/content-config.js";
 import { controlRoute, type ControlRouteDeps } from "./artifacts/control-route.js";
+import { uploadPageRoute } from "./artifacts/upload-page-route.js";
 import { chatRoute } from "./routes/chat.js";
 import { automationRoute } from "./routes/automation.js";
 import { sourcesRoute, type SourcesDeps } from "./routes/sources.js";
@@ -131,6 +132,17 @@ export function createApp(deps: AppDeps): Hono {
   if (deps.auth?.enabled) {
     if (deps.artifactsControl) {
       app.route("/api/v1/artifacts/control", controlRoute(deps.artifactsControl));
+      // Browser upload pages (files parity LOT 2) ride the control origin
+      // with the same session rules; without the page service the routes
+      // stay closed (503 after the cookie/origin checks).
+      const { auth, accounts, readActivation, storageScope, uploadPage } = deps.artifactsControl;
+      app.route("/api/v1/artifacts", uploadPageRoute({ auth, accounts,
+        ...(readActivation ? { readActivation } : {}),
+        ...(storageScope ? { storageScope } : {}),
+        ...(uploadPage?.service && uploadPage?.config ? { service: uploadPage.service,
+          config: { controlOrigin: uploadPage.config.controlOrigin,
+            s3Origins: uploadPage.config.s3Origins },
+          ...(uploadPage.pages ? { pages: uploadPage.pages } : {}) } : {}) }));
     } else {
       // Closed capability: same identity guards and cache headers as the
       // mounted route, without storage. The guard returns 503 after the

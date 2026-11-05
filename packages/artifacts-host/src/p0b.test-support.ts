@@ -15,7 +15,7 @@ export async function p0bFixture(profile = HOST_ARTIFACT_PROFILE) {
   if (url.hostname !== "postgres" || url.pathname !== "/p0b") throw new Error("p0b_test_database_required");
   const pool = new pg.Pool({ connectionString, max: 8, options: "-c statement_timeout=5000 -c lock_timeout=1000" });
   await pool.query("DROP SCHEMA IF EXISTS artifacts CASCADE; DROP SCHEMA IF EXISTS drizzle CASCADE; DROP TABLE IF EXISTS account_users");
-  for (const name of ["0015_artifacts_core", "0016_artifacts_lifecycle", "0024_artifacts_coordinator", "0025_artifacts_actor_quotas", "0028_artifacts_p0b", "0029_artifacts_parity", "0032_artifacts_sharing_access_mode", "0033_artifacts_upload_sessions", "0034_artifacts_reader_consent"]) {
+  for (const name of ["0015_artifacts_core", "0016_artifacts_lifecycle", "0024_artifacts_coordinator", "0025_artifacts_actor_quotas", "0028_artifacts_p0b", "0029_artifacts_parity", "0032_artifacts_sharing_access_mode", "0033_artifacts_upload_sessions", "0034_artifacts_reader_consent", "0035_artifacts_upload_pages"]) {
     await pool.query(readFileSync(new URL(`../../../api/drizzle/${name}.sql`, import.meta.url), "utf8"));
   }
   await pool.query(`CREATE SCHEMA drizzle; CREATE TABLE drizzle.__drizzle_migrations (created_at bigint, hash text);
@@ -31,7 +31,12 @@ export async function p0bFixture(profile = HOST_ARTIFACT_PROFILE) {
     const host = await composeArtifactHost(pool, { enabled: true, storageScope: "p0b", orgId: "test",
     s3Bucket: "test", s3Endpoint: "http://unused.test", s3Region: "test", s3AccessKey: "test", s3SecretKey: "test" },
     blobs, { confirmation, contentBase: "pages.test", profile: selected, readActivation: () => ({ enabled: true,
-      subjects: [], expiresAtMs: Number.POSITIVE_INFINITY, mode: "general" }), ...options });
+      subjects: [], expiresAtMs: Number.POSITIVE_INFINITY, mode: "general" }),
+    // Files parity LOT 2 — the provider requires the page wiring as soon as
+    // the mint capability is selected (always under P0B).
+    uploadPage: { cookieSecret: "test-upload-page-secret-32-bytes-padding",
+      controlOrigin: "https://app.test", pageBaseUrl: "https://app.test/api/v1", s3Origins: [] },
+    ...options });
     hosts.push(host);
     return host;
   }

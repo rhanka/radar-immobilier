@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as artifacts from "@radar/artifacts-host";
 import { startArtifactControl } from "./control-route-startup.js";
 import { createApp } from "../app.js";
@@ -23,7 +23,20 @@ const input = { storageScope: "startup", orgId: "org", s3Bucket: "test-artifacts
 const options = { input, auth, contentBase: "pages.example.test",
   poolParams: { host: "postgres", port: 5432, user: "test", password: "test", database: "test" },
   logger: { info: vi.fn(), error: vi.fn() } };
-afterEach(() => vi.restoreAllMocks());
+// B1 wiring: dependency-failure tests provide a valid page secret so the
+// asserted diagnostics come from the dependency checks, not the wiring gate.
+const VALID_UPLOAD_PAGE_SECRET = "test-upload-page-secret-32-bytes-padding";
+const previousUploadPageSecret = process.env["ARTIFACTS_UPLOAD_PAGE_SECRET"];
+beforeEach(() => {
+  process.env["ARTIFACTS_UPLOAD_PAGE_SECRET"] = VALID_UPLOAD_PAGE_SECRET;
+  options.logger.info.mockClear();
+  options.logger.error.mockClear();
+});
+afterEach(() => {
+  vi.restoreAllMocks();
+  if (previousUploadPageSecret === undefined) delete process.env["ARTIFACTS_UPLOAD_PAGE_SECRET"];
+  else process.env["ARTIFACTS_UPLOAD_PAGE_SECRET"] = previousUploadPageSecret;
+});
 
 describe("artifact control startup", () => {
   it("exits only for malformed storage configuration before creating a pool", async () => {
@@ -61,6 +74,34 @@ describe("artifact control startup", () => {
     expect((await app.request("https://app.example.test/livez")).status).toBe(200);
     expect(options.logger.error).toHaveBeenCalledWith({ err: cause }, expect.stringContaining("API remains available"));
     expect(pool.query).not.toHaveBeenCalled();
+    expect(exit).not.toHaveBeenCalled();
+  });
+
+  it("keeps API live and control at 503 when the upload page secret is missing", async () => {
+    delete process.env["ARTIFACTS_UPLOAD_PAGE_SECRET"];
+    const query = vi.fn();
+    const pool = { query } as unknown as ReturnType<typeof artifacts.createArtifactsPool>;
+    vi.spyOn(artifacts, "createArtifactsPool").mockReturnValue(pool);
+    const close = vi.fn();
+    const compose = vi.spyOn(artifacts, "composeArtifactHost").mockResolvedValue(
+      { close } as unknown as Awaited<ReturnType<typeof artifacts.composeArtifactHost>>);
+    const exit = vi.spyOn(process, "exit");
+    const deps = await startArtifactControl(options);
+    expect(deps).toEqual({ auth: options.auth, accounts: pool });
+    expect(deps?.backend).toBeUndefined();
+    // The dependency check ran before the wiring gate closed the control plane.
+    expect(compose).toHaveBeenCalled();
+    expect(close).toHaveBeenCalled();
+    const app = createApp({ auth, artifactsControl: deps!, store: {} as ObjectStore, db: {} as Database,
+      checkDb: async () => ({ ok: true }), checkObjectStore: async () => ({ ok: true }) });
+    const response = await app.request("https://app.example.test/api/v1/artifacts/control/list", {
+      headers: { cookie: await cookie("alice") } });
+    expect(response.status).toBe(503);
+    expect(await response.json()).toEqual({ error: "capability_unavailable" });
+    expect((await app.request("https://app.example.test/livez")).status).toBe(200);
+    expect(options.logger.error).toHaveBeenCalledWith(
+      { err: expect.objectContaining({ message: expect.stringContaining("upload page secret missing") }) },
+      expect.stringContaining("API remains available"));
     expect(exit).not.toHaveBeenCalled();
   });
 });

@@ -59,7 +59,9 @@ export async function startAstra(name: string, max = 5) {
     const blobs = createTestS3BlobStore({ client: s3, bucket: config.s3Bucket });
     const openHost = async (store: PublicationBlobStore = blobs) => {
       const host = await composeArtifactHost(pool, config, store, { readActivation: live, contentBase: BASE,
-        confirmation: createDeleteConfirmation(pool, config.storageScope, "https://app.example.test") });
+        confirmation: createDeleteConfirmation(pool, config.storageScope, "https://app.example.test"),
+        uploadPage: { cookieSecret: "test-upload-page-secret-32-bytes-padding",
+          controlOrigin: "https://app.example.test", pageBaseUrl: "https://app.example.test/api/v1", s3Origins: [] } });
       hosts.push(host);
       await pool.query(`INSERT INTO artifacts.host_quotas (storage_scope_id, operation_limit, byte_limit)
         VALUES ($1,1000000,1000000000) ON CONFLICT DO NOTHING`, [config.storageScope]);
@@ -83,6 +85,8 @@ export async function startAstra(name: string, max = 5) {
       ARTIFACTS_S3_REGION: config.s3Region, ARTIFACTS_S3_ACCESS_KEY: config.s3AccessKey,
       ARTIFACTS_S3_SECRET_KEY: config.s3SecretKey, ARTIFACTS_CONTENT_BASE: BASE,
       IMMO_MCP_OAUTH_RESOURCE: "https://app.example.test/mcp",
+      RADAR_PUBLIC_BASE_URL: "https://app.example.test",
+      ARTIFACTS_UPLOAD_PAGE_SECRET: "test-upload-page-secret-32-bytes-padding",
       ARTIFACTS_CONTROL_MODE: "validation", ARTIFACTS_VALIDATION_SUBJECTS: ALICE,
       ARTIFACTS_VALIDATION_UNTIL: "2030-01-01T00:00:00Z" };
     return { pool, params: { ...params, database }, config, blobs, memberships, openHost, durable,

@@ -50,7 +50,10 @@ if (process.argv[2] === "--connection-peer") {
         scope = message.args.config.storageScope;
         host = await composeArtifactHost(pool, message.args.config, undefined,
           { readActivation: live, contentBase: "pages.example.test",
-            confirmation: createDeleteConfirmation(pool, scope, "https://app.example.test") });
+            confirmation: createDeleteConfirmation(pool, scope, "https://app.example.test"),
+            uploadPage: { cookieSecret: "test-upload-page-secret-32-bytes-padding",
+              controlOrigin: "https://app.example.test", pageBaseUrl: "https://app.example.test/api/v1",
+              s3Origins: [] } });
       } else if (message.method === "reserve") {
         reserved = await pool.connect();
         value = (await reserved.query("SELECT pg_backend_pid() AS pid")).rows[0];

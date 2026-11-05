@@ -51,7 +51,10 @@ if (process.argv[2] === "--production-peer") {
         pool = new pg.Pool(message.args.database as pg.PoolConfig);
         const config = message.args.config as Harness["config"];
         host = await composeArtifactHost(pool, config, undefined, {
-          confirmation: createDeleteConfirmation(pool, config.storageScope, "https://app.example.test") });
+          confirmation: createDeleteConfirmation(pool, config.storageScope, "https://app.example.test"),
+          uploadPage: { cookieSecret: "test-upload-page-secret-32-bytes-padding",
+            controlOrigin: "https://app.example.test", pageBaseUrl: "https://app.example.test/api/v1",
+            s3Origins: [] } });
         value = { pid: process.pid };
       } else if (message.method === "ensure") {
         value = await createArtifactControl(host, "h2_scope", "pages.example.test")

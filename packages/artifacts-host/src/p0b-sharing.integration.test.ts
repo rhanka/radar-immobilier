@@ -143,27 +143,39 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("I2 sharing on G2", () => {
     expect((refused.body as { error: string }).error).toBe("person_not_shareable");
   });
 
-  // R5 — provider bug (fix requested from sentropic, skipped until then):
-  // revoking the dormant grant of a suspended or deleted colleague answers
-  // 422 person_not_shareable, because provider assertShareable requires an
-  // approved target even for revoke (server/management.ts:122-128, :187-189).
-  // Desired: revoke converges (grant gone, still refused after re-approval).
-  // Workaround without bypassing any guard: re-approve the account, revoke
-  // through set_access, then restore the prior status.
-  describe.skip("dormant grant revocation (provider R5)", () => {
+  // R5 — fixed provider-side in 0.2.15 (assertShareable gates grant only;
+  // revoke stays allowed for dormant principals). Revoke converges: the
+  // grant is gone and the re-approved colleague stays refused.
+  describe("dormant grant revocation (provider R5)", () => {
     it("should revoke a suspended beneficiary grant and keep it revoked after re-approval", async () => {
-      const dormant = await fixture.page();
+      // Bob owns this page: alice already spent the per-actor per-minute
+      // attempt budget (two pages plus the grant-cycle, platform and N3
+      // writes), and the budget is enforced per actor.
+      const ensured = await fixture.call("ensure",
+        { bindingName: randomUUID(), idempotencyKey: randomUUID() }, "idp-bob");
+      expect(ensured.status).toBe(201);
+      const dormant = (ensured.body as { artifactId: string }).artifactId;
+      const published = await fixture.call("publish", { artifactId: dormant,
+        files: [{ path: "index.html", mimeType: "text/html", text: "<h1>R5</h1>" }],
+        idempotencyKey: randomUUID() }, "idp-bob");
+      expect(published.status).toBe(201);
       const userRef = await colleagueRef("chloe");
-      expect((await fixture.call("set_access", { artifactId: dormant.artifactId, action: "grant",
-        principalId: userRef, grant: "read", idempotencyKey: randomUUID() })).status).toBe(200);
+      expect((await fixture.call("set_access", { artifactId: dormant, action: "grant",
+        principalId: userRef, grant: "read", idempotencyKey: randomUUID() }, "idp-bob")).status).toBe(200);
       await fixture.pool.query("UPDATE account_users SET status = 'suspended' WHERE sub = 'idp-chloe'");
-      const revoked = await fixture.call("set_access", { artifactId: dormant.artifactId, action: "revoke",
-        principalId: userRef, idempotencyKey: randomUUID() });
+      const revoked = await fixture.call("set_access", { artifactId: dormant, action: "revoke",
+        principalId: userRef, idempotencyKey: randomUUID() }, "idp-bob");
       expect(revoked.status).toBe(200);
-      const listed = await fixture.call("list_access", { artifactId: dormant.artifactId }, "alice");
+      const listed = await fixture.call("list_access", { artifactId: dormant }, "idp-bob");
       expect(JSON.stringify((listed.body as { grants: unknown }).grants)).not.toContain(userRef);
+      // Row convergence for suspended beneficiaries: no grant row survives
+      // the 200. (Erased beneficiaries keep their row — no tombstone by
+      // design — and are pinned by the restricted R5 erasure test.)
+      const remaining = await fixture.pool.query(
+        "SELECT principal_id FROM artifacts.artifact_access WHERE artifact_id = $1", [dormant]);
+      expect(remaining.rows).toEqual([]);
       await fixture.pool.query("UPDATE account_users SET status = 'approved' WHERE sub = 'idp-chloe'");
-      expect((await fixture.call("meta", { artifactId: dormant.artifactId }, "idp-chloe")).status)
+      expect((await fixture.call("meta", { artifactId: dormant }, "idp-chloe")).status)
         .toBeGreaterThanOrEqual(400);
     });
   });

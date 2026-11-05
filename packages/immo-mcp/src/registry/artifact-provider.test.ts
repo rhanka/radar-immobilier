@@ -31,6 +31,8 @@ describe("P7 published effective profile", () => {
       ...(ARTIFACT_P0B ? { artifacts_get_source: ["immo:artifacts:read"], artifacts_set_access: ["immo:artifacts:write"],
         artifacts_delete: ["immo:artifacts:write"], artifacts_create_upload: ["immo:artifacts:write"],
         artifacts_commit_upload: ["immo:artifacts:write"], artifacts_publish_bundle: ["immo:artifacts:write"],
+        artifacts_create_upload_page: ["immo:artifacts:write"], artifacts_list_assets: ["immo:artifacts:read"],
+        artifacts_publish_bundle_v2: ["immo:artifacts:write"],
         artifacts_lookup_people: ["immo:artifacts:read"], artifacts_list_access: ["immo:artifacts:read"],
         artifacts_revoke_reader_consent: ["immo:artifacts:write"] } : {}),
     });
@@ -42,6 +44,8 @@ describe("P7 published effective profile", () => {
       ...(ARTIFACT_P0B ? { artifacts_get_source: ["immo:artifacts:read"], artifacts_set_access: ["immo:artifacts:write"],
         artifacts_delete: ["immo:artifacts:write"], artifacts_create_upload: ["immo:artifacts:write"],
         artifacts_commit_upload: ["immo:artifacts:write"], artifacts_publish_bundle: ["immo:artifacts:write"],
+        artifacts_create_upload_page: ["immo:artifacts:write"], artifacts_list_assets: ["immo:artifacts:read"],
+        artifacts_publish_bundle_v2: ["immo:artifacts:write"],
         artifacts_lookup_people: ["immo:artifacts:read"], artifacts_list_access: ["immo:artifacts:read"],
         artifacts_revoke_reader_consent: ["immo:artifacts:write"] } : {}),
     });

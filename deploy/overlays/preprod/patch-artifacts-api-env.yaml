@@ -19,6 +19,20 @@
         name: radar-artifacts-preprod
         key: ARTIFACTS_S3_SECRET_KEY
         optional: true
+# Browser upload page (files parity LOT 2): dedicated page-cookie secret on
+# its own Secret so rotation never touches storage credentials. The
+# conductor creates radar-artifacts-upload-page-preprod (key `secret`);
+# this overlay only references it (no literal value: a literal here would
+# conflict on server-side apply).
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: ARTIFACTS_UPLOAD_PAGE_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: radar-artifacts-upload-page-preprod
+        key: secret
+        optional: true
 - op: add
   path: /spec/template/spec/containers/0/env/-
   value:
