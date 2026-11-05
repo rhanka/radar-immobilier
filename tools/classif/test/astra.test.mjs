@@ -42,9 +42,9 @@ test('astra-max parse: last-message file wins, usage from JSONL events', () => {
   const dir = tmp();
   try {
     mkdirSync(dir, { recursive: true });
+    // Review §10: fail closed on form — pure-JSON benign streams count 0.
     const events = [
       JSON.stringify({ type: 'thread.started', thread_id: 't-1' }),
-      'not json, ignored',
       JSON.stringify({ type: 'turn.completed', usage: { input_tokens: 12, output_tokens: 34 } }),
     ].join('\n');
     // No file: text falls back to the events (no text field here → empty, usage kept).
@@ -57,39 +57,52 @@ test('astra-max parse: last-message file wins, usage from JSONL events', () => {
     assert.equal(parsed.text, '{"code":"S-PLANIFIE"}');
     assert.deepEqual(parsed.usage, { input_tokens: 12, output_tokens: 34 });
     assert.equal(parsed.toolEvents, 0);
+    // A non-JSON line is not benign: it counts (fail-closed form).
+    assert.equal(r.parse(`${events}\nnot json\n`, dir).toolEvents, 1);
+    // A top-level error event counts (no longer allow-listed).
+    assert.ok(r.parse(`${events}\n${JSON.stringify({ type: 'error', message: 'boom' })}\n`, dir).toolEvents > 0);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
 });
 
 test('astra isolation: dedicated CODEX_HOME, config with NO mcp_servers, auth copied', () => {
+  // Review §12: hermetic — temp CLASSIF_HOME + fake auth source, never the real seat
+  // home nor the real ~/.codex/auth.json.
   const home = tmp();
+  const fakeAuth = path.join(home, 'fake-auth.json');
+  writeFileSync(fakeAuth, '{"fake":"auth-for-tests"}');
+  const prevHome = process.env.CLASSIF_HOME;
+  const prevSrc = process.env.CLASSIF_ASTRA_AUTH_SRC;
+  process.env.CLASSIF_HOME = home;
+  process.env.CLASSIF_ASTRA_AUTH_SRC = fakeAuth;
   try {
     const dir = ensureAstraHome(home);
     assert.equal(dir, astraCodexHomeDir(home));
     assert.ok(dir.startsWith(home));
+    assert.ok(!dir.startsWith(path.join(os.homedir(), '.local', 'share', 'radar-classif')), 'must not write the real seat home');
     assert.equal(statSync(dir).mode & 0o777 & 0o077, 0, 'seat home mode 700');
     const cfg = readFileSync(`${dir}/config.toml`, 'utf8');
     assert.ok(!/^\s*\[mcp_servers/m.test(cfg), 'isolated config holds NO mcp_servers section');
     assert.ok(!/^\s*\[mcp_servers/m.test(ASTRA_ISOLATED_CONFIG));
-    // The seat route points codex at the isolated home.
+    // The seat route points codex at the isolated home (temp CLASSIF_HOME, not the real one).
     const work = tmp();
     try {
       const built = ROUTES['astra-max'].build(work, `${work}/prompt.md`, 'p');
-      assert.equal(built.env?.CODEX_HOME, astraCodexHomeDir());
+      assert.equal(built.env?.CODEX_HOME, astraCodexHomeDir(home));
+      assert.ok(String(built.env.CODEX_HOME).startsWith(home), 'CODEX_HOME must stay in the temp home');
       assert.ok(String(built.env.CODEX_HOME).includes('seat-homes/astra'));
     } finally {
       rmSync(work, { recursive: true, force: true });
     }
-    // Auth: copied from ~/.codex/auth.json when present (mode 600), never committed.
-    const src = path.join(os.homedir(), '.codex', 'auth.json');
+    // Auth: copied from the fake source (mode 600), never the real auth, never committed.
     const dst = path.join(dir, 'auth.json');
-    if (existsSync(src)) {
-      assert.ok(existsSync(dst), 'auth copied to the isolated home');
-      assert.equal(statSync(dst).mode & 0o777 & 0o077, 0, 'auth mode 600');
-      assert.equal(readFileSync(dst, 'utf8'), readFileSync(src, 'utf8'));
-    }
+    assert.ok(existsSync(dst), 'auth copied to the isolated home');
+    assert.equal(statSync(dst).mode & 0o777 & 0o077, 0, 'auth mode 600');
+    assert.equal(readFileSync(dst, 'utf8'), '{"fake":"auth-for-tests"}');
   } finally {
+    if (prevHome === undefined) delete process.env.CLASSIF_HOME; else process.env.CLASSIF_HOME = prevHome;
+    if (prevSrc === undefined) delete process.env.CLASSIF_ASTRA_AUTH_SRC; else process.env.CLASSIF_ASTRA_AUTH_SRC = prevSrc;
     rmSync(home, { recursive: true, force: true });
   }
 });

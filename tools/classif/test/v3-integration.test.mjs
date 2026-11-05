@@ -98,11 +98,12 @@ test('integration §4: amend refuses any half but tuning', async () => {
 });
 
 // §5: strict spend, intent-before-call accounting, 3× pre-call control.
+// N1: a corrupt NON-final line still throws; a truncated LAST line is tolerated.
 test('integration §5: budget is strict and intent-counted', () => {
   const home = tmp();
   try {
     mkdirSync(path.join(home, 'l2'), { recursive: true });
-    writeFileSync(path.join(home, 'l2', 'calls.jsonl'), '{"phase":"a"}\nnot-json\n');
+    writeFileSync(path.join(home, 'l2', 'calls.jsonl'), '{"phase":"a"}\nnot-json\n{"phase":"b"}\n');
     assert.throws(() => spent(home), /corrupt calls log/);
     assert.throws(() => spentByPhase(home), /corrupt calls log/);
     assert.throws(() => budgetCheck(home, 1), /corrupt calls log/);
