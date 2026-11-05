@@ -98,4 +98,15 @@ describe("account directory model boundary", () => {
     expect(matches[0]?.userRef).toBe(ALICE.id);
     expect(JSON.stringify(matches)).not.toContain("idp-");
   });
+
+  it("should fail people lookup cleanly when name/email columns are not granted", async () => {
+    const denied = Object.assign(new Error("permission denied for table account_users"), { code: "42501" });
+    const failing = { query: async () => { throw denied; } } as unknown as pg.Pool;
+    const directory = createAccountDirectory(failing);
+    await expect(directory.searchPeople("scope", "example", 10))
+      .rejects.toMatchObject({ code: "directory_lookup_unavailable" });
+    // Principal resolution needs no name/email, so it stays available.
+    const resolving = { query: async () => ({ rows: [{ id: ALICE.id, sub: ALICE.sub, status: "approved" }] }) } as unknown as pg.Pool;
+    expect((await createAccountDirectory(resolving).describePrincipal("scope", ALICE.sub))?.userRef).toBe(ALICE.id);
+  });
 });
