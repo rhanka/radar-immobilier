@@ -21,8 +21,10 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { classifHome, CLASSIF_DIR } from '../lib/paths.mjs';
 import { check as budgetCheck, spent as budgetSpent, BUDGET_CAP } from '../lib/budget.mjs';
 import { assertNoVerbatim } from '../lib/freeze.mjs';
+import { sealedFile } from '../lib/blind.mjs';
 import { sha256 } from '../lib/render.mjs';
 import { runPass, loadDevItems, makeLots, ANNOTATORS } from './run.mjs';
+import { loadGoldenPack } from './golden-pack.mjs';
 import { main as revalidate } from './revalidate.mjs';
 import { main as scrape } from './scrape.mjs';
 import { main as converge, reconcileContext, loadComplements, latestVotes } from './converge.mjs';
@@ -84,10 +86,13 @@ export async function main(argv = process.argv.slice(2)) {
         context = new Map(Object.entries(ctx).map(([a, m]) => [a, new Map(Object.entries(m))]));
       }
     }
-    const planned = makeLots((todo ? loadDevItems(home).filter((i) => todo.has(i.itemId)) : loadDevItems(home))).length * active.length;
+    const planned = makeLots((todo ? loadDevItems(home).filter((i) => todo.has(i.itemId)) : loadDevItems(home))).length * active.length * 3;
     budgetCheck(home, planned);
     status(`pass ${pass} (${mode}, ${guide})`, { todo: todo ? todo.size : 'all', planned });
-    const r = await runPass({ pass, mode, guide, annotators: active, todo, context, concurrency, home, phase: `pass${pass}` });
+    // Review §2: crossreview needs the shared golden pack, fail closed before pass 2.
+    const golden = mode === 'crossreview' ? loadGoldenPack(home) : { goldenPack: null, goldenRows: null };
+    const r = await runPass({ pass, mode, guide, annotators: active, todo, context, concurrency, home, phase: `pass${pass}`,
+      goldenPack: golden.goldenPack, goldenRows: golden.goldenRows });
     status(`revalidate pass ${pass}`, { calls: r.calls });
     await revalidate(['--pass', String(pass)]);
     if (pass === 1) { status('complements (scrape)'); await scrape(); }
@@ -110,6 +115,8 @@ function freeze(home, guide, status) {
   const text = readFileSync(src, 'utf8');
   assertNoVerbatim(text, home, { what: 'guide FINAL' });
   const dst = path.join(home, 'l1', 'pack', 'guide-FINAL.md');
+  // Review §11: never overwrite a frozen artefact.
+  if (existsSync(dst)) throw new Error(`freeze refused: ${dst} already frozen`);
   copyFileSync(src, dst);
   const manifest = { kind: 'guide-freeze', frozen: 'FINAL', from: guide, createdAt: new Date().toISOString(), llmCalls: 0, guideSha256: sha256(text), shingleCheck: 'pass (0 verbatim shingles from the sealed set)' };
   writeFileSync(path.join(CLASSIF_DIR, 'l2', 'manifests', 'guide-freeze.json'), `${JSON.stringify(manifest, null, 1)}\n`);
@@ -126,14 +133,14 @@ async function blindStage({ home, active, deferred, concurrency, status, argv })
   const split = requireSplit();
   const pack = path.join(home, 'l1', 'pack', 'guide-FINAL.md');
   if (!existsSync(pack)) { process.stderr.write('classif-l2-chain --stage blind: refusing without the frozen guide (run the main stage to freeze FINAL first)\n'); process.exit(2); }
-  if (existsSync(path.join(home, 'l3b', 'blind.sealed'))) { process.stderr.write('classif-l2-chain --stage blind: refusing, the blind half is already sealed\n'); process.exit(2); }
+  if (existsSync(sealedFile(home))) { process.stderr.write('classif-l2-chain --stage blind: refusing, the blind half is already sealed\n'); process.exit(2); }
   const last = Math.max(...[1, 2, 3, 4, 5].filter((p) => existsSync(path.join(home, 'l2', `converge-pass${p}.json`))));
   const conv = JSON.parse(readFileSync(path.join(home, 'l2', `converge-pass${last}.json`), 'utf8'));
   const blindIds = new Set(split.halves.blind);
   const todo = new Set((conv.rows ?? []).filter((r) => blindIds.has(r.itemId) && (!r.codeUnanimous || !r.verdictUnanimous || r.ambiguousByOne)).map((r) => r.itemId));
   const pass = last + 1;
   status(`blind cross-review pass ${pass} (FINAL, blind half only)`, { todo: todo.size });
-  budgetCheck(home, makeLots(loadDevItems(home).filter((i) => todo.has(i.itemId))).length * active.length);
+  budgetCheck(home, makeLots(loadDevItems(home).filter((i) => todo.has(i.itemId))).length * active.length * 3);
   const dir = path.join(home, 'l2', `pass${pass}`);
   const { mkdirSync, writeFileSync: writeSync } = await import('node:fs');
   mkdirSync(dir, { recursive: true, mode: 0o700 });
@@ -146,7 +153,9 @@ async function blindStage({ home, active, deferred, concurrency, status, argv })
   const ctx = reconcileContext(blindRows, latest, loadComplements(home));
   writeSync(path.join(dir, 'context.json'), JSON.stringify(ctx), { mode: 0o600 });
   const context = new Map(Object.entries(ctx).map(([a, m]) => [a, new Map(Object.entries(m))]));
-  await runPass({ pass, mode: 'crossreview', guide: 'FINAL', annotators: active, todo, context, concurrency, home, phase: 'blind-crossreview' });
+  const golden = loadGoldenPack(home);
+  await runPass({ pass, mode: 'crossreview', guide: 'FINAL', annotators: active, todo, context, concurrency, home, phase: 'blind-crossreview',
+    goldenPack: golden.goldenPack, goldenRows: golden.goldenRows });
   await revalidate(['--pass', String(pass)]);
   await ambiguity(['--pass', String(pass)]);
   const report = await converge(['--pass', String(pass), ...(deferred.length ? ['--deferred', deferred.join(',')] : [])]);
