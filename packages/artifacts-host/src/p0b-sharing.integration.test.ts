@@ -168,6 +168,12 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("I2 sharing on G2", () => {
       expect(revoked.status).toBe(200);
       const listed = await fixture.call("list_access", { artifactId: dormant }, "idp-bob");
       expect(JSON.stringify((listed.body as { grants: unknown }).grants)).not.toContain(userRef);
+      // Row convergence for suspended beneficiaries: no grant row survives
+      // the 200. (Erased beneficiaries keep their row — no tombstone by
+      // design — and are pinned by the restricted R5 erasure test.)
+      const remaining = await fixture.pool.query(
+        "SELECT principal_id FROM artifacts.artifact_access WHERE artifact_id = $1", [dormant]);
+      expect(remaining.rows).toEqual([]);
       await fixture.pool.query("UPDATE account_users SET status = 'approved' WHERE sub = 'idp-chloe'");
       expect((await fixture.call("meta", { artifactId: dormant }, "idp-chloe")).status)
         .toBeGreaterThanOrEqual(400);
