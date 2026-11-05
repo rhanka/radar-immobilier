@@ -10,6 +10,7 @@ import path from 'node:path';
 import process from 'node:process';
 import { ALIASES, LEVELS, vibeHome } from './lib/vibe-home.mjs';
 import { classifHome } from './lib/paths.mjs';
+import { privateDir } from './lib/paths.mjs';
 
 const SCRUB = /(_API_KEY|_AUTH_TOKEN|_API_BASE|_BASE_URL|_SECRET_KEY|_ACCESS_KEY)$|^(ANTHROPIC_|OPENAI_|GEMINI_|CLAUDE_CODE_USE_|AWS_|GOOGLE_CLOUD_|GOOGLE_APPLICATION_CREDENTIALS|GOOGLE_GENAI_USE_VERTEXAI|VERTEX|SCRAPE_S3_|REFERENCE_C_KEY|CLASSIF_EVAL_KEY|CLASSIF_BLIND_KEY|MISTRAL_|VIBE_ACTIVE_MODEL)/;
 export function seatEnv(extra = {}) {
@@ -63,15 +64,18 @@ export const ROUTES = {
   }])),
   // Astra (ChatGPT seat, plan v3 owner decision 04/11): conductor-verified route
   // `codex exec -m gpt-6-astra -c model_reasoning_effort=max -s read-only`, empty cwd, scrubbed
-  // env. Machine flags added for parsing only: `--json` (JSONL events on stdout) and
-  // `-o last-message.md` (the model's final message on disk); the prompt goes through stdin
-  // (`-`, no 128 KB argument limit). `--skip-git-repo-check` allows the empty non-repo cwd;
-  // `--ephemeral` keeps session files out of the seat. MCP exposure is bounded by the empty cwd
-  // (no project .codex config) and the read-only sandbox.
+  // env, isolated CODEX_HOME ($CLASSIF_HOME/seat-homes/astra, mode 700, config with NO
+  // mcp_servers, auth copied from ~/.codex/auth.json). Machine flags added for parsing only:
+  // `--json` (JSONL events on stdout) and `-o last-message.md` (the model's final message on
+  // disk); the prompt goes through stdin (`-`, no 128 KB argument limit).
+  // `--skip-git-repo-check` allows the empty non-repo cwd; `--ephemeral` keeps session files
+  // out of the seat. codex reads CODEX_HOME (verified: unknown CODEX_HOME warns, isolated
+  // home with copied auth.json connects, `codex doctor` auth mode chatgpt).
   'astra-max': {
-    family: 'Astra', model: 'gpt-6-astra', effort: 'max', route: 'codex exec -m gpt-6-astra -c model_reasoning_effort=max -s read-only, empty cwd, scrubbed env (--json + -o last-message.md for parsing, prompt on stdin)',
+    family: 'Astra', model: 'gpt-6-astra', effort: 'max', route: 'codex exec -m gpt-6-astra -c model_reasoning_effort=max -s read-only, isolated CODEX_HOME, empty cwd, scrubbed env (--json + -o last-message.md for parsing, prompt on stdin)',
     build: (dir, _file, prompt) => ({ cmd: 'codex', args: ['exec', '-m', 'gpt-6-astra', '-c', 'model_reasoning_effort=max', '-s', 'read-only',
-      '--skip-git-repo-check', '--ephemeral', '--json', '-o', path.join(dir, 'last-message.md'), '-'], stdin: prompt }),
+      '--skip-git-repo-check', '--ephemeral', '--json', '-o', path.join(dir, 'last-message.md'), '-'], stdin: prompt,
+      env: { CODEX_HOME: ensureAstraHome() } }),
     parse: parseCodex,
   },
   // vibe: per-effort VIBE_HOME (lib/vibe-home.mjs) + classification alias; L0 aliases kept for reference.
@@ -87,10 +91,81 @@ export const ROUTES = {
   }])),
 };
 
+// Isolated CODEX_HOME for the astra seat (review §10): $CLASSIF_HOME/seat-homes/astra/
+// (mode 700). Holds a config with NO mcp_servers and only the auth file copied from
+// ~/.codex/auth.json (mode 600). codex reads CODEX_HOME (verified 2026-11-05: unknown
+// CODEX_HOME warns, isolated home with copied auth connects, doctor reports auth mode
+// chatgpt). The seat env sets CODEX_HOME to this dir, so the seat never sees the user's
+// ~/.codex/config.toml MCP servers.
+export function astraCodexHomeDir(home = classifHome()) {
+  return path.join(home, 'seat-homes', 'astra');
+}
+
+export const ASTRA_ISOLATED_CONFIG = `# Classification pilot — isolated Astra seat (review §10).
+# NO mcp_servers section: any MCP exposure fails the call (parseCodex counts it).
+# Auth comes from auth.json copied from ~/.codex/auth.json (never committed).
+model = "gpt-6-astra"
+model_reasoning_effort = "max"
+web_search = "disabled"
+approval_policy = "never"
+sandbox_mode = "read-only"
+`;
+
+export function ensureAstraHome(home = classifHome()) {
+  const dir = astraCodexHomeDir(home);
+  privateDir(dir);
+  fs.writeFileSync(path.join(dir, 'config.toml'), ASTRA_ISOLATED_CONFIG, { mode: 0o600 });
+  const src = path.join(os.homedir(), '.codex', 'auth.json');
+  const dst = path.join(dir, 'auth.json');
+  if (fs.existsSync(src)) {
+    fs.copyFileSync(src, dst);
+    fs.chmodSync(dst, 0o600);
+  } else if (!fs.existsSync(dst)) {
+    throw new Error(`astra isolation refused: no auth to copy (${src} absent and ${dst} absent)`);
+  }
+  return dir;
+}
+
 // codex exec --json: one JSON event per line; the model's final message is also written to
-// last-message.md (-o). Usage rides on turn/thread completion events. Unknown shapes are
-// tolerated: walk every decoded object for usage and candidate text, preferring the file.
-function parseCodex(stdout, dir) {
+// last-message.md (-o). Usage rides on turn completion events. Fail-closed tool accounting
+// (review §10): every tool/command/MCP/web-search/file event counts, and any UNKNOWN event
+// or item type counts too — the caller nulls the vote when toolEvents > 0.
+export const CODEX_KNOWN_EVENT_TYPES = new Set([
+  'thread.started', 'turn.started', 'turn.completed', 'turn.failed',
+  'item.started', 'item.updated', 'item.completed', 'error',
+]);
+
+// Only these item types are benign model output. Everything else (command_execution,
+// file_change, mcp_tool_call, collab_tool_call, web_search, todo_list, plan_update,
+// error items, or any unknown type) is a tool event.
+export const CODEX_BENIGN_ITEM_TYPES = new Set(['agent_message', 'reasoning']);
+
+const CODEX_TOOL_KEY = /(tool_call|toolcall|function_call|exec_command|shell_command|command_execution|file_change|mcp|web_search|websearch)/i;
+
+export function countCodexToolEvents(stdout) {
+  let toolEvents = 0;
+  const unknownTypes = [];
+  for (const line of String(stdout ?? '').split('\n')) {
+    if (!line.trim()) continue;
+    let e;
+    try { e = JSON.parse(line); } catch { continue; }
+    const type = e?.type ?? e?.event ?? null;
+    if (!type || typeof type !== 'string') { toolEvents++; unknownTypes.push('<missing-type>'); continue; }
+    if (!CODEX_KNOWN_EVENT_TYPES.has(type)) { toolEvents++; unknownTypes.push(type); continue; }
+    if (type.startsWith('item.')) {
+      const item = e?.item ?? e?.data ?? e;
+      const itype = item?.type ?? null;
+      if (!itype || typeof itype !== 'string') { toolEvents++; unknownTypes.push(`${type}:<missing-item-type>`); continue; }
+      if (!CODEX_BENIGN_ITEM_TYPES.has(itype)) { toolEvents++; continue; }
+      // Fail closed on a tool payload nested inside a benign item (keys only, never the
+      // model text: the word "tool" in prose must not count).
+      if (CODEX_TOOL_KEY.test(JSON.stringify(Object.keys(item)))) toolEvents++;
+    }
+  }
+  return { toolEvents, unknownTypes };
+}
+
+export function parseCodex(stdout, dir) {
   let usage = null;
   let text = '';
   try {
@@ -112,7 +187,17 @@ function parseCodex(stdout, dir) {
   for (const line of String(stdout ?? '').split('\n')) {
     try { walk(JSON.parse(line)); } catch { /* not json */ }
   }
-  return { text, usage };
+  const { toolEvents, unknownTypes } = countCodexToolEvents(stdout);
+  // Prefer agent_message text from item.completed events when the file is absent.
+  if (!text) {
+    for (const line of String(stdout ?? '').split('\n')) {
+      try {
+        const e = JSON.parse(line);
+        if (e?.type === 'item.completed' && e?.item?.type === 'agent_message' && typeof e.item.text === 'string' && e.item.text.trim()) text = e.item.text;
+      } catch { /* next */ }
+    }
+  }
+  return { text, usage, toolEvents, unknownTypes };
 }
 
 function parseVibe(stdout, dir) {
@@ -200,7 +285,10 @@ export function callSeat(label, prompt, { timeoutMs = 900000, base = process.env
       let parsed = { text: '', usage: null };
       try { parsed = r.parse(out, work); } catch { /* keep empty */ }
       fs.rmSync(dir, { recursive: true, force: true });
-      resolve({ code, latencyMs, timedOut, ...parsed, stderrTail: err.slice(-600), stdoutTail: parsed.text ? undefined : out.slice(-600) });
+      // Review §10: the astra --json event stream stays in the raw record (the run.mjs raw
+      // file saves this whole object), so tool-event audits are reproducible.
+      const rawJsonl = label === 'astra-max' ? out : undefined;
+      resolve({ code, latencyMs, timedOut, ...parsed, ...(rawJsonl !== undefined ? { rawJsonl } : {}), stderrTail: err.slice(-600), stdoutTail: parsed.text ? undefined : out.slice(-600) });
     };
     // Timeout: SIGTERM to the group, then SIGKILL to the group after killEscalationMs.
     const timer = setTimeout(() => {
