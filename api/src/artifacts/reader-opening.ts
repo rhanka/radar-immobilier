@@ -6,7 +6,7 @@ import { SESSION_COOKIE_NAME, verifySession } from "../services/auth/session.js"
 import { fingerprintReaderProfile, type AuthorityReader } from "./reader-profile.js";
 import { mintGrant, type GrantIssuer } from "./preview-grant.js";
 import { validateTicketForExchange } from "./preview-exchange.js";
-import { clearConsentPendingCookie, mintInitCookie, mintRetryCookie, mintSessionCookie, parseCookieHeader, PREVIEW_INIT_COOKIE, PREVIEW_RETRY_COOKIE, readConsentPending, readSessionClaims } from "./preview-session.js";
+import { clearConsentPendingCookie, mintConsentPendingCookie, mintInitCookie, mintRetryCookie, mintSessionCookie, parseCookieHeader, PREVIEW_INIT_COOKIE, PREVIEW_RETRY_COOKIE, readConsentPending, readSessionClaims } from "./preview-session.js";
 import { readerEventEmitter, type ReaderEventSink } from "./reader-event-log.js";
 import { parseContentHost } from "./content-host.js";
 import { applyReaderContentHeaders } from "./content-isolation.js";
@@ -133,11 +133,11 @@ export function consentErrorHtml(): string {
   ]);
 }
 
-/** Lot J1.3a: terminal refusal state — nothing recorded, no ticket, no loop. */
-export function consentRefusedHtml(): string {
-  return controlPage("Accès à vos paniers non autorisé", [
-    "Vous n’avez pas autorisé cette page à lire vos paniers. Rien n’a été enregistré et la page n’a pas été ouverte.",
-    "Pour l’autoriser plus tard, rouvrez la page depuis son lien d’origine.",
+/** Lot J1.3a: a submission without an explicit choice (stale screen) — nothing recorded, nothing opened. */
+export function consentDecisionInvalidHtml(): string {
+  return controlPage("Choix non reçu", [
+    "Ce formulaire n’est plus à jour : aucun choix n’a été reçu. Rien n’a été enregistré et la page n’a pas été ouverte.",
+    "Rouvrez la page depuis son lien d’origine pour faire votre choix.",
   ]);
 }
 
@@ -332,8 +332,21 @@ export function createReaderOpening(deps: {
     }
     return true;
   }
-  async function toExchange(c: Context, input: OpeningInput, code: string) {
-    const ticket = await deps.tickets.mint({ ...input, basketScope: true });
+  /**
+   * J1.3a revocation wording: driven by the ledger only (a revoked row for
+   * one of the scopes this page needs), never by a client parameter or a
+   * cookie value. Throws on a ledger failure.
+   */
+  async function consentWasRevoked(input: OpeningInput): Promise<boolean> {
+    if (!deps.consent?.hasRevokedConsent) return false;
+    for (const scopeId of basketsScopesForPage(input.writeIdentity !== undefined)) {
+      if (await deps.consent.hasRevokedConsent(input.readerSub, input.artifactId, scopeId)) return true;
+    }
+    return false;
+  }
+  async function toExchange(c: Context, input: OpeningInput, code: string, scope: "baskets" | "document" = "baskets") {
+    const ticket = await deps.tickets.mint(scope === "baskets"
+      ? { ...input, basketScope: true } : { ...input, consentDeclined: true });
     emit({ surface: "opening", code, status: 303 });
     return c.redirect(`${input.origin}/__reader/exchange?ticket=${ticket.ticket}`, 303);
   }
@@ -385,6 +398,7 @@ export function createReaderOpening(deps: {
       (input.writeIdentity
         ? `<p>Cette page peut aussi préparer des modifications dans vos paniers. Chaque écriture exige votre confirmation dans l’application.</p>`
         : "") +
+      `<p>Sans votre accord, la page s’ouvre sans lire vos paniers.</p>` +
       `<p>Cet accord est mémorisé pour cette page jusqu’à sa révocation, y compris pour ses prochaines versions. ` +
       `Vous pouvez le retirer à tout moment dans les réglages de votre compte, ` +
       `ou demander à votre assistant de retirer votre consentement de lecture.</p>` +
@@ -403,22 +417,32 @@ export function createReaderOpening(deps: {
     const input = await openingInput(c, c.req.query());
     if (!input) return refusal(c);
     let covered: boolean;
+    let revoked = false;
     try {
       covered = await consentCovers(input);
+      if (!covered) revoked = await consentWasRevoked(input);
     } catch { return ledgerError(c, "consent_ledger_unavailable"); }
     if (covered) return toExchange(c, input, "consent_reused");
-    return screen(c, input, variant, variant === "consent" && c.req.query("reason") === "revoked");
+    return screen(c, input, variant, revoked);
   }
   async function decide(c: Context) {
     if (!deps.auth.enabled || c.req.header("origin") !== deps.auth.appBaseUrl) return c.json({ error: "forbidden_origin" }, 403);
     const body = await c.req.parseBody();
     const input = await openingInput(c, body);
     if (!input) return refusal(c);
+    // Only an explicit choice from the current screen counts. A screen
+    // rendered before J1.3a (no `decision` field, no baskets wording) or
+    // any other value records nothing and mints nothing.
+    if (body.decision !== "grant" && body.decision !== "refuse") {
+      emit({ surface: "opening", code: "consent_decision_invalid", status: 400 });
+      if (!wantsBrowserExchange(c)) return c.json({ error: "decision_required" }, 400);
+      return c.html(consentDecisionInvalidHtml(), 400);
+    }
     if (body.decision === "refuse") {
-      // Refusal is a terminal state: nothing recorded, no ticket, no
-      // redirect back to a page that would ask again.
-      emit({ surface: "opening", code: "consent_refused", status: 200 });
-      return c.html(consentRefusedHtml());
+      // Conductor decision (rule I2 kept for refusal): « Ne pas autoriser »
+      // opens the DOCUMENT ONLY and records nothing. Basket calls answer the
+      // typed basket_consent_declined; « Réouvrir » reaches the consent screen.
+      return toExchange(c, input, "consent_refused", "document");
     }
     // The click is the first-party gesture: the durable acknowledgement
     // (scope + scope version) is recorded BEFORE any ticket exists. A
@@ -488,8 +512,7 @@ export function createReaderOpening(deps: {
     // The pending marker is consumed here: one consent entry per refusal.
     if (pending) c.header("Set-Cookie", clearConsentPendingCookie(), { append: true });
     return c.redirect(`${deps.auth.appBaseUrl}/api/v1/artifacts/reader/consent?` +
-      new URLSearchParams({ artifactId, binding, origin: `https://${c.req.header("host")}`,
-        ...(pending === "revoked" ? { reason: "revoked" } : {}) }), 303);
+      new URLSearchParams({ artifactId, binding, origin: `https://${c.req.header("host")}` }), 303);
   });
   content.get("/__reader/exchange", async (c) => {
     applyReaderContentHeaders(c);
@@ -530,7 +553,13 @@ export function createReaderOpening(deps: {
       ...(writeIdentity ? { writeIdentity } : {}) }, deps.sessionSecret));
     c.header("Set-Cookie", `${PREVIEW_INIT_COOKIE}=; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=0`, { append: true });
     c.header("Set-Cookie", `${PREVIEW_RETRY_COOKIE}=; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=0`, { append: true });
-    if (readConsentPending(c.req.header("cookie"))) c.header("Set-Cookie", clearConsentPendingCookie(), { append: true });
+    // J1.3a: a document-only session born from « Ne pas autoriser » marks
+    // the host as declined; any other exchange clears a stale marker.
+    if (ticket.consentDeclined === true) {
+      c.header("Set-Cookie", mintConsentPendingCookie("declined"), { append: true });
+    } else if (readConsentPending(c.req.header("cookie"))) {
+      c.header("Set-Cookie", clearConsentPendingCookie(), { append: true });
+    }
     return c.redirect(`/?grant=${encodeURIComponent(grant)}`, 303);
   });
   return { application, content };
