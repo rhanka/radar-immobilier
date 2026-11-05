@@ -103,12 +103,12 @@ export function createAccountDirectory(pool: pg.Pool): PrincipalDirectoryPort {
   return {
     async searchPeople(_scope, query, limit) {
       // People lookup is the ONLY path that needs name/email (sharing by
-      // colleague). The writer role is deliberately NOT granted those
-      // personal-data columns (owner decision pending), so a missing grant
-      // fails here with a documented code instead of a raw pg error — and
-      // never affects the resolution paths below, which stay available.
-      // Proposal (NOT applied): GRANT SELECT (name, email) ON
-      // public.account_users TO immo_mcp_artifact_writer;
+      // colleague). The writer role holds those personal-data columns only
+      // in preprod (owner decision 05/11: migrator flag
+      // IMMO_MCP_PEOPLE_LOOKUP_ENABLED=1 on the preprod db-migrate Job env,
+      // OFF by default elsewhere), so a missing grant fails here with a
+      // documented code instead of a raw pg error — and never affects the
+      // resolution paths below, which stay available.
       const folded = fold(query);
       let rows: AccountRow[];
       try {

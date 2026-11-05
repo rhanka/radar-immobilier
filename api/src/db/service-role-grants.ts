@@ -13,7 +13,21 @@
 export const IMMO_MCP_ARTIFACT_WRITER_ROLE = "immo_mcp_artifact_writer";
 export const IMMO_MCP_ACCOUNT_READER_ROLE = "immo_mcp_account_reader";
 
-export const SERVICE_ROLE_GRANTS_SQL = `DO $grants$
+/**
+ * Migrator flag for the preprod-only people lookup (owner decision 05/11).
+ * `artifacts_lookup_people` reads name/email of approved accounts; the
+ * writer role gets `SELECT (name, email) ON public.account_users` only when
+ * this flag is `"1"`. OFF by default (unset or any other value): prod and CI
+ * never set it, so a replay there revokes the two columns back.
+ */
+export const IMMO_MCP_PEOPLE_LOOKUP_ENV = "IMMO_MCP_PEOPLE_LOOKUP_ENABLED";
+
+export function isPeopleLookupEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  return env[IMMO_MCP_PEOPLE_LOOKUP_ENV] === "1";
+}
+
+function serviceRoleGrantsSql(peopleLookup: boolean): string {
+  return `DO $grants$
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '${IMMO_MCP_ACCOUNT_READER_ROLE}') THEN
     EXECUTE format('GRANT CONNECT ON DATABASE %I TO ${IMMO_MCP_ACCOUNT_READER_ROLE}', current_database());
@@ -44,14 +58,24 @@ BEGIN
     GRANT SELECT (id, sub, status), UPDATE (created_at) ON public.account_users TO ${IMMO_MCP_ARTIFACT_WRITER_ROLE};
     GRANT SELECT (account_id, workspace_id, status, revoked_at), UPDATE (created_at)
       ON public.workspace_memberships TO ${IMMO_MCP_ARTIFACT_WRITER_ROLE};
-  END IF;
+    -- People lookup (PREPROD ONLY, owner decision 05/11): the directory
+    -- searchPeople reads name/email of approved accounts. The REVOKE below
+    -- runs on every replay so an OFF replay converges back to the
+    -- least-privilege set; the GRANT runs only with the migrator flag ON
+    -- (preprod db-migrate Job env), which prod and CI never set.
+    REVOKE SELECT (name, email) ON public.account_users FROM ${IMMO_MCP_ARTIFACT_WRITER_ROLE};
+${peopleLookup ? `    GRANT SELECT (name, email) ON public.account_users TO ${IMMO_MCP_ARTIFACT_WRITER_ROLE};\n` : ""}  END IF;
 END
 $grants$;`;
+}
+
+export const SERVICE_ROLE_GRANTS_SQL: string = serviceRoleGrantsSql(false);
 
 export interface GrantQuery {
   query(sql: string): Promise<unknown>;
 }
 
-export async function applyServiceRoleGrants(db: GrantQuery): Promise<void> {
-  await db.query(SERVICE_ROLE_GRANTS_SQL);
+export async function applyServiceRoleGrants(
+  db: GrantQuery, env: NodeJS.ProcessEnv = process.env): Promise<void> {
+  await db.query(serviceRoleGrantsSql(isPeopleLookupEnabled(env)));
 }

@@ -55,3 +55,11 @@ spec:
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
             - name: POSTGRES_DB
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
+            # People lookup, PREPROD ONLY (owner decision 05/11): "1" lets the
+            # migrator grant SELECT (name, email) on public.account_users to
+            # immo_mcp_artifact_writer. Default "0" (OFF): prod and CI replay
+            # the least-privilege set and revoke those columns. Preprod turns
+            # it ON through deploy/overlays/preprod/patch-db-migrate-env.yaml
+            # (applied by the preprod CD migrate step, never on the prod path).
+            - name: IMMO_MCP_PEOPLE_LOOKUP_ENABLED
+              value: "0"
