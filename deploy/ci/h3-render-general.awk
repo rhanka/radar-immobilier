@@ -19,6 +19,9 @@ function judge( i, key, value) {
     reference("ARTIFACTS_READER_GRANT_SECRET", "radar-artifacts-reader-preprod", 1)
     reference("ARTIFACTS_READER_SESSION_SECRET", "radar-artifacts-reader-preprod", 1)
     reference("CLASSIFICATION_CURSOR_SECRET", "radar-classification-cursor-preprod", 1)
+    # The page secret lives under the generic `secret` key of its own Secret.
+    if (!index(doc, "        - name: ARTIFACTS_UPLOAD_PAGE_SECRET\n          valueFrom:\n            secretKeyRef:\n              key: secret\n              name: radar-artifacts-upload-page-preprod\n              optional: true\n"))
+      fail("exact Secret reference required for ARTIFACTS_UPLOAD_PAGE_SECRET")
     if (count("^        - name: CLASSIFICATION_CURSOR_") != 1) fail("cursor key ID must come from ConfigMap")
   }
   if (kind == "Deployment" && name == "radar-immo-mcp") {
@@ -27,7 +30,11 @@ function judge( i, key, value) {
     reference("IMMO_MCP_ACCOUNT_DATABASE_URL", "immo-mcp-account-reader", 0)
     reference("ARTIFACTS_S3_ACCESS_KEY", "radar-artifacts-preprod", 1)
     reference("ARTIFACTS_S3_SECRET_KEY", "radar-artifacts-preprod", 1)
-    if (count("^        - name: ARTIFACTS_") != 2) fail("unexpected MCP artifact override")
+    # The page secret lives under the generic `secret` key of its own Secret
+    # (not the variable name like the storage keys above).
+    if (!index(doc, "        - name: ARTIFACTS_UPLOAD_PAGE_SECRET\n          valueFrom:\n            secretKeyRef:\n              key: secret\n              name: radar-artifacts-upload-page-preprod\n              optional: true\n"))
+      fail("exact Secret reference required for ARTIFACTS_UPLOAD_PAGE_SECRET")
+    if (count("^        - name: ARTIFACTS_") != 3) fail("unexpected MCP artifact override")
     if (count("configMapRef:") != 1 || count("secretRef:") || count("prefix:") ||
         !index(doc, "        envFrom:\n        - configMapRef:\n            name: immo-mcp-config\n")) fail("exact MCP envFrom required")
   }

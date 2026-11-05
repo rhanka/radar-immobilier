@@ -62,7 +62,11 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("P0-C switchovers on real Postgre
     expect(changed).toMatchObject({ status: 409, body: { error: { code: "conflict", details: { variant: "command_conflict" } } } });
     expect(await usage()).toEqual(before);
     await h.pool.query("UPDATE artifacts.operation_receipts SET receipt='{}' WHERE receipt->>'releaseId'=$1", [(original.body as { releaseId: string }).releaseId]);
-    expect((await v2.control.handle("publish", "alice", args)).body).toMatchObject({ ok: false, commitState: "unknown" });
+    // Provider 0.2.15 (R1c receipt validation) rejects the shapeless receipt
+    // as `invalid publication receipt` before any commit work: not_committed
+    // (this attempt committed nothing) instead of the historical unknown.
+    // The property stands: usage is unchanged, nothing commits.
+    expect((await v2.control.handle("publish", "alice", args)).body).toMatchObject({ ok: false, commitState: "not_committed" });
     expect(await usage()).toEqual(before);
   });
 

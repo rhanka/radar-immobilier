@@ -2,13 +2,23 @@ import {
   composeArtifactHost, createAccountDirectory, createArtifactControl, createArtifactsPool,
   resolveArtifactsStorageConfig, type ArtifactsConfigInput, type ArtifactsPoolParams,
   createArtifactAdmissionAuthority, readActivationEnv, resolveActivationConfig,
-  ARTIFACT_P0B, createDeleteConfirmation,
+  ARTIFACT_P0B, createDeleteConfirmation, readUploadPageWiring,
 } from "@radar/artifacts-host";
 import type { AuthConfig } from "../config.js";
 import type { Logger } from "../logger.js";
 import type { ControlRouteDeps } from "./control-route.js";
+import type { UploadPageService } from "@sentropic/artifacts/server/upload-page";
+import { createPostgresUploadPageStore } from "@sentropic/artifacts/adapters/postgres-uploads";
 import { createReaderConsentService } from "./reader-consent.js";
 import { createStoredReader } from "./reader-storage.js";
+
+/**
+ * Files parity LOT 2 — browser upload page wiring, shared with the immo-mcp
+ * binding (`readUploadPageWiring` in artifacts-host). The page cookie secret
+ * is a dedicated secret (never the session secret). Absent or short under
+ * P0B, the control plane stays closed with an explicit log — the provider
+ * requires this wiring as soon as the page mint capability is selected.
+ */
 
 export async function startArtifactControl(options: {
   input: ArtifactsConfigInput;
@@ -36,14 +46,36 @@ export async function startArtifactControl(options: {
     if (!contentBase) throw new Error("artifact content base disabled");
     const readActivation = () => resolveActivationConfig(readActivationEnv());
     const confirmation = ARTIFACT_P0B ? createDeleteConfirmation(pool, parsed.storageScope, auth.appBaseUrl) : undefined;
+    // Dependency diagnostics first (DB reachability, schema/journal, scope):
+    // the upload-page wiring is read here so it can be passed to the host,
+    // but a missing secret is only reported AFTER composeArtifactHost has
+    // validated the dependencies, so the control log keeps the real cause.
+    const uploadPage = ARTIFACT_P0B ? readUploadPageWiring({ secret: process.env["ARTIFACTS_UPLOAD_PAGE_SECRET"],
+      controlOrigin: auth.appBaseUrl, s3Endpoint: parsed.s3Endpoint }) : null;
     const host = await composeArtifactHost(pool, parsed, undefined, { readActivation, contentBase,
-      ...(confirmation ? { confirmation } : {}) });
+      ...(confirmation ? { confirmation } : {}),
+      ...(uploadPage ? { uploadPage } : {}) });
+    if (ARTIFACT_P0B && !uploadPage) {
+      try { host.close(); } catch { /* host already torn down by compose */ }
+      throw new Error("artifact upload page secret missing (ARTIFACTS_UPLOAD_PAGE_SECRET)");
+    }
     const backend = createArtifactControl(host, parsed.storageScope, contentBase,
       createArtifactAdmissionAuthority(pool, readActivation, parsed.storageScope),
       { directory: createAccountDirectory(pool) });
     logger.info({ storageScope: parsed.storageScope, s3Bucket: parsed.s3Bucket }, "artifact control enabled");
+    const composed = host as typeof host & { uploadPageService?: UploadPageService;
+      uploadPageConfig?: { controlOrigin: string; s3Origins: readonly string[] } };
     return { auth, accounts: pool, backend, readActivation, storageScope: parsed.storageScope,
       ...(confirmation ? { confirmation } : {}),
+      // Browser upload page (LOT 2): same ledger as the provider, mounted on
+      // the control origin with the control session rules. The page store
+      // backs the session↔owner binding enforced by the route before every
+      // exchange and file call.
+      ...(composed.uploadPageService && composed.uploadPageConfig ? { uploadPage: {
+        service: composed.uploadPageService,
+        config: { controlOrigin: composed.uploadPageConfig.controlOrigin,
+          s3Origins: composed.uploadPageConfig.s3Origins },
+        pages: createPostgresUploadPageStore(pool) } } : {}),
       readerStorage: createStoredReader(pool, parsed.storageScope, contentBase, host.blobs),
       // Reader consent — durable BASKETS consent (Gate B), never the opening.
       readerConsent: createReaderConsentService(pool, parsed.storageScope) };

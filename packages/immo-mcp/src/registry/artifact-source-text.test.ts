@@ -235,8 +235,10 @@ describe.skipIf(!ARTIFACT_P0B)("artifact source text projection", () => {
   });
 
   it("should keep the get_source guide reference small next to the full guide", () => {
-    const reference = JSON.stringify(getSourceGuideReference()).length;
-    const full = JSON.stringify(getAuthoringGuide()).length;
+    // Budgets are wire bytes (UTF-8), not UTF-16 code units: the reference
+    // carries French text where one char may take two bytes.
+    const reference = Buffer.byteLength(JSON.stringify(getSourceGuideReference()), "utf8");
+    const full = Buffer.byteLength(JSON.stringify(getAuthoringGuide()), "utf8");
     expect(full).toBeGreaterThan(32 * 1024);
     expect(reference).toBeLessThan(8192);
     expect(reference).toBeLessThan(full / 4);
