@@ -6,7 +6,10 @@
  * and resolution misses count against the same budget (anti-enumeration).
  *
  * The store is process-local: every API replica enforces its own windows,
- * which only makes the effective budget tighter, never looser.
+ * so with N replicas the effective budget — and the concurrency and
+ * anti-enumeration caps — is up to N times LOOSER (`partial` until a shared
+ * store exists). Keys idle for longer than the longest window are swept
+ * periodically, so memory stays bounded by the keys active in the last hour.
  */
 export interface BudgetWindow {
   /** Max hits inside the window. */
@@ -23,6 +26,10 @@ export interface ReaderBudgetStore {
    * refusal, so a refused client is not pushed further over.
    */
   consume(key: string, windows: readonly BudgetWindow[], nowMs: number): { ok: true } | { ok: false; retryAfterSec: number };
+  /** Same decision as `consume`, recording nothing (admission checked before an authorization). */
+  check(key: string, windows: readonly BudgetWindow[], nowMs: number): { ok: true } | { ok: false; retryAfterSec: number };
+  /** Number of tracked keys (tests and bounded-memory checks). */
+  size(): number;
   /** Enter a bounded-concurrency section (`documents`, `coherent-city`). */
   tryEnter(key: string, maxConcurrent: number): boolean;
   /** Leave a bounded-concurrency section entered with `tryEnter`. */
@@ -67,32 +74,52 @@ export function budgetKey(readerSub: string, artifactId: string, op: string): st
   return `${readerSub}\u0000${artifactId}\u0000${op}`;
 }
 
+/** Longest window in use (hour budgets): hits older than this never matter. */
+const MAX_HORIZON_MS = 3_600_000;
+/** Sweep idle keys at most once per minute. */
+const SWEEP_EVERY_MS = 60_000;
+
 export function createBudgetStore(): ReaderBudgetStore {
   const hits = new Map<string, number[]>();
   const inflight = new Map<string, number>();
-  return {
-    consume(key, windows, nowMs) {
-      // One recorded hit per call, evaluated against every window: the 60 s
-      // window of a [minute(20), burst(5)] pair sees 5 hits after 5 calls,
-      // not 10.
-      const horizon = windows.reduce((max, window) => Math.max(max, window.windowMs), 0);
-      const seen = (hits.get(key) ?? []).filter((at) => at > nowMs - horizon);
-      let retryAfterSec = 0;
-      for (const window of windows) {
-        const inWindow = seen.filter((at) => at > nowMs - window.windowMs);
-        if (inWindow.length >= window.limit) {
-          const oldest = Math.min(...inWindow);
-          retryAfterSec = Math.max(retryAfterSec, Math.ceil((oldest + window.windowMs - nowMs) / 1000));
-        }
+  let lastSweep = Number.NEGATIVE_INFINITY;
+  function sweep(nowMs: number): void {
+    if (nowMs - lastSweep < SWEEP_EVERY_MS) return;
+    lastSweep = nowMs;
+    for (const [key, list] of hits) {
+      const live = list.filter((at) => at > nowMs - MAX_HORIZON_MS);
+      if (live.length === 0) hits.delete(key);
+      else if (live.length !== list.length) hits.set(key, live);
+    }
+  }
+  function decide(key: string, windows: readonly BudgetWindow[], nowMs: number, record: boolean) {
+    sweep(nowMs);
+    const horizon = windows.reduce((max, window) => Math.max(max, window.windowMs), 0);
+    const seen = (hits.get(key) ?? []).filter((at) => at > nowMs - horizon);
+    let retryAfterSec = 0;
+    for (const window of windows) {
+      const inWindow = seen.filter((at) => at > nowMs - window.windowMs);
+      if (inWindow.length >= window.limit) {
+        const oldest = Math.min(...inWindow);
+        retryAfterSec = Math.max(retryAfterSec, Math.ceil((oldest + window.windowMs - nowMs) / 1000));
       }
-      if (retryAfterSec > 0) {
-        hits.set(key, seen);
-        return { ok: false, retryAfterSec: Math.max(retryAfterSec, 1) };
-      }
+    }
+    if (retryAfterSec > 0) {
+      if (seen.length > 0) hits.set(key, seen); else hits.delete(key);
+      return { ok: false as const, retryAfterSec: Math.max(retryAfterSec, 1) };
+    }
+    if (record) {
       seen.push(nowMs);
       hits.set(key, seen);
-      return { ok: true };
-    },
+    }
+    return { ok: true as const };
+  }
+  return {
+    check(key, windows, nowMs) { return decide(key, windows, nowMs, false); },
+    size() { return hits.size; },
+    // One recorded hit per call, evaluated against every window: the 60 s
+    // window of a [minute(20), burst(5)] pair sees 5 hits after 5 calls, not 10.
+    consume(key, windows, nowMs) { return decide(key, windows, nowMs, true); },
     tryEnter(key, maxConcurrent) {
       const current = inflight.get(key) ?? 0;
       if (current >= maxConcurrent) return false;
