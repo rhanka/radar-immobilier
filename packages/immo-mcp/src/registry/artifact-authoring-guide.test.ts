@@ -138,7 +138,7 @@ describe("artifact authoring guide", () => {
     expect(guide.lifecycle.sharing).toContain("unavailable");
     const sharing = guide.lifecycle.sharing;
     expect(sharing).toContain("VIEW ONLY");
-    expect(sharing).toContain("Farid");
+    expect(sharing).toContain("Product Owner");
     expect(sharing).toContain("Public sharing");
     expect(sharing).toContain("all retained versions");
     expect(sharing).toContain("resumes automatically");
