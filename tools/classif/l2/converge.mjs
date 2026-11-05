@@ -117,17 +117,22 @@ export function loadComplements(home) {
  */
 export function residualsClassified(home, n, todo) {
   const f = path.join(home, 'l2', `ambiguity-pass${n}.json`);
-  if (!existsSync(f)) return { classified: false, causes: {}, missing: todo, mapSha256: null };
+  if (!existsSync(f)) return { classified: false, causes: {}, missing: todo, mapSha256: null, fallbackToDefinitionGap: 0, fallbackIds: [] };
   const raw = readFileSync(f, 'utf8');
   const map = JSON.parse(raw);
-  const byId = new Map((map.residuals ?? []).map((r) => [r.itemId, r.cause]));
+  const byId = new Map((map.residuals ?? []).map((r) => [r.itemId, r]));
   // Review §7: every cause must be a RESIDUAL_CAUSES value (no free-form chain).
-  const bad = [...byId.entries()].filter(([, c]) => !RESIDUAL_CAUSES.includes(c));
-  if (bad.length) throw new Error(`converge refused: ${bad.length} residual causes outside RESIDUAL_CAUSES (${bad.slice(0, 3).map(([id, c]) => `${id}=${c}`).join(',')}…)`);
+  const bad = [...byId.entries()].filter(([, r]) => !RESIDUAL_CAUSES.includes(r?.cause ?? r));
+  if (bad.length) throw new Error(`converge refused: ${bad.length} residual causes outside RESIDUAL_CAUSES (${bad.slice(0, 3).map(([id, r]) => `${id}=${r?.cause ?? r}`).join(',')}…)`);
   const missing = todo.filter((id) => !byId.has(id));
   const causes = {};
-  for (const id of todo) if (byId.has(id)) causes[byId.get(id)] = (causes[byId.get(id)] ?? 0) + 1;
-  return { classified: missing.length === 0, causes, missing, mapSha256: sha256(raw) };
+  for (const id of todo) {
+    const cause = byId.get(id)?.cause ?? byId.get(id);
+    if (cause !== undefined) causes[cause] = (causes[cause] ?? 0) + 1;
+  }
+  // Review §7b: a definition-gap fallback (fallback:true) is not a classification.
+  const fallbackIds = todo.filter((id) => byId.get(id)?.fallback === true);
+  return { classified: missing.length === 0, causes, missing, mapSha256: sha256(raw), fallbackToDefinitionGap: fallbackIds.length, fallbackIds };
 }
 
 /** At least one traced amendment round (repo manifest amend-*.json with gel !== true).
@@ -172,11 +177,11 @@ export async function main(argv = process.argv.slice(2)) {
     }
     changedShare = reannotated ? changed / reannotated : null;
   }
-  const { classified: allClassified, causes, missing, mapSha256 } = residualsClassified(home, n, todo);
-  const residuals = { count: todo.length, causes, unclassified: missing, unclassifiedCount: missing.length, mapSha256 };
+  const { classified: allClassified, causes, missing, mapSha256, fallbackToDefinitionGap = 0 } = residualsClassified(home, n, todo);
+  const residuals = { count: todo.length, causes, unclassified: missing, unclassifiedCount: missing.length, mapSha256, fallbackToDefinitionGap };
   const stop = n === 1
     ? { stop: false, why: 'pass 1 is blind: convergence is descriptive, the split must be committed before any A2 cross-review pass' }
-    : stopDecision({ changedShare, pass: n, residualsClassified: allClassified, hasAmend: hasTracedAmend() });
+    : stopDecision({ changedShare, pass: n, residualsClassified: allClassified, hasAmend: hasTracedAmend(), fallbackToDefinitionGap });
   const { spent, BUDGET_CAP } = await import('../lib/budget.mjs').then((m) => ({ spent: m.spent(home), BUDGET_CAP: m.BUDGET_CAP }));
   const report = { pass: n, createdAt: new Date().toISOString(), deferred, gaps,
     metrics: { ...metrics, changedShare, reannotatedVotes: reannotated }, residuals, stop, budget: { spent, cap: BUDGET_CAP },

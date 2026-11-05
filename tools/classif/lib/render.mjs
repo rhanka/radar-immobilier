@@ -45,9 +45,11 @@ export const sha256 = (s) => createHash('sha256').update(s).digest('hex');
  * resumed S113 restore must not change aggregatesSha256 at equal data).
  */
 export function stableStringify(v) {
+  if (v === undefined) return undefined;
   if (v === null || typeof v !== 'object') return JSON.stringify(v);
-  if (Array.isArray(v)) return `[${v.map(stableStringify).join(',')}]`;
-  return `{${Object.keys(v).sort().map((k) => `${JSON.stringify(k)}:${stableStringify(v[k])}`).join(',')}}`;
+  if (Array.isArray(v)) return `[${v.map((x) => (x === undefined ? 'null' : stableStringify(x))).join(',')}]`;
+  const keys = Object.keys(v).filter((k) => v[k] !== undefined).sort();
+  return `{${keys.map((k) => `${JSON.stringify(k)}:${stableStringify(v[k])}`).join(',')}}`;
 }
 
 /** docShas cited by a node (properties.docSha, refs[].docSha at both levels). */

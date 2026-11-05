@@ -155,6 +155,64 @@ test('fix2 §3b: real pass CLI refuses an absent, uncommitted or dirty split.jso
   }
 }));
 
+// F1 via the real split.main: the committed seed drives the draw in a temp repo.
+// Hermetic: temp CLASSIF_HOME + temp repo (CLASSIF_REPO + CLASSIF_TEST_MODE), never
+// the real checkout. On 9d1bec39c split.main throws ReferenceError (REPO undefined)
+// as soon as the seed file exists.
+test('fix2 F1: real split.main draws halves from the committed seed', withTempHome(async (home) => {
+  const { sha256 } = await import('../lib/render.mjs');
+  const { ANNOTATORS } = await import('../l2/run.mjs');
+  const items = [
+    { itemId: 'f1-i1', kind: 'signal', anchor: { id: 'n1', citySlug: 'ville-a' }, input: 'avis de motion du reglement 9001-9 afin de permettre six logements dans la zone H-9, dossier f1-1.' },
+    { itemId: 'f1-i2', kind: 'signal', anchor: { id: 'n2', citySlug: 'ville-a' }, input: 'avis de motion du reglement 9001-9 afin de permettre six logements dans la zone H-9, dossier f1-2.' },
+    { itemId: 'f1-i3', kind: 'signal', anchor: { id: 'n3', citySlug: 'ville-b' }, input: 'avis de motion du reglement 9001-9 afin de permettre six logements dans la zone H-9, dossier f1-3.' },
+    { itemId: 'f1-i4', kind: 'signal', anchor: { id: 'n4', citySlug: 'ville-b' }, input: 'avis de motion du reglement 9001-9 afin de permettre six logements dans la zone H-9, dossier f1-4.' },
+  ];
+  mkdirSync(path.join(home, 'l0'), { recursive: true });
+  const body = `${items.map((i) => JSON.stringify(i)).join('\n')}\n`;
+  writeFileSync(path.join(home, 'l0', 'dev-items.jsonl'), body);
+  writeFileSync(path.join(home, 'l0', 'dev-items.expect.json'), JSON.stringify({ count: items.length, sha256: sha256(body) }));
+  const mkVote = (id) => ({ itemId: id, kind: 'signal', valid: true, code: 'P-DENSITE', verdict: 'pertinent', ambiguous: false, cause: null, quote: 'avis de motion', reason: 'r', changed: false, quoteFound: true });
+  for (const a of ANNOTATORS) {
+    const d = path.join(home, 'l2', 'pass1', a);
+    mkdirSync(d, { recursive: true });
+    writeFileSync(path.join(d, 's001.json'), JSON.stringify({ pass: 1, annotator: a, lotId: 's001', exitCode: 0, attempts: 1,
+      annotations: items.map((i) => mkVote(i.itemId)) }));
+  }
+  const repo = initTempRepo();
+  const restoreRepo = swapEnv('CLASSIF_REPO', repo);
+  const seedRel = 'tools/classif/l3/manifests/split-seed.json';
+  const seed = 'fix2-split-seed-f1';
+  try {
+    writeRepoFile(repo, 'tools/classif/l0/manifests/signal-draw-manifest.json',
+      JSON.stringify({ items: items.map((i) => ({ itemId: i.itemId, pass: 'B1' })) }));
+    writeRepoFile(repo, seedRel, JSON.stringify({ seed, committedAt: new Date().toISOString() }));
+    const { main: splitMain } = await import('../l3/split.mjs');
+    await assert.rejects(() => splitMain([]), /not committed/, 'uncommitted seed must refuse the draw');
+    commitAll(repo);
+    const realSplit = path.join(CLASSIF_DIR, 'l3', 'manifests', 'split.json');
+    const realBefore = existsSync(realSplit) ? readFileSync(realSplit, 'utf8') : null;
+    const manifest = await splitMain([]);
+    assert.equal(manifest.kind, 'split');
+    assert.equal(manifest.seed, seed);
+    assert.equal(manifest.seedFile, seedRel, 'seedFile stays repo-relative to the temp repo root');
+    assert.ok(Array.isArray(manifest.halves.tuning) && Array.isArray(manifest.halves.blind), 'manifest carries both halves');
+    assert.deepEqual([...manifest.halves.tuning, ...manifest.halves.blind].sort(), items.map((i) => i.itemId).sort(), 'halves cover every item exactly once');
+    assert.equal(manifest.cityOverlap, 0, 'no city lands in both halves');
+    assert.ok(manifest.sha256?.tuning && manifest.sha256?.blind, 'halves carry their shas');
+    assert.ok(existsSync(path.join(repo, 'tools', 'classif', 'l3', 'manifests', 'split.json')), 'draw lands in the temp repo');
+    const realAfter = existsSync(realSplit) ? readFileSync(realSplit, 'utf8') : null;
+    assert.equal(realAfter, realBefore, 'real checkout split.json unchanged by the temp draw');
+    await assert.rejects(() => splitMain([]), /already holds a draw/, 'a committed draw refuses a silent redraw');
+    rmSync(path.join(repo, 'tools', 'classif', 'l3', 'manifests', 'split.json'));
+    writeRepoFile(repo, seedRel, JSON.stringify({ seed: 'fix2-split-seed-dirty', committedAt: new Date().toISOString() }));
+    await assert.rejects(() => splitMain([]), /differs from the committed/, 'dirty seed must refuse the draw');
+  } finally {
+    restoreRepo();
+    rmSync(repo, { recursive: true, force: true });
+  }
+}));
+
 // §7a via the real converge stop path: a gel-only round never unlocks the stop.
 // Hermetic: explicit dirs, plus the default dir pointed at a temp repo — never
 // the real checkout. On bcb704ca5 hasTracedAmend counts gel files.
@@ -485,6 +543,11 @@ test('fix2 N2: real blindMain resumes completed S113 routes', withTempHome(async
     writeFileSync(path.join(evalDir, 'access-log.jsonl'),
       `${JSON.stringify({ at: new Date().toISOString(), actor: 'fix2-test', role: 'test-executor', action: 'eval-run', purpose: 'l4-s113-s98', promptSha256, model, effort, items: 1 })}\n`);
     const callsBefore = callsLines(home).length;
+    const realBlind = path.join(CLASSIF_DIR, 'l4', 'manifests', 'series-98-blind.json');
+    const realRefD = path.join(CLASSIF_DIR, 'l3', 'manifests', 'reference-d.json');
+    const realBlindBefore = existsSync(realBlind) ? readFileSync(realBlind, 'utf8') : null;
+    const realRefDBefore = existsSync(realRefD) ? readFileSync(realRefD, 'utf8') : null;
+    const gitBefore = spawnSync('git', ['status', '--porcelain'], { cwd: CLASSIF_DIR, encoding: 'utf8' }).stdout;
     const { main: blindMain } = await import('../l4/blind.mjs');
     const { EVAL_ROUTES } = await import('../l4/dev.mjs');
     const skip = EVAL_ROUTES.filter((r) => r !== only);
@@ -494,10 +557,12 @@ test('fix2 N2: real blindMain resumes completed S113 routes', withTempHome(async
     // Hermetic: the blind manifest landed in the temp repo, never in the real checkout.
     assert.ok(existsSync(path.join(repo, 'tools', 'classif', 'l4', 'manifests', 'series-98-blind.json')),
       'blind manifest must land in the temp repo');
-    assert.ok(!existsSync(path.join(CLASSIF_DIR, 'l4', 'manifests', 'series-98-blind.json')),
-      'blind manifest must never touch the real checkout');
-    assert.ok(!existsSync(path.join(CLASSIF_DIR, 'l3', 'manifests', 'reference-d.json')),
-      'reference-d must never touch the real checkout');
+    assert.equal(existsSync(realBlind) ? readFileSync(realBlind, 'utf8') : null, realBlindBefore,
+      'real checkout blind manifest unchanged by the temp run');
+    assert.equal(existsSync(realRefD) ? readFileSync(realRefD, 'utf8') : null, realRefDBefore,
+      'real checkout reference-d unchanged by the temp run');
+    assert.equal(spawnSync('git', ['status', '--porcelain'], { cwd: CLASSIF_DIR, encoding: 'utf8' }).stdout, gitBefore,
+      'real checkout git state unchanged by the temp run');
   } finally {
     setup.cleanup();
   }
