@@ -13,17 +13,41 @@
 //  the blind half is cross-reviewed under the frozen guide.
 import path from 'node:path';
 import process from 'node:process';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { sha256 } from '../lib/render.mjs';
 import { chiSquareHalves } from '../l4/metrics.mjs';
-import { CLASSIF_DIR, classifHome } from '../lib/paths.mjs';
-import { loadDevItems } from '../l2/run.mjs';
+import { CLASSIF_DIR, REPO, classifHome } from '../lib/paths.mjs';
+import { ANNOTATORS, loadDevItems } from '../l2/run.mjs';
 
 export const bpassOf = (item, signalPass) => (item.kind === 'pv' ? 'pv' : signalPass.get(item.itemId) ?? 'unknown');
 
+/** FNV-1a 32-bit of the seed string → mulberry32 PRNG. Real seeded draw: the same committed
+    seed always reproduces the same halves; a different seed draws differently. */
+export function seededRng(seedString) {
+  let h = 0x811c9dc5;
+  for (const ch of String(seedString)) { h ^= ch.codePointAt(0); h = Math.imul(h, 0x01000193); }
+  let a = h >>> 0;
+  return () => {
+    a |= 0; a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+export function shuffleSeeded(arr, rng) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
 /** City-grouped greedy 50/50: sort cities by size desc, assign each to the half that best
-    balances every stratum (sum of squared deviations to half-targets). Deterministic. */
-export function splitGrouped(cities, targets) {
+    balances every stratum (sum of squared deviations to half-targets). With an rng the
+    input order is shuffled (stable sort keeps the shuffled order within equal sizes) and
+    score ties break randomly — the draw is reproducible from the seed. Without rng the
+    legacy deterministic order applies (tests). */
+export function splitGrouped(cities, targets, rng = null) {
   const tuning = new Set();
   const blind = new Set();
   const counts = { tuning: new Map(), blind: new Map() };
@@ -35,13 +59,14 @@ export function splitGrouped(cities, targets) {
     }
     return s;
   };
-  const ordered = [...cities].sort((a, b) => b.items.length - a.items.length || (a.city < b.city ? -1 : 1));
+  const base = rng ? shuffleSeeded(cities, rng) : [...cities];
+  const ordered = base.sort((a, b) => b.items.length - a.items.length || (a.city < b.city ? -1 : 1));
   for (const city of ordered) {
     const adds = new Map();
     for (const it of city.items) adds.set(it.stratum, (adds.get(it.stratum) ?? 0) + 1);
     const st = score('tuning', adds);
     const sb = score('blind', adds);
-    const pick = st < sb ? 'tuning' : sb < st ? 'blind' : tuning.size <= blind.size ? 'tuning' : 'blind';
+    const pick = st < sb ? 'tuning' : sb < st ? 'blind' : rng ? (rng() < 0.5 ? 'tuning' : 'blind') : tuning.size <= blind.size ? 'tuning' : 'blind';
     for (const it of city.items) {
       (pick === 'tuning' ? tuning : blind).add(it.id);
       counts[pick].set(it.stratum, (counts[pick].get(it.stratum) ?? 0) + 1);
@@ -50,25 +75,53 @@ export function splitGrouped(cities, targets) {
   return { tuning: [...tuning].sort(), blind: [...blind].sort() };
 }
 
+/** The seed must be committed in the repo BEFORE the draw: the seed file must be tracked
+    and clean (git ls-files + git diff --quiet HEAD). Returns the committed seed. */
+export function requireCommittedSeed(seedFile, cliSeed) {
+  const git = (...a) => spawnSync('git', a, { cwd: REPO, encoding: 'utf8' });
+  if (!existsSync(seedFile)) throw new Error(`split refused: seed file ${seedFile} absent (commit it before the draw)`);
+  const rel = path.relative(REPO, seedFile);
+  if (git('ls-files', '--error-unmatch', rel).status !== 0) throw new Error(`split refused: seed file ${rel} is not committed`);
+  if (git('diff', '--quiet', 'HEAD', '--', rel).status !== 0) throw new Error(`split refused: seed file ${rel} differs from the committed version (commit before the draw)`);
+  const committed = JSON.parse(readFileSync(seedFile, 'utf8'));
+  if (!committed.seed) throw new Error(`split refused: seed file ${rel} carries no seed`);
+  if (cliSeed && cliSeed !== committed.seed) throw new Error('split refused: --seed differs from the committed seed file');
+  return committed;
+}
+
 export function stratumOf(kind, verdict, bpass) {
   return `${kind}|${verdict}|${bpass}`;
 }
 
 export async function main(argv = process.argv.slice(2)) {
-  const seed = argv.includes('--seed') ? argv[argv.indexOf('--seed') + 1] : process.env.CLASSIF_SEED;
-  if (!seed) { process.stderr.write('classif-l3b-split: refusing without a seed (pass CLASSIF_SEED=<seed>)\n'); process.exit(2); }
+  const cliSeed = argv.includes('--seed') ? argv[argv.indexOf('--seed') + 1] : process.env.CLASSIF_SEED;
   const home = classifHome();
   const manifestFile = path.join(CLASSIF_DIR, 'l3', 'manifests', 'split.json');
+  const seedFile = path.join(CLASSIF_DIR, 'l3', 'manifests', 'split-seed.json');
   mkdirSync(path.dirname(manifestFile), { recursive: true });
-  // Seed committed BEFORE the draw; the draw reads back exactly this value.
-  writeFileSync(manifestFile, `${JSON.stringify({ kind: 'split-seed', seed, committedAt: new Date().toISOString(), llmCalls: 0 }, null, 1)}\n`);
-  const committed = JSON.parse(readFileSync(manifestFile, 'utf8'));
-  if (committed.seed !== seed) throw new Error('split seed changed between commit and draw');
-  void seed;
+  // Review §3: refuse to re-draw over an existing split; the seed must be committed clean.
+  if (existsSync(manifestFile)) {
+    try {
+      const prev = JSON.parse(readFileSync(manifestFile, 'utf8'));
+      if (prev?.kind === 'split') throw new Error(`split refused: ${manifestFile} already holds a draw (seed ${prev.seed}); refusing to redraw silently`);
+    } catch (e) { if (/already holds a draw/.test(e.message)) throw e; }
+  }
+  const committed = requireCommittedSeed(seedFile, cliSeed);
+  const seed = committed.seed;
+  const rng = seededRng(seed);
 
   const items = loadDevItems(home);
-  const conv1 = JSON.parse(readFileSync(path.join(home, 'l2', 'converge-pass1.json'), 'utf8'));
-  const verdictOf = new Map((conv1.rows ?? []).map((r) => [r.itemId, r.verdictMaj?.value ?? 'no-majority']));
+  const corpusSha256 = sha256(readFileSync(path.join(home, 'l0', 'dev-items.jsonl'), 'utf8'));
+  // Review §3: verdict strata from a converge RECOMPUTED on the current trio
+  // (muse-wonder-max, astra-max, opus-5.5-max) after Astra's pass 1 — never a stale file.
+  const { latestVotes, summarise } = await import('../l2/converge.mjs');
+  const { latest } = latestVotes(home, 1);
+  for (const a of ANNOTATORS) {
+    if (!latest.get(a) || latest.get(a).size === 0) throw new Error(`split refused: no pass-1 votes for ${a} (run Astra pass 1 first)`);
+  }
+  const { rows: convRows } = summarise(items, latest);
+  const convergeSha256 = sha256(JSON.stringify(convRows));
+  const verdictOf = new Map(convRows.map((r) => [r.itemId, r.verdictMaj?.value ?? 'no-majority']));
   const sigManifest = JSON.parse(readFileSync(path.join(CLASSIF_DIR, 'l0', 'manifests', 'signal-draw-manifest.json'), 'utf8'));
   const signalPass = new Map(sigManifest.items.map((i) => [i.itemId, i.pass]));
   const byCity = new Map();
@@ -81,7 +134,7 @@ export async function main(argv = process.argv.slice(2)) {
   const totals = new Map();
   for (const { items: list } of byCity.values()) for (const it of list) totals.set(it.stratum, (totals.get(it.stratum) ?? 0) + 1);
   const targets = new Map([...totals].map(([k, v]) => [k, v / 2]));
-  const halves = splitGrouped([...byCity.values()], targets);
+  const halves = splitGrouped([...byCity.values()], targets, rng);
   const inHalf = (ids) => new Set(ids);
   const t = inHalf(halves.tuning);
   const balance = [...totals.keys()].sort().map((s) => {
@@ -96,7 +149,8 @@ export async function main(argv = process.argv.slice(2)) {
     return { stratum: s, tuning: a, blind: b, ...chiSquareHalves(a, b) };
   });
   const body = (ids) => `${[...ids].sort().join('\n')}\n`;
-  const manifest = { kind: 'split', seed: committed.seed, committedAt: committed.committedAt, drawnAt: new Date().toISOString(), llmCalls: 0,
+  const manifest = { kind: 'split', seed: committed.seed, seedFile: path.relative(REPO, seedFile), committedAt: committed.committedAt, drawnAt: new Date().toISOString(), llmCalls: 0,
+    trio: [...ANNOTATORS], corpusSha256, convergeSha256,
     cities: byCity.size, halves,
     counts: { tuning: halves.tuning.length, blind: halves.blind.length,
       byKind: { tuning: {}, blind: {} }, byVerdict: { tuning: {}, blind: {} }, byBpass: { tuning: {}, blind: {} } },
