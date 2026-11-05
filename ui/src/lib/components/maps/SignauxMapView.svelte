@@ -247,7 +247,7 @@
     kind: "raster",
     // Artifact builds override this at build time with VITE_BASEMAP_TILE_URL
     // (same-origin tile relay); the app build keeps the OSM template.
-    tiles: [basemapTileTemplate(import.meta.env)],
+    tiles: [basemapTileTemplate({ VITE_BASEMAP_TILE_URL: import.meta.env.VITE_BASEMAP_TILE_URL })],
     attribution: "© OpenStreetMap contributors",
     saturation: -1,
   };

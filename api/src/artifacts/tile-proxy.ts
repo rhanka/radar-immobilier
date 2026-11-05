@@ -138,6 +138,31 @@ export const TILE_FRESHNESS_CAP_MS = 7 * 24 * 60 * 60 * 1000;
 export const TILE_DEFAULT_FRESHNESS_MS = 24 * 60 * 60 * 1000;
 /** Browser response after the global no-store middleware is rewritten by the mount. */
 export const TILE_CLIENT_MAX_AGE_SECONDS = 86400;
+/**
+ * Global throttle breaker (review m2): when OSM answers 429, 403 or 418
+ * (rate limited or blocked), every reader stops calling it until the
+ * breaker closes. It honours Retry-After (delta-seconds or HTTP-date),
+ * defaults to a short pause when absent and is capped so it stays short.
+ * The BDTQ/RNCan default path keeps its frozen behaviour.
+ */
+export const TILE_BREAKER_UPSTREAMS: ReadonlySet<TileUpstreamId> = new Set<TileUpstreamId>(["osm"]);
+export const TILE_BREAKER_STATUSES: ReadonlySet<number> = new Set([429, 403, 418]);
+export const TILE_BREAKER_DEFAULT_MS = 60 * 1000;
+export const TILE_BREAKER_MIN_MS = 1000;
+export const TILE_BREAKER_MAX_MS = 15 * 60 * 1000;
+
+/** Retry-After to a bounded breaker duration in milliseconds. */
+export function parseRetryAfterMs(value: string | null, now: number): number {
+  const raw = value?.trim() ?? "";
+  let ms = TILE_BREAKER_DEFAULT_MS;
+  if (/^[0-9]+$/.test(raw)) ms = Number(raw) * 1000;
+  else if (raw !== "") {
+    const at = Date.parse(raw);
+    if (Number.isFinite(at)) ms = at - now;
+  }
+  if (!Number.isFinite(ms)) ms = TILE_BREAKER_DEFAULT_MS;
+  return Math.min(Math.max(ms, TILE_BREAKER_MIN_MS), TILE_BREAKER_MAX_MS);
+}
 
 export const TILE_SERVICE_USER_AGENT =
   "immo-tile-proxy/1 (+https://immo.sent-tech.ca)" as const;
@@ -241,6 +266,8 @@ export class TileProxy {
   private readonly entries = new Map<string, TileCacheEntry>();
   private readonly negative = new Map<string, number>();
   private readonly inFlight = new Map<string, Promise<FetchOutcome>>();
+  /** Breaker close time per upstream (global, all readers). */
+  private readonly breaker = new Map<TileUpstreamId, number>();
   private bytes = 0;
   private hits = 0;
   private misses = 0;
@@ -277,7 +304,19 @@ export class TileProxy {
     this.entries.clear();
     this.negative.clear();
     this.inFlight.clear();
+    this.breaker.clear();
     this.bytes = 0;
+  }
+
+  /** Breaker close time for an upstream, or null when it is closed. */
+  breakerOpenUntil(upstream: TileUpstreamId, now: number = this.now()): number | null {
+    const until = this.breaker.get(upstream);
+    if (until === undefined) return null;
+    if (until <= now) {
+      this.breaker.delete(upstream);
+      return null;
+    }
+    return until;
   }
 
   private cacheKey(upstream: TileUpstreamId, layer: "tile" | "labels", z: number, x: number, y: number): string {
@@ -331,6 +370,10 @@ export class TileProxy {
     if (response.status === 304) return { kind: "not-modified",
       maxAgeMs: parseMaxAgeMs(response.headers.get("cache-control")) };
     if (response.status === 404) return { kind: "not-found" };
+    if (TILE_BREAKER_STATUSES.has(response.status)) {
+      await response.body?.cancel().catch(() => undefined);
+      return { kind: "throttled", retryAfterMs: parseRetryAfterMs(response.headers.get("retry-after"), this.now()) };
+    }
     if (response.status !== 200) return { kind: "error" };
     const contentType = (response.headers.get("content-type") ?? "").split(";")[0]?.trim().toLowerCase() ?? "";
     if (!TILE_ALLOWED_CONTENT_TYPES.has(contentType)) return { kind: "error" };
@@ -380,6 +423,13 @@ export class TileProxy {
     }
     if (negativeUntil !== undefined) this.negative.delete(key);
     let sawNotFound = false;
+    let throttledUntil: number | null = null;
+    const staleHit = (upstreamId: TileUpstreamId, cached: TileCacheEntry): TileResponse => {
+      this.hits += 1;
+      this.onEvent?.({ upstream: upstreamId, layer, z, x, y, cache: "hit",
+        status: 200, bytes: cached.body.byteLength, durationMs: this.now() - started });
+      return tileBody(cached);
+    };
     for (const upstreamId of order) {
       const upstream = TILE_UPSTREAMS[upstreamId];
       const template = layer === "labels" ? upstream.labels : upstream.tile;
@@ -393,6 +443,13 @@ export class TileProxy {
         this.onEvent?.({ upstream: upstreamId, layer, z, x, y, cache: "hit",
           status: 200, bytes: cached.body.byteLength, durationMs: this.now() - started });
         return tileBody(cached);
+      }
+      // Open breaker: no upstream call; a stale cached copy still serves.
+      const openUntil = TILE_BREAKER_UPSTREAMS.has(upstreamId) ? this.breakerOpenUntil(upstreamId, started) : null;
+      if (openUntil !== null) {
+        if (cached) return staleHit(upstreamId, cached);
+        throttledUntil = Math.min(throttledUntil ?? openUntil, openUntil);
+        continue;
       }
       this.misses += 1;
       const outcome = await this.inFlightFetch(entryKey, template(z, x, y), cached?.etag ?? null);
@@ -416,6 +473,13 @@ export class TileProxy {
         sawNotFound = true;
         continue;
       }
+      if (outcome.kind === "throttled" && TILE_BREAKER_UPSTREAMS.has(upstreamId)) {
+        const until = this.now() + outcome.retryAfterMs;
+        this.breaker.set(upstreamId, Math.max(this.breaker.get(upstreamId) ?? 0, until));
+        if (cached) return staleHit(upstreamId, cached);
+        throttledUntil = Math.min(throttledUntil ?? until, until);
+        continue;
+      }
     }
     // A tile missing on every tried upstream is cached briefly so it does
     // not hammer the public services. Any upstream error without a usable
@@ -427,6 +491,15 @@ export class TileProxy {
         cache: "negative", status: 404, bytes: 0, durationMs: this.now() - started });
       return tileJson(404, { error: "not_found" });
     }
+    if (throttledUntil !== null) {
+      // Upstream throttled or blocked us: answer 503 with the breaker
+      // Retry-After instead of letting every reader keep hammering it.
+      this.onEvent?.({ upstream: order[order.length - 1] ?? "quebec-bdtq20k", layer, z, x, y,
+        cache: "miss", status: 503, bytes: 0, durationMs: this.now() - started });
+      const retryAfter = Math.max(1, Math.ceil((throttledUntil - this.now()) / 1000));
+      return { ...tileJson(503, { error: "upstream_throttled" }),
+        headers: { "content-type": "application/json; charset=utf-8", "retry-after": String(retryAfter) } };
+    }
     this.onEvent?.({ upstream: order[order.length - 1] ?? "quebec-bdtq20k", layer, z, x, y,
       cache: "miss", status: 502, bytes: 0, durationMs: this.now() - started });
     return tileJson(502, { error: "tile_unavailable" });
@@ -437,6 +510,7 @@ type FetchOutcome =
   | { kind: "ok"; body: Uint8Array<ArrayBuffer>; contentType: string; etag: string | null; maxAgeMs: number }
   | { kind: "not-modified"; maxAgeMs: number }
   | { kind: "not-found" }
+  | { kind: "throttled"; retryAfterMs: number }
   | { kind: "error" };
 
 async function readCapped(response: Response, maxBytes: number): Promise<Uint8Array<ArrayBuffer> | null> {
@@ -570,6 +644,57 @@ export const TILE_OSM_RATE_LIMIT_DEFAULT: TileRateLimit = {
   maxRequests: 300,
 };
 
+/** Upper bound on reader keys tracked by the OSM guard (review m3). */
+export const TILE_OSM_RATE_LIMIT_MAX_KEYS = 10_000;
+
+/**
+ * Sliding-window limiter keyed by reader. Keys are kept in recency order
+ * (least recently seen first): readers whose window is empty are purged
+ * on each check, and the map is capped at maxKeys by evicting the least
+ * recently seen reader, so idle readers never accumulate.
+ */
+export class SlidingWindowLimiter {
+  private readonly hits = new Map<string, number[]>();
+
+  constructor(
+    private readonly limit: TileRateLimit,
+    private readonly maxKeys: number = TILE_OSM_RATE_LIMIT_MAX_KEYS,
+  ) {}
+
+  /** Tracked reader keys (tests and metrics). */
+  get size(): number {
+    return this.hits.size;
+  }
+
+  /** Records the hit and returns null when allowed, else Retry-After seconds. */
+  check(key: string, now: number): number | null {
+    const windowStart = now - this.limit.windowMs;
+    this.purgeIdle(windowStart);
+    const hits = (this.hits.get(key) ?? []).filter((at) => at > windowStart);
+    this.hits.delete(key);
+    if (hits.length >= this.limit.maxRequests) {
+      this.hits.set(key, hits);
+      return Math.max(1, Math.ceil((hits[0]! + this.limit.windowMs - now) / 1000));
+    }
+    hits.push(now);
+    this.hits.set(key, hits);
+    while (this.hits.size > this.maxKeys) {
+      const oldest = this.hits.keys().next();
+      if (oldest.done) break;
+      this.hits.delete(oldest.value);
+    }
+    return null;
+  }
+
+  private purgeIdle(windowStart: number): void {
+    for (const [key, hits] of this.hits) {
+      const last = hits[hits.length - 1];
+      if (last !== undefined && last > windowStart) break;
+      this.hits.delete(key);
+    }
+  }
+}
+
 export interface TileProxyMount {
   /** Sealed reader session check (authorized(c, true) at the I-10B mount). */
   readonly authorize: (c: Context) => Promise<boolean>;
@@ -596,12 +721,14 @@ export function createTileProxyApp(mount: TileProxyMount): Hono {
   const app = new Hono();
   const proxy = mount.proxy ?? new TileProxy(mount.proxyOptions ?? {});
   const clock = mount.now ?? Date.now;
-  // Sliding-window timestamps per reader key for the OSM relay guard.
-  const osmHits = new Map<string, number[]>();
+  // Sliding-window guard per reader key for the OSM relay (purged, capped).
+  const osmLimiter = mount.osmRateLimit ? new SlidingWindowLimiter(mount.osmRateLimit) : null;
 
   function answer(c: Context, proxyResponse: TileResponse): Response | Promise<Response> {
     if (proxyResponse.json !== null) {
-      return c.json(proxyResponse.json, proxyResponse.status as 404 | 429 | 502);
+      const retryAfter = proxyResponse.headers["retry-after"];
+      if (retryAfter) c.header("Retry-After", retryAfter);
+      return c.json(proxyResponse.json, proxyResponse.status as 404 | 429 | 502 | 503);
     }
     const headers = new Headers();
     for (const [name, value] of Object.entries(proxyResponse.headers)) headers.set(name, value);
@@ -610,21 +737,13 @@ export function createTileProxyApp(mount: TileProxyMount): Hono {
 
   /** Per-reader OSM guard; refuses 429 with Retry-After before any upstream call. */
   function osmAllowed(c: Context): Response | null {
-    const limit = mount.osmRateLimit;
-    if (!limit) return null;
+    if (!osmLimiter) return null;
     const key = mount.rateLimitKey?.(c) ?? null;
     if (key === null) return null;
-    const now = clock();
-    const windowStart = now - limit.windowMs;
-    const hits = (osmHits.get(key) ?? []).filter((at) => at > windowStart);
-    if (hits.length >= limit.maxRequests) {
-      const retryAfter = Math.max(1, Math.ceil((hits[0]! + limit.windowMs - now) / 1000));
-      c.header("Retry-After", String(retryAfter));
-      return c.json({ error: "rate_limited" }, 429);
-    }
-    hits.push(now);
-    osmHits.set(key, hits);
-    return null;
+    const retryAfter = osmLimiter.check(key, clock());
+    if (retryAfter === null) return null;
+    c.header("Retry-After", String(retryAfter));
+    return c.json({ error: "rate_limited" }, 429);
   }
 
   // OSM relay (J1.1): registered before the generic route so the sibling
