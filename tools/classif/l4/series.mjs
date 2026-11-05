@@ -6,22 +6,24 @@
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
-import { CLASSIF_DIR, REPO } from '../lib/paths.mjs';
+import { classifDir, repoRoot } from '../lib/paths.mjs';
 
 export const SERIES_MANIFEST_KIND = 'l4-series';
 
-export function seriesManifestFile(k) {
-  return path.join(CLASSIF_DIR, 'l4', 'manifests', `series-${k}.json`);
+export function seriesManifestFile(k, env = process.env) {
+  return path.join(classifDir(env), 'l4', 'manifests', `series-${k}.json`);
 }
 
 /** Loads and validates the pre-registered series manifest: tracked, clean, kind-checked.
     Review §9b/c: routes, halves sha, floors in ]0,1], failure ceiling in ]0,1] and supports
-    shapes are validated — a `floors:{}` no longer passes with floors at 0. */
-export function loadSeriesManifest(k) {
-  const file = seriesManifestFile(k);
+    shapes are validated — a `floors:{}` no longer passes with floors at 0.
+    Review §9: halves are REQUIRED (a manifest without frozen halves refuses). */
+export function loadSeriesManifest(k, env = process.env) {
+  const file = seriesManifestFile(k, env);
+  const repo = repoRoot(env);
   if (!existsSync(file)) throw new Error(`series ${k} refused: pre-registered manifest ${file} absent (commit it before dev)`);
-  const git = (...a) => spawnSync('git', a, { cwd: REPO, encoding: 'utf8' });
-  const rel = path.relative(REPO, file);
+  const git = (...a) => spawnSync('git', a, { cwd: repo, encoding: 'utf8' });
+  const rel = path.relative(repo, file);
   if (git('ls-files', '--error-unmatch', rel).status !== 0) throw new Error(`series ${k} refused: ${rel} is not committed`);
   if (git('diff', '--quiet', 'HEAD', '--', rel).status !== 0) throw new Error(`series ${k} refused: ${rel} differs from the committed version`);
   const m = JSON.parse(readFileSync(file, 'utf8'));
@@ -41,6 +43,10 @@ export function loadSeriesManifest(k) {
   if (!m.supports || typeof m.supports !== 'object' || !Number.isInteger(m.supports.recall) || m.supports.recall < 0
     || !Number.isInteger(m.supports.precision) || m.supports.precision < 0) {
     throw new Error(`series ${k} refused: ${rel} supports.recall/precision must be non-negative integers`);
+  }
+  const hex64 = (x) => typeof x === 'string' && /^[0-9a-f]{64}$/.test(x);
+  if (!m.halves || typeof m.halves !== 'object' || !hex64(m.halves.tuningSha256) || !hex64(m.halves.blindSha256)) {
+    throw new Error(`series ${k} refused: ${rel} halves.{tuningSha256,blindSha256} must be 64-hex shas (freeze the halves before dev)`);
   }
   return m;
 }
@@ -63,6 +69,7 @@ export function assertSeriesRoutes(seriesSpec, routes, k) {
  */
 export function assertSeriesHalves(seriesSpec, k, splitSha) {
   const h = seriesSpec.halves;
+  // (shape already enforced by loadSeriesManifest; re-checked for direct callers)
   if (!h || typeof h.tuningSha256 !== 'string' || !/^[0-9a-f]{64}$/.test(h.tuningSha256)
     || typeof h.blindSha256 !== 'string' || !/^[0-9a-f]{64}$/.test(h.blindSha256)) {
     throw new Error(`series ${k} refused: pre-registered manifest misses halves.{tuningSha256,blindSha256} (freeze the halves before dev)`);

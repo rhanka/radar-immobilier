@@ -11,8 +11,8 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { ROUTES, callSeat, parseJsonObject } from '../run-seat.mjs';
 import { appendJsonlRecord, parseJsonlTolerant } from '../lib/jsonl.mjs';
 import { sha256 } from '../lib/render.mjs';
-import { CLASSIF_DIR, classifHome, privateDir } from '../lib/paths.mjs';
-import { compareRoutes, seriesVerdict, shownStats } from './metrics.mjs';
+import { classifDir, classifHome, privateDir } from '../lib/paths.mjs';
+import { compareRoutes, routeFailed, seriesVerdict, shownStats } from './metrics.mjs';
 import { assertSeriesHalves, assertSeriesRoutes, loadSeriesManifest } from './series.mjs';
 import { check as budgetCheck } from '../lib/budget.mjs';
 import { assertNoVerbatim } from '../lib/freeze.mjs';
@@ -51,6 +51,17 @@ async function pool(tasks, n) {
 }
 
 /**
+ * Selection over ranked routes (review D4, Annex M M.3): routes failing the
+ * failure ceiling or with verdict `fail` are excluded — best is the first
+ * eligible route, null when every route failed. Exported for the selection test.
+ */
+export function selectBest(ranked) {
+  const eligible = ranked.filter((r) => !routeFailed(r));
+  return { order: ranked.map((r) => r.route), best: eligible[0]?.route ?? null,
+    excluded: ranked.filter((r) => routeFailed(r)).map((r) => r.route) };
+}
+
+/**
  * Per-item dev cache read (review §8): returns the cached row only when the stored key
  * (series,promptSha256,route,itemId) matches exactly; corrupt or stale entries read as null
  * (re-run). Exported for the resume test.
@@ -78,7 +89,7 @@ export async function main(argv = process.argv.slice(2)) {
   const routes = EVAL_ROUTES.filter((r) => !deferred.includes(r));
   const concurrency = Number(argv.includes('--concurrency') ? argv[argv.indexOf('--concurrency') + 1] : 2);
   const home = classifHome();
-  const promptFile = path.join(CLASSIF_DIR, 'l4', 'prompts', `P${k}.md`);
+  const promptFile = path.join(classifDir(process.env), 'l4', 'prompts', `P${k}.md`);
   if (!existsSync(promptFile)) { process.stderr.write(`classif-l4-dev: frozen prompt P${k} missing (run make classif-l4-p0 / optimise first)\n`); process.exit(2); }
   const frozen = readFileSync(promptFile, 'utf8');
   const promptSha = sha256(frozen);
@@ -93,7 +104,7 @@ export async function main(argv = process.argv.slice(2)) {
   // frozen halves must match the split draw (plain read — L2 already enforced committed).
   assertSeriesRoutes(seriesSpec, routes, k);
   try {
-    const splitFile = path.join(CLASSIF_DIR, 'l3', 'manifests', 'split.json');
+    const splitFile = path.join(classifDir(process.env), 'l3', 'manifests', 'split.json');
     if (existsSync(splitFile)) {
       const split = JSON.parse(readFileSync(splitFile, 'utf8'));
       if (split.sha256) assertSeriesHalves(seriesSpec, k, split.sha256);
@@ -150,6 +161,7 @@ export async function main(argv = process.argv.slice(2)) {
   // Review §9: metrics published WITH and WITHOUT unresolved rows; verdict from the series spec.
   // Review §9a: indeterminate supports come from the pre-registered series manifest.
   const devSupports = seriesSpec.supports ?? {};
+  const specFailureCeiling = seriesSpec.failureCeiling ?? 0.1;
   const aggregates = {};
   for (const [route, rows] of Object.entries(perRoute)) {
     const stats = shownStats(rows.map((r) => ({ ref: r.refVerdict, pred: r.failed ? { failed: true } : r.pred, unresolved: r.unresolved })),
@@ -158,7 +170,7 @@ export async function main(argv = process.argv.slice(2)) {
       { recallSupport: devSupports.recall ?? 30, precisionSupport: devSupports.precision ?? 30 });
     const failures = rows.filter((r) => r.failed).length;
     const spec = { recallFloor: seriesSpec.floors?.recall ?? 0, precisionFloor: seriesSpec.floors?.precision ?? 0,
-      failureCeiling: seriesSpec.failureCeiling ?? 0.1 };
+      failureCeiling: specFailureCeiling };
     aggregates[route] = { ...stats, failures,
       withUnresolved: statsWithUnresolved,
       verdict: seriesVerdict ? seriesVerdict({ stats, failures, items: rows.length }, spec) : null,
@@ -174,15 +186,19 @@ export async function main(argv = process.argv.slice(2)) {
   writeFileSync(path.join(dir, `errors.json`), `${JSON.stringify(errors, null, 1)}\n`, { mode: 0o600 });
   // Review §9d (M.3): lexicographic selection wired on the tuning half (compareRoutes is
   // no longer test-only) — recall LB, recall, precision LB, precision, prompt version, cost.
+  // Review D4: the ranked entries carry failures/verdict/items/ceiling so failing
+  // routes sort last and are excluded from best.
   const ranked = Object.entries(aggregates)
-    .map(([route, a]) => ({ route, stats: { recallLB: a.recallLB, recall: a.recall, precisionLB: a.precisionLB, precision: a.precision, indeterminate: a.indeterminate }, promptVersion: `P${k}`, costUsd: a.costUsd ?? 0 }))
+    .map(([route, a]) => ({ route, stats: { recallLB: a.recallLB, recall: a.recall, precisionLB: a.precisionLB, precision: a.precision, indeterminate: a.indeterminate },
+      promptVersion: `P${k}`, costUsd: a.costUsd ?? 0, failures: a.failures, verdict: a.verdict, items: a.items, failureCeiling: specFailureCeiling }))
     .sort(compareRoutes);
+  const selection = selectBest(ranked);
   const manifest = { kind: 'l4-dev', series: k, createdAt: new Date().toISOString(), promptSha256: promptSha,
     routes, deferred, tuningItems: tuning.length, aggregates,
-    selection: { order: ranked.map((r) => r.route), best: ranked[0]?.route ?? null, criterion: 'M.3 lexicographic (tuning half only)' },
+    selection: { order: selection.order, best: selection.best, excluded: selection.excluded, criterion: 'M.3 lexicographic (tuning half only, failing routes excluded)' },
     trackNote: 'per-item tuning outputs stay private (optimiser input); this manifest carries metrics only' };
-  mkdirSync(path.join(CLASSIF_DIR, 'l4', 'manifests'), { recursive: true });
-  writeFileSync(path.join(CLASSIF_DIR, 'l4', 'manifests', `series-${k}-dev.json`), `${JSON.stringify(manifest, null, 1)}\n`);
+  mkdirSync(path.join(classifDir(process.env), 'l4', 'manifests'), { recursive: true });
+  writeFileSync(path.join(classifDir(process.env), 'l4', 'manifests', `series-${k}-dev.json`), `${JSON.stringify(manifest, null, 1)}\n`);
   process.stdout.write(`${JSON.stringify(manifest, null, 2)}\n`);
   return manifest;
 }
