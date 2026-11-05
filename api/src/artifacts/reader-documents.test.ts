@@ -81,7 +81,9 @@ describe("documents.pv.v1 resolution (§11.3)", () => {
   it("should map workspace refusals to closed typed answers", async () => {
     vi.mocked(readWorkspaceArchiveCity).mockRejectedValue(new WorkspaceError(403, "workspace_not_authorized"));
     const { resolve, read, db } = setup([node([{ docSha: SHA, rawRef: CAS }])]);
-    expect(await resolve(params, context)).toEqual({ kind: "refused", status: 403, code: "workspace_not_authorized" });
+    const refused = await resolve(params, context);
+    expect(refused.kind).toBe("refused");
+    expect(refused.kind === "refused" && refused.cause.message).toBe("workspace_not_authorized");
     expect(db.select).not.toHaveBeenCalled();
     expect(read).not.toHaveBeenCalled();
   });
@@ -93,5 +95,25 @@ describe("documents.pv.v1 resolution (§11.3)", () => {
     }
     expect(documentsPvParams.safeParse({ ...params, docSha: "A".repeat(64) }).success).toBe(false);
     expect(documentsPvParams.safeParse({ ...params, type: "Lot" }).success).toBe(false);
+  });
+
+  it("should journal a failing doc-ref enrichment without city, node or storage key (B2)", async () => {
+    const where = vi.fn(async () => [node([{ docSha: SHA, rawRef: CAS }])]);
+    const db = { select: vi.fn(() => ({ from: () => ({ where }) })) };
+    const failing = { head: async (key: string) => { throw new Error(`S3 HEAD failed for ${key}`); },
+      get: async (key: string) => { throw new Error(`S3 GET failed for ${key}`); } };
+    const read = vi.fn(async () => ({ kind: "ok" as const, bytes: PDF, contentType: "application/pdf" }));
+    const logs: string[] = [];
+    const spies = (["log", "info", "warn", "error"] as const).map((level) =>
+      vi.spyOn(console, level).mockImplementation((...args: unknown[]) => { logs.push(args.map(String).join(" ")); }));
+    try {
+      const resolve = createReaderDocumentRead({ db: db as never, store: failing as never, readRaw: read as never });
+      expect(await resolve(params, context)).toEqual({ kind: "pdf", bytes: PDF });
+    } finally {
+      for (const spy of spies) spy.mockRestore();
+    }
+    expect(logs.length).toBeGreaterThan(0);
+    expect(logs.every((line) => line === "[reader-op] documents.pv.v1 doc-ref enrichment failed")).toBe(true);
+    for (const leak of [CITY, "sig-1", "raw/", SHA]) expect(logs.join("\n")).not.toContain(leak);
   });
 });

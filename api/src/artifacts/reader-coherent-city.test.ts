@@ -15,6 +15,7 @@ vi.mock("../services/graph/graph-store.js", async (importOriginal) => ({
 import { readCoherentProjection } from "../services/facets/projection-revisions.js";
 
 const WORKSPACE = "11111111-1111-4111-8111-111111111111";
+const KEY = Buffer.alloc(32, 7);
 const CITY = "valleyfield";
 const SHA = "a".repeat(64);
 const SHA2 = "b".repeat(64);
@@ -51,7 +52,7 @@ function assemble(nodes: Node[], extra: { total?: number; hidden?: number; selec
   const cards = nodes.map((node) => toDegradedSignalCard(node));
   return buildCoherentCityResponse({
     artifactId: "artifact-1", readerSub: "reader-alice", workspaceId: WORKSPACE, citySlug: CITY,
-    serverToken: "server-token-with-account-id", total: extra.total ?? nodes.length,
+    serverToken: "server-token-with-account-id", tokenKey: KEY, total: extra.total ?? nodes.length,
     hidden: extra.hidden ?? 0, selected: extra.selected ?? 0,
     legacyProjection: { version: "legacy-zmp-v1", a: { count: 0, signalIds: [] } },
     sources: nodes.map((node, index) => ({ node, card: cards[index]! })),
@@ -130,7 +131,7 @@ describe("signals.coherent-city.v1 projection (§5.2–§5.5)", () => {
   it("should derive a reader-scoped token, distinct across artifacts and readers", () => {
     const base = assemble([trapNode("sig-1")]);
     const other = buildCoherentCityResponse({ artifactId: "artifact-2", readerSub: "reader-alice",
-      workspaceId: WORKSPACE, citySlug: CITY, serverToken: "server-token-with-account-id", total: 0, hidden: 0,
+      workspaceId: WORKSPACE, citySlug: CITY, serverToken: "server-token-with-account-id", tokenKey: KEY, total: 0, hidden: 0,
       selected: 0, legacyProjection: { version: "legacy-zmp-v1", a: { count: 0, signalIds: [] } }, sources: [] });
     expect(base.token).toMatch(/^[a-f0-9]{64}$/);
     expect(base.token).not.toBe(other.token);
@@ -174,5 +175,76 @@ describe("signals.coherent-city.v1 service wiring", () => {
     expect(body.counts).toEqual({ total: 2, hidden: 1, visible: 1, selected: 1 });
     expect(vi.mocked(readCoherentProjection).mock.calls[0]!.slice(1, 5))
       .toEqual(["reader-alice", WORKSPACE, CITY, "signal"]);
+  });
+
+  it("should journal a failing doc-ref enrichment without city, node or storage key (B2)", async () => {
+    const node = trapNode("sig-enrich");
+    vi.mocked(readCoherentProjection).mockResolvedValue({
+      scope: { token: "server-token" } as never,
+      payload: { archive: [], selection: [], signals: [node] },
+    } as never);
+    const failing = { head: async (key: string) => { throw new Error(`S3 HEAD failed for ${key}`); },
+      get: async (key: string) => { throw new Error(`S3 GET failed for ${key}`); } };
+    const logs: string[] = [];
+    const spies = (["log", "info", "warn", "error"] as const).map((level) =>
+      vi.spyOn(console, level).mockImplementation((...args: unknown[]) => {
+        logs.push(args.map((arg) => (arg instanceof Error ? `${arg.message} ${arg.stack ?? ""}` : String(arg))).join(" "));
+      }));
+    try {
+      const read = createBasketReadOperation({ db: {} as never, store: failing as never });
+      const body = validateReaderResponse("signals.coherent-city.v1",
+        await read("signals.coherent-city.v1", { workspaceId: WORKSPACE, citySlug: CITY, mode: "signal" }, context),
+        "reader-alice") as Record<string, any>;
+      expect(body.signals).toHaveLength(1);
+    } finally {
+      for (const spy of spies) spy.mockRestore();
+    }
+    expect(logs.length).toBeGreaterThan(0);
+    expect(logs.every((line) => line === "[reader-op] signals.coherent-city.v1 doc-ref enrichment failed")).toBe(true);
+    const journal = logs.join("\n");
+    for (const leak of [CITY, "sig-enrich", "raw/", SHA]) expect(journal).not.toContain(leak);
+  });
+
+  it("should keep the reader-scoped token keyed: another server key gives another token (m6)", () => {
+    const one = buildCoherentCityResponse({ artifactId: "a", readerSub: "r", workspaceId: WORKSPACE, citySlug: CITY,
+      serverToken: "s", tokenKey: KEY, total: 0, hidden: 0, selected: 0,
+      legacyProjection: { version: "legacy-zmp-v1", a: { count: 0, signalIds: [] } }, sources: [] });
+    const two = buildCoherentCityResponse({ artifactId: "a", readerSub: "r", workspaceId: WORKSPACE, citySlug: CITY,
+      serverToken: "s", tokenKey: Buffer.alloc(32, 9), total: 0, hidden: 0, selected: 0,
+      legacyProjection: { version: "legacy-zmp-v1", a: { count: 0, signalIds: [] } }, sources: [] });
+    expect(one.token).not.toBe(two.token);
+  });
+});
+
+describe("signals.coherent-city.v1 payload size (§5.5, large fixture)", () => {
+  /** A dense but realistic city signal: long PV excerpts, 3 doc-refs, structured props. */
+  function denseNode(index: number): Node {
+    const sha = (index.toString(16).padStart(8, "0") + "e".repeat(56)).slice(0, 64);
+    return trapNode(`sig-${index}`, {
+      label: `Règlement 2026-${index} modifiant le zonage — zones H-${index} et C-${index}`.padEnd(160, "."),
+      props: {
+        status: "avis-motion", description: "Avis de motion. ".repeat(120),
+        refs: [0, 1, 2].map((page) => ({ docSha: sha, rawRef: `raw/proces-verbaux-${CITY}/cas/${sha}.pdf`,
+          excerpt: "Extrait du procès-verbal. ".repeat(60), page: page + 1, fetchedAt: "2026-02-01T00:00:00.000Z" })),
+        properties: { category: "zonage", etape: "avis_motion", zone_ref: [`H-${index}`, `C-${index}`],
+          reglement_number: `2026-${index}`, summary: "Résumé. ".repeat(100) },
+      },
+    });
+  }
+
+  it("should measure the serialized DTO per signal and fail typed beyond the 2 MiB ceiling", () => {
+    const measure = (count: number) => Buffer.byteLength(JSON.stringify(parseCoherentCityResponse(
+      assemble(Array.from({ length: count }, (_, index) => denseNode(index))))));
+    const hundred = measure(100);
+    const perSignal = hundred / 100;
+    // Recorded measure (dense fixture, 3 refs × ~1.5 kB excerpts, each excerpt
+    // served in docRefs, evidence.refs and props.refs): ~35 kB per signal, so
+    // a dense city crosses the 2 MiB ceiling near 59 signals and then fails
+    // typed (projection_payload_too_large). Real per-city sizes: unverified.
+    expect(perSignal).toBeGreaterThan(20_000);
+    expect(perSignal).toBeLessThan(50_000);
+    const fitting = Math.floor(2_097_152 / perSignal);
+    expect(measure(Math.max(1, fitting - 10))).toBeLessThanOrEqual(2_097_152);
+    expect(measure(fitting + 20)).toBeGreaterThan(2_097_152);
   });
 });

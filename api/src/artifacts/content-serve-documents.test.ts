@@ -4,6 +4,8 @@ import { createFixtureAuthority, fingerprintReaderProfile } from "./reader-profi
 import { createMemoryReleaseFiles } from "./release-files.js";
 import { mintSessionCookie } from "./preview-session.js";
 import type { ReaderDocumentResult } from "./reader-documents.js";
+import { ScopeError } from "../services/facets/scope.js";
+import { WorkspaceError } from "../services/workspaces/types.js";
 import { GRANT_SECRET, SESSION_SECRET, ISSUER, HOST } from "./reader-test-fixture.js";
 
 const ARTIFACT = "123e4567-e89b-12d3-a456-426614174000";
@@ -114,14 +116,19 @@ describe("documents.pv.v1 dispatch (§11.3, §15)", () => {
       [{ kind: "not_found" }, 404, "document_not_found"],
       [{ kind: "unsupported_media" }, 415, "unsupported_media_type"],
       [{ kind: "too_large" }, 413, "payload_too_large"],
-      [{ kind: "refused", status: 403, code: "workspace_not_authorized" }, 403, "workspace_not_authorized"],
+      [{ kind: "refused", cause: new WorkspaceError(404, "workspace_membership_required") }, 403, "workspace_not_authorized"],
+      // M2: a raw service message carrying the workspace id never reaches the body.
+      [{ kind: "refused", cause: new ScopeError(503, `scoped_facet_scope_unavailable:${WORKSPACE}`) }, 503,
+        "signal_capability_unavailable"],
     ];
     for (const [result, status, code] of outcomes) {
       const { app, readDocument } = setup();
       readDocument.mockResolvedValue(result);
       const res = await get(app, query, { host: HOST, cookie: sealedCookie() });
       expect(res.status).toBe(status);
-      expect(await res.json()).toEqual({ error: code });
+      const body = await res.json();
+      expect(body).toEqual({ error: code });
+      expect(JSON.stringify(body)).not.toContain(WORKSPACE);
     }
   });
 

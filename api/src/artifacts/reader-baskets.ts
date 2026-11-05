@@ -15,6 +15,7 @@
  * inside the services (workspace_not_authorized). Several memberships
  * require the caller to pick one workspace id explicitly.
  */
+import { randomBytes } from "node:crypto";
 import type { Database } from "../db/client.js";
 import type { ObjectStore } from "../storage/object-store.js";
 import { readFacetContext } from "../services/facets/classification-context.js";
@@ -32,6 +33,7 @@ import { getSignalNodesForCity } from "../services/graph/graph-store.js";
 import { buildScopedSignalCards, scopedLegacyProjection } from "../services/facets/scoped-signal-cards.js";
 import type { ApiReaderContext } from "./reader-context.js";
 import { toByCityServiceQuery, type ByCityParams } from "./reader-by-city.js";
+import { deriveReaderKey } from "./reader-me.js";
 import { buildCoherentCityResponse, type CoherentCityParams } from "./reader-coherent-city.js";
 import { isWorkspaceReadOperation, type ReaderOperationName } from "./reader-operations.js";
 
@@ -39,6 +41,11 @@ export interface BasketReadDeps {
   readonly db: Database;
   readonly store: ObjectStore;
   readonly classification?: ClassificationOptions | undefined;
+  /**
+   * Reader session secret: keys the coherent-city token (HKDF purpose key).
+   * Absent (tests, closed reader), a random per-process key.
+   */
+  readonly tokenSecret?: string | undefined;
 }
 
 export function createBasketReadOperation(deps: BasketReadDeps): (
@@ -46,6 +53,8 @@ export function createBasketReadOperation(deps: BasketReadDeps): (
   params: unknown,
   context: ApiReaderContext,
 ) => Promise<unknown> {
+  const tokenKey = deps.tokenSecret
+    ? deriveReaderKey(deps.tokenSecret, "signals.coherent-city.v1/token") : randomBytes(32);
   return async (op, params, context) => {
     // J1.2d/e §4.3: same service as the app route — the dispatch already
     // refused `showDiscarded` and unknown keys, so the viewer population
@@ -81,7 +90,8 @@ export function createBasketReadOperation(deps: BasketReadDeps): (
       const cards = await buildScopedSignalCards(
         { ...(deps.store ? { store: deps.store } : {}), docEnrichmentBudgetMs: 2000,
           // Typed journal only: never the city, the node id or the error text.
-          onDegraded: () => console.error("[reader-op] signals.coherent-city.v1 card degraded") },
+          onDegraded: () => console.error("[reader-op] signals.coherent-city.v1 card degraded"),
+          onRefFailed: () => console.error("[reader-op] signals.coherent-city.v1 doc-ref enrichment failed") },
         visibleNodes, scoped.citySlug);
       const total = coherent.payload.signals.length;
       const selected = coherent.payload.selection
@@ -89,7 +99,7 @@ export function createBasketReadOperation(deps: BasketReadDeps): (
       return buildCoherentCityResponse({
         artifactId: context.artifactId, readerSub: context.readerSub,
         workspaceId: scoped.workspaceId, citySlug: scoped.citySlug,
-        serverToken: coherent.scope.token, total, hidden: total - visibleNodes.length, selected,
+        serverToken: coherent.scope.token, tokenKey, total, hidden: total - visibleNodes.length, selected,
         legacyProjection: scopedLegacyProjection(cards),
         sources: visibleNodes.map((node, index) => ({
           node: { id: node.id, type: node.type, citySlug: node.citySlug,

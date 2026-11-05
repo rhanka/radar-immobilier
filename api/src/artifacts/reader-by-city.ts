@@ -14,7 +14,11 @@ import { vivierCountsSchema } from "@radar/domain";
 import { ClassificationError } from "../services/facets/classification-errors.js";
 import { WorkspaceId } from "../services/facets/classification-query.js";
 
-const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+/** A real civil date (`2026-02-31` refuses): the regex shape, then a UTC round-trip. */
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((value) => {
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+}, "not a civil date");
 
 /**
  * Exact §4.3 allowlist. `workspaceId` is the lowercase guid path scope; the

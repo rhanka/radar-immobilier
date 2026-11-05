@@ -12,7 +12,7 @@
  * - `documentUrl` rewritten server-side to the opaque `documents.pv.v1` op;
  * - `token` replaced by a reader-scoped digest (never the server token).
  */
-import { createHash } from "node:crypto";
+import { createHmac } from "node:crypto";
 import { z } from "zod";
 import { ClassificationError } from "../services/facets/classification-errors.js";
 import { CitySlug, WorkspaceId } from "../services/facets/classification-query.js";
@@ -405,14 +405,15 @@ export interface CoherentSignalSource {
 }
 
 /**
- * Reader-scoped digest replacing the server token: stable for the
- * (artifact, reader) couple, non reversible, not correlatable across
- * artifacts, and bound to the exact server snapshot it acknowledges.
+ * Reader-scoped token replacing the server token: an HMAC under a server key
+ * (derived from the reader session secret), stable for the (artifact,
+ * reader) couple, non reversible, not correlatable across artifacts, and
+ * bound to the exact server snapshot it acknowledges.
  */
-export function deriveCoherentToken(input: {
+export function deriveCoherentToken(key: Uint8Array, input: {
   artifactId: string; readerSub: string; workspaceId: string; citySlug: string; serverToken: string;
 }): string {
-  return createHash("sha256").update(
+  return createHmac("sha256", key).update(
     ["coherent-city-v1", input.artifactId, input.readerSub,
       input.workspaceId, input.citySlug, input.serverToken].join("\u0000"), "utf8",
   ).digest("hex");
@@ -466,6 +467,8 @@ export interface CoherentCityAssembly {
   workspaceId: string;
   citySlug: string;
   serverToken: string;
+  /** HMAC key of the reader-scoped token (`deriveReaderKey(secret, "signals.coherent-city.v1/token")`). */
+  tokenKey: Uint8Array;
   total: number;
   hidden: number;
   selected: number;
@@ -483,7 +486,7 @@ export function buildCoherentCityResponse(assembly: CoherentCityAssembly): Recor
     workspaceId: assembly.workspaceId,
     citySlug: assembly.citySlug,
     mode: "signal",
-    token: deriveCoherentToken({ artifactId: assembly.artifactId, readerSub: assembly.readerSub,
+    token: deriveCoherentToken(assembly.tokenKey, { artifactId: assembly.artifactId, readerSub: assembly.readerSub,
       workspaceId: assembly.workspaceId, citySlug: assembly.citySlug, serverToken: assembly.serverToken }),
     heads: [],
     signals,
