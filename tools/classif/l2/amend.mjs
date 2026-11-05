@@ -10,7 +10,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { callSeat, parseJsonObject } from '../run-seat.mjs';
 import { sha256 } from '../lib/render.mjs';
 import { appendJsonlRecord } from '../lib/jsonl.mjs';
-import { CLASSIF_DIR, REPO, classifHome, privateDir } from '../lib/paths.mjs';
+import { classifDir, repoRoot, testOnlyEnv, classifHome, privateDir } from '../lib/paths.mjs';
 import { check as checkBudget } from '../lib/budget.mjs';
 import { assertNoVerbatim } from '../lib/freeze.mjs';
 import { atomicWrite, ANNOTATORS, loadDevItems } from './run.mjs';
@@ -18,14 +18,18 @@ import { latestVotes } from './converge.mjs';
 
 /** Tuning-half item ids from the committed split (plan v3 D2: amendments from tuning only).
     Review §3b: the split must be committed clean — an edited uncommitted split is refused.
-    Hermetic tests override via CLASSIF_SPLIT_FILE / CLASSIF_REPO (temp committed split). */
-export function tuningHalf(splitFile = process.env.CLASSIF_SPLIT_FILE ?? path.join(CLASSIF_DIR, 'l3', 'manifests', 'split.json'), repo = process.env.CLASSIF_REPO ?? REPO) {
-  if (!existsSync(splitFile)) throw new Error(`split refused: ${splitFile} absent (run make classif-l3b-split first)`);
-  const rel = path.relative(repo, splitFile);
-  const git = (...a) => spawnSync('git', a, { cwd: repo, encoding: 'utf8' });
+    Review D1/D2: hermetic tests override via CLASSIF_SPLIT_FILE / CLASSIF_REPO in test
+    mode only (temp committed split); production refuses both hooks. */
+export function tuningHalf(splitFile = null, repo = null) {
+  const env = process.env;
+  const file = splitFile ?? testOnlyEnv(env, 'CLASSIF_SPLIT_FILE') ?? path.join(classifDir(env), 'l3', 'manifests', 'split.json');
+  const root = repo ?? repoRoot(env);
+  if (!existsSync(file)) throw new Error(`split refused: ${file} absent (run make classif-l3b-split first)`);
+  const rel = path.relative(root, file);
+  const git = (...a) => spawnSync('git', a, { cwd: root, encoding: 'utf8' });
   if (git('ls-files', '--error-unmatch', rel).status !== 0) throw new Error(`split refused: ${rel} is not committed (commit the draw before amending)`);
   if (git('diff', '--quiet', 'HEAD', '--', rel).status !== 0) throw new Error(`split refused: ${rel} differs from the committed version (commit before amending)`);
-  const m = JSON.parse(readFileSync(splitFile, 'utf8'));
+  const m = JSON.parse(readFileSync(file, 'utf8'));
   return new Set(m.halves.tuning);
 }
 
@@ -110,8 +114,8 @@ export async function main(argv = process.argv.slice(2)) {
       residualItems: 0, proposed: 0, adopted: 0, votes: [], calls: [], gel: true, guideSha256: sha256(guide),
       why: `gel: no ${half}-half residual disagreements after pass ${n} (guide ${from} stands, copied to ${to})` };
     writeFileSync(path.join(home, 'l2', `amend-${to}.json`), JSON.stringify({ gel: true, why: gel.why }, null, 1), { mode: 0o600 });
-    mkdirSync(path.join(CLASSIF_DIR, 'l2', 'manifests'), { recursive: true });
-    writeFileSync(path.join(CLASSIF_DIR, 'l2', 'manifests', `amend-${to}.json`), `${JSON.stringify(gel, null, 1)}\n`);
+    mkdirSync(path.join(classifDir(process.env), 'l2', 'manifests'), { recursive: true });
+    writeFileSync(path.join(classifDir(process.env), 'l2', 'manifests', `amend-${to}.json`), `${JSON.stringify(gel, null, 1)}\n`);
     process.stdout.write(`${JSON.stringify(gel, null, 2)}\n`);
     return gel;
   }
@@ -171,7 +175,7 @@ ${union.map((x) => `- ${x.id}: ${x.rule} (rationale: ${x.rationale})`).join('\n'
   writeFileSync(path.join(home, 'l2', `amend-${to}.json`), JSON.stringify({ tally, calls }, null, 1), { mode: 0o600 });
   const manifest = { kind: 'guide-amendment', from, to, afterPass: n, createdAt: new Date().toISOString(), half, deferred, gaps,
     residualItems: residual.length, proposed: union.length, adopted: adopted.length, votes: tally.map((x) => x.yes), calls, guideSha256: sha256(next) };
-  const repoDir = path.join(CLASSIF_DIR, 'l2', 'manifests');
+  const repoDir = path.join(classifDir(process.env), 'l2', 'manifests');
   mkdirSync(repoDir, { recursive: true });
   writeFileSync(path.join(repoDir, `amend-${to}.json`), `${JSON.stringify(manifest, null, 1)}\n`);
   process.stdout.write(`${JSON.stringify(manifest, null, 2)}\n`);

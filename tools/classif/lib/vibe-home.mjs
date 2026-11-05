@@ -6,8 +6,9 @@
 // price unknown (left at 0 = cost not computed). Provider keys stay in the system keyring (never copied, never read).
 import os from 'node:os';
 import path from 'node:path';
+import process from 'node:process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { privateDir } from './paths.mjs';
+import { privateDir, testOnlyEnv } from './paths.mjs';
 
 export const LEVELS = ['low', 'medium', 'high'];
 export const ALIASES = { glm: 'glm-5-3-classif', mistral: 'mistral-large-4-classif' };
@@ -39,10 +40,14 @@ supports_images = false
 }
 
 /** Writes (once) and returns the VIBE_HOME directory for `level`. */
-export function vibeHome(home, level, { source = path.join(os.homedir(), '.vibe', 'config.toml') } = {}) {
+export function vibeHome(home, level, { source } = {}) {
   if (!LEVELS.includes(level)) throw new Error(`vibe level ${level} not in ${LEVELS.join('|')}`);
+  // Review D1/D2: hermetic tests point CLASSIF_VIBE_CONFIG_SRC at a fake config in
+  // test mode — production refuses the hook, the real ~/.vibe/config.toml is
+  // never read in tests.
+  const src = source ?? testOnlyEnv(process.env, 'CLASSIF_VIBE_CONFIG_SRC') ?? path.join(os.homedir(), '.vibe', 'config.toml');
   const dir = privateDir(path.join(home, 'vibe', level));
   const file = path.join(dir, 'config.toml');
-  if (!existsSync(file)) writeFileSync(file, vibeConfig(readFileSync(source, 'utf8'), level), { mode: 0o600 });
+  if (!existsSync(file)) writeFileSync(file, vibeConfig(readFileSync(src, 'utf8'), level), { mode: 0o600 });
   return dir;
 }

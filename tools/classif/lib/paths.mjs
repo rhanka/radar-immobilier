@@ -13,6 +13,39 @@ export const MIGRATION_CODES = path.join(REPO, 'api', 'drizzle', '0014_facets_si
 
 export const classifHome = (env = process.env) => path.resolve(env.CLASSIF_HOME ?? path.join(os.homedir(), '.local', 'share', 'radar-classif'));
 
+/**
+ * Explicit test mode for hermetic tests (review D1/D2). The hooks below are
+ * honoured ONLY when `env.CLASSIF_TEST_MODE === '1'`; production paths refuse
+ * them otherwise (fail closed). The live Astra pass never sets test mode, so
+ * it never reads these overrides.
+ */
+export const isTestMode = (env = process.env) => env.CLASSIF_TEST_MODE === '1';
+
+/**
+ * Test-only env hook: returns `env[name]` in test mode, undefined when unset,
+ * and throws in production when set (a test hook must never steer a live run).
+ */
+export function testOnlyEnv(env, name) {
+  const v = (env ?? process.env)[name];
+  if (v === undefined) return undefined;
+  if ((env ?? process.env).CLASSIF_TEST_MODE !== '1') {
+    throw new Error(`${name} is test-only (CLASSIF_TEST_MODE=1 required): production refused`);
+  }
+  return v;
+}
+
+/** Repo root: the CLASSIF_REPO override (tests) else the real checkout. Test-only. */
+export function repoRoot(env = process.env) {
+  const o = testOnlyEnv(env, 'CLASSIF_REPO');
+  return o === undefined ? REPO : path.resolve(o);
+}
+
+/** tools/classif dir of the active repo (real checkout, or the temp repo in tests). */
+export function classifDir(env = process.env) {
+  const o = testOnlyEnv(env, 'CLASSIF_REPO');
+  return o === undefined ? CLASSIF_DIR : path.join(path.resolve(o), 'tools', 'classif');
+}
+
 /** Creates `dir` in mode 700, or requires an existing one to be private (no group/other bits). */
 export function privateDir(dir) {
   mkdirSync(dir, { recursive: true, mode: 0o700 });
