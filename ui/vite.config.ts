@@ -8,6 +8,10 @@ const apiProxyTarget = process.env.API_PROXY_TARGET ?? "http://localhost:3000";
 // Harnais QA (test navigateur de composants isolés). N'EST PAS inclus dans le
 // build prod : activé uniquement quand QA_HARNESS=1 (lancé par Playwright).
 const qaHarness = process.env.QA_HARNESS === "1";
+
+// J1.2d/e: build the real UI as an artifact (`VITE_ARTIFACT_MODE=1`): app
+// paths go through the named reader ops (src/lib/net/artifact-transport.ts).
+const artifactMode = process.env.VITE_ARTIFACT_MODE === "1";
 const harnessInput = qaHarness
   ? {
       main: fileURLToPath(new URL("./index.html", import.meta.url)),
@@ -61,9 +65,15 @@ export default defineConfig({
   plugins: [svelte()],
   resolve: {
     conditions: ["browser", "svelte", "module", "import", "default"],
-    alias: {
-      $lib: fileURLToPath(new URL("./src/lib", import.meta.url)),
-    },
+    alias: [
+      // J1.2d/e artifact build: swap the no-op boot hook for the transport
+      // installer. Absent (app build), the transport is never bundled.
+      ...(artifactMode
+        ? [{ find: /^\.\/lib\/net\/artifact-boot$/,
+          replacement: fileURLToPath(new URL("./src/lib/net/artifact-boot.artifact.ts", import.meta.url)) }]
+        : []),
+      { find: "$lib", replacement: fileURLToPath(new URL("./src/lib", import.meta.url)) },
+    ],
   },
   build: harnessInput ? { rollupOptions: { input: harnessInput } } : {},
   server: {
