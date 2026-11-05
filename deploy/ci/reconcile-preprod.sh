@@ -21,6 +21,10 @@
 #                                            Deployment exists; the pod is rolled when
 #                                            the ConfigMap changed, see step 4b)
 #   - Deployment radar-api, radar-ui        (#611: securityContext; pre-flight-present)
+#   - Deployment radar-immo-mcp          (env from the overlay — e.g. the
+#                                            ARTIFACTS_UPLOAD_PAGE_SECRET ref;
+#                                            applied only while the Deployment
+#                                            exists, same guard as immo-mcp-config)
 #   - CronJob    radar-consistency-snapshot (#611: securityContext)
 # EXCLUDED: the Namespace (PSS labels = operator act, cluster-scoped), Services /
 # StatefulSets / NetworkPolicies / Ingress (operator-owned, not in the SA Role),
@@ -28,9 +32,8 @@
 # it to the preprod IdP so the render is PROD-free, but it is still not applied —
 # radar-api is NOW reconciled: the preprod overlay patches its per-env storage
 # buckets AND its auth keys, so applying it no longer leaks base PROD values),
-# the radar-immo-mcp Deployment/Service (live since the bascule; image rolled by
-# set-image, spec not reconciled yet), and the radar-maildev / radar-obscura
-# Deployments
+# the radar-immo-mcp Service (operator-owned, like the other Services), and the
+# radar-maildev / radar-obscura Deployments
 # (the SA has no `create`, so an absent one would 403). A comprehensive reconcile
 # is a documented PR follow-up (grant deployments:create OR patch-existing-only,
 # plus an ns-agnostic audit of the env ConfigMaps).
@@ -120,6 +123,10 @@ targeted() {
   kf "$RENDER" Deployment radar-api
   echo ---
   kf "$RENDER" Deployment radar-ui
+  if [ "$MCP_PRESENT" = 1 ]; then
+    echo ---
+    kf "$RENDER" Deployment radar-immo-mcp
+  fi
   echo ---
   kf "$RENDER" CronJob radar-consistency-snapshot
 }
@@ -171,4 +178,18 @@ kf "$RENDER" Deployment radar-api \
 kf "$RENDER" Deployment radar-ui \
   | kubectl apply --server-side --field-manager="$FM" --force-conflicts -f -
 
-echo "reconcile OK — preprod durables applied (radar-ui-nginx + radar-api CMs, immo-mcp-config when radar-immo-mcp exists, radar-api/radar-ui Deployments, radar-consistency-snapshot CronJob)."
+# 6b. Deployment radar-immo-mcp env (the ARTIFACTS_UPLOAD_PAGE_SECRET ref added
+#     by #1004 lived only live, via a kubectl patch — the CD never applied it).
+#     Targeted SSA with the same field manager takes ownership of the overlay
+#     env entries; the rendered entries are valueFrom secretKeyRef refs (same
+#     name/key, no literal), so this SSA does not conflict with the live
+#     strategic-merge patch — it replaces drift with the git source of truth.
+#     Guarded like immo-mcp-config above: absent Deployment stays absent (the
+#     SA cannot create Deployments). set-image runs AFTER this reconcile and
+#     stays the last word on the served image.
+if [ "$MCP_PRESENT" = 1 ]; then
+  kf "$RENDER" Deployment radar-immo-mcp \
+    | kubectl apply --server-side --field-manager="$FM" --force-conflicts -f -
+fi
+
+echo "reconcile OK — preprod durables applied (radar-ui-nginx + radar-api CMs, immo-mcp-config + radar-immo-mcp Deployment when radar-immo-mcp exists, radar-api/radar-ui Deployments, radar-consistency-snapshot CronJob)."
