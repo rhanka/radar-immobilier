@@ -85,7 +85,7 @@ describe("reader consent baskets persistence", () => {
     const posted = await application.request("/approve", { method: "POST",
       headers: { cookie: session, origin: auth.appBaseUrl, "content-type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({ artifactId, binding: fields.binding!,
-        origin, releaseId: fields.releaseId!, profileFingerprint: fields.profileFingerprint! }) });
+        origin, releaseId: fields.releaseId!, profileFingerprint: fields.profileFingerprint!, decision: "grant" }) });
     expect(posted.status).toBe(303);
     expect(posted.headers.get("location")).toContain("/__reader/exchange?ticket=");
     expect(await consent().hasLiveConsent(reader, artifactId, BASKET_READ_SCOPE_ID)).toBe(true);
@@ -122,11 +122,21 @@ describe("reader consent baskets persistence", () => {
     expect(html).toContain("réglages de votre compte");
     const fields = hiddenFields(html);
 
+    // J1.3a: a submission without an explicit decision (stale screen)
+    // records nothing and mints nothing.
+    const stale = await application.request("/consent", { method: "POST",
+      headers: { cookie: session, origin: auth.appBaseUrl, "content-type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ artifactId, binding: fields.binding!,
+        origin, releaseId: fields.releaseId!, profileFingerprint: fields.profileFingerprint! }) });
+    expect(stale.status).toBe(400);
+    expect(stale.headers.get("location")).toBeNull();
+    expect(await consent().hasLiveConsent(reader, artifactId, BASKET_READ_SCOPE_ID)).toBe(false);
+
     // 2. The click persists the BASKETS consent and mints the basket ticket.
     const posted = await application.request("/consent", { method: "POST",
       headers: { cookie: session, origin: auth.appBaseUrl, "content-type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({ artifactId, binding: fields.binding!,
-        origin, releaseId: fields.releaseId!, profileFingerprint: fields.profileFingerprint! }) });
+        origin, releaseId: fields.releaseId!, profileFingerprint: fields.profileFingerprint!, decision: "grant" }) });
     expect(posted.status).toBe(303);
     expect(posted.headers.get("location")).toContain("/__reader/exchange?ticket=");
     expect(await consent().hasLiveConsent(reader, artifactId, BASKET_READ_SCOPE_ID)).toBe(true);
@@ -151,7 +161,10 @@ describe("reader consent baskets persistence", () => {
     const third = await application.request(consentQuery(randomBytes(32).toString("hex")),
       { headers: { cookie: session, ...BROWSER } });
     expect(third.status).toBe(200);
-    expect(await third.text()).toContain("Autoriser la lecture de vos paniers");
+    const thirdHtml = await third.text();
+    expect(thirdHtml).toContain("Autoriser la lecture de vos paniers");
+    // J1.3a: the revocation wording comes from the ledger row itself.
+    expect(thirdHtml).toContain("Votre accord précédent pour cette page a été retiré");
   });
 
   it("should refuse a suspended account even with a live consent row", async () => {
