@@ -39,6 +39,17 @@ export const renderItem = (citySlug, nodes) => `Municipalité : ${citySlug}\n\n$
 
 export const sha256 = (s) => createHash('sha256').update(s).digest('hex');
 
+/**
+ * Canonical JSON with sorted object keys (review D3): two aggregates with the
+ * same content hash identically whatever the route insertion order was (a
+ * resumed S113 restore must not change aggregatesSha256 at equal data).
+ */
+export function stableStringify(v) {
+  if (v === null || typeof v !== 'object') return JSON.stringify(v);
+  if (Array.isArray(v)) return `[${v.map(stableStringify).join(',')}]`;
+  return `{${Object.keys(v).sort().map((k) => `${JSON.stringify(k)}:${stableStringify(v[k])}`).join(',')}}`;
+}
+
 /** docShas cited by a node (properties.docSha, refs[].docSha at both levels). */
 export function nodeDocShas(n) {
   const p = n.props?.properties ?? {};
