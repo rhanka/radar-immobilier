@@ -156,6 +156,7 @@ logger.info(
 const basketReadOperation = createBasketReadOperation({
   db: dbHandle.db,
   store: objectStore,
+  ...(readerSessionSecret.length >= 32 ? { tokenSecret: readerSessionSecret } : {}),
   ...(readerCursorKeyring ? { classification: { cursorKeyring: readerCursorKeyring } } : {}),
 });
 // J1.2d/e §11.3: the reader PDF op resolves through the same raw stores as

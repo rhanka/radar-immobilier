@@ -11,6 +11,7 @@ import { credentials, GRANT_SECRET, SESSION_SECRET, ISSUER, HOST } from "./reade
 const ARTIFACT = "123e4567-e89b-12d3-a456-426614174000";
 const RELEASE = "123e4567-e89b-12d3-a456-426614174001";
 const WORKSPACE = "11111111-1111-4111-8111-111111111111";
+const KEY = Buffer.alloc(32, 7);
 const CITY = "valleyfield";
 const profile = { name: "demo", policyRevision: "pol-001",
   capabilities: ["geo.read", "signals.protected-read"] as const };
@@ -31,7 +32,7 @@ function validBody(signalCount = 1): Record<string, unknown> {
     props: { description: "x".repeat(1900), refs: [{ docSha: "c".repeat(64), excerpt: "y".repeat(1900) }] },
   })) as Array<Parameters<typeof toDegradedSignalCard>[0]>;
   return buildCoherentCityResponse({ artifactId: ARTIFACT, readerSub: "reader-alice", workspaceId: WORKSPACE,
-    citySlug: CITY, serverToken: "server", total: signalCount, hidden: 0, selected: 0,
+    citySlug: CITY, serverToken: "server", tokenKey: KEY, total: signalCount, hidden: 0, selected: 0,
     legacyProjection: { version: "legacy-zmp-v1", a: { count: 0, signalIds: [] } },
     sources: nodes.map((node) => ({ node, card: toDegradedSignalCard(node) })) });
 }

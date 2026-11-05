@@ -119,6 +119,8 @@ describe("signals.by-city.v1 dispatch (§4.3, §15)", () => {
       [`${query}&dateFrom=2024-01-01`, 200],
       [`${query}&dateFrom=2024-01-01&dateFrom=2024-02-01`, 400],
       [`${query}&dateFrom=2024-03-01&dateTo=2024-01-01`, 400],
+      [`${query}&dateFrom=2026-02-31`, 400],
+      [`${query}&dateTo=2026-13-01`, 400],
       [`${query}&unknown=1`, 400],
       [`${query}&pad=${"x".repeat(16384)}`, 414],
     ];
