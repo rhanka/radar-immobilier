@@ -302,11 +302,15 @@ describe("files parity bundle publish and serve", () => {
     expect(tail.status).toBe(206);
     expect(tail.headers.get("content-range")).toBe(`bytes ${size - 10}-${size - 1}/${size}`);
     expect(Buffer.from(await tail.arrayBuffer()).equals(videoBytes.subarray(size - 10))).toBe(true);
-    // Unsatisfiable start: 416 with the size hint, no body bytes.
+    // Unsatisfiable start: 416 with the size hint; the JSON error body
+    // carries no file bytes (wrong content-type would leak interpretation).
     const pastEnd = await get("/assets/clip.mp4", `bytes=${size}-`);
     expect(pastEnd.status).toBe(416);
     expect(pastEnd.headers.get("content-range")).toBe(`bytes */${size}`);
     expect(pastEnd.headers.get("accept-ranges")).toBe("bytes");
+    expect(pastEnd.headers.get("content-type")).toContain("application/json");
+    expect(Buffer.from(await pastEnd.arrayBuffer()).toString("utf8"))
+      .toBe(JSON.stringify({ error: "range_not_satisfiable" }));
     // Malformed and inverted ranges fall back to the whole file.
     for (const range of ["bytes=abc", "bytes=50-40", "items=0-99", "bytes=0-1,2-3"]) {
       const full = await get("/assets/clip.mp4", range);
