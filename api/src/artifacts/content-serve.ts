@@ -44,7 +44,9 @@ import type { AuthorityReader } from "./reader-profile.js";
 import { validateReaderResponse } from "./reader-responses.js";
 import {
   GEO_COLLECTION_ITEMS_QUERY_KEYS,
+  isGateBOperation,
   isGeoReadOperation,
+  isScopedSignalOperation,
   isWorkspaceReadOperation,
   workspacesListParams,
   basketsContextParams,
@@ -58,9 +60,12 @@ import {
 import { GeoItemsRefusal } from "./reader-geo.js";
 import { createGeoReaderBudget, type GeoReaderBudget } from "./reader-geo-budget.js";
 import { appMeParams, buildAppMeResponse } from "./reader-me.js";
+import { byCityParams } from "./reader-by-city.js";
 import {
+  READER_CONCURRENCY,
   READER_GLOBAL_BUDGET,
   READER_OP_BUDGETS,
+  READER_WORKSPACE_BUDGET,
   budgetKey,
   createBudgetStore,
   type ReaderBudgetStore,
@@ -474,7 +479,7 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     // call carries the one-time consent instead. Gate B re-reads the live
     // store row on every call: revocation refuses here at once, even under
     // a live cookie.
-    if (isWorkspaceReadOperation(op) && !await hasLiveBasketConsent(auth)) return basketConsentRefusal(c);
+    if (isGateBOperation(op) && !await hasLiveBasketConsent(auth)) return basketConsentRefusal(c);
     if (op === "status.closed.v1") {
       applyReaderContentHeaders(c);
       return c.json({ error: "capability_unavailable" }, 503);
@@ -508,10 +513,10 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
         return c.json(failure.body, failure.status);
       }
     }
-    if (isWorkspaceReadOperation(op)) {
+    if (isWorkspaceReadOperation(op) || isScopedSignalOperation(op)) {
       applyReaderContentHeaders(c);
       if (!await authorityCurrent(auth)) return c.json({ error: "unauthenticated" }, 401);
-      if (op === "workspaces.list.v1") {
+      if (op === "workspaces.list.v1" || op === "signals.by-city.v1") {
         const spent = spendBudget(auth, op);
         if (!spent.ok) return rateLimited(c, spent.retryAfterSec);
       }
@@ -520,9 +525,31 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
         if (Buffer.byteLength(url.pathname + url.search) > 16384) throw new ClassificationError("request_uri_too_long");
         if (url.searchParams.getAll("grant").length > 1) throw new ClassificationError("invalid_query");
         url.searchParams.delete("grant");
-        const schema = op === "workspaces.list.v1" ? workspacesListParams : op === "baskets.context.v1" ? basketsContextParams : op === "baskets.search.v1"
+        const schema = op === "workspaces.list.v1" ? workspacesListParams : op === "signals.by-city.v1" ? byCityParams
+          : op === "baskets.context.v1" ? basketsContextParams : op === "baskets.search.v1"
           ? basketsSearchParams : basketsStateParams;
-        const params = decodeQuery(url.searchParams, schema);
+        const params = decodeQuery(url.searchParams, schema) as { workspaceId?: string };
+        // J1.2d/e §4.3: per-workspace admission, single in-flight call per
+        // reader, and a serialized-response ceiling — never a silent
+        // truncation of cities.
+        if (op === "signals.by-city.v1" && params.workspaceId !== undefined) {
+          const admitted = budgets.consume(`ws\u0000${params.workspaceId}\u0000${op}`,
+            READER_WORKSPACE_BUDGET, now());
+          if (!admitted.ok) return rateLimited(c, admitted.retryAfterSec);
+          const slot = budgetKey(auth.readerSub, auth.artifactId, op);
+          if (!budgets.tryEnter(slot, READER_CONCURRENCY[op] ?? 1)) return rateLimited(c, 1);
+          try {
+            const body = validateReaderResponse(op, await deps.readOperation(op, params, auth), auth.readerSub);
+            if (Buffer.byteLength(JSON.stringify(body)) > 1048576) {
+              throw new ClassificationError("upstream_bad_payload");
+            }
+            if (!stillOpen(auth)) return c.json({ error: "unauthenticated" }, 401);
+            if (!await authorityCurrent(auth)) return c.json({ error: "unauthenticated" }, 401);
+            return c.json(body);
+          } finally {
+            budgets.leave(slot);
+          }
+        }
         const body = validateReaderResponse(op, await deps.readOperation(op, params, auth), auth.readerSub);
         if (!stillOpen(auth)) return c.json({ error: "unauthenticated" }, 401);
         if (!await authorityCurrent(auth)) return c.json({ error: "unauthenticated" }, 401);
