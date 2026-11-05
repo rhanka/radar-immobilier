@@ -58,6 +58,7 @@ import { GeoItemsRefusal } from "./reader-geo.js";
 import { BASKET_READ_SCOPE_ID, type BasketConsentGate } from "./reader-consent.js";
 import {
   TILE_CLIENT_MAX_AGE_SECONDS,
+  TILE_OSM_RATE_LIMIT_DEFAULT,
   TILE_PATH_PREFIX,
   TileProxy,
   createTileProxyApp,
@@ -517,6 +518,12 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
       proxy: tiles,
       isContentHost: (c) => parseContentHost(c.req.header("host"), deps.contentBase).kind !== "other",
       authorize: async (c) => (await authorized(c, true)) !== null,
+      // J1.1 OSM relay (B1): per-reader abuse guard on the OSM path only.
+      // The key is the sealed session reader; anonymous requests already
+      // fail closed on authorize, so a null key only skips the guard.
+      osmRateLimit: TILE_OSM_RATE_LIMIT_DEFAULT,
+      rateLimitKey: (c) =>
+        readSessionClaims(c.req.header("cookie"), deps.sessionSecret, now())?.readerSub ?? null,
     });
     app.use(`${TILE_PATH_PREFIX}/*`, async (c, next) => {
       await next();
