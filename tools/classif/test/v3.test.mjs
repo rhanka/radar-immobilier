@@ -120,7 +120,7 @@ test('v3 deferred annotator keeps its last vote with a recorded gap', async () =
   }
 });
 
-// Pilot budget D5: spent counts the calls log, check refuses over-cap batches.
+// Pilot budget D5: strict spend (corrupt lines fail closed), intent-counted, check refuses over-cap.
 test('v3 pilot budget: counter in the manifest, chain refuses over cap', async () => {
   const { BUDGET_CAP, check, spent, spentByPhase } = await import('../lib/budget.mjs');
   assert.equal(BUDGET_CAP, 22000);
@@ -128,11 +128,16 @@ test('v3 pilot budget: counter in the manifest, chain refuses over cap', async (
   try {
     mkdirSync(path.join(home, 'l2'), { recursive: true });
     writeFileSync(path.join(home, 'l2', 'calls.jsonl'), '{"phase":"pass1"}\n{"phase":"pass2"}\nnot-json\n');
+    assert.throws(() => spent(home), /corrupt calls log/);
+    writeFileSync(path.join(home, 'l2', 'calls.jsonl'), '{"phase":"pass1"}\n{"phase":"pass2"}\n');
     assert.equal(spent(home), 2);
     assert.deepEqual(spentByPhase(home), { pass1: 1, pass2: 1 });
     assert.equal(spent(tmp()), 0);
     assert.deepEqual(check(home, BUDGET_CAP - 2), { spent: 2, planned: BUDGET_CAP - 2, remaining: 0 });
     assert.throws(() => check(home, BUDGET_CAP - 1), /pilot budget refused/);
+    // Intent + result count once.
+    writeFileSync(path.join(home, 'l2', 'calls.jsonl'), '{"intent":true,"phase":"p"}\n{"intent":false,"phase":"p"}\n');
+    assert.equal(spent(home), 1);
   } finally {
     rmSync(home, { recursive: true, force: true });
   }
@@ -227,7 +232,7 @@ test('v3 Annex M metrics on synthetic fixtures', () => {
 
 // Split: grouped by city, deterministic, stratified inputs.
 test('v3 split is city-grouped, deterministic and balanced', async () => {
-  const { bpassOf, splitGrouped, stratumOf } = await import('../l3/split.mjs');
+  const { bpassOf, seededRng, splitGrouped, stratumOf } = await import('../l3/split.mjs');
   assert.equal(stratumOf('signal', 'pertinent', 'pass2'), 'signal|pertinent|pass2');
   assert.equal(bpassOf({ kind: 'pv' }, new Map()), 'pv');
   assert.equal(bpassOf({ kind: 'signal' }, new Map([['x', 'pass1']])), 'unknown');
@@ -243,6 +248,19 @@ test('v3 split is city-grouped, deterministic and balanced', async () => {
   const inBoth = once.tuning.filter((id) => once.blind.includes(id));
   assert.deepEqual(inBoth, []);
   assert.equal(once.tuning.length + once.blind.length, 4);
+  // §3: seeded draws reproduce from the seed; same seed twice, city-grouped.
+  const s1a = splitGrouped(cities, targets, seededRng('seed-1'));
+  const s1b = splitGrouped(cities, targets, seededRng('seed-1'));
+  assert.deepEqual(s1a, s1b, 'same seed reproduces the draw');
+  const citiesOf = (ids) => new Set(ids.map((id) => cities.find((c) => c.items.some((i) => i.id === id)).city));
+  assert.deepEqual([...citiesOf(s1a.tuning)].filter((c) => citiesOf(s1a.blind).has(c)), [], 'no city in both halves');
+  // Two cities of the same size in one stratum: the seed decides the tie.
+  const tie = [
+    { city: 'a', items: [{ id: 'a1', stratum: 's' }] },
+    { city: 'b', items: [{ id: 'b1', stratum: 's' }] },
+  ];
+  const seen = new Set([0, 1].map((i) => JSON.stringify(splitGrouped(tie, new Map([['s', 1]]), seededRng(`tie-${i}`)))));
+  assert.ok(seen.size >= 1, 'seeded tie-break runs');
 });
 
 // Reference D: provenance rule, core/unresolved partitions, halves.
@@ -264,7 +282,7 @@ test('v3 reference D: provenance, status, halves', () => {
     { itemId: 'b1', kind: 'pv', codeMaj: null, verdictMaj: null, ambiguousByOne: true },
   ];
   const halves = { tuning: new Set(['t1']), blind: new Set(['b1']) };
-  const ref = buildReferenceD({ rows, latest: noCite, complements: new Map(), halves, adjudications: new Set(['t1']), ambiguityCauses: new Map([['b1', 'missing-information']]), pass: 3, codes });
+  const ref = buildReferenceD({ rows, latest: noCite, complements: new Map(), halves, adjudications: new Map([['t1', true]]), ambiguityCauses: new Map([['b1', 'missing-information']]), pass: 3, codes });
   const t1 = ref.find((r) => r.itemId === 't1');
   assert.equal(t1.partition, 'core');
   assert.equal(t1.status, 'resolved');
@@ -275,6 +293,15 @@ test('v3 reference D: provenance, status, halves', () => {
   assert.equal(b1.partition, 'unresolved');
   assert.equal(b1.cause, 'missing-information');
   assert.equal(b1.half, 'blind');
+  // §6: adjudication {code} overrides the majority and resolves, validated against the registry.
+  const codes2 = new Map([['S-A', 'a_surveiller'], ['S-B', 'a_surveiller']]);
+  const rows2 = [{ itemId: 'x', kind: 'signal', codeMaj: { value: 'S-A', count: 2 }, verdictMaj: { value: 'a_surveiller', count: 2 }, ambiguousByOne: false }];
+  const mkL = () => new Map(ANNOTATORS.map((a) => [a, new Map([['x', { valid: true, code: 'S-A', verdict: 'a_surveiller', ambiguous: false, cause: null, goldenPrecedent: [], labelProvenance: null, pass: 3, guide: 'FINAL' }]])]));
+  const over = buildReferenceD({ rows: rows2, latest: mkL(), complements: new Map(), halves: { tuning: new Set(['x']), blind: new Set() }, adjudications: new Map([['x', { code: 'S-B' }]]), ambiguityCauses: new Map(), pass: 3, codes: codes2 });
+  assert.equal(over[0].code, 'S-B');
+  assert.equal(over[0].status, 'resolved');
+  assert.equal(over[0].label_provenance, 'human_adjudicated');
+  assert.throws(() => buildReferenceD({ rows: rows2, latest: mkL(), complements: new Map(), halves: { tuning: new Set(['x']), blind: new Set() }, adjudications: new Map([['x', { code: 'NOPE' }]]), ambiguityCauses: new Map(), pass: 3, codes: codes2 }), /unknown code/);
 });
 
 // Optimiser firewall: blind keys throw; the optimiser never opens blind or eval sets.
