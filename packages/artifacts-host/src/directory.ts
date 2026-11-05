@@ -15,16 +15,20 @@ import type { DirectoryPerson, PrincipalDirectoryPort } from "@sentropic/artifac
  * unprojected.
  *
  * Input path (N3): `resolvePrincipal` accepts the opaque directory userRef
- * (account UUID) of an approved account only (status = 'approved').
- * Anything else — raw IdP sub, email, unknown marker — resolves to nothing,
- * so no sub ever yields an account at the input boundary either. UUID misses
+ * (account UUID) of any existing account, regardless of status. Anything
+ * else — raw IdP sub, email, unknown marker — resolves to nothing, so no
+ * sub ever yields an account at the input boundary either. UUID misses
  * merge into the single `person_not_shareable` (a directory throw would
  * escape as a 500 instead, hence the miss); a known sub misused as input is
  * refused provider-side with 403 access_denied, told apart from an unknown
- * target precisely because `describePrincipal` always answers (R1). The
- * set_access transaction guard agrees userRef-only as a second line. The
- * guide instructs userRef exclusively, and outputs only ever carry userRef
- * (R1).
+ * target precisely because `describePrincipal` always answers (R1). Status
+ * is deliberately not a resolution criterion (R5): revoke is the cleanup
+ * step for dormant principals, so a suspended account still resolves and
+ * its grant row is really deleted. The approved-only rule lives on the
+ * grant path — the provider approval gate plus the set_access transaction
+ * guard (userRef-only as a second line) refuse grants to non-approved
+ * accounts. The guide instructs userRef exclusively, and outputs only ever
+ * carry userRef (R1).
  * The single-storage-scope host treats every account as in scope.
  * Display name falls back from the IdP name to the email local part, then to
  * the opaque reference; the package masks emails at the model boundary.
@@ -88,16 +92,21 @@ export function createAccountDirectory(pool: pg.Pool): PrincipalDirectoryPort {
       // Mode sentinels are provider-owned: they name no person.
       if (typeof userRef === "string" && userRef.startsWith("sentropic:")) return undefined;
       // N3: the canonical input form is the opaque directory userRef
-      // (account UUID) of an approved account. Anything else — raw IdP sub,
-      // email, unknown marker — resolves to nothing: subs never cross the
-      // model boundary in either direction (R1 covers outputs, this covers
-      // inputs). A miss (not a throw: the provider merges a miss into
+      // (account UUID). Anything else — raw IdP sub, email, unknown
+      // marker — resolves to nothing: subs never cross the model boundary
+      // in either direction (R1 covers outputs, this covers inputs). A
+      // miss (not a throw: the provider merges a miss into
       // `person_not_shareable` but lets a directory exception escape as a
       // 500) keeps the single merged refusal code, and the host transaction
-      // guard agrees.
+      // guard agrees. Resolution is status-blind on purpose (R5): revoke is
+      // the cleanup step for dormant principals, so a suspended account
+      // still resolves to its sub and the grant row is really deleted. The
+      // approved-only rule lives on the grant path, not here: the provider
+      // approval gate (isApprovedPrincipal) plus the host transaction guard
+      // (sharePrincipalApproved) refuse grants to non-approved accounts.
       if (!UUID_RE.test(userRef)) return undefined;
       const { rows } = await pool.query<{ sub: string }>(
-        "SELECT sub FROM account_users WHERE id = $1 AND status = 'approved'", [userRef]);
+        "SELECT sub FROM account_users WHERE id = $1", [userRef]);
       return rows[0]?.sub;
     },
     async describePrincipal(_scope, principalId) {
