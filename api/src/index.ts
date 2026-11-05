@@ -4,6 +4,8 @@ import { createApp } from "./app.js";
 import { startArtifactControl } from "./artifacts/control-route-startup.js";
 import { contentHostAppOption, resolveContentHostConfig } from "./artifacts/content-config.js";
 import { createBasketReadOperation } from "./artifacts/reader-baskets.js";
+import { createReaderDocumentRead } from "./artifacts/reader-documents.js";
+import { createRawDocumentReader } from "./routes/documents.js";
 import { createGeoReadOperation } from "./artifacts/reader-geo.js";
 import { listGeoCities } from "./services/geo/geo-features.js";
 import { createReaderContentApp } from "./artifacts/content-serve.js";
@@ -156,6 +158,20 @@ const basketReadOperation = createBasketReadOperation({
   store: objectStore,
   ...(readerCursorKeyring ? { classification: { cursorKeyring: readerCursorKeyring } } : {}),
 });
+// J1.2d/e §11.3: the reader PDF op resolves through the same raw stores as
+// the app route (scrape store first, geo repoint when enabled), but only from
+// a doc-ref of a signal the reader can see.
+const readerDocumentRead = createReaderDocumentRead({
+  db: dbHandle.db,
+  store: objectStore,
+  readRaw: createRawDocumentReader({
+    store: objectStore,
+    scrapeStore: scrapeObjectStore,
+    geoDocumentsRepoint: config.GEO_DOCUMENTS_REPOINT,
+    ...(geoDocumentsReader ? { geoDocumentsReader } : {}),
+    ...(geoKeyIndex ? { geoKeyIndex } : {}),
+  }),
+});
 const geoReadOperation = createGeoReadOperation({
   listCitiesImpl: () => listGeoCities(dbHandle.db),
 });
@@ -171,6 +187,7 @@ const readerContent = contentHost.enabled && artifactsControl?.readerStorage && 
     ...(artifactsControl.readerConsent ? { basketConsent: artifactsControl.readerConsent } : {}),
     ...(readerOpening ? { openingContent: readerOpening.content } : {}),
     ...artifactsControl.readerStorage,
+    readDocument: readerDocumentRead,
     readOperation: async (op, params, context) => {
       if (op === "geo.cities.v1" || op === "geo.collection-items.v1") return geoReadOperation(op, params);
       return basketReadOperation(op, params, context);
