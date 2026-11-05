@@ -90,8 +90,11 @@ boot().catch((error) => {
   status.textContent = "Echec : " + (error instanceof Error ? error.message : String(error));
 });`;
 
-// Explicit opt-in, like the other artifact browser specs: the default CI
-// API image has no browser installed.
+// Explicit opt-in, like the other artifact browser specs: no CI job sets
+// ARTIFACTS_BROWSER_ACCEPTANCE (the default CI API image has no browser
+// installed), so this runs in image-qualification runs only — see
+// tools/make/base-api-l5-images-container.sh, which installs the
+// Chromium shell and exports ARTIFACTS_BROWSER_ACCEPTANCE=1.
 describe.skipIf(process.env.ARTIFACTS_BROWSER_ACCEPTANCE !== "1")(
   "map-tilezoom province extent under the real release CSP",
   () => {
