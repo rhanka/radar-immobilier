@@ -146,17 +146,23 @@ export async function runPass({ pass, mode = 'independent', guide = 'G0', annota
       let reused = false;
       if (existsSync(rawFile)) { r = JSON.parse(readFileSync(rawFile, 'utf8')); reused = true; }
       else {
-        // Seat quota denials cost nothing: wait for the announced reset and call again without
-        // consuming an attempt (and without saving the denial as an answer).
+        // Review N3: ONE counted intent per attempt — quota retries are free (intent:false
+        // traced) and never burn the 22 000 cap; every counted re-call checks the budget first.
+        // Review §5: intent counted BEFORE the paid call, so a kill after the call cannot
+        // lose the spend (intents count, result records carry intent:false).
+        checkBudget(home, 1);
+        appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: true, phase: phase ?? `pass${pass}`, pass, mode, guide, annotator, lotId: lot.lotId, items: lot.items.length, attempt: attempts, promptSha256: promptSha });
+        r = await callSeat(annotator, prompt, { base: seatTmp, timeoutMs: 3600000 });
         for (;;) {
-          // Review §5: intent counted BEFORE the paid call, so a kill after the call cannot
-          // lose the spend (intents count, result records carry intent:false).
-          appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: true, phase: phase ?? `pass${pass}`, pass, mode, guide, annotator, lotId: lot.lotId, items: lot.items.length, attempt: attempts, promptSha256: promptSha });
-          r = await callSeat(annotator, prompt, { base: seatTmp, timeoutMs: 3600000 });
           const wait = quotaWaitMs(r);
           if (wait === null) break;
           log(`[pass ${pass}] ${annotator} quota reached, waiting ${Math.round(wait / 60000)} min`);
-          await sleep(wait);
+          appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: phase ?? `pass${pass}`, pass, mode, guide, annotator, lotId: lot.lotId, items: lot.items.length, attempt: attempts,
+            quota: true, quotaWaitMs: wait, exitCode: r.code });
+          const effectiveWait = process.env.CLASSIF_TEST_QUOTA_WAIT_MS !== undefined ? Number(process.env.CLASSIF_TEST_QUOTA_WAIT_MS) : wait;
+          await sleep(effectiveWait);
+          // Free retry after a quota denial: no new counted intent, no extra budget burn.
+          r = await callSeat(annotator, prompt, { base: seatTmp, timeoutMs: 3600000 });
         }
         atomicWrite(rawFile, JSON.stringify(r), { mode: 0o600 });
       }
@@ -231,16 +237,29 @@ if (process.argv[1] && path.resolve(process.argv[1]).endsWith(path.join('l2', 'r
   const home = classifHome();
   const todoFile = path.join(home, 'l2', `pass${pass}`, 'todo.json');
   const ctxFile = path.join(home, 'l2', `pass${pass}`, 'context.json');
-  // Review §4: manual passes ≥ 2 require the COMMITTED split and HALF∈{tuning,blind}.
-  // Blind runs only under the frozen FINAL guide and before the blind seal.
+  // Review §4 + §3b: manual passes ≥ 2 require the COMMITTED split and HALF∈{tuning,blind}.
+  // Blind runs only under the frozen FINAL guide (sha-checked, fail closed) and before the
+  // blind seal — and only in crossreview mode (an independent blind run would bypass review).
   if (pass >= 2) {
-    const splitFile = path.join(CLASSIF_DIR, 'l3', 'manifests', 'split.json');
-    if (!existsSync(splitFile)) { process.stderr.write('classif-l2-pass: refusing pass ≥ 2 without the committed split (run make classif-l3b-split ENV=preprod first)\n'); process.exit(2); }
+    const { requireCommittedSplit } = await import('../l3/split.mjs');
+    try {
+      requireCommittedSplit();
+    } catch (e) {
+      process.stderr.write(`classif-l2-pass: ${e.message}\n`);
+      process.exit(2);
+    }
     const half = arg('--half', '');
     if (half !== 'tuning' && half !== 'blind') { process.stderr.write('classif-l2-pass: refusing pass ≥ 2 without --half tuning|blind (D2 firewall)\n'); process.exit(2); }
     if (half === 'blind') {
+      if (mode !== 'crossreview') { process.stderr.write('classif-l2-pass: blind half requires --mode crossreview (independent blind review bypasses cross-review)\n'); process.exit(2); }
       if (guide !== 'FINAL') { process.stderr.write('classif-l2-pass: blind half requires --guide FINAL (frozen guide only)\n'); process.exit(2); }
-      if (!existsSync(path.join(home, 'l1', 'pack', 'guide-FINAL.md'))) { process.stderr.write('classif-l2-pass: blind half refused without the frozen guide-FINAL.md\n'); process.exit(2); }
+      const { assertFinalGuide } = await import('../lib/freeze.mjs');
+      try {
+        assertFinalGuide(home);
+      } catch (e) {
+        process.stderr.write(`classif-l2-pass: ${e.message}\n`);
+        process.exit(2);
+      }
       if (existsSync(sealedFile(home))) { process.stderr.write('classif-l2-pass: blind half refused, the blind half is already sealed\n'); process.exit(2); }
     }
   }
